@@ -16,5 +16,15 @@
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-data-module-deployer-spi</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>org.springframework.xd</groupId>
+			<artifactId>spring-xd-module</artifactId>
+			<version>${spring-xd-module.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.pivotal.receptor</groupId>
+			<artifactId>receptor-client</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
 	</dependencies>
 </project>

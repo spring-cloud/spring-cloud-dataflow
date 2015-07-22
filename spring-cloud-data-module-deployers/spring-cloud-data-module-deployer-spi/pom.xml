@@ -6,6 +6,13 @@
 	<packaging>jar</packaging>
 	<name>spring-cloud-data-module-deployer-spi</name>
 	<description>SPI for spring-cloud-stream module deployer implementations</description>
+	<dependencies>
+		<dependency>
+			<groupId>org.springframework.xd</groupId>
+			<artifactId>spring-xd-module</artifactId>
+			<version>${spring-xd-module.version}</version>
+		</dependency>
+	</dependencies>
 	<parent>
 		<groupId>org.springframework.cloud</groupId>
 		<artifactId>spring-cloud-data-module-deployers-parent</artifactId>
