@@ -19,7 +19,6 @@
 		<dependency>
 			<groupId>org.springframework.xd</groupId>
 			<artifactId>spring-xd-module</artifactId>
-			<version>${spring-xd-module.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>io.pivotal.receptor</groupId>
