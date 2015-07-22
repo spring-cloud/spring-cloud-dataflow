@@ -71,6 +71,6 @@ public interface ModuleDeployer {
 	 *
 	 * @return map of deployed {@code ModuleDescriptor}s.
 	 */
-	Map<ModuleDescriptor.Key, ModuleStatus> allStatuses();
+	Map<ModuleDescriptor.Key, ModuleStatus> status();
 
 }

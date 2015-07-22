@@ -48,7 +48,7 @@ public class ReceptorModuleDeployer implements ModuleDeployer {
 	}
 
 	@Override
-	public Map<ModuleDescriptor.Key, ModuleStatus> allStatuses() {
+	public Map<ModuleDescriptor.Key, ModuleStatus> status() {
 		throw new UnsupportedOperationException("todo");
 	}
 }
