@@ -19,6 +19,7 @@ package org.springframework.cloud.data.module.deployer;
 
 import java.util.Map;
 
+import org.springframework.cloud.data.module.ModuleKey;
 import org.springframework.cloud.data.module.ModuleStatus;
 import org.springframework.xd.module.ModuleDescriptor;
 
@@ -36,7 +37,7 @@ public interface ModuleDeployer {
 	 * may perform this operation asynchronously; therefore
 	 * a successful deployment may not be assumed upon return.
 	 * To determine the status of a deployment, invoke
-	 * {@link #status(org.springframework.xd.module.ModuleDescriptor.Key)}.
+	 * {@link #status(ModuleKey)}.
 	 *
 	 * @param descriptor descriptor for module to be deployed
 	 *
@@ -49,13 +50,13 @@ public interface ModuleDeployer {
 	 * may perform this operation asynchronously; therefore
 	 * a successful un-deployment may not be assumed upon return.
 	 * To determine the status of a deployment, invoke
-	 * {@link #status(org.springframework.xd.module.ModuleDescriptor.Key)}.
+	 * {@link #status(ModuleKey)}.
 	 *
 	 * @param key unique key for module to be un-deployed
 	 *
 	 * @throws IllegalStateException if the module has not been deployed
 	 */
-	void undeploy(ModuleDescriptor.Key key);
+	void undeploy(ModuleKey key);
 
 	/**
 	 * Return the deployment status of the given {@code ModuleDescriptor}.
@@ -64,13 +65,13 @@ public interface ModuleDeployer {
 	 *
 	 * @return module deployment status
 	 */
-	ModuleStatus status(ModuleDescriptor.Key key);
+	ModuleStatus status(ModuleKey key);
 
 	/**
 	 * Return a map of all deployed {@code ModuleDescriptor}s.
 	 *
 	 * @return map of deployed {@code ModuleDescriptor}s.
 	 */
-	Map<ModuleDescriptor.Key, ModuleStatus> status();
+	Map<ModuleKey, ModuleStatus> status();
 
 }

@@ -21,6 +21,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.springframework.cloud.data.module.ModuleKey;
 import org.springframework.cloud.data.module.ModuleStatus;
 import org.springframework.cloud.data.module.deployer.ModuleDeployer;
 import org.springframework.xd.module.ModuleDescriptor;
@@ -38,17 +39,17 @@ public class ReceptorModuleDeployer implements ModuleDeployer {
 	}
 
 	@Override
-	public void undeploy(ModuleDescriptor.Key key) {
+	public void undeploy(ModuleKey key) {
 		throw new UnsupportedOperationException("todo");
 	}
 
 	@Override
-	public ModuleStatus status(ModuleDescriptor.Key descriptor) {
+	public ModuleStatus status(ModuleKey key) {
 		throw new UnsupportedOperationException("todo");
 	}
 
 	@Override
-	public Map<ModuleDescriptor.Key, ModuleStatus> status() {
+	public Map<ModuleKey, ModuleStatus> status() {
 		throw new UnsupportedOperationException("todo");
 	}
 }
