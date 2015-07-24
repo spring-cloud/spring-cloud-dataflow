@@ -31,7 +31,7 @@ import org.springframework.util.Assert;
  * @author David Turanski
  */
 @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY)
-public abstract class ModuleDefinition implements Comparable<ModuleDefinition> {
+public class ModuleDefinition implements Comparable<ModuleDefinition> {
 	private String name;
 
 	private String artifactId;
@@ -54,13 +54,6 @@ public abstract class ModuleDefinition implements Comparable<ModuleDefinition> {
 		this.groupId = groupId;
 		this.version = version;
 	}
-
-	/**
-	 * Determine if this a composed module
-	 * @return true if this is a composed module, false otherwise.
-	 */
-	@JsonIgnore
-	public abstract boolean isComposed();
 
 	public String getName() {
 		return name;
