@@ -24,6 +24,7 @@
 		<spring-xd.version>1.0.2.RELEASE</spring-xd.version>
 	</properties>
 	<modules>
+		<module>spring-cloud-data-module-registry</module>
 		<module>spring-cloud-data-module-deployers</module>
 		<!-- module>docs</module -->
 	</modules>
