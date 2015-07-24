@@ -1,9 +1,27 @@
+*~
+.#*
+*#
+*.sw*
+_site/
+.factorypath
+.gradletasknamecache
+.DS_Store
+/application.yml
+/application.properties
+asciidoctor.css
+atlassian-ide-plugin.xml
+bin/
+build/
+dump.rdb
+out
 target/
+test-output
 
 # Eclipse artifacts, including WTP generated manifests
 .classpath
 .project
 .settings/
+.springBeans
 spring-*/src/main/java/META-INF/MANIFEST.MF
 
 # IDEA artifacts and output dirs
@@ -11,8 +29,3 @@ spring-*/src/main/java/META-INF/MANIFEST.MF
 *.ipr
 *.iws
 .idea
-out
-test-output
-atlassian-ide-plugin.xml
-.gradletasknamecache
-
