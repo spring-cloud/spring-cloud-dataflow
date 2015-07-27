@@ -26,6 +26,7 @@
 	<modules>
 		<module>spring-cloud-data-module-registry</module>
 		<module>spring-cloud-data-module-deployers</module>
+		<module>spring-cloud-data-core</module>
 		<!-- module>docs</module -->
 	</modules>
 	<dependencyManagement>
