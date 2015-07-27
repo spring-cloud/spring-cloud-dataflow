@@ -14,22 +14,21 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.data.module.registry;
+package org.springframework.cloud.data.core;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 import org.springframework.util.Assert;
 
 /**
- * An instance of ModuleDefinition reflects the fact that a given module (identified by its name, and resolved to its 
- * Maven coordinates) is 'available', <i>i.e.</i> that it can be used in a stream definition.
+ * The {@code ModuleCoordinates} class contains <a href="https://maven.apache.org/pom.html#Maven_Coordinates">
+ * Maven coordinates</a> for a jar file containing a module.
  *
  * @author David Turanski
  * @author Mark Fisher
  */
 @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY)
-public class ModuleDefinition {
+public class ModuleCoordinates {
 
 	private String name;
 
@@ -39,11 +38,11 @@ public class ModuleDefinition {
 
 	private String version;
 
-	protected ModuleDefinition() {
+	protected ModuleCoordinates() {
 		// For (subclass) JSON deserialization only
 	}
 
-	protected ModuleDefinition(String name, String artifactId, String groupId, String version) {
+	protected ModuleCoordinates(String name, String artifactId, String groupId, String version) {
 		Assert.hasLength(name, "'name' cannot be blank");
 		Assert.hasLength(artifactId, "'artifactId' cannot be blank");
 		Assert.hasLength(groupId, "'groupId' cannot be blank");
@@ -75,10 +74,10 @@ public class ModuleDefinition {
 		if (this == o) {
 			return true;
 		}
-		if (!(o instanceof ModuleDefinition)) {
+		if (!(o instanceof ModuleCoordinates)) {
 			return false;
 		}
-		ModuleDefinition that = (ModuleDefinition) o;
+		ModuleCoordinates that = (ModuleCoordinates) o;
 		if (!name.equals(that.name)) {
 			return false;
 		}

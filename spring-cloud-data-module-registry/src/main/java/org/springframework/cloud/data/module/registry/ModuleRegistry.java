@@ -16,19 +16,20 @@
 
 package org.springframework.cloud.data.module.registry;
 
-import java.util.List;
+
+import org.springframework.cloud.data.core.ModuleCoordinates;
 
 /**
- * A module registry is used to lookup {@link ModuleDefinition}s by name.
+ * A module registry is used to lookup {@link ModuleCoordinates}s by name.
  *
  * @author David Turanski
  */
 public interface ModuleRegistry {
 
 	/**
-	 * Look up a module definition by name.
+	 * Look up the coordinates for a module jar by name.
 	 * @param name the module name
 	 */
-	ModuleDefinition findByName(String name);
+	ModuleCoordinates findByName(String name);
 
 }
