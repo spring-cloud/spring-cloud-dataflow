@@ -23,6 +23,7 @@ import java.util.List;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.security.oauth2.OAuth2AutoConfiguration;
 import org.springframework.yarn.boot.YarnAppmasterAutoConfiguration;
 import org.springframework.yarn.boot.YarnClientAutoConfiguration;
 import org.springframework.yarn.boot.YarnContainerAutoConfiguration;
@@ -33,8 +34,12 @@ import org.springframework.yarn.boot.YarnContainerAutoConfiguration;
  * @author Mark Fisher
  */
 @SpringBootApplication
-@EnableAutoConfiguration(exclude = { YarnClientAutoConfiguration.class, YarnAppmasterAutoConfiguration.class,
-		YarnContainerAutoConfiguration.class })
+@EnableAutoConfiguration(exclude = {
+		YarnClientAutoConfiguration.class,
+		YarnAppmasterAutoConfiguration.class,
+		YarnContainerAutoConfiguration.class,
+		OAuth2AutoConfiguration.class
+})
 public class AdminApplication {
 
 	public static void main(String[] args) {
