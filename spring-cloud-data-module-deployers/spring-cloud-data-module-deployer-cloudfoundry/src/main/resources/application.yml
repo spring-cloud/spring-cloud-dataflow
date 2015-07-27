@@ -1,0 +1,20 @@
+---
+cloudfoundry:
+  api:
+    endpoint: https://api.${host}.springapps.io
+  moduleLauncherLocation: classpath:spring-cloud-stream-module-launcher.jar
+  organization: p-spring-xd
+  space: p-spring-xd
+security:
+  oauth2:
+    client:
+      access-token-uri: https://uaa.${host}.springapps.io/oauth/token
+      client-id: cf
+      client-secret:
+      grantType: password
+      id: cf
+      password:
+      user-authorization-uri: https://login.${host}.springapps.io/oauth/authorize
+      username:
+    resource:
+      userInfoUri: https://uaa.${host}.springapps.io/userinfo

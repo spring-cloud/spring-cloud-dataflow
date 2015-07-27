@@ -21,11 +21,12 @@ import org.springframework.boot.autoconfigure.redis.RedisAutoConfiguration;
 import org.springframework.cloud.Cloud;
 import org.springframework.cloud.CloudFactory;
 import org.springframework.cloud.data.module.deployer.ModuleDeployer;
-import org.springframework.cloud.data.module.deployer.cloudfoundry.CloudFoundryModuleDeployer;
+import org.springframework.cloud.data.module.deployer.cloudfoundry.CloudFoundryModuleDeployerConfiguration;
 import org.springframework.cloud.data.module.deployer.lattice.LrpModuleDeployer;
 import org.springframework.cloud.data.module.deployer.lattice.TaskModuleDeployer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 
@@ -57,7 +58,6 @@ public class CloudConfiguration {
 	@Profile("lattice")
 	protected static class LatticeConfig {
 
-		@Bean
 		public ModuleDeployer processModuleDeployer() {
 			return new LrpModuleDeployer();
 		}
@@ -69,12 +69,9 @@ public class CloudConfiguration {
 	}
 
 	@Profile("!lattice")
+	@Import(CloudFoundryModuleDeployerConfiguration.class)
 	protected static class CloudFoundryConfig {
 
-		@Bean
-		public ModuleDeployer moduleDeployer() {
-			return new CloudFoundryModuleDeployer();
-		}
 	}
 
 }
