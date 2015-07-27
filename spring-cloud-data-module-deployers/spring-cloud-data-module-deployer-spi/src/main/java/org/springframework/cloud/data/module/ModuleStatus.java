@@ -22,10 +22,11 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.springframework.xd.module.ModuleDescriptor;
+import org.springframework.cloud.data.core.ModuleDeploymentRequest;
+import org.springframework.cloud.data.core.ModuleDeploymentId;
 
 /**
- * Status of a {@link ModuleDescriptor} deployment. This status is
+ * Status of a {@link ModuleDeploymentRequest}. This status is
  * composed of an aggregate of all individual module deployments.
  * <p>
  * Consumers of the SPI obtain module status via
@@ -43,7 +44,7 @@ public class ModuleStatus {
 	 * Module deployment states. Unless indicated, these states
 	 * may represent the state of an individual module deployment
 	 * or the aggregate state of all module instances for a given
-	 * {@link ModuleDescriptor}.
+	 * module.
 	 */
 	public enum State {
 
@@ -78,9 +79,9 @@ public class ModuleStatus {
 	}
 
 	/**
-	 * The key of the {@link ModuleDescriptor} this status is for.
+	 * The key of the module this status is for.
 	 */
-	private final ModuleDescriptor.Key key;
+	private final ModuleDeploymentId moduleDeploymentId;
 
 	/**
 	 * Map of {@link ModuleInstanceStatus} keyed by a unique identifier
@@ -91,29 +92,26 @@ public class ModuleStatus {
 	/**
 	 * Construct a new {@code ModuleStatus}.
 	 *
-	 * @param key key of the {@code ModuleDescriptor} this status is for
+	 * @param moduleDeploymentId key of the module this status is for
 	 */
-	protected ModuleStatus(ModuleDescriptor.Key key) {
-		this.key = key;
+	protected ModuleStatus(ModuleDeploymentId moduleDeploymentId) {
+		this.moduleDeploymentId = moduleDeploymentId;
 	}
 
 	/**
-	 * Return the module label for the {@code ModuleDescriptor}.
-	 *
-	 * @see ModuleDescriptor.Key#getModuleLabel()
-	 *
-	 * @return module label for the {@code ModuleDescriptor}
+	 * Return the module deployment id for the module.
+	 * @return module deployment id
 	 */
-	public String getName() {
-		return key.getLabel();
+	public ModuleDeploymentId getModuleDeploymentId() {
+		return moduleDeploymentId;
 	}
 
 	/**
-	 * Return the deployment state for the the {@code ModuleDescriptor}.
-	 * If the descriptor indicates multiple instances, this state represents
-	 * an aggregate of all individual instances.
+	 * Return the deployment state for the the module. If the descriptor
+	 * indicates multiple instances, this state represents an aggregate
+	 * of all individual instances.
 	 *
-	 * @return deployment state for the {@code ModuleDescriptor}
+	 * @return deployment state for the module
 	 */
 	public State getState() {
 		Set<State> instanceStates = new HashSet<State>();
@@ -150,11 +148,11 @@ public class ModuleStatus {
 	/**
 	 * Return a {@code Builder} for {@code ModuleStatus}.
 	 *
-	 * @param key of the {@link ModuleDescriptor} this status is for
+	 * @param key of the module this status is for
 	 *
 	 * @return {@code Builder} for {@code ModuleStatus}
 	 */
-	public static Builder of(ModuleDescriptor.Key key) {
+	public static Builder of(ModuleDeploymentId key) {
 		return new Builder(key);
 	}
 
@@ -163,13 +161,13 @@ public class ModuleStatus {
 
 		private final ModuleStatus status;
 
-		private Builder(ModuleDescriptor.Key key) {
+		private Builder(ModuleDeploymentId key) {
 			this.status = new ModuleStatus(key);
 		}
 
 		/**
 		 * Add an instance of {@code ModuleInstanceStatus} to build
-		 * the status for the {@code ModuleDescriptor}. This will
+		 * the status for the module. This will
 		 * be invoked once per individual module instance.
 		 *
 		 * @param instance status of individual module deployment

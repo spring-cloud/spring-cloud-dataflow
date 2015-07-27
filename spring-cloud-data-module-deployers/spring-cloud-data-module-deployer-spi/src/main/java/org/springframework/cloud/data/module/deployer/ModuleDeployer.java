@@ -19,12 +19,14 @@ package org.springframework.cloud.data.module.deployer;
 
 import java.util.Map;
 
+import org.springframework.cloud.data.core.ModuleDeploymentRequest;
+import org.springframework.cloud.data.core.ModuleDeploymentId;
 import org.springframework.cloud.data.module.ModuleStatus;
-import org.springframework.xd.module.ModuleDescriptor;
 
 /**
  * Interface specifying the operations for a runtime environment
- * capable of launching {@link ModuleDescriptor modules}.
+ * capable of launching modules via
+ * {@link ModuleDeploymentRequest module deployment requests}.
  *
  * @author Mark Fisher
  * @author Patrick Peralta
@@ -32,45 +34,45 @@ import org.springframework.xd.module.ModuleDescriptor;
 public interface ModuleDeployer {
 
 	/**
-	 * Deploy the given {@code ModuleDescriptor}. Implementations
+	 * Handle the given {@code ModuleDeploymentRequest}. Implementations
 	 * may perform this operation asynchronously; therefore
 	 * a successful deployment may not be assumed upon return.
 	 * To determine the status of a deployment, invoke
-	 * {@link #status(org.springframework.xd.module.ModuleDescriptor.Key)}.
+	 * {@link #status(ModuleDeploymentId)}.
 	 *
-	 * @param descriptor descriptor for module to be deployed
-	 *
+	 * @param request request for module to be deployed
+	 * @return the deployment id for the module
 	 * @throws IllegalStateException if the module has already been deployed
 	 */
-	void deploy(ModuleDescriptor descriptor);
+	ModuleDeploymentId deploy(ModuleDeploymentRequest request);
 
 	/**
-	 * Un-deploy the the given {@code ModuleDescriptor}. Implementations
+	 * Un-deploy the the given {@code ModuleKey}. Implementations
 	 * may perform this operation asynchronously; therefore
 	 * a successful un-deployment may not be assumed upon return.
 	 * To determine the status of a deployment, invoke
-	 * {@link #status(org.springframework.xd.module.ModuleDescriptor.Key)}.
+	 * {@link #status(ModuleDeploymentId)}.
 	 *
-	 * @param key unique key for module to be un-deployed
+	 * @param id unique id for module to be un-deployed
 	 *
 	 * @throws IllegalStateException if the module has not been deployed
 	 */
-	void undeploy(ModuleDescriptor.Key key);
+	void undeploy(ModuleDeploymentId id);
 
 	/**
-	 * Return the deployment status of the given {@code ModuleDescriptor}.
+	 * Return the deployment status of the given {@code ModuleKey}.
 	 *
-	 * @param key of the {@link ModuleDescriptor} this status is for
+	 * @param id id for the module this status is for
 	 *
 	 * @return module deployment status
 	 */
-	ModuleStatus status(ModuleDescriptor.Key key);
+	ModuleStatus status(ModuleDeploymentId id);
 
 	/**
 	 * Return a map of all deployed {@code ModuleDescriptor}s.
 	 *
 	 * @return map of deployed {@code ModuleDescriptor}s.
 	 */
-	Map<ModuleDescriptor.Key, ModuleStatus> status();
+	Map<ModuleDeploymentId, ModuleStatus> status();
 
 }
