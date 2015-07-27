@@ -80,7 +80,7 @@ public class ModuleStatus {
 	/**
 	 * The key of the {@link ModuleDescriptor} this status is for.
 	 */
-	private final ModuleDescriptor.Key key;
+	private final ModuleKey key;
 
 	/**
 	 * Map of {@link ModuleInstanceStatus} keyed by a unique identifier
@@ -93,7 +93,7 @@ public class ModuleStatus {
 	 *
 	 * @param key key of the {@code ModuleDescriptor} this status is for
 	 */
-	protected ModuleStatus(ModuleDescriptor.Key key) {
+	protected ModuleStatus(ModuleKey key) {
 		this.key = key;
 	}
 
@@ -154,7 +154,7 @@ public class ModuleStatus {
 	 *
 	 * @return {@code Builder} for {@code ModuleStatus}
 	 */
-	public static Builder of(ModuleDescriptor.Key key) {
+	public static Builder of(ModuleKey key) {
 		return new Builder(key);
 	}
 
@@ -163,7 +163,7 @@ public class ModuleStatus {
 
 		private final ModuleStatus status;
 
-		private Builder(ModuleDescriptor.Key key) {
+		private Builder(ModuleKey key) {
 			this.status = new ModuleStatus(key);
 		}
 
