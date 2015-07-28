@@ -106,7 +106,7 @@ public class ModuleDefinition implements Comparable<ModuleDefinition> {
 	 * @return module name
 	 */
 	public String getName() {
-		return this.name;
+		return name;
 	}
 
 	/**
@@ -117,7 +117,7 @@ public class ModuleDefinition implements Comparable<ModuleDefinition> {
 	 * @return module label
 	 */
 	public String getLabel() {
-		return this.label;
+		return label;
 	}
 
 	/**
@@ -127,7 +127,7 @@ public class ModuleDefinition implements Comparable<ModuleDefinition> {
 	 * @return group name
 	 */
 	public String getGroup() {
-		return this.group;
+		return group;
 	}
 
 	/**
@@ -137,7 +137,7 @@ public class ModuleDefinition implements Comparable<ModuleDefinition> {
 	 * @return module index
 	 */
 	public int getIndex() {
-		return this.index;
+		return index;
 	}
 
 	/**
@@ -147,7 +147,7 @@ public class ModuleDefinition implements Comparable<ModuleDefinition> {
 	 * @return map of channel bindings for module
 	 */
 	public Map<String, String> getBindings() {
-		return this.bindings;
+		return bindings;
 	}
 
 	/**
@@ -157,7 +157,7 @@ public class ModuleDefinition implements Comparable<ModuleDefinition> {
 	 * @return read-only map of module parameters
 	 */
 	public Map<String, String> getParameters() {
-		return this.parameters;
+		return parameters;
 	}
 
 	@Override
@@ -328,7 +328,7 @@ public class ModuleDefinition implements Comparable<ModuleDefinition> {
 		 * @return module name
 		 */
 		public String getName() {
-			return this.name;
+			return name;
 		}
 
 		/**
@@ -339,7 +339,7 @@ public class ModuleDefinition implements Comparable<ModuleDefinition> {
 		 * @return module label
 		 */
 		public String getLabel() {
-			return this.label;
+			return label;
 		}
 
 		/**
@@ -349,7 +349,7 @@ public class ModuleDefinition implements Comparable<ModuleDefinition> {
 		 * @return group name
 		 */
 		public String getGroup() {
-			return this.group;
+			return group;
 		}
 
 		/**
@@ -359,7 +359,7 @@ public class ModuleDefinition implements Comparable<ModuleDefinition> {
 		 * @return module index
 		 */
 		public int getIndex() {
-			return this.index;
+			return index;
 		}
 
 		/**
@@ -371,7 +371,7 @@ public class ModuleDefinition implements Comparable<ModuleDefinition> {
 		 * @return map of module parameters
 		 */
 		public Map<String, String> getParameters() {
-			return this.parameters;
+			return parameters;
 		}
 
 		/**
@@ -380,7 +380,7 @@ public class ModuleDefinition implements Comparable<ModuleDefinition> {
 		 * @return map of module bindings
 		 */
 		public Map<String, String> getBindings() {
-			return this.bindings;
+			return bindings;
 		}
 
 		/**
