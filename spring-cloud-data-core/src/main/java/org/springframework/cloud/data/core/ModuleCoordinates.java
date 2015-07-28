@@ -31,7 +31,7 @@ import org.springframework.util.Assert;
  *     .setVersion("5.0.0")
  *     .build()
  * </pre>
- * ...or use {@link #parse(String)} to parse the coordinates as a colin delimited string:
+ * ...or use {@link #parse(String)} to parse the coordinates as a colon delimited string:
  * <p>
  * <pre>
  * ModuleCoordinates.parse("org.springframework:spring-core:5.0.0);
@@ -67,11 +67,11 @@ public class ModuleCoordinates {
 	 * @param version     artifact version
 	 */
 	private ModuleCoordinates(String groupId, String artifactId, String version) {
-		Assert.hasLength(artifactId, "'artifactId' cannot be blank");
 		Assert.hasLength(groupId, "'groupId' cannot be blank");
+		Assert.hasLength(artifactId, "'artifactId' cannot be blank");
 		Assert.hasLength(version, "'version' cannot be blank");
-		this.artifactId = artifactId;
 		this.groupId = groupId;
+		this.artifactId = artifactId;
 		this.version = version;
 	}
 
@@ -107,15 +107,15 @@ public class ModuleCoordinates {
 
 		ModuleCoordinates that = (ModuleCoordinates) o;
 
-		return this.artifactId.equals(that.artifactId) &&
-				this.groupId.equals(that.groupId) &&
+		return this.groupId.equals(that.groupId) &&
+				this.artifactId.equals(that.artifactId) &&
 				this.version.equals(that.version);
 	}
 
 	@Override
 	public int hashCode() {
-		int result = artifactId.hashCode();
-		result = 31 * result + groupId.hashCode();
+		int result = groupId.hashCode();
+		result = 31 * result + artifactId.hashCode();
 		result = 31 * result + version.hashCode();
 		return result;
 	}

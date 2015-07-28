@@ -47,10 +47,10 @@ public class ModuleDefinition implements Comparable<ModuleDefinition> {
 	 * Symbolic name of a module. This may be generated to a default
 	 * value or specified in the DSL string.
 	 */
-	private final String moduleLabel;
+	private final String label;
 
 	/**
-	 * Name of deployable unit this module instance belongs to (such as a stream or job).
+	 * Name of deployable unit this module instance belongs to (such as a stream).
 	 */
 	private final String group;
 
@@ -77,21 +77,21 @@ public class ModuleDefinition implements Comparable<ModuleDefinition> {
 	 * {@link ModuleDefinition.Builder} to create a new instance.
 	 *
 	 * @param name name of module
-	 * @param moduleLabel label used for module in stream/job definition
-	 * @param group group this module belongs to (stream/job)
-	 * @param index position of module in stream/job definition
+	 * @param label label used for module in stream definition
+	 * @param group group this module belongs to (stream)
+	 * @param index position of module in stream definition
 	 * @param bindings map of channel bindings; may not be {@code null}
 	 * @param parameters module parameters; may be {@code null}
 	 */
-	private ModuleDefinition(String name, String moduleLabel, String group,
+	private ModuleDefinition(String name, String label, String group,
 			int index, Map<String, String> bindings, Map<String, String> parameters) {
 		Assert.notNull(name, "name must not be null");
-		Assert.notNull(moduleLabel, "moduleLabel must not be null");
+		Assert.notNull(label, "label must not be null");
 		Assert.notNull(group, "group must not be null");
 		Assert.notNull(bindings, "bindings must not be null");
 		Assert.notEmpty(bindings, "bindings must not be empty");
 		this.name = name;
-		this.moduleLabel = moduleLabel;
+		this.label = label;
 		this.group = group;
 		this.index = index;
 		this.bindings = Collections.unmodifiableMap(new HashMap<String, String>(bindings));
@@ -117,12 +117,12 @@ public class ModuleDefinition implements Comparable<ModuleDefinition> {
 	 * @return module label
 	 */
 	public String getLabel() {
-		return moduleLabel;
+		return label;
 	}
 
 	/**
 	 * Return name of deployable unit this module instance belongs to
-	 * (such as a stream or job).
+	 * (such as a stream).
 	 *
 	 * @return group name
 	 */
@@ -131,7 +131,7 @@ public class ModuleDefinition implements Comparable<ModuleDefinition> {
 	}
 
 	/**
-	 * Return position in stream/job definition relative to the other
+	 * Return position in stream definition relative to the other
 	 * modules in the definition. 0 indicates the first/leftmost position.
 	 *
 	 * @return module index
@@ -163,8 +163,8 @@ public class ModuleDefinition implements Comparable<ModuleDefinition> {
 	@Override
 	public String toString() {
 		return new ToStringCreator(this)
-				.append("moduleName", this.name)
-				.append("moduleLabel", this.moduleLabel)
+				.append("name", this.name)
+				.append("label", this.label)
 				.append("group", this.group)
 				.append("bindings", this.bindings)
 				.append("index", index)
@@ -191,7 +191,7 @@ public class ModuleDefinition implements Comparable<ModuleDefinition> {
 		private String name;
 
 		/**
-		 * @see ModuleDefinition#moduleLabel
+		 * @see ModuleDefinition#label
 		 */
 		private String label;
 
@@ -235,7 +235,7 @@ public class ModuleDefinition implements Comparable<ModuleDefinition> {
 		 * @param label name of module label
 		 * @return this builder object
 		 *
-		 * @see ModuleDefinition#moduleLabel
+		 * @see ModuleDefinition#label
 		 */
 		public Builder setLabel(String label) {
 			this.label = label;
@@ -258,7 +258,7 @@ public class ModuleDefinition implements Comparable<ModuleDefinition> {
 		/**
 		 * Set the module index.
 		 *
-		 * @param index position of module in stream/job definition
+		 * @param index position of module in stream definition
 		 * @return this builder object
 		 *
 		 * @see ModuleDefinition#index
@@ -345,7 +345,7 @@ public class ModuleDefinition implements Comparable<ModuleDefinition> {
 
 		/**
 		 * Return name of deployable unit this module instance belongs to
-		 * (such as a stream or job).
+		 * (such as a stream).
 		 *
 		 * @return group name
 		 */
@@ -354,7 +354,7 @@ public class ModuleDefinition implements Comparable<ModuleDefinition> {
 		}
 
 		/**
-		 * Return position in stream/job definition relative to the other modules in
+		 * Return position in stream definition relative to the other modules in
 		 * the definition. 0 indicates the first/leftmost position.
 		 *
 		 * @return module index
