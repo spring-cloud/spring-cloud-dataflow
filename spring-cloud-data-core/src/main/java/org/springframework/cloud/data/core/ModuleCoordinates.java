@@ -16,55 +16,82 @@
 
 package org.springframework.cloud.data.core;
 
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 import org.springframework.util.Assert;
 
 /**
  * The {@code ModuleCoordinates} class contains <a href="https://maven.apache.org/pom.html#Maven_Coordinates">
  * Maven coordinates</a> for a jar file containing a module.
+ * <p>
+ * To create a new instance, either use {@link Builder} to set the individual fields:
+ * <pre>
+ * new ModuleCoordinates.Builder()
+ *     .setGroupId("org.springframework")
+ *     .setArtifactId("spring-core")
+ *     .setVersion("5.0.0")
+ *     .build()
+ * </pre>
+ * ...or use {@link #parse(String)} to parse the coordinates as a colin delimited string:
+ * <p>
+ * <pre>
+ * ModuleCoordinates.parse("org.springframework:spring-core:5.0.0);
+ * </pre>
  *
  * @author David Turanski
  * @author Mark Fisher
+ * @author Patrick Peralta
  */
-@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY)
 public class ModuleCoordinates {
 
-	private String name;
+	/**
+	 * Group ID for artifact; generally this includes the name of the
+	 * organization that generated the artifact.
+	 */
+	private final String groupId;
 
-	private String artifactId;
+	/**
+	 * Artifact ID; generally this includes the name of the module.
+	 */
+	private final String artifactId;
 
-	private String groupId;
+	/**
+	 * Version of the artifact.
+	 */
+	private final String version;
 
-	private String version;
-
-	protected ModuleCoordinates() {
-		// For (subclass) JSON deserialization only
-	}
-
-	protected ModuleCoordinates(String name, String artifactId, String groupId, String version) {
-		Assert.hasLength(name, "'name' cannot be blank");
+	/**
+	 * Construct a {@code ModuleCoordinates} object.
+	 *
+	 * @param groupId     group ID for artifact
+	 * @param artifactId  artifact ID
+	 * @param version     artifact version
+	 */
+	private ModuleCoordinates(String groupId, String artifactId, String version) {
 		Assert.hasLength(artifactId, "'artifactId' cannot be blank");
 		Assert.hasLength(groupId, "'groupId' cannot be blank");
 		Assert.hasLength(version, "'version' cannot be blank");
-		this.name = name;
 		this.artifactId = artifactId;
 		this.groupId = groupId;
 		this.version = version;
 	}
 
-	public String getName() {
-		return name;
-	}
-
-	public String getArtifactId() {
-		return artifactId;
-	}
-
+	/**
+	 * @see #groupId
+	 */
 	public String getGroupId() {
 		return groupId;
 	}
 
+	/**
+	 * @see #artifactId
+	 */
+	public String getArtifactId() {
+		return artifactId;
+	}
+
+	/**
+	 * @see #version
+	 */
 	public String getVersion() {
 		return version;
 	}
@@ -77,28 +104,55 @@ public class ModuleCoordinates {
 		if (!(o instanceof ModuleCoordinates)) {
 			return false;
 		}
+
 		ModuleCoordinates that = (ModuleCoordinates) o;
-		if (!name.equals(that.name)) {
-			return false;
-		}
-		if (!artifactId.equals(that.artifactId)) {
-			return false;
-		}
-		if (!groupId.equals(that.groupId)) {
-			return false;
-		}
-		if (!version.equals(that.version)) {
-			return false;
-		}
-		return true;
+
+		return this.artifactId.equals(that.artifactId) &&
+				this.groupId.equals(that.groupId) &&
+				this.version.equals(that.version);
 	}
 
 	@Override
 	public int hashCode() {
-		int result = name.hashCode();
-		result = 31 * result + artifactId.hashCode();
+		int result = artifactId.hashCode();
 		result = 31 * result + groupId.hashCode();
 		result = 31 * result + version.hashCode();
 		return result;
 	}
+
+	public static ModuleCoordinates parse(String id) {
+		Assert.hasText(id);
+		String[] fields = id.split(":");
+		Assert.state(fields.length == 3, "invalid format for Maven coordinates: " + id);
+
+		return new ModuleCoordinates(fields[0], fields[1], fields[2]);
+	}
+
+	public static class Builder {
+		private String groupId;
+
+		private String artifactId;
+
+		private String version;
+
+		public Builder setGroupId(String groupId) {
+			this.groupId = groupId;
+			return this;
+		}
+
+		public Builder setArtifactId(String artifactId) {
+			this.artifactId = artifactId;
+			return this;
+		}
+
+		public Builder setVersion(String version) {
+			this.version = version;
+			return this;
+		}
+
+		public ModuleCoordinates build() {
+			return new ModuleCoordinates(groupId, artifactId, version);
+		}
+	}
+
 }

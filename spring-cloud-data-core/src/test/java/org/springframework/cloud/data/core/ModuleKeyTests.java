@@ -10,14 +10,19 @@ import org.junit.Test;
 public class ModuleKeyTests {
 
 	@Test
-	public void testUID() throws Exception {
-		String group = "group";
-		String label = "label";
+	public void testParse() throws Exception {
+		String group = "ticktock";
+		String label = "time-0";
+		ModuleDefinition definition = new ModuleDefinition.Builder()
+				.setGroup(group)
+				.setName("time")
+				.setLabel(label)
+				.setBinding("output", "output")
+				.build();
+		String id = String.format("%s.%s", group,label);
 
-		String uid = String.format("%s.%s", group,label);
-		ModuleKey key = new ModuleKey(group, label);
-		assertEquals(uid, key.toUID());
-
-		assertEquals(key, ModuleKey.fromUID(uid));
+		ModuleKey key = ModuleKey.fromModuleDefinition(definition);
+		assertEquals(id, key.toString());
+		assertEquals(key, ModuleKey.parse(id));
 	}
 }

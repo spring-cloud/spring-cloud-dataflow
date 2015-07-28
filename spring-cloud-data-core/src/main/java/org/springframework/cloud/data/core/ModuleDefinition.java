@@ -73,7 +73,7 @@ public class ModuleDefinition implements Comparable<ModuleDefinition> {
 
 
 	/**
-	 * Construct a {@code ModuleDescriptor}. This constructor is private; use
+	 * Construct a {@code ModuleDefinition}. This constructor is private; use
 	 * {@link ModuleDefinition.Builder} to create a new instance.
 	 *
 	 * @param name name of module
@@ -105,7 +105,7 @@ public class ModuleDefinition implements Comparable<ModuleDefinition> {
 	 *
 	 * @return module name
 	 */
-	public String getModuleName() {
+	public String getName() {
 		return name;
 	}
 
@@ -116,7 +116,7 @@ public class ModuleDefinition implements Comparable<ModuleDefinition> {
 	 *
 	 * @return module label
 	 */
-	public String getModuleLabel() {
+	public String getLabel() {
 		return moduleLabel;
 	}
 
@@ -188,12 +188,12 @@ public class ModuleDefinition implements Comparable<ModuleDefinition> {
 		/**
 		 * @see ModuleDefinition#name
 		 */
-		private String moduleName;
+		private String name;
 
 		/**
 		 * @see ModuleDefinition#moduleLabel
 		 */
-		private String moduleLabel;
+		private String label;
 
 		/**
 		 * @see ModuleDefinition#group
@@ -219,26 +219,26 @@ public class ModuleDefinition implements Comparable<ModuleDefinition> {
 		/**
 		 * Set the module name.
 		 *
-		 * @param moduleName name of module
+		 * @param name name of module
 		 * @return this builder object
 		 *
 		 * @see ModuleDefinition#name
 		 */
-		public Builder setModuleName(String moduleName) {
-			this.moduleName = moduleName;
+		public Builder setName(String name) {
+			this.name = name;
 			return this;
 		}
 
 		/**
 		 * Set the module label.
 		 *
-		 * @param moduleLabel name of module label
+		 * @param label name of module label
 		 * @return this builder object
 		 *
 		 * @see ModuleDefinition#moduleLabel
 		 */
-		public Builder setModuleLabel(String moduleLabel) {
-			this.moduleLabel = moduleLabel;
+		public Builder setLabel(String label) {
+			this.label = label;
 			return this;
 		}
 
@@ -328,8 +328,8 @@ public class ModuleDefinition implements Comparable<ModuleDefinition> {
 		 *
 		 * @return module name
 		 */
-		public String getModuleName() {
-			return moduleName;
+		public String getName() {
+			return name;
 		}
 
 		/**
@@ -339,8 +339,8 @@ public class ModuleDefinition implements Comparable<ModuleDefinition> {
 		 *
 		 * @return module label
 		 */
-		public String getModuleLabel() {
-			return moduleLabel;
+		public String getLabel() {
+			return label;
 		}
 
 		/**
@@ -385,31 +385,12 @@ public class ModuleDefinition implements Comparable<ModuleDefinition> {
 		}
 
 		/**
-		 * Create a {@code Builder} object pre-populated with the configuration
-		 * for the provided {@link ModuleDefinition}.
-		 *
-		 * @param definition module descriptor
-		 * @return pre-populated builder object
-		 */
-		public static Builder fromModuleDefinition(ModuleDefinition definition) {
-			Builder builder = new Builder();
-			builder.setModuleName(definition.getModuleName());
-			builder.setModuleLabel(definition.getModuleLabel());
-			builder.setGroup(definition.getGroup());
-			builder.setIndex(definition.getIndex());
-			builder.addBindings(definition.getBindings());
-			builder.addParameters(definition.getParameters());
-
-			return builder;
-		}
-
-		/**
 		 * Return a new instance of {@link ModuleDefinition}.
 		 *
 		 * @return new instance of {@code ModuleDefinition}
 		 */
 		public ModuleDefinition build() {
-			return new ModuleDefinition(moduleName, moduleLabel, group,
+			return new ModuleDefinition(name, label, group,
 					index, bindings, parameters);
 		}
 	}

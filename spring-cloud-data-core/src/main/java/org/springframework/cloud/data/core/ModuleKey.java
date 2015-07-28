@@ -22,8 +22,8 @@ import org.springframework.util.Assert;
 
 /**
  * Unique identifier for a {@link ModuleDeploymentRequest}.
- * Methods {@link #toUID()} and {@link #fromUID(String)} can be used to convert
- * a key to a string and a string to a key, respectively. The UID string may be
+ * Methods {@link #toString()} and {@link #parse(String)} can be used to convert
+ * a key to a string and a string to a key, respectively. The id string may be
  * used to uniquely identify a module in a database or execution environment.
  *
  * @author Patrick Peralta
@@ -101,7 +101,8 @@ public class ModuleKey implements Serializable {
 	 *
 	 * @return string representation of this key
 	 */
-	public String toUID() {
+	@Override
+	public String toString() {
 		return String.format("%s.%s", this.group, this.label);
 	}
 
@@ -109,19 +110,19 @@ public class ModuleKey implements Serializable {
 	 * Parse the given string and return a {@code ModuleKey} based
 	 * on the string contents.
 	 *
-	 * @param uid uid containing the fields for a {@code ModuleKey}
+	 * @param id id containing the fields for a {@code ModuleKey}
 	 * @return a new {@code ModuleKey} based on the provided string
-	 * @throws NullPointerException if a null uid is provided
-	 * @throws IllegalArgumentException if an invalid uid is provided
+	 * @throws NullPointerException if a null id is provided
+	 * @throws IllegalArgumentException if an invalid id is provided
 	 */
-	public static ModuleKey fromUID(String uid) {
-		if (uid == null) {
-			throw new NullPointerException("uid == null");
+	public static ModuleKey parse(String id) {
+		if (id == null) {
+			throw new NullPointerException("id == null");
 		}
 
-		String[] fields = uid.split("\\.");
+		String[] fields = id.split("\\.");
 		if (fields.length != 2) {
-			throw new IllegalArgumentException(String.format("invalid format for uid '%s'", uid));
+			throw new IllegalArgumentException(String.format("invalid format for id '%s'", id));
 		}
 
 		return new ModuleKey(fields[0], fields[1]);
@@ -134,7 +135,7 @@ public class ModuleKey implements Serializable {
 	 * @return new {@code ModuleKey} for the provided module definition
 	 */
 	public static ModuleKey fromModuleDefinition(ModuleDefinition definition) {
-		return new ModuleKey(definition.getGroup(), definition.getModuleLabel());
+		return new ModuleKey(definition.getGroup(), definition.getLabel());
 	}
 
 }
