@@ -23,6 +23,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.springframework.core.style.ToStringCreator;
+import org.springframework.util.Assert;
 
 /**
  * Representation of a defined stream. A stream consists of an
@@ -63,6 +64,9 @@ public class StreamDefinition {
 	 * @param modules    ordered list of modules for stream
 	 */
 	private StreamDefinition(String name, String definition, List<ModuleDefinition> modules) {
+		Assert.hasText(name, "name is required");
+		Assert.hasText(definition, "definition is required");
+		Assert.notEmpty(modules, "modules are required");
 		this.name = name;
 		this.definition = definition;
 		this.modules = new LinkedList<>(modules);
