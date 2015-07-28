@@ -106,7 +106,7 @@ public class ModuleDefinition implements Comparable<ModuleDefinition> {
 	 * @return module name
 	 */
 	public String getName() {
-		return name;
+		return this.name;
 	}
 
 	/**
@@ -117,7 +117,7 @@ public class ModuleDefinition implements Comparable<ModuleDefinition> {
 	 * @return module label
 	 */
 	public String getLabel() {
-		return label;
+		return this.label;
 	}
 
 	/**
@@ -127,7 +127,7 @@ public class ModuleDefinition implements Comparable<ModuleDefinition> {
 	 * @return group name
 	 */
 	public String getGroup() {
-		return group;
+		return this.group;
 	}
 
 	/**
@@ -137,7 +137,7 @@ public class ModuleDefinition implements Comparable<ModuleDefinition> {
 	 * @return module index
 	 */
 	public int getIndex() {
-		return index;
+		return this.index;
 	}
 
 	/**
@@ -167,14 +167,14 @@ public class ModuleDefinition implements Comparable<ModuleDefinition> {
 				.append("label", this.label)
 				.append("group", this.group)
 				.append("bindings", this.bindings)
-				.append("index", index)
-				.append("parameters", parameters).toString();
+				.append("index", this.index)
+				.append("parameters", this.parameters).toString();
 	}
 
 	@Override
-	public int compareTo(ModuleDefinition o) {
-		Assert.notNull(o, "ModuleDefinition must not be null");
-		return (index < o.index) ? -1 : ((index == o.index) ? 0 : 1);
+	public int compareTo(ModuleDefinition that) {
+		Assert.notNull(that, "ModuleDefinition must not be null");
+		return (this.index < that.index) ? -1 : ((this.index == that.index) ? 0 : 1);
 	}
 
 
@@ -328,7 +328,7 @@ public class ModuleDefinition implements Comparable<ModuleDefinition> {
 		 * @return module name
 		 */
 		public String getName() {
-			return name;
+			return this.name;
 		}
 
 		/**
@@ -339,7 +339,7 @@ public class ModuleDefinition implements Comparable<ModuleDefinition> {
 		 * @return module label
 		 */
 		public String getLabel() {
-			return label;
+			return this.label;
 		}
 
 		/**
@@ -349,7 +349,7 @@ public class ModuleDefinition implements Comparable<ModuleDefinition> {
 		 * @return group name
 		 */
 		public String getGroup() {
-			return group;
+			return this.group;
 		}
 
 		/**
@@ -359,7 +359,7 @@ public class ModuleDefinition implements Comparable<ModuleDefinition> {
 		 * @return module index
 		 */
 		public int getIndex() {
-			return index;
+			return this.index;
 		}
 
 		/**
@@ -371,7 +371,7 @@ public class ModuleDefinition implements Comparable<ModuleDefinition> {
 		 * @return map of module parameters
 		 */
 		public Map<String, String> getParameters() {
-			return parameters;
+			return this.parameters;
 		}
 
 		/**
@@ -380,7 +380,7 @@ public class ModuleDefinition implements Comparable<ModuleDefinition> {
 		 * @return map of module bindings
 		 */
 		public Map<String, String> getBindings() {
-			return bindings;
+			return this.bindings;
 		}
 
 		/**
@@ -389,8 +389,8 @@ public class ModuleDefinition implements Comparable<ModuleDefinition> {
 		 * @return new instance of {@code ModuleDefinition}
 		 */
 		public ModuleDefinition build() {
-			return new ModuleDefinition(name, label, group,
-					index, bindings, parameters);
+			return new ModuleDefinition(this.name, this.label, this.group,
+					this.index, this.bindings, this.parameters);
 		}
 	}
 
