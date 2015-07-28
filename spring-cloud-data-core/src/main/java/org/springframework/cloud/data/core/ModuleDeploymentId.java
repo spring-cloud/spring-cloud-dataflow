@@ -23,17 +23,17 @@ import org.springframework.util.Assert;
 /**
  * Unique identifier for a {@link ModuleDeploymentRequest}.
  * Methods {@link #toString()} and {@link #parse(String)} can be used to convert
- * a key to a string and a string to a key, respectively. The id string may be
+ * an ID to a string and a string to an ID, respectively. The ID string may be
  * used to uniquely identify a module in a database or execution environment.
  *
  * @author Patrick Peralta
  */
-public class ModuleKey implements Serializable {
+public class ModuleDeploymentId implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	/**
 	 * The name of the associated group or deployment unit this
-	 * module belongs to, such as a stream or job.
+	 * module belongs to, such as a stream.
 	 */
 	private final String group;
 
@@ -45,12 +45,12 @@ public class ModuleKey implements Serializable {
 	private final String label;
 
 	/**
-	 * Construct a {@code ModuleKey}.
+	 * Construct a {@code ModuleDeploymentId}.
 	 *
-	 * @param group name of group (stream/job) this module belongs to
+	 * @param group name of group (stream) this module belongs to
 	 * @param label label to uniquely identify this module in its group
 	 */
-	public ModuleKey(String group, String label) {
+	public ModuleDeploymentId(String group, String label) {
 		Assert.hasText(group);
 		Assert.hasText(label);
 		Assert.doesNotContain(group, ".");
@@ -82,7 +82,7 @@ public class ModuleKey implements Serializable {
 			return false;
 		}
 
-		ModuleKey that = (ModuleKey) o;
+		ModuleDeploymentId that = (ModuleDeploymentId) o;
 		return this.group.equals(that.group)
 				&& this.label.equals(that.label);
 	}
@@ -95,11 +95,11 @@ public class ModuleKey implements Serializable {
 	}
 
 	/**
-	 * Return a string containing the key fields separated by
+	 * Return a string containing the ID fields separated by
 	 * periods. This string may be used as a key in a database
 	 * to uniquely identify a module.
 	 *
-	 * @return string representation of this key
+	 * @return string representation of this ID
 	 */
 	@Override
 	public String toString() {
@@ -107,15 +107,15 @@ public class ModuleKey implements Serializable {
 	}
 
 	/**
-	 * Parse the given string and return a {@code ModuleKey} based
+	 * Parse the given string and return a {@code ModuleDeploymentId} based
 	 * on the string contents.
 	 *
-	 * @param id id containing the fields for a {@code ModuleKey}
-	 * @return a new {@code ModuleKey} based on the provided string
+	 * @param id id containing the fields for a {@code ModuleDeploymentId}
+	 * @return a new {@code ModuleDeploymentId} based on the provided string
 	 * @throws NullPointerException if a null id is provided
 	 * @throws IllegalArgumentException if an invalid id is provided
 	 */
-	public static ModuleKey parse(String id) {
+	public static ModuleDeploymentId parse(String id) {
 		if (id == null) {
 			throw new NullPointerException("id == null");
 		}
@@ -125,17 +125,17 @@ public class ModuleKey implements Serializable {
 			throw new IllegalArgumentException(String.format("invalid format for id '%s'", id));
 		}
 
-		return new ModuleKey(fields[0], fields[1]);
+		return new ModuleDeploymentId(fields[0], fields[1]);
 	}
 
 	/**
-	 * Return a {@code ModuleKey} based on the provided {@link ModuleDefinition}.
+	 * Return a {@code ModuleDeploymentId} based on the provided {@link ModuleDefinition}.
 	 *
-	 * @param definition module definition to generate a key for
-	 * @return new {@code ModuleKey} for the provided module definition
+	 * @param definition module definition to generate an ID for
+	 * @return new {@code ModuleDeploymentId} for the provided module definition
 	 */
-	public static ModuleKey fromModuleDefinition(ModuleDefinition definition) {
-		return new ModuleKey(definition.getGroup(), definition.getLabel());
+	public static ModuleDeploymentId fromModuleDefinition(ModuleDefinition definition) {
+		return new ModuleDeploymentId(definition.getGroup(), definition.getLabel());
 	}
 
 }

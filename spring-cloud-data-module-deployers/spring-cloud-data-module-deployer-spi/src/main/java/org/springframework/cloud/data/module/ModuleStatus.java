@@ -23,7 +23,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.springframework.cloud.data.core.ModuleDeploymentRequest;
-import org.springframework.cloud.data.core.ModuleKey;
+import org.springframework.cloud.data.core.ModuleDeploymentId;
 
 /**
  * Status of a {@link ModuleDeploymentRequest}. This status is
@@ -81,7 +81,7 @@ public class ModuleStatus {
 	/**
 	 * The key of the module this status is for.
 	 */
-	private final ModuleKey key;
+	private final ModuleDeploymentId moduleDeploymentId;
 
 	/**
 	 * Map of {@link ModuleInstanceStatus} keyed by a unique identifier
@@ -92,19 +92,18 @@ public class ModuleStatus {
 	/**
 	 * Construct a new {@code ModuleStatus}.
 	 *
-	 * @param key key of the module this status is for
+	 * @param moduleDeploymentId key of the module this status is for
 	 */
-	protected ModuleStatus(ModuleKey key) {
-		this.key = key;
+	protected ModuleStatus(ModuleDeploymentId moduleDeploymentId) {
+		this.moduleDeploymentId = moduleDeploymentId;
 	}
 
 	/**
-	 * Return the module label for the module.
-	 *
-	 * @return module label for the module
+	 * Return the module deployment id for the module.
+	 * @return module deployment id
 	 */
-	public String getName() {
-		return key.getLabel();
+	public ModuleDeploymentId getModuleDeploymentId() {
+		return moduleDeploymentId;
 	}
 
 	/**
@@ -153,7 +152,7 @@ public class ModuleStatus {
 	 *
 	 * @return {@code Builder} for {@code ModuleStatus}
 	 */
-	public static Builder of(ModuleKey key) {
+	public static Builder of(ModuleDeploymentId key) {
 		return new Builder(key);
 	}
 
@@ -162,7 +161,7 @@ public class ModuleStatus {
 
 		private final ModuleStatus status;
 
-		private Builder(ModuleKey key) {
+		private Builder(ModuleDeploymentId key) {
 			this.status = new ModuleStatus(key);
 		}
 

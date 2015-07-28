@@ -23,23 +23,22 @@ import org.junit.Test;
 /**
  * @author Patrick Peralta
  */
-public class ModuleDefinitionTests {
+public class ModuleDeploymentIdTests {
 
 	@Test
-	public void testBuilder() {
+	public void testParse() throws Exception {
+		String group = "ticktock";
+		String label = "time-0";
 		ModuleDefinition definition = new ModuleDefinition.Builder()
-				.setGroup("ticktock")
-				.setIndex(0)
+				.setGroup(group)
 				.setName("time")
-				.setLabel("label")
-				.setBinding("output", "channel").build();
+				.setLabel(label)
+				.setBinding("output", "output")
+				.build();
+		String id = String.format("%s.%s", group, label);
 
-		assertEquals("ticktock", definition.getGroup());
-		assertEquals("time", definition.getName());
-		assertEquals("label", definition.getLabel());
-		assertEquals(0, definition.getIndex());
-		assertEquals(1, definition.getBindings().size());
-		assertEquals("channel", definition.getBindings().get("output"));
+		ModuleDeploymentId key = ModuleDeploymentId.fromModuleDefinition(definition);
+		assertEquals(id, key.toString());
+		assertEquals(key, ModuleDeploymentId.parse(id));
 	}
-
 }

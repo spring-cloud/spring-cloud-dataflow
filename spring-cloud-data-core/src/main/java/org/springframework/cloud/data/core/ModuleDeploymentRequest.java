@@ -22,7 +22,7 @@ import java.util.Map;
 /**
  * Representation of a module deployment request. This includes
  * module options defined at definition time (as part of a stream
- * definition) as well as module deployment options (such as the
+ * definition) as well as module deployment properties (such as the
  * number of module instances).
  *
  * @author Patrick Peralta

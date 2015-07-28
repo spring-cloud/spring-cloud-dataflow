@@ -18,37 +18,32 @@ package org.springframework.cloud.data.module.deployer.lattice;
 
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import org.springframework.cloud.data.core.ModuleDeploymentId;
+import org.springframework.cloud.data.core.ModuleDeploymentRequest;
 import org.springframework.cloud.data.module.ModuleStatus;
 import org.springframework.cloud.data.module.deployer.ModuleDeployer;
-import org.springframework.xd.module.ModuleDescriptor;
 
 /**
  * @author Patrick Peralta
  */
 public class ReceptorModuleDeployer implements ModuleDeployer {
-	private static final Logger logger = LoggerFactory.getLogger(ReceptorModuleDeployer.class);
-
-
 	@Override
-	public void deploy(ModuleDescriptor descriptor) {
-		throw new UnsupportedOperationException("todo");
+	public ModuleDeploymentId deploy(ModuleDeploymentRequest request) {
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public void undeploy(ModuleDescriptor.Key key) {
-		throw new UnsupportedOperationException("todo");
+	public void undeploy(ModuleDeploymentId id) {
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public ModuleStatus status(ModuleDescriptor.Key descriptor) {
-		throw new UnsupportedOperationException("todo");
+	public ModuleStatus status(ModuleDeploymentId id) {
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public Map<ModuleDescriptor.Key, ModuleStatus> status() {
-		throw new UnsupportedOperationException("todo");
+	public Map<ModuleDeploymentId, ModuleStatus> status() {
+		throw new UnsupportedOperationException();
 	}
 }

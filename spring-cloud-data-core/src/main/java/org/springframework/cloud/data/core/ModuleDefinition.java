@@ -181,7 +181,7 @@ public class ModuleDefinition implements Comparable<ModuleDefinition> {
 	/**
 	 * Builder object for {@code ModuleDefinition}.
 	 * This object is mutable to allow for flexibility in specifying module
-	 * type/fields/parameters during parsing.
+	 * fields/parameters during parsing.
 	 */
 	public static class Builder {
 
@@ -323,8 +323,7 @@ public class ModuleDefinition implements Comparable<ModuleDefinition> {
 		}
 
 		/**
-		 * Return name of module. Typically this module is present under
-		 * {@code $XD_HOME/modules/[module type]}.
+		 * Return name of module.
 		 *
 		 * @return module name
 		 */

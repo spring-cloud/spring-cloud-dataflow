@@ -20,7 +20,7 @@ package org.springframework.cloud.data.module.deployer;
 import java.util.Map;
 
 import org.springframework.cloud.data.core.ModuleDeploymentRequest;
-import org.springframework.cloud.data.core.ModuleKey;
+import org.springframework.cloud.data.core.ModuleDeploymentId;
 import org.springframework.cloud.data.module.ModuleStatus;
 
 /**
@@ -34,45 +34,45 @@ import org.springframework.cloud.data.module.ModuleStatus;
 public interface ModuleDeployer {
 
 	/**
-	 * Execute the given {@code ModuleDeploymentRequest}. Implementations
+	 * Handle the given {@code ModuleDeploymentRequest}. Implementations
 	 * may perform this operation asynchronously; therefore
 	 * a successful deployment may not be assumed upon return.
 	 * To determine the status of a deployment, invoke
-	 * {@link #status(ModuleKey)}.
+	 * {@link #status(ModuleDeploymentId)}.
 	 *
 	 * @param request request for module to be deployed
-	 *
+	 * @return the deployment id for the module
 	 * @throws IllegalStateException if the module has already been deployed
 	 */
-	void deploy(ModuleDeploymentRequest request);
+	ModuleDeploymentId deploy(ModuleDeploymentRequest request);
 
 	/**
 	 * Un-deploy the the given {@code ModuleKey}. Implementations
 	 * may perform this operation asynchronously; therefore
 	 * a successful un-deployment may not be assumed upon return.
 	 * To determine the status of a deployment, invoke
-	 * {@link #status(ModuleKey)}.
+	 * {@link #status(ModuleDeploymentId)}.
 	 *
-	 * @param key unique key for module to be un-deployed
+	 * @param id unique id for module to be un-deployed
 	 *
 	 * @throws IllegalStateException if the module has not been deployed
 	 */
-	void undeploy(ModuleKey key);
+	void undeploy(ModuleDeploymentId id);
 
 	/**
 	 * Return the deployment status of the given {@code ModuleKey}.
 	 *
-	 * @param key key for the module this status is for
+	 * @param id id for the module this status is for
 	 *
 	 * @return module deployment status
 	 */
-	ModuleStatus status(ModuleKey key);
+	ModuleStatus status(ModuleDeploymentId id);
 
 	/**
 	 * Return a map of all deployed {@code ModuleDescriptor}s.
 	 *
 	 * @return map of deployed {@code ModuleDescriptor}s.
 	 */
-	Map<ModuleKey, ModuleStatus> status();
+	Map<ModuleDeploymentId, ModuleStatus> status();
 
 }
