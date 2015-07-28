@@ -33,7 +33,7 @@ public class ModuleDeploymentIdTests {
 				.setGroup(group)
 				.setName("time")
 				.setLabel(label)
-				.setBinding("output", "output")
+				.addBinding("output", "output")
 				.build();
 		String id = String.format("%s.%s", group, label);
 
