@@ -41,6 +41,8 @@ public class ModuleCoordinatesTests {
 				.build();
 		validateModuleCoordinates(expected, ModuleCoordinates.parse(
 				String.format("%s:%s:%s", GROUP_ID, ARTIFACT_ID, VERSION)));
+
+		validateModuleCoordinates(expected, ModuleCoordinates.parse(expected.toString()));
 	}
 
 	@Test
@@ -55,6 +57,8 @@ public class ModuleCoordinatesTests {
 		validateModuleCoordinates(expected, ModuleCoordinates.parse(
 				String.format("%s:%s:%s:%s:%s", GROUP_ID, ARTIFACT_ID, ModuleCoordinates.DEFAULT_EXTENSION, "exec",
 						VERSION)));
+		
+		validateModuleCoordinates(expected, ModuleCoordinates.parse(expected.toString()));
 	}
 
 	@Test
@@ -67,6 +71,8 @@ public class ModuleCoordinatesTests {
 				.build();
 		validateModuleCoordinates(expected, ModuleCoordinates.parse(
 				String.format("%s:%s:%s:%s", GROUP_ID, ARTIFACT_ID, "zip", VERSION)));
+
+		validateModuleCoordinates(expected, ModuleCoordinates.parse(expected.toString()));
 	}
 
 	@Test

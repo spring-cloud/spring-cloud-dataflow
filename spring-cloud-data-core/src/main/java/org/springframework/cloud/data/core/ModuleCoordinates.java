@@ -166,6 +166,13 @@ public class ModuleCoordinates {
 		return result;
 	}
 
+	@Override
+	public String toString() {
+		return StringUtils.hasLength(classifier) ?
+				String.format("%s:%s:%s:%s:%s", groupId, artifactId, extension, classifier, version) :
+				String.format("%s:%s:%s:%s", groupId, artifactId, extension, version);
+	}
+
 	/**
 	 * Parse coordinates given as a colon delimited string
 	 * @param coords coordinates encoded as <groupId>:<artifactId>[:<extension>[:<classifier>]]:<version>, conforming
