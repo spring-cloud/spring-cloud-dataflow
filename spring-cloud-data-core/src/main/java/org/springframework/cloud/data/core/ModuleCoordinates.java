@@ -17,7 +17,11 @@
 package org.springframework.cloud.data.core;
 
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 /**
  * The {@code ModuleCoordinates} class contains <a href="https://maven.apache.org/pom.html#Maven_Coordinates">
@@ -26,22 +30,29 @@ import org.springframework.util.Assert;
  * To create a new instance, either use {@link Builder} to set the individual fields:
  * <pre>
  * new ModuleCoordinates.Builder()
- *     .setGroupId("org.springframework")
- *     .setArtifactId("spring-core")
- *     .setVersion("5.0.0")
+ *     .setGroupId("org.springframework.cloud.stream.module")
+ *     .setArtifactId("time-source")
+ *     .setExtension("jar") //optional
+ *     .setClassifier("exec") //optional
+ *     .setVersion("2.0.0")
  *     .build()
  * </pre>
  * ...or use {@link #parse(String)} to parse the coordinates as a colon delimited string:
- * <p>
+ * <groupId>:<artifactId>[:<extension>[:<classifier>]]:<version>
  * <pre>
- * ModuleCoordinates.parse("org.springframework:spring-core:5.0.0);
+ * ModuleCoordinates.parse("org.springframework.cloud.stream.module:some-module:2.0.0);
+ * ModuleCoordinates.parse("org.springframework.cloud.stream.module:time-source:jar:exec:2.0.0);
  * </pre>
- *
+ * </p>
  * @author David Turanski
  * @author Mark Fisher
  * @author Patrick Peralta
  */
 public class ModuleCoordinates {
+
+	final static String DEFAULT_EXTENSION = "jar";
+
+	final static String EMPTY_CLASSIFIER = "";
 
 	/**
 	 * Group ID for artifact; generally this includes the name of the
@@ -55,23 +66,39 @@ public class ModuleCoordinates {
 	private final String artifactId;
 
 	/**
+	 * Extension of the artifact.
+	 */
+	private final String extension;
+
+	/**
+	 * Classifier of the artifact.
+	 */
+	private final String classifier;
+
+	/**
 	 * Version of the artifact.
 	 */
 	private final String version;
 
+
 	/**
 	 * Construct a {@code ModuleCoordinates} object.
-	 *
-	 * @param groupId     group ID for artifact
-	 * @param artifactId  artifact ID
-	 * @param version     artifact version
+	 * @param groupId group ID for artifact
+	 * @param artifactId artifact ID
+	 * @param extension the file extension
+	 * @param classifier artifact classifier - can be null
+	 * @param version artifact version
 	 */
-	private ModuleCoordinates(String groupId, String artifactId, String version) {
-		Assert.hasLength(groupId, "'groupId' cannot be blank");
-		Assert.hasLength(artifactId, "'artifactId' cannot be blank");
-		Assert.hasLength(version, "'version' cannot be blank");
+	private ModuleCoordinates(String groupId, String artifactId, String extension, String classifier, String version) {
+		Assert.hasText(groupId, "'groupId' cannot be blank");
+		Assert.hasText(artifactId, "'artifactId' cannot be blank");
+		Assert.hasText(version, "'version' cannot be blank");
+		Assert.hasText(extension, "'extension' cannot be blank");
+
 		this.groupId = groupId;
 		this.artifactId = artifactId;
+		this.extension = extension;
+		this.classifier = classifier == null ? EMPTY_CLASSIFIER : classifier;
 		this.version = version;
 	}
 
@@ -87,6 +114,20 @@ public class ModuleCoordinates {
 	 */
 	public String getArtifactId() {
 		return artifactId;
+	}
+
+	/**
+	 * @see #extension
+	 */
+	public String getExtension() {
+		return extension;
+	}
+
+	/**
+	 * @see #version
+	 */
+	public String getClassifier() {
+		return classifier;
 	}
 
 	/**
@@ -109,6 +150,8 @@ public class ModuleCoordinates {
 
 		return this.groupId.equals(that.groupId) &&
 				this.artifactId.equals(that.artifactId) &&
+				this.extension.equals(that.extension) &&
+				this.classifier.equals(that.classifier) &&
 				this.version.equals(that.version);
 	}
 
@@ -116,22 +159,46 @@ public class ModuleCoordinates {
 	public int hashCode() {
 		int result = groupId.hashCode();
 		result = 31 * result + artifactId.hashCode();
+		result = 31 * result + extension.hashCode();
+		if (StringUtils.hasLength(classifier)) {
+			result = 31 * result + classifier.hashCode();
+		}
 		result = 31 * result + version.hashCode();
 		return result;
 	}
 
-	public static ModuleCoordinates parse(String id) {
-		Assert.hasText(id);
-		String[] fields = id.split(":");
-		Assert.state(fields.length == 3, "invalid format for Maven coordinates: " + id);
+	/**
+	 * Parse coordinates given as a colon delimited string
+	 * @param coords coordinates encoded as <groupId>:<artifactId>[:<extension>[:<classifier>]]:<version>, conforming
+	 * to the <a href="http://www.eclipse.org/aether">Aether</a> convention.
+	 * @return the instance
+	 */
+	public static ModuleCoordinates parse(String coords) {
+		Assert.hasText(coords);
 
-		return new ModuleCoordinates(fields[0], fields[1], fields[2]);
+		Pattern p = Pattern.compile("([^: ]+):([^: ]+)(:([^: ]*)(:([^: ]+))?)?:([^: ]+)");
+		Matcher m = p.matcher(coords);
+		Assert.isTrue(m.matches(), "Bad artifact coordinates " + coords
+				+ ", expected format is <groupId>:<artifactId>[:<extension>[:<classifier>]]:<version>");
+
+		String groupId = m.group(1);
+		String artifactId = m.group(2);
+		String extension = StringUtils.hasLength(m.group(4)) ? m.group(4) : DEFAULT_EXTENSION;
+		String classifier = StringUtils.hasLength(m.group(6)) ? m.group(6) : EMPTY_CLASSIFIER;
+		String version = m.group(7);
+
+		return new ModuleCoordinates(groupId, artifactId, extension, classifier, version);
 	}
 
 	public static class Builder {
+
 		private String groupId;
 
 		private String artifactId;
+
+		private String extension = DEFAULT_EXTENSION;
+
+		private String classifier = EMPTY_CLASSIFIER;
 
 		private String version;
 
@@ -145,14 +212,26 @@ public class ModuleCoordinates {
 			return this;
 		}
 
+		public Builder setExtension(String extension) {
+			this.extension = extension;
+			return this;
+		}
+
+		public Builder setClassifier(String classifier) {
+			this.classifier = classifier;
+			return this;
+		}
+
+
 		public Builder setVersion(String version) {
 			this.version = version;
 			return this;
 		}
 
 		public ModuleCoordinates build() {
-			return new ModuleCoordinates(groupId, artifactId, version);
+			return new ModuleCoordinates(groupId, artifactId, extension, classifier, version);
 		}
 	}
 
 }
+
