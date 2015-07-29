@@ -389,6 +389,9 @@ public class ModuleDefinition implements Comparable<ModuleDefinition> {
 		 * @return new instance of {@code ModuleDefinition}
 		 */
 		public ModuleDefinition build() {
+			if (this.label == null) {
+				this.label = this.name;
+			}
 			return new ModuleDefinition(this.name, this.label, this.group,
 					this.index, this.bindings, this.parameters);
 		}
