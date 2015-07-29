@@ -16,7 +16,6 @@
 
 package org.springframework.cloud.data.core;
 
-
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -92,8 +91,8 @@ public class ModuleCoordinates {
 	private ModuleCoordinates(String groupId, String artifactId, String extension, String classifier, String version) {
 		Assert.hasText(groupId, "'groupId' cannot be blank");
 		Assert.hasText(artifactId, "'artifactId' cannot be blank");
-		Assert.hasText(version, "'version' cannot be blank");
 		Assert.hasText(extension, "'extension' cannot be blank");
+		Assert.hasText(version, "'version' cannot be blank");
 
 		this.groupId = groupId;
 		this.artifactId = artifactId;
@@ -190,6 +189,7 @@ public class ModuleCoordinates {
 		return new ModuleCoordinates(groupId, artifactId, extension, classifier, version);
 	}
 
+
 	public static class Builder {
 
 		private String groupId;
@@ -234,4 +234,3 @@ public class ModuleCoordinates {
 	}
 
 }
-
