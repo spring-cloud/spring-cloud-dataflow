@@ -166,6 +166,13 @@ public class ModuleCoordinates {
 		return result;
 	}
 
+	@Override
+	public String toString() {
+		return StringUtils.hasLength(classifier) ?
+				String.format("%s:%s:%s:%s:%s", groupId, artifactId, extension, classifier, version) :
+				String.format("%s:%s:%s:%s", groupId, artifactId, extension, version);
+	}
+
 	/**
 	 * Returns the coordinates encoded as <groupId>:<artifactId>[:<extension>[:<classifier>]]:<version>, conforming
 	 * to the <a href="http://www.eclipse.org/aether">Aether</a> convention.
