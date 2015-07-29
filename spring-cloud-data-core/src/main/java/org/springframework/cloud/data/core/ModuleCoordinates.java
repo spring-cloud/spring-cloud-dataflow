@@ -167,6 +167,23 @@ public class ModuleCoordinates {
 	}
 
 	/**
+	 * Returns the coordinates encoded as <groupId>:<artifactId>[:<extension>[:<classifier>]]:<version>, conforming
+	 * to the <a href="http://www.eclipse.org/aether">Aether</a> convention.
+	 */
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+		builder.append(groupId);
+		builder.append(":" + artifactId);
+		builder.append(":" + extension);
+		if (StringUtils.hasLength(classifier)) {
+			builder.append(":" + classifier);
+		}
+		builder.append(":" + version);
+		return builder.toString();
+	}
+
+	/**
 	 * Parse coordinates given as a colon delimited string
 	 * @param coords coordinates encoded as <groupId>:<artifactId>[:<extension>[:<classifier>]]:<version>, conforming
 	 * to the <a href="http://www.eclipse.org/aether">Aether</a> convention.
