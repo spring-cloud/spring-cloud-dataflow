@@ -172,15 +172,9 @@ public class ModuleCoordinates {
 	 */
 	@Override
 	public String toString() {
-		StringBuilder builder = new StringBuilder();
-		builder.append(groupId);
-		builder.append(":" + artifactId);
-		builder.append(":" + extension);
-		if (StringUtils.hasLength(classifier)) {
-			builder.append(":" + classifier);
-		}
-		builder.append(":" + version);
-		return builder.toString();
+		return StringUtils.hasLength(classifier) ?
+				String.format("%s:%s:%s:%s:%s", groupId, artifactId, extension, classifier, version) :
+				String.format("%s:%s:%s:%s", groupId, artifactId, extension, version);
 	}
 
 	/**
