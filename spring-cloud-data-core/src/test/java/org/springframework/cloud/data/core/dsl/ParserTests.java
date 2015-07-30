@@ -33,12 +33,10 @@ public class ParserTests {
 		ModuleDefinition source = requests.get(1);
 		assertEquals("foo", source.getName());
 		assertEquals("test", source.getGroup());
-		assertEquals(0, source.getIndex());
 
 		assertEquals(0, source.getParameters().size());
 		assertEquals("bar", sink.getName());
 		assertEquals("test", sink.getGroup());
-		assertEquals(1, sink.getIndex());
 		assertEquals(0, sink.getParameters().size());
 	}
 
@@ -50,7 +48,6 @@ public class ParserTests {
 		ModuleDefinition source = requests.get(1);
 		assertEquals("foo", source.getName());
 		assertEquals("test", source.getGroup());
-		assertEquals(0, source.getIndex());
 		Map<String, String> sourceParameters = source.getParameters();
 		assertEquals(1, sourceParameters.size());
 		assertEquals("payload.matches('hello')", sourceParameters.get("bar"));
@@ -64,7 +61,6 @@ public class ParserTests {
 		ModuleDefinition filter = requests.get(1);
 		assertEquals("filter", filter.getName());
 		assertEquals("test", filter.getGroup());
-		assertEquals(1, filter.getIndex());
 		Map<String, String> sourceParameters = filter.getParameters();
 		assertEquals(1, sourceParameters.size());
 		assertEquals("payload.matches('hello world')", sourceParameters.get("expression"));
@@ -78,14 +74,12 @@ public class ParserTests {
 		ModuleDefinition source = requests.get(1);
 		assertEquals("foo", source.getName());
 		assertEquals("test", source.getGroup());
-		assertEquals(0, source.getIndex());
 		Map<String, String> sourceParameters = source.getParameters();
 		assertEquals(2, sourceParameters.size());
 		assertEquals("1", sourceParameters.get("x"));
 		assertEquals("two", sourceParameters.get("y"));
 		assertEquals("bar", sink.getName());
 		assertEquals("test", sink.getGroup());
-		assertEquals(1, sink.getIndex());
 		Map<String, String> sinkParameters = sink.getParameters();
 		assertEquals(1, sinkParameters.size());
 		assertEquals("3", sinkParameters.get("z"));

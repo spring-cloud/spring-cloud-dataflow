@@ -71,8 +71,7 @@ public class Parser {
 					new ModuleDefinition.Builder()
 							.setGroup(name)
 							.setName(moduleNode.getName())
-							.setLabel(moduleNode.getLabelName())
-							.setIndex(m);
+							.setLabel(moduleNode.getLabelName());
 			if (moduleNode.hasArguments()) {
 				ArgumentNode[] arguments = moduleNode.getArguments();
 				for (ArgumentNode argument : arguments) {
@@ -85,7 +84,7 @@ public class Parser {
 		SourceChannelNode sourceChannel = stream.getSourceChannelNode();
 		if (sourceChannel != null) {
 			if (context.supportsNamedChannels()) {
-				builders.getLast().setBinding(INPUT_CHANNEL, sourceChannel.getChannelName());
+				builders.getLast().addBinding(INPUT_CHANNEL, sourceChannel.getChannelName());
 			}
 			else {
 				throw new StreamDefinitionException(dsl, sourceChannel.getStartPos(),
@@ -96,7 +95,7 @@ public class Parser {
 		SinkChannelNode sinkChannel = stream.getSinkChannelNode();
 		if (sinkChannel != null) {
 			if (context.supportsNamedChannels()) {
-				builders.getFirst().setBinding(OUTPUT_CHANNEL, sinkChannel.getChannelName());
+				builders.getFirst().addBinding(OUTPUT_CHANNEL, sinkChannel.getChannelName());
 			}
 			else {
 				throw new StreamDefinitionException(dsl, sinkChannel.getChannelNode().getStartPos(),

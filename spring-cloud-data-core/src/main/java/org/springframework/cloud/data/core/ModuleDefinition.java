@@ -36,7 +36,7 @@ import org.springframework.util.Assert;
  * @author Ilayaperumal Gopinathan
  * @author Patrick Peralta
  */
-public class ModuleDefinition implements Comparable<ModuleDefinition> {
+public class ModuleDefinition {
 
 	/**
 	 * Name of module.
@@ -53,12 +53,6 @@ public class ModuleDefinition implements Comparable<ModuleDefinition> {
 	 * Name of deployable unit this module instance belongs to (such as a stream).
 	 */
 	private final String group;
-
-	/**
-	 * Position in stream definition relative to the other modules
-	 * in the definition. 0 indicates the first/leftmost position.
-	 */
-	private final int index;
 
 	/**
 	 * Map of channel bindings for this module (such as input and/or output channels).
@@ -79,12 +73,11 @@ public class ModuleDefinition implements Comparable<ModuleDefinition> {
 	 * @param name name of module
 	 * @param label label used for module in stream definition
 	 * @param group group this module belongs to (stream)
-	 * @param index position of module in stream definition
 	 * @param bindings map of channel bindings; may not be {@code null}
 	 * @param parameters module parameters; may be {@code null}
 	 */
 	private ModuleDefinition(String name, String label, String group,
-			int index, Map<String, String> bindings, Map<String, String> parameters) {
+			Map<String, String> bindings, Map<String, String> parameters) {
 		Assert.notNull(name, "name must not be null");
 		Assert.notNull(label, "label must not be null");
 		Assert.notNull(group, "group must not be null");
@@ -93,7 +86,6 @@ public class ModuleDefinition implements Comparable<ModuleDefinition> {
 		this.name = name;
 		this.label = label;
 		this.group = group;
-		this.index = index;
 		this.bindings = Collections.unmodifiableMap(new HashMap<String, String>(bindings));
 		this.parameters = parameters == null
 				? Collections.<String, String>emptyMap()
@@ -131,16 +123,6 @@ public class ModuleDefinition implements Comparable<ModuleDefinition> {
 	}
 
 	/**
-	 * Return position in stream definition relative to the other
-	 * modules in the definition. 0 indicates the first/leftmost position.
-	 *
-	 * @return module index
-	 */
-	public int getIndex() {
-		return index;
-	}
-
-	/**
 	 * Return map of channel bindings for this module (such as input
 	 * and/or output channels).
 	 *
@@ -167,14 +149,7 @@ public class ModuleDefinition implements Comparable<ModuleDefinition> {
 				.append("label", this.label)
 				.append("group", this.group)
 				.append("bindings", this.bindings)
-				.append("index", this.index)
 				.append("parameters", this.parameters).toString();
-	}
-
-	@Override
-	public int compareTo(ModuleDefinition that) {
-		Assert.notNull(that, "ModuleDefinition must not be null");
-		return (this.index < that.index) ? -1 : ((this.index == that.index) ? 0 : 1);
 	}
 
 
@@ -199,11 +174,6 @@ public class ModuleDefinition implements Comparable<ModuleDefinition> {
 		 * @see ModuleDefinition#group
 		 */
 		private String group;
-
-		/**
-		 * @see ModuleDefinition#index
-		 */
-		private int index;
 
 		/**
 		 * @see ModuleDefinition#bindings
@@ -256,19 +226,6 @@ public class ModuleDefinition implements Comparable<ModuleDefinition> {
 		}
 
 		/**
-		 * Set the module index.
-		 *
-		 * @param index position of module in stream definition
-		 * @return this builder object
-		 *
-		 * @see ModuleDefinition#index
-		 */
-		public Builder setIndex(int index) {
-			this.index = index;
-			return this;
-		}
-
-		/**
 		 * Set a module parameter.
 		 *
 		 * @param name parameter name
@@ -304,7 +261,7 @@ public class ModuleDefinition implements Comparable<ModuleDefinition> {
 		 *
 		 * @see ModuleDefinition#bindings
 		 */
-		public Builder setBinding(String name, String value) {
+		public Builder addBinding(String name, String value) {
 			this.bindings.put(name, value);
 			return this;
 		}
@@ -353,16 +310,6 @@ public class ModuleDefinition implements Comparable<ModuleDefinition> {
 		}
 
 		/**
-		 * Return position in stream definition relative to the other modules in
-		 * the definition. 0 indicates the first/leftmost position.
-		 *
-		 * @return module index
-		 */
-		public int getIndex() {
-			return index;
-		}
-
-		/**
 		 * Return parameters for module. This is specific to the type of module -
 		 * for instance an http module would include a port number as a parameter.
 		 * <br />
@@ -393,7 +340,7 @@ public class ModuleDefinition implements Comparable<ModuleDefinition> {
 				this.label = this.name;
 			}
 			return new ModuleDefinition(this.name, this.label, this.group,
-					this.index, this.bindings, this.parameters);
+					this.bindings, this.parameters);
 		}
 	}
 
