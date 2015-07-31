@@ -10,7 +10,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import static org.springframework.cloud.data.core.dsl.ParsingContext.stream;
+import org.springframework.cloud.data.core.parser.StreamDefinitionParser;
 
 /**
  * Parse streams and verify either the correct abstract syntax tree is produced or the current exception comes out.
@@ -162,9 +162,9 @@ public class StreamConfigParserTests {
 	@Test
 	public void testInvalidModules() {
 		String config = "test | foo--x=13";
-		Parser parser = new Parser();
+		StreamDefinitionParser parser = new StreamDefinitionParser();
 		try {
-			parser.parse("t", config, stream);
+			parser.parse("t", config);
 			fail(config + " is invalid. Should throw exception");
 		}
 		catch (Exception e) {
@@ -526,8 +526,8 @@ public class StreamConfigParserTests {
 	}
 
 
-	private StreamConfigParser getParser() {
-		return new StreamConfigParser();
+	private StreamDslParser getParser() {
+		return new StreamDslParser();
 	}
 
 	StreamNode parse(String streamDefinition) {

@@ -43,10 +43,7 @@ public class LabelNode extends AstNode {
 	}
 
 	public String toString() {
-		StringBuilder s = new StringBuilder();
-		s.append(label);
-		s.append(":");
-		return s.toString();
+		return label + ":";
 	}
 
 	public String getLabelName() {

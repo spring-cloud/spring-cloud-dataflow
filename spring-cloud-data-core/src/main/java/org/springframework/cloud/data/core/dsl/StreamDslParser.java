@@ -28,7 +28,7 @@ import org.springframework.util.Assert;
 /**
  * @author Andy Clement
  */
-public class StreamConfigParser {
+public class StreamDslParser {
 
 	private String expressionString;
 
@@ -42,16 +42,10 @@ public class StreamConfigParser {
 
 	private int lastGoodPoint;
 
-//	/** The repository (if supplied) is used to chase down substream/label references */
-//	private CrudRepository<? extends BaseDefinition, String> repository;
-
-//	public StreamConfigParser(CrudRepository<? extends BaseDefinition, String> repository) {
-//		this.repository = repository;
-//	}
-
 	/**
-	 * Parse a stream definition without supplying the stream name up front. The stream name may be embedded in the
-	 * definition. For example: <code>mystream = http | file</code>
+	 * Parse a stream definition without supplying the stream name up front.
+	 * The stream name may be embedded in the definition.
+	 * For example: <code>mystream = http | file</code>
 	 *
 	 * @return the AST for the parsed stream
 	 */

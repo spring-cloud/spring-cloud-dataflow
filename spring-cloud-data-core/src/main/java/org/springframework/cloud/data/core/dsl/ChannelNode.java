@@ -135,45 +135,6 @@ public class ChannelNode extends AstNode {
 		return new ChannelNode(this.channelType, super.startPos, super.endPos, nameComponents, indexingElements);
 	}
 
-//	public void resolve(StreamLookupEnvironment env, String expressionString) {
-//		if (channelType == ChannelType.TAP_STREAM) {
-//			String streamName = nameComponents.get(1);
-//			StreamNode sn = env.lookupStream(streamName);
-//			if (sn == null) {
-//				int offset = this.startpos + channelType.getStringRepresentation().length();
-//				throw new StreamDefinitionException(expressionString, offset, UNRECOGNIZED_STREAM_REFERENCE, streamName);
-//			}
-//
-//			if (indexingElements.isEmpty()) {
-//				// Point to the first element of the stream
-//				indexingElements = new ArrayList<String>();
-//				indexingElements.add(sn.getModuleNodes().get(0).getName() + ".0");
-//			}
-//			else {
-//				// Easter Egg: can use index of module in a stream when tapping.
-//				try {
-//					int index = Integer.parseInt(indexingElements.get(0));
-//					indexingElements.remove(0);
-//					indexingElements.add(0, sn.getModuleNodes().get(index).getName() + "." + index);
-//				}
-//				catch (NumberFormatException nfe) {
-//					// this is ok, probably wasn't a number
-//					String indexString = toString(indexingElements);
-//					int index = sn.getIndexOfLabel(indexString);
-//					if (index != -1) {
-//						indexingElements.clear();
-//						indexingElements.add(0, sn.getModuleNodes().get(index).getName() + "." + index);
-//					}
-//					else {
-//						int offset = this.startpos + getLengthOfPrefixPlusNameComponents() + 1;
-//						throw new StreamDefinitionException(expressionString, offset,
-//								UNRECOGNIZED_MODULE_REFERENCE, indexString);
-//					}
-//				}
-//			}
-//		}
-//	}
-
 	private String toString(List<String> elements) {
 		StringBuilder s = new StringBuilder();
 		for (int i = 0; i < elements.size(); i++) {

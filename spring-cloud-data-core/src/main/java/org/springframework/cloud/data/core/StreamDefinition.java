@@ -16,12 +16,12 @@
 
 package org.springframework.cloud.data.core;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.springframework.cloud.data.core.parser.StreamDefinitionParser;
 import org.springframework.core.style.ToStringCreator;
 import org.springframework.util.Assert;
 
@@ -40,6 +40,8 @@ import org.springframework.util.Assert;
  */
 public class StreamDefinition {
 
+	private static final StreamDefinitionParser parser = new StreamDefinitionParser();
+
 	/**
 	 * Name of stream.
 	 */
@@ -48,7 +50,7 @@ public class StreamDefinition {
 	/**
 	 * DSL definition for stream.
 	 */
-	private final String definition;
+	private final String dslText;
 
 	/**
 	 * Ordered list of {@link ModuleDefinition}s comprising this stream.
@@ -59,17 +61,18 @@ public class StreamDefinition {
 	/**
 	 * Construct a {@code StreamDefinition}.
 	 *
-	 * @param name       name of stream
-	 * @param definition DSL definition for stream
-	 * @param modules    ordered list of modules for stream
+	 * @param name     name of stream
+	 * @param dslText  DSL definition for stream
 	 */
-	private StreamDefinition(String name, String definition, List<ModuleDefinition> modules) {
+	public StreamDefinition(String name, String dslText) {
 		Assert.hasText(name, "name is required");
-		Assert.hasText(definition, "definition is required");
-		Assert.notEmpty(modules, "modules are required");
+		Assert.hasText(dslText, "dslText is required");
 		this.name = name;
-		this.definition = definition;
-		this.modules = new LinkedList<>(modules);
+		this.dslText = dslText;
+		this.modules = new LinkedList<>();
+		for (ModuleDefinition module : parser.parse(name, dslText)) {
+			this.modules.addFirst(module);
+		}
 	}
 
 	/**
@@ -86,8 +89,8 @@ public class StreamDefinition {
 	 *
 	 * @return stream definition DSL
 	 */
-	public String getDefinition() {
-		return definition;
+	public String getDslText() {
+		return dslText;
 	}
 
 	/**
@@ -117,86 +120,8 @@ public class StreamDefinition {
 	public String toString() {
 		return new ToStringCreator(this)
 				.append("name", this.name)
-				.append(this.definition)
+				.append("definition", this.dslText)
 				.toString();
-	}
-
-
-	/**
-	 * Builder object for {@link StreamDefinition} that supports
-	 * fluent style configuration.
-	 */
-	public static class Builder {
-
-		/**
-		 * @see StreamDefinition#name
-		 */
-		private String name;
-
-		/**
-		 * @see StreamDefinition#modules
-		 */
-		private List<ModuleDefinition> modules = new ArrayList<>();
-
-		/**
-		 * @see StreamDefinition#definition
-		 */
-		private String definition;
-
-		/**
-		 * Set the stream name
-		 *
-		 * @param name name of stream
-		 * @return this builder
-		 */
-		public Builder setName(String name) {
-			this.name = name;
-			return this;
-		}
-
-		/**
-		 * Set the DSL definition for the stream.
-		 *
-		 * @param definition DSL definition
-		 * @return this builder
-		 */
-		public Builder setDefinition(String definition) {
-			this.definition = definition;
-			return this;
-		}
-
-		/**
-		 * Add the provided {@link ModuleDefinition module definitions}
-		 * in the order provided by the list
-		 *
-		 * @param modules module definitions for stream
-		 * @return this builder
-		 */
-		public Builder addModuleDefinitions(List<ModuleDefinition> modules) {
-			this.modules.addAll(modules);
-			return this;
-		}
-
-		/**
-		 * Append a {@link ModuleDefinition module definition} to the
-		 * list of module definitions.
-		 *
-		 * @param module module definition to add to stream
-		 * @return this builder
-		 */
-		public Builder addModuleDefinition(ModuleDefinition module) {
-			this.modules.add(module);
-			return this;
-		}
-
-		/**
-		 * Create a new instance of {@link StreamDefinition}.
-		 *
-		 * @return new {@code StreamDefinition} instance
-		 */
-		public StreamDefinition build() {
-			return new StreamDefinition(this.name, this.definition, this.modules);
-		}
 	}
 
 

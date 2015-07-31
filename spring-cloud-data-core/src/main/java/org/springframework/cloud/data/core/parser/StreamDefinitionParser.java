@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.data.core.dsl;
+package org.springframework.cloud.data.core.parser;
 
-import static org.springframework.cloud.data.core.dsl.XDDSLMessages.NAMED_CHANNELS_UNSUPPORTED_HERE;
 
 import java.util.ArrayList;
 import java.util.Deque;
@@ -24,6 +23,12 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.springframework.cloud.data.core.ModuleDefinition;
+import org.springframework.cloud.data.core.dsl.ArgumentNode;
+import org.springframework.cloud.data.core.dsl.ModuleNode;
+import org.springframework.cloud.data.core.dsl.SinkChannelNode;
+import org.springframework.cloud.data.core.dsl.SourceChannelNode;
+import org.springframework.cloud.data.core.dsl.StreamDslParser;
+import org.springframework.cloud.data.core.dsl.StreamNode;
 
 /**
  * Parser to convert a DSL string for a stream into a list of
@@ -37,31 +42,41 @@ import org.springframework.cloud.data.core.ModuleDefinition;
  * @author Eric Bottard
  * @since 1.0
  */
-public class Parser {
+public class StreamDefinitionParser {
+
+	/**
+	 * Default name for input channel.
+	 */
+	// TODO: evaluate where this belongs
 	public static final String INPUT_CHANNEL = "input";
 
+	/**
+	 * Default name for output channel.
+	 */
+	// TODO: evaluate where this belongs
 	public static final String OUTPUT_CHANNEL = "output";
 
-	public List<ModuleDefinition> parse(String name, String dsl, ParsingContext context) {
-		StreamConfigParser parser = new StreamConfigParser();
-		StreamNode stream = parser.parse(name, dsl);
-		return buildModuleDefinitions(name, dsl, context, stream, null);
+	/**
+	 * Parse the provided stream DSL stream and return a list
+	 * of {@link ModuleDefinition module definitions} that define
+	 * the stream.
+	 *
+	 * @param name  stream name
+	 * @param dsl   stream DSL text
+	 * @return list of module definitions for the stream
+	 */
+	public List<ModuleDefinition> parse(String name, String dsl) {
+		StreamDslParser parser = new StreamDslParser();
+		return buildModuleDefinitions(name, parser.parse(name, dsl));
 	}
 
 	/**
-	 * todo: fix javadoc
-	 * Build a list of ModuleDefinitions out of a parsed StreamNode. If an {@code errors}
-	 * list is passed then the method will not exit on the first exception that occurs;
-	 * instead it will record the problems in the accumulator and attempt to continue processing.
+	 * Build a list of ModuleDefinitions out of a parsed StreamNode.
 	 *
 	 * @param name the name of the definition unit
-	 * @param dsl the raw DSL text of the definition
-	 * @param context the context in which parsing happens
 	 * @param stream the AST construct representing the definition
-	 * @param errors accumulates exceptions that occur during validation
 	 */
-	private List<ModuleDefinition> buildModuleDefinitions(String name, String dsl,
-			ParsingContext context, StreamNode stream, List<Exception> errors) {
+	private List<ModuleDefinition> buildModuleDefinitions(String name, StreamNode stream) {
 		Deque<ModuleDefinition.Builder> builders = new LinkedList<>();
 
 		List<ModuleNode> moduleNodes = stream.getModuleNodes();
@@ -78,29 +93,25 @@ public class Parser {
 					builder.setParameter(argument.getName(), argument.getValue());
 				}
 			}
+
+			if (m > 0) {
+				builder.addBinding(INPUT_CHANNEL, String.format("%s.%d", name, m - 1));
+			}
+			if (m < moduleNodes.size() - 1) {
+				builder.addBinding(OUTPUT_CHANNEL, String.format("%s.%d", name, m));
+			}
+
 			builders.add(builder);
 		}
 
 		SourceChannelNode sourceChannel = stream.getSourceChannelNode();
 		if (sourceChannel != null) {
-			if (context.supportsNamedChannels()) {
-				builders.getLast().addBinding(INPUT_CHANNEL, sourceChannel.getChannelName());
-			}
-			else {
-				throw new StreamDefinitionException(dsl, sourceChannel.getStartPos(),
-						NAMED_CHANNELS_UNSUPPORTED_HERE);
-			}
+			builders.getLast().addBinding(INPUT_CHANNEL, sourceChannel.getChannelName());
 		}
 
 		SinkChannelNode sinkChannel = stream.getSinkChannelNode();
 		if (sinkChannel != null) {
-			if (context.supportsNamedChannels()) {
-				builders.getFirst().addBinding(OUTPUT_CHANNEL, sinkChannel.getChannelName());
-			}
-			else {
-				throw new StreamDefinitionException(dsl, sinkChannel.getChannelNode().getStartPos(),
-						NAMED_CHANNELS_UNSUPPORTED_HERE);
-			}
+			builders.getFirst().addBinding(OUTPUT_CHANNEL, sinkChannel.getChannelName());
 		}
 
 		List<ModuleDefinition> result = new ArrayList<ModuleDefinition>(builders.size());

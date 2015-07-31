@@ -49,8 +49,14 @@ import org.springframework.util.StringUtils;
  */
 public class ModuleCoordinates {
 
+	/**
+	 * The default extension for the artifact.
+	 */
 	final static String DEFAULT_EXTENSION = "jar";
 
+	/**
+	 * String representing an empty classifier.
+	 */
 	final static String EMPTY_CLASSIFIER = "";
 
 	/**
@@ -167,17 +173,18 @@ public class ModuleCoordinates {
 	}
 
 	/**
-	 * Parse coordinates given as a colon delimited string
-	 * @param coords coordinates encoded as <groupId>:<artifactId>[:<extension>[:<classifier>]]:<version>, conforming
-	 * to the <a href="http://www.eclipse.org/aether">Aether</a> convention.
+	 * Parse coordinates given as a colon delimited string.
+	 *
+	 * @param coordinates coordinates encoded as <groupId>:<artifactId>[:<extension>[:<classifier>]]:<version>,
+	 * conforming to the <a href="http://www.eclipse.org/aether">Aether</a> convention.
 	 * @return the instance
 	 */
-	public static ModuleCoordinates parse(String coords) {
-		Assert.hasText(coords);
+	public static ModuleCoordinates parse(String coordinates) {
+		Assert.hasText(coordinates);
 
 		Pattern p = Pattern.compile("([^: ]+):([^: ]+)(:([^: ]*)(:([^: ]+))?)?:([^: ]+)");
-		Matcher m = p.matcher(coords);
-		Assert.isTrue(m.matches(), "Bad artifact coordinates " + coords
+		Matcher m = p.matcher(coordinates);
+		Assert.isTrue(m.matches(), "Bad artifact coordinates " + coordinates
 				+ ", expected format is <groupId>:<artifactId>[:<extension>[:<classifier>]]:<version>");
 
 		String groupId = m.group(1);

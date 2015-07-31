@@ -43,10 +43,6 @@ public class SourceChannelNode extends AstNode {
 		return channelNode;
 	}
 
-//	public void resolve(StreamLookupEnvironment env, String expressionString) {
-//		channelNode.resolve(env, expressionString);
-//	}
-
 	public SourceChannelNode copyOf() {
 		return new SourceChannelNode(channelNode.copyOf(), super.endPos);
 	}

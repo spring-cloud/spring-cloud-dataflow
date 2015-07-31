@@ -119,13 +119,6 @@ public class StreamNode extends AstNode {
 		return null;
 	}
 
-//	public void resolve(StreamLookupEnvironment env, String expressionString) {
-//		if (sourceChannelNode != null) {
-//			sourceChannelNode.resolve(env, expressionString);
-//		}
-//	}
-
-
 	public int getIndexOfLabel(String labelOrModuleName) {
 		for (int m = 0; m < moduleNodes.size(); m++) {
 			ModuleNode moduleNode = moduleNodes.get(m);
