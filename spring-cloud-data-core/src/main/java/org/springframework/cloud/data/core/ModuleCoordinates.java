@@ -37,7 +37,7 @@ import org.springframework.util.StringUtils;
  *     .build()
  * </pre>
  * ...or use {@link #parse(String)} to parse the coordinates as a colon delimited string:
- * <groupId>:<artifactId>[:<extension>[:<classifier>]]:<version>
+ * <code>&lt;groupId&gt;:&lt;artifactId&gt;[:&lt;extension&gt;[:&lt;classifier&gt;]]:&lt;version&gt;</code>
  * <pre>
  * ModuleCoordinates.parse("org.springframework.cloud.stream.module:some-module:2.0.0);
  * ModuleCoordinates.parse("org.springframework.cloud.stream.module:time-source:jar:exec:2.0.0);
