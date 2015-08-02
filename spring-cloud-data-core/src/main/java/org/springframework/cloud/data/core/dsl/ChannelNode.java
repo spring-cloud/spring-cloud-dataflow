@@ -16,7 +16,6 @@
 
 package org.springframework.cloud.data.core.dsl;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -92,20 +91,6 @@ public class ChannelNode extends AstNode {
 		return s.toString();
 	}
 
-	private int getLengthOfPrefixPlusNameComponents() {
-		int length = 0;
-		if (channelType.isTap()) {
-			length += 4;
-		}
-		for (int i = 0; i < nameComponents.size(); i++) {
-			if (i > 0) {
-				length++;
-			}
-			length += nameComponents.get(i).length();
-		}
-		return length;
-	}
-
 	private String getNameComponents() {
 		StringBuilder s = new StringBuilder();
 		for (int t = 0, max = nameComponents.size(); t < max; t++) {
@@ -133,16 +118,5 @@ public class ChannelNode extends AstNode {
 	public ChannelNode copyOf() {
 		// TODO not a deep copy, is that ok?
 		return new ChannelNode(this.channelType, super.startPos, super.endPos, nameComponents, indexingElements);
-	}
-
-	private String toString(List<String> elements) {
-		StringBuilder s = new StringBuilder();
-		for (int i = 0; i < elements.size(); i++) {
-			if (i > 0) {
-				s.append('.');
-			}
-			s.append(elements.get(i));
-		}
-		return s.toString();
 	}
 }

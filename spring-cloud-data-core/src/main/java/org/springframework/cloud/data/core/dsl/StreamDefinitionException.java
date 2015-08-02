@@ -19,7 +19,7 @@ package org.springframework.cloud.data.core.dsl;
 /**
  * Root exception for DSL parsing related exceptions. Rather than holding a
  * hard coded string indicating the problem, it records a message key and
- * the inserts for the message. See {@link XDDSLMessages} for the list of all
+ * the inserts for the message. See {@link DSLMessage} for the list of all
  * possible messages that can occur.
  *
  * @author Andy Clement
@@ -31,11 +31,11 @@ public class StreamDefinitionException extends RuntimeException {
 
 	protected int position; // -1 if not known - but should be known in all reasonable cases
 
-	protected XDDSLMessages message;
+	protected DSLMessage message;
 
 	protected Object[] inserts;
 
-	public StreamDefinitionException(String expressionString, int position, XDDSLMessages message, Object... inserts) {
+	public StreamDefinitionException(String expressionString, int position, DSLMessage message, Object... inserts) {
 		super(message.formatMessage(position, inserts));
 		this.position = position;
 		this.message = message;
@@ -70,7 +70,7 @@ public class StreamDefinitionException extends RuntimeException {
 	/**
 	 * @return the message code
 	 */
-	public XDDSLMessages getMessageCode() {
+	public DSLMessage getMessageCode() {
 		return this.message;
 	}
 

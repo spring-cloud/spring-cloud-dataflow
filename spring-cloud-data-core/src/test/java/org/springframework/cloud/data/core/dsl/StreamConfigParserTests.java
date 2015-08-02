@@ -1,3 +1,19 @@
+/*
+ * Copyright 2015 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.springframework.cloud.data.core.dsl;
 
 import static org.hamcrest.Matchers.*;
@@ -57,7 +73,7 @@ public class StreamConfigParserTests {
 	public void testInvalidStreamName() {
 		String streamName = "bar";
 		String stream = "foo | bar";
-		checkForParseError(streamName, stream, XDDSLMessages.STREAM_NAME_MATCHING_MODULE_NAME,
+		checkForParseError(streamName, stream, DSLMessage.STREAM_NAME_MATCHING_MODULE_NAME,
 				stream.indexOf(streamName), streamName);
 	}
 
@@ -85,9 +101,9 @@ public class StreamConfigParserTests {
 		sn = parse("http | foo:bar | file");
 		assertEquals("[(ModuleNode:http)((Label:foo) ModuleNode:bar)(ModuleNode:file)]", sn.stringify());
 
-		checkForParseError("http | foo: goggle: bar | file", XDDSLMessages.UNEXPECTED_DATA_AFTER_STREAMDEF,
+		checkForParseError("http | foo: goggle: bar | file", DSLMessage.UNEXPECTED_DATA_AFTER_STREAMDEF,
 				18);
-		checkForParseError("http | foo :bar | file", XDDSLMessages.NO_WHITESPACE_BETWEEN_LABEL_NAME_AND_COLON, 11);
+		checkForParseError("http | foo :bar | file", DSLMessage.NO_WHITESPACE_BETWEEN_LABEL_NAME_AND_COLON, 11);
 	}
 
 	// Modules can take parameters
@@ -202,7 +218,7 @@ public class StreamConfigParserTests {
 	public void expressions_xd159_2() {
 		// need quotes around an argument value with a space in it
 		checkForParseError("foo | transform --expression=new StringBuilder(payload).reverse() | bar",
-				XDDSLMessages.UNEXPECTED_DATA, 46);
+				DSLMessage.UNEXPECTED_DATA, 46);
 	}
 
 	@Test
@@ -299,10 +315,10 @@ public class StreamConfigParserTests {
 		props = mn.getArgumentsAsProperties();
 		assertEquals("'Hello, world!'", props.get("expression"));
 		// Prior to the change for XD-1613, this error should point to the comma:
-		// checkForParseError("foo |  transform --expression=''Hello, world!'' | bar", XDDSLMessages.UNEXPECTED_DATA,
+		// checkForParseError("foo |  transform --expression=''Hello, world!'' | bar", DSLMessage.UNEXPECTED_DATA,
 		// 37);
 		// but now it points to the !
-		checkForParseError("foo |  transform --expression=''Hello, world!'' | bar", XDDSLMessages.UNEXPECTED_DATA, 44);
+		checkForParseError("foo |  transform --expression=''Hello, world!'' | bar", DSLMessage.UNEXPECTED_DATA, 44);
 	}
 
 	@Test
@@ -336,29 +352,29 @@ public class StreamConfigParserTests {
 	@Test
 	public void channelVariants() {
 		// Job is not a legal channel prefix
-		checkForParseError("trigger > job:foo", XDDSLMessages.EXPECTED_CHANNEL_PREFIX_QUEUE_TOPIC, 10, "job");
+		checkForParseError("trigger > job:foo", DSLMessage.EXPECTED_CHANNEL_PREFIX_QUEUE_TOPIC, 10, "job");
 
 		// This looks like a label and so file is treated as a sink!
-		checkForParseError("queue: bar > file", XDDSLMessages.NO_WHITESPACE_IN_CHANNEL_DEFINITION, 7);
+		checkForParseError("queue: bar > file", DSLMessage.NO_WHITESPACE_IN_CHANNEL_DEFINITION, 7);
 
 		// 'queue' looks like a module all by itself so everything after is unexpected
-		checkForParseError("queue : bar > file", XDDSLMessages.NO_WHITESPACE_IN_CHANNEL_DEFINITION, 6);
+		checkForParseError("queue : bar > file", DSLMessage.NO_WHITESPACE_IN_CHANNEL_DEFINITION, 6);
 
 		// 'queue' looks like a module all by itself so everything after is unexpected
-		checkForParseError("queue :bar > file", XDDSLMessages.NO_WHITESPACE_IN_CHANNEL_DEFINITION, 6);
+		checkForParseError("queue :bar > file", DSLMessage.NO_WHITESPACE_IN_CHANNEL_DEFINITION, 6);
 
-		checkForParseError("tap:queue: boo > file", XDDSLMessages.NO_WHITESPACE_IN_CHANNEL_DEFINITION, 11);
-		checkForParseError("tap:queue :boo > file", XDDSLMessages.NO_WHITESPACE_IN_CHANNEL_DEFINITION, 10);
-		checkForParseError("tap:queue : boo > file", XDDSLMessages.NO_WHITESPACE_IN_CHANNEL_DEFINITION, 10);
+		checkForParseError("tap:queue: boo > file", DSLMessage.NO_WHITESPACE_IN_CHANNEL_DEFINITION, 11);
+		checkForParseError("tap:queue :boo > file", DSLMessage.NO_WHITESPACE_IN_CHANNEL_DEFINITION, 10);
+		checkForParseError("tap:queue : boo > file", DSLMessage.NO_WHITESPACE_IN_CHANNEL_DEFINITION, 10);
 
-		checkForParseError("tap:stream:boo .xx > file", XDDSLMessages.NO_WHITESPACE_IN_CHANNEL_DEFINITION, 15);
-		checkForParseError("tap:stream:boo . xx > file", XDDSLMessages.NO_WHITESPACE_IN_CHANNEL_DEFINITION, 15);
-		checkForParseError("tap:stream:boo. xx > file", XDDSLMessages.NO_WHITESPACE_IN_CHANNEL_DEFINITION, 16);
-		checkForParseError("tap:stream:boo.xx. yy > file", XDDSLMessages.NO_WHITESPACE_IN_CHANNEL_DEFINITION, 19);
-		checkForParseError("tap:stream:boo.xx .yy > file", XDDSLMessages.NO_WHITESPACE_IN_CHANNEL_DEFINITION, 18);
-		checkForParseError("tap:stream:boo.xx . yy > file", XDDSLMessages.NO_WHITESPACE_IN_CHANNEL_DEFINITION, 18);
+		checkForParseError("tap:stream:boo .xx > file", DSLMessage.NO_WHITESPACE_IN_CHANNEL_DEFINITION, 15);
+		checkForParseError("tap:stream:boo . xx > file", DSLMessage.NO_WHITESPACE_IN_CHANNEL_DEFINITION, 15);
+		checkForParseError("tap:stream:boo. xx > file", DSLMessage.NO_WHITESPACE_IN_CHANNEL_DEFINITION, 16);
+		checkForParseError("tap:stream:boo.xx. yy > file", DSLMessage.NO_WHITESPACE_IN_CHANNEL_DEFINITION, 19);
+		checkForParseError("tap:stream:boo.xx .yy > file", DSLMessage.NO_WHITESPACE_IN_CHANNEL_DEFINITION, 18);
+		checkForParseError("tap:stream:boo.xx . yy > file", DSLMessage.NO_WHITESPACE_IN_CHANNEL_DEFINITION, 18);
 
-		checkForParseError("tap:queue:boo.xx.yy > file", XDDSLMessages.ONLY_A_TAP_ON_A_STREAM_OR_JOB_CAN_BE_INDEXED, 13);
+		checkForParseError("tap:queue:boo.xx.yy > file", DSLMessage.ONLY_A_TAP_ON_A_STREAM_OR_JOB_CAN_BE_INDEXED, 13);
 
 		sn = parse("wibble: http > queue:bar");
 		assertEquals("[((Label:wibble) ModuleNode:http)>(queue:bar)]", sn.stringify());
@@ -367,7 +383,7 @@ public class StreamConfigParserTests {
 	@Test
 	public void qualifiedSinkChannelError() {
 		// Only the source channel supports a dotted suffix
-		checkForParseError("http > queue:wibble.foo", XDDSLMessages.CHANNEL_INDEXING_NOT_ALLOWED, 19);
+		checkForParseError("http > queue:wibble.foo", DSLMessage.CHANNEL_INDEXING_NOT_ALLOWED, 19);
 	}
 
 	@Test
@@ -406,70 +422,70 @@ public class StreamConfigParserTests {
 
 	@Test
 	public void nameSpaceTestWithSpaces() {
-		checkForParseError("trigger > queue:job:myjob   too", XDDSLMessages.UNEXPECTED_DATA_AFTER_STREAMDEF, 28, "too");
+		checkForParseError("trigger > queue:job:myjob   too", DSLMessage.UNEXPECTED_DATA_AFTER_STREAMDEF, 28, "too");
 	}
 
 	@Test
 	public void errorCases01() {
-		checkForParseError(".", XDDSLMessages.EXPECTED_MODULENAME, 0, ".");
-		checkForParseError(";", XDDSLMessages.EXPECTED_MODULENAME, 0, ";");
+		checkForParseError(".", DSLMessage.EXPECTED_MODULENAME, 0, ".");
+		checkForParseError(";", DSLMessage.EXPECTED_MODULENAME, 0, ";");
 	}
 
 	@Test
 	public void errorCases04() {
-		checkForParseError("foo bar=yyy", XDDSLMessages.UNEXPECTED_DATA_AFTER_STREAMDEF, 4, "bar");
-		checkForParseError("foo bar", XDDSLMessages.UNEXPECTED_DATA_AFTER_STREAMDEF, 4, "bar");
+		checkForParseError("foo bar=yyy", DSLMessage.UNEXPECTED_DATA_AFTER_STREAMDEF, 4, "bar");
+		checkForParseError("foo bar", DSLMessage.UNEXPECTED_DATA_AFTER_STREAMDEF, 4, "bar");
 	}
 
 	@Test
 	public void errorCases05() {
-		checkForParseError("foo --", XDDSLMessages.OOD, 6);
-		checkForParseError("foo --bar", XDDSLMessages.OOD, 9);
-		checkForParseError("foo --bar=", XDDSLMessages.OOD, 10);
+		checkForParseError("foo --", DSLMessage.OOD, 6);
+		checkForParseError("foo --bar", DSLMessage.OOD, 9);
+		checkForParseError("foo --bar=", DSLMessage.OOD, 10);
 	}
 
 	@Test
 	public void errorCases06() {
-		checkForParseError("|", XDDSLMessages.EXPECTED_MODULENAME, 0);
+		checkForParseError("|", DSLMessage.EXPECTED_MODULENAME, 0);
 	}
 
 	@Test
 	public void errorCases07() {
-		checkForParseError("foo > bar", XDDSLMessages.EXPECTED_CHANNEL_PREFIX_QUEUE_TOPIC, 6, "bar");
-		checkForParseError("foo >", XDDSLMessages.OOD, 5);
-		checkForParseError("foo > --2323", XDDSLMessages.EXPECTED_CHANNEL_PREFIX_QUEUE_TOPIC, 6, "--");
-		checkForParseError("foo > *", XDDSLMessages.UNEXPECTED_DATA, 6, "*");
+		checkForParseError("foo > bar", DSLMessage.EXPECTED_CHANNEL_PREFIX_QUEUE_TOPIC, 6, "bar");
+		checkForParseError("foo >", DSLMessage.OOD, 5);
+		checkForParseError("foo > --2323", DSLMessage.EXPECTED_CHANNEL_PREFIX_QUEUE_TOPIC, 6, "--");
+		checkForParseError("foo > *", DSLMessage.UNEXPECTED_DATA, 6, "*");
 	}
 
 	@Test
 	public void errorCases08() {
-		checkForParseError(":foo | bar", XDDSLMessages.EXPECTED_MODULENAME, 0, ":");
+		checkForParseError(":foo | bar", DSLMessage.EXPECTED_MODULENAME, 0, ":");
 	}
 
 	@Test
 	public void errorCases09() {
-		checkForParseError("* = http | file", XDDSLMessages.UNEXPECTED_DATA, 0, "*");
-		checkForParseError(": = http | file", XDDSLMessages.ILLEGAL_STREAM_NAME, 0, ":");
+		checkForParseError("* = http | file", DSLMessage.UNEXPECTED_DATA, 0, "*");
+		checkForParseError(": = http | file", DSLMessage.ILLEGAL_STREAM_NAME, 0, ":");
 	}
 
 	@Test
 	public void errorCase10() {
-		checkForParseError("trigger > :job:foo", XDDSLMessages.EXPECTED_CHANNEL_PREFIX_QUEUE_TOPIC, 10, ":");
+		checkForParseError("trigger > :job:foo", DSLMessage.EXPECTED_CHANNEL_PREFIX_QUEUE_TOPIC, 10, ":");
 	}
 
 	@Test
 	public void errorCase11() {
-		checkForParseError("tap:banana:yyy > file", XDDSLMessages.NOT_ALLOWED_TO_TAP_THAT, 4, "banana");
-		checkForParseError("tap:xxx > file", XDDSLMessages.TAP_NEEDS_THREE_COMPONENTS, 0);
+		checkForParseError("tap:banana:yyy > file", DSLMessage.NOT_ALLOWED_TO_TAP_THAT, 4, "banana");
+		checkForParseError("tap:xxx > file", DSLMessage.TAP_NEEDS_THREE_COMPONENTS, 0);
 	}
 
 	@Test
 	public void duplicateExplicitLabels() {
-		checkForParseError("xxx: http | xxx: file", XDDSLMessages.DUPLICATE_LABEL, 12, "xxx", "http", 0, "file", 1);
+		checkForParseError("xxx: http | xxx: file", DSLMessage.DUPLICATE_LABEL, 12, "xxx", "http", 0, "file", 1);
 		checkForParseError("xxx: http | yyy: filter | transform | xxx: transform | file",
-				XDDSLMessages.DUPLICATE_LABEL, 38, "xxx", "http", 0, "transform", 3);
+				DSLMessage.DUPLICATE_LABEL, 38, "xxx", "http", 0, "transform", 3);
 		checkForParseError("xxx: http | yyy: filter | transform | xxx: transform | xxx: file",
-				XDDSLMessages.DUPLICATE_LABEL, 38, "xxx", "http", 0, "transform", 3);
+				DSLMessage.DUPLICATE_LABEL, 38, "xxx", "http", 0, "transform", 3);
 	}
 
 	@Test
@@ -483,7 +499,7 @@ public class StreamConfigParserTests {
 	@Test
 	public void duplicateImplicitLabels() {
 		checkForParseError("http | filter | transform | transform | file",
-				XDDSLMessages.DUPLICATE_LABEL, 28, "transform", "transform", 2, "transform", 3);
+				DSLMessage.DUPLICATE_LABEL, 28, "transform", "transform", 2, "transform", 3);
 	}
 
 	@Test
@@ -502,18 +518,18 @@ public class StreamConfigParserTests {
 	// Parameters must be constructed via adjacent tokens
 	@Test
 	public void needAdjacentTokensForParameters() {
-		checkForParseError("foo -- name=value", XDDSLMessages.NO_WHITESPACE_BEFORE_ARG_NAME, 7);
-		checkForParseError("foo --name =value", XDDSLMessages.NO_WHITESPACE_BEFORE_ARG_EQUALS, 11);
-		checkForParseError("foo --name= value", XDDSLMessages.NO_WHITESPACE_BEFORE_ARG_VALUE, 12);
+		checkForParseError("foo -- name=value", DSLMessage.NO_WHITESPACE_BEFORE_ARG_NAME, 7);
+		checkForParseError("foo --name =value", DSLMessage.NO_WHITESPACE_BEFORE_ARG_EQUALS, 11);
+		checkForParseError("foo --name= value", DSLMessage.NO_WHITESPACE_BEFORE_ARG_VALUE, 12);
 	}
 
 	// ---
 
 	@Test
 	public void testComposedOptionNameErros() {
-		checkForParseError("foo --name.=value", XDDSLMessages.NOT_EXPECTED_TOKEN, 11);
-		checkForParseError("foo --name .sub=value", XDDSLMessages.NO_WHITESPACE_IN_DOTTED_NAME, 11);
-		checkForParseError("foo --name. sub=value", XDDSLMessages.NO_WHITESPACE_IN_DOTTED_NAME, 12);
+		checkForParseError("foo --name.=value", DSLMessage.NOT_EXPECTED_TOKEN, 11);
+		checkForParseError("foo --name .sub=value", DSLMessage.NO_WHITESPACE_IN_DOTTED_NAME, 11);
+		checkForParseError("foo --name. sub=value", DSLMessage.NO_WHITESPACE_IN_DOTTED_NAME, 12);
 	}
 
 	@Test
@@ -549,13 +565,13 @@ public class StreamConfigParserTests {
 			fail("expected to fail but parsed " + sn.stringify());
 		}
 		catch (StreamDefinitionException e) {
-			assertEquals(XDDSLMessages.ILLEGAL_STREAM_NAME, e.getMessageCode());
+			assertEquals(DSLMessage.ILLEGAL_STREAM_NAME, e.getMessageCode());
 			assertEquals(0, e.getPosition());
 			assertEquals(streamName, e.getInserts()[0]);
 		}
 	}
 
-	private void checkForParseError(String stream, XDDSLMessages msg, int pos, Object... inserts) {
+	private void checkForParseError(String stream, DSLMessage msg, int pos, Object... inserts) {
 		try {
 			StreamNode sn = parse(stream);
 			fail("expected to fail but parsed " + sn.stringify());
@@ -571,7 +587,7 @@ public class StreamConfigParserTests {
 		}
 	}
 
-	private void checkForParseError(String name, String stream, XDDSLMessages msg, int pos, String... inserts) {
+	private void checkForParseError(String name, String stream, DSLMessage msg, int pos, String... inserts) {
 		try {
 			StreamNode sn = parse(name, stream);
 			fail("expected to fail but parsed " + sn.stringify());

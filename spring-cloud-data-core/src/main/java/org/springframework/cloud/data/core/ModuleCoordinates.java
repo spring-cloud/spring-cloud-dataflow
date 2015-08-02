@@ -173,8 +173,9 @@ public class ModuleCoordinates {
 	}
 
 	/**
-	 * Returns the coordinates encoded as <groupId>:<artifactId>[:<extension>[:<classifier>]]:<version>, conforming
-	 * to the <a href="http://www.eclipse.org/aether">Aether</a> convention.
+	 * Returns the coordinates encoded as
+	 * &lt;groupId&gt;:&lt;artifactId&gt;[:&lt;extension&gt;[:&lt;classifier&gt;]]:&lt;version&gt;,
+	 * conforming to the <a href="http://www.eclipse.org/aether">Aether</a> convention.
 	 */
 	@Override
 	public String toString() {

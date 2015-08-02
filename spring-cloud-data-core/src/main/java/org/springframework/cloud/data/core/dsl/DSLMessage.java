@@ -16,12 +16,12 @@
 
 package org.springframework.cloud.data.core.dsl;
 
-import static org.springframework.cloud.data.core.dsl.XDDSLMessages.Kind.ERROR;
+import static org.springframework.cloud.data.core.dsl.DSLMessage.Kind.ERROR;
 
 import java.text.MessageFormat;
 
 /**
- * Contains all the messages that can be produced during Spring XD DSL
+ * Contains all the messages that can be produced during Spring Cloud Data DSL
  * parsing. Each message has a kind (info, warn, error) and a code number.
  * Tests can be written to expect particular code numbers rather than
  * particular text, enabling the message text to more easily be modified
@@ -30,14 +30,14 @@ import java.text.MessageFormat;
  * When a message is formatted, it will have this kind of form
  *
  * <pre class="code">
- * XD105E: (pos 34): Expected an argument value but was ' '
+ * 105E: (pos 34): Expected an argument value but was ' '
  * </pre>
  *
  * </code> The prefix captures the code and the error kind, whilst the position is included if it is known.
  *
  * @author Andy Clement
  */
-public enum XDDSLMessages {
+public enum DSLMessage {
 
 	UNEXPECTED_DATA_AFTER_STREAMDEF(ERROR, 100, "Found unexpected data after stream definition: ''{0}''"), //
 	NO_WHITESPACE_BEFORE_ARG_NAME(ERROR, 101, "No whitespace allowed between '--' and option name"), //
@@ -111,7 +111,7 @@ public enum XDDSLMessages {
 
 	private String message;
 
-	private XDDSLMessages(Kind kind, int code, String message) {
+	private DSLMessage(Kind kind, int code, String message) {
 		this.kind = kind;
 		this.code = code;
 		this.message = message;
@@ -127,7 +127,7 @@ public enum XDDSLMessages {
 	 */
 	public String formatMessage(int pos, Object... inserts) {
 		StringBuilder formattedMessage = new StringBuilder();
-		formattedMessage.append("XD").append(code);
+		formattedMessage.append(code);
 		// switch (kind) {
 		// case WARNING:
 		// formattedMessage.append("W");

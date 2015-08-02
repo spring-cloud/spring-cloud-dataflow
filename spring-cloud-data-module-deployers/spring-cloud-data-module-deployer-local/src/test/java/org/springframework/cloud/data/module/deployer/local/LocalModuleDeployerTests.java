@@ -39,14 +39,12 @@ public class LocalModuleDeployerTests {
 		ModuleDefinition timeDefinition = new ModuleDefinition.Builder()
 				.setGroup("ticktock")
 				.setName("time")
-				.setIndex(0)
-				.setBinding("output", "ticktock.0")
+				.addBinding("output", "ticktock.0")
 				.build();
 		ModuleDefinition logDefinition = new ModuleDefinition.Builder()
 				.setGroup("ticktock")
 				.setName("log")
-				.setIndex(1)
-				.setBinding("input", "ticktock.0")
+				.addBinding("input", "ticktock.0")
 				.build();
 		ModuleCoordinates timeCoordinates = new ModuleCoordinates.Builder()
 				.setGroupId(GROUP_ID)

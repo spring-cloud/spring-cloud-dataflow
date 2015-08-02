@@ -87,7 +87,7 @@ class Tokenizer {
 						if (!isTwoCharToken(TokenKind.DOUBLE_MINUS)) {
 							throw new StreamDefinitionException(
 									expressionString, pos,
-									XDDSLMessages.MISSING_CHARACTER, "-");
+									DSLMessage.MISSING_CHARACTER, "-");
 						}
 						pushPairToken(TokenKind.DOUBLE_MINUS);
 						break;
@@ -137,10 +137,10 @@ class Tokenizer {
 						break;
 					case '\\':
 						throw new StreamDefinitionException(
-								expressionString, pos, XDDSLMessages.UNEXPECTED_ESCAPE_CHAR);
+								expressionString, pos, DSLMessage.UNEXPECTED_ESCAPE_CHAR);
 					default:
 						throw new StreamDefinitionException(
-								expressionString, pos, XDDSLMessages.UNEXPECTED_DATA,
+								expressionString, pos, DSLMessage.UNEXPECTED_DATA,
 								Character.valueOf(ch).toString());
 				}
 			}
@@ -172,7 +172,7 @@ class Tokenizer {
 			}
 			if (ch == 0) {
 				throw new StreamDefinitionException(
-						expressionString, start, XDDSLMessages.NON_TERMINATING_QUOTED_STRING);
+						expressionString, start, DSLMessage.NON_TERMINATING_QUOTED_STRING);
 			}
 		}
 		pos++;
@@ -201,7 +201,7 @@ class Tokenizer {
 			}
 			if (ch == 0) {
 				throw new StreamDefinitionException(
-						expressionString, start, XDDSLMessages.NON_TERMINATING_DOUBLE_QUOTED_STRING);
+						expressionString, start, DSLMessage.NON_TERMINATING_DOUBLE_QUOTED_STRING);
 			}
 		}
 		pos++;
