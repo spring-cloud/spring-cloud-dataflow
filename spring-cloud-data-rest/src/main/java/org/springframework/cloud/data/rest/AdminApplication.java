@@ -14,24 +14,21 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.data.module.registry;
+package org.springframework.cloud.data.rest;
 
-
-import org.springframework.cloud.data.core.ModuleCoordinates;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.ComponentScan;
 
 /**
- * A module registry is used to lookup {@link ModuleCoordinates}s by name.
- *
- * @author David Turanski
  * @author Mark Fisher
  */
-public interface ModuleRegistry {
+@SpringBootApplication
+@ComponentScan(basePackageClasses=StreamController.class)
+public class AdminApplication {
 
-	/**
-	 * Look up the coordinates for a module jar by name and type.
-	 * @param name the module name
-	 * @param type the module type
-	 */
-	ModuleCoordinates findByNameAndType(String name, String type);
+	public static void main(String[] args) throws InterruptedException {
+		SpringApplication.run(AdminApplication.class, "--server.port=9393");
+	}
 
 }

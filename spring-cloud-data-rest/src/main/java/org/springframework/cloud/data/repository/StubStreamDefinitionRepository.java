@@ -1,0 +1,49 @@
+/*
+ * Copyright 2015 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.springframework.cloud.data.repository;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.cloud.data.core.StreamDefinition;
+
+/**
+ * @author Mark Fisher
+ */
+public class StubStreamDefinitionRepository implements StreamDefinitionRepository {
+
+	private final Map<String, StreamDefinition> definitions = new HashMap<>();
+
+	@Override
+	public void save(StreamDefinition definition) {
+		definitions.put(definition.getName(), definition);
+	}
+
+	@Override
+	public StreamDefinition findByName(String name) {
+		return definitions.get(name);
+	}
+
+	@Override
+	public List<StreamDefinition> findAll() {
+		return Collections.unmodifiableList(new ArrayList<>(definitions.values()));
+	}
+
+}

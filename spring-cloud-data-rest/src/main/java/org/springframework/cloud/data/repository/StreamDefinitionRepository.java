@@ -14,24 +14,23 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.data.module.registry;
+package org.springframework.cloud.data.repository;
 
+import java.util.List;
 
-import org.springframework.cloud.data.core.ModuleCoordinates;
+import org.springframework.cloud.data.core.StreamDefinition;
+import org.springframework.stereotype.Repository;
 
 /**
- * A module registry is used to lookup {@link ModuleCoordinates}s by name.
- *
- * @author David Turanski
  * @author Mark Fisher
  */
-public interface ModuleRegistry {
+@Repository
+public interface StreamDefinitionRepository {
 
-	/**
-	 * Look up the coordinates for a module jar by name and type.
-	 * @param name the module name
-	 * @param type the module type
-	 */
-	ModuleCoordinates findByNameAndType(String name, String type);
+	public void save(StreamDefinition definition);
+
+	public StreamDefinition findByName(String name);
+
+	public List<StreamDefinition> findAll();
 
 }
