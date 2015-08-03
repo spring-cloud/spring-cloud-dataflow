@@ -20,12 +20,14 @@ import org.springframework.cloud.data.module.deployer.ModuleDeployer;
 import org.springframework.cloud.data.module.deployer.lattice.ReceptorModuleDeployer;
 import org.springframework.cloud.data.module.deployer.local.LocalModuleDeployer;
 import org.springframework.cloud.data.rest.controller.StreamController;
+import org.springframework.cloud.stream.module.launcher.ModuleLauncher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
 /**
  * @author Mark Fisher
+ * @author Marius Bogoevici
  */
 @Configuration
 public class AdminConfiguration {
@@ -35,10 +37,19 @@ public class AdminConfiguration {
 		return new StreamController(moduleDeployer);
 	}
 
-	@Bean
+	@Configuration
 	@Profile("!cloud")
-	public ModuleDeployer moduleDeployer() {
-		return new LocalModuleDeployer();
+	protected static class LocalConfig {
+
+		@Bean
+		public ModuleLauncher moduleLauncher() {
+			return new ModuleLauncher();
+		}
+
+		@Bean
+		public ModuleDeployer moduleDeployer(ModuleLauncher moduleLauncher) {
+			return new LocalModuleDeployer(moduleLauncher);
+		}
 	}
 
 	@Configuration

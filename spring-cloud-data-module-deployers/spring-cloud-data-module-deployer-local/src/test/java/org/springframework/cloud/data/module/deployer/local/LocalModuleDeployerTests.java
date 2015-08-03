@@ -21,6 +21,7 @@ import org.junit.Test;
 import org.springframework.cloud.data.core.ModuleCoordinates;
 import org.springframework.cloud.data.core.ModuleDefinition;
 import org.springframework.cloud.data.core.ModuleDeploymentRequest;
+import org.springframework.cloud.stream.module.launcher.ModuleLauncher;
 
 /**
  * Tests deployment of the time-source and log-sink modules.
@@ -35,7 +36,7 @@ public class LocalModuleDeployerTests {
 
 	@Test @Ignore // see TODO below
 	public void timeToLogStream() {
-		LocalModuleDeployer deployer = new LocalModuleDeployer();
+		LocalModuleDeployer deployer = new LocalModuleDeployer(new ModuleLauncher());
 		ModuleDefinition timeDefinition = new ModuleDefinition.Builder()
 				.setGroup("ticktock")
 				.setName("time")

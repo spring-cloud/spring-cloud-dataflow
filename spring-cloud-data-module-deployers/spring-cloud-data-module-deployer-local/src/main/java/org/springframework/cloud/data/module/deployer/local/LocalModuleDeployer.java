@@ -33,7 +33,11 @@ public class LocalModuleDeployer implements ModuleDeployer {
 
 	private static final Logger logger = LoggerFactory.getLogger(LocalModuleDeployer.class);
 
-	private final ModuleLauncher launcher = new ModuleLauncher();
+	private final ModuleLauncher launcher;
+
+	public LocalModuleDeployer(ModuleLauncher launcher) {
+		this.launcher = launcher;
+	}
 
 	@Override
 	public ModuleDeploymentId deploy(ModuleDeploymentRequest request) {
