@@ -18,13 +18,14 @@ package org.springframework.cloud.data.rest;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.ComponentScan;
+import org.springframework.cloud.data.rest.config.AdminConfiguration;
+import org.springframework.context.annotation.Import;
 
 /**
  * @author Mark Fisher
  */
 @SpringBootApplication
-@ComponentScan(basePackages = "org.springframework.cloud.data.rest.controller")
+@Import(AdminConfiguration.class)
 public class AdminApplication {
 
 	public static void main(String[] args) throws InterruptedException {

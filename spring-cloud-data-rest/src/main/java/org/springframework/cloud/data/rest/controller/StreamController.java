@@ -23,7 +23,6 @@ import org.springframework.cloud.data.core.ModuleDefinition;
 import org.springframework.cloud.data.core.ModuleDeploymentRequest;
 import org.springframework.cloud.data.core.StreamDefinition;
 import org.springframework.cloud.data.module.deployer.ModuleDeployer;
-import org.springframework.cloud.data.module.deployer.local.LocalModuleDeployer;
 import org.springframework.cloud.data.module.registry.ModuleRegistry;
 import org.springframework.cloud.data.module.registry.StubModuleRegistry;
 import org.springframework.cloud.data.repository.StreamDefinitionRepository;
@@ -46,7 +45,17 @@ public class StreamController {
 
 	private final ModuleRegistry registry = new StubModuleRegistry();
 
-	private final ModuleDeployer deployer = new LocalModuleDeployer();
+	private final ModuleDeployer deployer;
+
+	/**
+	 * Create a StreamController that delegates to the provided {@link ModuleDeployer}.
+	 *
+	 * @param moduleDeployer the deployer this controller will use to deploy stream modules.
+	 */
+	public StreamController(ModuleDeployer moduleDeployer) {
+		Assert.notNull(moduleDeployer, "moduleDeployer must not be null");
+		this.deployer = moduleDeployer;
+	}
 
 	@RequestMapping
 	public String list() {
