@@ -21,7 +21,7 @@
 			<artifactId>spring-xd-module</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>io.pivotal.receptor</groupId>
+			<groupId>org.cloudfoundry.receptor</groupId>
 			<artifactId>receptor-client</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
