@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.data.rest;
+package org.springframework.cloud.data.rest.controller;
 
 import java.util.Iterator;
 

@@ -24,7 +24,7 @@ import org.springframework.context.annotation.ComponentScan;
  * @author Mark Fisher
  */
 @SpringBootApplication
-@ComponentScan(basePackageClasses=StreamController.class)
+@ComponentScan(basePackages = "org.springframework.cloud.data.rest.controller")
 public class AdminApplication {
 
 	public static void main(String[] args) throws InterruptedException {
