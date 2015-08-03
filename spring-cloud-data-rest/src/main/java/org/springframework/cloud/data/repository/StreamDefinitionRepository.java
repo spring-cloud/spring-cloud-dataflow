@@ -16,21 +16,13 @@
 
 package org.springframework.cloud.data.repository;
 
-import java.util.List;
-
 import org.springframework.cloud.data.core.StreamDefinition;
+import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.stereotype.Repository;
 
 /**
  * @author Mark Fisher
  */
 @Repository
-public interface StreamDefinitionRepository {
-
-	public void save(StreamDefinition definition);
-
-	public StreamDefinition findByName(String name);
-
-	public List<StreamDefinition> findAll();
-
+public interface StreamDefinitionRepository extends PagingAndSortingRepository<StreamDefinition, String> {
 }

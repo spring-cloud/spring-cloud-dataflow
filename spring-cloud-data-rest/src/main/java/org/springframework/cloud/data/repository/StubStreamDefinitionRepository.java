@@ -23,6 +23,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.cloud.data.core.StreamDefinition;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 /**
  * @author Mark Fisher
@@ -32,18 +36,82 @@ public class StubStreamDefinitionRepository implements StreamDefinitionRepositor
 	private final Map<String, StreamDefinition> definitions = new HashMap<>();
 
 	@Override
-	public void save(StreamDefinition definition) {
+	public Iterable<StreamDefinition> findAll(Sort sort) {
+		// todo: figure out sorting
+		return Collections.unmodifiableCollection(definitions.values());
+	}
+
+	@Override
+	public Page<StreamDefinition> findAll(Pageable pageable) {
+		// todo: figure out paging
+		return new PageImpl<StreamDefinition>(new ArrayList<>(definitions.values()));
+	}
+
+	@Override
+	public <S extends StreamDefinition> Iterable<S> save(Iterable<S> entities) {
+		for (S definition : entities) {
+			save(definition);
+		}
+		return entities;
+	}
+
+	@Override
+	public <S extends StreamDefinition> S save(S definition) {
 		definitions.put(definition.getName(), definition);
+		return definition;
 	}
 
 	@Override
-	public StreamDefinition findByName(String name) {
-		return definitions.get(name);
+	public StreamDefinition findOne(String s) {
+		return definitions.get(s);
 	}
 
 	@Override
-	public List<StreamDefinition> findAll() {
-		return Collections.unmodifiableList(new ArrayList<>(definitions.values()));
+	public boolean exists(String s) {
+		return definitions.containsKey(s);
+	}
+
+	@Override
+	public Iterable<StreamDefinition> findAll() {
+		return Collections.unmodifiableCollection(definitions.values());
+	}
+
+	@Override
+	public Iterable<StreamDefinition> findAll(Iterable<String> strings) {
+		List<StreamDefinition> results = new ArrayList<>();
+		for (String s : strings) {
+			if (definitions.containsKey(s)){
+				results.add(definitions.get(s));
+			}
+		}
+		return results;
+	}
+
+	@Override
+	public long count() {
+		return definitions.size();
+	}
+
+	@Override
+	public void delete(String s) {
+		definitions.remove(s);
+	}
+
+	@Override
+	public void delete(StreamDefinition entity) {
+		delete(entity.getName());
+	}
+
+	@Override
+	public void delete(Iterable<? extends StreamDefinition> entities) {
+		for (StreamDefinition definition : entities){
+			delete(definition);
+		}
+	}
+
+	@Override
+	public void deleteAll() {
+		definitions.clear();
 	}
 
 }

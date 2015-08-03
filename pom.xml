@@ -23,6 +23,7 @@
 		<spring-cloud.version>Brixton.BUILD-SNAPSHOT</spring-cloud.version>
 		<spring-cloud-stream.version>1.0.0.BUILD-SNAPSHOT</spring-cloud-stream.version>
 		<spring-xd.version>1.0.2.RELEASE</spring-xd.version>
+		<spring-data.version>1.9.1.RELEASE</spring-data.version>
 	</properties>
 	<modules>
 		<module>spring-cloud-data-rest</module>

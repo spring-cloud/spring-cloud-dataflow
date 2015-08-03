@@ -16,28 +16,36 @@
 
 package org.springframework.cloud.data.rest.config;
 
+import static org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType.HAL;
+
+import java.util.List;
+
 import org.springframework.cloud.data.module.deployer.ModuleDeployer;
 import org.springframework.cloud.data.module.deployer.lattice.ReceptorModuleDeployer;
 import org.springframework.cloud.data.module.deployer.local.LocalModuleDeployer;
-import org.springframework.cloud.data.rest.controller.StreamController;
 import org.springframework.cloud.stream.module.launcher.ModuleLauncher;
 import org.springframework.cloud.stream.module.launcher.ModuleLauncherConfiguration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Profile;
+import org.springframework.data.web.config.EnableSpringDataWebSupport;
+import org.springframework.hateoas.config.EnableHypermediaSupport;
+import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
 /**
  * @author Mark Fisher
  * @author Marius Bogoevici
  */
 @Configuration
+@EnableHypermediaSupport(type = HAL)
+@EnableSpringDataWebSupport
+@ComponentScan(basePackages = "org.springframework.cloud.data.rest.controller")
 public class AdminConfiguration {
-
-	@Bean
-	public StreamController streamController(ModuleDeployer moduleDeployer) {
-		return new StreamController(moduleDeployer);
-	}
 
 	@Configuration
 	@Profile("!cloud")
@@ -58,6 +66,21 @@ public class AdminConfiguration {
 		public ModuleDeployer moduleDeployer() {
 			return new ReceptorModuleDeployer();
 		}
+	}
+
+	@Bean
+	public WebMvcConfigurer configurer() {
+		return new WebMvcConfigurerAdapter() {
+
+			@Override
+			public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
+
+				// the REST API produces JSON only; adding this converter
+				// prevents the registration of the default converters
+				converters.add(new MappingJackson2HttpMessageConverter());
+			}
+
+		};
 	}
 
 }

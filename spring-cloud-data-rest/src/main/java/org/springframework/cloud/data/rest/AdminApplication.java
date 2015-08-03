@@ -29,7 +29,7 @@ import org.springframework.context.annotation.Import;
 public class AdminApplication {
 
 	public static void main(String[] args) throws InterruptedException {
-		SpringApplication.run(AdminApplication.class, "--server.port=9393");
+		SpringApplication.run(AdminApplication.class, "--server.port=9393", "--management.contextPath=/management");
 	}
 
 }
