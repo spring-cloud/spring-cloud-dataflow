@@ -25,9 +25,11 @@ import org.springframework.cloud.data.core.ModuleDeploymentRequest;
 import org.springframework.cloud.data.module.ModuleStatus;
 import org.springframework.cloud.data.module.deployer.ModuleDeployer;
 import org.springframework.cloud.stream.module.launcher.ModuleLauncher;
+import org.springframework.util.Assert;
 
 /**
  * @author Mark Fisher
+ * @author Marius Bogoevici
  */
 public class LocalModuleDeployer implements ModuleDeployer {
 
@@ -36,6 +38,7 @@ public class LocalModuleDeployer implements ModuleDeployer {
 	private final ModuleLauncher launcher;
 
 	public LocalModuleDeployer(ModuleLauncher launcher) {
+		Assert.notNull(launcher, "Module launcher cannot be null");
 		this.launcher = launcher;
 	}
 
