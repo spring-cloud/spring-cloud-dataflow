@@ -82,6 +82,7 @@ public class StreamController {
 	public StreamController(StreamDefinitionRepository repository, ModuleRegistry registry,
 			ModuleDeployer deployer) {
 		Assert.notNull(repository, "repository must not be null");
+		Assert.notNull(registry, "registry must not be null");
 		Assert.notNull(deployer, "deployer must not be null");
 		this.repository = repository;
 		this.registry = registry;
