@@ -21,8 +21,10 @@ import org.springframework.cloud.data.module.deployer.lattice.ReceptorModuleDepl
 import org.springframework.cloud.data.module.deployer.local.LocalModuleDeployer;
 import org.springframework.cloud.data.rest.controller.StreamController;
 import org.springframework.cloud.stream.module.launcher.ModuleLauncher;
+import org.springframework.cloud.stream.module.launcher.ModuleLauncherConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Profile;
 
 /**
@@ -39,12 +41,8 @@ public class AdminConfiguration {
 
 	@Configuration
 	@Profile("!cloud")
+	@Import(ModuleLauncherConfiguration.class)
 	protected static class LocalConfig {
-
-		@Bean
-		public ModuleLauncher moduleLauncher() {
-			return new ModuleLauncher();
-		}
 
 		@Bean
 		public ModuleDeployer moduleDeployer(ModuleLauncher moduleLauncher) {

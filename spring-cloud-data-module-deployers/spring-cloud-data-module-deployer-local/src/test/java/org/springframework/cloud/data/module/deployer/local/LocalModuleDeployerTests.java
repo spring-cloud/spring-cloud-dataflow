@@ -18,25 +18,39 @@ package org.springframework.cloud.data.module.deployer.local;
 
 import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.cloud.data.core.ModuleCoordinates;
 import org.springframework.cloud.data.core.ModuleDefinition;
 import org.springframework.cloud.data.core.ModuleDeploymentRequest;
 import org.springframework.cloud.stream.module.launcher.ModuleLauncher;
+import org.springframework.cloud.stream.module.launcher.ModuleLauncherConfiguration;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 /**
  * Tests deployment of the time-source and log-sink modules.
  *
  * @author Mark Fisher
+ * @author Marius Bogoevici
  */
+@RunWith(SpringJUnit4ClassRunner.class)
+@SpringApplicationConfiguration(classes = ModuleLauncherConfiguration.class)
+@DirtiesContext
 public class LocalModuleDeployerTests {
 
 	private static final String GROUP_ID = "org.springframework.cloud.stream.module";
 
 	private static final String VERSION = "1.0.0.BUILD-SNAPSHOT";
 
+	@Autowired
+	private ModuleLauncher moduleLauncher;
+
 	@Test @Ignore // see TODO below
 	public void timeToLogStream() {
-		LocalModuleDeployer deployer = new LocalModuleDeployer(new ModuleLauncher());
+		LocalModuleDeployer deployer = new LocalModuleDeployer(moduleLauncher);
 		ModuleDefinition timeDefinition = new ModuleDefinition.Builder()
 				.setGroup("ticktock")
 				.setName("time")
