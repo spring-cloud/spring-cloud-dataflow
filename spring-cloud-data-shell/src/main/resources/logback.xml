@@ -1,0 +1,12 @@
+<configuration>
+  <appender name="stdout" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder>
+      <pattern>%d{yyyy-MM-dd'T'HH:mm:ssZ} %level{5} %thread %c{2}:%L - %m%n</pattern>
+    </encoder>
+  </appender>
+  <logger name="org.springframework.web.client.RestTemplate" level="ERROR"/>
+  <logger name="org.apache.hadoop.util.NativeCodeLoader" level="ERROR"/>
+  <root level="WARN">
+    <appender-ref ref="stdout"/>
+  </root>
+</configuration>

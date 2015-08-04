@@ -38,6 +38,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.hateoas.PagedResources;
+import org.springframework.hateoas.mvc.ResourceAssemblerSupport;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -53,6 +54,7 @@ import org.springframework.web.bind.annotation.RestController;
  *
  * @author Mark Fisher
  * @author Patrick Peralta
+ * @author Ilayaperumal Gopinathan
  */
 @RestController
 @RequestMapping("/streams")
@@ -247,17 +249,27 @@ public class StreamController {
 		}
 	}
 
-
 	/**
-	 * Extension of {@link StreamDefinitionResource.Assembler} that
-	 * assembles {@link StreamDefinitionResource}s with stream status.
+	 * {@link org.springframework.hateoas.ResourceAssembler} implementation
+	 * that converts {@link StreamDefinition}s to {@link StreamDefinitionResource}s.
 	 */
-	class Assembler extends StreamDefinitionResource.Assembler {
+	class Assembler extends ResourceAssemblerSupport<StreamDefinition, StreamDefinitionResource> {
+
+		public Assembler() {
+			super(StreamController.class, StreamDefinitionResource.class);
+		}
+
 		@Override
 		public StreamDefinitionResource toResource(StreamDefinition stream) {
-			StreamDefinitionResource resource = super.toResource(stream);
-			resource.setStatus(calculateStreamState(stream.getName()));
+			return createResourceWithId(stream.getName(), stream);
+		}
+
+		@Override
+		public StreamDefinitionResource instantiateResource(StreamDefinition entity) {
+			StreamDefinitionResource resource = new StreamDefinitionResource(entity.getName(), entity.getDslText());
+			resource.setStatus(calculateStreamState(entity.getName()));
 			return resource;
 		}
 	}
+
 }

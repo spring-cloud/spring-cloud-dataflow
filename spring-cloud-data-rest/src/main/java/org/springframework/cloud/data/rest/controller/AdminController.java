@@ -57,9 +57,7 @@ public class AdminController {
 	@RequestMapping
 	public ResourceSupport info() {
 		ResourceSupport resourceSupport = new ResourceSupport();
-
 		resourceSupport.add(entityLinks.linkFor(StreamDefinitionResource.class).withRel("streams"));
-
 		return resourceSupport;
 	}
 

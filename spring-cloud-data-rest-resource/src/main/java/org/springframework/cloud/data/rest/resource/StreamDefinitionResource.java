@@ -17,9 +17,8 @@
 package org.springframework.cloud.data.rest.resource;
 
 import org.springframework.cloud.data.core.StreamDefinition;
-import org.springframework.cloud.data.rest.controller.StreamController;
+import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.ResourceSupport;
-import org.springframework.hateoas.mvc.ResourceAssemblerSupport;
 
 /**
  * A HATEOAS representation of a {@link StreamDefinition}.
@@ -29,13 +28,19 @@ import org.springframework.hateoas.mvc.ResourceAssemblerSupport;
  * Note: this implementation is not thread safe.
  *
  * @author Patrick Peralta
+ * @author Ilayaperumal Gopinathan
  */
 public class StreamDefinitionResource extends ResourceSupport {
 
 	/**
-	 * Stream definition.
+	 * Stream name.
 	 */
-	private StreamDefinition definition;
+	private String name;
+
+	/**
+	 * Stream definition DSL text.
+	 */
+	private String dslText;
 
 	/**
 	 * Stream status (i.e. deployed, undeployed, etc).
@@ -51,10 +56,12 @@ public class StreamDefinitionResource extends ResourceSupport {
 	/**
 	 * Construct a {@code StreamDefinitionResource}.
 	 *
-	 * @param definition stream definition object
+	 * @param name stream name
+	 * @param dslText stream definition DSL text
 	 */
-	public StreamDefinitionResource(StreamDefinition definition) {
-		this.definition = definition;
+	public StreamDefinitionResource(String name, String dslText) {
+		this.name = name;
+		this.dslText = dslText;
 	}
 
 	/**
@@ -63,7 +70,7 @@ public class StreamDefinitionResource extends ResourceSupport {
 	 * @return stream name
 	 */
 	public String getName() {
-		return definition.getName();
+		return this.name;
 	}
 
 	/**
@@ -71,8 +78,8 @@ public class StreamDefinitionResource extends ResourceSupport {
 	 *
 	 * @return stream definition DSL
 	 */
-	public String getDefinition() {
-		return definition.getDslText();
+	public String getDslText() {
+		return this.dslText;
 	}
 
 	/**
@@ -93,21 +100,8 @@ public class StreamDefinitionResource extends ResourceSupport {
 		this.status = status;
 	}
 
-	/**
-	 * {@link org.springframework.hateoas.ResourceAssembler} implementation
-	 * that converts {@link StreamDefinition}s to {@link StreamDefinitionResource}s.
-	 */
-	public static class Assembler
-			extends ResourceAssemblerSupport<StreamDefinition, StreamDefinitionResource> {
+	public static class Page extends PagedResources<StreamDefinitionResource> {
 
-		public Assembler() {
-			super(StreamController.class, StreamDefinitionResource.class);
-		}
-
-		@Override
-		public StreamDefinitionResource toResource(StreamDefinition entity) {
-			return new StreamDefinitionResource(entity);
-		}
 	}
 
 }
