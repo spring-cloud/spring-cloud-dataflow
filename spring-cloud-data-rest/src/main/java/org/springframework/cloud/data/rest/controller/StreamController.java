@@ -16,17 +16,11 @@
 
 package org.springframework.cloud.data.rest.controller;
 
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.data.core.StreamDefinition;
 import org.springframework.cloud.data.module.deployer.ModuleDeployer;
 import org.springframework.cloud.data.module.registry.ModuleRegistry;
-import org.springframework.cloud.data.module.registry.StubModuleRegistry;
 import org.springframework.cloud.data.repository.StreamDefinitionRepository;
-import org.springframework.cloud.data.repository.StubStreamDefinitionRepository;
 import org.springframework.cloud.data.rest.resource.StreamDefinitionResource;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
@@ -41,33 +35,66 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
+ * Controller for operations on {@link StreamDefinition}. This
+ * includes CRUD and deployment operations.
+ *
  * @author Mark Fisher
+ * @author Patrick Peralta
  */
 @RestController
 @RequestMapping("/streams")
 @ExposesResourceFor(StreamDefinitionResource.class)
 public class StreamController {
-	private static final Logger logger = LoggerFactory.getLogger(StreamController.class);
 
-	private final StreamDefinitionRepository repository = new StubStreamDefinitionRepository();
+	/**
+	 * The repository this controller will use for stream CRUD operations.
+	 */
+	private final StreamDefinitionRepository repository;
 
-	private final ModuleRegistry registry = new StubModuleRegistry();
+	/**
+	 * The module registry this controller will use to look up modules.
+	 */
+	private final ModuleRegistry registry;
 
+	/**
+	 * The deployer this controller will use to deploy stream modules.
+	 */
 	private final ModuleDeployer deployer;
 
 	/**
-	 * Create a StreamController that delegates to the provided {@link ModuleDeployer}.
-	 *
-	 * @param moduleDeployer the deployer this controller will use to deploy stream modules.
+	 * Assembler for {@link StreamDefinitionResource} objects.
 	 */
-	@Autowired
-	public StreamController(ModuleDeployer moduleDeployer) {
-		Assert.notNull(moduleDeployer, "moduleDeployer must not be null");
-		this.deployer = moduleDeployer;
-	}
-
 	private final Assembler streamAssembler = new Assembler();
 
+	/**
+	 * Create a {@code StreamController} that delegates
+	 * <ul>
+	 *     <li>CRUD operations to the provided {@link StreamDefinitionRepository}</li>
+	 *     <li>deployment operations to the provided {@link ModuleDeployer}</li>
+	 *     <li>module coordinate retrieval to the provided {@link ModuleRegistry}</li>
+	 * </ul>
+	 *
+	 * @param repository  the repository this controller will use for stream CRUD operations
+	 * @param registry    module registry this controller will use to look up modules
+	 * @param deployer    the deployer this controller will use to deploy stream modules
+	 */
+	@Autowired
+	public StreamController(StreamDefinitionRepository repository, ModuleRegistry registry,
+			ModuleDeployer deployer) {
+		Assert.notNull(repository, "repository must not be null");
+		Assert.notNull(deployer, "deployer must not be null");
+		this.repository = repository;
+		this.registry = registry;
+		this.deployer = deployer;
+	}
+
+	/**
+	 * Return a page-able list of {@link StreamDefinitionResource defined streams}.
+	 *
+	 * @param pageable   page-able collection of {@code StreamDefinitionResource}.
+	 * @param assembler  assembler for {@link StreamDefinition}
+	 * @return list of stream definitions
+	 */
 	@RequestMapping(value = "/definitions", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
 	public PagedResources<StreamDefinitionResource> list(Pageable pageable,
@@ -76,12 +103,19 @@ public class StreamController {
 		return assembler.toResource(repository.findAll(pageable), streamAssembler);
 	}
 
+	/**
+	 * Create a new stream.
+	 *
+	 * @param name    stream name
+	 * @param dsl     DSL definition for stream
+	 * @param deploy  if {@code true}, the stream is deployed upon creation
+	 */
 	@RequestMapping(value = "/definitions", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
 	public void save(@RequestParam("name") String name,
 			@RequestParam("definition") String dsl,
 			@RequestParam(value = "deploy", defaultValue = "true")
-			boolean deploy) throws Exception {
+			boolean deploy) {
 
 		StreamDefinition definition = new StreamDefinition(name, dsl);
 		this.repository.save(definition);

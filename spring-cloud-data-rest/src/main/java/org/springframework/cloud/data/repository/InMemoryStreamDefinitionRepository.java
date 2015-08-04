@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.cloud.data.core.StreamDefinition;
 import org.springframework.data.domain.Page;
@@ -29,30 +30,34 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
 /**
+ * In-memory implementation of {@link StreamDefinitionRepository}.
+ *
  * @author Mark Fisher
+ * @author Patrick Peralta
  */
-public class StubStreamDefinitionRepository implements StreamDefinitionRepository {
+public class InMemoryStreamDefinitionRepository implements StreamDefinitionRepository {
 
-	private final Map<String, StreamDefinition> definitions = new HashMap<>();
+	private final Map<String, StreamDefinition> definitions = new ConcurrentHashMap<>();
 
 	@Override
 	public Iterable<StreamDefinition> findAll(Sort sort) {
-		// todo: figure out sorting
-		return Collections.unmodifiableCollection(definitions.values());
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public Page<StreamDefinition> findAll(Pageable pageable) {
-		// todo: figure out paging
-		return new PageImpl<StreamDefinition>(new ArrayList<>(definitions.values()));
+		List<StreamDefinition> results = new ArrayList<>(definitions.values());
+		return new PageImpl<StreamDefinition>(results, pageable, results.size());
 	}
 
 	@Override
-	public <S extends StreamDefinition> Iterable<S> save(Iterable<S> entities) {
-		for (S definition : entities) {
-			save(definition);
+	public <S extends StreamDefinition> Iterable<S> save(Iterable<S> iterableDefinitions) {
+		Map<String, StreamDefinition> holder = new HashMap<>();
+		for (S definition : iterableDefinitions) {
+			holder.put(definition.getName(), definition);
 		}
-		return entities;
+		definitions.putAll(holder);
+		return iterableDefinitions;
 	}
 
 	@Override
@@ -62,13 +67,13 @@ public class StubStreamDefinitionRepository implements StreamDefinitionRepositor
 	}
 
 	@Override
-	public StreamDefinition findOne(String s) {
-		return definitions.get(s);
+	public StreamDefinition findOne(String name) {
+		return definitions.get(name);
 	}
 
 	@Override
-	public boolean exists(String s) {
-		return definitions.containsKey(s);
+	public boolean exists(String name) {
+		return definitions.containsKey(name);
 	}
 
 	@Override
@@ -77,9 +82,9 @@ public class StubStreamDefinitionRepository implements StreamDefinitionRepositor
 	}
 
 	@Override
-	public Iterable<StreamDefinition> findAll(Iterable<String> strings) {
+	public Iterable<StreamDefinition> findAll(Iterable<String> names) {
 		List<StreamDefinition> results = new ArrayList<>();
-		for (String s : strings) {
+		for (String s : names) {
 			if (definitions.containsKey(s)){
 				results.add(definitions.get(s));
 			}
@@ -93,18 +98,18 @@ public class StubStreamDefinitionRepository implements StreamDefinitionRepositor
 	}
 
 	@Override
-	public void delete(String s) {
-		definitions.remove(s);
+	public void delete(String name) {
+		definitions.remove(name);
 	}
 
 	@Override
-	public void delete(StreamDefinition entity) {
-		delete(entity.getName());
+	public void delete(StreamDefinition definition) {
+		delete(definition.getName());
 	}
 
 	@Override
-	public void delete(Iterable<? extends StreamDefinition> entities) {
-		for (StreamDefinition definition : entities){
+	public void delete(Iterable<? extends StreamDefinition> definitions) {
+		for (StreamDefinition definition : definitions){
 			delete(definition);
 		}
 	}

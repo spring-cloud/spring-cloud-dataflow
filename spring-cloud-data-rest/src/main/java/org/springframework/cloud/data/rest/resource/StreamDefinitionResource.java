@@ -24,29 +24,37 @@ import org.springframework.hateoas.ResourceSupport;
 import org.springframework.hateoas.mvc.ResourceAssemblerSupport;
 
 /**
- * todo: add javadoc
- *
- * todo: document that this is not thread safe
+ * A HATEOAS representation of a {@link StreamDefinition}.
+ * This class also includes a description of the
+ * {@link #status stream status}.
+ * <p>
+ * Note: this implementation is not thread safe.
  *
  * @author Patrick Peralta
  */
 @XmlRootElement
 public class StreamDefinitionResource extends ResourceSupport {
 
+	/**
+	 * Stream definition.
+	 */
 	private StreamDefinition definition;
 
+	/**
+	 * Stream status (i.e. deployed, undeployed, etc).
+	 */
 	private String status;
 
 	/**
 	 * Default constructor for serialization frameworks.
 	 */
 	protected StreamDefinitionResource() {
-
 	}
 
 	/**
-	 * todo
-	 * @param definition
+	 * Construct a {@code StreamDefinitionResource}.
+	 *
+	 * @param definition stream definition object
 	 */
 	public StreamDefinitionResource(StreamDefinition definition) {
 		this.definition = definition;
@@ -70,14 +78,28 @@ public class StreamDefinitionResource extends ResourceSupport {
 		return definition.getDslText();
 	}
 
+	/**
+	 * Return the status of this stream (i.e. deployed, undeployed, etc).
+	 *
+	 * @return stream status
+	 */
 	public String getStatus() {
 		return status;
 	}
 
+	/**
+	 * Set the status of this stream (i.e. deployed, undeployed, etc).
+	 *
+	 * @param status stream status
+	 */
 	public void setStatus(String status) {
 		this.status = status;
 	}
 
+	/**
+	 * {@link org.springframework.hateoas.ResourceAssembler} implementation
+	 * that converts {@link StreamDefinition}s to {@link StreamDefinitionResource}s.
+	 */
 	public static class Assembler
 			extends ResourceAssemblerSupport<StreamDefinition, StreamDefinitionResource> {
 

@@ -23,6 +23,10 @@ import java.util.List;
 import org.springframework.cloud.data.module.deployer.ModuleDeployer;
 import org.springframework.cloud.data.module.deployer.lattice.ReceptorModuleDeployer;
 import org.springframework.cloud.data.module.deployer.local.LocalModuleDeployer;
+import org.springframework.cloud.data.module.registry.ModuleRegistry;
+import org.springframework.cloud.data.module.registry.StubModuleRegistry;
+import org.springframework.cloud.data.repository.StreamDefinitionRepository;
+import org.springframework.cloud.data.repository.InMemoryStreamDefinitionRepository;
 import org.springframework.cloud.stream.module.launcher.ModuleLauncher;
 import org.springframework.cloud.stream.module.launcher.ModuleLauncherConfiguration;
 import org.springframework.context.annotation.Bean;
@@ -38,8 +42,13 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
 /**
+ * Configuration for admin application context. This includes support
+ * for various runtime profiles (local, cloud, etc) and REST API framework
+ * configuration.
+ *
  * @author Mark Fisher
  * @author Marius Bogoevici
+ * @author Patrick Peralta
  */
 @Configuration
 @EnableHypermediaSupport(type = HAL)
@@ -66,6 +75,16 @@ public class AdminConfiguration {
 		public ModuleDeployer moduleDeployer() {
 			return new ReceptorModuleDeployer();
 		}
+	}
+
+	@Bean
+	public StreamDefinitionRepository streamDefinitionRepository() {
+		return new InMemoryStreamDefinitionRepository();
+	}
+
+	@Bean
+	public ModuleRegistry moduleRegistry() {
+		return new StubModuleRegistry();
 	}
 
 	@Bean

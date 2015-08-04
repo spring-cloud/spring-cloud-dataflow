@@ -24,17 +24,36 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
+ * Controller for the root resource of the admin server.
+ *
  * @author Patrick Peralta
  */
 @RestController
 public class AdminController {
+
+	/**
+	 * Contains links pointing to controllers backing an entity type
+	 * (such as streams).
+	 */
 	private final EntityLinks entityLinks;
 
+	/**
+	 * Construct an {@code AdminController}.
+	 *
+	 * @param entityLinks holder of links to controllers and their associated
+	 *                    entity types
+	 */
 	@Autowired
 	public AdminController(EntityLinks entityLinks) {
 		this.entityLinks = entityLinks;
 	}
 
+	/**
+	 * Return a {@link ResourceSupport} object containing the resources
+	 * served by the admin server.
+	 *
+	 * @return {@code ResourceSupport} object containing the admin server's resources
+	 */
 	@RequestMapping
 	public ResourceSupport info() {
 		ResourceSupport resourceSupport = new ResourceSupport();
