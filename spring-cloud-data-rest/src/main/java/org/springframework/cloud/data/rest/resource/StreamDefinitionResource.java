@@ -18,6 +18,7 @@ package org.springframework.cloud.data.rest.resource;
 
 import org.springframework.cloud.data.core.StreamDefinition;
 import org.springframework.cloud.data.rest.controller.StreamController;
+import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.ResourceSupport;
 import org.springframework.hateoas.mvc.ResourceAssemblerSupport;
 
@@ -108,6 +109,10 @@ public class StreamDefinitionResource extends ResourceSupport {
 		public StreamDefinitionResource toResource(StreamDefinition entity) {
 			return new StreamDefinitionResource(entity);
 		}
+	}
+
+	public static class Page extends PagedResources<StreamDefinitionResource> {
+
 	}
 
 }
