@@ -16,7 +16,13 @@
 
 package org.springframework.cloud.data.rest.controller;
 
+import java.util.Iterator;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.data.core.ModuleCoordinates;
+import org.springframework.cloud.data.core.ModuleDefinition;
+import org.springframework.cloud.data.core.ModuleDeploymentId;
+import org.springframework.cloud.data.core.ModuleDeploymentRequest;
 import org.springframework.cloud.data.core.StreamDefinition;
 import org.springframework.cloud.data.module.deployer.ModuleDeployer;
 import org.springframework.cloud.data.module.registry.ModuleRegistry;
@@ -28,6 +34,7 @@ import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -118,10 +125,88 @@ public class StreamController {
 			@RequestParam(value = "deploy", defaultValue = "true")
 			boolean deploy) {
 
-		StreamDefinition definition = new StreamDefinition(name, dsl);
-		this.repository.save(definition);
+		StreamDefinition stream = new StreamDefinition(name, dsl);
+		stream = this.repository.save(stream);
+		if (deploy) {
+			deployStream(stream);
+		}
+	}
 
-		// todo: deploy
+	/**
+	 * Request removal of an existing stream definition.
+	 *
+	 * @param name the name of an existing stream definition (required)
+	 */
+	@RequestMapping(value = "/definitions/{name}", method = RequestMethod.DELETE)
+	@ResponseStatus(HttpStatus.OK)
+	public void delete(@PathVariable("name") String name) throws Exception {
+		this.repository.delete(name);
+	}
+
+	/**
+	 * Request removal of all stream definitions.
+	 */
+	@RequestMapping(value = "/definitions", method = RequestMethod.DELETE)
+	@ResponseStatus(HttpStatus.OK)
+	public void deleteAll() throws Exception {
+		this.repository.deleteAll();
+	}
+
+	/**
+	 * Request un-deployment of an existing stream.
+	 *
+	 * @param name the name of an existing stream (required)
+	 */
+	@RequestMapping(value = "/deployments/{name}", method = RequestMethod.DELETE)
+	@ResponseStatus(HttpStatus.OK)
+	public void undeploy(@PathVariable("name") String name) throws Exception {
+		StreamDefinition stream = this.repository.findOne(name);
+		Assert.notNull(stream, String.format("no stream defined: %s", name));
+		undeployStream(stream);
+	}
+
+	/**
+	 * Request un-deployment of all streams.
+	 */
+	@RequestMapping(value = "/deployments", method = RequestMethod.DELETE)
+	@ResponseStatus(HttpStatus.OK)
+	public void undeployAll() throws Exception {
+		for (StreamDefinition stream : this.repository.findAll()) {
+			this.undeployStream(stream);
+		}
+	}
+
+	/**
+	 * Request deployment of an existing stream definition. The name must be included in the path.
+	 *
+	 * @param name the name of an existing stream definition (required)
+	 * @param properties the deployment properties for the stream as a comma-delimited list of key=value pairs
+	 */
+	@RequestMapping(value = "/deployments/{name}", method = RequestMethod.POST)
+	@ResponseStatus(HttpStatus.CREATED)
+	public void deploy(@PathVariable("name") String name, @RequestParam(required = false) String properties) throws Exception {
+		StreamDefinition stream = this.repository.findOne(name);
+		Assert.notNull(stream, String.format("no stream defined: %s", name));
+		deployStream(stream);
+	}
+
+	private void deployStream(StreamDefinition stream) {
+		Iterator<ModuleDefinition> iterator = stream.getDeploymentOrderIterator();
+		for (int i = 0; iterator.hasNext(); i++) {
+			ModuleDefinition module = iterator.next();
+			// todo: support processor
+			String type = (i == 0) ? "sink" : "source";
+			ModuleCoordinates coordinates = this.registry.findByNameAndType(module.getName(), type);
+			// todo: pass deployment properties
+			this.deployer.deploy(new ModuleDeploymentRequest(module, coordinates));
+		}
+	}
+
+	private void undeployStream(StreamDefinition stream) {
+		for (ModuleDefinition module : stream.getModuleDefinitions()) {
+			ModuleDeploymentId id = ModuleDeploymentId.fromModuleDefinition(module);
+			this.deployer.undeploy(id);
+		}
 	}
 
 
