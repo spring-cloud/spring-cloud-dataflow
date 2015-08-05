@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.data.repository;
+package org.springframework.cloud.data.rest.repository;
 
 import org.springframework.cloud.data.core.StreamDefinition;
 import org.springframework.data.repository.PagingAndSortingRepository;

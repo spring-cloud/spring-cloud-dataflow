@@ -25,8 +25,8 @@ import org.springframework.cloud.data.module.deployer.lattice.ReceptorModuleDepl
 import org.springframework.cloud.data.module.deployer.local.LocalModuleDeployer;
 import org.springframework.cloud.data.module.registry.ModuleRegistry;
 import org.springframework.cloud.data.module.registry.StubModuleRegistry;
-import org.springframework.cloud.data.repository.StreamDefinitionRepository;
-import org.springframework.cloud.data.repository.InMemoryStreamDefinitionRepository;
+import org.springframework.cloud.data.rest.repository.InMemoryStreamDefinitionRepository;
+import org.springframework.cloud.data.rest.repository.StreamDefinitionRepository;
 import org.springframework.cloud.stream.module.launcher.ModuleLauncher;
 import org.springframework.cloud.stream.module.launcher.ModuleLauncherConfiguration;
 import org.springframework.context.annotation.Bean;

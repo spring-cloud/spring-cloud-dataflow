@@ -26,7 +26,7 @@ import org.springframework.cloud.data.core.ModuleDeploymentRequest;
 import org.springframework.cloud.data.core.StreamDefinition;
 import org.springframework.cloud.data.module.deployer.ModuleDeployer;
 import org.springframework.cloud.data.module.registry.ModuleRegistry;
-import org.springframework.cloud.data.repository.StreamDefinitionRepository;
+import org.springframework.cloud.data.rest.repository.StreamDefinitionRepository;
 import org.springframework.cloud.data.rest.resource.StreamDefinitionResource;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
