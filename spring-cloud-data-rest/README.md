@@ -25,25 +25,25 @@ java -jar spring-cloud-data-rest/target/spring-cloud-data-rest-1.0.0.BUILD-SNAPS
 1. create the 'ticktock' stream:
 
 ```
-$ curl -X POST -H "Content-Type: text/plain" -d "time | log" http://localhost:9393/streams/ticktock
+$ curl -X POST -d "name=ticktock&definition=time | log" http://localhost:9393/streams/definitions?deploy=false
 ```
 
 2. list all streams available in the repository:
 
 ```
-$ curl http://localhost:9393/streams
+$ curl http://localhost:9393/streams/definitions
 ```
 
 3. deploy the 'ticktock' stream:
 
 ```
-$ curl -X PUT http://localhost:9393/streams/ticktock
+$ curl -X POST http://localhost:9393/streams/deployments/ticktock
 ```
 
 If successful you should see output similar to the following in the `AdminApplication` console:
 
 ```
-2015-08-01 23:59:58.244  INFO 32845 --- [hannel-adapter1] sink.LogSink     : Received: 2015-08-01 23:59:58
-2015-08-02 00:00:03.245  INFO 32845 --- [hannel-adapter1] sink.LogSink     : Received: 2015-08-02 00:00:03
-2015-08-02 00:00:08.247  INFO 32845 --- [hannel-adapter1] sink.LogSink     : Received: 2015-08-02 00:00:08
+2015-08-05 07:36:19.723  INFO 59555 --- [hannel-adapter1] o.s.cloud.stream.module.log.LogSink      : Received: 2015-08-05 07:36:19
+2015-08-05 07:36:24.678  INFO 59555 --- [hannel-adapter1] o.s.cloud.stream.module.log.LogSink      : Received: 2015-08-05 07:36:24
+2015-08-05 07:36:29.678  INFO 59555 --- [hannel-adapter1] o.s.cloud.stream.module.log.LogSink      : Received: 2015-08-05 07:36:29
 ```
