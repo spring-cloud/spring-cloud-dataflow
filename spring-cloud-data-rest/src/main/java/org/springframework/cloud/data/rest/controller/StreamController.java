@@ -16,7 +16,14 @@
 
 package org.springframework.cloud.data.rest.controller;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.data.core.ModuleCoordinates;
@@ -24,6 +31,7 @@ import org.springframework.cloud.data.core.ModuleDefinition;
 import org.springframework.cloud.data.core.ModuleDeploymentId;
 import org.springframework.cloud.data.core.ModuleDeploymentRequest;
 import org.springframework.cloud.data.core.StreamDefinition;
+import org.springframework.cloud.data.module.ModuleStatus;
 import org.springframework.cloud.data.module.deployer.ModuleDeployer;
 import org.springframework.cloud.data.module.registry.ModuleRegistry;
 import org.springframework.cloud.data.rest.repository.StreamDefinitionRepository;
@@ -52,6 +60,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/streams")
 @ExposesResourceFor(StreamDefinitionResource.class)
 public class StreamController {
+
+	private static final Logger logger = LoggerFactory.getLogger(StreamController.class);
 
 	/**
 	 * The repository this controller will use for stream CRUD operations.
@@ -211,6 +221,38 @@ public class StreamController {
 		}
 	}
 
+	private String calculateStreamState(String name) {
+		List<ModuleStatus> moduleStates = new ArrayList<ModuleStatus>();
+		StreamDefinition stream = repository.findOne(name);
+		for (ModuleDefinition module : stream.getModuleDefinitions()) {
+			moduleStates.add(deployer.status(ModuleDeploymentId.fromModuleDefinition(module)));
+		}
+
+		Set<ModuleStatus.State> states = new HashSet<>();
+		for (ModuleStatus status : moduleStates) {
+			states.add(status.getState());
+		}
+
+		logger.debug("states: {}", states);
+
+		// todo: this requires more thought...
+		if (states.contains(ModuleStatus.State.failed)) {
+			return ModuleStatus.State.failed.toString();
+		}
+		else if (states.contains(ModuleStatus.State.incomplete)) {
+			return ModuleStatus.State.incomplete.toString();
+		}
+		else if (states.contains(ModuleStatus.State.deploying)) {
+			return ModuleStatus.State.deploying.toString();
+		}
+		else if (states.contains(ModuleStatus.State.deployed)) {
+			return ModuleStatus.State.deployed.toString();
+		}
+		else {
+			return ModuleStatus.State.unknown.toString();
+		}
+	}
+
 
 	/**
 	 * Extension of {@link StreamDefinitionResource.Assembler} that
@@ -218,11 +260,9 @@ public class StreamController {
 	 */
 	class Assembler extends StreamDefinitionResource.Assembler {
 		@Override
-		public StreamDefinitionResource toResource(StreamDefinition entity) {
-
-			StreamDefinitionResource resource = super.toResource(entity);
-			// todo: set stream status based on SPI status
-			resource.setStatus("undeployed");
+		public StreamDefinitionResource toResource(StreamDefinition stream) {
+			StreamDefinitionResource resource = super.toResource(stream);
+			resource.setStatus(calculateStreamState(stream.getName()));
 			return resource;
 		}
 	}
