@@ -11,6 +11,9 @@
 		<artifactId>spring-cloud-data-module-deployers-parent</artifactId>
 		<version>1.0.0.BUILD-SNAPSHOT</version>
 	</parent>
+	<properties>
+		<spring-cloud-lattice.version>1.1.0.BUILD-SNAPSHOT</spring-cloud-lattice.version>
+	</properties>
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
@@ -19,6 +22,11 @@
 		<dependency>
 			<groupId>org.springframework.xd</groupId>
 			<artifactId>spring-xd-module</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-lattice-core</artifactId>
+			<version>${spring-cloud-lattice.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.cloudfoundry.receptor</groupId>
