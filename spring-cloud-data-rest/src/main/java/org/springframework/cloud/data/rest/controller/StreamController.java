@@ -16,10 +16,8 @@
 
 package org.springframework.cloud.data.rest.controller;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -222,30 +220,26 @@ public class StreamController {
 	}
 
 	private String calculateStreamState(String name) {
-		List<ModuleStatus> moduleStates = new ArrayList<ModuleStatus>();
+		Set<ModuleStatus.State> moduleStates = new HashSet<>();
 		StreamDefinition stream = repository.findOne(name);
 		for (ModuleDefinition module : stream.getModuleDefinitions()) {
-			moduleStates.add(deployer.status(ModuleDeploymentId.fromModuleDefinition(module)));
+		    ModuleStatus status = deployer.status(ModuleDeploymentId.fromModuleDefinition(module));
+		    moduleStates.add(status.getState());
 		}
 
-		Set<ModuleStatus.State> states = new HashSet<>();
-		for (ModuleStatus status : moduleStates) {
-			states.add(status.getState());
-		}
-
-		logger.debug("states: {}", states);
+		logger.debug("states: {}", moduleStates);
 
 		// todo: this requires more thought...
-		if (states.contains(ModuleStatus.State.failed)) {
+		if (moduleStates.contains(ModuleStatus.State.failed)) {
 			return ModuleStatus.State.failed.toString();
 		}
-		else if (states.contains(ModuleStatus.State.incomplete)) {
+		else if (moduleStates.contains(ModuleStatus.State.incomplete)) {
 			return ModuleStatus.State.incomplete.toString();
 		}
-		else if (states.contains(ModuleStatus.State.deploying)) {
+		else if (moduleStates.contains(ModuleStatus.State.deploying)) {
 			return ModuleStatus.State.deploying.toString();
 		}
-		else if (states.contains(ModuleStatus.State.deployed)) {
+		else if (moduleStates.contains(ModuleStatus.State.deployed) && moduleStates.size() == 1) {
 			return ModuleStatus.State.deployed.toString();
 		}
 		else {
