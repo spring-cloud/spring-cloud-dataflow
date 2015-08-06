@@ -21,6 +21,7 @@ import static org.springframework.hateoas.config.EnableHypermediaSupport.Hyperme
 import java.util.List;
 
 import org.springframework.cloud.data.module.deployer.ModuleDeployer;
+import org.springframework.cloud.data.module.deployer.cloudfoundry.CloudFoundryModuleDeployer;
 import org.springframework.cloud.data.module.deployer.lattice.ReceptorModuleDeployer;
 import org.springframework.cloud.data.module.deployer.local.LocalModuleDeployer;
 import org.springframework.cloud.data.module.registry.ModuleRegistry;
@@ -56,6 +57,16 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 @ComponentScan(basePackages = "org.springframework.cloud.data.rest.controller")
 public class AdminConfiguration {
 
+	@Bean
+	public StreamDefinitionRepository streamDefinitionRepository() {
+		return new InMemoryStreamDefinitionRepository();
+	}
+
+	@Bean
+	public ModuleRegistry moduleRegistry() {
+		return new StubModuleRegistry();
+	}
+
 	@Configuration
 	@Profile("!cloud")
 	@Import(ModuleLauncherConfiguration.class)
@@ -71,20 +82,25 @@ public class AdminConfiguration {
 	@Profile("cloud")
 	protected static class CloudConfig {
 
-		@Bean
-		public ModuleDeployer moduleDeployer() {
-			return new ReceptorModuleDeployer();
+		@Configuration
+		@Profile("lattice")
+		protected static class LatticeConfig {
+
+			@Bean
+			public ModuleDeployer moduleDeployer() {
+				return new ReceptorModuleDeployer();
+			}
 		}
-	}
 
-	@Bean
-	public StreamDefinitionRepository streamDefinitionRepository() {
-		return new InMemoryStreamDefinitionRepository();
-	}
+		@Configuration
+		@Profile("!lattice")
+		protected static class CloudFoundryConfig {
 
-	@Bean
-	public ModuleRegistry moduleRegistry() {
-		return new StubModuleRegistry();
+			@Bean
+			public ModuleDeployer moduleDeployer() {
+				return new CloudFoundryModuleDeployer();
+			}
+		}
 	}
 
 	@Bean
@@ -93,12 +109,10 @@ public class AdminConfiguration {
 
 			@Override
 			public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
-
 				// the REST API produces JSON only; adding this converter
 				// prevents the registration of the default converters
 				converters.add(new MappingJackson2HttpMessageConverter());
 			}
-
 		};
 	}
 
