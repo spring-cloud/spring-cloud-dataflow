@@ -18,6 +18,7 @@ package org.springframework.cloud.data.rest.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.data.rest.resource.StreamDefinitionResource;
+import org.springframework.cloud.data.rest.resource.TaskDefinitionResource;
 import org.springframework.hateoas.EntityLinks;
 import org.springframework.hateoas.ResourceSupport;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -58,6 +59,7 @@ public class AdminController {
 	public ResourceSupport info() {
 		ResourceSupport resourceSupport = new ResourceSupport();
 		resourceSupport.add(entityLinks.linkFor(StreamDefinitionResource.class).withRel("streams"));
+		resourceSupport.add(entityLinks.linkFor(TaskDefinitionResource.class).withRel("tasks"));
 		return resourceSupport;
 	}
 

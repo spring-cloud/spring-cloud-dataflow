@@ -59,6 +59,7 @@ public enum DSLMessage {
 	EXPECTED_CHANNEL_QUALIFIER(ERROR, 120, "expected channel reference '':<channel>'' but found ''{0}''"), //
 	EXPECTED_CHANNEL_NAME(ERROR, 121, "expected channel name but found ''{0}''"), //
 	ILLEGAL_STREAM_NAME(ERROR, 122, "illegal name for a stream ''{0}''"), //
+	ILLEGAL_TASK_NAME(ERROR, 123, "illegal name for a task ''{0}''"), //
 	MISSING_VALUE_FOR_VARIABLE(ERROR, 125, "no value specified for variable ''{0}'' when using substream"), //
 	VARIABLE_NOT_TERMINATED(ERROR, 126, "unable to find variable terminator ''}'' in argument ''{0}''"), //
 	AMBIGUOUS_MODULE_NAME(ERROR,
