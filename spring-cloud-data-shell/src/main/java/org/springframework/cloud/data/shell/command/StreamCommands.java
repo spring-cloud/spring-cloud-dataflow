@@ -20,7 +20,7 @@ package org.springframework.cloud.data.shell.command;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.data.rest.client.StreamOperations;
 import org.springframework.cloud.data.rest.resource.StreamDefinitionResource;
-import org.springframework.cloud.data.shell.config.RESTClientShell;
+import org.springframework.cloud.data.shell.config.CloudDataShell;
 import org.springframework.cloud.data.shell.util.Table;
 import org.springframework.cloud.data.shell.util.TableHeader;
 import org.springframework.hateoas.PagedResources;
@@ -44,11 +44,11 @@ public class StreamCommands implements CommandMarker {
 	private static final String LIST_STREAM = "stream list";
 
 	@Autowired
-	private RESTClientShell RESTClientShell;
+	private CloudDataShell CloudDataShell;
 
 	@CliAvailabilityIndicator({ CREATE_STREAM, LIST_STREAM })
 	public boolean available() {
-		return RESTClientShell.getRESTClientOperations() != null;
+		return CloudDataShell.getCloudDataOperations() != null;
 	}
 
 	@CliCommand(value = CREATE_STREAM, help = "Create a new stream definition")
@@ -81,6 +81,6 @@ public class StreamCommands implements CommandMarker {
 	}
 
 	StreamOperations streamOperations() {
-		return RESTClientShell.getRESTClientOperations().streamOperations();
+		return CloudDataShell.getCloudDataOperations().streamOperations();
 	}
 }

@@ -21,7 +21,7 @@ package org.springframework.cloud.data.rest.client;
  *
  * @author Ilayaperumal Gopinathan
  */
-public interface RESTClientOperations {
+public interface CloudDataOperations {
 
 	/**
 	 * Stream related operations

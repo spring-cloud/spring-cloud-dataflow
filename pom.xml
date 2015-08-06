@@ -27,12 +27,13 @@
 		<spring-data.version>1.9.1.RELEASE</spring-data.version>
 	</properties>
 	<modules>
-		<module>spring-cloud-data-rest</module>
-		<module>spring-cloud-data-rest-client</module>
-		<module>spring-cloud-data-shell</module>
 		<module>spring-cloud-data-module-registry</module>
 		<module>spring-cloud-data-module-deployers</module>
 		<module>spring-cloud-data-core</module>
+		<module>spring-cloud-data-rest-resource</module>
+		<module>spring-cloud-data-rest</module>
+		<module>spring-cloud-data-rest-client</module>
+		<module>spring-cloud-data-shell</module>
 		<!-- module>docs</module -->
 	</modules>
 	<dependencyManagement>

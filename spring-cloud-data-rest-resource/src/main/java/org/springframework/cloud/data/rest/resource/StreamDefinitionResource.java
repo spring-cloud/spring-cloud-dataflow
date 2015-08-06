@@ -17,10 +17,8 @@
 package org.springframework.cloud.data.rest.resource;
 
 import org.springframework.cloud.data.core.StreamDefinition;
-import org.springframework.cloud.data.rest.controller.StreamController;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.ResourceSupport;
-import org.springframework.hateoas.mvc.ResourceAssemblerSupport;
 
 /**
  * A HATEOAS representation of a {@link StreamDefinition}.
@@ -30,6 +28,7 @@ import org.springframework.hateoas.mvc.ResourceAssemblerSupport;
  * Note: this implementation is not thread safe.
  *
  * @author Patrick Peralta
+ * @author Ilayaperumal Gopinathan
  */
 public class StreamDefinitionResource extends ResourceSupport {
 
@@ -92,23 +91,6 @@ public class StreamDefinitionResource extends ResourceSupport {
 	 */
 	public void setStatus(String status) {
 		this.status = status;
-	}
-
-	/**
-	 * {@link org.springframework.hateoas.ResourceAssembler} implementation
-	 * that converts {@link StreamDefinition}s to {@link StreamDefinitionResource}s.
-	 */
-	public static class Assembler
-			extends ResourceAssemblerSupport<StreamDefinition, StreamDefinitionResource> {
-
-		public Assembler() {
-			super(StreamController.class, StreamDefinitionResource.class);
-		}
-
-		@Override
-		public StreamDefinitionResource toResource(StreamDefinition entity) {
-			return new StreamDefinitionResource(entity);
-		}
 	}
 
 	public static class Page extends PagedResources<StreamDefinitionResource> {

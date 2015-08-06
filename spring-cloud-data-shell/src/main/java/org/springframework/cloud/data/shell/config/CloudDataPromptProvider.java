@@ -29,23 +29,23 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE)
-public class ShellPromptProvider implements PromptProvider {
+public class CloudDataPromptProvider implements PromptProvider {
 
 	@Autowired
-	private RESTClientShell shell;
+	private CloudDataShell shell;
 
 	@Override
 	public String getProviderName() {
-		return "cloud-data-prompt";
+		return "cloud-data";
 	}
 
 	@Override
 	public String getPrompt() {
-		if (shell.getRESTClientOperations() == null) {
-			return "cloud-data-not-available:>";
+		if (shell.getCloudDataOperations() == null) {
+			return "cloud-data-unknown:>";
 		}
 		else {
-			return "cloud-data-rest-client:>";
+			return "cloud-data:>";
 		}
 	}
 }

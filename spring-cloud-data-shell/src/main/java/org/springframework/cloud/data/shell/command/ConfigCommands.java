@@ -21,8 +21,8 @@ import java.net.URISyntaxException;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.data.rest.client.RESTClientTemplate;
-import org.springframework.cloud.data.shell.config.RESTClientShell;
+import org.springframework.cloud.data.rest.client.CloudDataTemplate;
+import org.springframework.cloud.data.shell.config.CloudDataShell;
 import org.springframework.shell.CommandLine;
 import org.springframework.shell.core.CommandMarker;
 import org.springframework.shell.core.annotation.CliCommand;
@@ -39,7 +39,7 @@ public class ConfigCommands implements CommandMarker, InitializingBean {
 	private CommandLine commandLine;
 
 	@Autowired
-	private RESTClientShell shell;
+	private CloudDataShell shell;
 
 	public static final String DEFAULT_SCHEME = "http";
 
@@ -56,11 +56,11 @@ public class ConfigCommands implements CommandMarker, InitializingBean {
 					unspecifiedDefaultValue = DEFAULT_TARGET) String targetUriString) {
 		try {
 			URI baseURI = URI.create(targetUriString);
-			this.shell.setRESTClientOperations(new RESTClientTemplate(baseURI));
+			this.shell.setCloudDataOperations(new CloudDataTemplate(baseURI));
 			return(String.format("Successfully targeted %s", targetUriString));
 		}
 		catch (Exception e) {
-			this.shell.setRESTClientOperations(null);
+			this.shell.setCloudDataOperations(null);
 			e.printStackTrace();
 			return(String.format("Unable to contact Cloud data main at '%s'.",
 							targetUriString));

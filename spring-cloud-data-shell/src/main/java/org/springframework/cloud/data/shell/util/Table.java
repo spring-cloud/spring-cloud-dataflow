@@ -62,18 +62,13 @@ public class Table {
 	}
 
 	public Table addRow(String... values) {
-
 		final TableRow row = new TableRow();
-
 		int column = 1;
-
 		for (String value : values) {
 			row.addValue(column, value);
 			column++;
 		}
-
 		rows.add(row);
-
 		return this;
 	}
 
@@ -106,13 +101,15 @@ public class Table {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
+		if (this == obj) {
 			return true;
-		if (obj == null)
+		}
+		if (obj == null) {
 			return false;
-		if (getClass() != obj.getClass())
+		}
+		if (getClass() != obj.getClass()) {
 			return false;
-
+		}
 		Table other = (Table) obj;
 		this.calculateColumnWidths();
 		other.calculateColumnWidths();
@@ -120,14 +117,16 @@ public class Table {
 			if (other.headers != null)
 				return false;
 		}
-		else if (!headers.equals(other.headers))
+		else if (!headers.equals(other.headers)) {
 			return false;
+		}
 		if (rows == null) {
 			if (other.rows != null)
 				return false;
 		}
-		else if (!rows.equals(other.rows))
+		else if (!rows.equals(other.rows)) {
 			return false;
+		}
 		return true;
 	}
 }

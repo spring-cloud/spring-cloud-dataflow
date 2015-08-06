@@ -21,17 +21,18 @@ import java.util.Map;
 
 import org.springframework.hateoas.ResourceSupport;
 import org.springframework.hateoas.UriTemplate;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
 
 /**
  *  @author Ilayaperumal Gopinathan
  */
-public class RESTClientTemplate implements RESTClientOperations {
+public class CloudDataTemplate implements CloudDataOperations {
 
 	/**
 	 * A template used for http interaction.
 	 */
-	protected RestTemplate restTemplate = new RestTemplate();
+	protected final RestTemplate restTemplate;
 
 	/**
 	 * Holds discovered URLs of the API.
@@ -44,12 +45,15 @@ public class RESTClientTemplate implements RESTClientOperations {
 	private final StreamTemplate streamTemplate;
 
 
-	public RESTClientTemplate(URI baseURI) {
+	public CloudDataTemplate(URI baseURI) {
+		this.restTemplate = new RestTemplate();
+		restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
 		ResourceSupport resourceSupport = restTemplate.getForObject(baseURI, ResourceSupport.class);
 
 		resources.put("streams/definitions", new UriTemplate(resourceSupport.getLink("streams").getHref() + "/definitions"));
 		resources.put("streams/deployments", new UriTemplate(resourceSupport.getLink("streams").getHref() + "/deployments"));
-		streamTemplate = new StreamTemplate(restTemplate, resources);
+
+		this.streamTemplate = new StreamTemplate(restTemplate, resources);
 	}
 
 	@Override

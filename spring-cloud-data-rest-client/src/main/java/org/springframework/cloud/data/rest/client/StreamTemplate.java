@@ -25,12 +25,19 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 /**
+ * Implementation for {@link StreamOperations}.
+ *
  * @author Ilayaperumal Gopinathan
  */
-public class StreamTemplate extends AbstractRestTemplate implements StreamOperations {
+public class StreamTemplate implements StreamOperations {
+
+	private final RestTemplate restTemplate;
+
+	private final Map<String, UriTemplate> resources;
 
 	StreamTemplate(RestTemplate restTemplate, Map<String, UriTemplate> resources) {
-		super(restTemplate, resources);
+		this.restTemplate = restTemplate;
+		this.resources = resources;
 	}
 
 	@Override
