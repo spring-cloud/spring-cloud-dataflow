@@ -27,7 +27,9 @@ import org.springframework.cloud.data.module.deployer.local.LocalModuleDeployer;
 import org.springframework.cloud.data.module.registry.ModuleRegistry;
 import org.springframework.cloud.data.module.registry.StubModuleRegistry;
 import org.springframework.cloud.data.rest.repository.InMemoryStreamDefinitionRepository;
+import org.springframework.cloud.data.rest.repository.InMemoryTaskDefinitionRepository;
 import org.springframework.cloud.data.rest.repository.StreamDefinitionRepository;
+import org.springframework.cloud.data.rest.repository.TaskDefinitionRepository;
 import org.springframework.cloud.stream.module.launcher.ModuleLauncher;
 import org.springframework.cloud.stream.module.launcher.ModuleLauncherConfiguration;
 import org.springframework.context.annotation.Bean;
@@ -60,6 +62,11 @@ public class AdminConfiguration {
 	@Bean
 	public StreamDefinitionRepository streamDefinitionRepository() {
 		return new InMemoryStreamDefinitionRepository();
+	}
+
+	@Bean
+	public TaskDefinitionRepository taskDefinitionRepository() {
+		return new InMemoryTaskDefinitionRepository();
 	}
 
 	@Bean
