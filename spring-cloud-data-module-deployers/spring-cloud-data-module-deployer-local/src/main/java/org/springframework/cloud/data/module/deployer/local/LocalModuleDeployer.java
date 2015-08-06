@@ -16,10 +16,14 @@
 
 package org.springframework.cloud.data.module.deployer.local;
 
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import org.springframework.cloud.data.core.ModuleDeploymentId;
 import org.springframework.cloud.data.core.ModuleDeploymentRequest;
 import org.springframework.cloud.data.module.ModuleStatus;
@@ -37,6 +41,8 @@ public class LocalModuleDeployer implements ModuleDeployer {
 
 	private final ModuleLauncher launcher;
 
+	private final Set<ModuleDeploymentId> deployedModules = new HashSet<>();
+
 	public LocalModuleDeployer(ModuleLauncher launcher) {
 		Assert.notNull(launcher, "Module launcher cannot be null");
 		this.launcher = launcher;
@@ -47,7 +53,10 @@ public class LocalModuleDeployer implements ModuleDeployer {
 		String module = request.getCoordinates().toString();
 		logger.info("deploying module: " + module);
 		launcher.launch(new String[] { module }, new String[0]);
-		return new ModuleDeploymentId(request.getDefinition().getGroup(), request.getDefinition().getLabel());
+		ModuleDeploymentId id = new ModuleDeploymentId(request.getDefinition().getGroup(),
+				request.getDefinition().getLabel());
+		this.deployedModules.add(id);
+		return id;
 	}
 
 	@Override
@@ -57,11 +66,17 @@ public class LocalModuleDeployer implements ModuleDeployer {
 
 	@Override
 	public ModuleStatus status(ModuleDeploymentId id) {
-		throw new UnsupportedOperationException("todo");
+		boolean deployed = this.deployedModules.contains(id);
+		LocalModuleInstanceStatus status = new LocalModuleInstanceStatus(id.toString(), deployed, null);
+		return ModuleStatus.of(id).with(status).build();
 	}
 
 	@Override
 	public Map<ModuleDeploymentId, ModuleStatus> status() {
-		throw new UnsupportedOperationException("todo");
+		Map<ModuleDeploymentId, ModuleStatus> statusMap = new HashMap<>();
+		for (ModuleDeploymentId id : this.deployedModules) {
+			statusMap.put(id, status(id));
+		}
+		return statusMap;
 	}
 }
