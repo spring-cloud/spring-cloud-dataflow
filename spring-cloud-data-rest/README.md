@@ -8,13 +8,13 @@ The `StreamController` will soon be replaced by a version that supports the stre
 
 ## Running the AdminApplication
 
-1. build from the spring-cloud-data root directory:
+1\. build from the spring-cloud-data root directory:
 
 ```
 mvn clean package
 ```
 
-2. start the app:
+2\. start the app:
 
 ```
 java -jar spring-cloud-data-rest/target/spring-cloud-data-rest-1.0.0.BUILD-SNAPSHOT.jar
@@ -22,19 +22,19 @@ java -jar spring-cloud-data-rest/target/spring-cloud-data-rest-1.0.0.BUILD-SNAPS
 
 ## Creating the `time | log` stream:
 
-1. create the 'ticktock' stream:
+1\. create the 'ticktock' stream:
 
 ```
 $ curl -X POST -d "name=ticktock&definition=time | log" http://localhost:9393/streams/definitions?deploy=false
 ```
 
-2. list all streams available in the repository:
+2\. list all streams available in the repository:
 
 ```
 $ curl http://localhost:9393/streams/definitions
 ```
 
-3. deploy the 'ticktock' stream:
+3\. deploy the 'ticktock' stream:
 
 ```
 $ curl -X POST http://localhost:9393/streams/deployments/ticktock

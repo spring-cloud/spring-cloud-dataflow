@@ -26,9 +26,9 @@ The instructions below describe the process of running both the Shell and the Ad
 
 ## Running Singlenode
 
-1. start Redis locally via `redis-server`
+1\. start Redis locally via `redis-server`
 
-2. clone this repository and build from the root directory:
+2\. clone this repository and build from the root directory:
 
 ```
 git clone https://github.com/spring-cloud/spring-cloud-data.git
@@ -36,13 +36,13 @@ cd spring-cloud-data
 mvn clean package
 ```
 
-3. launch the admin:
+3\. launch the admin:
 
 ```
 $ java -jar spring-cloud-data-rest/target/spring-cloud-data-rest-1.0.0.BUILD-SNAPSHOT.jar
 ```
 
-4. launch the shell:
+4\. launch the shell:
 
 ```
 $ java -jar spring-cloud-data-shell/target/spring-cloud-data-shell-1.0.0.BUILD-SNAPSHOT.jar
@@ -55,19 +55,19 @@ thus far, only the following commands are supported in the shell when running si
 
 ## Running on Lattice
 
-1. start Redis on Lattice (running as root):
+1\. start Redis on Lattice (running as root):
 
 ```
 ltc create redis redis -r
 ```
 
-2. launch the admin, with a mapping for port 9393:
+2\. launch the admin, with a mapping for port 9393:
 
 ```
 ltc create admin springcloud/data-admin -p 9393
 ```
 
-3. launching the shell is the same as above, but once running must be
+3\. launching the shell is the same as above, but once running must be
 configured to point to the admin that is running on Lattice:
 
 ```
