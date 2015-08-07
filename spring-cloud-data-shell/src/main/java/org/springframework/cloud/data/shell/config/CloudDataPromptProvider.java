@@ -23,7 +23,7 @@ import org.springframework.shell.plugin.PromptProvider;
 import org.springframework.stereotype.Component;
 
 /**
- * A provider that sets the shell prompt to cloud-data-rest-client:>
+ * A provider that sets the shell prompt to cloud-data shell.
  *
  * @author Ilayaperumal Gopinathan
  */
@@ -42,7 +42,7 @@ public class CloudDataPromptProvider implements PromptProvider {
 	@Override
 	public String getPrompt() {
 		if (shell.getCloudDataOperations() == null) {
-			return "cloud-data-unknown:>";
+			return "server-unknown:>";
 		}
 		else {
 			return "cloud-data:>";

@@ -253,7 +253,7 @@ public class StreamController {
 	 * {@link org.springframework.hateoas.ResourceAssembler} implementation
 	 * that converts {@link StreamDefinition}s to {@link StreamDefinitionResource}s.
 	 */
-	 class Assembler extends ResourceAssemblerSupport<StreamDefinition, StreamDefinitionResource> {
+	class Assembler extends ResourceAssemblerSupport<StreamDefinition, StreamDefinitionResource> {
 
 		public Assembler() {
 			super(StreamController.class, StreamDefinitionResource.class);
@@ -266,7 +266,7 @@ public class StreamController {
 
 		@Override
 		public StreamDefinitionResource instantiateResource(StreamDefinition entity) {
-			StreamDefinitionResource resource = new StreamDefinitionResource(entity);
+			StreamDefinitionResource resource = new StreamDefinitionResource(entity.getName(), entity.getDslText());
 			resource.setStatus(calculateStreamState(entity.getName()));
 			return resource;
 		}

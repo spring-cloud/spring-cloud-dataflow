@@ -30,7 +30,11 @@ import org.springframework.shell.core.annotation.CliOption;
 import org.springframework.stereotype.Component;
 
 /**
+ * Configuration commands for the Shell.
  *
+ * @author Gunnar Hillert
+ * @author Marius Bogoevici
+ * @author Ilayaperumal Gopinathan
  */
 @Component
 public class ConfigCommands implements CommandMarker, InitializingBean {

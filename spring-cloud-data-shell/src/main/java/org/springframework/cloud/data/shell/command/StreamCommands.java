@@ -74,7 +74,7 @@ public class StreamCommands implements CommandMarker {
 		for (StreamDefinitionResource stream : streams) {
 			table.newRow()
 					.addValue(1, stream.getName())
-					.addValue(2, stream.getDefinition())
+					.addValue(2, stream.getDslText())
 					.addValue(3, stream.getStatus());
 		}
 		return table;

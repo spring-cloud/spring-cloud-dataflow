@@ -33,9 +33,14 @@ import org.springframework.hateoas.ResourceSupport;
 public class StreamDefinitionResource extends ResourceSupport {
 
 	/**
-	 * Stream definition.
+	 * Stream name.
 	 */
-	private StreamDefinition definition;
+	private String name;
+
+	/**
+	 * Stream definition DSL text.
+	 */
+	private String dslText;
 
 	/**
 	 * Stream status (i.e. deployed, undeployed, etc).
@@ -51,10 +56,12 @@ public class StreamDefinitionResource extends ResourceSupport {
 	/**
 	 * Construct a {@code StreamDefinitionResource}.
 	 *
-	 * @param definition stream definition object
+	 * @param name stream name
+	 * @param dslText stream definition DSL text
 	 */
-	public StreamDefinitionResource(StreamDefinition definition) {
-		this.definition = definition;
+	public StreamDefinitionResource(String name, String dslText) {
+		this.name = name;
+		this.dslText = dslText;
 	}
 
 	/**
@@ -63,7 +70,7 @@ public class StreamDefinitionResource extends ResourceSupport {
 	 * @return stream name
 	 */
 	public String getName() {
-		return definition.getName();
+		return this.name;
 	}
 
 	/**
@@ -71,8 +78,8 @@ public class StreamDefinitionResource extends ResourceSupport {
 	 *
 	 * @return stream definition DSL
 	 */
-	public String getDefinition() {
-		return definition.getDslText();
+	public String getDslText() {
+		return this.dslText;
 	}
 
 	/**
