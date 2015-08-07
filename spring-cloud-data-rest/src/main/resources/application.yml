@@ -1,0 +1,4 @@
+server:
+  port: 9393
+management:
+  contextPath: /management
