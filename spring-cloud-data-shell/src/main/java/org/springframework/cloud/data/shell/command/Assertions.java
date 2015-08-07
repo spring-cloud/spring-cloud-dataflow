@@ -37,12 +37,12 @@ public class Assertions {
 	 * descriptive message otherwise.
 	 * 
 	 * @return the index of the "pair" that was not {@code null}
-	 * @throws IllegalArgumentException if more than one argument is non null
-	 * @throws IllegalStateException if the method is called with wrong values (e.g. non even number of args)
+	 * @throws IllegalStateException if more than one argument is non null
+	 * @throws IllegalArgumentException if the method is called with invalid values (e.g. non even number of args)
 	 */
 	public static int exactlyOneOf(Object... namesAndValues) {
 		int index = atMostOneOf(namesAndValues);
-		Assert.isTrue(index >= 0, "You must specify exactly one of " + collectNames(namesAndValues));
+		Assert.state(index >= 0, "You must specify exactly one of " + collectNames(namesAndValues));
 		return index;
 	}
 
@@ -52,24 +52,22 @@ public class Assertions {
 	 * message otherwise.
 	 * 
 	 * @return the index of the "pair" that was not {@code null}, or -1 if none was set
-	 * @throws IllegalArgumentException if more than one argument is non null
-	 * @throws IllegalStateException if the method is called with wrong values (e.g. non even number of args)
+	 * @throws IllegalStateException if more than one argument is non null
+	 * @throws IllegalArgumentException if the method is called with invalid values (e.g. non even number of args)
 	 */
 	public static int atMostOneOf(Object... namesAndValues) {
 		int index = -1;
-		Assert.state(namesAndValues.length % 2 == 0,
+		Assert.isTrue(namesAndValues.length % 2 == 0,
 				"Expected even number of arguments: " + Arrays.asList(namesAndValues));
 		for (int i = 0; i < namesAndValues.length / 2; i++) {
-			Assert.state(namesAndValues[i * 2] instanceof String, "Argument at position " + i
+			Assert.isTrue(namesAndValues[i * 2] instanceof String, "Argument at position " + i
 					+ " should be argument name");
 			if (namesAndValues[i * 2 + 1] != null && namesAndValues[i * 2 + 1] != Boolean.FALSE) {
 				if (index != -1) {
-					throw new IllegalArgumentException(String.format("You can't specify both '%s' and '%s'",
+					throw new IllegalStateException(String.format("You cannot specify both '%s' and '%s'",
 							namesAndValues[index * 2], namesAndValues[i * 2]));
 				}
-				else {
-					index = i;
-				}
+				index = i;
 			}
 		}
 		return index;
