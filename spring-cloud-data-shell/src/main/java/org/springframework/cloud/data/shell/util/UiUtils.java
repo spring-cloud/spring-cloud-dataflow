@@ -16,13 +16,12 @@
 
 package org.springframework.cloud.data.shell.util;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.commons.lang.StringUtils;
-
-import com.google.common.base.Splitter;
 
 /**
  * Contains utility methods for rendering data to a formatted console output. E.g. it provides helper methods for
@@ -155,7 +154,7 @@ public final class UiUtils {
 			for (TableHeader header : table.getHeaders().values()) {
 
 				if (header.getName().length() > header.getWidth()) {
-					Iterable<String> chunks = Splitter.fixedLength(header.getWidth()).split(header.getName());
+					Iterable<String> chunks = fixedLengthSplit(header.getName(), header.getWidth());
 					int length = headerline.length();
 					boolean first = true;
 					for (String chunk : chunks) {
@@ -189,7 +188,7 @@ public final class UiUtils {
 			for (Entry<Integer, TableHeader> entry : table.getHeaders().entrySet()) {
 				String value = row.getValue(entry.getKey());
 				if (null != value && (value.length() > entry.getValue().getWidth())) {
-					Iterable<String> chunks = Splitter.fixedLength(entry.getValue().getWidth()).split(value);
+					Iterable<String> chunks = fixedLengthSplit(value, entry.getValue().getWidth());
 					int length = rowLine.length();
 					boolean first = true;
 					for (String chunk : chunks) {
@@ -239,5 +238,16 @@ public final class UiUtils {
 		headerBorder.append("\n");
 
 		return headerBorder.toString();
+	}
+
+	private static Iterable<String> fixedLengthSplit(String s, int length) {
+		List<String> chunks = new ArrayList<>();
+		int lastIndex = 0;
+		while (lastIndex < s.length()) {
+			int nextIndex = Math.min(lastIndex + length, s.length());
+			chunks.add(s.substring(lastIndex, nextIndex));
+			lastIndex = nextIndex;
+		}
+		return chunks;
 	}
 }
