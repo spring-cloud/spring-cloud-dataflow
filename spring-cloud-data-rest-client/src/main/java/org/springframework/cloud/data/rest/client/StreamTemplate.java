@@ -22,6 +22,7 @@ import java.util.Map;
 import org.springframework.cloud.data.rest.resource.StreamDefinitionResource;
 import org.springframework.cloud.data.rest.util.DeploymentPropertiesUtils;
 import org.springframework.hateoas.UriTemplate;
+import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
@@ -34,6 +35,10 @@ import org.springframework.web.client.RestTemplate;
  */
 public class StreamTemplate implements StreamOperations {
 
+	private static final String DEFINITIONS_PATH = "streams/definitions";
+
+	private static final String DEPLOYMENTS_PATH = "streams/deployments";
+
 	private final RestTemplate restTemplate;
 
 	private final UriTemplate definitionsPath;
@@ -41,9 +46,12 @@ public class StreamTemplate implements StreamOperations {
 	private final UriTemplate deploymentsPath;
 
 	StreamTemplate(RestTemplate restTemplate, Map<String, UriTemplate> resources) {
+		Assert.notNull(resources, "URI Resources can't be null");
+		Assert.notNull(resources.get(DEFINITIONS_PATH), "Definitions path is required");
+		Assert.notNull(resources.get(DEPLOYMENTS_PATH), "Deployments path is required");
 		this.restTemplate = restTemplate;
-		this.definitionsPath = resources.get("streams/definitions");
-		this.deploymentsPath = resources.get("streams/deployments");
+		this.definitionsPath = resources.get(DEFINITIONS_PATH);
+		this.deploymentsPath = resources.get(DEPLOYMENTS_PATH);
 	}
 
 	@Override
