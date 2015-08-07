@@ -16,9 +16,11 @@
 
 package org.springframework.cloud.data.rest.client;
 
+import java.util.Collections;
 import java.util.Map;
 
 import org.springframework.cloud.data.rest.resource.StreamDefinitionResource;
+import org.springframework.cloud.data.rest.util.DeploymentPropertiesUtils;
 import org.springframework.hateoas.UriTemplate;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -28,16 +30,27 @@ import org.springframework.web.client.RestTemplate;
  * Implementation for {@link StreamOperations}.
  *
  * @author Ilayaperumal Gopinathan
+ * @author Mark Fisher
  */
 public class StreamTemplate implements StreamOperations {
 
 	private final RestTemplate restTemplate;
 
-	private final Map<String, UriTemplate> resources;
+	private final UriTemplate definitionsPath;
+
+	private final UriTemplate deploymentsPath;
 
 	StreamTemplate(RestTemplate restTemplate, Map<String, UriTemplate> resources) {
 		this.restTemplate = restTemplate;
-		this.resources = resources;
+		this.definitionsPath = resources.get("streams/definitions");
+		this.deploymentsPath = resources.get("streams/deployments");
+	}
+
+	@Override
+	public StreamDefinitionResource.Page list() {
+		String uriTemplate = definitionsPath.toString();
+		uriTemplate = uriTemplate + "?size=10000";
+		return restTemplate.getForObject(uriTemplate, StreamDefinitionResource.Page.class);
 	}
 
 	@Override
@@ -46,18 +59,38 @@ public class StreamTemplate implements StreamOperations {
 		values.add("name", name);
 		values.add("definition", definition);
 		values.add("deploy", Boolean.toString(deploy));
-
-		StreamDefinitionResource stream = restTemplate.postForObject(resources.get("streams/definitions").expand(),
-				values,
-				StreamDefinitionResource.class);
+		StreamDefinitionResource stream = restTemplate.postForObject(
+				definitionsPath.expand(), values, StreamDefinitionResource.class);
 		return stream;
 	}
 
 	@Override
-	public StreamDefinitionResource.Page list() {
-		String uriTemplate = resources.get("streams/definitions").toString();
-		uriTemplate = uriTemplate + "?size=10000";
-		return restTemplate.getForObject(uriTemplate, StreamDefinitionResource.Page.class);
+	public void deploy(String name, Map<String, String> properties) {
+		String uriTemplate = deploymentsPath.toString() + "/{name}";
+		MultiValueMap<String, Object> values = new LinkedMultiValueMap<String, Object>();
+		values.add("properties", DeploymentPropertiesUtils.format(properties));
+		restTemplate.postForObject(uriTemplate, values, Object.class, name);
 	}
 
+	@Override
+	public void undeploy(String name) {
+		String uriTemplate = deploymentsPath.toString() + "/{name}";
+		restTemplate.delete(uriTemplate, name);
+	}
+
+	@Override
+	public void undeployAll() {
+		restTemplate.delete(deploymentsPath.expand());
+	}
+
+	@Override
+	public void destroy(String name) {
+		String uriTemplate = definitionsPath.toString() + "/{name}";
+		restTemplate.delete(uriTemplate, Collections.singletonMap("name", name));
+	}
+
+	@Override
+	public void destroyAll() {
+		restTemplate.delete(definitionsPath.expand());
+	}
 }

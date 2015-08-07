@@ -13,13 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.data.shell.config;
 
 import org.springframework.cloud.data.rest.client.CloudDataOperations;
 import org.springframework.stereotype.Component;
 
 /**
- * REST client component that holds all the operations communicating to spring cloud data REST server.
+ * REST client component that holds all the available operations for
+ * communicating with the spring cloud data REST server.
  *
  * @author Ilayaperumal Gopinathan
  */
@@ -35,5 +37,4 @@ public class CloudDataShell {
 	public void setCloudDataOperations(CloudDataOperations cloudDataOperations) {
 		this.CloudDataOperations = cloudDataOperations;
 	}
-
 }

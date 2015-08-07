@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.data.rest.client;
 
 import java.net.URI;
@@ -26,6 +27,7 @@ import org.springframework.web.client.RestTemplate;
 
 /**
  *  @author Ilayaperumal Gopinathan
+ *  @author Mark Fisher
  */
 public class CloudDataTemplate implements CloudDataOperations {
 
@@ -48,11 +50,10 @@ public class CloudDataTemplate implements CloudDataOperations {
 	public CloudDataTemplate(URI baseURI) {
 		this.restTemplate = new RestTemplate();
 		restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
+		restTemplate.setErrorHandler(new VndErrorResponseErrorHandler(restTemplate.getMessageConverters()));
 		ResourceSupport resourceSupport = restTemplate.getForObject(baseURI, ResourceSupport.class);
-
 		resources.put("streams/definitions", new UriTemplate(resourceSupport.getLink("streams").getHref() + "/definitions"));
 		resources.put("streams/deployments", new UriTemplate(resourceSupport.getLink("streams").getHref() + "/deployments"));
-
 		this.streamTemplate = new StreamTemplate(restTemplate, resources);
 	}
 
