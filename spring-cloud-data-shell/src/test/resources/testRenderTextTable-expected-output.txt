@@ -1,0 +1,5 @@
+  Tap Name  Stream Name  Tap Definition
+  --------  -----------  ----------------
+  tap1      ticktock     tap@ticktock|log
+  tap2      ticktock     tap@ticktock|log
+  tap3      ticktock     tap@ticktock|log

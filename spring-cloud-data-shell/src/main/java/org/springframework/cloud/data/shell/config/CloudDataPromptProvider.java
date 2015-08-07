@@ -23,7 +23,7 @@ import org.springframework.shell.plugin.PromptProvider;
 import org.springframework.stereotype.Component;
 
 /**
- * A provider that sets the shell prompt to cloud-data shell.
+ * A provider that sets the shell prompt to 'cloud-data' if the server is available, 'server-unknown' otherwise.
  *
  * @author Ilayaperumal Gopinathan
  */

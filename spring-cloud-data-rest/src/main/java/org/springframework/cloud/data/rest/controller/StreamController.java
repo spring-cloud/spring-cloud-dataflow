@@ -265,9 +265,9 @@ public class StreamController {
 		}
 
 		@Override
-		public StreamDefinitionResource instantiateResource(StreamDefinition entity) {
-			StreamDefinitionResource resource = new StreamDefinitionResource(entity.getName(), entity.getDslText());
-			resource.setStatus(calculateStreamState(entity.getName()));
+		public StreamDefinitionResource instantiateResource(StreamDefinition stream) {
+			StreamDefinitionResource resource = new StreamDefinitionResource(stream.getName(), stream.getDslText());
+			resource.setStatus(calculateStreamState(stream.getName()));
 			return resource;
 		}
 	}

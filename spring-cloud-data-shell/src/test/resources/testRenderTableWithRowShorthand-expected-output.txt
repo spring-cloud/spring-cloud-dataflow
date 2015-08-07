@@ -1,0 +1,7 @@
+  Property              Value
+  --------------------  -----------
+  Job Execution ID      1
+  Job Name              My Job Name
+  Start Time            12:30
+  Step Execution Count  12
+  Status                COMPLETED

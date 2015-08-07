@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.data.shell.util;
+package org.springframework.cloud.data.shell.display;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,11 +28,11 @@ import org.apache.commons.lang.StringUtils;
  * rendering ASCII-based data tables.
  * 
  * @author Gunnar Hillert
+ * @author Stephan Oudmaijer
  * @author Thomas Risberg
  * @since 1.0
- * 
  */
-public final class UiUtils {
+public final class DisplayUtils {
 
 	public static final String HORIZONTAL_LINE = "-------------------------------------------------------------------------------\n";
 
@@ -50,23 +50,20 @@ public final class UiUtils {
 
 	/**
 	 * Prevent instantiation.
-	 * 
 	 */
-	private UiUtils() {
+	private DisplayUtils() {
 		throw new AssertionError();
 	}
 
 	/**
 	 * Renders a textual representation of the list of provided Map data
-	 * 
-	 * @param columns List of Maps
+	 *
+	 * @param data List of Maps
+	 * @param columns list of column names
 	 * @return The rendered table representation as String
-	 * 
 	 */
 	public static String renderMapDataAsTable(List<Map<String, Object>> data, List<String> columns) {
-
 		Table table = new Table();
-
 		int col = 0;
 		for (String colName : columns) {
 			col++;
@@ -75,48 +72,34 @@ public final class UiUtils {
 				break;
 			}
 		}
-
 		for (Map<String, Object> dataRow : data) {
-
 			TableRow tableRow = new TableRow();
-
 			for (int i = 0; i < col; i++) {
 				String value = dataRow.get(columns.get(i)).toString();
 				table.getHeaders().get(i + 1).updateWidth(value.length());
 				tableRow.addValue(i + 1, value);
 			}
-
 			table.getRows().add(tableRow);
 		}
-
 		return renderTextTable(table);
 	}
 
 	public static String renderParameterInfoDataAsTable(Map<String, String> parameters, boolean withHeader,
 			int lastColumnMaxWidth) {
 		final Table table = new Table();
-
 		table.getHeaders().put(COLUMN_1, new TableHeader("Parameter"));
-
 		final TableHeader tableHeader2 = new TableHeader("Value (Configured or Default)");
 		tableHeader2.setMaxWidth(lastColumnMaxWidth);
 		table.getHeaders().put(COLUMN_2, tableHeader2);
-
 		for (Entry<String, String> entry : parameters.entrySet()) {
-
 			final TableRow tableRow = new TableRow();
-
 			table.getHeaders().get(COLUMN_1).updateWidth(entry.getKey().length());
 			tableRow.addValue(COLUMN_1, entry.getKey());
-
 			int width = entry.getValue() != null ? entry.getValue().length() : 0;
-
 			table.getHeaders().get(COLUMN_2).updateWidth(width);
 			tableRow.addValue(COLUMN_2, entry.getValue());
-
 			table.getRows().add(tableRow);
 		}
-
 		return renderTextTable(table, withHeader);
 	}
 
@@ -142,17 +125,13 @@ public final class UiUtils {
 	 * @return The rendered table representation as String
 	 */
 	public static String renderTextTable(Table table, boolean withHeader) {
-
 		table.calculateColumnWidths();
-
 		final String padding = "  ";
 		final String headerBorder = getHeaderBorder(table.getHeaders());
 		final StringBuilder textTable = new StringBuilder();
-
 		if (withHeader) {
 			final StringBuilder headerline = new StringBuilder();
 			for (TableHeader header : table.getHeaders().values()) {
-
 				if (header.getName().length() > header.getWidth()) {
 					Iterable<String> chunks = fixedLengthSplit(header.getName(), header.getWidth());
 					int length = headerline.length();
@@ -160,11 +139,11 @@ public final class UiUtils {
 					for (String chunk : chunks) {
 						final String lineToAppend;
 						if (first) {
-							lineToAppend = padding + CommonUtils.padRight(chunk, header.getWidth());
+							lineToAppend = padding + padRight(chunk, header.getWidth());
 						}
 						else {
 							lineToAppend = StringUtils.leftPad("", length) + padding
-									+ CommonUtils.padRight(chunk, header.getWidth());
+									+ padRight(chunk, header.getWidth());
 						}
 						first = false;
 						headerline.append(lineToAppend);
@@ -173,16 +152,14 @@ public final class UiUtils {
 					headerline.deleteCharAt(headerline.lastIndexOf("\n"));
 				}
 				else {
-					String lineToAppend = padding + CommonUtils.padRight(header.getName(), header.getWidth());
+					String lineToAppend = padding + padRight(header.getName(), header.getWidth());
 					headerline.append(lineToAppend);
 				}
 			}
 			textTable.append(org.springframework.util.StringUtils.trimTrailingWhitespace(headerline.toString()));
 			textTable.append("\n");
 		}
-
 		textTable.append(headerBorder);
-
 		for (TableRow row : table.getRows()) {
 			StringBuilder rowLine = new StringBuilder();
 			for (Entry<Integer, TableHeader> entry : table.getHeaders().entrySet()) {
@@ -194,11 +171,11 @@ public final class UiUtils {
 					for (String chunk : chunks) {
 						final String lineToAppend;
 						if (first) {
-							lineToAppend = padding + CommonUtils.padRight(chunk, entry.getValue().getWidth());
+							lineToAppend = padding + padRight(chunk, entry.getValue().getWidth());
 						}
 						else {
 							lineToAppend = StringUtils.leftPad("", length) + padding
-									+ CommonUtils.padRight(chunk, entry.getValue().getWidth());
+									+ padRight(chunk, entry.getValue().getWidth());
 						}
 						first = false;
 						rowLine.append(lineToAppend);
@@ -207,18 +184,16 @@ public final class UiUtils {
 					rowLine.deleteCharAt(rowLine.lastIndexOf("\n"));
 				}
 				else {
-					String lineToAppend = padding + CommonUtils.padRight(value, entry.getValue().getWidth());
+					String lineToAppend = padding + padRight(value, entry.getValue().getWidth());
 					rowLine.append(lineToAppend);
 				}
 			}
 			textTable.append(org.springframework.util.StringUtils.trimTrailingWhitespace(rowLine.toString()));
 			textTable.append("\n");
 		}
-
 		if (!withHeader) {
 			textTable.append(headerBorder);
 		}
-
 		return textTable.toString();
 	}
 
@@ -229,25 +204,65 @@ public final class UiUtils {
 	 * @return Returns the rendered header border as String
 	 */
 	public static String getHeaderBorder(Map<Integer, TableHeader> headers) {
-
 		final StringBuilder headerBorder = new StringBuilder();
-
 		for (TableHeader header : headers.values()) {
-			headerBorder.append(CommonUtils.padRight("  ", header.getWidth() + 2, '-'));
+			headerBorder.append(padRight("  ", header.getWidth() + 2, '-'));
 		}
 		headerBorder.append("\n");
-
 		return headerBorder.toString();
 	}
 
-	private static Iterable<String> fixedLengthSplit(String s, int length) {
+	/**
+	 * Split the input String into chunks of the provided size. If the input String's length
+	 * is not evenly divisible by the provided size, the final chunk will be the length of
+	 * the remainder.
+	 *
+	 * @param inputString the String to split
+	 * @param size the size of each chunk
+	 * @return Iterable of Strings split according to the size parameter
+	 */
+	static Iterable<String> fixedLengthSplit(String inputString, int size) {
 		List<String> chunks = new ArrayList<>();
 		int lastIndex = 0;
-		while (lastIndex < s.length()) {
-			int nextIndex = Math.min(lastIndex + length, s.length());
-			chunks.add(s.substring(lastIndex, nextIndex));
+		while (lastIndex < inputString.length()) {
+			int nextIndex = Math.min(lastIndex + size, inputString.length());
+			chunks.add(inputString.substring(lastIndex, nextIndex));
 			lastIndex = nextIndex;
 		}
 		return chunks;
+	}
+
+	/**
+	 * Right-pad a String with a configurable padding character.
+	 *
+	 * @param inputString The String to pad. A {@code null} String will be treated like an empty String.
+	 * @param size Pad String by the number of characters.
+	 * @param paddingChar The character to pad the String with.
+	 * @return The padded String. If the provided String is null, an empty String is returned.
+	 */
+	static String padRight(String inputString, int size, char paddingChar) {
+		final String stringToPad;
+		if (inputString == null) {
+			stringToPad = "";
+		}
+		else {
+			stringToPad = inputString;
+		}
+		StringBuilder padded = new StringBuilder(stringToPad);
+		while (padded.length() < size) {
+			padded.append(paddingChar);
+		}
+		return padded.toString();
+	}
+
+	/**
+	 * Right-pad the provided String with empty spaces.
+	 *
+	 * @param string The String to pad
+	 * @param size Pad String by the number of characters.
+	 * @return The padded String. If the provided String is null, an empty String is returned.
+	 */
+	static String padRight(String string, int size) {
+		return padRight(string, size, ' ');
 	}
 }

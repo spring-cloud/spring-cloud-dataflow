@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.data.shell.util;
+package org.springframework.cloud.data.shell.command;
 
 import java.util.Arrays;
 

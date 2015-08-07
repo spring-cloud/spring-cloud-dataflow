@@ -14,80 +14,50 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.data.shell.util;
+package org.springframework.cloud.data.shell.display;
 
 /**
  * Defines table column headers used by {@link Table}.
- * 
- * @see UiUtils
- * 
+ *
+ * @see DisplayUtils
+ *
  * @author Gunnar Hillert
  * @since 1.0
- * 
  */
 public class TableHeader {
 
-	private int maxWidth = -1;
+	private String name;
 
 	private int width = 0;
 
-	private String name;
+	private int maxWidth = -1;
 
 	/**
-	 * Constructor that initializes the table header with the provided header name and the with of the table header.
-	 * 
+	 * Constructor that initializes the table header with the provided header name and the width of the table header.
+	 *
 	 * @param name
 	 * @param width
 	 */
 	public TableHeader(String name, int width) {
-
 		super();
 		this.width = width;
 		this.name = name;
-
 	}
 
 	/**
-	 * Constructor that initializes the table header with the provided header name. The with of the table header is
+	 * Constructor that initializes the table header with the provided header name. The width of the table header is
 	 * calculated and assigned based on the provided header name.
-	 * 
+	 *
 	 * @param name
 	 */
 	public TableHeader(String name) {
 		super();
 		this.name = name;
-
 		if (name == null) {
 			this.width = 0;
 		}
 		else {
 			this.width = name.length();
-		}
-
-	}
-
-	public int getWidth() {
-		return width;
-	}
-
-	public void setWidth(int width) {
-		this.width = width;
-	}
-
-	/**
-	 * Updated the width for this particular column, but only if the value of the passed-in width is higher than the
-	 * value of the pre-existing width.
-	 * 
-	 * @param width
-	 */
-	public void updateWidth(int width) {
-		if (this.width < width) {
-			if (this.maxWidth > 0 && this.maxWidth < width) {
-				this.width = this.maxWidth;
-			}
-			else {
-				this.width = width;
-			}
 		}
 	}
 
@@ -99,17 +69,42 @@ public class TableHeader {
 		this.name = name;
 	}
 
+	public int getWidth() {
+		return width;
+	}
+
+	public void setWidth(int width) {
+		this.width = width;
+	}
+
 	public int getMaxWidth() {
 		return maxWidth;
 	}
 
 	/**
 	 * Defaults to -1 indicating to ignore the property.
-	 * 
+	 *
 	 * @param maxWidth If negative or zero this property will be ignored.
 	 */
 	public void setMaxWidth(int maxWidth) {
 		this.maxWidth = maxWidth;
+	}
+
+	/**
+	 * Updated the width for this particular column, but only if the value of the passed-in width is higher than the
+	 * value of the pre-existing width.
+	 *
+	 * @param width
+	 */
+	public void updateWidth(int width) {
+		if (this.width < width) {
+			if (this.maxWidth > 0 && this.maxWidth < width) {
+				this.width = this.maxWidth;
+			}
+			else {
+				this.width = width;
+			}
+		}
 	}
 
 	@Override
@@ -124,25 +119,30 @@ public class TableHeader {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
+		if (this == obj) {
 			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		TableHeader other = (TableHeader) obj;
-		if (maxWidth != other.maxWidth)
-			return false;
-		if (name == null) {
-			if (other.name != null)
-				return false;
 		}
-		else if (!name.equals(other.name))
+		if (obj == null) {
 			return false;
-		if (width != other.width)
+		}
+		if (getClass() != obj.getClass()) {
 			return false;
+		}
+		TableHeader other = (TableHeader) obj;
+		if (maxWidth != other.maxWidth) {
+			return false;
+		}
+		if (name == null) {
+			if (other.name != null) {
+				return false;
+			}
+		}
+		else if (!name.equals(other.name)) {
+			return false;
+		}
+		if (width != other.width) {
+			return false;
+		}
 		return true;
 	}
-
-
 }

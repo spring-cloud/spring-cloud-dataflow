@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.data.shell.util;
+package org.springframework.cloud.data.shell.display;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -23,13 +23,12 @@ import org.springframework.util.Assert;
 
 /**
  * Holds the table rows used by {@link Table}.
- * 
- * @see UiUtils
- * 
+ *
+ * @see DisplayUtils
+ *
  * @author Gunnar Hillert
  * @author Ilayaperumal Gopinathan
  * @since 1.0
- * 
  */
 public class TableRow {
 
@@ -43,10 +42,9 @@ public class TableRow {
 
 	/**
 	 * Return a value from this row.
-	 * 
+	 *
 	 * @param key Column for which to return the value for
 	 * @return Value of the specified column within this row
-	 * 
 	 */
 	public String getValue(Integer key) {
 		return data.get(key);
@@ -54,7 +52,7 @@ public class TableRow {
 
 	/**
 	 * Add a value to the to the specified column within this row.
-	 * 
+	 *
 	 * @param column
 	 * @param value
 	 */
@@ -72,27 +70,30 @@ public class TableRow {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result
-				+ ((data == null) ? 0 : data.hashCode());
+		result = prime * result + ((data == null) ? 0 : data.hashCode());
 		return result;
 	}
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
+		if (this == obj) {
 			return true;
-		if (obj == null)
+		}
+		if (obj == null) {
 			return false;
-		if (getClass() != obj.getClass())
+		}
+		if (getClass() != obj.getClass()) {
 			return false;
+		}
 		TableRow other = (TableRow) obj;
 		if (data == null) {
-			if (other.data != null)
+			if (other.data != null) {
 				return false;
+			}
 		}
-		else if (!data.equals(other.data))
+		else if (!data.equals(other.data)) {
 			return false;
+		}
 		return true;
 	}
-
 }

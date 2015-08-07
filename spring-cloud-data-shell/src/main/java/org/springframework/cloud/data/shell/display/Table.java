@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.data.shell.util;
+package org.springframework.cloud.data.shell.display;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,11 +25,10 @@ import java.util.TreeMap;
  * Provide a basic concept of a table structure containing a map of column headers and a collection of rows. Used to
  * render text-based tables (console output).
  *
- * @see UiUtils
- * 
+ * @see DisplayUtils
+ *
  * @author Gunnar Hillert
  * @since 1.0
- * 
  */
 public class Table {
 
@@ -52,7 +51,7 @@ public class Table {
 
 	/**
 	 * Add a new empty row to the table.
-	 * 
+	 *
 	 * @return the newly created row, which can be then be populated
 	 */
 	public TableRow newRow() {
@@ -85,7 +84,7 @@ public class Table {
 
 	@Override
 	public String toString() {
-		return UiUtils.renderTextTable(this);
+		return DisplayUtils.renderTextTable(this);
 	}
 
 	@Override
@@ -97,7 +96,6 @@ public class Table {
 		result = prime * result + ((rows == null) ? 0 : rows.hashCode());
 		return result;
 	}
-
 
 	@Override
 	public boolean equals(Object obj) {
@@ -114,15 +112,17 @@ public class Table {
 		this.calculateColumnWidths();
 		other.calculateColumnWidths();
 		if (headers == null) {
-			if (other.headers != null)
+			if (other.headers != null) {
 				return false;
+			}
 		}
 		else if (!headers.equals(other.headers)) {
 			return false;
 		}
 		if (rows == null) {
-			if (other.rows != null)
+			if (other.rows != null) {
 				return false;
+			}
 		}
 		else if (!rows.equals(other.rows)) {
 			return false;
