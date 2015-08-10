@@ -27,17 +27,10 @@ import java.util.Map;
  */
 public class StreamDslParser {
 
-	private String expressionString;
-
-	private List<Token> tokenStream;
-
-	private int tokenStreamLength;
-
-	private int tokenStreamPointer; // Current location in the token stream when
-
-	// processing tokens
-
-	private int lastGoodPoint;
+	/**
+	 * Tokens resulting from stream definition parsing.
+	 */
+	private Tokens tokens;
 
 	/**
 	 * Parse a stream definition without supplying the stream name up front.
@@ -57,11 +50,7 @@ public class StreamDslParser {
 	 * @throws ParseException
 	 */
 	public StreamNode parse(String name, String stream) {
-		this.expressionString = stream;
-		Tokenizer tokenizer = new Tokenizer(expressionString);
-		tokenStream = tokenizer.getTokens();
-		tokenStreamLength = tokenStream.size();
-		tokenStreamPointer = 0;
+		tokens = new Tokens(stream);
 		StreamNode ast = eatStream();
 
 		// Check the stream name, however it was specified
@@ -92,12 +81,10 @@ public class StreamDslParser {
 					DSLMessage.STREAM_NAME_MATCHING_MODULE_NAME,
 					name);
 		}
-		if (moreTokens()) {
-			throw new ParseException(this.expressionString, peekToken().startPos, DSLMessage.MORE_INPUT,
-					toString(nextToken()));
+		if (tokens.more()) {
+			tokens.raiseException(tokens.peek().startPos, DSLMessage.MORE_INPUT,
+					toString(tokens.next()));
 		}
-
-		//ast.resolve(this, this.expressionString); // todo
 
 		return ast;
 	}
@@ -105,13 +92,14 @@ public class StreamDslParser {
 	// (name =)
 	private String maybeEatStreamName() {
 		String streamName = null;
-		if (lookAhead(1, TokenKind.EQUALS)) {
-			if (peekToken(TokenKind.IDENTIFIER)) {
-				streamName = eatToken(TokenKind.IDENTIFIER).data;
-				nextToken(); // skip '='
+		if (tokens.lookAhead(1, TokenKind.EQUALS)) {
+			if (tokens.peek(TokenKind.IDENTIFIER)) {
+				streamName = tokens.eat(TokenKind.IDENTIFIER).data;
+				tokens.next(); // skip '='
 			}
 			else {
-				raiseException(peekToken().startPos, DSLMessage.ILLEGAL_STREAM_NAME, toString(peekToken()));
+				tokens.raiseException(tokens.peek().startPos, DSLMessage.ILLEGAL_STREAM_NAME,
+						toString(tokens.peek()));
 			}
 		}
 		return streamName;
@@ -133,9 +121,10 @@ public class StreamDslParser {
 		List<ModuleNode> moduleNodes = null;
 		if (bridge) {
 			// Create a bridge module to hang the source/sink channels off
-			tokenStreamPointer--; // Rewind so we can nicely eat the sink channel
+			tokens.decrementPosition(); // Rewind so we can nicely eat the sink channel
 			moduleNodes = new ArrayList<ModuleNode>();
-			moduleNodes.add(new ModuleNode(null, "bridge", peekToken().startPos, peekToken().endPos, null));
+			moduleNodes.add(new ModuleNode(null, "bridge", tokens.peek().startPos,
+					tokens.peek().endPos, null));
 		}
 		else {
 			moduleNodes = eatModuleList();
@@ -143,23 +132,24 @@ public class StreamDslParser {
 		SinkChannelNode sinkChannelNode = maybeEatSinkChannel();
 
 		// Further data is an error
-		if (moreTokens()) {
-			Token t = peekToken();
-			raiseException(t.startPos, DSLMessage.UNEXPECTED_DATA_AFTER_STREAMDEF, toString(t));
+		if (tokens.more()) {
+			Token t = tokens.peek();
+			tokens.raiseException(t.startPos, DSLMessage.UNEXPECTED_DATA_AFTER_STREAMDEF, toString(t));
 		}
 
-		StreamNode streamNode = new StreamNode(expressionString, streamName, moduleNodes, sourceChannelNode,
-				sinkChannelNode);
-		return streamNode;
+		return new StreamNode(tokens.getExpression(), streamName, moduleNodes,
+				sourceChannelNode, sinkChannelNode);
 	}
 
 	private boolean noMorePipes() {
-		return noMorePipes(tokenStreamPointer);
+		return noMorePipes(tokens.position());
 	}
 
-	private boolean noMorePipes(int tp) {
-		while (tp < tokenStreamLength) {
-			if (tokenStream.get(tp++).getKind() == TokenKind.PIPE) {
+	private boolean noMorePipes(int position) {
+		List<Token> tokenList = tokens.getTokenStream();
+		int tokenStreamLength = tokenList.size();
+		while (position < tokenStreamLength) {
+			if (tokenList.get(position++).getKind() == TokenKind.PIPE) {
 				return false;
 			}
 		}
@@ -167,7 +157,7 @@ public class StreamDslParser {
 	}
 
 	private boolean looksLikeChannel() {
-		return looksLikeChannel(tokenStreamPointer);
+		return looksLikeChannel(tokens.position());
 	}
 
 	enum ChannelPrefix {
@@ -175,12 +165,15 @@ public class StreamDslParser {
 	}
 
 	// return true if the specified tokenpointer appears to be pointing at a channel
-	private boolean looksLikeChannel(int tp) {
-		if (moreTokens() && tokenStream.get(tp).getKind() == TokenKind.IDENTIFIER) {
-			String prefix = tokenStream.get(tp).data;
+	private boolean looksLikeChannel(int position) {
+		List<Token> tokenList = tokens.getTokenStream();
+		int size = tokenList.size();
+
+		if (tokens.more() && tokenList.get(position).getKind() == TokenKind.IDENTIFIER) {
+			String prefix = tokenList.get(position).data;
 			if (isLegalChannelPrefix(prefix)) {
-				if (tokenStreamPointer + 1 < tokenStream.size() && tokenStream.get(tp + 1).getKind() == TokenKind.COLON) {
-					// if (isNextTokenAdjacent(tp) && isNextTokenAdjacent(tp + 1)) {
+				if (tokens.position() + 1 < size && tokenList.get(position + 1).getKind() == TokenKind.COLON) {
+					// if (isNextAdjacent(tp) && isNextAdjacent(tp + 1)) {
 					return true;
 					// }
 				}
@@ -194,8 +187,9 @@ public class StreamDslParser {
 	private SourceChannelNode maybeEatSourceChannel() {
 		boolean gtBeforePipe = false;
 		// Seek for a GT(>) before a PIPE(|)
-		for (int tp = tokenStreamPointer; tp < tokenStreamLength; tp++) {
-			Token t = tokenStream.get(tp);
+		List<Token> tokenList = tokens.getTokenStream();
+		for (int i = tokens.position(); i < tokenList.size(); i++) {
+			Token t = tokenList.get(i);
 			if (t.getKind() == TokenKind.GT) {
 				gtBeforePipe = true;
 				break;
@@ -204,20 +198,20 @@ public class StreamDslParser {
 				break;
 			}
 		}
-		if (!gtBeforePipe || !looksLikeChannel(tokenStreamPointer)) {
+		if (!gtBeforePipe || !looksLikeChannel(tokens.position())) {
 			return null;
 		}
 
 		ChannelNode channel = eatChannelReference(true);
-		Token gt = eatToken(TokenKind.GT);
+		Token gt = tokens.eat(TokenKind.GT);
 		return new SourceChannelNode(channel, gt.endPos);
 	}
 
 	// '>' identifier ':' identifier
 	private SinkChannelNode maybeEatSinkChannel() {
 		SinkChannelNode sinkChannelNode = null;
-		if (peekToken(TokenKind.GT)) {
-			Token gt = eatToken(TokenKind.GT);
+		if (tokens.peek(TokenKind.GT)) {
+			Token gt = tokens.eat(TokenKind.GT);
 			ChannelNode channelNode = eatChannelReference(false);
 			sinkChannelNode = new SinkChannelNode(channelNode, gt.startPos);
 		}
@@ -238,55 +232,55 @@ public class StreamDslParser {
 	// If the first identifier is a tap (and tapping is allowed) then
 	// the dereferencing is allowed
 	private ChannelNode eatChannelReference(boolean tapAllowed) {
-		Token firstToken = nextToken();
+		Token firstToken = tokens.next();
 		if (!firstToken.isIdentifier() || !isLegalChannelPrefix(firstToken.data)) {
-			raiseException(firstToken.startPos,
+			tokens.raiseException(firstToken.startPos,
 					tapAllowed ? DSLMessage.EXPECTED_CHANNEL_PREFIX_QUEUE_TOPIC_TAP
 							: DSLMessage.EXPECTED_CHANNEL_PREFIX_QUEUE_TOPIC,
 					toString(firstToken));
 		}
 		List<Token> channelScopeComponents = new ArrayList<Token>();
 		channelScopeComponents.add(firstToken);
-		while (peekToken(TokenKind.COLON)) {
-			if (!isNextTokenAdjacent()) {
-				raiseException(peekToken().startPos, DSLMessage.NO_WHITESPACE_IN_CHANNEL_DEFINITION);
+		while (tokens.peek(TokenKind.COLON)) {
+			if (!tokens.isNextAdjacent()) {
+				tokens.raiseException(tokens.peek().startPos, DSLMessage.NO_WHITESPACE_IN_CHANNEL_DEFINITION);
 			}
-			nextToken(); // skip colon
-			if (!isNextTokenAdjacent()) {
-				raiseException(peekToken().startPos, DSLMessage.NO_WHITESPACE_IN_CHANNEL_DEFINITION);
+			tokens.next(); // skip colon
+			if (!tokens.isNextAdjacent()) {
+				tokens.raiseException(tokens.peek().startPos, DSLMessage.NO_WHITESPACE_IN_CHANNEL_DEFINITION);
 			}
-			channelScopeComponents.add(eatToken(TokenKind.IDENTIFIER));
+			channelScopeComponents.add(tokens.eat(TokenKind.IDENTIFIER));
 		}
 		List<Token> channelReferenceComponents = new ArrayList<Token>();
 		if (tapAllowed && firstToken.data.equalsIgnoreCase("tap")) {
-			if (peekToken(TokenKind.DOT)) {
+			if (tokens.peek(TokenKind.DOT)) {
 				if (channelScopeComponents.size() < 3) {
-					raiseException(firstToken.startPos, DSLMessage.TAP_NEEDS_THREE_COMPONENTS);
+					tokens.raiseException(firstToken.startPos, DSLMessage.TAP_NEEDS_THREE_COMPONENTS);
 				}
 				String tokenData = channelScopeComponents.get(1).data;
 				// for Stream, tap:stream:XXX - the channel name is always indexed
 				// for Job, tap:job:XXX - the channel name can have "." in case of job notification channels
 				if (!tokenData.equalsIgnoreCase("stream") && !tokenData.equalsIgnoreCase("job")) {
-					raiseException(peekToken().startPos, DSLMessage.ONLY_A_TAP_ON_A_STREAM_OR_JOB_CAN_BE_INDEXED);
+					tokens.raiseException(tokens.peek().startPos, DSLMessage.ONLY_A_TAP_ON_A_STREAM_OR_JOB_CAN_BE_INDEXED);
 				}
 			}
-			while (peekToken(TokenKind.DOT)) {
-				if (!isNextTokenAdjacent()) {
-					raiseException(peekToken().startPos, DSLMessage.NO_WHITESPACE_IN_CHANNEL_DEFINITION);
+			while (tokens.peek(TokenKind.DOT)) {
+				if (!tokens.isNextAdjacent()) {
+					tokens.raiseException(tokens.peek().startPos, DSLMessage.NO_WHITESPACE_IN_CHANNEL_DEFINITION);
 				}
-				nextToken(); // skip dot
-				if (!isNextTokenAdjacent()) {
-					raiseException(peekToken().startPos, DSLMessage.NO_WHITESPACE_IN_CHANNEL_DEFINITION);
+				tokens.next(); // skip dot
+				if (!tokens.isNextAdjacent()) {
+					tokens.raiseException(tokens.peek().startPos, DSLMessage.NO_WHITESPACE_IN_CHANNEL_DEFINITION);
 				}
-				channelReferenceComponents.add(eatToken(TokenKind.IDENTIFIER));
+				channelReferenceComponents.add(tokens.eat(TokenKind.IDENTIFIER));
 			}
 		}
-		else if (peekToken(TokenKind.DOT)) {
+		else if (tokens.peek(TokenKind.DOT)) {
 			if (tapAllowed) {
-				raiseException(peekToken().startPos, DSLMessage.ONLY_A_TAP_ON_A_STREAM_OR_JOB_CAN_BE_INDEXED);
+				tokens.raiseException(tokens.peek().startPos, DSLMessage.ONLY_A_TAP_ON_A_STREAM_OR_JOB_CAN_BE_INDEXED);
 			}
 			else {
-				raiseException(peekToken().startPos, DSLMessage.CHANNEL_INDEXING_NOT_ALLOWED);
+				tokens.raiseException(tokens.peek().startPos, DSLMessage.CHANNEL_INDEXING_NOT_ALLOWED);
 			}
 		}
 		// Verify the structure:
@@ -297,7 +291,7 @@ public class StreamDslParser {
 			// tap:queue:XXX
 			// tap:topic:XXX
 			if (channelScopeComponents.size() < 3) {
-				raiseException(firstToken.startPos, DSLMessage.TAP_NEEDS_THREE_COMPONENTS);
+				tokens.raiseException(firstToken.startPos, DSLMessage.TAP_NEEDS_THREE_COMPONENTS);
 			}
 			Token tappingToken = channelScopeComponents.get(1);
 			String tapping = tappingToken.data.toLowerCase();
@@ -315,7 +309,7 @@ public class StreamDslParser {
 				channelType = ChannelType.TAP_TOPIC;
 			}
 			else {
-				raiseException(tappingToken.startPos, DSLMessage.NOT_ALLOWED_TO_TAP_THAT, tappingToken.data);
+				tokens.raiseException(tappingToken.startPos, DSLMessage.NOT_ALLOWED_TO_TAP_THAT, tappingToken.data);
 			}
 		}
 		else {
@@ -359,10 +353,10 @@ public class StreamDslParser {
 		List<ModuleNode> moduleNodes = new ArrayList<ModuleNode>();
 
 		moduleNodes.add(eatModule());
-		while (moreTokens()) {
-			Token t = peekToken();
+		while (tokens.more()) {
+			Token t = tokens.peek();
 			if (t.kind == TokenKind.PIPE) {
-				nextToken();
+				tokens.next();
 				moduleNodes.add(eatModule());
 			}
 			else {
@@ -376,24 +370,24 @@ public class StreamDslParser {
 	// module: [label':']? identifier (moduleArguments)*
 	private ModuleNode eatModule() {
 		Token label = null;
-		Token name = nextToken();
+		Token name = tokens.next();
 		if (!name.isKind(TokenKind.IDENTIFIER)) {
-			raiseException(name.startPos, DSLMessage.EXPECTED_MODULENAME, name.data != null ? name.data
+			tokens.raiseException(name.startPos, DSLMessage.EXPECTED_MODULENAME, name.data != null ? name.data
 					: new String(name.getKind().tokenChars));
 		}
-		if (peekToken(TokenKind.COLON)) {
-			if (!isNextTokenAdjacent()) {
-				raiseException(peekToken().startPos, DSLMessage.NO_WHITESPACE_BETWEEN_LABEL_NAME_AND_COLON);
+		if (tokens.peek(TokenKind.COLON)) {
+			if (!tokens.isNextAdjacent()) {
+				tokens.raiseException(tokens.peek().startPos, DSLMessage.NO_WHITESPACE_BETWEEN_LABEL_NAME_AND_COLON);
 			}
-			nextToken(); // swallow colon
+			tokens.next(); // swallow colon
 			label = name;
-			name = eatToken(TokenKind.IDENTIFIER);
+			name = tokens.eat(TokenKind.IDENTIFIER);
 		}
 		Token moduleName = name;
-		checkpoint();
+		tokens.checkpoint();
 		ArgumentNode[] args = maybeEatModuleArgs();
-		int startpos = label != null ? label.startPos : moduleName.startPos;
-		return new ModuleNode(toLabelNode(label), moduleName.data, startpos, moduleName.endPos, args);
+		int startPos = label != null ? label.startPos : moduleName.startPos;
+		return new ModuleNode(toLabelNode(label), moduleName.data, startPos, moduleName.endPos, args);
 	}
 
 	private LabelNode toLabelNode(Token label) {
@@ -406,26 +400,26 @@ public class StreamDslParser {
 	// moduleArguments : DOUBLE_MINUS identifier(name) EQUALS identifier(value)
 	private ArgumentNode[] maybeEatModuleArgs() {
 		List<ArgumentNode> args = null;
-		if (peekToken(TokenKind.DOUBLE_MINUS) && isNextTokenAdjacent()) {
-			raiseException(peekToken().startPos, DSLMessage.EXPECTED_WHITESPACE_AFTER_MODULE_BEFORE_ARGUMENT);
+		if (tokens.peek(TokenKind.DOUBLE_MINUS) && tokens.isNextAdjacent()) {
+			tokens.raiseException(tokens.peek().startPos, DSLMessage.EXPECTED_WHITESPACE_AFTER_MODULE_BEFORE_ARGUMENT);
 		}
-		while (peekToken(TokenKind.DOUBLE_MINUS)) {
-			Token dashDash = nextToken(); // skip the '--'
-			if (peekToken(TokenKind.IDENTIFIER) && !isNextTokenAdjacent()) {
-				raiseException(peekToken().startPos, DSLMessage.NO_WHITESPACE_BEFORE_ARG_NAME);
+		while (tokens.peek(TokenKind.DOUBLE_MINUS)) {
+			Token dashDash = tokens.next(); // skip the '--'
+			if (tokens.peek(TokenKind.IDENTIFIER) && !tokens.isNextAdjacent()) {
+				tokens.raiseException(tokens.peek().startPos, DSLMessage.NO_WHITESPACE_BEFORE_ARG_NAME);
 			}
 			List<Token> argNameComponents = eatDottedName();
-			if (peekToken(TokenKind.EQUALS) && !isNextTokenAdjacent()) {
-				raiseException(peekToken().startPos, DSLMessage.NO_WHITESPACE_BEFORE_ARG_EQUALS);
+			if (tokens.peek(TokenKind.EQUALS) && !tokens.isNextAdjacent()) {
+				tokens.raiseException(tokens.peek().startPos, DSLMessage.NO_WHITESPACE_BEFORE_ARG_EQUALS);
 			}
-			eatToken(TokenKind.EQUALS);
-			if (peekToken(TokenKind.IDENTIFIER) && !isNextTokenAdjacent()) {
-				raiseException(peekToken().startPos, DSLMessage.NO_WHITESPACE_BEFORE_ARG_VALUE);
+			tokens.eat(TokenKind.EQUALS);
+			if (tokens.peek(TokenKind.IDENTIFIER) && !tokens.isNextAdjacent()) {
+				tokens.raiseException(tokens.peek().startPos, DSLMessage.NO_WHITESPACE_BEFORE_ARG_VALUE);
 			}
 			// Process argument value:
-			Token t = peekToken();
+			Token t = tokens.peek();
 			String argValue = eatArgValue();
-			checkpoint();
+			tokens.checkpoint();
 			if (args == null) {
 				args = new ArrayList<ArgumentNode>();
 			}
@@ -436,7 +430,7 @@ public class StreamDslParser {
 
 	// argValue: identifier | literal_string
 	private String eatArgValue() {
-		Token t = nextToken();
+		Token t = tokens.next();
 		String argValue = null;
 		if (t.getKind() == TokenKind.IDENTIFIER) {
 			argValue = t.data;
@@ -446,37 +440,11 @@ public class StreamDslParser {
 			argValue = t.data.substring(1, t.data.length() - 1).replace(quotesUsed+quotesUsed, quotesUsed);
 		}
 		else {
-			raiseException(t.startPos, DSLMessage.EXPECTED_ARGUMENT_VALUE, t.data);
+			tokens.raiseException(t.startPos, DSLMessage.EXPECTED_ARGUMENT_VALUE, t.data);
 		}
 		return argValue;
 	}
 
-	private Token eatToken(TokenKind expectedKind) {
-		Token t = nextToken();
-		if (t == null) {
-			raiseException(expressionString.length(), DSLMessage.OOD);
-		}
-		if (t.kind != expectedKind) {
-			raiseException(t.startPos, DSLMessage.NOT_EXPECTED_TOKEN, expectedKind.toString().toLowerCase(),
-					t.getKind().toString().toLowerCase() + (t.data == null ? "" : "(" + t.data + ")"));
-		}
-		return t;
-	}
-
-	private boolean peekToken(TokenKind desiredTokenKind) {
-		return peekToken(desiredTokenKind, false);
-	}
-
-	private boolean lookAhead(int distance, TokenKind desiredTokenKind) {
-		if ((tokenStreamPointer + distance) >= tokenStream.size()) {
-			return false;
-		}
-		Token t = tokenStream.get(tokenStreamPointer + distance);
-		if (t.kind == desiredTokenKind) {
-			return true;
-		}
-		return false;
-	}
 
 	private List<Token> eatDottedName() {
 		return eatDottedName(DSLMessage.NOT_EXPECTED_TOKEN);
@@ -489,21 +457,21 @@ public class StreamDslParser {
 	 */
 	private List<Token> eatDottedName(DSLMessage error) {
 		List<Token> result = new ArrayList<Token>(3);
-		Token name = nextToken();
+		Token name = tokens.next();
 		if (!name.isKind(TokenKind.IDENTIFIER)) {
-			raiseException(name.startPos, error, name.data != null ? name.data
+			tokens.raiseException(name.startPos, error, name.data != null ? name.data
 					: new String(name.getKind().tokenChars));
 		}
 		result.add(name);
-		while (peekToken(TokenKind.DOT)) {
-			if (!isNextTokenAdjacent()) {
-				raiseException(peekToken().startPos, DSLMessage.NO_WHITESPACE_IN_DOTTED_NAME);
+		while (tokens.peek(TokenKind.DOT)) {
+			if (!tokens.isNextAdjacent()) {
+				tokens.raiseException(tokens.peek().startPos, DSLMessage.NO_WHITESPACE_IN_DOTTED_NAME);
 			}
-			result.add(nextToken()); // consume dot
-			if (peekToken(TokenKind.IDENTIFIER) && !isNextTokenAdjacent()) {
-				raiseException(peekToken().startPos, DSLMessage.NO_WHITESPACE_IN_DOTTED_NAME);
+			result.add(tokens.next()); // consume dot
+			if (tokens.peek(TokenKind.IDENTIFIER) && !tokens.isNextAdjacent()) {
+				tokens.raiseException(tokens.peek().startPos, DSLMessage.NO_WHITESPACE_IN_DOTTED_NAME);
 			}
-			result.add(eatToken(TokenKind.IDENTIFIER));
+			result.add(tokens.eat(TokenKind.IDENTIFIER));
 		}
 		return result;
 	}
@@ -512,18 +480,18 @@ public class StreamDslParser {
 	 * Verify the supplied name is a valid stream name. Valid stream names must follow the same rules as java
 	 * identifiers, with the additional option to use a hyphen ('-') after the first character.
 	 *
-	 * @param streamname the name to validate
+	 * @param streamName the name to validate
 	 * @return true if name is valid
 	 */
-	public static boolean isValidStreamName(String streamname) {
-		if (streamname.length() == 0) {
+	public static boolean isValidStreamName(String streamName) {
+		if (streamName.length() == 0) {
 			return false;
 		}
-		if (!Character.isJavaIdentifierStart(streamname.charAt(0))) {
+		if (!Character.isJavaIdentifierStart(streamName.charAt(0))) {
 			return false;
 		}
-		for (int i = 1, max = streamname.length(); i < max; i++) {
-			char ch = streamname.charAt(i);
+		for (int i = 1, max = streamName.length(); i < max; i++) {
+			char ch = streamName.charAt(i);
 			if (!(Character.isJavaIdentifierPart(ch) || ch == '-')) {
 				return false;
 			}
@@ -547,58 +515,6 @@ public class StreamDslParser {
 		return result.toString();
 	}
 
-	private boolean peekToken(TokenKind desiredTokenKind, boolean consumeIfMatched) {
-		if (!moreTokens()) {
-			return false;
-		}
-		Token t = peekToken();
-		if (t.kind == desiredTokenKind) {
-			if (consumeIfMatched) {
-				tokenStreamPointer++;
-			}
-			return true;
-		}
-		else {
-			return false;
-		}
-	}
-
-	private boolean moreTokens() {
-		return tokenStreamPointer < tokenStream.size();
-	}
-
-	private Token nextToken() {
-		if (tokenStreamPointer >= tokenStreamLength) {
-			raiseException(expressionString.length(), DSLMessage.OOD);
-		}
-		return tokenStream.get(tokenStreamPointer++);
-	}
-
-	private boolean isNextTokenAdjacent() {
-		if (tokenStreamPointer >= tokenStreamLength) {
-			return false;
-		}
-		Token last = tokenStream.get(tokenStreamPointer - 1);
-		Token next = tokenStream.get(tokenStreamPointer);
-		return next.startPos == last.endPos;
-	}
-
-	private Token peekToken() {
-		if (tokenStreamPointer >= tokenStreamLength) {
-			return null;
-		}
-		return tokenStream.get(tokenStreamPointer);
-	}
-
-	private void raiseException(int pos, DSLMessage message, Object... inserts) {
-		throw new CheckPointedParseException(expressionString, pos, tokenStreamPointer, lastGoodPoint,
-				tokenStream, message, inserts);
-	}
-
-	private void checkpoint() {
-		lastGoodPoint = tokenStreamPointer;
-	}
-
 	private String toString(Token t) {
 		if (t.getKind().hasPayload()) {
 			return t.stringValue();
@@ -610,10 +526,8 @@ public class StreamDslParser {
 
 	@Override
 	public String toString() {
-		StringBuilder s = new StringBuilder();
-		s.append(tokenStream).append("\n");
-		s.append("tokenStreamPointer=" + tokenStreamPointer).append("\n");
-		return s.toString();
+		return String.valueOf(tokens.getTokenStream()) + "\n" +
+				"tokenStreamPointer=" + tokens.position() + "\n";
 	}
 
 }
