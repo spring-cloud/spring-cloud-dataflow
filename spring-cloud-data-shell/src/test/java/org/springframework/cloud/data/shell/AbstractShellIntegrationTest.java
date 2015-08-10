@@ -53,8 +53,6 @@ public abstract class AbstractShellIntegrationTest {
 
 	private static AdminApplication application;
 
-	private static JLineShellComponent shell;
-
 	private static CloudDataShell cloudDataShell;
 
 	/**
@@ -76,7 +74,7 @@ public abstract class AbstractShellIntegrationTest {
 					String.format("--server.port=%s", adminPort),
 					"--spring.main.show_banner=false"});
 		}
-		shell = new Bootstrap(new String[] {"--port", String.valueOf(adminPort)}).getJLineShellComponent();
+		JLineShellComponent shell = new Bootstrap(new String[] {"--port", String.valueOf(adminPort)}).getJLineShellComponent();
 		if (!shell.isRunning()) {
 			shell.start();
 		}
@@ -87,7 +85,7 @@ public abstract class AbstractShellIntegrationTest {
 	public static void shutdown() {
 		if (SHUTDOWN_AFTER_RUN) {
 			logger.info("Stopping Cloud Data Shell");
-			shell.stop();
+			cloudDataShell.stop();
 			if (application != null) {
 				logger.info("Stopping Cloud Data Admin Server");
 				application = null;
