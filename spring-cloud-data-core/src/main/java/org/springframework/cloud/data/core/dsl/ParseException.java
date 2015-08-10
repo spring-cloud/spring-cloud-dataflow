@@ -25,7 +25,7 @@ package org.springframework.cloud.data.core.dsl;
  * @author Andy Clement
  */
 @SuppressWarnings("serial")
-public class StreamDefinitionException extends RuntimeException {
+public class ParseException extends RuntimeException {
 
 	protected String expressionString;
 
@@ -35,7 +35,7 @@ public class StreamDefinitionException extends RuntimeException {
 
 	protected Object[] inserts;
 
-	public StreamDefinitionException(String expressionString, int position, DSLMessage message, Object... inserts) {
+	public ParseException(String expressionString, int position, DSLMessage message, Object... inserts) {
 		super(message.formatMessage(position, inserts));
 		this.position = position;
 		this.message = message;

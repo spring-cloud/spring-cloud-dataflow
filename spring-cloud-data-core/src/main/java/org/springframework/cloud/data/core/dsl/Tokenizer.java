@@ -85,7 +85,7 @@ class Tokenizer {
 				switch (ch) {
 					case '-':
 						if (!isTwoCharToken(TokenKind.DOUBLE_MINUS)) {
-							throw new StreamDefinitionException(
+							throw new ParseException(
 									expressionString, pos,
 									DSLMessage.MISSING_CHARACTER, "-");
 						}
@@ -136,10 +136,10 @@ class Tokenizer {
 						pos++; // will take us to the end
 						break;
 					case '\\':
-						throw new StreamDefinitionException(
+						throw new ParseException(
 								expressionString, pos, DSLMessage.UNEXPECTED_ESCAPE_CHAR);
 					default:
-						throw new StreamDefinitionException(
+						throw new ParseException(
 								expressionString, pos, DSLMessage.UNEXPECTED_DATA,
 								Character.valueOf(ch).toString());
 				}
@@ -171,8 +171,8 @@ class Tokenizer {
 				}
 			}
 			if (ch == 0) {
-				throw new StreamDefinitionException(
-						expressionString, start, DSLMessage.NON_TERMINATING_QUOTED_STRING);
+				throw new ParseException(expressionString, start,
+						DSLMessage.NON_TERMINATING_QUOTED_STRING);
 			}
 		}
 		pos++;
@@ -200,8 +200,8 @@ class Tokenizer {
 				}
 			}
 			if (ch == 0) {
-				throw new StreamDefinitionException(
-						expressionString, start, DSLMessage.NON_TERMINATING_DOUBLE_QUOTED_STRING);
+				throw new ParseException(expressionString, start,
+						DSLMessage.NON_TERMINATING_DOUBLE_QUOTED_STRING);
 			}
 		}
 		pos++;

@@ -19,13 +19,13 @@ package org.springframework.cloud.data.core.dsl;
 import java.util.List;
 
 /**
- * An extension of StreamDefinitionException that remembers the point up
- * to which parsing went OK (signaled by a '*' in the dumped message).
+ * An extension of {@link ParseException} that indicates where the parse
+ * error occurred. This is marked by a '{@code *}' in {@link #getMessage}.
  *
  * @author Eric Bottard
  */
 @SuppressWarnings("serial")
-public class CheckPointedStreamDefinitionException extends StreamDefinitionException {
+public class CheckPointedParseException extends ParseException {
 
 	private int checkpointPointer = -1;
 
@@ -34,7 +34,8 @@ public class CheckPointedStreamDefinitionException extends StreamDefinitionExcep
 	private int tokenPointer;
 
 	/**
-	 * Construct a new exception
+	 * Construct a new {@code CheckPointedParseException}.
+	 *
 	 * @param expressionString the raw, untokenized text that was being parsed
 	 * @param textPosition the text offset where the error occurs
 	 * @param tokenPointer the token-index of token where the error occurred
@@ -43,7 +44,7 @@ public class CheckPointedStreamDefinitionException extends StreamDefinitionExcep
 	 * @param message the error message
 	 * @param inserts variables that may be inserted in the error message
 	 */
-	public CheckPointedStreamDefinitionException(String expressionString, int textPosition, int tokenPointer,
+	public CheckPointedParseException(String expressionString, int textPosition, int tokenPointer,
 			int checkpointPointer, List<Token> tokens, DSLMessage message, Object... inserts) {
 		super(expressionString, textPosition, message, inserts);
 		this.tokenPointer = tokenPointer;
@@ -91,8 +92,8 @@ public class CheckPointedStreamDefinitionException extends StreamDefinitionExcep
 	}
 
 	/**
-	 * Return the parsed expression until the last known, well formed position. Attempting to re-parse that expression
-	 * is guaranteed to not fail.
+	 * Return the parsed expression until the last known, well formed position.
+	 * Attempting to re-parse that expression is guaranteed to not fail.
 	 */
 	public String getExpressionStringUntilCheckpoint() {
 		return expressionString.substring(0, getCheckpointPosition());

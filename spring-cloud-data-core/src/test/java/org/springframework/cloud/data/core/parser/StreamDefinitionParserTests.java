@@ -26,7 +26,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.cloud.data.core.ModuleDefinition;
-import org.springframework.cloud.data.core.dsl.StreamDefinitionException;
+import org.springframework.cloud.data.core.dsl.ParseException;
 
 /**
  * @author Mark Fisher
@@ -149,7 +149,7 @@ public class StreamDefinitionParserTests {
 		try {
 			parser.parse("test", "queue:foo > boot");
 		}
-		catch (StreamDefinitionException expected) {
+		catch (ParseException expected) {
 			assertThat(expected.getMessage(),
 					containsString("A named channel is not supported in this kind of definition"));
 			assertThat(expected.getPosition(), is(0));
@@ -157,7 +157,7 @@ public class StreamDefinitionParserTests {
 		try {
 			parser.parse("test", "bart | goo > queue:foo");
 		}
-		catch (StreamDefinitionException expected) {
+		catch (ParseException expected) {
 			assertThat(expected.getMessage(),
 					containsString("A named channel is not supported in this kind of definition"));
 			assertThat(expected.getPosition(), is(13));

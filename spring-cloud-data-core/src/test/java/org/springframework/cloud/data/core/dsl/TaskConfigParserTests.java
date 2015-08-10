@@ -265,7 +265,7 @@ public class TaskConfigParserTests {
 			ModuleNode sn = parse(taskName, taskDef);
 			fail("expected to fail but parsed " + sn.stringify());
 		}
-		catch (TaskDefinitionException e) {
+		catch (ParseException e) {
 			assertEquals(DSLMessage.ILLEGAL_TASK_NAME, e.getMessageCode());
 			assertEquals(0, e.getPosition());
 			assertEquals(taskName, e.getInserts()[0]);
@@ -277,7 +277,7 @@ public class TaskConfigParserTests {
 			ModuleNode sn = parse(task);
 			fail("expected to fail but parsed " + sn.stringify());
 		}
-		catch (TaskDefinitionException e) {
+		catch (ParseException e) {
 			assertEquals(msg, e.getMessageCode());
 			assertEquals(pos, e.getPosition());
 			if (inserts != null) {

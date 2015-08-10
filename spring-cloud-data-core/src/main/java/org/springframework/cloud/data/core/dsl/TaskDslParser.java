@@ -50,17 +50,11 @@ public class TaskDslParser {
 	 * Parse a task definition.
 	 *
 	 * @return the AST for the parsed task
-	 * @throws TaskDefinitionException
+	 * @throws ParseException
 	 */
 	public ModuleNode parse(String name, String task) {
 		this.expressionString = task;
-		Tokenizer tokenizer;
-		try {
-			tokenizer = new Tokenizer(expressionString);
-		}
-		catch (StreamDefinitionException e) {
-			throw new TaskDefinitionException(e.getExpressionString(), e.getPosition(), e.getMessageCode());
-		}
+		Tokenizer tokenizer = new Tokenizer(expressionString);
 
 		tokenStream = tokenizer.getTokens();
 		tokenStreamLength = tokenStream.size();
@@ -69,13 +63,13 @@ public class TaskDslParser {
 
 		// Check the task name, however it was specified
 		if (ast.getName() != null && !isValidTaskName(ast.getName())) {
-			throw new TaskDefinitionException(ast.getName(), 0, DSLMessage.ILLEGAL_TASK_NAME, ast.getName());
+			throw new ParseException(ast.getName(), 0, DSLMessage.ILLEGAL_TASK_NAME, ast.getName());
 		}
 		if (name != null && !isValidTaskName(name)) {
-			throw new TaskDefinitionException(name, 0, DSLMessage.ILLEGAL_TASK_NAME, name);
+			throw new ParseException(name, 0, DSLMessage.ILLEGAL_TASK_NAME, name);
 		}
 		if (moreTokens()) {
-			throw new TaskDefinitionException(this.expressionString, peekToken().startPos, DSLMessage.MORE_INPUT,
+			throw new ParseException(this.expressionString, peekToken().startPos, DSLMessage.MORE_INPUT,
 					toString(nextToken()));
 		}
 
@@ -300,7 +294,7 @@ public class TaskDslParser {
 	}
 
 	private void raiseException(int pos, DSLMessage message, Object... inserts) {
-		throw new CheckPointedTaskDefinitionException(expressionString, pos, tokenStreamPointer, lastGoodPoint,
+		throw new CheckPointedParseException(expressionString, pos, tokenStreamPointer, lastGoodPoint,
 				tokenStream, message, inserts);
 	}
 

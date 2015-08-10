@@ -54,7 +54,7 @@ public class StreamDslParser {
 	 * Parse a stream definition.
 	 *
 	 * @return the AST for the parsed stream
-	 * @throws StreamDefinitionException
+	 * @throws ParseException
 	 */
 	public StreamNode parse(String name, String stream) {
 		this.expressionString = stream;
@@ -66,10 +66,10 @@ public class StreamDslParser {
 
 		// Check the stream name, however it was specified
 		if (ast.getName() != null && !isValidStreamName(ast.getName())) {
-			throw new StreamDefinitionException(ast.getName(), 0, DSLMessage.ILLEGAL_STREAM_NAME, ast.getName());
+			throw new ParseException(ast.getName(), 0, DSLMessage.ILLEGAL_STREAM_NAME, ast.getName());
 		}
 		if (name != null && !isValidStreamName(name)) {
-			throw new StreamDefinitionException(name, 0, DSLMessage.ILLEGAL_STREAM_NAME, name);
+			throw new ParseException(name, 0, DSLMessage.ILLEGAL_STREAM_NAME, name);
 		}
 
 		// Check that each module has a unique label (either explicit or implicit)
@@ -80,7 +80,7 @@ public class StreamDslParser {
 			if (previous != null) {
 				String duplicate = node.getLabelName();
 				int previousIndex = new ArrayList<String>(alreadySeen.keySet()).indexOf(duplicate);
-				throw new StreamDefinitionException(stream, node.startPos, DSLMessage.DUPLICATE_LABEL,
+				throw new ParseException(stream, node.startPos, DSLMessage.DUPLICATE_LABEL,
 						duplicate, previous.getName(), previousIndex, node.getName(), m);
 			}
 		}
@@ -88,12 +88,12 @@ public class StreamDslParser {
 		// Check if the stream name is same as that of any of its modules' names
 		// Can lead to infinite recursion during resolution, when parsing a composite module.
 		if (ast.getModule(name) != null) {
-			throw new StreamDefinitionException(stream, stream.indexOf(name),
+			throw new ParseException(stream, stream.indexOf(name),
 					DSLMessage.STREAM_NAME_MATCHING_MODULE_NAME,
 					name);
 		}
 		if (moreTokens()) {
-			throw new StreamDefinitionException(this.expressionString, peekToken().startPos, DSLMessage.MORE_INPUT,
+			throw new ParseException(this.expressionString, peekToken().startPos, DSLMessage.MORE_INPUT,
 					toString(nextToken()));
 		}
 
@@ -591,7 +591,7 @@ public class StreamDslParser {
 	}
 
 	private void raiseException(int pos, DSLMessage message, Object... inserts) {
-		throw new CheckPointedStreamDefinitionException(expressionString, pos, tokenStreamPointer, lastGoodPoint,
+		throw new CheckPointedParseException(expressionString, pos, tokenStreamPointer, lastGoodPoint,
 				tokenStream, message, inserts);
 	}
 

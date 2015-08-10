@@ -564,7 +564,7 @@ public class StreamConfigParserTests {
 			StreamNode sn = parse(streamName, streamDef);
 			fail("expected to fail but parsed " + sn.stringify());
 		}
-		catch (StreamDefinitionException e) {
+		catch (ParseException e) {
 			assertEquals(DSLMessage.ILLEGAL_STREAM_NAME, e.getMessageCode());
 			assertEquals(0, e.getPosition());
 			assertEquals(streamName, e.getInserts()[0]);
@@ -576,7 +576,7 @@ public class StreamConfigParserTests {
 			StreamNode sn = parse(stream);
 			fail("expected to fail but parsed " + sn.stringify());
 		}
-		catch (StreamDefinitionException e) {
+		catch (ParseException e) {
 			assertEquals(msg, e.getMessageCode());
 			assertEquals(pos, e.getPosition());
 			if (inserts != null) {
@@ -592,7 +592,7 @@ public class StreamConfigParserTests {
 			StreamNode sn = parse(name, stream);
 			fail("expected to fail but parsed " + sn.stringify());
 		}
-		catch (StreamDefinitionException e) {
+		catch (ParseException e) {
 			assertEquals(msg, e.getMessageCode());
 			assertEquals(pos, e.getPosition());
 			if (inserts != null) {
