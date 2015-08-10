@@ -85,13 +85,6 @@ public class AdminConfiguration {
 		}
 	}
 
-//	@Configuration
-//	@Profile("cloud")
-//	@Import(CloudConfiguration.class)
-//	protected static class CloudConfig {
-//		//CloudConfiguration class is only used for {"cloud"} and {"cloud", "lattice"} profiles
-//	}
-
 	@Bean
 	public WebMvcConfigurer configurer() {
 		return new WebMvcConfigurerAdapter() {
