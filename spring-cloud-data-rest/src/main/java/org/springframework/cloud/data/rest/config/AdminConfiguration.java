@@ -21,8 +21,6 @@ import static org.springframework.hateoas.config.EnableHypermediaSupport.Hyperme
 import java.util.List;
 
 import org.springframework.cloud.data.module.deployer.ModuleDeployer;
-import org.springframework.cloud.data.module.deployer.cloudfoundry.CloudFoundryModuleDeployer;
-import org.springframework.cloud.data.module.deployer.lattice.ReceptorModuleDeployer;
 import org.springframework.cloud.data.module.deployer.local.LocalModuleDeployer;
 import org.springframework.cloud.data.module.registry.ModuleRegistry;
 import org.springframework.cloud.data.module.registry.StubModuleRegistry;
@@ -52,10 +50,12 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
  * @author Mark Fisher
  * @author Marius Bogoevici
  * @author Patrick Peralta
+ * @author Thomas Risberg
  */
 @Configuration
 @EnableHypermediaSupport(type = HAL)
 @EnableSpringDataWebSupport
+@Import(CloudConfiguration.class)
 @ComponentScan(basePackages = "org.springframework.cloud.data.rest.controller")
 public class AdminConfiguration {
 
@@ -82,31 +82,6 @@ public class AdminConfiguration {
 		@Bean
 		public ModuleDeployer moduleDeployer(ModuleLauncher moduleLauncher) {
 			return new LocalModuleDeployer(moduleLauncher);
-		}
-	}
-
-	@Configuration
-	@Profile("cloud")
-	protected static class CloudConfig {
-
-		@Configuration
-		@Profile("lattice")
-		protected static class LatticeConfig {
-
-			@Bean
-			public ModuleDeployer moduleDeployer() {
-				return new ReceptorModuleDeployer();
-			}
-		}
-
-		@Configuration
-		@Profile("!lattice")
-		protected static class CloudFoundryConfig {
-
-			@Bean
-			public ModuleDeployer moduleDeployer() {
-				return new CloudFoundryModuleDeployer();
-			}
 		}
 	}
 
