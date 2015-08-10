@@ -48,7 +48,6 @@ public class StreamCommandTemplate {
 	 *
 	 * @param shell the spring shell to execute commands against
 	 */
-	/* default */
 	public StreamCommandTemplate(JLineShellComponent shell) {
 		this.shell = shell;
 	}
