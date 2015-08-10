@@ -75,13 +75,14 @@ public class TaskController {
 		}
 
 		@Override
-		public TaskDefinitionResource toResource(TaskDefinition stream) {
-			return createResourceWithId(stream.getTaskName(), stream);
+		public TaskDefinitionResource toResource(TaskDefinition taskDefinition) {
+			return createResourceWithId(taskDefinition.getTaskName(), taskDefinition);
 		}
 
 		@Override
-		public TaskDefinitionResource instantiateResource(TaskDefinition entity) {
-			return new TaskDefinitionResource(entity.getTaskName(), entity.getTaskName());
+		public TaskDefinitionResource instantiateResource(TaskDefinition taskDefinition) {
+			return new TaskDefinitionResource(taskDefinition.getTaskName(),
+					taskDefinition.getTask());
 		}
 	}
 }

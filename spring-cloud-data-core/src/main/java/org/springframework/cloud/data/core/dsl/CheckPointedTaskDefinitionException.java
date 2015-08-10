@@ -19,7 +19,7 @@ package org.springframework.cloud.data.core.dsl;
 import java.util.List;
 
 /**
- * An extension of StreamDefinitionException that remembers the point up
+ * An extension of TaskDefinitionException that remembers the point up
  * to which parsing went OK (signaled by a '*' in the dumped message).
  *
  * @author Eric Bottard
