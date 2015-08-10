@@ -37,7 +37,9 @@ import org.springframework.shell.core.JLineShellComponent;
  * @author David Turanski
  * @author Ilayaperumal Gopinathan
  */
-public class StreamCommandTemplate extends AbstractCommandTemplate {
+public class StreamCommandTemplate {
+
+	private final JLineShellComponent shell;
 
 	private List<String> streams = new ArrayList<String>();
 
@@ -48,7 +50,7 @@ public class StreamCommandTemplate extends AbstractCommandTemplate {
 	 */
 	/* default */
 	public StreamCommandTemplate(JLineShellComponent shell) {
-		super(shell);
+		this.shell = shell;
 	}
 
 	/**
@@ -82,7 +84,7 @@ public class StreamCommandTemplate extends AbstractCommandTemplate {
 		// Shell parser expects quotes to be escaped by \
 		String wholeCommand = String.format("stream create %s --definition \"%s\" --deploy %s", streamname,
 				actualDefinition.replaceAll("\"", "\\\\\""), deploy);
-		CommandResult cr = executeCommand(wholeCommand);
+		CommandResult cr = shell.executeCommand(wholeCommand);
 		//todo: Add deployment and verifier
 //		if (deploy) {
 //			stateVerifier.waitForDeploy(streamname);
@@ -107,7 +109,7 @@ public class StreamCommandTemplate extends AbstractCommandTemplate {
 	 * @param streamname name of the stream
 	 */
 	public void deploy(String streamname) {
-		CommandResult cr = getShell().executeCommand("stream deploy --name " + streamname);
+		CommandResult cr = shell.executeCommand("stream deploy --name " + streamname);
 		//stateVerifier.waitForDeploy(streamname);
 		assertTrue("Failure.  CommandResult = " + cr.toString(), cr.isSuccess());
 		assertEquals("Deployed stream '" + streamname + "'", cr.getResult());
@@ -119,7 +121,7 @@ public class StreamCommandTemplate extends AbstractCommandTemplate {
 	public void destroyCreatedStreams() {
 		for (int s = streams.size() - 1; s >= 0; s--) {
 			String streamname = streams.get(s);
-			CommandResult cr = executeCommand("stream destroy --name " + streamname);
+			CommandResult cr = shell.executeCommand("stream destroy --name " + streamname);
 			//stateVerifier.waitForDestroy(streamname);
 			assertTrue("Failure to destroy stream " + streamname + ".  CommandResult = " + cr.toString(),
 					cr.isSuccess());
@@ -132,7 +134,7 @@ public class StreamCommandTemplate extends AbstractCommandTemplate {
 	 * @param stream The stream to destroy
 	 */
 	public void destroyStream(String stream) {
-		CommandResult cr = executeCommand("stream destroy --name " + stream);
+		CommandResult cr = shell.executeCommand("stream destroy --name " + stream);
 		//stateVerifier.waitForDestroy(stream);
 		assertTrue("Failure to destroy stream " + stream + ".  CommandResult = " + cr.toString(),
 				cr.isSuccess());
@@ -145,7 +147,7 @@ public class StreamCommandTemplate extends AbstractCommandTemplate {
 	 * @param streamname name of the stream.
 	 */
 	public void undeploy(String streamname) {
-		CommandResult cr = getShell().executeCommand("stream undeploy --name " + streamname);
+		CommandResult cr = shell.executeCommand("stream undeploy --name " + streamname);
 		//stateVerifier.waitForUndeploy(streamname);
 		assertTrue(cr.isSuccess());
 		assertEquals("Un-deployed stream '" + streamname + "'", cr.getResult());
@@ -158,7 +160,7 @@ public class StreamCommandTemplate extends AbstractCommandTemplate {
 	 * @param definition definition of the stream
 	 */
 	public void verifyExists(String streamName, String definition, boolean deployed) {
-		CommandResult cr = getShell().executeCommand("stream list");
+		CommandResult cr = shell.executeCommand("stream list");
 		assertTrue("Failure.  CommandResult = " + cr.toString(), cr.isSuccess());
 		Table t = (Table) cr.getResult();
 		assertTrue(t.getRows().contains(

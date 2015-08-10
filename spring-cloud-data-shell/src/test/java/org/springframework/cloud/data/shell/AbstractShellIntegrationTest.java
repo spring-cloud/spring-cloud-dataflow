@@ -28,8 +28,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.cloud.data.rest.AdminApplication;
 import org.springframework.cloud.data.shell.command.StreamCommandTemplate;
 import org.springframework.shell.Bootstrap;
+import org.springframework.shell.core.CommandResult;
 import org.springframework.shell.core.JLineShellComponent;
 import org.springframework.util.AlternativeJdkIdGenerator;
+import org.springframework.util.Assert;
 import org.springframework.util.IdGenerator;
 import org.springframework.util.SocketUtils;
 
@@ -52,6 +54,8 @@ public abstract class AbstractShellIntegrationTest {
 	private static AdminApplication application;
 
 	private static JLineShellComponent shell;
+
+	private static CloudDataShell cloudDataShell;
 
 	/**
 	 * Use available TCP port for the admin port
@@ -76,6 +80,7 @@ public abstract class AbstractShellIntegrationTest {
 		if (!shell.isRunning()) {
 			shell.start();
 		}
+		cloudDataShell = new CloudDataShell(shell);
 	}
 
 	@AfterClass
@@ -90,13 +95,9 @@ public abstract class AbstractShellIntegrationTest {
 		}
 	}
 
-	protected static JLineShellComponent getShell() {
-		return shell;
-	}
-
 	// Instantiate Command templates here
 	protected StreamCommandTemplate stream() {
-		return new StreamCommandTemplate(getShell());
+		return new StreamCommandTemplate(cloudDataShell);
 	}
 
 	// Util methods
@@ -114,5 +115,24 @@ public abstract class AbstractShellIntegrationTest {
 
 	protected String generateStreamName() {
 		return generateStreamName(null);
+	}
+
+
+	private static class CloudDataShell extends JLineShellComponent {
+
+		private final JLineShellComponent shell;
+
+		public CloudDataShell(JLineShellComponent shell) {
+			this.shell = shell;
+		}
+
+		public CommandResult executeCommand(String command) {
+			CommandResult cr = this.shell.executeCommand(command);
+			if (cr.getException() != null) {
+				cr.getException().printStackTrace();
+			}
+			Assert.isTrue(cr.isSuccess(), "Failure.  CommandResult = " + cr.toString());
+			return cr;
+		}
 	}
 }
