@@ -1,4 +1,4 @@
 /**
- * Base package for the shell integration tests.
+ * Package for shell.
  */
 package org.springframework.cloud.data.shell;
