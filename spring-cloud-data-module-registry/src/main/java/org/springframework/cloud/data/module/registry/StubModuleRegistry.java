@@ -35,8 +35,9 @@ public class StubModuleRegistry implements ModuleRegistry {
 	private final Map<String, ModuleCoordinates> sinks = new HashMap<>();
 
 	public StubModuleRegistry() {
-		sources.put("time", ModuleCoordinates.parse(String.format("%s:%s:%s", GROUP_ID, "time-source", VERSION)));
-		sinks.put("log", ModuleCoordinates.parse(String.format("%s:%s:%s", GROUP_ID, "log-sink", VERSION)));
+		sources.put("time", defaultCoordinatesFor("time-source"));
+		sinks.put("log", defaultCoordinatesFor("log-sink"));
+		sinks.put("counter", defaultCoordinatesFor("counter-sink"));
 	}
 
 	@Override
@@ -50,4 +51,7 @@ public class StubModuleRegistry implements ModuleRegistry {
 		throw new UnsupportedOperationException("only 'source' and 'sink' types are currently supported");
 	}
 
+	private ModuleCoordinates defaultCoordinatesFor(String moduleName) {
+		return ModuleCoordinates.parse(String.format("%s:%s:%s", GROUP_ID, moduleName, VERSION));
+	}
 }
