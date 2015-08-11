@@ -28,6 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
  * Controller for the root resource of the admin server.
  *
  * @author Patrick Peralta
+ * @author Ilayaperumal Gopinathan
  */
 @RestController
 public class AdminController {
@@ -55,12 +56,22 @@ public class AdminController {
 	 *
 	 * @return {@code ResourceSupport} object containing the admin server's resources
 	 */
-	@RequestMapping
+	@RequestMapping("/")
 	public ResourceSupport info() {
 		ResourceSupport resourceSupport = new ResourceSupport();
 		resourceSupport.add(entityLinks.linkFor(StreamDefinitionResource.class).withRel("streams"));
 		resourceSupport.add(entityLinks.linkFor(TaskDefinitionResource.class).withRel("tasks"));
 		return resourceSupport;
+	}
+
+	@RequestMapping("/admin-ui/")
+	String index() {
+		return "forward:/admin-ui/index.html";
+	}
+
+	@RequestMapping("/admin-ui")
+	String indexWithoutTrailingSlash() {
+		return "redirect:/admin-ui/";
 	}
 
 }
