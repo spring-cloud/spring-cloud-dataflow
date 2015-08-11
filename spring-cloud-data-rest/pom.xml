@@ -82,9 +82,6 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
-				<configuration>
-					<classifier>exec</classifier>
-				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>com.spotify</groupId>
@@ -97,7 +94,7 @@
 						<resource>
 							<targetPath>/</targetPath>
 							<directory>${project.build.directory}</directory>
-							<include>${project.build.finalName}-exec.jar</include>
+							<include>${project.build.finalName}.jar</include>
 						</resource>
 					</resources>
 				</configuration>
