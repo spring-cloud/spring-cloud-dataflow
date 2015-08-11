@@ -119,7 +119,7 @@ public class Tokens {
 	 *
 	 * @return {@code true} if there are more tokens to process
 	 */
-	protected boolean more() {
+	protected boolean hasNext() {
 		return position < tokenStream.size();
 	}
 
@@ -130,7 +130,7 @@ public class Tokens {
 	 * @return token at current position or {@code null} if there are no more tokens
 	 */
 	protected Token peek() {
-		return more() ? tokenStream.get(position) : null;
+		return hasNext() ? tokenStream.get(position) : null;
 	}
 
 	/**
@@ -153,7 +153,7 @@ public class Tokens {
 	 * @return true if the current token kind matches the provided token kind
 	 */
 	private boolean peek(TokenKind desiredTokenKind, boolean consumeIfMatched) {
-		if (!more()) {
+		if (!hasNext()) {
 			return false;
 		}
 		Token t = peek();
@@ -174,7 +174,7 @@ public class Tokens {
 	 * @return next {@code Token}
 	 */
 	protected Token next() {
-		if (!more()) {
+		if (!hasNext()) {
 			raiseException(expression.length(), DSLMessage.OOD);
 		}
 		return tokenStream.get(position++);
@@ -210,7 +210,7 @@ public class Tokens {
 	 * character of the previous token
 	 */
 	protected boolean isNextAdjacent() {
-		if (!more()) {
+		if (!hasNext()) {
 			return false;
 		}
 

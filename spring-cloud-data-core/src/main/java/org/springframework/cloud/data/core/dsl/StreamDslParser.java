@@ -81,7 +81,7 @@ public class StreamDslParser {
 					DSLMessage.STREAM_NAME_MATCHING_MODULE_NAME,
 					name);
 		}
-		if (tokens.more()) {
+		if (tokens.hasNext()) {
 			tokens.raiseException(tokens.peek().startPos, DSLMessage.MORE_INPUT,
 					toString(tokens.next()));
 		}
@@ -132,7 +132,7 @@ public class StreamDslParser {
 		SinkChannelNode sinkChannelNode = maybeEatSinkChannel();
 
 		// Further data is an error
-		if (tokens.more()) {
+		if (tokens.hasNext()) {
 			Token t = tokens.peek();
 			tokens.raiseException(t.startPos, DSLMessage.UNEXPECTED_DATA_AFTER_STREAMDEF, toString(t));
 		}
@@ -169,7 +169,7 @@ public class StreamDslParser {
 		List<Token> tokenList = tokens.getTokenStream();
 		int size = tokenList.size();
 
-		if (tokens.more() && tokenList.get(position).getKind() == TokenKind.IDENTIFIER) {
+		if (tokens.hasNext() && tokenList.get(position).getKind() == TokenKind.IDENTIFIER) {
 			String prefix = tokenList.get(position).data;
 			if (isLegalChannelPrefix(prefix)) {
 				if (tokens.position() + 1 < size && tokenList.get(position + 1).getKind() == TokenKind.COLON) {
@@ -353,7 +353,7 @@ public class StreamDslParser {
 		List<ModuleNode> moduleNodes = new ArrayList<ModuleNode>();
 
 		moduleNodes.add(eatModule());
-		while (tokens.more()) {
+		while (tokens.hasNext()) {
 			Token t = tokens.peek();
 			if (t.kind == TokenKind.PIPE) {
 				tokens.next();

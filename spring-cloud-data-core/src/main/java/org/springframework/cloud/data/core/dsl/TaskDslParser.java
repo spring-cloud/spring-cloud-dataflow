@@ -56,7 +56,7 @@ public class TaskDslParser {
 		if (name != null && !isValidTaskName(name)) {
 			throw new ParseException(name, 0, DSLMessage.ILLEGAL_TASK_NAME, name);
 		}
-		if (tokens.more()) {
+		if (tokens.hasNext()) {
 			tokens.raiseException(tokens.peek().startPos, DSLMessage.MORE_INPUT, toString(tokens.next()));
 		}
 
