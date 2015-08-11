@@ -217,7 +217,11 @@ public class StreamController {
 	private void undeployStream(StreamDefinition stream) {
 		for (ModuleDefinition module : stream.getModuleDefinitions()) {
 			ModuleDeploymentId id = ModuleDeploymentId.fromModuleDefinition(module);
-			this.deployer.undeploy(id);
+			ModuleStatus status = this.deployer.status(id);
+			// todo: change from 'unknown' to 'undeployed' when status() does the same
+			if (!ModuleStatus.State.unknown.equals(status.getState())) {
+				this.deployer.undeploy(id);
+			}
 		}
 	}
 
