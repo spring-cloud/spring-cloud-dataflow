@@ -17,9 +17,11 @@
 package org.springframework.cloud.data.rest.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.data.rest.resource.CounterResource;
 import org.springframework.cloud.data.rest.resource.StreamDefinitionResource;
 import org.springframework.cloud.data.rest.resource.TaskDefinitionResource;
 import org.springframework.hateoas.EntityLinks;
+import org.springframework.hateoas.Link;
 import org.springframework.hateoas.ResourceSupport;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -59,8 +61,10 @@ public class AdminController {
 	@RequestMapping("/")
 	public ResourceSupport info() {
 		ResourceSupport resourceSupport = new ResourceSupport();
-		resourceSupport.add(entityLinks.linkFor(StreamDefinitionResource.class).withRel("streams"));
-		resourceSupport.add(entityLinks.linkFor(TaskDefinitionResource.class).withRel("tasks"));
+		resourceSupport.add(entityLinks.linkToCollectionResource(StreamDefinitionResource.class).withRel("streams"));
+		resourceSupport.add(entityLinks.linkToCollectionResource(TaskDefinitionResource.class).withRel("tasks"));
+		resourceSupport.add(entityLinks.linkToCollectionResource(CounterResource.class).withRel("counters"));
+		resourceSupport.add(new Link(entityLinks.linkToCollectionResource(CounterResource.class).getHref() + "/{name}").withRel("counters/counter"));
 		return resourceSupport;
 	}
 

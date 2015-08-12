@@ -42,9 +42,14 @@ public class CloudDataTemplate implements CloudDataOperations {
 	protected Map<String, UriTemplate> resources = new HashMap<String, UriTemplate>();
 
 	/**
-	 * REST client template for stream operations
+	 * REST client template for stream operations.
 	 */
 	private final StreamTemplate streamTemplate;
+
+	/**
+	 * REST client template for stream operations.
+	 */
+	private final CounterTemplate counterTemplate;
 
 
 	public CloudDataTemplate(URI baseURI) {
@@ -55,10 +60,16 @@ public class CloudDataTemplate implements CloudDataOperations {
 		resources.put("streams/definitions", new UriTemplate(resourceSupport.getLink("streams").getHref() + "/definitions"));
 		resources.put("streams/deployments", new UriTemplate(resourceSupport.getLink("streams").getHref() + "/deployments"));
 		this.streamTemplate = new StreamTemplate(restTemplate, resources);
+		this.counterTemplate = new CounterTemplate(restTemplate, resourceSupport);
 	}
 
 	@Override
 	public StreamOperations streamOperations() {
 		return streamTemplate;
+	}
+
+	@Override
+	public CounterOperations counterOperations() {
+		return counterTemplate;
 	}
 }

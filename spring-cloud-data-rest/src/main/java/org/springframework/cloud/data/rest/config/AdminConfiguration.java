@@ -20,6 +20,9 @@ import static org.springframework.hateoas.config.EnableHypermediaSupport.Hyperme
 
 import java.util.List;
 
+import org.springframework.boot.actuate.metrics.repository.InMemoryMetricRepository;
+import org.springframework.boot.actuate.metrics.repository.MetricRepository;
+import org.springframework.boot.actuate.metrics.repository.redis.RedisMetricRepository;
 import org.springframework.cloud.data.module.deployer.ModuleDeployer;
 import org.springframework.cloud.data.module.deployer.local.LocalModuleDeployer;
 import org.springframework.cloud.data.module.registry.ModuleRegistry;
@@ -35,6 +38,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Profile;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -58,6 +62,11 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 @Import(CloudConfiguration.class)
 @ComponentScan(basePackages = "org.springframework.cloud.data.rest.controller")
 public class AdminConfiguration {
+
+	@Bean
+	public MetricRepository metricRepository(RedisConnectionFactory redisConnectionFactory) {
+		return new RedisMetricRepository(redisConnectionFactory);
+	}
 
 	@Bean
 	public StreamDefinitionRepository streamDefinitionRepository() {
