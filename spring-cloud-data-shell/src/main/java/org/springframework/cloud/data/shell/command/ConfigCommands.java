@@ -65,7 +65,6 @@ public class ConfigCommands implements CommandMarker, InitializingBean {
 		}
 		catch (Exception e) {
 			this.shell.setCloudDataOperations(null);
-			e.printStackTrace();
 			return(String.format("Unable to contact Cloud data main at '%s'.",
 							targetUriString));
 		}
