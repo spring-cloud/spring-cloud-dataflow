@@ -16,8 +16,10 @@
 
 package org.springframework.cloud.data.module.deployer.local;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -51,8 +53,13 @@ public class LocalModuleDeployer implements ModuleDeployer {
 	@Override
 	public ModuleDeploymentId deploy(ModuleDeploymentRequest request) {
 		String module = request.getCoordinates().toString();
+		List<String> args = new ArrayList<>();
+		for (Map.Entry<String, String> entry : request.getDefinition().getBindings().entrySet()) {
+			args.add(String.format("--%s.spring.cloud.stream.bindings.%s=%s",
+					module, entry.getKey(), entry.getValue()));
+		}
 		logger.info("deploying module: " + module);
-		launcher.launch(new String[] { module }, new String[0]);
+		launcher.launch(new String[] { module }, args.toArray(new String[args.size()]));
 		ModuleDeploymentId id = new ModuleDeploymentId(request.getDefinition().getGroup(),
 				request.getDefinition().getLabel());
 		this.deployedModules.add(id);
