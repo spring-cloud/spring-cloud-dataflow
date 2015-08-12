@@ -22,6 +22,7 @@
 		<module>spring-cloud-data-module-deployer-local</module>
 		<module>spring-cloud-data-module-deployer-lattice</module>
 		<module>spring-cloud-data-module-deployer-cloudfoundry</module>
+		<module>spring-cloud-data-module-deployer-yarn</module>
 	</modules>
 	<dependencyManagement>
 		<dependencies>

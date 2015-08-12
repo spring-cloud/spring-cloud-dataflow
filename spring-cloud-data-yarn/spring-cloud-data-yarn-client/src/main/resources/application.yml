@@ -1,0 +1,20 @@
+spring:
+    main:
+        show_banner: false
+    hadoop:
+        fsUri: hdfs://localhost:8020
+        resourceManagerHost: localhost
+    yarn:
+        appType: CLOUDDATA
+        appName: spring-cloud-data-yarn-app
+        applicationBaseDir: /app/
+        applicationDir: /app/spring-cloud-data-yarn-app/
+        client:
+            clientClass: org.springframework.yarn.client.DefaultApplicationYarnClient
+            files:
+              - "file:spring-cloud-data-yarn/spring-cloud-data-yarn-appmaster/target/spring-cloud-data-yarn-appmaster-1.0.0.BUILD-SNAPSHOT.jar"
+              - "file:spring-cloud-data-yarn/spring-cloud-data-yarn-container/target/spring-cloud-data-yarn-container-1.0.0.BUILD-SNAPSHOT.jar"
+            launchcontext:
+                archiveFile: spring-cloud-data-yarn-appmaster-1.0.0.BUILD-SNAPSHOT.jar
+            resource:
+                memory: 1g

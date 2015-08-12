@@ -33,9 +33,9 @@ import org.springframework.cloud.data.module.registry.StubModuleRegistry;
 import org.springframework.cloud.stream.module.launcher.ModuleLauncher;
 import org.springframework.cloud.stream.module.launcher.ModuleLauncherConfiguration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Profile;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
@@ -53,6 +53,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
  * @author Marius Bogoevici
  * @author Patrick Peralta
  * @author Thomas Risberg
+ * @author Janne Valkealahti
  */
 @Configuration
 @EnableHypermediaSupport(type = HAL)
@@ -80,7 +81,7 @@ public class AdminConfiguration {
 	}
 
 	@Configuration
-	@Profile("!cloud")
+	@Conditional(LocalCondition.class)
 	@Import(ModuleLauncherConfiguration.class)
 	protected static class LocalConfig {
 

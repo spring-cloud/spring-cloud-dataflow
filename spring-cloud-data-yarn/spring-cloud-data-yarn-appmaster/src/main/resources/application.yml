@@ -1,0 +1,33 @@
+server:
+    port: 0
+endpoints:
+    shutdown:
+        enabled: true
+spring:
+    hadoop:
+        fsUri: hdfs://localhost:8020
+        resourceManagerHost: localhost
+    yarn:
+        appType: BOOT
+        appName: spring-cloud-data-yarn-app
+        applicationBaseDir: /app/
+        applicationDir: /app/spring-cloud-data-yarn-app/
+        appmaster:
+            appmasterClass: org.springframework.cloud.data.yarn.appmaster.CloudDataAppmaster
+            keepContextAlive: true
+            containercluster:
+                enabled: true
+                clusters:
+                    module-template:
+                        resource:
+                            priority: 10
+                            memory: 64
+                            virtualCores: 1
+                        launchcontext:
+                            locality: false
+                            archiveFile: spring-cloud-data-yarn-container-1.0.0.BUILD-SNAPSHOT.jar
+        endpoints:
+            containercluster:
+                enabled: true
+            containerregister:
+                enabled: false
