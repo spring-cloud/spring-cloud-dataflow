@@ -38,7 +38,7 @@ import org.springframework.shell.core.annotation.CliOption;
 import org.springframework.stereotype.Component;
 
 /**
- * Stream commands
+ * Stream commands.
  *
  * @author Ilayaperumal Gopinathan
  * @author Mark Fisher
