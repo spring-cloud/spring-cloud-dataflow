@@ -37,7 +37,7 @@ public interface CounterOperations {
 	PagedResources<MetricResource> list(/* TODO */);
 
 	/**
-	 * Delete the counter with given name
+	 * Delete the counter with given name.
 	 */
 	void delete(String name);
 }
