@@ -34,7 +34,7 @@ import org.springframework.cloud.data.core.parser.StreamDefinitionParser;
  * @author Andy Clement
  * @author David Turanski
  */
-public class StreamConfigParserTests {
+public class StreamDslParserTests {
 
 	@Rule
 	public ExpectedException thrown = ExpectedException.none();
@@ -541,22 +541,12 @@ public class StreamConfigParserTests {
 		assertThat((String) ast.getModuleNodes().get(1).getArgumentsAsProperties().get("expression"), equalTo("payload.replace(\"abc\", '')"));
 	}
 
-
-	private StreamDslParser getParser() {
-		return new StreamDslParser();
-	}
-
 	StreamNode parse(String streamDefinition) {
-		return getParser().parse(streamDefinition);
+		return new StreamDslParser(streamDefinition).parse();
 	}
 
 	StreamNode parse(String streamName, String streamDefinition) {
-		StreamNode streamNode = getParser().parse(streamName, streamDefinition);
-		String sname = streamNode.getStreamName();
-		if (sname == null) {
-			sname = streamName;
-		}
-		return streamNode;
+		return new StreamDslParser(streamName, streamDefinition).parse();
 	}
 
 	private void checkForIllegalStreamName(String streamName, String streamDef) {

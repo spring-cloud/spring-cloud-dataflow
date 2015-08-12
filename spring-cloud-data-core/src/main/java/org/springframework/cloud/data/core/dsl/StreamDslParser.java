@@ -17,30 +17,50 @@
 package org.springframework.cloud.data.core.dsl;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 /**
+ * Parser for stream DSL that generates {@link StreamNode}.
+ *
  * @author Andy Clement
+ * @author Patrick Peralta
  */
-public class StreamDslParser {
+public class StreamDslParser extends ModuleParser {
 
 	/**
-	 * Tokens resulting from stream definition parsing.
+	 * Stream name (may be {@code null}).
 	 */
-	private Tokens tokens;
+	private final String name;
 
 	/**
-	 * Parse a stream definition without supplying the stream name up front.
-	 * The stream name may be embedded in the definition.
-	 * For example: <code>mystream = http | file</code>
+	 * Stream DSL text.
+	 */
+	private final String dsl;
+
+
+	/**
+	 * Construct a {@code StreamDslParser} without supplying the stream name up front.
+	 * The stream name may be embedded in the definition; for example:
+	 * {@code mystream = http | file}.
 	 *
-	 * @return the AST for the parsed stream
+	 * @param dsl the stream definition DSL text
 	 */
-	public StreamNode parse(String stream) {
-		return parse(null, stream);
+	public StreamDslParser(String dsl) {
+		this(null, dsl);
+	}
+
+	/**
+	 * Construct a {@code StreamDslParser} for a stream with the provided name.
+	 *
+	 * @param name stream name
+	 * @param dsl  stream dsl text
+	 */
+	public StreamDslParser(String name, String dsl) {
+		super(new Tokens(dsl));
+		this.name = name;
+		this.dsl = dsl;
 	}
 
 	/**
@@ -49,15 +69,14 @@ public class StreamDslParser {
 	 * @return the AST for the parsed stream
 	 * @throws ParseException
 	 */
-	public StreamNode parse(String name, String stream) {
-		tokens = new Tokens(stream);
+	public StreamNode parse() {
 		StreamNode ast = eatStream();
 
 		// Check the stream name, however it was specified
-		if (ast.getName() != null && !isValidStreamName(ast.getName())) {
+		if (ast.getName() != null && !isValidName(ast.getName())) {
 			throw new ParseException(ast.getName(), 0, DSLMessage.ILLEGAL_STREAM_NAME, ast.getName());
 		}
-		if (name != null && !isValidStreamName(name)) {
+		if (name != null && !isValidName(name)) {
 			throw new ParseException(name, 0, DSLMessage.ILLEGAL_STREAM_NAME, name);
 		}
 
@@ -69,7 +88,7 @@ public class StreamDslParser {
 			if (previous != null) {
 				String duplicate = node.getLabelName();
 				int previousIndex = new ArrayList<String>(alreadySeen.keySet()).indexOf(duplicate);
-				throw new ParseException(stream, node.startPos, DSLMessage.DUPLICATE_LABEL,
+				throw new ParseException(dsl, node.startPos, DSLMessage.DUPLICATE_LABEL,
 						duplicate, previous.getName(), previousIndex, node.getName(), m);
 			}
 		}
@@ -77,10 +96,11 @@ public class StreamDslParser {
 		// Check if the stream name is same as that of any of its modules' names
 		// Can lead to infinite recursion during resolution, when parsing a composite module.
 		if (ast.getModule(name) != null) {
-			throw new ParseException(stream, stream.indexOf(name),
+			throw new ParseException(dsl, dsl.indexOf(name),
 					DSLMessage.STREAM_NAME_MATCHING_MODULE_NAME,
 					name);
 		}
+		Tokens tokens = getTokens();
 		if (tokens.hasNext()) {
 			tokens.raiseException(tokens.peek().startPos, DSLMessage.MORE_INPUT,
 					toString(tokens.next()));
@@ -89,8 +109,17 @@ public class StreamDslParser {
 		return ast;
 	}
 
-	// (name =)
-	private String maybeEatStreamName() {
+	/**
+	 * If a stream name is present, return it and advance the token position -
+	 * otherwise return {@code null}.
+	 * <p>
+	 * Expected format:
+	 * {@code name =}
+	 *
+	 * @return stream name if present
+	 */
+	private String eatStreamName() {
+		Tokens tokens = getTokens();
 		String streamName = null;
 		if (tokens.lookAhead(1, TokenKind.EQUALS)) {
 			if (tokens.peek(TokenKind.IDENTIFIER)) {
@@ -105,10 +134,18 @@ public class StreamDslParser {
 		return streamName;
 	}
 
-	// stream: (streamName) (sourceChannel) moduleList (sinkChannel)
+	/**
+	 * Return a {@link StreamNode} based on the tokens resulting from the parsed DSL.
+	 * <p>
+	 * Expected format:
+	 * {@code stream: (streamName) (sourceChannel) moduleList (sinkChannel)}
+	 *
+	 * @return {@code StreamNode} based on parsed DSL
+	 */
 	private StreamNode eatStream() {
-		String streamName = maybeEatStreamName();
-		SourceChannelNode sourceChannelNode = maybeEatSourceChannel();
+		String streamName = eatStreamName();
+		SourceChannelNode sourceChannelNode = eatSourceChannel();
+
 		// This construct: queue:foo > topic:bar is a source then a sink channel
 		// with no module. Special handling for that is right here:
 		boolean bridge = false;
@@ -118,7 +155,8 @@ public class StreamDslParser {
 			}
 		}
 
-		List<ModuleNode> moduleNodes = null;
+		Tokens tokens = getTokens();
+		List<ModuleNode> moduleNodes;
 		if (bridge) {
 			// Create a bridge module to hang the source/sink channels off
 			tokens.decrementPosition(); // Rewind so we can nicely eat the sink channel
@@ -129,7 +167,7 @@ public class StreamDslParser {
 		else {
 			moduleNodes = eatModuleList();
 		}
-		SinkChannelNode sinkChannelNode = maybeEatSinkChannel();
+		SinkChannelNode sinkChannelNode = eatSinkChannel();
 
 		// Further data is an error
 		if (tokens.hasNext()) {
@@ -141,12 +179,23 @@ public class StreamDslParser {
 				sourceChannelNode, sinkChannelNode);
 	}
 
+	/**
+	 * Return {@code true} if no more pipes are present from the current token position.
+	 *
+	 * @return {@code true} if no more pipes are present from the current token position
+	 */
 	private boolean noMorePipes() {
-		return noMorePipes(tokens.position());
+		return noMorePipes(getTokens().position());
 	}
 
+	/**
+	 * Return {@code true} if no more pipes are present from the given position.
+	 *
+	 * @param position token position from which to check for the presence of pipes
+	 * @return {@code true} if no more pipes are present from the given position
+	 */
 	private boolean noMorePipes(int position) {
-		List<Token> tokenList = tokens.getTokenStream();
+		List<Token> tokenList = getTokens().getTokenStream();
 		int tokenStreamLength = tokenList.size();
 		while (position < tokenStreamLength) {
 			if (tokenList.get(position++).getKind() == TokenKind.PIPE) {
@@ -156,16 +205,25 @@ public class StreamDslParser {
 		return true;
 	}
 
+	/**
+	 * Return {@code true} if the current token position appears to be pointing
+	 * at a channel.
+	 *
+	 * @return {@code true} if the current token position appears to be pointing
+	 * at a channel
+	 */
 	private boolean looksLikeChannel() {
-		return looksLikeChannel(tokens.position());
+		return looksLikeChannel(getTokens().position());
 	}
 
-	enum ChannelPrefix {
-		queue, tap, topic;
-	}
-
-	// return true if the specified tokenpointer appears to be pointing at a channel
+	/**
+	 * Return {@code true} if the indicated position appears to be pointing at a channel.
+	 *
+	 * @param position token position to check
+	 * @return {@code true} if the indicated position appears to be pointing at a channel.
+	 */
 	private boolean looksLikeChannel(int position) {
+		Tokens tokens = getTokens();
 		List<Token> tokenList = tokens.getTokenStream();
 		int size = tokenList.size();
 
@@ -173,18 +231,27 @@ public class StreamDslParser {
 			String prefix = tokenList.get(position).data;
 			if (isLegalChannelPrefix(prefix)) {
 				if (tokens.position() + 1 < size && tokenList.get(position + 1).getKind() == TokenKind.COLON) {
-					// if (isNextAdjacent(tp) && isNextAdjacent(tp + 1)) {
 					return true;
-					// }
 				}
 			}
 		}
 		return false;
 	}
 
-	// identifier ':' identifier >
-	// tap ':' identifier ':' identifier '.' identifier >
-	private SourceChannelNode maybeEatSourceChannel() {
+	/**
+	 * If the current token position contains a source channel, return a
+	 * {@link SourceChannelNode} and advance the token position; otherwise
+	 * return {@code null}.
+	 * <p>
+	 * Expected format:
+	 * {@code identifier ':' identifier >}
+	 * {@code tap ':' identifier ':' identifier '.' identifier >}
+	 *
+	 * @return a {@code SourceChannelNode} or {@code null} if the token
+	 * position is not pointing at a source channel
+	 */
+	private SourceChannelNode eatSourceChannel() {
+		Tokens tokens = getTokens();
 		boolean gtBeforePipe = false;
 		// Seek for a GT(>) before a PIPE(|)
 		List<Token> tokenList = tokens.getTokenStream();
@@ -207,8 +274,19 @@ public class StreamDslParser {
 		return new SourceChannelNode(channel, gt.endPos);
 	}
 
-	// '>' identifier ':' identifier
-	private SinkChannelNode maybeEatSinkChannel() {
+	/**
+	 * If the current token position contains a sink channel, return a
+	 * {@link SourceChannelNode} and advance the token position; otherwise
+	 * return {@code null}.
+	 * <p>
+	 * Expected format:
+	 * {@code '>' identifier ':' identifier}
+	 *
+	 * @return a {@code SourceChannelNode} or {@code null} if the token
+	 * position is not pointing at a sink channel
+	 */
+	private SinkChannelNode eatSinkChannel() {
+		Tokens tokens = getTokens();
 		SinkChannelNode sinkChannelNode = null;
 		if (tokens.peek(TokenKind.GT)) {
 			Token gt = tokens.eat(TokenKind.GT);
@@ -218,24 +296,55 @@ public class StreamDslParser {
 		return sinkChannelNode;
 	}
 
+	/**
+	 * Enumeration of valid channel prefixes.
+	 */
+	enum ChannelPrefix {
+		queue, tap, topic;
+	}
+
+	/**
+	 * Return {@code true} if the provided string contains a valid
+	 * channel prefix.
+	 *
+	 * @param string string to check for a channel prefix
+	 * @return {@code true} if the provided string contains a channel prefix
+	 */
 	private boolean isLegalChannelPrefix(String string) {
 		return string.equals(ChannelPrefix.queue.toString()) ||
 				string.equals(ChannelPrefix.topic.toString()) ||
 				string.equals(ChannelPrefix.tap.toString());
 	}
 
-	// A channel reference is a colon separated list of identifiers that determine
-	// the appropriate scope then a sequence of dot separated identifiers that
-	// reference something within that scope.
-	// Only three types of top level prefix are supported for channels:queue, topic, tap
-	// identifier [ ':' identifier ]* [ '.' identifier ]*
-	// If the first identifier is a tap (and tapping is allowed) then
-	// the dereferencing is allowed
+	/**
+	 * Return a {@link ChannelNode} for the token at the current position.
+	 * <p>
+	 * A channel reference is a colon separated list of identifiers that determine
+	 * the appropriate scope then a sequence of dot separated identifiers that
+	 * reference something within that scope.
+	 * <p>
+	 * Three types of top level prefix are supported for channels:
+	 * <ul>
+	 *     <li>queue</li>
+	 *     <li>topic</li>
+	 *     <li>tap</li>
+	 * </ul>
+	 * Expected format:
+	 * {@code identifier [ ':' identifier ]* [ '.' identifier ]*}
+	 * <p>
+	 * If the first identifier is a tap (and tapping is allowed) then
+	 * the de-referencing is allowed.
+	 *
+	 * @param tapAllowed if {@code true}, a tap is allowed as the first identifier
+	 * @return {@code ChannelNode} representing the channel reference
+	 */
 	private ChannelNode eatChannelReference(boolean tapAllowed) {
+		Tokens tokens = getTokens();
 		Token firstToken = tokens.next();
 		if (!firstToken.isIdentifier() || !isLegalChannelPrefix(firstToken.data)) {
 			tokens.raiseException(firstToken.startPos,
-					tapAllowed ? DSLMessage.EXPECTED_CHANNEL_PREFIX_QUEUE_TOPIC_TAP
+					tapAllowed
+							? DSLMessage.EXPECTED_CHANNEL_PREFIX_QUEUE_TOPIC_TAP
 							: DSLMessage.EXPECTED_CHANNEL_PREFIX_QUEUE_TOPIC,
 					toString(firstToken));
 		}
@@ -243,11 +352,13 @@ public class StreamDslParser {
 		channelScopeComponents.add(firstToken);
 		while (tokens.peek(TokenKind.COLON)) {
 			if (!tokens.isNextAdjacent()) {
-				tokens.raiseException(tokens.peek().startPos, DSLMessage.NO_WHITESPACE_IN_CHANNEL_DEFINITION);
+				tokens.raiseException(tokens.peek().startPos,
+						DSLMessage.NO_WHITESPACE_IN_CHANNEL_DEFINITION);
 			}
 			tokens.next(); // skip colon
 			if (!tokens.isNextAdjacent()) {
-				tokens.raiseException(tokens.peek().startPos, DSLMessage.NO_WHITESPACE_IN_CHANNEL_DEFINITION);
+				tokens.raiseException(tokens.peek().startPos,
+						DSLMessage.NO_WHITESPACE_IN_CHANNEL_DEFINITION);
 			}
 			channelScopeComponents.add(tokens.eat(TokenKind.IDENTIFIER));
 		}
@@ -255,32 +366,38 @@ public class StreamDslParser {
 		if (tapAllowed && firstToken.data.equalsIgnoreCase("tap")) {
 			if (tokens.peek(TokenKind.DOT)) {
 				if (channelScopeComponents.size() < 3) {
-					tokens.raiseException(firstToken.startPos, DSLMessage.TAP_NEEDS_THREE_COMPONENTS);
+					tokens.raiseException(firstToken.startPos,
+							DSLMessage.TAP_NEEDS_THREE_COMPONENTS);
 				}
 				String tokenData = channelScopeComponents.get(1).data;
 				// for Stream, tap:stream:XXX - the channel name is always indexed
 				// for Job, tap:job:XXX - the channel name can have "." in case of job notification channels
 				if (!tokenData.equalsIgnoreCase("stream") && !tokenData.equalsIgnoreCase("job")) {
-					tokens.raiseException(tokens.peek().startPos, DSLMessage.ONLY_A_TAP_ON_A_STREAM_OR_JOB_CAN_BE_INDEXED);
+					tokens.raiseException(tokens.peek().startPos,
+							DSLMessage.ONLY_A_TAP_ON_A_STREAM_OR_JOB_CAN_BE_INDEXED);
 				}
 			}
 			while (tokens.peek(TokenKind.DOT)) {
 				if (!tokens.isNextAdjacent()) {
-					tokens.raiseException(tokens.peek().startPos, DSLMessage.NO_WHITESPACE_IN_CHANNEL_DEFINITION);
+					tokens.raiseException(tokens.peek().startPos,
+							DSLMessage.NO_WHITESPACE_IN_CHANNEL_DEFINITION);
 				}
 				tokens.next(); // skip dot
 				if (!tokens.isNextAdjacent()) {
-					tokens.raiseException(tokens.peek().startPos, DSLMessage.NO_WHITESPACE_IN_CHANNEL_DEFINITION);
+					tokens.raiseException(tokens.peek().startPos,
+							DSLMessage.NO_WHITESPACE_IN_CHANNEL_DEFINITION);
 				}
 				channelReferenceComponents.add(tokens.eat(TokenKind.IDENTIFIER));
 			}
 		}
 		else if (tokens.peek(TokenKind.DOT)) {
 			if (tapAllowed) {
-				tokens.raiseException(tokens.peek().startPos, DSLMessage.ONLY_A_TAP_ON_A_STREAM_OR_JOB_CAN_BE_INDEXED);
+				tokens.raiseException(tokens.peek().startPos,
+						DSLMessage.ONLY_A_TAP_ON_A_STREAM_OR_JOB_CAN_BE_INDEXED);
 			}
 			else {
-				tokens.raiseException(tokens.peek().startPos, DSLMessage.CHANNEL_INDEXING_NOT_ALLOWED);
+				tokens.raiseException(tokens.peek().startPos,
+						DSLMessage.CHANNEL_INDEXING_NOT_ALLOWED);
 			}
 		}
 		// Verify the structure:
@@ -291,25 +408,29 @@ public class StreamDslParser {
 			// tap:queue:XXX
 			// tap:topic:XXX
 			if (channelScopeComponents.size() < 3) {
-				tokens.raiseException(firstToken.startPos, DSLMessage.TAP_NEEDS_THREE_COMPONENTS);
+				tokens.raiseException(firstToken.startPos,
+						DSLMessage.TAP_NEEDS_THREE_COMPONENTS);
 			}
 			Token tappingToken = channelScopeComponents.get(1);
 			String tapping = tappingToken.data.toLowerCase();
 			channelScopeComponents.remove(0); // remove 'tap'
-			if (tapping.equals("stream")) {
-				channelType = ChannelType.TAP_STREAM;
-			}
-			else if (tapping.equals("job")) {
-				channelType = ChannelType.TAP_JOB;
-			}
-			else if (tapping.equals("queue")) {
-				channelType = ChannelType.TAP_QUEUE;
-			}
-			else if (tapping.equals("topic")) {
-				channelType = ChannelType.TAP_TOPIC;
-			}
-			else {
-				tokens.raiseException(tappingToken.startPos, DSLMessage.NOT_ALLOWED_TO_TAP_THAT, tappingToken.data);
+			switch (tapping) {
+				case "stream":
+					channelType = ChannelType.TAP_STREAM;
+					break;
+				case "job":
+					channelType = ChannelType.TAP_JOB;
+					break;
+				case "queue":
+					channelType = ChannelType.TAP_QUEUE;
+					break;
+				case "topic":
+					channelType = ChannelType.TAP_TOPIC;
+					break;
+				default:
+					tokens.raiseException(tappingToken.startPos,
+							DSLMessage.NOT_ALLOWED_TO_TAP_THAT, tappingToken.data);
+					break;
 			}
 		}
 		else {
@@ -327,29 +448,26 @@ public class StreamDslParser {
 				channelScopeComponents.remove(0);
 			}
 		}
-		int endpos = channelScopeComponents.get(channelScopeComponents.size() - 1).endPos;
+		int endPos = channelScopeComponents.get(channelScopeComponents.size() - 1).endPos;
 		if (!channelReferenceComponents.isEmpty()) {
-			endpos = channelReferenceComponents.get(channelReferenceComponents.size() - 1).endPos;
+			endPos = channelReferenceComponents.get(channelReferenceComponents.size() - 1).endPos;
 		}
-		return new ChannelNode(channelType, firstToken.startPos, endpos, tokenListToStringList(channelScopeComponents),
+		return new ChannelNode(channelType, firstToken.startPos, endPos,
+				tokenListToStringList(channelScopeComponents),
 				tokenListToStringList(channelReferenceComponents));
 	}
 
-	private List<String> tokenListToStringList(List<Token> tokens) {
-		if (tokens.isEmpty()) {
-			return Collections.<String> emptyList();
-		}
-		List<String> data = new ArrayList<String>();
-		for (Token token : tokens) {
-			data.add(token.data);
-		}
-		return data;
-	}
-
-	// moduleList: module (| module)*
-	// A stream may end in a module (if it is a sink) or be followed by
-	// a sink channel.
+	/**
+	 * Return a list of {@link ModuleNode} starting from the current token position.
+	 * <p>
+	 * Expected format:
+	 * {@code moduleList: module (| module)*}
+	 * A stream may end in a module (if it is a sink) or be followed by a sink channel.
+	 *
+	 * @return a list of {@code ModuleNode}
+	 */
 	private List<ModuleNode> eatModuleList() {
+		Tokens tokens = getTokens();
 		List<ModuleNode> moduleNodes = new ArrayList<ModuleNode>();
 
 		moduleNodes.add(eatModule());
@@ -367,165 +485,9 @@ public class StreamDslParser {
 		return moduleNodes;
 	}
 
-	// module: [label':']? identifier (moduleArguments)*
-	private ModuleNode eatModule() {
-		Token label = null;
-		Token name = tokens.next();
-		if (!name.isKind(TokenKind.IDENTIFIER)) {
-			tokens.raiseException(name.startPos, DSLMessage.EXPECTED_MODULENAME, name.data != null ? name.data
-					: new String(name.getKind().tokenChars));
-		}
-		if (tokens.peek(TokenKind.COLON)) {
-			if (!tokens.isNextAdjacent()) {
-				tokens.raiseException(tokens.peek().startPos, DSLMessage.NO_WHITESPACE_BETWEEN_LABEL_NAME_AND_COLON);
-			}
-			tokens.next(); // swallow colon
-			label = name;
-			name = tokens.eat(TokenKind.IDENTIFIER);
-		}
-		Token moduleName = name;
-		tokens.checkpoint();
-		ArgumentNode[] args = maybeEatModuleArgs();
-		int startPos = label != null ? label.startPos : moduleName.startPos;
-		return new ModuleNode(toLabelNode(label), moduleName.data, startPos, moduleName.endPos, args);
-	}
-
-	private LabelNode toLabelNode(Token label) {
-		if (label == null) {
-			return null;
-		}
-		return new LabelNode(label.data, label.startPos, label.endPos);
-	}
-
-	// moduleArguments : DOUBLE_MINUS identifier(name) EQUALS identifier(value)
-	private ArgumentNode[] maybeEatModuleArgs() {
-		List<ArgumentNode> args = null;
-		if (tokens.peek(TokenKind.DOUBLE_MINUS) && tokens.isNextAdjacent()) {
-			tokens.raiseException(tokens.peek().startPos, DSLMessage.EXPECTED_WHITESPACE_AFTER_MODULE_BEFORE_ARGUMENT);
-		}
-		while (tokens.peek(TokenKind.DOUBLE_MINUS)) {
-			Token dashDash = tokens.next(); // skip the '--'
-			if (tokens.peek(TokenKind.IDENTIFIER) && !tokens.isNextAdjacent()) {
-				tokens.raiseException(tokens.peek().startPos, DSLMessage.NO_WHITESPACE_BEFORE_ARG_NAME);
-			}
-			List<Token> argNameComponents = eatDottedName();
-			if (tokens.peek(TokenKind.EQUALS) && !tokens.isNextAdjacent()) {
-				tokens.raiseException(tokens.peek().startPos, DSLMessage.NO_WHITESPACE_BEFORE_ARG_EQUALS);
-			}
-			tokens.eat(TokenKind.EQUALS);
-			if (tokens.peek(TokenKind.IDENTIFIER) && !tokens.isNextAdjacent()) {
-				tokens.raiseException(tokens.peek().startPos, DSLMessage.NO_WHITESPACE_BEFORE_ARG_VALUE);
-			}
-			// Process argument value:
-			Token t = tokens.peek();
-			String argValue = eatArgValue();
-			tokens.checkpoint();
-			if (args == null) {
-				args = new ArrayList<ArgumentNode>();
-			}
-			args.add(new ArgumentNode(data(argNameComponents), argValue, dashDash.startPos, t.endPos));
-		}
-		return args == null ? null : args.toArray(new ArgumentNode[args.size()]);
-	}
-
-	// argValue: identifier | literal_string
-	private String eatArgValue() {
-		Token t = tokens.next();
-		String argValue = null;
-		if (t.getKind() == TokenKind.IDENTIFIER) {
-			argValue = t.data;
-		}
-		else if (t.getKind() == TokenKind.LITERAL_STRING) {
-			String quotesUsed = t.data.substring(0, 1);
-			argValue = t.data.substring(1, t.data.length() - 1).replace(quotesUsed+quotesUsed, quotesUsed);
-		}
-		else {
-			tokens.raiseException(t.startPos, DSLMessage.EXPECTED_ARGUMENT_VALUE, t.data);
-		}
-		return argValue;
-	}
-
-
-	private List<Token> eatDottedName() {
-		return eatDottedName(DSLMessage.NOT_EXPECTED_TOKEN);
-	}
-
-	/**
-	 * Consumes and returns (identifier [DOT identifier]*) as long as they're adjacent.
-	 *
-	 * @param error the kind of error to report if input is ill-formed
-	 */
-	private List<Token> eatDottedName(DSLMessage error) {
-		List<Token> result = new ArrayList<Token>(3);
-		Token name = tokens.next();
-		if (!name.isKind(TokenKind.IDENTIFIER)) {
-			tokens.raiseException(name.startPos, error, name.data != null ? name.data
-					: new String(name.getKind().tokenChars));
-		}
-		result.add(name);
-		while (tokens.peek(TokenKind.DOT)) {
-			if (!tokens.isNextAdjacent()) {
-				tokens.raiseException(tokens.peek().startPos, DSLMessage.NO_WHITESPACE_IN_DOTTED_NAME);
-			}
-			result.add(tokens.next()); // consume dot
-			if (tokens.peek(TokenKind.IDENTIFIER) && !tokens.isNextAdjacent()) {
-				tokens.raiseException(tokens.peek().startPos, DSLMessage.NO_WHITESPACE_IN_DOTTED_NAME);
-			}
-			result.add(tokens.eat(TokenKind.IDENTIFIER));
-		}
-		return result;
-	}
-
-	/**
-	 * Verify the supplied name is a valid stream name. Valid stream names must follow the same rules as java
-	 * identifiers, with the additional option to use a hyphen ('-') after the first character.
-	 *
-	 * @param streamName the name to validate
-	 * @return true if name is valid
-	 */
-	public static boolean isValidStreamName(String streamName) {
-		if (streamName.length() == 0) {
-			return false;
-		}
-		if (!Character.isJavaIdentifierStart(streamName.charAt(0))) {
-			return false;
-		}
-		for (int i = 1, max = streamName.length(); i < max; i++) {
-			char ch = streamName.charAt(i);
-			if (!(Character.isJavaIdentifierPart(ch) || ch == '-')) {
-				return false;
-			}
-		}
-		return true;
-	}
-
-	/**
-	 * Return the concatenation of the data of many tokens.
-	 */
-	private String data(Iterable<Token> many) {
-		StringBuilder result = new StringBuilder();
-		for (Token t : many) {
-			if (t.getKind().hasPayload()) {
-				result.append(t.data);
-			}
-			else {
-				result.append(t.getKind().tokenChars);
-			}
-		}
-		return result.toString();
-	}
-
-	private String toString(Token t) {
-		if (t.getKind().hasPayload()) {
-			return t.stringValue();
-		}
-		else {
-			return new String(t.kind.getTokenChars());
-		}
-	}
-
 	@Override
 	public String toString() {
+		Tokens tokens = getTokens();
 		return String.valueOf(tokens.getTokenStream()) + "\n" +
 				"tokenStreamPointer=" + tokens.position() + "\n";
 	}

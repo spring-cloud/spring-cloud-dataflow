@@ -66,8 +66,7 @@ public class StreamDefinitionParser {
 	 * @return list of module definitions for the stream
 	 */
 	public List<ModuleDefinition> parse(String name, String dsl) {
-		StreamDslParser parser = new StreamDslParser();
-		return buildModuleDefinitions(name, parser.parse(name, dsl));
+		return buildModuleDefinitions(name, new StreamDslParser(name, dsl).parse());
 	}
 
 	/**
