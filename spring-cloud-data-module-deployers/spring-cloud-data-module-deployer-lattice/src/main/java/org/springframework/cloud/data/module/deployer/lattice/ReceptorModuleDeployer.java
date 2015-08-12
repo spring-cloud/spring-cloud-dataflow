@@ -64,6 +64,9 @@ public class ReceptorModuleDeployer implements ModuleDeployer {
 		Collections.addAll(environmentVariables, lrp.getEnv());
 		environmentVariables.add(new EnvironmentVariable("MODULES", request.getCoordinates().toString()));
 		environmentVariables.add(new EnvironmentVariable("SPRING_PROFILES_ACTIVE", "cloud"));
+		for (Map.Entry<String, String> entry : request.getDefinition().getParameters().entrySet()) {
+			environmentVariables.add(new EnvironmentVariable(entry.getKey(), entry.getValue()));
+		}
 		for (Map.Entry<String, String> entry : request.getDefinition().getBindings().entrySet()) {
 			environmentVariables.add(new EnvironmentVariable(
 					String.format("SPRING_CLOUD_STREAM_BINDINGS_%s", entry.getKey().toUpperCase()),

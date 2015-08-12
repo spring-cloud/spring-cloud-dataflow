@@ -54,6 +54,9 @@ public class LocalModuleDeployer implements ModuleDeployer {
 	public ModuleDeploymentId deploy(ModuleDeploymentRequest request) {
 		String module = request.getCoordinates().toString();
 		List<String> args = new ArrayList<>();
+		for (Map.Entry<String, String> entry : request.getDefinition().getParameters().entrySet()) {
+			args.add(String.format("--%s.%s=%s", module, entry.getKey(), entry.getValue()));
+		}
 		for (Map.Entry<String, String> entry : request.getDefinition().getBindings().entrySet()) {
 			args.add(String.format("--%s.spring.cloud.stream.bindings.%s=%s",
 					module, entry.getKey(), entry.getValue()));
