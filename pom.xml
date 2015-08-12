@@ -34,6 +34,7 @@
 		<module>spring-cloud-data-rest</module>
 		<module>spring-cloud-data-rest-client</module>
 		<module>spring-cloud-data-shell</module>
+		<module>spring-cloud-data-yarn</module>
 		<!-- module>docs</module -->
 	</modules>
 	<dependencyManagement>

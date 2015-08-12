@@ -5,3 +5,6 @@ management:
 security:
   basic:
     enabled: false
+spring:
+  hadoop:
+    resourceManagerHost: localhost
