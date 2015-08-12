@@ -39,5 +39,5 @@ public interface CounterOperations {
 	/**
 	 * Delete the counter with given name.
 	 */
-	void delete(String name);
+	void reset(String name);
 }

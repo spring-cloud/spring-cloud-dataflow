@@ -15,17 +15,16 @@
 
 package org.springframework.cloud.data.rest.client;
 
-import java.util.Map;
-
 import org.springframework.cloud.data.rest.resource.CounterResource;
 import org.springframework.cloud.data.rest.resource.MetricResource;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.ResourceSupport;
-import org.springframework.hateoas.UriTemplate;
 import org.springframework.web.client.RestTemplate;
 
 /**
- * Created by ericbottard on 12/08/15.
+ * Implementation for {@link CounterOperations} that interacts with the Spring Cloud Data REST API.
+ *
+ * @author Eric Bottard
  */
 public class CounterTemplate implements CounterOperations {
 
@@ -53,7 +52,7 @@ public class CounterTemplate implements CounterOperations {
 	}
 
 	@Override
-	public void delete(String name) {
+	public void reset(String name) {
 		restTemplate.delete(links.getLink(COUNTER_RELATION).expand(name).getHref());
 	}
 }
