@@ -83,7 +83,7 @@ public class CounterController {
 	/**
 	 * Retrieve information about a specific counter.
 	 */
-	@RequestMapping(value = "/{name}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+	@RequestMapping(value = "/{name}", method = RequestMethod.GET)
 	public CounterResource display(@PathVariable("name") String name) {
 		Metric<Double> c = (Metric<Double>) metricRepository.findOne(COUNTER_PREFIX + name);
 		if (c == null) {
