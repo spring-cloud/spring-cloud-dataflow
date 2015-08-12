@@ -14,23 +14,38 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.data.rest.client;
+package org.springframework.cloud.data.rest.resource;
 
 /**
- * Interface the REST clients implement to interact with spring-cloud-data REST API.
+ * The REST representation of a Counter.
  *
- * @author Ilayaperumal Gopinathan
+ * @author Eric Bottard
  */
-public interface CloudDataOperations {
+public class CounterResource extends MetricResource {
 
 	/**
-	 * Stream related operations.
+	 * The value for the counter.
 	 */
-	public StreamOperations streamOperations();
+	private long value;
+
 
 	/**
-	 * Counter related operations.
+	 * No-arg constructor for serialization frameworks.
 	 */
-	public CounterOperations counterOperations();
+	protected CounterResource() {
+
+	}
+
+	public CounterResource(String name, long value) {
+		super(name);
+		this.value = value;
+	}
+
+	/**
+	 * Return the value for the counter.
+	 */
+	public long getValue() {
+		return value;
+	}
 
 }

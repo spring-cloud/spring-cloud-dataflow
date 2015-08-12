@@ -1,6 +1,5 @@
 /*
  * Copyright 2015 the original author or authors.
- *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,21 +15,29 @@
 
 package org.springframework.cloud.data.rest.client;
 
+import org.springframework.cloud.data.rest.resource.CounterResource;
+import org.springframework.cloud.data.rest.resource.MetricResource;
+import org.springframework.hateoas.PagedResources;
+
 /**
- * Interface the REST clients implement to interact with spring-cloud-data REST API.
- *
- * @author Ilayaperumal Gopinathan
+ * Interface defining operations available when dealing with Counters.
+ * 
+ * @author Eric Bottard
  */
-public interface CloudDataOperations {
+public interface CounterOperations {
 
 	/**
-	 * Stream related operations.
+	 * Retrieve information about the given named counter.
 	 */
-	public StreamOperations streamOperations();
+	CounterResource retrieve(String name);
 
 	/**
-	 * Counter related operations.
+	 * Retrieve basic information (i.e. names) for existing counters.
 	 */
-	public CounterOperations counterOperations();
+	PagedResources<MetricResource> list(/* TODO */);
 
+	/**
+	 * Delete the counter with given name
+	 */
+	void delete(String name);
 }
