@@ -15,28 +15,39 @@
  */
 package org.springframework.cloud.data.core.dsl;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
+ * Parser for task DSL that generates {@link ModuleNode}.
+ *
  * @author Michael Minella
+ * @author Patrick Peralta
  */
-public class TaskDslParser {
+public class TaskDslParser extends ModuleParser {
 
 	/**
-	 * Tokens resulting from task definition parsing.
+	 * Task name (may be {@code null}).
 	 */
-	private Tokens tokens;
+	private final String name;
 
 	/**
-	 * Parse a task definition without supplying the task name up front.
-	 * The task name may be embedded in the definition.
-	 * For example: <code>myTask = filejdbc</code>
+	 * Construct a {@code TaskDslParser} without supplying the task name up front.
+	 * The task name may be embedded in the definition; for example:
+	 * {@code myTask = filejdbc}
 	 *
-	 * @return the AST for the parsed stream
+	 * @param dsl the task definition DSL text
 	 */
-	public ModuleNode parse(String stream) {
-		return parse(null, stream);
+	public TaskDslParser(String dsl) {
+		this(null, dsl);
+	}
+
+	/**
+	 * Construct a {@code StreamDslParser} for a task with the provided name.
+	 *
+	 * @param name task name
+	 * @param dsl  task dsl text
+	 */
+	public TaskDslParser(String name, String dsl) {
+		super(new Tokens(dsl));
+		this.name = name;
 	}
 
 	/**
@@ -45,179 +56,22 @@ public class TaskDslParser {
 	 * @return the AST for the parsed task
 	 * @throws ParseException
 	 */
-	public ModuleNode parse(String name, String task) {
-		tokens = new Tokens(task);
+	public ModuleNode parse() {
 		ModuleNode ast = eatModule();
 
 		// Check the task name, however it was specified
-		if (ast.getName() != null && !isValidTaskName(ast.getName())) {
+		if (ast.getName() != null && !isValidName(ast.getName())) {
 			throw new ParseException(ast.getName(), 0, DSLMessage.ILLEGAL_TASK_NAME, ast.getName());
 		}
-		if (name != null && !isValidTaskName(name)) {
+		if (name != null && !isValidName(name)) {
 			throw new ParseException(name, 0, DSLMessage.ILLEGAL_TASK_NAME, name);
 		}
+		Tokens tokens = getTokens();
 		if (tokens.hasNext()) {
 			tokens.raiseException(tokens.peek().startPos, DSLMessage.MORE_INPUT, toString(tokens.next()));
 		}
 
 		return ast;
-	}
-
-	// module: [label':']? identifier (moduleArguments)*
-	private ModuleNode eatModule() {
-		Token label = null;
-		Token name = tokens.next();
-		if (!name.isKind(TokenKind.IDENTIFIER)) {
-			tokens.raiseException(name.startPos, DSLMessage.EXPECTED_MODULENAME, name.data != null ? name.data
-					: new String(name.getKind().tokenChars));
-		}
-		if (tokens.peek(TokenKind.COLON)) {
-			if (!tokens.isNextAdjacent()) {
-				tokens.raiseException(tokens.peek().startPos, DSLMessage.NO_WHITESPACE_BETWEEN_LABEL_NAME_AND_COLON);
-			}
-			tokens.next(); // swallow colon
-			label = name;
-			name = tokens.eat(TokenKind.IDENTIFIER);
-		}
-		Token moduleName = name;
-		tokens.checkpoint();
-		ArgumentNode[] args = maybeEatModuleArgs();
-		int startPos = label != null ? label.startPos : moduleName.startPos;
-		return new ModuleNode(toLabelNode(label), moduleName.data, startPos, moduleName.endPos, args);
-	}
-
-	private LabelNode toLabelNode(Token label) {
-		if (label == null) {
-			return null;
-		}
-		return new LabelNode(label.data, label.startPos, label.endPos);
-	}
-
-	// moduleArguments : DOUBLE_MINUS identifier(name) EQUALS identifier(value)
-	private ArgumentNode[] maybeEatModuleArgs() {
-		List<ArgumentNode> args = null;
-		if (tokens.peek(TokenKind.DOUBLE_MINUS) && tokens.isNextAdjacent()) {
-			tokens.raiseException(tokens.peek().startPos, DSLMessage.EXPECTED_WHITESPACE_AFTER_MODULE_BEFORE_ARGUMENT);
-		}
-		while (tokens.peek(TokenKind.DOUBLE_MINUS)) {
-			Token dashDash = tokens.next(); // skip the '--'
-			if (tokens.peek(TokenKind.IDENTIFIER) && !tokens.isNextAdjacent()) {
-				tokens.raiseException(tokens.peek().startPos, DSLMessage.NO_WHITESPACE_BEFORE_ARG_NAME);
-			}
-			List<Token> argNameComponents = eatDottedName();
-			if (tokens.peek(TokenKind.EQUALS) && !tokens.isNextAdjacent()) {
-				tokens.raiseException(tokens.peek().startPos, DSLMessage.NO_WHITESPACE_BEFORE_ARG_EQUALS);
-			}
-			tokens.eat(TokenKind.EQUALS);
-			if (tokens.peek(TokenKind.IDENTIFIER) && !tokens.isNextAdjacent()) {
-				tokens.raiseException(tokens.peek().startPos, DSLMessage.NO_WHITESPACE_BEFORE_ARG_VALUE);
-			}
-			// Process argument value:
-			Token t = tokens.peek();
-			String argValue = eatArgValue();
-			tokens.checkpoint();
-			if (args == null) {
-				args = new ArrayList<ArgumentNode>();
-			}
-			args.add(new ArgumentNode(data(argNameComponents), argValue, dashDash.startPos, t.endPos));
-		}
-		return args == null ? null : args.toArray(new ArgumentNode[args.size()]);
-	}
-
-	// argValue: identifier | literal_string
-	private String eatArgValue() {
-		Token t = tokens.next();
-		String argValue = null;
-		if (t.getKind() == TokenKind.IDENTIFIER) {
-			argValue = t.data;
-		}
-		else if (t.getKind() == TokenKind.LITERAL_STRING) {
-			String quotesUsed = t.data.substring(0, 1);
-			argValue = t.data.substring(1, t.data.length() - 1).replace(quotesUsed+quotesUsed, quotesUsed);
-		}
-		else {
-			tokens.raiseException(t.startPos, DSLMessage.EXPECTED_ARGUMENT_VALUE, t.data);
-		}
-		return argValue;
-	}
-
-
-	private List<Token> eatDottedName() {
-		return eatDottedName(DSLMessage.NOT_EXPECTED_TOKEN);
-	}
-
-	/**
-	 * Consumes and returns (identifier [DOT identifier]*) as long as they're adjacent.
-	 *
-	 * @param error the kind of error to report if input is ill-formed
-	 */
-	private List<Token> eatDottedName(DSLMessage error) {
-		List<Token> result = new ArrayList<Token>(3);
-		Token name = tokens.next();
-		if (!name.isKind(TokenKind.IDENTIFIER)) {
-			tokens.raiseException(name.startPos, error, name.data != null ? name.data
-					: new String(name.getKind().tokenChars));
-		}
-		result.add(name);
-		while (tokens.peek(TokenKind.DOT)) {
-			if (!tokens.isNextAdjacent()) {
-				tokens.raiseException(tokens.peek().startPos, DSLMessage.NO_WHITESPACE_IN_DOTTED_NAME);
-			}
-			result.add(tokens.next()); // consume dot
-			if (tokens.peek(TokenKind.IDENTIFIER) && !tokens.isNextAdjacent()) {
-				tokens.raiseException(tokens.peek().startPos, DSLMessage.NO_WHITESPACE_IN_DOTTED_NAME);
-			}
-			result.add(tokens.eat(TokenKind.IDENTIFIER));
-		}
-		return result;
-	}
-
-	/**
-	 * Verify the supplied name is a valid task name. Valid stream names must follow the same rules as java
-	 * identifiers, with the additional option to use a hyphen ('-') after the first character.
-	 *
-	 * @param taskName the name to validate
-	 * @return true if name is valid
-	 */
-	public static boolean isValidTaskName(String taskName) {
-		if (taskName.length() == 0) {
-			return false;
-		}
-		if (!Character.isJavaIdentifierStart(taskName.charAt(0))) {
-			return false;
-		}
-		for (int i = 1, max = taskName.length(); i < max; i++) {
-			char ch = taskName.charAt(i);
-			if (!(Character.isJavaIdentifierPart(ch) || ch == '-')) {
-				return false;
-			}
-		}
-		return true;
-	}
-
-	/**
-	 * Return the concatenation of the data of many tokens.
-	 */
-	private String data(Iterable<Token> many) {
-		StringBuilder result = new StringBuilder();
-		for (Token t : many) {
-			if (t.getKind().hasPayload()) {
-				result.append(t.data);
-			}
-			else {
-				result.append(t.getKind().tokenChars);
-			}
-		}
-		return result.toString();
-	}
-
-	private String toString(Token t) {
-		if (t.getKind().hasPayload()) {
-			return t.stringValue();
-		}
-		else {
-			return new String(t.kind.getTokenChars());
-		}
 	}
 
 }

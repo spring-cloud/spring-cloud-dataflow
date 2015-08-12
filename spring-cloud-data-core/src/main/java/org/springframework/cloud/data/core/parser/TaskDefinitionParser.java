@@ -35,8 +35,7 @@ public class TaskDefinitionParser {
 	 * @return task definition
 	 */
 	public TaskDefinition parse(String name, String dsl) {
-		TaskDslParser parser = new TaskDslParser();
-		return buildModuleDefinitions(name, parser.parse(name, dsl));
+		return buildModuleDefinitions(name, new TaskDslParser(name, dsl).parse());
 	}
 
 	/**
