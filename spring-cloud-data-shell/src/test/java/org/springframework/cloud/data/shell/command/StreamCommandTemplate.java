@@ -22,10 +22,10 @@ import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.cloud.data.shell.display.Table;
-import org.springframework.cloud.data.shell.display.TableRow;
 import org.springframework.shell.core.CommandResult;
 import org.springframework.shell.core.JLineShellComponent;
+import org.springframework.shell.support.table.Table;
+import org.springframework.shell.support.table.TableRow;
 
 /**
  * Helper methods for stream commands to execute in the shell.

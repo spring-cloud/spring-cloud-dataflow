@@ -28,13 +28,13 @@ import org.springframework.cloud.data.rest.client.StreamOperations;
 import org.springframework.cloud.data.rest.resource.StreamDefinitionResource;
 import org.springframework.cloud.data.rest.util.DeploymentPropertiesUtils;
 import org.springframework.cloud.data.shell.config.CloudDataShell;
-import org.springframework.cloud.data.shell.display.Table;
-import org.springframework.cloud.data.shell.display.TableHeader;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.shell.core.CommandMarker;
 import org.springframework.shell.core.annotation.CliAvailabilityIndicator;
 import org.springframework.shell.core.annotation.CliCommand;
 import org.springframework.shell.core.annotation.CliOption;
+import org.springframework.shell.support.table.Table;
+import org.springframework.shell.support.table.TableHeader;
 import org.springframework.stereotype.Component;
 
 /**
