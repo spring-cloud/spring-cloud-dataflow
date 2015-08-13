@@ -25,7 +25,7 @@ import org.junit.rules.TestName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.springframework.cloud.data.rest.AdminApplication;
+import org.springframework.cloud.data.admin.AdminApplication;
 import org.springframework.cloud.data.shell.command.StreamCommandTemplate;
 import org.springframework.shell.Bootstrap;
 import org.springframework.shell.core.CommandResult;
