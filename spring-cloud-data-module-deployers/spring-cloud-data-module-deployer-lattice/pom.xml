@@ -11,18 +11,12 @@
 		<artifactId>spring-cloud-data-module-deployers-parent</artifactId>
 		<version>1.0.0.BUILD-SNAPSHOT</version>
 	</parent>
-	<properties>
-		<spring-cloud-lattice.version>1.1.0.BUILD-SNAPSHOT</spring-cloud-lattice.version>
-	</properties>
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-data-module-deployer-spi</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>org.springframework.xd</groupId>
-			<artifactId>spring-xd-module</artifactId>
-		</dependency>
+		<!-- Following dependency activates `cloud`, `lattice` profiles on lattice environment -->
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-lattice-core</artifactId>

@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.data.admin.config;
 
+import org.springframework.cloud.config.java.CloudScan;
 import org.springframework.cloud.data.module.deployer.ModuleDeployer;
 import org.springframework.cloud.data.module.deployer.cloudfoundry.CloudFoundryModuleDeployer;
 import org.springframework.cloud.data.module.deployer.lattice.ReceptorModuleDeployer;
@@ -28,9 +29,11 @@ import org.springframework.context.annotation.Profile;
  *
  * @author Mark Fisher
  * @author Thomas Risberg
+ * @author Ilayaperumal Gopinathan
  */
 @Configuration
 @Profile("cloud")
+@CloudScan
 public class CloudConfiguration {
 
 	@Profile("lattice")
@@ -50,4 +53,5 @@ public class CloudConfiguration {
 			return new CloudFoundryModuleDeployer();
 		}
 	}
+
 }

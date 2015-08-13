@@ -31,16 +31,6 @@
 				<artifactId>spring-cloud-data-module-deployer-spi</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-			<dependency>
-				<groupId>org.springframework.cloud</groupId>
-				<artifactId>spring-cloud-spring-service-connector</artifactId>
-				<version>${spring-cloud.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.springframework.xd</groupId>
-				<artifactId>spring-xd-module</artifactId>
-				<version>${spring-xd.version}</version>
-			</dependency>
 		</dependencies>
 	</dependencyManagement>
 	<dependencies>
