@@ -23,8 +23,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.endpoint.mvc.MetricsMvcEndpoint;
 import org.springframework.boot.actuate.metrics.Metric;
 import org.springframework.boot.actuate.metrics.repository.MetricRepository;
-import org.springframework.cloud.data.rest.resource.MetricResource;
 import org.springframework.cloud.data.rest.resource.CounterResource;
+import org.springframework.cloud.data.rest.resource.MetricResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -34,12 +34,10 @@ import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.ResourceAssembler;
 import org.springframework.hateoas.mvc.ResourceAssemblerSupport;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -72,9 +70,10 @@ public class CounterController {
 			Pageable pageable,
 			PagedResourcesAssembler<Metric<Double>> pagedAssembler,
 			@RequestParam(value = "detailed", defaultValue = "false") boolean detailed) {
-		/* Page */
-		Iterable metrics = metricRepository.findAll(/* pageable */);
-		Page<Metric<Double>> page = new PageImpl<>(filterCounters(metrics));
+		/* Page */ Iterable metrics = metricRepository.findAll(/* pageable */);
+		@SuppressWarnings("unchecked")
+		List<Metric<Double>> content = filterCounters(metrics);
+		Page<Metric<Double>> page = new PageImpl<>(content);
 		ResourceAssembler<Metric<Double>, ? extends MetricResource> assemblerToUse =
 				detailed ? counterResourceAssembler : shallowResourceAssembler;
 		return pagedAssembler.toResource(page, assemblerToUse);
@@ -85,10 +84,7 @@ public class CounterController {
 	 */
 	@RequestMapping(value = "/{name}", method = RequestMethod.GET)
 	public CounterResource display(@PathVariable("name") String name) {
-		Metric<Double> c = (Metric<Double>) metricRepository.findOne(COUNTER_PREFIX + name);
-		if (c == null) {
-			throw new MetricsMvcEndpoint.NoSuchMetricException(name);
-		}
+		Metric<Double> c = findCounter(name);
 		return counterResourceAssembler.toResource(c);
 	}
 
@@ -98,14 +94,28 @@ public class CounterController {
 	@RequestMapping(value = "/{name}", method = RequestMethod.DELETE)
 	@ResponseStatus(HttpStatus.OK)
 	protected void delete(@PathVariable("name") String name) {
+		Metric<Double> c = findCounter(name);
+		metricRepository.reset(c.getName());
+	}
+
+	/**
+	 * Find a given counter, taking care of name conversion between the Spring Boot domain and our domain.
+	 * @throws MetricsMvcEndpoint.NoSuchMetricException if the counter does not exist
+	 */
+	private Metric<Double> findCounter(@PathVariable("name") String name) {
+		@SuppressWarnings("unchecked")
 		Metric<Double> c = (Metric<Double>) metricRepository.findOne(COUNTER_PREFIX + name);
 		if (c == null) {
 			throw new MetricsMvcEndpoint.NoSuchMetricException(name);
 		}
-		metricRepository.reset(c.getName());
+		return c;
 	}
 
 
+	/**
+	 * Filter the list of Boot metrics to only return those that are counters.
+	 */
+	@SuppressWarnings("unchecked")
 	private List<Metric<Double>> filterCounters(Iterable<Metric<?>> input) {
 		List<Metric<Double>> result = new ArrayList<>();
 		for (Metric<?> metric : input) {
