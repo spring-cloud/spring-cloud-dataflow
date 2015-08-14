@@ -35,7 +35,7 @@ import org.springframework.cloud.data.core.parser.TaskDefinitionParser;
  * @author David Turanski
  * @author Michael Minella
  */
-public class TaskConfigParserTests {
+public class TaskDslParserTests {
 
 	@Rule
 	public ExpectedException thrown = ExpectedException.none();
@@ -248,16 +248,12 @@ public class TaskConfigParserTests {
 		assertEquals(mn.getArgumentsAsProperties().get("expression"), "payload.replace(\"abc\", '')");
 	}
 
-	private TaskDslParser getParser() {
-		return new TaskDslParser();
-	}
-
 	ModuleNode parse(String taskDefinition) {
-		return getParser().parse(taskDefinition);
+		return new TaskDslParser(taskDefinition).parse();
 	}
 
 	ModuleNode parse(String taskName, String taskDefinition) {
-		return getParser().parse(taskName, taskDefinition);
+		return new TaskDslParser(taskName, taskDefinition).parse();
 	}
 
 	private void checkForIllegalTaskName(String taskName, String taskDef) {
