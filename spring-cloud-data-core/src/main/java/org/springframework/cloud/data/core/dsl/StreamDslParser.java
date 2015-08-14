@@ -276,13 +276,13 @@ public class StreamDslParser extends ModuleParser {
 
 	/**
 	 * If the current token position contains a sink channel, return a
-	 * {@link SourceChannelNode} and advance the token position; otherwise
+	 * {@link SinkChannelNode} and advance the token position; otherwise
 	 * return {@code null}.
 	 * <p>
 	 * Expected format:
 	 * {@code '>' identifier ':' identifier}
 	 *
-	 * @return a {@code SourceChannelNode} or {@code null} if the token
+	 * @return a {@code SinkChannelNode} or {@code null} if the token
 	 * position is not pointing at a sink channel
 	 */
 	private SinkChannelNode eatSinkChannel() {

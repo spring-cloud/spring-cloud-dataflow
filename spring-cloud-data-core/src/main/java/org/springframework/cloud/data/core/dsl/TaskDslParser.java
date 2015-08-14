@@ -40,7 +40,7 @@ public class TaskDslParser extends ModuleParser {
 	}
 
 	/**
-	 * Construct a {@code StreamDslParser} for a task with the provided name.
+	 * Construct a {@code TaskDslParser} for a task with the provided name.
 	 *
 	 * @param name task name
 	 * @param dsl  task dsl text
