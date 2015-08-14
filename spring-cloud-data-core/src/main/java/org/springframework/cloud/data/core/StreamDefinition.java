@@ -21,7 +21,8 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.springframework.cloud.data.core.parser.StreamDefinitionParser;
+import org.springframework.cloud.data.core.dsl.StreamDslParser;
+import org.springframework.cloud.data.core.dsl.StreamNode;
 import org.springframework.core.style.ToStringCreator;
 import org.springframework.util.Assert;
 
@@ -37,10 +38,9 @@ import org.springframework.util.Assert;
  * @see ModuleDefinition
  *
  * @author Patrick Peralta
+ * @author Mark Fisher
  */
 public class StreamDefinition {
-
-	private static final StreamDefinitionParser parser = new StreamDefinitionParser();
 
 	/**
 	 * Name of stream.
@@ -70,7 +70,8 @@ public class StreamDefinition {
 		this.name = name;
 		this.dslText = dslText;
 		this.modules = new LinkedList<>();
-		for (ModuleDefinition module : parser.parse(name, dslText)) {
+		StreamNode streamNode = new StreamDslParser(name, dslText).parse();
+		for (ModuleDefinition module : new ModuleDefinitionBuilder(name, streamNode).build()) {
 			this.modules.addFirst(module);
 		}
 	}

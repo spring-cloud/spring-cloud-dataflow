@@ -16,8 +16,11 @@
 
 package org.springframework.cloud.data.core.dsl;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.equalTo;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 import java.util.List;
 import java.util.Properties;
@@ -25,8 +28,6 @@ import java.util.Properties;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-
-import org.springframework.cloud.data.core.parser.StreamDefinitionParser;
 
 /**
  * Parse streams and verify either the correct abstract syntax tree is produced or the current exception comes out.
@@ -178,9 +179,9 @@ public class StreamDslParserTests {
 	@Test
 	public void testInvalidModules() {
 		String config = "test | foo--x=13";
-		StreamDefinitionParser parser = new StreamDefinitionParser();
+		StreamDslParser parser = new StreamDslParser("t", config);
 		try {
-			parser.parse("t", config);
+			parser.parse();
 			fail(config + " is invalid. Should throw exception");
 		}
 		catch (Exception e) {

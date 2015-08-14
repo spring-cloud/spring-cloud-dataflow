@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,76 +14,68 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.data.core.parser;
-
+package org.springframework.cloud.data.core;
 
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.springframework.cloud.data.core.ModuleDefinition;
 import org.springframework.cloud.data.core.dsl.ArgumentNode;
 import org.springframework.cloud.data.core.dsl.ModuleNode;
 import org.springframework.cloud.data.core.dsl.SinkChannelNode;
 import org.springframework.cloud.data.core.dsl.SourceChannelNode;
-import org.springframework.cloud.data.core.dsl.StreamDslParser;
 import org.springframework.cloud.data.core.dsl.StreamNode;
+import org.springframework.util.Assert;
 
 /**
- * Parser to convert a DSL string for a stream into a list of
- * {@link ModuleDefinition} objects that comprise the given stream.
+ * Builds a list of {@link ModuleDefinition ModuleDefinitions} out of a parsed {@link StreamNode}.
  *
- * @author Andy Clement
- * @author Gunnar Hillert
- * @author Glenn Renfro
  * @author Mark Fisher
  * @author Patrick Peralta
+ * @author Andy Clement
  * @author Eric Bottard
- * @since 1.0
  */
-public class StreamDefinitionParser {
+class ModuleDefinitionBuilder {
 
 	/**
 	 * Default name for input channel.
 	 */
-	// TODO: evaluate where this belongs
-	public static final String INPUT_CHANNEL = "input";
+	private static final String INPUT_CHANNEL = "input";
 
 	/**
 	 * Default name for output channel.
 	 */
-	// TODO: evaluate where this belongs
-	public static final String OUTPUT_CHANNEL = "output";
+	private static final String OUTPUT_CHANNEL = "output";
+
+	private final String streamName;
+
+	private final StreamNode streamNode;
 
 	/**
-	 * Parse the provided stream DSL stream and return a list
-	 * of {@link ModuleDefinition module definitions} that define
-	 * the stream.
+	 * Create a ModuleDefinitionBuilder for the given stream.
 	 *
-	 * @param name  stream name
-	 * @param dsl   stream DSL text
-	 * @return list of module definitions for the stream
+	 * @param streamName the name of the stream
+	 * @param streamNode the AST construct representing the stream
 	 */
-	public List<ModuleDefinition> parse(String name, String dsl) {
-		return buildModuleDefinitions(name, new StreamDslParser(name, dsl).parse());
+	public ModuleDefinitionBuilder(String streamName, StreamNode streamNode) {
+		Assert.hasText(streamName, "streamName is required");
+		Assert.notNull(streamNode, "streamNode must not be null");
+		this.streamName = streamName;
+		this.streamNode = streamNode;
 	}
 
 	/**
-	 * Build a list of ModuleDefinitions out of a parsed StreamNode.
-	 *
-	 * @param name the name of the definition unit
-	 * @param stream the AST construct representing the definition
+	 * Build a list of ModuleDefinitions out of the parsed StreamNode.
 	 */
-	private List<ModuleDefinition> buildModuleDefinitions(String name, StreamNode stream) {
+	public List<ModuleDefinition> build() {
 		Deque<ModuleDefinition.Builder> builders = new LinkedList<>();
-
-		List<ModuleNode> moduleNodes = stream.getModuleNodes();
+		List<ModuleNode> moduleNodes = streamNode.getModuleNodes();
 		for (int m = moduleNodes.size() - 1; m >= 0; m--) {
 			ModuleNode moduleNode = moduleNodes.get(m);
 			ModuleDefinition.Builder builder =
 					new ModuleDefinition.Builder()
-							.setGroup(name)
+							.setGroup(streamName)
 							.setName(moduleNode.getName())
 							.setLabel(moduleNode.getLabelName());
 			if (moduleNode.hasArguments()) {
@@ -92,32 +84,26 @@ public class StreamDefinitionParser {
 					builder.setParameter(argument.getName(), argument.getValue());
 				}
 			}
-
 			if (m > 0) {
-				builder.addBinding(INPUT_CHANNEL, String.format("%s.%d", name, m - 1));
+				builder.addBinding(INPUT_CHANNEL, String.format("%s.%d", streamName, m - 1));
 			}
 			if (m < moduleNodes.size() - 1) {
-				builder.addBinding(OUTPUT_CHANNEL, String.format("%s.%d", name, m));
+				builder.addBinding(OUTPUT_CHANNEL, String.format("%s.%d", streamName, m));
 			}
-
 			builders.add(builder);
 		}
-
-		SourceChannelNode sourceChannel = stream.getSourceChannelNode();
+		SourceChannelNode sourceChannel = streamNode.getSourceChannelNode();
 		if (sourceChannel != null) {
 			builders.getLast().addBinding(INPUT_CHANNEL, sourceChannel.getChannelName());
 		}
-
-		SinkChannelNode sinkChannel = stream.getSinkChannelNode();
+		SinkChannelNode sinkChannel = streamNode.getSinkChannelNode();
 		if (sinkChannel != null) {
 			builders.getFirst().addBinding(OUTPUT_CHANNEL, sinkChannel.getChannelName());
 		}
-
-		List<ModuleDefinition> result = new ArrayList<ModuleDefinition>(builders.size());
+		List<ModuleDefinition> moduleDefinitions = new ArrayList<ModuleDefinition>(builders.size());
 		for (ModuleDefinition.Builder builder : builders) {
-			result.add(builder.build());
+			moduleDefinitions.add(builder.build());
 		}
-		return result;
+		return moduleDefinitions;
 	}
-
 }
