@@ -29,8 +29,8 @@ import org.springframework.context.annotation.Profile;
  * @author Mark Fisher
  * @author Thomas Risberg
  */
-@Profile("cloud")
 @Configuration
+@Profile("cloud")
 public class CloudConfiguration {
 
 	@Profile("lattice")

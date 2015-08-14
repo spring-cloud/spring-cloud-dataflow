@@ -1,4 +1,4 @@
 /**
- * Spring Cloud Data REST repository classes.
+ * Spring Cloud Data Admin Repositories.
  */
 package org.springframework.cloud.data.admin.repository;

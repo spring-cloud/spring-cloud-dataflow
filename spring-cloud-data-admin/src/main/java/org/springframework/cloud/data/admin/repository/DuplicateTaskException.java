@@ -13,12 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.data.admin.repository;
 
 /**
  * @author Michael Minella
  */
 public class DuplicateTaskException extends RuntimeException {
+
+	private static final long serialVersionUID = 4902348644982085508L;
 
 	public DuplicateTaskException() {
 		super();

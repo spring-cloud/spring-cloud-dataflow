@@ -1,10 +1,8 @@
-# Spring Cloud Data REST API
+# Spring Cloud Data Admin
 
-The `spring-cloud-data-rest` subproject of `spring-cloud-data` provides the REST API via the executable boot-based `AdminApplication`.
+The `spring-cloud-data-admin` subproject of `spring-cloud-data` provides the REST API and UI via the executable boot-based `AdminApplication`.
 
-Currently the REST API includes only a PoC version of the `StreamController` that interacts with an in-memory implementation of the `StreamDefinitionRepository` and a stubbed implementation of the `ModuleRegistry` which is only aware of the `time` source and `log` sink. If the `cloud` profile is active, the Receptor-based `ModuleDeployer` will be instantiated and modules will run as LRPs on Lattice. Otherwise, the `LocalModuleDeployer` will be instantiated and the modules will be launched within the same process as the `AdminApplication` itself.
-
-The `StreamController` will soon be replaced by a version that supports the stream commands from the existing shell.
+Currently the REST API includes a `StreamController` and `TaskController` that interact with in-memory implementations of the `StreamDefinitionRepository` and `TaskDefinitionRepository`, respectively. The current implementation of the `ModuleRegistry` is a stub that is only aware of the `time` source, the `log` sink, and the `counter` sink. If the `cloud` profile is active, the Receptor-based `ModuleDeployer` will be instantiated and modules will run as LRPs on Lattice. Otherwise, the `LocalModuleDeployer` will be instantiated and the modules will be launched within the same process as the `AdminApplication` itself.
 
 ## Running the AdminApplication
 
@@ -17,7 +15,7 @@ mvn clean package
 2\. start the app:
 
 ```
-java -jar spring-cloud-data-rest/target/spring-cloud-data-rest-1.0.0.BUILD-SNAPSHOT.jar
+java -jar spring-cloud-data-admin/target/spring-cloud-data-admin-1.0.0.BUILD-SNAPSHOT.jar
 ```
 
 ## Creating the `time | log` stream:

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.data.admin.repository;
 
 import static org.junit.Assert.assertEquals;
@@ -29,8 +30,6 @@ import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 
-import org.springframework.cloud.data.admin.repository.DuplicateTaskException;
-import org.springframework.cloud.data.admin.repository.InMemoryTaskDefinitionRepository;
 import org.springframework.cloud.data.core.TaskDefinition;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -127,7 +126,7 @@ public class InMemoryTaskDefinitionRepositoryTests {
 		Iterable<TaskDefinition> items = repository.findAll();
 
 		int count = 0;
-		for (TaskDefinition item : items) {
+		for (@SuppressWarnings("unused") TaskDefinition item : items) {
 			count++;
 		}
 
@@ -147,7 +146,7 @@ public class InMemoryTaskDefinitionRepositoryTests {
 		Iterable<TaskDefinition> items = repository.findAll(names);
 
 		int count = 0;
-		for (TaskDefinition item : items) {
+		for (@SuppressWarnings("unused") TaskDefinition item : items) {
 			count++;
 		}
 

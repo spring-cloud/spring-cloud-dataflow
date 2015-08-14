@@ -26,19 +26,19 @@ import org.springframework.hateoas.mvc.ResourceAssemblerSupport;
  * @author Eric Bottard
  */
 public class ShallowMetricResourceAssembler extends
-		ResourceAssemblerSupport<Metric, MetricResource> {
+		ResourceAssemblerSupport<Metric<?>, MetricResource> {
 
 	public ShallowMetricResourceAssembler(Class<?> controllerClass) {
 		super(controllerClass, MetricResource.class);
 	}
 
 	@Override
-	public MetricResource toResource(Metric entity) {
+	public MetricResource toResource(Metric<?> entity) {
 		return createResourceWithId(entity.getName(), entity);
 	}
 
 	@Override
-	protected MetricResource instantiateResource(Metric entity) {
+	protected MetricResource instantiateResource(Metric<?> entity) {
 		return new MetricResource(entity.getName());
 	}
 

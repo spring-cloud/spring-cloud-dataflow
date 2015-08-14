@@ -16,13 +16,11 @@ provides the abstraction layer for deploying the modules of a given stream acros
 * [Lattice](https://github.com/spring-cloud/spring-cloud-data/tree/master/spring-cloud-data-module-deployers/spring-cloud-data-module-deployer-lattice)
 * [Cloud Foundry](https://github.com/spring-cloud/spring-cloud-data/tree/master/spring-cloud-data-module-deployers/spring-cloud-data-module-deployer-cloudfoundry)
 
-The [REST API](https://github.com/spring-cloud/spring-cloud-data/tree/master/spring-cloud-data-rest) is provided by an executable Spring Boot application
-that is profile aware, so that the proper implementation of the Module Deployer SPI will be instantiated based on the environment within which the Admin
-application itself is running.
+The [Admin](https://github.com/spring-cloud/spring-cloud-data/tree/master/spring-cloud-data-admin) provides a REST API and UI. It is an executable Spring Boot application that is profile aware, so that the proper implementation of the Module Deployer SPI will be instantiated based on the environment within which the Admin application itself is running.
 
-The [Shell](https://github.com/spring-cloud/spring-cloud-data/tree/master/spring-cloud-data-shell) connects to that REST API and supports a DSL that simplifies the process of defining a stream and managing its lifecycle.
+The [Shell](https://github.com/spring-cloud/spring-cloud-data/tree/master/spring-cloud-data-shell) connects to the Admin's REST API and supports a DSL that simplifies the process of defining a stream and managing its lifecycle.
 
-The instructions below describe the process of running both the Shell and the Admin across different runtime environments.
+The instructions below describe the process of running both the Admin and the Shell across different runtime environments.
 
 ## Running Singlenode
 
@@ -39,7 +37,7 @@ mvn clean package
 3\. launch the admin:
 
 ```
-$ java -jar spring-cloud-data-rest/target/spring-cloud-data-rest-1.0.0.BUILD-SNAPSHOT.jar
+$ java -jar spring-cloud-data-admin/target/spring-cloud-data-admin-1.0.0.BUILD-SNAPSHOT.jar
 ```
 
 4\. launch the shell:
@@ -61,10 +59,10 @@ thus far, only the following commands are supported in the shell when running si
 ltc create redis redis -r
 ```
 
-2\. launch the admin, with a mapping for port 9393:
+2\. launch the admin, with a mapping for port 9393 and extra memory (the default is 128MB):
 
 ```
-ltc create admin springcloud/data-admin -p 9393
+ltc create admin springcloud/data-admin -p 9393 -m 512
 ```
 
 3\. launching the shell is the same as above, but once running must be
