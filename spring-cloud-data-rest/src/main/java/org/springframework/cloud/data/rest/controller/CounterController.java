@@ -70,8 +70,7 @@ public class CounterController {
 			Pageable pageable,
 			PagedResourcesAssembler<Metric<Double>> pagedAssembler,
 			@RequestParam(value = "detailed", defaultValue = "false") boolean detailed) {
-		/* Page */ Iterable metrics = metricRepository.findAll(/* pageable */);
-		@SuppressWarnings("unchecked")
+		/* Page */ Iterable<Metric<?>> metrics = metricRepository.findAll(/* pageable */);
 		List<Metric<Double>> content = filterCounters(metrics);
 		Page<Metric<Double>> page = new PageImpl<>(content);
 		ResourceAssembler<Metric<Double>, ? extends MetricResource> assemblerToUse =
@@ -116,11 +115,11 @@ public class CounterController {
 	 * Filter the list of Boot metrics to only return those that are counters.
 	 */
 	@SuppressWarnings("unchecked")
-	private List<Metric<Double>> filterCounters(Iterable<Metric<?>> input) {
-		List<Metric<Double>> result = new ArrayList<>();
+	private <T extends Number> List<Metric<T>> filterCounters(Iterable<Metric<?>> input) {
+		List<Metric<T>> result = new ArrayList<>();
 		for (Metric<?> metric : input) {
 			if (metric.getName().startsWith(COUNTER_PREFIX)) {
-				result.add((Metric<Double>) metric);
+				result.add((Metric<T>) metric);
 			}
 		}
 		return result;
