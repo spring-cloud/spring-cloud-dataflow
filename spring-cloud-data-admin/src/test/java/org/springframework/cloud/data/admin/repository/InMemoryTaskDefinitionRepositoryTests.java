@@ -25,11 +25,9 @@ import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.cloud.data.core.TaskDefinition;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -37,6 +35,7 @@ import org.springframework.data.domain.Pageable;
 
 /**
  * @author Michael Minella
+ * @author Mark Fisher
  */
 public class InMemoryTaskDefinitionRepositoryTests {
 
@@ -76,16 +75,16 @@ public class InMemoryTaskDefinitionRepositoryTests {
 
 	@Test(expected = DuplicateTaskException.class)
 	public void testSaveDuplicate() {
-		repository.save(buildDefinition("task1", "myTask", null));
-		repository.save(buildDefinition("task1", "myTask", null));
+		repository.save(new TaskDefinition("task1", "myTask"));
+		repository.save(new TaskDefinition("task1", "myTask"));
 	}
 
 	@Test(expected = DuplicateTaskException.class)
 	public void testSaveAllDuplicate() {
 		List<TaskDefinition> definitions = new ArrayList<>();
-		definitions.add(buildDefinition("task1", "myTask", null));
+		definitions.add(new TaskDefinition("task1", "myTask"));
 
-		repository.save(buildDefinition("task1", "myTask", null));
+		repository.save(new TaskDefinition("task1", "myTask"));
 		repository.save(definitions);
 	}
 
@@ -100,10 +99,10 @@ public class InMemoryTaskDefinitionRepositoryTests {
 
 	@Test
 	public void testFindOne() {
-		TaskDefinition definition = buildDefinition("task1", "myTask", null);
+		TaskDefinition definition = new TaskDefinition("task1", "myTask");
 		repository.save(definition);
-		repository.save(buildDefinition("task2", "myTask", null));
-		repository.save(buildDefinition("task3", "myTask", null));
+		repository.save(new TaskDefinition("task2", "myTask"));
+		repository.save(new TaskDefinition("task3", "myTask"));
 
 		assertEquals(definition, repository.findOne("task1"));
 	}
@@ -112,7 +111,7 @@ public class InMemoryTaskDefinitionRepositoryTests {
 	public void testExists() {
 		assertFalse(repository.exists("exists"));
 
-		repository.save(buildDefinition("exists", "myExists", null));
+		repository.save(new TaskDefinition("exists", "myExists"));
 
 		assertTrue(repository.exists("exists"));
 	}
@@ -184,7 +183,7 @@ public class InMemoryTaskDefinitionRepositoryTests {
 
 		assertNotNull(repository.findOne("task2"));
 
-		repository.delete(buildDefinition("task2", "myTask", null));
+		repository.delete(new TaskDefinition("task2", "myTask"));
 
 		assertNull(repository.findOne("task2"));
 	}
@@ -196,7 +195,7 @@ public class InMemoryTaskDefinitionRepositoryTests {
 		assertNotNull(repository.findOne("task1"));
 		assertNotNull(repository.findOne("task2"));
 
-		repository.delete(Arrays.asList(buildDefinition("task1", "myTask", null), buildDefinition("task2", "myTask", null)));
+		repository.delete(Arrays.asList(new TaskDefinition("task1", "myTask"), new TaskDefinition("task2", "myTask")));
 
 		assertNull(repository.findOne("task1"));
 		assertNull(repository.findOne("task2"));
@@ -217,15 +216,9 @@ public class InMemoryTaskDefinitionRepositoryTests {
 	}
 
 	private void initializeRepository() {
-		repository.save(buildDefinition("task1", "myTask", null));
-		repository.save(buildDefinition("task2", "myTask", null));
-		repository.save(buildDefinition("task3", "myTask", null));
+		repository.save(new TaskDefinition("task1", "myTask"));
+		repository.save(new TaskDefinition("task2", "myTask"));
+		repository.save(new TaskDefinition("task3", "myTask"));
 	}
 
-	private TaskDefinition buildDefinition(String taskName, String task, Map<String, String> parameters) {
-		return new TaskDefinition.Builder().setTaskName(taskName)
-				.setTask(task)
-				.addParameters(parameters)
-				.build();
-	}
 }

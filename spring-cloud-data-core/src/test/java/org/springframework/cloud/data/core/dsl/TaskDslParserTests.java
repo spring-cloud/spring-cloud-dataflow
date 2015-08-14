@@ -26,8 +26,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import org.springframework.cloud.data.core.parser.TaskDefinitionParser;
-
 /**
  * Parse tasks and verify either the correct abstract syntax tree is produced or the current exception comes out.
  *
@@ -125,9 +123,9 @@ public class TaskDslParserTests {
 	@Test
 	public void testInvalidModules() {
 		String config = "foo--x=13";
-		TaskDefinitionParser parser = new TaskDefinitionParser();
+		TaskDslParser parser = new TaskDslParser("t", config);
 		try {
-			parser.parse("t", config);
+			parser.parse();
 			fail(config + " is invalid. Should throw exception");
 		}
 		catch (Exception e) {

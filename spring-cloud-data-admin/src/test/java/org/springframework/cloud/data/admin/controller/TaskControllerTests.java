@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.data.admin.controller;
 
 import static org.junit.Assert.assertEquals;
@@ -27,7 +28,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.cloud.data.admin.AdminApplication;
@@ -90,10 +90,7 @@ public class TaskControllerTests {
 	@Test
 	public void testSaveDuplicate() throws Exception {
 
-		repository.save(new TaskDefinition.Builder()
-				.setTaskName("myTask")
-				.setTask("task")
-				.build());
+		repository.save(new TaskDefinition("myTask", "task"));
 
 		//TODO: Make this into an elegant error...
 		mockMvc.perform(
@@ -126,11 +123,7 @@ public class TaskControllerTests {
 
 	@Test
 	public void testDestroyTask() throws Exception {
-
-		repository.save(new TaskDefinition.Builder()
-				.setTaskName("myTask")
-				.setTask("task")
-				.build());
+		repository.save(new TaskDefinition("myTask", "task"));
 
 		mockMvc.perform(
 				delete("/tasks/myTask").accept(MediaType.APPLICATION_JSON)).andDo(print())

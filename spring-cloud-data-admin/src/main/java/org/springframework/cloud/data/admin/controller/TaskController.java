@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.data.admin.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,7 +49,7 @@ public class TaskController {
 	@RequestMapping(value = "/", method = RequestMethod.POST)
 	public void save(@RequestParam("name") String name,
 			@RequestParam("definition") String dsl) {
-		repository.save(TaskDefinition.getInstance(name, dsl));
+		repository.save(new TaskDefinition(name, dsl));
 	}
 
 	@RequestMapping(value = "/{name}", method = RequestMethod.DELETE)
