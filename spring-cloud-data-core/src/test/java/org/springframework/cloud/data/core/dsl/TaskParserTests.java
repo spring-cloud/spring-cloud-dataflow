@@ -33,7 +33,7 @@ import org.junit.rules.ExpectedException;
  * @author David Turanski
  * @author Michael Minella
  */
-public class TaskDslParserTests {
+public class TaskParserTests {
 
 	@Rule
 	public ExpectedException thrown = ExpectedException.none();
@@ -123,7 +123,7 @@ public class TaskDslParserTests {
 	@Test
 	public void testInvalidModules() {
 		String config = "foo--x=13";
-		TaskDslParser parser = new TaskDslParser("t", config);
+		TaskParser parser = new TaskParser("t", config);
 		try {
 			parser.parse();
 			fail(config + " is invalid. Should throw exception");
@@ -247,11 +247,11 @@ public class TaskDslParserTests {
 	}
 
 	ModuleNode parse(String taskDefinition) {
-		return new TaskDslParser(taskDefinition).parse();
+		return new TaskParser(taskDefinition).parse();
 	}
 
 	ModuleNode parse(String taskName, String taskDefinition) {
-		return new TaskDslParser(taskName, taskDefinition).parse();
+		return new TaskParser(taskName, taskDefinition).parse();
 	}
 
 	private void checkForIllegalTaskName(String taskName, String taskDef) {

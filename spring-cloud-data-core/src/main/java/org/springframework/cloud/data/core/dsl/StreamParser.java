@@ -27,7 +27,7 @@ import java.util.Map;
  * @author Andy Clement
  * @author Patrick Peralta
  */
-public class StreamDslParser extends ModuleParser {
+public class StreamParser extends ModuleParser {
 
 	/**
 	 * Stream name (may be {@code null}).
@@ -41,23 +41,23 @@ public class StreamDslParser extends ModuleParser {
 
 
 	/**
-	 * Construct a {@code StreamDslParser} without supplying the stream name up front.
+	 * Construct a {@code StreamParser} without supplying the stream name up front.
 	 * The stream name may be embedded in the definition; for example:
 	 * {@code mystream = http | file}.
 	 *
 	 * @param dsl the stream definition DSL text
 	 */
-	public StreamDslParser(String dsl) {
+	public StreamParser(String dsl) {
 		this(null, dsl);
 	}
 
 	/**
-	 * Construct a {@code StreamDslParser} for a stream with the provided name.
+	 * Construct a {@code StreamParser} for a stream with the provided name.
 	 *
 	 * @param name stream name
 	 * @param dsl  stream dsl text
 	 */
-	public StreamDslParser(String name, String dsl) {
+	public StreamParser(String name, String dsl) {
 		super(new Tokens(dsl));
 		this.name = name;
 		this.dsl = dsl;

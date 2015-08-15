@@ -35,7 +35,7 @@ import org.junit.rules.ExpectedException;
  * @author Andy Clement
  * @author David Turanski
  */
-public class StreamDslParserTests {
+public class StreamParserTests {
 
 	@Rule
 	public ExpectedException thrown = ExpectedException.none();
@@ -179,7 +179,7 @@ public class StreamDslParserTests {
 	@Test
 	public void testInvalidModules() {
 		String config = "test | foo--x=13";
-		StreamDslParser parser = new StreamDslParser("t", config);
+		StreamParser parser = new StreamParser("t", config);
 		try {
 			parser.parse();
 			fail(config + " is invalid. Should throw exception");
@@ -543,11 +543,11 @@ public class StreamDslParserTests {
 	}
 
 	StreamNode parse(String streamDefinition) {
-		return new StreamDslParser(streamDefinition).parse();
+		return new StreamParser(streamDefinition).parse();
 	}
 
 	StreamNode parse(String streamName, String streamDefinition) {
-		return new StreamDslParser(streamName, streamDefinition).parse();
+		return new StreamParser(streamName, streamDefinition).parse();
 	}
 
 	private void checkForIllegalStreamName(String streamName, String streamDef) {

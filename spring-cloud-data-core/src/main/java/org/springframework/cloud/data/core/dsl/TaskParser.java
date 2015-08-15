@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.data.core.dsl;
 
 /**
@@ -21,7 +22,7 @@ package org.springframework.cloud.data.core.dsl;
  * @author Michael Minella
  * @author Patrick Peralta
  */
-public class TaskDslParser extends ModuleParser {
+public class TaskParser extends ModuleParser {
 
 	/**
 	 * Task name (may be {@code null}).
@@ -29,23 +30,23 @@ public class TaskDslParser extends ModuleParser {
 	private final String name;
 
 	/**
-	 * Construct a {@code TaskDslParser} without supplying the task name up front.
+	 * Construct a {@code TaskParser} without supplying the task name up front.
 	 * The task name may be embedded in the definition; for example:
 	 * {@code myTask = filejdbc}
 	 *
 	 * @param dsl the task definition DSL text
 	 */
-	public TaskDslParser(String dsl) {
+	public TaskParser(String dsl) {
 		this(null, dsl);
 	}
 
 	/**
-	 * Construct a {@code TaskDslParser} for a task with the provided name.
+	 * Construct a {@code TaskParser} for a task with the provided name.
 	 *
 	 * @param name task name
 	 * @param dsl  task dsl text
 	 */
-	public TaskDslParser(String name, String dsl) {
+	public TaskParser(String name, String dsl) {
 		super(new Tokens(dsl));
 		this.name = name;
 	}

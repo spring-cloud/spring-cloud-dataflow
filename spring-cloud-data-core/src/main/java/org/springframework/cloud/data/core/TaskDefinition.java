@@ -22,7 +22,7 @@ import java.util.Map;
 
 import org.springframework.cloud.data.core.dsl.ArgumentNode;
 import org.springframework.cloud.data.core.dsl.ModuleNode;
-import org.springframework.cloud.data.core.dsl.TaskDslParser;
+import org.springframework.cloud.data.core.dsl.TaskParser;
 import org.springframework.core.style.ToStringCreator;
 
 /**
@@ -50,7 +50,7 @@ public class TaskDefinition {
 
 
 	public TaskDefinition(String name, String dsl) {
-		ModuleNode taskNode = new TaskDslParser(name, dsl).parse();
+		ModuleNode taskNode = new TaskParser(name, dsl).parse();
 		this.taskName = name;
 		this.task = taskNode.getLabelName();
 		HashMap<String, String> arguments = new HashMap<>();
