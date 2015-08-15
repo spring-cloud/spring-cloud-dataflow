@@ -36,6 +36,10 @@ import org.springframework.cloud.data.core.dsl.ParseException;
  */
 public class StreamDefinitionTests {
 
+	private static final String INPUT_CHANNEL = "input";
+
+	private static final String OUTPUT_CHANNEL = "output";
+
 	@Test
 	public void testStreamCreation() {
 		StreamDefinition stream = new StreamDefinition("ticktock", "time | log");
@@ -43,14 +47,14 @@ public class StreamDefinitionTests {
 		ModuleDefinition time = stream.getModuleDefinitions().get(0);
 		assertEquals("time", time.getName());
 		assertEquals("time", time.getLabel());
-		assertEquals("ticktock.0", time.getBindings().get(StreamDefinition.OUTPUT_CHANNEL));
-		assertFalse(time.getBindings().containsKey(StreamDefinition.INPUT_CHANNEL));
+		assertEquals("ticktock.0", time.getBindings().get(OUTPUT_CHANNEL));
+		assertFalse(time.getBindings().containsKey(INPUT_CHANNEL));
 
 		ModuleDefinition log = stream.getModuleDefinitions().get(1);
 		assertEquals("log", log.getName());
 		assertEquals("log", log.getLabel());
-		assertEquals("ticktock.0", log.getBindings().get(StreamDefinition.INPUT_CHANNEL));
-		assertFalse(log.getBindings().containsKey(StreamDefinition.OUTPUT_CHANNEL));
+		assertEquals("ticktock.0", log.getBindings().get(INPUT_CHANNEL));
+		assertFalse(log.getBindings().containsKey(OUTPUT_CHANNEL));
 	}
 
 	@Test
@@ -121,7 +125,7 @@ public class StreamDefinitionTests {
 		StreamDefinition streamDefinition = new StreamDefinition("test", "topic:foo > goo | blah | file");
 		List<ModuleDefinition> requests = streamDefinition.getModuleDefinitions();
 		assertEquals(3, requests.size());
-		assertEquals("topic:foo", requests.get(0).getBindings().get(StreamDefinition.INPUT_CHANNEL));
+		assertEquals("topic:foo", requests.get(0).getBindings().get(INPUT_CHANNEL));
 	}
 
 	@Test
@@ -129,7 +133,7 @@ public class StreamDefinitionTests {
 		StreamDefinition streamDefinition = new StreamDefinition("test", "boo | blah | aaak > queue:foo");
 		List<ModuleDefinition> requests = streamDefinition.getModuleDefinitions();
 		assertEquals(3, requests.size());
-		assertEquals("queue:foo", requests.get(2).getBindings().get(StreamDefinition.OUTPUT_CHANNEL));
+		assertEquals("queue:foo", requests.get(2).getBindings().get(OUTPUT_CHANNEL));
 	}
 
 	@Test
@@ -137,7 +141,7 @@ public class StreamDefinitionTests {
 		StreamDefinition streamDefinition = new StreamDefinition("test", "bart > queue:foo");
 		List<ModuleDefinition> requests = streamDefinition.getModuleDefinitions();
 		assertEquals(1, requests.size());
-		assertEquals("queue:foo", requests.get(0).getBindings().get(StreamDefinition.OUTPUT_CHANNEL));
+		assertEquals("queue:foo", requests.get(0).getBindings().get(OUTPUT_CHANNEL));
 	}
 
 	@Test
@@ -160,7 +164,7 @@ public class StreamDefinitionTests {
 		StreamDefinition streamDefinition = new StreamDefinition("test", "queue:foo > boot");
 		List<ModuleDefinition> requests = streamDefinition.getModuleDefinitions();
 		assertEquals(1, requests.size());
-		assertEquals("queue:foo", requests.get(0).getBindings().get(StreamDefinition.INPUT_CHANNEL));
+		assertEquals("queue:foo", requests.get(0).getBindings().get(INPUT_CHANNEL));
 	}
 
 	@Test
@@ -190,11 +194,11 @@ public class StreamDefinitionTests {
 		ModuleDefinition source = modules.get(0);
 		ModuleDefinition sink = modules.get(1);
 		assertEquals("time", source.getLabel());
-		assertEquals("ticktock.0", source.getBindings().get(StreamDefinition.OUTPUT_CHANNEL));
-		assertFalse(source.getBindings().containsKey(StreamDefinition.INPUT_CHANNEL));
+		assertEquals("ticktock.0", source.getBindings().get(OUTPUT_CHANNEL));
+		assertFalse(source.getBindings().containsKey(INPUT_CHANNEL));
 		assertEquals("log", sink.getLabel());
-		assertEquals("ticktock.0", sink.getBindings().get(StreamDefinition.INPUT_CHANNEL));
-		assertFalse(sink.getBindings().containsKey(StreamDefinition.OUTPUT_CHANNEL));
+		assertEquals("ticktock.0", sink.getBindings().get(INPUT_CHANNEL));
+		assertFalse(sink.getBindings().containsKey(OUTPUT_CHANNEL));
 	}
 
 	@Test
@@ -207,16 +211,16 @@ public class StreamDefinitionTests {
 		ModuleDefinition sink = modules.get(2);
 
 		assertEquals("time", source.getLabel());
-		assertEquals("ticktock.0", source.getBindings().get(StreamDefinition.OUTPUT_CHANNEL));
-		assertFalse(source.getBindings().containsKey(StreamDefinition.INPUT_CHANNEL));
+		assertEquals("ticktock.0", source.getBindings().get(OUTPUT_CHANNEL));
+		assertFalse(source.getBindings().containsKey(INPUT_CHANNEL));
 
 		assertEquals("filter", processor.getLabel());
-		assertEquals("ticktock.0", processor.getBindings().get(StreamDefinition.INPUT_CHANNEL));
-		assertEquals("ticktock.1", processor.getBindings().get(StreamDefinition.OUTPUT_CHANNEL));
+		assertEquals("ticktock.0", processor.getBindings().get(INPUT_CHANNEL));
+		assertEquals("ticktock.1", processor.getBindings().get(OUTPUT_CHANNEL));
 
 		assertEquals("log", sink.getLabel());
-		assertEquals("ticktock.1", sink.getBindings().get(StreamDefinition.INPUT_CHANNEL));
-		assertFalse(sink.getBindings().containsKey(StreamDefinition.OUTPUT_CHANNEL));
+		assertEquals("ticktock.1", sink.getBindings().get(INPUT_CHANNEL));
+		assertFalse(sink.getBindings().containsKey(OUTPUT_CHANNEL));
 	}
 
 }
