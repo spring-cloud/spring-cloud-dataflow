@@ -8,10 +8,6 @@
 	<description>SPI for spring-cloud-stream module deployer implementations</description>
 	<dependencies>
 		<dependency>
-			<groupId>org.springframework.xd</groupId>
-			<artifactId>spring-xd-module</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-data-core</artifactId>
 			<version>1.0.0.BUILD-SNAPSHOT</version>

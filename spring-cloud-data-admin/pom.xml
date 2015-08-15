@@ -80,16 +80,16 @@
 			<groupId>org.springframework.plugin</groupId>
 			<artifactId>spring-plugin-core</artifactId>
 		</dependency>
+		<!-- Lattice connector dependency to create services info from lattice -->
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-lattice-connector</artifactId>
-			<version>${spring-cloud-lattice.version}</version>
 			<optional>true</optional>
 		</dependency>
+		<!-- dependency to connect to detected cloud services -->
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-spring-service-connector</artifactId>
-			<version>${spring-cloud-lattice.version}</version>
 			<optional>true</optional>
 		</dependency>
 		<dependency>
