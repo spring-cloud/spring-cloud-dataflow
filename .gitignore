@@ -30,4 +30,3 @@ spring-*/src/main/java/META-INF/MANIFEST.MF
 *.ipr
 *.iws
 .idea/*
-!.idea/copyright/
