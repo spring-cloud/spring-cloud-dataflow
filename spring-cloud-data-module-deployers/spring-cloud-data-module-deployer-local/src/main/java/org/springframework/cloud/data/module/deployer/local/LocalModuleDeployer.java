@@ -16,12 +16,12 @@
 
 package org.springframework.cloud.data.module.deployer.local;
 
+import java.net.Inet4Address;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,6 +32,8 @@ import org.springframework.cloud.data.module.ModuleStatus;
 import org.springframework.cloud.data.module.deployer.ModuleDeployer;
 import org.springframework.cloud.stream.module.launcher.ModuleLauncher;
 import org.springframework.util.Assert;
+import org.springframework.util.SocketUtils;
+import org.springframework.web.client.RestTemplate;
 
 /**
  * @author Mark Fisher
@@ -43,7 +45,9 @@ public class LocalModuleDeployer implements ModuleDeployer {
 
 	private final ModuleLauncher launcher;
 
-	private final Set<ModuleDeploymentId> deployedModules = new HashSet<>();
+	private final Map<ModuleDeploymentId, URL> deployedModules = new HashMap<>();
+
+	private final RestTemplate restTemplate = new RestTemplate();
 
 	public LocalModuleDeployer(ModuleLauncher launcher) {
 		Assert.notNull(launcher, "Module launcher cannot be null");
@@ -62,21 +66,36 @@ public class LocalModuleDeployer implements ModuleDeployer {
 					module, entry.getKey(), entry.getValue()));
 		}
 		logger.info("deploying module: " + module);
+		int port = SocketUtils.findAvailableTcpPort(8080);
+		URL moduleUrl;
+		try {
+			moduleUrl = new URL("http", Inet4Address.getLocalHost().getHostAddress(), port, "");
+		}
+		catch (Exception e) {
+			throw new IllegalStateException("failed to determine URL for module: " + module, e);
+		}
+		args.add(String.format("--%s.server.port=%d", module, port));
+		args.add(String.format("--%s.endpoints.shutdown.enabled=true", module));
 		launcher.launch(new String[] { module }, args.toArray(new String[args.size()]));
 		ModuleDeploymentId id = new ModuleDeploymentId(request.getDefinition().getGroup(),
 				request.getDefinition().getLabel());
-		this.deployedModules.add(id);
+		this.deployedModules.put(id, moduleUrl);
 		return id;
 	}
 
 	@Override
 	public void undeploy(ModuleDeploymentId id) {
-		throw new UnsupportedOperationException("todo");		
+		URL url = this.deployedModules.get(id);
+		if (url != null) {
+			logger.info("undeploying module: " + id);
+			this.restTemplate.postForObject(url + "/shutdown", null, String.class);
+			this.deployedModules.remove(id);
+		}
 	}
 
 	@Override
 	public ModuleStatus status(ModuleDeploymentId id) {
-		boolean deployed = this.deployedModules.contains(id);
+		boolean deployed = this.deployedModules.containsKey(id);
 		LocalModuleInstanceStatus status = new LocalModuleInstanceStatus(id.toString(), deployed, null);
 		return ModuleStatus.of(id).with(status).build();
 	}
@@ -84,7 +103,7 @@ public class LocalModuleDeployer implements ModuleDeployer {
 	@Override
 	public Map<ModuleDeploymentId, ModuleStatus> status() {
 		Map<ModuleDeploymentId, ModuleStatus> statusMap = new HashMap<>();
-		for (ModuleDeploymentId id : this.deployedModules) {
+		for (ModuleDeploymentId id : this.deployedModules.keySet()) {
 			statusMap.put(id, status(id));
 		}
 		return statusMap;
