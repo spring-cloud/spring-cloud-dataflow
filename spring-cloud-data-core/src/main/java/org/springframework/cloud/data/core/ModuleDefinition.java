@@ -25,9 +25,8 @@ import org.springframework.core.style.ToStringCreator;
 import org.springframework.util.Assert;
 
 /**
- * Representation of a module in the context of a defined stream.
- * This includes module options provided in a stream definition.
- * This does not include module information required at deployment
+ * Representation of a module, including module properties provided via the DSL
+ * definition. This does not include module information required at deployment
  * time (such as the number of module instances).
  *
  * @author Mark Fisher
@@ -67,8 +66,7 @@ public class ModuleDefinition {
 	 *
 	 * @param name name of module
 	 * @param label label used for module in stream definition
-	 * @param group group this module belongs to (stream)
-	 * @param bindings map of channel bindings; may not be {@code null}
+	 * @param group group this module belongs to (e.g. stream)
 	 * @param parameters module parameters; may be {@code null}
 	 */
 	private ModuleDefinition(String name, String label, String group, Map<String, String> parameters) {
@@ -94,7 +92,7 @@ public class ModuleDefinition {
 
 	/**
 	 * Return symbolic name of a module. This may be explicitly specified in
-	 * the DSL string, which is required if the stream contains another module
+	 * the DSL string, which is required if the group contains another module
 	 * with the same name. Otherwise, it will be the same as the module name.
 	 *
 	 * @return module label
@@ -238,7 +236,7 @@ public class ModuleDefinition {
 
 		/**
 		 * Return symbolic name of a module. This may be explicitly specified in
-		 * the DSL string, which is required if the stream contains another module
+		 * the DSL string, which is required if the group contains another module
 		 * with the same name. Otherwise, it will be the same as the module name.
 		 *
 		 * @return module label
