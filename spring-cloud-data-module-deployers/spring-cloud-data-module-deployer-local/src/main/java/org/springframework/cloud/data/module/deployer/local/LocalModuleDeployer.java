@@ -61,10 +61,6 @@ public class LocalModuleDeployer implements ModuleDeployer {
 		for (Map.Entry<String, String> entry : request.getDefinition().getParameters().entrySet()) {
 			args.add(String.format("--%s.%s=%s", module, entry.getKey(), entry.getValue()));
 		}
-		for (Map.Entry<String, String> entry : request.getDefinition().getBindings().entrySet()) {
-			args.add(String.format("--%s.spring.cloud.stream.bindings.%s=%s",
-					module, entry.getKey(), entry.getValue()));
-		}
 		logger.info("deploying module: " + module);
 		int port = SocketUtils.findAvailableTcpPort(8080);
 		URL moduleUrl;

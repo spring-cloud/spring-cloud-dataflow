@@ -25,9 +25,8 @@ import org.springframework.core.style.ToStringCreator;
 import org.springframework.util.Assert;
 
 /**
- * Representation of a module in the context of a defined stream.
- * This includes module options provided in a stream definition.
- * This does not include module information required at deployment
+ * Representation of a module, including module properties provided via the DSL
+ * definition. This does not include module information required at deployment
  * time (such as the number of module instances).
  *
  * @author Mark Fisher
@@ -55,11 +54,6 @@ public class ModuleDefinition {
 	private final String group;
 
 	/**
-	 * Map of channel bindings for this module (such as input and/or output channels).
-	 */
-	private final Map<String, String> bindings;
-
-	/**
 	 * Parameters for module. This is specific to the type of module - for
 	 * instance an http module would include a port number as a parameter.
 	 */
@@ -72,21 +66,16 @@ public class ModuleDefinition {
 	 *
 	 * @param name name of module
 	 * @param label label used for module in stream definition
-	 * @param group group this module belongs to (stream)
-	 * @param bindings map of channel bindings; may not be {@code null}
+	 * @param group group this module belongs to (e.g. stream)
 	 * @param parameters module parameters; may be {@code null}
 	 */
-	private ModuleDefinition(String name, String label, String group,
-			Map<String, String> bindings, Map<String, String> parameters) {
+	private ModuleDefinition(String name, String label, String group, Map<String, String> parameters) {
 		Assert.notNull(name, "name must not be null");
 		Assert.notNull(label, "label must not be null");
 		Assert.notNull(group, "group must not be null");
-		Assert.notNull(bindings, "bindings must not be null");
-		Assert.notEmpty(bindings, "bindings must not be empty");
 		this.name = name;
 		this.label = label;
 		this.group = group;
-		this.bindings = Collections.unmodifiableMap(new HashMap<String, String>(bindings));
 		this.parameters = parameters == null
 				? Collections.<String, String>emptyMap()
 				: Collections.unmodifiableMap(new HashMap<String, String>(parameters));
@@ -103,7 +92,7 @@ public class ModuleDefinition {
 
 	/**
 	 * Return symbolic name of a module. This may be explicitly specified in
-	 * the DSL string, which is required if the stream contains another module
+	 * the DSL string, which is required if the group contains another module
 	 * with the same name. Otherwise, it will be the same as the module name.
 	 *
 	 * @return module label
@@ -123,16 +112,6 @@ public class ModuleDefinition {
 	}
 
 	/**
-	 * Return map of channel bindings for this module (such as input
-	 * and/or output channels).
-	 *
-	 * @return map of channel bindings for module
-	 */
-	public Map<String, String> getBindings() {
-		return bindings;
-	}
-
-	/**
 	 * Return parameters for module. This is specific to the type of module - for
 	 * instance an http module would include a port number as a parameter.
 	 *
@@ -148,7 +127,6 @@ public class ModuleDefinition {
 				.append("name", this.name)
 				.append("label", this.label)
 				.append("group", this.group)
-				.append("bindings", this.bindings)
 				.append("parameters", this.parameters).toString();
 	}
 
@@ -174,11 +152,6 @@ public class ModuleDefinition {
 		 * @see ModuleDefinition#group
 		 */
 		private String group;
-
-		/**
-		 * @see ModuleDefinition#bindings
-		 */
-		private Map<String, String> bindings = new HashMap<String, String>();
 
 		/**
 		 * @see ModuleDefinition#parameters
@@ -253,33 +226,6 @@ public class ModuleDefinition {
 		}
 
 		/**
-		 * Set a module binding.
-		 *
-		 * @param name binding name
-		 * @param value binding value
-		 * @return this builder object
-		 *
-		 * @see ModuleDefinition#bindings
-		 */
-		public Builder addBinding(String name, String value) {
-			this.bindings.put(name, value);
-			return this;
-		}
-
-		/**
-		 * Add the contents of the provided map to the map of module bindings.
-		 *
-		 * @param bindings module bindings
-		 * @return this builder object
-		 *
-		 * @see ModuleDefinition#bindings
-		 */
-		public Builder addBindings(Map<String, String> bindings) {
-			this.bindings.putAll(bindings);
-			return this;
-		}
-
-		/**
 		 * Return name of module.
 		 *
 		 * @return module name
@@ -290,7 +236,7 @@ public class ModuleDefinition {
 
 		/**
 		 * Return symbolic name of a module. This may be explicitly specified in
-		 * the DSL string, which is required if the stream contains another module
+		 * the DSL string, which is required if the group contains another module
 		 * with the same name. Otherwise, it will be the same as the module name.
 		 *
 		 * @return module label
@@ -322,15 +268,6 @@ public class ModuleDefinition {
 		}
 
 		/**
-		 * Return bindings for module. Note that the contents of this map are <b>mutable</b>.
-		 *
-		 * @return map of module bindings
-		 */
-		public Map<String, String> getBindings() {
-			return bindings;
-		}
-
-		/**
 		 * Return a new instance of {@link ModuleDefinition}.
 		 *
 		 * @return new instance of {@code ModuleDefinition}
@@ -339,8 +276,7 @@ public class ModuleDefinition {
 			if (this.label == null) {
 				this.label = this.name;
 			}
-			return new ModuleDefinition(this.name, this.label, this.group,
-					this.bindings, this.parameters);
+			return new ModuleDefinition(this.name, this.label, this.group, this.parameters);
 		}
 	}
 

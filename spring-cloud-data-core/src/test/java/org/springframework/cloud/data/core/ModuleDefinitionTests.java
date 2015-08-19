@@ -22,8 +22,11 @@ import org.junit.Test;
 
 /**
  * @author Patrick Peralta
+ * @author Mark Fisher
  */
 public class ModuleDefinitionTests {
+
+	private static final String OUTPUT_BINDING_KEY = "spring.cloud.stream.bindings.output";
 
 	@Test
 	public void testBuilder() {
@@ -31,13 +34,13 @@ public class ModuleDefinitionTests {
 				.setGroup("ticktock")
 				.setName("time")
 				.setLabel("label")
-				.addBinding("output", "channel").build();
+				.setParameter(OUTPUT_BINDING_KEY, "channel").build();
 
 		assertEquals("ticktock", definition.getGroup());
 		assertEquals("time", definition.getName());
 		assertEquals("label", definition.getLabel());
-		assertEquals(1, definition.getBindings().size());
-		assertEquals("channel", definition.getBindings().get("output"));
+		assertEquals(1, definition.getParameters().size());
+		assertEquals("channel", definition.getParameters().get(OUTPUT_BINDING_KEY));
 	}
 
 }
