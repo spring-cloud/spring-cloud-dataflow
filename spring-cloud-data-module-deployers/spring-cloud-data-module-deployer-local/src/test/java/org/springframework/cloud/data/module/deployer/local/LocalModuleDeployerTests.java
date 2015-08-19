@@ -54,12 +54,12 @@ public class LocalModuleDeployerTests {
 		ModuleDefinition timeDefinition = new ModuleDefinition.Builder()
 				.setGroup("ticktock")
 				.setName("time")
-				.addBinding("output", "ticktock.0")
+				.setParameter("spring.cloud.stream.bindings.output", "ticktock.0")
 				.build();
 		ModuleDefinition logDefinition = new ModuleDefinition.Builder()
 				.setGroup("ticktock")
 				.setName("log")
-				.addBinding("input", "ticktock.0")
+				.setParameter("spring.cloud.stream.bindings.input", "ticktock.0")
 				.build();
 		ModuleCoordinates timeCoordinates = new ModuleCoordinates.Builder()
 				.setGroupId(GROUP_ID)

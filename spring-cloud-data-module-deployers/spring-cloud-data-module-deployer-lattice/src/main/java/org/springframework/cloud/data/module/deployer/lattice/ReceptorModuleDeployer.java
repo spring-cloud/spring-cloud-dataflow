@@ -37,8 +37,10 @@ import org.springframework.util.StringUtils;
 
 /**
  * @author Patrick Peralta
+ * @author Mark Fisher
  */
 public class ReceptorModuleDeployer implements ModuleDeployer {
+
 	private static final Logger logger = LoggerFactory.getLogger(ReceptorModuleDeployer.class);
 
 	public static final String DOCKER_PATH = "docker:///springcloud/stream-module-launcher";
@@ -66,11 +68,6 @@ public class ReceptorModuleDeployer implements ModuleDeployer {
 		environmentVariables.add(new EnvironmentVariable("SPRING_PROFILES_ACTIVE", "cloud"));
 		for (Map.Entry<String, String> entry : request.getDefinition().getParameters().entrySet()) {
 			environmentVariables.add(new EnvironmentVariable(entry.getKey(), entry.getValue()));
-		}
-		for (Map.Entry<String, String> entry : request.getDefinition().getBindings().entrySet()) {
-			environmentVariables.add(new EnvironmentVariable(
-					String.format("SPRING_CLOUD_STREAM_BINDINGS_%s", entry.getKey().toUpperCase()),
-					entry.getValue()));
 		}
 
 		lrp.setEnv(environmentVariables.toArray(new EnvironmentVariable[environmentVariables.size()]));
