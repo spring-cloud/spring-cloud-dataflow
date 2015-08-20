@@ -83,8 +83,8 @@ public class TaskControllerTests {
 		TaskDefinition myTask = repository.findOne("myTask");
 
 		assertTrue(CollectionUtils.isEmpty(myTask.getParameters()));
-		assertEquals("task", myTask.getTask());
-		assertEquals("myTask", myTask.getTaskName());
+		assertEquals("task", myTask.getDslText());
+		assertEquals("myTask", myTask.getName());
 	}
 
 	@Test
@@ -117,8 +117,9 @@ public class TaskControllerTests {
 
 		assertEquals("bar", myTask.getParameters().get("foo"));
 		assertEquals("baz", myTask.getParameters().get("bar"));
-		assertEquals("task", myTask.getTask());
-		assertEquals("myTask", myTask.getTaskName());
+		assertEquals("task --foo=bar --bar=baz", myTask.getDslText());
+		assertEquals("task", myTask.getModuleDefinition().getName());
+		assertEquals("myTask", myTask.getName());
 	}
 
 	@Test
