@@ -206,8 +206,8 @@ public class StreamController {
 		Iterator<ModuleDefinition> iterator = stream.getDeploymentOrderIterator();
 		for (int i = 0; iterator.hasNext(); i++) {
 			ModuleDefinition module = iterator.next();
-			// todo: support processor
-			String type = (i == 0) ? "sink" : "source";
+			String type = (i == 0) ? "sink"
+					: (iterator.hasNext() ? "processor" : "source");
 			ModuleCoordinates coordinates = this.registry.findByNameAndType(module.getName(), type);
 			// todo: pass deployment properties
 			this.deployer.deploy(new ModuleDeploymentRequest(module, coordinates));

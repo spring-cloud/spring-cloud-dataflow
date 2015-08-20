@@ -32,12 +32,18 @@ public class StubModuleRegistry implements ModuleRegistry {
 
 	private final Map<String, ModuleCoordinates> sources = new HashMap<>();
 
+	private final Map<String, ModuleCoordinates> processors = new HashMap<>();
+
 	private final Map<String, ModuleCoordinates> sinks = new HashMap<>();
 
 	public StubModuleRegistry() {
 		sources.put("time", defaultCoordinatesFor("time-source"));
-		sinks.put("log", defaultCoordinatesFor("log-sink"));
+		processors.put("filter", defaultCoordinatesFor("filter-processor"));		
+		processors.put("groovy-filter", defaultCoordinatesFor("groovy-filter-processor"));
+		processors.put("groovy-transform", defaultCoordinatesFor("groovy-transform-processor"));
+		processors.put("transform", defaultCoordinatesFor("transform-processor"));
 		sinks.put("counter", defaultCoordinatesFor("counter-sink"));
+		sinks.put("log", defaultCoordinatesFor("log-sink"));
 	}
 
 	@Override
@@ -45,10 +51,13 @@ public class StubModuleRegistry implements ModuleRegistry {
 		if ("source".equals(type)) {
 			return sources.get(name);
 		}
+		if ("processor".equals(type)) {
+			return processors.get(name);
+		}
 		if ("sink".equals(type)) {
 			return sinks.get(name);
 		}
-		throw new UnsupportedOperationException("only 'source' and 'sink' types are currently supported");
+		throw new UnsupportedOperationException("only 'source', 'processor', and 'sink' types are supported");
 	}
 
 	private ModuleCoordinates defaultCoordinatesFor(String moduleName) {
