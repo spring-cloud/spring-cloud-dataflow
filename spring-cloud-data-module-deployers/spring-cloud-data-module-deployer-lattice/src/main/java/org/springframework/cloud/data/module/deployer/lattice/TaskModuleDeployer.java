@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,9 +22,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.cloudfoundry.receptor.actions.RunAction;
 import org.cloudfoundry.receptor.client.ReceptorClient;
-import org.cloudfoundry.receptor.commands.ActualLRPResponse;
-import org.cloudfoundry.receptor.commands.DesiredLRPCreateRequest;
+import org.cloudfoundry.receptor.commands.TaskCreateRequest;
+import org.cloudfoundry.receptor.commands.TaskResponse;
 import org.cloudfoundry.receptor.support.EnvironmentVariable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,19 +34,17 @@ import org.springframework.cloud.data.core.ModuleDeploymentId;
 import org.springframework.cloud.data.core.ModuleDeploymentRequest;
 import org.springframework.cloud.data.module.ModuleStatus;
 import org.springframework.cloud.data.module.deployer.ModuleDeployer;
-import org.springframework.util.StringUtils;
 
 /**
  * @author Patrick Peralta
  * @author Mark Fisher
+ * @author Michael Minella
  */
-public class ReceptorModuleDeployer implements ModuleDeployer {
+public class TaskModuleDeployer implements ModuleDeployer {
 
-	private static final Logger logger = LoggerFactory.getLogger(ReceptorModuleDeployer.class);
+	private static final Logger logger = LoggerFactory.getLogger(TaskModuleDeployer.class);
 
 	public static final String DOCKER_PATH = "docker:///springcloud/stream-module-launcher";
-
-	public static final String BASE_ADDRESS = "192.168.11.11.xip.io";
 
 	private final ReceptorClient receptorClient = new ReceptorClient();
 
@@ -54,35 +53,34 @@ public class ReceptorModuleDeployer implements ModuleDeployer {
 		ModuleDeploymentId id = ModuleDeploymentId.fromModuleDefinition(request.getDefinition());
 		String guid = guid(id);
 
-		DesiredLRPCreateRequest lrp = new DesiredLRPCreateRequest();
-		lrp.setProcessGuid(guid);
-		lrp.setRootfs(DOCKER_PATH);
-		lrp.runAction().setPath("java");
-		lrp.runAction().addArg("-Djava.security.egd=file:/dev/./urandom");
-		lrp.runAction().addArg("-jar");
-		lrp.runAction().addArg("/module-launcher.jar");
+		TaskCreateRequest task = new TaskCreateRequest();
+		task.setLogGuid(guid);
+		task.setTaskGuid(guid);
+		task.setRootfs(DOCKER_PATH);
+
+		RunAction runAction = task.getAction().get("run");
+		runAction.setPath("java");
+		runAction.addArg("-Djava.security.egd=file:/dev/./urandom");
+		runAction.addArg("-jar");
+		runAction.addArg("/module-launcher.jar");
 
 		List<EnvironmentVariable> environmentVariables = new ArrayList<EnvironmentVariable>();
-		Collections.addAll(environmentVariables, lrp.getEnv());
+		Collections.addAll(environmentVariables, task.getEnv());
 		environmentVariables.add(new EnvironmentVariable("MODULES", request.getCoordinates().toString()));
 		environmentVariables.add(new EnvironmentVariable("SPRING_PROFILES_ACTIVE", "cloud"));
 		for (Map.Entry<String, String> entry : request.getDefinition().getParameters().entrySet()) {
 			environmentVariables.add(new EnvironmentVariable(entry.getKey(), entry.getValue()));
 		}
 
-		lrp.setEnv(environmentVariables.toArray(new EnvironmentVariable[environmentVariables.size()]));
-		lrp.setMemoryMb(512);
-		lrp.setPorts(new int[] {8080, 9000});
+		task.setEnv(environmentVariables.toArray(new EnvironmentVariable[environmentVariables.size()]));
+		task.setMemoryMb(512);
 
-		lrp.addRoute(8080, new String[] {guid + "." + BASE_ADDRESS, guid + "-8080." + BASE_ADDRESS});
-		lrp.addRoute(9000, new String[] {guid + "-9000." + BASE_ADDRESS});
-
-		logger.debug("Desired LRP: {}", lrp);
+		logger.debug("Desired Task: {}", task);
 		for (EnvironmentVariable e : environmentVariables) {
 			logger.debug("{}={}", e.getName(), e.getValue());
 		}
 
-		receptorClient.createDesiredLRP(lrp);
+		receptorClient.createTask(task);
 		return id;
 	}
 
@@ -99,27 +97,33 @@ public class ReceptorModuleDeployer implements ModuleDeployer {
 
 	@Override
 	public void undeploy(ModuleDeploymentId id) {
-		receptorClient.deleteDesiredLRP(guid(id));
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public ModuleStatus status(ModuleDeploymentId id) {
 		ModuleStatus.Builder builder = ModuleStatus.of(id);
 
-		// todo: if the actual LRP is not found, search for the desired LRP to verify
-		// that the LRP is known to Lattice
-		for (ActualLRPResponse lrp : receptorClient.getActualLRPsByProcessGuid(guid(id))) {
-			Map<String, String> attributes = new HashMap<String, String>();
-			attributes.put("address", lrp.getAddress());
-			attributes.put("cellId", lrp.getCellId());
-			attributes.put("domain", lrp.getDomain());
-			attributes.put("processGuid", lrp.getProcessGuid());
-			attributes.put("index", Integer.toString(lrp.getIndex()));
-			attributes.put("ports", StringUtils.arrayToCommaDelimitedString(lrp.getPorts()));
-			attributes.put("since", Long.toString(lrp.getSince()));
-			builder.with(new ReceptorModuleInstanceStatus(lrp.getInstanceGuid(), lrp.getState(), attributes));
+		// todo: if the actual Task is not found, search for the desired Task to verify
+		// that the Task is known to Lattice
+		TaskResponse task = receptorClient.getTask(guid(id));
+
+		if(task != null) {
+			Map<String, String> attributes = new HashMap<>();
+			attributes.put("failureReason", task.getFailureReason());
+			attributes.put("result", task.getResult());
+			attributes.put("annotation", task.getAnnotation());
+			attributes.put("completionCallbackUrl", task.getCompletionCallbackUrl());
+			attributes.put("resultFile", task.getResultFile());
+			attributes.put("cellId", task.getCellId());
+			attributes.put("domain", task.getDomain());
+			builder.with(new ReceptorModuleInstanceStatus(task.getTaskGuid(), task.getState(), attributes));
+
+			return builder.build();
 		}
-		return builder.build();
+		else {
+			return null;
+		}
 	}
 
 	@Override

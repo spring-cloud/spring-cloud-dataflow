@@ -16,8 +16,11 @@
 
 package org.springframework.cloud.data.admin.configuration;
 
+import static org.mockito.Mockito.mock;
+
 import org.springframework.cloud.data.module.registry.ModuleRegistry;
 import org.springframework.cloud.data.module.registry.InMemoryModuleRegistry;
+import org.springframework.cloud.stream.module.launcher.ModuleLauncher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
@@ -35,4 +38,8 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 		return new InMemoryModuleRegistry();
 	}
 
+	@Bean
+	public ModuleLauncher moduleLauncher() {
+		return mock(ModuleLauncher.class);
+	}
 }
