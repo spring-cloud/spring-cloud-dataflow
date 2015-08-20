@@ -19,7 +19,8 @@ package org.springframework.cloud.data.admin.config;
 import org.springframework.cloud.config.java.CloudScan;
 import org.springframework.cloud.data.module.deployer.ModuleDeployer;
 import org.springframework.cloud.data.module.deployer.cloudfoundry.CloudFoundryModuleDeployer;
-import org.springframework.cloud.data.module.deployer.lattice.ReceptorModuleDeployer;
+import org.springframework.cloud.data.module.deployer.lattice.ReceptorLrpModuleDeployer;
+import org.springframework.cloud.data.module.deployer.lattice.ReceptorTaskModuleDeployer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -40,8 +41,13 @@ public class CloudConfiguration {
 	protected static class LatticeConfig {
 
 		@Bean
-		public ModuleDeployer moduleDeployer() {
-			return new ReceptorModuleDeployer();
+		public ModuleDeployer longRunningModuleDeployer() {
+			return new ReceptorLrpModuleDeployer();
+		}
+
+		@Bean
+		public ModuleDeployer taskModuleDeployer() {
+			return new ReceptorTaskModuleDeployer();
 		}
 	}
 

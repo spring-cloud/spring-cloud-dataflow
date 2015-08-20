@@ -86,7 +86,12 @@ public class AdminConfiguration {
 	protected static class LocalConfig {
 
 		@Bean
-		public ModuleDeployer moduleDeployer(ModuleLauncher moduleLauncher) {
+		public ModuleDeployer longRunningModuleDeployer(ModuleLauncher moduleLauncher) {
+			return new LocalModuleDeployer(moduleLauncher);
+		}
+
+		@Bean
+		public ModuleDeployer taskModuleDeployer(ModuleLauncher moduleLauncher) {
 			return new LocalModuleDeployer(moduleLauncher);
 		}
 	}

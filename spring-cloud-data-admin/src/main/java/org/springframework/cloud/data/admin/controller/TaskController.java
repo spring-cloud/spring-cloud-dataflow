@@ -17,8 +17,10 @@
 package org.springframework.cloud.data.admin.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cloud.data.admin.repository.TaskDefinitionRepository;
 import org.springframework.cloud.data.core.TaskDefinition;
+import org.springframework.cloud.data.module.deployer.ModuleDeployer;
 import org.springframework.cloud.data.rest.resource.TaskDefinitionResource;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
@@ -45,6 +47,10 @@ public class TaskController {
 
 	@Autowired
 	private TaskDefinitionRepository repository;
+
+	@Autowired
+	@Qualifier("taskModuleDeployer")
+	private ModuleDeployer moduleDeployer;
 
 	@RequestMapping(value = "/", method = RequestMethod.POST)
 	public void save(@RequestParam("name") String name,
