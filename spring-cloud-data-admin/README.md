@@ -45,3 +45,58 @@ If successful you should see output similar to the following in the `AdminApplic
 2015-08-05 07:36:24.678  INFO 59555 --- [hannel-adapter1] o.s.cloud.stream.module.log.LogSink      : Received: 2015-08-05 07:36:24
 2015-08-05 07:36:29.678  INFO 59555 --- [hannel-adapter1] o.s.cloud.stream.module.log.LogSink      : Received: 2015-08-05 07:36:29
 ```
+
+## Configuration:
+
+### Default
+Out of the box `spring-cloud-data-admin` will start in singlenode mode.  To configure 
+SCD-Admin you can follow configuration setup
+guidelines specified in the boot documentation found [here](http://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-external-config.html)
+
+Note: The application.yml containing the the defaults can be found here: 
+[here](https://github.com/spring-cloud/spring-cloud-data/blob/master/spring-cloud-data-admin/src/main/resources/application.yml) 
+
+### Spring Cloud Configuration
+`spring-cloud-data-admin`  offers the user the ability to configure the 
+admin using 
+[spring-cloud-config](http://cloud.spring.io/spring-cloud-config/spring-cloud-config.html)
+.  And all configurations retrieved from the cloud config will take precedence over boot's
+defaults enumerated above.  
+The spring-cloud-data-admin will look for the server at `localhost:8888`, however this
+ can be overwritten by setting the `spring.cloud.config.uri` property to the
+ desired url.
+
+#### Cloud-Config-Server configuration
+
+To specify a repository in the cloud config server configuration.yml for SCD-Admin 
+setup a repo profile with the pattern `spring-cloud-data-admin`.  For example:
+
+```YAML
+spring:
+  cloud:
+     config:
+       server:
+         git:
+           uri: https://github.com/myrepo/configurations
+           repos:
+            spring-cloud-data-admin:
+              pattern: spring-cloud-data-admin
+              uri: https://github.com/myrepo/configurations
+              searchPaths: springDataAdmin
+```
+
+##### Fail Fast
+In some cases, it may be desirable to fail startup of a service if it cannot connect to
+the Config Server. If this is the desired behavior, set the bootstrap configuration
+property `spring.cloud.config.failFast=true` and the client will halt with an Exception.
+
+##### Note: 
+If the SCD-Admin can't connect to the cloud config server the
+following warning message will be logged: 
+`WARN 42924 --- [           main] c.c.c.ConfigServicePropertySourceLocator : Could not locate PropertySource: I/O error on GET request for "http://localhost:8888/spring-cloud-data-admin/default":Connection refused; nested exception is java.net.ConnectException: Connection refused`
+
+To disable the cloud config server set the `spring.cloud.config.enabled` property to false
+
+
+
+

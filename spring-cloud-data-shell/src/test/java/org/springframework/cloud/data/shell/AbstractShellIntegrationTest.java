@@ -113,7 +113,7 @@ public abstract class AbstractShellIntegrationTest {
 			SpringApplication application = new SpringApplicationBuilder(AdminApplication.class,
 					AdminConfiguration.class, TestConfig.class).build();
 			applicationContext = application.run(
-					String.format("--server.port=%s", adminPort), "--spring.main.show_banner=false");
+					String.format("--server.port=%s", adminPort), "--spring.main.show_banner=false", "--spring.cloud.config.enabled=false");
 		}
 		JLineShellComponent shell = new Bootstrap(new String[] {"--port", String.valueOf(adminPort)})
 				.getJLineShellComponent();
