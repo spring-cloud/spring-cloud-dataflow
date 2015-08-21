@@ -97,12 +97,8 @@ public class TaskController {
 			Exception {
 		TaskDefinition taskDefinition = this.repository.findOne(name);
 		Assert.notNull(taskDefinition, String.format("no task defined: %s", name));
-		deployStream(taskDefinition);
-	}
 
-	private void deployStream(TaskDefinition taskDefinition) {
 		ModuleDefinition module = taskDefinition.getModuleDefinition();
-		// todo: support processor
 		ModuleCoordinates coordinates = this.registry.findByNameAndType(module.getName(), "task");
 		// todo: pass deployment properties
 		this.moduleDeployer.deploy(new ModuleDeploymentRequest(module, coordinates));
