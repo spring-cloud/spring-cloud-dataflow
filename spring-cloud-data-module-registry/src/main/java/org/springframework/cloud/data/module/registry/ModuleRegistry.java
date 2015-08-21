@@ -34,4 +34,6 @@ public interface ModuleRegistry {
 	 */
 	ModuleCoordinates findByNameAndType(String name, String type);
 
+	void save(String name, String type, ModuleCoordinates coordinates);
+
 }

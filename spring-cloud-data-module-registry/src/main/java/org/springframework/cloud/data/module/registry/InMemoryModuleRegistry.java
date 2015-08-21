@@ -24,28 +24,13 @@ import org.springframework.cloud.data.core.ModuleCoordinates;
 /**
  * @author Mark Fisher
  */
-public class StubModuleRegistry implements ModuleRegistry {
-
-	private static final String GROUP_ID = "org.springframework.cloud.stream.module";
-
-	private static final String VERSION = "1.0.0.BUILD-SNAPSHOT";
+public class InMemoryModuleRegistry implements ModuleRegistry {
 
 	private final Map<String, ModuleCoordinates> sources = new HashMap<>();
 
 	private final Map<String, ModuleCoordinates> processors = new HashMap<>();
 
 	private final Map<String, ModuleCoordinates> sinks = new HashMap<>();
-
-	public StubModuleRegistry() {
-		sources.put("http", defaultCoordinatesFor("http-source"));
-		sources.put("time", defaultCoordinatesFor("time-source"));
-		processors.put("filter", defaultCoordinatesFor("filter-processor"));		
-		processors.put("groovy-filter", defaultCoordinatesFor("groovy-filter-processor"));
-		processors.put("groovy-transform", defaultCoordinatesFor("groovy-transform-processor"));
-		processors.put("transform", defaultCoordinatesFor("transform-processor"));
-		sinks.put("counter", defaultCoordinatesFor("counter-sink"));
-		sinks.put("log", defaultCoordinatesFor("log-sink"));
-	}
 
 	@Override
 	public ModuleCoordinates findByNameAndType(String name, String type) {
@@ -61,7 +46,16 @@ public class StubModuleRegistry implements ModuleRegistry {
 		throw new UnsupportedOperationException("only 'source', 'processor', and 'sink' types are supported");
 	}
 
-	private ModuleCoordinates defaultCoordinatesFor(String moduleName) {
-		return ModuleCoordinates.parse(String.format("%s:%s:%s", GROUP_ID, moduleName, VERSION));
+	@Override
+	public void save(String name, String type, ModuleCoordinates coordinates) {
+		if ("source".equals(type)) {
+			this.sources.put(name, coordinates);
+		}
+		if ("processor".equals(type)) {
+			this.processors.put(name, coordinates);
+		}
+		if ("sink".equals(type)) {
+			this.sinks.put(name, coordinates);
+		}
 	}
 }
