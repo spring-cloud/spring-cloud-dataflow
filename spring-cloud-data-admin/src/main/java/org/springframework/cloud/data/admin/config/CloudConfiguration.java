@@ -16,13 +16,17 @@
 
 package org.springframework.cloud.data.admin.config;
 
-import org.springframework.cloud.config.java.CloudScan;
+import org.springframework.boot.autoconfigure.AutoConfigureBefore;
+import org.springframework.boot.autoconfigure.redis.RedisAutoConfiguration;
+import org.springframework.cloud.Cloud;
+import org.springframework.cloud.CloudFactory;
 import org.springframework.cloud.data.module.deployer.ModuleDeployer;
 import org.springframework.cloud.data.module.deployer.cloudfoundry.CloudFoundryModuleDeployer;
 import org.springframework.cloud.data.module.deployer.lattice.ReceptorModuleDeployer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
 
 /**
  * Configuration for cloud profiles (cloud, lattice).
@@ -33,8 +37,21 @@ import org.springframework.context.annotation.Profile;
  */
 @Configuration
 @Profile("cloud")
-@CloudScan
 public class CloudConfiguration {
+
+	@AutoConfigureBefore(RedisAutoConfiguration.class)
+	protected static class RedisConfig {
+
+		@Bean
+		public Cloud cloud() {
+			return new CloudFactory().getCloud();
+		}
+
+		@Bean
+		RedisConnectionFactory redisConnectionFactory(Cloud cloud) {
+			return cloud.getSingletonServiceConnector(RedisConnectionFactory.class, null);
+		}
+	}
 
 	@Profile("lattice")
 	protected static class LatticeConfig {
