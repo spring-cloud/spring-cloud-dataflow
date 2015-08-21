@@ -16,8 +16,6 @@
 
 package org.springframework.cloud.data.core;
 
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.cloud.data.core.dsl.ArgumentNode;
@@ -34,40 +32,44 @@ public class TaskDefinition {
 	/**
 	 * Name of module.
 	 */
-	private final String taskName;
+	private final String name;
 
 	/**
-	 * Symbolic taskName of a module. This may be generated to a default
+	 * Symbolic name of a module. This may be generated to a default
 	 * value or specified in the DSL string.
 	 */
-	private final String task;
+	private final String dslText;
 
-	/**
-	 * Parameters for module. This is specific to the type of module - for
-	 * instance an http module would include a port number as a parameter.
-	 */
-	private final Map<String, String> parameters;
-
+	private ModuleDefinition module;
 
 	public TaskDefinition(String name, String dsl) {
+		this.name = name;
+		this.dslText = dsl;
 		ModuleNode taskNode = new TaskParser(name, dsl).parse();
-		this.taskName = name;
-		this.task = taskNode.getLabelName();
-		HashMap<String, String> arguments = new HashMap<>();
-		if (taskNode.hasArguments()) {
-			for (ArgumentNode argument : taskNode.getArguments()) {
-				arguments.put(argument.getName(), argument.getValue());
+		ModuleDefinition.Builder builder = new ModuleDefinition.Builder()
+				.setGroup(name)
+				.setLabel(taskNode.getLabelName())
+				.setName(taskNode.getName());
+
+		if(taskNode.hasArguments()) {
+			for (ArgumentNode argumentNode : taskNode.getArguments()) {
+				builder.setParameter(argumentNode.getName(), argumentNode.getValue());
 			}
 		}
-		this.parameters = Collections.unmodifiableMap(new HashMap<>(arguments));
+
+		this.module = builder.build();
 	}
 
-	public String getTaskName() {
-		return taskName;
+	public String getName() {
+		return name;
 	}
 
-	public String getTask() {
-		return task;
+	public String getDslText() {
+		return dslText;
+	}
+
+	public ModuleDefinition getModuleDefinition() {
+		return this.module;
 	}
 
 	/**
@@ -77,14 +79,14 @@ public class TaskDefinition {
 	 * @return read-only map of module parameters
 	 */
 	public Map<String, String> getParameters() {
-		return parameters;
+		return module.getParameters();
 	}
 
 	@Override
 	public String toString() {
 		return new ToStringCreator(this)
-				.append("taskName", this.taskName)
-				.append("task", this.task)
-				.append("parameters", this.parameters).toString();
+				.append("name", this.name)
+				.append("dslText", this.dslText)
+				.append("parameters", this.module.getParameters()).toString();
 	}
 }

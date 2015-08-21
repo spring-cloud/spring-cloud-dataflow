@@ -17,8 +17,14 @@
 package org.springframework.cloud.data.admin.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cloud.data.admin.repository.TaskDefinitionRepository;
+import org.springframework.cloud.data.core.ModuleCoordinates;
+import org.springframework.cloud.data.core.ModuleDefinition;
+import org.springframework.cloud.data.core.ModuleDeploymentRequest;
 import org.springframework.cloud.data.core.TaskDefinition;
+import org.springframework.cloud.data.module.deployer.ModuleDeployer;
+import org.springframework.cloud.data.module.registry.ModuleRegistry;
 import org.springframework.cloud.data.rest.resource.TaskDefinitionResource;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
@@ -26,6 +32,7 @@ import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.mvc.ResourceAssemblerSupport;
 import org.springframework.http.HttpStatus;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -46,6 +53,25 @@ public class TaskController {
 	@Autowired
 	private TaskDefinitionRepository repository;
 
+	@Autowired
+	@Qualifier("taskModuleDeployer")
+	private ModuleDeployer moduleDeployer;
+
+	/**
+	 * The module registry this controller will use to look up modules.
+	 */
+	private final ModuleRegistry registry;
+
+	@Autowired
+	public TaskController(TaskDefinitionRepository repository, ModuleRegistry registry,
+			@Qualifier("taskModuleDeployer") ModuleDeployer deployer) {
+		Assert.notNull(repository, "repository must not be null");
+		Assert.notNull(registry, "registry must not be null");
+		Assert.notNull(deployer, "deployer must not be null");
+		this.repository = repository;
+		this.registry = registry;
+		this.moduleDeployer = deployer;}
+
 	@RequestMapping(value = "/", method = RequestMethod.POST)
 	public void save(@RequestParam("name") String name,
 			@RequestParam("definition") String dsl) {
@@ -65,6 +91,19 @@ public class TaskController {
 		return assembler.toResource(repository.findAll(pageable), taskAssembler);
 	}
 
+	@RequestMapping(value = "/deployments/{name}", method = RequestMethod.POST)
+	@ResponseStatus(HttpStatus.CREATED)
+	public void deploy(@PathVariable("name") String name, @RequestParam(required = false) String properties) throws
+			Exception {
+		TaskDefinition taskDefinition = this.repository.findOne(name);
+		Assert.notNull(taskDefinition, String.format("no task defined: %s", name));
+
+		ModuleDefinition module = taskDefinition.getModuleDefinition();
+		ModuleCoordinates coordinates = this.registry.findByNameAndType(module.getName(), "task");
+		// todo: pass deployment properties
+		this.moduleDeployer.deploy(new ModuleDeploymentRequest(module, coordinates));
+	}
+
 	/**
 	 * {@link org.springframework.hateoas.ResourceAssembler} implementation
 	 * that converts {@link TaskDefinition}s to {@link TaskDefinitionResource}s.
@@ -77,13 +116,13 @@ public class TaskController {
 
 		@Override
 		public TaskDefinitionResource toResource(TaskDefinition taskDefinition) {
-			return createResourceWithId(taskDefinition.getTaskName(), taskDefinition);
+			return createResourceWithId(taskDefinition.getName(), taskDefinition);
 		}
 
 		@Override
 		public TaskDefinitionResource instantiateResource(TaskDefinition taskDefinition) {
-			return new TaskDefinitionResource(taskDefinition.getTaskName(),
-					taskDefinition.getTask());
+			return new TaskDefinitionResource(taskDefinition.getName(),
+					taskDefinition.getDslText());
 		}
 	}
 }
