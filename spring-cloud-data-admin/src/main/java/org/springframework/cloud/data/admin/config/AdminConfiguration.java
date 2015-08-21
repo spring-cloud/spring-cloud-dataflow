@@ -29,7 +29,7 @@ import org.springframework.cloud.data.admin.repository.TaskDefinitionRepository;
 import org.springframework.cloud.data.module.deployer.ModuleDeployer;
 import org.springframework.cloud.data.module.deployer.local.LocalModuleDeployer;
 import org.springframework.cloud.data.module.registry.ModuleRegistry;
-import org.springframework.cloud.data.module.registry.StubModuleRegistry;
+import org.springframework.cloud.data.module.registry.RedisModuleRegistry;
 import org.springframework.cloud.stream.module.launcher.ModuleLauncher;
 import org.springframework.cloud.stream.module.launcher.ModuleLauncherConfiguration;
 import org.springframework.context.annotation.Bean;
@@ -76,8 +76,8 @@ public class AdminConfiguration {
 	}
 
 	@Bean
-	public ModuleRegistry moduleRegistry() {
-		return new StubModuleRegistry();
+	public ModuleRegistry moduleRegistry(RedisConnectionFactory redisConnectionFactory) {
+		return new RedisModuleRegistry(redisConnectionFactory);
 	}
 
 	@Configuration
