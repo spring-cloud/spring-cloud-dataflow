@@ -37,6 +37,7 @@ public class StubModuleRegistry implements ModuleRegistry {
 	private final Map<String, ModuleCoordinates> sinks = new HashMap<>();
 
 	public StubModuleRegistry() {
+		sources.put("http", defaultCoordinatesFor("http-source"));
 		sources.put("time", defaultCoordinatesFor("time-source"));
 		processors.put("filter", defaultCoordinatesFor("filter-processor"));		
 		processors.put("groovy-filter", defaultCoordinatesFor("groovy-filter-processor"));
