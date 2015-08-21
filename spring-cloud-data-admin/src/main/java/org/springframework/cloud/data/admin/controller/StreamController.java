@@ -98,7 +98,7 @@ public class StreamController {
 	 */
 	@Autowired
 	public StreamController(StreamDefinitionRepository repository, ModuleRegistry registry,
-			@Qualifier("longRunningModuleDeployer") ModuleDeployer deployer) {
+			@Qualifier("processModuleDeployer") ModuleDeployer deployer) {
 		Assert.notNull(repository, "repository must not be null");
 		Assert.notNull(registry, "registry must not be null");
 		Assert.notNull(deployer, "deployer must not be null");

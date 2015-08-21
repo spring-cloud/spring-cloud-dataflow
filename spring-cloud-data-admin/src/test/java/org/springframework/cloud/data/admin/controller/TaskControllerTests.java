@@ -18,6 +18,8 @@ package org.springframework.cloud.data.admin.controller;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.anyObject;
+import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -26,14 +28,21 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.cloud.data.admin.AdminApplication;
 import org.springframework.cloud.data.admin.configuration.TestDependencies;
+import org.springframework.cloud.data.admin.repository.InMemoryTaskDefinitionRepository;
 import org.springframework.cloud.data.admin.repository.TaskDefinitionRepository;
 import org.springframework.cloud.data.core.TaskDefinition;
+import org.springframework.cloud.data.module.deployer.lattice.ReceptorTaskModuleDeployer;
+import org.springframework.cloud.data.module.registry.StubModuleRegistry;
+import org.springframework.cloud.stream.module.launcher.ModuleLauncher;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
@@ -58,6 +67,9 @@ public class TaskControllerTests {
 	@Autowired
 	private WebApplicationContext wac;
 
+	@Autowired
+	private ModuleLauncher moduleLauncher;
+
 	@Before
 	public void setupMockMVC() {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(wac).defaultRequest(
@@ -67,6 +79,22 @@ public class TaskControllerTests {
 	@After
 	public void tearDown() {
 		repository.deleteAll();
+		assertEquals(0, repository.count());
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void testConstructorMissingRepository() {
+		new TaskController(null, new StubModuleRegistry(), new ReceptorTaskModuleDeployer());
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void testConstructorMissingRegistry() {
+		new TaskController(new InMemoryTaskDefinitionRepository(), null, new ReceptorTaskModuleDeployer());
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void testConstructorMissingDeployer() {
+		new TaskController(new InMemoryTaskDefinitionRepository(), new StubModuleRegistry(), null);
 	}
 
 	@Test
@@ -135,11 +163,25 @@ public class TaskControllerTests {
 
 	@Test
 	public void testDestroyTaskNotFound() throws Exception {
-
 		mockMvc.perform(
 				delete("/tasks/myTask").accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isOk());
 
 		assertEquals(0, repository.count());
+	}
+
+	@Test
+	@Ignore("Until we have a task module that is available in the remote repo")
+	public void testDeploy() throws Exception {
+		repository.save(new TaskDefinition("myTask", "task"));
+
+		mockMvc.perform(
+				post("/tasks/deployments/myTask").accept(MediaType.APPLICATION_JSON)).andDo(print())
+				.andExpect(status().isOk());
+
+		ArgumentCaptor<String[]> module = ArgumentCaptor.forClass(String [].class);
+		verify(moduleLauncher).launch(module.capture(), (String[]) anyObject());
+		assertEquals(1, module.getValue().length);
+		assertEquals("task", module.getValue()[0]);
 	}
 }

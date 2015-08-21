@@ -47,7 +47,7 @@ public class InMemoryStreamDefinitionRepository implements StreamDefinitionRepos
 	@Override
 	public Page<StreamDefinition> findAll(Pageable pageable) {
 		List<StreamDefinition> results = new ArrayList<>(definitions.values());
-		return new PageImpl<StreamDefinition>(results, pageable, results.size());
+		return new PageImpl<>(results, pageable, results.size());
 	}
 
 	@Override

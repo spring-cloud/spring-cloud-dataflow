@@ -41,7 +41,7 @@ public class CloudConfiguration {
 	protected static class LatticeConfig {
 
 		@Bean
-		public ModuleDeployer longRunningModuleDeployer() {
+		public ModuleDeployer processModuleDeployer() {
 			return new ReceptorLrpModuleDeployer();
 		}
 
