@@ -17,7 +17,6 @@
 package org.springframework.cloud.data.admin.config;
 
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.redis.RedisAutoConfiguration;
 import org.springframework.cloud.Cloud;
 import org.springframework.cloud.CloudFactory;
@@ -49,7 +48,6 @@ public class CloudConfiguration {
 		}
 
 		@Bean
-		@ConditionalOnMissingBean(RedisConnectionFactory.class)
 		RedisConnectionFactory redisConnectionFactory(Cloud cloud) {
 			return cloud.getSingletonServiceConnector(RedisConnectionFactory.class, null);
 		}
