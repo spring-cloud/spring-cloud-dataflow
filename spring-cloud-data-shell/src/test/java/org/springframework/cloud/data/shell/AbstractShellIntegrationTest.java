@@ -25,8 +25,16 @@ import org.junit.rules.TestName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.cloud.data.admin.AdminApplication;
+import org.springframework.cloud.data.admin.config.AdminConfiguration;
+import org.springframework.cloud.data.module.registry.ModuleRegistry;
+import org.springframework.cloud.data.module.registry.StubModuleRegistry;
 import org.springframework.cloud.data.shell.command.StreamCommandTemplate;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.shell.Bootstrap;
 import org.springframework.shell.core.CommandResult;
 import org.springframework.shell.core.JLineShellComponent;
@@ -36,27 +44,53 @@ import org.springframework.util.IdGenerator;
 import org.springframework.util.SocketUtils;
 
 /**
- * Base class for all the Shell integration test classes.
+ * Base class for shell integration tests. This class sets up and tears down
+ * the infrastructure required for executing shell tests - in particular, the
+ * {@link AdminApplication} server.
+ * <p>
+ * Extensions of this class may obtain an instance of {@link StreamCommandTemplate}
+ * via {@link #stream} in order to perform stream operations.
  *
  * @author Ilayaperumal Gopinathan
+ * @author Patrick Peralta
  */
 public abstract class AbstractShellIntegrationTest {
 
 	private static final Logger logger = LoggerFactory.getLogger(AbstractShellIntegrationTest.class);
 
+	/**
+	 * Generator used to create random stream names.
+	 */
 	private final IdGenerator idGenerator = new AlternativeJdkIdGenerator();
 
 	/**
-	 * This property can be set to false when running test suite.
+	 * System property indicating whether the test infrastructure should
+	 * be shut down after all tests are executed. If running in a test
+	 * suite, this system property should be set to {@code true} to allow
+	 * multiple tests to execute with the same admin server.
 	 */
-	private static final boolean SHUTDOWN_AFTER_RUN = true;
+	public static final String SHUTDOWN_AFTER_RUN = "shutdown.after.run";
 
-	private static AdminApplication application;
+	/**
+	 * Indicates whether the test infrastructure should be shut down
+	 * after all tests are executed.
+	 *
+	 * @see #SHUTDOWN_AFTER_RUN
+	 */
+	private static boolean shutdownAfterRun = true;
 
+	/**
+	 * Application context for admin application.
+	 */
+	private static ApplicationContext applicationContext;
+
+	/**
+	 * Instance of shell to execute commands for testing.
+	 */
 	private static CloudDataShell cloudDataShell;
 
 	/**
-	 * Use available TCP port for the admin port
+	 * TCP port for the admin server.
 	 */
 	private static final int adminPort = SocketUtils.findAvailableTcpPort();
 
@@ -67,14 +101,19 @@ public abstract class AbstractShellIntegrationTest {
 	public TestName name = new TestName();
 
 	@BeforeClass
-	public static synchronized void startUp() throws InterruptedException, IOException {
-		if (application == null) {
-			application = new AdminApplication();
-			application.main(new String[] {
-					String.format("--server.port=%s", adminPort),
-					"--spring.main.show_banner=false"});
+	public static void startUp() throws InterruptedException, IOException {
+		if (applicationContext == null) {
+			if (System.getProperty(SHUTDOWN_AFTER_RUN) != null) {
+				shutdownAfterRun = Boolean.getBoolean(SHUTDOWN_AFTER_RUN);
+			}
+
+			SpringApplication application = new SpringApplicationBuilder(AdminApplication.class,
+					AdminConfiguration.class, TestConfig.class).build();
+			applicationContext = application.run(
+					String.format("--server.port=%s", adminPort), "--spring.main.show_banner=false");
 		}
-		JLineShellComponent shell = new Bootstrap(new String[] {"--port", String.valueOf(adminPort)}).getJLineShellComponent();
+		JLineShellComponent shell = new Bootstrap(new String[] {"--port", String.valueOf(adminPort)})
+				.getJLineShellComponent();
 		if (!shell.isRunning()) {
 			shell.start();
 		}
@@ -83,19 +122,46 @@ public abstract class AbstractShellIntegrationTest {
 
 	@AfterClass
 	public static void shutdown() {
-		if (SHUTDOWN_AFTER_RUN) {
+		if (shutdownAfterRun) {
 			logger.info("Stopping Cloud Data Shell");
-			cloudDataShell.stop();
-			if (application != null) {
+			if (cloudDataShell != null) {
+				cloudDataShell.stop();
+			}
+			if (applicationContext != null) {
 				logger.info("Stopping Cloud Data Admin Server");
-				application = null;
+				SpringApplication.exit(applicationContext);
+				applicationContext = null;
 			}
 		}
 	}
 
-	// Instantiate Command templates here
+	/**
+	 * Return a {@link StreamCommandTemplate} for issuing shell based
+	 * stream commands.
+	 *
+	 * @return template for issuing stream commands
+	 */
 	protected StreamCommandTemplate stream() {
 		return new StreamCommandTemplate(cloudDataShell);
+	}
+
+	/**
+	 * Return a unique random stream name for testing.
+	 *
+	 * @param name name to use as part of stream name
+	 * @return unique random stream name
+	 */
+	protected String generateStreamName(String name) {
+		return (name == null) ? generateUniqueName() : generateUniqueName(name);
+	}
+
+	/**
+	 * Return a unique random stream name for testing.
+	 *
+	 * @return unique random stream name
+	 */
+	protected String generateStreamName() {
+		return generateStreamName(null);
 	}
 
 	// Util methods
@@ -105,14 +171,6 @@ public abstract class AbstractShellIntegrationTest {
 
 	private String generateUniqueName() {
 		return generateUniqueName(name.getMethodName().replace('[', '-').replaceAll("]", ""));
-	}
-
-	protected String generateStreamName(String name) {
-		return (name == null) ? generateUniqueName() : generateUniqueName(name);
-	}
-
-	protected String generateStreamName() {
-		return generateStreamName(null);
 	}
 
 
@@ -132,5 +190,18 @@ public abstract class AbstractShellIntegrationTest {
 			Assert.isTrue(cr.isSuccess(), "Failure.  CommandResult = " + cr.toString());
 			return cr;
 		}
+	}
+
+	/**
+	 * Configuration for admin server that is specific to shell tests.
+	 */
+	@Configuration
+	public static class TestConfig {
+
+		@Bean
+		public ModuleRegistry moduleRegistry() {
+			return new StubModuleRegistry();
+		}
+
 	}
 }

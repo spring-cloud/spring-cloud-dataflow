@@ -16,6 +16,9 @@
 
 package org.springframework.cloud.data.admin.configuration;
 
+import org.springframework.cloud.data.module.registry.ModuleRegistry;
+import org.springframework.cloud.data.module.registry.StubModuleRegistry;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
@@ -26,5 +29,10 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupp
 @Configuration
 @EnableSpringDataWebSupport
 public class TestDependencies extends WebMvcConfigurationSupport {
+
+	@Bean
+	public ModuleRegistry moduleRegistry() {
+		return new StubModuleRegistry();
+	}
 
 }
