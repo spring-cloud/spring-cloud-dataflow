@@ -168,7 +168,7 @@ public class RedisStreamDefinitionRepositoryTests {
 	}
 
 
-		@After
+	@After
 	public void tearDown() {
 		cf.destroy();
 	}

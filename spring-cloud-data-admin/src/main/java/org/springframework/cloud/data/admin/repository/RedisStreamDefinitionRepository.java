@@ -35,9 +35,8 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.BoundHashOperations;
 import org.springframework.data.redis.core.BoundZSetOperations;
 import org.springframework.data.redis.core.DefaultTypedTuple;
-import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ZSetOperations;
-import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 /**
  * A redis implementation of {@link StreamDefinitionRepository}, storing each
@@ -55,15 +54,13 @@ public class RedisStreamDefinitionRepository implements StreamDefinitionReposito
 
 	private final String hashKey;
 
+	/**
+	 * Construct a new StreanDefinitionRepository backed by redis, storing definitions under the key
+	 * specified by '{@literal <hashKey>}' (and a helper sorted set under '{@literal <hashKey>.names}'.
+	 */
 	public RedisStreamDefinitionRepository(String hashKey, RedisConnectionFactory redisConnectionFactory) {
 		this.hashKey = hashKey;
-		RedisTemplate<String, String> redisTemplate = new RedisTemplate<>();
-		redisTemplate.setKeySerializer(new StringRedisSerializer());
-		redisTemplate.setValueSerializer(new StringRedisSerializer());
-		redisTemplate.setHashKeySerializer(new StringRedisSerializer());
-		redisTemplate.setHashValueSerializer(new StringRedisSerializer());
-		redisTemplate.setConnectionFactory(redisConnectionFactory);
-		redisTemplate.afterPropertiesSet();
+		StringRedisTemplate redisTemplate = new StringRedisTemplate(redisConnectionFactory);
 
 		hashOperations = redisTemplate.boundHashOps(hashKey);
 		zSetOperations = redisTemplate.boundZSetOps(hashKey + ".names");
@@ -78,8 +75,9 @@ public class RedisStreamDefinitionRepository implements StreamDefinitionReposito
 	public Page<StreamDefinition> findAll(Pageable pageable) {
 		int start = pageable.getOffset();
 		int end = pageable.getOffset() + pageable.getPageSize() - 1;
-		Set<String> names = pageable.getSort().getOrderFor("name").isAscending() ?
+		Set<String> namesAsSet = pageable.getSort().getOrderFor("name").isAscending() ?
 				zSetOperations.range(start, end) : zSetOperations.reverseRange(start, end);
+		List<String> names = new ArrayList<>(namesAsSet);
 		List<String> definitions = hashOperations.multiGet(names);
 		List<StreamDefinition> result = zipToStreamDefinitions(names, definitions);
 		long total = hashOperations.size();
@@ -124,10 +122,11 @@ public class RedisStreamDefinitionRepository implements StreamDefinitionReposito
 
 	@Override
 	public Iterable<StreamDefinition> findAll(Iterable<String> strings) {
-		Collection<String> keys;
-		if (strings instanceof Collection) {
-			keys = (Collection<String>) strings;
-		} else {
+		List<String> keys;
+		if (strings instanceof List) {
+			keys = (List<String>) strings;
+		}
+		else {
 			keys = new ArrayList<>();
 			for (String name : strings) {
 				keys.add(name);
@@ -157,12 +156,13 @@ public class RedisStreamDefinitionRepository implements StreamDefinitionReposito
 	public void delete(Iterable<? extends StreamDefinition> entities) {
 		Object[] keys;
 		if (entities instanceof Collection) {
-			keys = new Object[((Collection)entities).size()];
+			keys = new Object[((Collection) entities).size()];
 			int i = 0;
 			for (StreamDefinition sd : entities) {
 				keys[i++] = sd.getName();
 			}
-		} else {
+		}
+		else {
 			List<String> names = new ArrayList<>();
 			for (StreamDefinition sd : entities) {
 				names.add(sd.getName());
@@ -183,7 +183,7 @@ public class RedisStreamDefinitionRepository implements StreamDefinitionReposito
 	 * Return a list of StreamDefinitions, made by mapping a set of non null names and possibly null dsl texts.
 	 * In case of null dsl text, a null element is added to the result list.
 	 */
-	private List<StreamDefinition> zipToStreamDefinitions(Collection<String> names, Collection<String> definitions) {
+	private List<StreamDefinition> zipToStreamDefinitions(List<String> names, List<String> definitions) {
 		Iterator<String> it = definitions.iterator();
 		List<StreamDefinition> result = new ArrayList<>(definitions.size());
 		for (String name : names) {
