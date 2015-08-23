@@ -18,12 +18,12 @@ package org.springframework.cloud.data.admin.repository;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.TreeMap;
 
 import org.springframework.cloud.data.core.StreamDefinition;
 import org.springframework.data.domain.Page;
@@ -33,16 +33,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.BoundHashOperations;
-import org.springframework.data.redis.core.BoundZSetOperations;
-import org.springframework.data.redis.core.DefaultTypedTuple;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.data.redis.core.ZSetOperations;
 
 /**
  * A redis implementation of {@link StreamDefinitionRepository}, storing each
  * definition as a {@literal name:dsl} mapping in a redis hash.
- * Also stores the list of all names in a sorted set (with constant zero score), as this
- * guarantees lexicographic order.
  *
  * @author Eric Bottard
  */
@@ -50,20 +45,13 @@ public class RedisStreamDefinitionRepository implements StreamDefinitionReposito
 
 	private final BoundHashOperations<String, String, String> hashOperations;
 
-	private final BoundZSetOperations<String, String> zSetOperations;
-
-	private final String hashKey;
-
 	/**
 	 * Construct a new StreanDefinitionRepository backed by redis, storing definitions under the key
-	 * specified by '{@literal <hashKey>}' (and a helper sorted set under '{@literal <hashKey>.names}'.
+	 * specified by '{@literal <hashKey>}'.
 	 */
 	public RedisStreamDefinitionRepository(String hashKey, RedisConnectionFactory redisConnectionFactory) {
-		this.hashKey = hashKey;
 		StringRedisTemplate redisTemplate = new StringRedisTemplate(redisConnectionFactory);
-
-		hashOperations = redisTemplate.boundHashOps(hashKey);
-		zSetOperations = redisTemplate.boundZSetOps(hashKey + ".names");
+		hashOperations= redisTemplate.boundHashOps(hashKey);
 	}
 
 	@Override
@@ -73,20 +61,32 @@ public class RedisStreamDefinitionRepository implements StreamDefinitionReposito
 
 	@Override
 	public Page<StreamDefinition> findAll(Pageable pageable) {
+
+		TreeMap<String, String> sorted = new TreeMap<>(comparatorFor(pageable.getSort().getOrderFor("name").getDirection()));
+		sorted.putAll(hashOperations.entries());
+		int total = sorted.size();
 		int start = pageable.getOffset();
-		int end = pageable.getOffset() + pageable.getPageSize() - 1;
-		Set<String> namesAsSet = pageable.getSort().getOrderFor("name").isAscending() ?
-				zSetOperations.range(start, end) : zSetOperations.reverseRange(start, end);
-		List<String> names = new ArrayList<>(namesAsSet);
-		List<String> definitions = hashOperations.multiGet(names);
-		List<StreamDefinition> result = zipToStreamDefinitions(names, definitions);
-		long total = hashOperations.size();
+		int end = Math.min(pageable.getOffset() + pageable.getPageSize(), total);
+		@SuppressWarnings("unchecked")
+		Map.Entry<String, String>[] entries = sorted.entrySet().toArray(new Map.Entry[total]);
+		List<StreamDefinition> result = new ArrayList<>(Math.max(end - start, 0));
+		for (int i = start; i < end ; i++) {
+			result.add(new StreamDefinition(entries[i].getKey(), entries[i].getValue()));
+		}
 		return new PageImpl<>(result, pageable, total);
+	}
+
+	private Comparator<String> comparatorFor(final Sort.Direction order) {
+		return new Comparator<String>() {
+			@Override
+			public int compare(String o1, String o2) {
+				return order == Sort.Direction.ASC ? o1.compareTo(o2) : - o1.compareTo(o2);
+			}
+		};
 	}
 
 	@Override
 	public <S extends StreamDefinition> S save(S entity) {
-		zSetOperations.add(entity.getName(), 0);
 		hashOperations.put(entity.getName(), entity.getDslText());
 		return entity;
 	}
@@ -94,12 +94,9 @@ public class RedisStreamDefinitionRepository implements StreamDefinitionReposito
 	@Override
 	public <S extends StreamDefinition> Iterable<S> save(Iterable<S> entities) {
 		Map<String, String> asMap = new HashMap<>();
-		Set<ZSetOperations.TypedTuple<String>> asScores = new HashSet<>();
 		for (StreamDefinition sd : entities) {
 			asMap.put(sd.getName(), sd.getDslText());
-			asScores.add(new DefaultTypedTuple<>(sd.getName(), 0D));
 		}
-		zSetOperations.add(asScores);
 		hashOperations.putAll(asMap);
 		return entities;
 	}
@@ -144,7 +141,6 @@ public class RedisStreamDefinitionRepository implements StreamDefinitionReposito
 	@Override
 	public void delete(String s) {
 		hashOperations.delete(s);
-		zSetOperations.remove(s);
 	}
 
 	@Override
@@ -170,13 +166,11 @@ public class RedisStreamDefinitionRepository implements StreamDefinitionReposito
 			keys = names.toArray();
 		}
 		hashOperations.delete(keys);
-		zSetOperations.remove(keys);
 	}
 
 	@Override
 	public void deleteAll() {
-		hashOperations.getOperations().delete(hashKey);
-		zSetOperations.getOperations().delete(hashKey + ".names");
+		hashOperations.getOperations().delete(hashOperations.getKey());
 	}
 
 	/**
