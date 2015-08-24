@@ -22,8 +22,8 @@ import org.springframework.cloud.Cloud;
 import org.springframework.cloud.CloudFactory;
 import org.springframework.cloud.data.module.deployer.ModuleDeployer;
 import org.springframework.cloud.data.module.deployer.cloudfoundry.CloudFoundryModuleDeployer;
-import org.springframework.cloud.data.module.deployer.lattice.ReceptorLrpModuleDeployer;
-import org.springframework.cloud.data.module.deployer.lattice.ReceptorTaskModuleDeployer;
+import org.springframework.cloud.data.module.deployer.lattice.LrpModuleDeployer;
+import org.springframework.cloud.data.module.deployer.lattice.TaskModuleDeployer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -59,12 +59,12 @@ public class CloudConfiguration {
 
 		@Bean
 		public ModuleDeployer processModuleDeployer() {
-			return new ReceptorLrpModuleDeployer();
+			return new LrpModuleDeployer();
 		}
 
 		@Bean
 		public ModuleDeployer taskModuleDeployer() {
-			return new ReceptorTaskModuleDeployer();
+			return new TaskModuleDeployer();
 		}
 	}
 

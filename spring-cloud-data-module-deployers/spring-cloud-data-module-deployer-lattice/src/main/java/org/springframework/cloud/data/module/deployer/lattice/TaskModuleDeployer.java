@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -40,9 +40,9 @@ import org.springframework.cloud.data.module.deployer.ModuleDeployer;
  * @author Mark Fisher
  * @author Michael Minella
  */
-public class ReceptorTaskModuleDeployer implements ModuleDeployer {
+public class TaskModuleDeployer implements ModuleDeployer {
 
-	private static final Logger logger = LoggerFactory.getLogger(ReceptorTaskModuleDeployer.class);
+	private static final Logger logger = LoggerFactory.getLogger(TaskModuleDeployer.class);
 
 	public static final String DOCKER_PATH = "docker:///springcloud/stream-module-launcher";
 
@@ -108,17 +108,22 @@ public class ReceptorTaskModuleDeployer implements ModuleDeployer {
 		// that the Task is known to Lattice
 		TaskResponse task = receptorClient.getTask(guid(id));
 
-		Map<String, String> attributes = new HashMap<>();
-		attributes.put("failureReason", task.getFailureReason());
-		attributes.put("result", task.getResult());
-		attributes.put("annotation", task.getAnnotation());
-		attributes.put("completionCallbackUrl", task.getCompletionCallbackUrl());
-		attributes.put("resultFile", task.getResultFile());
-		attributes.put("cellId", task.getCellId());
-		attributes.put("domain", task.getDomain());
-		builder.with(new ReceptorModuleInstanceStatus(task.getTaskGuid(), task.getState(), attributes));
+		if(task != null) {
+			Map<String, String> attributes = new HashMap<>();
+			attributes.put("failureReason", task.getFailureReason());
+			attributes.put("result", task.getResult());
+			attributes.put("annotation", task.getAnnotation());
+			attributes.put("completionCallbackUrl", task.getCompletionCallbackUrl());
+			attributes.put("resultFile", task.getResultFile());
+			attributes.put("cellId", task.getCellId());
+			attributes.put("domain", task.getDomain());
+			builder.with(new ReceptorModuleInstanceStatus(task.getTaskGuid(), task.getState(), attributes));
 
-		return builder.build();
+			return builder.build();
+		}
+		else {
+			return null;
+		}
 	}
 
 	@Override

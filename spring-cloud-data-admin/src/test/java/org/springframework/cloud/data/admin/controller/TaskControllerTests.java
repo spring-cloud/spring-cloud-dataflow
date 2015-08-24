@@ -40,7 +40,7 @@ import org.springframework.cloud.data.admin.configuration.TestDependencies;
 import org.springframework.cloud.data.admin.repository.InMemoryTaskDefinitionRepository;
 import org.springframework.cloud.data.admin.repository.TaskDefinitionRepository;
 import org.springframework.cloud.data.core.TaskDefinition;
-import org.springframework.cloud.data.module.deployer.lattice.ReceptorTaskModuleDeployer;
+import org.springframework.cloud.data.module.deployer.lattice.TaskModuleDeployer;
 import org.springframework.cloud.data.module.registry.StubModuleRegistry;
 import org.springframework.cloud.stream.module.launcher.ModuleLauncher;
 import org.springframework.http.MediaType;
@@ -84,12 +84,12 @@ public class TaskControllerTests {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testConstructorMissingRepository() {
-		new TaskController(null, new StubModuleRegistry(), new ReceptorTaskModuleDeployer());
+		new TaskController(null, new StubModuleRegistry(), new TaskModuleDeployer());
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testConstructorMissingRegistry() {
-		new TaskController(new InMemoryTaskDefinitionRepository(), null, new ReceptorTaskModuleDeployer());
+		new TaskController(new InMemoryTaskDefinitionRepository(), null, new TaskModuleDeployer());
 	}
 
 	@Test(expected = IllegalArgumentException.class)

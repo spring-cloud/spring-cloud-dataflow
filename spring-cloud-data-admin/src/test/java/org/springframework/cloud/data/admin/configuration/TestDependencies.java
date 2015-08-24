@@ -17,6 +17,7 @@
 package org.springframework.cloud.data.admin.configuration;
 
 import static org.mockito.Mockito.mock;
+
 import org.springframework.cloud.stream.module.launcher.ModuleLauncher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

@@ -69,8 +69,8 @@ public class TaskController {
 	 * Creates a {@code TaskController} that delegates
 	 * <ul>
 	 *     <li>CRUD operations to the provided {@link TaskDefinitionRepository}</li>
-	 *     <li>deployment/launching operations to the provided {@link ModuleDeployer}</li>
 	 *     <li>module coordinate retrieval to the provided {@link ModuleRegistry}</li>
+	 *     <li>deployment/launching operations to the provided {@link ModuleDeployer}</li>
 	 * </ul>
 	 *
 	 * @param repository the repository this controller will use for task CRUD operations.
@@ -85,7 +85,8 @@ public class TaskController {
 		Assert.notNull(deployer, "deployer must not be null");
 		this.repository = repository;
 		this.registry = registry;
-		this.moduleDeployer = deployer;}
+		this.moduleDeployer = deployer;
+	}
 
 	/**
 	 * Register a task for future deployment/execution.
