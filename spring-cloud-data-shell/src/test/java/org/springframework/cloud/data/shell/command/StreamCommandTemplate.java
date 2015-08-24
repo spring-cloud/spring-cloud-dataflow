@@ -165,7 +165,7 @@ public class StreamCommandTemplate {
 		assertTrue(t.getRows().contains(
 				new TableRow().addValue(1, streamName).addValue(2, definition.replace("\\\\", "\\")).addValue(
 						3,
-						deployed ? "deployed" : "undeployed")));
+						deployed ? "deployed" : "unknown")));
 	}
 
 }

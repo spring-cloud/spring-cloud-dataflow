@@ -16,12 +16,23 @@
 
 package org.springframework.cloud.data.shell;
 
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
+
 import java.io.IOException;
 
+import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.rules.TestName;
+import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,8 +40,14 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.cloud.data.admin.AdminApplication;
 import org.springframework.cloud.data.admin.config.AdminConfiguration;
-import org.springframework.cloud.data.module.registry.ModuleRegistry;
+import org.springframework.cloud.data.admin.repository.StreamDefinitionRepository;
+import org.springframework.cloud.data.core.ModuleDeploymentId;
+import org.springframework.cloud.data.core.ModuleDeploymentRequest;
+import org.springframework.cloud.data.module.ModuleStatus;
+import org.springframework.cloud.data.module.deployer.ModuleDeployer;
+import org.springframework.cloud.data.module.deployer.local.LocalModuleInstanceStatus;
 import org.springframework.cloud.data.module.registry.InMemoryModuleRegistry;
+import org.springframework.cloud.data.module.registry.ModuleRegistry;
 import org.springframework.cloud.data.shell.command.StreamCommandTemplate;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -101,6 +118,33 @@ public abstract class AbstractShellIntegrationTest {
 	@Rule
 	public TestName name = new TestName();
 
+	/**
+	 * ModuleDeployer the admin uses.
+	 */
+	protected static ModuleDeployer moduleDeployer;
+
+	/**
+	 * StreamDefinitionRepository the admin uses.
+	 */
+	private static StreamDefinitionRepository streamDefinitionRepository;
+
+	/**
+	 * Mock for ModuleDeploymentId
+	 */
+	protected static ModuleDeploymentId moduleDeploymentId = mock(ModuleDeploymentId.class);
+
+	/**
+	 * ModuleStatus for `deployed`
+	 */
+	protected ModuleStatus deployed = ModuleStatus.of(moduleDeploymentId)
+			.with(new LocalModuleInstanceStatus("", true, null)).build();
+
+	/**
+	 * ModuleStatus for `unknown`
+	 */
+	protected ModuleStatus unknown = ModuleStatus.of(moduleDeploymentId)
+			.with(new LocalModuleInstanceStatus("", false, null)).build();
+
 	@BeforeClass
 	public static void startUp() throws InterruptedException, IOException {
 		if (applicationContext == null) {
@@ -112,6 +156,10 @@ public abstract class AbstractShellIntegrationTest {
 					AdminConfiguration.class, TestConfig.class).build();
 			applicationContext = application.run(
 					String.format("--server.port=%s", adminPort), "--spring.main.show_banner=false");
+			moduleDeployer = applicationContext.getBean("processModuleDeployer", ModuleDeployer.class);
+			Assert.notNull(moduleDeployer, "Module Deployer should not be null.");
+			streamDefinitionRepository = applicationContext.getBean(StreamDefinitionRepository.class);
+			Assert.notNull(streamDefinitionRepository, "Stream Definition Repository should not be null.");
 		}
 		JLineShellComponent shell = new Bootstrap(new String[] {"--port", String.valueOf(adminPort)})
 				.getJLineShellComponent();
@@ -134,6 +182,17 @@ public abstract class AbstractShellIntegrationTest {
 				applicationContext = null;
 			}
 		}
+	}
+
+	@Before
+	public void setup() {
+		when(moduleDeployer.deploy(any(ModuleDeploymentRequest.class))).thenReturn(moduleDeploymentId);
+	}
+
+	@After
+	public void tearDown() {
+		streamDefinitionRepository.deleteAll();
+		Mockito.reset(moduleDeployer);
 	}
 
 	/**
@@ -204,5 +263,32 @@ public abstract class AbstractShellIntegrationTest {
 			return new InMemoryModuleRegistry();
 		}
 
+		@Bean
+		public ModuleDeployer processModuleDeployer() {
+			return mock(ModuleDeployer.class);
+		}
+	}
+
+	private static void verifyStatusInteractions(int times) {
+		verify(moduleDeployer, times(times)).status(any(ModuleDeploymentId.class));
+	}
+
+	private static void verifyDeployInteractions(int times) {
+		verify(moduleDeployer, times(times)).deploy(any(ModuleDeploymentRequest.class));
+	}
+
+	private static int verifyStatus(ModuleStatus moduleStatus) {
+		int numIteractions = 1;
+		assertEquals(moduleStatus, moduleDeployer.status(any(ModuleDeploymentId.class)));
+		return numIteractions;
+	}
+
+	protected static void assertInteractions(int numModules, ModuleStatus moduleStatus) {
+		int numInteractions = verifyStatus(moduleStatus);
+		verifyStatusInteractions(numModules + numInteractions);
+		if (moduleStatus.getState().equals(ModuleStatus.State.deployed)) {
+			verifyDeployInteractions(numModules);
+		}
+		verifyNoMoreInteractions(moduleDeployer);
 	}
 }
