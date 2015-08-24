@@ -16,6 +16,9 @@
 
 package org.springframework.cloud.data.admin.configuration;
 
+import static org.mockito.Mockito.mock;
+import org.springframework.cloud.stream.module.launcher.ModuleLauncher;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
@@ -27,4 +30,8 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupp
 @EnableSpringDataWebSupport
 public class TestDependencies extends WebMvcConfigurationSupport {
 
+	@Bean
+	public ModuleLauncher moduleLauncher() {
+		return mock(ModuleLauncher.class);
+	}
 }

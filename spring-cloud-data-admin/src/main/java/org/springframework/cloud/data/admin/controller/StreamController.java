@@ -24,6 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cloud.data.admin.repository.StreamDefinitionRepository;
 import org.springframework.cloud.data.core.ModuleCoordinates;
 import org.springframework.cloud.data.core.ModuleDefinition;
@@ -97,7 +98,7 @@ public class StreamController {
 	 */
 	@Autowired
 	public StreamController(StreamDefinitionRepository repository, ModuleRegistry registry,
-			ModuleDeployer deployer) {
+			@Qualifier("processModuleDeployer") ModuleDeployer deployer) {
 		Assert.notNull(repository, "repository must not be null");
 		Assert.notNull(registry, "registry must not be null");
 		Assert.notNull(deployer, "deployer must not be null");
@@ -107,7 +108,7 @@ public class StreamController {
 	}
 
 	/**
-	 * Return a page-able list of {@link StreamDefinitionResource defined streams}.
+	 * Return a page-able list of {@link StreamDefinitionResource} defined streams.
 	 *
 	 * @param pageable   page-able collection of {@code StreamDefinitionResource}.
 	 * @param assembler  assembler for {@link StreamDefinition}
