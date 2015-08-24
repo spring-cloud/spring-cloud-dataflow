@@ -20,12 +20,10 @@
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-lattice-core</artifactId>
-			<version>${spring-cloud-lattice.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.cloudfoundry.receptor</groupId>
 			<artifactId>receptor-client</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
 </project>
