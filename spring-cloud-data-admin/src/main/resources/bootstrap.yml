@@ -4,6 +4,12 @@ spring:
   cloud:
     config:
       uri: http://localhost:8888
+#
+# If you prefer to use Eureka to locate the Config Server, you can do that by setting
+# spring.cloud.config.discovery.enabled=true (default "false"). The net result of that is 
+# that client apps all need a bootstrap.yml (or an environment variable) with the Eureka 
+# server address, e.g. in eureka.client.serviceUrl.defaultZone
+#
 #  cloud:
 #     config:
 #        discovery:
@@ -11,4 +17,4 @@ spring:
 #eureka:
 #  client:
 #    serviceUrl:
-#      defaultZone: http://localhost:9395/eureka/
+#      defaultZone: http://localhost:8761/eureka/

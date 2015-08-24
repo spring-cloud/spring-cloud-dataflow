@@ -63,7 +63,7 @@ admin using
 .  And all configurations retrieved from the cloud config will take precedence over boot's
 defaults enumerated above.  
 The spring-cloud-data-admin will look for the server at `localhost:8888`, however this
- can be overwritten by setting the `spring.cloud.config.uri` environment variable to the
+ can be overwritten by setting the `spring.cloud.config.uri` property to the
  desired url.
 
 #### Cloud-Config-Server configuration
@@ -90,7 +90,7 @@ If the SCD-Admin can't connect to the cloud config server the
 following warning message will be logged: 
 `WARN 42924 --- [           main] c.c.c.ConfigServicePropertySourceLocator : Could not locate PropertySource: I/O error on GET request for "http://localhost:8888/spring-cloud-data-admin/default":Connection refused; nested exception is java.net.ConnectException: Connection refused`
 
-To disable the cloud config server set the `spring.cloud.config.enabled` environment
-variable to false
+To disable the cloud config server set the `spring.cloud.config.enabled` property to false
+
 
 
