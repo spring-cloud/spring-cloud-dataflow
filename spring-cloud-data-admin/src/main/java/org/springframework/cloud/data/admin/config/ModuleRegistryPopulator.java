@@ -61,6 +61,7 @@ public class ModuleRegistryPopulator {
 	 */
 	@PostConstruct
 	public void populateDefaults() {
+		populateDefault("ftp", "source");
 		populateDefault("http", "source");
 		populateDefault("time", "source");
 		populateDefault("filter", "processor");
@@ -69,6 +70,7 @@ public class ModuleRegistryPopulator {
 		populateDefault("transform", "processor");
 		populateDefault("counter", "sink");
 		populateDefault("log", "sink");
+		populateDefault("redis", "sink");
 	}
 
 	/**
