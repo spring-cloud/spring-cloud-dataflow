@@ -38,6 +38,7 @@ import org.springframework.cloud.data.module.deployer.ModuleDeployer;
 /**
  * @author Patrick Peralta
  * @author Mark Fisher
+ * @author Michael Minella
  */
 public class ReceptorTaskModuleDeployer implements ModuleDeployer {
 

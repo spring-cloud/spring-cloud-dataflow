@@ -125,7 +125,7 @@ public class TaskController {
 	}
 
 	/**
-	 * Request the deployment/launching of an existing task definition.  The name must be
+	 * Request the launching of an existing task definition.  The name must be
 	 * included in the path.
 	 *
 	 * @param name the name of the existing task to be executed (required)
