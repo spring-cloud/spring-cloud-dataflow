@@ -16,7 +16,12 @@
 
 package org.springframework.cloud.data.module.registry;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.cloud.data.core.ModuleCoordinates;
+import org.springframework.cloud.data.core.ModuleType;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -51,14 +56,37 @@ public class RedisModuleRegistry implements ModuleRegistry {
 	}
 
 	@Override
-	public ModuleCoordinates findByNameAndType(String name, String type) {
+	public ModuleRegistration find(String name, ModuleType type) {
 		String coordinates = redisOperations.<String, String>boundHashOps(KEY_PREFIX + type).get(name);
-		return (coordinates == null ? null : ModuleCoordinates.parse(coordinates));
+		return (coordinates == null ? null :
+				new ModuleRegistration(name, type, ModuleCoordinates.parse(coordinates)));
 	}
 
 	@Override
-	public void save(String name, String type, ModuleCoordinates coordinates) {
-		redisOperations.boundHashOps(KEY_PREFIX + type).put(name, coordinates.toString());
+	public List<ModuleRegistration> findAll() {
+		List<ModuleRegistration> list = new ArrayList<>();
+
+		for (ModuleType type : ModuleType.values()) {
+			for (Map.Entry<String, String> entry :
+					redisOperations.<String, String>boundHashOps(KEY_PREFIX + type)
+							.entries().entrySet()) {
+				list.add(new ModuleRegistration(entry.getKey(), type,
+						ModuleCoordinates.parse(entry.getValue())));
+			}
+		}
+
+		return list;
+	}
+
+	@Override
+	public void save(ModuleRegistration registration) {
+		redisOperations.boundHashOps(KEY_PREFIX + registration.getType())
+				.put(registration.getName(), registration.getCoordinates().toString());
+	}
+
+	@Override
+	public void delete(String name, ModuleType type) {
+		redisOperations.boundHashOps(KEY_PREFIX + type).delete(name);
 	}
 
 }

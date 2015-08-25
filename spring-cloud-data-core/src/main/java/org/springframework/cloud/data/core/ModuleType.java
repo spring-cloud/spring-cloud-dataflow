@@ -14,33 +14,13 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.data.rest.client;
+package org.springframework.cloud.data.core;
 
 /**
- * Interface the REST clients implement to interact with spring-cloud-data REST API.
+ * Enumeration of module types.
  *
- * @author Ilayaperumal Gopinathan
+ * @author Patrick Peralta
  */
-public interface CloudDataOperations {
-
-	/**
-	 * Stream related operations.
-	 */
-	StreamOperations streamOperations();
-
-	/**
-	 * Counter related operations.
-	 */
-	CounterOperations counterOperations();
-
-	/**
-	 * Task related operations.
-	 */
-	TaskOperations taskOperations();
-
-	/**
-	 * Module related operations.
-	 */
-	ModuleOperations moduleOperations();
-
+public enum ModuleType {
+	source, processor, sink, task
 }
