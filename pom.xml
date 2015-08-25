@@ -22,8 +22,6 @@
 		<spring-framework.version>4.2.0.RELEASE</spring-framework.version>
 		<spring-boot.version>1.3.0.BUILD-SNAPSHOT</spring-boot.version>
 		<spring-cloud.version>Brixton.BUILD-SNAPSHOT</spring-cloud.version>
-		<spring-cloud-stream.version>1.0.0.BUILD-SNAPSHOT</spring-cloud-stream.version>
-		<spring-cloud-lattice.version>1.1.0.BUILD-SNAPSHOT</spring-cloud-lattice.version>
 		<spring-xd.version>1.0.2.RELEASE</spring-xd.version>
 		<spring-data.version>1.9.1.RELEASE</spring-data.version>
 	</properties>
@@ -36,7 +34,6 @@
 		<module>spring-cloud-data-rest-client</module>
 		<module>spring-cloud-data-shell</module>
 		<module>spring-cloud-data-yarn</module>
-		<!-- module>docs</module -->
 	</modules>
 	<dependencyManagement>
 		<dependencies>
@@ -51,13 +48,6 @@
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-starter-parent</artifactId>
 				<version>${spring-cloud.version}</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.springframework.cloud</groupId>
-				<artifactId>spring-cloud-lattice</artifactId>
-				<version>${spring-cloud-lattice.version}</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
