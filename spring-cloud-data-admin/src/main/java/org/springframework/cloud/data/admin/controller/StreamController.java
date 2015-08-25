@@ -46,7 +46,6 @@ import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.mvc.ResourceAssemblerSupport;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -219,11 +218,17 @@ public class StreamController {
 					: (iterator.hasNext() ? "processor" : "source");
 			ModuleCoordinates coordinates = this.registry.findByNameAndType(module.getName(), type);
 			Map<String, String> moduleDeploymentProperties = new HashMap<>();
+			String wildCardPrefix = "module.*.";
+			// first check for wild card prefix
+			for (Map.Entry<String, String> entry : deploymentProperties.entrySet()) {
+				if (entry.getKey().startsWith(wildCardPrefix)) {
+					moduleDeploymentProperties.put(entry.getKey().substring(wildCardPrefix.length()), entry.getValue());
+				}
+			}
 			String modulePrefix = String.format("module.%s.", module.getLabel());
 			for (Map.Entry<String, String> entry : deploymentProperties.entrySet()) {
 				if (entry.getKey().startsWith(modulePrefix)) {
-					moduleDeploymentProperties.put(
-							entry.getKey().substring(modulePrefix.length()), entry.getValue());
+					moduleDeploymentProperties.put(entry.getKey().substring(modulePrefix.length()), entry.getValue());
 				}
 			}
  			this.deployer.deploy(new ModuleDeploymentRequest(module, coordinates, moduleDeploymentProperties));
