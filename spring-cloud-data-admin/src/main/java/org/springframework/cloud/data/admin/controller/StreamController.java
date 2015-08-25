@@ -16,8 +16,11 @@
 
 package org.springframework.cloud.data.admin.controller;
 
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -35,6 +38,7 @@ import org.springframework.cloud.data.module.ModuleStatus;
 import org.springframework.cloud.data.module.deployer.ModuleDeployer;
 import org.springframework.cloud.data.module.registry.ModuleRegistry;
 import org.springframework.cloud.data.rest.resource.StreamDefinitionResource;
+import org.springframework.cloud.data.rest.util.DeploymentPropertiesUtils;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.ExposesResourceFor;
@@ -42,6 +46,7 @@ import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.mvc.ResourceAssemblerSupport;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -138,7 +143,7 @@ public class StreamController {
 		StreamDefinition stream = new StreamDefinition(name, dsl);
 		stream = this.repository.save(stream);
 		if (deploy) {
-			deployStream(stream);
+			deployStream(stream, null);
 		}
 	}
 
@@ -200,18 +205,28 @@ public class StreamController {
 			Exception {
 		StreamDefinition stream = this.repository.findOne(name);
 		Assert.notNull(stream, String.format("no stream defined: %s", name));
-		deployStream(stream);
+		deployStream(stream, DeploymentPropertiesUtils.parse(properties));
 	}
 
-	private void deployStream(StreamDefinition stream) {
+	private void deployStream(StreamDefinition stream, Map<String, String> deploymentProperties) {
+		if (deploymentProperties == null) {
+			deploymentProperties = Collections.emptyMap();
+		}
 		Iterator<ModuleDefinition> iterator = stream.getDeploymentOrderIterator();
 		for (int i = 0; iterator.hasNext(); i++) {
 			ModuleDefinition module = iterator.next();
 			String type = (i == 0) ? "sink"
 					: (iterator.hasNext() ? "processor" : "source");
 			ModuleCoordinates coordinates = this.registry.findByNameAndType(module.getName(), type);
-			// todo: pass deployment properties
-			this.deployer.deploy(new ModuleDeploymentRequest(module, coordinates));
+			Map<String, String> moduleDeploymentProperties = new HashMap<>();
+			String modulePrefix = String.format("module.%s.", module.getLabel());
+			for (Map.Entry<String, String> entry : deploymentProperties.entrySet()) {
+				if (entry.getKey().startsWith(modulePrefix)) {
+					moduleDeploymentProperties.put(
+							entry.getKey().substring(modulePrefix.length()), entry.getValue());
+				}
+			}
+ 			this.deployer.deploy(new ModuleDeploymentRequest(module, coordinates, moduleDeploymentProperties));
 		}
 	}
 

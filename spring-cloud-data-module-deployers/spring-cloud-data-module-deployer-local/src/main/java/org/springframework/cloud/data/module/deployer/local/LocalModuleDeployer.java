@@ -57,8 +57,15 @@ public class LocalModuleDeployer implements ModuleDeployer {
 	@Override
 	public ModuleDeploymentId deploy(ModuleDeploymentRequest request) {
 		String module = request.getCoordinates().toString();
+		if (request.getCount() != 1) {
+			logger.warn(String.format("%s only supports a single instance per module; ignoring count=%d for %s",
+					this.getClass().getSimpleName(), request.getCount(), request.getDefinition().getLabel()));			
+		}
 		List<String> args = new ArrayList<>();
 		for (Map.Entry<String, String> entry : request.getDefinition().getParameters().entrySet()) {
+			args.add(String.format("--%s.%s=%s", module, entry.getKey(), entry.getValue()));
+		}
+		for (Map.Entry<String, String> entry: request.getDeploymentProperties().entrySet()) {
 			args.add(String.format("--%s.%s=%s", module, entry.getKey(), entry.getValue()));
 		}
 		logger.info("deploying module: " + module);
