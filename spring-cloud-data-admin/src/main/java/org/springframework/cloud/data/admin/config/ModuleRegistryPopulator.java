@@ -18,7 +18,11 @@ package org.springframework.cloud.data.admin.config;
 
 import javax.annotation.PostConstruct;
 
+import static org.springframework.cloud.data.core.ModuleType.*;
+
 import org.springframework.cloud.data.core.ModuleCoordinates;
+import org.springframework.cloud.data.core.ModuleType;
+import org.springframework.cloud.data.module.registry.ModuleRegistration;
 import org.springframework.cloud.data.module.registry.ModuleRegistry;
 import org.springframework.util.Assert;
 
@@ -61,16 +65,16 @@ public class ModuleRegistryPopulator {
 	 */
 	@PostConstruct
 	public void populateDefaults() {
-		populateDefault("ftp", "source");
-		populateDefault("http", "source");
-		populateDefault("time", "source");
-		populateDefault("filter", "processor");
-		populateDefault("groovy-filter", "processor");
-		populateDefault("groovy-transform", "processor");
-		populateDefault("transform", "processor");
-		populateDefault("counter", "sink");
-		populateDefault("log", "sink");
-		populateDefault("redis", "sink");
+		populateDefault("ftp", source);
+		populateDefault("http", source);
+		populateDefault("time", source);
+		populateDefault("filter", processor);
+		populateDefault("groovy-filter", processor);
+		populateDefault("groovy-transform", processor);
+		populateDefault("transform", processor);
+		populateDefault("counter", sink);
+		populateDefault("log", sink);
+		populateDefault("redis", sink);
 	}
 
 	/**
@@ -80,9 +84,10 @@ public class ModuleRegistryPopulator {
 	 * @param name module name
 	 * @param type module type
 	 */
-	private void populateDefault(String name, String type) {
-		if (this.moduleRegistry.findByNameAndType(name, type) == null) {
-			this.moduleRegistry.save(name, type, defaultCoordinatesFor(name + '-' + type));
+	private void populateDefault(String name, ModuleType type) {
+		if (this.moduleRegistry.find(name, type) == null) {
+			this.moduleRegistry.save(new ModuleRegistration(name, type,
+					defaultCoordinatesFor(name + '-' + type)));
 		}
 	}
 

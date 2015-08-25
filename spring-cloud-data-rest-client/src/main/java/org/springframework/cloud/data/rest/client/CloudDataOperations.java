@@ -26,15 +26,21 @@ public interface CloudDataOperations {
 	/**
 	 * Stream related operations.
 	 */
-	public StreamOperations streamOperations();
+	StreamOperations streamOperations();
 
 	/**
 	 * Counter related operations.
 	 */
-	public CounterOperations counterOperations();
-
+	CounterOperations counterOperations();
+	
 	/**
 	 * Task related operations.
 	 */
-	public TaskOperations taskOperations();
+	TaskOperations taskOperations();
+	
+	/**
+	 * Module related operations.
+	 */
+	ModuleOperations moduleOperations();
+
 }

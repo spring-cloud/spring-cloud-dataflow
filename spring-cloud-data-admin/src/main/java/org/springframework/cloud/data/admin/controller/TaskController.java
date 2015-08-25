@@ -22,8 +22,10 @@ import org.springframework.cloud.data.admin.repository.TaskDefinitionRepository;
 import org.springframework.cloud.data.core.ModuleCoordinates;
 import org.springframework.cloud.data.core.ModuleDefinition;
 import org.springframework.cloud.data.core.ModuleDeploymentRequest;
+import org.springframework.cloud.data.core.ModuleType;
 import org.springframework.cloud.data.core.TaskDefinition;
 import org.springframework.cloud.data.module.deployer.ModuleDeployer;
+import org.springframework.cloud.data.module.registry.ModuleRegistration;
 import org.springframework.cloud.data.module.registry.ModuleRegistry;
 import org.springframework.cloud.data.rest.resource.TaskDefinitionResource;
 import org.springframework.data.domain.Pageable;
@@ -140,7 +142,12 @@ public class TaskController {
 		Assert.notNull(taskDefinition, String.format("no task defined: %s", name));
 
 		ModuleDefinition module = taskDefinition.getModuleDefinition();
-		ModuleCoordinates coordinates = this.registry.findByNameAndType(module.getName(), "task");
+		ModuleRegistration registration = this.registry.find(module.getName(), ModuleType.task);
+		if (registration == null) {
+			throw new IllegalArgumentException(String.format(
+					"Module %s of type %s not found in registry", module.getName(), ModuleType.task));
+		}
+		ModuleCoordinates coordinates = registration.getCoordinates();
 		// todo: pass deployment properties
 		this.moduleDeployer.deploy(new ModuleDeploymentRequest(module, coordinates));
 	}

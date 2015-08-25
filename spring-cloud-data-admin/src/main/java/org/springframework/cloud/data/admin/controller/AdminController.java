@@ -18,6 +18,7 @@ package org.springframework.cloud.data.admin.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.data.rest.resource.CounterResource;
+import org.springframework.cloud.data.rest.resource.ModuleRegistrationResource;
 import org.springframework.cloud.data.rest.resource.StreamDefinitionResource;
 import org.springframework.cloud.data.rest.resource.TaskDefinitionResource;
 import org.springframework.hateoas.EntityLinks;
@@ -65,6 +66,7 @@ public class AdminController {
 		resourceSupport.add(entityLinks.linkToCollectionResource(TaskDefinitionResource.class).withRel("tasks"));
 		resourceSupport.add(entityLinks.linkToCollectionResource(CounterResource.class).withRel("counters"));
 		resourceSupport.add(new Link(entityLinks.linkToCollectionResource(CounterResource.class).getHref() + "/{name}").withRel("counters/counter"));
+		resourceSupport.add(entityLinks.linkToCollectionResource(ModuleRegistrationResource.class).withRel("modules"));
 		return resourceSupport;
 	}
 
