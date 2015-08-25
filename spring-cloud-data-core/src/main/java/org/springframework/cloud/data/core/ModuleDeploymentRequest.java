@@ -39,14 +39,14 @@ public class ModuleDeploymentRequest {
 	private final ModuleCoordinates coordinates;
 
 	/**
-	 * Number of module instances to launch.
-	 */
-	private final int count;
-
-	/**
 	 * Map of deployment properties for this module.
 	 */
 	private final Map<String, String> deploymentProperties;
+
+	/**
+	 * Number of module instances to launch.
+	 */
+	private final int count;
 
 	/**
 	 * Construct a {@code ModuleDeploymentRequest}.
@@ -57,13 +57,15 @@ public class ModuleDeploymentRequest {
 	 * @param deploymentProperties map of deployment properties; may be {@code null}
 	 */
 	public ModuleDeploymentRequest(ModuleDefinition definition, ModuleCoordinates coordinates,
-			int count, Map<String, String> deploymentProperties) {
+			Map<String, String> deploymentProperties) {
 		this.definition = definition;
 		this.coordinates = coordinates;
-		this.count = count;
 		this.deploymentProperties = deploymentProperties == null
 				? Collections.<String, String>emptyMap()
 				: Collections.unmodifiableMap(deploymentProperties);
+		this.count = this.deploymentProperties.containsKey("count")
+				? Integer.parseInt(this.deploymentProperties.get("count"))
+				: 1;
 	}
 
 	/**
@@ -74,7 +76,7 @@ public class ModuleDeploymentRequest {
 	 * @param coordinates coordinates for module jar file
 	 */
 	public ModuleDeploymentRequest(ModuleDefinition definition, ModuleCoordinates coordinates) {
-		this(definition, coordinates, 1, null);
+		this(definition, coordinates, null);
 	}
 
 	/**

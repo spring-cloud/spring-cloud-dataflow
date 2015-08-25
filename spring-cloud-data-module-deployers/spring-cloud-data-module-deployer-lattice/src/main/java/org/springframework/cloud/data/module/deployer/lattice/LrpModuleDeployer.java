@@ -56,6 +56,7 @@ public class LrpModuleDeployer implements ModuleDeployer {
 
 		DesiredLRPCreateRequest lrp = new DesiredLRPCreateRequest();
 		lrp.setProcessGuid(guid);
+		lrp.setInstances(request.getCount());
 		lrp.setRootfs(DOCKER_PATH);
 		lrp.runAction().setPath("java");
 		lrp.runAction().addArg("-Djava.security.egd=file:/dev/./urandom");
@@ -69,7 +70,9 @@ public class LrpModuleDeployer implements ModuleDeployer {
 		for (Map.Entry<String, String> entry : request.getDefinition().getParameters().entrySet()) {
 			environmentVariables.add(new EnvironmentVariable(entry.getKey(), entry.getValue()));
 		}
-
+		for (Map.Entry<String, String> entry: request.getDeploymentProperties().entrySet()) {
+			environmentVariables.add(new EnvironmentVariable(entry.getKey(), entry.getValue()));
+		}
 		lrp.setEnv(environmentVariables.toArray(new EnvironmentVariable[environmentVariables.size()]));
 		lrp.setMemoryMb(512);
 		lrp.setPorts(new int[] {8080, 9000});
