@@ -34,7 +34,6 @@
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-stream-module-launcher</artifactId>
-			<version>${spring-cloud-stream.version}</version>
 		</dependency>
 	</dependencies>
 </project>
