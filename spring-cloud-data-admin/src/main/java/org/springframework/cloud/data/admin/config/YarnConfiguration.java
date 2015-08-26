@@ -19,6 +19,7 @@ package org.springframework.cloud.data.admin.config;
 import org.springframework.cloud.data.module.deployer.ModuleDeployer;
 import org.springframework.cloud.data.module.deployer.yarn.YarnModuleDeployer;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
 /**
@@ -28,6 +29,7 @@ import org.springframework.context.annotation.Profile;
  * @author Janne Valkealahti
  *
  */
+@Configuration
 @Profile("yarn")
 public class YarnConfiguration {
 
