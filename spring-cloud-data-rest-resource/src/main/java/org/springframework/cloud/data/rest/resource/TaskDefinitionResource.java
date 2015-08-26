@@ -23,12 +23,19 @@ import org.springframework.hateoas.ResourceSupport;
  * A HATEOAS representation of a {@link TaskDefinition}.
  *
  * @author Michael Minella
+ * @author Glenn Renfro
  */
 public class TaskDefinitionResource extends ResourceSupport {
 
 	private String name;
 
 	private String dslText;
+
+	/**
+	 * Stream status (i.e. running, complete, etc).
+	 */
+	private String status = "";
+	
 
 	public TaskDefinitionResource() {
 	}
@@ -44,6 +51,24 @@ public class TaskDefinitionResource extends ResourceSupport {
 
 	public String getDslText() {
 		return dslText;
+	}
+
+	/**
+	 * Return the status of this task (i.e. running, complete, etc)
+	 *
+	 * @return task status
+	 */
+	public String getStatus() {
+		return status;
+	}
+
+	/**
+	 * Set the status of this task (i.e. running, complete, etc)
+	 *
+	 * @param status task status
+	 */
+	public void setStatus(String status) {
+		this.status = status;
 	}
 
 	public static class Page extends PagedResources<TaskDefinitionResource>{}

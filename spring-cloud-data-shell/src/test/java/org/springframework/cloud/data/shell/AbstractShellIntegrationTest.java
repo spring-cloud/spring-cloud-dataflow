@@ -24,14 +24,14 @@ import org.junit.Rule;
 import org.junit.rules.TestName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.cloud.data.admin.AdminApplication;
 import org.springframework.cloud.data.admin.config.AdminConfiguration;
-import org.springframework.cloud.data.module.registry.ModuleRegistry;
 import org.springframework.cloud.data.module.registry.InMemoryModuleRegistry;
+import org.springframework.cloud.data.module.registry.ModuleRegistry;
 import org.springframework.cloud.data.shell.command.StreamCommandTemplate;
+import org.springframework.cloud.data.shell.command.TaskCommandTemplate;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -54,6 +54,7 @@ import org.springframework.util.SocketUtils;
  *
  * @author Ilayaperumal Gopinathan
  * @author Patrick Peralta
+ * @author Glenn Renfro
  */
 public abstract class AbstractShellIntegrationTest {
 
@@ -147,30 +148,20 @@ public abstract class AbstractShellIntegrationTest {
 	}
 
 	/**
-	 * Return a unique random stream name for testing.
+	 * Return a {@link TaskCommandTemplate} for issuing shell based
+	 * task commands.
 	 *
-	 * @param name name to use as part of stream name
-	 * @return unique random stream name
+	 * @return template for issuing task commands
 	 */
-	protected String generateStreamName(String name) {
-		return (name == null) ? generateUniqueName() : generateUniqueName(name);
+	protected TaskCommandTemplate task() {
+		return new TaskCommandTemplate(cloudDataShell);
 	}
-
-	/**
-	 * Return a unique random stream name for testing.
-	 *
-	 * @return unique random stream name
-	 */
-	protected String generateStreamName() {
-		return generateStreamName(null);
-	}
-
 	// Util methods
-	private String generateUniqueName(String name) {
+	protected String generateUniqueName(String name) {
 		return name + "-" + idGenerator.generateId();
 	}
 
-	private String generateUniqueName() {
+	protected String generateUniqueName() {
 		return generateUniqueName(name.getMethodName().replace('[', '-').replaceAll("]", ""));
 	}
 

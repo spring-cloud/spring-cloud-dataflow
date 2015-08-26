@@ -18,21 +18,20 @@ package org.springframework.cloud.data.shell.command;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import org.springframework.cloud.data.shell.AbstractShellIntegrationTest;
 
 /**
- * @author Ilayaperumal Gopinathan
+ * @author Glenn Renfro
  */
-public class StreamCommandTests extends AbstractShellIntegrationTest {
+public class TaskCommandTests extends AbstractShellIntegrationTest {
 
 
-	private static final Logger logger = LoggerFactory.getLogger(StreamCommandTests.class);
+	private static final Logger logger = LoggerFactory.getLogger(TaskCommandTests.class);
 
 	@Test
-	public void testStreamLifecycleForTickTock() throws InterruptedException {
-		logger.info("Starting Stream Test for TickTock");
-		String streamName = generateUniqueName();
-		stream().create(streamName, "time | log");
+	public void testCreateTask() throws InterruptedException {
+		logger.info("Create Task Test");
+		String taskName = generateUniqueName();
+		task().create(taskName, "foobar");
 	}
 }

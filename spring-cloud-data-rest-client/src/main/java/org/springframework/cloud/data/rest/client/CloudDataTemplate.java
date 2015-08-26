@@ -28,6 +28,7 @@ import org.springframework.web.client.RestTemplate;
 /**
  *  @author Ilayaperumal Gopinathan
  *  @author Mark Fisher
+ *  @author Glenn Renfro
  */
 public class CloudDataTemplate implements CloudDataOperations {
 
@@ -51,7 +52,12 @@ public class CloudDataTemplate implements CloudDataOperations {
 	 */
 	private final CounterTemplate counterTemplate;
 
+	/**
+	 * REST client template for task operations.
+	 */
+	private final TaskTemplate taskTemplate;
 
+	
 	public CloudDataTemplate(URI baseURI) {
 		this.restTemplate = new RestTemplate();
 		restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
@@ -59,7 +65,12 @@ public class CloudDataTemplate implements CloudDataOperations {
 		ResourceSupport resourceSupport = restTemplate.getForObject(baseURI, ResourceSupport.class);
 		resources.put("streams/definitions", new UriTemplate(resourceSupport.getLink("streams").getHref() + "/definitions"));
 		resources.put("streams/deployments", new UriTemplate(resourceSupport.getLink("streams").getHref() + "/deployments"));
+		resources.put("tasks/definitions", new UriTemplate(resourceSupport.getLink("tasks").getHref() + "/definitions"));
+		resources.put("tasks/deployments", new UriTemplate(resourceSupport.getLink("tasks").getHref() + "/deployments"));
+		resources.put("tasks/", new UriTemplate(resourceSupport.getLink("tasks").getHref() + "/"));
+
 		this.streamTemplate = new StreamTemplate(restTemplate, resources);
+		this.taskTemplate = new TaskTemplate(restTemplate, resources);
 		this.counterTemplate = new CounterTemplate(restTemplate, resourceSupport);
 	}
 
@@ -72,4 +83,10 @@ public class CloudDataTemplate implements CloudDataOperations {
 	public CounterOperations counterOperations() {
 		return counterTemplate;
 	}
+
+	@Override
+	public TaskOperations taskOperations() {
+		return taskTemplate;
+	}
+
 }

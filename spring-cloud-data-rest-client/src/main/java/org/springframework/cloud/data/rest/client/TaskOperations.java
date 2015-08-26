@@ -16,25 +16,36 @@
 
 package org.springframework.cloud.data.rest.client;
 
+import java.util.Map;
+
+import org.springframework.cloud.data.rest.resource.TaskDefinitionResource;
+import org.springframework.hateoas.PagedResources;
+
 /**
- * Interface the REST clients implement to interact with spring-cloud-data REST API.
+ * Interface defining operations available against tasks.
  *
- * @author Ilayaperumal Gopinathan
+ * @author Glenn Renfro
  */
-public interface CloudDataOperations {
+public interface TaskOperations {
 
 	/**
-	 * Stream related operations.
+	 * List tasks known to the system.
 	 */
-	public StreamOperations streamOperations();
+	public PagedResources<TaskDefinitionResource> list(/* TODO */);
 
 	/**
-	 * Counter related operations.
+	 * Create a new task.
 	 */
-	public CounterOperations counterOperations();
+	public TaskDefinitionResource createTask(String name, String definition);
 
 	/**
-	 * Task related operations.
+	 * Launch an already created task.
 	 */
-	public TaskOperations taskOperations();
+	public void launch(String name, Map<String, String> properties);
+	
+	/**
+	 * Destroy an existing task.
+	 */
+	public void destroy(String name);
+	
 }
