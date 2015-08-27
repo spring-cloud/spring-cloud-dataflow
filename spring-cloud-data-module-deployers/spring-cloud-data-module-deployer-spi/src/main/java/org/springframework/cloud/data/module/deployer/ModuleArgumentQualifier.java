@@ -26,9 +26,9 @@ import java.util.Map;
  *
  * @author Eric Bottard
  */
-public final class ModuleLauncherArgumentsHelper {
+public final class ModuleArgumentQualifier {
 
-	private ModuleLauncherArgumentsHelper() {
+	private ModuleArgumentQualifier() {
 		
 	}
 

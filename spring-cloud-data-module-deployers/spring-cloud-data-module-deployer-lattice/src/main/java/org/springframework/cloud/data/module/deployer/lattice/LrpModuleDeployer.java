@@ -33,7 +33,7 @@ import org.springframework.cloud.data.core.ModuleDeploymentId;
 import org.springframework.cloud.data.core.ModuleDeploymentRequest;
 import org.springframework.cloud.data.module.ModuleStatus;
 import org.springframework.cloud.data.module.deployer.ModuleDeployer;
-import org.springframework.cloud.data.module.deployer.ModuleLauncherArgumentsHelper;
+import org.springframework.cloud.data.module.deployer.ModuleArgumentQualifier;
 import org.springframework.util.StringUtils;
 
 /**
@@ -70,7 +70,7 @@ public class LrpModuleDeployer implements ModuleDeployer {
 		Map<String, String> rawArgs = new HashMap<>();
 		rawArgs.putAll(request.getDefinition().getParameters());
 		rawArgs.putAll(request.getDeploymentProperties());
-		Map<String, String> qualifiedArgs = ModuleLauncherArgumentsHelper.qualifyArgs(0, rawArgs);
+		Map<String, String> qualifiedArgs = ModuleArgumentQualifier.qualifyArgs(0, rawArgs);
 		for (Map.Entry<String, String> entry : qualifiedArgs.entrySet()) {
 			environmentVariables.add(new EnvironmentVariable(entry.getKey(), entry.getValue()));
 		}
