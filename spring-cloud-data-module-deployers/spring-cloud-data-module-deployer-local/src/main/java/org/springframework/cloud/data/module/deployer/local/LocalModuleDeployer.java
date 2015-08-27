@@ -82,8 +82,7 @@ public class LocalModuleDeployer implements ModuleDeployer {
 		args.put("server.port", String.valueOf(port));
 		args.put("endpoints.shutdown.enabled", "true");
 
-		ModuleLaunchRequest moduleLaunchRequest = new ModuleLaunchRequest(module);
-		moduleLaunchRequest.setArguments(args);
+		ModuleLaunchRequest moduleLaunchRequest = new ModuleLaunchRequest(module, args);
 		launcher.launch(Arrays.asList(moduleLaunchRequest));
 		ModuleDeploymentId id = new ModuleDeploymentId(request.getDefinition().getGroup(),
 				request.getDefinition().getLabel());

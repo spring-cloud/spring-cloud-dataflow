@@ -17,6 +17,8 @@
 package org.springframework.cloud.data.yarn.container;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.Future;
 
@@ -63,7 +65,8 @@ public class ContainerApplication extends YarnContainerSupport {
 		// indicating we're done. Naturally exception will
 		// terminate execution chain and container will exit.
 		SettableListenableFuture<Boolean> status = new SettableListenableFuture<Boolean>();
-		moduleLauncher.launch(Arrays.asList(new ModuleLaunchRequest(module)));
+		Map<String, String> args = new HashMap<>(); // TODO
+		moduleLauncher.launch(Arrays.asList(new ModuleLaunchRequest(module, args)));
 		return status;
 	}
 
