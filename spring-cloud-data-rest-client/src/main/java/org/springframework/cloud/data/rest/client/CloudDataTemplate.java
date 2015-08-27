@@ -67,7 +67,6 @@ public class CloudDataTemplate implements CloudDataOperations {
 		resources.put("streams/deployments", new UriTemplate(resourceSupport.getLink("streams").getHref() + "/deployments"));
 		resources.put("tasks/definitions", new UriTemplate(resourceSupport.getLink("tasks").getHref() + "/definitions"));
 		resources.put("tasks/deployments", new UriTemplate(resourceSupport.getLink("tasks").getHref() + "/deployments"));
-		resources.put("tasks/", new UriTemplate(resourceSupport.getLink("tasks").getHref() + "/"));
 
 		this.streamTemplate = new StreamTemplate(restTemplate, resources);
 		this.taskTemplate = new TaskTemplate(restTemplate, resources);

@@ -34,7 +34,7 @@ public class TaskDefinitionResource extends ResourceSupport {
 	/**
 	 * Stream status (i.e. running, complete, etc).
 	 */
-	private String status = "";
+	private String status;
 	
 
 	public TaskDefinitionResource() {

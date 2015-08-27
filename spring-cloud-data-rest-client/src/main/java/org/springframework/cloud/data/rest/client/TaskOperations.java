@@ -36,7 +36,7 @@ public interface TaskOperations {
 	/**
 	 * Create a new task.
 	 */
-	public TaskDefinitionResource createTask(String name, String definition);
+	public TaskDefinitionResource create(String name, String definition);
 
 	/**
 	 * Launch an already created task.

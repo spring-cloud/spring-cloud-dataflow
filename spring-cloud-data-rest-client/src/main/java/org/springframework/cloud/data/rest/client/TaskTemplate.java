@@ -46,17 +46,15 @@ public class TaskTemplate implements TaskOperations {
 
 	private final UriTemplate deploymentsPath;
 	
-	private final UriTemplate defaultPath;
 
 	TaskTemplate(RestTemplate restTemplate, Map<String, UriTemplate> resources) {
-		Assert.notNull(resources, "URI Resources can't be null");
+		Assert.notNull(resources, "URI Resources must not be be null");
 		Assert.notNull(resources.get(DEFINITIONS_PATH), "Definitions path is required");
 		Assert.notNull(resources.get(DEPLOYMENTS_PATH), "Deployments path is required");
-		Assert.notNull(resources.get(DEFAULT_PATH), "Default path is required");
+		Assert.notNull(restTemplate, "Rest Template must not be null");
 		this.restTemplate = restTemplate;
 		this.definitionsPath = resources.get(DEFINITIONS_PATH);
 		this.deploymentsPath = resources.get(DEPLOYMENTS_PATH);
-		this.defaultPath = resources.get(DEFAULT_PATH);
 	}
 
 	@Override
@@ -67,12 +65,12 @@ public class TaskTemplate implements TaskOperations {
 	}
 
 	@Override
-	public TaskDefinitionResource createTask(String name, String definition) {
+	public TaskDefinitionResource create(String name, String definition) {
 		MultiValueMap<String, Object> values = new LinkedMultiValueMap<String, Object>();
 		values.add("name", name);
 		values.add("definition", definition);
 		TaskDefinitionResource task = restTemplate.postForObject(
-				defaultPath.expand(), values, TaskDefinitionResource.class);
+				definitionsPath.expand(), values, TaskDefinitionResource.class);
 		return task;
 	}
 
@@ -86,7 +84,7 @@ public class TaskTemplate implements TaskOperations {
 
 	@Override
 	public void destroy(String name) {
-		String uriTemplate = defaultPath.toString() + "/{name}";
+		String uriTemplate = definitionsPath.toString() + "/{name}";
 		restTemplate.delete(uriTemplate, Collections.singletonMap("name", name));
 	}
 

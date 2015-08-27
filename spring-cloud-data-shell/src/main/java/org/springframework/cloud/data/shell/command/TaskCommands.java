@@ -44,17 +44,17 @@ import org.springframework.stereotype.Component;
  */
 @Component
 // todo: reenable optionContext attributes
-	public class TaskCommands implements CommandMarker {
+public class TaskCommands implements CommandMarker {
 
-	private static final String LIST_TASK = "task list";
+	private static final String LIST = "task list";
 
-	private static final String CREATE_TASK = "task create";
+	private static final String CREATE = "task create";
 
-	private static final String LAUNCH_TASK = "task launch";
+	private static final String LAUNCH = "task launch";
 
-	private static final String STATUS_TASK = "task status";
+	private static final String STATUS = "task status";
 
-	private static final String DESTROY_TASK = "task destroy";
+	private static final String DESTROY = "task destroy";
 
 	private static final String PROPERTIES_OPTION = "properties";
 
@@ -67,13 +67,13 @@ import org.springframework.stereotype.Component;
 	@Autowired
 	private UserInput userInput;
 
-	@CliAvailabilityIndicator({ LIST_TASK, CREATE_TASK, LAUNCH_TASK, STATUS_TASK, DESTROY_TASK})
+	@CliAvailabilityIndicator({ LIST, CREATE, LAUNCH, STATUS, DESTROY})
 	public boolean available() {
 		return cloudDataShell.getCloudDataOperations() != null;
 	}
 
-	@CliCommand(value = LIST_TASK, help = "List created tasks")
-	public Table listTasks() {
+	@CliCommand(value = LIST, help = "List created tasks")
+	public Table list() {
 		final PagedResources<TaskDefinitionResource> tasks = taskOperations().list();
 
 		final Table table = new Table()
@@ -84,24 +84,24 @@ import org.springframework.stereotype.Component;
 			table.newRow()
 					.addValue(1, task.getName())
 					.addValue(2, task.getDslText())
-					.addValue(3, task.getStatus());
+					.addValue(3, (task.getStatus() == null) ? "" : task.getStatus());
 		}
 
 		return table;
 	}
 
-	@CliCommand(value = CREATE_TASK, help = "Create a new task definition")
-	public String createTask(
+	@CliCommand(value = CREATE, help = "Create a new task definition")
+	public String create(
 			@CliOption(mandatory = true, key = { "", "name" }, help = "the name to give to the task") String name,
-			@CliOption(mandatory = true, key = { "definition" }, help = "a task definition, using the DSL (e.g. \"http --port=9000 | hdfs\")") String dsl){
-		this.taskOperations().createTask(name, dsl);
+			@CliOption(mandatory = true, key = { "definition" }, help = "a task definition, using the DSL (e.g. \"taskName\")") String dsl){
+		this.taskOperations().create(name, dsl);
 		return String.format(
 				"Created new task '%s'", name);
 	}
 
-	@CliCommand(value = LAUNCH_TASK, help = "Launch a previously created task")
-	public String launchTask(
-			@CliOption(key = { "", "name" }, help = "the name of the launch to launch", mandatory = true) String name,
+	@CliCommand(value = LAUNCH, help = "Launch a previously created task")
+	public String launch(
+			@CliOption(key = { "", "name" }, help = "the name of the task to launch", mandatory = true) String name,
 			@CliOption(key = { PROPERTIES_OPTION }, help = "the properties for this launch", mandatory = false) String properties,
 			@CliOption(key = { PROPERTIES_FILE_OPTION }, help = "the properties for this launch (as a File)", mandatory = false) File propertiesFile
 			) throws IOException {
@@ -128,15 +128,15 @@ import org.springframework.stereotype.Component;
 		return String.format("Launched task '%s'", name);
 	}
 	
-	@CliCommand(value = DESTROY_TASK, help = "Destroy an existing task")
-	public String destroyTask(
+	@CliCommand(value = DESTROY, help = "Destroy an existing task")
+	public String destroy(
 			@CliOption(key = { "", "name" }, help = "the name of the task to destroy", mandatory = true) String name) {
 		taskOperations().destroy(name);
 		return String.format("Destroyed task '%s'", name);
 	}
 
-	@CliCommand(value = STATUS_TASK, help = "Retrieve status info on an existing task")
-	public String statusTask(
+	@CliCommand(value = STATUS, help = "Retrieve status info on an existing task")
+	public String status(
 			@CliOption(key = { "", "name" }, help = "the name of the task ", mandatory = true) String name) {
 
 		return String.format("Feature Not Available");

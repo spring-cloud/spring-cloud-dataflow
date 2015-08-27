@@ -94,7 +94,7 @@ public class TaskController {
 	 * @param name the name of the task
 	 * @param dsl DSL definition for the task
 	 */
-	@RequestMapping(value = "/", method = RequestMethod.POST)
+	@RequestMapping(value = "/definitions", method = RequestMethod.POST)
 	public void save(@RequestParam("name") String name,
 			@RequestParam("definition") String dsl) {
 		repository.save(new TaskDefinition(name, dsl));
@@ -105,7 +105,7 @@ public class TaskController {
 	 *
 	 * @param name name of the task to be deleted
 	 */
-	@RequestMapping(value = "/{name}", method = RequestMethod.DELETE)
+	@RequestMapping(value = "/definitions/{name}", method = RequestMethod.DELETE)
 	@ResponseStatus(HttpStatus.OK)
 	public void destroyTask(@PathVariable("name") String name) {
 		repository.delete(name);

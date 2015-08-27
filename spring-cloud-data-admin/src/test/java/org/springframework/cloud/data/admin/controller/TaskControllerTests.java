@@ -38,7 +38,6 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.cloud.data.admin.AdminApplication;
@@ -109,7 +108,7 @@ public class TaskControllerTests {
 		assertEquals(0, repository.count());
 
 		mockMvc.perform(
-				post("/tasks/").param("name", "myTask").param("definition", "task")
+				post("/tasks/definitions/").param("name", "myTask").param("definition", "task")
 						.accept(MediaType.APPLICATION_JSON)).andDo(print())
 						.andExpect(status().isOk());
 
@@ -129,7 +128,7 @@ public class TaskControllerTests {
 
 		//TODO: Make this into an elegant error...
 		mockMvc.perform(
-				post("/tasks/").param("name", "myTask").param("definition", "task")
+				post("/tasks/definitions/").param("name", "myTask").param("definition", "task")
 						.accept(MediaType.APPLICATION_JSON)).andDo(print())
 						.andExpect(status().is5xxServerError());
 
@@ -141,7 +140,7 @@ public class TaskControllerTests {
 		assertEquals(0, repository.count());
 
 		mockMvc.perform(
-				post("/tasks/").param("name", "myTask")
+				post("/tasks/definitions/").param("name", "myTask")
 						.param("definition", "task --foo=bar --bar=baz")
 						.accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isOk());
@@ -162,7 +161,7 @@ public class TaskControllerTests {
 		repository.save(new TaskDefinition("myTask", "task"));
 
 		mockMvc.perform(
-				delete("/tasks/myTask").accept(MediaType.APPLICATION_JSON)).andDo(print())
+				delete("/tasks/definitions/myTask").accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isOk());
 
 		assertEquals(0, repository.count());
@@ -171,7 +170,7 @@ public class TaskControllerTests {
 	@Test
 	public void testDestroyTaskNotFound() throws Exception {
 		mockMvc.perform(
-				delete("/tasks/myTask").accept(MediaType.APPLICATION_JSON)).andDo(print())
+				delete("/tasks/definitions/myTask").accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isOk());
 
 		assertEquals(0, repository.count());
