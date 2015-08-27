@@ -70,8 +70,8 @@ public class LrpModuleDeployer implements ModuleDeployer {
 		Map<String, String> rawArgs = new HashMap<>();
 		rawArgs.putAll(request.getDefinition().getParameters());
 		rawArgs.putAll(request.getDeploymentProperties());
-		Map<String, String> transformed = ModuleLauncherArgumentsHelper.qualifyArgs(0, rawArgs);
-		for (Map.Entry<String, String> entry : transformed.entrySet()) {
+		Map<String, String> qualifiedArgs = ModuleLauncherArgumentsHelper.qualifyArgs(0, rawArgs);
+		for (Map.Entry<String, String> entry : qualifiedArgs.entrySet()) {
 			environmentVariables.add(new EnvironmentVariable(entry.getKey(), entry.getValue()));
 		}
 		lrp.setEnv(environmentVariables.toArray(new EnvironmentVariable[environmentVariables.size()]));
