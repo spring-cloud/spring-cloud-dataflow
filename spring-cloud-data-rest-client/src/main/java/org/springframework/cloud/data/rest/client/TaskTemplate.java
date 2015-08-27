@@ -38,8 +38,6 @@ public class TaskTemplate implements TaskOperations {
 
 	private static final String DEPLOYMENTS_PATH = "tasks/deployments";
 
-	private static final String DEFAULT_PATH = "tasks/";
-
 	private final RestTemplate restTemplate;
 
 	private final UriTemplate definitionsPath;
