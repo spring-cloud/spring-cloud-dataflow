@@ -15,10 +15,14 @@
  */
 package org.springframework.cloud.data.shell.command;
 
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.when;
+
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.springframework.cloud.data.core.ModuleDeploymentId;
 import org.springframework.cloud.data.shell.AbstractShellIntegrationTest;
 
 /**
@@ -26,13 +30,21 @@ import org.springframework.cloud.data.shell.AbstractShellIntegrationTest;
  */
 public class StreamCommandTests extends AbstractShellIntegrationTest {
 
-
 	private static final Logger logger = LoggerFactory.getLogger(StreamCommandTests.class);
 
 	@Test
-	public void testStreamLifecycleForTickTock() throws InterruptedException {
-		logger.info("Starting Stream Test for TickTock");
-		String streamName = generateStreamName();
-		stream().create(streamName, "time | log");
+	public void testCreateStream() {
+		logger.info("Test creating stream");
+		when(moduleDeployer.status(any(ModuleDeploymentId.class))).thenReturn(unknown);
+		stream().createDontDeploy("ticktock", "time | log");
+		assertInteractions(2, unknown);
+	}
+
+	@Test
+	public void testStreamCreateAndDeploy() {
+		logger.info("Test create and deploy stream");
+		when(moduleDeployer.status(any(ModuleDeploymentId.class))).thenReturn(deployed);
+		stream().create("ticktock", "time | log");
+		assertInteractions(2, deployed);
 	}
 }
