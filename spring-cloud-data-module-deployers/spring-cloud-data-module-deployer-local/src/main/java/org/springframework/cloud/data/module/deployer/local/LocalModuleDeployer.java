@@ -19,6 +19,7 @@ package org.springframework.cloud.data.module.deployer.local;
 import java.net.Inet4Address;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,14 +31,18 @@ import org.springframework.cloud.data.core.ModuleDeploymentId;
 import org.springframework.cloud.data.core.ModuleDeploymentRequest;
 import org.springframework.cloud.data.module.ModuleStatus;
 import org.springframework.cloud.data.module.deployer.ModuleDeployer;
+import org.springframework.cloud.stream.module.launcher.ModuleLaunchRequest;
 import org.springframework.cloud.stream.module.launcher.ModuleLauncher;
 import org.springframework.util.Assert;
 import org.springframework.util.SocketUtils;
 import org.springframework.web.client.RestTemplate;
 
 /**
+ * A ModuleDeployer that will launch a module in-process.
+ *
  * @author Mark Fisher
  * @author Marius Bogoevici
+ * @author Eric Bottard
  */
 public class LocalModuleDeployer implements ModuleDeployer {
 
@@ -58,17 +63,14 @@ public class LocalModuleDeployer implements ModuleDeployer {
 	public ModuleDeploymentId deploy(ModuleDeploymentRequest request) {
 		String module = request.getCoordinates().toString();
 		if (request.getCount() != 1) {
-			logger.warn(String.format("%s only supports a single instance per module; ignoring count=%d for %s",
-					this.getClass().getSimpleName(), request.getCount(), request.getDefinition().getLabel()));			
+			logger.warn("{} only supports a single instance per module; ignoring count={} for {}",
+					this.getClass().getSimpleName(), request.getCount(), request.getDefinition().getLabel());
 		}
-		List<String> args = new ArrayList<>();
-		for (Map.Entry<String, String> entry : request.getDefinition().getParameters().entrySet()) {
-			args.add(String.format("--%s.%s=%s", module, entry.getKey(), entry.getValue()));
-		}
-		for (Map.Entry<String, String> entry: request.getDeploymentProperties().entrySet()) {
-			args.add(String.format("--%s.%s=%s", module, entry.getKey(), entry.getValue()));
-		}
-		logger.info("deploying module: " + module);
+		Map<String, String> args = new HashMap<>();
+		args.putAll(request.getDefinition().getParameters());
+		args.putAll(request.getDeploymentProperties());
+
+		logger.info("deploying module: {}", module);
 		int port = SocketUtils.findAvailableTcpPort(8080);
 		URL moduleUrl;
 		try {
@@ -77,9 +79,11 @@ public class LocalModuleDeployer implements ModuleDeployer {
 		catch (Exception e) {
 			throw new IllegalStateException("failed to determine URL for module: " + module, e);
 		}
-		args.add(String.format("--%s.server.port=%d", module, port));
-		args.add(String.format("--%s.endpoints.shutdown.enabled=true", module));
-		launcher.launch(new String[] { module }, args.toArray(new String[args.size()]));
+		args.put("server.port", String.valueOf(port));
+		args.put("endpoints.shutdown.enabled", "true");
+
+		ModuleLaunchRequest moduleLaunchRequest = new ModuleLaunchRequest(module);
+		launcher.launch(Arrays.asList(moduleLaunchRequest));
 		ModuleDeploymentId id = new ModuleDeploymentId(request.getDefinition().getGroup(),
 				request.getDefinition().getLabel());
 		this.deployedModules.put(id, moduleUrl);
@@ -90,7 +94,7 @@ public class LocalModuleDeployer implements ModuleDeployer {
 	public void undeploy(ModuleDeploymentId id) {
 		URL url = this.deployedModules.get(id);
 		if (url != null) {
-			logger.info("undeploying module: " + id);
+			logger.info("undeploying module: {}", id);
 			this.restTemplate.postForObject(url + "/shutdown", null, String.class);
 			this.deployedModules.remove(id);
 		}
