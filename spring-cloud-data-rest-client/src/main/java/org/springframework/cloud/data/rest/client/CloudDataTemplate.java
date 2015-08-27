@@ -43,19 +43,19 @@ public class CloudDataTemplate implements CloudDataOperations {
 	protected Map<String, UriTemplate> resources = new HashMap<String, UriTemplate>();
 
 	/**
-	 * REST client template for stream operations.
+	 * REST client for stream operations.
 	 */
-	private final StreamTemplate streamTemplate;
+	private final StreamOperations streamOperations;
 
 	/**
-	 * REST client template for stream operations.
+	 * REST client for counter operations.
 	 */
-	private final CounterTemplate counterTemplate;
+	private final CounterOperations counterOperations;
 
 	/**
-	 * REST client template for task operations.
+	 * REST client for task operations.
 	 */
-	private final TaskTemplate taskTemplate;
+	private final TaskOperations taskOperations;
 
 	
 	public CloudDataTemplate(URI baseURI) {
@@ -68,24 +68,24 @@ public class CloudDataTemplate implements CloudDataOperations {
 		resources.put("tasks/definitions", new UriTemplate(resourceSupport.getLink("tasks").getHref() + "/definitions"));
 		resources.put("tasks/deployments", new UriTemplate(resourceSupport.getLink("tasks").getHref() + "/deployments"));
 
-		this.streamTemplate = new StreamTemplate(restTemplate, resources);
-		this.taskTemplate = new TaskTemplate(restTemplate, resources);
-		this.counterTemplate = new CounterTemplate(restTemplate, resourceSupport);
+		this.streamOperations = new StreamTemplate(restTemplate, resources);
+		this.taskOperations = new TaskTemplate(restTemplate, resources);
+		this.counterOperations = new CounterTemplate(restTemplate, resourceSupport);
 	}
 
 	@Override
 	public StreamOperations streamOperations() {
-		return streamTemplate;
+		return streamOperations;
 	}
 
 	@Override
 	public CounterOperations counterOperations() {
-		return counterTemplate;
+		return counterOperations;
 	}
 
 	@Override
 	public TaskOperations taskOperations() {
-		return taskTemplate;
+		return taskOperations;
 	}
 
 }

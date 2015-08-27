@@ -16,6 +16,9 @@
 
 package org.springframework.cloud.data.shell.command;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,9 +26,6 @@ import org.springframework.shell.core.CommandResult;
 import org.springframework.shell.core.JLineShellComponent;
 import org.springframework.shell.support.table.Table;
 import org.springframework.shell.support.table.TableRow;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Helper methods for task commands to execute in the shell.
@@ -82,7 +82,7 @@ public class TaskCommandTemplate {
 	}
 
 	/**
-	 * Destroy all tasks that were created using the 'create' method. Commonly called in a @After annotated method
+	 * Destroy all tasks that were created using the 'create' method. Commonly called in a @After annotated method.
 	 */
 	public void destroyCreatedTasks() {
 		for (int s = tasks.size() - 1; s >= 0; s--) {
@@ -95,7 +95,7 @@ public class TaskCommandTemplate {
 	}
 
 	/**
-	 * Destroy a specific task
+	 * Destroy a specific task name.
 	 *
 	 * @param task The task to destroy
 	 */

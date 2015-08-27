@@ -141,6 +141,7 @@ public class TaskCommands implements CommandMarker {
 
 		return String.format("Feature Not Available");
 	}
+	
 	TaskOperations taskOperations() {
 		return cloudDataShell.getCloudDataOperations().taskOperations();
 	}
