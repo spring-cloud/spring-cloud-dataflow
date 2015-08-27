@@ -16,8 +16,8 @@
 
 package org.springframework.cloud.data.admin.controller;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.*;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -26,6 +26,12 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.Iterator;
+import java.util.List;
+
+import org.hamcrest.CoreMatchers;
+import org.hamcrest.Matchers;
+import org.hamcrest.beans.HasPropertyWithValue;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -42,6 +48,7 @@ import org.springframework.cloud.data.admin.repository.TaskDefinitionRepository;
 import org.springframework.cloud.data.core.TaskDefinition;
 import org.springframework.cloud.data.module.deployer.lattice.TaskModuleDeployer;
 import org.springframework.cloud.data.module.registry.InMemoryModuleRegistry;
+import org.springframework.cloud.stream.module.launcher.ModuleLaunchRequest;
 import org.springframework.cloud.stream.module.launcher.ModuleLauncher;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -171,6 +178,7 @@ public class TaskControllerTests {
 	}
 
 	@Test
+	@SuppressWarnings("unchecked")
 	@Ignore("Until we have a task module that is available in the remote repo")
 	public void testDeploy() throws Exception {
 		repository.save(new TaskDefinition("myTask", "task"));
@@ -179,9 +187,12 @@ public class TaskControllerTests {
 				post("/tasks/deployments/myTask").accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isOk());
 
-		ArgumentCaptor<String[]> module = ArgumentCaptor.forClass(String [].class);
-		verify(moduleLauncher).launch(module.capture(), (String[]) anyObject());
-		assertEquals(1, module.getValue().length);
-		assertEquals("task", module.getValue()[0]);
+		ArgumentCaptor<List> requests = ArgumentCaptor.forClass(List.class);
+		verify(moduleLauncher).launch(requests.capture());
+		Iterator<ModuleLaunchRequest> iterator = requests.getValue().iterator();
+		assertThat(iterator.hasNext(), equalTo(true));
+		ModuleLaunchRequest request = iterator.next();
+		assertThat(iterator.hasNext(), equalTo(false));
+		assertThat(request.getModule(), is("task"));
 	}
 }

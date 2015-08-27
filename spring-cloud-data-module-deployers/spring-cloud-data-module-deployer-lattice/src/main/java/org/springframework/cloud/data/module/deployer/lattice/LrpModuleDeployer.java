@@ -33,6 +33,7 @@ import org.springframework.cloud.data.core.ModuleDeploymentId;
 import org.springframework.cloud.data.core.ModuleDeploymentRequest;
 import org.springframework.cloud.data.module.ModuleStatus;
 import org.springframework.cloud.data.module.deployer.ModuleDeployer;
+import org.springframework.cloud.data.module.deployer.ModuleArgumentQualifier;
 import org.springframework.util.StringUtils;
 
 /**
@@ -66,10 +67,11 @@ public class LrpModuleDeployer implements ModuleDeployer {
 		List<EnvironmentVariable> environmentVariables = new ArrayList<EnvironmentVariable>();
 		Collections.addAll(environmentVariables, lrp.getEnv());
 		environmentVariables.add(new EnvironmentVariable("MODULES", request.getCoordinates().toString()));
-		for (Map.Entry<String, String> entry : request.getDefinition().getParameters().entrySet()) {
-			environmentVariables.add(new EnvironmentVariable(entry.getKey(), entry.getValue()));
-		}
-		for (Map.Entry<String, String> entry: request.getDeploymentProperties().entrySet()) {
+		Map<String, String> rawArgs = new HashMap<>();
+		rawArgs.putAll(request.getDefinition().getParameters());
+		rawArgs.putAll(request.getDeploymentProperties());
+		Map<String, String> qualifiedArgs = ModuleArgumentQualifier.qualifyArgs(0, rawArgs);
+		for (Map.Entry<String, String> entry : qualifiedArgs.entrySet()) {
 			environmentVariables.add(new EnvironmentVariable(entry.getKey(), entry.getValue()));
 		}
 		lrp.setEnv(environmentVariables.toArray(new EnvironmentVariable[environmentVariables.size()]));
