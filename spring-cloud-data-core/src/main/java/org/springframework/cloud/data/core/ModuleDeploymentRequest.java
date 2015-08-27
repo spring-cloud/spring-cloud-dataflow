@@ -52,8 +52,7 @@ public class ModuleDeploymentRequest {
 	 * Construct a {@code ModuleDeploymentRequest}.
 	 *
 	 * @param definition module definition
-	 * @param coordinates coordinates for module jar file
-	 * @param count number of module instances to launch
+	 * @param coordinates maven coordinates for module jar file
 	 * @param deploymentProperties map of deployment properties; may be {@code null}
 	 */
 	public ModuleDeploymentRequest(ModuleDefinition definition, ModuleCoordinates coordinates,
