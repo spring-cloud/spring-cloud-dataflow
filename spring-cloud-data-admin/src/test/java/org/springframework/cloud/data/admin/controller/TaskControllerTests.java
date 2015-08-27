@@ -27,6 +27,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.Iterator;
+import java.util.List;
 
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matchers;
@@ -186,7 +187,7 @@ public class TaskControllerTests {
 				post("/tasks/deployments/myTask").accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isOk());
 
-		ArgumentCaptor<Iterable> requests = ArgumentCaptor.forClass(Iterable.class);
+		ArgumentCaptor<List> requests = ArgumentCaptor.forClass(List.class);
 		verify(moduleLauncher).launch(requests.capture());
 		Iterator<ModuleLaunchRequest> iterator = requests.getValue().iterator();
 		assertThat(iterator.hasNext(), equalTo(true));
