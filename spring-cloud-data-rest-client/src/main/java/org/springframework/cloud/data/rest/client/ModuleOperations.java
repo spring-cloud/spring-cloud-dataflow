@@ -64,7 +64,7 @@ public interface ModuleOperations {
 	 * @param coordinates  Maven coordinates for the module artifact
 	 * @param force if {@code true}, overwrites a pre-existing registration
 	 */
-	ModuleRegistrationResource registerModule(String name, ModuleType type,
+	ModuleRegistrationResource register(String name, ModuleType type,
 			String coordinates, boolean force);
 
 	/**

@@ -84,7 +84,7 @@ public class ModuleTemplate implements ModuleOperations {
 	}
 
 	@Override
-	public ModuleRegistrationResource registerModule(String name, ModuleType type,
+	public ModuleRegistrationResource register(String name, ModuleType type,
 			String coordinates, boolean force) {
 		MultiValueMap<String, Object> values = new LinkedMultiValueMap<String, Object>();
 		values.add("coordinates", coordinates);

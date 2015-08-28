@@ -140,7 +140,7 @@ public class ModuleCommands implements CommandMarker {
 					specifiedDefaultValue = "true",
 					unspecifiedDefaultValue = "false")
 			boolean force) {
-		moduleOperations().registerModule(name, type, coordinates, force);
+		moduleOperations().register(name, type, coordinates, force);
 		return String.format(("Successfully registered module '%s:%s'"), type, name);
 	}
 
