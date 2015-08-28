@@ -36,6 +36,8 @@ public class TaskDefinitionResource extends ResourceSupport {
 	 */
 	private String status;
 
+	TaskDefinitionResource() {
+	}
 
 	public TaskDefinitionResource(String name, String dslText) {
 		this.name = name;
