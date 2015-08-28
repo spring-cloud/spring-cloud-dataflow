@@ -43,13 +43,13 @@ public class TaskTemplate implements TaskOperations {
 	private final UriTemplate definitionsPath;
 
 	private final UriTemplate deploymentsPath;
-	
+
 
 	TaskTemplate(RestTemplate restTemplate, Map<String, UriTemplate> resources) {
 		Assert.notNull(resources, "URI Resources must not be be null");
 		Assert.notNull(resources.get(DEFINITIONS_PATH), "Definitions path is required");
 		Assert.notNull(resources.get(DEPLOYMENTS_PATH), "Deployments path is required");
-		Assert.notNull(restTemplate, "Rest Template must not be null");
+		Assert.notNull(restTemplate, "RestTemplate must not be null");
 		this.restTemplate = restTemplate;
 		this.definitionsPath = resources.get(DEFINITIONS_PATH);
 		this.deploymentsPath = resources.get(DEPLOYMENTS_PATH);

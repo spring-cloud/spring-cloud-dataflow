@@ -25,7 +25,6 @@ import org.springframework.cloud.data.shell.AbstractShellIntegrationTest;
  */
 public class TaskCommandTests extends AbstractShellIntegrationTest {
 
-
 	private static final Logger logger = LoggerFactory.getLogger(TaskCommandTests.class);
 
 	@Test

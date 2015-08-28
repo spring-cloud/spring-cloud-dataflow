@@ -157,11 +157,24 @@ public abstract class AbstractShellIntegrationTest {
 	protected TaskCommandTemplate task() {
 		return new TaskCommandTemplate(cloudDataShell);
 	}
+
 	// Util methods
+
+	/**
+	 * Return a unique random name for stream/task testing.
+	 *
+	 * @param name name to use as part of stream/task name
+	 * @return unique random stream/task name
+	 */
 	protected String generateUniqueName(String name) {
 		return name + "-" + idGenerator.generateId();
 	}
 
+	/**
+	 * Return a unique random name for stream/task testing.
+	 *
+	 * @return unique random stream/task name
+	 */
 	protected String generateUniqueName() {
 		return generateUniqueName(name.getMethodName().replace('[', '-').replaceAll("]", ""));
 	}

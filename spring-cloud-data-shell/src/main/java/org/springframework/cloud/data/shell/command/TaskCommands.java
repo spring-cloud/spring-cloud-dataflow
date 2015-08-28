@@ -67,7 +67,7 @@ public class TaskCommands implements CommandMarker {
 	@Autowired
 	private UserInput userInput;
 
-	@CliAvailabilityIndicator({ LIST, CREATE, LAUNCH, STATUS, DESTROY})
+	@CliAvailabilityIndicator({ LIST, CREATE, LAUNCH, STATUS, DESTROY })
 	public boolean available() {
 		return cloudDataShell.getCloudDataOperations() != null;
 	}
@@ -75,7 +75,6 @@ public class TaskCommands implements CommandMarker {
 	@CliCommand(value = LIST, help = "List created tasks")
 	public Table list() {
 		final PagedResources<TaskDefinitionResource> tasks = taskOperations().list();
-
 		final Table table = new Table()
 				.addHeader(1, new TableHeader("Task Name"))
 				.addHeader(2, new TableHeader("Task Definition"))
@@ -86,7 +85,6 @@ public class TaskCommands implements CommandMarker {
 					.addValue(2, task.getDslText())
 					.addValue(3, (task.getStatus() == null) ? "" : task.getStatus());
 		}
-
 		return table;
 	}
 
@@ -95,8 +93,7 @@ public class TaskCommands implements CommandMarker {
 			@CliOption(mandatory = true, key = { "", "name" }, help = "the name to give to the task") String name,
 			@CliOption(mandatory = true, key = { "definition" }, help = "a task definition, using the DSL (e.g. \"taskName\")") String dsl){
 		this.taskOperations().create(name, dsl);
-		return String.format(
-				"Created new task '%s'", name);
+		return String.format("Created new task '%s'", name);
 	}
 
 	@CliCommand(value = LAUNCH, help = "Launch a previously created task")
@@ -138,11 +135,10 @@ public class TaskCommands implements CommandMarker {
 	@CliCommand(value = STATUS, help = "Retrieve status info on an existing task")
 	public String status(
 			@CliOption(key = { "", "name" }, help = "the name of the task ", mandatory = true) String name) {
-
 		return String.format("Feature Not Available");
 	}
 	
-	TaskOperations taskOperations() {
+	private TaskOperations taskOperations() {
 		return cloudDataShell.getCloudDataOperations().taskOperations();
 	}
 }

@@ -106,7 +106,6 @@ public class TaskCommandTemplate {
 				cr.isSuccess());
 		tasks.remove(task);
 	}
-	
 
 	/**
 	 * Verify the task is listed in task list.
