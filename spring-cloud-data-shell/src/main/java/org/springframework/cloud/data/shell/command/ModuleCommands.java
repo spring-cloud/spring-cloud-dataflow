@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -49,8 +49,6 @@ import org.springframework.shell.support.table.TableHeader;
 @Component
 public class ModuleCommands implements CommandMarker {
 
-	private final static String COMPOSE_MODULE = "module compose";
-
 	private final static String LIST_MODULES = "module list";
 
 	private final static String MODULE_INFO = "module info";
@@ -63,9 +61,7 @@ public class ModuleCommands implements CommandMarker {
 	private CloudDataShell cloudDataShell;
 
 
-	@CliAvailabilityIndicator({
-			COMPOSE_MODULE, LIST_MODULES, MODULE_INFO,
-			UNREGISTER_MODULE, REGISTER_MODULE})
+	@CliAvailabilityIndicator({LIST_MODULES, MODULE_INFO, UNREGISTER_MODULE, REGISTER_MODULE})
 	public boolean available() {
 		return cloudDataShell.getCloudDataOperations() != null;
 	}
@@ -123,25 +119,6 @@ public class ModuleCommands implements CommandMarker {
 			result.append(table.toString());
 		}
 		return result.toString();
-	}
-
-	@CliCommand(value = COMPOSE_MODULE, help = "Create a virtual module")
-	public String composeModule(
-			@CliOption(mandatory = true,
-					key = {"name", ""},
-					help = "the name to give to the module")
-			String name,
-			@CliOption(mandatory = true,
-					key = "definition",
-					optionContext = "completion-module disable-string-converter",
-					help = "module definition using xd dsl")
-			String dsl,
-			@CliOption(key = "force",
-					help = "force update if module already exists (only if not in use)",
-					specifiedDefaultValue = "true",
-					unspecifiedDefaultValue = "false")
-			boolean force) {
-		throw new UnsupportedOperationException("composed modules not yet supported");
 	}
 
 	@CliCommand(value = REGISTER_MODULE, help = "Register a new module")

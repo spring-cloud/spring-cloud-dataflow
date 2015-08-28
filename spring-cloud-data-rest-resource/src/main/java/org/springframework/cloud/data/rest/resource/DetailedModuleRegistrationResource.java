@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -54,10 +54,9 @@ public class DetailedModuleRegistrationResource extends ModuleRegistrationResour
 	 * @param name module name
 	 * @param type module type
 	 * @param coordinates Maven coordinates for module artifact
-	 * @param composed if true, this is a composed module
 	 */
-	public DetailedModuleRegistrationResource(String name, String type, String coordinates, boolean composed) {
-		super(name, type, coordinates, composed);
+	public DetailedModuleRegistrationResource(String name, String type, String coordinates) {
+		super(name, type, coordinates);
 	}
 
 	/**
@@ -68,7 +67,7 @@ public class DetailedModuleRegistrationResource extends ModuleRegistrationResour
 	 *                 module registration data
 	 */
 	public DetailedModuleRegistrationResource(ModuleRegistrationResource resource) {
-		super(resource.getName(), resource.getType(), resource.getCoordinates(), resource.isComposed());
+		super(resource.getName(), resource.getType(), resource.getCoordinates());
 	}
 
 	/**

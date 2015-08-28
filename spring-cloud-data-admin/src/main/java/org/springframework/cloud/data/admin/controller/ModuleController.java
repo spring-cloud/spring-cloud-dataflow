@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -39,7 +39,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -70,9 +69,8 @@ public class ModuleController {
 	/**
 	 * List module registrations.
 	 */
-	@RequestMapping(value = "", method = RequestMethod.GET)
+	@RequestMapping(method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
-	@ResponseBody
 	public PagedResources<? extends ModuleRegistrationResource> list(Pageable pageable,
 			PagedResourcesAssembler<ModuleRegistration> assembler,
 			@RequestParam(value = "type", required = false) ModuleType type,
@@ -102,8 +100,8 @@ public class ModuleController {
 	 */
 	@RequestMapping(value = "/{type}/{name}", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
-	@ResponseBody
-	public DetailedModuleRegistrationResource info(@PathVariable("type") ModuleType type,
+	public DetailedModuleRegistrationResource info(
+			@PathVariable("type") ModuleType type,
 			@PathVariable("name") String name) {
 		ModuleRegistration registration = registry.find(name, type);
 
@@ -153,7 +151,7 @@ public class ModuleController {
 		@Override
 		public ModuleRegistrationResource toResource(ModuleRegistration registration) {
 			return new ModuleRegistrationResource(registration.getName(),
-					registration.getType().name(), registration.getCoordinates().toString(), false);
+					registration.getType().name(), registration.getCoordinates().toString());
 		}
 	}
 

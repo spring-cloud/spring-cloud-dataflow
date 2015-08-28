@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -45,11 +45,6 @@ public class ModuleRegistrationResource extends ResourceSupport {
 	private String coordinates;
 
 	/**
-	 * True if this is a composed module.
-	 */
-	private boolean composed;
-
-	/**
 	 * Default constructor for serialization frameworks.
 	 */
 	protected ModuleRegistrationResource() {
@@ -61,13 +56,11 @@ public class ModuleRegistrationResource extends ResourceSupport {
 	 * @param name module name
 	 * @param type module type
 	 * @param coordinates coordinates for module artifact
-	 * @param composed true if this is a composed module
 	 */
-	public ModuleRegistrationResource(String name, String type, String coordinates, boolean composed) {
+	public ModuleRegistrationResource(String name, String type, String coordinates) {
 		this.name = name;
 		this.type = type;
 		this.coordinates = coordinates;
-		this.composed = composed;
 	}
 
 	/**
@@ -89,13 +82,6 @@ public class ModuleRegistrationResource extends ResourceSupport {
 	 */
 	public String getCoordinates() {
 		return coordinates;
-	}
-
-	/**
-	 * @see #composed
-	 */
-	public boolean isComposed() {
-		return composed;
 	}
 
 	/**

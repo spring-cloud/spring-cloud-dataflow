@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -60,13 +60,9 @@ class ModuleList {
 		}
 		for (ModuleRegistrationResource module : modules) {
 			TableRow row = rowForType(module.getType(), table, currentRowByType);
-			row.addValue(typeToColumn.get(module.getType()), cellValue(module));
+			row.addValue(typeToColumn.get(module.getType()), module.getName());
 		}
 		return table;
-	}
-
-	private String cellValue(ModuleRegistrationResource module) {
-		return String.format("%s %s", module.isComposed() ? "(c)" : "   ", module.getName());
 	}
 
 	/**
@@ -79,7 +75,7 @@ class ModuleList {
 			value = 0;
 		}
 		currentRowByType.put(type, value + 1);
-		TableRow result = null;
+		TableRow result;
 		if (value >= table.getRows().size()) {
 			result = new TableRow();
 			for (int i = 1; i <= typeToColumn.size(); i++) {

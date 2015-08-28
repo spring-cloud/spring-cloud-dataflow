@@ -32,12 +32,12 @@ public interface CloudDataOperations {
 	 * Counter related operations.
 	 */
 	CounterOperations counterOperations();
-	
+
 	/**
 	 * Task related operations.
 	 */
 	TaskOperations taskOperations();
-	
+
 	/**
 	 * Module related operations.
 	 */
