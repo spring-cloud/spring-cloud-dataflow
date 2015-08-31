@@ -60,6 +60,11 @@ public class ModuleStatus {
 		deployed,
 
 		/**
+		 * The module exited normally.
+		 */
+		complete,
+
+		/**
 		 * In the case of multiple modules, some have successfully deployed.
 		 * This state does not apply for individual modules.
 		 */

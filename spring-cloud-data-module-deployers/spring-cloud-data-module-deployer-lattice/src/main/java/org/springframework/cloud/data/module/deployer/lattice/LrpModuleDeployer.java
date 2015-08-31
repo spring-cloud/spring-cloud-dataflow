@@ -50,6 +50,8 @@ public class LrpModuleDeployer implements ModuleDeployer {
 
 	private final ReceptorClient receptorClient = new ReceptorClient();
 
+	private final StatusMapper receptorProcessStatusMapper = new StatusMapper();
+
 	@Override
 	public ModuleDeploymentId deploy(ModuleDeploymentRequest request) {
 		ModuleDeploymentId id = ModuleDeploymentId.fromModuleDefinition(request.getDefinition());
@@ -121,7 +123,7 @@ public class LrpModuleDeployer implements ModuleDeployer {
 			attributes.put("index", Integer.toString(lrp.getIndex()));
 			attributes.put("ports", StringUtils.arrayToCommaDelimitedString(lrp.getPorts()));
 			attributes.put("since", Long.toString(lrp.getSince()));
-			builder.with(new ReceptorModuleInstanceStatus(lrp.getInstanceGuid(), lrp.getState(), attributes));
+			builder.with(new ReceptorModuleInstanceStatus(lrp.getInstanceGuid(), receptorProcessStatusMapper.map(lrp), attributes));
 		}
 		return builder.build();
 	}
@@ -130,4 +132,37 @@ public class LrpModuleDeployer implements ModuleDeployer {
 	public Map<ModuleDeploymentId, ModuleStatus> status() {
 		throw new UnsupportedOperationException();
 	}
+
+	private static class StatusMapper {
+
+		public ModuleStatus.State map(ActualLRPResponse actualLRPResponse) {
+			ModuleStatus.State state;
+
+			switch (actualLRPResponse.getState()) {
+				case "RUNNING":
+					state = ModuleStatus.State.deployed;
+					break;
+				case "UNCLAIMED":
+					// see description of UNCLAIMED here: https://github.com/cloudfoundry-incubator/receptor/blob/master/doc/lrps.md
+					if (StringUtils.hasText(actualLRPResponse.getPlacementError())) {
+						state = ModuleStatus.State.failed;
+					}
+					else {
+						state = ModuleStatus.State.deploying;
+					}
+					break;
+				case "CLAIMED":
+					state = ModuleStatus.State.deploying;
+					break;
+				case "CRASHED":
+					state = ModuleStatus.State.failed;
+					break;
+				default:
+					state = ModuleStatus.State.unknown;
+			}
+
+			return state;
+		}
+	}
+
 }

@@ -120,7 +120,7 @@ public class TaskCommandTemplate {
 		assertTrue(t.getRows().contains(
 				new TableRow().addValue(1, taskName).
 						addValue(2, definition.replace("\\\\", "\\")).addValue(
-						3, "")));
+						3, "unknown")));
 	}
 
 }
