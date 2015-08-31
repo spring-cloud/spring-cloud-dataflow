@@ -19,6 +19,8 @@ package org.springframework.cloud.data.core;
 import java.util.Collections;
 import java.util.Map;
 
+import org.springframework.util.Assert;
+
 /**
  * Representation of a module deployment request. This includes
  * module options defined at definition time (as part of a stream
@@ -57,6 +59,8 @@ public class ModuleDeploymentRequest {
 	 */
 	public ModuleDeploymentRequest(ModuleDefinition definition, ModuleCoordinates coordinates,
 			Map<String, String> deploymentProperties) {
+		Assert.notNull(definition, "definition must not be null");
+		Assert.notNull(coordinates, "coordinates must not be null");
 		this.definition = definition;
 		this.coordinates = coordinates;
 		this.deploymentProperties = deploymentProperties == null

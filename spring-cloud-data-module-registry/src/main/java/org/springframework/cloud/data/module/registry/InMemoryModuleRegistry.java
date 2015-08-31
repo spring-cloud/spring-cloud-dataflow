@@ -16,46 +16,102 @@
 
 package org.springframework.cloud.data.module.registry;
 
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.cloud.data.core.ModuleCoordinates;
+import org.springframework.cloud.data.core.ModuleType;
 
 /**
+ * In-memory implementation of {@link ModuleRegistry}.
+ *
  * @author Mark Fisher
+ * @author Patrick Peralta
  */
 public class InMemoryModuleRegistry implements ModuleRegistry {
 
-	private final Map<String, ModuleCoordinates> sources = new HashMap<>();
-
-	private final Map<String, ModuleCoordinates> processors = new HashMap<>();
-
-	private final Map<String, ModuleCoordinates> sinks = new HashMap<>();
+	private final Map<Key, ModuleCoordinates> map = new ConcurrentHashMap<>();
 
 	@Override
-	public ModuleCoordinates findByNameAndType(String name, String type) {
-		if ("source".equals(type)) {
-			return sources.get(name);
-		}
-		if ("processor".equals(type)) {
-			return processors.get(name);
-		}
-		if ("sink".equals(type)) {
-			return sinks.get(name);
-		}
-		throw new UnsupportedOperationException("only 'source', 'processor', and 'sink' types are supported");
+	public ModuleRegistration find(String name, ModuleType type) {
+		ModuleCoordinates coordinates = this.map.get(new Key(name, type));
+		return (coordinates == null ? null : new ModuleRegistration(name, type, coordinates));
 	}
 
 	@Override
-	public void save(String name, String type, ModuleCoordinates coordinates) {
-		if ("source".equals(type)) {
-			this.sources.put(name, coordinates);
+	public List<ModuleRegistration> findAll() {
+		List<ModuleRegistration> list = new ArrayList<>(this.map.size());
+		for (Map.Entry<Key, ModuleCoordinates> entry : this.map.entrySet()) {
+			list.add(new ModuleRegistration(entry.getKey().getName(),
+					entry.getKey().getType(), entry.getValue()));
 		}
-		if ("processor".equals(type)) {
-			this.processors.put(name, coordinates);
+		return list;
+	}
+
+	@Override
+	public void save(ModuleRegistration registration) {
+		String name = registration.getName();
+		ModuleType type = registration.getType();
+		ModuleCoordinates coordinates = registration.getCoordinates();
+
+		this.map.put(new Key(name, type), coordinates);
+	}
+
+	@Override
+	public void delete(String name, ModuleType type) {
+		this.map.remove(new Key(name, type));
+	}
+
+	/**
+	 * Key class for module registration.
+	 */
+	private static class Key {
+
+		private String name;
+
+		private ModuleType type;
+
+		public Key(String name, ModuleType type) {
+			this.name = name;
+			this.type = type;
 		}
-		if ("sink".equals(type)) {
-			this.sinks.put(name, coordinates);
+
+		public String getName() {
+			return name;
+		}
+
+		public ModuleType getType() {
+			return type;
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (this == o) {
+				return true;
+			}
+			if (o == null || getClass() != o.getClass()) {
+				return false;
+			}
+			Key that = (Key) o;
+			return this.getName().equals(that.getName()) && this.getType() == that.getType();
+		}
+
+		@Override
+		public int hashCode() {
+			int result = name.hashCode();
+			result = 31 * result + type.hashCode();
+			return result;
+		}
+
+		@Override
+		public String toString() {
+			return "Key{" +
+					"name='" + name + '\'' +
+					", type=" + type +
+					'}';
 		}
 	}
+
 }

@@ -17,23 +17,54 @@
 package org.springframework.cloud.data.module.registry;
 
 
-import org.springframework.cloud.data.core.ModuleCoordinates;
+import java.util.List;
+
+import org.springframework.cloud.data.core.ModuleType;
 
 /**
- * A module registry is used to lookup {@link ModuleCoordinates}s by name.
+ * {@code ModuleRegistry} is used to manage module registrations. This
+ * includes operations such as find, register, and delete.
+ *
+ * @see ModuleRegistration
  *
  * @author David Turanski
  * @author Mark Fisher
+ * @author Patrick Peralta
  */
 public interface ModuleRegistry {
 
 	/**
-	 * Look up the coordinates for a module jar by name and type.
+	 * Look up the registration for a module by name and type. If
+	 * a registration does not exist, {@code null} is returned.
+	 *
+	 * @param name the module name
+	 * @param type the module type
+	 *
+	 * @return registration for a module, or {@code null} if not found
+	 */
+	ModuleRegistration find(String name, ModuleType type);
+
+	/**
+	 * Return all module registrations.
+	 *
+	 * @return all module registrations
+	 */
+	List<ModuleRegistration> findAll();
+
+	/**
+	 * Save a new module registration. Pre-existing registrations
+	 * with a given name and type will be overwritten.
+	 *
+	 * @param registration module registration to save
+	 */
+	void save(ModuleRegistration registration);
+
+	/**
+	 * Unregister a module by name and type.
+	 *
 	 * @param name the module name
 	 * @param type the module type
 	 */
-	ModuleCoordinates findByNameAndType(String name, String type);
-
-	void save(String name, String type, ModuleCoordinates coordinates);
+	void delete(String name, ModuleType type);
 
 }

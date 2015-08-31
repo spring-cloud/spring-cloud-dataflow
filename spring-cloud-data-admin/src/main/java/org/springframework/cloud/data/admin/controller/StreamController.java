@@ -33,9 +33,11 @@ import org.springframework.cloud.data.core.ModuleCoordinates;
 import org.springframework.cloud.data.core.ModuleDefinition;
 import org.springframework.cloud.data.core.ModuleDeploymentId;
 import org.springframework.cloud.data.core.ModuleDeploymentRequest;
+import org.springframework.cloud.data.core.ModuleType;
 import org.springframework.cloud.data.core.StreamDefinition;
 import org.springframework.cloud.data.module.ModuleStatus;
 import org.springframework.cloud.data.module.deployer.ModuleDeployer;
+import org.springframework.cloud.data.module.registry.ModuleRegistration;
 import org.springframework.cloud.data.module.registry.ModuleRegistry;
 import org.springframework.cloud.data.rest.resource.StreamDefinitionResource;
 import org.springframework.cloud.data.rest.util.DeploymentPropertiesUtils;
@@ -214,9 +216,14 @@ public class StreamController {
 		Iterator<ModuleDefinition> iterator = stream.getDeploymentOrderIterator();
 		for (int i = 0; iterator.hasNext(); i++) {
 			ModuleDefinition module = iterator.next();
-			String type = (i == 0) ? "sink"
-					: (iterator.hasNext() ? "processor" : "source");
-			ModuleCoordinates coordinates = this.registry.findByNameAndType(module.getName(), type);
+			ModuleType type = (i == 0) ? ModuleType.sink
+					: (iterator.hasNext() ? ModuleType.processor : ModuleType.source);
+			ModuleRegistration registration = this.registry.find(module.getName(), type);
+			if (registration == null) {
+				throw new IllegalArgumentException(String.format(
+						"Module %s of type %s not found in registry", module.getName(), type));
+			}
+			ModuleCoordinates coordinates = registration.getCoordinates();
 			Map<String, String> moduleDeploymentProperties = new HashMap<>();
 			String wildCardPrefix = "module.*.";
 			// first check for wild card prefix

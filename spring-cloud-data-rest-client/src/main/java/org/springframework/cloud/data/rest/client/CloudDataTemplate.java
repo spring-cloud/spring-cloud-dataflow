@@ -29,6 +29,7 @@ import org.springframework.web.client.RestTemplate;
  *  @author Ilayaperumal Gopinathan
  *  @author Mark Fisher
  *  @author Glenn Renfro
+ *  @author Patrick Peralta
  */
 public class CloudDataTemplate implements CloudDataOperations {
 
@@ -40,7 +41,7 @@ public class CloudDataTemplate implements CloudDataOperations {
 	/**
 	 * Holds discovered URLs of the API.
 	 */
-	protected Map<String, UriTemplate> resources = new HashMap<String, UriTemplate>();
+	protected final Map<String, UriTemplate> resources = new HashMap<String, UriTemplate>();
 
 	/**
 	 * REST client for stream operations.
@@ -57,7 +58,12 @@ public class CloudDataTemplate implements CloudDataOperations {
 	 */
 	private final TaskOperations taskOperations;
 
-	
+	/**
+	 * REST client for module operations.
+	 */
+	private final ModuleOperations moduleOperations;
+
+
 	public CloudDataTemplate(URI baseURI) {
 		this.restTemplate = new RestTemplate();
 		restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
@@ -69,8 +75,9 @@ public class CloudDataTemplate implements CloudDataOperations {
 		resources.put("tasks/deployments", new UriTemplate(resourceSupport.getLink("tasks").getHref() + "/deployments"));
 
 		this.streamOperations = new StreamTemplate(restTemplate, resources);
-		this.taskOperations = new TaskTemplate(restTemplate, resources);
 		this.counterOperations = new CounterTemplate(restTemplate, resourceSupport);
+		this.taskOperations = new TaskTemplate(restTemplate, resources);
+		this.moduleOperations = new ModuleTemplate(restTemplate, resourceSupport);
 	}
 
 	@Override
@@ -86,6 +93,11 @@ public class CloudDataTemplate implements CloudDataOperations {
 	@Override
 	public TaskOperations taskOperations() {
 		return taskOperations;
+	}
+
+	@Override
+	public ModuleOperations moduleOperations() {
+		return moduleOperations;
 	}
 
 }
