@@ -163,16 +163,13 @@ public class DetailedModuleRegistrationResource extends ModuleRegistrationResour
 			return name;
 		}
 
-
 		public String getType() {
 			return type;
 		}
 
-
 		public String getDescription() {
 			return description;
 		}
-
 
 		public String getDefaultValue() {
 			return defaultValue;

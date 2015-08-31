@@ -71,7 +71,7 @@ public class ModuleController {
 	 */
 	@RequestMapping(method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
-	public PagedResources<? extends ModuleRegistrationResource> list(Pageable pageable,
+	public PagedResources<? extends ModuleRegistrationResource> list(
 			PagedResourcesAssembler<ModuleRegistration> assembler,
 			@RequestParam(value = "type", required = false) ModuleType type,
 			@RequestParam(value = "detailed", defaultValue = "false") boolean detailed) {

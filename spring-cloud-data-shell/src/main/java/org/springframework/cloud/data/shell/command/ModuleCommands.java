@@ -67,9 +67,9 @@ public class ModuleCommands implements CommandMarker {
 	}
 
 	@CliCommand(value = MODULE_INFO, help = "Get information about a module")
-	public String moduleInfo(
+	public String info(
 			@CliOption(mandatory = true,
-					key = { "", "name" },
+					key = {"", "name"},
 					help = "name of the module to query")
 			String name,
 			@CliOption(mandatory = false,
@@ -122,9 +122,9 @@ public class ModuleCommands implements CommandMarker {
 	}
 
 	@CliCommand(value = REGISTER_MODULE, help = "Register a new module")
-	public String registerModule(
+	public String register(
 			@CliOption(mandatory = true,
-					key = { "", "name" },
+					key = {"", "name"},
 					help = "the name for the registered module")
 			String name,
 			@CliOption(mandatory = true,
@@ -145,9 +145,9 @@ public class ModuleCommands implements CommandMarker {
 	}
 
 	@CliCommand(value = UNREGISTER_MODULE, help = "Unregister a module")
-	public String unregisterModule(
+	public String unregister(
 			@CliOption(mandatory = true,
-					key = { "", "name" },
+					key = {"", "name"},
 					help = "name of the module to unregister")
 			String name,
 			@CliOption(mandatory = false,
@@ -156,13 +156,13 @@ public class ModuleCommands implements CommandMarker {
 			ModuleType type) {
 
 		QualifiedModuleName module = processArgs(name, type);
-		moduleOperations().unregisterModule(module.name, module.type);
+		moduleOperations().unregister(module.name, module.type);
 		return String.format(("Successfully unregistered module '%s' with type %s"),
 				module.name, module.type);
 	}
 
 	@CliCommand(value = LIST_MODULES, help = "List all modules")
-	public Table listModules() {
+	public Table list() {
 		PagedResources<ModuleRegistrationResource> modules = moduleOperations().list();
 		return new ModuleList(modules).renderByType();
 	}

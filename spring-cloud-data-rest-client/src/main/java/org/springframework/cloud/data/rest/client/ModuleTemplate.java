@@ -72,7 +72,7 @@ public class ModuleTemplate implements ModuleOperations {
 	}
 
 	@Override
-	public void unregisterModule(String name, ModuleType moduleType) {
+	public void unregister(String name, ModuleType moduleType) {
 		String uri = uriTemplate.toString() + "/{type}/{name}";
 		restTemplate.delete(uri, moduleType.name(), name);
 	}

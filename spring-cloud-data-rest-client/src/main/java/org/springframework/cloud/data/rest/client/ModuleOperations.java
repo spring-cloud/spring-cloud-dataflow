@@ -73,6 +73,6 @@ public interface ModuleOperations {
 	 * @param name  module name
 	 * @param type  module type
 	 */
-	void unregisterModule(String name, ModuleType type);
+	void unregister(String name, ModuleType type);
 
 }
