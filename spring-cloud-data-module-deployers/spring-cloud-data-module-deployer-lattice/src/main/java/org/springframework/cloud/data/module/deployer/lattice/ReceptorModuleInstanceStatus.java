@@ -28,6 +28,7 @@ import org.springframework.cloud.data.module.ModuleStatus;
 
 /**
  * @author Patrick Peralta
+ * @author Michael Minella
  */
 public class ReceptorModuleInstanceStatus implements ModuleInstanceStatus {
 	private static final Logger logger = LoggerFactory.getLogger(ReceptorModuleInstanceStatus.class);
@@ -38,35 +39,12 @@ public class ReceptorModuleInstanceStatus implements ModuleInstanceStatus {
 
 	private final Map<String, String> attributes = new HashMap<String, String>();
 
-	public ReceptorModuleInstanceStatus(String id, String lrpState, Map<String, String> attributes) {
-		logger.trace("LRP {}, state {}, attributes: {}", id, lrpState, attributes);
+	public ReceptorModuleInstanceStatus(String id, ModuleStatus.State state, Map<String, String> attributes) {
+		logger.trace("ModuleStatus {}, state {}, attributes: {}", id, state, attributes);
 
 		this.id = id;
-		switch (lrpState) {
-			case "RUNNING":
-				this.state = ModuleStatus.State.deployed;
-				break;
-			case "UNCLAIMED":
-				// see description of UNCLAIMED here: https://github.com/cloudfoundry-incubator/receptor/blob/master/doc/lrps.md
-				// todo: make sure "placement_error" is populated into the attributes
-				if (attributes.containsKey("placement_error")) {
-					this.state = ModuleStatus.State.failed;
-				}
-				else {
-					this.state = ModuleStatus.State.deploying;
-				}
-				break;
-			case "CLAIMED":
-				this.state = ModuleStatus.State.deploying;
-				break;
-			case "CRASHED":
-				this.state = ModuleStatus.State.failed;
-				break;
-			default:
-				this.state = ModuleStatus.State.unknown;
-		}
-
 		this.attributes.putAll(attributes);
+		this.state = state;
 	}
 
 	public String getId() {

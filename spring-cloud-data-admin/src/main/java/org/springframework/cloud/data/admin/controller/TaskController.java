@@ -21,6 +21,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cloud.data.admin.repository.TaskDefinitionRepository;
 import org.springframework.cloud.data.core.ModuleCoordinates;
 import org.springframework.cloud.data.core.ModuleDefinition;
+import org.springframework.cloud.data.core.ModuleDeploymentId;
 import org.springframework.cloud.data.core.ModuleDeploymentRequest;
 import org.springframework.cloud.data.core.TaskDefinition;
 import org.springframework.cloud.data.module.deployer.ModuleDeployer;
@@ -162,8 +163,12 @@ public class TaskController {
 
 		@Override
 		public TaskDefinitionResource instantiateResource(TaskDefinition taskDefinition) {
-			return new TaskDefinitionResource(taskDefinition.getName(),
+			ModuleDeploymentId id =
+					ModuleDeploymentId.fromModuleDefinition(taskDefinition.getModuleDefinition());
+			TaskDefinitionResource taskDefinitionResource = new TaskDefinitionResource(taskDefinition.getName(),
 					taskDefinition.getDslText());
+			taskDefinitionResource.setStatus(moduleDeployer.status(id).getState().name());
+			return taskDefinitionResource;
 		}
 	}
 }

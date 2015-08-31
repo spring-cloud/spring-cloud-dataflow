@@ -48,9 +48,12 @@ public class TaskModuleDeployer implements ModuleDeployer {
 
 	private final ReceptorClient receptorClient = new ReceptorClient();
 
+	private final ReceptorTaskStatusMapper statusMapper = new ReceptorTaskStatusMapper();
+
 	@Override
 	public ModuleDeploymentId deploy(ModuleDeploymentRequest request) {
-		ModuleDeploymentId id = ModuleDeploymentId.fromModuleDefinition(request.getDefinition());
+		ModuleDeploymentId id =
+				ModuleDeploymentId.fromModuleDefinition(request.getDefinition());
 		String guid = guid(id);
 
 		TaskCreateRequest task = new TaskCreateRequest();
@@ -117,7 +120,7 @@ public class TaskModuleDeployer implements ModuleDeployer {
 			attributes.put("resultFile", task.getResultFile());
 			attributes.put("cellId", task.getCellId());
 			attributes.put("domain", task.getDomain());
-			builder.with(new ReceptorModuleInstanceStatus(task.getTaskGuid(), task.getState(), attributes));
+			builder.with(new ReceptorModuleInstanceStatus(task.getTaskGuid(), statusMapper.map(task), attributes));
 
 			return builder.build();
 		}
