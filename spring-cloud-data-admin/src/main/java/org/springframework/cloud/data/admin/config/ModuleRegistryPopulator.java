@@ -16,9 +16,12 @@
 
 package org.springframework.cloud.data.admin.config;
 
-import javax.annotation.PostConstruct;
+import static org.springframework.cloud.data.core.ModuleType.processor;
+import static org.springframework.cloud.data.core.ModuleType.sink;
+import static org.springframework.cloud.data.core.ModuleType.source;
+import static org.springframework.cloud.data.core.ModuleType.task;
 
-import static org.springframework.cloud.data.core.ModuleType.*;
+import javax.annotation.PostConstruct;
 
 import org.springframework.cloud.data.core.ModuleCoordinates;
 import org.springframework.cloud.data.core.ModuleType;
@@ -35,9 +38,14 @@ import org.springframework.util.Assert;
 public class ModuleRegistryPopulator {
 
 	/**
-	 * Group ID for default modules.
+	 * Group ID for default stream modules.
 	 */
-	private static final String DEFAULT_GROUP_ID = "org.springframework.cloud.stream.module";
+	private static final String DEFAULT_STREAM_GROUP_ID = "org.springframework.cloud.stream.module";
+
+	/**
+	 * Group ID for default task modules.
+	 */
+	private static final String DEFAULT_TASK_GROUP_ID = "org.springframework.cloud.task.module";
 
 	/**
 	 * Version number for default modules.
@@ -75,6 +83,7 @@ public class ModuleRegistryPopulator {
 		populateDefault("counter", sink);
 		populateDefault("log", sink);
 		populateDefault("redis", sink);
+		populateDefault("timestamp", task);
 	}
 
 	/**
@@ -87,19 +96,33 @@ public class ModuleRegistryPopulator {
 	private void populateDefault(String name, ModuleType type) {
 		if (this.moduleRegistry.find(name, type) == null) {
 			this.moduleRegistry.save(new ModuleRegistration(name, type,
-					defaultCoordinatesFor(name + '-' + type)));
+				(type == task) ?
+					defaultTaskCoordinatesFor(name + '-' + type) :
+					defaultStreamCoordinatesFor(name + '-' + type)));
 		}
 	}
 
 	/**
-	 * Return the default coordinates for the provided module name.
+	 * Return the default task coordinates for the provided module name.
 	 *
 	 * @param moduleName module name for which to provide default coordinates
 	 * @return default coordinates for the provided module
 	 */
-	private ModuleCoordinates defaultCoordinatesFor(String moduleName) {
+	private ModuleCoordinates defaultTaskCoordinatesFor(String moduleName) {
 		return ModuleCoordinates.parse(String.format("%s:%s:%s",
-				DEFAULT_GROUP_ID, moduleName, DEFAULT_VERSION));
+				DEFAULT_TASK_GROUP_ID, moduleName, DEFAULT_VERSION));
+	}
+
+
+	/**
+	 * Return the default stream coordinates for the provided module name.
+	 *
+	 * @param moduleName module name for which to provide default coordinates
+	 * @return default coordinates for the provided module
+	 */
+	private ModuleCoordinates defaultStreamCoordinatesFor(String moduleName) {
+		return ModuleCoordinates.parse(String.format("%s:%s:%s",
+				DEFAULT_STREAM_GROUP_ID, moduleName, DEFAULT_VERSION));
 	}
 
 }
