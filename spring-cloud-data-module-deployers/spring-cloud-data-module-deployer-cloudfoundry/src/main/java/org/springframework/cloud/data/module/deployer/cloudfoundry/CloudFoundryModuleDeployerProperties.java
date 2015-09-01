@@ -20,12 +20,35 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.springframework.boot.context.properties.ConfigurationProperties;
+
 /**
  * @author Eric Bottard
  */
+@ConfigurationProperties("cloudfoundry")
 class CloudFoundryModuleDeployerProperties {
 
+	/**
+	 * The names of services to bind to each application deployed as a module.
+	 * This should typically contain a service capable of playing the role of a binding transport.
+	 */
 	private Set<String> services = setOf(new HashSet<String>(), "redis");
+
+	/**
+	 * The domain to use when mapping routes for applications.
+	 */
+	private String domain;
+
+	/**
+	 * The organization to use when registering new applications.
+	 */
+	private String organization;
+
+	/**
+	 * The space to use when registering new applications.
+	 */
+	private String space;
+
 
 	public Set<String> getServices() {
 		return services;
@@ -33,6 +56,30 @@ class CloudFoundryModuleDeployerProperties {
 
 	public void setServices(Set<String> services) {
 		this.services = services;
+	}
+
+	public String getDomain() {
+		return domain;
+	}
+
+	public void setDomain(String domain) {
+		this.domain = domain;
+	}
+
+	public String getOrganization() {
+		return organization;
+	}
+
+	public void setOrganization(String organization) {
+		this.organization = organization;
+	}
+
+	public String getSpace() {
+		return space;
+	}
+
+	public void setSpace(String space) {
+		this.space = space;
 	}
 
 	@SafeVarargs

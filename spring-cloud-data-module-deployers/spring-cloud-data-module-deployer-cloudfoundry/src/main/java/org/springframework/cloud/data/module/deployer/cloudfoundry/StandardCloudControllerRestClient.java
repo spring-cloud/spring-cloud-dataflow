@@ -41,12 +41,32 @@ class StandardCloudControllerRestClient implements CloudControllerRestClient {
 	}
 
 	@Override
+	public ListRoutesResponse listRoutes(ListRoutesRequest request) {
+		URI uri = UriComponentsBuilder.fromUri(this.endpoint)
+				.pathSegment("v2", "routes")
+				.queryParam("q", "host:" + request.getHost())
+				.queryParam("q", "domain_guid:" + request.getDomainId())
+				.build().toUri();
+
+		return this.restOperations.getForObject(uri, ListRoutesResponse.class);
+	}
+
+	@Override
 	public CreateApplicationResponse createApplication(CreateApplicationRequest request) {
 		URI uri = UriComponentsBuilder.fromUri(this.endpoint)
 				.pathSegment("v2", "apps")
 				.build().toUri();
 
 		return this.restOperations.postForObject(uri, request, CreateApplicationResponse.class);
+	}
+
+	@Override
+	public CreateRouteResponse createRoute(CreateRouteRequest request) {
+		URI uri = UriComponentsBuilder.fromUri(this.endpoint)
+				.pathSegment("v2", "routes")
+				.build().toUri();
+
+		return this.restOperations.postForObject(uri, request, CreateRouteResponse.class);
 	}
 
 	@Override
@@ -67,6 +87,16 @@ class StandardCloudControllerRestClient implements CloudControllerRestClient {
 		this.restOperations.delete(uri);
 
 		return new DeleteApplicationResponse().withDeleted(true);
+	}
+
+	@Override
+	public void deleteRoute(DeleteRouteRequest request) {
+		URI uri = UriComponentsBuilder.fromUri(this.endpoint)
+				.pathSegment("v2", "routes", request.getId())
+				.build().toUri();
+
+		this.restOperations.delete(uri);
+
 	}
 
 	@Override
@@ -124,6 +154,18 @@ class StandardCloudControllerRestClient implements CloudControllerRestClient {
 	}
 
 	@Override
+	public ListSharedDomainsResponse listSharedDomains(ListSharedDomainsRequest request) {
+		UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.fromUri(this.endpoint)
+				.pathSegment("v2", "shared_domains");
+		if (!StringUtils.isEmpty(request.getName())) {
+			uriComponentsBuilder.queryParam("q", "name:" + request.getName());
+		}
+		URI uri = uriComponentsBuilder.build().toUri();
+
+		return this.restOperations.getForObject(uri, ListSharedDomainsResponse.class);
+	}
+
+	@Override
 	public ListSpacesResponse listSpaces(ListSpacesRequest request) {
 		URI uri = UriComponentsBuilder.fromUri(this.endpoint)
 				.pathSegment("v2", "spaces")
@@ -132,6 +174,15 @@ class StandardCloudControllerRestClient implements CloudControllerRestClient {
 				.build().toUri();
 
 		return this.restOperations.getForObject(uri, ListSpacesResponse.class);
+	}
+
+	@Override
+	public RouteMappingResponse mapRoute(RouteMappingRequest request) {
+		URI uri = UriComponentsBuilder.fromUri(this.endpoint)
+				.pathSegment("v2", "routes", request.getRouteId(), "apps", request.getAppId())
+				.build().toUri();
+
+		return this.restOperations.putForObject(uri, null, RouteMappingResponse.class);
 	}
 
 	@Override
@@ -151,6 +202,15 @@ class StandardCloudControllerRestClient implements CloudControllerRestClient {
 				.build().toUri();
 
 		return this.restOperations.putForObject(uri, request, UpdateApplicationResponse.class);
+	}
+
+	@Override
+	public void unmapRoute(RouteMappingRequest request) {
+		URI uri = UriComponentsBuilder.fromUri(this.endpoint)
+				.pathSegment("v2", "routes", request.getRouteId(), "apps", request.getAppId())
+				.build().toUri();
+
+		this.restOperations.delete(uri);
 	}
 
 	@Override

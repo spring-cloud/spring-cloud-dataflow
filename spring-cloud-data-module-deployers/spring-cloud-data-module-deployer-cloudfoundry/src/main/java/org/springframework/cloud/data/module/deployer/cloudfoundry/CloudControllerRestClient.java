@@ -24,12 +24,28 @@ package org.springframework.cloud.data.module.deployer.cloudfoundry;
 interface CloudControllerRestClient {
 
 	/**
+	 * Check that a given route exists.
+	 * @param request the structure carrying all necessary parameters
+	 * @return a Response instance carrying all the response values expected
+	 * @throws org.springframework.web.client.RestClientException in the event of failure
+	 */
+	ListRoutesResponse listRoutes(ListRoutesRequest request);
+
+	/**
 	 * Creates an application definition and returns its id.
 	 * @param request the structure carrying all necessary parameters
 	 * @return a Response instance carrying all the response values expected
 	 * @throws org.springframework.web.client.RestClientException in the event of failure
 	 */
 	CreateApplicationResponse createApplication(CreateApplicationRequest request);
+
+	/**
+	 * Create a new route in the given space and domain.
+	 * @param request the structure carrying all necessary parameters
+	 * @return a Response instance carrying all the response values expected
+	 * @throws org.springframework.web.client.RestClientException in the event of failure
+	 */
+	CreateRouteResponse createRoute(CreateRouteRequest request);
 
 	/**
 	 * Creates a service binding to an application (given its id).
@@ -46,6 +62,14 @@ interface CloudControllerRestClient {
 	 * @throws org.springframework.web.client.RestClientException in the event of failure
 	 */
 	DeleteApplicationResponse deleteApplication(DeleteApplicationRequest request);
+
+	/**
+	 * Deletes a route given its id.
+	 * @param request the structure carrying all necessary parameters
+	 * @return a Response instance carrying all the response values expected
+	 * @throws org.springframework.web.client.RestClientException in the event of failure
+	 */
+	void deleteRoute(DeleteRouteRequest request);
 
 	/**
 	 * Obtains application statistics for every instance of an application given its id.
@@ -88,12 +112,28 @@ interface CloudControllerRestClient {
 	ListServiceInstancesResponse listServiceInstances(ListServiceInstancesRequest request);
 
 	/**
+	 * Lists all shared domains.
+	 * @param request the structure carrying all necessary parameters
+	 * @return a Response instance carrying all the response values expected
+	 * @throws org.springframework.web.client.RestClientException in the event of failure
+	 */
+	ListSharedDomainsResponse listSharedDomains(ListSharedDomainsRequest request);
+
+	/**
 	 * Lists all the known spaces (with their ids) in a given organization (given by id).
 	 * @param request the structure carrying all necessary parameters
 	 * @return a Response instance carrying all the response values expected
 	 * @throws org.springframework.web.client.RestClientException in the event of failure
 	 */
 	ListSpacesResponse listSpaces(ListSpacesRequest request);
+
+	/**
+	 * Map an existing route to an application.
+	 * @param request the structure carrying all necessary parameters
+	 * @return a Response instance carrying all the response values expected
+	 * @throws org.springframework.web.client.RestClientException in the event of failure
+	 */
+	RouteMappingResponse mapRoute(RouteMappingRequest request);
 
 	/**
 	 * Remove a service binding from a particular application.
@@ -118,5 +158,13 @@ interface CloudControllerRestClient {
 	 * @throws org.springframework.web.client.RestClientException in the event of failure
 	 */
 	UpdateApplicationResponse updateApplication(UpdateApplicationRequest request);
+
+	/**
+	 * Un-map an existing route from an application.
+	 * @param request the structure carrying all necessary parameters
+	 * @return a Response instance carrying all the response values expected
+	 * @throws org.springframework.web.client.RestClientException in the event of failure
+	 */
+	void unmapRoute(RouteMappingRequest request);
 
 }

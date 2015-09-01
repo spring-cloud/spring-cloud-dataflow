@@ -5,6 +5,7 @@ cloudfoundry:
   moduleLauncherLocation: classpath:spring-cloud-stream-module-launcher.jar
   organization: p-spring-xd
   space: p-spring-xd
+  domain:
 security:
   oauth2:
     client:

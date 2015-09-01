@@ -36,9 +36,12 @@ class StandardCloudFoundryApplicationOperations implements CloudFoundryApplicati
 
 	private final String spaceId;
 
-	StandardCloudFoundryApplicationOperations(CloudControllerRestClient client, String organizationName, String spaceName) {
+	private final String domainId;
+
+	StandardCloudFoundryApplicationOperations(CloudControllerRestClient client, String organizationName, String spaceName, String domain) {
 		this.client = client;
-		this.spaceId = getSpaceId(client, organizationName, spaceName);
+		this.spaceId = getSpaceId(organizationName, spaceName);
+		this.domainId = getDomainId(domain);
 	}
 
 	@Override
@@ -54,6 +57,21 @@ class StandardCloudFoundryApplicationOperations implements CloudFoundryApplicati
 			return new DeleteApplicationResults().withFound(false);
 		}
 		String appId = applications.get(0).getMetadata().getId();
+
+		// Delete the associated route
+		ListRoutesRequest listRoutesRequest = new ListRoutesRequest()
+				.withDomainId(this.domainId)
+				.withHost(parameters.getName().replaceAll("[^A-Za-z0-9]", "-"));
+		ListRoutesResponse listRoutesResponse = this.client.listRoutes(listRoutesRequest);
+		for (ResourceResponse<RouteEntity> resource : listRoutesResponse.getResources()) {
+			String routeId = resource.getMetadata().getId();
+			this.client.unmapRoute(new RouteMappingRequest()
+					.withAppId(appId)
+					.withRouteId(routeId)
+			);
+			this.client.deleteRoute(new DeleteRouteRequest().withId(routeId));
+		}
+
 
 		// Then, unbind any services
 		ListServiceBindingsRequest listServiceBindingsRequest = new ListServiceBindingsRequest()
@@ -118,6 +136,7 @@ class StandardCloudFoundryApplicationOperations implements CloudFoundryApplicati
 	public PushBindAndStartApplicationResults pushBindAndStartApplication(PushBindAndStartApplicationParameters parameters) {
 		PushBindAndStartApplicationResults pushResults = new PushBindAndStartApplicationResults();
 
+		// Create app
 		CreateApplicationRequest createRequest = new CreateApplicationRequest()
 				.withSpaceId(this.spaceId)
 				.withName(parameters.getName())
@@ -135,6 +154,8 @@ class StandardCloudFoundryApplicationOperations implements CloudFoundryApplicati
 			return pushResults.withCreateSucceeded(false);
 		}
 
+		// Bind service instances
+		String appId = createResponse.getMetadata().getId();
 		for (String serviceInstanceName : parameters.getServiceInstanceNames()) {
 			ListServiceInstancesRequest listServiceInstancesRequest = new ListServiceInstancesRequest()
 					.withName(serviceInstanceName)
@@ -142,36 +163,68 @@ class StandardCloudFoundryApplicationOperations implements CloudFoundryApplicati
 			List<ResourceResponse<NamedEntity>> listServiceInstances = this.client.listServiceInstances(listServiceInstancesRequest).getResources();
 			for (ResourceResponse<NamedEntity> serviceInstanceResource : listServiceInstances) {
 				CreateServiceBindingRequest createServiceBindingRequest = new CreateServiceBindingRequest()
-						.withAppId(createResponse.getMetadata().getId())
+						.withAppId(appId)
 						.withServiceInstanceId(serviceInstanceResource.getMetadata().getId());
 				this.client.createServiceBinding(createServiceBindingRequest);
 			}
 		}
 
+		// Create and map route
+		CreateRouteRequest createRouteRequest = new CreateRouteRequest()
+				.withDomainId(this.domainId)
+				.withSpaceId(this.spaceId)
+				.withHost(parameters.getName().replaceAll("[^A-Za-z0-9]", "-"))
+				;
+		CreateRouteResponse createRouteResponse = this.client.createRoute(createRouteRequest);
+
+		RouteMappingRequest mapRouteRequest = new RouteMappingRequest()
+				.withRouteId(createRouteResponse.getMetadata().getId())
+				.withAppId(appId)
+				;
+		this.client.mapRoute(mapRouteRequest);
+
+
+		// Upload the bits for the app
 		UploadBitsRequest uploadBitsRequest = new UploadBitsRequest()
-				.withId(createResponse.getMetadata().getId())
+				.withId(appId)
 				.withResource(parameters.getResource());
 
 		UploadBitsResponse uploadBitsResponse = this.client.uploadBits(uploadBitsRequest);
 
+		// Start the app
 		UpdateApplicationRequest updateRequest = new UpdateApplicationRequest()
-				.withId(createResponse.getMetadata().getId())
+				.withId(appId)
 				.withState("STARTED");
 		UpdateApplicationResponse updateResponse = this.client.updateApplication(updateRequest);
 
 		return pushResults.withCreateSucceeded(true);
 	}
 
-	private static String getSpaceId(CloudControllerRestClient client, String organizationName, String spaceName) {
+	private String getSpaceId(String organizationName, String spaceName) {
 		ListOrganizationsRequest organizationsRequest = new ListOrganizationsRequest()
 				.withName(organizationName);
 
-		String orgId = client.listOrganizations(organizationsRequest).getResources().get(0).getMetadata().getId();
+		String orgId = this.client.listOrganizations(organizationsRequest).getResources().get(0).getMetadata().getId();
 
 		ListSpacesRequest spacesRequest = new ListSpacesRequest()
 				.withOrgId(orgId)
 				.withName(spaceName);
 
-		return client.listSpaces(spacesRequest).getResources().get(0).getMetadata().getId();
+		return this.client.listSpaces(spacesRequest).getResources().get(0).getMetadata().getId();
 	}
+
+	private String getDomainId(String domain) {
+		ListSharedDomainsRequest sharedDomainsRequest = new ListSharedDomainsRequest()
+				.withName(domain);
+
+		ListSharedDomainsResponse listSharedDomainsResponse = this.client.listSharedDomains(sharedDomainsRequest);
+		for (ResourceResponse<NamedEntity> response : listSharedDomainsResponse.getResources()) {
+			if (response.getEntity().getName().equals(domain)) {
+				return response.getMetadata().getId();
+			}
+		}
+		return null;
+	}
+
+
 }

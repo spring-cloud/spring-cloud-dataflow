@@ -18,6 +18,7 @@ package org.springframework.cloud.data.module.deployer.cloudfoundry;
 
 import java.net.URI;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.security.oauth2.OAuth2AutoConfiguration;
@@ -51,6 +52,9 @@ import org.springframework.web.client.RestClientException;
 @EnableConfigurationProperties(CloudFoundryModuleDeployerProperties.class)
 public class CloudFoundryModuleDeployerConfiguration {
 
+	@Autowired
+	private CloudFoundryModuleDeployerProperties properties;
+
 	@Bean
 	CloudControllerRestClient cloudControllerRestClient(
 			@Value("${cloudfoundry.api.endpoint}") URI endpoint,
@@ -61,9 +65,11 @@ public class CloudFoundryModuleDeployerConfiguration {
 	@Bean
 	CloudFoundryApplicationOperations cloudFoundryApplicationOperations(
 			CloudControllerRestClient client,
-			@Value("${cloudfoundry.organization}") String organizationName,
 			@Value("${cloudfoundry.space}") String spaceName) {
-		return new StandardCloudFoundryApplicationOperations(client, organizationName, spaceName);
+		return new StandardCloudFoundryApplicationOperations(client,
+				properties.getOrganization(),
+				properties.getSpace(),
+				properties.getDomain());
 	}
 
 	@Bean

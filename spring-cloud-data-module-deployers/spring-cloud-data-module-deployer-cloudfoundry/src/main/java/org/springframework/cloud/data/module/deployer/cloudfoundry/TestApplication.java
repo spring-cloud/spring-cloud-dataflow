@@ -66,7 +66,6 @@ class TestApplication {
 
 			ModuleDefinition md2 = new ModuleDefinition.Builder().setName("log").setLabel("log")
 					.setGroup("ticktock")
-					.setParameter("fixedDelay", "1")
 					.build();
 			ModuleDeploymentRequest mdr2 = new ModuleDeploymentRequest(md2, ModuleCoordinates.parse("org.springframework.cloud.stream.module:log-sink:1.0.0.BUILD-SNAPSHOT"));
 
