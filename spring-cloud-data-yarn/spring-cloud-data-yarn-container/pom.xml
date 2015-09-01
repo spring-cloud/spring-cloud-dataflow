@@ -19,7 +19,7 @@
 		<dependency>
 			<groupId>org.springframework.data</groupId>
 			<artifactId>spring-yarn-boot</artifactId>
-			<version>2.3.0.M1</version>
+			<version>2.3.0.M2</version>
 			<exclusions>
 <!--
 				<exclusion>
