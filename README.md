@@ -105,42 +105,41 @@ $ mvn clean package
 $ hdfs dfs -rm -R /app/app
 ```
 
-4\. start cli app, push and submit app to yarn
+4\. start `spring-cloud-data-admin` with `yarn` profile
+
+```
+$ java -Dspring.profiles.active=yarn -jar spring-cloud-data-admin/target/spring-cloud-data-admin-1.0.0.BUILD-SNAPSHOT.jar
+```
+
+5\. start `spring-cloud-data-shell`
+
+```
+$ java -jar spring-cloud-data-shell/target/spring-cloud-data-shell-1.0.0.BUILD-SNAPSHOT.jar
+
+cloud-data:>stream create --name "ticktock" --definition "time --fixedDelay=5|log" --deploy
+
+cloud-data:>stream list
+  Stream Name  Stream Definition        Status
+  -----------  -----------------------  --------
+  ticktock     time --fixedDelay=5|log  deployed
+
+cloud-data:>stream destroy --name "ticktock"
+Destroyed stream 'ticktock'
+```
+
+YARN application is pushed and started automatically during a stream deployment process. This application instance is not automatically closed which can be done from CLI:
 
 ```
 $ java -jar spring-cloud-data-yarn/spring-cloud-data-yarn-client/target/spring-cloud-data-yarn-client-1.0.0.BUILD-SNAPSHOT.jar shell
-Spring YARN Cli (v2.3.0.M1)
+Spring YARN Cli (v2.3.0.M2)
 Hit TAB to complete. Type 'help' and hit RETURN for help, and 'exit' to quit.
-$ push
-New version installed
-$ submit
-New instance submitted with id application_1439285616431_0010
-$ submitted 
-  APPLICATION ID                  USER          NAME                        QUEUE    TYPE  STARTTIME       FINISHTIME  STATE    FINALSTATUS  ORIGINAL TRACKING URL
-  ------------------------------  ------------  --------------------------  -------  ----  --------------  ----------  -------  -----------  --------------------------
-  application_1439285616431_0010  jvalkealahti  spring-cloud-data-yarn-app  default  XD    12/08/15 08:32  N/A         RUNNING  UNDEFINED    http://192.168.122.1:51656
-```
 
-5\. start `spring-cloud-data-rest` with `yarn` profile
+$ submitted
+  APPLICATION ID                  USER          NAME                            QUEUE    TYPE       STARTTIME       FINISHTIME  STATE    FINALSTATUS  ORIGINAL TRACKING URL
+  ------------------------------  ------------  ------------------------------  -------  ---------  --------------  ----------  -------  -----------  --------------------------
+  application_1439803106751_0088  jvalkealahti  spring-cloud-data-yarn-app_app  default  CLOUDDATA  01/09/15 09:02  N/A         RUNNING  UNDEFINED    http://192.168.122.1:48913
 
-```
-$ java -Dspring.profiles.active=yarn -jar spring-cloud-data-rest/target/spring-cloud-data-rest-1.0.0.BUILD-SNAPSHOT.jar
-```
-
-6\. start `spring-cloud-data-shell`
-
-```
-java -jar spring-cloud-data-shell/target/spring-cloud-data-shell-1.0.0.BUILD-SNAPSHOT.jar
-
-cloud-data:>stream create --name ticktock --definition "time|log" --deploy
-Created and deployed new stream 'ticktock'
-
-cloud-data:>stream list
-  Stream Name  Stream Definition  Status
-  -----------  -----------------  --------
-  ticktock     time|log           deployed
-
-cloud-data:>stream destroy --name ticktock
-Destroyed stream 'ticktock'
+$ shutdown -a application_1439803106751_0088
+shutdown requested
 ```
 

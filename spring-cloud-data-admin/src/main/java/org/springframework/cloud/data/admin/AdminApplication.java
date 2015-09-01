@@ -17,12 +17,18 @@
 package org.springframework.cloud.data.admin;
 
 import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.yarn.boot.YarnAppmasterAutoConfiguration;
+import org.springframework.yarn.boot.YarnClientAutoConfiguration;
+import org.springframework.yarn.boot.YarnContainerAutoConfiguration;
 
 /**
  * @author Mark Fisher
  */
 @SpringBootApplication
+@EnableAutoConfiguration(exclude = { YarnClientAutoConfiguration.class, YarnAppmasterAutoConfiguration.class,
+		YarnContainerAutoConfiguration.class })
 public class AdminApplication {
 
 	public static void main(String[] args) throws InterruptedException {

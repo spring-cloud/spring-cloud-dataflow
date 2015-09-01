@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,6 +19,7 @@ package org.springframework.cloud.data.yarn.appmaster;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -43,11 +44,18 @@ public class CloudDataAppmaster extends ManagedContainerClusterAppmaster {
 		ArrayList<String> list = new ArrayList<String>(commands);
 		Map<String, Object> extraProperties = cluster.getExtraProperties();
 
-		log.debug("onContainerLaunchCommands extraProperties=" + extraProperties);
+		log.info("onContainerLaunchCommands extraProperties=" + extraProperties);
 
-		if (extraProperties != null && extraProperties.containsKey("containerModules")) {
-			String value = "containerModules=" + cluster.getExtraProperties().get("containerModules");
-			list.add(Math.max(list.size() - 2, 0), value);
+		if (extraProperties != null) {
+			if (extraProperties.containsKey("containerModules")) {
+				String value = "containerModules=" + cluster.getExtraProperties().get("containerModules");
+				list.add(Math.max(list.size() - 2, 0), value);
+			}
+			for (Entry<String, Object> entry : extraProperties.entrySet()) {
+				if (entry.getKey().startsWith("containerArg")) {
+					list.add(Math.max(list.size() - 2, 0), entry.getValue().toString());
+				}
+			}
 		}
 		list.add(1, "-Dserver.port=0");
 		return list;

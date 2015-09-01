@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,6 +19,7 @@ package org.springframework.cloud.data.yarn.container;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.concurrent.Future;
 
@@ -57,15 +58,26 @@ public class ContainerApplication extends YarnContainerSupport {
 	@OnContainerStart
 	public Future<Boolean> runModule(@YarnParameters Properties properties, @YarnParameter("containerModules") String module) {
 		log.info("runModule module=" + module);
-		log.info("runModule properies=" + properties);
+		log.info("runModule properties=" + properties);
 		log.info("moduleLauncher=" + moduleLauncher);
+
+		Map<String, String> args = new HashMap<String, String>();
+
+		for (Entry<Object, Object> entry : properties.entrySet()) {
+			String key = entry.getKey().toString();
+			String value = entry.getValue().toString();
+			if (!key.startsWith("containerModules")) {
+				args.put(key, value);
+			}
+		}
+
+		log.info("Passing args to moduleLauncher: " + args);
 
 		// we should somehow get status back from module
 		// launcher when it fails or finishes to set future
 		// indicating we're done. Naturally exception will
 		// terminate execution chain and container will exit.
 		SettableListenableFuture<Boolean> status = new SettableListenableFuture<Boolean>();
-		Map<String, String> args = new HashMap<>(); // TODO
 		moduleLauncher.launch(Arrays.asList(new ModuleLaunchRequest(module, args)));
 		return status;
 	}
