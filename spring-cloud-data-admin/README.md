@@ -85,12 +85,18 @@ spring:
               searchPaths: springDataAdmin
 ```
 
+##### Fail Fast
+In some cases, it may be desirable to fail startup of a service if it cannot connect to
+the Config Server. If this is the desired behavior, set the bootstrap configuration
+property `spring.cloud.config.failFast=true` and the client will halt with an Exception.
+
 ##### Note: 
 If the SCD-Admin can't connect to the cloud config server the
 following warning message will be logged: 
 `WARN 42924 --- [           main] c.c.c.ConfigServicePropertySourceLocator : Could not locate PropertySource: I/O error on GET request for "http://localhost:8888/spring-cloud-data-admin/default":Connection refused; nested exception is java.net.ConnectException: Connection refused`
 
 To disable the cloud config server set the `spring.cloud.config.enabled` property to false
+
 
 
 
