@@ -69,7 +69,14 @@ public class LocalModuleDeployer implements ModuleDeployer {
 		args.putAll(request.getDeploymentProperties());
 
 		logger.info("deploying module: {}", module);
-		int port = SocketUtils.findAvailableTcpPort(8080);
+		int port;
+		if (args.containsKey("server.port")) {
+			port = Integer.parseInt(args.get("server.port"));
+		}
+		else {
+			port = SocketUtils.findAvailableTcpPort(8080);
+			args.put("server.port", String.valueOf(port));
+		}
 		URL moduleUrl;
 		try {
 			moduleUrl = new URL("http", Inet4Address.getLocalHost().getHostAddress(), port, "");
@@ -77,7 +84,6 @@ public class LocalModuleDeployer implements ModuleDeployer {
 		catch (Exception e) {
 			throw new IllegalStateException("failed to determine URL for module: " + module, e);
 		}
-		args.put("server.port", String.valueOf(port));
 		args.put("endpoints.shutdown.enabled", "true");
 
 		ModuleLaunchRequest moduleLaunchRequest = new ModuleLaunchRequest(module, args);
