@@ -62,7 +62,7 @@ public class YarnCloudAppStateMachineTests {
 
 		StateMachineTestPlan<States, Events> plan =
 				StateMachineTestPlanBuilder.<States, Events>builder()
-					.defaultAwaitTime(2)
+					.defaultAwaitTime(10)
 					.stateMachine(stateMachine)
 					.step()
 						.expectStateMachineStarted(1)
@@ -83,7 +83,7 @@ public class YarnCloudAppStateMachineTests {
 
 		StateMachineTestPlan<States, Events> plan =
 				StateMachineTestPlanBuilder.<States, Events>builder()
-					.defaultAwaitTime(2)
+					.defaultAwaitTime(10)
 					.stateMachine(stateMachine)
 					.step()
 						.expectStateMachineStarted(1)
@@ -117,7 +117,7 @@ public class YarnCloudAppStateMachineTests {
 
 		StateMachineTestPlan<States, Events> plan =
 				StateMachineTestPlanBuilder.<States, Events>builder()
-					.defaultAwaitTime(100)
+					.defaultAwaitTime(10)
 					.stateMachine(stateMachine)
 					.step()
 						.expectStateMachineStarted(1)
@@ -180,7 +180,7 @@ public class YarnCloudAppStateMachineTests {
 
 		StateMachineTestPlan<States, Events> plan =
 				StateMachineTestPlanBuilder.<States, Events>builder()
-					.defaultAwaitTime(2)
+					.defaultAwaitTime(10)
 					.stateMachine(stateMachine)
 					.step()
 						.expectStateMachineStarted(1)
