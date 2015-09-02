@@ -30,6 +30,7 @@ import org.springframework.yarn.boot.cli.YarnClustersInfoCommand;
 import org.springframework.yarn.boot.cli.YarnKillCommand;
 import org.springframework.yarn.boot.cli.YarnPushCommand;
 import org.springframework.yarn.boot.cli.YarnPushedCommand;
+import org.springframework.yarn.boot.cli.YarnShutdownCommand;
 import org.springframework.yarn.boot.cli.YarnSubmitCommand;
 import org.springframework.yarn.boot.cli.YarnSubmittedCommand;
 import org.springframework.yarn.boot.cli.YarnSubmittedCommand.SubmittedOptionHandler;
@@ -44,9 +45,7 @@ public class ClientApplication extends AbstractCli {
 		commands.add(new YarnSubmitCommand());
 		commands.add(new YarnSubmittedCommand(new SubmittedOptionHandler("CLOUDDATA")));
 		commands.add(new YarnKillCommand());
-		// disable due to boot #3724 which broke
-		// container registrar
-		//commands.add(new YarnShutdownCommand());
+		commands.add(new YarnShutdownCommand());
 		commands.add(new YarnClustersInfoCommand());
 		commands.add(new YarnClusterInfoCommand());
 		commands.add(new YarnClusterCreateCommand());
