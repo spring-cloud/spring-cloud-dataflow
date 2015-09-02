@@ -29,7 +29,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.Test;
-
 import org.springframework.cloud.data.module.deployer.yarn.YarnCloudAppStateMachine.Events;
 import org.springframework.cloud.data.module.deployer.yarn.YarnCloudAppStateMachine.States;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -40,6 +39,7 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.statemachine.StateMachine;
+import org.springframework.statemachine.listener.StateMachineListenerAdapter;
 import org.springframework.statemachine.test.StateMachineTestPlan;
 import org.springframework.statemachine.test.StateMachineTestPlanBuilder;
 
@@ -59,13 +59,16 @@ public class YarnCloudAppStateMachineTests {
 		TaskExecutor taskExecutor = context.getBean(TaskExecutor.class);
 		YarnCloudAppStateMachine ycasm = new YarnCloudAppStateMachine(yarnCloudAppService, taskExecutor);
 		StateMachine<States, Events> stateMachine = ycasm.buildStateMachine(false);
+		TestStateMachineListener listener = new TestStateMachineListener();
+		stateMachine.addStateListener(listener);
+		stateMachine.start();
+		assertThat(listener.latch.await(10, TimeUnit.SECONDS), is(true));
 
 		StateMachineTestPlan<States, Events> plan =
 				StateMachineTestPlanBuilder.<States, Events>builder()
 					.defaultAwaitTime(10)
 					.stateMachine(stateMachine)
 					.step()
-						.expectStateMachineStarted(1)
 						.expectStates(States.READY)
 						.and()
 					.build();
@@ -80,13 +83,16 @@ public class YarnCloudAppStateMachineTests {
 		TaskExecutor taskExecutor = context.getBean(TaskExecutor.class);
 		YarnCloudAppStateMachine ycasm = new YarnCloudAppStateMachine(yarnCloudAppService, taskExecutor);
 		StateMachine<States, Events> stateMachine = ycasm.buildStateMachine(false);
+		TestStateMachineListener listener = new TestStateMachineListener();
+		stateMachine.addStateListener(listener);
+		stateMachine.start();
+		assertThat(listener.latch.await(10, TimeUnit.SECONDS), is(true));
 
 		StateMachineTestPlan<States, Events> plan =
 				StateMachineTestPlanBuilder.<States, Events>builder()
 					.defaultAwaitTime(10)
 					.stateMachine(stateMachine)
 					.step()
-						.expectStateMachineStarted(1)
 						.expectStates(States.READY)
 						.and()
 					.step()
@@ -106,6 +112,10 @@ public class YarnCloudAppStateMachineTests {
 		TaskExecutor taskExecutor = context.getBean(TaskExecutor.class);
 		YarnCloudAppStateMachine ycasm = new YarnCloudAppStateMachine(yarnCloudAppService, taskExecutor);
 		StateMachine<States, Events> stateMachine = ycasm.buildStateMachine(false);
+		TestStateMachineListener listener = new TestStateMachineListener();
+		stateMachine.addStateListener(listener);
+		stateMachine.start();
+		assertThat(listener.latch.await(10, TimeUnit.SECONDS), is(true));
 
 		Message<Events> message = MessageBuilder.withPayload(Events.DEPLOY)
 				.setHeader(YarnCloudAppStateMachine.HEADER_APP_VERSION, "fakeApp")
@@ -120,7 +130,6 @@ public class YarnCloudAppStateMachineTests {
 					.defaultAwaitTime(10)
 					.stateMachine(stateMachine)
 					.step()
-						.expectStateMachineStarted(1)
 						.expectStates(States.READY)
 						.and()
 					.step()
@@ -169,6 +178,10 @@ public class YarnCloudAppStateMachineTests {
 		TaskExecutor taskExecutor = context.getBean(TaskExecutor.class);
 		YarnCloudAppStateMachine ycasm = new YarnCloudAppStateMachine(yarnCloudAppService, taskExecutor);
 		StateMachine<States, Events> stateMachine = ycasm.buildStateMachine(false);
+		TestStateMachineListener listener = new TestStateMachineListener();
+		stateMachine.addStateListener(listener);
+		stateMachine.start();
+		assertThat(listener.latch.await(10, TimeUnit.SECONDS), is(true));
 
 		Message<Events> message = MessageBuilder.withPayload(Events.DEPLOY)
 				.setHeader(YarnCloudAppStateMachine.HEADER_APP_VERSION, "fakeApp")
@@ -183,7 +196,6 @@ public class YarnCloudAppStateMachineTests {
 					.defaultAwaitTime(10)
 					.stateMachine(stateMachine)
 					.step()
-						.expectStateMachineStarted(1)
 						.expectStates(States.READY)
 						.and()
 					.step()
@@ -353,6 +365,16 @@ public class YarnCloudAppStateMachineTests {
 				this.definitionParameters = definitionParameters;
 			}
 
+		}
+	}
+
+	private static class TestStateMachineListener extends StateMachineListenerAdapter<States, Events> {
+
+		final CountDownLatch latch = new CountDownLatch(1);
+
+		@Override
+		public void stateMachineStarted(StateMachine<States, Events> stateMachine) {
+			latch.countDown();
 		}
 	}
 
