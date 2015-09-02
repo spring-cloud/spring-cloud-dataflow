@@ -51,9 +51,7 @@ public class DefaultYarnCloudAppService implements YarnCloudAppService {
 		appProperties.setProperty(PREFIX_YIA + "operation", "PUSHED");
 		app.appProperties(appProperties);
 		String info = app.run();
-		if (logger.isDebugEnabled()) {
-			logger.debug("Full response for PUSHED: " + info);
-		}
+		logger.debug("Full response for PUSHED: {}", info);
 
 		String[] lines = info.split("\\r?\\n");
 		if (lines.length > 2) {
@@ -78,9 +76,7 @@ public class DefaultYarnCloudAppService implements YarnCloudAppService {
 		appProperties.setProperty(PREFIX_YIA + "type", "CLOUDDATA");
 		app.appProperties(appProperties);
 		String info = app.run();
-		if (logger.isDebugEnabled()) {
-			logger.debug("Full response for SUBMITTED: " + info);
-		}
+		logger.debug("Full response for SUBMITTED: {}", info);
 
 		String[] lines = info.split("\\r?\\n");
 		if (lines.length > 2) {
@@ -137,9 +133,7 @@ public class DefaultYarnCloudAppService implements YarnCloudAppService {
 
 		app.appProperties(appProperties);
 		String output = app.run();
-		if (logger.isDebugEnabled()) {
-			logger.debug("Output from YarnContainerClusterApplication run for CLUSTERCREATE: " + output);
-		}
+		logger.debug("Output from YarnContainerClusterApplication run for CLUSTERCREATE: {}", output);
 	}
 
 	@Override
@@ -151,9 +145,7 @@ public class DefaultYarnCloudAppService implements YarnCloudAppService {
 		appProperties.setProperty(PREFIX_CCA + "clusterId", clusterId);
 		app.appProperties(appProperties);
 		String output = app.run();
-		if (logger.isDebugEnabled()) {
-			logger.debug("Output from YarnContainerClusterApplication run for CLUSTERSTART: " + output);
-		}
+		logger.debug("Output from YarnContainerClusterApplication run for CLUSTERSTART: {}", output);
 	}
 
 	@Override
@@ -165,9 +157,7 @@ public class DefaultYarnCloudAppService implements YarnCloudAppService {
 		appProperties.setProperty(PREFIX_CCA + "clusterId", clusterId);
 		app.appProperties(appProperties);
 		String output = app.run();
-		if (logger.isDebugEnabled()) {
-			logger.debug("Output from YarnContainerClusterApplication run for CLUSTERSTOP: " + output);
-		}
+		logger.debug("Output from YarnContainerClusterApplication run for CLUSTERSTOP: {}", output);
 	}
 
 	@Override
@@ -179,9 +169,7 @@ public class DefaultYarnCloudAppService implements YarnCloudAppService {
 		appProperties.setProperty(PREFIX_CCA + "clusterId", clusterId);
 		app.appProperties(appProperties);
 		String output = app.run();
-		if (logger.isDebugEnabled()) {
-			logger.debug("Output from YarnContainerClusterApplication run for CLUSTERDESTROY: " + output);
-		}
+		logger.debug("Output from YarnContainerClusterApplication run for CLUSTERDESTROY: {}", output);
 	}
 
 	@Override
@@ -205,9 +193,7 @@ public class DefaultYarnCloudAppService implements YarnCloudAppService {
 		app.appProperties(appProperties);
 		try {
 			String output = app.run();
-			if (logger.isDebugEnabled()) {
-				logger.debug("Output from YarnContainerClusterApplication run for CLUSTERSINFO: " + output);
-			}
+			logger.debug("Output from YarnContainerClusterApplication run for CLUSTERSINFO: {}", output);
 			String[] lines = output.split("\\r?\\n");
 			for (int i = 2; i < lines.length; i++) {
 				String[] fields = lines[i].trim().split("\\s+");
@@ -230,9 +216,7 @@ public class DefaultYarnCloudAppService implements YarnCloudAppService {
 		app.appProperties(appProperties);
 		try {
 			String output = app.run();
-			if (logger.isDebugEnabled()) {
-				logger.debug("Output from YarnContainerClusterApplication run for CLUSTERINFO: " + output);
-			}
+			logger.debug("Output from YarnContainerClusterApplication run for CLUSTERINFO: {}", output);
 
 			String[] lines = output.trim().split("\\r?\\n");
 			if (lines.length == 3) {

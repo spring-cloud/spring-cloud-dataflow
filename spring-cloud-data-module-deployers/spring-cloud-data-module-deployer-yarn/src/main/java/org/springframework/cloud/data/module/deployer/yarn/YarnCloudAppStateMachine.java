@@ -275,18 +275,29 @@ public class YarnCloudAppStateMachine {
 			String applicationId = yarnCloudAppService.submitApplication(appVersion);
 			context.getExtendedState().getVariables().put(VAR_APPLICATION_ID, applicationId);
 
+			// TODO: for now just loop until we get proper handling
+			//       via looping in a state machine itself.
+			boolean running = false;
+			Exception error = null;
 			for (int i = 0; i < 60; i++) {
-				if (isRunning()) {
-					return;
-				}
 				try {
-					Thread.sleep(1000);
-				} catch (InterruptedException e) {
+					running = isRunning();
+					if (running) {
+						return;
+					} else {
+						Thread.sleep(1000);
+					}
+				} catch (Exception e) {
+					error = e;
+					break;
 				}
 			}
 			// TODO: we don't yet handle errors
-			context.getStateMachine().sendEvent(
-					MessageBuilder.withPayload(Events.ERROR).setHeader(HEADER_ERROR, "failed starting app").build());
+			if (error != null) {
+				context.getStateMachine().sendEvent(
+						MessageBuilder.withPayload(Events.ERROR)
+								.setHeader(HEADER_ERROR, "failed starting app " + error).build());
+			}
 		}
 
 		private boolean isRunning() {

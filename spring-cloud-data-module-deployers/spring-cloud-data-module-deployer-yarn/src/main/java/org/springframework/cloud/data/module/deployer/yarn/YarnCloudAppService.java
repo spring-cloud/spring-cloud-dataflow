@@ -41,14 +41,17 @@ public interface YarnCloudAppService {
 	Collection<CloudAppInstanceInfo> getInstances();
 
 	/**
-	 * Push new application into hdfs.
+	 * Push new application into hdfs. Push operation is copying needed
+	 * files into hdfs without trying to start a new application instance.
 	 *
 	 * @param appVersion the app version
 	 */
 	void pushApplication(String appVersion);
 
 	/**
-	 * Submit new application instance into yarn.
+	 * Submit new application instance into yarn. Prior to calling a new
+	 * submit operation, application has to exist in hdfs which can be done
+	 * i.e. using {@link #pushApplication(String)} method.
 	 *
 	 * @param appVersion the app version
 	 * @return the application id
@@ -84,7 +87,9 @@ public interface YarnCloudAppService {
 	void stopCluster(String yarnApplicationId, String clusterId);
 
 	/**
-	 * Gets the clusters states.
+	 * Gets the clusters states. Returned map has a mapping between
+	 * yarn container cluster id and its state known by application master
+	 * using container clusters.
 	 *
 	 * @return the clusters states
 	 */
