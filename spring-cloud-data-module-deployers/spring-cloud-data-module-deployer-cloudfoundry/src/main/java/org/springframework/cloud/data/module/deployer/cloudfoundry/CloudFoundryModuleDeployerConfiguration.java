@@ -54,6 +54,23 @@ public class CloudFoundryModuleDeployerConfiguration {
 	private CloudFoundryModuleDeployerProperties properties;
 
 	@Bean
+	public ModuleDeployer processModuleDeployer(
+			CloudFoundryModuleDeploymentConverter converter,
+			CloudFoundryApplicationOperations applicationOperations) {
+		return new CloudFoundryModuleDeployer(properties, converter, applicationOperations);
+	}
+
+	@Bean
+	public ModuleDeployer taskModuleDeployer(
+			CloudFoundryModuleDeploymentConverter converter,
+			CloudFoundryApplicationOperations applicationOperations) {
+		// TODO: return appropriate task deployer
+		return new CloudFoundryModuleDeployer(properties, converter, applicationOperations);
+	}
+
+
+
+	@Bean
 	CloudControllerRestClient cloudControllerRestClient(
 			ExtendedOAuth2RestOperations restOperations) {
 		return new StandardCloudControllerRestClient(properties.getApiEndpoint(), restOperations);
@@ -74,14 +91,7 @@ public class CloudFoundryModuleDeployerConfiguration {
 	}
 
 	@Bean
-	ModuleDeployer moduleDeployer(
-			CloudFoundryModuleDeploymentConverter converter,
-			CloudFoundryApplicationOperations applicationOperations) {
-		return new CloudFoundryModuleDeployer(properties, converter, applicationOperations);
-	}
-
-	@Bean
-	public ExtendedOAuth2RestOperations oauth2RestTemplate(
+	ExtendedOAuth2RestOperations oauth2RestTemplate(
 			OAuth2ClientContext clientContext,
 			OAuth2ProtectedResourceDetails details) {
 		return new ExtendedOAuth2RestTemplate(details, clientContext);
@@ -89,12 +99,12 @@ public class CloudFoundryModuleDeployerConfiguration {
 
 	@Bean
 	@ConfigurationProperties("security.oauth2.client")
-	public OAuth2ProtectedResourceDetails oAuth2ProtectedResourceDetails() {
+	OAuth2ProtectedResourceDetails oAuth2ProtectedResourceDetails() {
 		return new ResourceOwnerPasswordResourceDetails();
 	}
 
 	@Bean
-	public OAuth2ClientContext oauth2ClientContext() {
+	OAuth2ClientContext oauth2ClientContext() {
 		return new DefaultOAuth2ClientContext(new DefaultAccessTokenRequest());
 	}
 

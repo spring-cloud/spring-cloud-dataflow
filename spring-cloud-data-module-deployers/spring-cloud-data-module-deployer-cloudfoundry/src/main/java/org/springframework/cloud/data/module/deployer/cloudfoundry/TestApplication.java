@@ -42,7 +42,7 @@ class TestApplication {
 
 			ApplicationContext applicationContext = SpringApplication.run(CloudFoundryModuleDeployerConfiguration.class, args);
 
-			ModuleDeployer moduleDeployer = applicationContext.getBean(ModuleDeployer.class);
+			ModuleDeployer moduleDeployer = (ModuleDeployer) applicationContext.getBean("processModuleDeployer");
 
 			// Get current state
 			Map<ModuleDeploymentId, ModuleStatus> mds = moduleDeployer.status();

@@ -1,13 +1,14 @@
-SPI implementation for deploying [Spring Cloud Stream](https://github.com/spring-cloud/spring-cloud-stream) modules to [Cloud Foundry](http://cloudfoundry.org)
+SPI implementation for deploying Spring Cloud Stream modules to http://cloudfoundry.org[Cloud Foundry]
 
 The external dependencies are environment variables declared (but not all
 defined) in `resources/application.yml`:
 
 ```
-  cloudfoundry.api.endpoint
-  cloudfoundry.moduleApplication = path/to/moduleLauncher.jar  // on classpath
+  cloudfoundry.apiEndpoint
+  cloudfoundry.moduleLauncherLocation = path/to/moduleLauncher.jar  // on classpath
   cloudfoundry.organization
   cloudfoundry.space
+  cloudfoundry.domain
   security.oauth2.client.access-token-uri
   security.oauth2.client.client-id
   security.oauth2.client.client-secret
