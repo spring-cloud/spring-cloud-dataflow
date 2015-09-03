@@ -21,5 +21,5 @@ package org.springframework.cloud.data.module.deployer.cloudfoundry;
  *
  * @author Eric Bottard
  */
-public class ListSharedDomainsResponse extends AbstractPaginatedResponse<ResourceResponse<NamedEntity>> {
+class ListSharedDomainsResponse extends AbstractPaginatedResponse<ResourceResponse<NamedEntity>> {
 }

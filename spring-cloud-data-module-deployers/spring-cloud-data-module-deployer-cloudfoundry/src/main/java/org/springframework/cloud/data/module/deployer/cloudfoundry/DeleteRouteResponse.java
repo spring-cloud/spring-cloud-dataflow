@@ -17,9 +17,9 @@
 package org.springframework.cloud.data.module.deployer.cloudfoundry;
 
 /**
- * Response from REST operation {@link CloudControllerRestClient#listRoutes(ListRoutesRequest)}.
+ * Response from REST operation {@link CloudControllerRestClient#deleteRoute(DeleteRouteRequest)}.
  *
  * @author Eric Bottard
  */
-class ListRoutesResponse extends AbstractPaginatedResponse<ResourceResponse<RouteEntity>> {
+class DeleteRouteResponse {
 }

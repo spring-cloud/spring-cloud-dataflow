@@ -21,7 +21,7 @@ package org.springframework.cloud.data.module.deployer.cloudfoundry;
  *
  * @author Eric Bottard
  */
-public class RouteEntity {
+class RouteEntity {
 
 	private String host;
 

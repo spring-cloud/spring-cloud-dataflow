@@ -23,7 +23,7 @@ package org.springframework.cloud.data.module.deployer.cloudfoundry;
  *
  * @author Eric Bottard
  */
-public class RouteMappingRequest {
+class RouteMappingRequest {
 
 	private String appId;
 

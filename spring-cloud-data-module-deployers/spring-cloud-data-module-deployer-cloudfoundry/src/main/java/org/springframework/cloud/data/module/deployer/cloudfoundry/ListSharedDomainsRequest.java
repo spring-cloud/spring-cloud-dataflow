@@ -17,11 +17,11 @@
 package org.springframework.cloud.data.module.deployer.cloudfoundry;
 
 /**
- * Holds request parameters for listing shared domains.
+ * Request for REST operation {@link CloudControllerRestClient#listSharedDomains(ListSharedDomainsRequest)}.
  *
  * @author Eric Bottard
  */
-public class ListSharedDomainsRequest {
+class ListSharedDomainsRequest {
 
 	private String name;
 

@@ -21,7 +21,7 @@ package org.springframework.cloud.data.module.deployer.cloudfoundry;
  *
  * @author Eric Bottard
  */
-public class DeleteRouteRequest {
+class DeleteRouteRequest {
 	private String id;
 
 	public String getId() {

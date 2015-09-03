@@ -69,7 +69,7 @@ interface CloudControllerRestClient {
 	 * @return a Response instance carrying all the response values expected
 	 * @throws org.springframework.web.client.RestClientException in the event of failure
 	 */
-	void deleteRoute(DeleteRouteRequest request);
+	DeleteRouteResponse deleteRoute(DeleteRouteRequest request);
 
 	/**
 	 * Obtains application statistics for every instance of an application given its id.
@@ -165,6 +165,6 @@ interface CloudControllerRestClient {
 	 * @return a Response instance carrying all the response values expected
 	 * @throws org.springframework.web.client.RestClientException in the event of failure
 	 */
-	void unmapRoute(RouteMappingRequest request);
+	RouteMappingResponse unmapRoute(RouteMappingRequest request);
 
 }

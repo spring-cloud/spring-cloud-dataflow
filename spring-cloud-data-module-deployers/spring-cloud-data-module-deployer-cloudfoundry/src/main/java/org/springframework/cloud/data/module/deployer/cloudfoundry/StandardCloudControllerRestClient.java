@@ -90,13 +90,13 @@ class StandardCloudControllerRestClient implements CloudControllerRestClient {
 	}
 
 	@Override
-	public void deleteRoute(DeleteRouteRequest request) {
+	public DeleteRouteResponse deleteRoute(DeleteRouteRequest request) {
 		URI uri = UriComponentsBuilder.fromUri(this.endpoint)
 				.pathSegment("v2", "routes", request.getId())
 				.build().toUri();
 
 		this.restOperations.delete(uri);
-
+		return new DeleteRouteResponse();
 	}
 
 	@Override
@@ -205,12 +205,13 @@ class StandardCloudControllerRestClient implements CloudControllerRestClient {
 	}
 
 	@Override
-	public void unmapRoute(RouteMappingRequest request) {
+	public RouteMappingResponse unmapRoute(RouteMappingRequest request) {
 		URI uri = UriComponentsBuilder.fromUri(this.endpoint)
 				.pathSegment("v2", "routes", request.getRouteId(), "apps", request.getAppId())
 				.build().toUri();
 
 		this.restOperations.delete(uri);
+		return new RouteMappingResponse();
 	}
 
 	@Override

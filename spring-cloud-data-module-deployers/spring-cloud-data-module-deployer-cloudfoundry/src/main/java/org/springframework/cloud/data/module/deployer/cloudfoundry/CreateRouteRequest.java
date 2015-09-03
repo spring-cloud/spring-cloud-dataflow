@@ -23,7 +23,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  *
  * @author Eric Bottard
  */
-public class CreateRouteRequest {
+class CreateRouteRequest {
 
 	private String domainId;
 

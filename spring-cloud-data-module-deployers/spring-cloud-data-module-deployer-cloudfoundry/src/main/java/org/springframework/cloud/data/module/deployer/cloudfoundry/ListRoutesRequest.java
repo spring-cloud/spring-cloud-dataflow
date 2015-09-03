@@ -17,9 +17,11 @@
 package org.springframework.cloud.data.module.deployer.cloudfoundry;
 
 /**
- * Created by ericbottard on 01/09/15.
+ * Request for REST operation {@link CloudControllerRestClient#listRoutes(ListRoutesRequest)}.
+ *
+ * @author Eric Bottard
  */
-public class ListRoutesRequest {
+class ListRoutesRequest {
 
 	private String domainId;
 

@@ -66,8 +66,8 @@ class StandardCloudFoundryApplicationOperations implements CloudFoundryApplicati
 		for (ResourceResponse<RouteEntity> resource : listRoutesResponse.getResources()) {
 			String routeId = resource.getMetadata().getId();
 			this.client.unmapRoute(new RouteMappingRequest()
-					.withAppId(appId)
-					.withRouteId(routeId)
+							.withAppId(appId)
+							.withRouteId(routeId)
 			);
 			this.client.deleteRoute(new DeleteRouteRequest().withId(routeId));
 		}
@@ -122,10 +122,9 @@ class StandardCloudFoundryApplicationOperations implements CloudFoundryApplicati
 						.withId(applicationId);
 
 				GetApplicationStatisticsResponse statsResponse = this.client.getApplicationStatistics(statsRequest);
-				response.withApplication(applicationName,
-						new ApplicationStatus()
-								.withId(applicationId)
-								.withInstances(statsResponse));
+				response.withApplication(applicationName, new ApplicationStatus()
+						.withId(applicationId)
+						.withInstances(statsResponse));
 			}
 		}
 
@@ -173,14 +172,12 @@ class StandardCloudFoundryApplicationOperations implements CloudFoundryApplicati
 		CreateRouteRequest createRouteRequest = new CreateRouteRequest()
 				.withDomainId(this.domainId)
 				.withSpaceId(this.spaceId)
-				.withHost(parameters.getName().replaceAll("[^A-Za-z0-9]", "-"))
-				;
+				.withHost(parameters.getName().replaceAll("[^A-Za-z0-9]", "-"));
 		CreateRouteResponse createRouteResponse = this.client.createRoute(createRouteRequest);
 
 		RouteMappingRequest mapRouteRequest = new RouteMappingRequest()
 				.withRouteId(createRouteResponse.getMetadata().getId())
-				.withAppId(appId)
-				;
+				.withAppId(appId);
 		this.client.mapRoute(mapRouteRequest);
 
 
@@ -204,13 +201,21 @@ class StandardCloudFoundryApplicationOperations implements CloudFoundryApplicati
 		ListOrganizationsRequest organizationsRequest = new ListOrganizationsRequest()
 				.withName(organizationName);
 
-		String orgId = this.client.listOrganizations(organizationsRequest).getResources().get(0).getMetadata().getId();
+		List<ResourceResponse<NamedEntity>> orgs = this.client.listOrganizations(organizationsRequest).getResources();
+		if (orgs.size() != 1) {
+			return null;
+		}
+		String orgId = orgs.get(0).getMetadata().getId();
 
 		ListSpacesRequest spacesRequest = new ListSpacesRequest()
 				.withOrgId(orgId)
 				.withName(spaceName);
 
-		return this.client.listSpaces(spacesRequest).getResources().get(0).getMetadata().getId();
+		List<ResourceResponse<NamedEntity>> spaces = this.client.listSpaces(spacesRequest).getResources();
+		if (spaces.size() != 1) {
+			return null;
+		}
+		return spaces.get(0).getMetadata().getId();
 	}
 
 	private String getDomainId(String domain) {
@@ -218,13 +223,11 @@ class StandardCloudFoundryApplicationOperations implements CloudFoundryApplicati
 				.withName(domain);
 
 		ListSharedDomainsResponse listSharedDomainsResponse = this.client.listSharedDomains(sharedDomainsRequest);
-		for (ResourceResponse<NamedEntity> response : listSharedDomainsResponse.getResources()) {
-			if (response.getEntity().getName().equals(domain)) {
-				return response.getMetadata().getId();
-			}
+		List<ResourceResponse<NamedEntity>> domains = listSharedDomainsResponse.getResources();
+		if (domains.size() != 1) {
+			return null;
 		}
-		return null;
+		return domains.get(0).getMetadata().getId();
 	}
-
 
 }

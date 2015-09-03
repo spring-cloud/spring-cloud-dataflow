@@ -21,5 +21,5 @@ package org.springframework.cloud.data.module.deployer.cloudfoundry;
  *
  * @author Eric Bottard
  */
-public class CreateRouteResponse extends ResourceResponse<RouteEntity> {
+class CreateRouteResponse extends ResourceResponse<RouteEntity> {
 }
