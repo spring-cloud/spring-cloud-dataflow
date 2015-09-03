@@ -17,7 +17,7 @@
 package org.springframework.cloud.data.module.deployer.cloudfoundry;
 
 /**
- * REST response for operation {@link CloudControllerRestClient#mapRoute(RouteMappingRequest)}.
+ * REST response for operation {@link CloudControllerOperations#mapRoute(RouteMappingRequest)}.
  *
  * @author Eric Bottard
  */

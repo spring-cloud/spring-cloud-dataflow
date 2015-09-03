@@ -19,8 +19,6 @@ package org.springframework.cloud.data.module.deployer.cloudfoundry;
 import java.net.URI;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.autoconfigure.security.oauth2.OAuth2AutoConfiguration;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.data.module.deployer.ModuleDeployer;
@@ -46,7 +44,6 @@ import org.springframework.web.client.RestClientException;
  * @author Eric Bottard
  */
 @Configuration
-@EnableAutoConfiguration(exclude = OAuth2AutoConfiguration.class)
 @EnableConfigurationProperties(CloudFoundryModuleDeployerProperties.class)
 public class CloudFoundryModuleDeployerConfiguration {
 
@@ -57,7 +54,7 @@ public class CloudFoundryModuleDeployerConfiguration {
 	public ModuleDeployer processModuleDeployer(
 			CloudFoundryModuleDeploymentConverter converter,
 			CloudFoundryApplicationOperations applicationOperations) {
-		return new CloudFoundryModuleDeployer(properties, converter, applicationOperations);
+		return new ApplicationModuleDeployer(properties, converter, applicationOperations);
 	}
 
 	@Bean
@@ -65,21 +62,18 @@ public class CloudFoundryModuleDeployerConfiguration {
 			CloudFoundryModuleDeploymentConverter converter,
 			CloudFoundryApplicationOperations applicationOperations) {
 		// TODO: return appropriate task deployer
-		return new CloudFoundryModuleDeployer(properties, converter, applicationOperations);
+		return new ApplicationModuleDeployer(properties, converter, applicationOperations);
 	}
 
-
-
 	@Bean
-	CloudControllerRestClient cloudControllerRestClient(
-			ExtendedOAuth2RestOperations restOperations) {
-		return new StandardCloudControllerRestClient(properties.getApiEndpoint(), restOperations);
+	CloudControllerOperations cloudControllerOperations(ExtendedOAuth2RestOperations restOperations) {
+		return new CloudControllerTemplate(properties.getApiEndpoint(), restOperations);
 	}
 
 	@Bean
 	CloudFoundryApplicationOperations cloudFoundryApplicationOperations(
-			CloudControllerRestClient client) {
-		return new StandardCloudFoundryApplicationOperations(client,
+			CloudControllerOperations client) {
+		return new CloudFoundryApplicationTemplate(client,
 				properties.getOrganization(),
 				properties.getSpace(),
 				properties.getDomain());
@@ -87,7 +81,7 @@ public class CloudFoundryModuleDeployerConfiguration {
 
 	@Bean
 	CloudFoundryModuleDeploymentConverter cloudFoundryModuleDeploymentConverter() {
-		return new CloudFoundryModuleDeploymentConverter(properties.getModuleLauncherLocation());
+		return new CloudFoundryModuleDeploymentConverter();
 	}
 
 	@Bean

@@ -30,8 +30,9 @@ import org.springframework.cloud.data.module.deployer.ModuleDeployer;
  *
  * @author Paul Harris
  * @author Steve Powell
+ * @author Eric Bottard
  */
-public class CloudFoundryModuleDeployer implements ModuleDeployer {
+public class ApplicationModuleDeployer implements ModuleDeployer {
 
 	private final CloudFoundryModuleDeploymentConverter cloudFoundryModuleDeploymentConverter;
 
@@ -39,7 +40,7 @@ public class CloudFoundryModuleDeployer implements ModuleDeployer {
 
 	private CloudFoundryModuleDeployerProperties properties;
 
-	public CloudFoundryModuleDeployer(
+	public ApplicationModuleDeployer(
 			CloudFoundryModuleDeployerProperties properties,
 			CloudFoundryModuleDeploymentConverter converter,
 			CloudFoundryApplicationOperations applicationOperations) {
@@ -56,12 +57,12 @@ public class CloudFoundryModuleDeployer implements ModuleDeployer {
 
 		PushBindAndStartApplicationResults response = this.resourceClient.pushBindAndStartApplication(new PushBindAndStartApplicationParameters()
 						.withName(applicationName)
-						.withResource(this.cloudFoundryModuleDeploymentConverter.toModuleLauncherResource(definition))
+						.withResource(properties.getModuleLauncherLocation())
 						.withEnvironment(this.cloudFoundryModuleDeploymentConverter.toModuleLauncherEnvironment(request))
 						.withServiceInstanceNames(this.properties.getServices())
 		);
 		if (!response.isCreateSucceeded()) {
-			throw new IllegalStateException("Module " + moduleDeploymentId + " is already deployed");
+			throw new IllegalStateException("Module " + moduleDeploymentId + " could not be deployed");
 		}
 		return moduleDeploymentId;
 	}

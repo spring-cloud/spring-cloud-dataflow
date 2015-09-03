@@ -17,7 +17,7 @@
 package org.springframework.cloud.data.module.deployer.cloudfoundry;
 
 /**
- * Request for REST operation {@link CloudControllerRestClient#deleteApplication(DeleteApplicationRequest) deleteApplication()}.
+ * Request for REST operation {@link CloudControllerOperations#deleteApplication(DeleteApplicationRequest) deleteApplication()}.
  *
  * @author Steve Powell
  */

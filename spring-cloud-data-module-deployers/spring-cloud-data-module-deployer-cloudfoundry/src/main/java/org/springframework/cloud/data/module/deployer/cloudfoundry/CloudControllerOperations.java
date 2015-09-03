@@ -17,11 +17,11 @@
 package org.springframework.cloud.data.module.deployer.cloudfoundry;
 
 /**
- * Interface to cloud controller functions which wrap the REST interface required by the {@link CloudFoundryModuleDeployer}.
+ * Interface to cloud controller functions which wrap the REST interface required by the {@link ApplicationModuleDeployer}.
  *
  * @author Steve Powell
  */
-interface CloudControllerRestClient {
+interface CloudControllerOperations {
 
 	/**
 	 * Check that a given route exists.

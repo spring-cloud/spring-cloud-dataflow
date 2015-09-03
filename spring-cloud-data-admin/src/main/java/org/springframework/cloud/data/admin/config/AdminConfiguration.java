@@ -16,7 +16,7 @@
 
 package org.springframework.cloud.data.admin.config;
 
-import static org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType.HAL;
+import static org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType.*;
 
 import java.util.List;
 
@@ -26,14 +26,10 @@ import org.springframework.cloud.data.admin.repository.InMemoryStreamDefinitionR
 import org.springframework.cloud.data.admin.repository.InMemoryTaskDefinitionRepository;
 import org.springframework.cloud.data.admin.repository.StreamDefinitionRepository;
 import org.springframework.cloud.data.admin.repository.TaskDefinitionRepository;
-import org.springframework.cloud.data.module.deployer.ModuleDeployer;
-import org.springframework.cloud.data.module.deployer.local.LocalModuleDeployer;
+import org.springframework.cloud.data.module.deployer.cloudfoundry.CloudFoundryModuleDeployerConfiguration;
 import org.springframework.cloud.data.module.registry.ModuleRegistry;
 import org.springframework.cloud.data.module.registry.RedisModuleRegistry;
-import org.springframework.cloud.stream.module.launcher.ModuleLauncher;
-import org.springframework.cloud.stream.module.launcher.ModuleLauncherConfiguration;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.PropertySource;
@@ -47,8 +43,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 
 /**
  * Configuration for admin application context. This includes support
- * for various runtime profiles (local, cloud, etc) and REST API framework
- * configuration.
+ * for the REST API framework configuration.
  *
  * @author Mark Fisher
  * @author Marius Bogoevici
@@ -86,22 +81,6 @@ public class AdminConfiguration {
 	@Bean
 	public ModuleRegistryPopulator moduleRegistryPopulator(ModuleRegistry moduleRegistry) {
 		return new ModuleRegistryPopulator(moduleRegistry);
-	}
-
-	@Configuration
-	@Conditional(LocalCondition.class)
-	@Import(ModuleLauncherConfiguration.class)
-	protected static class LocalConfig {
-
-		@Bean
-		public ModuleDeployer processModuleDeployer(ModuleLauncher moduleLauncher) {
-			return new LocalModuleDeployer(moduleLauncher);
-		}
-
-		@Bean
-		public ModuleDeployer taskModuleDeployer(ModuleLauncher moduleLauncher) {
-			return new LocalModuleDeployer(moduleLauncher);
-		}
 	}
 
 	@Bean

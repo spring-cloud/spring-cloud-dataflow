@@ -18,8 +18,8 @@ package org.springframework.cloud.data.module.deployer.cloudfoundry;
 
 /**
  * Request for REST operations
- * {@link CloudControllerRestClient#mapRoute(RouteMappingRequest)} and
- * {@link CloudControllerRestClient#unmapRoute(RouteMappingRequest)}.
+ * {@link CloudControllerOperations#mapRoute(RouteMappingRequest)} and
+ * {@link CloudControllerOperations#unmapRoute(RouteMappingRequest)}.
  *
  * @author Eric Bottard
  */

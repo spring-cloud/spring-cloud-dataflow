@@ -17,7 +17,7 @@
 package org.springframework.cloud.data.module.deployer.cloudfoundry;
 
 /**
- * Response from REST operation {@link CloudControllerRestClient#updateApplication(UpdateApplicationRequest) updateApplication()}.
+ * Response from REST operation {@link CloudControllerOperations#updateApplication(UpdateApplicationRequest) updateApplication()}.
  *
  * @author Steve Powell
  */

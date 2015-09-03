@@ -22,23 +22,24 @@ import org.springframework.web.client.RestClientException;
 
 /**
  * Implementation of high-level operations on applications, limited to those
- * operations required by the {@link CloudFoundryModuleDeployer}.
+ * operations required by the {@link ApplicationModuleDeployer}.
  *
  * @author Steve Powell
+ * @author Eric Bottard
  */
-class StandardCloudFoundryApplicationOperations implements CloudFoundryApplicationOperations {
+class CloudFoundryApplicationTemplate implements CloudFoundryApplicationOperations {
 
-	private static final String DEFAULT_BUILDPACK = "https://github.com/cloudfoundry/java-buildpack.git";
+	private static final String DEFAULT_BUILDPACK = "https://github.com/cloudfoundry/java-buildpack.git#69abec6d2726f73a22339caa6ae7739f060002e4";
 
 	private static final int DEFAULT_MEMORY = 1024; // megabytes
 
-	private final CloudControllerRestClient client;
+	private final CloudControllerOperations client;
 
 	private final String spaceId;
 
 	private final String domainId;
 
-	StandardCloudFoundryApplicationOperations(CloudControllerRestClient client, String organizationName, String spaceName, String domain) {
+	CloudFoundryApplicationTemplate(CloudControllerOperations client, String organizationName, String spaceName, String domain) {
 		this.client = client;
 		this.spaceId = getSpaceId(organizationName, spaceName);
 		this.domainId = getDomainId(domain);

@@ -17,7 +17,7 @@
 package org.springframework.cloud.data.module.deployer.cloudfoundry;
 
 /**
- * Response from REST operation {@link CloudControllerRestClient#listSpaces(ListSpacesRequest) listSpaces()}.
+ * Response from REST operation {@link CloudControllerOperations#listSpaces(ListSpacesRequest) listSpaces()}.
  *
  * @author Steve Powell
  */

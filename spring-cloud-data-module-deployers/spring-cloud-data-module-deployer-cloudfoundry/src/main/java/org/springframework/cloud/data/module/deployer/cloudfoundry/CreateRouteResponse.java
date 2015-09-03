@@ -17,7 +17,7 @@
 package org.springframework.cloud.data.module.deployer.cloudfoundry;
 
 /**
- * Response from REST operation {@link CloudControllerRestClient#createRoute}
+ * Response from REST operation {@link CloudControllerOperations#createRoute}
  *
  * @author Eric Bottard
  */

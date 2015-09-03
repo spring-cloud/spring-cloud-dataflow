@@ -17,7 +17,7 @@
 package org.springframework.cloud.data.module.deployer.cloudfoundry;
 
 /**
- * Request for REST operation {@link CloudControllerRestClient#listSharedDomains(ListSharedDomainsRequest)}.
+ * Request for REST operation {@link CloudControllerOperations#listSharedDomains(ListSharedDomainsRequest)}.
  *
  * @author Eric Bottard
  */

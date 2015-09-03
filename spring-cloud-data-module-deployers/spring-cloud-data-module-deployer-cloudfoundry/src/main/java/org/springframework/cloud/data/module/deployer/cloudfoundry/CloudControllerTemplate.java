@@ -28,14 +28,16 @@ import org.springframework.web.util.UriComponentsBuilder;
  * REST client specialised for module deployment requirements.
  *
  * @author Steve Powell
+ * @author Paul Harris
+ * @author Eric Bottard
  */
-class StandardCloudControllerRestClient implements CloudControllerRestClient {
+class CloudControllerTemplate implements CloudControllerOperations {
 
 	private final URI endpoint;
 
 	private final ExtendedOAuth2RestOperations restOperations;
 
-	StandardCloudControllerRestClient(URI endpoint, ExtendedOAuth2RestOperations restOperations) {
+	CloudControllerTemplate(URI endpoint, ExtendedOAuth2RestOperations restOperations) {
 		this.endpoint = endpoint;
 		this.restOperations = restOperations;
 	}

@@ -17,7 +17,7 @@
 package org.springframework.cloud.data.module.deployer.cloudfoundry;
 
 /**
- * Request for REST operation {@link CloudControllerRestClient#getApplicationStatistics(GetApplicationStatisticsRequest) getApplicationStatistics()}.
+ * Request for REST operation {@link CloudControllerOperations#getApplicationStatistics(GetApplicationStatisticsRequest) getApplicationStatistics()}.
  *
  * @author Steve Powell
  */

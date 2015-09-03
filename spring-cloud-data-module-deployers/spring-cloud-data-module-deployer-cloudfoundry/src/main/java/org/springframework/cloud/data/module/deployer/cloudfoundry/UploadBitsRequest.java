@@ -19,7 +19,7 @@ package org.springframework.cloud.data.module.deployer.cloudfoundry;
 import org.springframework.core.io.Resource;
 
 /**
- * Request for REST operation {@link CloudControllerRestClient#uploadBits(UploadBitsRequest) uploadBits()}.
+ * Request for REST operation {@link CloudControllerOperations#uploadBits(UploadBitsRequest) uploadBits()}.
  *
  * @author Steve Powell
  */

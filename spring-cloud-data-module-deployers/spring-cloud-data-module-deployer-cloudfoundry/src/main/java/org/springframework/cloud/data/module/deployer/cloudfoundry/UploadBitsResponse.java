@@ -17,7 +17,7 @@
 package org.springframework.cloud.data.module.deployer.cloudfoundry;
 
 /**
- * Response from REST operation {@link CloudControllerRestClient#uploadBits(UploadBitsRequest) uploadBits()}.
+ * Response from REST operation {@link CloudControllerOperations#uploadBits(UploadBitsRequest) uploadBits()}.
  *
  * @author Steve Powell
  */

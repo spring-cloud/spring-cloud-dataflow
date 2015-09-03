@@ -19,7 +19,7 @@ package org.springframework.cloud.data.module.deployer.cloudfoundry;
 import java.util.HashMap;
 
 /**
- * Response from REST operation {@link CloudControllerRestClient#getApplicationStatistics(GetApplicationStatisticsRequest) getApplicationStatistics()}.
+ * Response from REST operation {@link CloudControllerOperations#getApplicationStatistics(GetApplicationStatisticsRequest) getApplicationStatistics()}.
  *
  * @author Steve Powell
  */

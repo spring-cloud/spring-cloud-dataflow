@@ -22,7 +22,6 @@ import java.util.Map;
 
 import org.yaml.snakeyaml.Yaml;
 
-import org.springframework.cloud.data.core.ModuleDefinition;
 import org.springframework.cloud.data.core.ModuleDeploymentId;
 import org.springframework.cloud.data.core.ModuleDeploymentRequest;
 import org.springframework.cloud.data.module.deployer.ModuleArgumentQualifier;
@@ -41,10 +40,6 @@ class CloudFoundryModuleDeploymentConverter {
 
 	private Resource moduleLauncherResource;
 
-	CloudFoundryModuleDeploymentConverter(Resource moduleLauncherResource) {
-		this.moduleLauncherResource = moduleLauncherResource;
-	}
-
 	String toApplicationName(ModuleDeploymentId moduleDeploymentId) {
 		return APPLICATION_PREFIX + moduleDeploymentId.toString();
 	}
@@ -60,11 +55,6 @@ class CloudFoundryModuleDeploymentConverter {
 		catch (IllegalArgumentException e) {
 			return null; // We ignore invalid format cases
 		}
-	}
-
-	Resource toModuleLauncherResource(ModuleDefinition moduleDefinition) {
-		// We use a fixed launcher application
-		return this.moduleLauncherResource;
 	}
 
 	Map<String, String> toModuleLauncherEnvironment(ModuleDeploymentRequest moduleDeploymentRequest) {

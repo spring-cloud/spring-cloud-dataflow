@@ -17,7 +17,7 @@
 package org.springframework.cloud.data.module.deployer.cloudfoundry;
 
 /**
- * Request for REST operation {@link CloudControllerRestClient#listOrganizations(ListOrganizationsRequest) listOrganizations()}.
+ * Request for REST operation {@link CloudControllerOperations#listOrganizations(ListOrganizationsRequest) listOrganizations()}.
  *
  * @author Steve Powell
  */

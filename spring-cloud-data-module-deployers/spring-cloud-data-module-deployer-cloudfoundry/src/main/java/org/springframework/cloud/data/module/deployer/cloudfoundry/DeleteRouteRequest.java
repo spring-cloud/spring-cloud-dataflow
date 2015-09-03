@@ -17,7 +17,7 @@
 package org.springframework.cloud.data.module.deployer.cloudfoundry;
 
 /**
- * Request for REST opertation {@link CloudControllerRestClient#deleteRoute(DeleteRouteRequest)}.
+ * Request for REST opertation {@link CloudControllerOperations#deleteRoute(DeleteRouteRequest)}.
  *
  * @author Eric Bottard
  */

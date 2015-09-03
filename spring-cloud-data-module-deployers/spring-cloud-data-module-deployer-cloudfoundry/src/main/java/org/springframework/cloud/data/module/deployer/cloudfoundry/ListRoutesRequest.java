@@ -17,7 +17,7 @@
 package org.springframework.cloud.data.module.deployer.cloudfoundry;
 
 /**
- * Request for REST operation {@link CloudControllerRestClient#listRoutes(ListRoutesRequest)}.
+ * Request for REST operation {@link CloudControllerOperations#listRoutes(ListRoutesRequest)}.
  *
  * @author Eric Bottard
  */
