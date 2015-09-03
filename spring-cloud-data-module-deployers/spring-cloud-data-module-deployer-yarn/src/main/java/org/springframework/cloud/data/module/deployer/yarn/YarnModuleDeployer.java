@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.data.module.deployer.yarn;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -102,7 +103,14 @@ public class YarnModuleDeployer implements ModuleDeployer {
 
 	@Override
 	public ModuleStatus status(ModuleDeploymentId id) {
-		return status().get(id);
+		ModuleStatus status = status().get(id);
+		if (status == null) {
+			status = ModuleStatus.of(id)
+					.with(new YarnModuleInstanceStatus(id.toString(), false,
+							Collections.<String, String>emptyMap()))
+					.build();
+		}
+		return status;
 	}
 
 	@Override
