@@ -108,7 +108,7 @@ $ hdfs dfs -rm -R /app/app
 4\. start `spring-cloud-data-admin` with `yarn` profile
 
 ```
-$ java -Dspring.profiles.active=yarn -jar spring-cloud-data-admin/target/spring-cloud-data-admin-1.0.0.BUILD-SNAPSHOT.jar
+$ java -Dspring.profiles.active=yarn -Dclouddata.yarn.app.appmaster.path=spring-cloud-data-yarn/spring-cloud-data-yarn-appmaster/target -Dclouddata.yarn.app.container.path=spring-cloud-data-yarn/spring-cloud-data-yarn-container/target -jar spring-cloud-data-admin/target/spring-cloud-data-admin-1.0.0.BUILD-SNAPSHOT.jar
 ```
 
 5\. start `spring-cloud-data-shell`
@@ -143,3 +143,4 @@ $ shutdown -a application_1439803106751_0088
 shutdown requested
 ```
 
+Properties `clouddata.yarn.app.appmaster.path` and `clouddata.yarn.app.container.path` can be used with both `spring-cloud-data-admin` and `and spring-cloud-data-yarn-client` to define directory for `appmaster` and `container` jars. Values for those default to `.` which then assumes all needed jars are in a same working directory.

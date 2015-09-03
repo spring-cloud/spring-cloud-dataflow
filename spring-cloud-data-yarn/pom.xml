@@ -20,24 +20,4 @@
 		<module>spring-cloud-data-yarn-client</module>
 	</modules>
 
-<!--
-	<dependencies>
-		<dependency>
-			<groupId>org.springframework.data</groupId>
-			<artifactId>spring-yarn-boot</artifactId>
-			<version>2.3.0.M1</version>
-			<exclusions>
-				<exclusion>
-					<groupId>org.slf4j</groupId>
-					<artifactId>slf4j-log4j12</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>javax.servlet</groupId>
-					<artifactId>servlet-api</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-	</dependencies>
--->
-
 </project>

@@ -1,10 +1,10 @@
 server:
-    port: 0
+  port: 0
 endpoints:
-    shutdown:
-        enabled: false
+  shutdown:
+    enabled: false
 spring:
-    hadoop:
-        fsUri: hdfs://localhost:8020
-        resourceManagerHost: localhost
+  hadoop:
+    fsUri: hdfs://localhost:8020
+    resourceManagerHost: localhost
 
