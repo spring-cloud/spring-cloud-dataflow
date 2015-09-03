@@ -59,6 +59,7 @@ class TestApplication {
 			ModuleDefinition md = new ModuleDefinition.Builder().setName("time").setLabel("time")
 					.setGroup("ticktock")
 					.setParameter("fixedDelay", "1")
+//					.setParameter("spring.cloud.stream.bindings.output", "ticktock")
 					.build();
 			ModuleDeploymentRequest mdr = new ModuleDeploymentRequest(md, ModuleCoordinates.parse("org.springframework.cloud.stream.module:time-source:1.0.0.BUILD-SNAPSHOT"));
 
@@ -66,6 +67,7 @@ class TestApplication {
 
 			ModuleDefinition md2 = new ModuleDefinition.Builder().setName("log").setLabel("log")
 					.setGroup("ticktock")
+//					.setParameter("spring.cloud.stream.bindings.input", "ticktock")
 					.build();
 			ModuleDeploymentRequest mdr2 = new ModuleDeploymentRequest(md2, ModuleCoordinates.parse("org.springframework.cloud.stream.module:log-sink:1.0.0.BUILD-SNAPSHOT"));
 

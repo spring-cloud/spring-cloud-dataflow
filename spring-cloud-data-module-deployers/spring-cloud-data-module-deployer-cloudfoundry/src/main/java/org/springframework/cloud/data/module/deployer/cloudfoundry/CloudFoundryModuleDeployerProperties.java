@@ -16,11 +16,14 @@
 
 package org.springframework.cloud.data.module.deployer.cloudfoundry;
 
+import java.net.URI;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 
 /**
  * @author Eric Bottard
@@ -49,6 +52,23 @@ class CloudFoundryModuleDeployerProperties {
 	 */
 	private String space;
 
+	/**
+	 * Location of the ModuleLauncher uber-jar to be uploaded.
+	 */
+	private Resource moduleLauncherLocation = new ClassPathResource("spring-cloud-stream-module-launcher.jar");
+
+	/**
+	 * Location of the CloudFoundry REST API endpoint to use.
+	 */
+	private URI apiEndpoint;
+
+	public URI getApiEndpoint() {
+		return apiEndpoint;
+	}
+
+	public void setApiEndpoint(URI apiEndpoint) {
+		this.apiEndpoint = apiEndpoint;
+	}
 
 	public Set<String> getServices() {
 		return services;
@@ -80,6 +100,14 @@ class CloudFoundryModuleDeployerProperties {
 
 	public void setSpace(String space) {
 		this.space = space;
+	}
+
+	public Resource getModuleLauncherLocation() {
+		return moduleLauncherLocation;
+	}
+
+	public void setModuleLauncherLocation(Resource moduleLauncherLocation) {
+		this.moduleLauncherLocation = moduleLauncherLocation;
 	}
 
 	@SafeVarargs

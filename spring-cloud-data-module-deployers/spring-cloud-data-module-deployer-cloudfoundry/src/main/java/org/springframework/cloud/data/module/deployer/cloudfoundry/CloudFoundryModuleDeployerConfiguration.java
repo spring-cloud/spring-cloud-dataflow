@@ -19,7 +19,6 @@ package org.springframework.cloud.data.module.deployer.cloudfoundry;
 import java.net.URI;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.security.oauth2.OAuth2AutoConfiguration;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -27,7 +26,6 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.cloud.data.module.deployer.ModuleDeployer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.io.Resource;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.oauth2.client.DefaultOAuth2ClientContext;
 import org.springframework.security.oauth2.client.OAuth2ClientContext;
@@ -57,15 +55,13 @@ public class CloudFoundryModuleDeployerConfiguration {
 
 	@Bean
 	CloudControllerRestClient cloudControllerRestClient(
-			@Value("${cloudfoundry.api.endpoint}") URI endpoint,
 			ExtendedOAuth2RestOperations restOperations) {
-		return new StandardCloudControllerRestClient(endpoint, restOperations);
+		return new StandardCloudControllerRestClient(properties.getApiEndpoint(), restOperations);
 	}
 
 	@Bean
 	CloudFoundryApplicationOperations cloudFoundryApplicationOperations(
-			CloudControllerRestClient client,
-			@Value("${cloudfoundry.space}") String spaceName) {
+			CloudControllerRestClient client) {
 		return new StandardCloudFoundryApplicationOperations(client,
 				properties.getOrganization(),
 				properties.getSpace(),
@@ -73,14 +69,12 @@ public class CloudFoundryModuleDeployerConfiguration {
 	}
 
 	@Bean
-	CloudFoundryModuleDeploymentConverter cloudFoundryModuleDeploymentConverter(
-			@Value("${cloudfoundry.moduleLauncherLocation}") Resource moduleLauncherResource) {
-		return new CloudFoundryModuleDeploymentConverter(moduleLauncherResource);
+	CloudFoundryModuleDeploymentConverter cloudFoundryModuleDeploymentConverter() {
+		return new CloudFoundryModuleDeploymentConverter(properties.getModuleLauncherLocation());
 	}
 
 	@Bean
 	ModuleDeployer moduleDeployer(
-			CloudFoundryModuleDeployerProperties properties,
 			CloudFoundryModuleDeploymentConverter converter,
 			CloudFoundryApplicationOperations applicationOperations) {
 		return new CloudFoundryModuleDeployer(properties, converter, applicationOperations);
