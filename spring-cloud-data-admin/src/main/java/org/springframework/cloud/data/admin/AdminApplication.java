@@ -16,6 +16,10 @@
 
 package org.springframework.cloud.data.admin;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -34,7 +38,10 @@ import org.springframework.yarn.boot.YarnContainerAutoConfiguration;
 public class AdminApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(AdminApplication.class, args);
+		List<String> argsList = new ArrayList<>();
+		argsList.addAll(Arrays.asList(args));
+		argsList.add("--spring.cloud.bootstrap.name=admin");
+		SpringApplication.run(AdminApplication.class, argsList.toArray(new String[0]));
 	}
 
 }
