@@ -48,9 +48,12 @@ public class TaskModuleDeployer implements ModuleDeployer {
 
 	private final ReceptorClient receptorClient = new ReceptorClient();
 
+	private final StatusMapper statusMapper = new StatusMapper();
+
 	@Override
 	public ModuleDeploymentId deploy(ModuleDeploymentRequest request) {
-		ModuleDeploymentId id = ModuleDeploymentId.fromModuleDefinition(request.getDefinition());
+		ModuleDeploymentId id =
+				ModuleDeploymentId.fromModuleDefinition(request.getDefinition());
 		String guid = guid(id);
 
 		TaskCreateRequest task = new TaskCreateRequest();
@@ -117,7 +120,7 @@ public class TaskModuleDeployer implements ModuleDeployer {
 			attributes.put("resultFile", task.getResultFile());
 			attributes.put("cellId", task.getCellId());
 			attributes.put("domain", task.getDomain());
-			builder.with(new ReceptorModuleInstanceStatus(task.getTaskGuid(), task.getState(), attributes));
+			builder.with(new ReceptorModuleInstanceStatus(task.getTaskGuid(), statusMapper.map(task), attributes));
 
 			return builder.build();
 		}
@@ -130,4 +133,38 @@ public class TaskModuleDeployer implements ModuleDeployer {
 	public Map<ModuleDeploymentId, ModuleStatus> status() {
 		throw new UnsupportedOperationException();
 	}
+
+	private static class StatusMapper {
+
+		public ModuleStatus.State map(TaskResponse taskResponse) {
+			ModuleStatus.State state;
+
+			switch (taskResponse.getState()) {
+				case "PENDING":
+					state = ModuleStatus.State.deploying;
+					break;
+				case "CLAIMED":
+					state = ModuleStatus.State.deploying;
+					break;
+				case "RUNNING":
+					//TODO: Add support for canceling
+					state = ModuleStatus.State.deployed;
+					break;
+				case "COMPLETED":
+					//TODO: Add support for canceled
+					if(taskResponse.isFailed()) {
+						state = ModuleStatus.State.failed;
+					}
+					else {
+						state = ModuleStatus.State.complete;
+					}
+					break;
+				default:
+					state = ModuleStatus.State.unknown;
+			}
+
+			return state;
+		}
+	}
+
 }

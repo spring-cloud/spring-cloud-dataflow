@@ -18,7 +18,7 @@ package org.springframework.cloud.data.module.deployer.local;
 
 import java.net.Inet4Address;
 import java.net.URL;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -36,7 +36,7 @@ import org.springframework.util.SocketUtils;
 import org.springframework.web.client.RestTemplate;
 
 /**
- * A ModuleDeployer that will launch a module in-process.
+ * A {@link ModuleDeployer} that will launch a module in-process.
  *
  * @author Mark Fisher
  * @author Marius Bogoevici
@@ -87,7 +87,7 @@ public class LocalModuleDeployer implements ModuleDeployer {
 		args.put("endpoints.shutdown.enabled", "true");
 
 		ModuleLaunchRequest moduleLaunchRequest = new ModuleLaunchRequest(module, args);
-		launcher.launch(Arrays.asList(moduleLaunchRequest));
+		launcher.launch(Collections.singletonList(moduleLaunchRequest));
 		ModuleDeploymentId id = new ModuleDeploymentId(request.getDefinition().getGroup(),
 				request.getDefinition().getLabel());
 		this.deployedModules.put(id, moduleUrl);
