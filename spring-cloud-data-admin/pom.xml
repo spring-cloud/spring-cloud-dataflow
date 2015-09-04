@@ -113,9 +113,8 @@
 				<directory>src/main/resources</directory>
 				<filtering>true</filtering>
 				<includes>
-					<include>bootstrap.yml</include>
-					<include>bootstrap-yarn.yml</include>
-					<include>META-INF/spring-cloud-data-admin/admin.properties</include>
+					<include>admin.yml</include>
+					<include>admin-yarn.yml</include>
 				</includes>
 			</resource>
 		</resources>
