@@ -107,6 +107,7 @@ public class ModuleDeploymentRequest {
 	 * @see #deploymentProperties
 	 */
 	public Map<String, String> getDeploymentProperties() {
+
 		return deploymentProperties;
 	}
 }

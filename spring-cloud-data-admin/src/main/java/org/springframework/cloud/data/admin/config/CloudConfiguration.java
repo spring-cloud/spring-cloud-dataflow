@@ -21,7 +21,6 @@ import org.springframework.boot.autoconfigure.redis.RedisAutoConfiguration;
 import org.springframework.cloud.Cloud;
 import org.springframework.cloud.CloudFactory;
 import org.springframework.cloud.data.module.deployer.ModuleDeployer;
-import org.springframework.cloud.data.module.deployer.cloudfoundry.CloudFoundryModuleDeployer;
 import org.springframework.cloud.data.module.deployer.lattice.LrpModuleDeployer;
 import org.springframework.cloud.data.module.deployer.lattice.TaskModuleDeployer;
 import org.springframework.context.annotation.Bean;
@@ -30,7 +29,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 
 /**
- * Configuration for cloud profiles (cloud, lattice).
+ * Configuration used when running <i>in a cloud</i>, triggered by cloud profiles (cloud, lattice).
  *
  * @author Mark Fisher
  * @author Thomas Risberg
@@ -57,7 +56,6 @@ public class CloudConfiguration {
 	@Profile("lattice")
 	protected static class LatticeConfig {
 
-		@Bean
 		public ModuleDeployer processModuleDeployer() {
 			return new LrpModuleDeployer();
 		}
@@ -67,14 +65,4 @@ public class CloudConfiguration {
 			return new TaskModuleDeployer();
 		}
 	}
-
-	@Profile("!lattice")
-	protected static class CloudFoundryConfig {
-
-		@Bean
-		public ModuleDeployer moduleDeployer() {
-			return new CloudFoundryModuleDeployer();
-		}
-	}
-
 }
