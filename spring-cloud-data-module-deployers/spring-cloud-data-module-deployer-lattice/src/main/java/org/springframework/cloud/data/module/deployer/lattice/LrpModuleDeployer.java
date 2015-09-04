@@ -133,7 +133,7 @@ public class LrpModuleDeployer implements ModuleDeployer {
 		throw new UnsupportedOperationException();
 	}
 
-	public static class StatusMapper {
+	private static class StatusMapper {
 
 		public ModuleStatus.State map(ActualLRPResponse actualLRPResponse) {
 			ModuleStatus.State state;

@@ -134,7 +134,7 @@ public class TaskModuleDeployer implements ModuleDeployer {
 		throw new UnsupportedOperationException();
 	}
 
-	public static class StatusMapper {
+	private static class StatusMapper {
 
 		public ModuleStatus.State map(TaskResponse taskResponse) {
 			ModuleStatus.State state;
