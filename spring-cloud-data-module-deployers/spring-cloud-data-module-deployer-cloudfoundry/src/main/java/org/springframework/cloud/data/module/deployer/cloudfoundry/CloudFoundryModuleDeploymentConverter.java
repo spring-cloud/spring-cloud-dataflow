@@ -65,7 +65,12 @@ class CloudFoundryModuleDeploymentConverter {
 		return toEnvironmentVariables(environment);
 	}
 
-	/**
+	/*
+	 * WORKAROUND for spring binding not working well when dealing with props that bind to a Map and using underscores.
+	 * What we'd like is the commented out code, with following javadoc. What we currently do though, is to pass the
+	 * args as (dotted) "command line args", all thru a special CF Buildpack ENV var.
+	 * see https://github.com/cloudfoundry/java-buildpack/blob/81f993c5bdcdaca6a28ad6970a6d1144236f3f6d/docs/container-java_main.md#configuration
+	 *
 	 * Produce a copy of a {@code Map<String,String>} with the keys converted into environment variable names. Dots are
 	 * replaced by underscores, and the alphabetic characters are upper-cased. Any resulting key clashes will result in
 	 * entry losses.
