@@ -114,6 +114,7 @@
 				<filtering>true</filtering>
 				<includes>
 					<include>bootstrap.yml</include>
+					<include>bootstrap-yarn.yml</include>
 					<include>META-INF/spring-cloud-data-admin/admin.properties</include>
 				</includes>
 			</resource>
