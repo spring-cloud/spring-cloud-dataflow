@@ -26,6 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.util.StringUtils;
+import org.springframework.yarn.boot.app.AbstractClientApplication;
 import org.springframework.yarn.boot.app.YarnContainerClusterApplication;
 import org.springframework.yarn.boot.app.YarnInfoApplication;
 import org.springframework.yarn.boot.app.YarnPushApplication;
@@ -36,6 +37,7 @@ import org.springframework.yarn.boot.app.YarnSubmitApplication;
  * rest api's exposed by specific yarn controlling container clusters.
  *
  * @author Janne Valkealahti
+ * @author Mark Fisher
  */
 public class DefaultYarnCloudAppService implements YarnCloudAppService {
 
@@ -47,10 +49,10 @@ public class DefaultYarnCloudAppService implements YarnCloudAppService {
 
 	private static final String SPRING_CONFIG_NAME_OPTION = "--spring.config.name=";
 
-	private final String springConfigOption;
+	private final String bootstrapName;
 
 	public DefaultYarnCloudAppService(String bootstrapName) {
-		this.springConfigOption = SPRING_CONFIG_NAME_OPTION + bootstrapName;
+		this.bootstrapName = bootstrapName;
 	}
 
 	@Override
@@ -61,7 +63,7 @@ public class DefaultYarnCloudAppService implements YarnCloudAppService {
 		Properties appProperties = new Properties();
 		appProperties.setProperty(PREFIX_YIA + "operation", "PUSHED");
 		app.appProperties(appProperties);
-		String info = app.run(this.springConfigOption);
+		String info = runApp(app);
 		logger.debug("Full response for PUSHED: {}", info);
 
 		String[] lines = info.split("\\r?\\n");
@@ -86,7 +88,7 @@ public class DefaultYarnCloudAppService implements YarnCloudAppService {
 		appProperties.setProperty(PREFIX_YIA + "verbose", "false");
 		appProperties.setProperty(PREFIX_YIA + "type", "CLOUDDATA");
 		app.appProperties(appProperties);
-		String info = app.run(this.springConfigOption);
+		String info = runApp(app);
 		logger.debug("Full response for SUBMITTED: {}", info);
 
 		String[] lines = info.split("\\r?\\n");
@@ -109,7 +111,7 @@ public class DefaultYarnCloudAppService implements YarnCloudAppService {
 		Properties instanceProperties = new Properties();
 		instanceProperties.setProperty("spring.yarn.applicationVersion", appVersion);
 		app.configFile("application.properties", instanceProperties);
-		app.run(this.springConfigOption);
+		runApp(app);
 	}
 
 	@Override
@@ -120,7 +122,7 @@ public class DefaultYarnCloudAppService implements YarnCloudAppService {
 			app.applicationName(appName);
 		}
 		app.applicationVersion(appVersion);
-		return app.run(this.springConfigOption).toString();
+		return runApp(app);
 	}
 
 	@Override
@@ -143,7 +145,7 @@ public class DefaultYarnCloudAppService implements YarnCloudAppService {
 		}
 
 		app.appProperties(appProperties);
-		String output = app.run(this.springConfigOption);
+		String output = runApp(app);
 		logger.debug("Output from YarnContainerClusterApplication run for CLUSTERCREATE: {}", output);
 	}
 
@@ -155,7 +157,7 @@ public class DefaultYarnCloudAppService implements YarnCloudAppService {
 		appProperties.setProperty(PREFIX_CCA + "applicationId", yarnApplicationId);
 		appProperties.setProperty(PREFIX_CCA + "clusterId", clusterId);
 		app.appProperties(appProperties);
-		String output = app.run(this.springConfigOption);
+		String output = runApp(app);
 		logger.debug("Output from YarnContainerClusterApplication run for CLUSTERSTART: {}", output);
 	}
 
@@ -167,7 +169,7 @@ public class DefaultYarnCloudAppService implements YarnCloudAppService {
 		appProperties.setProperty(PREFIX_CCA + "applicationId", yarnApplicationId);
 		appProperties.setProperty(PREFIX_CCA + "clusterId", clusterId);
 		app.appProperties(appProperties);
-		String output = app.run(this.springConfigOption);
+		String output = runApp(app);
 		logger.debug("Output from YarnContainerClusterApplication run for CLUSTERSTOP: {}", output);
 	}
 
@@ -179,7 +181,7 @@ public class DefaultYarnCloudAppService implements YarnCloudAppService {
 		appProperties.setProperty(PREFIX_CCA + "applicationId", yarnApplicationId);
 		appProperties.setProperty(PREFIX_CCA + "clusterId", clusterId);
 		app.appProperties(appProperties);
-		String output = app.run(this.springConfigOption);
+		String output = runApp(app);
 		logger.debug("Output from YarnContainerClusterApplication run for CLUSTERDESTROY: {}", output);
 	}
 
@@ -203,7 +205,7 @@ public class DefaultYarnCloudAppService implements YarnCloudAppService {
 		appProperties.setProperty(PREFIX_CCA + "applicationId", yarnApplicationId);
 		app.appProperties(appProperties);
 		try {
-			String output = app.run(this.springConfigOption);
+			String output = runApp(app);
 			logger.debug("Output from YarnContainerClusterApplication run for CLUSTERSINFO: {}", output);
 			String[] lines = output.split("\\r?\\n");
 			for (int i = 2; i < lines.length; i++) {
@@ -226,7 +228,7 @@ public class DefaultYarnCloudAppService implements YarnCloudAppService {
 		appProperties.setProperty(PREFIX_CCA + "clusterId", clusterId);
 		app.appProperties(appProperties);
 		try {
-			String output = app.run(this.springConfigOption);
+			String output = runApp(app);
 			logger.debug("Output from YarnContainerClusterApplication run for CLUSTERINFO: {}", output);
 
 			String[] lines = output.trim().split("\\r?\\n");
@@ -234,10 +236,16 @@ public class DefaultYarnCloudAppService implements YarnCloudAppService {
 				String[] fields = lines[2].trim().split("\\s+");
 				states.put(clusterId, fields[0].trim());
 			}
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 			logger.warn("CLUSTERINFO resulted an error", e);
 		}
 		return states;
+	}
+
+	private <R> String runApp(AbstractClientApplication<R,?> app) {
+		R result = app.run(SPRING_CONFIG_NAME_OPTION + this.bootstrapName);
+		return result != null ? result.toString() : null;
 	}
 
 }
