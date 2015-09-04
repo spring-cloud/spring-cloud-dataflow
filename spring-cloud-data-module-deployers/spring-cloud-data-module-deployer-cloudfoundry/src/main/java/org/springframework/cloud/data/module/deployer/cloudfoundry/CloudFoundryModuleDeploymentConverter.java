@@ -16,8 +16,11 @@
 
 package org.springframework.cloud.data.module.deployer.cloudfoundry;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+
+import org.yaml.snakeyaml.Yaml;
 
 import org.springframework.cloud.data.core.ModuleDefinition;
 import org.springframework.cloud.data.core.ModuleDeploymentId;
@@ -78,11 +81,16 @@ class CloudFoundryModuleDeploymentConverter {
 	 * entry losses.
 	 */
 	private static Map<String, String> toEnvironmentVariables(Map<String, String> args) {
-		Map<String, String> env = new HashMap<>(args.size());
+//		Map<String, String> env = new HashMap<>(args.size());
+//		for (Map.Entry<String, String> entry : args.entrySet()) {
+//			env.put(entry.getKey().toUpperCase().replace('.', '_'), entry.getValue());
+//		}
+		StringBuilder sb = new StringBuilder();
 		for (Map.Entry<String, String> entry : args.entrySet()) {
-			env.put(entry.getKey().toUpperCase().replace('.', '_'), entry.getValue());
+			sb.append("--").append(entry.getKey()).append('=').append(entry.getValue()).append(' ');
 		}
-		return env;
+		String asYaml = new Yaml().dump(Collections.singletonMap("arguments", sb.toString()));
+		return Collections.singletonMap("JBP_CONFIG_JAVA_MAIN", asYaml);
 	}
 
 	private static String moduleIdString(String applicationName) {

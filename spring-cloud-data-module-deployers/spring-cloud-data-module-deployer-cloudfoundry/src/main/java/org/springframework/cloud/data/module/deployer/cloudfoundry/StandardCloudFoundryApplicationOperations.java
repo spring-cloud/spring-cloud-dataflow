@@ -28,7 +28,7 @@ import org.springframework.web.client.RestClientException;
  */
 class StandardCloudFoundryApplicationOperations implements CloudFoundryApplicationOperations {
 
-	private static final String DEFAULT_BUILDPACK = "";
+	private static final String DEFAULT_BUILDPACK = "https://github.com/cloudfoundry/java-buildpack.git";
 
 	private static final int DEFAULT_MEMORY = 1024; // megabytes
 
