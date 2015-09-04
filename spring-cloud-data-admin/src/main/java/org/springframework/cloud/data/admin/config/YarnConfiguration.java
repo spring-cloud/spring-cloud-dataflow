@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.data.admin.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.data.module.deployer.ModuleDeployer;
 import org.springframework.cloud.data.module.deployer.yarn.DefaultYarnCloudAppService;
 import org.springframework.cloud.data.module.deployer.yarn.YarnCloudAppService;
@@ -32,11 +33,14 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
  * profile is activated.
  *
  * @author Janne Valkealahti
- *
+ * @author Ilayaperumal Gopinathan
  */
 @Configuration
 @Profile("yarn")
 public class YarnConfiguration {
+
+	@Value("${spring.cloud.bootstrap.name:admin}")
+	private String bootstrapName;
 
 	@Bean
 	public ModuleDeployer processModuleDeployer() throws Exception {
@@ -56,7 +60,7 @@ public class YarnConfiguration {
 
 	@Bean
 	public YarnCloudAppService yarnCloudAppService() {
-		return new DefaultYarnCloudAppService();
+		return new DefaultYarnCloudAppService(bootstrapName);
 	}
 
 	@Bean
