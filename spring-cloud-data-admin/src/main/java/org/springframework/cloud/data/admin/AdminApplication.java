@@ -24,6 +24,8 @@ import org.springframework.yarn.boot.YarnClientAutoConfiguration;
 import org.springframework.yarn.boot.YarnContainerAutoConfiguration;
 
 /**
+ * Bootstrap class for Spring cloud data admin.
+ *
  * @author Mark Fisher
  */
 @SpringBootApplication
@@ -31,7 +33,7 @@ import org.springframework.yarn.boot.YarnContainerAutoConfiguration;
 		YarnContainerAutoConfiguration.class })
 public class AdminApplication {
 
-	public static void main(String[] args) throws InterruptedException {
+	public static void main(String[] args) {
 		SpringApplication.run(AdminApplication.class, args);
 	}
 
