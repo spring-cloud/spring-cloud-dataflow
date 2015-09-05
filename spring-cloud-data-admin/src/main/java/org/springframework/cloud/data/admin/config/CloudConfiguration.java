@@ -56,6 +56,7 @@ public class CloudConfiguration {
 	@Profile("lattice")
 	protected static class LatticeConfig {
 
+		@Bean
 		public ModuleDeployer processModuleDeployer() {
 			return new LrpModuleDeployer();
 		}
