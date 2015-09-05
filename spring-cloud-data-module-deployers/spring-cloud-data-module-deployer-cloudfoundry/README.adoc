@@ -1,7 +1,7 @@
 SPI implementation for deploying Spring Cloud Stream modules to http://cloudfoundry.org[Cloud Foundry]
 
 The external dependencies are environment variables declared (but not all
-defined) in `resources/application.yml`:
+defined) in `resources/admin.yml`:
 
 ```
   cloudfoundry.apiEndpoint
@@ -9,6 +9,7 @@ defined) in `resources/application.yml`:
   cloudfoundry.organization
   cloudfoundry.space
   cloudfoundry.domain
+  cloudfoundry.services
   security.oauth2.client.access-token-uri
   security.oauth2.client.client-id
   security.oauth2.client.client-secret

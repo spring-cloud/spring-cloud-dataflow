@@ -37,6 +37,11 @@ class CloudControllerTemplate implements CloudControllerOperations {
 
 	private final ExtendedOAuth2RestOperations restOperations;
 
+	/**
+	 * Cloud Controller REST API version
+	 */
+	private static final String CC_API_VERSION = "v2";
+
 	CloudControllerTemplate(URI endpoint, ExtendedOAuth2RestOperations restOperations) {
 		this.endpoint = endpoint;
 		this.restOperations = restOperations;
@@ -45,7 +50,7 @@ class CloudControllerTemplate implements CloudControllerOperations {
 	@Override
 	public ListRoutesResponse listRoutes(ListRoutesRequest request) {
 		URI uri = UriComponentsBuilder.fromUri(this.endpoint)
-				.pathSegment("v2", "routes")
+				.pathSegment(CC_API_VERSION, "routes")
 				.queryParam("q", "host:" + request.getHost())
 				.queryParam("q", "domain_guid:" + request.getDomainId())
 				.build().toUri();
@@ -56,7 +61,7 @@ class CloudControllerTemplate implements CloudControllerOperations {
 	@Override
 	public CreateApplicationResponse createApplication(CreateApplicationRequest request) {
 		URI uri = UriComponentsBuilder.fromUri(this.endpoint)
-				.pathSegment("v2", "apps")
+				.pathSegment(CC_API_VERSION, "apps")
 				.build().toUri();
 
 		return this.restOperations.postForObject(uri, request, CreateApplicationResponse.class);
@@ -65,7 +70,7 @@ class CloudControllerTemplate implements CloudControllerOperations {
 	@Override
 	public CreateRouteResponse createRoute(CreateRouteRequest request) {
 		URI uri = UriComponentsBuilder.fromUri(this.endpoint)
-				.pathSegment("v2", "routes")
+				.pathSegment(CC_API_VERSION, "routes")
 				.build().toUri();
 
 		return this.restOperations.postForObject(uri, request, CreateRouteResponse.class);
@@ -74,7 +79,7 @@ class CloudControllerTemplate implements CloudControllerOperations {
 	@Override
 	public CreateServiceBindingResponse createServiceBinding(CreateServiceBindingRequest request) {
 		URI uri = UriComponentsBuilder.fromUri(this.endpoint)
-				.pathSegment("v2", "service_bindings")
+				.pathSegment(CC_API_VERSION, "service_bindings")
 				.build().toUri();
 
 		return this.restOperations.postForObject(uri, request, CreateServiceBindingResponse.class);
@@ -83,7 +88,7 @@ class CloudControllerTemplate implements CloudControllerOperations {
 	@Override
 	public DeleteApplicationResponse deleteApplication(DeleteApplicationRequest request) {
 		URI uri = UriComponentsBuilder.fromUri(this.endpoint)
-				.pathSegment("v2", "apps", request.getId())
+				.pathSegment(CC_API_VERSION, "apps", request.getId())
 				.build().toUri();
 
 		this.restOperations.delete(uri);
@@ -94,7 +99,7 @@ class CloudControllerTemplate implements CloudControllerOperations {
 	@Override
 	public DeleteRouteResponse deleteRoute(DeleteRouteRequest request) {
 		URI uri = UriComponentsBuilder.fromUri(this.endpoint)
-				.pathSegment("v2", "routes", request.getId())
+				.pathSegment(CC_API_VERSION, "routes", request.getId())
 				.build().toUri();
 
 		this.restOperations.delete(uri);
@@ -104,7 +109,7 @@ class CloudControllerTemplate implements CloudControllerOperations {
 	@Override
 	public GetApplicationStatisticsResponse getApplicationStatistics(GetApplicationStatisticsRequest request) {
 		URI uri = UriComponentsBuilder.fromUri(this.endpoint)
-				.pathSegment("v2", "apps", request.getId(), "stats")
+				.pathSegment(CC_API_VERSION, "apps", request.getId(), "stats")
 				.build().toUri();
 
 		return this.restOperations.getForObject(uri, GetApplicationStatisticsResponse.class);
@@ -113,7 +118,7 @@ class CloudControllerTemplate implements CloudControllerOperations {
 	@Override
 	public ListApplicationsResponse listApplications(ListApplicationsRequest request) {
 		UriComponentsBuilder builder = UriComponentsBuilder.fromUri(this.endpoint)
-				.pathSegment("v2", "apps")
+				.pathSegment(CC_API_VERSION, "apps")
 				.queryParam("q", "space_guid:" + request.getSpaceId());
 		if (!StringUtils.isEmpty(request.getName())) {
 			builder.queryParam("q", "name:" + request.getName());
@@ -126,7 +131,7 @@ class CloudControllerTemplate implements CloudControllerOperations {
 	@Override
 	public ListOrganizationsResponse listOrganizations(ListOrganizationsRequest request) {
 		URI uri = UriComponentsBuilder.fromUri(this.endpoint)
-				.pathSegment("v2", "organizations")
+				.pathSegment(CC_API_VERSION, "organizations")
 				.queryParam("q", "name:" + request.getName())
 				.build().toUri();
 
@@ -136,7 +141,7 @@ class CloudControllerTemplate implements CloudControllerOperations {
 	@Override
 	public ListServiceBindingsResponse listServiceBindings(ListServiceBindingsRequest request) {
 		URI uri = UriComponentsBuilder.fromUri(this.endpoint)
-				.pathSegment("v2", "apps", request.getAppId(), "service_bindings")
+				.pathSegment(CC_API_VERSION, "apps", request.getAppId(), "service_bindings")
 				.build().toUri();
 
 		return this.restOperations.getForObject(uri, ListServiceBindingsResponse.class);
@@ -145,7 +150,7 @@ class CloudControllerTemplate implements CloudControllerOperations {
 	@Override
 	public ListServiceInstancesResponse listServiceInstances(ListServiceInstancesRequest request) {
 		UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.fromUri(this.endpoint)
-				.pathSegment("v2", "service_instances")
+				.pathSegment(CC_API_VERSION, "service_instances")
 				.queryParam("q", "space_guid:" + request.getSpaceId());
 		if (!StringUtils.isEmpty(request.getName())) {
 			uriComponentsBuilder.queryParam("q", "name:" + request.getName());
@@ -158,7 +163,7 @@ class CloudControllerTemplate implements CloudControllerOperations {
 	@Override
 	public ListSharedDomainsResponse listSharedDomains(ListSharedDomainsRequest request) {
 		UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.fromUri(this.endpoint)
-				.pathSegment("v2", "shared_domains");
+				.pathSegment(CC_API_VERSION, "shared_domains");
 		if (!StringUtils.isEmpty(request.getName())) {
 			uriComponentsBuilder.queryParam("q", "name:" + request.getName());
 		}
@@ -170,7 +175,7 @@ class CloudControllerTemplate implements CloudControllerOperations {
 	@Override
 	public ListSpacesResponse listSpaces(ListSpacesRequest request) {
 		URI uri = UriComponentsBuilder.fromUri(this.endpoint)
-				.pathSegment("v2", "spaces")
+				.pathSegment(CC_API_VERSION, "spaces")
 				.queryParam("q", "name:" + request.getName())
 				.queryParam("q", "organization_guid:" + request.getOrgId())
 				.build().toUri();
@@ -181,7 +186,7 @@ class CloudControllerTemplate implements CloudControllerOperations {
 	@Override
 	public RouteMappingResponse mapRoute(RouteMappingRequest request) {
 		URI uri = UriComponentsBuilder.fromUri(this.endpoint)
-				.pathSegment("v2", "routes", request.getRouteId(), "apps", request.getAppId())
+				.pathSegment(CC_API_VERSION, "routes", request.getRouteId(), "apps", request.getAppId())
 				.build().toUri();
 
 		return this.restOperations.putForObject(uri, null, RouteMappingResponse.class);
@@ -190,7 +195,7 @@ class CloudControllerTemplate implements CloudControllerOperations {
 	@Override
 	public RemoveServiceBindingResponse removeServiceBinding(RemoveServiceBindingRequest request) {
 		URI uri = UriComponentsBuilder.fromUri(this.endpoint)
-				.pathSegment("v2", "apps", request.getAppId(), "service_bindings", request.getBindingId())
+				.pathSegment(CC_API_VERSION, "apps", request.getAppId(), "service_bindings", request.getBindingId())
 				.build().toUri();
 
 		this.restOperations.delete(uri);
@@ -200,7 +205,7 @@ class CloudControllerTemplate implements CloudControllerOperations {
 	@Override
 	public UpdateApplicationResponse updateApplication(UpdateApplicationRequest request) {
 		URI uri = UriComponentsBuilder.fromUri(this.endpoint)
-				.pathSegment("v2", "apps", request.getId())
+				.pathSegment(CC_API_VERSION, "apps", request.getId())
 				.build().toUri();
 
 		return this.restOperations.putForObject(uri, request, UpdateApplicationResponse.class);
@@ -209,7 +214,7 @@ class CloudControllerTemplate implements CloudControllerOperations {
 	@Override
 	public RouteMappingResponse unmapRoute(RouteMappingRequest request) {
 		URI uri = UriComponentsBuilder.fromUri(this.endpoint)
-				.pathSegment("v2", "routes", request.getRouteId(), "apps", request.getAppId())
+				.pathSegment(CC_API_VERSION, "routes", request.getRouteId(), "apps", request.getAppId())
 				.build().toUri();
 
 		this.restOperations.delete(uri);
@@ -219,7 +224,7 @@ class CloudControllerTemplate implements CloudControllerOperations {
 	@Override
 	public UploadBitsResponse uploadBits(UploadBitsRequest request) {
 		URI uri = UriComponentsBuilder.fromUri(this.endpoint)
-				.pathSegment("v2", "apps", request.getId(), "bits")
+				.pathSegment(CC_API_VERSION, "apps", request.getId(), "bits")
 				.queryParam("async", false)
 				.build().toUri();
 

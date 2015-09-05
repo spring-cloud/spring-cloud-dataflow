@@ -81,8 +81,8 @@ class ModuleStatusBuilder {
 		if (statistics != null) {
 			status.withAttribute("usage.time", statistics.getUsage().getTime())
 					.withAttribute("usage.cpu", statistics.getUsage().getCpu().toString())
-					.withAttribute("usage.time", statistics.getUsage().getDisk().toString())
-					.withAttribute("usage.time", statistics.getUsage().getMemory().toString())
+					.withAttribute("usage.disk", statistics.getUsage().getDisk().toString())
+					.withAttribute("usage.memory", statistics.getUsage().getMemory().toString())
 					.withAttribute("name", statistics.getName())
 					.withAttribute("uris", statistics.getUris().toString())
 					.withAttribute("host", statistics.getHost())

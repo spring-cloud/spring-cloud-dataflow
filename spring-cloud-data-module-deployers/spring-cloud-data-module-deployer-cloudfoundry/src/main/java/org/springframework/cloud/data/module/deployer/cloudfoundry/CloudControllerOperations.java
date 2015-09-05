@@ -24,7 +24,7 @@ package org.springframework.cloud.data.module.deployer.cloudfoundry;
 interface CloudControllerOperations {
 
 	/**
-	 * Check that a given route exists.
+	 * Lists all the routes for the given domain and host.
 	 * @param request the structure carrying all necessary parameters
 	 * @return a Response instance carrying all the response values expected
 	 * @throws org.springframework.web.client.RestClientException in the event of failure
