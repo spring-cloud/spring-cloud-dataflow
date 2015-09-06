@@ -2,7 +2,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.springframework.cloud</groupId>
-	<artifactId>spring-cloud-data-parent</artifactId>
+	<artifactId>spring-cloud-dataflow-parent</artifactId>
 	<version>1.0.0.BUILD-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<parent>
@@ -26,14 +26,14 @@
 		<spring-data.version>1.9.1.RELEASE</spring-data.version>
 	</properties>
 	<modules>
-		<module>spring-cloud-data-module-registry</module>
-		<module>spring-cloud-data-module-deployers</module>
-		<module>spring-cloud-data-core</module>
-		<module>spring-cloud-data-rest-resource</module>
-		<module>spring-cloud-data-admin</module>
-		<module>spring-cloud-data-rest-client</module>
-		<module>spring-cloud-data-shell</module>
-		<module>spring-cloud-data-yarn</module>
+		<module>spring-cloud-dataflow-module-registry</module>
+		<module>spring-cloud-dataflow-module-deployers</module>
+		<module>spring-cloud-dataflow-core</module>
+		<module>spring-cloud-dataflow-rest-resource</module>
+		<module>spring-cloud-dataflow-admin</module>
+		<module>spring-cloud-dataflow-rest-client</module>
+		<module>spring-cloud-dataflow-shell</module>
+		<module>spring-cloud-dataflow-yarn</module>
 	</modules>
 	<dependencyManagement>
 		<dependencies>
