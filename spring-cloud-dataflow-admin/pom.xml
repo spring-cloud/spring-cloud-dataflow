@@ -85,6 +85,12 @@
 			<groupId>org.springframework.plugin</groupId>
 			<artifactId>spring-plugin-core</artifactId>
 		</dependency>
+		<!-- cloudfoundry connector for running on Cloud Foundry -->
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-cloudfoundry-connector</artifactId>
+			<optional>true</optional>
+		</dependency>
 		<!-- Lattice connector dependency to create services info from lattice -->
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
