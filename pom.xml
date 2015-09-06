@@ -12,9 +12,9 @@
 		<relativePath />
 	</parent>
 	<scm>
-		<url>https://github.com/spring-cloud/spring-cloud-data</url>
-		<connection>scm:git:git://github.com/spring-cloud/spring-cloud-data.git</connection>
-		<developerConnection>scm:git:ssh://git@github.com/spring-cloud/spring-cloud-data.git</developerConnection>
+		<url>https://github.com/spring-cloud/spring-cloud-dataflow</url>
+		<connection>scm:git:git://github.com/spring-cloud/spring-cloud-dataflow.git</connection>
+		<developerConnection>scm:git:ssh://git@github.com/spring-cloud/spring-cloud-dataflow.git</developerConnection>
 		<tag>HEAD</tag>
 	</scm>
 	<properties>

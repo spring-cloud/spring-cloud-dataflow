@@ -6,24 +6,24 @@ both [stream](https://github.com/spring-cloud/spring-cloud-stream) and
 
 ## Components
 
-The [Core](https://github.com/spring-cloud/spring-cloud-data/tree/master/spring-cloud-dataflow-core)
+The [Core](https://github.com/spring-cloud/spring-cloud-dataflow/tree/master/spring-cloud-dataflow-core)
 domain module includes the concept of a **stream** that is a composition of spring-cloud-stream
 modules in a linear pipeline from a *source* to a *sink*, optionally including *processor* modules
 in between. The domain also includes the concept of a **task**, which may be any process that does
 not run indefinitely, including [Spring Batch](https://github.com/spring-projects/spring-batch) jobs.
 
-The [Module Registry](https://github.com/spring-cloud/spring-cloud-data/tree/master/spring-cloud-dataflow-module-registry)
+The [Module Registry](https://github.com/spring-cloud/spring-cloud-dataflow/tree/master/spring-cloud-dataflow-module-registry)
 maintains the set of available modules, and their mappings to Maven coordinates.
 
-The [Module Deployer SPI](https://github.com/spring-cloud/spring-cloud-data/tree/master/spring-cloud-dataflow-module-deployers/spring-cloud-dataflow-module-deployer-spi)
+The [Module Deployer SPI](https://github.com/spring-cloud/spring-cloud-dataflow/tree/master/spring-cloud-dataflow-module-deployers/spring-cloud-dataflow-module-deployer-spi)
 provides the abstraction layer for deploying the modules of a given stream across a variety of runtime environments, including:
-* [Local](https://github.com/spring-cloud/spring-cloud-data/tree/master/spring-cloud-dataflow-module-deployers/spring-cloud-dataflow-module-deployer-local)
-* [Lattice](https://github.com/spring-cloud/spring-cloud-data/tree/master/spring-cloud-dataflow-module-deployers/spring-cloud-dataflow-module-deployer-lattice)
-* [Cloud Foundry](https://github.com/spring-cloud/spring-cloud-data/tree/master/spring-cloud-dataflow-module-deployers/spring-cloud-dataflow-module-deployer-cloudfoundry)
+* [Local](https://github.com/spring-cloud/spring-cloud-dataflow/tree/master/spring-cloud-dataflow-module-deployers/spring-cloud-dataflow-module-deployer-local)
+* [Lattice](https://github.com/spring-cloud/spring-cloud-dataflow/tree/master/spring-cloud-dataflow-module-deployers/spring-cloud-dataflow-module-deployer-lattice)
+* [Cloud Foundry](https://github.com/spring-cloud/spring-cloud-dataflow/tree/master/spring-cloud-dataflow-module-deployers/spring-cloud-dataflow-module-deployer-cloudfoundry)
 
-The [Admin](https://github.com/spring-cloud/spring-cloud-data/tree/master/spring-cloud-dataflow-admin) provides a REST API and UI. It is an executable Spring Boot application that is profile aware, so that the proper implementation of the Module Deployer SPI will be instantiated based on the environment within which the Admin application itself is running.
+The [Admin](https://github.com/spring-cloud/spring-cloud-dataflow/tree/master/spring-cloud-dataflow-admin) provides a REST API and UI. It is an executable Spring Boot application that is profile aware, so that the proper implementation of the Module Deployer SPI will be instantiated based on the environment within which the Admin application itself is running.
 
-The [Shell](https://github.com/spring-cloud/spring-cloud-data/tree/master/spring-cloud-dataflow-shell) connects to the Admin's REST API and supports a DSL that simplifies the process of defining a stream and managing its lifecycle.
+The [Shell](https://github.com/spring-cloud/spring-cloud-dataflow/tree/master/spring-cloud-dataflow-shell) connects to the Admin's REST API and supports a DSL that simplifies the process of defining a stream and managing its lifecycle.
 
 The instructions below describe the process of running both the Admin and the Shell across different runtime environments.
 
@@ -34,8 +34,8 @@ The instructions below describe the process of running both the Admin and the Sh
 2\. clone this repository and build from the root directory:
 
 ```
-git clone https://github.com/spring-cloud/spring-cloud-data.git
-cd spring-cloud-data
+git clone https://github.com/spring-cloud/spring-cloud-dataflow.git
+cd spring-cloud-dataflow
 mvn clean package
 ```
 
