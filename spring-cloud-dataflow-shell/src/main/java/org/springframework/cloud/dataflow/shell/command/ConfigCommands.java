@@ -21,8 +21,8 @@ import java.net.URISyntaxException;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.dataflow.rest.client.CloudDataTemplate;
-import org.springframework.cloud.dataflow.shell.config.CloudDataShell;
+import org.springframework.cloud.dataflow.rest.client.DataFlowTemplate;
+import org.springframework.cloud.dataflow.shell.config.DataFlowShell;
 import org.springframework.shell.CommandLine;
 import org.springframework.shell.core.CommandMarker;
 import org.springframework.shell.core.annotation.CliCommand;
@@ -43,7 +43,7 @@ public class ConfigCommands implements CommandMarker, InitializingBean {
 	private CommandLine commandLine;
 
 	@Autowired
-	private CloudDataShell shell;
+	private DataFlowShell shell;
 
 	public static final String DEFAULT_SCHEME = "http";
 
@@ -53,18 +53,18 @@ public class ConfigCommands implements CommandMarker, InitializingBean {
 
 	public static final String DEFAULT_TARGET = DEFAULT_SCHEME + "://" + DEFAULT_HOST + ":" + DEFAULT_PORT + "/";
 
-	@CliCommand(value = {"admin config server"}, help = "Configure the spring cloud data REST server to use")
+	@CliCommand(value = {"admin config server"}, help = "Configure the Spring Cloud Data Flow REST server to use")
 	public String target(
 			@CliOption(mandatory = false, key = {"", "uri"},
 					help = "the location of the Spring Cloud data REST endpoint",
 					unspecifiedDefaultValue = DEFAULT_TARGET) String targetUriString) {
 		try {
 			URI baseURI = URI.create(targetUriString);
-			this.shell.setCloudDataOperations(new CloudDataTemplate(baseURI));
+			this.shell.setDataFlowOperations(new DataFlowTemplate(baseURI));
 			return(String.format("Successfully targeted %s", targetUriString));
 		}
 		catch (Exception e) {
-			this.shell.setCloudDataOperations(null);
+			this.shell.setDataFlowOperations(null);
 			return(String.format("Unable to contact Cloud data main at '%s'.",
 							targetUriString));
 		}

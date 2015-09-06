@@ -24,6 +24,7 @@ import java.util.Map.Entry;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.yarn.api.records.Container;
+
 import org.springframework.yarn.am.cluster.ContainerCluster;
 import org.springframework.yarn.am.cluster.ManagedContainerClusterAppmaster;
 
@@ -33,9 +34,9 @@ import org.springframework.yarn.am.cluster.ManagedContainerClusterAppmaster;
  * @author Janne Valkealahti
  *
  */
-public class CloudDataAppmaster extends ManagedContainerClusterAppmaster {
+public class DataFlowAppmaster extends ManagedContainerClusterAppmaster {
 
-	private final static Log log = LogFactory.getLog(CloudDataAppmaster.class);
+	private final static Log log = LogFactory.getLog(DataFlowAppmaster.class);
 
 	@Override
 	protected List<String> onContainerLaunchCommands(Container container, ContainerCluster cluster,

@@ -23,29 +23,29 @@ import org.springframework.shell.plugin.PromptProvider;
 import org.springframework.stereotype.Component;
 
 /**
- * A provider that sets the shell prompt to 'cloud-data' if the server is available, 'server-unknown' otherwise.
+ * A provider that sets the shell prompt to 'dataflow' if the server is available, 'server-unknown' otherwise.
  *
  * @author Ilayaperumal Gopinathan
  */
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE)
-public class CloudDataPromptProvider implements PromptProvider {
+public class DataFlowPromptProvider implements PromptProvider {
 
 	@Autowired
-	private CloudDataShell shell;
+	private DataFlowShell shell;
 
 	@Override
 	public String getProviderName() {
-		return "cloud-data";
+		return "dataflow";
 	}
 
 	@Override
 	public String getPrompt() {
-		if (shell.getCloudDataOperations() == null) {
+		if (shell.getDataFlowOperations() == null) {
 			return "server-unknown:>";
 		}
 		else {
-			return "cloud-data:>";
+			return "dataflow:>";
 		}
 	}
 }

@@ -27,7 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.dataflow.rest.client.TaskOperations;
 import org.springframework.cloud.dataflow.rest.resource.TaskDefinitionResource;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
-import org.springframework.cloud.dataflow.shell.config.CloudDataShell;
+import org.springframework.cloud.dataflow.shell.config.DataFlowShell;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.shell.core.CommandMarker;
 import org.springframework.shell.core.annotation.CliAvailabilityIndicator;
@@ -62,14 +62,11 @@ public class TaskCommands implements CommandMarker {
 
 
 	@Autowired
-	private CloudDataShell cloudDataShell;
-
-	@Autowired
-	private UserInput userInput;
+	private DataFlowShell dataFlowShell;
 
 	@CliAvailabilityIndicator({ LIST, CREATE, LAUNCH, STATUS, DESTROY })
 	public boolean available() {
-		return cloudDataShell.getCloudDataOperations() != null;
+		return dataFlowShell.getDataFlowOperations() != null;
 	}
 
 	@CliCommand(value = LIST, help = "List created tasks")
@@ -139,6 +136,6 @@ public class TaskCommands implements CommandMarker {
 	}
 	
 	private TaskOperations taskOperations() {
-		return cloudDataShell.getCloudDataOperations().taskOperations();
+		return dataFlowShell.getDataFlowOperations().taskOperations();
 	}
 }

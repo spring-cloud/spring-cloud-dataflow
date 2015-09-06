@@ -24,7 +24,7 @@ security:
 #      userInfoUri: https://uaa.run.pez.pivotal.io/userinfo
 spring:
   application:
-    name: spring-cloud-data-admin
+    name: spring-cloud-dataflow-admin
   cloud:
     config:
       uri: http://localhost:8888

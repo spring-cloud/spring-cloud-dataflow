@@ -90,7 +90,7 @@ public abstract class AbstractShellIntegrationTest {
 	/**
 	 * Instance of shell to execute commands for testing.
 	 */
-	private static CloudDataShell cloudDataShell;
+	private static DataFlowShell dataFlowShell;
 
 	/**
 	 * TCP port for the admin server.
@@ -121,15 +121,15 @@ public abstract class AbstractShellIntegrationTest {
 		if (!shell.isRunning()) {
 			shell.start();
 		}
-		cloudDataShell = new CloudDataShell(shell);
+		dataFlowShell = new DataFlowShell(shell);
 	}
 
 	@AfterClass
 	public static void shutdown() {
 		if (shutdownAfterRun) {
 			logger.info("Stopping Cloud Data Shell");
-			if (cloudDataShell != null) {
-				cloudDataShell.stop();
+			if (dataFlowShell != null) {
+				dataFlowShell.stop();
 			}
 			if (applicationContext != null) {
 				logger.info("Stopping Cloud Data Admin Server");
@@ -146,7 +146,7 @@ public abstract class AbstractShellIntegrationTest {
 	 * @return template for issuing stream commands
 	 */
 	protected StreamCommandTemplate stream() {
-		return new StreamCommandTemplate(cloudDataShell);
+		return new StreamCommandTemplate(dataFlowShell);
 	}
 
 	/**
@@ -156,7 +156,7 @@ public abstract class AbstractShellIntegrationTest {
 	 * @return template for issuing task commands
 	 */
 	protected TaskCommandTemplate task() {
-		return new TaskCommandTemplate(cloudDataShell);
+		return new TaskCommandTemplate(dataFlowShell);
 	}
 
 	// Util methods
@@ -181,11 +181,11 @@ public abstract class AbstractShellIntegrationTest {
 	}
 
 
-	private static class CloudDataShell extends JLineShellComponent {
+	private static class DataFlowShell extends JLineShellComponent {
 
 		private final JLineShellComponent shell;
 
-		public CloudDataShell(JLineShellComponent shell) {
+		public DataFlowShell(JLineShellComponent shell) {
 			this.shell = shell;
 		}
 

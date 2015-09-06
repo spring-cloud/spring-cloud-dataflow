@@ -31,7 +31,7 @@ import org.springframework.web.client.RestTemplate;
  *  @author Glenn Renfro
  *  @author Patrick Peralta
  */
-public class CloudDataTemplate implements CloudDataOperations {
+public class DataFlowTemplate implements DataFlowOperations {
 
 	/**
 	 * A template used for http interaction.
@@ -64,7 +64,7 @@ public class CloudDataTemplate implements CloudDataOperations {
 	private final ModuleOperations moduleOperations;
 
 
-	public CloudDataTemplate(URI baseURI) {
+	public DataFlowTemplate(URI baseURI) {
 		this.restTemplate = new RestTemplate();
 		restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
 		restTemplate.setErrorHandler(new VndErrorResponseErrorHandler(restTemplate.getMessageConverters()));

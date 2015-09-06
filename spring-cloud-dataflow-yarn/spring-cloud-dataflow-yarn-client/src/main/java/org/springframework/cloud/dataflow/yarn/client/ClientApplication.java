@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.dataflow.yarn.client;
 
 import java.util.ArrayList;
@@ -43,7 +44,7 @@ public class ClientApplication extends AbstractCli {
 		commands.add(new YarnPushCommand());
 		commands.add(new YarnPushedCommand());
 		commands.add(new YarnSubmitCommand());
-		commands.add(new YarnSubmittedCommand(new SubmittedOptionHandler("CLOUDDATA")));
+		commands.add(new YarnSubmittedCommand(new SubmittedOptionHandler("DATAFLOW")));
 		commands.add(new YarnKillCommand());
 		commands.add(new YarnShutdownCommand());
 		commands.add(new YarnClustersInfoCommand());

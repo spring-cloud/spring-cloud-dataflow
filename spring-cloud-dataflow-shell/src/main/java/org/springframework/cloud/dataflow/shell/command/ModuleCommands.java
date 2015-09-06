@@ -24,7 +24,7 @@ import org.springframework.cloud.dataflow.rest.client.ModuleOperations;
 import org.springframework.cloud.dataflow.rest.resource.DetailedModuleRegistrationResource;
 import org.springframework.cloud.dataflow.rest.resource.ModuleRegistrationResource;
 import org.springframework.cloud.dataflow.rest.resource.DetailedModuleRegistrationResource.Option;
-import org.springframework.cloud.dataflow.shell.config.CloudDataShell;
+import org.springframework.cloud.dataflow.shell.config.DataFlowShell;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.shell.core.CommandMarker;
 import org.springframework.shell.core.annotation.CliAvailabilityIndicator;
@@ -58,12 +58,12 @@ public class ModuleCommands implements CommandMarker {
 	private static final String REGISTER_MODULE = "module register";
 
 	@Autowired
-	private CloudDataShell cloudDataShell;
+	private DataFlowShell dataFlowShell;
 
 
 	@CliAvailabilityIndicator({LIST_MODULES, MODULE_INFO, UNREGISTER_MODULE, REGISTER_MODULE})
 	public boolean available() {
-		return cloudDataShell.getCloudDataOperations() != null;
+		return dataFlowShell.getDataFlowOperations() != null;
 	}
 
 	@CliCommand(value = MODULE_INFO, help = "Get information about a module")
@@ -182,7 +182,7 @@ public class ModuleCommands implements CommandMarker {
 	}
 
 	private ModuleOperations moduleOperations() {
-		return cloudDataShell.getCloudDataOperations().moduleOperations();
+		return dataFlowShell.getDataFlowOperations().moduleOperations();
 	}
 
 	/**

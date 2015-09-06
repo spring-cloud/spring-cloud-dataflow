@@ -21,7 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.dataflow.rest.client.CounterOperations;
 import org.springframework.cloud.dataflow.rest.resource.CounterResource;
 import org.springframework.cloud.dataflow.rest.resource.MetricResource;
-import org.springframework.cloud.dataflow.shell.config.CloudDataShell;
+import org.springframework.cloud.dataflow.shell.config.DataFlowShell;
 import org.springframework.cloud.dataflow.shell.converter.NumberFormatConverter;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.shell.core.CommandMarker;
@@ -51,11 +51,11 @@ public class CounterCommands extends AbstractMetricsCommands implements CommandM
 	private static final String DELETE_COUNTER = "counter reset";
 
 	@Autowired
-	private CloudDataShell cloudDataShell;
+	private DataFlowShell dataFlowShell;
 
 	@CliAvailabilityIndicator({ LIST_COUNTERS, DISPLAY_COUNTER, DELETE_COUNTER })
 	public boolean available() {
-		return cloudDataShell.getCloudDataOperations() != null;
+		return dataFlowShell.getDataFlowOperations() != null;
 	}
 
 	@CliCommand(value = DISPLAY_COUNTER, help = "Display the value of a counter")
@@ -84,7 +84,7 @@ public class CounterCommands extends AbstractMetricsCommands implements CommandM
 	}
 
 	private CounterOperations counterOperations() {
-		return cloudDataShell.getCloudDataOperations().counterOperations();
+		return dataFlowShell.getDataFlowOperations().counterOperations();
 	}
 
 }

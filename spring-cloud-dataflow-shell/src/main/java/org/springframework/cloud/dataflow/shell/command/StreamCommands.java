@@ -27,7 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.dataflow.rest.client.StreamOperations;
 import org.springframework.cloud.dataflow.rest.resource.StreamDefinitionResource;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
-import org.springframework.cloud.dataflow.shell.config.CloudDataShell;
+import org.springframework.cloud.dataflow.shell.config.DataFlowShell;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.shell.core.CommandMarker;
 import org.springframework.shell.core.annotation.CliAvailabilityIndicator;
@@ -66,7 +66,7 @@ public class StreamCommands implements CommandMarker {
 	private static final String PROPERTIES_FILE_OPTION = "propertiesFile";
 
 	@Autowired
-	private CloudDataShell cloudDataShell;
+	private DataFlowShell dataFlowShell;
 
 	@Autowired
 	private UserInput userInput;
@@ -74,7 +74,7 @@ public class StreamCommands implements CommandMarker {
 	@CliAvailabilityIndicator({ LIST_STREAM, CREATE_STREAM, DEPLOY_STREAM, UNDEPLOY_STREAM, UNDEPLOY_STREAM_ALL,
 		DESTROY_STREAM, DESTROY_STREAM_ALL })
 	public boolean available() {
-		return cloudDataShell.getCloudDataOperations() != null;
+		return dataFlowShell.getDataFlowOperations() != null;
 	}
 
 	@CliCommand(value = LIST_STREAM, help = "List created streams")
@@ -173,6 +173,6 @@ public class StreamCommands implements CommandMarker {
 	}
 
 	StreamOperations streamOperations() {
-		return cloudDataShell.getCloudDataOperations().streamOperations();
+		return dataFlowShell.getDataFlowOperations().streamOperations();
 	}
 }

@@ -301,7 +301,7 @@ public class YarnCloudAppStateMachineTests {
 
 		@Override
 		public String submitApplication(String appVersion) {
-			instance = "spring-cloud-data-yarn-app_" + appVersion;
+			instance = "spring-cloud-dataflow-yarn-app_" + appVersion;
 			submitApplicationCount.add(new Wrapper(appVersion));
 			submitApplicationLatch.countDown();
 			return "fakeApplicationId";

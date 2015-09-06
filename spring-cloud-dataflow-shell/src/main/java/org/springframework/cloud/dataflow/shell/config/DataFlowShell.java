@@ -14,33 +14,27 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.dataflow.rest.client;
+package org.springframework.cloud.dataflow.shell.config;
+
+import org.springframework.cloud.dataflow.rest.client.DataFlowOperations;
+import org.springframework.stereotype.Component;
 
 /**
- * Interface the REST clients implement to interact with spring-cloud-data REST API.
+ * REST client component that holds all the available operations for
+ * communicating with the Spring Cloud Data Flow REST server.
  *
  * @author Ilayaperumal Gopinathan
  */
-public interface CloudDataOperations {
+@Component
+public class DataFlowShell {
 
-	/**
-	 * Stream related operations.
-	 */
-	StreamOperations streamOperations();
+	private DataFlowOperations dataFlowOperations;
 
-	/**
-	 * Counter related operations.
-	 */
-	CounterOperations counterOperations();
+	public DataFlowOperations getDataFlowOperations() {
+		return dataFlowOperations;
+	}
 
-	/**
-	 * Task related operations.
-	 */
-	TaskOperations taskOperations();
-
-	/**
-	 * Module related operations.
-	 */
-	ModuleOperations moduleOperations();
-
+	public void setDataFlowOperations(DataFlowOperations dataFlowOperations) {
+		this.dataFlowOperations = dataFlowOperations;
+	}
 }

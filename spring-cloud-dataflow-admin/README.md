@@ -1,4 +1,4 @@
-# Spring Cloud Data Admin
+# Spring Cloud Data Flow Admin
 
 The `spring-cloud-dataflow-admin` subproject of `spring-cloud-dataflow` provides the REST API and UI via the executable boot-based `AdminApplication`.
 
@@ -76,10 +76,10 @@ spring:
          git:
            uri: https://github.com/myrepo/configurations
            repos:
-            spring-cloud-data-admin:
-              pattern: spring-cloud-data-admin
+            spring-cloud-dataflow-admin:
+              pattern: spring-cloud-dataflow-admin
               uri: https://github.com/myrepo/configurations
-              searchPaths: springDataAdmin
+              searchPaths: dataFlowAdmin
 ```
 
 ##### Fail Fast
@@ -90,6 +90,6 @@ property `spring.cloud.config.failFast=true` and the client will halt with an Ex
 ##### Note: 
 If the Admin cannot connect to the cloud config server, the
 following warning message will be logged: 
-`WARN 42924 --- [           main] c.c.c.ConfigServicePropertySourceLocator : Could not locate PropertySource: I/O error on GET request for "http://localhost:8888/spring-cloud-data-admin/default":Connection refused; nested exception is java.net.ConnectException: Connection refused`
+`WARN 42924 --- [           main] c.c.c.ConfigServicePropertySourceLocator : Could not locate PropertySource: I/O error on GET request for "http://localhost:8888/spring-cloud-dataflow-admin/default":Connection refused; nested exception is java.net.ConnectException: Connection refused`
 
 To disable the cloud config server set the `spring.cloud.config.enabled` property to false.

@@ -49,6 +49,6 @@ public class VndErrorResponseErrorHandler extends DefaultResponseErrorHandler {
 		catch (Exception e) {
 			super.handleError(response);
 		}
-		throw new CloudDataClientException(error);
+		throw new DataFlowClientException(error);
 	}
 }

@@ -86,7 +86,7 @@ public class DefaultYarnCloudAppService implements YarnCloudAppService {
 		Properties appProperties = new Properties();
 		appProperties.setProperty(PREFIX_YIA + "operation", "SUBMITTED");
 		appProperties.setProperty(PREFIX_YIA + "verbose", "false");
-		appProperties.setProperty(PREFIX_YIA + "type", "CLOUDDATA");
+		appProperties.setProperty(PREFIX_YIA + "type", "DATAFLOW");
 		app.appProperties(appProperties);
 		String info = runApp(app);
 		logger.debug("Full response for SUBMITTED: {}", info);
@@ -116,7 +116,7 @@ public class DefaultYarnCloudAppService implements YarnCloudAppService {
 
 	@Override
 	public String submitApplication(String appVersion) {
-		String appName = "spring-cloud-data-yarn-app_" + appVersion;
+		String appName = "spring-cloud-dataflow-yarn-app_" + appVersion;
 		YarnSubmitApplication app = new YarnSubmitApplication();
 		if (StringUtils.hasText(appName)) {
 			app.applicationName(appName);

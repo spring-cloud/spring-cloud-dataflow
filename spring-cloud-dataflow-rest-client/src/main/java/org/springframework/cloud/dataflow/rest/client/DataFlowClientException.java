@@ -25,11 +25,11 @@ import org.springframework.hateoas.VndErrors;
  * @author Mark Fisher
  */
 @SuppressWarnings("serial")
-public class CloudDataClientException extends RuntimeException {
+public class DataFlowClientException extends RuntimeException {
 
 	private VndErrors vndErrors;
 
-	public CloudDataClientException(VndErrors error) {
+	public DataFlowClientException(VndErrors error) {
 		this.vndErrors = error;
 	}
 

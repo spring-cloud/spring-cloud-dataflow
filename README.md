@@ -76,7 +76,7 @@ configured to point to the admin that is running on Lattice:
 ```
 server-unknown:>admin config server http://admin.192.168.11.11.xip.io
 Successfully targeted http://admin.192.168.11.11.xip.io
-cloud-data:>
+dataflow:>
 ```
 
 all stream commands are supported in the shell when running on Lattice:
@@ -113,7 +113,7 @@ $ hdfs dfs -rm -R /app/app
 4\. start `spring-cloud-dataflow-admin` with `yarn` profile
 
 ```
-$ java -Dspring.profiles.active=yarn -Dclouddata.yarn.app.appmaster.path=spring-cloud-dataflow-yarn/spring-cloud-dataflow-yarn-appmaster/target -Dclouddata.yarn.app.container.path=spring-cloud-dataflow-yarn/spring-cloud-dataflow-yarn-container/target -jar spring-cloud-dataflow-admin/target/spring-cloud-dataflow-admin-1.0.0.BUILD-SNAPSHOT.jar
+$ java -Dspring.profiles.active=yarn -Ddataflow.yarn.app.appmaster.path=spring-cloud-dataflow-yarn/spring-cloud-dataflow-yarn-appmaster/target -Ddataflow.yarn.app.container.path=spring-cloud-dataflow-yarn/spring-cloud-dataflow-yarn-container/target -jar spring-cloud-dataflow-admin/target/spring-cloud-dataflow-admin-1.0.0.BUILD-SNAPSHOT.jar
 ```
 
 5\. start `spring-cloud-dataflow-shell`
@@ -121,14 +121,14 @@ $ java -Dspring.profiles.active=yarn -Dclouddata.yarn.app.appmaster.path=spring-
 ```
 $ java -jar spring-cloud-dataflow-shell/target/spring-cloud-dataflow-shell-1.0.0.BUILD-SNAPSHOT.jar
 
-cloud-data:>stream create --name "ticktock" --definition "time --fixedDelay=5|log" --deploy
+dataflow:>stream create --name "ticktock" --definition "time --fixedDelay=5|log" --deploy
 
-cloud-data:>stream list
+dataflow:>stream list
   Stream Name  Stream Definition        Status
   -----------  -----------------------  --------
   ticktock     time --fixedDelay=5|log  deployed
 
-cloud-data:>stream destroy --name "ticktock"
+dataflow:>stream destroy --name "ticktock"
 Destroyed stream 'ticktock'
 ```
 
@@ -141,11 +141,11 @@ Hit TAB to complete. Type 'help' and hit RETURN for help, and 'exit' to quit.
 
 $ submitted
   APPLICATION ID                  USER          NAME                            QUEUE    TYPE       STARTTIME       FINISHTIME  STATE    FINALSTATUS  ORIGINAL TRACKING URL
-  ------------------------------  ------------  ----------------------------------  -------  ---------  --------------  ----------  -------  -----------  --------------------------
-  application_1439803106751_0088  jvalkealahti  spring-cloud-dataflow-yarn-app_app  default  CLOUDDATA  01/09/15 09:02  N/A         RUNNING  UNDEFINED    http://192.168.122.1:48913
+  ------------------------------  ------------  ----------------------------------  -------  --------  --------------  ----------  -------  -----------  --------------------------
+  application_1439803106751_0088  jvalkealahti  spring-cloud-dataflow-yarn-app_app  default  DATAFLOW  01/09/15 09:02  N/A         RUNNING  UNDEFINED    http://192.168.122.1:48913
 
 $ shutdown -a application_1439803106751_0088
 shutdown requested
 ```
 
-Properties `clouddata.yarn.app.appmaster.path` and `clouddata.yarn.app.container.path` can be used with both `spring-cloud-dataflow-admin` and `and spring-cloud-dataflow-yarn-client` to define directory for `appmaster` and `container` jars. Values for those default to `.` which then assumes all needed jars are in a same working directory.
+Properties `dataflow.yarn.app.appmaster.path` and `dataflow.yarn.app.container.path` can be used with both `spring-cloud-dataflow-admin` and `and spring-cloud-dataflow-yarn-client` to define directory for `appmaster` and `container` jars. Values for those default to `.` which then assumes all needed jars are in a same working directory.

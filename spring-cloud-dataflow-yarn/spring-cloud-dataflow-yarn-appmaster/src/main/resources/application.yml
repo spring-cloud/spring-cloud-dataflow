@@ -9,11 +9,11 @@ spring:
     resourceManagerHost: localhost
   yarn:
     appType: BOOT
-    appName: spring-cloud-data-yarn-app
+    appName: spring-cloud-dataflow-yarn-app
     applicationBaseDir: /app/
-    applicationDir: /app/spring-cloud-data-yarn-app/
+    applicationDir: /app/spring-cloud-dataflow-yarn-app/
     appmaster:
-      appmasterClass: org.springframework.cloud.data.yarn.appmaster.CloudDataAppmaster
+      appmasterClass: org.springframework.cloud.dataflow.yarn.appmaster.DataFlowAppmaster
       keepContextAlive: true
       containercluster:
         enabled: true
@@ -25,7 +25,7 @@ spring:
               virtualCores: 1
             launchcontext:
               locality: false
-              archiveFile: spring-cloud-data-yarn-container-@project.version@.jar
+              archiveFile: spring-cloud-dataflow-yarn-container-@project.version@.jar
     endpoints:
       containercluster:
         enabled: true

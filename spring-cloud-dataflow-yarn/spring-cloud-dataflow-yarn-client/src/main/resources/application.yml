@@ -9,15 +9,15 @@ spring:
     fsUri: hdfs://localhost:8020
     resourceManagerHost: localhost
   yarn:
-    appType: CLOUDDATA
-    appName: spring-cloud-data-yarn-app
+    appType: DATAFLOW
+    appName: spring-cloud-dataflow-yarn-app
     applicationBaseDir: /app/
     client:
       clientClass: org.springframework.yarn.client.DefaultApplicationYarnClient
       files:
-        - "file:${clouddata.yarn.app.appmaster.path:.}/spring-cloud-data-yarn-appmaster-@project.version@.jar"
-        - "file:${clouddata.yarn.app.container.path:.}/spring-cloud-data-yarn-container-@project.version@.jar"
+        - "file:${dataflow.yarn.app.appmaster.path:.}/spring-cloud-dataflow-yarn-appmaster-@project.version@.jar"
+        - "file:${dataflow.yarn.app.container.path:.}/spring-cloud-dataflow-yarn-container-@project.version@.jar"
       launchcontext:
-        archiveFile: spring-cloud-data-yarn-appmaster-@project.version@.jar
+        archiveFile: spring-cloud-dataflow-yarn-appmaster-@project.version@.jar
       resource:
         memory: 1g
