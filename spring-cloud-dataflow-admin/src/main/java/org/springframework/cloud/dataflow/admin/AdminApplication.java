@@ -29,7 +29,7 @@ import org.springframework.yarn.boot.YarnClientAutoConfiguration;
 import org.springframework.yarn.boot.YarnContainerAutoConfiguration;
 
 /**
- * Bootstrap class for Spring cloud data admin.
+ * Bootstrap class for Spring Cloud Data Flow Admin.
  *
  * @author Mark Fisher
  */

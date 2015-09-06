@@ -67,7 +67,7 @@ ltc create redis redis -r
 2\. launch the admin, with a mapping for port 9393 and extra memory (the default is 128MB):
 
 ```
-ltc create admin springcloud/data-admin -p 9393 -m 512
+ltc create admin springcloud/dataflow-admin -p 9393 -m 512
 ```
 
 3\. launching the shell is the same as above, but once running must be

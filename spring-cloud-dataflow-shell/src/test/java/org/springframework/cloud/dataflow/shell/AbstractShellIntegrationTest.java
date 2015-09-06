@@ -127,12 +127,12 @@ public abstract class AbstractShellIntegrationTest {
 	@AfterClass
 	public static void shutdown() {
 		if (shutdownAfterRun) {
-			logger.info("Stopping Cloud Data Shell");
+			logger.info("Stopping Data Flow Shell");
 			if (dataFlowShell != null) {
 				dataFlowShell.stop();
 			}
 			if (applicationContext != null) {
-				logger.info("Stopping Cloud Data Admin Server");
+				logger.info("Stopping Data Flow Admin Server");
 				SpringApplication.exit(applicationContext);
 				applicationContext = null;
 			}
@@ -140,8 +140,7 @@ public abstract class AbstractShellIntegrationTest {
 	}
 
 	/**
-	 * Return a {@link StreamCommandTemplate} for issuing shell based
-	 * stream commands.
+	 * Return a {@link StreamCommandTemplate} for issuing shell based stream commands.
 	 *
 	 * @return template for issuing stream commands
 	 */
@@ -150,8 +149,7 @@ public abstract class AbstractShellIntegrationTest {
 	}
 
 	/**
-	 * Return a {@link TaskCommandTemplate} for issuing shell based
-	 * task commands.
+	 * Return a {@link TaskCommandTemplate} for issuing shell based task commands.
 	 *
 	 * @return template for issuing task commands
 	 */

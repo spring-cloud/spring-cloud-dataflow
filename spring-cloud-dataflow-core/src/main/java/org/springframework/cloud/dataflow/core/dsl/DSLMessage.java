@@ -21,8 +21,8 @@ import static org.springframework.cloud.dataflow.core.dsl.DSLMessage.Kind.ERROR;
 import java.text.MessageFormat;
 
 /**
- * Contains all the messages that can be produced during Spring Cloud Data DSL
- * parsing. Each message has a kind (info, warn, error) and a code number.
+ * Contains all the messages that can be produced during Spring Cloud Data Flow
+ * DSL parsing. Each message has a kind (info, warn, error) and a code number.
  * Tests can be written to expect particular code numbers rather than
  * particular text, enabling the message text to more easily be modified
  * and the tests to run successfully in different locales.

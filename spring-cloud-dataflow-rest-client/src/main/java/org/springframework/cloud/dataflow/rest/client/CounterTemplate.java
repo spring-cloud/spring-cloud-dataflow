@@ -22,7 +22,7 @@ import org.springframework.hateoas.ResourceSupport;
 import org.springframework.web.client.RestTemplate;
 
 /**
- * Implementation for {@link CounterOperations} that interacts with the Spring Cloud Data REST API.
+ * Implementation for {@link CounterOperations} that interacts with the Spring Cloud Data Flow REST API.
  *
  * @author Eric Bottard
  */

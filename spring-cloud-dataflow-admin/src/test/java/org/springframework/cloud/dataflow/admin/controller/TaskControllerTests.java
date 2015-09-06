@@ -174,7 +174,7 @@ public class TaskControllerTests {
 	}
 
 	@Test
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({"unchecked", "rawtypes"})
 	@Ignore("Until we have a task module that is available in the remote repo")
 	public void testDeploy() throws Exception {
 		repository.save(new TaskDefinition("myTask", "task"));

@@ -160,7 +160,7 @@ public class RedisStreamDefinitionRepository implements StreamDefinitionReposito
 	@Override
 	public void delete(Iterable<? extends StreamDefinition> entities) {
 		List<String> names = entities instanceof Collection
-				? new ArrayList<String>(((Collection) entities).size())
+				? new ArrayList<String>(((Collection<?>) entities).size())
 				: new ArrayList<String>();
 
 		for (StreamDefinition sd : entities) {

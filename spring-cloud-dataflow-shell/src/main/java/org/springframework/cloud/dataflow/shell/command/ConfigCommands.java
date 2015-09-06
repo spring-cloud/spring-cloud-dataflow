@@ -56,7 +56,7 @@ public class ConfigCommands implements CommandMarker, InitializingBean {
 	@CliCommand(value = {"admin config server"}, help = "Configure the Spring Cloud Data Flow REST server to use")
 	public String target(
 			@CliOption(mandatory = false, key = {"", "uri"},
-					help = "the location of the Spring Cloud data REST endpoint",
+					help = "the location of the Spring Cloud Data Flow REST endpoint",
 					unspecifiedDefaultValue = DEFAULT_TARGET) String targetUriString) {
 		try {
 			URI baseURI = URI.create(targetUriString);
@@ -65,7 +65,7 @@ public class ConfigCommands implements CommandMarker, InitializingBean {
 		}
 		catch (Exception e) {
 			this.shell.setDataFlowOperations(null);
-			return(String.format("Unable to contact Cloud data main at '%s'.",
+			return(String.format("Unable to contact Data Flow Admin at '%s'.",
 							targetUriString));
 		}
 	}

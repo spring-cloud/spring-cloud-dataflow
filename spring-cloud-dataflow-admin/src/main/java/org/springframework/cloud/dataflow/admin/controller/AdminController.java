@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -45,8 +45,7 @@ public class AdminController {
 	/**
 	 * Construct an {@code AdminController}.
 	 *
-	 * @param entityLinks holder of links to controllers and their associated
-	 *                    entity types
+	 * @param entityLinks holder of links to controllers and their associated entity types
 	 */
 	@Autowired
 	public AdminController(EntityLinks entityLinks) {
