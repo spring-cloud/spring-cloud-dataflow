@@ -56,9 +56,10 @@ public class ApplicationModuleDeployer implements ModuleDeployer {
 		String applicationName = this.cloudFoundryModuleDeploymentConverter.toApplicationName(moduleDeploymentId);
 
 		PushBindAndStartApplicationResults response = this.resourceClient.pushBindAndStartApplication(new PushBindAndStartApplicationParameters()
+						.withEnvironment(this.cloudFoundryModuleDeploymentConverter.toModuleLauncherEnvironment(request))
+						.withInstances(request.getCount())
 						.withName(applicationName)
 						.withResource(properties.getModuleLauncherLocation())
-						.withEnvironment(this.cloudFoundryModuleDeploymentConverter.toModuleLauncherEnvironment(request))
 						.withServiceInstanceNames(this.properties.getServices())
 		);
 		if (!response.isCreateSucceeded()) {

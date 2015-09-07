@@ -26,10 +26,13 @@ import org.springframework.core.io.Resource;
  * Parameters for {@link CloudFoundryApplicationOperations#pushBindAndStartApplication(PushBindAndStartApplicationParameters) pushBindAndStartApplication()} operation.
  *
  * @author Steve Powell
+ * @author Paul Harris
  */
 class PushBindAndStartApplicationParameters {
 
 	private Map<String, String> environment;
+
+	private int instances = 1;
 
 	private String name;
 
@@ -43,6 +46,15 @@ class PushBindAndStartApplicationParameters {
 
 	public PushBindAndStartApplicationParameters withEnvironment(Map<String, String> environment) {
 		this.environment = environment;
+		return this;
+	}
+
+	public int getInstances() {
+		return instances;
+	}
+
+	public PushBindAndStartApplicationParameters withInstances(int instances) {
+		this.instances = instances;
 		return this;
 	}
 
@@ -72,4 +84,5 @@ class PushBindAndStartApplicationParameters {
 		this.serviceInstanceNames.addAll(serviceInstanceNames);
 		return this;
 	}
+
 }
