@@ -112,13 +112,8 @@ class CloudFoundryApplicationTemplate implements CloudFoundryApplicationOperatio
 		for (ResourceResponse<ApplicationEntity> application : applications) {
 			String applicationId = application.getMetadata().getId();
 			String applicationName = application.getEntity().getName();
-			String applicationState = application.getEntity().getState();
 
-			// TODO: decide what to do here
-			if (!"STARTED".equals(applicationState)) {
-				response.withApplication(applicationName, new ApplicationStatus());
-			}
-			else {
+			try {
 				GetApplicationStatisticsRequest statsRequest = new GetApplicationStatisticsRequest()
 						.withId(applicationId);
 
@@ -126,6 +121,10 @@ class CloudFoundryApplicationTemplate implements CloudFoundryApplicationOperatio
 				response.withApplication(applicationName, new ApplicationStatus()
 						.withId(applicationId)
 						.withInstances(statsResponse));
+			}
+			catch (RestClientException rce) {
+				// TODO: Log the error?
+				response.withApplication(applicationName, new ApplicationStatus());
 			}
 		}
 

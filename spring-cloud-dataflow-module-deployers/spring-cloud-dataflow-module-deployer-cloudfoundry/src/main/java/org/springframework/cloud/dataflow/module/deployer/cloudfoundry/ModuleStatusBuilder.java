@@ -56,9 +56,15 @@ class ModuleStatusBuilder {
 		return this;
 	}
 
-	// TODO: Find out what the application state candidates are
 	private static ModuleStatus.State convertState(String state) {
 		switch (state) {
+			case "STARTED":
+			case "STARTING":
+			case "STOPPED":
+				return ModuleStatus.State.deploying;
+			case "CRASHED":
+			case "CRASHING":
+				return ModuleStatus.State.failed;
 			case "RUNNING":
 				return ModuleStatus.State.deployed;
 			default:
