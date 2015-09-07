@@ -140,7 +140,7 @@ class CloudFoundryApplicationTemplate implements CloudFoundryApplicationOperatio
 		CreateApplicationRequest createRequest = new CreateApplicationRequest()
 				.withSpaceId(this.spaceId)
 				.withName(parameters.getName())
-				.withInstances(1) // TODO: use the correct instances value
+				.withInstances(parameters.getInstances())
 				.withBuildpack(DEFAULT_BUILDPACK)
 				.withMemory(DEFAULT_MEMORY)
 				.withState("STOPPED")
