@@ -25,20 +25,18 @@ import org.yaml.snakeyaml.Yaml;
 import org.springframework.cloud.dataflow.core.ModuleDeploymentId;
 import org.springframework.cloud.dataflow.core.ModuleDeploymentRequest;
 import org.springframework.cloud.dataflow.module.deployer.ModuleArgumentQualifier;
-import org.springframework.core.io.Resource;
 
 /**
  * Converts between Module information and Application information.
- * Sole owner of correspondence between module ids and application names; also builds environment for the module launcher application.
+ * Sole owner of correspondence between module ids and application names;
+ * also builds environment for the module launcher application.
  *
  * @author Steve Powell
  */
 class CloudFoundryModuleDeploymentConverter {
 
 	//TODO: validate the prefixing strategy
-	private static final String APPLICATION_PREFIX = "spring_cloud_data_";
-
-	private Resource moduleLauncherResource;
+	private static final String APPLICATION_PREFIX = "spring_cloud_dataflow_";
 
 	String toApplicationName(ModuleDeploymentId moduleDeploymentId) {
 		return APPLICATION_PREFIX + moduleDeploymentId.toString();
