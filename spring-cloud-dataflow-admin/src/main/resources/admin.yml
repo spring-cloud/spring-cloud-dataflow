@@ -2,26 +2,24 @@ server:
   port: 9393
 management:
   contextPath: /management
-#cloudfoundry:
-#  apiEndpoint: https://api.run.pez.pivotal.io
+cloudfoundry:
+  space: ${vcap.application.space_name:development}
+#  apiEndpoint: https://api.run.pivotal.io
 #  organization: org
-#  space: development
-#  domain: cfapps.pez.pivotal.io
+#  domain: cfapps.io
 #  services: redis
 
 security:
   basic:
     enabled: false
-#  oauth2:
-#    client:
-#      access-token-uri: https://login.run.pez.pivotal.io/oauth/token
-#      grantType: password
-#      client-id: cf
+  oauth2:
+    client:
+      grantType: password
+      client-id: cf
+#      access-token-uri: https://uaa.run.pivotal.io/oauth/token
 #      password: user-password
-#      user-authorization-uri: https://login.run.pez.pivotal.io/oauth/authorize
+#      user-authorization-uri: https://login.run.pivotal.io/oauth/authorize
 #      username: username
-#    resource:
-#      userInfoUri: https://uaa.run.pez.pivotal.io/userinfo
 spring:
   application:
     name: spring-cloud-dataflow-admin
