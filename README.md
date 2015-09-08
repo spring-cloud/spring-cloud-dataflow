@@ -91,11 +91,84 @@ all stream commands are supported in the shell when running on Lattice:
 
 ## Running on Cloud Foundry
 
-*work in progress, stay tuned!*
+Spring Cloud Data Flow can be used to deploy modules in a Cloud Foundry
+environment. When doing so, the [Admin](https://github.com/spring-cloud/spring-cloud-dataflow/tree/master/spring-cloud-dataflow-admin) application can either run itself on Cloud Foundry, or on another installation (_e.g._ a simple laptop).
+
+The required configuration amounts to the same, and is merely related to providing credentials to the Cloud Foundry instance, so that the admin can spawn applications itself. Any Spring Boot compatible configuration mechanism can be used (passing program arguments, editing configuration files before building the application, using [Spring Cloud Config](https://github.com/spring-cloud/spring-cloud-config), using environment variables, _etc._), although although some may prove more adequate than others when running _on_ Cloud Foundry.
+
+1\. provision a redis service instance on Cloud Foundry.
+Your mileage may vary depending on your Cloud Foundry installation. Use `cf marketplace` to discover which plans are available to you. For example when using [Pivotal Web Services](https://run.pivotal.io/):
+```
+cf create-service rediscloud 30mb my-redis
+```
+
+2\. build packages
+
+```
+$ mvn clean package
+```
+
+3a\. push the admin application on Cloud Foundry
+
+```
+cf push s-c-dataflow-admin --no-start -p spring-cloud-dataflow-admin/target/spring-cloud-dataflow-admin-1.0.0.BUILD-SNAPSHOT.jar
+```
+
+alternatively,
+
+3b\. run the admin application locally, targeting your Cloud Foundry installation (see below for configuration)
+
+```
+java -jar spring-cloud-dataflow-admin/target/spring-cloud-dataflow-admin-1.0.0.BUILD-SNAPSHOT.jar [--option1=value1] [--option2=value2] [etc.]
+```
+
+4\. run the shell and optionally target the Admin application if not running on the same host (will typically be the case if deployed on Cloud Foundry as **3a.**)
+```
+$ java -jar spring-cloud-dataflow-shell/target/spring-cloud-dataflow-shell-1.0.0.BUILD-SNAPSHOT.jar
+```
+```
+server-unknown:>admin config server http://s-c-dataflow-admin.cfapps.io
+Successfully targeted http://s-c-dataflow-admin.cfapps.io
+dataflow:>
+```
+
+At step **3.**, either running _on_ Cloud Foundry or _targeting_ Cloud Foundry, the following pieces of configuration must be provided, for example using `cf env s-c-dataflow-admin CLOUDFOUNDRY_DOMAIN mydomain.cfapps.io` (note the use of underscores) when running _in_ Cloud Foundry
+
+```
+# Default values cited after the equal sign.
+# Example values, typical for Pivotal Web Services, cited as a comment
+
+# url of the CF API (used when using cf login -a for example), e.g. https://api.run.pivotal.io
+cloudfoundry.apiEndpoint=
+
+# name of the space into which modules will be deployed
+cloudfoundry.space=<same as admin when running on CF or 'development'>
+
+# name of the organization that owns the space above, e.g. youruser-org
+cloudfoundry.organization=
+
+# the root domain to use when mapping routes, e.g. cfapps.io
+cloudfoundry.domain=
+
+# Comma separated set of service instance names to bind to the module.
+# Amongst other things, this should include a service that will be used
+# for Spring Cloud Stream binding
+cloudfoundry.services=redis
+
+# url used for obtaining an OAuth2 token, e.g. https://uaa.run.pivotal.io/oauth/token
+security.oauth2.client.access-token-uri=
+
+# url used to grant user authorizations, e.g. https://login.run.pivotal.io/oauth/authorize
+security.oauth2.client.user-authorization-uri=
+
+# username and password of the user to use to create apps (modules)
+security.oauth2.client.username=
+security.oauth2.client.password=
+```
 
 ## Running on Hadoop YARN
 
-Current YARN configuration is set to use localhost meaning this can only be run against local cluster. Also all commands needs to be run from a project root.
+Current YARN configuration is set to use localhost meaning this can only be run against local cluster. Also all commands need to be run from a project root.
 
 1\. build packages
 
