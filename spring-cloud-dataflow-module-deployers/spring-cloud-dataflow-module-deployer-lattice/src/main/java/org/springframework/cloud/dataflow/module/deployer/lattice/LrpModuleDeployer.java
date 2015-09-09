@@ -80,8 +80,8 @@ public class LrpModuleDeployer implements ModuleDeployer {
 		lrp.setMemoryMb(512);
 		lrp.setPorts(new int[] {8080, 9000});
 
-		lrp.addRoute(8080, new String[] {guid + "." + BASE_ADDRESS, guid + "-8080." + BASE_ADDRESS});
-		lrp.addRoute(9000, new String[] {guid + "-9000." + BASE_ADDRESS});
+		lrp.addHttpRoute(8080, new String[] {guid + "." + BASE_ADDRESS, guid + "-8080." + BASE_ADDRESS});
+		lrp.addHttpRoute(9000, new String[] {guid + "-9000." + BASE_ADDRESS});
 
 		logger.debug("Desired LRP: {}", lrp);
 		for (EnvironmentVariable e : environmentVariables) {
