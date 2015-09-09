@@ -48,6 +48,10 @@ public class LrpModuleDeployer implements ModuleDeployer {
 
 	public static final String BASE_ADDRESS = "192.168.11.11.xip.io";
 
+	private static final String SERVER_PORT_KEY = "server.port";
+
+	private static final int DEFAULT_SERVER_PORT = 8080;
+
 	private final ReceptorClient receptorClient = new ReceptorClient();
 
 	private final StatusMapper receptorProcessStatusMapper = new StatusMapper();
@@ -78,10 +82,11 @@ public class LrpModuleDeployer implements ModuleDeployer {
 		}
 		lrp.setEnv(environmentVariables.toArray(new EnvironmentVariable[environmentVariables.size()]));
 		lrp.setMemoryMb(512);
-		lrp.setPorts(new int[] {8080, 9000});
-
-		lrp.addHttpRoute(8080, new String[] {guid + "." + BASE_ADDRESS, guid + "-8080." + BASE_ADDRESS});
-		lrp.addHttpRoute(9000, new String[] {guid + "-9000." + BASE_ADDRESS});
+		int serverPort = StringUtils.hasText(qualifiedArgs.get(SERVER_PORT_KEY)) ?
+				Integer.valueOf(qualifiedArgs.get(SERVER_PORT_KEY)) : DEFAULT_SERVER_PORT;
+		lrp.setPorts(new int[] {serverPort});
+		lrp.addHttpRoute(serverPort, new String[] {String.format("%s.%s", guid, BASE_ADDRESS),
+				String.format("%s-%s.%s", guid, serverPort, BASE_ADDRESS) });
 
 		logger.debug("Desired LRP: {}", lrp);
 		for (EnvironmentVariable e : environmentVariables) {
