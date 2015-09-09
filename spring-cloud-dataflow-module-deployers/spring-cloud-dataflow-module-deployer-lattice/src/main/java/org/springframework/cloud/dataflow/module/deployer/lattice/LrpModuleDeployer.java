@@ -48,10 +48,6 @@ public class LrpModuleDeployer implements ModuleDeployer {
 
 	public static final String BASE_ADDRESS = "192.168.11.11.xip.io";
 
-	private static final String SERVER_PORT_KEY = "server.port";
-
-	private static final int DEFAULT_SERVER_PORT = 8080;
-
 	private final ReceptorClient receptorClient = new ReceptorClient();
 
 	private final StatusMapper receptorProcessStatusMapper = new StatusMapper();
@@ -76,16 +72,14 @@ public class LrpModuleDeployer implements ModuleDeployer {
 		Map<String, String> rawArgs = new HashMap<>();
 		rawArgs.putAll(request.getDefinition().getParameters());
 		rawArgs.putAll(request.getDeploymentProperties());
-		int index = 0;
-		Map<String, String> qualifiedArgs = ModuleArgumentQualifier.qualifyArgs(index, rawArgs);
+		Map<String, String> qualifiedArgs = ModuleArgumentQualifier.qualifyArgs(0, rawArgs);
 		for (Map.Entry<String, String> entry : qualifiedArgs.entrySet()) {
 			environmentVariables.add(new EnvironmentVariable(entry.getKey(), entry.getValue()));
 		}
 		lrp.setEnv(environmentVariables.toArray(new EnvironmentVariable[environmentVariables.size()]));
 		lrp.setMemoryMb(512);
-		String argsPrefix = String.format("%s.%s.", "args", index);
-		int serverPort = StringUtils.hasText(qualifiedArgs.get(argsPrefix + SERVER_PORT_KEY)) ?
-				Integer.valueOf(qualifiedArgs.get(argsPrefix + SERVER_PORT_KEY)) : DEFAULT_SERVER_PORT;
+		int serverPort = rawArgs.containsKey(SERVER_PORT_KEY) ?
+				Integer.valueOf(rawArgs.get(SERVER_PORT_KEY)) : DEFAULT_SERVER_PORT;
 		lrp.setPorts(new int[] {serverPort});
 		lrp.addHttpRoute(serverPort, new String[] {String.format("%s.%s", guid, BASE_ADDRESS),
 				String.format("%s-%s.%s", guid, serverPort, BASE_ADDRESS) });

@@ -70,12 +70,12 @@ public class LocalModuleDeployer implements ModuleDeployer {
 
 		logger.info("deploying module: {}", module);
 		int port;
-		if (args.containsKey("server.port")) {
-			port = Integer.parseInt(args.get("server.port"));
+		if (args.containsKey(SERVER_PORT_KEY)) {
+			port = Integer.parseInt(args.get(SERVER_PORT_KEY));
 		}
 		else {
-			port = SocketUtils.findAvailableTcpPort(8080);
-			args.put("server.port", String.valueOf(port));
+			port = SocketUtils.findAvailableTcpPort(DEFAULT_SERVER_PORT);
+			args.put(SERVER_PORT_KEY, String.valueOf(port));
 		}
 		URL moduleUrl;
 		try {
