@@ -33,6 +33,10 @@ import org.springframework.cloud.dataflow.module.ModuleStatus;
  */
 public interface ModuleDeployer {
 
+	public static final String SERVER_PORT_KEY = "server.port";
+
+	public static final int DEFAULT_SERVER_PORT = 8080;
+
 	/**
 	 * Handle the given {@code ModuleDeploymentRequest}. Implementations
 	 * may perform this operation asynchronously; therefore

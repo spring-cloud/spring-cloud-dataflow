@@ -78,10 +78,11 @@ public class LrpModuleDeployer implements ModuleDeployer {
 		}
 		lrp.setEnv(environmentVariables.toArray(new EnvironmentVariable[environmentVariables.size()]));
 		lrp.setMemoryMb(512);
-		lrp.setPorts(new int[] {8080, 9000});
-
-		lrp.addHttpRoute(8080, new String[] {guid + "." + BASE_ADDRESS, guid + "-8080." + BASE_ADDRESS});
-		lrp.addHttpRoute(9000, new String[] {guid + "-9000." + BASE_ADDRESS});
+		int serverPort = rawArgs.containsKey(SERVER_PORT_KEY) ?
+				Integer.valueOf(rawArgs.get(SERVER_PORT_KEY)) : DEFAULT_SERVER_PORT;
+		lrp.setPorts(new int[] {serverPort});
+		lrp.addHttpRoute(serverPort, new String[] {String.format("%s.%s", guid, BASE_ADDRESS),
+				String.format("%s-%s.%s", guid, serverPort, BASE_ADDRESS) });
 
 		logger.debug("Desired LRP: {}", lrp);
 		for (EnvironmentVariable e : environmentVariables) {
