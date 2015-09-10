@@ -226,3 +226,17 @@ shutdown requested
 ```
 
 Properties `dataflow.yarn.app.appmaster.path` and `dataflow.yarn.app.container.path` can be used with both `spring-cloud-dataflow-admin` and `and spring-cloud-dataflow-yarn-client` to define directory for `appmaster` and `container` jars. Values for those default to `.` which then assumes all needed jars are in a same working directory.
+
+## Building from Source
+
+	$ mvn clean install
+
+### Building reference documentation
+
+You can build the reference documentation with the command below:
+
+	$ mvn clean install -pl spring-boot-docs -Pfull
+
+> TIP: The generated documentation is available from `spring-cloud-dataflow-docs/target/contents/reference`
+
+

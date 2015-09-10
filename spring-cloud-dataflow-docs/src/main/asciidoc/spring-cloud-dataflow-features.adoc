@@ -1,0 +1,12 @@
+[[dataflow-features]]
+= Spring Cloud Dataflow features
+
+[partintro]
+--
+This section dives into the details of Spring Cloud Dataflow. Here you can learn about the key
+features that you will want to use and customize. If you haven't already, you might want
+to read the _<<getting-started.adoc#getting-started>>_ and
+_<<using-spring-cloud-dataflow.adoc#using-dataflow>>_ sections so that you have a good grounding
+of the basics.
+--
+
