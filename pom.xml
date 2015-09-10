@@ -4,11 +4,11 @@
 	<artifactId>spring-cloud-dataflow-parent</artifactId>
 	<version>1.0.0.BUILD-SNAPSHOT</version>
 	<packaging>pom</packaging>
-    <url>http://cloud.spring.io/spring-cloud-dataflow/</url>
-    <organization>
-        <name>Pivotal Software, Inc.</name>
-        <url>http://www.spring.io</url>
-    </organization>
+	<url>http://cloud.spring.io/spring-cloud-dataflow/</url>
+	<organization>
+		<name>Pivotal Software, Inc.</name>
+		<url>http://www.spring.io</url>
+	</organization>
 	<parent>
 		<groupId>org.springframework.cloud</groupId>
 		<artifactId>spring-cloud-build</artifactId>
