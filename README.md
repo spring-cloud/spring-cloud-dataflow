@@ -99,7 +99,7 @@ The required configuration amounts to the same, and is merely related to providi
 1\. provision a redis service instance on Cloud Foundry.
 Your mileage may vary depending on your Cloud Foundry installation. Use `cf marketplace` to discover which plans are available to you. For example when using [Pivotal Web Services](https://run.pivotal.io/):
 ```
-cf create-service rediscloud 30mb my-redis
+cf create-service rediscloud 30mb redis
 ```
 
 2\. build packages
@@ -108,10 +108,13 @@ cf create-service rediscloud 30mb my-redis
 $ mvn clean package
 ```
 
-3a\. push the admin application on Cloud Foundry
+3a\. push the admin application on Cloud Foundry, configure it (see below) and start it
 
 ```
 cf push s-c-dataflow-admin --no-start -p spring-cloud-dataflow-admin/target/spring-cloud-dataflow-admin-1.0.0.BUILD-SNAPSHOT.jar
+cf bind-service s-c-dataflow-admin redis
+... configure it ...
+cf start s-c-dataflow-admin
 ```
 
 alternatively,

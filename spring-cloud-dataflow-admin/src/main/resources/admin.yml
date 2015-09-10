@@ -15,6 +15,7 @@ security:
   oauth2:
     client:
       grantType: password
+      id: cf
       client-id: cf
 #      access-token-uri: https://uaa.run.pivotal.io/oauth/token
 #      password: user-password
