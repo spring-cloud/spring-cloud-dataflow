@@ -212,55 +212,81 @@ public class StreamController {
 		deployStream(stream, DeploymentPropertiesUtils.parse(properties));
 	}
 
-	private void deployStream(StreamDefinition stream, Map<String, String> deploymentProperties) {
-		if (deploymentProperties == null) {
-			deploymentProperties = Collections.emptyMap();
+	private void deployStream(StreamDefinition stream, Map<String, String> cumulatedDeploymentProperties) {
+		if (cumulatedDeploymentProperties == null) {
+			cumulatedDeploymentProperties = Collections.emptyMap();
 		}
 		Iterator<ModuleDefinition> iterator = stream.getDeploymentOrderIterator();
+		Iterator<ModuleDefinition> iteratorHolder = stream.getDeploymentOrderIterator();
 		int nextModuleCount = 0;
 		boolean isDownStreamModulePartitioned = false;
+		ModuleDefinition upstreamModule = null;
 		for (int i = 0; iterator.hasNext(); i++) {
-			ModuleDefinition module = iterator.next();
+			ModuleDefinition currentModule = iterator.next();
 			ModuleType type = (i == 0) ? ModuleType.sink
 					: (iterator.hasNext() ? ModuleType.processor : ModuleType.source);
-			ModuleRegistration registration = this.registry.find(module.getName(), type);
+			ModuleRegistration registration = this.registry.find(currentModule.getName(), type);
 			if (registration == null) {
 				throw new IllegalArgumentException(String.format(
-						"Module %s of type %s not found in registry", module.getName(), type));
+						"Module %s of type %s not found in registry", currentModule.getName(), type));
 			}
 			ModuleCoordinates coordinates = registration.getCoordinates();
-			Map<String, String> moduleDeploymentProperties = new HashMap<>();
-			String wildCardPrefix = "module.*.";
-			// first check for wild card prefix
-			for (Map.Entry<String, String> entry : deploymentProperties.entrySet()) {
-				if (entry.getKey().startsWith(wildCardPrefix)) {
-					moduleDeploymentProperties.put(entry.getKey().substring(wildCardPrefix.length()), entry.getValue());
-				}
-			}
-			String modulePrefix = String.format("module.%s.", module.getLabel());
-			for (Map.Entry<String, String> entry : deploymentProperties.entrySet()) {
-				if (entry.getKey().startsWith(modulePrefix)) {
-					moduleDeploymentProperties.put(entry.getKey().substring(modulePrefix.length()), entry.getValue());
-				}
-			}
+			Map<String, String> moduleDeploymentProperties = getModuleDeploymentProperties(currentModule, cumulatedDeploymentProperties);
+			boolean upstreamModuleSupportsPartition = upstreamModuleHasPartitionInfo(stream, currentModule, cumulatedDeploymentProperties);
 			// consumer module partition properties
-			if (isPartitionedConsumer(module, moduleDeploymentProperties)) {
+			if (isPartitionedConsumer(currentModule, moduleDeploymentProperties, upstreamModuleSupportsPartition)) {
 				updateConsumerPartitionProperties(moduleDeploymentProperties);
 			}
 			// producer module partition properties
 			if (isDownStreamModulePartitioned) {
 				updateProducerPartitionProperties(moduleDeploymentProperties, nextModuleCount);
 			}
-			this.deployer.deploy(new ModuleDeploymentRequest(module, coordinates, moduleDeploymentProperties));
+			this.deployer.deploy(new ModuleDeploymentRequest(currentModule, coordinates, moduleDeploymentProperties));
 			nextModuleCount = getNextModuleCount(moduleDeploymentProperties);
-			isDownStreamModulePartitioned = isPartitionedConsumer(module, moduleDeploymentProperties);
+			isDownStreamModulePartitioned = isPartitionedConsumer(currentModule, moduleDeploymentProperties,
+					upstreamModuleSupportsPartition);
 		}
 	}
 
-	private boolean isPartitionedConsumer(ModuleDefinition module, Map<String, String> properties) {
-		return module.getParameters().containsKey(BindingProperties.INPUT_BINDING_KEY) &&
+	private Map<String, String> getModuleDeploymentProperties(ModuleDefinition module, Map<String, String> deploymentProperties) {
+		Map<String, String> moduleDeploymentProperties = new HashMap<>();
+		String wildCardPrefix = "module.*.";
+		// first check for wild card prefix
+		for (Map.Entry<String, String> entry : deploymentProperties.entrySet()) {
+			if (entry.getKey().startsWith(wildCardPrefix)) {
+				moduleDeploymentProperties.put(entry.getKey().substring(wildCardPrefix.length()), entry.getValue());
+			}
+		}
+		String modulePrefix = String.format("module.%s.", module.getLabel());
+		for (Map.Entry<String, String> entry : deploymentProperties.entrySet()) {
+			if (entry.getKey().startsWith(modulePrefix)) {
+				moduleDeploymentProperties.put(entry.getKey().substring(modulePrefix.length()), entry.getValue());
+			}
+		}
+		return moduleDeploymentProperties;
+	}
+
+	private boolean upstreamModuleHasPartitionInfo(StreamDefinition stream, ModuleDefinition currentModule,
+			Map<String, String> cumulatedDeploymentProperties) {
+		Iterator<ModuleDefinition> iterator = stream.getDeploymentOrderIterator();
+		while (iterator.hasNext()) {
+			ModuleDefinition module = iterator.next();
+			if (module.equals(currentModule) && iterator.hasNext()) {
+				ModuleDefinition prevModule = iterator.next();
+				Map<String, String> moduleDeploymentProperties = getModuleDeploymentProperties(prevModule, cumulatedDeploymentProperties);
+				return moduleDeploymentProperties.containsKey(BindingProperties.PARTITION_KEY_EXPRESSION) ||
+						moduleDeploymentProperties.containsKey(BindingProperties.PARTITION_KEY_EXTRACTOR_CLASS);
+			}
+		}
+		return false;
+	}
+
+	private boolean isPartitionedConsumer(ModuleDefinition module, Map<String, String> properties,
+			boolean upstreamModuleSupportsPartition) {
+		return upstreamModuleSupportsPartition ||
+				(module.getParameters().containsKey(BindingProperties.INPUT_BINDING_KEY) &&
 				properties.containsKey(BindingProperties.PARTITIONED_PROPERTY) &&
-				properties.get(BindingProperties.PARTITIONED_PROPERTY).equalsIgnoreCase("true");
+				properties.get(BindingProperties.PARTITIONED_PROPERTY).equalsIgnoreCase("true"));
 	}
 
 	private void updateConsumerPartitionProperties(Map<String, String> properties) {
