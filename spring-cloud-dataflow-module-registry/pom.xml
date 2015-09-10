@@ -4,11 +4,6 @@
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>spring-cloud-dataflow-module-registry</artifactId>
 	<packaging>jar</packaging>
-	<url>http://projects.spring.io/spring-xd/</url>
-	<organization>
-		<name>Pivotal Software, Inc.</name>
-		<url>http://www.spring.io</url>
-	</organization>
 	<parent>
 		<groupId>org.springframework.cloud</groupId>
 		<artifactId>spring-cloud-dataflow-parent</artifactId>
