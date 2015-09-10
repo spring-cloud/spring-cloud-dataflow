@@ -76,6 +76,7 @@ public class ModuleRegistryPopulator {
 		populateDefault("ftp", source);
 		populateDefault("http", source);
 		populateDefault("time", source);
+		populateDefault("twitterstream", source);
 		populateDefault("filter", processor);
 		populateDefault("groovy-filter", processor);
 		populateDefault("groovy-transform", processor);
