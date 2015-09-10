@@ -34,6 +34,7 @@ import org.springframework.cloud.dataflow.core.ModuleDefinition;
 import org.springframework.cloud.dataflow.core.ModuleDeploymentId;
 import org.springframework.cloud.dataflow.core.ModuleDeploymentRequest;
 import org.springframework.cloud.dataflow.core.ModuleType;
+import org.springframework.cloud.dataflow.core.BindingProperties;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.module.ModuleStatus;
 import org.springframework.cloud.dataflow.module.deployer.ModuleDeployer;
@@ -89,6 +90,8 @@ public class StreamController {
 	 * Assembler for {@link StreamDefinitionResource} objects.
 	 */
 	private final Assembler streamAssembler = new Assembler();
+
+	private static final String DEFAULT_PARTITION_KEY_EXPRESSION = "payload";
 
 	/**
 	 * Create a {@code StreamController} that delegates
@@ -209,37 +212,116 @@ public class StreamController {
 		deployStream(stream, DeploymentPropertiesUtils.parse(properties));
 	}
 
-	private void deployStream(StreamDefinition stream, Map<String, String> deploymentProperties) {
-		if (deploymentProperties == null) {
-			deploymentProperties = Collections.emptyMap();
+	private void deployStream(StreamDefinition stream, Map<String, String> cumulatedDeploymentProperties) {
+		if (cumulatedDeploymentProperties == null) {
+			cumulatedDeploymentProperties = Collections.emptyMap();
 		}
 		Iterator<ModuleDefinition> iterator = stream.getDeploymentOrderIterator();
+		Iterator<ModuleDefinition> iteratorHolder = stream.getDeploymentOrderIterator();
+		int nextModuleCount = 0;
+		boolean isDownStreamModulePartitioned = false;
+		ModuleDefinition upstreamModule = null;
 		for (int i = 0; iterator.hasNext(); i++) {
-			ModuleDefinition module = iterator.next();
+			ModuleDefinition currentModule = iterator.next();
 			ModuleType type = (i == 0) ? ModuleType.sink
 					: (iterator.hasNext() ? ModuleType.processor : ModuleType.source);
-			ModuleRegistration registration = this.registry.find(module.getName(), type);
+			ModuleRegistration registration = this.registry.find(currentModule.getName(), type);
 			if (registration == null) {
 				throw new IllegalArgumentException(String.format(
-						"Module %s of type %s not found in registry", module.getName(), type));
+						"Module %s of type %s not found in registry", currentModule.getName(), type));
 			}
 			ModuleCoordinates coordinates = registration.getCoordinates();
-			Map<String, String> moduleDeploymentProperties = new HashMap<>();
-			String wildCardPrefix = "module.*.";
-			// first check for wild card prefix
-			for (Map.Entry<String, String> entry : deploymentProperties.entrySet()) {
-				if (entry.getKey().startsWith(wildCardPrefix)) {
-					moduleDeploymentProperties.put(entry.getKey().substring(wildCardPrefix.length()), entry.getValue());
-				}
+			Map<String, String> moduleDeploymentProperties = getModuleDeploymentProperties(currentModule, cumulatedDeploymentProperties);
+			boolean upstreamModuleSupportsPartition = upstreamModuleHasPartitionInfo(stream, currentModule, cumulatedDeploymentProperties);
+			// consumer module partition properties
+			if (isPartitionedConsumer(currentModule, moduleDeploymentProperties, upstreamModuleSupportsPartition)) {
+				updateConsumerPartitionProperties(moduleDeploymentProperties);
 			}
-			String modulePrefix = String.format("module.%s.", module.getLabel());
-			for (Map.Entry<String, String> entry : deploymentProperties.entrySet()) {
-				if (entry.getKey().startsWith(modulePrefix)) {
-					moduleDeploymentProperties.put(entry.getKey().substring(modulePrefix.length()), entry.getValue());
-				}
+			// producer module partition properties
+			if (isDownStreamModulePartitioned) {
+				updateProducerPartitionProperties(moduleDeploymentProperties, nextModuleCount);
 			}
- 			this.deployer.deploy(new ModuleDeploymentRequest(module, coordinates, moduleDeploymentProperties));
+			this.deployer.deploy(new ModuleDeploymentRequest(currentModule, coordinates, moduleDeploymentProperties));
+			nextModuleCount = getNextModuleCount(moduleDeploymentProperties);
+			isDownStreamModulePartitioned = isPartitionedConsumer(currentModule, moduleDeploymentProperties,
+					upstreamModuleSupportsPartition);
 		}
+	}
+
+	private Map<String, String> getModuleDeploymentProperties(ModuleDefinition module, Map<String, String> deploymentProperties) {
+		Map<String, String> moduleDeploymentProperties = new HashMap<>();
+		String wildCardPrefix = "module.*.";
+		// first check for wild card prefix
+		for (Map.Entry<String, String> entry : deploymentProperties.entrySet()) {
+			if (entry.getKey().startsWith(wildCardPrefix)) {
+				moduleDeploymentProperties.put(entry.getKey().substring(wildCardPrefix.length()), entry.getValue());
+			}
+		}
+		String modulePrefix = String.format("module.%s.", module.getLabel());
+		for (Map.Entry<String, String> entry : deploymentProperties.entrySet()) {
+			if (entry.getKey().startsWith(modulePrefix)) {
+				moduleDeploymentProperties.put(entry.getKey().substring(modulePrefix.length()), entry.getValue());
+			}
+		}
+		return moduleDeploymentProperties;
+	}
+
+	private boolean upstreamModuleHasPartitionInfo(StreamDefinition stream, ModuleDefinition currentModule,
+			Map<String, String> cumulatedDeploymentProperties) {
+		Iterator<ModuleDefinition> iterator = stream.getDeploymentOrderIterator();
+		while (iterator.hasNext()) {
+			ModuleDefinition module = iterator.next();
+			if (module.equals(currentModule) && iterator.hasNext()) {
+				ModuleDefinition prevModule = iterator.next();
+				Map<String, String> moduleDeploymentProperties = getModuleDeploymentProperties(prevModule, cumulatedDeploymentProperties);
+				return moduleDeploymentProperties.containsKey(BindingProperties.PARTITION_KEY_EXPRESSION) ||
+						moduleDeploymentProperties.containsKey(BindingProperties.PARTITION_KEY_EXTRACTOR_CLASS);
+			}
+		}
+		return false;
+	}
+
+	private boolean isPartitionedConsumer(ModuleDefinition module, Map<String, String> properties,
+			boolean upstreamModuleSupportsPartition) {
+		return upstreamModuleSupportsPartition ||
+				(module.getParameters().containsKey(BindingProperties.INPUT_BINDING_KEY) &&
+				properties.containsKey(BindingProperties.PARTITIONED_PROPERTY) &&
+				properties.get(BindingProperties.PARTITIONED_PROPERTY).equalsIgnoreCase("true"));
+	}
+
+	private void updateConsumerPartitionProperties(Map<String, String> properties) {
+		properties.put(BindingProperties.INPUT_PARTITIONED, "true");
+		if (properties.containsKey(BindingProperties.COUNT_PROPERTY)) {
+			properties.put(BindingProperties.INSTANCE_COUNT, properties.get(BindingProperties.COUNT_PROPERTY));
+		}
+	}
+
+	private void updateProducerPartitionProperties(Map<String, String> properties, int nextModuleCount) {
+		properties.put(BindingProperties.OUTPUT_PARTITION_COUNT, String.valueOf(nextModuleCount));
+		if (properties.containsKey(BindingProperties.PARTITION_KEY_EXPRESSION)) {
+			properties.put(BindingProperties.OUTPUT_PARTITION_KEY_EXPRESSION,
+					properties.get(BindingProperties.PARTITION_KEY_EXPRESSION));
+		}
+		else {
+			properties.put(BindingProperties.OUTPUT_PARTITION_KEY_EXPRESSION, DEFAULT_PARTITION_KEY_EXPRESSION);
+		}
+		if (properties.containsKey(BindingProperties.PARTITION_KEY_EXTRACTOR_CLASS)) {
+			properties.put(BindingProperties.OUTPUT_PARTITION_KEY_EXTRACTOR_CLASS,
+					properties.get(BindingProperties.PARTITION_KEY_EXTRACTOR_CLASS));
+		}
+		if (properties.containsKey(BindingProperties.PARTITION_SELECTOR_CLASS)) {
+			properties.put(BindingProperties.OUTPUT_PARTITION_SELECTOR_CLASS,
+					properties.get(BindingProperties.PARTITION_SELECTOR_CLASS));
+		}
+		if (properties.containsKey(BindingProperties.PARTITION_SELECTOR_EXPRESSION)) {
+			properties.put(BindingProperties.OUTPUT_PARTITION_SELECTOR_EXPRESSION,
+					properties.get(BindingProperties.PARTITION_SELECTOR_EXPRESSION));
+		}
+	}
+
+	private int getNextModuleCount(Map<String, String> properties) {
+		return (properties.containsKey(BindingProperties.COUNT_PROPERTY)) ?
+				Integer.valueOf(properties.get(BindingProperties.COUNT_PROPERTY)) : 1;
 	}
 
 	private void undeployStream(StreamDefinition stream) {
@@ -257,8 +339,8 @@ public class StreamController {
 		Set<ModuleStatus.State> moduleStates = new HashSet<>();
 		StreamDefinition stream = repository.findOne(name);
 		for (ModuleDefinition module : stream.getModuleDefinitions()) {
-		    ModuleStatus status = deployer.status(ModuleDeploymentId.fromModuleDefinition(module));
-		    moduleStates.add(status.getState());
+			ModuleStatus status = deployer.status(ModuleDeploymentId.fromModuleDefinition(module));
+			moduleStates.add(status.getState());
 		}
 
 		logger.debug("states: {}", moduleStates);
