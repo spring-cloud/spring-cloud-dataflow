@@ -38,16 +38,6 @@ import org.springframework.util.Assert;
  */
 class ModuleDefinitionBuilder {
 
-	/**
-	 * Default property key for input channel binding.
-	 */
-	private static final String INPUT_BINDING_KEY = "spring.cloud.stream.bindings.input";
-
-	/**
-	 * Default property key for output channel binding.
-	 */
-	private static final String OUTPUT_BINDING_KEY = "spring.cloud.stream.bindings.output";
-
 	private final String streamName;
 
 	private final StreamNode streamNode;
@@ -85,20 +75,24 @@ class ModuleDefinitionBuilder {
 				}
 			}
 			if (m > 0) {
-				builder.setParameter(INPUT_BINDING_KEY, String.format("%s.%d", streamName, m - 1));
+				builder.setParameter(BindingProperties.INPUT_BINDING_KEY,
+						String.format("%s.%d", streamName, m - 1));
 			}
 			if (m < moduleNodes.size() - 1) {
-				builder.setParameter(OUTPUT_BINDING_KEY, String.format("%s.%d", streamName, m));
+				builder.setParameter(BindingProperties.OUTPUT_BINDING_KEY,
+						String.format("%s.%d", streamName, m));
 			}
 			builders.add(builder);
 		}
 		SourceChannelNode sourceChannel = streamNode.getSourceChannelNode();
 		if (sourceChannel != null) {
-			builders.getLast().setParameter(INPUT_BINDING_KEY, sourceChannel.getChannelName());
+			builders.getLast().setParameter(BindingProperties.INPUT_BINDING_KEY,
+					sourceChannel.getChannelName());
 		}
 		SinkChannelNode sinkChannel = streamNode.getSinkChannelNode();
 		if (sinkChannel != null) {
-			builders.getFirst().setParameter(OUTPUT_BINDING_KEY, sinkChannel.getChannelName());
+			builders.getFirst().setParameter(BindingProperties.OUTPUT_BINDING_KEY,
+					sinkChannel.getChannelName());
 		}
 		List<ModuleDefinition> moduleDefinitions = new ArrayList<ModuleDefinition>(builders.size());
 		for (ModuleDefinition.Builder builder : builders) {

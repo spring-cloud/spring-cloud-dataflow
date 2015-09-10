@@ -37,10 +37,6 @@ import org.springframework.cloud.dataflow.core.dsl.ParseException;
  */
 public class StreamDefinitionTests {
 
-	private static final String INPUT_BINDING_KEY = "spring.cloud.stream.bindings.input";
-
-	private static final String OUTPUT_BINDING_KEY = "spring.cloud.stream.bindings.output";
-
 	@Test
 	public void testStreamCreation() {
 		StreamDefinition stream = new StreamDefinition("ticktock", "time | log");
@@ -48,14 +44,14 @@ public class StreamDefinitionTests {
 		ModuleDefinition time = stream.getModuleDefinitions().get(0);
 		assertEquals("time", time.getName());
 		assertEquals("time", time.getLabel());
-		assertEquals("ticktock.0", time.getParameters().get(OUTPUT_BINDING_KEY));
-		assertFalse(time.getParameters().containsKey(INPUT_BINDING_KEY));
+		assertEquals("ticktock.0", time.getParameters().get(BindingProperties.OUTPUT_BINDING_KEY));
+		assertFalse(time.getParameters().containsKey(BindingProperties.INPUT_BINDING_KEY));
 
 		ModuleDefinition log = stream.getModuleDefinitions().get(1);
 		assertEquals("log", log.getName());
 		assertEquals("log", log.getLabel());
-		assertEquals("ticktock.0", log.getParameters().get(INPUT_BINDING_KEY));
-		assertFalse(log.getParameters().containsKey(OUTPUT_BINDING_KEY));
+		assertEquals("ticktock.0", log.getParameters().get(BindingProperties.INPUT_BINDING_KEY));
+		assertFalse(log.getParameters().containsKey(BindingProperties.OUTPUT_BINDING_KEY));
 	}
 
 	@Test
@@ -69,11 +65,11 @@ public class StreamDefinitionTests {
 		assertEquals("test", source.getGroup());
 
 		assertEquals(1, source.getParameters().size());
-		assertEquals("test.0", source.getParameters().get(OUTPUT_BINDING_KEY));
+		assertEquals("test.0", source.getParameters().get(BindingProperties.OUTPUT_BINDING_KEY));
 		assertEquals("bar", sink.getName());
 		assertEquals("test", sink.getGroup());
 		assertEquals(1, sink.getParameters().size());
-		assertEquals("test.0", sink.getParameters().get(INPUT_BINDING_KEY));
+		assertEquals("test.0", sink.getParameters().get(BindingProperties.INPUT_BINDING_KEY));
 	}
 
 	@Test
@@ -128,7 +124,7 @@ public class StreamDefinitionTests {
 		StreamDefinition streamDefinition = new StreamDefinition("test", "topic:foo > goo | blah | file");
 		List<ModuleDefinition> requests = streamDefinition.getModuleDefinitions();
 		assertEquals(3, requests.size());
-		assertEquals("topic:foo", requests.get(0).getParameters().get(INPUT_BINDING_KEY));
+		assertEquals("topic:foo", requests.get(0).getParameters().get(BindingProperties.INPUT_BINDING_KEY));
 	}
 
 	@Test
@@ -136,7 +132,7 @@ public class StreamDefinitionTests {
 		StreamDefinition streamDefinition = new StreamDefinition("test", "boo | blah | aaak > queue:foo");
 		List<ModuleDefinition> requests = streamDefinition.getModuleDefinitions();
 		assertEquals(3, requests.size());
-		assertEquals("queue:foo", requests.get(2).getParameters().get(OUTPUT_BINDING_KEY));
+		assertEquals("queue:foo", requests.get(2).getParameters().get(BindingProperties.OUTPUT_BINDING_KEY));
 	}
 
 	@Test
@@ -144,7 +140,7 @@ public class StreamDefinitionTests {
 		StreamDefinition streamDefinition = new StreamDefinition("test", "bart > queue:foo");
 		List<ModuleDefinition> requests = streamDefinition.getModuleDefinitions();
 		assertEquals(1, requests.size());
-		assertEquals("queue:foo", requests.get(0).getParameters().get(OUTPUT_BINDING_KEY));
+		assertEquals("queue:foo", requests.get(0).getParameters().get(BindingProperties.OUTPUT_BINDING_KEY));
 	}
 
 	@Test
@@ -167,7 +163,7 @@ public class StreamDefinitionTests {
 		StreamDefinition streamDefinition = new StreamDefinition("test", "queue:foo > boot");
 		List<ModuleDefinition> requests = streamDefinition.getModuleDefinitions();
 		assertEquals(1, requests.size());
-		assertEquals("queue:foo", requests.get(0).getParameters().get(INPUT_BINDING_KEY));
+		assertEquals("queue:foo", requests.get(0).getParameters().get(BindingProperties.INPUT_BINDING_KEY));
 	}
 
 	@Test
@@ -197,11 +193,11 @@ public class StreamDefinitionTests {
 		ModuleDefinition source = modules.get(0);
 		ModuleDefinition sink = modules.get(1);
 		assertEquals("time", source.getLabel());
-		assertEquals("ticktock.0", source.getParameters().get(OUTPUT_BINDING_KEY));
-		assertFalse(source.getParameters().containsKey(INPUT_BINDING_KEY));
+		assertEquals("ticktock.0", source.getParameters().get(BindingProperties.OUTPUT_BINDING_KEY));
+		assertFalse(source.getParameters().containsKey(BindingProperties.INPUT_BINDING_KEY));
 		assertEquals("log", sink.getLabel());
-		assertEquals("ticktock.0", sink.getParameters().get(INPUT_BINDING_KEY));
-		assertFalse(sink.getParameters().containsKey(OUTPUT_BINDING_KEY));
+		assertEquals("ticktock.0", sink.getParameters().get(BindingProperties.INPUT_BINDING_KEY));
+		assertFalse(sink.getParameters().containsKey(BindingProperties.OUTPUT_BINDING_KEY));
 	}
 
 	@Test
@@ -214,16 +210,16 @@ public class StreamDefinitionTests {
 		ModuleDefinition sink = modules.get(2);
 
 		assertEquals("time", source.getLabel());
-		assertEquals("ticktock.0", source.getParameters().get(OUTPUT_BINDING_KEY));
-		assertFalse(source.getParameters().containsKey(INPUT_BINDING_KEY));
+		assertEquals("ticktock.0", source.getParameters().get(BindingProperties.OUTPUT_BINDING_KEY));
+		assertFalse(source.getParameters().containsKey(BindingProperties.INPUT_BINDING_KEY));
 
 		assertEquals("filter", processor.getLabel());
-		assertEquals("ticktock.0", processor.getParameters().get(INPUT_BINDING_KEY));
-		assertEquals("ticktock.1", processor.getParameters().get(OUTPUT_BINDING_KEY));
+		assertEquals("ticktock.0", processor.getParameters().get(BindingProperties.INPUT_BINDING_KEY));
+		assertEquals("ticktock.1", processor.getParameters().get(BindingProperties.OUTPUT_BINDING_KEY));
 
 		assertEquals("log", sink.getLabel());
-		assertEquals("ticktock.1", sink.getParameters().get(INPUT_BINDING_KEY));
-		assertFalse(sink.getParameters().containsKey(OUTPUT_BINDING_KEY));
+		assertEquals("ticktock.1", sink.getParameters().get(BindingProperties.INPUT_BINDING_KEY));
+		assertFalse(sink.getParameters().containsKey(BindingProperties.OUTPUT_BINDING_KEY));
 	}
 
 }
