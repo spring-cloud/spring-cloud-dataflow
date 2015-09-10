@@ -54,41 +54,39 @@ evolve in isolation.
 * Consume stream and batch microservices as maven dependency and push it to production
 * Develop using: DSL, Shell, REST-APIs, Admin-UI, and Flo
 * Take advantage of metrics, health checks and remote management functionalities
-* Scale stream and batch pipelines without interrupting data flow
+* Scale stream and batch pipelines without interrupting data flows
 
 <span id="quick-start"></span>
 ## Quick Start
 
-Step 1 - Clone the git Repository: 
-git clone https://github.com/spring-cloud/spring-cloud-dataflow.git
+Step 1 - [Clone Spring Cloud Data Flow repository](https://github.com/spring-cloud/spring-cloud-dataflow)
 
-Step 2 - Build Project:
+Step 2 - Build Project
 ```
-cd [spring-dataflow-folder]
 mvn clean package
 ```
 
-Step 3 - Start Redis Server: 
+Step 3 - Start
 ```
 redis-server
 ```
 
-Step 4 - Launch *‘local’* Admin SPI: 
+Step 4 - Launch **‘local’** Implementation of Admin: 
 ```
-java -jar [spring-dataflow-folder]/spring-cloud-dataflow-admin/target/spring-cloud-dataflow-admin-***.jar --spring.profiles.active=local
-```
-
-Step 5 - Launch Shell:
-```
-java -jar [spring-dataflow-folder]/spring-cloud-dataflow-shell/target/spring-cloud-dataflow-shell***.jar
+java -jar spring-cloud-dataflow-admin/target/spring-cloud-dataflow-admin***.jar 
 ```
 
-Step 6 - Create a *‘ticktock’* Stream using the Shell:
+Step 5 - Launch Shell
+```
+java -jar spring-cloud-dataflow-shell/target/spring-cloud-dataflow-shell***.jar
+```
+
+Step 6 - Create **‘ticktock’** Stream using the Shell
 ```
 dataflow:>stream create ticktock --definition "time | log" --deploy
 ```
 
-Step 7 - Launch Admin UI:
+Step 7 - Launch Admin UI
 http://localhost:9393/admin-ui
 
 {% endcapture %}
