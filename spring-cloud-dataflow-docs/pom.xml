@@ -8,7 +8,7 @@
 	</parent>
 	<artifactId>spring-cloud-dataflow-docs</artifactId>
 	<name>spring-cloud-dataflow-docs</name>
-	<description>Spring Cloud Dataflow Docs</description>
+	<description>Spring Cloud Data Flow Docs</description>
 	<properties>
 		<main.basedir>${basedir}/..</main.basedir>
 	</properties>
