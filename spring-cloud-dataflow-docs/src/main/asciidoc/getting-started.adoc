@@ -221,7 +221,7 @@ security.oauth2.client.password=
 Currently the YARN configuration is set to use `localhost`, meaning this can only be run against a local cluster. Also, all commands shown here need to be run from the project root.
 
 [start=1]
-1. download the Spring Cloud Data Flow Admin and Shell apps:
+1. download the Spring Cloud Data Flow YARN and Shell apps:
 
 ```
 wget http://repo.spring.io/milestone/org/springframework/cloud/spring-cloud-dataflow-yarn-appmaster/1.0.0.M1/spring-cloud-dataflow-yarn-appmaster-1.0.0.M1.jar
