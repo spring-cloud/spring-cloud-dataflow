@@ -266,4 +266,19 @@ You can build the reference documentation with the command below:
 
 > TIP: The generated documentation is available from `spring-cloud-dataflow-docs/target/contents/reference`
 
+### Running the Shell inside STS
+
+When running the Shell from within Spring Tool Suite using `org.springframework.cloud.dataflow.shell.ShellApplication`, you may encounter weird character formatting. In that case, please start the Shell by providing the following
+system property:
+
+* Linux/Mac: `-Djline.terminal=org.springframework.shell.core.IdeTerminal`
+* Windows:
+
+```
+-Djline.WindowsTerminal.directConsole=false
+-Djline.terminal=jline.UnsupportedTerminal`
+```
+See also:
+
+https://github.com/spring-projects/spring-shell/blob/master/readme.dev
 
