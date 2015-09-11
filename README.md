@@ -110,10 +110,29 @@ $ mvn clean package
 
 3a\. push the admin application on Cloud Foundry, configure it (see below) and start it
 
+NOTE: You must use a unique name for your app that's not already used by someone else or your deployment will fail
+
 ```
 cf push s-c-dataflow-admin --no-start -p spring-cloud-dataflow-admin/target/spring-cloud-dataflow-admin-1.0.0.BUILD-SNAPSHOT.jar
 cf bind-service s-c-dataflow-admin redis
-... configure it ...
+```
+Now we can configure the app. This configuration is for Pivotal Web Services. You need to fill in {org}, {space}, {email} and {password} before running these commands. 
+
+```
+cf set-env s-c-dataflow-admin CLOUDFOUNDRY_API_ENDPOINT https://api.run.pivotal.io
+cf set-env s-c-dataflow-admin CLOUDFOUNDRY_ORGANIZATION {org}
+cf set-env s-c-dataflow-admin CLOUDFOUNDRY_SPACE {space}
+cf set-env s-c-dataflow-admin CLOUDFOUNDRY_DOMAIN cfapps.io
+cf set-env s-c-dataflow-admin CLOUDFOUNDRY_SERVICES redis
+cf set-env s-c-dataflow-admin SECURITY_OAUTH2_CLIENT_USERNAME {email}
+cf set-env s-c-dataflow-admin SECURITY_OAUTH2_CLIENT_PASSWORD {password}
+cf set-env s-c-dataflow-admin SECURITY_OAUTH2_CLIENT_ACCESS_TOKEN_URI https://login.run.pivotal.io/oauth/token
+cf set-env s-c-dataflow-admin SECURITY_OAUTH2_CLIENT_USER_AUTHORIZATION_URI https://login.run.pivotal.io/oauth/authorize
+```
+
+We are now ready to start the app.
+
+```
 cf start s-c-dataflow-admin
 ```
 
@@ -142,29 +161,37 @@ At step **3.**, either running _on_ Cloud Foundry or _targeting_ Cloud Foundry, 
 # Example values, typical for Pivotal Web Services, cited as a comment
 
 # url of the CF API (used when using cf login -a for example), e.g. https://api.run.pivotal.io
+# (for setting env var use CLOUDFOUNDRY_API_ENDPOINT)
 cloudfoundry.apiEndpoint=
 
-# name of the space into which modules will be deployed
-cloudfoundry.space=<same as admin when running on CF or 'development'>
-
 # name of the organization that owns the space above, e.g. youruser-org
+# (for setting env var use CLOUDFOUNDRY_ORGANIZATION)
 cloudfoundry.organization=
 
+# name of the space into which modules will be deployed
+# (for setting env var use CLOUDFOUNDRY_SPACE)
+cloudfoundry.space=<same as admin when running on CF or 'development'>
+
 # the root domain to use when mapping routes, e.g. cfapps.io
+# (for setting env var use CLOUDFOUNDRY_DOMAIN)
 cloudfoundry.domain=
 
 # Comma separated set of service instance names to bind to the module.
 # Amongst other things, this should include a service that will be used
 # for Spring Cloud Stream binding
+# (for setting env var use CLOUDFOUNDRY_SERVICES)
 cloudfoundry.services=redis
 
 # url used for obtaining an OAuth2 token, e.g. https://uaa.run.pivotal.io/oauth/token
+# (for setting env var use SECURITY_OAUTH2_CLIENT_ACCESS_TOKEN_URI)
 security.oauth2.client.access-token-uri=
 
 # url used to grant user authorizations, e.g. https://login.run.pivotal.io/oauth/authorize
+# (for setting env var use SECURITY_OAUTH2_CLIENT_USER_AUTHORIZATION_URI)
 security.oauth2.client.user-authorization-uri=
 
 # username and password of the user to use to create apps (modules)
+# (for setting env var use SECURITY_OAUTH2_CLIENT_USERNAME and SECURITY_OAUTH2_CLIENT_PASSWORD)
 security.oauth2.client.username=
 security.oauth2.client.password=
 ```
@@ -235,7 +262,7 @@ Properties `dataflow.yarn.app.appmaster.path` and `dataflow.yarn.app.container.p
 
 You can build the reference documentation with the command below:
 
-	$ mvn clean install -pl spring-boot-docs -Pfull
+	$ mvn clean install -pl spring-cloud-dataflow-docs -Pfull
 
 > TIP: The generated documentation is available from `spring-cloud-dataflow-docs/target/contents/reference`
 
