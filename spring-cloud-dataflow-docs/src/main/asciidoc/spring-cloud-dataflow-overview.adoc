@@ -1,0 +1,87 @@
+[[dataflow-documentation]]
+= Spring Cloud Data Flow Overview
+
+[partintro]
+--
+This section provides a brief overview of the Spring Cloud Data Flow reference documentation. Think of
+it as map for the rest of the document. You can read this reference guide in a linear
+fashion, or you can skip sections if something doesn't interest you.
+--
+
+[[dataflow-documentation-about]]
+== About the documentation
+The Spring Cloud Data Flow reference guide is available as {spring-cloud-dataflow-docs}/html[html],
+{spring-cloud-dataflow-docs}/pdf/spring-cloud-dataflow-reference.pdf[pdf]
+and {spring-cloud-dataflow-docs}/epub/spring-cloud-dataflow-reference.epub[epub] documents. The latest copy
+is available at {spring-cloud-dataflow-docs-current}.
+
+Copies of this document may be made for your own use and for
+distribution to others, provided that you do not charge any fee for such copies and
+further provided that each copy contains this Copyright Notice, whether distributed in
+print or electronically.
+
+
+[[dataflow-documentation-getting-help]]
+== Getting help
+Having trouble with Spring Boot, We'd like to help!
+
+* Try the <<howto.adoc#howto, How-to's>> -- they provide solutions to the most common
+  questions.
+* Ask a question - we monitor http://stackoverflow.com[stackoverflow.com] for questions
+  tagged with http://stackoverflow.com/tags/spring-cloud[`spring-cloud`].
+* Report bugs with Spring Boot at https://github.com/spring-cloud/spring-cloud-dataflow/issues.
+
+NOTE: All of Spring Cloud Data Flow is open source, including the documentation! If you find problems
+with the docs; or if you just want to improve them, please {github-code}[get involved].
+
+[[dataflow-documentation-intro]]
+== Introducing Spring Cloud Data Flow
+Spring Cloud Data Flow is a cloud native data framework that unifies stream and batch processing for data microservices, across the cloud or on-prem. 
+It allows developers to create, orchestrate and refactor data pipelines with a single programming model for common use cases 
+like data ingest, real time analytics, and data import/export.
+
+Spring Cloud Data Flow defines the best practices for distributed stream and batch data processing.
+
+Spring Cloud Data Flow is the cloud native redesign of Spring XD - a project that aimed to simplify Big Data application 
+development. This redesign allows running stream and batch applications as data microservices and they can independently 
+evolve in isolation. 
+
+=== Features
+
+* Orchestrate applications across a variety of distributed runtime platforms including: Cloud Foundry, Lattice, and Apache YARN
+* Separate runtime dependencies backed by ‘spring profiles’
+* Consume stream and batch microservices as maven dependency and push it to production
+* Develop using: DSL, Shell, REST-APIs, Admin-UI, and Flo
+* Take advantage of metrics, health checks and remote management functionalities
+* Scale stream and batch pipelines without interrupting data flows
+
+
+== Spring Cloud Data Flow Architecture
+
+The architecture for Spring Cloud Data Flow is separated into a number of distinct components.
+
+=== Components
+
+The link:https://github.com/spring-cloud/spring-cloud-dataflow/tree/master/spring-cloud-dataflow-core[Core]
+domain module includes the concept of a **stream** that is a composition of spring-cloud-stream
+modules in a linear pipeline from a *source* to a *sink*, optionally including *processor* modules
+in between. The domain also includes the concept of a **task**, which may be any process that does
+not run indefinitely, including link:https://github.com/spring-projects/spring-batch[Spring Batch] jobs.
+
+The link:https://github.com/spring-cloud/spring-cloud-dataflow/tree/master/spring-cloud-dataflow-module-registry[Module Registry]
+maintains the set of available modules, and their mappings to Maven coordinates.
+
+The link:https://github.com/spring-cloud/spring-cloud-dataflow/tree/master/spring-cloud-dataflow-module-deployers/spring-cloud-dataflow-module-deployer-spi[Module Deployer SPI] provides the abstraction layer for deploying the modules of a given stream across a variety of runtime environments, including:
+
+* link:https://github.com/spring-cloud/spring-cloud-dataflow/tree/master/spring-cloud-dataflow-module-deployers/spring-cloud-dataflow-module-deployer-local[Local]
+
+* link:https://github.com/spring-cloud/spring-cloud-dataflow/tree/master/spring-cloud-dataflow-module-deployers/spring-cloud-dataflow-module-deployer-lattice[Lattice]
+
+* link:https://github.com/spring-cloud/spring-cloud-dataflow/tree/master/spring-cloud-dataflow-module-deployers/spring-cloud-dataflow-module-deployer-cloudfoundry[Cloud Foundry]
+
+* link:https://github.com/spring-cloud/spring-cloud-dataflow/tree/master/spring-cloud-dataflow-module-deployers/spring-cloud-dataflow-module-deployer-yarn[Yarn]
+
+The link:https://github.com/spring-cloud/spring-cloud-dataflow/tree/master/spring-cloud-dataflow-admin[Admin] provides a REST API and UI. It is an executable Spring Boot application that is profile aware, so that the proper implementation of the Module Deployer SPI will be instantiated based on the environment within which the Admin application itself is running.
+
+The link:https://github.com/spring-cloud/spring-cloud-dataflow/tree/master/spring-cloud-dataflow-shell[Shell] connects to the Admin's REST API and supports a DSL that simplifies the process of defining a stream and managing its lifecycle.
+

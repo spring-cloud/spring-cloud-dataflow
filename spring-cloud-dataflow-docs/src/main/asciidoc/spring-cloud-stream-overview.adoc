@@ -1,0 +1,121 @@
+
+[[spring-cloud-stream-overview]]
+= Spring Cloud Stream Overview
+
+[partintro]
+--
+This section goes into more detail about how you can work with Spring Cloud Stream. It covers topics
+such as creating and running stream modules.
+
+If you're just starting out with Spring Cloud Data Flow, you should probably read the
+_<<getting-started.adoc#getting-started, Getting Started>>_ guide before diving into
+this section.
+--
+
+== Introducing Spring Cloud Stream
+
+The Spring Cloud Stream project allows a user to develop and run messaging microservices using Spring Integration and run them locally, or in the cloud, or even on Spring XD. Just add `@EnableBinding` and run your app as a Spring Boot app (single application context). You just need to connect to the physical broker for the bindings, which is automatic if the relevant binder implementation is available on the classpath. The sample uses Redis.
+
+Here's a sample source module (output channel only):
+
+[source,java]
+----
+@SpringBootApplication
+@ComponentScan(basePackageClasses=TimerSource.class)
+public class ModuleApplication {
+
+  public static void main(String[] args) {
+    SpringApplication.run(ModuleApplication.class, args);
+  }
+
+}
+
+@Configuration
+@EnableBinding(Source.class)
+public class TimerSource {
+
+  @Value("${format}")
+  private String format;
+
+  @Bean
+  @InboundChannelAdapter(value = Source.OUTPUT, poller = @Poller(fixedDelay = "${fixedDelay}", maxMessagesPerPoll = "1"))
+  public MessageSource<String> timerMessageSource() {
+    return () -> new GenericMessage<>(new SimpleDateFormat(format).format(new Date()));
+  }
+
+}
+----
+
+`@EnableBinding` is parameterized by an interface (in this case `Source`) which declares input and output channels. `Source`, `Sink` and `Processor` are provided off the shelf, but you can define others. Here's the definition of `Source`:
+
+[source,java]
+----
+public interface Source {
+  @Output("output")
+  MessageChannel output();
+}
+----
+
+The `@Output` annotation is used to identify output channels (messages leaving the module) and `@Input` is used to identify input channels (messages entering the module). It is optionally parameterized by a channel name - if the name is not provided the method name is used instead. An implementation of the interface is created for you and can be used in the application context by autowiring it, e.g. into a test case:
+
+[source,java]
+----
+@RunWith(SpringJUnit4ClassRunner.class)
+@SpringApplicationConfiguration(classes = ModuleApplication.class)
+@WebAppConfiguration
+@DirtiesContext
+public class ModuleApplicationTests {
+
+	@Autowired
+	private Source source
+
+	@Test
+	public void contextLoads() {
+		assertNotNull(this.source.output());
+	}
+
+}
+----
+
+NOTE: In this case there is only one `Source` in the application context so there is no need to qualify it when it is autowired. If there is ambiguity, e.g. if you are composing one module from some others, you can use `@Bindings` qualifier to inject a specific channel set. The `@Bindings` qualifier takes a parameter which is the class that carries the `@EnableBinding` annotation (in this case the `TimerSource`).
+
+=== Multiple Input or Output Channels
+
+A module can have multiple input or output channels all defined either as `@Input` and `@Output` methods in an interface (preferrable) or as bean definitions. Instead of just one channel named "input" or "output" you can add multiple `MessageChannel` methods annotated `@Input` or `@Output` and the names are converted to external channel names on the broker. The external channel names can be specified as properties that consist of the channel names prefixed with `spring.cloud.stream.bindings` (e.g. `spring.cloud.stream.bindings.input` or `spring.cloud.stream.bindings.output`). External channel names can have a channel type as a colon-separated prefix, and the semantics of the external bus channel changes accordingly. For example, you can have two `MessageChannels` called "output" and "foo" in a module with `spring.cloud.stream.bindings.output=bar` and `spring.cloud.stream.bindings.foo=topic:foo`, and the result is 2 external channels called "bar" and "topic:foo".
+
+=== Samples
+
+There are several samples, all running on the redis transport (so you need redis running locally to test them).
+
+
+NOTE: The main set of samples are "vanilla" in the sense that they are not deployable as XD modules by the current generation (1.x) of XD. You can still interact with an XD system using the appropriate naming convention for input and output channel names (`<stream>.<index>` format).
+
+* `source` is a Java config version of the classic "timer" module from Spring XD. It has a "fixedDelay" option (in milliseconds) for the period between emitting messages.
+
+* `sink` is a Java config version of the classic "log" module from Spring XD. It has no options (but some could easily be added), and just logs incoming messages at INFO level.
+
+* `transform` is a simple pass through logging transformer (just logs the incoming message and passes it on).
+
+* `double` is a combination of 2 modules defined locally (a source and a sink, so the whole app is self contained).
+
+* `extended` is a multi-module mashup of `source | transform | transform | sink`, where the modules are defined in the other samples and referred to in this app just as dependencies.
+
+If you run the source and the sink and point them at the same redis instance (e.g. do nothing to get the one on localhost, or the one they are both bound to as a service on Cloud Foundry) then they will form a "stream" and start talking to each other. All the samples have friendly JMX and Actuator endpoints for inspecting what is going on in the system.
+
+=== Module or App
+
+Code using this library can be deployed as a standalone app or as an XD module. In standalone mode you app will run happily as a service or in any PaaS (Cloud Foundry, Lattice, Heroku, Azure, etc.). Depending on whether your main aim is to develop an XD module and you just want to test it locally using the standalone mode, or if the ultimate goal is a standalone app, there are some things that you might do differently.
+
+==== Fat JAR
+
+You can run in standalone mode from your IDE for testing. To run in production you can create an executable (or "fat") JAR using the standard Spring Boot tooling.
+// To be confirmed...
+// the executable JAR has a load of stuff in it that isn't needed if it's going to be deployed as an XD module. In that case you are better off with the normal JAR packaging provided by Maven or Gradle.
+
+=== Making Standalone Modules Talk to Each Other
+
+The `[input,output]ChannelName` are used to create physical endpoints in the external broker (e.g. `queue.<channelName>` in Redis).
+
+For an XD module the channel names are `<group>.<index>` and a source (output only) has `index=0` (the default) and downstream modules have the same group but incremented index, with a sink module (input only) having the highest index. To listen to the output from a running XD module, just use the same "group" name and an index 1 larger than the app before it in the chain.
+
+> Note: since the same naming conventions are used in XD, you can steal messages from or send messages to an existing XD stream by copying the stream name (to `spring.cloud.streams.group`) and knowing the index of the XD module you want to interact with.

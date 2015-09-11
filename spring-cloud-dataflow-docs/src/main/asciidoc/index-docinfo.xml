@@ -1,7 +1,8 @@
-<productname>Spring Cloud Dataflow</productname>
+<productname>Spring Cloud Data Flow</productname>
 <releaseinfo>{spring-boot-version}</releaseinfo>
 <copyright>
 	<year>2013-2015</year>
+	<holder>Pivotal Software, Inc.</holder>
 </copyright>
 <legalnotice>
 	<para>
