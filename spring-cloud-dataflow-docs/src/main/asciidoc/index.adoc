@@ -1,5 +1,5 @@
 = Spring Cloud Data Flow Reference Guide
-Sabby Anandan, Eric Bottard, Mark Fisher, Ilayaperumal Gopinathan, Gunnar Hillert, Mark Pollack, Thomas Risberg, Janne Valkealahti
+Sabby Anandan, Marius Bogoevici, Eric Bottard, Mark Fisher, Ilayaperumal Gopinathan, Gunnar Hillert, Mark Pollack, Glenn Renfro, Thomas Risberg, Dave Syer, David Turanski, Janne Valkealahti
 :doctype: book
 :toc:
 :toclevels: 4
