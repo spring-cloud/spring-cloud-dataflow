@@ -262,7 +262,7 @@ Properties `dataflow.yarn.app.appmaster.path` and `dataflow.yarn.app.container.p
 
 You can build the reference documentation with the command below:
 
-	$ mvn clean install -pl spring-boot-docs -Pfull
+	$ mvn clean install -pl spring-cloud-dataflow-docs -Pfull
 
 > TIP: The generated documentation is available from `spring-cloud-dataflow-docs/target/contents/reference`
 
