@@ -22,18 +22,30 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.configurationmetadata.ConfigurationMetadataGroup;
+import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
+import org.springframework.boot.configurationmetadata.ConfigurationMetadataRepositoryJsonBuilder;
+import org.springframework.boot.configurationmetadata.ConfigurationMetadataSource;
+import org.springframework.boot.loader.archive.JarFileArchive;
 import org.springframework.cloud.dataflow.core.ModuleCoordinates;
 import org.springframework.cloud.dataflow.core.ModuleType;
 import org.springframework.cloud.dataflow.module.registry.ModuleRegistration;
 import org.springframework.cloud.dataflow.module.registry.ModuleRegistry;
 import org.springframework.cloud.dataflow.rest.resource.DetailedModuleRegistrationResource;
 import org.springframework.cloud.dataflow.rest.resource.ModuleRegistrationResource;
+import org.springframework.cloud.stream.module.launcher.ModuleJarLauncher;
+import org.springframework.cloud.stream.module.resolver.Coordinates;
+import org.springframework.cloud.stream.module.resolver.ModuleResolver;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.mvc.ResourceAssemblerSupport;
 import org.springframework.http.HttpStatus;
+import org.springframework.util.ClassUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -61,6 +73,9 @@ public class ModuleController {
 	private final ModuleRegistry registry;
 
 	@Autowired
+	private ModuleResolver moduleResolver;
+
+	@Autowired
 	public ModuleController(ModuleRegistry registry) {
 		this.registry = registry;
 	}
@@ -77,7 +92,7 @@ public class ModuleController {
 
 		List<ModuleRegistration> list = new ArrayList<>(registry.findAll());
 		if (type != null) {
-			for (Iterator<ModuleRegistration> iterator = list.iterator(); iterator.hasNext();) {
+			for (Iterator<ModuleRegistration> iterator = list.iterator(); iterator.hasNext(); ) {
 				if (iterator.next().getType() != type) {
 					iterator.remove();
 				}
@@ -100,9 +115,44 @@ public class ModuleController {
 			@PathVariable("type") ModuleType type,
 			@PathVariable("name") String name) {
 		ModuleRegistration registration = registry.find(name, type);
+		if (registration == null) {
+			return null;
+		}
+		DetailedModuleRegistrationResource result = new DetailedModuleRegistrationResource(moduleAssembler.toResource(registration));
+		Resource resource = moduleResolver.resolve(adapt(registration.getCoordinates()));
+		try {
+			JarFileArchive jarFileArchive = new JarFileArchive(resource.getFile());
+			ClassLoader classLoader = new ModuleJarLauncher(jarFileArchive).createClassLoader();
+			ConfigurationMetadataRepositoryJsonBuilder builder = ConfigurationMetadataRepositoryJsonBuilder.create();
+			ResourcePatternResolver moduleResourceLoader = new PathMatchingResourcePatternResolver(classLoader);
+			for (Resource r : moduleResourceLoader.getResources("classpath*:/META-INF/*spring-configuration-metadata.json")) {
+				builder.withJsonResource(r.getInputStream());
+			}
+			for (ConfigurationMetadataGroup configurationMetadataGroup : builder.build().getAllGroups().values()) {
+				for (ConfigurationMetadataSource configurationMetadataSource : configurationMetadataGroup.getSources().values()) {
+					boolean visible = ClassUtils.isPresent(configurationMetadataSource.getSourceType(), classLoader);
+					try {
+						classLoader.loadClass(configurationMetadataSource.getSourceType()).newInstance();
+					}
+					catch (Throwable e) {
+						visible = false;
+					}
+					if (visible) {
+						for (ConfigurationMetadataProperty property : configurationMetadataSource.getProperties().values()) {
+							result.addOption(property);
+						}
+					}
+				}
+			}
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+		return result;
+	}
 
-		return (registration == null ? null :
-				new DetailedModuleRegistrationResource(moduleAssembler.toResource(registration)));
+	private Coordinates adapt(ModuleCoordinates coordinates) {
+		return new Coordinates(coordinates.getGroupId(), coordinates.getArtifactId(), coordinates.getExtension(), "exec", coordinates.getVersion());
 	}
 
 	/**

@@ -25,7 +25,7 @@
 		<java.version>1.7</java.version>
 		<spring-framework.version>4.2.0.RELEASE</spring-framework.version>
 		<spring-boot.version>1.3.0.M5</spring-boot.version>
-		<spring-cloud.version>Brixton.M1</spring-cloud.version>
+		<spring-cloud.version>Brixton.BUILD-SNAPSHOT</spring-cloud.version>
 		<spring-xd.version>1.0.2.RELEASE</spring-xd.version>
 		<spring-data.version>1.9.1.RELEASE</spring-data.version>
 		<cloudfoundry-client-lib.version>1.1.3</cloudfoundry-client-lib.version>

@@ -19,21 +19,21 @@ package org.springframework.cloud.dataflow.shell.command;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
 import org.springframework.cloud.dataflow.core.ModuleType;
 import org.springframework.cloud.dataflow.rest.client.ModuleOperations;
 import org.springframework.cloud.dataflow.rest.resource.DetailedModuleRegistrationResource;
 import org.springframework.cloud.dataflow.rest.resource.ModuleRegistrationResource;
-import org.springframework.cloud.dataflow.rest.resource.DetailedModuleRegistrationResource.Option;
 import org.springframework.cloud.dataflow.shell.config.DataFlowShell;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.shell.core.CommandMarker;
 import org.springframework.shell.core.annotation.CliAvailabilityIndicator;
 import org.springframework.shell.core.annotation.CliCommand;
 import org.springframework.shell.core.annotation.CliOption;
-import org.springframework.shell.support.table.TableRow;
-import org.springframework.stereotype.Component;
 import org.springframework.shell.support.table.Table;
 import org.springframework.shell.support.table.TableHeader;
+import org.springframework.shell.support.table.TableRow;
+import org.springframework.stereotype.Component;
 
 
 /**
@@ -83,7 +83,7 @@ public class ModuleCommands implements CommandMarker {
 			boolean showHidden) {
 		QualifiedModuleName module = processArgs(name, type);
 		DetailedModuleRegistrationResource info = moduleOperations().info(module.name, module.type);
-		List<Option> options = info.getOptions();
+		List<ConfigurationMetadataProperty> options = info.getOptions();
 		StringBuilder result = new StringBuilder();
 		result.append("Information about ")
 				.append(module.type.name())
@@ -105,13 +105,13 @@ public class ModuleCommands implements CommandMarker {
 					.addHeader(2, new TableHeader("Description"))
 					.addHeader(3, new TableHeader("Default"))
 					.addHeader(4, new TableHeader("Type"));
-			for (DetailedModuleRegistrationResource.Option o : options) {
-				if (!showHidden && o.isHidden()) {
-					continue;
-				}
+			for (ConfigurationMetadataProperty o : options) {
+//				if (!showHidden && o.isHidden()) {
+//					continue;
+//				}
 				final TableRow row = new TableRow();
-				row.addValue(1, o.getName())
-						.addValue(2, o.getDescription())
+				row.addValue(1, o.getId())
+						.addValue(2, o.getDescription() == null ? "<unknown>" : o.getDescription())
 						.addValue(3, prettyPrintDefaultValue(o))
 						.addValue(4, o.getType() == null ? "<unknown>" : o.getType());
 				table.getRows().add(row);
@@ -171,11 +171,11 @@ public class ModuleCommands implements CommandMarker {
 	 * Escapes some special values so that they don't disturb console
 	 * rendering and are easier to read.
 	 */
-	private String prettyPrintDefaultValue(Option o) {
+	private String prettyPrintDefaultValue(ConfigurationMetadataProperty o) {
 		if (o.getDefaultValue() == null) {
 			return "<none>";
 		}
-		return o.getDefaultValue()
+		return o.getDefaultValue().toString()
 				.replace("\n", "\\n")
 				.replace("\t", "\\t")
 				.replace("\f", "\\f");
