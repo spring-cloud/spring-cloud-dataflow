@@ -227,6 +227,7 @@ Currently the YARN configuration is set to use `localhost`, meaning this can onl
 wget http://repo.spring.io/milestone/org/springframework/cloud/spring-cloud-dataflow-yarn-appmaster/1.0.0.M1/spring-cloud-dataflow-yarn-appmaster-1.0.0.M1.jar
 wget http://repo.spring.io/milestone/org/springframework/cloud/spring-cloud-dataflow-yarn-container/1.0.0.M1/spring-cloud-dataflow-yarn-container-1.0.0.M1.jar
 wget http://repo.spring.io/milestone/org/springframework/cloud/spring-cloud-dataflow-yarn-client/1.0.0.M1/spring-cloud-dataflow-yarn-client-1.0.0.M1.jar
+wget http://repo.spring.io/milestone/org/springframework/cloud/spring-cloud-dataflow-admin/1.0.0.M1/spring-cloud-dataflow-admin-1.0.0.M1.jar
 wget http://repo.spring.io/milestone/org/springframework/cloud/spring-cloud-dataflow-shell/1.0.0.M1/spring-cloud-dataflow-shell-1.0.0.M1.jar
 ```
 
