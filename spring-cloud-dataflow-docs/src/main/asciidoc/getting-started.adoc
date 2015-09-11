@@ -13,30 +13,269 @@ we go.
 [[getting-started-system-requirements]]
 == System Requirements
 
-...
+You need Java installed (Java 7 or better, we recommend Java 8) and to build you need to have Maven installed as well.
+
+You also need to have link:http://redis.io/[Redis] installed and running if you plan on running a local system.
 
 [[getting-started-building-spring-cloud-dataflow]]
 == Building Spring Cloud Data Flow
 
-...
+Clone the GitHub repository:
+
+    git clone https://github.com/spring-cloud/spring-cloud-dataflow.git
+
+Switch to the project directory:
+
+    cd spring-cloud-dataflow
+
+Build the project:
+
+    mvn clean install -s .settings.xml
 
 [[getting-started-deploying-spring-cloud-dataflow]]
 == Deploying Spring Cloud Data Flow
 
 === Deploying 'local'
 
-...
+[start=1]
+1. start Redis locally via `redis-server`
+
+2. clone this repository and build from the root directory:
+
+```
+git clone https://github.com/spring-cloud/spring-cloud-dataflow.git
+cd spring-cloud-dataflow
+mvn clean package
+```
+
+[start=3]
+3. launch the admin:
+
+```
+$ java -jar spring-cloud-dataflow-admin/target/spring-cloud-dataflow-admin-1.0.0.BUILD-SNAPSHOT.jar
+```
+
+[start=4]
+4. launch the shell:
+
+```
+$ java -jar spring-cloud-dataflow-shell/target/spring-cloud-dataflow-shell-1.0.0.BUILD-SNAPSHOT.jar
+```
+
+thus far, only the following commands are supported in the shell when running singlenode:
+
+* `stream list`
+* `stream create`
+* `stream deploy`
 
 === Deploying on Lattice
 
-...
+[start=1]
+1. start Redis on Lattice (running as root):
+
+```
+ltc create redis redis -r
+```
+
+[start=2]
+2. launch the admin, with a mapping for port 9393 and extra memory (the default is 128MB):
+
+```
+ltc create admin springcloud/dataflow-admin -p 9393 -m 512
+```
+
+[start=3]
+3. launching the shell is the same as above, but once running must be
+configured to point to the admin that is running on Lattice:
+
+```
+server-unknown:>admin config server http://admin.192.168.11.11.xip.io
+Successfully targeted http://admin.192.168.11.11.xip.io
+dataflow:>
+```
+
+all stream commands are supported in the shell when running on Lattice:
+
+* `stream list`
+* `stream create`
+* `stream deploy`
+* `stream undeploy`
+* `stream all undeploy`
+* `stream destroy`
+* `stream all destroy`
 
 === Deploying on Cloud Foundry
 
-...
+Spring Cloud Data Flow can be used to deploy modules in a Cloud Foundry
+environment. When doing so, the link:https://github.com/spring-cloud/spring-cloud-dataflow/tree/master/spring-cloud-dataflow-admin[Admin] application can either run itself on Cloud Foundry, or on another installation (_e.g._ a simple laptop).
+
+The required configuration amounts to the same, and is merely related to providing credentials to the Cloud Foundry instance, so that the admin can spawn applications itself. Any Spring Boot compatible configuration mechanism can be used (passing program arguments, editing configuration files before building the application, using link:https://github.com/spring-cloud/spring-cloud-config[Spring Cloud Config], using environment variables, _etc._), although although some may prove more adequate than others when running _on_ Cloud Foundry.
+
+[start=1]
+1. provision a redis service instance on Cloud Foundry.
+Your mileage may vary depending on your Cloud Foundry installation. Use `cf marketplace` to discover which plans are available to you. For example when using link:https://run.pivotal.io/[Pivotal Web Services]:
+```
+cf create-service rediscloud 30mb redis
+```
+
+[start=2]
+2. build packages
+
+```
+$ mvn clean package
+```
+
+[start=3a]
+3a. push the admin application on Cloud Foundry, configure it (see below) and start it
+
+NOTE: You must use a unique name for your app that's not already used by someone else or your deployment will fail
+
+```
+cf push s-c-dataflow-admin --no-start -p spring-cloud-dataflow-admin/target/spring-cloud-dataflow-admin-1.0.0.BUILD-SNAPSHOT.jar
+cf bind-service s-c-dataflow-admin redis
+```
+Now we can configure the app. This configuration is for Pivotal Web Services. You need to fill in {org}, \{space}, {email} and {password} before running these commands. 
+
+```
+cf set-env s-c-dataflow-admin CLOUDFOUNDRY_API_ENDPOINT https://api.run.pivotal.io
+cf set-env s-c-dataflow-admin CLOUDFOUNDRY_ORGANIZATION {org}
+cf set-env s-c-dataflow-admin CLOUDFOUNDRY_SPACE {space}
+cf set-env s-c-dataflow-admin CLOUDFOUNDRY_DOMAIN cfapps.io
+cf set-env s-c-dataflow-admin CLOUDFOUNDRY_SERVICES redis
+cf set-env s-c-dataflow-admin SECURITY_OAUTH2_CLIENT_USERNAME {email}
+cf set-env s-c-dataflow-admin SECURITY_OAUTH2_CLIENT_PASSWORD {password}
+cf set-env s-c-dataflow-admin SECURITY_OAUTH2_CLIENT_ACCESS_TOKEN_URI https://login.run.pivotal.io/oauth/token
+cf set-env s-c-dataflow-admin SECURITY_OAUTH2_CLIENT_USER_AUTHORIZATION_URI https://login.run.pivotal.io/oauth/authorize
+```
+
+We are now ready to start the app.
+
+```
+cf start s-c-dataflow-admin
+```
+
+alternatively,
+
+[start=3b]
+3b. run the admin application locally, targeting your Cloud Foundry installation (see below for configuration)
+
+```
+java -jar spring-cloud-dataflow-admin/target/spring-cloud-dataflow-admin-1.0.0.BUILD-SNAPSHOT.jar [--option1=value1] [--option2=value2] [etc.]
+```
+
+[start=4]
+4. run the shell and optionally target the Admin application if not running on the same host (will typically be the case if deployed on Cloud Foundry as **3a.**)
+```
+$ java -jar spring-cloud-dataflow-shell/target/spring-cloud-dataflow-shell-1.0.0.BUILD-SNAPSHOT.jar
+```
+```
+server-unknown:>admin config server http://s-c-dataflow-admin.cfapps.io
+Successfully targeted http://s-c-dataflow-admin.cfapps.io
+dataflow:>
+```
+
+At step **3.**, either running _on_ Cloud Foundry or _targeting_ Cloud Foundry, the following pieces of configuration must be provided, for example using `cf env s-c-dataflow-admin CLOUDFOUNDRY_DOMAIN mydomain.cfapps.io` (note the use of underscores) when running _in_ Cloud Foundry
+
+```
+# Default values cited after the equal sign.
+# Example values, typical for Pivotal Web Services, cited as a comment
+
+# url of the CF API (used when using cf login -a for example), e.g. https://api.run.pivotal.io
+# (for setting env var use CLOUDFOUNDRY_API_ENDPOINT)
+cloudfoundry.apiEndpoint=
+
+# name of the organization that owns the space above, e.g. youruser-org
+# (for setting env var use CLOUDFOUNDRY_ORGANIZATION)
+cloudfoundry.organization=
+
+# name of the space into which modules will be deployed
+# (for setting env var use CLOUDFOUNDRY_SPACE)
+cloudfoundry.space=<same as admin when running on CF or 'development'>
+
+# the root domain to use when mapping routes, e.g. cfapps.io
+# (for setting env var use CLOUDFOUNDRY_DOMAIN)
+cloudfoundry.domain=
+
+# Comma separated set of service instance names to bind to the module.
+# Amongst other things, this should include a service that will be used
+# for Spring Cloud Stream binding
+# (for setting env var use CLOUDFOUNDRY_SERVICES)
+cloudfoundry.services=redis
+
+# url used for obtaining an OAuth2 token, e.g. https://uaa.run.pivotal.io/oauth/token
+# (for setting env var use SECURITY_OAUTH2_CLIENT_ACCESS_TOKEN_URI)
+security.oauth2.client.access-token-uri=
+
+# url used to grant user authorizations, e.g. https://login.run.pivotal.io/oauth/authorize
+# (for setting env var use SECURITY_OAUTH2_CLIENT_USER_AUTHORIZATION_URI)
+security.oauth2.client.user-authorization-uri=
+
+# username and password of the user to use to create apps (modules)
+# (for setting env var use SECURITY_OAUTH2_CLIENT_USERNAME and SECURITY_OAUTH2_CLIENT_PASSWORD)
+security.oauth2.client.username=
+security.oauth2.client.password=
+```
 
 === Deploying on YARN
 
-...
+Currently the YARN configuration is set to use `localhost`, meaning this can only be run against a local cluster. Also, all commands shown here need to be run from the project root.
 
+[start=1]
+1. build packages
+
+```
+$ mvn clean package
+```
+
+[start=2]
+2. start Redis locally via `redis-server`
+
+[start=3]
+3. optionally wipe existing data on `hdfs`
+
+```
+$ hdfs dfs -rm -R /app/app
+```
+
+[start=4]
+4. start `spring-cloud-dataflow-admin` with `yarn` profile
+
+```
+$ java -Dspring.profiles.active=yarn -Ddataflow.yarn.app.appmaster.path=spring-cloud-dataflow-yarn/spring-cloud-dataflow-yarn-appmaster/target -Ddataflow.yarn.app.container.path=spring-cloud-dataflow-yarn/spring-cloud-dataflow-yarn-container/target -jar spring-cloud-dataflow-admin/target/spring-cloud-dataflow-admin-1.0.0.BUILD-SNAPSHOT.jar
+```
+
+[start=5]
+5. start `spring-cloud-dataflow-shell`
+
+```
+$ java -jar spring-cloud-dataflow-shell/target/spring-cloud-dataflow-shell-1.0.0.BUILD-SNAPSHOT.jar
+
+dataflow:>stream create --name "ticktock" --definition "time --fixedDelay=5|log" --deploy
+
+dataflow:>stream list
+  Stream Name  Stream Definition        Status
+  -----------  -----------------------  --------
+  ticktock     time --fixedDelay=5|log  deployed
+
+dataflow:>stream destroy --name "ticktock"
+Destroyed stream 'ticktock'
+```
+
+YARN application is pushed and started automatically during a stream deployment process. This application instance is not automatically closed which can be done from CLI:
+
+```
+$ java -jar spring-cloud-dataflow-yarn/spring-cloud-dataflow-yarn-client/target/spring-cloud-dataflow-yarn-client-1.0.0.BUILD-SNAPSHOT.jar shell
+Spring YARN Cli (v2.3.0.M2)
+Hit TAB to complete. Type 'help' and hit RETURN for help, and 'exit' to quit.
+
+$ submitted
+  APPLICATION ID                  USER          NAME                            QUEUE    TYPE       STARTTIME       FINISHTIME  STATE    FINALSTATUS  ORIGINAL TRACKING URL
+  ------------------------------  ------------  ----------------------------------  -------  --------  --------------  ----------  -------  -----------  --------------------------
+  application_1439803106751_0088  jvalkealahti  spring-cloud-dataflow-yarn-app_app  default  DATAFLOW  01/09/15 09:02  N/A         RUNNING  UNDEFINED    http://192.168.122.1:48913
+
+$ shutdown -a application_1439803106751_0088
+shutdown requested
+```
+
+Properties `dataflow.yarn.app.appmaster.path` and `dataflow.yarn.app.container.path` can be used with both `spring-cloud-dataflow-admin` and `and spring-cloud-dataflow-yarn-client` to define directory for `appmaster` and `container` jars. Values for those default to `.` which then assumes all needed jars are in a same working directory.
 
