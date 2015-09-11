@@ -1,5 +1,5 @@
-= Spring Cloud Dataflow Reference Guide
-Gunnar Hillert
+= Spring Cloud Data Flow Reference Guide
+Sabby Anandan, Marius Bogoevici, Eric Bottard, Mark Fisher, Ilayaperumal Gopinathan, Gunnar Hillert, Mark Pollack, Glenn Renfro, Thomas Risberg, Dave Syer, David Turanski, Janne Valkealahti
 :doctype: book
 :toc:
 :toclevels: 4
@@ -38,11 +38,9 @@ Gunnar Hillert
 :ant-manual: http://ant.apache.org/manual
 // ======================================================================================
 
-include::documentation-overview.adoc[]
+include::spring-cloud-dataflow-overview.adoc[]
 include::getting-started.adoc[]
-include::using-spring-cloud-dataflow.adoc[]
-include::spring-cloud-dataflow-features.adoc[]
-include::howto.adoc[]
-include::appendix.adoc[]
+include::spring-cloud-stream-overview.adoc[]
+include::using-spring-cloud-stream-modules.adoc[]
 
 // ======================================================================================

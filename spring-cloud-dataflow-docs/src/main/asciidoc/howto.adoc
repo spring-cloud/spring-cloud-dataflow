@@ -4,7 +4,7 @@
 [partintro]
 --
 This section provides answers to some common '`how do I do that...`' type of questions
-that often arise when using Spring Cloud Dataflow. This is by no means an exhaustive list, but it
+that often arise when using Spring Cloud Data Flow. This is by no means an exhaustive list, but it
 does cover quite a lot.
 
 If you are having a specific problem that we don't cover here, you might want to check out
