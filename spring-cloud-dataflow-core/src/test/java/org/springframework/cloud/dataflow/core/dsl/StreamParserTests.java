@@ -99,7 +99,7 @@ public class StreamParserTests {
 				"[food = (ModuleNode:http:7>11)((Label:label3:14>20) ModuleNode:foo:14>25)]",
 				ast.stringify(true));
 
-		sn = parse("http | foo:bar | file");
+		sn = parse("http | foo: bar | file");
 		assertEquals("[(ModuleNode:http)((Label:foo) ModuleNode:bar)(ModuleNode:file)]", sn.stringify());
 
 		checkForParseError("http | foo: goggle: bar | file", DSLMessage.UNEXPECTED_DATA_AFTER_STREAMDEF,
@@ -375,7 +375,7 @@ public class StreamParserTests {
 		checkForParseError("tap:stream:boo.xx .yy > file", DSLMessage.NO_WHITESPACE_IN_CHANNEL_DEFINITION, 18);
 		checkForParseError("tap:stream:boo.xx . yy > file", DSLMessage.NO_WHITESPACE_IN_CHANNEL_DEFINITION, 18);
 
-		checkForParseError("tap:queue:boo.xx.yy > file", DSLMessage.ONLY_A_TAP_ON_A_STREAM_OR_JOB_CAN_BE_INDEXED, 13);
+		checkForParseError("tap:queue:boo.xx.yy > file", DSLMessage.ONLY_A_TAP_ON_A_STREAM_OR_TASK_CAN_BE_INDEXED, 13);
 
 		sn = parse("wibble: http > queue:bar");
 		assertEquals("[((Label:wibble) ModuleNode:http)>(queue:bar)]", sn.stringify());

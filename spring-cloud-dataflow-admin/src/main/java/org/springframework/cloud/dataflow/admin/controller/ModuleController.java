@@ -22,12 +22,17 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
 import org.springframework.cloud.dataflow.core.ModuleCoordinates;
 import org.springframework.cloud.dataflow.core.ModuleType;
 import org.springframework.cloud.dataflow.module.registry.ModuleRegistration;
 import org.springframework.cloud.dataflow.module.registry.ModuleRegistry;
 import org.springframework.cloud.dataflow.rest.resource.DetailedModuleRegistrationResource;
 import org.springframework.cloud.dataflow.rest.resource.ModuleRegistrationResource;
+import org.springframework.cloud.stream.configuration.metadata.ModuleConfigurationMetadataResolver;
+import org.springframework.cloud.stream.module.resolver.Coordinates;
+import org.springframework.cloud.stream.module.resolver.ModuleResolver;
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.ExposesResourceFor;
@@ -61,6 +66,12 @@ public class ModuleController {
 	private final ModuleRegistry registry;
 
 	@Autowired
+	private ModuleResolver moduleResolver;
+
+	@Autowired
+	private ModuleConfigurationMetadataResolver moduleConfigurationMetadataResolver;
+
+	@Autowired
 	public ModuleController(ModuleRegistry registry) {
 		this.registry = registry;
 	}
@@ -77,7 +88,7 @@ public class ModuleController {
 
 		List<ModuleRegistration> list = new ArrayList<>(registry.findAll());
 		if (type != null) {
-			for (Iterator<ModuleRegistration> iterator = list.iterator(); iterator.hasNext();) {
+			for (Iterator<ModuleRegistration> iterator = list.iterator(); iterator.hasNext(); ) {
 				if (iterator.next().getType() != type) {
 					iterator.remove();
 				}
@@ -100,9 +111,21 @@ public class ModuleController {
 			@PathVariable("type") ModuleType type,
 			@PathVariable("name") String name) {
 		ModuleRegistration registration = registry.find(name, type);
+		if (registration == null) {
+			return null;
+		}
+		DetailedModuleRegistrationResource result = new DetailedModuleRegistrationResource(moduleAssembler.toResource(registration));
+		Resource resource = moduleResolver.resolve(adapt(registration.getCoordinates()));
 
-		return (registration == null ? null :
-				new DetailedModuleRegistrationResource(moduleAssembler.toResource(registration)));
+		List<ConfigurationMetadataProperty> properties = moduleConfigurationMetadataResolver.listProperties(resource);
+		for (ConfigurationMetadataProperty property : properties) {
+			result.addOption(property);
+		}
+		return result;
+	}
+
+	private Coordinates adapt(ModuleCoordinates coordinates) {
+		return new Coordinates(coordinates.getGroupId(), coordinates.getArtifactId(), coordinates.getExtension(), "exec", coordinates.getVersion());
 	}
 
 	/**
@@ -138,7 +161,7 @@ public class ModuleController {
 		registry.delete(name, type);
 	}
 
-	class Assembler extends ResourceAssemblerSupport<ModuleRegistration, ModuleRegistrationResource> {
+	static class Assembler extends ResourceAssemblerSupport<ModuleRegistration, ModuleRegistrationResource> {
 
 		public Assembler() {
 			super(ModuleController.class, ModuleRegistrationResource.class);

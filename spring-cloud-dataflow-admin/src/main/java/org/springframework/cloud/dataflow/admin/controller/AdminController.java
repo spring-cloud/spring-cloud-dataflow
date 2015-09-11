@@ -17,6 +17,7 @@
 package org.springframework.cloud.dataflow.admin.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.dataflow.rest.resource.CompletionProposalsResource;
 import org.springframework.cloud.dataflow.rest.resource.CounterResource;
 import org.springframework.cloud.dataflow.rest.resource.ModuleRegistrationResource;
 import org.springframework.cloud.dataflow.rest.resource.StreamDefinitionResource;
@@ -66,6 +67,8 @@ public class AdminController {
 		resourceSupport.add(entityLinks.linkToCollectionResource(CounterResource.class).withRel("counters"));
 		resourceSupport.add(new Link(entityLinks.linkToCollectionResource(CounterResource.class).getHref() + "/{name}").withRel("counters/counter"));
 		resourceSupport.add(entityLinks.linkToCollectionResource(ModuleRegistrationResource.class).withRel("modules"));
+		String templated = entityLinks.linkFor(CompletionProposalsResource.class).withSelfRel().getHref() + ("/stream{?start,detailLevel}");
+		resourceSupport.add(new Link(templated).withRel("completions/stream"));
 		return resourceSupport;
 	}
 
