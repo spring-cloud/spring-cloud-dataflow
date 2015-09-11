@@ -36,7 +36,7 @@
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-stream-module-launcher</artifactId>
-			<version>1.0.0.BUILD-SNAPSHOT</version>
+			<version>1.0.0.M1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
