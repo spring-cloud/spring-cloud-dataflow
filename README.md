@@ -179,7 +179,7 @@ cloudfoundry.domain=
 # Comma separated set of service instance names to bind to the module.
 # Amongst other things, this should include a service that will be used
 # for Spring Cloud Stream binding
-# (for setting env var use CLOUDFOUNDRY_DOMAIN)
+# (for setting env var use CLOUDFOUNDRY_SERVICES)
 cloudfoundry.services=redis
 
 # url used for obtaining an OAuth2 token, e.g. https://uaa.run.pivotal.io/oauth/token
