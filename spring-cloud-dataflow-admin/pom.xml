@@ -116,6 +116,7 @@
 				<includes>
 					<include>admin.yml</include>
 					<include>admin-yarn.yml</include>
+					<include>banner.txt</include>
 				</includes>
 			</resource>
 		</resources>
