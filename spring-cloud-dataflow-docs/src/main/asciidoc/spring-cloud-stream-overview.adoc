@@ -1,0 +1,22 @@
+
+[[spring-cloud-stream-overview]]
+= Spring Cloud Stream Overview
+
+[partintro]
+--
+This section goes into more detail about how you should work with Spring Cloud Stream. It covers topics
+such as ...
+
+If you're just starting out with Spring Cloud Data Flow, you should probably read the
+_<<getting-started.adoc#getting-started, Getting Started>>_ guide before diving into
+this section.
+--
+
+== Introducing Spring Cloud Stream
+
+...
+
+== Spring Cloud Stream Architecture
+
+...
+

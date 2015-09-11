@@ -3,21 +3,40 @@
 
 [partintro]
 --
-If you're just getting started with Spring Cloud Dataflow, this is the section
+If you're just getting started with Spring Cloud Data Flow, this is the section
 for you! Here we answer the basic "`what?`", "`how?`" and "`why?`" questions. You'll
-find a gentle introduction to Spring Cloud Dataflow along with installation instructions.
-We'll then build our first Spring Cloud Dataflow application, discussing some core principles as
+find a gentle introduction to Spring Cloud Data Flow along with installation instructions.
+We'll then build our first Spring Cloud Data Flow application, discussing some core principles as
 we go.
 --
-
-
-[[getting-started-introducing-spring-cloud-dataflow]]
-== Introducing Spring Cloud Dataflow
-
-...
-
 
 [[getting-started-system-requirements]]
 == System Requirements
 
 ...
+
+[[getting-started-building-spring-cloud-dataflow]]
+== Building Spring Cloud Data Flow
+
+...
+
+[[getting-started-deploying-spring-cloud-dataflow]]
+== Deploying Spring Cloud Data Flow
+
+=== Deploying 'local'
+
+...
+
+=== Deploying on Lattice
+
+...
+
+=== Deploying on Cloud Foundry
+
+...
+
+=== Deploying on YARN
+
+...
+
+
