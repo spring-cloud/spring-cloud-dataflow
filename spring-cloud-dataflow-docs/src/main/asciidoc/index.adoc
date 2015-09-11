@@ -1,5 +1,5 @@
 = Spring Cloud Data Flow Reference Guide
-Gunnar Hillert, Thomas Risberg
+Sabby Anandan, Eric Bottard, Mark Fisher, Ilayaperumal Gopinathan, Gunnar Hillert, Mark Pollack, Thomas Risberg, Janne Valkealahti
 :doctype: book
 :toc:
 :toclevels: 4
