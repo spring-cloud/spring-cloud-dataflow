@@ -5,12 +5,12 @@
 
 	<groupId>org.springframework.cloud</groupId>
 	<artifactId>spring-cloud-dataflow-yarn-client</artifactId>
-	<version>1.0.0.BUILD-SNAPSHOT</version>
+	<version>1.0.0.M1</version>
 
 	<parent>
 		<groupId>org.springframework.cloud</groupId>
 		<artifactId>spring-cloud-dataflow-yarn</artifactId>
-		<version>1.0.0.BUILD-SNAPSHOT</version>
+		<version>1.0.0.M1</version>
 	</parent>
 
 	<dependencies>
