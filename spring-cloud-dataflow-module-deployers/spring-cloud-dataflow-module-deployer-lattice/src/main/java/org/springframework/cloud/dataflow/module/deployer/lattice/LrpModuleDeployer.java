@@ -44,7 +44,7 @@ public class LrpModuleDeployer implements ModuleDeployer {
 
 	private static final Logger logger = LoggerFactory.getLogger(LrpModuleDeployer.class);
 
-	public static final String DOCKER_PATH = "docker:///springcloud/stream-module-launcher:1.0.0.M1";
+	public static final String DOCKER_PATH = "docker:///springcloud/stream-module-launcher#1.0.0.M1";
 
 	public static final String BASE_ADDRESS = "192.168.11.11.xip.io";
 

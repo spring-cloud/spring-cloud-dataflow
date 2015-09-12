@@ -44,7 +44,7 @@ public class TaskModuleDeployer implements ModuleDeployer {
 
 	private static final Logger logger = LoggerFactory.getLogger(TaskModuleDeployer.class);
 
-	public static final String DOCKER_PATH = "docker:///springcloud/stream-module-launcher:1.0.0.M1";
+	public static final String DOCKER_PATH = "docker:///springcloud/stream-module-launcher#1.0.0.M1";
 
 	private final ReceptorClient receptorClient = new ReceptorClient();
 
