@@ -73,7 +73,7 @@ public class CloudConfiguration {
 
 		@Bean
 		public ModuleDeployer processModuleDeployer() {
-			return new LrpModuleDeployer(receptorClient());
+			return new LrpModuleDeployer(receptorClient(), latticeProperties.getReceptor().getHost());
 		}
 
 		@Bean

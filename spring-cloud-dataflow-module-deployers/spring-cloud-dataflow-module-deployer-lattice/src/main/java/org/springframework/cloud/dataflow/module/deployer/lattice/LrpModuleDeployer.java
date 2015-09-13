@@ -50,10 +50,13 @@ public class LrpModuleDeployer implements ModuleDeployer {
 
 	private final ReceptorClient receptorClient;
 
+	private final String receptorHost;
+
 	private final StatusMapper receptorProcessStatusMapper = new StatusMapper();
 
-	public LrpModuleDeployer(ReceptorClient receptorClient) {
+	public LrpModuleDeployer(ReceptorClient receptorClient, String receptorHost) {
 		this.receptorClient = receptorClient;
+		this.receptorHost = receptorHost;
 	}
 
 	@Override
@@ -80,6 +83,8 @@ public class LrpModuleDeployer implements ModuleDeployer {
 		for (Map.Entry<String, String> entry : qualifiedArgs.entrySet()) {
 			environmentVariables.add(new EnvironmentVariable(entry.getKey(), entry.getValue()));
 		}
+		environmentVariables.add(new EnvironmentVariable("SPRING_CLOUD_LATTICE_RECEPTOR_HOST", receptorHost));
+
 		lrp.setEnv(environmentVariables.toArray(new EnvironmentVariable[environmentVariables.size()]));
 		lrp.setMemoryMb(512);
 		int serverPort = rawArgs.containsKey(SERVER_PORT_KEY) ?
