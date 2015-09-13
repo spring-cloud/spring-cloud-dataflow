@@ -133,7 +133,7 @@
 				<artifactId>docker-maven-plugin</artifactId>
 				<version>0.2.3</version>
 				<configuration>
-					<imageName>${docker.image.prefix}/${docker.image.name}:1.0.0.M1</imageName>
+					<imageName>${docker.image.prefix}/${docker.image.name}</imageName>
 					<dockerDirectory>src/main/docker</dockerDirectory>
 					<resources>
 						<resource>
