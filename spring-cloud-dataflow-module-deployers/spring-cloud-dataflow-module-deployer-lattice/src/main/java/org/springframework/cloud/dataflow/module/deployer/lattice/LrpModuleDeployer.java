@@ -48,9 +48,13 @@ public class LrpModuleDeployer implements ModuleDeployer {
 
 	public static final String BASE_ADDRESS = "192.168.11.11.xip.io";
 
-	private final ReceptorClient receptorClient = new ReceptorClient();
+	private final ReceptorClient receptorClient;
 
 	private final StatusMapper receptorProcessStatusMapper = new StatusMapper();
+
+	public LrpModuleDeployer(ReceptorClient receptorClient) {
+		this.receptorClient = receptorClient;
+	}
 
 	@Override
 	public ModuleDeploymentId deploy(ModuleDeploymentRequest request) {

@@ -23,8 +23,10 @@ import static org.junit.Assert.assertThat;
 import org.junit.Test;
 
 import org.springframework.boot.SpringApplication;
+import org.springframework.boot.test.EnvironmentTestUtils;
 import org.springframework.cloud.dataflow.module.deployer.local.LocalModuleDeployer;
 import org.springframework.cloud.dataflow.module.deployer.yarn.YarnModuleDeployer;
+import org.springframework.cloud.lattice.LatticeProperties;
 import org.springframework.context.ConfigurableApplicationContext;
 
 /**
@@ -50,6 +52,16 @@ public class AdminApplicationTests {
 				"--server.port=0" });
 		assertThat(context.containsBean("processModuleDeployer"), is(true));
 		assertThat(context.getBean("processModuleDeployer"), instanceOf(YarnModuleDeployer.class));
+		context.close();
+	}
+
+	@Test
+	public void testLatticeProfile() {
+		SpringApplication app = new SpringApplication(AdminApplication.class);
+		ConfigurableApplicationContext context = app.run(new String[] { "--spring.profiles.active=lattice",
+				"--server.port=0" , "--spring.cloud.lattice.receptor.host=receptor.52.7.176.225.xip.io"});
+		assertThat(context.containsBean("latticeProperties"), is(true));
+		assertThat(context.getBean("latticeProperties", LatticeProperties.class).getReceptor().getHost(), is("receptor.52.7.176.225.xip.io"));
 		context.close();
 	}
 

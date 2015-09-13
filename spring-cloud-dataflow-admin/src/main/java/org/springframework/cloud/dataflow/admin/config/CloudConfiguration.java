@@ -16,6 +16,8 @@
 
 package org.springframework.cloud.dataflow.admin.config;
 
+import org.cloudfoundry.receptor.client.ReceptorClient;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.redis.RedisAutoConfiguration;
 import org.springframework.cloud.Cloud;
@@ -24,11 +26,13 @@ import org.springframework.cloud.CloudFactory;
 import org.springframework.cloud.dataflow.module.deployer.ModuleDeployer;
 import org.springframework.cloud.dataflow.module.deployer.lattice.LrpModuleDeployer;
 import org.springframework.cloud.dataflow.module.deployer.lattice.TaskModuleDeployer;
+import org.springframework.cloud.lattice.LatticeProperties;
 import org.springframework.cloud.lattice.connector.LatticeConnector;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.util.StringUtils;
 
 /**
  * Configuration used when running <i>in a cloud</i>, triggered by cloud profiles (cloud, lattice).
@@ -64,9 +68,12 @@ public class CloudConfiguration {
 	@Profile("lattice")
 	protected static class LatticeConfig {
 
+		@Autowired
+		private LatticeProperties latticeProperties;
+
 		@Bean
 		public ModuleDeployer processModuleDeployer() {
-			return new LrpModuleDeployer();
+			return new LrpModuleDeployer(receptorClient());
 		}
 
 		@Bean
@@ -77,6 +84,11 @@ public class CloudConfiguration {
 		@Bean
 		public CloudFactory cloudFactory() {
 			return new LatticeCloudFactory();
+		}
+
+		@Bean
+		public ReceptorClient receptorClient() {
+			return new ReceptorClient(latticeProperties.getReceptor().getHost());
 		}
 	}
 
