@@ -19,5 +19,5 @@ package org.springframework.cloud.dataflow.module.deployer.cloudfoundry;
 /**
  * @author Steve Powell
  */
-class CreateServiceBindingResponse extends ResourceResponse<ServiceBindingEntity> {
+class CreateServiceBindingResponse extends ResourceResponse<ServiceBindingEntity, CreateServiceBindingResponse> {
 }

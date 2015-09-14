@@ -18,8 +18,10 @@ package org.springframework.cloud.dataflow.module.deployer.cloudfoundry;
 
 /**
  * @author Eric Bottard
+ * @author Steve Powell
+ * @author Paul Harris
  */
-class NamedEntity {
+class NamedEntity<E extends NamedEntity<E>> extends Entity {
 
 	private volatile String name;
 
@@ -27,8 +29,10 @@ class NamedEntity {
 		return name;
 	}
 
-	public void setName(String name) {
+	public E withName(String name) {
 		this.name = name;
+		@SuppressWarnings("unchecked") E ethis = (E) this;
+		return ethis;
 	}
 
 }

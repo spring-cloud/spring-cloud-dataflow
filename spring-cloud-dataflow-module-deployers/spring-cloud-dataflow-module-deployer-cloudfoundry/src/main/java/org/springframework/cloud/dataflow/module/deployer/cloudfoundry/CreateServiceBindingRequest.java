@@ -66,4 +66,24 @@ class CreateServiceBindingRequest {
 		return this;
 	}
 
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+
+		CreateServiceBindingRequest that = (CreateServiceBindingRequest) o;
+
+		if (appId != null ? !appId.equals(that.appId) : that.appId != null) return false;
+		if (parameters != null ? !parameters.equals(that.parameters) : that.parameters != null) return false;
+		return !(serviceInstanceId != null ? !serviceInstanceId.equals(that.serviceInstanceId) : that.serviceInstanceId != null);
+
+	}
+
+	@Override
+	public int hashCode() {
+		int result = appId != null ? appId.hashCode() : 0;
+		result = 31 * result + (parameters != null ? parameters.hashCode() : 0);
+		result = 31 * result + (serviceInstanceId != null ? serviceInstanceId.hashCode() : 0);
+		return result;
+	}
 }

@@ -36,7 +36,7 @@ public class ApplicationModuleDeployer implements ModuleDeployer {
 
 	private final CloudFoundryModuleDeploymentConverter cloudFoundryModuleDeploymentConverter;
 
-	private final CloudFoundryApplicationOperations resourceClient;
+	private final CloudFoundryApplicationOperations applicationOperations;
 
 	private CloudFoundryModuleDeployerProperties properties;
 
@@ -46,7 +46,7 @@ public class ApplicationModuleDeployer implements ModuleDeployer {
 			CloudFoundryApplicationOperations applicationOperations) {
 		this.properties = properties;
 		this.cloudFoundryModuleDeploymentConverter = converter;
-		this.resourceClient = applicationOperations;
+		this.applicationOperations = applicationOperations;
 	}
 
 	@Override
@@ -55,7 +55,7 @@ public class ApplicationModuleDeployer implements ModuleDeployer {
 		ModuleDeploymentId moduleDeploymentId = new ModuleDeploymentId(definition.getGroup(), definition.getLabel());
 		String applicationName = this.cloudFoundryModuleDeploymentConverter.toApplicationName(moduleDeploymentId);
 
-		PushBindAndStartApplicationResults response = this.resourceClient.pushBindAndStartApplication(new PushBindAndStartApplicationParameters()
+		PushBindAndStartApplicationResults response = this.applicationOperations.pushBindAndStartApplication(new PushBindAndStartApplicationParameters()
 						.withEnvironment(this.cloudFoundryModuleDeploymentConverter.toModuleLauncherEnvironment(request))
 						.withInstances(request.getCount())
 						.withName(applicationName)
@@ -70,7 +70,7 @@ public class ApplicationModuleDeployer implements ModuleDeployer {
 
 	@Override
 	public Map<ModuleDeploymentId, ModuleStatus> status() {
-		GetApplicationsStatusResults response = this.resourceClient.getApplicationsStatus(
+		GetApplicationsStatusResults response = this.applicationOperations.getApplicationsStatus(
 				new GetApplicationsStatusParameters());
 
 		Map<ModuleDeploymentId, ModuleStatus> result = new HashMap<>();
@@ -88,7 +88,7 @@ public class ApplicationModuleDeployer implements ModuleDeployer {
 	public ModuleStatus status(ModuleDeploymentId moduleId) {
 		String applicationName = this.cloudFoundryModuleDeploymentConverter.toApplicationName(moduleId);
 
-		GetApplicationsStatusResults response = this.resourceClient.getApplicationsStatus(
+		GetApplicationsStatusResults response = this.applicationOperations.getApplicationsStatus(
 				new GetApplicationsStatusParameters().withName(applicationName));
 
 		return new ModuleStatusBuilder().withId(moduleId).withApplicationStatus(response.getApplications().get(applicationName)).build();
@@ -96,7 +96,7 @@ public class ApplicationModuleDeployer implements ModuleDeployer {
 
 	@Override
 	public void undeploy(ModuleDeploymentId moduleId) {
-		DeleteApplicationResults response = this.resourceClient.deleteApplication(
+		DeleteApplicationResults response = this.applicationOperations.deleteApplication(
 				new DeleteApplicationParameters()
 						.withName(this.cloudFoundryModuleDeploymentConverter.toApplicationName(moduleId)));
 		if (!response.isFound()) {

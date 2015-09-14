@@ -21,7 +21,7 @@ package org.springframework.cloud.dataflow.module.deployer.cloudfoundry;
  *
  * @author Steve Powell
  */
-class UpdateApplicationRequest extends CreateApplicationRequest<UpdateApplicationRequest> {
+class UpdateApplicationRequest extends ApplicationRequest<UpdateApplicationRequest> {
 
 	private String id;
 
@@ -32,5 +32,24 @@ class UpdateApplicationRequest extends CreateApplicationRequest<UpdateApplicatio
 	public UpdateApplicationRequest withId(String id) {
 		this.id = id;
 		return this;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) { return true; }
+		if (o == null || getClass() != o.getClass()) { return false; }
+		if (!super.equals(o)) { return false; }
+
+		UpdateApplicationRequest that = (UpdateApplicationRequest) o;
+
+		return !(id != null ? !id.equals(that.id) : that.id != null);
+
+	}
+
+	@Override
+	public int hashCode() {
+		int result = super.hashCode();
+		result = 31 * result + (id != null ? id.hashCode() : 0);
+		return result;
 	}
 }

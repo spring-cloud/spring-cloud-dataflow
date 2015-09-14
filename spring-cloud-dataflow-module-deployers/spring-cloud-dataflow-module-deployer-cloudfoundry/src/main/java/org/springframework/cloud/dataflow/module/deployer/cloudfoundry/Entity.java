@@ -17,36 +17,8 @@
 package org.springframework.cloud.dataflow.module.deployer.cloudfoundry;
 
 /**
- * Request for REST operation {@link CloudControllerOperations#listOrganizations(ListOrganizationsRequest) listOrganizations()}.
- *
+ * Base class of entities that appear in REST responses.
  * @author Steve Powell
  */
-class ListOrganizationsRequest {
-
-	private volatile String name;
-
-	public String getName() {
-		return name;
-	}
-
-	public ListOrganizationsRequest withName(String name) {
-		this.name = name;
-		return this;
-	}
-
-	@Override
-	public boolean equals(Object o) {
-		if (this == o) { return true; }
-		if (o == null || getClass() != o.getClass()) { return false; }
-
-		ListOrganizationsRequest that = (ListOrganizationsRequest) o;
-
-		return !(name != null ? !name.equals(that.name) : that.name != null);
-
-	}
-
-	@Override
-	public int hashCode() {
-		return name != null ? name.hashCode() : 0;
-	}
+class Entity {
 }

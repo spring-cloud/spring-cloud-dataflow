@@ -46,4 +46,29 @@ class UploadBitsRequest {
 		this.id = id;
 		return this;
 	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
+
+		UploadBitsRequest that = (UploadBitsRequest) o;
+
+		if (id != null ? !id.equals(that.id) : that.id != null) {
+			return false;
+		}
+		return !(resource != null ? !resource.equals(that.resource) : that.resource != null);
+
+	}
+
+	@Override
+	public int hashCode() {
+		int result = id != null ? id.hashCode() : 0;
+		result = 31 * result + (resource != null ? resource.hashCode() : 0);
+		return result;
+	}
 }

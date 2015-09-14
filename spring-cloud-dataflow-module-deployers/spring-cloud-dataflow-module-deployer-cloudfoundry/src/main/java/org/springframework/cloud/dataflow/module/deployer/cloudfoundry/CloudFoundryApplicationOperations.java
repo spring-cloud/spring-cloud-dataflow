@@ -31,9 +31,9 @@ interface CloudFoundryApplicationOperations {
 	DeleteApplicationResults deleteApplication(DeleteApplicationParameters parameters);
 
 	/**
-	 * Get status (including instances) for all applications, or all applications (in our space).
+	 * Get status (including instances) for an application, or all applications (in our space).
 	 * @param parameters the get applications parameters
-	 * @return a Response instance carrying the instance status for all applications denoted, or just one.
+	 * @return a Response instance carrying the instance status for all applications, or just one.
 	 */
 	GetApplicationsStatusResults getApplicationsStatus(GetApplicationsStatusParameters parameters);
 

@@ -19,5 +19,5 @@ package org.springframework.cloud.dataflow.module.deployer.cloudfoundry;
 /**
  * @author Eric Bottard
  */
-class ListServiceBindingsResponse extends AbstractPaginatedResponse<ResourceResponse<ServiceBindingEntity>> {
+class ListServiceBindingsResponse extends AbstractPaginatedResponse<BindingResourceResponse, ListServiceBindingsResponse> {
 }

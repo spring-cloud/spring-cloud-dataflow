@@ -22,20 +22,24 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * Part or the whole of a number of responses returned from list operations, get operations,
  * and create and update operations.
  *
+ * @param <Ent> entity type embedded in response
+ *
  * @author Steve Powell
  */
-class ResourceResponse<E> {
+class ResourceResponse<Ent, R extends ResourceResponse<Ent, R>> {
 
 	private volatile Metadata metadata;
 
-	private volatile E entity;
+	private volatile Ent entity;
 
 	public Metadata getMetadata() {
 		return metadata;
 	}
 
-	public void setMetadata(Metadata metadata) {
+	public R withMetadata(Metadata metadata) {
 		this.metadata = metadata;
+		@SuppressWarnings("unchecked") R rthis = (R) this;
+		return rthis;
 	}
 
 	static class Metadata {
@@ -53,16 +57,18 @@ class ResourceResponse<E> {
 		}
 
 		@JsonProperty("guid")
-		public void setId(String id) {
+		public Metadata withId(String id) {
 			this.id = id;
+			return this;
 		}
 
 		public String getUrl() {
 			return url;
 		}
 
-		public void setUrl(String url) {
+		public Metadata withUrl(String url) {
 			this.url = url;
+			return this;
 		}
 
 		public String getCreatedAt() {
@@ -70,8 +76,9 @@ class ResourceResponse<E> {
 		}
 
 		@JsonProperty("created_at")
-		public void setCreatedAt(String createdAt) {
+		public Metadata withCreatedAt(String createdAt) {
 			this.createdAt = createdAt;
+			return this;
 		}
 
 		public String getUpdatedAt() {
@@ -79,17 +86,20 @@ class ResourceResponse<E> {
 		}
 
 		@JsonProperty("updated_at")
-		public void setUpdatedAt(String updatedAt) {
+		public Metadata withUpdatedAt(String updatedAt) {
 			this.updatedAt = updatedAt;
+			return this;
 		}
 	}
 
-	public E getEntity() {
+	public Ent getEntity() {
 		return entity;
 	}
 
-	public void setEntity(E entity) {
+	public R withEntity(Ent entity) {
 		this.entity = entity;
+		@SuppressWarnings("unchecked") R rthis = (R) this;
+		return rthis;
 	}
 
 }

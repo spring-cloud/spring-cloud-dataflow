@@ -21,7 +21,7 @@ package org.springframework.cloud.dataflow.module.deployer.cloudfoundry;
  *
  * @author Eric Bottard
  */
-class RouteEntity {
+class RouteEntity extends Entity {
 
 	private String host;
 

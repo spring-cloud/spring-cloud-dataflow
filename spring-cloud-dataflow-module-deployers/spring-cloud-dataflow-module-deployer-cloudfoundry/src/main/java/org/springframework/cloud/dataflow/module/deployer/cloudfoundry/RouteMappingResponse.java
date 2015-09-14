@@ -21,5 +21,5 @@ package org.springframework.cloud.dataflow.module.deployer.cloudfoundry;
  *
  * @author Eric Bottard
  */
-class RouteMappingResponse extends ResourceResponse<Object> {
+class RouteMappingResponse extends ResourceResponse<Entity, RouteMappingResponse> {
 }

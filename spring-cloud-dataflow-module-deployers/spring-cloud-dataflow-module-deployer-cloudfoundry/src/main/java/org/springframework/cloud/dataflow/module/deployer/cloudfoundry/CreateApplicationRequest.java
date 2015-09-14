@@ -16,103 +16,10 @@
 
 package org.springframework.cloud.dataflow.module.deployer.cloudfoundry;
 
-import java.util.Map;
-
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 /**
- * A type used by RestTemplate requests that is made generic so that it can be extended by other Requests.
- * @param <T> The request type extending this one
+ * Request for REST operation {@link CloudControllerOperations#updateApplication(UpdateApplicationRequest) updateApplication()}.
  *
  * @author Steve Powell
  */
-@JsonInclude(JsonInclude.Include.NON_NULL)
-class CreateApplicationRequest<T extends CreateApplicationRequest<T>> {
-
-	private String name;
-
-	private Integer instances;
-
-	private Integer memory;
-
-	private String spaceId;
-
-	private String state;
-
-	private String buildpack;
-
-	private Map<String, String> environment;
-
-	public String getName() {
-		return name;
-	}
-
-	public T withName(String name) {
-		this.name = name;
-		@SuppressWarnings("unchecked") T thisT = (T) this;
-		return thisT;
-	}
-
-	public Integer getInstances() {
-		return instances;
-	}
-
-	public T withInstances(int instances) {
-		this.instances = instances;
-		@SuppressWarnings("unchecked") T thisT = (T) this;
-		return thisT;
-	}
-
-	public Integer getMemory() {
-		return memory;
-	}
-
-	public T withMemory(int memory) {
-		this.memory = memory;
-		@SuppressWarnings("unchecked") T thisT = (T) this;
-		return thisT;
-	}
-
-	@JsonProperty("space_guid")
-	public String getSpaceId() {
-		return spaceId;
-	}
-
-	public T withSpaceId(String spaceId) {
-		this.spaceId = spaceId;
-		@SuppressWarnings("unchecked") T thisT = (T) this;
-		return thisT;
-	}
-
-	public String getState() {
-		return state;
-	}
-
-	public T withState(String state) {
-		this.state = state;
-		@SuppressWarnings("unchecked") T thisT = (T) this;
-		return thisT;
-	}
-
-	public String getBuildpack() {
-		return buildpack;
-	}
-
-	public T withBuildpack(String buildpack) {
-		this.buildpack = buildpack;
-		@SuppressWarnings("unchecked") T thisT = (T) this;
-		return thisT;
-	}
-
-	@JsonProperty("environment_json")
-	public Map<String, String> getEnvironment() {
-		return environment;
-	}
-
-	public T withEnvironment(Map<String, String> environment) {
-		this.environment = environment;
-		@SuppressWarnings("unchecked") T thisT = (T) this;
-		return thisT;
-	}
+class CreateApplicationRequest extends ApplicationRequest<CreateApplicationRequest> {
 }

@@ -41,4 +41,23 @@ class RemoveServiceBindingRequest {
 		this.bindingId = bindingId;
 		return this;
 	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) { return true; }
+		if (o == null || getClass() != o.getClass()) { return false; }
+
+		RemoveServiceBindingRequest that = (RemoveServiceBindingRequest) o;
+
+		if (bindingId != null ? !bindingId.equals(that.bindingId) : that.bindingId != null) { return false; }
+		return !(appId != null ? !appId.equals(that.appId) : that.appId != null);
+
+	}
+
+	@Override
+	public int hashCode() {
+		int result = bindingId != null ? bindingId.hashCode() : 0;
+		result = 31 * result + (appId != null ? appId.hashCode() : 0);
+		return result;
+	}
 }

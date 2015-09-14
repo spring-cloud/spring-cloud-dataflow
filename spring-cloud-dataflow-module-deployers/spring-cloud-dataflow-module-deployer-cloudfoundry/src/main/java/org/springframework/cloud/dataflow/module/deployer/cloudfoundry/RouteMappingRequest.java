@@ -46,4 +46,23 @@ class RouteMappingRequest {
 		this.routeId = routeId;
 		return this;
 	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) { return true; }
+		if (o == null || getClass() != o.getClass()) { return false; }
+
+		RouteMappingRequest that = (RouteMappingRequest) o;
+
+		if (appId != null ? !appId.equals(that.appId) : that.appId != null) { return false; }
+		return !(routeId != null ? !routeId.equals(that.routeId) : that.routeId != null);
+
+	}
+
+	@Override
+	public int hashCode() {
+		int result = appId != null ? appId.hashCode() : 0;
+		result = 31 * result + (routeId != null ? routeId.hashCode() : 0);
+		return result;
+	}
 }

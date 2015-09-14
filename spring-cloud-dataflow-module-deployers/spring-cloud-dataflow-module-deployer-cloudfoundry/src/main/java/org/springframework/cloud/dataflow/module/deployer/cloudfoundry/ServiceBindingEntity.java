@@ -17,11 +17,9 @@
 package org.springframework.cloud.dataflow.module.deployer.cloudfoundry;
 
 /**
- * Response mapping for a service binding entity.
+ * Entity in a service binding response.
  *
  * @author Eric Bottard
  */
-class ServiceBindingEntity {
-
-	// Nothing specific needed atm
+class ServiceBindingEntity extends Entity {
 }

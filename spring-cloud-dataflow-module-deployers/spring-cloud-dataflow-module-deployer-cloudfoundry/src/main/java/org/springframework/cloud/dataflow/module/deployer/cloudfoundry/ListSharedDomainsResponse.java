@@ -21,5 +21,5 @@ package org.springframework.cloud.dataflow.module.deployer.cloudfoundry;
  *
  * @author Eric Bottard
  */
-class ListSharedDomainsResponse extends AbstractPaginatedResponse<ResourceResponse<NamedEntity>> {
+class ListSharedDomainsResponse extends AbstractPaginatedResponse<NamedResourceResponse, ListSharedDomainsResponse> {
 }

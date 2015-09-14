@@ -18,15 +18,18 @@ package org.springframework.cloud.dataflow.module.deployer.cloudfoundry;
 
 /**
  * @author Eric Bottard
+ * @author Steve Powell
+ * @author Paul Harris
  */
-class ApplicationEntity extends NamedEntity {
+class ApplicationEntity extends NamedEntity<ApplicationEntity> {
 	private volatile String state;
 
 	public String getState() {
 		return state;
 	}
 
-	public void setState(String state) {
+	public ApplicationEntity withState(String state) {
 		this.state = state;
+		return this;
 	}
 }

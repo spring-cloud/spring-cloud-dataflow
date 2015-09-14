@@ -60,4 +60,24 @@ class CreateRouteRequest {
 		return this;
 	}
 
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+
+		CreateRouteRequest that = (CreateRouteRequest) o;
+
+		if (domainId != null ? !domainId.equals(that.domainId) : that.domainId != null) return false;
+		if (spaceId != null ? !spaceId.equals(that.spaceId) : that.spaceId != null) return false;
+		return !(host != null ? !host.equals(that.host) : that.host != null);
+
+	}
+
+	@Override
+	public int hashCode() {
+		int result = domainId != null ? domainId.hashCode() : 0;
+		result = 31 * result + (spaceId != null ? spaceId.hashCode() : 0);
+		result = 31 * result + (host != null ? host.hashCode() : 0);
+		return result;
+	}
 }

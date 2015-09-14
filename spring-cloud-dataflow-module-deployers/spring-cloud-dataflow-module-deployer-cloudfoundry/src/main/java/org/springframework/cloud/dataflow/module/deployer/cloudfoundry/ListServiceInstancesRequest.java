@@ -41,4 +41,23 @@ class ListServiceInstancesRequest {
 		this.spaceId = spaceId;
 		return this;
 	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+
+		ListServiceInstancesRequest that = (ListServiceInstancesRequest) o;
+
+		if (name != null ? !name.equals(that.name) : that.name != null) return false;
+		return !(spaceId != null ? !spaceId.equals(that.spaceId) : that.spaceId != null);
+
+	}
+
+	@Override
+	public int hashCode() {
+		int result = name != null ? name.hashCode() : 0;
+		result = 31 * result + (spaceId != null ? spaceId.hashCode() : 0);
+		return result;
+	}
 }

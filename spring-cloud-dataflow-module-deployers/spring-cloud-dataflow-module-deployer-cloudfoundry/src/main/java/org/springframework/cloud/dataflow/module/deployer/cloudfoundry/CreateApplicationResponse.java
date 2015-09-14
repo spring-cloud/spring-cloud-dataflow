@@ -21,5 +21,5 @@ package org.springframework.cloud.dataflow.module.deployer.cloudfoundry;
  *
  * @author Steve Powell
  */
-class CreateApplicationResponse extends ResourceResponse {
+class CreateApplicationResponse extends ResourceResponse<Entity, CreateApplicationResponse> {
 }

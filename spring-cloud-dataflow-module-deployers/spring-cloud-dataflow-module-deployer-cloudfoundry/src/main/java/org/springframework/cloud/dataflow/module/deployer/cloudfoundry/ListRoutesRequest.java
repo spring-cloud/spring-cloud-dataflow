@@ -25,8 +25,6 @@ class ListRoutesRequest {
 
 	private String domainId;
 
-	private String path;
-
 	private String host;
 
 	public String getDomainId() {
@@ -38,15 +36,6 @@ class ListRoutesRequest {
 		return this;
 	}
 
-	public String getPath() {
-		return path;
-	}
-
-	public ListRoutesRequest withPath(String path) {
-		this.path = path;
-		return this;
-	}
-
 	public String getHost() {
 		return host;
 	}
@@ -54,5 +43,24 @@ class ListRoutesRequest {
 	public ListRoutesRequest withHost(String host) {
 		this.host = host;
 		return this;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) { return true; }
+		if (o == null || getClass() != o.getClass()) { return false; }
+
+		ListRoutesRequest that = (ListRoutesRequest) o;
+
+		if (domainId != null ? !domainId.equals(that.domainId) : that.domainId != null) { return false; }
+		return !(host != null ? !host.equals(that.host) : that.host != null);
+
+	}
+
+	@Override
+	public int hashCode() {
+		int result = domainId != null ? domainId.hashCode() : 0;
+		result = 31 * result + (host != null ? host.hashCode() : 0);
+		return result;
 	}
 }

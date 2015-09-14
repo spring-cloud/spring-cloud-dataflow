@@ -23,8 +23,6 @@ class ListServiceBindingsRequest {
 
 	private String appId;
 
-	private String spaceId;
-
 	public String getAppId() {
 		return appId;
 	}
@@ -34,12 +32,20 @@ class ListServiceBindingsRequest {
 		return this;
 	}
 
-	public String getSpaceId() {
-		return spaceId;
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) { return true; }
+		if (o == null || getClass() != o.getClass()) { return false; }
+
+		ListServiceBindingsRequest that = (ListServiceBindingsRequest) o;
+
+		return !(appId != null ? !appId.equals(that.appId) : that.appId != null);
+
 	}
 
-	public ListServiceBindingsRequest withSpaceId(String spaceId) {
-		this.spaceId = spaceId;
-		return this;
+	@Override
+	public int hashCode() {
+		return appId != null ? appId.hashCode() : 0;
 	}
+
 }

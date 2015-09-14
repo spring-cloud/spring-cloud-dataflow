@@ -23,7 +23,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 /**
  * @author Steve Powell
  */
-abstract class AbstractPaginatedResponse<R> {
+abstract class AbstractPaginatedResponse<Res, R extends AbstractPaginatedResponse<Res, R>> {
 
 	private volatile int totalResults;
 
@@ -33,15 +33,17 @@ abstract class AbstractPaginatedResponse<R> {
 
 	private volatile String nextUrl;
 
-	private volatile List<R> resources;
+	private volatile List<Res> resources;
 
 	public final int getTotalResults() {
 		return totalResults;
 	}
 
 	@JsonProperty("total_results")
-	public final void setTotalResults(int totalResults) {
+	public final R withTotalResults(int totalResults) {
 		this.totalResults = totalResults;
+		@SuppressWarnings("unchecked") R rthis = (R) this;
+		return rthis;
 	}
 
 	public final int getTotalPages() {
@@ -49,8 +51,10 @@ abstract class AbstractPaginatedResponse<R> {
 	}
 
 	@JsonProperty("total_pages")
-	public final void setTotalPages(int totalPages) {
+	public final R withTotalPages(int totalPages) {
 		this.totalPages = totalPages;
+		@SuppressWarnings("unchecked") R rthis = (R) this;
+		return rthis;
 	}
 
 	public final String getPreviousUrl() {
@@ -58,8 +62,10 @@ abstract class AbstractPaginatedResponse<R> {
 	}
 
 	@JsonProperty("prev_url")
-	public final void setPreviousUrl(String previousUrl) {
+	public final R withPreviousUrl(String previousUrl) {
 		this.previousUrl = previousUrl;
+		@SuppressWarnings("unchecked") R rthis = (R) this;
+		return rthis;
 	}
 
 	public final String getNextUrl() {
@@ -67,16 +73,20 @@ abstract class AbstractPaginatedResponse<R> {
 	}
 
 	@JsonProperty("next_url")
-	public final void setNextUrl(String nextUrl) {
+	public final R withNextUrl(String nextUrl) {
 		this.nextUrl = nextUrl;
+		@SuppressWarnings("unchecked") R rthis = (R) this;
+		return rthis;
 	}
 
-	public final List<R> getResources() {
+	public final List<Res> getResources() {
 		return resources;
 	}
 
-	public final void setResources(List<R> resources) {
+	public final R withResources(List<Res> resources) {
 		this.resources = resources;
+		@SuppressWarnings("unchecked") R rthis = (R) this;
+		return rthis;
 	}
 
 }
