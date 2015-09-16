@@ -15,6 +15,7 @@
 		<module>spring-cloud-dataflow-module-deployer-spi</module>
 		<module>spring-cloud-dataflow-module-deployer-local</module>
 		<module>spring-cloud-dataflow-module-deployer-lattice</module>
+		<module>spring-cloud-dataflow-module-deployer-marathon</module>
 		<module>spring-cloud-dataflow-module-deployer-cloudfoundry</module>
 		<module>spring-cloud-dataflow-module-deployer-yarn</module>
 	</modules>

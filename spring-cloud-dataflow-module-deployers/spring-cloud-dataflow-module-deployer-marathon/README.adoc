@@ -1,0 +1,2 @@
+SPI implementation for deploying https://github.com/spring-cloud/spring-cloud-stream[Spring Cloud Stream] modules to
+ https://mesosphere.github.io/marathon[Marathon].
