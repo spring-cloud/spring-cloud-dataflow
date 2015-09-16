@@ -72,7 +72,12 @@ public class LocalConfiguration {
 		}
 
 		@ConditionalOnProperty("cloudfoundry.apiEndpoint")
-		static class TragetingCloudFoundry {
+		static class TargetingCloudFoundry {
+		}
+
+		@ConditionalOnProperty("marathon.apiEndpoint")
+		static class TargetingMarathon {
+
 		}
 	}
 
