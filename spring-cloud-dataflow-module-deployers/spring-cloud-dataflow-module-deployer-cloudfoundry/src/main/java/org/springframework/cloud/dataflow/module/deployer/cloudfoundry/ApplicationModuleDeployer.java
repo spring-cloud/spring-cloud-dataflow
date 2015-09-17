@@ -235,12 +235,18 @@ public class ApplicationModuleDeployer implements ModuleDeployer {
 //		}
 		StringBuilder sb = new StringBuilder();
 		for (Map.Entry<String, String> entry : args.entrySet()) {
-			sb.append("--").append(entry.getKey()).append('=').append(entry.getValue()).append(' ');
+			String oneArg = "--" + entry.getKey() + "=" + entry.getValue();
+			sb.append(bashEscape(oneArg)).append(' ');
 		}
 		String asYaml = new Yaml().dump(Collections.singletonMap("arguments", sb.toString()));
 
 		env.put("JBP_CONFIG_JAVA_MAIN", asYaml);
 		return env;
+	}
+
+	private static String bashEscape(String original) {
+		// Adapted from http://ruby-doc.org/stdlib-1.9.3/libdoc/shellwords/rdoc/Shellwords.html#method-c-shellescape
+		return original.replaceAll("([^A-Za-z0-9_\\-.,:\\/@\\n])", "\\\\$1").replaceAll("\n", "'\\\\n'");
 	}
 
 	/**
