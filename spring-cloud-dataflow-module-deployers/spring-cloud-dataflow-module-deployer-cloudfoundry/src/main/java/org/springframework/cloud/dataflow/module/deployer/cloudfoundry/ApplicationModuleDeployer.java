@@ -20,8 +20,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -57,7 +57,7 @@ public class ApplicationModuleDeployer implements ModuleDeployer {
 
 	private final CloudFoundryModuleDeployerProperties properties;
 
-	private CloudFoundryClient cloudFoundryClient;
+	private final CloudFoundryClient cloudFoundryClient;
 
 	private final Logger logger = LoggerFactory.getLogger(ApplicationModuleDeployer.class);
 
@@ -87,15 +87,15 @@ public class ApplicationModuleDeployer implements ModuleDeployer {
 		final List<String> uris = deduceUris(request);
 		final List<String> serviceNames = new ArrayList<>(properties.getServices());
 
-		Rollbacker rollbacker = new Rollbacker();
+		Undoer undoer = new Undoer();
 
-		rollbacker.attempt(new Runnable() {
+		undoer.attempt(new Runnable() {
 			@Override
 			public void run() {
 				logger.debug("Creating app {} using disk[{}], mem[{}]\n\tservices={}, uris={}\n\t{}", appName, disk, memory, serviceNames, uris, staging);
 				cloudFoundryClient.createApplication(appName, staging, disk, memory, uris, serviceNames);
 			}
-		}).andRollbackBy(new Runnable() {
+		}).andUndoBy(new Runnable() {
 			@Override
 			public void run() {
 				logger.error("Rollback: deleting app {}", appName);
@@ -104,41 +104,41 @@ public class ApplicationModuleDeployer implements ModuleDeployer {
 		});
 
 		final Map<String, String> env = createModuleLauncherEnvironment(request);
-		rollbacker.attempt(new Runnable() {
+		undoer.attempt(new Runnable() {
 			@Override
 			public void run() {
 				logger.trace("Setting env for app {} as {}", appName, env);
 				cloudFoundryClient.updateApplicationEnv(appName, env);
 			}
-		}).withNoParticularRollback();
+		}).withNoParticularUndo();
 
-		rollbacker.attempt(new Callable<Void>() {
+		undoer.attempt(new Callable<Void>() {
 			@Override
 			public Void call() throws IOException {
 				Resource launcher = properties.getModuleLauncherLocation();
 				cloudFoundryClient.uploadApplication(appName, launcher.getFilename(), launcher.getInputStream(), new LoggingUploadStatusCallback(appName));
 				return null;
 			}
-		}).withNoParticularRollback();
+		}).withNoParticularUndo();
 
 		final int instances = request.getCount();
 		if (instances > 1) { // spare a network call if instances == 1
-			rollbacker.attempt(new Runnable() {
+			undoer.attempt(new Runnable() {
 				@Override
 				public void run() {
 					logger.trace("Setting number of instances for {} to {}", appName, instances);
 					cloudFoundryClient.updateApplicationInstances(appName, instances);
 				}
-			}).withNoParticularRollback();
+			}).withNoParticularUndo();
 		}
 
-		rollbacker.attempt(new Runnable() {
+		undoer.attempt(new Runnable() {
 			@Override
 			public void run() {
 				logger.debug("Starting application {}", appName);
 				cloudFoundryClient.startApplication(appName);
 			}
-		}).withNoParticularRollback();
+		}).withNoParticularUndo();
 
 		ModuleDefinition definition = request.getDefinition();
 		ModuleDeploymentId moduleDeploymentId = new ModuleDeploymentId(definition.getGroup(), definition.getLabel());
@@ -166,7 +166,7 @@ public class ApplicationModuleDeployer implements ModuleDeployer {
 				result.put(id, status);
 			}
 		}
-		throw new UnsupportedOperationException();
+		return result;
 	}
 
 	@Override
@@ -186,17 +186,46 @@ public class ApplicationModuleDeployer implements ModuleDeployer {
 		String appName = deduceAppName(id);
 		if (cloudApplication != null && cloudApplication.getState() == CloudApplication.AppState.STARTED) {
 			InstancesInfo applicationInstances = cloudFoundryClient.getApplicationInstances(cloudApplication);
-			Iterator<InstanceStats> instanceStats = cloudFoundryClient.getApplicationStats(appName).getRecords().iterator();
-			for (InstanceInfo instance : applicationInstances.getInstances()) {
-				// Changes builder by side-effect
-				statusBuilder.with(new CloudFoundryModuleInstanceStatus(appName, instance, instanceStats.next()));
-			}
-		} // No running instances, app must be stopped/updating, or even inexistent
-		else {
-			if (cloudApplication != null) {
-				for (int i = 0; i < cloudApplication.getInstances(); i++) {
-					statusBuilder.with(new CloudFoundryModuleInstanceStatus(appName, i));
+
+
+			if (applicationInstances.getInstances() != null) { // null can happen despite the STARTED check above
+				List<InstanceStats> instanceStats = new ArrayList<>(cloudFoundryClient.getApplicationStats(appName).getRecords());
+				List<InstanceInfo> instanceInfos = new ArrayList<>(applicationInstances.getInstances());
+				if (instanceStats.size() != instanceInfos.size()) {
+					return notRunningInstancesStatus(id, cloudApplication);
 				}
+				// Use instanceStat.id and instanceInfo.index as synching key
+				Collections.sort(instanceStats, new Comparator<InstanceStats>() {
+					@Override
+					public int compare(InstanceStats o1, InstanceStats o2) {
+						return Integer.valueOf(o1.getId()).compareTo(Integer.valueOf(o2.getId()));
+					}
+				});
+				Collections.sort(instanceInfos, new Comparator<InstanceInfo>() {
+					@Override
+					public int compare(InstanceInfo o1, InstanceInfo o2) {
+						return o1.getIndex() - o2.getIndex();
+					}
+				});
+
+				for (int i = 0; i < instanceStats.size(); i++) {
+					// Changes builder by side-effect
+					statusBuilder.with(new CloudFoundryModuleInstanceStatus(appName, instanceInfos.get(i), instanceStats.get(i)));
+				}
+				return statusBuilder.build();
+			}
+		}
+		// Fall through from all if() checks above
+		// No running instances, app must be stopped/updating, or even inexistent
+		return notRunningInstancesStatus(id, cloudApplication);
+	}
+
+	private ModuleStatus notRunningInstancesStatus(ModuleDeploymentId id, CloudApplication cloudApplication) {
+		String appName = deduceAppName(id);
+		ModuleStatus.Builder statusBuilder = ModuleStatus.of(id);
+		if (cloudApplication != null) {
+			for (int i = 0; i < cloudApplication.getInstances(); i++) {
+				statusBuilder.with(new CloudFoundryModuleInstanceStatus(appName, i));
 			}
 		}
 		return statusBuilder.build();

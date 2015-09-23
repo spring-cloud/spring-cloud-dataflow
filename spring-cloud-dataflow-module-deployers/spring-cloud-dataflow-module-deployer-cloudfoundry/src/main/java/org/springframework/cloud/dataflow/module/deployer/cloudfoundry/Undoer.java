@@ -22,20 +22,20 @@ import java.util.List;
 import java.util.concurrent.Callable;
 
 /**
- * Helper class to run (several) closures that may fail, needing to be rolled back.
+ * Helper class to run (several) closures that may fail, needing to be undone.
  *
  * @author Eric Bottard
  */
-public class Rollbacker {
+public class Undoer {
 
 	private List<Runnable> undos = new ArrayList<>();
 
-	public <T> RollbackBuilder<T> attempt(Callable<T> task) {
-		return this.new RollbackBuilder<>(task);
+	public <T> UndoerRunner<T> attempt(Callable<T> task) {
+		return this.new UndoerRunner(task);
 	}
 
-	public RollbackBuilder<Void> attempt(final Runnable task) {
-		return this.new RollbackBuilder<>(new Callable<Void>() {
+	public UndoerRunner<Void> attempt(final Runnable task) {
+		return this.new UndoerRunner(new Callable<Void>() {
 			@Override
 			public Void call() throws Exception {
 				task.run();
@@ -44,14 +44,14 @@ public class Rollbacker {
 		});
 	}
 
-	public class RollbackBuilder<T> {
+	public class UndoerRunner<T> {
 		private final Callable<T> action;
 
-		private RollbackBuilder(Callable<T> action) {
+		private UndoerRunner(Callable<T> action) {
 			this.action = action;
 		}
 
-		public T andRollbackBy(Runnable undo) {
+		public T andUndoBy(Runnable undo) {
 			try {
 				T result = action.call();
 				if (undo != null) {
@@ -60,25 +60,25 @@ public class Rollbacker {
 				return result;
 			}
 			catch (RuntimeException e) {
-				rollback();
+				undo();
 				throw e;
 			}
 			catch (Exception e) {
-				rollback();
+				undo();
 				throw new RuntimeException(e);
 			}
 		}
 
-		public T withNoParticularRollback() {
-			return andRollbackBy(null);
+		public T withNoParticularUndo() {
+			return andUndoBy(null);
 		}
 	}
 
 	/**
-	 * Attempt to rollback all operations that have happened thus far. This will be called automatically
+	 * Attempt to undo all operations that have happened thus far. This will be called automatically
 	 * if an operation wrapped in an {@link #attempt(Callable)} fails, but can also be called externally.
 	 */
-	public void rollback() {
+	public void undo() {
 		Collections.reverse(undos);
 		for (Runnable undo : undos) {
 			try {

@@ -62,8 +62,14 @@ class CloudFoundryModuleDeployerProperties {
 	 */
 	private URL apiEndpoint;
 
+	/**
+	 * Username to use to authenticate against the Cloud Foundry API.
+	 */
 	private String username;
 
+	/**
+	 * Password to use to authenticate against the Cloud Foundry API.
+	 */
 	private String password;
 
 	public String getPassword() {
