@@ -85,7 +85,7 @@ public class CloudFoundryModuleDeployerConfiguration {
 	}
 
 	@Bean
-	ExtendedOAuth2RestOperations oauth2RestTemplate(
+	ExtendedOAuth2RestOperations oAuth2RestTemplate(
 			OAuth2ClientContext clientContext,
 			OAuth2ProtectedResourceDetails details) {
 		return new ExtendedOAuth2RestTemplate(details, clientContext);
@@ -98,7 +98,7 @@ public class CloudFoundryModuleDeployerConfiguration {
 	}
 
 	@Bean
-	OAuth2ClientContext oauth2ClientContext() {
+	OAuth2ClientContext oAuth2ClientContext() {
 		return new DefaultOAuth2ClientContext(new DefaultAccessTokenRequest());
 	}
 

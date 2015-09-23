@@ -24,7 +24,7 @@ import org.springframework.cloud.dataflow.module.ModuleStatus;
 
 /**
  * Build a ModuleStatus from id, {@link ApplicationStatus} and several
- * {@link ApplicationInstanceStatus} objects.
+ * {@link Responses.ApplicationInstanceStatus} objects.
  *
  * @author Ben Hale
  * @author Steve Powell
@@ -38,7 +38,7 @@ class ModuleStatusBuilder {
 	ModuleStatus build() {
 		ModuleStatus.Builder builder = ModuleStatus.of(this.id);
 		if (this.applicationStatus != null) {
-			for (Map.Entry<String, ApplicationInstanceStatus> e : this.applicationStatus.getInstances().entrySet()) {
+			for (Map.Entry<String, Responses.ApplicationInstanceStatus> e : this.applicationStatus.getInstances().entrySet()) {
 				builder.with(moduleInstanceStatus(moduleInstanceId(this.applicationStatus.getId(), e.getKey()),
 						e.getValue()));
 			}
@@ -78,8 +78,8 @@ class ModuleStatusBuilder {
 	}
 
 	private static ModuleInstanceStatus moduleInstanceStatus(String id,
-			ApplicationInstanceStatus applicationInstanceStatus) {
-		ApplicationInstanceStatus.Statistics statistics = applicationInstanceStatus.getStatistics();
+			Responses.ApplicationInstanceStatus applicationInstanceStatus) {
+		Responses.ApplicationInstanceStatus.Statistics statistics = applicationInstanceStatus.getStatistics();
 
 		CloudFoundryModuleInstanceStatus status = new CloudFoundryModuleInstanceStatus()
 				.withId(id)

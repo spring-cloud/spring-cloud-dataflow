@@ -49,34 +49,34 @@ class CloudFoundryApplicationTemplate implements CloudFoundryApplicationOperatio
 	}
 
 	@Override
-	public DeleteApplicationResults deleteApplication(DeleteApplicationParameters parameters) {
+	public Results.DeleteApplication deleteApplication(Parameters.DeleteApplication parameters) {
 		String appName = parameters.getName();
 
 		String appId = findApplicationId(appName);
 		if (appId == null) {
 			deleteOldRoutes(appName);
-			return new DeleteApplicationResults().withFound(false);
+			return new Results.DeleteApplication().withFound(false);
 		}
 
 		deleteBoundRoutes(appName, appId);
 
 		unbindServices(appId);
 
-		return new DeleteApplicationResults().withFound(true).withDeleted(deleteBaseApplication(appId));
+		return new Results.DeleteApplication().withFound(true).withDeleted(deleteBaseApplication(appId));
 	}
 
 	@Override
-	public GetApplicationsStatusResults getApplicationsStatus(GetApplicationsStatusParameters parameters) {
-		GetApplicationsStatusResults response = new GetApplicationsStatusResults();
+	public Results.GetApplicationsStatus getApplicationsStatus(Parameters.GetApplicationsStatus parameters) {
+		Results.GetApplicationsStatus response = new Results.GetApplicationsStatus();
 
-		ListApplicationsRequest listRequest = new ListApplicationsRequest()
+		Requests.ListApplications listRequest = new Requests.ListApplications()
 				.withSpaceId(this.spaceId);
 
 		if (parameters.getName() != null) {
 			listRequest.withName(parameters.getName());
 		}
 
-		List<ApplicationResourceResponse> applications;
+		List<Responses.ApplicationResource> applications;
 		try {
 			applications = this.client.listApplications(listRequest).getResources();
 			if (applications.isEmpty()) {
@@ -87,15 +87,15 @@ class CloudFoundryApplicationTemplate implements CloudFoundryApplicationOperatio
 			return response;
 		}
 
-		for (ApplicationResourceResponse application : applications) {
+		for (Responses.ApplicationResource application : applications) {
 			String applicationId = application.getMetadata().getId();
 			String applicationName = application.getEntity().getName();
 
 			try {
-				GetApplicationStatisticsRequest statsRequest = new GetApplicationStatisticsRequest()
+				Requests.GetApplicationStatistics statsRequest = new Requests.GetApplicationStatistics()
 						.withId(applicationId);
 
-				GetApplicationStatisticsResponse statsResponse = this.client.getApplicationStatistics(statsRequest);
+				Responses.GetApplicationStatistics statsResponse = this.client.getApplicationStatistics(statsRequest);
 				response.withApplication(applicationName, new ApplicationStatus()
 						.withId(applicationId)
 						.withInstances(statsResponse));
@@ -109,8 +109,8 @@ class CloudFoundryApplicationTemplate implements CloudFoundryApplicationOperatio
 	}
 
 	@Override
-	public PushBindAndStartApplicationResults pushBindAndStartApplication(PushBindAndStartApplicationParameters parameters) {
-		PushBindAndStartApplicationResults pushResults = new PushBindAndStartApplicationResults();
+	public Results.PushBindAndStartApplication pushBindAndStartApplication(Parameters.PushBindAndStartApplication parameters) {
+		Results.PushBindAndStartApplication pushResults = new Results.PushBindAndStartApplication();
 
 		String appId = createBaseApplication(parameters);
 
@@ -155,13 +155,13 @@ class CloudFoundryApplicationTemplate implements CloudFoundryApplicationOperatio
 
 	private boolean bindServiceInstances(String appId, Set<String> serviceInstanceNames) {
 		for (String serviceInstanceName : serviceInstanceNames) {
-			ListServiceInstancesRequest listServiceInstancesRequest = new ListServiceInstancesRequest()
+			Requests.ListServiceInstances listServiceInstancesRequest = new Requests.ListServiceInstances()
 					.withName(serviceInstanceName)
 					.withSpaceId(this.spaceId);
 			try {
-				List<NamedResourceResponse> listServiceInstances = this.client.listServiceInstances(listServiceInstancesRequest).getResources();
-				for (NamedResourceResponse serviceInstanceResource : listServiceInstances) {
-					CreateServiceBindingRequest createServiceBindingRequest = new CreateServiceBindingRequest()
+				List<Responses.NamedResource> listServiceInstances = this.client.listServiceInstances(listServiceInstancesRequest).getResources();
+				for (Responses.NamedResource serviceInstanceResource : listServiceInstances) {
+					Requests.CreateServiceBinding createServiceBindingRequest = new Requests.CreateServiceBinding()
 							.withAppId(appId)
 							.withServiceInstanceId(serviceInstanceResource.getMetadata().getId());
 					this.client.createServiceBinding(createServiceBindingRequest);
@@ -175,14 +175,14 @@ class CloudFoundryApplicationTemplate implements CloudFoundryApplicationOperatio
 	}
 
 	private boolean createAndMapRoute(String appName, String appId) {
-		CreateRouteRequest createRouteRequest = new CreateRouteRequest()
+		Requests.CreateRoute createRouteRequest = new Requests.CreateRoute()
 				.withDomainId(this.domainId)
 				.withSpaceId(this.spaceId)
 				.withHost(appName.replaceAll("[^A-Za-z0-9]", "-"));
 		try {
-			CreateRouteResponse createRouteResponse = this.client.createRoute(createRouteRequest);
+			Responses.CreateRoute createRouteResponse = this.client.createRoute(createRouteRequest);
 
-			RouteMappingRequest mapRouteRequest = new RouteMappingRequest()
+			Requests.RouteMapping mapRouteRequest = new Requests.RouteMapping()
 					.withRouteId(createRouteResponse.getMetadata().getId())
 					.withAppId(appId);
 			this.client.mapRoute(mapRouteRequest);
@@ -193,8 +193,8 @@ class CloudFoundryApplicationTemplate implements CloudFoundryApplicationOperatio
 		return true;
 	}
 
-	private String createBaseApplication(PushBindAndStartApplicationParameters parameters) {
-		CreateApplicationRequest createRequest = new CreateApplicationRequest()
+	private String createBaseApplication(Parameters.PushBindAndStartApplication parameters) {
+		Requests.CreateApplication createRequest = new Requests.CreateApplication()
 				.withSpaceId(this.spaceId)
 				.withName(parameters.getName())
 				.withInstances(parameters.getInstances())
@@ -203,7 +203,7 @@ class CloudFoundryApplicationTemplate implements CloudFoundryApplicationOperatio
 				.withState("STOPPED")
 				.withEnvironment(parameters.getEnvironment());
 
-		CreateApplicationResponse createResponse;
+		Responses.CreateApplication createResponse;
 		try {
 			createResponse = this.client.createApplication(createRequest);
 		}
@@ -214,9 +214,9 @@ class CloudFoundryApplicationTemplate implements CloudFoundryApplicationOperatio
 	}
 
 	private boolean deleteBaseApplication(String appId) {
-		DeleteApplicationRequest deleteRequest = new DeleteApplicationRequest()
+		Requests.DeleteApplication deleteRequest = new Requests.DeleteApplication()
 				.withId(appId);
-		DeleteApplicationResponse response;
+		Responses.DeleteApplication response;
 		try {
 			response = this.client.deleteApplication(deleteRequest);
 		}
@@ -227,20 +227,20 @@ class CloudFoundryApplicationTemplate implements CloudFoundryApplicationOperatio
 	}
 
 	private boolean deleteBoundRoutes(String appName, String appId) {
-		ListRoutesRequest listRoutesRequest = new ListRoutesRequest()
+		Requests.ListRoutes listRoutesRequest = new Requests.ListRoutes()
 				.withDomainId(this.domainId)
 				.withHost(appName.replaceAll("[^A-Za-z0-9]", "-"));
 		try {
-			ListRoutesResponse listRoutesResponse = this.client.listRoutes(listRoutesRequest);
-			for (RouteResourceResponse resource : listRoutesResponse.getResources()) {
+			Responses.ListRoutes listRoutesResponse = this.client.listRoutes(listRoutesRequest);
+			for (Responses.RouteResource resource : listRoutesResponse.getResources()) {
 				String routeId = resource.getMetadata().getId();
 				if (appId != null) {
-					this.client.unmapRoute(new RouteMappingRequest()
+					this.client.unmapRoute(new Requests.RouteMapping()
 									.withAppId(appId)
 									.withRouteId(routeId)
 					);
 				}
-				this.client.deleteRoute(new DeleteRouteRequest().withId(routeId));
+				this.client.deleteRoute(new Requests.DeleteRoute().withId(routeId));
 			}
 		}
 		catch (RestClientException rce) {
@@ -254,11 +254,11 @@ class CloudFoundryApplicationTemplate implements CloudFoundryApplicationOperatio
 	}
 
 	private String findApplicationId(String appName) {
-		ListApplicationsRequest listRequest = new ListApplicationsRequest()
+		Requests.ListApplications listRequest = new Requests.ListApplications()
 				.withSpaceId(this.spaceId)
 				.withName(appName);
 
-		List<ApplicationResourceResponse> applications;
+		List<Responses.ApplicationResource> applications;
 		try {
 			applications = this.client.listApplications(listRequest).getResources();
 		}
@@ -273,7 +273,7 @@ class CloudFoundryApplicationTemplate implements CloudFoundryApplicationOperatio
 	}
 
 	private boolean startApplication(String appId) {
-		UpdateApplicationRequest updateRequest = new UpdateApplicationRequest()
+		Requests.UpdateApplication updateRequest = new Requests.UpdateApplication()
 				.withId(appId)
 				.withState("STARTED");
 		try {
@@ -286,12 +286,12 @@ class CloudFoundryApplicationTemplate implements CloudFoundryApplicationOperatio
 	}
 
 	private boolean unbindServices(String appId) {
-		ListServiceBindingsRequest listServiceBindingsRequest = new ListServiceBindingsRequest()
+		Requests.ListServiceBindings listServiceBindingsRequest = new Requests.ListServiceBindings()
 				.withAppId(appId);
 		try {
-			List<BindingResourceResponse> serviceBindings = this.client.listServiceBindings(listServiceBindingsRequest).getResources();
-			for (BindingResourceResponse serviceBinding : serviceBindings) {
-				this.client.removeServiceBinding(new RemoveServiceBindingRequest()
+			List<Responses.BindingResource> serviceBindings = this.client.listServiceBindings(listServiceBindingsRequest).getResources();
+			for (Responses.BindingResource serviceBinding : serviceBindings) {
+				this.client.removeServiceBinding(new Requests.RemoveServiceBinding()
 								.withAppId(appId)
 								.withBindingId(serviceBinding.getMetadata().getId())
 				);
@@ -304,7 +304,7 @@ class CloudFoundryApplicationTemplate implements CloudFoundryApplicationOperatio
 	}
 
 	private boolean uploadBits(String appId, Resource resource) {
-		UploadBitsRequest uploadBitsRequest = new UploadBitsRequest()
+		Requests.UploadBits uploadBitsRequest = new Requests.UploadBits()
 				.withId(appId)
 				.withResource(resource);
 		try {
@@ -317,20 +317,20 @@ class CloudFoundryApplicationTemplate implements CloudFoundryApplicationOperatio
 	}
 
 	private static String getSpaceId(CloudControllerOperations client, String organizationName, String spaceName) {
-		ListOrganizationsRequest organizationsRequest = new ListOrganizationsRequest()
+		Requests.ListOrganizations organizationsRequest = new Requests.ListOrganizations()
 				.withName(organizationName);
 
-		List<NamedResourceResponse> orgs = client.listOrganizations(organizationsRequest).getResources();
+		List<Responses.NamedResource> orgs = client.listOrganizations(organizationsRequest).getResources();
 		if (orgs.size() != 1) {
 			return null;
 		}
 		String orgId = orgs.get(0).getMetadata().getId();
 
-		ListSpacesRequest spacesRequest = new ListSpacesRequest()
+		Requests.ListSpaces spacesRequest = new Requests.ListSpaces()
 				.withOrgId(orgId)
 				.withName(spaceName);
 
-		List<NamedResourceResponse> spaces = client.listSpaces(spacesRequest).getResources();
+		List<Responses.NamedResource> spaces = client.listSpaces(spacesRequest).getResources();
 		if (spaces.size() != 1) {
 			return null;
 		}
@@ -338,11 +338,11 @@ class CloudFoundryApplicationTemplate implements CloudFoundryApplicationOperatio
 	}
 
 	private static String getDomainId(CloudControllerOperations client, String domain) {
-		ListSharedDomainsRequest sharedDomainsRequest = new ListSharedDomainsRequest()
+		Requests.ListSharedDomains sharedDomainsRequest = new Requests.ListSharedDomains()
 				.withName(domain);
 
-		ListSharedDomainsResponse listSharedDomainsResponse = client.listSharedDomains(sharedDomainsRequest);
-		List<NamedResourceResponse> domains = listSharedDomainsResponse.getResources();
+		Responses.ListSharedDomains listSharedDomainsResponse = client.listSharedDomains(sharedDomainsRequest);
+		List<Responses.NamedResource> domains = listSharedDomainsResponse.getResources();
 		if (domains.size() != 1) {
 			return null;
 		}

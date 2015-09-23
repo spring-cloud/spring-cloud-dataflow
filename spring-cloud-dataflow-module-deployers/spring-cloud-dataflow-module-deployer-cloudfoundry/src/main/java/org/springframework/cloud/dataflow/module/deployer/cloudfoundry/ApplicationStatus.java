@@ -28,7 +28,7 @@ class ApplicationStatus {
 
 	private volatile String id;
 
-	private Map<String, ApplicationInstanceStatus> instances = new HashMap<>();
+	private Map<String, Responses.ApplicationInstanceStatus> instances = new HashMap<>();
 
 	public String getId() {
 		return id;
@@ -39,11 +39,11 @@ class ApplicationStatus {
 		return this;
 	}
 
-	public Map<String, ApplicationInstanceStatus> getInstances() {
+	public Map<String, Responses.ApplicationInstanceStatus> getInstances() {
 		return instances;
 	}
 
-	public ApplicationStatus withInstances(Map<String, ApplicationInstanceStatus> instances) {
+	public ApplicationStatus withInstances(Map<String, Responses.ApplicationInstanceStatus> instances) {
 		this.instances.putAll(instances);
 		return this;
 	}
