@@ -36,31 +36,44 @@ import org.springframework.cloud.dataflow.module.deployer.ModuleArgumentQualifie
 class CloudFoundryModuleDeploymentConverter {
 
 	//TODO: validate the prefixing strategy
-	private static final String APPLICATION_PREFIX = "spring_cloud_dataflow_";
+	static final String APPLICATION_PREFIX = "spring_cloud_dataflow_";
+
+	static final String MODULE_ID_ENVIRONMENT_VARNAME = "SPRING_CLOUD_DATAFLOW_MODULE";
+
+	ModuleDeploymentId getModuleId(ApplicationStatus applicationStatus) {
+		Map<String, String> environment = applicationStatus.getEnvironment();
+		if (environment != null) {
+			String moduleIdString = environment.get(MODULE_ID_ENVIRONMENT_VARNAME);
+			if (moduleIdString != null) {
+				try {
+					return ModuleDeploymentId.parse(moduleIdString);
+				}
+				catch (IllegalArgumentException e) {
+					// We ignore invalid format cases
+				}
+			}
+		}
+		return null; // we ignore applications that don't have the right environment setting
+	}
 
 	String toApplicationName(ModuleDeploymentId moduleDeploymentId) {
 		return APPLICATION_PREFIX + moduleDeploymentId.toString();
 	}
 
-	ModuleDeploymentId toModuleDeploymentId(String applicationName) {
-		String moduleIdString = moduleIdString(applicationName);
-		if (moduleIdString == null) {
-			return null;
-		}
-		try {
-			return ModuleDeploymentId.parse(moduleIdString);
-		}
-		catch (IllegalArgumentException e) {
-			return null; // We ignore invalid format cases
-		}
+	Map<String, String> generateModuleLauncherEnvironment(ModuleDeploymentRequest request) {
+		Map<String, String> env = new HashMap<>();
+		env.put(MODULE_ID_ENVIRONMENT_VARNAME, request.getDefinition().getGroup() + ":" + request.getDefinition().getLabel());
+		Map<String, String> argEnvironment = argsToEnvironmentVariables(generateArguments(request));
+		env.putAll(argEnvironment);
+		return env;
 	}
 
-	Map<String, String> toModuleLauncherEnvironment(ModuleDeploymentRequest moduleDeploymentRequest) {
-		HashMap<String, String> environment = new HashMap<>();
-		environment.put("modules", moduleDeploymentRequest.getCoordinates().toString());
-		environment.putAll(ModuleArgumentQualifier.qualifyArgs(0, moduleDeploymentRequest.getDefinition().getParameters()));
-		environment.putAll(ModuleArgumentQualifier.qualifyArgs(0, moduleDeploymentRequest.getDeploymentProperties()));
-		return toEnvironmentVariables(environment);
+	private static Map<String, String> generateArguments(ModuleDeploymentRequest moduleDeploymentRequest) {
+		Map<String, String> arguments = new HashMap<>();
+		arguments.put("modules", moduleDeploymentRequest.getCoordinates().toString());
+		arguments.putAll(ModuleArgumentQualifier.qualifyArgs(0, moduleDeploymentRequest.getDefinition().getParameters()));
+		arguments.putAll(ModuleArgumentQualifier.qualifyArgs(0, moduleDeploymentRequest.getDeploymentProperties()));
+		return arguments;
 	}
 
 	/*
@@ -69,11 +82,11 @@ class CloudFoundryModuleDeploymentConverter {
 	 * args as (dotted) "command line args", all thru a special CF Buildpack ENV var.
 	 * see https://github.com/cloudfoundry/java-buildpack/blob/81f993c5bdcdaca6a28ad6970a6d1144236f3f6d/docs/container-java_main.md#configuration
 	 *
-	 * Produce a copy of a {@code Map<String,String>} with the keys converted into environment variable names. Dots are
-	 * replaced by underscores, and the alphabetic characters are upper-cased. Any resulting key clashes will result in
-	 * entry losses.
+	 * Produce a collection of environment variables from arguments intended for the application.
+	 * The keys are converted into environment variable names where dots are replaced by underscores,
+	 * and the alphabetic characters are upper-cased. Any resulting name clashes will result in entry losses.
 	 */
-	private static Map<String, String> toEnvironmentVariables(Map<String, String> args) {
+	private static Map<String, String> argsToEnvironmentVariables(Map<String, String> args) {
 //		Map<String, String> env = new HashMap<>(args.size());
 //		for (Map.Entry<String, String> entry : args.entrySet()) {
 //			env.put(entry.getKey().toUpperCase().replace('.', '_'), entry.getValue());

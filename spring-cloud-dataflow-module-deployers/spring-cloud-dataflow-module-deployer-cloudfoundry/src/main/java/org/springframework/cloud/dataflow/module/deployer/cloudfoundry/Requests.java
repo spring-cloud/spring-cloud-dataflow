@@ -346,6 +346,38 @@ class Requests {
 	}
 
 	/**
+	 * Request for REST operation {@link CloudControllerOperations#getApplicationEnvironment(GetApplicationEnvironment) getApplicationEnvironment()}.
+	 */
+	static class GetApplicationEnvironment {
+
+		private volatile String id;
+
+		public String getId() {
+			return id;
+		}
+
+		public GetApplicationEnvironment withId(String id) {
+			this.id = id;
+			return this;
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (this == o) { return true; }
+			if (o == null || getClass() != o.getClass()) { return false; }
+
+			GetApplicationEnvironment that = (GetApplicationEnvironment) o;
+
+			return !(id != null ? !id.equals(that.id) : that.id != null);
+		}
+
+		@Override
+		public int hashCode() {
+			return id != null ? id.hashCode() : 0;
+		}
+	}
+
+	/**
 	 * Request for REST operation {@link CloudControllerOperations#getApplicationStatistics(GetApplicationStatistics) getApplicationStatistics()}.
 	 */
 	static class GetApplicationStatistics {

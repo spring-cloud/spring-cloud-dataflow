@@ -17,6 +17,7 @@
 package org.springframework.cloud.dataflow.module.deployer.cloudfoundry;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.springframework.core.io.Resource;
@@ -88,24 +89,40 @@ class CloudFoundryApplicationTemplate implements CloudFoundryApplicationOperatio
 		}
 
 		for (Responses.ApplicationResource application : applications) {
-			String applicationId = application.getMetadata().getId();
 			String applicationName = application.getEntity().getName();
+			String applicationId = application.getMetadata().getId();
 
-			try {
-				Requests.GetApplicationStatistics statsRequest = new Requests.GetApplicationStatistics()
-						.withId(applicationId);
-
-				Responses.GetApplicationStatistics statsResponse = this.client.getApplicationStatistics(statsRequest);
-				response.withApplication(applicationName, new ApplicationStatus()
-						.withId(applicationId)
-						.withInstances(statsResponse));
-			}
-			catch (RestClientException rce) {
-				response.withApplication(applicationName, new ApplicationStatus());
-			}
+			response.withApplication(applicationName, new ApplicationStatus()
+					.withId(applicationId)
+					.withInstances(safeGetApplicationStatistics(applicationId))
+					.withEnvironment(safeGetApplicationEnvironment(applicationId)));
 		}
 
 		return response;
+	}
+
+	private Map<String, String> safeGetApplicationEnvironment(String applicationId) {
+		try {
+			Requests.GetApplicationEnvironment request = new Requests.GetApplicationEnvironment()
+					.withId(applicationId);
+
+			return this.client.getApplicationEnvironment(request).getEnvironment();
+		}
+		catch (RestClientException rce) {
+			return null;
+		}
+	}
+
+	private Responses.GetApplicationStatistics safeGetApplicationStatistics(String applicationId) {
+		try {
+			Requests.GetApplicationStatistics statsRequest = new Requests.GetApplicationStatistics()
+					.withId(applicationId);
+
+			return this.client.getApplicationStatistics(statsRequest);
+		}
+		catch (RestClientException rce) {
+			return new Responses.GetApplicationStatistics();
+		}
 	}
 
 	@Override

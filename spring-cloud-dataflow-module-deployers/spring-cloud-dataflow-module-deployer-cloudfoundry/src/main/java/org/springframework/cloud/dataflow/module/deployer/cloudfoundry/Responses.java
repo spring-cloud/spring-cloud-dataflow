@@ -18,6 +18,7 @@ package org.springframework.cloud.dataflow.module.deployer.cloudfoundry;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -79,6 +80,24 @@ class Responses {
 	 * Response from REST operation {@link CloudControllerOperations#deleteRoute(Requests.DeleteRoute) deleteRoute()}.
 	 */
 	static class DeleteRoute {
+	}
+
+	/**
+	 * Response from REST operation {@link CloudControllerOperations#getApplicationEnvironment(GetApplicationEnvironment) getApplicationEnvironment()}.
+	 */
+	static class GetApplicationEnvironment {
+
+		private Map<String, String> environment;
+
+		public Map<String, String> getEnvironment() {
+			return environment;
+		}
+
+		@JsonProperty("environment_json")
+		public GetApplicationEnvironment withEnvironment(Map<String, String> environment) {
+			this.environment = environment;
+			return this;
+		}
 	}
 
 	/**

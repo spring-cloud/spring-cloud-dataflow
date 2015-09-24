@@ -61,10 +61,11 @@ class ModuleStatusBuilder {
 			case "STARTED":
 			case "STARTING":
 			case "STOPPED":
+			case "DOWN":
+			case "FLAPPING":
 				return ModuleStatus.State.deploying;
 			case "CRASHED":
 			case "CRASHING":
-			case "DOWN":
 				return ModuleStatus.State.failed;
 			case "RUNNING":
 				return ModuleStatus.State.deployed;

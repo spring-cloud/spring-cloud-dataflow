@@ -38,7 +38,7 @@ public class ApplicationModuleDeployer implements ModuleDeployer {
 
 	private final CloudFoundryApplicationOperations applicationOperations;
 
-	private CloudFoundryModuleDeployerProperties properties;
+	private final CloudFoundryModuleDeployerProperties properties;
 
 	public ApplicationModuleDeployer(
 			CloudFoundryModuleDeployerProperties properties,
@@ -56,7 +56,7 @@ public class ApplicationModuleDeployer implements ModuleDeployer {
 		String applicationName = this.cloudFoundryModuleDeploymentConverter.toApplicationName(moduleDeploymentId);
 
 		Results.PushBindAndStartApplication response = this.applicationOperations.pushBindAndStartApplication(new Parameters.PushBindAndStartApplication()
-						.withEnvironment(this.cloudFoundryModuleDeploymentConverter.toModuleLauncherEnvironment(request))
+						.withEnvironment(this.cloudFoundryModuleDeploymentConverter.generateModuleLauncherEnvironment(request))
 						.withInstances(request.getCount())
 						.withName(applicationName)
 						.withResource(properties.getModuleLauncherLocation())
@@ -75,10 +75,11 @@ public class ApplicationModuleDeployer implements ModuleDeployer {
 
 		Map<ModuleDeploymentId, ModuleStatus> result = new HashMap<>();
 		for (Map.Entry<String, ApplicationStatus> e : response.getApplications().entrySet()) {
-			ModuleDeploymentId moduleId = this.cloudFoundryModuleDeploymentConverter.toModuleDeploymentId(e.getKey());
+			ApplicationStatus applicationStatus = e.getValue();
+			ModuleDeploymentId moduleId = this.cloudFoundryModuleDeploymentConverter.getModuleId(applicationStatus);
 			if (null != moduleId) { // filter out non-modules
 				result.put(moduleId,
-						new ModuleStatusBuilder().withId(moduleId).withApplicationStatus(e.getValue()).build());
+						new ModuleStatusBuilder().withId(moduleId).withApplicationStatus(applicationStatus).build());
 			}
 		}
 		return result;

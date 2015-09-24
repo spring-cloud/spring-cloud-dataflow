@@ -107,6 +107,15 @@ class CloudControllerTemplate implements CloudControllerOperations {
 	}
 
 	@Override
+	public Responses.GetApplicationEnvironment getApplicationEnvironment(Requests.GetApplicationEnvironment request) {
+		URI uri = UriComponentsBuilder.fromUri(this.endpoint)
+				.pathSegment(CC_API_VERSION, "apps", request.getId(), "env")
+				.build().toUri();
+
+		return this.restOperations.getForObject(uri, Responses.GetApplicationEnvironment.class);
+	}
+
+	@Override
 	public Responses.GetApplicationStatistics getApplicationStatistics(Requests.GetApplicationStatistics request) {
 		URI uri = UriComponentsBuilder.fromUri(this.endpoint)
 				.pathSegment(CC_API_VERSION, "apps", request.getId(), "stats")

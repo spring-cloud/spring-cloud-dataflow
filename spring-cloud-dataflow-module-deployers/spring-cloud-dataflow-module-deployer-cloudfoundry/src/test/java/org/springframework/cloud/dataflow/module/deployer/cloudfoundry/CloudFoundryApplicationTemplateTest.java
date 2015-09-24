@@ -111,6 +111,10 @@ public class CloudFoundryApplicationTemplateTest {
 				.thenReturn(testGetApplicationStatisticsResponse("test-app-instance-id1", testApplicationInstanceStatus1));
 		when(this.client.getApplicationStatistics(new Requests.GetApplicationStatistics().withId("test-app-id2")))
 				.thenReturn(testGetApplicationStatisticsResponse("test-app-instance-id2", testApplicationInstanceStatus2));
+		when(this.client.getApplicationEnvironment(new Requests.GetApplicationEnvironment().withId("test-app-id1")))
+				.thenReturn(new Responses.GetApplicationEnvironment());
+		when(this.client.getApplicationEnvironment(new Requests.GetApplicationEnvironment().withId("test-app-id2")))
+				.thenReturn(new Responses.GetApplicationEnvironment());
 
 		CloudFoundryApplicationOperations applicationOperations = createApplicationOperations();
 		Results.GetApplicationsStatus results = applicationOperations.getApplicationsStatus(new Parameters.GetApplicationsStatus());
@@ -153,6 +157,8 @@ public class CloudFoundryApplicationTemplateTest {
 		Responses.ApplicationInstanceStatus testApplicationInstanceStatus = new Responses.ApplicationInstanceStatus();
 		when(this.client.getApplicationStatistics(new Requests.GetApplicationStatistics().withId("test-app-id")))
 				.thenReturn(testGetApplicationStatisticsResponse("test-app-instance-id", testApplicationInstanceStatus));
+		when(this.client.getApplicationEnvironment(new Requests.GetApplicationEnvironment().withId("test-app-id")))
+				.thenReturn(new Responses.GetApplicationEnvironment());
 
 		CloudFoundryApplicationOperations applicationOperations = createApplicationOperations();
 		Results.GetApplicationsStatus results = applicationOperations.getApplicationsStatus(new Parameters.GetApplicationsStatus().withName("test-app-name"));

@@ -72,6 +72,14 @@ interface CloudControllerOperations {
 	Responses.DeleteRoute deleteRoute(Requests.DeleteRoute request);
 
 	/**
+	 * Obtains environment for an application given its id.
+	 * @param request the structure carrying all necessary parameters
+	 * @return a Response instance carrying all the response values expected
+	 * @throws org.springframework.web.client.RestClientException in the event of failure
+	 */
+	Responses.GetApplicationEnvironment getApplicationEnvironment(Requests.GetApplicationEnvironment request);
+
+	/**
 	 * Obtains application statistics for every instance of an application given its id.
 	 * @param request the structure carrying all necessary parameters
 	 * @return a Response instance carrying all the response values expected

@@ -26,9 +26,20 @@ import java.util.Map;
  */
 class ApplicationStatus {
 
+	private Map<String,String> environment = new HashMap<>();
+
 	private volatile String id;
 
 	private Map<String, Responses.ApplicationInstanceStatus> instances = new HashMap<>();
+
+	public Map<String, String> getEnvironment() {
+		return environment;
+	}
+
+	public ApplicationStatus withEnvironment(Map<String, String> environment) {
+		this.environment = environment;
+		return this;
+	}
 
 	public String getId() {
 		return id;
