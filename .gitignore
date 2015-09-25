@@ -30,3 +30,4 @@ spring-*/src/main/java/META-INF/MANIFEST.MF
 *.ipr
 *.iws
 .idea/*
+hs_err_*.log
