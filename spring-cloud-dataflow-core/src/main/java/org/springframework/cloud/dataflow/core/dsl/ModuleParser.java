@@ -205,7 +205,11 @@ public class ModuleParser {
 	protected String toData(Iterable<Token> iterable) {
 		StringBuilder result = new StringBuilder();
 		for (Token t : iterable) {
-			result.append(t.getKind().hasPayload() ? t.data : t.getKind().tokenChars);
+			if (t.getKind().hasPayload()) {
+				result.append(t.data);
+			} else {
+				result.append(t.getKind().tokenChars);
+			}
 		}
 		return result.toString();
 	}
