@@ -36,15 +36,15 @@ with the docs; or if you just want to improve them, please {github-code}[get inv
 
 [[dataflow-documentation-intro]]
 == Introducing Spring Cloud Data Flow
-Spring Cloud Data Flow is a cloud native data framework that unifies stream and batch processing for data microservices, across the cloud or on-prem. 
-It allows developers to create, orchestrate and refactor data pipelines with a single programming model for common use cases 
-like data ingest, real time analytics, and data import/export.
+A cloud native programming and operating model for composable data microservices on a structured platform. It allows developers to create, 
+orchestrate and refactor data pipelines with a single programming model for common use cases like data ingest, real time analytics, and 
+data import/export.
+
+Spring Cloud Data Flow is the cloud native redesign of Spring XD - a project that aimed to simplify Big Data application development. Existing 
+integration and batch modules are refactored as Spring Boot link:http://cloud.spring.io/spring-cloud-stream-modules/[data microservices] that are 
+now autonomous deployment units – thus enabling them to take full advantage of environment capabilities "natively" and they can independently evolve in isolation.
 
 Spring Cloud Data Flow defines the best practices for distributed stream and batch data processing.
-
-Spring Cloud Data Flow is the cloud native redesign of Spring XD - a project that aimed to simplify Big Data application 
-development. This redesign allows running stream and batch applications as data microservices and they can independently 
-evolve in isolation. 
 
 === Features
 
