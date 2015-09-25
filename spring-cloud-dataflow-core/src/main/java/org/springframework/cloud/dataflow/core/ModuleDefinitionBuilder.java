@@ -71,7 +71,15 @@ class ModuleDefinitionBuilder {
 			if (moduleNode.hasArguments()) {
 				ArgumentNode[] arguments = moduleNode.getArguments();
 				for (ArgumentNode argument : arguments) {
-					builder.setParameter(argument.getName(), argument.getValue());
+					if (argument.getName().equalsIgnoreCase("inputType")) {
+						builder.setParameter(BindingProperties.INPUT_TYPE_KEY, argument.getValue());
+					}
+					else if (argument.getName().equalsIgnoreCase("outputType")) {
+						builder.setParameter(BindingProperties.OUTPUT_TYPE_KEY, argument.getValue());
+					}
+					else {
+						builder.setParameter(argument.getName(), argument.getValue());
+					}
 				}
 			}
 			if (m > 0) {

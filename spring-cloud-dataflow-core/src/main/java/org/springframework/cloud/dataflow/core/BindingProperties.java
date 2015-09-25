@@ -44,6 +44,8 @@ public class BindingProperties {
 
 	public static final String OUTPUT_BINDING_KEY_PREFIX = BINDING_KEY_PREFIX + "output.";
 
+	public static final String CONTENT_TYPE_KEY = "contentType";
+
 	/**
 	 * Default property key for input channel binding.
 	 */
@@ -65,5 +67,12 @@ public class BindingProperties {
 	public static final String OUTPUT_PARTITION_SELECTOR_EXPRESSION = OUTPUT_BINDING_KEY_PREFIX + PARTITION_SELECTOR_EXPRESSION;
 
 	public static final String OUTPUT_PARTITION_COUNT = OUTPUT_BINDING_KEY_PREFIX + "partitionCount";
+
+	/**
+	 * Type conversion for channel binding
+	 */
+	public static final String INPUT_TYPE_KEY = INPUT_BINDING_KEY_PREFIX + CONTENT_TYPE_KEY;
+
+	public static final String OUTPUT_TYPE_KEY = OUTPUT_BINDING_KEY_PREFIX + CONTENT_TYPE_KEY;
 
 }
