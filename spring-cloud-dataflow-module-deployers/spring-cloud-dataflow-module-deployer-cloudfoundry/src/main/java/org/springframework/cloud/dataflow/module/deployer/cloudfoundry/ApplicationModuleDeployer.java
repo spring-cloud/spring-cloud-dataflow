@@ -53,7 +53,7 @@ import org.springframework.core.io.Resource;
  *
  * @author Eric Bottard
  */
-public class ApplicationModuleDeployer implements ModuleDeployer {
+class ApplicationModuleDeployer implements ModuleDeployer {
 
 	private final CloudFoundryModuleDeployerProperties properties;
 
@@ -149,7 +149,13 @@ public class ApplicationModuleDeployer implements ModuleDeployer {
 	public void undeploy(ModuleDeploymentId moduleId) {
 		final String appName = deduceAppName(moduleId);
 		logger.debug("Undeploy: requesting deletion of app {}", appName);
-		cloudFoundryClient.deleteApplication(appName);
+		Map<String, Object> applicationEnvironment = cloudFoundryClient.getApplicationEnvironment(appName);
+		String moduleMarker = (String) applicationEnvironment.get("SPRING_CLOUD_DATAFLOW_MODULE");
+		if (moduleMarker != null && moduleMarker.equals(makeModuleMarker(moduleId))) {
+			cloudFoundryClient.deleteApplication(appName);
+		} else {
+			logger.warn("Not destroying app {}, because its SPRING_CLOUD_DATAFLOW_MODULE env value was unexpected");
+		}
 	}
 
 	@Override
@@ -184,33 +190,33 @@ public class ApplicationModuleDeployer implements ModuleDeployer {
 	private ModuleStatus buildModuleStatus(ModuleDeploymentId id, CloudApplication cloudApplication) {
 		ModuleStatus.Builder statusBuilder = ModuleStatus.of(id);
 		String appName = deduceAppName(id);
-		if (cloudApplication != null && cloudApplication.getState() == CloudApplication.AppState.STARTED) {
+		if (cloudApplication != null) {
 			InstancesInfo applicationInstances = cloudFoundryClient.getApplicationInstances(cloudApplication);
-
-
-			if (applicationInstances.getInstances() != null) { // null can happen despite the STARTED check above
-				List<InstanceStats> instanceStats = new ArrayList<>(cloudFoundryClient.getApplicationStats(appName).getRecords());
-				List<InstanceInfo> instanceInfos = new ArrayList<>(applicationInstances.getInstances());
-				if (instanceStats.size() != instanceInfos.size()) {
-					return notRunningInstancesStatus(id, cloudApplication);
-				}
-				// Use instanceStat.id and instanceInfo.index as synching key
-				Collections.sort(instanceStats, new Comparator<InstanceStats>() {
-					@Override
-					public int compare(InstanceStats o1, InstanceStats o2) {
-						return Integer.valueOf(o1.getId()).compareTo(Integer.valueOf(o2.getId()));
+			if (applicationInstances != null) {
+				if (applicationInstances.getInstances() != null) { // null can happen despite the STARTED check above
+					List<InstanceStats> instanceStats = new ArrayList<>(cloudFoundryClient.getApplicationStats(appName).getRecords());
+					List<InstanceInfo> instanceInfos = new ArrayList<>(applicationInstances.getInstances());
+					if (instanceStats.size() != instanceInfos.size()) {
+						return notRunningInstancesStatus(id, cloudApplication);
 					}
-				});
-				Collections.sort(instanceInfos, new Comparator<InstanceInfo>() {
-					@Override
-					public int compare(InstanceInfo o1, InstanceInfo o2) {
-						return o1.getIndex() - o2.getIndex();
-					}
-				});
+					// Use instanceStat.id and instanceInfo.index as synching key
+					Collections.sort(instanceStats, new Comparator<InstanceStats>() {
+						@Override
+						public int compare(InstanceStats o1, InstanceStats o2) {
+							return Integer.valueOf(o1.getId()).compareTo(Integer.valueOf(o2.getId()));
+						}
+					});
+					Collections.sort(instanceInfos, new Comparator<InstanceInfo>() {
+						@Override
+						public int compare(InstanceInfo o1, InstanceInfo o2) {
+							return o1.getIndex() - o2.getIndex();
+						}
+					});
 
-				for (int i = 0; i < instanceStats.size(); i++) {
-					// Changes builder by side-effect
-					statusBuilder.with(new CloudFoundryModuleInstanceStatus(appName, instanceInfos.get(i), instanceStats.get(i)));
+					for (int i = 0; i < instanceStats.size(); i++) {
+						// Changes builder by side-effect
+						statusBuilder.with(new CloudFoundryModuleInstanceStatus(appName, instanceInfos.get(i), instanceStats.get(i)));
+					}
 				}
 				return statusBuilder.build();
 			}
@@ -251,9 +257,13 @@ public class ApplicationModuleDeployer implements ModuleDeployer {
 		args.putAll(ModuleArgumentQualifier.qualifyArgs(0, request.getDeploymentProperties()));
 
 		Map<String, String> env = new HashMap<>(toEnvironmentVariables(args));
-		env.put("SPRING_CLOUD_DATAFLOW_MODULE", request.getDefinition().getGroup() + ":" + request.getDefinition().getLabel());
+		env.put("SPRING_CLOUD_DATAFLOW_MODULE", makeModuleMarker(ModuleDeploymentId.fromModuleDefinition(request.getDefinition())));
 
 		return env;
+	}
+
+	private String makeModuleMarker(ModuleDeploymentId moduleId) {
+		return moduleId.getGroup() + ":" + moduleId.getLabel();
 	}
 
 	private Map<String, String> toEnvironmentVariables(HashMap<String, String> args) {

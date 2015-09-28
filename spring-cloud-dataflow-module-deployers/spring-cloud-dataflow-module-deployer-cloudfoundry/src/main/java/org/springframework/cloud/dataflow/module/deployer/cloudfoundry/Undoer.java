@@ -26,7 +26,7 @@ import java.util.concurrent.Callable;
  *
  * @author Eric Bottard
  */
-public class Undoer {
+class Undoer {
 
 	private List<Runnable> undos = new ArrayList<>();
 
