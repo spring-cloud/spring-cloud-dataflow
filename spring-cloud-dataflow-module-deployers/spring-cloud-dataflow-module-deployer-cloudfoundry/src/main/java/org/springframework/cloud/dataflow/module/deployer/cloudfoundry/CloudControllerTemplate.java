@@ -48,75 +48,84 @@ class CloudControllerTemplate implements CloudControllerOperations {
 	}
 
 	@Override
-	public ListRoutesResponse listRoutes(ListRoutesRequest request) {
+	public Responses.ListRoutes listRoutes(Requests.ListRoutes request) {
 		URI uri = UriComponentsBuilder.fromUri(this.endpoint)
 				.pathSegment(CC_API_VERSION, "routes")
 				.queryParam("q", "host:" + request.getHost())
 				.queryParam("q", "domain_guid:" + request.getDomainId())
 				.build().toUri();
 
-		return this.restOperations.getForObject(uri, ListRoutesResponse.class);
+		return this.restOperations.getForObject(uri, Responses.ListRoutes.class);
 	}
 
 	@Override
-	public CreateApplicationResponse createApplication(CreateApplicationRequest request) {
+	public Responses.CreateApplication createApplication(Requests.CreateApplication request) {
 		URI uri = UriComponentsBuilder.fromUri(this.endpoint)
 				.pathSegment(CC_API_VERSION, "apps")
 				.build().toUri();
 
-		return this.restOperations.postForObject(uri, request, CreateApplicationResponse.class);
+		return this.restOperations.postForObject(uri, request, Responses.CreateApplication.class);
 	}
 
 	@Override
-	public CreateRouteResponse createRoute(CreateRouteRequest request) {
+	public Responses.CreateRoute createRoute(Requests.CreateRoute request) {
 		URI uri = UriComponentsBuilder.fromUri(this.endpoint)
 				.pathSegment(CC_API_VERSION, "routes")
 				.build().toUri();
 
-		return this.restOperations.postForObject(uri, request, CreateRouteResponse.class);
+		return this.restOperations.postForObject(uri, request, Responses.CreateRoute.class);
 	}
 
 	@Override
-	public CreateServiceBindingResponse createServiceBinding(CreateServiceBindingRequest request) {
+	public Responses.CreateServiceBinding createServiceBinding(Requests.CreateServiceBinding request) {
 		URI uri = UriComponentsBuilder.fromUri(this.endpoint)
 				.pathSegment(CC_API_VERSION, "service_bindings")
 				.build().toUri();
 
-		return this.restOperations.postForObject(uri, request, CreateServiceBindingResponse.class);
+		return this.restOperations.postForObject(uri, request, Responses.CreateServiceBinding.class);
 	}
 
 	@Override
-	public DeleteApplicationResponse deleteApplication(DeleteApplicationRequest request) {
+	public Responses.DeleteApplication deleteApplication(Requests.DeleteApplication request) {
 		URI uri = UriComponentsBuilder.fromUri(this.endpoint)
 				.pathSegment(CC_API_VERSION, "apps", request.getId())
 				.build().toUri();
 
 		this.restOperations.delete(uri);
 
-		return new DeleteApplicationResponse().withDeleted(true);
+		return new Responses.DeleteApplication().withDeleted(true);
 	}
 
 	@Override
-	public DeleteRouteResponse deleteRoute(DeleteRouteRequest request) {
+	public Responses.DeleteRoute deleteRoute(Requests.DeleteRoute request) {
 		URI uri = UriComponentsBuilder.fromUri(this.endpoint)
 				.pathSegment(CC_API_VERSION, "routes", request.getId())
 				.build().toUri();
 
 		this.restOperations.delete(uri);
-		return new DeleteRouteResponse();
+		return new Responses.DeleteRoute();
 	}
 
 	@Override
-	public GetApplicationStatisticsResponse getApplicationStatistics(GetApplicationStatisticsRequest request) {
+	public Responses.GetApplicationEnvironment getApplicationEnvironment(Requests.GetApplicationEnvironment request) {
+		URI uri = UriComponentsBuilder.fromUri(this.endpoint)
+				.pathSegment(CC_API_VERSION, "apps", request.getId(), "env")
+				.build().toUri();
+
+		return this.restOperations.getForObject(uri, Responses.GetApplicationEnvironment.class);
+	}
+
+	@Override
+	public Responses.GetApplicationStatistics getApplicationStatistics(Requests.GetApplicationStatistics request) {
 		URI uri = UriComponentsBuilder.fromUri(this.endpoint)
 				.pathSegment(CC_API_VERSION, "apps", request.getId(), "stats")
 				.build().toUri();
 
-		return this.restOperations.getForObject(uri, GetApplicationStatisticsResponse.class);
+		return this.restOperations.getForObject(uri, Responses.GetApplicationStatistics.class);
 	}
 
 	@Override
-	public ListApplicationsResponse listApplications(ListApplicationsRequest request) {
+	public Responses.ListApplications listApplications(Requests.ListApplications request) {
 		UriComponentsBuilder builder = UriComponentsBuilder.fromUri(this.endpoint)
 				.pathSegment(CC_API_VERSION, "apps")
 				.queryParam("q", "space_guid:" + request.getSpaceId());
@@ -125,30 +134,30 @@ class CloudControllerTemplate implements CloudControllerOperations {
 		}
 		URI uri = builder.build().toUri();
 
-		return this.restOperations.getForObject(uri, ListApplicationsResponse.class);
+		return this.restOperations.getForObject(uri, Responses.ListApplications.class);
 	}
 
 	@Override
-	public ListOrganizationsResponse listOrganizations(ListOrganizationsRequest request) {
+	public Responses.ListOrganizations listOrganizations(Requests.ListOrganizations request) {
 		URI uri = UriComponentsBuilder.fromUri(this.endpoint)
 				.pathSegment(CC_API_VERSION, "organizations")
 				.queryParam("q", "name:" + request.getName())
 				.build().toUri();
 
-		return this.restOperations.getForObject(uri, ListOrganizationsResponse.class);
+		return this.restOperations.getForObject(uri, Responses.ListOrganizations.class);
 	}
 
 	@Override
-	public ListServiceBindingsResponse listServiceBindings(ListServiceBindingsRequest request) {
+	public Responses.ListServiceBindings listServiceBindings(Requests.ListServiceBindings request) {
 		URI uri = UriComponentsBuilder.fromUri(this.endpoint)
 				.pathSegment(CC_API_VERSION, "apps", request.getAppId(), "service_bindings")
 				.build().toUri();
 
-		return this.restOperations.getForObject(uri, ListServiceBindingsResponse.class);
+		return this.restOperations.getForObject(uri, Responses.ListServiceBindings.class);
 	}
 
 	@Override
-	public ListServiceInstancesResponse listServiceInstances(ListServiceInstancesRequest request) {
+	public Responses.ListServiceInstances listServiceInstances(Requests.ListServiceInstances request) {
 		UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.fromUri(this.endpoint)
 				.pathSegment(CC_API_VERSION, "service_instances")
 				.queryParam("q", "space_guid:" + request.getSpaceId());
@@ -157,11 +166,11 @@ class CloudControllerTemplate implements CloudControllerOperations {
 		}
 		URI uri = uriComponentsBuilder.build().toUri();
 
-		return this.restOperations.getForObject(uri, ListServiceInstancesResponse.class);
+		return this.restOperations.getForObject(uri, Responses.ListServiceInstances.class);
 	}
 
 	@Override
-	public ListSharedDomainsResponse listSharedDomains(ListSharedDomainsRequest request) {
+	public Responses.ListSharedDomains listSharedDomains(Requests.ListSharedDomains request) {
 		UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.fromUri(this.endpoint)
 				.pathSegment(CC_API_VERSION, "shared_domains");
 		if (!StringUtils.isEmpty(request.getName())) {
@@ -169,60 +178,60 @@ class CloudControllerTemplate implements CloudControllerOperations {
 		}
 		URI uri = uriComponentsBuilder.build().toUri();
 
-		return this.restOperations.getForObject(uri, ListSharedDomainsResponse.class);
+		return this.restOperations.getForObject(uri, Responses.ListSharedDomains.class);
 	}
 
 	@Override
-	public ListSpacesResponse listSpaces(ListSpacesRequest request) {
+	public Responses.ListSpaces listSpaces(Requests.ListSpaces request) {
 		URI uri = UriComponentsBuilder.fromUri(this.endpoint)
 				.pathSegment(CC_API_VERSION, "spaces")
 				.queryParam("q", "name:" + request.getName())
 				.queryParam("q", "organization_guid:" + request.getOrgId())
 				.build().toUri();
 
-		return this.restOperations.getForObject(uri, ListSpacesResponse.class);
+		return this.restOperations.getForObject(uri, Responses.ListSpaces.class);
 	}
 
 	@Override
-	public RouteMappingResponse mapRoute(RouteMappingRequest request) {
+	public Responses.RouteMapping mapRoute(Requests.RouteMapping request) {
 		URI uri = UriComponentsBuilder.fromUri(this.endpoint)
 				.pathSegment(CC_API_VERSION, "routes", request.getRouteId(), "apps", request.getAppId())
 				.build().toUri();
 
-		return this.restOperations.putForObject(uri, null, RouteMappingResponse.class);
+		return this.restOperations.putForObject(uri, null, Responses.RouteMapping.class);
 	}
 
 	@Override
-	public RemoveServiceBindingResponse removeServiceBinding(RemoveServiceBindingRequest request) {
+	public Responses.RemoveServiceBinding removeServiceBinding(Requests.RemoveServiceBinding request) {
 		URI uri = UriComponentsBuilder.fromUri(this.endpoint)
 				.pathSegment(CC_API_VERSION, "apps", request.getAppId(), "service_bindings", request.getBindingId())
 				.build().toUri();
 
 		this.restOperations.delete(uri);
-		return new RemoveServiceBindingResponse();
+		return new Responses.RemoveServiceBinding();
 	}
 
 	@Override
-	public UpdateApplicationResponse updateApplication(UpdateApplicationRequest request) {
+	public Responses.UpdateApplication updateApplication(Requests.UpdateApplication request) {
 		URI uri = UriComponentsBuilder.fromUri(this.endpoint)
 				.pathSegment(CC_API_VERSION, "apps", request.getId())
 				.build().toUri();
 
-		return this.restOperations.putForObject(uri, request, UpdateApplicationResponse.class);
+		return this.restOperations.putForObject(uri, request, Responses.UpdateApplication.class);
 	}
 
 	@Override
-	public RouteMappingResponse unmapRoute(RouteMappingRequest request) {
+	public Responses.RouteMapping unmapRoute(Requests.RouteMapping request) {
 		URI uri = UriComponentsBuilder.fromUri(this.endpoint)
 				.pathSegment(CC_API_VERSION, "routes", request.getRouteId(), "apps", request.getAppId())
 				.build().toUri();
 
 		this.restOperations.delete(uri);
-		return new RouteMappingResponse();
+		return new Responses.RouteMapping();
 	}
 
 	@Override
-	public UploadBitsResponse uploadBits(UploadBitsRequest request) {
+	public Responses.UploadBits uploadBits(Requests.UploadBits request) {
 		URI uri = UriComponentsBuilder.fromUri(this.endpoint)
 				.pathSegment(CC_API_VERSION, "apps", request.getId(), "bits")
 				.queryParam("async", false)
@@ -234,7 +243,7 @@ class CloudControllerTemplate implements CloudControllerOperations {
 		payload.add("resources", new ArrayList());
 
 		this.restOperations.put(uri, payload);
-		return new UploadBitsResponse();
+		return new Responses.UploadBits();
 	}
 
 }

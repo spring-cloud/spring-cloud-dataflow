@@ -28,20 +28,20 @@ interface CloudFoundryApplicationOperations {
 	 * @param parameters the delete application parameters
 	 * @return a Response instance including whether application was found and was deleted.
 	 */
-	DeleteApplicationResults deleteApplication(DeleteApplicationParameters parameters);
+	Results.DeleteApplication deleteApplication(Parameters.DeleteApplication parameters);
 
 	/**
-	 * Get status (including instances) for all applications, or all applications (in our space).
+	 * Get status (including instances) for an application, or all applications (in our space).
 	 * @param parameters the get applications parameters
-	 * @return a Response instance carrying the instance status for all applications denoted, or just one.
+	 * @return a Response instance carrying the instance status for all applications, or just one.
 	 */
-	GetApplicationsStatusResults getApplicationsStatus(GetApplicationsStatusParameters parameters);
+	Results.GetApplicationsStatus getApplicationsStatus(Parameters.GetApplicationsStatus parameters);
 
 	/**
 	 * Creates and starts an application. Is given name, bits resource, service-instances to bind and environment.
 	 * @param parameters the push application parameters
 	 * @return a Response instance carrying an indication of failure reason (if any).
 	 */
-	PushBindAndStartApplicationResults pushBindAndStartApplication(PushBindAndStartApplicationParameters parameters);
+	Results.PushBindAndStartApplication pushBindAndStartApplication(Parameters.PushBindAndStartApplication parameters);
 
 }

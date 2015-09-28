@@ -29,7 +29,7 @@ interface CloudControllerOperations {
 	 * @return a Response instance carrying all the response values expected
 	 * @throws org.springframework.web.client.RestClientException in the event of failure
 	 */
-	ListRoutesResponse listRoutes(ListRoutesRequest request);
+	Responses.ListRoutes listRoutes(Requests.ListRoutes request);
 
 	/**
 	 * Creates an application definition and returns its id.
@@ -37,7 +37,7 @@ interface CloudControllerOperations {
 	 * @return a Response instance carrying all the response values expected
 	 * @throws org.springframework.web.client.RestClientException in the event of failure
 	 */
-	CreateApplicationResponse createApplication(CreateApplicationRequest request);
+	Responses.CreateApplication createApplication(Requests.CreateApplication request);
 
 	/**
 	 * Create a new route in the given space and domain.
@@ -45,7 +45,7 @@ interface CloudControllerOperations {
 	 * @return a Response instance carrying all the response values expected
 	 * @throws org.springframework.web.client.RestClientException in the event of failure
 	 */
-	CreateRouteResponse createRoute(CreateRouteRequest request);
+	Responses.CreateRoute createRoute(Requests.CreateRoute request);
 
 	/**
 	 * Creates a service binding to an application (given its id).
@@ -53,7 +53,7 @@ interface CloudControllerOperations {
 	 * @return a Response instance carrying all the response values expected
 	 * @throws org.springframework.web.client.RestClientException in the event of failure
 	 */
-	CreateServiceBindingResponse createServiceBinding(CreateServiceBindingRequest request);
+	Responses.CreateServiceBinding createServiceBinding(Requests.CreateServiceBinding request);
 
 	/**
 	 * Deletes an application given its id. The application may be in any state.
@@ -61,7 +61,7 @@ interface CloudControllerOperations {
 	 * @return a Response instance carrying all the response values expected
 	 * @throws org.springframework.web.client.RestClientException in the event of failure
 	 */
-	DeleteApplicationResponse deleteApplication(DeleteApplicationRequest request);
+	Responses.DeleteApplication deleteApplication(Requests.DeleteApplication request);
 
 	/**
 	 * Deletes a route given its id.
@@ -69,7 +69,15 @@ interface CloudControllerOperations {
 	 * @return a Response instance carrying all the response values expected
 	 * @throws org.springframework.web.client.RestClientException in the event of failure
 	 */
-	DeleteRouteResponse deleteRoute(DeleteRouteRequest request);
+	Responses.DeleteRoute deleteRoute(Requests.DeleteRoute request);
+
+	/**
+	 * Obtains environment for an application given its id.
+	 * @param request the structure carrying all necessary parameters
+	 * @return a Response instance carrying all the response values expected
+	 * @throws org.springframework.web.client.RestClientException in the event of failure
+	 */
+	Responses.GetApplicationEnvironment getApplicationEnvironment(Requests.GetApplicationEnvironment request);
 
 	/**
 	 * Obtains application statistics for every instance of an application given its id.
@@ -77,7 +85,7 @@ interface CloudControllerOperations {
 	 * @return a Response instance carrying all the response values expected
 	 * @throws org.springframework.web.client.RestClientException in the event of failure
 	 */
-	GetApplicationStatisticsResponse getApplicationStatistics(GetApplicationStatisticsRequest request);
+	Responses.GetApplicationStatistics getApplicationStatistics(Requests.GetApplicationStatistics request);
 
 	/**
 	 * Lists applications (with their ids) in a given space(id) and optionally matching a name.
@@ -85,7 +93,7 @@ interface CloudControllerOperations {
 	 * @return a Response instance carrying all the response values expected
 	 * @throws org.springframework.web.client.RestClientException in the event of failure
 	 */
-	ListApplicationsResponse listApplications(ListApplicationsRequest request);
+	Responses.ListApplications listApplications(Requests.ListApplications request);
 
 	/**
 	 * Lists services bindings for a given application.
@@ -93,7 +101,7 @@ interface CloudControllerOperations {
 	 * @return a Response instance carrying all the response values expected
 	 * @throws org.springframework.web.client.RestClientException in the event of failure
 	 */
-	ListServiceBindingsResponse listServiceBindings(ListServiceBindingsRequest request);
+	Responses.ListServiceBindings listServiceBindings(Requests.ListServiceBindings request);
 
 	/**
 	 * Lists all the known organizations (with their ids).
@@ -101,7 +109,7 @@ interface CloudControllerOperations {
 	 * @return a Response instance carrying all the response values expected
 	 * @throws org.springframework.web.client.RestClientException in the event of failure
 	 */
-	ListOrganizationsResponse listOrganizations(ListOrganizationsRequest request);
+	Responses.ListOrganizations listOrganizations(Requests.ListOrganizations request);
 
 	/**
 	 * Lists all the known service instances (with their ids) in a given space (by id), optionally matching a name.
@@ -109,7 +117,7 @@ interface CloudControllerOperations {
 	 * @return a Response instance carrying all the response values expected
 	 * @throws org.springframework.web.client.RestClientException in the event of failure
 	 */
-	ListServiceInstancesResponse listServiceInstances(ListServiceInstancesRequest request);
+	Responses.ListServiceInstances listServiceInstances(Requests.ListServiceInstances request);
 
 	/**
 	 * Lists all shared domains.
@@ -117,7 +125,7 @@ interface CloudControllerOperations {
 	 * @return a Response instance carrying all the response values expected
 	 * @throws org.springframework.web.client.RestClientException in the event of failure
 	 */
-	ListSharedDomainsResponse listSharedDomains(ListSharedDomainsRequest request);
+	Responses.ListSharedDomains listSharedDomains(Requests.ListSharedDomains request);
 
 	/**
 	 * Lists all the known spaces (with their ids) in a given organization (given by id).
@@ -125,7 +133,7 @@ interface CloudControllerOperations {
 	 * @return a Response instance carrying all the response values expected
 	 * @throws org.springframework.web.client.RestClientException in the event of failure
 	 */
-	ListSpacesResponse listSpaces(ListSpacesRequest request);
+	Responses.ListSpaces listSpaces(Requests.ListSpaces request);
 
 	/**
 	 * Map an existing route to an application.
@@ -133,7 +141,7 @@ interface CloudControllerOperations {
 	 * @return a Response instance carrying all the response values expected
 	 * @throws org.springframework.web.client.RestClientException in the event of failure
 	 */
-	RouteMappingResponse mapRoute(RouteMappingRequest request);
+	Responses.RouteMapping mapRoute(Requests.RouteMapping request);
 
 	/**
 	 * Remove a service binding from a particular application.
@@ -141,7 +149,7 @@ interface CloudControllerOperations {
 	 * @return a Response instance carrying all the response values expected
 	 * @throws org.springframework.web.client.RestClientException in the event of failure
 	 */
-	RemoveServiceBindingResponse removeServiceBinding(RemoveServiceBindingRequest request);
+	Responses.RemoveServiceBinding removeServiceBinding(Requests.RemoveServiceBinding request);
 
 	/**
 	 * Uploads the bits required for an application (identified by its id) to run.
@@ -149,7 +157,7 @@ interface CloudControllerOperations {
 	 * @return a Response instance carrying all the response values expected
 	 * @throws org.springframework.web.client.RestClientException in the event of failure
 	 */
-	UploadBitsResponse uploadBits(UploadBitsRequest request);
+	Responses.UploadBits uploadBits(Requests.UploadBits request);
 
 	/**
 	 * Updates the state of an application (given by its id), for example, to start it.
@@ -157,7 +165,7 @@ interface CloudControllerOperations {
 	 * @return a Response instance carrying all the response values expected
 	 * @throws org.springframework.web.client.RestClientException in the event of failure
 	 */
-	UpdateApplicationResponse updateApplication(UpdateApplicationRequest request);
+	Responses.UpdateApplication updateApplication(Requests.UpdateApplication request);
 
 	/**
 	 * Un-map an existing route from an application.
@@ -165,6 +173,6 @@ interface CloudControllerOperations {
 	 * @return a Response instance carrying all the response values expected
 	 * @throws org.springframework.web.client.RestClientException in the event of failure
 	 */
-	RouteMappingResponse unmapRoute(RouteMappingRequest request);
+	Responses.RouteMapping unmapRoute(Requests.RouteMapping request);
 
 }

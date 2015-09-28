@@ -26,9 +26,20 @@ import java.util.Map;
  */
 class ApplicationStatus {
 
+	private Map<String,String> environment = new HashMap<>();
+
 	private volatile String id;
 
-	private Map<String, ApplicationInstanceStatus> instances = new HashMap<>();
+	private Map<String, Responses.ApplicationInstanceStatus> instances = new HashMap<>();
+
+	public Map<String, String> getEnvironment() {
+		return environment;
+	}
+
+	public ApplicationStatus withEnvironment(Map<String, String> environment) {
+		this.environment = environment;
+		return this;
+	}
 
 	public String getId() {
 		return id;
@@ -39,11 +50,11 @@ class ApplicationStatus {
 		return this;
 	}
 
-	public Map<String, ApplicationInstanceStatus> getInstances() {
+	public Map<String, Responses.ApplicationInstanceStatus> getInstances() {
 		return instances;
 	}
 
-	public ApplicationStatus withInstances(Map<String, ApplicationInstanceStatus> instances) {
+	public ApplicationStatus withInstances(Map<String, Responses.ApplicationInstanceStatus> instances) {
 		this.instances.putAll(instances);
 		return this;
 	}

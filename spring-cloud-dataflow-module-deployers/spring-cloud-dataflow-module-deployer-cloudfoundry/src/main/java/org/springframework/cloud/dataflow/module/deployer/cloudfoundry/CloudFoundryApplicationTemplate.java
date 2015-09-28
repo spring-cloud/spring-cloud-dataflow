@@ -17,7 +17,10 @@
 package org.springframework.cloud.dataflow.module.deployer.cloudfoundry;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
+import org.springframework.core.io.Resource;
 import org.springframework.web.client.RestClientException;
 
 /**
@@ -26,6 +29,7 @@ import org.springframework.web.client.RestClientException;
  *
  * @author Steve Powell
  * @author Eric Bottard
+ * @author Paul Harris
  */
 class CloudFoundryApplicationTemplate implements CloudFoundryApplicationOperations {
 
@@ -41,102 +45,173 @@ class CloudFoundryApplicationTemplate implements CloudFoundryApplicationOperatio
 
 	CloudFoundryApplicationTemplate(CloudControllerOperations client, String organizationName, String spaceName, String domain) {
 		this.client = client;
-		this.spaceId = getSpaceId(organizationName, spaceName);
-		this.domainId = getDomainId(domain);
+		this.spaceId = getSpaceId(client, organizationName, spaceName);
+		this.domainId = getDomainId(client, domain);
 	}
 
 	@Override
-	public DeleteApplicationResults deleteApplication(DeleteApplicationParameters parameters) {
-		// Check that application actually exists
-		ListApplicationsRequest listRequest = new ListApplicationsRequest()
-				.withSpaceId(this.spaceId)
-				.withName(parameters.getName());
+	public Results.DeleteApplication deleteApplication(Parameters.DeleteApplication parameters) {
+		String appName = parameters.getName();
 
-		List<ResourceResponse<ApplicationEntity>> applications = this.client.listApplications(listRequest).getResources();
-
-		if (applications.isEmpty()) {
-			return new DeleteApplicationResults().withFound(false);
-		}
-		String appId = applications.get(0).getMetadata().getId();
-
-		// Delete the associated route
-		ListRoutesRequest listRoutesRequest = new ListRoutesRequest()
-				.withDomainId(this.domainId)
-				.withHost(parameters.getName().replaceAll("[^A-Za-z0-9]", "-"));
-		ListRoutesResponse listRoutesResponse = this.client.listRoutes(listRoutesRequest);
-		for (ResourceResponse<RouteEntity> resource : listRoutesResponse.getResources()) {
-			String routeId = resource.getMetadata().getId();
-			this.client.unmapRoute(new RouteMappingRequest()
-							.withAppId(appId)
-							.withRouteId(routeId)
-			);
-			this.client.deleteRoute(new DeleteRouteRequest().withId(routeId));
+		String appId = findApplicationId(appName);
+		if (appId == null) {
+			deleteOldRoutes(appName);
+			return new Results.DeleteApplication().withFound(false);
 		}
 
+		deleteBoundRoutes(appName, appId);
 
-		// Then, unbind any services
-		ListServiceBindingsRequest listServiceBindingsRequest = new ListServiceBindingsRequest()
-				.withAppId(appId);
-		List<ResourceResponse<ServiceBindingEntity>> serviceBindings = this.client.listServiceBindings(listServiceBindingsRequest).getResources();
-		for (ResourceResponse<ServiceBindingEntity> serviceBinding : serviceBindings) {
-			this.client.removeServiceBinding(new RemoveServiceBindingRequest()
-							.withAppId(appId)
-							.withBindingId(serviceBinding.getMetadata().getId())
-			);
-		}
+		unbindServices(appId);
 
-		// Then, perform the actual deletion
-		DeleteApplicationRequest deleteRequest = new DeleteApplicationRequest()
-				.withId(appId);
-
-		DeleteApplicationResponse response = this.client.deleteApplication(deleteRequest);
-
-		return new DeleteApplicationResults().withFound(true).withDeleted(response.isDeleted());
+		return new Results.DeleteApplication().withFound(true).withDeleted(deleteBaseApplication(appId));
 	}
 
 	@Override
-	public GetApplicationsStatusResults getApplicationsStatus(GetApplicationsStatusParameters parameters) {
-		ListApplicationsRequest listRequest = new ListApplicationsRequest()
+	public Results.GetApplicationsStatus getApplicationsStatus(Parameters.GetApplicationsStatus parameters) {
+		Results.GetApplicationsStatus response = new Results.GetApplicationsStatus();
+
+		Requests.ListApplications listRequest = new Requests.ListApplications()
 				.withSpaceId(this.spaceId);
 
 		if (parameters.getName() != null) {
 			listRequest.withName(parameters.getName());
 		}
 
-		List<ResourceResponse<ApplicationEntity>> applications = this.client.listApplications(listRequest).getResources();
-		if (applications.isEmpty()) {
-			return new GetApplicationsStatusResults();
+		List<Responses.ApplicationResource> applications;
+		try {
+			applications = this.client.listApplications(listRequest).getResources();
+			if (applications.isEmpty()) {
+				return response;
+			}
+		}
+		catch (RestClientException rce) {
+			return response;
 		}
 
-		GetApplicationsStatusResults response = new GetApplicationsStatusResults();
-		for (ResourceResponse<ApplicationEntity> application : applications) {
-			String applicationId = application.getMetadata().getId();
+		for (Responses.ApplicationResource application : applications) {
 			String applicationName = application.getEntity().getName();
+			String applicationId = application.getMetadata().getId();
 
-			try {
-				GetApplicationStatisticsRequest statsRequest = new GetApplicationStatisticsRequest()
-						.withId(applicationId);
-
-				GetApplicationStatisticsResponse statsResponse = this.client.getApplicationStatistics(statsRequest);
-				response.withApplication(applicationName, new ApplicationStatus()
-						.withId(applicationId)
-						.withInstances(statsResponse));
-			}
-			catch (RestClientException rce) {
-				// TODO: Log the error?
-				response.withApplication(applicationName, new ApplicationStatus());
-			}
+			response.withApplication(applicationName, new ApplicationStatus()
+					.withId(applicationId)
+					.withInstances(safeGetApplicationStatistics(applicationId))
+					.withEnvironment(safeGetApplicationEnvironment(applicationId)));
 		}
 
 		return response;
 	}
 
-	@Override
-	public PushBindAndStartApplicationResults pushBindAndStartApplication(PushBindAndStartApplicationParameters parameters) {
-		PushBindAndStartApplicationResults pushResults = new PushBindAndStartApplicationResults();
+	private Map<String, String> safeGetApplicationEnvironment(String applicationId) {
+		try {
+			Requests.GetApplicationEnvironment request = new Requests.GetApplicationEnvironment()
+					.withId(applicationId);
 
-		// Create app
-		CreateApplicationRequest createRequest = new CreateApplicationRequest()
+			return this.client.getApplicationEnvironment(request).getEnvironment();
+		}
+		catch (RestClientException rce) {
+			return null;
+		}
+	}
+
+	private Responses.GetApplicationStatistics safeGetApplicationStatistics(String applicationId) {
+		try {
+			Requests.GetApplicationStatistics statsRequest = new Requests.GetApplicationStatistics()
+					.withId(applicationId);
+
+			return this.client.getApplicationStatistics(statsRequest);
+		}
+		catch (RestClientException rce) {
+			return new Responses.GetApplicationStatistics();
+		}
+	}
+
+	@Override
+	public Results.PushBindAndStartApplication pushBindAndStartApplication(Parameters.PushBindAndStartApplication parameters) {
+		Results.PushBindAndStartApplication pushResults = new Results.PushBindAndStartApplication();
+
+		String appId = createBaseApplication(parameters);
+
+		String appName = parameters.getName();
+
+		if (appId == null) {
+			return pushResults.withCreateSucceeded(false);
+		}
+
+		if (!deleteOldRoutes(appName)) {
+			deleteBaseApplication(appId);
+			return pushResults.withCreateSucceeded(false);
+		}
+
+		if (!bindServiceInstances(appId, parameters.getServiceInstanceNames())) {
+			deleteBaseApplication(appId);
+			return pushResults.withCreateSucceeded(false);
+		}
+
+		if (!createAndMapRoute(appName, appId)) {
+			unbindServices(appId);
+			deleteBaseApplication(appId);
+			return pushResults.withCreateSucceeded(false);
+		}
+
+		if (!uploadBits(appId, parameters.getResource())) {
+			deleteBoundRoutes(appName, appId);
+			unbindServices(appId);
+			deleteBaseApplication(appId);
+			return pushResults.withCreateSucceeded(false);
+		}
+
+		if (!startApplication(appId)) {
+			deleteBoundRoutes(appName, appId);
+			unbindServices(appId);
+			deleteBaseApplication(appId);
+			return pushResults.withCreateSucceeded(false);
+		}
+
+		return pushResults.withCreateSucceeded(true);
+	}
+
+	private boolean bindServiceInstances(String appId, Set<String> serviceInstanceNames) {
+		for (String serviceInstanceName : serviceInstanceNames) {
+			Requests.ListServiceInstances listServiceInstancesRequest = new Requests.ListServiceInstances()
+					.withName(serviceInstanceName)
+					.withSpaceId(this.spaceId);
+			try {
+				List<Responses.NamedResource> listServiceInstances = this.client.listServiceInstances(listServiceInstancesRequest).getResources();
+				for (Responses.NamedResource serviceInstanceResource : listServiceInstances) {
+					Requests.CreateServiceBinding createServiceBindingRequest = new Requests.CreateServiceBinding()
+							.withAppId(appId)
+							.withServiceInstanceId(serviceInstanceResource.getMetadata().getId());
+					this.client.createServiceBinding(createServiceBindingRequest);
+				}
+			}
+			catch (RestClientException rce) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	private boolean createAndMapRoute(String appName, String appId) {
+		Requests.CreateRoute createRouteRequest = new Requests.CreateRoute()
+				.withDomainId(this.domainId)
+				.withSpaceId(this.spaceId)
+				.withHost(appName.replaceAll("[^A-Za-z0-9]", "-"));
+		try {
+			Responses.CreateRoute createRouteResponse = this.client.createRoute(createRouteRequest);
+
+			Requests.RouteMapping mapRouteRequest = new Requests.RouteMapping()
+					.withRouteId(createRouteResponse.getMetadata().getId())
+					.withAppId(appId);
+			this.client.mapRoute(mapRouteRequest);
+		}
+		catch (RestClientException rce) {
+			return false;
+		}
+		return true;
+	}
+
+	private String createBaseApplication(Parameters.PushBindAndStartApplication parameters) {
+		Requests.CreateApplication createRequest = new Requests.CreateApplication()
 				.withSpaceId(this.spaceId)
 				.withName(parameters.getName())
 				.withInstances(parameters.getInstances())
@@ -145,89 +220,149 @@ class CloudFoundryApplicationTemplate implements CloudFoundryApplicationOperatio
 				.withState("STOPPED")
 				.withEnvironment(parameters.getEnvironment());
 
-		CreateApplicationResponse createResponse;
+		Responses.CreateApplication createResponse;
 		try {
 			createResponse = this.client.createApplication(createRequest);
 		}
 		catch (RestClientException rce) {
-			return pushResults.withCreateSucceeded(false);
+			return null;
 		}
-
-		// Bind service instances
-		String appId = createResponse.getMetadata().getId();
-		for (String serviceInstanceName : parameters.getServiceInstanceNames()) {
-			ListServiceInstancesRequest listServiceInstancesRequest = new ListServiceInstancesRequest()
-					.withName(serviceInstanceName)
-					.withSpaceId(this.spaceId);
-			List<ResourceResponse<NamedEntity>> listServiceInstances = this.client.listServiceInstances(listServiceInstancesRequest).getResources();
-			for (ResourceResponse<NamedEntity> serviceInstanceResource : listServiceInstances) {
-				CreateServiceBindingRequest createServiceBindingRequest = new CreateServiceBindingRequest()
-						.withAppId(appId)
-						.withServiceInstanceId(serviceInstanceResource.getMetadata().getId());
-				this.client.createServiceBinding(createServiceBindingRequest);
-			}
-		}
-
-		// Create and map route
-		CreateRouteRequest createRouteRequest = new CreateRouteRequest()
-				.withDomainId(this.domainId)
-				.withSpaceId(this.spaceId)
-				.withHost(parameters.getName().replaceAll("[^A-Za-z0-9]", "-"));
-		CreateRouteResponse createRouteResponse = this.client.createRoute(createRouteRequest);
-
-		RouteMappingRequest mapRouteRequest = new RouteMappingRequest()
-				.withRouteId(createRouteResponse.getMetadata().getId())
-				.withAppId(appId);
-		this.client.mapRoute(mapRouteRequest);
-
-
-		// Upload the bits for the app
-		UploadBitsRequest uploadBitsRequest = new UploadBitsRequest()
-				.withId(appId)
-				.withResource(parameters.getResource());
-
-		UploadBitsResponse uploadBitsResponse = this.client.uploadBits(uploadBitsRequest);
-
-		// Start the app
-		UpdateApplicationRequest updateRequest = new UpdateApplicationRequest()
-				.withId(appId)
-				.withState("STARTED");
-		UpdateApplicationResponse updateResponse = this.client.updateApplication(updateRequest);
-
-		return pushResults.withCreateSucceeded(true);
+		return createResponse.getMetadata().getId();
 	}
 
-	private String getSpaceId(String organizationName, String spaceName) {
-		ListOrganizationsRequest organizationsRequest = new ListOrganizationsRequest()
+	private boolean deleteBaseApplication(String appId) {
+		Requests.DeleteApplication deleteRequest = new Requests.DeleteApplication()
+				.withId(appId);
+		Responses.DeleteApplication response;
+		try {
+			response = this.client.deleteApplication(deleteRequest);
+		}
+		catch (RestClientException rce) {
+			return false;
+		}
+		return response.isDeleted();
+	}
+
+	private boolean deleteBoundRoutes(String appName, String appId) {
+		Requests.ListRoutes listRoutesRequest = new Requests.ListRoutes()
+				.withDomainId(this.domainId)
+				.withHost(appName.replaceAll("[^A-Za-z0-9]", "-"));
+		try {
+			Responses.ListRoutes listRoutesResponse = this.client.listRoutes(listRoutesRequest);
+			for (Responses.RouteResource resource : listRoutesResponse.getResources()) {
+				String routeId = resource.getMetadata().getId();
+				if (appId != null) {
+					this.client.unmapRoute(new Requests.RouteMapping()
+									.withAppId(appId)
+									.withRouteId(routeId)
+					);
+				}
+				this.client.deleteRoute(new Requests.DeleteRoute().withId(routeId));
+			}
+		}
+		catch (RestClientException rce) {
+			return false;
+		}
+		return true;
+	}
+
+	private boolean deleteOldRoutes(String appName) {
+		return deleteBoundRoutes(appName, null);
+	}
+
+	private String findApplicationId(String appName) {
+		Requests.ListApplications listRequest = new Requests.ListApplications()
+				.withSpaceId(this.spaceId)
+				.withName(appName);
+
+		List<Responses.ApplicationResource> applications;
+		try {
+			applications = this.client.listApplications(listRequest).getResources();
+		}
+		catch (RestClientException rce) {
+			return null;
+		}
+
+		if (applications.isEmpty()) {
+			return null;
+		}
+		return applications.get(0).getMetadata().getId();
+	}
+
+	private boolean startApplication(String appId) {
+		Requests.UpdateApplication updateRequest = new Requests.UpdateApplication()
+				.withId(appId)
+				.withState("STARTED");
+		try {
+			this.client.updateApplication(updateRequest);
+		}
+		catch (RestClientException rce) {
+			return false;
+		}
+		return true;
+	}
+
+	private boolean unbindServices(String appId) {
+		Requests.ListServiceBindings listServiceBindingsRequest = new Requests.ListServiceBindings()
+				.withAppId(appId);
+		try {
+			List<Responses.BindingResource> serviceBindings = this.client.listServiceBindings(listServiceBindingsRequest).getResources();
+			for (Responses.BindingResource serviceBinding : serviceBindings) {
+				this.client.removeServiceBinding(new Requests.RemoveServiceBinding()
+								.withAppId(appId)
+								.withBindingId(serviceBinding.getMetadata().getId())
+				);
+			}
+		}
+		catch (RestClientException rce) {
+			return false;
+		}
+		return true;
+	}
+
+	private boolean uploadBits(String appId, Resource resource) {
+		Requests.UploadBits uploadBitsRequest = new Requests.UploadBits()
+				.withId(appId)
+				.withResource(resource);
+		try {
+			this.client.uploadBits(uploadBitsRequest);
+		}
+		catch (RestClientException rce) {
+			return false;
+		}
+		return true;
+	}
+
+	private static String getSpaceId(CloudControllerOperations client, String organizationName, String spaceName) {
+		Requests.ListOrganizations organizationsRequest = new Requests.ListOrganizations()
 				.withName(organizationName);
 
-		List<ResourceResponse<NamedEntity>> orgs = this.client.listOrganizations(organizationsRequest).getResources();
+		List<Responses.NamedResource> orgs = client.listOrganizations(organizationsRequest).getResources();
 		if (orgs.size() != 1) {
 			return null;
 		}
 		String orgId = orgs.get(0).getMetadata().getId();
 
-		ListSpacesRequest spacesRequest = new ListSpacesRequest()
+		Requests.ListSpaces spacesRequest = new Requests.ListSpaces()
 				.withOrgId(orgId)
 				.withName(spaceName);
 
-		List<ResourceResponse<NamedEntity>> spaces = this.client.listSpaces(spacesRequest).getResources();
+		List<Responses.NamedResource> spaces = client.listSpaces(spacesRequest).getResources();
 		if (spaces.size() != 1) {
 			return null;
 		}
 		return spaces.get(0).getMetadata().getId();
 	}
 
-	private String getDomainId(String domain) {
-		ListSharedDomainsRequest sharedDomainsRequest = new ListSharedDomainsRequest()
+	private static String getDomainId(CloudControllerOperations client, String domain) {
+		Requests.ListSharedDomains sharedDomainsRequest = new Requests.ListSharedDomains()
 				.withName(domain);
 
-		ListSharedDomainsResponse listSharedDomainsResponse = this.client.listSharedDomains(sharedDomainsRequest);
-		List<ResourceResponse<NamedEntity>> domains = listSharedDomainsResponse.getResources();
+		Responses.ListSharedDomains listSharedDomainsResponse = client.listSharedDomains(sharedDomainsRequest);
+		List<Responses.NamedResource> domains = listSharedDomainsResponse.getResources();
 		if (domains.size() != 1) {
 			return null;
 		}
 		return domains.get(0).getMetadata().getId();
 	}
-
 }

@@ -36,9 +36,9 @@ public class ApplicationModuleDeployer implements ModuleDeployer {
 
 	private final CloudFoundryModuleDeploymentConverter cloudFoundryModuleDeploymentConverter;
 
-	private final CloudFoundryApplicationOperations resourceClient;
+	private final CloudFoundryApplicationOperations applicationOperations;
 
-	private CloudFoundryModuleDeployerProperties properties;
+	private final CloudFoundryModuleDeployerProperties properties;
 
 	public ApplicationModuleDeployer(
 			CloudFoundryModuleDeployerProperties properties,
@@ -46,7 +46,7 @@ public class ApplicationModuleDeployer implements ModuleDeployer {
 			CloudFoundryApplicationOperations applicationOperations) {
 		this.properties = properties;
 		this.cloudFoundryModuleDeploymentConverter = converter;
-		this.resourceClient = applicationOperations;
+		this.applicationOperations = applicationOperations;
 	}
 
 	@Override
@@ -55,8 +55,8 @@ public class ApplicationModuleDeployer implements ModuleDeployer {
 		ModuleDeploymentId moduleDeploymentId = new ModuleDeploymentId(definition.getGroup(), definition.getLabel());
 		String applicationName = this.cloudFoundryModuleDeploymentConverter.toApplicationName(moduleDeploymentId);
 
-		PushBindAndStartApplicationResults response = this.resourceClient.pushBindAndStartApplication(new PushBindAndStartApplicationParameters()
-						.withEnvironment(this.cloudFoundryModuleDeploymentConverter.toModuleLauncherEnvironment(request))
+		Results.PushBindAndStartApplication response = this.applicationOperations.pushBindAndStartApplication(new Parameters.PushBindAndStartApplication()
+						.withEnvironment(this.cloudFoundryModuleDeploymentConverter.generateModuleLauncherEnvironment(request))
 						.withInstances(request.getCount())
 						.withName(applicationName)
 						.withResource(properties.getModuleLauncherLocation())
@@ -70,15 +70,16 @@ public class ApplicationModuleDeployer implements ModuleDeployer {
 
 	@Override
 	public Map<ModuleDeploymentId, ModuleStatus> status() {
-		GetApplicationsStatusResults response = this.resourceClient.getApplicationsStatus(
-				new GetApplicationsStatusParameters());
+		Results.GetApplicationsStatus response = this.applicationOperations.getApplicationsStatus(
+				new Parameters.GetApplicationsStatus());
 
 		Map<ModuleDeploymentId, ModuleStatus> result = new HashMap<>();
 		for (Map.Entry<String, ApplicationStatus> e : response.getApplications().entrySet()) {
-			ModuleDeploymentId moduleId = this.cloudFoundryModuleDeploymentConverter.toModuleDeploymentId(e.getKey());
+			ApplicationStatus applicationStatus = e.getValue();
+			ModuleDeploymentId moduleId = this.cloudFoundryModuleDeploymentConverter.getModuleId(applicationStatus);
 			if (null != moduleId) { // filter out non-modules
 				result.put(moduleId,
-						new ModuleStatusBuilder().withId(moduleId).withApplicationStatus(e.getValue()).build());
+						new ModuleStatusBuilder().withId(moduleId).withApplicationStatus(applicationStatus).build());
 			}
 		}
 		return result;
@@ -88,16 +89,16 @@ public class ApplicationModuleDeployer implements ModuleDeployer {
 	public ModuleStatus status(ModuleDeploymentId moduleId) {
 		String applicationName = this.cloudFoundryModuleDeploymentConverter.toApplicationName(moduleId);
 
-		GetApplicationsStatusResults response = this.resourceClient.getApplicationsStatus(
-				new GetApplicationsStatusParameters().withName(applicationName));
+		Results.GetApplicationsStatus response = this.applicationOperations.getApplicationsStatus(
+				new Parameters.GetApplicationsStatus().withName(applicationName));
 
 		return new ModuleStatusBuilder().withId(moduleId).withApplicationStatus(response.getApplications().get(applicationName)).build();
 	}
 
 	@Override
 	public void undeploy(ModuleDeploymentId moduleId) {
-		DeleteApplicationResults response = this.resourceClient.deleteApplication(
-				new DeleteApplicationParameters()
+		Results.DeleteApplication response = this.applicationOperations.deleteApplication(
+				new Parameters.DeleteApplication()
 						.withName(this.cloudFoundryModuleDeploymentConverter.toApplicationName(moduleId)));
 		if (!response.isFound()) {
 			throw new IllegalStateException("Module " + moduleId + " is not deployed");
