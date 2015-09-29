@@ -94,7 +94,7 @@ all stream commands are supported in the shell when running on Lattice:
 Spring Cloud Data Flow can be used to deploy modules in a Cloud Foundry
 environment. When doing so, the [Admin](https://github.com/spring-cloud/spring-cloud-dataflow/tree/master/spring-cloud-dataflow-admin) application can either run itself on Cloud Foundry, or on another installation (_e.g._ a simple laptop).
 
-The required configuration amounts to the same, and is merely related to providing credentials to the Cloud Foundry instance, so that the admin can spawn applications itself. Any Spring Boot compatible configuration mechanism can be used (passing program arguments, editing configuration files before building the application, using [Spring Cloud Config](https://github.com/spring-cloud/spring-cloud-config), using environment variables, _etc._), although although some may prove more adequate than others when running _on_ Cloud Foundry.
+The required configuration amounts to the same, and is merely related to providing credentials to the Cloud Foundry instance, so that the admin can spawn applications itself. Any Spring Boot compatible configuration mechanism can be used (passing program arguments, editing configuration files before building the application, using [Spring Cloud Config](https://github.com/spring-cloud/spring-cloud-config), using environment variables, _etc._), although some may prove more adequate than others when running _on_ Cloud Foundry.
 
 1\. provision a redis service instance on Cloud Foundry.
 Your mileage may vary depending on your Cloud Foundry installation. Use `cf marketplace` to discover which plans are available to you. For example when using [Pivotal Web Services](https://run.pivotal.io/):
@@ -154,7 +154,15 @@ Successfully targeted http://s-c-dataflow-admin.cfapps.io
 dataflow:>
 ```
 
-At step **3.**, either running _on_ Cloud Foundry or _targeting_ Cloud Foundry, the following pieces of configuration must be provided, for example using `cf env s-c-dataflow-admin CLOUDFOUNDRY_DOMAIN mydomain.cfapps.io` (note the use of underscores) when running _in_ Cloud Foundry
+At step **3.** the following pieces of configuration must be provided.
+When running _on_ Cloud Foundry use the `cf env` command, for example:
+```
+cf env s-c-dataflow-admin CLOUDFOUNDRY_DOMAIN mydomain.cfapps.io
+```
+Note the use of the capitalized name.
+
+When running locally set the local environment, or pass variables on the Java invocation:
+
 
 ```
 # Default values cited after the equal sign.
@@ -170,7 +178,7 @@ cloudfoundry.organization=
 
 # name of the space into which modules will be deployed
 # (for setting env var use CLOUDFOUNDRY_SPACE)
-cloudfoundry.space=<same as admin when running on CF or 'development'>
+cloudfoundry.space=<same space as admin when running on CF, or 'development'>
 
 # the root domain to use when mapping routes, e.g. cfapps.io
 # (for setting env var use CLOUDFOUNDRY_DOMAIN)
@@ -182,18 +190,15 @@ cloudfoundry.domain=
 # (for setting env var use CLOUDFOUNDRY_SERVICES)
 cloudfoundry.services=redis
 
-# url used for obtaining an OAuth2 token, e.g. https://uaa.run.pivotal.io/oauth/token
-# (for setting env var use SECURITY_OAUTH2_CLIENT_ACCESS_TOKEN_URI)
-security.oauth2.client.access-token-uri=
-
-# url used to grant user authorizations, e.g. https://login.run.pivotal.io/oauth/authorize
-# (for setting env var use SECURITY_OAUTH2_CLIENT_USER_AUTHORIZATION_URI)
-security.oauth2.client.user-authorization-uri=
-
 # username and password of the user to use to create apps (modules)
-# (for setting env var use SECURITY_OAUTH2_CLIENT_USERNAME and SECURITY_OAUTH2_CLIENT_PASSWORD)
-security.oauth2.client.username=
-security.oauth2.client.password=
+# (for setting env var use CLOUDFOUNDRY_USERNAME and CLOUDFOUNDRY_PASSWORD)
+cloudfoundry.username=
+cloudfoundry.password=
+
+# Whether to allow self-signed certificates during SSL validation
+# (for setting env var use CLOUDFOUNDRY_SKIP_SSL_VALIDATION)
+cloudfoundry.skipSslValidation=false
+
 ```
 
 ## Running on Hadoop YARN

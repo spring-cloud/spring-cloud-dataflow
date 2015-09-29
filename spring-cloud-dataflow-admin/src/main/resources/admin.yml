@@ -2,25 +2,21 @@ server:
   port: 9393
 management:
   contextPath: /management
+
 cloudfoundry:
-  space: ${vcap.application.space_name:development}
-#  apiEndpoint: https://api.run.pivotal.io
-#  organization: org
-#  domain: cfapps.io
-#  services: redis
+#  apiEndpoint: https://api.run.pivotal.io  # Location of the CloudFoundry REST API endpoint to use.
+#  domain: cfapps.io                        # The domain to use when mapping routes for applications.
+#  organization: org                        # The organization to use when registering new applications.
+#  password: user-password                  # Password to use to authenticate against the Cloud Foundry API.
+#  services: redis                          # The names of services to bind to each application deployed as a module.
+  skipSslValidation: false                  # Allow operation using self-signed certificates.
+#  space: ${vcap.application.space_name:development} # The space to use when registering new applications.
+#  username: username                       # Username to use to authenticate against the Cloud Foundry API.
 
 security:
   basic:
     enabled: false
-  oauth2:
-    client:
-      grantType: password
-      id: cf
-      client-id: cf
-#      access-token-uri: https://uaa.run.pivotal.io/oauth/token
-#      password: user-password
-#      user-authorization-uri: https://login.run.pivotal.io/oauth/authorize
-#      username: username
+
 spring:
   application:
     name: spring-cloud-dataflow-admin

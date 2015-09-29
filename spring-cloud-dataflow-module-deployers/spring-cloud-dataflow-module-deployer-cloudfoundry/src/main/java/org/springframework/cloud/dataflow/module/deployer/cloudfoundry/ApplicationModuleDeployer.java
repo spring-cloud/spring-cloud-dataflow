@@ -66,7 +66,8 @@ class ApplicationModuleDeployer implements ModuleDeployer {
 		CloudFoundryClient cloudFoundryClient = new CloudFoundryClient(credentials,
 				properties.getApiEndpoint(),
 				properties.getOrganization(),
-				properties.getSpace());
+				properties.getSpace(),
+				properties.isSkipSslValidation());
 		cloudFoundryClient.login();
 
 		this.properties = properties;

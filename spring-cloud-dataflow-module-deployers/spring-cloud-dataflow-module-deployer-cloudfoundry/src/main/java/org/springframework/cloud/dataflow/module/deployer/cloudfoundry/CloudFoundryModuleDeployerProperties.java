@@ -72,6 +72,11 @@ class CloudFoundryModuleDeployerProperties {
 	 */
 	private String password;
 
+	/**
+	 * Allow operation using self-signed certificates.
+	 */
+	private boolean skipSslValidation = false;
+
 	public String getPassword() {
 		return password;
 	}
@@ -126,6 +131,14 @@ class CloudFoundryModuleDeployerProperties {
 
 	public void setSpace(String space) {
 		this.space = space;
+	}
+
+	public boolean isSkipSslValidation() {
+		return skipSslValidation;
+	}
+
+	public void setSkipSslValidation(boolean skipSslValidation) {
+		this.skipSslValidation = skipSslValidation;
 	}
 
 	public Resource getModuleLauncherLocation() {
