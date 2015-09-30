@@ -16,8 +16,8 @@
 
 package org.springframework.cloud.dataflow.module.deployer.cloudfoundry;
 
-import java.net.URI;
-import java.util.Collections;
+import java.net.URL;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -35,7 +35,7 @@ class CloudFoundryModuleDeployerProperties {
 	 * The names of services to bind to each application deployed as a module.
 	 * This should typically contain a service capable of playing the role of a binding transport.
 	 */
-	private Set<String> services = setOf(new HashSet<String>(), "redis");
+	private Set<String> services = new HashSet<>(Arrays.asList("redis"));
 
 	/**
 	 * The domain to use when mapping routes for applications.
@@ -60,13 +60,39 @@ class CloudFoundryModuleDeployerProperties {
 	/**
 	 * Location of the CloudFoundry REST API endpoint to use.
 	 */
-	private URI apiEndpoint;
+	private URL apiEndpoint;
 
-	public URI getApiEndpoint() {
+	/**
+	 * Username to use to authenticate against the Cloud Foundry API.
+	 */
+	private String username;
+
+	/**
+	 * Password to use to authenticate against the Cloud Foundry API.
+	 */
+	private String password;
+
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
+	public String getUsername() {
+		return username;
+	}
+
+	public void setUsername(String username) {
+		this.username = username;
+	}
+
+	public URL getApiEndpoint() {
 		return apiEndpoint;
 	}
 
-	public void setApiEndpoint(URI apiEndpoint) {
+	public void setApiEndpoint(URL apiEndpoint) {
 		this.apiEndpoint = apiEndpoint;
 	}
 
@@ -108,11 +134,5 @@ class CloudFoundryModuleDeployerProperties {
 
 	public void setModuleLauncherLocation(Resource moduleLauncherLocation) {
 		this.moduleLauncherLocation = moduleLauncherLocation;
-	}
-
-	@SafeVarargs
-	private static <T> Set<T> setOf(Set<T> set, T... elements) {
-		Collections.addAll(set, elements);
-		return set;
 	}
 }

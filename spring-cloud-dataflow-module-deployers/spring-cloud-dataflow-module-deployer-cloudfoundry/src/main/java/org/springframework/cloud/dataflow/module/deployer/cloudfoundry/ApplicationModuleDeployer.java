@@ -16,69 +16,160 @@
 
 package org.springframework.cloud.dataflow.module.deployer.cloudfoundry;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.Callable;
+
+import org.cloudfoundry.client.lib.CloudCredentials;
+import org.cloudfoundry.client.lib.CloudFoundryClient;
+import org.cloudfoundry.client.lib.CloudFoundryException;
+import org.cloudfoundry.client.lib.UploadStatusCallback;
+import org.cloudfoundry.client.lib.domain.CloudApplication;
+import org.cloudfoundry.client.lib.domain.InstanceInfo;
+import org.cloudfoundry.client.lib.domain.InstanceStats;
+import org.cloudfoundry.client.lib.domain.InstancesInfo;
+import org.cloudfoundry.client.lib.domain.Staging;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.yaml.snakeyaml.Yaml;
 
 import org.springframework.cloud.dataflow.core.ModuleDefinition;
 import org.springframework.cloud.dataflow.core.ModuleDeploymentId;
 import org.springframework.cloud.dataflow.core.ModuleDeploymentRequest;
 import org.springframework.cloud.dataflow.module.ModuleStatus;
+import org.springframework.cloud.dataflow.module.deployer.ModuleArgumentQualifier;
 import org.springframework.cloud.dataflow.module.deployer.ModuleDeployer;
+import org.springframework.core.io.Resource;
 
 /**
  * A {@link ModuleDeployer} which deploys modules as applications running in a space in CloudFoundry.
  *
- * @author Paul Harris
- * @author Steve Powell
  * @author Eric Bottard
  */
-public class ApplicationModuleDeployer implements ModuleDeployer {
+class ApplicationModuleDeployer implements ModuleDeployer {
 
-	private final CloudFoundryModuleDeploymentConverter cloudFoundryModuleDeploymentConverter;
+	private final CloudFoundryModuleDeployerProperties properties;
 
-	private final CloudFoundryApplicationOperations resourceClient;
+	private final CloudFoundryClient cloudFoundryClient;
 
-	private CloudFoundryModuleDeployerProperties properties;
+	private final Logger logger = LoggerFactory.getLogger(ApplicationModuleDeployer.class);
 
-	public ApplicationModuleDeployer(
-			CloudFoundryModuleDeployerProperties properties,
-			CloudFoundryModuleDeploymentConverter converter,
-			CloudFoundryApplicationOperations applicationOperations) {
+	public ApplicationModuleDeployer(CloudFoundryModuleDeployerProperties properties) {
 		this.properties = properties;
-		this.cloudFoundryModuleDeploymentConverter = converter;
-		this.resourceClient = applicationOperations;
+		CloudCredentials credentials = new CloudCredentials(properties.getUsername(), properties.getPassword());
+		cloudFoundryClient = new CloudFoundryClient(credentials,
+				properties.getApiEndpoint(),
+				properties.getOrganization(),
+				properties.getSpace());
+		cloudFoundryClient.login();
 	}
 
 	@Override
 	public ModuleDeploymentId deploy(ModuleDeploymentRequest request) {
+
+		final String appName = deduceAppName(request);
+
+		String command = null;
+		String buildpack = "https://github.com/cloudfoundry/java-buildpack.git#69abec6d2726f73a22339caa6ae7739f060002e4";
+		String stack = null;
+		Integer healthCheckTimeout = null;
+
+		final Staging staging = new Staging(command, buildpack, stack, healthCheckTimeout);
+		final Integer disk = 1024;
+		final Integer memory = 1024;
+		final List<String> uris = deduceUris(request);
+		final List<String> serviceNames = new ArrayList<>(properties.getServices());
+
+		Undoer undoer = new Undoer();
+
+		undoer.attempt(new Runnable() {
+			@Override
+			public void run() {
+				logger.debug("Creating app {} using disk[{}], mem[{}]\n\tservices={}, uris={}\n\t{}", appName, disk, memory, serviceNames, uris, staging);
+				cloudFoundryClient.createApplication(appName, staging, disk, memory, uris, serviceNames);
+			}
+		}).andUndoBy(new Runnable() {
+			@Override
+			public void run() {
+				logger.error("Rollback: deleting app {}", appName);
+				cloudFoundryClient.deleteApplication(appName);
+			}
+		});
+
+		final Map<String, String> env = createModuleLauncherEnvironment(request);
+		undoer.attempt(new Runnable() {
+			@Override
+			public void run() {
+				logger.trace("Setting env for app {} as {}", appName, env);
+				cloudFoundryClient.updateApplicationEnv(appName, env);
+			}
+		}).withNoParticularUndo();
+
+		undoer.attempt(new Callable<Void>() {
+			@Override
+			public Void call() throws IOException {
+				Resource launcher = properties.getModuleLauncherLocation();
+				cloudFoundryClient.uploadApplication(appName, launcher.getFilename(), launcher.getInputStream(), new LoggingUploadStatusCallback(appName));
+				return null;
+			}
+		}).withNoParticularUndo();
+
+		final int instances = request.getCount();
+		if (instances > 1) { // spare a network call if instances == 1
+			undoer.attempt(new Runnable() {
+				@Override
+				public void run() {
+					logger.trace("Setting number of instances for {} to {}", appName, instances);
+					cloudFoundryClient.updateApplicationInstances(appName, instances);
+				}
+			}).withNoParticularUndo();
+		}
+
+		undoer.attempt(new Runnable() {
+			@Override
+			public void run() {
+				logger.debug("Starting application {}", appName);
+				cloudFoundryClient.startApplication(appName);
+			}
+		}).withNoParticularUndo();
+
 		ModuleDefinition definition = request.getDefinition();
 		ModuleDeploymentId moduleDeploymentId = new ModuleDeploymentId(definition.getGroup(), definition.getLabel());
-		String applicationName = this.cloudFoundryModuleDeploymentConverter.toApplicationName(moduleDeploymentId);
-
-		PushBindAndStartApplicationResults response = this.resourceClient.pushBindAndStartApplication(new PushBindAndStartApplicationParameters()
-						.withEnvironment(this.cloudFoundryModuleDeploymentConverter.toModuleLauncherEnvironment(request))
-						.withInstances(request.getCount())
-						.withName(applicationName)
-						.withResource(properties.getModuleLauncherLocation())
-						.withServiceInstanceNames(this.properties.getServices())
-		);
-		if (!response.isCreateSucceeded()) {
-			throw new IllegalStateException("Module " + moduleDeploymentId + " could not be deployed");
-		}
 		return moduleDeploymentId;
 	}
 
 	@Override
-	public Map<ModuleDeploymentId, ModuleStatus> status() {
-		GetApplicationsStatusResults response = this.resourceClient.getApplicationsStatus(
-				new GetApplicationsStatusParameters());
+	public void undeploy(ModuleDeploymentId moduleId) {
+		final String appName = deduceAppName(moduleId);
+		logger.debug("Undeploy: requesting deletion of app {}", appName);
+		Map<String, Object> applicationEnvironment = cloudFoundryClient.getApplicationEnvironment(appName);
+		String moduleMarker = (String) applicationEnvironment.get("SPRING_CLOUD_DATAFLOW_MODULE");
+		if (moduleMarker != null && moduleMarker.equals(makeModuleMarker(moduleId))) {
+			cloudFoundryClient.deleteApplication(appName);
+		} else {
+			logger.warn("Not destroying app {}, because its SPRING_CLOUD_DATAFLOW_MODULE env value was unexpected");
+		}
+	}
 
+	@Override
+	public Map<ModuleDeploymentId, ModuleStatus> status() {
 		Map<ModuleDeploymentId, ModuleStatus> result = new HashMap<>();
-		for (Map.Entry<String, ApplicationStatus> e : response.getApplications().entrySet()) {
-			ModuleDeploymentId moduleId = this.cloudFoundryModuleDeploymentConverter.toModuleDeploymentId(e.getKey());
-			if (null != moduleId) { // filter out non-modules
-				result.put(moduleId,
-						new ModuleStatusBuilder().withId(moduleId).withApplicationStatus(e.getValue()).build());
+		for (CloudApplication cloudApplication : cloudFoundryClient.getApplications()) {
+			String moduleMarker = cloudApplication.getEnvAsMap().get("SPRING_CLOUD_DATAFLOW_MODULE");
+			if (moduleMarker != null) {
+				int colon = moduleMarker.indexOf(':');
+				String group = moduleMarker.substring(0, colon);
+				String label = moduleMarker.substring(colon + 1);
+				ModuleDeploymentId id = new ModuleDeploymentId(group, label);
+				ModuleStatus status = buildModuleStatus(id, cloudApplication);
+				result.put(id, status);
 			}
 		}
 		return result;
@@ -86,21 +177,148 @@ public class ApplicationModuleDeployer implements ModuleDeployer {
 
 	@Override
 	public ModuleStatus status(ModuleDeploymentId moduleId) {
-		String applicationName = this.cloudFoundryModuleDeploymentConverter.toApplicationName(moduleId);
-
-		GetApplicationsStatusResults response = this.resourceClient.getApplicationsStatus(
-				new GetApplicationsStatusParameters().withName(applicationName));
-
-		return new ModuleStatusBuilder().withId(moduleId).withApplicationStatus(response.getApplications().get(applicationName)).build();
+		String appName = deduceAppName(moduleId);
+		try {
+			CloudApplication cloudApplication = cloudFoundryClient.getApplication(appName);
+			return buildModuleStatus(moduleId, cloudApplication);
+		}
+		catch (CloudFoundryException e) {
+			return buildModuleStatus(moduleId, null);
+		}
 	}
 
-	@Override
-	public void undeploy(ModuleDeploymentId moduleId) {
-		DeleteApplicationResults response = this.resourceClient.deleteApplication(
-				new DeleteApplicationParameters()
-						.withName(this.cloudFoundryModuleDeploymentConverter.toApplicationName(moduleId)));
-		if (!response.isFound()) {
-			throw new IllegalStateException("Module " + moduleId + " is not deployed");
+	private ModuleStatus buildModuleStatus(ModuleDeploymentId id, CloudApplication cloudApplication) {
+		ModuleStatus.Builder statusBuilder = ModuleStatus.of(id);
+		String appName = deduceAppName(id);
+		if (cloudApplication != null) {
+			InstancesInfo applicationInstances = cloudFoundryClient.getApplicationInstances(cloudApplication);
+			if (applicationInstances != null) {
+				if (applicationInstances.getInstances() != null) { // null can happen despite the STARTED check above
+					List<InstanceStats> instanceStats = new ArrayList<>(cloudFoundryClient.getApplicationStats(appName).getRecords());
+					List<InstanceInfo> instanceInfos = new ArrayList<>(applicationInstances.getInstances());
+					if (instanceStats.size() != instanceInfos.size()) {
+						return notRunningInstancesStatus(id, cloudApplication);
+					}
+					// Use instanceStat.id and instanceInfo.index as synching key
+					Collections.sort(instanceStats, new Comparator<InstanceStats>() {
+						@Override
+						public int compare(InstanceStats o1, InstanceStats o2) {
+							return Integer.valueOf(o1.getId()).compareTo(Integer.valueOf(o2.getId()));
+						}
+					});
+					Collections.sort(instanceInfos, new Comparator<InstanceInfo>() {
+						@Override
+						public int compare(InstanceInfo o1, InstanceInfo o2) {
+							return o1.getIndex() - o2.getIndex();
+						}
+					});
+
+					for (int i = 0; i < instanceStats.size(); i++) {
+						// Changes builder by side-effect
+						statusBuilder.with(new CloudFoundryModuleInstanceStatus(appName, instanceInfos.get(i), instanceStats.get(i)));
+					}
+				}
+				return statusBuilder.build();
+			}
+		}
+		// Fall through from all if() checks above
+		// No running instances, app must be stopped/updating, or even inexistent
+		return notRunningInstancesStatus(id, cloudApplication);
+	}
+
+	private ModuleStatus notRunningInstancesStatus(ModuleDeploymentId id, CloudApplication cloudApplication) {
+		String appName = deduceAppName(id);
+		ModuleStatus.Builder statusBuilder = ModuleStatus.of(id);
+		if (cloudApplication != null) {
+			for (int i = 0; i < cloudApplication.getInstances(); i++) {
+				statusBuilder.with(new CloudFoundryModuleInstanceStatus(appName, i));
+			}
+		}
+		return statusBuilder.build();
+	}
+
+	private String deduceAppName(ModuleDeploymentId moduleId) {
+		return moduleId.getGroup() + "-" + moduleId.getLabel();
+	}
+
+	private String deduceAppName(ModuleDeploymentRequest request) {
+		return request.getDefinition().getGroup() + "-" + request.getDefinition().getLabel();
+	}
+
+	private List<String> deduceUris(ModuleDeploymentRequest request) {
+		String url = deduceAppName(request) + "." + properties.getDomain();
+		return Arrays.asList(url);
+	}
+
+	private Map<String, String> createModuleLauncherEnvironment(ModuleDeploymentRequest request) {
+		HashMap<String, String> args = new HashMap<>();
+		args.put("modules", request.getCoordinates().toString());
+		args.putAll(ModuleArgumentQualifier.qualifyArgs(0, request.getDefinition().getParameters()));
+		args.putAll(ModuleArgumentQualifier.qualifyArgs(0, request.getDeploymentProperties()));
+
+		Map<String, String> env = new HashMap<>(toEnvironmentVariables(args));
+		env.put("SPRING_CLOUD_DATAFLOW_MODULE", makeModuleMarker(ModuleDeploymentId.fromModuleDefinition(request.getDefinition())));
+
+		return env;
+	}
+
+	private String makeModuleMarker(ModuleDeploymentId moduleId) {
+		return moduleId.getGroup() + ":" + moduleId.getLabel();
+	}
+
+	private Map<String, String> toEnvironmentVariables(HashMap<String, String> args) {
+
+		Map<String, String> env = new HashMap<>(args.size());
+//		for (Map.Entry<String, String> entry : args.entrySet()) {
+//			env.put(entry.getKey().toUpperCase().replace('.', '_'), entry.getValue());
+//		}
+		StringBuilder sb = new StringBuilder();
+		for (Map.Entry<String, String> entry : args.entrySet()) {
+			String oneArg = "--" + entry.getKey() + "=" + entry.getValue();
+			sb.append(bashEscape(oneArg)).append(' ');
+		}
+		String asYaml = new Yaml().dump(Collections.singletonMap("arguments", sb.toString()));
+
+		env.put("JBP_CONFIG_JAVA_MAIN", asYaml);
+		return env;
+	}
+
+	private static String bashEscape(String original) {
+		// Adapted from http://ruby-doc.org/stdlib-1.9.3/libdoc/shellwords/rdoc/Shellwords.html#method-c-shellescape
+		return original.replaceAll("([^A-Za-z0-9_\\-.,:\\/@\\n])", "\\\\$1").replaceAll("\n", "'\\\\n'");
+	}
+
+	/**
+	 * Status callback that prints debug information using the outer class logger.
+	 *
+	 * @author Eric Bottard
+	 */
+	private class LoggingUploadStatusCallback implements UploadStatusCallback {
+		private final String appName;
+
+		public LoggingUploadStatusCallback(String appName) {
+			this.appName = appName;
+		}
+
+		@Override
+		public void onCheckResources() {
+
+		}
+
+		@Override
+		public void onMatchedFileNames(Set<String> matchedFileNames) {
+			logger.debug("Upload of {}: {} (new) files to upload", appName, matchedFileNames.size());
+		}
+
+		@Override
+		public void onProcessMatchedResources(int length) {
+			logger.debug("Upload of {}: {} bytes need to be uploaded", appName, length);
+		}
+
+		@Override
+		public boolean onProgress(String status) {
+			logger.debug("Upload of {}: {}", appName, status);
+			return false;
 		}
 	}
 }

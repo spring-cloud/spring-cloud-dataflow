@@ -16,62 +16,108 @@
 
 package org.springframework.cloud.dataflow.module.deployer.cloudfoundry;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TimeZone;
+
+import org.cloudfoundry.client.lib.domain.InstanceInfo;
+import org.cloudfoundry.client.lib.domain.InstanceState;
+import org.cloudfoundry.client.lib.domain.InstanceStats;
 
 import org.springframework.cloud.dataflow.module.ModuleInstanceStatus;
 import org.springframework.cloud.dataflow.module.ModuleStatus;
+import org.springframework.util.StringUtils;
 
 /**
- * A simple holder for the module instance status derived from an application instance status.
+ * Adapter from the structures returned by the Cloud Foundry client API to ModuleInstanceStatus.
  *
- * @author Steve Powell
+ * <p>May also represent a non-existing instance.</p>
+ *
+ * @author Eric Bottard
  */
 public class CloudFoundryModuleInstanceStatus implements ModuleInstanceStatus {
 
-	private final Map<String, String> attributes = new HashMap<>();
+	private final String applicationName;
 
-	private volatile String id;
+	private final InstanceInfo instance;
 
-	private volatile ModuleStatus.State state;
+	private final InstanceStats instanceStats;
+
+	private final int index;
+
+	/**
+	 * Construct a status for an instance that should be running (but may not actually be).
+	 */
+	public CloudFoundryModuleInstanceStatus(String applicationName, InstanceInfo instance, InstanceStats instanceStats) {
+		this.applicationName = applicationName;
+		this.instance = instance;
+		this.instanceStats = instanceStats;
+		this.index = instance.getIndex();
+	}
+
+	/**
+	 * Construct a status for an instance that does not exist (app is not running).
+	 */
+	public CloudFoundryModuleInstanceStatus(String applicationName, int index) {
+		this.applicationName = applicationName;
+		this.index = index;
+		this.instance = null;
+		this.instanceStats = null;
+	}
 
 	@Override
 	public String getId() {
-		return this.id;
+		return applicationName + ":" + index;
 	}
 
 	@Override
 	public ModuleStatus.State getState() {
-		return this.state;
+		return instance != null ? map(instance.getState()) : ModuleStatus.State.failed;
+	}
+
+	private ModuleStatus.State map(InstanceState state) {
+		switch (state) {
+			case STARTING:
+			case DOWN:
+				return ModuleStatus.State.deploying;
+			case CRASHED:
+				return ModuleStatus.State.failed;
+			// Seems the client incorrectly reports apps as FLAPPING when they are
+			// obviously fine. Mapping as RUNNING for now
+			case FLAPPING:
+			case RUNNING:
+				return ModuleStatus.State.deployed;
+			case UNKNOWN:
+				return ModuleStatus.State.unknown;
+			default:
+				throw new AssertionError("Unsupported CF state " + state);
+		}
+
 	}
 
 	@Override
 	public Map<String, String> getAttributes() {
-		return this.attributes;
-	}
+		Map<String, String> result = new HashMap<>();
+		if (instanceStats != null) {
+			DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+			formatter.setTimeZone(TimeZone.getTimeZone("UTC"));
 
-	CloudFoundryModuleInstanceStatus withAttribute(String key, String value) {
-		this.attributes.put(key, value);
-		return this;
-	}
-
-	CloudFoundryModuleInstanceStatus withAttributes(Map<String, String> attributes) {
-		this.attributes.putAll(attributes);
-		return this;
-	}
-
-	CloudFoundryModuleInstanceStatus withId(String id) {
-		this.id = id;
-		return this;
-	}
-
-	CloudFoundryModuleInstanceStatus withState(ModuleStatus.State state) {
-		this.state = state;
-		return this;
-	}
-
-	@Override
-	public String toString() {
-		return "CloudFoundryModuleInstanceStatus{state=" + this.getState() + ", id='" + this.getId() + "', attributes=" + this.getAttributes() + "}";
+			InstanceStats.Usage usage = instanceStats.getUsage();
+			result.put("usage.time", formatter.format(usage.getTime()));
+			result.put("usage.cpu", Double.toString(usage.getCpu()));
+			result.put("usage.disk", Integer.toString(usage.getDisk()));
+			result.put("usage.memory", Integer.toString(usage.getMem()));
+			result.put("name", instanceStats.getName());
+			result.put("uris", StringUtils.collectionToCommaDelimitedString(instanceStats.getUris()));
+			result.put("host", instanceStats.getHost());
+			result.put("port", Integer.toString(instanceStats.getPort()));
+			result.put("uptime", Double.toString(instanceStats.getUptime()));
+			result.put("mem_quota", Long.toString(instanceStats.getMemQuota()));
+			result.put("disk_quota", Long.toString(instanceStats.getDiskQuota()));
+			result.put("fds_quota", Integer.toString(instanceStats.getFdsQuota()));
+		}
+		return result;
 	}
 }
