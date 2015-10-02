@@ -16,35 +16,20 @@
 
 package org.springframework.cloud.dataflow.rest.client;
 
+import org.springframework.cloud.dataflow.rest.resource.CompletionProposalsResource;
+
 /**
- * Interface the REST clients implement to interact with spring-cloud-dataflow REST API.
+ * Interface defining operations related to providing code completion in the DSL.
  *
- * @author Ilayaperumal Gopinathan
+ * @author Eric Bottard
  */
-public interface DataFlowOperations {
+public interface CompletionOperations {
 
 	/**
-	 * Stream related operations.
+	 * Return the list of streamCompletions that are compatible with the given DSL prefix.
+	 *
+	 * @param levelOfDetail 1 based integer allowing progressive disclosure of more and more
+	 * complex streamCompletions
 	 */
-	StreamOperations streamOperations();
-
-	/**
-	 * Counter related operations.
-	 */
-	CounterOperations counterOperations();
-
-	/**
-	 * Task related operations.
-	 */
-	TaskOperations taskOperations();
-
-	/**
-	 * Module related operations.
-	 */
-	ModuleOperations moduleOperations();
-
-	/**
-	 * DSL Completion related operations.
-	 */
-	CompletionOperations completionOperations();
+	CompletionProposalsResource streamCompletions(String prefix, int levelOfDetail);
 }

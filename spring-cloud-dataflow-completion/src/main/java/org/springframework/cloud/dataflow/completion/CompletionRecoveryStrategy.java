@@ -14,37 +14,26 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.dataflow.rest.client;
+package org.springframework.cloud.dataflow.completion;
+
+import java.util.List;
 
 /**
- * Interface the REST clients implement to interact with spring-cloud-dataflow REST API.
- *
- * @author Ilayaperumal Gopinathan
+ * Used to provide completions on ill-formed stream definitions, after an initial (failed) parse.
+ * 
+ * @param <E> the kind of exception that is intercepted during parsing
+ * 
+ * @author Eric Bottard
  */
-public interface DataFlowOperations {
+public interface CompletionRecoveryStrategy<E extends Exception> {
 
 	/**
-	 * Stream related operations.
+	 * Whether this completion should be triggered.
 	 */
-	StreamOperations streamOperations();
+	boolean shouldTrigger(String dslStart, Exception exception);
 
 	/**
-	 * Counter related operations.
+	 * Perform code completion by adding proposals to the {@code proposals} list.
 	 */
-	CounterOperations counterOperations();
-
-	/**
-	 * Task related operations.
-	 */
-	TaskOperations taskOperations();
-
-	/**
-	 * Module related operations.
-	 */
-	ModuleOperations moduleOperations();
-
-	/**
-	 * DSL Completion related operations.
-	 */
-	CompletionOperations completionOperations();
+	void addProposals(String dsl, E exception, int detailLevel, List<CompletionProposal> proposals);
 }

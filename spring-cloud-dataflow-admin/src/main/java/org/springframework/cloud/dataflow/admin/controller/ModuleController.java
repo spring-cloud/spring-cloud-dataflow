@@ -161,7 +161,7 @@ public class ModuleController {
 		registry.delete(name, type);
 	}
 
-	class Assembler extends ResourceAssemblerSupport<ModuleRegistration, ModuleRegistrationResource> {
+	static class Assembler extends ResourceAssemblerSupport<ModuleRegistration, ModuleRegistrationResource> {
 
 		public Assembler() {
 			super(ModuleController.class, ModuleRegistrationResource.class);

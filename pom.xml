@@ -40,7 +40,8 @@
 		<module>spring-cloud-dataflow-shell</module>
 		<module>spring-cloud-dataflow-yarn</module>
 		<module>spring-cloud-dataflow-docs</module>
-	</modules>
+		<module>spring-cloud-dataflow-completion</module>
+  </modules>
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
@@ -61,6 +62,12 @@
 				<groupId>org.cloudfoundry</groupId>
 				<artifactId>cloudfoundry-client-lib</artifactId>
 				<version>${cloudfoundry-client-lib.version}</version>
+			</dependency>
+			<!-- To be moved to bom -->
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-stream-configuration-metadata</artifactId>
+				<version>1.0.0.BUILD-SNAPSHOT</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
