@@ -82,6 +82,7 @@ public class ModuleRegistryPopulator {
 		populateDefault("groovy-transform", processor);
 		populateDefault("transform", processor);
 		populateDefault("counter", sink);
+		populateDefault("file", sink);
 		populateDefault("hdfs", sink);
 		populateDefault("log", sink);
 		populateDefault("redis", sink);
