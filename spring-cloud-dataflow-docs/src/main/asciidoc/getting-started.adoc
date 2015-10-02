@@ -20,6 +20,11 @@ You also need to have link:http://redis.io/[Redis] installed and running if you 
 [[getting-started-building-spring-cloud-dataflow]]
 == Building Spring Cloud Data Flow
 
+Start Redis:
+
+    cd  $REDIS_INSTALL_DIRECTORY/src
+    ./redis-server
+
 Clone the GitHub repository:
 
     git clone https://github.com/spring-cloud/spring-cloud-dataflow.git
@@ -38,24 +43,21 @@ Build the project:
 === Deploying 'local'
 
 [start=1]
-1. start Redis locally via `redis-server`
-
-2. download the Spring Cloud Data Flow Admin and Shell apps:
+1. download the Spring Cloud Data Flow Admin and Shell apps:
 
 ```
 wget http://repo.spring.io/milestone/org/springframework/cloud/spring-cloud-dataflow-admin/1.0.0.M1/spring-cloud-dataflow-admin-1.0.0.M1.jar
 wget http://repo.spring.io/milestone/org/springframework/cloud/spring-cloud-dataflow-shell/1.0.0.M1/spring-cloud-dataflow-shell-1.0.0.M1.jar
 ```
-
-[start=3]
-3. launch the admin:
+[start=2]
+2. launch the admin:
 
 ```
 $ java -jar spring-cloud-dataflow-admin-1.0.0.M1.jar
 ```
 
-[start=4]
-4. launch the shell:
+[start=3]
+3. launch the shell:
 
 ```
 $ java -jar spring-cloud-dataflow-shell-1.0.0.M1.jar
@@ -134,7 +136,7 @@ NOTE: You must use a unique name for your app that's not already used by someone
 cf push s-c-dataflow-admin --no-start -p spring-cloud-dataflow-admin-1.0.0.M1.jar
 cf bind-service s-c-dataflow-admin redis
 ```
-Now we can configure the app. This configuration is for Pivotal Web Services. You need to fill in {org}, \{space}, {email} and {password} before running these commands. 
+Now we can configure the app. This configuration is for Pivotal Web Services. You need to fill in {org}, \{space}, {email} and {password} before running these commands.
 
 ```
 cf set-env s-c-dataflow-admin CLOUDFOUNDRY_API_ENDPOINT https://api.run.pivotal.io
@@ -282,4 +284,3 @@ shutdown requested
 ```
 
 Properties `dataflow.yarn.app.appmaster.path` and `dataflow.yarn.app.container.path` can be used with both `spring-cloud-dataflow-admin` and `and spring-cloud-dataflow-yarn-client` to define directory for `appmaster` and `container` jars. Values for those default to `.` which then assumes all needed jars are in a same working directory.
-
