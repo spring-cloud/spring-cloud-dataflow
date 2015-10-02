@@ -21,7 +21,11 @@ With `redis.json` containing
   "container": {
     "type": "DOCKER",
     "docker": {
-      "image": "redis"
+      "image": "redis",
+      "network": "BRIDGE",
+      "portMappings": [
+        { "containerPort": 6379 }
+      ]
     }
   }
 }
