@@ -50,7 +50,7 @@ public class MarathonProperties {
 	private double memory = 128.0D;
 
 	/**
-	 * How manu CPUs to allocate per module, can be overridden at deployment time.
+	 * How many CPUs to allocate per module, can be overridden at deployment time.
 	 */
 	private double cpu = 0.5D;
 

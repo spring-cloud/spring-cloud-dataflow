@@ -1,2 +1,28 @@
 SPI implementation for deploying https://github.com/spring-cloud/spring-cloud-stream[Spring Cloud Stream] modules to
  https://mesosphere.github.io/marathon[Marathon].
+
+The SPI currently assumes that there will be a running redis Marathon app running.
+
+One way to create one is to have Marathon run the `redis` docker image:
+
+```
+curl -X POST http://10.141.141.10:8080/v2/apps -d @redis.json -H "Content-type: application/json"
+```
+
+With `redis.json` containing
+
+[source, json]
+```
+{
+  "id": "redis",
+  "cpus": 0.5,
+  "mem": 64.0,
+  "instances": 1,
+  "container": {
+    "type": "DOCKER",
+    "docker": {
+      "image": "redis"
+    }
+  }
+}
+```
