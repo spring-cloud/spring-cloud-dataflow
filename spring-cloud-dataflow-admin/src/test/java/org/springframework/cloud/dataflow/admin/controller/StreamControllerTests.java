@@ -159,6 +159,111 @@ public class StreamControllerTests {
 	}
 
 	@Test
+	public void testStreamWithProcessor() throws Exception {
+		assertEquals(0, repository.count());
+		String definition = "time | filter | log";
+		mockMvc.perform(
+				post("/streams/definitions/").param("name", "myStream").param("definition", definition)
+						.accept(MediaType.APPLICATION_JSON)).andDo(print())
+						.andExpect(status().isCreated());
+		assertEquals(1, repository.count());
+		StreamDefinition myStream = repository.findOne("myStream");
+		assertEquals(definition, myStream.getDslText());
+		assertEquals("myStream", myStream.getName());
+		assertEquals(3, myStream.getModuleDefinitions().size());
+		ModuleDefinition timeDefinition = myStream.getModuleDefinitions().get(0);
+		ModuleDefinition filterDefinition = myStream.getModuleDefinitions().get(1);
+		ModuleDefinition logDefinition = myStream.getModuleDefinitions().get(2);
+		assertEquals(1, timeDefinition.getParameters().size());
+		assertEquals("myStream.0", timeDefinition.getParameters().get(BindingProperties.OUTPUT_BINDING_KEY));
+		assertEquals(2, filterDefinition.getParameters().size());
+		assertEquals("myStream.0", filterDefinition.getParameters().get(BindingProperties.INPUT_BINDING_KEY));
+		assertEquals("myStream.1", filterDefinition.getParameters().get(BindingProperties.OUTPUT_BINDING_KEY));
+		assertEquals(1, logDefinition.getParameters().size());
+		assertEquals("myStream.1", logDefinition.getParameters().get(BindingProperties.INPUT_BINDING_KEY));
+	}
+
+	@Test
+	public void testSourceChannelWithSingleModule() throws Exception {
+		assertEquals(0, repository.count());
+		String definition = "queue:foo > log";
+		mockMvc.perform(
+				post("/streams/definitions/").param("name", "myStream").param("definition", definition)
+						.accept(MediaType.APPLICATION_JSON)).andDo(print())
+						.andExpect(status().isCreated());
+		assertEquals(1, repository.count());
+		StreamDefinition myStream = repository.findOne("myStream");
+		assertEquals(definition, myStream.getDslText());
+		assertEquals("myStream", myStream.getName());
+		assertEquals(1, myStream.getModuleDefinitions().size());
+		ModuleDefinition logDefinition = myStream.getModuleDefinitions().get(0);
+		assertEquals(1, logDefinition.getParameters().size());
+		assertEquals("queue:foo", logDefinition.getParameters().get(BindingProperties.INPUT_BINDING_KEY));
+	}
+
+	@Test
+	public void testSourceChannelWithTwoModules() throws Exception {
+		assertEquals(0, repository.count());
+		String definition = "queue:foo > filter | log";
+		mockMvc.perform(
+				post("/streams/definitions/").param("name", "myStream").param("definition", definition)
+						.accept(MediaType.APPLICATION_JSON)).andDo(print())
+						.andExpect(status().isCreated());
+		assertEquals(1, repository.count());
+		StreamDefinition myStream = repository.findOne("myStream");
+		assertEquals(definition, myStream.getDslText());
+		assertEquals("myStream", myStream.getName());
+		assertEquals(2, myStream.getModuleDefinitions().size());
+		ModuleDefinition filterDefinition = myStream.getModuleDefinitions().get(0);
+		assertEquals(2, filterDefinition.getParameters().size());
+		assertEquals("queue:foo", filterDefinition.getParameters().get(BindingProperties.INPUT_BINDING_KEY));
+		assertEquals("myStream.0", filterDefinition.getParameters().get(BindingProperties.OUTPUT_BINDING_KEY));
+		ModuleDefinition logDefinition = myStream.getModuleDefinitions().get(1);
+		assertEquals(1, logDefinition.getParameters().size());
+		assertEquals("myStream.0", logDefinition.getParameters().get(BindingProperties.INPUT_BINDING_KEY));
+	}
+
+	@Test
+	public void testSinkChannelWithSingleModule() throws Exception {
+		assertEquals(0, repository.count());
+		String definition = "time > queue:foo";
+		mockMvc.perform(
+				post("/streams/definitions/").param("name", "myStream").param("definition", definition)
+						.accept(MediaType.APPLICATION_JSON)).andDo(print())
+						.andExpect(status().isCreated());
+		assertEquals(1, repository.count());
+		StreamDefinition myStream = repository.findOne("myStream");
+		assertEquals(definition, myStream.getDslText());
+		assertEquals("myStream", myStream.getName());
+		assertEquals(1, myStream.getModuleDefinitions().size());
+		ModuleDefinition timeDefinition = myStream.getModuleDefinitions().get(0);
+		assertEquals(1, timeDefinition.getParameters().size());
+		assertEquals("queue:foo", timeDefinition.getParameters().get(BindingProperties.OUTPUT_BINDING_KEY));
+	}
+
+	@Test
+	public void testSinkChannelWithTwoModules() throws Exception {
+		assertEquals(0, repository.count());
+		String definition = "time | filter > queue:foo";
+		mockMvc.perform(
+				post("/streams/definitions/").param("name", "myStream").param("definition", definition)
+						.accept(MediaType.APPLICATION_JSON)).andDo(print())
+						.andExpect(status().isCreated());
+		assertEquals(1, repository.count());
+		StreamDefinition myStream = repository.findOne("myStream");
+		assertEquals(definition, myStream.getDslText());
+		assertEquals("myStream", myStream.getName());
+		assertEquals(2, myStream.getModuleDefinitions().size());
+		ModuleDefinition timeDefinition = myStream.getModuleDefinitions().get(0);
+		assertEquals(1, timeDefinition.getParameters().size());
+		assertEquals("myStream.0", timeDefinition.getParameters().get(BindingProperties.OUTPUT_BINDING_KEY));
+		ModuleDefinition filterDefinition = myStream.getModuleDefinitions().get(1);
+		assertEquals(2, filterDefinition.getParameters().size());
+		assertEquals("myStream.0", filterDefinition.getParameters().get(BindingProperties.INPUT_BINDING_KEY));
+		assertEquals("queue:foo", filterDefinition.getParameters().get(BindingProperties.OUTPUT_BINDING_KEY));
+	}
+
+	@Test
 	public void testDestroyStream() throws Exception {
 		repository.save(new StreamDefinition("myStream", "time | log"));
 		assertEquals(1, repository.count());

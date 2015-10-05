@@ -227,8 +227,7 @@ public class StreamController {
 		boolean isDownStreamModulePartitioned = false;
 		for (int i = 0; iterator.hasNext(); i++) {
 			ModuleDefinition currentModule = iterator.next();
-			ModuleType type = (i == 0) ? ModuleType.sink
-					: (iterator.hasNext() ? ModuleType.processor : ModuleType.source);
+			ModuleType type = determineModuleType(currentModule, i, iterator.hasNext());
 			ModuleRegistration registration = this.registry.find(currentModule.getName(), type);
 			if (registration == null) {
 				throw new IllegalArgumentException(String.format(
@@ -250,6 +249,37 @@ public class StreamController {
 			isDownStreamModulePartitioned = isPartitionedConsumer(currentModule, moduleDeploymentProperties,
 					upstreamModuleSupportsPartition);
 		}
+	}
+
+	private ModuleType determineModuleType(ModuleDefinition moduleDefinition, int index, boolean hasNext) {
+		ModuleType type = null;
+		if (index == 0) {
+			if (moduleDefinition.getParameters().containsKey(BindingProperties.OUTPUT_BINDING_KEY)) {
+				if (hasNext) {
+					type = ModuleType.processor;
+				}
+				else {
+					// single module stream with a named channel in the sink position
+					type = ModuleType.source;
+				}
+			}
+			else {
+				// this will handle any case that the module is a sink,
+				// even if a single module stream with a named input channel
+				type = ModuleType.sink;
+			}
+		}
+		else if (hasNext) {
+			type = ModuleType.processor;
+		}
+		else if (moduleDefinition.getParameters().containsKey(BindingProperties.INPUT_BINDING_KEY)) {
+			// stream begins with a named channel in the source position
+			type = ModuleType.processor;
+		}
+		else { 
+			type = ModuleType.source;
+		}
+		return type;
 	}
 
 	private Map<String, String> getModuleDeploymentProperties(ModuleDefinition module, Map<String, String> deploymentProperties) {
