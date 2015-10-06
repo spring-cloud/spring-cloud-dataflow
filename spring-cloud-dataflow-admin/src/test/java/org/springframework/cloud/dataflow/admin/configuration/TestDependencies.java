@@ -18,9 +18,9 @@ package org.springframework.cloud.dataflow.admin.configuration;
 
 import static org.mockito.Mockito.mock;
 
+import org.springframework.cloud.dataflow.module.deployer.ModuleDeployer;
 import org.springframework.cloud.dataflow.module.registry.InMemoryModuleRegistry;
 import org.springframework.cloud.dataflow.module.registry.ModuleRegistry;
-import org.springframework.cloud.stream.module.launcher.ModuleLauncher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
@@ -28,6 +28,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupp
 
 /**
  * @author Michael Minella
+ * @author Mark Fisher
  */
 @Configuration
 @EnableSpringDataWebSupport
@@ -39,7 +40,12 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	}
 
 	@Bean
-	public ModuleLauncher moduleLauncher() {
-		return mock(ModuleLauncher.class);
+	public ModuleDeployer processModuleDeployer() {
+		return mock(ModuleDeployer.class);
+	}
+
+	@Bean
+	public ModuleDeployer taskModuleDeployer() {
+		return mock(ModuleDeployer.class);
 	}
 }

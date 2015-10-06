@@ -16,8 +16,10 @@
 
 package org.springframework.cloud.dataflow.admin.controller;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -25,27 +27,24 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.util.Iterator;
-import java.util.List;
-
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.cloud.dataflow.admin.AdminApplication;
 import org.springframework.cloud.dataflow.admin.configuration.TestDependencies;
 import org.springframework.cloud.dataflow.admin.repository.InMemoryTaskDefinitionRepository;
 import org.springframework.cloud.dataflow.admin.repository.TaskDefinitionRepository;
+import org.springframework.cloud.dataflow.core.ModuleDeploymentRequest;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
+import org.springframework.cloud.dataflow.module.deployer.ModuleDeployer;
 import org.springframework.cloud.dataflow.module.deployer.lattice.TaskModuleDeployer;
 import org.springframework.cloud.dataflow.module.registry.InMemoryModuleRegistry;
-import org.springframework.cloud.stream.module.launcher.ModuleLaunchRequest;
-import org.springframework.cloud.stream.module.launcher.ModuleLauncher;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
@@ -56,6 +55,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 /**
  * @author Michael Minella
+ * @author Mark Fisher
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = {AdminApplication.class, TestDependencies.class})
@@ -71,7 +71,8 @@ public class TaskControllerTests {
 	private WebApplicationContext wac;
 
 	@Autowired
-	private ModuleLauncher moduleLauncher;
+	@Qualifier("taskModuleDeployer")
+	private ModuleDeployer moduleDeployer;
 
 	@Before
 	public void setupMockMVC() {
@@ -174,21 +175,16 @@ public class TaskControllerTests {
 	}
 
 	@Test
-	@SuppressWarnings({"unchecked", "rawtypes"})
-	@Ignore("Until we have a task module that is available in the remote repo")
 	public void testDeploy() throws Exception {
-		repository.save(new TaskDefinition("myTask", "task"));
+		repository.save(new TaskDefinition("myTask", "timestamp"));
 
 		mockMvc.perform(
 				post("/tasks/deployments/myTask").accept(MediaType.APPLICATION_JSON)).andDo(print())
-				.andExpect(status().isOk());
+				.andExpect(status().isCreated());
 
-		ArgumentCaptor<List> requests = ArgumentCaptor.forClass(List.class);
-		verify(moduleLauncher).launch(requests.capture());
-		Iterator<ModuleLaunchRequest> iterator = requests.getValue().iterator();
-		assertThat(iterator.hasNext(), equalTo(true));
-		ModuleLaunchRequest request = iterator.next();
-		assertThat(iterator.hasNext(), equalTo(false));
-		assertThat(request.getModule(), is("task"));
+		ArgumentCaptor<ModuleDeploymentRequest> captor = ArgumentCaptor.forClass(ModuleDeploymentRequest.class);
+		verify(moduleDeployer).deploy(captor.capture());
+		ModuleDeploymentRequest request = captor.getValue();
+		assertThat(request.getDefinition().getName(), is("timestamp"));
 	}
 }
