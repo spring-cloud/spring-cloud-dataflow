@@ -80,7 +80,7 @@ public abstract class AbstractShellIntegrationTest {
 	 *
 	 * @see #SHUTDOWN_AFTER_RUN
 	 */
-	private static boolean shutdownAfterRun = true;
+	private static boolean shutdownAfterRun = false;
 
 	/**
 	 * Application context for admin application.
