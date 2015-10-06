@@ -17,20 +17,20 @@
 package org.springframework.cloud.dataflow.admin.repository;
 
 /**
- * Thrown to indicate that the creation of a task failed
- * because a task with the given name already exists.
+ * Thrown to indicate that the creation of a stream failed
+ * because a stream with the given name already exists.
  *
- * @author Michael Minella
+ * @author Mark Fisher
  */
-public class DuplicateTaskException extends RuntimeException {
+public class DuplicateStreamException extends RuntimeException {
 
-	private static final long serialVersionUID = 4902348644982085508L;
+	private static final long serialVersionUID = -3073129756296341192L;
 
-	public DuplicateTaskException() {
+	public DuplicateStreamException() {
 		super();
 	}
 
-	public DuplicateTaskException(String message) {
+	public DuplicateStreamException(String message) {
 		super(message);
 	}
 }

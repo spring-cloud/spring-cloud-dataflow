@@ -28,13 +28,14 @@ import org.slf4j.LoggerFactory;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.cloud.dataflow.admin.repository.DuplicateStreamException;
 import org.springframework.cloud.dataflow.admin.repository.StreamDefinitionRepository;
+import org.springframework.cloud.dataflow.core.BindingProperties;
 import org.springframework.cloud.dataflow.core.ModuleCoordinates;
 import org.springframework.cloud.dataflow.core.ModuleDefinition;
 import org.springframework.cloud.dataflow.core.ModuleDeploymentId;
 import org.springframework.cloud.dataflow.core.ModuleDeploymentRequest;
 import org.springframework.cloud.dataflow.core.ModuleType;
-import org.springframework.cloud.dataflow.core.BindingProperties;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.module.ModuleStatus;
 import org.springframework.cloud.dataflow.module.deployer.ModuleDeployer;
@@ -143,6 +144,11 @@ public class StreamController {
 			@RequestParam("definition") String dsl,
 			@RequestParam(value = "deploy", defaultValue = "true")
 			boolean deploy) {
+		if (this.repository.exists(name)) {
+			throw new DuplicateStreamException(
+					String.format("Cannot create stream %s because another one has already " +
+							"been created with the same name", name));
+		}
 
 		StreamDefinition stream = new StreamDefinition(name, dsl);
 		stream = this.repository.save(stream);
@@ -217,10 +223,8 @@ public class StreamController {
 			cumulatedDeploymentProperties = Collections.emptyMap();
 		}
 		Iterator<ModuleDefinition> iterator = stream.getDeploymentOrderIterator();
-		Iterator<ModuleDefinition> iteratorHolder = stream.getDeploymentOrderIterator();
 		int nextModuleCount = 0;
 		boolean isDownStreamModulePartitioned = false;
-		ModuleDefinition upstreamModule = null;
 		for (int i = 0; iterator.hasNext(); i++) {
 			ModuleDefinition currentModule = iterator.next();
 			ModuleType type = (i == 0) ? ModuleType.sink
