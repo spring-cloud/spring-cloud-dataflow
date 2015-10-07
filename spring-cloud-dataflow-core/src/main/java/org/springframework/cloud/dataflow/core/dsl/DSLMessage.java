@@ -68,7 +68,7 @@ public enum DSLMessage {
 	STREAM_NAME_MATCHING_MODULE_NAME(ERROR, 130,
 			"Stream name ''{0}'' same as that of its modules' names is not allowed."), //
 	CHANNEL_INDEXING_NOT_ALLOWED(ERROR, 131, "Channel does not support indexing"), //
-	ONLY_A_TAP_ON_A_STREAM_OR_JOB_CAN_BE_INDEXED(ERROR, 132, "Only a tap on a stream or job can be indexed"), //
+	ONLY_A_TAP_ON_A_STREAM_OR_TASK_CAN_BE_INDEXED(ERROR, 132, "Only a tap on a stream or task can be indexed"), //
 	EXPECTED_CHANNEL_PREFIX_QUEUE_TOPIC(ERROR,
 			133,
 			"Expected channel prefix of ''queue'' or ''topic'' but found ''{0}''"), //
@@ -91,20 +91,22 @@ public enum DSLMessage {
 	NO_WHITESPACE_BETWEEN_LABEL_NAME_AND_COLON(ERROR, 140, "no whitespace allowed between label name and colon"), //
 	TAP_NEEDS_THREE_COMPONENTS(ERROR,
 			141,
-			"a tap needs at least three components (tap:queue:[name], tap:topic:[name], tap:stream:[streamname] or tap:job:[jobname])"), //
+			"a tap needs at least three components (tap:queue:[name], tap:topic:[name], tap:stream:[streamname] or tap:task:[taskname])"), //
 	NOT_ALLOWED_TO_TAP_THAT(ERROR,
 			142,
-			"tapping only allowed on 'stream', 'topic', 'job' or 'queue'. Not allowed on ''{0}''"), //
+			"tapping only allowed on 'stream', 'topic', 'task' or 'queue'. Not allowed on ''{0}''"), //
 	DUPLICATE_LABEL(ERROR,
 			143,
-			"Label ''{0}'' should be unique but module ''{1}'' (at position {2}) and module ''{3}'' (at position {4}) both use it"), //
+			"label ''{0}'' should be unique but module ''{1}'' (at position {2}) and module ''{3}'' (at position {4}) both use it"), //
 	MODULE_REFERENCE_NOT_UNIQUE(ERROR,
 			144,
-			"Reference to ''{0}'' is not unique in the target stream ''{1}'', please label the relevant module and use the label, or use a suffix index to indicate which occurrence of the module, e.g. ''{0}.0''"), //
+			"reference to ''{0}'' is not unique in the target stream ''{1}'', please label the relevant module and use the label, or use a suffix index to indicate which occurrence of the module, e.g. ''{0}.0''"), //
 	NO_WHITESPACE_IN_DOTTED_NAME(ERROR,
 			145,
-			"No whitespace is allowed between dot and components of a name"),
-	NAMED_CHANNELS_UNSUPPORTED_HERE(ERROR, 146, "A named channel is not supported in this kind of definition"), ;
+			"no whitespace is allowed between dot and components of a name"),
+	NAMED_CHANNELS_UNSUPPORTED_HERE(ERROR, 146, "a named channel is not supported in this kind of definition"),
+	EXPECTED_WHITESPACE_AFTER_LABEL_COLON(ERROR, 147, "whitespace is expected after a moudle label"), //
+	;
 
 	private Kind kind;
 

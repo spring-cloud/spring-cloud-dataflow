@@ -23,13 +23,24 @@ package org.springframework.cloud.dataflow.completion;
  */
 public class CompletionProposal {
 
+	/**
+	 * The full text of the proposal. Also includes the prefix that was used to trigger the completion, as
+	 * some strategies may decide to actuall <em>overwrite</em> that prefix (<i>e.g.</i> to provide correction).
+	 */
 	private final String text;
 
+	/**
+	 * Some description of the completion, may be {@literal null}.
+	 */
 	private final String explanation;
 
 	public CompletionProposal(String text, String explanation) {
 		this.text = text;
 		this.explanation = explanation;
+	}
+
+	public static Factory expanding(String start) {
+		return new Factory(start);
 	}
 
 	public String getText() {
@@ -48,10 +59,6 @@ public class CompletionProposal {
 			this.start = start;
 		}
 
-		public static Factory expanding(String start) {
-			return new Factory(start);
-		}
-
 		public CompletionProposal withSuffix(String suffix, String explanation) {
 			return new CompletionProposal(start + suffix, explanation);
 		}
@@ -60,10 +67,20 @@ public class CompletionProposal {
 			return withSuffix(suffix, null);
 		}
 
+		/**
+		 * Add a suffix as a new token, that is, make sure there is a space before it.
+		 *
+		 * A space is not appended if this is the very first token.
+		 */
 		public CompletionProposal withSeparateTokens(String suffix, String explanation) {
-			return new CompletionProposal(start.endsWith(" ") ? start + suffix : start + " " + suffix, explanation);
+			return new CompletionProposal((start.endsWith(" ") || start.isEmpty()) ? start + suffix : start + " " + suffix, explanation);
 		}
 
+		/**
+		 * Add a suffix as a new token, that is, make sure there is a space before it.
+		 *
+		 * A space is not appended if this is the very first token.
+		 */
 		public CompletionProposal withSeparateTokens(String suffix) {
 			return withSeparateTokens(suffix, null);
 		}

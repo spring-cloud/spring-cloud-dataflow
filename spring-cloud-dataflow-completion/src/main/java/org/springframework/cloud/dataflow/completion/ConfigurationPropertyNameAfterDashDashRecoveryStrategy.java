@@ -16,7 +16,7 @@
 
 package org.springframework.cloud.dataflow.completion;
 
-import static org.springframework.cloud.dataflow.completion.CompletionProposal.*;
+import static org.springframework.cloud.dataflow.completion.CompletionProposal.expanding;
 
 import java.util.HashSet;
 import java.util.List;
@@ -26,6 +26,7 @@ import org.springframework.boot.configurationmetadata.ConfigurationMetadataPrope
 import org.springframework.cloud.dataflow.core.ModuleDefinition;
 import org.springframework.cloud.dataflow.core.ModuleType;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
+import org.springframework.cloud.dataflow.core.dsl.CheckPointedParseException;
 import org.springframework.cloud.dataflow.module.registry.ModuleRegistration;
 import org.springframework.cloud.dataflow.module.registry.ModuleRegistry;
 import org.springframework.cloud.stream.configuration.metadata.ModuleConfigurationMetadataResolver;
@@ -33,42 +34,30 @@ import org.springframework.cloud.stream.module.resolver.ModuleResolver;
 import org.springframework.core.io.Resource;
 
 /**
- * Adds missing module configuration properties at the end of a well formed stream definition.
+ * Provides completion proposals when the user has typed the two dashes that precede a module configuration property.
  *
  * @author Eric Bottard
  */
-class AddModuleOptionsExpansionStrategy implements ExpansionStrategy {
+class ConfigurationPropertyNameAfterDashDashRecoveryStrategy extends StacktraceFingerprintingRecoveryStrategy<CheckPointedParseException> {
 
 	private final ModuleRegistry moduleRegistry;
 
-	private final ModuleConfigurationMetadataResolver moduleConfigurationMetadataResolver;
-
 	private final ModuleResolver moduleResolver;
 
+	private final ModuleConfigurationMetadataResolver moduleConfigurationMetadataResolver;
 
-	/**
-	 * Construct a new AddModuleOptionsExpansionStrategy for use in detecting missing module options.
-	 *  @param moduleRegistry the registry to check for the existence of the last entered module
-	 *        definition.
-	 * @param moduleConfigurationMetadataResolver the metadata resolver to use in order to create a list of proposals for
-	 * @param moduleResolver
-	 */
-	public AddModuleOptionsExpansionStrategy(ModuleRegistry moduleRegistry, ModuleConfigurationMetadataResolver moduleConfigurationMetadataResolver, ModuleResolver moduleResolver) {
+	ConfigurationPropertyNameAfterDashDashRecoveryStrategy(ModuleRegistry moduleRegistry, ModuleResolver moduleResolver, ModuleConfigurationMetadataResolver moduleConfigurationMetadataResolver) {
+		super(CheckPointedParseException.class, "file --", "file | foo --");
 		this.moduleRegistry = moduleRegistry;
-		this.moduleConfigurationMetadataResolver = moduleConfigurationMetadataResolver;
 		this.moduleResolver = moduleResolver;
+		this.moduleConfigurationMetadataResolver = moduleConfigurationMetadataResolver;
 	}
 
 	@Override
-	public boolean shouldTrigger(String text, StreamDefinition streamDefinition) {
-		// Could assert that the last module is a valid module, but this logic
-		// needs to be duplicated in addProposals anyway
-		return text.endsWith(" ");
-	}
+	public void addProposals(String dsl, CheckPointedParseException exception, int detailLevel, List<CompletionProposal> collector) {
 
-	@Override
-	public void addProposals(String text, StreamDefinition streamDefinition, int detailLevel,
-			List<CompletionProposal> collector) {
+		String safe = exception.getExpressionStringUntilCheckpoint();
+		StreamDefinition streamDefinition = new StreamDefinition("__dummy", safe);
 		ModuleDefinition lastModule = streamDefinition.getDeploymentOrderIterator().next();
 
 		String lastModuleName = lastModule.getName();
@@ -87,14 +76,13 @@ class AddModuleOptionsExpansionStrategy implements ExpansionStrategy {
 
 		Resource jarFile = moduleResolver.resolve(CompletionUtils.adapt(lastModuleRegistration.getCoordinates()));
 
-		CompletionProposal.Factory proposals = expanding(text);
+		CompletionProposal.Factory proposals = expanding(dsl);
 
 		for (ConfigurationMetadataProperty property : moduleConfigurationMetadataResolver.listProperties(jarFile)) {
 			if (!alreadyPresentOptions.contains(property.getId())) {
-				collector.add(proposals.withSeparateTokens("--" + property.getId() + "=", property.getShortDescription()));
+				collector.add(proposals.withSuffix(property.getId() + "=", property.getShortDescription()));
 			}
 		}
 
 	}
-
 }

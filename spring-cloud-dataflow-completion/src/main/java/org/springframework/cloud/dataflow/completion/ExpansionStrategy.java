@@ -26,7 +26,7 @@ import org.springframework.cloud.dataflow.core.StreamDefinition;
  * 
  * @author Eric Bottard
  */
-public interface CompletionExpansionStrategy {
+public interface ExpansionStrategy {
 
 	/**
 	 * Whether this completion should be triggered.
@@ -36,5 +36,5 @@ public interface CompletionExpansionStrategy {
 	/**
 	 * Perform code completion by adding proposals to the {@code proposals} list.
 	 */
-	void addProposals(String text, StreamDefinition parseResult, int detailLevel, List<CompletionProposal> proposals);
+	void addProposals(String text, StreamDefinition parseResult, int detailLevel, List<CompletionProposal> collector);
 }

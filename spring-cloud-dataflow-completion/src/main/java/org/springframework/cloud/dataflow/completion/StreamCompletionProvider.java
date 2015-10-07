@@ -29,14 +29,11 @@ import org.springframework.cloud.dataflow.core.StreamDefinition;
  */
 public class StreamCompletionProvider {
 
-//	@Autowired
-	private List<? extends CompletionRecoveryStrategy<Exception>> completionRecoveryStrategies = new ArrayList<>();
+	@Autowired
+	private List<? extends RecoveryStrategy<Exception>> completionRecoveryStrategies = new ArrayList<>();
 
 	@Autowired
-	private List<? extends CompletionExpansionStrategy> completionExpansionStrategies = new ArrayList<>();
-
-	@Autowired
-	private StreamDefinitionResolver streamDefinitionResolver;
+	private List<? extends ExpansionStrategy> completionExpansionStrategies = new ArrayList<>();
 
 	/*
 	 * Attempt to parse the text the user has already typed in. This either succeeds, in which case we may propose to
@@ -48,10 +45,10 @@ public class StreamCompletionProvider {
 
 		StreamDefinition parsed = null;
 		try {
-			parsed = streamDefinitionResolver.parseAndResolve(dslStart);
+			parsed = new StreamDefinition("__dummy", dslStart);
 		}
 		catch (Exception recoverable) {
-			for (CompletionRecoveryStrategy<Exception> strategy : completionRecoveryStrategies) {
+			for (RecoveryStrategy<Exception> strategy : completionRecoveryStrategies) {
 				if (strategy.shouldTrigger(dslStart, recoverable)) {
 					strategy.addProposals(dslStart, recoverable, detailLevel, collector);
 				}
@@ -60,7 +57,7 @@ public class StreamCompletionProvider {
 			return collector;
 		}
 
-		for (CompletionExpansionStrategy strategy : completionExpansionStrategies) {
+		for (ExpansionStrategy strategy : completionExpansionStrategies) {
 			if (strategy.shouldTrigger(dslStart, parsed)) {
 				strategy.addProposals(dslStart, parsed, detailLevel, collector);
 			}

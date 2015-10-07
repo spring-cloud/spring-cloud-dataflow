@@ -17,16 +17,33 @@
 package org.springframework.cloud.dataflow.completion;
 
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.dataflow.module.registry.ModuleRegistry;
+import org.springframework.cloud.stream.configuration.metadata.ModuleConfigurationMetadataResolver;
+import org.springframework.cloud.stream.module.resolver.ModuleResolver;
+import org.springframework.cloud.stream.module.resolver.ModuleResolverConfiguration;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 
 /**
- * Created by ericbottard on 02/10/15.
+ * Include this Configuration class to expose a fully configured {@link StreamCompletionProvider}.
+ *
+ * @author Eric Bottard
  */
 @Configuration
-@ComponentScan
+@Import(ModuleResolverConfiguration.class)
 public class CompletionConfiguration {
+
+	@Autowired
+	private ModuleRegistry moduleRegistry;
+
+	@Autowired
+	private ModuleConfigurationMetadataResolver moduleConfigurationMetadataResolver;
+
+	@Autowired
+	private ModuleResolver moduleResolver;
+
 
 	@Bean
 	public StreamCompletionProvider streamCompletionProvider() {
@@ -34,8 +51,72 @@ public class CompletionConfiguration {
 	}
 
 	@Bean
-	public StreamDefinitionResolver streamDefinitionResolver() {
-		return new StreamDefinitionResolver();
+	public ExpansionStrategy addModuleOptionsExpansionStrategy() {
+		return new AddModuleOptionsExpansionStrategy(moduleRegistry, moduleConfigurationMetadataResolver, moduleResolver);
 	}
 
+	@Bean
+	public RecoveryStrategy emptyStartYieldsModulesRecoveryStrategy() {
+		return new EmptyStartYieldsSourceModulesRecoveryStrategy(moduleRegistry);
+	}
+
+	@Bean
+	public RecoveryStrategy expandOneDashToTwoDashesRecoveryStrategy() {
+		return new ExpandOneDashToTwoDashesRecoveryStrategy();
+	}
+
+	@Bean
+	public RecoveryStrategy configurationPropertyNameAfterDashDashRecoveryStrategy() {
+		return new ConfigurationPropertyNameAfterDashDashRecoveryStrategy(moduleRegistry, moduleResolver, moduleConfigurationMetadataResolver);
+	}
+
+	@Bean
+	public RecoveryStrategy unfinishedConfigurationPropertyNameRecoveryStrategy() {
+		return new UnfinishedConfigurationPropertyNameRecoveryStrategy(moduleRegistry, moduleResolver, moduleConfigurationMetadataResolver);
+	}
+
+	@Bean
+	public RecoveryStrategy modulesAfterPipeRecoveryStrategy() {
+		return new ModulesAfterPipeRecoveryStrategy(moduleRegistry);
+	}
+
+	@Bean
+	public ExpansionStrategy unfinishedModuleNameExpansionStrategy() {
+		return new UnfinishedModuleNameExpansionStrategy(moduleRegistry);
+	}
+
+	@Bean
+	public RecoveryStrategy channelNameYieldsModulesRecoveryStrategy() {
+		return new ChannelNameYieldsModulesRecoveryStrategy(moduleRegistry);
+	}
+
+	@Bean
+	public ExpansionStrategy pipeIntoOtherModulesExpansionStrategy() {
+		return new PipeIntoOtherModulesExpansionStrategy(moduleRegistry);
+	}
+
+	@Bean
+	public RecoveryStrategy configurationPropertyValueHintRecoveryStrategy() {
+		return new ConfigurationPropertyValueHintRecoveryStrategy(moduleRegistry, moduleResolver, moduleConfigurationMetadataResolver);
+	}
+
+	@Bean
+	public ExpansionStrategy configurationPropertyValueHintExpansionStrategy() {
+		return new ConfigurationPropertyValueHintExpansionStrategy(moduleRegistry, moduleResolver, moduleConfigurationMetadataResolver);
+	}
+
+	@Bean
+	public ValueHintProvider defaultValueHintProvider() {
+		return new DefaultValueHintProvider();
+	}
+
+	@Bean
+	public ValueHintProvider enumValueHintProvider() {
+		return new EnumValueHintProvider();
+	}
+
+	@Bean
+	public ValueHintProvider booleanValueHintProvider() {
+		return new BooleanValueHintProvider();
+	}
 }

@@ -18,22 +18,15 @@ package org.springframework.cloud.dataflow.completion;
 
 import java.util.List;
 
+import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
+import org.springframework.boot.configurationmetadata.ValueHint;
+
 /**
- * Used to provide completions on ill-formed stream definitions, after an initial (failed) parse.
- * 
- * @param <E> the kind of exception that is intercepted during parsing
- * 
+ * Pluggable interface to provide value hints that can be discovered for some properties.
+ *
  * @author Eric Bottard
  */
-public interface CompletionRecoveryStrategy<E extends Exception> {
+public interface ValueHintProvider {
 
-	/**
-	 * Whether this completion should be triggered.
-	 */
-	boolean shouldTrigger(String dslStart, Exception exception);
-
-	/**
-	 * Perform code completion by adding proposals to the {@code proposals} list.
-	 */
-	void addProposals(String dsl, E exception, int detailLevel, List<CompletionProposal> proposals);
+	List<ValueHint> guessValueHints(ConfigurationMetadataProperty property, ClassLoader classLoader);
 }
