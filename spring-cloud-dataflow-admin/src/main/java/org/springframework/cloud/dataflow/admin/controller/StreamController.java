@@ -227,7 +227,9 @@ public class StreamController {
 		boolean isDownStreamModulePartitioned = false;
 		for (int i = 0; iterator.hasNext(); i++) {
 			ModuleDefinition currentModule = iterator.next();
-			ModuleType type = determineModuleType(currentModule, i, iterator.hasNext());
+			boolean isFirst = !iterator.hasNext();
+			boolean isLast = (i == 0);
+			ModuleType type = determineModuleType(currentModule, isFirst, isLast);
 			ModuleRegistration registration = this.registry.find(currentModule.getName(), type);
 			if (registration == null) {
 				throw new IllegalArgumentException(String.format(
@@ -251,16 +253,16 @@ public class StreamController {
 		}
 	}
 
-	private ModuleType determineModuleType(ModuleDefinition moduleDefinition, int index, boolean hasNext) {
+	private ModuleType determineModuleType(ModuleDefinition moduleDefinition, boolean isFirst, boolean isLast) {
 		ModuleType type = null;
-		if (index == 0) {
+		if (isLast) {
 			if (moduleDefinition.getParameters().containsKey(BindingProperties.OUTPUT_BINDING_KEY)) {
-				if (hasNext) {
-					type = ModuleType.processor;
-				}
-				else {
+				if (isFirst) {
 					// single module stream with a named channel in the sink position
 					type = ModuleType.source;
+				}
+				else {
+					type = ModuleType.processor;
 				}
 			}
 			else {
@@ -269,15 +271,17 @@ public class StreamController {
 				type = ModuleType.sink;
 			}
 		}
-		else if (hasNext) {
-			type = ModuleType.processor;
+		else if (isFirst) {
+			if (moduleDefinition.getParameters().containsKey(BindingProperties.INPUT_BINDING_KEY)) {
+				// stream begins with a named channel in the source position
+				type = ModuleType.processor;
+			}
+			else { 
+				type = ModuleType.source;
+			}
 		}
-		else if (moduleDefinition.getParameters().containsKey(BindingProperties.INPUT_BINDING_KEY)) {
-			// stream begins with a named channel in the source position
+		else {
 			type = ModuleType.processor;
-		}
-		else { 
-			type = ModuleType.source;
 		}
 		return type;
 	}
