@@ -19,6 +19,7 @@ package org.springframework.cloud.dataflow.completion;
 import static org.springframework.cloud.dataflow.completion.CompletionProposal.*;
 
 import java.io.Closeable;
+import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
@@ -27,6 +28,8 @@ import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
 import org.springframework.boot.configurationmetadata.ValueHint;
+import org.springframework.boot.loader.archive.Archive;
+import org.springframework.boot.loader.archive.ExplodedArchive;
 import org.springframework.boot.loader.archive.JarFileArchive;
 import org.springframework.cloud.dataflow.core.ModuleDefinition;
 import org.springframework.cloud.dataflow.core.ModuleType;
@@ -90,23 +93,24 @@ public class ConfigurationPropertyValueHintExpansionStrategy implements Expansio
 			// Not a valid module name, do nothing
 			return;
 		}
-		Resource jarFile = moduleResolver.resolve(CompletionUtils.adapt(lastModuleRegistration.getCoordinates()));
+		Resource moduleResource = moduleResolver.resolve(CompletionUtils.adapt(lastModuleRegistration.getCoordinates()));
 
 		CompletionProposal.Factory proposals = expanding(text);
 
-		for (ConfigurationMetadataProperty property : moduleConfigurationMetadataResolver.listProperties(jarFile)) {
+		for (ConfigurationMetadataProperty property : moduleConfigurationMetadataResolver.listProperties(moduleResource)) {
 			if (property.getId().equals(propertyName)) {
 				ClassLoader classLoader = null;
 				try {
 
-					JarFileArchive jarFileArchive = new JarFileArchive(jarFile.getFile());
+					File file = moduleResource.getFile();
+					Archive jarFileArchive = file.isDirectory() ? new ExplodedArchive(file) : new JarFileArchive(file);
 					classLoader = new ModuleJarLauncher(jarFileArchive).createClassLoader();
 
 					for (ValueHintProvider valueHintProvider : valueHintProviders) {
 						for (ValueHint valueHint : valueHintProvider.guessValueHints(property, classLoader)) {
-							String suffix = String.valueOf(valueHint.getValue());
-							if( suffix.startsWith(alreadyTyped)) {
-								collector.add(proposals.withSuffix(suffix.substring(alreadyTyped.length()), valueHint.getShortDescription()));
+							String candidate = String.valueOf(valueHint.getValue());
+							if( !candidate.equals(alreadyTyped) && candidate.startsWith(alreadyTyped)) {
+								collector.add(proposals.withSuffix(candidate.substring(alreadyTyped.length()), valueHint.getShortDescription()));
 							}
 						}
 					}
@@ -125,9 +129,7 @@ public class ConfigurationPropertyValueHintExpansionStrategy implements Expansio
 					}
 				}
 			}
-
 		}
-
 	}
 
 	// This may be the safest way to backtrack to the property name

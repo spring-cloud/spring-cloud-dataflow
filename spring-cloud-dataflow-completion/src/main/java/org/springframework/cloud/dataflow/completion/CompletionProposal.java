@@ -51,6 +51,11 @@ public class CompletionProposal {
 		return explanation;
 	}
 
+	@Override
+	public String toString() {
+		return String.format("%s[%s]", getClass().getSimpleName(), text);
+	}
+
 	public static class Factory {
 
 		private final String start;

@@ -19,12 +19,15 @@ package org.springframework.cloud.dataflow.completion;
 import static org.springframework.cloud.dataflow.completion.CompletionProposal.*;
 
 import java.io.Closeable;
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
 import org.springframework.boot.configurationmetadata.ValueHint;
+import org.springframework.boot.loader.archive.Archive;
+import org.springframework.boot.loader.archive.ExplodedArchive;
 import org.springframework.boot.loader.archive.JarFileArchive;
 import org.springframework.cloud.dataflow.core.ModuleDefinition;
 import org.springframework.cloud.dataflow.core.ModuleType;
@@ -73,16 +76,17 @@ public class ConfigurationPropertyValueHintRecoveryStrategy extends StacktraceFi
 			// Not a valid module name, do nothing
 			return;
 		}
-		Resource jarFile = moduleResolver.resolve(CompletionUtils.adapt(lastModuleRegistration.getCoordinates()));
+		Resource moduleResource = moduleResolver.resolve(CompletionUtils.adapt(lastModuleRegistration.getCoordinates()));
 
 		CompletionProposal.Factory proposals = expanding(dsl);
 
-		for (ConfigurationMetadataProperty property : moduleConfigurationMetadataResolver.listProperties(jarFile)) {
+		for (ConfigurationMetadataProperty property : moduleConfigurationMetadataResolver.listProperties(moduleResource)) {
 			if (property.getId().equals(propertyName)) {
 				ClassLoader classLoader = null;
 				try {
 
-					JarFileArchive jarFileArchive = new JarFileArchive(jarFile.getFile());
+					File moduleFile = moduleResource.getFile();
+					Archive jarFileArchive = moduleFile.isDirectory() ? new ExplodedArchive(moduleFile) : new JarFileArchive(moduleFile);
 					classLoader = new ModuleJarLauncher(jarFileArchive).createClassLoader();
 
 					for (ValueHintProvider valueHintProvider : valueHintProviders) {

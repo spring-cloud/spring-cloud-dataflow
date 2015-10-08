@@ -87,6 +87,7 @@ public class CompletionUtils {
 		for (ModuleDefinition moduleDefinition : streamDefinition.getModuleDefinitions()) {
 			alreadyUsed.add(moduleDefinition.getLabel());
 		}
+
 		String result = candidate;
 		while (alreadyUsed.contains(candidate)) {
 			candidate = prefix + counter++;

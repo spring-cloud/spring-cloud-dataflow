@@ -1,0 +1,18 @@
+{
+  "properties": [
+    {
+      "name": "expression",
+      "type": "org.springframework.expression.Expression",
+      "description": "A predicate to evaluate",
+      "sourceType": "foo.bar.FilterProperties",
+      "defaultValue": "true"
+    },
+    {
+      "name": "expresso",
+      "type": "org.springframework.cloud.dataflow.completion.Expresso",
+      "description": "A property of type enum and whose name starts like 'expression'",
+      "sourceType": "foo.bar.FilterProperties"
+    }
+  ],
+  "hints": []
+}

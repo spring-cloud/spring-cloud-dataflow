@@ -60,7 +60,7 @@ public class UnfinishedModuleNameExpansionStrategy implements ExpansionStrategy 
 
 		for (ModuleRegistration moduleRegistration : moduleRegistry.findAll()) {
 			String candidateName = moduleRegistration.getName();
-			if (validTypesAtThisPosition.contains(moduleRegistration.getType()) && candidateName.startsWith(alreadyTyped)) {
+			if (validTypesAtThisPosition.contains(moduleRegistration.getType()) && !alreadyTyped.equals(candidateName) && candidateName.startsWith(alreadyTyped)) {
 				String expansion = CompletionUtils.maybeQualifyWithLabel(moduleRegistration.getName(), streamDefinition);
 
 				collector.add(proposals.withSuffix(expansion.substring(alreadyTyped.length())));

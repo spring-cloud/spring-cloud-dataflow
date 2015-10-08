@@ -63,7 +63,7 @@ class AddModuleOptionsExpansionStrategy implements ExpansionStrategy {
 	public boolean shouldTrigger(String text, StreamDefinition streamDefinition) {
 		// Could assert that the last module is a valid module, but this logic
 		// needs to be duplicated in addProposals anyway
-		return text.endsWith(" ");
+		return true;
 	}
 
 	@Override
