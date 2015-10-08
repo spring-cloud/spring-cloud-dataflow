@@ -91,18 +91,18 @@ all stream commands are supported in the shell when running on Lattice:
 
 ## Running on Cloud Foundry
 
-Spring Cloud Data Flow can be used to deploy modules in a Cloud Foundry
-environment. When doing so, the [Admin](https://github.com/spring-cloud/spring-cloud-dataflow/tree/master/spring-cloud-dataflow-admin) application can either run itself on Cloud Foundry, or on another installation (_e.g._ a simple laptop).
+Spring Cloud Data Flow can be used to deploy modules in a Cloud Foundry environment. When doing so, the [Admin](https://github.com/spring-cloud/spring-cloud-dataflow/tree/master/spring-cloud-dataflow-admin) application can either run itself on Cloud Foundry, or on another installation (e.g. a simple laptop).
 
-The required configuration amounts to the same, and is merely related to providing credentials to the Cloud Foundry instance, so that the admin can spawn applications itself. Any Spring Boot compatible configuration mechanism can be used (passing program arguments, editing configuration files before building the application, using [Spring Cloud Config](https://github.com/spring-cloud/spring-cloud-config), using environment variables, _etc._), although some may prove more adequate than others when running _on_ Cloud Foundry.
+The required configuration amounts to the same in either case, and is merely related to providing credentials to the Cloud Foundry instance so that the admin can spawn applications itself. Any Spring Boot compatible configuration mechanism can be used (passing program arguments, editing configuration files before building the application, using [Spring Cloud Config](https://github.com/spring-cloud/spring-cloud-config), using environment variables, etc.), although some may prove more practicable than others when running _on_ Cloud Foundry.
 
 1\. provision a redis service instance on Cloud Foundry.
-Your mileage may vary depending on your Cloud Foundry installation. Use `cf marketplace` to discover which plans are available to you. For example when using [Pivotal Web Services](https://run.pivotal.io/):
+Use `cf marketplace` to discover which plans are available to you, depending on the details of your Cloud Foundry setup. For example when using [Pivotal Web Services](https://run.pivotal.io/):
+
 ```
 cf create-service rediscloud 30mb redis
 ```
 
-2\. build packages
+2\. build packages (you'll need redis running locally for the included tests to run)
 
 ```
 $ mvn clean package
@@ -110,13 +110,16 @@ $ mvn clean package
 
 3a\. push the admin application on Cloud Foundry, configure it (see below) and start it
 
-NOTE: You must use a unique name for your app that's not already used by someone else or your deployment will fail
+NOTE: You must use a unique name for your app; an app with the same name in the same organization will cause your deployment to fail
 
 ```
 cf push s-c-dataflow-admin --no-start -p spring-cloud-dataflow-admin/target/spring-cloud-dataflow-admin-1.0.0.BUILD-SNAPSHOT.jar
 cf bind-service s-c-dataflow-admin redis
 ```
-Now we can configure the app. This configuration is for Pivotal Web Services. You need to fill in {org}, {space}, {email} and {password} before running these commands. 
+
+Now we can configure the app. This configuration is for Pivotal Web Services. You need to fill in {org}, {space}, {email} and {password} before running these commands.
+
+NOTE: Only set 'Skip SSL Validation' to true if you're running on a Cloud Foundry instance using self-signed certs (e.g. in development). Do not use for production.
 
 ```
 cf set-env s-c-dataflow-admin CLOUDFOUNDRY_API_ENDPOINT https://api.run.pivotal.io
@@ -124,10 +127,9 @@ cf set-env s-c-dataflow-admin CLOUDFOUNDRY_ORGANIZATION {org}
 cf set-env s-c-dataflow-admin CLOUDFOUNDRY_SPACE {space}
 cf set-env s-c-dataflow-admin CLOUDFOUNDRY_DOMAIN cfapps.io
 cf set-env s-c-dataflow-admin CLOUDFOUNDRY_SERVICES redis
-cf set-env s-c-dataflow-admin SECURITY_OAUTH2_CLIENT_USERNAME {email}
-cf set-env s-c-dataflow-admin SECURITY_OAUTH2_CLIENT_PASSWORD {password}
-cf set-env s-c-dataflow-admin SECURITY_OAUTH2_CLIENT_ACCESS_TOKEN_URI https://login.run.pivotal.io/oauth/token
-cf set-env s-c-dataflow-admin SECURITY_OAUTH2_CLIENT_USER_AUTHORIZATION_URI https://login.run.pivotal.io/oauth/authorize
+cf set-env s-c-dataflow-admin CLOUDFOUNDRY_USERNAME {email}
+cf set-env s-c-dataflow-admin CLOUDFOUNDRY_PASSWORD {password}
+cf set-env s-c-dataflow-admin CLOUDFOUNDRY_SKIP_SSL_VALIDATION false
 ```
 
 We are now ready to start the app.
@@ -136,7 +138,7 @@ We are now ready to start the app.
 cf start s-c-dataflow-admin
 ```
 
-alternatively,
+Alternatively,
 
 3b\. run the admin application locally, targeting your Cloud Foundry installation (see below for configuration)
 
@@ -144,25 +146,19 @@ alternatively,
 java -jar spring-cloud-dataflow-admin/target/spring-cloud-dataflow-admin-1.0.0.BUILD-SNAPSHOT.jar [--option1=value1] [--option2=value2] [etc.]
 ```
 
-4\. run the shell and optionally target the Admin application if not running on the same host (will typically be the case if deployed on Cloud Foundry as **3a.**)
+4\. run the shell and optionally target the Admin application if it's not running on the same host (will typically be the case if deployed on Cloud Foundry as **3a.**)
+
 ```
 $ java -jar spring-cloud-dataflow-shell/target/spring-cloud-dataflow-shell-1.0.0.BUILD-SNAPSHOT.jar
 ```
+
 ```
 server-unknown:>admin config server http://s-c-dataflow-admin.cfapps.io
 Successfully targeted http://s-c-dataflow-admin.cfapps.io
 dataflow:>
 ```
 
-At step **3.** the following pieces of configuration must be provided.
-When running _on_ Cloud Foundry use the `cf env` command, for example:
-```
-cf env s-c-dataflow-admin CLOUDFOUNDRY_DOMAIN mydomain.cfapps.io
-```
-Note the use of the capitalized name.
-
-When running locally set the local environment, or pass variables on the Java invocation:
-
+At step **3b.** the following pieces of configuration must be provided, e.g. by setting the local environment, or passing variables on the Java invocation:
 
 ```
 # Default values cited after the equal sign.
@@ -198,7 +194,6 @@ cloudfoundry.password=
 # Whether to allow self-signed certificates during SSL validation
 # (for setting env var use CLOUDFOUNDRY_SKIP_SSL_VALIDATION)
 cloudfoundry.skipSslValidation=false
-
 ```
 
 ## Running on Hadoop YARN
@@ -286,4 +281,3 @@ system property:
 See also:
 
 https://github.com/spring-projects/spring-shell/blob/master/readme.dev
-

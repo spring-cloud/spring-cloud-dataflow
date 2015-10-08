@@ -1,1 +1,0 @@
-SPI implementation for deploying Spring Cloud Stream modules to http://cloudfoundry.org[Cloud Foundry]
