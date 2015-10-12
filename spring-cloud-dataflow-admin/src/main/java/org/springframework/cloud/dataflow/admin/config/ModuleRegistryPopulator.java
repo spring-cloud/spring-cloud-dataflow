@@ -83,6 +83,7 @@ public class ModuleRegistryPopulator {
 		populateDefault("transform", processor);
 		populateDefault("counter", sink);
 		populateDefault("file", sink);
+		populateDefault("gemfire", sink);
 		populateDefault("hdfs", sink);
 		populateDefault("log", sink);
 		populateDefault("redis", sink);
