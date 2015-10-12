@@ -1,16 +1,34 @@
+= Mesos/Marathon Deployer implementation
+
 SPI implementation for deploying https://github.com/spring-cloud/spring-cloud-stream[Spring Cloud Stream] modules to
  https://mesosphere.github.io/marathon[Marathon].
 
-The SPI currently assumes that there will be a running redis Marathon app running.
+== Quick install using playa-mesos
 
+1. Install Mesos and Marathon from https://github.com/mesosphere/playa-mesos
+(_i.e._ clone and `vagrant up`)
+
+2. Build and install `spring-cloud-dataflow`:
++
+```
+mvn install
+```
++
+You'll want to `install`, because this deployer currently relies on
+`spring-cloud-marathon-connector` that will need to be in your local maven repository later.
+This requirement (and step 4 below) will be later alleviated when `spring-cloud-marathon-connector`
+is published as an official Spring Cloud Connector.
+
+3. The SPI currently assumes that there will be a running redis Marathon app running, named `redis`.
++
 One way to create one is to have Marathon run the `redis` docker image:
-
++
 ```
 curl -X POST http://10.141.141.10:8080/v2/apps -d @redis.json -H "Content-type: application/json"
 ```
-
++
 With `redis.json` containing
-
++
 [source, json]
 ```
 {
@@ -30,3 +48,21 @@ With `redis.json` containing
   }
 }
 ```
+
+4. Expose your host's maven repository over http so that it can be accessed from
+the running marathon apps:
++
+```
+cd ~/.m2/repository
+python -m SimpleHTTPServer 8000
+```
++
+Also note your host IP address, later denoted as `<HostIP>`
+
+5. Launch admin server
++
+```
+java -jar spring-cloud-dataflow-admin/target/spring-cloud-dataflow-admin-1.0.0.BUILD-SNAPSHOT.jar --marathon.apiEndpoint=http://10.141.141.10:8080 --marathon.launcherProperties.remoteRepositories=http://<HostIP>:8000
+```
+
+6. Launch shell and create ticktock stream
