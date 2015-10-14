@@ -29,12 +29,28 @@ import org.springframework.cloud.dataflow.core.StreamDefinition;
 public interface ExpansionStrategy {
 
 	/**
-	 * Whether this completion should be triggered.
+	 * For a given stream DSL text and {@link StreamDefinition},
+	 * <ul>
+	 *   <li>
+	 *     Generate {@link CompletionProposal}s that apply (if any)
+	 *     and add them to the provided {@code collector} list
+	 *   </li>
+	 *   <li>
+	 *     Return {@code true} if no other strategies should be applied for
+	 *     the stream DSL text (this strategy make take the liberty to erase
+	 *     already collected proposals)
+	 *   </li>
+	 * </ul>
+	 *
+	 * @param text DSL text for the stream
+	 * @param streamDefinition stream definition
+	 * @param detailLevel integer representing the amount of detail to include
+	 * in the generated {@code CompletionProposal}s (higher values mean more details.
+	 * typical range is [1..5])
+	 * @return {@code true} if no other strategies should be applied for
+	 * the stream DSL text
 	 */
-	boolean shouldTrigger(String text, StreamDefinition parseResult);
+	boolean addProposals(String text, StreamDefinition streamDefinition, int detailLevel,
+			List<CompletionProposal> collector);
 
-	/**
-	 * Perform code completion by adding proposals to the {@code proposals} list.
-	 */
-	void addProposals(String text, StreamDefinition parseResult, int detailLevel, List<CompletionProposal> collector);
 }

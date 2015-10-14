@@ -40,24 +40,23 @@ public class PipeIntoOtherModulesExpansionStrategy implements ExpansionStrategy 
 	}
 
 	@Override
-	public boolean shouldTrigger(String text, StreamDefinition streamDefinition) {
+	public boolean addProposals(String text, StreamDefinition parseResult, int detailLevel, List<CompletionProposal> collector) {
 		if (text.isEmpty() || !text.endsWith(" ")) {
 			return false;
 		}
-		ModuleDefinition lastModule = streamDefinition.getDeploymentOrderIterator().next();
-		if (moduleRegistry.find(lastModule.getName(), sink) == null) {
-			// Current written text does not end on a sink, so we MUST continue somehow
-			return true;
+		ModuleDefinition lastModule = parseResult.getDeploymentOrderIterator().next();
+		// Consider "bar | foo". If there is indeed a sink named foo in the registry,
+		// "foo" may also be a processor, in which case we can continue
+		boolean couldBeASink = moduleRegistry.find(lastModule.getName(), sink) != null;
+		if (couldBeASink) {
+			boolean couldBeAProcessor = moduleRegistry.find(lastModule.getName(), processor) != null;
+			if (!couldBeAProcessor) {
+				return false;
+			}
 		}
-		else {
-			// Consider "bar | foo". If there is indeed a sink named foo in the registry,
-			// "foo" may also be a processor, in which case we can continue
-			return moduleRegistry.find(lastModule.getName(), processor) != null;
-		}
-	}
 
-	@Override
-	public void addProposals(String text, StreamDefinition parseResult, int detailLevel, List<CompletionProposal> collector) {
+
+
 		CompletionProposal.Factory proposals = CompletionProposal.expanding(text);
 		for (ModuleRegistration moduleRegistration : moduleRegistry.findAll()) {
 			if (moduleRegistration.getType() == processor || moduleRegistration.getType() == sink) {
@@ -66,6 +65,6 @@ public class PipeIntoOtherModulesExpansionStrategy implements ExpansionStrategy 
 						"Continue stream definition with a " + moduleRegistration.getType()));
 			}
 		}
-
+		return false;
 	}
 }

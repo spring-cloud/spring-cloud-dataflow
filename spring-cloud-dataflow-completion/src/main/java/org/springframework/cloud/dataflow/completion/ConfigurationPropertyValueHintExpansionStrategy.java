@@ -67,14 +67,13 @@ public class ConfigurationPropertyValueHintExpansionStrategy implements Expansio
 	}
 
 	@Override
-	public boolean shouldTrigger(String text, StreamDefinition parseResult) {
+	public boolean addProposals(String text, StreamDefinition parseResult, int detailLevel, List<CompletionProposal> collector) {
 		Set<String> propertyNames = new HashSet<>(parseResult.getDeploymentOrderIterator().next().getParameters().keySet());
 		propertyNames.removeAll(CompletionUtils.IMPLICIT_PARAMETER_NAMES);
-		return !text.endsWith(" ") && !propertyNames.isEmpty();
-	}
+		if (text.endsWith(" ") || propertyNames.isEmpty()) {
+			return false;
+		}
 
-	@Override
-	public void addProposals(String text, StreamDefinition parseResult, int detailLevel, List<CompletionProposal> collector) {
 		String propertyName = recoverPropertyName(text);
 
 		ModuleDefinition lastModule = parseResult.getDeploymentOrderIterator().next();
@@ -91,7 +90,7 @@ public class ConfigurationPropertyValueHintExpansionStrategy implements Expansio
 
 		if (lastModuleRegistration == null) {
 			// Not a valid module name, do nothing
-			return;
+			return false;
 		}
 		Resource moduleResource = moduleResolver.resolve(CompletionUtils.adapt(lastModuleRegistration.getCoordinates()));
 
@@ -109,7 +108,7 @@ public class ConfigurationPropertyValueHintExpansionStrategy implements Expansio
 					for (ValueHintProvider valueHintProvider : valueHintProviders) {
 						for (ValueHint valueHint : valueHintProvider.guessValueHints(property, classLoader)) {
 							String candidate = String.valueOf(valueHint.getValue());
-							if( !candidate.equals(alreadyTyped) && candidate.startsWith(alreadyTyped)) {
+							if (!candidate.equals(alreadyTyped) && candidate.startsWith(alreadyTyped)) {
 								collector.add(proposals.withSuffix(candidate.substring(alreadyTyped.length()), valueHint.getShortDescription()));
 							}
 						}
@@ -130,6 +129,7 @@ public class ConfigurationPropertyValueHintExpansionStrategy implements Expansio
 				}
 			}
 		}
+		return false;
 	}
 
 	// This may be the safest way to backtrack to the property name

@@ -42,16 +42,16 @@ public class UnfinishedModuleNameExpansionStrategy implements ExpansionStrategy 
 	}
 
 	@Override
-	public boolean shouldTrigger(String text, StreamDefinition parseResult) {
-		ModuleDefinition lastModule = parseResult.getDeploymentOrderIterator().next();
+	public boolean addProposals(String text, StreamDefinition streamDefinition, int detailLevel, List<CompletionProposal> collector) {
+
+		ModuleDefinition lastModule = streamDefinition.getDeploymentOrderIterator().next();
 		Set<String> parameterNames = new HashSet<>(lastModule.getParameters().keySet());
 		parameterNames.removeAll(CompletionUtils.IMPLICIT_PARAMETER_NAMES);
-		return parameterNames.isEmpty() && text.endsWith(lastModule.getName());
-	}
+		if( !parameterNames.isEmpty() || !text.endsWith(lastModule.getName())) {
+			return false;
+		}
 
-	@Override
-	public void addProposals(String text, StreamDefinition streamDefinition, int detailLevel, List<CompletionProposal> collector) {
-		ModuleDefinition lastModule = streamDefinition.getDeploymentOrderIterator().next();
+		// Actually add completions
 
 		String alreadyTyped = lastModule.getName();
 		CompletionProposal.Factory proposals = CompletionProposal.expanding(text);
@@ -66,6 +66,7 @@ public class UnfinishedModuleNameExpansionStrategy implements ExpansionStrategy 
 				collector.add(proposals.withSuffix(expansion.substring(alreadyTyped.length())));
 			}
 		}
+		return false;
 
 	}
 }

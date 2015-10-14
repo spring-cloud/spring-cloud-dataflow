@@ -58,9 +58,7 @@ public class StreamCompletionProvider {
 		}
 
 		for (ExpansionStrategy strategy : completionExpansionStrategies) {
-			if (strategy.shouldTrigger(dslStart, parsed)) {
-				strategy.addProposals(dslStart, parsed, detailLevel, collector);
-			}
+			strategy.addProposals(dslStart, parsed, detailLevel, collector);
 		}
 		return collector;
 	}

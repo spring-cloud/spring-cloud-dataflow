@@ -45,14 +45,6 @@ class AddModuleOptionsExpansionStrategy implements ExpansionStrategy {
 
 	private final ModuleResolver moduleResolver;
 
-
-	/**
-	 * Construct a new AddModuleOptionsExpansionStrategy for use in detecting missing module options.
-	 *  @param moduleRegistry the registry to check for the existence of the last entered module
-	 *        definition.
-	 * @param moduleConfigurationMetadataResolver the metadata resolver to use in order to create a list of proposals for
-	 * @param moduleResolver
-	 */
 	public AddModuleOptionsExpansionStrategy(ModuleRegistry moduleRegistry, ModuleConfigurationMetadataResolver moduleConfigurationMetadataResolver, ModuleResolver moduleResolver) {
 		this.moduleRegistry = moduleRegistry;
 		this.moduleConfigurationMetadataResolver = moduleConfigurationMetadataResolver;
@@ -60,14 +52,7 @@ class AddModuleOptionsExpansionStrategy implements ExpansionStrategy {
 	}
 
 	@Override
-	public boolean shouldTrigger(String text, StreamDefinition streamDefinition) {
-		// Could assert that the last module is a valid module, but this logic
-		// needs to be duplicated in addProposals anyway
-		return true;
-	}
-
-	@Override
-	public void addProposals(String text, StreamDefinition streamDefinition, int detailLevel,
+	public boolean addProposals(String text, StreamDefinition streamDefinition, int detailLevel,
 			List<CompletionProposal> collector) {
 		ModuleDefinition lastModule = streamDefinition.getDeploymentOrderIterator().next();
 
@@ -81,7 +66,7 @@ class AddModuleOptionsExpansionStrategy implements ExpansionStrategy {
 		}
 		if (lastModuleRegistration == null) {
 			// Not a valid module name, do nothing
-			return;
+			return false;
 		}
 		Set<String> alreadyPresentOptions = new HashSet<>(lastModule.getParameters().keySet());
 
@@ -94,6 +79,7 @@ class AddModuleOptionsExpansionStrategy implements ExpansionStrategy {
 				collector.add(proposals.withSeparateTokens("--" + property.getId() + "=", property.getShortDescription()));
 			}
 		}
+		return false;
 
 	}
 
