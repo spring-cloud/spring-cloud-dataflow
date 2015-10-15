@@ -222,34 +222,70 @@ public class StreamController {
 		if (cumulatedDeploymentProperties == null) {
 			cumulatedDeploymentProperties = Collections.emptyMap();
 		}
-		Iterator<ModuleDefinition> iterator = stream.getDeploymentOrderIterator();
-		int nextModuleCount = 0;
-		boolean isDownStreamModulePartitioned = false;
-		for (int i = 0; iterator.hasNext(); i++) {
+
+		DownStreamModuleInfo info = new DownStreamModuleInfo(1, false);
+
+		for (StreamDefinition.DeploymentOrderIterator iterator = stream.getDeploymentOrderIterator();
+			iterator.hasNext(); ) {
 			ModuleDefinition currentModule = iterator.next();
-			boolean isFirst = !iterator.hasNext();
-			boolean isLast = (i == 0);
-			ModuleType type = determineModuleType(currentModule, isFirst, isLast);
-			ModuleRegistration registration = this.registry.find(currentModule.getName(), type);
-			if (registration == null) {
-				throw new IllegalArgumentException(String.format(
-						"Module %s of type %s not found in registry", currentModule.getName(), type));
-			}
-			ModuleCoordinates coordinates = registration.getCoordinates();
+
+			ModuleCoordinates coordinates = getModuleCoordinates(iterator, currentModule);
+
 			Map<String, String> moduleDeploymentProperties = getModuleDeploymentProperties(currentModule, cumulatedDeploymentProperties);
-			boolean upstreamModuleSupportsPartition = upstreamModuleHasPartitionInfo(stream, currentModule, cumulatedDeploymentProperties);
-			// consumer module partition properties
-			if (isPartitionedConsumer(currentModule, moduleDeploymentProperties, upstreamModuleSupportsPartition)) {
-				updateConsumerPartitionProperties(moduleDeploymentProperties);
-			}
-			// producer module partition properties
-			if (isDownStreamModulePartitioned) {
-				updateProducerPartitionProperties(moduleDeploymentProperties, nextModuleCount);
-			}
+
+			info = postProcessPartitioningProperties(stream, cumulatedDeploymentProperties, info, currentModule, moduleDeploymentProperties);
+
 			this.deployer.deploy(new ModuleDeploymentRequest(currentModule, coordinates, moduleDeploymentProperties));
-			nextModuleCount = getNextModuleCount(moduleDeploymentProperties);
-			isDownStreamModulePartitioned = isPartitionedConsumer(currentModule, moduleDeploymentProperties,
-					upstreamModuleSupportsPartition);
+		}
+	}
+
+	/**
+	 * Maybe update the {@literal currentModule} {@literal moduleDeploymentProperties} with properties related
+	 * to partitioning.
+	 *
+	 * @param stream the whole stream definition
+	 * @param cumulatedDeploymentProperties the whole set of stream deployment properties
+	 * @param info information about the previous (i.e. downstream) module in the stream
+	 * @param currentModule the module whose deployment properties we want to alter
+	 * @param moduleDeploymentProperties the deployment properties for the current module
+	 * @return information about the current module, to be used as 'previous' in the next invocation
+	 */
+	private DownStreamModuleInfo postProcessPartitioningProperties(StreamDefinition stream, Map<String, String> cumulatedDeploymentProperties, DownStreamModuleInfo info, ModuleDefinition currentModule, Map<String, String> moduleDeploymentProperties) {
+		boolean upstreamModuleSupportsPartition = upstreamModuleHasPartitionInfo(stream, currentModule, cumulatedDeploymentProperties);
+		// consumer module partition properties
+		if (isPartitionedConsumer(currentModule, moduleDeploymentProperties, upstreamModuleSupportsPartition)) {
+			updateConsumerPartitionProperties(moduleDeploymentProperties);
+		}
+		// producer module partition properties
+		if (info.isDownStreamModulePartitioned) {
+			updateProducerPartitionProperties(moduleDeploymentProperties, info.nextModuleCount);
+		}
+		int nextModuleCount = getNextModuleCount(moduleDeploymentProperties);
+		boolean isDownStreamModulePartitioned = isPartitionedConsumer(currentModule, moduleDeploymentProperties,
+				upstreamModuleSupportsPartition);
+		return new DownStreamModuleInfo(nextModuleCount, isDownStreamModulePartitioned);
+	}
+
+	private ModuleCoordinates getModuleCoordinates(StreamDefinition.DeploymentOrderIterator iterator, ModuleDefinition currentModule) {
+		ModuleType type = determineModuleType(currentModule, iterator.isFirstUpstream(), iterator.isLastDownstream());
+		ModuleRegistration registration = this.registry.find(currentModule.getName(), type);
+		if (registration == null) {
+			throw new IllegalArgumentException(String.format(
+					"Module %s of type %s not found in registry", currentModule.getName(), type));
+		}
+		return registration.getCoordinates();
+	}
+
+	/**
+	 * Holds composite state about a module in the context of deployment.
+	 */
+	private static class DownStreamModuleInfo {
+		private final int nextModuleCount;
+		private final boolean isDownStreamModulePartitioned;
+
+		private DownStreamModuleInfo(int nextModuleCount, boolean isDownStreamModulePartitioned) {
+			this.nextModuleCount = nextModuleCount;
+			this.isDownStreamModulePartitioned = isDownStreamModulePartitioned;
 		}
 	}
 

@@ -113,8 +113,8 @@ public class StreamDefinition {
 	 *
 	 * @return iterator that iterates over the modules in deployment order
 	 */
-	public Iterator<ModuleDefinition> getDeploymentOrderIterator() {
-		return new ReadOnlyIterator<>(modules.descendingIterator());
+	public DeploymentOrderIterator getDeploymentOrderIterator() {
+		return new DeploymentOrderIterator(modules.descendingIterator());
 	}
 
 	@Override
@@ -127,14 +127,15 @@ public class StreamDefinition {
 
 
 	/**
-	 * Iterator that prevents mutation of its backing data structure.
-	 *
-	 * @param <T> the type of elements returned by this iterator
+	 * Iterator that walks through ModuleDefinitions in deployment order, that is, from downstream (sink, if present)
+	 * to upstream (source) module.
+	 * Also prevents mutation of its backing data structure.
 	 */
-	private static class ReadOnlyIterator<T> implements Iterator<T> {
-		private final Iterator<T> wrapped;
+	public static class DeploymentOrderIterator implements Iterator<ModuleDefinition> {
+		private final Iterator<ModuleDefinition> wrapped;
+		private int i;
 
-		public ReadOnlyIterator(Iterator<T> wrapped) {
+		public DeploymentOrderIterator(Iterator<ModuleDefinition> wrapped) {
 			this.wrapped = wrapped;
 		}
 
@@ -144,13 +145,22 @@ public class StreamDefinition {
 		}
 
 		@Override
-		public T next() {
+		public ModuleDefinition next() {
+			i++;
 			return wrapped.next();
 		}
 
 		@Override
 		public void remove() {
 			throw new UnsupportedOperationException();
+		}
+
+		public boolean isLastDownstream() {
+			return i == 1;
+		}
+
+		public boolean isFirstUpstream() {
+			return !hasNext();
 		}
 
 	}
