@@ -16,7 +16,7 @@
 
 package org.springframework.cloud.dataflow.rest.client;
 
-import org.springframework.cloud.dataflow.core.ModuleType;
+import org.springframework.cloud.dataflow.core.ArtifactType;
 import org.springframework.cloud.dataflow.rest.resource.DetailedModuleRegistrationResource;
 import org.springframework.cloud.dataflow.rest.resource.ModuleRegistrationResource;
 import org.springframework.hateoas.PagedResources;
@@ -39,12 +39,12 @@ public interface ModuleOperations {
 	PagedResources<ModuleRegistrationResource> list();
 
 	/**
-	 * Return a list of all module registrations for the given {@link ModuleType}.
+	 * Return a list of all module registrations for the given {@link ArtifactType}.
 	 *
 	 * @param type module type for which to return a list of registrations
 	 * @return list of all module registrations for the given module type
 	 */
-	PagedResources<ModuleRegistrationResource> list(ModuleType type);
+	PagedResources<ModuleRegistrationResource> list(ArtifactType type);
 
 	/**
 	 * Retrieve information about a module registration.
@@ -54,7 +54,7 @@ public interface ModuleOperations {
 	 *
 	 * @return detailed information about a module registration
 	 */
-	DetailedModuleRegistrationResource info(String name, ModuleType type);
+	DetailedModuleRegistrationResource info(String name, ArtifactType type);
 
 	/**
 	 * Register a module name and type with its Maven coordinates.
@@ -64,7 +64,7 @@ public interface ModuleOperations {
 	 * @param coordinates  Maven coordinates for the module artifact
 	 * @param force if {@code true}, overwrites a pre-existing registration
 	 */
-	ModuleRegistrationResource register(String name, ModuleType type,
+	ModuleRegistrationResource register(String name, ArtifactType type,
 			String coordinates, boolean force);
 
 	/**
@@ -73,6 +73,6 @@ public interface ModuleOperations {
 	 * @param name  module name
 	 * @param type  module type
 	 */
-	void unregister(String name, ModuleType type);
+	void unregister(String name, ArtifactType type);
 
 }

@@ -1,5 +1,5 @@
 /**
- * Root package of the ModuleRegistry support.
+ * Root package of the ArtifactRegistry support.
  */
 
 package org.springframework.cloud.dataflow.module.registry;

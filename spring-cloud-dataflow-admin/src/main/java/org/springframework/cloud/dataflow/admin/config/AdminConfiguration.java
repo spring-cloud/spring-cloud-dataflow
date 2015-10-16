@@ -29,8 +29,8 @@ import org.springframework.cloud.dataflow.admin.repository.StreamDefinitionRepos
 import org.springframework.cloud.dataflow.admin.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.completion.CompletionConfiguration;
 import org.springframework.cloud.dataflow.completion.RecoveryStrategy;
-import org.springframework.cloud.dataflow.module.registry.ModuleRegistry;
-import org.springframework.cloud.dataflow.module.registry.RedisModuleRegistry;
+import org.springframework.cloud.dataflow.module.registry.ArtifactRegistry;
+import org.springframework.cloud.dataflow.module.registry.RedisArtifactRegistry;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -74,13 +74,13 @@ public class AdminConfiguration {
 	}
 
 	@Bean
-	public ModuleRegistry moduleRegistry(RedisConnectionFactory redisConnectionFactory) {
-		return new RedisModuleRegistry(redisConnectionFactory);
+	public ArtifactRegistry moduleRegistry(RedisConnectionFactory redisConnectionFactory) {
+		return new RedisArtifactRegistry(redisConnectionFactory);
 	}
 
 	@Bean
-	public ModuleRegistryPopulator moduleRegistryPopulator(ModuleRegistry moduleRegistry) {
-		return new ModuleRegistryPopulator(moduleRegistry);
+	public ModuleRegistryPopulator moduleRegistryPopulator(ArtifactRegistry artifactRegistry) {
+		return new ModuleRegistryPopulator(artifactRegistry);
 	}
 
 	@Bean

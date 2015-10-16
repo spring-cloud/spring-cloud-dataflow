@@ -51,7 +51,7 @@ import org.springframework.cloud.dataflow.core.ModuleDeploymentRequest;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.module.ModuleStatus;
 import org.springframework.cloud.dataflow.module.deployer.ModuleDeployer;
-import org.springframework.cloud.dataflow.module.registry.InMemoryModuleRegistry;
+import org.springframework.cloud.dataflow.module.registry.InMemoryArtifactRegistry;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
@@ -96,7 +96,7 @@ public class StreamControllerTests {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testConstructorMissingRepository() {
-		new StreamController(null, new InMemoryModuleRegistry(), moduleDeployer);
+		new StreamController(null, new InMemoryArtifactRegistry(), moduleDeployer);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
@@ -106,7 +106,7 @@ public class StreamControllerTests {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testConstructorMissingDeployer() {
-		new StreamController(new InMemoryStreamDefinitionRepository(), new InMemoryModuleRegistry(), null);
+		new StreamController(new InMemoryStreamDefinitionRepository(), new InMemoryArtifactRegistry(), null);
 	}
 
 	@Test

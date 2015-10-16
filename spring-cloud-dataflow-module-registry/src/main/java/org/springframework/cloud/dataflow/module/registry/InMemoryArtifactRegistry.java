@@ -21,46 +21,46 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.springframework.cloud.dataflow.core.ArtifactType;
 import org.springframework.cloud.dataflow.core.ModuleCoordinates;
-import org.springframework.cloud.dataflow.core.ModuleType;
 
 /**
- * In-memory implementation of {@link ModuleRegistry}.
+ * In-memory implementation of {@link ArtifactRegistry}.
  *
  * @author Mark Fisher
  * @author Patrick Peralta
  */
-public class InMemoryModuleRegistry implements ModuleRegistry {
+public class InMemoryArtifactRegistry implements ArtifactRegistry {
 
 	private final Map<Key, ModuleCoordinates> map = new ConcurrentHashMap<>();
 
 	@Override
-	public ModuleRegistration find(String name, ModuleType type) {
+	public ArtifactRegistration find(String name, ArtifactType type) {
 		ModuleCoordinates coordinates = this.map.get(new Key(name, type));
-		return (coordinates == null ? null : new ModuleRegistration(name, type, coordinates));
+		return (coordinates == null ? null : new ArtifactRegistration(name, type, coordinates));
 	}
 
 	@Override
-	public List<ModuleRegistration> findAll() {
-		List<ModuleRegistration> list = new ArrayList<>(this.map.size());
+	public List<ArtifactRegistration> findAll() {
+		List<ArtifactRegistration> list = new ArrayList<>(this.map.size());
 		for (Map.Entry<Key, ModuleCoordinates> entry : this.map.entrySet()) {
-			list.add(new ModuleRegistration(entry.getKey().getName(),
+			list.add(new ArtifactRegistration(entry.getKey().getName(),
 					entry.getKey().getType(), entry.getValue()));
 		}
 		return list;
 	}
 
 	@Override
-	public void save(ModuleRegistration registration) {
+	public void save(ArtifactRegistration registration) {
 		String name = registration.getName();
-		ModuleType type = registration.getType();
+		ArtifactType type = registration.getType();
 		ModuleCoordinates coordinates = registration.getCoordinates();
 
 		this.map.put(new Key(name, type), coordinates);
 	}
 
 	@Override
-	public void delete(String name, ModuleType type) {
+	public void delete(String name, ArtifactType type) {
 		this.map.remove(new Key(name, type));
 	}
 
@@ -71,9 +71,9 @@ public class InMemoryModuleRegistry implements ModuleRegistry {
 
 		private String name;
 
-		private ModuleType type;
+		private ArtifactType type;
 
-		public Key(String name, ModuleType type) {
+		public Key(String name, ArtifactType type) {
 			this.name = name;
 			this.type = type;
 		}
@@ -82,7 +82,7 @@ public class InMemoryModuleRegistry implements ModuleRegistry {
 			return name;
 		}
 
-		public ModuleType getType() {
+		public ArtifactType getType() {
 			return type;
 		}
 

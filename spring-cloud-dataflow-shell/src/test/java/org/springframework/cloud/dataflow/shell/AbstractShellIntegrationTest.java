@@ -29,8 +29,8 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.cloud.dataflow.admin.AdminApplication;
 import org.springframework.cloud.dataflow.admin.config.AdminConfiguration;
-import org.springframework.cloud.dataflow.module.registry.InMemoryModuleRegistry;
-import org.springframework.cloud.dataflow.module.registry.ModuleRegistry;
+import org.springframework.cloud.dataflow.module.registry.InMemoryArtifactRegistry;
+import org.springframework.cloud.dataflow.module.registry.ArtifactRegistry;
 import org.springframework.cloud.dataflow.shell.command.StreamCommandTemplate;
 import org.springframework.cloud.dataflow.shell.command.TaskCommandTemplate;
 import org.springframework.context.ApplicationContext;
@@ -204,8 +204,8 @@ public abstract class AbstractShellIntegrationTest {
 	public static class TestConfig {
 
 		@Bean
-		public ModuleRegistry moduleRegistry() {
-			return new InMemoryModuleRegistry();
+		public ArtifactRegistry moduleRegistry() {
+			return new InMemoryArtifactRegistry();
 		}
 
 	}

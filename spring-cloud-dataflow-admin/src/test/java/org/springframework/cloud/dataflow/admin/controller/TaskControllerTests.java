@@ -44,7 +44,7 @@ import org.springframework.cloud.dataflow.core.ModuleDeploymentRequest;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.module.deployer.ModuleDeployer;
 import org.springframework.cloud.dataflow.module.deployer.lattice.TaskModuleDeployer;
-import org.springframework.cloud.dataflow.module.registry.InMemoryModuleRegistry;
+import org.springframework.cloud.dataflow.module.registry.InMemoryArtifactRegistry;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
@@ -88,7 +88,7 @@ public class TaskControllerTests {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testConstructorMissingRepository() {
-		new TaskController(null, new InMemoryModuleRegistry(), new TaskModuleDeployer());
+		new TaskController(null, new InMemoryArtifactRegistry(), new TaskModuleDeployer());
 	}
 
 	@Test(expected = IllegalArgumentException.class)
@@ -98,7 +98,7 @@ public class TaskControllerTests {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testConstructorMissingDeployer() {
-		new TaskController(new InMemoryTaskDefinitionRepository(), new InMemoryModuleRegistry(), null);
+		new TaskController(new InMemoryTaskDefinitionRepository(), new InMemoryArtifactRegistry(), null);
 	}
 
 	@Test

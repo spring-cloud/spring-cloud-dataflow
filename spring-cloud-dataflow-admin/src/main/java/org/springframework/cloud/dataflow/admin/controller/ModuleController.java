@@ -23,10 +23,10 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
+import org.springframework.cloud.dataflow.core.ArtifactType;
 import org.springframework.cloud.dataflow.core.ModuleCoordinates;
-import org.springframework.cloud.dataflow.core.ModuleType;
-import org.springframework.cloud.dataflow.module.registry.ModuleRegistration;
-import org.springframework.cloud.dataflow.module.registry.ModuleRegistry;
+import org.springframework.cloud.dataflow.module.registry.ArtifactRegistration;
+import org.springframework.cloud.dataflow.module.registry.ArtifactRegistry;
 import org.springframework.cloud.dataflow.rest.resource.DetailedModuleRegistrationResource;
 import org.springframework.cloud.dataflow.rest.resource.ModuleRegistrationResource;
 import org.springframework.cloud.stream.configuration.metadata.ModuleConfigurationMetadataResolver;
@@ -63,7 +63,7 @@ public class ModuleController {
 
 	private final Assembler moduleAssembler = new Assembler();
 
-	private final ModuleRegistry registry;
+	private final ArtifactRegistry registry;
 
 	@Autowired
 	private ModuleResolver moduleResolver;
@@ -72,7 +72,7 @@ public class ModuleController {
 	private ModuleConfigurationMetadataResolver moduleConfigurationMetadataResolver;
 
 	@Autowired
-	public ModuleController(ModuleRegistry registry) {
+	public ModuleController(ArtifactRegistry registry) {
 		this.registry = registry;
 	}
 
@@ -82,13 +82,13 @@ public class ModuleController {
 	@RequestMapping(method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
 	public PagedResources<? extends ModuleRegistrationResource> list(
-			PagedResourcesAssembler<ModuleRegistration> assembler,
-			@RequestParam(value = "type", required = false) ModuleType type,
+			PagedResourcesAssembler<ArtifactRegistration> assembler,
+			@RequestParam(value = "type", required = false) ArtifactType type,
 			@RequestParam(value = "detailed", defaultValue = "false") boolean detailed) {
 
-		List<ModuleRegistration> list = new ArrayList<>(registry.findAll());
+		List<ArtifactRegistration> list = new ArrayList<>(registry.findAll());
 		if (type != null) {
-			for (Iterator<ModuleRegistration> iterator = list.iterator(); iterator.hasNext(); ) {
+			for (Iterator<ArtifactRegistration> iterator = list.iterator(); iterator.hasNext(); ) {
 				if (iterator.next().getType() != type) {
 					iterator.remove();
 				}
@@ -108,9 +108,9 @@ public class ModuleController {
 	@RequestMapping(value = "/{type}/{name}", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
 	public DetailedModuleRegistrationResource info(
-			@PathVariable("type") ModuleType type,
+			@PathVariable("type") ArtifactType type,
 			@PathVariable("name") String name) {
-		ModuleRegistration registration = registry.find(name, type);
+		ArtifactRegistration registration = registry.find(name, type);
 		if (registration == null) {
 			return null;
 		}
@@ -139,14 +139,14 @@ public class ModuleController {
 	@RequestMapping(value = "/{type}/{name}", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
 	public void register(
-			@PathVariable("type") ModuleType type,
+			@PathVariable("type") ArtifactType type,
 			@PathVariable("name") String name,
 			@RequestParam("coordinates") String coordinates,
 			@RequestParam(value = "force", defaultValue = "false") boolean force) {
 		if (!force && registry.find(name, type) != null) {
 			return;
 		}
-		registry.save(new ModuleRegistration(name, type, ModuleCoordinates.parse(coordinates)));
+		registry.save(new ArtifactRegistration(name, type, ModuleCoordinates.parse(coordinates)));
 	}
 
 	/**
@@ -157,18 +157,18 @@ public class ModuleController {
 	 */
 	@RequestMapping(value = "/{type}/{name}", method = RequestMethod.DELETE)
 	@ResponseStatus(HttpStatus.OK)
-	public void unregister(@PathVariable("type") ModuleType type, @PathVariable("name") String name) {
+	public void unregister(@PathVariable("type") ArtifactType type, @PathVariable("name") String name) {
 		registry.delete(name, type);
 	}
 
-	static class Assembler extends ResourceAssemblerSupport<ModuleRegistration, ModuleRegistrationResource> {
+	class Assembler extends ResourceAssemblerSupport<ArtifactRegistration, ModuleRegistrationResource> {
 
 		public Assembler() {
 			super(ModuleController.class, ModuleRegistrationResource.class);
 		}
 
 		@Override
-		public ModuleRegistrationResource toResource(ModuleRegistration registration) {
+		public ModuleRegistrationResource toResource(ArtifactRegistration registration) {
 			return new ModuleRegistrationResource(registration.getName(),
 					registration.getType().name(), registration.getCoordinates().toString());
 		}

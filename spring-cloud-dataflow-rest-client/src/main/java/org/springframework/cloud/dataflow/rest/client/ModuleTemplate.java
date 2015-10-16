@@ -16,7 +16,7 @@
 
 package org.springframework.cloud.dataflow.rest.client;
 
-import org.springframework.cloud.dataflow.core.ModuleType;
+import org.springframework.cloud.dataflow.core.ArtifactType;
 import org.springframework.cloud.dataflow.rest.resource.DetailedModuleRegistrationResource;
 import org.springframework.cloud.dataflow.rest.resource.ModuleRegistrationResource;
 import org.springframework.hateoas.PagedResources;
@@ -61,30 +61,30 @@ public class ModuleTemplate implements ModuleOperations {
 
 	@Override
 	public PagedResources<ModuleRegistrationResource> list() {
-		return list(/* ModuleType */null);
+		return list(/* ArtifactType */null);
 	}
 
 	@Override
-	public PagedResources<ModuleRegistrationResource> list(ModuleType type) {
+	public PagedResources<ModuleRegistrationResource> list(ArtifactType type) {
 		// TODO handle pagination at the client side
 		String uri = uriTemplate + "?size=10000" + ((type == null) ? "" : "&type=" + type.name());
 		return restTemplate.getForObject(uri, ModuleRegistrationResource.Page.class);
 	}
 
 	@Override
-	public void unregister(String name, ModuleType moduleType) {
+	public void unregister(String name, ArtifactType artifactType) {
 		String uri = uriTemplate.toString() + "/{type}/{name}";
-		restTemplate.delete(uri, moduleType.name(), name);
+		restTemplate.delete(uri, artifactType.name(), name);
 	}
 
 	@Override
-	public DetailedModuleRegistrationResource info(String name, ModuleType type) {
+	public DetailedModuleRegistrationResource info(String name, ArtifactType type) {
 		String uri = uriTemplate.toString() + "/{type}/{name}";
 		return restTemplate.getForObject(uri, DetailedModuleRegistrationResource.class, type, name);
 	}
 
 	@Override
-	public ModuleRegistrationResource register(String name, ModuleType type,
+	public ModuleRegistrationResource register(String name, ArtifactType type,
 			String coordinates, boolean force) {
 		MultiValueMap<String, Object> values = new LinkedMultiValueMap<String, Object>();
 		values.add("coordinates", coordinates);
