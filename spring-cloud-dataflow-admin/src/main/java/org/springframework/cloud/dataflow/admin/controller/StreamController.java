@@ -223,7 +223,7 @@ public class StreamController {
 			cumulatedDeploymentProperties = Collections.emptyMap();
 		}
 
-		DownStreamModuleInfo info = new DownStreamModuleInfo(1, false);
+		ModulePartitionInfo downstreamInfo = ModulePartitionInfo.initial();
 
 		for (StreamDefinition.DeploymentOrderIterator iterator = stream.getDeploymentOrderIterator();
 			iterator.hasNext(); ) {
@@ -233,7 +233,7 @@ public class StreamController {
 
 			Map<String, String> moduleDeploymentProperties = getModuleDeploymentProperties(currentModule, cumulatedDeploymentProperties);
 
-			info = postProcessPartitioningProperties(stream, cumulatedDeploymentProperties, info, currentModule, moduleDeploymentProperties);
+			downstreamInfo = postProcessPartitioningProperties(stream, cumulatedDeploymentProperties, downstreamInfo, currentModule, moduleDeploymentProperties);
 
 			this.deployer.deploy(new ModuleDeploymentRequest(currentModule, coordinates, moduleDeploymentProperties));
 		}
@@ -250,20 +250,20 @@ public class StreamController {
 	 * @param moduleDeploymentProperties the deployment properties for the current module
 	 * @return information about the current module, to be used as 'previous' in the next invocation
 	 */
-	private DownStreamModuleInfo postProcessPartitioningProperties(StreamDefinition stream, Map<String, String> cumulatedDeploymentProperties, DownStreamModuleInfo info, ModuleDefinition currentModule, Map<String, String> moduleDeploymentProperties) {
+	private ModulePartitionInfo postProcessPartitioningProperties(StreamDefinition stream, Map<String, String> cumulatedDeploymentProperties, ModulePartitionInfo info, ModuleDefinition currentModule, Map<String, String> moduleDeploymentProperties) {
 		boolean upstreamModuleSupportsPartition = upstreamModuleHasPartitionInfo(stream, currentModule, cumulatedDeploymentProperties);
 		// consumer module partition properties
 		if (isPartitionedConsumer(currentModule, moduleDeploymentProperties, upstreamModuleSupportsPartition)) {
 			updateConsumerPartitionProperties(moduleDeploymentProperties);
 		}
 		// producer module partition properties
-		if (info.isDownStreamModulePartitioned) {
-			updateProducerPartitionProperties(moduleDeploymentProperties, info.nextModuleCount);
+		if (info.isPartitioned) {
+			updateProducerPartitionProperties(moduleDeploymentProperties, info.instances);
 		}
 		int nextModuleCount = getNextModuleCount(moduleDeploymentProperties);
 		boolean isDownStreamModulePartitioned = isPartitionedConsumer(currentModule, moduleDeploymentProperties,
 				upstreamModuleSupportsPartition);
-		return new DownStreamModuleInfo(nextModuleCount, isDownStreamModulePartitioned);
+		return new ModulePartitionInfo(nextModuleCount, isDownStreamModulePartitioned);
 	}
 
 	private ModuleCoordinates getModuleCoordinates(StreamDefinition.DeploymentOrderIterator iterator, ModuleDefinition currentModule) {
@@ -277,15 +277,22 @@ public class StreamController {
 	}
 
 	/**
-	 * Holds composite state about a module in the context of deployment.
+	 * Holds partitioning state about a module in the context of deployment.
 	 */
-	private static class DownStreamModuleInfo {
-		private final int nextModuleCount;
-		private final boolean isDownStreamModulePartitioned;
+	private static class ModulePartitionInfo {
+		private final int instances;
+		private final boolean isPartitioned;
 
-		private DownStreamModuleInfo(int nextModuleCount, boolean isDownStreamModulePartitioned) {
-			this.nextModuleCount = nextModuleCount;
-			this.isDownStreamModulePartitioned = isDownStreamModulePartitioned;
+		private ModulePartitionInfo(int instances, boolean isPartitioned) {
+			this.instances = instances;
+			this.isPartitioned = isPartitioned;
+		}
+
+		/**
+		 * Return an info suitable for the initial module, <i>i.e.</i> the first one to be deployed.
+		 */
+		private static ModulePartitionInfo initial() {
+			return new ModulePartitionInfo(1, false);
 		}
 	}
 
