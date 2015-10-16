@@ -23,11 +23,11 @@ import java.util.List;
 import java.util.Set;
 
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
+import org.springframework.cloud.dataflow.core.ArtifactType;
 import org.springframework.cloud.dataflow.core.ModuleDefinition;
-import org.springframework.cloud.dataflow.core.ModuleType;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
-import org.springframework.cloud.dataflow.module.registry.ModuleRegistration;
-import org.springframework.cloud.dataflow.module.registry.ModuleRegistry;
+import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistration;
+import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistry;
 import org.springframework.cloud.stream.configuration.metadata.ModuleConfigurationMetadataResolver;
 import org.springframework.cloud.stream.module.resolver.ModuleResolver;
 import org.springframework.core.io.Resource;
@@ -39,16 +39,16 @@ import org.springframework.core.io.Resource;
  */
 class AddModuleOptionsExpansionStrategy implements ExpansionStrategy {
 
-	private final ModuleRegistry moduleRegistry;
+	private final ArtifactRegistry artifactRegistry;
 
 	private final ModuleConfigurationMetadataResolver moduleConfigurationMetadataResolver;
 
 	private final ModuleResolver moduleResolver;
 
-	public AddModuleOptionsExpansionStrategy(ModuleRegistry moduleRegistry,
+	public AddModuleOptionsExpansionStrategy(ArtifactRegistry artifactRegistry,
 			ModuleConfigurationMetadataResolver moduleConfigurationMetadataResolver,
 			ModuleResolver moduleResolver) {
-		this.moduleRegistry = moduleRegistry;
+		this.artifactRegistry = artifactRegistry;
 		this.moduleConfigurationMetadataResolver = moduleConfigurationMetadataResolver;
 		this.moduleResolver = moduleResolver;
 	}
@@ -59,20 +59,20 @@ class AddModuleOptionsExpansionStrategy implements ExpansionStrategy {
 		ModuleDefinition lastModule = streamDefinition.getDeploymentOrderIterator().next();
 
 		String lastModuleName = lastModule.getName();
-		ModuleRegistration lastModuleRegistration = null;
-		for (ModuleType moduleType : CompletionUtils.determinePotentialTypes(lastModule)) {
-			lastModuleRegistration = moduleRegistry.find(lastModuleName, moduleType);
-			if (lastModuleRegistration != null) {
+		ArtifactRegistration lastArtifactRegistration = null;
+		for (ArtifactType moduleType : CompletionUtils.determinePotentialTypes(lastModule)) {
+			lastArtifactRegistration = artifactRegistry.find(lastModuleName, moduleType);
+			if (lastArtifactRegistration != null) {
 				break;
 			}
 		}
-		if (lastModuleRegistration == null) {
+		if (lastArtifactRegistration == null) {
 			// Not a valid module name, do nothing
 			return false;
 		}
 		Set<String> alreadyPresentOptions = new HashSet<>(lastModule.getParameters().keySet());
 
-		Resource jarFile = moduleResolver.resolve(CompletionUtils.fromModuleCoordinates(lastModuleRegistration.getCoordinates()));
+		Resource jarFile = moduleResolver.resolve(CompletionUtils.fromModuleCoordinates(lastArtifactRegistration.getCoordinates()));
 
 		CompletionProposal.Factory proposals = expanding(text);
 

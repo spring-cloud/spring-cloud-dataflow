@@ -19,15 +19,15 @@ package org.springframework.cloud.dataflow.admin.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cloud.dataflow.admin.repository.TaskDefinitionRepository;
-import org.springframework.cloud.dataflow.core.ModuleCoordinates;
+import org.springframework.cloud.dataflow.core.ArtifactCoordinates;
+import org.springframework.cloud.dataflow.core.ArtifactType;
 import org.springframework.cloud.dataflow.core.ModuleDefinition;
 import org.springframework.cloud.dataflow.core.ModuleDeploymentId;
 import org.springframework.cloud.dataflow.core.ModuleDeploymentRequest;
-import org.springframework.cloud.dataflow.core.ModuleType;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.module.deployer.ModuleDeployer;
-import org.springframework.cloud.dataflow.module.registry.ModuleRegistration;
-import org.springframework.cloud.dataflow.module.registry.ModuleRegistry;
+import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistration;
+import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistry;
 import org.springframework.cloud.dataflow.rest.resource.TaskDefinitionResource;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
@@ -64,24 +64,24 @@ public class TaskController {
 	private ModuleDeployer moduleDeployer;
 
 	/**
-	 * The module registry this controller will use to look up modules.
+	 * The artifact registry this controller will use to look up modules.
 	 */
-	private final ModuleRegistry registry;
+	private final ArtifactRegistry registry;
 
 	/**
 	 * Creates a {@code TaskController} that delegates
 	 * <ul>
 	 *     <li>CRUD operations to the provided {@link TaskDefinitionRepository}</li>
-	 *     <li>module coordinate retrieval to the provided {@link ModuleRegistry}</li>
+	 *     <li>module coordinate retrieval to the provided {@link ArtifactRegistry}</li>
 	 *     <li>deployment/launching operations to the provided {@link ModuleDeployer}</li>
 	 * </ul>
 	 *
 	 * @param repository the repository this controller will use for task CRUD operations.
-	 * @param registry module registry this controller will use to look up modules.
+	 * @param registry artifact registry this controller will use to look up modules.
 	 * @param deployer the deployer this controller will use to deploy/launch task modules.
 	 */
 	@Autowired
-	public TaskController(TaskDefinitionRepository repository, ModuleRegistry registry,
+	public TaskController(TaskDefinitionRepository repository, ArtifactRegistry registry,
 			@Qualifier("taskModuleDeployer") ModuleDeployer deployer) {
 		Assert.notNull(repository, "repository must not be null");
 		Assert.notNull(registry, "registry must not be null");
@@ -143,12 +143,12 @@ public class TaskController {
 		Assert.notNull(taskDefinition, String.format("no task defined: %s", name));
 
 		ModuleDefinition module = taskDefinition.getModuleDefinition();
-		ModuleRegistration registration = this.registry.find(module.getName(), ModuleType.task);
+		ArtifactRegistration registration = this.registry.find(module.getName(), ArtifactType.task);
 		if (registration == null) {
 			throw new IllegalArgumentException(String.format(
-					"Module %s of type %s not found in registry", module.getName(), ModuleType.task));
+					"Module %s of type %s not found in registry", module.getName(), ArtifactType.task));
 		}
-		ModuleCoordinates coordinates = registration.getCoordinates();
+		ArtifactCoordinates coordinates = registration.getCoordinates();
 		// todo: pass deployment properties
 		this.moduleDeployer.deploy(new ModuleDeploymentRequest(module, coordinates));
 	}

@@ -14,30 +14,30 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.dataflow.module.registry;
+package org.springframework.cloud.dataflow.artifact.registry;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.cloud.dataflow.core.ModuleCoordinates;
-import org.springframework.cloud.dataflow.core.ModuleType;
+import org.springframework.cloud.dataflow.core.ArtifactCoordinates;
+import org.springframework.cloud.dataflow.core.ArtifactType;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
 /**
- * {@link ModuleRegistry} implementation backed by Redis.
+ * {@link ArtifactRegistry} implementation backed by Redis.
  *
  * @author Patrick Peralta
  * @author Mark Fisher
  */
-public class RedisModuleRegistry implements ModuleRegistry {
+public class RedisArtifactRegistry implements ArtifactRegistry {
 
 	/**
-	 * Prefix for keys used for storing module coordinates.
+	 * Prefix for keys used for storing artifact coordinates.
 	 */
-	public static final String KEY_PREFIX = "spring.cloud.module.";
+	public static final String KEY_PREFIX = "spring.cloud.artifact.";
 
 	/**
 	 * Redis operations template.
@@ -46,32 +46,32 @@ public class RedisModuleRegistry implements ModuleRegistry {
 
 
 	/**
-	 * Construct a {@code RedisModuleRegistry} with the provided
+	 * Construct a {@code RedisArtifactRegistry} with the provided
 	 * {@link RedisConnectionFactory}.
 	 *
 	 * @param redisConnectionFactory connection factory for Redis
 	 */
-	public RedisModuleRegistry(RedisConnectionFactory redisConnectionFactory) {
+	public RedisArtifactRegistry(RedisConnectionFactory redisConnectionFactory) {
 		redisOperations = new StringRedisTemplate(redisConnectionFactory);
 	}
 
 	@Override
-	public ModuleRegistration find(String name, ModuleType type) {
+	public ArtifactRegistration find(String name, ArtifactType type) {
 		String coordinates = redisOperations.<String, String>boundHashOps(KEY_PREFIX + type).get(name);
 		return (coordinates == null ? null :
-				new ModuleRegistration(name, type, ModuleCoordinates.parse(coordinates)));
+				new ArtifactRegistration(name, type, ArtifactCoordinates.parse(coordinates)));
 	}
 
 	@Override
-	public List<ModuleRegistration> findAll() {
-		List<ModuleRegistration> list = new ArrayList<>();
+	public List<ArtifactRegistration> findAll() {
+		List<ArtifactRegistration> list = new ArrayList<>();
 
-		for (ModuleType type : ModuleType.values()) {
+		for (ArtifactType type : ArtifactType.values()) {
 			for (Map.Entry<String, String> entry :
 					redisOperations.<String, String>boundHashOps(KEY_PREFIX + type)
 							.entries().entrySet()) {
-				list.add(new ModuleRegistration(entry.getKey(), type,
-						ModuleCoordinates.parse(entry.getValue())));
+				list.add(new ArtifactRegistration(entry.getKey(), type,
+						ArtifactCoordinates.parse(entry.getValue())));
 			}
 		}
 
@@ -79,13 +79,13 @@ public class RedisModuleRegistry implements ModuleRegistry {
 	}
 
 	@Override
-	public void save(ModuleRegistration registration) {
+	public void save(ArtifactRegistration registration) {
 		redisOperations.boundHashOps(KEY_PREFIX + registration.getType())
 				.put(registration.getName(), registration.getCoordinates().toString());
 	}
 
 	@Override
-	public void delete(String name, ModuleType type) {
+	public void delete(String name, ArtifactType type) {
 		redisOperations.boundHashOps(KEY_PREFIX + type).delete(name);
 	}
 

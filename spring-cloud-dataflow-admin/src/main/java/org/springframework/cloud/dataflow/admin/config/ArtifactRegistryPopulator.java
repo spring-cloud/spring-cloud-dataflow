@@ -16,26 +16,26 @@
 
 package org.springframework.cloud.dataflow.admin.config;
 
-import static org.springframework.cloud.dataflow.core.ModuleType.processor;
-import static org.springframework.cloud.dataflow.core.ModuleType.sink;
-import static org.springframework.cloud.dataflow.core.ModuleType.source;
-import static org.springframework.cloud.dataflow.core.ModuleType.task;
+import static org.springframework.cloud.dataflow.core.ArtifactType.processor;
+import static org.springframework.cloud.dataflow.core.ArtifactType.sink;
+import static org.springframework.cloud.dataflow.core.ArtifactType.source;
+import static org.springframework.cloud.dataflow.core.ArtifactType.task;
 
 import javax.annotation.PostConstruct;
 
-import org.springframework.cloud.dataflow.core.ModuleCoordinates;
-import org.springframework.cloud.dataflow.core.ModuleType;
-import org.springframework.cloud.dataflow.module.registry.ModuleRegistration;
-import org.springframework.cloud.dataflow.module.registry.ModuleRegistry;
+import org.springframework.cloud.dataflow.core.ArtifactCoordinates;
+import org.springframework.cloud.dataflow.core.ArtifactType;
+import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistration;
+import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistry;
 import org.springframework.util.Assert;
 
 /**
- * Populates a {@link ModuleRegistry} with default modules.
+ * Populates a {@link ArtifactRegistry} with default modules.
  *
  * @author Patrick Peralta
  * @author Mark Fisher
  */
-public class ModuleRegistryPopulator {
+public class ArtifactRegistryPopulator {
 
 	/**
 	 * Group ID for default stream modules.
@@ -53,18 +53,18 @@ public class ModuleRegistryPopulator {
 	private static final String DEFAULT_VERSION = "1.0.0.BUILD-SNAPSHOT";
 
 	/**
-	 * The {@link ModuleRegistry} to populate.
+	 * The {@link ArtifactRegistry} to populate.
 	 */
-	private final ModuleRegistry moduleRegistry;
+	private final ArtifactRegistry artifactRegistry;
 
 	/**
-	 * Construct a {@code ModuleRegistryPopulator} with the provided {@link ModuleRegistry}.
+	 * Construct a {@code ArtifactRegistryPopulator} with the provided {@link ArtifactRegistry}.
 	 *
-	 * @param moduleRegistry the {@link ModuleRegistry} to populate.
+	 * @param artifactRegistry the {@link ArtifactRegistry} to populate.
 	 */
-	public ModuleRegistryPopulator(ModuleRegistry moduleRegistry) {
-		Assert.notNull(moduleRegistry, "ModuleRegistry must not be null");
-		this.moduleRegistry = moduleRegistry;
+	public ArtifactRegistryPopulator(ArtifactRegistry artifactRegistry) {
+		Assert.notNull(artifactRegistry, "ArtifactRegistry must not be null");
+		this.artifactRegistry = artifactRegistry;
 	}
 
 	/**
@@ -99,9 +99,9 @@ public class ModuleRegistryPopulator {
 	 * @param name module name
 	 * @param type module type
 	 */
-	private void populateDefault(String name, ModuleType type) {
-		if (this.moduleRegistry.find(name, type) == null) {
-			this.moduleRegistry.save(new ModuleRegistration(name, type,
+	private void populateDefault(String name, ArtifactType type) {
+		if (this.artifactRegistry.find(name, type) == null) {
+			this.artifactRegistry.save(new ArtifactRegistration(name, type,
 				(type == task) ?
 					defaultTaskCoordinatesFor(name + '-' + type) :
 					defaultStreamCoordinatesFor(name + '-' + type)));
@@ -114,8 +114,8 @@ public class ModuleRegistryPopulator {
 	 * @param moduleName module name for which to provide default coordinates
 	 * @return default coordinates for the provided module
 	 */
-	private ModuleCoordinates defaultTaskCoordinatesFor(String moduleName) {
-		return ModuleCoordinates.parse(String.format("%s:%s:%s",
+	private ArtifactCoordinates defaultTaskCoordinatesFor(String moduleName) {
+		return ArtifactCoordinates.parse(String.format("%s:%s:%s",
 				DEFAULT_TASK_GROUP_ID, moduleName, DEFAULT_VERSION));
 	}
 
@@ -126,8 +126,8 @@ public class ModuleRegistryPopulator {
 	 * @param moduleName module name for which to provide default coordinates
 	 * @return default coordinates for the provided module
 	 */
-	private ModuleCoordinates defaultStreamCoordinatesFor(String moduleName) {
-		return ModuleCoordinates.parse(String.format("%s:%s:%s",
+	private ArtifactCoordinates defaultStreamCoordinatesFor(String moduleName) {
+		return ArtifactCoordinates.parse(String.format("%s:%s:%s",
 				DEFAULT_STREAM_GROUP_ID, moduleName, DEFAULT_VERSION));
 	}
 

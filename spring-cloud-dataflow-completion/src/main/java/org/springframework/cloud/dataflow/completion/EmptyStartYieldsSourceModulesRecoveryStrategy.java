@@ -18,9 +18,9 @@ package org.springframework.cloud.dataflow.completion;
 
 import java.util.List;
 
-import org.springframework.cloud.dataflow.core.ModuleType;
-import org.springframework.cloud.dataflow.module.registry.ModuleRegistration;
-import org.springframework.cloud.dataflow.module.registry.ModuleRegistry;
+import org.springframework.cloud.dataflow.core.ArtifactType;
+import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistration;
+import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistry;
 
 /**
  * Proposes source module names when the user has typed nothing.
@@ -30,19 +30,19 @@ import org.springframework.cloud.dataflow.module.registry.ModuleRegistry;
 class EmptyStartYieldsSourceModulesRecoveryStrategy extends
 		StacktraceFingerprintingRecoveryStrategy<IllegalArgumentException> {
 
-	private final ModuleRegistry moduleRegistry;
+	private final ArtifactRegistry artifactRegistry;
 
-	public EmptyStartYieldsSourceModulesRecoveryStrategy(ModuleRegistry moduleRegistry) {
+	public EmptyStartYieldsSourceModulesRecoveryStrategy(ArtifactRegistry artifactRegistry) {
 		super(IllegalArgumentException.class, "");
-		this.moduleRegistry = moduleRegistry;
+		this.artifactRegistry = artifactRegistry;
 	}
 
 	@Override
 	public void addProposals(String dsl, IllegalArgumentException exception,
 			int detailLevel, List<CompletionProposal> proposals) {
 		CompletionProposal.Factory completionFactory = CompletionProposal.expanding(dsl);
-		for (ModuleRegistration moduleRegistration : moduleRegistry.findAll()) {
-			if (moduleRegistration.getType() == ModuleType.source) {
+		for (ArtifactRegistration moduleRegistration : artifactRegistry.findAll()) {
+			if (moduleRegistration.getType() == ArtifactType.source) {
 				proposals.add(completionFactory.withSeparateTokens(moduleRegistration.getName(),
 						"Start with a source module"));
 			}

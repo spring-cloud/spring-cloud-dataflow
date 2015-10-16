@@ -17,10 +17,34 @@
 package org.springframework.cloud.dataflow.core;
 
 /**
- * Enumeration of module types.
+ * Enumeration of artifact types.
  *
  * @author Patrick Peralta
+ * @author Eric Bottard
  */
-public enum ModuleType {
-	source, processor, sink, task
+public enum ArtifactType {
+	/**
+	 * A module type that appears in a stream, at first position.
+	 */
+	source,
+
+	/**
+	 * A module type that appears in a stream, in middle position.
+	 */
+	processor,
+
+	/**
+	 * A module type that appears in a stream, in last position.
+	 */
+	sink,
+
+	/**
+	 * A module type to execute a short-lived process.
+	 */
+	task,
+
+	/**
+	 * A supporting library to a module, either as a single (jar) maven artifact, or as a bom.
+	 */
+	library
 }

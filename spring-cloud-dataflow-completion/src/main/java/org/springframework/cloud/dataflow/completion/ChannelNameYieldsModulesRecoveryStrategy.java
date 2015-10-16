@@ -16,13 +16,13 @@
 
 package org.springframework.cloud.dataflow.completion;
 
-import static org.springframework.cloud.dataflow.core.ModuleType.*;
+import static org.springframework.cloud.dataflow.core.ArtifactType.*;
 
 import java.util.List;
 
 import org.springframework.cloud.dataflow.core.dsl.CheckPointedParseException;
-import org.springframework.cloud.dataflow.module.registry.ModuleRegistration;
-import org.springframework.cloud.dataflow.module.registry.ModuleRegistry;
+import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistration;
+import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistry;
 
 /**
  * Proposes module names when the user has typed a named channel redirection.
@@ -32,11 +32,11 @@ import org.springframework.cloud.dataflow.module.registry.ModuleRegistry;
 class ChannelNameYieldsModulesRecoveryStrategy extends
 		StacktraceFingerprintingRecoveryStrategy<CheckPointedParseException> {
 
-	private final ModuleRegistry moduleRegistry;
+	private final ArtifactRegistry artifactRegistry;
 
-	public ChannelNameYieldsModulesRecoveryStrategy(ModuleRegistry moduleRegistry) {
+	public ChannelNameYieldsModulesRecoveryStrategy(ArtifactRegistry artifactRegistry) {
 		super(CheckPointedParseException.class, "queue:foo >", "queue:foo > ");
-		this.moduleRegistry = moduleRegistry;
+		this.artifactRegistry = artifactRegistry;
 	}
 
 	@Override
@@ -53,7 +53,7 @@ class ChannelNameYieldsModulesRecoveryStrategy extends
 	public void addProposals(String dsl, CheckPointedParseException exception,
 			int detailLevel, List<CompletionProposal> proposals) {
 		CompletionProposal.Factory completionFactory = CompletionProposal.expanding(dsl);
-		for (ModuleRegistration moduleRegistration : moduleRegistry.findAll()) {
+		for (ArtifactRegistration moduleRegistration : artifactRegistry.findAll()) {
 			if (moduleRegistration.getType() == processor || moduleRegistration.getType() == sink) {
 				proposals.add(completionFactory.withSeparateTokens(moduleRegistration.getName(),
 						"Wire named channel into a " + moduleRegistration.getType() + " module"));

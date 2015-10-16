@@ -32,13 +32,13 @@ import org.springframework.boot.loader.archive.Archive;
 import org.springframework.boot.loader.archive.ExplodedArchive;
 import org.springframework.boot.loader.archive.JarFileArchive;
 import org.springframework.cloud.dataflow.core.ModuleDefinition;
-import org.springframework.cloud.dataflow.core.ModuleType;
+import org.springframework.cloud.dataflow.core.ArtifactType;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.dsl.CheckPointedParseException;
 import org.springframework.cloud.dataflow.core.dsl.Token;
 import org.springframework.cloud.dataflow.core.dsl.TokenKind;
-import org.springframework.cloud.dataflow.module.registry.ModuleRegistration;
-import org.springframework.cloud.dataflow.module.registry.ModuleRegistry;
+import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistration;
+import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistry;
 import org.springframework.cloud.stream.configuration.metadata.ModuleConfigurationMetadataResolver;
 import org.springframework.cloud.stream.module.resolver.ModuleResolver;
 import org.springframework.core.io.Resource;
@@ -51,7 +51,7 @@ import org.springframework.core.io.Resource;
  */
 public class ConfigurationPropertyValueHintExpansionStrategy implements ExpansionStrategy {
 
-	private final ModuleRegistry moduleRegistry;
+	private final ArtifactRegistry artifactRegistry;
 
 	private final ModuleResolver moduleResolver;
 
@@ -60,10 +60,10 @@ public class ConfigurationPropertyValueHintExpansionStrategy implements Expansio
 	@Autowired
 	private ValueHintProvider[] valueHintProviders = new ValueHintProvider[0];
 
-	ConfigurationPropertyValueHintExpansionStrategy(ModuleRegistry moduleRegistry,
+	ConfigurationPropertyValueHintExpansionStrategy(ArtifactRegistry artifactRegistry,
 			ModuleResolver moduleResolver,
 			ModuleConfigurationMetadataResolver moduleConfigurationMetadataResolver) {
-		this.moduleRegistry = moduleRegistry;
+		this.artifactRegistry = artifactRegistry;
 		this.moduleResolver = moduleResolver;
 		this.moduleConfigurationMetadataResolver = moduleConfigurationMetadataResolver;
 	}
@@ -84,20 +84,20 @@ public class ConfigurationPropertyValueHintExpansionStrategy implements Expansio
 		String alreadyTyped = lastModule.getParameters().get(propertyName);
 
 		String lastModuleName = lastModule.getName();
-		ModuleRegistration lastModuleRegistration = null;
-		for (ModuleType moduleType : CompletionUtils.determinePotentialTypes(lastModule)) {
-			lastModuleRegistration = moduleRegistry.find(lastModuleName, moduleType);
-			if (lastModuleRegistration != null) {
+		ArtifactRegistration lastArtifactRegistration = null;
+		for (ArtifactType moduleType : CompletionUtils.determinePotentialTypes(lastModule)) {
+			lastArtifactRegistration = artifactRegistry.find(lastModuleName, moduleType);
+			if (lastArtifactRegistration != null) {
 				break;
 			}
 		}
 
-		if (lastModuleRegistration == null) {
+		if (lastArtifactRegistration == null) {
 			// Not a valid module name, do nothing
 			return false;
 		}
 		Resource moduleResource = moduleResolver.resolve(CompletionUtils
-				.fromModuleCoordinates(lastModuleRegistration.getCoordinates()));
+				.fromModuleCoordinates(lastArtifactRegistration.getCoordinates()));
 
 		CompletionProposal.Factory proposals = expanding(text);
 

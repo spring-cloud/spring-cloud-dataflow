@@ -158,6 +158,19 @@ public class ModuleDefinition {
 		 */
 		private final Map<String, String> parameters = new HashMap<String, String>();
 
+		/**
+		 * Create a new builder that is initialized with properties of the given definition.
+		 * Useful for "mutating" a definition by building a slightly different copy.
+		 */
+		public static Builder from(ModuleDefinition definition) {
+			Builder builder = new Builder();
+			builder.setGroup(definition.getGroup())
+				.setLabel(definition.getLabel())
+				.setName(definition.getName())
+				.addParameters(definition.getParameters());
+			return builder;
+		}
+
 
 		/**
 		 * Set the module name.

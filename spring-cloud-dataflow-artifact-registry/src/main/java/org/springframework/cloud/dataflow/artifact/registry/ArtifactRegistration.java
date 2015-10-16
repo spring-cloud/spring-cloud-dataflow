@@ -14,43 +14,42 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.dataflow.module.registry;
+package org.springframework.cloud.dataflow.artifact.registry;
 
-import org.springframework.cloud.dataflow.core.ModuleCoordinates;
-import org.springframework.cloud.dataflow.core.ModuleType;
+import org.springframework.cloud.dataflow.core.ArtifactCoordinates;
+import org.springframework.cloud.dataflow.core.ArtifactType;
 import org.springframework.util.Assert;
 
 /**
- * Registration for a module name, {@link ModuleType type}, and
- * {@link ModuleCoordinates artifact coordinates}.
+ * This maps a (name + type) pair to artifact coordinates.
  *
  * @author Patrick Peralta
  */
-public class ModuleRegistration implements Comparable<ModuleRegistration> {
+public class ArtifactRegistration implements Comparable<ArtifactRegistration> {
 
 	/**
-	 * Module name.
+	 * Module/Library symbolic name.
 	 */
 	private final String name;
 
 	/**
-	 * Module type.
+	 * Artifact type.
 	 */
-	private final ModuleType type;
+	private final ArtifactType type;
 
 	/**
-	 * Maven coordinates for module artifact.
+	 * Maven coordinates for the artifact.
 	 */
-	private final ModuleCoordinates coordinates;
+	private final ArtifactCoordinates coordinates;
 
 	/**
-	 * Construct a {@code ModuleRegistration} object.
+	 * Construct a {@code ArtifactRegistration} object.
 	 *
-	 * @param name module name
-	 * @param type module type
-	 * @param coordinates coordinates for module artifact
+	 * @param name artifact name
+	 * @param type artifact type
+	 * @param coordinates coordinates for the artifact
 	 */
-	public ModuleRegistration(String name, ModuleType type, ModuleCoordinates coordinates) {
+	public ArtifactRegistration(String name, ArtifactType type, ArtifactCoordinates coordinates) {
 		Assert.notNull(name, "name must not be null");
 		Assert.notNull(type, "type must not be null");
 		Assert.notNull(coordinates, "coordinates must not be null");
@@ -69,20 +68,20 @@ public class ModuleRegistration implements Comparable<ModuleRegistration> {
 	/**
 	 * @see #type
 	 */
-	public ModuleType getType() {
+	public ArtifactType getType() {
 		return type;
 	}
 
 	/**
 	 * @see #coordinates
 	 */
-	public ModuleCoordinates getCoordinates() {
+	public ArtifactCoordinates getCoordinates() {
 		return coordinates;
 	}
 
 	@Override
 	public String toString() {
-		return "ModuleRegistration{" +
+		return "ArtifactRegistration{" +
 				"name='" + name + '\'' +
 				", type='" + type + '\'' +
 				", coordinates=" + coordinates +
@@ -90,7 +89,7 @@ public class ModuleRegistration implements Comparable<ModuleRegistration> {
 	}
 
 	@Override
-	public int compareTo(ModuleRegistration that) {
+	public int compareTo(ArtifactRegistration that) {
 		int i = this.type.compareTo(that.type);
 		if (i == 0) {
 			i = this.name.compareTo(that.name);

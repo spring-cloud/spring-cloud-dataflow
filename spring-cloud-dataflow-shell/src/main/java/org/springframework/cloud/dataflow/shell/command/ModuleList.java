@@ -20,7 +20,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.springframework.cloud.dataflow.core.ModuleType;
+import org.springframework.cloud.dataflow.core.ArtifactType;
 import org.springframework.cloud.dataflow.rest.resource.ModuleRegistrationResource;
 import org.springframework.shell.support.table.Table;
 import org.springframework.shell.support.table.TableHeader;
@@ -41,8 +41,8 @@ class ModuleList {
 	private static final Map<String, Integer> typeToColumn = new LinkedHashMap<String, Integer>();
 
 	static {
-		for (int i = 0; i < ModuleType.values().length;) {
-			typeToColumn.put(ModuleType.values()[i].name(), ++i); // 1 based
+		for (int i = 0; i < ArtifactType.values().length;) {
+			typeToColumn.put(ArtifactType.values()[i].name(), ++i); // 1 based
 		}
 	}
 

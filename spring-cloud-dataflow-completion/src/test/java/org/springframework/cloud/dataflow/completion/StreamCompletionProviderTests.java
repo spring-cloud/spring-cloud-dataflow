@@ -34,12 +34,11 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.loader.LaunchedURLClassLoader;
 import org.springframework.boot.loader.archive.Archive;
-import org.springframework.cloud.dataflow.core.ModuleCoordinates;
-import org.springframework.cloud.dataflow.core.ModuleType;
-import org.springframework.cloud.dataflow.module.registry.ModuleRegistration;
-import org.springframework.cloud.dataflow.module.registry.ModuleRegistry;
+import org.springframework.cloud.dataflow.core.ArtifactType;
+import org.springframework.cloud.dataflow.core.ArtifactCoordinates;
+import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistration;
+import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistry;
 import org.springframework.cloud.stream.configuration.metadata.ModuleConfigurationMetadataResolver;
-import org.springframework.cloud.stream.module.launcher.ModuleJarLauncher;
 import org.springframework.cloud.stream.module.resolver.Coordinates;
 import org.springframework.cloud.stream.module.resolver.ModuleResolver;
 import org.springframework.context.annotation.Bean;
@@ -263,13 +262,13 @@ public class StreamCompletionProviderTests {
 		private ResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
 
 		@Bean
-		public ModuleRegistry moduleRegistry() {
-			return new ModuleRegistry() {
+		public ArtifactRegistry artifactRegistry() {
+			return new ArtifactRegistry() {
 				@Override
-				public ModuleRegistration find(String name, ModuleType type) {
+				public ArtifactRegistration find(String name, ArtifactType type) {
 					String filename = name + "-" + type;
 					if (new File(ROOT, filename).exists()) {
-						return new ModuleRegistration(name, type, ModuleCoordinates.parse("com.acme:" + filename + ":1.0:jar"));
+						return new ArtifactRegistration(name, type, ArtifactCoordinates.parse("com.acme:" + filename + ":1.0:jar"));
 					}
 					else {
 						return null;
@@ -277,8 +276,8 @@ public class StreamCompletionProviderTests {
 				}
 
 				@Override
-				public List<ModuleRegistration> findAll() {
-					List<ModuleRegistration> result = new ArrayList<>();
+				public List<ArtifactRegistration> findAll() {
+					List<ArtifactRegistration> result = new ArrayList<>();
 					for (File file : ROOT.listFiles(FILTER)) {
 						result.add(makeModuleRegistration(file.getName()));
 					}
@@ -286,21 +285,21 @@ public class StreamCompletionProviderTests {
 				}
 
 				@Override
-				public void save(ModuleRegistration registration) {
+				public void save(ArtifactRegistration registration) {
 					throw new UnsupportedOperationException();
 				}
 
 				@Override
-				public void delete(String name, ModuleType type) {
+				public void delete(String name, ArtifactType type) {
 					throw new UnsupportedOperationException();
 				}
 
-				private ModuleRegistration makeModuleRegistration(String fileName) {
+				private ArtifactRegistration makeModuleRegistration(String fileName) {
 					Matcher matcher = Pattern.compile("(?<name>.+)-(?<type>.+)").matcher(fileName);
 					Assert.isTrue(matcher.matches());
 					String name = matcher.group("name");
-					ModuleType type = ModuleType.valueOf(matcher.group("type"));
-					return new ModuleRegistration(name, type, ModuleCoordinates.parse("com.acme:" + fileName + ":1.0:jar"));
+					ArtifactType type = ArtifactType.valueOf(matcher.group("type"));
+					return new ArtifactRegistration(name, type, ArtifactCoordinates.parse("com.acme:" + fileName + ":1.0:jar"));
 
 				}
 			};

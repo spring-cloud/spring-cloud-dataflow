@@ -16,14 +16,14 @@
 
 package org.springframework.cloud.dataflow.completion;
 
-import static org.springframework.cloud.dataflow.core.ModuleType.*;
+import static org.springframework.cloud.dataflow.core.ArtifactType.*;
 
 import java.util.List;
 
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.dsl.CheckPointedParseException;
-import org.springframework.cloud.dataflow.module.registry.ModuleRegistration;
-import org.springframework.cloud.dataflow.module.registry.ModuleRegistry;
+import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistration;
+import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistry;
 
 /**
  * Provides completions for the case where the user has entered a pipe
@@ -34,11 +34,11 @@ import org.springframework.cloud.dataflow.module.registry.ModuleRegistry;
 public class ModulesAfterPipeRecoveryStrategy extends
 		StacktraceFingerprintingRecoveryStrategy<CheckPointedParseException> {
 
-	private final ModuleRegistry moduleRegistry;
+	private final ArtifactRegistry artifactRegistry;
 
-	ModulesAfterPipeRecoveryStrategy(ModuleRegistry moduleRegistry) {
+	ModulesAfterPipeRecoveryStrategy(ArtifactRegistry artifactRegistry) {
 		super(CheckPointedParseException.class, "foo |", "foo | ");
-		this.moduleRegistry = moduleRegistry;
+		this.artifactRegistry = artifactRegistry;
 	}
 
 
@@ -52,7 +52,7 @@ public class ModulesAfterPipeRecoveryStrategy extends
 		CompletionProposal.Factory proposals = CompletionProposal.expanding(dsl);
 
 		// We only support full streams at the moment, so completions can only be processor or sink
-		for (ModuleRegistration moduleRegistration : moduleRegistry.findAll()) {
+		for (ArtifactRegistration moduleRegistration : artifactRegistry.findAll()) {
 			if (moduleRegistration.getType() == processor || moduleRegistration.getType() == sink) {
 				String expansion = CompletionUtils.maybeQualifyWithLabel(moduleRegistration.getName(), streamDefinition);
 				collector.add(proposals.withSeparateTokens(expansion,

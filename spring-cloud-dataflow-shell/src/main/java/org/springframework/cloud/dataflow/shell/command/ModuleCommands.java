@@ -20,7 +20,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
-import org.springframework.cloud.dataflow.core.ModuleType;
+import org.springframework.cloud.dataflow.core.ArtifactType;
 import org.springframework.cloud.dataflow.rest.client.ModuleOperations;
 import org.springframework.cloud.dataflow.rest.resource.DetailedModuleRegistrationResource;
 import org.springframework.cloud.dataflow.rest.resource.ModuleRegistrationResource;
@@ -75,7 +75,7 @@ public class ModuleCommands implements CommandMarker {
 			@CliOption(mandatory = false,
 					key = {"type"},
 					help = "type of the module to query")
-			ModuleType type,
+			ArtifactType type,
 			@CliOption(key = "hidden",
 					help = "whether to show 'hidden' options",
 					specifiedDefaultValue = "true",
@@ -127,7 +127,7 @@ public class ModuleCommands implements CommandMarker {
 			@CliOption(mandatory = true,
 					key = {"type"},
 					help = "the type for the registered module")
-			ModuleType type,
+			ArtifactType type,
 			@CliOption(mandatory = true,
 					key = {"coordinates"},
 					help = "coordinates to the module archive")
@@ -150,7 +150,7 @@ public class ModuleCommands implements CommandMarker {
 			@CliOption(mandatory = false,
 					key = {"type"},
 					help = "type of the module to unregister")
-			ModuleType type) {
+			ArtifactType type) {
 
 		QualifiedModuleName module = processArgs(name, type);
 		moduleOperations().unregister(module.name, module.type);
@@ -192,14 +192,14 @@ public class ModuleCommands implements CommandMarker {
 	 * @param type module type; may be {@code null}
 	 * @return {@code QualifiedModuleName} for the provided arguments
 	 */
-	private QualifiedModuleName processArgs(String name, ModuleType type) {
+	private QualifiedModuleName processArgs(String name, ArtifactType type) {
 		if (type == null) {
 			String[] split = name.split("\\:");
 			if (split.length != 2) {
 				throw new IllegalArgumentException(
 						String.format("Expected format of 'name:type' for module name %s", name));
 			}
-			return new QualifiedModuleName(split[0], ModuleType.valueOf(split[1]));
+			return new QualifiedModuleName(split[0], ArtifactType.valueOf(split[1]));
 		}
 		else {
 			return new QualifiedModuleName(name, type);
@@ -211,11 +211,11 @@ public class ModuleCommands implements CommandMarker {
 	 */
 	private static class QualifiedModuleName {
 
-		public ModuleType type;
+		public ArtifactType type;
 
 		public String name;
 
-		public QualifiedModuleName(String name, ModuleType type) {
+		public QualifiedModuleName(String name, ArtifactType type) {
 			this.name = name;
 			this.type = type;
 		}

@@ -19,8 +19,8 @@ package org.springframework.cloud.dataflow.admin.configuration;
 import static org.mockito.Mockito.mock;
 
 import org.springframework.cloud.dataflow.module.deployer.ModuleDeployer;
-import org.springframework.cloud.dataflow.module.registry.InMemoryModuleRegistry;
-import org.springframework.cloud.dataflow.module.registry.ModuleRegistry;
+import org.springframework.cloud.dataflow.artifact.registry.InMemoryArtifactRegistry;
+import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistry;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
@@ -35,8 +35,8 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupp
 public class TestDependencies extends WebMvcConfigurationSupport {
 
 	@Bean
-	public ModuleRegistry moduleRegistry() {
-		return new InMemoryModuleRegistry();
+	public ArtifactRegistry artifactRegistry() {
+		return new InMemoryArtifactRegistry();
 	}
 
 	@Bean

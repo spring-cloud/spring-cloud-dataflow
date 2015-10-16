@@ -30,17 +30,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cloud.dataflow.admin.repository.DuplicateStreamException;
 import org.springframework.cloud.dataflow.admin.repository.StreamDefinitionRepository;
+import org.springframework.cloud.dataflow.core.ArtifactCoordinates;
+import org.springframework.cloud.dataflow.core.ArtifactType;
 import org.springframework.cloud.dataflow.core.BindingProperties;
-import org.springframework.cloud.dataflow.core.ModuleCoordinates;
 import org.springframework.cloud.dataflow.core.ModuleDefinition;
 import org.springframework.cloud.dataflow.core.ModuleDeploymentId;
 import org.springframework.cloud.dataflow.core.ModuleDeploymentRequest;
-import org.springframework.cloud.dataflow.core.ModuleType;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.module.ModuleStatus;
 import org.springframework.cloud.dataflow.module.deployer.ModuleDeployer;
-import org.springframework.cloud.dataflow.module.registry.ModuleRegistration;
-import org.springframework.cloud.dataflow.module.registry.ModuleRegistry;
+import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistration;
+import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistry;
 import org.springframework.cloud.dataflow.rest.resource.StreamDefinitionResource;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
 import org.springframework.data.domain.Pageable;
@@ -50,6 +50,7 @@ import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.mvc.ResourceAssemblerSupport;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -78,9 +79,9 @@ public class StreamController {
 	private final StreamDefinitionRepository repository;
 
 	/**
-	 * The module registry this controller will use to look up modules.
+	 * The artifact registry this controller will use to look up modules and libraries.
 	 */
-	private final ModuleRegistry registry;
+	private final ArtifactRegistry registry;
 
 	/**
 	 * The deployer this controller will use to deploy stream modules.
@@ -99,7 +100,7 @@ public class StreamController {
 	 * <ul>
 	 *     <li>CRUD operations to the provided {@link StreamDefinitionRepository}</li>
 	 *     <li>deployment operations to the provided {@link ModuleDeployer}</li>
-	 *     <li>module coordinate retrieval to the provided {@link ModuleRegistry}</li>
+	 *     <li>module coordinate retrieval to the provided {@link ArtifactRegistry}</li>
 	 * </ul>
 	 *
 	 * @param repository  the repository this controller will use for stream CRUD operations
@@ -107,7 +108,7 @@ public class StreamController {
 	 * @param deployer    the deployer this controller will use to deploy stream modules
 	 */
 	@Autowired
-	public StreamController(StreamDefinitionRepository repository, ModuleRegistry registry,
+	public StreamController(StreamDefinitionRepository repository, ArtifactRegistry registry,
 			@Qualifier("processModuleDeployer") ModuleDeployer deployer) {
 		Assert.notNull(repository, "repository must not be null");
 		Assert.notNull(registry, "registry must not be null");
@@ -229,13 +230,13 @@ public class StreamController {
 			ModuleDefinition currentModule = iterator.next();
 			boolean isFirst = !iterator.hasNext();
 			boolean isLast = (i == 0);
-			ModuleType type = determineModuleType(currentModule, isFirst, isLast);
-			ModuleRegistration registration = this.registry.find(currentModule.getName(), type);
+			ArtifactType type = determineModuleType(currentModule, isFirst, isLast);
+			ArtifactRegistration registration = this.registry.find(currentModule.getName(), type);
 			if (registration == null) {
 				throw new IllegalArgumentException(String.format(
 						"Module %s of type %s not found in registry", currentModule.getName(), type));
 			}
-			ModuleCoordinates coordinates = registration.getCoordinates();
+			ArtifactCoordinates coordinates = registration.getCoordinates();
 			Map<String, String> moduleDeploymentProperties = getModuleDeploymentProperties(currentModule, cumulatedDeploymentProperties);
 			boolean upstreamModuleSupportsPartition = upstreamModuleHasPartitionInfo(stream, currentModule, cumulatedDeploymentProperties);
 			// consumer module partition properties
@@ -246,42 +247,74 @@ public class StreamController {
 			if (isDownStreamModulePartitioned) {
 				updateProducerPartitionProperties(moduleDeploymentProperties, nextModuleCount);
 			}
-			this.deployer.deploy(new ModuleDeploymentRequest(currentModule, coordinates, moduleDeploymentProperties));
 			nextModuleCount = getNextModuleCount(moduleDeploymentProperties);
 			isDownStreamModulePartitioned = isPartitionedConsumer(currentModule, moduleDeploymentProperties,
 					upstreamModuleSupportsPartition);
+
+			currentModule = postProcessLibraryProperties(currentModule);
+
+			this.deployer.deploy(new ModuleDeploymentRequest(currentModule, coordinates, moduleDeploymentProperties));
 		}
 	}
 
-	private ModuleType determineModuleType(ModuleDefinition moduleDefinition, boolean isFirst, boolean isLast) {
-		ModuleType type = null;
+	/**
+	 * Looks at parameters of a module that represent maven coordinates and, if a simple name has been used,
+	 * resolve it from the {@link ArtifactRegistry}.
+	 */
+	private ModuleDefinition postProcessLibraryProperties(ModuleDefinition module) {
+		String includes = module.getParameters().get("includes");
+		if (includes == null) {
+			return module;
+		}
+		String[] libs = StringUtils.delimitedListToStringArray(includes, ",", " \t");
+		for (int i = 0; i < libs.length; i++) {
+			ArtifactCoordinates coordinates;
+			try {
+				coordinates = ArtifactCoordinates.parse(libs[i]);
+			}
+			catch (IllegalArgumentException e) {
+				ArtifactRegistration registration = registry.find(libs[i], ArtifactType.library);
+				if (registration == null) {
+					throw new IllegalArgumentException("'" + libs[i] + "' could not be parsed as maven coordinates and is not a registered library");
+				}
+				coordinates = registration.getCoordinates();
+			}
+			libs[i] = coordinates.toString();
+		}
+		return ModuleDefinition.Builder.from(module)
+				.setParameter("includes", StringUtils.arrayToCommaDelimitedString(libs))
+				.build();
+	}
+
+	private ArtifactType determineModuleType(ModuleDefinition moduleDefinition, boolean isFirst, boolean isLast) {
+		ArtifactType type = null;
 		if (isLast) {
 			if (moduleDefinition.getParameters().containsKey(BindingProperties.OUTPUT_BINDING_KEY)) {
 				if (isFirst) {
 					// single module stream with a named channel in the sink position
-					type = ModuleType.source;
+					type = ArtifactType.source;
 				}
 				else {
-					type = ModuleType.processor;
+					type = ArtifactType.processor;
 				}
 			}
 			else {
 				// this will handle any case that the module is a sink,
 				// even if a single module stream with a named input channel
-				type = ModuleType.sink;
+				type = ArtifactType.sink;
 			}
 		}
 		else if (isFirst) {
 			if (moduleDefinition.getParameters().containsKey(BindingProperties.INPUT_BINDING_KEY)) {
 				// stream begins with a named channel in the source position
-				type = ModuleType.processor;
+				type = ArtifactType.processor;
 			}
 			else { 
-				type = ModuleType.source;
+				type = ArtifactType.source;
 			}
 		}
 		else {
-			type = ModuleType.processor;
+			type = ArtifactType.processor;
 		}
 		return type;
 	}
