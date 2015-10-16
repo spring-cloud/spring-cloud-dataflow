@@ -155,12 +155,18 @@ public class StreamDefinition {
 			throw new UnsupportedOperationException();
 		}
 
-		public boolean isLastDownstream() {
-			return i == 1;
+		/**
+		 * Return whether or not this iterator is past the very first module to deploy.
+		 */
+		public boolean hasMoreDownstream() {
+			return i > 1;
 		}
 
-		public boolean isFirstUpstream() {
-			return !hasNext();
+		/**
+		 * Return whether or not there are more modules to deploy.
+		 */
+		public boolean hasMoreUpstream() {
+			return hasNext();
 		}
 
 	}

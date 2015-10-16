@@ -267,7 +267,7 @@ public class StreamController {
 	}
 
 	private ModuleCoordinates getModuleCoordinates(StreamDefinition.DeploymentOrderIterator iterator, ModuleDefinition currentModule) {
-		ModuleType type = determineModuleType(currentModule, iterator.isFirstUpstream(), iterator.isLastDownstream());
+		ModuleType type = determineModuleType(currentModule, !iterator.hasMoreUpstream(), !iterator.hasMoreDownstream());
 		ModuleRegistration registration = this.registry.find(currentModule.getName(), type);
 		if (registration == null) {
 			throw new IllegalArgumentException(String.format(
