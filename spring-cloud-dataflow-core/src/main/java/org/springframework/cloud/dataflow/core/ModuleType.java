@@ -22,5 +22,28 @@ package org.springframework.cloud.dataflow.core;
  * @author Patrick Peralta
  */
 public enum ModuleType {
-	source, processor, sink, task
+	/**
+	 * A module type that appears in a stream, at first position.
+	 */
+	source,
+
+	/**
+	 * A module type that appears in a stream, in middle position.
+	 */
+	processor,
+
+	/**
+	 * A module type that appears in a stream, in last position.
+	 */
+	sink,
+
+	/**
+	 * A module type to execute a short-lived process.
+	 */
+	task,
+
+	/**
+	 * A supporting library to a module, either as a single (jar) artifact, or as a bom.
+	 */
+	library
 }

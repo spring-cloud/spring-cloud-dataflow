@@ -50,6 +50,7 @@ import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.mvc.ResourceAssemblerSupport;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -250,7 +251,40 @@ public class StreamController {
 			nextModuleCount = getNextModuleCount(moduleDeploymentProperties);
 			isDownStreamModulePartitioned = isPartitionedConsumer(currentModule, moduleDeploymentProperties,
 					upstreamModuleSupportsPartition);
+
+			currentModule = postProcessLibraryProperties(currentModule);
+
+			this.deployer.deploy(new ModuleDeploymentRequest(currentModule, coordinates, moduleDeploymentProperties));
 		}
+	}
+
+	/**
+	 * Looks at parameters of a module that represent maven coordinates and, if a simple name has been used,
+	 * resolve it from the {@link ModuleRegistry}.
+	 */
+	private ModuleDefinition postProcessLibraryProperties(ModuleDefinition module) {
+		String includes = module.getParameters().get("includes");
+		if (includes == null) {
+			return module;
+		}
+		String[] libs = StringUtils.delimitedListToStringArray(includes, ",", " \t");
+		for (int i = 0; i < libs.length; i++) {
+			ModuleCoordinates coordinates;
+			try {
+				coordinates = ModuleCoordinates.parse(libs[i]);
+			}
+			catch (IllegalArgumentException e) {
+				ModuleRegistration registration = registry.find(libs[i], ModuleType.library);
+				if (registration == null) {
+					throw new IllegalArgumentException("'" + libs[i] + "' could not be parsed as maven coordinates and is not a registered library");
+				}
+				coordinates = registration.getCoordinates();
+			}
+			libs[i] = coordinates.toString();
+		}
+		return ModuleDefinition.Builder.from(module)
+				.setParameter("includes", StringUtils.arrayToCommaDelimitedString(libs))
+				.build();
 	}
 
 	private ModuleType determineModuleType(ModuleDefinition moduleDefinition, boolean isFirst, boolean isLast) {
