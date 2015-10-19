@@ -76,7 +76,7 @@ public class ConfigurationPropertyValueHintRecoveryStrategy extends StacktraceFi
 			// Not a valid module name, do nothing
 			return;
 		}
-		Resource moduleResource = moduleResolver.resolve(CompletionUtils.adapt(lastModuleRegistration.getCoordinates()));
+		Resource moduleResource = moduleResolver.resolve(CompletionUtils.fromModuleCoordinates(lastModuleRegistration.getCoordinates()));
 
 		CompletionProposal.Factory proposals = expanding(dsl);
 
@@ -120,7 +120,7 @@ public class ConfigurationPropertyValueHintRecoveryStrategy extends StacktraceFi
 
 		String lastModuleName = lastModule.getName();
 		ModuleRegistration lastModuleRegistration = null;
-		for (ModuleType moduleType : CompletionUtils.inferType(lastModule)) {
+		for (ModuleType moduleType : CompletionUtils.determinePotentialTypes(lastModule)) {
 			lastModuleRegistration = moduleRegistry.find(lastModuleName, moduleType);
 			if (lastModuleRegistration != null) {
 				break;

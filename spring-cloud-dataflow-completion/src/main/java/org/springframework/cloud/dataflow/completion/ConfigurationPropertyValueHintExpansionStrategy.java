@@ -81,7 +81,7 @@ public class ConfigurationPropertyValueHintExpansionStrategy implements Expansio
 
 		String lastModuleName = lastModule.getName();
 		ModuleRegistration lastModuleRegistration = null;
-		for (ModuleType moduleType : CompletionUtils.inferType(lastModule)) {
+		for (ModuleType moduleType : CompletionUtils.determinePotentialTypes(lastModule)) {
 			lastModuleRegistration = moduleRegistry.find(lastModuleName, moduleType);
 			if (lastModuleRegistration != null) {
 				break;
@@ -92,7 +92,7 @@ public class ConfigurationPropertyValueHintExpansionStrategy implements Expansio
 			// Not a valid module name, do nothing
 			return false;
 		}
-		Resource moduleResource = moduleResolver.resolve(CompletionUtils.adapt(lastModuleRegistration.getCoordinates()));
+		Resource moduleResource = moduleResolver.resolve(CompletionUtils.fromModuleCoordinates(lastModuleRegistration.getCoordinates()));
 
 		CompletionProposal.Factory proposals = expanding(text);
 

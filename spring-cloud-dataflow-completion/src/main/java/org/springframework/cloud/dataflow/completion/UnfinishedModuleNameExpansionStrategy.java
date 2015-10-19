@@ -56,7 +56,7 @@ public class UnfinishedModuleNameExpansionStrategy implements ExpansionStrategy 
 		String alreadyTyped = lastModule.getName();
 		CompletionProposal.Factory proposals = CompletionProposal.expanding(text);
 
-		List<ModuleType> validTypesAtThisPosition = Arrays.asList(CompletionUtils.inferType(lastModule));
+		List<ModuleType> validTypesAtThisPosition = Arrays.asList(CompletionUtils.determinePotentialTypes(lastModule));
 
 		for (ModuleRegistration moduleRegistration : moduleRegistry.findAll()) {
 			String candidateName = moduleRegistration.getName();

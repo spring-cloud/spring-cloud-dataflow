@@ -18,8 +18,6 @@ package org.springframework.cloud.dataflow.completion;
 
 import java.util.HashSet;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.springframework.cloud.dataflow.core.BindingProperties;
 import org.springframework.cloud.dataflow.core.ModuleCoordinates;
@@ -27,7 +25,6 @@ import org.springframework.cloud.dataflow.core.ModuleDefinition;
 import org.springframework.cloud.dataflow.core.ModuleType;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.stream.module.resolver.Coordinates;
-import org.springframework.util.Assert;
 
 /**
  * Various utility methods used throughout the completion package.
@@ -47,9 +44,9 @@ public class CompletionUtils {
 	}
 
 	/**
-	 * Return the type(s) of a given module definition, in the context of code completion.
+	 * Return the type(s) a given module definition <em>could</em> have, in the context of code completion.
 	 */
-	static ModuleType[] inferType(ModuleDefinition moduleDefinition) {
+	static ModuleType[] determinePotentialTypes(ModuleDefinition moduleDefinition) {
 		Set<String> properties = moduleDefinition.getParameters().keySet();
 		if (properties.contains(BindingProperties.INPUT_BINDING_KEY)) {
 			// Can't be source. For the purpose of completion, being the last module
@@ -66,22 +63,22 @@ public class CompletionUtils {
 		}
 	}
 
-	static Coordinates adapt(ModuleCoordinates coordinates) {
-		return new Coordinates(coordinates.getGroupId(), coordinates.getArtifactId(), coordinates.getExtension(), "exec", coordinates.getVersion());
+	static Coordinates fromModuleCoordinates(ModuleCoordinates coordinates) {
+		return new Coordinates(coordinates.getGroupId(), coordinates.getArtifactId(), coordinates.getExtension(), coordinates.getClassifier(), coordinates.getVersion());
 	}
 
 	/**
 	 * Given a candidate module name, maybe prefix it with an auto-generated label if its use would clash with
 	 * an already existing definition.
+	 *
+	 * <p>As an example, consider the (unfinished) stream definition {@literal http | filter | filter}.
+	 * Here {@literal moduleName} refers to the second "filter" module name. An invocation of this
+	 * method would return {@literal "filter2: filter"} in that case.</p>
+	 * <p>Contrast this with the case of {@literal http | transform | filter}, where "filter" is not yet used.
+	 * This method would simply return an unaltered "filter" in that case.</p>
 	 */
 	static String maybeQualifyWithLabel(String moduleName, StreamDefinition streamDefinition) {
 		String candidate = moduleName;
-		Pattern pattern = Pattern.compile("^(?<prefix>.+?)(?<number>\\d+)?$");
-		Matcher matcher = pattern.matcher(moduleName);
-		Assert.isTrue(matcher.matches(), "Module name did match the expected format");
-		String prefix = matcher.group("prefix");
-		int counter = matcher.group("number") == null ? 2 : Integer.parseInt(matcher.group("number"));
-
 
 		Set<String> alreadyUsed = new HashSet<>();
 		for (ModuleDefinition moduleDefinition : streamDefinition.getModuleDefinitions()) {
@@ -89,8 +86,9 @@ public class CompletionUtils {
 		}
 
 		String result = candidate;
+		int counter = 2;
 		while (alreadyUsed.contains(candidate)) {
-			candidate = prefix + counter++;
+			candidate = moduleName + counter++;
 			result = String.format("%s: %s", candidate, moduleName);
 		}
 		return result;

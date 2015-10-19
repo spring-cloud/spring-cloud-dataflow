@@ -40,10 +40,6 @@ public class CompletionProposalsResource extends ResourceSupport {
 		return proposals;
 	}
 
-	public void setProposals(List<Proposal> proposals) {
-		this.proposals = proposals;
-	}
-
 	/**
 	 * Represents a completion proposal for the DSL when using <i>e.g.</i> TAB completion in the Shell.
 	 *

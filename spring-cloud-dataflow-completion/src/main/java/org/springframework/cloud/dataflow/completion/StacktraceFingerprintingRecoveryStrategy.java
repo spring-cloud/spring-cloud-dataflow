@@ -80,7 +80,7 @@ public abstract class StacktraceFingerprintingRecoveryStrategy<E extends Excepti
 			}
 			catch (RuntimeException exception) {
 				if (this.exceptionClass.isAssignableFrom(exception.getClass())) {
-					computeFingerprint((E) exception);
+					addFingerprintForException((E) exception);
 				}
 				else {
 					throw exception;
@@ -92,7 +92,7 @@ public abstract class StacktraceFingerprintingRecoveryStrategy<E extends Excepti
 	/**
 	 * Extract the top frames (until the call to the {@link StreamDefinition} constructor appears) of the given exception.
 	 */
-	private void computeFingerprint(E exception) {
+	private void addFingerprintForException(E exception) {
 		boolean seenParserClass = false;
 		List<StackTraceElement> fingerPrint = new ArrayList<StackTraceElement>();
 		for (StackTraceElement frame : exception.getStackTrace()) {

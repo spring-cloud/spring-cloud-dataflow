@@ -58,7 +58,7 @@ class AddModuleOptionsExpansionStrategy implements ExpansionStrategy {
 
 		String lastModuleName = lastModule.getName();
 		ModuleRegistration lastModuleRegistration = null;
-		for (ModuleType moduleType : CompletionUtils.inferType(lastModule)) {
+		for (ModuleType moduleType : CompletionUtils.determinePotentialTypes(lastModule)) {
 			lastModuleRegistration = moduleRegistry.find(lastModuleName, moduleType);
 			if (lastModuleRegistration != null) {
 				break;
@@ -70,7 +70,7 @@ class AddModuleOptionsExpansionStrategy implements ExpansionStrategy {
 		}
 		Set<String> alreadyPresentOptions = new HashSet<>(lastModule.getParameters().keySet());
 
-		Resource jarFile = moduleResolver.resolve(CompletionUtils.adapt(lastModuleRegistration.getCoordinates()));
+		Resource jarFile = moduleResolver.resolve(CompletionUtils.fromModuleCoordinates(lastModuleRegistration.getCoordinates()));
 
 		CompletionProposal.Factory proposals = expanding(text);
 

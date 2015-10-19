@@ -53,7 +53,8 @@ public class CompletionController {
 	/**
 	 * Return a list of possible completions given a prefix string that the user has started typing.
 	 *  @param start the amount of text written so far
-	 * @param detailLevel the level of detail the user wants in completions
+	 * @param detailLevel the level of detail the user wants in completions, starting at 1.
+	 * Higher values request more detail, with values typically in the range [1..5]
 	 */
 	@RequestMapping(value = "/stream")
 	public CompletionProposalsResource completions(
