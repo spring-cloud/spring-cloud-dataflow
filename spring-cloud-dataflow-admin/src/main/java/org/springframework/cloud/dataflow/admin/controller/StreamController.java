@@ -19,7 +19,6 @@ package org.springframework.cloud.dataflow.admin.controller;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -223,17 +222,18 @@ public class StreamController {
 			cumulatedDeploymentProperties = Collections.emptyMap();
 		}
 
-		ModulePartitionInfo downstreamInfo = ModulePartitionInfo.initial();
+		ModulePartitionInfo downstreamInfo = ModulePartitionInfo.afterLastDownstream(cumulatedDeploymentProperties);
 
-		for (StreamDefinition.DeploymentOrderIterator iterator = stream.getDeploymentOrderIterator();
-			iterator.hasNext(); ) {
+		StreamDefinition.DeploymentOrderIterator iterator = stream.getDeploymentOrderIterator();
+		while (iterator.hasNext()) {
 			ModuleDefinition currentModule = iterator.next();
 
-			ModuleCoordinates coordinates = getModuleCoordinates(iterator, currentModule);
+			ModuleType type = determineModuleType(currentModule, !iterator.hasMoreUpstream(), !iterator.hasMoreDownstream());
+			ModuleCoordinates coordinates = getModuleCoordinates(type, currentModule);
 
 			Map<String, String> moduleDeploymentProperties = getModuleDeploymentProperties(currentModule, cumulatedDeploymentProperties);
 
-			downstreamInfo = postProcessPartitioningProperties(stream, cumulatedDeploymentProperties, downstreamInfo, currentModule, moduleDeploymentProperties);
+			downstreamInfo = postProcessPartitioningProperties(cumulatedDeploymentProperties, downstreamInfo, currentModule, iterator.peekUpstream(), moduleDeploymentProperties);
 
 			this.deployer.deploy(new ModuleDeploymentRequest(currentModule, coordinates, moduleDeploymentProperties));
 		}
@@ -243,31 +243,30 @@ public class StreamController {
 	 * Maybe update the {@literal currentModule} {@literal moduleDeploymentProperties} with properties related
 	 * to partitioning.
 	 *
-	 * @param stream the whole stream definition
 	 * @param cumulatedDeploymentProperties the whole set of stream deployment properties
-	 * @param info information about the previous (i.e. downstream) module in the stream
+	 * @param downstreamInfo information about the downstream module in the stream
 	 * @param currentModule the module whose deployment properties we want to alter
+	 * @param upstreamModule the next module after {@literal currentModule} in deployment order, or null if none
 	 * @param moduleDeploymentProperties the deployment properties for the current module
 	 * @return information about the current module, to be used as 'previous' in the next invocation
 	 */
-	private ModulePartitionInfo postProcessPartitioningProperties(StreamDefinition stream, Map<String, String> cumulatedDeploymentProperties, ModulePartitionInfo info, ModuleDefinition currentModule, Map<String, String> moduleDeploymentProperties) {
-		boolean upstreamModuleSupportsPartition = upstreamModuleHasPartitionInfo(stream, currentModule, cumulatedDeploymentProperties);
+	private ModulePartitionInfo postProcessPartitioningProperties(Map<String, String> cumulatedDeploymentProperties, ModulePartitionInfo downstreamInfo, ModuleDefinition currentModule, ModuleDefinition upstreamModule,  Map<String, String> moduleDeploymentProperties) {
+		boolean upstreamModuleSupportsPartition = moduleHasPartitionInfo(upstreamModule, cumulatedDeploymentProperties);
 		// consumer module partition properties
 		if (isPartitionedConsumer(currentModule, moduleDeploymentProperties, upstreamModuleSupportsPartition)) {
 			updateConsumerPartitionProperties(moduleDeploymentProperties);
 		}
 		// producer module partition properties
-		if (info.isPartitioned) {
-			updateProducerPartitionProperties(moduleDeploymentProperties, info.instances);
+		if (downstreamInfo.isPartitioned) {
+			updateProducerPartitionProperties(moduleDeploymentProperties, downstreamInfo.instances);
 		}
-		int nextModuleCount = getNextModuleCount(moduleDeploymentProperties);
-		boolean isDownStreamModulePartitioned = isPartitionedConsumer(currentModule, moduleDeploymentProperties,
+		int thisModuleCount = getModuleCount(moduleDeploymentProperties);
+		boolean isThisModulePartitioned = isPartitionedConsumer(currentModule, moduleDeploymentProperties,
 				upstreamModuleSupportsPartition);
-		return new ModulePartitionInfo(nextModuleCount, isDownStreamModulePartitioned);
+		return new ModulePartitionInfo(thisModuleCount, isThisModulePartitioned);
 	}
 
-	private ModuleCoordinates getModuleCoordinates(StreamDefinition.DeploymentOrderIterator iterator, ModuleDefinition currentModule) {
-		ModuleType type = determineModuleType(currentModule, !iterator.hasMoreUpstream(), !iterator.hasMoreDownstream());
+	private ModuleCoordinates getModuleCoordinates(ModuleType type, ModuleDefinition currentModule) {
 		ModuleRegistration registration = this.registry.find(currentModule.getName(), type);
 		if (registration == null) {
 			throw new IllegalArgumentException(String.format(
@@ -281,6 +280,7 @@ public class StreamController {
 	 */
 	private static class ModulePartitionInfo {
 		private final int instances;
+
 		private final boolean isPartitioned;
 
 		private ModulePartitionInfo(int instances, boolean isPartitioned) {
@@ -289,10 +289,17 @@ public class StreamController {
 		}
 
 		/**
-		 * Return an info suitable for the initial module, <i>i.e.</i> the first one to be deployed.
+		 * Return info suitable for handling partitioning for the last downstream module. If it is a regular sink, then
+		 * no partitioning happens. If it is a module that redirects to a named channel, then the number of partitions
+		 * for that channel is driven by the {@literal channel.sink.partitionCount} deployment property.
 		 */
-		private static ModulePartitionInfo initial() {
-			return new ModulePartitionInfo(1, false);
+		private static ModulePartitionInfo afterLastDownstream(Map<String, String> cumulatedDeploymentProperties) {
+			String namedChannelPartitionCount =  cumulatedDeploymentProperties.get("channel.sink.partitionCount");
+			if (namedChannelPartitionCount != null) {
+				return new ModulePartitionInfo(Integer.parseInt(namedChannelPartitionCount), true);
+			} else {
+				return new ModulePartitionInfo(1, false);
+			}
 		}
 	}
 
@@ -319,7 +326,7 @@ public class StreamController {
 				// stream begins with a named channel in the source position
 				type = ModuleType.processor;
 			}
-			else { 
+			else {
 				type = ModuleType.source;
 			}
 		}
@@ -347,27 +354,22 @@ public class StreamController {
 		return moduleDeploymentProperties;
 	}
 
-	private boolean upstreamModuleHasPartitionInfo(StreamDefinition stream, ModuleDefinition currentModule,
-			Map<String, String> cumulatedDeploymentProperties) {
-		Iterator<ModuleDefinition> iterator = stream.getDeploymentOrderIterator();
-		while (iterator.hasNext()) {
-			ModuleDefinition module = iterator.next();
-			if (module.equals(currentModule) && iterator.hasNext()) {
-				ModuleDefinition prevModule = iterator.next();
-				Map<String, String> moduleDeploymentProperties = getModuleDeploymentProperties(prevModule, cumulatedDeploymentProperties);
-				return moduleDeploymentProperties.containsKey(BindingProperties.PARTITION_KEY_EXPRESSION) ||
-						moduleDeploymentProperties.containsKey(BindingProperties.PARTITION_KEY_EXTRACTOR_CLASS);
-			}
+	private boolean moduleHasPartitionInfo(ModuleDefinition module, Map<String, String> cumulatedDeploymentProperties) {
+		if (module != null) {
+			Map<String, String> moduleDeploymentProperties = getModuleDeploymentProperties(module, cumulatedDeploymentProperties);
+			return moduleDeploymentProperties.containsKey(BindingProperties.PARTITION_KEY_EXPRESSION) ||
+					moduleDeploymentProperties.containsKey(BindingProperties.PARTITION_KEY_EXTRACTOR_CLASS);
+		} else {
+			return false;
 		}
-		return false;
 	}
 
 	private boolean isPartitionedConsumer(ModuleDefinition module, Map<String, String> properties,
 			boolean upstreamModuleSupportsPartition) {
 		return upstreamModuleSupportsPartition ||
 				(module.getParameters().containsKey(BindingProperties.INPUT_BINDING_KEY) &&
-				properties.containsKey(BindingProperties.PARTITIONED_PROPERTY) &&
-				properties.get(BindingProperties.PARTITIONED_PROPERTY).equalsIgnoreCase("true"));
+						properties.containsKey(BindingProperties.PARTITIONED_PROPERTY) &&
+						properties.get(BindingProperties.PARTITIONED_PROPERTY).equalsIgnoreCase("true"));
 	}
 
 	private void updateConsumerPartitionProperties(Map<String, String> properties) {
@@ -400,7 +402,7 @@ public class StreamController {
 		}
 	}
 
-	private int getNextModuleCount(Map<String, String> properties) {
+	private int getModuleCount(Map<String, String> properties) {
 		return (properties.containsKey(BindingProperties.COUNT_PROPERTY)) ?
 				Integer.valueOf(properties.get(BindingProperties.COUNT_PROPERTY)) : 1;
 	}

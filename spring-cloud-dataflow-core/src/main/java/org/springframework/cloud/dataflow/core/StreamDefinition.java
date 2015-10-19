@@ -114,7 +114,7 @@ public class StreamDefinition {
 	 * @return iterator that iterates over the modules in deployment order
 	 */
 	public DeploymentOrderIterator getDeploymentOrderIterator() {
-		return new DeploymentOrderIterator(modules.descendingIterator());
+		return new DeploymentOrderIterator();
 	}
 
 	@Override
@@ -131,23 +131,17 @@ public class StreamDefinition {
 	 * to upstream (source) module.
 	 * Also prevents mutation of its backing data structure.
 	 */
-	public static class DeploymentOrderIterator implements Iterator<ModuleDefinition> {
-		private final Iterator<ModuleDefinition> wrapped;
-		private int i;
-
-		public DeploymentOrderIterator(Iterator<ModuleDefinition> wrapped) {
-			this.wrapped = wrapped;
-		}
+	public class DeploymentOrderIterator implements Iterator<ModuleDefinition> {
+		private int i = modules.size() - 1;
 
 		@Override
 		public boolean hasNext() {
-			return wrapped.hasNext();
+			return i >= 0;
 		}
 
 		@Override
 		public ModuleDefinition next() {
-			i++;
-			return wrapped.next();
+			return modules.get(i--);
 		}
 
 		@Override
@@ -159,7 +153,7 @@ public class StreamDefinition {
 		 * Return whether or not this iterator is past the very first module to deploy.
 		 */
 		public boolean hasMoreDownstream() {
-			return i > 1;
+			return i < modules.size() - 2;
 		}
 
 		/**
@@ -167,6 +161,14 @@ public class StreamDefinition {
 		 */
 		public boolean hasMoreUpstream() {
 			return hasNext();
+		}
+
+		/**
+		 * Return the next module to deploy after the one currently pointed at, if any.
+		 * This does not advance this iterator.
+		 */
+		public ModuleDefinition peekUpstream() {
+			return i >= 0 ? modules.get(i) : null;
 		}
 
 	}
