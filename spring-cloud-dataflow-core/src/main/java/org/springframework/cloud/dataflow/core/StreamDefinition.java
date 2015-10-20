@@ -127,8 +127,8 @@ public class StreamDefinition {
 
 
 	/**
-	 * Iterator that walks through ModuleDefinitions in deployment order, that is, from downstream (sink, if present)
-	 * to upstream (source) module.
+	 * Iterator that traverses ModuleDefinitions in deployment order, that is, from downstream (sink, if present)
+	 * to upstream (source, if present) module.
 	 * Also prevents mutation of its backing data structure.
 	 */
 	public class DeploymentOrderIterator implements Iterator<ModuleDefinition> {
@@ -168,7 +168,7 @@ public class StreamDefinition {
 		 * This does not advance this iterator.
 		 */
 		public ModuleDefinition peekUpstream() {
-			return i >= 0 ? modules.get(i) : null;
+			return hasMoreUpstream() ? modules.get(i) : null;
 		}
 
 	}

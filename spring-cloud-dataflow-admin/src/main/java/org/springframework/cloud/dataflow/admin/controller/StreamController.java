@@ -251,7 +251,7 @@ public class StreamController {
 	 * @return information about the current module, to be used as 'previous' in the next invocation
 	 */
 	private ModulePartitionInfo postProcessPartitioningProperties(Map<String, String> cumulatedDeploymentProperties, ModulePartitionInfo downstreamInfo, ModuleDefinition currentModule, ModuleDefinition upstreamModule,  Map<String, String> moduleDeploymentProperties) {
-		boolean upstreamModuleSupportsPartition = moduleHasPartitionInfo(upstreamModule, cumulatedDeploymentProperties);
+		boolean upstreamModuleSupportsPartition = isPartitionedProducer(upstreamModule, cumulatedDeploymentProperties);
 		// consumer module partition properties
 		if (isPartitionedConsumer(currentModule, moduleDeploymentProperties, upstreamModuleSupportsPartition)) {
 			updateConsumerPartitionProperties(moduleDeploymentProperties);
@@ -290,7 +290,7 @@ public class StreamController {
 
 		/**
 		 * Return info suitable for handling partitioning for the last downstream module. If it is a regular sink, then
-		 * no partitioning happens. If it is a module that redirects to a named channel, then the number of partitions
+		 * no partitioning happens. If it is a module that publishes to a named channel, then the number of partitions
 		 * for that channel is driven by the {@literal channel.sink.partitionCount} deployment property.
 		 */
 		private static ModulePartitionInfo afterLastDownstream(Map<String, String> cumulatedDeploymentProperties) {
@@ -354,7 +354,7 @@ public class StreamController {
 		return moduleDeploymentProperties;
 	}
 
-	private boolean moduleHasPartitionInfo(ModuleDefinition module, Map<String, String> cumulatedDeploymentProperties) {
+	private boolean isPartitionedProducer(ModuleDefinition module, Map<String, String> cumulatedDeploymentProperties) {
 		if (module != null) {
 			Map<String, String> moduleDeploymentProperties = getModuleDeploymentProperties(module, cumulatedDeploymentProperties);
 			return moduleDeploymentProperties.containsKey(BindingProperties.PARTITION_KEY_EXPRESSION) ||
