@@ -75,6 +75,7 @@ public class ModuleRegistryPopulator {
 	public void populateDefaults() {
 		populateDefault("ftp", source);
 		populateDefault("http", source);
+		populateDefault("sftp", source);
 		populateDefault("time", source);
 		populateDefault("twitterstream", source);
 		populateDefault("filter", processor);
