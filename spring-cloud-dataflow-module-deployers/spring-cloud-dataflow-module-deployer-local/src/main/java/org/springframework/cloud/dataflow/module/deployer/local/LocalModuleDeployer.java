@@ -85,6 +85,7 @@ public class LocalModuleDeployer implements ModuleDeployer {
 			throw new IllegalStateException("failed to determine URL for module: " + module, e);
 		}
 		args.put("endpoints.shutdown.enabled", "true");
+		args.put("spring.main.show_banner", "false");
 
 		ModuleLaunchRequest moduleLaunchRequest = new ModuleLaunchRequest(module, args);
 		launcher.launch(Collections.singletonList(moduleLaunchRequest));
