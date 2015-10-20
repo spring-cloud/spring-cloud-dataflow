@@ -55,8 +55,8 @@ public class ModuleNode extends AstNode {
 		}
 		s.append(moduleName);
 		if (arguments != null) {
-			for (int a = 0; a < arguments.length; a++) {
-				s.append(" --").append(arguments[a].getName()).append("=").append(arguments[a].getValue());
+			for (ArgumentNode argumentNode : arguments) {
+				s.append(" --").append(argumentNode.getName()).append("=").append(argumentNode.getValue());
 			}
 		}
 		return s.toString();
@@ -72,8 +72,8 @@ public class ModuleNode extends AstNode {
 		}
 		s.append("ModuleNode:").append(moduleName);
 		if (arguments != null) {
-			for (int a = 0; a < arguments.length; a++) {
-				s.append(" --").append(arguments[a].getName()).append("=").append(arguments[a].getValue());
+			for (ArgumentNode argumentNode : arguments) {
+				s.append(" --").append(argumentNode.getName()).append("=").append(argumentNode.getValue());
 			}
 		}
 		if (includePositionalInfo) {
