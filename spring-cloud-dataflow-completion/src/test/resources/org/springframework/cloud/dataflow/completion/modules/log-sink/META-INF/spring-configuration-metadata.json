@@ -1,0 +1,30 @@
+{
+  "properties": [
+    {
+      "name": "level",
+      "type": "java.lang.String",
+      "description": "The logger level",
+      "sourceType": "com.foo.LogProperties",
+      "defaultValue": "debug"
+    }
+  ],
+  "hints": [
+    {
+      "name": "level",
+      "values": [
+        {
+          "value": "debug"
+        },
+        {
+          "value": "info"
+        },
+        {
+          "value": "warn"
+        },
+        {
+          "value": "error"
+        }
+      ]
+    }
+  ]
+}

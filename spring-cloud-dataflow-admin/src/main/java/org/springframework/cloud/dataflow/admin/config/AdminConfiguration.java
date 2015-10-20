@@ -22,14 +22,18 @@ import java.util.List;
 
 import org.springframework.boot.actuate.metrics.repository.MetricRepository;
 import org.springframework.boot.actuate.metrics.repository.redis.RedisMetricRepository;
+import org.springframework.cloud.dataflow.admin.completion.TapOnChannelExpansionStrategy;
 import org.springframework.cloud.dataflow.admin.repository.InMemoryStreamDefinitionRepository;
 import org.springframework.cloud.dataflow.admin.repository.InMemoryTaskDefinitionRepository;
 import org.springframework.cloud.dataflow.admin.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.admin.repository.TaskDefinitionRepository;
+import org.springframework.cloud.dataflow.completion.CompletionConfiguration;
+import org.springframework.cloud.dataflow.completion.RecoveryStrategy;
 import org.springframework.cloud.dataflow.module.registry.ModuleRegistry;
 import org.springframework.cloud.dataflow.module.registry.RedisModuleRegistry;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
@@ -51,6 +55,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 @Configuration
 @EnableHypermediaSupport(type = HAL)
 @EnableSpringDataWebSupport
+@Import(CompletionConfiguration.class)
 public class AdminConfiguration {
 
 	@Bean
@@ -89,6 +94,11 @@ public class AdminConfiguration {
 				converters.add(new MappingJackson2HttpMessageConverter());
 			}
 		};
+	}
+
+	@Bean
+	public RecoveryStrategy tapOnChannelExpansionStrategy() {
+		return new TapOnChannelExpansionStrategy();
 	}
 
 }

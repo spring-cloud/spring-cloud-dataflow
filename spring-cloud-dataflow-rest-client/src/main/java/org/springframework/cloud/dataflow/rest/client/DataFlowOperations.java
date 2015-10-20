@@ -43,4 +43,8 @@ public interface DataFlowOperations {
 	 */
 	ModuleOperations moduleOperations();
 
+	/**
+	 * DSL Completion related operations.
+	 */
+	CompletionOperations completionOperations();
 }

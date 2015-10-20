@@ -19,6 +19,7 @@ package org.springframework.cloud.dataflow.rest.resource;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
 import org.springframework.hateoas.PagedResources;
 
 /**
@@ -39,7 +40,7 @@ public class DetailedModuleRegistrationResource extends ModuleRegistrationResour
 	/**
 	 * List of module options.
 	 */
-	private final List<Option> options = new ArrayList<Option>();
+	private final List<ConfigurationMetadataProperty> options = new ArrayList<>();
 
 
 	/**
@@ -75,7 +76,7 @@ public class DetailedModuleRegistrationResource extends ModuleRegistrationResour
 	 *
 	 * @param option module option to add
 	 */
-	public void addOption(Option option) {
+	public void addOption(ConfigurationMetadataProperty option) {
 		options.add(option);
 	}
 
@@ -84,7 +85,7 @@ public class DetailedModuleRegistrationResource extends ModuleRegistrationResour
 	 *
 	 * @return list of module options
 	 */
-	public List<Option> getOptions() {
+	public List<ConfigurationMetadataProperty> getOptions() {
 		return options;
 	}
 
@@ -104,86 +105,6 @@ public class DetailedModuleRegistrationResource extends ModuleRegistrationResour
 	 */
 	public String getShortDescription() {
 		return shortDescription;
-	}
-
-	/**
-	 * Class for a module option.
-	 */
-	public static class Option {
-
-		/**
-		 * Option name.
-		 */
-		private String name;
-
-		/**
-		 * Option type.
-		 */
-		private String type;
-
-		/**
-		 * Option description.
-		 */
-		private String description;
-
-		/**
-		 * Default value for option.
-		 */
-		private String defaultValue;
-
-		/**
-		 * If true, this is a hidden option.
-		 */
-		private boolean hidden;
-
-		/**
-		 * Default constructor for serialization frameworks.
-		 */
-		protected Option() {
-		}
-
-		/**
-		 * Construct a module {@code Option} object.
-		 *
-		 * @param name option name
-		 * @param type option type
-		 * @param description option description
-		 * @param defaultValue default value for option
-		 * @param hidden if true, this option is hidden
-		 */
-		public Option(String name, String type, String description, String defaultValue, boolean hidden) {
-			this.name = name;
-			this.type = type;
-			this.description = description;
-			this.defaultValue = defaultValue;
-			this.hidden = hidden;
-		}
-
-		public String getName() {
-			return name;
-		}
-
-		public String getType() {
-			return type;
-		}
-
-		public String getDescription() {
-			return description;
-		}
-
-		public String getDefaultValue() {
-			return defaultValue;
-		}
-
-		public boolean isHidden() {
-			return hidden;
-		}
-
-		@Override
-		public String toString() {
-			return "Option [name=" + name + ", type=" + type + ", defaultValue=" + defaultValue + ", hidden=" + hidden
-					+ "]";
-		}
 	}
 
 	/**

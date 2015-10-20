@@ -1,0 +1,12 @@
+{
+  "properties": [
+    {
+      "name": "directory",
+      "type": "java.lang.String",
+      "description": "A path",
+      "sourceType": "com.foo.HdfsProperties",
+      "defaultValue": "/tmp"
+    }
+  ],
+  "hints": []
+}

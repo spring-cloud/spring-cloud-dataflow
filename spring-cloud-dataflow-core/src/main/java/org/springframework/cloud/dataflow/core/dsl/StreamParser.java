@@ -160,7 +160,7 @@ public class StreamParser extends ModuleParser {
 		if (bridge) {
 			// Create a bridge module to hang the source/sink channels off
 			tokens.decrementPosition(); // Rewind so we can nicely eat the sink channel
-			moduleNodes = new ArrayList<ModuleNode>();
+			moduleNodes = new ArrayList<>();
 			moduleNodes.add(new ModuleNode(null, "bridge", tokens.peek().startPos,
 					tokens.peek().endPos, null));
 		}
@@ -372,9 +372,9 @@ public class StreamParser extends ModuleParser {
 				String tokenData = channelScopeComponents.get(1).data;
 				// for Stream, tap:stream:XXX - the channel name is always indexed
 				// for Job, tap:job:XXX - the channel name can have "." in case of job notification channels
-				if (!tokenData.equalsIgnoreCase("stream") && !tokenData.equalsIgnoreCase("job")) {
+				if (!tokenData.equalsIgnoreCase("stream") && !tokenData.equalsIgnoreCase("task")) {
 					tokens.raiseException(tokens.peek().startPos,
-							DSLMessage.ONLY_A_TAP_ON_A_STREAM_OR_JOB_CAN_BE_INDEXED);
+							DSLMessage.ONLY_A_TAP_ON_A_STREAM_OR_TASK_CAN_BE_INDEXED);
 				}
 			}
 			while (tokens.peek(TokenKind.DOT)) {
@@ -393,7 +393,7 @@ public class StreamParser extends ModuleParser {
 		else if (tokens.peek(TokenKind.DOT)) {
 			if (tapAllowed) {
 				tokens.raiseException(tokens.peek().startPos,
-						DSLMessage.ONLY_A_TAP_ON_A_STREAM_OR_JOB_CAN_BE_INDEXED);
+						DSLMessage.ONLY_A_TAP_ON_A_STREAM_OR_TASK_CAN_BE_INDEXED);
 			}
 			else {
 				tokens.raiseException(tokens.peek().startPos,

@@ -76,6 +76,10 @@ public class ModuleParser {
 						DSLMessage.NO_WHITESPACE_BETWEEN_LABEL_NAME_AND_COLON);
 			}
 			tokens.next(); // swallow colon
+			if (tokens.isNextAdjacent()) {
+				tokens.raiseException(tokens.peek().startPos,
+						DSLMessage.EXPECTED_WHITESPACE_AFTER_LABEL_COLON);
+			}
 			label = name;
 			name = tokens.eat(TokenKind.IDENTIFIER);
 		}
