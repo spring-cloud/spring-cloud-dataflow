@@ -43,7 +43,7 @@ public class ArgumentNode extends AstNode {
 
 	@Override
 	public String stringify(boolean includePositionalInfo) {
-		return "--" + name + "=" + value;
+		return toString();
 	}
 
 	@Override
