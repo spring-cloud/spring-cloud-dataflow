@@ -74,6 +74,8 @@ public class LrpModuleDeployer implements ModuleDeployer {
 		lrp.runAction().addArg("/module-launcher.jar");
 
 		List<EnvironmentVariable> environmentVariables = new ArrayList<EnvironmentVariable>();
+		environmentVariables.add(new EnvironmentVariable(JMX_DEFAULT_DOMAIN_NAME, String.format("%s.%s",
+				request.getDefinition().getGroup(), request.getDefinition().getLabel())));
 		Collections.addAll(environmentVariables, lrp.getEnv());
 		environmentVariables.add(new EnvironmentVariable("MODULES", request.getCoordinates().toString()));
 		Map<String, String> rawArgs = new HashMap<>();
