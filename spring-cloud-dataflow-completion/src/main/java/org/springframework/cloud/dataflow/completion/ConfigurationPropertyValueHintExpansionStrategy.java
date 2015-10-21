@@ -112,7 +112,7 @@ public class ConfigurationPropertyValueHintExpansionStrategy implements Expansio
 					classLoader = new ClassLoaderExposingJarLauncher(jarFileArchive).createClassLoader();
 
 					for (ValueHintProvider valueHintProvider : valueHintProviders) {
-						List<ValueHint> valueHints = valueHintProvider.guessValueHints(property, classLoader);
+						List<ValueHint> valueHints = valueHintProvider.generateValueHints(property, classLoader);
 						if (!valueHints.isEmpty() && valueHintProvider.isExclusive(property)) {
 							collector.clear();
 						}

@@ -24,15 +24,15 @@ import org.springframework.boot.configurationmetadata.ValueHint;
 import org.springframework.util.ClassUtils;
 
 /**
- * A ValueHintProvider that returns possible values when the property
- * is some kind of {@link Enum}.
+ * A {@link ValueHintProvider} that returns possible values when the
+ * property is an {@link Enum}.
  *
  * @author Eric Bottard
  */
 public class EnumValueHintProvider implements ValueHintProvider {
 
 	@Override
-	public List<ValueHint> guessValueHints(ConfigurationMetadataProperty property, ClassLoader classLoader) {
+	public List<ValueHint> generateValueHints(ConfigurationMetadataProperty property, ClassLoader classLoader) {
 		List<ValueHint> result = new ArrayList<>();
 		if (ClassUtils.isPresent(property.getType(), classLoader)) {
 			Class<?> clazz = ClassUtils.resolveClassName(property.getType(), classLoader);

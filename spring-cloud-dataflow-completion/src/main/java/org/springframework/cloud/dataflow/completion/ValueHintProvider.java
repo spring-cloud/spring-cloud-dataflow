@@ -22,19 +22,34 @@ import org.springframework.boot.configurationmetadata.ConfigurationMetadataPrope
 import org.springframework.boot.configurationmetadata.ValueHint;
 
 /**
- * Pluggable interface to provide value hints that can be discovered for some properties.
+ * Interface to provide value hints that can be discovered for properties.
  *
  * @author Eric Bottard
  */
 public interface ValueHintProvider {
 
-	List<ValueHint> guessValueHints(ConfigurationMetadataProperty property, ClassLoader classLoader);
+	/**
+	 * For a given property, return a list of {@link ValueHint} that may apply.
+	 *
+	 * @param property     property for which to generate value hints
+	 * @param classLoader  class loader for the artifact/module that this
+	 * property applies to; this may be used to load other classes/resources
+	 * for generating value hints
+	 * @return list of value hints for the provided property
+	 */
+	List<ValueHint> generateValueHints(ConfigurationMetadataProperty property, ClassLoader classLoader);
 
 	/**
-	 * Return {@literal true} if the values returned by this provider, if any, are the only values
-	 * that make sense as completion proposals. If this is true, then no other kind of completion
-	 * makes sense until one of the returned values has been typed in full.
-	 * @param property
+	 * Return {@code true} if the values returned by this provider
+	 * are the only values that apply as completion proposals. If this
+	 * returns {@code true}, then no other kind of completion
+	 * applies until one of the returned values has been typed in full.
+	 *
+	 * @param property property for which to determine if the values
+	 * returned by this provider are exclusive
+	 * @return {@code true} if the values returned by this provider are exclusive,
+	 * thus requiring one of these values to be provided before any other
+	 * {@code ValueHintProvider} may be applied
 	 */
 	boolean isExclusive(ConfigurationMetadataProperty property);
 }

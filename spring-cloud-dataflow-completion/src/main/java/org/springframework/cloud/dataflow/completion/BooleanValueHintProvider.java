@@ -16,7 +16,7 @@
 
 package org.springframework.cloud.dataflow.completion;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -31,23 +31,20 @@ import org.springframework.boot.configurationmetadata.ValueHint;
  */
 public class BooleanValueHintProvider implements ValueHintProvider {
 
-	private static final List<ValueHint> BOOLEANS = new ArrayList<>();
+	private static final List<ValueHint> BOOLEANS;
 	static {
 		ValueHint yes = new ValueHint();
 		yes.setValue(true);
-		BOOLEANS.add(yes);
 		ValueHint no = new ValueHint();
 		no.setValue(false);
-		BOOLEANS.add(no);
+		BOOLEANS = Collections.unmodifiableList(Arrays.asList(yes, no));
 	}
 
 	@Override
-	public List<ValueHint> guessValueHints(ConfigurationMetadataProperty property, ClassLoader classLoader) {
-		if ("java.lang.Boolean".equals(property.getType())) {
-			return BOOLEANS;
-		} else {
-			return Collections.emptyList();
-		}
+	public List<ValueHint> generateValueHints(ConfigurationMetadataProperty property, ClassLoader classLoader) {
+		return "java.lang.Boolean".equals(property.getType())
+				? BOOLEANS
+				: Collections.<ValueHint>emptyList();
 	}
 
 	@Override

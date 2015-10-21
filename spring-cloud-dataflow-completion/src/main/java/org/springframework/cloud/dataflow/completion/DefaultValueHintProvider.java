@@ -23,14 +23,15 @@ import org.springframework.boot.configurationmetadata.ValueHint;
 import org.springframework.boot.configurationmetadata.ValueProvider;
 
 /**
- * A default ValueHint provider that returns hints explicitly defined by a property.
+ * A default {@link ValueHintProvider} that returns hints explicitly
+ * defined by a property.
  *
  * @author Eric Bottard
  */
 public class DefaultValueHintProvider implements ValueHintProvider {
 
 	@Override
-	public List<ValueHint> guessValueHints(ConfigurationMetadataProperty property, ClassLoader classLoader) {
+	public List<ValueHint> generateValueHints(ConfigurationMetadataProperty property, ClassLoader classLoader) {
 		return property.getValueHints();
 	}
 
