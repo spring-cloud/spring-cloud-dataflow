@@ -86,7 +86,7 @@ public class LocalModuleDeployer implements ModuleDeployer {
 		}
 		args.put("endpoints.shutdown.enabled", "true");
 		args.put("spring.main.show_banner", "false");
-		args.put("spring.jmx.default-domain", String.format("%s.%s",
+		args.put(JMX_DEFAULT_DOMAIN_NAME, String.format("%s.%s",
 				request.getDefinition().getGroup(), request.getDefinition().getLabel()));
 		args.put("endpoints.jmx.unique-names", "true");
 		ModuleLaunchRequest moduleLaunchRequest = new ModuleLaunchRequest(module, args);
