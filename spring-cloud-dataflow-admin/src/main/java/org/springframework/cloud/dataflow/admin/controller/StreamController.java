@@ -79,7 +79,7 @@ public class StreamController {
 	private final StreamDefinitionRepository repository;
 
 	/**
-	 * The module registry this controller will use to look up modules.
+	 * The artifact registry this controller will use to look up modules and libraries.
 	 */
 	private final ArtifactRegistry registry;
 
