@@ -231,6 +231,17 @@ public class StreamCompletionProviderTests {
 		assertThat(completionProvider.complete("http | filter --expression=something --expresso=not-a-valid-prefix", 1), empty());
 	}
 
+	/*
+	 * http --use.ssl=tr<TAB> => must be true or false, no need to present "...=tr --other.prop"
+	 */
+	@Test
+	public void testClosedSetValuesShouldBeExclusive() {
+		assertThat(completionProvider.complete("http --use.ssl=tr", 1), not(hasItems(
+				proposalThat(startsWith("http --use.ssl=tr "))
+		)));
+
+	}
+
 
 	private static org.hamcrest.Matcher<CompletionProposal> proposalThat(org.hamcrest.Matcher<String> matcher) {
 		return new FeatureMatcher<CompletionProposal, String>(matcher, "a proposal whose text", "text") {

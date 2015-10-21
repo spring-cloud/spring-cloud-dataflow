@@ -29,4 +29,12 @@ import org.springframework.boot.configurationmetadata.ValueHint;
 public interface ValueHintProvider {
 
 	List<ValueHint> guessValueHints(ConfigurationMetadataProperty property, ClassLoader classLoader);
+
+	/**
+	 * Return {@literal true} if the values returned by this provider, if any, are the only values
+	 * that make sense as completion proposals. If this is true, then no other kind of completion
+	 * makes sense until one of the returned values has been typed in full.
+	 * @param property
+	 */
+	boolean isExclusive(ConfigurationMetadataProperty property);
 }

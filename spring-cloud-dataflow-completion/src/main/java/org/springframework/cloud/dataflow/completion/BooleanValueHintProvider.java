@@ -49,4 +49,9 @@ public class BooleanValueHintProvider implements ValueHintProvider {
 			return Collections.emptyList();
 		}
 	}
+
+	@Override
+	public boolean isExclusive(ConfigurationMetadataProperty property) {
+		return true;
+	}
 }
