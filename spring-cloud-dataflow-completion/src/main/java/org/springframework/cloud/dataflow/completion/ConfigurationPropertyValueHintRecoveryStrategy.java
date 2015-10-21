@@ -89,7 +89,7 @@ public class ConfigurationPropertyValueHintRecoveryStrategy extends StacktraceFi
 					classLoader = new ClassLoaderExposingJarLauncher(jarFileArchive).createClassLoader();
 
 					for (ValueHintProvider valueHintProvider : valueHintProviders) {
-						for (ValueHint valueHint : valueHintProvider.guessValueHints(property, classLoader)) {
+						for (ValueHint valueHint : valueHintProvider.generateValueHints(property, classLoader)) {
 							collector.add(proposals.withSuffix(String.valueOf(valueHint.getValue()), valueHint.getShortDescription()));
 						}
 					}
