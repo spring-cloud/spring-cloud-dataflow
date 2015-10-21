@@ -42,12 +42,10 @@ public class BooleanValueHintProvider implements ValueHintProvider {
 	}
 
 	@Override
-	public List<ValueHint> guessValueHints(ConfigurationMetadataProperty property, ClassLoader classLoader) {
-		if ("java.lang.Boolean".equals(property.getType())) {
-			return BOOLEANS;
-		} else {
-			return Collections.emptyList();
-		}
+	public List<ValueHint> generateValueHints(ConfigurationMetadataProperty property, ClassLoader classLoader) {
+		return "java.lang.Boolean".equals(property.getType())
+				? Collections.unmodifiableList(BOOLEANS)
+				: Collections.<ValueHint>emptyList();
 	}
 
 	@Override
