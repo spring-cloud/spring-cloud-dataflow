@@ -53,6 +53,16 @@ public class ArtifactRegistryPopulator {
 	private static final String DEFAULT_VERSION = "1.0.0.BUILD-SNAPSHOT";
 
 	/**
+	 * Default classifier for default modules.
+	 */
+	private static final String DEFAULT_CLASSIFIER = "exec";
+
+	/**
+	 * Default extension for default modules.
+	 */
+	private static final String DEFAULT_EXTENSION = "jar";
+
+	/**
 	 * The {@link ArtifactRegistry} to populate.
 	 */
 	private final ArtifactRegistry artifactRegistry;
@@ -115,8 +125,8 @@ public class ArtifactRegistryPopulator {
 	 * @return default coordinates for the provided module
 	 */
 	private ArtifactCoordinates defaultTaskCoordinatesFor(String moduleName) {
-		return ArtifactCoordinates.parse(String.format("%s:%s:%s",
-				DEFAULT_TASK_GROUP_ID, moduleName, DEFAULT_VERSION));
+		return ArtifactCoordinates.parse(String.format("%s:%s:%s:%s:%s",
+				DEFAULT_TASK_GROUP_ID, moduleName, DEFAULT_EXTENSION, DEFAULT_CLASSIFIER, DEFAULT_VERSION));
 	}
 
 
@@ -127,8 +137,8 @@ public class ArtifactRegistryPopulator {
 	 * @return default coordinates for the provided module
 	 */
 	private ArtifactCoordinates defaultStreamCoordinatesFor(String moduleName) {
-		return ArtifactCoordinates.parse(String.format("%s:%s:%s",
-				DEFAULT_STREAM_GROUP_ID, moduleName, DEFAULT_VERSION));
+		return ArtifactCoordinates.parse(String.format("%s:%s:%s:%s:%s",
+				DEFAULT_STREAM_GROUP_ID, moduleName, DEFAULT_EXTENSION, DEFAULT_CLASSIFIER, DEFAULT_VERSION));
 	}
 
 }
