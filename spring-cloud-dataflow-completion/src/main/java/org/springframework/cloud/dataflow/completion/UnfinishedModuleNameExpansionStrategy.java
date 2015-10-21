@@ -24,8 +24,8 @@ import java.util.Set;
 import org.springframework.cloud.dataflow.core.ModuleDefinition;
 import org.springframework.cloud.dataflow.core.ArtifactType;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
-import org.springframework.cloud.dataflow.module.registry.ArtifactRegistration;
-import org.springframework.cloud.dataflow.module.registry.ArtifactRegistry;
+import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistration;
+import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistry;
 
 /**
  * Provides completions by finding modules whose name starts with a

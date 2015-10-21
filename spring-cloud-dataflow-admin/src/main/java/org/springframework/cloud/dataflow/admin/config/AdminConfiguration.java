@@ -29,8 +29,8 @@ import org.springframework.cloud.dataflow.admin.repository.StreamDefinitionRepos
 import org.springframework.cloud.dataflow.admin.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.completion.CompletionConfiguration;
 import org.springframework.cloud.dataflow.completion.RecoveryStrategy;
-import org.springframework.cloud.dataflow.module.registry.ArtifactRegistry;
-import org.springframework.cloud.dataflow.module.registry.RedisArtifactRegistry;
+import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistry;
+import org.springframework.cloud.dataflow.artifact.registry.RedisArtifactRegistry;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;

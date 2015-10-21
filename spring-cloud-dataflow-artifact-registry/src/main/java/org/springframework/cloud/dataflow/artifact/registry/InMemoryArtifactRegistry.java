@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.dataflow.module.registry;
+package org.springframework.cloud.dataflow.artifact.registry;
 
 import java.util.ArrayList;
 import java.util.List;

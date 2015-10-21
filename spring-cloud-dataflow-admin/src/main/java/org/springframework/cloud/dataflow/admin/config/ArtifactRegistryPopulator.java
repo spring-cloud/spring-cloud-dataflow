@@ -25,8 +25,8 @@ import javax.annotation.PostConstruct;
 
 import org.springframework.cloud.dataflow.core.ArtifactCoordinates;
 import org.springframework.cloud.dataflow.core.ArtifactType;
-import org.springframework.cloud.dataflow.module.registry.ArtifactRegistration;
-import org.springframework.cloud.dataflow.module.registry.ArtifactRegistry;
+import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistration;
+import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistry;
 import org.springframework.util.Assert;
 
 /**

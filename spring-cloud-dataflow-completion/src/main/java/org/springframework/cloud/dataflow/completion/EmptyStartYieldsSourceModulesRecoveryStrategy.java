@@ -19,8 +19,8 @@ package org.springframework.cloud.dataflow.completion;
 import java.util.List;
 
 import org.springframework.cloud.dataflow.core.ArtifactType;
-import org.springframework.cloud.dataflow.module.registry.ArtifactRegistration;
-import org.springframework.cloud.dataflow.module.registry.ArtifactRegistry;
+import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistration;
+import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistry;
 
 /**
  * Proposes source module names when the user has typed nothing.
