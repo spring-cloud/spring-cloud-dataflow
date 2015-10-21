@@ -24,11 +24,11 @@ import java.util.Set;
 
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
 import org.springframework.cloud.dataflow.core.ModuleDefinition;
-import org.springframework.cloud.dataflow.core.ModuleType;
+import org.springframework.cloud.dataflow.core.ArtifactType;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.dsl.CheckPointedParseException;
-import org.springframework.cloud.dataflow.module.registry.ModuleRegistration;
-import org.springframework.cloud.dataflow.module.registry.ModuleRegistry;
+import org.springframework.cloud.dataflow.module.registry.ArtifactRegistration;
+import org.springframework.cloud.dataflow.module.registry.ArtifactRegistry;
 import org.springframework.cloud.stream.configuration.metadata.ModuleConfigurationMetadataResolver;
 import org.springframework.cloud.stream.module.resolver.ModuleResolver;
 import org.springframework.core.io.Resource;
@@ -42,13 +42,13 @@ import org.springframework.core.io.Resource;
 class ConfigurationPropertyNameAfterDashDashRecoveryStrategy
 		extends StacktraceFingerprintingRecoveryStrategy<CheckPointedParseException> {
 
-	private final ModuleRegistry moduleRegistry;
+	private final ArtifactRegistry moduleRegistry;
 
 	private final ModuleResolver moduleResolver;
 
 	private final ModuleConfigurationMetadataResolver moduleConfigurationMetadataResolver;
 
-	ConfigurationPropertyNameAfterDashDashRecoveryStrategy(ModuleRegistry moduleRegistry,
+	ConfigurationPropertyNameAfterDashDashRecoveryStrategy(ArtifactRegistry moduleRegistry,
 			ModuleResolver moduleResolver, ModuleConfigurationMetadataResolver moduleConfigurationMetadataResolver) {
 		super(CheckPointedParseException.class, "file --", "file | foo --");
 		this.moduleRegistry = moduleRegistry;
@@ -65,21 +65,21 @@ class ConfigurationPropertyNameAfterDashDashRecoveryStrategy
 		ModuleDefinition lastModule = streamDefinition.getDeploymentOrderIterator().next();
 
 		String lastModuleName = lastModule.getName();
-		ModuleRegistration lastModuleRegistration = null;
-		for (ModuleType moduleType : CompletionUtils.determinePotentialTypes(lastModule)) {
-			lastModuleRegistration = moduleRegistry.find(lastModuleName, moduleType);
-			if (lastModuleRegistration != null) {
+		ArtifactRegistration lastArtifactRegistration = null;
+		for (ArtifactType moduleType : CompletionUtils.determinePotentialTypes(lastModule)) {
+			lastArtifactRegistration = moduleRegistry.find(lastModuleName, moduleType);
+			if (lastArtifactRegistration != null) {
 				break;
 			}
 		}
-		if (lastModuleRegistration == null) {
+		if (lastArtifactRegistration == null) {
 			// Not a valid module name, do nothing
 			return;
 		}
 		Set<String> alreadyPresentOptions = new HashSet<>(lastModule.getParameters().keySet());
 
 		Resource jarFile = moduleResolver.resolve(CompletionUtils
-				.fromModuleCoordinates(lastModuleRegistration.getCoordinates()));
+				.fromModuleCoordinates(lastArtifactRegistration.getCoordinates()));
 
 		CompletionProposal.Factory proposals = expanding(dsl);
 

@@ -16,13 +16,13 @@
 
 package org.springframework.cloud.dataflow.completion;
 
-import static org.springframework.cloud.dataflow.core.ModuleType.*;
+import static org.springframework.cloud.dataflow.core.ArtifactType.*;
 
 import java.util.List;
 
 import org.springframework.cloud.dataflow.core.dsl.CheckPointedParseException;
-import org.springframework.cloud.dataflow.module.registry.ModuleRegistration;
-import org.springframework.cloud.dataflow.module.registry.ModuleRegistry;
+import org.springframework.cloud.dataflow.module.registry.ArtifactRegistration;
+import org.springframework.cloud.dataflow.module.registry.ArtifactRegistry;
 
 /**
  * Proposes module names when the user has typed a named channel redirection.
@@ -32,9 +32,9 @@ import org.springframework.cloud.dataflow.module.registry.ModuleRegistry;
 class ChannelNameYieldsModulesRecoveryStrategy extends
 		StacktraceFingerprintingRecoveryStrategy<CheckPointedParseException> {
 
-	private final ModuleRegistry moduleRegistry;
+	private final ArtifactRegistry moduleRegistry;
 
-	public ChannelNameYieldsModulesRecoveryStrategy(ModuleRegistry moduleRegistry) {
+	public ChannelNameYieldsModulesRecoveryStrategy(ArtifactRegistry moduleRegistry) {
 		super(CheckPointedParseException.class, "queue:foo >", "queue:foo > ");
 		this.moduleRegistry = moduleRegistry;
 	}
@@ -53,7 +53,7 @@ class ChannelNameYieldsModulesRecoveryStrategy extends
 	public void addProposals(String dsl, CheckPointedParseException exception,
 			int detailLevel, List<CompletionProposal> proposals) {
 		CompletionProposal.Factory completionFactory = CompletionProposal.expanding(dsl);
-		for (ModuleRegistration moduleRegistration : moduleRegistry.findAll()) {
+		for (ArtifactRegistration moduleRegistration : moduleRegistry.findAll()) {
 			if (moduleRegistration.getType() == processor || moduleRegistration.getType() == sink) {
 				proposals.add(completionFactory.withSeparateTokens(moduleRegistration.getName(),
 						"Wire named channel into a " + moduleRegistration.getType() + " module"));

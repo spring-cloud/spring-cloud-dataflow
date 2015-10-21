@@ -16,14 +16,14 @@
 
 package org.springframework.cloud.dataflow.completion;
 
-import static org.springframework.cloud.dataflow.core.ModuleType.*;
+import static org.springframework.cloud.dataflow.core.ArtifactType.*;
 
 import java.util.List;
 
 import org.springframework.cloud.dataflow.core.ModuleDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
-import org.springframework.cloud.dataflow.module.registry.ModuleRegistration;
-import org.springframework.cloud.dataflow.module.registry.ModuleRegistry;
+import org.springframework.cloud.dataflow.module.registry.ArtifactRegistration;
+import org.springframework.cloud.dataflow.module.registry.ArtifactRegistry;
 
 /**
  * Continues a well-formed stream definition by adding a pipe symbol and another module, provided that the stream
@@ -33,9 +33,9 @@ import org.springframework.cloud.dataflow.module.registry.ModuleRegistry;
  */
 public class PipeIntoOtherModulesExpansionStrategy implements ExpansionStrategy {
 
-	private final ModuleRegistry moduleRegistry;
+	private final ArtifactRegistry moduleRegistry;
 
-	public PipeIntoOtherModulesExpansionStrategy(ModuleRegistry moduleRegistry) {
+	public PipeIntoOtherModulesExpansionStrategy(ArtifactRegistry moduleRegistry) {
 		this.moduleRegistry = moduleRegistry;
 	}
 
@@ -57,7 +57,7 @@ public class PipeIntoOtherModulesExpansionStrategy implements ExpansionStrategy 
 		}
 
 		CompletionProposal.Factory proposals = CompletionProposal.expanding(text);
-		for (ModuleRegistration moduleRegistration : moduleRegistry.findAll()) {
+		for (ArtifactRegistration moduleRegistration : moduleRegistry.findAll()) {
 			if (moduleRegistration.getType() == processor || moduleRegistration.getType() == sink) {
 				String expansion = CompletionUtils.maybeQualifyWithLabel(moduleRegistration.getName(), parseResult);
 				collector.add(proposals.withSeparateTokens("| " + expansion,

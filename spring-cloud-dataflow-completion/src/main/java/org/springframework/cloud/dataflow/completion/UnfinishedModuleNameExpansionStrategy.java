@@ -22,10 +22,10 @@ import java.util.List;
 import java.util.Set;
 
 import org.springframework.cloud.dataflow.core.ModuleDefinition;
-import org.springframework.cloud.dataflow.core.ModuleType;
+import org.springframework.cloud.dataflow.core.ArtifactType;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
-import org.springframework.cloud.dataflow.module.registry.ModuleRegistration;
-import org.springframework.cloud.dataflow.module.registry.ModuleRegistry;
+import org.springframework.cloud.dataflow.module.registry.ArtifactRegistration;
+import org.springframework.cloud.dataflow.module.registry.ArtifactRegistry;
 
 /**
  * Provides completions by finding modules whose name starts with a
@@ -35,9 +35,9 @@ import org.springframework.cloud.dataflow.module.registry.ModuleRegistry;
  */
 public class UnfinishedModuleNameExpansionStrategy implements ExpansionStrategy {
 
-	private final ModuleRegistry moduleRegistry;
+	private final ArtifactRegistry moduleRegistry;
 
-	UnfinishedModuleNameExpansionStrategy(ModuleRegistry moduleRegistry) {
+	UnfinishedModuleNameExpansionStrategy(ArtifactRegistry moduleRegistry) {
 		this.moduleRegistry = moduleRegistry;
 	}
 
@@ -57,9 +57,9 @@ public class UnfinishedModuleNameExpansionStrategy implements ExpansionStrategy 
 		String alreadyTyped = lastModule.getName();
 		CompletionProposal.Factory proposals = CompletionProposal.expanding(text);
 
-		List<ModuleType> validTypesAtThisPosition = Arrays.asList(CompletionUtils.determinePotentialTypes(lastModule));
+		List<ArtifactType> validTypesAtThisPosition = Arrays.asList(CompletionUtils.determinePotentialTypes(lastModule));
 
-		for (ModuleRegistration moduleRegistration : moduleRegistry.findAll()) {
+		for (ArtifactRegistration moduleRegistration : moduleRegistry.findAll()) {
 			String candidateName = moduleRegistration.getName();
 			if (validTypesAtThisPosition.contains(moduleRegistration.getType())
 					&& !alreadyTyped.equals(candidateName) && candidateName.startsWith(alreadyTyped)) {

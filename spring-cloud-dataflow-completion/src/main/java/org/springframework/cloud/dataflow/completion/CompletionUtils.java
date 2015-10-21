@@ -19,10 +19,10 @@ package org.springframework.cloud.dataflow.completion;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.springframework.cloud.dataflow.core.ArtifactType;
 import org.springframework.cloud.dataflow.core.BindingProperties;
 import org.springframework.cloud.dataflow.core.ModuleCoordinates;
 import org.springframework.cloud.dataflow.core.ModuleDefinition;
-import org.springframework.cloud.dataflow.core.ModuleType;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.stream.module.resolver.Coordinates;
 
@@ -46,20 +46,20 @@ public class CompletionUtils {
 	/**
 	 * Return the type(s) a given module definition <em>could</em> have, in the context of code completion.
 	 */
-	static ModuleType[] determinePotentialTypes(ModuleDefinition moduleDefinition) {
+	static ArtifactType[] determinePotentialTypes(ModuleDefinition moduleDefinition) {
 		Set<String> properties = moduleDefinition.getParameters().keySet();
 		if (properties.contains(BindingProperties.INPUT_BINDING_KEY)) {
 			// Can't be source. For the purpose of completion, being the last module
 			// (hence having BindingProperties.OUTPUT_BINDING_KEY not set) does NOT guarantee we're dealing
 			// with a sink (could be an unfinished "source | processor | processor" stream)
 			if (properties.contains(BindingProperties.OUTPUT_BINDING_KEY)) {
-				return new ModuleType[] {ModuleType.processor};
+				return new ArtifactType[] {ArtifactType.processor};
 			} else {
-				return new ModuleType[] {ModuleType.processor, ModuleType.sink};
+				return new ArtifactType[] {ArtifactType.processor, ArtifactType.sink};
 			}
 		} // MUST be source
 		else {
-			return new ModuleType[] {ModuleType.source};
+			return new ArtifactType[] {ArtifactType.source};
 		}
 	}
 
