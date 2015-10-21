@@ -87,7 +87,8 @@ public class LocalModuleDeployer implements ModuleDeployer {
 		args.put("endpoints.shutdown.enabled", "true");
 		args.put("spring.main.show_banner", "false");
 
-		ModuleLaunchRequest moduleLaunchRequest = new ModuleLaunchRequest(module, args);
+		ModuleLaunchRequest moduleLaunchRequest = new ModuleLaunchRequest(String.format("%s.%s",
+				request.getDefinition().getGroup(), request.getDefinition().getLabel()), module, args);
 		launcher.launch(Collections.singletonList(moduleLaunchRequest));
 		ModuleDeploymentId id = new ModuleDeploymentId(request.getDefinition().getGroup(),
 				request.getDefinition().getLabel());
