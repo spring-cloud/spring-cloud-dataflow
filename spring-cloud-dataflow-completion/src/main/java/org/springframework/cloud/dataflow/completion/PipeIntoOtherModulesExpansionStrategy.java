@@ -33,10 +33,10 @@ import org.springframework.cloud.dataflow.module.registry.ArtifactRegistry;
  */
 public class PipeIntoOtherModulesExpansionStrategy implements ExpansionStrategy {
 
-	private final ArtifactRegistry moduleRegistry;
+	private final ArtifactRegistry artifactRegistry;
 
-	public PipeIntoOtherModulesExpansionStrategy(ArtifactRegistry moduleRegistry) {
-		this.moduleRegistry = moduleRegistry;
+	public PipeIntoOtherModulesExpansionStrategy(ArtifactRegistry artifactRegistry) {
+		this.artifactRegistry = artifactRegistry;
 	}
 
 	@Override
@@ -48,16 +48,16 @@ public class PipeIntoOtherModulesExpansionStrategy implements ExpansionStrategy 
 		ModuleDefinition lastModule = parseResult.getDeploymentOrderIterator().next();
 		// Consider "bar | foo". If there is indeed a sink named foo in the registry,
 		// "foo" may also be a processor, in which case we can continue
-		boolean couldBeASink = moduleRegistry.find(lastModule.getName(), sink) != null;
+		boolean couldBeASink = artifactRegistry.find(lastModule.getName(), sink) != null;
 		if (couldBeASink) {
-			boolean couldBeAProcessor = moduleRegistry.find(lastModule.getName(), processor) != null;
+			boolean couldBeAProcessor = artifactRegistry.find(lastModule.getName(), processor) != null;
 			if (!couldBeAProcessor) {
 				return false;
 			}
 		}
 
 		CompletionProposal.Factory proposals = CompletionProposal.expanding(text);
-		for (ArtifactRegistration moduleRegistration : moduleRegistry.findAll()) {
+		for (ArtifactRegistration moduleRegistration : artifactRegistry.findAll()) {
 			if (moduleRegistration.getType() == processor || moduleRegistration.getType() == sink) {
 				String expansion = CompletionUtils.maybeQualifyWithLabel(moduleRegistration.getName(), parseResult);
 				collector.add(proposals.withSeparateTokens("| " + expansion,

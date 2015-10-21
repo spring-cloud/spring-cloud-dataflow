@@ -42,16 +42,16 @@ import org.springframework.core.io.Resource;
 class ConfigurationPropertyNameAfterDashDashRecoveryStrategy
 		extends StacktraceFingerprintingRecoveryStrategy<CheckPointedParseException> {
 
-	private final ArtifactRegistry moduleRegistry;
+	private final ArtifactRegistry artifactRegistry;
 
 	private final ModuleResolver moduleResolver;
 
 	private final ModuleConfigurationMetadataResolver moduleConfigurationMetadataResolver;
 
-	ConfigurationPropertyNameAfterDashDashRecoveryStrategy(ArtifactRegistry moduleRegistry,
+	ConfigurationPropertyNameAfterDashDashRecoveryStrategy(ArtifactRegistry artifactRegistry,
 			ModuleResolver moduleResolver, ModuleConfigurationMetadataResolver moduleConfigurationMetadataResolver) {
 		super(CheckPointedParseException.class, "file --", "file | foo --");
-		this.moduleRegistry = moduleRegistry;
+		this.artifactRegistry = artifactRegistry;
 		this.moduleResolver = moduleResolver;
 		this.moduleConfigurationMetadataResolver = moduleConfigurationMetadataResolver;
 	}
@@ -67,7 +67,7 @@ class ConfigurationPropertyNameAfterDashDashRecoveryStrategy
 		String lastModuleName = lastModule.getName();
 		ArtifactRegistration lastArtifactRegistration = null;
 		for (ArtifactType moduleType : CompletionUtils.determinePotentialTypes(lastModule)) {
-			lastArtifactRegistration = moduleRegistry.find(lastModuleName, moduleType);
+			lastArtifactRegistration = artifactRegistry.find(lastModuleName, moduleType);
 			if (lastArtifactRegistration != null) {
 				break;
 			}

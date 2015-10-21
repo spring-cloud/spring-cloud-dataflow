@@ -30,18 +30,18 @@ import org.springframework.cloud.dataflow.module.registry.ArtifactRegistry;
 class EmptyStartYieldsSourceModulesRecoveryStrategy extends
 		StacktraceFingerprintingRecoveryStrategy<IllegalArgumentException> {
 
-	private final ArtifactRegistry moduleRegistry;
+	private final ArtifactRegistry artifactRegistry;
 
-	public EmptyStartYieldsSourceModulesRecoveryStrategy(ArtifactRegistry moduleRegistry) {
+	public EmptyStartYieldsSourceModulesRecoveryStrategy(ArtifactRegistry artifactRegistry) {
 		super(IllegalArgumentException.class, "");
-		this.moduleRegistry = moduleRegistry;
+		this.artifactRegistry = artifactRegistry;
 	}
 
 	@Override
 	public void addProposals(String dsl, IllegalArgumentException exception,
 			int detailLevel, List<CompletionProposal> proposals) {
 		CompletionProposal.Factory completionFactory = CompletionProposal.expanding(dsl);
-		for (ArtifactRegistration moduleRegistration : moduleRegistry.findAll()) {
+		for (ArtifactRegistration moduleRegistration : artifactRegistry.findAll()) {
 			if (moduleRegistration.getType() == ArtifactType.source) {
 				proposals.add(completionFactory.withSeparateTokens(moduleRegistration.getName(),
 						"Start with a source module"));

@@ -39,16 +39,16 @@ import org.springframework.core.io.Resource;
  */
 class AddModuleOptionsExpansionStrategy implements ExpansionStrategy {
 
-	private final ArtifactRegistry moduleRegistry;
+	private final ArtifactRegistry artifactRegistry;
 
 	private final ModuleConfigurationMetadataResolver moduleConfigurationMetadataResolver;
 
 	private final ModuleResolver moduleResolver;
 
-	public AddModuleOptionsExpansionStrategy(ArtifactRegistry moduleRegistry,
+	public AddModuleOptionsExpansionStrategy(ArtifactRegistry artifactRegistry,
 			ModuleConfigurationMetadataResolver moduleConfigurationMetadataResolver,
 			ModuleResolver moduleResolver) {
-		this.moduleRegistry = moduleRegistry;
+		this.artifactRegistry = artifactRegistry;
 		this.moduleConfigurationMetadataResolver = moduleConfigurationMetadataResolver;
 		this.moduleResolver = moduleResolver;
 	}
@@ -61,7 +61,7 @@ class AddModuleOptionsExpansionStrategy implements ExpansionStrategy {
 		String lastModuleName = lastModule.getName();
 		ArtifactRegistration lastArtifactRegistration = null;
 		for (ArtifactType moduleType : CompletionUtils.determinePotentialTypes(lastModule)) {
-			lastArtifactRegistration = moduleRegistry.find(lastModuleName, moduleType);
+			lastArtifactRegistration = artifactRegistry.find(lastModuleName, moduleType);
 			if (lastArtifactRegistration != null) {
 				break;
 			}

@@ -51,7 +51,7 @@ import org.springframework.core.io.Resource;
  */
 public class ConfigurationPropertyValueHintExpansionStrategy implements ExpansionStrategy {
 
-	private final ArtifactRegistry moduleRegistry;
+	private final ArtifactRegistry artifactRegistry;
 
 	private final ModuleResolver moduleResolver;
 
@@ -60,10 +60,10 @@ public class ConfigurationPropertyValueHintExpansionStrategy implements Expansio
 	@Autowired
 	private ValueHintProvider[] valueHintProviders = new ValueHintProvider[0];
 
-	ConfigurationPropertyValueHintExpansionStrategy(ArtifactRegistry moduleRegistry,
+	ConfigurationPropertyValueHintExpansionStrategy(ArtifactRegistry artifactRegistry,
 			ModuleResolver moduleResolver,
 			ModuleConfigurationMetadataResolver moduleConfigurationMetadataResolver) {
-		this.moduleRegistry = moduleRegistry;
+		this.artifactRegistry = artifactRegistry;
 		this.moduleResolver = moduleResolver;
 		this.moduleConfigurationMetadataResolver = moduleConfigurationMetadataResolver;
 	}
@@ -86,7 +86,7 @@ public class ConfigurationPropertyValueHintExpansionStrategy implements Expansio
 		String lastModuleName = lastModule.getName();
 		ArtifactRegistration lastArtifactRegistration = null;
 		for (ArtifactType moduleType : CompletionUtils.determinePotentialTypes(lastModule)) {
-			lastArtifactRegistration = moduleRegistry.find(lastModuleName, moduleType);
+			lastArtifactRegistration = artifactRegistry.find(lastModuleName, moduleType);
 			if (lastArtifactRegistration != null) {
 				break;
 			}

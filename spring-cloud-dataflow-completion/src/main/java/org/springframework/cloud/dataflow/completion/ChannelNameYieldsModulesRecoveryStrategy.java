@@ -32,11 +32,11 @@ import org.springframework.cloud.dataflow.module.registry.ArtifactRegistry;
 class ChannelNameYieldsModulesRecoveryStrategy extends
 		StacktraceFingerprintingRecoveryStrategy<CheckPointedParseException> {
 
-	private final ArtifactRegistry moduleRegistry;
+	private final ArtifactRegistry artifactRegistry;
 
-	public ChannelNameYieldsModulesRecoveryStrategy(ArtifactRegistry moduleRegistry) {
+	public ChannelNameYieldsModulesRecoveryStrategy(ArtifactRegistry artifactRegistry) {
 		super(CheckPointedParseException.class, "queue:foo >", "queue:foo > ");
-		this.moduleRegistry = moduleRegistry;
+		this.artifactRegistry = artifactRegistry;
 	}
 
 	@Override
@@ -53,7 +53,7 @@ class ChannelNameYieldsModulesRecoveryStrategy extends
 	public void addProposals(String dsl, CheckPointedParseException exception,
 			int detailLevel, List<CompletionProposal> proposals) {
 		CompletionProposal.Factory completionFactory = CompletionProposal.expanding(dsl);
-		for (ArtifactRegistration moduleRegistration : moduleRegistry.findAll()) {
+		for (ArtifactRegistration moduleRegistration : artifactRegistry.findAll()) {
 			if (moduleRegistration.getType() == processor || moduleRegistration.getType() == sink) {
 				proposals.add(completionFactory.withSeparateTokens(moduleRegistration.getName(),
 						"Wire named channel into a " + moduleRegistration.getType() + " module"));

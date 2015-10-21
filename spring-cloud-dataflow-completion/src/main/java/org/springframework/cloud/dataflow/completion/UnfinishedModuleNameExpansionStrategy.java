@@ -35,10 +35,10 @@ import org.springframework.cloud.dataflow.module.registry.ArtifactRegistry;
  */
 public class UnfinishedModuleNameExpansionStrategy implements ExpansionStrategy {
 
-	private final ArtifactRegistry moduleRegistry;
+	private final ArtifactRegistry artifactRegistry;
 
-	UnfinishedModuleNameExpansionStrategy(ArtifactRegistry moduleRegistry) {
-		this.moduleRegistry = moduleRegistry;
+	UnfinishedModuleNameExpansionStrategy(ArtifactRegistry artifactRegistry) {
+		this.artifactRegistry = artifactRegistry;
 	}
 
 	@Override
@@ -59,7 +59,7 @@ public class UnfinishedModuleNameExpansionStrategy implements ExpansionStrategy 
 
 		List<ArtifactType> validTypesAtThisPosition = Arrays.asList(CompletionUtils.determinePotentialTypes(lastModule));
 
-		for (ArtifactRegistration moduleRegistration : moduleRegistry.findAll()) {
+		for (ArtifactRegistration moduleRegistration : artifactRegistry.findAll()) {
 			String candidateName = moduleRegistration.getName();
 			if (validTypesAtThisPosition.contains(moduleRegistration.getType())
 					&& !alreadyTyped.equals(candidateName) && candidateName.startsWith(alreadyTyped)) {

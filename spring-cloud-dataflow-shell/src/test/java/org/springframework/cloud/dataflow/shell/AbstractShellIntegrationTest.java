@@ -204,7 +204,7 @@ public abstract class AbstractShellIntegrationTest {
 	public static class TestConfig {
 
 		@Bean
-		public ArtifactRegistry moduleRegistry() {
+		public ArtifactRegistry artifactRegistry() {
 			return new InMemoryArtifactRegistry();
 		}
 

@@ -36,7 +36,7 @@ import org.springframework.context.annotation.Import;
 public class CompletionConfiguration {
 
 	@Autowired
-	private ArtifactRegistry moduleRegistry;
+	private ArtifactRegistry artifactRegistry;
 
 	@Autowired
 	private ModuleConfigurationMetadataResolver moduleConfigurationMetadataResolver;
@@ -52,12 +52,12 @@ public class CompletionConfiguration {
 
 	@Bean
 	public ExpansionStrategy addModuleOptionsExpansionStrategy() {
-		return new AddModuleOptionsExpansionStrategy(moduleRegistry, moduleConfigurationMetadataResolver, moduleResolver);
+		return new AddModuleOptionsExpansionStrategy(artifactRegistry, moduleConfigurationMetadataResolver, moduleResolver);
 	}
 
 	@Bean
 	public RecoveryStrategy emptyStartYieldsModulesRecoveryStrategy() {
-		return new EmptyStartYieldsSourceModulesRecoveryStrategy(moduleRegistry);
+		return new EmptyStartYieldsSourceModulesRecoveryStrategy(artifactRegistry);
 	}
 
 	@Bean
@@ -67,45 +67,45 @@ public class CompletionConfiguration {
 
 	@Bean
 	public RecoveryStrategy configurationPropertyNameAfterDashDashRecoveryStrategy() {
-		return new ConfigurationPropertyNameAfterDashDashRecoveryStrategy(moduleRegistry,
+		return new ConfigurationPropertyNameAfterDashDashRecoveryStrategy(artifactRegistry,
 				moduleResolver, moduleConfigurationMetadataResolver);
 	}
 
 	@Bean
 	public RecoveryStrategy unfinishedConfigurationPropertyNameRecoveryStrategy() {
-		return new UnfinishedConfigurationPropertyNameRecoveryStrategy(moduleRegistry,
+		return new UnfinishedConfigurationPropertyNameRecoveryStrategy(artifactRegistry,
 				moduleResolver, moduleConfigurationMetadataResolver);
 	}
 
 	@Bean
 	public RecoveryStrategy modulesAfterPipeRecoveryStrategy() {
-		return new ModulesAfterPipeRecoveryStrategy(moduleRegistry);
+		return new ModulesAfterPipeRecoveryStrategy(artifactRegistry);
 	}
 
 	@Bean
 	public ExpansionStrategy unfinishedModuleNameExpansionStrategy() {
-		return new UnfinishedModuleNameExpansionStrategy(moduleRegistry);
+		return new UnfinishedModuleNameExpansionStrategy(artifactRegistry);
 	}
 
 	@Bean
 	public RecoveryStrategy channelNameYieldsModulesRecoveryStrategy() {
-		return new ChannelNameYieldsModulesRecoveryStrategy(moduleRegistry);
+		return new ChannelNameYieldsModulesRecoveryStrategy(artifactRegistry);
 	}
 
 	@Bean
 	public ExpansionStrategy pipeIntoOtherModulesExpansionStrategy() {
-		return new PipeIntoOtherModulesExpansionStrategy(moduleRegistry);
+		return new PipeIntoOtherModulesExpansionStrategy(artifactRegistry);
 	}
 
 	@Bean
 	public RecoveryStrategy configurationPropertyValueHintRecoveryStrategy() {
-		return new ConfigurationPropertyValueHintRecoveryStrategy(moduleRegistry,
+		return new ConfigurationPropertyValueHintRecoveryStrategy(artifactRegistry,
 				moduleResolver, moduleConfigurationMetadataResolver);
 	}
 
 	@Bean
 	public ExpansionStrategy configurationPropertyValueHintExpansionStrategy() {
-		return new ConfigurationPropertyValueHintExpansionStrategy(moduleRegistry,
+		return new ConfigurationPropertyValueHintExpansionStrategy(artifactRegistry,
 				moduleResolver, moduleConfigurationMetadataResolver);
 	}
 

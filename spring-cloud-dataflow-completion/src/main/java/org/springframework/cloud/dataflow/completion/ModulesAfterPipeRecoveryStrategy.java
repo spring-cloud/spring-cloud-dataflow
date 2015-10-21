@@ -34,11 +34,11 @@ import org.springframework.cloud.dataflow.module.registry.ArtifactRegistry;
 public class ModulesAfterPipeRecoveryStrategy extends
 		StacktraceFingerprintingRecoveryStrategy<CheckPointedParseException> {
 
-	private final ArtifactRegistry moduleRegistry;
+	private final ArtifactRegistry artifactRegistry;
 
-	ModulesAfterPipeRecoveryStrategy(ArtifactRegistry moduleRegistry) {
+	ModulesAfterPipeRecoveryStrategy(ArtifactRegistry artifactRegistry) {
 		super(CheckPointedParseException.class, "foo |", "foo | ");
-		this.moduleRegistry = moduleRegistry;
+		this.artifactRegistry = artifactRegistry;
 	}
 
 
@@ -52,7 +52,7 @@ public class ModulesAfterPipeRecoveryStrategy extends
 		CompletionProposal.Factory proposals = CompletionProposal.expanding(dsl);
 
 		// We only support full streams at the moment, so completions can only be processor or sink
-		for (ArtifactRegistration moduleRegistration : moduleRegistry.findAll()) {
+		for (ArtifactRegistration moduleRegistration : artifactRegistry.findAll()) {
 			if (moduleRegistration.getType() == processor || moduleRegistration.getType() == sink) {
 				String expansion = CompletionUtils.maybeQualifyWithLabel(moduleRegistration.getName(), streamDefinition);
 				collector.add(proposals.withSeparateTokens(expansion,

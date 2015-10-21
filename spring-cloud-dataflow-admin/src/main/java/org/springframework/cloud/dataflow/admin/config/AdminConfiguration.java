@@ -79,7 +79,7 @@ public class AdminConfiguration {
 	}
 
 	@Bean
-	public ArtifactRegistryPopulator moduleRegistryPopulator(ArtifactRegistry artifactRegistry) {
+	public ArtifactRegistryPopulator artifactRegistryPopulator(ArtifactRegistry artifactRegistry) {
 		return new ArtifactRegistryPopulator(artifactRegistry);
 	}
 

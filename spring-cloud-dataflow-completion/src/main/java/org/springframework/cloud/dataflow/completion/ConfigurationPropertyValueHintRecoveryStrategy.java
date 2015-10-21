@@ -29,8 +29,8 @@ import org.springframework.boot.configurationmetadata.ValueHint;
 import org.springframework.boot.loader.archive.Archive;
 import org.springframework.boot.loader.archive.ExplodedArchive;
 import org.springframework.boot.loader.archive.JarFileArchive;
-import org.springframework.cloud.dataflow.core.ModuleDefinition;
 import org.springframework.cloud.dataflow.core.ArtifactType;
+import org.springframework.cloud.dataflow.core.ModuleDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.dsl.CheckPointedParseException;
 import org.springframework.cloud.dataflow.core.dsl.Token;
@@ -38,7 +38,6 @@ import org.springframework.cloud.dataflow.core.dsl.TokenKind;
 import org.springframework.cloud.dataflow.module.registry.ArtifactRegistration;
 import org.springframework.cloud.dataflow.module.registry.ArtifactRegistry;
 import org.springframework.cloud.stream.configuration.metadata.ModuleConfigurationMetadataResolver;
-import org.springframework.cloud.stream.module.launcher.ModuleJarLauncher;
 import org.springframework.cloud.stream.module.resolver.ModuleResolver;
 import org.springframework.core.io.Resource;
 
@@ -49,7 +48,7 @@ import org.springframework.core.io.Resource;
  */
 public class ConfigurationPropertyValueHintRecoveryStrategy extends StacktraceFingerprintingRecoveryStrategy<CheckPointedParseException> {
 
-	private final ArtifactRegistry moduleRegistry;
+	private final ArtifactRegistry artifactRegistry;
 
 	private final ModuleResolver moduleResolver;
 
@@ -58,9 +57,9 @@ public class ConfigurationPropertyValueHintRecoveryStrategy extends StacktraceFi
 	@Autowired
 	private ValueHintProvider[] valueHintProviders = new ValueHintProvider[0];
 
-	ConfigurationPropertyValueHintRecoveryStrategy(ArtifactRegistry moduleRegistry, ModuleResolver moduleResolver, ModuleConfigurationMetadataResolver moduleConfigurationMetadataResolver) {
+	ConfigurationPropertyValueHintRecoveryStrategy(ArtifactRegistry artifactRegistry, ModuleResolver moduleResolver, ModuleConfigurationMetadataResolver moduleConfigurationMetadataResolver) {
 		super(CheckPointedParseException.class, "foo --bar=", "foo | wizz --bar=");
-		this.moduleRegistry = moduleRegistry;
+		this.artifactRegistry = artifactRegistry;
 		this.moduleResolver = moduleResolver;
 		this.moduleConfigurationMetadataResolver = moduleConfigurationMetadataResolver;
 	}
@@ -121,7 +120,7 @@ public class ConfigurationPropertyValueHintRecoveryStrategy extends StacktraceFi
 		String lastModuleName = lastModule.getName();
 		ArtifactRegistration lastArtifactRegistration = null;
 		for (ArtifactType moduleType : CompletionUtils.determinePotentialTypes(lastModule)) {
-			lastArtifactRegistration = moduleRegistry.find(lastModuleName, moduleType);
+			lastArtifactRegistration = artifactRegistry.find(lastModuleName, moduleType);
 			if (lastArtifactRegistration != null) {
 				break;
 			}

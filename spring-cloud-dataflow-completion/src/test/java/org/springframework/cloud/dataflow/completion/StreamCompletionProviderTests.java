@@ -262,7 +262,7 @@ public class StreamCompletionProviderTests {
 		private ResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
 
 		@Bean
-		public ArtifactRegistry moduleRegistry() {
+		public ArtifactRegistry artifactRegistry() {
 			return new ArtifactRegistry() {
 				@Override
 				public ArtifactRegistration find(String name, ArtifactType type) {
