@@ -79,6 +79,7 @@ public class LrpModuleDeployer implements ModuleDeployer {
 		Map<String, String> rawArgs = new HashMap<>();
 		rawArgs.putAll(request.getDefinition().getParameters());
 		rawArgs.putAll(request.getDeploymentProperties());
+		rawArgs.put(JMX_DEFAULT_DOMAIN_NAME, String.format("%s.%s", request.getDefinition().getGroup(), request.getDefinition().getLabel()));
 		Map<String, String> qualifiedArgs = ModuleArgumentQualifier.qualifyArgs(0, rawArgs);
 		for (Map.Entry<String, String> entry : qualifiedArgs.entrySet()) {
 			environmentVariables.add(new EnvironmentVariable(entry.getKey(), entry.getValue()));
