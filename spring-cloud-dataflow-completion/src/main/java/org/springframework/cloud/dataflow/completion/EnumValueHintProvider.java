@@ -24,7 +24,10 @@ import org.springframework.boot.configurationmetadata.ValueHint;
 import org.springframework.util.ClassUtils;
 
 /**
- * Created by ericbottard on 07/10/15.
+ * A ValueHintProvider that returns possible values when the property
+ * is some kind of {@link Enum}.
+ *
+ * @author Eric Bottard
  */
 public class EnumValueHintProvider implements ValueHintProvider {
 
@@ -42,5 +45,10 @@ public class EnumValueHintProvider implements ValueHintProvider {
 			}
 		}
 		return result;
+	}
+
+	@Override
+	public boolean isExclusive(ConfigurationMetadataProperty property) {
+		return true;
 	}
 }

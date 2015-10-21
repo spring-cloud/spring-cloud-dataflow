@@ -31,14 +31,14 @@ import org.springframework.boot.configurationmetadata.ValueHint;
 import org.springframework.boot.loader.archive.Archive;
 import org.springframework.boot.loader.archive.ExplodedArchive;
 import org.springframework.boot.loader.archive.JarFileArchive;
-import org.springframework.cloud.dataflow.core.ModuleDefinition;
+import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistration;
+import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistry;
 import org.springframework.cloud.dataflow.core.ArtifactType;
+import org.springframework.cloud.dataflow.core.ModuleDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.dsl.CheckPointedParseException;
 import org.springframework.cloud.dataflow.core.dsl.Token;
 import org.springframework.cloud.dataflow.core.dsl.TokenKind;
-import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistration;
-import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistry;
 import org.springframework.cloud.stream.configuration.metadata.ModuleConfigurationMetadataResolver;
 import org.springframework.cloud.stream.module.resolver.ModuleResolver;
 import org.springframework.core.io.Resource;
@@ -112,12 +112,19 @@ public class ConfigurationPropertyValueHintExpansionStrategy implements Expansio
 					classLoader = new ClassLoaderExposingJarLauncher(jarFileArchive).createClassLoader();
 
 					for (ValueHintProvider valueHintProvider : valueHintProviders) {
-						for (ValueHint valueHint : valueHintProvider.guessValueHints(property, classLoader)) {
+						List<ValueHint> valueHints = valueHintProvider.guessValueHints(property, classLoader);
+						if (!valueHints.isEmpty() && valueHintProvider.isExclusive(property)) {
+							collector.clear();
+						}
+						for (ValueHint valueHint : valueHints) {
 							String candidate = String.valueOf(valueHint.getValue());
 							if (!candidate.equals(alreadyTyped) && candidate.startsWith(alreadyTyped)) {
 								collector.add(proposals.withSuffix(candidate.substring(alreadyTyped.length()),
 										valueHint.getShortDescription()));
 							}
+						}
+						if (!valueHints.isEmpty() && valueHintProvider.isExclusive(property)) {
+							return true;
 						}
 					}
 				}
@@ -136,6 +143,7 @@ public class ConfigurationPropertyValueHintExpansionStrategy implements Expansio
 				}
 			}
 		}
+
 		return false;
 	}
 
