@@ -30,9 +30,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cloud.dataflow.admin.repository.DuplicateStreamException;
 import org.springframework.cloud.dataflow.admin.repository.StreamDefinitionRepository;
+import org.springframework.cloud.dataflow.core.ArtifactCoordinates;
 import org.springframework.cloud.dataflow.core.ArtifactType;
 import org.springframework.cloud.dataflow.core.BindingProperties;
-import org.springframework.cloud.dataflow.core.ModuleCoordinates;
 import org.springframework.cloud.dataflow.core.ModuleDefinition;
 import org.springframework.cloud.dataflow.core.ModuleDeploymentId;
 import org.springframework.cloud.dataflow.core.ModuleDeploymentRequest;
@@ -236,7 +236,7 @@ public class StreamController {
 				throw new IllegalArgumentException(String.format(
 						"Module %s of type %s not found in registry", currentModule.getName(), type));
 			}
-			ModuleCoordinates coordinates = registration.getCoordinates();
+			ArtifactCoordinates coordinates = registration.getCoordinates();
 			Map<String, String> moduleDeploymentProperties = getModuleDeploymentProperties(currentModule, cumulatedDeploymentProperties);
 			boolean upstreamModuleSupportsPartition = upstreamModuleHasPartitionInfo(stream, currentModule, cumulatedDeploymentProperties);
 			// consumer module partition properties
@@ -268,9 +268,9 @@ public class StreamController {
 		}
 		String[] libs = StringUtils.delimitedListToStringArray(includes, ",", " \t");
 		for (int i = 0; i < libs.length; i++) {
-			ModuleCoordinates coordinates;
+			ArtifactCoordinates coordinates;
 			try {
-				coordinates = ModuleCoordinates.parse(libs[i]);
+				coordinates = ArtifactCoordinates.parse(libs[i]);
 			}
 			catch (IllegalArgumentException e) {
 				ArtifactRegistration registration = registry.find(libs[i], ArtifactType.library);

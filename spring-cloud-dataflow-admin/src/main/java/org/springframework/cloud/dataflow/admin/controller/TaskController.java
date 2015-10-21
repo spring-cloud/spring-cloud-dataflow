@@ -19,8 +19,8 @@ package org.springframework.cloud.dataflow.admin.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cloud.dataflow.admin.repository.TaskDefinitionRepository;
+import org.springframework.cloud.dataflow.core.ArtifactCoordinates;
 import org.springframework.cloud.dataflow.core.ArtifactType;
-import org.springframework.cloud.dataflow.core.ModuleCoordinates;
 import org.springframework.cloud.dataflow.core.ModuleDefinition;
 import org.springframework.cloud.dataflow.core.ModuleDeploymentId;
 import org.springframework.cloud.dataflow.core.ModuleDeploymentRequest;
@@ -64,7 +64,7 @@ public class TaskController {
 	private ModuleDeployer moduleDeployer;
 
 	/**
-	 * The module registry this controller will use to look up modules.
+	 * The artifact registry this controller will use to look up modules.
 	 */
 	private final ArtifactRegistry registry;
 
@@ -77,7 +77,7 @@ public class TaskController {
 	 * </ul>
 	 *
 	 * @param repository the repository this controller will use for task CRUD operations.
-	 * @param registry module registry this controller will use to look up modules.
+	 * @param registry artifact registry this controller will use to look up modules.
 	 * @param deployer the deployer this controller will use to deploy/launch task modules.
 	 */
 	@Autowired
@@ -148,7 +148,7 @@ public class TaskController {
 			throw new IllegalArgumentException(String.format(
 					"Module %s of type %s not found in registry", module.getName(), ArtifactType.task));
 		}
-		ModuleCoordinates coordinates = registration.getCoordinates();
+		ArtifactCoordinates coordinates = registration.getCoordinates();
 		// todo: pass deployment properties
 		this.moduleDeployer.deploy(new ModuleDeploymentRequest(module, coordinates));
 	}

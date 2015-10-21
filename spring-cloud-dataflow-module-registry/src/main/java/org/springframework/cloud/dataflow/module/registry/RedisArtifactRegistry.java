@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.cloud.dataflow.core.ModuleCoordinates;
+import org.springframework.cloud.dataflow.core.ArtifactCoordinates;
 import org.springframework.cloud.dataflow.core.ArtifactType;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisOperations;
@@ -35,9 +35,9 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 public class RedisArtifactRegistry implements ArtifactRegistry {
 
 	/**
-	 * Prefix for keys used for storing module coordinates.
+	 * Prefix for keys used for storing artifact coordinates.
 	 */
-	public static final String KEY_PREFIX = "spring.cloud.module.";
+	public static final String KEY_PREFIX = "spring.cloud.artifact.";
 
 	/**
 	 * Redis operations template.
@@ -59,7 +59,7 @@ public class RedisArtifactRegistry implements ArtifactRegistry {
 	public ArtifactRegistration find(String name, ArtifactType type) {
 		String coordinates = redisOperations.<String, String>boundHashOps(KEY_PREFIX + type).get(name);
 		return (coordinates == null ? null :
-				new ArtifactRegistration(name, type, ModuleCoordinates.parse(coordinates)));
+				new ArtifactRegistration(name, type, ArtifactCoordinates.parse(coordinates)));
 	}
 
 	@Override
@@ -71,7 +71,7 @@ public class RedisArtifactRegistry implements ArtifactRegistry {
 					redisOperations.<String, String>boundHashOps(KEY_PREFIX + type)
 							.entries().entrySet()) {
 				list.add(new ArtifactRegistration(entry.getKey(), type,
-						ModuleCoordinates.parse(entry.getValue())));
+						ArtifactCoordinates.parse(entry.getValue())));
 			}
 		}
 

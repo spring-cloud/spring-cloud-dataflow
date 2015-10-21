@@ -21,8 +21,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.springframework.cloud.dataflow.core.ArtifactCoordinates;
 import org.springframework.cloud.dataflow.core.ArtifactType;
-import org.springframework.cloud.dataflow.core.ModuleCoordinates;
 
 /**
  * In-memory implementation of {@link ArtifactRegistry}.
@@ -32,18 +32,18 @@ import org.springframework.cloud.dataflow.core.ModuleCoordinates;
  */
 public class InMemoryArtifactRegistry implements ArtifactRegistry {
 
-	private final Map<Key, ModuleCoordinates> map = new ConcurrentHashMap<>();
+	private final Map<Key, ArtifactCoordinates> map = new ConcurrentHashMap<>();
 
 	@Override
 	public ArtifactRegistration find(String name, ArtifactType type) {
-		ModuleCoordinates coordinates = this.map.get(new Key(name, type));
+		ArtifactCoordinates coordinates = this.map.get(new Key(name, type));
 		return (coordinates == null ? null : new ArtifactRegistration(name, type, coordinates));
 	}
 
 	@Override
 	public List<ArtifactRegistration> findAll() {
 		List<ArtifactRegistration> list = new ArrayList<>(this.map.size());
-		for (Map.Entry<Key, ModuleCoordinates> entry : this.map.entrySet()) {
+		for (Map.Entry<Key, ArtifactCoordinates> entry : this.map.entrySet()) {
 			list.add(new ArtifactRegistration(entry.getKey().getName(),
 					entry.getKey().getType(), entry.getValue()));
 		}
@@ -54,7 +54,7 @@ public class InMemoryArtifactRegistry implements ArtifactRegistry {
 	public void save(ArtifactRegistration registration) {
 		String name = registration.getName();
 		ArtifactType type = registration.getType();
-		ModuleCoordinates coordinates = registration.getCoordinates();
+		ArtifactCoordinates coordinates = registration.getCoordinates();
 
 		this.map.put(new Key(name, type), coordinates);
 	}

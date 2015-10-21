@@ -38,7 +38,7 @@ public class ModuleDeploymentRequest {
 	/**
 	 * Coordinates for module jar file.
 	 */
-	private final ModuleCoordinates coordinates;
+	private final ArtifactCoordinates coordinates;
 
 	/**
 	 * Map of deployment properties for this module.
@@ -57,7 +57,7 @@ public class ModuleDeploymentRequest {
 	 * @param coordinates maven coordinates for module jar file
 	 * @param deploymentProperties map of deployment properties; may be {@code null}
 	 */
-	public ModuleDeploymentRequest(ModuleDefinition definition, ModuleCoordinates coordinates,
+	public ModuleDeploymentRequest(ModuleDefinition definition, ArtifactCoordinates coordinates,
 			Map<String, String> deploymentProperties) {
 		Assert.notNull(definition, "definition must not be null");
 		Assert.notNull(coordinates, "coordinates must not be null");
@@ -78,7 +78,7 @@ public class ModuleDeploymentRequest {
 	 * @param definition module definition
 	 * @param coordinates coordinates for module jar file
 	 */
-	public ModuleDeploymentRequest(ModuleDefinition definition, ModuleCoordinates coordinates) {
+	public ModuleDeploymentRequest(ModuleDefinition definition, ArtifactCoordinates coordinates) {
 		this(definition, coordinates, null);
 	}
 
@@ -92,7 +92,7 @@ public class ModuleDeploymentRequest {
 	/**
 	 * @see #coordinates
 	 */
-	public ModuleCoordinates getCoordinates() {
+	public ArtifactCoordinates getCoordinates() {
 		return coordinates;
 	}
 

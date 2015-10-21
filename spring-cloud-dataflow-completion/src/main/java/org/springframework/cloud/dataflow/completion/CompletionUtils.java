@@ -21,7 +21,7 @@ import java.util.Set;
 
 import org.springframework.cloud.dataflow.core.ArtifactType;
 import org.springframework.cloud.dataflow.core.BindingProperties;
-import org.springframework.cloud.dataflow.core.ModuleCoordinates;
+import org.springframework.cloud.dataflow.core.ArtifactCoordinates;
 import org.springframework.cloud.dataflow.core.ModuleDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.stream.module.resolver.Coordinates;
@@ -63,7 +63,7 @@ public class CompletionUtils {
 		}
 	}
 
-	static Coordinates fromModuleCoordinates(ModuleCoordinates coordinates) {
+	static Coordinates fromModuleCoordinates(ArtifactCoordinates coordinates) {
 		return new Coordinates(coordinates.getGroupId(), coordinates.getArtifactId(),
 				coordinates.getExtension(), coordinates.getClassifier(), coordinates.getVersion());
 	}

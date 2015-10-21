@@ -35,7 +35,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.loader.LaunchedURLClassLoader;
 import org.springframework.boot.loader.archive.Archive;
 import org.springframework.cloud.dataflow.core.ArtifactType;
-import org.springframework.cloud.dataflow.core.ModuleCoordinates;
+import org.springframework.cloud.dataflow.core.ArtifactCoordinates;
 import org.springframework.cloud.dataflow.module.registry.ArtifactRegistration;
 import org.springframework.cloud.dataflow.module.registry.ArtifactRegistry;
 import org.springframework.cloud.stream.configuration.metadata.ModuleConfigurationMetadataResolver;
@@ -268,7 +268,7 @@ public class StreamCompletionProviderTests {
 				public ArtifactRegistration find(String name, ArtifactType type) {
 					String filename = name + "-" + type;
 					if (new File(ROOT, filename).exists()) {
-						return new ArtifactRegistration(name, type, ModuleCoordinates.parse("com.acme:" + filename + ":1.0:jar"));
+						return new ArtifactRegistration(name, type, ArtifactCoordinates.parse("com.acme:" + filename + ":1.0:jar"));
 					}
 					else {
 						return null;
@@ -299,7 +299,7 @@ public class StreamCompletionProviderTests {
 					Assert.isTrue(matcher.matches());
 					String name = matcher.group("name");
 					ArtifactType type = ArtifactType.valueOf(matcher.group("type"));
-					return new ArtifactRegistration(name, type, ModuleCoordinates.parse("com.acme:" + fileName + ":1.0:jar"));
+					return new ArtifactRegistration(name, type, ArtifactCoordinates.parse("com.acme:" + fileName + ":1.0:jar"));
 
 				}
 			};

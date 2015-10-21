@@ -35,7 +35,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupp
 public class TestDependencies extends WebMvcConfigurationSupport {
 
 	@Bean
-	public ArtifactRegistry moduleRegistry() {
+	public ArtifactRegistry artifactRegistry() {
 		return new InMemoryArtifactRegistry();
 	}
 

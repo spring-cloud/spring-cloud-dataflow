@@ -23,8 +23,8 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
+import org.springframework.cloud.dataflow.core.ArtifactCoordinates;
 import org.springframework.cloud.dataflow.core.ArtifactType;
-import org.springframework.cloud.dataflow.core.ModuleCoordinates;
 import org.springframework.cloud.dataflow.module.registry.ArtifactRegistration;
 import org.springframework.cloud.dataflow.module.registry.ArtifactRegistry;
 import org.springframework.cloud.dataflow.rest.resource.DetailedModuleRegistrationResource;
@@ -124,7 +124,7 @@ public class ModuleController {
 		return result;
 	}
 
-	private Coordinates adapt(ModuleCoordinates coordinates) {
+	private Coordinates adapt(ArtifactCoordinates coordinates) {
 		return new Coordinates(coordinates.getGroupId(), coordinates.getArtifactId(), coordinates.getExtension(), "exec", coordinates.getVersion());
 	}
 
@@ -146,7 +146,7 @@ public class ModuleController {
 		if (!force && registry.find(name, type) != null) {
 			return;
 		}
-		registry.save(new ArtifactRegistration(name, type, ModuleCoordinates.parse(coordinates)));
+		registry.save(new ArtifactRegistration(name, type, ArtifactCoordinates.parse(coordinates)));
 	}
 
 	/**

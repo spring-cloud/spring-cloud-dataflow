@@ -24,7 +24,7 @@ import java.util.Map.Entry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.springframework.cloud.dataflow.core.ModuleCoordinates;
+import org.springframework.cloud.dataflow.core.ArtifactCoordinates;
 import org.springframework.cloud.dataflow.core.ModuleDefinition;
 import org.springframework.cloud.dataflow.core.ModuleDeploymentId;
 import org.springframework.cloud.dataflow.core.ModuleDeploymentRequest;
@@ -66,7 +66,7 @@ public class YarnModuleDeployer implements ModuleDeployer {
 	@Override
 	public ModuleDeploymentId deploy(ModuleDeploymentRequest request) {
 		int count = request.getCount();
-		ModuleCoordinates coordinates = request.getCoordinates();
+		ArtifactCoordinates coordinates = request.getCoordinates();
 		ModuleDefinition definition = request.getDefinition();
 		ModuleDeploymentId id = ModuleDeploymentId.fromModuleDefinition(definition);
 		String clusterId = moduleDeploymentIdToClusterId(id);

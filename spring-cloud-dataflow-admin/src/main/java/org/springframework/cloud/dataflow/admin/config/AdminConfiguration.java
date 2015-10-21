@@ -74,13 +74,13 @@ public class AdminConfiguration {
 	}
 
 	@Bean
-	public ArtifactRegistry moduleRegistry(RedisConnectionFactory redisConnectionFactory) {
+	public ArtifactRegistry artifactRegistry(RedisConnectionFactory redisConnectionFactory) {
 		return new RedisArtifactRegistry(redisConnectionFactory);
 	}
 
 	@Bean
-	public ModuleRegistryPopulator moduleRegistryPopulator(ArtifactRegistry artifactRegistry) {
-		return new ModuleRegistryPopulator(artifactRegistry);
+	public ArtifactRegistryPopulator moduleRegistryPopulator(ArtifactRegistry artifactRegistry) {
+		return new ArtifactRegistryPopulator(artifactRegistry);
 	}
 
 	@Bean

@@ -22,7 +22,7 @@ import org.junit.runner.RunWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
-import org.springframework.cloud.dataflow.core.ModuleCoordinates;
+import org.springframework.cloud.dataflow.core.ArtifactCoordinates;
 import org.springframework.cloud.dataflow.core.ModuleDefinition;
 import org.springframework.cloud.dataflow.core.ModuleDeploymentRequest;
 import org.springframework.cloud.stream.module.launcher.ModuleLauncher;
@@ -61,13 +61,13 @@ public class LocalModuleDeployerTests {
 				.setName("log")
 				.setParameter("spring.cloud.stream.bindings.input", "ticktock.0")
 				.build();
-		ModuleCoordinates timeCoordinates = new ModuleCoordinates.Builder()
+		ArtifactCoordinates timeCoordinates = new ArtifactCoordinates.Builder()
 				.setGroupId(GROUP_ID)
 				.setArtifactId("time-source")
 				.setVersion(VERSION)
 				.setClassifier("exec")
 				.build();
-		ModuleCoordinates logCoordinates = new ModuleCoordinates.Builder()
+		ArtifactCoordinates logCoordinates = new ArtifactCoordinates.Builder()
 				.setGroupId(GROUP_ID)
 				.setArtifactId("log-sink")
 				.setVersion(VERSION)

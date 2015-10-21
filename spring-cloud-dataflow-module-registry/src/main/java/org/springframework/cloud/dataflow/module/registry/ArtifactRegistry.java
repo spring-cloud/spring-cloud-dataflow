@@ -22,8 +22,8 @@ import java.util.List;
 import org.springframework.cloud.dataflow.core.ArtifactType;
 
 /**
- * {@code ArtifactRegistry} is used to manage module registrations, as well
- * as supporting libraries. This includes operations such as find, register, and delete.
+ * {@code ArtifactRegistry} is used to manage artifact registrations.
+ * This includes operations such as find, register, and delete.
  *
  * @see ArtifactRegistration
  *
@@ -41,7 +41,7 @@ public interface ArtifactRegistry {
 	 * @param name the artifact name
 	 * @param type the artifact type
 	 *
-	 * @return registration for a module/library, or {@code null} if not found
+	 * @return registration for an artifact, or {@code null} if not found
 	 */
 	ArtifactRegistration find(String name, ArtifactType type);
 
@@ -53,7 +53,7 @@ public interface ArtifactRegistry {
 	List<ArtifactRegistration> findAll();
 
 	/**
-	 * Save a new module/library registration. Pre-existing registrations
+	 * Save a new artifact registration. Pre-existing registrations
 	 * with a given name and type will be overwritten.
 	 *
 	 * @param registration module/library registration to save

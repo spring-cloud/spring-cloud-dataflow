@@ -46,5 +46,5 @@ public enum ArtifactType {
 	/**
 	 * A supporting library to a module, either as a single (jar) maven artifact, or as a bom.
 	 */
-	library,
+	library
 }

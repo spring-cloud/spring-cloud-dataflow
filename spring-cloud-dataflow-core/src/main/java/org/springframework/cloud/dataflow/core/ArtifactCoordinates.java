@@ -23,12 +23,12 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
- * The {@code ModuleCoordinates} class contains <a href="https://maven.apache.org/pom.html#Maven_Coordinates">
- * Maven coordinates</a> for a jar file containing a module.
+ * The {@code ArtifactCoordinates} class contains <a href="https://maven.apache.org/pom.html#Maven_Coordinates">
+ * Maven coordinates</a> for a jar file containing a module/library, or a Bill of Materials pom.
  * <p>
  * To create a new instance, either use {@link Builder} to set the individual fields:
  * <pre>
- * new ModuleCoordinates.Builder()
+ * new ArtifactCoordinates.Builder()
  *     .setGroupId("org.springframework.cloud.stream.module")
  *     .setArtifactId("time-source")
  *     .setExtension("jar") //optional
@@ -39,15 +39,15 @@ import org.springframework.util.StringUtils;
  * ...or use {@link #parse(String)} to parse the coordinates as a colon delimited string:
  * <code>&lt;groupId&gt;:&lt;artifactId&gt;[:&lt;extension&gt;[:&lt;classifier&gt;]]:&lt;version&gt;</code>
  * <pre>
- * ModuleCoordinates.parse("org.springframework.cloud.stream.module:some-module:2.0.0);
- * ModuleCoordinates.parse("org.springframework.cloud.stream.module:time-source:jar:exec:2.0.0);
+ * ArtifactCoordinates.parse("org.springframework.cloud.stream.module:some-module:2.0.0);
+ * ArtifactCoordinates.parse("org.springframework.cloud.stream.module:time-source:jar:exec:2.0.0);
  * </pre>
  * </p>
  * @author David Turanski
  * @author Mark Fisher
  * @author Patrick Peralta
  */
-public class ModuleCoordinates {
+public class ArtifactCoordinates {
 
 	/**
 	 * The default extension for the artifact.
@@ -87,14 +87,14 @@ public class ModuleCoordinates {
 
 
 	/**
-	 * Construct a {@code ModuleCoordinates} object.
+	 * Construct a {@code ArtifactCoordinates} object.
 	 * @param groupId group ID for artifact
 	 * @param artifactId artifact ID
 	 * @param extension the file extension
 	 * @param classifier artifact classifier - can be null
 	 * @param version artifact version
 	 */
-	private ModuleCoordinates(String groupId, String artifactId, String extension, String classifier, String version) {
+	private ArtifactCoordinates(String groupId, String artifactId, String extension, String classifier, String version) {
 		Assert.hasText(groupId, "'groupId' cannot be blank");
 		Assert.hasText(artifactId, "'artifactId' cannot be blank");
 		Assert.hasText(extension, "'extension' cannot be blank");
@@ -147,11 +147,11 @@ public class ModuleCoordinates {
 		if (this == o) {
 			return true;
 		}
-		if (!(o instanceof ModuleCoordinates)) {
+		if (!(o instanceof ArtifactCoordinates)) {
 			return false;
 		}
 
-		ModuleCoordinates that = (ModuleCoordinates) o;
+		ArtifactCoordinates that = (ArtifactCoordinates) o;
 
 		return this.groupId.equals(that.groupId) &&
 				this.artifactId.equals(that.artifactId) &&
@@ -191,7 +191,7 @@ public class ModuleCoordinates {
 	 * conforming to the <a href="http://www.eclipse.org/aether">Aether</a> convention.
 	 * @return the instance
 	 */
-	public static ModuleCoordinates parse(String coordinates) {
+	public static ArtifactCoordinates parse(String coordinates) {
 		Assert.hasText(coordinates);
 
 		Pattern p = Pattern.compile("([^: ]+):([^: ]+)(:([^: ]*)(:([^: ]+))?)?:([^: ]+)");
@@ -205,7 +205,7 @@ public class ModuleCoordinates {
 		String classifier = StringUtils.hasLength(m.group(6)) ? m.group(6) : EMPTY_CLASSIFIER;
 		String version = m.group(7);
 
-		return new ModuleCoordinates(groupId, artifactId, extension, classifier, version);
+		return new ArtifactCoordinates(groupId, artifactId, extension, classifier, version);
 	}
 
 
@@ -247,8 +247,8 @@ public class ModuleCoordinates {
 			return this;
 		}
 
-		public ModuleCoordinates build() {
-			return new ModuleCoordinates(groupId, artifactId, extension, classifier, version);
+		public ArtifactCoordinates build() {
+			return new ArtifactCoordinates(groupId, artifactId, extension, classifier, version);
 		}
 	}
 

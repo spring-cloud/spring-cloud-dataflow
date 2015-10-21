@@ -16,7 +16,7 @@
 
 package org.springframework.cloud.dataflow.module.registry;
 
-import org.springframework.cloud.dataflow.core.ModuleCoordinates;
+import org.springframework.cloud.dataflow.core.ArtifactCoordinates;
 import org.springframework.cloud.dataflow.core.ArtifactType;
 import org.springframework.util.Assert;
 
@@ -40,16 +40,16 @@ public class ArtifactRegistration implements Comparable<ArtifactRegistration> {
 	/**
 	 * Maven coordinates for the artifact.
 	 */
-	private final ModuleCoordinates coordinates;
+	private final ArtifactCoordinates coordinates;
 
 	/**
 	 * Construct a {@code ArtifactRegistration} object.
 	 *
-	 * @param name module name
-	 * @param type module type
-	 * @param coordinates coordinates for module artifact
+	 * @param name artifact name
+	 * @param type artifact type
+	 * @param coordinates coordinates for the artifact
 	 */
-	public ArtifactRegistration(String name, ArtifactType type, ModuleCoordinates coordinates) {
+	public ArtifactRegistration(String name, ArtifactType type, ArtifactCoordinates coordinates) {
 		Assert.notNull(name, "name must not be null");
 		Assert.notNull(type, "type must not be null");
 		Assert.notNull(coordinates, "coordinates must not be null");
@@ -75,7 +75,7 @@ public class ArtifactRegistration implements Comparable<ArtifactRegistration> {
 	/**
 	 * @see #coordinates
 	 */
-	public ModuleCoordinates getCoordinates() {
+	public ArtifactCoordinates getCoordinates() {
 		return coordinates;
 	}
 
