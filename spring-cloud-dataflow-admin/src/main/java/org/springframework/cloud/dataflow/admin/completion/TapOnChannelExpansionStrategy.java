@@ -47,13 +47,12 @@ public class TapOnChannelExpansionStrategy implements RecoveryStrategy<ParseExce
 
 	@Override
 	public void addProposals(String dsl, ParseException exception, int detailLevel, List<CompletionProposal> collector) {
-		String streamAndModule = dsl.substring("tap:stream:".length());
-		int firstDot = streamAndModule.indexOf('.');
-		String streamName = streamAndModule;
+		String streamName = dsl.substring("tap:stream:".length());
 		String moduleName = "";
-		if (firstDot > 0) {
-			streamName = streamAndModule.substring(0, firstDot);
-			moduleName = streamAndModule.substring(firstDot + 1);
+		if (streamName.contains(".")) {
+			String[] splits = streamName.split("\\.");
+			streamName = splits[0];
+			moduleName = splits[1];
 		}
 
 		StreamDefinition streamDefinition = streamDefinitionRepository.findOne(streamName);
