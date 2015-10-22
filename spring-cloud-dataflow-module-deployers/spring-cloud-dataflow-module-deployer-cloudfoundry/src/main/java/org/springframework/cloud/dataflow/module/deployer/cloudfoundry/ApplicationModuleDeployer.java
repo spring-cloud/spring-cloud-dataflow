@@ -248,7 +248,7 @@ class ApplicationModuleDeployer implements ModuleDeployer {
 
 		Map<String, String> env = new HashMap<>(toEnvironmentVariables(args));
 		env.put(MARKER_ENVIRONMENT_VAR_NAME, this.makeModuleMarker(ModuleDeploymentId.fromModuleDefinition(request.getDefinition())));
-		env.put(JMX_DEFAULT_DOMAIN_NAME, String.format("%s.%s",
+		env.put(JMX_DEFAULT_DOMAIN_NAME.replace(".", "_"), String.format("%s.%s",
 				request.getDefinition().getGroup(), request.getDefinition().getLabel()));
 		return env;
 	}
