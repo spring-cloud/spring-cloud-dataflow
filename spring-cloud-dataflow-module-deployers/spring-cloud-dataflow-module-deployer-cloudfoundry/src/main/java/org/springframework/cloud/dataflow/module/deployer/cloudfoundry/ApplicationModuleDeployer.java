@@ -245,10 +245,11 @@ class ApplicationModuleDeployer implements ModuleDeployer {
 		args.put("modules", request.getCoordinates().toString());
 		args.putAll(ModuleArgumentQualifier.qualifyArgs(0, request.getDefinition().getParameters()));
 		args.putAll(ModuleArgumentQualifier.qualifyArgs(0, request.getDeploymentProperties()));
+		String jmxDomainName = String.format("%s.%s", request.getDefinition().getGroup(), request.getDefinition().getLabel());
+		args.putAll(ModuleArgumentQualifier.qualifyArgs(0, Collections.singletonMap(JMX_DEFAULT_DOMAIN_NAME, jmxDomainName)));
 
 		Map<String, String> env = new HashMap<>(toEnvironmentVariables(args));
 		env.put(MARKER_ENVIRONMENT_VAR_NAME, this.makeModuleMarker(ModuleDeploymentId.fromModuleDefinition(request.getDefinition())));
-
 		return env;
 	}
 

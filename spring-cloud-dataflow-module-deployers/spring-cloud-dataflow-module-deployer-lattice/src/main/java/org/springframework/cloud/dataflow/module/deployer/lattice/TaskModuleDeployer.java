@@ -68,6 +68,8 @@ public class TaskModuleDeployer implements ModuleDeployer {
 		runAction.addArg("/module-launcher.jar");
 
 		List<EnvironmentVariable> environmentVariables = new ArrayList<EnvironmentVariable>();
+		environmentVariables.add(new EnvironmentVariable(JMX_DEFAULT_DOMAIN_NAME.toUpperCase().replace(".", "_"),
+				String.format("%s.%s", request.getDefinition().getGroup(), request.getDefinition().getLabel())));
 		Collections.addAll(environmentVariables, task.getEnv());
 		environmentVariables.add(new EnvironmentVariable("MODULES", request.getCoordinates().toString()));
 		environmentVariables.add(new EnvironmentVariable("SPRING_PROFILES_ACTIVE", "cloud"));
