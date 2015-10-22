@@ -73,7 +73,7 @@ public class LrpModuleDeployer implements ModuleDeployer {
 		lrp.runAction().addArg("-jar");
 		lrp.runAction().addArg("/module-launcher.jar");
 
-		List<EnvironmentVariable> environmentVariables = new ArrayList<EnvironmentVariable>();
+		List<EnvironmentVariable> environmentVariables = new ArrayList<>();
 		Collections.addAll(environmentVariables, lrp.getEnv());
 		environmentVariables.add(new EnvironmentVariable("MODULES", request.getCoordinates().toString()));
 		Map<String, String> rawArgs = new HashMap<>();
@@ -125,7 +125,7 @@ public class LrpModuleDeployer implements ModuleDeployer {
 		// todo: if the actual LRP is not found, search for the desired LRP to verify
 		// that the LRP is known to Lattice
 		for (ActualLRPResponse lrp : receptorClient.getActualLRPsByProcessGuid(guid(id))) {
-			Map<String, String> attributes = new HashMap<String, String>();
+			Map<String, String> attributes = new HashMap<>();
 			attributes.put("address", lrp.getAddress());
 			attributes.put("cellId", lrp.getCellId());
 			attributes.put("domain", lrp.getDomain());
