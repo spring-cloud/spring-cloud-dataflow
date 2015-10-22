@@ -36,7 +36,7 @@ public interface ModuleDeployer {
 
 	public static final int DEFAULT_SERVER_PORT = 8080;
 
-	public static final String JMX_DEFAULT_DOMAIN_NAME  = "spring.jmx.default-domain";
+	public static final String JMX_DEFAULT_DOMAIN_KEY  = "spring.jmx.default-domain";
 
 	/**
 	 * Handle the given {@code ModuleDeploymentRequest}. Implementations
