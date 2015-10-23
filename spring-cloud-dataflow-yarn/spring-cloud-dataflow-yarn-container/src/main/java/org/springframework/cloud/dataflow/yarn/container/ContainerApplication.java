@@ -57,11 +57,14 @@ public class ContainerApplication extends YarnContainerSupport {
 
 	@OnContainerStart
 	public Future<Boolean> runModule(@YarnParameters Properties properties, @YarnParameter("containerModules") String module) {
-		log.info("runModule module=" + module);
-		log.info("runModule properties=" + properties);
-		log.info("moduleLauncher=" + moduleLauncher);
-
-		Map<String, String> args = new HashMap<String, String>();
+		
+		if (log.isInfoEnabled()) {
+			log.info("runModule module=" + module);
+			log.info("runModule properties=" + properties);
+			log.info("moduleLauncher=" + moduleLauncher);
+		}
+		
+		Map<String, String> args = new HashMap<>();
 
 		for (Entry<Object, Object> entry : properties.entrySet()) {
 			String key = entry.getKey().toString();
@@ -70,14 +73,16 @@ public class ContainerApplication extends YarnContainerSupport {
 				args.put(key, value);
 			}
 		}
-
-		log.info("Passing args to moduleLauncher: " + args);
-
+		
+		if (log.isInfoEnabled()) {
+			log.info("Passing args to moduleLauncher: " + args);
+		}
+		
 		// we should somehow get status back from module
 		// launcher when it fails or finishes to set future
 		// indicating we're done. Naturally exception will
 		// terminate execution chain and container will exit.
-		SettableListenableFuture<Boolean> status = new SettableListenableFuture<Boolean>();
+		SettableListenableFuture<Boolean> status = new SettableListenableFuture<>();
 		moduleLauncher.launch(Arrays.asList(new ModuleLaunchRequest(module, args)));
 		return status;
 	}
