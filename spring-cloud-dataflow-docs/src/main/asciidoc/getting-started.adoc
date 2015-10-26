@@ -47,6 +47,7 @@ Build the project:
 === Deploying 'local'
 
 [start=1]
+<<<<<<< HEAD
 1. download the Spring Cloud Data Flow Admin and Shell apps:
 
 ```
