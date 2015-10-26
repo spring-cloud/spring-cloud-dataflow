@@ -290,12 +290,15 @@ public class StreamController {
 		boolean hasInput = moduleDefinition.getParameters().containsKey(BindingProperties.INPUT_BINDING_KEY);
 		if (hasInput && hasOutput) {
 			return ArtifactType.processor;
-		} else if (hasInput) {
+		}
+		else if (hasInput) {
 			return ArtifactType.sink;
-		} else if (hasOutput) {
+		}
+		else if (hasOutput) {
 			return ArtifactType.source;
-		} else {
-			throw new IllegalStateException(moduleDefinition + " had neither input not output set");
+		}
+		else {
+			throw new IllegalStateException(moduleDefinition + " had neither input nor output set");
 		}
 	}
 
@@ -336,8 +339,8 @@ public class StreamController {
 			boolean upstreamModuleSupportsPartition) {
 		return upstreamModuleSupportsPartition ||
 				(module.getParameters().containsKey(BindingProperties.INPUT_BINDING_KEY) &&
-				properties.containsKey(BindingProperties.PARTITIONED_PROPERTY) &&
-				properties.get(BindingProperties.PARTITIONED_PROPERTY).equalsIgnoreCase("true"));
+						properties.containsKey(BindingProperties.PARTITIONED_PROPERTY) &&
+						properties.get(BindingProperties.PARTITIONED_PROPERTY).equalsIgnoreCase("true"));
 	}
 
 	private void updateConsumerPartitionProperties(Map<String, String> properties) {

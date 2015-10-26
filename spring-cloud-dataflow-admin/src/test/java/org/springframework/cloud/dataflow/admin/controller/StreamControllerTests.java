@@ -267,6 +267,32 @@ public class StreamControllerTests {
 	}
 
 	@Test
+	public void testChannelsOnBothSides() throws Exception {
+		assertEquals(0, repository.count());
+		String definition = "queue:bar > filter > queue:foo";
+		mockMvc.perform(
+				post("/streams/definitions/").param("name", "myStream").param("definition", definition)
+						.param("deploy", "true")
+						.accept(MediaType.APPLICATION_JSON)).andDo(print())
+						.andExpect(status().isCreated());
+		assertEquals(1, repository.count());
+		StreamDefinition myStream = repository.findOne("myStream");
+		assertEquals(definition, myStream.getDslText());
+		assertEquals("myStream", myStream.getName());
+		assertEquals(1, myStream.getModuleDefinitions().size());
+		ModuleDefinition filterDefinition = myStream.getModuleDefinitions().get(0);
+		assertEquals(2, filterDefinition.getParameters().size());
+		assertEquals("queue:bar", filterDefinition.getParameters().get(BindingProperties.INPUT_BINDING_KEY));
+		assertEquals("queue:foo", filterDefinition.getParameters().get(BindingProperties.OUTPUT_BINDING_KEY));
+
+		ArgumentCaptor<ModuleDeploymentRequest> captor = ArgumentCaptor.forClass(ModuleDeploymentRequest.class);
+		verify(moduleDeployer).deploy(captor.capture());
+		ModuleDeploymentRequest request = captor.getValue();
+		assertThat(request.getDefinition().getName(), is("filter"));
+		assertThat(request.getCoordinates().getArtifactId(), is("filter-processor"));
+	}
+
+	@Test
 	public void testDestroyStream() throws Exception {
 		repository.save(new StreamDefinition("myStream", "time | log"));
 		assertEquals(1, repository.count());
