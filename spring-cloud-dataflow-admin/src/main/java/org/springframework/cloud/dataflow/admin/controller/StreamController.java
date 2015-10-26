@@ -30,6 +30,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cloud.dataflow.admin.repository.DuplicateStreamException;
 import org.springframework.cloud.dataflow.admin.repository.StreamDefinitionRepository;
+import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistration;
+import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistry;
 import org.springframework.cloud.dataflow.core.ArtifactCoordinates;
 import org.springframework.cloud.dataflow.core.ArtifactType;
 import org.springframework.cloud.dataflow.core.BindingProperties;
@@ -39,8 +41,6 @@ import org.springframework.cloud.dataflow.core.ModuleDeploymentRequest;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.module.ModuleStatus;
 import org.springframework.cloud.dataflow.module.deployer.ModuleDeployer;
-import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistration;
-import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistry;
 import org.springframework.cloud.dataflow.rest.resource.StreamDefinitionResource;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
 import org.springframework.data.domain.Pageable;
@@ -228,9 +228,7 @@ public class StreamController {
 		boolean isDownStreamModulePartitioned = false;
 		for (int i = 0; iterator.hasNext(); i++) {
 			ModuleDefinition currentModule = iterator.next();
-			boolean isFirst = !iterator.hasNext();
-			boolean isLast = (i == 0);
-			ArtifactType type = determineModuleType(currentModule, isFirst, isLast);
+			ArtifactType type = determineModuleType(currentModule);
 			ArtifactRegistration registration = this.registry.find(currentModule.getName(), type);
 			if (registration == null) {
 				throw new IllegalArgumentException(String.format(
@@ -286,37 +284,19 @@ public class StreamController {
 				.build();
 	}
 
-	private ArtifactType determineModuleType(ModuleDefinition moduleDefinition, boolean isFirst, boolean isLast) {
-		ArtifactType type = null;
-		if (isLast) {
-			if (moduleDefinition.getParameters().containsKey(BindingProperties.OUTPUT_BINDING_KEY)) {
-				if (isFirst) {
-					// single module stream with a named channel in the sink position
-					type = ArtifactType.source;
-				}
-				else {
-					type = ArtifactType.processor;
-				}
-			}
-			else {
-				// this will handle any case that the module is a sink,
-				// even if a single module stream with a named input channel
-				type = ArtifactType.sink;
-			}
+	private ArtifactType determineModuleType(ModuleDefinition moduleDefinition) {
+		// Parser has already taken care of source/sink named channels, etc
+		boolean hasOutput = moduleDefinition.getParameters().containsKey(BindingProperties.OUTPUT_BINDING_KEY);
+		boolean hasInput = moduleDefinition.getParameters().containsKey(BindingProperties.INPUT_BINDING_KEY);
+		if (hasInput && hasOutput) {
+			return ArtifactType.processor;
+		} else if (hasInput) {
+			return ArtifactType.sink;
+		} else if (hasOutput) {
+			return ArtifactType.source;
+		} else {
+			throw new IllegalStateException(moduleDefinition + " had neither input not output set");
 		}
-		else if (isFirst) {
-			if (moduleDefinition.getParameters().containsKey(BindingProperties.INPUT_BINDING_KEY)) {
-				// stream begins with a named channel in the source position
-				type = ArtifactType.processor;
-			}
-			else { 
-				type = ArtifactType.source;
-			}
-		}
-		else {
-			type = ArtifactType.processor;
-		}
-		return type;
 	}
 
 	private Map<String, String> getModuleDeploymentProperties(ModuleDefinition module, Map<String, String> deploymentProperties) {
