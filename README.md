@@ -254,6 +254,11 @@ shutdown requested
 
 Properties `dataflow.yarn.app.appmaster.path` and `dataflow.yarn.app.container.path` can be used with both `spring-cloud-dataflow-admin` and `and spring-cloud-dataflow-yarn-client` to define directory for `appmaster` and `container` jars. Values for those default to `.` which then assumes all needed jars are in a same working directory.
 
+##Run on Kubernetes
+
+See [here](spring-cloud-dataflow-module-deployers/spring-cloud-dataflow-module-deployer-kubernetes/README.md)
+
+
 ## Building from Source
 
 	$ mvn clean install

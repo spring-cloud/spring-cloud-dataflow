@@ -24,6 +24,7 @@ import org.junit.Test;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.test.EnvironmentTestUtils;
+import org.springframework.cloud.dataflow.module.deployer.kubernetes.KubernetesModuleDeployer;
 import org.springframework.cloud.dataflow.module.deployer.local.LocalModuleDeployer;
 import org.springframework.cloud.dataflow.module.deployer.yarn.YarnModuleDeployer;
 import org.springframework.cloud.lattice.LatticeProperties;
@@ -62,6 +63,16 @@ public class AdminApplicationTests {
 				"--server.port=0" , "--spring.cloud.lattice.receptor.host=receptor.52.7.176.225.xip.io"});
 		assertThat(context.containsBean("latticeProperties"), is(true));
 		assertThat(context.getBean("latticeProperties", LatticeProperties.class).getReceptor().getHost(), is("receptor.52.7.176.225.xip.io"));
+		context.close();
+	}
+	
+	@Test
+	public void testKubernetesProfile() {
+		SpringApplication app = new SpringApplication(AdminApplication.class);
+		ConfigurableApplicationContext context = app.run(new String[] { "--spring.profiles.active=kubernetes",
+				"--server.port=-1" });
+		assertThat(context.containsBean("processModuleDeployer"), is(true));
+		assertThat(context.getBean("processModuleDeployer"), instanceOf(KubernetesModuleDeployer.class));
 		context.close();
 	}
 
