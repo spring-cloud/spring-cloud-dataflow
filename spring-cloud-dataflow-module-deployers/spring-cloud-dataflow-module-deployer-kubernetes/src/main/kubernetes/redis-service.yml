@@ -2,6 +2,8 @@ kind: Service
 apiVersion: v1
 metadata:
   name: redis
+  labels:
+    spring-cloud-service: redis
 spec:
   ports:
     - port: 6379

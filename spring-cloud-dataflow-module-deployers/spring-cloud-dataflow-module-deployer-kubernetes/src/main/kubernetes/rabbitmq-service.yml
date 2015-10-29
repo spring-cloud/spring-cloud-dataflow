@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    spring-cloud-service: rabbitmq
+  name: rabbitmq
+spec:
+  ports:
+  - port: 5672
+  selector:
+    name: rabbitmq

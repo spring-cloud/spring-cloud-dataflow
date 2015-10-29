@@ -4,12 +4,21 @@ import static org.junit.Assert.*;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
+import io.fabric8.kubernetes.client.KubernetesClient;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.cloud.dataflow.core.ArtifactCoordinates;
@@ -19,8 +28,6 @@ import org.springframework.cloud.dataflow.core.ModuleDeploymentRequest;
 import org.springframework.cloud.dataflow.module.ModuleStatus;
 import org.springframework.cloud.dataflow.module.deployer.ModuleDeployer;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-
-import io.fabric8.kubernetes.client.KubernetesClient;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = KubernetesModuleDeployerConfiguration.class)
@@ -45,6 +52,7 @@ public class KubernetesModuleDeployerIT {
 	}
 
 	@Test
+	@Ignore
 	public void end2endDeployment1() throws InterruptedException, ExecutionException  {
 
 		String group = "deployment-test-0";

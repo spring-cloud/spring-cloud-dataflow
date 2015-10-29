@@ -15,6 +15,9 @@
  */
 package org.springframework.cloud.dataflow.module.deployer.kubernetes;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
@@ -43,24 +46,28 @@ class KubernetesModuleDeployerProperties {
 	 * Delay in seconds when the Kubernetes liveness check of the stream module container
 	 * should start checking its health status.
 	 */
+	// See http://kubernetes.io/v1.0/docs/user-guide/production-pods.html#liveness-and-readiness-probes-aka-health-checks}
 	private int livenessProbeDelay = 180;
 
 	/**
 	 * Timeout in seconds for the Kubernetes liveness check of the stream module container.
 	 * If the health check takes longer than this value to return it is assumed as 'unavailable'.
 	 */
+	// see http://kubernetes.io/v1.0/docs/user-guide/production-pods.html#liveness-and-readiness-probes-aka-health-checks}
 	private int livenessProbeTimeout = 2;
 
 	/**
 	 * Delay in seconds when the readiness check of the stream module container
 	 * should start checking if the module is fully up and running.
 	 */
-	private int readinessProbeDelay = 10;
+	 // see http://kubernetes.io/v1.0/docs/user-guide/production-pods.html#liveness-and-readiness-probes-aka-health-checks}
+	private int readinessProbeDelay = 120;
 
 	/**
 	 * Timeout in seconds that the stream module container has to respond its
-	 * health status during the readiness check.
+	 * health status during the readiness check. 
 	 */
+	 // see http://kubernetes.io/v1.0/docs/user-guide/production-pods.html#liveness-and-readiness-probes-aka-health-checks}
 	private int readinessProbeTimeout = 2;
 
 	/**
@@ -72,7 +79,20 @@ class KubernetesModuleDeployerProperties {
 	 * CPU to allocate for a Pod (quarter of a CPU).
 	 */
 	private String cpu = "250m";
-	
+
+	/**
+	 * Additional properties to be passed to the ModuleLauncher itself.
+	 */
+	private Map<String, String> launcherProperties = new HashMap<>();
+
+	public Map<String, String> getLauncherProperties() {
+		return launcherProperties;
+	}
+
+	public void setLauncherProperties(Map<String, String> launcherProperties) {
+		this.launcherProperties = launcherProperties;
+	}
+
 	public String getModuleLauncherImage() {
 		return moduleLauncherImage;
 	}
