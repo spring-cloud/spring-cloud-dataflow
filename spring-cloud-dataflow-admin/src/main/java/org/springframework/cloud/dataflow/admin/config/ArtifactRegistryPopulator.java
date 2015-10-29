@@ -83,6 +83,7 @@ public class ArtifactRegistryPopulator {
 	 */
 	@PostConstruct
 	public void populateDefaults() {
+		populateDefault("file", source);
 		populateDefault("ftp", source);
 		populateDefault("http", source);
 		populateDefault("sftp", source);
