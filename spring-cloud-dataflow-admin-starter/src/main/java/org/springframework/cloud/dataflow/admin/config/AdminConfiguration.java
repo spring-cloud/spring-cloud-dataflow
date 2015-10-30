@@ -39,6 +39,7 @@ import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
@@ -92,6 +93,11 @@ public class AdminConfiguration {
 				// the REST API produces JSON only; adding this converter
 				// prevents the registration of the default converters
 				converters.add(new MappingJackson2HttpMessageConverter());
+			}
+
+			@Override
+			public void configurePathMatch(PathMatchConfigurer configurer) {
+				configurer.setUseSuffixPatternMatch(false);
 			}
 		};
 	}

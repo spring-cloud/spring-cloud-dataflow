@@ -69,6 +69,11 @@ public class DataFlowTemplate implements DataFlowOperations {
 	 */
 	private final CompletionOperations completionOperations;
 
+	/**
+	 * REST Client for runtime operations.
+	 */
+	private final RuntimeOperations runtimeOperations;
+
 
 	public DataFlowTemplate(URI baseURI, RestTemplate restTemplate) {
 		this.restTemplate = restTemplate;
@@ -85,6 +90,7 @@ public class DataFlowTemplate implements DataFlowOperations {
 		this.taskOperations = new TaskTemplate(restTemplate, resources);
 		this.moduleOperations = new ModuleTemplate(restTemplate, resourceSupport);
 		this.completionOperations = new CompletionTemplate(restTemplate, resourceSupport.getLink("completions/stream"));
+		this.runtimeOperations = new RuntimeTemplate(restTemplate, resourceSupport);
 	}
 
 	public Link getLink(ResourceSupport resourceSupport, String rel) {
@@ -119,5 +125,10 @@ public class DataFlowTemplate implements DataFlowOperations {
 	@Override
 	public CompletionOperations completionOperations() {
 		return completionOperations;
+	}
+
+	@Override
+	public RuntimeOperations runtimeOperations() {
+		return runtimeOperations;
 	}
 }
