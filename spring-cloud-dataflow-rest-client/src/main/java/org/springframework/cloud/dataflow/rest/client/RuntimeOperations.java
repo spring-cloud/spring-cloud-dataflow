@@ -16,40 +16,23 @@
 
 package org.springframework.cloud.dataflow.rest.client;
 
+import org.springframework.cloud.dataflow.rest.resource.ModuleStatusResource;
+import org.springframework.hateoas.PagedResources;
+
 /**
- * Interface the REST clients implement to interact with spring-cloud-dataflow REST API.
+ * Defines operations available for obtaining information about deployed modules.
  *
- * @author Ilayaperumal Gopinathan
+ * @author Eric Bottard
  */
-public interface DataFlowOperations {
+public interface RuntimeOperations {
 
 	/**
-	 * Stream related operations.
+	 * Return runtime information about all deployed modules.
 	 */
-	StreamOperations streamOperations();
+	PagedResources<ModuleStatusResource> status();
 
 	/**
-	 * Counter related operations.
+	 * Return runtime information about a single module deployment.
 	 */
-	CounterOperations counterOperations();
-
-	/**
-	 * Task related operations.
-	 */
-	TaskOperations taskOperations();
-
-	/**
-	 * Module related operations.
-	 */
-	ModuleOperations moduleOperations();
-
-	/**
-	 * DSL Completion related operations.
-	 */
-	CompletionOperations completionOperations();
-
-	/**
-	 * Runtime related opertations.
-	 */
-	RuntimeOperations runtimeOperations();
+	ModuleStatusResource status(String moduleDeploymentId);
 }
