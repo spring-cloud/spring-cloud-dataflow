@@ -17,9 +17,10 @@
 package org.springframework.cloud.dataflow.admin.config;
 
 import org.cloudfoundry.receptor.client.ReceptorClient;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
-import org.springframework.boot.autoconfigure.redis.RedisAutoConfiguration;
+import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration;
 import org.springframework.cloud.Cloud;
 import org.springframework.cloud.CloudConnector;
 import org.springframework.cloud.CloudFactory;
@@ -32,7 +33,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
-import org.springframework.util.StringUtils;
 
 /**
  * Configuration used when running <i>in a cloud</i>, triggered by cloud profiles (cloud, lattice).

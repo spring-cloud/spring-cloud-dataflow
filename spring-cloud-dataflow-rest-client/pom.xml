@@ -19,5 +19,9 @@
 			<artifactId>spring-cloud-dataflow-rest-resource</artifactId>
 			<version>1.0.0.BUILD-SNAPSHOT</version>
 		</dependency>
+		<dependency>
+			<groupId>org.springframework.plugin</groupId>
+			<artifactId>spring-plugin-core</artifactId>
+		</dependency>
 	</dependencies>
 </project>

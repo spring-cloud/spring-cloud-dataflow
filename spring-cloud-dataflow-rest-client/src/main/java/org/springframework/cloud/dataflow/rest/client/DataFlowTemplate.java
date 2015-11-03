@@ -23,7 +23,6 @@ import java.util.Map;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.ResourceSupport;
 import org.springframework.hateoas.UriTemplate;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
 
 /**
@@ -71,10 +70,8 @@ public class DataFlowTemplate implements DataFlowOperations {
 	private final CompletionOperations completionOperations;
 
 
-	public DataFlowTemplate(URI baseURI) {
-		this.restTemplate = new RestTemplate();
-		restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
-		restTemplate.setErrorHandler(new VndErrorResponseErrorHandler(restTemplate.getMessageConverters()));
+	public DataFlowTemplate(URI baseURI, RestTemplate restTemplate) {
+		this.restTemplate = restTemplate;
 		ResourceSupport resourceSupport = restTemplate.getForObject(baseURI, ResourceSupport.class);
 		Link link = getLink(resourceSupport, "streams");
 		resources.put("streams/definitions", new UriTemplate(link.getHref() + "/definitions"));
