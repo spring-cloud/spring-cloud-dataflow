@@ -99,6 +99,7 @@ public class ArtifactRegistryPopulator {
 		populateDefault("ftp", sink);
 		populateDefault("gemfire", sink);
 		populateDefault("hdfs", sink);
+		populateDefault("jdbc", sink);
 		populateDefault("log", sink);
 		populateDefault("redis", sink);
 		populateDefault("timestamp", task);
