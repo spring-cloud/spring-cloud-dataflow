@@ -88,3 +88,18 @@ following warning message will be logged:
 `WARN 42924 --- [           main] c.c.c.ConfigServicePropertySourceLocator : Could not locate PropertySource: I/O error on GET request for "http://localhost:8888/spring-cloud-dataflow-admin/default":Connection refused; nested exception is java.net.ConnectException: Connection refused`
 
 To disable the cloud config server set the `spring.cloud.config.enabled` property to false.
+
+#### Running the Shell inside STS
+
+When running the Shell from within Spring Tool Suite using `org.springframework.cloud.dataflow.shell.ShellApplication`, you may encounter weird character formatting. In that case, please start the Shell by providing the following
+system property:
+
+* Linux/Mac: `-Djline.terminal=org.springframework.shell.core.IdeTerminal`
+* Windows:
+
+```
+-Djline.WindowsTerminal.directConsole=false
+-Djline.terminal=jline.UnsupportedTerminal`
+```
+See also: https://github.com/spring-projects/spring-shell/blob/master/readme.dev
+
