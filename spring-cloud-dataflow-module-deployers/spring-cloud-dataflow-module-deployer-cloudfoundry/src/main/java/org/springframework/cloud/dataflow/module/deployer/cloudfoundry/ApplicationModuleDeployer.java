@@ -277,8 +277,7 @@ class ApplicationModuleDeployer implements ModuleDeployer {
 	}
 
 	private Staging getStagingSettings() {
-		String buildpack = "https://github.com/cloudfoundry/java-buildpack.git#69abec6d2726f73a22339caa6ae7739f060002e4";
-		return new Staging(null, buildpack, null, null);
+		return new Staging(null, properties.getBuildpack(), null, null);
 	}
 
 	private String makeModuleMarker(ModuleDeploymentId moduleId) {
