@@ -77,6 +77,11 @@ class CloudFoundryModuleDeployerProperties {
 	 */
 	private boolean skipSslValidation = false;
 
+	/**
+	 * The buildpack to use for deploying the application.
+	 */
+	private String buildback = "https://github.com/cloudfoundry/java-buildpack.git#master";
+
 	public String getPassword() {
 		return password;
 	}
@@ -147,5 +152,13 @@ class CloudFoundryModuleDeployerProperties {
 
 	public void setModuleLauncherLocation(Resource moduleLauncherLocation) {
 		this.moduleLauncherLocation = moduleLauncherLocation;
+	}
+
+	public String getBuildback() {
+		return buildback;
+	}
+
+	public void setBuildback(String buildback) {
+		this.buildback = buildback;
 	}
 }
