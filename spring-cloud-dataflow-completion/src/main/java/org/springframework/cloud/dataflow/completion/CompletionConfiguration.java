@@ -20,6 +20,7 @@ package org.springframework.cloud.dataflow.completion;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistry;
 import org.springframework.cloud.stream.configuration.metadata.ModuleConfigurationMetadataResolver;
+import org.springframework.cloud.stream.configuration.metadata.ModuleConfigurationMetadataResolverAutoConfiguration;
 import org.springframework.cloud.stream.module.resolver.ModuleResolver;
 import org.springframework.cloud.stream.module.resolver.ModuleResolverConfiguration;
 import org.springframework.context.annotation.Bean;
@@ -32,7 +33,7 @@ import org.springframework.context.annotation.Import;
  * @author Eric Bottard
  */
 @Configuration
-@Import(ModuleResolverConfiguration.class)
+@Import({ModuleResolverConfiguration.class, ModuleConfigurationMetadataResolverAutoConfiguration.class})
 public class CompletionConfiguration {
 
 	@Autowired
