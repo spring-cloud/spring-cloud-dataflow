@@ -19,8 +19,12 @@ package org.springframework.cloud.dataflow.shell.command;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.dataflow.rest.client.DataFlowServerException;
 import org.springframework.cloud.dataflow.rest.client.DataFlowTemplate;
 import org.springframework.cloud.dataflow.shell.config.DataFlowShell;
 import org.springframework.shell.CommandLine;
@@ -35,9 +39,12 @@ import org.springframework.stereotype.Component;
  * @author Gunnar Hillert
  * @author Marius Bogoevici
  * @author Ilayaperumal Gopinathan
+ * @author Gary Russell
  */
 @Component
 public class ConfigCommands implements CommandMarker, InitializingBean {
+
+	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
 	@Autowired
 	private CommandLine commandLine;
@@ -65,8 +72,21 @@ public class ConfigCommands implements CommandMarker, InitializingBean {
 		}
 		catch (Exception e) {
 			this.shell.setDataFlowOperations(null);
-			return(String.format("Unable to contact Data Flow Admin at '%s'.",
-							targetUriString));
+			if (e instanceof DataFlowServerException) {
+				String message = String.format("Unable to parse admin response: %s - at URI '%s'.", e.getMessage(),
+						targetUriString);
+				if (logger.isDebugEnabled()) {
+					logger.debug(message, e);
+				}
+				else {
+					logger.warn(message);
+				}
+				return message;
+			}
+			else {
+				return(String.format("Unable to contact Data Flow Admin at '%s': '%s'.",
+								targetUriString, e.toString()));
+			}
 		}
 	}
 

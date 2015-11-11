@@ -20,6 +20,7 @@ import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.hateoas.Link;
 import org.springframework.hateoas.ResourceSupport;
 import org.springframework.hateoas.UriTemplate;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
@@ -30,6 +31,7 @@ import org.springframework.web.client.RestTemplate;
  *  @author Mark Fisher
  *  @author Glenn Renfro
  *  @author Patrick Peralta
+ *  @author Gary Russell
  */
 public class DataFlowTemplate implements DataFlowOperations {
 
@@ -74,16 +76,27 @@ public class DataFlowTemplate implements DataFlowOperations {
 		restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
 		restTemplate.setErrorHandler(new VndErrorResponseErrorHandler(restTemplate.getMessageConverters()));
 		ResourceSupport resourceSupport = restTemplate.getForObject(baseURI, ResourceSupport.class);
-		resources.put("streams/definitions", new UriTemplate(resourceSupport.getLink("streams").getHref() + "/definitions"));
-		resources.put("streams/deployments", new UriTemplate(resourceSupport.getLink("streams").getHref() + "/deployments"));
-		resources.put("tasks/definitions", new UriTemplate(resourceSupport.getLink("tasks").getHref() + "/definitions"));
-		resources.put("tasks/deployments", new UriTemplate(resourceSupport.getLink("tasks").getHref() + "/deployments"));
+		Link link = getLink(resourceSupport, "streams");
+		resources.put("streams/definitions", new UriTemplate(link.getHref() + "/definitions"));
+		resources.put("streams/deployments", new UriTemplate(link.getHref() + "/deployments"));
+		link = getLink(resourceSupport, "tasks");
+		resources.put("tasks/definitions", new UriTemplate(link.getHref() + "/definitions"));
+		resources.put("tasks/deployments", new UriTemplate(link.getHref() + "/deployments"));
 
 		this.streamOperations = new StreamTemplate(restTemplate, resources);
 		this.counterOperations = new CounterTemplate(restTemplate, resourceSupport);
 		this.taskOperations = new TaskTemplate(restTemplate, resources);
 		this.moduleOperations = new ModuleTemplate(restTemplate, resourceSupport);
 		this.completionOperations = new CompletionTemplate(restTemplate, resourceSupport.getLink("completions/stream"));
+	}
+
+	public Link getLink(ResourceSupport resourceSupport, String rel) {
+		Link link = resourceSupport.getLink(rel);
+		if (link == null) {
+			throw new DataFlowServerException("Server did not return a link for '" + rel + "', links: '"
+					+ resourceSupport + "'");
+		}
+		return link;
 	}
 
 	@Override
