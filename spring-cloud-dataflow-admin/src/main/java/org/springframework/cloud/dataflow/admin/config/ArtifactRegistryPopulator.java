@@ -102,6 +102,7 @@ public class ArtifactRegistryPopulator {
 		populateDefault("jdbc", sink);
 		populateDefault("log", sink);
 		populateDefault("redis", sink);
+		populateDefault("websocket", sink);
 		populateDefault("timestamp", task);
 	}
 
