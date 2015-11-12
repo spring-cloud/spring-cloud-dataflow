@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -29,6 +29,7 @@ import org.springframework.util.Assert;
  * @author Patrick Peralta
  */
 public class ModuleDeploymentId implements Serializable {
+
 	private static final long serialVersionUID = 1L;
 
 	/**
@@ -112,14 +113,10 @@ public class ModuleDeploymentId implements Serializable {
 	 *
 	 * @param id id containing the fields for a {@code ModuleDeploymentId}
 	 * @return a new {@code ModuleDeploymentId} based on the provided string
-	 * @throws NullPointerException if a null id is provided
-	 * @throws IllegalArgumentException if an invalid id is provided
+	 * @throws IllegalArgumentException if a null or an invalid id is provided
 	 */
 	public static ModuleDeploymentId parse(String id) {
-		if (id == null) {
-			throw new NullPointerException("id == null");
-		}
-
+		Assert.notNull(id, "id must not be null");
 		String[] fields = id.split("\\.");
 		if (fields.length != 2) {
 			throw new IllegalArgumentException(String.format("invalid format for id '%s'", id));
