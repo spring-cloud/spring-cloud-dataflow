@@ -17,6 +17,7 @@ out
 spring-shell.log
 target/
 test-output
+rebel.xml
 
 # Eclipse artifacts, including WTP generated manifests
 .classpath

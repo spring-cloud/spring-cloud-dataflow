@@ -17,6 +17,8 @@
 		<module>spring-cloud-dataflow-module-deployer-lattice</module>
 		<module>spring-cloud-dataflow-module-deployer-cloudfoundry</module>
 		<module>spring-cloud-dataflow-module-deployer-yarn</module>
+		<module>spring-cloud-dataflow-module-deployer-kubernetes</module>
+		<module>spring-cloud-kubernetes-connector</module>
 	</modules>
 	<dependencyManagement>
 		<dependencies>
