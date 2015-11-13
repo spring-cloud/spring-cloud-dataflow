@@ -1,0 +1,5 @@
+= Spring Cloud Marathon Connector
+
+A https://github.com/spring-cloud/spring-cloud-connectors[Spring Cloud Connector] implementation for applications and
+services running on http://mesosphere.github.io/marathon/[Mesos/Marathon].
+
