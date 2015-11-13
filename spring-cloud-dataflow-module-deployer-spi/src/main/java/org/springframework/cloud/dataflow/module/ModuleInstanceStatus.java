@@ -35,14 +35,14 @@ public interface ModuleInstanceStatus {
 	String getId();
 
 	/**
-	 * Return the state of the deployed module.
+	 * Return the state of the deployed module instance.
 	 *
-	 * @return state of the deployed module
+	 * @return state of the deployed module instance
 	 */
-	ModuleStatus.State getState();
+	DeploymentState getState();
 
 	/**
-	 * Return a map of attributes for the deployed module. The specific
+	 * Return a map of attributes for the deployed module instance. The specific
 	 * keys/values returned are dependent on the runtime executing the module.
 	 * This may include extra information such as deployment location
 	 * or specific error messages in the case of failure.

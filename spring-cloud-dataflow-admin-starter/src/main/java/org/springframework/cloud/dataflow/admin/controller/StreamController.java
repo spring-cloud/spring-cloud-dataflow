@@ -17,8 +17,8 @@
 package org.springframework.cloud.dataflow.admin.controller;
 
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -39,6 +39,7 @@ import org.springframework.cloud.dataflow.core.ModuleDefinition;
 import org.springframework.cloud.dataflow.core.ModuleDeploymentId;
 import org.springframework.cloud.dataflow.core.ModuleDeploymentRequest;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
+import org.springframework.cloud.dataflow.module.DeploymentState;
 import org.springframework.cloud.dataflow.module.ModuleStatus;
 import org.springframework.cloud.dataflow.module.deployer.ModuleDeployer;
 import org.springframework.cloud.dataflow.rest.resource.StreamDefinitionResource;
@@ -61,7 +62,6 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * Controller for operations on {@link StreamDefinition}. This
  * includes CRUD and deployment operations.
- *
  * @author Mark Fisher
  * @author Patrick Peralta
  * @author Ilayaperumal Gopinathan
@@ -449,8 +449,8 @@ public class StreamController {
 		for (ModuleDefinition module : stream.getModuleDefinitions()) {
 			ModuleDeploymentId id = ModuleDeploymentId.fromModuleDefinition(module);
 			ModuleStatus status = this.deployer.status(id);
-			// todo: change from 'unknown' to 'undeployed' when status() does the same
-			if (!ModuleStatus.State.unknown.equals(status.getState())) {
+			if (!EnumSet.of(DeploymentState.unknown, DeploymentState.undeployed)
+					.contains(status.getState())) {
 				this.deployer.undeploy(id);
 			}
 		}
@@ -461,34 +461,45 @@ public class StreamController {
 	 *
 	 * @param name name of stream to determine state for
 	 * @return stream state
-	 * @see org.springframework.cloud.dataflow.module.ModuleStatus.State
+	 * @see DeploymentState
 	 */
 	private String calculateStreamState(String name) {
-		Set<ModuleStatus.State> moduleStates = new HashSet<>();
+		Set<DeploymentState> moduleStates = EnumSet.noneOf(DeploymentState.class);
 		StreamDefinition stream = repository.findOne(name);
 		for (ModuleDefinition module : stream.getModuleDefinitions()) {
 			ModuleStatus status = deployer.status(ModuleDeploymentId.fromModuleDefinition(module));
 			moduleStates.add(status.getState());
 		}
 
-		logger.debug("states: {}", moduleStates);
+		logger.debug("Module states for stream {}: {}", name, moduleStates);
+		return aggregateState(moduleStates).toString();
+	}
 
-		// todo: this requires more thought...
-		if (moduleStates.contains(ModuleStatus.State.failed)) {
-			return ModuleStatus.State.failed.toString();
+	/**
+	 * Aggregate the set of module states into a single state for a stream.
+	 *
+	 * @param states set of states for modules of a stream
+	 * @return stream state based on module states
+	 */
+	static DeploymentState aggregateState(Set<DeploymentState> states) {
+		if (states.size() == 1) {
+			DeploymentState state = states.iterator().next();
+
+			// a stream which is known to the stream repository
+			// but unknown to deployers is undeployed
+			return state == DeploymentState.unknown ? DeploymentState.undeployed : state;
 		}
-		else if (moduleStates.contains(ModuleStatus.State.incomplete)) {
-			return ModuleStatus.State.incomplete.toString();
+		if (states.isEmpty() || states.contains(DeploymentState.error)) {
+			return DeploymentState.error;
 		}
-		else if (moduleStates.contains(ModuleStatus.State.deploying)) {
-			return ModuleStatus.State.deploying.toString();
+		if (states.contains(DeploymentState.failed)) {
+			return DeploymentState.failed;
 		}
-		else if (moduleStates.contains(ModuleStatus.State.deployed) && moduleStates.size() == 1) {
-			return ModuleStatus.State.deployed.toString();
+		if (states.contains(DeploymentState.deploying)) {
+			return DeploymentState.deploying;
 		}
-		else {
-			return ModuleStatus.State.unknown.toString();
-		}
+
+		return DeploymentState.partial;
 	}
 
 	/**
