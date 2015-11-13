@@ -16,9 +16,14 @@
 
 package org.springframework.cloud.dataflow.shell.command;
 
-import static org.springframework.shell.table.CellMatchers.*;
-import static org.springframework.shell.table.SimpleHorizontalAligner.*;
-import static org.springframework.shell.table.SimpleVerticalAligner.*;
+import static org.springframework.shell.table.BorderSpecification.TOP;
+import static org.springframework.shell.table.BorderStyle.fancy_light;
+import static org.springframework.shell.table.BorderStyle.fancy_light_quadruple_dash;
+import static org.springframework.shell.table.CellMatchers.column;
+import static org.springframework.shell.table.CellMatchers.ofType;
+import static org.springframework.shell.table.CellMatchers.row;
+import static org.springframework.shell.table.SimpleHorizontalAligner.center;
+import static org.springframework.shell.table.SimpleVerticalAligner.middle;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -36,10 +41,9 @@ import org.springframework.shell.core.CommandMarker;
 import org.springframework.shell.core.annotation.CliAvailabilityIndicator;
 import org.springframework.shell.core.annotation.CliCommand;
 import org.springframework.shell.core.annotation.CliOption;
-import org.springframework.shell.table.BorderFactory;
-import org.springframework.shell.table.BorderSpecification;
 import org.springframework.shell.table.BorderStyle;
 import org.springframework.shell.table.Table;
+import org.springframework.shell.table.TableBuilder;
 import org.springframework.shell.table.TableModel;
 import org.springframework.shell.table.TableModelBuilder;
 import org.springframework.shell.table.Tables;
@@ -74,15 +78,15 @@ public class RuntimeCommands implements CommandMarker {
 			filter = new HashSet<>(Arrays.asList(moduleIds));
 		}
 
-		TableModelBuilder<Object> builder = new TableModelBuilder<>();
+		TableModelBuilder<Object> modelBuilder = new TableModelBuilder<>();
 		if (!summary) {
-			builder.addRow()
+			modelBuilder.addRow()
 					.addValue("Module Id / Instance Id")
 					.addValue("Unit Status")
 					.addValue("Nb of Instances / Attributes");
 		}
 		else {
-			builder.addRow()
+			modelBuilder.addRow()
 					.addValue("Module Id")
 					.addValue("Unit Status")
 					.addValue("Nb of Instances");
@@ -105,7 +109,7 @@ public class RuntimeCommands implements CommandMarker {
 			if (filter != null && !shouldRetain(filter, moduleStatusResource)) {
 				continue;
 			}
-			builder.addRow()
+			modelBuilder.addRow()
 					.addValue(moduleStatusResource.getModuleDeploymentId())
 					.addValue(moduleStatusResource.getState())
 					.addValue(moduleStatusResource.getInstances().getContent().size());
@@ -113,7 +117,7 @@ public class RuntimeCommands implements CommandMarker {
 			line++;
 			if (!summary) {
 				for (ModuleInstanceStatusResource moduleInstanceStatusResource : moduleStatusResource.getInstances()) {
-					builder.addRow()
+					modelBuilder.addRow()
 							.addValue(moduleInstanceStatusResource.getInstanceId())
 							.addValue(moduleInstanceStatusResource.getState())
 							.addValue(moduleInstanceStatusResource.getAttributes());
@@ -122,30 +126,29 @@ public class RuntimeCommands implements CommandMarker {
 			}
 		}
 
-		TableModel model = builder.build();
-		final Table table = new Table(model);
-		BorderFactory.header(table, BorderStyle.fancy_double);
-		BorderFactory.inner(table, BorderStyle.fancy_light);
-		Tables.configureKeyValueRendering(table, " = ");
+		TableModel model = modelBuilder.build();
+		final TableBuilder builder = new TableBuilder(model);
+		builder.addHeaderBorder(BorderStyle.fancy_double)
+				.addInnerBorder(fancy_light)
+				.on(column(0)).addAligner(middle)
+				.on(column(1)).addAligner(middle)
+				.on(column(1)).addAligner(center)
+				.on(row(0)).addAligner(center)
+				// This will match the "number of instances" cells only
+				.on(ofType(Integer.class)).addAligner(center);
 
-		table.align(column(0), middle);
-		table.align(column(1), middle);
-		table.align(column(1), center);
-		table.align(row(0), center);
 
-		// This will match the "number of instances" cells only
-		table.align(ofType(Integer.class), center);
-
+		Tables.configureKeyValueRendering(builder, " = ");
 		for (int i = 2; i < model.getRowCount(); i++) {
 			if (splits.contains(i)) {
-				table.withBorder(i, 0, i + 1, model.getColumnCount(), BorderSpecification.TOP, BorderStyle.fancy_light);
+				builder.paintBorder(fancy_light, TOP).fromRowColumn(i, 0).toRowColumn(i + 1, model.getColumnCount());
 			}
 			else {
-				table.withBorder(i, 0, i + 1, model.getColumnCount(), BorderSpecification.TOP, BorderStyle.fancy_light_quadruple_dash);
+				builder.paintBorder(fancy_light_quadruple_dash, TOP).fromRowColumn(i, 0).toRowColumn(i + 1, model.getColumnCount());
 			}
 		}
 
-		return table;
+		return builder.build();
 	}
 
 	private boolean shouldRetain(Set<String> filter, ModuleStatusResource moduleStatusResource) {
