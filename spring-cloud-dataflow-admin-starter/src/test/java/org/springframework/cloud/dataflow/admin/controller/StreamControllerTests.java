@@ -28,7 +28,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.cloud.dataflow.module.DeploymentState.*;
 
+import java.util.EnumSet;
 import java.util.List;
 
 import org.junit.After;
@@ -49,6 +51,7 @@ import org.springframework.cloud.dataflow.core.ModuleDefinition;
 import org.springframework.cloud.dataflow.core.ModuleDeploymentId;
 import org.springframework.cloud.dataflow.core.ModuleDeploymentRequest;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
+import org.springframework.cloud.dataflow.module.DeploymentState;
 import org.springframework.cloud.dataflow.module.ModuleStatus;
 import org.springframework.cloud.dataflow.module.deployer.ModuleDeployer;
 import org.springframework.http.MediaType;
@@ -296,7 +299,7 @@ public class StreamControllerTests {
 		repository.save(new StreamDefinition("myStream", "time | log"));
 		assertEquals(1, repository.count());
 		ModuleStatus status = mock(ModuleStatus.class);
-		when(status.getState()).thenReturn(ModuleStatus.State.unknown);
+		when(status.getState()).thenReturn(DeploymentState.unknown);
 		when(moduleDeployer.status(ModuleDeploymentId.parse("myStream.time"))).thenReturn(status);
 		when(moduleDeployer.status(ModuleDeploymentId.parse("myStream.log"))).thenReturn(status);
 		mockMvc.perform(
@@ -328,4 +331,16 @@ public class StreamControllerTests {
 		ModuleDeploymentRequest timeRequest = requests.get(1);
 		assertThat(timeRequest.getDefinition().getName(), is("time"));
 	}
+
+	@Test
+	public void testAggregateState() {
+		assertThat(StreamController.aggregateState(EnumSet.of(deployed, failed)), is(failed));
+		assertThat(StreamController.aggregateState(EnumSet.of(unknown, failed)), is(failed));
+		assertThat(StreamController.aggregateState(EnumSet.of(deployed, failed, error)), is(error));
+		assertThat(StreamController.aggregateState(EnumSet.of(deployed, undeployed)), is(partial));
+		assertThat(StreamController.aggregateState(EnumSet.of(deployed, unknown)), is(partial));
+		assertThat(StreamController.aggregateState(EnumSet.of(undeployed, unknown)), is(partial));
+		assertThat(StreamController.aggregateState(EnumSet.of(unknown)), is(undeployed));
+	}
+
 }

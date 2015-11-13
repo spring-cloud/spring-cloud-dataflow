@@ -37,6 +37,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.dataflow.core.ModuleDeploymentId;
 import org.springframework.cloud.dataflow.core.ModuleDeploymentRequest;
+import org.springframework.cloud.dataflow.module.DeploymentState;
 import org.springframework.cloud.dataflow.module.ModuleInstanceStatus;
 import org.springframework.cloud.dataflow.module.ModuleStatus;
 import org.springframework.cloud.dataflow.module.deployer.ModuleArgumentQualifier;
@@ -208,8 +209,8 @@ public class OutOfProcessModuleDeployer implements ModuleDeployer {
 		}
 
 		@Override
-		public ModuleStatus.State getState() {
-			return isAlive(process) ? ModuleStatus.State.deployed : ModuleStatus.State.failed;
+		public DeploymentState getState() {
+			return isAlive(process) ? DeploymentState.deployed : DeploymentState.failed;
 		}
 
 		@Override
@@ -222,8 +223,7 @@ public class OutOfProcessModuleDeployer implements ModuleDeployer {
 			return result;
 		}
 	}
-
-	// Copy-pasting of JDK8+ isAlive method to retain JDK7 compat
+	// Copy-pasting of JDK8+ isAlive method to retain JDK7 compatibility
 	private static boolean isAlive(Process process) {
 		try {
 			process.exitValue();
