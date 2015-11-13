@@ -88,11 +88,13 @@ public class ArtifactRegistryPopulator {
 		populateDefault("http", source);
 		populateDefault("sftp", source);
 		populateDefault("time", source);
+		populateDefault("load-generator", source);
 		populateDefault("twitterstream", source);
 		populateDefault("filter", processor);
 		populateDefault("groovy-filter", processor);
 		populateDefault("groovy-transform", processor);
 		populateDefault("transform", processor);
+		populateDefault("noop", processor);
 		populateDefault("cassandra", sink);
 		populateDefault("counter", sink);
 		populateDefault("file", sink);
@@ -103,6 +105,7 @@ public class ArtifactRegistryPopulator {
 		populateDefault("log", sink);
 		populateDefault("redis", sink);
 		populateDefault("websocket", sink);
+		populateDefault("throughput", sink);
 		populateDefault("timestamp", task);
 	}
 
