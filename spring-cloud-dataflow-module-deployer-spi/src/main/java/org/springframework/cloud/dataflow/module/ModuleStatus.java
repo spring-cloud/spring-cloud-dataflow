@@ -60,6 +60,11 @@ public class ModuleStatus {
 		deployed,
 
 		/**
+		 * The unit is known to the system, but is not currently deployed.
+		 */
+		undeployed,
+
+		/**
 		 * The module exited normally.
 		 */
 		complete,
@@ -80,7 +85,7 @@ public class ModuleStatus {
 		 * Module deployment state could not be calculated. This may be
 		 * caused by an error in the SPI implementation.
 		 */
-		unknown
+		unknown // some error occured
 	}
 
 	/**
