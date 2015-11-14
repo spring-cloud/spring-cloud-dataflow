@@ -74,6 +74,10 @@ public class LocalConfiguration {
 		@ConditionalOnProperty("cloudfoundry.apiEndpoint")
 		static class TragetingCloudFoundry {
 		}
+
+		@Profile("fork")
+		static class UsingFork{
+		}
 	}
 
 }
