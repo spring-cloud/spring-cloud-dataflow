@@ -18,14 +18,15 @@ package org.springframework.cloud.dataflow.shell.command;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.shell.core.CommandResult;
 import org.springframework.shell.core.JLineShellComponent;
-import org.springframework.shell.support.table.Table;
-import org.springframework.shell.support.table.TableRow;
+import org.springframework.shell.table.Table;
+import org.springframework.shell.table.TableModel;
 
 /**
  * Helper methods for stream commands to execute in the shell.
@@ -161,11 +162,19 @@ public class StreamCommandTemplate {
 	public void verifyExists(String streamName, String definition, boolean deployed) {
 		CommandResult cr = shell.executeCommand("stream list");
 		assertTrue("Failure.  CommandResult = " + cr.toString(), cr.isSuccess());
-		Table t = (Table) cr.getResult();
-		assertTrue(t.getRows().contains(
-				new TableRow().addValue(1, streamName).addValue(2, definition.replace("\\\\", "\\")).addValue(
-						3,
-						deployed ? "deployed" : "undeployed")));
+
+		Table table = (org.springframework.shell.table.Table) cr.getResult();
+		TableModel model = table.getModel();
+		String status = deployed ? "deployed" : "undeployed";
+		for (int row = 0; row < model.getRowCount(); row++) {
+			if (streamName.equals(model.getValue(row, 0))
+					&& definition.replace("\\\\", "\\").equals(model.getValue(row, 1))
+					&& status.equals(model.getValue(row, 2))) {
+				return;
+			}
+		}
+		fail("Stream named " + streamName + " does not exist");
+
 	}
 
 }

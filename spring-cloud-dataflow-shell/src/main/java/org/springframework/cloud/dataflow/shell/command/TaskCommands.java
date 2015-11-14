@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Properties;
 
@@ -33,8 +34,9 @@ import org.springframework.shell.core.CommandMarker;
 import org.springframework.shell.core.annotation.CliAvailabilityIndicator;
 import org.springframework.shell.core.annotation.CliCommand;
 import org.springframework.shell.core.annotation.CliOption;
-import org.springframework.shell.support.table.Table;
-import org.springframework.shell.support.table.TableHeader;
+import org.springframework.shell.table.BeanListTableModel;
+import org.springframework.shell.table.Table;
+import org.springframework.shell.table.TableBuilder;
 import org.springframework.stereotype.Component;
 
 /**
@@ -72,17 +74,12 @@ public class TaskCommands implements CommandMarker {
 	@CliCommand(value = LIST, help = "List created tasks")
 	public Table list() {
 		final PagedResources<TaskDefinitionResource> tasks = taskOperations().list();
-		final Table table = new Table()
-				.addHeader(1, new TableHeader("Task Name"))
-				.addHeader(2, new TableHeader("Task Definition"))
-				.addHeader(3, new TableHeader("Task Status"));
-		for (TaskDefinitionResource task : tasks) {
-			table.newRow()
-					.addValue(1, task.getName())
-					.addValue(2, task.getDslText())
-					.addValue(3, (task.getStatus() == null) ? "" : task.getStatus());
-		}
-		return table;
+		LinkedHashMap<String, Object> headers = new LinkedHashMap<>();
+		headers.put("name", "Task Name");
+		headers.put("dslText", "Task Definition");
+		headers.put("status", "Task Status");
+		final TableBuilder builder = new TableBuilder(new BeanListTableModel<>(tasks, headers));
+		return DataFlowTables.applyStyle(builder).build();
 	}
 
 	@CliCommand(value = CREATE, help = "Create a new task definition")
@@ -113,7 +110,7 @@ public class TaskCommands implements CommandMarker {
 				propertiesToUse = DeploymentPropertiesUtils.convert(props);
 				break;
 			case -1: // Neither option specified
-				propertiesToUse = Collections.<String, String> emptyMap();
+				propertiesToUse = Collections.emptyMap();
 				break;
 			default:
 				throw new AssertionError();
@@ -132,7 +129,7 @@ public class TaskCommands implements CommandMarker {
 	@CliCommand(value = STATUS, help = "Retrieve status info on an existing task")
 	public String status(
 			@CliOption(key = { "", "name" }, help = "the name of the task ", mandatory = true) String name) {
-		return String.format("Feature Not Available");
+		return "Feature Not Available";
 	}
 	
 	private TaskOperations taskOperations() {
