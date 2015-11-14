@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Properties;
 
@@ -33,8 +34,9 @@ import org.springframework.shell.core.CommandMarker;
 import org.springframework.shell.core.annotation.CliAvailabilityIndicator;
 import org.springframework.shell.core.annotation.CliCommand;
 import org.springframework.shell.core.annotation.CliOption;
-import org.springframework.shell.support.table.Table;
-import org.springframework.shell.support.table.TableHeader;
+import org.springframework.shell.table.BeanListTableModel;
+import org.springframework.shell.table.Table;
+import org.springframework.shell.table.TableBuilder;
 import org.springframework.stereotype.Component;
 
 /**
@@ -80,17 +82,13 @@ public class StreamCommands implements CommandMarker {
 	@CliCommand(value = LIST_STREAM, help = "List created streams")
 	public Table listStreams() {
 		final PagedResources<StreamDefinitionResource> streams = streamOperations().list();
-		final Table table = new Table()
-				.addHeader(1, new TableHeader("Stream Name"))
-				.addHeader(2, new TableHeader("Stream Definition"))
-				.addHeader(3, new TableHeader("Status"));
-		for (StreamDefinitionResource stream : streams) {
-			table.newRow()
-					.addValue(1, stream.getName())
-					.addValue(2, stream.getDslText())
-					.addValue(3, stream.getStatus());
-		}
-		return table;
+		LinkedHashMap<String, Object> headers = new LinkedHashMap<>();
+		headers.put("name", "Stream Name");
+		headers.put("dslText", "Stream Definition");
+		headers.put("status", "Status");
+		BeanListTableModel<StreamDefinitionResource> model = new BeanListTableModel<>(streams, headers);
+		return DataFlowTables.applyStyle(new TableBuilder(model))
+				.build();
 	}
 
 	@CliCommand(value = CREATE_STREAM, help = "Create a new stream definition")

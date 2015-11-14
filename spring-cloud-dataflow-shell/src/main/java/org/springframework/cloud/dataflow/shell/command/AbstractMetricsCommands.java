@@ -15,10 +15,14 @@
 
 package org.springframework.cloud.dataflow.shell.command;
 
+import java.util.LinkedHashMap;
+
 import org.springframework.cloud.dataflow.rest.resource.MetricResource;
 import org.springframework.hateoas.PagedResources;
-import org.springframework.shell.support.table.Table;
-import org.springframework.shell.support.table.TableHeader;
+import org.springframework.shell.table.BeanListTableModel;
+import org.springframework.shell.table.Table;
+import org.springframework.shell.table.TableBuilder;
+import org.springframework.shell.table.TableModel;
 
 /**
  * Base class to factor out similar behavior for all related metrics commands.
@@ -40,12 +44,10 @@ public abstract class AbstractMetricsCommands {
 	 * Render a table with information about a list of metrics
 	 */
 	protected Table displayMetrics(PagedResources<MetricResource> list) {
-		Table table = new Table();
-		table.addHeader(1, new TableHeader(String.format("%s name", kind)));
-		for (MetricResource r : list) {
-			table.newRow().addValue(1, r.getName());
-		}
-		return table;
+		LinkedHashMap<String, Object> headers = new LinkedHashMap<>();
+		headers.put("name", String.format("%s name", kind));
+		TableModel model = new BeanListTableModel<>(list, headers);
+		return DataFlowTables.applyStyle(new TableBuilder(model)).build();
 	}
 
 }

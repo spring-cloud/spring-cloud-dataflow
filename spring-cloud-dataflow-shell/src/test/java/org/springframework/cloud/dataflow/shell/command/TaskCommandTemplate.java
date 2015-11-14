@@ -18,14 +18,15 @@ package org.springframework.cloud.dataflow.shell.command;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.shell.core.CommandResult;
 import org.springframework.shell.core.JLineShellComponent;
-import org.springframework.shell.support.table.Table;
-import org.springframework.shell.support.table.TableRow;
+import org.springframework.shell.table.Table;
+import org.springframework.shell.table.TableModel;
 
 /**
  * Helper methods for task commands to execute in the shell.
@@ -116,11 +117,15 @@ public class TaskCommandTemplate {
 	public void verifyExists(String taskName, String definition) {
 		CommandResult cr = shell.executeCommand("task list");
 		assertTrue("Failure.  CommandResult = " + cr.toString(), cr.isSuccess());
-		Table t = (Table) cr.getResult();
-		assertTrue(t.getRows().contains(
-				new TableRow().addValue(1, taskName).
-						addValue(2, definition.replace("\\\\", "\\")).addValue(
-						3, "unknown")));
+		Table table = (Table) cr.getResult();
+		TableModel model = table.getModel();
+		for (int row = 0; row < model.getRowCount(); row++) {
+			if (taskName.equals(model.getValue(row, 0))
+					&& definition.replace("\\\\", "\\").equals(model.getValue(row, 1))) {
+				return;
+			}
+		}
+		fail("Task named " + taskName + " was not created");
 	}
 
 }
