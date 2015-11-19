@@ -27,18 +27,28 @@ import org.springframework.cloud.dataflow.admin.AdminApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 
 /**
- * Tests for {@link AdminApplication}.
+ * Tests for {@link LocalConfiguration}.
  *
  * @author Janne Valkealahti
+ * @author Eric Bottard
  */
-public class AdminApplicationTests {
+public class LocalConfigurationTests {
 
 	@Test
-	public void testDefaultProfile() {
+	public void testDefaultDeployer() {
 		SpringApplication app = new SpringApplication(AdminApplication.class);
 		ConfigurableApplicationContext context = app.run(new String[] { "--server.port=0" });
 		assertThat(context.containsBean("processModuleDeployer"), is(true));
-		assertThat(context.getBean("processModuleDeployer"), instanceOf(LocalModuleDeployer.class));
+		assertThat(context.getBean("processModuleDeployer"), instanceOf(OutOfProcessModuleDeployer.class));
+		context.close();
+	}
+
+	@Test
+	public void testInProcessDeployer() {
+		SpringApplication app = new SpringApplication(AdminApplication.class);
+		ConfigurableApplicationContext context = app.run(new String[] { "--server.port=0", "--deployer.local.out-of-process=false" });
+		assertThat(context.containsBean("processModuleDeployer"), is(true));
+		assertThat(context.getBean("processModuleDeployer"), instanceOf(InProcessModuleDeployer.class));
 		context.close();
 	}
 }

@@ -16,6 +16,8 @@
 
 package org.springframework.cloud.dataflow.admin.spi.local;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.dataflow.module.deployer.ModuleDeployer;
 import org.springframework.cloud.stream.module.launcher.ModuleLauncher;
 import org.springframework.cloud.stream.module.launcher.ModuleLauncherConfiguration;
@@ -29,17 +31,39 @@ import org.springframework.context.annotation.Import;
  * @author Eric Bottard
  */
 @Configuration
-@Import(ModuleLauncherConfiguration.class)
 public class LocalConfiguration {
 
-	@Bean
-	public ModuleDeployer processModuleDeployer(ModuleLauncher moduleLauncher) {
-		return new LocalModuleDeployer(moduleLauncher);
+	static final String LOCAL_DEPLOYER_PREFIX = "deployer.local";
+
+	@ConditionalOnProperty(prefix = LOCAL_DEPLOYER_PREFIX, name = "out-of-process", havingValue = "false")
+	@Import(ModuleLauncherConfiguration.class)
+	public static class InProcess {
+
+		@Bean
+		public ModuleDeployer processModuleDeployer(ModuleLauncher moduleLauncher) {
+			return new InProcessModuleDeployer(moduleLauncher);
+		}
+
+		@Bean
+		public ModuleDeployer taskModuleDeployer(ModuleLauncher moduleLauncher) {
+			return processModuleDeployer(moduleLauncher);
+		}
 	}
 
-	@Bean
-	public ModuleDeployer taskModuleDeployer(ModuleLauncher moduleLauncher) {
-		return new LocalModuleDeployer(moduleLauncher);
+	@EnableConfigurationProperties(OutOfProcessModuleDeployerProperties.class)
+	@ConditionalOnProperty(prefix = LOCAL_DEPLOYER_PREFIX, name = "out-of-process", havingValue = "true", matchIfMissing = true)
+	public static class OutOfProcess {
+
+		@Bean
+		public ModuleDeployer processModuleDeployer() throws Exception {
+			return new OutOfProcessModuleDeployer();
+		}
+
+		@Bean
+		public ModuleDeployer taskModuleDeployer() throws Exception {
+			return processModuleDeployer();
+		}
+
 	}
 
 }
