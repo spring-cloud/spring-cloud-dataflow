@@ -42,9 +42,9 @@ import org.springframework.web.client.RestTemplate;
  * @author Marius Bogoevici
  * @author Eric Bottard
  */
-public class LocalModuleDeployer implements ModuleDeployer {
+public class InProcessModuleDeployer implements ModuleDeployer {
 
-	private static final Logger logger = LoggerFactory.getLogger(LocalModuleDeployer.class);
+	private static final Logger logger = LoggerFactory.getLogger(InProcessModuleDeployer.class);
 
 	private final ModuleLauncher launcher;
 
@@ -52,7 +52,7 @@ public class LocalModuleDeployer implements ModuleDeployer {
 
 	private final RestTemplate restTemplate = new RestTemplate();
 
-	public LocalModuleDeployer(ModuleLauncher launcher) {
+	public InProcessModuleDeployer(ModuleLauncher launcher) {
 		Assert.notNull(launcher, "Module launcher cannot be null");
 		this.launcher = launcher;
 	}
@@ -110,7 +110,7 @@ public class LocalModuleDeployer implements ModuleDeployer {
 	@Override
 	public ModuleStatus status(ModuleDeploymentId id) {
 		boolean deployed = this.deployedModules.containsKey(id);
-		LocalModuleInstanceStatus status = new LocalModuleInstanceStatus(id.toString(), deployed, null);
+		InProcessModuleInstanceStatus status = new InProcessModuleInstanceStatus(id.toString(), deployed, null);
 		return ModuleStatus.of(id).with(status).build();
 	}
 

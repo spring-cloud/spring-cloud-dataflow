@@ -39,7 +39,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = ModuleLauncherConfiguration.class)
 @DirtiesContext
-public class LocalModuleDeployerTests {
+public class InProcessModuleDeployerTests {
 
 	private static final String GROUP_ID = "org.springframework.cloud.stream.module";
 
@@ -50,7 +50,7 @@ public class LocalModuleDeployerTests {
 
 	@Test @Ignore // see TODO below
 	public void timeToLogStream() {
-		LocalModuleDeployer deployer = new LocalModuleDeployer(moduleLauncher);
+		InProcessModuleDeployer deployer = new InProcessModuleDeployer(moduleLauncher);
 		ModuleDefinition timeDefinition = new ModuleDefinition.Builder()
 				.setGroup("ticktock")
 				.setName("time")
