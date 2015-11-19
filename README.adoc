@@ -1,0 +1,70 @@
+== Spring Cloud Data Flow image:https://build.spring.io/plugins/servlet/buildStatusImage/SCD-BMASTER[Build Status, link=https://build.spring.io/browse/SCD-BMASTER] image:https://badge.waffle.io/spring-cloud/spring-cloud-dataflow.svg?label=ready&title=Ready[Stories Ready, link=http://waffle.io/spring-cloud/spring-cloud-dataflow] image:https://badge.waffle.io/spring-cloud/spring-cloud-dataflow.svg?label=In%20Progress&title=In%20Progress[Stores In Progress, link=http://waffle.io/spring-cloud/spring-cloud-dataflow]
+
+The Spring Cloud Data Flow project provides orchestration for data microservices, including long lived
+https://github.com/spring-cloud/spring-cloud-stream[stream] applications and
+https://github.com/spring-cloud/spring-cloud-task short lived [task] applications.
+
+== Components
+
+The https://github.com/spring-cloud/spring-cloud-dataflow/tree/master/spring-cloud-dataflow-core[Core]
+domain module includes the concept of a *stream* that is a composition of spring-cloud-stream
+modules in a linear pipeline from a *source* to a *sink*, optionally including *processor* modules
+in between. The domain also includes the concept of a *task*, which may be any process that does
+not run indefinitely, including https://github.com/spring-projects/spring-batch[Spring Batch] jobs.
+
+The https://github.com/spring-cloud/spring-cloud-dataflow/tree/master/spring-cloud-dataflow-module-registry[Module Registry] maintains the set of available modules, and their mappings to Maven coordinates.
+
+The https://github.com/spring-cloud/spring-cloud-dataflow/tree/master/spring-cloud-dataflow-module-deployers/spring-cloud-dataflow-module-deployer-spi[Module Deployer SPI] provides the abstraction layer for deploying the modules of a given stream across a variety of runtime environments.  Current SPI implementations support Local deployment, YARN, Cloud Foundary, Mesos and Kubernetes.
+
+
+The https://github.com/spring-cloud/spring-cloud-dataflow/tree/master/spring-cloud-dataflow-admin[Admin Server] is a Spring Boot applications that provides a common REST API, UI, and an implementation of the SPI interface for the runtime environment.  For each runtime environment there is a different version of the admin server.  The github locations for these admin servers are:
+
+* https://github.com/spring-cloud/spring-cloud-dataflow/tree/master/spring-cloud-dataflow-module-deployers/spring-cloud-dataflow-module-deployer-local[Local]
+* https://github.com/spring-cloud/spring-cloud-dataflow-admin-yarn[YARN]
+* https://github.com/spring-cloud/spring-cloud-dataflow-admin-cloudfoundry[Cloud Foundry]
+* https://github.com/spring-cloud/spring-cloud-dataflow-admin-mesos[Mesos]
+* https://github.com/spring-cloud/spring-cloud-dataflow-admin-kubernetes[Kubernetes]
+
+
+The https://github.com/spring-cloud/spring-cloud-dataflow/tree/master/spring-cloud-dataflow-shell[Shell] connects to the Admin's REST API and supports a DSL that simplifies the process of defining a stream and managing its lifecycle.
+
+The instructions below describe the process of running both the Admin and the Shell for the local runtime environment.  Instructions for other runtime environments can be found in their respective github repositories.
+
+=== Running Singlenode
+
+. Start Redis locally via `redis-server`
+. Clone this repository and build from the root directory:
++
+----
+git clone https://github.com/spring-cloud/spring-cloud-dataflow.git
+cd spring-cloud-dataflow
+./mvnw install
+----
++
+. launch the admin:
++
+----
+$ java -jar spring-cloud-dataflow-admin-local/target/spring-cloud-dataflow-admin-local-1.0.0.BUILD-SNAPSHOT.jar
+----
++
+. launch the shell:
++
+----
+$ java -jar spring-cloud-dataflow-shell/target/spring-cloud-dataflow-shell-1.0.0.BUILD-SNAPSHOT.jar
+----
+
+=== Running the Shell inside STS
+
+When running the Shell from within Spring Tool Suite using `org.springframework.cloud.dataflow.shell.ShellApplication`, you may encounter weird character formatting. In that case, please start the Shell by providing the following
+system property:
+
+* Linux/Mac: `-Djline.terminal=org.springframework.shell.core.IdeTerminal`
+* Windows:
+
+----
+-Djline.WindowsTerminal.directConsole=false
+-Djline.terminal=jline.UnsupportedTerminal`
+----
+See also:
+
+https://github.com/spring-projects/spring-shell/blob/master/readme.dev
