@@ -83,13 +83,13 @@ public class RuntimeCommands implements CommandMarker {
 			modelBuilder.addRow()
 					.addValue("Module Id / Instance Id")
 					.addValue("Unit Status")
-					.addValue("Nb of Instances / Attributes");
+					.addValue("No. of Instances / Attributes");
 		}
 		else {
 			modelBuilder.addRow()
 					.addValue("Module Id")
 					.addValue("Unit Status")
-					.addValue("Nb of Instances");
+					.addValue("No. of Instances");
 		}
 
 		// In detailed mode, keep track of module vs instance lines, to use
