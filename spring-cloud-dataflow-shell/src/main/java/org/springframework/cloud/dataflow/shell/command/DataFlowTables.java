@@ -35,16 +35,16 @@ public class DataFlowTables {
 	 * Customize the given TableBuilder with the following common features
 	 * (these choices can always be overridden by applying later customizations) :<ul>
 	 *     <li>double border around the whole table and first row</li>
-	 *     <li>vertical single line borders, space (air) separators between rows</li>
+	 *     <li>vertical space (air) borders, single line separators between rows</li>
 	 *     <li>first row is assumed to be a header and is centered horizontally and vertically</li>
 	 *     <li>cells containing Map values are rendered as {@literal key = value} lines, trying to align on equal signs</li>
 	 * </ul>
 	 */
 	public static TableBuilder applyStyle(TableBuilder builder) {
 		builder.addOutlineBorder(BorderStyle.fancy_double)
-				.paintBorder(BorderStyle.fancy_light, BorderSpecification.INNER_VERTICAL)
+				.paintBorder(BorderStyle.air, BorderSpecification.INNER_VERTICAL)
 				.fromTopLeft().toBottomRight()
-				.paintBorder(BorderStyle.air, BorderSpecification.INNER_HORIZONTAL)
+				.paintBorder(BorderStyle.fancy_light, BorderSpecification.INNER_VERTICAL)
 				.fromTopLeft().toBottomRight()
 				.addHeaderBorder(BorderStyle.fancy_double)
 				.on(CellMatchers.row(0))
