@@ -22,6 +22,7 @@ import java.util.List;
 
 import org.springframework.boot.actuate.metrics.repository.MetricRepository;
 import org.springframework.boot.actuate.metrics.repository.redis.RedisMetricRepository;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.dataflow.admin.completion.TapOnChannelExpansionStrategy;
 import org.springframework.cloud.dataflow.admin.repository.InMemoryStreamDefinitionRepository;
 import org.springframework.cloud.dataflow.admin.repository.InMemoryTaskDefinitionRepository;
@@ -56,6 +57,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 @EnableHypermediaSupport(type = HAL)
 @EnableSpringDataWebSupport
 @Import(CompletionConfiguration.class)
+@EnableConfigurationProperties(AdminProperties.class)
 public class AdminConfiguration {
 
 	@Bean
