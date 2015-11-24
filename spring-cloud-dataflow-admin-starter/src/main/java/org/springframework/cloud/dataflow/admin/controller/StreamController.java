@@ -17,8 +17,8 @@
 package org.springframework.cloud.dataflow.admin.controller;
 
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -39,6 +39,7 @@ import org.springframework.cloud.dataflow.core.ModuleDefinition;
 import org.springframework.cloud.dataflow.core.ModuleDeploymentId;
 import org.springframework.cloud.dataflow.core.ModuleDeploymentRequest;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
+import org.springframework.cloud.dataflow.module.DeploymentState;
 import org.springframework.cloud.dataflow.module.ModuleStatus;
 import org.springframework.cloud.dataflow.module.deployer.ModuleDeployer;
 import org.springframework.cloud.dataflow.rest.resource.StreamDefinitionResource;
@@ -61,7 +62,6 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * Controller for operations on {@link StreamDefinition}. This
  * includes CRUD and deployment operations.
- *
  * @author Mark Fisher
  * @author Patrick Peralta
  * @author Ilayaperumal Gopinathan
@@ -98,18 +98,17 @@ public class StreamController {
 	/**
 	 * Create a {@code StreamController} that delegates
 	 * <ul>
-	 *     <li>CRUD operations to the provided {@link StreamDefinitionRepository}</li>
-	 *     <li>deployment operations to the provided {@link ModuleDeployer}</li>
-	 *     <li>module coordinate retrieval to the provided {@link ArtifactRegistry}</li>
+	 * <li>CRUD operations to the provided {@link StreamDefinitionRepository}</li>
+	 * <li>deployment operations to the provided {@link ModuleDeployer}</li>
+	 * <li>module coordinate retrieval to the provided {@link ArtifactRegistry}</li>
 	 * </ul>
-	 *
-	 * @param repository  the repository this controller will use for stream CRUD operations
-	 * @param registry    module registry this controller will use to look up modules
-	 * @param deployer    the deployer this controller will use to deploy stream modules
+	 * @param repository the repository this controller will use for stream CRUD operations
+	 * @param registry   module registry this controller will use to look up modules
+	 * @param deployer   the deployer this controller will use to deploy stream modules
 	 */
 	@Autowired
 	public StreamController(StreamDefinitionRepository repository, ArtifactRegistry registry,
-			@Qualifier("processModuleDeployer") ModuleDeployer deployer) {
+	                        @Qualifier("processModuleDeployer") ModuleDeployer deployer) {
 		Assert.notNull(repository, "repository must not be null");
 		Assert.notNull(registry, "registry must not be null");
 		Assert.notNull(deployer, "deployer must not be null");
@@ -120,31 +119,29 @@ public class StreamController {
 
 	/**
 	 * Return a page-able list of {@link StreamDefinitionResource} defined streams.
-	 *
-	 * @param pageable   page-able collection of {@code StreamDefinitionResource}.
-	 * @param assembler  assembler for {@link StreamDefinition}
+	 * @param pageable  page-able collection of {@code StreamDefinitionResource}.
+	 * @param assembler assembler for {@link StreamDefinition}
 	 * @return list of stream definitions
 	 */
 	@RequestMapping(value = "/definitions", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
 	public PagedResources<StreamDefinitionResource> list(Pageable pageable,
-			PagedResourcesAssembler<StreamDefinition> assembler) {
+	                                                     PagedResourcesAssembler<StreamDefinition> assembler) {
 		return assembler.toResource(repository.findAll(pageable), streamAssembler);
 	}
 
 	/**
 	 * Create a new stream.
-	 *
-	 * @param name    stream name
-	 * @param dsl     DSL definition for stream
-	 * @param deploy  if {@code true}, the stream is deployed upon creation
+	 * @param name   stream name
+	 * @param dsl    DSL definition for stream
+	 * @param deploy if {@code true}, the stream is deployed upon creation
 	 */
 	@RequestMapping(value = "/definitions", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
 	public void save(@RequestParam("name") String name,
-			@RequestParam("definition") String dsl,
-			@RequestParam(value = "deploy", defaultValue = "true")
-			boolean deploy) {
+	                 @RequestParam("definition") String dsl,
+	                 @RequestParam(value = "deploy", defaultValue = "true")
+	                 boolean deploy) {
 		if (this.repository.exists(name)) {
 			throw new DuplicateStreamException(
 					String.format("Cannot create stream %s because another one has already " +
@@ -160,7 +157,6 @@ public class StreamController {
 
 	/**
 	 * Request removal of an existing stream definition.
-	 *
 	 * @param name the name of an existing stream definition (required)
 	 */
 	@RequestMapping(value = "/definitions/{name}", method = RequestMethod.DELETE)
@@ -182,7 +178,6 @@ public class StreamController {
 
 	/**
 	 * Request un-deployment of an existing stream.
-	 *
 	 * @param name the name of an existing stream (required)
 	 */
 	@RequestMapping(value = "/deployments/{name}", method = RequestMethod.DELETE)
@@ -206,8 +201,7 @@ public class StreamController {
 
 	/**
 	 * Request deployment of an existing stream definition. The name must be included in the path.
-	 *
-	 * @param name the name of an existing stream definition (required)
+	 * @param name       the name of an existing stream definition (required)
 	 * @param properties the deployment properties for the stream as a comma-delimited list of key=value pairs
 	 */
 	@RequestMapping(value = "/deployments/{name}", method = RequestMethod.POST)
@@ -321,7 +315,7 @@ public class StreamController {
 	}
 
 	private boolean upstreamModuleHasPartitionInfo(StreamDefinition stream, ModuleDefinition currentModule,
-			Map<String, String> cumulatedDeploymentProperties) {
+	                                               Map<String, String> cumulatedDeploymentProperties) {
 		Iterator<ModuleDefinition> iterator = stream.getDeploymentOrderIterator();
 		while (iterator.hasNext()) {
 			ModuleDefinition module = iterator.next();
@@ -336,7 +330,7 @@ public class StreamController {
 	}
 
 	private boolean isPartitionedConsumer(ModuleDefinition module, Map<String, String> properties,
-			boolean upstreamModuleSupportsPartition) {
+	                                      boolean upstreamModuleSupportsPartition) {
 		return upstreamModuleSupportsPartition ||
 				(module.getParameters().containsKey(BindingProperties.INPUT_BINDING_KEY) &&
 						properties.containsKey(BindingProperties.PARTITIONED_PROPERTY) &&
@@ -383,14 +377,14 @@ public class StreamController {
 			ModuleDeploymentId id = ModuleDeploymentId.fromModuleDefinition(module);
 			ModuleStatus status = this.deployer.status(id);
 			// todo: change from 'unknown' to 'undeployed' when status() does the same
-			if (!ModuleStatus.State.unknown.equals(status.getState())) {
+			if (!DeploymentState.unknown.equals(status.getState())) {
 				this.deployer.undeploy(id);
 			}
 		}
 	}
 
 	private String calculateStreamState(String name) {
-		Set<ModuleStatus.State> moduleStates = new HashSet<>();
+		Set<DeploymentState> moduleStates = EnumSet.noneOf(DeploymentState.class);
 		StreamDefinition stream = repository.findOne(name);
 		for (ModuleDefinition module : stream.getModuleDefinitions()) {
 			ModuleStatus status = deployer.status(ModuleDeploymentId.fromModuleDefinition(module));
@@ -398,23 +392,9 @@ public class StreamController {
 		}
 
 		logger.debug("states: {}", moduleStates);
-
-		// todo: this requires more thought...
-		if (moduleStates.contains(ModuleStatus.State.failed)) {
-			return ModuleStatus.State.failed.toString();
-		}
-		else if (moduleStates.contains(ModuleStatus.State.incomplete)) {
-			return ModuleStatus.State.incomplete.toString();
-		}
-		else if (moduleStates.contains(ModuleStatus.State.deploying)) {
-			return ModuleStatus.State.deploying.toString();
-		}
-		else if (moduleStates.contains(ModuleStatus.State.deployed) && moduleStates.size() == 1) {
-			return ModuleStatus.State.deployed.toString();
-		}
-		else {
-			return ModuleStatus.State.unknown.toString();
-		}
+		DeploymentState aggregateState = DeploymentState.reduce(moduleStates);
+		// A stream which is known to the streamRepository but unknown to deployers is undeployed
+		return aggregateState == DeploymentState.unknown ? DeploymentState.undeployed.toString() : aggregateState.toString();
 	}
 
 	/**

@@ -18,8 +18,10 @@ package org.springframework.cloud.dataflow.module;
 
 import java.util.Map;
 
+import org.springframework.cloud.dataflow.core.ModuleDeploymentRequest;
+
 /**
- * Status for an individual instance of a {@link org.springframework.xd.module.ModuleDescriptor}
+ * Status for an individual instance of a {@link ModuleDeploymentRequest}
  * deployment. The underlying instance may be backed by an application context in
  * the JVM, or by a remote process managed by a distributed runtime.
  *
@@ -35,14 +37,14 @@ public interface ModuleInstanceStatus {
 	String getId();
 
 	/**
-	 * Return the state of the deployed module.
+	 * Return the state of the deployed module instance.
 	 *
-	 * @return state of the deployed module
+	 * @return state of the deployed module instance
 	 */
-	ModuleStatus.State getState();
+	DeploymentState getState();
 
 	/**
-	 * Return a map of attributes for the deployed module. The specific
+	 * Return a map of attributes for the deployed module instance. The specific
 	 * keys/values returned are dependent on the runtime executing the module.
 	 * This may include extra information such as deployment location
 	 * or specific error messages in the case of failure.

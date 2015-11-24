@@ -69,7 +69,7 @@ public interface ModuleDeployer {
 	 *
 	 * @param id id for the module this status is for
 	 *
-	 * @return module deployment status
+	 * @return module deployment status or {@literal null} if this deployer knows nothing about the given deployment
 	 */
 	ModuleStatus status(ModuleDeploymentId id);
 

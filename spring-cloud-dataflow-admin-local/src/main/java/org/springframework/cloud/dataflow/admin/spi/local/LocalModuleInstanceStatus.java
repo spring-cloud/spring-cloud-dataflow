@@ -23,8 +23,8 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.springframework.cloud.dataflow.module.DeploymentState;
 import org.springframework.cloud.dataflow.module.ModuleInstanceStatus;
-import org.springframework.cloud.dataflow.module.ModuleStatus;
 
 /**
  * @author Mark Fisher
@@ -35,7 +35,7 @@ public class LocalModuleInstanceStatus implements ModuleInstanceStatus {
 
 	private final String id;
 
-	private final ModuleStatus.State state;
+	private final DeploymentState state;
 
 	private final Map<String, String> attributes = new HashMap<String, String>();
 
@@ -43,7 +43,7 @@ public class LocalModuleInstanceStatus implements ModuleInstanceStatus {
 	public LocalModuleInstanceStatus(String id, boolean deployed, Map<String, String> attributes) {
 		logger.trace("Local Module {}, deployed {}, attributes: {}", id, deployed, attributes);
 		this.id = id;
-		this.state = deployed ? ModuleStatus.State.deployed : ModuleStatus.State.unknown;
+		this.state = deployed ? DeploymentState.deployed : DeploymentState.unknown;
 		if (attributes != null) {
 			this.attributes.putAll(attributes);
 		}
@@ -53,7 +53,7 @@ public class LocalModuleInstanceStatus implements ModuleInstanceStatus {
 		return id;
 	}
 
-	public ModuleStatus.State getState() {
+	public DeploymentState getState() {
 		return state;
 	}
 
