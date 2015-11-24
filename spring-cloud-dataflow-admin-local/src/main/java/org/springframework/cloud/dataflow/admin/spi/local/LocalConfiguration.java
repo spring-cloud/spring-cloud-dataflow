@@ -27,6 +27,7 @@ import org.springframework.context.annotation.Import;
 
 /**
  * Creates deployers that will deploy modules in-process.
+ *
  * @author Eric Bottard
  */
 @Configuration
@@ -34,7 +35,7 @@ public class LocalConfiguration {
 
 	static final String LOCAL_DEPLOYER_PREFIX = "deployer.local";
 
-	@ConditionalOnProperty(prefix = LocalConfiguration.LOCAL_DEPLOYER_PREFIX, name = "out-of-process", havingValue = "false", matchIfMissing = true)
+	@ConditionalOnProperty(prefix = LOCAL_DEPLOYER_PREFIX, name = "out-of-process", havingValue = "false")
 	@Import(ModuleLauncherConfiguration.class)
 	public static class InProcess {
 
@@ -50,7 +51,7 @@ public class LocalConfiguration {
 	}
 
 	@EnableConfigurationProperties(OutOfProcessModuleDeployerProperties.class)
-	@ConditionalOnProperty(prefix = LocalConfiguration.LOCAL_DEPLOYER_PREFIX, name = "out-of-process", havingValue = "true")
+	@ConditionalOnProperty(prefix = LOCAL_DEPLOYER_PREFIX, name = "out-of-process", havingValue = "true", matchIfMissing = true)
 	public static class OutOfProcess {
 
 		@Bean

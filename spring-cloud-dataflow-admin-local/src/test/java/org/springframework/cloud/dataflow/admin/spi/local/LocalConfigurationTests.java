@@ -39,16 +39,16 @@ public class LocalConfigurationTests {
 		SpringApplication app = new SpringApplication(AdminApplication.class);
 		ConfigurableApplicationContext context = app.run(new String[] { "--server.port=0" });
 		assertThat(context.containsBean("processModuleDeployer"), is(true));
-		assertThat(context.getBean("processModuleDeployer"), instanceOf(InProcessModuleDeployer.class));
+		assertThat(context.getBean("processModuleDeployer"), instanceOf(OutOfProcessModuleDeployer.class));
 		context.close();
 	}
 
 	@Test
-	public void testOutOfProcessDeployer() {
+	public void testInProcessDeployer() {
 		SpringApplication app = new SpringApplication(AdminApplication.class);
-		ConfigurableApplicationContext context = app.run(new String[] { "--server.port=0", "--deployer.local.out-of-process=true" });
+		ConfigurableApplicationContext context = app.run(new String[] { "--server.port=0", "--deployer.local.out-of-process=false" });
 		assertThat(context.containsBean("processModuleDeployer"), is(true));
-		assertThat(context.getBean("processModuleDeployer"), instanceOf(OutOfProcessModuleDeployer.class));
+		assertThat(context.getBean("processModuleDeployer"), instanceOf(InProcessModuleDeployer.class));
 		context.close();
 	}
 }
