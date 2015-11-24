@@ -39,6 +39,7 @@ import org.springframework.cloud.dataflow.core.ModuleDefinition;
 import org.springframework.cloud.dataflow.core.ModuleDeploymentId;
 import org.springframework.cloud.dataflow.core.ModuleDeploymentRequest;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
+import org.springframework.cloud.dataflow.module.DeploymentState;
 import org.springframework.cloud.dataflow.module.ModuleStatus;
 import org.springframework.cloud.dataflow.module.deployer.ModuleDeployer;
 import org.springframework.cloud.dataflow.rest.resource.StreamDefinitionResource;
@@ -376,44 +377,24 @@ public class StreamController {
 			ModuleDeploymentId id = ModuleDeploymentId.fromModuleDefinition(module);
 			ModuleStatus status = this.deployer.status(id);
 			// todo: change from 'unknown' to 'undeployed' when status() does the same
-			if (!ModuleStatus.State.unknown.equals(status.getState())) {
+			if (!DeploymentState.unknown.equals(status.getState())) {
 				this.deployer.undeploy(id);
 			}
 		}
 	}
 
 	private String calculateStreamState(String name) {
-		Set<ModuleStatus.State> moduleStates = EnumSet.noneOf(ModuleStatus.State.class);
+		Set<DeploymentState> moduleStates = EnumSet.noneOf(DeploymentState.class);
 		StreamDefinition stream = repository.findOne(name);
 		for (ModuleDefinition module : stream.getModuleDefinitions()) {
 			ModuleStatus status = deployer.status(ModuleDeploymentId.fromModuleDefinition(module));
-			moduleStates.add(status == null ? ModuleStatus.State.undeployed : status.getState());
+			moduleStates.add(status.getState());
 		}
 
 		logger.debug("states: {}", moduleStates);
-
-		// todo: this requires more thought...
-		if (moduleStates.contains(ModuleStatus.State.failed)) {
-			return ModuleStatus.State.failed.toString();
-		}
-		else if (moduleStates.contains(ModuleStatus.State.incomplete)) {
-			return ModuleStatus.State.incomplete.toString();
-		}
-		else if (moduleStates.contains(ModuleStatus.State.deploying)) {
-			return ModuleStatus.State.deploying.toString();
-		}
-		else if (moduleStates.contains(ModuleStatus.State.deployed) && moduleStates.size() == 1) {
-			return ModuleStatus.State.deployed.toString();
-		}
-		else if (moduleStates.contains(ModuleStatus.State.undeployed) && moduleStates.size() == 1) {
-			return ModuleStatus.State.undeployed.toString();
-		}
-		else if (moduleStates.contains(ModuleStatus.State.undeployed) && moduleStates.contains(ModuleStatus.State.deployed)) {
-			return ModuleStatus.State.incomplete.toString();
-		}
-		else {
-			return ModuleStatus.State.unknown.toString();
-		}
+		DeploymentState aggregateState = DeploymentState.reduce(moduleStates);
+		// A stream which is known to the streamRepository but unknown to deployers is undeployed
+		return aggregateState == DeploymentState.unknown ? DeploymentState.undeployed.toString() : aggregateState.toString();
 	}
 
 	/**

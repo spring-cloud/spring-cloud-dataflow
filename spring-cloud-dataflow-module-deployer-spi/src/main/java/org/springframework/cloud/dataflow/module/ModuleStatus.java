@@ -33,60 +33,10 @@ import org.springframework.cloud.dataflow.core.ModuleDeploymentRequest;
  * {@link org.springframework.cloud.dataflow.module.deployer.ModuleDeployer#status},
  * whereas SPI implementations create instances of this class via
  * {@link ModuleStatus.Builder}.
- *
- * @see ModuleInstanceStatus
- *
  * @author Patrick Peralta
+ * @see ModuleInstanceStatus
  */
 public class ModuleStatus {
-
-	/**
-	 * Module deployment states. Unless indicated, these states
-	 * may represent the state of an individual module deployment
-	 * or the aggregate state of all module instances for a given
-	 * module.
-	 */
-	public enum State {
-
-		/**
-		 * The module is being deployed. If there are multiple modules,
-		 * at least one module is being deployed.
-		 */
-		deploying,
-
-		/**
-		 * All modules have been deployed.
-		 */
-		deployed,
-
-		/**
-		 * The unit is known to the system, but is not currently deployed.
-		 */
-		undeployed,
-
-		/**
-		 * The module exited normally.
-		 */
-		complete,
-
-		/**
-		 * In the case of multiple modules, some have successfully deployed.
-		 * This state does not apply for individual modules.
-		 */
-		incomplete,
-
-		/**
-		 * The module has failed to deploy. If there are multiple modules,
-		 * all instances have failed deployment.
-		 */
-		failed,
-
-		/**
-		 * Module deployment state could not be calculated. This may be
-		 * caused by an error in the SPI implementation.
-		 */
-		unknown // some error occured
-	}
 
 	/**
 	 * The key of the module this status is for.
@@ -101,7 +51,6 @@ public class ModuleStatus {
 
 	/**
 	 * Construct a new {@code ModuleStatus}.
-	 *
 	 * @param moduleDeploymentId key of the module this status is for
 	 */
 	protected ModuleStatus(ModuleDeploymentId moduleDeploymentId) {
@@ -120,31 +69,19 @@ public class ModuleStatus {
 	 * Return the deployment state for the the module. If the descriptor
 	 * indicates multiple instances, this state represents an aggregate
 	 * of all individual instances.
-	 *
 	 * @return deployment state for the module
 	 */
-	public State getState() {
-		Set<State> instanceStates = new HashSet<State>();
+	public DeploymentState getState() {
+		Set<DeploymentState> instanceStates = new HashSet<DeploymentState>();
 		for (Map.Entry<String, ModuleInstanceStatus> entry : instances.entrySet()) {
 			instanceStates.add(entry.getValue().getState());
 		}
-		State state = State.unknown;
-		if (instanceStates.size() == 1 && instanceStates.contains(State.deployed)) {
-			state = State.deployed;
-		}
-		if (instanceStates.contains(State.deploying)) {
-			state = State.deploying;
-		}
-		if (instanceStates.contains(State.failed)) {
-			state = (instanceStates.size() == 1 ? State.failed : State.incomplete);
-		}
-		return state;
+		return DeploymentState.reduce(instanceStates);
 	}
 
 	/**
 	 * Return a map of {@code ModuleInstanceStatus} keyed by a unique identifier
 	 * for each module deployment instance.
-	 *
 	 * @return map of {@code ModuleInstanceStatus}
 	 */
 	public Map<String, ModuleInstanceStatus> getInstances() {
@@ -157,9 +94,7 @@ public class ModuleStatus {
 
 	/**
 	 * Return a {@code Builder} for {@code ModuleStatus}.
-	 *
 	 * @param key of the module this status is for
-	 *
 	 * @return {@code Builder} for {@code ModuleStatus}
 	 */
 	public static Builder of(ModuleDeploymentId key) {
@@ -179,9 +114,7 @@ public class ModuleStatus {
 		 * Add an instance of {@code ModuleInstanceStatus} to build
 		 * the status for the module. This will
 		 * be invoked once per individual module instance.
-		 *
 		 * @param instance status of individual module deployment
-		 *
 		 * @return this {@code Builder}
 		 */
 		public Builder with(ModuleInstanceStatus instance) {
@@ -193,7 +126,6 @@ public class ModuleStatus {
 		 * Return a new instance of {@code ModuleStatus} based on
 		 * the provided individual module instances via
 		 * {@link #with(ModuleInstanceStatus)}.
-		 *
 		 * @return new instance of {@code ModuleStatus}
 		 */
 		public ModuleStatus build() {
