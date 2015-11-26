@@ -22,15 +22,17 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.springframework.boot.configurationmetadata.ConfigurationMetadataGroup;
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
-import org.springframework.cloud.dataflow.core.ModuleDefinition;
+import org.springframework.boot.configurationmetadata.ConfigurationMetadataRepository;
+import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistration;
+import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistry;
 import org.springframework.cloud.dataflow.core.ArtifactType;
+import org.springframework.cloud.dataflow.core.ModuleDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.dsl.CheckPointedParseException;
 import org.springframework.cloud.dataflow.core.dsl.Token;
 import org.springframework.cloud.dataflow.core.dsl.TokenKind;
-import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistration;
-import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistry;
 import org.springframework.cloud.stream.configuration.metadata.ModuleConfigurationMetadataResolver;
 import org.springframework.cloud.stream.module.resolver.ModuleResolver;
 import org.springframework.core.io.Resource;
@@ -38,7 +40,6 @@ import org.springframework.core.io.Resource;
 /**
  * Provides completions for the case where the user has started to type a
  * module configuration property name but it is not typed in full yet.
- *
  * @author Eric Bottard
  */
 public class UnfinishedConfigurationPropertyNameRecoveryStrategy
@@ -51,8 +52,8 @@ public class UnfinishedConfigurationPropertyNameRecoveryStrategy
 	private final ModuleConfigurationMetadataResolver moduleConfigurationMetadataResolver;
 
 	UnfinishedConfigurationPropertyNameRecoveryStrategy(ArtifactRegistry artifactRegistry,
-			ModuleResolver moduleResolver, ModuleConfigurationMetadataResolver moduleConfigurationMetadataResolver) {
-		super(CheckPointedParseException.class, "file --foo", "file | bar --quick");
+	                                                    ModuleResolver moduleResolver, ModuleConfigurationMetadataResolver moduleConfigurationMetadataResolver) {
+		super(CheckPointedParseException.class, "file --foo", "file | bar --quick", "file --foo.", "file | bar --quick.");
 		this.artifactRegistry = artifactRegistry;
 		this.moduleResolver = moduleResolver;
 		this.moduleConfigurationMetadataResolver = moduleConfigurationMetadataResolver;
@@ -60,7 +61,7 @@ public class UnfinishedConfigurationPropertyNameRecoveryStrategy
 
 	@Override
 	public void addProposals(String dsl, CheckPointedParseException exception,
-			int detailLevel, List<CompletionProposal> collector) {
+	                         int detailLevel, List<CompletionProposal> collector) {
 
 		String safe = exception.getExpressionStringUntilCheckpoint();
 
@@ -79,7 +80,7 @@ public class UnfinishedConfigurationPropertyNameRecoveryStrategy
 				builder.append(t.getKind().getTokenChars());
 			}
 		}
-		String prefix = builder.toString();
+		String buffer = builder.toString();
 
 		StreamDefinition streamDefinition = new StreamDefinition("__dummy", safe);
 		ModuleDefinition lastModule = streamDefinition.getDeploymentOrderIterator().next();
@@ -103,10 +104,28 @@ public class UnfinishedConfigurationPropertyNameRecoveryStrategy
 
 		CompletionProposal.Factory proposals = expanding(safe);
 
-		for (ConfigurationMetadataProperty property : moduleConfigurationMetadataResolver.listProperties(jarFile)) {
-			if (!alreadyPresentOptions.contains(property.getId()) && property.getId().startsWith(prefix)) {
-				collector.add(proposals.withSeparateTokens("--" + property.getId()
-						+ "=", property.getShortDescription()));
+		Set<String> prefixes = new HashSet<>();
+		for (ConfigurationMetadataGroup group : moduleConfigurationMetadataResolver.listPropertyGroups(jarFile)) {
+			String groupId = ConfigurationMetadataRepository.ROOT_GROUP.equals(group.getId()) ? "" : group.getId();
+			int lastDot = buffer.lastIndexOf('.');
+			String bufferWithoutEndingDot = lastDot > 0 ? buffer.substring(0, lastDot) : "";
+			if (bufferWithoutEndingDot.equals(groupId)) {
+				// User has typed in the group id, complete with property names
+				for (ConfigurationMetadataProperty property : group.getProperties().values()) {
+					if (!alreadyPresentOptions.contains(property.getId()) && property.getId().startsWith(buffer)) {
+						collector.add(proposals.withSeparateTokens("--" + property.getId()
+								+ "=", property.getShortDescription()));
+					}
+				}
+			}
+			else if (groupId.startsWith(buffer)) {
+				// User has typed in a substring of the the group id, complete till the next dot
+				int dot = groupId.indexOf('.', buffer.length());
+				String prefix = dot > 0 ? groupId.substring(0, dot) : groupId;
+				if (!prefixes.contains(prefix)) {
+					prefixes.add(prefix);
+					collector.add(proposals.withSeparateTokens("--" + prefix + ".", "Properties starting with '" + prefix + ".'"));
+				}
 			}
 		}
 	}
