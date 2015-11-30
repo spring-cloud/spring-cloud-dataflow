@@ -43,7 +43,7 @@ mvn clean package
 3\. launch the admin:
 
 ```
-$ java -jar spring-cloud-dataflow-admin/target/spring-cloud-dataflow-admin-1.0.0.BUILD-SNAPSHOT.jar
+$ java -jar spring-cloud-dataflow-admin-local/target/spring-cloud-dataflow-admin-local-1.0.0.BUILD-SNAPSHOT.jar
 ```
 
 4\. launch the shell:
