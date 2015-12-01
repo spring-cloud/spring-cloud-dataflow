@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.cloud.dataflow.admin.config.AdminProperties;
+import org.springframework.util.StringUtils;
 
 /**
  * @author Ilayaperumal Gopinathan
@@ -37,7 +38,8 @@ public class AdminApplicationUtils {
 			properties.put("localRepository", adminProperties.getLocalRepository());
 		}
 		if (adminProperties.getRemoteRepositories() != null) {
-			properties.put("remoteRepositories", adminProperties.getRemoteRepositories());
+			properties.put("remoteRepositories", StringUtils.arrayToCommaDelimitedString(
+					adminProperties.getRemoteRepositories()));
 		}
 		if (adminProperties.getOffline() != null) {
 			properties.put("offline", adminProperties.getOffline());

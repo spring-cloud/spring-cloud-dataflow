@@ -33,18 +33,18 @@ public class AdminProperties {
 	/**
 	 * Location of comma separated remote maven repositories from which modules will be downloaded, if not available locally.
 	 */
-	private String remoteRepositories;
+	private String[] remoteRepositories;
 
 	/**
 	 * Whether the resolver should operate in offline mode. true to set to offline mode.
 	 */
 	private String offline;
 
-	public void setRemoteRepositories(String remoteRepositories) {
+	public void setRemoteRepositories(String[] remoteRepositories) {
 		this.remoteRepositories = remoteRepositories;
 	}
 
-	public String getRemoteRepositories() {
+	public String[] getRemoteRepositories() {
 		return remoteRepositories;
 	}
 	public void setLocalRepository(String localRepository) {
