@@ -112,14 +112,10 @@ public class ModuleDeploymentId implements Serializable {
 	 *
 	 * @param id id containing the fields for a {@code ModuleDeploymentId}
 	 * @return a new {@code ModuleDeploymentId} based on the provided string
-	 * @throws NullPointerException if a null id is provided
-	 * @throws IllegalArgumentException if an invalid id is provided
+	 * @throws IllegalArgumentException if a null or an invalid id is provided
 	 */
 	public static ModuleDeploymentId parse(String id) {
-		if (id == null) {
-			throw new NullPointerException("id == null");
-		}
-
+		Assert.notNull(id, "id == null");
 		String[] fields = id.split("\\.");
 		if (fields.length != 2) {
 			throw new IllegalArgumentException(String.format("invalid format for id '%s'", id));
