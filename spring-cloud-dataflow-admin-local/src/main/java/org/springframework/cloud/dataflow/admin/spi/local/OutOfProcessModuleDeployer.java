@@ -49,7 +49,6 @@ import org.springframework.web.client.RestTemplate;
 /**
  * A ModuleDeployer implementation that spins off a new JVM process per
  * module instance.
- *
  * @author Eric Bottard
  */
 public class OutOfProcessModuleDeployer implements ModuleDeployer {
@@ -84,27 +83,31 @@ public class OutOfProcessModuleDeployer implements ModuleDeployer {
 		args.put("endpoints.jmx.unique-names", "true");
 
 
-		for (int i = 0; i < request.getCount(); i++) {
-			int port = SocketUtils.findAvailableTcpPort(DEFAULT_SERVER_PORT);
-			args.put(SERVER_PORT_KEY, String.valueOf(port));
+		try {
+			Path workDir = Files.createTempDirectory(properties.getWorkingDirectoriesRoot(), moduleDeploymentId.toString() + "-");
+			if (properties.isDeleteFilesOnExit()) {
+				workDir.toFile().deleteOnExit();
+			}
+			for (int i = 0; i < request.getCount(); i++) {
+				int port = SocketUtils.findAvailableTcpPort(DEFAULT_SERVER_PORT);
+				args.put(SERVER_PORT_KEY, String.valueOf(port));
 
-			ProcessBuilder builder = new ProcessBuilder(properties.getJavaCmd(), "-jar", moduleLauncherPath);
-			builder.environment().clear();
-			builder.environment().putAll(args);
+				ProcessBuilder builder = new ProcessBuilder(properties.getJavaCmd(), "-jar", moduleLauncherPath);
+				builder.environment().clear();
+				builder.environment().putAll(args);
 
-			try {
-				Path workDir = Files.createTempDirectory(properties.getWorkingDirectoriesRoot(), moduleDeploymentId.toString() + "-" + i + "-");
+				Instance instance = new Instance(moduleDeploymentId, i, builder, workDir);
+				processes.add(instance);
 				if (properties.isDeleteFilesOnExit()) {
-					workDir.toFile().deleteOnExit();
+					instance.stdout.deleteOnExit();
+					instance.stderr.deleteOnExit();
 				}
-
-				processes.add(new Instance(moduleDeploymentId, i, builder, workDir));
 				logger.info("deploying module {} instance {}\n   Logs will be in {}", module, i, workDir);
-			}
-			catch (IOException e) {
-				throw new RuntimeException("Exception trying to deploy " + request, e);
-			}
 
+			}
+		}
+		catch (IOException e) {
+			throw new RuntimeException("Exception trying to deploy " + request, e);
 		}
 
 
@@ -135,12 +138,11 @@ public class OutOfProcessModuleDeployer implements ModuleDeployer {
 	@Override
 	public ModuleStatus status(ModuleDeploymentId id) {
 		List<Instance> instances = running.get(id);
-		if (instances == null) {
-			return null;
-		}
 		ModuleStatus.Builder builder = ModuleStatus.of(id);
-		for (Instance instance : instances) {
-			builder.with(instance);
+		if (instances != null) {
+			for (Instance instance : instances) {
+				builder.with(instance);
+			}
 		}
 		return builder.build();
 	}
@@ -171,6 +173,7 @@ public class OutOfProcessModuleDeployer implements ModuleDeployer {
 	}
 
 	private static class Instance implements ModuleInstanceStatus {
+
 		private final ModuleDeploymentId moduleDeploymentId;
 
 		private final int instanceNumber;
@@ -189,8 +192,8 @@ public class OutOfProcessModuleDeployer implements ModuleDeployer {
 			this.moduleDeploymentId = moduleDeploymentId;
 			this.instanceNumber = instanceNumber;
 			builder.directory(workDir.toFile());
-			builder.redirectOutput(this.stdout = Files.createTempFile(workDir, "stdout_", ".log").toFile());
-			builder.redirectError(this.stderr = Files.createTempFile(workDir, "stderr_", ".log").toFile());
+			builder.redirectOutput(this.stdout = Files.createTempFile(workDir, "stdout_" + instanceNumber + "_", ".log").toFile());
+			builder.redirectError(this.stderr = Files.createTempFile(workDir, "stderr_" + instanceNumber + "_", ".log").toFile());
 			builder.environment().put("INSTANCE_INDEX", Integer.toString(instanceNumber));
 			this.process = builder.start();
 			this.workDir = workDir.toFile();
