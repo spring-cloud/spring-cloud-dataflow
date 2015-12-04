@@ -21,7 +21,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.Inet4Address;
 import java.net.URL;
-import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -92,9 +91,8 @@ public class OutOfProcessModuleDeployer implements ModuleDeployer {
 
 
 		try {
-			Path workDir = Files.createDirectory(
-					FileSystems.getDefault().getPath(logPathRoot.toFile().getAbsolutePath(),
-							moduleDeploymentId.toString()));
+			Path workDir = Files.createDirectory(Paths.get(logPathRoot.toFile().getAbsolutePath(),
+					moduleDeploymentId.toString()));
 			if (properties.isDeleteFilesOnExit()) {
 				workDir.toFile().deleteOnExit();
 			}
