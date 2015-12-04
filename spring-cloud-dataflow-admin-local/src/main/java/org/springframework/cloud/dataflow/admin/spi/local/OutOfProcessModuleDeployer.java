@@ -23,13 +23,16 @@ import java.net.Inet4Address;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,12 +59,16 @@ public class OutOfProcessModuleDeployer implements ModuleDeployer {
 
 	private String moduleLauncherPath;
 
+	private Path logPathRoot;
+
 	private static final Logger logger = LoggerFactory.getLogger(OutOfProcessModuleDeployer.class);
 
-	private Map<ModuleDeploymentId, List<Instance>> running = new HashMap<>();
+	private Map<ModuleDeploymentId, List<Instance>> running = new ConcurrentHashMap<>();
 
 	@Autowired
 	private OutOfProcessModuleDeployerProperties properties;
+
+	private final RestTemplate restTemplate = new RestTemplate();
 
 	@Override
 	public ModuleDeploymentId deploy(ModuleDeploymentRequest request) {
@@ -85,7 +92,8 @@ public class OutOfProcessModuleDeployer implements ModuleDeployer {
 
 
 		try {
-			Path workDir = Files.createTempDirectory(properties.getWorkingDirectoriesRoot(), moduleDeploymentId.toString() + "-");
+			Path workDir = Files.createDirectory(Paths.get(logPathRoot.toFile().getAbsolutePath(),
+					moduleDeploymentId.toString()));
 			if (properties.isDeleteFilesOnExit()) {
 				workDir.toFile().deleteOnExit();
 			}
@@ -119,20 +127,22 @@ public class OutOfProcessModuleDeployer implements ModuleDeployer {
 	public void undeploy(ModuleDeploymentId id) {
 		List<Instance> processes = running.get(id);
 		if (processes != null) {
-			RestTemplate restTemplate = new RestTemplate();
 			for (Instance instance : processes) {
-				if (!isAlive(instance.process)) {
-					continue;
-				}
-				try {
-					restTemplate.postForObject(instance.moduleUrl + "/shutdown", null, String.class);
-					instance.process.waitFor();
-				}
-				catch (InterruptedException e) {
-					instance.process.destroy();
+				if (isAlive(instance.process)) {
+					shutdownAndWait(instance);
 				}
 			}
 			running.remove(id);
+		}
+	}
+
+	private void shutdownAndWait(Instance instance) {
+		try {
+			restTemplate.postForObject(instance.moduleUrl + "/shutdown", null, String.class);
+			instance.process.waitFor();
+		}
+		catch (InterruptedException e) {
+			instance.process.destroy();
 		}
 	}
 
@@ -171,6 +181,14 @@ public class OutOfProcessModuleDeployer implements ModuleDeployer {
 		launcherFile.deleteOnExit();
 		FileCopyUtils.copy(new ClassPathResource("spring-cloud-stream-module-launcher.jar").getInputStream(), new FileOutputStream(launcherFile));
 		this.moduleLauncherPath = launcherFile.getAbsolutePath();
+		this.logPathRoot = Files.createTempDirectory(properties.getWorkingDirectoriesRoot(), "spring-cloud-data-flow-");
+	}
+
+	@PreDestroy
+	public void shutdown() throws Exception {
+		for (ModuleDeploymentId moduleDeploymentId : running.keySet()) {
+			undeploy(moduleDeploymentId);
+		}
 	}
 
 	private static class Instance implements ModuleInstanceStatus {
@@ -193,8 +211,11 @@ public class OutOfProcessModuleDeployer implements ModuleDeployer {
 			this.moduleDeploymentId = moduleDeploymentId;
 			this.instanceNumber = instanceNumber;
 			builder.directory(workDir.toFile());
-			builder.redirectOutput(this.stdout = Files.createTempFile(workDir, "stdout_" + instanceNumber + "_", ".log").toFile());
-			builder.redirectError(this.stderr = Files.createTempFile(workDir, "stderr_" + instanceNumber + "_", ".log").toFile());
+			String workDirPath = workDir.toFile().getAbsolutePath();
+			this.stdout = Files.createFile(Paths.get(workDirPath, "stdout_" + instanceNumber + ".log")).toFile();
+			this.stderr = Files.createFile(Paths.get(workDirPath, "stderr_" + instanceNumber + ".log")).toFile();
+			builder.redirectOutput(this.stdout);
+			builder.redirectError(this.stderr);
 			builder.environment().put("INSTANCE_INDEX", Integer.toString(instanceNumber));
 			this.process = builder.start();
 			this.workDir = workDir.toFile();
