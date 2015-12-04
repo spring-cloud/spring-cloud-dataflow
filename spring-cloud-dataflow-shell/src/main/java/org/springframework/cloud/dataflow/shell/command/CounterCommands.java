@@ -28,7 +28,7 @@ import org.springframework.shell.core.CommandMarker;
 import org.springframework.shell.core.annotation.CliAvailabilityIndicator;
 import org.springframework.shell.core.annotation.CliCommand;
 import org.springframework.shell.core.annotation.CliOption;
-import org.springframework.shell.support.table.Table;
+import org.springframework.shell.table.Table;
 import org.springframework.stereotype.Component;
 
 /**

@@ -21,7 +21,6 @@ import static org.springframework.shell.table.BorderStyle.fancy_light;
 import static org.springframework.shell.table.BorderStyle.fancy_light_quadruple_dash;
 import static org.springframework.shell.table.CellMatchers.column;
 import static org.springframework.shell.table.CellMatchers.ofType;
-import static org.springframework.shell.table.CellMatchers.row;
 import static org.springframework.shell.table.SimpleHorizontalAligner.center;
 import static org.springframework.shell.table.SimpleVerticalAligner.middle;
 
@@ -41,7 +40,6 @@ import org.springframework.shell.core.CommandMarker;
 import org.springframework.shell.core.annotation.CliAvailabilityIndicator;
 import org.springframework.shell.core.annotation.CliCommand;
 import org.springframework.shell.core.annotation.CliOption;
-import org.springframework.shell.table.BorderStyle;
 import org.springframework.shell.table.Table;
 import org.springframework.shell.table.TableBuilder;
 import org.springframework.shell.table.TableModel;
@@ -128,12 +126,10 @@ public class RuntimeCommands implements CommandMarker {
 
 		TableModel model = modelBuilder.build();
 		final TableBuilder builder = new TableBuilder(model);
-		builder.addHeaderBorder(BorderStyle.fancy_double)
-				.addInnerBorder(fancy_light)
-				.on(column(0)).addAligner(middle)
+		DataFlowTables.applyStyle(builder);
+		builder.on(column(0)).addAligner(middle)
 				.on(column(1)).addAligner(middle)
 				.on(column(1)).addAligner(center)
-				.on(row(0)).addAligner(center)
 				// This will match the "number of instances" cells only
 				.on(ofType(Integer.class)).addAligner(center);
 

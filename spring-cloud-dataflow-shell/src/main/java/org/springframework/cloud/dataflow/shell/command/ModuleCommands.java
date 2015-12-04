@@ -16,6 +16,8 @@
 
 package org.springframework.cloud.dataflow.shell.command;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,16 +32,18 @@ import org.springframework.shell.core.CommandMarker;
 import org.springframework.shell.core.annotation.CliAvailabilityIndicator;
 import org.springframework.shell.core.annotation.CliCommand;
 import org.springframework.shell.core.annotation.CliOption;
-import org.springframework.shell.support.table.Table;
-import org.springframework.shell.support.table.TableHeader;
-import org.springframework.shell.support.table.TableRow;
+import org.springframework.shell.table.AbsoluteWidthSizeConstraints;
+import org.springframework.shell.table.CellMatchers;
+import org.springframework.shell.table.Table;
+import org.springframework.shell.table.TableBuilder;
+import org.springframework.shell.table.TableModel;
+import org.springframework.shell.table.TableModelBuilder;
 import org.springframework.stereotype.Component;
 
 
 /**
  * Commands for working with modules. Allows retrieval of information about
  * available modules, as well as creating and removing module registrations.
- *
  * @author Glenn Renfro
  * @author Eric Bottard
  * @author Florent Biville
@@ -67,7 +71,7 @@ public class ModuleCommands implements CommandMarker {
 	}
 
 	@CliCommand(value = MODULE_INFO, help = "Get information about a module")
-	public String info(
+	public List<Object> info(
 			@CliOption(mandatory = true,
 					key = {"", "name"},
 					help = "name of the module to query")
@@ -84,38 +88,37 @@ public class ModuleCommands implements CommandMarker {
 		QualifiedModuleName module = processArgs(name, type);
 		DetailedModuleRegistrationResource info = moduleOperations().info(module.name, module.type);
 		List<ConfigurationMetadataProperty> options = info.getOptions();
-		StringBuilder result = new StringBuilder();
-		result.append("Information about ")
-				.append(module.type.name())
-				.append(" module '")
-				.append(module.name)
-				.append("':\n\n");
+		List<Object> result = new ArrayList<Object>();
+		result.add(String.format("Information about %s module '%s':", module.type, module.name));
 
-		result.append("Maven coordinates: ").append(info.getCoordinates()).append("\n\n");
+		result.add(String.format("Maven coordinates: %s", info.getCoordinates()));
 
 		if (info.getShortDescription() != null) {
-			result.append(info.getShortDescription()).append("\n\n");
+			result.add(info.getShortDescription());
 		}
 		if (options == null) {
-			result.append("Module options metadata is not available");
+			result.add("Module options metadata is not available");
 		}
 		else {
-			Table table = new Table()
-					.addHeader(1, new TableHeader("Option Name"))
-					.addHeader(2, new TableHeader("Description"))
-					.addHeader(3, new TableHeader("Default"))
-					.addHeader(4, new TableHeader("Type"));
-			for (ConfigurationMetadataProperty o : options) {
-				final TableRow row = new TableRow();
-				row.addValue(1, o.getId())
-						.addValue(2, o.getDescription() == null ? "<unknown>" : o.getDescription())
-						.addValue(3, prettyPrintDefaultValue(o))
-						.addValue(4, o.getType() == null ? "<unknown>" : o.getType());
-				table.getRows().add(row);
+			TableModelBuilder<Object> modelBuidler = new TableModelBuilder<>();
+			modelBuidler.addRow()
+					.addValue("Option Name")
+					.addValue("Description")
+					.addValue("Default")
+					.addValue("Type");
+			for (ConfigurationMetadataProperty option : options) {
+				modelBuidler.addRow()
+						.addValue(option.getId())
+						.addValue(option.getDescription() == null ? "<unknown>" : option.getDescription())
+						.addValue(prettyPrintDefaultValue(option))
+						.addValue(option.getType() == null ? "<unknown>" : option.getType());
 			}
-			result.append(table.toString());
+			TableBuilder builder = DataFlowTables.applyStyle(new TableBuilder(modelBuidler.build()))
+					.on(CellMatchers.table()).addSizer(new AbsoluteWidthSizeConstraints(30))
+					.and();
+			result.add(builder.build());
 		}
-		return result.toString();
+		return result;
 	}
 
 	@CliCommand(value = REGISTER_MODULE, help = "Register a new module")
@@ -161,7 +164,44 @@ public class ModuleCommands implements CommandMarker {
 	@CliCommand(value = LIST_MODULES, help = "List all modules")
 	public Table list() {
 		PagedResources<ModuleRegistrationResource> modules = moduleOperations().list();
-		return new ModuleList(modules).renderByType();
+		final LinkedHashMap<String, List<String>> mappings = new LinkedHashMap<>();
+		for (ArtifactType type : ArtifactType.values()) {
+			mappings.put(type.name(), new ArrayList<String>());
+		}
+		int max = 0;
+		for (ModuleRegistrationResource module : modules) {
+			List<String> column = mappings.get(module.getType());
+			column.add(module.getName());
+			max = Math.max(max, column.size());
+		}
+		final List<String> keys = new ArrayList<>(mappings.keySet());
+		final int rows = max + 1;
+		final TableModel model = new TableModel() {
+
+			@Override
+			public int getRowCount() {
+				return rows;
+			}
+
+			@Override
+			public int getColumnCount() {
+				return keys.size();
+			}
+
+			@Override
+			public Object getValue(int row, int column) {
+				String key = keys.get(column);
+				if (row == 0) {
+					return key;
+				}
+				if (mappings.get(key).size() > row) {
+					return mappings.get(key).get(row);
+				} else {
+					return null;
+				}
+			}
+		};
+		return DataFlowTables.applyStyle(new TableBuilder(model)).build();
 	}
 
 	/**
@@ -187,7 +227,6 @@ public class ModuleCommands implements CommandMarker {
 	 * If {@code type} is {@code null}, the module type may be obtained
 	 * from the module name if the module name is in the format
 	 * {@code name:type}.
-	 *
 	 * @param name module name
 	 * @param type module type; may be {@code null}
 	 * @return {@code QualifiedModuleName} for the provided arguments
