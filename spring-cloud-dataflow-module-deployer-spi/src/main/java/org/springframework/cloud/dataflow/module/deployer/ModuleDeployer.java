@@ -34,7 +34,11 @@ public interface ModuleDeployer {
 
 	public static final String SERVER_PORT_KEY = "server.port";
 
+	public static final String MANAGEMENT_PORT_KEY = "management.port";
+
 	public static final int DEFAULT_SERVER_PORT = 8080;
+
+	public static final int DEFAULT_MANAGEMENT_PORT = 8080;
 
 	public static final String JMX_DEFAULT_DOMAIN_KEY  = "spring.jmx.default-domain";
 
