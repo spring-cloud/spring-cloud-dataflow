@@ -1,4 +1,4 @@
-# spring-cloud-dataflow
+# spring-cloud-dataflow [![Build Status](http://build.spring.io/plugins/servlet/buildStatusImage/SCD-BMASTER)](https://build.spring.io/browse/SCD-BMASTER) [![Stories Ready](https://badge.waffle.io/spring-cloud/spring-cloud-dataflow.svg?label=ready&title=Ready)](http://waffle.io/spring-cloud/spring-cloud-dataflow) [![Stories in Progress](https://badge.waffle.io/spring-cloud/spring-cloud-dataflow.svg?label=In%20Progress&title=In%20Progress)](http://waffle.io/spring-cloud/spring-cloud-dataflow) 
 
 The Spring Cloud Data Flow project provides orchestration for data microservices, including
 both [stream](https://github.com/spring-cloud/spring-cloud-stream) and
