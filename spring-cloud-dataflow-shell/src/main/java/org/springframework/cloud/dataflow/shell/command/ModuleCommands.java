@@ -61,9 +61,12 @@ public class ModuleCommands implements CommandMarker {
 
 	private static final String REGISTER_MODULE = "module register";
 
-	@Autowired
 	private DataFlowShell dataFlowShell;
 
+	@Autowired
+	public void setDataFlowShell(DataFlowShell dataFlowShell) {
+		this.dataFlowShell = dataFlowShell;
+	}
 
 	@CliAvailabilityIndicator({LIST_MODULES, MODULE_INFO, UNREGISTER_MODULE, REGISTER_MODULE})
 	public boolean available() {
@@ -194,8 +197,9 @@ public class ModuleCommands implements CommandMarker {
 				if (row == 0) {
 					return key;
 				}
-				if (mappings.get(key).size() > row) {
-					return mappings.get(key).get(row);
+				int currentRow = row - 1;
+				if (mappings.get(key).size() > currentRow) {
+					return mappings.get(key).get(currentRow);
 				} else {
 					return null;
 				}
