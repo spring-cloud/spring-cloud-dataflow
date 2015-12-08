@@ -17,7 +17,8 @@
 package org.springframework.cloud.dataflow.admin.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.env.Environment;
+import org.springframework.boot.autoconfigure.security.SecurityProperties;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -31,10 +32,11 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/security/info")
+@EnableConfigurationProperties(SecurityProperties.class)
 public class SecurityController {
 
 	@Autowired
-	private Environment environment;
+	SecurityProperties securityProperties;
 
 	/**
 	 * Return security information.
@@ -43,7 +45,7 @@ public class SecurityController {
 	@ResponseStatus(HttpStatus.OK)
 	public boolean getSecurityInfo() {
 		//todo: Add SecurityResource with authentication information
-		return environment.getRequiredProperty("security.basic.enabled", boolean.class);
+		return securityProperties.getBasic().isEnabled();
 	}
 
 }
