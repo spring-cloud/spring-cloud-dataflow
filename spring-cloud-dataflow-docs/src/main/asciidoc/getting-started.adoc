@@ -50,21 +50,21 @@ Build the project:
 1. download the Spring Cloud Data Flow Admin and Shell apps:
 
 ```
-wget http://repo.spring.io/milestone/org/springframework/cloud/spring-cloud-dataflow-admin/1.0.0.M1/spring-cloud-dataflow-admin-1.0.0.M1.jar
-wget http://repo.spring.io/milestone/org/springframework/cloud/spring-cloud-dataflow-shell/1.0.0.M1/spring-cloud-dataflow-shell-1.0.0.M1.jar
+wget http://repo.spring.io/milestone/org/springframework/cloud/spring-cloud-dataflow-admin/1.0.0.M2/spring-cloud-dataflow-admin-local-1.0.0.M2.jar
+wget http://repo.spring.io/milestone/org/springframework/cloud/spring-cloud-dataflow-shell/1.0.0.M2/spring-cloud-dataflow-shell-1.0.0.M2.jar
 ```
 [start=2]
 2. launch the admin:
 
 ```
-$ java -jar spring-cloud-dataflow-admin-1.0.0.M1.jar
+$ java -jar spring-cloud-dataflow-admin-local-1.0.0.M2.jar
 ```
 
 [start=3]
 3. launch the shell:
 
 ```
-$ java -jar spring-cloud-dataflow-shell-1.0.0.M1.jar
+$ java -jar spring-cloud-dataflow-shell-1.0.0.M2.jar
 ```
 
 thus far, only the following commands are supported in the shell when running singlenode:
@@ -73,51 +73,17 @@ thus far, only the following commands are supported in the shell when running si
 * `stream create`
 * `stream deploy`
 
-=== Deploying on Lattice
-
-[start=1]
-1. start Redis on Lattice (running as root):
-
-```
-ltc create redis redis -r
-```
-
-[start=2]
-2. launch the admin, with a mapping for port 9393 and extra memory (the default is 128MB):
-
-```
-ltc create admin springcloud/dataflow-admin -p 9393 -m 512
-```
-
-[start=3]
-3. launching the shell is the same as above, but once running must be
-configured to point to the admin that is running on Lattice:
-
-```
-server-unknown:>admin config server http://admin.192.168.11.11.xip.io
-Successfully targeted http://admin.192.168.11.11.xip.io
-dataflow:>
-```
-
-all stream commands are supported in the shell when running on Lattice:
-
-* `stream list`
-* `stream create`
-* `stream deploy`
-* `stream undeploy`
-* `stream all undeploy`
-* `stream destroy`
-* `stream all destroy`
-
 === Deploying on Cloud Foundry
 
-Spring Cloud Data Flow can be used to deploy modules in a Cloud Foundry environment. When doing so, the [Admin](https://github.com/spring-cloud/spring-cloud-dataflow/tree/master/spring-cloud-dataflow-admin) application can either run itself on Cloud Foundry, or on another installation (e.g. a simple laptop).
+NOTE: The Cloud Foundry SPI implementation is a separate link:https://github.com/spring-cloud/spring-cloud-dataflow-admin-cloudfoundry[project]. 
 
-The required configuration amounts to the same in either case, and is merely related to providing credentials to the Cloud Foundry instance so that the admin can spawn applications itself. Any Spring Boot compatible configuration mechanism can be used (passing program arguments, editing configuration files before building the application, using [Spring Cloud Config](https://github.com/spring-cloud/spring-cloud-config), using environment variables, etc.), although some may prove more practicable than others when running _on_ Cloud Foundry.
+Spring Cloud Data Flow can be used to deploy modules in a Cloud Foundry environment. When doing so, the link:https://github.com/spring-cloud/spring-cloud-dataflow/tree/master/spring-cloud-dataflow-admin[Admin] application can either run itself on Cloud Foundry, or on another installation (e.g. a simple laptop).
+
+The required configuration amounts to the same in either case, and is merely related to providing credentials to the Cloud Foundry instance so that the admin can spawn applications itself. Any Spring Boot compatible configuration mechanism can be used (passing program arguments, editing configuration files before building the application, using link:https://github.com/spring-cloud/spring-cloud-config[Spring Cloud Config], using environment variables, etc.), although some may prove more practicable than others when running _on_ Cloud Foundry.
 
 [start=1]
 1. provision a redis service instance on Cloud Foundry.
-Use `cf marketplace` to discover which plans are available to you, depending on the details of your Cloud Foundry setup. For example when using [Pivotal Web Services](https://run.pivotal.io/):
+Use `cf marketplace` to discover which plans are available to you, depending on the details of your Cloud Foundry setup. For example when using link:https://run.pivotal.io/[Pivotal Web Services]:
 
 ```
 cf create-service rediscloud 30mb redis
@@ -127,17 +93,19 @@ cf create-service rediscloud 30mb redis
 2. download the Spring Cloud Data Flow Admin and Shell apps:
 
 ```
-wget http://repo.spring.io/milestone/org/springframework/cloud/spring-cloud-dataflow-admin/1.0.0.M1/spring-cloud-dataflow-admin-1.0.0.M1.jar
-wget http://repo.spring.io/milestone/org/springframework/cloud/spring-cloud-dataflow-shell/1.0.0.M1/spring-cloud-dataflow-shell-1.0.0.M1.jar
+wget http://repo.spring.io/milestone/org/springframework/cloud/spring-cloud-dataflow-admin/1.0.0.M2/spring-cloud-dataflow-admin-cloudfoundry-1.0.0.M2.jar
+wget http://repo.spring.io/milestone/org/springframework/cloud/spring-cloud-dataflow-shell/1.0.0.M2/spring-cloud-dataflow-shell-1.0.0.M2.jar
 ```
 
 [start=3a]
+==== Deploying Admin app on Cloud Foundry
+
 3a. push the admin application on Cloud Foundry, configure it (see below) and start it
 
 NOTE: You must use a unique name for your app; an app with the same name in the same organization will cause your deployment to fail
 
 ```
-cf push s-c-dataflow-admin --no-start -p spring-cloud-dataflow-admin-1.0.0.M1.jar
+cf push s-c-dataflow-admin --no-start -p spring-cloud-dataflow-admin-cloudfoundry-1.0.0.M2.jar
 cf bind-service s-c-dataflow-admin redis
 ```
 
@@ -165,17 +133,42 @@ cf start s-c-dataflow-admin
 Alternatively,
 
 [start=3b]
-3b. run the admin application locally, targeting your Cloud Foundry installation (see below for configuration)
+==== Running Admin app locally
+
+3b. run the admin application locally, targeting your Cloud Foundry installation
+
+First you need to configure the application either by passing in command line arguments (see below) or setting a number of environment variables.
+
+To use environment variables set the following:
 
 ```
-java -jar spring-cloud-dataflow-admin-1.0.0.M1.jar [--option1=value1] [--option2=value2] [etc.]
+export CLOUDFOUNDRY_API_ENDPOINT=https://api.run.pivotal.io
+export CLOUDFOUNDRY_ORGANIZATION={org}
+export CLOUDFOUNDRY_SPACE={space}
+export CLOUDFOUNDRY_DOMAIN=cfapps.io
+export CLOUDFOUNDRY_SERVICES=redis
+export CLOUDFOUNDRY_USERNAME={email}
+export CLOUDFOUNDRY_PASSWORD={password}
+export CLOUDFOUNDRY_SKIP_SSL_VALIDATION=false
+```
+
+You need to fill in {org}, \{space}, {email} and {password} before running these commands.
+
+NOTE: Only set 'Skip SSL Validation' to true if you're running on a Cloud Foundry instance using self-signed certs (e.g. in development). Do not use for production.
+
+Now we are ready to start the admin application:
+
+```
+java -jar spring-cloud-dataflow-admin-cloudfoundry-1.0.0.M2.jar [--option1=value1] [--option2=value2] [etc.]
 ```
 
 [start=4]
+==== Running Spring Cloud Data Flow Shell locally
+
 4. run the shell and optionally target the Admin application if not running on the same host (will typically be the case if deployed on Cloud Foundry as **3a.**)
 
 ```
-$ java -jar spring-cloud-dataflow-shell-1.0.0.M1.jar
+$ java -jar spring-cloud-dataflow-shell-1.0.0.M2.jar
 ```
 
 ```
@@ -184,7 +177,9 @@ Successfully targeted http://s-c-dataflow-admin.cfapps.io
 dataflow:>
 ```
 
-At step **3b.** the following pieces of configuration must be provided, e.g. by setting the local environment, or passing variables on the Java invocation:
+==== SpringCloud Data Flow Admin app configuration settings for Cloud Foundry
+
+The following pieces of configuration must be provided, e.g. by setting variables in the apps environment, or passing variables on the Java invocation:
 
 ```
 # Default values cited after the equal sign.
@@ -224,67 +219,85 @@ cloudfoundry.skipSslValidation=false
 
 === Deploying on YARN
 
-Currently the YARN configuration is set to use `localhost`, meaning this can only be run against a local cluster. Also, all commands shown here need to be run from the project root.
+NOTE: The Apache YARN SPI implementation is a separate link:https://github.com/spring-cloud/spring-cloud-dataflow-admin-yarn[project].
+
+For YARN deployments we run the Admin app as a standalone application and all modules used for streams and tasks will be deployed on the YARN cluster that is configured to be used.
 
 [start=1]
-1. download the Spring Cloud Data Flow YARN and Shell apps:
+1. download the Spring Cloud Data Flow YARN distribution ZIP file which includes the Admin and the Shell apps:
 
 ```
-wget http://repo.spring.io/milestone/org/springframework/cloud/spring-cloud-dataflow-yarn-appmaster/1.0.0.M1/spring-cloud-dataflow-yarn-appmaster-1.0.0.M1.jar
-wget http://repo.spring.io/milestone/org/springframework/cloud/spring-cloud-dataflow-yarn-container/1.0.0.M1/spring-cloud-dataflow-yarn-container-1.0.0.M1.jar
-wget http://repo.spring.io/milestone/org/springframework/cloud/spring-cloud-dataflow-yarn-client/1.0.0.M1/spring-cloud-dataflow-yarn-client-1.0.0.M1.jar
-wget http://repo.spring.io/milestone/org/springframework/cloud/spring-cloud-dataflow-admin/1.0.0.M1/spring-cloud-dataflow-admin-1.0.0.M1.jar
-wget http://repo.spring.io/milestone/org/springframework/cloud/spring-cloud-dataflow-shell/1.0.0.M1/spring-cloud-dataflow-shell-1.0.0.M1.jar
+wget http://repo.spring.io/snapshot/org/springframework/cloud/dist/spring-cloud-dataflow-admin-yarn-dist/1.0.0.M2/spring-cloud-dataflow-admin-yarn-dist-1.0.0.M2.zip
+```
+
+Unzip the distribution ZIP file and change to the directory containing the deployment files.
+
+```
+cd spring-cloud-dataflow-admin-yarn-1.0.0.M2
 ```
 
 [start=2]
-2. start Redis locally via `redis-server`
+2. Make sure Hadoop and Redis are running. If either one is not running on `localhost` you need to configure them in `config/servers.yml`
 
 [start=3]
-3. optionally wipe existing data on `hdfs`
+3. If this is the first time deploying make sure the user that runs the Admin app has rights to create and write to /dataflow directory. If there is an existing deployment on `hdfs` remove it using:
 
 ```
-$ hdfs dfs -rm -R /app/app
+$ hdfs dfs -rm -R /dataflow
 ```
 
 [start=4]
-4. start `spring-cloud-dataflow-admin` with `yarn` profile
+4. start the Spring Cloud Data Flow Admin app for YARN
 
 ```
-$ java -Dspring.profiles.active=yarn -jar spring-cloud-dataflow-admin-1.0.0.M1.jar
+$ ./bin/dataflow-admin-yarn
 ```
 
 [start=5]
 5. start `spring-cloud-dataflow-shell`
 
 ```
-$ java -jar spring-cloud-dataflow-shell-1.0.0.M1.jar
+$ ./bin/dataflow-shell
+```
 
-dataflow:>stream create --name "ticktock" --definition "time --fixedDelay=5|log" --deploy
+[start=6]
+6. Test the deployment
 
+Create a stream:
+
+```
+dataflow:>stream create --name "ticktock" --definition "time | hdfs --rollover=100" --deploy
+```
+
+List streams:
+
+```
 dataflow:>stream list
-  Stream Name  Stream Definition        Status
-  -----------  -----------------------  --------
-  ticktock     time --fixedDelay=5|log  deployed
-
-dataflow:>stream destroy --name "ticktock"
-Destroyed stream 'ticktock'
+  Stream Name  Stream Definition           Status
+  -----------  --------------------------  --------
+  ticktock     time | hdfs --rollover=100  deployed
 ```
 
-YARN application is pushed and started automatically during a stream deployment process. This application instance is not automatically closed which can be done from CLI:
+After some time, destroy the stream:
 
 ```
-$ java -jar spring-cloud-dataflow-yarn-client-1.0.0.M1.jar shell
-Spring YARN Cli (v2.3.0.M2)
-Hit TAB to complete. Type 'help' and hit RETURN for help, and 'exit' to quit.
-
-$ submitted
-  APPLICATION ID                  USER          NAME                            QUEUE    TYPE       STARTTIME       FINISHTIME  STATE    FINALSTATUS  ORIGINAL TRACKING URL
-  ------------------------------  ------------  ----------------------------------  -------  --------  --------------  ----------  -------  -----------  --------------------------
-  application_1439803106751_0088  jvalkealahti  spring-cloud-dataflow-yarn-app_app  default  DATAFLOW  01/09/15 09:02  N/A         RUNNING  UNDEFINED    http://192.168.122.1:48913
-
-$ shutdown -a application_1439803106751_0088
-shutdown requested
+dataflow:>stream destroy --name ticktock
 ```
 
-Properties `dataflow.yarn.app.appmaster.path` and `dataflow.yarn.app.container.path` can be used with both `spring-cloud-dataflow-admin` and `and spring-cloud-dataflow-yarn-client` to define directory for `appmaster` and `container` jars. Values for those default to `.` which then assumes all needed jars are in a same working directory.
+YARN application is pushed and started automatically during a stream deployment process. However, at the moment, this YARN application instance is not automatically stopped. This has to be done using the provided YARN CLI for now. In future releases this should be done by the Admin app when the stream is un-deployed.
+
+From the Spring Cloud Data Flow Shell use:
+
+```
+dataflow:>! bin/dataflow-yarn-cli submitted
+APPLICATION ID                  USER          
+------------------------------  ------------  
+application_1447944262603_0003  spring        
+```
+Use the application id to kill the app using the CLI:
+
+```
+dataflow:>! bin/dataflow-yarn-cli kill -a application_1447944262603_0003
+Kill request for application_1447944262603_0003 sent
+```
+
