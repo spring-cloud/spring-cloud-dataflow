@@ -35,8 +35,12 @@ import org.springframework.web.bind.annotation.RestController;
 @EnableConfigurationProperties(SecurityProperties.class)
 public class SecurityController {
 
+	private final SecurityProperties securityProperties;
+
 	@Autowired
-	SecurityProperties securityProperties;
+	public SecurityController(SecurityProperties securityProperties) {
+		this.securityProperties = securityProperties;
+	}
 
 	/**
 	 * Return security information.
