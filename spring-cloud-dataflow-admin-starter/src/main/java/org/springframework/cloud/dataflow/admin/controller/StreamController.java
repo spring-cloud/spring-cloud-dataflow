@@ -171,6 +171,17 @@ public class StreamController {
 	}
 
 	/**
+	 * Return a given stream definition resource.
+	 *
+	 * @param name the name of an existing stream definition (required)
+	 */
+	@RequestMapping(value = "/definitions/{name}", method = RequestMethod.GET)
+	@ResponseStatus(HttpStatus.OK)
+	public StreamDefinitionResource display(@PathVariable("name") String name) throws Exception {
+		return streamAssembler.toResource(repository.findOne(name));
+	}
+
+	/**
 	 * Request removal of all stream definitions.
 	 */
 	@RequestMapping(value = "/definitions", method = RequestMethod.DELETE)

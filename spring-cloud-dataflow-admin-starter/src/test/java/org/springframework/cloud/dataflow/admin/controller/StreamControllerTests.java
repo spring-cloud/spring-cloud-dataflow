@@ -27,6 +27,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.cloud.dataflow.module.DeploymentState.*;
 
@@ -306,6 +307,21 @@ public class StreamControllerTests {
 				delete("/streams/definitions/myStream").accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isOk());
 		assertEquals(0, repository.count());
+	}
+
+	@Test
+	public void testDisplaySingleStream() throws Exception {
+		repository.save(new StreamDefinition("myStream", "time | log"));
+		assertEquals(1, repository.count());
+		ModuleStatus status = mock(ModuleStatus.class);
+		when(status.getState()).thenReturn(DeploymentState.unknown);
+		when(moduleDeployer.status(ModuleDeploymentId.parse("myStream.time"))).thenReturn(status);
+		when(moduleDeployer.status(ModuleDeploymentId.parse("myStream.log"))).thenReturn(status);
+		mockMvc.perform(
+				get("/streams/definitions/myStream").accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk())
+				.andExpect(content().json("{name: \"myStream\"}"))
+				.andExpect(content().json("{dslText: \"time | log\"}"));
 	}
 
 	@Test
