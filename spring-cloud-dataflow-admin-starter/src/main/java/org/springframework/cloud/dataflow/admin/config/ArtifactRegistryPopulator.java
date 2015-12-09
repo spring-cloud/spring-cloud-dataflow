@@ -93,6 +93,7 @@ public class ArtifactRegistryPopulator {
 		populateDefault("filter", processor);
 		populateDefault("groovy-filter", processor);
 		populateDefault("groovy-transform", processor);
+		populateDefault("httpclient", processor);
 		populateDefault("transform", processor);
 		populateDefault("noop", processor);
 		populateDefault("cassandra", sink);
