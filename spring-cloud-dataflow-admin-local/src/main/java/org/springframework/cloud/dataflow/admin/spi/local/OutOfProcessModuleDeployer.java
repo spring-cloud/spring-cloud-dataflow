@@ -79,6 +79,7 @@ public class OutOfProcessModuleDeployer implements ModuleDeployer {
 		List<Instance> processes = new ArrayList<>();
 		running.put(moduleDeploymentId, processes);
 
+		boolean useDynamicPort = !request.getDefinition().getParameters().containsKey(SERVER_PORT_KEY);
 
 		HashMap<String, String> args = new HashMap<>();
 		args.put("modules", request.getCoordinates().toString());
@@ -98,14 +99,18 @@ public class OutOfProcessModuleDeployer implements ModuleDeployer {
 				workDir.toFile().deleteOnExit();
 			}
 			for (int i = 0; i < request.getCount(); i++) {
-				int port = SocketUtils.findAvailableTcpPort(DEFAULT_SERVER_PORT);
-				args.put(SERVER_PORT_KEY, String.valueOf(port));
+				int port = useDynamicPort ? SocketUtils.findAvailableTcpPort(DEFAULT_SERVER_PORT)
+						: Integer.parseInt(request.getDefinition().getParameters().get(SERVER_PORT_KEY));
+				if (useDynamicPort) {
+					args.putAll(ModuleArgumentQualifier.qualifyArgs(0,
+							Collections.singletonMap(SERVER_PORT_KEY, String.valueOf(port))));
+				}
 
 				ProcessBuilder builder = new ProcessBuilder(properties.getJavaCmd(), "-jar", moduleLauncherPath);
 				builder.environment().clear();
 				builder.environment().putAll(args);
 
-				Instance instance = new Instance(moduleDeploymentId, i, builder, workDir);
+				Instance instance = new Instance(moduleDeploymentId, i, builder, workDir, port);
 				processes.add(instance);
 				if (properties.isDeleteFilesOnExit()) {
 					instance.stdout.deleteOnExit();
@@ -207,7 +212,7 @@ public class OutOfProcessModuleDeployer implements ModuleDeployer {
 
 		private final URL moduleUrl;
 
-		private Instance(ModuleDeploymentId moduleDeploymentId, int instanceNumber, ProcessBuilder builder, Path workDir) throws IOException {
+		private Instance(ModuleDeploymentId moduleDeploymentId, int instanceNumber, ProcessBuilder builder, Path workDir, int port) throws IOException {
 			this.moduleDeploymentId = moduleDeploymentId;
 			this.instanceNumber = instanceNumber;
 			builder.directory(workDir.toFile());
@@ -219,7 +224,6 @@ public class OutOfProcessModuleDeployer implements ModuleDeployer {
 			builder.environment().put("INSTANCE_INDEX", Integer.toString(instanceNumber));
 			this.process = builder.start();
 			this.workDir = workDir.toFile();
-			int port = Integer.parseInt(builder.environment().get("server.port"));
 			moduleUrl = new URL("http", Inet4Address.getLocalHost().getHostAddress(), port, "");
 
 		}
