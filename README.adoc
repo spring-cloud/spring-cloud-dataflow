@@ -2,7 +2,7 @@
 
 The Spring Cloud Data Flow project provides orchestration for data microservices, including long lived
 https://github.com/spring-cloud/spring-cloud-stream[stream] applications and
-https://github.com/spring-cloud/spring-cloud-task short lived [task] applications.
+https://github.com/spring-cloud/spring-cloud-task short lived https://github.com/spring-cloud/spring-cloud-task[task] applications.
 
 == Components
 
@@ -17,9 +17,9 @@ The https://github.com/spring-cloud/spring-cloud-dataflow/tree/master/spring-clo
 The https://github.com/spring-cloud/spring-cloud-dataflow/tree/master/spring-cloud-dataflow-module-deployers/spring-cloud-dataflow-module-deployer-spi[Module Deployer SPI] provides the abstraction layer for deploying the modules of a given stream across a variety of runtime environments.  Current SPI implementations support Local deployment, YARN, Cloud Foundary, Mesos and Kubernetes.
 
 
-The https://github.com/spring-cloud/spring-cloud-dataflow/tree/master/spring-cloud-dataflow-admin[Admin Server] is a Spring Boot applications that provides a common REST API, UI, and an implementation of the SPI interface for the runtime environment.  For each runtime environment there is a different version of the admin server.  The github locations for these admin servers are:
+The Admin Server is a Spring Boot applications that provides a common REST API, UI, and an implementation of the SPI interface for the runtime environment.  For each runtime environment there is a different version of the admin server.  The github locations for these admin servers are:
 
-* https://github.com/spring-cloud/spring-cloud-dataflow/tree/master/spring-cloud-dataflow-module-deployers/spring-cloud-dataflow-module-deployer-local[Local]
+* https://github.com/spring-cloud/spring-cloud-dataflow/tree/master/spring-cloud-dataflow-admin-local[Local]
 * https://github.com/spring-cloud/spring-cloud-dataflow-admin-yarn[YARN]
 * https://github.com/spring-cloud/spring-cloud-dataflow-admin-cloudfoundry[Cloud Foundry]
 * https://github.com/spring-cloud/spring-cloud-dataflow-admin-mesos[Mesos]
@@ -32,5 +32,5 @@ Instructions to run the Admin Server for each runtime environments can be found 
 
 === Contributing
 
-We would love contributions.  Follow this https://github.com/spring-cloud/spring-cloud-commons#contributing[link] for more information on how to contribute.
+We love contributions.  Follow this https://github.com/spring-cloud/spring-cloud-commons#contributing[link] for more information on how to contribute.
 
