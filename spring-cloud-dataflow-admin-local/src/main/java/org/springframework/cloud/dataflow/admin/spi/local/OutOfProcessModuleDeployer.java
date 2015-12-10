@@ -90,6 +90,7 @@ public class OutOfProcessModuleDeployer implements ModuleDeployer {
 		args.put("endpoints.shutdown.enabled", "true");
 		args.put("endpoints.jmx.unique-names", "true");
 
+		boolean useDynamicPort = !args.containsKey(SERVER_PORT_KEY);
 
 		try {
 			Path workDir = Files.createDirectory(Paths.get(logPathRoot.toFile().getAbsolutePath(),
@@ -98,8 +99,10 @@ public class OutOfProcessModuleDeployer implements ModuleDeployer {
 				workDir.toFile().deleteOnExit();
 			}
 			for (int i = 0; i < request.getCount(); i++) {
-				int port = SocketUtils.findAvailableTcpPort(DEFAULT_SERVER_PORT);
-				args.put(SERVER_PORT_KEY, String.valueOf(port));
+				if (useDynamicPort) {
+					int port = SocketUtils.findAvailableTcpPort(DEFAULT_SERVER_PORT);
+					args.put(SERVER_PORT_KEY, String.valueOf(port));
+				}
 
 				ProcessBuilder builder = new ProcessBuilder(properties.getJavaCmd(), "-jar", moduleLauncherPath);
 				builder.environment().clear();
