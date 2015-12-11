@@ -19,6 +19,7 @@ package org.springframework.cloud.dataflow.admin.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.dataflow.rest.resource.CompletionProposalsResource;
 import org.springframework.cloud.dataflow.rest.resource.CounterResource;
+import org.springframework.cloud.dataflow.rest.resource.LibraryRegistrationResource;
 import org.springframework.cloud.dataflow.rest.resource.ModuleInstanceStatusResource;
 import org.springframework.cloud.dataflow.rest.resource.ModuleRegistrationResource;
 import org.springframework.cloud.dataflow.rest.resource.ModuleStatusResource;
@@ -78,6 +79,8 @@ public class AdminController {
 		resourceSupport.add(unescapeTemplateVariables(entityLinks.linkToSingleResource(CounterResource.class, "{name}").withRel("counters/counter")));
 
 		resourceSupport.add(entityLinks.linkToCollectionResource(ModuleRegistrationResource.class).withRel("modules"));
+
+		resourceSupport.add(entityLinks.linkToCollectionResource(LibraryRegistrationResource.class).withRel("libraries"));
 
 		resourceSupport.add(entityLinks.linkToCollectionResource(ModuleStatusResource.class).withRel("runtime/modules"));
 		resourceSupport.add(unescapeTemplateVariables(entityLinks.linkForSingleResource(ModuleStatusResource.class, "{moduleId}").withRel("runtime/module")));
