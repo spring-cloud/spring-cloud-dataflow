@@ -44,6 +44,7 @@ import org.springframework.stereotype.Component;
 /**
  * Commands for working with modules. Allows retrieval of information about
  * available modules, as well as creating and removing module registrations.
+ *
  * @author Glenn Renfro
  * @author Eric Bottard
  * @author Florent Biville
@@ -78,15 +79,11 @@ public class ModuleCommands implements CommandMarker {
 			@CliOption(mandatory = true,
 					key = {"", "name"},
 					help = "name of the module to query in the form of 'type:name'")
-			QualifiedModuleName module,
-			@CliOption(key = "hidden",
-					help = "whether to show 'hidden' options",
-					specifiedDefaultValue = "true",
-					unspecifiedDefaultValue = "false")
-			boolean showHidden) {
+			QualifiedModuleName module
+) {
 		DetailedModuleRegistrationResource info = moduleOperations().info(module.name, module.type);
 		List<ConfigurationMetadataProperty> options = info.getOptions();
-		List<Object> result = new ArrayList<Object>();
+		List<Object> result = new ArrayList<>();
 		result.add(String.format("Information about %s module '%s':", module.type, module.name));
 
 		result.add(String.format("Maven coordinates: %s", info.getCoordinates()));
@@ -163,7 +160,7 @@ public class ModuleCommands implements CommandMarker {
 	public Table list() {
 		PagedResources<ModuleRegistrationResource> modules = moduleOperations().list();
 		final LinkedHashMap<String, List<String>> mappings = new LinkedHashMap<>();
-		for (ArtifactType type : ArtifactType.values()) {
+		for (ArtifactType type : ArtifactType.MODULE_TYPES) {
 			mappings.put(type.name(), new ArrayList<String>());
 		}
 		int max = 0;

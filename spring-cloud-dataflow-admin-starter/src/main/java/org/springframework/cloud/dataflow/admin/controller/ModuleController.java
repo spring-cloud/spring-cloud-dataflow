@@ -23,10 +23,10 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
-import org.springframework.cloud.dataflow.core.ArtifactCoordinates;
-import org.springframework.cloud.dataflow.core.ArtifactType;
 import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistration;
 import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistry;
+import org.springframework.cloud.dataflow.core.ArtifactCoordinates;
+import org.springframework.cloud.dataflow.core.ArtifactType;
 import org.springframework.cloud.dataflow.rest.resource.DetailedModuleRegistrationResource;
 import org.springframework.cloud.dataflow.rest.resource.ModuleRegistrationResource;
 import org.springframework.cloud.stream.configuration.metadata.ModuleConfigurationMetadataResolver;
@@ -39,6 +39,7 @@ import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.mvc.ResourceAssemblerSupport;
 import org.springframework.http.HttpStatus;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -48,7 +49,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * Handles all Module related interactions.
- *
  * @author Glenn Renfro
  * @author Mark Fisher
  * @author Gunnar Hillert
@@ -87,11 +87,10 @@ public class ModuleController {
 			@RequestParam(value = "detailed", defaultValue = "false") boolean detailed) {
 
 		List<ArtifactRegistration> list = new ArrayList<>(registry.findAll());
-		if (type != null) {
-			for (Iterator<ArtifactRegistration> iterator = list.iterator(); iterator.hasNext(); ) {
-				if (iterator.next().getType() != type) {
-					iterator.remove();
-				}
+		for (Iterator<ArtifactRegistration> iterator = list.iterator(); iterator.hasNext(); ) {
+			ArtifactType artifactType = iterator.next().getType();
+			if ((type != null && artifactType != type) || artifactType == ArtifactType.library) {
+				iterator.remove();
 			}
 		}
 		Collections.sort(list);
@@ -100,9 +99,8 @@ public class ModuleController {
 
 	/**
 	 * Retrieve detailed information about a particular module.
-	 *
-	 * @param type  module type
-	 * @param name  module name
+	 * @param type module type
+	 * @param name module name
 	 * @return detailed module information
 	 */
 	@RequestMapping(value = "/{type}/{name}", method = RequestMethod.GET)
@@ -110,6 +108,7 @@ public class ModuleController {
 	public DetailedModuleRegistrationResource info(
 			@PathVariable("type") ArtifactType type,
 			@PathVariable("name") String name) {
+		Assert.isTrue(type != ArtifactType.library, "Only modules are supported by this endpoint");
 		ArtifactRegistration registration = registry.find(name, type);
 		if (registration == null) {
 			return null;
@@ -130,11 +129,10 @@ public class ModuleController {
 
 	/**
 	 * Register a module name and type with its Maven coordinates.
-	 *
-	 * @param type  module type
-	 * @param name  module name
-	 * @param coordinates  Maven coordinates for the module artifact
-	 * @param force if {@code true}, overwrites a pre-existing registration
+	 * @param type        module type
+	 * @param name        module name
+	 * @param coordinates Maven coordinates for the module artifact
+	 * @param force       if {@code true}, overwrites a pre-existing registration
 	 */
 	@RequestMapping(value = "/{type}/{name}", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
@@ -143,6 +141,7 @@ public class ModuleController {
 			@PathVariable("name") String name,
 			@RequestParam("coordinates") String coordinates,
 			@RequestParam(value = "force", defaultValue = "false") boolean force) {
+		Assert.isTrue(type != ArtifactType.library, "Only modules are supported by this endpoint");
 		if (!force && registry.find(name, type) != null) {
 			return;
 		}
@@ -151,13 +150,13 @@ public class ModuleController {
 
 	/**
 	 * Unregister a module name and type.
-	 *
 	 * @param type the module type
 	 * @param name the module name
 	 */
 	@RequestMapping(value = "/{type}/{name}", method = RequestMethod.DELETE)
 	@ResponseStatus(HttpStatus.OK)
 	public void unregister(@PathVariable("type") ArtifactType type, @PathVariable("name") String name) {
+		Assert.isTrue(type != ArtifactType.library, "Only modules are supported by this endpoint");
 		registry.delete(name, type);
 	}
 
@@ -169,6 +168,11 @@ public class ModuleController {
 
 		@Override
 		public ModuleRegistrationResource toResource(ArtifactRegistration registration) {
+			return createResourceWithId(String.format("%s/%s", registration.getType(), registration.getName()), registration);
+		}
+
+		@Override
+		protected ModuleRegistrationResource instantiateResource(ArtifactRegistration registration) {
 			return new ModuleRegistrationResource(registration.getName(),
 					registration.getType().name(), registration.getCoordinates().toString());
 		}
