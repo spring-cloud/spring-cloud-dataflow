@@ -77,18 +77,13 @@ public class ModuleCommands implements CommandMarker {
 	public List<Object> info(
 			@CliOption(mandatory = true,
 					key = {"", "name"},
-					help = "name of the module to query")
-			String name,
-			@CliOption(mandatory = false,
-					key = {"type"},
-					help = "type of the module to query")
-			ArtifactType type,
+					help = "name of the module to query in the form of 'type:name'")
+			QualifiedModuleName module,
 			@CliOption(key = "hidden",
 					help = "whether to show 'hidden' options",
 					specifiedDefaultValue = "true",
 					unspecifiedDefaultValue = "false")
 			boolean showHidden) {
-		QualifiedModuleName module = processArgs(name, type);
 		DetailedModuleRegistrationResource info = moduleOperations().info(module.name, module.type);
 		List<ConfigurationMetadataProperty> options = info.getOptions();
 		List<Object> result = new ArrayList<Object>();
@@ -252,7 +247,7 @@ public class ModuleCommands implements CommandMarker {
 	/**
 	 * Unique identifier for a module, including the name and type.
 	 */
-	private static class QualifiedModuleName {
+	public static class QualifiedModuleName {
 
 		public ArtifactType type;
 
