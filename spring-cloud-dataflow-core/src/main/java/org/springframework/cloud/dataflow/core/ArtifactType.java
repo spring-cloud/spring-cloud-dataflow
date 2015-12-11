@@ -16,6 +16,10 @@
 
 package org.springframework.cloud.dataflow.core;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+
 /**
  * Enumeration of artifact types.
  *
@@ -46,5 +50,14 @@ public enum ArtifactType {
 	/**
 	 * A supporting library to a module, either as a single (jar) maven artifact, or as a bom.
 	 */
-	library
+	library;
+
+	public static final Collection<ArtifactType> STREAM_TYPES = Arrays.asList(source, processor, sink);
+	public static final Collection<ArtifactType> TASK_TYPES = Arrays.asList(task);
+	public static final Collection<ArtifactType> LIBRARY_TYPES = Arrays.asList(library);
+	public static final Collection<ArtifactType> MODULE_TYPES = new ArrayList<>();
+	static {
+		MODULE_TYPES.addAll(STREAM_TYPES);
+		MODULE_TYPES.addAll(TASK_TYPES);
+	}
 }
