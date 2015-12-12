@@ -98,6 +98,7 @@ public class ArtifactRegistryPopulator {
 		populateDefault("noop", processor);
 		populateDefault("cassandra", sink);
 		populateDefault("counter", sink);
+		populateDefault("field-value-counter", sink);
 		populateDefault("file", sink);
 		populateDefault("ftp", sink);
 		populateDefault("gemfire", sink);
@@ -105,9 +106,9 @@ public class ArtifactRegistryPopulator {
 		populateDefault("jdbc", sink);
 		populateDefault("log", sink);
 		populateDefault("redis", sink);
-		populateDefault("websocket", sink);
 		populateDefault("throughput", sink);
 		populateDefault("timestamp", task);
+		populateDefault("websocket", sink);
 	}
 
 	/**
