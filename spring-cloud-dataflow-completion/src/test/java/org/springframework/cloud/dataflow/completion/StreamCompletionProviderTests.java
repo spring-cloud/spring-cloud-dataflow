@@ -242,6 +242,28 @@ public class StreamCompletionProviderTests {
 
 	}
 
+	/*
+	 *
+	 */
+	@Test
+	public void testCompletionStopsAtDots() {
+		assertThat(completionProvider.complete("hdfs --", 1), hasItems(
+				proposalThat(is("hdfs --directory=")),
+				proposalThat(is("hdfs --some."))
+		));
+		assertThat(completionProvider.complete("hdfs --", 1), not(hasItems(
+				proposalThat(startsWith("hdfs --some.l"))
+		)));
+		assertThat(completionProvider.complete("hdfs --some.long.prefix", 1), hasItems(
+				proposalThat(is("hdfs --some.long.prefix."))
+		));
+		assertThat(completionProvider.complete("hdfs --some.long.prefix.", 1), hasItems(
+				proposalThat(is("hdfs --some.long.prefix.option1=")),
+				proposalThat(is("hdfs --some.long.prefix.option2=")),
+				proposalThat(startsWith("hdfs --some.long.prefix.nested."))
+		));
+	}
+
 
 	private static org.hamcrest.Matcher<CompletionProposal> proposalThat(org.hamcrest.Matcher<String> matcher) {
 		return new FeatureMatcher<CompletionProposal, String>(matcher, "a proposal whose text", "text") {
