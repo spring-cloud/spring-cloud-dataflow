@@ -45,7 +45,7 @@ public class LibraryTemplate implements LibraryOperations {
 	/**
 	 * Construct a {@code LibraryTemplate} object.
 	 * @param restTemplate    template for HTTP/rest commands
-	 * @param resourceSupport HATEOS link support
+	 * @param resourceSupport HATEOAS link support
 	 */
 	public LibraryTemplate(RestTemplate restTemplate, ResourceSupport resourceSupport) {
 		this.restTemplate = restTemplate;

@@ -62,7 +62,7 @@ public class LibraryCommands implements CommandMarker {
 	public String register(
 			@CliOption(mandatory = true,
 					key = {"", "name"},
-					help = "the name for the registered library")
+					help = "the name for the library to register")
 			String name,
 			@CliOption(mandatory = true,
 					key = {"coordinates"},

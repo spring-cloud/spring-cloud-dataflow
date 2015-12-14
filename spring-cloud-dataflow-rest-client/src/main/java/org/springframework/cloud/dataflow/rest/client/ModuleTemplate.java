@@ -52,7 +52,7 @@ public class ModuleTemplate implements ModuleOperations {
 	 * Construct a {@code ModuleTemplate} object.
 	 *
 	 * @param restTemplate template for HTTP/rest commands
-	 * @param resourceSupport HATEOS link support
+	 * @param resourceSupport HATEOAS link support
 	 */
 	public ModuleTemplate(RestTemplate restTemplate, ResourceSupport resourceSupport) {
 		this.restTemplate = restTemplate;
