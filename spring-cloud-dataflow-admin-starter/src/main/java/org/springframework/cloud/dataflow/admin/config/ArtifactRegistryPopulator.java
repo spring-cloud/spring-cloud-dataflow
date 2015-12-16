@@ -23,10 +23,10 @@ import static org.springframework.cloud.dataflow.core.ArtifactType.task;
 
 import javax.annotation.PostConstruct;
 
-import org.springframework.cloud.dataflow.core.ArtifactCoordinates;
-import org.springframework.cloud.dataflow.core.ArtifactType;
 import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistration;
 import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistry;
+import org.springframework.cloud.dataflow.core.ArtifactCoordinates;
+import org.springframework.cloud.dataflow.core.ArtifactType;
 import org.springframework.util.Assert;
 
 /**
@@ -89,6 +89,7 @@ public class ArtifactRegistryPopulator {
 		populateDefault("sftp", source);
 		populateDefault("time", source);
 		populateDefault("load-generator", source);
+		populateDefault("tcp", source);
 		populateDefault("twitterstream", source);
 		populateDefault("filter", processor);
 		populateDefault("groovy-filter", processor);
