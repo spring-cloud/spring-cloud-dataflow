@@ -40,7 +40,8 @@ Sabby Anandan, Marius Bogoevici, Eric Bottard, Mark Fisher, Ilayaperumal Gopinat
 
 include::spring-cloud-dataflow-overview.adoc[]
 include::getting-started.adoc[]
-include::spring-cloud-stream-overview.adoc[]
 include::using-spring-cloud-stream-modules.adoc[]
+include::appendix.adoc[]
+
 
 // ======================================================================================
