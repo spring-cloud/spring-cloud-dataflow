@@ -16,12 +16,12 @@
 
 package org.springframework.cloud.dataflow.rest.client;
 
-import java.util.Collections;
 import java.util.Map;
 
 import org.springframework.cloud.dataflow.rest.resource.StreamDefinitionResource;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
-import org.springframework.hateoas.UriTemplate;
+import org.springframework.hateoas.Link;
+import org.springframework.hateoas.ResourceSupport;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -32,31 +32,40 @@ import org.springframework.web.client.RestTemplate;
  *
  * @author Ilayaperumal Gopinathan
  * @author Mark Fisher
+ * @author Eric Bottard
  */
 public class StreamTemplate implements StreamOperations {
 
-	private static final String DEFINITIONS_PATH = "streams/definitions";
+	private static final String DEFINITIONS_REL = "streams/definitions";
+	private static final String DEFINITION_REL = "streams/definitions/definition";
 
-	private static final String DEPLOYMENTS_PATH = "streams/deployments";
+	private static final String DEPLOYMENTS_REL = "streams/deployments";
+	private static final String DEPLOYMENT_REL = "streams/deployments/deployment";
 
 	private final RestTemplate restTemplate;
 
-	private final UriTemplate definitionsPath;
+	private final Link definitionsLink;
+	private final Link definitionLink;
 
-	private final UriTemplate deploymentsPath;
+	private final Link deploymentsLink;
+	private final Link deploymentLink;
 
-	StreamTemplate(RestTemplate restTemplate, Map<String, UriTemplate> resources) {
+	StreamTemplate(RestTemplate restTemplate, ResourceSupport resources) {
 		Assert.notNull(resources, "URI Resources can't be null");
-		Assert.notNull(resources.get(DEFINITIONS_PATH), "Definitions path is required");
-		Assert.notNull(resources.get(DEPLOYMENTS_PATH), "Deployments path is required");
+		Assert.notNull(resources.getLink(DEFINITIONS_REL), "Definitions relation is required");
+		Assert.notNull(resources.getLink(DEFINITION_REL), "Definition relation is required");
+		Assert.notNull(resources.getLink(DEPLOYMENTS_REL), "Deployments relation is required");
+		Assert.notNull(resources.getLink(DEPLOYMENT_REL), "Deployment relation is required");
 		this.restTemplate = restTemplate;
-		this.definitionsPath = resources.get(DEFINITIONS_PATH);
-		this.deploymentsPath = resources.get(DEPLOYMENTS_PATH);
+		this.definitionsLink = resources.getLink(DEFINITIONS_REL);
+		this.definitionLink = resources.getLink(DEFINITION_REL);
+		this.deploymentsLink = resources.getLink(DEPLOYMENTS_REL);
+		this.deploymentLink = resources.getLink(DEPLOYMENT_REL);
 	}
 
 	@Override
 	public StreamDefinitionResource.Page list() {
-		String uriTemplate = definitionsPath.toString();
+		String uriTemplate = definitionsLink.expand().getHref();
 		uriTemplate = uriTemplate + "?size=10000";
 		return restTemplate.getForObject(uriTemplate, StreamDefinitionResource.Page.class);
 	}
@@ -68,37 +77,37 @@ public class StreamTemplate implements StreamOperations {
 		values.add("definition", definition);
 		values.add("deploy", Boolean.toString(deploy));
 		StreamDefinitionResource stream = restTemplate.postForObject(
-				definitionsPath.expand(), values, StreamDefinitionResource.class);
+				definitionsLink.expand().getHref(), values, StreamDefinitionResource.class);
 		return stream;
 	}
 
 	@Override
 	public void deploy(String name, Map<String, String> properties) {
-		String uriTemplate = deploymentsPath.toString() + "/{name}";
+		String uri = deploymentLink.expand(name).getHref();
 		MultiValueMap<String, Object> values = new LinkedMultiValueMap<String, Object>();
 		values.add("properties", DeploymentPropertiesUtils.format(properties));
-		restTemplate.postForObject(uriTemplate, values, Object.class, name);
+		restTemplate.postForObject(uri, values, Object.class);
 	}
 
 	@Override
 	public void undeploy(String name) {
-		String uriTemplate = deploymentsPath.toString() + "/{name}";
-		restTemplate.delete(uriTemplate, name);
+		String uri = deploymentsLink.expand(name).getHref();
+		restTemplate.delete(uri);
 	}
 
 	@Override
 	public void undeployAll() {
-		restTemplate.delete(deploymentsPath.expand());
+		restTemplate.delete(deploymentsLink.expand().getHref());
 	}
 
 	@Override
 	public void destroy(String name) {
-		String uriTemplate = definitionsPath.toString() + "/{name}";
-		restTemplate.delete(uriTemplate, Collections.singletonMap("name", name));
+		String uri = definitionsLink.expand(name).getHref();
+		restTemplate.delete(uri);
 	}
 
 	@Override
 	public void destroyAll() {
-		restTemplate.delete(definitionsPath.expand());
+		restTemplate.delete(definitionsLink.expand().getHref());
 	}
 }

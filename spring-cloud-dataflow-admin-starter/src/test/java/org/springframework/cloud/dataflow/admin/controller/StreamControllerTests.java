@@ -99,17 +99,19 @@ public class StreamControllerTests {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testConstructorMissingRepository() {
-		new StreamController(null, new InMemoryArtifactRegistry(), moduleDeployer);
+		StreamDeploymentController deploymentController = new StreamDeploymentController(new InMemoryStreamDefinitionRepository(), new InMemoryArtifactRegistry(), moduleDeployer);
+		new StreamDefinitionController(null, deploymentController, moduleDeployer);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
-	public void testConstructorMissingRegistry() {
-		new StreamController(new InMemoryStreamDefinitionRepository(), null, moduleDeployer);
+	public void testConstructorMissingDeploymentController() {
+		new StreamDefinitionController(new InMemoryStreamDefinitionRepository(), null, moduleDeployer);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testConstructorMissingDeployer() {
-		new StreamController(new InMemoryStreamDefinitionRepository(), new InMemoryArtifactRegistry(), null);
+		StreamDeploymentController deploymentController = new StreamDeploymentController(new InMemoryStreamDefinitionRepository(), new InMemoryArtifactRegistry(), moduleDeployer);
+		new StreamDefinitionController(new InMemoryStreamDefinitionRepository(), deploymentController, null);
 	}
 
 	@Test
@@ -350,13 +352,13 @@ public class StreamControllerTests {
 
 	@Test
 	public void testAggregateState() {
-		assertThat(StreamController.aggregateState(EnumSet.of(deployed, failed)), is(failed));
-		assertThat(StreamController.aggregateState(EnumSet.of(unknown, failed)), is(failed));
-		assertThat(StreamController.aggregateState(EnumSet.of(deployed, failed, error)), is(error));
-		assertThat(StreamController.aggregateState(EnumSet.of(deployed, undeployed)), is(partial));
-		assertThat(StreamController.aggregateState(EnumSet.of(deployed, unknown)), is(partial));
-		assertThat(StreamController.aggregateState(EnumSet.of(undeployed, unknown)), is(partial));
-		assertThat(StreamController.aggregateState(EnumSet.of(unknown)), is(undeployed));
+		assertThat(StreamDefinitionController.aggregateState(EnumSet.of(deployed, failed)), is(failed));
+		assertThat(StreamDefinitionController.aggregateState(EnumSet.of(unknown, failed)), is(failed));
+		assertThat(StreamDefinitionController.aggregateState(EnumSet.of(deployed, failed, error)), is(error));
+		assertThat(StreamDefinitionController.aggregateState(EnumSet.of(deployed, undeployed)), is(partial));
+		assertThat(StreamDefinitionController.aggregateState(EnumSet.of(deployed, unknown)), is(partial));
+		assertThat(StreamDefinitionController.aggregateState(EnumSet.of(undeployed, unknown)), is(partial));
+		assertThat(StreamDefinitionController.aggregateState(EnumSet.of(unknown)), is(undeployed));
 	}
 
 }

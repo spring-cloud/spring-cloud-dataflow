@@ -21,7 +21,8 @@ import static org.springframework.hateoas.config.EnableHypermediaSupport.Hyperme
 
 import org.springframework.cloud.dataflow.admin.config.ArtifactRegistryPopulator;
 import org.springframework.cloud.dataflow.admin.controller.RestControllerAdvice;
-import org.springframework.cloud.dataflow.admin.controller.StreamController;
+import org.springframework.cloud.dataflow.admin.controller.StreamDefinitionController;
+import org.springframework.cloud.dataflow.admin.controller.StreamDeploymentController;
 import org.springframework.cloud.dataflow.admin.controller.TaskController;
 import org.springframework.cloud.dataflow.admin.repository.InMemoryStreamDefinitionRepository;
 import org.springframework.cloud.dataflow.admin.repository.InMemoryTaskDefinitionRepository;
@@ -54,8 +55,13 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	}
 
 	@Bean
-	public StreamController streamController(StreamDefinitionRepository repository, ArtifactRegistry registry) {
-		return new StreamController(repository, registry, processModuleDeployer());
+	public StreamDeploymentController streamDeploymentController(StreamDefinitionRepository repository, ArtifactRegistry registry) {
+		return new StreamDeploymentController(repository, registry, processModuleDeployer());
+	}
+
+	@Bean
+	public StreamDefinitionController streamDefinitionController(StreamDefinitionRepository repository, StreamDeploymentController deploymentController) {
+		return new StreamDefinitionController(repository, deploymentController, processModuleDeployer());
 	}
 
 	@Bean

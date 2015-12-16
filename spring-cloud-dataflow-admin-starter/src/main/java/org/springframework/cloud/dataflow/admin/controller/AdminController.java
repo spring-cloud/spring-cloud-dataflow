@@ -23,6 +23,7 @@ import org.springframework.cloud.dataflow.rest.resource.ModuleInstanceStatusReso
 import org.springframework.cloud.dataflow.rest.resource.ModuleRegistrationResource;
 import org.springframework.cloud.dataflow.rest.resource.ModuleStatusResource;
 import org.springframework.cloud.dataflow.rest.resource.StreamDefinitionResource;
+import org.springframework.cloud.dataflow.rest.resource.StreamDeploymentResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskDefinitionResource;
 import org.springframework.hateoas.EntityLinks;
 import org.springframework.hateoas.Link;
@@ -65,16 +66,27 @@ public class AdminController {
 	@RequestMapping("/")
 	public ResourceSupport info() {
 		ResourceSupport resourceSupport = new ResourceSupport();
-		resourceSupport.add(entityLinks.linkToCollectionResource(StreamDefinitionResource.class).withRel("streams"));
+		resourceSupport.add(entityLinks.linkToCollectionResource(StreamDefinitionResource.class).withRel("streams/definitions"));
+		resourceSupport.add(unescapeTemplateVariables(entityLinks.linkToSingleResource(StreamDefinitionResource.class, "{name}").withRel("streams/definitions/definition")));
+
+		resourceSupport.add(entityLinks.linkToCollectionResource(StreamDeploymentResource.class).withRel("streams/deployments"));
+		resourceSupport.add(unescapeTemplateVariables(entityLinks.linkToSingleResource(StreamDeploymentResource.class, "{name}").withRel("streams/deployments/deployment")));
+
 		resourceSupport.add(entityLinks.linkToCollectionResource(TaskDefinitionResource.class).withRel("tasks"));
+
 		resourceSupport.add(entityLinks.linkToCollectionResource(CounterResource.class).withRel("counters"));
 		resourceSupport.add(unescapeTemplateVariables(entityLinks.linkToSingleResource(CounterResource.class, "{name}").withRel("counters/counter")));
+
 		resourceSupport.add(entityLinks.linkToCollectionResource(ModuleRegistrationResource.class).withRel("modules"));
+
 		resourceSupport.add(entityLinks.linkToCollectionResource(ModuleStatusResource.class).withRel("runtime/modules"));
 		resourceSupport.add(unescapeTemplateVariables(entityLinks.linkForSingleResource(ModuleStatusResource.class, "{moduleId}").withRel("runtime/module")));
+
 		resourceSupport.add(unescapeTemplateVariables(entityLinks.linkFor(ModuleInstanceStatusResource.class, UriComponents.UriTemplateVariables.SKIP_VALUE).withRel("runtime/modules/instances")));
+
 		String templated = entityLinks.linkFor(CompletionProposalsResource.class).withSelfRel().getHref() + ("/stream{?start,detailLevel}");
 		resourceSupport.add(new Link(templated).withRel("completions/stream"));
+
 		return resourceSupport;
 	}
 

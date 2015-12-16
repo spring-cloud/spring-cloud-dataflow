@@ -22,15 +22,15 @@ package org.springframework.cloud.dataflow.admin.repository;
  *
  * @author Mark Fisher
  */
-public class DuplicateStreamException extends RuntimeException {
+public class DuplicateStreamDefinitionException extends RuntimeException {
 
 	private static final long serialVersionUID = -3073129756296341192L;
 
-	public DuplicateStreamException() {
+	public DuplicateStreamDefinitionException() {
 		super();
 	}
 
-	public DuplicateStreamException(String message) {
+	public DuplicateStreamDefinitionException(String message) {
 		super(message);
 	}
 }
