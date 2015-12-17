@@ -48,7 +48,16 @@
 					<plugin>
 						<groupId>org.asciidoctor</groupId>
 						<artifactId>asciidoctor-maven-plugin</artifactId>
-						<version>1.5.0</version>
+						<version>1.5.2</version>
+						<dependencies>
+						  <dependency>
+						    <!-- Needed to resolve URI includes -->
+						    <!-- See https://github.com/asciidoctor/asciidoctor.js/issues/153 -->
+						    <groupId>org.jruby</groupId>
+						    <artifactId>jruby-complete</artifactId>
+						    <version>9.0.0.0</version>
+						  </dependency>
+						</dependencies>
 						<executions>
 							<execution>
 								<id>generate-docbook</id>
@@ -67,6 +76,7 @@
 										<spring-boot-repo>${spring-boot-repo}</spring-boot-repo>
 										<spring-docs-version>${spring.version}</spring-docs-version>
 										<spring-security-docs-version>${spring-security.version}</spring-security-docs-version>
+										<allow-uri-read>true</allow-uri-read>
 										<github-tag>${github-tag}</github-tag>
 									</attributes>
 								</configuration>
