@@ -9,6 +9,36 @@ This section dives into the details of using the modules from Spring Cloud Strea
 [[spring-cloud-stream-modules-sources]]
 == Sources
 
+[[spring-cloud-stream-modules-file-source]]
+=== File
+
+The file source provides the contents of a File as a byte array by default. However, this can be
+customized using the `--mode` option:
+
+- *ref* Provides a `java.io.File` reference
+- *lines* Will split files line-by-line and emit a new message for each line
+- *contents* The default. Provides the contents of a file as a byte array
+
+When using `--mode=lines`, you can also provide the additional option `--withMarkers=true`.
+If set to `true`, the underlying `FileSplitter` will emit additional _start-of-file_ and _end-of-file_ marker messages before and after the actual data.
+The payload of these 2 additional marker messages is of type `FileSplitter.FileMarker`. The option `withMarkers` defaults to `false` if not explicitly set.
+
+==== Options
+
+The **$$file$$** $$source$$ has the following options:
+
+$$dir$$:: $$the absolute path to the directory to monitor for files$$ *($$String$$, default: ``)*
+$$fixedDelay$$:: $$the fixed delay polling interval specified in seconds$$ *($$int$$, default: `5`)*
+$$initialDelay$$:: $$an initial delay when using a fixed delay trigger, expressed in TimeUnits (seconds by default)$$ *($$int$$, default: `0`)*
+$$maxMessages$$:: $$the maximum messages per poll; -1 for unlimited$$ *($$long$$, default: `-1`)*
+$$mode$$:: $$specifies how the file is being read. By default the content of a file is provided as byte array$$ *($$FileReadingMode$$, default: `contents`, possible values: `ref,lines,contents`)*
+$$pattern$$:: $$a filter expression (Ant style) to accept only files that match the pattern$$ *($$String$$, default: `*`)*
+$$preventDuplicates$$:: $$whether to prevent the same file from being processed twice$$ *($$boolean$$, default: `true`)*
+$$timeUnit$$:: $$the time unit for the fixed and initial delays$$ *($$String$$, default: `SECONDS`)*
+$$withMarkers$$:: $$if true emits start of file/end of file marker messages before/after the data. Only valid with FileReadingMode 'lines'$$ *($$Boolean$$, no default)*
+
+The `ref` option is useful in some cases in which the file contents are large and it would be more efficient to send the file path.
+
 [[spring-cloud-stream-modules-ftp]]
 === FTP (`ftp`)
 
@@ -36,7 +66,7 @@ $$filenamePattern$$:: $$simple filename pattern to apply to the filter$$ *($$Str
 $$fixedDelay$$:: $$the rate at which to poll the remote directory$$ *($$int$$, default: `1`)*
 $$host$$:: $$the host name for the FTP server$$ *($$String$$, default: `localhost`)*
 $$initialDelay$$:: $$an initial delay when using a fixed delay trigger, expressed in TimeUnits (seconds by default)$$ *($$int$$, default: `0`)*
-$$localDir$$:: $$set the local directory the remote files are transferred to$$ *($$String$$, default: `/tmp/xd/ftp`)*
+$$localDir$$:: $$set the local directory the remote files are transferred to$$ *($$String$$, default: ``)*
 $$maxMessages$$:: $$the maximum messages per poll; -1 for unlimited$$ *($$long$$, default: `-1`)*
 $$mode$$:: $$specifies how the file is being read. By default the content of a file is provided as byte array$$ *($$FileReadingMode$$, default: `contents`, possible values: `ref,lines,contents`)*
 $$password$$:: $$the password for the FTP connection$$ *($$Password$$, no default)*
@@ -56,16 +86,72 @@ A source module that listens for HTTP requests and emits the body as a message p
 If the Content-Type matches 'text/*' or 'application/json', the payload will be a String,
 otherwise the payload will be a byte array.
 
-To create a stream definition in the server using the XD shell
+To create a stream definition in the server using the Spring Cloud Data Flow shell
 
-    dataflow:> stream create --name httptest --definition "http | log" --deploy
+    dataflow:> stream create --name httptest --definition "http --server.port=9000 | log" --deploy
 
-Post some data to the http server on the default port of 9000
+Post some data to the http server on port 9000
 
      dataflow:> http post --target http://localhost:9000 --data "hello world"
 
 See if the data ended up in the log.
 
+[[spring-cloud-stream-modules-load-generator]]
+=== Load Generator (`load-generator`)
+
+A source that sends generated data and dispatches it to the stream. This is to provide a method for users to identify the performance of Spring Cloud Data Flow in different environments and deployment types.
+
+==== Options
+
+The **$$load-generator$$** $$source$$ has the following options:
+
+$$messageCount$$:: $$the number of messages to send$$ *($$Integer$$, default: `100`)*
+$$messageSize$$:: $$the size of message to send$$ *($$Integer$$, `1000`)*
+$$producers$$:: $$the number of producers$$ *($$Integer$$, `1`)*
+$$outputType$$:: $$how this module should emit messages it produces$$ *($$MimeType$$, default: no default)*
+
+[[spring-cloud-stream-modules-sftp]]
+=== SFTP (`sftp`)
+
+This source module supports transfer of files using the SFTP protocol.
+Files are transferred from the `remote` directory to the `local` directory where the module is deployed.
+
+Messages emitted by the source are provided as a byte array by default. However, this can be
+customized using the `--mode` option:
+
+- *ref* Provides a `java.io.File` reference
+- *lines* Will split files line-by-line and emit a new message for each line
+- *contents* The default. Provides the contents of a file as a byte array
+
+When using `--mode=lines`, you can also provide the additional option `--withMarkers=true`.
+If set to `true`, the underlying `FileSplitter` will emit additional _start-of-file_ and _end-of-file_ marker messages before and after the actual data.
+The payload of these 2 additional marker messages is of type `FileSplitter.FileMarker`. The option `withMarkers` defaults to `false` if not explicitly set.
+
+==== Options
+
+The **$$sftp$$** $$source$$ has the following options:
+
+$$allowUnknownKeys$$:: $$true to allow connecting to a host with an unknown or changed key$$ *($$boolean$$, default: `false`)*
+$$autoCreateLocalDir$$:: $$if local directory must be auto created if it does not exist$$ *($$boolean$$, default: `true`)*
+$$deleteRemoteFiles$$:: $$delete remote files after transfer$$ *($$boolean$$, default: `false`)*
+$$fixedDelay$$:: $$fixed delay in SECONDS to poll the remote directory$$ *($$int$$, default: `1`)*
+$$host$$:: $$the remote host to connect to$$ *($$String$$, default: `localhost`)*
+$$initialDelay$$:: $$an initial delay when using a fixed delay trigger, expressed in TimeUnits (seconds by default)$$ *($$int$$, default: `0`)*
+$$knownHostsExpression$$:: $$a SpEL expresssion location of known hosts file; required if 'allowUnknownKeys' is false; examples: systemProperties["user.home"]+"/.ssh/known_hosts", "/foo/bar/known_hosts"$$ *($$String$$, no default)*
+$$localDir$$:: $$set the local directory the remote files are transferred to$$ *($$String$$, default: ``)*
+$$maxMessages$$:: $$the maximum messages per poll; -1 for unlimited$$ *($$long$$, default: `-1`)*
+$$mode$$:: $$specifies how the file is being read. By default the content of a file is provided as byte array$$ *($$FileReadingMode$$, default: `contents`, possible values: `ref,lines,contents`)*
+$$passPhrase$$:: $$the passphrase to use$$ *($$String$$, default: ``)*
+$$password$$:: $$the password for the provided user$$ *($$String$$, default: ``)*
+$$pattern$$:: $$simple filename pattern to apply to the filter$$ *($$String$$, no default)*
+$$port$$:: $$the remote port to connect to$$ *($$int$$, default: `22`)*
+$$privateKey$$:: $$the private key location (a valid Spring Resource URL)$$ *($$String$$, default: ``)*
+$$regexPattern$$:: $$filename regex pattern to apply to the filter$$ *($$String$$, no default)*
+$$remoteDir$$:: $$the remote directory to transfer the files from$$ *($$String$$, no default)*
+$$timeUnit$$:: $$the time unit for the fixed and initial delays$$ *($$String$$, default: `SECONDS`)*
+$$tmpFileSuffix$$:: $$extension to use when downloading files$$ *($$String$$, default: `.tmp`)*
+$$user$$:: $$the username to use$$ *($$String$$, no default)*
+$$withMarkers$$:: $$if true emits start of file/end of file marker messages before/after the data. Only valid with FileReadingMode 'lines'$$ *($$Boolean$$, no default)*
 
 [[spring-cloud-stream-modules-time]]
 === Time (`time`)
@@ -98,7 +184,7 @@ $$consumerKey$$:: $$a consumer key issued by twitter$$ *($$String$$, no default)
 $$consumerSecret$$:: $$consumer secret corresponding to the consumer key$$ *($$String$$, no default)*
 $$language$$:: $$language code e.g. 'en'$$ *($$String$$, default: ``)*
 
-NOTE: `twittersearch` emit JSON in the https://dev.twitter.com/docs/platform-objects/tweets[native Twitter format].
+NOTE: `twitterstream` emit JSON in the https://dev.twitter.com/docs/platform-objects/tweets[native Twitter format].
 
 
 [[spring-cloud-stream-modules-processors]]
@@ -107,6 +193,8 @@ NOTE: `twittersearch` emit JSON in the https://dev.twitter.com/docs/platform-obj
 [[spring-cloud-stream-modules-filter]]
 === Filter (`filter`)
 Use the filter module in a stream to determine whether a Message should be passed to the output channel.
+
+==== Options
 
 The **$$filter$$** $$processor$$ has the following options:
 
@@ -117,7 +205,7 @@ The simplest way to use the filter processor is to pass a SpEL expression when c
 
     dataflow:> stream create --name filtertest --definition "http | filter --expression=payload=='good' | log" --deploy
 
-This filter will only pass Messages to the log sink if the payload is the word "good". Try sending "good" to the HTTP endpoint and you should see it in the XD log:
+This filter will only pass Messages to the log sink if the payload is the word "good". Try sending "good" to the HTTP endpoint and you should see it in the console:
 
     dataflow:> http post --target http://localhost:9000 --data "good"
 
@@ -125,9 +213,11 @@ Alternatively, if you send the word "bad" (or anything else), you shouldn't see 
 
 
 [[spring-cloud-stream-modules-groovy-filter]]
-=== `groovy-filter`
+=== Groovy Filter (`groovy-filter`)
 
 A Processor module that retains or discards messages according to a predicate, expressed as a Groovy script.
+
+==== Options
 
 The **$$groovy-filter$$** $$processor$$ has the following options:
 
@@ -137,20 +227,46 @@ $$variablesLocation$$:: $$The location of a properties file containing custom sc
 
 
 [[spring-cloud-stream-modules-groovy-transform]]
-=== `groovy-transform`
+=== Groovy Transform (`groovy-transform`)
 
 A Processor module that transforms messages using a Groovy script.
 
-The **$$groovy-filter$$** $$processor$$ has the following options:
+==== Options
+
+The **$$groovy-transform$$** $$processor$$ has the following options:
 
 $$script$$:: $$The script resource location$$ *($$String$$, default: ``)*
 $$variables$$:: $$Variable bindings as a comma delimited string of name-value pairs, e.g. 'foo=bar,baz=car'$$ *($$String$$, default: ``)*
 $$variablesLocation$$:: $$The location of a properties file containing custom script variable bindings$$ *($$String$$, default: ``)*
 
+[[spring-cloud-stream-modules-httpclient]]
+=== Http Client (`httpclient`)
+
+A processor module that makes requests to an HTTP resource and emits the response body as a message payload. This processor can be combined, e.g., with a time source module to periodically poll results from a HTTP resource.
+
+==== Options
+
+The **$$httpclient$$** $$processor$$ has the following options:
+
+$$url$$:: The URL to issue an http request to, as a static value.
+$$urlExpression$$:: A SpEL expression against incoming message to determine the URL to use.
+$$httpMethod$$:: The kind of http method to use.
+$$body$$:: The (static) body of the request to use.
+$$bodyExpression$$:: A SpEL expression against incoming message to derive the request body to use.
+$$headersExpression$$:: A SpEL expression used to derive the http headers map to use.
+$$expectedResponseType$$:: The type used to interpret the response.
+$$replyExpression$$:: A SpEL expression used to compute the final result, applied against the whole http response.
+
+[[spring-cloud-stream-modules-noop]]
+=== Noop (`noop`)
+
+A Processor module that returns messages that is passed in for performance testing.
 
 [[spring-cloud-stream-modules-transform]]
 === Transform (`transform`)
 Use the transform module in a stream to convert a Message's content or structure.
+
+==== Options
 
 The **$$transform$$** $$processor$$ has the following options:
 
@@ -161,7 +277,7 @@ The simplest way to use the transform processor is to pass a SpEL expression whe
 
     dataflow:> stream create --name transformtest --definition "http --port=9003 | transform --expression=payload.toUpperCase() | log" --deploy
 
-This transform will convert all message payloads to upper case. If sending the word "foo" to the HTTP endpoint and you should see "FOO" in the XD log:
+This transform will convert all message payloads to upper case. If sending the word "foo" to the HTTP endpoint and you should see "FOO" in the console:
 
     dataflow:> http post --target http://localhost:9003 --data "foo"
 
@@ -169,6 +285,57 @@ As part of the SpEL expression you can make use of the pre-registered JSON Path 
 
 [[spring-cloud-stream-modules-sinks]]
 == Sinks
+
+[[spring-cloud-stream-modules-cassandra]]
+=== Cassandra (`cassandra`)
+
+The Cassandra sink write into a Cassandra table.  Here is a simple example
+
+  dataflow:>stream create cassandrastream --definition "http --server.port=8888 --spring.cloud.stream.bindings.output.contentType='application/json' | cassandra --ingestQuery='insert into book (id, isbn, title, author) values (uuid(), ?, ?, ?)' --spring.cassandra.keyspace=clouddata" --deploy
+
+Create a keyspace and a `book` table in Cassandra using:
+
+[source,text]
+----
+CREATE KEYSPACE clouddata WITH REPLICATION = { 'class' : 'org.apache.cassandra.locator.SimpleStrategy', 'replication_factor': '1' } AND DURABLE_WRITES = true;
+USE clouddata;
+CREATE TABLE book  (
+    id          uuid PRIMARY KEY,
+    isbn        text,
+    author      text,
+    title       text
+);
+----
+
+You can then send data to this stream via
+
+  dataflow:>http post --contentType 'application/json' --data '{"isbn": "1599869772", "title": "The Art of War", "author": "Sun Tzu"}' --target http://localhost:8888/messages
+  > POST (application/json;charset=UTF-8) http://localhost:8888/messages {"isbn": "1599869772", "title": "The Art of War", "author": "Sun Tzu"}
+  > 202 ACCEPTED
+
+and see the table contents using the CQL
+
+  SELECT * FROM cassandratest.book;
+
+==== Options
+
+The **$$cassandra$$** $$sink$$ has the following options:
+
+$$compressionType$$:: $$the compression to use for the transport$$ *($$CompressionType$$, default: `NONE`, possible values: `NONE,SNAPPY`)*
+$$consistencyLevel$$:: $$the consistencyLevel option of WriteOptions$$ *($$ConsistencyLevel$$, no default, possible values: `ANY,ONE,TWO,THREE,QUOROM,LOCAL_QUOROM,EACH_QUOROM,ALL,LOCAL_ONE,SERIAL,LOCAL_SERIAL`)*
+$$contactPoints$$:: $$the comma-delimited string of the hosts to connect to Cassandra$$ *($$String$$, default: `localhost`)*
+$$entityBasePackages$$:: $$the base packages to scan for entities annotated with Table annotations$$ *($$String[]$$, default: `[]`)*
+$$ingestQuery$$:: $$the ingest Cassandra query$$ *($$String$$, no default)*
+$$initScript$$:: $$the path to file with CQL scripts (delimited by ';') to initialize keyspace schema$$ *($$String$$, no default)*
+$$keyspace$$:: $$the keyspace name to connect to$$ *($$String$$, default: `<stream name>`)*
+$$metricsEnabled$$:: $$enable/disable metrics collection for the created cluster$$ *($$boolean$$, default: `true`)*
+$$password$$:: $$the password for connection$$ *($$String$$, no default)*
+$$port$$:: $$the port to use to connect to the Cassandra host$$ *($$int$$, default: `9042`)*
+$$queryType$$:: $$the queryType for Cassandra Sink$$ *($$Type$$, default: `INSERT`, possible values: `INSERT,UPDATE,DELETE,STATEMENT`)*
+$$retryPolicy$$:: $$the retryPolicy  option of WriteOptions$$ *($$RetryPolicy$$, no default, possible values: `DEFAULT,DOWNGRADING_CONSISTENCY,FALLTHROUGH,LOGGING`)*
+$$statementExpression$$:: $$the expression in Cassandra query DSL style$$ *($$String$$, no default)*
+$$ttl$$:: $$the time-to-live option of WriteOptions$$ *($$int$$, default: `0`)*
+$$username$$:: $$the username for connection$$ *($$String$$, no default)*
 
 [[spring-cloud-stream-modules-counter]]
 === Counter (`counter`)
@@ -181,11 +348,110 @@ $$name$$:: $$The name of the counter to increment.$$ *($$String$$, default: `cou
 $$nameExpression$$:: $$A SpEL expression (against the incoming Message) to derive the name of the counter to increment.$$ *($$String$$, default: ``)*
 $$store$$:: $$The name of a store used to store the counter.$$ *($$String$$, default: `memory`, possible values: `memory`, `redis`)*
 
+[[spring-cloud-stream-modules-field-value-counter]]
+=== Field Value Counter (`field-value-counter`)
+
+A field value counter is a Metric used for counting occurrences of unique values for a named field in a message payload. Spring Cloud Data Flow supports the following payload types out of the box:
+
+* POJO (Java bean)
+* Tuple
+* JSON String
+
+For example suppose a message source produces a payload with a field named _user_ :
+
+[source,java]
+class Foo {
+   String user;
+   public Foo(String user) {
+       this.user = user;
+   }
+}
+
+If the stream source produces messages with the following objects:
+
+[source, java]
+   new Foo("fred")
+   new Foo("sue")
+   new Foo("dave")
+   new Foo("sue")
+
+The field value counter on the field _user_ will contain:
+
+    fred:1, sue:2, dave:1 
+
+Multi-value fields are also supported. For example, if a field contains a list, each value will be counted once:
+    
+     users:["dave","fred","sue"]
+     users:["sue","jon"]
+
+The field value counter on the field _users_ will contain:
+
+    dave:1, fred:1, sue:2, jon:1
+
+==== Options
+
+The **$$field-value-counter$$** $$sink$$ has the following options:
+
+$$fieldName$$:: $$the name of the field for which values are counted$$ *($$String$$, no default)*
+$$name$$:: $$the name of the metric to contribute to (will be created if necessary)$$ *($$String$$, default: `<stream name>`)*
+$$nameExpression$$:: $$a SpEL expression to compute the name of the metric to contribute to$$ *($$String$$, no default)*
+
+[[spring-cloud-stream-modules-file-sink]]
+=== File (`file`)
+
+This module writes each message it receives to a file.
+
+==== Options
+
+The **$$file$$** $$sink$$ has the following options:
+
+$$binary$$:: $$if false, will append a newline character at the end of each line$$ *($$boolean$$, default: `false`)*
+$$charset$$:: $$the charset to use when writing a String payload$$ *($$String$$, default: `UTF-8`)*
+$$dir$$:: $$the directory in which files will be created$$ *($$String$$, default: ``)*
+$$dirExpression$$:: $$spring expression used to define directory name$$ *($$String$$, no default)*
+$$mode$$:: $$what to do if the file already exists$$ *($$Mode$$, default: `APPEND`, possible values: `APPEND,REPLACE,FAIL,IGNORE`)*
+$$name$$:: $$filename pattern to use$$ *($$String$$, default: `<stream name>`)*
+$$nameExpression$$:: $$spring expression used to define filename$$ *($$String$$, no default)*
+$$suffix$$:: $$filename extension to use$$ *($$String$$, no default)*
+
+[[ftp-sink]]
+=== FTP Sink (`ftp`)
+
+FTP sink is a simple option to push files to an FTP server from incoming messages.
+
+It uses an `ftp-outbound-adapter`, therefore incoming messages could be either a `java.io.File` object, a `String` (content of the file)
+or an array of `bytes` (file content as well).
+
+To use this sink, you need a username and a password to login. 
+
+NOTE:
+By default Spring Integration will use `o.s.i.file.DefaultFileNameGenerator` if none is specified. `DefaultFileNameGenerator` will determine the file name
+based on the value of the `file_name` header (if it exists) in the `MessageHeaders`, or if the payload of the `Message` is already a `java.io.File`, then it will
+use the original name of that file.
+
+
+[[spring-cloud-stream-modules-gemfire-sink]]
+=== Gemfire (`gemfire`)
+
+A sink module that allows one to write message payloads to a Gemfire server.
+
+==== Options
+
+The **$$gemfire$$** $$sink$$ has the following options:
+
+$$hostAddresses$$:: $$a comma separated list of [host]:[port] specifying either locator or server addresses for the client connection pool$$ *($$String$$, `localhost:10334`)*
+$$keyExpression$$:: $$a SpEL expression which is evaluated to create a cache key$$ *($$String$$, default: `the value is currently the message payload'`)*
+$$port$$:: $$port of the cache server or locator (if useLocator=true). May be a comma delimited list$$ *($$String$$, no default)*
+$$regionName$$:: $$name of the region to use when storing data$$ *($$String$$, default: `${spring.application.name}`)*
+$$connectType$$:: $$'server' or 'locator'$$ *($$String$$, default: `locator`)*
 
 [[spring-cloud-stream-modules-hdfs]]
 === Hadoop (HDFS) (`hdfs`)
 
-If you do not have Hadoop installed, you can install Hadoop as described in our xref:Hadoop-Installation#installing-hadoop[separate guide]. Spring XD supports 4 Hadoop distributions, see xref:Running-Distributed-Mode#using-hadoop[using Hadoop] for more information on how to start Spring XD to target a specific distribution.
+If you do not have Hadoop installed, you can install Hadoop as described in our xref:Hadoop-Installation#installing-hadoop[separate guide]. Spring xd:
+
+
+ supports 4 Hadoop distributions, see xref:Running-Distributed-Mode#using-hadoop[using Hadoop] for more information on how to start Spring XD to target a specific distribution.
 
 Once Hadoop is up and running, you can then use the `hdfs` sink when creating a xref:Streams#streams[stream]
 
@@ -502,6 +768,25 @@ bucketcount:: A number of buckets
 A path part prefixed with a hash key i.e. `XXX_hash`.
 
 
+[[spring-cloud-stream-modules-jdbc]]
+=== JDBC (`jdbc`)
+
+A module that writes its incoming payload to an RDBMS using JDBC.
+
+==== Options
+
+The **$$jdbc$$** $$sink$$ has the following options:
+
+$$expression$$:: $$a SpEL expression used to transform messages$$ *($$String$$, default: ``)*
+$$tableName$$:: $$String$$ *($$String$$, default: `<stream name`)*
+$$columns$$:: $$the names of the columns that shall receive data, as a set of column[:SpEL] mappings, also used at initialization time to issue the DDL$$ *($$String$$, default: `payload`)*
+$$initialize$$:: $$String$$ *($$Boolean$$, default: `false`)*
+$$batchSize$$:: $$String$$ *($$long$$, default: `10000`)*
+
+The module also uses Spring Boot's http://docs.spring.io/spring-boot/docs/1.3.0.BUILD-SNAPSHOT/reference/htmlsingle/#boot-features-configure-datasource[DataSource support]
+for configuring the database connection, so properties like `spring.datasource.url` _etc._ apply.
+
+
 [[spring-cloud-stream-modules-log]]
 === Log (`log`)
 
@@ -513,9 +798,9 @@ You can then try adding some data. We've used the `http` source on port 8000 her
 
   dataflow:> http post --target http://localhost:8000 --data "hello"
 
-and you should see the following output in the XD container console.
+and you should see the following output in the Spring Cloud Data Flow console.
 
-  13/06/07 16:12:18 INFO Received: hello
+  16:12:18 INFO Received: hello
 
 
 [[spring-cloud-stream-modules-redis]]
@@ -539,6 +824,25 @@ $$keyExpression$$:: $$a SpEL expression to use for keyExpression$$ *($$String$$,
 $$key$$:: $$name for the key$$ *($$String$$, no default)*
 $$queue$$:: $$name for the queue$$ *($$String$$, no default)*
 $$topic$$:: $$name for the topic$$ *($$String$$, no default)*
+
+
+[[spring-cloud-stream-modules-throughput]]
+=== Throughput (`throughput`)
+
+A simple handler that will count messages and log witnessed throughput at a selected interval.
+
+[[spring-cloud-stream-modules-websocket-sink]]
+=== Websocket (`websocket`)
+
+A simple websocket sink that receives messages from upstream modules. 
+
+==== Options
+
+$$websocketPort$$:: $$Controls the port onto which the Netty server binds$$ *($$String$$, `9292`)*
+$$websocketPath$$:: $$Controls the path where the WebsocketServer expects Websocket connections$$ *($$String$$, `/websocket`)*
+$$ssl$$:: $$ontrols whether the Websocket server should accept SSL connections (i.e. `wss://host:9292/websocket`)n$$ *($$Boolean$$, `false`)*
+$$websocketLoglevel$$:: $$Controls the loglevel of the underlying Netty loghandler$$ *($$String$$, `WARN`)*
+$$threads$$:: $$Controls the number of worker threads used for the Netty event loop$$ *($$String$$, `1`)*
 
 
 [[spring-cloud-stream-modules-tasks]]
