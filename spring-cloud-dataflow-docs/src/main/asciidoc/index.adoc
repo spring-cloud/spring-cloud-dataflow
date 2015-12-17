@@ -10,7 +10,7 @@ Sabby Anandan, Marius Bogoevici, Eric Bottard, Mark Fisher, Ilayaperumal Gopinat
 :spring-cloud-dataflow-repo: snapshot
 :github-tag: master
 :spring-cloud-dataflow-docs-version: current
-:spring-cloud-dataflow-docs: http://docs.spring.io/spring-cloud-dataflow/docs/{spring-cloud-dataflow-docs-version}/reference
+:spring-cloud-dataflow-docs: http://docs.spring.io/spring-cloud-dataflow/docs/{version}/reference
 :spring-cloud-dataflow-docs-current: http://docs.spring.io/spring-cloud-dataflow/docs/current-SNAPSHOT/reference/html/
 :github-repo: spring-projects/spring-cloud-dataflow
 :github-raw: http://raw.github.com/{github-repo}/{github-tag}

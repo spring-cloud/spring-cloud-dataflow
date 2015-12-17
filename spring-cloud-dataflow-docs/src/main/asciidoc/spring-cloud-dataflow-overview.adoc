@@ -23,36 +23,31 @@ print or electronically.
 
 [[dataflow-documentation-getting-help]]
 == Getting help
-Having trouble with Spring Boot, We'd like to help!
+Having trouble with Spring Cloud Data Flow, We'd like to help!
 
-* Try the <<howto.adoc#howto, How-to's>> -- they provide solutions to the most common
-  questions.
 * Ask a question - we monitor http://stackoverflow.com[stackoverflow.com] for questions
   tagged with http://stackoverflow.com/tags/spring-cloud[`spring-cloud`].
-* Report bugs with Spring Boot at https://github.com/spring-cloud/spring-cloud-dataflow/issues.
+* Report bugs with Spring Cloud Data Flow at https://github.com/spring-cloud/spring-cloud-dataflow/issues.
 
 NOTE: All of Spring Cloud Data Flow is open source, including the documentation! If you find problems
 with the docs; or if you just want to improve them, please {github-code}[get involved].
 
 [[dataflow-documentation-intro]]
 == Introducing Spring Cloud Data Flow
-A cloud native programming and operating model for composable data microservices on a structured platform. It allows developers to create, 
-orchestrate and refactor data pipelines with a single programming model for common use cases like data ingest, real time analytics, and 
-data import/export.
+A cloud native programming and operating model for composable data microservices on a structured platform. 
+With Spring Cloud Data Flow, developers can create, orchestrate and refactor data pipelines through single programming model for common use cases such as data ingest, real-time analytics, and data import/export.
 
-Spring Cloud Data Flow is the cloud native redesign of Spring XD - a project that aimed to simplify Big Data application development. Existing 
-integration and batch modules are refactored as Spring Boot link:http://cloud.spring.io/spring-cloud-stream-modules/[data microservices] that are 
-now autonomous deployment units – thus enabling them to take full advantage of environment capabilities "natively" and they can independently evolve in isolation.
+Spring Cloud Data Flow is the cloud native redesign of link:http://projects.spring.io/spring-xd/[Spring XD] – a project that aimed to simplify development of Big Data applications. The integration and batch modules from Spring XD are refactored into Spring Boot link:http://cloud.spring.io/spring-cloud-stream-modules/[data microservices] applications that are now autonomous deployment units – thus enabling them to take full advantage of platform capabilities "natively", and they can independently evolve in isolation.
 
-Spring Cloud Data Flow defines the best practices for distributed stream and batch data processing.
+Spring Cloud Data Flow defines best practices for distributed stream and batch microservice design patterns.
 
 === Features
 
-* Orchestrate applications across a variety of distributed runtime platforms including: Cloud Foundry, Lattice, and Apache YARN
+* Orchestrate applications across a variety of distributed runtime platforms including: Cloud Foundry, Apache YARN, Apache Mesos, and Kubernetes
 * Separate runtime dependencies backed by ‘spring profiles’
-* Consume stream and batch microservices as maven dependency and push it to production
+* Consume stream and batch data-microservices as maven dependency
 * Develop using: DSL, Shell, REST-APIs, Admin-UI, and Flo
-* Take advantage of metrics, health checks and remote management functionalities
+* Take advantage of metrics, health checks and remote management of data-microservices
 * Scale stream and batch pipelines without interrupting data flows
 
 
@@ -77,7 +72,11 @@ The link:https://github.com/spring-cloud/spring-cloud-dataflow/tree/master/sprin
 
 * link:https://github.com/spring-cloud/spring-cloud-dataflow-admin-cloudfoundry[Cloud Foundry]
 
-* link:https://github.com/spring-cloud/spring-cloud-dataflow-admin-yarn[Yarn]
+* link:https://github.com/spring-cloud/spring-cloud-dataflow-admin-yarn[Apache Yarn]
+
+* link:https://github.com/spring-cloud/spring-cloud-dataflow-admin-mesos[Apache Mesos]
+
+* link:https://github.com/spring-cloud/spring-cloud-dataflow-admin-kubernetes[Kubernetes]
 
 The link:https://github.com/spring-cloud/spring-cloud-dataflow/tree/master/spring-cloud-dataflow-admin-starter[Admin Starter] provides the REST API and UI for implementations of the Admin SPI.
 
