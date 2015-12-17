@@ -23,10 +23,10 @@ import static org.springframework.cloud.dataflow.core.ArtifactType.task;
 
 import javax.annotation.PostConstruct;
 
-import org.springframework.cloud.dataflow.core.ArtifactCoordinates;
-import org.springframework.cloud.dataflow.core.ArtifactType;
 import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistration;
 import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistry;
+import org.springframework.cloud.dataflow.core.ArtifactCoordinates;
+import org.springframework.cloud.dataflow.core.ArtifactType;
 import org.springframework.util.Assert;
 
 /**
@@ -107,6 +107,7 @@ public class ArtifactRegistryPopulator {
 		populateDefault("jdbc", sink);
 		populateDefault("log", sink);
 		populateDefault("redis", sink);
+		populateDefault("tcp", sink);
 		populateDefault("throughput", sink);
 		populateDefault("timestamp", task);
 		populateDefault("websocket", sink);
