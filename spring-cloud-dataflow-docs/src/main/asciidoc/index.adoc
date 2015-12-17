@@ -38,6 +38,7 @@ Sabby Anandan, Marius Bogoevici, Eric Bottard, Mark Fisher, Ilayaperumal Gopinat
 :ant-manual: http://ant.apache.org/manual
 // ======================================================================================
 
+include::preface.adoc[]
 include::spring-cloud-dataflow-overview.adoc[]
 include::getting-started.adoc[]
 include::using-spring-cloud-stream-modules.adoc[]
