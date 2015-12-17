@@ -20,32 +20,6 @@
 			<build>
 				<plugins>
 					<plugin>
-						<groupId>org.codehaus.mojo</groupId>
-						<artifactId>xml-maven-plugin</artifactId>
-						<version>1.0</version>
-						<executions>
-							<execution>
-								<goals>
-									<goal>transform</goal>
-								</goals>
-							</execution>
-						</executions>
-						<configuration>
-							<transformationSets>
-								<transformationSet>
-									<dir>${project.build.directory}/external-resources</dir>
-									<stylesheet>src/main/xslt/dependencyVersions.xsl</stylesheet>
-									<fileMappers>
-										<fileMapper implementation="org.codehaus.plexus.components.io.filemappers.FileExtensionMapper">
-											<targetExtension>.adoc</targetExtension>
-										</fileMapper>
-									</fileMappers>
-									<outputDir>${project.build.directory}/generated-resources</outputDir>
-								</transformationSet>
-							</transformationSets>
-						</configuration>
-					</plugin>
-					<plugin>
 						<groupId>org.asciidoctor</groupId>
 						<artifactId>asciidoctor-maven-plugin</artifactId>
 						<version>1.5.2</version>
