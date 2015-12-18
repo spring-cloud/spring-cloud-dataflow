@@ -65,6 +65,11 @@ public class DataFlowTemplate implements DataFlowOperations {
 	private final ModuleOperations moduleOperations;
 
 	/**
+	 * REST client for library operations.
+	 */
+	private final LibraryOperations libraryOperations;
+
+	/**
 	 * REST client for completion operations.
 	 */
 	private final CompletionOperations completionOperations;
@@ -89,6 +94,7 @@ public class DataFlowTemplate implements DataFlowOperations {
 		this.counterOperations = new CounterTemplate(restTemplate, resourceSupport);
 		this.taskOperations = new TaskTemplate(restTemplate, resources);
 		this.moduleOperations = new ModuleTemplate(restTemplate, resourceSupport);
+		this.libraryOperations = new LibraryTemplate(restTemplate, resourceSupport);
 		this.completionOperations = new CompletionTemplate(restTemplate, resourceSupport.getLink("completions/stream"));
 		this.runtimeOperations = new RuntimeTemplate(restTemplate, resourceSupport);
 	}
@@ -120,6 +126,11 @@ public class DataFlowTemplate implements DataFlowOperations {
 	@Override
 	public ModuleOperations moduleOperations() {
 		return moduleOperations;
+	}
+
+	@Override
+	public LibraryOperations libraryOperations() {
+		return libraryOperations;
 	}
 
 	@Override
