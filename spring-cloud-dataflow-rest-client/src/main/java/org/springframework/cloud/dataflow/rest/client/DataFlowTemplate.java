@@ -26,11 +26,15 @@ import org.springframework.hateoas.UriTemplate;
 import org.springframework.web.client.RestTemplate;
 
 /**
+ * Implementation of DataFlowOperations delegating to sub-templates, discovered
+ * via REST relations.
+ *
  *  @author Ilayaperumal Gopinathan
  *  @author Mark Fisher
  *  @author Glenn Renfro
  *  @author Patrick Peralta
  *  @author Gary Russell
+ *  @author Eric Bottard
  */
 public class DataFlowTemplate implements DataFlowOperations {
 
@@ -78,14 +82,11 @@ public class DataFlowTemplate implements DataFlowOperations {
 	public DataFlowTemplate(URI baseURI, RestTemplate restTemplate) {
 		this.restTemplate = restTemplate;
 		ResourceSupport resourceSupport = restTemplate.getForObject(baseURI, ResourceSupport.class);
-		Link link = getLink(resourceSupport, "streams");
-		resources.put("streams/definitions", new UriTemplate(link.getHref() + "/definitions"));
-		resources.put("streams/deployments", new UriTemplate(link.getHref() + "/deployments"));
-		link = getLink(resourceSupport, "tasks");
+		Link link = getLink(resourceSupport, "tasks");
 		resources.put("tasks/definitions", new UriTemplate(link.getHref() + "/definitions"));
 		resources.put("tasks/deployments", new UriTemplate(link.getHref() + "/deployments"));
 
-		this.streamOperations = new StreamTemplate(restTemplate, resources);
+		this.streamOperations = new StreamTemplate(restTemplate, resourceSupport);
 		this.counterOperations = new CounterTemplate(restTemplate, resourceSupport);
 		this.taskOperations = new TaskTemplate(restTemplate, resources);
 		this.moduleOperations = new ModuleTemplate(restTemplate, resourceSupport);
