@@ -9,4 +9,4 @@ services:
   - redis-server
 install: true
 script:
-  - '[ "${TRAVIS_PULL_REQUEST}" != "false" ] || ./mvnw package -U -Dmaven.test.redirectTestOutputToFile=false'
+  - '[ "${TRAVIS_PULL_REQUEST}" != "false" ] || ./mvnw package -Pfull -U -Dmaven.test.redirectTestOutputToFile=false'
