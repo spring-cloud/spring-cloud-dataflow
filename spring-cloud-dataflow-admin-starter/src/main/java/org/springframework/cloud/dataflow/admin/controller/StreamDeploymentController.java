@@ -22,9 +22,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cloud.dataflow.admin.repository.StreamDefinitionRepository;
@@ -66,8 +63,6 @@ import org.springframework.web.bind.annotation.RestController;
 @ExposesResourceFor(StreamDeploymentResource.class)
 public class StreamDeploymentController {
 
-	private static final Logger logger = LoggerFactory.getLogger(StreamDeploymentController.class);
-
 	/**
 	 * The repository this controller will use for stream CRUD operations.
 	 */
@@ -89,7 +84,7 @@ public class StreamDeploymentController {
 
 	private static final String CHANNEL_BINDING_CONSUMER_PROPERTIES_PREFIX = "spring.cloud.stream.consumerProperties.";
 
-	private static final String PARTITION_KEY = CHANNEL_BINDING_PRODUCER_PROPERTIES_PREFIX + BindingProperties.PARTITION_KEY_EXPRESSION;
+	private static final String PARTITION_KEY_EXPRESSION = CHANNEL_BINDING_PRODUCER_PROPERTIES_PREFIX + BindingProperties.PARTITION_KEY_EXPRESSION;
 
 	private static final String PARTITION_KEY_EXTRACTOR_CLASS = CHANNEL_BINDING_PRODUCER_PROPERTIES_PREFIX + BindingProperties.PARTITION_KEY_EXTRACTOR_CLASS;
 
@@ -312,7 +307,7 @@ public class StreamDeploymentController {
 			if (module.equals(currentModule) && iterator.hasNext()) {
 				ModuleDefinition prevModule = iterator.next();
 				Map<String, String> moduleDeploymentProperties = extractModuleDeploymentProperties(prevModule, streamDeploymentProperties);
-				return moduleDeploymentProperties.containsKey(PARTITION_KEY) ||
+				return moduleDeploymentProperties.containsKey(PARTITION_KEY_EXPRESSION) ||
 						moduleDeploymentProperties.containsKey(PARTITION_KEY_EXTRACTOR_CLASS);
 			}
 		}
@@ -359,9 +354,9 @@ public class StreamDeploymentController {
 	 */
 	private void updateProducerPartitionProperties(Map<String, String> properties, int nextModuleCount) {
 		properties.put(BindingProperties.OUTPUT_PARTITION_COUNT, String.valueOf(nextModuleCount));
-		if (properties.containsKey(PARTITION_KEY)) {
+		if (properties.containsKey(PARTITION_KEY_EXPRESSION)) {
 			properties.put(BindingProperties.OUTPUT_PARTITION_KEY_EXPRESSION,
-					properties.get(PARTITION_KEY));
+					properties.get(PARTITION_KEY_EXPRESSION));
 		}
 		else {
 			properties.put(BindingProperties.OUTPUT_PARTITION_KEY_EXPRESSION, DEFAULT_PARTITION_KEY_EXPRESSION);
