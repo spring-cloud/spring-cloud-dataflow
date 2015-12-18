@@ -48,7 +48,7 @@ public class InProcessModuleDeployerTests {
 	@Autowired
 	private ModuleLauncher moduleLauncher;
 
-	@Test @Ignore // see TODO below
+	@Test @Ignore("https://github.com/spring-cloud/spring-cloud-dataflow/issues/254")
 	public void timeToLogStream() {
 		InProcessModuleDeployer deployer = new InProcessModuleDeployer(moduleLauncher);
 		ModuleDefinition timeDefinition = new ModuleDefinition.Builder()
