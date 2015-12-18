@@ -57,6 +57,9 @@ import org.springframework.web.bind.annotation.RestController;
  * Controller for deployment operations on {@link StreamDefinition}.
  *
  * @author Eric Bottard
+ * @author Mark Fisher
+ * @author Patrick Peralta
+ * @author Ilayaperumal Gopinathan
  */
 @RestController
 @RequestMapping("/streams/deployments")
@@ -81,6 +84,18 @@ public class StreamDeploymentController {
 	private final ModuleDeployer deployer;
 
 	private static final String DEFAULT_PARTITION_KEY_EXPRESSION = "payload";
+
+	private static final String CHANNEL_BINDING_PRODUCER_PROPERTIES_PREFIX = "spring.cloud.stream.producerProperties.";
+
+	private static final String CHANNEL_BINDING_CONSUMER_PROPERTIES_PREFIX = "spring.cloud.stream.consumerProperties.";
+
+	private static final String PARTITION_KEY = CHANNEL_BINDING_PRODUCER_PROPERTIES_PREFIX + BindingProperties.PARTITION_KEY_EXPRESSION;
+
+	private static final String PARTITION_KEY_EXTRACTOR_CLASS = CHANNEL_BINDING_PRODUCER_PROPERTIES_PREFIX + BindingProperties.PARTITION_KEY_EXTRACTOR_CLASS;
+
+	private static final String PARTITION_SELECTOR_CLASS = CHANNEL_BINDING_PRODUCER_PROPERTIES_PREFIX + BindingProperties.PARTITION_SELECTOR_CLASS;
+
+	private static final String PARTITION_SELECTOR_EXPRESSION = CHANNEL_BINDING_PRODUCER_PROPERTIES_PREFIX + BindingProperties.PARTITION_SELECTOR_EXPRESSION;
 
 	/**
 	 * Create a {@code StreamController} that delegates
@@ -258,10 +273,22 @@ public class StreamDeploymentController {
 				moduleDeploymentProperties.put(entry.getKey().substring(wildCardPrefix.length()), entry.getValue());
 			}
 		}
+		String producerPropertyPrefix = String.format("module.%s.producer.", module.getLabel());
+		String consumerPropertyPrefix = String.format("module.%s.consumer.", module.getLabel());
 		String modulePrefix = String.format("module.%s.", module.getLabel());
 		for (Map.Entry<String, String> entry : streamDeploymentProperties.entrySet()) {
 			if (entry.getKey().startsWith(modulePrefix)) {
-				moduleDeploymentProperties.put(entry.getKey().substring(modulePrefix.length()), entry.getValue());
+				if (entry.getKey().startsWith(producerPropertyPrefix)) {
+					moduleDeploymentProperties.put(CHANNEL_BINDING_PRODUCER_PROPERTIES_PREFIX +
+							entry.getKey().substring(producerPropertyPrefix.length()), entry.getValue());
+				}
+				else if (entry.getKey().startsWith(consumerPropertyPrefix)) {
+					moduleDeploymentProperties.put(CHANNEL_BINDING_CONSUMER_PROPERTIES_PREFIX +
+							entry.getKey().substring(consumerPropertyPrefix.length()), entry.getValue());
+				}
+				else {
+					moduleDeploymentProperties.put(entry.getKey().substring(modulePrefix.length()), entry.getValue());
+				}
 			}
 		}
 		return moduleDeploymentProperties;
@@ -285,8 +312,8 @@ public class StreamDeploymentController {
 			if (module.equals(currentModule) && iterator.hasNext()) {
 				ModuleDefinition prevModule = iterator.next();
 				Map<String, String> moduleDeploymentProperties = extractModuleDeploymentProperties(prevModule, streamDeploymentProperties);
-				return moduleDeploymentProperties.containsKey(BindingProperties.PARTITION_KEY_EXPRESSION) ||
-						moduleDeploymentProperties.containsKey(BindingProperties.PARTITION_KEY_EXTRACTOR_CLASS);
+				return moduleDeploymentProperties.containsKey(PARTITION_KEY) ||
+						moduleDeploymentProperties.containsKey(PARTITION_KEY_EXTRACTOR_CLASS);
 			}
 		}
 		return false;
@@ -332,24 +359,24 @@ public class StreamDeploymentController {
 	 */
 	private void updateProducerPartitionProperties(Map<String, String> properties, int nextModuleCount) {
 		properties.put(BindingProperties.OUTPUT_PARTITION_COUNT, String.valueOf(nextModuleCount));
-		if (properties.containsKey(BindingProperties.PARTITION_KEY_EXPRESSION)) {
+		if (properties.containsKey(PARTITION_KEY)) {
 			properties.put(BindingProperties.OUTPUT_PARTITION_KEY_EXPRESSION,
-					properties.get(BindingProperties.PARTITION_KEY_EXPRESSION));
+					properties.get(PARTITION_KEY));
 		}
 		else {
 			properties.put(BindingProperties.OUTPUT_PARTITION_KEY_EXPRESSION, DEFAULT_PARTITION_KEY_EXPRESSION);
 		}
-		if (properties.containsKey(BindingProperties.PARTITION_KEY_EXTRACTOR_CLASS)) {
+		if (properties.containsKey(PARTITION_KEY_EXTRACTOR_CLASS)) {
 			properties.put(BindingProperties.OUTPUT_PARTITION_KEY_EXTRACTOR_CLASS,
-					properties.get(BindingProperties.PARTITION_KEY_EXTRACTOR_CLASS));
+					properties.get(PARTITION_KEY_EXTRACTOR_CLASS));
 		}
-		if (properties.containsKey(BindingProperties.PARTITION_SELECTOR_CLASS)) {
+		if (properties.containsKey(PARTITION_SELECTOR_CLASS)) {
 			properties.put(BindingProperties.OUTPUT_PARTITION_SELECTOR_CLASS,
-					properties.get(BindingProperties.PARTITION_SELECTOR_CLASS));
+					properties.get(PARTITION_SELECTOR_CLASS));
 		}
-		if (properties.containsKey(BindingProperties.PARTITION_SELECTOR_EXPRESSION)) {
+		if (properties.containsKey(PARTITION_SELECTOR_EXPRESSION)) {
 			properties.put(BindingProperties.OUTPUT_PARTITION_SELECTOR_EXPRESSION,
-					properties.get(BindingProperties.PARTITION_SELECTOR_EXPRESSION));
+					properties.get(PARTITION_SELECTOR_EXPRESSION));
 		}
 	}
 
