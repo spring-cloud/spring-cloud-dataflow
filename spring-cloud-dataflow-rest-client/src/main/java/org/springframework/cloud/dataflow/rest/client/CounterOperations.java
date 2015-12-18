@@ -34,7 +34,7 @@ public interface CounterOperations {
 	/**
 	 * Retrieve basic information (i.e. names) for existing counters.
 	 */
-	PagedResources<MetricResource> list(/* TODO */);
+	PagedResources<MetricResource> list();
 
 	/**
 	 * Delete the counter with given name.

@@ -77,6 +77,5 @@ public class InProcessModuleDeployerTests {
 		ModuleDeploymentRequest log = new ModuleDeploymentRequest(logDefinition, logCoordinates);
 		deployer.deploy(time);
 		deployer.deploy(log);
-		// TODO: check status, then undeploy
 	}
 }

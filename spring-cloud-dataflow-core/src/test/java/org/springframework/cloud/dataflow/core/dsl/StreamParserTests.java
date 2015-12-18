@@ -195,7 +195,6 @@ public class StreamParserTests {
 		StreamNode ast = parse("tap:stream:mystream.group1 > file");
 
 		assertEquals("[(tap:stream:mystream.group1)>(ModuleNode:file)]", ast.stringify());
-		// TODO: Index should still be present in this case
 		ast = parse("tap:stream:mystream > file");
 		assertEquals("[(tap:stream:mystream)>(ModuleNode:file)]", ast.stringify());
 	}

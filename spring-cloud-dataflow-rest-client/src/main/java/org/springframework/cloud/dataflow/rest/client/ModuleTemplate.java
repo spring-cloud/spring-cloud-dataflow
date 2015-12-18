@@ -66,7 +66,6 @@ public class ModuleTemplate implements ModuleOperations {
 
 	@Override
 	public PagedResources<ModuleRegistrationResource> list(ArtifactType type) {
-		// TODO handle pagination at the client side
 		String uri = uriTemplate + "?size=10000" + ((type == null) ? "" : "&type=" + type.name());
 		return restTemplate.getForObject(uri, ModuleRegistrationResource.Page.class);
 	}

@@ -31,7 +31,7 @@ public interface TaskOperations {
 	/**
 	 * List tasks known to the system.
 	 */
-	public PagedResources<TaskDefinitionResource> list(/* TODO */);
+	public PagedResources<TaskDefinitionResource> list();
 
 	/**
 	 * Create a new task.

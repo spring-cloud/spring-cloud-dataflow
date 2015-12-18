@@ -122,7 +122,6 @@ public class TaskControllerTests {
 
 		repository.save(new TaskDefinition("myTask", "task"));
 
-		//TODO: Make this into an elegant error...
 		mockMvc.perform(
 				post("/tasks/definitions/").param("name", "myTask").param("definition", "task")
 						.accept(MediaType.APPLICATION_JSON)).andDo(print())

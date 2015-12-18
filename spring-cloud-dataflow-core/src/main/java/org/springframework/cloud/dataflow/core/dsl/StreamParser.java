@@ -442,8 +442,6 @@ public class StreamParser extends ModuleParser {
 			else if (firstToken.data.equalsIgnoreCase("topic")) {
 				channelType = ChannelType.TOPIC;
 			}
-			// TODO: DT not sure if this is the best way to handle
-			// StreamConfigParserTests.substreamsWithSourceChannels()
 			if (channelScopeComponents.size() >= 3) {
 				channelScopeComponents.remove(0);
 			}

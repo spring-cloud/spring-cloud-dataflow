@@ -116,7 +116,6 @@ public class ChannelNode extends AstNode {
 	}
 
 	public ChannelNode copyOf() {
-		// TODO not a deep copy, is that ok?
 		return new ChannelNode(this.channelType, super.startPos, super.endPos, nameComponents, indexingElements);
 	}
 }

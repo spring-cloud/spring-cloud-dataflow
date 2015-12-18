@@ -33,7 +33,7 @@ public interface StreamOperations {
 	/**
 	 * List streams known to the system.
 	 */
-	public PagedResources<StreamDefinitionResource> list(/* TODO */);
+	public PagedResources<StreamDefinitionResource> list();
 
 	/**
 	 * Create a new stream, optionally deploying it.

@@ -100,7 +100,6 @@ public class StreamNode extends AstNode {
 	}
 
 	public String getStreamName() {
-		// TODO [Andy] if null, could compute it using the module2module2module... algorithm
 		return streamName;
 	}
 
@@ -130,7 +129,7 @@ public class StreamNode extends AstNode {
 	}
 
 	public String getStreamData() {
-		return toString(); // TODO is toString always ok? currently only used in testing...
+		return toString();
 	}
 
 	public String getStreamText() {

@@ -70,7 +70,7 @@ public class CounterCommands extends AbstractMetricsCommands implements CommandM
 	}
 
 	@CliCommand(value = LIST_COUNTERS, help = "List all available counter names")
-	public Table list(/* TODO */) {
+	public Table list() {
 		PagedResources<MetricResource> list = counterOperations().list(/* TODO */);
 		return displayMetrics(list);
 	}
