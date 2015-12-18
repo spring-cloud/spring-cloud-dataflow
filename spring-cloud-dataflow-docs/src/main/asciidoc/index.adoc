@@ -36,6 +36,7 @@ Sabby Anandan, Marius Bogoevici, Eric Bottard, Mark Fisher, Ilayaperumal Gopinat
 :gradle-userguide: http://www.gradle.org/docs/current/userguide
 :propdeps-plugin: https://github.com/spring-projects/gradle-plugins/tree/master/propdeps-plugin
 :ant-manual: http://ant.apache.org/manual
+:project-doc-module: spring-cloud-dataflow-modules-docs 
 // ======================================================================================
 
 include::preface.adoc[]
