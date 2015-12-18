@@ -17,10 +17,14 @@
 package org.springframework.cloud.dataflow.completion;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+
+import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
+import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 
 /**
  * Provides code completion on a (maybe ill-formed) stream definition.
@@ -34,6 +38,15 @@ public class StreamCompletionProvider {
 
 	@Autowired
 	private List<? extends ExpansionStrategy> completionExpansionStrategies = new ArrayList<>();
+
+	@PostConstruct
+	public void sortStrategies() {
+		// Here we mean HIGHEST_PRECEDENCE to win over others, so must be *last*
+		AnnotationAwareOrderComparator.sort(completionExpansionStrategies);
+		Collections.reverse(completionExpansionStrategies);
+		AnnotationAwareOrderComparator.sort(completionRecoveryStrategies);
+		Collections.reverse(completionRecoveryStrategies);
+	}
 
 	/*
 	 * Attempt to parse the text the user has already typed in. This either succeeds,
