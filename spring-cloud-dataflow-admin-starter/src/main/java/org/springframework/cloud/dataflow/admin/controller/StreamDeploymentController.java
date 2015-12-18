@@ -112,7 +112,7 @@ public class StreamDeploymentController {
 	 */
 	@RequestMapping(value = "/{name}", method = RequestMethod.DELETE)
 	@ResponseStatus(HttpStatus.OK)
-	public void undeploy(@PathVariable("name") String name) throws Exception {
+	public void undeploy(@PathVariable("name") String name) {
 		StreamDefinition stream = this.repository.findOne(name);
 		Assert.notNull(stream, String.format("no stream defined: %s", name));
 		undeployStream(stream);
@@ -123,7 +123,7 @@ public class StreamDeploymentController {
 	 */
 	@RequestMapping(value = "", method = RequestMethod.DELETE)
 	@ResponseStatus(HttpStatus.OK)
-	public void undeployAll() throws Exception {
+	public void undeployAll() {
 		for (StreamDefinition stream : this.repository.findAll()) {
 			this.undeployStream(stream);
 		}
@@ -138,7 +138,7 @@ public class StreamDeploymentController {
 	@RequestMapping(value = "/{name}", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
 	public void deploy(@PathVariable("name") String name,
-			@RequestParam(required = false) String properties) throws Exception {
+			@RequestParam(required = false) String properties) {
 		StreamDefinition stream = this.repository.findOne(name);
 		Assert.notNull(stream, String.format("no stream defined: %s", name));
 		deployStream(stream, DeploymentPropertiesUtils.parse(properties));

@@ -24,9 +24,8 @@ import org.slf4j.LoggerFactory;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.cloud.dataflow.admin.repository.DuplicateStreamException;
+import org.springframework.cloud.dataflow.admin.repository.DuplicateStreamDefinitionException;
 import org.springframework.cloud.dataflow.admin.repository.StreamDefinitionRepository;
-import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistry;
 import org.springframework.cloud.dataflow.core.ModuleDefinition;
 import org.springframework.cloud.dataflow.core.ModuleDeploymentId;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
@@ -51,7 +50,6 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * Controller for operations on {@link StreamDefinition}. This
  * includes CRUD and optional deployment operations.
- *
  * @author Eric Bottard
  * @author Mark Fisher
  * @author Patrick Peralta
@@ -70,28 +68,30 @@ public class StreamDefinitionController {
 	private final StreamDefinitionRepository repository;
 
 	/**
-	 * The deployer this controller will use to deploy stream modules.
+	 * The deployer this controller will use to compute stream deployment status.
 	 */
 	private final ModuleDeployer deployer;
 
 	/**
 	 * Assembler for {@link StreamDefinitionResource} objects.
 	 */
-	private final Assembler streamAssembler = new Assembler();
+	private final Assembler streamDefinitionAssembler = new Assembler();
 
+	/**
+	 * This deployment controller is used as a delegate when stream creation is immediately followed by deployment.
+	 */
 	private final StreamDeploymentController deploymentController;
 
 	/**
-	 * Create a {@code StreamController} that delegates
+	 * Create a {@code StreamDefinitionController} that delegates
 	 * <ul>
-	 *     <li>CRUD operations to the provided {@link StreamDefinitionRepository}</li>
-	 *     <li>module coordinate retrieval to the provided {@link ArtifactRegistry}</li>
-	 *     <li>deployment operations to the provided {@link ModuleDeployer}</li>
+	 * <li>CRUD operations to the provided {@link StreamDefinitionRepository}</li>
+	 * <li>deployment operations to the provided {@link StreamDeploymentController}</li>
+	 * <li>deployment status computation to the provided {@link ModuleDeployer}</li>
 	 * </ul>
-	 *
-	 * @param repository  the repository this controller will use for stream CRUD operations
-	 * @param deploymentController    collabor
-	 * @param deployer    the deployer this controller will use to deploy stream modules
+	 * @param repository           the repository this controller will use for stream CRUD operations
+	 * @param deploymentController collabor
+	 * @param deployer             the deployer this controller will use to deploy stream modules
 	 */
 	@Autowired
 	public StreamDefinitionController(StreamDefinitionRepository repository, StreamDeploymentController deploymentController,
@@ -106,33 +106,33 @@ public class StreamDefinitionController {
 
 	/**
 	 * Return a page-able list of {@link StreamDefinitionResource} defined streams.
-	 *
-	 * @param pageable   page-able collection of {@code StreamDefinitionResource}.
-	 * @param assembler  assembler for {@link StreamDefinition}
+	 * @param pageable  page-able collection of {@code StreamDefinitionResource}s.
+	 * @param assembler assembler for {@link StreamDefinition}
 	 * @return list of stream definitions
 	 */
 	@RequestMapping(value = "", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
 	public PagedResources<StreamDefinitionResource> list(Pageable pageable,
-			PagedResourcesAssembler<StreamDefinition> assembler) {
-		return assembler.toResource(repository.findAll(pageable), streamAssembler);
+	                                                     PagedResourcesAssembler<StreamDefinition> assembler) {
+		return assembler.toResource(repository.findAll(pageable), streamDefinitionAssembler);
 	}
 
 	/**
 	 * Create a new stream.
 	 *
-	 * @param name    stream name
-	 * @param dsl     DSL definition for stream
-	 * @param deploy  if {@code true}, the stream is deployed upon creation
+	 * @param name   stream name
+	 * @param dsl    DSL definition for stream
+	 * @param deploy if {@code true}, the stream is deployed upon creation
+	 * @throws DuplicateStreamDefinitionException if a stream definition with the same name already exists
 	 */
 	@RequestMapping(value = "", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
 	public void save(@RequestParam("name") String name,
-			@RequestParam("definition") String dsl,
-			@RequestParam(value = "deploy", defaultValue = "true")
-			boolean deploy) throws Exception{
+	                 @RequestParam("definition") String dsl,
+	                 @RequestParam(value = "deploy", defaultValue = "true")
+	                 boolean deploy) {
 		if (this.repository.exists(name)) {
-			throw new DuplicateStreamException(
+			throw new DuplicateStreamDefinitionException(
 					String.format("Cannot create stream %s because another one has already " +
 							"been created with the same name", name));
 		}
@@ -146,25 +146,23 @@ public class StreamDefinitionController {
 
 	/**
 	 * Request removal of an existing stream definition.
-	 *
 	 * @param name the name of an existing stream definition (required)
 	 */
 	@RequestMapping(value = "/{name}", method = RequestMethod.DELETE)
 	@ResponseStatus(HttpStatus.OK)
-	public void delete(@PathVariable("name") String name) throws Exception {
+	public void delete(@PathVariable("name") String name) {
 		deploymentController.undeploy(name);
 		this.repository.delete(name);
 	}
 
 	/**
 	 * Return a given stream definition resource.
-	 *
 	 * @param name the name of an existing stream definition (required)
 	 */
 	@RequestMapping(value = "/{name}", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
-	public StreamDefinitionResource display(@PathVariable("name") String name) throws Exception {
-		return streamAssembler.toResource(repository.findOne(name));
+	public StreamDefinitionResource display(@PathVariable("name") String name) {
+		return streamDefinitionAssembler.toResource(repository.findOne(name));
 	}
 
 	/**
@@ -178,10 +176,8 @@ public class StreamDefinitionController {
 	}
 
 
-
 	/**
 	 * Return a string that describes the state of the given stream.
-	 *
 	 * @param name name of stream to determine state for
 	 * @return stream state
 	 * @see DeploymentState
@@ -200,7 +196,6 @@ public class StreamDefinitionController {
 
 	/**
 	 * Aggregate the set of module states into a single state for a stream.
-	 *
 	 * @param states set of states for modules of a stream
 	 * @return stream state based on module states
 	 */
@@ -208,7 +203,7 @@ public class StreamDefinitionController {
 		if (states.size() == 1) {
 			DeploymentState state = states.iterator().next();
 
-			// a stream which is known to the stream repository
+			// a stream which is known to the stream definition repository
 			// but unknown to deployers is undeployed
 			return state == DeploymentState.unknown ? DeploymentState.undeployed : state;
 		}
