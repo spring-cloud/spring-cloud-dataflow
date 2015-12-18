@@ -18,10 +18,11 @@ package org.springframework.cloud.dataflow.admin.config;
 
 import static org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType.HAL;
 
-import java.util.List;
+import java.util.Arrays;
 
 import org.springframework.boot.actuate.metrics.repository.MetricRepository;
 import org.springframework.boot.actuate.metrics.repository.redis.RedisMetricRepository;
+import org.springframework.boot.autoconfigure.web.HttpMessageConverters;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.dataflow.admin.completion.TapOnChannelExpansionStrategy;
 import org.springframework.cloud.dataflow.admin.repository.InMemoryStreamDefinitionRepository;
@@ -87,15 +88,17 @@ public class AdminConfiguration {
 	}
 
 	@Bean
+	public HttpMessageConverters messageConverters() {
+		return new HttpMessageConverters(
+				// Prevent default converters
+				false,
+				// Have Jackson2 converter as the sole converter
+				Arrays.<HttpMessageConverter<?>>asList(new MappingJackson2HttpMessageConverter()));
+	}
+
+	@Bean
 	public WebMvcConfigurer configurer() {
 		return new WebMvcConfigurerAdapter() {
-
-			@Override
-			public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
-				// the REST API produces JSON only; adding this converter
-				// prevents the registration of the default converters
-				converters.add(new MappingJackson2HttpMessageConverter());
-			}
 
 			@Override
 			public void configurePathMatch(PathMatchConfigurer configurer) {
