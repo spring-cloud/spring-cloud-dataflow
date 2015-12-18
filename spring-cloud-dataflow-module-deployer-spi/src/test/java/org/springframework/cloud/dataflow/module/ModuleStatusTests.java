@@ -16,6 +16,14 @@
 
 package org.springframework.cloud.dataflow.module;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
+import static org.springframework.cloud.dataflow.module.DeploymentState.deployed;
+import static org.springframework.cloud.dataflow.module.DeploymentState.failed;
+import static org.springframework.cloud.dataflow.module.DeploymentState.partial;
+import static org.springframework.cloud.dataflow.module.DeploymentState.undeployed;
+import static org.springframework.cloud.dataflow.module.DeploymentState.unknown;
+
 import java.util.Collections;
 import java.util.Map;
 import java.util.UUID;
@@ -23,10 +31,6 @@ import java.util.UUID;
 import org.junit.Test;
 
 import org.springframework.cloud.dataflow.core.ModuleDeploymentId;
-
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-import static org.springframework.cloud.dataflow.module.DeploymentState.*;
 
 /**
  * Tests for {@link ModuleStatus}.
@@ -42,6 +46,7 @@ public class ModuleStatusTests {
 		assertThat(moduleStatus(deployed, undeployed).getState(), is(partial));
 		assertThat(moduleStatus(deployed, unknown).getState(), is(partial));
 		assertThat(moduleStatus(undeployed, unknown).getState(), is(partial));
+		assertThat(moduleStatus(new DeploymentState[0]).getState(), is(undeployed));
 	}
 
 	static ModuleStatus moduleStatus(DeploymentState... states) {

@@ -78,6 +78,9 @@ public class ModuleStatus {
 			states.add(entry.getValue().getState());
 		}
 
+		if (states.size() == 0) {
+			return DeploymentState.undeployed;
+		}
 		if (states.size() == 1) {
 			return states.iterator().next();
 		}
