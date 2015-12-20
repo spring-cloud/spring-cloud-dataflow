@@ -97,6 +97,7 @@ public class ArtifactRegistryPopulator {
 		populateDefault("httpclient", processor);
 		populateDefault("noop", processor);
 		populateDefault("pmml", processor);
+		populateDefault("splitter", processor);
 		populateDefault("transform", processor);
 		populateDefault("cassandra", sink);
 		populateDefault("counter", sink);
