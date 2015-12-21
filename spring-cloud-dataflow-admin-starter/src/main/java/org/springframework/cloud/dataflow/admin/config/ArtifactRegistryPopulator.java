@@ -111,7 +111,6 @@ public class ArtifactRegistryPopulator {
 		populateDefault("tcp", sink);
 		populateDefault("throughput", sink);
 		populateDefault("websocket", sink);
-		populateDefault("timestamp", task);
 	}
 
 	/**
