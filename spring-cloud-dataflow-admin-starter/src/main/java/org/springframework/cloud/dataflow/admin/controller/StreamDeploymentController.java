@@ -274,10 +274,20 @@ public class StreamDeploymentController {
 		for (Map.Entry<String, String> entry : streamDeploymentProperties.entrySet()) {
 			if (entry.getKey().startsWith(modulePrefix)) {
 				if (entry.getKey().startsWith(producerPropertyPrefix)) {
+					// Set per-binding properties
+					moduleDeploymentProperties.put(BindingProperties.OUTPUT_BINDING_KEY_PREFIX +
+							entry.getKey().substring(producerPropertyPrefix.length()), entry.getValue());
+					// Set ChannelBindingServiceProperties' producer properties
+					// todo: Once the producer/consumer properties are moved to per-binding properties, following step
+					// 		isn't needed: https://github.com/spring-cloud/spring-cloud-stream/issues/256
 					moduleDeploymentProperties.put(CHANNEL_BINDING_PRODUCER_PROPERTIES_PREFIX +
 							entry.getKey().substring(producerPropertyPrefix.length()), entry.getValue());
 				}
 				else if (entry.getKey().startsWith(consumerPropertyPrefix)) {
+					// Set per-binding properties
+					moduleDeploymentProperties.put(BindingProperties.INPUT_BINDING_KEY_PREFIX +
+							entry.getKey().substring(consumerPropertyPrefix.length()), entry.getValue());
+					// Set ChannelBindingServiceProperties' consumer properties
 					moduleDeploymentProperties.put(CHANNEL_BINDING_CONSUMER_PROPERTIES_PREFIX +
 							entry.getKey().substring(consumerPropertyPrefix.length()), entry.getValue());
 				}
