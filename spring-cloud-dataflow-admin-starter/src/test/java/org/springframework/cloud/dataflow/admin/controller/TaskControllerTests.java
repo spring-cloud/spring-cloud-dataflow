@@ -166,8 +166,8 @@ public class TaskControllerTests {
 	}
 
 	@Test
-	public void testDeploy() throws Exception {
-		repository.save(new TaskDefinition("myTask", "timestamp"));
+	public void testMissingModule() throws Exception {
+		repository.save(new TaskDefinition("myTask", "nosuchtaskmodule"));
 
 		mockMvc.perform(
 				post("/tasks/deployments/myTask").accept(MediaType.APPLICATION_JSON)).andDo(print())
