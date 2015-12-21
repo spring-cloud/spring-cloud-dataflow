@@ -16,11 +16,8 @@
 
 package org.springframework.cloud.dataflow.admin.controller;
 
-import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -31,8 +28,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.SpringApplicationConfiguration;
@@ -40,7 +35,6 @@ import org.springframework.cloud.dataflow.admin.configuration.TestDependencies;
 import org.springframework.cloud.dataflow.admin.repository.InMemoryTaskDefinitionRepository;
 import org.springframework.cloud.dataflow.admin.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.artifact.registry.InMemoryArtifactRegistry;
-import org.springframework.cloud.dataflow.core.ModuleDeploymentRequest;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.module.deployer.ModuleDeployer;
 import org.springframework.http.MediaType;
@@ -172,16 +166,12 @@ public class TaskControllerTests {
 	}
 
 	@Test
-	public void testDeploy() throws Exception {
-		repository.save(new TaskDefinition("myTask", "timestamp"));
+	public void testMissingModule() throws Exception {
+		repository.save(new TaskDefinition("myTask", "nosuchtaskmodule"));
 
 		mockMvc.perform(
 				post("/tasks/deployments/myTask").accept(MediaType.APPLICATION_JSON)).andDo(print())
-				.andExpect(status().isCreated());
+				.andExpect(status().is5xxServerError());
 
-		ArgumentCaptor<ModuleDeploymentRequest> captor = ArgumentCaptor.forClass(ModuleDeploymentRequest.class);
-		verify(moduleDeployer).deploy(captor.capture());
-		ModuleDeploymentRequest request = captor.getValue();
-		assertThat(request.getDefinition().getName(), is("timestamp"));
 	}
 }
