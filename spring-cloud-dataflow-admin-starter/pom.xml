@@ -13,6 +13,7 @@
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-stream-configuration-metadata</artifactId>
+			<version>${spring-cloud-stream-configuration-metadata.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
@@ -58,7 +59,7 @@
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-dataflow-ui</artifactId>
-			<version>1.0.0.BUILD-SNAPSHOT</version>
+			<version>${spring-cloud-dataflow-ui.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -75,7 +76,7 @@
 		<dependency>
 			<groupId>org.springframework.data</groupId>
 			<artifactId>spring-data-commons</artifactId>
-			<version>${spring-data.version}</version>
+			<version>${spring-data-commons.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.plugin</groupId>
