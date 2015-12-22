@@ -23,16 +23,22 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.cloud.dataflow.module.DeploymentState.deployed;
+import static org.springframework.cloud.dataflow.module.DeploymentState.error;
+import static org.springframework.cloud.dataflow.module.DeploymentState.failed;
+import static org.springframework.cloud.dataflow.module.DeploymentState.partial;
+import static org.springframework.cloud.dataflow.module.DeploymentState.undeployed;
+import static org.springframework.cloud.dataflow.module.DeploymentState.unknown;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.cloud.dataflow.module.DeploymentState.*;
 
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.After;
 import org.junit.Before;
@@ -66,6 +72,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 /**
  * @author Mark Fisher
+ * @author Ilayaperumal Gopinathan
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = TestDependencies.class)
@@ -348,6 +355,38 @@ public class StreamControllerTests {
 		assertThat(logRequest.getDefinition().getName(), is("log"));
 		ModuleDeploymentRequest timeRequest = requests.get(1);
 		assertThat(timeRequest.getDefinition().getName(), is("time"));
+	}
+
+	@Test
+	public void testDeployWithProperties() throws Exception {
+		repository.save(new StreamDefinition("myStream", "time | log"));
+		mockMvc.perform(
+				post("/streams/deployments/myStream").param("properties",
+						"module.time.producer.partitionKeyExpression=payload," +
+								"module.time.producer.trackHistory=true," +
+								"module.log.count=2," +
+								"module.log.consumer.concurrency=3," +
+								"module.log.consumer.trackHistory=true")
+						.accept(MediaType.APPLICATION_JSON)).andDo(print())
+				.andExpect(status().isCreated());
+		ArgumentCaptor<ModuleDeploymentRequest> captor = ArgumentCaptor.forClass(ModuleDeploymentRequest.class);
+		verify(moduleDeployer, times(2)).deploy(captor.capture());
+		List<ModuleDeploymentRequest> requests = captor.getAllValues();
+		assertEquals(2, requests.size());
+		ModuleDeploymentRequest logRequest = requests.get(0);
+		assertThat(logRequest.getDefinition().getName(), is("log"));
+		Map<String, String> logDeploymentProps = logRequest.getDeploymentProperties();
+		assertEquals(logDeploymentProps.get("spring.cloud.stream.bindings.input.trackHistory"), "true");
+		assertEquals(logDeploymentProps.get("spring.cloud.stream.instanceCount"), "2");
+		assertEquals(logDeploymentProps.get("spring.cloud.stream.bindings.input.partitioned"), "true");
+		assertEquals(logDeploymentProps.get("spring.cloud.stream.bindings.input.concurrency"), "3");
+		assertEquals(logDeploymentProps.get("count"), "2");
+		ModuleDeploymentRequest timeRequest = requests.get(1);
+		assertThat(timeRequest.getDefinition().getName(), is("time"));
+		Map<String, String> timeDeploymentProps = timeRequest.getDeploymentProperties();
+		assertEquals(timeDeploymentProps.get("spring.cloud.stream.bindings.output.trackHistory"), "true");
+		assertEquals(timeDeploymentProps.get("spring.cloud.stream.bindings.output.partitionCount"), "2");
+		assertEquals(timeDeploymentProps.get("spring.cloud.stream.bindings.output.partitionKeyExpression"), "payload");
 	}
 
 	@Test

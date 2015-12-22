@@ -78,22 +78,8 @@ public class StreamDeploymentController {
 	 */
 	private final ModuleDeployer deployer;
 
-	private static final String DEFAULT_PARTITION_KEY_EXPRESSION = "payload";
-
-	private static final String CHANNEL_BINDING_PRODUCER_PROPERTIES_PREFIX = "spring.cloud.stream.producerProperties.";
-
-	private static final String CHANNEL_BINDING_CONSUMER_PROPERTIES_PREFIX = "spring.cloud.stream.consumerProperties.";
-
-	private static final String PARTITION_KEY_EXPRESSION = CHANNEL_BINDING_PRODUCER_PROPERTIES_PREFIX + BindingProperties.PARTITION_KEY_EXPRESSION;
-
-	private static final String PARTITION_KEY_EXTRACTOR_CLASS = CHANNEL_BINDING_PRODUCER_PROPERTIES_PREFIX + BindingProperties.PARTITION_KEY_EXTRACTOR_CLASS;
-
-	private static final String PARTITION_SELECTOR_CLASS = CHANNEL_BINDING_PRODUCER_PROPERTIES_PREFIX + BindingProperties.PARTITION_SELECTOR_CLASS;
-
-	private static final String PARTITION_SELECTOR_EXPRESSION = CHANNEL_BINDING_PRODUCER_PROPERTIES_PREFIX + BindingProperties.PARTITION_SELECTOR_EXPRESSION;
-
 	/**
-	 * Create a {@code StreamController} that delegates
+	 * Create a {@code StreamDeploymentController} that delegates
 	 * <ul>
 	 *     <li>CRUD operations to the provided {@link StreamDefinitionRepository}</li>
 	 *     <li>module coordinate retrieval to the provided {@link ArtifactRegistry}</li>
@@ -106,7 +92,7 @@ public class StreamDeploymentController {
 	 */
 	@Autowired
 	public StreamDeploymentController(StreamDefinitionRepository repository, ArtifactRegistry registry,
-	                                  @Qualifier("processModuleDeployer") ModuleDeployer deployer) {
+			@Qualifier("processModuleDeployer") ModuleDeployer deployer) {
 		Assert.notNull(repository, "repository must not be null");
 		Assert.notNull(registry, "registry must not be null");
 		Assert.notNull(deployer, "deployer must not be null");
@@ -179,7 +165,7 @@ public class StreamDeploymentController {
 			Map<String, String> moduleDeploymentProperties = extractModuleDeploymentProperties(currentModule, streamDeploymentProperties);
 			boolean upstreamModuleSupportsPartition = upstreamModuleHasPartitionInfo(stream, currentModule, streamDeploymentProperties);
 			// consumer module partition properties
-			if (isPartitionedConsumer(currentModule, moduleDeploymentProperties, upstreamModuleSupportsPartition)) {
+			if (upstreamModuleSupportsPartition) {
 				updateConsumerPartitionProperties(moduleDeploymentProperties);
 			}
 			// producer module partition properties
@@ -274,11 +260,11 @@ public class StreamDeploymentController {
 		for (Map.Entry<String, String> entry : streamDeploymentProperties.entrySet()) {
 			if (entry.getKey().startsWith(modulePrefix)) {
 				if (entry.getKey().startsWith(producerPropertyPrefix)) {
-					moduleDeploymentProperties.put(CHANNEL_BINDING_PRODUCER_PROPERTIES_PREFIX +
+					moduleDeploymentProperties.put(BindingProperties.OUTPUT_BINDING_KEY_PREFIX +
 							entry.getKey().substring(producerPropertyPrefix.length()), entry.getValue());
 				}
 				else if (entry.getKey().startsWith(consumerPropertyPrefix)) {
-					moduleDeploymentProperties.put(CHANNEL_BINDING_CONSUMER_PROPERTIES_PREFIX +
+					moduleDeploymentProperties.put(BindingProperties.INPUT_BINDING_KEY_PREFIX +
 							entry.getKey().substring(consumerPropertyPrefix.length()), entry.getValue());
 				}
 				else {
@@ -307,8 +293,8 @@ public class StreamDeploymentController {
 			if (module.equals(currentModule) && iterator.hasNext()) {
 				ModuleDefinition prevModule = iterator.next();
 				Map<String, String> moduleDeploymentProperties = extractModuleDeploymentProperties(prevModule, streamDeploymentProperties);
-				return moduleDeploymentProperties.containsKey(PARTITION_KEY_EXPRESSION) ||
-						moduleDeploymentProperties.containsKey(PARTITION_KEY_EXTRACTOR_CLASS);
+				return moduleDeploymentProperties.containsKey(BindingProperties.PARTITION_KEY_EXPRESSION) ||
+						moduleDeploymentProperties.containsKey(BindingProperties.PARTITION_KEY_EXTRACTOR_CLASS);
 			}
 		}
 		return false;
@@ -329,9 +315,8 @@ public class StreamDeploymentController {
 			Map<String, String> moduleDeploymentProperties,
 			boolean upstreamModuleSupportsPartition) {
 		return upstreamModuleSupportsPartition ||
-				(module.getParameters().containsKey(BindingProperties.INPUT_BINDING_KEY) &&
-						moduleDeploymentProperties.containsKey(BindingProperties.PARTITIONED_PROPERTY) &&
-						moduleDeploymentProperties.get(BindingProperties.PARTITIONED_PROPERTY).equalsIgnoreCase("true"));
+				(moduleDeploymentProperties.containsKey(BindingProperties.PARTITIONED) &&
+						moduleDeploymentProperties.get(BindingProperties.PARTITIONED).equalsIgnoreCase("true"));
 	}
 
 	/**
@@ -340,7 +325,7 @@ public class StreamDeploymentController {
 	 * @param properties properties to update
 	 */
 	private void updateConsumerPartitionProperties(Map<String, String> properties) {
-		properties.put(BindingProperties.INPUT_PARTITIONED, "true");
+		properties.put(BindingProperties.PARTITIONED, "true");
 		if (properties.containsKey(BindingProperties.COUNT_PROPERTY)) {
 			properties.put(BindingProperties.INSTANCE_COUNT, properties.get(BindingProperties.COUNT_PROPERTY));
 		}
@@ -353,25 +338,9 @@ public class StreamDeploymentController {
 	 * @param nextModuleCount the number of module instances for the next (downstream) module in the stream
 	 */
 	private void updateProducerPartitionProperties(Map<String, String> properties, int nextModuleCount) {
-		properties.put(BindingProperties.OUTPUT_PARTITION_COUNT, String.valueOf(nextModuleCount));
-		if (properties.containsKey(PARTITION_KEY_EXPRESSION)) {
-			properties.put(BindingProperties.OUTPUT_PARTITION_KEY_EXPRESSION,
-					properties.get(PARTITION_KEY_EXPRESSION));
-		}
-		else {
-			properties.put(BindingProperties.OUTPUT_PARTITION_KEY_EXPRESSION, DEFAULT_PARTITION_KEY_EXPRESSION);
-		}
-		if (properties.containsKey(PARTITION_KEY_EXTRACTOR_CLASS)) {
-			properties.put(BindingProperties.OUTPUT_PARTITION_KEY_EXTRACTOR_CLASS,
-					properties.get(PARTITION_KEY_EXTRACTOR_CLASS));
-		}
-		if (properties.containsKey(PARTITION_SELECTOR_CLASS)) {
-			properties.put(BindingProperties.OUTPUT_PARTITION_SELECTOR_CLASS,
-					properties.get(PARTITION_SELECTOR_CLASS));
-		}
-		if (properties.containsKey(PARTITION_SELECTOR_EXPRESSION)) {
-			properties.put(BindingProperties.OUTPUT_PARTITION_SELECTOR_EXPRESSION,
-					properties.get(PARTITION_SELECTOR_EXPRESSION));
+		properties.put(BindingProperties.PARTITION_COUNT, String.valueOf(nextModuleCount));
+		if (!properties.containsKey(BindingProperties.PARTITION_KEY_EXPRESSION)) {
+			properties.put(BindingProperties.PARTITION_KEY_EXPRESSION, BindingProperties.DEFAULT_PARTITION_KEY_EXPRESSION);
 		}
 	}
 
@@ -402,6 +371,5 @@ public class StreamDeploymentController {
 			}
 		}
 	}
-
 
 }
