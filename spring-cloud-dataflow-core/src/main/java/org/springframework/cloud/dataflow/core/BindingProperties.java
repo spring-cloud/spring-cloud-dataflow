@@ -24,16 +24,6 @@ public class BindingProperties {
 
 	public static final String COUNT_PROPERTY = "count";
 
-	public static final String PARTITIONED_PROPERTY = "partitioned";
-
-	public static final String PARTITION_KEY_EXPRESSION = "partitionKeyExpression";
-
-	public static final String PARTITION_KEY_EXTRACTOR_CLASS = "partitionKeyExtractorClass";
-
-	public static final String PARTITION_SELECTOR_CLASS = "partitionSelectorClass";
-
-	public static final String PARTITION_SELECTOR_EXPRESSION = "partitionSelectorExpression";
-
 	public static final String ROOT_PREFIX = "spring.cloud.stream.";
 
 	public static final String INSTANCE_COUNT = ROOT_PREFIX + "instanceCount";
@@ -51,22 +41,10 @@ public class BindingProperties {
 	 */
 	public static final String INPUT_BINDING_KEY = INPUT_BINDING_KEY_PREFIX + "destination";
 
-	public static final String INPUT_PARTITIONED = INPUT_BINDING_KEY_PREFIX + PARTITIONED_PROPERTY;
-
 	/**
 	 * Default property key for output channel binding.
 	 */
 	public static final String OUTPUT_BINDING_KEY = OUTPUT_BINDING_KEY_PREFIX + "destination";
-
-	public static final String OUTPUT_PARTITION_KEY_EXPRESSION = OUTPUT_BINDING_KEY_PREFIX + PARTITION_KEY_EXPRESSION;
-
-	public static final String OUTPUT_PARTITION_KEY_EXTRACTOR_CLASS = OUTPUT_BINDING_KEY_PREFIX + PARTITION_KEY_EXTRACTOR_CLASS;
-
-	public static final String OUTPUT_PARTITION_SELECTOR_CLASS = OUTPUT_BINDING_KEY_PREFIX + PARTITION_SELECTOR_CLASS;
-
-	public static final String OUTPUT_PARTITION_SELECTOR_EXPRESSION = OUTPUT_BINDING_KEY_PREFIX + PARTITION_SELECTOR_EXPRESSION;
-
-	public static final String OUTPUT_PARTITION_COUNT = OUTPUT_BINDING_KEY_PREFIX + "partitionCount";
 
 	/**
 	 * Type conversion for channel binding
@@ -74,5 +52,18 @@ public class BindingProperties {
 	public static final String INPUT_TYPE_KEY = INPUT_BINDING_KEY_PREFIX + CONTENT_TYPE_KEY;
 
 	public static final String OUTPUT_TYPE_KEY = OUTPUT_BINDING_KEY_PREFIX + CONTENT_TYPE_KEY;
+
+	/**
+	 * Partition properties
+	 */
+	public static final String DEFAULT_PARTITION_KEY_EXPRESSION = "payload";
+
+	public static final String PARTITION_KEY_EXPRESSION = OUTPUT_BINDING_KEY_PREFIX + "partitionKeyExpression";
+
+	public static final String PARTITION_KEY_EXTRACTOR_CLASS = OUTPUT_BINDING_KEY_PREFIX + "partitionKeyExtractorClass";
+
+	public static final String PARTITIONED = INPUT_BINDING_KEY_PREFIX + "partitioned";
+
+	public static final String PARTITION_COUNT = OUTPUT_BINDING_KEY_PREFIX + "partitionCount";
 
 }
