@@ -19,17 +19,23 @@ package org.springframework.cloud.dataflow.admin.controller;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.cloud.dataflow.module.DeploymentState.deployed;
+import static org.springframework.cloud.dataflow.module.DeploymentState.error;
+import static org.springframework.cloud.dataflow.module.DeploymentState.failed;
+import static org.springframework.cloud.dataflow.module.DeploymentState.partial;
+import static org.springframework.cloud.dataflow.module.DeploymentState.undeployed;
+import static org.springframework.cloud.dataflow.module.DeploymentState.unknown;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.cloud.dataflow.module.DeploymentState.*;
 
 import java.util.EnumSet;
 import java.util.List;
@@ -348,6 +354,28 @@ public class StreamControllerTests {
 		assertThat(logRequest.getDefinition().getName(), is("log"));
 		ModuleDeploymentRequest timeRequest = requests.get(1);
 		assertThat(timeRequest.getDefinition().getName(), is("time"));
+	}
+
+	@Test
+	public void testDeployWithProperties() throws Exception {
+		repository.save(new StreamDefinition("myStream", "time | log"));
+		mockMvc.perform(
+				post("/streams/deployments/myStream").param("properties", "module.time.producer.trackHistory=true," +
+						"module.log.consumer.trackHistory=false,module.log.consumer.concurrency=1," +
+						"module.time.producer.nextModuleCount=2").accept(MediaType.APPLICATION_JSON)).andDo(print())
+				.andExpect(status().isCreated());
+		ArgumentCaptor<ModuleDeploymentRequest> captor = ArgumentCaptor.forClass(ModuleDeploymentRequest.class);
+		verify(moduleDeployer, times(2)).deploy(captor.capture());
+		List<ModuleDeploymentRequest> requests = captor.getAllValues();
+		assertEquals(2, requests.size());
+		ModuleDeploymentRequest logRequest = requests.get(0);
+		assertThat(logRequest.getDefinition().getName(), is("log"));
+		assertTrue(logRequest.getDeploymentProperties().get("spring.cloud.stream.bindings.input.trackHistory").equals("false"));
+		assertTrue(logRequest.getDeploymentProperties().get("spring.cloud.stream.consumerProperties.concurrency").equals("1"));
+		ModuleDeploymentRequest timeRequest = requests.get(1);
+		assertThat(timeRequest.getDefinition().getName(), is("time"));
+		assertTrue(timeRequest.getDeploymentProperties().get("spring.cloud.stream.bindings.output.trackHistory").equals("true"));
+		assertTrue(timeRequest.getDeploymentProperties().get("spring.cloud.stream.producerProperties.nextModuleCount").equals("2"));
 	}
 
 	@Test
