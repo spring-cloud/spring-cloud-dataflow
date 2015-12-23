@@ -8,7 +8,7 @@
 	<parent>
 		<groupId>org.springframework.cloud</groupId>
 		<artifactId>spring-cloud-dataflow-parent</artifactId>
-		<version>1.0.0.M2</version>
+		<version>1.0.0.BUILD-SNAPSHOT</version>
 	</parent>
 	<properties>
 		<start-class>org.springframework.cloud.dataflow.admin.AdminApplication</start-class>
@@ -17,7 +17,7 @@
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-dataflow-admin-starter</artifactId>
-			<version>1.0.0.M2</version>
+			<version>1.0.0.BUILD-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
