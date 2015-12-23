@@ -53,10 +53,10 @@ dataflow:>
 
 You can now use the shell commands to list modules and create streams.  For example
 
----
+```
 dataflow:>stream create --name httptest --definition "http --server.port=9000 | log" --deploy
 
 dataflow:> http post --target http://localhost:9000 --data "hello world"
----
+```
 
 Look to see if data ended up in log files under the /tmp directory.
