@@ -23,7 +23,7 @@
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-stream-configuration-metadata</artifactId>
-			<version>1.0.0.BUILD-SNAPSHOT</version>
+			<version>${spring-cloud-stream-configuration-metadata.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
