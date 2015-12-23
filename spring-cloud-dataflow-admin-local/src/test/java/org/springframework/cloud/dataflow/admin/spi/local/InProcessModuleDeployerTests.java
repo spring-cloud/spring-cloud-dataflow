@@ -43,7 +43,7 @@ public class InProcessModuleDeployerTests {
 
 	private static final String GROUP_ID = "org.springframework.cloud.stream.module";
 
-	private static final String VERSION = "1.0.0.BUILD-SNAPSHOT";
+	private static final String VERSION = "1.0.0.M2";
 
 	@Autowired
 	private ModuleLauncher moduleLauncher;

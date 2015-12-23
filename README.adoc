@@ -32,5 +32,16 @@ Instructions to run the Admin Server for each runtime environments can be found 
 
 === Contributing
 
-We love contributions.  Follow this https://github.com/spring-cloud/spring-cloud-commons#contributing[link] for more information on how to contribute.
+We love contributions.  Follow this https://github.com/spring-cloud/spring-cloud-dataflow/blob/master/spring-cloud-dataflow-docs/src/main/asciidoc/appendix-contributing.adoc[link] for more information on how to contribute.
+
+=== Building
+
+Clone the repo and type 
+
+----
+$ ./mvnw clean install 
+----
+
+For more information on building, see this https://github.com/spring-cloud/spring-cloud-dataflow/blob/master/spring-cloud-dataflow-docs/src/main/asciidoc/appendix-building.adoc[link].
+
 
