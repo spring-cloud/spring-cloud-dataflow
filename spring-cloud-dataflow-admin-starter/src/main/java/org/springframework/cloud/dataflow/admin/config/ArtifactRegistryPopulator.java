@@ -50,7 +50,7 @@ public class ArtifactRegistryPopulator {
 	/**
 	 * Version number for default modules.
 	 */
-	private static final String DEFAULT_VERSION = "1.0.0.BUILD-SNAPSHOT";
+	private static final String DEFAULT_VERSION = "1.0.0.M2";
 
 	/**
 	 * Default classifier for default modules.
