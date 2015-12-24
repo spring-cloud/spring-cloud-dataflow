@@ -90,6 +90,7 @@ public class ArtifactRegistryPopulator {
 		populateDefault("sftp", source);
 		populateDefault("tcp", source);
 		populateDefault("time", source);
+		populateDefault("trigger", source);
 		populateDefault("twitterstream", source);
 		populateDefault("filter", processor);
 		populateDefault("groovy-filter", processor);
