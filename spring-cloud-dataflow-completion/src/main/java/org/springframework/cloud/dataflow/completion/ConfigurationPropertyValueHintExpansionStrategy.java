@@ -16,7 +16,7 @@
 
 package org.springframework.cloud.dataflow.completion;
 
-import static org.springframework.cloud.dataflow.completion.CompletionProposal.*;
+import static org.springframework.cloud.dataflow.completion.CompletionProposal.expanding;
 
 import java.io.Closeable;
 import java.io.File;
@@ -41,6 +41,8 @@ import org.springframework.cloud.dataflow.core.dsl.Token;
 import org.springframework.cloud.dataflow.core.dsl.TokenKind;
 import org.springframework.cloud.stream.configuration.metadata.ModuleConfigurationMetadataResolver;
 import org.springframework.cloud.stream.module.resolver.ModuleResolver;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.core.io.Resource;
 
 /**
@@ -49,6 +51,7 @@ import org.springframework.core.io.Resource;
  *
  * @author Eric Bottard
  */
+@Order(Ordered.HIGHEST_PRECEDENCE)
 public class ConfigurationPropertyValueHintExpansionStrategy implements ExpansionStrategy {
 
 	private final ArtifactRegistry artifactRegistry;

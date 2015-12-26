@@ -162,7 +162,7 @@ public class StreamCompletionProviderTests {
 	@Ignore
 	// file | counter --name=foo --inputType=bar<TAB> => we're done
 	public void testSinkWithAllOptionsSetCantGoFurther() {
-		assertThat(completionProvider.complete("http --port=1234 --use.ssl=true", 1), empty());
+		assertThat(completionProvider.complete("http | log --level=debug", 1), empty());
 	}
 
 	@Test
