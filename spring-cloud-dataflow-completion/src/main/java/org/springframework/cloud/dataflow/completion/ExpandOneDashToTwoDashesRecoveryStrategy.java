@@ -19,7 +19,10 @@ package org.springframework.cloud.dataflow.completion;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.dataflow.core.StreamDefinition;
+import org.springframework.cloud.dataflow.core.dsl.CheckPointedParseException;
 import org.springframework.cloud.dataflow.core.dsl.ParseException;
+import org.springframework.util.Assert;
 
 /**
  * Provides completion when the user has typed in the first dash to a module configuration property.
@@ -29,7 +32,7 @@ import org.springframework.cloud.dataflow.core.dsl.ParseException;
 class ExpandOneDashToTwoDashesRecoveryStrategy extends StacktraceFingerprintingRecoveryStrategy<ParseException> {
 
 	@Autowired
-	private StreamCompletionProvider completionProvider;
+	private ConfigurationPropertyNameAfterDashDashRecoveryStrategy recoveryAfterDashDash;
 
 	public ExpandOneDashToTwoDashesRecoveryStrategy() {
 		super(ParseException.class, "file -");
@@ -37,9 +40,15 @@ class ExpandOneDashToTwoDashesRecoveryStrategy extends StacktraceFingerprintingR
 
 	@Override
 	public void addProposals(String dsl, ParseException exception, int detailLevel, List<CompletionProposal> proposals) {
-		// Pretend there was an additional dash and invoke recursively
-		List<CompletionProposal> completions = completionProvider.complete(dsl + "-", detailLevel);
-		proposals.addAll(completions);
+		// Pretend there was an additional dash and invoke the dedicated strategy for that case
+		String withDashDash = dsl + "-";
+		try {
+			new StreamDefinition("__dummy", withDashDash);
+		}
+		catch (CheckPointedParseException recoverable) {
+			Assert.isTrue(recoveryAfterDashDash.shouldTrigger(withDashDash, recoverable));
+			recoveryAfterDashDash.addProposals(withDashDash, recoverable, detailLevel, proposals);
+		}
 	}
 
 }

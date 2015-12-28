@@ -17,6 +17,9 @@
 package org.springframework.cloud.dataflow.completion;
 
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistry;
 import org.springframework.cloud.stream.configuration.metadata.ModuleConfigurationMetadataResolver;
@@ -29,7 +32,6 @@ import org.springframework.context.annotation.Import;
 
 /**
  * Include this Configuration class to expose a fully configured {@link StreamCompletionProvider}.
- *
  * @author Eric Bottard
  */
 @Configuration
@@ -47,17 +49,31 @@ public class CompletionConfiguration {
 
 
 	@Bean
+	@SuppressWarnings("unchecked")
 	public StreamCompletionProvider streamCompletionProvider() {
-		return new StreamCompletionProvider();
+		List<RecoveryStrategy<?>> recoveryStrategies = Arrays.<RecoveryStrategy<?>>asList(
+				emptyStartYieldsModulesRecoveryStrategy(),
+				expandOneDashToTwoDashesRecoveryStrategy(),
+				configurationPropertyNameAfterDashDashRecoveryStrategy(),
+				unfinishedConfigurationPropertyNameRecoveryStrategy(),
+				channelNameYieldsModulesRecoveryStrategy(),
+				modulesAfterPipeRecoveryStrategy(),
+				configurationPropertyValueHintRecoveryStrategy()
+
+		);
+		List<ExpansionStrategy> expansionStrategies = Arrays.asList(
+				addModuleOptionsExpansionStrategy(),
+				pipeIntoOtherModulesExpansionStrategy(),
+				unfinishedModuleNameExpansionStrategy(),
+				// Make sure this one runs last, as it may clear already computed proposals
+				// and return its own as the sole candidates
+				configurationPropertyValueHintExpansionStrategy()
+		);
+		return new StreamCompletionProvider(recoveryStrategies, expansionStrategies);
 	}
 
 	@Bean
-	public ExpansionStrategy addModuleOptionsExpansionStrategy() {
-		return new AddModuleOptionsExpansionStrategy(artifactRegistry, moduleConfigurationMetadataResolver, moduleResolver);
-	}
-
-	@Bean
-	public RecoveryStrategy emptyStartYieldsModulesRecoveryStrategy() {
+	public RecoveryStrategy<?> emptyStartYieldsModulesRecoveryStrategy() {
 		return new EmptyStartYieldsSourceModulesRecoveryStrategy(artifactRegistry);
 	}
 
@@ -67,7 +83,7 @@ public class CompletionConfiguration {
 	}
 
 	@Bean
-	public RecoveryStrategy configurationPropertyNameAfterDashDashRecoveryStrategy() {
+	public ConfigurationPropertyNameAfterDashDashRecoveryStrategy configurationPropertyNameAfterDashDashRecoveryStrategy() {
 		return new ConfigurationPropertyNameAfterDashDashRecoveryStrategy(artifactRegistry,
 				moduleResolver, moduleConfigurationMetadataResolver);
 	}
@@ -84,24 +100,29 @@ public class CompletionConfiguration {
 	}
 
 	@Bean
-	public ExpansionStrategy unfinishedModuleNameExpansionStrategy() {
-		return new UnfinishedModuleNameExpansionStrategy(artifactRegistry);
-	}
-
-	@Bean
 	public RecoveryStrategy channelNameYieldsModulesRecoveryStrategy() {
 		return new ChannelNameYieldsModulesRecoveryStrategy(artifactRegistry);
-	}
-
-	@Bean
-	public ExpansionStrategy pipeIntoOtherModulesExpansionStrategy() {
-		return new PipeIntoOtherModulesExpansionStrategy(artifactRegistry);
 	}
 
 	@Bean
 	public RecoveryStrategy configurationPropertyValueHintRecoveryStrategy() {
 		return new ConfigurationPropertyValueHintRecoveryStrategy(artifactRegistry,
 				moduleResolver, moduleConfigurationMetadataResolver);
+	}
+
+	@Bean
+	public ExpansionStrategy addModuleOptionsExpansionStrategy() {
+		return new AddModuleOptionsExpansionStrategy(artifactRegistry, moduleConfigurationMetadataResolver, moduleResolver);
+	}
+
+	@Bean
+	public ExpansionStrategy unfinishedModuleNameExpansionStrategy() {
+		return new UnfinishedModuleNameExpansionStrategy(artifactRegistry);
+	}
+
+	@Bean
+	public ExpansionStrategy pipeIntoOtherModulesExpansionStrategy() {
+		return new PipeIntoOtherModulesExpansionStrategy(artifactRegistry);
 	}
 
 	@Bean

@@ -19,7 +19,6 @@ package org.springframework.cloud.dataflow.completion;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 
 /**
@@ -29,11 +28,16 @@ import org.springframework.cloud.dataflow.core.StreamDefinition;
  */
 public class StreamCompletionProvider {
 
-	@Autowired
-	private List<? extends RecoveryStrategy<Exception>> completionRecoveryStrategies = new ArrayList<>();
+	private final List<RecoveryStrategy<?>> completionRecoveryStrategies;
 
-	@Autowired
-	private List<? extends ExpansionStrategy> completionExpansionStrategies = new ArrayList<>();
+	private final List<ExpansionStrategy> completionExpansionStrategies;
+
+	public StreamCompletionProvider(
+			List<RecoveryStrategy<?>> completionRecoveryStrategies,
+			List<ExpansionStrategy> completionExpansionStrategies) {
+		this.completionRecoveryStrategies = completionRecoveryStrategies;
+		this.completionExpansionStrategies = completionExpansionStrategies;
+	}
 
 	/*
 	 * Attempt to parse the text the user has already typed in. This either succeeds,
@@ -41,6 +45,7 @@ public class StreamCompletionProvider {
 	 * (most likely because this is not well formed), in which case we try to
 	 * recover from the parsing failure and still add proposals.
 	 */
+	@SuppressWarnings("unchecked")
 	public List<CompletionProposal> complete(String dslStart, int detailLevel) {
 		List<CompletionProposal> collector = new ArrayList<>();
 
@@ -49,7 +54,7 @@ public class StreamCompletionProvider {
 			parsed = new StreamDefinition("__dummy", dslStart);
 		}
 		catch (Exception recoverable) {
-			for (RecoveryStrategy<Exception> strategy : completionRecoveryStrategies) {
+			for (RecoveryStrategy strategy : completionRecoveryStrategies) {
 				if (strategy.shouldTrigger(dslStart, recoverable)) {
 					strategy.addProposals(dslStart, recoverable, detailLevel, collector);
 				}

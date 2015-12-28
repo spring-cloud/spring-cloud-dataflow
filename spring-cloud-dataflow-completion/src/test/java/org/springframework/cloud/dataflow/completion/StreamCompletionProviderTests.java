@@ -16,8 +16,12 @@
 
 package org.springframework.cloud.dataflow.completion;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.hasItems;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.startsWith;
+import static org.junit.Assert.assertThat;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -28,17 +32,16 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.hamcrest.FeatureMatcher;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.loader.LaunchedURLClassLoader;
 import org.springframework.boot.loader.archive.Archive;
-import org.springframework.cloud.dataflow.core.ArtifactType;
-import org.springframework.cloud.dataflow.core.ArtifactCoordinates;
 import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistration;
 import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistry;
+import org.springframework.cloud.dataflow.core.ArtifactCoordinates;
+import org.springframework.cloud.dataflow.core.ArtifactType;
 import org.springframework.cloud.stream.configuration.metadata.ModuleConfigurationMetadataResolver;
 import org.springframework.cloud.stream.module.resolver.Coordinates;
 import org.springframework.cloud.stream.module.resolver.ModuleResolver;
@@ -159,10 +162,9 @@ public class StreamCompletionProviderTests {
 	}
 
 	@Test
-	@Ignore
 	// file | counter --name=foo --inputType=bar<TAB> => we're done
 	public void testSinkWithAllOptionsSetCantGoFurther() {
-		assertThat(completionProvider.complete("http --port=1234 --use.ssl=true", 1), empty());
+		assertThat(completionProvider.complete("http | log --level=debug", 1), empty());
 	}
 
 	@Test
@@ -237,7 +239,6 @@ public class StreamCompletionProviderTests {
 	 * http --use.ssl=tr<TAB> => must be true or false, no need to present "...=tr --other.prop"
 	 */
 	@Test
-	@Ignore
 	public void testClosedSetValuesShouldBeExclusive() {
 		assertThat(completionProvider.complete("http --use.ssl=tr", 1), not(hasItems(
 				proposalThat(startsWith("http --use.ssl=tr "))

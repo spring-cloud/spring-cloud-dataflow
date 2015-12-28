@@ -19,8 +19,9 @@ package org.springframework.cloud.dataflow.core.dsl;
 import java.util.List;
 
 /**
- * An extension of {@link ParseException} that indicates where the parse
- * error occurred. This is marked by a '{@code *}' in {@link #getMessage}.
+ * An extension of {@link ParseException} that keeps track of the last position up to which
+ * parsing was successful. Backtracking to that position and attempting a parse again is guaranteed
+ * to be successful.
  *
  * @author Eric Bottard
  */
