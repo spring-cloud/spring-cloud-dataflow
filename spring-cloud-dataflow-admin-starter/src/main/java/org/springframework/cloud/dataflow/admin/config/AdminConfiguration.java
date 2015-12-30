@@ -33,6 +33,8 @@ import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistry;
 import org.springframework.cloud.dataflow.artifact.registry.RedisArtifactRegistry;
 import org.springframework.cloud.dataflow.completion.CompletionConfiguration;
 import org.springframework.cloud.dataflow.completion.RecoveryStrategy;
+import org.springframework.cloud.stream.module.metrics.FieldValueCounterRepository;
+import org.springframework.cloud.stream.module.metrics.RedisFieldValueCounterRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -41,6 +43,7 @@ import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.retry.support.RetryTemplate;
 import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
@@ -65,6 +68,11 @@ public class AdminConfiguration {
 	@Bean
 	public MetricRepository metricRepository(RedisConnectionFactory redisConnectionFactory) {
 		return new RedisMetricRepository(redisConnectionFactory);
+	}
+
+	@Bean
+	public FieldValueCounterRepository fieldValueCounterReader(RedisConnectionFactory redisConnectionFactory) {
+		return new RedisFieldValueCounterRepository(redisConnectionFactory, new RetryTemplate());
 	}
 
 	@Bean

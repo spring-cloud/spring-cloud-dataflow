@@ -34,6 +34,11 @@ public interface DataFlowOperations {
 	CounterOperations counterOperations();
 
 	/**
+	 * Field Value Counter related operations.
+	 */
+	FieldValueCounterOperations fieldValueCounterOperations();
+
+	/**
 	 * Task related operations.
 	 */
 	TaskOperations taskOperations();

@@ -19,6 +19,7 @@ package org.springframework.cloud.dataflow.admin.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.dataflow.rest.resource.CompletionProposalsResource;
 import org.springframework.cloud.dataflow.rest.resource.CounterResource;
+import org.springframework.cloud.dataflow.rest.resource.FieldValueCounterResource;
 import org.springframework.cloud.dataflow.rest.resource.LibraryRegistrationResource;
 import org.springframework.cloud.dataflow.rest.resource.ModuleInstanceStatusResource;
 import org.springframework.cloud.dataflow.rest.resource.ModuleRegistrationResource;
@@ -77,6 +78,9 @@ public class AdminController {
 
 		resourceSupport.add(entityLinks.linkToCollectionResource(CounterResource.class).withRel("counters"));
 		resourceSupport.add(unescapeTemplateVariables(entityLinks.linkToSingleResource(CounterResource.class, "{name}").withRel("counters/counter")));
+
+		resourceSupport.add(entityLinks.linkToCollectionResource(FieldValueCounterResource.class).withRel("field-value-counters"));
+		resourceSupport.add(unescapeTemplateVariables(entityLinks.linkToSingleResource(FieldValueCounterResource.class, "{name}").withRel("field-value-counters/counter")));
 
 		resourceSupport.add(entityLinks.linkToCollectionResource(ModuleRegistrationResource.class).withRel("modules"));
 

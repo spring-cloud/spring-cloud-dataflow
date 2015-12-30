@@ -59,6 +59,11 @@ public class DataFlowTemplate implements DataFlowOperations {
 	private final CounterOperations counterOperations;
 
 	/**
+	 * REST client for field value counter operations.
+	 */
+	private final FieldValueCounterOperations fieldValueCounterOperations;
+
+	/**
 	 * REST client for task operations.
 	 */
 	private final TaskOperations taskOperations;
@@ -93,6 +98,7 @@ public class DataFlowTemplate implements DataFlowOperations {
 
 		this.streamOperations = new StreamTemplate(restTemplate, resourceSupport);
 		this.counterOperations = new CounterTemplate(restTemplate, resourceSupport);
+		this.fieldValueCounterOperations = new FieldValueCounterTemplate(restTemplate, resourceSupport);
 		this.taskOperations = new TaskTemplate(restTemplate, resources);
 		this.moduleOperations = new ModuleTemplate(restTemplate, resourceSupport);
 		this.libraryOperations = new LibraryTemplate(restTemplate, resourceSupport);
@@ -117,6 +123,11 @@ public class DataFlowTemplate implements DataFlowOperations {
 	@Override
 	public CounterOperations counterOperations() {
 		return counterOperations;
+	}
+
+	@Override
+	public FieldValueCounterOperations fieldValueCounterOperations() {
+		return fieldValueCounterOperations;
 	}
 
 	@Override
