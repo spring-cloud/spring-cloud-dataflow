@@ -46,7 +46,7 @@ public class ModuleStatusTests {
 		assertThat(moduleStatus(deployed, undeployed).getState(), is(partial));
 		assertThat(moduleStatus(deployed, unknown).getState(), is(partial));
 		assertThat(moduleStatus(undeployed, unknown).getState(), is(partial));
-		assertThat(moduleStatus(new DeploymentState[0]).getState(), is(undeployed));
+		assertThat(moduleStatus(new DeploymentState[0]).getState(), is(unknown));
 	}
 
 	static ModuleStatus moduleStatus(DeploymentState... states) {

@@ -79,7 +79,7 @@ public class ModuleStatus {
 		}
 
 		if (states.size() == 0) {
-			return DeploymentState.undeployed;
+			return DeploymentState.unknown;
 		}
 		if (states.size() == 1) {
 			return states.iterator().next();

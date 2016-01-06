@@ -19,6 +19,7 @@ package org.springframework.cloud.dataflow.admin.spi.local;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.net.Inet4Address;
 import java.net.URL;
 import java.nio.file.Files;
@@ -246,7 +247,19 @@ public class OutOfProcessModuleDeployer implements ModuleDeployer {
 
 		@Override
 		public DeploymentState getState() {
-			return isAlive(process) ? DeploymentState.deployed : DeploymentState.failed;
+			boolean alive = isAlive(process);
+			if (!alive) {
+				return DeploymentState.failed;
+			}
+			try {
+				HttpURLConnection urlConnection = (HttpURLConnection) moduleUrl.openConnection();
+				urlConnection.connect();
+				urlConnection.disconnect();
+				return DeploymentState.deployed;
+			}
+			catch (IOException e) {
+				return DeploymentState.deploying;
+			}
 		}
 
 		@Override

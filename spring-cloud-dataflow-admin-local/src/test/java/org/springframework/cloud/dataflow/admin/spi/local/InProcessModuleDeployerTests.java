@@ -16,66 +16,27 @@
 
 package org.springframework.cloud.dataflow.admin.spi.local;
 
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
-import org.springframework.cloud.dataflow.core.ArtifactCoordinates;
-import org.springframework.cloud.dataflow.core.ModuleDefinition;
-import org.springframework.cloud.dataflow.core.ModuleDeploymentRequest;
+import org.springframework.cloud.dataflow.module.deployer.ModuleDeployer;
 import org.springframework.cloud.stream.module.launcher.ModuleLauncher;
 import org.springframework.cloud.stream.module.launcher.ModuleLauncherConfiguration;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 
 /**
- * Tests deployment of the time-source and log-sink modules.
- *
- * @author Mark Fisher
- * @author Marius Bogoevici
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = ModuleLauncherConfiguration.class)
-@DirtiesContext
-public class InProcessModuleDeployerTests {
+@SpringApplicationConfiguration(classes = InProcessModuleDeployerTests.Config.class)
+public class InProcessModuleDeployerTests/* extends AbstractModuleDeployerTests */{
 
-	private static final String GROUP_ID = "org.springframework.cloud.stream.module";
+	@Configuration
+	@Import(ModuleLauncherConfiguration.class)
+	public static class Config {
 
-	private static final String VERSION = "1.0.0.BUILD-SNAPSHOT";
+		@Bean
+		ModuleDeployer moduleDeployer(ModuleLauncher moduleLauncher) {
+			return new InProcessModuleDeployer(moduleLauncher);
+		}
 
-	@Autowired
-	private ModuleLauncher moduleLauncher;
-
-	@Test @Ignore("https://github.com/spring-cloud/spring-cloud-dataflow/issues/254")
-	public void timeToLogStream() {
-		InProcessModuleDeployer deployer = new InProcessModuleDeployer(moduleLauncher);
-		ModuleDefinition timeDefinition = new ModuleDefinition.Builder()
-				.setGroup("ticktock")
-				.setName("time")
-				.setParameter("spring.cloud.stream.bindings.output", "ticktock.0")
-				.build();
-		ModuleDefinition logDefinition = new ModuleDefinition.Builder()
-				.setGroup("ticktock")
-				.setName("log")
-				.setParameter("spring.cloud.stream.bindings.input", "ticktock.0")
-				.build();
-		ArtifactCoordinates timeCoordinates = new ArtifactCoordinates.Builder()
-				.setGroupId(GROUP_ID)
-				.setArtifactId("time-source")
-				.setVersion(VERSION)
-				.setClassifier("exec")
-				.build();
-		ArtifactCoordinates logCoordinates = new ArtifactCoordinates.Builder()
-				.setGroupId(GROUP_ID)
-				.setArtifactId("log-sink")
-				.setVersion(VERSION)
-				.setClassifier("exec")
-				.build();
-		ModuleDeploymentRequest time = new ModuleDeploymentRequest(timeDefinition, timeCoordinates);
-		ModuleDeploymentRequest log = new ModuleDeploymentRequest(logDefinition, logCoordinates);
-		deployer.deploy(time);
-		deployer.deploy(log);
 	}
 }

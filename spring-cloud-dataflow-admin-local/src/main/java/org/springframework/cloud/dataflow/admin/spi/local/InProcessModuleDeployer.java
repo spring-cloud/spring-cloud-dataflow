@@ -109,9 +109,13 @@ public class InProcessModuleDeployer implements ModuleDeployer {
 
 	@Override
 	public ModuleStatus status(ModuleDeploymentId id) {
-		boolean deployed = this.deployedModules.containsKey(id);
-		InProcessModuleInstanceStatus status = new InProcessModuleInstanceStatus(id.toString(), deployed, null);
-		return ModuleStatus.of(id).with(status).build();
+		URL url = this.deployedModules.get(id);
+		if (url != null) {
+			InProcessModuleInstanceStatus status = new InProcessModuleInstanceStatus(id.toString(), url, null);
+			return ModuleStatus.of(id).with(status).build();
+		} else {
+			return ModuleStatus.of(id).build();
+		}
 	}
 
 	@Override
