@@ -19,6 +19,7 @@ package org.springframework.cloud.dataflow.admin.spi.local;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.net.Inet4Address;
 import java.net.URL;
 import java.nio.file.Files;
@@ -49,6 +50,7 @@ import org.springframework.cloud.dataflow.module.deployer.ModuleDeployer;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.SocketUtils;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 
 /**
@@ -157,7 +159,7 @@ public class OutOfProcessModuleDeployer implements ModuleDeployer {
 			restTemplate.postForObject(instance.moduleUrl + "/shutdown", null, String.class);
 			instance.process.waitFor();
 		}
-		catch (InterruptedException e) {
+		catch (InterruptedException | ResourceAccessException e) {
 			instance.process.destroy();
 		}
 	}
@@ -246,7 +248,19 @@ public class OutOfProcessModuleDeployer implements ModuleDeployer {
 
 		@Override
 		public DeploymentState getState() {
-			return isAlive(process) ? DeploymentState.deployed : DeploymentState.failed;
+			boolean alive = isAlive(process);
+			if (!alive) {
+				return DeploymentState.failed;
+			}
+			try {
+				HttpURLConnection urlConnection = (HttpURLConnection) moduleUrl.openConnection();
+				urlConnection.connect();
+				urlConnection.disconnect();
+				return DeploymentState.deployed;
+			}
+			catch (IOException e) {
+				return DeploymentState.deploying;
+			}
 		}
 
 		@Override

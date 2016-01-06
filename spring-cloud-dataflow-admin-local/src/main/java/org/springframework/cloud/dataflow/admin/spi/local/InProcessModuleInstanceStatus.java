@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2015-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,9 @@
 
 package org.springframework.cloud.dataflow.admin.spi.local;
 
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -35,15 +38,15 @@ public class InProcessModuleInstanceStatus implements ModuleInstanceStatus {
 
 	private final String id;
 
-	private final DeploymentState state;
-
 	private final Map<String, String> attributes = new HashMap<String, String>();
 
+	private final URL url;
+
 	// todo: this is just a simple placeholder, providing state as 'deployed' or 'unknown'
-	public InProcessModuleInstanceStatus(String id, boolean deployed, Map<String, String> attributes) {
-		logger.trace("Local Module {}, deployed {}, attributes: {}", id, deployed, attributes);
+	public InProcessModuleInstanceStatus(String id, URL url, Map<String, String> attributes) {
+		this.url = url;
+		logger.trace("Local Module {}, reachable at {}, attributes: {}", id, url, attributes);
 		this.id = id;
-		this.state = deployed ? DeploymentState.deployed : DeploymentState.unknown;
 		if (attributes != null) {
 			this.attributes.putAll(attributes);
 		}
@@ -54,7 +57,15 @@ public class InProcessModuleInstanceStatus implements ModuleInstanceStatus {
 	}
 
 	public DeploymentState getState() {
-		return state;
+		try {
+			HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+			urlConnection.connect();
+			urlConnection.disconnect();
+			return DeploymentState.deployed;
+		}
+		catch (IOException e) {
+			return DeploymentState.deploying;
+		}
 	}
 
 	public Map<String, String> getAttributes() {

@@ -21,6 +21,8 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 import org.springframework.shell.core.CommandResult;
@@ -165,11 +167,11 @@ public class StreamCommandTemplate {
 
 		Table table = (org.springframework.shell.table.Table) cr.getResult();
 		TableModel model = table.getModel();
-		String status = deployed ? "deployed" : "undeployed";
+		Collection<String> statuses = deployed ? Arrays.asList("deployed", "deploying") : Arrays.asList("undeployed");
 		for (int row = 0; row < model.getRowCount(); row++) {
 			if (streamName.equals(model.getValue(row, 0))
 					&& definition.replace("\\\\", "\\").equals(model.getValue(row, 1))
-					&& status.equals(model.getValue(row, 2))) {
+					&& statuses.contains(model.getValue(row, 2))) {
 				return;
 			}
 		}

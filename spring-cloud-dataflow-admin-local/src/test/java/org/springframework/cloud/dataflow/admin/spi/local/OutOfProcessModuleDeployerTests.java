@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2016 the original author or authors.
+ * Copyright 2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,48 +16,28 @@
 
 package org.springframework.cloud.dataflow.admin.spi.local;
 
-import org.junit.Ignore;
-import org.junit.Test;
-
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.cloud.dataflow.module.deployer.ModuleDeployer;
 import org.springframework.cloud.dataflow.module.deployer.test.AbstractModuleDeployerTests;
-import org.springframework.cloud.stream.module.launcher.ModuleLauncher;
-import org.springframework.cloud.stream.module.launcher.ModuleLauncherConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 
 /**
- * Integration tests for the {@link InProcessModuleDeployer}.
+ * Integration Tests for {@link OutOfProcessModuleDeployer}.
  *
  * @author Eric Bottard
  */
-@SpringApplicationConfiguration(classes = InProcessModuleDeployerTests.Config.class)
-public class InProcessModuleDeployerTests extends AbstractModuleDeployerTests {
-
-	@Test
-	@Ignore("Can't afford to kill this JVM")
-	@Override
-	public void testFailedDeployment() {
-		super.testFailedDeployment();
-	}
-
-	@Test
-	@Ignore("Can't really force-kill a module")
-	@Override
-	public void testDeployingStateCalculationAndCancel() {
-		super.testDeployingStateCalculationAndCancel();
-	}
+@SpringApplicationConfiguration(classes = OutOfProcessModuleDeployerTests.Config.class)
+public class OutOfProcessModuleDeployerTests extends AbstractModuleDeployerTests {
 
 	@Configuration
-	@Import(ModuleLauncherConfiguration.class)
+	@EnableConfigurationProperties(OutOfProcessModuleDeployerProperties.class)
 	public static class Config {
 
 		@Bean
-		ModuleDeployer moduleDeployer(ModuleLauncher moduleLauncher) {
-			return new InProcessModuleDeployer(moduleLauncher);
+		public ModuleDeployer moduleDeployer() {
+			return new OutOfProcessModuleDeployer();
 		}
-
 	}
 }

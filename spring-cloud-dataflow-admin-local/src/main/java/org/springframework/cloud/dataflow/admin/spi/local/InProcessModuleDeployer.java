@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2015-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,6 +84,7 @@ public class InProcessModuleDeployer implements ModuleDeployer {
 		catch (Exception e) {
 			throw new IllegalStateException("failed to determine URL for module: " + module, e);
 		}
+		args.put("security.ignored", "/shutdown"); // Make sure we can shutdown the module
 		args.put("endpoints.shutdown.enabled", "true");
 		args.put("spring.main.show_banner", "false");
 		args.put(JMX_DEFAULT_DOMAIN_KEY, String.format("%s.%s",
@@ -109,9 +110,13 @@ public class InProcessModuleDeployer implements ModuleDeployer {
 
 	@Override
 	public ModuleStatus status(ModuleDeploymentId id) {
-		boolean deployed = this.deployedModules.containsKey(id);
-		InProcessModuleInstanceStatus status = new InProcessModuleInstanceStatus(id.toString(), deployed, null);
-		return ModuleStatus.of(id).with(status).build();
+		URL url = this.deployedModules.get(id);
+		if (url != null) {
+			InProcessModuleInstanceStatus status = new InProcessModuleInstanceStatus(id.toString(), url, null);
+			return ModuleStatus.of(id).with(status).build();
+		} else {
+			return ModuleStatus.of(id).build();
+		}
 	}
 
 	@Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2015-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@ public class ModuleStatusTests {
 		assertThat(moduleStatus(deployed, undeployed).getState(), is(partial));
 		assertThat(moduleStatus(deployed, unknown).getState(), is(partial));
 		assertThat(moduleStatus(undeployed, unknown).getState(), is(partial));
-		assertThat(moduleStatus(new DeploymentState[0]).getState(), is(undeployed));
+		assertThat(moduleStatus(new DeploymentState[0]).getState(), is(unknown));
 	}
 
 	static ModuleStatus moduleStatus(DeploymentState... states) {
