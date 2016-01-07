@@ -20,7 +20,9 @@ import java.util.Collections;
 import java.util.Map;
 
 import org.springframework.cloud.dataflow.rest.resource.TaskDefinitionResource;
+import org.springframework.cloud.dataflow.rest.resource.TaskExecutionResource;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
+import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.UriTemplate;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
@@ -38,21 +40,28 @@ public class TaskTemplate implements TaskOperations {
 
 	private static final String DEPLOYMENTS_PATH = "tasks/deployments";
 
+	private static final String EXECUTIONS_PATH = "tasks/executions";
+
 	private final RestTemplate restTemplate;
 
 	private final UriTemplate definitionsPath;
 
 	private final UriTemplate deploymentsPath;
 
+	private final UriTemplate executionsPath;
 
 	TaskTemplate(RestTemplate restTemplate, Map<String, UriTemplate> resources) {
 		Assert.notNull(resources, "URI Resources must not be be null");
 		Assert.notNull(resources.get(DEFINITIONS_PATH), "Definitions path is required");
 		Assert.notNull(resources.get(DEPLOYMENTS_PATH), "Deployments path is required");
 		Assert.notNull(restTemplate, "RestTemplate must not be null");
+		Assert.notNull(resources.get(EXECUTIONS_PATH), "Executions path is required");
+
 		this.restTemplate = restTemplate;
 		this.definitionsPath = resources.get(DEFINITIONS_PATH);
 		this.deploymentsPath = resources.get(DEPLOYMENTS_PATH);
+		this.executionsPath = resources.get(EXECUTIONS_PATH);
+
 	}
 
 	@Override
@@ -84,6 +93,21 @@ public class TaskTemplate implements TaskOperations {
 	public void destroy(String name) {
 		String uriTemplate = definitionsPath.toString() + "/{name}";
 		restTemplate.delete(uriTemplate, Collections.singletonMap("name", name));
+	}
+
+	@Override
+	public TaskExecutionResource.Page executionList() {
+		String uriTemplate = executionsPath.toString();
+		uriTemplate = uriTemplate + "?size=10000";
+		return restTemplate.getForObject(uriTemplate, TaskExecutionResource.Page.class);
+	}
+
+	@Override
+	public PagedResources<TaskExecutionResource> executionListByTaskName(String taskName) {
+		String uriTemplate = executionsPath.toString();
+		uriTemplate = uriTemplate + "/{taskName}" + "?size=10000";
+		return restTemplate.getForObject(uriTemplate, TaskExecutionResource.Page.class,
+				Collections.singletonMap("taskName", taskName));
 	}
 
 }

@@ -35,4 +35,16 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 		String taskName = generateUniqueName();
 		task().create(taskName, "foobar");
 	}
+
+	@Test
+	public void testTaskExecutionList() throws InterruptedException {
+		logger.info("Retrieve Task Execution List Test");
+		task().taskExecutionList();
+	}
+
+	@Test
+	public void testTaskExecutionListByName() throws InterruptedException {
+		logger.info("Retrieve Task Execution List By Name Test");
+		task().taskExecutionListByName();
+	}
 }

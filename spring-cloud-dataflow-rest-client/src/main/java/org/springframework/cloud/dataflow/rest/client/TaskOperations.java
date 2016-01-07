@@ -19,6 +19,7 @@ package org.springframework.cloud.dataflow.rest.client;
 import java.util.Map;
 
 import org.springframework.cloud.dataflow.rest.resource.TaskDefinitionResource;
+import org.springframework.cloud.dataflow.rest.resource.TaskExecutionResource;
 import org.springframework.hateoas.PagedResources;
 
 /**
@@ -47,5 +48,16 @@ public interface TaskOperations {
 	 * Destroy an existing task.
 	 */
 	public void destroy(String name);
-	
+
+	/**
+	 * List task executions known to the system.
+	 */
+	public PagedResources<TaskExecutionResource> executionList();
+
+	/**
+	 * List task executions known to the system filtered by task name.
+	 * @param taskName of the executions.
+	 */
+	public PagedResources<TaskExecutionResource> executionListByTaskName(String taskName);
+
 }

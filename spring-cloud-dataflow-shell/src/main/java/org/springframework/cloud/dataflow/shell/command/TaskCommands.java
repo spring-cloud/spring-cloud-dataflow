@@ -27,6 +27,7 @@ import java.util.Properties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.dataflow.rest.client.TaskOperations;
 import org.springframework.cloud.dataflow.rest.resource.TaskDefinitionResource;
+import org.springframework.cloud.dataflow.rest.resource.TaskExecutionResource;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
 import org.springframework.cloud.dataflow.shell.config.DataFlowShell;
 import org.springframework.hateoas.PagedResources;
@@ -61,6 +62,8 @@ public class TaskCommands implements CommandMarker {
 	private static final String PROPERTIES_OPTION = "properties";
 
 	private static final String PROPERTIES_FILE_OPTION = "propertiesFile";
+
+	private static final String EXECUTION_LIST = "task execution list";
 
 
 	@Autowired
@@ -131,7 +134,31 @@ public class TaskCommands implements CommandMarker {
 			@CliOption(key = { "", "name" }, help = "the name of the task ", mandatory = true) String name) {
 		return "Feature Not Available";
 	}
-	
+
+	@CliCommand(value = EXECUTION_LIST,
+			help = "List created task executions filtered by taskName")
+	public Table executionListByName(
+			@CliOption(key = { "name" },
+					help = "the task name to be used as a filter",
+					mandatory = false) String name) {
+
+		final PagedResources<TaskExecutionResource> tasks;
+		if(name == null){
+			tasks = taskOperations().executionList();
+		}
+		else{
+			tasks = taskOperations().executionListByTaskName(name);
+		}
+		LinkedHashMap<String, Object> headers = new LinkedHashMap<>();
+		headers.put("taskName", "Task Name");
+		headers.put("executionId", "ID");
+		headers.put("startTime", "Start Time");
+		headers.put("endTime", "End Time");
+		headers.put("exitCode", "Exit Code");
+		final TableBuilder builder = new TableBuilder(new BeanListTableModel<>(tasks, headers));
+		return DataFlowTables.applyStyle(builder).build();
+	}
+
 	private TaskOperations taskOperations() {
 		return dataFlowShell.getDataFlowOperations().taskOperations();
 	}
