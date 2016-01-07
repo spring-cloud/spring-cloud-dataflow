@@ -64,6 +64,35 @@ public class TaskCommandTemplate {
 		doCreate(taskName, taskDefinition, true, values);
 	}
 
+	/**
+	 * Executes a task execution list.
+	 */
+	public void taskExecutionList() {
+		CommandResult cr = shell.executeCommand("task execution list");
+		assertTrue("task execution list command must be successful", cr.isSuccess());
+		Table table = (Table) cr.getResult();
+		assertEquals("Number of columns returned was not expected", 5, table.getModel().getColumnCount());
+		assertEquals("First column should be Task Name", "Task Name", table.getModel().getValue(0,0));
+		assertEquals("Second column should be ID", "ID", table.getModel().getValue(0,1));
+		assertEquals("Third column should be Start Time", "Start Time", table.getModel().getValue(0,2));
+		assertEquals("Fourth column should be End Time", "End Time", table.getModel().getValue(0,3));
+		assertEquals("Fifth column should be Exit Code", "Exit Code", table.getModel().getValue(0,4));
+	}
+
+	/**
+	 * Executes a task execution list.
+	 */
+	public void taskExecutionListByName() {
+		CommandResult cr = shell.executeCommand("task execution list --name foo");
+		assertTrue("task execution list by name command must be successful", cr.isSuccess());
+		Table table = (Table) cr.getResult();
+		assertEquals("Number of columns returned was not expected", 5, table.getModel().getColumnCount());
+		assertEquals("First column should be Task Name", "Task Name", table.getModel().getValue(0,0));
+		assertEquals("Second column should be ID", "ID", table.getModel().getValue(0,1));
+		assertEquals("Third column should be Start Time", "Start Time", table.getModel().getValue(0,2));
+		assertEquals("Fourth column should be End Time", "End Time", table.getModel().getValue(0,3));
+		assertEquals("Fifth column should be Exit Code", "Exit Code", table.getModel().getValue(0,4));
+	}
 
 	private void doCreate(String taskName, String taskDefinition, Object... values) {
 		String actualDefinition = String.format(taskDefinition, values);

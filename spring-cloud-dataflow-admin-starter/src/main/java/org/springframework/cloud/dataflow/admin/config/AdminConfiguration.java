@@ -29,6 +29,7 @@ import org.springframework.cloud.dataflow.admin.repository.InMemoryStreamDefinit
 import org.springframework.cloud.dataflow.admin.repository.InMemoryTaskDefinitionRepository;
 import org.springframework.cloud.dataflow.admin.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.admin.repository.TaskDefinitionRepository;
+import org.springframework.cloud.dataflow.admin.repository.TaskExecutionRepository;
 import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistry;
 import org.springframework.cloud.dataflow.artifact.registry.RedisArtifactRegistry;
 import org.springframework.cloud.dataflow.completion.CompletionConfiguration;
@@ -118,6 +119,11 @@ public class AdminConfiguration {
 	@Bean
 	public RecoveryStrategy tapOnChannelExpansionStrategy() {
 		return new TapOnChannelExpansionStrategy();
+	}
+
+	@Bean
+	public TaskExecutionRepository taskExecutionRepository() {
+		return new TaskExecutionRepository();
 	}
 
 }

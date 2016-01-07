@@ -95,6 +95,7 @@ public class DataFlowTemplate implements DataFlowOperations {
 		Link link = getLink(resourceSupport, "tasks");
 		resources.put("tasks/definitions", new UriTemplate(link.getHref() + "/definitions"));
 		resources.put("tasks/deployments", new UriTemplate(link.getHref() + "/deployments"));
+		resources.put("tasks/executions", new UriTemplate(link.getHref() + "/executions"));
 
 		this.streamOperations = new StreamTemplate(restTemplate, resourceSupport);
 		this.counterOperations = new CounterTemplate(restTemplate, resourceSupport);
