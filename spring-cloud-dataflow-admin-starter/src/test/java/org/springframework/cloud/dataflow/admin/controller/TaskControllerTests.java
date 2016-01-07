@@ -22,12 +22,15 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.mockito.Mockito.*;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -35,7 +38,12 @@ import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.cloud.dataflow.admin.configuration.TestDependencies;
 import org.springframework.cloud.dataflow.admin.repository.InMemoryTaskDefinitionRepository;
 import org.springframework.cloud.dataflow.admin.repository.TaskDefinitionRepository;
+import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistration;
+import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistry;
 import org.springframework.cloud.dataflow.artifact.registry.InMemoryArtifactRegistry;
+import org.springframework.cloud.dataflow.core.ArtifactCoordinates;
+import org.springframework.cloud.dataflow.core.ArtifactType;
+import org.springframework.cloud.dataflow.core.ModuleDeploymentRequest;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.module.deployer.ModuleDeployer;
 import org.springframework.http.MediaType;
@@ -57,6 +65,9 @@ public class TaskControllerTests {
 
 	@Autowired
 	private TaskDefinitionRepository repository;
+
+	@Autowired
+	private ArtifactRegistry registry;
 
 	private MockMvc mockMvc;
 
@@ -171,8 +182,38 @@ public class TaskControllerTests {
 		repository.save(new TaskDefinition("myTask", "nosuchtaskmodule"));
 
 		mockMvc.perform(
-				post("/tasks/deployments/myTask").accept(MediaType.APPLICATION_JSON)).andDo(print())
-				.andExpect(status().is5xxServerError());
+				post("/tasks/deployments/{name}", "myTask").accept(MediaType.APPLICATION_JSON)).andDo(print())
+			.andExpect(status().is5xxServerError())
+			.andExpect(content().json("[{message: \"Module nosuchtaskmodule of type task not found in registry\"}]"));
 
+	}
+
+	@Test
+	public void testDeployNotDefined() throws Exception {
+		mockMvc.perform(
+				post("/tasks/deployments/{name}", "myFoo")
+						.accept(MediaType.APPLICATION_JSON)).andDo(print())
+			.andExpect(status().is5xxServerError())
+			.andExpect(content().json("[{message: \"no task defined: myFoo\"}]"));
+	}
+
+	@Test
+	public void testDeploy() throws Exception {
+		repository.save(new TaskDefinition("myTask", "foo"));
+		ArtifactCoordinates coordinates = ArtifactCoordinates.parse("org.springframework.cloud:foo:1");
+		ArtifactRegistration registration = new ArtifactRegistration("foo", ArtifactType.task, coordinates);
+		this.registry.save(registration);
+
+		mockMvc.perform(
+				post("/tasks/deployments/{name}", "myTask").accept(MediaType.APPLICATION_JSON)).andDo(print())
+				.andExpect(status().isCreated());
+
+		ArgumentCaptor<ModuleDeploymentRequest> argumentCaptor = ArgumentCaptor.forClass(ModuleDeploymentRequest.class);
+		verify(this.moduleDeployer).deploy(argumentCaptor.capture());
+
+		ModuleDeploymentRequest result = argumentCaptor.getValue();
+		assertEquals(1, result.getCount());
+		assertEquals(coordinates, result.getCoordinates());
+		assertEquals("myTask", result.getDeploymentProperties().get("spring.cloud.task.name"));
 	}
 }

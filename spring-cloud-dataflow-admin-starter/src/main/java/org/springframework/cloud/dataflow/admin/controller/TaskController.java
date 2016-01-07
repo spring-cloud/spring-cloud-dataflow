@@ -16,6 +16,9 @@
 
 package org.springframework.cloud.dataflow.admin.controller;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cloud.dataflow.admin.repository.TaskDefinitionRepository;
@@ -29,6 +32,7 @@ import org.springframework.cloud.dataflow.module.deployer.ModuleDeployer;
 import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistration;
 import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistry;
 import org.springframework.cloud.dataflow.rest.resource.TaskDefinitionResource;
+import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.ExposesResourceFor;
@@ -149,8 +153,13 @@ public class TaskController {
 					"Module %s of type %s not found in registry", module.getName(), ArtifactType.task));
 		}
 		ArtifactCoordinates coordinates = registration.getCoordinates();
-		// todo: pass deployment properties
-		this.moduleDeployer.deploy(new ModuleDeploymentRequest(module, coordinates));
+
+		Map<String, String> deploymentProperties = new HashMap<>();
+		deploymentProperties.put("spring.cloud.task.name", taskDefinition.getName());
+		deploymentProperties.putAll(DeploymentPropertiesUtils.parse(properties));
+
+		this.moduleDeployer.deploy(
+				new ModuleDeploymentRequest(module, coordinates, deploymentProperties));
 	}
 
 	/**
