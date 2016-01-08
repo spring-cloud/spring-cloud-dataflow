@@ -89,7 +89,7 @@
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-task-core</artifactId>
-			<version>1.0.0.BUILD-SNAPSHOT</version>
+			<version>${spring-cloud-task.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.skyscreamer</groupId>
