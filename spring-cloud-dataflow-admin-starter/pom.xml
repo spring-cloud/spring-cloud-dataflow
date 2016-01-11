@@ -118,6 +118,7 @@
 			<groupId>org.hsqldb</groupId>
 			<artifactId>hsqldb</artifactId>
 			<scope>test</scope>
+			<optional>true</optional>
 		</dependency>
 	</dependencies>
 	<build>
