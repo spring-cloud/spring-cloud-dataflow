@@ -94,8 +94,8 @@ public class TaskExecutionResource extends ResourceSupport {
 		this.statusCode = statusCode;
 		this.exitMessage = exitMessage;
 		this.parameters = parameters;
-		setStartTime(startTime);
-		setEndTime(endTime);
+		this.startTime = startTime;
+		this.endTime = endTime;
 	}
 
 	public static class Page extends PagedResources<TaskExecutionResource> {}
@@ -120,55 +120,28 @@ public class TaskExecutionResource extends ResourceSupport {
 		return exitCode;
 	}
 
-	public void setExitCode(int exitCode) {
-		this.exitCode = exitCode;
-	}
-
 	public String getTaskName() {
 		return taskName;
-	}
-
-	public void setTaskName(String taskName) {
-		this.taskName = taskName;
 	}
 
 	public Date getStartTime() {
 		return startTime;
 	}
 
-	public void setStartTime(Date startTime) {
-		this.startTime = startTime;
-	}
-
 	public Date getEndTime() {
 		return endTime;
-	}
-
-	public void setEndTime(Date endTime) {
-		this.endTime = endTime;
 	}
 
 	public String getStatusCode() {
 		return statusCode;
 	}
 
-	public void setStatusCode(String statusCode) {
-		this.statusCode = statusCode;
-	}
-
 	public String getExitMessage() {
 		return exitMessage;
-	}
-
-	public void setExitMessage(String exitMessage) {
-		this.exitMessage = exitMessage;
 	}
 
 	public List<String> getParameters() {
 		return parameters;
 	}
 
-	public void setParameters(List<String> parameters) {
-		this.parameters = parameters;
-	}
 }

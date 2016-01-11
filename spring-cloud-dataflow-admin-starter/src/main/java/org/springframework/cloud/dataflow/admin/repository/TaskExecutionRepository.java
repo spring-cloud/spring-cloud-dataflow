@@ -22,9 +22,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.task.repository.TaskExplorer;
-import org.springframework.cloud.task.repository.support.JdbcTaskExplorerFactoryBean;
-import org.springframework.cloud.task.repository.support.SimpleTaskExplorer;
 import org.springframework.cloud.task.repository.support.TaskDatabaseInitializer;
 import org.springframework.core.io.DefaultResourceLoader;
 
@@ -41,7 +38,6 @@ public class TaskExecutionRepository implements InitializingBean {
 
 	private static final Logger logger = LoggerFactory.getLogger(TaskExecutionRepository.class);
 
-	private TaskExplorer taskExplorer;
 
 	@Autowired
 	DataSource dataSource;
@@ -52,18 +48,6 @@ public class TaskExecutionRepository implements InitializingBean {
 	public void initializeDatabase() {
 		TaskDatabaseInitializer.initializeDatabase(dataSource,
 				new DefaultResourceLoader());
-		JdbcTaskExplorerFactoryBean factoryBean =
-				new JdbcTaskExplorerFactoryBean(dataSource);
-		taskExplorer = factoryBean.getObject();
-	}
-
-	/**
-	 * Retriever the current {@link SimpleTaskExplorer} that retrieves data from a jdbc datasource.
-	 *
-	 * @return an instance of taskExplorer
-	 */
-	public TaskExplorer getTaskExplorer() {
-		return taskExplorer;
 	}
 
 	@Override

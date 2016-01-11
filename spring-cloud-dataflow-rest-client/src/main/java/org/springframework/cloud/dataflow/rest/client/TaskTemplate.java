@@ -98,14 +98,14 @@ public class TaskTemplate implements TaskOperations {
 	@Override
 	public TaskExecutionResource.Page executionList() {
 		String uriTemplate = executionsPath.toString();
-		uriTemplate = uriTemplate + "?size=10000";
+		uriTemplate = uriTemplate;
 		return restTemplate.getForObject(uriTemplate, TaskExecutionResource.Page.class);
 	}
 
 	@Override
 	public PagedResources<TaskExecutionResource> executionListByTaskName(String taskName) {
 		String uriTemplate = executionsPath.toString();
-		uriTemplate = uriTemplate + "/{taskName}" + "?size=10000";
+		uriTemplate = uriTemplate + "/{taskName}";
 		return restTemplate.getForObject(uriTemplate, TaskExecutionResource.Page.class,
 				Collections.singletonMap("taskName", taskName));
 	}

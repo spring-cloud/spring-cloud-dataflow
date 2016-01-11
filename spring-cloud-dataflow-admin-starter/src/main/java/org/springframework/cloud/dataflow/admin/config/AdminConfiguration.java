@@ -20,8 +20,11 @@ import static org.springframework.hateoas.config.EnableHypermediaSupport.Hyperme
 
 import java.util.Arrays;
 
+import javax.sql.DataSource;
+
 import org.springframework.boot.actuate.metrics.repository.MetricRepository;
 import org.springframework.boot.actuate.metrics.repository.redis.RedisMetricRepository;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.web.HttpMessageConverters;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.dataflow.admin.completion.TapOnChannelExpansionStrategy;
@@ -36,6 +39,8 @@ import org.springframework.cloud.dataflow.completion.CompletionConfiguration;
 import org.springframework.cloud.dataflow.completion.RecoveryStrategy;
 import org.springframework.cloud.stream.module.metrics.FieldValueCounterRepository;
 import org.springframework.cloud.stream.module.metrics.RedisFieldValueCounterRepository;
+import org.springframework.cloud.task.repository.TaskExplorer;
+import org.springframework.cloud.task.repository.support.JdbcTaskExplorerFactoryBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -122,8 +127,16 @@ public class AdminConfiguration {
 	}
 
 	@Bean
-	public TaskExecutionRepository taskExecutionRepository() {
-		return new TaskExecutionRepository();
+	public TaskExplorer taskExplorer(DataSource dataSource) {
+		JdbcTaskExplorerFactoryBean factoryBean =
+				new JdbcTaskExplorerFactoryBean(dataSource);
+		return factoryBean.getObject();
 	}
 
+	@Bean
+	@ConditionalOnProperty(name = "spring.cloud.task.repo.initialize",
+			havingValue = "true", matchIfMissing = true)
+	public TaskExecutionRepository taskExecutionRepository(){
+		return new TaskExecutionRepository();
+	}
 }

@@ -36,6 +36,7 @@ import org.springframework.boot.autoconfigure.PropertyPlaceholderAutoConfigurati
 import org.springframework.boot.autoconfigure.jdbc.EmbeddedDataSourceConfiguration;
 import org.springframework.cloud.dataflow.admin.configuration.TaskDependencies;
 import org.springframework.cloud.task.repository.TaskExecution;
+import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -54,7 +55,7 @@ public class TaskExecutionExplorerTests {
 	DataSource dataSource;
 
 	@Autowired
-	TaskExecutionRepository repository;
+	TaskExplorer explorer;
 
 	private JdbcTemplate template;
 
@@ -81,7 +82,7 @@ public class TaskExecutionExplorerTests {
 		insertTestExecutionDataIntoRepo(template, 1l, "foo");
 		insertTestExecutionDataIntoRepo(template, 0l, "foo");
 
-		List<TaskExecution> resultList = repository.getTaskExplorer().
+		List<TaskExecution> resultList = explorer.
 				findAll(new PageRequest(0, 10)).getContent();
 		assertEquals(String.format("expected %s entries returned from task_execution",
 				ENTRY_COUNT), ENTRY_COUNT, resultList.size());
@@ -107,7 +108,7 @@ public class TaskExecutionExplorerTests {
 		insertTestExecutionDataIntoRepo(template, 1l, "baz");
 		insertTestExecutionDataIntoRepo(template, 0l, "fee");
 
-		List<TaskExecution> resultList = repository.getTaskExplorer().
+		List<TaskExecution> resultList = explorer.
 				findTaskExecutionsByName("fee", new PageRequest(0, 10)).getContent();
 		assertEquals("expected 1 entries returned from task_execution", 1, resultList.size());
 		TaskExecution taskExecution = resultList.get(0);
