@@ -52,6 +52,7 @@ import org.springframework.web.bind.annotation.RestController;
  * operations.
  *
  * @author Michael Minella
+ * @author Marius Bogoevici
  */
 @RestController
 @RequestMapping("/tasks")
@@ -157,6 +158,8 @@ public class TaskController {
 		Map<String, String> deploymentProperties = new HashMap<>();
 		deploymentProperties.put("spring.cloud.task.name", taskDefinition.getName());
 		deploymentProperties.putAll(DeploymentPropertiesUtils.parse(properties));
+		deploymentProperties.put(ModuleDeployer.MODULE_DEPLOYMENT_GROUP_ID, taskDefinition.getName()
+				+ "-" + System.currentTimeMillis());
 
 		this.moduleDeployer.deploy(
 				new ModuleDeploymentRequest(module, coordinates, deploymentProperties));
