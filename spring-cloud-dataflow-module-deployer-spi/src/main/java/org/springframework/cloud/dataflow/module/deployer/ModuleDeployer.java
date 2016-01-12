@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2015-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import org.springframework.cloud.dataflow.module.ModuleStatus;
  *
  * @author Mark Fisher
  * @author Patrick Peralta
+ * @author Marius Bogoevici
  */
 public interface ModuleDeployer {
 
@@ -37,6 +38,8 @@ public interface ModuleDeployer {
 	public static final int DEFAULT_SERVER_PORT = 8080;
 
 	public static final String JMX_DEFAULT_DOMAIN_KEY  = "spring.jmx.default-domain";
+
+	public static final String GROUP_DEPLOYMENT_ID = "dataflow.group-deployment-id";
 
 	/**
 	 * Handle the given {@code ModuleDeploymentRequest}. Implementations

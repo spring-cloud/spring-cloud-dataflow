@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2015-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,6 +57,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @author Mark Fisher
  * @author Patrick Peralta
  * @author Ilayaperumal Gopinathan
+ * @author Marius Bogoevici
  */
 @RestController
 @RequestMapping("/streams/deployments")
@@ -153,6 +154,7 @@ public class StreamDeploymentController {
 		Iterator<ModuleDefinition> iterator = stream.getDeploymentOrderIterator();
 		int nextModuleCount = 0;
 		boolean isDownStreamModulePartitioned = false;
+		long timestamp = System.currentTimeMillis();
 		while (iterator.hasNext()) {
 			ModuleDefinition currentModule = iterator.next();
 			ArtifactType type = determineModuleType(currentModule);
@@ -163,6 +165,7 @@ public class StreamDeploymentController {
 			}
 			ArtifactCoordinates coordinates = registration.getCoordinates();
 			Map<String, String> moduleDeploymentProperties = extractModuleDeploymentProperties(currentModule, streamDeploymentProperties);
+			moduleDeploymentProperties.put(ModuleDeployer.GROUP_DEPLOYMENT_ID, currentModule.getGroup() + "-" + timestamp);
 			boolean upstreamModuleSupportsPartition = upstreamModuleHasPartitionInfo(stream, currentModule, streamDeploymentProperties);
 			// consumer module partition properties
 			if (upstreamModuleSupportsPartition) {

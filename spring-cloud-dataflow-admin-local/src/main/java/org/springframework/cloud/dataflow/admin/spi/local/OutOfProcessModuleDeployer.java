@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2015-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.PostConstruct;
@@ -54,6 +55,7 @@ import org.springframework.web.client.RestTemplate;
  * A ModuleDeployer implementation that spins off a new JVM process per
  * module instance.
  * @author Eric Bottard
+ * @author Marius Bogoevici
  */
 public class OutOfProcessModuleDeployer implements ModuleDeployer {
 
@@ -93,7 +95,16 @@ public class OutOfProcessModuleDeployer implements ModuleDeployer {
 
 
 		try {
-			Path workDir = Files.createDirectory(Paths.get(logPathRoot.toFile().getAbsolutePath(),
+			String groupDeploymentId = request.getDeploymentProperties().get(GROUP_DEPLOYMENT_ID);
+			if (groupDeploymentId == null) {
+				groupDeploymentId = request.getDefinition().getGroup() + "-" + System.currentTimeMillis();
+			}
+			Path moduleDeploymentGroupDir = Paths.get(logPathRoot.toFile().getAbsolutePath(), groupDeploymentId);
+			if (!Files.exists(moduleDeploymentGroupDir)) {
+				Files.createDirectory(moduleDeploymentGroupDir);
+				moduleDeploymentGroupDir.toFile().deleteOnExit();
+			}
+			Path workDir = Files.createDirectory(Paths.get(moduleDeploymentGroupDir.toFile().getAbsolutePath(),
 					moduleDeploymentId.toString()));
 			if (properties.isDeleteFilesOnExit()) {
 				workDir.toFile().deleteOnExit();
