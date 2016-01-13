@@ -57,27 +57,27 @@ public class FieldValueCounterCommands extends AbstractMetricsCommands implement
 
 	private static final String LIST_COUNTERS = "field-value-counter list";
 
-	private static final String DELETE_COUNTER = "field-value-counter reset";
+	private static final String RESET_COUNTER = "field-value-counter reset";
 
 	@Autowired
 	private DataFlowShell dataFlowShell;
 
-	@CliAvailabilityIndicator({ LIST_COUNTERS, DISPLAY_COUNTER, DELETE_COUNTER })
+	@CliAvailabilityIndicator({ LIST_COUNTERS, DISPLAY_COUNTER, RESET_COUNTER})
 	public boolean available() {
 		return dataFlowShell.getDataFlowOperations() != null;
 	}
 
 	@CliCommand(value = DISPLAY_COUNTER, help = "Display the value of a field value counter")
 	public List<Object> display(
-			@CliOption(key = { "", "name" }, help = "the name of the field value counter to display", mandatory = true
-					/*,optionContext = "existing-counter disable-string-converter"*/) String name,
+			@CliOption(key = { "", "name" }, help = "the name of the field value counter to display", mandatory = true)
+			String name,
 			final @CliOption(key = "pattern", help = "the pattern used to format the values (see DecimalFormat)",
 					mandatory = false, unspecifiedDefaultValue = NumberFormatConverter.DEFAULT) NumberFormat pattern) {
 		FieldValueCounterResource counter = fvcOperations().retrieve(name);
 
 		LinkedHashMap<String, Object> header = new LinkedHashMap<>();
-		header.put("key", "Key");
-		header.put("value", "Value");
+		header.put("key", "Value");
+		header.put("value", "Count");
 		TableModel model = new BeanListTableModel<>(counter.getValues().entrySet(), header);
 
 		Table table = DataFlowTables.applyStyle(new TableBuilder(model))
@@ -102,7 +102,7 @@ public class FieldValueCounterCommands extends AbstractMetricsCommands implement
 		return displayMetrics(list);
 	}
 
-	@CliCommand(value = DELETE_COUNTER, help = "Reset the field value counter with the given name")
+	@CliCommand(value = RESET_COUNTER, help = "Reset the field value counter with the given name")
 	public String reset(
 			@CliOption(mandatory = true, key = { "", "name" }, help = "the name of the field value counter to reset"
 					/*, optionContext = "existing-counter disable-string-converter"*/) String name) {

@@ -115,7 +115,7 @@ public class FieldValueCounterController {
 	}
 
 	/**
-	 * Knows how to assemble {@link FieldValueCounterResource}s out of counter {@link FieldValueCounter}s.
+	 * Knows how to assemble {@link FieldValueCounterResource} out of {@link FieldValueCounter}.
 	 *
 	 * @author Eric Bottard
 	 */
