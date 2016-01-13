@@ -22,7 +22,6 @@ import java.util.Map;
 import org.springframework.cloud.dataflow.rest.resource.TaskDefinitionResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionResource;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
-import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.UriTemplate;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
@@ -36,11 +35,11 @@ import org.springframework.web.client.RestTemplate;
  */
 public class TaskTemplate implements TaskOperations {
 
-	private static final String DEFINITIONS_PATH = "tasks/definitions";
+	private static final String DEFINITIONS_RELATION = "tasks/definitions";
 
-	private static final String DEPLOYMENTS_PATH = "tasks/deployments";
+	private static final String DEPLOYMENTS_RELATION = "tasks/deployments";
 
-	private static final String EXECUTIONS_PATH = "tasks/executions";
+	private static final String EXECUTIONS_RELATION = "tasks/executions";
 
 	private final RestTemplate restTemplate;
 
@@ -52,15 +51,15 @@ public class TaskTemplate implements TaskOperations {
 
 	TaskTemplate(RestTemplate restTemplate, Map<String, UriTemplate> resources) {
 		Assert.notNull(resources, "URI Resources must not be be null");
-		Assert.notNull(resources.get(DEFINITIONS_PATH), "Definitions path is required");
-		Assert.notNull(resources.get(DEPLOYMENTS_PATH), "Deployments path is required");
+		Assert.notNull(resources.get(DEFINITIONS_RELATION), "Definitions path is required");
+		Assert.notNull(resources.get(DEPLOYMENTS_RELATION), "Deployments path is required");
 		Assert.notNull(restTemplate, "RestTemplate must not be null");
-		Assert.notNull(resources.get(EXECUTIONS_PATH), "Executions path is required");
+		Assert.notNull(resources.get(EXECUTIONS_RELATION), "Executions path is required");
 
 		this.restTemplate = restTemplate;
-		this.definitionsPath = resources.get(DEFINITIONS_PATH);
-		this.deploymentsPath = resources.get(DEPLOYMENTS_PATH);
-		this.executionsPath = resources.get(EXECUTIONS_PATH);
+		this.definitionsPath = resources.get(DEFINITIONS_RELATION);
+		this.deploymentsPath = resources.get(DEPLOYMENTS_RELATION);
+		this.executionsPath = resources.get(EXECUTIONS_RELATION);
 
 	}
 
@@ -97,13 +96,12 @@ public class TaskTemplate implements TaskOperations {
 
 	@Override
 	public TaskExecutionResource.Page executionList() {
-		String uriTemplate = executionsPath.toString();
-		uriTemplate = uriTemplate;
-		return restTemplate.getForObject(uriTemplate, TaskExecutionResource.Page.class);
+		return restTemplate.getForObject(executionsPath.toString(),
+				TaskExecutionResource.Page.class);
 	}
 
 	@Override
-	public PagedResources<TaskExecutionResource> executionListByTaskName(String taskName) {
+	public TaskExecutionResource.Page executionListByTaskName(String taskName) {
 		String uriTemplate = executionsPath.toString();
 		uriTemplate = uriTemplate + "/{taskName}";
 		return restTemplate.getForObject(uriTemplate, TaskExecutionResource.Page.class,

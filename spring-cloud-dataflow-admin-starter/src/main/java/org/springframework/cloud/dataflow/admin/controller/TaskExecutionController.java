@@ -47,9 +47,7 @@ public class TaskExecutionController {
 
 	private final Assembler taskAssembler = new Assembler();
 
-	@Autowired
 	private TaskExplorer explorer;
-
 
 	/**
 	 * Creates a {@code TaskExecutionController} that retrieves Task Execution information
@@ -98,7 +96,7 @@ public class TaskExecutionController {
 	 * {@link org.springframework.hateoas.ResourceAssembler} implementation
 	 * that converts {@link TaskExecution}s to {@link TaskExecutionResource}s.
 	 */
-	class Assembler extends ResourceAssemblerSupport<TaskExecution, TaskExecutionResource> {
+	private static class Assembler extends ResourceAssemblerSupport<TaskExecution, TaskExecutionResource> {
 
 		public Assembler() {
 			super(TaskExecutionController.class, TaskExecutionResource.class);

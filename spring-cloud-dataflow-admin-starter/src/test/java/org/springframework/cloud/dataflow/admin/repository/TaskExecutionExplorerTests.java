@@ -52,10 +52,10 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 		PropertyPlaceholderAutoConfiguration.class})
 public class TaskExecutionExplorerTests {
 	@Autowired
-	DataSource dataSource;
+	private DataSource dataSource;
 
 	@Autowired
-	TaskExplorer explorer;
+	private TaskExplorer explorer;
 
 	private JdbcTemplate template;
 
