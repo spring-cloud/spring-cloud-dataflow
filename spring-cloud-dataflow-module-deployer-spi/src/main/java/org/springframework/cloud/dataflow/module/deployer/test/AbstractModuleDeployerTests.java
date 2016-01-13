@@ -19,9 +19,13 @@ package org.springframework.cloud.dataflow.module.deployer.test;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.springframework.cloud.dataflow.module.DeploymentState.deployed;
+import static org.springframework.cloud.dataflow.module.DeploymentState.deploying;
+import static org.springframework.cloud.dataflow.module.DeploymentState.failed;
 import static org.springframework.cloud.dataflow.module.DeploymentState.unknown;
 import static org.springframework.cloud.dataflow.module.deployer.test.EventuallyMatcher.eventually;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 import org.hamcrest.BaseMatcher;
@@ -29,6 +33,7 @@ import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
 import org.hamcrest.collection.IsMapContaining;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -46,11 +51,11 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
  * {@link org.springframework.cloud.dataflow.module.deployer.ModuleDeployer} implementations.
  *
  * <p>Inheritors should setup an environment with a newly created {@link ModuleDeployer} that has no pre-deployed
- * modules. Tests in this class are independent and leave the deployer in a clean state after they successfully run.</p>
+ * modules. Tests in this class are independent and leave the deployer in a clean state after they successfully
+ * run.</p>
  *
  * <p>As deploying a module is often quite time consuming, some tests often test various aspects of deployment in a
  * row, to avoid re-deploying modules over and over again.</p>
- *
  * @author Eric Bottard
  */
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -59,9 +64,11 @@ public abstract class AbstractModuleDeployerTests {
 	@Autowired
 	protected ModuleDeployer moduleDeployer;
 
-	@Test
-	public void newlyCreatedDeployerShouldReportNoModules() {
-		assertThat(moduleDeployer.status().isEmpty(), is(true));
+	@Before
+	public void assertCleanStart() {
+		assertThat("A newly created deployer should report no modules " +
+						"(this error may be caused by a previous test failing and not cleaning after itself)",
+				moduleDeployer.status().isEmpty(), is(true));
 	}
 
 	@Test
@@ -74,6 +81,9 @@ public abstract class AbstractModuleDeployerTests {
 		assertThat(status.getState(), is(unknown));
 	}
 
+	/**
+	 * Tests a simple deploy-undeploy cycle.
+	 */
 	@Test
 	public void testSimpleDeployment() {
 		ModuleDefinition definition = new ModuleDefinition.Builder()
@@ -98,6 +108,107 @@ public abstract class AbstractModuleDeployerTests {
 		assertThat(moduleDeployer.status().isEmpty(), is(true));
 	}
 
+	/**
+	 * A module deployer should be able to re-deploy a module after it has been un-deployed.
+	 * This tests makes sure the deployer does not leave things lying around for example.
+	 */
+	@Test
+	public void testRedeploy() {
+		ModuleDefinition definition = new ModuleDefinition.Builder()
+				.setGroup(randomName())
+				.setName(randomName())
+				.build();
+		ArtifactCoordinates coordinates = ArtifactCoordinates
+				.parse("org.springframework.cloud.stream.module:time-source:jar:exec:1.0.0.M2");
+		ModuleDeploymentRequest request = new ModuleDeploymentRequest(definition, coordinates);
+
+		ModuleDeploymentId deploymentId = moduleDeployer.deploy(request);
+		Attempts timeout = deploymentTimeout();
+		assertThat(deploymentId, eventually(hasStatusThat(Matchers.<ModuleStatus>hasProperty("state", is(deployed))), timeout.noAttempts, timeout.pause));
+
+		// Use this opportunity to also test the multi-status query
+		assertThat(moduleDeployer.status(), IsMapContaining.hasEntry(is(deploymentId),
+				Matchers.<ModuleStatus>hasProperty("state", is(deployed))));
+
+		timeout = undeploymentTimeout();
+		moduleDeployer.undeploy(deploymentId);
+		assertThat(deploymentId, eventually(hasStatusThat(Matchers.<ModuleStatus>hasProperty("state", is(unknown))), timeout.noAttempts, timeout.pause));
+		assertThat(moduleDeployer.status().isEmpty(), is(true));
+
+		// Attempt re-deploy of SAME request
+		deploymentId = moduleDeployer.deploy(request);
+		timeout = deploymentTimeout();
+		assertThat(deploymentId, eventually(hasStatusThat(Matchers.<ModuleStatus>hasProperty("state", is(deployed))), timeout.noAttempts, timeout.pause));
+
+		// Use this opportunity to also test the multi-status query
+		assertThat(moduleDeployer.status(), IsMapContaining.hasEntry(is(deploymentId),
+				Matchers.<ModuleStatus>hasProperty("state", is(deployed))));
+
+		timeout = undeploymentTimeout();
+		moduleDeployer.undeploy(deploymentId);
+		assertThat(deploymentId, eventually(hasStatusThat(Matchers.<ModuleStatus>hasProperty("state", is(unknown))), timeout.noAttempts, timeout.pause));
+		assertThat(moduleDeployer.status().isEmpty(), is(true));
+
+	}
+
+	/**
+	 * Tests that a module which takes a long time to deploy is correctly reported as deploying.
+	 * Test that such a module can be killed (undeployed).
+	 */
+	@Test
+	public void testDeployingStateCalculationAndCancel() {
+		ModuleDefinition definition = new ModuleDefinition.Builder()
+				.setGroup(randomName())
+				.setName(randomName())
+				.build();
+		ArtifactCoordinates coordinates = ArtifactCoordinates
+				.parse("org.springframework.cloud.stream.module:integration-test-processor:jar:exec:1.0.0.BUILD-SNAPSHOT");
+		Map<String, String> properties = new HashMap<>();
+		properties.put("initDelay", "" + 1000 * 60 * 60); // 1hr
+		ModuleDeploymentRequest request = new ModuleDeploymentRequest(definition, coordinates, properties);
+
+		ModuleDeploymentId deploymentId = moduleDeployer.deploy(request);
+		Attempts timeout = deploymentTimeout();
+		assertThat(deploymentId, eventually(hasStatusThat(Matchers.<ModuleStatus>hasProperty("state", is(deploying))), timeout.noAttempts, timeout.pause));
+
+		// Use this opportunity to also test the multi-status query
+		assertThat(moduleDeployer.status(), IsMapContaining.hasEntry(is(deploymentId),
+				Matchers.<ModuleStatus>hasProperty("state", is(deploying))));
+
+		timeout = undeploymentTimeout();
+		moduleDeployer.undeploy(deploymentId);
+		assertThat(deploymentId, eventually(hasStatusThat(Matchers.<ModuleStatus>hasProperty("state", is(unknown))), timeout.noAttempts, timeout.pause));
+		assertThat(moduleDeployer.status().isEmpty(), is(true));
+
+	}
+
+	@Test
+	public void testFailedDeployment() {
+		ModuleDefinition definition = new ModuleDefinition.Builder()
+				.setGroup(randomName())
+				.setName(randomName())
+				.build();
+		ArtifactCoordinates coordinates = ArtifactCoordinates
+				.parse("org.springframework.cloud.stream.module:integration-test-processor:jar:exec:1.0.0.BUILD-SNAPSHOT");
+		Map<String, String> properties = new HashMap<>();
+		properties.put("killDelay", "0");
+		ModuleDeploymentRequest request = new ModuleDeploymentRequest(definition, coordinates, properties);
+
+		ModuleDeploymentId deploymentId = moduleDeployer.deploy(request);
+		Attempts timeout = deploymentTimeout();
+		assertThat(deploymentId, eventually(hasStatusThat(Matchers.<ModuleStatus>hasProperty("state", is(failed))), timeout.noAttempts, timeout.pause));
+
+		// Use this opportunity to also test the multi-status query
+		assertThat(moduleDeployer.status(), IsMapContaining.hasEntry(is(deploymentId),
+				Matchers.<ModuleStatus>hasProperty("state", is(failed))));
+
+		timeout = undeploymentTimeout();
+		moduleDeployer.undeploy(deploymentId);
+		assertThat(deploymentId, eventually(hasStatusThat(Matchers.<ModuleStatus>hasProperty("state", is(unknown))), timeout.noAttempts, timeout.pause));
+		assertThat(moduleDeployer.status().isEmpty(), is(true));
+
+	}
+
 	protected String randomName() {
 		return UUID.randomUUID().toString();
 	}
@@ -120,11 +231,12 @@ public abstract class AbstractModuleDeployerTests {
 
 	/**
 	 * Represents a timeout for querying status, with repetitive queries until a certain number have been made.
-	 *
 	 * @author Eric Bottard
 	 */
 	protected static class Attempts {
+
 		public final int noAttempts;
+
 		public final int pause;
 
 		public Attempts(int noAttempts, int pause) {
@@ -135,7 +247,6 @@ public abstract class AbstractModuleDeployerTests {
 
 	/**
 	 * A Hamcrest Matcher that queries the deployment status for some {@link ModuleDeploymentId}.
-	 *
 	 * @author Eric Bottard
 	 */
 	protected Matcher<ModuleDeploymentId> hasStatusThat(final Matcher<ModuleStatus> statusMatcher) {

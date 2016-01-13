@@ -50,6 +50,7 @@ import org.springframework.cloud.dataflow.module.deployer.ModuleDeployer;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.SocketUtils;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 
 /**
@@ -158,7 +159,7 @@ public class OutOfProcessModuleDeployer implements ModuleDeployer {
 			restTemplate.postForObject(instance.moduleUrl + "/shutdown", null, String.class);
 			instance.process.waitFor();
 		}
-		catch (InterruptedException e) {
+		catch (InterruptedException | ResourceAccessException e) {
 			instance.process.destroy();
 		}
 	}
