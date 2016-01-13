@@ -18,7 +18,7 @@ package org.springframework.cloud.dataflow.admin.configuration;
 
 import javax.sql.DataSource;
 
-import org.springframework.cloud.dataflow.admin.repository.TaskExecutionRepository;
+import org.springframework.cloud.dataflow.admin.repository.TaskDatabaseInitializer;
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.cloud.task.repository.support.JdbcTaskExplorerFactoryBean;
 import org.springframework.context.annotation.Bean;
@@ -33,8 +33,8 @@ import org.springframework.data.web.config.EnableSpringDataWebSupport;
 public class TaskDependencies {
 
 	@Bean
-	public TaskExecutionRepository taskExecutionRepository(){
-		return new TaskExecutionRepository();
+	public TaskDatabaseInitializer taskExecutionRepository(){
+		return new TaskDatabaseInitializer();
 	}
 
 	@Bean

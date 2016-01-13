@@ -22,32 +22,31 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.task.repository.support.TaskDatabaseInitializer;
 import org.springframework.core.io.DefaultResourceLoader;
 
 /**
  * @author Glenn Renfro
  */
 /**
- * Intitialize the repo for TaskExecutionRepository and offers access to the TaskExplorer.
+ * Intitializes the schema for the task database .
  *
  * @author Glenn Renfro.
  */
 
-public class TaskExecutionRepository implements InitializingBean {
+public class TaskDatabaseInitializer implements InitializingBean {
 
-	private static final Logger logger = LoggerFactory.getLogger(TaskExecutionRepository.class);
+	private static final Logger logger = LoggerFactory.getLogger(TaskDatabaseInitializer.class);
 
 
 	@Autowired
 	DataSource dataSource;
 
-	public TaskExecutionRepository() {
+	public TaskDatabaseInitializer() {
 	}
 
 	public void initializeDatabase() {
-		TaskDatabaseInitializer.initializeDatabase(dataSource,
-				new DefaultResourceLoader());
+		org.springframework.cloud.task.repository.support.
+				TaskDatabaseInitializer.initializeDatabase(dataSource, new DefaultResourceLoader());
 	}
 
 	@Override
@@ -55,7 +54,4 @@ public class TaskExecutionRepository implements InitializingBean {
 		initializeDatabase();
 	}
 
-	public void setDataSource(DataSource dataSource){
-		this.dataSource = dataSource;
-	}
 }
