@@ -60,12 +60,7 @@ public class InProcessModuleInstanceStatus implements ModuleInstanceStatus {
 		try {
 			HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
 			urlConnection.connect();
-			try {
-				urlConnection.disconnect();
-			}
-			catch (Exception ignored) {
-
-			}
+			urlConnection.disconnect();
 			return DeploymentState.deployed;
 		}
 		catch (IOException e) {
