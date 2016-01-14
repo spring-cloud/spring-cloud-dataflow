@@ -16,8 +16,12 @@
 
 package org.springframework.cloud.dataflow.admin.spi.local;
 
+import org.junit.Ignore;
+import org.junit.Test;
+
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.cloud.dataflow.module.deployer.ModuleDeployer;
+import org.springframework.cloud.dataflow.module.deployer.test.AbstractModuleDeployerTests;
 import org.springframework.cloud.stream.module.launcher.ModuleLauncher;
 import org.springframework.cloud.stream.module.launcher.ModuleLauncherConfiguration;
 import org.springframework.context.annotation.Bean;
@@ -25,9 +29,26 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 /**
+ * Integration tests for the {@link InProcessModuleDeployer}.
+ *
+ * @author Eric Bottard
  */
 @SpringApplicationConfiguration(classes = InProcessModuleDeployerTests.Config.class)
-public class InProcessModuleDeployerTests/* extends AbstractModuleDeployerTests */{
+public class InProcessModuleDeployerTests extends AbstractModuleDeployerTests {
+
+	@Test
+	@Ignore("Can't afford to kill this JVM")
+	@Override
+	public void testFailedDeployment() {
+		super.testFailedDeployment();
+	}
+
+	@Test
+	@Ignore("Can't really force-kill a module")
+	@Override
+	public void testDeployingStateCalculationAndCancel() {
+		super.testDeployingStateCalculationAndCancel();
+	}
 
 	@Configuration
 	@Import(ModuleLauncherConfiguration.class)
