@@ -1,0 +1,142 @@
+[[streams]]
+= Streams
+
+[partintro]
+--
+In this section you will learn all about Streams and how to use them with Spring Cloud Data Flow.
+--
+
+== Introduction
+
+In Spring Cloud Data Flow, a basic stream defines the ingestion of event driven data from a _source_ to a _sink_ that passes through any number of _processors_. Streams are composed of spring-cloud-stream modules and the deployment of stream definitions is done via the Admin Server (REST API). The xref:getting-started#getting-started[Getting Started] section shows you how to start these servers and how to start and use the Spring Cloud Data Flow shell.
+
+A high level DSL is used to create stream definitions. The DSL to define a stream that has an http source and a file sink (with no processors) is shown below
+
+     http | file
+
+The DSL mimics a UNIX pipes and filters syntax. Default values for ports and filenames are used in this example but can be overridden using `--` options, such as
+
+     http --port=8091 | file --dir=/tmp/httpdata/
+
+To create these stream definitions you make an HTTP POST request to the Spring Cloud Data Flow Admin Server. More details can be found in the sections below.
+
+== Creating a Simple Stream
+
+The Spring Cloud Data Flow Admin Server footnote:[The server is implemented by the `AdminApplication` class in the `spring-cloud-dataflow-admin-starter` subproject] exposes a full RESTful API for managing the lifecycle of stream definitions, but the easiest way to use is it is via the Spring Cloud Data Flow shell. Start the shell as described in the xref:Getting-Started#getting-started[Getting Started] section.
+
+New streams are created by posting stream definitions. The definitions are built from a simple DSL. For example, let's walk through what happens if we execute the following shell command:
+
+    dataflow:> stream create --definition "time | log" --name ticktock
+
+This defines a stream named `ticktock` based off the DSL expression `time | log`.  The DSL uses the "pipe" symbol `|`, to connect a source to a sink.
+
+Then to deploy the stream execute the following shell command (or alternatively add the `--deploy` flag when creating the stream so that this step is not needed):
+
+    dataflow:> stream deploy --name ticktock
+
+The stream server finds the `time` and `log` definitions and uses them to setup the stream. In this simple example, the time source simply sends the current time as a message each second, and the log sink outputs it using the logging framework.
+
+....
+2016-01-13 10:41:15.398  INFO 65275 --- [nio-9393-exec-1] o.s.c.d.a.s.l.OutOfProcessModuleDeployer : deploying module org.springframework.cloud.stream.module:log-sink:jar:exec:1.0.0.BUILD-SNAPSHOT instance 0
+   Logs will be in /var/folders/hs/h87zy7z17qs6mcnl4hj8_dp00000gp/T/spring-cloud-data-flow-3652850284472151116/ticktock.log
+2016-01-13 10:41:15.433  INFO 65275 --- [nio-9393-exec-1] o.s.c.d.a.s.l.OutOfProcessModuleDeployer : deploying module org.springframework.cloud.stream.module:time-source:jar:exec:1.0.0.BUILD-SNAPSHOT instance 0
+   Logs will be in /var/folders/hs/h87zy7z17qs6mcnl4hj8_dp00000gp/T/spring-cloud-data-flow-3652850284472151116/ticktock.time
+....
+
+If you would like to have multiple instances of a module in the stream, you can include a property with the deploy command:
+
+    dataflow:> stream deploy --name ticktock --properties "module.time.count=3"
+
+You can also include a http://docs.spring.io/spring/docs/4.0.x/spring-framework-reference/htmlsingle/#expressions[SpEL Expression] as a `criteria` property for any module. That will be evaluated against the attributes of each currently available module.
+
+    dataflow:> stream deploy --name ticktock --properties "module.time.count=3,module.log.criteria=groups.contains('x')"
+
+IMPORTANT: See <<module-labels>>.
+
+== Deleting a Stream
+
+You can delete a stream by issuing the `stream destroy` command from the shell:
+
+    dataflow:> stream destroy --name ticktock
+
+== Deploying and Undeploying Streams
+
+Often you will want to stop a stream, but retain the name and definition for future use. In that case you can `undeploy` the stream by name and issue the `deploy` command at a later time to restart it.
+
+    dataflow:> stream undeploy --name ticktock
+    dataflow:> stream deploy --name ticktock
+
+== Other Source and Sink Types
+
+Let's try something a bit more complicated and swap out the `time` source for something else. Another supported source type is `http`, which accepts data for ingestion over HTTP POSTs. Note that the `http` source accepts data on a different port from the Admin Server (default 8080). By default the port is randomly assigned.
+
+To create a stream using an `http` source, but still using the same `log` sink, we would change the original command above to
+
+    dataflow:> stream create --definition "http | log" --name myhttpstream --deploy
+
+which will produce the following output from the server
+
+....
+2016-01-13 18:42:19.162  INFO 19463 --- [nio-9393-exec-7] o.s.c.d.a.s.l.OutOfProcessModuleDeployer : deploying module org.springframework.cloud.stream.module:log-sink:jar:exec:1.0.0.BUILD-SNAPSHOT instance 0
+   Logs will be in /var/folders/hs/h87zy7z17qs6mcnl4hj8_dp00000gp/T/spring-cloud-data-flow-2185888994718649403/myhttpstream.log
+2016-01-13 18:42:19.180  INFO 19463 --- [nio-9393-exec-7] o.s.c.d.a.s.l.OutOfProcessModuleDeployer : deploying module org.springframework.cloud.stream.module:http-source:jar:exec:1.0.0.BUILD-SNAPSHOT instance 0
+   Logs will be in /var/folders/hs/h87zy7z17qs6mcnl4hj8_dp00000gp/T/spring-cloud-data-flow-2185888994718649403/myhttpstream.http
+....
+
+Note that we don't see any other output this time until we actually post some data (using shell command). In oder to see the randomly assigned port on which the http source is listening, execute:
+
+	dataflow:> runtime modules
+
+You should see that the corresponding http source has a `url` property containing the host and port information on which it is listening. You are now ready to post to that url, e.g.:
+
+  dataflow:> http post --target http://localhost:1234 --data "hello"
+  dataflow:> http post --target http://localhost:1234 --data "goodbye"
+
+and the stream will then funnel the data from the http source to the output log implemented by the log sink
+
+  2016-01-13 21:15:34.825  INFO 54348 --- [hannel-adapter1] log.sink                                 : hello
+  2016-01-13 21:17:36.544  INFO 54348 --- [hannel-adapter1] log.sink                                 : goodbye
+
+Of course, we could also change the sink implementation. You could pipe the output to a file (`file`), to hadoop (`hdfs`) or to any of the other sink modules which are provided. You can also define your own xref:Modules#modules[modules].
+
+== Simple Stream Processing
+
+As an example of a simple processing step, we can transform the payload of the HTTP posted data to upper case using the stream definitions
+
+    http | transform --expression=payload.toUpperCase() | log
+
+To create this stream enter the following command in the shell
+
+    dataflow:> stream create --definition "http | transform --expression=payload.toUpperCase() | log" --name myprocstrem --deploy
+
+Posting some data (using shell command)
+
+  dataflow:> http post --target http://localhost:1234 --data "hello"
+
+Will result in an uppercased 'hello' in the log
+
+  15:18:21,345  WARN ThreadPoolTaskScheduler-1 logger.myprocstream:141 - HELLO
+
+See the xref:Processors#processors[Processors] section for more information.
+
+== DSL Syntax
+
+In the examples above, we connected a source to a sink using the pipe symbol `|`. You can also pass parameters to the source and sink configurations. The parameter names will depend on the individual module implementations, but as an example, the `http` source module exposes a `server.port` setting which allows you to change the data ingestion port from the default value. To create the stream using port 8000, we would use
+
+    dataflow:> stream create --definition "http --server.port=8000 | log" --name myhttpstream
+
+For more information please see the chapter xref:using-spring-cloud-stream-modules#spring-cloud-stream-modules[Using Spring Cloud Stream Modules].
+
+== Advanced Features
+
+In the examples above, simple module definitions are used to construct each stream. However, modules may be grouped together in order to avoid duplication and/or reduce the amount of chattiness over the messaging middleware. To learn more about that feature, refer to the xref:Modules#composing-modules[Composing Modules] section.
+
+If directed graphs are needed instead of the simple linear streams described above, two features are relevant. First, named channels may be used as a way to combine multiple flows upstream and/or downstream from the channel. The behavior of that channel may either be queue-based or topic-based depending on what prefix is used ("queue:myqueue" or "topic:mytopic", respectively). To learn more, refer to the xref:DSL-Reference#named-channels[Named Channels] section. Second, you may need to determine the output channel of a stream based on some information that is only known at runtime. To learn about such content-based routing, refer to the xref:Sinks#dynamic-router[Dynamic Router] section.
+
+[[module-labels]]
+== Module Labels
+
+When a stream is comprised of multiple modules with the same name, they must be qualified with labels:
+
+  stream create --definition "http | firstLabel: transform --expression=payload.toUpperCase() | secondLabel: transform --expression=payload+'!' | log" --name myStreamWithLabels --deploy
+
