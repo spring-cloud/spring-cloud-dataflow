@@ -36,13 +36,16 @@ Sabby Anandan, Marius Bogoevici, Eric Bottard, Mark Fisher, Ilayaperumal Gopinat
 :gradle-userguide: http://www.gradle.org/docs/current/userguide
 :propdeps-plugin: https://github.com/spring-projects/gradle-plugins/tree/master/propdeps-plugin
 :ant-manual: http://ant.apache.org/manual
-:project-doc-module: spring-cloud-dataflow-modules-docs 
+:project-doc-module: spring-cloud-dataflow-modules-docs
+:scsm-asciidoc: https://raw.githubusercontent.com/spring-cloud/spring-cloud-stream-modules/master/spring-cloud-stream-modules-docs/src/main/asciidoc
+:attributes: allow-uri-read
 // ======================================================================================
 
 include::preface.adoc[]
 include::spring-cloud-dataflow-overview.adoc[]
 include::getting-started.adoc[]
-include::using-spring-cloud-stream-modules.adoc[]
+include::streams.adoc[]
+include::modules.adoc[]
 include::appendix.adoc[]
 
 
