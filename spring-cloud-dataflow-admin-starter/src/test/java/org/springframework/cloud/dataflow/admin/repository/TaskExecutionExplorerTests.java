@@ -62,7 +62,7 @@ public class TaskExecutionExplorerTests {
 	@Before
 	public void setup() throws Exception{
 			template = new JdbcTemplate(dataSource);
-			template.execute("TRUNCATE TABLE task_execution");
+			template.execute("DELETE FROM task_execution");
 	}
 
 	@Test
