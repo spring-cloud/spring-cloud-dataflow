@@ -16,15 +16,12 @@
 
 package org.springframework.cloud.dataflow.admin.spi.local;
 
-import org.junit.Ignore;
-import org.junit.Test;
-
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.cloud.dataflow.module.deployer.ModuleDeployer;
 import org.springframework.cloud.dataflow.module.deployer.test.AbstractModuleDeployerTests;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
 /**
  * Integration Tests for {@link OutOfProcessModuleDeployer}.
@@ -33,13 +30,6 @@ import org.springframework.context.annotation.Bean;
  */
 @SpringApplicationConfiguration(classes = OutOfProcessModuleDeployerTests.Config.class)
 public class OutOfProcessModuleDeployerTests extends AbstractModuleDeployerTests {
-
-	@Test
-	@Override
-	@Ignore("https://github.com/spring-cloud/spring-cloud-dataflow/pull/302")
-	public void testRedeploy() {
-		super.testRedeploy();
-	}
 
 	@Configuration
 	@EnableConfigurationProperties(OutOfProcessModuleDeployerProperties.class)
