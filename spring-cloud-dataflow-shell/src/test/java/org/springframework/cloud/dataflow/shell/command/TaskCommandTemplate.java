@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2015-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ import org.springframework.shell.table.TableModel;
  * It should mimic the client side API of TaskOperations as much as possible.
  *
  * @author Glenn Renfro
+ * @author Michael Minella
  */
 public class TaskCommandTemplate {
 
@@ -141,6 +142,18 @@ public class TaskCommandTemplate {
 			}
 		}
 		fail("Task named " + taskName + " was not created");
+	}
+
+	/**
+	 * Return the results of executing the shell command:
+	 * <code>dataflow: task view --id FOO</code> where FOO is the id for the task
+	 * execution requested.
+	 *
+	 * @param id the identifier for the task execution
+	 * @return the results of the shell command.
+	 */
+	public CommandResult view(long id) {
+		return shell.executeCommand("task view --id " + id);
 	}
 
 }

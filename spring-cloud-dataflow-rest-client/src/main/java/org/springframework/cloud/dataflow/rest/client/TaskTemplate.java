@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2015-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import org.springframework.web.client.RestTemplate;
  * Implementation for {@link org.springframework.cloud.dataflow.rest.client.TaskOperations}.
  *
  * @author Glenn Renfro
+ * @author Michael Minella
  */
 public class TaskTemplate implements TaskOperations {
 
@@ -103,9 +104,18 @@ public class TaskTemplate implements TaskOperations {
 	@Override
 	public TaskExecutionResource.Page executionListByTaskName(String taskName) {
 		String uriTemplate = executionsPath.toString();
-		uriTemplate = uriTemplate + "/{taskName}";
+		uriTemplate = uriTemplate + "/name/{taskName}";
 		return restTemplate.getForObject(uriTemplate, TaskExecutionResource.Page.class,
 				Collections.singletonMap("taskName", taskName));
+	}
+
+	@Override
+	public TaskExecutionResource view(long id) {
+		String uriTemplate = executionsPath.toString();
+		uriTemplate = uriTemplate + "/id/{id}";
+
+		return restTemplate.getForObject(uriTemplate, TaskExecutionResource.class,
+			Collections.singletonMap("id", id));
 	}
 
 }
