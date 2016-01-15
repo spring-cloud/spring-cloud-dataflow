@@ -1,0 +1,173 @@
+[[spring-cloud-task-overview]]
+= Tasks
+
+[partintro]
+--
+This section goes into more detail about how you can work with Spring Cloud Tasks. It
+covers topics such as creating and running task modules.
+
+If you're just starting out with Spring Cloud Dataflow, you should probably read the
+_<<getting-started.adoc#getting-started, Getting Started>>_ guide before diving into
+this section.
+--
+
+== Introducing Spring Cloud Task
+A task executes a process on demand.  In this case a task is a
+http://projects.spring.io/spring-boot/[Spring Boot] application that is annotated with
+`@EnableTask`.  Hence a user launches a task that performs a certain process, once
+complete the task terminates. An example of a task would be a boot application that exports
+data from a JDBC repository to an HDFS instance.  Tasks record the start time and the end
+time as well as the boot exit code in a relational database. The task implementation is
+based on the https://github.com/spring-cloud/spring-cloud-task[Spring Cloud Task] project.
+
+== The Lifecycle of a task
+Before we dive deeper into the details of creating Tasks, we need to understand the
+typical lifecycle for tasks in the context of Spring Cloud Dataflow:
+
+1. Register a Task Module
+2. Create a Task Definition
+3. Launch a Task
+4. Task Execution
+5. Destroy a Task Definition
+
+=== Register a Task Module
+Register a Task Module with the Module Registry using the Spring Cloud Dataflow Shell `module upload`
+command.
+
+=== Create a Task Definition
+Create a Task Definition from a Task Module by providing a definition name as well as
+properties that apply to the task execution.  Creating a task definition can be done via
+the restful API or the shell.  To create a task definition using the shell, use the
+`task create` command to create the task definition.  For example:
+
+[Source]
+----
+dataflow:>task create mytask --definition "timestamp --format=\"yyyy\""
+ Created new task 'mytask'
+----
+
+=== Launch an ad-hoc Task
+An adhoc job can be launched via the restful API or via the shell.  To launch an ad-hoc
+task via the shell use the `task launch` command.  For Example:
+
+[Source]
+----
+dataflow:>task launch mytask
+ Launched task 'mytask'
+----
+
+=== Task Execution
+Once the task is launched the state of the task is stored in a relational DB.  The state
+includes:
+
+* Task Name
+* Start Time
+* End Time
+* External Id
+* Exit Code
+* Exit Message
+* Status Code
+* Last Updated Time
+
+A user can check the status of their task executions via the restful API or by the shell.
+To view the latest task executions via the shell use the `task execution list` command.
+For example:
+
+[Source]
+----
+dataflow:>task execution list
+╔═══════════╤═══╤════════════════════════════╤════════════════════════════╤═════════╗
+║ Task Name │ID │         Start Time         │          End Time          │Exit Code║
+╠═══════════╪═══╪════════════════════════════╪════════════════════════════╪═════════╣
+║foo        │549│Tue Jan 12 16:29:01 EST 2016│Tue Jan 12 16:29:01 EST 2016│0        ║
+║bar        │548│Tue Jan 12 14:38:55 EST 2016│Tue Jan 12 14:38:55 EST 2016│0        ║
+║baz        │547│Tue Jan 12 14:06:38 EST 2016│Tue Jan 12 14:06:38 EST 2016│0        ║
+╚═══════════╧═══╧════════════════════════════╧════════════════════════════╧═════════╝
+----
+
+To get a list of task executions for just one task definition, add `--name` and
+the task definition name, for example `task execution list --name foo`.  To retrieve full
+details for a task execution use the `task execution detail` command, for example
+`task execution detail --name foo`.
+
+
+=== Destroy a Task Definition
+Destroying a Task Definition will remove the definition from the definition repository.
+This can be done via the restful API or via the shell.  To destroy a task via the shell
+use the `task destroy` command. For Example:
+
+[Source]
+----
+dataflow:>task destroy mytask
+ Destroyed task 'mytask'
+----
+
+The task execution information for previously launched tasks will remain in the
+task repository.
+[Note]
+*Note:* This will not stop any currently executing tasks for this definition, this just
+removes the definition.
+
+== Task Repository
+
+Out of the box Spring Cloud Dataflow offers an embedded instance of the HSQLDB database.
+The HSQLDB is good for development purposes but is not recommended for production use.
+
+=== Configuring the Task Execution Repository
+To add a driver for the database that will store the Task Execution information, a
+dependency for the driver will need to be added to a maven pom file and the
+Spring Cloud Dataflow will need to be rebuilt.  Since Spring Cloud Dataflow is comprised of an SPI for
+each environment it supports, please review the SPI's documentation on which POM should be
+updated to add the dependency and how to build.  This document will cover how to setup the
+dependency for local SPI.
+
+==== Local
+
+1. Open the spring-cloud-data-flow-admin-local/pom.xml in your IDE.
+2. In the `dependencies` section add the dependency for the database driver required.  In
+the sample below postgres has been chosen.
+
+[Source]
+----
+<dependencies>
+...
+    <dependency>
+        <groupId>org.postgresql</groupId>
+        <artifactId>postgresql</artifactId>
+    </dependency>
+...
+</dependencies>
+----
+3. Save the changed pom.xml
+3. Build the application as described here: <<appendix-building.adoc#Building, Building Spring Cloud Dataflow>>
+
+=== Datasource
+
+To configure the datasource Add the following properties to the admin.yml or via
+environment variables:
+
+a. spring.datasource.url
+b. spring.datasource.username
+c. spring.datasource.password
+d. spring.datasource.driver-class-name
+
+For example adding postgres would look something like this:
+
+* Environment variables:
+[Source]
+----
+export spring_datasource_url=jdbc:postgresql://localhost:5432/mydb
+export spring_datasource_username=myuser
+export spring_datasource_password=mypass
+export spring_datasource_driver-class-name="org.postgresql.Driver"
+----
+* admin.yml
+[Source]
+----
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/mydb
+    username: myuser
+    password: mypass
+    driver-class-name:org.postgresql.Driver
+----
