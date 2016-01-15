@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2015-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,38 +26,47 @@ import org.springframework.hateoas.PagedResources;
  * Interface defining operations available against tasks.
  *
  * @author Glenn Renfro
+ * @author Michael Minella
  */
 public interface TaskOperations {
 
 	/**
 	 * List tasks known to the system.
 	 */
-	public PagedResources<TaskDefinitionResource> list();
+	PagedResources<TaskDefinitionResource> list();
 
 	/**
 	 * Create a new task.
 	 */
-	public TaskDefinitionResource create(String name, String definition);
+	TaskDefinitionResource create(String name, String definition);
 
 	/**
 	 * Launch an already created task.
 	 */
-	public void launch(String name, Map<String, String> properties);
+	void launch(String name, Map<String, String> properties);
 	
 	/**
 	 * Destroy an existing task.
 	 */
-	public void destroy(String name);
+	void destroy(String name);
 
 	/**
 	 * List task executions known to the system.
 	 */
-	public PagedResources<TaskExecutionResource> executionList();
+	PagedResources<TaskExecutionResource> executionList();
 
 	/**
 	 * List task executions known to the system filtered by task name.
 	 * @param taskName of the executions.
 	 */
-	public PagedResources<TaskExecutionResource> executionListByTaskName(String taskName);
+	PagedResources<TaskExecutionResource> executionListByTaskName(String taskName);
+
+	/**
+	 * Return the {@link TaskExecutionResource} for the id specified.
+	 *
+	 * @param id identifier of the task execution
+	 * @return {@link TaskExecutionResource}
+	 */
+	TaskExecutionResource view(long id);
 
 }

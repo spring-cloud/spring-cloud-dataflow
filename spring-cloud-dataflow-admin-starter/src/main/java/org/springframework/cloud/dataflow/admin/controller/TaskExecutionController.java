@@ -17,6 +17,7 @@
 package org.springframework.cloud.dataflow.admin.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.dataflow.admin.repository.NoSuchTaskExecutionException;
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionResource;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.TaskExplorer;
@@ -39,6 +40,7 @@ import org.springframework.web.bind.annotation.RestController;
  * This includes obtaining task execution information from the task explorer.
  *
  * @author Glenn Renfro
+ * @author Michael Minella
  */
 @RestController
 @RequestMapping("/tasks/executions")
@@ -83,13 +85,29 @@ public class TaskExecutionController {
 	 * @param pageable  page-able collection of {@code TaskExecution}s.
 	 * @param assembler for the {@link TaskExecution}s
 	 */
-	@RequestMapping(value = "/{taskName}", method = RequestMethod.GET)
+	@RequestMapping(value = "/name/{taskName}", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
 	public PagedResources<TaskExecutionResource> retrieveTasksByName(
 			@PathVariable("taskName") String taskName, Pageable pageable,
 				PagedResourcesAssembler<TaskExecution> assembler) {
 		Page<TaskExecution> result = explorer.findTaskExecutionsByName(taskName, pageable);
 		return assembler.toResource(result, taskAssembler);
+	}
+
+	/**
+	 * View the details of a single task execution, specified by id.
+	 *
+	 * @param id the id of the requested {@link TaskExecution}
+	 * @return the {@link TaskExecution}
+	 */
+	@RequestMapping(value = "/id/{id}", method = RequestMethod.GET)
+	@ResponseStatus(HttpStatus.OK)
+	public TaskExecutionResource view(@PathVariable("id") long id) {
+		TaskExecution execution = this.explorer.getTaskExecution(id);
+		if(execution == null){
+			throw new NoSuchTaskExecutionException(id);
+		}
+		return taskAssembler.toResource(execution);
 	}
 
 	/**
