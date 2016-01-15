@@ -39,7 +39,7 @@ public interface ModuleDeployer {
 
 	public static final String JMX_DEFAULT_DOMAIN_KEY  = "spring.jmx.default-domain";
 
-	public static final String MODULE_DEPLOYMENT_GROUP_ID = "spring_cloud_dataflow.module_deployment_group_id";
+	public static final String GROUP_DEPLOYMENT_ID = "dataflow.group-deployment-id";
 
 	/**
 	 * Handle the given {@code ModuleDeploymentRequest}. Implementations

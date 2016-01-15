@@ -158,7 +158,7 @@ public class TaskController {
 		Map<String, String> deploymentProperties = new HashMap<>();
 		deploymentProperties.put("spring.cloud.task.name", taskDefinition.getName());
 		deploymentProperties.putAll(DeploymentPropertiesUtils.parse(properties));
-		deploymentProperties.put(ModuleDeployer.MODULE_DEPLOYMENT_GROUP_ID, taskDefinition.getName()
+		deploymentProperties.put(ModuleDeployer.GROUP_DEPLOYMENT_ID, taskDefinition.getName()
 				+ "-" + System.currentTimeMillis());
 
 		this.moduleDeployer.deploy(

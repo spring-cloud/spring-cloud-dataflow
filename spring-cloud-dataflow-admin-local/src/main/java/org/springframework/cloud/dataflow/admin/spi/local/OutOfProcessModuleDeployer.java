@@ -95,11 +95,11 @@ public class OutOfProcessModuleDeployer implements ModuleDeployer {
 
 
 		try {
-			String moduleDeploymentGroupId = request.getDeploymentProperties().get(MODULE_DEPLOYMENT_GROUP_ID);
-			if (moduleDeploymentGroupId == null) {
-				moduleDeploymentGroupId = UUID.randomUUID().toString();
+			String groupDeploymentId = request.getDeploymentProperties().get(GROUP_DEPLOYMENT_ID);
+			if (groupDeploymentId == null) {
+				groupDeploymentId = request.getDefinition().getGroup() + "-" + System.currentTimeMillis();
 			}
-			Path moduleDeploymentGroupDir = Paths.get(logPathRoot.toFile().getAbsolutePath(), moduleDeploymentGroupId);
+			Path moduleDeploymentGroupDir = Paths.get(logPathRoot.toFile().getAbsolutePath(), groupDeploymentId);
 			if (!Files.exists(moduleDeploymentGroupDir)) {
 				Files.createDirectory(moduleDeploymentGroupDir);
 				moduleDeploymentGroupDir.toFile().deleteOnExit();

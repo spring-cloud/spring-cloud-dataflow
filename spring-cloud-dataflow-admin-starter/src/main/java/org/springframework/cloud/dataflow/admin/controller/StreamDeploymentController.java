@@ -165,7 +165,7 @@ public class StreamDeploymentController {
 			}
 			ArtifactCoordinates coordinates = registration.getCoordinates();
 			Map<String, String> moduleDeploymentProperties = extractModuleDeploymentProperties(currentModule, streamDeploymentProperties);
-			moduleDeploymentProperties.put(ModuleDeployer.MODULE_DEPLOYMENT_GROUP_ID, currentModule.getGroup() + "-" + timestamp);
+			moduleDeploymentProperties.put(ModuleDeployer.GROUP_DEPLOYMENT_ID, currentModule.getGroup() + "-" + timestamp);
 			boolean upstreamModuleSupportsPartition = upstreamModuleHasPartitionInfo(stream, currentModule, streamDeploymentProperties);
 			// consumer module partition properties
 			if (upstreamModuleSupportsPartition) {
