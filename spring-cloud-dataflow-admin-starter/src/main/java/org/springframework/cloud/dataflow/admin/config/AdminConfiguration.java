@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2015-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,12 +18,17 @@ package org.springframework.cloud.dataflow.admin.config;
 
 import static org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType.HAL;
 
+import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.StringTokenizer;
 
 import javax.sql.DataSource;
 
+import org.h2.tools.Server;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.actuate.metrics.repository.MetricRepository;
 import org.springframework.boot.actuate.metrics.repository.redis.RedisMetricRepository;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.web.HttpMessageConverters;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -31,8 +36,8 @@ import org.springframework.cloud.dataflow.admin.completion.TapOnChannelExpansion
 import org.springframework.cloud.dataflow.admin.repository.InMemoryStreamDefinitionRepository;
 import org.springframework.cloud.dataflow.admin.repository.InMemoryTaskDefinitionRepository;
 import org.springframework.cloud.dataflow.admin.repository.StreamDefinitionRepository;
-import org.springframework.cloud.dataflow.admin.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.admin.repository.TaskDatabaseInitializer;
+import org.springframework.cloud.dataflow.admin.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistry;
 import org.springframework.cloud.dataflow.artifact.registry.RedisArtifactRegistry;
 import org.springframework.cloud.dataflow.completion.CompletionConfiguration;
@@ -50,6 +55,8 @@ import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.retry.support.RetryTemplate;
+import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
@@ -63,6 +70,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
  * @author Patrick Peralta
  * @author Thomas Risberg
  * @author Janne Valkealahti
+ * @author Glenn Renfro
  */
 @Configuration
 @EnableHypermediaSupport(type = HAL)
@@ -70,6 +78,9 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 @Import(CompletionConfiguration.class)
 @EnableConfigurationProperties(AdminProperties.class)
 public class AdminConfiguration {
+
+	@Value("${spring.datasource.url:#{null}}")
+	private String dataSourceUrl;
 
 	@Bean
 	public MetricRepository metricRepository(RedisConnectionFactory redisConnectionFactory) {
@@ -133,10 +144,30 @@ public class AdminConfiguration {
 		return factoryBean.getObject();
 	}
 
+	@Bean(destroyMethod = "stop")
+	@ConditionalOnExpression("#{'${spring.datasource.url:}'.startsWith('jdbc:h2:tcp://localhost:') && '${spring.datasource.url:}'.contains('/mem:')}")
+	public Server initH2TCPServer() {
+		Server server = null;
+		try {
+			server = Server.createTcpServer("-tcp", "-tcpAllowOthers", "-tcpPort",
+					getH2Port(dataSourceUrl)).start();
+		} catch (SQLException e) {
+			throw new IllegalStateException(e);
+		}
+
+		return server;
+	}
+
 	@Bean
 	@ConditionalOnProperty(name = "spring.cloud.task.repo.initialize",
 			havingValue = "true", matchIfMissing = true)
 	public TaskDatabaseInitializer taskDatabaseInitializer(){
 		return new TaskDatabaseInitializer();
+	}
+
+	private String getH2Port(String url){
+		String[] tokens = StringUtils.tokenizeToStringArray(url,":");
+		Assert.isTrue(tokens.length >= 5, "URL not properly formatted");
+		return tokens[4].substring(0,tokens[4].indexOf("/"));
 	}
 }
