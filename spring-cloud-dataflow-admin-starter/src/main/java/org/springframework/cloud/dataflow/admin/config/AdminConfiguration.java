@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2015-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,12 +18,16 @@ package org.springframework.cloud.dataflow.admin.config;
 
 import static org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType.HAL;
 
+import java.sql.SQLException;
 import java.util.Arrays;
 
 import javax.sql.DataSource;
 
+import org.h2.tools.Server;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.actuate.metrics.repository.MetricRepository;
 import org.springframework.boot.actuate.metrics.repository.redis.RedisMetricRepository;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.web.HttpMessageConverters;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -31,8 +35,8 @@ import org.springframework.cloud.dataflow.admin.completion.TapOnChannelExpansion
 import org.springframework.cloud.dataflow.admin.repository.InMemoryStreamDefinitionRepository;
 import org.springframework.cloud.dataflow.admin.repository.InMemoryTaskDefinitionRepository;
 import org.springframework.cloud.dataflow.admin.repository.StreamDefinitionRepository;
-import org.springframework.cloud.dataflow.admin.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.admin.repository.TaskDatabaseInitializer;
+import org.springframework.cloud.dataflow.admin.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistry;
 import org.springframework.cloud.dataflow.artifact.registry.RedisArtifactRegistry;
 import org.springframework.cloud.dataflow.completion.CompletionConfiguration;
@@ -63,6 +67,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
  * @author Patrick Peralta
  * @author Thomas Risberg
  * @author Janne Valkealahti
+ * @author Glenn Renfro
  */
 @Configuration
 @EnableHypermediaSupport(type = HAL)
@@ -131,6 +136,19 @@ public class AdminConfiguration {
 		JdbcTaskExplorerFactoryBean factoryBean =
 				new JdbcTaskExplorerFactoryBean(dataSource);
 		return factoryBean.getObject();
+	}
+
+	@Bean(destroyMethod = "stop")
+	@ConditionalOnExpression("#{'${spring.datasource.url:}'.startsWith('jdbc:h2:tcp://')}")
+	public Server initH2TCPServer() {
+		Server server = null;
+		try {
+			server = Server.createTcpServer("-tcp", "-tcpAllowOthers", "-tcpPort", "9092").start();
+		} catch (SQLException e) {
+			throw new IllegalStateException(e);
+		}
+
+		return server;
 	}
 
 	@Bean

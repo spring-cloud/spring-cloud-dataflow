@@ -17,6 +17,14 @@ spring:
   cloud:
     config:
       uri: http://localhost:8888
+  datasource:
+    url: jdbc:h2:tcp://localhost:9092/mem:testdb
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+  task:
+    repo:
+      initialize: true
 
 # If you prefer to use Eureka to locate the Config Server, you can do that by setting
 # spring.cloud.config.discovery.enabled=true (default "false"). The net result of that is
