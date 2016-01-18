@@ -19,11 +19,18 @@ package org.springframework.cloud.dataflow.shell.command;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Date;
+import java.util.UUID;
+
+import javax.sql.DataSource;
+
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.cloud.dataflow.shell.AbstractShellIntegrationTest;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.shell.core.CommandResult;
 import org.springframework.shell.table.Table;
 
@@ -33,6 +40,38 @@ import org.springframework.shell.table.Table;
 public class TaskCommandTests extends AbstractShellIntegrationTest {
 
 	private static final Logger logger = LoggerFactory.getLogger(TaskCommandTests.class);
+
+	private static JdbcTemplate template;
+
+	private static String taskName = "foo" + UUID.randomUUID().toString();
+
+	@BeforeClass
+	public static void setUp() {
+		template = new JdbcTemplate(applicationContext.getBean(DataSource.class));
+		template.afterPropertiesSet();
+
+		Date startTime = new Date();
+		Date endTime = new Date(startTime.getTime() + 5000);
+		template.update("INSERT into TASK_EXECUTION(TASK_EXECUTION_ID, " +
+				"TASK_EXTERNAL_EXECUTION_ID, " +
+				"START_TIME, " +
+				"END_TIME, " +
+				"TASK_NAME, " +
+				"EXIT_CODE, " +
+				"EXIT_MESSAGE, " +
+				"LAST_UPDATED, " +
+				"STATUS_CODE)" +
+				"values (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+				1,
+				UUID.randomUUID().toString(),
+				startTime,
+				endTime,
+				taskName,
+				20,
+				"exit",
+				endTime,
+				"status");
+	}
 
 	@Test
 	public void testCreateTask() throws InterruptedException {
@@ -68,4 +107,30 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 		assertEquals("Fourth column should be End Time", "End Time", table.getModel().getValue(0,3));
 		assertEquals("Fifth column should be Exit Code", "Exit Code", table.getModel().getValue(0,4));
 	}
+
+	@Test
+	public void testViewExecution() throws InterruptedException {
+		logger.info("Retrieve Task Execution List By Name Test");
+
+		CommandResult idResult = task().taskExecutionList();
+		Table result = (Table) idResult.getResult();
+
+		long value = (long) result.getModel().getValue(1, 1);
+		System.out.println("Looking up id " + value);
+		CommandResult cr = task().view(value);
+		assertTrue("task execution view command must be successful", cr.isSuccess());
+		Table table = (Table) cr.getResult();
+		assertEquals("Number of columns returned was not expected", 2, table.getModel().getColumnCount());
+		assertEquals("First key should be Key", "Key ", table.getModel().getValue(0,0));
+		assertEquals("Second key should be Id ", "Id ", table.getModel().getValue(1,0));
+		assertEquals("Third key should be Name ", "Name ", table.getModel().getValue(2,0));
+		assertEquals("Fourth key should be Parameters", "Parameters ", table.getModel().getValue(3,0));
+		assertEquals("Fifth key should be External Execution Id ", "External Execution Id ", table.getModel().getValue(4,0));
+		assertEquals("Sixth key should be Start Time  ", "Start Time ", table.getModel().getValue(5,0));
+		assertEquals("Seventh key should be Status Code ", "Status Code ", table.getModel().getValue(6,0));
+		assertEquals("Eighth key should be End Time ", "End Time ", table.getModel().getValue(7,0));
+		assertEquals("Ninth key should be Exit Code ", "Exit Code ", table.getModel().getValue(8,0));
+		assertEquals("Tenth key should be Exit Message ", "Exit Message ", table.getModel().getValue(9,0));
+	}
+
 }

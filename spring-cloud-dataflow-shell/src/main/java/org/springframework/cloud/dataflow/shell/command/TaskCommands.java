@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2015-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,12 +38,14 @@ import org.springframework.shell.core.annotation.CliOption;
 import org.springframework.shell.table.BeanListTableModel;
 import org.springframework.shell.table.Table;
 import org.springframework.shell.table.TableBuilder;
+import org.springframework.shell.table.TableModelBuilder;
 import org.springframework.stereotype.Component;
 
 /**
  * Task commands.
  *
  * @author Glenn Renfro
+ * @author Michael Minella
  */
 @Component
 // todo: reenable optionContext attributes
@@ -58,6 +60,8 @@ public class TaskCommands implements CommandMarker {
 	private static final String STATUS = "task status";
 
 	private static final String DESTROY = "task destroy";
+
+	private static final String VIEW = "task view";
 
 	private static final String PROPERTIES_OPTION = "properties";
 
@@ -157,6 +161,34 @@ public class TaskCommands implements CommandMarker {
 		headers.put("exitCode", "Exit Code");
 		final TableBuilder builder = new TableBuilder(new BeanListTableModel<>(tasks, headers));
 		return DataFlowTables.applyStyle(builder).build();
+	}
+
+	@CliCommand(value = VIEW, help = "View the details of a specific task execution")
+	public Table view(
+			@CliOption(key = { "id" },
+					help = "the task execution id",
+					mandatory = true) long id) {
+
+		TaskExecutionResource taskExecutionResource = taskOperations().view(id);
+
+		TableModelBuilder<Object> modelBuilder = new TableModelBuilder<>();
+
+		modelBuilder.addRow().addValue("Key ").addValue("Value ");
+		modelBuilder.addRow().addValue("Id ").addValue(taskExecutionResource.getExecutionId());
+		modelBuilder.addRow().addValue("Name ").addValue(taskExecutionResource.getTaskName());
+		modelBuilder.addRow().addValue("Parameters ").addValue(taskExecutionResource.getParameters());
+		modelBuilder.addRow().addValue("External Execution Id ").addValue(taskExecutionResource.getExternalExecutionID());
+		modelBuilder.addRow().addValue("Start Time ").addValue(taskExecutionResource.getStartTime());
+		modelBuilder.addRow().addValue("Status Code ").addValue(taskExecutionResource.getStatusCode());
+		modelBuilder.addRow().addValue("End Time ").addValue(taskExecutionResource.getEndTime());
+		modelBuilder.addRow().addValue("Exit Code ").addValue(taskExecutionResource.getExitCode());
+		modelBuilder.addRow().addValue("Exit Message ").addValue(taskExecutionResource.getExitMessage());
+
+		TableBuilder builder = new TableBuilder(modelBuilder.build());
+
+		DataFlowTables.applyStyle(builder);
+
+		return builder.build();
 	}
 
 	private TaskOperations taskOperations() {
