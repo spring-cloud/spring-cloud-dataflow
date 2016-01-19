@@ -156,7 +156,6 @@ public class TaskController {
 		ArtifactCoordinates coordinates = registration.getCoordinates();
 
 		Map<String, String> deploymentProperties = new HashMap<>();
-		deploymentProperties.put("spring.cloud.task.name", taskDefinition.getName());
 		deploymentProperties.putAll(DeploymentPropertiesUtils.parse(properties));
 		deploymentProperties.put(ModuleDeployer.GROUP_DEPLOYMENT_ID, taskDefinition.getName()
 				+ "-" + System.currentTimeMillis());

@@ -55,6 +55,9 @@ public class TaskDefinition {
 				builder.setParameter(argumentNode.getName(), argumentNode.getValue());
 			}
 		}
+
+		builder.setParameter("spring.cloud.task.name", name);
+
 		this.moduleDefinition = builder.build();
 	}
 
