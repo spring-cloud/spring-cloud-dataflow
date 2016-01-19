@@ -17,14 +17,13 @@
 package org.springframework.cloud.dataflow.admin.controller;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.mockito.Mockito.*;
 
 import org.junit.After;
 import org.junit.Before;
@@ -51,7 +50,6 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.util.CollectionUtils;
 import org.springframework.web.context.WebApplicationContext;
 
 /**
@@ -118,7 +116,8 @@ public class TaskControllerTests {
 
 		TaskDefinition myTask = repository.findOne("myTask");
 
-		assertTrue(CollectionUtils.isEmpty(myTask.getParameters()));
+		assertEquals(1, myTask.getParameters().size());
+		assertEquals("myTask", myTask.getParameters().get("spring.cloud.task.name"));
 		assertEquals("task", myTask.getDslText());
 		assertEquals("myTask", myTask.getName());
 	}
@@ -214,6 +213,6 @@ public class TaskControllerTests {
 		ModuleDeploymentRequest result = argumentCaptor.getValue();
 		assertEquals(1, result.getCount());
 		assertEquals(coordinates, result.getCoordinates());
-		assertEquals("myTask", result.getDeploymentProperties().get("spring.cloud.task.name"));
+		assertEquals("myTask", result.getDefinition().getParameters().get("spring.cloud.task.name"));
 	}
 }
