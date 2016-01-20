@@ -29,17 +29,12 @@ import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistry;
 import org.springframework.cloud.dataflow.core.ArtifactCoordinates;
 import org.springframework.cloud.dataflow.core.ArtifactType;
 import org.springframework.cloud.dataflow.core.ModuleDefinition;
-import org.springframework.cloud.dataflow.core.ModuleDeploymentId;
 import org.springframework.cloud.dataflow.core.ModuleDeploymentRequest;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.module.deployer.ModuleDeployer;
-import org.springframework.cloud.dataflow.rest.resource.TaskDefinitionResource;
+import org.springframework.cloud.dataflow.rest.resource.TaskDeploymentResource;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.ExposesResourceFor;
-import org.springframework.hateoas.PagedResources;
-import org.springframework.hateoas.mvc.ResourceAssemblerSupport;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -51,24 +46,22 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Controller for operations on {@link TaskDefinition}.  This includes CRUD and deployment
- * operations.
+ * Controller for operations for deployment operations.
  *
  * @author Michael Minella
  * @author Marius Bogoevici
+ * @author Glenn Renfro
  */
 @RestController
-@RequestMapping("/tasks")
-@ExposesResourceFor(TaskDefinitionResource.class)
-public class TaskController {
+@RequestMapping("/tasks/deployments")
+@ExposesResourceFor(TaskDeploymentResource.class)
+public class TaskDeploymentController {
 
-	private final String DEFAULT_TASK_DATASOURCE_URL = "jdbc:h2:tcp://localhost:9092/mem:dataflow";
+	private final String DEFAULT_TASK_DATASOURCE_URL = "jdbc:h2:tcp://localhost:19092/mem:dataflow";
 
 	private final String DEFAULT_TASK_DATASOURCE_USER_NAME = "sa";
 
 	private final String DEFAULT_TASK_DATASOURCE_DRIVER_CLASS_NAME = "org.h2.Driver";
-
-	private final Assembler taskAssembler = new Assembler();
 
 	@Autowired
 	private TaskDefinitionRepository repository;
@@ -95,66 +88,21 @@ public class TaskController {
 	private final ArtifactRegistry registry;
 
 	/**
-	 * Creates a {@code TaskController} that delegates
-	 * <ul>
-	 *     <li>CRUD operations to the provided {@link TaskDefinitionRepository}</li>
-	 *     <li>module coordinate retrieval to the provided {@link ArtifactRegistry}</li>
-	 *     <li>deployment/launching operations to the provided {@link ModuleDeployer}</li>
-	 * </ul>
-	 *
+	 * Creates a {@code TaskDeploymentController} that delegates deployment/launching
+	 * operations to the provided {@link ModuleDeployer}
 	 * @param repository the repository this controller will use for task CRUD operations.
 	 * @param registry artifact registry this controller will use to look up modules.
 	 * @param deployer the deployer this controller will use to deploy/launch task modules.
 	 */
 	@Autowired
-	public TaskController(TaskDefinitionRepository repository, ArtifactRegistry registry,
-			@Qualifier("taskModuleDeployer") ModuleDeployer deployer) {
+	public TaskDeploymentController(TaskDefinitionRepository repository, ArtifactRegistry registry,
+					@Qualifier("taskModuleDeployer") ModuleDeployer deployer) {
 		Assert.notNull(repository, "repository must not be null");
 		Assert.notNull(registry, "registry must not be null");
 		Assert.notNull(deployer, "deployer must not be null");
 		this.repository = repository;
 		this.registry = registry;
 		this.moduleDeployer = deployer;
-	}
-
-	/**
-	 * Register a task for future deployment/execution.
-	 *
-	 * @param name the name of the task
-	 * @param dsl DSL definition for the task
-	 */
-	@RequestMapping(value = "/definitions", method = RequestMethod.POST)
-	public void save(@RequestParam("name") String name,
-			@RequestParam("definition") String dsl) {
-		repository.save(new TaskDefinition(name, dsl));
-	}
-
-	/**
-	 * Delete the task from the repository so that it can no longer be executed.
-	 *
-	 * @param name name of the task to be deleted
-	 */
-	@RequestMapping(value = "/definitions/{name}", method = RequestMethod.DELETE)
-	@ResponseStatus(HttpStatus.OK)
-	public void destroyTask(@PathVariable("name") String name) {
-		if (repository.findOne(name) == null) {
-			throw new NoSuchTaskDefinitionException(name);
-		}
-		repository.delete(name);
-	}
-
-	/**
-	 * Return a page-able list of {@link TaskDefinitionResource} defined tasks.
-	 *
-	 * @param pageable  page-able collection of {@code TaskDefinitionResource}.
-	 * @param assembler assembler for the {@link TaskDefinition}
-	 * @return a list of task definitions
-	 */
-	@RequestMapping(value="/definitions", method = RequestMethod.GET)
-	@ResponseStatus(HttpStatus.OK)
-	public PagedResources<TaskDefinitionResource> list(Pageable pageable,
-			PagedResourcesAssembler<TaskDefinition> assembler) {
-		return assembler.toResource(repository.findAll(pageable), taskAssembler);
 	}
 
 	/**
@@ -165,7 +113,7 @@ public class TaskController {
 	 * @param properties the runtime properties for the task, as a comma-delimited list of
 	 * 					 key=value pairs
 	 */
-	@RequestMapping(value = "/deployments/{name}", method = RequestMethod.POST)
+	@RequestMapping(value = "/{name}", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
 	public void deploy(@PathVariable("name") String name, @RequestParam(required = false) String properties) {
 		TaskDefinition taskDefinition = this.repository.findOne(name);
@@ -189,32 +137,6 @@ public class TaskController {
 
 		this.moduleDeployer.deploy(
 				new ModuleDeploymentRequest(module, coordinates, deploymentProperties));
-	}
-
-	/**
-	 * {@link org.springframework.hateoas.ResourceAssembler} implementation
-	 * that converts {@link TaskDefinition}s to {@link TaskDefinitionResource}s.
-	 */
-	class Assembler extends ResourceAssemblerSupport<TaskDefinition, TaskDefinitionResource> {
-
-		public Assembler() {
-			super(TaskController.class, TaskDefinitionResource.class);
-		}
-
-		@Override
-		public TaskDefinitionResource toResource(TaskDefinition taskDefinition) {
-			return createResourceWithId(taskDefinition.getName(), taskDefinition);
-		}
-
-		@Override
-		public TaskDefinitionResource instantiateResource(TaskDefinition taskDefinition) {
-			ModuleDeploymentId id =
-					ModuleDeploymentId.fromModuleDefinition(taskDefinition.getModuleDefinition());
-			TaskDefinitionResource taskDefinitionResource = new TaskDefinitionResource(taskDefinition.getName(),
-					taskDefinition.getDslText());
-			taskDefinitionResource.setStatus(moduleDeployer.status(id).getState().name());
-			return taskDefinitionResource;
-		}
 	}
 
 	private ModuleDefinition updateTaskProperties(ModuleDefinition moduleDefinition, String taskDefinitionName) {

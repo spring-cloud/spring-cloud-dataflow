@@ -55,6 +55,7 @@ import org.springframework.web.context.WebApplicationContext;
 /**
  * @author Michael Minella
  * @author Mark Fisher
+ * @author Glenn Renfro
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = TestDependencies.class)
@@ -89,20 +90,30 @@ public class TaskControllerTests {
 	}
 
 	@Test(expected = IllegalArgumentException.class)
-	public void testConstructorMissingRepository() {
-		new TaskController(null, new InMemoryArtifactRegistry(), moduleDeployer);
+	public void testTaskDeploymentControllerConstructorMissingRepository() {
+		new TaskDeploymentController(null, new InMemoryArtifactRegistry(), moduleDeployer);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
-	public void testConstructorMissingRegistry() {
-		new TaskController(new InMemoryTaskDefinitionRepository(), null, moduleDeployer);
+	public void testTaskDeploymentControllerConstructorMissingRegistry() {
+		new TaskDeploymentController(new InMemoryTaskDefinitionRepository(), null, moduleDeployer);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
-	public void testConstructorMissingDeployer() {
-		new TaskController(new InMemoryTaskDefinitionRepository(), new InMemoryArtifactRegistry(), null);
+	public void testTaskDeploymentControllerConstructorMissingDeployer() {
+		new TaskDeploymentController(new InMemoryTaskDefinitionRepository(), new InMemoryArtifactRegistry(), null);
 	}
 
+	@Test(expected = IllegalArgumentException.class)
+	public void testTaskDefinitionControllerConstructorMissingRepository() {
+		new TaskDefinitionController(null, moduleDeployer);
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void testTaskDefinitionControllerConstructorMissingDeployer() {
+		new TaskDefinitionController(new InMemoryTaskDefinitionRepository(), null);
+	}
+	
 	@Test
 	public void testSave() throws Exception {
 		assertEquals(0, repository.count());

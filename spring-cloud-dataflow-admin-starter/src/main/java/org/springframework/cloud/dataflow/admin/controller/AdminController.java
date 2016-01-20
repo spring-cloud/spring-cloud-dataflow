@@ -27,6 +27,8 @@ import org.springframework.cloud.dataflow.rest.resource.ModuleStatusResource;
 import org.springframework.cloud.dataflow.rest.resource.StreamDefinitionResource;
 import org.springframework.cloud.dataflow.rest.resource.StreamDeploymentResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskDefinitionResource;
+import org.springframework.cloud.dataflow.rest.resource.TaskDeploymentResource;
+import org.springframework.cloud.dataflow.rest.resource.TaskExecutionResource;
 import org.springframework.hateoas.EntityLinks;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.ResourceSupport;
@@ -39,6 +41,7 @@ import org.springframework.web.util.UriComponents;
  *
  * @author Patrick Peralta
  * @author Ilayaperumal Gopinathan
+ * @author Glenn Renfro
  */
 @RestController
 public class AdminController {
@@ -74,7 +77,15 @@ public class AdminController {
 		resourceSupport.add(entityLinks.linkToCollectionResource(StreamDeploymentResource.class).withRel("streams/deployments"));
 		resourceSupport.add(unescapeTemplateVariables(entityLinks.linkToSingleResource(StreamDeploymentResource.class, "{name}").withRel("streams/deployments/deployment")));
 
-		resourceSupport.add(entityLinks.linkToCollectionResource(TaskDefinitionResource.class).withRel("tasks"));
+		resourceSupport.add(entityLinks.linkToCollectionResource(TaskDefinitionResource.class).withRel("tasks/definitions"));
+		resourceSupport.add(unescapeTemplateVariables(entityLinks.linkToSingleResource(TaskDefinitionResource.class, "{name}").withRel("tasks/definitions")));
+
+		resourceSupport.add(entityLinks.linkToCollectionResource(TaskDeploymentResource.class).withRel("tasks/deployments"));
+		resourceSupport.add(unescapeTemplateVariables(entityLinks.linkToSingleResource(TaskDeploymentResource.class, "{name}").withRel("tasks/deployments")));
+
+		resourceSupport.add(entityLinks.linkToCollectionResource(TaskExecutionResource.class).withRel("tasks/executions"));
+		resourceSupport.add(unescapeTemplateVariables(entityLinks.linkToSingleResource(TaskExecutionResource.class, "{name}").withRel("tasks/executions/name")));
+		resourceSupport.add(unescapeTemplateVariables(entityLinks.linkToSingleResource(TaskExecutionResource.class, "{id}").withRel("tasks/executions/id")));
 
 		resourceSupport.add(entityLinks.linkToCollectionResource(CounterResource.class).withRel("counters"));
 		resourceSupport.add(unescapeTemplateVariables(entityLinks.linkToSingleResource(CounterResource.class, "{name}").withRel("counters/counter")));

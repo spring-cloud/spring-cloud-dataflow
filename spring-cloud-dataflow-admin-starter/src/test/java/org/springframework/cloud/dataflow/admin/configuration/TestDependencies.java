@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2015-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,8 @@ import org.springframework.cloud.dataflow.admin.config.ArtifactRegistryPopulator
 import org.springframework.cloud.dataflow.admin.controller.RestControllerAdvice;
 import org.springframework.cloud.dataflow.admin.controller.StreamDefinitionController;
 import org.springframework.cloud.dataflow.admin.controller.StreamDeploymentController;
-import org.springframework.cloud.dataflow.admin.controller.TaskController;
+import org.springframework.cloud.dataflow.admin.controller.TaskDeploymentController;
+import org.springframework.cloud.dataflow.admin.controller.TaskDefinitionController;
 import org.springframework.cloud.dataflow.admin.repository.InMemoryStreamDefinitionRepository;
 import org.springframework.cloud.dataflow.admin.repository.InMemoryTaskDefinitionRepository;
 import org.springframework.cloud.dataflow.admin.repository.StreamDefinitionRepository;
@@ -65,8 +66,13 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	}
 
 	@Bean
-	public TaskController taskController(TaskDefinitionRepository repository, ArtifactRegistry registry) {
-		return new TaskController(repository, registry, taskModuleDeployer());
+	public TaskDeploymentController taskController(TaskDefinitionRepository repository, ArtifactRegistry registry) {
+		return new TaskDeploymentController(repository, registry, taskModuleDeployer());
+	}
+
+	@Bean
+	public TaskDefinitionController taskDefinitionController(TaskDefinitionRepository repository, ArtifactRegistry registry) {
+		return new TaskDefinitionController(repository, taskModuleDeployer());
 	}
 
 	@Bean
