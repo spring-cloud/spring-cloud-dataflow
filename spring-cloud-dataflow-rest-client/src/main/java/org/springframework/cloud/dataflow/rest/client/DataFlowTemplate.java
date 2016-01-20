@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2015-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -92,15 +92,11 @@ public class DataFlowTemplate implements DataFlowOperations {
 	public DataFlowTemplate(URI baseURI, RestTemplate restTemplate) {
 		this.restTemplate = restTemplate;
 		ResourceSupport resourceSupport = restTemplate.getForObject(baseURI, ResourceSupport.class);
-		Link link = getLink(resourceSupport, "tasks");
-		resources.put("tasks/definitions", new UriTemplate(link.getHref() + "/definitions"));
-		resources.put("tasks/deployments", new UriTemplate(link.getHref() + "/deployments"));
-		resources.put("tasks/executions", new UriTemplate(link.getHref() + "/executions"));
 
 		this.streamOperations = new StreamTemplate(restTemplate, resourceSupport);
 		this.counterOperations = new CounterTemplate(restTemplate, resourceSupport);
 		this.fieldValueCounterOperations = new FieldValueCounterTemplate(restTemplate, resourceSupport);
-		this.taskOperations = new TaskTemplate(restTemplate, resources);
+		this.taskOperations = new TaskTemplate(restTemplate, resourceSupport);
 		this.moduleOperations = new ModuleTemplate(restTemplate, resourceSupport);
 		this.libraryOperations = new LibraryTemplate(restTemplate, resourceSupport);
 		this.completionOperations = new CompletionTemplate(restTemplate, resourceSupport.getLink("completions/stream"));

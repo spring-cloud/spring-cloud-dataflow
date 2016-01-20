@@ -24,6 +24,7 @@ import org.springframework.cloud.dataflow.admin.repository.DuplicateStreamDefini
 import org.springframework.cloud.dataflow.admin.repository.DuplicateTaskException;
 import org.springframework.cloud.dataflow.admin.repository.NoSuchStreamDefinitionException;
 import org.springframework.cloud.dataflow.admin.repository.NoSuchTaskDefinitionException;
+import org.springframework.cloud.dataflow.admin.repository.NoSuchTaskExecutionException;
 import org.springframework.hateoas.VndErrors;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.StringUtils;
@@ -67,6 +68,7 @@ public class RestControllerAdvice {
 
 	@ExceptionHandler({NoSuchStreamDefinitionException.class,
 			NoSuchTaskDefinitionException.class,
+			NoSuchTaskExecutionException.class,
 			MetricsMvcEndpoint.NoSuchMetricException.class})
 	@ResponseStatus(HttpStatus.NOT_FOUND)
 	@ResponseBody

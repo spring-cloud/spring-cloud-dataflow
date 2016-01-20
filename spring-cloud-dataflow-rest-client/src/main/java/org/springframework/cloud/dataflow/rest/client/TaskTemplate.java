@@ -22,7 +22,8 @@ import java.util.Map;
 import org.springframework.cloud.dataflow.rest.resource.TaskDefinitionResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionResource;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
-import org.springframework.hateoas.UriTemplate;
+import org.springframework.hateoas.Link;
+import org.springframework.hateoas.ResourceSupport;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -30,7 +31,6 @@ import org.springframework.web.client.RestTemplate;
 
 /**
  * Implementation for {@link org.springframework.cloud.dataflow.rest.client.TaskOperations}.
- *
  * @author Glenn Renfro
  * @author Michael Minella
  */
@@ -38,35 +38,61 @@ public class TaskTemplate implements TaskOperations {
 
 	private static final String DEFINITIONS_RELATION = "tasks/definitions";
 
+	private static final String DEFINITION_RELATION = "tasks/definitions/definition";
+
 	private static final String DEPLOYMENTS_RELATION = "tasks/deployments";
+
+	private static final String DEPLOYMENT_RELATION = "tasks/deployments/deployment";
 
 	private static final String EXECUTIONS_RELATION = "tasks/executions";
 
+	private static final String EXECUTION_RELATION = "tasks/executions/execution";
+
+	private static final String EXECUTION_RELATION_BY_NAME = "tasks/executions/name";
+
 	private final RestTemplate restTemplate;
 
-	private final UriTemplate definitionsPath;
+	private final Link definitionsLink;
 
-	private final UriTemplate deploymentsPath;
+	private final Link definitionLink;
 
-	private final UriTemplate executionsPath;
+	private final Link deploymentsLink;
 
-	TaskTemplate(RestTemplate restTemplate, Map<String, UriTemplate> resources) {
+	private final Link deploymentLink;
+
+	private final Link executionsLink;
+
+	private final Link executionLink;
+
+	private final Link executionByNameLink;
+
+	TaskTemplate(RestTemplate restTemplate, ResourceSupport resources) {
 		Assert.notNull(resources, "URI Resources must not be be null");
-		Assert.notNull(resources.get(DEFINITIONS_RELATION), "Definitions path is required");
-		Assert.notNull(resources.get(DEPLOYMENTS_RELATION), "Deployments path is required");
+		Assert.notNull(resources.getLink(EXECUTIONS_RELATION), "Executions relation is required");
+		Assert.notNull(resources.getLink(DEFINITIONS_RELATION), "Definitions relation is required");
+		Assert.notNull(resources.getLink(DEPLOYMENTS_RELATION), "Deployments relation is required");
+		Assert.notNull(resources.getLink(DEFINITION_RELATION), "Definition relation is required");
+		Assert.notNull(resources.getLink(DEPLOYMENT_RELATION), "Deployment relation is required");
 		Assert.notNull(restTemplate, "RestTemplate must not be null");
-		Assert.notNull(resources.get(EXECUTIONS_RELATION), "Executions path is required");
+		Assert.notNull(resources.getLink(EXECUTIONS_RELATION), "Executions relation is required");
+		Assert.notNull(resources.getLink(EXECUTION_RELATION), "Execution relation is required");
+		Assert.notNull(resources.getLink(EXECUTION_RELATION_BY_NAME), "Execution by name relation is required");
+
 
 		this.restTemplate = restTemplate;
-		this.definitionsPath = resources.get(DEFINITIONS_RELATION);
-		this.deploymentsPath = resources.get(DEPLOYMENTS_RELATION);
-		this.executionsPath = resources.get(EXECUTIONS_RELATION);
+		this.definitionsLink = resources.getLink(DEFINITIONS_RELATION);
+		this.definitionLink = resources.getLink(DEFINITION_RELATION);
+		this.deploymentsLink = resources.getLink(DEPLOYMENTS_RELATION);
+		this.deploymentLink = resources.getLink(DEPLOYMENT_RELATION);
+		this.executionsLink = resources.getLink(EXECUTIONS_RELATION);
+		this.executionLink = resources.getLink(EXECUTION_RELATION);
+		this.executionByNameLink = resources.getLink(EXECUTION_RELATION_BY_NAME);
 
 	}
 
 	@Override
 	public TaskDefinitionResource.Page list() {
-		String uriTemplate = definitionsPath.toString();
+		String uriTemplate = definitionsLink.getHref().toString();
 		uriTemplate = uriTemplate + "?size=10000";
 		return restTemplate.getForObject(uriTemplate, TaskDefinitionResource.Page.class);
 	}
@@ -77,45 +103,37 @@ public class TaskTemplate implements TaskOperations {
 		values.add("name", name);
 		values.add("definition", definition);
 		TaskDefinitionResource task = restTemplate.postForObject(
-				definitionsPath.expand(), values, TaskDefinitionResource.class);
+				definitionsLink.expand().getHref(), values, TaskDefinitionResource.class);
 		return task;
 	}
 
 	@Override
 	public void launch(String name, Map<String, String> properties) {
-		String uriTemplate = deploymentsPath.toString() + "/{name}";
 		MultiValueMap<String, Object> values = new LinkedMultiValueMap<String, Object>();
 		values.add("properties", DeploymentPropertiesUtils.format(properties));
-		restTemplate.postForObject(uriTemplate, values, Object.class, name);
+		restTemplate.postForObject(deploymentLink.expand(name).getHref(), values, Object.class, name);
 	}
 
 	@Override
 	public void destroy(String name) {
-		String uriTemplate = definitionsPath.toString() + "/{name}";
-		restTemplate.delete(uriTemplate, Collections.singletonMap("name", name));
+		restTemplate.delete(definitionLink.expand(name).getHref(), Collections.singletonMap("name", name));
 	}
 
 	@Override
 	public TaskExecutionResource.Page executionList() {
-		return restTemplate.getForObject(executionsPath.toString(),
+		return restTemplate.getForObject(executionsLink.getHref().toString(),
 				TaskExecutionResource.Page.class);
 	}
 
 	@Override
 	public TaskExecutionResource.Page executionListByTaskName(String taskName) {
-		String uriTemplate = executionsPath.toString();
-		uriTemplate = uriTemplate + "/name/{taskName}";
-		return restTemplate.getForObject(uriTemplate, TaskExecutionResource.Page.class,
-				Collections.singletonMap("taskName", taskName));
+		return restTemplate.getForObject(executionByNameLink.expand(taskName).getHref(), TaskExecutionResource.Page.class);
 	}
 
 	@Override
 	public TaskExecutionResource view(long id) {
-		String uriTemplate = executionsPath.toString();
-		uriTemplate = uriTemplate + "/id/{id}";
-
-		return restTemplate.getForObject(uriTemplate, TaskExecutionResource.class,
-			Collections.singletonMap("id", id));
+		return restTemplate.getForObject(executionLink.expand(id).getHref(),
+				TaskExecutionResource.class);
 	}
 
 }
