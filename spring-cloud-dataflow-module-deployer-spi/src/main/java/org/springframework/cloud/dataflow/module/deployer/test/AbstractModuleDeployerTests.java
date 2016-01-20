@@ -33,6 +33,7 @@ import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
 import org.hamcrest.collection.IsMapContaining;
+import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -91,7 +92,7 @@ public abstract class AbstractModuleDeployerTests {
 				.setName(randomName())
 				.build();
 		ArtifactCoordinates coordinates = ArtifactCoordinates
-				.parse("org.springframework.cloud.stream.module:time-source:jar:exec:1.0.0.M2");
+				.parse("org.springframework.cloud.stream.module:time-source:jar:exec:1.0.0.BUILD-SNAPSHOT");
 		ModuleDeploymentRequest request = new ModuleDeploymentRequest(definition, coordinates);
 
 		ModuleDeploymentId deploymentId = moduleDeployer.deploy(request);
@@ -114,12 +115,13 @@ public abstract class AbstractModuleDeployerTests {
 	 */
 	@Test
 	public void testRedeploy() {
+		Assume.assumeTrue("Should run only on JDK8", System.getProperty("java.version").startsWith("1.8."));
 		ModuleDefinition definition = new ModuleDefinition.Builder()
 				.setGroup(randomName())
 				.setName(randomName())
 				.build();
 		ArtifactCoordinates coordinates = ArtifactCoordinates
-				.parse("org.springframework.cloud.stream.module:time-source:jar:exec:1.0.0.M2");
+				.parse("org.springframework.cloud.stream.module:time-source:jar:exec:1.0.0.BUILD-SNAPSHOT");
 		ModuleDeploymentRequest request = new ModuleDeploymentRequest(definition, coordinates);
 
 		ModuleDeploymentId deploymentId = moduleDeployer.deploy(request);
