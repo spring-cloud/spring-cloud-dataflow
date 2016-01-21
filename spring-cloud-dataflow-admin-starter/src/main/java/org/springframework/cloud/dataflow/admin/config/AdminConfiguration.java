@@ -20,6 +20,7 @@ import static org.springframework.hateoas.config.EnableHypermediaSupport.Hyperme
 
 import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.StringTokenizer;
 
 import javax.sql.DataSource;
 
@@ -54,6 +55,8 @@ import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.retry.support.RetryTemplate;
+import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
@@ -75,6 +78,9 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 @Import(CompletionConfiguration.class)
 @EnableConfigurationProperties(AdminProperties.class)
 public class AdminConfiguration {
+
+	@Value("${spring.datasource.url:#{null}}")
+	private String dataSourceUrl;
 
 	@Bean
 	public MetricRepository metricRepository(RedisConnectionFactory redisConnectionFactory) {
@@ -139,11 +145,12 @@ public class AdminConfiguration {
 	}
 
 	@Bean(destroyMethod = "stop")
-	@ConditionalOnExpression("#{'${spring.datasource.url:}'.startsWith('jdbc:h2:tcp://')}")
+	@ConditionalOnExpression("#{'${spring.datasource.url:}'.startsWith('jdbc:h2:tcp://localhost:') && '${spring.datasource.url:}'.contains('/mem:')}")
 	public Server initH2TCPServer() {
 		Server server = null;
 		try {
-			server = Server.createTcpServer("-tcp", "-tcpAllowOthers", "-tcpPort", "9092").start();
+			server = Server.createTcpServer("-tcp", "-tcpAllowOthers", "-tcpPort",
+					getH2Port(dataSourceUrl)).start();
 		} catch (SQLException e) {
 			throw new IllegalStateException(e);
 		}
@@ -156,5 +163,11 @@ public class AdminConfiguration {
 			havingValue = "true", matchIfMissing = true)
 	public TaskDatabaseInitializer taskDatabaseInitializer(){
 		return new TaskDatabaseInitializer();
+	}
+
+	private String getH2Port(String url){
+		String[] tokens = StringUtils.tokenizeToStringArray(url,":");
+		Assert.isTrue(tokens.length >= 5, "URL not properly formatted");
+		return tokens[4].substring(0,tokens[4].indexOf("/"));
 	}
 }

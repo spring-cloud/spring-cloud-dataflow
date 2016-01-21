@@ -61,11 +61,9 @@ import org.springframework.web.bind.annotation.RestController;
 @ExposesResourceFor(TaskDefinitionResource.class)
 public class TaskController {
 
-	private final String DEFAULT_TASK_DATASOURCE_URL = "jdbc:h2:tcp://localhost:9092/mem:testdb";
+	private final String DEFAULT_TASK_DATASOURCE_URL = "jdbc:h2:tcp://localhost:9092/mem:dataflow";
 
 	private final String DEFAULT_TASK_DATASOURCE_USER_NAME = "sa";
-
-	private final String DEFAULT_TASK_DATASOURCE_PASSWORD = "";
 
 	private final String DEFAULT_TASK_DATASOURCE_DRIVER_CLASS_NAME = "org.h2.Driver";
 
@@ -87,7 +85,7 @@ public class TaskController {
 	@Value("${spring.datasource.password:#{null}}")
 	private String dataSourcePassword;
 
-	@Value("${spring.datasource.driver-class-name:#{null}}")
+	@Value("${spring.datasource.driverClassName:#{null}}")
 	private String dataSourceDriverClassName;
 
 	/**
@@ -227,7 +225,7 @@ public class TaskController {
 			builder.setParameter("spring.datasource.password", dataSourcePassword );
 		}
 
-		builder.setParameter("spring.datasource.driver-class-name",
+		builder.setParameter("spring.datasource.driverClassName",
 				(StringUtils.hasText(dataSourceDriverClassName)) ? dataSourceDriverClassName :
 						DEFAULT_TASK_DATASOURCE_DRIVER_CLASS_NAME);
 
