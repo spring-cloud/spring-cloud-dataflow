@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2015-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,8 +35,11 @@ import org.springframework.util.Assert;
  * @author Patrick Peralta
  * @author Andy Clement
  * @author Eric Bottard
+ * @author Marius Bogoevici
  */
 class ModuleDefinitionBuilder {
+
+	public static final String DEFAULT_CONSUMER_GROUP_NAME = "default";
 
 	private final String streamName;
 
@@ -83,8 +86,9 @@ class ModuleDefinitionBuilder {
 				}
 			}
 			if (m > 0) {
-				builder.setParameter(BindingProperties.INPUT_BINDING_KEY,
-						String.format("%s.%d", streamName, m - 1));
+				builder.setParameter(BindingProperties.INPUT_BINDING_KEY, String.format("%s.%d", streamName, m - 1));
+				builder.setParameter(BindingProperties.INPUT_GROUP_KEY, DEFAULT_CONSUMER_GROUP_NAME);
+				builder.setParameter(BindingProperties.INPUT_DURABLE_SUBSCRIPTION_KEY,"true");
 			}
 			if (m < moduleNodes.size() - 1) {
 				builder.setParameter(BindingProperties.OUTPUT_BINDING_KEY,
@@ -96,6 +100,8 @@ class ModuleDefinitionBuilder {
 		if (sourceChannel != null) {
 			builders.getLast().setParameter(BindingProperties.INPUT_BINDING_KEY,
 					sourceChannel.getChannelName());
+			builders.getLast().setParameter(BindingProperties.INPUT_GROUP_KEY, streamName);
+			builders.getLast().setParameter(BindingProperties.INPUT_DURABLE_SUBSCRIPTION_KEY,"true");
 		}
 		SinkChannelNode sinkChannel = streamNode.getSinkChannelNode();
 		if (sinkChannel != null) {

@@ -20,12 +20,9 @@ import static org.springframework.hateoas.config.EnableHypermediaSupport.Hyperme
 
 import java.sql.SQLException;
 import java.util.Arrays;
-import java.util.StringTokenizer;
-import java.util.logging.Logger;
 
 import javax.sql.DataSource;
 
-import org.apache.commons.logging.Log;
 import org.h2.tools.Server;
 import org.slf4j.LoggerFactory;
 

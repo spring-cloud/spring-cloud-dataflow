@@ -54,6 +54,16 @@ public class BindingProperties {
 	public static final String OUTPUT_TYPE_KEY = OUTPUT_BINDING_KEY_PREFIX + CONTENT_TYPE_KEY;
 
 	/**
+	 * Group property key for input.
+	 */
+	public static final String INPUT_GROUP_KEY = INPUT_BINDING_KEY_PREFIX + "group";
+
+	/**
+	 * Subscription durability for input.
+	 */
+	public static final String INPUT_DURABLE_SUBSCRIPTION_KEY = INPUT_BINDING_KEY_PREFIX + "durableSubscription";
+
+	/**
 	 * Partition properties
 	 */
 	public static final String DEFAULT_PARTITION_KEY_EXPRESSION = "payload";

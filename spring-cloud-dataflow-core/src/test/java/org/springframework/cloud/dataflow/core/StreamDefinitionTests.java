@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2015-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ import org.springframework.cloud.dataflow.core.dsl.ParseException;
  * @author Mark Fisher
  * @author David Turanski
  * @author Patrick Peralta
+ * @author Marius Bogoevici
  */
 public class StreamDefinitionTests {
 
@@ -51,6 +52,8 @@ public class StreamDefinitionTests {
 		assertEquals("log", log.getName());
 		assertEquals("log", log.getLabel());
 		assertEquals("ticktock.0", log.getParameters().get(BindingProperties.INPUT_BINDING_KEY));
+		assertEquals("default", log.getParameters().get(BindingProperties.INPUT_GROUP_KEY));
+		assertEquals("true", log.getParameters().get(BindingProperties.INPUT_DURABLE_SUBSCRIPTION_KEY));
 		assertFalse(log.getParameters().containsKey(BindingProperties.OUTPUT_BINDING_KEY));
 	}
 
@@ -68,8 +71,10 @@ public class StreamDefinitionTests {
 		assertEquals("test.0", source.getParameters().get(BindingProperties.OUTPUT_BINDING_KEY));
 		assertEquals("bar", sink.getName());
 		assertEquals("test", sink.getGroup());
-		assertEquals(1, sink.getParameters().size());
+		assertEquals(3, sink.getParameters().size());
 		assertEquals("test.0", sink.getParameters().get(BindingProperties.INPUT_BINDING_KEY));
+		assertEquals("default", sink.getParameters().get(BindingProperties.INPUT_GROUP_KEY));
+		assertEquals("true", sink.getParameters().get(BindingProperties.INPUT_DURABLE_SUBSCRIPTION_KEY));
 	}
 
 	@Test
@@ -95,7 +100,7 @@ public class StreamDefinitionTests {
 		assertEquals("filter", filter.getName());
 		assertEquals("test", filter.getGroup());
 		Map<String, String> filterParameters = filter.getParameters();
-		assertEquals(3, filterParameters.size());
+		assertEquals(5, filterParameters.size());
 		assertEquals("payload.matches('hello world')", filterParameters.get("expression"));
 	}
 
@@ -115,7 +120,7 @@ public class StreamDefinitionTests {
 		assertEquals("bar", sink.getName());
 		assertEquals("test", sink.getGroup());
 		Map<String, String> sinkParameters = sink.getParameters();
-		assertEquals(2, sinkParameters.size());
+		assertEquals(4, sinkParameters.size());
 		assertEquals("3", sinkParameters.get("z"));
 	}
 
@@ -125,6 +130,7 @@ public class StreamDefinitionTests {
 		List<ModuleDefinition> requests = streamDefinition.getModuleDefinitions();
 		assertEquals(3, requests.size());
 		assertEquals("topic:foo", requests.get(0).getParameters().get(BindingProperties.INPUT_BINDING_KEY));
+		assertEquals("test", requests.get(0).getParameters().get(BindingProperties.INPUT_GROUP_KEY));
 	}
 
 	@Test
@@ -164,6 +170,8 @@ public class StreamDefinitionTests {
 		List<ModuleDefinition> requests = streamDefinition.getModuleDefinitions();
 		assertEquals(1, requests.size());
 		assertEquals("queue:foo", requests.get(0).getParameters().get(BindingProperties.INPUT_BINDING_KEY));
+		assertEquals("test", requests.get(0).getParameters().get(BindingProperties.INPUT_GROUP_KEY));
+		assertEquals("true", requests.get(0).getParameters().get(BindingProperties.INPUT_DURABLE_SUBSCRIPTION_KEY));
 	}
 
 	@Test
@@ -197,6 +205,8 @@ public class StreamDefinitionTests {
 		assertFalse(source.getParameters().containsKey(BindingProperties.INPUT_BINDING_KEY));
 		assertEquals("log", sink.getLabel());
 		assertEquals("ticktock.0", sink.getParameters().get(BindingProperties.INPUT_BINDING_KEY));
+		assertEquals("default", sink.getParameters().get(BindingProperties.INPUT_GROUP_KEY));
+		assertEquals("true", sink.getParameters().get(BindingProperties.INPUT_DURABLE_SUBSCRIPTION_KEY));
 		assertFalse(sink.getParameters().containsKey(BindingProperties.OUTPUT_BINDING_KEY));
 	}
 
@@ -215,10 +225,14 @@ public class StreamDefinitionTests {
 
 		assertEquals("filter", processor.getLabel());
 		assertEquals("ticktock.0", processor.getParameters().get(BindingProperties.INPUT_BINDING_KEY));
+		assertEquals("default", processor.getParameters().get(BindingProperties.INPUT_GROUP_KEY));
+		assertEquals("true", processor.getParameters().get(BindingProperties.INPUT_DURABLE_SUBSCRIPTION_KEY));
 		assertEquals("ticktock.1", processor.getParameters().get(BindingProperties.OUTPUT_BINDING_KEY));
 
 		assertEquals("log", sink.getLabel());
 		assertEquals("ticktock.1", sink.getParameters().get(BindingProperties.INPUT_BINDING_KEY));
+		assertEquals("default", sink.getParameters().get(BindingProperties.INPUT_GROUP_KEY));
+		assertEquals("true", sink.getParameters().get(BindingProperties.INPUT_DURABLE_SUBSCRIPTION_KEY));
 		assertFalse(sink.getParameters().containsKey(BindingProperties.OUTPUT_BINDING_KEY));
 	}
 
