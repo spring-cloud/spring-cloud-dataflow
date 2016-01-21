@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2015-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,17 +37,21 @@ import org.springframework.web.client.RestTemplate;
 public class StreamTemplate implements StreamOperations {
 
 	private static final String DEFINITIONS_REL = "streams/definitions";
+
 	private static final String DEFINITION_REL = "streams/definitions/definition";
 
 	private static final String DEPLOYMENTS_REL = "streams/deployments";
+
 	private static final String DEPLOYMENT_REL = "streams/deployments/deployment";
 
 	private final RestTemplate restTemplate;
 
 	private final Link definitionsLink;
+
 	private final Link definitionLink;
 
 	private final Link deploymentsLink;
+
 	private final Link deploymentLink;
 
 	StreamTemplate(RestTemplate restTemplate, ResourceSupport resources) {
@@ -58,8 +62,8 @@ public class StreamTemplate implements StreamOperations {
 		Assert.notNull(resources.getLink(DEPLOYMENT_REL), "Deployment relation is required");
 		this.restTemplate = restTemplate;
 		this.definitionsLink = resources.getLink(DEFINITIONS_REL);
-		this.definitionLink = resources.getLink(DEFINITION_REL);
 		this.deploymentsLink = resources.getLink(DEPLOYMENTS_REL);
+		this.definitionLink = resources.getLink(DEFINITION_REL);
 		this.deploymentLink = resources.getLink(DEPLOYMENT_REL);
 	}
 
@@ -72,7 +76,7 @@ public class StreamTemplate implements StreamOperations {
 
 	@Override
 	public StreamDefinitionResource createStream(String name, String definition, boolean deploy) {
-		MultiValueMap<String, Object> values = new LinkedMultiValueMap<String, Object>();
+		MultiValueMap<String, Object> values = new LinkedMultiValueMap<>();
 		values.add("name", name);
 		values.add("definition", definition);
 		values.add("deploy", Boolean.toString(deploy));
@@ -83,31 +87,28 @@ public class StreamTemplate implements StreamOperations {
 
 	@Override
 	public void deploy(String name, Map<String, String> properties) {
-		String uri = deploymentLink.expand(name).getHref();
-		MultiValueMap<String, Object> values = new LinkedMultiValueMap<String, Object>();
+		MultiValueMap<String, Object> values = new LinkedMultiValueMap<>();
 		values.add("properties", DeploymentPropertiesUtils.format(properties));
-		restTemplate.postForObject(uri, values, Object.class);
+		restTemplate.postForObject(deploymentLink.expand(name).getHref(), values, Object.class);
 	}
 
 	@Override
 	public void undeploy(String name) {
-		String uri = deploymentsLink.expand(name).getHref();
-		restTemplate.delete(uri);
+		restTemplate.delete(deploymentLink.expand(name).getHref());
 	}
 
 	@Override
 	public void undeployAll() {
-		restTemplate.delete(deploymentsLink.expand().getHref());
+		restTemplate.delete(deploymentsLink.getHref());
 	}
 
 	@Override
 	public void destroy(String name) {
-		String uri = definitionsLink.expand(name).getHref();
-		restTemplate.delete(uri);
+		restTemplate.delete(definitionLink.expand(name).getHref());
 	}
 
 	@Override
 	public void destroyAll() {
-		restTemplate.delete(definitionsLink.expand().getHref());
+		restTemplate.delete(definitionsLink.getHref());
 	}
 }
