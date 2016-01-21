@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2015-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -87,7 +87,7 @@ public class AdminController {
 		resourceSupport.add(entityLinks.linkToCollectionResource(LibraryRegistrationResource.class).withRel("libraries"));
 
 		resourceSupport.add(entityLinks.linkToCollectionResource(ModuleStatusResource.class).withRel("runtime/modules"));
-		resourceSupport.add(unescapeTemplateVariables(entityLinks.linkForSingleResource(ModuleStatusResource.class, "{moduleId}").withRel("runtime/module")));
+		resourceSupport.add(unescapeTemplateVariables(entityLinks.linkForSingleResource(ModuleStatusResource.class, "{moduleId}").withRel("runtime/modules/module")));
 
 		resourceSupport.add(unescapeTemplateVariables(entityLinks.linkFor(ModuleInstanceStatusResource.class, UriComponents.UriTemplateVariables.SKIP_VALUE).withRel("runtime/modules/instances")));
 

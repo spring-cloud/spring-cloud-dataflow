@@ -38,13 +38,21 @@ public class StreamTemplate implements StreamOperations {
 
 	private static final String DEFINITIONS_REL = "streams/definitions";
 
+	private static final String DEFINITION_REL = "streams/definitions/definition";
+
 	private static final String DEPLOYMENTS_REL = "streams/deployments";
+
+	private static final String DEPLOYMENT_REL = "streams/deployments/deployment";
 
 	private final RestTemplate restTemplate;
 
 	private final Link definitionsLink;
 
+	private final Link definitionLink;
+
 	private final Link deploymentsLink;
+
+	private final Link deploymentLink;
 
 	StreamTemplate(RestTemplate restTemplate, ResourceSupport resources) {
 		Assert.notNull(resources, "URI Resources can't be null");
@@ -53,6 +61,8 @@ public class StreamTemplate implements StreamOperations {
 		this.restTemplate = restTemplate;
 		this.definitionsLink = resources.getLink(DEFINITIONS_REL);
 		this.deploymentsLink = resources.getLink(DEPLOYMENTS_REL);
+		this.definitionLink = resources.getLink(DEFINITION_REL);
+		this.deploymentLink = resources.getLink(DEPLOYMENT_REL);
 	}
 
 	@Override
@@ -75,29 +85,28 @@ public class StreamTemplate implements StreamOperations {
 
 	@Override
 	public void deploy(String name, Map<String, String> properties) {
-		String uri = deploymentsLink.getHref() + "/{name}";
 		MultiValueMap<String, Object> values = new LinkedMultiValueMap<String, Object>();
 		values.add("properties", DeploymentPropertiesUtils.format(properties));
-		restTemplate.postForObject(uri, values, Object.class, name);
+		restTemplate.postForObject(deploymentLink.expand(name).getHref(), values, Object.class);
 	}
 
 	@Override
 	public void undeploy(String name) {
-		restTemplate.delete(deploymentsLink.getHref() + "/{name}", name);
+		restTemplate.delete(deploymentLink.expand(name).getHref());
 	}
 
 	@Override
 	public void undeployAll() {
-		restTemplate.delete(deploymentsLink.expand().getHref());
+		restTemplate.delete(deploymentsLink.getHref());
 	}
 
 	@Override
 	public void destroy(String name) {
-		restTemplate.delete(definitionsLink.getHref() + "/{name}", name);
+		restTemplate.delete(definitionLink.expand(name).getHref());
 	}
 
 	@Override
 	public void destroyAll() {
-		restTemplate.delete(definitionsLink.expand().getHref());
+		restTemplate.delete(definitionsLink.getHref());
 	}
 }
