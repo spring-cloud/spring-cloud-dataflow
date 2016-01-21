@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2015-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -316,6 +316,21 @@ public class StreamControllerTests {
 				delete("/streams/definitions/myStream").accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isOk());
 		assertEquals(0, repository.count());
+	}
+
+	@Test
+	public void testDestroySingleStream() throws Exception {
+		repository.save(new StreamDefinition("myStream", "time | log"));
+		repository.save(new StreamDefinition("myStream1", "time | log"));
+		assertEquals(2, repository.count());
+		ModuleStatus status = mock(ModuleStatus.class);
+		when(status.getState()).thenReturn(DeploymentState.unknown);
+		when(moduleDeployer.status(ModuleDeploymentId.parse("myStream.time"))).thenReturn(status);
+		when(moduleDeployer.status(ModuleDeploymentId.parse("myStream.log"))).thenReturn(status);
+		mockMvc.perform(
+				delete("/streams/definitions/myStream").accept(MediaType.APPLICATION_JSON)).andDo(print())
+				.andExpect(status().isOk());
+		assertEquals(1, repository.count());
 	}
 
 	@Test

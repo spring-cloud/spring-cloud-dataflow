@@ -44,7 +44,7 @@ public class RuntimeTemplate implements RuntimeOperations {
 	RuntimeTemplate(RestTemplate restTemplate, ResourceSupport resources) {
 		this.restTemplate = restTemplate;
 		this.moduleStatusesUriTemplate = resources.getLink("runtime/modules");
-		this.moduleStatusUriTemplate = resources.getLink("runtime/module");
+		this.moduleStatusUriTemplate = resources.getLink("runtime/modules/module");
 	}
 
 	@Override
