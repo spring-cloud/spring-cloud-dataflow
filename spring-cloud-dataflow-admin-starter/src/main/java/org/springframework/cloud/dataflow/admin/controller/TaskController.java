@@ -21,7 +21,10 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.dataflow.admin.repository.TaskDefinitionRepository;
+import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistration;
+import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistry;
 import org.springframework.cloud.dataflow.core.ArtifactCoordinates;
 import org.springframework.cloud.dataflow.core.ArtifactType;
 import org.springframework.cloud.dataflow.core.ModuleDefinition;
@@ -29,8 +32,6 @@ import org.springframework.cloud.dataflow.core.ModuleDeploymentId;
 import org.springframework.cloud.dataflow.core.ModuleDeploymentRequest;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.module.deployer.ModuleDeployer;
-import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistration;
-import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistry;
 import org.springframework.cloud.dataflow.rest.resource.TaskDefinitionResource;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
 import org.springframework.data.domain.Pageable;
@@ -40,6 +41,7 @@ import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.mvc.ResourceAssemblerSupport;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -59,6 +61,12 @@ import org.springframework.web.bind.annotation.RestController;
 @ExposesResourceFor(TaskDefinitionResource.class)
 public class TaskController {
 
+	private final String DEFAULT_TASK_DATASOURCE_URL = "jdbc:h2:tcp://localhost:9092/mem:dataflow";
+
+	private final String DEFAULT_TASK_DATASOURCE_USER_NAME = "sa";
+
+	private final String DEFAULT_TASK_DATASOURCE_DRIVER_CLASS_NAME = "org.h2.Driver";
+
 	private final Assembler taskAssembler = new Assembler();
 
 	@Autowired
@@ -67,6 +75,18 @@ public class TaskController {
 	@Autowired
 	@Qualifier("taskModuleDeployer")
 	private ModuleDeployer moduleDeployer;
+
+	@Value("${spring.datasource.url:#{null}}")
+	private String dataSourceUrl;
+
+	@Value("${spring.datasource.username:#{null}}")
+	private String dataSourceUserName;
+
+	@Value("${spring.datasource.password:#{null}}")
+	private String dataSourcePassword;
+
+	@Value("${spring.datasource.driverClassName:#{null}}")
+	private String dataSourceDriverClassName;
 
 	/**
 	 * The artifact registry this controller will use to look up modules.
@@ -156,6 +176,7 @@ public class TaskController {
 		ArtifactCoordinates coordinates = registration.getCoordinates();
 
 		Map<String, String> deploymentProperties = new HashMap<>();
+		module = updateTaskProperties(module, module.getName() );
 		deploymentProperties.putAll(DeploymentPropertiesUtils.parse(properties));
 		deploymentProperties.put(ModuleDeployer.GROUP_DEPLOYMENT_ID, taskDefinition.getName()
 				+ "-" + System.currentTimeMillis());
@@ -188,5 +209,26 @@ public class TaskController {
 			taskDefinitionResource.setStatus(moduleDeployer.status(id).getState().name());
 			return taskDefinitionResource;
 		}
+	}
+
+	private ModuleDefinition updateTaskProperties(ModuleDefinition moduleDefinition, String taskDefinitionName) {
+		ModuleDefinition.Builder builder = ModuleDefinition.Builder.from(moduleDefinition);
+		builder.setParameter("spring.datasource.url",
+				(StringUtils.hasText(dataSourceUrl)) ? dataSourceUrl :
+						DEFAULT_TASK_DATASOURCE_URL);
+
+		builder.setParameter("spring.datasource.username",
+				(StringUtils.hasText(dataSourceUserName)) ? dataSourceUserName :
+						DEFAULT_TASK_DATASOURCE_USER_NAME);
+
+		if(StringUtils.hasText(dataSourcePassword)) {//password may be empty
+			builder.setParameter("spring.datasource.password", dataSourcePassword );
+		}
+
+		builder.setParameter("spring.datasource.driverClassName",
+				(StringUtils.hasText(dataSourceDriverClassName)) ? dataSourceDriverClassName :
+						DEFAULT_TASK_DATASOURCE_DRIVER_CLASS_NAME);
+
+		return builder.build();
 	}
 }
