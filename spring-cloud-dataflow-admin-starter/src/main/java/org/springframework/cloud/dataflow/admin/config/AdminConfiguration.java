@@ -21,10 +21,14 @@ import static org.springframework.hateoas.config.EnableHypermediaSupport.Hyperme
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.StringTokenizer;
+import java.util.logging.Logger;
 
 import javax.sql.DataSource;
 
+import org.apache.commons.logging.Log;
 import org.h2.tools.Server;
+import org.slf4j.LoggerFactory;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.actuate.metrics.repository.MetricRepository;
 import org.springframework.boot.actuate.metrics.repository.redis.RedisMetricRepository;
@@ -78,6 +82,8 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 @Import(CompletionConfiguration.class)
 @EnableConfigurationProperties(AdminProperties.class)
 public class AdminConfiguration {
+
+	protected static final org.slf4j.Logger logger = LoggerFactory.getLogger(AdminConfiguration.class);
 
 	@Value("${spring.datasource.url:#{null}}")
 	private String dataSourceUrl;
@@ -148,6 +154,7 @@ public class AdminConfiguration {
 	@ConditionalOnExpression("#{'${spring.datasource.url:}'.startsWith('jdbc:h2:tcp://localhost:') && '${spring.datasource.url:}'.contains('/mem:')}")
 	public Server initH2TCPServer() {
 		Server server = null;
+		logger.info("Starting H2 Server with URL: " + dataSourceUrl);
 		try {
 			server = Server.createTcpServer("-tcp", "-tcpAllowOthers", "-tcpPort",
 					getH2Port(dataSourceUrl)).start();
