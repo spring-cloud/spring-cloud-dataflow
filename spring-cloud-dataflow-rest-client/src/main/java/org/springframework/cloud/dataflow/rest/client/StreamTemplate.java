@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2015-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,30 +37,22 @@ import org.springframework.web.client.RestTemplate;
 public class StreamTemplate implements StreamOperations {
 
 	private static final String DEFINITIONS_REL = "streams/definitions";
-	private static final String DEFINITION_REL = "streams/definitions/definition";
 
 	private static final String DEPLOYMENTS_REL = "streams/deployments";
-	private static final String DEPLOYMENT_REL = "streams/deployments/deployment";
 
 	private final RestTemplate restTemplate;
 
 	private final Link definitionsLink;
-	private final Link definitionLink;
 
 	private final Link deploymentsLink;
-	private final Link deploymentLink;
 
 	StreamTemplate(RestTemplate restTemplate, ResourceSupport resources) {
 		Assert.notNull(resources, "URI Resources can't be null");
 		Assert.notNull(resources.getLink(DEFINITIONS_REL), "Definitions relation is required");
-		Assert.notNull(resources.getLink(DEFINITION_REL), "Definition relation is required");
 		Assert.notNull(resources.getLink(DEPLOYMENTS_REL), "Deployments relation is required");
-		Assert.notNull(resources.getLink(DEPLOYMENT_REL), "Deployment relation is required");
 		this.restTemplate = restTemplate;
 		this.definitionsLink = resources.getLink(DEFINITIONS_REL);
-		this.definitionLink = resources.getLink(DEFINITION_REL);
 		this.deploymentsLink = resources.getLink(DEPLOYMENTS_REL);
-		this.deploymentLink = resources.getLink(DEPLOYMENT_REL);
 	}
 
 	@Override
@@ -83,16 +75,15 @@ public class StreamTemplate implements StreamOperations {
 
 	@Override
 	public void deploy(String name, Map<String, String> properties) {
-		String uri = deploymentLink.expand(name).getHref();
+		String uri = deploymentsLink.getHref() + "/{name}";
 		MultiValueMap<String, Object> values = new LinkedMultiValueMap<String, Object>();
 		values.add("properties", DeploymentPropertiesUtils.format(properties));
-		restTemplate.postForObject(uri, values, Object.class);
+		restTemplate.postForObject(uri, values, Object.class, name);
 	}
 
 	@Override
 	public void undeploy(String name) {
-		String uri = deploymentsLink.expand(name).getHref();
-		restTemplate.delete(uri);
+		restTemplate.delete(deploymentsLink.getHref() + "/{name}", name);
 	}
 
 	@Override
@@ -102,8 +93,7 @@ public class StreamTemplate implements StreamOperations {
 
 	@Override
 	public void destroy(String name) {
-		String uri = definitionsLink.expand(name).getHref();
-		restTemplate.delete(uri);
+		restTemplate.delete(definitionsLink.getHref() + "/{name}", name);
 	}
 
 	@Override
