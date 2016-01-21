@@ -40,6 +40,8 @@ public class CompletionUtils {
 	static final Set<String> IMPLICIT_PARAMETER_NAMES = new HashSet<>();
 	static {
 		IMPLICIT_PARAMETER_NAMES.add(BindingProperties.INPUT_BINDING_KEY);
+		IMPLICIT_PARAMETER_NAMES.add(BindingProperties.INPUT_GROUP_KEY);
+		IMPLICIT_PARAMETER_NAMES.add(BindingProperties.INPUT_DURABLE_SUBSCRIPTION_KEY);
 		IMPLICIT_PARAMETER_NAMES.add(BindingProperties.OUTPUT_BINDING_KEY);
 	}
 

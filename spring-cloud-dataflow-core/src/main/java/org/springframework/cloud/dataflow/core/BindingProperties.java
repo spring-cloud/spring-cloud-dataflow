@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2015-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.cloud.dataflow.core;
  * Spring Cloud Stream property names mostly used for binding.
  *
  * @author Ilayaperumal Gopinathan
+ * @author Marius Bogoevici
  */
 public class BindingProperties {
 
@@ -52,6 +53,16 @@ public class BindingProperties {
 	public static final String INPUT_TYPE_KEY = INPUT_BINDING_KEY_PREFIX + CONTENT_TYPE_KEY;
 
 	public static final String OUTPUT_TYPE_KEY = OUTPUT_BINDING_KEY_PREFIX + CONTENT_TYPE_KEY;
+
+	/**
+	 * Group property key for input.
+	 */
+	public static final String INPUT_GROUP_KEY = INPUT_BINDING_KEY_PREFIX + "group";
+
+	/**
+	 * Subscription durability for input.
+	 */
+	public static final String INPUT_DURABLE_SUBSCRIPTION_KEY = INPUT_BINDING_KEY_PREFIX + "durableSubscription";
 
 	/**
 	 * Partition properties
