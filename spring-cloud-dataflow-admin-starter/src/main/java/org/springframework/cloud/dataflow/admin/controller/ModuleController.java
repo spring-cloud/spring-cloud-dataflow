@@ -142,8 +142,9 @@ public class ModuleController {
 			@RequestParam("coordinates") String coordinates,
 			@RequestParam(value = "force", defaultValue = "false") boolean force) {
 		Assert.isTrue(type != ArtifactType.library, "Only modules are supported by this endpoint");
-		if (!force && registry.find(name, type) != null) {
-			return;
+		ArtifactRegistration previous = registry.find(name, type);
+		if (!force && previous != null) {
+			throw new ModuleAlreadyRegisteredException(previous);
 		}
 		registry.save(new ArtifactRegistration(name, type, ArtifactCoordinates.parse(coordinates)));
 	}
@@ -175,6 +176,24 @@ public class ModuleController {
 		protected ModuleRegistrationResource instantiateResource(ArtifactRegistration registration) {
 			return new ModuleRegistrationResource(registration.getName(),
 					registration.getType().name(), registration.getCoordinates().toString());
+		}
+	}
+
+	@ResponseStatus(HttpStatus.CONFLICT)
+	public static class ModuleAlreadyRegisteredException extends IllegalStateException {
+		private final ArtifactRegistration previous;
+
+		public ModuleAlreadyRegisteredException(ArtifactRegistration previous) {
+			this.previous = previous;
+		}
+
+		@Override
+		public String getMessage() {
+			return String.format("The '%s:%s' module is already registered as %s", previous.getType(), previous.getName(), previous.getCoordinates());
+		}
+
+		public ArtifactRegistration getPrevious() {
+			return previous;
 		}
 	}
 
