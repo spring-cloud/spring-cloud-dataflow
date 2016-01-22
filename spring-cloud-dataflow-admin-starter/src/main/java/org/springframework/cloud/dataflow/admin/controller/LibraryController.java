@@ -111,8 +111,9 @@ public class LibraryController {
 			@PathVariable("name") String name,
 			@RequestParam("coordinates") String coordinates,
 			@RequestParam(value = "force", defaultValue = "false") boolean force) {
-		if (!force && registry.find(name, ArtifactType.library) != null) {
-			return;
+		ArtifactRegistration previous = registry.find(name, ArtifactType.library);
+		if (!force && previous != null) {
+			throw new LibraryAlreadyRegisteredException(previous);
 		}
 		registry.save(new ArtifactRegistration(name, ArtifactType.library, ArtifactCoordinates.parse(coordinates)));
 	}
@@ -143,6 +144,24 @@ public class LibraryController {
 		protected LibraryRegistrationResource instantiateResource(ArtifactRegistration registration) {
 			return new LibraryRegistrationResource(registration.getName(),
 					registration.getType().name(), registration.getCoordinates().toString());
+		}
+	}
+
+	@ResponseStatus(HttpStatus.CONFLICT)
+	public static class LibraryAlreadyRegisteredException extends IllegalStateException {
+		private final ArtifactRegistration previous;
+
+		public LibraryAlreadyRegisteredException(ArtifactRegistration previous) {
+			this.previous = previous;
+		}
+
+		@Override
+		public String getMessage() {
+			return String.format("The '%s' library is already registered as %s", previous.getName(), previous.getCoordinates());
+		}
+
+		public ArtifactRegistration getPrevious() {
+			return previous;
 		}
 	}
 
