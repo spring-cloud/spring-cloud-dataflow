@@ -95,7 +95,7 @@ class ConfigurationPropertyNameAfterDashDashRecoveryStrategy
 						String prefix = property.getId().substring(0, dot);
 						if (!prefixes.contains(prefix)) {
 							prefixes.add(prefix);
-							collector.add(proposals.withSuffix("--" + prefix + ".", "Properties starting with '" + prefix + ".'"));
+							collector.add(proposals.withSuffix(prefix + ".", "Properties starting with '" + prefix + ".'"));
 						}
 					}
 					else if (!alreadyPresentOptions.contains(property.getId())) {
