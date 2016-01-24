@@ -43,6 +43,7 @@
 		<module>spring-cloud-dataflow-shell</module>
 		<module>spring-cloud-dataflow-docs</module>
 		<module>spring-cloud-dataflow-completion</module>
+		<module>spring-cloud-starter-dataflow-admin-local</module>
   </modules>
 	<dependencyManagement>
 		<dependencies>
