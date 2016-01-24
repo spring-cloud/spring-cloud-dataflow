@@ -32,8 +32,8 @@ import org.springframework.context.annotation.Configuration;
  * @author Mark Fisher
  * @author Josh Long
  */
-@SpringBootApplication
-@EnableAutoConfiguration(exclude = OAuth2AutoConfiguration.class)
+@Configuration
+@EnableDataflowAdminServer
 public class AdminApplication {
 
     public static void main(String[] args) {
