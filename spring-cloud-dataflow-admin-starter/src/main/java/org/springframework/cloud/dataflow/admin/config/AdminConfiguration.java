@@ -32,16 +32,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.actuate.metrics.repository.MetricRepository;
 import org.springframework.boot.actuate.metrics.repository.redis.RedisMetricRepository;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.web.HttpMessageConverters;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.dataflow.admin.completion.TapOnChannelExpansionStrategy;
-import org.springframework.cloud.dataflow.admin.repository.InMemoryStreamDefinitionRepository;
-import org.springframework.cloud.dataflow.admin.repository.InMemoryTaskDefinitionRepository;
-import org.springframework.cloud.dataflow.admin.repository.StreamDefinitionRepository;
-import org.springframework.cloud.dataflow.admin.repository.TaskDatabaseInitializer;
-import org.springframework.cloud.dataflow.admin.repository.TaskDefinitionRepository;
+import org.springframework.cloud.dataflow.admin.controller.AdminController;
+import org.springframework.cloud.dataflow.admin.repository.*;
 import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistry;
 import org.springframework.cloud.dataflow.artifact.registry.RedisArtifactRegistry;
 import org.springframework.cloud.dataflow.completion.CompletionConfiguration;
@@ -51,6 +49,7 @@ import org.springframework.cloud.stream.module.metrics.RedisFieldValueCounterRep
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.cloud.task.repository.support.JdbcTaskExplorerFactoryBean;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
@@ -75,6 +74,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
  * @author Thomas Risberg
  * @author Janne Valkealahti
  * @author Glenn Renfro
+ * @author Josh Long
  */
 @Configuration
 @EnableHypermediaSupport(type = HAL)
