@@ -127,6 +127,8 @@
 				<filtering>true</filtering>
 				<includes>
 					<include>banner.txt</include>
+					<include>admin.yml</include>
+					<include>test.yml</include>
 					<include>META-INF/spring.factories</include>
 				</includes>
 			</resource>
