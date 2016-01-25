@@ -53,24 +53,20 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 		Date startTime = new Date();
 		Date endTime = new Date(startTime.getTime() + 5000);
 		template.update("INSERT into TASK_EXECUTION(TASK_EXECUTION_ID, " +
-				"TASK_EXTERNAL_EXECUTION_ID, " +
 				"START_TIME, " +
 				"END_TIME, " +
 				"TASK_NAME, " +
 				"EXIT_CODE, " +
 				"EXIT_MESSAGE, " +
-				"LAST_UPDATED, " +
-				"STATUS_CODE)" +
-				"values (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+				"LAST_UPDATED)" +
+				"values (?, ?, ?, ?, ?, ?, ?)",
 				1,
-				UUID.randomUUID().toString(),
 				startTime,
 				endTime,
 				taskName,
 				20,
 				"exit",
-				endTime,
-				"status");
+				endTime);
 	}
 
 	@Test
@@ -125,12 +121,10 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 		assertEquals("Second key should be Id ", "Id ", table.getModel().getValue(1,0));
 		assertEquals("Third key should be Name ", "Name ", table.getModel().getValue(2,0));
 		assertEquals("Fourth key should be Parameters", "Parameters ", table.getModel().getValue(3,0));
-		assertEquals("Fifth key should be External Execution Id ", "External Execution Id ", table.getModel().getValue(4,0));
-		assertEquals("Sixth key should be Start Time  ", "Start Time ", table.getModel().getValue(5,0));
-		assertEquals("Seventh key should be Status Code ", "Status Code ", table.getModel().getValue(6,0));
-		assertEquals("Eighth key should be End Time ", "End Time ", table.getModel().getValue(7,0));
-		assertEquals("Ninth key should be Exit Code ", "Exit Code ", table.getModel().getValue(8,0));
-		assertEquals("Tenth key should be Exit Message ", "Exit Message ", table.getModel().getValue(9,0));
+		assertEquals("Fifth key should be Start Time  ", "Start Time ", table.getModel().getValue(4,0));
+		assertEquals("Sixth key should be End Time ", "End Time ", table.getModel().getValue(5,0));
+		assertEquals("Seventh key should be Exit Code ", "Exit Code ", table.getModel().getValue(6,0));
+		assertEquals("Eighth key should be Exit Message ", "Exit Message ", table.getModel().getValue(7,0));
 	}
 
 }

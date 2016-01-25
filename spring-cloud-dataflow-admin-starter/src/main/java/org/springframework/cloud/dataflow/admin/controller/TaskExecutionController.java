@@ -130,9 +130,8 @@ public class TaskExecutionController {
 			TaskExecutionResource taskExecutionResource = new TaskExecutionResource(
 					taskExecution.getExecutionId(), taskExecution.getExitCode(),
 					taskExecution.getTaskName(), taskExecution.getStartTime(),
-					taskExecution.getEndTime(),taskExecution.getStatusCode(),
-					taskExecution.getExitMessage(), taskExecution.getParameters(),
-					taskExecution.getExternalExecutionID());
+					taskExecution.getEndTime(), taskExecution.getExitMessage(),
+					taskExecution.getParameters());
 			return taskExecutionResource;
 		}
 	}

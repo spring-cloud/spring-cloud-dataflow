@@ -37,11 +37,6 @@ public class TaskExecutionResource extends ResourceSupport {
 	private long executionId;
 
 	/**
-	 * Id provided by an external system for the given task execution.
-	 */
-	private String externalExecutionID;
-
-	/**
 	 * The recorded exit code for the task.
 	 */
 	private int exitCode;
@@ -62,11 +57,6 @@ public class TaskExecutionResource extends ResourceSupport {
 	private Date endTime;
 
 	/**
-	 * The status code associated with the task execution.
-	 */
-	private String statusCode;
-
-	/**
 	 * Message returned from the task or stacktrace.parameters.
 	 */
 	private String exitMessage;
@@ -81,17 +71,14 @@ public class TaskExecutionResource extends ResourceSupport {
 	}
 
 	public TaskExecutionResource(long executionId, int exitCode, String taskName,
-								 Date startTime, Date endTime, String statusCode,
-								 String exitMessage, List<String> parameters,
-								 String externalExecutionID) {
+								 Date startTime, Date endTime,
+								 String exitMessage, List<String> parameters) {
 
 		Assert.notNull(parameters, "parameters must not be null");
 		Assert.notNull(startTime, "startTime must not be null");
 		this.executionId = executionId;
-		this.externalExecutionID = externalExecutionID;
 		this.exitCode = exitCode;
 		this.taskName = taskName;
-		this.statusCode = statusCode;
 		this.exitMessage = exitMessage;
 		this.parameters = parameters;
 		this.startTime = startTime;
@@ -106,14 +93,6 @@ public class TaskExecutionResource extends ResourceSupport {
 
 	public void setExecutionId(long executionId) {
 		this.executionId = executionId;
-	}
-
-	public String getExternalExecutionID() {
-		return externalExecutionID;
-	}
-
-	public void setExternalExecutionID(String externalExecutionID) {
-		this.externalExecutionID = externalExecutionID;
 	}
 
 	public int getExitCode() {
@@ -131,11 +110,7 @@ public class TaskExecutionResource extends ResourceSupport {
 	public Date getEndTime() {
 		return endTime;
 	}
-
-	public String getStatusCode() {
-		return statusCode;
-	}
-
+	
 	public String getExitMessage() {
 		return exitMessage;
 	}

@@ -120,12 +120,12 @@ public class TaskExecutionExplorerTests {
 
 	private void insertTestExecutionDataIntoRepo(JdbcTemplate template,
 												 long id, String taskName){
-		final String INSERT_STATEMENT = "INSERT INTO task_execution (task_execution_id,"
-				+ "task_external_execution_id, start_time, end_time, task_name, "
-				+ "exit_code,exit_message,last_updated,status_code) "
-				+ "VALUES (?,?,?,?,?,?,?,?,?)";
-		Object[] param = new Object[] {id, null, new Date(id), new Date(), taskName, 0, null,
-				new Date(), null};
+		final String INSERT_STATEMENT = "INSERT INTO task_execution (task_execution_id, "
+				+ "start_time, end_time, task_name, "
+				+ "exit_code,exit_message,last_updated) "
+				+ "VALUES (?,?,?,?,?,?,?)";
+		Object[] param = new Object[] {id, new Date(id), new Date(), taskName, 0, null,
+				new Date()};
 		template.update(INSERT_STATEMENT, param);
 	}
 
@@ -142,10 +142,8 @@ public class TaskExecutionExplorerTests {
 					rs.getString("TASK_NAME"),
 					rs.getTimestamp("START_TIME"),
 					rs.getTimestamp("END_TIME"),
-					rs.getString("STATUS_CODE"),
 					rs.getString("EXIT_MESSAGE"),
-					new ArrayList<String>(),
-					rs.getString("TASK_EXTERNAL_EXECUTION_ID"));
+					new ArrayList<String>());
 			return taskExecution;
 		}
 	}
