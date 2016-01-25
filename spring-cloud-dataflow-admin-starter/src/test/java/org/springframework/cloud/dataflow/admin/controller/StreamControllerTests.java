@@ -148,7 +148,7 @@ public class StreamControllerTests {
 		mockMvc.perform(
 				post("/streams/definitions/").param("name", "myStream").param("definition", "time | log")
 						.accept(MediaType.APPLICATION_JSON)).andDo(print())
-						.andExpect(status().is5xxServerError());
+						.andExpect(status().isConflict());
 		assertEquals(1, repository.count());
 	}
 
@@ -352,7 +352,7 @@ public class StreamControllerTests {
 	public void testDestroyStreamNotFound() throws Exception {
 		mockMvc.perform(
 				delete("/streams/definitions/myStream").accept(MediaType.APPLICATION_JSON)).andDo(print())
-				.andExpect(status().is5xxServerError());
+				.andExpect(status().isNotFound());
 		assertEquals(0, repository.count());
 	}
 

@@ -105,7 +105,7 @@ public class CounterController {
 		@SuppressWarnings("unchecked")
 		Metric<Double> c = (Metric<Double>) metricRepository.findOne(COUNTER_PREFIX + name);
 		if (c == null) {
-			throw new MetricsMvcEndpoint.NoSuchMetricException(name);
+			throw new ResourceNotFoundException(name, "counter");
 		}
 		return c;
 	}

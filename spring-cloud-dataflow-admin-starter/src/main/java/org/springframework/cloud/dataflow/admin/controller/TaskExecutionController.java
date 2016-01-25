@@ -17,7 +17,6 @@
 package org.springframework.cloud.dataflow.admin.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.dataflow.admin.repository.NoSuchTaskExecutionException;
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionResource;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.TaskExplorer;
@@ -104,8 +103,8 @@ public class TaskExecutionController {
 	@ResponseStatus(HttpStatus.OK)
 	public TaskExecutionResource view(@PathVariable("id") long id) {
 		TaskExecution execution = this.explorer.getTaskExecution(id);
-		if(execution == null){
-			throw new NoSuchTaskExecutionException(id);
+		if(execution == null) {
+			throw new ResourceNotFoundException(String.valueOf(id), "task execution");
 		}
 		return taskAssembler.toResource(execution);
 	}

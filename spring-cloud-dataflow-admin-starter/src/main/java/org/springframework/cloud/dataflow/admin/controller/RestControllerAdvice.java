@@ -51,6 +51,22 @@ public class RestControllerAdvice {
 		return new VndErrors(logref, msg);
 	}
 
+	@ExceptionHandler(ResourceAlreadyExistsException.class)
+	@ResponseStatus(HttpStatus.CONFLICT)
+	@ResponseBody
+	public VndErrors onException(ResourceAlreadyExistsException e) {
+		String logref = logError(e);
+		return new VndErrors(logref, e.getMessage());
+	}
+
+	@ExceptionHandler(ResourceNotFoundException.class)
+	@ResponseStatus(HttpStatus.NOT_FOUND)
+	@ResponseBody
+	public VndErrors onException(ResourceNotFoundException e) {
+		String logref = logError(e);
+		return new VndErrors(logref, e.getMessage());
+	}
+
 	private String logError(Throwable t) {
 		logger.error("Caught exception while handling a request", t);
 		return t.getClass().getSimpleName();

@@ -93,7 +93,7 @@ public class LibraryController {
 			@PathVariable("name") String name) {
 		ArtifactRegistration registration = registry.find(name, ArtifactType.library);
 		if (registration == null) {
-			return null;
+			throw new ResourceNotFoundException(name, "library");
 		}
 		return libraryAssembler.toResource(registration);
 	}
@@ -111,8 +111,9 @@ public class LibraryController {
 			@PathVariable("name") String name,
 			@RequestParam("coordinates") String coordinates,
 			@RequestParam(value = "force", defaultValue = "false") boolean force) {
-		if (!force && registry.find(name, ArtifactType.library) != null) {
-			return;
+		ArtifactRegistration previous = registry.find(name, ArtifactType.library);
+		if (!force && previous != null) {
+			throw new ResourceAlreadyExistsException(name, "library", "The '%s' library is already registered as %s", name, previous.getCoordinates());
 		}
 		registry.save(new ArtifactRegistration(name, ArtifactType.library, ArtifactCoordinates.parse(coordinates)));
 	}
@@ -125,6 +126,10 @@ public class LibraryController {
 	@RequestMapping(value = "/{name}", method = RequestMethod.DELETE)
 	@ResponseStatus(HttpStatus.OK)
 	public void unregister(@PathVariable("name") String name) {
+		ArtifactRegistration previous = registry.find(name, ArtifactType.library);
+		if (previous == null) {
+			throw new ResourceNotFoundException(name, "library");
+		}
 		registry.delete(name, ArtifactType.library);
 	}
 

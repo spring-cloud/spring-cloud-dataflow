@@ -125,6 +125,10 @@ public class TaskController {
 	@RequestMapping(value = "/definitions", method = RequestMethod.POST)
 	public void save(@RequestParam("name") String name,
 			@RequestParam("definition") String dsl) {
+		TaskDefinition previous = repository.findOne(name);
+		if (previous != null) {
+			throw new ResourceAlreadyExistsException(name, "task definition");
+		}
 		repository.save(new TaskDefinition(name, dsl));
 	}
 
@@ -136,7 +140,16 @@ public class TaskController {
 	@RequestMapping(value = "/definitions/{name}", method = RequestMethod.DELETE)
 	@ResponseStatus(HttpStatus.OK)
 	public void destroyTask(@PathVariable("name") String name) {
+		findDefinitionOrFail(name);
 		repository.delete(name);
+	}
+
+	private TaskDefinition findDefinitionOrFail(@PathVariable("name") String name) {
+		TaskDefinition definition = repository.findOne(name);
+		if (definition == null) {
+			throw new ResourceNotFoundException(name, "task definition");
+		}
+		return definition;
 	}
 
 	/**
@@ -164,8 +177,7 @@ public class TaskController {
 	@RequestMapping(value = "/deployments/{name}", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
 	public void deploy(@PathVariable("name") String name, @RequestParam(required = false) String properties) {
-		TaskDefinition taskDefinition = this.repository.findOne(name);
-		Assert.notNull(taskDefinition, String.format("no task defined: %s", name));
+		TaskDefinition taskDefinition = this.findDefinitionOrFail(name);
 
 		ModuleDefinition module = taskDefinition.getModuleDefinition();
 		ArtifactRegistration registration = this.registry.find(module.getName(), ArtifactType.task);

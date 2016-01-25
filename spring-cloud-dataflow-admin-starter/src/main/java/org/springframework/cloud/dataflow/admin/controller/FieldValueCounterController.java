@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.actuate.endpoint.mvc.MetricsMvcEndpoint;
 import org.springframework.cloud.dataflow.rest.resource.FieldValueCounterResource;
 import org.springframework.cloud.dataflow.rest.resource.MetricResource;
 import org.springframework.cloud.stream.module.metrics.FieldValueCounter;
@@ -63,11 +62,16 @@ public class FieldValueCounterController {
 	 */
 	@RequestMapping(value = "/{name}", method = RequestMethod.GET)
 	public FieldValueCounterResource display(@PathVariable("name") String name) {
+		FieldValueCounter counter = findFieldValueCounter(name);
+		return deepAssembler.toResource(counter);
+	}
+
+	private FieldValueCounter findFieldValueCounter(String name) {
 		FieldValueCounter counter = repository.findOne(name);
 		if (counter == null) {
-			throw new MetricsMvcEndpoint.NoSuchMetricException(name);
+			throw new ResourceNotFoundException(name, "field value counter");
 		}
-		return deepAssembler.toResource(counter);
+		return counter;
 	}
 
 	/**
@@ -76,10 +80,7 @@ public class FieldValueCounterController {
 	@RequestMapping(value = "/{name}", method = RequestMethod.DELETE)
 	@ResponseStatus(HttpStatus.OK)
 	protected void delete(@PathVariable("name") String name) {
-		FieldValueCounter counter = repository.findOne(name);
-		if (counter == null) {
-			throw new MetricsMvcEndpoint.NoSuchMetricException(name);
-		}
+		FieldValueCounter counter = findFieldValueCounter(name);
 		repository.reset(name);
 	}
 
