@@ -43,6 +43,7 @@ import org.springframework.web.client.RestTemplate;
  * @author Mark Fisher
  * @author Marius Bogoevici
  * @author Eric Bottard
+ * @author Josh Long
  */
 public class InProcessModuleDeployer implements ModuleDeployer {
 
