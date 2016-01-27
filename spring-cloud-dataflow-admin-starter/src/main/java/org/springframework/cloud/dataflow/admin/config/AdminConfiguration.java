@@ -194,8 +194,9 @@ public class AdminConfiguration {
 	@Bean
 	@ConditionalOnProperty(name = "spring.cloud.task.repo.initialize",
 			havingValue = "true", matchIfMissing = true)
-    public TaskDatabaseInitializer taskDatabaseInitializer(){
-		return new TaskDatabaseInitializer();
+    public TaskDatabaseInitializer taskDatabaseInitializer(Server server,
+														   DataSource dataSource){
+		return new TaskDatabaseInitializer(dataSource);
 	}
 
 	private String getH2Port(String url){
