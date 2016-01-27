@@ -43,95 +43,92 @@ import org.springframework.web.client.RestTemplate;
  * @author Mark Fisher
  * @author Marius Bogoevici
  * @author Eric Bottard
- * @author Josh Long
  */
 public class InProcessModuleDeployer implements ModuleDeployer {
 
-    private static final Logger logger = LoggerFactory.getLogger(InProcessModuleDeployer.class);
+	private static final Logger logger = LoggerFactory.getLogger(InProcessModuleDeployer.class);
 
-    private final ModuleLauncher launcher;
+	private final ModuleLauncher launcher;
 
-    private final Map<ModuleDeploymentId, URL> deployedModules = new HashMap<>();
+	private final Map<ModuleDeploymentId, URL> deployedModules = new HashMap<>();
 
-    private final RestTemplate restTemplate = new RestTemplate();
+	private final RestTemplate restTemplate = new RestTemplate();
 
-    public InProcessModuleDeployer(ModuleLauncher launcher) {
-        Assert.notNull(launcher, "Module launcher cannot be null");
-        this.launcher = launcher;
-    }
+	public InProcessModuleDeployer(ModuleLauncher launcher) {
+		Assert.notNull(launcher, "Module launcher cannot be null");
+		this.launcher = launcher;
+	}
 
-    @Override
-    public ModuleDeploymentId deploy(ModuleDeploymentRequest request) {
-        String module = request.getCoordinates().toString();
-        if (request.getCount() != 1) {
-            logger.warn("{} only supports a single instance per module; ignoring count={} for {}",
-                    this.getClass().getSimpleName(), request.getCount(), request.getDefinition().getLabel());
-        }
-        Map<String, String> args = new HashMap<>();
-        args.putAll(request.getDefinition().getParameters());
-        args.putAll(request.getDeploymentProperties());
+	@Override
+	public ModuleDeploymentId deploy(ModuleDeploymentRequest request) {
+		String module = request.getCoordinates().toString();
+		if (request.getCount() != 1) {
+			logger.warn("{} only supports a single instance per module; ignoring count={} for {}",
+					this.getClass().getSimpleName(), request.getCount(), request.getDefinition().getLabel());
+		}
+		Map<String, String> args = new HashMap<>();
+		args.putAll(request.getDefinition().getParameters());
+		args.putAll(request.getDeploymentProperties());
 
-        logger.info("deploying module: {}", module);
-        int port;
-        if (args.containsKey(SERVER_PORT_KEY)) {
-            port = Integer.parseInt(args.get(SERVER_PORT_KEY));
-        }
-        else {
-            port = SocketUtils.findAvailableTcpPort(DEFAULT_SERVER_PORT);
-            args.put(SERVER_PORT_KEY, String.valueOf(port));
-        }
-        URL moduleUrl;
-        try {
-            moduleUrl = new URL("http", Inet4Address.getLocalHost().getHostAddress(), port, "");
-        }
-        catch (Exception e) {
-            throw new IllegalStateException("failed to determine URL for module: " + module, e);
-        }
+		logger.info("deploying module: {}", module);
+		int port;
+		if (args.containsKey(SERVER_PORT_KEY)) {
+			port = Integer.parseInt(args.get(SERVER_PORT_KEY));
+		}
+		else {
+			port = SocketUtils.findAvailableTcpPort(DEFAULT_SERVER_PORT);
+			args.put(SERVER_PORT_KEY, String.valueOf(port));
+		}
+		URL moduleUrl;
+		try {
+			moduleUrl = new URL("http", Inet4Address.getLocalHost().getHostAddress(), port, "");
+		}
+		catch (Exception e) {
+			throw new IllegalStateException("failed to determine URL for module: " + module, e);
+		}
         args.put("security.ignored", getShutdownUrl() + ",/shutdown"); // Make sure we can shutdown the module
         args.put("endpoints.shutdown.enabled", "true");
-        args.put("spring.main.show_banner", "false");
-        args.put(JMX_DEFAULT_DOMAIN_KEY, String.format("%s.%s",
-                request.getDefinition().getGroup(), request.getDefinition().getLabel()));
-        args.put("endpoints.jmx.unique-names", "true");
-        ModuleLaunchRequest moduleLaunchRequest = new ModuleLaunchRequest(module, args);
-        launcher.launch(Collections.singletonList(moduleLaunchRequest));
-        ModuleDeploymentId id = new ModuleDeploymentId(request.getDefinition().getGroup(),
-                request.getDefinition().getLabel());
-        this.deployedModules.put(id, moduleUrl);
-        return id;
-    }
+		args.put("spring.main.show_banner", "false");
+		args.put(JMX_DEFAULT_DOMAIN_KEY, String.format("%s.%s",
+				request.getDefinition().getGroup(), request.getDefinition().getLabel()));
+		args.put("endpoints.jmx.unique-names", "true");
+		ModuleLaunchRequest moduleLaunchRequest = new ModuleLaunchRequest(module, args);
+		launcher.launch(Collections.singletonList(moduleLaunchRequest));
+		ModuleDeploymentId id = new ModuleDeploymentId(request.getDefinition().getGroup(),
+				request.getDefinition().getLabel());
+		this.deployedModules.put(id, moduleUrl);
+		return id;
+	}
 
-    @Override
-    public ModuleStatus status(ModuleDeploymentId id) {
-        URL url = this.deployedModules.get(id);
-        if (url != null) {
-            InProcessModuleInstanceStatus status = new InProcessModuleInstanceStatus(id.toString(), url, null);
-            return ModuleStatus.of(id).with(status).build();
-        } else {
-            return ModuleStatus.of(id).build();
-        }
-    }
-
-    @Override
-    public Map<ModuleDeploymentId, ModuleStatus> status() {
-        Map<ModuleDeploymentId, ModuleStatus> statusMap = new HashMap<>();
-        for (ModuleDeploymentId id : this.deployedModules.keySet()) {
-            statusMap.put(id, status(id));
-        }
-        return statusMap;
-    }
-
-
-
-    @Override
-    public void undeploy(ModuleDeploymentId id) {
-        URL url = this.deployedModules.get(id);
-        if (url != null) {
-            logger.info("undeploying module: {}", id);
+	@Override
+	public void undeploy(ModuleDeploymentId id) {
+		URL url = this.deployedModules.get(id);
+		if (url != null) {
+			logger.info("undeploying module: {}", id);
             this.restTemplate.postForObject(url + getShutdownUrl(), null, String.class);
-            this.deployedModules.remove(id);
-        }
-    }
+			this.deployedModules.remove(id);
+		}
+	}
+
+	@Override
+	public ModuleStatus status(ModuleDeploymentId id) {
+		URL url = this.deployedModules.get(id);
+		if (url != null) {
+			InProcessModuleInstanceStatus status = new InProcessModuleInstanceStatus(id.toString(), url, null);
+			return ModuleStatus.of(id).with(status).build();
+		} else {
+			return ModuleStatus.of(id).build();
+		}
+	}
+
+	@Override
+	public Map<ModuleDeploymentId, ModuleStatus> status() {
+		Map<ModuleDeploymentId, ModuleStatus> statusMap = new HashMap<>();
+		for (ModuleDeploymentId id : this.deployedModules.keySet()) {
+			statusMap.put(id, status(id));
+		}
+		return statusMap;
+	}
 
     @Autowired
     private Environment environment ;
