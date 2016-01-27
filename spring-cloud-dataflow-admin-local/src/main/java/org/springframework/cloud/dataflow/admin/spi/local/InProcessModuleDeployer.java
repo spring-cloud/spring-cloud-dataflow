@@ -35,7 +35,6 @@ import org.springframework.cloud.stream.module.launcher.ModuleLauncher;
 import org.springframework.core.env.Environment;
 import org.springframework.util.Assert;
 import org.springframework.util.SocketUtils;
-import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
 /**
@@ -48,21 +47,21 @@ import org.springframework.web.client.RestTemplate;
  */
 public class InProcessModuleDeployer implements ModuleDeployer {
 
+    @Autowired
+    private Environment environment ;
+
     private static final Logger logger = LoggerFactory.getLogger(InProcessModuleDeployer.class);
 
     private final ModuleLauncher launcher;
 
     private final Map<ModuleDeploymentId, URL> deployedModules = new HashMap<>();
 
-    @Autowired
-    private Environment environment;
-
     private final RestTemplate restTemplate = new RestTemplate();
 
-	public InProcessModuleDeployer(ModuleLauncher launcher) {
-		Assert.notNull(launcher, "Module launcher cannot be null");
-		this.launcher = launcher;
-	}
+    public InProcessModuleDeployer(ModuleLauncher launcher) {
+        Assert.notNull(launcher, "Module launcher cannot be null");
+        this.launcher = launcher;
+    }
 
     @Override
     public ModuleDeploymentId deploy(ModuleDeploymentRequest request) {
@@ -79,14 +78,16 @@ public class InProcessModuleDeployer implements ModuleDeployer {
         int port;
         if (args.containsKey(SERVER_PORT_KEY)) {
             port = Integer.parseInt(args.get(SERVER_PORT_KEY));
-        } else {
+        }
+        else {
             port = SocketUtils.findAvailableTcpPort(DEFAULT_SERVER_PORT);
             args.put(SERVER_PORT_KEY, String.valueOf(port));
         }
         URL moduleUrl;
         try {
             moduleUrl = new URL("http", Inet4Address.getLocalHost().getHostAddress(), port, "");
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             throw new IllegalStateException("failed to determine URL for module: " + module, e);
         }
         args.put("security.ignored", getShutdownUrl() + ",/shutdown"); // Make sure we can shutdown the module
@@ -103,12 +104,6 @@ public class InProcessModuleDeployer implements ModuleDeployer {
         return id;
     }
 
-    private String getShutdownUrl() {
-        String contextPath = this.environment.getProperty("management.contextPath");
-        String base = contextPath != null && !contextPath.trim().equals("") ? contextPath : "";
-        return base + "/shutdown";
-    }
-
     @Override
     public void undeploy(ModuleDeploymentId id) {
         URL url = this.deployedModules.get(id);
@@ -119,23 +114,29 @@ public class InProcessModuleDeployer implements ModuleDeployer {
         }
     }
 
-	@Override
-	public ModuleStatus status(ModuleDeploymentId id) {
-		URL url = this.deployedModules.get(id);
-		if (url != null) {
-			InProcessModuleInstanceStatus status = new InProcessModuleInstanceStatus(id.toString(), url, null);
-			return ModuleStatus.of(id).with(status).build();
-		} else {
-			return ModuleStatus.of(id).build();
-		}
-	}
+    @Override
+    public ModuleStatus status(ModuleDeploymentId id) {
+        URL url = this.deployedModules.get(id);
+        if (url != null) {
+            InProcessModuleInstanceStatus status = new InProcessModuleInstanceStatus(id.toString(), url, null);
+            return ModuleStatus.of(id).with(status).build();
+        } else {
+            return ModuleStatus.of(id).build();
+        }
+    }
 
-	@Override
-	public Map<ModuleDeploymentId, ModuleStatus> status() {
-		Map<ModuleDeploymentId, ModuleStatus> statusMap = new HashMap<>();
-		for (ModuleDeploymentId id : this.deployedModules.keySet()) {
-			statusMap.put(id, status(id));
-		}
-		return statusMap;
-	}
+    private String getShutdownUrl() {
+        String contextPath = this.environment.getProperty("management.contextPath");
+        String base = contextPath != null && !contextPath.trim().equals("") ? contextPath : "";
+        return base + "/shutdown";
+    }
+
+    @Override
+    public Map<ModuleDeploymentId, ModuleStatus> status() {
+        Map<ModuleDeploymentId, ModuleStatus> statusMap = new HashMap<>();
+        for (ModuleDeploymentId id : this.deployedModules.keySet()) {
+            statusMap.put(id, status(id));
+        }
+        return statusMap;
+    }
 }
