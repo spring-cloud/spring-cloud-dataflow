@@ -17,6 +17,7 @@
 package org.springframework.cloud.dataflow.admin.config;
 
 
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.env.EnvironmentPostProcessor;
@@ -28,9 +29,8 @@ import org.springframework.core.env.PropertySource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
+import java.util.function.Consumer;
 
 /**
  * Contributes the values from {@code admin.yml} if it exists, before any of Spring Boot's normal
@@ -61,8 +61,10 @@ public class AdminDefaultEnvironmentPostProcessor implements EnvironmentPostProc
             PropertySource<?> propertySource = existingPropertySources.get(defaultProperties);
             Map mapOfProperties = Map.class.cast(propertySource.getSource());
             for (String k : defaults.keySet()) {
-                if (!mapOfProperties.containsKey(k)) {
+                Set setOfPropertyKeys = mapOfProperties.keySet();
+                if (!setOfPropertyKeys.contains(k)) {
                     mapOfProperties.put(k, defaults.get(k));
+                    LogFactory.getLog(getClass()).info(k + '=' + defaults.get(k));
                 }
             }
         }
@@ -84,7 +86,7 @@ public class AdminDefaultEnvironmentPostProcessor implements EnvironmentPostProc
             Properties p = yamlPropertiesFactoryBean.getObject();
             for (Object k : p.keySet()) {
                 String key = k.toString();
-                defaults.put(key, p.getProperty(key));
+                defaults.put(key, p.get(key));
             }
         }
     }
