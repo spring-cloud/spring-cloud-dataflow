@@ -47,9 +47,6 @@ import org.springframework.web.client.RestTemplate;
  */
 public class InProcessModuleDeployer implements ModuleDeployer {
 
-    @Autowired
-    private Environment environment ;
-
     private static final Logger logger = LoggerFactory.getLogger(InProcessModuleDeployer.class);
 
     private final ModuleLauncher launcher;
@@ -105,16 +102,6 @@ public class InProcessModuleDeployer implements ModuleDeployer {
     }
 
     @Override
-    public void undeploy(ModuleDeploymentId id) {
-        URL url = this.deployedModules.get(id);
-        if (url != null) {
-            logger.info("undeploying module: {}", id);
-            this.restTemplate.postForObject(url + getShutdownUrl(), null, String.class);
-            this.deployedModules.remove(id);
-        }
-    }
-
-    @Override
     public ModuleStatus status(ModuleDeploymentId id) {
         URL url = this.deployedModules.get(id);
         if (url != null) {
@@ -125,12 +112,6 @@ public class InProcessModuleDeployer implements ModuleDeployer {
         }
     }
 
-    private String getShutdownUrl() {
-        String contextPath = this.environment.getProperty("management.contextPath");
-        String base = contextPath != null && !contextPath.trim().equals("") ? contextPath : "";
-        return base + "/shutdown";
-    }
-
     @Override
     public Map<ModuleDeploymentId, ModuleStatus> status() {
         Map<ModuleDeploymentId, ModuleStatus> statusMap = new HashMap<>();
@@ -138,5 +119,26 @@ public class InProcessModuleDeployer implements ModuleDeployer {
             statusMap.put(id, status(id));
         }
         return statusMap;
+    }
+
+
+
+    @Override
+    public void undeploy(ModuleDeploymentId id) {
+        URL url = this.deployedModules.get(id);
+        if (url != null) {
+            logger.info("undeploying module: {}", id);
+            this.restTemplate.postForObject(url + getShutdownUrl(), null, String.class);
+            this.deployedModules.remove(id);
+        }
+    }
+
+    @Autowired
+    private Environment environment ;
+
+    private String getShutdownUrl() {
+        String contextPath = this.environment.getProperty("management.contextPath");
+        String base = contextPath != null && !contextPath.trim().equals("") ? contextPath : "";
+        return base + "/shutdown";
     }
 }

@@ -30,6 +30,7 @@ import org.springframework.context.annotation.Import;
  * Creates deployers that will deploy modules in-process.
  *
  * @author Eric Bottard
+ * @author Josh Long
  */
 @Configuration
 public class LocalAutoConfiguration {
