@@ -33,15 +33,20 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.actuate.metrics.repository.MetricRepository;
 import org.springframework.boot.actuate.metrics.repository.redis.RedisMetricRepository;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.autoconfigure.condition.*;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.autoconfigure.security.oauth2.OAuth2AutoConfiguration;
 import org.springframework.boot.autoconfigure.web.HttpMessageConverters;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.dataflow.admin.completion.TapOnChannelExpansionStrategy;
-import org.springframework.cloud.dataflow.admin.controller.AdminController;
-import org.springframework.cloud.dataflow.admin.controller.SecurityController;
 import org.springframework.cloud.dataflow.admin.controller.StreamDefinitionController;
-import org.springframework.cloud.dataflow.admin.repository.*;
+import org.springframework.cloud.dataflow.admin.repository.InMemoryStreamDefinitionRepository;
+import org.springframework.cloud.dataflow.admin.repository.InMemoryTaskDefinitionRepository;
+import org.springframework.cloud.dataflow.admin.repository.StreamDefinitionRepository;
+import org.springframework.cloud.dataflow.admin.repository.TaskDatabaseInitializer;
+import org.springframework.cloud.dataflow.admin.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistry;
 import org.springframework.cloud.dataflow.artifact.registry.RedisArtifactRegistry;
 import org.springframework.cloud.dataflow.completion.CompletionConfiguration;
@@ -90,57 +95,58 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 @EnableAutoConfiguration(exclude = OAuth2AutoConfiguration.class)
 public class AdminConfiguration {
 
-    protected static final org.slf4j.Logger logger = LoggerFactory.getLogger(AdminConfiguration.class);
+	protected static final org.slf4j.Logger logger = LoggerFactory.getLogger(AdminConfiguration.class);
 
-    @Value("${spring.datasource.url:#{null}}")
-    private String dataSourceUrl;
+	@Value("${spring.datasource.url:#{null}}")
+	private String dataSourceUrl;
 
-    @Bean
+	@Bean
     @ConditionalOnMissingBean
     public MetricRepository metricRepository(RedisConnectionFactory redisConnectionFactory) {
-        return new RedisMetricRepository(redisConnectionFactory);
-    }
+		return new RedisMetricRepository(redisConnectionFactory);
+	}
 
-    @Bean
+	@Bean
     @ConditionalOnMissingBean
     public FieldValueCounterRepository fieldValueCounterReader(RedisConnectionFactory redisConnectionFactory) {
-        return new RedisFieldValueCounterRepository(redisConnectionFactory, new RetryTemplate());
-    }
+		return new RedisFieldValueCounterRepository(redisConnectionFactory, new RetryTemplate());
+	}
 
-    @Bean
+	@Bean
     @ConditionalOnMissingBean
     public StreamDefinitionRepository streamDefinitionRepository() {
-        return new InMemoryStreamDefinitionRepository();
-    }
+		return new InMemoryStreamDefinitionRepository();
+	}
 
-    @Bean
+	@Bean
     @ConditionalOnMissingBean
     public TaskDefinitionRepository taskDefinitionRepository() {
-        return new InMemoryTaskDefinitionRepository();
-    }
+		return new InMemoryTaskDefinitionRepository();
+	}
 
-    @Bean
+	@Bean
     @ConditionalOnMissingBean
     public ArtifactRegistry artifactRegistry(RedisConnectionFactory redisConnectionFactory) {
-        return new RedisArtifactRegistry(redisConnectionFactory);
-    }
+		return new RedisArtifactRegistry(redisConnectionFactory);
+	}
 
-    @Bean
+	@Bean
     @ConditionalOnMissingBean
     public ArtifactRegistryPopulator artifactRegistryPopulator(ArtifactRegistry artifactRegistry) {
-        return new ArtifactRegistryPopulator(artifactRegistry);
-    }
+		return new ArtifactRegistryPopulator(artifactRegistry);
+	}
 
     @Configuration
     @ConditionalOnWebApplication
-    public static class WebConfiguration {
+    public static class AdminWebConfiguration {
+
         @Bean
         public HttpMessageConverters messageConverters() {
             return new HttpMessageConverters(
-                    // Prevent default converters
-                    false,
-                    // Have Jackson2 converter as the sole converter
-                    Arrays.<HttpMessageConverter<?>>asList(new MappingJackson2HttpMessageConverter()));
+                // Prevent default converters
+                false,
+                // Have Jackson2 converter as the sole converter
+                Arrays.<HttpMessageConverter<?>>asList(new MappingJackson2HttpMessageConverter()));
         }
 
         @Bean
@@ -156,45 +162,46 @@ public class AdminConfiguration {
     }
 
 
-    @Bean
+	@Bean
     @ConditionalOnMissingBean
     public RecoveryStrategy tapOnChannelExpansionStrategy() {
-        return new TapOnChannelExpansionStrategy();
-    }
+		return new TapOnChannelExpansionStrategy();
+	}
 
-    @Bean
+	@Bean
     @ConditionalOnMissingBean
     public TaskExplorer taskExplorer(DataSource dataSource) {
-        JdbcTaskExplorerFactoryBean factoryBean =
-                new JdbcTaskExplorerFactoryBean(dataSource);
-        return factoryBean.getObject();
-    }
+		JdbcTaskExplorerFactoryBean factoryBean =
+				new JdbcTaskExplorerFactoryBean(dataSource);
+		return factoryBean.getObject();
+	}
 
-    @Bean(destroyMethod = "stop")
-    @ConditionalOnExpression("#{'${spring.datasource.url:}'.startsWith('jdbc:h2:tcp://localhost:') && '${spring.datasource.url:}'.contains('/mem:')}")
-    public Server initH2TCPServer() {
-        Server server = null;
-        logger.info("Starting H2 Server with URL: " + dataSourceUrl);
-        try {
-            server = Server.createTcpServer("-tcp", "-tcpAllowOthers", "-tcpPort",
-                    getH2Port(dataSourceUrl)).start();
-        } catch (SQLException e) {
-            throw new IllegalStateException(e);
-        }
+	@Bean(destroyMethod = "stop")
+	@ConditionalOnExpression("#{'${spring.datasource.url:}'.startsWith('jdbc:h2:tcp://localhost:') && '${spring.datasource.url:}'.contains('/mem:')}")
+	public Server initH2TCPServer() {
+		Server server = null;
+		logger.info("Starting H2 Server with URL: " + dataSourceUrl);
+		try {
+			server = Server.createTcpServer("-tcp", "-tcpAllowOthers", "-tcpPort",
+					getH2Port(dataSourceUrl)).start();
+		} catch (SQLException e) {
+			throw new IllegalStateException(e);
+		}
 
-        return server;
-    }
+		return server;
+	}
 
-    @Bean
-    @ConditionalOnProperty(name = "spring.cloud.task.repo.initialize",
-            havingValue = "true", matchIfMissing = true)
-    public TaskDatabaseInitializer taskDatabaseInitializer() {
-        return new TaskDatabaseInitializer();
-    }
+	@Bean
+	@ConditionalOnProperty(name = "spring.cloud.task.repo.initialize",
+			havingValue = "true", matchIfMissing = true)
+    @ConditionalOnMissingBean
+    public TaskDatabaseInitializer taskDatabaseInitializer(){
+		return new TaskDatabaseInitializer();
+	}
 
-    private String getH2Port(String url) {
-        String[] tokens = StringUtils.tokenizeToStringArray(url, ":");
-        Assert.isTrue(tokens.length >= 5, "URL not properly formatted");
-        return tokens[4].substring(0, tokens[4].indexOf("/"));
-    }
+	private String getH2Port(String url){
+		String[] tokens = StringUtils.tokenizeToStringArray(url,":");
+		Assert.isTrue(tokens.length >= 5, "URL not properly formatted");
+		return tokens[4].substring(0,tokens[4].indexOf("/"));
+	}
 }
