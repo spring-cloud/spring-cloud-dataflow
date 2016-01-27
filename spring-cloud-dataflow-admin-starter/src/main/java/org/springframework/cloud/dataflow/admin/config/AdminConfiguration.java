@@ -194,7 +194,6 @@ public class AdminConfiguration {
 	@Bean
 	@ConditionalOnProperty(name = "spring.cloud.task.repo.initialize",
 			havingValue = "true", matchIfMissing = true)
-    @ConditionalOnMissingBean
     public TaskDatabaseInitializer taskDatabaseInitializer(){
 		return new TaskDatabaseInitializer();
 	}
