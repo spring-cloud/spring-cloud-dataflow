@@ -228,7 +228,7 @@ public abstract class AbstractModuleDeployerTests {
 	 * Default value is one minute, being queried every 5 seconds.
 	 */
 	protected Attempts undeploymentTimeout() {
-		return new Attempts(12, 5000);
+		return new Attempts(20, 5000);
 	}
 
 	/**

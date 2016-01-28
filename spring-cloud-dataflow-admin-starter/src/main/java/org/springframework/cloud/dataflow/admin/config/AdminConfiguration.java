@@ -29,11 +29,15 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.actuate.metrics.repository.MetricRepository;
 import org.springframework.boot.actuate.metrics.repository.redis.RedisMetricRepository;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
+import org.springframework.boot.autoconfigure.security.oauth2.OAuth2AutoConfiguration;
 import org.springframework.boot.autoconfigure.web.HttpMessageConverters;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.dataflow.admin.completion.TapOnChannelExpansionStrategy;
+import org.springframework.cloud.dataflow.admin.controller.StreamDefinitionController;
 import org.springframework.cloud.dataflow.admin.repository.InMemoryStreamDefinitionRepository;
 import org.springframework.cloud.dataflow.admin.repository.InMemoryTaskDefinitionRepository;
 import org.springframework.cloud.dataflow.admin.repository.StreamDefinitionRepository;
@@ -48,6 +52,7 @@ import org.springframework.cloud.stream.module.metrics.RedisFieldValueCounterRep
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.cloud.task.repository.support.JdbcTaskExplorerFactoryBean;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
@@ -63,7 +68,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
 /**
- * Configuration for admin application context. This includes support
+ * Configuration for the Admin application context. This includes support
  * for the REST API framework configuration.
  *
  * @author Mark Fisher
@@ -72,12 +77,18 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
  * @author Thomas Risberg
  * @author Janne Valkealahti
  * @author Glenn Renfro
+ * @author Josh Long
  */
 @Configuration
 @EnableHypermediaSupport(type = HAL)
 @EnableSpringDataWebSupport
 @Import(CompletionConfiguration.class)
 @EnableConfigurationProperties(AdminProperties.class)
+@ComponentScan(basePackageClasses = {
+		StreamDefinitionController.class,
+		StreamDefinitionRepository.class
+})
+@EnableAutoConfiguration(exclude = OAuth2AutoConfiguration.class)
 public class AdminConfiguration {
 
 	protected static final org.slf4j.Logger logger = LoggerFactory.getLogger(AdminConfiguration.class);
@@ -86,64 +97,76 @@ public class AdminConfiguration {
 	private String dataSourceUrl;
 
 	@Bean
+	@ConditionalOnMissingBean
 	public MetricRepository metricRepository(RedisConnectionFactory redisConnectionFactory) {
 		return new RedisMetricRepository(redisConnectionFactory);
 	}
 
 	@Bean
+	@ConditionalOnMissingBean
 	public FieldValueCounterRepository fieldValueCounterReader(RedisConnectionFactory redisConnectionFactory) {
 		return new RedisFieldValueCounterRepository(redisConnectionFactory, new RetryTemplate());
 	}
 
 	@Bean
+	@ConditionalOnMissingBean
 	public StreamDefinitionRepository streamDefinitionRepository() {
 		return new InMemoryStreamDefinitionRepository();
 	}
 
 	@Bean
+	@ConditionalOnMissingBean
 	public TaskDefinitionRepository taskDefinitionRepository() {
 		return new InMemoryTaskDefinitionRepository();
 	}
 
 	@Bean
+	@ConditionalOnMissingBean
 	public ArtifactRegistry artifactRegistry(RedisConnectionFactory redisConnectionFactory) {
 		return new RedisArtifactRegistry(redisConnectionFactory);
 	}
 
 	@Bean
+	@ConditionalOnMissingBean
 	public ArtifactRegistryPopulator artifactRegistryPopulator(ArtifactRegistry artifactRegistry) {
 		return new ArtifactRegistryPopulator(artifactRegistry);
 	}
 
-	@Bean
-	public HttpMessageConverters messageConverters() {
-		return new HttpMessageConverters(
-				// Prevent default converters
-				false,
-				// Have Jackson2 converter as the sole converter
-				Arrays.<HttpMessageConverter<?>>asList(new MappingJackson2HttpMessageConverter()));
+	@Configuration
+	@ConditionalOnWebApplication
+	public static class AdminWebConfiguration {
+
+		@Bean
+		public HttpMessageConverters messageConverters() {
+			return new HttpMessageConverters(
+					// Prevent default converters
+					false,
+					// Have Jackson2 converter as the sole converter
+					Arrays.<HttpMessageConverter<?>>asList(new MappingJackson2HttpMessageConverter()));
+		}
+
+		@Bean
+		public WebMvcConfigurer configurer() {
+			return new WebMvcConfigurerAdapter() {
+
+				@Override
+				public void configurePathMatch(PathMatchConfigurer configurer) {
+					configurer.setUseSuffixPatternMatch(false);
+				}
+			};
+		}
 	}
 
 	@Bean
-	public WebMvcConfigurer configurer() {
-		return new WebMvcConfigurerAdapter() {
-
-			@Override
-			public void configurePathMatch(PathMatchConfigurer configurer) {
-				configurer.setUseSuffixPatternMatch(false);
-			}
-		};
-	}
-
-	@Bean
-	public RecoveryStrategy tapOnChannelExpansionStrategy() {
+	@ConditionalOnMissingBean
+	public RecoveryStrategy<?> tapOnChannelExpansionStrategy() {
 		return new TapOnChannelExpansionStrategy();
 	}
 
 	@Bean
+	@ConditionalOnMissingBean
 	public TaskExplorer taskExplorer(DataSource dataSource) {
-		JdbcTaskExplorerFactoryBean factoryBean =
-				new JdbcTaskExplorerFactoryBean(dataSource);
+		JdbcTaskExplorerFactoryBean factoryBean = new JdbcTaskExplorerFactoryBean(dataSource);
 		return factoryBean.getObject();
 	}
 
@@ -155,23 +178,28 @@ public class AdminConfiguration {
 		try {
 			server = Server.createTcpServer("-tcp", "-tcpAllowOthers", "-tcpPort",
 					getH2Port(dataSourceUrl)).start();
-		} catch (SQLException e) {
+		}
+		catch (SQLException e) {
 			throw new IllegalStateException(e);
 		}
-
 		return server;
 	}
 
 	@Bean
-	@ConditionalOnProperty(name = "spring.cloud.task.repo.initialize",
-			havingValue = "true", matchIfMissing = true)
-	public TaskDatabaseInitializer taskDatabaseInitializer(){
-		return new TaskDatabaseInitializer();
+	@ConditionalOnExpression("#{'!${spring.datasource.url:}'.startsWith('jdbc:h2:tcp://localhost:') && !'${spring.datasource.url:}'.contains('/mem:')}")
+	public TaskDatabaseInitializer taskDatabaseInitializerForDB(DataSource dataSource) {
+		return new TaskDatabaseInitializer(dataSource);
 	}
 
-	private String getH2Port(String url){
-		String[] tokens = StringUtils.tokenizeToStringArray(url,":");
+	@Bean
+	@ConditionalOnExpression("#{'${spring.datasource.url:}'.startsWith('jdbc:h2:tcp://localhost:') && '${spring.datasource.url:}'.contains('/mem:')}")
+	public TaskDatabaseInitializer taskDatabaseInitializerForDefaultDB(DataSource dataSource, Server server) {
+		return new TaskDatabaseInitializer(dataSource);
+	}
+
+	private String getH2Port(String url) {
+		String[] tokens = StringUtils.tokenizeToStringArray(url, ":");
 		Assert.isTrue(tokens.length >= 5, "URL not properly formatted");
-		return tokens[4].substring(0,tokens[4].indexOf("/"));
+		return tokens[4].substring(0, tokens[4].indexOf("/"));
 	}
 }

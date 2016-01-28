@@ -33,6 +33,7 @@ import org.springframework.cloud.stream.module.launcher.ModuleLaunchRequest;
 import org.springframework.cloud.stream.module.launcher.ModuleLauncher;
 import org.springframework.util.Assert;
 import org.springframework.util.SocketUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
 /**
@@ -41,8 +42,11 @@ import org.springframework.web.client.RestTemplate;
  * @author Mark Fisher
  * @author Marius Bogoevici
  * @author Eric Bottard
+ * @author Josh Long
  */
 public class InProcessModuleDeployer implements ModuleDeployer {
+
+	private String contextPath ;
 
 	private static final Logger logger = LoggerFactory.getLogger(InProcessModuleDeployer.class);
 
@@ -52,9 +56,10 @@ public class InProcessModuleDeployer implements ModuleDeployer {
 
 	private final RestTemplate restTemplate = new RestTemplate();
 
-	public InProcessModuleDeployer(ModuleLauncher launcher) {
+	public InProcessModuleDeployer(ModuleLauncher launcher, String contextPath) {
 		Assert.notNull(launcher, "Module launcher cannot be null");
 		this.launcher = launcher;
+		this.contextPath = contextPath ;
 	}
 
 	@Override
@@ -84,7 +89,7 @@ public class InProcessModuleDeployer implements ModuleDeployer {
 		catch (Exception e) {
 			throw new IllegalStateException("failed to determine URL for module: " + module, e);
 		}
-		args.put("security.ignored", "/shutdown"); // Make sure we can shutdown the module
+		args.put("security.ignored", getShutdownUrl()); // Make sure we can shutdown the module
 		args.put("endpoints.shutdown.enabled", "true");
 		args.put("spring.main.show_banner", "false");
 		args.put(JMX_DEFAULT_DOMAIN_KEY, String.format("%s.%s",
@@ -103,7 +108,7 @@ public class InProcessModuleDeployer implements ModuleDeployer {
 		URL url = this.deployedModules.get(id);
 		if (url != null) {
 			logger.info("undeploying module: {}", id);
-			this.restTemplate.postForObject(url + "/shutdown", null, String.class);
+			this.restTemplate.postForObject(url + getShutdownUrl(), null, String.class);
 			this.deployedModules.remove(id);
 		}
 	}
@@ -114,7 +119,8 @@ public class InProcessModuleDeployer implements ModuleDeployer {
 		if (url != null) {
 			InProcessModuleInstanceStatus status = new InProcessModuleInstanceStatus(id.toString(), url, null);
 			return ModuleStatus.of(id).with(status).build();
-		} else {
+		}
+		else {
 			return ModuleStatus.of(id).build();
 		}
 	}
@@ -126,5 +132,10 @@ public class InProcessModuleDeployer implements ModuleDeployer {
 			statusMap.put(id, status(id));
 		}
 		return statusMap;
+	}
+
+	private String getShutdownUrl() {
+		String base = StringUtils.hasText(contextPath) ? contextPath : "";
+		return base + "/shutdown";
 	}
 }
