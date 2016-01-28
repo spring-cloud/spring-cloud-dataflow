@@ -18,7 +18,7 @@ spring:
     config:
       uri: http://localhost:8888
   datasource:
-    url: jdbc:h2:tcp://localhost:9092/mem:dataflow
+    url: jdbc:h2:tcp://localhost:9093/mem:dataflow
     username: sa
     password:
     driverClassName: org.h2.Driver
