@@ -178,7 +178,7 @@ public class AdminConfiguration {
 
 	@Bean(destroyMethod = "stop")
 	@ConditionalOnExpression("#{'${spring.datasource.url:}'.startsWith('jdbc:h2:tcp://localhost:') && '${spring.datasource.url:}'.contains('/mem:')}")
-	public Server initH2TCPServer() {
+	public Server initH2TCPServer(Server server) {
 		Server server = null;
 		logger.info("Starting H2 Server with URL: " + dataSourceUrl);
 		try {
@@ -194,8 +194,7 @@ public class AdminConfiguration {
 	@Bean
 	@ConditionalOnProperty(name = "spring.cloud.task.repo.initialize",
 			havingValue = "true", matchIfMissing = true)
-    public TaskDatabaseInitializer taskDatabaseInitializer(Server server,
-														   DataSource dataSource){
+    public TaskDatabaseInitializer taskDatabaseInitializer( DataSource dataSource){
 		return new TaskDatabaseInitializer(dataSource);
 	}
 
