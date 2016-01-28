@@ -33,14 +33,13 @@ import org.springframework.data.web.config.EnableSpringDataWebSupport;
 public class TaskDependencies {
 
 	@Bean
-	public TaskDatabaseInitializer taskExecutionRepository(){
-		return new TaskDatabaseInitializer();
+	public TaskDatabaseInitializer taskExecutionRepository(DataSource ds) {
+		return new TaskDatabaseInitializer(ds);
 	}
 
 	@Bean
-	public TaskExplorer taskExplorer(DataSource dataSource){
-		JdbcTaskExplorerFactoryBean factoryBean =
-				new JdbcTaskExplorerFactoryBean(dataSource);
+	public TaskExplorer taskExplorer(DataSource dataSource) {
+		JdbcTaskExplorerFactoryBean factoryBean = new JdbcTaskExplorerFactoryBean(dataSource);
 		return factoryBean.getObject();
 	}
 

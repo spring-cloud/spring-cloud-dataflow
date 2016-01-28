@@ -13,24 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.springframework.cloud.dataflow.admin;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.cloud.dataflow.admin.config.AdminConfiguration;
+import org.springframework.context.annotation.Import;
+
+import java.lang.annotation.Inherited;
+import java.lang.annotation.Target;
+import java.lang.annotation.Retention;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Documented;
 
 /**
- * Bootstrap class for Spring Cloud Data Flow Admin.
+ * Activates a Spring Cloud Dataflow Admin Server implementation.
  *
- * @author Mark Fisher
  * @author Josh Long
  */
-@Configuration
-@EnableDataflowAdminServer
-public class AdminApplication {
-
-	public static void main(String[] args) {
-		SpringApplication.run(AdminApplication.class, args);
-	}
-
+@Target({ElementType.TYPE})
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+@Inherited
+@Import(AdminConfiguration.class)
+public @interface EnableDataflowAdminServer {
 }

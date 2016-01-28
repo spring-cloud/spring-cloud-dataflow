@@ -25,12 +25,14 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.dataflow.core.ModuleDeploymentId;
 import org.springframework.cloud.dataflow.core.ModuleDeploymentRequest;
 import org.springframework.cloud.dataflow.module.ModuleStatus;
 import org.springframework.cloud.dataflow.module.deployer.ModuleDeployer;
 import org.springframework.cloud.stream.module.launcher.ModuleLaunchRequest;
 import org.springframework.cloud.stream.module.launcher.ModuleLauncher;
+import org.springframework.core.env.Environment;
 import org.springframework.util.Assert;
 import org.springframework.util.SocketUtils;
 import org.springframework.web.client.RestTemplate;
@@ -41,8 +43,11 @@ import org.springframework.web.client.RestTemplate;
  * @author Mark Fisher
  * @author Marius Bogoevici
  * @author Eric Bottard
+ * @author Josh Long
  */
 public class InProcessModuleDeployer implements ModuleDeployer {
+
+	private String contextPath ;
 
 	private static final Logger logger = LoggerFactory.getLogger(InProcessModuleDeployer.class);
 
@@ -52,9 +57,10 @@ public class InProcessModuleDeployer implements ModuleDeployer {
 
 	private final RestTemplate restTemplate = new RestTemplate();
 
-	public InProcessModuleDeployer(ModuleLauncher launcher) {
+	public InProcessModuleDeployer(ModuleLauncher launcher, String contextPath) {
 		Assert.notNull(launcher, "Module launcher cannot be null");
 		this.launcher = launcher;
+		this.contextPath = contextPath ;
 	}
 
 	@Override
@@ -84,7 +90,7 @@ public class InProcessModuleDeployer implements ModuleDeployer {
 		catch (Exception e) {
 			throw new IllegalStateException("failed to determine URL for module: " + module, e);
 		}
-		args.put("security.ignored", "/shutdown"); // Make sure we can shutdown the module
+		args.put("security.ignored", getShutdownUrl() + ",/shutdown"); // Make sure we can shutdown the module
 		args.put("endpoints.shutdown.enabled", "true");
 		args.put("spring.main.show_banner", "false");
 		args.put(JMX_DEFAULT_DOMAIN_KEY, String.format("%s.%s",
@@ -103,7 +109,7 @@ public class InProcessModuleDeployer implements ModuleDeployer {
 		URL url = this.deployedModules.get(id);
 		if (url != null) {
 			logger.info("undeploying module: {}", id);
-			this.restTemplate.postForObject(url + "/shutdown", null, String.class);
+			this.restTemplate.postForObject(url + getShutdownUrl(), null, String.class);
 			this.deployedModules.remove(id);
 		}
 	}
@@ -126,5 +132,11 @@ public class InProcessModuleDeployer implements ModuleDeployer {
 			statusMap.put(id, status(id));
 		}
 		return statusMap;
+	}
+
+	private String getShutdownUrl() {
+		//String contextPath = this.environment.getProperty("management.contextPath");
+		String base = contextPath != null && !contextPath.trim().equals("") ? contextPath : "";
+		return base + "/shutdown";
 	}
 }
