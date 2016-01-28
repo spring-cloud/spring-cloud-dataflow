@@ -118,13 +118,13 @@ class ModuleDefinitionBuilder {
 		return moduleDefinitions;
 	}
 
-	private String removeChannelTypePrefix(String sourceChannelName) {
-		if (sourceChannelName.startsWith(ChannelType.QUEUE.getStringRepresentation())) {
-			sourceChannelName = sourceChannelName.substring(ChannelType.QUEUE.getStringRepresentation().length());
+	private String removeChannelTypePrefix(String channelName) {
+		if (channelName.startsWith(ChannelType.QUEUE.getStringRepresentation())) {
+			channelName = channelName.substring(ChannelType.QUEUE.getStringRepresentation().length());
 		}
-		else if (sourceChannelName.startsWith(ChannelType.TOPIC.getStringRepresentation())) {
-			sourceChannelName = sourceChannelName.substring(ChannelType.TOPIC.getStringRepresentation().length());
+		else if (channelName.startsWith(ChannelType.TOPIC.getStringRepresentation())) {
+			channelName = channelName.substring(ChannelType.TOPIC.getStringRepresentation().length());
 		}
-		return sourceChannelName;
+		return channelName;
 	}
 }
