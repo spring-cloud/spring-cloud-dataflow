@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.dataflow.admin.spi.local;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.dataflow.module.deployer.ModuleDeployer;
@@ -29,13 +30,16 @@ import org.springframework.context.annotation.Import;
  * Creates deployers that will deploy modules in-process.
  *
  * @author Eric Bottard
+ * @author Josh Long
  */
 @Configuration
-public class LocalConfiguration {
+public class LocalAutoConfiguration {
 
 	static final String LOCAL_DEPLOYER_PREFIX = "deployer.local";
 
+	@Configuration
 	@ConditionalOnProperty(prefix = LOCAL_DEPLOYER_PREFIX, name = "out-of-process", havingValue = "false")
+	@ConditionalOnMissingBean(ModuleDeployer.class)
 	@Import(ModuleLauncherConfiguration.class)
 	public static class InProcess {
 
@@ -50,7 +54,9 @@ public class LocalConfiguration {
 		}
 	}
 
+	@Configuration
 	@EnableConfigurationProperties(OutOfProcessModuleDeployerProperties.class)
+	@ConditionalOnMissingBean(ModuleDeployer.class)
 	@ConditionalOnProperty(prefix = LOCAL_DEPLOYER_PREFIX, name = "out-of-process", havingValue = "true", matchIfMissing = true)
 	public static class OutOfProcess {
 

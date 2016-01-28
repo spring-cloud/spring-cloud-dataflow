@@ -26,7 +26,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  *
  * @author Eric Bottard
  */
-@ConfigurationProperties(prefix = LocalConfiguration.LOCAL_DEPLOYER_PREFIX)
+@ConfigurationProperties(prefix = LocalAutoConfiguration.LOCAL_DEPLOYER_PREFIX)
 public class OutOfProcessModuleDeployerProperties {
 
 	/**

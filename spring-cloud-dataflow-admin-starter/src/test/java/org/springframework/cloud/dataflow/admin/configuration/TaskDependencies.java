@@ -33,8 +33,8 @@ import org.springframework.data.web.config.EnableSpringDataWebSupport;
 public class TaskDependencies {
 
 	@Bean
-	public TaskDatabaseInitializer taskExecutionRepository(){
-		return new TaskDatabaseInitializer();
+	public TaskDatabaseInitializer taskExecutionRepository(DataSource dataSource){
+		return new TaskDatabaseInitializer(dataSource);
 	}
 
 	@Bean
