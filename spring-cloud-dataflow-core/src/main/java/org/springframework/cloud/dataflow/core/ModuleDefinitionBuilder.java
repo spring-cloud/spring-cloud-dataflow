@@ -22,6 +22,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.springframework.cloud.dataflow.core.dsl.ArgumentNode;
+import org.springframework.cloud.dataflow.core.dsl.ChannelType;
 import org.springframework.cloud.dataflow.core.dsl.ModuleNode;
 import org.springframework.cloud.dataflow.core.dsl.SinkChannelNode;
 import org.springframework.cloud.dataflow.core.dsl.SourceChannelNode;
@@ -98,20 +99,32 @@ class ModuleDefinitionBuilder {
 		}
 		SourceChannelNode sourceChannel = streamNode.getSourceChannelNode();
 		if (sourceChannel != null) {
+			String sourceChannelName = removeChannelTypePrefix(sourceChannel.getChannelName());
 			builders.getLast().setParameter(BindingProperties.INPUT_BINDING_KEY,
-					sourceChannel.getChannelName());
+					sourceChannelName);
 			builders.getLast().setParameter(BindingProperties.INPUT_GROUP_KEY, streamName);
 			builders.getLast().setParameter(BindingProperties.INPUT_DURABLE_SUBSCRIPTION_KEY,"true");
 		}
 		SinkChannelNode sinkChannel = streamNode.getSinkChannelNode();
 		if (sinkChannel != null) {
+			String sinkChannelName = removeChannelTypePrefix(sinkChannel.getChannelName());
 			builders.getFirst().setParameter(BindingProperties.OUTPUT_BINDING_KEY,
-					sinkChannel.getChannelName());
+					sinkChannelName);
 		}
 		List<ModuleDefinition> moduleDefinitions = new ArrayList<ModuleDefinition>(builders.size());
 		for (ModuleDefinition.Builder builder : builders) {
 			moduleDefinitions.add(builder.build());
 		}
 		return moduleDefinitions;
+	}
+
+	private String removeChannelTypePrefix(String sourceChannelName) {
+		if (sourceChannelName.startsWith(ChannelType.QUEUE.getStringRepresentation())) {
+			sourceChannelName = sourceChannelName.substring(ChannelType.QUEUE.getStringRepresentation().length());
+		}
+		else if (sourceChannelName.startsWith(ChannelType.TOPIC.getStringRepresentation())) {
+			sourceChannelName = sourceChannelName.substring(ChannelType.TOPIC.getStringRepresentation().length());
+		}
+		return sourceChannelName;
 	}
 }

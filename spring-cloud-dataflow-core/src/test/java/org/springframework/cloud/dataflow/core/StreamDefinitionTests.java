@@ -129,7 +129,7 @@ public class StreamDefinitionTests {
 		StreamDefinition streamDefinition = new StreamDefinition("test", "topic:foo > goo | blah | file");
 		List<ModuleDefinition> requests = streamDefinition.getModuleDefinitions();
 		assertEquals(3, requests.size());
-		assertEquals("topic:foo", requests.get(0).getParameters().get(BindingProperties.INPUT_BINDING_KEY));
+		assertEquals("foo", requests.get(0).getParameters().get(BindingProperties.INPUT_BINDING_KEY));
 		assertEquals("test", requests.get(0).getParameters().get(BindingProperties.INPUT_GROUP_KEY));
 	}
 
@@ -138,7 +138,7 @@ public class StreamDefinitionTests {
 		StreamDefinition streamDefinition = new StreamDefinition("test", "boo | blah | aaak > queue:foo");
 		List<ModuleDefinition> requests = streamDefinition.getModuleDefinitions();
 		assertEquals(3, requests.size());
-		assertEquals("queue:foo", requests.get(2).getParameters().get(BindingProperties.OUTPUT_BINDING_KEY));
+		assertEquals("foo", requests.get(2).getParameters().get(BindingProperties.OUTPUT_BINDING_KEY));
 	}
 
 	@Test
@@ -146,7 +146,7 @@ public class StreamDefinitionTests {
 		StreamDefinition streamDefinition = new StreamDefinition("test", "bart > queue:foo");
 		List<ModuleDefinition> requests = streamDefinition.getModuleDefinitions();
 		assertEquals(1, requests.size());
-		assertEquals("queue:foo", requests.get(0).getParameters().get(BindingProperties.OUTPUT_BINDING_KEY));
+		assertEquals("foo", requests.get(0).getParameters().get(BindingProperties.OUTPUT_BINDING_KEY));
 	}
 
 	@Test
@@ -169,7 +169,7 @@ public class StreamDefinitionTests {
 		StreamDefinition streamDefinition = new StreamDefinition("test", "queue:foo > boot");
 		List<ModuleDefinition> requests = streamDefinition.getModuleDefinitions();
 		assertEquals(1, requests.size());
-		assertEquals("queue:foo", requests.get(0).getParameters().get(BindingProperties.INPUT_BINDING_KEY));
+		assertEquals("foo", requests.get(0).getParameters().get(BindingProperties.INPUT_BINDING_KEY));
 		assertEquals("test", requests.get(0).getParameters().get(BindingProperties.INPUT_GROUP_KEY));
 		assertEquals("true", requests.get(0).getParameters().get(BindingProperties.INPUT_DURABLE_SUBSCRIPTION_KEY));
 	}
