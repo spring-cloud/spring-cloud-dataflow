@@ -78,10 +78,10 @@ public class AdminController {
 		resourceSupport.add(unescapeTemplateVariables(entityLinks.linkToSingleResource(StreamDeploymentResource.class, "{name}").withRel("streams/deployments/deployment")));
 
 		resourceSupport.add(entityLinks.linkToCollectionResource(TaskDefinitionResource.class).withRel("tasks/definitions"));
-		resourceSupport.add(unescapeTemplateVariables(entityLinks.linkToSingleResource(TaskDefinitionResource.class, "{name}").withRel("tasks/definitions")));
+		resourceSupport.add(unescapeTemplateVariables(entityLinks.linkToSingleResource(TaskDefinitionResource.class, "{name}").withRel("tasks/definitions/definition")));
 
 		resourceSupport.add(entityLinks.linkToCollectionResource(TaskDeploymentResource.class).withRel("tasks/deployments"));
-		resourceSupport.add(unescapeTemplateVariables(entityLinks.linkToSingleResource(TaskDeploymentResource.class, "{name}").withRel("tasks/deployments")));
+		resourceSupport.add(unescapeTemplateVariables(entityLinks.linkToSingleResource(TaskDeploymentResource.class, "{name}").withRel("tasks/deployments/deployment")));
 
 		resourceSupport.add(entityLinks.linkToCollectionResource(TaskExecutionResource.class).withRel("tasks/executions"));
 		resourceSupport.add(unescapeTemplateVariables(entityLinks.linkToSingleResource(TaskExecutionResource.class, "{name}").withRel("tasks/executions/name")));

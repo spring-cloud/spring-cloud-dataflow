@@ -39,36 +39,48 @@ public class TaskTemplate implements TaskOperations {
 
 	private static final String DEFINITIONS_RELATION = "tasks/definitions";
 
+	private static final String DEFINITION_RELATION = "tasks/definitions/definition";
+
 	private static final String DEPLOYMENTS_RELATION = "tasks/deployments";
+
+	private static final String DEPLOYMENT_RELATION = "tasks/deployments/deployment";
 
 	private static final String EXECUTIONS_RELATION = "tasks/executions";
 
 	private final RestTemplate restTemplate;
 
-	private final Link definitionsPath;
+	private final Link definitionsLink;
 
-	private final Link deploymentsPath;
+	private final Link definitionLink;
 
-	private final Link executionsPath;
+	private final Link deploymentsLink;
+
+	private final Link deploymentLink;
+
+	private final Link executionsLink;
 
 	TaskTemplate(RestTemplate restTemplate, ResourceSupport resources) {
 		Assert.notNull(resources, "URI Resources must not be be null");
-		Assert.notNull(resources.getLink(EXECUTIONS_RELATION), "Executions path is required");
-		Assert.notNull(resources.getLink(DEFINITIONS_RELATION), "Definitions path is required");
-		Assert.notNull(resources.getLink(DEPLOYMENTS_RELATION), "Deployments path is required");
+		Assert.notNull(resources.getLink(EXECUTIONS_RELATION), "Executions relation is required");
+		Assert.notNull(resources.getLink(DEFINITIONS_RELATION), "Definitions relation is required");
+		Assert.notNull(resources.getLink(DEPLOYMENTS_RELATION), "Deployments relation is required");
+		Assert.notNull(resources.getLink(DEFINITION_RELATION), "Definition relation is required");
+		Assert.notNull(resources.getLink(DEPLOYMENT_RELATION), "Deployment relation is required");
 		Assert.notNull(restTemplate, "RestTemplate must not be null");
-		Assert.notNull(resources.getLink(EXECUTIONS_RELATION), "Executions path is required");
+		Assert.notNull(resources.getLink(EXECUTIONS_RELATION), "Executions relation is required");
 
 		this.restTemplate = restTemplate;
-		this.definitionsPath = resources.getLink(DEFINITIONS_RELATION);
-		this.deploymentsPath = resources.getLink(DEPLOYMENTS_RELATION);
-		this.executionsPath = resources.getLink(EXECUTIONS_RELATION);
+		this.definitionsLink = resources.getLink(DEFINITIONS_RELATION);
+		this.definitionLink = resources.getLink(DEFINITION_RELATION);
+		this.deploymentsLink = resources.getLink(DEPLOYMENTS_RELATION);
+		this.deploymentLink = resources.getLink(DEPLOYMENT_RELATION);
+		this.executionsLink = resources.getLink(EXECUTIONS_RELATION);
 
 	}
 
 	@Override
 	public TaskDefinitionResource.Page list() {
-		String uriTemplate = definitionsPath.getHref().toString();
+		String uriTemplate = definitionsLink.getHref().toString();
 		uriTemplate = uriTemplate + "?size=10000";
 		return restTemplate.getForObject(uriTemplate, TaskDefinitionResource.Page.class);
 	}
@@ -79,33 +91,31 @@ public class TaskTemplate implements TaskOperations {
 		values.add("name", name);
 		values.add("definition", definition);
 		TaskDefinitionResource task = restTemplate.postForObject(
-				definitionsPath.expand().getHref(), values, TaskDefinitionResource.class);
+				definitionsLink.expand().getHref(), values, TaskDefinitionResource.class);
 		return task;
 	}
 
 	@Override
 	public void launch(String name, Map<String, String> properties) {
-		String uriTemplate = deploymentsPath.getHref().toString() + "/{name}";
 		MultiValueMap<String, Object> values = new LinkedMultiValueMap<String, Object>();
 		values.add("properties", DeploymentPropertiesUtils.format(properties));
-		restTemplate.postForObject(uriTemplate, values, Object.class, name);
+		restTemplate.postForObject(deploymentLink.expand(name).getHref(), values, Object.class, name);
 	}
 
 	@Override
 	public void destroy(String name) {
-		String uriTemplate = definitionsPath.getHref().toString() + "/{name}";
-		restTemplate.delete(uriTemplate, Collections.singletonMap("name", name));
+		restTemplate.delete(definitionLink.expand(name).getHref(), Collections.singletonMap("name", name));
 	}
 
 	@Override
 	public TaskExecutionResource.Page executionList() {
-		return restTemplate.getForObject(executionsPath.getHref().toString(),
+		return restTemplate.getForObject(executionsLink.getHref().toString(),
 				TaskExecutionResource.Page.class);
 	}
 
 	@Override
 	public TaskExecutionResource.Page executionListByTaskName(String taskName) {
-		String uriTemplate = executionsPath.getHref().toString();
+		String uriTemplate = executionsLink.getHref().toString();
 		uriTemplate = uriTemplate + "/name/{taskName}";
 		return restTemplate.getForObject(uriTemplate, TaskExecutionResource.Page.class,
 				Collections.singletonMap("taskName", taskName));
@@ -113,7 +123,7 @@ public class TaskTemplate implements TaskOperations {
 
 	@Override
 	public TaskExecutionResource view(long id) {
-		String uriTemplate = executionsPath.getHref().toString();
+		String uriTemplate = executionsLink.getHref().toString();
 		uriTemplate = uriTemplate + "/id/{id}";
 
 		return restTemplate.getForObject(uriTemplate, TaskExecutionResource.class,
