@@ -19,6 +19,7 @@ package org.springframework.cloud.dataflow.admin.spi.local;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.cloud.dataflow.module.deployer.ModuleDeployer;
 import org.springframework.cloud.dataflow.module.deployer.test.AbstractModuleDeployerTests;
@@ -27,11 +28,13 @@ import org.springframework.cloud.stream.module.launcher.ModuleLauncherConfigurat
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.core.env.Environment;
 
 /**
  * Integration tests for the {@link InProcessModuleDeployer}.
  *
  * @author Eric Bottard
+ * @author Josh Long
  */
 @SpringApplicationConfiguration(classes = InProcessModuleDeployerTests.Config.class)
 public class InProcessModuleDeployerTests extends AbstractModuleDeployerTests {
@@ -54,9 +57,12 @@ public class InProcessModuleDeployerTests extends AbstractModuleDeployerTests {
 	@Import(ModuleLauncherConfiguration.class)
 	public static class Config {
 
+		@Autowired
+		private Environment environment;
+
 		@Bean
 		ModuleDeployer moduleDeployer(ModuleLauncher moduleLauncher) {
-			return new InProcessModuleDeployer(moduleLauncher);
+			return new InProcessModuleDeployer(moduleLauncher, this.environment.getProperty("management.contextPath"));
 		}
 
 	}
