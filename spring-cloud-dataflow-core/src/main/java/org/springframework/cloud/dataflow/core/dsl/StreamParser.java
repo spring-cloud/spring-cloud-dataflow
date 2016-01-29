@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2015-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import java.util.Map;
  *
  * @author Andy Clement
  * @author Patrick Peralta
+ * @author Ilayaperumal Gopinathan
  */
 public class StreamParser extends ModuleParser {
 
@@ -145,8 +146,7 @@ public class StreamParser extends ModuleParser {
 	private StreamNode eatStream() {
 		String streamName = eatStreamName();
 		SourceChannelNode sourceChannelNode = eatSourceChannel();
-
-		// This construct: queue:foo > topic:bar is a source then a sink channel
+		// This construct: :foo > :bar is a source then a sink channel
 		// with no module. Special handling for that is right here:
 		boolean bridge = false;
 		if (sourceChannelNode != null) { // so if we are just after a '>'
@@ -154,18 +154,16 @@ public class StreamParser extends ModuleParser {
 				bridge = true;
 			}
 		}
-
 		Tokens tokens = getTokens();
-		List<ModuleNode> moduleNodes;
+		List<ModuleNode> moduleNodes = new ArrayList<>();
 		if (bridge) {
 			// Create a bridge module to hang the source/sink channels off
 			tokens.decrementPosition(); // Rewind so we can nicely eat the sink channel
-			moduleNodes = new ArrayList<>();
 			moduleNodes.add(new ModuleNode(null, "bridge", tokens.peek().startPos,
 					tokens.peek().endPos, null));
 		}
 		else {
-			moduleNodes = eatModuleList();
+			moduleNodes.addAll(eatModuleList());
 		}
 		SinkChannelNode sinkChannelNode = eatSinkChannel();
 
@@ -225,14 +223,9 @@ public class StreamParser extends ModuleParser {
 	private boolean looksLikeChannel(int position) {
 		Tokens tokens = getTokens();
 		List<Token> tokenList = tokens.getTokenStream();
-		int size = tokenList.size();
-
-		if (tokens.hasNext() && tokenList.get(position).getKind() == TokenKind.IDENTIFIER) {
-			String prefix = tokenList.get(position).data;
-			if (isLegalChannelPrefix(prefix)) {
-				if (tokens.position() + 1 < size && tokenList.get(position + 1).getKind() == TokenKind.COLON) {
-					return true;
-				}
+		if (tokens.hasNext() && tokenList.get(position).getKind() == TokenKind.COLON) {
+			if (tokenList.get(position - 1).isKind(TokenKind.GT)) {
+				return true;
 			}
 		}
 		return false;
@@ -244,8 +237,8 @@ public class StreamParser extends ModuleParser {
 	 * return {@code null}.
 	 * <p>
 	 * Expected format:
-	 * {@code identifier ':' identifier >}
-	 * {@code tap ':' identifier ':' identifier '.' identifier >}
+	 * {@code ':' identifier >}
+	 * {@code ':' identifier '.' identifier >}
 	 *
 	 * @return a {@code SourceChannelNode} or {@code null} if the token
 	 * position is not pointing at a source channel
@@ -265,13 +258,16 @@ public class StreamParser extends ModuleParser {
 				break;
 			}
 		}
-		if (!gtBeforePipe || !looksLikeChannel(tokens.position())) {
+		if (!gtBeforePipe) {
 			return null;
 		}
 
-		ChannelNode channel = eatChannelReference(true);
+		ChannelNode channelNode = eatChannelReference();
+		if (channelNode == null) {
+			return null;
+		}
 		Token gt = tokens.eat(TokenKind.GT);
-		return new SourceChannelNode(channel, gt.endPos);
+		return new SourceChannelNode(channelNode, gt.endPos);
 	}
 
 	/**
@@ -280,7 +276,7 @@ public class StreamParser extends ModuleParser {
 	 * return {@code null}.
 	 * <p>
 	 * Expected format:
-	 * {@code '>' identifier ':' identifier}
+	 * {@code '>' ':' identifier}
 	 *
 	 * @return a {@code SinkChannelNode} or {@code null} if the token
 	 * position is not pointing at a sink channel
@@ -290,168 +286,54 @@ public class StreamParser extends ModuleParser {
 		SinkChannelNode sinkChannelNode = null;
 		if (tokens.peek(TokenKind.GT)) {
 			Token gt = tokens.eat(TokenKind.GT);
-			ChannelNode channelNode = eatChannelReference(false);
+			ChannelNode channelNode = eatChannelReference();
+			if (channelNode == null) {
+				return null;
+			}
 			sinkChannelNode = new SinkChannelNode(channelNode, gt.startPos);
 		}
 		return sinkChannelNode;
 	}
 
 	/**
-	 * Enumeration of valid channel prefixes.
-	 */
-	enum ChannelPrefix {
-		queue, tap, topic;
-	}
-
-	/**
-	 * Return {@code true} if the provided string contains a valid
-	 * channel prefix.
-	 *
-	 * @param string string to check for a channel prefix
-	 * @return {@code true} if the provided string contains a channel prefix
-	 */
-	private boolean isLegalChannelPrefix(String string) {
-		return string.equals(ChannelPrefix.queue.toString()) ||
-				string.equals(ChannelPrefix.topic.toString()) ||
-				string.equals(ChannelPrefix.tap.toString());
-	}
-
-	/**
 	 * Return a {@link ChannelNode} for the token at the current position.
 	 * <p>
-	 * A channel reference is a colon separated list of identifiers that determine
-	 * the appropriate scope then a sequence of dot separated identifiers that
-	 * reference something within that scope.
-	 * <p>
-	 * Three types of top level prefix are supported for channels:
-	 * <ul>
-	 *     <li>queue</li>
-	 *     <li>topic</li>
-	 *     <li>tap</li>
-	 * </ul>
-	 * Expected format:
-	 * {@code identifier [ ':' identifier ]* [ '.' identifier ]*}
-	 * <p>
-	 * If the first identifier is a tap (and tapping is allowed) then
-	 * the de-referencing is allowed.
+	 * A channel reference is the label component when referencing a specific
+	 * module/label in a stream definition.
 	 *
-	 * @param tapAllowed if {@code true}, a tap is allowed as the first identifier
+	 * Expected format:
+	 * {@code [ ':' identifier ]* [ '.' identifier ]*}
+	 * <p>
+	 *
 	 * @return {@code ChannelNode} representing the channel reference
 	 */
-	private ChannelNode eatChannelReference(boolean tapAllowed) {
+	private ChannelNode eatChannelReference() {
 		Tokens tokens = getTokens();
 		Token firstToken = tokens.next();
-		if (!firstToken.isIdentifier() || !isLegalChannelPrefix(firstToken.data)) {
-			tokens.raiseException(firstToken.startPos,
-					tapAllowed
-							? DSLMessage.EXPECTED_CHANNEL_PREFIX_QUEUE_TOPIC_TAP
-							: DSLMessage.EXPECTED_CHANNEL_PREFIX_QUEUE_TOPIC,
-					toString(firstToken));
+		if (!firstToken.isKind(TokenKind.COLON)) {
+			tokens.decrementPosition();
+			return null;
 		}
-		List<Token> channelScopeComponents = new ArrayList<Token>();
-		channelScopeComponents.add(firstToken);
-		while (tokens.peek(TokenKind.COLON)) {
-			if (!tokens.isNextAdjacent()) {
-				tokens.raiseException(tokens.peek().startPos,
-						DSLMessage.NO_WHITESPACE_IN_CHANNEL_DEFINITION);
-			}
-			tokens.next(); // skip colon
-			if (!tokens.isNextAdjacent()) {
-				tokens.raiseException(tokens.peek().startPos,
-						DSLMessage.NO_WHITESPACE_IN_CHANNEL_DEFINITION);
-			}
-			channelScopeComponents.add(tokens.eat(TokenKind.IDENTIFIER));
-		}
+		Token identifierToken = tokens.next();
+		String nameComponent = identifierToken.stringValue();
 		List<Token> channelReferenceComponents = new ArrayList<Token>();
-		if (tapAllowed && firstToken.data.equalsIgnoreCase("tap")) {
-			if (tokens.peek(TokenKind.DOT)) {
-				if (channelScopeComponents.size() < 3) {
-					tokens.raiseException(firstToken.startPos,
-							DSLMessage.TAP_NEEDS_THREE_COMPONENTS);
-				}
-				String tokenData = channelScopeComponents.get(1).data;
-				// for Stream, tap:stream:XXX - the channel name is always indexed
-				// for Job, tap:job:XXX - the channel name can have "." in case of job notification channels
-				if (!tokenData.equalsIgnoreCase("stream") && !tokenData.equalsIgnoreCase("task")) {
-					tokens.raiseException(tokens.peek().startPos,
-							DSLMessage.ONLY_A_TAP_ON_A_STREAM_OR_TASK_CAN_BE_INDEXED);
-				}
-			}
-			while (tokens.peek(TokenKind.DOT)) {
-				if (!tokens.isNextAdjacent()) {
-					tokens.raiseException(tokens.peek().startPos,
-							DSLMessage.NO_WHITESPACE_IN_CHANNEL_DEFINITION);
-				}
-				tokens.next(); // skip dot
-				if (!tokens.isNextAdjacent()) {
-					tokens.raiseException(tokens.peek().startPos,
-							DSLMessage.NO_WHITESPACE_IN_CHANNEL_DEFINITION);
-				}
-				channelReferenceComponents.add(tokens.eat(TokenKind.IDENTIFIER));
-			}
-		}
-		else if (tokens.peek(TokenKind.DOT)) {
-			if (tapAllowed) {
+		while (tokens.peek(TokenKind.DOT)) {
+			if (!tokens.isNextAdjacent()) {
 				tokens.raiseException(tokens.peek().startPos,
-						DSLMessage.ONLY_A_TAP_ON_A_STREAM_OR_TASK_CAN_BE_INDEXED);
+						DSLMessage.NO_WHITESPACE_IN_CHANNEL_DEFINITION);
 			}
-			else {
+			tokens.next(); // skip dot
+			if (!tokens.isNextAdjacent()) {
 				tokens.raiseException(tokens.peek().startPos,
-						DSLMessage.CHANNEL_INDEXING_NOT_ALLOWED);
+						DSLMessage.NO_WHITESPACE_IN_CHANNEL_DEFINITION);
 			}
+			channelReferenceComponents.add(tokens.eat(TokenKind.IDENTIFIER));
 		}
-		// Verify the structure:
-		ChannelType channelType = null;
-		if (firstToken.data.equalsIgnoreCase("tap")) {
-			// tap:stream:XXX.YYY
-			// tap:job:XXX
-			// tap:queue:XXX
-			// tap:topic:XXX
-			if (channelScopeComponents.size() < 3) {
-				tokens.raiseException(firstToken.startPos,
-						DSLMessage.TAP_NEEDS_THREE_COMPONENTS);
-			}
-			Token tappingToken = channelScopeComponents.get(1);
-			String tapping = tappingToken.data.toLowerCase();
-			channelScopeComponents.remove(0); // remove 'tap'
-			switch (tapping) {
-				case "stream":
-					channelType = ChannelType.TAP_STREAM;
-					break;
-				case "job":
-					channelType = ChannelType.TAP_JOB;
-					break;
-				case "queue":
-					channelType = ChannelType.TAP_QUEUE;
-					break;
-				case "topic":
-					channelType = ChannelType.TAP_TOPIC;
-					break;
-				default:
-					tokens.raiseException(tappingToken.startPos,
-							DSLMessage.NOT_ALLOWED_TO_TAP_THAT, tappingToken.data);
-					break;
-			}
-		}
-		else {
-			// queue:XXX
-			// topic:XXX
-			if (firstToken.data.equalsIgnoreCase("queue")) {
-				channelType = ChannelType.QUEUE;
-			}
-			else if (firstToken.data.equalsIgnoreCase("topic")) {
-				channelType = ChannelType.TOPIC;
-			}
-			if (channelScopeComponents.size() >= 3) {
-				channelScopeComponents.remove(0);
-			}
-		}
-		int endPos = channelScopeComponents.get(channelScopeComponents.size() - 1).endPos;
+		int endPos = identifierToken.endPos;
 		if (!channelReferenceComponents.isEmpty()) {
 			endPos = channelReferenceComponents.get(channelReferenceComponents.size() - 1).endPos;
 		}
-		return new ChannelNode(channelType, firstToken.startPos, endPos,
-				tokenListToStringList(channelScopeComponents),
+		return new ChannelNode(identifierToken.startPos, endPos, nameComponent,
 				tokenListToStringList(channelReferenceComponents));
 	}
 

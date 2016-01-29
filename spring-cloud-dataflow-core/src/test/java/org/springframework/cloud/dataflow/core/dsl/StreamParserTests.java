@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2015-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ import org.junit.rules.ExpectedException;
  *
  * @author Andy Clement
  * @author David Turanski
+ * @author Ilayaperumal Gopinathan
  */
 public class StreamParserTests {
 
@@ -192,18 +193,18 @@ public class StreamParserTests {
 	@Test
 	public void tapWithLabelReference() {
 		parse("mystream = http | filter | group1: transform | group2: transform | file");
-		StreamNode ast = parse("tap:stream:mystream.group1 > file");
+		StreamNode ast = parse(":mystream.group1 > file");
 
-		assertEquals("[(tap:stream:mystream.group1)>(ModuleNode:file)]", ast.stringify());
-		ast = parse("tap:stream:mystream > file");
-		assertEquals("[(tap:stream:mystream)>(ModuleNode:file)]", ast.stringify());
+		assertEquals("[(mystream.group1)>(ModuleNode:file)]", ast.stringify());
+		ast = parse(":mystream.group2 > file");
+		assertEquals("[(mystream.group2)>(ModuleNode:file)]", ast.stringify());
 	}
 
 	@Test
 	public void tapWithQualifiedModuleReference() {
 		parse("mystream = http | foobar | file");
-		StreamNode sn = parse("tap:stream:mystream.foobar > file");
-		assertEquals("[(tap:stream:mystream.foobar:0>26)>(ModuleNode:file:29>33)]", sn.stringify(true));
+		StreamNode sn = parse(":mystream.foobar > file");
+		assertEquals("[(mystream.foobar:1>16)>(ModuleNode:file:19>23)]", sn.stringify(true));
 	}
 
 	@Test
@@ -247,7 +248,7 @@ public class StreamParserTests {
 		StreamNode ast = null;
 
 		// notice no space between the ' and final >
-		ast = parse("queue:producer > transform --expression='payload.toUpperCase()' | filter --expression='payload.length() > 4'> queue:consumer");
+		ast = parse(":producer > transform --expression='payload.toUpperCase()' | filter --expression='payload.length() > 4'> :consumer");
 		assertEquals("payload.toUpperCase()", ast.getModule("transform").getArguments()[0].getValue());
 		assertEquals("payload.length() > 4", ast.getModule("filter").getArguments()[0].getValue());
 
@@ -339,73 +340,53 @@ public class StreamParserTests {
 
 	@Test
 	public void sourceChannel() {
-		StreamNode sn = parse("queue:foobar > file");
-		assertEquals("[(queue:foobar:0>12)>(ModuleNode:file:15>19)]", sn.stringify(true));
+		StreamNode sn = parse(":foobar > file");
+		assertEquals("[(foobar:1>7)>(ModuleNode:file:10>14)]", sn.stringify(true));
 	}
 
 	@Test
 	public void sinkChannel() {
-		StreamNode sn = parse("http > queue:foo");
-		assertEquals("[(ModuleNode:http:0>4)>(queue:foo:7>16)]", sn.stringify(true));
+		StreamNode sn = parse("http > :foo");
+		assertEquals("[(ModuleNode:http:0>4)>(foo:8>11)]", sn.stringify(true));
 	}
 
 	@Test
 	public void channelVariants() {
-		// Job is not a legal channel prefix
-		checkForParseError("trigger > job:foo", DSLMessage.EXPECTED_CHANNEL_PREFIX_QUEUE_TOPIC, 10, "job");
 
 		// This looks like a label and so file is treated as a sink!
-		checkForParseError("queue: bar > file", DSLMessage.NO_WHITESPACE_IN_CHANNEL_DEFINITION, 7);
+		checkForParseError("http > :test value", DSLMessage.UNEXPECTED_DATA_AFTER_STREAMDEF, 13);
 
-		// 'queue' looks like a module all by itself so everything after is unexpected
-		checkForParseError("queue : bar > file", DSLMessage.NO_WHITESPACE_IN_CHANNEL_DEFINITION, 6);
+		checkForParseError(":boo .xx > file", DSLMessage.NO_WHITESPACE_IN_CHANNEL_DEFINITION, 5);
+		checkForParseError(":boo . xx > file", DSLMessage.NO_WHITESPACE_IN_CHANNEL_DEFINITION, 5);
+		checkForParseError(":boo. xx > file", DSLMessage.NO_WHITESPACE_IN_CHANNEL_DEFINITION, 6);
+		checkForParseError(":boo.xx. yy > file", DSLMessage.NO_WHITESPACE_IN_CHANNEL_DEFINITION, 9);
+		checkForParseError(":boo.xx .yy > file", DSLMessage.NO_WHITESPACE_IN_CHANNEL_DEFINITION, 8);
+		checkForParseError(":boo.xx . yy > file", DSLMessage.NO_WHITESPACE_IN_CHANNEL_DEFINITION, 8);
 
-		// 'queue' looks like a module all by itself so everything after is unexpected
-		checkForParseError("queue :bar > file", DSLMessage.NO_WHITESPACE_IN_CHANNEL_DEFINITION, 6);
-
-		checkForParseError("tap:queue: boo > file", DSLMessage.NO_WHITESPACE_IN_CHANNEL_DEFINITION, 11);
-		checkForParseError("tap:queue :boo > file", DSLMessage.NO_WHITESPACE_IN_CHANNEL_DEFINITION, 10);
-		checkForParseError("tap:queue : boo > file", DSLMessage.NO_WHITESPACE_IN_CHANNEL_DEFINITION, 10);
-
-		checkForParseError("tap:stream:boo .xx > file", DSLMessage.NO_WHITESPACE_IN_CHANNEL_DEFINITION, 15);
-		checkForParseError("tap:stream:boo . xx > file", DSLMessage.NO_WHITESPACE_IN_CHANNEL_DEFINITION, 15);
-		checkForParseError("tap:stream:boo. xx > file", DSLMessage.NO_WHITESPACE_IN_CHANNEL_DEFINITION, 16);
-		checkForParseError("tap:stream:boo.xx. yy > file", DSLMessage.NO_WHITESPACE_IN_CHANNEL_DEFINITION, 19);
-		checkForParseError("tap:stream:boo.xx .yy > file", DSLMessage.NO_WHITESPACE_IN_CHANNEL_DEFINITION, 18);
-		checkForParseError("tap:stream:boo.xx . yy > file", DSLMessage.NO_WHITESPACE_IN_CHANNEL_DEFINITION, 18);
-
-		checkForParseError("tap:queue:boo.xx.yy > file", DSLMessage.ONLY_A_TAP_ON_A_STREAM_OR_TASK_CAN_BE_INDEXED, 13);
-
-		sn = parse("wibble: http > queue:bar");
-		assertEquals("[((Label:wibble) ModuleNode:http)>(queue:bar)]", sn.stringify());
-	}
-
-	@Test
-	public void qualifiedSinkChannelError() {
-		// Only the source channel supports a dotted suffix
-		checkForParseError("http > queue:wibble.foo", DSLMessage.CHANNEL_INDEXING_NOT_ALLOWED, 19);
+		sn = parse("wibble: http > :bar");
+		assertEquals("[((Label:wibble) ModuleNode:http)>(bar)]", sn.stringify());
 	}
 
 	@Test
 	public void sourceChannel2() {
 		parse("foo = http | bar | file");
-		StreamNode ast = parse("tap:stream:foo.bar > file");
-		assertEquals("[(tap:stream:foo.bar:0>18)>(ModuleNode:file:21>25)]", ast.stringify(true));
-		assertEquals("tap:stream:foo.bar", ast.getSourceChannelNode().getChannelName());
+		StreamNode ast = parse(":foo.bar > file");
+		assertEquals("[(foo.bar:1>8)>(ModuleNode:file:11>15)]", ast.stringify(true));
+		assertEquals("foo.bar", ast.getSourceChannelNode().getChannelName());
 	}
 
 	@Test
 	public void sourceTapChannel() {
-		StreamNode ast = parse("tap:queue:xxy > file");
-		assertEquals("[(tap:queue:xxy:0>13)>(ModuleNode:file:16>20)]", ast.stringify(true));
+		StreamNode ast = parse(":xxy > file");
+		assertEquals("[(xxy:1>4)>(ModuleNode:file:7>11)]", ast.stringify(true));
 	}
 
 	@Test
 	public void sourceTapChannel2() {
 		parse("mystream = http | file");
-		StreamNode ast = parse("tap:stream:mystream.http > file");
+		StreamNode ast = parse(":mystream.http > file");
 		assertEquals(
-				"[(tap:stream:mystream.http:0>24)>(ModuleNode:file:27>31)]",
+				"[(mystream.http:1>14)>(ModuleNode:file:17>21)]",
 				ast.stringify(true));
 	}
 
@@ -415,14 +396,14 @@ public class StreamParserTests {
 		StreamNode ast = null;
 		SourceChannelNode sourceChannelNode = null;
 
-		ast = parse("tap:stream:mystream.http > file");
+		ast = parse(":mystream.http > file");
 		sourceChannelNode = ast.getSourceChannelNode();
-		assertEquals("tap:stream:mystream.http", sourceChannelNode.getChannelName());
+		assertEquals("mystream.http", sourceChannelNode.getChannelName());
 	}
 
 	@Test
 	public void nameSpaceTestWithSpaces() {
-		checkForParseError("trigger > queue:job:myjob   too", DSLMessage.UNEXPECTED_DATA_AFTER_STREAMDEF, 28, "too");
+		checkForParseError("trigger > :myjob   too", DSLMessage.UNEXPECTED_DATA_AFTER_STREAMDEF, 19, "too");
 	}
 
 	@Test
@@ -451,10 +432,10 @@ public class StreamParserTests {
 
 	@Test
 	public void errorCases07() {
-		checkForParseError("foo > bar", DSLMessage.EXPECTED_CHANNEL_PREFIX_QUEUE_TOPIC, 6, "bar");
-		checkForParseError("foo >", DSLMessage.OOD, 5);
-		checkForParseError("foo > --2323", DSLMessage.EXPECTED_CHANNEL_PREFIX_QUEUE_TOPIC, 6, "--");
-		checkForParseError("foo > *", DSLMessage.UNEXPECTED_DATA, 6, "*");
+		//checkForParseError("foo > bar", DSLMessage.EXPECTED_CHANNEL_PREFIX, 6, "bar");
+		checkForParseError(":foo >", DSLMessage.OOD, 6);
+		checkForParseError(":foo > --2323", DSLMessage.EXPECTED_MODULENAME, 7, "--");
+		checkForParseError(":foo > *", DSLMessage.UNEXPECTED_DATA, 7, "*");
 	}
 
 	@Test
@@ -466,17 +447,6 @@ public class StreamParserTests {
 	public void errorCases09() {
 		checkForParseError("* = http | file", DSLMessage.UNEXPECTED_DATA, 0, "*");
 		checkForParseError(": = http | file", DSLMessage.ILLEGAL_STREAM_NAME, 0, ":");
-	}
-
-	@Test
-	public void errorCase10() {
-		checkForParseError("trigger > :job:foo", DSLMessage.EXPECTED_CHANNEL_PREFIX_QUEUE_TOPIC, 10, ":");
-	}
-
-	@Test
-	public void errorCase11() {
-		checkForParseError("tap:banana:yyy > file", DSLMessage.NOT_ALLOWED_TO_TAP_THAT, 4, "banana");
-		checkForParseError("tap:xxx > file", DSLMessage.TAP_NEEDS_THREE_COMPONENTS, 0);
 	}
 
 	@Test
@@ -505,14 +475,14 @@ public class StreamParserTests {
 	@Test
 	public void tapWithLabels() {
 		parse("mystream = http | flibble: transform | file");
-		sn = parse("tap:stream:mystream.flibble > file");
-		assertEquals("tap:stream:mystream.flibble", sn.getSourceChannelNode().getChannelName());
+		sn = parse(":mystream.flibble > file");
+		assertEquals("mystream.flibble", sn.getSourceChannelNode().getChannelName());
 	}
 
 	@Test
 	public void bridge01() {
-		StreamNode sn = parse("queue:bar > topic:boo");
-		assertEquals("[(queue:bar:0>9)>(ModuleNode:bridge:10>11)>(topic:boo:12>21)]", sn.stringify(true));
+		StreamNode sn = parse(":bar > :boo");
+		assertEquals("[(bar:1>4)>(ModuleNode:bridge:5>6)>(boo:8>11)]", sn.stringify(true));
 	}
 
 	// Parameters must be constructed via adjacent tokens

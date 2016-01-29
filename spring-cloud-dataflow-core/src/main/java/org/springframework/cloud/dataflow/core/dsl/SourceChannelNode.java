@@ -48,11 +48,7 @@ public class SourceChannelNode extends AstNode {
 	}
 
 	public String getChannelName() {
-		return channelNode.getChannelName();
-	}
-
-	public Object getChannelType() {
-		return channelNode.getChannelType();
+			return this.channelNode.getChannelName();
 	}
 
 }
