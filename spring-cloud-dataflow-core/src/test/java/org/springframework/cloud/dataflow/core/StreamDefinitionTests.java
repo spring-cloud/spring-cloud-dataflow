@@ -35,6 +35,7 @@ import org.springframework.cloud.dataflow.core.dsl.ParseException;
  * @author David Turanski
  * @author Patrick Peralta
  * @author Marius Bogoevici
+ * @author Ilayaperumal Gopinathan
  */
 public class StreamDefinitionTests {
 
@@ -45,13 +46,13 @@ public class StreamDefinitionTests {
 		ModuleDefinition time = stream.getModuleDefinitions().get(0);
 		assertEquals("time", time.getName());
 		assertEquals("time", time.getLabel());
-		assertEquals("ticktock.0", time.getParameters().get(BindingProperties.OUTPUT_BINDING_KEY));
+		assertEquals("ticktock.time", time.getParameters().get(BindingProperties.OUTPUT_BINDING_KEY));
 		assertFalse(time.getParameters().containsKey(BindingProperties.INPUT_BINDING_KEY));
 
 		ModuleDefinition log = stream.getModuleDefinitions().get(1);
 		assertEquals("log", log.getName());
 		assertEquals("log", log.getLabel());
-		assertEquals("ticktock.0", log.getParameters().get(BindingProperties.INPUT_BINDING_KEY));
+		assertEquals("ticktock.time", log.getParameters().get(BindingProperties.INPUT_BINDING_KEY));
 		assertEquals("default", log.getParameters().get(BindingProperties.INPUT_GROUP_KEY));
 		assertEquals("true", log.getParameters().get(BindingProperties.INPUT_DURABLE_SUBSCRIPTION_KEY));
 		assertFalse(log.getParameters().containsKey(BindingProperties.OUTPUT_BINDING_KEY));
@@ -68,11 +69,11 @@ public class StreamDefinitionTests {
 		assertEquals("test", source.getGroup());
 
 		assertEquals(1, source.getParameters().size());
-		assertEquals("test.0", source.getParameters().get(BindingProperties.OUTPUT_BINDING_KEY));
+		assertEquals("test.foo", source.getParameters().get(BindingProperties.OUTPUT_BINDING_KEY));
 		assertEquals("bar", sink.getName());
 		assertEquals("test", sink.getGroup());
 		assertEquals(3, sink.getParameters().size());
-		assertEquals("test.0", sink.getParameters().get(BindingProperties.INPUT_BINDING_KEY));
+		assertEquals("test.foo", sink.getParameters().get(BindingProperties.INPUT_BINDING_KEY));
 		assertEquals("default", sink.getParameters().get(BindingProperties.INPUT_GROUP_KEY));
 		assertEquals("true", sink.getParameters().get(BindingProperties.INPUT_DURABLE_SUBSCRIPTION_KEY));
 	}
@@ -126,7 +127,7 @@ public class StreamDefinitionTests {
 
 	@Test
 	public void sourceChannelNameIsAppliedToSourceModule() throws Exception {
-		StreamDefinition streamDefinition = new StreamDefinition("test", "topic:foo > goo | blah | file");
+		StreamDefinition streamDefinition = new StreamDefinition("test", ":foo > goo | blah | file");
 		List<ModuleDefinition> requests = streamDefinition.getModuleDefinitions();
 		assertEquals(3, requests.size());
 		assertEquals("foo", requests.get(0).getParameters().get(BindingProperties.INPUT_BINDING_KEY));
@@ -135,7 +136,7 @@ public class StreamDefinitionTests {
 
 	@Test
 	public void sinkChannelNameIsAppliedToSinkModule() throws Exception {
-		StreamDefinition streamDefinition = new StreamDefinition("test", "boo | blah | aaak > queue:foo");
+		StreamDefinition streamDefinition = new StreamDefinition("test", "boo | blah | aaak > :foo");
 		List<ModuleDefinition> requests = streamDefinition.getModuleDefinitions();
 		assertEquals(3, requests.size());
 		assertEquals("foo", requests.get(2).getParameters().get(BindingProperties.OUTPUT_BINDING_KEY));
@@ -143,20 +144,17 @@ public class StreamDefinitionTests {
 
 	@Test
 	public void simpleSinkNamedChannel() throws Exception {
-		StreamDefinition streamDefinition = new StreamDefinition("test", "bart > queue:foo");
+		StreamDefinition streamDefinition = new StreamDefinition("test", "bart > :foo");
 		List<ModuleDefinition> requests = streamDefinition.getModuleDefinitions();
 		assertEquals(1, requests.size());
 		assertEquals("foo", requests.get(0).getParameters().get(BindingProperties.OUTPUT_BINDING_KEY));
 	}
 
 	@Test
-	public void simpleSinkNamedChannelBadType() throws Exception {
-		// The parser will identify this as a Named channel sink and thus badLog will be
-		// labeled a source.
-		// But badLog is a sink and there should be an exception thrown by the parser.
+	public void moduleWithBadDestination() throws Exception {
 		boolean isException = false;
 		try {
-			new StreamDefinition("test", "badLog > :foo");
+			new StreamDefinition("test", "module > foo");
 		}
 		catch (Exception e) {
 			isException = true;
@@ -166,7 +164,7 @@ public class StreamDefinitionTests {
 
 	@Test
 	public void simpleSourceNamedChannel() throws Exception {
-		StreamDefinition streamDefinition = new StreamDefinition("test", "queue:foo > boot");
+		StreamDefinition streamDefinition = new StreamDefinition("test", ":foo > boot");
 		List<ModuleDefinition> requests = streamDefinition.getModuleDefinitions();
 		assertEquals(1, requests.size());
 		assertEquals("foo", requests.get(0).getParameters().get(BindingProperties.INPUT_BINDING_KEY));
@@ -177,7 +175,7 @@ public class StreamDefinitionTests {
 	@Test
 	public void namedChannelsForbiddenInComposedModules() {
 		try {
-			new StreamDefinition("test", "queue:foo > boot");
+			new StreamDefinition("test", ":foo > boot");
 		}
 		catch (ParseException expected) {
 			assertThat(expected.getMessage(),
@@ -185,7 +183,7 @@ public class StreamDefinitionTests {
 			assertThat(expected.getPosition(), is(0));
 		}
 		try {
-			new StreamDefinition("test", "bart | goo > queue:foo");
+			new StreamDefinition("test", "bart | goo > :foo");
 		}
 		catch (ParseException expected) {
 			assertThat(expected.getMessage(),
@@ -201,10 +199,10 @@ public class StreamDefinitionTests {
 		ModuleDefinition source = modules.get(0);
 		ModuleDefinition sink = modules.get(1);
 		assertEquals("time", source.getLabel());
-		assertEquals("ticktock.0", source.getParameters().get(BindingProperties.OUTPUT_BINDING_KEY));
+		assertEquals("ticktock.time", source.getParameters().get(BindingProperties.OUTPUT_BINDING_KEY));
 		assertFalse(source.getParameters().containsKey(BindingProperties.INPUT_BINDING_KEY));
 		assertEquals("log", sink.getLabel());
-		assertEquals("ticktock.0", sink.getParameters().get(BindingProperties.INPUT_BINDING_KEY));
+		assertEquals("ticktock.time", sink.getParameters().get(BindingProperties.INPUT_BINDING_KEY));
 		assertEquals("default", sink.getParameters().get(BindingProperties.INPUT_GROUP_KEY));
 		assertEquals("true", sink.getParameters().get(BindingProperties.INPUT_DURABLE_SUBSCRIPTION_KEY));
 		assertFalse(sink.getParameters().containsKey(BindingProperties.OUTPUT_BINDING_KEY));
@@ -220,17 +218,17 @@ public class StreamDefinitionTests {
 		ModuleDefinition sink = modules.get(2);
 
 		assertEquals("time", source.getLabel());
-		assertEquals("ticktock.0", source.getParameters().get(BindingProperties.OUTPUT_BINDING_KEY));
+		assertEquals("ticktock.time", source.getParameters().get(BindingProperties.OUTPUT_BINDING_KEY));
 		assertFalse(source.getParameters().containsKey(BindingProperties.INPUT_BINDING_KEY));
 
 		assertEquals("filter", processor.getLabel());
-		assertEquals("ticktock.0", processor.getParameters().get(BindingProperties.INPUT_BINDING_KEY));
+		assertEquals("ticktock.time", processor.getParameters().get(BindingProperties.INPUT_BINDING_KEY));
 		assertEquals("default", processor.getParameters().get(BindingProperties.INPUT_GROUP_KEY));
 		assertEquals("true", processor.getParameters().get(BindingProperties.INPUT_DURABLE_SUBSCRIPTION_KEY));
-		assertEquals("ticktock.1", processor.getParameters().get(BindingProperties.OUTPUT_BINDING_KEY));
+		assertEquals("ticktock.filter", processor.getParameters().get(BindingProperties.OUTPUT_BINDING_KEY));
 
 		assertEquals("log", sink.getLabel());
-		assertEquals("ticktock.1", sink.getParameters().get(BindingProperties.INPUT_BINDING_KEY));
+		assertEquals("ticktock.filter", sink.getParameters().get(BindingProperties.INPUT_BINDING_KEY));
 		assertEquals("default", sink.getParameters().get(BindingProperties.INPUT_GROUP_KEY));
 		assertEquals("true", sink.getParameters().get(BindingProperties.INPUT_DURABLE_SUBSCRIPTION_KEY));
 		assertFalse(sink.getParameters().containsKey(BindingProperties.OUTPUT_BINDING_KEY));
