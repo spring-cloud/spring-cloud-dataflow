@@ -68,7 +68,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
 /**
- * Configuration for admin application context. This includes support
+ * Configuration for the Admin application context. This includes support
  * for the REST API framework configuration.
  *
  * @author Mark Fisher
@@ -187,14 +187,14 @@ public class AdminConfiguration {
 
 	@Bean
 	@ConditionalOnExpression("#{'!${spring.datasource.url:}'.startsWith('jdbc:h2:tcp://localhost:') && !'${spring.datasource.url:}'.contains('/mem:')}")
-	public TaskDatabaseInitializer taskDatabaseInitializerForDB(DataSource ds) {
-		return new TaskDatabaseInitializer(ds);
+	public TaskDatabaseInitializer taskDatabaseInitializerForDB(DataSource dataSource) {
+		return new TaskDatabaseInitializer(dataSource);
 	}
 
 	@Bean
 	@ConditionalOnExpression("#{'${spring.datasource.url:}'.startsWith('jdbc:h2:tcp://localhost:') && '${spring.datasource.url:}'.contains('/mem:')}")
-	public TaskDatabaseInitializer taskDatabaseInitializerForDefaultDB(DataSource ds, Server server) {
-		return new TaskDatabaseInitializer(ds);
+	public TaskDatabaseInitializer taskDatabaseInitializerForDefaultDB(DataSource dataSource, Server server) {
+		return new TaskDatabaseInitializer(dataSource);
 	}
 
 	private String getH2Port(String url) {
@@ -202,5 +202,4 @@ public class AdminConfiguration {
 		Assert.isTrue(tokens.length >= 5, "URL not properly formatted");
 		return tokens[4].substring(0, tokens[4].indexOf("/"));
 	}
-
 }

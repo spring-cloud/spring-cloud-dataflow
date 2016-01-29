@@ -20,7 +20,6 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.cloud.dataflow.module.deployer.ModuleDeployer;
 import org.springframework.cloud.dataflow.module.deployer.test.AbstractModuleDeployerTests;
@@ -35,6 +34,7 @@ import org.springframework.core.env.Environment;
  * Integration tests for the {@link InProcessModuleDeployer}.
  *
  * @author Eric Bottard
+ * @author Josh Long
  */
 @SpringApplicationConfiguration(classes = InProcessModuleDeployerTests.Config.class)
 public class InProcessModuleDeployerTests extends AbstractModuleDeployerTests {

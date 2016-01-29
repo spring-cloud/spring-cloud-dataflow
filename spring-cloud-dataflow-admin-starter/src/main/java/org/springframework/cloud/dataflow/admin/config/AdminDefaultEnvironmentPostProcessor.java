@@ -16,6 +16,10 @@
 
 package org.springframework.cloud.dataflow.admin.config;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
 
 import org.apache.commons.logging.LogFactory;
 
@@ -30,16 +34,11 @@ import org.springframework.core.env.PropertySource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-
 /**
  * Contributes the values from {@code admin.yml} if it exists, before any of Spring Boot's normal
- * configuration contributions apply. This has the effect of supplying overridable defaults
- * to the various Spring Cloud Dataflow Admin SPI implementations
- * that in turn override the defaults provided by Spring Boot.
+ * configuration contributions apply. This has the effect of supplying overridable defaults to the
+ * various Spring Cloud Dataflow Admin SPI implementations that in turn override the defaults
+ * provided by Spring Boot.
  *
  * @author Josh Long
  */
@@ -49,23 +48,23 @@ public class AdminDefaultEnvironmentPostProcessor implements EnvironmentPostProc
 
 	@Override
 	public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
-
 		Map<String, Object> defaults = new HashMap<>();
 		MutablePropertySources existingPropertySources = environment.getPropertySources();
 
 		this.contributeAdminDefaults(defaults);
 
-		String defaultProperties = "defaultProperties";
+		String defaultPropertiesKey = "defaultProperties";
 
-		if (!existingPropertySources.contains(defaultProperties) ||
-				existingPropertySources.get(defaultProperties) == null) {
-			existingPropertySources.addLast(new MapPropertySource(defaultProperties, defaults));
+		if (!existingPropertySources.contains(defaultPropertiesKey) ||
+				existingPropertySources.get(defaultPropertiesKey) == null) {
+			existingPropertySources.addLast(new MapPropertySource(defaultPropertiesKey, defaults));
 		}
 		else {
-			PropertySource<?> propertySource = existingPropertySources.get(defaultProperties);
-			Map mapOfProperties = Map.class.cast(propertySource.getSource());
+			PropertySource<?> propertySource = existingPropertySources.get(defaultPropertiesKey);
+			@SuppressWarnings("unchecked")
+			Map<String, Object> mapOfProperties = Map.class.cast(propertySource.getSource());
 			for (String k : defaults.keySet()) {
-				Set setOfPropertyKeys = mapOfProperties.keySet();
+				Set<String> setOfPropertyKeys = mapOfProperties.keySet();
 				if (!setOfPropertyKeys.contains(k)) {
 					mapOfProperties.put(k, defaults.get(k));
 					LogFactory.getLog(getClass()).info(k + '=' + defaults.get(k));
@@ -82,19 +81,14 @@ public class AdminDefaultEnvironmentPostProcessor implements EnvironmentPostProc
 
 	private void contributeAdminDefaults(Map<String, Object> defaults) {
 		if (this.resource.exists()) {
-
-			YamlPropertiesFactoryBean yamlPropertiesFactoryBean =
-					new YamlPropertiesFactoryBean();
+			YamlPropertiesFactoryBean yamlPropertiesFactoryBean = new YamlPropertiesFactoryBean();
 			yamlPropertiesFactoryBean.setResources(this.resource);
 			yamlPropertiesFactoryBean.afterPropertiesSet();
 			Properties p = yamlPropertiesFactoryBean.getObject();
-
 			for (Object k : p.keySet()) {
 				String key = k.toString();
 				defaults.put(key, p.get(key));
 			}
-
 		}
-
 	}
 }

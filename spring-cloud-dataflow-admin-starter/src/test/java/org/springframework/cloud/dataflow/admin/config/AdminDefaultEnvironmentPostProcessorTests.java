@@ -16,6 +16,8 @@
 
 package org.springframework.cloud.dataflow.admin.config;
 
+import static org.junit.Assert.assertEquals;
+
 import org.junit.Test;
 
 import org.springframework.boot.SpringApplication;
@@ -23,16 +25,14 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Configuration;
 
-import static org.junit.Assert.*;
-
 /**
  * @author Josh Long
  */
 public class AdminDefaultEnvironmentPostProcessorTests {
 
-	public static final String MANAGEMENT_CONTEXT_PATH = "management.contextPath";
+	private static final String MANAGEMENT_CONTEXT_PATH = "management.contextPath";
 
-	public static final String CONTRIBUTED_PATH = "/bar";
+	private static final String CONTRIBUTED_PATH = "/bar";
 
 	@Configuration
 	@EnableAutoConfiguration
@@ -55,5 +55,4 @@ public class AdminDefaultEnvironmentPostProcessorTests {
 			assertEquals(cp, "/foo");
 		}
 	}
-
 }

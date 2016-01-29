@@ -25,16 +25,15 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.dataflow.core.ModuleDeploymentId;
 import org.springframework.cloud.dataflow.core.ModuleDeploymentRequest;
 import org.springframework.cloud.dataflow.module.ModuleStatus;
 import org.springframework.cloud.dataflow.module.deployer.ModuleDeployer;
 import org.springframework.cloud.stream.module.launcher.ModuleLaunchRequest;
 import org.springframework.cloud.stream.module.launcher.ModuleLauncher;
-import org.springframework.core.env.Environment;
 import org.springframework.util.Assert;
 import org.springframework.util.SocketUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
 /**
@@ -90,7 +89,7 @@ public class InProcessModuleDeployer implements ModuleDeployer {
 		catch (Exception e) {
 			throw new IllegalStateException("failed to determine URL for module: " + module, e);
 		}
-		args.put("security.ignored", getShutdownUrl() + ",/shutdown"); // Make sure we can shutdown the module
+		args.put("security.ignored", getShutdownUrl()); // Make sure we can shutdown the module
 		args.put("endpoints.shutdown.enabled", "true");
 		args.put("spring.main.show_banner", "false");
 		args.put(JMX_DEFAULT_DOMAIN_KEY, String.format("%s.%s",
@@ -120,7 +119,8 @@ public class InProcessModuleDeployer implements ModuleDeployer {
 		if (url != null) {
 			InProcessModuleInstanceStatus status = new InProcessModuleInstanceStatus(id.toString(), url, null);
 			return ModuleStatus.of(id).with(status).build();
-		} else {
+		}
+		else {
 			return ModuleStatus.of(id).build();
 		}
 	}
@@ -135,8 +135,7 @@ public class InProcessModuleDeployer implements ModuleDeployer {
 	}
 
 	private String getShutdownUrl() {
-		//String contextPath = this.environment.getProperty("management.contextPath");
-		String base = contextPath != null && !contextPath.trim().equals("") ? contextPath : "";
+		String base = StringUtils.hasText(contextPath) ? contextPath : "";
 		return base + "/shutdown";
 	}
 }
