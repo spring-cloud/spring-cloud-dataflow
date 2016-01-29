@@ -25,33 +25,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.DefaultResourceLoader;
 
 /**
- * @author Glenn Renfro
- */
-/**
- * Intitializes the schema for the task database .
+ * initializes the schema for the task database .
  *
  * @author Glenn Renfro.
  */
-
 public class TaskDatabaseInitializer implements InitializingBean {
 
-	private static final Logger logger = LoggerFactory.getLogger(TaskDatabaseInitializer.class);
+	private final DataSource dataSource ;
 
 
-	@Autowired
-	DataSource dataSource;
-
-	public TaskDatabaseInitializer() {
-	}
-
-	public void initializeDatabase() {
-		org.springframework.cloud.task.repository.support.
-				TaskDatabaseInitializer.initializeDatabase(dataSource, new DefaultResourceLoader());
+	public TaskDatabaseInitializer(DataSource dataSource) {
+		this.dataSource = dataSource;
 	}
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
-		initializeDatabase();
+		org.springframework.cloud.task.repository.support.
+				TaskDatabaseInitializer.initializeDatabase(dataSource, new DefaultResourceLoader());
 	}
-
 }
