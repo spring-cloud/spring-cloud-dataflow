@@ -44,7 +44,8 @@
 		<module>spring-cloud-dataflow-docs</module>
 		<module>spring-cloud-dataflow-completion</module>
 		<module>spring-cloud-starter-dataflow-server-local</module>
-  </modules>
+		<module>spring-cloud-dataflow-dependencies</module>
+	</modules>
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
