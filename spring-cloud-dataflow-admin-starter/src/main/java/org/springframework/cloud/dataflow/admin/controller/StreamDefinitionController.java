@@ -24,7 +24,6 @@ import org.slf4j.LoggerFactory;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.cloud.dataflow.admin.repository.DuplicateStreamDefinitionException;
 import org.springframework.cloud.dataflow.admin.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.core.ModuleDefinition;
 import org.springframework.cloud.dataflow.core.ModuleDeploymentId;
@@ -123,7 +122,7 @@ public class StreamDefinitionController {
 	 * @param name   stream name
 	 * @param dsl    DSL definition for stream
 	 * @param deploy if {@code true}, the stream is deployed upon creation
-	 * @throws DuplicateStreamDefinitionException if a stream definition with the same name already exists
+	 * @throws ResourceAlreadyExistsException if a stream definition with the same name already exists
 	 */
 	@RequestMapping(value = "", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
@@ -132,9 +131,9 @@ public class StreamDefinitionController {
 	                 @RequestParam(value = "deploy", defaultValue = "true")
 	                 boolean deploy) {
 		if (this.repository.exists(name)) {
-			throw new DuplicateStreamDefinitionException(
-					String.format("Cannot create stream %s because another one has already " +
-							"been created with the same name", name));
+			throw new ResourceAlreadyExistsException(name, "stream definition",
+					"Cannot create stream %s because another one has already " +
+					"been created with the same name", name);
 		}
 
 		StreamDefinition stream = new StreamDefinition(name, dsl);
@@ -152,6 +151,7 @@ public class StreamDefinitionController {
 	@ResponseStatus(HttpStatus.OK)
 	public void delete(@PathVariable("name") String name) {
 		deploymentController.undeploy(name);
+		lookupOrFail(name);
 		this.repository.delete(name);
 	}
 
@@ -162,7 +162,16 @@ public class StreamDefinitionController {
 	@RequestMapping(value = "/{name}", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
 	public StreamDefinitionResource display(@PathVariable("name") String name) {
-		return streamDefinitionAssembler.toResource(repository.findOne(name));
+		StreamDefinition definition = lookupOrFail(name);
+		return streamDefinitionAssembler.toResource(definition);
+	}
+
+	private StreamDefinition lookupOrFail(@PathVariable("name") String name) {
+		StreamDefinition result = repository.findOne(name);
+		if (result == null) {
+			throw new ResourceNotFoundException(name, "stream definition");
+		}
+		return result;
 	}
 
 	/**

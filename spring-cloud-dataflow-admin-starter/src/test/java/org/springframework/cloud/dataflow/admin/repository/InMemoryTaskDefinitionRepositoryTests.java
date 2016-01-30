@@ -74,21 +74,6 @@ public class InMemoryTaskDefinitionRepositoryTests {
 		assertEquals(page.getContent().size(), 3);
 	}
 
-	@Test(expected = DuplicateTaskException.class)
-	public void testSaveDuplicate() {
-		repository.save(new TaskDefinition("task1", "myTask"));
-		repository.save(new TaskDefinition("task1", "myTask"));
-	}
-
-	@Test(expected = DuplicateTaskException.class)
-	public void testSaveAllDuplicate() {
-		List<TaskDefinition> definitions = new ArrayList<>();
-		definitions.add(new TaskDefinition("task1", "myTask"));
-
-		repository.save(new TaskDefinition("task1", "myTask"));
-		repository.save(definitions);
-	}
-
 	@Test
 	public void testFindOneNoneFound() {
 		assertNull(repository.findOne("notFound"));

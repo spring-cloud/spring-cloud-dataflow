@@ -109,10 +109,7 @@ public class ModuleController {
 			@PathVariable("type") ArtifactType type,
 			@PathVariable("name") String name) {
 		Assert.isTrue(type != ArtifactType.library, "Only modules are supported by this endpoint");
-		ArtifactRegistration registration = registry.find(name, type);
-		if (registration == null) {
-			return null;
-		}
+		ArtifactRegistration registration = findRegistrationOrFail(type, name);
 		DetailedModuleRegistrationResource result = new DetailedModuleRegistrationResource(moduleAssembler.toResource(registration));
 		Resource resource = moduleResolver.resolve(adapt(registration.getCoordinates()));
 
@@ -121,6 +118,14 @@ public class ModuleController {
 			result.addOption(property);
 		}
 		return result;
+	}
+
+	private ArtifactRegistration findRegistrationOrFail(ArtifactType type, String name) {
+		ArtifactRegistration registration = registry.find(name, type);
+		if (registration == null) {
+			throw new ResourceNotFoundException(String.format("%s:%s", type, name), "module registration");
+		}
+		return registration;
 	}
 
 	private Coordinates adapt(ArtifactCoordinates coordinates) {
@@ -142,8 +147,9 @@ public class ModuleController {
 			@RequestParam("coordinates") String coordinates,
 			@RequestParam(value = "force", defaultValue = "false") boolean force) {
 		Assert.isTrue(type != ArtifactType.library, "Only modules are supported by this endpoint");
-		if (!force && registry.find(name, type) != null) {
-			return;
+		ArtifactRegistration previous = registry.find(name, type);
+		if (!force && previous != null) {
+			throw new ResourceAlreadyExistsException(String.format("%s:%s", type, name), "module registration");
 		}
 		registry.save(new ArtifactRegistration(name, type, ArtifactCoordinates.parse(coordinates)));
 	}
@@ -157,6 +163,7 @@ public class ModuleController {
 	@ResponseStatus(HttpStatus.OK)
 	public void unregister(@PathVariable("type") ArtifactType type, @PathVariable("name") String name) {
 		Assert.isTrue(type != ArtifactType.library, "Only modules are supported by this endpoint");
+		findRegistrationOrFail(type, name);
 		registry.delete(name, type);
 	}
 

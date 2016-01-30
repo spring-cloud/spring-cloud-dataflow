@@ -124,6 +124,11 @@ public class FieldValueCounterControllerTests {
 	public static class Config {
 
 		@Bean
+		public RestControllerAdvice restControllerAdvice() {
+			return new RestControllerAdvice();
+		}
+
+		@Bean
 		public FieldValueCounterRepository fieldValueCounterRepository() {
 			return new InMemoryFieldValueCounterRepository();
 		}

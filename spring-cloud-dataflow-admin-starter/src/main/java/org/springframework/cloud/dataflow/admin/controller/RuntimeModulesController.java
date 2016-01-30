@@ -37,10 +37,8 @@ import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.ResourceAssembler;
 import org.springframework.hateoas.Resources;
 import org.springframework.hateoas.mvc.ResourceAssemblerSupport;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -93,7 +91,7 @@ public class RuntimeModulesController {
 				return statusAssembler.toResource(status);
 			}
 		}
-		throw new ResourceNotFoundException();
+		throw new ResourceNotFoundException(id, "module status");
 	}
 
 	private class Assembler extends ResourceAssemblerSupport<ModuleStatus, ModuleStatusResource> {
@@ -146,7 +144,7 @@ public class RuntimeModulesController {
 					return assembler.toResource(new PageImpl<>(moduleInstanceStatuses), new InstanceAssembler(status));
 				}
 			}
-			throw new ResourceNotFoundException();
+			throw new ResourceNotFoundException(moduleId, "module instances status");
 		}
 
 		@RequestMapping("/{instanceId}")
@@ -157,18 +155,13 @@ public class RuntimeModulesController {
 				if (status != null) {
 					ModuleInstanceStatus moduleInstanceStatus = status.getInstances().get(instanceId);
 					if (moduleInstanceStatus == null) {
-						throw new ResourceNotFoundException();
+						throw new ResourceNotFoundException(String.format("%s:%s", moduleId, instanceId), "module instance status");
 					}
 					return new InstanceAssembler(status).toResource(moduleInstanceStatus);
 				}
 			}
-			throw new ResourceNotFoundException();
+			throw new ResourceNotFoundException(moduleId, "module instances status");
 		}
-
-	}
-
-	@ResponseStatus(HttpStatus.NOT_FOUND)
-	private static class ResourceNotFoundException extends RuntimeException {
 
 	}
 

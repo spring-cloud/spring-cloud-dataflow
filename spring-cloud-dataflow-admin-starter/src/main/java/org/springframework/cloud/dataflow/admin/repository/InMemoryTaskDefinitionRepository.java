@@ -60,13 +60,6 @@ public class InMemoryTaskDefinitionRepository implements TaskDefinitionRepositor
 
 	@Override
 	public <S extends TaskDefinition> S save(S definition) {
-		if(definitions.containsKey(definition.getName())) {
-			throw new DuplicateTaskException(
-					String.format("Cannot register task %s because another one has already " +
-							"been registered with the same name",
-							definition.getName()));
-		}
-
 		definitions.put(definition.getName(), definition);
 
 		return definition;
