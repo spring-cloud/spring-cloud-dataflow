@@ -130,7 +130,7 @@ public class TaskControllerTests {
 		mockMvc.perform(
 				post("/tasks/definitions/").param("name", "myTask").param("definition", "task")
 						.accept(MediaType.APPLICATION_JSON)).andDo(print())
-						.andExpect(status().is5xxServerError());
+						.andExpect(status().isConflict());
 
 		assertEquals(1, repository.count());
 	}
@@ -171,7 +171,7 @@ public class TaskControllerTests {
 	public void testDestroyTaskNotFound() throws Exception {
 		mockMvc.perform(
 				delete("/tasks/definitions/myTask").accept(MediaType.APPLICATION_JSON)).andDo(print())
-				.andExpect(status().isOk());
+				.andExpect(status().isNotFound());
 
 		assertEquals(0, repository.count());
 	}
@@ -192,8 +192,8 @@ public class TaskControllerTests {
 		mockMvc.perform(
 				post("/tasks/deployments/{name}", "myFoo")
 						.accept(MediaType.APPLICATION_JSON)).andDo(print())
-			.andExpect(status().is5xxServerError())
-			.andExpect(content().json("[{message: \"no task defined: myFoo\"}]"));
+			.andExpect(status().isNotFound())
+			.andExpect(content().json("[{message: \"Could not find task definition named myFoo\"}]"));
 	}
 
 	@Test

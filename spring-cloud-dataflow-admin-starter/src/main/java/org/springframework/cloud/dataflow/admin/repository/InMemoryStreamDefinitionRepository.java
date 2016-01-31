@@ -18,7 +18,6 @@ package org.springframework.cloud.dataflow.admin.repository;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -52,16 +51,20 @@ public class InMemoryStreamDefinitionRepository implements StreamDefinitionRepos
 
 	@Override
 	public <S extends StreamDefinition> Iterable<S> save(Iterable<S> iterableDefinitions) {
-		Map<String, StreamDefinition> holder = new HashMap<>();
 		for (S definition : iterableDefinitions) {
-			holder.put(definition.getName(), definition);
+			save(definition);
 		}
-		definitions.putAll(holder);
 		return iterableDefinitions;
 	}
 
 	@Override
 	public <S extends StreamDefinition> S save(S definition) {
+		if(definitions.containsKey(definition.getName())) {
+			throw new DuplicateTaskException(
+					String.format("Cannot register stream definition %s because another one has already " +
+									"been registered with the same name",
+							definition.getName()));
+		}
 		definitions.put(definition.getName(), definition);
 		return definition;
 	}

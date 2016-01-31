@@ -19,6 +19,11 @@ package org.springframework.cloud.dataflow.admin.controller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.springframework.boot.actuate.endpoint.mvc.MetricsMvcEndpoint;
+import org.springframework.cloud.dataflow.admin.repository.DuplicateStreamDefinitionException;
+import org.springframework.cloud.dataflow.admin.repository.DuplicateTaskException;
+import org.springframework.cloud.dataflow.admin.repository.NoSuchStreamDefinitionException;
+import org.springframework.cloud.dataflow.admin.repository.NoSuchTaskDefinitionException;
 import org.springframework.hateoas.VndErrors;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.StringUtils;
@@ -50,6 +55,28 @@ public class RestControllerAdvice {
 		String msg = StringUtils.hasText(e.getMessage()) ? e.getMessage() : e.getClass().getSimpleName();
 		return new VndErrors(logref, msg);
 	}
+
+	@ExceptionHandler({DuplicateStreamDefinitionException.class, DuplicateTaskException.class})
+	@ResponseStatus(HttpStatus.CONFLICT)
+	@ResponseBody
+	public VndErrors onConflictException(Exception e) {
+		String logref = logError(e);
+		String msg = StringUtils.hasText(e.getMessage()) ? e.getMessage() : e.getClass().getSimpleName();
+		return new VndErrors(logref, msg);
+	}
+
+	@ExceptionHandler({NoSuchStreamDefinitionException.class,
+			NoSuchTaskDefinitionException.class,
+			MetricsMvcEndpoint.NoSuchMetricException.class})
+	@ResponseStatus(HttpStatus.NOT_FOUND)
+	@ResponseBody
+	public VndErrors onNotFoundException(Exception e) {
+		String logref = logError(e);
+		String msg = StringUtils.hasText(e.getMessage()) ? e.getMessage() : e.getClass().getSimpleName();
+		return new VndErrors(logref, msg);
+	}
+
+
 
 	private String logError(Throwable t) {
 		logger.error("Caught exception while handling a request", t);
