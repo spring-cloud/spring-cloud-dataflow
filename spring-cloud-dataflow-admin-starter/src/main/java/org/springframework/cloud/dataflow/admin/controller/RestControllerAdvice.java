@@ -19,6 +19,8 @@ package org.springframework.cloud.dataflow.admin.controller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.springframework.cloud.dataflow.admin.repository.DuplicateStreamDefinitionException;
+import org.springframework.cloud.dataflow.admin.repository.DuplicateTaskException;
 import org.springframework.hateoas.VndErrors;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.StringUtils;
@@ -46,6 +48,15 @@ public class RestControllerAdvice {
 	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
 	@ResponseBody
 	public VndErrors onException(Exception e) {
+		String logref = logError(e);
+		String msg = StringUtils.hasText(e.getMessage()) ? e.getMessage() : e.getClass().getSimpleName();
+		return new VndErrors(logref, msg);
+	}
+
+	@ExceptionHandler({DuplicateStreamDefinitionException.class, DuplicateTaskException.class})
+	@ResponseStatus(HttpStatus.CONFLICT)
+	@ResponseBody
+	public VndErrors onConflictException(Exception e) {
 		String logref = logError(e);
 		String msg = StringUtils.hasText(e.getMessage()) ? e.getMessage() : e.getClass().getSimpleName();
 		return new VndErrors(logref, msg);

@@ -131,12 +131,6 @@ public class StreamDefinitionController {
 	                 @RequestParam("definition") String dsl,
 	                 @RequestParam(value = "deploy", defaultValue = "true")
 	                 boolean deploy) {
-		if (this.repository.exists(name)) {
-			throw new DuplicateStreamDefinitionException(
-					String.format("Cannot create stream %s because another one has already " +
-							"been created with the same name", name));
-		}
-
 		StreamDefinition stream = new StreamDefinition(name, dsl);
 		this.repository.save(stream);
 		if (deploy) {

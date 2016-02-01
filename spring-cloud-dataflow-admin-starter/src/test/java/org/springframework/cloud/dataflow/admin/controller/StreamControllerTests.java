@@ -150,7 +150,7 @@ public class StreamControllerTests {
 		mockMvc.perform(
 				post("/streams/definitions/").param("name", "myStream").param("definition", "time | log")
 						.accept(MediaType.APPLICATION_JSON)).andDo(print())
-						.andExpect(status().is5xxServerError());
+						.andExpect(status().isConflict());
 		assertEquals(1, repository.count());
 	}
 
