@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cloud.dataflow.admin.repository.DuplicateStreamDefinitionException;
+import org.springframework.cloud.dataflow.admin.repository.NoSuchStreamDefinitionException;
 import org.springframework.cloud.dataflow.admin.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.core.ModuleDefinition;
 import org.springframework.cloud.dataflow.core.ModuleDeploymentId;
@@ -145,6 +146,9 @@ public class StreamDefinitionController {
 	@RequestMapping(value = "/{name}", method = RequestMethod.DELETE)
 	@ResponseStatus(HttpStatus.OK)
 	public void delete(@PathVariable("name") String name) {
+		if(repository.findOne(name) == null) {
+			throw new NoSuchStreamDefinitionException(name);
+		}
 		deploymentController.undeploy(name);
 		this.repository.delete(name);
 	}
@@ -156,7 +160,11 @@ public class StreamDefinitionController {
 	@RequestMapping(value = "/{name}", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
 	public StreamDefinitionResource display(@PathVariable("name") String name) {
-		return streamDefinitionAssembler.toResource(repository.findOne(name));
+		StreamDefinition definition = repository.findOne(name);
+		if (definition == null) {
+			throw new NoSuchStreamDefinitionException(name);
+		}
+		return streamDefinitionAssembler.toResource(definition);
 	}
 
 	/**

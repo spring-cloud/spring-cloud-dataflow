@@ -368,7 +368,7 @@ public class StreamControllerTests {
 	public void testDestroyStreamNotFound() throws Exception {
 		mockMvc.perform(
 				delete("/streams/definitions/myStream").accept(MediaType.APPLICATION_JSON)).andDo(print())
-				.andExpect(status().is5xxServerError());
+				.andExpect(status().isNotFound());
 		assertEquals(0, repository.count());
 	}
 

@@ -17,27 +17,23 @@
 package org.springframework.cloud.dataflow.admin.repository;
 
 /**
- * Thrown when a stream definition of a given name was expected but did not exist.
+ * Thrown when a task definition of a given name was expected but did not exist.
  *
  * @author Eric Bottard
  */
-public class NoSuchStreamDefinitionException extends RuntimeException {
+public class NoSuchTaskDefinitionException extends RuntimeException {
 
+	/**
+	 * The name of the task definition that could not be found.
+	 */
 	private final String name;
 
-	public NoSuchStreamDefinitionException(String name) {
-		this(name, "Could not find stream definition named " + name);
-	}
-
-	public NoSuchStreamDefinitionException(String name, String message) {
+	public NoSuchTaskDefinitionException(String name, String message) {
 		super(message);
 		this.name = name;
 	}
 
-	/**
-	 * Return the name of the stream definition that could not be found.
-	 */
-	public String getName() {
-		return name;
+	public NoSuchTaskDefinitionException(String name) {
+		this(name, "Could not find task definition named " + name);
 	}
 }

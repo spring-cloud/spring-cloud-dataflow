@@ -22,6 +22,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.dataflow.admin.repository.NoSuchTaskDefinitionException;
 import org.springframework.cloud.dataflow.admin.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistration;
 import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistry;
@@ -136,6 +137,9 @@ public class TaskController {
 	@RequestMapping(value = "/definitions/{name}", method = RequestMethod.DELETE)
 	@ResponseStatus(HttpStatus.OK)
 	public void destroyTask(@PathVariable("name") String name) {
+		if (repository.findOne(name) == null) {
+			throw new NoSuchTaskDefinitionException(name);
+		}
 		repository.delete(name);
 	}
 
@@ -165,7 +169,9 @@ public class TaskController {
 	@ResponseStatus(HttpStatus.CREATED)
 	public void deploy(@PathVariable("name") String name, @RequestParam(required = false) String properties) {
 		TaskDefinition taskDefinition = this.repository.findOne(name);
-		Assert.notNull(taskDefinition, String.format("no task defined: %s", name));
+		if (taskDefinition == null) {
+			throw new NoSuchTaskDefinitionException(name);
+		}
 
 		ModuleDefinition module = taskDefinition.getModuleDefinition();
 		ArtifactRegistration registration = this.registry.find(module.getName(), ArtifactType.task);
