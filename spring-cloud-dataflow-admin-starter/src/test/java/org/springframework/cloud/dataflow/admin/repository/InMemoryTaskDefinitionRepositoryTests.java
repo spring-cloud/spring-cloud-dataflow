@@ -63,12 +63,12 @@ public class InMemoryTaskDefinitionRepositoryTests {
 	@Test
 	public void testFindAllPageable() {
 		initializeRepository();
-		Pageable pageable = new PageRequest(1, 10);
+		Pageable pageable = new PageRequest(0, 10);
 
 		Page<TaskDefinition> page = repository.findAll(pageable);
 
 		assertEquals(page.getTotalElements(), 3);
-		assertEquals(page.getNumber(), 1);
+		assertEquals(page.getNumber(), 0);
 		assertEquals(page.getNumberOfElements(), 3);
 		assertEquals(page.getSize(), 10);
 		assertEquals(page.getContent().size(), 3);

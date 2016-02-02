@@ -23,14 +23,12 @@
 	</scm>
 	<properties>
 		<java.version>1.7</java.version>
-		<!-- Note, latest version is 1.11.2.RELEASE and get a failing test when upgrading -->
-		<spring-data-commons.version>1.9.1.RELEASE</spring-data-commons.version>
 		<spring-cloud-dataflow-ui.version>1.0.0.BUILD-SNAPSHOT</spring-cloud-dataflow-ui.version>
-		<spring-cloud-stream-configuration-metadata.version>1.0.0.BUILD-SNAPSHOT</spring-cloud-stream-configuration-metadata.version>
-		<spring-shell.version>1.2.0.M1</spring-shell.version>
-		<spring-cloud.version>Brixton.BUILD-SNAPSHOT</spring-cloud.version>
-		<cloudfoundry-client-lib.version>1.1.3</cloudfoundry-client-lib.version>
+		<spring-cloud-stream.version>1.0.0.BUILD-SNAPSHOT</spring-cloud-stream.version>
 		<spring-cloud-task.version>1.0.0.BUILD-SNAPSHOT</spring-cloud-task.version>
+		<spring-cloud-commons.version>1.1.0.BUILD-SNAPSHOT</spring-cloud-commons.version>
+		<spring-cloud-config.version>1.1.0.BUILD-SNAPSHOT</spring-cloud-config.version>
+		<spring-cloud-stream-configuration-metadata.version>1.0.0.BUILD-SNAPSHOT</spring-cloud-stream-configuration-metadata.version>
 	</properties>
 	<modules>
 		<module>spring-cloud-dataflow-artifact-registry</module>
@@ -49,30 +47,112 @@
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
+				<!-- TODO: remove this (it should be in stream BOM)
+					See https://github.com/spring-cloud/spring-cloud-stream/issues/338
+				-->
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-stream-configuration-metadata</artifactId>
+				<version>${spring-cloud-stream-configuration-metadata.version}</version>
+			</dependency>
+				<!-- TODO: remove this (it should be in stream modules BOM)
+					See https://github.com/spring-cloud/spring-cloud-stream-modules/issues/185
+				-->
+			<dependency>
+				<groupId>org.springframework.cloud.stream.module</groupId>
+				<artifactId>spring-cloud-stream-modules-analytics</artifactId>
+				<version>1.0.0.BUILD-SNAPSHOT</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-dataflow-dependencies</artifactId>
+				<version>1.0.0.BUILD-SNAPSHOT</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<dependency>
 				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-starter-parent</artifactId>
+				<artifactId>spring-boot-dependencies</artifactId>
 				<version>${spring-boot.version}</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
-				<artifactId>spring-cloud-starter-parent</artifactId>
-				<version>${spring-cloud.version}</version>
+				<artifactId>spring-cloud-stream-dependencies</artifactId>
+				<version>${spring-cloud-stream.version}</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
 			<dependency>
-				<groupId>org.cloudfoundry</groupId>
-				<artifactId>cloudfoundry-client-lib</artifactId>
-				<version>${cloudfoundry-client-lib.version}</version>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-commons-dependencies</artifactId>
+				<version>${spring-cloud-commons.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
 			</dependency>
-			<!-- To be moved to bom -->
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
-				<artifactId>spring-cloud-stream-configuration-metadata</artifactId>
-				<version>${spring-cloud-stream-configuration-metadata.version}</version>
+				<artifactId>spring-cloud-config-dependencies</artifactId>
+				<version>${spring-cloud-config.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-task-dependencies</artifactId>
+				<version>${spring-cloud-task.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
+	<profiles>
+		<profile>
+			<id>spring</id>
+			<repositories>
+				<repository>
+					<id>spring-snapshots</id>
+					<name>Spring Snapshots</name>
+					<url>http://repo.spring.io/libs-snapshot-local</url>
+					<snapshots>
+						<enabled>true</enabled>
+					</snapshots>
+				</repository>
+				<repository>
+					<id>spring-milestones</id>
+					<name>Spring Milestones</name>
+					<url>http://repo.spring.io/libs-milestone-local</url>
+					<snapshots>
+						<enabled>false</enabled>
+					</snapshots>
+				</repository>
+				<repository>
+					<id>spring-releases</id>
+					<name>Spring Releases</name>
+					<url>http://repo.spring.io/release</url>
+					<snapshots>
+						<enabled>false</enabled>
+					</snapshots>
+				</repository>
+			</repositories>
+			<pluginRepositories>
+				<pluginRepository>
+					<id>spring-snapshots</id>
+					<name>Spring Snapshots</name>
+					<url>http://repo.spring.io/libs-snapshot-local</url>
+					<snapshots>
+						<enabled>true</enabled>
+					</snapshots>
+				</pluginRepository>
+				<pluginRepository>
+					<id>spring-milestones</id>
+					<name>Spring Milestones</name>
+					<url>http://repo.spring.io/libs-milestone-local</url>
+					<snapshots>
+						<enabled>false</enabled>
+					</snapshots>
+				</pluginRepository>
+			</pluginRepositories>
+		</profile>
+	</profiles>
 </project>
