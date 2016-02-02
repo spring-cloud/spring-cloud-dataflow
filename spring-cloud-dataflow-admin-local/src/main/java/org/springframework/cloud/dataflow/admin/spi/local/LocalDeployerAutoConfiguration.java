@@ -17,6 +17,7 @@
 package org.springframework.cloud.dataflow.admin.spi.local;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -32,9 +33,11 @@ import org.springframework.context.annotation.Import;
  *
  * @author Eric Bottard
  * @author Josh Long
+ * @author Ilayaperumal Gopinathan
  */
 @Configuration
-public class LocalAutoConfiguration {
+@ConditionalOnClass(ModuleDeployer.class)
+public class LocalDeployerAutoConfiguration {
 
 	static final String LOCAL_DEPLOYER_PREFIX = "deployer.local";
 

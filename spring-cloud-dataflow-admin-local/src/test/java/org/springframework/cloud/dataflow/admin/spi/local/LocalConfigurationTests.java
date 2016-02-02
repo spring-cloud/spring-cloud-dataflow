@@ -27,7 +27,7 @@ import org.springframework.cloud.dataflow.admin.AdminApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 
 /**
- * Tests for {@link LocalAutoConfiguration}.
+ * Tests for {@link LocalDeployerAutoConfiguration}.
  *
  * @author Janne Valkealahti
  * @author Eric Bottard

@@ -1,2 +1,2 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-  org.springframework.cloud.dataflow.admin.spi.local.LocalAutoConfiguration
+  org.springframework.cloud.dataflow.admin.spi.local.LocalDeployerAutoConfiguration
