@@ -35,7 +35,6 @@
 				<filtering>true</filtering>
 				<includes>
 					<include>META-INF/spring.factories</include>
-					<include>admin.yml</include>
 					<include>banner.txt</include>
 				</includes>
 			</resource>
