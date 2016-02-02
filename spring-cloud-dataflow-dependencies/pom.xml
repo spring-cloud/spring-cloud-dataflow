@@ -2,10 +2,6 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<!--
-		NB: This BOM is designed to support consumption of Spring Cloud Data Flow
-		from the <a href="http://start.spring.io">Spring Initializr</a>.
- 	-->
 	<parent>
 		<artifactId>spring-cloud-dependencies-parent</artifactId>
 		<groupId>org.springframework.cloud</groupId>
@@ -18,16 +14,14 @@
 	<name>spring-cloud-dataflow-dependencies</name>
 	<description>Spring Cloud Data Flow Dependencies BOM designed to support consumption of Spring Cloud Data Flow from the Spring Initializr.</description>
 	<properties>
-		<spring-cloud-commons.version>1.1.0.BUILD-SNAPSHOT</spring-cloud-commons.version>
+		<cloudfoundry-client-lib.version>1.1.3</cloudfoundry-client-lib.version>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
-				<groupId>org.springframework.cloud</groupId>
-				<artifactId>spring-cloud-commons-dependencies</artifactId>
-				<version>${spring-cloud-commons.version}</version>
-				<type>pom</type>
-				<scope>import</scope>
+				<groupId>org.cloudfoundry</groupId>
+				<artifactId>cloudfoundry-client-lib</artifactId>
+				<version>${cloudfoundry-client-lib.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
