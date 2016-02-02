@@ -26,7 +26,6 @@
 		<!-- Note, latest version is 1.11.2.RELEASE and get a failing test when upgrading -->
 		<spring-data-commons.version>1.9.1.RELEASE</spring-data-commons.version>
 		<spring-cloud-dataflow-ui.version>1.0.0.BUILD-SNAPSHOT</spring-cloud-dataflow-ui.version>
-		<spring-shell.version>1.2.0.M1</spring-shell.version>
 		<spring-cloud-stream.version>1.0.0.BUILD-SNAPSHOT</spring-cloud-stream.version>
 		<spring-cloud-task.version>1.0.0.BUILD-SNAPSHOT</spring-cloud-task.version>
 		<spring-cloud-commons.version>1.1.0.BUILD-SNAPSHOT</spring-cloud-commons.version>
@@ -54,6 +53,19 @@
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-stream-configuration-metadata</artifactId>
 				<version>${spring-cloud-stream-configuration-metadata.version}</version>
+			</dependency>
+				<!-- TODO: remove this (it should be in stream modules BOM) -->
+			<dependency>
+				<groupId>org.springframework.cloud.stream.module</groupId>
+				<artifactId>spring-cloud-stream-modules-analytics</artifactId>
+				<version>1.0.0.BUILD-SNAPSHOT</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-dataflow-dependencies</artifactId>
+				<version>1.0.0.BUILD-SNAPSHOT</version>
+				<type>pom</type>
+				<scope>import</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.boot</groupId>
