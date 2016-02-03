@@ -34,6 +34,7 @@
 				<directory>src/main/resources</directory>
 				<filtering>true</filtering>
 				<includes>
+					<include>admin.yml</include>
 					<include>META-INF/spring.factories</include>
 					<include>banner.txt</include>
 				</includes>
