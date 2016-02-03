@@ -47,12 +47,9 @@ public class LocalDeployerAutoConfiguration {
 	@Import(ModuleLauncherConfiguration.class)
 	public static class InProcess {
 
-		@Value("${management.contextPath}")
-		private String contextPath;
-
 		@Bean
 		public ModuleDeployer processModuleDeployer(ModuleLauncher moduleLauncher) {
-			return new InProcessModuleDeployer(moduleLauncher, this.contextPath);
+			return new InProcessModuleDeployer(moduleLauncher);
 		}
 
 		@Bean
