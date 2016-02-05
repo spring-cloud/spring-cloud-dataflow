@@ -88,6 +88,7 @@ public class InProcessModuleDeployer implements ModuleDeployer {
 		catch (Exception e) {
 			throw new IllegalStateException("failed to determine URL for module: " + module, e);
 		}
+		args.put("management.contextPath", "/");
 		args.put("security.ignored", SHUTDOWN_URL); // Make sure we can shutdown the module
 		args.put("endpoints.shutdown.enabled", "true");
 		args.put("spring.main.show_banner", "false");
