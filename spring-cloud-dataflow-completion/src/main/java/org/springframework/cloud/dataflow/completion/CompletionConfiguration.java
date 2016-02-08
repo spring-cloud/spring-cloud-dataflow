@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2015-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import org.springframework.context.annotation.Import;
 /**
  * Include this Configuration class to expose a fully configured {@link StreamCompletionProvider}.
  * @author Eric Bottard
+ * @author Ilayaperumal Gopinathan
  */
 @Configuration
 @Import({ModuleResolverConfiguration.class, ModuleConfigurationMetadataResolverAutoConfiguration.class})
@@ -59,7 +60,6 @@ public class CompletionConfiguration {
 				channelNameYieldsModulesRecoveryStrategy(),
 				modulesAfterPipeRecoveryStrategy(),
 				configurationPropertyValueHintRecoveryStrategy()
-
 		);
 		List<ExpansionStrategy> expansionStrategies = Arrays.asList(
 				addModuleOptionsExpansionStrategy(),
@@ -69,6 +69,7 @@ public class CompletionConfiguration {
 				// and return its own as the sole candidates
 				configurationPropertyValueHintExpansionStrategy()
 		);
+
 		return new StreamCompletionProvider(recoveryStrategies, expansionStrategies);
 	}
 
