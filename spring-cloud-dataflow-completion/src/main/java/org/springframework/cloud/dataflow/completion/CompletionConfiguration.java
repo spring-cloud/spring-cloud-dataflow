@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2015-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 package org.springframework.cloud.dataflow.completion;
 
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +33,7 @@ import org.springframework.context.annotation.Import;
 /**
  * Include this Configuration class to expose a fully configured {@link StreamCompletionProvider}.
  * @author Eric Bottard
+ * @author Ilayaperumal Gopinathan
  */
 @Configuration
 @Import({ModuleResolverConfiguration.class, ModuleConfigurationMetadataResolverAutoConfiguration.class})
@@ -51,24 +52,22 @@ public class CompletionConfiguration {
 	@Bean
 	@SuppressWarnings("unchecked")
 	public StreamCompletionProvider streamCompletionProvider() {
-		List<RecoveryStrategy<?>> recoveryStrategies = Arrays.<RecoveryStrategy<?>>asList(
-				emptyStartYieldsModulesRecoveryStrategy(),
-				expandOneDashToTwoDashesRecoveryStrategy(),
-				configurationPropertyNameAfterDashDashRecoveryStrategy(),
-				unfinishedConfigurationPropertyNameRecoveryStrategy(),
-				channelNameYieldsModulesRecoveryStrategy(),
-				modulesAfterPipeRecoveryStrategy(),
-				configurationPropertyValueHintRecoveryStrategy()
+		List<RecoveryStrategy<?>> recoveryStrategies = new ArrayList<>();
+		recoveryStrategies.add(emptyStartYieldsModulesRecoveryStrategy());
+		recoveryStrategies.add(expandOneDashToTwoDashesRecoveryStrategy());
+		recoveryStrategies.add(configurationPropertyNameAfterDashDashRecoveryStrategy());
+		recoveryStrategies.add(unfinishedConfigurationPropertyNameRecoveryStrategy());
+		recoveryStrategies.add(channelNameYieldsModulesRecoveryStrategy());
+		recoveryStrategies.add(modulesAfterPipeRecoveryStrategy());
+		recoveryStrategies.add(configurationPropertyValueHintRecoveryStrategy());
 
-		);
-		List<ExpansionStrategy> expansionStrategies = Arrays.asList(
-				addModuleOptionsExpansionStrategy(),
-				pipeIntoOtherModulesExpansionStrategy(),
-				unfinishedModuleNameExpansionStrategy(),
-				// Make sure this one runs last, as it may clear already computed proposals
-				// and return its own as the sole candidates
-				configurationPropertyValueHintExpansionStrategy()
-		);
+		List<ExpansionStrategy> expansionStrategies = new ArrayList<>();
+		expansionStrategies.add(addModuleOptionsExpansionStrategy());
+		expansionStrategies.add(pipeIntoOtherModulesExpansionStrategy());
+		expansionStrategies.add(unfinishedModuleNameExpansionStrategy());
+		// Make sure this one runs last, as it may clear already computed proposals
+		// and return its own as the sole candidates
+		expansionStrategies.add(configurationPropertyValueHintExpansionStrategy());
 		return new StreamCompletionProvider(recoveryStrategies, expansionStrategies);
 	}
 
