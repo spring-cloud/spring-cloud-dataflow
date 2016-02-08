@@ -112,6 +112,7 @@ public class ArtifactRegistryPopulator {
 		populateDefault("jdbc", sink);
 		populateDefault("log", sink);
 		populateDefault("redis", sink);
+		populateDefault("router", sink);
 		populateDefault("tcp", sink);
 		populateDefault("throughput", sink);
 		populateDefault("websocket", sink);
