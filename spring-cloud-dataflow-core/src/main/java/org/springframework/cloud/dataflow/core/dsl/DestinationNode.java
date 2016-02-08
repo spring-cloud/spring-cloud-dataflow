@@ -28,9 +28,12 @@ public class DestinationNode extends AstNode {
 
 	private List<String> nameComponents;
 
-	public DestinationNode(int startPos, int endPos, List<String> nameComponents) {
+	private ArgumentNode[] arguments;
+
+	public DestinationNode(int startPos, int endPos, List<String> nameComponents, ArgumentNode[] arguments) {
 		super(startPos, endPos);
 		this.nameComponents = nameComponents;
+		this.arguments = arguments;
 	}
 
 	@Override
@@ -41,6 +44,11 @@ public class DestinationNode extends AstNode {
 		if (includePositionalInfo) {
 			s.append(":");
 			s.append(getStartPos()).append(">").append(getEndPos());
+		}
+		if (arguments != null) {
+			for (ArgumentNode argumentNode : arguments) {
+				s.append(" --").append(argumentNode.getName()).append("=").append(argumentNode.getValue());
+			}
 		}
 		s.append(")");
 		return s.toString();
@@ -63,6 +71,11 @@ public class DestinationNode extends AstNode {
 	}
 
 	public DestinationNode copyOf() {
-		return new DestinationNode(super.startPos, super.endPos, nameComponents);
+		return new DestinationNode(super.startPos, super.endPos, nameComponents, arguments);
 	}
+
+	ArgumentNode[] getArguments() {
+		return this.arguments;
+	}
+
 }

@@ -339,7 +339,9 @@ public class StreamParser extends ModuleParser {
 		if (!destinationNameComponents.isEmpty()) {
 			endPos = destinationNameComponents.get(destinationNameComponents.size() - 1).endPos;
 		}
-		return new DestinationNode(identifierToken.startPos, endPos, tokenListToStringList(destinationNameComponents));
+		ArgumentNode[] argumentNodes = eatModuleArgs();
+		return new DestinationNode(identifierToken.startPos, endPos, tokenListToStringList(destinationNameComponents),
+				argumentNodes);
 	}
 
 	/**
