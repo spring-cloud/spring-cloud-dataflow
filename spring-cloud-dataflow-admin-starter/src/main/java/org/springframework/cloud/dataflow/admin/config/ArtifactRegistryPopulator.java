@@ -94,11 +94,11 @@ public class ArtifactRegistryPopulator {
 		populateDefault("time", source);
 		populateDefault("trigger", source);
 		populateDefault("twitterstream", source);
+		populateDefault("bridge", processor);
 		populateDefault("filter", processor);
 		populateDefault("groovy-filter", processor);
 		populateDefault("groovy-transform", processor);
 		populateDefault("httpclient", processor);
-		populateDefault("noop", processor);
 		populateDefault("pmml", processor);
 		populateDefault("splitter", processor);
 		populateDefault("transform", processor);
