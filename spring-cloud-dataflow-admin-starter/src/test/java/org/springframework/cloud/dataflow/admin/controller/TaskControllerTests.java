@@ -182,8 +182,7 @@ public class TaskControllerTests {
 	public void testDestroyTaskNotFound() throws Exception {
 		mockMvc.perform(
 				delete("/tasks/definitions/myTask").accept(MediaType.APPLICATION_JSON)).andDo(print())
-				.andExpect(status().isNotFound());
-
+				.andExpect(status().isOk());
 		assertEquals(0, repository.count());
 	}
 

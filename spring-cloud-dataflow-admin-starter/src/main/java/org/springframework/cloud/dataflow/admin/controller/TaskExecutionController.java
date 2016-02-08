@@ -100,7 +100,7 @@ public class TaskExecutionController {
 	 * @param id the id of the requested {@link TaskExecution}
 	 * @return the {@link TaskExecution}
 	 */
-	@RequestMapping(value = "/id/{id}", method = RequestMethod.GET)
+	@RequestMapping(value = "/{id}", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
 	public TaskExecutionResource view(@PathVariable("id") long id) {
 		TaskExecution execution = this.explorer.getTaskExecution(id);

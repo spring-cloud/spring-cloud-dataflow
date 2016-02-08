@@ -47,6 +47,8 @@ public class TaskTemplate implements TaskOperations {
 
 	private static final String EXECUTIONS_RELATION = "tasks/executions";
 
+	private static final String EXECUTION_RELATION = "tasks/executions/execution";
+
 	private final RestTemplate restTemplate;
 
 	private final Link definitionsLink;
@@ -59,6 +61,8 @@ public class TaskTemplate implements TaskOperations {
 
 	private final Link executionsLink;
 
+	private final Link executionLink;
+
 	TaskTemplate(RestTemplate restTemplate, ResourceSupport resources) {
 		Assert.notNull(resources, "URI Resources must not be be null");
 		Assert.notNull(resources.getLink(EXECUTIONS_RELATION), "Executions relation is required");
@@ -68,6 +72,8 @@ public class TaskTemplate implements TaskOperations {
 		Assert.notNull(resources.getLink(DEPLOYMENT_RELATION), "Deployment relation is required");
 		Assert.notNull(restTemplate, "RestTemplate must not be null");
 		Assert.notNull(resources.getLink(EXECUTIONS_RELATION), "Executions relation is required");
+		Assert.notNull(resources.getLink(EXECUTION_RELATION), "Executions view relation is required");
+
 
 		this.restTemplate = restTemplate;
 		this.definitionsLink = resources.getLink(DEFINITIONS_RELATION);
@@ -75,6 +81,7 @@ public class TaskTemplate implements TaskOperations {
 		this.deploymentsLink = resources.getLink(DEPLOYMENTS_RELATION);
 		this.deploymentLink = resources.getLink(DEPLOYMENT_RELATION);
 		this.executionsLink = resources.getLink(EXECUTIONS_RELATION);
+		this.executionLink = resources.getLink(EXECUTION_RELATION);
 
 	}
 
@@ -123,11 +130,8 @@ public class TaskTemplate implements TaskOperations {
 
 	@Override
 	public TaskExecutionResource view(long id) {
-		String uriTemplate = executionsLink.getHref().toString();
-		uriTemplate = uriTemplate + "/id/{id}";
-
-		return restTemplate.getForObject(uriTemplate, TaskExecutionResource.class,
-			Collections.singletonMap("id", id));
+		return restTemplate.getForObject(executionLink.expand(id).getHref(),
+				TaskExecutionResource.class);
 	}
 
 }
