@@ -468,6 +468,12 @@ public class StreamParserTests {
 		assertEquals("[(bar:1>4)>(ModuleNode:bridge:5>6)>(boo:8>11)]", sn.stringify(true));
 	}
 
+	@Test
+	public void testSourceChannelArgs() {
+		StreamNode sn = parse(":test --group=test > file");
+		assertEquals("[(test:1>5 --group=test)>(ModuleNode:file:21>25)]", sn.stringify(true));
+	}
+
 	// Parameters must be constructed via adjacent tokens
 	@Test
 	public void needAdjacentTokensForParameters() {

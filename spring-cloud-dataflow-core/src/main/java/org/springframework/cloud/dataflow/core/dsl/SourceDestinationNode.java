@@ -51,4 +51,8 @@ public class SourceDestinationNode extends AstNode {
 		return destinationNode.getDestinationName();
 	}
 
+	public ArgumentNode[] getArguments() {
+		return this.getDestinationNode().getArguments();
+	}
+
 }
