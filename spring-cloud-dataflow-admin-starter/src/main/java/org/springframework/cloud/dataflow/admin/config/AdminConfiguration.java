@@ -26,6 +26,7 @@ import javax.sql.DataSource;
 import org.h2.tools.Server;
 import org.slf4j.LoggerFactory;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.actuate.metrics.repository.MetricRepository;
 import org.springframework.boot.actuate.metrics.repository.redis.RedisMetricRepository;
@@ -36,7 +37,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplicat
 import org.springframework.boot.autoconfigure.security.oauth2.OAuth2AutoConfiguration;
 import org.springframework.boot.autoconfigure.web.HttpMessageConverters;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.cloud.dataflow.admin.completion.TapOnChannelExpansionStrategy;
+import org.springframework.cloud.dataflow.admin.completion.TapOnChannelRecoveryStrategy;
 import org.springframework.cloud.dataflow.admin.controller.StreamDefinitionController;
 import org.springframework.cloud.dataflow.admin.repository.InMemoryStreamDefinitionRepository;
 import org.springframework.cloud.dataflow.admin.repository.InMemoryTaskDefinitionRepository;
@@ -47,6 +48,7 @@ import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistry;
 import org.springframework.cloud.dataflow.artifact.registry.RedisArtifactRegistry;
 import org.springframework.cloud.dataflow.completion.CompletionConfiguration;
 import org.springframework.cloud.dataflow.completion.RecoveryStrategy;
+import org.springframework.cloud.dataflow.completion.StreamCompletionProvider;
 import org.springframework.cloud.stream.module.metrics.FieldValueCounterRepository;
 import org.springframework.cloud.stream.module.metrics.RedisFieldValueCounterRepository;
 import org.springframework.cloud.task.repository.TaskExplorer;
@@ -95,6 +97,9 @@ public class AdminConfiguration {
 
 	@Value("${spring.datasource.url:#{null}}")
 	private String dataSourceUrl;
+
+	@Autowired
+	StreamCompletionProvider streamCompletionProvider;
 
 	@Bean
 	@ConditionalOnMissingBean
@@ -158,9 +163,13 @@ public class AdminConfiguration {
 	}
 
 	@Bean
-	@ConditionalOnMissingBean
+	@ConditionalOnMissingBean(TapOnChannelRecoveryStrategy.class)
 	public RecoveryStrategy<?> tapOnChannelExpansionStrategy() {
-		return new TapOnChannelExpansionStrategy();
+		RecoveryStrategy<?> recoveryStrategy = new TapOnChannelRecoveryStrategy(streamDefinitionRepository());
+		if (this.streamCompletionProvider != null) {
+			this.streamCompletionProvider.addCompletionRecoveryStrategy(recoveryStrategy);
+		}
+		return recoveryStrategy;
 	}
 
 	@Bean

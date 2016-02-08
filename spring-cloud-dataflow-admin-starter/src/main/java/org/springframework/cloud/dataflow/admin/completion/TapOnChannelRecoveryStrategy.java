@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2015-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.cloud.dataflow.admin.completion;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.dataflow.admin.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.completion.CompletionProposal;
 import org.springframework.cloud.dataflow.completion.RecoveryStrategy;
@@ -33,11 +32,15 @@ import org.springframework.cloud.dataflow.core.dsl.ParseException;
  * <p>Lives in this package as it needs access to a {@link StreamDefinitionRepository}.</p>
  *
  * @author Eric Bottard
+ * @author Ilayaperumal Gopinathan
  */
-public class TapOnChannelExpansionStrategy implements RecoveryStrategy<ParseException> {
+public class TapOnChannelRecoveryStrategy implements RecoveryStrategy<ParseException> {
 
-	@Autowired
-	private StreamDefinitionRepository streamDefinitionRepository;
+	private final StreamDefinitionRepository streamDefinitionRepository;
+
+	public TapOnChannelRecoveryStrategy(StreamDefinitionRepository streamDefinitionRepository) {
+		this.streamDefinitionRepository = streamDefinitionRepository;
+	}
 
 	@Override
 	public boolean shouldTrigger(String dslStart, Exception exception) {
