@@ -32,6 +32,7 @@ import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -85,10 +86,10 @@ public class TaskExecutionController {
 	 * @param pageable  page-able collection of {@code TaskExecution}s.
 	 * @param assembler for the {@link TaskExecution}s
 	 */
-	@RequestMapping(value = "/name/{taskName}", method = RequestMethod.GET)
+	@RequestMapping(value = "", method = RequestMethod.GET, params = "name")
 	@ResponseStatus(HttpStatus.OK)
 	public PagedResources<TaskExecutionResource> retrieveTasksByName(
-			@PathVariable("taskName") String taskName, Pageable pageable,
+			@RequestParam("name") String taskName, Pageable pageable,
 				PagedResourcesAssembler<TaskExecution> assembler) {
 		Page<TaskExecution> result = explorer.findTaskExecutionsByName(taskName, pageable);
 		return assembler.toResource(result, taskAssembler);

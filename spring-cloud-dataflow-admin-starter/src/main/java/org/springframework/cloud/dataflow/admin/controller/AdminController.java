@@ -84,7 +84,8 @@ public class AdminController {
 		resourceSupport.add(unescapeTemplateVariables(entityLinks.linkToSingleResource(TaskDeploymentResource.class, "{name}").withRel("tasks/deployments/deployment")));
 
 		resourceSupport.add(entityLinks.linkToCollectionResource(TaskExecutionResource.class).withRel("tasks/executions"));
-		resourceSupport.add(unescapeTemplateVariables(entityLinks.linkToSingleResource(TaskExecutionResource.class, "{name}").withRel("tasks/executions/name")));
+		String templated = entityLinks.linkToCollectionResource(TaskExecutionResource.class).getHref() + "{?name}";
+		resourceSupport.add(new Link(templated).withRel("tasks/executions/name"));
 		resourceSupport.add(unescapeTemplateVariables(entityLinks.linkToSingleResource(TaskExecutionResource.class, "{id}").withRel("tasks/executions/execution")));
 
 		resourceSupport.add(entityLinks.linkToCollectionResource(CounterResource.class).withRel("counters"));
@@ -102,7 +103,7 @@ public class AdminController {
 
 		resourceSupport.add(unescapeTemplateVariables(entityLinks.linkFor(ModuleInstanceStatusResource.class, UriComponents.UriTemplateVariables.SKIP_VALUE).withRel("runtime/modules/instances")));
 
-		String templated = entityLinks.linkFor(CompletionProposalsResource.class).withSelfRel().getHref() + ("/stream{?start,detailLevel}");
+		templated = entityLinks.linkFor(CompletionProposalsResource.class).withSelfRel().getHref() + ("/stream{?start,detailLevel}");
 		resourceSupport.add(new Link(templated).withRel("completions/stream"));
 
 		return resourceSupport;

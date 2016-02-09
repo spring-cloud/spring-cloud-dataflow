@@ -31,7 +31,6 @@ import org.springframework.web.client.RestTemplate;
 
 /**
  * Implementation for {@link org.springframework.cloud.dataflow.rest.client.TaskOperations}.
- *
  * @author Glenn Renfro
  * @author Michael Minella
  */
@@ -49,6 +48,8 @@ public class TaskTemplate implements TaskOperations {
 
 	private static final String EXECUTION_RELATION = "tasks/executions/execution";
 
+	private static final String EXECUTION_RELATION_BY_NAME = "tasks/executions/name";
+
 	private final RestTemplate restTemplate;
 
 	private final Link definitionsLink;
@@ -63,6 +64,8 @@ public class TaskTemplate implements TaskOperations {
 
 	private final Link executionLink;
 
+	private final Link executionByNameLink;
+
 	TaskTemplate(RestTemplate restTemplate, ResourceSupport resources) {
 		Assert.notNull(resources, "URI Resources must not be be null");
 		Assert.notNull(resources.getLink(EXECUTIONS_RELATION), "Executions relation is required");
@@ -72,7 +75,8 @@ public class TaskTemplate implements TaskOperations {
 		Assert.notNull(resources.getLink(DEPLOYMENT_RELATION), "Deployment relation is required");
 		Assert.notNull(restTemplate, "RestTemplate must not be null");
 		Assert.notNull(resources.getLink(EXECUTIONS_RELATION), "Executions relation is required");
-		Assert.notNull(resources.getLink(EXECUTION_RELATION), "Execution view relation is required");
+		Assert.notNull(resources.getLink(EXECUTION_RELATION), "Execution relation is required");
+		Assert.notNull(resources.getLink(EXECUTION_RELATION_BY_NAME), "Execution by name relation is required");
 
 
 		this.restTemplate = restTemplate;
@@ -82,6 +86,7 @@ public class TaskTemplate implements TaskOperations {
 		this.deploymentLink = resources.getLink(DEPLOYMENT_RELATION);
 		this.executionsLink = resources.getLink(EXECUTIONS_RELATION);
 		this.executionLink = resources.getLink(EXECUTION_RELATION);
+		this.executionByNameLink = resources.getLink(EXECUTION_RELATION_BY_NAME);
 
 	}
 
@@ -122,10 +127,7 @@ public class TaskTemplate implements TaskOperations {
 
 	@Override
 	public TaskExecutionResource.Page executionListByTaskName(String taskName) {
-		String uriTemplate = executionsLink.getHref().toString();
-		uriTemplate = uriTemplate + "/name/{taskName}";
-		return restTemplate.getForObject(uriTemplate, TaskExecutionResource.Page.class,
-				Collections.singletonMap("taskName", taskName));
+		return restTemplate.getForObject(executionByNameLink.expand(taskName).getHref(), TaskExecutionResource.Page.class);
 	}
 
 	@Override
