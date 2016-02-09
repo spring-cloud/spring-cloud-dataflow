@@ -72,7 +72,7 @@ public class TaskTemplate implements TaskOperations {
 		Assert.notNull(resources.getLink(DEPLOYMENT_RELATION), "Deployment relation is required");
 		Assert.notNull(restTemplate, "RestTemplate must not be null");
 		Assert.notNull(resources.getLink(EXECUTIONS_RELATION), "Executions relation is required");
-		Assert.notNull(resources.getLink(EXECUTION_RELATION), "Executions view relation is required");
+		Assert.notNull(resources.getLink(EXECUTION_RELATION), "Execution view relation is required");
 
 
 		this.restTemplate = restTemplate;

@@ -18,6 +18,7 @@ package org.springframework.cloud.dataflow.admin.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.cloud.dataflow.admin.repository.NoSuchTaskDefinitionException;
 import org.springframework.cloud.dataflow.admin.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistry;
 import org.springframework.cloud.dataflow.core.ModuleDeploymentId;
@@ -98,6 +99,9 @@ public class TaskDefinitionController {
 	@RequestMapping(value = "/{name}", method = RequestMethod.DELETE)
 	@ResponseStatus(HttpStatus.OK)
 	public void destroyTask(@PathVariable("name") String name) {
+		if (repository.findOne(name) == null) {
+			throw new NoSuchTaskDefinitionException(name);
+		}
 		repository.delete(name);
 	}
 
