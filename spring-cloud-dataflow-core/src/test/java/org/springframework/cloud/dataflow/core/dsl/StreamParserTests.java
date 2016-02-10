@@ -340,48 +340,48 @@ public class StreamParserTests {
 	}
 
 	@Test
-	public void sourceChannel() {
+	public void sourceDestination() {
 		StreamNode sn = parse(":foobar > file");
 		assertEquals("[(foobar:1>7)>(ModuleNode:file:10>14)]", sn.stringify(true));
 	}
 
 	@Test
-	public void sinkChannel() {
+	public void sinkDestination() {
 		StreamNode sn = parse("http > :foo");
 		assertEquals("[(ModuleNode:http:0>4)>(foo:8>11)]", sn.stringify(true));
 	}
 
 	@Test
-	public void channelVariants() {
+	public void destinationVariants() {
 		checkForParseError("http > :test value", DSLMessage.UNEXPECTED_DATA_AFTER_STREAMDEF, 13);
-		checkForParseError(":boo .xx > file", DSLMessage.NO_WHITESPACE_IN_CHANNEL_DEFINITION, 5);
-		checkForParseError(":boo . xx > file", DSLMessage.NO_WHITESPACE_IN_CHANNEL_DEFINITION, 5);
-		checkForParseError(":boo. xx > file", DSLMessage.NO_WHITESPACE_IN_CHANNEL_DEFINITION, 6);
-		checkForParseError(":boo.xx. yy > file", DSLMessage.NO_WHITESPACE_IN_CHANNEL_DEFINITION, 9);
-		checkForParseError(":boo.xx .yy > file", DSLMessage.NO_WHITESPACE_IN_CHANNEL_DEFINITION, 8);
-		checkForParseError(":boo.xx . yy > file", DSLMessage.NO_WHITESPACE_IN_CHANNEL_DEFINITION, 8);
+		checkForParseError(":boo .xx > file", DSLMessage.NO_WHITESPACE_IN_DESTINATION_DEFINITION, 5);
+		checkForParseError(":boo . xx > file", DSLMessage.NO_WHITESPACE_IN_DESTINATION_DEFINITION, 5);
+		checkForParseError(":boo. xx > file", DSLMessage.NO_WHITESPACE_IN_DESTINATION_DEFINITION, 6);
+		checkForParseError(":boo.xx. yy > file", DSLMessage.NO_WHITESPACE_IN_DESTINATION_DEFINITION, 9);
+		checkForParseError(":boo.xx .yy > file", DSLMessage.NO_WHITESPACE_IN_DESTINATION_DEFINITION, 8);
+		checkForParseError(":boo.xx . yy > file", DSLMessage.NO_WHITESPACE_IN_DESTINATION_DEFINITION, 8);
 
 		sn = parse("wibble: http > :bar");
 		assertEquals("[((Label:wibble) ModuleNode:http)>(bar)]", sn.stringify());
 	}
 
 	@Test
-	public void sourceChannel2() {
+	public void sourceDestination2() {
 		parse("foo = http | bar | file");
 		StreamNode ast = parse(":foo.bar > file");
 		assertEquals("[(foo.bar:1>8)>(ModuleNode:file:11>15)]", ast.stringify(true));
-		assertEquals("foo.bar", ast.getSourceChannelNode().getChannelName());
+		assertEquals("foo.bar", ast.getSourceDestinationNode().getDestinationName());
 	}
 
 	@Test
-	public void sourceTapChannel() {
+	public void sourceTapDestination() {
 		parse("mystream = http | file");
 		StreamNode ast = parse(":mystream.http > file");
 		assertEquals(
 				"[(mystream.http:1>14)>(ModuleNode:file:17>21)]",
 				ast.stringify(true));
-		SourceChannelNode sourceChannelNode = ast.getSourceChannelNode();
-		assertEquals("mystream.http", sourceChannelNode.getChannelName());
+		SourceDestinationNode sourceDestinationNode = ast.getSourceDestinationNode();
+		assertEquals("mystream.http", sourceDestinationNode.getDestinationName());
 	}
 
 	@Test
@@ -415,7 +415,7 @@ public class StreamParserTests {
 
 	@Test
 	public void errorCases07() {
-		checkForParseError("foo > bar", DSLMessage.EXPECTED_CHANNEL_PREFIX, 6, "bar");
+		checkForParseError("foo > bar", DSLMessage.EXPECTED_DESTINATION_PREFIX, 6, "bar");
 		checkForParseError(":foo >", DSLMessage.OOD, 6);
 		checkForParseError(":foo > --2323", DSLMessage.EXPECTED_MODULENAME, 7, "--");
 		checkForParseError(":foo > *", DSLMessage.UNEXPECTED_DATA, 7, "*");
@@ -459,7 +459,7 @@ public class StreamParserTests {
 	public void tapWithLabels() {
 		parse("mystream = http | flibble: transform | file");
 		sn = parse(":mystream.flibble > file");
-		assertEquals("mystream.flibble", sn.getSourceChannelNode().getChannelName());
+		assertEquals("mystream.flibble", sn.getSourceDestinationNode().getDestinationName());
 	}
 
 	@Test

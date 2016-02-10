@@ -19,36 +19,36 @@ package org.springframework.cloud.dataflow.core.dsl;
 /**
  * @author Andy Clement
  */
-public class SourceChannelNode extends AstNode {
+public class SourceDestinationNode extends AstNode {
 
-	private final ChannelNode channelNode;
+	private final DestinationNode destinationNode;
 
-	public SourceChannelNode(ChannelNode channelNode, int endPos) {
-		super(channelNode.startPos, endPos);
-		this.channelNode = channelNode;
+	public SourceDestinationNode(DestinationNode destinationNode, int endPos) {
+		super(destinationNode.startPos, endPos);
+		this.destinationNode = destinationNode;
 	}
 
 	/** @inheritDoc */
 	@Override
 	public String stringify(boolean includePositionalInfo) {
-		return channelNode.stringify(includePositionalInfo) + ">";
+		return destinationNode.stringify(includePositionalInfo) + ">";
 	}
 
 	@Override
 	public String toString() {
-		return channelNode.toString() + " > ";
+		return destinationNode.toString() + " > ";
 	}
 
-	public ChannelNode getChannelNode() {
-		return channelNode;
+	public DestinationNode getDestinationNode() {
+		return destinationNode;
 	}
 
-	public SourceChannelNode copyOf() {
-		return new SourceChannelNode(channelNode.copyOf(), super.endPos);
+	public SourceDestinationNode copyOf() {
+		return new SourceDestinationNode(destinationNode.copyOf(), super.endPos);
 	}
 
-	public String getChannelName() {
-		return channelNode.getChannelName();
+	public String getDestinationName() {
+		return destinationNode.getDestinationName();
 	}
 
 }

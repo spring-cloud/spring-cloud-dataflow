@@ -173,13 +173,13 @@ public class StreamDefinitionTests {
 	}
 
 	@Test
-	public void namedChannelsForbiddenInComposedModules() {
+	public void destinationsForbiddenInComposedModules() {
 		try {
 			new StreamDefinition("test", ":foo > boot");
 		}
 		catch (ParseException expected) {
 			assertThat(expected.getMessage(),
-					containsString("A named channel is not supported in this kind of definition"));
+					containsString("A destination is not supported in this kind of definition"));
 			assertThat(expected.getPosition(), is(0));
 		}
 		try {
@@ -187,7 +187,7 @@ public class StreamDefinitionTests {
 		}
 		catch (ParseException expected) {
 			assertThat(expected.getMessage(),
-					containsString("A named channel is not supported in this kind of definition"));
+					containsString("A destination is not supported in this kind of definition"));
 			assertThat(expected.getPosition(), is(13));
 		}
 	}

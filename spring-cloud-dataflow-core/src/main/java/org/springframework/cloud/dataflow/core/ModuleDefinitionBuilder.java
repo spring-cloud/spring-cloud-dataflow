@@ -23,8 +23,8 @@ import java.util.List;
 
 import org.springframework.cloud.dataflow.core.dsl.ArgumentNode;
 import org.springframework.cloud.dataflow.core.dsl.ModuleNode;
-import org.springframework.cloud.dataflow.core.dsl.SinkChannelNode;
-import org.springframework.cloud.dataflow.core.dsl.SourceChannelNode;
+import org.springframework.cloud.dataflow.core.dsl.SinkDestinationNode;
+import org.springframework.cloud.dataflow.core.dsl.SourceDestinationNode;
 import org.springframework.cloud.dataflow.core.dsl.StreamNode;
 import org.springframework.util.Assert;
 
@@ -98,15 +98,15 @@ class ModuleDefinitionBuilder {
 			}
 			builders.add(builder);
 		}
-		SourceChannelNode sourceChannel = streamNode.getSourceChannelNode();
+		SourceDestinationNode sourceChannel = streamNode.getSourceDestinationNode();
 		if (sourceChannel != null) {
-			builders.getLast().setParameter(BindingProperties.INPUT_BINDING_KEY, sourceChannel.getChannelName());
+			builders.getLast().setParameter(BindingProperties.INPUT_BINDING_KEY, sourceChannel.getDestinationName());
 			builders.getLast().setParameter(BindingProperties.INPUT_GROUP_KEY, streamName);
 			builders.getLast().setParameter(BindingProperties.INPUT_DURABLE_SUBSCRIPTION_KEY, "true");
 		}
-		SinkChannelNode sinkChannel = streamNode.getSinkChannelNode();
+		SinkDestinationNode sinkChannel = streamNode.getSinkDestinationNode();
 		if (sinkChannel != null) {
-			builders.getFirst().setParameter(BindingProperties.OUTPUT_BINDING_KEY, sinkChannel.getChannelName());
+			builders.getFirst().setParameter(BindingProperties.OUTPUT_BINDING_KEY, sinkChannel.getDestinationName());
 		}
 		List<ModuleDefinition> moduleDefinitions = new ArrayList<ModuleDefinition>(builders.size());
 		for (ModuleDefinition.Builder builder : builders) {
