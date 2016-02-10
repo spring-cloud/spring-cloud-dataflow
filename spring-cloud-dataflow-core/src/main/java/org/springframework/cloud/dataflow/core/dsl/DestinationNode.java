@@ -24,11 +24,11 @@ import java.util.List;
  * @author Ilayaperumal Gopinathan
  * @author Mark Fisher
  */
-public class ChannelNode extends AstNode {
+public class DestinationNode extends AstNode {
 
 	private List<String> nameComponents;
 
-	public ChannelNode(int startPos, int endPos, List<String> nameComponents) {
+	public DestinationNode(int startPos, int endPos, List<String> nameComponents) {
 		super(startPos, endPos);
 		this.nameComponents = nameComponents;
 	}
@@ -37,7 +37,7 @@ public class ChannelNode extends AstNode {
 	public String stringify(boolean includePositionalInfo) {
 		StringBuilder s = new StringBuilder();
 		s.append("(");
-		s.append(getChannelName());
+		s.append(getDestinationName());
 		if (includePositionalInfo) {
 			s.append(":");
 			s.append(getStartPos()).append(">").append(getEndPos());
@@ -48,10 +48,10 @@ public class ChannelNode extends AstNode {
 
 	@Override
 	public String toString() {
-		return getChannelName();
+		return getDestinationName();
 	}
 
-	String getChannelName() {
+	String getDestinationName() {
 		StringBuilder s = new StringBuilder();
 		for (int t = 0, max = nameComponents.size(); t < max; t++) {
 			if (t != 0) {
@@ -62,7 +62,7 @@ public class ChannelNode extends AstNode {
 		return s.toString();
 	}
 
-	public ChannelNode copyOf() {
-		return new ChannelNode(super.startPos, super.endPos, nameComponents);
+	public DestinationNode copyOf() {
+		return new DestinationNode(super.startPos, super.endPos, nameComponents);
 	}
 }

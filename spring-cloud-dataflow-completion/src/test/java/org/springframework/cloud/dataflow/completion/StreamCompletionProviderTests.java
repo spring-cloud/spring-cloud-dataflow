@@ -175,7 +175,7 @@ public class StreamCompletionProviderTests {
 
 	@Test
 	// queue:foo > <TAB>  ==> add module names
-	public void testNamedChannelIntoModules() {
+	public void testDestinationIntoModules() {
 		assertThat(completionProvider.complete("queue:foo >", 1), hasItems(
 				proposalThat(is("queue:foo > filter")),
 				proposalThat(is("queue:foo > log"))
@@ -187,7 +187,7 @@ public class StreamCompletionProviderTests {
 
 	@Test
 	// tap:stream:foo > <TAB>  ==> add module names
-	public void testNamedChannelIntoModulesVariant() {
+	public void testDestinationIntoModulesVariant() {
 		assertThat(completionProvider.complete("tap:stream:foo >", 1), hasItems(
 				proposalThat(is("tap:stream:foo > filter")),
 				proposalThat(is("tap:stream:foo > log"))

@@ -66,21 +66,20 @@ public enum DSLMessage {
 			"ambiguous module name ''{0}'' in stream named ''{1}'', appears at both position {2} and {3}"), //
 	STREAM_NAME_MATCHING_MODULE_NAME(ERROR, 130,
 			"Stream name ''{0}'' same as that of its modules' names is not allowed."), //
-	CHANNEL_INDEXING_NOT_ALLOWED(ERROR, 131, "Channel does not support indexing"), //
-	EXPECTED_CHANNEL_PREFIX(ERROR, 133, "Expected channel prefix but found ''{0}''"), //
-	CANNOT_USE_COMPOSEDMODULE_HERE_AS_IT_DEFINES_SOURCE_CHANNEL(ERROR,
+	CANNOT_USE_COMPOSEDMODULE_HERE_AS_IT_DEFINES_SOURCE_DESTINATION(ERROR,
 			135,
-			"cannot use composed module ''{0}'' here because it defines a source channel"), //
-	CANNOT_USE_COMPOSEDMODULE_HERE_AS_IT_DEFINES_SINK_CHANNEL(ERROR,
+			"cannot use composed module ''{0}'' here because it defines a source destination"), //
+	CANNOT_USE_COMPOSEDMODULE_HERE_AS_IT_DEFINES_SINK_DESTINATION(ERROR,
 			136,
-			"cannot use composed module ''{0}'' here because it defines a sink channel"), //
-	CANNOT_USE_COMPOSEDMODULE_HERE_ALREADY_HAS_SOURCE_CHANNEL(ERROR,
+			"cannot use composed module ''{0}'' here because it defines a sink destination"), //
+	CANNOT_USE_COMPOSEDMODULE_HERE_ALREADY_HAS_SOURCE_DESTINATION(ERROR,
 			137,
-			"cannot use composed module ''{0}'' here, both that composed module and this stream define a source channel"), //
-	CANNOT_USE_COMPOSEDMODULE_HERE_ALREADY_HAS_SINK_CHANNEL(ERROR,
+			"cannot use composed module ''{0}'' here, both that composed module and this stream define a source destination"), //
+	CANNOT_USE_COMPOSEDMODULE_HERE_ALREADY_HAS_SINK_DESTINATION(ERROR,
 			138,
-			"cannot use composed module ''{0}'' here, both that composed module and this stream define a sink channel"), //
-	NO_WHITESPACE_IN_CHANNEL_DEFINITION(ERROR, 139, "no whitespace allowed between components in a channel name"), //
+			"cannot use composed module ''{0}'' here, both that composed module and this stream define a sink destination"), //
+	EXPECTED_DESTINATION_PREFIX(ERROR, 133, "Expected destination prefix but found ''{0}''"), //
+	NO_WHITESPACE_IN_DESTINATION_DEFINITION(ERROR, 139, "no whitespace allowed between components in a destination name"), //
 	NO_WHITESPACE_BETWEEN_LABEL_NAME_AND_COLON(ERROR, 140, "no whitespace allowed between label name and colon"), //
 	DUPLICATE_LABEL(ERROR,
 			143,
@@ -91,7 +90,7 @@ public enum DSLMessage {
 	NO_WHITESPACE_IN_DOTTED_NAME(ERROR,
 			145,
 			"no whitespace is allowed between dot and components of a name"),
-	NAMED_CHANNELS_UNSUPPORTED_HERE(ERROR, 146, "a named channel is not supported in this kind of definition"),
+	DESTINATIONS_UNSUPPORTED_HERE(ERROR, 146, "a destination is not supported in this kind of definition"),
 	EXPECTED_WHITESPACE_AFTER_LABEL_COLON(ERROR, 147, "whitespace is expected after a moudle label"), //
 	;
 

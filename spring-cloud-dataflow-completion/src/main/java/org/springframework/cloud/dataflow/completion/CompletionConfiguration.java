@@ -57,7 +57,7 @@ public class CompletionConfiguration {
 				expandOneDashToTwoDashesRecoveryStrategy(),
 				configurationPropertyNameAfterDashDashRecoveryStrategy(),
 				unfinishedConfigurationPropertyNameRecoveryStrategy(),
-				channelNameYieldsModulesRecoveryStrategy(),
+				destinationNameYieldsModulesRecoveryStrategy(),
 				modulesAfterPipeRecoveryStrategy(),
 				configurationPropertyValueHintRecoveryStrategy()
 		);
@@ -101,8 +101,8 @@ public class CompletionConfiguration {
 	}
 
 	@Bean
-	public RecoveryStrategy channelNameYieldsModulesRecoveryStrategy() {
-		return new ChannelNameYieldsModulesRecoveryStrategy(artifactRegistry);
+	public RecoveryStrategy destinationNameYieldsModulesRecoveryStrategy() {
+		return new DestinationNameYieldsModulesRecoveryStrategy(artifactRegistry);
 	}
 
 	@Bean
