@@ -469,7 +469,7 @@ public class StreamParserTests {
 	}
 
 	@Test
-	public void testSourceChannelArgs() {
+	public void testSourceDestinationArgs() {
 		StreamNode sn = parse(":test --group=test > file");
 		assertEquals("[(test:1>5 --group=test)>(ModuleNode:file:21>25)]", sn.stringify(true));
 	}
