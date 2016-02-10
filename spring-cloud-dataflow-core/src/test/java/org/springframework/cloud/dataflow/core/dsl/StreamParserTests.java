@@ -35,6 +35,7 @@ import org.junit.rules.ExpectedException;
  * @author Andy Clement
  * @author David Turanski
  * @author Ilayaperumal Gopinathan
+ * @author Mark Fisher
  */
 public class StreamParserTests {
 
@@ -352,10 +353,7 @@ public class StreamParserTests {
 
 	@Test
 	public void channelVariants() {
-
-		// This looks like a label and so file is treated as a sink!
 		checkForParseError("http > :test value", DSLMessage.UNEXPECTED_DATA_AFTER_STREAMDEF, 13);
-
 		checkForParseError(":boo .xx > file", DSLMessage.NO_WHITESPACE_IN_CHANNEL_DEFINITION, 5);
 		checkForParseError(":boo . xx > file", DSLMessage.NO_WHITESPACE_IN_CHANNEL_DEFINITION, 5);
 		checkForParseError(":boo. xx > file", DSLMessage.NO_WHITESPACE_IN_CHANNEL_DEFINITION, 6);
@@ -377,27 +375,12 @@ public class StreamParserTests {
 
 	@Test
 	public void sourceTapChannel() {
-		StreamNode ast = parse(":xxy > file");
-		assertEquals("[(xxy:1>4)>(ModuleNode:file:7>11)]", ast.stringify(true));
-	}
-
-	@Test
-	public void sourceTapChannel2() {
 		parse("mystream = http | file");
 		StreamNode ast = parse(":mystream.http > file");
 		assertEquals(
 				"[(mystream.http:1>14)>(ModuleNode:file:17>21)]",
 				ast.stringify(true));
-	}
-
-	@Test
-	public void sourceTapChannelNoColon() {
-		parse("mystream = http | file");
-		StreamNode ast = null;
-		SourceChannelNode sourceChannelNode = null;
-
-		ast = parse(":mystream.http > file");
-		sourceChannelNode = ast.getSourceChannelNode();
+		SourceChannelNode sourceChannelNode = ast.getSourceChannelNode();
 		assertEquals("mystream.http", sourceChannelNode.getChannelName());
 	}
 
@@ -432,7 +415,7 @@ public class StreamParserTests {
 
 	@Test
 	public void errorCases07() {
-		//checkForParseError("foo > bar", DSLMessage.EXPECTED_CHANNEL_PREFIX, 6, "bar");
+		checkForParseError("foo > bar", DSLMessage.UNEXPECTED_DATA_AFTER_STREAMDEF, 6, "bar");
 		checkForParseError(":foo >", DSLMessage.OOD, 6);
 		checkForParseError(":foo > --2323", DSLMessage.EXPECTED_MODULENAME, 7, "--");
 		checkForParseError(":foo > *", DSLMessage.UNEXPECTED_DATA, 7, "*");

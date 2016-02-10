@@ -27,6 +27,7 @@ import java.util.Map;
  * @author Andy Clement
  * @author Patrick Peralta
  * @author Ilayaperumal Gopinathan
+ * @author Mark Fisher
  */
 public class StreamParser extends ModuleParser {
 
@@ -302,7 +303,7 @@ public class StreamParser extends ModuleParser {
 	 * module/label in a stream definition.
 	 *
 	 * Expected format:
-	 * {@code [ ':' identifier ]* [ '.' identifier ]*}
+	 * {@code ':' identifier [ '.' identifier ]*}
 	 * <p>
 	 *
 	 * @return {@code ChannelNode} representing the channel reference
@@ -314,9 +315,9 @@ public class StreamParser extends ModuleParser {
 			tokens.decrementPosition();
 			return null;
 		}
+		List<Token> channelNameComponents = new ArrayList<Token>();
 		Token identifierToken = tokens.next();
-		String nameComponent = identifierToken.stringValue();
-		List<Token> channelReferenceComponents = new ArrayList<Token>();
+		channelNameComponents.add(identifierToken);
 		while (tokens.peek(TokenKind.DOT)) {
 			if (!tokens.isNextAdjacent()) {
 				tokens.raiseException(tokens.peek().startPos,
@@ -327,14 +328,13 @@ public class StreamParser extends ModuleParser {
 				tokens.raiseException(tokens.peek().startPos,
 						DSLMessage.NO_WHITESPACE_IN_CHANNEL_DEFINITION);
 			}
-			channelReferenceComponents.add(tokens.eat(TokenKind.IDENTIFIER));
+			channelNameComponents.add(tokens.eat(TokenKind.IDENTIFIER));
 		}
 		int endPos = identifierToken.endPos;
-		if (!channelReferenceComponents.isEmpty()) {
-			endPos = channelReferenceComponents.get(channelReferenceComponents.size() - 1).endPos;
+		if (!channelNameComponents.isEmpty()) {
+			endPos = channelNameComponents.get(channelNameComponents.size() - 1).endPos;
 		}
-		return new ChannelNode(identifierToken.startPos, endPos, nameComponent,
-				tokenListToStringList(channelReferenceComponents));
+		return new ChannelNode(identifierToken.startPos, endPos, tokenListToStringList(channelNameComponents));
 	}
 
 	/**
