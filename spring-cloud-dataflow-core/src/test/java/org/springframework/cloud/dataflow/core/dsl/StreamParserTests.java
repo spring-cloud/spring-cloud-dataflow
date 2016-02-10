@@ -415,7 +415,7 @@ public class StreamParserTests {
 
 	@Test
 	public void errorCases07() {
-		checkForParseError("foo > bar", DSLMessage.UNEXPECTED_DATA_AFTER_STREAMDEF, 6, "bar");
+		checkForParseError("foo > bar", DSLMessage.EXPECTED_CHANNEL_PREFIX, 6, "bar");
 		checkForParseError(":foo >", DSLMessage.OOD, 6);
 		checkForParseError(":foo > --2323", DSLMessage.EXPECTED_MODULENAME, 7, "--");
 		checkForParseError(":foo > *", DSLMessage.UNEXPECTED_DATA, 7, "*");

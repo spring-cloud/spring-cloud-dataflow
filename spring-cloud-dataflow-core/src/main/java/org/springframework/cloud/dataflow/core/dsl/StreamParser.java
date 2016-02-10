@@ -171,9 +171,14 @@ public class StreamParser extends ModuleParser {
 		// Further data is an error
 		if (tokens.hasNext()) {
 			Token t = tokens.peek();
-			tokens.raiseException(t.startPos, DSLMessage.UNEXPECTED_DATA_AFTER_STREAMDEF, toString(t));
+			DSLMessage errorMessage = DSLMessage.UNEXPECTED_DATA_AFTER_STREAMDEF;
+			if (!moduleNodes.isEmpty() && sinkChannelNode == null &&
+					tokens.getTokenStream().get(tokens.position() - 1).isKind(TokenKind.GT)) {
+				// Additional token where a destination is expected, but has no prefix
+				errorMessage = DSLMessage.EXPECTED_CHANNEL_PREFIX;
+			}
+			tokens.raiseException(t.startPos, errorMessage, toString(t));
 		}
-
 		return new StreamNode(tokens.getExpression(), streamName, moduleNodes,
 				sourceChannelNode, sinkChannelNode);
 	}
