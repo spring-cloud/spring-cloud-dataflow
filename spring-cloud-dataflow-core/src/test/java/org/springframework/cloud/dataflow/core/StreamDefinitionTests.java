@@ -126,7 +126,7 @@ public class StreamDefinitionTests {
 	}
 
 	@Test
-	public void sourceChannelNameIsAppliedToSourceModule() throws Exception {
+	public void sourceDestinationNameIsAppliedToSourceModule() throws Exception {
 		StreamDefinition streamDefinition = new StreamDefinition("test", ":foo > goo | blah | file");
 		List<ModuleDefinition> requests = streamDefinition.getModuleDefinitions();
 		assertEquals(3, requests.size());
@@ -135,7 +135,7 @@ public class StreamDefinitionTests {
 	}
 
 	@Test
-	public void sinkChannelNameIsAppliedToSinkModule() throws Exception {
+	public void sinkDestinationNameIsAppliedToSinkModule() throws Exception {
 		StreamDefinition streamDefinition = new StreamDefinition("test", "boo | blah | aaak > :foo");
 		List<ModuleDefinition> requests = streamDefinition.getModuleDefinitions();
 		assertEquals(3, requests.size());
@@ -143,7 +143,7 @@ public class StreamDefinitionTests {
 	}
 
 	@Test
-	public void simpleSinkNamedChannel() throws Exception {
+	public void simpleSinkDestination() throws Exception {
 		StreamDefinition streamDefinition = new StreamDefinition("test", "bart > :foo");
 		List<ModuleDefinition> requests = streamDefinition.getModuleDefinitions();
 		assertEquals(1, requests.size());
@@ -163,7 +163,7 @@ public class StreamDefinitionTests {
 	}
 
 	@Test
-	public void simpleSourceNamedChannel() throws Exception {
+	public void simpleSourceDestination() throws Exception {
 		StreamDefinition streamDefinition = new StreamDefinition("test", ":foo > boot");
 		List<ModuleDefinition> requests = streamDefinition.getModuleDefinitions();
 		assertEquals(1, requests.size());

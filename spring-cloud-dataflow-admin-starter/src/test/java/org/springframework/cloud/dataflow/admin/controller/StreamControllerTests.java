@@ -205,7 +205,7 @@ public class StreamControllerTests {
 	}
 
 	@Test
-	public void testSourceChannelWithSingleModule() throws Exception {
+	public void testSourceDestinationWithSingleModule() throws Exception {
 		assertEquals(0, repository.count());
 		String definition = ":foo > log";
 		mockMvc.perform(
@@ -225,7 +225,7 @@ public class StreamControllerTests {
 	}
 
 	@Test
-	public void testSourceChannelWithTwoModules() throws Exception {
+	public void testSourceDestinationWithTwoModules() throws Exception {
 		assertEquals(0, repository.count());
 		String definition = ":foo > filter | log";
 		mockMvc.perform(
@@ -251,7 +251,7 @@ public class StreamControllerTests {
 	}
 
 	@Test
-	public void testSinkChannelWithSingleModule() throws Exception {
+	public void testSinkDestinationWithSingleModule() throws Exception {
 		assertEquals(0, repository.count());
 		String definition = "time > :foo";
 		mockMvc.perform(
@@ -269,7 +269,7 @@ public class StreamControllerTests {
 	}
 
 	@Test
-	public void testSinkChannelWithTwoModules() throws Exception {
+	public void testSinkDestinationWithTwoModules() throws Exception {
 		assertEquals(0, repository.count());
 		String definition = "time | filter > :foo";
 		mockMvc.perform(
@@ -293,7 +293,7 @@ public class StreamControllerTests {
 	}
 
 	@Test
-	public void testChannelsOnBothSides() throws Exception {
+	public void testDestinationsOnBothSides() throws Exception {
 		assertEquals(0, repository.count());
 		String definition = ":bar > filter > :foo";
 		mockMvc.perform(

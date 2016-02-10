@@ -90,7 +90,7 @@ public enum DSLMessage {
 	NO_WHITESPACE_IN_DOTTED_NAME(ERROR,
 			145,
 			"no whitespace is allowed between dot and components of a name"),
-	NAMED_DESTINATIONS_UNSUPPORTED_HERE(ERROR, 146, "a named destination is not supported in this kind of definition"),
+	DESTINATIONS_UNSUPPORTED_HERE(ERROR, 146, "a destination is not supported in this kind of definition"),
 	EXPECTED_WHITESPACE_AFTER_LABEL_COLON(ERROR, 147, "whitespace is expected after a moudle label"), //
 	;
 

@@ -98,15 +98,15 @@ class ModuleDefinitionBuilder {
 			}
 			builders.add(builder);
 		}
-		SourceDestinationNode sourceChannel = streamNode.getSourceDestinationNode();
-		if (sourceChannel != null) {
-			builders.getLast().setParameter(BindingProperties.INPUT_BINDING_KEY, sourceChannel.getDestinationName());
+		SourceDestinationNode sourceDestination = streamNode.getSourceDestinationNode();
+		if (sourceDestination != null) {
+			builders.getLast().setParameter(BindingProperties.INPUT_BINDING_KEY, sourceDestination.getDestinationName());
 			builders.getLast().setParameter(BindingProperties.INPUT_GROUP_KEY, streamName);
 			builders.getLast().setParameter(BindingProperties.INPUT_DURABLE_SUBSCRIPTION_KEY, "true");
 		}
-		SinkDestinationNode sinkChannel = streamNode.getSinkDestinationNode();
-		if (sinkChannel != null) {
-			builders.getFirst().setParameter(BindingProperties.OUTPUT_BINDING_KEY, sinkChannel.getDestinationName());
+		SinkDestinationNode sinkDestination = streamNode.getSinkDestinationNode();
+		if (sinkDestination != null) {
+			builders.getFirst().setParameter(BindingProperties.OUTPUT_BINDING_KEY, sinkDestination.getDestinationName());
 		}
 		List<ModuleDefinition> moduleDefinitions = new ArrayList<ModuleDefinition>(builders.size());
 		for (ModuleDefinition.Builder builder : builders) {

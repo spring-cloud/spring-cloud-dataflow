@@ -37,7 +37,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplicat
 import org.springframework.boot.autoconfigure.security.oauth2.OAuth2AutoConfiguration;
 import org.springframework.boot.autoconfigure.web.HttpMessageConverters;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.cloud.dataflow.admin.completion.TapOnChannelRecoveryStrategy;
+import org.springframework.cloud.dataflow.admin.completion.TapOnDestinationRecoveryStrategy;
 import org.springframework.cloud.dataflow.admin.controller.StreamDefinitionController;
 import org.springframework.cloud.dataflow.admin.repository.InMemoryStreamDefinitionRepository;
 import org.springframework.cloud.dataflow.admin.repository.InMemoryTaskDefinitionRepository;
@@ -163,9 +163,9 @@ public class AdminConfiguration {
 	}
 
 	@Bean
-	@ConditionalOnMissingBean(TapOnChannelRecoveryStrategy.class)
-	public RecoveryStrategy<?> tapOnChannelExpansionStrategy() {
-		RecoveryStrategy<?> recoveryStrategy = new TapOnChannelRecoveryStrategy(streamDefinitionRepository());
+	@ConditionalOnMissingBean(TapOnDestinationRecoveryStrategy.class)
+	public RecoveryStrategy<?> tapOnDestinationExpansionStrategy() {
+		RecoveryStrategy<?> recoveryStrategy = new TapOnDestinationRecoveryStrategy(streamDefinitionRepository());
 		if (this.streamCompletionProvider != null) {
 			this.streamCompletionProvider.addCompletionRecoveryStrategy(recoveryStrategy);
 		}

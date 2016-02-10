@@ -27,18 +27,18 @@ import org.springframework.cloud.dataflow.core.dsl.DSLMessage;
 import org.springframework.cloud.dataflow.core.dsl.ParseException;
 
 /**
- * Expands constructs that start with {@literal tap:stream} to add stream and maybe module identifiers.
+ * Expands constructs that start with {@literal :} to add stream name and module identifiers.
  *
  * <p>Lives in this package as it needs access to a {@link StreamDefinitionRepository}.</p>
  *
  * @author Eric Bottard
  * @author Ilayaperumal Gopinathan
  */
-public class TapOnChannelRecoveryStrategy implements RecoveryStrategy<ParseException> {
+public class TapOnDestinationRecoveryStrategy implements RecoveryStrategy<ParseException> {
 
 	private final StreamDefinitionRepository streamDefinitionRepository;
 
-	public TapOnChannelRecoveryStrategy(StreamDefinitionRepository streamDefinitionRepository) {
+	public TapOnDestinationRecoveryStrategy(StreamDefinitionRepository streamDefinitionRepository) {
 		this.streamDefinitionRepository = streamDefinitionRepository;
 	}
 
