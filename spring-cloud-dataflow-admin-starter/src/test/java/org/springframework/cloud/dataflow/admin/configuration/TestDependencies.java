@@ -23,8 +23,9 @@ import org.springframework.cloud.dataflow.admin.config.ArtifactRegistryPopulator
 import org.springframework.cloud.dataflow.admin.controller.RestControllerAdvice;
 import org.springframework.cloud.dataflow.admin.controller.StreamDefinitionController;
 import org.springframework.cloud.dataflow.admin.controller.StreamDeploymentController;
-import org.springframework.cloud.dataflow.admin.controller.TaskDeploymentController;
 import org.springframework.cloud.dataflow.admin.controller.TaskDefinitionController;
+import org.springframework.cloud.dataflow.admin.controller.TaskDeploymentController;
+import org.springframework.cloud.dataflow.admin.controller.TaskExecutionController;
 import org.springframework.cloud.dataflow.admin.repository.InMemoryStreamDefinitionRepository;
 import org.springframework.cloud.dataflow.admin.repository.InMemoryTaskDefinitionRepository;
 import org.springframework.cloud.dataflow.admin.repository.StreamDefinitionRepository;
@@ -33,6 +34,10 @@ import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistry;
 import org.springframework.cloud.dataflow.artifact.registry.InMemoryArtifactRegistry;
 import org.springframework.cloud.dataflow.completion.CompletionConfiguration;
 import org.springframework.cloud.dataflow.module.deployer.ModuleDeployer;
+import org.springframework.cloud.task.repository.TaskExplorer;
+import org.springframework.cloud.task.repository.dao.MapTaskExecutionDao;
+import org.springframework.cloud.task.repository.dao.TaskExecutionDao;
+import org.springframework.cloud.task.repository.support.SimpleTaskExplorer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -76,6 +81,11 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	}
 
 	@Bean
+	public TaskExecutionController taskExecutionController(TaskExplorer explorer) {
+		return new TaskExecutionController(explorer);
+	}
+
+	@Bean
 	public ArtifactRegistry artifactRegistry() {
 		return new InMemoryArtifactRegistry();
 	}
@@ -104,4 +114,15 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	public TaskDefinitionRepository taskDefinitionRepository() {
 		return new InMemoryTaskDefinitionRepository();
 	}
+
+	@Bean
+	public TaskExplorer taskExplorer(TaskExecutionDao dao){
+		return new SimpleTaskExplorer(dao);
+	}
+
+	@Bean
+	public TaskExecutionDao taskExecutionDao(){
+		return new MapTaskExecutionDao();
+	}
+
 }
