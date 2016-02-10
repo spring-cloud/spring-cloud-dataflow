@@ -22,24 +22,22 @@ import java.util.List;
  * @author Andy Clement
  * @author David Turanski
  * @author Ilayaperumal Gopinathan
+ * @author Mark Fisher
  */
 public class ChannelNode extends AstNode {
 
-	private String nameComponent;
+	private List<String> nameComponents;
 
-	private List<String> labelComponents;
-
-	public ChannelNode(int startPos, int endPos, String nameComponent, List<String> labelComponents) {
+	public ChannelNode(int startPos, int endPos, List<String> nameComponents) {
 		super(startPos, endPos);
-		this.nameComponent = nameComponent;
-		this.labelComponents = labelComponents;
+		this.nameComponents = nameComponents;
 	}
 
 	@Override
 	public String stringify(boolean includePositionalInfo) {
 		StringBuilder s = new StringBuilder();
 		s.append("(");
-		produceStringRepresentation(s);
+		s.append(getChannelName());
 		if (includePositionalInfo) {
 			s.append(":");
 			s.append(getStartPos()).append(">").append(getEndPos());
@@ -50,39 +48,21 @@ public class ChannelNode extends AstNode {
 
 	@Override
 	public String toString() {
-		StringBuilder s = new StringBuilder();
-		produceStringRepresentation(s);
-		return s.toString();
-	}
-
-	private void produceStringRepresentation(StringBuilder s) {
-		int t = 0;
-		s.append(nameComponent);
-		if (labelComponents.size() != 0) {
-			for (int t2 = 0, max = labelComponents.size(); t2 < max; t2++) {
-				s.append(".");
-				s.append(labelComponents.get(t2));
-			}
-		}
+		return getChannelName();
 	}
 
 	String getChannelName() {
 		StringBuilder s = new StringBuilder();
-		s.append(this.nameComponent);
-		s.append(getLabelComponents());
-		return s.toString();
-	}
-
-	private String getLabelComponents() {
-		StringBuilder s = new StringBuilder();
-		for (int t = 0, max = labelComponents.size(); t < max; t++) {
-			s.append(".");
-			s.append(labelComponents.get(t));
+		for (int t = 0, max = nameComponents.size(); t < max; t++) {
+			if (t != 0) {
+				s.append(".");
+			}
+			s.append(nameComponents.get(t));
 		}
 		return s.toString();
 	}
 
 	public ChannelNode copyOf() {
-		return new ChannelNode(super.startPos, super.endPos, nameComponent, labelComponents);
+		return new ChannelNode(super.startPos, super.endPos, nameComponents);
 	}
 }
