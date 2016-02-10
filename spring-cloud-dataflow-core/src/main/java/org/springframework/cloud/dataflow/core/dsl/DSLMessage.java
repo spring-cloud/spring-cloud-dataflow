@@ -91,7 +91,7 @@ public enum DSLMessage {
 			145,
 			"no whitespace is allowed between dot and components of a name"),
 	DESTINATIONS_UNSUPPORTED_HERE(ERROR, 146, "a destination is not supported in this kind of definition"),
-	EXPECTED_WHITESPACE_AFTER_LABEL_COLON(ERROR, 147, "whitespace is expected after a moudle label"), //
+	EXPECTED_WHITESPACE_AFTER_LABEL_COLON(ERROR, 147, "whitespace is expected after a module label"), //
 	;
 
 	private Kind kind;

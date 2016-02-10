@@ -166,13 +166,13 @@ public class StreamParser extends ModuleParser {
 		else {
 			moduleNodes.addAll(eatModuleList());
 		}
-		SinkDestinationNode SinkDestinationNode = eatSinkDestination();
+		SinkDestinationNode sinkDestinationNode = eatSinkDestination();
 
 		// Further data is an error
 		if (tokens.hasNext()) {
 			Token t = tokens.peek();
 			DSLMessage errorMessage = DSLMessage.UNEXPECTED_DATA_AFTER_STREAMDEF;
-			if (!moduleNodes.isEmpty() && SinkDestinationNode == null &&
+			if (!moduleNodes.isEmpty() && sinkDestinationNode == null &&
 					tokens.getTokenStream().get(tokens.position() - 1).isKind(TokenKind.GT)) {
 				// Additional token where a destination is expected, but has no prefix
 				errorMessage = DSLMessage.EXPECTED_DESTINATION_PREFIX;
@@ -180,7 +180,7 @@ public class StreamParser extends ModuleParser {
 			tokens.raiseException(t.startPos, errorMessage, toString(t));
 		}
 		return new StreamNode(tokens.getExpression(), streamName, moduleNodes,
-				sourceDestinationNode, SinkDestinationNode);
+				sourceDestinationNode, sinkDestinationNode);
 	}
 
 	/**
