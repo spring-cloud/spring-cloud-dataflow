@@ -16,9 +16,13 @@
 
 package org.springframework.cloud.dataflow.admin.controller;
 
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.ArrayList;
@@ -48,7 +52,14 @@ import org.springframework.web.context.WebApplicationContext;
 @WebAppConfiguration
 public class TaskExecutionControllerTests {
 
-	private final static String TASK_NAME = "myTask";
+	private final static String BASE_TASK_NAME = "myTask";
+
+	private final static String TASK_NAME_ORIG = BASE_TASK_NAME + "_ORIG";
+
+	private final static String TASK_NAME_FOO = BASE_TASK_NAME + "_FOO";
+
+	private final static String TASK_NAME_FOOBAR = BASE_TASK_NAME + "_FOOBAR";
+
 
 	@Autowired
 	private TaskExecutionDao dao;
@@ -63,18 +74,18 @@ public class TaskExecutionControllerTests {
 
 	@Autowired private ApplicationContext applicationContext;
 
-	private boolean initialized = false;
-
 	@Before
 	public void setupMockMVC() {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(wac).defaultRequest(
 				get("/").accept(MediaType.APPLICATION_JSON)).build();
-
-		if(!initialized) {
-			initialized = true;
-			dao.saveTaskExecution(new TaskExecution(0, 0, TASK_NAME, new Date(),
-					new Date(), null, new ArrayList<String>()));
-		}
+		dao.saveTaskExecution(new TaskExecution(0, 0, TASK_NAME_ORIG, new Date(),
+				new Date(), null, new ArrayList<String>()));
+		dao.saveTaskExecution(new TaskExecution(1, 0, TASK_NAME_ORIG, new Date(),
+				new Date(), null, new ArrayList<String>()));
+		dao.saveTaskExecution(new TaskExecution(2, 0, TASK_NAME_FOO, new Date(),
+				new Date(), null, new ArrayList<String>()));
+		dao.saveTaskExecution(new TaskExecution(3, 0, TASK_NAME_FOOBAR, new Date(),
+				new Date(), null, new ArrayList<String>()));
 	}
 
 	@Test(expected = IllegalArgumentException.class)
@@ -94,13 +105,33 @@ public class TaskExecutionControllerTests {
 		mockMvc.perform(
 				get("/tasks/executions/0").accept(MediaType.APPLICATION_JSON)
 		).andExpect(status().isOk()).andDo(print()).andExpect(content().json("{taskName: \"" +
-				TASK_NAME + "\"}"));
+				TASK_NAME_ORIG + "\"}"));
 	}
 
 	@Test
-	public void testGetExecutionByName() throws Exception{
+	public void testGetAllExecutions() throws Exception{
 		mockMvc.perform(
 				get("/tasks/executions/").accept(MediaType.APPLICATION_JSON)
-		).andExpect(status().isOk());
+		).andExpect(status().isOk()).andDo(print())
+				.andExpect(jsonPath("$.content[*].executionId",
+						containsInAnyOrder(3, 2, 1, 0)))
+				.andExpect(jsonPath("$.content", hasSize(4)));
+	}
+
+	@Test
+	public void testGetExecutionsByName() throws Exception{
+		mockMvc.perform(
+				get("/tasks/executions/").param("name", TASK_NAME_ORIG).accept(MediaType.APPLICATION_JSON)
+		).andExpect(status().isOk()).andDo(print())
+				.andExpect(jsonPath("$.content[0].taskName", is(TASK_NAME_ORIG)))
+				.andExpect(jsonPath("$.content[1].taskName", is(TASK_NAME_ORIG)))
+				.andExpect(jsonPath("$.content", hasSize(2)));
+	}
+	@Test
+	public void testGetExecutionsByNameNotFound() throws Exception{
+		mockMvc.perform(
+				get("/tasks/executions/").param("name", "BAZ").accept(MediaType.APPLICATION_JSON)
+		).andExpect(status().isOk()).andDo(print())
+				.andExpect(jsonPath("$.content", hasSize(0)));
 	}
 }
