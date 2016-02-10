@@ -108,6 +108,7 @@ public class ArtifactRegistryPopulator {
 		populateDefault("file", sink);
 		populateDefault("ftp", sink);
 		populateDefault("gemfire", sink);
+		populateDefault("gpfdist", sink);
 		populateDefault("hdfs", sink);
 		populateDefault("jdbc", sink);
 		populateDefault("log", sink);
