@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2015-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.springframework.cloud.dataflow.core.ArtifactType;
-import org.springframework.cloud.dataflow.core.BindingProperties;
+import org.springframework.cloud.dataflow.core.BindingPropertyKeys;
 import org.springframework.cloud.dataflow.core.ArtifactCoordinates;
 import org.springframework.cloud.dataflow.core.ModuleDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
@@ -39,10 +39,10 @@ public class CompletionUtils {
 	 */
 	static final Set<String> IMPLICIT_PARAMETER_NAMES = new HashSet<>();
 	static {
-		IMPLICIT_PARAMETER_NAMES.add(BindingProperties.INPUT_BINDING_KEY);
-		IMPLICIT_PARAMETER_NAMES.add(BindingProperties.INPUT_GROUP_KEY);
-		IMPLICIT_PARAMETER_NAMES.add(BindingProperties.INPUT_DURABLE_SUBSCRIPTION_KEY);
-		IMPLICIT_PARAMETER_NAMES.add(BindingProperties.OUTPUT_BINDING_KEY);
+		IMPLICIT_PARAMETER_NAMES.add(BindingPropertyKeys.INPUT_DESTINATION);
+		IMPLICIT_PARAMETER_NAMES.add(BindingPropertyKeys.INPUT_GROUP);
+		IMPLICIT_PARAMETER_NAMES.add(BindingPropertyKeys.INPUT_DURABLE_SUBSCRIPTION);
+		IMPLICIT_PARAMETER_NAMES.add(BindingPropertyKeys.OUTPUT_DESTINATION);
 	}
 
 	/**
@@ -50,13 +50,14 @@ public class CompletionUtils {
 	 */
 	static ArtifactType[] determinePotentialTypes(ModuleDefinition moduleDefinition) {
 		Set<String> properties = moduleDefinition.getParameters().keySet();
-		if (properties.contains(BindingProperties.INPUT_BINDING_KEY)) {
+		if (properties.contains(BindingPropertyKeys.INPUT_DESTINATION)) {
 			// Can't be source. For the purpose of completion, being the last module
-			// (hence having BindingProperties.OUTPUT_BINDING_KEY not set) does NOT guarantee we're dealing
+			// (hence having BindingPropertyKeys.OUTPUT_DESTINATION not set) does NOT guarantee we're dealing
 			// with a sink (could be an unfinished "source | processor | processor" stream)
-			if (properties.contains(BindingProperties.OUTPUT_BINDING_KEY)) {
+			if (properties.contains(BindingPropertyKeys.OUTPUT_DESTINATION)) {
 				return new ArtifactType[] {ArtifactType.processor};
-			} else {
+			}
+			else {
 				return new ArtifactType[] {ArtifactType.processor, ArtifactType.sink};
 			}
 		} // MUST be source

@@ -30,11 +30,12 @@ import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistration
 import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistry;
 import org.springframework.cloud.dataflow.core.ArtifactCoordinates;
 import org.springframework.cloud.dataflow.core.ArtifactType;
-import org.springframework.cloud.dataflow.core.BindingProperties;
+import org.springframework.cloud.dataflow.core.BindingPropertyKeys;
 import org.springframework.cloud.dataflow.core.ModuleDefinition;
 import org.springframework.cloud.dataflow.core.ModuleDeploymentId;
 import org.springframework.cloud.dataflow.core.ModuleDeploymentRequest;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
+import org.springframework.cloud.dataflow.core.StreamPropertyKeys;
 import org.springframework.cloud.dataflow.module.DeploymentState;
 import org.springframework.cloud.dataflow.module.ModuleStatus;
 import org.springframework.cloud.dataflow.module.deployer.ModuleDeployer;
@@ -64,6 +65,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/streams/deployments")
 @ExposesResourceFor(StreamDeploymentResource.class)
 public class StreamDeploymentController {
+
+	private static final String INSTANCE_COUNT_PROPERTY_KEY = "count";
+
+	private static final String DEFAULT_PARTITION_KEY_EXPRESSION = "payload";
 
 	/**
 	 * The repository this controller will use for stream CRUD operations.
@@ -227,9 +232,9 @@ public class StreamDeploymentController {
 	 * @return {@link ArtifactType} for the given module
 	 */
 	private ArtifactType determineModuleType(ModuleDefinition moduleDefinition) {
-		// Parser has already taken care of source/sink named channels, etc
-		boolean hasOutput = moduleDefinition.getParameters().containsKey(BindingProperties.OUTPUT_BINDING_KEY);
-		boolean hasInput = moduleDefinition.getParameters().containsKey(BindingProperties.INPUT_BINDING_KEY);
+		// Parser has already taken care of source/sink destinations, etc
+		boolean hasOutput = moduleDefinition.getParameters().containsKey(BindingPropertyKeys.OUTPUT_DESTINATION);
+		boolean hasInput = moduleDefinition.getParameters().containsKey(BindingPropertyKeys.INPUT_DESTINATION);
 		if (hasInput && hasOutput) {
 			return ArtifactType.processor;
 		}
@@ -268,11 +273,11 @@ public class StreamDeploymentController {
 		for (Map.Entry<String, String> entry : streamDeploymentProperties.entrySet()) {
 			if (entry.getKey().startsWith(modulePrefix)) {
 				if (entry.getKey().startsWith(producerPropertyPrefix)) {
-					moduleDeploymentProperties.put(BindingProperties.OUTPUT_BINDING_KEY_PREFIX +
+					moduleDeploymentProperties.put(BindingPropertyKeys.OUTPUT_BINDING_KEY_PREFIX +
 							entry.getKey().substring(producerPropertyPrefix.length()), entry.getValue());
 				}
 				else if (entry.getKey().startsWith(consumerPropertyPrefix)) {
-					moduleDeploymentProperties.put(BindingProperties.INPUT_BINDING_KEY_PREFIX +
+					moduleDeploymentProperties.put(BindingPropertyKeys.INPUT_BINDING_KEY_PREFIX +
 							entry.getKey().substring(consumerPropertyPrefix.length()), entry.getValue());
 				}
 				else {
@@ -301,8 +306,8 @@ public class StreamDeploymentController {
 			if (module.equals(currentModule) && iterator.hasNext()) {
 				ModuleDefinition prevModule = iterator.next();
 				Map<String, String> moduleDeploymentProperties = extractModuleDeploymentProperties(prevModule, streamDeploymentProperties);
-				return moduleDeploymentProperties.containsKey(BindingProperties.PARTITION_KEY_EXPRESSION) ||
-						moduleDeploymentProperties.containsKey(BindingProperties.PARTITION_KEY_EXTRACTOR_CLASS);
+				return moduleDeploymentProperties.containsKey(BindingPropertyKeys.OUTPUT_PARTITION_KEY_EXPRESSION) ||
+						moduleDeploymentProperties.containsKey(BindingPropertyKeys.OUTPUT_PARTITION_KEY_EXTRACTOR_CLASS);
 			}
 		}
 		return false;
@@ -323,8 +328,8 @@ public class StreamDeploymentController {
 			Map<String, String> moduleDeploymentProperties,
 			boolean upstreamModuleSupportsPartition) {
 		return upstreamModuleSupportsPartition ||
-				(moduleDeploymentProperties.containsKey(BindingProperties.PARTITIONED) &&
-						moduleDeploymentProperties.get(BindingProperties.PARTITIONED).equalsIgnoreCase("true"));
+				(moduleDeploymentProperties.containsKey(BindingPropertyKeys.INPUT_PARTITIONED) &&
+						moduleDeploymentProperties.get(BindingPropertyKeys.INPUT_PARTITIONED).equalsIgnoreCase("true"));
 	}
 
 	/**
@@ -333,9 +338,9 @@ public class StreamDeploymentController {
 	 * @param properties properties to update
 	 */
 	private void updateConsumerPartitionProperties(Map<String, String> properties) {
-		properties.put(BindingProperties.PARTITIONED, "true");
-		if (properties.containsKey(BindingProperties.COUNT_PROPERTY)) {
-			properties.put(BindingProperties.INSTANCE_COUNT, properties.get(BindingProperties.COUNT_PROPERTY));
+		properties.put(BindingPropertyKeys.INPUT_PARTITIONED, "true");
+		if (properties.containsKey(INSTANCE_COUNT_PROPERTY_KEY)) {
+			properties.put(StreamPropertyKeys.INSTANCE_COUNT, properties.get(INSTANCE_COUNT_PROPERTY_KEY));
 		}
 	}
 
@@ -346,9 +351,9 @@ public class StreamDeploymentController {
 	 * @param nextModuleCount the number of module instances for the next (downstream) module in the stream
 	 */
 	private void updateProducerPartitionProperties(Map<String, String> properties, int nextModuleCount) {
-		properties.put(BindingProperties.PARTITION_COUNT, String.valueOf(nextModuleCount));
-		if (!properties.containsKey(BindingProperties.PARTITION_KEY_EXPRESSION)) {
-			properties.put(BindingProperties.PARTITION_KEY_EXPRESSION, BindingProperties.DEFAULT_PARTITION_KEY_EXPRESSION);
+		properties.put(BindingPropertyKeys.OUTPUT_PARTITION_COUNT, String.valueOf(nextModuleCount));
+		if (!properties.containsKey(BindingPropertyKeys.OUTPUT_PARTITION_KEY_EXPRESSION)) {
+			properties.put(BindingPropertyKeys.OUTPUT_PARTITION_KEY_EXPRESSION, DEFAULT_PARTITION_KEY_EXPRESSION);
 		}
 	}
 
@@ -360,8 +365,8 @@ public class StreamDeploymentController {
 	 * if the properties do not contain a count a value of {@code 1} is returned
 	 */
 	private int getModuleCount(Map<String, String> properties) {
-		return (properties.containsKey(BindingProperties.COUNT_PROPERTY)) ?
-				Integer.valueOf(properties.get(BindingProperties.COUNT_PROPERTY)) : 1;
+		return (properties.containsKey(INSTANCE_COUNT_PROPERTY_KEY)) ?
+				Integer.valueOf(properties.get(INSTANCE_COUNT_PROPERTY_KEY)) : 1;
 	}
 
 	/**
