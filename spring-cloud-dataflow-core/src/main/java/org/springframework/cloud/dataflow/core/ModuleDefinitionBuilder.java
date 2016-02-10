@@ -78,10 +78,10 @@ class ModuleDefinitionBuilder {
 				ArgumentNode[] arguments = moduleNode.getArguments();
 				for (ArgumentNode argument : arguments) {
 					if (argument.getName().equalsIgnoreCase("inputType")) {
-						builder.setParameter(BindingProperties.INPUT_TYPE_KEY, argument.getValue());
+						builder.setParameter(BindingPropertyKeys.INPUT_CONTENT_TYPE, argument.getValue());
 					}
 					else if (argument.getName().equalsIgnoreCase("outputType")) {
-						builder.setParameter(BindingProperties.OUTPUT_TYPE_KEY, argument.getValue());
+						builder.setParameter(BindingPropertyKeys.OUTPUT_CONTENT_TYPE, argument.getValue());
 					}
 					else {
 						builder.setParameter(argument.getName(), argument.getValue());
@@ -89,13 +89,13 @@ class ModuleDefinitionBuilder {
 				}
 			}
 			if (m > 0) {
-				builder.setParameter(BindingProperties.INPUT_BINDING_KEY,
+				builder.setParameter(BindingPropertyKeys.INPUT_DESTINATION,
 						String.format("%s.%s", streamName, moduleNodes.get(m - 1).getLabelName()));
-				builder.setParameter(BindingProperties.INPUT_GROUP_KEY, DEFAULT_CONSUMER_GROUP_NAME);
-				builder.setParameter(BindingProperties.INPUT_DURABLE_SUBSCRIPTION_KEY, "true");
+				builder.setParameter(BindingPropertyKeys.INPUT_GROUP, DEFAULT_CONSUMER_GROUP_NAME);
+				builder.setParameter(BindingPropertyKeys.INPUT_DURABLE_SUBSCRIPTION, "true");
 			}
 			if (m < moduleNodes.size() - 1) {
-				builder.setParameter(BindingProperties.OUTPUT_BINDING_KEY,
+				builder.setParameter(BindingPropertyKeys.OUTPUT_DESTINATION,
 						String.format("%s.%s", streamName, moduleNode.getLabelName()));
 			}
 			builders.add(builder);
@@ -103,7 +103,7 @@ class ModuleDefinitionBuilder {
 		SourceDestinationNode sourceDestination = streamNode.getSourceDestinationNode();
 		if (sourceDestination != null) {
 			ModuleDefinition.Builder sourceModuleBuilder = builders.getLast();
-			sourceModuleBuilder.setParameter(BindingProperties.INPUT_BINDING_KEY, sourceDestination.getDestinationName());
+			sourceModuleBuilder.setParameter(BindingPropertyKeys.INPUT_DESTINATION, sourceDestination.getDestinationName());
 			String consumerGroupName = streamName;
 			if (sourceDestination.getArguments() != null) {
 				ArgumentNode[] argumentNodes = sourceDestination.getArguments();
@@ -113,12 +113,12 @@ class ModuleDefinitionBuilder {
 					}
 				}
 			}
-			sourceModuleBuilder.setParameter(BindingProperties.INPUT_GROUP_KEY, consumerGroupName);
-			sourceModuleBuilder.setParameter(BindingProperties.INPUT_DURABLE_SUBSCRIPTION_KEY, "true");
+			sourceModuleBuilder.setParameter(BindingPropertyKeys.INPUT_GROUP, consumerGroupName);
+			sourceModuleBuilder.setParameter(BindingPropertyKeys.INPUT_DURABLE_SUBSCRIPTION, "true");
 		}
 		SinkDestinationNode sinkDestination = streamNode.getSinkDestinationNode();
 		if (sinkDestination != null) {
-			builders.getFirst().setParameter(BindingProperties.OUTPUT_BINDING_KEY, sinkDestination.getDestinationName());
+			builders.getFirst().setParameter(BindingPropertyKeys.OUTPUT_DESTINATION, sinkDestination.getDestinationName());
 		}
 		List<ModuleDefinition> moduleDefinitions = new ArrayList<ModuleDefinition>(builders.size());
 		for (ModuleDefinition.Builder builder : builders) {

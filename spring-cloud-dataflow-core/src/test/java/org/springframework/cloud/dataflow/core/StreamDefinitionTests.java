@@ -46,16 +46,16 @@ public class StreamDefinitionTests {
 		ModuleDefinition time = stream.getModuleDefinitions().get(0);
 		assertEquals("time", time.getName());
 		assertEquals("time", time.getLabel());
-		assertEquals("ticktock.time", time.getParameters().get(BindingProperties.OUTPUT_BINDING_KEY));
-		assertFalse(time.getParameters().containsKey(BindingProperties.INPUT_BINDING_KEY));
+		assertEquals("ticktock.time", time.getParameters().get(BindingPropertyKeys.OUTPUT_DESTINATION));
+		assertFalse(time.getParameters().containsKey(BindingPropertyKeys.INPUT_DESTINATION));
 
 		ModuleDefinition log = stream.getModuleDefinitions().get(1);
 		assertEquals("log", log.getName());
 		assertEquals("log", log.getLabel());
-		assertEquals("ticktock.time", log.getParameters().get(BindingProperties.INPUT_BINDING_KEY));
-		assertEquals("default", log.getParameters().get(BindingProperties.INPUT_GROUP_KEY));
-		assertEquals("true", log.getParameters().get(BindingProperties.INPUT_DURABLE_SUBSCRIPTION_KEY));
-		assertFalse(log.getParameters().containsKey(BindingProperties.OUTPUT_BINDING_KEY));
+		assertEquals("ticktock.time", log.getParameters().get(BindingPropertyKeys.INPUT_DESTINATION));
+		assertEquals("default", log.getParameters().get(BindingPropertyKeys.INPUT_GROUP));
+		assertEquals("true", log.getParameters().get(BindingPropertyKeys.INPUT_DURABLE_SUBSCRIPTION));
+		assertFalse(log.getParameters().containsKey(BindingPropertyKeys.OUTPUT_DESTINATION));
 	}
 
 	@Test
@@ -69,13 +69,13 @@ public class StreamDefinitionTests {
 		assertEquals("test", source.getGroup());
 
 		assertEquals(1, source.getParameters().size());
-		assertEquals("test.foo", source.getParameters().get(BindingProperties.OUTPUT_BINDING_KEY));
+		assertEquals("test.foo", source.getParameters().get(BindingPropertyKeys.OUTPUT_DESTINATION));
 		assertEquals("bar", sink.getName());
 		assertEquals("test", sink.getGroup());
 		assertEquals(3, sink.getParameters().size());
-		assertEquals("test.foo", sink.getParameters().get(BindingProperties.INPUT_BINDING_KEY));
-		assertEquals("default", sink.getParameters().get(BindingProperties.INPUT_GROUP_KEY));
-		assertEquals("true", sink.getParameters().get(BindingProperties.INPUT_DURABLE_SUBSCRIPTION_KEY));
+		assertEquals("test.foo", sink.getParameters().get(BindingPropertyKeys.INPUT_DESTINATION));
+		assertEquals("default", sink.getParameters().get(BindingPropertyKeys.INPUT_GROUP));
+		assertEquals("true", sink.getParameters().get(BindingPropertyKeys.INPUT_DURABLE_SUBSCRIPTION));
 	}
 
 	@Test
@@ -130,8 +130,8 @@ public class StreamDefinitionTests {
 		StreamDefinition streamDefinition = new StreamDefinition("test", ":foo > goo | blah | file");
 		List<ModuleDefinition> requests = streamDefinition.getModuleDefinitions();
 		assertEquals(3, requests.size());
-		assertEquals("foo", requests.get(0).getParameters().get(BindingProperties.INPUT_BINDING_KEY));
-		assertEquals("test", requests.get(0).getParameters().get(BindingProperties.INPUT_GROUP_KEY));
+		assertEquals("foo", requests.get(0).getParameters().get(BindingPropertyKeys.INPUT_DESTINATION));
+		assertEquals("test", requests.get(0).getParameters().get(BindingPropertyKeys.INPUT_GROUP));
 	}
 
 	@Test
@@ -139,7 +139,7 @@ public class StreamDefinitionTests {
 		StreamDefinition streamDefinition = new StreamDefinition("test", "boo | blah | aaak > :foo");
 		List<ModuleDefinition> requests = streamDefinition.getModuleDefinitions();
 		assertEquals(3, requests.size());
-		assertEquals("foo", requests.get(2).getParameters().get(BindingProperties.OUTPUT_BINDING_KEY));
+		assertEquals("foo", requests.get(2).getParameters().get(BindingPropertyKeys.OUTPUT_DESTINATION));
 	}
 
 	@Test
@@ -147,7 +147,7 @@ public class StreamDefinitionTests {
 		StreamDefinition streamDefinition = new StreamDefinition("test", "bart > :foo");
 		List<ModuleDefinition> requests = streamDefinition.getModuleDefinitions();
 		assertEquals(1, requests.size());
-		assertEquals("foo", requests.get(0).getParameters().get(BindingProperties.OUTPUT_BINDING_KEY));
+		assertEquals("foo", requests.get(0).getParameters().get(BindingPropertyKeys.OUTPUT_DESTINATION));
 	}
 
 	@Test
@@ -167,9 +167,9 @@ public class StreamDefinitionTests {
 		StreamDefinition streamDefinition = new StreamDefinition("test", ":foo > boot");
 		List<ModuleDefinition> requests = streamDefinition.getModuleDefinitions();
 		assertEquals(1, requests.size());
-		assertEquals("foo", requests.get(0).getParameters().get(BindingProperties.INPUT_BINDING_KEY));
-		assertEquals("test", requests.get(0).getParameters().get(BindingProperties.INPUT_GROUP_KEY));
-		assertEquals("true", requests.get(0).getParameters().get(BindingProperties.INPUT_DURABLE_SUBSCRIPTION_KEY));
+		assertEquals("foo", requests.get(0).getParameters().get(BindingPropertyKeys.INPUT_DESTINATION));
+		assertEquals("test", requests.get(0).getParameters().get(BindingPropertyKeys.INPUT_GROUP));
+		assertEquals("true", requests.get(0).getParameters().get(BindingPropertyKeys.INPUT_DURABLE_SUBSCRIPTION));
 	}
 
 	@Test
@@ -199,13 +199,13 @@ public class StreamDefinitionTests {
 		ModuleDefinition source = modules.get(0);
 		ModuleDefinition sink = modules.get(1);
 		assertEquals("time", source.getLabel());
-		assertEquals("ticktock.time", source.getParameters().get(BindingProperties.OUTPUT_BINDING_KEY));
-		assertFalse(source.getParameters().containsKey(BindingProperties.INPUT_BINDING_KEY));
+		assertEquals("ticktock.time", source.getParameters().get(BindingPropertyKeys.OUTPUT_DESTINATION));
+		assertFalse(source.getParameters().containsKey(BindingPropertyKeys.INPUT_DESTINATION));
 		assertEquals("log", sink.getLabel());
-		assertEquals("ticktock.time", sink.getParameters().get(BindingProperties.INPUT_BINDING_KEY));
-		assertEquals("default", sink.getParameters().get(BindingProperties.INPUT_GROUP_KEY));
-		assertEquals("true", sink.getParameters().get(BindingProperties.INPUT_DURABLE_SUBSCRIPTION_KEY));
-		assertFalse(sink.getParameters().containsKey(BindingProperties.OUTPUT_BINDING_KEY));
+		assertEquals("ticktock.time", sink.getParameters().get(BindingPropertyKeys.INPUT_DESTINATION));
+		assertEquals("default", sink.getParameters().get(BindingPropertyKeys.INPUT_GROUP));
+		assertEquals("true", sink.getParameters().get(BindingPropertyKeys.INPUT_DURABLE_SUBSCRIPTION));
+		assertFalse(sink.getParameters().containsKey(BindingPropertyKeys.OUTPUT_DESTINATION));
 	}
 
 	@Test
@@ -218,20 +218,19 @@ public class StreamDefinitionTests {
 		ModuleDefinition sink = modules.get(2);
 
 		assertEquals("time", source.getLabel());
-		assertEquals("ticktock.time", source.getParameters().get(BindingProperties.OUTPUT_BINDING_KEY));
-		assertFalse(source.getParameters().containsKey(BindingProperties.INPUT_BINDING_KEY));
+		assertEquals("ticktock.time", source.getParameters().get(BindingPropertyKeys.OUTPUT_DESTINATION));
+		assertFalse(source.getParameters().containsKey(BindingPropertyKeys.INPUT_DESTINATION));
 
 		assertEquals("filter", processor.getLabel());
-		assertEquals("ticktock.time", processor.getParameters().get(BindingProperties.INPUT_BINDING_KEY));
-		assertEquals("default", processor.getParameters().get(BindingProperties.INPUT_GROUP_KEY));
-		assertEquals("true", processor.getParameters().get(BindingProperties.INPUT_DURABLE_SUBSCRIPTION_KEY));
-		assertEquals("ticktock.filter", processor.getParameters().get(BindingProperties.OUTPUT_BINDING_KEY));
+		assertEquals("ticktock.time", processor.getParameters().get(BindingPropertyKeys.INPUT_DESTINATION));
+		assertEquals("default", processor.getParameters().get(BindingPropertyKeys.INPUT_GROUP));
+		assertEquals("true", processor.getParameters().get(BindingPropertyKeys.INPUT_DURABLE_SUBSCRIPTION));
+		assertEquals("ticktock.filter", processor.getParameters().get(BindingPropertyKeys.OUTPUT_DESTINATION));
 
 		assertEquals("log", sink.getLabel());
-		assertEquals("ticktock.filter", sink.getParameters().get(BindingProperties.INPUT_BINDING_KEY));
-		assertEquals("default", sink.getParameters().get(BindingProperties.INPUT_GROUP_KEY));
-		assertEquals("true", sink.getParameters().get(BindingProperties.INPUT_DURABLE_SUBSCRIPTION_KEY));
-		assertFalse(sink.getParameters().containsKey(BindingProperties.OUTPUT_BINDING_KEY));
+		assertEquals("ticktock.filter", sink.getParameters().get(BindingPropertyKeys.INPUT_DESTINATION));
+		assertEquals("default", sink.getParameters().get(BindingPropertyKeys.INPUT_GROUP));
+		assertEquals("true", sink.getParameters().get(BindingPropertyKeys.INPUT_DURABLE_SUBSCRIPTION));
+		assertFalse(sink.getParameters().containsKey(BindingPropertyKeys.OUTPUT_DESTINATION));
 	}
-
 }
