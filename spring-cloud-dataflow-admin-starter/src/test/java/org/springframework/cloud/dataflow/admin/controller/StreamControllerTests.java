@@ -136,9 +136,9 @@ public class StreamControllerTests {
 		ModuleDefinition timeDefinition = myStream.getModuleDefinitions().get(0);
 		ModuleDefinition logDefinition = myStream.getModuleDefinitions().get(1);
 		assertEquals(1, timeDefinition.getParameters().size());
-		assertEquals("myStream.0", timeDefinition.getParameters().get(BindingProperties.OUTPUT_BINDING_KEY));
+		assertEquals("myStream.time", timeDefinition.getParameters().get(BindingProperties.OUTPUT_BINDING_KEY));
 		assertEquals(3, logDefinition.getParameters().size());
-		assertEquals("myStream.0", logDefinition.getParameters().get(BindingProperties.INPUT_BINDING_KEY));
+		assertEquals("myStream.time", logDefinition.getParameters().get(BindingProperties.INPUT_BINDING_KEY));
 		assertEquals("default", logDefinition.getParameters().get(BindingProperties.INPUT_GROUP_KEY));
 		assertEquals("true", logDefinition.getParameters().get(BindingProperties.INPUT_DURABLE_SUBSCRIPTION_KEY));
 	}
@@ -192,14 +192,14 @@ public class StreamControllerTests {
 		ModuleDefinition filterDefinition = myStream.getModuleDefinitions().get(1);
 		ModuleDefinition logDefinition = myStream.getModuleDefinitions().get(2);
 		assertEquals(1, timeDefinition.getParameters().size());
-		assertEquals("myStream.0", timeDefinition.getParameters().get(BindingProperties.OUTPUT_BINDING_KEY));
+		assertEquals("myStream.time", timeDefinition.getParameters().get(BindingProperties.OUTPUT_BINDING_KEY));
 		assertEquals(4, filterDefinition.getParameters().size());
-		assertEquals("myStream.0", filterDefinition.getParameters().get(BindingProperties.INPUT_BINDING_KEY));
+		assertEquals("myStream.time", filterDefinition.getParameters().get(BindingProperties.INPUT_BINDING_KEY));
 		assertEquals("default", filterDefinition.getParameters().get(BindingProperties.INPUT_GROUP_KEY));
 		assertEquals("true", filterDefinition.getParameters().get(BindingProperties.INPUT_DURABLE_SUBSCRIPTION_KEY));
-		assertEquals("myStream.1", filterDefinition.getParameters().get(BindingProperties.OUTPUT_BINDING_KEY));
+		assertEquals("myStream.filter", filterDefinition.getParameters().get(BindingProperties.OUTPUT_BINDING_KEY));
 		assertEquals(3, logDefinition.getParameters().size());
-		assertEquals("myStream.1", logDefinition.getParameters().get(BindingProperties.INPUT_BINDING_KEY));
+		assertEquals("myStream.filter", logDefinition.getParameters().get(BindingProperties.INPUT_BINDING_KEY));
 		assertEquals("default", logDefinition.getParameters().get(BindingProperties.INPUT_GROUP_KEY));
 		assertEquals("true", logDefinition.getParameters().get(BindingProperties.INPUT_DURABLE_SUBSCRIPTION_KEY));
 	}
@@ -207,7 +207,7 @@ public class StreamControllerTests {
 	@Test
 	public void testSourceChannelWithSingleModule() throws Exception {
 		assertEquals(0, repository.count());
-		String definition = "queue:foo > log";
+		String definition = ":foo > log";
 		mockMvc.perform(
 				post("/streams/definitions/").param("name", "myStream").param("definition", definition)
 						.accept(MediaType.APPLICATION_JSON)).andDo(print())
@@ -227,7 +227,7 @@ public class StreamControllerTests {
 	@Test
 	public void testSourceChannelWithTwoModules() throws Exception {
 		assertEquals(0, repository.count());
-		String definition = "queue:foo > filter | log";
+		String definition = ":foo > filter | log";
 		mockMvc.perform(
 				post("/streams/definitions/").param("name", "myStream").param("definition", definition)
 						.accept(MediaType.APPLICATION_JSON)).andDo(print())
@@ -242,10 +242,10 @@ public class StreamControllerTests {
 		assertEquals("foo", filterDefinition.getParameters().get(BindingProperties.INPUT_BINDING_KEY));
 		assertEquals("myStream", filterDefinition.getParameters().get(BindingProperties.INPUT_GROUP_KEY));
 		assertEquals("true", filterDefinition.getParameters().get(BindingProperties.INPUT_DURABLE_SUBSCRIPTION_KEY));
-		assertEquals("myStream.0", filterDefinition.getParameters().get(BindingProperties.OUTPUT_BINDING_KEY));
+		assertEquals("myStream.filter", filterDefinition.getParameters().get(BindingProperties.OUTPUT_BINDING_KEY));
 		ModuleDefinition logDefinition = myStream.getModuleDefinitions().get(1);
 		assertEquals(3, logDefinition.getParameters().size());
-		assertEquals("myStream.0", logDefinition.getParameters().get(BindingProperties.INPUT_BINDING_KEY));
+		assertEquals("myStream.filter", logDefinition.getParameters().get(BindingProperties.INPUT_BINDING_KEY));
 		assertEquals("default", logDefinition.getParameters().get(BindingProperties.INPUT_GROUP_KEY));
 		assertEquals("true", logDefinition.getParameters().get(BindingProperties.INPUT_DURABLE_SUBSCRIPTION_KEY));
 	}
@@ -253,7 +253,7 @@ public class StreamControllerTests {
 	@Test
 	public void testSinkChannelWithSingleModule() throws Exception {
 		assertEquals(0, repository.count());
-		String definition = "time > queue:foo";
+		String definition = "time > :foo";
 		mockMvc.perform(
 				post("/streams/definitions/").param("name", "myStream").param("definition", definition)
 						.accept(MediaType.APPLICATION_JSON)).andDo(print())
@@ -271,7 +271,7 @@ public class StreamControllerTests {
 	@Test
 	public void testSinkChannelWithTwoModules() throws Exception {
 		assertEquals(0, repository.count());
-		String definition = "time | filter > queue:foo";
+		String definition = "time | filter > :foo";
 		mockMvc.perform(
 				post("/streams/definitions/").param("name", "myStream").param("definition", definition)
 						.accept(MediaType.APPLICATION_JSON)).andDo(print())
@@ -283,10 +283,10 @@ public class StreamControllerTests {
 		assertEquals(2, myStream.getModuleDefinitions().size());
 		ModuleDefinition timeDefinition = myStream.getModuleDefinitions().get(0);
 		assertEquals(1, timeDefinition.getParameters().size());
-		assertEquals("myStream.0", timeDefinition.getParameters().get(BindingProperties.OUTPUT_BINDING_KEY));
+		assertEquals("myStream.time", timeDefinition.getParameters().get(BindingProperties.OUTPUT_BINDING_KEY));
 		ModuleDefinition filterDefinition = myStream.getModuleDefinitions().get(1);
 		assertEquals(4, filterDefinition.getParameters().size());
-		assertEquals("myStream.0", filterDefinition.getParameters().get(BindingProperties.INPUT_BINDING_KEY));
+		assertEquals("myStream.time", filterDefinition.getParameters().get(BindingProperties.INPUT_BINDING_KEY));
 		assertEquals("default", filterDefinition.getParameters().get(BindingProperties.INPUT_GROUP_KEY));
 		assertEquals("true", filterDefinition.getParameters().get(BindingProperties.INPUT_DURABLE_SUBSCRIPTION_KEY));
 		assertEquals("foo", filterDefinition.getParameters().get(BindingProperties.OUTPUT_BINDING_KEY));
@@ -295,7 +295,7 @@ public class StreamControllerTests {
 	@Test
 	public void testChannelsOnBothSides() throws Exception {
 		assertEquals(0, repository.count());
-		String definition = "queue:bar > filter > queue:foo";
+		String definition = ":bar > filter > :foo";
 		mockMvc.perform(
 				post("/streams/definitions/").param("name", "myStream").param("definition", definition)
 						.param("deploy", "true")

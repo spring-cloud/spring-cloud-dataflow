@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2015-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,28 +21,23 @@ import java.util.List;
 /**
  * @author Andy Clement
  * @author David Turanski
+ * @author Ilayaperumal Gopinathan
+ * @author Mark Fisher
  */
 public class ChannelNode extends AstNode {
 
-	private ChannelType channelType;
-
 	private List<String> nameComponents;
 
-	private List<String> indexingElements;
-
-	public ChannelNode(ChannelType channelType, int startPos, int endPos, List<String> nameElements,
-			List<String> indexingElements) {
+	public ChannelNode(int startPos, int endPos, List<String> nameComponents) {
 		super(startPos, endPos);
-		this.channelType = channelType;
-		this.nameComponents = nameElements;
-		this.indexingElements = indexingElements;
+		this.nameComponents = nameComponents;
 	}
 
 	@Override
 	public String stringify(boolean includePositionalInfo) {
 		StringBuilder s = new StringBuilder();
 		s.append("(");
-		produceStringRepresentation(s);
+		s.append(getChannelName());
 		if (includePositionalInfo) {
 			s.append(":");
 			s.append(getStartPos()).append(">").append(getEndPos());
@@ -53,69 +48,21 @@ public class ChannelNode extends AstNode {
 
 	@Override
 	public String toString() {
-		StringBuilder s = new StringBuilder();
-		produceStringRepresentation(s);
-		return s.toString();
-	}
-
-	private void produceStringRepresentation(StringBuilder s) {
-		int t = 0;
-		if (channelType.isTap()) {
-			s.append(channelType.getStringRepresentation());
-		}
-		if (nameComponents.size() > 0 && channelType.isTap() &&
-				nameComponents.get(0).equalsIgnoreCase(channelType.tapSource().name())) {
-			t = 1;
-		}
-		for (int max = nameComponents.size(); t < max; t++) {
-			s.append(nameComponents.get(t));
-			if (t < nameComponents.size() - 1) {
-				s.append(":");
-			}
-		}
-		if (indexingElements.size() != 0) {
-			for (int t2 = 0, max = indexingElements.size(); t2 < max; t2++) {
-				s.append(".");
-				s.append(indexingElements.get(t2));
-			}
-		}
+		return getChannelName();
 	}
 
 	String getChannelName() {
 		StringBuilder s = new StringBuilder();
-		if (channelType.isTap()) {
-			s.append("tap:");
-		}
-		s.append(getNameComponents());
-		s.append(getIndexingComponents());
-		return s.toString();
-	}
-
-	private String getNameComponents() {
-		StringBuilder s = new StringBuilder();
 		for (int t = 0, max = nameComponents.size(); t < max; t++) {
-			if (t > 0) {
-				s.append(":");
+			if (t != 0) {
+				s.append(".");
 			}
 			s.append(nameComponents.get(t));
 		}
 		return s.toString();
 	}
 
-	private String getIndexingComponents() {
-		StringBuilder s = new StringBuilder();
-		for (int t = 0, max = indexingElements.size(); t < max; t++) {
-			s.append(".");
-			s.append(indexingElements.get(t));
-		}
-		return s.toString();
-	}
-
-	ChannelType getChannelType() {
-		return this.channelType;
-	}
-
 	public ChannelNode copyOf() {
-		return new ChannelNode(this.channelType, super.startPos, super.endPos, nameComponents, indexingElements);
+		return new ChannelNode(super.startPos, super.endPos, nameComponents);
 	}
 }

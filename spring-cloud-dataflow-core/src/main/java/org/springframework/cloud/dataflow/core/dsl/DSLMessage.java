@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2015-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ import java.text.MessageFormat;
  * </code> The prefix captures the code and the error kind, whilst the position is included if it is known.
  *
  * @author Andy Clement
+ * @author Ilayaperumal Gopinathan
  */
 public enum DSLMessage {
 
@@ -56,8 +57,6 @@ public enum DSLMessage {
 	EXPECTED_MODULENAME(ERROR, 118, "expected module name but found ''{0}''"), //
 	EXPECTED_WHITESPACE_AFTER_MODULE_BEFORE_ARGUMENT(ERROR, 119,
 			"expected whitespace after module name and before argument"), //
-	EXPECTED_CHANNEL_QUALIFIER(ERROR, 120, "expected channel reference '':<channel>'' but found ''{0}''"), //
-	EXPECTED_CHANNEL_NAME(ERROR, 121, "expected channel name but found ''{0}''"), //
 	ILLEGAL_STREAM_NAME(ERROR, 122, "illegal name for a stream ''{0}''"), //
 	ILLEGAL_TASK_NAME(ERROR, 123, "illegal name for a task ''{0}''"), //
 	MISSING_VALUE_FOR_VARIABLE(ERROR, 125, "no value specified for variable ''{0}'' when using substream"), //
@@ -68,13 +67,7 @@ public enum DSLMessage {
 	STREAM_NAME_MATCHING_MODULE_NAME(ERROR, 130,
 			"Stream name ''{0}'' same as that of its modules' names is not allowed."), //
 	CHANNEL_INDEXING_NOT_ALLOWED(ERROR, 131, "Channel does not support indexing"), //
-	ONLY_A_TAP_ON_A_STREAM_OR_TASK_CAN_BE_INDEXED(ERROR, 132, "Only a tap on a stream or task can be indexed"), //
-	EXPECTED_CHANNEL_PREFIX_QUEUE_TOPIC(ERROR,
-			133,
-			"Expected channel prefix of ''queue'' or ''topic'' but found ''{0}''"), //
-	EXPECTED_CHANNEL_PREFIX_QUEUE_TOPIC_TAP(ERROR,
-			134,
-			"Expected channel prefix of ''queue'', ''topic'' or ''tap'' but found ''{0}''"), //
+	EXPECTED_CHANNEL_PREFIX(ERROR, 133, "Expected channel prefix but found ''{0}''"), //
 	CANNOT_USE_COMPOSEDMODULE_HERE_AS_IT_DEFINES_SOURCE_CHANNEL(ERROR,
 			135,
 			"cannot use composed module ''{0}'' here because it defines a source channel"), //
@@ -89,12 +82,6 @@ public enum DSLMessage {
 			"cannot use composed module ''{0}'' here, both that composed module and this stream define a sink channel"), //
 	NO_WHITESPACE_IN_CHANNEL_DEFINITION(ERROR, 139, "no whitespace allowed between components in a channel name"), //
 	NO_WHITESPACE_BETWEEN_LABEL_NAME_AND_COLON(ERROR, 140, "no whitespace allowed between label name and colon"), //
-	TAP_NEEDS_THREE_COMPONENTS(ERROR,
-			141,
-			"a tap needs at least three components (tap:queue:[name], tap:topic:[name], tap:stream:[streamname] or tap:task:[taskname])"), //
-	NOT_ALLOWED_TO_TAP_THAT(ERROR,
-			142,
-			"tapping only allowed on 'stream', 'topic', 'task' or 'queue'. Not allowed on ''{0}''"), //
 	DUPLICATE_LABEL(ERROR,
 			143,
 			"label ''{0}'' should be unique but module ''{1}'' (at position {2}) and module ''{3}'' (at position {4}) both use it"), //
