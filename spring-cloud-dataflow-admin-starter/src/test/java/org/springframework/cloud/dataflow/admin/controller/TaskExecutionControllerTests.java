@@ -97,4 +97,10 @@ public class TaskExecutionControllerTests {
 				TASK_NAME + "\"}"));
 	}
 
+	@Test
+	public void testGetExecutionByName() throws Exception{
+		mockMvc.perform(
+				get("/tasks/executions/").accept(MediaType.APPLICATION_JSON)
+		).andExpect(status().isOk());
+	}
 }
