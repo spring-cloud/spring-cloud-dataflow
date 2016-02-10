@@ -140,47 +140,47 @@ public class StreamParser extends ModuleParser {
 	 * Return a {@link StreamNode} based on the tokens resulting from the parsed DSL.
 	 * <p>
 	 * Expected format:
-	 * {@code stream: (streamName) (sourceChannel) moduleList (sinkChannel)}
+	 * {@code stream: (streamName) (sourceDestination) moduleList (sinkDestination)}
 	 *
 	 * @return {@code StreamNode} based on parsed DSL
 	 */
 	private StreamNode eatStream() {
 		String streamName = eatStreamName();
-		SourceChannelNode sourceChannelNode = eatSourceChannel();
-		// This construct: :foo > :bar is a source then a sink channel
+		SourceDestinationNode sourceDestinationNode = eatSourceDestination();
+		// This construct: :foo > :bar is a source then a sink destination
 		// with no module. Special handling for that is right here:
 		boolean bridge = false;
-		if (sourceChannelNode != null) { // so if we are just after a '>'
-			if (looksLikeChannel() && noMorePipes()) {
+		if (sourceDestinationNode != null) { // so if we are just after a '>'
+			if (looksLikeDestination() && noMorePipes()) {
 				bridge = true;
 			}
 		}
 		Tokens tokens = getTokens();
 		List<ModuleNode> moduleNodes = new ArrayList<>();
 		if (bridge) {
-			// Create a bridge module to hang the source/sink channels off
-			tokens.decrementPosition(); // Rewind so we can nicely eat the sink channel
+			// Create a bridge module to hang the source/sink destinations off
+			tokens.decrementPosition(); // Rewind so we can nicely eat the sink destination
 			moduleNodes.add(new ModuleNode(null, "bridge", tokens.peek().startPos,
 					tokens.peek().endPos, null));
 		}
 		else {
 			moduleNodes.addAll(eatModuleList());
 		}
-		SinkChannelNode sinkChannelNode = eatSinkChannel();
+		SinkDestinationNode SinkDestinationNode = eatSinkDestination();
 
 		// Further data is an error
 		if (tokens.hasNext()) {
 			Token t = tokens.peek();
 			DSLMessage errorMessage = DSLMessage.UNEXPECTED_DATA_AFTER_STREAMDEF;
-			if (!moduleNodes.isEmpty() && sinkChannelNode == null &&
+			if (!moduleNodes.isEmpty() && SinkDestinationNode == null &&
 					tokens.getTokenStream().get(tokens.position() - 1).isKind(TokenKind.GT)) {
 				// Additional token where a destination is expected, but has no prefix
-				errorMessage = DSLMessage.EXPECTED_CHANNEL_PREFIX;
+				errorMessage = DSLMessage.EXPECTED_DESTINATION_PREFIX;
 			}
 			tokens.raiseException(t.startPos, errorMessage, toString(t));
 		}
 		return new StreamNode(tokens.getExpression(), streamName, moduleNodes,
-				sourceChannelNode, sinkChannelNode);
+				sourceDestinationNode, SinkDestinationNode);
 	}
 
 	/**
@@ -211,22 +211,22 @@ public class StreamParser extends ModuleParser {
 
 	/**
 	 * Return {@code true} if the current token position appears to be pointing
-	 * at a channel.
+	 * at a destination.
 	 *
 	 * @return {@code true} if the current token position appears to be pointing
-	 * at a channel
+	 * at a destination
 	 */
-	private boolean looksLikeChannel() {
-		return looksLikeChannel(getTokens().position());
+	private boolean looksLikeDestination() {
+		return looksLikeDestination(getTokens().position());
 	}
 
 	/**
-	 * Return {@code true} if the indicated position appears to be pointing at a channel.
+	 * Return {@code true} if the indicated position appears to be pointing at a destination.
 	 *
 	 * @param position token position to check
-	 * @return {@code true} if the indicated position appears to be pointing at a channel.
+	 * @return {@code true} if the indicated position appears to be pointing at a destination.
 	 */
-	private boolean looksLikeChannel(int position) {
+	private boolean looksLikeDestination(int position) {
 		Tokens tokens = getTokens();
 		List<Token> tokenList = tokens.getTokenStream();
 		if (tokens.hasNext() && tokenList.get(position).getKind() == TokenKind.COLON) {
@@ -238,18 +238,18 @@ public class StreamParser extends ModuleParser {
 	}
 
 	/**
-	 * If the current token position contains a source channel, return a
-	 * {@link SourceChannelNode} and advance the token position; otherwise
+	 * If the current token position contains a source destination, return a
+	 * {@link SourceDestinationNode} and advance the token position; otherwise
 	 * return {@code null}.
 	 * <p>
 	 * Expected format:
 	 * {@code ':' identifier >}
 	 * {@code ':' identifier '.' identifier >}
 	 *
-	 * @return a {@code SourceChannelNode} or {@code null} if the token
-	 * position is not pointing at a source channel
+	 * @return a {@code SourceDestinationNode} or {@code null} if the token
+	 * position is not pointing at a source destination
 	 */
-	private SourceChannelNode eatSourceChannel() {
+	private SourceDestinationNode eatSourceDestination() {
 		Tokens tokens = getTokens();
 		boolean gtBeforePipe = false;
 		// Seek for a GT(>) before a PIPE(|)
@@ -268,78 +268,78 @@ public class StreamParser extends ModuleParser {
 			return null;
 		}
 
-		ChannelNode channelNode = eatChannelReference();
-		if (channelNode == null) {
+		DestinationNode destinationNode = eatDestinationReference();
+		if (destinationNode == null) {
 			return null;
 		}
 		Token gt = tokens.eat(TokenKind.GT);
-		return new SourceChannelNode(channelNode, gt.endPos);
+		return new SourceDestinationNode(destinationNode, gt.endPos);
 	}
 
 	/**
-	 * If the current token position contains a sink channel, return a
-	 * {@link SinkChannelNode} and advance the token position; otherwise
+	 * If the current token position contains a sink destination, return a
+	 * {@link SinkDestinationNode} and advance the token position; otherwise
 	 * return {@code null}.
 	 * <p>
 	 * Expected format:
 	 * {@code '>' ':' identifier}
 	 *
-	 * @return a {@code SinkChannelNode} or {@code null} if the token
-	 * position is not pointing at a sink channel
+	 * @return a {@code SinkDestinationNode} or {@code null} if the token
+	 * position is not pointing at a sink destination
 	 */
-	private SinkChannelNode eatSinkChannel() {
+	private SinkDestinationNode eatSinkDestination() {
 		Tokens tokens = getTokens();
-		SinkChannelNode sinkChannelNode = null;
+		SinkDestinationNode SinkDestinationNode = null;
 		if (tokens.peek(TokenKind.GT)) {
 			Token gt = tokens.eat(TokenKind.GT);
-			ChannelNode channelNode = eatChannelReference();
-			if (channelNode == null) {
+			DestinationNode destinationNode = eatDestinationReference();
+			if (destinationNode == null) {
 				return null;
 			}
-			sinkChannelNode = new SinkChannelNode(channelNode, gt.startPos);
+			SinkDestinationNode = new SinkDestinationNode(destinationNode, gt.startPos);
 		}
-		return sinkChannelNode;
+		return SinkDestinationNode;
 	}
 
 	/**
-	 * Return a {@link ChannelNode} for the token at the current position.
+	 * Return a {@link DestinationNode} for the token at the current position.
 	 * <p>
-	 * A channel reference is the label component when referencing a specific
+	 * A destination reference is the label component when referencing a specific
 	 * module/label in a stream definition.
 	 *
 	 * Expected format:
 	 * {@code ':' identifier [ '.' identifier ]*}
 	 * <p>
 	 *
-	 * @return {@code ChannelNode} representing the channel reference
+	 * @return {@code DestinationNode} representing the destination reference
 	 */
-	private ChannelNode eatChannelReference() {
+	private DestinationNode eatDestinationReference() {
 		Tokens tokens = getTokens();
 		Token firstToken = tokens.next();
 		if (!firstToken.isKind(TokenKind.COLON)) {
 			tokens.decrementPosition();
 			return null;
 		}
-		List<Token> channelNameComponents = new ArrayList<Token>();
+		List<Token> destinationNameComponents = new ArrayList<Token>();
 		Token identifierToken = tokens.next();
-		channelNameComponents.add(identifierToken);
+		destinationNameComponents.add(identifierToken);
 		while (tokens.peek(TokenKind.DOT)) {
 			if (!tokens.isNextAdjacent()) {
 				tokens.raiseException(tokens.peek().startPos,
-						DSLMessage.NO_WHITESPACE_IN_CHANNEL_DEFINITION);
+						DSLMessage.NO_WHITESPACE_IN_DESTINATION_DEFINITION);
 			}
 			tokens.next(); // skip dot
 			if (!tokens.isNextAdjacent()) {
 				tokens.raiseException(tokens.peek().startPos,
-						DSLMessage.NO_WHITESPACE_IN_CHANNEL_DEFINITION);
+						DSLMessage.NO_WHITESPACE_IN_DESTINATION_DEFINITION);
 			}
-			channelNameComponents.add(tokens.eat(TokenKind.IDENTIFIER));
+			destinationNameComponents.add(tokens.eat(TokenKind.IDENTIFIER));
 		}
 		int endPos = identifierToken.endPos;
-		if (!channelNameComponents.isEmpty()) {
-			endPos = channelNameComponents.get(channelNameComponents.size() - 1).endPos;
+		if (!destinationNameComponents.isEmpty()) {
+			endPos = destinationNameComponents.get(destinationNameComponents.size() - 1).endPos;
 		}
-		return new ChannelNode(identifierToken.startPos, endPos, tokenListToStringList(channelNameComponents));
+		return new DestinationNode(identifierToken.startPos, endPos, tokenListToStringList(destinationNameComponents));
 	}
 
 	/**
@@ -347,7 +347,7 @@ public class StreamParser extends ModuleParser {
 	 * <p>
 	 * Expected format:
 	 * {@code moduleList: module (| module)*}
-	 * A stream may end in a module (if it is a sink) or be followed by a sink channel.
+	 * A stream may end in a module (if it is a sink) or be followed by a sink destination.
 	 *
 	 * @return a list of {@code ModuleNode}
 	 */
@@ -363,7 +363,7 @@ public class StreamParser extends ModuleParser {
 				moduleNodes.add(eatModule());
 			}
 			else {
-				// might be followed by sink channel
+				// might be followed by sink destination
 				break;
 			}
 		}

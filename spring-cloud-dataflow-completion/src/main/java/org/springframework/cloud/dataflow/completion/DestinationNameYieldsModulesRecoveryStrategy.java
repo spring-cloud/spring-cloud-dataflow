@@ -25,16 +25,16 @@ import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistration
 import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistry;
 
 /**
- * Proposes module names when the user has typed a named channel redirection.
+ * Proposes module names when the user has typed a destination redirection.
  *
  * @author Eric Bottard
  */
-class ChannelNameYieldsModulesRecoveryStrategy extends
+class DestinationNameYieldsModulesRecoveryStrategy extends
 		StacktraceFingerprintingRecoveryStrategy<CheckPointedParseException> {
 
 	private final ArtifactRegistry artifactRegistry;
 
-	public ChannelNameYieldsModulesRecoveryStrategy(ArtifactRegistry artifactRegistry) {
+	public DestinationNameYieldsModulesRecoveryStrategy(ArtifactRegistry artifactRegistry) {
 		super(CheckPointedParseException.class, "queue:foo >", "queue:foo > ");
 		this.artifactRegistry = artifactRegistry;
 	}
@@ -45,7 +45,7 @@ class ChannelNameYieldsModulesRecoveryStrategy extends
 			return false;
 		}
 		// Cast is safe from call to super.
-		// Backtracking would return even before the named channel
+		// Backtracking would return even before the destination
 		return ((CheckPointedParseException)exception).getExpressionStringUntilCheckpoint().trim().isEmpty();
 	}
 
@@ -56,7 +56,7 @@ class ChannelNameYieldsModulesRecoveryStrategy extends
 		for (ArtifactRegistration moduleRegistration : artifactRegistry.findAll()) {
 			if (moduleRegistration.getType() == processor || moduleRegistration.getType() == sink) {
 				proposals.add(completionFactory.withSeparateTokens(moduleRegistration.getName(),
-						"Wire named channel into a " + moduleRegistration.getType() + " module"));
+						"Wire destination into a " + moduleRegistration.getType() + " module"));
 			}
 		}
 	}

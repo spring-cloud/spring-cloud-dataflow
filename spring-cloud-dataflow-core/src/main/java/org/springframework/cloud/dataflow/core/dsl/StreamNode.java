@@ -29,18 +29,18 @@ public class StreamNode extends AstNode {
 
 	private final List<ModuleNode> moduleNodes;
 
-	private SourceChannelNode sourceChannelNode;
+	private SourceDestinationNode sourceDestinationNode;
 
-	private SinkChannelNode sinkChannelNode;
+	private SinkDestinationNode sinkDestinationNode;
 
 	public StreamNode(String streamText, String streamName, List<ModuleNode> moduleNodes,
-			SourceChannelNode sourceChannelNode, SinkChannelNode sinkChannelNode) {
+			SourceDestinationNode sourceDestinationNode, SinkDestinationNode sinkDestinationNode) {
 		super(moduleNodes.get(0).getStartPos(), moduleNodes.get(moduleNodes.size() - 1).getEndPos());
 		this.streamText = streamText;
 		this.streamName = streamName;
 		this.moduleNodes = moduleNodes;
-		this.sourceChannelNode = sourceChannelNode;
-		this.sinkChannelNode = sinkChannelNode;
+		this.sourceDestinationNode = sourceDestinationNode;
+		this.sinkDestinationNode = sinkDestinationNode;
 	}
 
 	/** @inheritDoc */
@@ -52,14 +52,14 @@ public class StreamNode extends AstNode {
 		if (getStreamName() != null) {
 			s.append(getStreamName()).append(" = ");
 		}
-		if (sourceChannelNode != null) {
-			s.append(sourceChannelNode.stringify(includePositionalInfo));
+		if (sourceDestinationNode != null) {
+			s.append(sourceDestinationNode.stringify(includePositionalInfo));
 		}
 		for (ModuleNode moduleNode : moduleNodes) {
 			s.append(moduleNode.stringify(includePositionalInfo));
 		}
-		if (sinkChannelNode != null) {
-			s.append(sinkChannelNode.stringify(includePositionalInfo));
+		if (sinkDestinationNode != null) {
+			s.append(sinkDestinationNode.stringify(includePositionalInfo));
 		}
 		s.append("]");
 		return s.toString();
@@ -71,8 +71,8 @@ public class StreamNode extends AstNode {
 		if (getStreamName() != null) {
 			s.append(getStreamName()).append(" = ");
 		}
-		if (sourceChannelNode != null) {
-			s.append(sourceChannelNode.toString());
+		if (sourceDestinationNode != null) {
+			s.append(sourceDestinationNode.toString());
 		}
 		for (int m = 0; m < moduleNodes.size(); m++) {
 			ModuleNode moduleNode = moduleNodes.get(m);
@@ -81,8 +81,8 @@ public class StreamNode extends AstNode {
 				s.append(" | ");
 			}
 		}
-		if (sinkChannelNode != null) {
-			s.append(sinkChannelNode.toString());
+		if (sinkDestinationNode != null) {
+			s.append(sinkDestinationNode.toString());
 		}
 		return s.toString();
 	}
@@ -91,12 +91,12 @@ public class StreamNode extends AstNode {
 		return moduleNodes;
 	}
 
-	public SourceChannelNode getSourceChannelNode() {
-		return sourceChannelNode;
+	public SourceDestinationNode getSourceDestinationNode() {
+		return sourceDestinationNode;
 	}
 
-	public SinkChannelNode getSinkChannelNode() {
-		return sinkChannelNode;
+	public SinkDestinationNode getSinkDestinationNode() {
+		return sinkDestinationNode;
 	}
 
 	public String getStreamName() {

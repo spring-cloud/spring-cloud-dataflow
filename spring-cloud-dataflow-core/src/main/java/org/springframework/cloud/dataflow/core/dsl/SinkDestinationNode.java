@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2015-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,36 +19,36 @@ package org.springframework.cloud.dataflow.core.dsl;
 /**
  * @author Andy Clement
  */
-public class SinkChannelNode extends AstNode {
+public class SinkDestinationNode extends AstNode {
 
-	private final ChannelNode channelNode;
+	private final DestinationNode destinationNode;
 
-	public SinkChannelNode(ChannelNode channelNode, int startPos) {
-		super(startPos, channelNode.endPos);
-		this.channelNode = channelNode;
+	public SinkDestinationNode(DestinationNode destinationNode, int startPos) {
+		super(startPos, destinationNode.endPos);
+		this.destinationNode = destinationNode;
 	}
 
 	/** @inheritDoc */
 	@Override
 	public String stringify(boolean includePositionalInfo) {
-		return ">" + channelNode.stringify(includePositionalInfo);
+		return ">" + destinationNode.stringify(includePositionalInfo);
 	}
 
 	@Override
 	public String toString() {
-		return " > " + channelNode.toString();
+		return " > " + destinationNode.toString();
 	}
 
-	public ChannelNode getChannelNode() {
-		return channelNode;
+	public DestinationNode getDestinationNode() {
+		return destinationNode;
 	}
 
-	public String getChannelName() {
-		return channelNode.getChannelName();
+	public String getDestinationName() {
+		return destinationNode.getDestinationName();
 	}
 
-	public SinkChannelNode copyOf() {
-		return new SinkChannelNode(channelNode.copyOf(), super.startPos);
+	public SinkDestinationNode copyOf() {
+		return new SinkDestinationNode(destinationNode.copyOf(), super.startPos);
 	}
 
 }
