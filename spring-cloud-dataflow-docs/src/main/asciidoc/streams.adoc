@@ -22,7 +22,7 @@ To create these stream definitions you make an HTTP POST request to the Spring C
 
 == Creating a Simple Stream
 
-The Spring Cloud Data Flow Admin Server footnote:[The server is implemented by the `AdminApplication` class in the `spring-cloud-dataflow-admin-starter` subproject] exposes a full RESTful API for managing the lifecycle of stream definitions, but the easiest way to use is it is via the Spring Cloud Data Flow shell. Start the shell as described in the xref:Getting-Started#getting-started[Getting Started] section.
+The Spring Cloud Data Flow Admin Server footnote:[The server is implemented by the `AdminApplication` class in the `spring-cloud-dataflow-server-core` subproject] exposes a full RESTful API for managing the lifecycle of stream definitions, but the easiest way to use is it is via the Spring Cloud Data Flow shell. Start the shell as described in the xref:Getting-Started#getting-started[Getting Started] section.
 
 New streams are created by posting stream definitions. The definitions are built from a simple DSL. For example, let's walk through what happens if we execute the following shell command:
 

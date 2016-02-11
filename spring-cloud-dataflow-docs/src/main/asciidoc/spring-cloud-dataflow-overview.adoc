@@ -54,7 +54,7 @@ The link:https://github.com/spring-cloud/spring-cloud-dataflow/tree/master/sprin
 
 * link:https://github.com/spring-cloud/spring-cloud-dataflow-admin-kubernetes[Kubernetes]
 
-The link:https://github.com/spring-cloud/spring-cloud-dataflow/tree/master/spring-cloud-dataflow-admin-starter[Admin Starter] provides the REST API and UI for implementations of the Admin SPI.
+The link:https://github.com/spring-cloud/spring-cloud-dataflow/tree/master/spring-cloud-dataflow-server-core[Data Flow Server Core] provides the REST API and UI for implementations of the Admin SPI.
 
 The link:https://github.com/spring-cloud/spring-cloud-dataflow/tree/master/spring-cloud-dataflow-shell[Shell] connects to the Admin's REST API and supports a DSL that simplifies the process of defining a stream and managing its lifecycle.
 
