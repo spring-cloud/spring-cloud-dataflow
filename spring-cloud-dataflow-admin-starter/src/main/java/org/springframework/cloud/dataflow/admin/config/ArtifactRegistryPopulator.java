@@ -86,6 +86,7 @@ public class ArtifactRegistryPopulator {
 		populateDefault("file", source);
 		populateDefault("ftp", source);
 		populateDefault("jdbc", source);
+		populateDefault("jms", source);
 		populateDefault("http", source);
 		populateDefault("load-generator", source);
 		populateDefault("rabbit", source);
