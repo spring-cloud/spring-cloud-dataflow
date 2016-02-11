@@ -26,7 +26,6 @@ import javax.sql.DataSource;
 import org.h2.tools.Server;
 import org.slf4j.LoggerFactory;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.actuate.metrics.repository.MetricRepository;
 import org.springframework.boot.actuate.metrics.repository.redis.RedisMetricRepository;
@@ -98,9 +97,6 @@ public class AdminConfiguration {
 	@Value("${spring.datasource.url:#{null}}")
 	private String dataSourceUrl;
 
-	@Autowired
-	StreamCompletionProvider streamCompletionProvider;
-
 	@Bean
 	@ConditionalOnMissingBean
 	public MetricRepository metricRepository(RedisConnectionFactory redisConnectionFactory) {
@@ -164,11 +160,9 @@ public class AdminConfiguration {
 
 	@Bean
 	@ConditionalOnMissingBean(TapOnDestinationRecoveryStrategy.class)
-	public RecoveryStrategy<?> tapOnDestinationExpansionStrategy() {
+	public RecoveryStrategy<?> tapOnDestinationExpansionStrategy(StreamCompletionProvider streamCompletionProvider) {
 		RecoveryStrategy<?> recoveryStrategy = new TapOnDestinationRecoveryStrategy(streamDefinitionRepository());
-		if (this.streamCompletionProvider != null) {
-			this.streamCompletionProvider.addCompletionRecoveryStrategy(recoveryStrategy);
-		}
+		streamCompletionProvider.addCompletionRecoveryStrategy(recoveryStrategy);
 		return recoveryStrategy;
 	}
 
