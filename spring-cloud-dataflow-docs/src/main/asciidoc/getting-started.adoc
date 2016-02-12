@@ -23,31 +23,31 @@ You also need to have link:http://redis.io/[Redis] installed and running if you 
 === Deploying 'local'
 
 [start=1]
-1. download the Spring Cloud Data Flow Admin and Shell apps:
+1. download the Spring Cloud Data Flow Server and Shell apps:
 
 ```
-wget http://repo.spring.io/milestone/org/springframework/cloud/spring-cloud-dataflow-admin-local/1.0.0.M2/spring-cloud-dataflow-admin-local-1.0.0.M2.jar
-wget http://repo.spring.io/milestone/org/springframework/cloud/spring-cloud-dataflow-shell/1.0.0.M2/spring-cloud-dataflow-shell-1.0.0.M2.jar
+wget http://repo.spring.io/milestone/org/springframework/cloud/spring-cloud-dataflow-server-local/1.0.0.BUILD-SNAPSHOT/spring-cloud-dataflow-server-local-1.0.0.BUILD-SNAPSHOT.jar
+wget http://repo.spring.io/milestone/org/springframework/cloud/spring-cloud-dataflow-shell/1.0.0.BUILD-SNAPSHOT/spring-cloud-dataflow-shell-1.0.0.BUILD-SNAPSHOT.jar
 ```
 [start=2]
-1. launch the admin:
+1. launch the Data Flow Server:
 
 ```
-$ java -jar spring-cloud-dataflow-admin-local-1.0.0.M2.jar
+$ java -jar spring-cloud-dataflow-server-local-1.0.0.BUILD-SNAPSHOT.jar
 ```
 
 [start=3]
 1. launch the shell:
 
 ```
-$ java -jar spring-cloud-dataflow-shell-1.0.0.M2.jar
+$ java -jar spring-cloud-dataflow-shell-1.0.0.BUILD-SNAPSHOT.jar
 ```
 
-If the admin and local are not running onthe same host, point the shell to the admin server
+If the Data Flow server and shell are not running on the same host, point the shell to the Data Flow server
 
 ```
-server-unknown:>admin config server http://s-c-dataflow-admin.cfapps.io
-Successfully targeted http://s-c-dataflow-admin.cfapps.io
+server-unknown:>dataflow config server http://dataflow-server.cfapps.io
+Successfully targeted http://dataflow-server.cfapps.io
 dataflow:>
 ```
 

@@ -14,21 +14,20 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.dataflow.server.local;
+package org.springframework.cloud.dataflow.server.repository;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.cloud.dataflow.server.EnableDataFlowServer;
-
+import org.springframework.cloud.task.repository.TaskExecution;
 /**
- * Bootstrap class for the local Spring Cloud Data Flow Server.
- *
- * @author Mark Fisher
+ * @author Glenn Renfro
  */
-@EnableDataFlowServer
-public class LocalDataFlowServer {
+public class NoSuchTaskExecutionException extends RuntimeException{
 
-	public static void main(String[] args) {
-		SpringApplication.run(LocalDataFlowServer.class, args);
+	/**
+	 * Create a new exception.
+	 *
+	 * @param id the id of the {@link TaskExecution} that could not be found
+	 */
+	public NoSuchTaskExecutionException(long id) {
+		super("Could not find TaskExecution with id " + id);
 	}
-
 }

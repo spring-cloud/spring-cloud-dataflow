@@ -27,7 +27,7 @@ import org.springframework.web.client.RestTemplate;
 
 /**
  * Implementation of {@link LibraryOperations} that uses {@link RestTemplate}
- * to issue commands to the admin server.
+ * to issue commands to the Data Flow server.
  * @author Eric Bottard
  */
 public class LibraryTemplate implements LibraryOperations {

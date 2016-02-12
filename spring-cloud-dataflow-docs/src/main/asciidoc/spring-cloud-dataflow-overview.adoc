@@ -42,9 +42,9 @@ not run indefinitely, including link:https://github.com/spring-projects/spring-b
 The link:https://github.com/spring-cloud/spring-cloud-dataflow/tree/master/spring-cloud-dataflow-artifact-registry[Artifact Registry]
 maintains the set of available modules, and their mappings to Maven coordinates.
 
-The link:https://github.com/spring-cloud/spring-cloud-dataflow/tree/master/spring-cloud-dataflow-module-deployer-spi[Module Deployer SPI] provides the abstraction layer for deploying the modules of a given stream across a variety of runtime environments, including:
+The link:https://github.com/spring-cloud/spring-cloud-dataflow/tree/master/spring-cloud-dataflow-deployer-spi[Module Deployer SPI] provides the abstraction layer for deploying the modules of a given stream across a variety of runtime environments, including:
 
-* link:https://github.com/spring-cloud/spring-cloud-dataflow/tree/master/spring-cloud-dataflow-admin-local[Local]
+* link:https://github.com/spring-cloud/spring-cloud-dataflow/tree/master/spring-cloud-dataflow-server-local[Local]
 
 * link:https://github.com/spring-cloud/spring-cloud-dataflow-admin-cloudfoundry[Cloud Foundry]
 

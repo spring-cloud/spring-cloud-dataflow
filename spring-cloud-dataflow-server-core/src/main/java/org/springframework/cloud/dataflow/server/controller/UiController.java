@@ -1,6 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
- *
+ * Copyright 2015 the original author or authors.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,21 +13,23 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.dataflow.server.local;
+package org.springframework.cloud.dataflow.server.controller;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.cloud.dataflow.server.EnableDataFlowServer;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 /**
- * Bootstrap class for the local Spring Cloud Data Flow Server.
+ * A simple (web, not REST) controller to trigger a redirect to the index page of the
+ * admin ui (which comes packaged as a dependency).
  *
- * @author Mark Fisher
+ * @author Eric Bottard
  */
-@EnableDataFlowServer
-public class LocalDataFlowServer {
+@Controller
+public class UiController {
 
-	public static void main(String[] args) {
-		SpringApplication.run(LocalDataFlowServer.class, args);
+	@RequestMapping("/admin-ui")
+	public String index() {
+		return "redirect:/admin-ui/index.html";
 	}
 
 }

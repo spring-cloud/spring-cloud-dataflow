@@ -27,10 +27,10 @@ import org.slf4j.LoggerFactory;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
-import org.springframework.cloud.dataflow.server.local.LocalDataFlowServer;
-import org.springframework.cloud.dataflow.admin.config.AdminConfiguration;
 import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistry;
 import org.springframework.cloud.dataflow.artifact.registry.InMemoryArtifactRegistry;
+import org.springframework.cloud.dataflow.server.config.DataFlowServerConfiguration;
+import org.springframework.cloud.dataflow.server.local.LocalDataFlowServer;
 import org.springframework.cloud.dataflow.shell.command.StreamCommandTemplate;
 import org.springframework.cloud.dataflow.shell.command.TaskCommandTemplate;
 import org.springframework.context.ApplicationContext;
@@ -46,8 +46,7 @@ import org.springframework.util.SocketUtils;
 
 /**
  * Base class for shell integration tests. This class sets up and tears down
- * the infrastructure required for executing shell tests - in particular, the
- * {@link AdminApplication} server.
+ * the infrastructure required for executing shell tests - in particular, the Data Flow server.
  * <p>
  * Extensions of this class may obtain instances of command templates.
  * For example, call {@link #stream} to obtain a {@link StreamCommandTemplate}
@@ -70,7 +69,7 @@ public abstract class AbstractShellIntegrationTest {
 	 * System property indicating whether the test infrastructure should
 	 * be shut down after all tests are executed. If running in a test
 	 * suite, this system property should be set to {@code false} to allow
-	 * multiple tests to execute with the same admin server.
+	 * multiple tests to execute with the same Data Flow server.
 	 */
 	public static final String SHUTDOWN_AFTER_RUN = "shutdown.after.run";
 
@@ -83,7 +82,7 @@ public abstract class AbstractShellIntegrationTest {
 	private static boolean shutdownAfterRun = false;
 
 	/**
-	 * Application context for admin application.
+	 * Application context for server application.
 	 */
 	protected static ApplicationContext applicationContext;
 
@@ -93,9 +92,9 @@ public abstract class AbstractShellIntegrationTest {
 	private static DataFlowShell dataFlowShell;
 
 	/**
-	 * TCP port for the admin server.
+	 * TCP port for the server.
 	 */
-	private static final int adminPort = SocketUtils.findAvailableTcpPort();
+	private static final int serverPort = SocketUtils.findAvailableTcpPort();
 
 	/**
 	 * Used to capture currently executing test method.
@@ -111,13 +110,13 @@ public abstract class AbstractShellIntegrationTest {
 			}
 
 			SpringApplication application = new SpringApplicationBuilder(LocalDataFlowServer.class,
-					AdminConfiguration.class, TestConfig.class).build();
+					DataFlowServerConfiguration.class, TestConfig.class).build();
 			applicationContext = application.run(
-					String.format("--server.port=%s", adminPort), "--security.basic.enabled=false",
+					String.format("--server.port=%s", serverPort), "--security.basic.enabled=false",
 					"--spring.main.show_banner=false", "--spring.cloud.config.enabled=false",
 					"--deployer.local.out-of-process=false");
 		}
-		JLineShellComponent shell = new Bootstrap(new String[] {"--port", String.valueOf(adminPort)})
+		JLineShellComponent shell = new Bootstrap(new String[] {"--port", String.valueOf(serverPort)})
 				.getJLineShellComponent();
 		if (!shell.isRunning()) {
 			shell.start();
@@ -199,7 +198,7 @@ public abstract class AbstractShellIntegrationTest {
 	}
 
 	/**
-	 * Configuration for admin server that is specific to shell tests.
+	 * Configuration for the Data Flow server that is specific to shell tests.
 	 */
 	@Configuration
 	public static class TestConfig {
