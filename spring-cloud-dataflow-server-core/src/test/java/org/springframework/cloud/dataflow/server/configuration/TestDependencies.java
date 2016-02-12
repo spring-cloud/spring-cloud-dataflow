@@ -37,9 +37,8 @@ import org.springframework.cloud.deployer.resource.maven.MavenProperties;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.cloud.task.repository.TaskExplorer;
-import org.springframework.cloud.task.repository.dao.MapTaskExecutionDao;
-import org.springframework.cloud.task.repository.dao.TaskExecutionDao;
 import org.springframework.cloud.task.repository.support.SimpleTaskExplorer;
+import org.springframework.cloud.task.repository.support.TaskExecutionDaoFactoryBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -87,11 +86,6 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	}
 
 	@Bean
-	public TaskExecutionController taskExecutionController(TaskExplorer explorer) {
-		return new TaskExecutionController(explorer);
-	}
-
-	@Bean
 	public ArtifactRegistry artifactRegistry() {
 		return new InMemoryArtifactRegistry();
 	}
@@ -120,15 +114,4 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	public TaskDefinitionRepository taskDefinitionRepository() {
 		return new InMemoryTaskDefinitionRepository();
 	}
-
-	@Bean
-	public TaskExplorer taskExplorer(TaskExecutionDao dao){
-		return new SimpleTaskExplorer(dao);
-	}
-
-	@Bean
-	public TaskExecutionDao taskExecutionDao(){
-		return new MapTaskExecutionDao();
-	}
-
 }
