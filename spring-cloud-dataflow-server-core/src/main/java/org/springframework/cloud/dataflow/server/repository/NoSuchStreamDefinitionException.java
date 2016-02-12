@@ -14,21 +14,30 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.dataflow.server.local;
-
-import org.springframework.boot.SpringApplication;
-import org.springframework.cloud.dataflow.server.EnableDataFlowServer;
+package org.springframework.cloud.dataflow.server.repository;
 
 /**
- * Bootstrap class for the local Spring Cloud Data Flow Server.
+ * Thrown when a stream definition of a given name was expected but did not exist.
  *
- * @author Mark Fisher
+ * @author Eric Bottard
  */
-@EnableDataFlowServer
-public class LocalDataFlowServer {
+public class NoSuchStreamDefinitionException extends RuntimeException {
 
-	public static void main(String[] args) {
-		SpringApplication.run(LocalDataFlowServer.class, args);
+	private final String name;
+
+	public NoSuchStreamDefinitionException(String name) {
+		this(name, "Could not find stream definition named " + name);
 	}
 
+	public NoSuchStreamDefinitionException(String name, String message) {
+		super(message);
+		this.name = name;
+	}
+
+	/**
+	 * Return the name of the stream definition that could not be found.
+	 */
+	public String getName() {
+		return name;
+	}
 }

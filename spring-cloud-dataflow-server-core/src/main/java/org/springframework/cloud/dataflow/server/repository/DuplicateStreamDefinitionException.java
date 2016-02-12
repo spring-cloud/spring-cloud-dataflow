@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,21 +14,23 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.dataflow.server.local;
-
-import org.springframework.boot.SpringApplication;
-import org.springframework.cloud.dataflow.server.EnableDataFlowServer;
+package org.springframework.cloud.dataflow.server.repository;
 
 /**
- * Bootstrap class for the local Spring Cloud Data Flow Server.
+ * Thrown to indicate that the creation of a stream failed
+ * because a stream with the given name already exists.
  *
  * @author Mark Fisher
  */
-@EnableDataFlowServer
-public class LocalDataFlowServer {
+public class DuplicateStreamDefinitionException extends RuntimeException {
 
-	public static void main(String[] args) {
-		SpringApplication.run(LocalDataFlowServer.class, args);
+	private static final long serialVersionUID = -3073129756296341192L;
+
+	public DuplicateStreamDefinitionException() {
+		super();
 	}
 
+	public DuplicateStreamDefinitionException(String message) {
+		super(message);
+	}
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2015-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,21 +14,23 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.dataflow.server.local;
+package org.springframework.cloud.dataflow.server;
 
 import org.springframework.boot.SpringApplication;
-import org.springframework.cloud.dataflow.server.EnableDataFlowServer;
+import org.springframework.context.annotation.Configuration;
 
 /**
- * Bootstrap class for the local Spring Cloud Data Flow Server.
+ * Bootstrap class for Spring Cloud Data Flow Admin.
  *
  * @author Mark Fisher
+ * @author Josh Long
  */
+@Configuration
 @EnableDataFlowServer
-public class LocalDataFlowServer {
+public class AdminApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(LocalDataFlowServer.class, args);
+		SpringApplication.run(AdminApplication.class, args);
 	}
 
 }

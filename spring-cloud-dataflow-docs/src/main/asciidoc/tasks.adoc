@@ -109,7 +109,7 @@ dependency for local SPI.
 
 ==== Local
 
-1. Open the spring-cloud-data-flow-admin-local/pom.xml in your IDE.
+1. Open the spring-cloud-data-flow-server-local/pom.xml in your IDE.
 2. In the `dependencies` section add the dependency for the database driver required.  In
 the sample below postgresql has been chosen.
 ```

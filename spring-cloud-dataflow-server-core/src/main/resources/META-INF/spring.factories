@@ -1,2 +1,2 @@
 org.springframework.boot.env.EnvironmentPostProcessor=\
-  org.springframework.cloud.dataflow.admin.config.AdminDefaultEnvironmentPostProcessor
+  org.springframework.cloud.dataflow.server.config.DefaultEnvironmentPostProcessor

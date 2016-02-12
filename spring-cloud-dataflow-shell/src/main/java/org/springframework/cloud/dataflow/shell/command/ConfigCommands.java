@@ -71,7 +71,7 @@ public class ConfigCommands implements CommandMarker, InitializingBean {
 
 	public static final String DEFAULT_TARGET = DEFAULT_SCHEME + "://" + DEFAULT_HOST + ":" + DEFAULT_PORT + "/";
 
-	@CliCommand(value = {"admin config server"}, help = "Configure the Spring Cloud Data Flow REST server to use")
+	@CliCommand(value = {"dataflow config server"}, help = "Configure the Spring Cloud Data Flow REST server to use")
 	public String target(
 			@CliOption(mandatory = false, key = {"", "uri"},
 					help = "the location of the Spring Cloud Data Flow REST endpoint",
@@ -84,7 +84,7 @@ public class ConfigCommands implements CommandMarker, InitializingBean {
 		catch (Exception e) {
 			this.shell.setDataFlowOperations(null);
 			if (e instanceof DataFlowServerException) {
-				String message = String.format("Unable to parse admin response: %s - at URI '%s'.", e.getMessage(),
+				String message = String.format("Unable to parse server response: %s - at URI '%s'.", e.getMessage(),
 						targetUriString);
 				if (logger.isDebugEnabled()) {
 					logger.debug(message, e);
@@ -95,7 +95,7 @@ public class ConfigCommands implements CommandMarker, InitializingBean {
 				return message;
 			}
 			else {
-				return(String.format("Unable to contact Data Flow Admin at '%s': '%s'.",
+				return(String.format("Unable to contact Data Flow Server at '%s': '%s'.",
 								targetUriString, e.toString()));
 			}
 		}

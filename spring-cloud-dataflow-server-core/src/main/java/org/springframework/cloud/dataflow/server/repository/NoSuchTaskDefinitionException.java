@@ -14,21 +14,26 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.dataflow.server.local;
-
-import org.springframework.boot.SpringApplication;
-import org.springframework.cloud.dataflow.server.EnableDataFlowServer;
+package org.springframework.cloud.dataflow.server.repository;
 
 /**
- * Bootstrap class for the local Spring Cloud Data Flow Server.
+ * Thrown when a task definition of a given name was expected but did not exist.
  *
- * @author Mark Fisher
+ * @author Eric Bottard
  */
-@EnableDataFlowServer
-public class LocalDataFlowServer {
+public class NoSuchTaskDefinitionException extends RuntimeException {
 
-	public static void main(String[] args) {
-		SpringApplication.run(LocalDataFlowServer.class, args);
+	/**
+	 * The name of the task definition that could not be found.
+	 */
+	private final String name;
+
+	public NoSuchTaskDefinitionException(String name, String message) {
+		super(message);
+		this.name = name;
 	}
 
+	public NoSuchTaskDefinitionException(String name) {
+		this(name, "Could not find task definition named " + name);
+	}
 }
