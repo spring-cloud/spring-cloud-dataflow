@@ -16,7 +16,6 @@
 
 package org.springframework.cloud.dataflow.server.controller;
 
-import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -60,15 +59,15 @@ import org.springframework.web.context.WebApplicationContext;
 		PropertyPlaceholderAutoConfiguration.class, BatchProperties.class})
 @WebAppConfiguration
 @DirtiesContext
-public class TaskExecutionControllerTests {
+public class JobInstanceControllerTests {
 
-	private final static String BASE_TASK_NAME = "myTask";
+	private final static String BASE_JOB_NAME = "myJob";
 
-	private final static String TASK_NAME_ORIG = BASE_TASK_NAME + "_ORIG";
+	private final static String JOB_NAME_ORIG = BASE_JOB_NAME + "_ORIG";
 
-	private final static String TASK_NAME_FOO = BASE_TASK_NAME + "_FOO";
+	private final static String JOB_NAME_FOO = BASE_JOB_NAME + "_FOO";
 
-	private final static String TASK_NAME_FOOBAR = BASE_TASK_NAME + "_FOOBAR";
+	private final static String JOB_NAME_FOOBAR = BASE_JOB_NAME + "_FOOBAR";
 
 	private static boolean initialized = false;
 
@@ -91,79 +90,71 @@ public class TaskExecutionControllerTests {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(wac).defaultRequest(
 				get("/").accept(MediaType.APPLICATION_JSON)).build();
 		if (!initialized) {
-			dao.createTaskExecution(TASK_NAME_ORIG, new Date(), new ArrayList<String>());
-			dao.createTaskExecution(TASK_NAME_ORIG, new Date(), new ArrayList<String>());
-			dao.createTaskExecution(TASK_NAME_FOO, new Date(), new ArrayList<String>());
-			TaskExecution taskExecution = dao.createTaskExecution(TASK_NAME_FOOBAR,
-					new Date(), new ArrayList<String>());
-			JobInstance instance = jobRepository.createJobInstance(TASK_NAME_FOOBAR,
-					new JobParameters());
-			JobExecution jobExecution = jobRepository.createJobExecution(
-					instance, new JobParameters(), null);
-			taskBatchDao.saveRelationship(taskExecution,jobExecution);
-
+			createSampleJob(JOB_NAME_ORIG, 1);
+			createSampleJob(JOB_NAME_FOO, 1);
+			createSampleJob(JOB_NAME_FOOBAR, 2);
 			initialized = true;
 		}
 	}
 
 	@Test(expected = IllegalArgumentException.class)
-	public void testTaskExecutionControllerConstructorMissingExplorer() {
-		new TaskExecutionController(null);
+	public void testJobInstanceControllerConstructorMissingRepository() {
+		new JobInstanceController(null);
 	}
 
 	@Test
-	public void testGetExecutionNotFound() throws Exception{
+	public void testGetInstanceNotFound() throws Exception{
 		mockMvc.perform(
-				get("/tasks/executions/1345345345345").accept(MediaType.APPLICATION_JSON)
+				get("/jobs/instances/1345345345345").accept(MediaType.APPLICATION_JSON)
 		).andExpect(status().isNotFound());
 	}
 
 	@Test
-	public void testGetExecution() throws Exception{
+	public void testGetInstance() throws Exception{
 		mockMvc.perform(
-				get("/tasks/executions/1").accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk())
-				.andExpect(content().json("{taskName: \"" + TASK_NAME_ORIG + "\"}"))
-				.andExpect(jsonPath("jobExecutionIds", hasSize(0)));
+				get("/jobs/instances/1").accept(MediaType.APPLICATION_JSON)
+		).andExpect(status().isOk()).andExpect(content().json("{jobInstanceId: " +
+				1 + "}"));
 	}
 
 	@Test
-	public void testGetExecutionForJob() throws Exception{
+	public void testGetInstancesByName() throws Exception{
 		mockMvc.perform(
-				get("/tasks/executions/4").accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk())
-				.andExpect(content().json("{taskName: \"" + TASK_NAME_FOOBAR + "\"}"))
-				.andExpect(jsonPath("jobExecutionIds[0]", is(1)))
-				.andExpect(jsonPath("jobExecutionIds", hasSize(1)));
-	}
-
-	@Test
-	public void testGetAllExecutions() throws Exception{
-		mockMvc.perform(
-				get("/tasks/executions/").accept(MediaType.APPLICATION_JSON)
+				get("/jobs/instances/").param("name", JOB_NAME_ORIG).accept(MediaType.APPLICATION_JSON)
 		).andExpect(status().isOk())
-				.andExpect(jsonPath("$.content[*].executionId",
-						containsInAnyOrder(4, 3, 2, 1)))
-				.andExpect(jsonPath("$.content", hasSize(4)));
+				.andExpect(jsonPath("$.content[0].jobName", is(JOB_NAME_ORIG)))
+				.andExpect(jsonPath("$.content", hasSize(1)));
 	}
 
 	@Test
-	public void testGetExecutionsByName() throws Exception{
+	public void testGetExecutionsByNameMultipleResult() throws Exception{
 		mockMvc.perform(
-				get("/tasks/executions/").param("name", TASK_NAME_ORIG).accept(MediaType.APPLICATION_JSON)
+				get("/jobs/instances/").param("name", JOB_NAME_FOOBAR).accept(MediaType.APPLICATION_JSON)
 		).andExpect(status().isOk())
-				.andExpect(jsonPath("$.content[0].taskName", is(TASK_NAME_ORIG)))
-				.andExpect(jsonPath("$.content[1].taskName", is(TASK_NAME_ORIG)))
-				.andExpect(jsonPath("$.content[0].jobExecutionIds", hasSize(0)))
-				.andExpect(jsonPath("$.content[1].jobExecutionIds", hasSize(0)))
-				.andExpect(jsonPath("$.content", hasSize(2)));
+				.andExpect(jsonPath("$.content[0].jobName", is(JOB_NAME_FOOBAR)))
+				.andExpect(jsonPath("$.content[0].jobExecutions[0].jobExecutionId", is(4)))
+				.andExpect(jsonPath("$.content[0].jobExecutions[1].jobExecutionId", is(3)))
+				.andExpect(jsonPath("$.content", hasSize(1)));
 	}
 
 	@Test
-	public void testGetExecutionsByNameNotFound() throws Exception{
+	public void testGetInstanceByNameNotFound() throws Exception{
 		mockMvc.perform(
-				get("/tasks/executions/").param("name", "BAZ").accept(MediaType.APPLICATION_JSON)
+				get("/jobs/instances/").param("name", "BAZ").accept(MediaType.APPLICATION_JSON)
 		).andExpect(status().isOk())
 				.andExpect(jsonPath("$.content", hasSize(0)));
+	}
+
+	private void createSampleJob(String jobName, int jobExecutionCount){
+		JobInstance instance = jobRepository.createJobInstance(jobName, new JobParameters());
+		TaskExecution taskExecution = dao.createTaskExecution(
+				jobName, new Date(), new ArrayList<String>());
+		JobExecution jobExecution = null;
+
+		for(int i = 0 ; i < jobExecutionCount; i++){
+			jobExecution = jobRepository.createJobExecution(
+					instance, new JobParameters(), null);
+			taskBatchDao.saveRelationship(taskExecution,jobExecution);
+		}
 	}
 }

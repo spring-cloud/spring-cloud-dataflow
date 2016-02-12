@@ -18,7 +18,9 @@ package org.springframework.cloud.dataflow.server.controller;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+import org.springframework.batch.admin.service.NoSuchStepExecutionException;
+import org.springframework.batch.core.launch.NoSuchJobExecutionException;
+import org.springframework.batch.core.launch.NoSuchJobInstanceException;
 import org.springframework.boot.actuate.endpoint.mvc.MetricsMvcEndpoint;
 import org.springframework.cloud.dataflow.server.repository.DuplicateStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.DuplicateTaskException;
@@ -69,6 +71,9 @@ public class RestControllerAdvice {
 	@ExceptionHandler({NoSuchStreamDefinitionException.class,
 			NoSuchTaskDefinitionException.class,
 			NoSuchTaskExecutionException.class,
+			NoSuchJobExecutionException.class,
+			NoSuchJobInstanceException.class,
+			NoSuchStepExecutionException.class,
 			MetricsMvcEndpoint.NoSuchMetricException.class})
 	@ResponseStatus(HttpStatus.NOT_FOUND)
 	@ResponseBody
