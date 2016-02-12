@@ -21,8 +21,12 @@ import org.springframework.cloud.dataflow.rest.resource.AppStatusResource;
 import org.springframework.cloud.dataflow.rest.resource.CompletionProposalsResource;
 import org.springframework.cloud.dataflow.rest.resource.CounterResource;
 import org.springframework.cloud.dataflow.rest.resource.FieldValueCounterResource;
+import org.springframework.cloud.dataflow.rest.resource.JobExecutionResource;
+import org.springframework.cloud.dataflow.rest.resource.JobInstanceResource;
 import org.springframework.cloud.dataflow.rest.resource.LibraryRegistrationResource;
 import org.springframework.cloud.dataflow.rest.resource.ModuleRegistrationResource;
+import org.springframework.cloud.dataflow.rest.resource.StepExecutionProgressInfoResource;
+import org.springframework.cloud.dataflow.rest.resource.StepExecutionResource;
 import org.springframework.cloud.dataflow.rest.resource.StreamDefinitionResource;
 import org.springframework.cloud.dataflow.rest.resource.StreamDeploymentResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskDefinitionResource;
@@ -86,6 +90,20 @@ public class RootController {
 		String templated = entityLinks.linkToCollectionResource(TaskExecutionResource.class).getHref() + "{?name}";
 		resourceSupport.add(new Link(templated).withRel("tasks/executions/name"));
 		resourceSupport.add(unescapeTemplateVariables(entityLinks.linkToSingleResource(TaskExecutionResource.class, "{id}").withRel("tasks/executions/execution")));
+
+		resourceSupport.add(entityLinks.linkToCollectionResource(JobExecutionResource.class).withRel("jobs/executions"));
+		templated = entityLinks.linkToCollectionResource(JobExecutionResource.class).getHref() + "{?name}";
+		resourceSupport.add(new Link(templated).withRel("jobs/executions/name"));
+		resourceSupport.add(unescapeTemplateVariables(entityLinks.linkToSingleResource(JobExecutionResource.class, "{id}").withRel("jobs/executions/execution")));
+
+		resourceSupport.add(unescapeTemplateVariables(entityLinks.linkFor(StepExecutionResource.class, "{jobExecutionId}").withRel("jobs/executions/execution/steps")));
+		resourceSupport.add(unescapeTemplateVariables(entityLinks.linkFor(StepExecutionResource.class, "{jobExecutionId}").slash("{stepId}").withRel("jobs/executions/execution/steps/step")));
+		resourceSupport.add(unescapeTemplateVariables(entityLinks.linkFor(StepExecutionProgressInfoResource.class, "{jobExecutionId}").slash("{stepId}").withRel("jobs/executions/execution/steps/step/progress")));
+
+		templated = entityLinks.linkToCollectionResource(JobInstanceResource.class).getHref() + "{?name}";
+		resourceSupport.add(new Link(templated).withRel("jobs/instances/name"));
+		resourceSupport.add(unescapeTemplateVariables(entityLinks.linkToSingleResource(JobInstanceResource.class, "{id}").withRel("jobs/instances/instance")));
+
 
 		resourceSupport.add(entityLinks.linkToCollectionResource(CounterResource.class).withRel("counters"));
 		resourceSupport.add(unescapeTemplateVariables(entityLinks.linkToSingleResource(CounterResource.class, "{name}").withRel("counters/counter")));

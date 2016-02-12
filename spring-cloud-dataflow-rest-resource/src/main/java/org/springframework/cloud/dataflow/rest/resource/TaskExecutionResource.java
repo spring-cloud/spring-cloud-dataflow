@@ -17,9 +17,13 @@
 package org.springframework.cloud.dataflow.rest.resource;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
+import org.springframework.batch.core.JobExecution;
+import org.springframework.cloud.dataflow.rest.job.TaskJobExecutionRel;
+import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.ResourceSupport;
 import org.springframework.util.Assert;
@@ -66,23 +70,34 @@ public class TaskExecutionResource extends ResourceSupport {
 	 */
 	private List<String> parameters;
 
+	/**
+	 * List of {@link JobExecution}s that are associated with this task.
+	 */
+	private List<Long> jobExecutionIds;
+
 	public TaskExecutionResource() {
 		parameters = new ArrayList<>();
 	}
 
-	public TaskExecutionResource(long executionId, int exitCode, String taskName,
-								 Date startTime, Date endTime,
-								 String exitMessage, List<String> parameters) {
-
-		Assert.notNull(parameters, "parameters must not be null");
-		Assert.notNull(startTime, "startTime must not be null");
-		this.executionId = executionId;
-		this.exitCode = exitCode;
-		this.taskName = taskName;
-		this.exitMessage = exitMessage;
-		this.parameters = parameters;
-		this.startTime = startTime;
-		this.endTime = endTime;
+	/**
+	 * Constructor to initialize the TaskExecutionResource using {@link TaskJobExecutionRel}.
+	 * @param taskJobExecutionRel contans the {@link TaskExecution} but also a list
+	 * of the Job ExecutionIds that were associated with this task if applicable.
+	 */
+	public TaskExecutionResource(TaskJobExecutionRel taskJobExecutionRel) {
+		Assert.notNull(taskJobExecutionRel, "taskJobExecutionDTO must not be null");
+		this.executionId = taskJobExecutionRel.getTaskExecution().getExecutionId();
+		this.exitCode = taskJobExecutionRel.getTaskExecution().getExitCode();
+		this.taskName = taskJobExecutionRel.getTaskExecution().getTaskName();
+		this.exitMessage = taskJobExecutionRel.getTaskExecution().getExitMessage();
+		this.parameters = Collections.unmodifiableList(taskJobExecutionRel.getTaskExecution().getParameters());
+		this.startTime = taskJobExecutionRel.getTaskExecution().getStartTime();
+		this.endTime = taskJobExecutionRel.getTaskExecution().getEndTime();
+		if(taskJobExecutionRel.getJobExecutionIds() == null){
+			this.jobExecutionIds = Collections.emptyList();
+		}else{
+			this.jobExecutionIds = Collections.unmodifiableList(new ArrayList<>(taskJobExecutionRel.getJobExecutionIds()));
+		}
 	}
 
 	public static class Page extends PagedResources<TaskExecutionResource> {}
@@ -91,10 +106,10 @@ public class TaskExecutionResource extends ResourceSupport {
 		return executionId;
 	}
 
-	public void setExecutionId(long executionId) {
-		this.executionId = executionId;
-	}
-
+	/**
+	 * @return the int containing the exit code of the task application upon completion.
+	 * Default is 0.
+	 */
 	public int getExitCode() {
 		return exitCode;
 	}
@@ -117,6 +132,10 @@ public class TaskExecutionResource extends ResourceSupport {
 
 	public List<String> getParameters() {
 		return parameters;
+	}
+
+	public List<Long> getJobExecutionIds(){
+		return jobExecutionIds;
 	}
 
 }
