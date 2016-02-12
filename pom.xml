@@ -32,17 +32,18 @@
 	</properties>
 	<modules>
 		<module>spring-cloud-dataflow-artifact-registry</module>
-		<module>spring-cloud-dataflow-module-deployer-spi</module>
+		<module>spring-cloud-dataflow-deployer-spi</module>
+		<module>spring-cloud-dataflow-deployer-local</module>
 		<module>spring-cloud-dataflow-core</module>
 		<module>spring-cloud-dataflow-rest-resource</module>
 		<module>spring-cloud-dataflow-server-core</module>
-		<module>spring-cloud-dataflow-admin-local</module>
+		<module>spring-cloud-dataflow-server-local</module>
 		<module>spring-cloud-dataflow-rest-client</module>
 		<module>spring-cloud-dataflow-shell</module>
 		<module>spring-cloud-dataflow-docs</module>
 		<module>spring-cloud-dataflow-completion</module>
-		<module>spring-cloud-starter-dataflow-server-local</module>
 		<module>spring-cloud-dataflow-dependencies</module>
+		<module>spring-cloud-starter-dataflow-server-local</module>
 	</modules>
 	<dependencyManagement>
 		<dependencies>
@@ -54,10 +55,10 @@
 				<artifactId>spring-cloud-stream-configuration-metadata</artifactId>
 				<version>${spring-cloud-stream-configuration-metadata.version}</version>
 			</dependency>
+			<dependency>
 				<!-- TODO: remove this (it should be in stream modules BOM)
 					See https://github.com/spring-cloud/spring-cloud-stream-modules/issues/185
 				-->
-			<dependency>
 				<groupId>org.springframework.cloud.stream.module</groupId>
 				<artifactId>spring-cloud-stream-modules-analytics</artifactId>
 				<version>1.0.0.BUILD-SNAPSHOT</version>

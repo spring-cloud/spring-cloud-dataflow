@@ -27,10 +27,10 @@ import org.slf4j.LoggerFactory;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
-import org.springframework.cloud.dataflow.admin.AdminApplication;
+import org.springframework.cloud.dataflow.server.local.LocalDataFlowServer;
 import org.springframework.cloud.dataflow.admin.config.AdminConfiguration;
-import org.springframework.cloud.dataflow.artifact.registry.InMemoryArtifactRegistry;
 import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistry;
+import org.springframework.cloud.dataflow.artifact.registry.InMemoryArtifactRegistry;
 import org.springframework.cloud.dataflow.shell.command.StreamCommandTemplate;
 import org.springframework.cloud.dataflow.shell.command.TaskCommandTemplate;
 import org.springframework.context.ApplicationContext;
@@ -110,7 +110,7 @@ public abstract class AbstractShellIntegrationTest {
 				shutdownAfterRun = Boolean.getBoolean(SHUTDOWN_AFTER_RUN);
 			}
 
-			SpringApplication application = new SpringApplicationBuilder(AdminApplication.class,
+			SpringApplication application = new SpringApplicationBuilder(LocalDataFlowServer.class,
 					AdminConfiguration.class, TestConfig.class).build();
 			applicationContext = application.run(
 					String.format("--server.port=%s", adminPort), "--security.basic.enabled=false",

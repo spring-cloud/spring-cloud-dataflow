@@ -49,7 +49,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
-			<artifactId>spring-cloud-dataflow-admin-local</artifactId>
+			<artifactId>spring-cloud-dataflow-server-local</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
