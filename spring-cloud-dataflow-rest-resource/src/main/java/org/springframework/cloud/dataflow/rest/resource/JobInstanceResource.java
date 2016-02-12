@@ -19,6 +19,7 @@ package org.springframework.cloud.dataflow.rest.resource;
 import java.util.Collections;
 import java.util.List;
 
+import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.ResourceSupport;
 import org.springframework.util.Assert;
 
@@ -29,11 +30,15 @@ import org.springframework.util.Assert;
  */
 public class JobInstanceResource extends ResourceSupport {
 
-	private final String jobName;
+	private String jobName;
 
-	private final long jobInstanceId;
+	private long jobInstanceId;
 
 	private List<JobExecutionResource> jobExecutions;
+
+	public JobInstanceResource(){
+
+	}
 
 	public JobInstanceResource(String jobName, long jobInstanceId, List<JobExecutionResource> taskJobExecutions) {
 		Assert.hasText(jobName, "jobName must not be empty nor null");
@@ -46,6 +51,8 @@ public class JobInstanceResource extends ResourceSupport {
 			this.jobExecutions = Collections.unmodifiableList(this.jobExecutions);
 		}
 	}
+
+	public static class Page extends PagedResources<JobInstanceResource> {}
 
 	public String getJobName() {
 		return jobName;

@@ -146,6 +146,7 @@ public class DataFlowServerConfiguration {
 		/**
 		 * Obtains the Spring Hateos Object Mapper so that we can apply SCDF Batch Mixins
 		 * to ignore the JobExecution in StepExecution to prevent infinite loop.
+		 * https://github.com/spring-projects/spring-hateoas/issues/333
 		 */
 		@Autowired
 		@Qualifier(SPRING_HATEOAS_OBJECT_MAPPER)

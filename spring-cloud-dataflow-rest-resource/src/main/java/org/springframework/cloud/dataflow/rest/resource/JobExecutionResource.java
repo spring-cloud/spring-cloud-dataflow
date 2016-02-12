@@ -30,6 +30,7 @@ import org.springframework.batch.core.converter.JobParametersConverter;
 import org.springframework.batch.support.PropertiesConverter;
 import org.springframework.cloud.dataflow.rest.job.TaskJobExecution;
 import org.springframework.cloud.dataflow.rest.job.support.TimeUtils;
+import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.ResourceSupport;
 import org.springframework.util.Assert;
 
@@ -122,6 +123,8 @@ public class JobExecutionResource extends ResourceSupport {
 		}
 
 	}
+
+	public static class Page extends PagedResources<JobExecutionResource> {}
 
 	public TimeZone getTimeZone() {
 		return timeZone;

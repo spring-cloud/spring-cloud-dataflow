@@ -98,7 +98,7 @@ public class RootController {
 
 		resourceSupport.add(unescapeTemplateVariables(entityLinks.linkFor(StepExecutionResource.class, "{jobExecutionId}").withRel("jobs/executions/execution/steps")));
 		resourceSupport.add(unescapeTemplateVariables(entityLinks.linkFor(StepExecutionResource.class, "{jobExecutionId}").slash("{stepId}").withRel("jobs/executions/execution/steps/step")));
-		resourceSupport.add(unescapeTemplateVariables(entityLinks.linkFor(StepExecutionProgressInfoResource.class, "{jobExecutionId}").slash("{stepId}").withRel("jobs/executions/execution/steps/step/progress")));
+		resourceSupport.add(unescapeTemplateVariables(entityLinks.linkFor(StepExecutionProgressInfoResource.class, "{jobExecutionId}").slash("{stepId}").slash("progress").withRel("jobs/executions/execution/steps/step/progress")));
 
 		templated = entityLinks.linkToCollectionResource(JobInstanceResource.class).getHref() + "{?name}";
 		resourceSupport.add(new Link(templated).withRel("jobs/instances/name"));

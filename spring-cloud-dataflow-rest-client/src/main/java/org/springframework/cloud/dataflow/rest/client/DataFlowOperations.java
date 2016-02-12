@@ -44,6 +44,11 @@ public interface DataFlowOperations {
 	TaskOperations taskOperations();
 
 	/**
+	 * Job related operations.
+	 */
+	JobOperations jobOperations();
+
+	/**
 	 * Module related operations.
 	 */
 	ModuleOperations moduleOperations();

@@ -21,17 +21,35 @@ import java.net.URISyntaxException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+import org.springframework.batch.core.ExitStatus;
+import org.springframework.batch.core.JobExecution;
+import org.springframework.batch.core.JobInstance;
+import org.springframework.batch.core.JobParameter;
+import org.springframework.batch.core.JobParameters;
+import org.springframework.batch.core.StepExecution;
+import org.springframework.batch.item.ExecutionContext;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.dataflow.rest.client.DataFlowServerException;
 import org.springframework.cloud.dataflow.rest.client.DataFlowTemplate;
 import org.springframework.cloud.dataflow.rest.client.VndErrorResponseErrorHandler;
+import org.springframework.cloud.dataflow.rest.client.support.ExecutionContextJacksonMixIn;
+import org.springframework.cloud.dataflow.rest.client.support.ExitStatusJacksonMixIn;
+import org.springframework.cloud.dataflow.rest.client.support.JobExecutionJacksonMixIn;
+import org.springframework.cloud.dataflow.rest.client.support.JobInstanceJacksonMixIn;
+import org.springframework.cloud.dataflow.rest.client.support.JobParameterJacksonMixIn;
+import org.springframework.cloud.dataflow.rest.client.support.JobParametersJacksonMixIn;
+import org.springframework.cloud.dataflow.rest.client.support.StepExecutionHistoryJacksonMixIn;
+import org.springframework.cloud.dataflow.rest.client.support.StepExecutionJacksonMixIn;
+import org.springframework.cloud.dataflow.rest.job.StepExecutionHistory;
 import org.springframework.cloud.dataflow.shell.config.DataFlowShell;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
+import org.springframework.hateoas.hal.Jackson2HalModule;
+import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.shell.CommandLine;
 import org.springframework.shell.core.CommandMarker;
 import org.springframework.shell.core.annotation.CliCommand;
@@ -78,6 +96,7 @@ public class ConfigCommands implements CommandMarker, InitializingBean {
 					unspecifiedDefaultValue = DEFAULT_TARGET) String targetUriString) {
 		try {
 			URI baseURI = URI.create(targetUriString);
+			establishConverters(this.restTemplate);
 			this.shell.setDataFlowOperations(new DataFlowTemplate(baseURI, this.restTemplate));
 			return(String.format("Successfully targeted %s", targetUriString));
 		}
@@ -129,6 +148,24 @@ public class ConfigCommands implements CommandMarker, InitializingBean {
 			}
 		}
 		return new URI(DEFAULT_SCHEME, null, host, port, null, null, null);
+	}
+
+	private void establishConverters(RestTemplate restTemplate){
+		for(HttpMessageConverter converter : restTemplate.getMessageConverters()) {
+			if (converter instanceof MappingJackson2HttpMessageConverter) {
+				final MappingJackson2HttpMessageConverter jacksonConverter = (MappingJackson2HttpMessageConverter) converter;
+				jacksonConverter.getObjectMapper().registerModule(new Jackson2HalModule());
+				jacksonConverter.getObjectMapper().addMixIn(JobExecution.class, JobExecutionJacksonMixIn.class);
+				jacksonConverter.getObjectMapper().addMixIn(JobParameters.class, JobParametersJacksonMixIn.class);
+				jacksonConverter.getObjectMapper().addMixIn(JobParameter.class, JobParameterJacksonMixIn.class);
+				jacksonConverter.getObjectMapper().addMixIn(JobInstance.class, JobInstanceJacksonMixIn.class);
+				jacksonConverter.getObjectMapper().addMixIn(ExitStatus.class, ExitStatusJacksonMixIn.class);
+				jacksonConverter.getObjectMapper().addMixIn(StepExecution.class, StepExecutionJacksonMixIn.class);
+				jacksonConverter.getObjectMapper().addMixIn(ExecutionContext.class, ExecutionContextJacksonMixIn.class);
+				jacksonConverter.getObjectMapper().addMixIn(StepExecutionHistory.class, StepExecutionHistoryJacksonMixIn.class);
+				jacksonConverter.getObjectMapper().registerModule(new Jackson2HalModule());
+			}
+		}
 	}
 
 	@Bean

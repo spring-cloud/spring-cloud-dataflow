@@ -24,7 +24,6 @@ import org.springframework.batch.core.launch.NoSuchJobExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.dataflow.rest.job.StepExecutionHistory;
 import org.springframework.cloud.dataflow.rest.resource.StepExecutionProgressInfoResource;
-import org.springframework.cloud.dataflow.rest.resource.StepExecutionResource;
 import org.springframework.cloud.dataflow.server.job.support.StepExecutionProgressInfo;
 import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.hateoas.mvc.ResourceAssemblerSupport;
@@ -66,7 +65,7 @@ public class JobStepExecutionProgressController {
 	 *
 	 * @param jobExecutionId  Id of the {@link JobExecution}, must not be null
 	 * @param stepExecutionId Id of the {@link StepExecution}, must not be null
-	 * @return {@link StepExecutionResource} that has the progress info on the given {@link StepExecution}.
+	 * @return {@link StepExecutionProgressInfoResource} that has the progress info on the given {@link StepExecution}.
 	 * @throws NoSuchJobExecutionException  Thrown if the respective {@link JobExecution} does not exist
 	 * @throws NoSuchStepExecutionException Thrown if the respective {@link StepExecution} does not exist
 	 */
@@ -121,7 +120,7 @@ public class JobStepExecutionProgressController {
 	private static class Assembler extends ResourceAssemblerSupport<StepExecutionProgressInfo, StepExecutionProgressInfoResource> {
 
 		public Assembler() {
-			super(JobStepExecutionController.class, StepExecutionProgressInfoResource.class);
+			super(JobStepExecutionProgressController.class, StepExecutionProgressInfoResource.class);
 		}
 
 		@Override

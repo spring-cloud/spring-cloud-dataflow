@@ -24,11 +24,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * Jackson MixIn for StepExecutionHistory de-serialization.
  *
  * @author Ilayaperumal Gopinathan
+ * @author Glenn Renfro
  * @since 1.0
  */
 
-@JsonIgnoreProperties({ "count", "commitCount", "rollbackCount", "readCount", "writeCount", "filterCount",
-		"readSkipCount", "writeSkipCount", "processSkipCount", "duration", "durationPerRead" })
+@JsonIgnoreProperties({ "count",  "durationPerRead" })
 public abstract class StepExecutionHistoryJacksonMixIn {
 
 	@JsonCreator()

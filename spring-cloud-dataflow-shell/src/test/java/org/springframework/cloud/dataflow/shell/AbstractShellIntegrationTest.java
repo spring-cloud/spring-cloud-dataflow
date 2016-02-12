@@ -24,10 +24,10 @@ import org.junit.Rule;
 import org.junit.rules.TestName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.cloud.dataflow.server.EnableDataFlowServer;
+import org.springframework.cloud.dataflow.shell.command.JobCommandTemplate;
 import org.springframework.cloud.dataflow.shell.command.StreamCommandTemplate;
 import org.springframework.cloud.dataflow.shell.command.TaskCommandTemplate;
 import org.springframework.context.ApplicationContext;
@@ -155,6 +155,15 @@ public abstract class AbstractShellIntegrationTest {
 	 */
 	protected TaskCommandTemplate task() {
 		return new TaskCommandTemplate(dataFlowShell);
+	}
+
+	/**
+	 * Return a {@link JobCommandTemplate} for issuing shell based job commands.
+	 *
+	 * @return template for issuing job commands
+	 */
+	protected JobCommandTemplate job() {
+		return new JobCommandTemplate(dataFlowShell);
 	}
 
 	// Util methods

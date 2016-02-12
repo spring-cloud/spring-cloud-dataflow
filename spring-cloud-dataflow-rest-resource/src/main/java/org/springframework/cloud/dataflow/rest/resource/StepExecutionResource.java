@@ -17,6 +17,7 @@
 package org.springframework.cloud.dataflow.rest.resource;
 
 import org.springframework.batch.core.StepExecution;
+import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.ResourceSupport;
 import org.springframework.util.Assert;
 
@@ -72,5 +73,6 @@ public class StepExecutionResource extends ResourceSupport {
 		return this.stepType;
 	}
 
+	public static class Page extends PagedResources<StepExecutionResource> {}
 
 }

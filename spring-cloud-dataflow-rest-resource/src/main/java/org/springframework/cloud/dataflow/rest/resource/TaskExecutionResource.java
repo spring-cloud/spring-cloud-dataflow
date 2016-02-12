@@ -81,7 +81,7 @@ public class TaskExecutionResource extends ResourceSupport {
 
 	/**
 	 * Constructor to initialize the TaskExecutionResource using {@link TaskJobExecutionRel}.
-	 * @param taskJobExecutionRel contans the {@link TaskExecution} but also a list
+	 * @param taskJobExecutionRel contains the {@link TaskExecution} but also a list
 	 * of the Job ExecutionIds that were associated with this task if applicable.
 	 */
 	public TaskExecutionResource(TaskJobExecutionRel taskJobExecutionRel) {
