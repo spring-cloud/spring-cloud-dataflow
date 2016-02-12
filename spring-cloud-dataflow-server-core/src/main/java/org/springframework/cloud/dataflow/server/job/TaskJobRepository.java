@@ -18,7 +18,6 @@ package org.springframework.cloud.dataflow.server.job;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 
 import org.springframework.batch.admin.service.JobService;
@@ -104,7 +103,6 @@ public class TaskJobRepository {
 	 */
 	public TaskJobExecution getJobExecution(long id) throws NoSuchJobExecutionException{
 		JobExecution jobExecution = jobService.getJobExecution(id);
-		jobExecution.setStartTime(new Date());
 		return getTaskJobExecution(jobExecution);
 	}
 

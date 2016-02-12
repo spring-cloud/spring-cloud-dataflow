@@ -60,7 +60,7 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 				"EXIT_MESSAGE, " +
 				"LAST_UPDATED)" +
 				"values (?, ?, ?, ?, ?, ?, ?)",
-				1,
+				10000,
 				startTime,
 				endTime,
 				taskName,
@@ -112,7 +112,7 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 		Table result = (Table) idResult.getResult();
 
 		long value = (long) result.getModel().getValue(1, 1);
-		System.out.println("Looking up id " + value);
+		logger.info("Looking up id " + value);
 		CommandResult cr = task().view(value);
 		assertTrue("task execution view command must be successful", cr.isSuccess());
 		Table table = (Table) cr.getResult();
@@ -121,10 +121,11 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 		assertEquals("Second key should be Id ", "Id ", table.getModel().getValue(1,0));
 		assertEquals("Third key should be Name ", "Name ", table.getModel().getValue(2,0));
 		assertEquals("Fourth key should be Parameters", "Parameters ", table.getModel().getValue(3,0));
-		assertEquals("Fifth key should be Start Time  ", "Start Time ", table.getModel().getValue(4,0));
-		assertEquals("Sixth key should be End Time ", "End Time ", table.getModel().getValue(5,0));
-		assertEquals("Seventh key should be Exit Code ", "Exit Code ", table.getModel().getValue(6,0));
-		assertEquals("Eighth key should be Exit Message ", "Exit Message ", table.getModel().getValue(7,0));
+		assertEquals("Fifth key should be Job Execution Ids  ", "Job Execution Ids ", table.getModel().getValue(4,0));
+		assertEquals("Sixth key should be Start Time  ", "Start Time ", table.getModel().getValue(5,0));
+		assertEquals("Seventh key should be End Time ", "End Time ", table.getModel().getValue(6,0));
+		assertEquals("Eighth key should be Exit Code ", "Exit Code ", table.getModel().getValue(7,0));
+		assertEquals("Nineth key should be Exit Message ", "Exit Message ", table.getModel().getValue(8,0));
 	}
 
 }

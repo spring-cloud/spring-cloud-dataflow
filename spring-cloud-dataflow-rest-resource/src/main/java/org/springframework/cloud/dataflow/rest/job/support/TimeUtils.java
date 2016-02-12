@@ -25,6 +25,7 @@ import java.util.TimeZone;
  * date/time formats.
  *
  * @author Gunnar Hillert
+ * @author Glenn Renfro
  * @since 1.0
  */
 public final class TimeUtils {

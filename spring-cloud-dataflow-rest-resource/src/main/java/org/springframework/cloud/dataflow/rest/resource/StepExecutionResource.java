@@ -17,6 +17,7 @@
 package org.springframework.cloud.dataflow.rest.resource;
 
 import org.springframework.batch.core.StepExecution;
+import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.ResourceSupport;
 import org.springframework.util.Assert;
 
@@ -48,7 +49,10 @@ public class StepExecutionResource extends ResourceSupport {
 		this.stepType = stepType;
 	}
 
-	public StepExecutionResource() {
+	/**
+	 * Default constructor to be used by Jackson.
+	 */
+	private StepExecutionResource() {
 		this.stepExecution = null;
 		this.jobExecutionId = null;
 		this.stepType = null;
@@ -72,5 +76,6 @@ public class StepExecutionResource extends ResourceSupport {
 		return this.stepType;
 	}
 
+	public static class Page extends PagedResources<StepExecutionResource> {}
 
 }
