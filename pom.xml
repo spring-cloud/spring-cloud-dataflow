@@ -25,7 +25,7 @@
 		<java.version>1.7</java.version>
 		<spring-cloud-dataflow-ui.version>1.0.0.BUILD-SNAPSHOT</spring-cloud-dataflow-ui.version>
 		<spring-cloud-stream.version>1.0.0.BUILD-SNAPSHOT</spring-cloud-stream.version>
-		<spring-cloud-task.version>1.0.0.BUILD-SNAPSHOT</spring-cloud-task.version>
+		<spring-cloud-task.version>1.0.0.M1</spring-cloud-task.version>
 		<spring-cloud-commons.version>1.1.0.BUILD-SNAPSHOT</spring-cloud-commons.version>
 		<spring-cloud-config.version>1.1.0.BUILD-SNAPSHOT</spring-cloud-config.version>
 		<spring-cloud-stream-configuration-metadata.version>1.0.0.BUILD-SNAPSHOT</spring-cloud-stream-configuration-metadata.version>
