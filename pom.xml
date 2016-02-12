@@ -28,7 +28,6 @@
 		<spring-cloud-task.version>1.0.0.M1</spring-cloud-task.version>
 		<spring-cloud-commons.version>1.1.0.BUILD-SNAPSHOT</spring-cloud-commons.version>
 		<spring-cloud-config.version>1.1.0.BUILD-SNAPSHOT</spring-cloud-config.version>
-		<spring-cloud-stream-configuration-metadata.version>1.0.0.BUILD-SNAPSHOT</spring-cloud-stream-configuration-metadata.version>
 	</properties>
 	<modules>
 		<module>spring-cloud-dataflow-artifact-registry</module>
@@ -47,18 +46,10 @@
 	</modules>
 	<dependencyManagement>
 		<dependencies>
+			<!-- TODO: remove this (it should be in stream modules BOM)
+				See https://github.com/spring-cloud/spring-cloud-stream-modules/issues/185
+			-->
 			<dependency>
-				<!-- TODO: remove this (it should be in stream BOM)
-					See https://github.com/spring-cloud/spring-cloud-stream/issues/338
-				-->
-				<groupId>org.springframework.cloud</groupId>
-				<artifactId>spring-cloud-stream-configuration-metadata</artifactId>
-				<version>${spring-cloud-stream-configuration-metadata.version}</version>
-			</dependency>
-			<dependency>
-				<!-- TODO: remove this (it should be in stream modules BOM)
-					See https://github.com/spring-cloud/spring-cloud-stream-modules/issues/185
-				-->
 				<groupId>org.springframework.cloud.stream.module</groupId>
 				<artifactId>spring-cloud-stream-modules-analytics</artifactId>
 				<version>1.0.0.BUILD-SNAPSHOT</version>
