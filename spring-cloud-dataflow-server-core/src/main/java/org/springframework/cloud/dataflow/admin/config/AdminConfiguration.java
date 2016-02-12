@@ -41,7 +41,6 @@ import org.springframework.cloud.dataflow.admin.controller.StreamDefinitionContr
 import org.springframework.cloud.dataflow.admin.repository.InMemoryStreamDefinitionRepository;
 import org.springframework.cloud.dataflow.admin.repository.InMemoryTaskDefinitionRepository;
 import org.springframework.cloud.dataflow.admin.repository.StreamDefinitionRepository;
-import org.springframework.cloud.dataflow.admin.repository.TaskDatabaseInitializer;
 import org.springframework.cloud.dataflow.admin.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistry;
 import org.springframework.cloud.dataflow.artifact.registry.RedisArtifactRegistry;
@@ -52,6 +51,7 @@ import org.springframework.cloud.stream.module.metrics.FieldValueCounterReposito
 import org.springframework.cloud.stream.module.metrics.RedisFieldValueCounterRepository;
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.cloud.task.repository.support.JdbcTaskExplorerFactoryBean;
+import org.springframework.cloud.task.repository.support.TaskRepositoryInitializer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -79,6 +79,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
  * @author Janne Valkealahti
  * @author Glenn Renfro
  * @author Josh Long
+ * @author Michael Minella
  */
 @Configuration
 @EnableHypermediaSupport(type = HAL)
@@ -190,14 +191,18 @@ public class AdminConfiguration {
 
 	@Bean
 	@ConditionalOnExpression("#{'!${spring.datasource.url:}'.startsWith('jdbc:h2:tcp://localhost:') && !'${spring.datasource.url:}'.contains('/mem:')}")
-	public TaskDatabaseInitializer taskDatabaseInitializerForDB(DataSource dataSource) {
-		return new TaskDatabaseInitializer(dataSource);
+	public TaskRepositoryInitializer taskRepositoryInitializerForDB(DataSource dataSource) {
+		TaskRepositoryInitializer taskRepositoryInitializer = new TaskRepositoryInitializer();
+		taskRepositoryInitializer.setDataSource(dataSource);
+		return taskRepositoryInitializer;
 	}
 
 	@Bean
 	@ConditionalOnExpression("#{'${spring.datasource.url:}'.startsWith('jdbc:h2:tcp://localhost:') && '${spring.datasource.url:}'.contains('/mem:')}")
-	public TaskDatabaseInitializer taskDatabaseInitializerForDefaultDB(DataSource dataSource, Server server) {
-		return new TaskDatabaseInitializer(dataSource);
+	public TaskRepositoryInitializer taskRepositoryInitializerForDefaultDB(DataSource dataSource, Server server) {
+		TaskRepositoryInitializer taskRepositoryInitializer = new TaskRepositoryInitializer();
+		taskRepositoryInitializer.setDataSource(dataSource);
+		return taskRepositoryInitializer;
 	}
 
 	private String getH2Port(String url) {
