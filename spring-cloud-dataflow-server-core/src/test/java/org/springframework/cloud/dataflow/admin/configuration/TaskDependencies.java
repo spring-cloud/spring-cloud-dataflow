@@ -18,23 +18,26 @@ package org.springframework.cloud.dataflow.admin.configuration;
 
 import javax.sql.DataSource;
 
-import org.springframework.cloud.dataflow.admin.repository.TaskDatabaseInitializer;
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.cloud.task.repository.support.JdbcTaskExplorerFactoryBean;
+import org.springframework.cloud.task.repository.support.TaskRepositoryInitializer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 
 /**
  * @author Glenn Renfro
+ * @author Michael Minella
  */
 @Configuration
 @EnableSpringDataWebSupport
 public class TaskDependencies {
 
 	@Bean
-	public TaskDatabaseInitializer taskExecutionRepository(DataSource dataSource) {
-		return new TaskDatabaseInitializer(dataSource);
+	public TaskRepositoryInitializer taskExecutionRepository(DataSource dataSource) {
+		TaskRepositoryInitializer taskRepositoryInitializer = new TaskRepositoryInitializer();
+		taskRepositoryInitializer.setDataSource(dataSource);
+		return taskRepositoryInitializer;
 	}
 
 	@Bean
