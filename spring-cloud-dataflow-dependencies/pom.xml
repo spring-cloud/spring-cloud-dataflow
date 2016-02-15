@@ -72,7 +72,6 @@
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-starter-dataflow-server-local</artifactId>
-				<type>pom</type>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
