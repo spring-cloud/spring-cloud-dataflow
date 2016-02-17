@@ -18,6 +18,8 @@ package org.springframework.cloud.dataflow.deployer.local;
 
 import java.io.File;
 import java.nio.file.Path;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
@@ -49,6 +51,11 @@ public class OutOfProcessModuleDeployerProperties {
 	 */
 	private String javaCmd = "java";
 
+	/**
+	 * Additional properties to add to every module's command line
+	 */
+	private Map<String, String> sharedArgs = new LinkedHashMap<>();
+
 	public String getJavaCmd() {
 		return javaCmd;
 	}
@@ -79,5 +86,13 @@ public class OutOfProcessModuleDeployerProperties {
 
 	public void setDeleteFilesOnExit(boolean deleteFilesOnExit) {
 		this.deleteFilesOnExit = deleteFilesOnExit;
+	}
+	
+	public void setSharedArgs(Map<String, String> sharedArgs) {
+		this.sharedArgs = sharedArgs;
+	}
+
+	public Map<String, String> getSharedArgs() {
+		return sharedArgs;
 	}
 }
