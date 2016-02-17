@@ -26,37 +26,51 @@ You also need to have link:http://redis.io/[Redis] installed and running if you 
 1. download the Spring Cloud Data Flow Admin and Shell apps:
 
 ```
-wget http://repo.spring.io/milestone/org/springframework/cloud/spring-cloud-dataflow-admin-local/1.0.0.M2/spring-cloud-dataflow-admin-local-1.0.0.M2.jar
-wget http://repo.spring.io/milestone/org/springframework/cloud/spring-cloud-dataflow-shell/1.0.0.M2/spring-cloud-dataflow-shell-1.0.0.M2.jar
+wget http://repo.spring.io/snapshot/org/springframework/cloud/spring-cloud-dataflow-server-local/1.0.0.BUILD-SNAPSHOT/spring-cloud-dataflow-server-local-1.0.0.BUILD-SNAPSHOT.jar
+wget http://repo.spring.io/snapshot/org/springframework/cloud/spring-cloud-dataflow-shell/1.0.0.BUILD-SNAPSHOT/spring-cloud-dataflow-shell-1.0.0.BUILD-SNAPSHOT.jar
 ```
 [start=2]
-1. launch the admin:
+1. launch the Data Flow Server:
 
 ```
-$ java -jar spring-cloud-dataflow-admin-local-1.0.0.M2.jar
+$ java -jar spring-cloud-dataflow-server-local-1.0.0.BUILD-SNAPSHOT.jar
+```
+
+By default, this starts the Data Flow server with the `out-of-process` local deployer.
+
+If you want to have `in-process` local deployer for this server then you can use
+```
+$ java -jar spring-cloud-dataflow-server-local-1.0.0.BUILD-SNAPSHOT.jar --deployer.local.out-of-process=false
 ```
 
 [start=3]
 1. launch the shell:
 
 ```
-$ java -jar spring-cloud-dataflow-shell-1.0.0.M2.jar
+$ java -jar spring-cloud-dataflow-shell-1.0.0.BUILD-SNAPSHOT.jar
 ```
 
 If the admin and local are not running onthe same host, point the shell to the admin server
 
 ```
-server-unknown:>admin config server http://s-c-dataflow-admin.cfapps.io
-Successfully targeted http://s-c-dataflow-admin.cfapps.io
+server-unknown:>admin config server http://s-c-dataflow-server.cfapps.io
+Successfully targeted http://s-c-dataflow-server.cfapps.io
 dataflow:>
 ```
 
-You can now use the shell commands to list modules and create streams.  For example
+You can now use the shell commands to list apps and create streams.  For example
 
 ```
 dataflow:>stream create --name httptest --definition "http --server.port=9000 | log" --deploy
 
+```
+Once both the `http` and `log` apps are deployed, you can post the data into http endpoint.
+
+Note: If you are using `out-of-process` deployer, you may need to wait until the apps are actually deployed successfully before posting the data.
+Since the shell comes out with the `success` message soon after submitting the deployment requests, the app may not be ready yet to receive the data.
+
+
+```
 dataflow:> http post --target http://localhost:9000 --data "hello world"
 ```
-
-Look to see if data ended up in log files under the /tmp directory.
+Now look to see if data ended up in log files under the /tmp directory.
