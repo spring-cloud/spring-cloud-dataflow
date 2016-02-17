@@ -162,10 +162,10 @@ taps can be created at the output of `http`, `step1` and `step2`.
 To create a stream that acts as a 'tap' on another stream requires to specify the `source destination name` for the tap stream. The syntax for source destination name is:
 
 ```
-`<stream-name>.<label/app name>`
+`<stream-name>.<label/app-name>`
 ```
 To create a tap at the output of `http` in the stream above, the source destination name is `mainstream.http`
-To create a tap at the output of first transform app in the stream above, the source destination name is `mainstream.step1`
+To create a tap at the output of the first transform app in the stream above, the source destination name is `mainstream.step1`
 
 The tap stream DSL looks like this:
 
@@ -181,26 +181,30 @@ Note the colon (:) prefix before the destination names. The colon lets the parse
 [[explicit-destination-names]]
 == Connecting to explicit destination names at the broker
 
-One can connect to a specific source destination name located in the broker (Rabbit, Kafka) and connect it to a downstream set of apps.
-In this case, the DSL looks like this:
+One can connect to a specific destination name located in the broker (Rabbit, Kafka etc.,) either at the `source` or at the `sink` position.
+
+The following stream has the destination name at the `source` position:
 
 ```
-  stream create --definition ":mySource > log" --name ingest_from_broker --deploy
+  stream create --definition ":myDestination > log" --name ingest_from_broker --deploy
 ```
 
-In the above stream, the destination name `mySource` is the `source` destination name and the stream receives messages from the source destination `mySource` at the broker and connects it to the `log` app.
+This stream receives messages from the destination `myDestination` located at the broker and connects it to the `log` app.
 
-The destination can act as `sink` as well.
 
-```
-  stream create --definition "http > :mySink" --name ingest_to_broker --deploy
-```
-In the above stream, the destination name `mySink` is the `sink` destination name and the stream sends the messages from `http` app to the destination `mySink` at the broker.
-
-It is also possible to connect `source` and `sink` destinations at the broker.
+The following stream has the destination name at the `sink` position:
 
 ```
-  stream create --definition ":myOtherSource > :myOtherSink" --name source_sink_destinations --deploy
+  stream create --definition "http > :myDestination" --name ingest_to_broker --deploy
+```
+This stream sends the messages from `http` app to the destination `myDestination` located at the broker.
+
+From the above streams, notice that the `http` and `log` apps are interacting with each other via `broker` (through the destination `myDestination`) rather than having a pipe directly between `http` and `log` within a single stream.
+
+It is also possible to connect two different destinations (`source` and `sink` positions) at the broker in a stream.
+
+```
+  stream create --definition ":destination1 > :destination2" --name bridge_destinations --deploy
 ```
 
-In the above stream, both the source and sink destinations are located in the broker. The messages flow from the source destination to the sink destination via a `bridge` app that connects the source and sink destinations.
+In the above stream, both the destinations (`destination1` and `destination2`) are located in the broker. The messages flow from the source destination to the sink destination via a `bridge` app that connects them.
