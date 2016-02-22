@@ -36,7 +36,7 @@ public class OutOfProcessModuleDeployerTests extends AbstractModuleDeployerTests
 	public static class Config {
 
 		@Bean
-		public ModuleDeployer moduleDeployer() {
+		public ModuleDeployer processModuleDeployer() {
 			return new OutOfProcessModuleDeployer();
 		}
 	}

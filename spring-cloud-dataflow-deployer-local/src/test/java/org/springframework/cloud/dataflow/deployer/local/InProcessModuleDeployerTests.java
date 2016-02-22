@@ -56,7 +56,7 @@ public class InProcessModuleDeployerTests extends AbstractModuleDeployerTests {
 	public static class Config {
 
 		@Bean
-		ModuleDeployer moduleDeployer(ModuleLauncher moduleLauncher) {
+		ModuleDeployer processModuleDeployer(ModuleLauncher moduleLauncher) {
 			return new InProcessModuleDeployer(moduleLauncher);
 		}
 
