@@ -27,8 +27,10 @@ import org.springframework.util.StringUtils;
  * @author Ilayaperumal Gopinathan
  * @author Eric Bottard
  */
-@ConfigurationProperties
+@ConfigurationProperties(prefix = DataFlowServerProperties.PREFIX)
 public class DataFlowServerProperties {
+
+	static final String PREFIX = "deployer";
 
 	/**
 	 * File path to a locally available maven repository, where modules will be downloaded.
@@ -52,14 +54,14 @@ public class DataFlowServerProperties {
 	public Map<String, String> asStringProperties() {
 		Map<String, String> properties = new HashMap<>();
 		if (this.getLocalRepository() != null) {
-			properties.put("localRepository", this.getLocalRepository());
+			properties.put(PREFIX + ".localRepository", this.getLocalRepository());
 		}
 		if (this.getRemoteRepositories() != null) {
-			properties.put("remoteRepositories", StringUtils.arrayToCommaDelimitedString(
+			properties.put(PREFIX + ".remoteRepositories", StringUtils.arrayToCommaDelimitedString(
 					this.getRemoteRepositories()));
 		}
 		if (this.getOffline() != null) {
-			properties.put("offline", String.valueOf(this.getOffline()));
+			properties.put(PREFIX + ".offline", String.valueOf(this.getOffline()));
 		}
 		return properties;
 	}
