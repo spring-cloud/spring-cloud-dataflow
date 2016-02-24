@@ -51,7 +51,7 @@ public class DefaultEnvironmentPostProcessor implements EnvironmentPostProcessor
 		Map<String, Object> defaults = new HashMap<>();
 		MutablePropertySources existingPropertySources = environment.getPropertySources();
 
-		this.contributeAdminDefaults(defaults);
+		this.contributeDefaults(defaults);
 
 		String defaultPropertiesKey = "defaultProperties";
 
@@ -79,7 +79,7 @@ public class DefaultEnvironmentPostProcessor implements EnvironmentPostProcessor
 		return 0;
 	}
 
-	private void contributeAdminDefaults(Map<String, Object> defaults) {
+	private void contributeDefaults(Map<String, Object> defaults) {
 		if (this.resource.exists()) {
 			YamlPropertiesFactoryBean yamlPropertiesFactoryBean = new YamlPropertiesFactoryBean();
 			yamlPropertiesFactoryBean.setResources(this.resource);

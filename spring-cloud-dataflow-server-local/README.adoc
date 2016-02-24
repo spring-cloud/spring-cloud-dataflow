@@ -87,7 +87,7 @@ If successful you should see output similar to the following in the `Data Flow S
 ### Default
 To configure the Data Flow Server you can follow the configuration setup guidelines specified in the boot documentation found http://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-external-config.html[here]
 
-Note: The `admin.yml` containing the defaults can be found https://github.com/spring-cloud/spring-cloud-dataflow/blob/master/spring-cloud-dataflow-deployer-local/src/main/resources/admin.yml[here]
+Note: The `dataflow-server.yml` containing the defaults can be found https://github.com/spring-cloud/spring-cloud-dataflow/blob/master/spring-cloud-dataflow-deployer-local/src/main/resources/dataflow-server.yml[here]
 
 ### Spring Cloud Configuration
 The Spring Cloud Data Flow Server offers the user the ability to configure properties via

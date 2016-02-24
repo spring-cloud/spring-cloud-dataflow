@@ -132,7 +132,7 @@ public abstract class AbstractShellIntegrationTest {
 				dataFlowShell.stop();
 			}
 			if (applicationContext != null) {
-				logger.info("Stopping Data Flow Admin Server");
+				logger.info("Stopping Data Flow Server");
 				SpringApplication.exit(applicationContext);
 				applicationContext = null;
 			}

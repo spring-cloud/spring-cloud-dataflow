@@ -8,7 +8,7 @@ In this section you will learn all about Streams and how to use them with Spring
 
 == Introduction
 
-In Spring Cloud Data Flow, a basic stream defines the ingestion of event driven data from a _source_ to a _sink_ that passes through any number of _processors_. Streams are composed of spring-cloud-stream modules and the deployment of stream definitions is done via the Admin Server (REST API). The xref:getting-started#getting-started[Getting Started] section shows you how to start these servers and how to start and use the Spring Cloud Data Flow shell.
+In Spring Cloud Data Flow, a basic stream defines the ingestion of event driven data from a _source_ to a _sink_ that passes through any number of _processors_. Streams are composed of spring-cloud-stream modules and the deployment of stream definitions is done via the Data Flow Server (REST API). The xref:getting-started#getting-started[Getting Started] section shows you how to start these servers and how to start and use the Spring Cloud Data Flow shell.
 
 A high level DSL is used to create stream definitions. The DSL to define a stream that has an http source and a file sink (with no processors) is shown below
 
@@ -18,11 +18,11 @@ The DSL mimics a UNIX pipes and filters syntax. Default values for ports and fil
 
      http --port=8091 | file --dir=/tmp/httpdata/
 
-To create these stream definitions you make an HTTP POST request to the Spring Cloud Data Flow Admin Server. More details can be found in the sections below.
+To create these stream definitions you make an HTTP POST request to the Spring Cloud Data Flow Server. More details can be found in the sections below.
 
 == Creating a Simple Stream
 
-The Spring Cloud Data Flow Admin Server footnote:[The server is implemented by the `AdminApplication` class in the `spring-cloud-dataflow-server-core` subproject] exposes a full RESTful API for managing the lifecycle of stream definitions, but the easiest way to use is it is via the Spring Cloud Data Flow shell. Start the shell as described in the xref:Getting-Started#getting-started[Getting Started] section.
+The Spring Cloud Data Flow Server exposes a full RESTful API for managing the lifecycle of stream definitions, but the easiest way to use is it is via the Spring Cloud Data Flow shell. Start the shell as described in the xref:Getting-Started#getting-started[Getting Started] section.
 
 New streams are created by posting stream definitions. The definitions are built from a simple DSL. For example, let's walk through what happens if we execute the following shell command:
 
@@ -34,7 +34,7 @@ Then to deploy the stream execute the following shell command (or alternatively 
 
     dataflow:> stream deploy --name ticktock
 
-The Admin Server resolves `time` and `log` to maven coordinates and uses those to launch the `time` and `log` applications of the stream.  In this simple example, the time source simply sends the current time as a message each second, and the log sink outputs it using the logging framework.
+The Data Flow Server resolves `time` and `log` to maven coordinates and uses those to launch the `time` and `log` applications of the stream.  In this simple example, the time source simply sends the current time as a message each second, and the log sink outputs it using the logging framework.
 
 ....
 2016-01-13 10:41:15.398  INFO 65275 --- [nio-9393-exec-1] o.s.c.d.a.s.l.OutOfProcessModuleDeployer : deploying module org.springframework.cloud.stream.module:log-sink:jar:exec:1.0.0.BUILD-SNAPSHOT instance 0
@@ -68,7 +68,7 @@ Often you will want to stop a stream, but retain the name and definition for fut
 
 == Other Source and Sink Types
 
-Let's try something a bit more complicated and swap out the `time` source for something else. Another supported source type is `http`, which accepts data for ingestion over HTTP POSTs. Note that the `http` source accepts data on a different port from the Admin Server (default 8080). By default the port is randomly assigned.
+Let's try something a bit more complicated and swap out the `time` source for something else. Another supported source type is `http`, which accepts data for ingestion over HTTP POSTs. Note that the `http` source accepts data on a different port from the Data Flow Server (default 8080). By default the port is randomly assigned.
 
 To create a stream using an `http` source, but still using the same `log` sink, we would change the original command above to
 

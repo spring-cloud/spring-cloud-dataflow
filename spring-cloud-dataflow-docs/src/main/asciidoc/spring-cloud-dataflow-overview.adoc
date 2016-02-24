@@ -34,7 +34,7 @@ The architecture for Spring Cloud Data Flow is separated into a number of distin
 === Components
 
 The link:https://github.com/spring-cloud/spring-cloud-dataflow/tree/master/spring-cloud-dataflow-core[Core]
-domain module includes the concept of a **stream** that is a composition of spring-cloud-stream
+domain model includes the concept of a **stream** that is a composition of spring-cloud-stream
 modules in a linear pipeline from a *source* to a *sink*, optionally including *processor* modules
 in between. The domain also includes the concept of a **task**, which may be any process that does
 not run indefinitely, including link:https://github.com/spring-projects/spring-batch[Spring Batch] jobs.
@@ -42,7 +42,7 @@ not run indefinitely, including link:https://github.com/spring-projects/spring-b
 The link:https://github.com/spring-cloud/spring-cloud-dataflow/tree/master/spring-cloud-dataflow-artifact-registry[Artifact Registry]
 maintains the set of available modules, and their mappings to Maven coordinates.
 
-The link:https://github.com/spring-cloud/spring-cloud-dataflow/tree/master/spring-cloud-dataflow-deployer-spi[Module Deployer SPI] provides the abstraction layer for deploying the modules of a given stream across a variety of runtime environments, including:
+The link:https://github.com/spring-cloud/spring-cloud-dataflow/tree/master/spring-cloud-dataflow-deployer-spi[Deployer SPI] provides the abstraction layer for deploying the apps of a given stream across a variety of runtime environments, including:
 
 * link:https://github.com/spring-cloud/spring-cloud-dataflow/tree/master/spring-cloud-dataflow-server-local[Local]
 
@@ -54,7 +54,7 @@ The link:https://github.com/spring-cloud/spring-cloud-dataflow/tree/master/sprin
 
 * link:https://github.com/spring-cloud/spring-cloud-dataflow-admin-kubernetes[Kubernetes]
 
-The link:https://github.com/spring-cloud/spring-cloud-dataflow/tree/master/spring-cloud-dataflow-server-core[Data Flow Server Core] provides the REST API and UI for implementations of the Admin SPI.
+The link:https://github.com/spring-cloud/spring-cloud-dataflow/tree/master/spring-cloud-dataflow-server-core[Data Flow Server Core] provides the REST API and UI to be used in combination with an implementation of the Deployer SPI when creating a Data Flow Server for a given deployment environment.
 
-The link:https://github.com/spring-cloud/spring-cloud-dataflow/tree/master/spring-cloud-dataflow-shell[Shell] connects to the Admin's REST API and supports a DSL that simplifies the process of defining a stream and managing its lifecycle.
+The link:https://github.com/spring-cloud/spring-cloud-dataflow/tree/master/spring-cloud-dataflow-shell[Shell] connects to the Data Flow Server's REST API and supports a DSL that simplifies the process of defining a stream and managing its lifecycle.
 

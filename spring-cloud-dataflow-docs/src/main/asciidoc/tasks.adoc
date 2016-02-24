@@ -128,7 +128,7 @@ the sample below postgresql has been chosen.
 
 === Datasource
 
-To configure the datasource Add the following properties to the admin.yml or via
+To configure the datasource Add the following properties to the dataflow-server.yml or via
 environment variables:
 
 a. spring.datasource.url
@@ -145,7 +145,7 @@ export spring_datasource_username=myuser
 export spring_datasource_password=mypass
 export spring_datasource_driver-class-name="org.postgresql.Driver"
 ```
-* admin.yml
+* dataflow-server.yml
 ```
 spring:
   datasource:
