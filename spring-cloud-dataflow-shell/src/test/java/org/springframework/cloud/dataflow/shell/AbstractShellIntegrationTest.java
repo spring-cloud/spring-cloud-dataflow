@@ -27,10 +27,10 @@ import org.slf4j.LoggerFactory;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
-import org.springframework.cloud.dataflow.server.local.LocalDataFlowServer;
-import org.springframework.cloud.dataflow.server.config.DataFlowServerConfiguration;
 import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistry;
 import org.springframework.cloud.dataflow.artifact.registry.InMemoryArtifactRegistry;
+import org.springframework.cloud.dataflow.server.config.DataFlowServerConfiguration;
+import org.springframework.cloud.dataflow.server.local.LocalDataFlowServer;
 import org.springframework.cloud.dataflow.shell.command.StreamCommandTemplate;
 import org.springframework.cloud.dataflow.shell.command.TaskCommandTemplate;
 import org.springframework.context.ApplicationContext;
@@ -46,8 +46,7 @@ import org.springframework.util.SocketUtils;
 
 /**
  * Base class for shell integration tests. This class sets up and tears down
- * the infrastructure required for executing shell tests - in particular, the
- * {@link AdminApplication} server.
+ * the infrastructure required for executing shell tests - in particular, the Data Flow server.
  * <p>
  * Extensions of this class may obtain instances of command templates.
  * For example, call {@link #stream} to obtain a {@link StreamCommandTemplate}

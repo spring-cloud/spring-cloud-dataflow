@@ -24,8 +24,6 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.cloud.dataflow.server.repository.NoSuchStreamDefinitionException;
-import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistration;
 import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistry;
 import org.springframework.cloud.dataflow.core.ArtifactCoordinates;
@@ -41,6 +39,8 @@ import org.springframework.cloud.dataflow.module.ModuleStatus;
 import org.springframework.cloud.dataflow.module.deployer.ModuleDeployer;
 import org.springframework.cloud.dataflow.rest.resource.StreamDeploymentResource;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
+import org.springframework.cloud.dataflow.server.repository.NoSuchStreamDefinitionException;
+import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;

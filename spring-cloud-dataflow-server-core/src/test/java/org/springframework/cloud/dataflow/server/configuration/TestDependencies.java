@@ -19,6 +19,10 @@ package org.springframework.cloud.dataflow.server.configuration;
 import static org.mockito.Mockito.mock;
 import static org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType.HAL;
 
+import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistry;
+import org.springframework.cloud.dataflow.artifact.registry.InMemoryArtifactRegistry;
+import org.springframework.cloud.dataflow.completion.CompletionConfiguration;
+import org.springframework.cloud.dataflow.module.deployer.ModuleDeployer;
 import org.springframework.cloud.dataflow.server.config.ArtifactRegistryPopulator;
 import org.springframework.cloud.dataflow.server.controller.RestControllerAdvice;
 import org.springframework.cloud.dataflow.server.controller.StreamDefinitionController;
@@ -30,10 +34,6 @@ import org.springframework.cloud.dataflow.server.repository.InMemoryStreamDefini
 import org.springframework.cloud.dataflow.server.repository.InMemoryTaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
-import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistry;
-import org.springframework.cloud.dataflow.artifact.registry.InMemoryArtifactRegistry;
-import org.springframework.cloud.dataflow.completion.CompletionConfiguration;
-import org.springframework.cloud.dataflow.module.deployer.ModuleDeployer;
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.cloud.task.repository.dao.MapTaskExecutionDao;
 import org.springframework.cloud.task.repository.dao.TaskExecutionDao;

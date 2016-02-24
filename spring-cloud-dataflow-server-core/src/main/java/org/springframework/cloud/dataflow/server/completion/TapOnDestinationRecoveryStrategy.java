@@ -18,13 +18,13 @@ package org.springframework.cloud.dataflow.server.completion;
 
 import java.util.List;
 
-import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.completion.CompletionProposal;
 import org.springframework.cloud.dataflow.completion.RecoveryStrategy;
 import org.springframework.cloud.dataflow.core.ModuleDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.dsl.DSLMessage;
 import org.springframework.cloud.dataflow.core.dsl.ParseException;
+import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 
 /**
  * Expands constructs that start with {@literal :} to add stream name and module identifiers.

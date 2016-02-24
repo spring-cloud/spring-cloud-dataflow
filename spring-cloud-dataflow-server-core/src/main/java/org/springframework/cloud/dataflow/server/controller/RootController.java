@@ -53,7 +53,7 @@ public class RootController {
 	private final EntityLinks entityLinks;
 
 	/**
-	 * Construct an {@code ServerController}.
+	 * Construct an {@code RootController}.
 	 *
 	 * @param entityLinks holder of links to controllers and their associated entity types
 	 */

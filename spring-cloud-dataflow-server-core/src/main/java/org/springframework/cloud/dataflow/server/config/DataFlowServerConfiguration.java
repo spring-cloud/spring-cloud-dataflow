@@ -36,6 +36,11 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplicat
 import org.springframework.boot.autoconfigure.security.oauth2.OAuth2AutoConfiguration;
 import org.springframework.boot.autoconfigure.web.HttpMessageConverters;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistry;
+import org.springframework.cloud.dataflow.artifact.registry.RedisArtifactRegistry;
+import org.springframework.cloud.dataflow.completion.CompletionConfiguration;
+import org.springframework.cloud.dataflow.completion.RecoveryStrategy;
+import org.springframework.cloud.dataflow.completion.StreamCompletionProvider;
 import org.springframework.cloud.dataflow.server.completion.TapOnDestinationRecoveryStrategy;
 import org.springframework.cloud.dataflow.server.controller.StreamDefinitionController;
 import org.springframework.cloud.dataflow.server.repository.InMemoryStreamDefinitionRepository;
@@ -43,11 +48,6 @@ import org.springframework.cloud.dataflow.server.repository.InMemoryTaskDefiniti
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDatabaseInitializer;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
-import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistry;
-import org.springframework.cloud.dataflow.artifact.registry.RedisArtifactRegistry;
-import org.springframework.cloud.dataflow.completion.CompletionConfiguration;
-import org.springframework.cloud.dataflow.completion.RecoveryStrategy;
-import org.springframework.cloud.dataflow.completion.StreamCompletionProvider;
 import org.springframework.cloud.stream.module.metrics.FieldValueCounterRepository;
 import org.springframework.cloud.stream.module.metrics.RedisFieldValueCounterRepository;
 import org.springframework.cloud.task.repository.TaskExplorer;

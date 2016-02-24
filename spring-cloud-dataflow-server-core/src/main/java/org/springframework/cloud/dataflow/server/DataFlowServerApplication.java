@@ -20,17 +20,17 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * Bootstrap class for Spring Cloud Data Flow Admin.
+ * Bootstrap class for Spring Cloud Data Flow Server.
  *
  * @author Mark Fisher
  * @author Josh Long
  */
 @Configuration
 @EnableDataFlowServer
-public class AdminApplication {
+public class DataFlowServerApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(AdminApplication.class, args);
+		SpringApplication.run(DataFlowServerApplication.class, args);
 	}
 
 }
