@@ -30,6 +30,8 @@
 		<spring-cloud-config.version>1.1.0.BUILD-SNAPSHOT</spring-cloud-config.version>
 	</properties>
 	<modules>
+		<module>spring-cloud-dataflow-app-launcher</module>
+		<module>spring-cloud-dataflow-configuration-metadata</module>
 		<module>spring-cloud-dataflow-artifact-registry</module>
 		<module>spring-cloud-dataflow-deployer-spi</module>
 		<module>spring-cloud-dataflow-deployer-local</module>

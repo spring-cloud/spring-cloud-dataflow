@@ -21,8 +21,8 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.dataflow.module.deployer.ModuleDeployer;
-import org.springframework.cloud.stream.module.launcher.ModuleLauncher;
-import org.springframework.cloud.stream.module.launcher.ModuleLauncherConfiguration;
+import org.springframework.cloud.dataflow.app.launcher.ModuleLauncher;
+import org.springframework.cloud.dataflow.app.launcher.ModuleLauncherConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;

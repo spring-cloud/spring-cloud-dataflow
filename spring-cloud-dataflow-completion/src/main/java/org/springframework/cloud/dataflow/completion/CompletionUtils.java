@@ -24,7 +24,7 @@ import org.springframework.cloud.dataflow.core.BindingPropertyKeys;
 import org.springframework.cloud.dataflow.core.ArtifactCoordinates;
 import org.springframework.cloud.dataflow.core.ModuleDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
-import org.springframework.cloud.stream.module.resolver.Coordinates;
+import org.springframework.cloud.dataflow.app.resolver.Coordinates;
 
 /**
  * Various utility methods used throughout the completion package.
