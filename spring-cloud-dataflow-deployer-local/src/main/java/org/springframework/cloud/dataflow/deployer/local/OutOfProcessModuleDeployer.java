@@ -60,6 +60,8 @@ import org.springframework.web.client.RestTemplate;
  */
 public class OutOfProcessModuleDeployer implements ModuleDeployer {
 
+	private static final String APP_LAUNCHER = "spring-cloud-dataflow-app-launcher";
+
 	private String moduleLauncherPath;
 
 	private Path logPathRoot;
@@ -194,9 +196,9 @@ public class OutOfProcessModuleDeployer implements ModuleDeployer {
 	 */
 	@PostConstruct
 	public void setup() throws IOException {
-		File launcherFile = Files.createTempFile("spring-cloud-stream-module-launcher", ".jar").toFile();
+		File launcherFile = Files.createTempFile(APP_LAUNCHER, ".jar").toFile();
 		launcherFile.deleteOnExit();
-		FileCopyUtils.copy(new ClassPathResource("spring-cloud-stream-module-launcher.jar").getInputStream(), new FileOutputStream(launcherFile));
+		FileCopyUtils.copy(new ClassPathResource(APP_LAUNCHER + ".jar").getInputStream(), new FileOutputStream(launcherFile));
 		this.moduleLauncherPath = launcherFile.getAbsolutePath();
 		this.logPathRoot = Files.createTempDirectory(properties.getWorkingDirectoriesRoot(), "spring-cloud-data-flow-");
 	}
