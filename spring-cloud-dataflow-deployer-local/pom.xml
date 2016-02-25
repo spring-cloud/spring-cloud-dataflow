@@ -17,7 +17,8 @@
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
-			<artifactId>spring-cloud-stream-module-launcher</artifactId>
+			<artifactId>spring-cloud-dataflow-app-launcher</artifactId>
+			<version>1.0.0.BUILD-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
@@ -59,7 +60,7 @@
 							<artifactItems>
 								<artifactItem>
 									<groupId>org.springframework.cloud</groupId>
-									<artifactId>spring-cloud-stream-module-launcher</artifactId>
+									<artifactId>spring-cloud-dataflow-app-launcher</artifactId>
 								</artifactItem>
 							</artifactItems>
 							<stripVersion>true</stripVersion>
