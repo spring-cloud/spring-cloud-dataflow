@@ -131,10 +131,17 @@ public class AetherModuleResolver implements ModuleResolver {
 			for (Map.Entry<String, String> remoteRepo : remoteRepositories.entrySet()) {
 				RemoteRepository.Builder remoteRepositoryBuilder = new RemoteRepository.Builder(remoteRepo.getKey(),
 						DEFAULT_CONTENT_TYPE, remoteRepo.getValue());
-				if (this.authentication != null) {
-					//todo: Set direct authentication for the remote repositories
-					remoteRepositoryBuilder.setProxy(new Proxy(proxyProperties.getProtocol(), proxyProperties.getHost(),
-							proxyProperties.getPort(), authentication));
+				if (isProxyEnabled()) {
+					if(this.authentication != null) {
+						//todo: Set direct authentication for the remote repositories
+						remoteRepositoryBuilder.setProxy(new Proxy(proxyProperties.getProtocol(), proxyProperties.getHost(),
+								proxyProperties.getPort(), authentication));	
+					}
+					else {
+						//If proxy doesn't need authentication to use it
+						remoteRepositoryBuilder.setProxy(new Proxy(proxyProperties.getProtocol(), proxyProperties.getHost(),
+								proxyProperties.getPort()));						
+					}
 				}
 				this.remoteRepositories.add(remoteRepositoryBuilder.build());
 			}
