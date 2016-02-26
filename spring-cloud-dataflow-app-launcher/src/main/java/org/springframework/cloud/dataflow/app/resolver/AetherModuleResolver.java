@@ -136,6 +136,11 @@ public class AetherModuleResolver implements ModuleResolver {
 					remoteRepositoryBuilder.setProxy(new Proxy(proxyProperties.getProtocol(), proxyProperties.getHost(),
 							proxyProperties.getPort(), authentication));
 				}
+				else {
+					//If proxy doesn't need authentication to use it
+					remoteRepositoryBuilder.setProxy(new Proxy(proxyProperties.getProtocol(), proxyProperties.getHost(),
+							proxyProperties.getPort()));
+				}
 				this.remoteRepositories.add(remoteRepositoryBuilder.build());
 			}
 		}
