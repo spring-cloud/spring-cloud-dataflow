@@ -25,6 +25,7 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.eclipse.aether.artifact.ArtifactType;
 
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.BindingPropertyKeys;
@@ -43,6 +44,7 @@ import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepo
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.app.AppStatus;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
+import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.core.io.Resource;
 import org.springframework.hateoas.ExposesResourceFor;
@@ -237,6 +239,18 @@ public class StreamDeploymentController {
 				loggger.warn(String.format("Exception when deploying the app %s: %s", currentApp, e.getMessage()));
 			}
 		}
+	}
+
+	private Map<String, String> wrap(Map<String, String> parameters) {
+		Map<String, String> result = new HashMap<>(parameters.size());
+		for (Map.Entry<String, String> entry : parameters.entrySet()) {
+			if (entry.getKey().contains(".")) {
+				result.put(entry.getKey(), entry.getValue());
+			} else {
+				result.put(StreamAppDefinition.MAIN_PARAMETER_IMPLICIT_PREFIX + entry.getKey(), entry.getValue());
+			}
+		}
+		return result;
 	}
 
 	/**

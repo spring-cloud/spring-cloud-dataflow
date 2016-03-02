@@ -20,11 +20,18 @@ import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Properties;
+import java.util.Set;
+import java.util.regex.Pattern;
 
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataGroup;
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataRepositoryJsonBuilder;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.loader.archive.Archive;
 import org.springframework.boot.loader.archive.ExplodedArchive;
 import org.springframework.boot.loader.archive.JarFileArchive;
@@ -32,91 +39,113 @@ import org.springframework.boot.loader.jar.JarFile;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
+import org.springframework.util.StringUtils;
 
 /**
  * Used to retrieve metadata about the configuration properties that can alter an application's behavior.
- *
  * @author Eric Bottard
  */
 public class ApplicationConfigurationMetadataResolver {
 
-	public ApplicationConfigurationMetadataResolver() {
-		JarFile.registerUrlProtocolHandler();
-	}
+	private static final String CONFIGURATION_METADATA_PATTERN = "classpath*:/META-INF/*spring-configuration-metadata.json";
+
+	private static final String DATAFLOW_PROPERTIES = "classpath*:/META-INF/dataflow.properties";
 
 	/**
-	 * Return metadata about configuration properties (as groups) that are documented via
-	 * <a href="http://docs.spring.io/spring-boot/docs/current/reference/html/configuration-metadata.html">
-	 * Spring Boot configuration metadata</a> and visible in an application.
-	 *
-	 * @param applicationResource a Spring Cloud Stream application resource; typically a Boot uberjar,
-	 * but directories are supported as well
+	 * A regex matching a {@link ConfigurationProperties#prefix()} that identifies the "main" configuration class.
 	 */
-	public List<ConfigurationMetadataGroup> listPropertyGroups(Resource applicationResource) {
-		List<ConfigurationMetadataGroup> result = new ArrayList<>();
-		ClassLoader classLoader = null;
+	private static final Pattern MAIN_SPRING_CLOUD_STREAM_APP_PREFIX = Pattern.compile("spring\\.cloud\\.stream\\.app");
+
+	public static final String CONFIGURATION_CLASSES = "configuration.classes";
+
+	public static final String CONFIGURATION_PROPERTIES = "configuration.properties";
+
+	private final Set<String> globalWhiteListedProperties = new HashSet<>();
+
+	private final Set<String> globalWhiteListedClasses = new HashSet<>();
+
+	public ApplicationConfigurationMetadataResolver() {
+		JarFile.registerUrlProtocolHandler();
 		try {
-			File applicationFile = applicationResource.getFile();
-			Archive archive = applicationFile.isDirectory() ? new ExplodedArchive(applicationFile)
-					: new JarFileArchive(applicationFile);
-			classLoader = createClassLoader(archive);
-			ConfigurationMetadataRepositoryJsonBuilder builder = ConfigurationMetadataRepositoryJsonBuilder.create();
-			ResourcePatternResolver applicationResourceLoader = new PathMatchingResourcePatternResolver(classLoader);
-			for (Resource r : applicationResourceLoader.getResources("classpath*:/META-INF/*spring-configuration-metadata.json")) {
-				builder.withJsonResource(r.getInputStream());
-			}
-			for (ConfigurationMetadataGroup group : builder.build().getAllGroups().values()) {
-				result.add(group);
-			}
+			Resource[] globalResources = new PathMatchingResourcePatternResolver(ApplicationConfigurationMetadataResolver.class.getClassLoader()).getResources(DATAFLOW_PROPERTIES);
+			loadWhiteLists(globalResources, globalWhiteListedClasses, globalWhiteListedProperties);
 		}
-		catch (Exception e) {
-			throw new RuntimeException("Exception trying to list configuration properties for application " + applicationResource, e);
+		catch (IOException e) {
+			throw new RuntimeException("Error reading global white list of configuration properties", e);
 		}
-		finally {
-			if (classLoader instanceof Closeable) {
-				try {
-					((Closeable) classLoader).close();
-				}
-				catch (IOException e) {
-					// ignore
-				}
-			}
-		}
-		return result;
+	}
+
+	public List<ConfigurationMetadataProperty> listProperties(Resource app) {
+		return listProperties(app, false);
 	}
 
 	/**
 	 * Return metadata about configuration properties that are documented via
 	 * <a href="http://docs.spring.io/spring-boot/docs/current/reference/html/configuration-metadata.html">
-	 * Spring Boot configuration metadata</a> and visible in an application.
+	 * Spring Boot configuration metadata</a> and visible in an app.
 	 *
-	 * @param applicationResource a Spring Cloud Stream application; typically a Boot uberjar,
-	 * but directories are supported as well
+	 * @param app a Spring Cloud Stream app; typically a Boot uberjar,
+	 *               but directories are supported as well
 	 */
-	public List<ConfigurationMetadataProperty> listProperties(Resource applicationResource) {
+	public List<ConfigurationMetadataProperty> listProperties(Resource app, boolean exhaustive) {
 		List<ConfigurationMetadataProperty> result = new ArrayList<>();
-		ClassLoader classLoader = null;
+		ClassLoader moduleClassLoader = null;
 		try {
-			File applicationFile = applicationResource.getFile();
-			Archive archive = applicationFile.isDirectory() ? new ExplodedArchive(applicationFile)
-					: new JarFileArchive(applicationFile);
-			classLoader = createClassLoader(archive);
+			File moduleFile = app.getFile();
+			Archive archive = moduleFile.isDirectory() ? new ExplodedArchive(moduleFile) : new JarFileArchive(moduleFile);
+			moduleClassLoader = createClassLoader(archive);
+			ResourcePatternResolver moduleResourceLoader = new PathMatchingResourcePatternResolver(moduleClassLoader);
+
+
+			Collection<String> whiteListedClasses = new HashSet<>(globalWhiteListedClasses);
+			Collection<String> whiteListedProperties = new HashSet<>(globalWhiteListedProperties);
+
+			loadWhiteLists(moduleResourceLoader.getResources(DATAFLOW_PROPERTIES), whiteListedClasses, whiteListedProperties);
+
+
 			ConfigurationMetadataRepositoryJsonBuilder builder = ConfigurationMetadataRepositoryJsonBuilder.create();
-			ResourcePatternResolver applicationResourceLoader = new PathMatchingResourcePatternResolver(classLoader);
-			for (Resource r : applicationResourceLoader.getResources("classpath*:/META-INF/*spring-configuration-metadata.json")) {
+			for (Resource r : moduleResourceLoader.getResources(CONFIGURATION_METADATA_PATTERN)) {
 				builder.withJsonResource(r.getInputStream());
 			}
-			for (ConfigurationMetadataProperty property : builder.build().getAllProperties().values()) {
-						result.add(property);
+
+			for (ConfigurationMetadataGroup group : builder.build().getAllGroups().values()) {
+				if (isMainGroup(group)) {
+					for (ConfigurationMetadataProperty property : group.getProperties().values()) {
+						result.add(unprefix(property));
+					}
+				}
+				else if (exhaustive || isWhiteListed(group, whiteListedClasses)) {
+					result.addAll(group.getProperties().values());
+				} // Props in the root group have an id that looks prefixed itself. Handle here
+				else if ("_ROOT_GROUP_".equals(group.getId())) {
+					for (ConfigurationMetadataProperty property : group.getProperties().values()) {
+						int lastDot = property.getId().lastIndexOf('.');
+						String prefix = lastDot > 0 ? property.getId().substring(0, lastDot) : "";
+						if (MAIN_SPRING_CLOUD_STREAM_APP_PREFIX.matcher(prefix).matches()) {
+							result.add(unprefix(property));
+						}
+						else if (isWhiteListed(property, whiteListedProperties)) {
+							result.add(property);
+						}
+					}
+				}
+				else { // Look for per property WL
+					for (ConfigurationMetadataProperty property : group.getProperties().values()) {
+						if (isWhiteListed(property, whiteListedProperties)) {
+							result.add(property);
+						}
+					}
+				}
 			}
+
 		}
 		catch (Exception e) {
-			throw new RuntimeException("Exception trying to list configuration properties for application " + applicationResource, e);
+			throw new RuntimeException("Exception trying to list configuration properties for application " + app, e);
 		}
 		finally {
-			if (classLoader instanceof Closeable) {
+			if (moduleClassLoader instanceof Closeable) {
 				try {
-					((Closeable) classLoader).close();
+					((Closeable) moduleClassLoader).close();
 				}
 				catch (IOException e) {
 					// ignore
@@ -124,13 +153,59 @@ public class ApplicationConfigurationMetadataResolver {
 			}
 		}
 		return result;
+	}
+
+	/**
+	 * For properties that are deemed to belong to the "main" group, return a copy that uses no qualifying prefix.
+	 */
+	private ConfigurationMetadataProperty unprefix(ConfigurationMetadataProperty original) {
+		ConfigurationMetadataProperty result = new ConfigurationMetadataProperty();
+		result.setDefaultValue(original.getDefaultValue());
+		result.setDeprecation(original.getDeprecation());
+		result.setDescription(original.getDescription());
+		result.setName(original.getName());
+		int lastDot = original.getId().lastIndexOf('.');
+		result.setId(original.getId().substring(lastDot + 1)); // removes prefix, will be -1+1=0 if no dot
+		result.setShortDescription(original.getShortDescription());
+		result.setType(original.getType());
+		return result;
+	}
+
+	/**
+	 * Loads white lists of properties and group classes and add them to the given collections.
+	 */
+	private void loadWhiteLists(Resource[] resources, Collection<String> classes, Collection<String> props) throws IOException {
+		for (Resource resource : resources) {
+			Properties properties = new Properties();
+			properties.load(resource.getInputStream());
+			classes.addAll(Arrays.asList(StringUtils.delimitedListToStringArray(properties.getProperty(CONFIGURATION_CLASSES), ",", " ")));
+			props.addAll(Arrays.asList(StringUtils.delimitedListToStringArray(properties.getProperty(CONFIGURATION_PROPERTIES), ",", " ")));
+		}
+	}
+
+	private boolean isMainGroup(ConfigurationMetadataGroup group) {
+		return MAIN_SPRING_CLOUD_STREAM_APP_PREFIX.matcher(group.getId()).matches();
+	}
+
+	/**
+	 * Return whether a single property has been white listed as being a "main" configuration property.
+	 */
+	private boolean isWhiteListed(ConfigurationMetadataProperty property, Collection<String> properties) {
+		return properties.contains(property.getId());
+	}
+
+	/**
+	 * Return whether a configuration property group (class) has been white listed as being a "main" group.
+	 */
+	private boolean isWhiteListed(ConfigurationMetadataGroup group, Collection<String> classes) {
+		Set<String> sourceTypes = group.getSources().keySet();
+		return !sourceTypes.isEmpty() && classes.containsAll(sourceTypes);
 	}
 
 	/**
 	 * Return a {@link ClassLoader} for accessing resources in the provided
 	 * {@link Archive}. The caller is responsible for disposing of the
 	 * class loader.
-	 *
 	 * @param archive the archive for which to return a class loader
 	 * @return class loader for the given archive
 	 * @throws Exception if the class loader cannot be created
@@ -155,4 +230,5 @@ public class ApplicationConfigurationMetadataResolver {
 			return createClassLoader(classPathArchives);
 		}
 	}
+
 }
