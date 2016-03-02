@@ -45,7 +45,6 @@ import org.springframework.core.io.Resource;
 /**
  * Attempts to fill in possible values after a {@literal --foo=prefix}
  * (syntactically valid) construct in the DSL.
- *
  * @author Eric Bottard
  * @author Mark Fisher
  */
@@ -59,14 +58,14 @@ public class ConfigurationPropertyValueHintExpansionStrategy implements Expansio
 	private ValueHintProvider[] valueHintProviders = new ValueHintProvider[0];
 
 	ConfigurationPropertyValueHintExpansionStrategy(AppRegistry appRegistry,
-			ApplicationConfigurationMetadataResolver metadataResolver) {
+	                                                ApplicationConfigurationMetadataResolver metadataResolver) {
 		this.appRegistry = appRegistry;
 		this.metadataResolver = metadataResolver;
 	}
 
 	@Override
 	public boolean addProposals(String text, StreamDefinition parseResult,
-			int detailLevel, List<CompletionProposal> collector) {
+	                            int detailLevel, List<CompletionProposal> collector) {
 		Set<String> propertyNames = new HashSet<>(parseResult.getDeploymentOrderIterator()
 				.next().getProperties().keySet());
 		propertyNames.removeAll(CompletionUtils.IMPLICIT_PARAMETER_NAMES);
@@ -96,8 +95,11 @@ public class ConfigurationPropertyValueHintExpansionStrategy implements Expansio
 
 		CompletionProposal.Factory proposals = expanding(text);
 
-		for (ConfigurationMetadataProperty property : metadataResolver.listProperties(appResource)) {
-			if (property.getId().equals(propertyName)) {
+		List<ConfigurationMetadataProperty> allProps = metadataResolver.listProperties(appResource, true);
+		List<ConfigurationMetadataProperty> whiteListedProps = metadataResolver.listProperties(appResource);
+
+		for (ConfigurationMetadataProperty property : allProps) {
+			if (CompletionUtils.isMatchingProperty(propertyName, property, whiteListedProps)) {
 				ClassLoader classLoader = null;
 				try {
 					File file = appResource.getFile();

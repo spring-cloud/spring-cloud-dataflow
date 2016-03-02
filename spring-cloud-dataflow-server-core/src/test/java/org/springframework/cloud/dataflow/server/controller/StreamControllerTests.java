@@ -70,6 +70,7 @@ import org.springframework.cloud.deployer.spi.app.AppInstanceStatus;
 import org.springframework.cloud.deployer.spi.app.AppStatus;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
+import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
@@ -95,6 +96,9 @@ public class StreamControllerTests {
 
 	@Autowired
 	private DeploymentIdRepository deploymentIdRepository;
+
+	@Autowired
+	private ApplicationConfigurationMetadataResolver metadataResolver;
 
 	private MockMvc mockMvc;
 
@@ -125,7 +129,7 @@ public class StreamControllerTests {
 	@Test(expected = IllegalArgumentException.class)
 	public void testConstructorMissingRepository() {
 		StreamDeploymentController deploymentController = new StreamDeploymentController(new InMemoryStreamDefinitionRepository(),
-				new InMemoryDeploymentIdRepository(), appRegistry, appDeployer);
+				new InMemoryDeploymentIdRepository(), appRegistry, appDeployer, metadataResolver);
 		new StreamDefinitionController(null, null, deploymentController, appDeployer, appRegistry);
 	}
 
@@ -137,7 +141,7 @@ public class StreamControllerTests {
 	@Test(expected = IllegalArgumentException.class)
 	public void testConstructorMissingDeployer() {
 		StreamDeploymentController deploymentController = new StreamDeploymentController(new InMemoryStreamDefinitionRepository(),
-				new InMemoryDeploymentIdRepository(), appRegistry, appDeployer);
+				new InMemoryDeploymentIdRepository(), appRegistry, appDeployer, metadataResolver);
 		new StreamDefinitionController(new InMemoryStreamDefinitionRepository(), new InMemoryDeploymentIdRepository(), deploymentController, null, appRegistry);
 	}
 
