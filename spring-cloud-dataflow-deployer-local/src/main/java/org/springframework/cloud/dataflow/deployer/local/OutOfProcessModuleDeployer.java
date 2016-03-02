@@ -61,7 +61,7 @@ import org.springframework.web.client.RestTemplate;
  * @author Marius Bogoevici
  */
 public class OutOfProcessModuleDeployer implements ModuleDeployer {
-	
+
 	private static final String APP_LAUNCHER = "spring-cloud-dataflow-app-launcher";
 
 	private String moduleLauncherPath;
@@ -140,8 +140,8 @@ public class OutOfProcessModuleDeployer implements ModuleDeployer {
 							.singletonMap(SERVER_PORT_KEY, String.valueOf(port))));
 				}
 
-				ProcessBuilder builder = new ProcessBuilder(properties.getJavaCmd(),
-						"-jar", moduleLauncherPath);
+				String[] command = getJavaCommand();
+				ProcessBuilder builder = new ProcessBuilder(command);
 				builder.environment().clear();
 				builder.environment().putAll(args);
 
@@ -162,6 +162,17 @@ public class OutOfProcessModuleDeployer implements ModuleDeployer {
 		}
 
 		return moduleDeploymentId;
+	}
+
+	private String[] getJavaCommand() {
+		String[] command = new String[properties.getJavaOpts().length + 3];
+		command[0] = properties.getJavaCmd();
+		for (int j=0; j<properties.getJavaOpts().length; j++) {
+			command[j+1] = properties.getJavaOpts()[j];
+		}
+		command[properties.getJavaOpts().length + 1] = "-jar";
+		command[properties.getJavaOpts().length + 2] = moduleLauncherPath;
+		return command;
 	}
 
 	private Map<String, String> mergeProperties(
@@ -245,9 +256,11 @@ public class OutOfProcessModuleDeployer implements ModuleDeployer {
 	public void setup() throws IOException {
 		File launcherFile = Files.createTempFile(APP_LAUNCHER, ".jar").toFile();
 		launcherFile.deleteOnExit();
-		FileCopyUtils.copy(new ClassPathResource(APP_LAUNCHER + ".jar").getInputStream(), new FileOutputStream(launcherFile));
+		FileCopyUtils.copy(new ClassPathResource(APP_LAUNCHER + ".jar").getInputStream(),
+				new FileOutputStream(launcherFile));
 		this.moduleLauncherPath = launcherFile.getAbsolutePath();
-		this.logPathRoot = Files.createTempDirectory(properties.getWorkingDirectoriesRoot(), "spring-cloud-data-flow-");
+		this.logPathRoot = Files.createTempDirectory(
+				properties.getWorkingDirectoriesRoot(), "spring-cloud-data-flow-");
 	}
 
 	@PreDestroy

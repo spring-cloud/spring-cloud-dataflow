@@ -52,6 +52,11 @@ public class OutOfProcessModuleDeployerProperties {
 	private String javaCmd = "java";
 
 	/**
+	 * The options to pass to the java virtual machine.
+	 */
+	private String[] javaOpts = new String[0];
+
+	/**
 	 * Additional properties to add to every module's command line
 	 */
 	private Map<String, String> sharedArgs = new LinkedHashMap<>();
@@ -62,6 +67,14 @@ public class OutOfProcessModuleDeployerProperties {
 
 	public void setJavaCmd(String javaCmd) {
 		this.javaCmd = javaCmd;
+	}
+
+	public String[] getJavaOpts() {
+		return javaOpts;
+	}
+
+	public void setJavaOpts(String[] javaOpts) {
+		this.javaOpts = javaOpts;
 	}
 
 	public boolean isUseOutOfProcess() {
