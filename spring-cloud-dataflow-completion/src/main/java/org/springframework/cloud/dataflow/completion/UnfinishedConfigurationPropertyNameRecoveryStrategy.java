@@ -22,9 +22,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.springframework.boot.configurationmetadata.ConfigurationMetadataGroup;
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
-import org.springframework.boot.configurationmetadata.ConfigurationMetadataRepository;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
@@ -36,10 +34,10 @@ import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.core.io.Resource;
 
+
 /**
  * Provides completions for the case where the user has started to type
  * an app configuration property name but it is not typed in full yet.
- *
  * @author Eric Bottard
  * @author Mark Fisher
  */
@@ -51,7 +49,7 @@ public class UnfinishedConfigurationPropertyNameRecoveryStrategy
 	private final ApplicationConfigurationMetadataResolver metadataResolver;
 
 	UnfinishedConfigurationPropertyNameRecoveryStrategy(AppRegistry appRegistry,
-			ApplicationConfigurationMetadataResolver metadataResolver) {
+	                                                    ApplicationConfigurationMetadataResolver metadataResolver) {
 		super(CheckPointedParseException.class, "file --foo", "file | bar --quick", "file --foo.", "file | bar --quick.");
 		this.appRegistry = appRegistry;
 		this.metadataResolver = metadataResolver;
@@ -101,28 +99,10 @@ public class UnfinishedConfigurationPropertyNameRecoveryStrategy
 
 		CompletionProposal.Factory proposals = expanding(safe);
 
-		Set<String> prefixes = new HashSet<>();
-		for (ConfigurationMetadataGroup group : metadataResolver.listPropertyGroups(jarFile)) {
-			String groupId = ConfigurationMetadataRepository.ROOT_GROUP.equals(group.getId()) ? "" : group.getId();
-			int lastDot = buffer.lastIndexOf('.');
-			String bufferWithoutEndingDot = lastDot > 0 ? buffer.substring(0, lastDot) : "";
-			if (bufferWithoutEndingDot.equals(groupId)) {
-				// User has typed in the group id, complete with property names
-				for (ConfigurationMetadataProperty property : group.getProperties().values()) {
-					if (!alreadyPresentOptions.contains(property.getId()) && property.getId().startsWith(buffer)) {
-						collector.add(proposals.withSeparateTokens("--" + property.getId()
-								+ "=", property.getShortDescription()));
-					}
-				}
-			}
-			else if (groupId.startsWith(buffer)) {
-				// User has typed in a substring of the the group id, complete till the next dot
-				int dot = groupId.indexOf('.', buffer.length());
-				String prefix = dot > 0 ? groupId.substring(0, dot) : groupId;
-				if (!prefixes.contains(prefix)) {
-					prefixes.add(prefix);
-					collector.add(proposals.withSeparateTokens("--" + prefix + ".", "Properties starting with '" + prefix + ".'"));
-				}
+		for (ConfigurationMetadataProperty property : metadataResolver.listProperties(jarFile)) {
+			if (!alreadyPresentOptions.contains(property.getId()) && property.getId().startsWith(buffer)) {
+				collector.add(proposals.withSeparateTokens("--" + property.getId()
+						+ "=", property.getShortDescription()));
 			}
 		}
 	}

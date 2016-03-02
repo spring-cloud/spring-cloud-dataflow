@@ -1,7 +1,14 @@
 {
+  "groups": [
+    {
+      "name": "spring.cloud.stream.app",
+      "type": "com.foo.LogProperties",
+      "sourceType": "com.foo.LogProperties"
+    }
+  ],
   "properties": [
     {
-      "name": "level",
+      "name": "spring.cloud.stream.app.level",
       "type": "java.lang.String",
       "description": "The logger level",
       "sourceType": "com.foo.LogProperties",
