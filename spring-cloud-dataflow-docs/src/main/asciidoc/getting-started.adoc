@@ -17,6 +17,23 @@ You need Java installed (Java 7 or better, we recommend Java 8) and to build you
 
 You also need to have link:http://redis.io/[Redis] installed and running if you plan on running a local system, or to run the included tests.
 
+== Running behind proxy
+
+If you run the Data Flow Server behind the proxy, then you can update the proxy configuration properties for Aether resolver either in `dataflow-server.yml` as:
+
+```
+aether:
+  proxy:
+    protocol:
+    host:
+    port:
+    auth:
+      username:
+      password:
+```
+By default, the protocol is set to use `http`. You can omit the auth properties if the proxy doesn't need username/password.
+These properties can also be specified as command line arguments like `--aether.proxy.host=<?> --aether.proxy.port=<?>` to the Data Flow server.
+
 [[getting-started-deploying-spring-cloud-dataflow]]
 == Deploying Spring Cloud Data Flow
 
@@ -34,6 +51,11 @@ wget http://repo.spring.io/milestone/org/springframework/cloud/spring-cloud-data
 
 ```
 $ java -jar spring-cloud-dataflow-server-local-1.0.0.BUILD-SNAPSHOT.jar
+```
+By default, this will start the local deployer that is `out-of-process`. If you want to use `in-process` deployer then
+
+```
+$ java -jar spring-cloud-dataflow-server-local-1.0.0.BUILD-SNAPSHOT.jar --deployer.out-of-process=false
 ```
 
 [start=3]
