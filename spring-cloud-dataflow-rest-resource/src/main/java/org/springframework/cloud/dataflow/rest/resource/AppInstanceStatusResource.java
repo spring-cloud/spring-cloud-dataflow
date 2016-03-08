@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2015-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,11 +21,12 @@ import java.util.Map;
 import org.springframework.hateoas.ResourceSupport;
 
 /**
- * REST representation for a ModuleInstanceStatus.
+ * REST representation for an AppInstanceStatus.
  *
  * @author Eric Bottard
+ * @author Mark Fisher
  */
-public class ModuleInstanceStatusResource extends ResourceSupport {
+public class AppInstanceStatusResource extends ResourceSupport {
 
 	private String instanceId;
 
@@ -33,11 +34,11 @@ public class ModuleInstanceStatusResource extends ResourceSupport {
 
 	private Map<String, String> attributes;
 
-	private ModuleInstanceStatusResource() {
+	private AppInstanceStatusResource() {
 		// noarg constructor for serialization
 	}
 
-	public ModuleInstanceStatusResource(String instanceId, String state, Map<String, String> attributes) {
+	public AppInstanceStatusResource(String instanceId, String state, Map<String, String> attributes) {
 		this.instanceId = instanceId;
 		this.state = state;
 		this.attributes = attributes;

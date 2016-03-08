@@ -21,7 +21,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
 import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistration;
 import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistry;
@@ -65,15 +64,15 @@ public class ModuleController {
 
 	private final ArtifactRegistry registry;
 
-	@Autowired
-	private ModuleResolver moduleResolver;
+	private final ModuleResolver moduleResolver;
 
-	@Autowired
 	private ModuleConfigurationMetadataResolver moduleConfigurationMetadataResolver;
 
-	@Autowired
-	public ModuleController(ArtifactRegistry registry) {
+	public ModuleController(ArtifactRegistry registry, ModuleResolver moduleResolver,
+			ModuleConfigurationMetadataResolver moduleConfigurationMetadataResolver) {
 		this.registry = registry;
+		this.moduleResolver = moduleResolver;
+		this.moduleConfigurationMetadataResolver = moduleConfigurationMetadataResolver;
 	}
 
 	/**

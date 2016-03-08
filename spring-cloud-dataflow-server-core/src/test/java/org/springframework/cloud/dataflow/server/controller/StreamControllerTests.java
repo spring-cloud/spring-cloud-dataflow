@@ -17,18 +17,19 @@
 package org.springframework.cloud.dataflow.server.controller;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.springframework.cloud.dataflow.module.DeploymentState.deployed;
-import static org.springframework.cloud.dataflow.module.DeploymentState.error;
-import static org.springframework.cloud.dataflow.module.DeploymentState.failed;
-import static org.springframework.cloud.dataflow.module.DeploymentState.partial;
-import static org.springframework.cloud.dataflow.module.DeploymentState.undeployed;
-import static org.springframework.cloud.dataflow.module.DeploymentState.unknown;
+import static org.springframework.cloud.deployer.spi.app.DeploymentState.deployed;
+import static org.springframework.cloud.deployer.spi.app.DeploymentState.error;
+import static org.springframework.cloud.deployer.spi.app.DeploymentState.failed;
+import static org.springframework.cloud.deployer.spi.app.DeploymentState.partial;
+import static org.springframework.cloud.deployer.spi.app.DeploymentState.undeployed;
+import static org.springframework.cloud.deployer.spi.app.DeploymentState.unknown;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -47,20 +48,20 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.cloud.dataflow.artifact.registry.InMemoryArtifactRegistry;
 import org.springframework.cloud.dataflow.core.BindingPropertyKeys;
 import org.springframework.cloud.dataflow.core.ModuleDefinition;
-import org.springframework.cloud.dataflow.core.ModuleDeploymentId;
-import org.springframework.cloud.dataflow.core.ModuleDeploymentRequest;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
-import org.springframework.cloud.dataflow.module.DeploymentState;
-import org.springframework.cloud.dataflow.module.ModuleStatus;
-import org.springframework.cloud.dataflow.module.deployer.ModuleDeployer;
 import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
 import org.springframework.cloud.dataflow.server.repository.InMemoryStreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
+import org.springframework.cloud.deployer.resource.maven.MavenProperties;
+import org.springframework.cloud.deployer.resource.maven.MavenResource;
+import org.springframework.cloud.deployer.spi.app.AppDeployer;
+import org.springframework.cloud.deployer.spi.app.AppStatus;
+import org.springframework.cloud.deployer.spi.app.DeploymentState;
+import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
@@ -89,8 +90,9 @@ public class StreamControllerTests {
 	private WebApplicationContext wac;
 
 	@Autowired
-	@Qualifier("processModuleDeployer")
-	private ModuleDeployer moduleDeployer;
+	private AppDeployer appDeployer;
+
+	private final MavenProperties mavenProperties = new MavenProperties();
 
 	@Before
 	public void setupMockMVC() {
@@ -106,18 +108,22 @@ public class StreamControllerTests {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testConstructorMissingRepository() {
-		StreamDeploymentController deploymentController = new StreamDeploymentController(new InMemoryStreamDefinitionRepository(), new InMemoryArtifactRegistry(), moduleDeployer);
-		new StreamDefinitionController(null, deploymentController, moduleDeployer);
+		StreamDeploymentController deploymentController = new StreamDeploymentController(
+				new InMemoryStreamDefinitionRepository(), new InMemoryArtifactRegistry(),
+				appDeployer, mavenProperties);
+		new StreamDefinitionController(null, deploymentController, appDeployer);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testConstructorMissingDeploymentController() {
-		new StreamDefinitionController(new InMemoryStreamDefinitionRepository(), null, moduleDeployer);
+		new StreamDefinitionController(new InMemoryStreamDefinitionRepository(), null, appDeployer);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testConstructorMissingDeployer() {
-		StreamDeploymentController deploymentController = new StreamDeploymentController(new InMemoryStreamDefinitionRepository(), new InMemoryArtifactRegistry(), moduleDeployer);
+		StreamDeploymentController deploymentController = new StreamDeploymentController(
+				new InMemoryStreamDefinitionRepository(), new InMemoryArtifactRegistry(),
+				appDeployer, mavenProperties);
 		new StreamDefinitionController(new InMemoryStreamDefinitionRepository(), deploymentController, null);
 	}
 
@@ -313,21 +319,22 @@ public class StreamControllerTests {
 		assertEquals("true", filterDefinition.getParameters().get(BindingPropertyKeys.INPUT_DURABLE_SUBSCRIPTION));
 		assertEquals("foo", filterDefinition.getParameters().get(BindingPropertyKeys.OUTPUT_DESTINATION));
 
-		ArgumentCaptor<ModuleDeploymentRequest> captor = ArgumentCaptor.forClass(ModuleDeploymentRequest.class);
-		verify(moduleDeployer).deploy(captor.capture());
-		ModuleDeploymentRequest request = captor.getValue();
+		ArgumentCaptor<AppDeploymentRequest> captor = ArgumentCaptor.forClass(AppDeploymentRequest.class);
+		verify(appDeployer).deploy(captor.capture());
+		AppDeploymentRequest request = captor.getValue();
 		assertThat(request.getDefinition().getName(), is("filter"));
-		assertThat(request.getCoordinates().getArtifactId(), is("filter-processor"));
+		assertThat(request.getResource(), instanceOf(MavenResource.class));
+		assertThat(((MavenResource) request.getResource()).getArtifactId(), is("filter-processor"));
 	}
 
 	@Test
 	public void testDestroyStream() throws Exception {
 		repository.save(new StreamDefinition("myStream", "time | log"));
 		assertEquals(1, repository.count());
-		ModuleStatus status = mock(ModuleStatus.class);
+		AppStatus status = mock(AppStatus.class);
 		when(status.getState()).thenReturn(DeploymentState.unknown);
-		when(moduleDeployer.status(ModuleDeploymentId.parse("myStream.time"))).thenReturn(status);
-		when(moduleDeployer.status(ModuleDeploymentId.parse("myStream.log"))).thenReturn(status);
+		when(appDeployer.status("myStream.time")).thenReturn(status);
+		when(appDeployer.status("myStream.log")).thenReturn(status);
 		mockMvc.perform(
 				delete("/streams/definitions/myStream").accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isOk());
@@ -339,10 +346,10 @@ public class StreamControllerTests {
 		repository.save(new StreamDefinition("myStream", "time | log"));
 		repository.save(new StreamDefinition("myStream1", "time | log"));
 		assertEquals(2, repository.count());
-		ModuleStatus status = mock(ModuleStatus.class);
+		AppStatus status = mock(AppStatus.class);
 		when(status.getState()).thenReturn(DeploymentState.unknown);
-		when(moduleDeployer.status(ModuleDeploymentId.parse("myStream.time"))).thenReturn(status);
-		when(moduleDeployer.status(ModuleDeploymentId.parse("myStream.log"))).thenReturn(status);
+		when(appDeployer.status("myStream.time")).thenReturn(status);
+		when(appDeployer.status("myStream.log")).thenReturn(status);
 		mockMvc.perform(
 				delete("/streams/definitions/myStream").accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isOk());
@@ -353,10 +360,10 @@ public class StreamControllerTests {
 	public void testDisplaySingleStream() throws Exception {
 		repository.save(new StreamDefinition("myStream", "time | log"));
 		assertEquals(1, repository.count());
-		ModuleStatus status = mock(ModuleStatus.class);
+		AppStatus status = mock(AppStatus.class);
 		when(status.getState()).thenReturn(DeploymentState.unknown);
-		when(moduleDeployer.status(ModuleDeploymentId.parse("myStream.time"))).thenReturn(status);
-		when(moduleDeployer.status(ModuleDeploymentId.parse("myStream.log"))).thenReturn(status);
+		when(appDeployer.status("myStream.time")).thenReturn(status);
+		when(appDeployer.status("myStream.log")).thenReturn(status);
 		mockMvc.perform(
 				get("/streams/definitions/myStream").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
@@ -378,13 +385,13 @@ public class StreamControllerTests {
 		mockMvc.perform(
 				post("/streams/deployments/myStream").accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isCreated());
-		ArgumentCaptor<ModuleDeploymentRequest> captor = ArgumentCaptor.forClass(ModuleDeploymentRequest.class);
-		verify(moduleDeployer, times(2)).deploy(captor.capture());
-		List<ModuleDeploymentRequest> requests = captor.getAllValues();
+		ArgumentCaptor<AppDeploymentRequest> captor = ArgumentCaptor.forClass(AppDeploymentRequest.class);
+		verify(appDeployer, times(2)).deploy(captor.capture());
+		List<AppDeploymentRequest> requests = captor.getAllValues();
 		assertEquals(2, requests.size());
-		ModuleDeploymentRequest logRequest = requests.get(0);
+		AppDeploymentRequest logRequest = requests.get(0);
 		assertThat(logRequest.getDefinition().getName(), is("log"));
-		ModuleDeploymentRequest timeRequest = requests.get(1);
+		AppDeploymentRequest timeRequest = requests.get(1);
 		assertThat(timeRequest.getDefinition().getName(), is("time"));
 	}
 
@@ -400,21 +407,21 @@ public class StreamControllerTests {
 								"module.log.consumer.trackHistory=true")
 						.accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isCreated());
-		ArgumentCaptor<ModuleDeploymentRequest> captor = ArgumentCaptor.forClass(ModuleDeploymentRequest.class);
-		verify(moduleDeployer, times(2)).deploy(captor.capture());
-		List<ModuleDeploymentRequest> requests = captor.getAllValues();
+		ArgumentCaptor<AppDeploymentRequest> captor = ArgumentCaptor.forClass(AppDeploymentRequest.class);
+		verify(appDeployer, times(2)).deploy(captor.capture());
+		List<AppDeploymentRequest> requests = captor.getAllValues();
 		assertEquals(2, requests.size());
-		ModuleDeploymentRequest logRequest = requests.get(0);
+		AppDeploymentRequest logRequest = requests.get(0);
 		assertThat(logRequest.getDefinition().getName(), is("log"));
-		Map<String, String> logDeploymentProps = logRequest.getDeploymentProperties();
+		Map<String, String> logDeploymentProps = logRequest.getEnvironmentProperties();
 		assertEquals(logDeploymentProps.get("spring.cloud.stream.bindings.input.trackHistory"), "true");
 		assertEquals(logDeploymentProps.get("spring.cloud.stream.instanceCount"), "2");
 		assertEquals(logDeploymentProps.get("spring.cloud.stream.bindings.input.partitioned"), "true");
 		assertEquals(logDeploymentProps.get("spring.cloud.stream.bindings.input.concurrency"), "3");
 		assertEquals(logDeploymentProps.get("count"), "2");
-		ModuleDeploymentRequest timeRequest = requests.get(1);
+		AppDeploymentRequest timeRequest = requests.get(1);
 		assertThat(timeRequest.getDefinition().getName(), is("time"));
-		Map<String, String> timeDeploymentProps = timeRequest.getDeploymentProperties();
+		Map<String, String> timeDeploymentProps = timeRequest.getEnvironmentProperties();
 		assertEquals(timeDeploymentProps.get("spring.cloud.stream.bindings.output.trackHistory"), "true");
 		assertEquals(timeDeploymentProps.get("spring.cloud.stream.bindings.output.partitionCount"), "2");
 		assertEquals(timeDeploymentProps.get("spring.cloud.stream.bindings.output.partitionKeyExpression"), "payload");

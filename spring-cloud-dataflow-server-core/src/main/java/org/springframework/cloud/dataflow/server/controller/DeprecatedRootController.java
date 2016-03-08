@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.dataflow.server.controller;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.dataflow.rest.resource.AppInstanceStatusResource;
 import org.springframework.cloud.dataflow.rest.resource.AppStatusResource;
 import org.springframework.cloud.dataflow.rest.resource.CompletionProposalsResource;
@@ -41,10 +42,10 @@ import org.springframework.web.util.UriComponents;
  * @author Patrick Peralta
  * @author Ilayaperumal Gopinathan
  * @author Glenn Renfro
- * @author Mark Fisher
  */
 @RestController
-public class RootController {
+@Deprecated
+public class DeprecatedRootController {
 
 	/**
 	 * Contains links pointing to controllers backing an entity type
@@ -57,7 +58,8 @@ public class RootController {
 	 *
 	 * @param entityLinks holder of links to controllers and their associated entity types
 	 */
-	public RootController(EntityLinks entityLinks) {
+	@Autowired
+	public DeprecatedRootController(EntityLinks entityLinks) {
 		this.entityLinks = entityLinks;
 	}
 

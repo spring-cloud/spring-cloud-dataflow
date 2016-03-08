@@ -22,7 +22,6 @@ import static org.springframework.hateoas.config.EnableHypermediaSupport.Hyperme
 import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistry;
 import org.springframework.cloud.dataflow.artifact.registry.InMemoryArtifactRegistry;
 import org.springframework.cloud.dataflow.completion.CompletionConfiguration;
-import org.springframework.cloud.dataflow.module.deployer.ModuleDeployer;
 import org.springframework.cloud.dataflow.server.config.ArtifactRegistryPopulator;
 import org.springframework.cloud.dataflow.server.controller.RestControllerAdvice;
 import org.springframework.cloud.dataflow.server.controller.StreamDefinitionController;
@@ -34,6 +33,9 @@ import org.springframework.cloud.dataflow.server.repository.InMemoryStreamDefini
 import org.springframework.cloud.dataflow.server.repository.InMemoryTaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
+import org.springframework.cloud.deployer.resource.maven.MavenProperties;
+import org.springframework.cloud.deployer.spi.app.AppDeployer;
+import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.cloud.task.repository.dao.MapTaskExecutionDao;
 import org.springframework.cloud.task.repository.dao.TaskExecutionDao;
@@ -57,6 +59,8 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupp
 @EnableWebMvc
 public class TestDependencies extends WebMvcConfigurationSupport {
 
+	private final MavenProperties mavenProperties = new MavenProperties();
+
 	@Bean
 	public RestControllerAdvice restControllerAdvice() {
 		return new RestControllerAdvice();
@@ -64,22 +68,22 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 
 	@Bean
 	public StreamDeploymentController streamDeploymentController(StreamDefinitionRepository repository, ArtifactRegistry registry) {
-		return new StreamDeploymentController(repository, registry, processModuleDeployer());
+		return new StreamDeploymentController(repository, registry, appDeployer(), mavenProperties);
 	}
 
 	@Bean
 	public StreamDefinitionController streamDefinitionController(StreamDefinitionRepository repository, StreamDeploymentController deploymentController) {
-		return new StreamDefinitionController(repository, deploymentController, processModuleDeployer());
+		return new StreamDefinitionController(repository, deploymentController, appDeployer());
 	}
 
 	@Bean
 	public TaskDeploymentController taskController(TaskDefinitionRepository repository, ArtifactRegistry registry) {
-		return new TaskDeploymentController(repository, registry, taskModuleDeployer());
+		return new TaskDeploymentController(repository, registry, taskLauncher(), mavenProperties);
 	}
 
 	@Bean
 	public TaskDefinitionController taskDefinitionController(TaskDefinitionRepository repository, ArtifactRegistry registry) {
-		return new TaskDefinitionController(repository, taskModuleDeployer());
+		return new TaskDefinitionController(repository, taskLauncher());
 	}
 
 	@Bean
@@ -98,13 +102,13 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	}
 
 	@Bean
-	public ModuleDeployer processModuleDeployer() {
-		return mock(ModuleDeployer.class);
+	public AppDeployer appDeployer() {
+		return mock(AppDeployer.class);
 	}
 
 	@Bean
-	public ModuleDeployer taskModuleDeployer() {
-		return mock(ModuleDeployer.class);
+	public TaskLauncher taskLauncher() {
+		return mock(TaskLauncher.class);
 	}
 
 	@Bean

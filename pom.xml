@@ -34,7 +34,6 @@
 		<module>spring-cloud-dataflow-configuration-metadata</module>
 		<module>spring-cloud-dataflow-artifact-registry</module>
 		<module>spring-cloud-dataflow-deployer-spi</module>
-		<module>spring-cloud-dataflow-deployer-local</module>
 		<module>spring-cloud-dataflow-core</module>
 		<module>spring-cloud-dataflow-rest-resource</module>
 		<module>spring-cloud-dataflow-server-core</module>

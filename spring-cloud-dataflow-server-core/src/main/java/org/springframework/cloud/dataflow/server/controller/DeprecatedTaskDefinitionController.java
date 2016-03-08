@@ -16,14 +16,15 @@
 
 package org.springframework.cloud.dataflow.server.controller;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistry;
 import org.springframework.cloud.dataflow.core.ModuleDeploymentId;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
+import org.springframework.cloud.dataflow.module.deployer.ModuleDeployer;
 import org.springframework.cloud.dataflow.rest.resource.TaskDefinitionResource;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
-import org.springframework.cloud.deployer.spi.task.TaskLauncher;
-import org.springframework.cloud.deployer.spi.task.TaskStatus;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.ExposesResourceFor;
@@ -44,18 +45,21 @@ import org.springframework.web.bind.annotation.RestController;
  * @author Michael Minella
  * @author Marius Bogoevici
  * @author Glenn Renfro
- * @author Mark Fisher
  */
 @RestController
 @RequestMapping("/tasks/definitions")
 @ExposesResourceFor(TaskDefinitionResource.class)
-public class TaskDefinitionController {
+@Deprecated
+public class DeprecatedTaskDefinitionController {
 
 	private final Assembler taskAssembler = new Assembler();
 
+	@Autowired
 	private TaskDefinitionRepository repository;
 
-	private TaskLauncher taskLauncher;
+	@Autowired
+	@Qualifier("taskModuleDeployer")
+	private ModuleDeployer moduleDeployer;
 
 	/**
 	 * Creates a {@code TaskDefinitionController} that delegates
@@ -65,14 +69,15 @@ public class TaskDefinitionController {
 	 * </ul>
 	 *
 	 * @param repository the repository this controller will use for task CRUD operations.
-	 * @param taskLauncher the TaskLauncher this controller will use to launch task apps.
+	 * @param deployer the deployer this controller will use to deploy/launch task modules.
 	 */
-	public TaskDefinitionController(TaskDefinitionRepository repository,
-			TaskLauncher taskLauncher) {
+	@Autowired
+	public DeprecatedTaskDefinitionController(TaskDefinitionRepository repository,
+									@Qualifier("taskModuleDeployer") ModuleDeployer deployer) {
 		Assert.notNull(repository, "repository must not be null");
-		Assert.notNull(taskLauncher, "taskLauncher must not be null");
+		Assert.notNull(deployer, "deployer must not be null");
 		this.repository = repository;
-		this.taskLauncher = taskLauncher;
+		this.moduleDeployer = deployer;
 	}
 
 	/**
@@ -122,7 +127,7 @@ public class TaskDefinitionController {
 	class Assembler extends ResourceAssemblerSupport<TaskDefinition, TaskDefinitionResource> {
 
 		public Assembler() {
-			super(TaskDefinitionController.class, TaskDefinitionResource.class);
+			super(DeprecatedTaskDefinitionController.class, TaskDefinitionResource.class);
 		}
 
 		@Override
@@ -136,9 +141,7 @@ public class TaskDefinitionController {
 					ModuleDeploymentId.fromModuleDefinition(taskDefinition.getModuleDefinition());
 			TaskDefinitionResource taskDefinitionResource = new TaskDefinitionResource(taskDefinition.getName(),
 					taskDefinition.getDslText());
-			TaskStatus status = taskLauncher.status(id.getLabel().toString());
-			String state = (status != null) ? status.getState().name() : "unknown";
-			taskDefinitionResource.setStatus(state);
+			taskDefinitionResource.setStatus(moduleDeployer.status(id).getState().name());
 			return taskDefinitionResource;
 		}
 	}

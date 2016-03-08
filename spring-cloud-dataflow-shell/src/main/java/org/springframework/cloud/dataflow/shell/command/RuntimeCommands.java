@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2015-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,8 +33,8 @@ import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.dataflow.rest.client.RuntimeOperations;
-import org.springframework.cloud.dataflow.rest.resource.ModuleInstanceStatusResource;
-import org.springframework.cloud.dataflow.rest.resource.ModuleStatusResource;
+import org.springframework.cloud.dataflow.rest.resource.AppInstanceStatusResource;
+import org.springframework.cloud.dataflow.rest.resource.AppStatusResource;
 import org.springframework.cloud.dataflow.shell.config.DataFlowShell;
 import org.springframework.shell.core.CommandMarker;
 import org.springframework.shell.core.annotation.CliAvailabilityIndicator;
@@ -48,9 +48,10 @@ import org.springframework.shell.table.Tables;
 import org.springframework.stereotype.Component;
 
 /**
- * Commands for displaying the runtime state of deployed modules.
+ * Commands for displaying the runtime state of deployed apps.
  *
  * @author Eric Bottard
+ * @author Mark Fisher
  */
 @Component
 public class RuntimeCommands implements CommandMarker {
@@ -96,29 +97,29 @@ public class RuntimeCommands implements CommandMarker {
 		int line = 1;
 		// Optimise for the 1 module case, which is likely less resource intensive on the server
 		// than client side filtering
-		Iterable<ModuleStatusResource> statuses;
+		Iterable<AppStatusResource> statuses;
 		if (filter != null && filter.size() == 1 && !filter.iterator().next().endsWith(".*")) {
 			statuses = Collections.singleton(runtimeOperations().status(filter.iterator().next()));
 		}
 		else {
 			statuses = runtimeOperations().status();
 		}
-		for (ModuleStatusResource moduleStatusResource : statuses) {
-			if (filter != null && !shouldRetain(filter, moduleStatusResource)) {
+		for (AppStatusResource appStatusResource : statuses) {
+			if (filter != null && !shouldRetain(filter, appStatusResource)) {
 				continue;
 			}
 			modelBuilder.addRow()
-					.addValue(moduleStatusResource.getModuleDeploymentId())
-					.addValue(moduleStatusResource.getState())
-					.addValue(moduleStatusResource.getInstances().getContent().size());
+					.addValue(appStatusResource.getDeploymentId())
+					.addValue(appStatusResource.getState())
+					.addValue(appStatusResource.getInstances().getContent().size());
 			splits.add(line);
 			line++;
 			if (!summary) {
-				for (ModuleInstanceStatusResource moduleInstanceStatusResource : moduleStatusResource.getInstances()) {
+				for (AppInstanceStatusResource appInstanceStatusResource : appStatusResource.getInstances()) {
 					modelBuilder.addRow()
-							.addValue(moduleInstanceStatusResource.getInstanceId())
-							.addValue(moduleInstanceStatusResource.getState())
-							.addValue(moduleInstanceStatusResource.getAttributes());
+							.addValue(appInstanceStatusResource.getInstanceId())
+							.addValue(appInstanceStatusResource.getState())
+							.addValue(appInstanceStatusResource.getAttributes());
 					line++;
 				}
 			}
@@ -147,16 +148,16 @@ public class RuntimeCommands implements CommandMarker {
 		return builder.build();
 	}
 
-	private boolean shouldRetain(Set<String> filter, ModuleStatusResource moduleStatusResource) {
-		String moduleDeploymentId = moduleStatusResource.getModuleDeploymentId();
-		boolean directMatch = filter.contains(moduleDeploymentId);
+	private boolean shouldRetain(Set<String> filter, AppStatusResource appStatusResource) {
+		String deploymentId = appStatusResource.getDeploymentId();
+		boolean directMatch = filter.contains(deploymentId);
 		if (directMatch) {
 			return true;
 		}
 		for (String candidate : filter) {
 			if (candidate.endsWith(".*")) {
 				String pattern = candidate.substring(0, candidate.length() - "*".length());
-				if (moduleDeploymentId.startsWith(pattern)) {
+				if (deploymentId.startsWith(pattern)) {
 					return true;
 				}
 			}

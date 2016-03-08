@@ -19,7 +19,6 @@ package org.springframework.cloud.dataflow.server.controller;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.endpoint.mvc.MetricsMvcEndpoint;
 import org.springframework.boot.actuate.metrics.Metric;
 import org.springframework.boot.actuate.metrics.repository.MetricRepository;
@@ -53,7 +52,6 @@ public class CounterController {
 
 	public static final String COUNTER_PREFIX = "counter.";
 
-	@Autowired
 	private MetricRepository metricRepository;
 
 	private final ResourceAssembler<Metric<Double>, CounterResource> counterResourceAssembler =
