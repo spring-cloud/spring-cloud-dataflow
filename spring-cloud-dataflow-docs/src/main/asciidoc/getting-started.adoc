@@ -29,14 +29,46 @@ You also need to have link:http://redis.io/[Redis] installed and running if you 
 wget http://repo.spring.io/milestone/org/springframework/cloud/spring-cloud-dataflow-server-local/1.0.0.BUILD-SNAPSHOT/spring-cloud-dataflow-server-local-1.0.0.BUILD-SNAPSHOT.jar
 wget http://repo.spring.io/milestone/org/springframework/cloud/spring-cloud-dataflow-shell/1.0.0.BUILD-SNAPSHOT/spring-cloud-dataflow-shell-1.0.0.BUILD-SNAPSHOT.jar
 ```
+
 [start=2]
+1. Running behind proxy/custom maven settings (remote repositories etc.,)
+
+If you run the Data Flow Server behind the proxy and want to override specific maven configuration properties, you need to specify those properties as command line arguments
+when starting the Data Flow Server.
+For instance,
+```
+$ java -jar spring-cloud-dataflow-server-local-1.0.0.BUILD-SNAPSHOT.jar --maven.localRepository=mylocal --maven.remoteRepositories=repo1,repo2 --maven.offline=true
+--maven.proxy.protocol=https --maven.proxy.host=host1 --maven.proxy.port=8090 --maven.proxy.non_proxy_hosts='host2|host3' --maven.proxy.auth.username=user1 --maven.proxy.auth.password=passwd
+```
+By default, the protocol is set to use `http`. You can omit the auth properties if the proxy doesn't need username/password.
+By default, the maven `localRepository` is set to use `${user.home}/.m2/repository/` and the remote repositories uses `https://repo.spring.io/libs-snapshot`
+
+You can also use environment variables to specify the maven/proxy properties:
+```
+export MAVEN_LOCAL_REPOSITORY=mylocalMavenRepo
+export MAVEN_REMOTE_REPOSITORIES=repo1,repo2
+export MAVEN_OFFLINE=true
+export MAVEN_PROXY_PROTOCOL=https
+export MAVEN_PROXY_HOST=host1
+export MAVEN_PROXY_PORT=8090
+export MAVEN_PROXY_NON_PROXY_HOSTS='host2|host3'
+export MAVEN_PROXY_AUTH_USERNAME=user1
+export MAVEN_PROXY_AUTH_PASSWORD=passwd
+```
+
+[start=3]
 1. launch the Data Flow Server:
 
 ```
 $ java -jar spring-cloud-dataflow-server-local-1.0.0.BUILD-SNAPSHOT.jar
 ```
+By default, this will start the local deployer that is `out-of-process`. If you want to use `in-process` deployer then
 
-[start=3]
+```
+$ java -jar spring-cloud-dataflow-server-local-1.0.0.BUILD-SNAPSHOT.jar --deployer.out-of-process=false
+```
+
+[start=4]
 1. launch the shell:
 
 ```
