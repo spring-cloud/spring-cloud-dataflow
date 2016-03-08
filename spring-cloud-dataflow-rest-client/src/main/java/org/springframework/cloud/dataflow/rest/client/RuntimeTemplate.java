@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2015-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package org.springframework.cloud.dataflow.rest.client;
 
-import org.springframework.cloud.dataflow.rest.resource.ModuleStatusResource;
+import org.springframework.cloud.dataflow.rest.resource.AppStatusResource;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.ResourceSupport;
@@ -26,34 +26,35 @@ import org.springframework.web.client.RestTemplate;
  * Implementation for {@link RuntimeOperations}.
  *
  * @author Eric Bottard
+ * @author Mark Fisher
  */
 public class RuntimeTemplate implements RuntimeOperations {
 
 	private final RestTemplate restTemplate;
 
 	/**
-	 * Uri template for accessing status of all modules.
+	 * Uri template for accessing status of all apps.
 	 */
-	private final Link moduleStatusesUriTemplate;
+	private final Link appStatusesUriTemplate;
 
 	/**
-	 * Uri template for accessing status of a single module.
+	 * Uri template for accessing status of a single app.
 	 */
-	private final Link moduleStatusUriTemplate;
+	private final Link appStatusUriTemplate;
 
 	RuntimeTemplate(RestTemplate restTemplate, ResourceSupport resources) {
 		this.restTemplate = restTemplate;
-		this.moduleStatusesUriTemplate = resources.getLink("runtime/modules");
-		this.moduleStatusUriTemplate = resources.getLink("runtime/modules/module");
+		this.appStatusesUriTemplate = resources.getLink("runtime/modules");
+		this.appStatusUriTemplate = resources.getLink("runtime/modules/module");
 	}
 
 	@Override
-	public PagedResources<ModuleStatusResource> status() {
-		return restTemplate.getForObject(moduleStatusesUriTemplate.expand().getHref(), ModuleStatusResource.Page.class);
+	public PagedResources<AppStatusResource> status() {
+		return restTemplate.getForObject(appStatusesUriTemplate.expand().getHref(), AppStatusResource.Page.class);
 	}
 
 	@Override
-	public ModuleStatusResource status(String moduleDeploymentId) {
-		return restTemplate.getForObject(moduleStatusUriTemplate.expand(moduleDeploymentId).getHref(), ModuleStatusResource.class);
+	public AppStatusResource status(String deploymentId) {
+		return restTemplate.getForObject(appStatusUriTemplate.expand(deploymentId).getHref(), AppStatusResource.class);
 	}
 }

@@ -19,7 +19,6 @@ package org.springframework.cloud.dataflow.server.controller;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.dataflow.completion.CompletionProposal;
 import org.springframework.cloud.dataflow.completion.StreamCompletionProvider;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
@@ -45,7 +44,6 @@ public class CompletionController {
 
 	private Assembler assembler = new Assembler();
 
-	@Autowired
 	public CompletionController(StreamCompletionProvider completionProvider) {
 		this.completionProvider = completionProvider;
 	}

@@ -19,23 +19,21 @@ package org.springframework.cloud.dataflow.server.controller;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistration;
 import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistry;
 import org.springframework.cloud.dataflow.core.ArtifactCoordinates;
 import org.springframework.cloud.dataflow.core.ArtifactType;
 import org.springframework.cloud.dataflow.core.ModuleDefinition;
+import org.springframework.cloud.dataflow.core.ModuleDeploymentRequest;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.module.deployer.ModuleDeployer;
 import org.springframework.cloud.dataflow.rest.resource.TaskDeploymentResource;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
-import org.springframework.cloud.deployer.resource.maven.MavenProperties;
-import org.springframework.cloud.deployer.resource.maven.MavenResource;
-import org.springframework.cloud.deployer.spi.core.AppDefinition;
-import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
-import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
@@ -53,23 +51,25 @@ import org.springframework.web.bind.annotation.RestController;
  * @author Michael Minella
  * @author Marius Bogoevici
  * @author Glenn Renfro
- * @author Mark Fisher
  */
 @RestController
 @RequestMapping("/tasks/deployments")
 @ExposesResourceFor(TaskDeploymentResource.class)
-public class TaskDeploymentController {
+@Deprecated
+public class DeprecatedTaskDeploymentController {
 
-	private static final String DEFAULT_TASK_DATASOURCE_URL = "jdbc:h2:tcp://localhost:19092/mem:dataflow";
+	private final String DEFAULT_TASK_DATASOURCE_URL = "jdbc:h2:tcp://localhost:19092/mem:dataflow";
 
-	private static final String DEFAULT_TASK_DATASOURCE_USER_NAME = "sa";
+	private final String DEFAULT_TASK_DATASOURCE_USER_NAME = "sa";
 
-	private static final String DEFAULT_TASK_DATASOURCE_DRIVER_CLASS_NAME = "org.h2.Driver";
+	private final String DEFAULT_TASK_DATASOURCE_DRIVER_CLASS_NAME = "org.h2.Driver";
 
+	@Autowired
+	private TaskDefinitionRepository repository;
 
-	private final TaskDefinitionRepository repository;
-
-	private final TaskLauncher taskLauncher;
+	@Autowired
+	@Qualifier("taskModuleDeployer")
+	private ModuleDeployer moduleDeployer;
 
 	@Value("${spring.datasource.url:#{null}}")
 	private String dataSourceUrl;
@@ -89,27 +89,21 @@ public class TaskDeploymentController {
 	private final ArtifactRegistry registry;
 
 	/**
-	 * Properties for the resolution of Maven artifacts.
-	 */
-	private final MavenProperties mavenProperties;
-
-	/**
-	 * Creates a {@code TaskDeploymentController} that delegates launching
-	 * operations to the provided {@link TaskLauncher}
+	 * Creates a {@code TaskDeploymentController} that delegates deployment/launching
+	 * operations to the provided {@link ModuleDeployer}
 	 * @param repository the repository this controller will use for task CRUD operations.
-	 * @param registry artifact registry this controller will use to look up app coordinates.
-	 * @param taskLauncher the launcher this controller will use to launch task apps.
-	 * @param mavenProperties  properties for the resolution of Maven artifacts
+	 * @param registry artifact registry this controller will use to look up modules.
+	 * @param deployer the deployer this controller will use to deploy/launch task modules.
 	 */
-	public TaskDeploymentController(TaskDefinitionRepository repository, ArtifactRegistry registry,
-			TaskLauncher taskLauncher, MavenProperties mavenProperties) {
+	@Autowired
+	public DeprecatedTaskDeploymentController(TaskDefinitionRepository repository, ArtifactRegistry registry,
+					@Qualifier("taskModuleDeployer") ModuleDeployer deployer) {
 		Assert.notNull(repository, "repository must not be null");
 		Assert.notNull(registry, "registry must not be null");
-		Assert.notNull(taskLauncher, "TaskLauncher must not be null");
+		Assert.notNull(deployer, "deployer must not be null");
 		this.repository = repository;
 		this.registry = registry;
-		this.taskLauncher = taskLauncher;
-		this.mavenProperties = mavenProperties;
+		this.moduleDeployer = deployer;
 	}
 
 	/**
@@ -142,10 +136,8 @@ public class TaskDeploymentController {
 		deploymentProperties.put(ModuleDeployer.GROUP_DEPLOYMENT_ID, taskDefinition.getName()
 				+ "-" + System.currentTimeMillis());
 
-		AppDefinition definition = new AppDefinition(module.getLabel(), module.getParameters());
-		MavenResource resource = MavenResource.parse(coordinates.toString(), mavenProperties);
-		AppDeploymentRequest request = new AppDeploymentRequest(definition, resource, deploymentProperties);
-		this.taskLauncher.launch(request);
+		this.moduleDeployer.deploy(
+				new ModuleDeploymentRequest(module, coordinates, deploymentProperties));
 	}
 
 	private ModuleDefinition updateTaskProperties(ModuleDefinition moduleDefinition, String taskDefinitionName) {

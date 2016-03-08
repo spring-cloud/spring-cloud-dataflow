@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2016 the original author or authors.
+ * Copyright 2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,16 +22,18 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cloud.dataflow.core.ModuleDefinition;
 import org.springframework.cloud.dataflow.core.ModuleDeploymentId;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
+import org.springframework.cloud.dataflow.module.DeploymentState;
+import org.springframework.cloud.dataflow.module.ModuleStatus;
+import org.springframework.cloud.dataflow.module.deployer.ModuleDeployer;
 import org.springframework.cloud.dataflow.rest.resource.StreamDefinitionResource;
 import org.springframework.cloud.dataflow.server.repository.DuplicateStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.NoSuchStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
-import org.springframework.cloud.deployer.spi.app.AppDeployer;
-import org.springframework.cloud.deployer.spi.app.AppStatus;
-import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.ExposesResourceFor;
@@ -49,7 +51,6 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * Controller for operations on {@link StreamDefinition}. This
  * includes CRUD and optional deployment operations.
- *
  * @author Eric Bottard
  * @author Mark Fisher
  * @author Patrick Peralta
@@ -58,9 +59,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/streams/definitions")
 @ExposesResourceFor(StreamDefinitionResource.class)
-public class StreamDefinitionController {
+@Deprecated
+public class DeprecatedStreamDefinitionController {
 
-	private static final Logger logger = LoggerFactory.getLogger(StreamDefinitionController.class);
+	private static final Logger logger = LoggerFactory.getLogger(DeprecatedStreamDefinitionController.class);
 
 	/**
 	 * The repository this controller will use for stream CRUD operations.
@@ -70,7 +72,7 @@ public class StreamDefinitionController {
 	/**
 	 * The deployer this controller will use to compute stream deployment status.
 	 */
-	private final AppDeployer deployer;
+	private final ModuleDeployer deployer;
 
 	/**
 	 * Assembler for {@link StreamDefinitionResource} objects.
@@ -80,21 +82,22 @@ public class StreamDefinitionController {
 	/**
 	 * This deployment controller is used as a delegate when stream creation is immediately followed by deployment.
 	 */
-	private final StreamDeploymentController deploymentController;
+	private final DeprecatedStreamDeploymentController deploymentController;
 
 	/**
 	 * Create a {@code StreamDefinitionController} that delegates
 	 * <ul>
 	 * <li>CRUD operations to the provided {@link StreamDefinitionRepository}</li>
-	 * <li>deployment operations to the provided {@link StreamDeploymentController}</li>
-	 * <li>deployment status computation to the provided {@link AppDeployer}</li>
+	 * <li>deployment operations to the provided {@link DeprecatedStreamDeploymentController}</li>
+	 * <li>deployment status computation to the provided {@link ModuleDeployer}</li>
 	 * </ul>
 	 * @param repository           the repository this controller will use for stream CRUD operations
 	 * @param deploymentController the deployment controller to delegate deployment operations
 	 * @param deployer             the deployer this controller will use to compute deployment status
 	 */
-	public StreamDefinitionController(StreamDefinitionRepository repository,
-			StreamDeploymentController deploymentController, AppDeployer deployer) {
+	@Autowired
+	public DeprecatedStreamDefinitionController(StreamDefinitionRepository repository, DeprecatedStreamDeploymentController deploymentController,
+	                                  @Qualifier("processModuleDeployer") ModuleDeployer deployer) {
 		Assert.notNull(repository, "repository must not be null");
 		Assert.notNull(deploymentController, "deploymentController must not be null");
 		Assert.notNull(deployer, "deployer must not be null");
@@ -112,7 +115,7 @@ public class StreamDefinitionController {
 	@RequestMapping(value = "", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
 	public PagedResources<StreamDefinitionResource> list(Pageable pageable,
-			PagedResourcesAssembler<StreamDefinition> assembler) {
+	                                                     PagedResourcesAssembler<StreamDefinition> assembler) {
 		return assembler.toResource(repository.findAll(pageable), streamDefinitionAssembler);
 	}
 
@@ -186,7 +189,7 @@ public class StreamDefinitionController {
 		Set<DeploymentState> moduleStates = EnumSet.noneOf(DeploymentState.class);
 		StreamDefinition stream = repository.findOne(name);
 		for (ModuleDefinition module : stream.getModuleDefinitions()) {
-			AppStatus status = deployer.status(ModuleDeploymentId.fromModuleDefinition(module).toString());
+			ModuleStatus status = deployer.status(ModuleDeploymentId.fromModuleDefinition(module));
 			moduleStates.add(status.getState());
 		}
 
@@ -227,7 +230,7 @@ public class StreamDefinitionController {
 	class Assembler extends ResourceAssemblerSupport<StreamDefinition, StreamDefinitionResource> {
 
 		public Assembler() {
-			super(StreamDefinitionController.class, StreamDefinitionResource.class);
+			super(DeprecatedStreamDefinitionController.class, StreamDefinitionResource.class);
 		}
 
 		@Override

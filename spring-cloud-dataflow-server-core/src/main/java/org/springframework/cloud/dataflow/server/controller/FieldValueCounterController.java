@@ -19,7 +19,6 @@ package org.springframework.cloud.dataflow.server.controller;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.endpoint.mvc.MetricsMvcEndpoint;
 import org.springframework.cloud.dataflow.rest.resource.FieldValueCounterResource;
 import org.springframework.cloud.dataflow.rest.resource.MetricResource;
@@ -49,7 +48,6 @@ public class FieldValueCounterController {
 
 	private final FieldValueCounterRepository repository;
 
-	@Autowired
 	public FieldValueCounterController(FieldValueCounterRepository repository) {
 		this.repository = repository;
 	}

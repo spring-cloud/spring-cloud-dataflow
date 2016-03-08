@@ -16,7 +16,9 @@
 
 package org.springframework.cloud.dataflow.server.controller;
 
+import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -32,19 +34,20 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistration;
 import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistry;
 import org.springframework.cloud.dataflow.artifact.registry.InMemoryArtifactRegistry;
 import org.springframework.cloud.dataflow.core.ArtifactCoordinates;
 import org.springframework.cloud.dataflow.core.ArtifactType;
-import org.springframework.cloud.dataflow.core.ModuleDeploymentRequest;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
-import org.springframework.cloud.dataflow.module.deployer.ModuleDeployer;
 import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
 import org.springframework.cloud.dataflow.server.repository.InMemoryTaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
+import org.springframework.cloud.deployer.resource.maven.MavenProperties;
+import org.springframework.cloud.deployer.resource.maven.MavenResource;
+import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
+import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
@@ -74,8 +77,9 @@ public class TaskControllerTests {
 	private WebApplicationContext wac;
 
 	@Autowired
-	@Qualifier("taskModuleDeployer")
-	private ModuleDeployer moduleDeployer;
+	private TaskLauncher taskLauncher;
+
+	private final MavenProperties mavenProperties = new MavenProperties();
 
 	@Before
 	public void setupMockMVC() {
@@ -91,22 +95,23 @@ public class TaskControllerTests {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testTaskDeploymentControllerConstructorMissingRepository() {
-		new TaskDeploymentController(null, new InMemoryArtifactRegistry(), moduleDeployer);
+		new TaskDeploymentController(null, new InMemoryArtifactRegistry(), taskLauncher, mavenProperties);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testTaskDeploymentControllerConstructorMissingRegistry() {
-		new TaskDeploymentController(new InMemoryTaskDefinitionRepository(), null, moduleDeployer);
+		new TaskDeploymentController(new InMemoryTaskDefinitionRepository(), null, taskLauncher, mavenProperties);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testTaskDeploymentControllerConstructorMissingDeployer() {
-		new TaskDeploymentController(new InMemoryTaskDefinitionRepository(), new InMemoryArtifactRegistry(), null);
+		new TaskDeploymentController(new InMemoryTaskDefinitionRepository(),
+				new InMemoryArtifactRegistry(), null, mavenProperties);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testTaskDefinitionControllerConstructorMissingRepository() {
-		new TaskDefinitionController(null, moduleDeployer);
+		new TaskDefinitionController(null, taskLauncher);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
@@ -207,7 +212,7 @@ public class TaskControllerTests {
 	}
 
 	@Test
-	public void testDeploy() throws Exception {
+	public void testLaunch() throws Exception {
 		repository.save(new TaskDefinition("myTask", "foo"));
 		ArtifactCoordinates coordinates = ArtifactCoordinates.parse("org.springframework.cloud:foo:1");
 		ArtifactRegistration registration = new ArtifactRegistration("foo", ArtifactType.task, coordinates);
@@ -217,12 +222,16 @@ public class TaskControllerTests {
 				post("/tasks/deployments/{name}", "myTask").accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isCreated());
 
-		ArgumentCaptor<ModuleDeploymentRequest> argumentCaptor = ArgumentCaptor.forClass(ModuleDeploymentRequest.class);
-		verify(this.moduleDeployer).deploy(argumentCaptor.capture());
+		ArgumentCaptor<AppDeploymentRequest> argumentCaptor = ArgumentCaptor.forClass(AppDeploymentRequest.class);
+		verify(this.taskLauncher).launch(argumentCaptor.capture());
 
-		ModuleDeploymentRequest result = argumentCaptor.getValue();
-		assertEquals(1, result.getCount());
-		assertEquals(coordinates, result.getCoordinates());
-		assertEquals("myTask", result.getDefinition().getParameters().get("spring.cloud.task.name"));
+		AppDeploymentRequest request = argumentCaptor.getValue();
+		assertThat(request.getResource(), instanceOf(MavenResource.class));
+		MavenResource mavenResource = (MavenResource) request.getResource();
+		assertEquals(coordinates.getGroupId(), mavenResource.getGroupId());
+		assertEquals(coordinates.getArtifactId(), mavenResource.getArtifactId());
+		assertEquals(coordinates.getClassifier(), mavenResource.getClassifier());
+		assertEquals(coordinates.getExtension(), mavenResource.getExtension());
+		assertEquals("myTask", request.getDefinition().getProperties().get("spring.cloud.task.name"));
 	}
 }

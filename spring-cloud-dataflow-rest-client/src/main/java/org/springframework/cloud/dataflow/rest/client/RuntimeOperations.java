@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2015-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,23 +16,24 @@
 
 package org.springframework.cloud.dataflow.rest.client;
 
-import org.springframework.cloud.dataflow.rest.resource.ModuleStatusResource;
+import org.springframework.cloud.dataflow.rest.resource.AppStatusResource;
 import org.springframework.hateoas.PagedResources;
 
 /**
- * Defines operations available for obtaining information about deployed modules.
+ * Defines operations available for obtaining information about deployed apps.
  *
  * @author Eric Bottard
+ * @author Mark Fisher
  */
 public interface RuntimeOperations {
 
 	/**
-	 * Return runtime information about all deployed modules.
+	 * Return runtime information about all deployed apps.
 	 */
-	PagedResources<ModuleStatusResource> status();
+	PagedResources<AppStatusResource> status();
 
 	/**
-	 * Return runtime information about a single module deployment.
+	 * Return runtime information about a single app deployment.
 	 */
-	ModuleStatusResource status(String moduleDeploymentId);
+	AppStatusResource status(String deploymentId);
 }

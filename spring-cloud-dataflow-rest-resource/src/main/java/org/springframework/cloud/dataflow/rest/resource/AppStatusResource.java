@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2015-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,49 +21,51 @@ import org.springframework.hateoas.ResourceSupport;
 import org.springframework.hateoas.Resources;
 
 /**
- * REST representation of a ModuleStatus.
+ * REST representation of an app status.
  *
  * @author Eric Bottard
+ * @author Mark Fisher
  */
-public class ModuleStatusResource extends ResourceSupport {
+public class AppStatusResource extends ResourceSupport {
 
-	private String moduleDeploymentId;
+	private String deploymentId;
 
 	private String state;
 
-	private Resources<ModuleInstanceStatusResource> instances;
+	private Resources<AppInstanceStatusResource> instances;
 
-	private ModuleStatusResource() {
+	@SuppressWarnings("unused")
+	private AppStatusResource() {
 		// Noarg constructor for serialization;
 	}
 
-	public ModuleStatusResource(String moduleDeploymentId, String state) {
-		this.moduleDeploymentId = moduleDeploymentId;
+	public AppStatusResource(String deploymentId, String state) {
+		this.deploymentId = deploymentId;
 		this.state = state;
 	}
 
-	public String getModuleDeploymentId() {
-		return moduleDeploymentId;
+	public String getDeploymentId() {
+		return deploymentId;
 	}
 
 	public String getState() {
 		return state;
 	}
 
-	public Resources<ModuleInstanceStatusResource> getInstances() {
+	public Resources<AppInstanceStatusResource> getInstances() {
 		return instances;
 	}
 
-	public void setInstances(Resources<ModuleInstanceStatusResource> instances) {
+	public void setInstances(Resources<AppInstanceStatusResource> instances) {
 		this.instances = instances;
 	}
 
-	public static class Page extends PagedResources<ModuleStatusResource> {
+	public static class Page extends PagedResources<AppStatusResource> {
 
 	}
 
-	public void setModuleDeploymentId(String moduleDeploymentId) {
-		this.moduleDeploymentId = moduleDeploymentId;
+	public void setDeploymentId(String deploymentId) {
+		this.deploymentId = deploymentId;
 	}
 
 	public void setState(String state) {

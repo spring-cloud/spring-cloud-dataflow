@@ -16,7 +16,6 @@
 
 package org.springframework.cloud.dataflow.server.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionResource;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskExecutionException;
 import org.springframework.cloud.task.repository.TaskExecution;
@@ -59,7 +58,6 @@ public class TaskExecutionController {
 	 * @param explorer the explorer this controller will use for retrieving
 	 *                   task execution information.
 	 */
-	@Autowired
 	public TaskExecutionController(TaskExplorer explorer) {
 		Assert.notNull(explorer, "explorer must not be null");
 		this.explorer = explorer;
