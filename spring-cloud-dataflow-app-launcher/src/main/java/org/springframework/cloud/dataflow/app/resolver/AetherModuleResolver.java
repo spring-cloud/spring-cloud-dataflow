@@ -84,7 +84,7 @@ public class AetherModuleResolver implements ModuleResolver {
 
 	private volatile boolean offline = false;
 
-	private AetherProperties.Proxy proxyProperties;
+	private MavenProperties.Proxy proxyProperties;
 
 	private Authentication authentication;
 
@@ -96,7 +96,7 @@ public class AetherModuleResolver implements ModuleResolver {
 	 * @param aetherProperties the proxy properties for the maven proxy settings.
 	 */
 	public AetherModuleResolver(File localRepository, Map<String, String> remoteRepositories,
-			final AetherProperties aetherProperties) {
+			final MavenProperties mavenProperties) {
 		Assert.notNull(localRepository, "Local repository path cannot be null");
 		if (log.isDebugEnabled()) {
 			log.debug("Local repository: " + localRepository);
@@ -105,15 +105,15 @@ public class AetherModuleResolver implements ModuleResolver {
 				log.debug("Remote repositories: " + StringUtils.collectionToCommaDelimitedString(remoteRepositories.values()));
 			}
 		}
-		if (aetherProperties != null) {
-			this.proxyProperties = aetherProperties.getProxy();
+		if (mavenProperties != null) {
+			this.proxyProperties = mavenProperties.getProxy();
 		}
 		if (isProxyEnabled() && proxyHasCredentials()) {
 			this.authentication = new Authentication() {
 				@Override
 				public void fill(AuthenticationContext context, String key, Map<String, String> data) {
-					context.put(context.USERNAME, aetherProperties.getProxy().getAuth().getUsername());
-					context.put(context.PASSWORD, aetherProperties.getProxy().getAuth().getPassword());
+					context.put(AuthenticationContext.USERNAME, mavenProperties.getProxy().getAuth().getUsername());
+					context.put(AuthenticationContext.PASSWORD, mavenProperties.getProxy().getAuth().getPassword());
 				}
 
 				@Override
