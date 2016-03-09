@@ -46,7 +46,7 @@ public class MavenProperties {
 	/**
 	 * Locations of remote maven repositories from which modules will be downloaded, if not available locally.
 	 */
-	private String[] remoteRepositories = new String[] {};
+	private String[] remoteRepositories = new String[]{"https://repo.spring.io/libs-snapshot"};
 
 	/**
 	 * Whether the resolver should operate in offline mode.
