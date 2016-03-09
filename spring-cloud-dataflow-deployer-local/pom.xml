@@ -17,7 +17,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
-			<artifactId>spring-cloud-dataflow-server-core</artifactId>
+			<artifactId>spring-cloud-dataflow-app-launcher</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>

@@ -36,6 +36,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplicat
 import org.springframework.boot.autoconfigure.security.oauth2.OAuth2AutoConfiguration;
 import org.springframework.boot.autoconfigure.web.HttpMessageConverters;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.cloud.dataflow.app.resolver.MavenProperties;
 import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistry;
 import org.springframework.cloud.dataflow.artifact.registry.RedisArtifactRegistry;
 import org.springframework.cloud.dataflow.completion.CompletionConfiguration;
@@ -84,7 +85,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 @EnableHypermediaSupport(type = HAL)
 @EnableSpringDataWebSupport
 @Import(CompletionConfiguration.class)
-@EnableConfigurationProperties(DataFlowServerProperties.class)
+@EnableConfigurationProperties(MavenProperties.class)
 @ComponentScan(basePackageClasses = {
 		StreamDefinitionController.class,
 		StreamDefinitionRepository.class

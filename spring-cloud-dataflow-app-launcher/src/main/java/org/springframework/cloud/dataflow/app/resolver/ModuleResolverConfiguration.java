@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.dataflow.app.resolver;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -23,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.util.StringUtils;
 
 /**
  * Sets up the default Aether-based module resolver, unless overridden.
@@ -30,25 +32,30 @@ import org.springframework.context.annotation.Bean;
  * @author Eric Bottard
  * @author Ilayaperumal Gopinathan
  */
-@EnableConfigurationProperties({ModuleResolverProperties.class, AetherProperties.class})
+@EnableConfigurationProperties(MavenProperties.class)
 public class ModuleResolverConfiguration {
 
-	@Autowired
-	private ModuleResolverProperties properties;
+	/**
+	 * Default file path to a locally available maven repository, where modules will be downloaded.
+	 */
+	private static File DEFAULT_LOCAL_REPO = new File(System.getProperty("user.home") +
+			File.separator + ".m2" + File.separator + "repository");
 
 	@Autowired
-	private AetherProperties proxyProperties;
+	private MavenProperties properties;
 
 	@Bean
 	@ConditionalOnMissingBean(ModuleResolver.class)
 	public ModuleResolver moduleResolver() {
 		int i = 1;
-		Map<String, String> repositoriesMap = new HashMap<>();
+		Map<String, String> remoteRepositoryMap = new HashMap<>();
 		for (String repository : properties.getRemoteRepositories()) {
-			repositoriesMap.put("repository " + i++, repository);
+			remoteRepositoryMap.put("repository " + i++, repository);
 		}
-		AetherModuleResolver aetherModuleResolver = new AetherModuleResolver(properties.getLocalRepository(),
-				repositoriesMap, proxyProperties);
+		File localRepository = (!StringUtils.isEmpty(properties.getLocalRepository()))
+				? new File(properties.getLocalRepository()) : DEFAULT_LOCAL_REPO;
+		AetherModuleResolver aetherModuleResolver = new AetherModuleResolver(localRepository,
+				remoteRepositoryMap, properties);
 		aetherModuleResolver.setOffline(properties.isOffline());
 		return aetherModuleResolver;
 	}
