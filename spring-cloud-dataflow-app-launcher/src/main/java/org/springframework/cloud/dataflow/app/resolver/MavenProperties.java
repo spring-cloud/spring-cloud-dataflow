@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.cloud.dataflow.server.config;
+package org.springframework.cloud.dataflow.app.resolver;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -28,8 +28,8 @@ import org.springframework.util.StringUtils;
  * @author Ilayaperumal Gopinathan
  * @author Eric Bottard
  */
-@ConfigurationProperties(prefix = DataFlowServerProperties.PREFIX)
-public class DataFlowServerProperties {
+@ConfigurationProperties(prefix = MavenProperties.PREFIX)
+public class MavenProperties {
 
 	static final String PREFIX = "deployer";
 
