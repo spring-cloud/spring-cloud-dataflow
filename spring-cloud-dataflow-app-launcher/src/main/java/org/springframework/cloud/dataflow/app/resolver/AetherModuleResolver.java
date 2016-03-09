@@ -84,7 +84,7 @@ public class AetherModuleResolver implements ModuleResolver {
 
 	private volatile boolean offline = false;
 
-	private final AetherProxyProperties proxyProperties;
+	private AetherProperties.Proxy proxyProperties;
 
 	private Authentication authentication;
 
@@ -93,10 +93,10 @@ public class AetherModuleResolver implements ModuleResolver {
 	 * @param localRepository the root path of the local maven repository
 	 * @param remoteRepositories a Map containing pairs of (repository ID,repository URL). This
 	 * may be null or empty if the local repository is off line.
-	 * @param proxyProperties the proxy properties for the maven proxy settings.
+	 * @param aetherProperties the proxy properties for the maven proxy settings.
 	 */
 	public AetherModuleResolver(File localRepository, Map<String, String> remoteRepositories,
-			final AetherProxyProperties proxyProperties) {
+			final AetherProperties aetherProperties) {
 		Assert.notNull(localRepository, "Local repository path cannot be null");
 		if (log.isDebugEnabled()) {
 			log.debug("Local repository: " + localRepository);
@@ -105,13 +105,15 @@ public class AetherModuleResolver implements ModuleResolver {
 				log.debug("Remote repositories: " + StringUtils.collectionToCommaDelimitedString(remoteRepositories.values()));
 			}
 		}
-		this.proxyProperties = proxyProperties;
+		if (aetherProperties != null) {
+			this.proxyProperties = aetherProperties.getProxy();
+		}
 		if (isProxyEnabled() && proxyHasCredentials()) {
 			this.authentication = new Authentication() {
 				@Override
 				public void fill(AuthenticationContext context, String key, Map<String, String> data) {
-					context.put(context.USERNAME, proxyProperties.getAuth().getUsername());
-					context.put(context.PASSWORD, proxyProperties.getAuth().getPassword());
+					context.put(context.USERNAME, aetherProperties.getProxy().getAuth().getUsername());
+					context.put(context.PASSWORD, aetherProperties.getProxy().getAuth().getPassword());
 				}
 
 				@Override
@@ -132,15 +134,15 @@ public class AetherModuleResolver implements ModuleResolver {
 				RemoteRepository.Builder remoteRepositoryBuilder = new RemoteRepository.Builder(remoteRepo.getKey(),
 						DEFAULT_CONTENT_TYPE, remoteRepo.getValue());
 				if (isProxyEnabled()) {
-					if(this.authentication != null) {
+					if (this.authentication != null) {
 						//todo: Set direct authentication for the remote repositories
 						remoteRepositoryBuilder.setProxy(new Proxy(proxyProperties.getProtocol(), proxyProperties.getHost(),
-								proxyProperties.getPort(), authentication));	
+								proxyProperties.getPort(), authentication));
 					}
 					else {
 						//If proxy doesn't need authentication to use it
 						remoteRepositoryBuilder.setProxy(new Proxy(proxyProperties.getProtocol(), proxyProperties.getHost(),
-								proxyProperties.getPort()));						
+								proxyProperties.getPort()));
 					}
 				}
 				this.remoteRepositories.add(remoteRepositoryBuilder.build());

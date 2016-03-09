@@ -20,6 +20,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.cloud.dataflow.module.deployer.ModuleDeployer;
 import org.springframework.cloud.dataflow.module.deployer.test.AbstractModuleDeployerTests;
+import org.springframework.cloud.dataflow.server.config.DataFlowServerProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -32,7 +33,7 @@ import org.springframework.context.annotation.Configuration;
 public class OutOfProcessModuleDeployerTests extends AbstractModuleDeployerTests {
 
 	@Configuration
-	@EnableConfigurationProperties(OutOfProcessModuleDeployerProperties.class)
+	@EnableConfigurationProperties({OutOfProcessModuleDeployerProperties.class, DataFlowServerProperties.class})
 	public static class Config {
 
 		@Bean

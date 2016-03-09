@@ -30,14 +30,14 @@ import org.springframework.context.annotation.Bean;
  * @author Eric Bottard
  * @author Ilayaperumal Gopinathan
  */
-@EnableConfigurationProperties({ModuleResolverProperties.class, AetherProxyProperties.class})
+@EnableConfigurationProperties({ModuleResolverProperties.class, AetherProperties.class})
 public class ModuleResolverConfiguration {
 
 	@Autowired
 	private ModuleResolverProperties properties;
 
 	@Autowired
-	private AetherProxyProperties proxyProperties;
+	private AetherProperties proxyProperties;
 
 	@Bean
 	@ConditionalOnMissingBean(ModuleResolver.class)

@@ -46,6 +46,7 @@ import org.springframework.cloud.dataflow.module.ModuleInstanceStatus;
 import org.springframework.cloud.dataflow.module.ModuleStatus;
 import org.springframework.cloud.dataflow.module.deployer.ModuleArgumentQualifier;
 import org.springframework.cloud.dataflow.module.deployer.ModuleDeployer;
+import org.springframework.cloud.dataflow.server.config.DataFlowServerProperties;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.SocketUtils;
@@ -72,6 +73,9 @@ public class OutOfProcessModuleDeployer implements ModuleDeployer {
 
 	@Autowired
 	private OutOfProcessModuleDeployerProperties properties;
+
+	@Autowired
+	private DataFlowServerProperties dataFlowServerProperties;
 
 	private final RestTemplate restTemplate = new RestTemplate();
 
@@ -122,6 +126,7 @@ public class OutOfProcessModuleDeployer implements ModuleDeployer {
 
 				ProcessBuilder builder = new ProcessBuilder(properties.getJavaCmd(), "-jar", moduleLauncherPath);
 				builder.environment().clear();
+				builder.environment().putAll(dataFlowServerProperties.asStringProperties());
 				builder.environment().putAll(args);
 
 				Instance instance = new Instance(moduleDeploymentId, i, builder, workDir, port);
@@ -274,6 +279,7 @@ public class OutOfProcessModuleDeployer implements ModuleDeployer {
 			return result;
 		}
 	}
+
 	// Copy-pasting of JDK8+ isAlive method to retain JDK7 compatibility
 	private static boolean isAlive(Process process) {
 		try {

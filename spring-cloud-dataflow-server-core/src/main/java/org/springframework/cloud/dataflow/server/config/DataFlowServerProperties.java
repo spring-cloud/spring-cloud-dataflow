@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.cloud.dataflow.app.resolver.AetherProperties;
 import org.springframework.util.StringUtils;
 
 /**
@@ -31,6 +32,10 @@ import org.springframework.util.StringUtils;
 public class DataFlowServerProperties {
 
 	static final String PREFIX = "deployer";
+
+	static final String AETHER_PROXY_PREFIX = "aether.proxy.";
+
+	static final String AETHER_PROXY_AUTH_PREFIX = "aether.proxy.auth.";
 
 	/**
 	 * File path to a locally available maven repository, where modules will be downloaded.
@@ -48,20 +53,49 @@ public class DataFlowServerProperties {
 	private Boolean offline;
 
 	/**
+	 *
+	 */
+	private AetherProperties aether;
+
+	/**
 	 * Return a String representation of the properties actually set in this object, suitable for
 	 * passing to a ModuleLauncher process.
 	 */
 	public Map<String, String> asStringProperties() {
 		Map<String, String> properties = new HashMap<>();
-		if (this.getLocalRepository() != null) {
-			properties.put(PREFIX + ".localRepository", this.getLocalRepository());
+		if (StringUtils.hasText(this.getLocalRepository())) {
+			properties.put("localRepository", this.getLocalRepository());
 		}
 		if (this.getRemoteRepositories() != null) {
-			properties.put(PREFIX + ".remoteRepositories", StringUtils.arrayToCommaDelimitedString(
+			properties.put("remoteRepositories", StringUtils.arrayToCommaDelimitedString(
 					this.getRemoteRepositories()));
 		}
 		if (this.getOffline() != null) {
-			properties.put(PREFIX + ".offline", String.valueOf(this.getOffline()));
+			properties.put("offline", String.valueOf(this.getOffline()));
+		}
+		if (getAether() != null && getAether().getProxy() != null) {
+			AetherProperties.Proxy proxy = getAether().getProxy();
+			if (StringUtils.hasText(proxy.getProtocol())) {
+				properties.put(AETHER_PROXY_PREFIX + "protocol", proxy.getProtocol());
+			}
+			if (StringUtils.hasText(proxy.getHost())) {
+				properties.put(AETHER_PROXY_PREFIX + "host", proxy.getHost());
+			}
+			if (proxy.getPort() > 0) {
+				properties.put(AETHER_PROXY_PREFIX + "port", String.valueOf(proxy.getPort()));
+			}
+			if (StringUtils.hasText(proxy.getNonProxyHosts())) {
+				properties.put(AETHER_PROXY_PREFIX + "nonProxyHosts", proxy.getNonProxyHosts());
+			}
+			if (proxy.getAuth() != null) {
+				AetherProperties.Proxy.Authentication auth = proxy.getAuth();
+				if (StringUtils.hasText(auth.getUsername())) {
+					properties.put(AETHER_PROXY_AUTH_PREFIX + "username", auth.getUsername());
+				}
+				if (StringUtils.hasText(auth.getPassword())) {
+					properties.put(AETHER_PROXY_AUTH_PREFIX + "password", auth.getPassword());
+				}
+			}
 		}
 		return properties;
 	}
@@ -74,6 +108,7 @@ public class DataFlowServerProperties {
 	public String[] getRemoteRepositories() {
 		return remoteRepositories;
 	}
+
 	public void setLocalRepository(String localRepository) {
 		this.localRepository = localRepository;
 	}
@@ -88,5 +123,13 @@ public class DataFlowServerProperties {
 
 	public void setOffline(Boolean offline) {
 		this.offline = offline;
+	}
+
+	public AetherProperties getAether() {
+		return this.aether;
+	}
+
+	public void setAether(AetherProperties aether) {
+		this.aether = aether;
 	}
 }

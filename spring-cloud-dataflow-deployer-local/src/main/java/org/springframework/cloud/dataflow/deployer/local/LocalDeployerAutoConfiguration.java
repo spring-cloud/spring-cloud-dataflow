@@ -20,9 +20,10 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.cloud.dataflow.module.deployer.ModuleDeployer;
 import org.springframework.cloud.dataflow.app.launcher.ModuleLauncher;
 import org.springframework.cloud.dataflow.app.launcher.ModuleLauncherConfiguration;
+import org.springframework.cloud.dataflow.module.deployer.ModuleDeployer;
+import org.springframework.cloud.dataflow.server.config.DataFlowServerProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -58,7 +59,7 @@ public class LocalDeployerAutoConfiguration {
 	}
 
 	@Configuration
-	@EnableConfigurationProperties(OutOfProcessModuleDeployerProperties.class)
+	@EnableConfigurationProperties({OutOfProcessModuleDeployerProperties.class, DataFlowServerProperties.class})
 	@ConditionalOnMissingBean(ModuleDeployer.class)
 	@ConditionalOnProperty(prefix = LOCAL_DEPLOYER_PREFIX, name = "out-of-process", havingValue = "true", matchIfMissing = true)
 	public static class OutOfProcess {
