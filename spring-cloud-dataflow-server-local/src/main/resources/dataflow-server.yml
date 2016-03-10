@@ -15,7 +15,7 @@ security:
 
 spring:
   application:
-    name: spring-cloud-dataflow-server
+    name: spring-cloud-dataflow-server-local
   cloud:
     config:
       uri: http://localhost:8888

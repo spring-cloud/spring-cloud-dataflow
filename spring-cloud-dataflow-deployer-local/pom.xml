@@ -35,7 +35,6 @@
 				<directory>src/main/resources</directory>
 				<filtering>true</filtering>
 				<includes>
-					<include>dataflow-server.yml</include>
 					<include>META-INF/spring.factories</include>
 				</includes>
 			</resource>
