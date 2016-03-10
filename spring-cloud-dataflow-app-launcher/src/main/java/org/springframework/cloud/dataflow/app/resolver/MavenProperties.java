@@ -34,7 +34,9 @@ public class MavenProperties {
 
 	static final String PREFIX = "maven";
 
-	static final String PROXY_PREFIX = "proxy.";
+	static final String MAVEN_PREFIX = PREFIX + ".";
+
+	static final String PROXY_PREFIX = MAVEN_PREFIX + "proxy.";
 
 	static final String PROXY_AUTH_PREFIX = PROXY_PREFIX + "auth.";
 
@@ -184,18 +186,18 @@ public class MavenProperties {
 
 	/**
 	 * Return a String representation of the properties actually set in this object, suitable for
-	 * passing to a ModuleLauncher process.
+	 * passing to a App launcher process.
 	 */
 	public Map<String, String> asStringProperties() {
 		Map<String, String> properties = new HashMap<>();
 		if (StringUtils.hasText(this.getLocalRepository())) {
-			properties.put("localRepository", this.getLocalRepository());
+			properties.put(MAVEN_PREFIX + "localRepository", this.getLocalRepository());
 		}
 		if (this.getRemoteRepositories() != null) {
-			properties.put("remoteRepositories", StringUtils.arrayToCommaDelimitedString(
+			properties.put(MAVEN_PREFIX + "remoteRepositories", StringUtils.arrayToCommaDelimitedString(
 					this.getRemoteRepositories()));
 		}
-		properties.put("offline", String.valueOf(this.isOffline()));
+		properties.put(MAVEN_PREFIX + "offline", String.valueOf(this.isOffline()));
 		Proxy proxy = getProxy();
 		if (proxy != null) {
 			if (StringUtils.hasText(proxy.getProtocol())) {

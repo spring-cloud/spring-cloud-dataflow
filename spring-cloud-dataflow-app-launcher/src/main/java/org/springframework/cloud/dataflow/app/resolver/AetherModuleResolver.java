@@ -93,7 +93,7 @@ public class AetherModuleResolver implements ModuleResolver {
 	 * @param localRepository the root path of the local maven repository
 	 * @param remoteRepositories a Map containing pairs of (repository ID,repository URL). This
 	 * may be null or empty if the local repository is off line.
-	 * @param aetherProperties the proxy properties for the maven proxy settings.
+	 * @param mavenProperties the properties for the maven repository, proxy settings.
 	 */
 	public AetherModuleResolver(File localRepository, Map<String, String> remoteRepositories,
 			final MavenProperties mavenProperties) {
@@ -135,7 +135,6 @@ public class AetherModuleResolver implements ModuleResolver {
 						DEFAULT_CONTENT_TYPE, remoteRepo.getValue());
 				if (isProxyEnabled()) {
 					if (this.authentication != null) {
-						//todo: Set direct authentication for the remote repositories
 						remoteRepositoryBuilder.setProxy(new Proxy(proxyProperties.getProtocol(), proxyProperties.getHost(),
 								proxyProperties.getPort(), authentication));
 					}
