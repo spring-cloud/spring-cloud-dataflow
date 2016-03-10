@@ -13,7 +13,7 @@ we go.
 [[getting-started-system-requirements]]
 == System Requirements
 
-You need Java installed (Java 7 or better, we recommend Java 8) and to build you need to have Maven installed as well.
+You need Java installed (Java 7 or better, we recommend Java 8), and to build, you need to have Maven installed as well.
 
 You also need to have link:http://redis.io/[Redis] installed and running if you plan on running a local system, or to run the included tests.
 
@@ -31,17 +31,19 @@ wget http://repo.spring.io/milestone/org/springframework/cloud/spring-cloud-data
 ```
 
 [start=2]
-1. Running behind proxy/custom maven settings (remote repositories etc.,)
+1. Running with Custom Maven Settings and/or Behind a Proxy
 
-If you run the Data Flow Server behind the proxy and want to override specific maven configuration properties, you need to specify those properties as command line arguments
-when starting the Data Flow Server.
-For instance,
+If you want to override specific maven configuration properties (remote repositories, etc.) and/or run the Data Flow Server behind a proxy,
+you need to specify those properties as command line arguments when starting the Data Flow Server. For example:
+
 ```
 $ java -jar spring-cloud-dataflow-server-local-1.0.0.BUILD-SNAPSHOT.jar --maven.localRepository=mylocal --maven.remoteRepositories=repo1,repo2 --maven.offline=true
 --maven.proxy.protocol=https --maven.proxy.host=host1 --maven.proxy.port=8090 --maven.proxy.non_proxy_hosts='host2|host3' --maven.proxy.auth.username=user1 --maven.proxy.auth.password=passwd
 ```
-By default, the protocol is set to use `http`. You can omit the auth properties if the proxy doesn't need username/password.
-By default, the maven `localRepository` is set to use `${user.home}/.m2/repository/` and the remote repositories uses `https://repo.spring.io/libs-snapshot`
+By default, the protocol is set to `http`. You can omit the auth properties if the proxy doesn't need a username and password.
+
+By default, the maven `localRepository` is set to `${user.home}/.m2/repository/`,
+and `https://repo.spring.io/libs-snapshot` will be the only remote repository.
 
 You can also use environment variables to specify the maven/proxy properties:
 ```
@@ -62,11 +64,6 @@ export MAVEN_PROXY_AUTH_PASSWORD=passwd
 ```
 $ java -jar spring-cloud-dataflow-server-local-1.0.0.BUILD-SNAPSHOT.jar
 ```
-By default, this will start the local deployer that is `out-of-process`. If you want to use `in-process` deployer then
-
-```
-$ java -jar spring-cloud-dataflow-server-local-1.0.0.BUILD-SNAPSHOT.jar --deployer.out-of-process=false
-```
 
 [start=4]
 1. launch the shell:
@@ -75,7 +72,7 @@ $ java -jar spring-cloud-dataflow-server-local-1.0.0.BUILD-SNAPSHOT.jar --deploy
 $ java -jar spring-cloud-dataflow-shell-1.0.0.BUILD-SNAPSHOT.jar
 ```
 
-If the Data Flow server and shell are not running on the same host, point the shell to the Data Flow server
+If the Data Flow Server and shell are not running on the same host, point the shell to the Data Flow server:
 
 ```
 server-unknown:>dataflow config server http://dataflow-server.cfapps.io
@@ -83,7 +80,7 @@ Successfully targeted http://dataflow-server.cfapps.io
 dataflow:>
 ```
 
-You can now use the shell commands to list modules and create streams.  For example
+You can now use the shell commands to list modules and create streams. For example:
 
 ```
 dataflow:>stream create --name httptest --definition "http --server.port=9000 | log" --deploy
