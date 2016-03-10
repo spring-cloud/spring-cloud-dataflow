@@ -41,6 +41,19 @@ Clone the repo and type
 ----
 $ ./mvnw clean install 
 ----
+If you are running behind proxy, then you need to specify the proxy settings via environment properties like this:
+(choose the ones that are appropriate for your settings)
+```
+export MAVEN_LOCAL_REPOSITORY=mylocalMavenRepo
+export MAVEN_REMOTE_REPOSITORIES=repo1,repo2
+export MAVEN_OFFLINE=true
+export MAVEN_PROXY_PROTOCOL=https
+export MAVEN_PROXY_HOST=host1
+export MAVEN_PROXY_PORT=8090
+export MAVEN_PROXY_NON_PROXY_HOSTS='host2|host3'
+export MAVEN_PROXY_AUTH_USERNAME=user1
+export MAVEN_PROXY_AUTH_PASSWORD=passwd
+```
 
 For more information on building, see this https://github.com/spring-cloud/spring-cloud-dataflow/blob/master/spring-cloud-dataflow-docs/src/main/asciidoc/appendix-building.adoc[link].
 
