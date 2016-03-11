@@ -113,6 +113,7 @@ public class ArtifactRegistryPopulator {
 		populateDefault("hdfs", sink);
 		populateDefault("jdbc", sink);
 		populateDefault("log", sink);
+		populateDefault("rabbit", sink);		
 		populateDefault("redis", sink);
 		populateDefault("router", sink);
 		populateDefault("tcp", sink);
