@@ -55,6 +55,10 @@ public class MavenProperties {
 	 */
 	private boolean offline;
 
+	private int connectTimeout;
+
+	private int requestTimeout;
+
 	private Proxy proxy;
 
 	public void setRemoteRepositories(String[] remoteRepositories) {
@@ -79,6 +83,22 @@ public class MavenProperties {
 
 	public void setOffline(Boolean offline) {
 		this.offline = offline;
+	}
+
+	public int getConnectTimeout() {
+		return this.connectTimeout;
+	}
+
+	public void setConnectTimeout(int connectTimeout) {
+		this.connectTimeout = connectTimeout;
+	}
+
+	public int getRequestTimeout() {
+		return this.requestTimeout;
+	}
+
+	public void setRequestTimeout(int requestTimeout) {
+		this.requestTimeout = requestTimeout;
 	}
 
 	public Proxy getProxy() {
@@ -198,6 +218,12 @@ public class MavenProperties {
 					this.getRemoteRepositories()));
 		}
 		properties.put(MAVEN_PREFIX + "offline", String.valueOf(this.isOffline()));
+		if (this.getConnectTimeout() > 0) {
+			properties.put(MAVEN_PREFIX + "connectTimeout", String.valueOf(this.getConnectTimeout()));
+		}
+		if (this.getRequestTimeout() > 0) {
+			properties.put(MAVEN_PREFIX + "requestTimeout", String.valueOf(this.getRequestTimeout()));
+		}
 		Proxy proxy = getProxy();
 		if (proxy != null) {
 			if (StringUtils.hasText(proxy.getProtocol())) {
