@@ -92,7 +92,6 @@ class ModuleDefinitionBuilder {
 				builder.setParameter(BindingPropertyKeys.INPUT_DESTINATION,
 						String.format("%s.%s", streamName, moduleNodes.get(m - 1).getLabelName()));
 				builder.setParameter(BindingPropertyKeys.INPUT_GROUP, DEFAULT_CONSUMER_GROUP_NAME);
-				builder.setParameter(BindingPropertyKeys.INPUT_DURABLE_SUBSCRIPTION, "true");
 			}
 			if (m < moduleNodes.size() - 1) {
 				builder.setParameter(BindingPropertyKeys.OUTPUT_DESTINATION,
@@ -114,7 +113,6 @@ class ModuleDefinitionBuilder {
 				}
 			}
 			sourceModuleBuilder.setParameter(BindingPropertyKeys.INPUT_GROUP, consumerGroupName);
-			sourceModuleBuilder.setParameter(BindingPropertyKeys.INPUT_DURABLE_SUBSCRIPTION, "true");
 		}
 		SinkDestinationNode sinkDestination = streamNode.getSinkDestinationNode();
 		if (sinkDestination != null) {

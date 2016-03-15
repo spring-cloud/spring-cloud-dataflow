@@ -67,11 +67,6 @@ public class BindingPropertyKeys {
 	public static final String INPUT_GROUP = INPUT_BINDING_KEY_PREFIX + "group";
 
 	/**
-	 * Durable Subscription property key for input binding.
-	 */
-	public static final String INPUT_DURABLE_SUBSCRIPTION = INPUT_BINDING_KEY_PREFIX + "durableSubscription";
-
-	/**
 	 * Partition Key Expression property key for output binding.
 	 */
 	public static final String OUTPUT_PARTITION_KEY_EXPRESSION = OUTPUT_BINDING_KEY_PREFIX + "partitionKeyExpression";

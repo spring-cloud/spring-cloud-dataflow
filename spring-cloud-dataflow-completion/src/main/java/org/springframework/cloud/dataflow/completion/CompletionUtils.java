@@ -19,12 +19,12 @@ package org.springframework.cloud.dataflow.completion;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.springframework.cloud.dataflow.app.resolver.Coordinates;
+import org.springframework.cloud.dataflow.core.ArtifactCoordinates;
 import org.springframework.cloud.dataflow.core.ArtifactType;
 import org.springframework.cloud.dataflow.core.BindingPropertyKeys;
-import org.springframework.cloud.dataflow.core.ArtifactCoordinates;
 import org.springframework.cloud.dataflow.core.ModuleDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
-import org.springframework.cloud.dataflow.app.resolver.Coordinates;
 
 /**
  * Various utility methods used throughout the completion package.
@@ -41,7 +41,6 @@ public class CompletionUtils {
 	static {
 		IMPLICIT_PARAMETER_NAMES.add(BindingPropertyKeys.INPUT_DESTINATION);
 		IMPLICIT_PARAMETER_NAMES.add(BindingPropertyKeys.INPUT_GROUP);
-		IMPLICIT_PARAMETER_NAMES.add(BindingPropertyKeys.INPUT_DURABLE_SUBSCRIPTION);
 		IMPLICIT_PARAMETER_NAMES.add(BindingPropertyKeys.OUTPUT_DESTINATION);
 	}
 
