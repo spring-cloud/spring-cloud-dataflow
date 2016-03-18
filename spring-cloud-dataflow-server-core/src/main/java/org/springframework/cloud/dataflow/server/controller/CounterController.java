@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2015-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.ResourceAssembler;
 import org.springframework.hateoas.mvc.ResourceAssemblerSupport;
 import org.springframework.http.HttpStatus;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -44,6 +45,7 @@ import org.springframework.web.bind.annotation.RestController;
  * Allows interaction with Counters.
  *
  * @author Eric Bottard
+ * @author Mark Fisher
  */
 @RestController
 @RequestMapping("/metrics/counters")
@@ -52,13 +54,23 @@ public class CounterController {
 
 	public static final String COUNTER_PREFIX = "counter.";
 
-	private MetricRepository metricRepository;
+	private final MetricRepository metricRepository;
 
 	private final ResourceAssembler<Metric<Double>, CounterResource> counterResourceAssembler =
 			new DeepCounterResourceAssembler();
 
 	protected final ResourceAssembler<Metric<Double>, ? extends MetricResource> shallowResourceAssembler =
 			new ShallowMetricResourceAssembler();
+
+	/**
+	 * Create a {@link CounterController} that delegates to the provided {@link MetricRepository}.
+	 *
+	 * @param metricRepository the {@link MetricRepository} used by this controller
+	 */
+	public CounterController(MetricRepository metricRepository) {
+		Assert.notNull(metricRepository, "metricRepository must not be null");
+		this.metricRepository = metricRepository;
+	}
 
 	/**
 	 * List Counters that match the given criteria.

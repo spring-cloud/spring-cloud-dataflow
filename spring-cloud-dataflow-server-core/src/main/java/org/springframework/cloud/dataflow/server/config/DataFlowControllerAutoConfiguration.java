@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.dataflow.server.config;
 
+import org.springframework.boot.actuate.metrics.repository.MetricRepository;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -105,8 +106,8 @@ public class DataFlowControllerAutoConfiguration {
 	}
 
 	@Bean
-	public CounterController counterController() {
-		return new CounterController();
+	public CounterController counterController(MetricRepository metricRepository) {
+		return new CounterController(metricRepository);
 	}
 
 	@Bean
