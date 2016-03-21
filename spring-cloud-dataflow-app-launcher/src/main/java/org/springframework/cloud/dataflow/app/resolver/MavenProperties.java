@@ -48,16 +48,16 @@ public class MavenProperties {
 	/**
 	 * Locations of remote maven repositories from which modules will be downloaded, if not available locally.
 	 */
-	private String[] remoteRepositories = new String[]{"https://repo.spring.io/libs-snapshot"};
+	private String[] remoteRepositories = new String[] {"https://repo.spring.io/libs-snapshot"};
 
 	/**
 	 * Whether the resolver should operate in offline mode.
 	 */
 	private boolean offline;
 
-	private int connectTimeout;
+	private Integer connectTimeout;
 
-	private int requestTimeout;
+	private Integer requestTimeout;
 
 	private Proxy proxy;
 
@@ -85,19 +85,19 @@ public class MavenProperties {
 		this.offline = offline;
 	}
 
-	public int getConnectTimeout() {
+	public Integer getConnectTimeout() {
 		return this.connectTimeout;
 	}
 
-	public void setConnectTimeout(int connectTimeout) {
+	public void setConnectTimeout(Integer connectTimeout) {
 		this.connectTimeout = connectTimeout;
 	}
 
-	public int getRequestTimeout() {
+	public Integer getRequestTimeout() {
 		return this.requestTimeout;
 	}
 
-	public void setRequestTimeout(int requestTimeout) {
+	public void setRequestTimeout(Integer requestTimeout) {
 		this.requestTimeout = requestTimeout;
 	}
 
@@ -218,10 +218,10 @@ public class MavenProperties {
 					this.getRemoteRepositories()));
 		}
 		properties.put(MAVEN_PREFIX + "offline", String.valueOf(this.isOffline()));
-		if (this.getConnectTimeout() > 0) {
+		if (this.getConnectTimeout() != null) {
 			properties.put(MAVEN_PREFIX + "connectTimeout", String.valueOf(this.getConnectTimeout()));
 		}
-		if (this.getRequestTimeout() > 0) {
+		if (this.getRequestTimeout() != null) {
 			properties.put(MAVEN_PREFIX + "requestTimeout", String.valueOf(this.getRequestTimeout()));
 		}
 		Proxy proxy = getProxy();

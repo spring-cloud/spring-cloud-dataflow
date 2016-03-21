@@ -25,6 +25,7 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.maven.repository.internal.MavenRepositorySystemUtils;
+import org.eclipse.aether.ConfigurationProperties;
 import org.eclipse.aether.DefaultRepositorySystemSession;
 import org.eclipse.aether.RepositorySystem;
 import org.eclipse.aether.RepositorySystemSession;
@@ -206,11 +207,11 @@ public class AetherModuleResolver implements ModuleResolver {
 		LocalRepository localRepo = new LocalRepository(localRepoPath);
 		session.setLocalRepositoryManager(system.newLocalRepositoryManager(session, localRepo));
 		session.setOffline(this.offline);
-		if (this.mavenProperties != null && this.mavenProperties.getConnectTimeout() > 0) {
-			session.setConfigProperty("aether.connector.connectTimeout", this.mavenProperties.getConnectTimeout());
+		if (this.mavenProperties != null && this.mavenProperties.getConnectTimeout() != null) {
+			session.setConfigProperty(ConfigurationProperties.CONNECT_TIMEOUT, this.mavenProperties.getConnectTimeout());
 		}
-		if (this.mavenProperties != null && this.mavenProperties.getRequestTimeout() > 0) {
-			session.setConfigProperty("aether.connector.requestTimeout", this.mavenProperties.getRequestTimeout());
+		if (this.mavenProperties != null && this.mavenProperties.getRequestTimeout() != null) {
+			session.setConfigProperty(ConfigurationProperties.REQUEST_TIMEOUT, this.mavenProperties.getRequestTimeout());
 		}
 		if (isProxyEnabled()) {
 			DefaultProxySelector proxySelector = new DefaultProxySelector();
