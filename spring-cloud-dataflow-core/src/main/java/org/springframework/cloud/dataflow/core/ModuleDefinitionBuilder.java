@@ -40,8 +40,6 @@ import org.springframework.util.Assert;
  */
 class ModuleDefinitionBuilder {
 
-	private static final String DEFAULT_CONSUMER_GROUP_NAME = "default";
-
 	private static final String CONSUMER_GROUP_PARAMETER = "group";
 
 	private final String streamName;
@@ -91,12 +89,12 @@ class ModuleDefinitionBuilder {
 			if (m > 0) {
 				builder.setParameter(BindingPropertyKeys.INPUT_DESTINATION,
 						String.format("%s.%s", streamName, moduleNodes.get(m - 1).getLabelName()));
-				builder.setParameter(BindingPropertyKeys.INPUT_GROUP, DEFAULT_CONSUMER_GROUP_NAME);
-				builder.setParameter(BindingPropertyKeys.INPUT_DURABLE_SUBSCRIPTION, "true");
+				builder.setParameter(BindingPropertyKeys.INPUT_GROUP, streamName);
 			}
 			if (m < moduleNodes.size() - 1) {
 				builder.setParameter(BindingPropertyKeys.OUTPUT_DESTINATION,
 						String.format("%s.%s", streamName, moduleNode.getLabelName()));
+				builder.setParameter(BindingPropertyKeys.OUTPUT_REQUIRED_GROUPS, streamName);
 			}
 			builders.add(builder);
 		}
@@ -114,7 +112,6 @@ class ModuleDefinitionBuilder {
 				}
 			}
 			sourceModuleBuilder.setParameter(BindingPropertyKeys.INPUT_GROUP, consumerGroupName);
-			sourceModuleBuilder.setParameter(BindingPropertyKeys.INPUT_DURABLE_SUBSCRIPTION, "true");
 		}
 		SinkDestinationNode sinkDestination = streamNode.getSinkDestinationNode();
 		if (sinkDestination != null) {

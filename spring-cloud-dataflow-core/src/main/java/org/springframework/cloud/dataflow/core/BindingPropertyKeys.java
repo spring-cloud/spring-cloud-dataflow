@@ -67,28 +67,30 @@ public class BindingPropertyKeys {
 	public static final String INPUT_GROUP = INPUT_BINDING_KEY_PREFIX + "group";
 
 	/**
-	 * Durable Subscription property key for input binding.
-	 */
-	public static final String INPUT_DURABLE_SUBSCRIPTION = INPUT_BINDING_KEY_PREFIX + "durableSubscription";
-
-	/**
 	 * Partition Key Expression property key for output binding.
 	 */
-	public static final String OUTPUT_PARTITION_KEY_EXPRESSION = OUTPUT_BINDING_KEY_PREFIX + "partitionKeyExpression";
+	public static final String OUTPUT_PARTITION_KEY_EXPRESSION = OUTPUT_BINDING_KEY_PREFIX +
+			"producer.partitionKeyExpression";
 
 	/**
 	 * Partition Key Extractor Class property key for output binding.
 	 */
-	public static final String OUTPUT_PARTITION_KEY_EXTRACTOR_CLASS = OUTPUT_BINDING_KEY_PREFIX + "partitionKeyExtractorClass";
+	public static final String OUTPUT_PARTITION_KEY_EXTRACTOR_CLASS = OUTPUT_BINDING_KEY_PREFIX +
+			"producer.partitionKeyExtractorClass";
 
 	/**
 	 * Partitioned property key for input binding.
 	 */
-	public static final String INPUT_PARTITIONED = INPUT_BINDING_KEY_PREFIX + "partitioned";
+	public static final String INPUT_PARTITIONED = INPUT_BINDING_KEY_PREFIX + "consumer.partitioned";
 
 	/**
 	 * Partition Count property key for output binding.
 	 */
-	public static final String OUTPUT_PARTITION_COUNT = OUTPUT_BINDING_KEY_PREFIX + "partitionCount";
+	public static final String OUTPUT_PARTITION_COUNT = OUTPUT_BINDING_KEY_PREFIX + "producer.partitionCount";
 
+	/**
+	 * Required groups for output binding. Ensures that if the producer is created first, consumers will still
+	 * receive data.
+	 */
+	public static final String OUTPUT_REQUIRED_GROUPS = OUTPUT_BINDING_KEY_PREFIX + "producer.requiredGroups";
 }

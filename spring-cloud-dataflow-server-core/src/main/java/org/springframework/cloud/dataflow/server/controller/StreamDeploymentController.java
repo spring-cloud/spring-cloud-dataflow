@@ -287,11 +287,11 @@ public class StreamDeploymentController {
 			if (entry.getKey().startsWith(modulePrefix)) {
 				if (entry.getKey().startsWith(producerPropertyPrefix)) {
 					moduleDeploymentProperties.put(BindingPropertyKeys.OUTPUT_BINDING_KEY_PREFIX +
-							entry.getKey().substring(producerPropertyPrefix.length()), entry.getValue());
+							entry.getKey().substring(modulePrefix.length()), entry.getValue());
 				}
 				else if (entry.getKey().startsWith(consumerPropertyPrefix)) {
 					moduleDeploymentProperties.put(BindingPropertyKeys.INPUT_BINDING_KEY_PREFIX +
-							entry.getKey().substring(consumerPropertyPrefix.length()), entry.getValue());
+							entry.getKey().substring(modulePrefix.length()), entry.getValue());
 				}
 				else {
 					moduleDeploymentProperties.put(entry.getKey().substring(modulePrefix.length()), entry.getValue());

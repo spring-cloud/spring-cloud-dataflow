@@ -141,12 +141,12 @@ public class StreamControllerTests {
 		assertEquals(2, myStream.getModuleDefinitions().size());
 		ModuleDefinition timeDefinition = myStream.getModuleDefinitions().get(0);
 		ModuleDefinition logDefinition = myStream.getModuleDefinitions().get(1);
-		assertEquals(1, timeDefinition.getParameters().size());
+		assertEquals(2, timeDefinition.getParameters().size());
 		assertEquals("myStream.time", timeDefinition.getParameters().get(BindingPropertyKeys.OUTPUT_DESTINATION));
-		assertEquals(3, logDefinition.getParameters().size());
+		assertEquals("myStream", timeDefinition.getParameters().get(BindingPropertyKeys.OUTPUT_REQUIRED_GROUPS));
+		assertEquals(2, logDefinition.getParameters().size());
 		assertEquals("myStream.time", logDefinition.getParameters().get(BindingPropertyKeys.INPUT_DESTINATION));
-		assertEquals("default", logDefinition.getParameters().get(BindingPropertyKeys.INPUT_GROUP));
-		assertEquals("true", logDefinition.getParameters().get(BindingPropertyKeys.INPUT_DURABLE_SUBSCRIPTION));
+		assertEquals("myStream", logDefinition.getParameters().get(BindingPropertyKeys.INPUT_GROUP));
 	}
 
 	@Test
@@ -197,17 +197,17 @@ public class StreamControllerTests {
 		ModuleDefinition timeDefinition = myStream.getModuleDefinitions().get(0);
 		ModuleDefinition filterDefinition = myStream.getModuleDefinitions().get(1);
 		ModuleDefinition logDefinition = myStream.getModuleDefinitions().get(2);
-		assertEquals(1, timeDefinition.getParameters().size());
+		assertEquals(2, timeDefinition.getParameters().size());
 		assertEquals("myStream.time", timeDefinition.getParameters().get(BindingPropertyKeys.OUTPUT_DESTINATION));
+		assertEquals("myStream", timeDefinition.getParameters().get(BindingPropertyKeys.OUTPUT_REQUIRED_GROUPS));
 		assertEquals(4, filterDefinition.getParameters().size());
 		assertEquals("myStream.time", filterDefinition.getParameters().get(BindingPropertyKeys.INPUT_DESTINATION));
-		assertEquals("default", filterDefinition.getParameters().get(BindingPropertyKeys.INPUT_GROUP));
-		assertEquals("true", filterDefinition.getParameters().get(BindingPropertyKeys.INPUT_DURABLE_SUBSCRIPTION));
+		assertEquals("myStream", filterDefinition.getParameters().get(BindingPropertyKeys.INPUT_GROUP));
 		assertEquals("myStream.filter", filterDefinition.getParameters().get(BindingPropertyKeys.OUTPUT_DESTINATION));
-		assertEquals(3, logDefinition.getParameters().size());
+		assertEquals("myStream", filterDefinition.getParameters().get(BindingPropertyKeys.OUTPUT_REQUIRED_GROUPS));
+		assertEquals(2, logDefinition.getParameters().size());
 		assertEquals("myStream.filter", logDefinition.getParameters().get(BindingPropertyKeys.INPUT_DESTINATION));
-		assertEquals("default", logDefinition.getParameters().get(BindingPropertyKeys.INPUT_GROUP));
-		assertEquals("true", logDefinition.getParameters().get(BindingPropertyKeys.INPUT_DURABLE_SUBSCRIPTION));
+		assertEquals("myStream", logDefinition.getParameters().get(BindingPropertyKeys.INPUT_GROUP));
 	}
 
 	@Test
@@ -224,10 +224,9 @@ public class StreamControllerTests {
 		assertEquals("myStream", myStream.getName());
 		assertEquals(1, myStream.getModuleDefinitions().size());
 		ModuleDefinition logDefinition = myStream.getModuleDefinitions().get(0);
-		assertEquals(3, logDefinition.getParameters().size());
+		assertEquals(2, logDefinition.getParameters().size());
 		assertEquals("foo", logDefinition.getParameters().get(BindingPropertyKeys.INPUT_DESTINATION));
 		assertEquals("myStream", logDefinition.getParameters().get(BindingPropertyKeys.INPUT_GROUP));
-		assertEquals("true", logDefinition.getParameters().get(BindingPropertyKeys.INPUT_DURABLE_SUBSCRIPTION));
 	}
 
 	@Test
@@ -247,13 +246,12 @@ public class StreamControllerTests {
 		assertEquals(4, filterDefinition.getParameters().size());
 		assertEquals("foo", filterDefinition.getParameters().get(BindingPropertyKeys.INPUT_DESTINATION));
 		assertEquals("myStream", filterDefinition.getParameters().get(BindingPropertyKeys.INPUT_GROUP));
-		assertEquals("true", filterDefinition.getParameters().get(BindingPropertyKeys.INPUT_DURABLE_SUBSCRIPTION));
 		assertEquals("myStream.filter", filterDefinition.getParameters().get(BindingPropertyKeys.OUTPUT_DESTINATION));
+		assertEquals("myStream", filterDefinition.getParameters().get(BindingPropertyKeys.OUTPUT_REQUIRED_GROUPS));
 		ModuleDefinition logDefinition = myStream.getModuleDefinitions().get(1);
-		assertEquals(3, logDefinition.getParameters().size());
+		assertEquals(2, logDefinition.getParameters().size());
 		assertEquals("myStream.filter", logDefinition.getParameters().get(BindingPropertyKeys.INPUT_DESTINATION));
-		assertEquals("default", logDefinition.getParameters().get(BindingPropertyKeys.INPUT_GROUP));
-		assertEquals("true", logDefinition.getParameters().get(BindingPropertyKeys.INPUT_DURABLE_SUBSCRIPTION));
+		assertEquals("myStream", logDefinition.getParameters().get(BindingPropertyKeys.INPUT_GROUP));
 	}
 
 	@Test
@@ -288,13 +286,13 @@ public class StreamControllerTests {
 		assertEquals("myStream", myStream.getName());
 		assertEquals(2, myStream.getModuleDefinitions().size());
 		ModuleDefinition timeDefinition = myStream.getModuleDefinitions().get(0);
-		assertEquals(1, timeDefinition.getParameters().size());
+		assertEquals(2, timeDefinition.getParameters().size());
 		assertEquals("myStream.time", timeDefinition.getParameters().get(BindingPropertyKeys.OUTPUT_DESTINATION));
+		assertEquals("myStream", timeDefinition.getParameters().get(BindingPropertyKeys.OUTPUT_REQUIRED_GROUPS));
 		ModuleDefinition filterDefinition = myStream.getModuleDefinitions().get(1);
-		assertEquals(4, filterDefinition.getParameters().size());
+		assertEquals(3, filterDefinition.getParameters().size());
 		assertEquals("myStream.time", filterDefinition.getParameters().get(BindingPropertyKeys.INPUT_DESTINATION));
-		assertEquals("default", filterDefinition.getParameters().get(BindingPropertyKeys.INPUT_GROUP));
-		assertEquals("true", filterDefinition.getParameters().get(BindingPropertyKeys.INPUT_DURABLE_SUBSCRIPTION));
+		assertEquals("myStream", filterDefinition.getParameters().get(BindingPropertyKeys.INPUT_GROUP));
 		assertEquals("foo", filterDefinition.getParameters().get(BindingPropertyKeys.OUTPUT_DESTINATION));
 	}
 
@@ -313,10 +311,9 @@ public class StreamControllerTests {
 		assertEquals("myStream", myStream.getName());
 		assertEquals(1, myStream.getModuleDefinitions().size());
 		ModuleDefinition filterDefinition = myStream.getModuleDefinitions().get(0);
-		assertEquals(4, filterDefinition.getParameters().size());
+		assertEquals(3, filterDefinition.getParameters().size());
 		assertEquals("bar", filterDefinition.getParameters().get(BindingPropertyKeys.INPUT_DESTINATION));
 		assertEquals("myStream", filterDefinition.getParameters().get(BindingPropertyKeys.INPUT_GROUP));
-		assertEquals("true", filterDefinition.getParameters().get(BindingPropertyKeys.INPUT_DURABLE_SUBSCRIPTION));
 		assertEquals("foo", filterDefinition.getParameters().get(BindingPropertyKeys.OUTPUT_DESTINATION));
 
 		ArgumentCaptor<AppDeploymentRequest> captor = ArgumentCaptor.forClass(AppDeploymentRequest.class);
@@ -401,10 +398,8 @@ public class StreamControllerTests {
 		mockMvc.perform(
 				post("/streams/deployments/myStream").param("properties",
 						"module.time.producer.partitionKeyExpression=payload," +
-								"module.time.producer.trackHistory=true," +
 								"module.log.count=2," +
-								"module.log.consumer.concurrency=3," +
-								"module.log.consumer.trackHistory=true")
+								"module.log.consumer.concurrency=3")
 						.accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isCreated());
 		ArgumentCaptor<AppDeploymentRequest> captor = ArgumentCaptor.forClass(AppDeploymentRequest.class);
@@ -414,17 +409,15 @@ public class StreamControllerTests {
 		AppDeploymentRequest logRequest = requests.get(0);
 		assertThat(logRequest.getDefinition().getName(), is("log"));
 		Map<String, String> logDeploymentProps = logRequest.getEnvironmentProperties();
-		assertEquals(logDeploymentProps.get("spring.cloud.stream.bindings.input.trackHistory"), "true");
 		assertEquals(logDeploymentProps.get("spring.cloud.stream.instanceCount"), "2");
-		assertEquals(logDeploymentProps.get("spring.cloud.stream.bindings.input.partitioned"), "true");
-		assertEquals(logDeploymentProps.get("spring.cloud.stream.bindings.input.concurrency"), "3");
+		assertEquals(logDeploymentProps.get("spring.cloud.stream.bindings.input.consumer.partitioned"), "true");
+		assertEquals(logDeploymentProps.get("spring.cloud.stream.bindings.input.consumer.concurrency"), "3");
 		assertEquals(logDeploymentProps.get("count"), "2");
 		AppDeploymentRequest timeRequest = requests.get(1);
 		assertThat(timeRequest.getDefinition().getName(), is("time"));
 		Map<String, String> timeDeploymentProps = timeRequest.getEnvironmentProperties();
-		assertEquals(timeDeploymentProps.get("spring.cloud.stream.bindings.output.trackHistory"), "true");
-		assertEquals(timeDeploymentProps.get("spring.cloud.stream.bindings.output.partitionCount"), "2");
-		assertEquals(timeDeploymentProps.get("spring.cloud.stream.bindings.output.partitionKeyExpression"), "payload");
+		assertEquals(timeDeploymentProps.get("spring.cloud.stream.bindings.output.producer.partitionCount"), "2");
+		assertEquals(timeDeploymentProps.get("spring.cloud.stream.bindings.output.producer.partitionKeyExpression"), "payload");
 	}
 
 	@Test
