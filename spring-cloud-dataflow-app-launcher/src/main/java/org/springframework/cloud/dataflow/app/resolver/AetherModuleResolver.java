@@ -25,6 +25,7 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.maven.repository.internal.MavenRepositorySystemUtils;
+import org.eclipse.aether.ConfigurationProperties;
 import org.eclipse.aether.DefaultRepositorySystemSession;
 import org.eclipse.aether.RepositorySystem;
 import org.eclipse.aether.RepositorySystemSession;
@@ -84,9 +85,21 @@ public class AetherModuleResolver implements ModuleResolver {
 
 	private volatile boolean offline = false;
 
+	private MavenProperties mavenProperties;
+
 	private MavenProperties.Proxy proxyProperties;
 
 	private Authentication authentication;
+
+	/**
+	 * @see {@link org.eclipse.aether.ConfigurationProperties#CONNECT_TIMEOUT}
+	 */
+	private int connectTimeout;
+
+	/**
+	 * @see {@link org.eclipse.aether.ConfigurationProperties#REQUEST_TIMEOUT}
+	 */
+	private int requestTimeout;
 
 	/**
 	 * Create an instance specifying the locations of the local and remote repositories.
@@ -105,6 +118,7 @@ public class AetherModuleResolver implements ModuleResolver {
 				log.debug("Remote repositories: " + StringUtils.collectionToCommaDelimitedString(remoteRepositories.values()));
 			}
 		}
+		this.mavenProperties = mavenProperties;
 		if (mavenProperties != null) {
 			this.proxyProperties = mavenProperties.getProxy();
 		}
@@ -193,6 +207,12 @@ public class AetherModuleResolver implements ModuleResolver {
 		LocalRepository localRepo = new LocalRepository(localRepoPath);
 		session.setLocalRepositoryManager(system.newLocalRepositoryManager(session, localRepo));
 		session.setOffline(this.offline);
+		if (this.mavenProperties != null && this.mavenProperties.getConnectTimeout() != null) {
+			session.setConfigProperty(ConfigurationProperties.CONNECT_TIMEOUT, this.mavenProperties.getConnectTimeout());
+		}
+		if (this.mavenProperties != null && this.mavenProperties.getRequestTimeout() != null) {
+			session.setConfigProperty(ConfigurationProperties.REQUEST_TIMEOUT, this.mavenProperties.getRequestTimeout());
+		}
 		if (isProxyEnabled()) {
 			DefaultProxySelector proxySelector = new DefaultProxySelector();
 			Proxy proxy = new Proxy(proxyProperties.getProtocol(), proxyProperties.getHost(), proxyProperties.getPort(),
