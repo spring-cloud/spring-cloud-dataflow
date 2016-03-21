@@ -103,6 +103,7 @@ public class ArtifactRegistryPopulator {
 		populateDefault("pmml", processor);
 		populateDefault("splitter", processor);
 		populateDefault("transform", processor);
+		populateDefault("aggregate-counter", sink);
 		populateDefault("cassandra", sink);
 		populateDefault("counter", sink);
 		populateDefault("field-value-counter", sink);
