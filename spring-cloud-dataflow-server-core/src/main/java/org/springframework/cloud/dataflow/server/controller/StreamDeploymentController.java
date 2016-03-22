@@ -185,6 +185,10 @@ public class StreamDeploymentController {
 			Map<String, String> moduleDeploymentProperties = extractModuleDeploymentProperties(currentModule, streamDeploymentProperties);
 			moduleDeploymentProperties.put(AppDeployer.GROUP_PROPERTY_KEY, currentModule.getGroup());
 			moduleDeploymentProperties.put(ModuleDeployer.GROUP_DEPLOYMENT_ID, currentModule.getGroup() + "-" + timestamp);
+			if (moduleDeploymentProperties.containsKey(INSTANCE_COUNT_PROPERTY_KEY)) {
+				moduleDeploymentProperties.put(AppDeployer.COUNT_PROPERTY_KEY,
+						moduleDeploymentProperties.get(INSTANCE_COUNT_PROPERTY_KEY));
+			}
 			boolean upstreamModuleSupportsPartition = upstreamModuleHasPartitionInfo(stream, currentModule, streamDeploymentProperties);
 			// consumer module partition properties
 			if (upstreamModuleSupportsPartition) {
@@ -197,9 +201,7 @@ public class StreamDeploymentController {
 			nextModuleCount = getModuleCount(moduleDeploymentProperties);
 			isDownStreamModulePartitioned = isPartitionedConsumer(currentModule, moduleDeploymentProperties,
 					upstreamModuleSupportsPartition);
-
 			currentModule = postProcessLibraryProperties(currentModule);
-
 			AppDefinition definition = new AppDefinition(currentModule.getLabel(), currentModule.getParameters());
 			MavenResource resource = MavenResource.parse(coordinates.toString(), mavenProperties);
 			AppDeploymentRequest request = new AppDeploymentRequest(definition, resource, moduleDeploymentProperties);
