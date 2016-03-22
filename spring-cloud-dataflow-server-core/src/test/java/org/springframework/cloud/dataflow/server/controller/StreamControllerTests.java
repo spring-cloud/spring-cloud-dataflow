@@ -421,6 +421,34 @@ public class StreamControllerTests {
 	}
 
 	@Test
+	public void testDeployWithWildcardProperties() throws Exception {
+		repository.save(new StreamDefinition("myStream", "time | log"));
+		mockMvc.perform(
+				post("/streams/deployments/myStream").param("properties",
+						"module.*.producer.partitionKeyExpression=payload," +
+								"module.*.count=2," +
+								"module.*.consumer.concurrency=3")
+						.accept(MediaType.APPLICATION_JSON)).andDo(print())
+				.andExpect(status().isCreated());
+		ArgumentCaptor<AppDeploymentRequest> captor = ArgumentCaptor.forClass(AppDeploymentRequest.class);
+		verify(appDeployer, times(2)).deploy(captor.capture());
+		List<AppDeploymentRequest> requests = captor.getAllValues();
+		assertEquals(2, requests.size());
+		AppDeploymentRequest logRequest = requests.get(0);
+		assertThat(logRequest.getDefinition().getName(), is("log"));
+		Map<String, String> logDeploymentProps = logRequest.getEnvironmentProperties();
+		assertEquals(logDeploymentProps.get("spring.cloud.stream.instanceCount"), "2");
+		assertEquals(logDeploymentProps.get("spring.cloud.stream.bindings.input.consumer.partitioned"), "true");
+		assertEquals(logDeploymentProps.get("spring.cloud.stream.bindings.input.consumer.concurrency"), "3");
+		assertEquals(logDeploymentProps.get("count"), "2");
+		AppDeploymentRequest timeRequest = requests.get(1);
+		assertThat(timeRequest.getDefinition().getName(), is("time"));
+		Map<String, String> timeDeploymentProps = timeRequest.getEnvironmentProperties();
+		assertEquals(timeDeploymentProps.get("spring.cloud.stream.bindings.output.producer.partitionCount"), "2");
+		assertEquals(timeDeploymentProps.get("spring.cloud.stream.bindings.output.producer.partitionKeyExpression"), "payload");
+	}
+
+	@Test
 	public void testAggregateState() {
 		assertThat(StreamDefinitionController.aggregateState(EnumSet.of(deployed, failed)), is(failed));
 		assertThat(StreamDefinitionController.aggregateState(EnumSet.of(unknown, failed)), is(failed));

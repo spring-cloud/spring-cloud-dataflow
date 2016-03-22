@@ -273,11 +273,23 @@ public class StreamDeploymentController {
 	private Map<String, String> extractModuleDeploymentProperties(ModuleDefinition module,
 			Map<String, String> streamDeploymentProperties) {
 		Map<String, String> moduleDeploymentProperties = new HashMap<>();
+		String wildCardProducerPropertyPrefix = "module.*.producer.";
+		String wildCardConsumerPropertyPrefix = "module.*.consumer.";
 		String wildCardPrefix = "module.*.";
 		// first check for wild card prefix
 		for (Map.Entry<String, String> entry : streamDeploymentProperties.entrySet()) {
 			if (entry.getKey().startsWith(wildCardPrefix)) {
-				moduleDeploymentProperties.put(entry.getKey().substring(wildCardPrefix.length()), entry.getValue());
+				if (entry.getKey().startsWith(wildCardProducerPropertyPrefix)) {
+					moduleDeploymentProperties.put(BindingPropertyKeys.OUTPUT_BINDING_KEY_PREFIX +
+							entry.getKey().substring(wildCardPrefix.length()), entry.getValue());
+				}
+				else if (entry.getKey().startsWith(wildCardConsumerPropertyPrefix)) {
+					moduleDeploymentProperties.put(BindingPropertyKeys.INPUT_BINDING_KEY_PREFIX +
+							entry.getKey().substring(wildCardPrefix.length()), entry.getValue());
+				}
+				else {
+					moduleDeploymentProperties.put(entry.getKey().substring(wildCardPrefix.length()), entry.getValue());
+				}
 			}
 		}
 		String producerPropertyPrefix = String.format("module.%s.producer.", module.getLabel());
