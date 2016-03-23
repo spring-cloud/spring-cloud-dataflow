@@ -34,15 +34,21 @@ import org.springframework.batch.core.JobInstance;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.item.ExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.PropertyPlaceholderAutoConfiguration;
 import org.springframework.boot.autoconfigure.batch.BatchProperties;
 import org.springframework.boot.autoconfigure.jdbc.EmbeddedDataSourceConfiguration;
+import org.springframework.cloud.dataflow.rest.job.support.ISO8601DateFormatWithMilliSeconds;
+import org.springframework.cloud.dataflow.server.job.support.ExecutionContextJacksonMixIn;
+import org.springframework.cloud.dataflow.server.job.support.StepExecutionJacksonMixIn;
 import org.springframework.cloud.dataflow.server.configuration.JobDependencies;
 import org.springframework.cloud.task.batch.listener.TaskBatchDao;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.dao.TaskExecutionDao;
 import org.springframework.http.MediaType;
+import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -50,14 +56,14 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 
 /**
  * @author Glenn Renfro
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = { EmbeddedDataSourceConfiguration.class,
-		JobDependencies.class,
-		PropertyPlaceholderAutoConfiguration.class, BatchProperties.class })
+		JobDependencies.class, PropertyPlaceholderAutoConfiguration.class, BatchProperties.class })
 @WebAppConfiguration
 @DirtiesContext
 public class JobStepExecutionControllerTests {
@@ -95,6 +101,9 @@ public class JobStepExecutionControllerTests {
 	@Autowired
 	private WebApplicationContext wac;
 
+	@Autowired
+	private RequestMappingHandlerAdapter adapter;
+
 	@Before
 	public void setupMockMVC() {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(wac).defaultRequest(
@@ -104,6 +113,14 @@ public class JobStepExecutionControllerTests {
 			createStepExecution(JOB_NAME_FOO, STEP_NAME_ORIG, STEP_NAME_FOO);
 			createStepExecution(JOB_NAME_FOOBAR, STEP_NAME_ORIG, STEP_NAME_FOO, STEP_NAME_FOOBAR);
 			initialized = true;
+		}
+		for(HttpMessageConverter converter : adapter.getMessageConverters()) {
+			if (converter instanceof MappingJackson2HttpMessageConverter) {
+				final MappingJackson2HttpMessageConverter jacksonConverter = (MappingJackson2HttpMessageConverter) converter;
+				jacksonConverter.getObjectMapper().addMixIn(StepExecution.class, StepExecutionJacksonMixIn.class);
+				jacksonConverter.getObjectMapper().addMixIn(ExecutionContext.class, ExecutionContextJacksonMixIn.class);
+				jacksonConverter.getObjectMapper().setDateFormat(new ISO8601DateFormatWithMilliSeconds());
+			}
 		}
 	}
 
@@ -133,9 +150,20 @@ public class JobStepExecutionControllerTests {
 				get("/jobs/executions/3/steps").accept(MediaType.APPLICATION_JSON)
 		).andExpect(status().isOk())
 				.andExpect(jsonPath("$", hasSize(3)))
-				.andExpect(jsonPath("$[0].stepExecutionId", is(4)))
-				.andExpect(jsonPath("$[1].stepExecutionId", is(5)))
-				.andExpect(jsonPath("$[2].stepExecutionId", is(6)));
+				.andExpect(jsonPath("$[0].stepExecution.id", is(4)))
+				.andExpect(jsonPath("$[1].stepExecution.id", is(5)))
+				.andExpect(jsonPath("$[2].stepExecution.id", is(6)));
+	}
+
+	@Test
+	public void testSingleGetStepExecutionProgress() throws Exception {
+		mockMvc.perform(
+				get("/jobs/executions/1/steps/1/progress").accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk())
+				.andExpect(content().json("{finished: " + false + "}"))
+				.andExpect(content().json("{percentageComplete: " + 0.5 + "}"))
+				.andExpect(jsonPath("$.stepExecutionHistory.count", is(0)))
+				.andExpect(jsonPath("$.stepExecutionHistory.commitCount.count", is(0)));
 	}
 
 	private void createStepExecution(String jobName, String... stepNames) {

@@ -35,6 +35,7 @@ import org.springframework.cloud.dataflow.server.controller.FieldValueCounterCon
 import org.springframework.cloud.dataflow.server.controller.JobExecutionController;
 import org.springframework.cloud.dataflow.server.controller.JobInstanceController;
 import org.springframework.cloud.dataflow.server.controller.JobStepExecutionController;
+import org.springframework.cloud.dataflow.server.controller.JobStepExecutionProgressController;
 import org.springframework.cloud.dataflow.server.controller.LibraryController;
 import org.springframework.cloud.dataflow.server.controller.ModuleController;
 import org.springframework.cloud.dataflow.server.controller.RestControllerAdvice;
@@ -165,6 +166,11 @@ public class DataFlowControllerAutoConfiguration {
 	@Bean
 	public JobStepExecutionController jobStepExecutionController(JobService service) {
 		return new JobStepExecutionController(service);
+	}
+
+	@Bean
+	public JobStepExecutionProgressController jobStepExecutionProgressController(JobService service) {
+		return new JobStepExecutionProgressController(service);
 	}
 
 	@Bean

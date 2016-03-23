@@ -16,16 +16,18 @@
 
 package org.springframework.cloud.dataflow.server.controller;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.TimeZone;
 
 import org.springframework.batch.admin.service.JobService;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.launch.NoSuchJobException;
 import org.springframework.batch.core.launch.NoSuchJobExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.dataflow.rest.resource.JobExecutionResource;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cloud.dataflow.rest.job.TaskJobExecution;
+import org.springframework.cloud.dataflow.rest.job.support.TimeUtils;
+import org.springframework.cloud.dataflow.rest.resource.JobExecutionResource;
 import org.springframework.cloud.dataflow.server.job.TaskJobRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -63,7 +65,7 @@ public class JobExecutionController {
 	 * from a the {@link JobService}
 	 *
 	 * @param repository the repository this controller will use for retrieving
-	 *  job execution information.
+	 * job execution information.
 	 */
 	@Autowired
 	public JobExecutionController(TaskJobRepository repository) {
@@ -78,7 +80,7 @@ public class JobExecutionController {
 	 * @param assembler for the {@link TaskJobExecution}s
 	 * @return a list of Task/Job executions
 	 */
-	@RequestMapping(value = "", method = RequestMethod.GET)
+	@RequestMapping(value = "", method = RequestMethod.GET, produces = "application/json")
 	@ResponseStatus(HttpStatus.OK)
 	public PagedResources<JobExecutionResource> list(Pageable pageable,
 			PagedResourcesAssembler<TaskJobExecution> assembler) {
@@ -90,25 +92,20 @@ public class JobExecutionController {
 	/**
 	 * Retrieve all task job executions with the task name specified
 	 *
-	 * @param jobName name of the job
+	 * @param jobName   name of the job
 	 * @param pageable  page-able collection of {@code TaskJobExecution}s.
 	 * @param assembler for the {@link TaskJobExecution}s
 	 */
-	@RequestMapping(value = "", method = RequestMethod.GET, params = "name")
+	@RequestMapping(value = "", method = RequestMethod.GET, params = "name", produces = "application/json")
 	@ResponseStatus(HttpStatus.OK)
 	public PagedResources<JobExecutionResource> retrieveJobsByName(
 			@RequestParam("name") String jobName, Pageable pageable,
-				PagedResourcesAssembler<TaskJobExecution> assembler){
+			PagedResourcesAssembler<TaskJobExecution> assembler)
+			throws NoSuchJobException {
 		Page page;
-		List<TaskJobExecution> jobExecutions;
-		try {
-			jobExecutions = repository.listJobExecutionsForJob(pageable, jobName);
-			page = new PageImpl<>(jobExecutions, pageable,
-					repository.countJobExecutionsForJob(jobName));
-		}
-		catch (NoSuchJobException e) {
-			page = new PageImpl<>(new ArrayList<TaskJobExecution>());
-		}
+		List<TaskJobExecution> jobExecutions  = repository.listJobExecutionsForJob(pageable, jobName);
+		page = new PageImpl<>(jobExecutions, pageable,
+				repository.countJobExecutionsForJob(jobName));
 		return assembler.toResource(page, jobAssembler);
 	}
 
@@ -118,11 +115,11 @@ public class JobExecutionController {
 	 * @param id the id of the requested {@link JobExecution}
 	 * @return the {@link JobExecution}
 	 */
-	@RequestMapping(value = "/{id}", method = RequestMethod.GET)
+	@RequestMapping(value = "/{id}", method = RequestMethod.GET, produces = "application/json")
 	@ResponseStatus(HttpStatus.OK)
-	public JobExecutionResource view(@PathVariable("id") long id) throws NoSuchJobExecutionException{
+	public JobExecutionResource view(@PathVariable("id") long id) throws NoSuchJobExecutionException {
 		TaskJobExecution jobExecution = repository.getJobExecution(id);
-		if(jobExecution == null){
+		if (jobExecution == null) {
 			throw new NoSuchJobExecutionException(String.format("No Job Execution with id of %d exits", id));
 		}
 		return jobAssembler.toResource(jobExecution);
@@ -133,6 +130,17 @@ public class JobExecutionController {
 	 * that converts {@link JobExecution}s to {@link JobExecutionResource}s.
 	 */
 	private static class Assembler extends ResourceAssemblerSupport<TaskJobExecution, JobExecutionResource> {
+
+		private TimeZone timeZone = TimeUtils.getDefaultTimeZone();
+
+		/**
+		 * @param timeZone the timeZone to set
+		 */
+		@Autowired(required = false)
+		@Qualifier("userTimeZone")
+		public void setTimeZone(TimeZone timeZone) {
+			this.timeZone = timeZone;
+		}
 
 		public Assembler() {
 			super(JobExecutionController.class, JobExecutionResource.class);
@@ -145,8 +153,8 @@ public class JobExecutionController {
 
 		@Override
 		public JobExecutionResource instantiateResource(TaskJobExecution taskJobExecution) {
-			JobExecution jobExecution = taskJobExecution.getJobExecution();
-			return new JobExecutionResource(taskJobExecution.getTaskId(), jobExecution);
+			return new JobExecutionResource(taskJobExecution.getTaskId(),
+					taskJobExecution.getJobExecution(), timeZone);
 		}
 	}
 }

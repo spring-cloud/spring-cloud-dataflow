@@ -16,11 +16,9 @@
 
 package org.springframework.cloud.dataflow.rest.resource;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.springframework.cloud.dataflow.rest.job.TaskJobExecution;
 import org.springframework.hateoas.ResourceSupport;
 import org.springframework.util.Assert;
 
@@ -37,17 +35,14 @@ public class JobInstanceResource extends ResourceSupport {
 
 	private List<JobExecutionResource> jobExecutions;
 
-	public JobInstanceResource(String jobName, long jobInstanceId, List<TaskJobExecution> taskJobExecutions) {
+	public JobInstanceResource(String jobName, long jobInstanceId, List<JobExecutionResource> taskJobExecutions) {
 		Assert.hasText(jobName, "jobName must not be empty nor null");
 		this.jobName = jobName;
 		this.jobInstanceId = jobInstanceId;
 		if(taskJobExecutions == null){
 			this.jobExecutions = Collections.emptyList();
 		}else {
-			this.jobExecutions = new ArrayList<>();
-			for(TaskJobExecution taskJobExecution: taskJobExecutions){
-				this.jobExecutions.add(new JobExecutionResource(jobName, taskJobExecution));
-			}
+			this.jobExecutions = taskJobExecutions;
 			this.jobExecutions = Collections.unmodifiableList(this.jobExecutions);
 		}
 	}

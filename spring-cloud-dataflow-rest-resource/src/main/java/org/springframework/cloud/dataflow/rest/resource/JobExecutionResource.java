@@ -16,15 +16,20 @@
 
 package org.springframework.cloud.dataflow.rest.resource;
 
+import java.text.DateFormat;
 import java.util.Date;
+import java.util.Properties;
+import java.util.TimeZone;
 
 import org.springframework.batch.core.BatchStatus;
-import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.JobExecution;
+import org.springframework.batch.core.JobInstance;
 import org.springframework.batch.core.JobParameters;
-import org.springframework.cloud.dataflow.rest.job.TaskJobExecution;
+import org.springframework.batch.core.converter.DefaultJobParametersConverter;
+import org.springframework.batch.core.converter.JobParametersConverter;
+import org.springframework.batch.support.PropertiesConverter;
+import org.springframework.cloud.dataflow.rest.job.support.TimeUtils;
 import org.springframework.hateoas.ResourceSupport;
-import org.springframework.util.Assert;
 
 /**
  * A HATEOAS representation of a JobExecution.
@@ -33,100 +38,164 @@ import org.springframework.util.Assert;
  */
 public class JobExecutionResource extends ResourceSupport {
 
-	/**
-	 * The unique id  associated with the task execution.
-	 */
-	private final long taskExecutionId;
+	private static final String LINE_SEPARATOR = System.getProperty("line.separator");
 
-	/**
-	 * The unique id  associated with the job execution.
-	 */
-	private final long jobExecutionId;
+	private DateFormat dateFormat = TimeUtils.getDefaultDateFormat();
 
+	private DateFormat timeFormat = TimeUtils.getDefaultTimeFormat();
 
-	/**
-	 * The recorded batch status for the Job execution.
-	 */
-	private final BatchStatus batchStatus;
+	private DateFormat durationFormat = TimeUtils.getDefaultDurationFormat();
 
-	/**
-	 * Time of when the Job was started.
-	 */
-	private final Date startTime;
+	private Long executionId;
 
-	/**
-	 * Timestamp of when the Job was completed/terminated.
-	 */
-	private final Date endTime;
+	private int stepExecutionCount;
 
-	/**
-	 * ExitStatus returned from the Job or stacktrace.parameters.
-	 */
-	private final ExitStatus exitStatus;
+	private Long jobId;
 
-	/**
-	 * The parameters that were used for this job execution.
-	 */
-	private final JobParameters parameters;
+	private Long taskExecutionId;
 
-	/**
-	 * The name associated with the job.
-	 */
-	private final String jobName;
+	private String name;
 
-	public JobExecutionResource(long taskExecutionId, JobExecution jobExecution) {
-		Assert.notNull(jobExecution, "jobExecution must not be null");
+	private String startDate = "";
+
+	private String startTime = "";
+
+	private String duration = "";
+
+	private JobExecution jobExecution;
+
+	private Properties jobParameters;
+
+	private String jobParametersString;
+
+	private boolean restartable = false;
+
+	private boolean abandonable = false;
+
+	private boolean stoppable = false;
+
+	private JobParametersConverter converter = new DefaultJobParametersConverter();
+
+	private TimeZone timeZone;
+
+	private JobExecutionResource() {
+
+	}
+
+	public JobExecutionResource( long taskExecutionId, JobExecution jobExecution, TimeZone timeZone) {
+
 		this.taskExecutionId = taskExecutionId;
-		this.jobExecutionId = jobExecution.getId();
-		this.batchStatus = jobExecution.getStatus();
-		this.startTime = jobExecution.getStartTime();
-		this.endTime = jobExecution.getEndTime();
-		this.exitStatus = jobExecution.getExitStatus();
-		this.parameters = jobExecution.getJobParameters();
-		this.jobName = jobExecution.getJobInstance().getJobName();
+		this.jobExecution = jobExecution;
+		this.timeZone = timeZone;
+		this.executionId = jobExecution.getId();
+		this.jobId = jobExecution.getJobId();
+		this.stepExecutionCount = jobExecution.getStepExecutions().size();
+		this.jobParameters = converter.getProperties(jobExecution.getJobParameters());
+		this.jobParametersString = fromJobParameters(jobExecution.getJobParameters());
+		JobInstance jobInstance = jobExecution.getJobInstance();
+		if (jobInstance != null) {
+			this.name = jobInstance.getJobName();
+			BatchStatus status = jobExecution.getStatus();
+			this.restartable = status.isGreaterThan(BatchStatus.STOPPING) && status.isLessThan(BatchStatus.ABANDONED);
+			this.abandonable = status.isGreaterThan(BatchStatus.STARTED) && status != BatchStatus.ABANDONED;
+			this.stoppable = status.isLessThan(BatchStatus.STOPPING);
+		}
+		else {
+			this.name = "?";
+		}
+
+		// Duration is always in GMT
+		durationFormat.setTimeZone(TimeUtils.getDefaultTimeZone());
+		// The others can be localized
+		timeFormat.setTimeZone(timeZone);
+		dateFormat.setTimeZone(timeZone);
+		if (jobExecution.getStartTime() != null) {
+			this.startDate = dateFormat.format(jobExecution.getStartTime());
+			this.startTime = timeFormat.format(jobExecution.getStartTime());
+			Date endTime = jobExecution.getEndTime() != null ? jobExecution.getEndTime() : new Date();
+			this.duration = durationFormat.format(new Date(endTime.getTime() - jobExecution.getStartTime().getTime()));
+		}
+
 	}
 
-	public JobExecutionResource(String jobName, TaskJobExecution taskJobExecution) {
-		Assert.notNull(taskJobExecution, "taskJobExecution must not be null");
-		this.taskExecutionId = taskJobExecution.getTaskId();
-		this.jobExecutionId = taskJobExecution.getJobExecution().getId();
-		this.batchStatus = taskJobExecution.getJobExecution().getStatus();
-		this.startTime = taskJobExecution.getJobExecution().getStartTime();
-		this.endTime = taskJobExecution.getJobExecution().getEndTime();
-		this.exitStatus = taskJobExecution.getJobExecution().getExitStatus();
-		this.parameters = taskJobExecution.getJobExecution().getJobParameters();
-		this.jobName = jobName;
+	public TimeZone getTimeZone() {
+		return timeZone;
 	}
 
-	public JobParameters getParameters() {
-		return parameters;
+	public String getName() {
+		return name;
 	}
 
-	public BatchStatus getBatchStatus() {
-		return batchStatus;
+	public Long getExecutionId() {
+		return executionId;
 	}
 
-	public Date getStartTime() {
+	public int getStepExecutionCount() {
+		return stepExecutionCount;
+	}
+
+	public Long getJobId() {
+		return jobId;
+	}
+
+	public String getStartDate() {
+		return startDate;
+	}
+
+	public String getStartTime() {
 		return startTime;
 	}
 
-	public Date getEndTime() {
-		return endTime;
+	public String getDuration() {
+		return duration;
 	}
 
-	public ExitStatus getExitStatus() {
-		return exitStatus;
+	public JobExecution getJobExecution() {
+		return jobExecution;
 	}
 
-	public long getTaskExecutionId() {
+	public boolean isRestartable() {
+		return restartable;
+	}
+
+	public boolean isAbandonable() {
+		return abandonable;
+	}
+
+	public boolean isStoppable() {
+		return stoppable;
+	}
+
+	public String getJobParametersString() {
+		return jobParametersString;
+	}
+
+	public Properties getJobParameters() {
+		return jobParameters;
+	}
+
+	public long getTaskExecutionId(){
 		return taskExecutionId;
 	}
+	/**
+	 * @param oldParameters the latest job parameters
+	 * @return a String representation for rendering the job parameters from the
+	 * last instance
+	 */
+	private  String fromJobParameters(JobParameters oldParameters) {
 
-	public long getJobExecutionId() {
-		return jobExecutionId;
+		String properties = PropertiesConverter.propertiesToString(converter.getProperties(oldParameters));
+		if (properties.startsWith("#")) {
+			properties = properties.substring(properties.indexOf(LINE_SEPARATOR) + LINE_SEPARATOR.length());
+		}
+		properties = properties.replace("\\:", ":");
+		return properties;
+
 	}
 
-	public String getJobName() {
-		return jobName;
+	private JobParameters fromString(String params) {
+		Properties properties = PropertiesConverter.stringToProperties(params);
+		return converter.getJobParameters(properties);
 	}
+
 }

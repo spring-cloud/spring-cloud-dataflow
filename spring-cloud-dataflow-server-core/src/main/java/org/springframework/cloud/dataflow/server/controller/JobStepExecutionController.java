@@ -26,6 +26,7 @@ import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.launch.NoSuchJobExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.dataflow.rest.resource.StepExecutionResource;
+import org.springframework.cloud.dataflow.server.job.support.StepExecutionResourceBuilder;
 import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.hateoas.mvc.ResourceAssemblerSupport;
 import org.springframework.http.HttpStatus;
@@ -53,7 +54,7 @@ public class JobStepExecutionController {
 	 * information from a the {@link JobService}
 	 *
 	 * @param jobService the service this controller will use for retrieving
-	 *  job execution information.
+	 *  job step execution information.
 	 */
 	@Autowired
 	public JobStepExecutionController(JobService jobService) {
@@ -70,7 +71,7 @@ public class JobStepExecutionController {
 	@RequestMapping(value = { "" }, method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
 	public List<StepExecutionResource> stepExecutions(
-			@PathVariable("jobExecutionId") Long id) throws NoSuchJobExecutionException{
+			@PathVariable("jobExecutionId") long id) throws NoSuchJobExecutionException{
 		List<StepExecution> result;
 			result = new ArrayList<>(jobService.getStepExecutions(id));
 		return stepAssembler.toResources(result);
@@ -109,7 +110,7 @@ public class JobStepExecutionController {
 
 		@Override
 		public StepExecutionResource instantiateResource(StepExecution stepExecution) {
-			return new StepExecutionResource(stepExecution);
+			return StepExecutionResourceBuilder.toResource(stepExecution);
 		}
 	}
 }

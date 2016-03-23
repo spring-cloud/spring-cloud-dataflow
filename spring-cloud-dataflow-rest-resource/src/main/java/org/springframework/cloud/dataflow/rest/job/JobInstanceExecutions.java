@@ -27,17 +27,18 @@ import org.springframework.util.Assert;
  * Enumerates the relationship between a {@link JobInstance} and its {@link JobExecution}s.
  * @author Glenn Renfro
  */
-public class JobInstanceExecution {
+public class JobInstanceExecutions {
 
 	private final JobInstance jobInstance;
 	private final List<TaskJobExecution> taskJobExecutions;
 
-	public JobInstanceExecution(JobInstance jobInstance, List<TaskJobExecution> taskJobExecutions) {
+	public JobInstanceExecutions(JobInstance jobInstance, List<TaskJobExecution> taskJobExecutions) {
 		Assert.notNull(jobInstance, "jobInstance must not be null");
 		this.jobInstance = jobInstance;
-		if(taskJobExecutions == null){
+		if (taskJobExecutions == null) {
 			this.taskJobExecutions = Collections.emptyList();
-		}else{
+		}
+		else {
 			this.taskJobExecutions = Collections.unmodifiableList(taskJobExecutions);
 		}
 	}

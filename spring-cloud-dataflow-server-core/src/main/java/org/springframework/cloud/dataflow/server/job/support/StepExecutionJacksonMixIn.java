@@ -14,33 +14,21 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.dataflow.rest.job;
+package org.springframework.cloud.dataflow.server.job.support;
 
-
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.batch.core.JobExecution;
-import org.springframework.util.Assert;
+import org.springframework.batch.core.StepExecution;
 
 /**
- * The relation a {@link JobExecution} has with its associated task
- * execution id.
+ * Jackson MixIn for {@link StepExecution} serialization. This MixIn excludes the {@link JobExecution} from being
+ * serialized. This is due to the fact that it would cause a {@link StackOverflowError} due to a circular reference.
  *
- * @author Glenn Renfro
+ * @author Gunnar Hillert
+ * @since 1.0
  */
-public class TaskJobExecution {
-	private final long taskId;
-	private final JobExecution jobExecution;
+public abstract class StepExecutionJacksonMixIn {
 
-	public TaskJobExecution(long taskId, JobExecution jobExecution) {
-		Assert.notNull(jobExecution, "jobExecution must not be null");
-		this.taskId = taskId;
-		this.jobExecution = jobExecution;
-	}
-
-	public long getTaskId() {
-		return taskId;
-	}
-
-	public JobExecution getJobExecution() {
-		return jobExecution;
-	}
+	@JsonIgnore
+	abstract JobExecution getJobExecution();
 }

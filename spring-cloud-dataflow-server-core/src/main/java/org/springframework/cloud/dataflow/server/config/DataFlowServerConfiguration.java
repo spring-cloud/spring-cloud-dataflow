@@ -23,14 +23,20 @@ import java.util.Arrays;
 
 import javax.sql.DataSource;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import org.h2.tools.Server;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.admin.service.JobService;
 import org.springframework.batch.admin.service.SimpleJobServiceFactoryBean;
+import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.configuration.support.MapJobRegistry;
 import org.springframework.batch.core.explore.support.JobExplorerFactoryBean;
 import org.springframework.batch.core.launch.support.SimpleJobLauncher;
 import org.springframework.batch.core.repository.support.JobRepositoryFactoryBean;
+import org.springframework.batch.item.ExecutionContext;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.actuate.metrics.repository.MetricRepository;
 import org.springframework.boot.actuate.metrics.repository.redis.RedisMetricRepository;
@@ -49,8 +55,12 @@ import org.springframework.cloud.dataflow.artifact.registry.RedisArtifactRegistr
 import org.springframework.cloud.dataflow.completion.CompletionConfiguration;
 import org.springframework.cloud.dataflow.completion.RecoveryStrategy;
 import org.springframework.cloud.dataflow.completion.StreamCompletionProvider;
+import org.springframework.cloud.dataflow.rest.job.support.ISO8601DateFormatWithMilliSeconds;
 import org.springframework.cloud.dataflow.server.completion.TapOnDestinationRecoveryStrategy;
+import org.springframework.cloud.dataflow.server.job.TaskExplorerFactoryBean;
 import org.springframework.cloud.dataflow.server.job.TaskJobRepository;
+import org.springframework.cloud.dataflow.server.job.support.ExecutionContextJacksonMixIn;
+import org.springframework.cloud.dataflow.server.job.support.StepExecutionJacksonMixIn;
 import org.springframework.cloud.dataflow.server.repository.InMemoryStreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.InMemoryTaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
@@ -58,13 +68,13 @@ import org.springframework.cloud.dataflow.server.repository.TaskDefinitionReposi
 import org.springframework.cloud.stream.module.metrics.FieldValueCounterRepository;
 import org.springframework.cloud.stream.module.metrics.redis.RedisFieldValueCounterRepository;
 import org.springframework.cloud.task.repository.TaskExplorer;
-import org.springframework.cloud.task.repository.support.SimpleTaskExplorer;
-import org.springframework.cloud.task.repository.support.TaskExecutionDaoFactoryBean;
 import org.springframework.cloud.task.repository.support.TaskRepositoryInitializer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Primary;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
@@ -145,13 +155,33 @@ public class DataFlowServerConfiguration {
 	@ConditionalOnWebApplication
 	public static class ServerWebConfiguration {
 
+		private static final String SPRING_HATEOAS_OBJECT_MAPPER = "_halObjectMapper";
+
+		/**
+		 * Obtains the Spring Hateos Object Mapper so that we can apply SCDF Batch Mixins
+		 * to ignore the JobExecution in StepExecution to prevent infinite loop.
+		 */
+		@Autowired
+		@Qualifier(SPRING_HATEOAS_OBJECT_MAPPER)
+		private ObjectMapper springHateoasObjectMapper;
+
+		@Bean
+		@Primary
+		public ObjectMapper objectMapper(){
+			ObjectMapper objectMapper = springHateoasObjectMapper;
+			setupObjectMapper(objectMapper);
+			return objectMapper;
+		}
+
 		@Bean
 		public HttpMessageConverters messageConverters() {
+			final ObjectMapper objectMapper = new ObjectMapper();
+			setupObjectMapper(objectMapper);
 			return new HttpMessageConverters(
 					// Prevent default converters
 					false,
 					// Have Jackson2 converter as the sole converter
-					Arrays.<HttpMessageConverter<?>>asList(new MappingJackson2HttpMessageConverter()));
+					Arrays.<HttpMessageConverter<?>>asList(new MappingJackson2HttpMessageConverter(objectMapper)));
 		}
 
 		@Bean
@@ -164,6 +194,13 @@ public class DataFlowServerConfiguration {
 				}
 			};
 		}
+
+		private void setupObjectMapper(ObjectMapper objectMapper){
+			objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+			objectMapper.setDateFormat(new ISO8601DateFormatWithMilliSeconds());
+			objectMapper.addMixIn(StepExecution.class, StepExecutionJacksonMixIn.class);
+			objectMapper.addMixIn(ExecutionContext.class, ExecutionContextJacksonMixIn.class);
+		}
 	}
 
 	@Bean
@@ -175,42 +212,38 @@ public class DataFlowServerConfiguration {
 	}
 
 	@Bean
-	@ConditionalOnBean(Server.class)
-	public TaskExplorer taskExplorer(DataSource dataSource, Server server) {
-		return new SimpleTaskExplorer(new TaskExecutionDaoFactoryBean(dataSource));
+	public TaskExplorerFactoryBean taskExplorerFactoryBean(DataSource dataSource) {
+		return new TaskExplorerFactoryBean(dataSource);
 	}
 
 	@Bean
-	@ConditionalOnMissingBean(Server.class)
-	public TaskExplorer taskExplorer(DataSource dataSource) {
-		return new SimpleTaskExplorer(new TaskExecutionDaoFactoryBean(dataSource));
-	}
-
-	@Bean
-	public TaskJobRepository taskJobExecutionRepository(JobService service, TaskExplorer taskExplorer){
+	public TaskJobRepository taskJobExecutionRepository(JobService service, TaskExplorer taskExplorer) {
 		return new TaskJobRepository(service, taskExplorer);
 	}
 
 	@Bean
 	public SimpleJobServiceFactoryBean simpleJobServiceFactoryBean(DataSource dataSource,
-			JobRepositoryFactoryBean repositoryFactoryBean) {
+			JobRepositoryFactoryBean repositoryFactoryBean) throws Exception {
 		SimpleJobServiceFactoryBean factoryBean = new SimpleJobServiceFactoryBean();
 		factoryBean.setDataSource(dataSource);
-		try {
-			factoryBean.setJobRepository(repositoryFactoryBean.getObject());
-			factoryBean.setJobLocator(new MapJobRegistry());
-			factoryBean.setJobLauncher(new SimpleJobLauncher());
-			factoryBean.setDataSource(dataSource);
-		}
-		catch (Exception e) {
-			throw new IllegalStateException(e);
-		}
+		factoryBean.setJobRepository(repositoryFactoryBean.getObject());
+		factoryBean.setJobLocator(new MapJobRegistry());
+		factoryBean.setJobLauncher(new SimpleJobLauncher());
+		factoryBean.setDataSource(dataSource);
 		return factoryBean;
 	}
 
 	@Bean
-	@ConditionalOnBean(Server.class)
-	public JobRepositoryFactoryBean jobRepositoryFactoryBeanForServer(DataSource dataSource, Server server, DataSourceTransactionManager dataSourceTransactionManager){
+	public JobExplorerFactoryBean jobExplorerFactoryBean(DataSource dataSource) {
+		JobExplorerFactoryBean jobExplorerFactoryBean = new JobExplorerFactoryBean();
+		jobExplorerFactoryBean.setDataSource(dataSource);
+		return jobExplorerFactoryBean;
+	}
+
+	@Bean
+	@ConditionalOnExpression("#{'${spring.datasource.url:}'.startsWith('jdbc:h2:tcp://localhost:') && '${spring.datasource.url:}'.contains('/mem:')}")
+	public JobRepositoryFactoryBean jobRepositoryFactoryBeanForServer(DataSource dataSource,
+			Server server, DataSourceTransactionManager dataSourceTransactionManager) {
 		JobRepositoryFactoryBean repositoryFactoryBean = new JobRepositoryFactoryBean();
 		repositoryFactoryBean.setDataSource(dataSource);
 		repositoryFactoryBean.setTransactionManager(dataSourceTransactionManager);
@@ -218,52 +251,36 @@ public class DataFlowServerConfiguration {
 	}
 
 	@Bean
-	@ConditionalOnBean(Server.class)
-	public DataSourceTransactionManager transactionManagerForServer(DataSource dataSource, Server server){
+	@ConditionalOnExpression("#{'${spring.datasource.url:}'.startsWith('jdbc:h2:tcp://localhost:') && '${spring.datasource.url:}'.contains('/mem:')}")
+	public DataSourceTransactionManager transactionManagerForServer(DataSource dataSource, Server server) {
 		return new DataSourceTransactionManager(dataSource);
 	}
 
 	@Bean
-	@ConditionalOnBean(Server.class)
-	public JobExplorerFactoryBean jobExplorerFactoryBeanForServer(DataSource dataSource, Server server){
-		JobExplorerFactoryBean jobExplorerFactoryBean = new JobExplorerFactoryBean();
-		jobExplorerFactoryBean.setDataSource(dataSource);
-		return jobExplorerFactoryBean;
-	}
-
-	@Bean
-	@ConditionalOnBean(Server.class)
+	@ConditionalOnExpression("#{'${spring.datasource.url:}'.startsWith('jdbc:h2:tcp://localhost:') && '${spring.datasource.url:}'.contains('/mem:')}")
 	public BatchDatabaseInitializer batchRepositoryInitializerForDefaultDBForServer(DataSource dataSource, Server server) {
 		return new BatchDatabaseInitializer();
 	}
 
 	@Bean
-	@ConditionalOnMissingBean(Server.class)
-	public JobRepositoryFactoryBean jobRepositoryFactoryBean(DataSource dataSource, DataSourceTransactionManager dataSourceTransactionManager){
+	@ConditionalOnExpression("#{!'${spring.datasource.url:}'.startsWith('jdbc:h2:tcp://localhost:') && !'${spring.datasource.url:}'.contains('/mem:')}")
+	public JobRepositoryFactoryBean jobRepositoryFactoryBean(DataSource dataSource,
+			DataSourceTransactionManager dataSourceTransactionManager) {
 		JobRepositoryFactoryBean repositoryFactoryBean = new JobRepositoryFactoryBean();
 		repositoryFactoryBean.setDataSource(dataSource);
 		repositoryFactoryBean.setTransactionManager(dataSourceTransactionManager);
 		return repositoryFactoryBean;
 	}
 
-
 	@Bean
-	@ConditionalOnMissingBean(Server.class)
-	public JobExplorerFactoryBean jobExplorerFactoryBean(DataSource dataSource){
-		JobExplorerFactoryBean jobExplorerFactoryBean = new JobExplorerFactoryBean();
-		jobExplorerFactoryBean.setDataSource(dataSource);
-		return jobExplorerFactoryBean;
-	}
-
-	@Bean
-	@ConditionalOnMissingBean(Server.class)
-	public DataSourceTransactionManager transactionManager(DataSource dataSource){
+	@ConditionalOnExpression("#{!'${spring.datasource.url:}'.startsWith('jdbc:h2:tcp://localhost:') && !'${spring.datasource.url:}'.contains('/mem:')}")
+	public DataSourceTransactionManager transactionManager(DataSource dataSource) {
 		return new DataSourceTransactionManager(dataSource);
 	}
 
 
 	@Bean
-	@ConditionalOnMissingBean(Server.class)
+	@ConditionalOnExpression("#{!'${spring.datasource.url:}'.startsWith('jdbc:h2:tcp://localhost:') && !'${spring.datasource.url:}'.contains('/mem:')}")
 	public BatchDatabaseInitializer batchRepositoryInitializerForDefaultDB(DataSource dataSource) {
 		return new BatchDatabaseInitializer();
 	}
@@ -284,7 +301,7 @@ public class DataFlowServerConfiguration {
 	}
 
 	@Bean
-	@ConditionalOnMissingBean(Server.class)
+	@ConditionalOnExpression("#{!'${spring.datasource.url:}'.startsWith('jdbc:h2:tcp://localhost:') && !'${spring.datasource.url:}'.contains('/mem:')}")
 	public TaskRepositoryInitializer taskRepositoryInitializerForDB(DataSource dataSource) {
 		TaskRepositoryInitializer taskRepositoryInitializer = new TaskRepositoryInitializer();
 		taskRepositoryInitializer.setDataSource(dataSource);
@@ -292,7 +309,7 @@ public class DataFlowServerConfiguration {
 	}
 
 	@Bean
-	@ConditionalOnBean(Server.class)
+	@ConditionalOnExpression("#{'${spring.datasource.url:}'.startsWith('jdbc:h2:tcp://localhost:') && '${spring.datasource.url:}'.contains('/mem:')}")
 	public TaskRepositoryInitializer taskRepositoryInitializerForDefaultDB(DataSource dataSource, Server server) {
 		TaskRepositoryInitializer taskRepositoryInitializer = new TaskRepositoryInitializer();
 		taskRepositoryInitializer.setDataSource(dataSource);
@@ -304,4 +321,5 @@ public class DataFlowServerConfiguration {
 		Assert.isTrue(tokens.length >= 5, "URL not properly formatted");
 		return tokens[4].substring(0, tokens[4].indexOf("/"));
 	}
+
 }

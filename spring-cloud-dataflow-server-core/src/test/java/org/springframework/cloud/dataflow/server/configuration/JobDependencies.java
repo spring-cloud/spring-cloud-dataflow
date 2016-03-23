@@ -30,6 +30,7 @@ import org.springframework.boot.autoconfigure.batch.BatchDatabaseInitializer;
 import org.springframework.cloud.dataflow.server.controller.JobExecutionController;
 import org.springframework.cloud.dataflow.server.controller.JobInstanceController;
 import org.springframework.cloud.dataflow.server.controller.JobStepExecutionController;
+import org.springframework.cloud.dataflow.server.controller.JobStepExecutionProgressController;
 import org.springframework.cloud.dataflow.server.controller.RestControllerAdvice;
 import org.springframework.cloud.dataflow.server.controller.TaskExecutionController;
 import org.springframework.cloud.dataflow.server.job.TaskJobRepository;
@@ -63,6 +64,10 @@ public class JobDependencies {
 	@Bean
 	public JobStepExecutionController jobStepExecutionController(JobService jobService) {
 		return new JobStepExecutionController(jobService);
+	}
+	@Bean
+	public JobStepExecutionProgressController jobStepExecutionProgressController(JobService jobService) {
+		return new JobStepExecutionProgressController(jobService);
 	}
 
 	@Bean

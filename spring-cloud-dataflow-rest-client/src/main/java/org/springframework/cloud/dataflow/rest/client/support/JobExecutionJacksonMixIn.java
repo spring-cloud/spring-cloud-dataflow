@@ -14,33 +14,22 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.dataflow.rest.job;
+package org.springframework.cloud.dataflow.rest.client.support;
 
-
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.batch.core.JobExecution;
-import org.springframework.util.Assert;
 
 /**
- * The relation a {@link JobExecution} has with its associated task
- * execution id.
+ * Jackson MixIn for {@link JobExecution} de-serialization. {@link JobExecution} does not have a default constructor.
  *
- * @author Glenn Renfro
+ * @author Gunnar Hillert
+ * @since 1.0
  */
-public class TaskJobExecution {
-	private final long taskId;
-	private final JobExecution jobExecution;
+@JsonIgnoreProperties({ "running", "jobId", "stopping" })
+public abstract class JobExecutionJacksonMixIn {
 
-	public TaskJobExecution(long taskId, JobExecution jobExecution) {
-		Assert.notNull(jobExecution, "jobExecution must not be null");
-		this.taskId = taskId;
-		this.jobExecution = jobExecution;
+	JobExecutionJacksonMixIn(@JsonProperty("id") Long id) {
 	}
 
-	public long getTaskId() {
-		return taskId;
-	}
-
-	public JobExecution getJobExecution() {
-		return jobExecution;
-	}
 }

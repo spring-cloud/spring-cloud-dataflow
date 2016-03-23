@@ -17,13 +17,19 @@
 package org.springframework.cloud.dataflow.server.controller;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.TimeZone;
 
 import org.springframework.batch.core.JobInstance;
 import org.springframework.batch.core.launch.NoSuchJobException;
 import org.springframework.batch.core.launch.NoSuchJobInstanceException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.dataflow.rest.job.JobInstanceExecution;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.cloud.dataflow.rest.job.JobInstanceExecutions;
+import org.springframework.cloud.dataflow.rest.job.TaskJobExecution;
+import org.springframework.cloud.dataflow.rest.job.support.TimeUtils;
+import org.springframework.cloud.dataflow.rest.resource.JobExecutionResource;
 import org.springframework.cloud.dataflow.rest.resource.JobInstanceResource;
 import org.springframework.cloud.dataflow.server.job.TaskJobRepository;
 import org.springframework.data.domain.Page;
@@ -78,16 +84,16 @@ public class JobInstanceController {
 	@RequestMapping(value = "", method = RequestMethod.GET, params = "name")
 	@ResponseStatus(HttpStatus.OK)
 	public PagedResources<JobInstanceResource> list(@RequestParam("name") String jobName,
-			Pageable pageable, PagedResourcesAssembler<JobInstanceExecution> assembler)
+			Pageable pageable, PagedResourcesAssembler<JobInstanceExecutions> assembler)
 			throws NoSuchJobException {
-		List<JobInstanceExecution> jobInstances;
+		List<JobInstanceExecutions> jobInstances;
 		Page page;
 		try{
 			jobInstances = repository.listTaskJobInstancesForJobName(pageable, jobName);
 			page = new PageImpl<>(jobInstances, pageable, repository.countJobInstances(jobName));
 		}
 		catch (NoSuchJobException e){
-				page = new PageImpl<>(new ArrayList<JobInstanceExecution>());
+				page = new PageImpl<>(new ArrayList<JobInstanceExecutions>());
 		}
 		return assembler.toResource(page, jobAssembler);
 	}
@@ -102,7 +108,7 @@ public class JobInstanceController {
 	@ResponseStatus(HttpStatus.OK)
 	public JobInstanceResource view(@PathVariable("id") long id)
 			throws NoSuchJobInstanceException, NoSuchJobException {
-		JobInstanceExecution jobInstance = repository.getJobInstance(id);
+		JobInstanceExecutions jobInstance = repository.getJobInstance(id);
 		return jobAssembler.toResource(jobInstance);
 	}
 
@@ -110,21 +116,37 @@ public class JobInstanceController {
 	 * {@link org.springframework.hateoas.ResourceAssembler} implementation
 	 * that converts {@link JobInstance}s to {@link JobInstanceResource}s.
 	 */
-	private static class Assembler extends ResourceAssemblerSupport<JobInstanceExecution, JobInstanceResource> {
+	private static class Assembler extends ResourceAssemblerSupport<JobInstanceExecutions, JobInstanceResource> {
+
+		private TimeZone timeZone = TimeUtils.getDefaultTimeZone();
+
+		/**
+		 * @param timeZone the timeZone to set
+		 */
+		@Autowired(required = false)
+		@Qualifier("userTimeZone")
+		public void setTimeZone(TimeZone timeZone) {
+			this.timeZone = timeZone;
+		}
 
 		public Assembler() {
 			super(JobInstanceController.class, JobInstanceResource.class);
 		}
 
 		@Override
-		public JobInstanceResource toResource(JobInstanceExecution jobInstance) {
+		public JobInstanceResource toResource(JobInstanceExecutions jobInstance) {
 			return createResourceWithId(jobInstance.getJobInstance().getInstanceId(), jobInstance);
 		}
 
 		@Override
-		public JobInstanceResource instantiateResource(JobInstanceExecution jobInstance) {
+		public JobInstanceResource instantiateResource(JobInstanceExecutions jobInstance) {
+			List<JobExecutionResource> jobExecutions = new ArrayList<>();
+			for(TaskJobExecution taskJobExecution: jobInstance.getTaskJobExecutions()){
+				jobExecutions.add(new JobExecutionResource(taskJobExecution.getTaskId(), taskJobExecution.getJobExecution(),timeZone));
+			}
+			jobExecutions = Collections.unmodifiableList(jobExecutions);
 			return new JobInstanceResource(jobInstance.getJobInstance().getJobName(),
-							jobInstance.getJobInstance().getInstanceId(),jobInstance.getTaskJobExecutions());
+							jobInstance.getJobInstance().getInstanceId(), jobExecutions);
 		}
 	}
 }

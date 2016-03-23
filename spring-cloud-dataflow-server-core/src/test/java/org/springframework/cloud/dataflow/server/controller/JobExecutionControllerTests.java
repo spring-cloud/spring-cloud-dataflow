@@ -114,7 +114,7 @@ public class JobExecutionControllerTests {
 	public void testGetExecution() throws Exception{
 		mockMvc.perform(
 				get("/jobs/executions/1").accept(MediaType.APPLICATION_JSON)
-		).andExpect(status().isOk()).andExpect(content().json("{jobExecutionId: " +
+		).andExpect(status().isOk()).andExpect(content().json("{executionId: " +
 				1 + "}"));
 	}
 
@@ -133,7 +133,7 @@ public class JobExecutionControllerTests {
 		mockMvc.perform(
 				get("/jobs/executions/").param("name", JOB_NAME_ORIG).accept(MediaType.APPLICATION_JSON)
 		).andExpect(status().isOk())
-				.andExpect(jsonPath("$.content[0].jobName", is(JOB_NAME_ORIG)))
+				.andExpect(jsonPath("$.content[0].jobExecution.jobInstance.jobName", is(JOB_NAME_ORIG)))
 				.andExpect(jsonPath("$.content", hasSize(1)));
 	}
 
@@ -142,8 +142,8 @@ public class JobExecutionControllerTests {
 		mockMvc.perform(
 				get("/jobs/executions/").param("name", JOB_NAME_FOOBAR).accept(MediaType.APPLICATION_JSON)
 		).andExpect(status().isOk())
-				.andExpect(jsonPath("$.content[0].jobName", is(JOB_NAME_FOOBAR)))
-				.andExpect(jsonPath("$.content[1].jobName", is(JOB_NAME_FOOBAR)))
+				.andExpect(jsonPath("$.content[0].jobExecution.jobInstance.jobName", is(JOB_NAME_FOOBAR)))
+				.andExpect(jsonPath("$.content[1].jobExecution.jobInstance.jobName", is(JOB_NAME_FOOBAR)))
 				.andExpect(jsonPath("$.content", hasSize(2)));
 	}
 
@@ -151,8 +151,7 @@ public class JobExecutionControllerTests {
 	public void testGetExecutionsByNameNotFound() throws Exception{
 		mockMvc.perform(
 				get("/jobs/executions/").param("name", "BAZ").accept(MediaType.APPLICATION_JSON)
-		).andExpect(status().isOk())
-				.andExpect(jsonPath("$.content", hasSize(0)));
+		).andExpect(status().isNotFound());
 	}
 
 	private void createSampleJob(String jobName, int jobExecutionCount){
