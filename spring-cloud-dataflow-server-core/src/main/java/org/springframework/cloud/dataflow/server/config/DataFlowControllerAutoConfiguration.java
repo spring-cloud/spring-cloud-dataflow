@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.dataflow.server.config;
 
+import org.springframework.batch.admin.service.JobService;
 import org.springframework.boot.actuate.metrics.repository.MetricRepository;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
@@ -26,6 +27,9 @@ import org.springframework.cloud.dataflow.completion.StreamCompletionProvider;
 import org.springframework.cloud.dataflow.server.controller.CompletionController;
 import org.springframework.cloud.dataflow.server.controller.CounterController;
 import org.springframework.cloud.dataflow.server.controller.FieldValueCounterController;
+import org.springframework.cloud.dataflow.server.controller.JobExecutionController;
+import org.springframework.cloud.dataflow.server.controller.JobInstanceController;
+import org.springframework.cloud.dataflow.server.controller.JobStepExecutionController;
 import org.springframework.cloud.dataflow.server.controller.LibraryController;
 import org.springframework.cloud.dataflow.server.controller.ModuleController;
 import org.springframework.cloud.dataflow.server.controller.RestControllerAdvice;
@@ -39,6 +43,7 @@ import org.springframework.cloud.dataflow.server.controller.TaskDefinitionContro
 import org.springframework.cloud.dataflow.server.controller.TaskDeploymentController;
 import org.springframework.cloud.dataflow.server.controller.TaskExecutionController;
 import org.springframework.cloud.dataflow.server.controller.UiController;
+import org.springframework.cloud.dataflow.server.job.TaskJobRepository;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.deployer.resource.maven.MavenProperties;
@@ -103,6 +108,21 @@ public class DataFlowControllerAutoConfiguration {
 	@Bean
 	public TaskExecutionController taskExecutionController(TaskExplorer explorer) {
 		return new TaskExecutionController(explorer);
+	}
+
+	@Bean
+	public JobExecutionController jobExecutionController(TaskJobRepository repository) {
+		return new JobExecutionController(repository);
+	}
+
+	@Bean
+	public JobStepExecutionController jobStepExecutionController(JobService service) {
+		return new JobStepExecutionController(service);
+	}
+
+	@Bean
+	JobInstanceController jobInstanceController(TaskJobRepository repository){
+		return new JobInstanceController(repository);
 	}
 
 	@Bean

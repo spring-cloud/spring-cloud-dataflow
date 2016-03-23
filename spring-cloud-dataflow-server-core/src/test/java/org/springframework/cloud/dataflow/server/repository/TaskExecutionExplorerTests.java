@@ -18,9 +18,6 @@ package org.springframework.cloud.dataflow.server.repository;
 
 import static org.junit.Assert.assertEquals;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -39,7 +36,7 @@ import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -50,6 +47,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 @ContextConfiguration(classes = {TaskDependencies.class,
 		EmbeddedDataSourceConfiguration.class,
 		PropertyPlaceholderAutoConfiguration.class})
+@DirtiesContext
 public class TaskExecutionExplorerTests {
 	@Autowired
 	private DataSource dataSource;
@@ -86,7 +84,7 @@ public class TaskExecutionExplorerTests {
 				findAll(new PageRequest(0, 10)).getContent();
 		assertEquals(String.format("expected %s entries returned from task_execution",
 				ENTRY_COUNT), ENTRY_COUNT, resultList.size());
-		Map<Long, TaskExecution> actual= new HashMap<Long, TaskExecution>();
+		Map<Long, TaskExecution> actual= new HashMap<>();
 		for(int executionId = 0; executionId < ENTRY_COUNT; executionId++){
 			TaskExecution taskExecution = resultList.get(executionId);
 			actual.put(taskExecution.getExecutionId(), taskExecution);
@@ -127,25 +125,6 @@ public class TaskExecutionExplorerTests {
 		Object[] param = new Object[] {id, new Date(id), new Date(), taskName, 0, null,
 				new Date()};
 		template.update(INSERT_STATEMENT, param);
-	}
-
-	private final class TaskExecutionRowMapper implements RowMapper<TaskExecution> {
-
-		public TaskExecutionRowMapper() {
-		}
-
-		@Override
-		public TaskExecution mapRow(ResultSet rs, int rowNum) throws SQLException {
-			long  id = rs.getLong("TASK_EXECUTION_ID");
-			TaskExecution taskExecution=new TaskExecution(id,
-					rs.getInt("EXIT_CODE"),
-					rs.getString("TASK_NAME"),
-					rs.getTimestamp("START_TIME"),
-					rs.getTimestamp("END_TIME"),
-					rs.getString("EXIT_MESSAGE"),
-					new ArrayList<String>());
-			return taskExecution;
-		}
 	}
 
 }

@@ -16,7 +16,6 @@
 
 package org.springframework.cloud.dataflow.server.controller;
 
-import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -33,6 +32,7 @@ import org.junit.runner.RunWith;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobInstance;
 import org.springframework.batch.core.JobParameters;
+import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.PropertyPlaceholderAutoConfiguration;
@@ -55,20 +55,29 @@ import org.springframework.web.context.WebApplicationContext;
  * @author Glenn Renfro
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = {EmbeddedDataSourceConfiguration.class,
+@ContextConfiguration(classes = { EmbeddedDataSourceConfiguration.class,
 		JobDependencies.class,
-		PropertyPlaceholderAutoConfiguration.class, BatchProperties.class})
+		PropertyPlaceholderAutoConfiguration.class, BatchProperties.class })
 @WebAppConfiguration
 @DirtiesContext
-public class TaskExecutionControllerTests {
+public class JobStepExecutionControllerTests {
 
-	private final static String BASE_TASK_NAME = "myTask";
+	private final static String BASE_JOB_NAME = "myJob";
 
-	private final static String TASK_NAME_ORIG = BASE_TASK_NAME + "_ORIG";
+	private final static String JOB_NAME_ORIG = BASE_JOB_NAME + "_ORIG";
 
-	private final static String TASK_NAME_FOO = BASE_TASK_NAME + "_FOO";
+	private final static String JOB_NAME_FOO = BASE_JOB_NAME + "_FOO";
 
-	private final static String TASK_NAME_FOOBAR = BASE_TASK_NAME + "_FOOBAR";
+	private final static String JOB_NAME_FOOBAR = BASE_JOB_NAME + "_FOOBAR";
+
+	private final static String BASE_STEP_NAME = "myStep";
+
+	private final static String STEP_NAME_ORIG = BASE_STEP_NAME + "_ORIG";
+
+	private final static String STEP_NAME_FOO = BASE_STEP_NAME + "_FOO";
+
+	private final static String STEP_NAME_FOOBAR = BASE_STEP_NAME + "_FOOBAR";
+
 
 	private static boolean initialized = false;
 
@@ -91,79 +100,55 @@ public class TaskExecutionControllerTests {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(wac).defaultRequest(
 				get("/").accept(MediaType.APPLICATION_JSON)).build();
 		if (!initialized) {
-			dao.createTaskExecution(TASK_NAME_ORIG, new Date(), new ArrayList<String>());
-			dao.createTaskExecution(TASK_NAME_ORIG, new Date(), new ArrayList<String>());
-			dao.createTaskExecution(TASK_NAME_FOO, new Date(), new ArrayList<String>());
-			TaskExecution taskExecution = dao.createTaskExecution(TASK_NAME_FOOBAR,
-					new Date(), new ArrayList<String>());
-			JobInstance instance = jobRepository.createJobInstance(TASK_NAME_FOOBAR,
-					new JobParameters());
-			JobExecution jobExecution = jobRepository.createJobExecution(
-					instance, new JobParameters(), null);
-			taskBatchDao.saveRelationship(taskExecution,jobExecution);
-
+			createStepExecution(JOB_NAME_ORIG, STEP_NAME_ORIG);
+			createStepExecution(JOB_NAME_FOO, STEP_NAME_ORIG, STEP_NAME_FOO);
+			createStepExecution(JOB_NAME_FOOBAR, STEP_NAME_ORIG, STEP_NAME_FOO, STEP_NAME_FOOBAR);
 			initialized = true;
 		}
 	}
 
 	@Test(expected = IllegalArgumentException.class)
-	public void testTaskExecutionControllerConstructorMissingExplorer() {
-		new TaskExecutionController(null);
+	public void testJobStepExecutionControllerConstructorMissingRepository() {
+		new JobStepExecutionController(null);
 	}
 
 	@Test
-	public void testGetExecutionNotFound() throws Exception{
+	public void testGetExecutionNotFound() throws Exception {
 		mockMvc.perform(
-				get("/tasks/executions/1345345345345").accept(MediaType.APPLICATION_JSON)
+				get("/jobs/executions/1342434234/steps").accept(MediaType.APPLICATION_JSON)
 		).andExpect(status().isNotFound());
 	}
 
 	@Test
-	public void testGetExecution() throws Exception{
+	public void testSingleGetStepExecution() throws Exception {
 		mockMvc.perform(
-				get("/tasks/executions/1").accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk())
-				.andExpect(content().json("{taskName: \"" + TASK_NAME_ORIG + "\"}"))
-				.andExpect(jsonPath("jobExecutionIds", hasSize(0)));
+				get("/jobs/executions/1/steps/1").accept(MediaType.APPLICATION_JSON)
+		).andExpect(status().isOk()).andExpect(content().json("{jobExecutionId: " +
+				1 + "}"));
 	}
 
 	@Test
-	public void testGetExecutionForJob() throws Exception{
+	public void testGetMultipleStepExecutions() throws Exception {
 		mockMvc.perform(
-				get("/tasks/executions/4").accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk())
-				.andExpect(content().json("{taskName: \"" + TASK_NAME_FOOBAR + "\"}"))
-				.andExpect(jsonPath("jobExecutionIds[0]", is(1)))
-				.andExpect(jsonPath("jobExecutionIds", hasSize(1)));
-	}
-
-	@Test
-	public void testGetAllExecutions() throws Exception{
-		mockMvc.perform(
-				get("/tasks/executions/").accept(MediaType.APPLICATION_JSON)
+				get("/jobs/executions/3/steps").accept(MediaType.APPLICATION_JSON)
 		).andExpect(status().isOk())
-				.andExpect(jsonPath("$.content[*].executionId",
-						containsInAnyOrder(4, 3, 2, 1)))
-				.andExpect(jsonPath("$.content", hasSize(4)));
+				.andExpect(jsonPath("$", hasSize(3)))
+				.andExpect(jsonPath("$[0].stepExecutionId", is(4)))
+				.andExpect(jsonPath("$[1].stepExecutionId", is(5)))
+				.andExpect(jsonPath("$[2].stepExecutionId", is(6)));
 	}
 
-	@Test
-	public void testGetExecutionsByName() throws Exception{
-		mockMvc.perform(
-				get("/tasks/executions/").param("name", TASK_NAME_ORIG).accept(MediaType.APPLICATION_JSON)
-		).andExpect(status().isOk())
-				.andExpect(jsonPath("$.content[0].taskName", is(TASK_NAME_ORIG)))
-				.andExpect(jsonPath("$.content[1].taskName", is(TASK_NAME_ORIG)))
-				.andExpect(jsonPath("$.content[0].jobExecutionIds", hasSize(0)))
-				.andExpect(jsonPath("$.content[1].jobExecutionIds", hasSize(0)))
-				.andExpect(jsonPath("$.content", hasSize(2)));
-	}
-
-	@Test
-	public void testGetExecutionsByNameNotFound() throws Exception{
-		mockMvc.perform(
-				get("/tasks/executions/").param("name", "BAZ").accept(MediaType.APPLICATION_JSON)
-		).andExpect(status().isOk())
-				.andExpect(jsonPath("$.content", hasSize(0)));
+	private void createStepExecution(String jobName, String... stepNames) {
+		JobInstance instance = jobRepository.createJobInstance(jobName, new JobParameters());
+		JobExecution jobExecution = jobRepository.createJobExecution(
+				instance, new JobParameters(), null);
+		for(String stepName : stepNames) {
+			StepExecution stepExecution = new StepExecution(stepName, jobExecution, 1L);
+			stepExecution.setId(null);
+			jobRepository.add(stepExecution);
+		}
+		TaskExecution taskExecution = dao.createTaskExecution(
+				jobName, new Date(), new ArrayList<String>());
+		taskBatchDao.saveRelationship(taskExecution, jobExecution);
 	}
 }
