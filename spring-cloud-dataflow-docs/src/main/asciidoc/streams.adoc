@@ -53,12 +53,6 @@ If you would like to have multiple instances of a module in the stream, you can 
 dataflow:> stream deploy --name ticktock --properties "module.time.count=3"
 ```
 
-You can also include a http://docs.spring.io/spring/docs/4.0.x/spring-framework-reference/htmlsingle/#expressions[SpEL Expression] as a `criteria` property for any module. That will be evaluated against the attributes of each currently available module.
-
-```
-dataflow:> stream deploy --name ticktock --properties "module.time.count=3,module.log.criteria=groups.contains('x')"
-```
-
 IMPORTANT: See <<module-labels>>.
 
 == Deleting a Stream
