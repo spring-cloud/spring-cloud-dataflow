@@ -47,7 +47,7 @@ import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepo
 import org.springframework.cloud.dataflow.server.repository.TaskDatabaseInitializer;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.stream.module.metrics.FieldValueCounterRepository;
-import org.springframework.cloud.stream.module.metrics.RedisFieldValueCounterRepository;
+import org.springframework.cloud.stream.module.metrics.redis.RedisFieldValueCounterRepository;
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.cloud.task.repository.support.JdbcTaskExplorerFactoryBean;
 import org.springframework.context.annotation.Bean;
