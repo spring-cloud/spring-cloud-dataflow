@@ -21,6 +21,11 @@
 		<dependencies>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-dataflow-shell</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-dataflow-completion</artifactId>
 				<version>${project.version}</version>
 			</dependency>
