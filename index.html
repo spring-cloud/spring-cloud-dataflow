@@ -46,9 +46,7 @@ use cases such as data ingest, real-time analytics, and data import/export.
 
 {% capture main_content %}
 
-Spring Cloud Data Flow is the cloud native redesign of [Spring XD](http://projects.spring.io/spring-xd/) – a project that aimed to simplify development of Big Data applications. The integration 
-and batch modules from Spring XD are refactored into Spring Boot _data-microservice_ 
-applications that are now autonomous deployment units – thus enabling them to take 
+Spring Cloud Data Flow is the cloud native redesign of [Spring XD](http://projects.spring.io/spring-xd/) – a project that aimed to simplify development of Big Data applications. The integration and batch modules from Spring XD are refactored into Spring Boot data-microservices that are now autonomous deployment applications – thus enabling them to take 
 full advantage of platform capabilities "natively", and they can independently evolve 
 in isolation.
 
@@ -80,18 +78,17 @@ Step 3 - Build Project
 mvn clean package
 ```
 
-Step 4 - Launch **‘local’** Implementation of Server: 
+Step 4 - Launch **‘local’** Server [_spring-cloud-dataflow-server-local/target_] 
 ```
-java -jar spring-cloud-dataflow-server-local/target/
-spring-cloud-dataflow-server-local-***.jar 
-```
-
-Step 5 - Launch Shell
-```
-java -jar spring-cloud-dataflow-shell/target/spring-cloud-dataflow-shell-***.jar
+java -jar spring-cloud-dataflow-server-local-***.jar 
 ```
 
-Step 6 - Create **‘ticktock’** Stream using the Shell
+Step 5 - Launch Shell [_spring-cloud-dataflow-shell/target_]
+```
+java -jar spring-cloud-dataflow-shell-***.jar
+```
+
+Step 6 - Create **‘ticktock’** Stream
 ```
 dataflow:>stream create ticktock --definition "time | log" --deploy
 ```
@@ -108,7 +105,7 @@ http://localhost:9393/admin-ui
 * [Spring Cloud Stream](http://cloud.spring.io/spring-cloud-stream/)
 * [Spring Cloud Stream Modules](http://cloud.spring.io/spring-cloud-stream-modules/)
 * [Spring Cloud Task](https://github.com/spring-cloud/spring-cloud-task/)
-* [Spring Cloud Data Flow](https://github.com/spring-cloud/spring-cloud-dataflow)
+* [Spring Cloud Data Flow Samples](https://github.com/spring-cloud/spring-cloud-dataflow-samples)
 * [Spring Cloud Data Flow UI](https://github.com/spring-cloud/spring-cloud-dataflow-ui)
 * [Spring Cloud Data Flow Cloud Foundry](https://github.com/spring-cloud/spring-cloud-dataflow-admin-cloudfoundry)
 * [Spring Cloud Data Flow YARN](https://github.com/spring-cloud/spring-cloud-dataflow-admin-yarn)
