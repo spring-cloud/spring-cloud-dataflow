@@ -30,5 +30,4 @@ public class LocalDataFlowServer {
 	public static void main(String[] args) {
 		SpringApplication.run(LocalDataFlowServer.class, args);
 	}
-
 }

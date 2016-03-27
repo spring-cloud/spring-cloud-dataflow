@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,25 +16,21 @@
 
 package org.springframework.cloud.dataflow.shell;
 
-import org.springframework.cloud.dataflow.shell.EnableDataFlowShell;
-import org.springframework.boot.Banner;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.cloud.dataflow.shell.autoconfigure.BootstrapConfiguration;
+import org.springframework.context.annotation.Import;
+
+import java.lang.annotation.*;
 
 /**
- * Bootstrap class for spring shell.
+ * Activates the Spring Cloud Data Flow shell.
  *
- * @author Ilayaperumal Gopinathan
  * @author <a href="mailto:josh@joshlong.com">Josh Long</a>
  */
-@EnableDataFlowShell
-@SpringBootApplication
-public class ShellApplication {
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+@Inherited
+@Import(BootstrapConfiguration.class)
+public @interface EnableDataFlowShell {
 
-	public static void main(String[] args) throws Exception {
-		new SpringApplicationBuilder()
-				.sources(ShellApplication.class )
-				.bannerMode(Banner.Mode.OFF)
-				.run(args);
-	}
 }
