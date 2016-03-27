@@ -16,16 +16,23 @@
 
 package org.springframework.cloud.dataflow.shell;
 
-import org.springframework.shell.Bootstrap;
+import org.springframework.boot.Banner;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.builder.SpringApplicationBuilder;
 
 /**
  * Bootstrap class for spring shell.
  *
  * @author Ilayaperumal Gopinathan
+ * @author <a href="mailto:josh@joshlong.com">Josh Long</a>
  */
+@SpringBootApplication
 public class ShellApplication {
 
 	public static void main(String[] args) throws Exception {
-		Bootstrap.main(new String[] {});
+		new SpringApplicationBuilder()
+				.sources(ShellApplication.class )
+				.bannerMode(Banner.Mode.OFF)
+				.run(args);
 	}
 }
