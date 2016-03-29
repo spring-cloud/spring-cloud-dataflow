@@ -16,14 +16,11 @@
 
 package org.springframework.cloud.dataflow.server.controller;
 
+import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistration;
-import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistry;
-import org.springframework.cloud.dataflow.core.ArtifactCoordinates;
-import org.springframework.cloud.dataflow.core.ArtifactType;
 import org.springframework.cloud.dataflow.core.ModuleDefinition;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.module.deployer.ModuleDeployer;
@@ -31,11 +28,12 @@ import org.springframework.cloud.dataflow.rest.resource.TaskDeploymentResource;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
-import org.springframework.cloud.deployer.resource.maven.MavenProperties;
-import org.springframework.cloud.deployer.resource.maven.MavenResource;
+import org.springframework.cloud.deployer.resource.registry.UriRegistry;
 import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
@@ -84,32 +82,33 @@ public class TaskDeploymentController {
 	private String dataSourceDriverClassName;
 
 	/**
-	 * The artifact registry this controller will use to look up modules.
+	 * The {@link UriRegistry} this controller will use to look up task app URIs.
 	 */
-	private final ArtifactRegistry registry;
+	private final UriRegistry registry;
 
 	/**
-	 * Properties for the resolution of Maven artifacts.
+	 * The {@link ResourceLoader} that will resolve URIs to {@link Resource}s.
 	 */
-	private final MavenProperties mavenProperties;
+	private final ResourceLoader resourceLoader;
 
 	/**
 	 * Creates a {@code TaskDeploymentController} that delegates launching
 	 * operations to the provided {@link TaskLauncher}
 	 * @param repository the repository this controller will use for task CRUD operations.
-	 * @param registry artifact registry this controller will use to look up app coordinates.
+	 * @param registry URI registry this controller will use to look up app URIs.
+	 * @param resourceLoader the {@link ResourceLoader} that will resolve URIs to {@link Resource}s. 
 	 * @param taskLauncher the launcher this controller will use to launch task apps.
-	 * @param mavenProperties  properties for the resolution of Maven artifacts
 	 */
-	public TaskDeploymentController(TaskDefinitionRepository repository, ArtifactRegistry registry,
-			TaskLauncher taskLauncher, MavenProperties mavenProperties) {
+	public TaskDeploymentController(TaskDefinitionRepository repository, UriRegistry registry,
+			ResourceLoader resourceLoader, TaskLauncher taskLauncher) {
 		Assert.notNull(repository, "repository must not be null");
 		Assert.notNull(registry, "registry must not be null");
+		Assert.notNull(resourceLoader, "ResourceLoader must not be null");
 		Assert.notNull(taskLauncher, "TaskLauncher must not be null");
 		this.repository = repository;
 		this.registry = registry;
+		this.resourceLoader = resourceLoader;
 		this.taskLauncher = taskLauncher;
-		this.mavenProperties = mavenProperties;
 	}
 
 	/**
@@ -127,14 +126,7 @@ public class TaskDeploymentController {
 		if (taskDefinition == null) {
 			throw new NoSuchTaskDefinitionException(name);
 		}
-
 		ModuleDefinition module = taskDefinition.getModuleDefinition();
-		ArtifactRegistration registration = this.registry.find(module.getName(), ArtifactType.task);
-		if (registration == null) {
-			throw new IllegalArgumentException(String.format(
-					"Module %s of type %s not found in registry", module.getName(), ArtifactType.task));
-		}
-		ArtifactCoordinates coordinates = registration.getCoordinates();
 
 		Map<String, String> deploymentProperties = new HashMap<>();
 		module = updateTaskProperties(module, module.getName() );
@@ -143,7 +135,8 @@ public class TaskDeploymentController {
 				+ "-" + System.currentTimeMillis());
 
 		AppDefinition definition = new AppDefinition(module.getLabel(), module.getParameters());
-		MavenResource resource = MavenResource.parse(coordinates.toString(), mavenProperties);
+		URI uri = this.registry.find(String.format("task.%s", module.getName()));
+		Resource resource = this.resourceLoader.getResource(uri.toString());
 		AppDeploymentRequest request = new AppDeploymentRequest(definition, resource, deploymentProperties);
 		this.taskLauncher.launch(request);
 	}

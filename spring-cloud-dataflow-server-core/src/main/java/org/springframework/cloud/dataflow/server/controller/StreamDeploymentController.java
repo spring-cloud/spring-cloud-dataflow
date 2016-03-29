@@ -16,15 +16,13 @@
 
 package org.springframework.cloud.dataflow.server.controller;
 
+import java.net.URI;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistration;
-import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistry;
-import org.springframework.cloud.dataflow.core.ArtifactCoordinates;
 import org.springframework.cloud.dataflow.core.ArtifactType;
 import org.springframework.cloud.dataflow.core.BindingPropertyKeys;
 import org.springframework.cloud.dataflow.core.ModuleDefinition;
@@ -37,16 +35,16 @@ import org.springframework.cloud.dataflow.rest.resource.StreamDeploymentResource
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
 import org.springframework.cloud.dataflow.server.repository.NoSuchStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
-import org.springframework.cloud.deployer.resource.maven.MavenProperties;
-import org.springframework.cloud.deployer.resource.maven.MavenResource;
+import org.springframework.cloud.deployer.resource.registry.UriRegistry;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.app.AppStatus;
 import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -78,9 +76,14 @@ public class StreamDeploymentController {
 	private final StreamDefinitionRepository repository;
 
 	/**
-	 * The artifact registry this controller will use to look up app and library coordinates.
+	 * The URI registry this controller will use to look up app resource locations.
 	 */
-	private final ArtifactRegistry registry;
+	private final UriRegistry registry;
+
+	/**
+	 * {@link ResourceLoader} that will resolve app {@link Resource}s from URI locations. 
+	 */
+	private final ResourceLoader resourceLoader;
 
 	/**
 	 * The deployer this controller will use to deploy stream apps.
@@ -88,32 +91,29 @@ public class StreamDeploymentController {
 	private final AppDeployer deployer;
 
 	/**
-	 * Properties for the resolution of Maven artifacts.
-	 */
-	private final MavenProperties mavenProperties;
-
-	/**
 	 * Create a {@code StreamDeploymentController} that delegates
 	 * <ul>
 	 *     <li>CRUD operations to the provided {@link StreamDefinitionRepository}</li>
-	 *     <li>app coordinate retrieval to the provided {@link ArtifactRegistry}</li>
+	 *     <li>app URI retrieval to the provided {@link UriRegistry}</li>
+	 *     <li>URI resolution to the provided {@link ResourceLoader}</li>
 	 *     <li>deployment operations to the provided {@link AppDeployer}</li>
 	 * </ul>
 	 *
 	 * @param repository       the repository this controller will use for stream CRUD operations
-	 * @param registry         artifact registry this controller will use to look up apps
+	 * @param registry         URI registry this controller will use to look up URIs for apps
+	 * @param resourceLoader   the ResourceLoader that resolves a URI to a Resource
 	 * @param deployer         the deployer this controller will use to deploy stream apps
-	 * @param mavenProperties  properties for the resolution of Maven artifacts
 	 */
-	public StreamDeploymentController(StreamDefinitionRepository repository, ArtifactRegistry registry,
-			AppDeployer deployer, MavenProperties mavenProperties) {
+	public StreamDeploymentController(StreamDefinitionRepository repository, UriRegistry registry,
+			ResourceLoader resourceLoader, AppDeployer deployer) {
 		Assert.notNull(repository, "repository must not be null");
 		Assert.notNull(registry, "registry must not be null");
+		Assert.notNull(resourceLoader, "resourceLoader must not be null");
 		Assert.notNull(deployer, "deployer must not be null");
 		this.repository = repository;
 		this.registry = registry;
+		this.resourceLoader = resourceLoader;
 		this.deployer = deployer;
-		this.mavenProperties = mavenProperties;
 	}
 
 	/**
@@ -176,12 +176,6 @@ public class StreamDeploymentController {
 		while (iterator.hasNext()) {
 			ModuleDefinition currentModule = iterator.next();
 			ArtifactType type = determineModuleType(currentModule);
-			ArtifactRegistration registration = this.registry.find(currentModule.getName(), type);
-			if (registration == null) {
-				throw new IllegalArgumentException(String.format(
-						"Module %s of type %s not found in registry", currentModule.getName(), type));
-			}
-			ArtifactCoordinates coordinates = registration.getCoordinates();
 			Map<String, String> moduleDeploymentProperties = extractModuleDeploymentProperties(currentModule, streamDeploymentProperties);
 			moduleDeploymentProperties.put(AppDeployer.GROUP_PROPERTY_KEY, currentModule.getGroup());
 			moduleDeploymentProperties.put(ModuleDeployer.GROUP_DEPLOYMENT_ID, currentModule.getGroup() + "-" + timestamp);
@@ -201,42 +195,12 @@ public class StreamDeploymentController {
 			nextModuleCount = getModuleCount(moduleDeploymentProperties);
 			isDownStreamModulePartitioned = isPartitionedConsumer(currentModule, moduleDeploymentProperties,
 					upstreamModuleSupportsPartition);
-			currentModule = postProcessLibraryProperties(currentModule);
 			AppDefinition definition = new AppDefinition(currentModule.getLabel(), currentModule.getParameters());
-			MavenResource resource = MavenResource.parse(coordinates.toString(), mavenProperties);
+			URI uri = this.registry.find(String.format("%s.%s", type, currentModule.getName()));
+			Resource resource = this.resourceLoader.getResource(uri.toString());
 			AppDeploymentRequest request = new AppDeploymentRequest(definition, resource, moduleDeploymentProperties);
 			this.deployer.deploy(request);
 		}
-	}
-
-	/**
-	 * Looks at parameters of a module that represent maven coordinates and, if
-	 * a simple name has been used, resolve it from the {@link ArtifactRegistry}
-	 * .
-	 */
-	private ModuleDefinition postProcessLibraryProperties(ModuleDefinition module) {
-		String includes = module.getParameters().get("includes");
-		if (includes == null) {
-			return module;
-		}
-		String[] libs = StringUtils.delimitedListToStringArray(includes, ",", " \t");
-		for (int i = 0; i < libs.length; i++) {
-			ArtifactCoordinates coordinates;
-			try {
-				coordinates = ArtifactCoordinates.parse(libs[i]);
-			}
-			catch (IllegalArgumentException e) {
-				ArtifactRegistration registration = registry.find(libs[i], ArtifactType.library);
-				if (registration == null) {
-					throw new IllegalArgumentException("'" + libs[i] + "' could not be parsed as maven coordinates and is not a registered library");
-				}
-				coordinates = registration.getCoordinates();
-			}
-			libs[i] = coordinates.toString();
-		}
-		return ModuleDefinition.Builder.from(module)
-				.setParameter("includes", StringUtils.arrayToCommaDelimitedString(libs))
-				.build();
 	}
 
 	/**

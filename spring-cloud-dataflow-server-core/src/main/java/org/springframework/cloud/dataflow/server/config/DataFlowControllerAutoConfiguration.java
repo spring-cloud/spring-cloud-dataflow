@@ -16,10 +16,14 @@
 
 package org.springframework.cloud.dataflow.server.config;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.boot.actuate.metrics.repository.MetricRepository;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.dataflow.app.resolver.ModuleResolver;
 import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistry;
 import org.springframework.cloud.dataflow.completion.StreamCompletionProvider;
@@ -39,9 +43,16 @@ import org.springframework.cloud.dataflow.server.controller.TaskDefinitionContro
 import org.springframework.cloud.dataflow.server.controller.TaskDeploymentController;
 import org.springframework.cloud.dataflow.server.controller.TaskExecutionController;
 import org.springframework.cloud.dataflow.server.controller.UiController;
+import org.springframework.cloud.dataflow.server.registry.DataFlowUriRegistryPopulator;
+import org.springframework.cloud.dataflow.server.registry.DataFlowUriRegistryPopulatorProperties;
+import org.springframework.cloud.dataflow.server.registry.RedisUriRegistry;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.deployer.resource.maven.MavenProperties;
+import org.springframework.cloud.deployer.resource.maven.MavenResourceLoader;
+import org.springframework.cloud.deployer.resource.registry.UriRegistry;
+import org.springframework.cloud.deployer.resource.registry.UriRegistryPopulator;
+import org.springframework.cloud.deployer.resource.support.DelegatingResourceLoader;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.cloud.stream.configuration.metadata.ModuleConfigurationMetadataResolver;
@@ -49,6 +60,9 @@ import org.springframework.cloud.stream.module.metrics.FieldValueCounterReposito
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.DefaultResourceLoader;
+import org.springframework.core.io.ResourceLoader;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.hateoas.EntityLinks;
 
 /**
@@ -58,7 +72,23 @@ import org.springframework.hateoas.EntityLinks;
  */
 @Configuration
 @ConditionalOnBean({ AppDeployer.class, TaskLauncher.class })
+@EnableConfigurationProperties(DataFlowUriRegistryPopulatorProperties.class)
 public class DataFlowControllerAutoConfiguration {
+
+	@Bean
+	public UriRegistry uriRegistry(RedisConnectionFactory connectionFactory) {
+		return new RedisUriRegistry(connectionFactory);
+	}
+
+	@Bean
+	public UriRegistryPopulator uriRegistryPopulator() {
+		return new UriRegistryPopulator();
+	}
+
+	@Bean
+	public DataFlowUriRegistryPopulator dataflowUriRegistryPopulator(UriRegistry uriRegistry, DataFlowUriRegistryPopulatorProperties properties) {
+		return new DataFlowUriRegistryPopulator(uriRegistry, uriRegistryPopulator(), properties);
+	}
 
 	@Bean
 	public RootController rootController(EntityLinks entityLinks) {
@@ -84,8 +114,23 @@ public class DataFlowControllerAutoConfiguration {
 
 	@Bean
 	public StreamDeploymentController streamDeploymentController(StreamDefinitionRepository repository,
-			ArtifactRegistry registry, AppDeployer deployer, MavenProperties mavenProperties) {
-		return new StreamDeploymentController(repository, registry, deployer, mavenProperties);
+			UriRegistry registry, AppDeployer deployer, DelegatingResourceLoader resourceLoader) {
+		return new StreamDeploymentController(repository, registry, resourceLoader, deployer);
+	}
+
+	@Bean
+	public MavenResourceLoader MavenResourceLoader(MavenProperties properties) {
+		return new MavenResourceLoader(properties);
+	}
+
+	@Bean
+	public DelegatingResourceLoader delegatingResourceLoader(MavenResourceLoader mavenResourceLoader) {
+		DefaultResourceLoader defaultLoader = new DefaultResourceLoader();
+		Map<String, ResourceLoader> loaders = new HashMap<>();
+		loaders.put("maven", mavenResourceLoader);
+		loaders.put("file", defaultLoader);
+		loaders.put("http", defaultLoader);
+		return new DelegatingResourceLoader(loaders);
 	}
 
 	@Bean
@@ -96,8 +141,8 @@ public class DataFlowControllerAutoConfiguration {
 
 	@Bean
 	public TaskDeploymentController taskDeploymentController(TaskDefinitionRepository repository,
-			ArtifactRegistry registry, TaskLauncher taskLauncher, MavenProperties mavenProperties) {
-		return new TaskDeploymentController(repository, registry, taskLauncher, mavenProperties);
+			UriRegistry registry, DelegatingResourceLoader resourceLoader, TaskLauncher taskLauncher) {
+		return new TaskDeploymentController(repository, registry, resourceLoader, taskLauncher);
 	}
 
 	@Bean

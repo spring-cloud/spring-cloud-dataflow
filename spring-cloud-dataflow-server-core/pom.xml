@@ -8,6 +8,9 @@
 		<artifactId>spring-cloud-dataflow-parent</artifactId>
 		<version>1.0.0.BUILD-SNAPSHOT</version>
 	</parent>
+	<properties>
+		<spring-cloud-deployer.version>1.0.0.BUILD-SNAPSHOT</spring-cloud-deployer.version>
+	</properties>
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
@@ -36,17 +39,17 @@
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-deployer-spi</artifactId>
-			<version>1.0.0.BUILD-SNAPSHOT</version>
+			<version>${spring-cloud-deployer.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-deployer-resource-support</artifactId>
-			<version>1.0.0.BUILD-SNAPSHOT</version>
+			<version>${spring-cloud-deployer.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-deployer-resource-maven</artifactId>
-			<version>1.0.0.BUILD-SNAPSHOT</version>
+			<version>${spring-cloud-deployer.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -130,6 +133,7 @@
 				<directory>src/main/resources</directory>
 				<filtering>true</filtering>
 				<includes>
+					<include>META-INF/applications.properties</include>
 					<include>META-INF/spring.factories</include>
 					<include>banner.txt</include>
 				</includes>

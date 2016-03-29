@@ -49,7 +49,6 @@ import org.mockito.ArgumentCaptor;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
-import org.springframework.cloud.dataflow.artifact.registry.InMemoryArtifactRegistry;
 import org.springframework.cloud.dataflow.core.BindingPropertyKeys;
 import org.springframework.cloud.dataflow.core.ModuleDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
@@ -58,6 +57,8 @@ import org.springframework.cloud.dataflow.server.repository.InMemoryStreamDefini
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.deployer.resource.maven.MavenProperties;
 import org.springframework.cloud.deployer.resource.maven.MavenResource;
+import org.springframework.cloud.deployer.resource.maven.MavenResourceLoader;
+import org.springframework.cloud.deployer.resource.registry.InMemoryUriRegistry;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.app.AppStatus;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
@@ -109,8 +110,8 @@ public class StreamControllerTests {
 	@Test(expected = IllegalArgumentException.class)
 	public void testConstructorMissingRepository() {
 		StreamDeploymentController deploymentController = new StreamDeploymentController(
-				new InMemoryStreamDefinitionRepository(), new InMemoryArtifactRegistry(),
-				appDeployer, mavenProperties);
+				new InMemoryStreamDefinitionRepository(), new InMemoryUriRegistry(),
+				new MavenResourceLoader(mavenProperties), appDeployer);
 		new StreamDefinitionController(null, deploymentController, appDeployer);
 	}
 
@@ -122,8 +123,8 @@ public class StreamControllerTests {
 	@Test(expected = IllegalArgumentException.class)
 	public void testConstructorMissingDeployer() {
 		StreamDeploymentController deploymentController = new StreamDeploymentController(
-				new InMemoryStreamDefinitionRepository(), new InMemoryArtifactRegistry(),
-				appDeployer, mavenProperties);
+				new InMemoryStreamDefinitionRepository(), new InMemoryUriRegistry(),
+				new MavenResourceLoader(mavenProperties), appDeployer);
 		new StreamDefinitionController(new InMemoryStreamDefinitionRepository(), deploymentController, null);
 	}
 

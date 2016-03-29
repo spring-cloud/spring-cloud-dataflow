@@ -26,6 +26,7 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.BoundHashOperations;
 import org.springframework.data.redis.core.RedisOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.util.Assert;
 
 /**
  * {@link UriRegistry} implementation backed by Redis.
@@ -53,7 +54,9 @@ public class RedisUriRegistry implements UriRegistry {
 
 	@Override
 	public URI find(String key) {
-		return toUri(hashOps().get(key));
+		String uri = hashOps().get(key);
+		Assert.notNull(uri, String.format("No URI registered for %s", key));
+		return toUri(uri);
 	}
 
 	@Override

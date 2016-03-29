@@ -29,11 +29,17 @@ import org.springframework.cloud.dataflow.server.controller.StreamDeploymentCont
 import org.springframework.cloud.dataflow.server.controller.TaskDefinitionController;
 import org.springframework.cloud.dataflow.server.controller.TaskDeploymentController;
 import org.springframework.cloud.dataflow.server.controller.TaskExecutionController;
+import org.springframework.cloud.dataflow.server.registry.DataFlowUriRegistryPopulator;
+import org.springframework.cloud.dataflow.server.registry.DataFlowUriRegistryPopulatorProperties;
 import org.springframework.cloud.dataflow.server.repository.InMemoryStreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.InMemoryTaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.deployer.resource.maven.MavenProperties;
+import org.springframework.cloud.deployer.resource.maven.MavenResourceLoader;
+import org.springframework.cloud.deployer.resource.registry.InMemoryUriRegistry;
+import org.springframework.cloud.deployer.resource.registry.UriRegistry;
+import org.springframework.cloud.deployer.resource.registry.UriRegistryPopulator;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.cloud.task.repository.TaskExplorer;
@@ -43,6 +49,7 @@ import org.springframework.cloud.task.repository.support.SimpleTaskExplorer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
@@ -67,8 +74,13 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	}
 
 	@Bean
-	public StreamDeploymentController streamDeploymentController(StreamDefinitionRepository repository, ArtifactRegistry registry) {
-		return new StreamDeploymentController(repository, registry, appDeployer(), mavenProperties);
+	public ResourceLoader resourceLoader() {
+		return new MavenResourceLoader(mavenProperties);
+	}
+
+	@Bean
+	public StreamDeploymentController streamDeploymentController(StreamDefinitionRepository repository, UriRegistry registry) {
+		return new StreamDeploymentController(repository, registry, resourceLoader(), appDeployer());
 	}
 
 	@Bean
@@ -77,8 +89,8 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	}
 
 	@Bean
-	public TaskDeploymentController taskController(TaskDefinitionRepository repository, ArtifactRegistry registry) {
-		return new TaskDeploymentController(repository, registry, taskLauncher(), mavenProperties);
+	public TaskDeploymentController taskController(TaskDefinitionRepository repository, UriRegistry registry) {
+		return new TaskDeploymentController(repository, registry, resourceLoader(), taskLauncher());
 	}
 
 	@Bean
@@ -89,6 +101,22 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	@Bean
 	public TaskExecutionController taskExecutionController(TaskExplorer explorer) {
 		return new TaskExecutionController(explorer);
+	}
+
+	@Bean
+	public UriRegistry uriRegistry() {
+		return new InMemoryUriRegistry();
+	}
+
+	@Bean
+	public UriRegistryPopulator uriRegistryPopulator() {
+		return new UriRegistryPopulator();
+	}
+
+	@Bean
+	public DataFlowUriRegistryPopulator datafloUriRegistryPopulator() {
+		return new DataFlowUriRegistryPopulator(uriRegistry(), uriRegistryPopulator(),
+				new DataFlowUriRegistryPopulatorProperties());
 	}
 
 	@Bean
