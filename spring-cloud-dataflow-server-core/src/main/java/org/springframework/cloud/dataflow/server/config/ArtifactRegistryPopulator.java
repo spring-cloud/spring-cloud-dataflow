@@ -101,6 +101,7 @@ public class ArtifactRegistryPopulator {
 		populateDefault("groovy-transform", processor);
 		populateDefault("httpclient", processor);
 		populateDefault("pmml", processor);
+		populateDefault("scriptable-transform", processor);
 		populateDefault("splitter", processor);
 		populateDefault("transform", processor);
 		populateDefault("aggregate-counter", sink);
