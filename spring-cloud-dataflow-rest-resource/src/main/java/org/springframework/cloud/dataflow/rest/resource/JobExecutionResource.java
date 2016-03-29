@@ -28,8 +28,10 @@ import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.converter.DefaultJobParametersConverter;
 import org.springframework.batch.core.converter.JobParametersConverter;
 import org.springframework.batch.support.PropertiesConverter;
+import org.springframework.cloud.dataflow.rest.job.TaskJobExecution;
 import org.springframework.cloud.dataflow.rest.job.support.TimeUtils;
 import org.springframework.hateoas.ResourceSupport;
+import org.springframework.util.Assert;
 
 /**
  * A HATEOAS representation of a JobExecution.
@@ -74,6 +76,8 @@ public class JobExecutionResource extends ResourceSupport {
 
 	private boolean stoppable = false;
 
+	private boolean defined;
+
 	private JobParametersConverter converter = new DefaultJobParametersConverter();
 
 	private TimeZone timeZone;
@@ -82,16 +86,17 @@ public class JobExecutionResource extends ResourceSupport {
 
 	}
 
-	public JobExecutionResource( long taskExecutionId, JobExecution jobExecution, TimeZone timeZone) {
-
-		this.taskExecutionId = taskExecutionId;
-		this.jobExecution = jobExecution;
+	public JobExecutionResource( TaskJobExecution taskJobExecution, TimeZone timeZone) {
+		Assert.notNull(taskJobExecution, "taskJobExecution must not be null");
+		this.taskExecutionId = taskJobExecution.getTaskId();
+		this.jobExecution = taskJobExecution.getJobExecution();
 		this.timeZone = timeZone;
 		this.executionId = jobExecution.getId();
 		this.jobId = jobExecution.getJobId();
 		this.stepExecutionCount = jobExecution.getStepExecutions().size();
 		this.jobParameters = converter.getProperties(jobExecution.getJobParameters());
 		this.jobParametersString = fromJobParameters(jobExecution.getJobParameters());
+		this.defined = taskJobExecution.isTaskDefined();
 		JobInstance jobInstance = jobExecution.getJobInstance();
 		if (jobInstance != null) {
 			this.name = jobInstance.getJobName();
@@ -176,6 +181,10 @@ public class JobExecutionResource extends ResourceSupport {
 
 	public long getTaskExecutionId(){
 		return taskExecutionId;
+	}
+
+	public boolean isDefined() {
+		return defined;
 	}
 	/**
 	 * @param oldParameters the latest job parameters

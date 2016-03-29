@@ -217,8 +217,9 @@ public class DataFlowServerConfiguration {
 	}
 
 	@Bean
-	public TaskJobRepository taskJobExecutionRepository(JobService service, TaskExplorer taskExplorer) {
-		return new TaskJobRepository(service, taskExplorer);
+	public TaskJobRepository taskJobExecutionRepository(JobService service,
+			TaskExplorer taskExplorer, TaskDefinitionRepository taskDefinitionRepository ) {
+		return new TaskJobRepository(service, taskExplorer, taskDefinitionRepository);
 	}
 
 	@Bean

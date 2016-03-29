@@ -83,7 +83,7 @@ public class JobExecutionController {
 	@RequestMapping(value = "", method = RequestMethod.GET, produces = "application/json")
 	@ResponseStatus(HttpStatus.OK)
 	public PagedResources<JobExecutionResource> list(Pageable pageable,
-			PagedResourcesAssembler<TaskJobExecution> assembler) {
+			PagedResourcesAssembler<TaskJobExecution> assembler) throws NoSuchJobExecutionException {
 		List<TaskJobExecution> jobExecutions = repository.listJobExecutions(pageable);
 		Page page = new PageImpl<>(jobExecutions, pageable, repository.countJobExecutions());
 		return assembler.toResource(page, jobAssembler);
@@ -153,8 +153,7 @@ public class JobExecutionController {
 
 		@Override
 		public JobExecutionResource instantiateResource(TaskJobExecution taskJobExecution) {
-			return new JobExecutionResource(taskJobExecution.getTaskId(),
-					taskJobExecution.getJobExecution(), timeZone);
+			return new JobExecutionResource(taskJobExecution, timeZone);
 		}
 	}
 }

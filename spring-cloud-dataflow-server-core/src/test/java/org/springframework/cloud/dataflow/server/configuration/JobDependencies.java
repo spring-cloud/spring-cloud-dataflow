@@ -34,6 +34,8 @@ import org.springframework.cloud.dataflow.server.controller.JobStepExecutionProg
 import org.springframework.cloud.dataflow.server.controller.RestControllerAdvice;
 import org.springframework.cloud.dataflow.server.controller.TaskExecutionController;
 import org.springframework.cloud.dataflow.server.job.TaskJobRepository;
+import org.springframework.cloud.dataflow.server.repository.InMemoryTaskDefinitionRepository;
+import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.task.batch.listener.TaskBatchDao;
 import org.springframework.cloud.task.batch.listener.support.JdbcTaskBatchDao;
 import org.springframework.cloud.task.repository.TaskExplorer;
@@ -87,8 +89,14 @@ public class JobDependencies {
 	}
 
 	@Bean
-	public TaskJobRepository taskJobExecutionRepository(JobService jobService, TaskExplorer taskExplorer){
-		return new TaskJobRepository(jobService, taskExplorer);
+	public TaskJobRepository taskJobExecutionRepository(JobService jobService,
+			TaskExplorer taskExplorer, TaskDefinitionRepository taskDefinitionRepository){
+		return new TaskJobRepository(jobService, taskExplorer, taskDefinitionRepository);
+	}
+
+	@Bean
+	public TaskDefinitionRepository taskDefinitionRepository() {
+		return new InMemoryTaskDefinitionRepository();
 	}
 
 	@Bean

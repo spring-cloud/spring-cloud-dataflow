@@ -24,11 +24,15 @@ import java.util.List;
 import org.springframework.batch.admin.service.JobService;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobInstance;
+import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.launch.NoSuchJobException;
 import org.springframework.batch.core.launch.NoSuchJobExecutionException;
 import org.springframework.batch.core.launch.NoSuchJobInstanceException;
+import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.rest.job.JobInstanceExecutions;
 import org.springframework.cloud.dataflow.rest.job.TaskJobExecution;
+import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
+import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.data.domain.Pageable;
 import org.springframework.util.Assert;
@@ -45,12 +49,17 @@ public class TaskJobRepository {
 
 	private JobService jobService;
 
+	private TaskDefinitionRepository taskDefinitionRepository;
 
-	public TaskJobRepository(JobService jobService, TaskExplorer taskExplorer){
+
+	public TaskJobRepository(JobService jobService, TaskExplorer taskExplorer,
+			TaskDefinitionRepository taskDefinitionRepository){
 		Assert.notNull(jobService, "jobService must not be null");
 		Assert.notNull(taskExplorer, "taskExplorer must not be null");
+		Assert.notNull(taskDefinitionRepository, "taskDefinitionRepository must not be null");
 		this.jobService = jobService;
 		this.taskExplorer = taskExplorer;
+		this.taskDefinitionRepository = taskDefinitionRepository;
 	}
 	/**
 	 * Retrieves Pageable list of {@link JobExecution}s from the JobRepository and matches
@@ -58,10 +67,18 @@ public class TaskJobRepository {
 	 * @param pageable enumerates the data to be returned.
 	 * @return List containing {@link TaskJobExecution}s.
 	 */
-	public List<TaskJobExecution> listJobExecutions(Pageable pageable){
+	public List<TaskJobExecution> listJobExecutions(Pageable pageable)
+			throws NoSuchJobExecutionException{
 		Assert.notNull(pageable, "pageable must not be null");
-		return getTaskJobExecutionsForList(
-				jobService.listJobExecutions(pageable.getOffset(), pageable.getPageSize()));
+		List<JobExecution> jobExecutions = new ArrayList<>(
+				jobService.listJobExecutions(pageable.getOffset(),
+				pageable.getPageSize()));
+		for (JobExecution jobExecution : jobExecutions){
+			jobExecution.addStepExecutions(
+					new ArrayList<StepExecution>(jobService.getStepExecutions(jobExecution.getId())));
+		}
+
+		return getTaskJobExecutionsForList(jobExecutions);
 	}
 
 	/**
@@ -161,7 +178,7 @@ public class TaskJobRepository {
 		Assert.notNull(jobExecution, "jobExecution must not be null");
 		return new TaskJobExecution(
 				taskExplorer.getTaskExecutionIdByJobExecutionId(jobExecution.getJobId()),
-				jobExecution);
+				jobExecution, isTaskDefined(jobExecution));
 	}
 
 	private JobInstanceExecutions getJobInstanceExecution(JobInstance jobInstance)
@@ -174,4 +191,10 @@ public class TaskJobRepository {
 				getTaskJobExecutionsForList(jobExecutions));
 	}
 
+	private boolean isTaskDefined(JobExecution jobExecution){
+		TaskExecution taskExecution = taskExplorer.getTaskExecution(
+				taskExplorer.getTaskExecutionIdByJobExecutionId(jobExecution.getId()));
+		TaskDefinition definition = taskDefinitionRepository.findOne(taskExecution.getTaskName());
+		return (definition != null);
+	}
 }

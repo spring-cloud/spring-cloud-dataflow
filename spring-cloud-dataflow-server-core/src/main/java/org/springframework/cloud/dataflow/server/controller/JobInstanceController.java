@@ -142,7 +142,7 @@ public class JobInstanceController {
 		public JobInstanceResource instantiateResource(JobInstanceExecutions jobInstance) {
 			List<JobExecutionResource> jobExecutions = new ArrayList<>();
 			for(TaskJobExecution taskJobExecution: jobInstance.getTaskJobExecutions()){
-				jobExecutions.add(new JobExecutionResource(taskJobExecution.getTaskId(), taskJobExecution.getJobExecution(),timeZone));
+				jobExecutions.add(new JobExecutionResource(taskJobExecution, timeZone));
 			}
 			jobExecutions = Collections.unmodifiableList(jobExecutions);
 			return new JobInstanceResource(jobInstance.getJobInstance().getJobName(),

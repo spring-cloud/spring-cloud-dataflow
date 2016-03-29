@@ -28,12 +28,14 @@ import org.springframework.util.Assert;
  */
 public class TaskJobExecution {
 	private final long taskId;
+	private final boolean isTaskDefined;
 	private final JobExecution jobExecution;
 
-	public TaskJobExecution(long taskId, JobExecution jobExecution) {
+	public TaskJobExecution(long taskId, JobExecution jobExecution, boolean isTaskDefined) {
 		Assert.notNull(jobExecution, "jobExecution must not be null");
 		this.taskId = taskId;
 		this.jobExecution = jobExecution;
+		this.isTaskDefined = isTaskDefined;
 	}
 
 	public long getTaskId() {
@@ -42,5 +44,9 @@ public class TaskJobExecution {
 
 	public JobExecution getJobExecution() {
 		return jobExecution;
+	}
+
+	public boolean isTaskDefined() {
+		return isTaskDefined;
 	}
 }
