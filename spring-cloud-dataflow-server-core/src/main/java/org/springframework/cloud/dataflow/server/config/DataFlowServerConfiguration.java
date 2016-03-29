@@ -240,50 +240,67 @@ public class DataFlowServerConfiguration {
 		jobExplorerFactoryBean.setDataSource(dataSource);
 		return jobExplorerFactoryBean;
 	}
-
-	@Bean
+	@Configuration
 	@ConditionalOnExpression("#{'${spring.datasource.url:}'.startsWith('jdbc:h2:tcp://localhost:') && '${spring.datasource.url:}'.contains('/mem:')}")
-	public JobRepositoryFactoryBean jobRepositoryFactoryBeanForServer(DataSource dataSource,
-			Server server, DataSourceTransactionManager dataSourceTransactionManager) {
-		JobRepositoryFactoryBean repositoryFactoryBean = new JobRepositoryFactoryBean();
-		repositoryFactoryBean.setDataSource(dataSource);
-		repositoryFactoryBean.setTransactionManager(dataSourceTransactionManager);
-		return repositoryFactoryBean;
-	}
+	public static class H2ServerConfiguration {
 
-	@Bean
-	@ConditionalOnExpression("#{'${spring.datasource.url:}'.startsWith('jdbc:h2:tcp://localhost:') && '${spring.datasource.url:}'.contains('/mem:')}")
-	public DataSourceTransactionManager transactionManagerForServer(DataSource dataSource, Server server) {
-		return new DataSourceTransactionManager(dataSource);
-	}
+		@Bean
+		public JobRepositoryFactoryBean jobRepositoryFactoryBeanForServer(DataSource dataSource,
+				Server server, DataSourceTransactionManager dataSourceTransactionManager) {
+			JobRepositoryFactoryBean repositoryFactoryBean = new JobRepositoryFactoryBean();
+			repositoryFactoryBean.setDataSource(dataSource);
+			repositoryFactoryBean.setTransactionManager(dataSourceTransactionManager);
+			return repositoryFactoryBean;
+		}
 
-	@Bean
-	@ConditionalOnExpression("#{'${spring.datasource.url:}'.startsWith('jdbc:h2:tcp://localhost:') && '${spring.datasource.url:}'.contains('/mem:')}")
-	public BatchDatabaseInitializer batchRepositoryInitializerForDefaultDBForServer(DataSource dataSource, Server server) {
-		return new BatchDatabaseInitializer();
-	}
+		@Bean
+		public DataSourceTransactionManager transactionManagerForServer(DataSource dataSource, Server server) {
+			return new DataSourceTransactionManager(dataSource);
+		}
 
-	@Bean
+		@Bean
+		public BatchDatabaseInitializer batchRepositoryInitializerForDefaultDBForServer(DataSource dataSource, Server server) {
+			return new BatchDatabaseInitializer();
+		}
+
+		@Bean
+		public TaskRepositoryInitializer taskRepositoryInitializerForDefaultDB(DataSource dataSource, Server server) {
+			TaskRepositoryInitializer taskRepositoryInitializer = new TaskRepositoryInitializer();
+			taskRepositoryInitializer.setDataSource(dataSource);
+			return taskRepositoryInitializer;
+		}
+
+	}
+	@Configuration
 	@ConditionalOnExpression("#{!'${spring.datasource.url:}'.startsWith('jdbc:h2:tcp://localhost:') && !'${spring.datasource.url:}'.contains('/mem:')}")
-	public JobRepositoryFactoryBean jobRepositoryFactoryBean(DataSource dataSource,
-			DataSourceTransactionManager dataSourceTransactionManager) {
-		JobRepositoryFactoryBean repositoryFactoryBean = new JobRepositoryFactoryBean();
-		repositoryFactoryBean.setDataSource(dataSource);
-		repositoryFactoryBean.setTransactionManager(dataSourceTransactionManager);
-		return repositoryFactoryBean;
-	}
+	public static class NoH2ServerConfiguration {
 
-	@Bean
-	@ConditionalOnExpression("#{!'${spring.datasource.url:}'.startsWith('jdbc:h2:tcp://localhost:') && !'${spring.datasource.url:}'.contains('/mem:')}")
-	public DataSourceTransactionManager transactionManager(DataSource dataSource) {
-		return new DataSourceTransactionManager(dataSource);
-	}
+		@Bean
+		public JobRepositoryFactoryBean jobRepositoryFactoryBean(DataSource dataSource,
+				DataSourceTransactionManager dataSourceTransactionManager) {
+			JobRepositoryFactoryBean repositoryFactoryBean = new JobRepositoryFactoryBean();
+			repositoryFactoryBean.setDataSource(dataSource);
+			repositoryFactoryBean.setTransactionManager(dataSourceTransactionManager);
+			return repositoryFactoryBean;
+		}
 
+		@Bean
+		public DataSourceTransactionManager transactionManager(DataSource dataSource) {
+			return new DataSourceTransactionManager(dataSource);
+		}
 
-	@Bean
-	@ConditionalOnExpression("#{!'${spring.datasource.url:}'.startsWith('jdbc:h2:tcp://localhost:') && !'${spring.datasource.url:}'.contains('/mem:')}")
-	public BatchDatabaseInitializer batchRepositoryInitializerForDefaultDB(DataSource dataSource) {
-		return new BatchDatabaseInitializer();
+		@Bean
+		public BatchDatabaseInitializer batchRepositoryInitializerForDefaultDB(DataSource dataSource) {
+			return new BatchDatabaseInitializer();
+		}
+
+		@Bean
+		public TaskRepositoryInitializer taskRepositoryInitializerForDB(DataSource dataSource) {
+			TaskRepositoryInitializer taskRepositoryInitializer = new TaskRepositoryInitializer();
+			taskRepositoryInitializer.setDataSource(dataSource);
+			return taskRepositoryInitializer;
+		}
+
 	}
 
 	@Bean(destroyMethod = "stop")
@@ -299,22 +316,6 @@ public class DataFlowServerConfiguration {
 			throw new IllegalStateException(e);
 		}
 		return server;
-	}
-
-	@Bean
-	@ConditionalOnExpression("#{!'${spring.datasource.url:}'.startsWith('jdbc:h2:tcp://localhost:') && !'${spring.datasource.url:}'.contains('/mem:')}")
-	public TaskRepositoryInitializer taskRepositoryInitializerForDB(DataSource dataSource) {
-		TaskRepositoryInitializer taskRepositoryInitializer = new TaskRepositoryInitializer();
-		taskRepositoryInitializer.setDataSource(dataSource);
-		return taskRepositoryInitializer;
-	}
-
-	@Bean
-	@ConditionalOnExpression("#{'${spring.datasource.url:}'.startsWith('jdbc:h2:tcp://localhost:') && '${spring.datasource.url:}'.contains('/mem:')}")
-	public TaskRepositoryInitializer taskRepositoryInitializerForDefaultDB(DataSource dataSource, Server server) {
-		TaskRepositoryInitializer taskRepositoryInitializer = new TaskRepositoryInitializer();
-		taskRepositoryInitializer.setDataSource(dataSource);
-		return taskRepositoryInitializer;
 	}
 
 	private String getH2Port(String url) {

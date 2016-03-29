@@ -174,7 +174,7 @@ public class DataFlowControllerAutoConfiguration {
 	}
 
 	@Bean
-	JobInstanceController jobInstanceController(TaskJobRepository repository){
+	public JobInstanceController jobInstanceController(TaskJobRepository repository){
 		return new JobInstanceController(repository);
 	}
 
