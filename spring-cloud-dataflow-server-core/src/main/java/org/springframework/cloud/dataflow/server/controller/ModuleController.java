@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2015-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,21 +16,24 @@
 
 package org.springframework.cloud.dataflow.server.controller;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
+import org.springframework.cloud.dataflow.app.resolver.Coordinates;
+import org.springframework.cloud.dataflow.app.resolver.ModuleResolver;
 import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistration;
 import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistry;
 import org.springframework.cloud.dataflow.core.ArtifactCoordinates;
 import org.springframework.cloud.dataflow.core.ArtifactType;
 import org.springframework.cloud.dataflow.rest.resource.DetailedModuleRegistrationResource;
 import org.springframework.cloud.dataflow.rest.resource.ModuleRegistrationResource;
+import org.springframework.cloud.deployer.resource.registry.UriRegistry;
 import org.springframework.cloud.stream.configuration.metadata.ModuleConfigurationMetadataResolver;
-import org.springframework.cloud.dataflow.app.resolver.Coordinates;
-import org.springframework.cloud.dataflow.app.resolver.ModuleResolver;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.web.PagedResourcesAssembler;
@@ -62,14 +65,17 @@ public class ModuleController {
 
 	private final Assembler moduleAssembler = new Assembler();
 
-	private final ArtifactRegistry registry;
+	private final ArtifactRegistry artifactRegistry;
+
+	private final UriRegistry registry;
 
 	private final ModuleResolver moduleResolver;
 
 	private ModuleConfigurationMetadataResolver moduleConfigurationMetadataResolver;
 
-	public ModuleController(ArtifactRegistry registry, ModuleResolver moduleResolver,
+	public ModuleController(ArtifactRegistry artifactRegistry, UriRegistry registry, ModuleResolver moduleResolver,
 			ModuleConfigurationMetadataResolver moduleConfigurationMetadataResolver) {
+		this.artifactRegistry = artifactRegistry;
 		this.registry = registry;
 		this.moduleResolver = moduleResolver;
 		this.moduleConfigurationMetadataResolver = moduleConfigurationMetadataResolver;
@@ -85,7 +91,7 @@ public class ModuleController {
 			@RequestParam(value = "type", required = false) ArtifactType type,
 			@RequestParam(value = "detailed", defaultValue = "false") boolean detailed) {
 
-		List<ArtifactRegistration> list = new ArrayList<>(registry.findAll());
+		List<ArtifactRegistration> list = new ArrayList<>(artifactRegistry.findAll());
 		for (Iterator<ArtifactRegistration> iterator = list.iterator(); iterator.hasNext(); ) {
 			ArtifactType artifactType = iterator.next().getType();
 			if ((type != null && artifactType != type) || artifactType == ArtifactType.library) {
@@ -108,7 +114,7 @@ public class ModuleController {
 			@PathVariable("type") ArtifactType type,
 			@PathVariable("name") String name) {
 		Assert.isTrue(type != ArtifactType.library, "Only modules are supported by this endpoint");
-		ArtifactRegistration registration = registry.find(name, type);
+		ArtifactRegistration registration = artifactRegistry.find(name, type);
 		if (registration == null) {
 			return null;
 		}
@@ -141,11 +147,20 @@ public class ModuleController {
 			@RequestParam("coordinates") String coordinates,
 			@RequestParam(value = "force", defaultValue = "false") boolean force) {
 		Assert.isTrue(type != ArtifactType.library, "Only modules are supported by this endpoint");
-		ArtifactRegistration previous = registry.find(name, type);
+		ArtifactRegistration previous = artifactRegistry.find(name, type);
 		if (!force && previous != null) {
 			throw new ModuleAlreadyRegisteredException(previous);
 		}
-		registry.save(new ArtifactRegistration(name, type, ArtifactCoordinates.parse(coordinates)));
+		artifactRegistry.save(new ArtifactRegistration(name, type, ArtifactCoordinates.parse(coordinates)));
+		if (this.registry != null) {
+			try {
+				this.registry.register(String.format("%s.%s", type, name),
+						new URI(String.format("maven://%s", coordinates)));
+			}
+			catch (URISyntaxException e) {
+				throw new IllegalArgumentException(e);
+			}
+		}
 	}
 
 	/**
@@ -157,7 +172,10 @@ public class ModuleController {
 	@ResponseStatus(HttpStatus.OK)
 	public void unregister(@PathVariable("type") ArtifactType type, @PathVariable("name") String name) {
 		Assert.isTrue(type != ArtifactType.library, "Only modules are supported by this endpoint");
-		registry.delete(name, type);
+		artifactRegistry.delete(name, type);
+		if (this.registry != null) {
+			this.registry.unregister(String.format("%s.%s", type, name));
+		}
 	}
 
 	class Assembler extends ResourceAssemblerSupport<ArtifactRegistration, ModuleRegistrationResource> {

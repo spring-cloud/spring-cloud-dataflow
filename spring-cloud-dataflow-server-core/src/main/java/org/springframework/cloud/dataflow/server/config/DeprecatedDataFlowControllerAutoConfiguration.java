@@ -128,7 +128,7 @@ public class DeprecatedDataFlowControllerAutoConfiguration {
 	@Bean
 	public ModuleController moduleController(ArtifactRegistry registry, ModuleResolver moduleResolver,
 			ModuleConfigurationMetadataResolver moduleConfigurationMetadataResolver) {
-		return new ModuleController(registry, moduleResolver, moduleConfigurationMetadataResolver);
+		return new ModuleController(registry, null, moduleResolver, moduleConfigurationMetadataResolver);
 	}
 
 	@Bean

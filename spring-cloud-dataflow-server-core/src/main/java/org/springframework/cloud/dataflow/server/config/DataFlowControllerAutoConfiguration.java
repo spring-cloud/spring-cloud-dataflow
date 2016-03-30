@@ -171,9 +171,9 @@ public class DataFlowControllerAutoConfiguration {
 	}
 
 	@Bean
-	public ModuleController moduleController(ArtifactRegistry registry, ModuleResolver moduleResolver,
-			ModuleConfigurationMetadataResolver moduleConfigurationMetadataResolver) {
-		return new ModuleController(registry, moduleResolver, moduleConfigurationMetadataResolver);
+	public ModuleController moduleController(ArtifactRegistry artifactRegistry, UriRegistry registry,
+			ModuleResolver moduleResolver, ModuleConfigurationMetadataResolver moduleConfigurationMetadataResolver) {
+		return new ModuleController(artifactRegistry, registry, moduleResolver, moduleConfigurationMetadataResolver);
 	}
 
 	@Bean
