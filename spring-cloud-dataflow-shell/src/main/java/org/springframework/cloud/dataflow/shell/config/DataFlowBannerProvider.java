@@ -26,6 +26,7 @@ import org.springframework.stereotype.Component;
  * Provides the Spring Cloud Data Flow specific {@link BannerProvider}.
  *
  * @author Gunnar Hillert
+ * @author <a href="mailto:josh@joshlong.com">Josh Long</a>
  * @since 1.0
  */
 @Component
@@ -41,12 +42,8 @@ public class DataFlowBannerProvider implements BannerProvider {
 
 	@Override
 	public String getBanner() {
-
-		final StringBuilder banner = new StringBuilder();
-		banner.append(FileUtils.readBanner(DataFlowBannerProvider.class, "/banner.txt"));
-		banner.append("\n" + getVersion() + "\n");
-
-		return banner.toString();
+		return FileUtils.readBanner(DataFlowBannerProvider.class, "/dataflow-banner.txt") +
+				"\n" + getVersion() + "\n";
 	}
 
 	/**

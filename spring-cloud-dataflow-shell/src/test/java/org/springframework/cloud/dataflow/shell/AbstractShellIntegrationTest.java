@@ -29,6 +29,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistry;
 import org.springframework.cloud.dataflow.artifact.registry.InMemoryArtifactRegistry;
+import org.springframework.cloud.dataflow.server.EnableDataFlowServer;
 import org.springframework.cloud.dataflow.server.config.DataFlowServerConfiguration;
 import org.springframework.cloud.dataflow.server.local.LocalDataFlowServer;
 import org.springframework.cloud.dataflow.shell.command.StreamCommandTemplate;
@@ -109,19 +110,23 @@ public abstract class AbstractShellIntegrationTest {
 				shutdownAfterRun = Boolean.getBoolean(SHUTDOWN_AFTER_RUN);
 			}
 
-			SpringApplication application = new SpringApplicationBuilder(LocalDataFlowServer.class,
-					DataFlowServerConfiguration.class, TestConfig.class).build();
+			SpringApplication application = new SpringApplicationBuilder(TestConfig.class).build();
+
 			applicationContext = application.run(
-					String.format("--server.port=%s", serverPort), "--security.basic.enabled=false",
+					String.format("--server.port=%s", serverPort),
+					"--spring.jmx.default-domain=" + System.currentTimeMillis(),
+					"--spring.jmx.enabled=false",
+					"--security.basic.enabled=false",
 					"--spring.main.show_banner=false", "--spring.cloud.config.enabled=false",
 					"--deployer.local.out-of-process=false");
+
+			JLineShellComponent shell = new Bootstrap(new String[]{"--port", String.valueOf(serverPort)})
+					.getJLineShellComponent();
+			if (!shell.isRunning()) {
+				shell.start();
+			}
+			dataFlowShell = new DataFlowShell(shell);
 		}
-		JLineShellComponent shell = new Bootstrap(new String[] {"--port", String.valueOf(serverPort)})
-				.getJLineShellComponent();
-		if (!shell.isRunning()) {
-			shell.start();
-		}
-		dataFlowShell = new DataFlowShell(shell);
 	}
 
 	@AfterClass
@@ -134,6 +139,7 @@ public abstract class AbstractShellIntegrationTest {
 			if (applicationContext != null) {
 				logger.info("Stopping Data Flow Server");
 				SpringApplication.exit(applicationContext);
+
 				applicationContext = null;
 			}
 		}
@@ -201,6 +207,7 @@ public abstract class AbstractShellIntegrationTest {
 	 * Configuration for the Data Flow server that is specific to shell tests.
 	 */
 	@Configuration
+	@EnableDataFlowServer
 	public static class TestConfig {
 
 		@Bean
