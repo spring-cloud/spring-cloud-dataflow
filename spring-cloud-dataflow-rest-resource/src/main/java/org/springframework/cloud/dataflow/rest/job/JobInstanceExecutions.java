@@ -43,10 +43,17 @@ public class JobInstanceExecutions {
 		}
 	}
 
+	/**
+	 * @return the job instance for this relationship.
+	 */
 	public JobInstance getJobInstance() {
 		return jobInstance;
 	}
 
+	/**
+	 * @return a list ot TaskJobExecutions that are associated with the Job Instance
+	 * for this relationship.
+	 */
 	public List<TaskJobExecution> getTaskJobExecutions() {
 		return taskJobExecutions;
 	}

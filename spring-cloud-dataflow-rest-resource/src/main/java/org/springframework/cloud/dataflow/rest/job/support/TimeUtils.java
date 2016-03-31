@@ -29,15 +29,15 @@ import java.util.TimeZone;
  */
 public final class TimeUtils {
 
-	public static final String DEFAULT_XD_DATE_FORMAT_PATTERN = "yyyy-MM-dd";
+	public static final String DEFAULT_DATAFLOW_DATE_FORMAT_PATTERN = "yyyy-MM-dd";
 
-	public static final String DEFAULT_XD_TIME_FORMAT_PATTERN = "HH:mm:ss";
+	public static final String DEFAULT_DATAFLOW_TIME_FORMAT_PATTERN = "HH:mm:ss";
 
-	public static final String DEFAULT_XD_DATE_TIME_FORMAT_PATTERN = "yyyy-MM-dd HH:mm:ss,SSS";
+	public static final String DEFAULT_DATAFLOW_DATE_TIME_FORMAT_PATTERN = "yyyy-MM-dd HH:mm:ss,SSS";
 
-	public static final String DEFAULT_XD_DURATION_FORMAT_PATTERN = "HH:mm:ss";
+	public static final String DEFAULT_DATAFLOW_DURATION_FORMAT_PATTERN = "HH:mm:ss";
 
-	public static final String DEFAULT_XD_TIMEZONE_ID = "UTC";
+	public static final String DEFAULT_DATAFLOW_TIMEZONE_ID = "UTC";
 
 	/** Prevent instantiation. */
 	private TimeUtils() {
@@ -45,10 +45,10 @@ public final class TimeUtils {
 	}
 
 	/**
-	 * @return Default Spring XD {@link TimeZone} using ID {@link TimeUtils#DEFAULT_XD_TIMEZONE_ID}
+	 * @return Default Spring Cloud DataFLow  {@link TimeZone} using ID
 	 */
 	public static TimeZone getDefaultTimeZone() {
-		return TimeZone.getTimeZone(DEFAULT_XD_TIMEZONE_ID);
+		return TimeZone.getTimeZone(DEFAULT_DATAFLOW_TIMEZONE_ID);
 	}
 
 	/**
@@ -59,31 +59,35 @@ public final class TimeUtils {
 	}
 
 	/**
-	 * @return The Default Spring XD {@link DateFormat} using pattern {@link TimeUtils#DEFAULT_XD_DATE_FORMAT_PATTERN}
+	 * @return The Default Spring Cloud Data Flow {@link DateFormat} using pattern
+	 * {@link TimeUtils#DEFAULT_DATAFLOW_DATE_FORMAT_PATTERN}
 	 */
 	public static DateFormat getDefaultDateFormat() {
-		return new SimpleDateFormat(DEFAULT_XD_DATE_FORMAT_PATTERN);
+		return new SimpleDateFormat(DEFAULT_DATAFLOW_DATE_FORMAT_PATTERN);
 	}
 
 	/**
-	 * @return The Default Spring XD time format using {@link DateFormat} pattern {@link TimeUtils#DEFAULT_XD_TIME_FORMAT_PATTERN}
+	 * @return The Default Spring Cloud Data Flow time format using {@link DateFormat}
+	 * pattern {@link TimeUtils#DEFAULT_DATAFLOW_TIME_FORMAT_PATTERN}
 	 */
 	public static DateFormat getDefaultTimeFormat() {
-		return new SimpleDateFormat(DEFAULT_XD_TIME_FORMAT_PATTERN);
+		return new SimpleDateFormat(DEFAULT_DATAFLOW_TIME_FORMAT_PATTERN);
 	}
 
 	/**
-	 * @return The Default Spring XD date/time format using {@link DateFormat} pattern {@link TimeUtils#DEFAULT_XD_DATE_TIME_FORMAT_PATTERN}
+	 * @return The Default Spring Cloud Data Flow date/time format using
+	 * {@link DateFormat} pattern {@link TimeUtils#DEFAULT_DATAFLOW_DATE_TIME_FORMAT_PATTERN}
 	 */
 	public static DateFormat getDefaultDateTimeFormat() {
-		return new SimpleDateFormat(DEFAULT_XD_DATE_TIME_FORMAT_PATTERN);
+		return new SimpleDateFormat(DEFAULT_DATAFLOW_DATE_TIME_FORMAT_PATTERN);
 	}
 
 	/**
-	 * @return The Default Spring XD duration format using {@link DateFormat} pattern {@link TimeUtils#DEFAULT_XD_DURATION_FORMAT_PATTERN}
+	 * @return The Default Spring Cloud Data Flow duration format using
+	 * {@link DateFormat} pattern {@link TimeUtils#DEFAULT_DATAFLOW_DURATION_FORMAT_PATTERN}
 	 */
 	public static DateFormat getDefaultDurationFormat() {
-		return new SimpleDateFormat(DEFAULT_XD_DURATION_FORMAT_PATTERN);
+		return new SimpleDateFormat(DEFAULT_DATAFLOW_DURATION_FORMAT_PATTERN);
 	}
 
 }

@@ -38,14 +38,24 @@ public class TaskJobExecution {
 		this.isTaskDefined = isTaskDefined;
 	}
 
+	/**
+	 * @return the Task Id that is associated with the {@link JobExecution}.
+	 */
 	public long getTaskId() {
 		return taskId;
 	}
 
+	/**
+	 * @return the {@link JobExecution} that is associated with the task id.
+	 */
 	public JobExecution getJobExecution() {
 		return jobExecution;
 	}
 
+	/**
+	 * @return true if the Task Definition for the task id exists in the task repository
+	 * else returns false.
+	 */
 	public boolean isTaskDefined() {
 		return isTaskDefined;
 	}

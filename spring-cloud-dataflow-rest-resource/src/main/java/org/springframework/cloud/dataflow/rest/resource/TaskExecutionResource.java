@@ -23,6 +23,7 @@ import java.util.List;
 
 import org.springframework.batch.core.JobExecution;
 import org.springframework.cloud.dataflow.rest.job.TaskJobExecutionRel;
+import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.ResourceSupport;
 import org.springframework.util.Assert;
@@ -78,6 +79,11 @@ public class TaskExecutionResource extends ResourceSupport {
 		parameters = new ArrayList<>();
 	}
 
+	/**
+	 * Constructor to initialize the TaskExecutionResource using {@link TaskJobExecutionRel}.
+	 * @param taskJobExecutionRel contans the {@link TaskExecution} but also a list
+	 * of the Job ExecutionIds that were associated with this task if applicable.
+	 */
 	public TaskExecutionResource(TaskJobExecutionRel taskJobExecutionRel) {
 		Assert.notNull(taskJobExecutionRel, "taskJobExecutionDTO must not be null");
 		this.executionId = taskJobExecutionRel.getTaskExecution().getExecutionId();
@@ -100,6 +106,10 @@ public class TaskExecutionResource extends ResourceSupport {
 		return executionId;
 	}
 
+	/**
+	 * @return the int containing the exit code of the task application upon completion.
+	 * Default is 0.
+	 */
 	public int getExitCode() {
 		return exitCode;
 	}
