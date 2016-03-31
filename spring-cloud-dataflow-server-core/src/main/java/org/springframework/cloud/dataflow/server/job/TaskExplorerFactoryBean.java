@@ -14,36 +14,48 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.dataflow.server.configuration;
+package org.springframework.cloud.dataflow.server.job;
 
 import javax.sql.DataSource;
 
+import org.springframework.beans.factory.FactoryBean;
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.cloud.task.repository.support.SimpleTaskExplorer;
 import org.springframework.cloud.task.repository.support.TaskExecutionDaoFactoryBean;
-import org.springframework.cloud.task.repository.support.TaskRepositoryInitializer;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.data.web.config.EnableSpringDataWebSupport;
+import org.springframework.util.Assert;
 
 /**
- * @author Glenn Renfro
- * @author Michael Minella
+ * Factory bean to create a Task Explorer.
+ *
+ * @author  Glenn Renfro
  */
-@Configuration
-@EnableSpringDataWebSupport
-public class TaskDependencies {
+public class TaskExplorerFactoryBean implements FactoryBean<TaskExplorer> {
 
-	@Bean
-	public TaskRepositoryInitializer taskExecutionRepository(DataSource dataSource) {
-		TaskRepositoryInitializer taskRepositoryInitializer = new TaskRepositoryInitializer();
-		taskRepositoryInitializer.setDataSource(dataSource);
-		return taskRepositoryInitializer;
+	private DataSource dataSource;
+
+	private TaskExplorer taskExplorer;
+
+	public TaskExplorerFactoryBean(DataSource dataSource){
+		Assert.notNull(dataSource, "dataSource must not be null");
+		this.dataSource = dataSource;
 	}
 
-	@Bean
-	public TaskExplorer taskExplorer(DataSource dataSource) {
-		return new SimpleTaskExplorer(new TaskExecutionDaoFactoryBean(dataSource));
+	@Override
+	public TaskExplorer getObject() throws Exception {
+		if(taskExplorer == null){
+			taskExplorer = new SimpleTaskExplorer(new TaskExecutionDaoFactoryBean(dataSource));
+		}
+		return taskExplorer;
+	}
+
+	@Override
+	public Class<?> getObjectType() {
+		return TaskExplorer.class;
+	}
+
+	@Override
+	public boolean isSingleton() {
+		return true;
 	}
 
 }

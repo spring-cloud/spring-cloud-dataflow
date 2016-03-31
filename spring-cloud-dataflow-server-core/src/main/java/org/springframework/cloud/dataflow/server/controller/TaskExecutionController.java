@@ -16,11 +16,16 @@
 
 package org.springframework.cloud.dataflow.server.controller;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.cloud.dataflow.rest.job.TaskJobExecutionRel;
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionResource;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskExecutionException;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.ExposesResourceFor;
@@ -72,9 +77,11 @@ public class TaskExecutionController {
 	 */
 	@RequestMapping(value = "", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
-	public PagedResources<TaskExecutionResource> list(Pageable pageable, PagedResourcesAssembler<TaskExecution> assembler) {
-		Page page = explorer.findAll(pageable);
-		return assembler.toResource(page, taskAssembler);
+	public PagedResources<TaskExecutionResource> list(Pageable pageable,
+			PagedResourcesAssembler<TaskJobExecutionRel> assembler) {
+		Page taskExecutions = explorer.findAll(pageable);
+		Page<TaskJobExecutionRel> result = getPageableRelationships(taskExecutions, pageable);
+		return assembler.toResource(result, taskAssembler);
 	}
 
 	/**
@@ -88,8 +95,9 @@ public class TaskExecutionController {
 	@ResponseStatus(HttpStatus.OK)
 	public PagedResources<TaskExecutionResource> retrieveTasksByName(
 			@RequestParam("name") String taskName, Pageable pageable,
-				PagedResourcesAssembler<TaskExecution> assembler) {
-		Page<TaskExecution> result = explorer.findTaskExecutionsByName(taskName, pageable);
+				PagedResourcesAssembler<TaskJobExecutionRel> assembler) {
+		Page<TaskExecution> taskExecutions = explorer.findTaskExecutionsByName(taskName, pageable);
+		Page<TaskJobExecutionRel> result = getPageableRelationships(taskExecutions, pageable);
 		return assembler.toResource(result, taskAssembler);
 	}
 
@@ -102,36 +110,44 @@ public class TaskExecutionController {
 	@RequestMapping(value = "/{id}", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
 	public TaskExecutionResource view(@PathVariable("id") long id) {
-		TaskExecution execution = this.explorer.getTaskExecution(id);
-		if(execution == null){
+		TaskExecution taskExecution = this.explorer.getTaskExecution(id);
+		if(taskExecution == null){
 			throw new NoSuchTaskExecutionException(id);
 		}
-		return taskAssembler.toResource(execution);
+		TaskJobExecutionRel taskJobExecutionRel = new TaskJobExecutionRel(taskExecution,
+				new ArrayList<>(explorer.getJobExecutionIdsByTaskExecutionId(
+						taskExecution.getExecutionId())));
+		return taskAssembler.toResource(taskJobExecutionRel);
 	}
 
 	/**
 	 * {@link org.springframework.hateoas.ResourceAssembler} implementation
-	 * that converts {@link TaskExecution}s to {@link TaskExecutionResource}s.
+	 * that converts {@link TaskJobExecutionRel}s to {@link TaskExecutionResource}s.
 	 */
-	private static class Assembler extends ResourceAssemblerSupport<TaskExecution, TaskExecutionResource> {
+	private static class Assembler extends ResourceAssemblerSupport<TaskJobExecutionRel, TaskExecutionResource> {
 
 		public Assembler() {
 			super(TaskExecutionController.class, TaskExecutionResource.class);
 		}
 
 		@Override
-		public TaskExecutionResource toResource(TaskExecution taskExecution) {
-			return createResourceWithId(taskExecution.getExecutionId(), taskExecution);
+		public TaskExecutionResource toResource(TaskJobExecutionRel taskJobExecutionRel) {
+			return createResourceWithId(taskJobExecutionRel.getTaskExecution().getExecutionId(), taskJobExecutionRel);
 		}
 
 		@Override
-		public TaskExecutionResource instantiateResource(TaskExecution taskExecution) {
-			TaskExecutionResource taskExecutionResource = new TaskExecutionResource(
-					taskExecution.getExecutionId(), taskExecution.getExitCode(),
-					taskExecution.getTaskName(), taskExecution.getStartTime(),
-					taskExecution.getEndTime(), taskExecution.getExitMessage(),
-					taskExecution.getParameters());
-			return taskExecutionResource;
+		public TaskExecutionResource instantiateResource(TaskJobExecutionRel taskJobExecutionRel) {
+			return new TaskExecutionResource(taskJobExecutionRel);
 		}
+	}
+
+	private Page<TaskJobExecutionRel> getPageableRelationships(Page<TaskExecution> taskExecutions, Pageable pageable){
+		List<TaskJobExecutionRel> taskJobExecutionRels = new ArrayList<>();
+		for(TaskExecution taskExecution: taskExecutions.getContent()) {
+			taskJobExecutionRels.add( new TaskJobExecutionRel(taskExecution,
+					new ArrayList<>(explorer.getJobExecutionIdsByTaskExecutionId(
+							taskExecution.getExecutionId()))));
+		}
+		return new PageImpl<>(taskJobExecutionRels,pageable,taskExecutions.getTotalElements());
 	}
 }
