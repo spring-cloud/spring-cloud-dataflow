@@ -21,10 +21,8 @@ import java.io.InputStream;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import org.junit.Test;
-import org.springframework.batch.admin.history.StepExecutionHistory;
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobInstance;
@@ -40,11 +38,13 @@ import org.springframework.cloud.dataflow.rest.client.support.JobParameterJackso
 import org.springframework.cloud.dataflow.rest.client.support.JobParametersJacksonMixIn;
 import org.springframework.cloud.dataflow.rest.client.support.StepExecutionHistoryJacksonMixIn;
 import org.springframework.cloud.dataflow.rest.client.support.StepExecutionJacksonMixIn;
+import org.springframework.cloud.dataflow.rest.job.StepExecutionHistory;
 import org.springframework.cloud.dataflow.rest.job.support.ISO8601DateFormatWithMilliSeconds;
 import org.springframework.cloud.dataflow.rest.resource.JobExecutionResource;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.hal.Jackson2HalModule;
+import org.springframework.util.StreamUtils;
 
 /**
  * @author Gunnar Hillert
@@ -60,7 +60,7 @@ public class JobExecutionDeserializationTests {
 		final InputStream inputStream =
 				JobExecutionDeserializationTests.class.getResourceAsStream("/JobExecutionJson.txt");
 
-		final String json = IOUtils.toString(inputStream);
+		final String json = new String(StreamUtils.copyToByteArray(inputStream));
 
 		objectMapper.registerModule(new Jackson2HalModule());
 		objectMapper.addMixIn(JobExecution.class, JobExecutionJacksonMixIn.class);
@@ -90,7 +90,7 @@ public class JobExecutionDeserializationTests {
 
 		final InputStream inputStream = JobExecutionDeserializationTests.class.getResourceAsStream("/SingleJobExecutionJson.txt");
 
-		final String json = IOUtils.toString(inputStream);
+		final String json = new String(StreamUtils.copyToByteArray(inputStream));
 
 		objectMapper.addMixIn(JobExecution.class, JobExecutionJacksonMixIn.class);
 		objectMapper.addMixIn(JobParameters.class, JobParametersJacksonMixIn.class);

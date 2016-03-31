@@ -16,8 +16,8 @@
 
 package org.springframework.cloud.dataflow.rest.resource;
 
-import org.springframework.batch.admin.history.StepExecutionHistory;
 import org.springframework.batch.core.StepExecution;
+import org.springframework.cloud.dataflow.rest.job.StepExecutionHistory;
 import org.springframework.hateoas.ResourceSupport;
 import org.springframework.util.Assert;
 
@@ -25,6 +25,7 @@ import org.springframework.util.Assert;
  * Represents the step execution progress info resource.
  *
  * @author Ilayaperumal Gopinathan
+ * @author Glenn Renfro
  * @since 1.0
  */
 

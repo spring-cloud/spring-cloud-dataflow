@@ -19,8 +19,8 @@ package org.springframework.cloud.dataflow.rest.job.support;
 import java.text.FieldPosition;
 import java.util.Date;
 
-import org.codehaus.jackson.map.util.ISO8601DateFormat;
-import org.codehaus.jackson.map.util.ISO8601Utils;
+import com.fasterxml.jackson.databind.util.ISO8601DateFormat;
+import com.fasterxml.jackson.databind.util.ISO8601Utils;
 
 /**
  * Improved version of the {@link ISO8601DateFormat} that also serializes milliseconds.

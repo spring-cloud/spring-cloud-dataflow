@@ -27,7 +27,12 @@ import org.springframework.batch.core.launch.NoSuchJobExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.dataflow.rest.resource.StepExecutionResource;
 import org.springframework.cloud.dataflow.server.job.support.StepExecutionResourceBuilder;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.ExposesResourceFor;
+import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.mvc.ResourceAssemblerSupport;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
@@ -70,11 +75,12 @@ public class JobStepExecutionController {
 	 */
 	@RequestMapping(value = { "" }, method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
-	public List<StepExecutionResource> stepExecutions(
-			@PathVariable("jobExecutionId") long id) throws NoSuchJobExecutionException{
+	public PagedResources<StepExecutionResource> stepExecutions(
+			@PathVariable("jobExecutionId") long id, Pageable pageable, PagedResourcesAssembler<StepExecution> assembler) throws NoSuchJobExecutionException{
 		List<StepExecution> result;
 			result = new ArrayList<>(jobService.getStepExecutions(id));
-		return stepAssembler.toResources(result);
+		Page page = new PageImpl<>(result, pageable, result.size());
+		return assembler.toResource(page,stepAssembler);
 	}
 
 	/**

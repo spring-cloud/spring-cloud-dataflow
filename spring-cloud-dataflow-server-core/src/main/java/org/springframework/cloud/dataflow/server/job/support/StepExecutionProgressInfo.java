@@ -19,9 +19,9 @@ package org.springframework.cloud.dataflow.server.job.support;
 import java.util.Arrays;
 import java.util.Date;
 
-import org.springframework.batch.admin.history.CumulativeHistory;
-import org.springframework.batch.admin.history.StepExecutionHistory;
 import org.springframework.batch.core.StepExecution;
+import org.springframework.cloud.dataflow.rest.job.StepExecutionHistory;
+import org.springframework.cloud.dataflow.rest.job.CumulativeHistory;
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.util.StringUtils;

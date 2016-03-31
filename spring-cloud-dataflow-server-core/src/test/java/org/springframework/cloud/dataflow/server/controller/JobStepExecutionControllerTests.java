@@ -149,10 +149,10 @@ public class JobStepExecutionControllerTests {
 		mockMvc.perform(
 				get("/jobs/executions/3/steps").accept(MediaType.APPLICATION_JSON)
 		).andExpect(status().isOk())
-				.andExpect(jsonPath("$", hasSize(3)))
-				.andExpect(jsonPath("$[0].stepExecution.id", is(4)))
-				.andExpect(jsonPath("$[1].stepExecution.id", is(5)))
-				.andExpect(jsonPath("$[2].stepExecution.id", is(6)));
+				.andExpect(jsonPath("$.content[*]", hasSize(3)))
+				.andExpect(jsonPath("$.content[0].stepExecution.id", is(4)))
+				.andExpect(jsonPath("$.content[1].stepExecution.id", is(5)))
+				.andExpect(jsonPath("$.content[2].stepExecution.id", is(6)));
 	}
 
 	@Test

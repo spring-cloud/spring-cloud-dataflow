@@ -35,10 +35,5 @@
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
-		<dependency>
-			<groupId>org.springframework.batch</groupId>
-			<artifactId>spring-batch-admin-manager</artifactId>
-			<scope>test</scope>
-		</dependency>
 	</dependencies>
 </project>
