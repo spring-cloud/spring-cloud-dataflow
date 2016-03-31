@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2015-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,13 +84,12 @@ public class ModuleTemplate implements ModuleOperations {
 
 	@Override
 	public ModuleRegistrationResource register(String name, ArtifactType type,
-			String coordinates, boolean force) {
+			String uri, boolean force) {
 		MultiValueMap<String, Object> values = new LinkedMultiValueMap<String, Object>();
-		values.add("coordinates", coordinates);
+		values.add("uri", uri);
 		values.add("force", Boolean.toString(force));
 
-		String uri = uriTemplate.toString() + "/{type}/{name}";
-		return restTemplate.postForObject(uri, values, ModuleRegistrationResource.class,
-				type, name);
+		return restTemplate.postForObject(uriTemplate.toString() + "/{type}/{name}", values,
+				ModuleRegistrationResource.class, type, name);
 	}
 }

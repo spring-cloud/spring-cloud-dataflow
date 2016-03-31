@@ -51,6 +51,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * Handles all Module related interactions.
+ *
  * @author Glenn Renfro
  * @author Mark Fisher
  * @author Gunnar Hillert
@@ -133,10 +134,10 @@ public class ModuleController {
 	}
 
 	/**
-	 * Register a module name and type with its Maven coordinates.
+	 * Register a module name and type with its URI.
 	 * @param type        module type
 	 * @param name        module name
-	 * @param coordinates Maven coordinates for the module artifact
+	 * @param uri         URI for the module artifact (e.g. {@literal maven://group:artifact:version})
 	 * @param force       if {@code true}, overwrites a pre-existing registration
 	 */
 	@RequestMapping(value = "/{type}/{name}", method = RequestMethod.POST)
@@ -144,18 +145,20 @@ public class ModuleController {
 	public void register(
 			@PathVariable("type") ArtifactType type,
 			@PathVariable("name") String name,
-			@RequestParam("coordinates") String coordinates,
+			@RequestParam("uri") String uri,
 			@RequestParam(value = "force", defaultValue = "false") boolean force) {
 		Assert.isTrue(type != ArtifactType.library, "Only modules are supported by this endpoint");
 		ArtifactRegistration previous = artifactRegistry.find(name, type);
 		if (!force && previous != null) {
 			throw new ModuleAlreadyRegisteredException(previous);
 		}
-		artifactRegistry.save(new ArtifactRegistration(name, type, ArtifactCoordinates.parse(coordinates)));
+		if (uri.startsWith("maven:")) {
+			String coordinates = uri.replaceFirst("maven:\\/*", "");
+			artifactRegistry.save(new ArtifactRegistration(name, type, ArtifactCoordinates.parse(coordinates)));
+		}
 		if (this.registry != null) {
 			try {
-				this.registry.register(String.format("%s.%s", type, name),
-						new URI(String.format("maven://%s", coordinates)));
+				this.registry.register(String.format("%s.%s", type, name), new URI(uri));
 			}
 			catch (URISyntaxException e) {
 				throw new IllegalArgumentException(e);
