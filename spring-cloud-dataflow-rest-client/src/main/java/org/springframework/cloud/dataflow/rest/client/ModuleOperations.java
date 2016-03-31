@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2015-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,11 +61,11 @@ public interface ModuleOperations {
 	 *
 	 * @param name  module name
 	 * @param type  module type
-	 * @param coordinates  Maven coordinates for the module artifact
+	 * @param uri   URI for the module artifact
 	 * @param force if {@code true}, overwrites a pre-existing registration
 	 */
 	ModuleRegistrationResource register(String name, ArtifactType type,
-			String coordinates, boolean force);
+			String uri, boolean force);
 
 	/**
 	 * Unregister a module name and type.

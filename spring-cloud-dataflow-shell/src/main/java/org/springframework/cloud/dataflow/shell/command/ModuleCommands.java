@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2015-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -127,15 +127,15 @@ public class ModuleCommands implements CommandMarker {
 					help = "the type for the registered module")
 			ArtifactType type,
 			@CliOption(mandatory = true,
-					key = {"coordinates"},
-					help = "coordinates to the module archive")
-			String coordinates,
+					key = {"uri"},
+					help = "URI for the module artifact")
+			String uri,
 			@CliOption(key = "force",
 					help = "force update if module already exists (only if not in use)",
 					specifiedDefaultValue = "true",
 					unspecifiedDefaultValue = "false")
 			boolean force) {
-		moduleOperations().register(name, type, coordinates, force);
+		moduleOperations().register(name, type, uri, force);
 		return String.format(("Successfully registered module '%s:%s'"), type, name);
 	}
 
