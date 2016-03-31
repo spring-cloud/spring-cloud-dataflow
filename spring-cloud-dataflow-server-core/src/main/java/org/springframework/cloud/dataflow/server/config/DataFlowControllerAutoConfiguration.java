@@ -125,7 +125,7 @@ public class DataFlowControllerAutoConfiguration {
 	}
 
 	@Bean
-	@ConditionalOnMissingBean
+	@ConditionalOnMissingBean(DelegatingResourceLoader.class)
 	public DelegatingResourceLoader delegatingResourceLoader(MavenResourceLoader mavenResourceLoader) {
 		DefaultResourceLoader defaultLoader = new DefaultResourceLoader();
 		Map<String, ResourceLoader> loaders = new HashMap<>();
