@@ -21,6 +21,7 @@ import java.util.Map;
 
 import org.springframework.boot.actuate.metrics.repository.MetricRepository;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -124,6 +125,7 @@ public class DataFlowControllerAutoConfiguration {
 	}
 
 	@Bean
+	@ConditionalOnMissingBean
 	public DelegatingResourceLoader delegatingResourceLoader(MavenResourceLoader mavenResourceLoader) {
 		DefaultResourceLoader defaultLoader = new DefaultResourceLoader();
 		Map<String, ResourceLoader> loaders = new HashMap<>();
