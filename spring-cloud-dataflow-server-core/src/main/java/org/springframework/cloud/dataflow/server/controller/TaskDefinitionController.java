@@ -16,7 +16,6 @@
 
 package org.springframework.cloud.dataflow.server.controller;
 
-import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistry;
 import org.springframework.cloud.dataflow.core.ModuleDeploymentId;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.rest.resource.TaskDefinitionResource;
@@ -61,11 +60,11 @@ public class TaskDefinitionController {
 	 * Creates a {@code TaskDefinitionController} that delegates
 	 * <ul>
 	 *     <li>CRUD operations to the provided {@link TaskDefinitionRepository}</li>
-	 *     <li>module coordinate retrieval to the provided {@link ArtifactRegistry}</li>
+	 *     <li>task status checks to the provided {@link TaskLauncher}</li>
 	 * </ul>
 	 *
 	 * @param repository the repository this controller will use for task CRUD operations.
-	 * @param taskLauncher the TaskLauncher this controller will use to launch task apps.
+	 * @param taskLauncher the TaskLauncher this controller will use to check task status.
 	 */
 	public TaskDefinitionController(TaskDefinitionRepository repository,
 			TaskLauncher taskLauncher) {

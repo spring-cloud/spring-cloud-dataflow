@@ -40,7 +40,6 @@ import org.springframework.shell.table.TableModel;
 import org.springframework.shell.table.TableModelBuilder;
 import org.springframework.stereotype.Component;
 
-
 /**
  * Commands for working with modules. Allows retrieval of information about
  * available modules, as well as creating and removing module registrations.
@@ -86,7 +85,7 @@ public class ModuleCommands implements CommandMarker {
 		List<Object> result = new ArrayList<>();
 		result.add(String.format("Information about %s module '%s':", module.type, module.name));
 
-		result.add(String.format("Maven coordinates: %s", info.getCoordinates()));
+		result.add(String.format("Resource URI: %s", info.getUri()));
 
 		if (info.getShortDescription() != null) {
 			result.add(info.getShortDescription());

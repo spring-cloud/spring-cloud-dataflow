@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.dataflow.server.controller;
 
+import java.net.URI;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -24,8 +25,8 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistration;
-import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistry;
+import org.springframework.cloud.dataflow.artifact.registry.AppRegistration;
+import org.springframework.cloud.dataflow.artifact.registry.AppRegistry;
 import org.springframework.cloud.dataflow.core.ArtifactCoordinates;
 import org.springframework.cloud.dataflow.core.ArtifactType;
 import org.springframework.cloud.dataflow.core.BindingPropertyKeys;
@@ -77,9 +78,9 @@ public class DeprecatedStreamDeploymentController {
 	private final StreamDefinitionRepository repository;
 
 	/**
-	 * The artifact registry this controller will use to look up modules and libraries.
+	 * The app registry this controller will use to look up modules and libraries.
 	 */
-	private final ArtifactRegistry registry;
+	private final AppRegistry registry;
 
 	/**
 	 * The deployer this controller will use to deploy stream modules.
@@ -90,7 +91,7 @@ public class DeprecatedStreamDeploymentController {
 	 * Create a {@code StreamDeploymentController} that delegates
 	 * <ul>
 	 *     <li>CRUD operations to the provided {@link StreamDefinitionRepository}</li>
-	 *     <li>module coordinate retrieval to the provided {@link ArtifactRegistry}</li>
+	 *     <li>module coordinate retrieval to the provided {@link AppRegistry}</li>
 	 *     <li>deployment operations to the provided {@link ModuleDeployer}</li>
 	 * </ul>
 	 *
@@ -99,7 +100,7 @@ public class DeprecatedStreamDeploymentController {
 	 * @param deployer    the deployer this controller will use to deploy stream modules
 	 */
 	@Autowired
-	public DeprecatedStreamDeploymentController(StreamDefinitionRepository repository, ArtifactRegistry registry,
+	public DeprecatedStreamDeploymentController(StreamDefinitionRepository repository, AppRegistry registry,
 			@Qualifier("processModuleDeployer") ModuleDeployer deployer) {
 		Assert.notNull(repository, "repository must not be null");
 		Assert.notNull(registry, "registry must not be null");
@@ -169,12 +170,13 @@ public class DeprecatedStreamDeploymentController {
 		while (iterator.hasNext()) {
 			ModuleDefinition currentModule = iterator.next();
 			ArtifactType type = determineModuleType(currentModule);
-			ArtifactRegistration registration = this.registry.find(currentModule.getName(), type);
+			AppRegistration registration = this.registry.find(currentModule.getName(), type);
 			if (registration == null) {
 				throw new IllegalArgumentException(String.format(
 						"Module %s of type %s not found in registry", currentModule.getName(), type));
 			}
-			ArtifactCoordinates coordinates = registration.getCoordinates();
+			URI uri = registration.getUri();
+			ArtifactCoordinates coordinates = ArtifactCoordinates.parse(uri.toString().replaceFirst("maven:\\/*", ""));
 			Map<String, String> moduleDeploymentProperties = extractModuleDeploymentProperties(currentModule, streamDeploymentProperties);
 			moduleDeploymentProperties.put(ModuleDeployer.GROUP_DEPLOYMENT_ID, currentModule.getGroup() + "-" + timestamp);
 			boolean upstreamModuleSupportsPartition = upstreamModuleHasPartitionInfo(stream, currentModule, streamDeploymentProperties);
@@ -198,7 +200,7 @@ public class DeprecatedStreamDeploymentController {
 
 	/**
 	 * Looks at parameters of a module that represent maven coordinates and, if a simple name has been used,
-	 * resolve it from the {@link ArtifactRegistry}.
+	 * resolve it from the {@link AppRegistry}.
 	 */
 	private ModuleDefinition postProcessLibraryProperties(ModuleDefinition module) {
 		String includes = module.getParameters().get("includes");
@@ -212,11 +214,12 @@ public class DeprecatedStreamDeploymentController {
 				coordinates = ArtifactCoordinates.parse(libs[i]);
 			}
 			catch (IllegalArgumentException e) {
-				ArtifactRegistration registration = registry.find(libs[i], ArtifactType.library);
+				AppRegistration registration = registry.find(libs[i], ArtifactType.library);
 				if (registration == null) {
 					throw new IllegalArgumentException("'" + libs[i] + "' could not be parsed as maven coordinates and is not a registered library");
 				}
-				coordinates = registration.getCoordinates();
+				coordinates = ArtifactCoordinates.parse(
+						registration.getUri().toString().replaceFirst("maven:\\/*", ""));
 			}
 			libs[i] = coordinates.toString();
 		}
@@ -385,5 +388,4 @@ public class DeprecatedStreamDeploymentController {
 			}
 		}
 	}
-
 }

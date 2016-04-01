@@ -23,10 +23,9 @@ import java.util.Arrays;
 
 import javax.sql.DataSource;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import org.h2.tools.Server;
 import org.slf4j.LoggerFactory;
+
 import org.springframework.batch.admin.service.JobService;
 import org.springframework.batch.admin.service.SimpleJobServiceFactoryBean;
 import org.springframework.batch.core.StepExecution;
@@ -43,15 +42,12 @@ import org.springframework.boot.actuate.metrics.repository.redis.RedisMetricRepo
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.batch.BatchDatabaseInitializer;
 import org.springframework.boot.autoconfigure.batch.BatchProperties;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.autoconfigure.security.oauth2.OAuth2AutoConfiguration;
 import org.springframework.boot.autoconfigure.web.HttpMessageConverters;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistry;
-import org.springframework.cloud.dataflow.artifact.registry.RedisArtifactRegistry;
 import org.springframework.cloud.dataflow.completion.CompletionConfiguration;
 import org.springframework.cloud.dataflow.completion.RecoveryStrategy;
 import org.springframework.cloud.dataflow.completion.StreamCompletionProvider;
@@ -72,7 +68,6 @@ import org.springframework.cloud.task.repository.support.TaskRepositoryInitializ
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
@@ -87,6 +82,9 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 
 /**
  * Configuration for the Data Flow Server application context. This includes support
@@ -137,18 +135,6 @@ public class DataFlowServerConfiguration {
 	@ConditionalOnMissingBean
 	public TaskDefinitionRepository taskDefinitionRepository() {
 		return new InMemoryTaskDefinitionRepository();
-	}
-
-	@Bean
-	@ConditionalOnMissingBean
-	public ArtifactRegistry artifactRegistry(RedisConnectionFactory redisConnectionFactory) {
-		return new RedisArtifactRegistry(redisConnectionFactory);
-	}
-
-	@Bean
-	@ConditionalOnMissingBean
-	public ArtifactRegistryPopulator artifactRegistryPopulator(ArtifactRegistry artifactRegistry) {
-		return new ArtifactRegistryPopulator(artifactRegistry);
 	}
 
 	@Configuration

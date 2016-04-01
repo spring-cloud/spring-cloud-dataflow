@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2015-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,10 +39,9 @@ public class ModuleRegistrationResource extends ResourceSupport {
 	private String type;
 
 	/**
-	 * Maven coordinates for module artifact. String is in standard format
-	 * such as {@code groupId:artifactId:version}.
+	 * URI for module resource, such as {@code maven://groupId:artifactId:version}.
 	 */
-	private String coordinates;
+	private String uri;
 
 	/**
 	 * Default constructor for serialization frameworks.
@@ -55,12 +54,12 @@ public class ModuleRegistrationResource extends ResourceSupport {
 	 *
 	 * @param name module name
 	 * @param type module type
-	 * @param coordinates coordinates for module artifact
+	 * @param uri uri for module resource
 	 */
-	public ModuleRegistrationResource(String name, String type, String coordinates) {
+	public ModuleRegistrationResource(String name, String type, String uri) {
 		this.name = name;
 		this.type = type;
-		this.coordinates = coordinates;
+		this.uri = uri;
 	}
 
 	/**
@@ -78,10 +77,10 @@ public class ModuleRegistrationResource extends ResourceSupport {
 	}
 
 	/**
-	 * @see #coordinates
+	 * @see #uri
 	 */
-	public String getCoordinates() {
-		return coordinates;
+	public String getUri() {
+		return uri;
 	}
 
 	/**

@@ -68,7 +68,7 @@ public class DetailedModuleRegistrationResource extends ModuleRegistrationResour
 	 *                 module registration data
 	 */
 	public DetailedModuleRegistrationResource(ModuleRegistrationResource resource) {
-		super(resource.getName(), resource.getType(), resource.getCoordinates());
+		super(resource.getName(), resource.getType(), resource.getUri());
 	}
 
 	/**

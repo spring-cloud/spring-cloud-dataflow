@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2015-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,36 +25,34 @@ import java.util.Set;
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataGroup;
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataRepository;
-import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistration;
-import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistry;
+import org.springframework.cloud.dataflow.artifact.registry.AppRegistration;
+import org.springframework.cloud.dataflow.artifact.registry.AppRegistry;
 import org.springframework.cloud.dataflow.core.ArtifactType;
 import org.springframework.cloud.dataflow.core.ModuleDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.dsl.CheckPointedParseException;
 import org.springframework.cloud.stream.configuration.metadata.ModuleConfigurationMetadataResolver;
-import org.springframework.cloud.dataflow.app.resolver.ModuleResolver;
 import org.springframework.core.io.Resource;
 
 /**
  * Provides completion proposals when the user has typed the two dashes that
  * precede a module configuration property.
+ *
  * @author Eric Bottard
+ * @author Mark Fisher
  */
 class ConfigurationPropertyNameAfterDashDashRecoveryStrategy
 		extends StacktraceFingerprintingRecoveryStrategy<CheckPointedParseException> {
 
-	private final ArtifactRegistry artifactRegistry;
+	private final AppRegistry appRegistry;
 
-	private final ModuleResolver moduleResolver;
+	private final ModuleConfigurationMetadataResolver metadataResolver;
 
-	private final ModuleConfigurationMetadataResolver moduleConfigurationMetadataResolver;
-
-	ConfigurationPropertyNameAfterDashDashRecoveryStrategy(ArtifactRegistry artifactRegistry,
-	                                                       ModuleResolver moduleResolver, ModuleConfigurationMetadataResolver moduleConfigurationMetadataResolver) {
+	ConfigurationPropertyNameAfterDashDashRecoveryStrategy(AppRegistry appRegistry,
+			ModuleConfigurationMetadataResolver metadataResolver) {
 		super(CheckPointedParseException.class, "file --", "file | foo --");
-		this.artifactRegistry = artifactRegistry;
-		this.moduleResolver = moduleResolver;
-		this.moduleConfigurationMetadataResolver = moduleConfigurationMetadataResolver;
+		this.appRegistry = appRegistry;
+		this.metadataResolver = metadataResolver;
 	}
 
 	@Override
@@ -66,25 +64,24 @@ class ConfigurationPropertyNameAfterDashDashRecoveryStrategy
 		ModuleDefinition lastModule = streamDefinition.getDeploymentOrderIterator().next();
 
 		String lastModuleName = lastModule.getName();
-		ArtifactRegistration lastArtifactRegistration = null;
+		AppRegistration lastAppRegistration = null;
 		for (ArtifactType moduleType : CompletionUtils.determinePotentialTypes(lastModule)) {
-			lastArtifactRegistration = artifactRegistry.find(lastModuleName, moduleType);
-			if (lastArtifactRegistration != null) {
+			lastAppRegistration = appRegistry.find(lastModuleName, moduleType);
+			if (lastAppRegistration != null) {
 				break;
 			}
 		}
-		if (lastArtifactRegistration == null) {
+		if (lastAppRegistration == null) {
 			// Not a valid module name, do nothing
 			return;
 		}
 		Set<String> alreadyPresentOptions = new HashSet<>(lastModule.getParameters().keySet());
 
-		Resource jarFile = moduleResolver.resolve(CompletionUtils
-				.fromModuleCoordinates(lastArtifactRegistration.getCoordinates()));
+		Resource jarFile = lastAppRegistration.getResource();
 
 		CompletionProposal.Factory proposals = expanding(dsl);
 		Set<String> prefixes = new HashSet<>();
-		for (ConfigurationMetadataGroup group : moduleConfigurationMetadataResolver.listPropertyGroups(jarFile)) {
+		for (ConfigurationMetadataGroup group : metadataResolver.listPropertyGroups(jarFile)) {
 			String groupId = ConfigurationMetadataRepository.ROOT_GROUP.equals(group.getId()) ? "" : group.getId();
 			if ("".equals(groupId)) {
 				// For props that don't have a group id, add their bare names as proposals

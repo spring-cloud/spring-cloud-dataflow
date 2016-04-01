@@ -16,13 +16,13 @@
 
 package org.springframework.cloud.dataflow.server.controller;
 
-import java.net.URI;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.springframework.cloud.dataflow.artifact.registry.AppRegistry;
 import org.springframework.cloud.dataflow.core.ArtifactType;
 import org.springframework.cloud.dataflow.core.BindingPropertyKeys;
 import org.springframework.cloud.dataflow.core.ModuleDefinition;
@@ -35,13 +35,11 @@ import org.springframework.cloud.dataflow.rest.resource.StreamDeploymentResource
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
 import org.springframework.cloud.dataflow.server.repository.NoSuchStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
-import org.springframework.cloud.deployer.resource.registry.UriRegistry;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.app.AppStatus;
 import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.ResourceLoader;
 import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
@@ -76,14 +74,9 @@ public class StreamDeploymentController {
 	private final StreamDefinitionRepository repository;
 
 	/**
-	 * The URI registry this controller will use to look up app resource locations.
+	 * The app registry this controller will use to lookup apps.
 	 */
-	private final UriRegistry registry;
-
-	/**
-	 * {@link ResourceLoader} that will resolve app {@link Resource}s from URI locations. 
-	 */
-	private final ResourceLoader resourceLoader;
+	private final AppRegistry registry;
 
 	/**
 	 * The deployer this controller will use to deploy stream apps.
@@ -94,25 +87,20 @@ public class StreamDeploymentController {
 	 * Create a {@code StreamDeploymentController} that delegates
 	 * <ul>
 	 *     <li>CRUD operations to the provided {@link StreamDefinitionRepository}</li>
-	 *     <li>app URI retrieval to the provided {@link UriRegistry}</li>
-	 *     <li>URI resolution to the provided {@link ResourceLoader}</li>
+	 *     <li>app retrieval to the provided {@link AppRegistry}</li>
 	 *     <li>deployment operations to the provided {@link AppDeployer}</li>
 	 * </ul>
 	 *
 	 * @param repository       the repository this controller will use for stream CRUD operations
-	 * @param registry         URI registry this controller will use to look up URIs for apps
-	 * @param resourceLoader   the ResourceLoader that resolves a URI to a Resource
+	 * @param registry         the registry this controller will use to lookup apps
 	 * @param deployer         the deployer this controller will use to deploy stream apps
 	 */
-	public StreamDeploymentController(StreamDefinitionRepository repository, UriRegistry registry,
-			ResourceLoader resourceLoader, AppDeployer deployer) {
+	public StreamDeploymentController(StreamDefinitionRepository repository, AppRegistry registry, AppDeployer deployer) {
 		Assert.notNull(repository, "repository must not be null");
 		Assert.notNull(registry, "registry must not be null");
-		Assert.notNull(resourceLoader, "resourceLoader must not be null");
 		Assert.notNull(deployer, "deployer must not be null");
 		this.repository = repository;
 		this.registry = registry;
-		this.resourceLoader = resourceLoader;
 		this.deployer = deployer;
 	}
 
@@ -196,8 +184,7 @@ public class StreamDeploymentController {
 			isDownStreamModulePartitioned = isPartitionedConsumer(currentModule, moduleDeploymentProperties,
 					upstreamModuleSupportsPartition);
 			AppDefinition definition = new AppDefinition(currentModule.getLabel(), currentModule.getParameters());
-			URI uri = this.registry.find(String.format("%s.%s", type, currentModule.getName()));
-			Resource resource = this.resourceLoader.getResource(uri.toString());
+			Resource resource = this.registry.find(currentModule.getName(), type).getResource();
 			AppDeploymentRequest request = new AppDeploymentRequest(definition, resource, moduleDeploymentProperties);
 			this.deployer.deploy(request);
 		}

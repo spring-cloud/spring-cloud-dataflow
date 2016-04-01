@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2015-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,29 +16,31 @@
 
 package org.springframework.cloud.dataflow.completion;
 
-import static org.springframework.cloud.dataflow.core.ArtifactType.*;
+import static org.springframework.cloud.dataflow.core.ArtifactType.processor;
+import static org.springframework.cloud.dataflow.core.ArtifactType.sink;
 
 import java.util.List;
 
+import org.springframework.cloud.dataflow.artifact.registry.AppRegistration;
+import org.springframework.cloud.dataflow.artifact.registry.AppRegistry;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.dsl.CheckPointedParseException;
-import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistration;
-import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistry;
 
 /**
  * Provides completions for the case where the user has entered a pipe
  * symbol and a module reference is expected next.
  *
  * @author Eric Bottard
+ * @author Mark Fisher
  */
 public class ModulesAfterPipeRecoveryStrategy extends
 		StacktraceFingerprintingRecoveryStrategy<CheckPointedParseException> {
 
-	private final ArtifactRegistry artifactRegistry;
+	private final AppRegistry appRegistry;
 
-	ModulesAfterPipeRecoveryStrategy(ArtifactRegistry artifactRegistry) {
+	ModulesAfterPipeRecoveryStrategy(AppRegistry appRegistry) {
 		super(CheckPointedParseException.class, "foo |", "foo | ");
-		this.artifactRegistry = artifactRegistry;
+		this.appRegistry = appRegistry;
 	}
 
 
@@ -52,11 +54,11 @@ public class ModulesAfterPipeRecoveryStrategy extends
 		CompletionProposal.Factory proposals = CompletionProposal.expanding(dsl);
 
 		// We only support full streams at the moment, so completions can only be processor or sink
-		for (ArtifactRegistration moduleRegistration : artifactRegistry.findAll()) {
-			if (moduleRegistration.getType() == processor || moduleRegistration.getType() == sink) {
-				String expansion = CompletionUtils.maybeQualifyWithLabel(moduleRegistration.getName(), streamDefinition);
+		for (AppRegistration appRegistration : appRegistry.findAll()) {
+			if (appRegistration.getType() == processor || appRegistration.getType() == sink) {
+				String expansion = CompletionUtils.maybeQualifyWithLabel(appRegistration.getName(), streamDefinition);
 				collector.add(proposals.withSeparateTokens(expansion,
-						"Continue stream definition with a " + moduleRegistration.getType()));
+						"Continue stream definition with a " + appRegistration.getType()));
 			}
 		}
 	}

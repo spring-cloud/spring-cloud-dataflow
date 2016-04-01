@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2015-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,32 +18,33 @@ package org.springframework.cloud.dataflow.completion;
 
 import java.util.List;
 
+import org.springframework.cloud.dataflow.artifact.registry.AppRegistration;
+import org.springframework.cloud.dataflow.artifact.registry.AppRegistry;
 import org.springframework.cloud.dataflow.core.ArtifactType;
-import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistration;
-import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistry;
 
 /**
  * Proposes source module names when the user has typed nothing.
  *
  * @author Eric Bottard
+ * @author Mark Fisher
  */
 class EmptyStartYieldsSourceModulesRecoveryStrategy extends
 		StacktraceFingerprintingRecoveryStrategy<IllegalArgumentException> {
 
-	private final ArtifactRegistry artifactRegistry;
+	private final AppRegistry registry;
 
-	public EmptyStartYieldsSourceModulesRecoveryStrategy(ArtifactRegistry artifactRegistry) {
+	public EmptyStartYieldsSourceModulesRecoveryStrategy(AppRegistry registry) {
 		super(IllegalArgumentException.class, "");
-		this.artifactRegistry = artifactRegistry;
+		this.registry = registry;
 	}
 
 	@Override
 	public void addProposals(String dsl, IllegalArgumentException exception,
 			int detailLevel, List<CompletionProposal> proposals) {
 		CompletionProposal.Factory completionFactory = CompletionProposal.expanding(dsl);
-		for (ArtifactRegistration moduleRegistration : artifactRegistry.findAll()) {
-			if (moduleRegistration.getType() == ArtifactType.source) {
-				proposals.add(completionFactory.withSeparateTokens(moduleRegistration.getName(),
+		for (AppRegistration app : this.registry.findAll()) {
+			if (app.getType() == ArtifactType.source) {
+				proposals.add(completionFactory.withSeparateTokens(app.getName(),
 						"Start with a source module"));
 			}
 		}

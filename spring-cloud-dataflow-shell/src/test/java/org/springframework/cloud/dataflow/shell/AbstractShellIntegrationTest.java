@@ -27,13 +27,10 @@ import org.slf4j.LoggerFactory;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
-import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistry;
-import org.springframework.cloud.dataflow.artifact.registry.InMemoryArtifactRegistry;
 import org.springframework.cloud.dataflow.server.EnableDataFlowServer;
 import org.springframework.cloud.dataflow.shell.command.StreamCommandTemplate;
 import org.springframework.cloud.dataflow.shell.command.TaskCommandTemplate;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.shell.Bootstrap;
 import org.springframework.shell.core.CommandResult;
@@ -206,11 +203,5 @@ public abstract class AbstractShellIntegrationTest {
 	@Configuration
 	@EnableDataFlowServer
 	public static class TestConfig {
-
-		@Bean
-		public ArtifactRegistry artifactRegistry() {
-			return new InMemoryArtifactRegistry();
-		}
-
 	}
 }

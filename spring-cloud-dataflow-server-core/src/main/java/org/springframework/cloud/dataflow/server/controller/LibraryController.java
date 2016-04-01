@@ -16,14 +16,15 @@
 
 package org.springframework.cloud.dataflow.server.controller;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistration;
-import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistry;
-import org.springframework.cloud.dataflow.core.ArtifactCoordinates;
+import org.springframework.cloud.dataflow.artifact.registry.AppRegistration;
+import org.springframework.cloud.dataflow.artifact.registry.AppRegistry;
 import org.springframework.cloud.dataflow.core.ArtifactType;
 import org.springframework.cloud.dataflow.rest.resource.LibraryRegistrationResource;
 import org.springframework.cloud.dataflow.rest.resource.ModuleRegistrationResource;
@@ -52,9 +53,9 @@ public class LibraryController {
 
 	private final Assembler libraryAssembler = new Assembler();
 
-	private final ArtifactRegistry registry;
+	private final AppRegistry registry;
 
-	public LibraryController(ArtifactRegistry registry) {
+	public LibraryController(AppRegistry registry) {
 		this.registry = registry;
 	}
 
@@ -64,9 +65,9 @@ public class LibraryController {
 	@RequestMapping(method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
 	public PagedResources<? extends ModuleRegistrationResource> list(
-			PagedResourcesAssembler<ArtifactRegistration> assembler) {
-		List<ArtifactRegistration> list = new ArrayList<>(registry.findAll());
-		for (Iterator<ArtifactRegistration> iterator = list.iterator(); iterator.hasNext(); ) {
+			PagedResourcesAssembler<AppRegistration> assembler) {
+		List<AppRegistration> list = new ArrayList<>(registry.findAll());
+		for (Iterator<AppRegistration> iterator = list.iterator(); iterator.hasNext(); ) {
 			if (iterator.next().getType() != ArtifactType.library) {
 				iterator.remove();
 			}
@@ -85,7 +86,7 @@ public class LibraryController {
 	@ResponseStatus(HttpStatus.OK)
 	public LibraryRegistrationResource info(
 			@PathVariable("name") String name) {
-		ArtifactRegistration registration = registry.find(name, ArtifactType.library);
+		AppRegistration registration = registry.find(name, ArtifactType.library);
 		if (registration == null) {
 			return null;
 		}
@@ -105,11 +106,16 @@ public class LibraryController {
 			@PathVariable("name") String name,
 			@RequestParam("coordinates") String coordinates,
 			@RequestParam(value = "force", defaultValue = "false") boolean force) {
-		ArtifactRegistration previous = registry.find(name, ArtifactType.library);
+		AppRegistration previous = registry.find(name, ArtifactType.library);
 		if (!force && previous != null) {
 			throw new LibraryAlreadyRegisteredException(previous);
 		}
-		registry.save(new ArtifactRegistration(name, ArtifactType.library, ArtifactCoordinates.parse(coordinates)));
+		try {
+			registry.save(name, ArtifactType.library, new URI(String.format("maven://%s", coordinates)));
+		}
+		catch (URISyntaxException e) {
+			throw new IllegalArgumentException(e);
+		}
 	}
 
 	/**
@@ -123,38 +129,39 @@ public class LibraryController {
 		registry.delete(name, ArtifactType.library);
 	}
 
-	class Assembler extends ResourceAssemblerSupport<ArtifactRegistration, LibraryRegistrationResource> {
+	class Assembler extends ResourceAssemblerSupport<AppRegistration, LibraryRegistrationResource> {
 
 		public Assembler() {
 			super(LibraryController.class, LibraryRegistrationResource.class);
 		}
 
 		@Override
-		public LibraryRegistrationResource toResource(ArtifactRegistration registration) {
+		public LibraryRegistrationResource toResource(AppRegistration registration) {
 			return createResourceWithId(registration.getName(), registration);
 		}
 
 		@Override
-		protected LibraryRegistrationResource instantiateResource(ArtifactRegistration registration) {
+		protected LibraryRegistrationResource instantiateResource(AppRegistration registration) {
 			return new LibraryRegistrationResource(registration.getName(),
-					registration.getType().name(), registration.getCoordinates().toString());
+					registration.getType().name(), registration.getUri().toString());
 		}
 	}
 
 	@ResponseStatus(HttpStatus.CONFLICT)
 	public static class LibraryAlreadyRegisteredException extends IllegalStateException {
-		private final ArtifactRegistration previous;
 
-		public LibraryAlreadyRegisteredException(ArtifactRegistration previous) {
+		private final AppRegistration previous;
+
+		public LibraryAlreadyRegisteredException(AppRegistration previous) {
 			this.previous = previous;
 		}
 
 		@Override
 		public String getMessage() {
-			return String.format("The '%s' library is already registered as %s", previous.getName(), previous.getCoordinates());
+			return String.format("The '%s' library is already registered as %s", previous.getName(), previous.getUri());
 		}
 
-		public ArtifactRegistration getPrevious() {
+		public AppRegistration getPrevious() {
 			return previous;
 		}
 	}

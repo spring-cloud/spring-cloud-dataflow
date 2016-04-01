@@ -24,15 +24,11 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
-import org.springframework.cloud.dataflow.app.resolver.Coordinates;
-import org.springframework.cloud.dataflow.app.resolver.ModuleResolver;
-import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistration;
-import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistry;
-import org.springframework.cloud.dataflow.core.ArtifactCoordinates;
+import org.springframework.cloud.dataflow.artifact.registry.AppRegistration;
+import org.springframework.cloud.dataflow.artifact.registry.AppRegistry;
 import org.springframework.cloud.dataflow.core.ArtifactType;
 import org.springframework.cloud.dataflow.rest.resource.DetailedModuleRegistrationResource;
 import org.springframework.cloud.dataflow.rest.resource.ModuleRegistrationResource;
-import org.springframework.cloud.deployer.resource.registry.UriRegistry;
 import org.springframework.cloud.stream.configuration.metadata.ModuleConfigurationMetadataResolver;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.PageImpl;
@@ -66,20 +62,13 @@ public class ModuleController {
 
 	private final Assembler moduleAssembler = new Assembler();
 
-	private final ArtifactRegistry artifactRegistry;
+	private final AppRegistry appRegistry;
 
-	private final UriRegistry registry;
+	private ModuleConfigurationMetadataResolver metadataResolver;
 
-	private final ModuleResolver moduleResolver;
-
-	private ModuleConfigurationMetadataResolver moduleConfigurationMetadataResolver;
-
-	public ModuleController(ArtifactRegistry artifactRegistry, UriRegistry registry, ModuleResolver moduleResolver,
-			ModuleConfigurationMetadataResolver moduleConfigurationMetadataResolver) {
-		this.artifactRegistry = artifactRegistry;
-		this.registry = registry;
-		this.moduleResolver = moduleResolver;
-		this.moduleConfigurationMetadataResolver = moduleConfigurationMetadataResolver;
+	public ModuleController(AppRegistry appRegistry, ModuleConfigurationMetadataResolver metadataResolver) {
+		this.appRegistry = appRegistry;
+		this.metadataResolver = metadataResolver;
 	}
 
 	/**
@@ -88,12 +77,12 @@ public class ModuleController {
 	@RequestMapping(method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
 	public PagedResources<? extends ModuleRegistrationResource> list(
-			PagedResourcesAssembler<ArtifactRegistration> assembler,
+			PagedResourcesAssembler<AppRegistration> assembler,
 			@RequestParam(value = "type", required = false) ArtifactType type,
 			@RequestParam(value = "detailed", defaultValue = "false") boolean detailed) {
 
-		List<ArtifactRegistration> list = new ArrayList<>(artifactRegistry.findAll());
-		for (Iterator<ArtifactRegistration> iterator = list.iterator(); iterator.hasNext(); ) {
+		List<AppRegistration> list = new ArrayList<>(appRegistry.findAll());
+		for (Iterator<AppRegistration> iterator = list.iterator(); iterator.hasNext(); ) {
 			ArtifactType artifactType = iterator.next().getType();
 			if ((type != null && artifactType != type) || artifactType == ArtifactType.library) {
 				iterator.remove();
@@ -115,22 +104,18 @@ public class ModuleController {
 			@PathVariable("type") ArtifactType type,
 			@PathVariable("name") String name) {
 		Assert.isTrue(type != ArtifactType.library, "Only modules are supported by this endpoint");
-		ArtifactRegistration registration = artifactRegistry.find(name, type);
+		AppRegistration registration = appRegistry.find(name, type);
 		if (registration == null) {
 			return null;
 		}
 		DetailedModuleRegistrationResource result = new DetailedModuleRegistrationResource(moduleAssembler.toResource(registration));
-		Resource resource = moduleResolver.resolve(adapt(registration.getCoordinates()));
+		Resource resource = registration.getResource();
 
-		List<ConfigurationMetadataProperty> properties = moduleConfigurationMetadataResolver.listProperties(resource);
+		List<ConfigurationMetadataProperty> properties = metadataResolver.listProperties(resource);
 		for (ConfigurationMetadataProperty property : properties) {
 			result.addOption(property);
 		}
 		return result;
-	}
-
-	private Coordinates adapt(ArtifactCoordinates coordinates) {
-		return new Coordinates(coordinates.getGroupId(), coordinates.getArtifactId(), coordinates.getExtension(), "exec", coordinates.getVersion());
 	}
 
 	/**
@@ -148,21 +133,15 @@ public class ModuleController {
 			@RequestParam("uri") String uri,
 			@RequestParam(value = "force", defaultValue = "false") boolean force) {
 		Assert.isTrue(type != ArtifactType.library, "Only modules are supported by this endpoint");
-		ArtifactRegistration previous = artifactRegistry.find(name, type);
+		AppRegistration previous = appRegistry.find(name, type);
 		if (!force && previous != null) {
 			throw new ModuleAlreadyRegisteredException(previous);
 		}
-		if (uri.startsWith("maven:")) {
-			String coordinates = uri.replaceFirst("maven:\\/*", "");
-			artifactRegistry.save(new ArtifactRegistration(name, type, ArtifactCoordinates.parse(coordinates)));
+		try {
+			appRegistry.save(name, type, new URI(uri));
 		}
-		if (this.registry != null) {
-			try {
-				this.registry.register(String.format("%s.%s", type, name), new URI(uri));
-			}
-			catch (URISyntaxException e) {
-				throw new IllegalArgumentException(e);
-			}
+		catch (URISyntaxException e) {
+			throw new IllegalArgumentException(e);
 		}
 	}
 
@@ -175,44 +154,42 @@ public class ModuleController {
 	@ResponseStatus(HttpStatus.OK)
 	public void unregister(@PathVariable("type") ArtifactType type, @PathVariable("name") String name) {
 		Assert.isTrue(type != ArtifactType.library, "Only modules are supported by this endpoint");
-		artifactRegistry.delete(name, type);
-		if (this.registry != null) {
-			this.registry.unregister(String.format("%s.%s", type, name));
-		}
+		appRegistry.delete(name, type);
 	}
 
-	class Assembler extends ResourceAssemblerSupport<ArtifactRegistration, ModuleRegistrationResource> {
+	class Assembler extends ResourceAssemblerSupport<AppRegistration, ModuleRegistrationResource> {
 
 		public Assembler() {
 			super(ModuleController.class, ModuleRegistrationResource.class);
 		}
 
 		@Override
-		public ModuleRegistrationResource toResource(ArtifactRegistration registration) {
+		public ModuleRegistrationResource toResource(AppRegistration registration) {
 			return createResourceWithId(String.format("%s/%s", registration.getType(), registration.getName()), registration);
 		}
 
 		@Override
-		protected ModuleRegistrationResource instantiateResource(ArtifactRegistration registration) {
+		protected ModuleRegistrationResource instantiateResource(AppRegistration registration) {
 			return new ModuleRegistrationResource(registration.getName(),
-					registration.getType().name(), registration.getCoordinates().toString());
+					registration.getType().name(), registration.getUri().toString());
 		}
 	}
 
 	@ResponseStatus(HttpStatus.CONFLICT)
 	public static class ModuleAlreadyRegisteredException extends IllegalStateException {
-		private final ArtifactRegistration previous;
 
-		public ModuleAlreadyRegisteredException(ArtifactRegistration previous) {
+		private final AppRegistration previous;
+
+		public ModuleAlreadyRegisteredException(AppRegistration previous) {
 			this.previous = previous;
 		}
 
 		@Override
 		public String getMessage() {
-			return String.format("The '%s:%s' module is already registered as %s", previous.getType(), previous.getName(), previous.getCoordinates());
+			return String.format("The '%s:%s' module is already registered as %s", previous.getType(), previous.getName(), previous.getUri());
 		}
 
-		public ArtifactRegistration getPrevious() {
+		public AppRegistration getPrevious() {
 			return previous;
 		}
 	}

@@ -19,10 +19,8 @@ package org.springframework.cloud.dataflow.server.configuration;
 import static org.mockito.Mockito.mock;
 import static org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType.HAL;
 
-import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistry;
-import org.springframework.cloud.dataflow.artifact.registry.InMemoryArtifactRegistry;
+import org.springframework.cloud.dataflow.artifact.registry.AppRegistry;
 import org.springframework.cloud.dataflow.completion.CompletionConfiguration;
-import org.springframework.cloud.dataflow.server.config.ArtifactRegistryPopulator;
 import org.springframework.cloud.dataflow.server.controller.RestControllerAdvice;
 import org.springframework.cloud.dataflow.server.controller.StreamDefinitionController;
 import org.springframework.cloud.dataflow.server.controller.StreamDeploymentController;
@@ -78,8 +76,8 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	}
 
 	@Bean
-	public StreamDeploymentController streamDeploymentController(StreamDefinitionRepository repository, UriRegistry registry) {
-		return new StreamDeploymentController(repository, registry, resourceLoader(), appDeployer());
+	public StreamDeploymentController streamDeploymentController(StreamDefinitionRepository repository, AppRegistry registry) {
+		return new StreamDeploymentController(repository, registry, appDeployer());
 	}
 
 	@Bean
@@ -93,7 +91,7 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	}
 
 	@Bean
-	public TaskDefinitionController taskDefinitionController(TaskDefinitionRepository repository, ArtifactRegistry registry) {
+	public TaskDefinitionController taskDefinitionController(TaskDefinitionRepository repository) {
 		return new TaskDefinitionController(repository, taskLauncher());
 	}
 
@@ -107,24 +105,19 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	}
 
 	@Bean
+	public AppRegistry appRegistry() {
+		return new AppRegistry(uriRegistry(), resourceLoader());
+	}
+
+	@Bean
 	public UriRegistryPopulator uriRegistryPopulator() {
 		return new UriRegistryPopulator();
 	}
 
 	@Bean
-	public DataFlowUriRegistryPopulator datafloUriRegistryPopulator() {
+	public DataFlowUriRegistryPopulator dataflowUriRegistryPopulator() {
 		return new DataFlowUriRegistryPopulator(uriRegistry(), uriRegistryPopulator(),
 				new DataFlowUriRegistryPopulatorProperties());
-	}
-
-	@Bean
-	public ArtifactRegistry artifactRegistry() {
-		return new InMemoryArtifactRegistry();
-	}
-
-	@Bean
-	public ArtifactRegistryPopulator artifactRegistryPopulator() {
-		return new ArtifactRegistryPopulator(artifactRegistry());
 	}
 
 	@Bean

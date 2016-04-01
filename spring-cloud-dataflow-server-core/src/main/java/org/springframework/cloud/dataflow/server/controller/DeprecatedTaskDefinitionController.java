@@ -18,7 +18,6 @@ package org.springframework.cloud.dataflow.server.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistry;
 import org.springframework.cloud.dataflow.core.ModuleDeploymentId;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.module.deployer.ModuleDeployer;
@@ -65,7 +64,7 @@ public class DeprecatedTaskDefinitionController {
 	 * Creates a {@code TaskDefinitionController} that delegates
 	 * <ul>
 	 *     <li>CRUD operations to the provided {@link TaskDefinitionRepository}</li>
-	 *     <li>module coordinate retrieval to the provided {@link ArtifactRegistry}</li>
+	 *     <li>status checks to the provided {@link ModuleDeployer}</li>
 	 * </ul>
 	 *
 	 * @param repository the repository this controller will use for task CRUD operations.

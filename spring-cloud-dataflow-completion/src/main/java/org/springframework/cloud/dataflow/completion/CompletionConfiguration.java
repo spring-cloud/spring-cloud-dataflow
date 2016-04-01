@@ -16,41 +16,36 @@
 
 package org.springframework.cloud.dataflow.completion;
 
-
 import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistry;
+import org.springframework.cloud.dataflow.app.resolver.ModuleResolverConfiguration;
+import org.springframework.cloud.dataflow.artifact.registry.AppRegistry;
 import org.springframework.cloud.stream.configuration.metadata.ModuleConfigurationMetadataResolver;
 import org.springframework.cloud.stream.configuration.metadata.ModuleConfigurationMetadataResolverAutoConfiguration;
-import org.springframework.cloud.dataflow.app.resolver.ModuleResolver;
-import org.springframework.cloud.dataflow.app.resolver.ModuleResolverConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 /**
  * Include this Configuration class to expose a fully configured {@link StreamCompletionProvider}.
+ *
  * @author Eric Bottard
  * @author Ilayaperumal Gopinathan
+ * @author Mark Fisher
  */
 @Configuration
 @Import({ModuleResolverConfiguration.class, ModuleConfigurationMetadataResolverAutoConfiguration.class})
 public class CompletionConfiguration {
 
 	@Autowired
-	private ArtifactRegistry artifactRegistry;
+	private AppRegistry appRegistry;
 
 	@Autowired
-	private ModuleConfigurationMetadataResolver moduleConfigurationMetadataResolver;
-
-	@Autowired
-	private ModuleResolver moduleResolver;
-
+	private ModuleConfigurationMetadataResolver metadataResolver;
 
 	@Bean
-	@SuppressWarnings("unchecked")
 	public StreamCompletionProvider streamCompletionProvider() {
 		List<RecoveryStrategy<?>> recoveryStrategies = Arrays.<RecoveryStrategy<?>>asList(
 				emptyStartYieldsModulesRecoveryStrategy(),
@@ -75,61 +70,57 @@ public class CompletionConfiguration {
 
 	@Bean
 	public RecoveryStrategy<?> emptyStartYieldsModulesRecoveryStrategy() {
-		return new EmptyStartYieldsSourceModulesRecoveryStrategy(artifactRegistry);
+		return new EmptyStartYieldsSourceModulesRecoveryStrategy(appRegistry);
 	}
 
 	@Bean
-	public RecoveryStrategy expandOneDashToTwoDashesRecoveryStrategy() {
+	public RecoveryStrategy<?> expandOneDashToTwoDashesRecoveryStrategy() {
 		return new ExpandOneDashToTwoDashesRecoveryStrategy();
 	}
 
 	@Bean
 	public ConfigurationPropertyNameAfterDashDashRecoveryStrategy configurationPropertyNameAfterDashDashRecoveryStrategy() {
-		return new ConfigurationPropertyNameAfterDashDashRecoveryStrategy(artifactRegistry,
-				moduleResolver, moduleConfigurationMetadataResolver);
+		return new ConfigurationPropertyNameAfterDashDashRecoveryStrategy(appRegistry, metadataResolver);
 	}
 
 	@Bean
-	public RecoveryStrategy unfinishedConfigurationPropertyNameRecoveryStrategy() {
-		return new UnfinishedConfigurationPropertyNameRecoveryStrategy(artifactRegistry,
-				moduleResolver, moduleConfigurationMetadataResolver);
+	public RecoveryStrategy<?> unfinishedConfigurationPropertyNameRecoveryStrategy() {
+		return new UnfinishedConfigurationPropertyNameRecoveryStrategy(appRegistry, metadataResolver);
 	}
 
 	@Bean
-	public RecoveryStrategy modulesAfterPipeRecoveryStrategy() {
-		return new ModulesAfterPipeRecoveryStrategy(artifactRegistry);
+	public RecoveryStrategy<?> modulesAfterPipeRecoveryStrategy() {
+		return new ModulesAfterPipeRecoveryStrategy(appRegistry);
 	}
 
 	@Bean
-	public RecoveryStrategy destinationNameYieldsModulesRecoveryStrategy() {
-		return new DestinationNameYieldsModulesRecoveryStrategy(artifactRegistry);
+	public RecoveryStrategy<?> destinationNameYieldsModulesRecoveryStrategy() {
+		return new DestinationNameYieldsModulesRecoveryStrategy(appRegistry);
 	}
 
 	@Bean
-	public RecoveryStrategy configurationPropertyValueHintRecoveryStrategy() {
-		return new ConfigurationPropertyValueHintRecoveryStrategy(artifactRegistry,
-				moduleResolver, moduleConfigurationMetadataResolver);
+	public RecoveryStrategy<?> configurationPropertyValueHintRecoveryStrategy() {
+		return new ConfigurationPropertyValueHintRecoveryStrategy(appRegistry, metadataResolver);
 	}
 
 	@Bean
 	public ExpansionStrategy addModuleOptionsExpansionStrategy() {
-		return new AddModuleOptionsExpansionStrategy(artifactRegistry, moduleConfigurationMetadataResolver, moduleResolver);
+		return new AddModuleOptionsExpansionStrategy(appRegistry, metadataResolver);
 	}
 
 	@Bean
 	public ExpansionStrategy unfinishedModuleNameExpansionStrategy() {
-		return new UnfinishedModuleNameExpansionStrategy(artifactRegistry);
+		return new UnfinishedModuleNameExpansionStrategy(appRegistry);
 	}
 
 	@Bean
 	public ExpansionStrategy pipeIntoOtherModulesExpansionStrategy() {
-		return new PipeIntoOtherModulesExpansionStrategy(artifactRegistry);
+		return new PipeIntoOtherModulesExpansionStrategy(appRegistry);
 	}
 
 	@Bean
 	public ExpansionStrategy configurationPropertyValueHintExpansionStrategy() {
-		return new ConfigurationPropertyValueHintExpansionStrategy(artifactRegistry,
-				moduleResolver, moduleConfigurationMetadataResolver);
+		return new ConfigurationPropertyValueHintExpansionStrategy(appRegistry, metadataResolver);
 	}
 
 	@Bean

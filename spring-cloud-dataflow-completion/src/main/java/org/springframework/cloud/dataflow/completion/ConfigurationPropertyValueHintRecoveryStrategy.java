@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2015-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package org.springframework.cloud.dataflow.completion;
 
-import static org.springframework.cloud.dataflow.completion.CompletionProposal.*;
+import static org.springframework.cloud.dataflow.completion.CompletionProposal.expanding;
 
 import java.io.Closeable;
 import java.io.File;
@@ -29,39 +29,36 @@ import org.springframework.boot.configurationmetadata.ValueHint;
 import org.springframework.boot.loader.archive.Archive;
 import org.springframework.boot.loader.archive.ExplodedArchive;
 import org.springframework.boot.loader.archive.JarFileArchive;
+import org.springframework.cloud.dataflow.artifact.registry.AppRegistration;
+import org.springframework.cloud.dataflow.artifact.registry.AppRegistry;
 import org.springframework.cloud.dataflow.core.ArtifactType;
 import org.springframework.cloud.dataflow.core.ModuleDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.dsl.CheckPointedParseException;
 import org.springframework.cloud.dataflow.core.dsl.Token;
 import org.springframework.cloud.dataflow.core.dsl.TokenKind;
-import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistration;
-import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistry;
 import org.springframework.cloud.stream.configuration.metadata.ModuleConfigurationMetadataResolver;
-import org.springframework.cloud.dataflow.app.resolver.ModuleResolver;
 import org.springframework.core.io.Resource;
 
 /**
  * Attempts to fill in possible values after a {@literal --foo=} dangling construct in the DSL.
  *
  * @author Eric Bottard
+ * @author Mark Fisher
  */
 public class ConfigurationPropertyValueHintRecoveryStrategy extends StacktraceFingerprintingRecoveryStrategy<CheckPointedParseException> {
 
-	private final ArtifactRegistry artifactRegistry;
+	private final AppRegistry appRegistry;
 
-	private final ModuleResolver moduleResolver;
-
-	private final ModuleConfigurationMetadataResolver moduleConfigurationMetadataResolver;
+	private final ModuleConfigurationMetadataResolver metadataResolver;
 
 	@Autowired
 	private ValueHintProvider[] valueHintProviders = new ValueHintProvider[0];
 
-	ConfigurationPropertyValueHintRecoveryStrategy(ArtifactRegistry artifactRegistry, ModuleResolver moduleResolver, ModuleConfigurationMetadataResolver moduleConfigurationMetadataResolver) {
+	ConfigurationPropertyValueHintRecoveryStrategy(AppRegistry appRegistry, ModuleConfigurationMetadataResolver metadataResolver) {
 		super(CheckPointedParseException.class, "foo --bar=", "foo | wizz --bar=");
-		this.artifactRegistry = artifactRegistry;
-		this.moduleResolver = moduleResolver;
-		this.moduleConfigurationMetadataResolver = moduleConfigurationMetadataResolver;
+		this.appRegistry = appRegistry;
+		this.metadataResolver = metadataResolver;
 	}
 
 	@Override
@@ -69,23 +66,23 @@ public class ConfigurationPropertyValueHintRecoveryStrategy extends StacktraceFi
 
 		String propertyName = recoverPropertyName(exception);
 
-		ArtifactRegistration lastArtifactRegistration = lookupLastModule(exception);
+		AppRegistration lastAppRegistration = lookupLastApp(exception);
 
-		if (lastArtifactRegistration == null) {
-			// Not a valid module name, do nothing
+		if (lastAppRegistration == null) {
+			// Not a valid app name, do nothing
 			return;
 		}
-		Resource moduleResource = moduleResolver.resolve(CompletionUtils.fromModuleCoordinates(lastArtifactRegistration.getCoordinates()));
+		Resource appResource = lastAppRegistration.getResource();
 
 		CompletionProposal.Factory proposals = expanding(dsl);
 
-		for (ConfigurationMetadataProperty property : moduleConfigurationMetadataResolver.listProperties(moduleResource)) {
+		for (ConfigurationMetadataProperty property : metadataResolver.listProperties(appResource)) {
 			if (property.getId().equals(propertyName)) {
 				ClassLoader classLoader = null;
 				try {
 
-					File moduleFile = moduleResource.getFile();
-					Archive jarFileArchive = moduleFile.isDirectory() ? new ExplodedArchive(moduleFile) : new JarFileArchive(moduleFile);
+					File appFile = appResource.getFile();
+					Archive jarFileArchive = appFile.isDirectory() ? new ExplodedArchive(appFile) : new JarFileArchive(appFile);
 					classLoader = new ClassLoaderExposingJarLauncher(jarFileArchive).createClassLoader();
 
 					for (ValueHintProvider valueHintProvider : valueHintProviders) {
@@ -96,7 +93,8 @@ public class ConfigurationPropertyValueHintRecoveryStrategy extends StacktraceFi
 				}
 				catch (Exception e) {
 					throw new RuntimeException(e);
-				} finally {
+				}
+				finally {
 					if (classLoader instanceof Closeable) {
 						try {
 							((Closeable)classLoader).close();
@@ -109,23 +107,22 @@ public class ConfigurationPropertyValueHintRecoveryStrategy extends StacktraceFi
 			}
 
 		}
-
 	}
 
-	private ArtifactRegistration lookupLastModule(CheckPointedParseException exception) {
+	private AppRegistration lookupLastApp(CheckPointedParseException exception) {
 		String safe = exception.getExpressionStringUntilCheckpoint();
 		StreamDefinition streamDefinition = new StreamDefinition("__dummy", safe);
 		ModuleDefinition lastModule = streamDefinition.getDeploymentOrderIterator().next();
 
 		String lastModuleName = lastModule.getName();
-		ArtifactRegistration lastArtifactRegistration = null;
+		AppRegistration lastAppRegistration = null;
 		for (ArtifactType moduleType : CompletionUtils.determinePotentialTypes(lastModule)) {
-			lastArtifactRegistration = artifactRegistry.find(lastModuleName, moduleType);
-			if (lastArtifactRegistration != null) {
+			lastAppRegistration = this.appRegistry.find(lastModuleName, moduleType);
+			if (lastAppRegistration != null) {
 				break;
 			}
 		}
-		return lastArtifactRegistration;
+		return lastAppRegistration;
 	}
 
 	private String recoverPropertyName(CheckPointedParseException exception) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2015-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package org.springframework.cloud.dataflow.completion;
 
-import static org.springframework.cloud.dataflow.completion.CompletionProposal.*;
+import static org.springframework.cloud.dataflow.completion.CompletionProposal.expanding;
 
 import java.io.Closeable;
 import java.io.File;
@@ -31,8 +31,8 @@ import org.springframework.boot.configurationmetadata.ValueHint;
 import org.springframework.boot.loader.archive.Archive;
 import org.springframework.boot.loader.archive.ExplodedArchive;
 import org.springframework.boot.loader.archive.JarFileArchive;
-import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistration;
-import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistry;
+import org.springframework.cloud.dataflow.artifact.registry.AppRegistration;
+import org.springframework.cloud.dataflow.artifact.registry.AppRegistry;
 import org.springframework.cloud.dataflow.core.ArtifactType;
 import org.springframework.cloud.dataflow.core.ModuleDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
@@ -40,7 +40,6 @@ import org.springframework.cloud.dataflow.core.dsl.CheckPointedParseException;
 import org.springframework.cloud.dataflow.core.dsl.Token;
 import org.springframework.cloud.dataflow.core.dsl.TokenKind;
 import org.springframework.cloud.stream.configuration.metadata.ModuleConfigurationMetadataResolver;
-import org.springframework.cloud.dataflow.app.resolver.ModuleResolver;
 import org.springframework.core.io.Resource;
 
 /**
@@ -48,24 +47,21 @@ import org.springframework.core.io.Resource;
  * (syntactically valid) construct in the DSL.
  *
  * @author Eric Bottard
+ * @author Mark Fisher
  */
 public class ConfigurationPropertyValueHintExpansionStrategy implements ExpansionStrategy {
 
-	private final ArtifactRegistry artifactRegistry;
+	private final AppRegistry appRegistry;
 
-	private final ModuleResolver moduleResolver;
-
-	private final ModuleConfigurationMetadataResolver moduleConfigurationMetadataResolver;
+	private final ModuleConfigurationMetadataResolver metadataResolver;
 
 	@Autowired
 	private ValueHintProvider[] valueHintProviders = new ValueHintProvider[0];
 
-	ConfigurationPropertyValueHintExpansionStrategy(ArtifactRegistry artifactRegistry,
-			ModuleResolver moduleResolver,
-			ModuleConfigurationMetadataResolver moduleConfigurationMetadataResolver) {
-		this.artifactRegistry = artifactRegistry;
-		this.moduleResolver = moduleResolver;
-		this.moduleConfigurationMetadataResolver = moduleConfigurationMetadataResolver;
+	ConfigurationPropertyValueHintExpansionStrategy(AppRegistry appRegistry,
+			ModuleConfigurationMetadataResolver metadataResolver) {
+		this.appRegistry = appRegistry;
+		this.metadataResolver = metadataResolver;
 	}
 
 	@Override
@@ -84,30 +80,27 @@ public class ConfigurationPropertyValueHintExpansionStrategy implements Expansio
 		String alreadyTyped = lastModule.getParameters().get(propertyName);
 
 		String lastModuleName = lastModule.getName();
-		ArtifactRegistration lastArtifactRegistration = null;
+		AppRegistration lastAppRegistration = null;
 		for (ArtifactType moduleType : CompletionUtils.determinePotentialTypes(lastModule)) {
-			lastArtifactRegistration = artifactRegistry.find(lastModuleName, moduleType);
-			if (lastArtifactRegistration != null) {
+			lastAppRegistration = appRegistry.find(lastModuleName, moduleType);
+			if (lastAppRegistration != null) {
 				break;
 			}
 		}
 
-		if (lastArtifactRegistration == null) {
+		if (lastAppRegistration == null) {
 			// Not a valid module name, do nothing
 			return false;
 		}
-		Resource moduleResource = moduleResolver.resolve(CompletionUtils
-				.fromModuleCoordinates(lastArtifactRegistration.getCoordinates()));
+		Resource appResource = lastAppRegistration.getResource();
 
 		CompletionProposal.Factory proposals = expanding(text);
 
-		for (ConfigurationMetadataProperty property : moduleConfigurationMetadataResolver
-				.listProperties(moduleResource)) {
+		for (ConfigurationMetadataProperty property : metadataResolver.listProperties(appResource)) {
 			if (property.getId().equals(propertyName)) {
 				ClassLoader classLoader = null;
 				try {
-
-					File file = moduleResource.getFile();
+					File file = appResource.getFile();
 					Archive jarFileArchive = file.isDirectory() ? new ExplodedArchive(file) : new JarFileArchive(file);
 					classLoader = new ClassLoaderExposingJarLauncher(jarFileArchive).createClassLoader();
 

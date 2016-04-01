@@ -22,8 +22,8 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistration;
-import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistry;
+import org.springframework.cloud.dataflow.artifact.registry.AppRegistration;
+import org.springframework.cloud.dataflow.artifact.registry.AppRegistry;
 import org.springframework.cloud.dataflow.core.ArtifactCoordinates;
 import org.springframework.cloud.dataflow.core.ArtifactType;
 import org.springframework.cloud.dataflow.core.ModuleDefinition;
@@ -84,19 +84,19 @@ public class DeprecatedTaskDeploymentController {
 	private String dataSourceDriverClassName;
 
 	/**
-	 * The artifact registry this controller will use to look up modules.
+	 * The app registry this controller will use to look up modules.
 	 */
-	private final ArtifactRegistry registry;
+	private final AppRegistry registry;
 
 	/**
 	 * Creates a {@code TaskDeploymentController} that delegates deployment/launching
 	 * operations to the provided {@link ModuleDeployer}
 	 * @param repository the repository this controller will use for task CRUD operations.
-	 * @param registry artifact registry this controller will use to look up modules.
+	 * @param registry app registry this controller will use to look up modules.
 	 * @param deployer the deployer this controller will use to deploy/launch task modules.
 	 */
 	@Autowired
-	public DeprecatedTaskDeploymentController(TaskDefinitionRepository repository, ArtifactRegistry registry,
+	public DeprecatedTaskDeploymentController(TaskDefinitionRepository repository, AppRegistry registry,
 					@Qualifier("taskModuleDeployer") ModuleDeployer deployer) {
 		Assert.notNull(repository, "repository must not be null");
 		Assert.notNull(registry, "registry must not be null");
@@ -123,12 +123,13 @@ public class DeprecatedTaskDeploymentController {
 		}
 
 		ModuleDefinition module = taskDefinition.getModuleDefinition();
-		ArtifactRegistration registration = this.registry.find(module.getName(), ArtifactType.task);
+		AppRegistration registration = this.registry.find(module.getName(), ArtifactType.task);
 		if (registration == null) {
 			throw new IllegalArgumentException(String.format(
 					"Module %s of type %s not found in registry", module.getName(), ArtifactType.task));
 		}
-		ArtifactCoordinates coordinates = registration.getCoordinates();
+		ArtifactCoordinates coordinates = ArtifactCoordinates.parse(
+				registration.getUri().toString().replaceFirst("maven:\\/*", ""));
 
 		Map<String, String> deploymentProperties = new HashMap<>();
 		module = updateTaskProperties(module, module.getName() );

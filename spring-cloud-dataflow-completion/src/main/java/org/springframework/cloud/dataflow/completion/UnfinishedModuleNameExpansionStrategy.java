@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2015-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,24 +21,25 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.springframework.cloud.dataflow.core.ModuleDefinition;
+import org.springframework.cloud.dataflow.artifact.registry.AppRegistration;
+import org.springframework.cloud.dataflow.artifact.registry.AppRegistry;
 import org.springframework.cloud.dataflow.core.ArtifactType;
+import org.springframework.cloud.dataflow.core.ModuleDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
-import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistration;
-import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistry;
 
 /**
  * Provides completions by finding modules whose name starts with a
  * prefix (which was assumed to be a correct module name, but wasn't).
  *
  * @author Eric Bottard
+ * @author Mark Fisher
  */
 public class UnfinishedModuleNameExpansionStrategy implements ExpansionStrategy {
 
-	private final ArtifactRegistry artifactRegistry;
+	private final AppRegistry appRegistry;
 
-	UnfinishedModuleNameExpansionStrategy(ArtifactRegistry artifactRegistry) {
-		this.artifactRegistry = artifactRegistry;
+	UnfinishedModuleNameExpansionStrategy(AppRegistry appRegistry) {
+		this.appRegistry = appRegistry;
 	}
 
 	@Override
@@ -59,11 +60,11 @@ public class UnfinishedModuleNameExpansionStrategy implements ExpansionStrategy 
 
 		List<ArtifactType> validTypesAtThisPosition = Arrays.asList(CompletionUtils.determinePotentialTypes(lastModule));
 
-		for (ArtifactRegistration moduleRegistration : artifactRegistry.findAll()) {
-			String candidateName = moduleRegistration.getName();
-			if (validTypesAtThisPosition.contains(moduleRegistration.getType())
+		for (AppRegistration appRegistration : appRegistry.findAll()) {
+			String candidateName = appRegistration.getName();
+			if (validTypesAtThisPosition.contains(appRegistration.getType())
 					&& !alreadyTyped.equals(candidateName) && candidateName.startsWith(alreadyTyped)) {
-				String expansion = CompletionUtils.maybeQualifyWithLabel(moduleRegistration.getName(), streamDefinition);
+				String expansion = CompletionUtils.maybeQualifyWithLabel(appRegistration.getName(), streamDefinition);
 
 				collector.add(proposals.withSuffix(expansion.substring(alreadyTyped.length())));
 			}

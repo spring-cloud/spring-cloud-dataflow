@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2015-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,19 +38,15 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.loader.LaunchedURLClassLoader;
 import org.springframework.boot.loader.archive.Archive;
-import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistration;
-import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistry;
-import org.springframework.cloud.dataflow.core.ArtifactCoordinates;
+import org.springframework.cloud.dataflow.artifact.registry.AppRegistration;
+import org.springframework.cloud.dataflow.artifact.registry.AppRegistry;
 import org.springframework.cloud.dataflow.core.ArtifactType;
+import org.springframework.cloud.deployer.resource.registry.InMemoryUriRegistry;
 import org.springframework.cloud.stream.configuration.metadata.ModuleConfigurationMetadataResolver;
-import org.springframework.cloud.dataflow.app.resolver.Coordinates;
-import org.springframework.cloud.dataflow.app.resolver.ModuleResolver;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.io.FileSystemResource;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
-import org.springframework.core.io.support.ResourcePatternResolver;
+import org.springframework.core.io.FileSystemResourceLoader;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.util.Assert;
@@ -63,6 +59,7 @@ import org.springframework.util.Assert;
  * set of well known modules.</p>
  *
  * @author Eric Bottard
+ * @author Mark Fisher
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {CompletionConfiguration.class, StreamCompletionProviderTests.Mocks.class})
@@ -283,6 +280,7 @@ public class StreamCompletionProviderTests {
 	 * archives.
 	 *
 	 * @author Eric Bottard
+	 * @author Mark Fisher
 	 */
 	@Configuration
 	public static class Mocks {
@@ -296,16 +294,16 @@ public class StreamCompletionProviderTests {
 			}
 		};
 
-		private ResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
-
 		@Bean
-		public ArtifactRegistry artifactRegistry() {
-			return new ArtifactRegistry() {
+		public AppRegistry appRegistry() {
+			final ResourceLoader resourceLoader = new FileSystemResourceLoader();
+			return new AppRegistry(new InMemoryUriRegistry(), resourceLoader) {
 				@Override
-				public ArtifactRegistration find(String name, ArtifactType type) {
+				public AppRegistration find(String name, ArtifactType type) {
 					String filename = name + "-" + type;
-					if (new File(ROOT, filename).exists()) {
-						return new ArtifactRegistration(name, type, ArtifactCoordinates.parse("com.acme:" + filename + ":1.0:jar"));
+					File file = new File(ROOT, filename);
+					if (file.exists()) {
+						return new AppRegistration(name, type, file.toURI(), resourceLoader);
 					}
 					else {
 						return null;
@@ -313,46 +311,21 @@ public class StreamCompletionProviderTests {
 				}
 
 				@Override
-				public List<ArtifactRegistration> findAll() {
-					List<ArtifactRegistration> result = new ArrayList<>();
+				public List<AppRegistration> findAll() {
+					List<AppRegistration> result = new ArrayList<>();
 					for (File file : ROOT.listFiles(FILTER)) {
-						result.add(makeModuleRegistration(file.getName()));
+						result.add(makeAppRegistration(file));
 					}
 					return result;
 				}
 
-				@Override
-				public void save(ArtifactRegistration registration) {
-					throw new UnsupportedOperationException();
-				}
-
-				@Override
-				public void delete(String name, ArtifactType type) {
-					throw new UnsupportedOperationException();
-				}
-
-				private ArtifactRegistration makeModuleRegistration(String fileName) {
+				private AppRegistration makeAppRegistration(File file) {
+					String fileName = file.getName();
 					Matcher matcher = Pattern.compile("(?<name>.+)-(?<type>.+)").matcher(fileName);
 					Assert.isTrue(matcher.matches());
 					String name = matcher.group("name");
 					ArtifactType type = ArtifactType.valueOf(matcher.group("type"));
-					return new ArtifactRegistration(name, type, ArtifactCoordinates.parse("com.acme:" + fileName + ":1.0:jar"));
-
-				}
-			};
-		}
-
-		@Bean
-		public ModuleResolver moduleResolver() {
-			return new ModuleResolver() {
-				@Override
-				public Resource resolve(Coordinates coordinates) {
-					return new FileSystemResource(new File(ROOT, coordinates.getArtifactId()));
-				}
-
-				@Override
-				public Resource[] resolve(Coordinates root, Coordinates[] includes, String[] excludePatterns) {
-					throw new UnsupportedOperationException();
+					return new AppRegistration(name, type, file.toURI(), resourceLoader);
 				}
 			};
 		}

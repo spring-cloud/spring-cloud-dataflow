@@ -26,8 +26,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.cloud.dataflow.app.resolver.ModuleResolver;
-import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistry;
+import org.springframework.cloud.dataflow.artifact.registry.AppRegistry;
 import org.springframework.cloud.dataflow.completion.StreamCompletionProvider;
 import org.springframework.cloud.dataflow.server.controller.CompletionController;
 import org.springframework.cloud.dataflow.server.controller.CounterController;
@@ -93,6 +92,11 @@ public class DataFlowControllerAutoConfiguration {
 	}
 
 	@Bean
+	public AppRegistry appRegistry(UriRegistry uriRegistry, DelegatingResourceLoader resourceLoader) {
+		return new AppRegistry(uriRegistry, resourceLoader);
+	}
+
+	@Bean
 	public DataFlowUriRegistryPopulator dataflowUriRegistryPopulator(UriRegistry uriRegistry, DataFlowUriRegistryPopulatorProperties properties) {
 		return new DataFlowUriRegistryPopulator(uriRegistry, uriRegistryPopulator(), properties);
 	}
@@ -121,8 +125,8 @@ public class DataFlowControllerAutoConfiguration {
 
 	@Bean
 	public StreamDeploymentController streamDeploymentController(StreamDefinitionRepository repository,
-			UriRegistry registry, AppDeployer deployer, DelegatingResourceLoader resourceLoader) {
-		return new StreamDeploymentController(repository, registry, resourceLoader, deployer);
+			AppRegistry registry, AppDeployer deployer, DelegatingResourceLoader resourceLoader) {
+		return new StreamDeploymentController(repository, registry, deployer);
 	}
 
 	@Bean
@@ -194,14 +198,13 @@ public class DataFlowControllerAutoConfiguration {
 	}
 
 	@Bean
-	public LibraryController libraryController(ArtifactRegistry registry) {
+	public LibraryController libraryController(AppRegistry registry) {
 		return new LibraryController(registry);
 	}
 
 	@Bean
-	public ModuleController moduleController(ArtifactRegistry artifactRegistry, UriRegistry registry,
-			ModuleResolver moduleResolver, ModuleConfigurationMetadataResolver moduleConfigurationMetadataResolver) {
-		return new ModuleController(artifactRegistry, registry, moduleResolver, moduleConfigurationMetadataResolver);
+	public ModuleController moduleController(AppRegistry appRegistry, ModuleConfigurationMetadataResolver metadataResolver) {
+		return new ModuleController(appRegistry, metadataResolver);
 	}
 
 	@Bean

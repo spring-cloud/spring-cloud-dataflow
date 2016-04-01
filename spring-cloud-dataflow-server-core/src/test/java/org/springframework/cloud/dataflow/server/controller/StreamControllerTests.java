@@ -49,6 +49,7 @@ import org.mockito.ArgumentCaptor;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.cloud.dataflow.artifact.registry.AppRegistry;
 import org.springframework.cloud.dataflow.core.BindingPropertyKeys;
 import org.springframework.cloud.dataflow.core.ModuleDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
@@ -93,7 +94,10 @@ public class StreamControllerTests {
 	@Autowired
 	private AppDeployer appDeployer;
 
-	private final MavenProperties mavenProperties = new MavenProperties();
+	private final AppRegistry appRegistry = new AppRegistry(
+			new InMemoryUriRegistry(),
+			new MavenResourceLoader(new MavenProperties())
+	);
 
 	@Before
 	public void setupMockMVC() {
@@ -110,8 +114,7 @@ public class StreamControllerTests {
 	@Test(expected = IllegalArgumentException.class)
 	public void testConstructorMissingRepository() {
 		StreamDeploymentController deploymentController = new StreamDeploymentController(
-				new InMemoryStreamDefinitionRepository(), new InMemoryUriRegistry(),
-				new MavenResourceLoader(mavenProperties), appDeployer);
+				new InMemoryStreamDefinitionRepository(), appRegistry, appDeployer);
 		new StreamDefinitionController(null, deploymentController, appDeployer);
 	}
 
@@ -123,8 +126,7 @@ public class StreamControllerTests {
 	@Test(expected = IllegalArgumentException.class)
 	public void testConstructorMissingDeployer() {
 		StreamDeploymentController deploymentController = new StreamDeploymentController(
-				new InMemoryStreamDefinitionRepository(), new InMemoryUriRegistry(),
-				new MavenResourceLoader(mavenProperties), appDeployer);
+				new InMemoryStreamDefinitionRepository(), appRegistry, appDeployer);
 		new StreamDefinitionController(new InMemoryStreamDefinitionRepository(), deploymentController, null);
 	}
 

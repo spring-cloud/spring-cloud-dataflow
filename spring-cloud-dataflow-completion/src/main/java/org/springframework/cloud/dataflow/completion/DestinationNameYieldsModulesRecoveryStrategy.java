@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2015-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,27 +16,29 @@
 
 package org.springframework.cloud.dataflow.completion;
 
-import static org.springframework.cloud.dataflow.core.ArtifactType.*;
+import static org.springframework.cloud.dataflow.core.ArtifactType.processor;
+import static org.springframework.cloud.dataflow.core.ArtifactType.sink;
 
 import java.util.List;
 
+import org.springframework.cloud.dataflow.artifact.registry.AppRegistration;
+import org.springframework.cloud.dataflow.artifact.registry.AppRegistry;
 import org.springframework.cloud.dataflow.core.dsl.CheckPointedParseException;
-import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistration;
-import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistry;
 
 /**
  * Proposes module names when the user has typed a destination redirection.
  *
  * @author Eric Bottard
+ * @author Mark Fisher
  */
 class DestinationNameYieldsModulesRecoveryStrategy extends
 		StacktraceFingerprintingRecoveryStrategy<CheckPointedParseException> {
 
-	private final ArtifactRegistry artifactRegistry;
+	private final AppRegistry appRegistry;
 
-	public DestinationNameYieldsModulesRecoveryStrategy(ArtifactRegistry artifactRegistry) {
+	public DestinationNameYieldsModulesRecoveryStrategy(AppRegistry appRegistry) {
 		super(CheckPointedParseException.class, "queue:foo >", "queue:foo > ");
-		this.artifactRegistry = artifactRegistry;
+		this.appRegistry = appRegistry;
 	}
 
 	@Override
@@ -53,10 +55,10 @@ class DestinationNameYieldsModulesRecoveryStrategy extends
 	public void addProposals(String dsl, CheckPointedParseException exception,
 			int detailLevel, List<CompletionProposal> proposals) {
 		CompletionProposal.Factory completionFactory = CompletionProposal.expanding(dsl);
-		for (ArtifactRegistration moduleRegistration : artifactRegistry.findAll()) {
-			if (moduleRegistration.getType() == processor || moduleRegistration.getType() == sink) {
-				proposals.add(completionFactory.withSeparateTokens(moduleRegistration.getName(),
-						"Wire destination into a " + moduleRegistration.getType() + " module"));
+		for (AppRegistration appRegistration : appRegistry.findAll()) {
+			if (appRegistration.getType() == processor || appRegistration.getType() == sink) {
+				proposals.add(completionFactory.withSeparateTokens(appRegistration.getName(),
+						"Wire destination into a " + appRegistration.getType() + " module"));
 			}
 		}
 	}

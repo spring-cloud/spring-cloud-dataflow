@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2015-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,27 +16,29 @@
 
 package org.springframework.cloud.dataflow.completion;
 
-import static org.springframework.cloud.dataflow.core.ArtifactType.*;
+import static org.springframework.cloud.dataflow.core.ArtifactType.processor;
+import static org.springframework.cloud.dataflow.core.ArtifactType.sink;
 
 import java.util.List;
 
+import org.springframework.cloud.dataflow.artifact.registry.AppRegistration;
+import org.springframework.cloud.dataflow.artifact.registry.AppRegistry;
 import org.springframework.cloud.dataflow.core.ModuleDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
-import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistration;
-import org.springframework.cloud.dataflow.artifact.registry.ArtifactRegistry;
 
 /**
- * Continues a well-formed stream definition by adding a pipe symbol and another module, provided that the stream
- * definition hasn't reached its end yet.
+ * Continues a well-formed stream definition by adding a pipe symbol and another module,
+ * provided that the stream definition hasn't reached its end yet.
  *
  * @author Eric Bottard
+ * @author Mark Fisher
  */
 public class PipeIntoOtherModulesExpansionStrategy implements ExpansionStrategy {
 
-	private final ArtifactRegistry artifactRegistry;
+	private final AppRegistry appRegistry;
 
-	public PipeIntoOtherModulesExpansionStrategy(ArtifactRegistry artifactRegistry) {
-		this.artifactRegistry = artifactRegistry;
+	public PipeIntoOtherModulesExpansionStrategy(AppRegistry appRegistry) {
+		this.appRegistry = appRegistry;
 	}
 
 	@Override
@@ -48,20 +50,20 @@ public class PipeIntoOtherModulesExpansionStrategy implements ExpansionStrategy 
 		ModuleDefinition lastModule = parseResult.getDeploymentOrderIterator().next();
 		// Consider "bar | foo". If there is indeed a sink named foo in the registry,
 		// "foo" may also be a processor, in which case we can continue
-		boolean couldBeASink = artifactRegistry.find(lastModule.getName(), sink) != null;
+		boolean couldBeASink = appRegistry.find(lastModule.getName(), sink) != null;
 		if (couldBeASink) {
-			boolean couldBeAProcessor = artifactRegistry.find(lastModule.getName(), processor) != null;
+			boolean couldBeAProcessor = appRegistry.find(lastModule.getName(), processor) != null;
 			if (!couldBeAProcessor) {
 				return false;
 			}
 		}
 
 		CompletionProposal.Factory proposals = CompletionProposal.expanding(text);
-		for (ArtifactRegistration moduleRegistration : artifactRegistry.findAll()) {
-			if (moduleRegistration.getType() == processor || moduleRegistration.getType() == sink) {
-				String expansion = CompletionUtils.maybeQualifyWithLabel(moduleRegistration.getName(), parseResult);
+		for (AppRegistration appRegistration : appRegistry.findAll()) {
+			if (appRegistration.getType() == processor || appRegistration.getType() == sink) {
+				String expansion = CompletionUtils.maybeQualifyWithLabel(appRegistration.getName(), parseResult);
 				collector.add(proposals.withSeparateTokens("| " + expansion,
-						"Continue stream definition with a " + moduleRegistration.getType()));
+						"Continue stream definition with a " + appRegistration.getType()));
 			}
 		}
 		return false;
