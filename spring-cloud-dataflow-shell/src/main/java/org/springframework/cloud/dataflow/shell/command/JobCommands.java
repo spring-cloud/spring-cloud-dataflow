@@ -16,12 +16,9 @@
 
 package org.springframework.cloud.dataflow.shell.command;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 import org.springframework.batch.core.JobParameter;
-import org.springframework.batch.core.JobParameters;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.dataflow.rest.client.JobOperations;
 import org.springframework.cloud.dataflow.rest.resource.JobExecutionResource;
@@ -37,7 +34,6 @@ import org.springframework.shell.table.Table;
 import org.springframework.shell.table.TableBuilder;
 import org.springframework.shell.table.TableModelBuilder;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
 /**
  * Job commands for the SCDF Shell.
@@ -140,7 +136,7 @@ public class JobCommands implements CommandMarker {
 		return builder.build();
 	}
 
-	@CliCommand(value = INSTANCE_VIEW, help = "View the details of a specific job instance")
+	@CliCommand(value = INSTANCE_VIEW, help = "View the job executions for a specific job instance.")
 	public Table instanceView(
 			@CliOption(key = { "id" },
 					help = "the job instance id",
@@ -150,13 +146,13 @@ public class JobCommands implements CommandMarker {
 
 		TableModelBuilder<Object> modelBuilder = new TableModelBuilder<>();
 		modelBuilder.addRow().addValue("Name ").addValue("Execution ID ").addValue("Step Execution Count ")
-				.addValue("Status ").addValue("Job Parameters (Identifiable) ");
+				.addValue("Status ").addValue("Job Parameters ");
 		for (JobExecutionResource job : jobInstanceResource.getJobExecutions()) {
 			modelBuilder.addRow().addValue(jobInstanceResource.getJobName())
 					.addValue(job.getExecutionId())
 					.addValue(job.getStepExecutionCount())
 					.addValue(job.getJobExecution().getStatus().name())
-					.addValue(getIdentifiableParamString(job));
+					.addValue(job.getJobParametersString());
 		}
 		TableBuilder builder = new TableBuilder(modelBuilder.build());
 		DataFlowTables.applyStyle(builder);
@@ -257,18 +253,6 @@ public class JobCommands implements CommandMarker {
 		DataFlowTables.applyStyle(builder);
 
 		return builder.build();
-	}
-
-	private String getIdentifiableParamString(JobExecutionResource jobExecutionResource){
-		List<Object> result = new ArrayList<>();
-		JobParameters jobParameters =
-				jobExecutionResource.getJobExecution().getJobParameters();
-		for (JobParameter jobParameter : jobParameters.getParameters().values()) {
-			if(jobParameter.isIdentifying()){
-				result.add(jobParameter.getValue());
-			}
-		}
-		return StringUtils.collectionToCommaDelimitedString(result);
 	}
 
 	private JobOperations jobOperations() {

@@ -163,8 +163,13 @@ public class JobCommandTests extends AbstractShellIntegrationTest {
 		checkCell(table ,0 , 1, "Execution ID ");
 		checkCell(table ,0 , 2, "Step Execution Count ");
 		checkCell(table ,0 , 3, "Status ");
-		checkCell(table ,0 , 4, "Job Parameters (Identifiable) ");
-		checkCell(table ,1 , 4, "FOO");
+		checkCell(table ,0 , 4, "Job Parameters ");
+		boolean isValidCell = false;
+		if (table.getModel().getValue(1,4).equals("foo=FOO,-bar=BAR")
+			|| table.getModel().getValue(1,4).equals("-bar=BAR,foo=FOO")){
+			isValidCell = true;
+		}
+		assertTrue("Job Parameters does match expected.", isValidCell);
 	}
 
 	@Test
