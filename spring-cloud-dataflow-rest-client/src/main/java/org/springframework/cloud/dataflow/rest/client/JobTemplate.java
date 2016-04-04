@@ -113,13 +113,13 @@ public class JobTemplate implements JobOperations {
 	}
 
 	@Override
-	public JobExecutionResource viewJobExecution(long id) {
+	public JobExecutionResource jobExecution(long id) {
 		return restTemplate.getForObject(executionLink.expand(id).getHref(),
 				JobExecutionResource.class);
 	}
 
 	@Override
-	public JobInstanceResource viewJobInstance(long id) {
+	public JobInstanceResource jobInstance(long id) {
 		return restTemplate.getForObject(instanceLink.expand(id).getHref(),
 				JobInstanceResource.class);
 	}

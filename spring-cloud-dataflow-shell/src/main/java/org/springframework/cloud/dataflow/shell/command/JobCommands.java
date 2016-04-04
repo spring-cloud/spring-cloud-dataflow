@@ -103,7 +103,7 @@ public class JobCommands implements CommandMarker {
 					help = "the job execution id",
 					mandatory = true) long id) {
 
-		JobExecutionResource jobExecutionResource = jobOperations().viewJobExecution(id);
+		JobExecutionResource jobExecutionResource = jobOperations().jobExecution(id);
 
 		TableModelBuilder<Object> modelBuilder = new TableModelBuilder<>();
 
@@ -145,7 +145,7 @@ public class JobCommands implements CommandMarker {
 					help = "the job instance id",
 					mandatory = true) long id) {
 
-		JobInstanceResource jobInstanceResource = jobOperations().viewJobInstance(id);
+		JobInstanceResource jobInstanceResource = jobOperations().jobInstance(id);
 
 		TableModelBuilder<Object> modelBuilder = new TableModelBuilder<>();
 		modelBuilder.addRow().addValue("Name ").addValue("Execution ID ").addValue("Step Execution Count ")

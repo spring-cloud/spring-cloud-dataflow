@@ -52,7 +52,7 @@ public interface JobOperations {
 	 * @param id identifier of the job execution
 	 * @return {@link JobExecutionResource}
 	 */
-	JobExecutionResource viewJobExecution(long id);
+	JobExecutionResource jobExecution(long id);
 
 	/**
 	 * Return the {@link JobInstanceResource} for the id specified.
@@ -60,7 +60,7 @@ public interface JobOperations {
 	 * @param id identifier of the job instasnce
 	 * @return {@link JobInstanceResource}
 	 */
-	JobInstanceResource viewJobInstance(long id);
+	JobInstanceResource jobInstance(long id);
 
 	/**
 	 * List step executions known for a specific job execution id.

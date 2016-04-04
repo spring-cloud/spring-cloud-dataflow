@@ -83,6 +83,9 @@ public class JobExecutionResource extends ResourceSupport {
 
 	private TimeZone timeZone;
 
+	/**
+	 * Default constructor to be used by Jackson.
+	 */
 	private JobExecutionResource() {
 
 	}

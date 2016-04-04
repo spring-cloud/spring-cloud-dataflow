@@ -49,7 +49,10 @@ public class StepExecutionResource extends ResourceSupport {
 		this.stepType = stepType;
 	}
 
-	public StepExecutionResource() {
+	/**
+	 * Default constructor to be used by Jackson.
+	 */
+	private StepExecutionResource() {
 		this.stepExecution = null;
 		this.jobExecutionId = null;
 		this.stepType = null;

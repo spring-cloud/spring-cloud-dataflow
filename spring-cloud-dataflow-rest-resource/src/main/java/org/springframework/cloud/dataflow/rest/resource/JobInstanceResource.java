@@ -36,7 +36,10 @@ public class JobInstanceResource extends ResourceSupport {
 
 	private List<JobExecutionResource> jobExecutions;
 
-	public JobInstanceResource(){
+	/**
+	 * Default constructor to be used by Jackson.
+	 */
+	private JobInstanceResource(){
 
 	}
 
