@@ -80,14 +80,14 @@ public class JobCommands implements CommandMarker {
 		TableModelBuilder<Object> modelBuilder = new TableModelBuilder<>();
 
 		modelBuilder.addRow().addValue("ID ").addValue("Task ID").addValue("Job Name ")
-				.addValue("Start Time ").addValue("Step Execution Count ").addValue("Status ");
+				.addValue("Start Time ").addValue("Step Execution Count ").addValue("Definition Status ");
 		for (JobExecutionResource job : jobs) {
-			modelBuilder.addRow().addValue(job.getJobId())
+			modelBuilder.addRow().addValue(job.getExecutionId())
 					.addValue(job.getTaskExecutionId())
 					.addValue(job.getJobExecution().getJobInstance().getJobName())
 					.addValue(job.getJobExecution().getStartTime())
 					.addValue(job.getJobExecution().getStepExecutions().size())
-					.addValue(job.isDefined() ? "Defined" : "Destroyed");
+					.addValue(job.isDefined() ? "Created" : "Destroyed");
 		}
 		TableBuilder builder = new TableBuilder(modelBuilder.build());
 
@@ -108,11 +108,12 @@ public class JobCommands implements CommandMarker {
 		TableModelBuilder<Object> modelBuilder = new TableModelBuilder<>();
 
 		modelBuilder.addRow().addValue("Key ").addValue("Value ");
-		modelBuilder.addRow().addValue("Job Execution Id ").addValue(jobExecutionResource.getJobExecution().getJobId());
+		modelBuilder.addRow().addValue("Job Execution Id ").addValue(jobExecutionResource.getExecutionId());
 		modelBuilder.addRow().addValue("Task Execution Id ").addValue(jobExecutionResource.getTaskExecutionId());
+		modelBuilder.addRow().addValue("Task Instance Id ").addValue(jobExecutionResource.getJobExecution().getJobInstance().getInstanceId());
 		modelBuilder.addRow().addValue("Job Name ").addValue(jobExecutionResource.getJobExecution().getJobInstance().getJobName());
 		modelBuilder.addRow().addValue("Create Time ").addValue(jobExecutionResource.getJobExecution().getCreateTime());
-		modelBuilder.addRow().addValue("Start Time ").addValue(jobExecutionResource.getStartTime());
+		modelBuilder.addRow().addValue("Start Time ").addValue(jobExecutionResource.getJobExecution().getStartTime());
 		modelBuilder.addRow().addValue("End Time ").addValue(jobExecutionResource.getJobExecution().getEndTime());
 		modelBuilder.addRow().addValue("Running ").addValue(jobExecutionResource.getJobExecution().isRunning());
 		modelBuilder.addRow().addValue("Stopping ").addValue(jobExecutionResource.getJobExecution().isStopping());
@@ -120,8 +121,8 @@ public class JobCommands implements CommandMarker {
 		modelBuilder.addRow().addValue("Execution Status ").addValue(jobExecutionResource.getJobExecution().getStatus().name());
 		modelBuilder.addRow().addValue("Exit Status ").addValue(jobExecutionResource.getJobExecution().getExitStatus().getExitCode());
 		modelBuilder.addRow().addValue("Exit Message ").addValue(jobExecutionResource.getJobExecution().getExitStatus().getExitDescription());
-		modelBuilder.addRow().addValue("Definition Status ").addValue(jobExecutionResource.isDefined() ? "Defined" : "Destroyed");
-		modelBuilder.addRow().addValue("Job Parameters: ").addValue("");
+		modelBuilder.addRow().addValue("Definition Status ").addValue(jobExecutionResource.isDefined() ? "Created" : "Destroyed");
+		modelBuilder.addRow().addValue("Job Parameters ").addValue("");
 		for (Map.Entry<String, JobParameter> jobParameterEntry : jobExecutionResource.getJobExecution().getJobParameters().getParameters().entrySet()) {
 			String key = org.springframework.util.StringUtils.trimLeadingCharacter(jobParameterEntry.getKey(), '-');
 			if (!jobParameterEntry.getValue().isIdentifying()) {

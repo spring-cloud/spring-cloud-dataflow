@@ -99,7 +99,7 @@ public class JobCommandTests extends AbstractShellIntegrationTest {
 		checkCell(table ,0 , 2, "Job Name ");
 		checkCell(table ,0 , 3, "Start Time ");
 		checkCell(table ,0 , 4, "Step Execution Count ");
-		checkCell(table ,0 , 5, "Status ");
+		checkCell(table ,0 , 5, "Definition Status ");
 	}
 
 	@Test
@@ -112,7 +112,7 @@ public class JobCommandTests extends AbstractShellIntegrationTest {
 		checkCell(table ,0 , 2, "Job Name ");
 		checkCell(table ,0 , 3, "Start Time ");
 		checkCell(table ,0 , 4, "Step Execution Count ");
-		checkCell(table ,0 , 5, "Status ");
+		checkCell(table ,0 , 5, "Definition Status ");
 	}
 
 	@Test
@@ -122,29 +122,32 @@ public class JobCommandTests extends AbstractShellIntegrationTest {
 		Table table = getTable(job().executionView(getFirstJobExecutionIdFromTable()));
 		verifyColumnNumber(table, 2);
 		assertEquals("Number of expected rows returned from the table is incorrect",
-				17, table.getModel().getRowCount());
-
-		checkCell(table ,0 , 0, "Key ");
-		checkCell(table ,1 , 0, "Job Execution Id ");
-		checkCell(table ,2 , 0, "Task Execution Id ");
-		checkCell(table ,3 , 0, "Job Name ");
-		checkCell(table ,4 , 0, "Create Time ");
-		checkCell(table ,5 , 0, "Start Time ");
-		checkCell(table ,6 , 0, "End Time ");
-		checkCell(table ,7 , 0, "Running ");
-		checkCell(table ,8 , 0, "Stopping ");
-		checkCell(table ,9 , 0, "Step Execution Count ");
-		checkCell(table ,10 , 0, "Execution Status ");
-		checkCell(table ,11 , 0, "Exit Status ");
-		checkCell(table ,12 , 0, "Exit Message ");
-		checkCell(table ,13 , 0, "Definition Status ");
-		checkCell(table ,14 , 0, "Job Parameters: ");
+				18, table.getModel().getRowCount());
+		int rowNumber = 0;
+		checkCell(table ,rowNumber++ , 0, "Key ");
+		checkCell(table ,rowNumber++ , 0, "Job Execution Id ");
+		checkCell(table ,rowNumber++ , 0, "Task Execution Id ");
+		checkCell(table ,rowNumber++ , 0, "Task Instance Id ");
+		checkCell(table ,rowNumber++ , 0, "Job Name ");
+		checkCell(table ,rowNumber++ , 0, "Create Time ");
+		checkCell(table ,rowNumber++ , 0, "Start Time ");
+		checkCell(table ,rowNumber++ , 0, "End Time ");
+		checkCell(table ,rowNumber++ , 0, "Running ");
+		checkCell(table ,rowNumber++ , 0, "Stopping ");
+		checkCell(table ,rowNumber++ , 0, "Step Execution Count ");
+		checkCell(table ,rowNumber++ , 0, "Execution Status ");
+		checkCell(table ,rowNumber++ , 0, "Exit Status ");
+		checkCell(table ,rowNumber++ , 0, "Exit Message ");
+		checkCell(table ,rowNumber++ , 0, "Definition Status ");
+		checkCell(table ,rowNumber++ , 0, "Job Parameters ");
+		int paramRowOne = rowNumber++;
+		int paramRowTwo = rowNumber++;
 		boolean jobParamsPresent = false;
-		if((table.getModel().getValue(15,0).equals("foo(STRING) ")
-				&& table.getModel().getValue(16,0).equals("-bar(STRING) "))
+		if((table.getModel().getValue(paramRowOne,0).equals("foo(STRING) ")
+				&& table.getModel().getValue(paramRowTwo,0).equals("-bar(STRING) "))
 				||
-				(table.getModel().getValue(15,0).equals("-bar(STRING) ")
-						&& table.getModel().getValue(16,0).equals("foo(STRING) "))){
+				(table.getModel().getValue(paramRowOne,0).equals("-bar(STRING) ")
+						&& table.getModel().getValue(paramRowTwo,0).equals("foo(STRING) "))){
 			jobParamsPresent = true;
 		}
 		assertTrue("the table did not contain the correct job parameters ", jobParamsPresent);
