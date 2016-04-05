@@ -26,13 +26,14 @@ import org.springframework.cloud.dataflow.artifact.registry.AppRegistry;
 import org.springframework.cloud.dataflow.core.ArtifactType;
 import org.springframework.cloud.dataflow.core.BindingPropertyKeys;
 import org.springframework.cloud.dataflow.core.ModuleDefinition;
-import org.springframework.cloud.dataflow.core.ModuleDeploymentId;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.StreamPropertyKeys;
 import org.springframework.cloud.dataflow.module.DeploymentState;
 import org.springframework.cloud.dataflow.module.deployer.ModuleDeployer;
 import org.springframework.cloud.dataflow.rest.resource.StreamDeploymentResource;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
+import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
+import org.springframework.cloud.dataflow.server.repository.DeploymentKey;
 import org.springframework.cloud.dataflow.server.repository.NoSuchStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
@@ -58,6 +59,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @author Patrick Peralta
  * @author Ilayaperumal Gopinathan
  * @author Marius Bogoevici
+ * @author Janne Valkealahti
  */
 @RestController
 @RequestMapping("/streams/deployments")
@@ -72,6 +74,11 @@ public class StreamDeploymentController {
 	 * The repository this controller will use for stream CRUD operations.
 	 */
 	private final StreamDefinitionRepository repository;
+
+	/**
+	 * The repository this controller will use for deployment IDs.
+	 */
+	private final DeploymentIdRepository deploymentIdRepository;
 
 	/**
 	 * The app registry this controller will use to lookup apps.
@@ -92,14 +99,18 @@ public class StreamDeploymentController {
 	 * </ul>
 	 *
 	 * @param repository       the repository this controller will use for stream CRUD operations
+	 * @param deploymentIdRepository the repository this controller will use for deployment IDs
 	 * @param registry         the registry this controller will use to lookup apps
 	 * @param deployer         the deployer this controller will use to deploy stream apps
 	 */
-	public StreamDeploymentController(StreamDefinitionRepository repository, AppRegistry registry, AppDeployer deployer) {
-		Assert.notNull(repository, "repository must not be null");
-		Assert.notNull(registry, "registry must not be null");
-		Assert.notNull(deployer, "deployer must not be null");
+	public StreamDeploymentController(StreamDefinitionRepository repository, DeploymentIdRepository deploymentIdRepository,
+			AppRegistry registry, AppDeployer deployer) {
+		Assert.notNull(repository, "StreamDefinitionRepository must not be null");
+		Assert.notNull(deploymentIdRepository, "DeploymentIdRepository must not be null");
+		Assert.notNull(registry, "AppRegistry must not be null");
+		Assert.notNull(deployer, "AppDeployer must not be null");
 		this.repository = repository;
+		this.deploymentIdRepository = deploymentIdRepository;
 		this.registry = registry;
 		this.deployer = deployer;
 	}
@@ -186,7 +197,8 @@ public class StreamDeploymentController {
 			AppDefinition definition = new AppDefinition(currentModule.getLabel(), currentModule.getParameters());
 			Resource resource = this.registry.find(currentModule.getName(), type).getResource();
 			AppDeploymentRequest request = new AppDeploymentRequest(definition, resource, moduleDeploymentProperties);
-			this.deployer.deploy(request);
+			String id = this.deployer.deploy(request);
+			this.deploymentIdRepository.save(DeploymentKey.forApp(currentModule), id);
 		}
 	}
 
@@ -354,7 +366,8 @@ public class StreamDeploymentController {
 	 */
 	private void undeployStream(StreamDefinition stream) {
 		for (ModuleDefinition module : stream.getModuleDefinitions()) {
-			String id = ModuleDeploymentId.fromModuleDefinition(module).toString();
+			String key = DeploymentKey.forApp(module);
+			String id = this.deploymentIdRepository.findOne(key);
 			AppStatus status = this.deployer.status(id);
 			if (!EnumSet.of(DeploymentState.unknown, DeploymentState.undeployed)
 					.contains(status.getState())) {
