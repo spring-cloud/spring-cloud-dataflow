@@ -26,13 +26,14 @@ import org.springframework.cloud.dataflow.artifact.registry.AppRegistry;
 import org.springframework.cloud.dataflow.core.ArtifactType;
 import org.springframework.cloud.dataflow.core.BindingPropertyKeys;
 import org.springframework.cloud.dataflow.core.ModuleDefinition;
-import org.springframework.cloud.dataflow.core.ModuleDeploymentId;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.StreamPropertyKeys;
 import org.springframework.cloud.dataflow.module.DeploymentState;
 import org.springframework.cloud.dataflow.module.deployer.ModuleDeployer;
 import org.springframework.cloud.dataflow.rest.resource.StreamDeploymentResource;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
+import org.springframework.cloud.dataflow.server.repository.AppDeploymentKey;
+import org.springframework.cloud.dataflow.server.repository.AppDeploymentRepository;
 import org.springframework.cloud.dataflow.server.repository.NoSuchStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
@@ -74,6 +75,11 @@ public class StreamDeploymentController {
 	private final StreamDefinitionRepository repository;
 
 	/**
+	 * The repository this controller will use for app deployment operations.
+	 */
+	private final AppDeploymentRepository appDeploymentRepository;
+
+	/**
 	 * The app registry this controller will use to lookup apps.
 	 */
 	private final AppRegistry registry;
@@ -92,14 +98,18 @@ public class StreamDeploymentController {
 	 * </ul>
 	 *
 	 * @param repository       the repository this controller will use for stream CRUD operations
+	 * @param appDeploymentRepository the repository this controller will use for app deployment operations
 	 * @param registry         the registry this controller will use to lookup apps
 	 * @param deployer         the deployer this controller will use to deploy stream apps
 	 */
-	public StreamDeploymentController(StreamDefinitionRepository repository, AppRegistry registry, AppDeployer deployer) {
+	public StreamDeploymentController(StreamDefinitionRepository repository, AppDeploymentRepository appDeploymentRepository,
+			AppRegistry registry, AppDeployer deployer) {
 		Assert.notNull(repository, "repository must not be null");
+		Assert.notNull(appDeploymentRepository, "appDeploymentRepository must not be null");
 		Assert.notNull(registry, "registry must not be null");
 		Assert.notNull(deployer, "deployer must not be null");
 		this.repository = repository;
+		this.appDeploymentRepository = appDeploymentRepository;
 		this.registry = registry;
 		this.deployer = deployer;
 	}
@@ -186,7 +196,8 @@ public class StreamDeploymentController {
 			AppDefinition definition = new AppDefinition(currentModule.getLabel(), currentModule.getParameters());
 			Resource resource = this.registry.find(currentModule.getName(), type).getResource();
 			AppDeploymentRequest request = new AppDeploymentRequest(definition, resource, moduleDeploymentProperties);
-			this.deployer.deploy(request);
+			String id = this.deployer.deploy(request);
+			appDeploymentRepository.save(new AppDeploymentKey(stream, currentModule), id);
 		}
 	}
 
@@ -354,7 +365,8 @@ public class StreamDeploymentController {
 	 */
 	private void undeployStream(StreamDefinition stream) {
 		for (ModuleDefinition module : stream.getModuleDefinitions()) {
-			String id = ModuleDeploymentId.fromModuleDefinition(module).toString();
+			AppDeploymentKey key = new AppDeploymentKey(stream, module);
+			String id = appDeploymentRepository.findOne(key);
 			AppStatus status = this.deployer.status(id);
 			if (!EnumSet.of(DeploymentState.unknown, DeploymentState.undeployed)
 					.contains(status.getState())) {

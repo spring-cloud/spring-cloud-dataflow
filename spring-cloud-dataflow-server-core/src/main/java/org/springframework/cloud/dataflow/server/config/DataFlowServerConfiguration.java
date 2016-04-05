@@ -57,6 +57,8 @@ import org.springframework.cloud.dataflow.server.job.TaskExplorerFactoryBean;
 import org.springframework.cloud.dataflow.server.job.TaskJobRepository;
 import org.springframework.cloud.dataflow.server.job.support.ExecutionContextJacksonMixIn;
 import org.springframework.cloud.dataflow.server.job.support.StepExecutionJacksonMixIn;
+import org.springframework.cloud.dataflow.server.repository.AppDeploymentRepository;
+import org.springframework.cloud.dataflow.server.repository.InMemoryAppDeploymentRepository;
 import org.springframework.cloud.dataflow.server.repository.InMemoryStreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.InMemoryTaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
@@ -135,6 +137,12 @@ public class DataFlowServerConfiguration {
 	@ConditionalOnMissingBean
 	public TaskDefinitionRepository taskDefinitionRepository() {
 		return new InMemoryTaskDefinitionRepository();
+	}
+
+	@Bean
+	@ConditionalOnMissingBean
+	public AppDeploymentRepository appDeploymentRepository() {
+		return new InMemoryAppDeploymentRepository();
 	}
 
 	@Configuration

@@ -19,6 +19,7 @@ package org.springframework.cloud.dataflow.server.configuration;
 import static org.mockito.Mockito.mock;
 import static org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType.HAL;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.cloud.dataflow.artifact.registry.AppRegistry;
 import org.springframework.cloud.dataflow.completion.CompletionConfiguration;
 import org.springframework.cloud.dataflow.server.controller.RestControllerAdvice;
@@ -29,6 +30,8 @@ import org.springframework.cloud.dataflow.server.controller.TaskDeploymentContro
 import org.springframework.cloud.dataflow.server.controller.TaskExecutionController;
 import org.springframework.cloud.dataflow.server.registry.DataFlowUriRegistryPopulator;
 import org.springframework.cloud.dataflow.server.registry.DataFlowUriRegistryPopulatorProperties;
+import org.springframework.cloud.dataflow.server.repository.AppDeploymentRepository;
+import org.springframework.cloud.dataflow.server.repository.InMemoryAppDeploymentRepository;
 import org.springframework.cloud.dataflow.server.repository.InMemoryStreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.InMemoryTaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
@@ -41,8 +44,6 @@ import org.springframework.cloud.deployer.resource.registry.UriRegistryPopulator
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.cloud.task.repository.TaskExplorer;
-import org.springframework.cloud.task.repository.support.SimpleTaskExplorer;
-import org.springframework.cloud.task.repository.support.TaskExecutionDaoFactoryBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -76,13 +77,15 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	}
 
 	@Bean
-	public StreamDeploymentController streamDeploymentController(StreamDefinitionRepository repository, AppRegistry registry) {
-		return new StreamDeploymentController(repository, registry, appDeployer());
+	public StreamDeploymentController streamDeploymentController(StreamDefinitionRepository repository,
+			AppDeploymentRepository appDeploymentRepository, AppRegistry registry) {
+		return new StreamDeploymentController(repository, appDeploymentRepository, registry, appDeployer());
 	}
 
 	@Bean
-	public StreamDefinitionController streamDefinitionController(StreamDefinitionRepository repository, StreamDeploymentController deploymentController) {
-		return new StreamDefinitionController(repository, deploymentController, appDeployer());
+	public StreamDefinitionController streamDefinitionController(StreamDefinitionRepository repository,
+			AppDeploymentRepository appDeploymentRepository, StreamDeploymentController deploymentController) {
+		return new StreamDefinitionController(repository, appDeploymentRepository, deploymentController, appDeployer());
 	}
 
 	@Bean
@@ -138,5 +141,11 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	@Bean
 	public TaskDefinitionRepository taskDefinitionRepository() {
 		return new InMemoryTaskDefinitionRepository();
+	}
+
+	@Bean
+	@ConditionalOnMissingBean
+	public AppDeploymentRepository appDeploymentRepository() {
+		return new InMemoryAppDeploymentRepository();
 	}
 }

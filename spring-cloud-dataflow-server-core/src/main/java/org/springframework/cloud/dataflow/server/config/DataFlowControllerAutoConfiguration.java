@@ -52,6 +52,7 @@ import org.springframework.cloud.dataflow.server.registry.DataFlowUriRegistryPop
 import org.springframework.cloud.dataflow.server.registry.DataFlowUriRegistryPopulatorProperties;
 import org.springframework.cloud.dataflow.server.registry.RedisUriRegistry;
 import org.springframework.cloud.dataflow.server.job.TaskJobRepository;
+import org.springframework.cloud.dataflow.server.repository.AppDeploymentRepository;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.deployer.resource.maven.MavenProperties;
@@ -119,14 +120,15 @@ public class DataFlowControllerAutoConfiguration {
 
 	@Bean
 	public StreamDefinitionController streamDefinitionController(StreamDefinitionRepository repository,
-			StreamDeploymentController deploymentController, AppDeployer deployer) {
-		return new StreamDefinitionController(repository, deploymentController, deployer);
+			AppDeploymentRepository appDeploymentRepository, StreamDeploymentController deploymentController, AppDeployer deployer) {
+		return new StreamDefinitionController(repository, appDeploymentRepository, deploymentController, deployer);
 	}
 
 	@Bean
 	public StreamDeploymentController streamDeploymentController(StreamDefinitionRepository repository,
-			AppRegistry registry, AppDeployer deployer, DelegatingResourceLoader resourceLoader) {
-		return new StreamDeploymentController(repository, registry, deployer);
+			AppDeploymentRepository appDeploymentRepository, AppRegistry registry, AppDeployer deployer,
+			DelegatingResourceLoader resourceLoader) {
+		return new StreamDeploymentController(repository, appDeploymentRepository, registry, deployer);
 	}
 
 	@Bean

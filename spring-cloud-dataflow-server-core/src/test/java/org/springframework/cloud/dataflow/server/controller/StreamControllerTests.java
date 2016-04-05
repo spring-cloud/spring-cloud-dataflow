@@ -20,6 +20,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -54,6 +55,9 @@ import org.springframework.cloud.dataflow.core.BindingPropertyKeys;
 import org.springframework.cloud.dataflow.core.ModuleDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
+import org.springframework.cloud.dataflow.server.repository.AppDeploymentKey;
+import org.springframework.cloud.dataflow.server.repository.AppDeploymentRepository;
+import org.springframework.cloud.dataflow.server.repository.InMemoryAppDeploymentRepository;
 import org.springframework.cloud.dataflow.server.repository.InMemoryStreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.deployer.resource.maven.MavenProperties;
@@ -86,6 +90,9 @@ public class StreamControllerTests {
 	@Autowired
 	private StreamDefinitionRepository repository;
 
+	@Autowired
+	private AppDeploymentRepository appDeploymentRepository;
+
 	private MockMvc mockMvc;
 
 	@Autowired
@@ -113,25 +120,26 @@ public class StreamControllerTests {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testConstructorMissingRepository() {
-		StreamDeploymentController deploymentController = new StreamDeploymentController(
-				new InMemoryStreamDefinitionRepository(), appRegistry, appDeployer);
-		new StreamDefinitionController(null, deploymentController, appDeployer);
+		StreamDeploymentController deploymentController = new StreamDeploymentController(new InMemoryStreamDefinitionRepository(),
+				new InMemoryAppDeploymentRepository(), appRegistry, appDeployer);
+		new StreamDefinitionController(null, null, deploymentController, appDeployer);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testConstructorMissingDeploymentController() {
-		new StreamDefinitionController(new InMemoryStreamDefinitionRepository(), null, appDeployer);
+		new StreamDefinitionController(new InMemoryStreamDefinitionRepository(), new InMemoryAppDeploymentRepository(), null, appDeployer);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testConstructorMissingDeployer() {
-		StreamDeploymentController deploymentController = new StreamDeploymentController(
-				new InMemoryStreamDefinitionRepository(), appRegistry, appDeployer);
-		new StreamDefinitionController(new InMemoryStreamDefinitionRepository(), deploymentController, null);
+		StreamDeploymentController deploymentController = new StreamDeploymentController(new InMemoryStreamDefinitionRepository(),
+				new InMemoryAppDeploymentRepository(), appRegistry, appDeployer);
+		new StreamDefinitionController(new InMemoryStreamDefinitionRepository(), new InMemoryAppDeploymentRepository(), deploymentController, null);
 	}
 
 	@Test
 	public void testSave() throws Exception {
+		when(appDeployer.deploy(any(AppDeploymentRequest.class))).thenReturn("preventnpe");
 		assertEquals(0, repository.count());
 		mockMvc.perform(
 				post("/streams/definitions/").param("name", "myStream").param("definition", "time | log")
@@ -165,6 +173,7 @@ public class StreamControllerTests {
 
 	@Test
 	public void testSaveWithParameters() throws Exception {
+		when(appDeployer.deploy(any(AppDeploymentRequest.class))).thenReturn("preventnpe");
 		assertEquals(0, repository.count());
 		String definition = "time --fixedDelay=500 --timeUnit=milliseconds | log";
 		mockMvc.perform(
@@ -186,6 +195,7 @@ public class StreamControllerTests {
 
 	@Test
 	public void testStreamWithProcessor() throws Exception {
+		when(appDeployer.deploy(any(AppDeploymentRequest.class))).thenReturn("preventnpe");
 		assertEquals(0, repository.count());
 		String definition = "time | filter | log";
 		mockMvc.perform(
@@ -215,6 +225,7 @@ public class StreamControllerTests {
 
 	@Test
 	public void testSourceDestinationWithSingleModule() throws Exception {
+		when(appDeployer.deploy(any(AppDeploymentRequest.class))).thenReturn("preventnpe");
 		assertEquals(0, repository.count());
 		String definition = ":foo > log";
 		mockMvc.perform(
@@ -234,6 +245,7 @@ public class StreamControllerTests {
 
 	@Test
 	public void testSourceDestinationWithTwoModules() throws Exception {
+		when(appDeployer.deploy(any(AppDeploymentRequest.class))).thenReturn("preventnpe");
 		assertEquals(0, repository.count());
 		String definition = ":foo > filter | log";
 		mockMvc.perform(
@@ -259,6 +271,7 @@ public class StreamControllerTests {
 
 	@Test
 	public void testSinkDestinationWithSingleModule() throws Exception {
+		when(appDeployer.deploy(any(AppDeploymentRequest.class))).thenReturn("preventnpe");
 		assertEquals(0, repository.count());
 		String definition = "time > :foo";
 		mockMvc.perform(
@@ -277,6 +290,7 @@ public class StreamControllerTests {
 
 	@Test
 	public void testSinkDestinationWithTwoModules() throws Exception {
+		when(appDeployer.deploy(any(AppDeploymentRequest.class))).thenReturn("preventnpe");
 		assertEquals(0, repository.count());
 		String definition = "time | filter > :foo";
 		mockMvc.perform(
@@ -301,6 +315,7 @@ public class StreamControllerTests {
 
 	@Test
 	public void testDestinationsOnBothSides() throws Exception {
+		when(appDeployer.deploy(any(AppDeploymentRequest.class))).thenReturn("preventnpe");
 		assertEquals(0, repository.count());
 		String definition = ":bar > filter > :foo";
 		mockMvc.perform(
@@ -329,7 +344,12 @@ public class StreamControllerTests {
 
 	@Test
 	public void testDestroyStream() throws Exception {
-		repository.save(new StreamDefinition("myStream", "time | log"));
+		StreamDefinition streamDefinition1 = new StreamDefinition("myStream", "time | log");
+		repository.save(streamDefinition1);
+		for (ModuleDefinition moduleDefinition : streamDefinition1.getModuleDefinitions()) {
+			appDeploymentRepository.save(new AppDeploymentKey(streamDefinition1, moduleDefinition),
+					streamDefinition1.getName() + "." + moduleDefinition.getName());
+		}
 		assertEquals(1, repository.count());
 		AppStatus status = mock(AppStatus.class);
 		when(status.getState()).thenReturn(DeploymentState.unknown);
@@ -343,8 +363,14 @@ public class StreamControllerTests {
 
 	@Test
 	public void testDestroySingleStream() throws Exception {
-		repository.save(new StreamDefinition("myStream", "time | log"));
-		repository.save(new StreamDefinition("myStream1", "time | log"));
+		StreamDefinition streamDefinition1 = new StreamDefinition("myStream", "time | log");
+		StreamDefinition streamDefinition2 = new StreamDefinition("myStream1", "time | log");
+		repository.save(streamDefinition1);
+		repository.save(streamDefinition2);
+		for (ModuleDefinition moduleDefinition : streamDefinition1.getModuleDefinitions()) {
+			appDeploymentRepository.save(new AppDeploymentKey(streamDefinition1, moduleDefinition),
+					streamDefinition1.getName() + "." + moduleDefinition.getName());
+		}
 		assertEquals(2, repository.count());
 		AppStatus status = mock(AppStatus.class);
 		when(status.getState()).thenReturn(DeploymentState.unknown);
@@ -358,7 +384,12 @@ public class StreamControllerTests {
 
 	@Test
 	public void testDisplaySingleStream() throws Exception {
-		repository.save(new StreamDefinition("myStream", "time | log"));
+		StreamDefinition streamDefinition1 = new StreamDefinition("myStream", "time | log");
+		for (ModuleDefinition moduleDefinition : streamDefinition1.getModuleDefinitions()) {
+			appDeploymentRepository.save(new AppDeploymentKey(streamDefinition1, moduleDefinition),
+					streamDefinition1.getName() + "." + moduleDefinition.getName());
+		}
+		repository.save(streamDefinition1);
 		assertEquals(1, repository.count());
 		AppStatus status = mock(AppStatus.class);
 		when(status.getState()).thenReturn(DeploymentState.unknown);
@@ -381,6 +412,7 @@ public class StreamControllerTests {
 
 	@Test
 	public void testDeploy() throws Exception {
+		when(appDeployer.deploy(any(AppDeploymentRequest.class))).thenReturn("preventnpe");
 		repository.save(new StreamDefinition("myStream", "time | log"));
 		mockMvc.perform(
 				post("/streams/deployments/myStream").accept(MediaType.APPLICATION_JSON)).andDo(print())
@@ -397,6 +429,7 @@ public class StreamControllerTests {
 
 	@Test
 	public void testDeployWithProperties() throws Exception {
+		when(appDeployer.deploy(any(AppDeploymentRequest.class))).thenReturn("preventnpe");
 		repository.save(new StreamDefinition("myStream", "time | log"));
 		mockMvc.perform(
 				post("/streams/deployments/myStream").param("properties",
@@ -425,6 +458,7 @@ public class StreamControllerTests {
 
 	@Test
 	public void testDeployWithWildcardProperties() throws Exception {
+		when(appDeployer.deploy(any(AppDeploymentRequest.class))).thenReturn("preventnpe");
 		repository.save(new StreamDefinition("myStream", "time | log"));
 		mockMvc.perform(
 				post("/streams/deployments/myStream").param("properties",
