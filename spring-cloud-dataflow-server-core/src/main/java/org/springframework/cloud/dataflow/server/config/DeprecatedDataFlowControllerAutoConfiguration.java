@@ -24,6 +24,8 @@ import org.springframework.boot.actuate.metrics.repository.MetricRepository;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.dataflow.artifact.registry.AppRegistry;
 import org.springframework.cloud.dataflow.completion.StreamCompletionProvider;
 import org.springframework.cloud.dataflow.module.deployer.ModuleDeployer;
@@ -70,6 +72,7 @@ import org.springframework.hateoas.EntityLinks;
  */
 @Configuration
 @ConditionalOnBean(ModuleDeployer.class)
+@EnableConfigurationProperties(DataFlowUriRegistryPopulatorProperties.class)
 @Deprecated
 public class DeprecatedDataFlowControllerAutoConfiguration {
 
@@ -188,5 +191,14 @@ public class DeprecatedDataFlowControllerAutoConfiguration {
 	@Bean
 	public RestControllerAdvice restControllerAdvice() {
 		return new RestControllerAdvice();
+	}
+
+	@Bean
+	public MavenProperties mavenProperties() {
+		return new MavenConfigurationProperties();
+	}
+
+	@ConfigurationProperties(prefix = "maven")
+	static class MavenConfigurationProperties extends MavenProperties {
 	}
 }
