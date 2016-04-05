@@ -20,7 +20,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.any;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -80,6 +80,7 @@ import org.springframework.web.context.WebApplicationContext;
 /**
  * @author Mark Fisher
  * @author Ilayaperumal Gopinathan
+ * @author Janne Valkealahti
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = TestDependencies.class)
@@ -107,9 +108,10 @@ public class StreamControllerTests {
 	);
 
 	@Before
-	public void setupMockMVC() {
+	public void setupMocks() {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(wac).defaultRequest(
 				get("/").accept(MediaType.APPLICATION_JSON)).build();
+		when(appDeployer.deploy(any(AppDeploymentRequest.class))).thenReturn("testID");
 	}
 
 	@After
@@ -139,7 +141,6 @@ public class StreamControllerTests {
 
 	@Test
 	public void testSave() throws Exception {
-		when(appDeployer.deploy(any(AppDeploymentRequest.class))).thenReturn("preventnpe");
 		assertEquals(0, repository.count());
 		mockMvc.perform(
 				post("/streams/definitions/").param("name", "myStream").param("definition", "time | log")
@@ -173,7 +174,6 @@ public class StreamControllerTests {
 
 	@Test
 	public void testSaveWithParameters() throws Exception {
-		when(appDeployer.deploy(any(AppDeploymentRequest.class))).thenReturn("preventnpe");
 		assertEquals(0, repository.count());
 		String definition = "time --fixedDelay=500 --timeUnit=milliseconds | log";
 		mockMvc.perform(
@@ -195,7 +195,6 @@ public class StreamControllerTests {
 
 	@Test
 	public void testStreamWithProcessor() throws Exception {
-		when(appDeployer.deploy(any(AppDeploymentRequest.class))).thenReturn("preventnpe");
 		assertEquals(0, repository.count());
 		String definition = "time | filter | log";
 		mockMvc.perform(
@@ -225,7 +224,6 @@ public class StreamControllerTests {
 
 	@Test
 	public void testSourceDestinationWithSingleModule() throws Exception {
-		when(appDeployer.deploy(any(AppDeploymentRequest.class))).thenReturn("preventnpe");
 		assertEquals(0, repository.count());
 		String definition = ":foo > log";
 		mockMvc.perform(
@@ -245,7 +243,6 @@ public class StreamControllerTests {
 
 	@Test
 	public void testSourceDestinationWithTwoModules() throws Exception {
-		when(appDeployer.deploy(any(AppDeploymentRequest.class))).thenReturn("preventnpe");
 		assertEquals(0, repository.count());
 		String definition = ":foo > filter | log";
 		mockMvc.perform(
@@ -271,7 +268,6 @@ public class StreamControllerTests {
 
 	@Test
 	public void testSinkDestinationWithSingleModule() throws Exception {
-		when(appDeployer.deploy(any(AppDeploymentRequest.class))).thenReturn("preventnpe");
 		assertEquals(0, repository.count());
 		String definition = "time > :foo";
 		mockMvc.perform(
@@ -290,7 +286,6 @@ public class StreamControllerTests {
 
 	@Test
 	public void testSinkDestinationWithTwoModules() throws Exception {
-		when(appDeployer.deploy(any(AppDeploymentRequest.class))).thenReturn("preventnpe");
 		assertEquals(0, repository.count());
 		String definition = "time | filter > :foo";
 		mockMvc.perform(
@@ -315,7 +310,6 @@ public class StreamControllerTests {
 
 	@Test
 	public void testDestinationsOnBothSides() throws Exception {
-		when(appDeployer.deploy(any(AppDeploymentRequest.class))).thenReturn("preventnpe");
 		assertEquals(0, repository.count());
 		String definition = ":bar > filter > :foo";
 		mockMvc.perform(
@@ -412,7 +406,6 @@ public class StreamControllerTests {
 
 	@Test
 	public void testDeploy() throws Exception {
-		when(appDeployer.deploy(any(AppDeploymentRequest.class))).thenReturn("preventnpe");
 		repository.save(new StreamDefinition("myStream", "time | log"));
 		mockMvc.perform(
 				post("/streams/deployments/myStream").accept(MediaType.APPLICATION_JSON)).andDo(print())
@@ -429,7 +422,6 @@ public class StreamControllerTests {
 
 	@Test
 	public void testDeployWithProperties() throws Exception {
-		when(appDeployer.deploy(any(AppDeploymentRequest.class))).thenReturn("preventnpe");
 		repository.save(new StreamDefinition("myStream", "time | log"));
 		mockMvc.perform(
 				post("/streams/deployments/myStream").param("properties",
@@ -458,7 +450,6 @@ public class StreamControllerTests {
 
 	@Test
 	public void testDeployWithWildcardProperties() throws Exception {
-		when(appDeployer.deploy(any(AppDeploymentRequest.class))).thenReturn("preventnpe");
 		repository.save(new StreamDefinition("myStream", "time | log"));
 		mockMvc.perform(
 				post("/streams/deployments/myStream").param("properties",

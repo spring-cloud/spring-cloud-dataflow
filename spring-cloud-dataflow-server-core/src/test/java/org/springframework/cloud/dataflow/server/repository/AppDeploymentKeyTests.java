@@ -23,9 +23,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.Test;
+
 import org.springframework.cloud.dataflow.core.ModuleDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 
+/**
+ * @author Janne Valkealahti
+ */
 public class AppDeploymentKeyTests {
 
 	@Test

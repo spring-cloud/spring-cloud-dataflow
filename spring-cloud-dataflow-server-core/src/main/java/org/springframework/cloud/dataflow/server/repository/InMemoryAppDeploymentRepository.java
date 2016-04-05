@@ -19,6 +19,8 @@ package org.springframework.cloud.dataflow.server.repository;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.springframework.util.Assert;
+
 /**
  * In-memory implementation of an {@link AppDeploymentRepository}.
  *
@@ -32,6 +34,8 @@ public class InMemoryAppDeploymentRepository implements AppDeploymentRepository 
 	public <S extends AppDeploymentKey> S save(S key, String id) {
 		// we don't care if key or id already exists as
 		// repository is used to track last deployment
+		Assert.notNull(key, "key must not be null");
+		Assert.notNull(id, "id must not be null");
 		deployments.put(key, id);
 		return key;
 	}

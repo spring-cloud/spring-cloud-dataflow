@@ -21,9 +21,13 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertThat;
 
 import org.junit.Test;
+
 import org.springframework.cloud.dataflow.core.ModuleDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 
+/**
+ * @author Janne Valkealahti
+ */
 public class InMemoryAppDeploymentRepositoryTests {
 
 	@Test
