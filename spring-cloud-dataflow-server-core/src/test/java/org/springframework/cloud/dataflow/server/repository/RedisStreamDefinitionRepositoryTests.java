@@ -29,7 +29,6 @@ import java.util.Random;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.stream.test.junit.redis.RedisTestSupport;
 import org.springframework.data.domain.PageRequest;
