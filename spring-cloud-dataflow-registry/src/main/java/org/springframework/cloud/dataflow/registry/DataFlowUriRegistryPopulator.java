@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.dataflow.server.registry;
+package org.springframework.cloud.dataflow.registry;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.cloud.deployer.resource.registry.UriRegistry;

@@ -21,10 +21,10 @@ import static org.springframework.cloud.dataflow.core.ArtifactType.sink;
 
 import java.util.List;
 
-import org.springframework.cloud.dataflow.artifact.registry.AppRegistration;
-import org.springframework.cloud.dataflow.artifact.registry.AppRegistry;
 import org.springframework.cloud.dataflow.core.ModuleDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
+import org.springframework.cloud.dataflow.registry.AppRegistration;
+import org.springframework.cloud.dataflow.registry.AppRegistry;
 
 /**
  * Continues a well-formed stream definition by adding a pipe symbol and another module,

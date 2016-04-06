@@ -21,10 +21,10 @@ import static org.springframework.cloud.dataflow.core.ArtifactType.sink;
 
 import java.util.List;
 
-import org.springframework.cloud.dataflow.artifact.registry.AppRegistration;
-import org.springframework.cloud.dataflow.artifact.registry.AppRegistry;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.dsl.CheckPointedParseException;
+import org.springframework.cloud.dataflow.registry.AppRegistration;
+import org.springframework.cloud.dataflow.registry.AppRegistry;
 
 /**
  * Provides completions for the case where the user has entered a pipe

@@ -21,9 +21,9 @@ import static org.springframework.cloud.dataflow.core.ArtifactType.sink;
 
 import java.util.List;
 
-import org.springframework.cloud.dataflow.artifact.registry.AppRegistration;
-import org.springframework.cloud.dataflow.artifact.registry.AppRegistry;
 import org.springframework.cloud.dataflow.core.dsl.CheckPointedParseException;
+import org.springframework.cloud.dataflow.registry.AppRegistration;
+import org.springframework.cloud.dataflow.registry.AppRegistry;
 
 /**
  * Proposes module names when the user has typed a destination redirection.

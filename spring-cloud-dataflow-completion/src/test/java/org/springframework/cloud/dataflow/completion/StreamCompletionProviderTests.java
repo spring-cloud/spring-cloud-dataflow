@@ -38,9 +38,9 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.loader.LaunchedURLClassLoader;
 import org.springframework.boot.loader.archive.Archive;
-import org.springframework.cloud.dataflow.artifact.registry.AppRegistration;
-import org.springframework.cloud.dataflow.artifact.registry.AppRegistry;
 import org.springframework.cloud.dataflow.core.ArtifactType;
+import org.springframework.cloud.dataflow.registry.AppRegistration;
+import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.deployer.resource.registry.InMemoryUriRegistry;
 import org.springframework.cloud.stream.configuration.metadata.ModuleConfigurationMetadataResolver;
 import org.springframework.context.annotation.Bean;
@@ -54,9 +54,9 @@ import org.springframework.util.Assert;
 /**
  * Integration tests for StreamCompletionProvider.
  *
- * <p>These tests work hand in hand with custom ModuleResolver, ModuleRegistry and
- * ModuleConfigurationMetadataResolver to provide completions for a fictional
- * set of well known modules.</p>
+ * <p>These tests work hand in hand with a custom {@link AppRegistry} and
+ * {@link ModuleConfigurationMetadataResolver} to provide completions for a fictional
+ * set of well known apps.</p>
  *
  * @author Eric Bottard
  * @author Mark Fisher
