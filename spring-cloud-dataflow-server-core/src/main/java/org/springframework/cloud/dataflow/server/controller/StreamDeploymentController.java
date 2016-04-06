@@ -68,6 +68,8 @@ public class StreamDeploymentController {
 
 	private static final String INSTANCE_COUNT_PROPERTY_KEY = "count";
 
+	private static final String DEBUG_PORT_PROPERTY_KEY = "debug-port";
+
 	private static final String DEFAULT_PARTITION_KEY_EXPRESSION = "payload";
 
 	/**
@@ -181,6 +183,10 @@ public class StreamDeploymentController {
 			if (moduleDeploymentProperties.containsKey(INSTANCE_COUNT_PROPERTY_KEY)) {
 				moduleDeploymentProperties.put(AppDeployer.COUNT_PROPERTY_KEY,
 						moduleDeploymentProperties.get(INSTANCE_COUNT_PROPERTY_KEY));
+			}
+			if (moduleDeploymentProperties.containsKey(DEBUG_PORT_PROPERTY_KEY)) {
+				moduleDeploymentProperties.put(AppDeployer.DEBUG_PORT_PROPERTY_KEY,
+						moduleDeploymentProperties.get(DEBUG_PORT_PROPERTY_KEY));
 			}
 			boolean upstreamModuleSupportsPartition = upstreamModuleHasPartitionInfo(stream, currentModule, streamDeploymentProperties);
 			// consumer module partition properties
