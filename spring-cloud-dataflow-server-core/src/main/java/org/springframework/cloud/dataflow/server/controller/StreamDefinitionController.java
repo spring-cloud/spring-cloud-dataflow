@@ -92,6 +92,7 @@ public class StreamDefinitionController {
 	 * Create a {@code StreamDefinitionController} that delegates
 	 * <ul>
 	 * <li>CRUD operations to the provided {@link StreamDefinitionRepository}</li>
+	 * <li>deployment ID operations to the provided {@link DeploymentIdRepository}</li>
 	 * <li>deployment operations to the provided {@link StreamDeploymentController}</li>
 	 * <li>deployment status computation to the provided {@link AppDeployer}</li>
 	 * </ul>
@@ -130,14 +131,14 @@ public class StreamDefinitionController {
 	 *
 	 * @param name   stream name
 	 * @param dsl    DSL definition for stream
-	 * @param deploy if {@code true}, the stream is deployed upon creation
+	 * @param deploy if {@code true}, the stream is deployed upon creation (default is {@code false})
 	 * @throws DuplicateStreamDefinitionException if a stream definition with the same name already exists
 	 */
 	@RequestMapping(value = "", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
 	public void save(@RequestParam("name") String name,
 					@RequestParam("definition") String dsl,
-					@RequestParam(value = "deploy", defaultValue = "true")
+					@RequestParam(value = "deploy", defaultValue = "false")
 					boolean deploy) {
 		StreamDefinition stream = new StreamDefinition(name, dsl);
 		this.repository.save(stream);
