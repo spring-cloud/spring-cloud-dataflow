@@ -19,7 +19,9 @@ package org.springframework.cloud.dataflow.server.controller;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -39,6 +41,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
+import org.springframework.cloud.dataflow.server.repository.InMemoryAppDeploymentRepository;
 import org.springframework.cloud.dataflow.server.repository.InMemoryTaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.deployer.resource.maven.MavenProperties;
@@ -85,6 +88,7 @@ public class TaskControllerTests {
 	public void setupMockMVC() {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(wac).defaultRequest(
 				get("/").accept(MediaType.APPLICATION_JSON)).build();
+		when(taskLauncher.launch(any(AppDeploymentRequest.class))).thenReturn("testID");
 	}
 
 	@After
@@ -95,19 +99,19 @@ public class TaskControllerTests {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testTaskDeploymentControllerConstructorMissingRepository() {
-		new TaskDeploymentController(null, new InMemoryUriRegistry(),
+		new TaskDeploymentController(null, null, new InMemoryUriRegistry(),
 				new MavenResourceLoader(mavenProperties), taskLauncher);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testTaskDeploymentControllerConstructorMissingRegistry() {
-		new TaskDeploymentController(new InMemoryTaskDefinitionRepository(), null,
+		new TaskDeploymentController(new InMemoryTaskDefinitionRepository(), new InMemoryAppDeploymentRepository(), null,
 				new MavenResourceLoader(mavenProperties), taskLauncher);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testTaskDeploymentControllerConstructorMissingLauncher() {
-		new TaskDeploymentController(new InMemoryTaskDefinitionRepository(),
+		new TaskDeploymentController(new InMemoryTaskDefinitionRepository(), new InMemoryAppDeploymentRepository(),
 				new InMemoryUriRegistry(), new MavenResourceLoader(mavenProperties), null);
 	}
 
@@ -120,7 +124,7 @@ public class TaskControllerTests {
 	public void testTaskDefinitionControllerConstructorMissingDeployer() {
 		new TaskDefinitionController(new InMemoryTaskDefinitionRepository(), null);
 	}
-	
+
 	@Test
 	public void testSave() throws Exception {
 		assertEquals(0, repository.count());

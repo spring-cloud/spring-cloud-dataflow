@@ -18,20 +18,24 @@ package org.springframework.cloud.dataflow.server.repository;
 
 import org.springframework.cloud.dataflow.core.ModuleDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
+import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.util.Assert;
 
 /**
- * Key used in an {@link AppDeploymentRepository}.
+ * Key used in an {@link AppDeploymentRepository}. Required to be used
+ * either with {@link StreamDefinition} or {@link TaskDefinition} with
+ * accompanying {@link ModuleDefinition}.
  *
  * @author Janne Valkealahti
  */
 public class AppDeploymentKey {
 
 	private final StreamDefinition streamDefinition;
+	private final TaskDefinition taskDefinition;
 	private final ModuleDefinition moduleDefinition;
 
 	/**
-	 * Instantiates a new app deployment key.
+	 * Instantiates a new app deployment key for stream.
 	 *
 	 * @param streamDefinition the stream definition
 	 * @param moduleDefinition the module definition
@@ -41,24 +45,42 @@ public class AppDeploymentKey {
 		Assert.notNull(moduleDefinition, "moduleDefinition must be set");
 		this.streamDefinition = streamDefinition;
 		this.moduleDefinition = moduleDefinition;
+		this.taskDefinition = null;
 	}
 
 	/**
-	 * Gets the stream definition.
+	 * Instantiates a new app deployment key for task.
 	 *
-	 * @return the stream definition
+	 * @param taskDefinition the task definition
+	 * @param moduleDefinition the module definition
 	 */
-	public StreamDefinition getStreamDefinition() {
-		return streamDefinition;
+	public AppDeploymentKey(TaskDefinition taskDefinition, ModuleDefinition moduleDefinition) {
+		Assert.notNull(taskDefinition, "taskDefinition must be set");
+		Assert.notNull(moduleDefinition, "moduleDefinition must be set");
+		this.taskDefinition = taskDefinition;
+		this.moduleDefinition = moduleDefinition;
+		this.streamDefinition = null;
 	}
 
 	/**
-	 * Gets the module definition.
+	 * Gets the unique identifier for this key to be
+	 * used in maps or other hashes.
 	 *
-	 * @return the module definition
+	 * @return the unique id
 	 */
-	public ModuleDefinition getModuleDefinition() {
-		return moduleDefinition;
+	public String getId() {
+		StringBuilder buf = new StringBuilder();
+		if (streamDefinition != null) {
+			buf.append(streamDefinition.getName());
+			buf.append(streamDefinition.getDslText());
+		} else if (taskDefinition != null) {
+			buf.append(taskDefinition.getName());
+			buf.append(taskDefinition.getDslText());
+		}
+		buf.append(moduleDefinition.getName());
+		buf.append(moduleDefinition.getLabel());
+		buf.append(moduleDefinition.getGroup());
+		return buf.toString();
 	}
 
 	@Override
@@ -67,6 +89,7 @@ public class AppDeploymentKey {
 		int result = 1;
 		result = prime * result + ((moduleDefinition == null) ? 0 : moduleDefinition.hashCode());
 		result = prime * result + ((streamDefinition == null) ? 0 : streamDefinition.hashCode());
+		result = prime * result + ((taskDefinition == null) ? 0 : taskDefinition.hashCode());
 		return result;
 	}
 
@@ -88,6 +111,11 @@ public class AppDeploymentKey {
 			if (other.streamDefinition != null)
 				return false;
 		} else if (!streamDefinition.equals(other.streamDefinition))
+			return false;
+		if (taskDefinition == null) {
+			if (other.taskDefinition != null)
+				return false;
+		} else if (!taskDefinition.equals(other.taskDefinition))
 			return false;
 		return true;
 	}

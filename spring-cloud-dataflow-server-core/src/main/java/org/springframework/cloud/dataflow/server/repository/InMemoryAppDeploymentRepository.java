@@ -31,7 +31,7 @@ public class InMemoryAppDeploymentRepository implements AppDeploymentRepository 
 	private final Map<AppDeploymentKey, String> deployments = new ConcurrentHashMap<AppDeploymentKey, String>();
 
 	@Override
-	public <S extends AppDeploymentKey> S save(S key, String id) {
+	public AppDeploymentKey save(AppDeploymentKey key, String id) {
 		// we don't care if key or id already exists as
 		// repository is used to track last deployment
 		Assert.notNull(key, "key must not be null");

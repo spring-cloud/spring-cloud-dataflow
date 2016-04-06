@@ -19,10 +19,27 @@ package org.springframework.cloud.dataflow.server.repository;
 import org.springframework.stereotype.Repository;
 
 /**
- * Specialised {@link KeyRepository} working with an {@link AppDeploymentKey}.
+ * Interface for repository working with an {@link AppDeploymentKey} backmapping.
  *
  * @author Janne Valkealahti
  */
 @Repository
-public interface AppDeploymentRepository extends KeyRepository<AppDeploymentKey, String> {
+public interface AppDeploymentRepository extends org.springframework.data.repository.Repository<AppDeploymentKey, String> {
+
+	/**
+	 * Saves a given {@link AppDeploymentKey} with an associated identifier.
+	 *
+	 * @param key the app deployment key
+	 * @param id the identifier
+	 * @return the saved key
+	 */
+	AppDeploymentKey save(AppDeploymentKey key, String id);
+
+	/**
+	 * Find an identifier by its key.
+	 *
+	 * @param key the app deployment key
+	 * @return the identifier
+	 */
+	String findOne(AppDeploymentKey key);
 }

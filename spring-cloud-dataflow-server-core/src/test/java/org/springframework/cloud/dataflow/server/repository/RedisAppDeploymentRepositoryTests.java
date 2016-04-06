@@ -20,19 +20,33 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertThat;
 
+import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
-
 import org.springframework.cloud.dataflow.core.ModuleDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
+import org.springframework.cloud.stream.test.junit.redis.RedisTestSupport;
 
 /**
+ * Tests for {@link RedisAppDeploymentRepository}.
+ *
  * @author Janne Valkealahti
  */
-public class InMemoryAppDeploymentRepositoryTests {
+public class RedisAppDeploymentRepositoryTests {
+
+	@Rule
+	public RedisTestSupport redisTestSupport = new RedisTestSupport();
+
+	private RedisAppDeploymentRepository repository;
+
+	@Before
+	public void setUp() {
+		repository = new RedisAppDeploymentRepository("RedisAppDeploymentRepositoryTests", redisTestSupport.getResource());
+	}
 
 	@Test
-	public void testSimpleSaveFind() {
+	public void testSimpleOperations() {
 		StreamDefinition streamDefinition1 = new StreamDefinition("myStream1", "time | log");
 		ModuleDefinition[] moduleDefinitions1 = streamDefinition1.getModuleDefinitions().toArray(new ModuleDefinition[0]);
 		StreamDefinition streamDefinition2 = new StreamDefinition("myStream1", "time | log");
@@ -46,7 +60,6 @@ public class InMemoryAppDeploymentRepositoryTests {
 		AppDeploymentKey appDeploymentKey5 = new AppDeploymentKey(taskDefinition1, taskDefinition1.getModuleDefinition());
 		AppDeploymentKey appDeploymentKey6 = new AppDeploymentKey(taskDefinition2, taskDefinition2.getModuleDefinition());
 
-		AppDeploymentRepository repository = new InMemoryAppDeploymentRepository();
 		AppDeploymentKey saved1 = repository.save(appDeploymentKey1, "id1");
 		AppDeploymentKey saved2 = repository.save(appDeploymentKey2, "id2");
 		AppDeploymentKey saved3 = repository.save(appDeploymentKey5, "id3");

@@ -89,8 +89,9 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	}
 
 	@Bean
-	public TaskDeploymentController taskController(TaskDefinitionRepository repository, UriRegistry registry) {
-		return new TaskDeploymentController(repository, registry, resourceLoader(), taskLauncher());
+	public TaskDeploymentController taskController(TaskDefinitionRepository repository, AppDeploymentRepository appDeploymentRepository,
+			UriRegistry registry) {
+		return new TaskDeploymentController(repository, appDeploymentRepository, registry, resourceLoader(), taskLauncher());
 	}
 
 	@Bean

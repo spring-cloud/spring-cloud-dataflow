@@ -26,6 +26,8 @@ import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.module.deployer.ModuleDeployer;
 import org.springframework.cloud.dataflow.rest.resource.TaskDeploymentResource;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
+import org.springframework.cloud.dataflow.server.repository.AppDeploymentKey;
+import org.springframework.cloud.dataflow.server.repository.AppDeploymentRepository;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.deployer.resource.registry.UriRegistry;
@@ -67,6 +69,11 @@ public class TaskDeploymentController {
 
 	private final TaskDefinitionRepository repository;
 
+	/**
+	 * The repository this controller will use for app deployment operations.
+	 */
+	private final AppDeploymentRepository appDeploymentRepository;
+
 	private final TaskLauncher taskLauncher;
 
 	@Value("${spring.datasource.url:#{null}}")
@@ -95,17 +102,20 @@ public class TaskDeploymentController {
 	 * Creates a {@code TaskDeploymentController} that delegates launching
 	 * operations to the provided {@link TaskLauncher}
 	 * @param repository the repository this controller will use for task CRUD operations.
+	 * @param appDeploymentRepository the repository this controller will use for app deployment operations
 	 * @param registry URI registry this controller will use to look up app URIs.
-	 * @param resourceLoader the {@link ResourceLoader} that will resolve URIs to {@link Resource}s. 
+	 * @param resourceLoader the {@link ResourceLoader} that will resolve URIs to {@link Resource}s.
 	 * @param taskLauncher the launcher this controller will use to launch task apps.
 	 */
-	public TaskDeploymentController(TaskDefinitionRepository repository, UriRegistry registry,
-			ResourceLoader resourceLoader, TaskLauncher taskLauncher) {
+	public TaskDeploymentController(TaskDefinitionRepository repository, AppDeploymentRepository appDeploymentRepository,
+			UriRegistry registry, ResourceLoader resourceLoader, TaskLauncher taskLauncher) {
 		Assert.notNull(repository, "repository must not be null");
+		Assert.notNull(appDeploymentRepository, "appDeploymentRepository must not be null");
 		Assert.notNull(registry, "registry must not be null");
 		Assert.notNull(resourceLoader, "ResourceLoader must not be null");
 		Assert.notNull(taskLauncher, "TaskLauncher must not be null");
 		this.repository = repository;
+		this.appDeploymentRepository = appDeploymentRepository;
 		this.registry = registry;
 		this.resourceLoader = resourceLoader;
 		this.taskLauncher = taskLauncher;
@@ -138,7 +148,8 @@ public class TaskDeploymentController {
 		URI uri = this.registry.find(String.format("task.%s", module.getName()));
 		Resource resource = this.resourceLoader.getResource(uri.toString());
 		AppDeploymentRequest request = new AppDeploymentRequest(definition, resource, deploymentProperties);
-		this.taskLauncher.launch(request);
+		String id = this.taskLauncher.launch(request);
+		appDeploymentRepository.save(new AppDeploymentKey(taskDefinition, module), id);
 	}
 
 	private ModuleDefinition updateTaskProperties(ModuleDefinition moduleDefinition, String taskDefinitionName) {
