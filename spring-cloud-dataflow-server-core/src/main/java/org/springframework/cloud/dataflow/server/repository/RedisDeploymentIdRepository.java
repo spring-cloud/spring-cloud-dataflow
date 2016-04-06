@@ -21,35 +21,33 @@ import org.springframework.data.redis.core.BoundHashOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
 /**
- * Redis implementation of an {@link AppDeploymentRepository}.
+ * Redis implementation of a {@link DeploymentIdRepository}.
  *
  * @author Janne Valkealahti
+ * @author Mark Fisher
  */
-public class RedisAppDeploymentRepository implements AppDeploymentRepository {
+public class RedisDeploymentIdRepository implements DeploymentIdRepository {
 
 	private final BoundHashOperations<String, String, String> hashOperations;
 
 	/**
-	 * Instantiates a new redis app deployment repository.
+	 * Instantiates a new redis deployment ID repository.
 	 *
 	 * @param hashKey the hash key
 	 * @param redisConnectionFactory the redis connection factory
 	 */
-	public RedisAppDeploymentRepository(String hashKey, RedisConnectionFactory redisConnectionFactory) {
+	public RedisDeploymentIdRepository(String hashKey, RedisConnectionFactory redisConnectionFactory) {
 		StringRedisTemplate redisTemplate = new StringRedisTemplate(redisConnectionFactory);
 		hashOperations = redisTemplate.boundHashOps(hashKey);
 	}
 
 	@Override
-	public AppDeploymentKey save(AppDeploymentKey key, String id) {
-		// as identifer from key is a unique composition we can
-		// use it as a key to backmap id
-		hashOperations.put(key.getId(), id);
-		return key;
+	public void save(String key, String id) {
+		hashOperations.put(key, id);
 	}
 
 	@Override
-	public String findOne(AppDeploymentKey key) {
-		return hashOperations.get(key.getId());
+	public String findOne(String key) {
+		return hashOperations.get(key);
 	}
 }

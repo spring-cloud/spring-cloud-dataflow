@@ -20,52 +20,37 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertThat;
 
-import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
+
 import org.springframework.cloud.dataflow.core.ModuleDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
-import org.springframework.cloud.stream.test.junit.redis.RedisTestSupport;
 
 /**
- * Tests for {@link RedisAppDeploymentRepository}.
- *
  * @author Janne Valkealahti
+ * @author Mark Fisher
  */
-public class RedisAppDeploymentRepositoryTests {
-
-	@Rule
-	public RedisTestSupport redisTestSupport = new RedisTestSupport();
-
-	private RedisAppDeploymentRepository repository;
-
-	@Before
-	public void setUp() {
-		repository = new RedisAppDeploymentRepository("RedisAppDeploymentRepositoryTests", redisTestSupport.getResource());
-	}
+public class InMemoryDeploymentIdRepositoryTests {
 
 	@Test
-	public void testSimpleOperations() {
+	public void testSimpleSaveFind() {
 		StreamDefinition streamDefinition1 = new StreamDefinition("myStream1", "time | log");
 		ModuleDefinition[] moduleDefinitions1 = streamDefinition1.getModuleDefinitions().toArray(new ModuleDefinition[0]);
 		StreamDefinition streamDefinition2 = new StreamDefinition("myStream1", "time | log");
-		ModuleDefinition[] moduleDefinitions2 = streamDefinition1.getModuleDefinitions().toArray(new ModuleDefinition[0]);
+		ModuleDefinition[] moduleDefinitions2 = streamDefinition2.getModuleDefinitions().toArray(new ModuleDefinition[0]);
 		TaskDefinition taskDefinition1 = new TaskDefinition("myTask", "timestamp");
 		TaskDefinition taskDefinition2 = new TaskDefinition("myTask", "timestamp");
-		AppDeploymentKey appDeploymentKey1 = new AppDeploymentKey(streamDefinition1, moduleDefinitions1[0]);
-		AppDeploymentKey appDeploymentKey2 = new AppDeploymentKey(streamDefinition1, moduleDefinitions1[1]);
-		AppDeploymentKey appDeploymentKey3 = new AppDeploymentKey(streamDefinition2, moduleDefinitions2[0]);
-		AppDeploymentKey appDeploymentKey4 = new AppDeploymentKey(streamDefinition2, moduleDefinitions2[1]);
-		AppDeploymentKey appDeploymentKey5 = new AppDeploymentKey(taskDefinition1, taskDefinition1.getModuleDefinition());
-		AppDeploymentKey appDeploymentKey6 = new AppDeploymentKey(taskDefinition2, taskDefinition2.getModuleDefinition());
+		String appDeploymentKey1 = DeploymentKey.forApp(moduleDefinitions1[0]);
+		String appDeploymentKey2 = DeploymentKey.forApp(moduleDefinitions1[1]);
+		String appDeploymentKey3 = DeploymentKey.forApp(moduleDefinitions2[0]);
+		String appDeploymentKey4 = DeploymentKey.forApp(moduleDefinitions2[1]);
+		String appDeploymentKey5 = DeploymentKey.forApp(taskDefinition1.getModuleDefinition());
+		String appDeploymentKey6 = DeploymentKey.forApp(taskDefinition2.getModuleDefinition());
 
-		AppDeploymentKey saved1 = repository.save(appDeploymentKey1, "id1");
-		AppDeploymentKey saved2 = repository.save(appDeploymentKey2, "id2");
-		AppDeploymentKey saved3 = repository.save(appDeploymentKey5, "id3");
-		assertThat(appDeploymentKey1.equals(saved1), is(true));
-		assertThat(appDeploymentKey2.equals(saved2), is(true));
-		assertThat(appDeploymentKey5.equals(saved3), is(true));
+		DeploymentIdRepository repository = new InMemoryDeploymentIdRepository();
+		repository.save(appDeploymentKey1, "id1");
+		repository.save(appDeploymentKey2, "id2");
+		repository.save(appDeploymentKey5, "id3");
 
 		String findOne1 = repository.findOne(appDeploymentKey1);
 		assertThat(findOne1, notNullValue());

@@ -30,8 +30,8 @@ import org.springframework.cloud.dataflow.server.controller.TaskDeploymentContro
 import org.springframework.cloud.dataflow.server.controller.TaskExecutionController;
 import org.springframework.cloud.dataflow.server.registry.DataFlowUriRegistryPopulator;
 import org.springframework.cloud.dataflow.server.registry.DataFlowUriRegistryPopulatorProperties;
-import org.springframework.cloud.dataflow.server.repository.AppDeploymentRepository;
-import org.springframework.cloud.dataflow.server.repository.InMemoryAppDeploymentRepository;
+import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
+import org.springframework.cloud.dataflow.server.repository.InMemoryDeploymentIdRepository;
 import org.springframework.cloud.dataflow.server.repository.InMemoryStreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.InMemoryTaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
@@ -78,20 +78,20 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 
 	@Bean
 	public StreamDeploymentController streamDeploymentController(StreamDefinitionRepository repository,
-			AppDeploymentRepository appDeploymentRepository, AppRegistry registry) {
-		return new StreamDeploymentController(repository, appDeploymentRepository, registry, appDeployer());
+			DeploymentIdRepository deploymentIdRepository, AppRegistry registry) {
+		return new StreamDeploymentController(repository, deploymentIdRepository, registry, appDeployer());
 	}
 
 	@Bean
 	public StreamDefinitionController streamDefinitionController(StreamDefinitionRepository repository,
-			AppDeploymentRepository appDeploymentRepository, StreamDeploymentController deploymentController) {
-		return new StreamDefinitionController(repository, appDeploymentRepository, deploymentController, appDeployer());
+			DeploymentIdRepository deploymentIdRepository, StreamDeploymentController deploymentController) {
+		return new StreamDefinitionController(repository, deploymentIdRepository, deploymentController, appDeployer());
 	}
 
 	@Bean
-	public TaskDeploymentController taskController(TaskDefinitionRepository repository, AppDeploymentRepository appDeploymentRepository,
+	public TaskDeploymentController taskController(TaskDefinitionRepository repository, DeploymentIdRepository deploymentIdRepository,
 			UriRegistry registry) {
-		return new TaskDeploymentController(repository, appDeploymentRepository, registry, resourceLoader(), taskLauncher());
+		return new TaskDeploymentController(repository, deploymentIdRepository, registry, resourceLoader(), taskLauncher());
 	}
 
 	@Bean
@@ -146,7 +146,7 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 
 	@Bean
 	@ConditionalOnMissingBean
-	public AppDeploymentRepository appDeploymentRepository() {
-		return new InMemoryAppDeploymentRepository();
+	public DeploymentIdRepository deploymentIdRepository() {
+		return new InMemoryDeploymentIdRepository();
 	}
 }

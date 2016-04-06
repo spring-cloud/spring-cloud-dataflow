@@ -22,26 +22,26 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.util.Assert;
 
 /**
- * In-memory implementation of an {@link AppDeploymentRepository}.
+ * In-memory implementation of a {@link DeploymentIdRepository}.
  *
  * @author Janne Valkealahti
+ * @author Mark Fisher
  */
-public class InMemoryAppDeploymentRepository implements AppDeploymentRepository {
+public class InMemoryDeploymentIdRepository implements DeploymentIdRepository {
 
-	private final Map<AppDeploymentKey, String> deployments = new ConcurrentHashMap<AppDeploymentKey, String>();
+	private final Map<String, String> deployments = new ConcurrentHashMap<String, String>();
 
 	@Override
-	public AppDeploymentKey save(AppDeploymentKey key, String id) {
+	public void save(String key, String id) {
 		// we don't care if key or id already exists as
 		// repository is used to track last deployment
 		Assert.notNull(key, "key must not be null");
 		Assert.notNull(id, "id must not be null");
 		deployments.put(key, id);
-		return key;
 	}
 
 	@Override
-	public String findOne(AppDeploymentKey entity) {
-		return deployments.get(entity);
+	public String findOne(String key) {
+		return deployments.get(key);
 	}
 }

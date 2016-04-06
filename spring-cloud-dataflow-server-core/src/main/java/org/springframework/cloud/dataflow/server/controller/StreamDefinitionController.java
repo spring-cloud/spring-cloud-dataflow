@@ -25,8 +25,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.cloud.dataflow.core.ModuleDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.rest.resource.StreamDefinitionResource;
-import org.springframework.cloud.dataflow.server.repository.AppDeploymentKey;
-import org.springframework.cloud.dataflow.server.repository.AppDeploymentRepository;
+import org.springframework.cloud.dataflow.server.repository.DeploymentKey;
+import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
 import org.springframework.cloud.dataflow.server.repository.DuplicateStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.NoSuchStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
@@ -69,9 +69,9 @@ public class StreamDefinitionController {
 	private final StreamDefinitionRepository repository;
 
 	/**
-	 * The repository this controller will use for app deployment operations.
+	 * The repository this controller will use for deployment IDs.
 	 */
-	private final AppDeploymentRepository appDeploymentRepository;
+	private final DeploymentIdRepository deploymentIdRepository;
 
 	/**
 	 * The deployer this controller will use to compute stream deployment status.
@@ -96,18 +96,18 @@ public class StreamDefinitionController {
 	 * <li>deployment status computation to the provided {@link AppDeployer}</li>
 	 * </ul>
 	 * @param repository           the repository this controller will use for stream CRUD operations
-	 * @param appDeploymentRepository the repository this controller will use for app deployment operations
+	 * @param deploymentIdRepository the repository this controller will use for deployment IDs
 	 * @param deploymentController the deployment controller to delegate deployment operations
 	 * @param deployer             the deployer this controller will use to compute deployment status
 	 */
-	public StreamDefinitionController(StreamDefinitionRepository repository, AppDeploymentRepository appDeploymentRepository,
+	public StreamDefinitionController(StreamDefinitionRepository repository, DeploymentIdRepository deploymentIdRepository,
 			StreamDeploymentController deploymentController, AppDeployer deployer) {
-		Assert.notNull(repository, "repository must not be null");
-		Assert.notNull(appDeploymentRepository, "appDeploymentRepository must not be null");
-		Assert.notNull(deploymentController, "deploymentController must not be null");
-		Assert.notNull(deployer, "deployer must not be null");
+		Assert.notNull(repository, "StreamDefinitionRepository must not be null");
+		Assert.notNull(deploymentIdRepository, "DeploymentIdRepository must not be null");
+		Assert.notNull(deploymentController, "StreamDeploymentController must not be null");
+		Assert.notNull(deployer, "AppDeployer must not be null");
 		this.deploymentController = deploymentController;
-		this.appDeploymentRepository = appDeploymentRepository;
+		this.deploymentIdRepository = deploymentIdRepository;
 		this.repository = repository;
 		this.deployer = deployer;
 	}
@@ -195,8 +195,8 @@ public class StreamDefinitionController {
 		Set<DeploymentState> moduleStates = EnumSet.noneOf(DeploymentState.class);
 		StreamDefinition stream = repository.findOne(name);
 		for (ModuleDefinition module : stream.getModuleDefinitions()) {
-			AppDeploymentKey key = new AppDeploymentKey(stream, module);
-			String id = appDeploymentRepository.findOne(key);
+			String key = DeploymentKey.forApp(module);
+			String id = deploymentIdRepository.findOne(key);
 			AppStatus status = deployer.status(id);
 			moduleStates.add(status.getState());
 		}
