@@ -198,8 +198,13 @@ public class StreamDefinitionController {
 		for (ModuleDefinition module : stream.getModuleDefinitions()) {
 			String key = DeploymentKey.forApp(module);
 			String id = deploymentIdRepository.findOne(key);
-			AppStatus status = deployer.status(id);
-			moduleStates.add(status.getState());
+			if (id != null) {
+				AppStatus status = deployer.status(id);
+				moduleStates.add(status.getState());
+			}
+			else {
+				moduleStates.add(DeploymentState.undeployed);
+			}
 		}
 
 		logger.debug("Module states for stream {}: {}", name, moduleStates);
