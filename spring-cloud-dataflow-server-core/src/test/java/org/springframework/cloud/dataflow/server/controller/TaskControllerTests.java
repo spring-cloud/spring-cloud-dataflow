@@ -117,12 +117,12 @@ public class TaskControllerTests {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testTaskDefinitionControllerConstructorMissingRepository() {
-		new TaskDefinitionController(null, taskLauncher);
+		new TaskDefinitionController(null, null, taskLauncher);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testTaskDefinitionControllerConstructorMissingDeployer() {
-		new TaskDefinitionController(new InMemoryTaskDefinitionRepository(), null);
+		new TaskDefinitionController(new InMemoryTaskDefinitionRepository(), null, null);
 	}
 
 	@Test
