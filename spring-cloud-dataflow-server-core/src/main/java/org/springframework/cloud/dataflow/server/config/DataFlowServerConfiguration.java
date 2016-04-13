@@ -62,6 +62,7 @@ import org.springframework.cloud.dataflow.server.repository.InMemoryTaskDefiniti
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.stream.module.metrics.FieldValueCounterRepository;
+import org.springframework.cloud.stream.module.metrics.redis.RedisAggregateCounterRepository;
 import org.springframework.cloud.stream.module.metrics.redis.RedisFieldValueCounterRepository;
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.cloud.task.repository.support.TaskRepositoryInitializer;
@@ -124,6 +125,13 @@ public class DataFlowServerConfiguration {
 	public FieldValueCounterRepository fieldValueCounterReader(RedisConnectionFactory redisConnectionFactory) {
 		return new RedisFieldValueCounterRepository(redisConnectionFactory, new RetryTemplate());
 	}
+
+	@Bean
+	@ConditionalOnMissingBean
+	public RedisAggregateCounterRepository aggregateCounterReader(RedisConnectionFactory redisConnectionFactory) {
+		return new RedisAggregateCounterRepository(redisConnectionFactory, new RetryTemplate());
+	}
+
 
 	@Bean
 	@ConditionalOnMissingBean
