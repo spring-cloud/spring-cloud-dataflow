@@ -26,8 +26,11 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.cloud.dataflow.artifact.registry.AppRegistry;
 import org.springframework.cloud.dataflow.completion.StreamCompletionProvider;
+import org.springframework.cloud.dataflow.registry.AppRegistry;
+import org.springframework.cloud.dataflow.registry.DataFlowUriRegistryPopulator;
+import org.springframework.cloud.dataflow.registry.DataFlowUriRegistryPopulatorProperties;
+import org.springframework.cloud.dataflow.registry.RedisUriRegistry;
 import org.springframework.cloud.dataflow.server.controller.CompletionController;
 import org.springframework.cloud.dataflow.server.controller.CounterController;
 import org.springframework.cloud.dataflow.server.controller.FieldValueCounterController;
@@ -48,10 +51,8 @@ import org.springframework.cloud.dataflow.server.controller.TaskDefinitionContro
 import org.springframework.cloud.dataflow.server.controller.TaskDeploymentController;
 import org.springframework.cloud.dataflow.server.controller.TaskExecutionController;
 import org.springframework.cloud.dataflow.server.controller.UiController;
-import org.springframework.cloud.dataflow.server.registry.DataFlowUriRegistryPopulator;
-import org.springframework.cloud.dataflow.server.registry.DataFlowUriRegistryPopulatorProperties;
-import org.springframework.cloud.dataflow.server.registry.RedisUriRegistry;
 import org.springframework.cloud.dataflow.server.job.TaskJobRepository;
+import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.deployer.resource.maven.MavenProperties;
@@ -108,7 +109,7 @@ public class DataFlowControllerAutoConfiguration {
 
 	@Bean
 	public RuntimeModulesController runtimeModulesController(StreamDefinitionRepository repository,
-			AppDeployer appDeployer) {
+															 AppDeployer appDeployer) {
 		return new RuntimeModulesController(repository, appDeployer);
 	}
 
@@ -119,14 +120,15 @@ public class DataFlowControllerAutoConfiguration {
 
 	@Bean
 	public StreamDefinitionController streamDefinitionController(StreamDefinitionRepository repository,
-			StreamDeploymentController deploymentController, AppDeployer deployer) {
-		return new StreamDefinitionController(repository, deploymentController, deployer);
+																 DeploymentIdRepository deploymentIdRepository, StreamDeploymentController deploymentController, AppDeployer deployer) {
+		return new StreamDefinitionController(repository, deploymentIdRepository, deploymentController, deployer);
 	}
 
 	@Bean
 	public StreamDeploymentController streamDeploymentController(StreamDefinitionRepository repository,
-			AppRegistry registry, AppDeployer deployer, DelegatingResourceLoader resourceLoader) {
-		return new StreamDeploymentController(repository, registry, deployer);
+																 DeploymentIdRepository deploymentIdRepository, AppRegistry registry, AppDeployer deployer,
+																 DelegatingResourceLoader resourceLoader) {
+		return new StreamDeploymentController(repository, deploymentIdRepository, registry, deployer);
 	}
 
 	@Bean
@@ -147,14 +149,15 @@ public class DataFlowControllerAutoConfiguration {
 
 	@Bean
 	public TaskDefinitionController taskDefinitionController(TaskDefinitionRepository repository,
-			TaskLauncher taskLauncher) {
-		return new TaskDefinitionController(repository, taskLauncher);
+															 DeploymentIdRepository deploymentIdRepository, TaskLauncher taskLauncher) {
+		return new TaskDefinitionController(repository, deploymentIdRepository, taskLauncher);
 	}
 
 	@Bean
 	public TaskDeploymentController taskDeploymentController(TaskDefinitionRepository repository,
-			UriRegistry registry, DelegatingResourceLoader resourceLoader, TaskLauncher taskLauncher) {
-		return new TaskDeploymentController(repository, registry, resourceLoader, taskLauncher);
+															 DeploymentIdRepository deploymentIdRepository, UriRegistry registry, DelegatingResourceLoader resourceLoader,
+															 TaskLauncher taskLauncher) {
+		return new TaskDeploymentController(repository, deploymentIdRepository, registry, resourceLoader, taskLauncher);
 	}
 
 	@Bean
