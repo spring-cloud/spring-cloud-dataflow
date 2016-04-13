@@ -21,7 +21,6 @@ import java.util.Date;
 import java.util.Properties;
 import java.util.TimeZone;
 
-import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobInstance;
 import org.springframework.batch.core.JobParameters;
@@ -29,6 +28,7 @@ import org.springframework.batch.core.converter.DefaultJobParametersConverter;
 import org.springframework.batch.core.converter.JobParametersConverter;
 import org.springframework.batch.support.PropertiesConverter;
 import org.springframework.cloud.dataflow.rest.job.TaskJobExecution;
+import org.springframework.cloud.dataflow.rest.job.support.JobUtils;
 import org.springframework.cloud.dataflow.rest.job.support.TimeUtils;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.ResourceSupport;
@@ -38,6 +38,8 @@ import org.springframework.util.Assert;
  * A HATEOAS representation of a JobExecution.
  *
  * @author Glenn Renfro
+ * @author Gunnar Hillert
+ *
  */
 public class JobExecutionResource extends ResourceSupport {
 
@@ -86,6 +88,7 @@ public class JobExecutionResource extends ResourceSupport {
 	/**
 	 * Default constructor to be used by Jackson.
 	 */
+	@SuppressWarnings("unused")
 	private JobExecutionResource() {
 
 	}
@@ -104,10 +107,9 @@ public class JobExecutionResource extends ResourceSupport {
 		JobInstance jobInstance = jobExecution.getJobInstance();
 		if (jobInstance != null) {
 			this.name = jobInstance.getJobName();
-			BatchStatus status = jobExecution.getStatus();
-			this.restartable = status.isGreaterThan(BatchStatus.STOPPING) && status.isLessThan(BatchStatus.ABANDONED);
-			this.abandonable = status.isGreaterThan(BatchStatus.STARTED) && status != BatchStatus.ABANDONED;
-			this.stoppable = status.isLessThan(BatchStatus.STOPPING);
+			this.restartable = JobUtils.isJobExecutionRestartable(jobExecution);
+			this.abandonable = JobUtils.isJobExecutionAbandonable(jobExecution);
+			this.stoppable = JobUtils.isJobExecutionStoppable(jobExecution);
 		}
 		else {
 			this.name = "?";
@@ -207,10 +209,4 @@ public class JobExecutionResource extends ResourceSupport {
 		return properties;
 
 	}
-
-	private JobParameters fromString(String params) {
-		Properties properties = PropertiesConverter.stringToProperties(params);
-		return converter.getJobParameters(properties);
-	}
-
 }

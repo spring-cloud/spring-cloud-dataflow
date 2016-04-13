@@ -36,6 +36,8 @@ import org.springframework.cloud.dataflow.server.repository.InMemoryStreamDefini
 import org.springframework.cloud.dataflow.server.repository.InMemoryTaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
+import org.springframework.cloud.dataflow.server.service.TaskService;
+import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskService;
 import org.springframework.cloud.deployer.resource.maven.MavenProperties;
 import org.springframework.cloud.deployer.resource.maven.MavenResourceLoader;
 import org.springframework.cloud.deployer.resource.registry.InMemoryUriRegistry;
@@ -89,9 +91,8 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	}
 
 	@Bean
-	public TaskDeploymentController taskController(TaskDefinitionRepository repository, DeploymentIdRepository deploymentIdRepository,
-			UriRegistry registry) {
-		return new TaskDeploymentController(repository, deploymentIdRepository, registry, resourceLoader(), taskLauncher());
+	public TaskDeploymentController taskController() {
+		return new TaskDeploymentController(taskService());
 	}
 
 	@Bean
@@ -134,6 +135,11 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	@Bean
 	public TaskLauncher taskLauncher() {
 		return mock(TaskLauncher.class);
+	}
+
+	@Bean
+	public TaskService taskService() {
+		return new DefaultTaskService(taskDefinitionRepository(), deploymentIdRepository(), uriRegistry(), resourceLoader(), taskLauncher());
 	}
 
 	@Bean

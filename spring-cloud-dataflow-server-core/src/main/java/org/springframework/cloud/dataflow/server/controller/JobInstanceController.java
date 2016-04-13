@@ -31,7 +31,7 @@ import org.springframework.cloud.dataflow.rest.job.TaskJobExecution;
 import org.springframework.cloud.dataflow.rest.job.support.TimeUtils;
 import org.springframework.cloud.dataflow.rest.resource.JobExecutionResource;
 import org.springframework.cloud.dataflow.rest.resource.JobInstanceResource;
-import org.springframework.cloud.dataflow.server.job.TaskJobRepository;
+import org.springframework.cloud.dataflow.server.service.TaskJobService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -53,6 +53,7 @@ import org.springframework.web.bind.annotation.RestController;
  * This includes obtaining Job Instance information from the job service.
  *
  * @author Glenn Renfro
+ * @author Gunnar Hillert
  */
 @RestController
 @RequestMapping("/jobs/instances")
@@ -61,17 +62,17 @@ public class JobInstanceController {
 
 	private final Assembler jobAssembler = new Assembler();
 
-	private final TaskJobRepository repository;
+	private final TaskJobService taskJobService;
 
 	/**
 	 * Creates a {@code JobInstanceController} that retrieves Job Instance information.
 	 *
-	 * @param repository the {@link TaskJobRepository} used for retrieving batch instance data.
+	 * @param taskJobService the {@link TaskJobService} used for retrieving batch instance data.
 	 */
 	@Autowired
-	public JobInstanceController(TaskJobRepository repository) {
-		Assert.notNull(repository, "repository must not be null");
-		this.repository = repository;
+	public JobInstanceController(TaskJobService taskJobService) {
+		Assert.notNull(taskJobService, "taskJobService must not be null");
+		this.taskJobService = taskJobService;
 	}
 
 	/**
@@ -89,8 +90,8 @@ public class JobInstanceController {
 		List<JobInstanceExecutions> jobInstances;
 		Page<JobInstanceExecutions> page;
 		try{
-			jobInstances = repository.listTaskJobInstancesForJobName(pageable, jobName);
-			page = new PageImpl<>(jobInstances, pageable, repository.countJobInstances(jobName));
+			jobInstances = taskJobService.listTaskJobInstancesForJobName(pageable, jobName);
+			page = new PageImpl<>(jobInstances, pageable, taskJobService.countJobInstances(jobName));
 		}
 		catch (NoSuchJobException e){
 				page = new PageImpl<>(new ArrayList<JobInstanceExecutions>());
@@ -108,7 +109,7 @@ public class JobInstanceController {
 	@ResponseStatus(HttpStatus.OK)
 	public JobInstanceResource view(@PathVariable("id") long id)
 			throws NoSuchJobInstanceException, NoSuchJobException {
-		JobInstanceExecutions jobInstance = repository.getJobInstance(id);
+		JobInstanceExecutions jobInstance = taskJobService.getJobInstance(id);
 		return jobAssembler.toResource(jobInstance);
 	}
 

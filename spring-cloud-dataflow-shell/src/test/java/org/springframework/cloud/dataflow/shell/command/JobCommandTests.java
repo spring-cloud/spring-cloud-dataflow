@@ -270,7 +270,7 @@ public class JobCommandTests extends AbstractShellIntegrationTest {
 
 	private long getFirstJobExecutionIdFromTable() {
 		Table result = getTable(job().jobExecutionList());
-		return (long) result.getModel().getValue(1, 1);
+		return (long) result.getModel().getValue(1, 0);
 	}
 
 	private long getFirstStepExecutionIdFromJobExecution(long jobExecutionId) {

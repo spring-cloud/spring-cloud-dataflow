@@ -54,7 +54,6 @@ import org.springframework.cloud.dataflow.completion.StreamCompletionProvider;
 import org.springframework.cloud.dataflow.rest.job.support.ISO8601DateFormatWithMilliSeconds;
 import org.springframework.cloud.dataflow.server.completion.TapOnDestinationRecoveryStrategy;
 import org.springframework.cloud.dataflow.server.job.TaskExplorerFactoryBean;
-import org.springframework.cloud.dataflow.server.job.TaskJobRepository;
 import org.springframework.cloud.dataflow.server.job.support.ExecutionContextJacksonMixIn;
 import org.springframework.cloud.dataflow.server.job.support.StepExecutionJacksonMixIn;
 import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
@@ -63,6 +62,13 @@ import org.springframework.cloud.dataflow.server.repository.InMemoryStreamDefini
 import org.springframework.cloud.dataflow.server.repository.InMemoryTaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
+import org.springframework.cloud.dataflow.server.service.TaskJobService;
+import org.springframework.cloud.dataflow.server.service.TaskService;
+import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskJobService;
+import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskService;
+import org.springframework.cloud.deployer.resource.registry.UriRegistry;
+import org.springframework.cloud.deployer.resource.support.DelegatingResourceLoader;
+import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.cloud.stream.module.metrics.FieldValueCounterRepository;
 import org.springframework.cloud.stream.module.metrics.redis.RedisFieldValueCounterRepository;
 import org.springframework.cloud.task.repository.TaskExplorer;
@@ -100,6 +106,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
  * @author Glenn Renfro
  * @author Josh Long
  * @author Michael Minella
+ * @author Gunnar Hillert
  */
 @Configuration
 @EnableHypermediaSupport(type = HAL)
@@ -212,9 +219,16 @@ public class DataFlowServerConfiguration {
 	}
 
 	@Bean
-	public TaskJobRepository taskJobExecutionRepository(JobService service,
-			TaskExplorer taskExplorer, TaskDefinitionRepository taskDefinitionRepository ) {
-		return new TaskJobRepository(service, taskExplorer, taskDefinitionRepository);
+	public TaskService taskService(TaskDefinitionRepository repository,
+			DeploymentIdRepository deploymentIdRepository, UriRegistry registry, DelegatingResourceLoader resourceLoader,
+			TaskLauncher taskLauncher) {
+		return new DefaultTaskService(repository, deploymentIdRepository, registry, resourceLoader, taskLauncher);
+	}
+
+	@Bean
+	public TaskJobService taskJobExecutionRepository(JobService service,
+			TaskExplorer taskExplorer, TaskDefinitionRepository taskDefinitionRepository, TaskService taskService ) {
+		return new DefaultTaskJobService(service, taskExplorer, taskDefinitionRepository, taskService);
 	}
 
 	@Bean

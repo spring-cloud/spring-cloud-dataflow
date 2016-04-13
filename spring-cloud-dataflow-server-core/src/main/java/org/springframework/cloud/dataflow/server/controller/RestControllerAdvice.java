@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2015-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +19,12 @@ package org.springframework.cloud.dataflow.server.controller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.admin.service.NoSuchStepExecutionException;
+import org.springframework.batch.core.launch.JobExecutionNotRunningException;
 import org.springframework.batch.core.launch.NoSuchJobException;
 import org.springframework.batch.core.launch.NoSuchJobExecutionException;
 import org.springframework.batch.core.launch.NoSuchJobInstanceException;
 import org.springframework.boot.actuate.endpoint.mvc.MetricsMvcEndpoint;
+import org.springframework.cloud.dataflow.server.job.support.JobNotRestartableException;
 import org.springframework.cloud.dataflow.server.repository.DuplicateStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.DuplicateTaskException;
 import org.springframework.cloud.dataflow.server.repository.NoSuchStreamDefinitionException;
@@ -69,6 +71,15 @@ public class RestControllerAdvice {
 		return new VndErrors(logref, msg);
 	}
 
+	@ExceptionHandler({JobNotRestartableException.class, JobExecutionNotRunningException.class})
+	@ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+	@ResponseBody
+	public VndErrors onUnprocessableEntityException(Exception e) {
+		String logref = logError(e);
+		String msg = StringUtils.hasText(e.getMessage()) ? e.getMessage() : e.getClass().getSimpleName();
+		return new VndErrors(logref, msg);
+	}
+
 	@ExceptionHandler({NoSuchStreamDefinitionException.class,
 			NoSuchTaskDefinitionException.class,
 			NoSuchTaskExecutionException.class,
@@ -84,8 +95,6 @@ public class RestControllerAdvice {
 		String msg = StringUtils.hasText(e.getMessage()) ? e.getMessage() : e.getClass().getSimpleName();
 		return new VndErrors(logref, msg);
 	}
-
-
 
 	private String logError(Throwable t) {
 		logger.error("Caught exception while handling a request", t);

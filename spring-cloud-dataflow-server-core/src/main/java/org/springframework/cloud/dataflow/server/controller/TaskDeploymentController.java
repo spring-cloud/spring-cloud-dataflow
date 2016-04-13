@@ -16,30 +16,12 @@
 
 package org.springframework.cloud.dataflow.server.controller;
 
-import java.net.URI;
-import java.util.HashMap;
-import java.util.Map;
-
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cloud.dataflow.core.ModuleDefinition;
-import org.springframework.cloud.dataflow.core.TaskDefinition;
-import org.springframework.cloud.dataflow.module.deployer.ModuleDeployer;
 import org.springframework.cloud.dataflow.rest.resource.TaskDeploymentResource;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
-import org.springframework.cloud.dataflow.server.repository.DeploymentKey;
-import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
-import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;
-import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
-import org.springframework.cloud.deployer.resource.registry.UriRegistry;
-import org.springframework.cloud.deployer.spi.core.AppDefinition;
-import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
-import org.springframework.cloud.deployer.spi.task.TaskLauncher;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.ResourceLoader;
+import org.springframework.cloud.dataflow.server.service.TaskService;
 import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -55,122 +37,37 @@ import org.springframework.web.bind.annotation.RestController;
  * @author Glenn Renfro
  * @author Mark Fisher
  * @author Janne Valkealahti
+ * @author Gunnar Hillert
  */
 @RestController
 @RequestMapping("/tasks/deployments")
 @ExposesResourceFor(TaskDeploymentResource.class)
 public class TaskDeploymentController {
 
-	private static final String DEFAULT_TASK_DATASOURCE_URL = "jdbc:h2:tcp://localhost:19092/mem:dataflow";
-
-	private static final String DEFAULT_TASK_DATASOURCE_USER_NAME = "sa";
-
-	private static final String DEFAULT_TASK_DATASOURCE_DRIVER_CLASS_NAME = "org.h2.Driver";
-
-
-	private final TaskDefinitionRepository repository;
-
-	/**
-	 * The repository this controller will use for deployment IDs.
-	 */
-	private final DeploymentIdRepository deploymentIdRepository;
-
-	private final TaskLauncher taskLauncher;
-
-	@Value("${spring.datasource.url:#{null}}")
-	private String dataSourceUrl;
-
-	@Value("${spring.datasource.username:#{null}}")
-	private String dataSourceUserName;
-
-	@Value("${spring.datasource.password:#{null}}")
-	private String dataSourcePassword;
-
-	@Value("${spring.datasource.driverClassName:#{null}}")
-	private String dataSourceDriverClassName;
-
-	/**
-	 * The {@link UriRegistry} this controller will use to look up task app URIs.
-	 */
-	private final UriRegistry registry;
-
-	/**
-	 * The {@link ResourceLoader} that will resolve URIs to {@link Resource}s.
-	 */
-	private final ResourceLoader resourceLoader;
+	private final TaskService taskService;
 
 	/**
 	 * Creates a {@code TaskDeploymentController} that delegates launching
-	 * operations to the provided {@link TaskLauncher}
-	 * @param repository the repository this controller will use for task CRUD operations.
-	 * @param deploymentIdRepository the repository this controller will use for deployment IDs
-	 * @param registry URI registry this controller will use to look up app URIs.
-	 * @param resourceLoader the {@link ResourceLoader} that will resolve URIs to {@link Resource}s.
-	 * @param taskLauncher the launcher this controller will use to launch task apps.
+	 * operations to the provided {@link TaskService}
+	 * @param taskService Must not be null
 	 */
-	public TaskDeploymentController(TaskDefinitionRepository repository, DeploymentIdRepository deploymentIdRepository,
-			UriRegistry registry, ResourceLoader resourceLoader, TaskLauncher taskLauncher) {
-		Assert.notNull(repository, "TaskDefinitionRepository must not be null");
-		Assert.notNull(deploymentIdRepository, "DeploymentIdRepository must not be null");
-		Assert.notNull(registry, "UriRegistry must not be null");
-		Assert.notNull(resourceLoader, "ResourceLoader must not be null");
-		Assert.notNull(taskLauncher, "TaskLauncher must not be null");
-		this.repository = repository;
-		this.deploymentIdRepository = deploymentIdRepository;
-		this.registry = registry;
-		this.resourceLoader = resourceLoader;
-		this.taskLauncher = taskLauncher;
+	public TaskDeploymentController(TaskService taskService) {
+		Assert.notNull(taskService, "TaskService must not be null");
+		this.taskService = taskService;
 	}
 
 	/**
 	 * Request the launching of an existing task definition.  The name must be
 	 * included in the path.
 	 *
-	 * @param name the name of the existing task to be executed (required)
+	 * @param taskName the name of the existing task to be executed (required)
 	 * @param properties the runtime properties for the task, as a comma-delimited list of
 	 * 					 key=value pairs
 	 */
 	@RequestMapping(value = "/{name}", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
-	public void deploy(@PathVariable("name") String name, @RequestParam(required = false) String properties) {
-		TaskDefinition taskDefinition = this.repository.findOne(name);
-		if (taskDefinition == null) {
-			throw new NoSuchTaskDefinitionException(name);
-		}
-		ModuleDefinition module = taskDefinition.getModuleDefinition();
-
-		Map<String, String> deploymentProperties = new HashMap<>();
-		module = updateTaskProperties(module, module.getName() );
-		deploymentProperties.putAll(DeploymentPropertiesUtils.parse(properties));
-		deploymentProperties.put(ModuleDeployer.GROUP_DEPLOYMENT_ID, taskDefinition.getName()
-				+ "-" + System.currentTimeMillis());
-
-		AppDefinition definition = new AppDefinition(module.getLabel(), module.getParameters());
-		URI uri = this.registry.find(String.format("task.%s", module.getName()));
-		Resource resource = this.resourceLoader.getResource(uri.toString());
-		AppDeploymentRequest request = new AppDeploymentRequest(definition, resource, deploymentProperties);
-		String id = this.taskLauncher.launch(request);
-		this.deploymentIdRepository.save(DeploymentKey.forApp(module), id);
+	public void deploy(@PathVariable("name") String taskName, @RequestParam(required = false) String properties) {
+		this.taskService.executeTask(taskName, DeploymentPropertiesUtils.parse(properties));
 	}
 
-	private ModuleDefinition updateTaskProperties(ModuleDefinition moduleDefinition, String taskDefinitionName) {
-		ModuleDefinition.Builder builder = ModuleDefinition.Builder.from(moduleDefinition);
-		builder.setParameter("spring.datasource.url",
-				(StringUtils.hasText(dataSourceUrl)) ? dataSourceUrl :
-						DEFAULT_TASK_DATASOURCE_URL);
-
-		builder.setParameter("spring.datasource.username",
-				(StringUtils.hasText(dataSourceUserName)) ? dataSourceUserName :
-						DEFAULT_TASK_DATASOURCE_USER_NAME);
-
-		if(StringUtils.hasText(dataSourcePassword)) {//password may be empty
-			builder.setParameter("spring.datasource.password", dataSourcePassword );
-		}
-
-		builder.setParameter("spring.datasource.driverClassName",
-				(StringUtils.hasText(dataSourceDriverClassName)) ? dataSourceDriverClassName :
-						DEFAULT_TASK_DATASOURCE_DRIVER_CLASS_NAME);
-
-		return builder.build();
-	}
 }
