@@ -23,17 +23,7 @@ package org.springframework.cloud.dataflow.server.repository;
  */
 public class NoSuchTaskDefinitionException extends RuntimeException {
 
-	/**
-	 * The name of the task definition that could not be found.
-	 */
-	private final String name;
-
-	public NoSuchTaskDefinitionException(String name, String message) {
-		super(message);
-		this.name = name;
-	}
-
 	public NoSuchTaskDefinitionException(String name) {
-		this(name, "Could not find task definition named " + name);
+		super(String.format("Could not find task definition named %s", name));
 	}
 }

@@ -20,6 +20,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -49,11 +50,14 @@ import org.mockito.ArgumentCaptor;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
-import org.springframework.cloud.dataflow.artifact.registry.AppRegistry;
 import org.springframework.cloud.dataflow.core.BindingPropertyKeys;
 import org.springframework.cloud.dataflow.core.ModuleDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
+import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
+import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
+import org.springframework.cloud.dataflow.server.repository.DeploymentKey;
+import org.springframework.cloud.dataflow.server.repository.InMemoryDeploymentIdRepository;
 import org.springframework.cloud.dataflow.server.repository.InMemoryStreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.deployer.resource.maven.MavenProperties;
@@ -76,6 +80,7 @@ import org.springframework.web.context.WebApplicationContext;
 /**
  * @author Mark Fisher
  * @author Ilayaperumal Gopinathan
+ * @author Janne Valkealahti
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = TestDependencies.class)
@@ -85,6 +90,9 @@ public class StreamControllerTests {
 
 	@Autowired
 	private StreamDefinitionRepository repository;
+
+	@Autowired
+	private DeploymentIdRepository deploymentIdRepository;
 
 	private MockMvc mockMvc;
 
@@ -100,9 +108,10 @@ public class StreamControllerTests {
 	);
 
 	@Before
-	public void setupMockMVC() {
+	public void setupMocks() {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(wac).defaultRequest(
 				get("/").accept(MediaType.APPLICATION_JSON)).build();
+		when(appDeployer.deploy(any(AppDeploymentRequest.class))).thenReturn("testID");
 	}
 
 	@After
@@ -113,21 +122,21 @@ public class StreamControllerTests {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testConstructorMissingRepository() {
-		StreamDeploymentController deploymentController = new StreamDeploymentController(
-				new InMemoryStreamDefinitionRepository(), appRegistry, appDeployer);
-		new StreamDefinitionController(null, deploymentController, appDeployer);
+		StreamDeploymentController deploymentController = new StreamDeploymentController(new InMemoryStreamDefinitionRepository(),
+				new InMemoryDeploymentIdRepository(), appRegistry, appDeployer);
+		new StreamDefinitionController(null, null, deploymentController, appDeployer);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testConstructorMissingDeploymentController() {
-		new StreamDefinitionController(new InMemoryStreamDefinitionRepository(), null, appDeployer);
+		new StreamDefinitionController(new InMemoryStreamDefinitionRepository(), new InMemoryDeploymentIdRepository(), null, appDeployer);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testConstructorMissingDeployer() {
-		StreamDeploymentController deploymentController = new StreamDeploymentController(
-				new InMemoryStreamDefinitionRepository(), appRegistry, appDeployer);
-		new StreamDefinitionController(new InMemoryStreamDefinitionRepository(), deploymentController, null);
+		StreamDeploymentController deploymentController = new StreamDeploymentController(new InMemoryStreamDefinitionRepository(),
+				new InMemoryDeploymentIdRepository(), appRegistry, appDeployer);
+		new StreamDefinitionController(new InMemoryStreamDefinitionRepository(), new InMemoryDeploymentIdRepository(), deploymentController, null);
 	}
 
 	@Test
@@ -329,7 +338,12 @@ public class StreamControllerTests {
 
 	@Test
 	public void testDestroyStream() throws Exception {
-		repository.save(new StreamDefinition("myStream", "time | log"));
+		StreamDefinition streamDefinition1 = new StreamDefinition("myStream", "time | log");
+		repository.save(streamDefinition1);
+		for (ModuleDefinition moduleDefinition : streamDefinition1.getModuleDefinitions()) {
+			deploymentIdRepository.save(DeploymentKey.forApp(moduleDefinition),
+					streamDefinition1.getName() + "." + moduleDefinition.getName());
+		}
 		assertEquals(1, repository.count());
 		AppStatus status = mock(AppStatus.class);
 		when(status.getState()).thenReturn(DeploymentState.unknown);
@@ -343,8 +357,14 @@ public class StreamControllerTests {
 
 	@Test
 	public void testDestroySingleStream() throws Exception {
-		repository.save(new StreamDefinition("myStream", "time | log"));
-		repository.save(new StreamDefinition("myStream1", "time | log"));
+		StreamDefinition streamDefinition1 = new StreamDefinition("myStream", "time | log");
+		StreamDefinition streamDefinition2 = new StreamDefinition("myStream1", "time | log");
+		repository.save(streamDefinition1);
+		repository.save(streamDefinition2);
+		for (ModuleDefinition moduleDefinition : streamDefinition1.getModuleDefinitions()) {
+			deploymentIdRepository.save(DeploymentKey.forApp(moduleDefinition),
+					streamDefinition1.getName() + "." + moduleDefinition.getName());
+		}
 		assertEquals(2, repository.count());
 		AppStatus status = mock(AppStatus.class);
 		when(status.getState()).thenReturn(DeploymentState.unknown);
@@ -358,7 +378,12 @@ public class StreamControllerTests {
 
 	@Test
 	public void testDisplaySingleStream() throws Exception {
-		repository.save(new StreamDefinition("myStream", "time | log"));
+		StreamDefinition streamDefinition1 = new StreamDefinition("myStream", "time | log");
+		for (ModuleDefinition moduleDefinition : streamDefinition1.getModuleDefinitions()) {
+			deploymentIdRepository.save(DeploymentKey.forApp(moduleDefinition),
+					streamDefinition1.getName() + "." + moduleDefinition.getName());
+		}
+		repository.save(streamDefinition1);
 		assertEquals(1, repository.count());
 		AppStatus status = mock(AppStatus.class);
 		when(status.getState()).thenReturn(DeploymentState.unknown);

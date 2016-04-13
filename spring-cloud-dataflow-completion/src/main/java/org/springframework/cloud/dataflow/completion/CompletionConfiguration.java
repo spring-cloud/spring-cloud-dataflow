@@ -21,7 +21,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.dataflow.app.resolver.ModuleResolverConfiguration;
-import org.springframework.cloud.dataflow.artifact.registry.AppRegistry;
+import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.stream.configuration.metadata.ModuleConfigurationMetadataResolver;
 import org.springframework.cloud.stream.configuration.metadata.ModuleConfigurationMetadataResolverAutoConfiguration;
 import org.springframework.context.annotation.Bean;

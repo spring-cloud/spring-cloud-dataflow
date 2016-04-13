@@ -19,16 +19,19 @@ package org.springframework.cloud.dataflow.server.configuration;
 import static org.mockito.Mockito.mock;
 import static org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType.HAL;
 
-import org.springframework.cloud.dataflow.artifact.registry.AppRegistry;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.cloud.dataflow.completion.CompletionConfiguration;
+import org.springframework.cloud.dataflow.registry.AppRegistry;
+import org.springframework.cloud.dataflow.registry.DataFlowUriRegistryPopulator;
+import org.springframework.cloud.dataflow.registry.DataFlowUriRegistryPopulatorProperties;
 import org.springframework.cloud.dataflow.server.controller.RestControllerAdvice;
 import org.springframework.cloud.dataflow.server.controller.StreamDefinitionController;
 import org.springframework.cloud.dataflow.server.controller.StreamDeploymentController;
 import org.springframework.cloud.dataflow.server.controller.TaskDefinitionController;
 import org.springframework.cloud.dataflow.server.controller.TaskDeploymentController;
 import org.springframework.cloud.dataflow.server.controller.TaskExecutionController;
-import org.springframework.cloud.dataflow.server.registry.DataFlowUriRegistryPopulator;
-import org.springframework.cloud.dataflow.server.registry.DataFlowUriRegistryPopulatorProperties;
+import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
+import org.springframework.cloud.dataflow.server.repository.InMemoryDeploymentIdRepository;
 import org.springframework.cloud.dataflow.server.repository.InMemoryStreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.InMemoryTaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
@@ -41,8 +44,6 @@ import org.springframework.cloud.deployer.resource.registry.UriRegistryPopulator
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.cloud.task.repository.TaskExplorer;
-import org.springframework.cloud.task.repository.support.SimpleTaskExplorer;
-import org.springframework.cloud.task.repository.support.TaskExecutionDaoFactoryBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -76,23 +77,27 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	}
 
 	@Bean
-	public StreamDeploymentController streamDeploymentController(StreamDefinitionRepository repository, AppRegistry registry) {
-		return new StreamDeploymentController(repository, registry, appDeployer());
+	public StreamDeploymentController streamDeploymentController(StreamDefinitionRepository repository,
+			DeploymentIdRepository deploymentIdRepository, AppRegistry registry) {
+		return new StreamDeploymentController(repository, deploymentIdRepository, registry, appDeployer());
 	}
 
 	@Bean
-	public StreamDefinitionController streamDefinitionController(StreamDefinitionRepository repository, StreamDeploymentController deploymentController) {
-		return new StreamDefinitionController(repository, deploymentController, appDeployer());
+	public StreamDefinitionController streamDefinitionController(StreamDefinitionRepository repository,
+			DeploymentIdRepository deploymentIdRepository, StreamDeploymentController deploymentController) {
+		return new StreamDefinitionController(repository, deploymentIdRepository, deploymentController, appDeployer());
 	}
 
 	@Bean
-	public TaskDeploymentController taskController(TaskDefinitionRepository repository, UriRegistry registry) {
-		return new TaskDeploymentController(repository, registry, resourceLoader(), taskLauncher());
+	public TaskDeploymentController taskController(TaskDefinitionRepository repository, DeploymentIdRepository deploymentIdRepository,
+			UriRegistry registry) {
+		return new TaskDeploymentController(repository, deploymentIdRepository, registry, resourceLoader(), taskLauncher());
 	}
 
 	@Bean
-	public TaskDefinitionController taskDefinitionController(TaskDefinitionRepository repository) {
-		return new TaskDefinitionController(repository, taskLauncher());
+	public TaskDefinitionController taskDefinitionController(TaskDefinitionRepository repository,
+			DeploymentIdRepository deploymentIdRepository) {
+		return new TaskDefinitionController(repository, deploymentIdRepository, taskLauncher());
 	}
 
 	public TaskExecutionController taskExecutionController(TaskExplorer explorer) {
@@ -138,5 +143,11 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	@Bean
 	public TaskDefinitionRepository taskDefinitionRepository() {
 		return new InMemoryTaskDefinitionRepository();
+	}
+
+	@Bean
+	@ConditionalOnMissingBean
+	public DeploymentIdRepository deploymentIdRepository() {
+		return new InMemoryDeploymentIdRepository();
 	}
 }

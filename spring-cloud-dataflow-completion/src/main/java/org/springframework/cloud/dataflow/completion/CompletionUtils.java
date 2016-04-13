@@ -21,10 +21,8 @@ import java.util.Set;
 
 import org.springframework.cloud.dataflow.core.ArtifactType;
 import org.springframework.cloud.dataflow.core.BindingPropertyKeys;
-import org.springframework.cloud.dataflow.core.ArtifactCoordinates;
 import org.springframework.cloud.dataflow.core.ModuleDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
-import org.springframework.cloud.dataflow.app.resolver.Coordinates;
 
 /**
  * Various utility methods used throughout the completion package.
@@ -64,11 +62,6 @@ public class CompletionUtils {
 		else {
 			return new ArtifactType[] {ArtifactType.source};
 		}
-	}
-
-	static Coordinates fromModuleCoordinates(ArtifactCoordinates coordinates) {
-		return new Coordinates(coordinates.getGroupId(), coordinates.getArtifactId(),
-				coordinates.getExtension(), coordinates.getClassifier(), coordinates.getVersion());
 	}
 
 	/**

@@ -16,9 +16,11 @@
 
 package org.springframework.cloud.dataflow.server.controller;
 
-import org.springframework.cloud.dataflow.core.ModuleDeploymentId;
+import org.springframework.cloud.dataflow.core.ModuleDefinition;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.rest.resource.TaskDefinitionResource;
+import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
+import org.springframework.cloud.dataflow.server.repository.DeploymentKey;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
@@ -54,6 +56,11 @@ public class TaskDefinitionController {
 
 	private TaskDefinitionRepository repository;
 
+	/**
+	 * The repository this controller will use for deployment IDs.
+	 */
+	private final DeploymentIdRepository deploymentIdRepository;
+
 	private TaskLauncher taskLauncher;
 
 	/**
@@ -64,13 +71,16 @@ public class TaskDefinitionController {
 	 * </ul>
 	 *
 	 * @param repository the repository this controller will use for task CRUD operations.
+	 * @param deploymentIdRepository the repository this controller will use for deployment IDs
 	 * @param taskLauncher the TaskLauncher this controller will use to check task status.
 	 */
-	public TaskDefinitionController(TaskDefinitionRepository repository,
+	public TaskDefinitionController(TaskDefinitionRepository repository, DeploymentIdRepository deploymentIdRepository,
 			TaskLauncher taskLauncher) {
 		Assert.notNull(repository, "repository must not be null");
+		Assert.notNull(deploymentIdRepository, "DeploymentIdRepository must not be null");
 		Assert.notNull(taskLauncher, "taskLauncher must not be null");
 		this.repository = repository;
+		this.deploymentIdRepository = deploymentIdRepository;
 		this.taskLauncher = taskLauncher;
 	}
 
@@ -131,12 +141,16 @@ public class TaskDefinitionController {
 
 		@Override
 		public TaskDefinitionResource instantiateResource(TaskDefinition taskDefinition) {
-			ModuleDeploymentId id =
-					ModuleDeploymentId.fromModuleDefinition(taskDefinition.getModuleDefinition());
+			ModuleDefinition module = taskDefinition.getModuleDefinition();
+			String key = DeploymentKey.forApp(module);
+			String id = deploymentIdRepository.findOne(key);
+			TaskStatus status = null;
+			if (id != null) {
+				status = taskLauncher.status(id);
+			}
+			String state = (status != null) ? status.getState().name() : "unknown";
 			TaskDefinitionResource taskDefinitionResource = new TaskDefinitionResource(taskDefinition.getName(),
 					taskDefinition.getDslText());
-			TaskStatus status = taskLauncher.status(id.getLabel().toString());
-			String state = (status != null) ? status.getState().name() : "unknown";
 			taskDefinitionResource.setStatus(state);
 			return taskDefinitionResource;
 		}

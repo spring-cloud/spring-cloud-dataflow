@@ -79,7 +79,7 @@ public class JobStepExecutionController {
 			@PathVariable("jobExecutionId") long id, Pageable pageable, PagedResourcesAssembler<StepExecution> assembler) throws NoSuchJobExecutionException{
 		List<StepExecution> result;
 			result = new ArrayList<>(jobService.getStepExecutions(id));
-		Page page = new PageImpl<>(result, pageable, result.size());
+		Page<StepExecution> page = new PageImpl<>(result, pageable, result.size());
 		return assembler.toResource(page,stepAssembler);
 	}
 

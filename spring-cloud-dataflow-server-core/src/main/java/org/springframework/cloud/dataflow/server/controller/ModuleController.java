@@ -24,9 +24,9 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
-import org.springframework.cloud.dataflow.artifact.registry.AppRegistration;
-import org.springframework.cloud.dataflow.artifact.registry.AppRegistry;
 import org.springframework.cloud.dataflow.core.ArtifactType;
+import org.springframework.cloud.dataflow.registry.AppRegistration;
+import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.rest.resource.DetailedModuleRegistrationResource;
 import org.springframework.cloud.dataflow.rest.resource.ModuleRegistrationResource;
 import org.springframework.cloud.stream.configuration.metadata.ModuleConfigurationMetadataResolver;

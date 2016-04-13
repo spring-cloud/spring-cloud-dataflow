@@ -26,9 +26,12 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.cloud.dataflow.artifact.registry.AppRegistry;
 import org.springframework.cloud.dataflow.completion.StreamCompletionProvider;
 import org.springframework.cloud.dataflow.module.deployer.ModuleDeployer;
+import org.springframework.cloud.dataflow.registry.AppRegistry;
+import org.springframework.cloud.dataflow.registry.DataFlowUriRegistryPopulator;
+import org.springframework.cloud.dataflow.registry.DataFlowUriRegistryPopulatorProperties;
+import org.springframework.cloud.dataflow.registry.RedisUriRegistry;
 import org.springframework.cloud.dataflow.server.controller.CompletionController;
 import org.springframework.cloud.dataflow.server.controller.CounterController;
 import org.springframework.cloud.dataflow.server.controller.DeprecatedRootController;
@@ -45,9 +48,6 @@ import org.springframework.cloud.dataflow.server.controller.RestControllerAdvice
 import org.springframework.cloud.dataflow.server.controller.SecurityController;
 import org.springframework.cloud.dataflow.server.controller.TaskExecutionController;
 import org.springframework.cloud.dataflow.server.controller.UiController;
-import org.springframework.cloud.dataflow.server.registry.DataFlowUriRegistryPopulator;
-import org.springframework.cloud.dataflow.server.registry.DataFlowUriRegistryPopulatorProperties;
-import org.springframework.cloud.dataflow.server.registry.RedisUriRegistry;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.deployer.resource.maven.MavenProperties;

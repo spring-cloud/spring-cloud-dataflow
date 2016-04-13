@@ -56,7 +56,7 @@
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
-				<artifactId>spring-cloud-dataflow-artifact-registry</artifactId>
+				<artifactId>spring-cloud-dataflow-registry</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>

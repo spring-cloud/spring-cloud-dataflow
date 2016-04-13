@@ -87,7 +87,7 @@ public class JobInstanceController {
 			Pageable pageable, PagedResourcesAssembler<JobInstanceExecutions> assembler)
 			throws NoSuchJobException {
 		List<JobInstanceExecutions> jobInstances;
-		Page page;
+		Page<JobInstanceExecutions> page;
 		try{
 			jobInstances = repository.listTaskJobInstancesForJobName(pageable, jobName);
 			page = new PageImpl<>(jobInstances, pageable, repository.countJobInstances(jobName));

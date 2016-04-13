@@ -16,19 +16,31 @@
 
 package org.springframework.cloud.dataflow.server.repository;
 
-import org.springframework.cloud.task.repository.TaskExecution;
+import org.springframework.stereotype.Repository;
 
 /**
- * @author Glenn Renfro
+ * Interface for repository that maps deployment keys to IDs.
+ *
+ * @author Janne Valkealahti
+ * @author Mark Fisher
  */
-public class NoSuchTaskExecutionException extends RuntimeException{
+@Repository
+public interface DeploymentIdRepository extends org.springframework.data.repository.Repository<String, String> {
 
 	/**
-	 * Create a new exception.
+	 * Associates a given app deployment key with an identifier.
 	 *
-	 * @param id the id of the {@link TaskExecution} that could not be found
+	 * @param key the app deployment key
+	 * @param id the identifier
+	 * @return the saved key
 	 */
-	public NoSuchTaskExecutionException(long id) {
-		super("Could not find TaskExecution with id " + id);
-	}
+	void save(String key, String id);
+
+	/**
+	 * Find an identifier by its key.
+	 *
+	 * @param key the app deployment key
+	 * @return the identifier
+	 */
+	String findOne(String key);
 }

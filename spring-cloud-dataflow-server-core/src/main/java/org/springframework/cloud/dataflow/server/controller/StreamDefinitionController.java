@@ -23,9 +23,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.cloud.dataflow.core.ModuleDefinition;
-import org.springframework.cloud.dataflow.core.ModuleDeploymentId;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.rest.resource.StreamDefinitionResource;
+import org.springframework.cloud.dataflow.server.repository.DeploymentKey;
+import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
 import org.springframework.cloud.dataflow.server.repository.DuplicateStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.NoSuchStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
@@ -68,6 +69,11 @@ public class StreamDefinitionController {
 	private final StreamDefinitionRepository repository;
 
 	/**
+	 * The repository this controller will use for deployment IDs.
+	 */
+	private final DeploymentIdRepository deploymentIdRepository;
+
+	/**
 	 * The deployer this controller will use to compute stream deployment status.
 	 */
 	private final AppDeployer deployer;
@@ -86,19 +92,23 @@ public class StreamDefinitionController {
 	 * Create a {@code StreamDefinitionController} that delegates
 	 * <ul>
 	 * <li>CRUD operations to the provided {@link StreamDefinitionRepository}</li>
+	 * <li>deployment ID operations to the provided {@link DeploymentIdRepository}</li>
 	 * <li>deployment operations to the provided {@link StreamDeploymentController}</li>
 	 * <li>deployment status computation to the provided {@link AppDeployer}</li>
 	 * </ul>
 	 * @param repository           the repository this controller will use for stream CRUD operations
+	 * @param deploymentIdRepository the repository this controller will use for deployment IDs
 	 * @param deploymentController the deployment controller to delegate deployment operations
 	 * @param deployer             the deployer this controller will use to compute deployment status
 	 */
-	public StreamDefinitionController(StreamDefinitionRepository repository,
+	public StreamDefinitionController(StreamDefinitionRepository repository, DeploymentIdRepository deploymentIdRepository,
 			StreamDeploymentController deploymentController, AppDeployer deployer) {
-		Assert.notNull(repository, "repository must not be null");
-		Assert.notNull(deploymentController, "deploymentController must not be null");
-		Assert.notNull(deployer, "deployer must not be null");
+		Assert.notNull(repository, "StreamDefinitionRepository must not be null");
+		Assert.notNull(deploymentIdRepository, "DeploymentIdRepository must not be null");
+		Assert.notNull(deploymentController, "StreamDeploymentController must not be null");
+		Assert.notNull(deployer, "AppDeployer must not be null");
 		this.deploymentController = deploymentController;
+		this.deploymentIdRepository = deploymentIdRepository;
 		this.repository = repository;
 		this.deployer = deployer;
 	}
@@ -121,15 +131,15 @@ public class StreamDefinitionController {
 	 *
 	 * @param name   stream name
 	 * @param dsl    DSL definition for stream
-	 * @param deploy if {@code true}, the stream is deployed upon creation
+	 * @param deploy if {@code true}, the stream is deployed upon creation (default is {@code false})
 	 * @throws DuplicateStreamDefinitionException if a stream definition with the same name already exists
 	 */
 	@RequestMapping(value = "", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
 	public void save(@RequestParam("name") String name,
-	                 @RequestParam("definition") String dsl,
-	                 @RequestParam(value = "deploy", defaultValue = "true")
-	                 boolean deploy) {
+					@RequestParam("definition") String dsl,
+					@RequestParam(value = "deploy", defaultValue = "false")
+					boolean deploy) {
 		StreamDefinition stream = new StreamDefinition(name, dsl);
 		this.repository.save(stream);
 		if (deploy) {
@@ -144,7 +154,7 @@ public class StreamDefinitionController {
 	@RequestMapping(value = "/{name}", method = RequestMethod.DELETE)
 	@ResponseStatus(HttpStatus.OK)
 	public void delete(@PathVariable("name") String name) {
-		if(repository.findOne(name) == null) {
+		if (repository.findOne(name) == null) {
 			throw new NoSuchStreamDefinitionException(name);
 		}
 		deploymentController.undeploy(name);
@@ -186,8 +196,15 @@ public class StreamDefinitionController {
 		Set<DeploymentState> moduleStates = EnumSet.noneOf(DeploymentState.class);
 		StreamDefinition stream = repository.findOne(name);
 		for (ModuleDefinition module : stream.getModuleDefinitions()) {
-			AppStatus status = deployer.status(ModuleDeploymentId.fromModuleDefinition(module).toString());
-			moduleStates.add(status.getState());
+			String key = DeploymentKey.forApp(module);
+			String id = deploymentIdRepository.findOne(key);
+			if (id != null) {
+				AppStatus status = deployer.status(id);
+				moduleStates.add(status.getState());
+			}
+			else {
+				moduleStates.add(DeploymentState.undeployed);
+			}
 		}
 
 		logger.debug("Module states for stream {}: {}", name, moduleStates);

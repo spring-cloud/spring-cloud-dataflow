@@ -85,7 +85,7 @@ public class JobExecutionController {
 	public PagedResources<JobExecutionResource> list(Pageable pageable,
 			PagedResourcesAssembler<TaskJobExecution> assembler) throws NoSuchJobExecutionException {
 		List<TaskJobExecution> jobExecutions = repository.listJobExecutions(pageable);
-		Page page = new PageImpl<>(jobExecutions, pageable, repository.countJobExecutions());
+		Page<TaskJobExecution> page = new PageImpl<>(jobExecutions, pageable, repository.countJobExecutions());
 		return assembler.toResource(page, jobAssembler);
 	}
 
@@ -102,9 +102,8 @@ public class JobExecutionController {
 			@RequestParam("name") String jobName, Pageable pageable,
 			PagedResourcesAssembler<TaskJobExecution> assembler)
 			throws NoSuchJobException {
-		Page page;
 		List<TaskJobExecution> jobExecutions  = repository.listJobExecutionsForJob(pageable, jobName);
-		page = new PageImpl<>(jobExecutions, pageable,
+		Page<TaskJobExecution> page = new PageImpl<>(jobExecutions, pageable,
 				repository.countJobExecutionsForJob(jobName));
 		return assembler.toResource(page, jobAssembler);
 	}

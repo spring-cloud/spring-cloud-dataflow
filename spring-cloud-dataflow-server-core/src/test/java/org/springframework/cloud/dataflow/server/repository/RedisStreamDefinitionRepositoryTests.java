@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2015-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,43 +16,44 @@
 
 package org.springframework.cloud.dataflow.server.repository;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.emptyIterableOf;
+import static org.hamcrest.Matchers.hasProperty;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
+import static org.junit.Assert.assertThat;
 
 import java.util.Arrays;
 import java.util.Random;
 
-import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
+import org.junit.Rule;
 import org.junit.Test;
 
 import org.springframework.cloud.dataflow.core.StreamDefinition;
+import org.springframework.cloud.stream.test.junit.redis.RedisTestSupport;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 
 /**
  * Tests for RedisStreamDefinitionRepository that connect to an actual redis instance.
  *
  * @author Eric Bottard
+ * @author Janne Valkealahti
  */
-// todo: disabling tests until https://jira.spring.io/browse/XD-3414 is complete
-@Ignore
 public class RedisStreamDefinitionRepositoryTests {
 
 	private RedisStreamDefinitionRepository repository;
 
 	private String key;
 
-	private JedisConnectionFactory cf;
+	@Rule
+	public RedisTestSupport redisTestSupport = new RedisTestSupport();
 
 	@Before
 	public void setUp() {
-		key = "redis-test-" + new Random().nextLong();
-		cf = new JedisConnectionFactory();
-		cf.afterPropertiesSet();
-		repository = new RedisStreamDefinitionRepository(key, cf);
+		key = "RedisStreamDefinitionRepositoryTests-" + new Random().nextLong();
+		repository = new RedisStreamDefinitionRepository(key, redisTestSupport.getResource());
 	}
 
 	@Test
@@ -65,6 +66,7 @@ public class RedisStreamDefinitionRepositoryTests {
 		assertThat(readBack.getDslText(), is("time | log"));
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
 	public void testFindAll() {
 		assertThat(repository.findAll(), is(emptyIterableOf(StreamDefinition.class)));
@@ -74,6 +76,7 @@ public class RedisStreamDefinitionRepositoryTests {
 		assertThat(result, contains(hasProperty("name", is("a")), hasProperty("name", is("b"))));
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
 	public void testFindAllWithSort() {
 		Sort sort = new Sort(Sort.Direction.DESC, "name");
@@ -84,6 +87,7 @@ public class RedisStreamDefinitionRepositoryTests {
 		assertThat(result, contains(hasProperty("name", is("b")), hasProperty("name", is("a"))));
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
 	public void testFindAllWithPageable() {
 		PageRequest request = new PageRequest(1, 3, Sort.Direction.DESC, "name");
@@ -98,6 +102,7 @@ public class RedisStreamDefinitionRepositoryTests {
 				hasProperty("name", is("a4"))));
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
 	public void testSaveIterable() {
 		repository.save(Arrays.asList(new StreamDefinition("a", "time | log"), new StreamDefinition("b", "time | log")));
@@ -113,6 +118,7 @@ public class RedisStreamDefinitionRepositoryTests {
 		assertThat(repository.exists("does-exist"), is(true));
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
 	public void testFindAllByIds() {
 		repository.save(new StreamDefinition("c", "time | log"));
@@ -169,11 +175,4 @@ public class RedisStreamDefinitionRepositoryTests {
 		repository.save(new StreamDefinition("a", "time | file"));
 		assertThat(repository.findOne("a"), hasProperty("dslText", is("time | file")));
 	}
-
-
-	@After
-	public void tearDown() {
-		cf.destroy();
-	}
-
 }

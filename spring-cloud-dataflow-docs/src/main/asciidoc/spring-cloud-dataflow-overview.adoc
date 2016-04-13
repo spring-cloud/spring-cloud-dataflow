@@ -35,12 +35,14 @@ The architecture for Spring Cloud Data Flow is separated into a number of distin
 
 The link:https://github.com/spring-cloud/spring-cloud-dataflow/tree/master/spring-cloud-dataflow-core[Core]
 domain model includes the concept of a **stream** that is a composition of spring-cloud-stream
-modules in a linear pipeline from a *source* to a *sink*, optionally including *processor* modules
+apps in a linear pipeline from a *source* to a *sink*, optionally including *processor* apps
 in between. The domain also includes the concept of a **task**, which may be any process that does
 not run indefinitely, including link:https://github.com/spring-projects/spring-batch[Spring Batch] jobs.
 
-The link:https://github.com/spring-cloud/spring-cloud-dataflow/tree/master/spring-cloud-dataflow-artifact-registry[Artifact Registry]
-maintains the set of available modules, and their mappings to Maven coordinates.
+The link:https://github.com/spring-cloud/spring-cloud-dataflow/tree/master/spring-cloud-dataflow-registry[App Registry]
+maintains the set of available apps, and their mappings to a URI.
+For example, if relying on Maven coordinates, the URI would be of the format:
+`maven://<groupId>:<artifactId>:<version>`
 
 The link:https://github.com/spring-cloud/spring-cloud-dataflow/tree/master/spring-cloud-dataflow-deployer-spi[Deployer SPI] provides the abstraction layer for deploying the apps of a given stream across a variety of runtime environments, including:
 
