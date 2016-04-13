@@ -78,159 +78,159 @@ import org.springframework.hateoas.EntityLinks;
  * @author Mark Fisher
  */
 @Configuration
-@ConditionalOnBean({AppDeployer.class, TaskLauncher.class})
+@ConditionalOnBean({ AppDeployer.class, TaskLauncher.class })
 @EnableConfigurationProperties(DataFlowUriRegistryPopulatorProperties.class)
 public class DataFlowControllerAutoConfiguration {
 
-    @Bean
-    public UriRegistry uriRegistry(RedisConnectionFactory connectionFactory) {
-        return new RedisUriRegistry(connectionFactory);
-    }
+	@Bean
+	public UriRegistry uriRegistry(RedisConnectionFactory connectionFactory) {
+		return new RedisUriRegistry(connectionFactory);
+	}
 
-    @Bean
-    public UriRegistryPopulator uriRegistryPopulator() {
-        return new UriRegistryPopulator();
-    }
+	@Bean
+	public UriRegistryPopulator uriRegistryPopulator() {
+		return new UriRegistryPopulator();
+	}
 
-    @Bean
-    public AppRegistry appRegistry(UriRegistry uriRegistry, DelegatingResourceLoader resourceLoader) {
-        return new AppRegistry(uriRegistry, resourceLoader);
-    }
+	@Bean
+	public AppRegistry appRegistry(UriRegistry uriRegistry, DelegatingResourceLoader resourceLoader) {
+		return new AppRegistry(uriRegistry, resourceLoader);
+	}
 
-    @Bean
-    public DataFlowUriRegistryPopulator dataflowUriRegistryPopulator(UriRegistry uriRegistry, DataFlowUriRegistryPopulatorProperties properties) {
-        return new DataFlowUriRegistryPopulator(uriRegistry, uriRegistryPopulator(), properties);
-    }
+	@Bean
+	public DataFlowUriRegistryPopulator dataflowUriRegistryPopulator(UriRegistry uriRegistry, DataFlowUriRegistryPopulatorProperties properties) {
+		return new DataFlowUriRegistryPopulator(uriRegistry, uriRegistryPopulator(), properties);
+	}
 
-    @Bean
-    public RootController rootController(EntityLinks entityLinks) {
-        return new RootController(entityLinks);
-    }
+	@Bean
+	public RootController rootController(EntityLinks entityLinks) {
+		return new RootController(entityLinks);
+	}
 
-    @Bean
-    public RuntimeModulesController runtimeModulesController(StreamDefinitionRepository repository,
-            AppDeployer appDeployer) {
-        return new RuntimeModulesController(repository, appDeployer);
-    }
+	@Bean
+	public RuntimeModulesController runtimeModulesController(StreamDefinitionRepository repository,
+			AppDeployer appDeployer) {
+		return new RuntimeModulesController(repository, appDeployer);
+	}
 
-    @Bean
-    public AppInstanceController appInstanceController(AppDeployer appDeployer) {
-        return new AppInstanceController(appDeployer);
-    }
+	@Bean
+	public AppInstanceController appInstanceController(AppDeployer appDeployer) {
+		return new AppInstanceController(appDeployer);
+	}
 
-    @Bean
-    public StreamDefinitionController streamDefinitionController(StreamDefinitionRepository repository,
-            DeploymentIdRepository deploymentIdRepository, StreamDeploymentController deploymentController, AppDeployer deployer) {
-        return new StreamDefinitionController(repository, deploymentIdRepository, deploymentController, deployer);
-    }
+	@Bean
+	public StreamDefinitionController streamDefinitionController(StreamDefinitionRepository repository,
+			DeploymentIdRepository deploymentIdRepository, StreamDeploymentController deploymentController, AppDeployer deployer) {
+		return new StreamDefinitionController(repository, deploymentIdRepository, deploymentController, deployer);
+	}
 
-    @Bean
-    public StreamDeploymentController streamDeploymentController(StreamDefinitionRepository repository,
-            DeploymentIdRepository deploymentIdRepository, AppRegistry registry, AppDeployer deployer,
-            DelegatingResourceLoader resourceLoader) {
-        return new StreamDeploymentController(repository, deploymentIdRepository, registry, deployer);
-    }
+	@Bean
+	public StreamDeploymentController streamDeploymentController(StreamDefinitionRepository repository,
+			DeploymentIdRepository deploymentIdRepository, AppRegistry registry, AppDeployer deployer,
+			DelegatingResourceLoader resourceLoader) {
+		return new StreamDeploymentController(repository, deploymentIdRepository, registry, deployer);
+	}
 
-    @Bean
-    public MavenResourceLoader MavenResourceLoader(MavenProperties properties) {
-        return new MavenResourceLoader(properties);
-    }
+	@Bean
+	public MavenResourceLoader MavenResourceLoader(MavenProperties properties) {
+		return new MavenResourceLoader(properties);
+	}
 
-    @Bean
-    @ConditionalOnMissingBean(DelegatingResourceLoader.class)
-    public DelegatingResourceLoader delegatingResourceLoader(MavenResourceLoader mavenResourceLoader) {
-        DefaultResourceLoader defaultLoader = new DefaultResourceLoader();
-        Map<String, ResourceLoader> loaders = new HashMap<>();
-        loaders.put("maven", mavenResourceLoader);
-        loaders.put("file", defaultLoader);
-        loaders.put("http", defaultLoader);
-        return new DelegatingResourceLoader(loaders);
-    }
+	@Bean
+	@ConditionalOnMissingBean(DelegatingResourceLoader.class)
+	public DelegatingResourceLoader delegatingResourceLoader(MavenResourceLoader mavenResourceLoader) {
+		DefaultResourceLoader defaultLoader = new DefaultResourceLoader();
+		Map<String, ResourceLoader> loaders = new HashMap<>();
+		loaders.put("maven", mavenResourceLoader);
+		loaders.put("file", defaultLoader);
+		loaders.put("http", defaultLoader);
+		return new DelegatingResourceLoader(loaders);
+	}
 
-    @Bean
-    public TaskDefinitionController taskDefinitionController(TaskDefinitionRepository repository,
-            DeploymentIdRepository deploymentIdRepository, TaskLauncher taskLauncher) {
-        return new TaskDefinitionController(repository, deploymentIdRepository, taskLauncher);
-    }
+	@Bean
+	public TaskDefinitionController taskDefinitionController(TaskDefinitionRepository repository,
+			DeploymentIdRepository deploymentIdRepository, TaskLauncher taskLauncher) {
+		return new TaskDefinitionController(repository, deploymentIdRepository, taskLauncher);
+	}
 
-    @Bean
-    public TaskDeploymentController taskDeploymentController(TaskDefinitionRepository repository,
-            DeploymentIdRepository deploymentIdRepository, UriRegistry registry, DelegatingResourceLoader resourceLoader,
-            TaskLauncher taskLauncher) {
-        return new TaskDeploymentController(repository, deploymentIdRepository, registry, resourceLoader, taskLauncher);
-    }
+	@Bean
+	public TaskDeploymentController taskDeploymentController(TaskDefinitionRepository repository,
+			DeploymentIdRepository deploymentIdRepository, UriRegistry registry, DelegatingResourceLoader resourceLoader,
+			TaskLauncher taskLauncher) {
+		return new TaskDeploymentController(repository, deploymentIdRepository, registry, resourceLoader, taskLauncher);
+	}
 
-    @Bean
-    public TaskExecutionController taskExecutionController(TaskExplorer explorer) {
-        return new TaskExecutionController(explorer);
-    }
+	@Bean
+	public TaskExecutionController taskExecutionController(TaskExplorer explorer) {
+		return new TaskExecutionController(explorer);
+	}
 
-    @Bean
-    public JobExecutionController jobExecutionController(TaskJobRepository repository) {
-        return new JobExecutionController(repository);
-    }
+	@Bean
+	public JobExecutionController jobExecutionController(TaskJobRepository repository) {
+		return new JobExecutionController(repository);
+	}
 
-    @Bean
-    public JobStepExecutionController jobStepExecutionController(JobService service) {
-        return new JobStepExecutionController(service);
-    }
+	@Bean
+	public JobStepExecutionController jobStepExecutionController(JobService service) {
+		return new JobStepExecutionController(service);
+	}
 
-    @Bean
-    public JobStepExecutionProgressController jobStepExecutionProgressController(JobService service) {
-        return new JobStepExecutionProgressController(service);
-    }
+	@Bean
+	public JobStepExecutionProgressController jobStepExecutionProgressController(JobService service) {
+		return new JobStepExecutionProgressController(service);
+	}
 
-    @Bean
-    public JobInstanceController jobInstanceController(TaskJobRepository repository) {
-        return new JobInstanceController(repository);
-    }
+	@Bean
+	public JobInstanceController jobInstanceController(TaskJobRepository repository){
+		return new JobInstanceController(repository);
+	}
 
-    @Bean
-    public CounterController counterController(MetricRepository metricRepository) {
-        return new CounterController(metricRepository);
-    }
+	@Bean
+	public CounterController counterController(MetricRepository metricRepository) {
+		return new CounterController(metricRepository);
+	}
 
-    @Bean
-    public CompletionController completionController(StreamCompletionProvider completionProvider) {
-        return new CompletionController(completionProvider);
-    }
+	@Bean
+	public CompletionController completionController(StreamCompletionProvider completionProvider) {
+		return new CompletionController(completionProvider);
+	}
 
-    @Bean
-    public FieldValueCounterController fieldValueCounterController(FieldValueCounterRepository repository) {
-        return new FieldValueCounterController(repository);
-    }
+	@Bean
+	public FieldValueCounterController fieldValueCounterController(FieldValueCounterRepository repository) {
+		return new FieldValueCounterController(repository);
+	}
 
-    @Bean
-    public LibraryController libraryController(AppRegistry registry) {
-        return new LibraryController(registry);
-    }
+	@Bean
+	public LibraryController libraryController(AppRegistry registry) {
+		return new LibraryController(registry);
+	}
 
-    @Bean
-    public ModuleController moduleController(AppRegistry appRegistry, ModuleConfigurationMetadataResolver metadataResolver) {
-        return new ModuleController(appRegistry, metadataResolver);
-    }
+	@Bean
+	public ModuleController moduleController(AppRegistry appRegistry, ModuleConfigurationMetadataResolver metadataResolver) {
+		return new ModuleController(appRegistry, metadataResolver);
+	}
 
-    @Bean
-    public SecurityController securityController(SecurityProperties securityProperties) {
-        return new SecurityController(securityProperties);
-    }
+	@Bean
+	public SecurityController securityController(SecurityProperties securityProperties) {
+		return new SecurityController(securityProperties);
+	}
 
-    @Bean
-    public UiController uiController() {
-        return new UiController();
-    }
+	@Bean
+	public UiController uiController() {
+		return new UiController();
+	}
 
-    @Bean
-    public RestControllerAdvice restControllerAdvice() {
-        return new RestControllerAdvice();
-    }
+	@Bean
+	public RestControllerAdvice restControllerAdvice() {
+		return new RestControllerAdvice();
+	}
 
-    @Bean
-    public MavenProperties mavenProperties() {
-        return new MavenConfigurationProperties();
-    }
+	@Bean
+	public MavenProperties mavenProperties() {
+		return new MavenConfigurationProperties();
+	}
 
-    @ConfigurationProperties(prefix = "maven")
-    static class MavenConfigurationProperties extends MavenProperties {
-    }
+	@ConfigurationProperties(prefix = "maven")
+	static class MavenConfigurationProperties extends MavenProperties {
+	}
 }
