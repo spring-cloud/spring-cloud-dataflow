@@ -19,7 +19,7 @@ package org.springframework.cloud.dataflow.server.config;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.springframework.batch.admin.service.JobService;
+iimport org.springframework.batch.admin.service.JobService;
 import org.springframework.boot.actuate.metrics.repository.MetricRepository;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -31,8 +31,27 @@ import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.registry.DataFlowUriRegistryPopulator;
 import org.springframework.cloud.dataflow.registry.DataFlowUriRegistryPopulatorProperties;
 import org.springframework.cloud.dataflow.registry.RedisUriRegistry;
-import org.springframework.cloud.dataflow.server.controller.*;
+import org.springframework.cloud.dataflow.server.controller.AggregateCounterController;
+import org.springframework.cloud.dataflow.server.controller.CompletionController;
+import org.springframework.cloud.dataflow.server.controller.CounterController;
+import org.springframework.cloud.dataflow.server.controller.FieldValueCounterController;
+import org.springframework.cloud.dataflow.server.controller.JobExecutionController;
+import org.springframework.cloud.dataflow.server.controller.JobInstanceController;
+import org.springframework.cloud.dataflow.server.controller.JobStepExecutionController;
+import org.springframework.cloud.dataflow.server.controller.JobStepExecutionProgressController;
+import org.springframework.cloud.dataflow.server.controller.LibraryController;
+import org.springframework.cloud.dataflow.server.controller.ModuleController;
+import org.springframework.cloud.dataflow.server.controller.RestControllerAdvice;
+import org.springframework.cloud.dataflow.server.controller.RootController;
+import org.springframework.cloud.dataflow.server.controller.RuntimeModulesController;
 import org.springframework.cloud.dataflow.server.controller.RuntimeModulesController.AppInstanceController;
+import org.springframework.cloud.dataflow.server.controller.SecurityController;
+import org.springframework.cloud.dataflow.server.controller.StreamDefinitionController;
+import org.springframework.cloud.dataflow.server.controller.StreamDeploymentController;
+import org.springframework.cloud.dataflow.server.controller.TaskDefinitionController;
+import org.springframework.cloud.dataflow.server.controller.TaskDeploymentController;
+import org.springframework.cloud.dataflow.server.controller.TaskExecutionController;
+import org.springframework.cloud.dataflow.server.controller.UiController;
 import org.springframework.cloud.dataflow.server.job.TaskJobRepository;
 import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
@@ -54,7 +73,6 @@ import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.hateoas.EntityLinks;
-
 /**
  * Configuration for the Data Flow Server Controllers.
  *
