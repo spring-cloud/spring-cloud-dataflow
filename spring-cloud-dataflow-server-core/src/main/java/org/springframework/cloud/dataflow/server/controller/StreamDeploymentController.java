@@ -368,10 +368,13 @@ public class StreamDeploymentController {
 		for (ModuleDefinition module : stream.getModuleDefinitions()) {
 			String key = DeploymentKey.forApp(module);
 			String id = this.deploymentIdRepository.findOne(key);
-			AppStatus status = this.deployer.status(id);
-			if (!EnumSet.of(DeploymentState.unknown, DeploymentState.undeployed)
-					.contains(status.getState())) {
-				this.deployer.undeploy(id);
+			// if id is null, assume nothing is deployed
+			if (id != null) {
+				AppStatus status = this.deployer.status(id);
+				if (!EnumSet.of(DeploymentState.unknown, DeploymentState.undeployed)
+						.contains(status.getState())) {
+					this.deployer.undeploy(id);
+				}
 			}
 		}
 	}

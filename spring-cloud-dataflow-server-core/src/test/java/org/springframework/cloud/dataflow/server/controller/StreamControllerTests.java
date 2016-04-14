@@ -421,6 +421,27 @@ public class StreamControllerTests {
 	}
 
 	@Test
+	public void testUndeployNonDeployedStream() throws Exception {
+		repository.save(new StreamDefinition("myStream", "time | log"));
+		mockMvc.perform(
+				delete("/streams/deployments/myStream").accept(MediaType.APPLICATION_JSON)).andDo(print())
+				.andExpect(status().isOk());
+		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
+		verify(appDeployer, times(0)).undeploy(captor.capture());
+	}
+
+	@Test
+	public void testUndeployAllNonDeployedStream() throws Exception {
+		repository.save(new StreamDefinition("myStream1", "time | log"));
+		repository.save(new StreamDefinition("myStream2", "time | log"));
+		mockMvc.perform(
+				delete("/streams/deployments").accept(MediaType.APPLICATION_JSON)).andDo(print())
+				.andExpect(status().isOk());
+		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
+		verify(appDeployer, times(0)).undeploy(captor.capture());
+	}
+
+	@Test
 	public void testDeployWithProperties() throws Exception {
 		repository.save(new StreamDefinition("myStream", "time | log"));
 		mockMvc.perform(
