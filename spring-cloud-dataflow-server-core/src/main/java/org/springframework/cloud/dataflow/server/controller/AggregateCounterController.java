@@ -42,31 +42,13 @@ public class AggregateCounterController {
     }
 
     /**
-     * List {@link AggregateCounter}s that match the given criteria.
+     * Lists all {@link AggregateCounter}s.
      */
     @ResponseBody
     @RequestMapping(value = "", method = RequestMethod.GET)
-    public PagedResources<? extends MetricResource> list(Pageable pageable,
-                                                         PagedResourcesAssembler<AggregateCounter> pagedAssembler,
-                                                         @RequestParam(value = "detailed", defaultValue = "false") boolean detailed,//
-                                                         @RequestParam(value = "from", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) DateTime from, //
-                                                         @RequestParam(value = "to", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) DateTime to, //
-                                                         @RequestParam(value = "resolution", defaultValue = "hour") AggregateCounterResolution resolution) {
-        to = providedOrDefaultToValue(to);
-        from = providedOrDefaultFromValue(from, to, resolution);
-        Interval interval = new Interval(from, to);
-
+    public PagedResources<? extends MetricResource> list(PagedResourcesAssembler<String> pagedAssembler) {
         List<String> names = new ArrayList<>(repository.list());
-
-        List<AggregateCounter> aggregateCounts = new LinkedList<>();
-        for (String name : names) {
-            AggregateCounter aggregateCounter = repository.getCounts(name, interval, resolution);
-            if (aggregateCounter != null) {
-                aggregateCounts.add(aggregateCounter);
-            }
-        }
-
-        return pagedAssembler.toResource(new PageImpl<>(aggregateCounts), detailed ? aggregateCountResourceAssembler : shallowAssembler);
+        return pagedAssembler.toResource(new PageImpl<>(names), shallowAssembler);
     }
 
     /**
@@ -132,20 +114,20 @@ public class AggregateCounterController {
      * @author Eric Bottard
      */
     private static class ShallowResourceAssembler extends
-            ResourceAssemblerSupport<AggregateCounter, MetricResource> {
+            ResourceAssemblerSupport<String, MetricResource> {
 
         public ShallowResourceAssembler(Class<?> controllerClass) {
             super(controllerClass, MetricResource.class);
         }
 
         @Override
-        public MetricResource toResource(AggregateCounter entity) {
-            return createResourceWithId(entity.getName(), entity);
+        public MetricResource toResource(String name) {
+            return createResourceWithId(name, name);
         }
 
         @Override
-        protected MetricResource instantiateResource(AggregateCounter entity) {
-            return new MetricResource(entity.getName());
+        protected MetricResource instantiateResource(String name) {
+            return new MetricResource(name);
         }
 
     }
