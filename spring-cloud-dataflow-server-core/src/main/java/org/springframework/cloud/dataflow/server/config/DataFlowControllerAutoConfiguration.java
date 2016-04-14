@@ -19,7 +19,7 @@ package org.springframework.cloud.dataflow.server.config;
 import java.util.HashMap;
 import java.util.Map;
 
-iimport org.springframework.batch.admin.service.JobService;
+import org.springframework.batch.admin.service.JobService;
 import org.springframework.boot.actuate.metrics.repository.MetricRepository;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -73,6 +73,7 @@ import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.hateoas.EntityLinks;
+
 /**
  * Configuration for the Data Flow Server Controllers.
  *
