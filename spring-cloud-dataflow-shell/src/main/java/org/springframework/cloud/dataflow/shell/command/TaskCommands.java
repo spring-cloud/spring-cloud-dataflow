@@ -19,8 +19,10 @@ package org.springframework.cloud.dataflow.shell.command;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
@@ -67,6 +69,8 @@ public class TaskCommands implements CommandMarker {
 
 	private static final String PROPERTIES_FILE_OPTION = "propertiesFile";
 
+	private static final String PARAMS_OPTION = "params";
+
 	private static final String EXECUTION_LIST = "task execution list";
 
 
@@ -101,7 +105,8 @@ public class TaskCommands implements CommandMarker {
 	public String launch(
 			@CliOption(key = { "", "name" }, help = "the name of the task to launch", mandatory = true) String name,
 			@CliOption(key = { PROPERTIES_OPTION }, help = "the properties for this launch", mandatory = false) String properties,
-			@CliOption(key = { PROPERTIES_FILE_OPTION }, help = "the properties for this launch (as a File)", mandatory = false) File propertiesFile
+			@CliOption(key = { PROPERTIES_FILE_OPTION }, help = "the properties for this launch (as a File)", mandatory = false) File propertiesFile,
+			@CliOption(key = { PARAMS_OPTION }, help = "the commandline arguments for this launch", mandatory = false) String params
 			) throws IOException {
 		int which = Assertions.atMostOneOf(PROPERTIES_OPTION, properties, PROPERTIES_FILE_OPTION, propertiesFile);
 		Map<String, String> propertiesToUse;
@@ -122,10 +127,15 @@ public class TaskCommands implements CommandMarker {
 			default:
 				throw new AssertionError();
 		}
-		taskOperations().launch(name, propertiesToUse);
+		// need to pass through raw params string into
+		// List as shell can handle conversion if its
+		// function param is a List<String>.
+		List<String> arguments = new ArrayList<String>();
+		arguments.add(params);
+		taskOperations().launch(name, propertiesToUse, arguments);
 		return String.format("Launched task '%s'", name);
 	}
-	
+
 	@CliCommand(value = DESTROY, help = "Destroy an existing task")
 	public String destroy(
 			@CliOption(key = { "", "name" }, help = "the name of the task to destroy", mandatory = true) String name) {
