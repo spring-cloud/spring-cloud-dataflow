@@ -152,6 +152,12 @@ dataflow:>module register --name myprocessor --type processor --uri file:///User
 dataflow:>module register --name mysink --type sink --uri http://example.com/mysink-2.0.1.jar
 ```
 
+When providing a URI with the `maven` scheme, the format should conform to the following:
+
+```
+maven://<groupId>:<artifactId>[:<extension>[:<classifier>]]:>version>
+```
+
 If a stream app is already registered with the provided name and type, it will not be overridden by default.
 If you would like to override the pre-existing stream app, then include the `--force` option.
 

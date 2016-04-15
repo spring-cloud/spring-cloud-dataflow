@@ -44,6 +44,12 @@ dataflow:>module register --name task2 --type task --uri file:///Users/example/m
 dataflow:>module register --name task3 --type task --uri http://example.com/mytask-1.0.2.jar
 ```
 
+When providing a URI with the `maven` scheme, the format should conform to the following:
+
+```
+maven://<groupId>:<artifactId>[:<extension>[:<classifier>]]:>version>
+```
+
 If a task app is already registered with the provided name, it will not be overridden by default.
 If you would like to override the pre-existing task app, then include the `--force` option.
 
