@@ -20,6 +20,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.cloud.deployer.resource.registry.UriRegistry;
 import org.springframework.cloud.deployer.resource.registry.UriRegistryPopulator;
 import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 
 /**
  * A {@link UriRegistryPopulator} implementation that provides stream and task app URIs for a Data Flow Server.
@@ -53,7 +54,7 @@ public class DataFlowUriRegistryPopulator implements InitializingBean {
 
 	@Override
 	public void afterPropertiesSet() {
-		if (this.properties.isEnabled()) {
+		if (this.properties.isEnabled() && !ObjectUtils.isEmpty(this.properties.getLocations())) {
 			this.populator.populateRegistry(this.registry, this.properties.getLocations());
 		}
 	}

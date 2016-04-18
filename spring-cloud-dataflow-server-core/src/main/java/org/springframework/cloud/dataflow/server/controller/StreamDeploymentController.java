@@ -28,6 +28,7 @@ import org.springframework.cloud.dataflow.core.ModuleDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.StreamPropertyKeys;
 import org.springframework.cloud.dataflow.module.deployer.ModuleDeployer;
+import org.springframework.cloud.dataflow.registry.AppRegistration;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.rest.resource.StreamDeploymentResource;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
@@ -195,7 +196,10 @@ public class StreamDeploymentController {
 			isDownStreamModulePartitioned = isPartitionedConsumer(currentModule, moduleDeploymentProperties,
 					upstreamModuleSupportsPartition);
 			AppDefinition definition = new AppDefinition(currentModule.getLabel(), currentModule.getParameters());
-			Resource resource = this.registry.find(currentModule.getName(), type).getResource();
+			AppRegistration registration = this.registry.find(currentModule.getName(), type);
+			Assert.notNull(registration, String.format("no application '%s' of type '%s' exists in the registry",
+					definition.getName(), type));
+			Resource resource = registration.getResource();
 			AppDeploymentRequest request = new AppDeploymentRequest(definition, resource, moduleDeploymentProperties);
 			String id = this.deployer.deploy(request);
 			this.deploymentIdRepository.save(DeploymentKey.forApp(currentModule), id);
