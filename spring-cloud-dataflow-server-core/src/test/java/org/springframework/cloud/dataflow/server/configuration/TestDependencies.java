@@ -121,8 +121,9 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 
 	@Bean
 	public DataFlowUriRegistryPopulator dataflowUriRegistryPopulator() {
-		return new DataFlowUriRegistryPopulator(uriRegistry(), uriRegistryPopulator(),
-				new DataFlowUriRegistryPopulatorProperties());
+		DataFlowUriRegistryPopulatorProperties props = new DataFlowUriRegistryPopulatorProperties();
+		props.setLocations(new String[] { "classpath:META-INF/test-apps.properties" });
+		return new DataFlowUriRegistryPopulator(uriRegistry(), uriRegistryPopulator(), props);
 	}
 
 	@Bean
