@@ -112,7 +112,8 @@ public abstract class AbstractShellIntegrationTest {
 					"--spring.jmx.default-domain=" + System.currentTimeMillis(),
 					"--spring.jmx.enabled=false",
 					"--security.basic.enabled=false",
-					"--spring.main.show_banner=false", "--spring.cloud.config.enabled=false");
+					"--spring.main.show_banner=false",
+					"--spring.cloud.config.enabled=false");
 
 			JLineShellComponent shell = new Bootstrap(new String[]{"--port", String.valueOf(serverPort)})
 					.getJLineShellComponent();
