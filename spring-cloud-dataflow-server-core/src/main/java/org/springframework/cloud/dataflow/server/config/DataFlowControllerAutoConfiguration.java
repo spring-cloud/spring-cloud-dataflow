@@ -132,7 +132,7 @@ public class DataFlowControllerAutoConfiguration {
 	}
 
 	@Bean
-	public MavenResourceLoader MavenResourceLoader(MavenProperties properties) {
+	public MavenResourceLoader mavenResourceLoader(MavenProperties properties) {
 		return new MavenResourceLoader(properties);
 	}
 
