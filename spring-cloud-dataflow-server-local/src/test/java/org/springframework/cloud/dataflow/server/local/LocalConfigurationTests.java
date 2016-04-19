@@ -28,7 +28,7 @@ import org.springframework.cloud.deployer.spi.local.LocalTaskLauncher;
 import org.springframework.context.ConfigurableApplicationContext;
 
 /**
- * Tests for {@link LocalDeployerAutoConfiguration}.
+ * Tests for {@link LocalDataFlowServer}.
  *
  * @author Janne Valkealahti
  * @author Eric Bottard
