@@ -20,6 +20,7 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -27,9 +28,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.ArrayList;
 import java.util.Date;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobInstance;
 import org.springframework.batch.core.JobParameters;
@@ -53,6 +56,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 /**
  * @author Glenn Renfro
+ * @author Gunnar Hillert
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {EmbeddedDataSourceConfiguration.class,
@@ -67,6 +71,12 @@ public class JobExecutionControllerTests {
 	private final static String JOB_NAME_ORIG = BASE_JOB_NAME + "_ORIG";
 
 	private final static String JOB_NAME_FOO = BASE_JOB_NAME + "_FOO";
+
+	private final static String JOB_NAME_COMPLETED = BASE_JOB_NAME + "_FOO_COMPLETED";
+
+	private final static String JOB_NAME_STOPPED = BASE_JOB_NAME + "_FOO_STOPPED";
+
+	private final static String JOB_NAME_STARTED = BASE_JOB_NAME + "_FOO_STARTED";
 
 	private final static String JOB_NAME_FOOBAR = BASE_JOB_NAME + "_FOOBAR";
 
@@ -94,6 +104,9 @@ public class JobExecutionControllerTests {
 			createSampleJob(JOB_NAME_ORIG, 1);
 			createSampleJob(JOB_NAME_FOO, 1);
 			createSampleJob(JOB_NAME_FOOBAR, 2);
+			createSampleJob(JOB_NAME_COMPLETED, 1, BatchStatus.COMPLETED);
+			createSampleJob(JOB_NAME_STARTED, 1, BatchStatus.STARTED);
+			createSampleJob(JOB_NAME_STOPPED, 1, BatchStatus.STOPPED);
 			initialized = true;
 		}
 	}
@@ -111,6 +124,63 @@ public class JobExecutionControllerTests {
 	}
 
 	@Test
+	public void testStopNonExistingJobExecution() throws Exception{
+		mockMvc.perform(
+				put("/jobs/executions/1345345345345").accept(MediaType.APPLICATION_JSON).param("stop", "true")
+		).andExpect(status().isNotFound());
+	}
+
+	@Test
+	public void testRestartNonExistingJobExecution() throws Exception{
+		mockMvc.perform(
+				put("/jobs/executions/1345345345345").accept(MediaType.APPLICATION_JSON).param("restart", "true")
+		).andExpect(status().isNotFound());
+	}
+
+	@Test
+	public void testRestartCompletedJobExecution() throws Exception{
+		mockMvc.perform(
+				put("/jobs/executions/5").accept(MediaType.APPLICATION_JSON).param("restart", "true")
+		).andExpect(status().isUnprocessableEntity());
+	}
+
+	@Test
+	public void testStopStartedJobExecution() throws Exception{
+		mockMvc.perform(
+				put("/jobs/executions/6").accept(MediaType.APPLICATION_JSON).param("stop", "true")
+		).andExpect(status().isOk());
+	}
+
+	@Test
+	public void testStopStartedJobExecutionTwice() throws Exception{
+		mockMvc.perform(
+				put("/jobs/executions/6").accept(MediaType.APPLICATION_JSON).param("stop", "true")
+		).andExpect(status().isOk());
+
+		final JobExecution jobExecution = jobRepository.getLastJobExecution(JOB_NAME_STARTED, new JobParameters());
+		Assert.assertNotNull(jobExecution);
+		Assert.assertEquals(Long.valueOf(6), jobExecution.getId());
+		Assert.assertEquals(BatchStatus.STOPPING, jobExecution.getStatus());
+
+		mockMvc.perform(
+				put("/jobs/executions/6").accept(MediaType.APPLICATION_JSON).param("stop", "true")
+		).andExpect(status().isOk());
+	}
+
+	@Test
+	public void testStopStoppedJobExecution() throws Exception{
+		mockMvc.perform(
+				put("/jobs/executions/7").accept(MediaType.APPLICATION_JSON).param("stop", "true")
+		).andExpect(status().isUnprocessableEntity());
+
+		final JobExecution jobExecution = jobRepository.getLastJobExecution(JOB_NAME_STOPPED, new JobParameters());
+		Assert.assertNotNull(jobExecution);
+		Assert.assertEquals(Long.valueOf(7), jobExecution.getId());
+		Assert.assertEquals(BatchStatus.STOPPED, jobExecution.getStatus());
+
+	}
+
+	@Test
 	public void testGetExecution() throws Exception{
 		mockMvc.perform(
 				get("/jobs/executions/1").accept(MediaType.APPLICATION_JSON)
@@ -124,8 +194,8 @@ public class JobExecutionControllerTests {
 				get("/jobs/executions/").accept(MediaType.APPLICATION_JSON)
 		).andExpect(status().isOk())
 				.andExpect(jsonPath("$.content[*].taskExecutionId",
-						containsInAnyOrder(3, 3, 2, 1)))
-				.andExpect(jsonPath("$.content", hasSize(4)));
+						containsInAnyOrder(6, 5, 4, 3, 3, 2, 1)))
+				.andExpect(jsonPath("$.content", hasSize(7)));
 	}
 
 	@Test
@@ -154,7 +224,7 @@ public class JobExecutionControllerTests {
 		).andExpect(status().isNotFound());
 	}
 
-	private void createSampleJob(String jobName, int jobExecutionCount){
+	private void createSampleJob(String jobName, int jobExecutionCount, BatchStatus status){
 		JobInstance instance = jobRepository.createJobInstance(jobName, new JobParameters());
 		TaskExecution taskExecution = dao.createTaskExecution(
 				jobName, new Date(), new ArrayList<String>());
@@ -164,6 +234,15 @@ public class JobExecutionControllerTests {
 			jobExecution = jobRepository.createJobExecution(
 					instance, new JobParameters(), null);
 			taskBatchDao.saveRelationship(taskExecution,jobExecution);
+			jobExecution.setStatus(status);
+			if (BatchStatus.STOPPED.equals(status)) {
+				jobExecution.setEndTime(new Date());
+			}
+			jobRepository.update(jobExecution);
 		}
+	}
+
+	private void createSampleJob(String jobName, int jobExecutionCount){
+		createSampleJob(jobName, jobExecutionCount, BatchStatus.UNKNOWN);
 	}
 }

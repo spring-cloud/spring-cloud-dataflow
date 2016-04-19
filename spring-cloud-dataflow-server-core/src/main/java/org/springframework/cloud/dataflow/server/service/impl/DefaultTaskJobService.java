@@ -14,23 +14,31 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.dataflow.server.job;
+package org.springframework.cloud.dataflow.server.service.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.batch.admin.service.JobService;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobInstance;
 import org.springframework.batch.core.StepExecution;
+import org.springframework.batch.core.launch.JobExecutionNotRunningException;
 import org.springframework.batch.core.launch.NoSuchJobException;
 import org.springframework.batch.core.launch.NoSuchJobExecutionException;
 import org.springframework.batch.core.launch.NoSuchJobInstanceException;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.rest.job.JobInstanceExecutions;
 import org.springframework.cloud.dataflow.rest.job.TaskJobExecution;
+import org.springframework.cloud.dataflow.rest.job.support.JobUtils;
+import org.springframework.cloud.dataflow.server.job.support.JobNotRestartableException;
+import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
+import org.springframework.cloud.dataflow.server.service.TaskJobService;
+import org.springframework.cloud.dataflow.server.service.TaskService;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.data.domain.Pageable;
@@ -41,8 +49,9 @@ import org.springframework.util.Assert;
  * between them.
  *
  * @author Glenn Renfro.
+ * @author Gunnar Hillert
  */
-public class TaskJobRepository {
+public class DefaultTaskJobService implements TaskJobService {
 
 	private TaskExplorer taskExplorer;
 
@@ -50,14 +59,19 @@ public class TaskJobRepository {
 
 	private TaskDefinitionRepository taskDefinitionRepository;
 
+	private final TaskService taskService;
 
-	public TaskJobRepository(JobService jobService, TaskExplorer taskExplorer,
-			TaskDefinitionRepository taskDefinitionRepository){
+	private static final Logger logger = LoggerFactory.getLogger(DefaultTaskJobService.class);
+
+	public DefaultTaskJobService(JobService jobService, TaskExplorer taskExplorer,
+			TaskDefinitionRepository taskDefinitionRepository,
+			TaskService taskService){
 		Assert.notNull(jobService, "jobService must not be null");
 		Assert.notNull(taskExplorer, "taskExplorer must not be null");
 		Assert.notNull(taskDefinitionRepository, "taskDefinitionRepository must not be null");
 		this.jobService = jobService;
 		this.taskExplorer = taskExplorer;
+		this.taskService = taskService;
 		this.taskDefinitionRepository = taskDefinitionRepository;
 	}
 	/**
@@ -66,6 +80,7 @@ public class TaskJobRepository {
 	 * @param pageable enumerates the data to be returned.
 	 * @return List containing {@link TaskJobExecution}s.
 	 */
+	@Override
 	public List<TaskJobExecution> listJobExecutions(Pageable pageable)
 			throws NoSuchJobExecutionException{
 		Assert.notNull(pageable, "pageable must not be null");
@@ -87,6 +102,7 @@ public class TaskJobRepository {
 	 * @param jobName the name of the job for which to search.
 	 * @return List containing {@link TaskJobExecution}s.
 	 */
+	@Override
 	public List<TaskJobExecution> listJobExecutionsForJob (Pageable pageable,
 			String jobName) throws NoSuchJobException{
 		Assert.notNull(pageable, "pageable must not be null");
@@ -101,6 +117,7 @@ public class TaskJobRepository {
 	 * @param id the id of the {@link JobExecution}
 	 * @return the {@link TaskJobExecution}s associated with the id.
 	 */
+	@Override
 	public TaskJobExecution getJobExecution(long id) throws NoSuchJobExecutionException{
 		JobExecution jobExecution = jobService.getJobExecution(id);
 		return getTaskJobExecution(jobExecution);
@@ -113,6 +130,7 @@ public class TaskJobRepository {
 	 * @param jobName the name of the job for which to search.
 	 * @return List containing {@link JobInstanceExecutions}.
 	 */
+	@Override
 	public List<JobInstanceExecutions> listTaskJobInstancesForJobName(Pageable pageable,
 			String jobName) throws NoSuchJobException{
 		Assert.notNull(pageable, "pageable must not be null");
@@ -131,6 +149,7 @@ public class TaskJobRepository {
 	 * @param id the id of the {@link JobInstance}
 	 * @return the {@link JobInstanceExecutions} associated with the id.
 	 */
+	@Override
 	public JobInstanceExecutions getJobInstance(long id)
 			throws NoSuchJobInstanceException, NoSuchJobException {
 		return getJobInstanceExecution(jobService.getJobInstance(id));
@@ -140,6 +159,7 @@ public class TaskJobRepository {
 	 * Retrieves the total number of job instances for a job name.
 	 * @param jobName the name of the job instance.
 	 */
+	@Override
 	public int countJobInstances(String jobName) throws NoSuchJobException{
 		Assert.notNull(jobName, "jobName must not be null");
 		return jobService.countJobInstances(jobName);
@@ -148,6 +168,7 @@ public class TaskJobRepository {
 	/**
 	 * Retrieves the total number of the job executions.
 	 */
+	@Override
 	public int countJobExecutions(){
 		return jobService.countJobExecutions();
 	}
@@ -158,9 +179,39 @@ public class TaskJobRepository {
 	 * @return the number of {@link JobExecution}s that match the job name.
 	 * @throws NoSuchJobException
 	 */
+	@Override
 	public int countJobExecutionsForJob(String jobName) throws NoSuchJobException{
 		Assert.notNull(jobName, "jobName must not be null");
 		return jobService.countJobExecutionsForJob(jobName);
+	}
+
+	@Override
+	public void restartJobExecution(long jobExecutionId) throws NoSuchJobExecutionException {
+		logger.info("Restarting Job with Id " + jobExecutionId);
+
+		final TaskJobExecution taskJobExecution = this.getJobExecution(jobExecutionId);
+		final JobExecution jobExecution         = taskJobExecution.getJobExecution();
+
+		if (!JobUtils.isJobExecutionRestartable(taskJobExecution.getJobExecution())) {
+			throw new JobNotRestartableException(String.format("JobExecution with Id '%s' and state '%s' is not restartable.",
+					jobExecution.getId(), taskJobExecution.getJobExecution().getStatus()));
+		}
+
+		TaskExecution taskExecution = this.taskExplorer.getTaskExecution(taskJobExecution.getTaskId());
+
+		TaskDefinition taskDefinition = this.taskDefinitionRepository.findOne(taskExecution.getTaskName());
+
+		if (taskDefinition == null) {
+			throw new NoSuchTaskDefinitionException(taskExecution.getTaskName());
+		}
+
+		taskService.executeTask(taskDefinition.getName(), taskDefinition.getParameters());
+
+	}
+
+	@Override
+	public void stopJobExecution(long jobExecutionId) throws NoSuchJobExecutionException, JobExecutionNotRunningException {
+		this.jobService.stop(jobExecutionId).getStatus();
 	}
 
 	private List<TaskJobExecution> getTaskJobExecutionsForList(Collection<JobExecution> jobExecutions){
@@ -175,7 +226,7 @@ public class TaskJobRepository {
 	private TaskJobExecution getTaskJobExecution(JobExecution jobExecution){
 		Assert.notNull(jobExecution, "jobExecution must not be null");
 		return new TaskJobExecution(
-				taskExplorer.getTaskExecutionIdByJobExecutionId(jobExecution.getJobId()),
+				taskExplorer.getTaskExecutionIdByJobExecutionId(jobExecution.getId()),
 				jobExecution, isTaskDefined(jobExecution));
 	}
 

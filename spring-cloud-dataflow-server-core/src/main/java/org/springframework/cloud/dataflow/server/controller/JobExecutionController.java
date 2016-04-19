@@ -21,6 +21,7 @@ import java.util.TimeZone;
 
 import org.springframework.batch.admin.service.JobService;
 import org.springframework.batch.core.JobExecution;
+import org.springframework.batch.core.launch.JobExecutionNotRunningException;
 import org.springframework.batch.core.launch.NoSuchJobException;
 import org.springframework.batch.core.launch.NoSuchJobExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +29,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cloud.dataflow.rest.job.TaskJobExecution;
 import org.springframework.cloud.dataflow.rest.job.support.TimeUtils;
 import org.springframework.cloud.dataflow.rest.resource.JobExecutionResource;
-import org.springframework.cloud.dataflow.server.job.TaskJobRepository;
+import org.springframework.cloud.dataflow.server.service.TaskJobService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -50,6 +51,7 @@ import org.springframework.web.bind.annotation.RestController;
  * This includes obtaining Job execution information from the job explorer.
  *
  * @author Glenn Renfro
+ * @author Gunnar Hillert
  */
 @RestController
 @RequestMapping("/jobs/executions")
@@ -58,19 +60,19 @@ public class JobExecutionController {
 
 	private final Assembler jobAssembler = new Assembler();
 
-	private final TaskJobRepository repository;
+	private final TaskJobService taskJobService;
 
 	/**
 	 * Creates a {@code JobExecutionController} that retrieves Job Execution information
 	 * from a the {@link JobService}
 	 *
-	 * @param repository the repository this controller will use for retrieving
-	 * job execution information.
+	 * @param taskJobService the service this controller will use for retrieving
+	 * job execution information. Must not be null.
 	 */
 	@Autowired
-	public JobExecutionController(TaskJobRepository repository) {
-		Assert.notNull(repository, "repository must not be null");
-		this.repository = repository;
+	public JobExecutionController(TaskJobService taskJobService) {
+		Assert.notNull(taskJobService, "taskJobService must not be null");
+		this.taskJobService = taskJobService;
 	}
 
 	/**
@@ -84,8 +86,8 @@ public class JobExecutionController {
 	@ResponseStatus(HttpStatus.OK)
 	public PagedResources<JobExecutionResource> list(Pageable pageable,
 			PagedResourcesAssembler<TaskJobExecution> assembler) throws NoSuchJobExecutionException {
-		List<TaskJobExecution> jobExecutions = repository.listJobExecutions(pageable);
-		Page<TaskJobExecution> page = new PageImpl<>(jobExecutions, pageable, repository.countJobExecutions());
+		List<TaskJobExecution> jobExecutions = taskJobService.listJobExecutions(pageable);
+		Page<TaskJobExecution> page = new PageImpl<>(jobExecutions, pageable, taskJobService.countJobExecutions());
 		return assembler.toResource(page, jobAssembler);
 	}
 
@@ -102,9 +104,9 @@ public class JobExecutionController {
 			@RequestParam("name") String jobName, Pageable pageable,
 			PagedResourcesAssembler<TaskJobExecution> assembler)
 			throws NoSuchJobException {
-		List<TaskJobExecution> jobExecutions  = repository.listJobExecutionsForJob(pageable, jobName);
+		List<TaskJobExecution> jobExecutions  = taskJobService.listJobExecutionsForJob(pageable, jobName);
 		Page<TaskJobExecution> page = new PageImpl<>(jobExecutions, pageable,
-				repository.countJobExecutionsForJob(jobName));
+				taskJobService.countJobExecutionsForJob(jobName));
 		return assembler.toResource(page, jobAssembler);
 	}
 
@@ -117,11 +119,36 @@ public class JobExecutionController {
 	@RequestMapping(value = "/{id}", method = RequestMethod.GET, produces = "application/json")
 	@ResponseStatus(HttpStatus.OK)
 	public JobExecutionResource view(@PathVariable("id") long id) throws NoSuchJobExecutionException {
-		TaskJobExecution jobExecution = repository.getJobExecution(id);
+		TaskJobExecution jobExecution = taskJobService.getJobExecution(id);
 		if (jobExecution == null) {
 			throw new NoSuchJobExecutionException(String.format("No Job Execution with id of %d exits", id));
 		}
 		return jobAssembler.toResource(jobExecution);
+	}
+
+	/**
+	 * Stop Job Execution by the given jobExecutionId.
+	 *
+	 * @param jobExecutionId the executionId of the job execution to stop
+	 * @throws JobExecutionNotRunningException
+	 * @throws NoSuchJobExecutionException
+	 */
+	@RequestMapping(value = { "/{executionId}" }, method = RequestMethod.PUT, params = "stop=true")
+	@ResponseStatus(HttpStatus.OK)
+	public void stopJobExecution(@PathVariable("executionId") long jobExecutionId) throws NoSuchJobExecutionException, JobExecutionNotRunningException {
+		taskJobService.stopJobExecution(jobExecutionId);
+	}
+
+	/**
+	 * Restart the Job Execution with the given jobExecutionId.
+	 *
+	 * @param jobExecutionId the executionId of the job execution to restart
+	 * @throws NoSuchJobExecutionException
+	 */
+	@RequestMapping(value = { "/{executionId}" }, method = RequestMethod.PUT, params = "restart=true")
+	@ResponseStatus(HttpStatus.OK)
+	public void restartJobExecution(@PathVariable("executionId") long jobExecutionId) throws NoSuchJobExecutionException {
+		taskJobService.restartJobExecution(jobExecutionId);
 	}
 
 	/**

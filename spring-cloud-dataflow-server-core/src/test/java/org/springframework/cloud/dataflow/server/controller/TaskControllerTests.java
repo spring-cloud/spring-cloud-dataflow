@@ -36,18 +36,14 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
-import org.springframework.cloud.dataflow.server.repository.InMemoryDeploymentIdRepository;
 import org.springframework.cloud.dataflow.server.repository.InMemoryTaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.deployer.resource.maven.MavenProperties;
 import org.springframework.cloud.deployer.resource.maven.MavenResource;
-import org.springframework.cloud.deployer.resource.maven.MavenResourceLoader;
-import org.springframework.cloud.deployer.resource.registry.InMemoryUriRegistry;
 import org.springframework.cloud.deployer.resource.registry.UriRegistry;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
@@ -62,6 +58,7 @@ import org.springframework.web.context.WebApplicationContext;
  * @author Michael Minella
  * @author Mark Fisher
  * @author Glenn Renfro
+ * @author Gunnar Hillert
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = TestDependencies.class)
@@ -98,21 +95,8 @@ public class TaskControllerTests {
 	}
 
 	@Test(expected = IllegalArgumentException.class)
-	public void testTaskDeploymentControllerConstructorMissingRepository() {
-		new TaskDeploymentController(null, null, new InMemoryUriRegistry(),
-				new MavenResourceLoader(mavenProperties), taskLauncher);
-	}
-
-	@Test(expected = IllegalArgumentException.class)
-	public void testTaskDeploymentControllerConstructorMissingRegistry() {
-		new TaskDeploymentController(new InMemoryTaskDefinitionRepository(), new InMemoryDeploymentIdRepository(), null,
-				new MavenResourceLoader(mavenProperties), taskLauncher);
-	}
-
-	@Test(expected = IllegalArgumentException.class)
-	public void testTaskDeploymentControllerConstructorMissingLauncher() {
-		new TaskDeploymentController(new InMemoryTaskDefinitionRepository(), new InMemoryDeploymentIdRepository(),
-				new InMemoryUriRegistry(), new MavenResourceLoader(mavenProperties), null);
+	public void testTaskDeploymentControllerConstructorMissingTaskService() {
+		new TaskDeploymentController(null);
 	}
 
 	@Test(expected = IllegalArgumentException.class)

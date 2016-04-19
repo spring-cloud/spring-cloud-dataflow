@@ -51,10 +51,11 @@ import org.springframework.cloud.dataflow.server.controller.TaskDefinitionContro
 import org.springframework.cloud.dataflow.server.controller.TaskDeploymentController;
 import org.springframework.cloud.dataflow.server.controller.TaskExecutionController;
 import org.springframework.cloud.dataflow.server.controller.UiController;
-import org.springframework.cloud.dataflow.server.job.TaskJobRepository;
 import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
+import org.springframework.cloud.dataflow.server.service.TaskJobService;
+import org.springframework.cloud.dataflow.server.service.TaskService;
 import org.springframework.cloud.deployer.resource.maven.MavenProperties;
 import org.springframework.cloud.deployer.resource.maven.MavenResourceLoader;
 import org.springframework.cloud.deployer.resource.registry.UriRegistry;
@@ -76,6 +77,7 @@ import org.springframework.hateoas.EntityLinks;
  * Configuration for the Data Flow Server Controllers.
  *
  * @author Mark Fisher
+ * @author Gunnar Hillert
  */
 @Configuration
 @ConditionalOnBean({ AppDeployer.class, TaskLauncher.class })
@@ -154,10 +156,8 @@ public class DataFlowControllerAutoConfiguration {
 	}
 
 	@Bean
-	public TaskDeploymentController taskDeploymentController(TaskDefinitionRepository repository,
-			DeploymentIdRepository deploymentIdRepository, UriRegistry registry, DelegatingResourceLoader resourceLoader,
-			TaskLauncher taskLauncher) {
-		return new TaskDeploymentController(repository, deploymentIdRepository, registry, resourceLoader, taskLauncher);
+	public TaskDeploymentController taskDeploymentController(TaskService taskService) {
+		return new TaskDeploymentController(taskService);
 	}
 
 	@Bean
@@ -166,7 +166,7 @@ public class DataFlowControllerAutoConfiguration {
 	}
 
 	@Bean
-	public JobExecutionController jobExecutionController(TaskJobRepository repository) {
+	public JobExecutionController jobExecutionController(TaskJobService repository) {
 		return new JobExecutionController(repository);
 	}
 
@@ -181,7 +181,7 @@ public class DataFlowControllerAutoConfiguration {
 	}
 
 	@Bean
-	public JobInstanceController jobInstanceController(TaskJobRepository repository){
+	public JobInstanceController jobInstanceController(TaskJobService repository){
 		return new JobInstanceController(repository);
 	}
 

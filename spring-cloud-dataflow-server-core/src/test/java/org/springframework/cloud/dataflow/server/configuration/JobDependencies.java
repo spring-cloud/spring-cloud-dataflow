@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.dataflow.server.configuration;
 
+import static org.mockito.Mockito.mock;
 import static org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType.HAL;
 
 import javax.sql.DataSource;
@@ -33,9 +34,17 @@ import org.springframework.cloud.dataflow.server.controller.JobStepExecutionCont
 import org.springframework.cloud.dataflow.server.controller.JobStepExecutionProgressController;
 import org.springframework.cloud.dataflow.server.controller.RestControllerAdvice;
 import org.springframework.cloud.dataflow.server.controller.TaskExecutionController;
-import org.springframework.cloud.dataflow.server.job.TaskJobRepository;
+import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
+import org.springframework.cloud.dataflow.server.repository.InMemoryDeploymentIdRepository;
 import org.springframework.cloud.dataflow.server.repository.InMemoryTaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
+import org.springframework.cloud.dataflow.server.service.TaskJobService;
+import org.springframework.cloud.dataflow.server.service.TaskService;
+import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskJobService;
+import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskService;
+import org.springframework.cloud.deployer.resource.registry.InMemoryUriRegistry;
+import org.springframework.cloud.deployer.resource.registry.UriRegistry;
+import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.cloud.task.batch.listener.TaskBatchDao;
 import org.springframework.cloud.task.batch.listener.support.JdbcTaskBatchDao;
 import org.springframework.cloud.task.repository.TaskExplorer;
@@ -44,6 +53,7 @@ import org.springframework.cloud.task.repository.support.TaskExecutionDaoFactory
 import org.springframework.cloud.task.repository.support.TaskRepositoryInitializer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
@@ -51,6 +61,7 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 /**
  * @author Glenn Renfro
+ * @author Gunnar Hillert
  */
 @Configuration
 @EnableSpringDataWebSupport
@@ -59,7 +70,7 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 public class JobDependencies {
 
 	@Bean
-	public JobExecutionController jobExecutionController(TaskJobRepository repository) {
+	public JobExecutionController jobExecutionController(TaskJobService repository) {
 		return new JobExecutionController(repository);
 	}
 
@@ -73,7 +84,7 @@ public class JobDependencies {
 	}
 
 	@Bean
-	public JobInstanceController jobInstanceController(TaskJobRepository repository) {
+	public JobInstanceController jobInstanceController(TaskJobService repository) {
 		return new JobInstanceController(repository);
 	}
 	@Bean
@@ -89,14 +100,20 @@ public class JobDependencies {
 	}
 
 	@Bean
-	public TaskJobRepository taskJobExecutionRepository(JobService jobService,
-			TaskExplorer taskExplorer, TaskDefinitionRepository taskDefinitionRepository){
-		return new TaskJobRepository(jobService, taskExplorer, taskDefinitionRepository);
+	public TaskJobService taskJobExecutionRepository(JobService jobService,
+			TaskExplorer taskExplorer, TaskDefinitionRepository taskDefinitionRepository, TaskService taskService){
+		return new DefaultTaskJobService(jobService, taskExplorer, taskDefinitionRepository, taskService);
 	}
 
 	@Bean
 	public TaskDefinitionRepository taskDefinitionRepository() {
 		return new InMemoryTaskDefinitionRepository();
+	}
+
+	@Bean
+	public TaskService taskService(TaskDefinitionRepository repository, DeploymentIdRepository deploymentIdRepository,
+			UriRegistry registry, ResourceLoader resourceLoader, TaskLauncher taskLauncher) {
+		return new DefaultTaskService(repository, deploymentIdRepository, registry, resourceLoader, taskLauncher);
 	}
 
 	@Bean
@@ -160,4 +177,16 @@ public class JobDependencies {
 		return new RestControllerAdvice();
 	}
 
+	@Bean
+	public DeploymentIdRepository deploymentIdRepository() {
+		return new InMemoryDeploymentIdRepository();
+	}
+	@Bean
+	public UriRegistry uriRegistry() {
+		return new InMemoryUriRegistry();
+	}
+	@Bean
+	public TaskLauncher taskLauncher() {
+		return mock(TaskLauncher.class);
+	}
 }
