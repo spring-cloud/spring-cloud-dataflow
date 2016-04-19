@@ -27,7 +27,6 @@ import org.springframework.cloud.dataflow.core.BindingPropertyKeys;
 import org.springframework.cloud.dataflow.core.ModuleDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.StreamPropertyKeys;
-import org.springframework.cloud.dataflow.module.DeploymentState;
 import org.springframework.cloud.dataflow.module.deployer.ModuleDeployer;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.rest.resource.StreamDeploymentResource;
@@ -38,6 +37,7 @@ import org.springframework.cloud.dataflow.server.repository.NoSuchStreamDefiniti
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.app.AppStatus;
+import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.core.io.Resource;
@@ -368,10 +368,13 @@ public class StreamDeploymentController {
 		for (ModuleDefinition module : stream.getModuleDefinitions()) {
 			String key = DeploymentKey.forApp(module);
 			String id = this.deploymentIdRepository.findOne(key);
-			AppStatus status = this.deployer.status(id);
-			if (!EnumSet.of(DeploymentState.unknown, DeploymentState.undeployed)
-					.contains(status.getState())) {
-				this.deployer.undeploy(id);
+			// if id is null, assume nothing is deployed
+			if (id != null) {
+				AppStatus status = this.deployer.status(id);
+				if (!EnumSet.of(DeploymentState.unknown, DeploymentState.undeployed)
+						.contains(status.getState())) {
+					this.deployer.undeploy(id);
+				}
 			}
 		}
 	}

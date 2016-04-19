@@ -137,6 +137,35 @@ dataflow:> stream create --definition "http --server.port=8000 | log" --name myh
 ```
 The shell provides tab completion for module parameters and also the shell command `module info` provides some additional documentation.  For more comprehensive documentation on module parameters, please see the xref:modules#modules[Modules] chapter.
 
+=== Register a Stream App
+
+Register a Stream App with the App Registry using the Spring Cloud Data Flow Shell
+`module register` command. You must provide a unique name and a URI that can be
+resolved to the app artifact. For the type, specify "source", "processor", or "sink".
+Here are a few examples:
+
+```
+dataflow:>module register --name mysource --type source --uri maven://com.example:mysource:0.0.1-SNAPSHOT
+
+dataflow:>module register --name myprocessor --type processor --uri file:///Users/example/myprocessor-1.2.3.jar
+
+dataflow:>module register --name mysink --type sink --uri http://example.com/mysink-2.0.1.jar
+```
+
+When providing a URI with the `maven` scheme, the format should conform to the following:
+
+```
+maven://<groupId>:<artifactId>[:<extension>[:<classifier>]]:<version>
+```
+
+If a stream app is already registered with the provided name and type, it will not be overridden by default.
+If you would like to override the pre-existing stream app, then include the `--force` option.
+
+[NOTE]
+In some cases the Resource is resolved on the server side, whereas in others the
+URI will be passed to a runtime container instance where it is resolved. Consult
+the specific documentation of each Data Flow Server for more detail.
+
 == Advanced Features
 
 If directed graphs are needed instead of the simple linear streams described above, two features are relevant. First, named destinations may be used as a way to combine the output from multiple streams or for multiple consumers to share the output from a single stream.  This can be done using the DSL syntax `http > mydestination` or `mydestination > log`.  To learn more, refer to then section on Named Destinations.  Second, you may need to determine the output channel of a stream based on some information that is only known at runtime. To learn about such content-based routing, refer to the Dynamic Router section.

@@ -15,7 +15,7 @@ this section.
 == Introducing Spring Cloud Task
 A task executes a process on demand.  In this case a task is a
 http://projects.spring.io/spring-boot/[Spring Boot] application that is annotated with
-`@EnableTask`.  Hence a user launches a task that performs a certain process, once
+`@EnableTask`.  Hence a user launches a task that performs a certain process, and once
 complete the task ends. An example of a task would be a boot application that exports
 data from a JDBC repository to an HDFS instance.  Tasks record the start time and the end
 time as well as the boot exit code in a relational database. The task implementation is
@@ -23,17 +23,41 @@ based on the http://cloud.spring.io/spring-cloud-task/[Spring Cloud Task] projec
 
 == The Lifecycle of a task
 Before we dive deeper into the details of creating Tasks, we need to understand the
-typical lifecycle for tasks in the context of Spring Cloud Dataflow:
+typical lifecycle for tasks in the context of Spring Cloud Data Flow:
 
-1. Register a Task Module
+1. Register a Task App
 2. Create a Task Definition
 3. Launch a Task
 4. Task Execution
 5. Destroy a Task Definition
 
-=== Register a Task Module
-Register a Task Module with the Module Registry using the Spring Cloud Dataflow Shell
-`module register` command.
+=== Register a Task App
+Register a Task App with the App Registry using the Spring Cloud Data Flow Shell
+`module register` command. You must provide a unique name and a URI that can be
+resolved to the app artifact. For the type, specify "task". Here are a few examples:
+
+```
+dataflow:>module register --name task1 --type task --uri maven://com.example:mytask:1.0.2
+
+dataflow:>module register --name task2 --type task --uri file:///Users/example/mytask-1.0.2.jar
+
+dataflow:>module register --name task3 --type task --uri http://example.com/mytask-1.0.2.jar
+```
+
+When providing a URI with the `maven` scheme, the format should conform to the following:
+
+```
+maven://<groupId>:<artifactId>[:<extension>[:<classifier>]]:<version>
+```
+
+If a task app is already registered with the provided name, it will not be overridden by default.
+If you would like to override the pre-existing task app, then include the `--force` option.
+
+[NOTE]
+In some cases the Resource is resolved on the server side, whereas in others the
+URI will be passed to a runtime container instance where it is resolved. Consult
+the specific documentation of each Data Flow Server for more detail.
+
 
 === Create a Task Definition
 Create a Task Definition from a Task Module by providing a definition name as well as
