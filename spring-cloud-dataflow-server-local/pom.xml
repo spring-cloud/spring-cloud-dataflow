@@ -12,6 +12,7 @@
 	</parent>
 	<properties>
 		<start-class>org.springframework.cloud.dataflow.server.local.LocalDataFlowServer</start-class>
+		<registry.app.defaultVersion>1.0.0.BUILD-SNAPSHOT</registry.app.defaultVersion>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -26,6 +27,7 @@
 				<filtering>true</filtering>
 				<includes>
 					<include>dataflow-server.yml</include>
+					<include>META-INF/applications.properties</include>
 				</includes>
 			</resource>
 		</resources>

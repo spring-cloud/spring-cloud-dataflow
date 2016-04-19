@@ -32,11 +32,12 @@ public class DataFlowUriRegistryPopulatorProperties {
 	private boolean enabled = true;
 
 	/**
-	 * Resource locations for one or more properties files where the keys are stream or task app
-	 * names (e.g. "source.foo" or "task.bar") and the values are Resource URIs. Default location
-	 * is {@code "classpath:META-INF/applications.properties"}.
+	 * Resource locations for one or more (comma-delimited) properties files where the keys are
+	 * stream or task app names (e.g. "source.foo" or "task.bar") and the values are Resource URIs.
+	 * Default is an empty array. An example of a valid value for this property would be:
+	 * {@code "classpath:META-INF/stream-apps.properties,classpath:META-INF/task-apps.properties"}.
 	 */
-	private String[] locations = new String[] { "classpath:META-INF/applications.properties" };
+	private String[] locations = new String[] {};
 
 	public boolean isEnabled() {
 		return enabled;
