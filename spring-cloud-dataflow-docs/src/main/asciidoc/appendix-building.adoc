@@ -39,9 +39,9 @@ rabbit and redis.
 
 === Documentation
 
-There is a "full" profile that will generate documentation.  You can build just the documentation by executing 
+There is a "full" profile that will generate documentation. You can build just the documentation by executing
 
-`$ ./mvnw clean package -DskipTests -P full -pl {project-doc-module} -am`
+`$ ./mvnw clean package -DskipTests -P full -pl {project-artifactId} -am`
 
 === Working with the code
 If you don't have an IDE preference we would recommend that you use

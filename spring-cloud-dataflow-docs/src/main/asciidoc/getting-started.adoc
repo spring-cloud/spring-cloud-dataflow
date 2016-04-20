@@ -23,26 +23,29 @@ You also need to have link:http://redis.io/[Redis] installed and running if you 
 === Deploying 'local'
 . Download the Spring Cloud Data Flow Server and Shell apps:
 +
+[subs=attributes]
 ```
-wget http://repo.spring.io/milestone/org/springframework/cloud/spring-cloud-dataflow-server-local/1.0.0.BUILD-SNAPSHOT/spring-cloud-dataflow-server-local-1.0.0.BUILD-SNAPSHOT.jar
+wget http://repo.spring.io/milestone/org/springframework/cloud/spring-cloud-dataflow-server-local/{project-version}/spring-cloud-dataflow-server-local-{project-version}.jar
 
-wget http://repo.spring.io/milestone/org/springframework/cloud/spring-cloud-dataflow-shell/1.0.0.BUILD-SNAPSHOT/spring-cloud-dataflow-shell-1.0.0.BUILD-SNAPSHOT.jar
+wget http://repo.spring.io/milestone/org/springframework/cloud/spring-cloud-dataflow-shell/{project-version}/spring-cloud-dataflow-shell-{project-version}.jar
 ```
 +
 . Launch the Data Flow Server
 +
 .. Since the Data Flow Server is a Spring Boot application, you can run it just by using `java -jar`.
 +
+[subs=attributes]
 ```
-$ java -jar spring-cloud-dataflow-server-local-1.0.0.BUILD-SNAPSHOT.jar
+$ java -jar spring-cloud-dataflow-server-local-{project-version}.jar
 ```
 +
 .. Running with Custom Maven Settings and/or Behind a Proxy
 If you want to override specific maven configuration properties (remote repositories, etc.) and/or run the Data Flow Server behind a proxy,
 you need to specify those properties as command line arguments when starting the Data Flow Server. For example:
 +
+[subs=attributes]
 ```
-$ java -jar spring-cloud-dataflow-server-local-1.0.0.BUILD-SNAPSHOT.jar --maven.localRepository=mylocal --maven.remoteRepositories=repo1,repo2 --maven.offline=true
+$ java -jar spring-cloud-dataflow-server-local-{project-version}.jar --maven.localRepository=mylocal --maven.remoteRepositories=repo1,repo2 --maven.offline=true
 --maven.proxy.protocol=https --maven.proxy.host=host1 --maven.proxy.port=8090 --maven.proxy.non_proxy_hosts='host2|host3' --maven.proxy.auth.username=user1 --maven.proxy.auth.password=passwd
 ```
 +
@@ -67,8 +70,9 @@ export MAVEN_PROXY_AUTH_PASSWORD=passwd
 +
 . Launch the shell:
 +
+[subs=attributes]
 ```
-$ java -jar spring-cloud-dataflow-shell-1.0.0.BUILD-SNAPSHOT.jar
+$ java -jar spring-cloud-dataflow-shell-{project-version}.jar
 ```
 +
 If the Data Flow Server and shell are not running on the same host, point the shell to the Data Flow server:
