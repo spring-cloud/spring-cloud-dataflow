@@ -32,11 +32,14 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.metrics.CounterService;
 import org.springframework.boot.actuate.metrics.Metric;
-import org.springframework.boot.actuate.metrics.repository.InMemoryMetricRepository;
 import org.springframework.boot.actuate.metrics.repository.MetricRepository;
+import org.springframework.boot.actuate.metrics.repository.redis.RedisMetricRepository;
 import org.springframework.boot.actuate.metrics.writer.DefaultCounterService;
+import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.http.MediaType;
@@ -116,11 +119,15 @@ public class CounterControllerTests {
 	@EnableSpringDataWebSupport
 	@EnableHypermediaSupport(type = HAL)
 	@EnableWebMvc
+	@Import(RedisAutoConfiguration.class)
 	public static class Config {
+
+		@Autowired
+		RedisConnectionFactory redisConnectionFactory;
 
 		@Bean
 		public MetricRepository counterRepository() {
-			return new InMemoryMetricRepository();
+			return new RedisMetricRepository(redisConnectionFactory);
 		}
 
 
