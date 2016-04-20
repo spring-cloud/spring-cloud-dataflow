@@ -47,15 +47,13 @@ import org.springframework.shell.table.TableModel;
  */
 public class RuntimeCommandsTests {
 
-	RuntimeCommands runtimeCommands = new RuntimeCommands();
+	private RuntimeCommands runtimeCommands;
 
 	@Mock
 	private DataFlowOperations dataFlowOperations;
 
 	@Mock
 	private RuntimeOperations runtimeOperations;
-
-	private DataFlowShell dataFlowShell = new DataFlowShell();
 
 	private AppStatusResource appStatusResource1;
 
@@ -67,8 +65,9 @@ public class RuntimeCommandsTests {
 	public void setUp() {
 		MockitoAnnotations.initMocks(this);
 		when(dataFlowOperations.runtimeOperations()).thenReturn(runtimeOperations);
+		DataFlowShell dataFlowShell = new DataFlowShell();
 		dataFlowShell.setDataFlowOperations(dataFlowOperations);
-		runtimeCommands.setDataFlowShell(dataFlowShell);
+		this.runtimeCommands = new RuntimeCommands(dataFlowShell);
 		appStatusResource1 = new AppStatusResource("1", "deployed");
 		Map<String, String> properties = new HashMap<>();
 		properties.put("key1", "value1");
