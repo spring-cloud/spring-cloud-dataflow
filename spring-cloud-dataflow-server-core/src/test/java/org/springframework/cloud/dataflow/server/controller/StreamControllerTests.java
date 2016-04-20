@@ -508,4 +508,15 @@ public class StreamControllerTests {
 		assertThat(StreamDefinitionController.aggregateState(EnumSet.of(unknown)), is(undeployed));
 	}
 
+	@Test
+	public void testAppDeploymentFailure() throws Exception {
+		when(appDeployer.deploy(any(AppDeploymentRequest.class))).thenThrow(new RuntimeException());
+		repository.save(new StreamDefinition("myStream", "time | log"));
+		mockMvc.perform(
+				post("/streams/deployments/myStream").accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isCreated());
+		ArgumentCaptor<AppDeploymentRequest> captor = ArgumentCaptor.forClass(AppDeploymentRequest.class);
+		verify(appDeployer, times(2)).deploy(captor.capture());
+	}
+
 }
