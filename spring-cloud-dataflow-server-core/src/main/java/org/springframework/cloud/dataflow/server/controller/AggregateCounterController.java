@@ -10,7 +10,6 @@ import org.springframework.cloud.stream.module.metrics.AggregateCounter;
 import org.springframework.cloud.stream.module.metrics.AggregateCounterRepository;
 import org.springframework.cloud.stream.module.metrics.AggregateCounterResolution;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.hateoas.ExposesResourceFor;
@@ -23,7 +22,9 @@ import org.springframework.web.bind.annotation.*;
 import java.util.*;
 
 /**
- * @author Alex Boyko
+ * REST controller for aggregate-counters
+ *
+ * @author Eric Bottard
  */
 @Controller
 @RequestMapping("/metrics/aggregate-counters")
@@ -47,7 +48,10 @@ public class AggregateCounterController {
     @ResponseBody
     @RequestMapping(value = "", method = RequestMethod.GET)
     public PagedResources<? extends MetricResource> list(PagedResourcesAssembler<String> pagedAssembler) {
-        List<String> names = new ArrayList<>(repository.list());
+        List<String> names = new ArrayList<>();
+        for (Iterator<String> itr = repository.list().iterator(); itr.hasNext();) {
+            names.add(itr.next());
+        }
         return pagedAssembler.toResource(new PageImpl<>(names), shallowAssembler);
     }
 
