@@ -209,7 +209,7 @@ public class StreamDeploymentController {
 			// If the deployer implementation handles the deployment request synchronously, log warning message if
 			// any exception is thrown out of the deployment and proceed to the next deployment.
 			catch (Exception e) {
-				loggger.warn(String.format("Exception when deploying the app %s:%s", currentModule, e.getMessage()));
+				loggger.warn(String.format("Exception when deploying the app %s: %s", currentModule, e.getMessage()));
 			}
 		}
 	}
