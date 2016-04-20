@@ -18,6 +18,7 @@ package org.springframework.cloud.dataflow.server.controller;
 
 import java.net.URI;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -132,7 +133,8 @@ public class TaskDeploymentController {
 	 */
 	@RequestMapping(value = "/{name}", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
-	public void deploy(@PathVariable("name") String name, @RequestParam(required = false) String properties) {
+	public void deploy(@PathVariable("name") String name, @RequestParam(required = false) String properties,
+			@RequestParam(required = false) List<String> arguments) {
 		TaskDefinition taskDefinition = this.repository.findOne(name);
 		if (taskDefinition == null) {
 			throw new NoSuchTaskDefinitionException(name);
@@ -148,7 +150,7 @@ public class TaskDeploymentController {
 		AppDefinition definition = new AppDefinition(module.getLabel(), module.getParameters());
 		URI uri = this.registry.find(String.format("task.%s", module.getName()));
 		Resource resource = this.resourceLoader.getResource(uri.toString());
-		AppDeploymentRequest request = new AppDeploymentRequest(definition, resource, deploymentProperties);
+		AppDeploymentRequest request = new AppDeploymentRequest(definition, resource, deploymentProperties, arguments);
 		String id = this.taskLauncher.launch(request);
 		this.deploymentIdRepository.save(DeploymentKey.forApp(module), id);
 	}

@@ -17,6 +17,7 @@
 package org.springframework.cloud.dataflow.rest.client;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.cloud.dataflow.rest.resource.TaskDefinitionResource;
@@ -27,6 +28,7 @@ import org.springframework.hateoas.ResourceSupport;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
 /**
@@ -108,9 +110,10 @@ public class TaskTemplate implements TaskOperations {
 	}
 
 	@Override
-	public void launch(String name, Map<String, String> properties) {
+	public void launch(String name, Map<String, String> properties, List<String> arguments) {
 		MultiValueMap<String, Object> values = new LinkedMultiValueMap<String, Object>();
 		values.add("properties", DeploymentPropertiesUtils.format(properties));
+		values.add("arguments", StringUtils.collectionToDelimitedString(arguments, " "));
 		restTemplate.postForObject(deploymentLink.expand(name).getHref(), values, Object.class, name);
 	}
 
