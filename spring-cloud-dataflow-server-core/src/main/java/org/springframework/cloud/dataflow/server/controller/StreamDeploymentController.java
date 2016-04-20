@@ -22,6 +22,9 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import org.springframework.cloud.dataflow.core.ArtifactType;
 import org.springframework.cloud.dataflow.core.BindingPropertyKeys;
 import org.springframework.cloud.dataflow.core.ModuleDefinition;
@@ -66,6 +69,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/streams/deployments")
 @ExposesResourceFor(StreamDeploymentResource.class)
 public class StreamDeploymentController {
+
+	private static Log loggger = LogFactory.getLog(StreamDeploymentController.class);
 
 	private static final String INSTANCE_COUNT_PROPERTY_KEY = "count";
 
@@ -201,8 +206,15 @@ public class StreamDeploymentController {
 					definition.getName(), type));
 			Resource resource = registration.getResource();
 			AppDeploymentRequest request = new AppDeploymentRequest(definition, resource, moduleDeploymentProperties);
-			String id = this.deployer.deploy(request);
-			this.deploymentIdRepository.save(DeploymentKey.forApp(currentModule), id);
+			try {
+				String id = this.deployer.deploy(request);
+				this.deploymentIdRepository.save(DeploymentKey.forApp(currentModule), id);
+			}
+			// If the deployer implementation handles the deployment request synchronously, log warning message if
+			// any exception is thrown out of the deployment and proceed to the next deployment.
+			catch (Exception e) {
+				loggger.warn(String.format("Exception when deploying the app %s: %s", currentModule, e.getMessage()));
+			}
 		}
 	}
 
