@@ -57,9 +57,13 @@ import org.springframework.stereotype.Component;
 public class RuntimeCommands implements CommandMarker {
 
 	private static final String LIST_MODULES = "runtime modules";
+	
+	private DataFlowShell dataFlowShell;
 
 	@Autowired
-	private DataFlowShell dataFlowShell;
+	public void setDataFlowShell(DataFlowShell dataFlowShell) {
+		this.dataFlowShell = dataFlowShell;
+	}
 
 	@CliAvailabilityIndicator({LIST_MODULES})
 	public boolean available() {
