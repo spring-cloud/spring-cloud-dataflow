@@ -127,7 +127,9 @@ public class JobExecutionController {
 	}
 
 	/**
-	 * Stop Job Execution by the given jobExecutionId.
+	 * Stop a Job Execution with the given jobExecutionId. Please be aware that
+	 * you must provide the request parameter {@code stop=true} in order to invoke
+	 * this endpoint.
 	 *
 	 * @param jobExecutionId the executionId of the job execution to stop
 	 * @throws JobExecutionNotRunningException
@@ -140,7 +142,9 @@ public class JobExecutionController {
 	}
 
 	/**
-	 * Restart the Job Execution with the given jobExecutionId.
+	 * Restart the Job Execution with the given jobExecutionId. Please be aware
+	 * that you must provide the request parameter {@code restart=true} in order
+	 * to invoke this endpoint.
 	 *
 	 * @param jobExecutionId the executionId of the job execution to restart
 	 * @throws NoSuchJobExecutionException

@@ -69,10 +69,11 @@ public class DefaultTaskJobService implements TaskJobService {
 		Assert.notNull(jobService, "jobService must not be null");
 		Assert.notNull(taskExplorer, "taskExplorer must not be null");
 		Assert.notNull(taskDefinitionRepository, "taskDefinitionRepository must not be null");
+		Assert.notNull(taskService, "taskService must not be null");
 		this.jobService = jobService;
 		this.taskExplorer = taskExplorer;
-		this.taskService = taskService;
 		this.taskDefinitionRepository = taskDefinitionRepository;
+		this.taskService = taskService;
 	}
 	/**
 	 * Retrieves Pageable list of {@link JobExecution}s from the JobRepository and matches

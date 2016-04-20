@@ -46,7 +46,7 @@ public interface TaskJobService {
 	 * @param pageable enumerates the data to be returned.
 	 * @return List containing {@link TaskJobExecution}s.
 	 */
-	public List<TaskJobExecution> listJobExecutions(Pageable pageable)
+	List<TaskJobExecution> listJobExecutions(Pageable pageable)
 			throws NoSuchJobExecutionException;
 
 	/**
@@ -56,7 +56,7 @@ public interface TaskJobService {
 	 * @param jobName the name of the job for which to search.
 	 * @return List containing {@link TaskJobExecution}s.
 	 */
-	public List<TaskJobExecution> listJobExecutionsForJob (Pageable pageable,
+	List<TaskJobExecution> listJobExecutionsForJob (Pageable pageable,
 			String jobName) throws NoSuchJobException;
 
 	/**
@@ -64,7 +64,7 @@ public interface TaskJobService {
 	 * @param id the id of the {@link JobExecution}
 	 * @return the {@link TaskJobExecution}s associated with the id.
 	 */
-	public TaskJobExecution getJobExecution(long id) throws NoSuchJobExecutionException;
+	TaskJobExecution getJobExecution(long id) throws NoSuchJobExecutionException;
 
 	/**
 	 * Retrieves Pageable list of {@link JobInstanceExecutions} from the JobRepository with a
@@ -73,7 +73,7 @@ public interface TaskJobService {
 	 * @param jobName the name of the job for which to search.
 	 * @return List containing {@link JobInstanceExecutions}.
 	 */
-	public List<JobInstanceExecutions> listTaskJobInstancesForJobName(Pageable pageable,
+	List<JobInstanceExecutions> listTaskJobInstancesForJobName(Pageable pageable,
 			String jobName) throws NoSuchJobException;
 
 	/**
@@ -82,19 +82,19 @@ public interface TaskJobService {
 	 * @param id the id of the {@link JobInstance}
 	 * @return the {@link JobInstanceExecutions} associated with the id.
 	 */
-	public JobInstanceExecutions getJobInstance(long id)
+	JobInstanceExecutions getJobInstance(long id)
 			throws NoSuchJobInstanceException, NoSuchJobException;
 
 	/**
 	 * Retrieves the total number of job instances for a job name.
 	 * @param jobName the name of the job instance.
 	 */
-	public int countJobInstances(String jobName) throws NoSuchJobException;
+	int countJobInstances(String jobName) throws NoSuchJobException;
 
 	/**
 	 * Retrieves the total number of the job executions.
 	 */
-	public int countJobExecutions();
+	int countJobExecutions();
 
 	/**
 	 * Retrieves the total number {@link JobExecution} that match a specific job name.
@@ -102,7 +102,7 @@ public interface TaskJobService {
 	 * @return the number of {@link JobExecution}s that match the job name.
 	 * @throws NoSuchJobException
 	 */
-	public int countJobExecutionsForJob(String jobName) throws NoSuchJobException;
+	int countJobExecutionsForJob(String jobName) throws NoSuchJobException;
 
 	/**
 	 * Restarts a {@link JobExecution} IF the respective {@link JobExecution}
@@ -112,7 +112,7 @@ public interface TaskJobService {
 	 * @param jobExecutionId The id of the JobExecution to restart
 	 * @throws NoSuchJobExecutionException Thrown if the JobExecution for the provided id does not exist
 	 */
-	public void restartJobExecution(long jobExecutionId) throws NoSuchJobExecutionException;
+	void restartJobExecution(long jobExecutionId) throws NoSuchJobExecutionException;
 
 	/**
 	 * Requests a {@link JobExecution} to stop.
@@ -129,5 +129,5 @@ public interface TaskJobService {
 	 * @throws NoSuchJobExecutionException
 	 * @throws JobExecutionNotRunningException
 	 */
-	public void stopJobExecution(long jobExecutionId) throws NoSuchJobExecutionException, JobExecutionNotRunningException;
+	void stopJobExecution(long jobExecutionId) throws NoSuchJobExecutionException, JobExecutionNotRunningException;
 }
