@@ -46,7 +46,6 @@ import org.springframework.web.bind.annotation.RestController;
  *
  * @author Eric Bottard
  * @author Mark Fisher
- * @author Ilayaperumal Gopinathan
  */
 @RestController
 @RequestMapping("/metrics/counters")
@@ -57,10 +56,10 @@ public class CounterController {
 
 	private final MetricRepository metricRepository;
 
-	private final ResourceAssembler<Metric<Long>, CounterResource> counterResourceAssembler =
+	private final ResourceAssembler<Metric<Double>, CounterResource> counterResourceAssembler =
 			new DeepCounterResourceAssembler();
 
-	protected final ResourceAssembler<Metric<Long>, ? extends MetricResource> shallowResourceAssembler =
+	protected final ResourceAssembler<Metric<Double>, ? extends MetricResource> shallowResourceAssembler =
 			new ShallowMetricResourceAssembler();
 
 	/**
@@ -79,12 +78,12 @@ public class CounterController {
 	@RequestMapping(value = "", method = RequestMethod.GET)
 	public PagedResources<? extends MetricResource> list(
 			Pageable pageable,
-			PagedResourcesAssembler<Metric<Long>> pagedAssembler,
+			PagedResourcesAssembler<Metric<Double>> pagedAssembler,
 			@RequestParam(value = "detailed", defaultValue = "false") boolean detailed) {
 		/* Page */ Iterable<Metric<?>> metrics = metricRepository.findAll(/* pageable */);
-		List<Metric<Long>> content = filterCounters(metrics);
-		Page<Metric<Long>> page = new PageImpl<>(content);
-		ResourceAssembler<Metric<Long>, ? extends MetricResource> assemblerToUse =
+		List<Metric<Double>> content = filterCounters(metrics);
+		Page<Metric<Double>> page = new PageImpl<>(content);
+		ResourceAssembler<Metric<Double>, ? extends MetricResource> assemblerToUse =
 				detailed ? counterResourceAssembler : shallowResourceAssembler;
 		return pagedAssembler.toResource(page, assemblerToUse);
 	}
@@ -94,7 +93,7 @@ public class CounterController {
 	 */
 	@RequestMapping(value = "/{name}", method = RequestMethod.GET)
 	public CounterResource display(@PathVariable("name") String name) {
-		Metric<Long> c = findCounter(name);
+		Metric<Double> c = findCounter(name);
 		return counterResourceAssembler.toResource(c);
 	}
 
@@ -104,7 +103,7 @@ public class CounterController {
 	@RequestMapping(value = "/{name}", method = RequestMethod.DELETE)
 	@ResponseStatus(HttpStatus.OK)
 	protected void delete(@PathVariable("name") String name) {
-		Metric<Long> c = findCounter(name);
+		Metric<Double> c = findCounter(name);
 		metricRepository.reset(c.getName());
 	}
 
@@ -112,9 +111,9 @@ public class CounterController {
 	 * Find a given counter, taking care of name conversion between the Spring Boot domain and our domain.
 	 * @throws MetricsMvcEndpoint.NoSuchMetricException if the counter does not exist
 	 */
-	private Metric<Long> findCounter(@PathVariable("name") String name) {
+	private Metric<Double> findCounter(@PathVariable("name") String name) {
 		@SuppressWarnings("unchecked")
-		Metric<Long> c = (Metric<Long>) metricRepository.findOne(COUNTER_PREFIX + name);
+		Metric<Double> c = (Metric<Double>) metricRepository.findOne(COUNTER_PREFIX + name);
 		if (c == null) {
 			throw new MetricsMvcEndpoint.NoSuchMetricException(name);
 		}
@@ -143,19 +142,19 @@ public class CounterController {
 	 * @author Eric Bottard
 	 */
 	static class ShallowMetricResourceAssembler extends
-			ResourceAssemblerSupport<Metric<Long>, MetricResource> {
+			ResourceAssemblerSupport<Metric<Double>, MetricResource> {
 
 		public ShallowMetricResourceAssembler() {
 			super(CounterController.class, MetricResource.class);
 		}
 
 		@Override
-		public MetricResource toResource(Metric<Long> entity) {
+		public MetricResource toResource(Metric<Double> entity) {
 			return createResourceWithId(entity.getName().substring(COUNTER_PREFIX.length()), entity);
 		}
 
 		@Override
-		protected MetricResource instantiateResource(Metric<Long> entity) {
+		protected MetricResource instantiateResource(Metric<Double> entity) {
 			return new MetricResource(entity.getName().substring(COUNTER_PREFIX.length()));
 		}
 
@@ -167,19 +166,19 @@ public class CounterController {
 	 * @author Eric Bottard
 	 */
 	static class DeepCounterResourceAssembler extends
-			ResourceAssemblerSupport<Metric<Long>, CounterResource> {
+			ResourceAssemblerSupport<Metric<Double>, CounterResource> {
 
 		public DeepCounterResourceAssembler() {
 			super(CounterController.class, CounterResource.class);
 		}
 
 		@Override
-		public CounterResource toResource(Metric<Long> entity) {
+		public CounterResource toResource(Metric<Double> entity) {
 			return createResourceWithId(entity.getName().substring(COUNTER_PREFIX.length()), entity);
 		}
 
 		@Override
-		protected CounterResource instantiateResource(Metric<Long> entity) {
+		protected CounterResource instantiateResource(Metric<Double> entity) {
 			return new CounterResource(entity.getName().substring(COUNTER_PREFIX.length()), entity.getValue().longValue());
 		}
 
