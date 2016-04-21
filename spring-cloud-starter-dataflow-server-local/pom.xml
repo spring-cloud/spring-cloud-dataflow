@@ -25,4 +25,15 @@
 			<artifactId>spring-cloud-dataflow-server-core</artifactId>
 		</dependency>
 	</dependencies>
+	<build>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>true</filtering>
+				<includes>
+					<include>dataflow-server.yml</include>
+				</includes>
+			</resource>
+		</resources>
+	</build>
 </project>
