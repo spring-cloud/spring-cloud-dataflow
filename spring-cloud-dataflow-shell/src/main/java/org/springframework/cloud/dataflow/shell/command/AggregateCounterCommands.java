@@ -64,7 +64,7 @@ public class AggregateCounterCommands extends AbstractMetricsCommands implements
 
     @CliCommand(value = DISPLAY_AGGR_COUNTER, help = "Display aggregate counter values by chosen interval and resolution(minute, hour)")
     public List<Object> display(
-            @CliOption(key = { "", "name" }, help = "the name of the aggregate counter to display", mandatory = true, optionContext = "existing-aggregate-counter disable-string-converter") String name,
+            @CliOption(key = { "", "name" }, help = "the name of the aggregate counter to display", mandatory = true, optionContext = "existing-aggregate-counter") String name,
             @CliOption(key = "from", help = "start-time for the interval. format: 'yyyy-MM-dd HH:mm:ss'", mandatory = false) String from,
             @CliOption(key = "to", help = "end-time for the interval. format: 'yyyy-MM-dd HH:mm:ss'. defaults to now", mandatory = false) String to,
             @CliOption(key = "lastHours", help = "set the interval to last 'n' hours", mandatory = false) Integer lastHours,
@@ -111,7 +111,7 @@ public class AggregateCounterCommands extends AbstractMetricsCommands implements
 
     @CliCommand(value = DELETE_AGGR_COUNTER, help = "Delete an aggregate counter")
     public String delete(
-            @CliOption(key = { "", "name" }, help = "the name of the aggregate counter to delete", mandatory = true, optionContext = "existing-aggregate-counter disable-string-converter") String name) {
+            @CliOption(key = { "", "name" }, help = "the name of the aggregate counter to delete", mandatory = true, optionContext = "existing-aggregate-counter") String name) {
         aggrCounterOperations().delete(name);
         return String.format("Deleted aggregate counter '%s'", name);
     }

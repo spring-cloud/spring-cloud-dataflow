@@ -18,7 +18,6 @@ import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.mvc.ResourceAssemblerSupport;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -28,7 +27,7 @@ import java.util.*;
  *
  * @author Eric Bottard
  */
-@Controller
+@RestController
 @RequestMapping("/metrics/aggregate-counters")
 @ExposesResourceFor(AggregateCounterResource.class)
 public class AggregateCounterController {
