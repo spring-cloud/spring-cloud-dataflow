@@ -134,7 +134,6 @@ public class DataFlowServerConfiguration {
 		return new RedisAggregateCounterRepository(redisConnectionFactory, new RetryTemplate());
 	}
 
-
 	@Bean
 	@ConditionalOnMissingBean
 	public StreamDefinitionRepository streamDefinitionRepository() {

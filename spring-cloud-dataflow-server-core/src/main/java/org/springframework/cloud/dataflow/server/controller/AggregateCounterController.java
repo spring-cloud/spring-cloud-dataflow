@@ -4,17 +4,20 @@ import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.joda.time.ReadablePeriod;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.actuate.endpoint.mvc.MetricsMvcEndpoint;
 import org.springframework.cloud.dataflow.rest.resource.AggregateCounterResource;
 import org.springframework.cloud.dataflow.rest.resource.MetricResource;
 import org.springframework.cloud.stream.module.metrics.AggregateCounter;
 import org.springframework.cloud.stream.module.metrics.AggregateCounterRepository;
 import org.springframework.cloud.stream.module.metrics.AggregateCounterResolution;
+import org.springframework.cloud.stream.module.metrics.FieldValueCounter;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.mvc.ResourceAssemblerSupport;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -49,10 +52,25 @@ public class AggregateCounterController {
     @RequestMapping(value = "", method = RequestMethod.GET)
     public PagedResources<? extends MetricResource> list(PagedResourcesAssembler<String> pagedAssembler) {
         List<String> names = new ArrayList<>();
-        for (Iterator<String> itr = repository.list().iterator(); itr.hasNext();) {
-            names.add(itr.next());
+        for (String name : repository.list()) {
+            names.add(name);
         }
         return pagedAssembler.toResource(new PageImpl<>(names), shallowAssembler);
+    }
+
+    /**
+     * Delete (reset) a specific counter.
+     */
+    @RequestMapping(value = "/{name}", method = RequestMethod.DELETE)
+    @ResponseStatus(HttpStatus.OK)
+    protected void delete(@PathVariable("name") String name) {
+        DateTime to = providedOrDefaultToValue(null);
+        DateTime from = providedOrDefaultFromValue(null, to, AggregateCounterResolution.minute);
+        AggregateCounter counter = repository.getCounts(name, new Interval(from, to), AggregateCounterResolution.minute);
+        if (counter == null) {
+            throw new MetricsMvcEndpoint.NoSuchMetricException(name);
+        }
+        repository.reset(counter.getName());
     }
 
     /**
@@ -76,6 +94,9 @@ public class AggregateCounterController {
 
         AggregateCounter aggregate = repository.getCounts(name, new Interval(from, to), resolution);
 
+        if (aggregate == null) {
+            throw new MetricsMvcEndpoint.NoSuchMetricException(name);
+        }
         return aggregateCountResourceAssembler.toResource(aggregate);
     }
 
