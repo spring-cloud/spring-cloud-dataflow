@@ -10,7 +10,6 @@ import org.springframework.cloud.dataflow.rest.resource.MetricResource;
 import org.springframework.cloud.stream.module.metrics.AggregateCounter;
 import org.springframework.cloud.stream.module.metrics.AggregateCounterRepository;
 import org.springframework.cloud.stream.module.metrics.AggregateCounterResolution;
-import org.springframework.cloud.stream.module.metrics.FieldValueCounter;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.format.annotation.DateTimeFormat;
