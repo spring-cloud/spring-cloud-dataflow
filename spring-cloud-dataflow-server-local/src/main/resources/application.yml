@@ -1,36 +1,8 @@
-server:
-  port: 9393
-management:
-  contextPath: /management
-  security:
-    enabled: false
 info:
   app:
     name: "@project.artifactId@"
     description: "@project.description@"
     version: "@project.version@"
-security:
-  basic:
-    enabled: false
-
-spring:
-  application:
-    name: spring-cloud-dataflow-server-local
-  cloud:
-    config:
-      uri: http://localhost:8888
-    dataflow:
-      registry:
-        populator:
-          locations: classpath:META-INF/applications.properties
-  datasource:
-    url: jdbc:h2:tcp://localhost:19092/mem:dataflow
-    username: sa
-    password:
-    driverClassName: org.h2.Driver
-  task:
-    repo:
-      initialize: true
 
 # If you prefer to use Eureka to locate the Config Server, you can do that by setting
 # spring.cloud.config.discovery.enabled=true (default "false"). The net result of that is
