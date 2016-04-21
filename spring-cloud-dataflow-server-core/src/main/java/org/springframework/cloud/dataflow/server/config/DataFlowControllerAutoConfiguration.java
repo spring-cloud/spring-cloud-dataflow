@@ -68,7 +68,6 @@ import org.springframework.cloud.stream.module.metrics.FieldValueCounterReposito
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.hateoas.EntityLinks;
@@ -141,11 +140,8 @@ public class DataFlowControllerAutoConfiguration {
 	@Bean
 	@ConditionalOnMissingBean(DelegatingResourceLoader.class)
 	public DelegatingResourceLoader delegatingResourceLoader(MavenResourceLoader mavenResourceLoader) {
-		DefaultResourceLoader defaultLoader = new DefaultResourceLoader();
 		Map<String, ResourceLoader> loaders = new HashMap<>();
 		loaders.put("maven", mavenResourceLoader);
-		loaders.put("file", defaultLoader);
-		loaders.put("http", defaultLoader);
 		return new DelegatingResourceLoader(loaders);
 	}
 

@@ -19,6 +19,7 @@ package org.springframework.cloud.dataflow.shell.command;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Properties;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
@@ -61,6 +62,10 @@ public class ModuleCommands implements CommandMarker {
 
 	private static final String REGISTER_MODULE = "module register";
 
+	private static final String IMPORT_APPS = "apps import";
+
+	private static final String REGISTER_APPS = "apps register";
+
 	private DataFlowShell dataFlowShell;
 
 	@Autowired
@@ -68,7 +73,7 @@ public class ModuleCommands implements CommandMarker {
 		this.dataFlowShell = dataFlowShell;
 	}
 
-	@CliAvailabilityIndicator({LIST_MODULES, MODULE_INFO, UNREGISTER_MODULE, REGISTER_MODULE})
+	@CliAvailabilityIndicator({LIST_MODULES, MODULE_INFO, UNREGISTER_MODULE, REGISTER_MODULE, IMPORT_APPS, REGISTER_APPS})
 	public boolean available() {
 		return dataFlowShell.getDataFlowOperations() != null;
 	}
@@ -78,8 +83,7 @@ public class ModuleCommands implements CommandMarker {
 			@CliOption(mandatory = true,
 					key = {"", "name"},
 					help = "name of the module to query in the form of 'type:name'")
-			QualifiedModuleName module
-) {
+			QualifiedModuleName module) {
 		DetailedModuleRegistrationResource info = moduleOperations().info(module.name, module.type);
 		List<ConfigurationMetadataProperty> options = info.getOptions();
 		List<Object> result = new ArrayList<>();
@@ -191,12 +195,43 @@ public class ModuleCommands implements CommandMarker {
 				int currentRow = row - 1;
 				if (mappings.get(key).size() > currentRow) {
 					return mappings.get(key).get(currentRow);
-				} else {
+				}
+				else {
 					return null;
 				}
 			}
 		};
 		return DataFlowTables.applyStyle(new TableBuilder(model)).build();
+	}
+
+	@CliCommand(value = IMPORT_APPS, help = "Register all apps listed in a properties file")
+	public String importFromResource(
+			@CliOption(mandatory = true,
+					key = {"", "uri"},
+					help = "URI for the properties file")
+			String uri,
+			@CliOption(key = "force",
+				help = "force update if any app already exists (only if not in use)",
+				specifiedDefaultValue = "true",
+				unspecifiedDefaultValue = "false")
+			boolean force) {
+		moduleOperations().importFromResource(uri, force);
+		return String.format("Successfully registered apps from '%s'", uri);
+	}
+
+	@CliCommand(value = REGISTER_APPS, help = "Register all apps provided in a map")
+	public String registerAll(
+			@CliOption(mandatory = true,
+					key = {"", "map"},
+					help = "apps as key/value pairs with key as 'type.name' and value as a URI")
+			Properties apps,
+			@CliOption(key = "force",
+				help = "force update if any app already exists (only if not in use)",
+				specifiedDefaultValue = "true",
+				unspecifiedDefaultValue = "false")
+			boolean force) {
+		moduleOperations().registerAll(apps, force);
+		return String.format("Successfully registered apps: " + apps.keySet());
 	}
 
 	/**

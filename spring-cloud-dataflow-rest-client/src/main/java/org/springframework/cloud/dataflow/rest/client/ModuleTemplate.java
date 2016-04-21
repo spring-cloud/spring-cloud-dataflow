@@ -16,6 +16,8 @@
 
 package org.springframework.cloud.dataflow.rest.client;
 
+import java.util.Properties;
+
 import org.springframework.cloud.dataflow.core.ArtifactType;
 import org.springframework.cloud.dataflow.rest.resource.DetailedModuleRegistrationResource;
 import org.springframework.cloud.dataflow.rest.resource.ModuleRegistrationResource;
@@ -91,5 +93,27 @@ public class ModuleTemplate implements ModuleOperations {
 
 		return restTemplate.postForObject(uriTemplate.toString() + "/{type}/{name}", values,
 				ModuleRegistrationResource.class, type, name);
+	}
+
+	@Override
+	public PagedResources<ModuleRegistrationResource> importFromResource(String uri, boolean force) {
+		MultiValueMap<String, Object> values = new LinkedMultiValueMap<String, Object>();
+		values.add("uri", uri);
+		values.add("force", Boolean.toString(force));
+		return restTemplate.postForObject(uriTemplate.toString(), values,
+				ModuleRegistrationResource.Page.class);
+	}
+
+	@Override
+	public PagedResources<ModuleRegistrationResource> registerAll(Properties apps, boolean force) {
+		MultiValueMap<String, Object> values = new LinkedMultiValueMap<String, Object>();
+		StringBuffer buffer = new StringBuffer();
+		for (String key : apps.stringPropertyNames()) {
+			buffer.append(String.format("%s=%s\n", key, apps.getProperty(key)));
+		}
+		values.add("apps", buffer.toString());
+		values.add("force", Boolean.toString(force));
+		return restTemplate.postForObject(uriTemplate.toString(), values,
+				ModuleRegistrationResource.Page.class);
 	}
 }
