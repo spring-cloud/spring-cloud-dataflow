@@ -26,7 +26,7 @@
 				<directory>src/main/resources</directory>
 				<filtering>true</filtering>
 				<includes>
-					<include>dataflow-server.yml</include>
+					<include>application.yml</include>
 					<include>META-INF/applications.properties</include>
 				</includes>
 			</resource>
