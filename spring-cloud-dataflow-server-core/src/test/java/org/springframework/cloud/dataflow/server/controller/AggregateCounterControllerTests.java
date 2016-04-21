@@ -98,20 +98,21 @@ public class AggregateCounterControllerTests {
                 .andExpect(status().isOk())
         ;
 
-//        mockMvc.perform(
-//                get("/metrics/aggregate-counters/foo").accept(MediaType.APPLICATION_JSON)
-//        )
-//                .andExpect(status().isNotFound())
-//        ;
         mockMvc.perform(
-                get("/metrics/aggregate-counters").accept(MediaType.APPLICATION_JSON)
+                get("/metrics/aggregate-counters/foo").accept(MediaType.APPLICATION_JSON)
         )
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.page.totalElements", is(0)))
+                .andExpect(status().isNotFound())
         ;
-
     }
 
+    @Test
+    public void testInvalidDelete() throws Exception {
+        mockMvc.perform(
+                delete("/metrics/aggregate-counters/foo").accept(MediaType.APPLICATION_JSON)
+        )
+                .andExpect(status().isNotFound())
+        ;
+    }
 
     @Configuration
     @EnableSpringDataWebSupport

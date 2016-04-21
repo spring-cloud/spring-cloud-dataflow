@@ -64,13 +64,10 @@ public class AggregateCounterController {
     @RequestMapping(value = "/{name}", method = RequestMethod.DELETE)
     @ResponseStatus(HttpStatus.OK)
     protected void delete(@PathVariable("name") String name) {
-        DateTime to = providedOrDefaultToValue(null);
-        DateTime from = providedOrDefaultFromValue(null, to, AggregateCounterResolution.minute);
-        AggregateCounter counter = repository.getCounts(name, new Interval(from, to), AggregateCounterResolution.minute);
-        if (counter == null) {
+        if (!counterExists(name)) {
             throw new MetricsMvcEndpoint.NoSuchMetricException(name);
         }
-        repository.reset(counter.getName());
+        repository.reset(name);
     }
 
     /**
@@ -89,15 +86,25 @@ public class AggregateCounterController {
                                            @RequestParam(value = "to", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) DateTime to, //
                                            @RequestParam(value = "resolution", defaultValue = "hour") AggregateCounterResolution resolution) {
 
+        if (!counterExists(name)) {
+            throw new MetricsMvcEndpoint.NoSuchMetricException(name);
+        }
+
         to = providedOrDefaultToValue(to);
         from = providedOrDefaultFromValue(from, to, resolution);
 
         AggregateCounter aggregate = repository.getCounts(name, new Interval(from, to), resolution);
 
-        if (aggregate == null) {
-            throw new MetricsMvcEndpoint.NoSuchMetricException(name);
-        }
         return aggregateCountResourceAssembler.toResource(aggregate);
+    }
+
+    private boolean counterExists(String name) {
+        for (String n : repository.list()) {
+            if (n.equals(name)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
