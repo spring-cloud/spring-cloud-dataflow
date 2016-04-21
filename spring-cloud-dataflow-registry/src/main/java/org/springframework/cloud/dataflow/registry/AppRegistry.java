@@ -23,6 +23,7 @@ import java.util.Map;
 
 import org.springframework.cloud.dataflow.core.ArtifactType;
 import org.springframework.cloud.deployer.resource.registry.UriRegistry;
+import org.springframework.cloud.deployer.resource.registry.UriRegistryPopulator;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 
@@ -36,10 +37,14 @@ public class AppRegistry {
 
 	private final UriRegistry uriRegistry;
 
+	private final UriRegistryPopulator uriRegistryPopulator;
+
 	private final ResourceLoader resourceLoader;
 
 	public AppRegistry(UriRegistry uriRegistry, ResourceLoader resourceLoader) {
 		this.uriRegistry = uriRegistry;
+		this.uriRegistryPopulator = new UriRegistryPopulator();
+		this.uriRegistryPopulator.setResourceLoader(resourceLoader);
 		this.resourceLoader = resourceLoader;
 	}
 
@@ -56,15 +61,24 @@ public class AppRegistry {
 	public List<AppRegistration> findAll() {
 		List<AppRegistration> apps = new ArrayList<>();
 		for (Map.Entry<String, URI> entry : this.uriRegistry.findAll().entrySet()) {
-			String[] tokens = entry.getKey().split("\\.", 2);
-			apps.add(new AppRegistration(tokens[1], ArtifactType.valueOf(tokens[0]),
-					entry.getValue(), this.resourceLoader));
+			apps.add(createAppRegistration(entry.getKey(), entry.getValue()));
 		}
 		return apps;
 	}
 
-	public void save(String name, ArtifactType type, URI uri) {
+	public AppRegistration save(String name, ArtifactType type, URI uri) {
 		this.uriRegistry.register(key(name, type), uri);
+		return new AppRegistration(name, type, uri, this.resourceLoader);
+	}
+
+	public List<AppRegistration> importAll(boolean overwrite, String... resourceUris) {
+		List<AppRegistration> apps = new ArrayList<>();
+		Map<String, URI> registered = this.uriRegistryPopulator.populateRegistry(
+				overwrite, this.uriRegistry, resourceUris);
+		for (Map.Entry<String, URI> entry : registered.entrySet()) {
+			apps.add(createAppRegistration(entry.getKey(), entry.getValue()));
+		}
+		return apps;
 	}
 
 	public void delete(String name, ArtifactType type) {
@@ -73,5 +87,10 @@ public class AppRegistry {
 
 	private String key(String name, ArtifactType type) {
 		return String.format("%s.%s", type, name);
+	}
+
+	private AppRegistration createAppRegistration(String key, URI uri) {
+		String[] tokens = key.split("\\.", 2);
+		return new AppRegistration(tokens[1], ArtifactType.valueOf(tokens[0]), uri, this.resourceLoader);
 	}
 }

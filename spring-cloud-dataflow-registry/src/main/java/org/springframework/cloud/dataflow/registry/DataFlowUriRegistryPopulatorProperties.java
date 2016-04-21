@@ -27,9 +27,16 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class DataFlowUriRegistryPopulatorProperties {
 
 	/**
-	 * Indicates whether to populate the registry on startup. Default is {@literal true}.
+	 * Indicates whether to populate the registry on startup.
+	 * Default is {@literal true}.
 	 */
 	private boolean enabled = true;
+
+	/**
+	 * Indicates whether to overwrite any apps that are already registry on startup.
+	 * Default is {@literal true}.
+	 */
+	private boolean overwrite = true;
 
 	/**
 	 * Resource locations for one or more (comma-delimited) properties files where the keys are
@@ -45,6 +52,14 @@ public class DataFlowUriRegistryPopulatorProperties {
 
 	public void setEnabled(boolean enabled) {
 		this.enabled = enabled;
+	}
+
+	public boolean isOverwrite() {
+		return overwrite;
+	}
+
+	public void setOverwrite(boolean overwrite) {
+		this.overwrite = overwrite;
 	}
 
 	public String[] getLocations() {

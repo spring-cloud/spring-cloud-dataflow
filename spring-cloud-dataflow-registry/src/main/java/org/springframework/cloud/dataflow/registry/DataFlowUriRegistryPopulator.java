@@ -55,7 +55,7 @@ public class DataFlowUriRegistryPopulator implements InitializingBean {
 	@Override
 	public void afterPropertiesSet() {
 		if (this.properties.isEnabled() && !ObjectUtils.isEmpty(this.properties.getLocations())) {
-			this.populator.populateRegistry(this.registry, this.properties.getLocations());
+			this.populator.populateRegistry(this.properties.isOverwrite(), this.registry, this.properties.getLocations());
 		}
 	}
 
