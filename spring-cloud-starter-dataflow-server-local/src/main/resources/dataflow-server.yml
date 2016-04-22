@@ -19,10 +19,6 @@ spring:
   cloud:
     config:
       uri: http://localhost:8888
-    dataflow:
-      registry:
-        populator:
-          locations: classpath:META-INF/applications.properties
   datasource:
     url: jdbc:h2:tcp://localhost:19092/mem:dataflow
     username: sa
