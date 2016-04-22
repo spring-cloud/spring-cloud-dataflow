@@ -25,6 +25,8 @@ import org.springframework.cloud.dataflow.core.ModuleDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.rest.resource.AppInstanceStatusResource;
 import org.springframework.cloud.dataflow.rest.resource.AppStatusResource;
+import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
+import org.springframework.cloud.dataflow.server.repository.DeploymentKey;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.app.AppInstanceStatus;
@@ -37,6 +39,7 @@ import org.springframework.hateoas.ResourceAssembler;
 import org.springframework.hateoas.Resources;
 import org.springframework.hateoas.mvc.ResourceAssemblerSupport;
 import org.springframework.http.HttpStatus;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -47,6 +50,7 @@ import org.springframework.web.bind.annotation.RestController;
  *
  * @author Eric Bottard
  * @author Mark Fisher
+ * @author Janne Valkealahti
  */
 @RestController
 @RequestMapping("/runtime/modules")
@@ -60,14 +64,37 @@ public class RuntimeModulesController {
 		}
 	};
 
+	/**
+	 * The repository this controller will use for stream CRUD operations.
+	 */
 	private final StreamDefinitionRepository streamDefinitionRepository;
 
+	/**
+	 * The repository this controller will use for deployment IDs.
+	 */
+	private final DeploymentIdRepository deploymentIdRepository;
+
+	/**
+	 * The deployer this controller will use to deploy stream apps.
+	 */
 	private final AppDeployer appDeployer;
 
 	private final ResourceAssembler<AppStatus, AppStatusResource> statusAssembler = new Assembler();
 
-	public RuntimeModulesController(StreamDefinitionRepository streamDefinitionRepository, AppDeployer appDeployer) {
+	/**
+	 * Instantiates a new runtime modules controller.
+	 *
+	 * @param streamDefinitionRepository the repository this controller will use for stream CRUD operations
+	 * @param deploymentIdRepository the repository this controller will use for deployment IDs
+	 * @param appDeployer the deployer this controller will use to deploy stream apps
+	 */
+	public RuntimeModulesController(StreamDefinitionRepository streamDefinitionRepository, DeploymentIdRepository deploymentIdRepository,
+			AppDeployer appDeployer) {
+		Assert.notNull(streamDefinitionRepository, "StreamDefinitionRepository must not be null");
+		Assert.notNull(deploymentIdRepository, "DeploymentIdRepository must not be null");
+		Assert.notNull(appDeployer, "AppDeployer must not be null");
 		this.streamDefinitionRepository = streamDefinitionRepository;
+		this.deploymentIdRepository = deploymentIdRepository;
 		this.appDeployer = appDeployer;
 	}
 
@@ -75,10 +102,12 @@ public class RuntimeModulesController {
 	public PagedResources<AppStatusResource> list(PagedResourcesAssembler<AppStatus> assembler) {
 		List<AppStatus> values = new ArrayList<>();
 		for (StreamDefinition streamDefinition : this.streamDefinitionRepository.findAll()) {
-			String stream = streamDefinition.getName();
 			for (ModuleDefinition moduleDefinition : streamDefinition.getModuleDefinitions()) {
-				String module = moduleDefinition.getLabel();
-				values.add(this.appDeployer.status(String.format("%s.%s", stream, module)));
+				String key = DeploymentKey.forApp(moduleDefinition);
+				String id = this.deploymentIdRepository.findOne(key);
+				if (id != null) {
+					values.add(appDeployer.status(id));
+				}
 			}
 		}
 		Collections.sort(values, new Comparator<AppStatus>() {
@@ -163,9 +192,9 @@ public class RuntimeModulesController {
 
 	}
 
+	@SuppressWarnings("serial")
 	@ResponseStatus(HttpStatus.NOT_FOUND)
 	private static class ResourceNotFoundException extends RuntimeException {
-
 	}
 
 	private static class InstanceAssembler extends ResourceAssemblerSupport<AppInstanceStatus, AppInstanceStatusResource> {

@@ -109,8 +109,8 @@ public class DataFlowControllerAutoConfiguration {
 
 	@Bean
 	public RuntimeModulesController runtimeModulesController(StreamDefinitionRepository repository,
-			AppDeployer appDeployer) {
-		return new RuntimeModulesController(repository, appDeployer);
+			DeploymentIdRepository deploymentIdRepository, AppDeployer appDeployer) {
+		return new RuntimeModulesController(repository, deploymentIdRepository, appDeployer);
 	}
 
 	@Bean
