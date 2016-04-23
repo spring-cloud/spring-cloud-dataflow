@@ -30,7 +30,6 @@ import org.springframework.cloud.dataflow.core.BindingPropertyKeys;
 import org.springframework.cloud.dataflow.core.ModuleDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.StreamPropertyKeys;
-import org.springframework.cloud.dataflow.module.deployer.ModuleDeployer;
 import org.springframework.cloud.dataflow.registry.AppRegistration;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.rest.resource.StreamDeploymentResource;
@@ -183,7 +182,6 @@ public class StreamDeploymentController {
 			ArtifactType type = determineModuleType(currentModule);
 			Map<String, String> moduleDeploymentProperties = extractModuleDeploymentProperties(currentModule, streamDeploymentProperties);
 			moduleDeploymentProperties.put(AppDeployer.GROUP_PROPERTY_KEY, currentModule.getGroup());
-			moduleDeploymentProperties.put(ModuleDeployer.GROUP_DEPLOYMENT_ID, currentModule.getGroup() + "-" + timestamp);
 			if (moduleDeploymentProperties.containsKey(INSTANCE_COUNT_PROPERTY_KEY)) {
 				moduleDeploymentProperties.put(AppDeployer.COUNT_PROPERTY_KEY,
 						moduleDeploymentProperties.get(INSTANCE_COUNT_PROPERTY_KEY));

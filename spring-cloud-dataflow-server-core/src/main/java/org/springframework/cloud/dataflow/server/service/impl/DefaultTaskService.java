@@ -20,10 +20,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.h2.util.Task;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.dataflow.core.ModuleDefinition;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
-import org.springframework.cloud.dataflow.module.deployer.ModuleDeployer;
 import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
 import org.springframework.cloud.dataflow.server.repository.DeploymentKey;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;
@@ -159,8 +159,6 @@ public class DefaultTaskService implements TaskService {
 		Map<String, String> deploymentProperties = new HashMap<>();
 		module = this.updateTaskProperties(module, module.getName() );
 		deploymentProperties.putAll(runtimeProperties);
-		deploymentProperties.put(ModuleDeployer.GROUP_DEPLOYMENT_ID, taskDefinition.getName()
-				+ "-" + System.currentTimeMillis());
 
 		AppDefinition definition = new AppDefinition(module.getLabel(), module.getParameters());
 		URI uri = this.registry.find(String.format("task.%s", module.getName()));

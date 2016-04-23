@@ -31,9 +31,7 @@
 		<spring-batch-admin-dependencies.version>1.3.1.RELEASE</spring-batch-admin-dependencies.version>
 	</properties>
 	<modules>
-		<module>spring-cloud-dataflow-app-launcher</module>
 		<module>spring-cloud-dataflow-configuration-metadata</module>
-		<module>spring-cloud-dataflow-deployer-spi</module>
 		<module>spring-cloud-dataflow-core</module>
 		<module>spring-cloud-dataflow-registry</module>
 		<module>spring-cloud-dataflow-rest-resource</module>
