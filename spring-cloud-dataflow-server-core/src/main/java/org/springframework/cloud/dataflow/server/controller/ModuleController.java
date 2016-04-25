@@ -167,7 +167,7 @@ public class ModuleController {
 	 * @param force       if {@code true}, overwrites any pre-existing registrations
 	 */
 	@RequestMapping(method = RequestMethod.POST)
-	@ResponseStatus(HttpStatus.OK)
+	@ResponseStatus(HttpStatus.CREATED)
 	public PagedResources<? extends ModuleRegistrationResource> registerAll(
 			PagedResourcesAssembler<AppRegistration> assembler,
 			@RequestParam(value = "uri", required = false) String uri,

@@ -113,7 +113,7 @@ public class ModuleCommandsTests {
 	}
 
 	@Test
-	public void registerAll() {
+	public void importFromLocalResource() {
 		String name1 = "foo";
 		ArtifactType type1 = ArtifactType.source;
 		String uri1 = "file:///foo";
@@ -129,8 +129,9 @@ public class ModuleCommandsTests {
 		PagedResources<ModuleRegistrationResource> pagedResources = new PagedResources<>(resources,
 				new PagedResources.PageMetadata(resources.size(), 1, resources.size(), 1));
 		when(moduleOperations.registerAll(apps, true)).thenReturn(pagedResources);
-		String result = moduleCommands.registerAll(apps, true);
-		assertEquals("Successfully registered apps: [source.foo, sink.bar]", result);
+		String appsFileUri = "classpath:moduleCommandsTests-apps.properties";
+		String result = moduleCommands.importFromResource(appsFileUri, true, true);
+		assertEquals("Successfully registered modules: [source.foo, sink.bar]", result);
 	}
 
 	@Test
@@ -142,7 +143,7 @@ public class ModuleCommandsTests {
 				new PagedResources.PageMetadata(resources.size(), 1, resources.size(), 1));
 		String uri = "test://example";
 		when(moduleOperations.importFromResource(uri, true)).thenReturn(pagedResources);
-		String result = moduleCommands.importFromResource(uri, true);
-		assertEquals("Successfully registered apps from 'test://example'", result);
+		String result = moduleCommands.importFromResource(uri, false, true);
+		assertEquals("Successfully registered 2 modules from 'test://example'", result);
 	}
 }
