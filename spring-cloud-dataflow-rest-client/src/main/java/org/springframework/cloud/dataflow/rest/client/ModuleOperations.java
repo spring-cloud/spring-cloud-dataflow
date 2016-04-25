@@ -16,6 +16,8 @@
 
 package org.springframework.cloud.dataflow.rest.client;
 
+import java.util.Properties;
+
 import org.springframework.cloud.dataflow.core.ArtifactType;
 import org.springframework.cloud.dataflow.rest.resource.DetailedModuleRegistrationResource;
 import org.springframework.cloud.dataflow.rest.resource.ModuleRegistrationResource;
@@ -74,5 +76,21 @@ public interface ModuleOperations {
 	 * @param type  module type
 	 */
 	void unregister(String name, ArtifactType type);
+
+	/**
+	 * Register all modules listed in a properties file.
+	 *
+	 * @param uri   URI for the properties file
+	 * @param force if {@code true}, overwrites any pre-existing registrations
+	 */
+	PagedResources<ModuleRegistrationResource> importFromResource(String uri, boolean force);
+
+	/**
+	 * Register all modules provided as key/value pairs.
+	 *
+	 * @param apps   the apps as key/value pairs where key is "type.name" and value is a URI
+	 * @param force if {@code true}, overwrites any pre-existing registrations
+	 */
+	PagedResources<ModuleRegistrationResource> registerAll(Properties apps, boolean force);
 
 }
