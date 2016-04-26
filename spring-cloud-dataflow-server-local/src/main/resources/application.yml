@@ -4,6 +4,7 @@ info:
     description: "@project.description@"
     version: "@project.version@"
 spring:
+  cloud:
     dataflow:
       registry:
         populator:
