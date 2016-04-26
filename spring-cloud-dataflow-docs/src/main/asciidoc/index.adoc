@@ -19,6 +19,7 @@ include::spring-cloud-dataflow-overview.adoc[]
 include::getting-started.adoc[]
 include::streams.adoc[]
 include::tasks.adoc[]
+include::dashboard.adoc[]
 include::appendix.adoc[]
 
 
