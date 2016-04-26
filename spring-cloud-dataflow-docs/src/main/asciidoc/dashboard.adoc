@@ -15,18 +15,17 @@ Spring Cloud Data Flow provides a browser-based GUI which currently has 6 sectio
 * **Runtime** Provides the Dataflow cluster view with the list of all running applications
 * **Streams** Deploy/undeploy Stream Definitions
 * **Tasks** List, create, launch and destroy Task Definitions
-* **Jobs** Perform Batch Job related tasks
+* **Jobs** Perform Batch Job related functions
 * **Analytics** Create data visualizations for the various analytics modules
 
 Upon starting Spring Cloud Data Flow, the Dashboard is available at:
 
-"http://<adminHost>:<adminPort>/admin-ui"
+`http://<adminHost>:<adminPort>/admin-ui`
 
-For example: http://localhost:9393/admin-ui
+For example: http://localhost:9393/admin-ui[http://localhost:9393/admin-ui]
 
-If you have enabled https, then it will be located at https://localhost:9393/admin-ui
-
-If you have enabled security, a login form is available at http://localhost:9393/admin-ui/#/login
+If you have enabled https, then it will be located at `https://localhost:9393/admin-ui`.
+If you have enabled security, a login form is available at `http://localhost:9393/admin-ui/#/login`.
 
 **Note**: The default Dashboard server port is `9393`
 
@@ -47,7 +46,7 @@ image::images/dataflow-available-apps-list.png[List of available applications, w
 == Runtime
 The _Runtime_ section of the Dashboard application shows the Spring Cloud Data Flow
 cluster view with the list of all running applications. For each runtime module the
-state of the deployment and the number of deployed instanced is shown.
+state of the deployment and the number of deployed instances is shown.
 A list of the used deployment properties is available by clicking on the
 module id.
 
@@ -59,7 +58,7 @@ image::images/dataflow-runtime.png[List of running applications, width=500]
 
 The _Streams_ section of the Dashboard provides the _Definitions_ tab that provides
 a listing of Stream definitions. There you have the option to *deploy* or *undeploy*
-those streams. Additionally you can remove the definition by clicking on *destroy*.
+those stream definitions. Additionally you can remove the definition by clicking on *destroy*.
 
 .List of Stream Definitions
 image::images/dataflow-streams-list-definitions.png[List of Stream Definitions, width=500]
@@ -91,7 +90,7 @@ On this screen you can perform the following actions:
 * View details such as the task module options.
 * Create a Task Definition from the respective Module.
 
-==== Create a Job Definition from a selected Job Module
+==== Create a Task Definition from a selected Job Module
 
 On this screen you can create a new Task Definition. As a minimum you must provide a
 name for the new definition. You will also have the option
@@ -137,7 +136,7 @@ image::images/dataflow-task-executions-list.png[List of Task Executions, width=5
 
 The _Jobs_ section of the Dashboard allows you to inspect *Batch Jobs*. The main
 section of the screen provides a list of Job Executions. *Batch Jobs*
-are basically *Tasks* that were executing one or more *Batch Job*. As such each
+are *Tasks* that were executing one or more *Batch Job*. As such each
 Job Execution has a back reference to the *Task Execution Id* (Task Id).
 
 In case of a failed job, you can also restart the task. When dealing with long-running
