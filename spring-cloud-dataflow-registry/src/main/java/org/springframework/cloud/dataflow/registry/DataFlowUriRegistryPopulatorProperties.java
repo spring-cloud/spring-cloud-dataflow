@@ -33,7 +33,7 @@ public class DataFlowUriRegistryPopulatorProperties {
 	private boolean enabled = true;
 
 	/**
-	 * Indicates whether to overwrite any apps that are already registry on startup.
+	 * Indicates whether to overwrite any apps that are already registered on startup.
 	 * Default is {@literal true}.
 	 */
 	private boolean overwrite = true;
