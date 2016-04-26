@@ -1,6 +1,8 @@
 == Spring Cloud Data Flow Server - Local
 
-The SPI implementation for deploying https://github.com/spring-cloud/spring-cloud-stream[Spring Cloud Stream] modules locally, either within the same JVM as the Data Flow Server or by spawning a new JVM process on the local machine. Spawning a new JVM process is the default. To run modules within the existing JVM process set the environment variable `DEPLOYER_LOCAL_OUT_OF_PROCESS=false` or the corresponding property: `deployer.local.out-of-process`.
+The Data Flow Server implementation for deploying https://github.com/spring-cloud/spring-cloud-stream[Spring Cloud Stream]
+and https://github.com/spring-cloud/spring-cloud-task[Spring Cloud Task] apps locally by spawning
+a new JVM process on the local machine. This server is intended for development use only.
 
 == Getting Started
 
@@ -8,6 +10,7 @@ This shows how to start the Data Flow Server and Shell to create the `time | log
 
 === Start the Data Flow Server and Shell
 
+. Start Kafka locally (e.g. `kafka-server-start.sh /usr/local/etc/kafka/server.properties`)
 . Start Redis locally via `redis-server`
 . Build from the spring-cloud-dataflow root directory:
 +
@@ -15,18 +18,16 @@ This shows how to start the Data Flow Server and Shell to create the `time | log
 ./mvnw clean install
 ----
 +
-. Start the Data Flow Server application:
+. Start the Local Data Flow Server application:
 +
 ----
-export DEPLOYER_LOCAL_OUT_OF_PROCESS=false
-
-java -jar spring-cloud-dataflow-server-local/target/spring-cloud-dataflow-server-local-1.0.0.BUILD-SNAPSHOT.jar
+java -jar spring-cloud-dataflow-server-local/target/spring-cloud-dataflow-server-local-<version>.jar
 ----
 +
 . Start the shell
 +
 ----
-$ java -jar spring-cloud-dataflow-shell/target/spring-cloud-dataflow-shell-1.0.0.BUILD-SNAPSHOT.jar
+$ java -jar spring-cloud-dataflow-shell/target/spring-cloud-dataflow-shell-<version>.jar
 ----
 
 === Creating the `time | log` stream:
@@ -77,17 +78,28 @@ $ curl -X POST http://localhost:9393/streams/deployments/ticktock
 If successful you should see output similar to the following in the `Data Flow Server` console:
 
 ----
-2015-12-08 16:36:23.917  INFO 22951 --- [hannel-adapter1] log.sink  : 2015-12-08 16:36:23
-2015-12-08 16:36:24.918  INFO 22951 --- [hannel-adapter1] log.sink  : 2015-12-08 16:36:24
-2015-12-08 16:36:25.919  INFO 22951 --- [hannel-adapter1] log.sink  : 2015-12-08 16:36:25
+...o.s.c.d.spi.local.LocalAppDeployer    : deploying app ticktock.log instance 0
+   Logs will be in /some/path/ticktock.log
 ----
+
+If you tail the `stdout_0.log` file from the directory mentioned, you should see output similar to the following:
+
+----
+2016-04-26 15:10:18.320  INFO 59890 --- [pool-1-thread-1] log.sink    : 04/26/16 15:10:18
+2016-04-26 15:10:19.322  INFO 59890 --- [pool-1-thread-1] log.sink    : 04/26/16 15:10:19
+2016-04-26 15:10:20.322  INFO 59890 --- [pool-1-thread-1] log.sink    : 04/26/16 15:10:20
+----
+
+If you want to use RabbitMQ instead of Kafka as the binder, you can simply pass `--binder=rabbit` as a command line
+argument when starting the `spring-cloud-dataflow-server-local` JAR (and be sure to start the RabbitMQ server).
+
 
 ## Configuration
 
 ### Default
 To configure the Data Flow Server you can follow the configuration setup guidelines specified in the boot documentation found http://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-external-config.html[here]
 
-Note: The `dataflow-server.yml` containing the defaults can be found https://github.com/spring-cloud/spring-cloud-dataflow/blob/master/spring-cloud-dataflow-deployer-local/src/main/resources/dataflow-server.yml[here]
+Note: The `dataflow-server.yml` containing the defaults can be found https://github.com/spring-cloud/spring-cloud-dataflow/blob/master/spring-cloud-starter-dataflow-server-local/src/main/resources/dataflow-server.yml[here]
 
 ### Spring Cloud Configuration
 The Spring Cloud Data Flow Server offers the user the ability to configure properties via
