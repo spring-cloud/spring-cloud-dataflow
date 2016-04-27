@@ -114,10 +114,13 @@ public class ModuleController {
 		DetailedModuleRegistrationResource result = new DetailedModuleRegistrationResource(moduleAssembler.toResource(registration));
 		Resource resource = registration.getResource();
 
-		List<ConfigurationMetadataProperty> properties = metadataResolver.listProperties(resource);
-		for (ConfigurationMetadataProperty property : properties) {
-			result.addOption(property);
-		}
+		//TODO: Docker URIs will throw an exception, need another way to get the properties for them
+		try {
+			List<ConfigurationMetadataProperty> properties = metadataResolver.listProperties(resource);
+			for (ConfigurationMetadataProperty property : properties) {
+				result.addOption(property);
+			}
+		} catch (Exception ignore) {}
 		return result;
 	}
 
