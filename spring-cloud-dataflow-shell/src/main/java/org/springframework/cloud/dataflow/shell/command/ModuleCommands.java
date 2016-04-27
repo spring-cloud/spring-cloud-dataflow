@@ -98,36 +98,41 @@ public class ModuleCommands implements CommandMarker, ResourceLoaderAware {
 					help = "name of the module to query in the form of 'type:name'")
 			QualifiedModuleName module) {
 		DetailedModuleRegistrationResource info = moduleOperations().info(module.name, module.type);
-		List<ConfigurationMetadataProperty> options = info.getOptions();
 		List<Object> result = new ArrayList<>();
-		result.add(String.format("Information about %s module '%s':", module.type, module.name));
+		if (info != null) {
+			List<ConfigurationMetadataProperty> options = info.getOptions();
+			result.add(String.format("Information about %s module '%s':", module.type, module.name));
 
-		result.add(String.format("Resource URI: %s", info.getUri()));
+			result.add(String.format("Resource URI: %s", info.getUri()));
 
-		if (info.getShortDescription() != null) {
-			result.add(info.getShortDescription());
-		}
-		if (options == null) {
-			result.add("Module options metadata is not available");
+			if (info.getShortDescription() != null) {
+				result.add(info.getShortDescription());
+			}
+			if (options == null) {
+				result.add("Module options metadata is not available");
+			}
+			else {
+				TableModelBuilder<Object> modelBuilder = new TableModelBuilder<>();
+				modelBuilder.addRow()
+						.addValue("Option Name")
+						.addValue("Description")
+						.addValue("Default")
+						.addValue("Type");
+				for (ConfigurationMetadataProperty option : options) {
+					modelBuilder.addRow()
+							.addValue(option.getId())
+							.addValue(option.getDescription() == null ? "<unknown>" : option.getDescription())
+							.addValue(prettyPrintDefaultValue(option))
+							.addValue(option.getType() == null ? "<unknown>" : option.getType());
+				}
+				TableBuilder builder = DataFlowTables.applyStyle(new TableBuilder(modelBuilder.build()))
+						.on(CellMatchers.table()).addSizer(new AbsoluteWidthSizeConstraints(30))
+						.and();
+				result.add(builder.build());
+			}
 		}
 		else {
-			TableModelBuilder<Object> modelBuilder = new TableModelBuilder<>();
-			modelBuilder.addRow()
-					.addValue("Option Name")
-					.addValue("Description")
-					.addValue("Default")
-					.addValue("Type");
-			for (ConfigurationMetadataProperty option : options) {
-				modelBuilder.addRow()
-						.addValue(option.getId())
-						.addValue(option.getDescription() == null ? "<unknown>" : option.getDescription())
-						.addValue(prettyPrintDefaultValue(option))
-						.addValue(option.getType() == null ? "<unknown>" : option.getType());
-			}
-			TableBuilder builder = DataFlowTables.applyStyle(new TableBuilder(modelBuilder.build()))
-					.on(CellMatchers.table()).addSizer(new AbsoluteWidthSizeConstraints(30))
-					.and();
-			result.add(builder.build());
+			result.add(String.format("Module info is not available for %s:%s", module.type, module.name));
 		}
 		return result;
 	}

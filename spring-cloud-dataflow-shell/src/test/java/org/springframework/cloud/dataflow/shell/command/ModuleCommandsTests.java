@@ -98,7 +98,13 @@ public class ModuleCommandsTests {
 				assertThat(model.getValue(row, col), Matchers.is(expected[row][col]));
 			}
 		}
- 	}
+	}
+
+	@Test
+	public void testUnknownModule() {
+		List<Object> result = moduleCommands.info(new ModuleCommands.QualifiedModuleName("unknown", ArtifactType.processor));
+		assertEquals((String) result.get(0), "Module info is not available for processor:unknown");
+	}
 
 	@Test
 	public void register() {
