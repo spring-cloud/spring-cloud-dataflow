@@ -8,11 +8,11 @@
 	<parent>
 		<groupId>org.springframework.cloud</groupId>
 		<artifactId>spring-cloud-dataflow-parent</artifactId>
-		<version>1.0.0.BUILD-SNAPSHOT</version>
+		<version>1.0.0.M3</version>
 	</parent>
 	<properties>
 		<start-class>org.springframework.cloud.dataflow.server.local.LocalDataFlowServer</start-class>
-		<registry.app.defaultVersion>1.0.0.BUILD-SNAPSHOT</registry.app.defaultVersion>
+		<registry.app.defaultVersion>1.0.0.M1</registry.app.defaultVersion>
 		<registry.app.defaultBinder>kafka</registry.app.defaultBinder>
 	</properties>
 	<dependencies>
