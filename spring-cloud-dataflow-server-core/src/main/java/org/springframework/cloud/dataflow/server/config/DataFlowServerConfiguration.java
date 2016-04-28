@@ -34,9 +34,11 @@ import org.springframework.batch.core.explore.support.JobExplorerFactoryBean;
 import org.springframework.batch.core.launch.support.SimpleJobLauncher;
 import org.springframework.batch.core.repository.support.JobRepositoryFactoryBean;
 import org.springframework.batch.item.ExecutionContext;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.actuate.metrics.repository.MetricRepository;
 import org.springframework.boot.actuate.metrics.repository.redis.RedisMetricRepository;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -81,6 +83,7 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
+import org.springframework.hateoas.core.DefaultRelProvider;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
@@ -119,6 +122,8 @@ public class DataFlowServerConfiguration {
 
 	protected static final org.slf4j.Logger logger = LoggerFactory.getLogger(DataFlowServerConfiguration.class);
 
+	private static final String REL_PROVIDER_BEAN_NAME = "defaultRelProvider";
+
 	@Value("${spring.datasource.url:#{null}}")
 	private String dataSourceUrl;
 
@@ -132,6 +137,27 @@ public class DataFlowServerConfiguration {
 	@ConditionalOnMissingBean
 	public FieldValueCounterRepository fieldValueCounterReader(RedisConnectionFactory redisConnectionFactory) {
 		return new RedisFieldValueCounterRepository(redisConnectionFactory, new RetryTemplate());
+	}
+
+	@Bean
+	public BeanPostProcessor relProviderOverridingBeanPostProcessor() {
+		return new BeanPostProcessor() {
+			@Override
+			public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
+				// Override the RelProvider to DefaultRelProvider
+				// Since DataFlow UI expects DefaultRelProvider to be used, override any other instance of
+				// DefaultRelProvider (EvoInflectorRelProvider for instance) with the DefaultRelProvider.
+				if (beanName.equals(REL_PROVIDER_BEAN_NAME)) {
+					return new DefaultRelProvider();
+				}
+				return bean;
+			}
+
+			@Override
+			public Object postProcessAfterInitialization(Object bean, String s) throws BeansException {
+				return bean;
+			}
+		};
 	}
 
 	@Bean
@@ -169,7 +195,7 @@ public class DataFlowServerConfiguration {
 
 		@Bean
 		@Primary
-		public ObjectMapper objectMapper(){
+		public ObjectMapper objectMapper() {
 			ObjectMapper objectMapper = springHateoasObjectMapper;
 			setupObjectMapper(objectMapper);
 			return objectMapper;
@@ -197,7 +223,7 @@ public class DataFlowServerConfiguration {
 			};
 		}
 
-		private void setupObjectMapper(ObjectMapper objectMapper){
+		private void setupObjectMapper(ObjectMapper objectMapper) {
 			objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
 			objectMapper.setDateFormat(new ISO8601DateFormatWithMilliSeconds());
 			objectMapper.addMixIn(StepExecution.class, StepExecutionJacksonMixIn.class);
@@ -227,7 +253,7 @@ public class DataFlowServerConfiguration {
 
 	@Bean
 	public TaskJobService taskJobExecutionRepository(JobService service,
-			TaskExplorer taskExplorer, TaskDefinitionRepository taskDefinitionRepository, TaskService taskService ) {
+			TaskExplorer taskExplorer, TaskDefinitionRepository taskDefinitionRepository, TaskService taskService) {
 		return new DefaultTaskJobService(service, taskExplorer, taskDefinitionRepository, taskService);
 	}
 
@@ -249,6 +275,7 @@ public class DataFlowServerConfiguration {
 		jobExplorerFactoryBean.setDataSource(dataSource);
 		return jobExplorerFactoryBean;
 	}
+
 	@Configuration
 	@ConditionalOnExpression("#{'${spring.datasource.url:}'.startsWith('jdbc:h2:tcp://localhost:') && '${spring.datasource.url:}'.contains('/mem:')}")
 	public static class H2ServerConfiguration {
@@ -280,6 +307,7 @@ public class DataFlowServerConfiguration {
 		}
 
 	}
+
 	@Configuration
 	@ConditionalOnExpression("#{!'${spring.datasource.url:}'.startsWith('jdbc:h2:tcp://localhost:') && !'${spring.datasource.url:}'.contains('/mem:')}")
 	public static class NoH2ServerConfiguration {
