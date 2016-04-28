@@ -22,7 +22,6 @@ import java.net.URL;
 
 import org.springframework.boot.loader.JarLauncher;
 import org.springframework.boot.loader.archive.Archive;
-import org.springframework.cloud.dataflow.app.utils.ClassloaderUtils;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 

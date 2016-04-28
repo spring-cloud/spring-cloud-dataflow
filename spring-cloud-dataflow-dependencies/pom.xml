@@ -14,6 +14,8 @@
 	<name>spring-cloud-dataflow-dependencies</name>
 	<description>Spring Cloud Data Flow Dependencies BOM designed to support consumption of Spring Cloud Data Flow from the Spring Initializr.</description>
 	<properties>
+		<spring-cloud-dataflow.version>1.0.0.BUILD-SNAPSHOT</spring-cloud-dataflow.version>
+		<spring-cloud-dataflow-ui.version>1.0.0.BUILD-SNAPSHOT</spring-cloud-dataflow-ui.version>
 		<cloudfoundry-client-lib.version>1.1.3</cloudfoundry-client-lib.version>
 		<spring-shell.version>1.2.0.M1</spring-shell.version>
 	</properties>
@@ -22,62 +24,57 @@
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-dataflow-shell</artifactId>
-				<version>${project.version}</version>
+				<version>${spring-cloud-dataflow.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-dataflow-completion</artifactId>
-				<version>${project.version}</version>
+				<version>${spring-cloud-dataflow.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-dataflow-core</artifactId>
-				<version>${project.version}</version>
+				<version>${spring-cloud-dataflow.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-dataflow-rest-client</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.springframework.cloud</groupId>
-				<artifactId>spring-cloud-dataflow-app-launcher</artifactId>
-				<version>${project.version}</version>
+				<version>${spring-cloud-dataflow.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-dataflow-configuration-metadata</artifactId>
-				<version>${project.version}</version>
+				<version>${spring-cloud-dataflow.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-dataflow-rest-resource</artifactId>
-				<version>${project.version}</version>
+				<version>${spring-cloud-dataflow.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-dataflow-registry</artifactId>
-				<version>${project.version}</version>
+				<version>${spring-cloud-dataflow.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-dataflow-ui</artifactId>
-				<version>${project.version}</version>
+				<version>${spring-cloud-dataflow-ui.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-dataflow-server-core</artifactId>
-				<version>${project.version}</version>
+				<version>${spring-cloud-dataflow.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-dataflow-server-local</artifactId>
-				<version>${project.version}</version>
+				<version>${spring-cloud-dataflow.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-starter-dataflow-server-local</artifactId>
-				<version>${project.version}</version>
+				<version>${spring-cloud-dataflow.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.cloudfoundry</groupId>
