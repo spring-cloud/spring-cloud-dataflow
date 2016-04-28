@@ -1,0 +1,21 @@
+== Spring Cloud Data Flow Server Core
+
+The `spring-cloud-dataflow-server-core` subproject of `spring-cloud-dataflow` provides a common
+REST API and UI that can be used to create a Data Flow Server for a particular deployment
+environment when combined with an implementation of the `spring-cloud-deployer` SPI for that
+environment.
+
+The REST API includes a `StreamDefinitionController` and `TaskDefinitionController` that manage
+stream and task definitions by delegating to the `StreamDefinitionRepository` and
+`TaskDefinitionRepository`, respectively. The `StreamDeploymentController` and
+`TaskDeploymentController` delegate to the `AppDeployer` and `TaskLauncher` provided by the
+underlying `spring-cloud-deployer` SPI implementation. Other controllers provide endpoints for
+managing the `AppRegistry`, viewing counters, etc.
+
+For a simple getting-started experience, see the `spring-cloud-dataflow-server-local` (sibling)
+project. The build for that project produces a boot-executable `LocalDataFlowServer` that relies on
+an implementation of the Spring Cloud Deployer SPI that launches each stream app as a new JVM
+process on the same host as the `LocalDataFlowServer` itself. By default the local server is
+auto-populated with apps generated from the
+link:https://github.com/spring-cloud/spring-cloud-stream-app-starters[`spring-cloud-stream-app-starters`]
+project.
