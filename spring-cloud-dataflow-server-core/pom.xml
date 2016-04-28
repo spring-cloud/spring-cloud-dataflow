@@ -87,8 +87,8 @@
 			<artifactId>spring-plugin-core</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.springframework.cloud.stream.module</groupId>
-			<artifactId>spring-cloud-stream-modules-analytics</artifactId>
+			<groupId>org.springframework.cloud.stream.app</groupId>
+			<artifactId>app-starters-common-analytics</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

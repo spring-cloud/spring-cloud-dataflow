@@ -24,6 +24,7 @@
 	<properties>
 		<java.version>1.7</java.version>
 		<spring-cloud-dataflow-ui.version>1.0.0.BUILD-SNAPSHOT</spring-cloud-dataflow-ui.version>
+		<spring-cloud-stream-app.version>1.0.0.BUILD-SNAPSHOT</spring-cloud-stream-app.version>
 		<spring-cloud-stream.version>1.0.0.RC2</spring-cloud-stream.version>
 		<spring-cloud-task.version>1.0.0.BUILD-SNAPSHOT</spring-cloud-task.version>
 		<spring-cloud-commons.version>1.1.0.RC3</spring-cloud-commons.version>
@@ -50,9 +51,9 @@
 				See https://github.com/spring-cloud/spring-cloud-stream-modules/issues/185
 			-->
 			<dependency>
-				<groupId>org.springframework.cloud.stream.module</groupId>
-				<artifactId>spring-cloud-stream-modules-analytics</artifactId>
-				<version>1.0.0.BUILD-SNAPSHOT</version>
+				<groupId>org.springframework.cloud.stream.app</groupId>
+				<artifactId>app-starters-common-analytics</artifactId>
+				<version>${spring-cloud-stream-app.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
