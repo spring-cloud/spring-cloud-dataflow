@@ -147,7 +147,7 @@ public class DataFlowServerConfiguration {
 				// Override the RelProvider to DefaultRelProvider
 				// Since DataFlow UI expects DefaultRelProvider to be used, override any other instance of
 				// DefaultRelProvider (EvoInflectorRelProvider for instance) with the DefaultRelProvider.
-				if (beanName.equals(REL_PROVIDER_BEAN_NAME)) {
+				if (beanName != null && beanName.equals(REL_PROVIDER_BEAN_NAME)) {
 					return new DefaultRelProvider();
 				}
 				return bean;
