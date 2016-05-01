@@ -68,15 +68,12 @@ including: Cloud Foundry, Apache YARN, Apache Mesos, and Kubernetes
 
 Step 1 - Clone [Spring Cloud Data Flow](https://github.com/spring-cloud/spring-cloud-dataflow) repository
 
-Step 2 - Start
-```
-redis-server
-```
-
-Step 3 - Build Project
+Step 2 - Build Project
 ```
 mvn clean package
 ```
+
+Step 3 - Start Redis (_for: anaytics store_) and Kafka (_for: message bus_)
 
 Step 4 - Launch **‘local’** Server [_spring-cloud-dataflow-server-local/target_] 
 ```
@@ -93,8 +90,7 @@ Step 6 - Create **‘ticktock’** Stream
 dataflow:>stream create ticktock --definition "time | log" --deploy
 ```
 
-Step 7 - Launch Admin UI
-http://localhost:9393/admin-ui
+Step 7 - Launch Admin UI at: http://localhost:9393/admin-ui
 
 {% endcapture %}
 
@@ -115,6 +111,7 @@ http://localhost:9393/admin-ui
 * [Spring Cloud Task Applications](https://github.com/spring-cloud/spring-cloud-task-app-starters)
 * [Spring Cloud Data Flow Samples](https://github.com/spring-cloud/spring-cloud-dataflow-samples)
 * [Spring Cloud Data Flow UI](https://github.com/spring-cloud/spring-cloud-dataflow-ui)
+* [Flo for Spring Cloud Data Flow UI](https://network.pivotal.io/products/p-flo-for-spring-cloud-data-flow)
 * [Spring Cloud Data Flow Cloud Foundry](https://github.com/spring-cloud/spring-cloud-dataflow-server-cloudfoundry)
 * [Spring Cloud Data Flow YARN](https://github.com/spring-cloud/spring-cloud-dataflow-server-yarn)
 * [Spring Cloud Data Flow Mesos](https://github.com/spring-cloud/spring-cloud-dataflow-server-mesos)
