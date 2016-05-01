@@ -73,9 +73,9 @@ Step 2 - Build Project
 mvn clean package
 ```
 
-Step 3 - Start Redis (_for: anaytics store_) and Kafka (_for: message bus_)
+Step 3 - Start Redis [_for: analytics store_] and Kafka [_for: message bus_]  
 
-Step 4 - Launch **‘local’** Server [_spring-cloud-dataflow-server-local/target_] 
+Step 4 - Launch **‘Local’** Server [_spring-cloud-dataflow-server-local/target_] 
 ```
 java -jar spring-cloud-dataflow-server-local-***.jar 
 ```
@@ -91,6 +91,28 @@ dataflow:>stream create ticktock --definition "time | log" --deploy
 ```
 
 Step 7 - Launch Admin UI at: http://localhost:9393/admin-ui
+
+## Release Trains
+
+| __Component__ | __Spring Cloud Data Flow [1.0.0.M2]__ | __Spring Cloud Data Flow [1.0.0.M3]__ |
+| --------- | --------------------------------- | --------------------------------- |
+| Spring Cloud Deployer | NA | 1.0.0.M1 |
+| Spring Cloud Deployer Cloud Foundry | NA | 1.0.0.M1 |
+| Spring Cloud Deployer Yarn | NA | 1.0.0.M1 |
+| Spring Cloud Deployer Mesos | NA | 1.0.0.M1 |
+| Spring Cloud Deployer Kubernetes | NA | 1.0.0.M1 |
+| Spring Cloud Data Flow Server Cloud Foundry | 1.0.0.M1 | 1.0.0.M2 |
+| Spring Cloud Data Flow Server Yarn | 1.0.0.M1 | 1.0.0.M2 |
+| Spring Cloud Data Flow Server Mesos | 1.0.0.M1 | 1.0.0.M2 |
+| Spring Cloud Data Flow Server Kubernetes | 1.0.0.M1 | 1.0.0.M2 |
+| Spring Cloud Stream | 1.0.0.M3 | 1.0.0.RC3 |
+| Spring Cloud Stream App Starters | NA | 1.0.0.M1 |
+| Spring Cloud Task | NA | 1.0.0.M2 (_only: Local/YARN_) |
+| Spring Cloud Task App Starters | NA | 1.0.0.M1 (_only: Local/YARN_) |
+| Spring Cloud Data Flow UI | 1.0.0.M2 | 1.0.0.M3 |
+| Flo for Spring Cloud Data Flow UI | 1.0.0.M2 | 1.0.0.M3 |
+| Spring Cloud Data Flow RPM | NA | 1.0-1 |
+| Spring Cloud Data Flow Ambari | NA | 1.0-1 |
 
 {% endcapture %}
 
