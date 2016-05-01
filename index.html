@@ -69,21 +69,21 @@ including: Cloud Foundry, Apache YARN, Apache Mesos, and Kubernetes
 
 Step 1 - Clone [Spring Cloud Data Flow](https://github.com/spring-cloud/spring-cloud-dataflow) repository
 
-Step 2 - Build Project
+Step 2 - Start Redis [_for: analytics store_] and Kafka [_for: message bus_]  
+
+Step 3 - Build Project
 ```
 mvn clean package
 ```
 
-Step 3 - Start Redis [_for: analytics store_] and Kafka [_for: message bus_]  
-
 Step 4 - Launch **‘Local’** Server [_spring-cloud-dataflow-server-local/target_] 
 ```
-java -jar spring-cloud-dataflow-server-local-***.jar 
+java -jar spring-cloud-dataflow-server-local-1.0.0.BUILD-SNAPSHOT.jar 
 ```
 
 Step 5 - Launch Shell [_spring-cloud-dataflow-shell/target_]
 ```
-java -jar spring-cloud-dataflow-shell-***.jar
+java -jar spring-cloud-dataflow-shell-1.0.0.BUILD-SNAPSHOT.jar
 ```
 
 Step 6 - Create **‘ticktock’** Stream
