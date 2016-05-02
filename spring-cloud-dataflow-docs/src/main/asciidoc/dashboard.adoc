@@ -30,7 +30,7 @@ If you have enabled security, a login form is available at `\http://localhost:93
 **Note**: The default Dashboard server port is `9393`
 
 .The Spring Cloud Data Flow Dashboard
-image::dataflow-dashboard-about.png[The Spring Cloud Data Flow Dashboard, width=400, scaledwidth="50%"]
+image::dataflow-dashboard-about.png[The Spring Cloud Data Flow Dashboard, scaledwidth="100%"]
 
 [[dashboard-apps]]
 == Apps
@@ -40,7 +40,7 @@ provides the control to register/unregister them (if applicable). By clicking on
 the magnifying glass, you will get a listing of available definition properties.
 
 .List of Available Applications
-image::dataflow-available-apps-list.png[List of available applications, width=400, scaledwidth="50%"]
+image::dataflow-available-apps-list.png[List of available applications, scaledwidth="100%"]
 
 [[dashboard-runtime]]
 == Runtime
@@ -51,7 +51,7 @@ A list of the used deployment properties is available by clicking on the
 module id.
 
 .List of Running Applications
-image::dataflow-runtime.png[List of running applications, width=400, scaledwidth="50%"]
+image::dataflow-runtime.png[List of running applications, scaledwidth="100%"]
 
 [[dashboard-streams]]
 == Streams
@@ -61,7 +61,7 @@ a listing of Stream definitions. There you have the option to *deploy* or *undep
 those stream definitions. Additionally you can remove the definition by clicking on *destroy*.
 
 .List of Stream Definitions
-image::dataflow-streams-list-definitions.png[List of Stream Definitions, width=400, scaledwidth="50%"]
+image::dataflow-streams-list-definitions.png[List of Stream Definitions, scaledwidth="100%"]
 
 [[dashboard-tasks]]
 == Tasks
@@ -83,7 +83,7 @@ allows users to create _Task_ definitions.
 **Note**: You will also use this tab to create Batch Jobs.
 
 .List of Task Modules
-image::dataflow-task-modules-list.png[List of Task Modules, width=400, scaledwidth="50%"]
+image::dataflow-task-modules-list.png[List of Task Modules, scaledwidth="100%"]
 
 On this screen you can perform the following actions:
 
@@ -110,7 +110,7 @@ This page lists the Dataflow Task definitions and provides actions to *launch*
 or *destroy* those tasks.
 
 .List of Task Definitions
-image::dataflow-task-definitions-list.png[List of Task Definitions, width=400, scaledwidth="50%"]
+image::dataflow-task-definitions-list.png[List of Task Definitions, scaledwidth="100%"]
 
 ==== Launching Tasks
 
@@ -129,7 +129,7 @@ Task parameters are not typed.
 === Executions
 
 .List of Task Executions
-image::dataflow-task-executions-list.png[List of Task Executions, width=400, scaledwidth="50%"]
+image::dataflow-task-executions-list.png[List of Task Executions, scaledwidth="100%"]
 
 [[dashboard-jobs]]
 == Jobs
@@ -143,7 +143,7 @@ In case of a failed job, you can also restart the task. When dealing with long-r
 Batch Jobs, you can also request to stop it.
 
 .List of Job Executions
-image::dataflow-job-executions-list.png[List of Job Executions, width=400, scaledwidth="50%"]
+image::dataflow-job-executions-list.png[List of Job Executions, scaledwidth="100%"]
 
 [[dashboard-job-executions-list]]
 === List job executions
@@ -158,7 +158,7 @@ Thus, if the underlying definition has been deleted, _deleted_ will be shown.
 ==== Job execution details
 
 .Job Execution Details
-image::dataflow-jobs-job-execution-details.png[Job Execution Details, width=400, scaledwidth="50%"]
+image::dataflow-jobs-job-execution-details.png[Job Execution Details, scaledwidth="100%"]
 
 The Job Execution Details screen also contains a list of the executed steps. You can
 further drill into the _Step Execution Details_ by clicking onto the magnifying glass.
@@ -183,12 +183,12 @@ the server log files for further details.
 ==== Step Execution Progress
 
 On this screen, you can see a progress bar indicator in regards to the execution
-of the current step. Under the *Step Execution History, you can also view various
+of the current step. Under the *Step Execution History*, you can also view various
 metrics associated with the selected step such as *duration*, *read counts*, *write
 counts* etc.
 
 .Step Execution History
-image::dataflow-step-execution-history.png[Step Execution History, width=400, scaledwidth="50%"]
+image::dataflow-step-execution-history.png[Step Execution History, scaledwidth="100%"]
 
 [[dashboard-analytics]]
 == Analytics

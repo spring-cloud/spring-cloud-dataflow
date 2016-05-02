@@ -12,3 +12,17 @@
 		print or electronically.
 	</para>
 </legalnotice>
+
+<cover>
+	<mediaobject>
+		<imageobject>
+			<imagedata fileref="images/cover.png">
+				<info>
+					<othercredit>
+						<orgname>Pivotal Software, Inc.</orgname>
+					</othercredit>
+				</info>
+			</imagedata>
+		</imageobject>
+	</mediaobject>
+</cover>
