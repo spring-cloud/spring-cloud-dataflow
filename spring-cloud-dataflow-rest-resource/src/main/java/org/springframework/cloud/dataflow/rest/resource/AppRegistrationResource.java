@@ -20,43 +20,43 @@ import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.ResourceSupport;
 
 /**
- * Rest resource for a module registration.
+ * Rest resource for an app registration.
  *
  * @author Glenn Renfro
  * @author Mark Fisher
  * @author Patrick Peralta
  */
-public class ModuleRegistrationResource extends ResourceSupport {
+public class AppRegistrationResource extends ResourceSupport {
 
 	/**
-	 * Module name.
+	 * App name.
 	 */
 	private String name;
 
 	/**
-	 * Module type.
+	 * App type.
 	 */
 	private String type;
 
 	/**
-	 * URI for module resource, such as {@code maven://groupId:artifactId:version}.
+	 * URI for app resource, such as {@code maven://groupId:artifactId:version}.
 	 */
 	private String uri;
 
 	/**
 	 * Default constructor for serialization frameworks.
 	 */
-	protected ModuleRegistrationResource() {
+	protected AppRegistrationResource() {
 	}
 
 	/**
-	 * Construct a {@code ModuleRegistrationResource}.
+	 * Construct a {@code AppRegistrationResource}.
 	 *
-	 * @param name module name
-	 * @param type module type
-	 * @param uri uri for module resource
+	 * @param name app name
+	 * @param type app type
+	 * @param uri uri for app resource
 	 */
-	public ModuleRegistrationResource(String name, String type, String uri) {
+	public AppRegistrationResource(String name, String type, String uri) {
 		this.name = name;
 		this.type = type;
 		this.uri = uri;
@@ -86,7 +86,7 @@ public class ModuleRegistrationResource extends ResourceSupport {
 	/**
 	 * Dedicated subclass to workaround type erasure.
 	 */
-	public static class Page extends PagedResources<ModuleRegistrationResource> {
+	public static class Page extends PagedResources<AppRegistrationResource> {
 	}
 
 }

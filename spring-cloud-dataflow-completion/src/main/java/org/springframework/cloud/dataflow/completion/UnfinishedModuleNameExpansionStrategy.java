@@ -21,7 +21,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.springframework.cloud.dataflow.core.ArtifactType;
+import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.ModuleDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.registry.AppRegistration;
@@ -58,7 +58,7 @@ public class UnfinishedModuleNameExpansionStrategy implements ExpansionStrategy 
 		String alreadyTyped = lastModule.getName();
 		CompletionProposal.Factory proposals = CompletionProposal.expanding(text);
 
-		List<ArtifactType> validTypesAtThisPosition = Arrays.asList(CompletionUtils.determinePotentialTypes(lastModule));
+		List<ApplicationType> validTypesAtThisPosition = Arrays.asList(CompletionUtils.determinePotentialTypes(lastModule));
 
 		for (AppRegistration appRegistration : appRegistry.findAll()) {
 			String candidateName = appRegistration.getName();

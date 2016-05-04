@@ -25,7 +25,7 @@ import java.util.Set;
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataGroup;
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataRepository;
-import org.springframework.cloud.dataflow.core.ArtifactType;
+import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.ModuleDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.registry.AppRegistration;
@@ -34,7 +34,7 @@ import org.springframework.cloud.stream.configuration.metadata.ModuleConfigurati
 import org.springframework.core.io.Resource;
 
 /**
- * Adds missing module configuration properties at the end of a well formed stream definition.
+ * Adds missing application configuration properties at the end of a well formed stream definition.
  *
  * @author Eric Bottard
  * @author Mark Fisher
@@ -57,7 +57,7 @@ class AddModuleOptionsExpansionStrategy implements ExpansionStrategy {
 
 		String lastModuleName = lastModule.getName();
 		AppRegistration lastAppRegistration = null;
-		for (ArtifactType moduleType : CompletionUtils.determinePotentialTypes(lastModule)) {
+		for (ApplicationType moduleType : CompletionUtils.determinePotentialTypes(lastModule)) {
 			lastAppRegistration = this.appRegistry.find(lastModuleName, moduleType);
 			if (lastAppRegistration != null) {
 				break;

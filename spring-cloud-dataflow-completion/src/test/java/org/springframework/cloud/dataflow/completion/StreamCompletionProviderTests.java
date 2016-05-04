@@ -38,7 +38,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.loader.LaunchedURLClassLoader;
 import org.springframework.boot.loader.archive.Archive;
-import org.springframework.cloud.dataflow.core.ArtifactType;
+import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.registry.AppRegistration;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.deployer.resource.registry.InMemoryUriRegistry;
@@ -299,7 +299,7 @@ public class StreamCompletionProviderTests {
 			final ResourceLoader resourceLoader = new FileSystemResourceLoader();
 			return new AppRegistry(new InMemoryUriRegistry(), resourceLoader) {
 				@Override
-				public AppRegistration find(String name, ArtifactType type) {
+				public AppRegistration find(String name, ApplicationType type) {
 					String filename = name + "-" + type;
 					File file = new File(ROOT, filename);
 					if (file.exists()) {
@@ -324,7 +324,7 @@ public class StreamCompletionProviderTests {
 					Matcher matcher = Pattern.compile("(?<name>.+)-(?<type>.+)").matcher(fileName);
 					Assert.isTrue(matcher.matches());
 					String name = matcher.group("name");
-					ArtifactType type = ArtifactType.valueOf(matcher.group("type"));
+					ApplicationType type = ApplicationType.valueOf(matcher.group("type"));
 					return new AppRegistration(name, type, file.toURI(), resourceLoader);
 				}
 			};

@@ -18,7 +18,7 @@ package org.springframework.cloud.dataflow.completion;
 
 import java.util.List;
 
-import org.springframework.cloud.dataflow.core.ArtifactType;
+import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.registry.AppRegistration;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
 
@@ -43,7 +43,7 @@ class EmptyStartYieldsSourceModulesRecoveryStrategy extends
 			int detailLevel, List<CompletionProposal> proposals) {
 		CompletionProposal.Factory completionFactory = CompletionProposal.expanding(dsl);
 		for (AppRegistration app : this.registry.findAll()) {
-			if (app.getType() == ArtifactType.source) {
+			if (app.getType() == ApplicationType.source) {
 				proposals.add(completionFactory.withSeparateTokens(app.getName(),
 						"Start with a source module"));
 			}

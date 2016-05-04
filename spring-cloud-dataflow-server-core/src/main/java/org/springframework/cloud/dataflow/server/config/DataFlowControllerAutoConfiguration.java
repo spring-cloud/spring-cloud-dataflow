@@ -31,6 +31,7 @@ import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.registry.DataFlowUriRegistryPopulator;
 import org.springframework.cloud.dataflow.registry.DataFlowUriRegistryPopulatorProperties;
 import org.springframework.cloud.dataflow.registry.RedisUriRegistry;
+import org.springframework.cloud.dataflow.server.controller.AppRegistryController;
 import org.springframework.cloud.dataflow.server.controller.CompletionController;
 import org.springframework.cloud.dataflow.server.controller.CounterController;
 import org.springframework.cloud.dataflow.server.controller.FieldValueCounterController;
@@ -38,8 +39,6 @@ import org.springframework.cloud.dataflow.server.controller.JobExecutionControll
 import org.springframework.cloud.dataflow.server.controller.JobInstanceController;
 import org.springframework.cloud.dataflow.server.controller.JobStepExecutionController;
 import org.springframework.cloud.dataflow.server.controller.JobStepExecutionProgressController;
-import org.springframework.cloud.dataflow.server.controller.LibraryController;
-import org.springframework.cloud.dataflow.server.controller.ModuleController;
 import org.springframework.cloud.dataflow.server.controller.RestControllerAdvice;
 import org.springframework.cloud.dataflow.server.controller.RootController;
 import org.springframework.cloud.dataflow.server.controller.RuntimeModulesController;
@@ -199,14 +198,8 @@ public class DataFlowControllerAutoConfiguration {
 	}
 
 	@Bean
-	public LibraryController libraryController(AppRegistry registry) {
-		return new LibraryController(registry);
-	}
-
-	@Bean
-	public ModuleController moduleController(AppRegistry appRegistry,
-			ModuleConfigurationMetadataResolver metadataResolver) {
-		return new ModuleController(appRegistry, metadataResolver);
+	public AppRegistryController appRegistryController(AppRegistry appRegistry, ModuleConfigurationMetadataResolver metadataResolver) {
+		return new AppRegistryController(appRegistry, metadataResolver);
 	}
 
 	@Bean

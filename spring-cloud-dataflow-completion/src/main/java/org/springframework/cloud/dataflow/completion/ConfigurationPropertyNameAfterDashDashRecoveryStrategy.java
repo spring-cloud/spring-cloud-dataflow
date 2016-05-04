@@ -25,7 +25,7 @@ import java.util.Set;
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataGroup;
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataRepository;
-import org.springframework.cloud.dataflow.core.ArtifactType;
+import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.ModuleDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.dsl.CheckPointedParseException;
@@ -65,7 +65,7 @@ class ConfigurationPropertyNameAfterDashDashRecoveryStrategy
 
 		String lastModuleName = lastModule.getName();
 		AppRegistration lastAppRegistration = null;
-		for (ArtifactType moduleType : CompletionUtils.determinePotentialTypes(lastModule)) {
+		for (ApplicationType moduleType : CompletionUtils.determinePotentialTypes(lastModule)) {
 			lastAppRegistration = appRegistry.find(lastModuleName, moduleType);
 			if (lastAppRegistration != null) {
 				break;

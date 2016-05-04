@@ -25,7 +25,7 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.cloud.dataflow.core.ArtifactType;
+import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.BindingPropertyKeys;
 import org.springframework.cloud.dataflow.core.ModuleDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
@@ -179,7 +179,7 @@ public class StreamDeploymentController {
 		long timestamp = System.currentTimeMillis();
 		while (iterator.hasNext()) {
 			ModuleDefinition currentModule = iterator.next();
-			ArtifactType type = StreamDefinitionController.determineModuleType(currentModule);
+			ApplicationType type = StreamDefinitionController.determineModuleType(currentModule);
 			Map<String, String> moduleDeploymentProperties = extractModuleDeploymentProperties(currentModule, streamDeploymentProperties);
 			moduleDeploymentProperties.put(AppDeployer.GROUP_PROPERTY_KEY, currentModule.getGroup());
 			if (moduleDeploymentProperties.containsKey(INSTANCE_COUNT_PROPERTY_KEY)) {
@@ -215,7 +215,6 @@ public class StreamDeploymentController {
 			}
 		}
 	}
-
 
 	/**
 	 * Extract and return a map of properties for a specific module within the

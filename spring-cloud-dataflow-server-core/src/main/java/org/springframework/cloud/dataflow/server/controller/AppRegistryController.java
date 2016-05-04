@@ -25,11 +25,11 @@ import java.util.List;
 import java.util.Properties;
 
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
-import org.springframework.cloud.dataflow.core.ArtifactType;
+import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.registry.AppRegistration;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
-import org.springframework.cloud.dataflow.rest.resource.DetailedModuleRegistrationResource;
-import org.springframework.cloud.dataflow.rest.resource.ModuleRegistrationResource;
+import org.springframework.cloud.dataflow.rest.resource.AppRegistrationResource;
+import org.springframework.cloud.dataflow.rest.resource.DetailedAppRegistrationResource;
 import org.springframework.cloud.stream.configuration.metadata.ModuleConfigurationMetadataResolver;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.PageImpl;
@@ -38,7 +38,6 @@ import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.mvc.ResourceAssemblerSupport;
 import org.springframework.http.HttpStatus;
-import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -49,7 +48,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Handles all Module related interactions.
+ * Handles all {@link AppRegistry} related interactions.
  *
  * @author Glenn Renfro
  * @author Mark Fisher
@@ -59,59 +58,58 @@ import org.springframework.web.bind.annotation.RestController;
  * @author Patrick Peralta
  */
 @RestController
-@RequestMapping("/modules")
-@ExposesResourceFor(ModuleRegistrationResource.class)
-public class ModuleController {
+@RequestMapping("/apps")
+@ExposesResourceFor(AppRegistrationResource.class)
+public class AppRegistryController {
 
-	private final Assembler moduleAssembler = new Assembler();
+	private final Assembler assembler = new Assembler();
 
 	private final AppRegistry appRegistry;
 
 	private ModuleConfigurationMetadataResolver metadataResolver;
 
-	public ModuleController(AppRegistry appRegistry, ModuleConfigurationMetadataResolver metadataResolver) {
+	public AppRegistryController(AppRegistry appRegistry, ModuleConfigurationMetadataResolver metadataResolver) {
 		this.appRegistry = appRegistry;
 		this.metadataResolver = metadataResolver;
 	}
 
 	/**
-	 * List module registrations.
+	 * List app registrations.
 	 */
 	@RequestMapping(method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
-	public PagedResources<? extends ModuleRegistrationResource> list(
-			PagedResourcesAssembler<AppRegistration> assembler,
-			@RequestParam(value = "type", required = false) ArtifactType type,
+	public PagedResources<? extends AppRegistrationResource> list(
+			PagedResourcesAssembler<AppRegistration> pagedResourcesAssembler,
+			@RequestParam(value = "type", required = false) ApplicationType type,
 			@RequestParam(value = "detailed", defaultValue = "false") boolean detailed) {
 
 		List<AppRegistration> list = new ArrayList<>(appRegistry.findAll());
 		for (Iterator<AppRegistration> iterator = list.iterator(); iterator.hasNext(); ) {
-			ArtifactType artifactType = iterator.next().getType();
-			if ((type != null && artifactType != type) || artifactType == ArtifactType.library) {
+			ApplicationType applicationType = iterator.next().getType();
+			if (type != null && applicationType != type) {
 				iterator.remove();
 			}
 		}
 		Collections.sort(list);
-		return assembler.toResource(new PageImpl<>(list), moduleAssembler);
+		return pagedResourcesAssembler.toResource(new PageImpl<>(list), assembler);
 	}
 
 	/**
-	 * Retrieve detailed information about a particular module.
-	 * @param type module type
-	 * @param name module name
-	 * @return detailed module information
+	 * Retrieve detailed information about a particular application.
+	 * @param type application type
+	 * @param name application name
+	 * @return detailed application information
 	 */
 	@RequestMapping(value = "/{type}/{name}", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
-	public DetailedModuleRegistrationResource info(
-			@PathVariable("type") ArtifactType type,
+	public DetailedAppRegistrationResource info(
+			@PathVariable("type") ApplicationType type,
 			@PathVariable("name") String name) {
-		Assert.isTrue(type != ArtifactType.library, "Only modules are supported by this endpoint");
 		AppRegistration registration = appRegistry.find(name, type);
 		if (registration == null) {
 			return null;
 		}
-		DetailedModuleRegistrationResource result = new DetailedModuleRegistrationResource(moduleAssembler.toResource(registration));
+		DetailedAppRegistrationResource result = new DetailedAppRegistrationResource(assembler.toResource(registration));
 		Resource resource = registration.getResource();
 
 		//TODO: Docker URIs will throw an exception, need another way to get the properties for them
@@ -134,14 +132,13 @@ public class ModuleController {
 	@RequestMapping(value = "/{type}/{name}", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
 	public void register(
-			@PathVariable("type") ArtifactType type,
+			@PathVariable("type") ApplicationType type,
 			@PathVariable("name") String name,
 			@RequestParam("uri") String uri,
 			@RequestParam(value = "force", defaultValue = "false") boolean force) {
-		Assert.isTrue(type != ArtifactType.library, "Only modules are supported by this endpoint");
 		AppRegistration previous = appRegistry.find(name, type);
 		if (!force && previous != null) {
-			throw new ModuleAlreadyRegisteredException(previous);
+			throw new AppAlreadyRegisteredException(previous);
 		}
 		try {
 			appRegistry.save(name, type, new URI(uri));
@@ -152,27 +149,26 @@ public class ModuleController {
 	}
 
 	/**
-	 * Unregister a module name and type.
-	 * @param type the module type
-	 * @param name the module name
+	 * Unregister an application name and type.
+	 * @param type the application type
+	 * @param name the application name
 	 */
 	@RequestMapping(value = "/{type}/{name}", method = RequestMethod.DELETE)
 	@ResponseStatus(HttpStatus.OK)
-	public void unregister(@PathVariable("type") ArtifactType type, @PathVariable("name") String name) {
-		Assert.isTrue(type != ArtifactType.library, "Only modules are supported by this endpoint");
+	public void unregister(@PathVariable("type") ApplicationType type, @PathVariable("name") String name) {
 		appRegistry.delete(name, type);
 	}
 
 	/**
-	 * Register all apps listed in a properties file or provided as key/value pairs.
+	 * Register all applications listed in a properties file or provided as key/value pairs.
 	 * @param uri         URI for the properties file
-	 * @param apps        key/value pairs representing apps, separated by newlines
+	 * @param apps        key/value pairs representing applications, separated by newlines
 	 * @param force       if {@code true}, overwrites any pre-existing registrations
 	 */
 	@RequestMapping(method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
-	public PagedResources<? extends ModuleRegistrationResource> registerAll(
-			PagedResourcesAssembler<AppRegistration> assembler,
+	public PagedResources<? extends AppRegistrationResource> registerAll(
+			PagedResourcesAssembler<AppRegistration> pagedResourcesAssembler,
 			@RequestParam(value = "uri", required = false) String uri,
 			@RequestParam(value = "apps", required = false) Properties apps,
 			@RequestParam(value = "force", defaultValue = "false") boolean force) {
@@ -184,7 +180,7 @@ public class ModuleController {
 			for (String key : apps.stringPropertyNames()) {
 				String[] tokens = key.split("\\.", 2);
 				String name = tokens[1];
-				ArtifactType type = ArtifactType.valueOf(tokens[0]);
+				ApplicationType type = ApplicationType.valueOf(tokens[0]);
 				if (force || null == appRegistry.find(name, type)) {
 					try {
 						registrations.add(appRegistry.save(name, type, new URI(apps.getProperty(key))));
@@ -196,39 +192,39 @@ public class ModuleController {
 			}
 		}
 		Collections.sort(registrations);
-		return assembler.toResource(new PageImpl<>(registrations), moduleAssembler);
+		return pagedResourcesAssembler.toResource(new PageImpl<>(registrations), assembler);
 	}
 
-	class Assembler extends ResourceAssemblerSupport<AppRegistration, ModuleRegistrationResource> {
+	class Assembler extends ResourceAssemblerSupport<AppRegistration, AppRegistrationResource> {
 
 		public Assembler() {
-			super(ModuleController.class, ModuleRegistrationResource.class);
+			super(AppRegistryController.class, AppRegistrationResource.class);
 		}
 
 		@Override
-		public ModuleRegistrationResource toResource(AppRegistration registration) {
+		public AppRegistrationResource toResource(AppRegistration registration) {
 			return createResourceWithId(String.format("%s/%s", registration.getType(), registration.getName()), registration);
 		}
 
 		@Override
-		protected ModuleRegistrationResource instantiateResource(AppRegistration registration) {
-			return new ModuleRegistrationResource(registration.getName(),
+		protected AppRegistrationResource instantiateResource(AppRegistration registration) {
+			return new AppRegistrationResource(registration.getName(),
 					registration.getType().name(), registration.getUri().toString());
 		}
 	}
 
 	@ResponseStatus(HttpStatus.CONFLICT)
-	public static class ModuleAlreadyRegisteredException extends IllegalStateException {
+	public static class AppAlreadyRegisteredException extends IllegalStateException {
 
 		private final AppRegistration previous;
 
-		public ModuleAlreadyRegisteredException(AppRegistration previous) {
+		public AppAlreadyRegisteredException(AppRegistration previous) {
 			this.previous = previous;
 		}
 
 		@Override
 		public String getMessage() {
-			return String.format("The '%s:%s' module is already registered as %s", previous.getType(), previous.getName(), previous.getUri());
+			return String.format("The '%s:%s' application is already registered as %s", previous.getType(), previous.getName(), previous.getUri());
 		}
 
 		public AppRegistration getPrevious() {

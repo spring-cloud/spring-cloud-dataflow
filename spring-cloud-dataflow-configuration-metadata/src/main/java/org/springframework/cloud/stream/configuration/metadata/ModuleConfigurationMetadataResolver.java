@@ -52,16 +52,17 @@ public class ModuleConfigurationMetadataResolver {
 	 * @param module a Spring Cloud Stream module; typically a Boot uberjar,
 	 * but directories are supported as well
 	 */
-	public List<ConfigurationMetadataGroup> listPropertyGroups(Resource module) {
+	public List<ConfigurationMetadataGroup> listPropertyGroups(Resource applicationResource) {
 		List<ConfigurationMetadataGroup> result = new ArrayList<>();
 		ClassLoader classLoader = null;
 		try {
-			File moduleFile = module.getFile();
-			Archive archive = moduleFile.isDirectory() ? new ExplodedArchive(moduleFile) : new JarFileArchive(moduleFile);
+			File applicationFile = applicationResource.getFile();
+			Archive archive = applicationFile.isDirectory() ? new ExplodedArchive(applicationFile)
+					: new JarFileArchive(applicationFile);
 			classLoader = createClassLoader(archive);
 			ConfigurationMetadataRepositoryJsonBuilder builder = ConfigurationMetadataRepositoryJsonBuilder.create();
-			ResourcePatternResolver moduleResourceLoader = new PathMatchingResourcePatternResolver(classLoader);
-			for (Resource r : moduleResourceLoader.getResources("classpath*:/META-INF/*spring-configuration-metadata.json")) {
+			ResourcePatternResolver applicationResourceLoader = new PathMatchingResourcePatternResolver(classLoader);
+			for (Resource r : applicationResourceLoader.getResources("classpath*:/META-INF/*spring-configuration-metadata.json")) {
 				builder.withJsonResource(r.getInputStream());
 			}
 			for (ConfigurationMetadataGroup group : builder.build().getAllGroups().values()) {
@@ -69,7 +70,7 @@ public class ModuleConfigurationMetadataResolver {
 			}
 		}
 		catch (Exception e) {
-			throw new RuntimeException("Exception trying to list configuration properties for module " + module, e);
+			throw new RuntimeException("Exception trying to list configuration properties for application " + applicationResource, e);
 		}
 		finally {
 			if (classLoader instanceof Closeable) {
@@ -87,21 +88,22 @@ public class ModuleConfigurationMetadataResolver {
 	/**
 	 * Return metadata about configuration properties that are documented via
 	 * <a href="http://docs.spring.io/spring-boot/docs/current/reference/html/configuration-metadata.html">
-	 * Spring Boot configuration metadata</a> and visible in a module.
+	 * Spring Boot configuration metadata</a> and visible in an application.
 	 *
-	 * @param module a Spring Cloud Stream module; typically a Boot uberjar,
+	 * @param applicationResource a Spring Cloud Stream application; typically a Boot uberjar,
 	 * but directories are supported as well
 	 */
-	public List<ConfigurationMetadataProperty> listProperties(Resource module) {
+	public List<ConfigurationMetadataProperty> listProperties(Resource applicationResource) {
 		List<ConfigurationMetadataProperty> result = new ArrayList<>();
 		ClassLoader classLoader = null;
 		try {
-			File moduleFile = module.getFile();
-			Archive archive = moduleFile.isDirectory() ? new ExplodedArchive(moduleFile) : new JarFileArchive(moduleFile);
+			File applicationFile = applicationResource.getFile();
+			Archive archive = applicationFile.isDirectory() ? new ExplodedArchive(applicationFile)
+					: new JarFileArchive(applicationFile);
 			classLoader = createClassLoader(archive);
 			ConfigurationMetadataRepositoryJsonBuilder builder = ConfigurationMetadataRepositoryJsonBuilder.create();
-			ResourcePatternResolver moduleResourceLoader = new PathMatchingResourcePatternResolver(classLoader);
-			for (Resource r : moduleResourceLoader.getResources("classpath*:/META-INF/*spring-configuration-metadata.json")) {
+			ResourcePatternResolver applicationResourceLoader = new PathMatchingResourcePatternResolver(classLoader);
+			for (Resource r : applicationResourceLoader.getResources("classpath*:/META-INF/*spring-configuration-metadata.json")) {
 				builder.withJsonResource(r.getInputStream());
 			}
 			for (ConfigurationMetadataProperty property : builder.build().getAllProperties().values()) {
@@ -109,7 +111,7 @@ public class ModuleConfigurationMetadataResolver {
 			}
 		}
 		catch (Exception e) {
-			throw new RuntimeException("Exception trying to list configuration properties for module " + module, e);
+			throw new RuntimeException("Exception trying to list configuration properties for application " + applicationResource, e);
 		}
 		finally {
 			if (classLoader instanceof Closeable) {

@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.cloud.dataflow.core.ArtifactType;
+import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.deployer.resource.registry.UriRegistry;
 import org.springframework.cloud.deployer.resource.registry.UriRegistryPopulator;
 import org.springframework.core.io.Resource;
@@ -48,7 +48,7 @@ public class AppRegistry {
 		this.resourceLoader = resourceLoader;
 	}
 
-	public AppRegistration find(String name, ArtifactType type) {
+	public AppRegistration find(String name, ApplicationType type) {
 		try {
 			URI uri = this.uriRegistry.find(key(name, type));
 			return new AppRegistration(name, type, uri, this.resourceLoader);
@@ -66,7 +66,7 @@ public class AppRegistry {
 		return apps;
 	}
 
-	public AppRegistration save(String name, ArtifactType type, URI uri) {
+	public AppRegistration save(String name, ApplicationType type, URI uri) {
 		this.uriRegistry.register(key(name, type), uri);
 		return new AppRegistration(name, type, uri, this.resourceLoader);
 	}
@@ -81,16 +81,16 @@ public class AppRegistry {
 		return apps;
 	}
 
-	public void delete(String name, ArtifactType type) {
+	public void delete(String name, ApplicationType type) {
 		this.uriRegistry.unregister(key(name, type));
 	}
 
-	private String key(String name, ArtifactType type) {
+	private String key(String name, ApplicationType type) {
 		return String.format("%s.%s", type, name);
 	}
 
 	private AppRegistration createAppRegistration(String key, URI uri) {
 		String[] tokens = key.split("\\.", 2);
-		return new AppRegistration(tokens[1], ArtifactType.valueOf(tokens[0]), uri, this.resourceLoader);
+		return new AppRegistration(tokens[1], ApplicationType.valueOf(tokens[0]), uri, this.resourceLoader);
 	}
 }

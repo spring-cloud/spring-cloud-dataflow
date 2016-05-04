@@ -16,8 +16,8 @@
 
 package org.springframework.cloud.dataflow.completion;
 
-import static org.springframework.cloud.dataflow.core.ArtifactType.processor;
-import static org.springframework.cloud.dataflow.core.ArtifactType.sink;
+import static org.springframework.cloud.dataflow.core.ApplicationType.processor;
+import static org.springframework.cloud.dataflow.core.ApplicationType.sink;
 
 import java.util.List;
 

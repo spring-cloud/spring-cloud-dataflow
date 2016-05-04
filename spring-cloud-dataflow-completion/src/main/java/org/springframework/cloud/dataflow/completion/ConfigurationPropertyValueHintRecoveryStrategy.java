@@ -29,7 +29,7 @@ import org.springframework.boot.configurationmetadata.ValueHint;
 import org.springframework.boot.loader.archive.Archive;
 import org.springframework.boot.loader.archive.ExplodedArchive;
 import org.springframework.boot.loader.archive.JarFileArchive;
-import org.springframework.cloud.dataflow.core.ArtifactType;
+import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.ModuleDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.dsl.CheckPointedParseException;
@@ -116,7 +116,7 @@ public class ConfigurationPropertyValueHintRecoveryStrategy extends StacktraceFi
 
 		String lastModuleName = lastModule.getName();
 		AppRegistration lastAppRegistration = null;
-		for (ArtifactType moduleType : CompletionUtils.determinePotentialTypes(lastModule)) {
+		for (ApplicationType moduleType : CompletionUtils.determinePotentialTypes(lastModule)) {
 			lastAppRegistration = this.appRegistry.find(lastModuleName, moduleType);
 			if (lastAppRegistration != null) {
 				break;

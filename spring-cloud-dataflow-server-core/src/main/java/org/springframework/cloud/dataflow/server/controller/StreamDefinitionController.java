@@ -24,7 +24,7 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.springframework.cloud.dataflow.core.ArtifactType;
+import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.BindingPropertyKeys;
 import org.springframework.cloud.dataflow.core.ModuleDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
@@ -158,10 +158,10 @@ public class StreamDefinitionController {
 		List<String> errorMessages = new ArrayList<>();
 		for (ModuleDefinition appDefintion: stream.getModuleDefinitions()) {
 			String appName = appDefintion.getName();
-			ArtifactType artifactType = determineModuleType(appDefintion);
-			if (appRegistry.find(appName, artifactType) == null) {
+			ApplicationType appType = determineModuleType(appDefintion);
+			if (appRegistry.find(appName, appType) == null) {
 				errorMessages.add(String.format("Application name '%s' with type '%s' does not exist in the app registry.",
-						appName, artifactType));
+						appName, appType));
 			}
 		}
 		if (!errorMessages.isEmpty()) {
@@ -174,24 +174,24 @@ public class StreamDefinitionController {
 	}
 
 	/**
-	 * Return the {@link ArtifactType} for a {@link ModuleDefinition} in the context
+	 * Return the {@link ApplicationType} for a {@link ModuleDefinition} in the context
 	 * of a defined stream.
 	 *
 	 * @param moduleDefinition the module for which to determine the type
-	 * @return {@link ArtifactType} for the given module
+	 * @return {@link ApplicationType} for the given module
 	 */
-	 static ArtifactType determineModuleType(ModuleDefinition moduleDefinition) {
+	static ApplicationType determineModuleType(ModuleDefinition moduleDefinition) {
 		// Parser has already taken care of source/sink destinations, etc
 		boolean hasOutput = moduleDefinition.getParameters().containsKey(BindingPropertyKeys.OUTPUT_DESTINATION);
 		boolean hasInput = moduleDefinition.getParameters().containsKey(BindingPropertyKeys.INPUT_DESTINATION);
 		if (hasInput && hasOutput) {
-			return ArtifactType.processor;
+			return ApplicationType.processor;
 		}
 		else if (hasInput) {
-			return ArtifactType.sink;
+			return ApplicationType.sink;
 		}
 		else if (hasOutput) {
-			return ArtifactType.source;
+			return ApplicationType.source;
 		}
 		else {
 			throw new IllegalStateException(moduleDefinition + " had neither input nor output set");
