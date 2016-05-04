@@ -21,16 +21,16 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Bean;
 
 /**
- * Automatically exposes a ModuleConfigurationMetadataResolver if none is already registered.
+ * Automatically exposes an {@link ApplicationConfigurationMetadataResolver} if none is already registered.
  *
  * @author Eric Bottard
  */
 @Configuration
-public class ModuleConfigurationMetadataResolverAutoConfiguration {
+public class ApplicationConfigurationMetadataResolverAutoConfiguration {
 
 	@Bean
-	@ConditionalOnMissingBean(ModuleConfigurationMetadataResolver.class)
-	public ModuleConfigurationMetadataResolver metadataResolver() {
-		return new ModuleConfigurationMetadataResolver();
+	@ConditionalOnMissingBean(ApplicationConfigurationMetadataResolver.class)
+	public ApplicationConfigurationMetadataResolver metadataResolver() {
+		return new ApplicationConfigurationMetadataResolver();
 	}
 }

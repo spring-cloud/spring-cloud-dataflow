@@ -21,7 +21,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import org.springframework.cloud.dataflow.core.ModuleDefinition;
+import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.rest.resource.AppInstanceStatusResource;
 import org.springframework.cloud.dataflow.rest.resource.AppStatusResource;
@@ -46,16 +46,16 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Exposes runtime status of deployed modules.
+ * Exposes runtime status of deployed apps.
  *
  * @author Eric Bottard
  * @author Mark Fisher
  * @author Janne Valkealahti
  */
 @RestController
-@RequestMapping("/runtime/modules")
+@RequestMapping("/runtime/apps")
 @ExposesResourceFor(AppStatusResource.class)
-public class RuntimeModulesController {
+public class RuntimeAppsController {
 
 	private static final Comparator<? super AppInstanceStatus> INSTANCE_SORTER = new Comparator<AppInstanceStatus>() {
 		@Override
@@ -82,13 +82,13 @@ public class RuntimeModulesController {
 	private final ResourceAssembler<AppStatus, AppStatusResource> statusAssembler = new Assembler();
 
 	/**
-	 * Instantiates a new runtime modules controller.
+	 * Instantiates a new runtime apps controller.
 	 *
 	 * @param streamDefinitionRepository the repository this controller will use for stream CRUD operations
 	 * @param deploymentIdRepository the repository this controller will use for deployment IDs
 	 * @param appDeployer the deployer this controller will use to deploy stream apps
 	 */
-	public RuntimeModulesController(StreamDefinitionRepository streamDefinitionRepository, DeploymentIdRepository deploymentIdRepository,
+	public RuntimeAppsController(StreamDefinitionRepository streamDefinitionRepository, DeploymentIdRepository deploymentIdRepository,
 			AppDeployer appDeployer) {
 		Assert.notNull(streamDefinitionRepository, "StreamDefinitionRepository must not be null");
 		Assert.notNull(deploymentIdRepository, "DeploymentIdRepository must not be null");
@@ -102,8 +102,8 @@ public class RuntimeModulesController {
 	public PagedResources<AppStatusResource> list(PagedResourcesAssembler<AppStatus> assembler) {
 		List<AppStatus> values = new ArrayList<>();
 		for (StreamDefinition streamDefinition : this.streamDefinitionRepository.findAll()) {
-			for (ModuleDefinition moduleDefinition : streamDefinition.getModuleDefinitions()) {
-				String key = DeploymentKey.forApp(moduleDefinition);
+			for (StreamAppDefinition streamAppDefinition : streamDefinition.getAppDefinitions()) {
+				String key = DeploymentKey.forStreamAppDefinition(streamAppDefinition);
 				String id = this.deploymentIdRepository.findOne(key);
 				if (id != null) {
 					values.add(appDeployer.status(id));
@@ -131,7 +131,7 @@ public class RuntimeModulesController {
 	private class Assembler extends ResourceAssemblerSupport<AppStatus, AppStatusResource> {
 
 		public Assembler() {
-			super(RuntimeModulesController.class, AppStatusResource.class);
+			super(RuntimeAppsController.class, AppStatusResource.class);
 		}
 
 		@Override
@@ -155,7 +155,7 @@ public class RuntimeModulesController {
 	}
 
 	@RestController
-	@RequestMapping("/runtime/modules/{moduleId}/instances")
+	@RequestMapping("/runtime/apps/{appId}/instances")
 	@ExposesResourceFor(AppInstanceStatusResource.class)
 	public static class AppInstanceController {
 
@@ -166,9 +166,9 @@ public class RuntimeModulesController {
 		}
 
 		@RequestMapping
-		public PagedResources<AppInstanceStatusResource> list(@PathVariable String moduleId,
+		public PagedResources<AppInstanceStatusResource> list(@PathVariable String appId,
 				PagedResourcesAssembler<AppInstanceStatus> assembler) {
-			AppStatus status = appDeployer.status(moduleId);
+			AppStatus status = appDeployer.status(appId);
 			if (status != null) {
 				List<AppInstanceStatus> appInstanceStatuses = new ArrayList<>(status.getInstances().values());
 				Collections.sort(appInstanceStatuses, INSTANCE_SORTER);
@@ -178,8 +178,8 @@ public class RuntimeModulesController {
 		}
 
 		@RequestMapping("/{instanceId}")
-		public AppInstanceStatusResource display(@PathVariable String moduleId, @PathVariable String instanceId) {
-			AppStatus status = appDeployer.status(moduleId);
+		public AppInstanceStatusResource display(@PathVariable String appId, @PathVariable String instanceId) {
+			AppStatus status = appDeployer.status(appId);
 			if (status != null) {
 				AppInstanceStatus appInstanceStatus = status.getInstances().get(instanceId);
 				if (appInstanceStatus == null) {
@@ -199,16 +199,16 @@ public class RuntimeModulesController {
 
 	private static class InstanceAssembler extends ResourceAssemblerSupport<AppInstanceStatus, AppInstanceStatusResource> {
 
-		private final AppStatus owningModule;
+		private final AppStatus owningApp;
 
-		public InstanceAssembler(AppStatus owningModule) {
+		public InstanceAssembler(AppStatus owningApp) {
 			super(AppInstanceController.class, AppInstanceStatusResource.class);
-			this.owningModule = owningModule;
+			this.owningApp = owningApp;
 		}
 
 		@Override
 		public AppInstanceStatusResource toResource(AppInstanceStatus entity) {
-			return createResourceWithId("/" + entity.getId(), entity, owningModule.getDeploymentId().toString());
+			return createResourceWithId("/" + entity.getId(), entity, owningApp.getDeploymentId().toString());
 		}
 
 		@Override

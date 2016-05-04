@@ -20,14 +20,14 @@ import java.util.List;
 
 import org.springframework.cloud.dataflow.completion.CompletionProposal;
 import org.springframework.cloud.dataflow.completion.RecoveryStrategy;
-import org.springframework.cloud.dataflow.core.ModuleDefinition;
+import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.dsl.DSLMessage;
 import org.springframework.cloud.dataflow.core.dsl.ParseException;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 
 /**
- * Expands constructs that start with {@literal :} to add stream name and module identifiers.
+ * Expands constructs that start with {@literal :} to add stream name and app identifiers.
  *
  * <p>Lives in this package as it needs access to a {@link StreamDefinitionRepository}.</p>
  *
@@ -51,20 +51,20 @@ public class TapOnDestinationRecoveryStrategy implements RecoveryStrategy<ParseE
 	@Override
 	public void addProposals(String dsl, ParseException exception, int detailLevel, List<CompletionProposal> collector) {
 		String streamName = dsl.substring("tap:stream:".length());
-		String moduleName = "";
+		String appName = "";
 		if (streamName.contains(".")) {
 			String[] splits = streamName.split("\\.");
 			streamName = splits[0];
-			moduleName = splits[1];
+			appName = splits[1];
 		}
 
 		StreamDefinition streamDefinition = streamDefinitionRepository.findOne(streamName);
 		// User has started to type a module name, or at least the stream name is valid
 		if (streamDefinition != null) {
 			CompletionProposal.Factory proposals = CompletionProposal.expanding("tap:stream:" + streamName + ".");
-			for (ModuleDefinition moduleDefinition : streamDefinition.getModuleDefinitions()) {
-				if (moduleDefinition.getLabel().startsWith(moduleName)) {
-					collector.add(proposals.withSuffix(moduleDefinition.getLabel()));
+			for (StreamAppDefinition appDefinition : streamDefinition.getAppDefinitions()) {
+				if (appDefinition.getName().startsWith(appName)) {
+					collector.add(proposals.withSuffix(appDefinition.getName()));
 				}
 			}
 		} // Stream name is not valid (yet). Try to use it as a prefix

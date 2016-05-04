@@ -17,12 +17,12 @@
 package org.springframework.cloud.dataflow.core.dsl;
 
 /**
- * Parser for task DSL that generates {@link ModuleNode}.
+ * Parser for task DSL that generates {@link AppNode}.
  *
  * @author Michael Minella
  * @author Patrick Peralta
  */
-public class TaskParser extends ModuleParser {
+public class TaskParser extends AppParser {
 
 	/**
 	 * Task name (may be {@code null}).
@@ -57,8 +57,8 @@ public class TaskParser extends ModuleParser {
 	 * @return the AST for the parsed task
 	 * @throws ParseException
 	 */
-	public ModuleNode parse() {
-		ModuleNode ast = eatModule();
+	public AppNode parse() {
+		AppNode ast = eatApp();
 
 		// Check the task name, however it was specified
 		if (ast.getName() != null && !isValidName(ast.getName())) {

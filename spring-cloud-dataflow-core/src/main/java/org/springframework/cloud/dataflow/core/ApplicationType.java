@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2015-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,28 +16,33 @@
 
 package org.springframework.cloud.dataflow.core;
 
-import static org.junit.Assert.*;
-
-import org.junit.Test;
-
 /**
+ * Enumeration of application types.
+ *
  * @author Patrick Peralta
+ * @author Eric Bottard
+ * @author Mark Fisher
  */
-public class ModuleDeploymentIdTests {
+public enum ApplicationType {
 
-	@Test
-	public void testParse() throws Exception {
-		String group = "ticktock";
-		String label = "time-0";
-		ModuleDefinition definition = new ModuleDefinition.Builder()
-				.setGroup(group)
-				.setName("time")
-				.setLabel(label)
-				.build();
-		String id = String.format("%s.%s", group, label);
+	/**
+	 * An application type that appears in a stream, at first position.
+	 */
+	source,
 
-		ModuleDeploymentId key = ModuleDeploymentId.fromModuleDefinition(definition);
-		assertEquals(id, key.toString());
-		assertEquals(key, ModuleDeploymentId.parse(id));
-	}
+	/**
+	 * An application type that appears in a stream, in middle position.
+	 */
+	processor,
+
+	/**
+	 * An application type that appears in a stream, in last position.
+	 */
+	sink,
+
+	/**
+	 * An application type to execute a short-lived process.
+	 */
+	task;
+
 }

@@ -27,18 +27,18 @@ public class StreamNode extends AstNode {
 
 	private final String streamName;
 
-	private final List<ModuleNode> moduleNodes;
+	private final List<AppNode> appNodes;
 
 	private SourceDestinationNode sourceDestinationNode;
 
 	private SinkDestinationNode sinkDestinationNode;
 
-	public StreamNode(String streamText, String streamName, List<ModuleNode> moduleNodes,
+	public StreamNode(String streamText, String streamName, List<AppNode> appNodes,
 			SourceDestinationNode sourceDestinationNode, SinkDestinationNode sinkDestinationNode) {
-		super(moduleNodes.get(0).getStartPos(), moduleNodes.get(moduleNodes.size() - 1).getEndPos());
+		super(appNodes.get(0).getStartPos(), appNodes.get(appNodes.size() - 1).getEndPos());
 		this.streamText = streamText;
 		this.streamName = streamName;
-		this.moduleNodes = moduleNodes;
+		this.appNodes = appNodes;
 		this.sourceDestinationNode = sourceDestinationNode;
 		this.sinkDestinationNode = sinkDestinationNode;
 	}
@@ -55,8 +55,8 @@ public class StreamNode extends AstNode {
 		if (sourceDestinationNode != null) {
 			s.append(sourceDestinationNode.stringify(includePositionalInfo));
 		}
-		for (ModuleNode moduleNode : moduleNodes) {
-			s.append(moduleNode.stringify(includePositionalInfo));
+		for (AppNode appNode : appNodes) {
+			s.append(appNode.stringify(includePositionalInfo));
 		}
 		if (sinkDestinationNode != null) {
 			s.append(sinkDestinationNode.stringify(includePositionalInfo));
@@ -74,10 +74,10 @@ public class StreamNode extends AstNode {
 		if (sourceDestinationNode != null) {
 			s.append(sourceDestinationNode.toString());
 		}
-		for (int m = 0; m < moduleNodes.size(); m++) {
-			ModuleNode moduleNode = moduleNodes.get(m);
-			s.append(moduleNode.toString());
-			if (m + 1 < moduleNodes.size()) {
+		for (int m = 0; m < appNodes.size(); m++) {
+			AppNode appNode = appNodes.get(m);
+			s.append(appNode.toString());
+			if (m + 1 < appNodes.size()) {
 				s.append(" | ");
 			}
 		}
@@ -87,8 +87,8 @@ public class StreamNode extends AstNode {
 		return s.toString();
 	}
 
-	public List<ModuleNode> getModuleNodes() {
-		return moduleNodes;
+	public List<AppNode> getAppNodes() {
+		return appNodes;
 	}
 
 	public SourceDestinationNode getSourceDestinationNode() {
@@ -104,24 +104,24 @@ public class StreamNode extends AstNode {
 	}
 
 	/**
-	 * Find the first reference to the named module in the stream. If the same module is referred to multiple times the
+	 * Find the first reference to the named app in the stream. If the same app is referred to multiple times the
 	 * secondary references cannot be accessed via this method.
 	 *
-	 * @return the first occurrence of the named module in the stream
+	 * @return the first occurrence of the named app in the stream
 	 */
-	public ModuleNode getModule(String moduleName) {
-		for (ModuleNode moduleNode : moduleNodes) {
-			if (moduleNode.getName().equals(moduleName)) {
-				return moduleNode;
+	public AppNode getApp(String appName) {
+		for (AppNode appNode : appNodes) {
+			if (appNode.getName().equals(appName)) {
+				return appNode;
 			}
 		}
 		return null;
 	}
 
-	public int getIndexOfLabel(String labelOrModuleName) {
-		for (int m = 0; m < moduleNodes.size(); m++) {
-			ModuleNode moduleNode = moduleNodes.get(m);
-			if (moduleNode.getLabelName().equals(labelOrModuleName)) {
+	public int getIndexOfLabel(String labelOrAppName) {
+		for (int m = 0; m < appNodes.size(); m++) {
+			AppNode appNode = appNodes.get(m);
+			if (appNode.getLabelName().equals(labelOrAppName)) {
 				return m;
 			}
 		}

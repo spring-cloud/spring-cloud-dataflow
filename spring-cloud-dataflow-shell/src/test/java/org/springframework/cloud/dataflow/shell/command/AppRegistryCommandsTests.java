@@ -31,29 +31,29 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import org.springframework.cloud.dataflow.core.ArtifactType;
+import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.rest.client.DataFlowOperations;
-import org.springframework.cloud.dataflow.rest.client.ModuleOperations;
-import org.springframework.cloud.dataflow.rest.resource.ModuleRegistrationResource;
+import org.springframework.cloud.dataflow.rest.client.AppRegistryOperations;
+import org.springframework.cloud.dataflow.rest.resource.AppRegistrationResource;
 import org.springframework.cloud.dataflow.shell.config.DataFlowShell;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.shell.table.TableModel;
 
 /**
- * Unit tests for ModuleCommands.
+ * Unit tests for {@link AppRegistryCommands}.
  *
  * @author Eric Bottard
  * @author Mark Fisher
  */
-public class ModuleCommandsTests {
+public class AppRegistryCommandsTests {
 
-	ModuleCommands moduleCommands = new ModuleCommands();
+	AppRegistryCommands appRegistryCommands = new AppRegistryCommands();
 
 	@Mock
 	private DataFlowOperations dataFlowOperations;
 
 	@Mock
-	private ModuleOperations moduleOperations;
+	private AppRegistryOperations appRegistryOperations;
 
 	private DataFlowShell dataFlowShell = new DataFlowShell();
 
@@ -61,15 +61,15 @@ public class ModuleCommandsTests {
 	public void setUp() {
 		MockitoAnnotations.initMocks(this);
 
-		when(dataFlowOperations.moduleOperations()).thenReturn(moduleOperations);
+		when(dataFlowOperations.appRegistryOperations()).thenReturn(appRegistryOperations);
 		dataFlowShell.setDataFlowOperations(dataFlowOperations);
-		moduleCommands.setDataFlowShell(dataFlowShell);
+		appRegistryCommands.setDataFlowShell(dataFlowShell);
 	}
 
 	@Test
 	public void testList() {
 
-		String[][] modules = new String[][] {
+		String[][] apps = new String[][] {
 				{"http", "source"},
 				{"filter", "processor"},
 				{"transform", "processor"},
@@ -78,13 +78,13 @@ public class ModuleCommandsTests {
 				{"moving-average", "processor"}
 		};
 
-		Collection<ModuleRegistrationResource> data = new ArrayList<>();
-		for (String[] module : modules) {
-			data.add(new ModuleRegistrationResource(module[0], module[1], null));
+		Collection<AppRegistrationResource> data = new ArrayList<>();
+		for (String[] app : apps) {
+			data.add(new AppRegistrationResource(app[0], app[1], null));
 		}
 		PagedResources.PageMetadata metadata = new PagedResources.PageMetadata(data.size(), 1, data.size(), 1);
-		PagedResources<ModuleRegistrationResource> result = new PagedResources<>(data, metadata);
-		when(moduleOperations.list()).thenReturn(result);
+		PagedResources<AppRegistrationResource> result = new PagedResources<>(data, metadata);
+		when(appRegistryOperations.list()).thenReturn(result);
 
 		Object[][] expected = new String[][] {
 				{"source", "processor", "sink", "task"},
@@ -92,7 +92,7 @@ public class ModuleCommandsTests {
 				{"file", "transform", null, null},
 				{null, "moving-average", null, null},
 		};
-		TableModel model = moduleCommands.list().getModel();
+		TableModel model = appRegistryCommands.list().getModel();
 		for (int row = 0; row < expected.length; row++) {
 			for (int col = 0; col < expected[row].length; col++) {
 				assertThat(model.getValue(row, col), Matchers.is(expected[row][col]));
@@ -102,54 +102,54 @@ public class ModuleCommandsTests {
 
 	@Test
 	public void testUnknownModule() {
-		List<Object> result = moduleCommands.info(new ModuleCommands.QualifiedModuleName("unknown", ArtifactType.processor));
-		assertEquals((String) result.get(0), "Module info is not available for processor:unknown");
+		List<Object> result = appRegistryCommands.info(new AppRegistryCommands.QualifiedApplicationName("unknown", ApplicationType.processor));
+		assertEquals((String) result.get(0), "Application info is not available for processor:unknown");
 	}
 
 	@Test
 	public void register() {
 		String name = "foo";
-		ArtifactType type = ArtifactType.sink;
+		ApplicationType type = ApplicationType.sink;
 		String uri = "file:///foo";
 		boolean force = false;
-		ModuleRegistrationResource resource = new ModuleRegistrationResource(name, type.name(), uri);
-		when(moduleOperations.register(name, type, uri, force)).thenReturn(resource);
-		String result = moduleCommands.register(name, type, uri, force);
-		assertEquals("Successfully registered module 'sink:foo'", result);
+		AppRegistrationResource resource = new AppRegistrationResource(name, type.name(), uri);
+		when(appRegistryOperations.register(name, type, uri, force)).thenReturn(resource);
+		String result = appRegistryCommands.register(name, type, uri, force);
+		assertEquals("Successfully registered application 'sink:foo'", result);
 	}
 
 	@Test
 	public void importFromLocalResource() {
 		String name1 = "foo";
-		ArtifactType type1 = ArtifactType.source;
+		ApplicationType type1 = ApplicationType.source;
 		String uri1 = "file:///foo";
 		String name2 = "bar";
-		ArtifactType type2 = ArtifactType.sink;
+		ApplicationType type2 = ApplicationType.sink;
 		String uri2 = "file:///bar";
 		Properties apps = new Properties();
 		apps.setProperty(type1.name() + "." + name1, uri1);
 		apps.setProperty(type2.name() + "." + name2, uri2);
-		List<ModuleRegistrationResource> resources = new ArrayList<>();
-		resources.add(new ModuleRegistrationResource(name1, type1.name(), uri1));
-		resources.add(new ModuleRegistrationResource(name2, type2.name(), uri2));
-		PagedResources<ModuleRegistrationResource> pagedResources = new PagedResources<>(resources,
+		List<AppRegistrationResource> resources = new ArrayList<>();
+		resources.add(new AppRegistrationResource(name1, type1.name(), uri1));
+		resources.add(new AppRegistrationResource(name2, type2.name(), uri2));
+		PagedResources<AppRegistrationResource> pagedResources = new PagedResources<>(resources,
 				new PagedResources.PageMetadata(resources.size(), 1, resources.size(), 1));
-		when(moduleOperations.registerAll(apps, true)).thenReturn(pagedResources);
-		String appsFileUri = "classpath:moduleCommandsTests-apps.properties";
-		String result = moduleCommands.importFromResource(appsFileUri, true, true);
-		assertEquals("Successfully registered modules: [source.foo, sink.bar]", result);
+		when(appRegistryOperations.registerAll(apps, true)).thenReturn(pagedResources);
+		String appsFileUri = "classpath:appRegistryCommandsTests-apps.properties";
+		String result = appRegistryCommands.importFromResource(appsFileUri, true, true);
+		assertEquals("Successfully registered applications: [source.foo, sink.bar]", result);
 	}
 
 	@Test
 	public void importFromResource() {
-		List<ModuleRegistrationResource> resources = new ArrayList<>();
-		resources.add(new ModuleRegistrationResource("foo", "source", null));
-		resources.add(new ModuleRegistrationResource("bar", "sink", null));
-		PagedResources<ModuleRegistrationResource> pagedResources = new PagedResources<>(resources,
+		List<AppRegistrationResource> resources = new ArrayList<>();
+		resources.add(new AppRegistrationResource("foo", "source", null));
+		resources.add(new AppRegistrationResource("bar", "sink", null));
+		PagedResources<AppRegistrationResource> pagedResources = new PagedResources<>(resources,
 				new PagedResources.PageMetadata(resources.size(), 1, resources.size(), 1));
 		String uri = "test://example";
-		when(moduleOperations.importFromResource(uri, true)).thenReturn(pagedResources);
-		String result = moduleCommands.importFromResource(uri, false, true);
-		assertEquals("Successfully registered 2 modules from 'test://example'", result);
+		when(appRegistryOperations.importFromResource(uri, true)).thenReturn(pagedResources);
+		String result = appRegistryCommands.importFromResource(uri, false, true);
+		assertEquals("Successfully registered 2 applications from 'test://example'", result);
 	}
 }

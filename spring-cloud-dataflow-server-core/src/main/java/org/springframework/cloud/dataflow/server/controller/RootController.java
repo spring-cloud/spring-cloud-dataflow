@@ -17,14 +17,13 @@
 package org.springframework.cloud.dataflow.server.controller;
 
 import org.springframework.cloud.dataflow.rest.resource.AppInstanceStatusResource;
+import org.springframework.cloud.dataflow.rest.resource.AppRegistrationResource;
 import org.springframework.cloud.dataflow.rest.resource.AppStatusResource;
 import org.springframework.cloud.dataflow.rest.resource.CompletionProposalsResource;
 import org.springframework.cloud.dataflow.rest.resource.CounterResource;
 import org.springframework.cloud.dataflow.rest.resource.FieldValueCounterResource;
 import org.springframework.cloud.dataflow.rest.resource.JobExecutionResource;
 import org.springframework.cloud.dataflow.rest.resource.JobInstanceResource;
-import org.springframework.cloud.dataflow.rest.resource.LibraryRegistrationResource;
-import org.springframework.cloud.dataflow.rest.resource.ModuleRegistrationResource;
 import org.springframework.cloud.dataflow.rest.resource.StepExecutionProgressInfoResource;
 import org.springframework.cloud.dataflow.rest.resource.StepExecutionResource;
 import org.springframework.cloud.dataflow.rest.resource.StreamDefinitionResource;
@@ -111,14 +110,12 @@ public class RootController {
 		resourceSupport.add(entityLinks.linkToCollectionResource(FieldValueCounterResource.class).withRel("field-value-counters"));
 		resourceSupport.add(unescapeTemplateVariables(entityLinks.linkToSingleResource(FieldValueCounterResource.class, "{name}").withRel("field-value-counters/counter")));
 
-		resourceSupport.add(entityLinks.linkToCollectionResource(ModuleRegistrationResource.class).withRel("modules"));
+		resourceSupport.add(entityLinks.linkToCollectionResource(AppRegistrationResource.class).withRel("apps"));
 
-		resourceSupport.add(entityLinks.linkToCollectionResource(LibraryRegistrationResource.class).withRel("libraries"));
+		resourceSupport.add(entityLinks.linkToCollectionResource(AppStatusResource.class).withRel("runtime/apps"));
+		resourceSupport.add(unescapeTemplateVariables(entityLinks.linkForSingleResource(AppStatusResource.class, "{appId}").withRel("runtime/apps/app")));
 
-		resourceSupport.add(entityLinks.linkToCollectionResource(AppStatusResource.class).withRel("runtime/modules"));
-		resourceSupport.add(unescapeTemplateVariables(entityLinks.linkForSingleResource(AppStatusResource.class, "{moduleId}").withRel("runtime/modules/module")));
-
-		resourceSupport.add(unescapeTemplateVariables(entityLinks.linkFor(AppInstanceStatusResource.class, UriComponents.UriTemplateVariables.SKIP_VALUE).withRel("runtime/modules/instances")));
+		resourceSupport.add(unescapeTemplateVariables(entityLinks.linkFor(AppInstanceStatusResource.class, UriComponents.UriTemplateVariables.SKIP_VALUE).withRel("runtime/apps/instances")));
 
 		templated = entityLinks.linkFor(CompletionProposalsResource.class).withSelfRel().getHref() + ("/stream{?start,detailLevel}");
 		resourceSupport.add(new Link(templated).withRel("completions/stream"));

@@ -18,9 +18,9 @@ package org.springframework.cloud.dataflow.rest.client;
 
 import java.util.Properties;
 
-import org.springframework.cloud.dataflow.core.ArtifactType;
-import org.springframework.cloud.dataflow.rest.resource.DetailedModuleRegistrationResource;
-import org.springframework.cloud.dataflow.rest.resource.ModuleRegistrationResource;
+import org.springframework.cloud.dataflow.core.ApplicationType;
+import org.springframework.cloud.dataflow.rest.resource.DetailedAppRegistrationResource;
+import org.springframework.cloud.dataflow.rest.resource.AppRegistrationResource;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.ResourceSupport;
 import org.springframework.hateoas.UriTemplate;
@@ -29,7 +29,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 /**
- * Implementation of {@link ModuleOperations} that uses {@link RestTemplate}
+ * Implementation of {@link AppRegistryOperations} that uses {@link RestTemplate}
  * to issue commands to the Data Flow server.
  *
  * @author Eric Bottard
@@ -38,7 +38,7 @@ import org.springframework.web.client.RestTemplate;
  * @author Gunnar Hillert
  * @author Patrick Peralta
  */
-public class ModuleTemplate implements ModuleOperations {
+public class AppRegistryTemplate implements AppRegistryOperations {
 
 	/**
 	 * Template used for http interaction.
@@ -51,61 +51,61 @@ public class ModuleTemplate implements ModuleOperations {
 	private final UriTemplate uriTemplate;
 
 	/**
-	 * Construct a {@code ModuleTemplate} object.
+	 * Construct a {@code AppRegistryTemplate} object.
 	 *
 	 * @param restTemplate template for HTTP/rest commands
 	 * @param resourceSupport HATEOAS link support
 	 */
-	public ModuleTemplate(RestTemplate restTemplate, ResourceSupport resourceSupport) {
+	public AppRegistryTemplate(RestTemplate restTemplate, ResourceSupport resourceSupport) {
 		this.restTemplate = restTemplate;
-		this.uriTemplate = new UriTemplate(resourceSupport.getLink("modules").getHref());
+		this.uriTemplate = new UriTemplate(resourceSupport.getLink("apps").getHref());
 	}
 
 	@Override
-	public PagedResources<ModuleRegistrationResource> list() {
-		return list(/* ArtifactType */null);
+	public PagedResources<AppRegistrationResource> list() {
+		return list(/* ApplicationType */null);
 	}
 
 	@Override
-	public PagedResources<ModuleRegistrationResource> list(ArtifactType type) {
+	public PagedResources<AppRegistrationResource> list(ApplicationType type) {
 		String uri = uriTemplate + "?size=10000" + ((type == null) ? "" : "&type=" + type.name());
-		return restTemplate.getForObject(uri, ModuleRegistrationResource.Page.class);
+		return restTemplate.getForObject(uri, AppRegistrationResource.Page.class);
 	}
 
 	@Override
-	public void unregister(String name, ArtifactType artifactType) {
+	public void unregister(String name, ApplicationType applicationType) {
 		String uri = uriTemplate.toString() + "/{type}/{name}";
-		restTemplate.delete(uri, artifactType.name(), name);
+		restTemplate.delete(uri, applicationType.name(), name);
 	}
 
 	@Override
-	public DetailedModuleRegistrationResource info(String name, ArtifactType type) {
+	public DetailedAppRegistrationResource info(String name, ApplicationType type) {
 		String uri = uriTemplate.toString() + "/{type}/{name}";
-		return restTemplate.getForObject(uri, DetailedModuleRegistrationResource.class, type, name);
+		return restTemplate.getForObject(uri, DetailedAppRegistrationResource.class, type, name);
 	}
 
 	@Override
-	public ModuleRegistrationResource register(String name, ArtifactType type,
+	public AppRegistrationResource register(String name, ApplicationType type,
 			String uri, boolean force) {
 		MultiValueMap<String, Object> values = new LinkedMultiValueMap<String, Object>();
 		values.add("uri", uri);
 		values.add("force", Boolean.toString(force));
 
 		return restTemplate.postForObject(uriTemplate.toString() + "/{type}/{name}", values,
-				ModuleRegistrationResource.class, type, name);
+				AppRegistrationResource.class, type, name);
 	}
 
 	@Override
-	public PagedResources<ModuleRegistrationResource> importFromResource(String uri, boolean force) {
+	public PagedResources<AppRegistrationResource> importFromResource(String uri, boolean force) {
 		MultiValueMap<String, Object> values = new LinkedMultiValueMap<String, Object>();
 		values.add("uri", uri);
 		values.add("force", Boolean.toString(force));
 		return restTemplate.postForObject(uriTemplate.toString(), values,
-				ModuleRegistrationResource.Page.class);
+				AppRegistrationResource.Page.class);
 	}
 
 	@Override
-	public PagedResources<ModuleRegistrationResource> registerAll(Properties apps, boolean force) {
+	public PagedResources<AppRegistrationResource> registerAll(Properties apps, boolean force) {
 		MultiValueMap<String, Object> values = new LinkedMultiValueMap<String, Object>();
 		StringBuffer buffer = new StringBuffer();
 		for (String key : apps.stringPropertyNames()) {
@@ -114,6 +114,6 @@ public class ModuleTemplate implements ModuleOperations {
 		values.add("apps", buffer.toString());
 		values.add("force", Boolean.toString(force));
 		return restTemplate.postForObject(uriTemplate.toString(), values,
-				ModuleRegistrationResource.Page.class);
+				AppRegistrationResource.Page.class);
 	}
 }

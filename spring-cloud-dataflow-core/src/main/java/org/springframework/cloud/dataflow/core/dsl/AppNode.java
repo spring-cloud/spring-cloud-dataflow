@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2015-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,24 +21,25 @@ import java.util.Properties;
 
 /**
  * @author Andy Clement
+ * @author Mark Fisher
  */
-public class ModuleNode extends AstNode {
+public class AppNode extends AstNode {
 
 	private static final ArgumentNode[] NO_ARGUMENTS = new ArgumentNode[0];
 
 	private LabelNode label;
 
-	private final String moduleName;
+	private final String appName;
 
 	private ArgumentNode[] arguments;
 
-	public ModuleNode(LabelNode label, String moduleName, int startPos, int endPos, ArgumentNode[] arguments) {
+	public AppNode(LabelNode label, String appName, int startPos, int endPos, ArgumentNode[] arguments) {
 		super(startPos, endPos);
 		this.label = label;
-		this.moduleName = moduleName;
+		this.appName = appName;
 		if (arguments != null) {
 			this.arguments = Arrays.copyOf(arguments, arguments.length);
-			// adjust end pos for module node to end of final argument
+			// adjust end pos for app node to end of final argument
 			super.endPos = this.arguments[this.arguments.length - 1].endPos;
 		}
 		else {
@@ -53,7 +54,7 @@ public class ModuleNode extends AstNode {
 			s.append(label.toString());
 			s.append(" ");
 		}
-		s.append(moduleName);
+		s.append(appName);
 		if (arguments != null) {
 			for (ArgumentNode argumentNode : arguments) {
 				s.append(" --").append(argumentNode.getName()).append("=").append(argumentNode.getValue());
@@ -70,7 +71,7 @@ public class ModuleNode extends AstNode {
 			s.append(label.stringify(includePositionalInfo));
 			s.append(" ");
 		}
-		s.append("ModuleNode:").append(moduleName);
+		s.append("AppNode:").append(appName);
 		if (arguments != null) {
 			for (ArgumentNode argumentNode : arguments) {
 				s.append(" --").append(argumentNode.getName()).append("=").append(argumentNode.getValue());
@@ -85,7 +86,7 @@ public class ModuleNode extends AstNode {
 	}
 
 	public String getName() {
-		return moduleName;
+		return appName;
 	}
 
 	public ArgumentNode[] getArguments() {
@@ -97,18 +98,18 @@ public class ModuleNode extends AstNode {
 	}
 
 	/**
-	 * Return the label for this module, that is:
+	 * Return the label for this app, that is:
 	 * <ul>
 	 * <li>an explicit label if provided</li>
-	 * <li>the module name if no label was provided</li>
+	 * <li>the app name if no label was provided</li>
 	 * </ul>
 	 */
 	public String getLabelName() {
-		return (label != null) ? label.getLabelName() : moduleName;
+		return (label != null) ? label.getLabelName() : appName;
 	}
 
 	/**
-	 * @return Retrieve the module arguments as a simple {@link java.util.Properties} object.
+	 * @return Retrieve the app arguments as a simple {@link java.util.Properties} object.
 	 */
 	public Properties getArgumentsAsProperties() {
 		Properties props = new Properties();

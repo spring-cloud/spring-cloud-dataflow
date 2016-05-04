@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2015-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,22 +23,23 @@ import org.springframework.boot.configurationmetadata.ConfigurationMetadataPrope
 import org.springframework.hateoas.PagedResources;
 
 /**
- * Extension of {@link ModuleRegistrationResource} that contains module options
- * and other detailed module information.
+ * Extension of {@link AppRegistrationResource} that contains application options
+ * and other detailed application information.
  *
  * @author Eric Bottard
  * @author Gunnar Hillert
  * @author Patrick Peralta
+ * @author Mark Fisher
  */
-public class DetailedModuleRegistrationResource extends ModuleRegistrationResource {
+public class DetailedAppRegistrationResource extends AppRegistrationResource {
 
 	/**
-	 * Optional short description of the module.
+	 * Optional short description of the application.
 	 */
 	private String shortDescription;
 
 	/**
-	 * List of module options.
+	 * List of application options.
 	 */
 	private final List<ConfigurationMetadataProperty> options = new ArrayList<>();
 
@@ -46,62 +47,62 @@ public class DetailedModuleRegistrationResource extends ModuleRegistrationResour
 	/**
 	 * Default constructor for serialization frameworks.
 	 */
-	protected DetailedModuleRegistrationResource() {
+	protected DetailedAppRegistrationResource() {
 	}
 
 	/**
-	 * Construct a {@code DetailedModuleRegistrationResource} object.
+	 * Construct a {@code DetailedAppRegistrationResource} object.
 	 *
-	 * @param name module name
-	 * @param type module type
-	 * @param coordinates Maven coordinates for module artifact
+	 * @param name application name
+	 * @param type application type
+	 * @param coordinates Maven coordinates for the application artifact
 	 */
-	public DetailedModuleRegistrationResource(String name, String type, String coordinates) {
+	public DetailedAppRegistrationResource(String name, String type, String coordinates) {
 		super(name, type, coordinates);
 	}
 
 	/**
-	 * Construct a {@code DetailedModuleRegistrationResource} object based
-	 * on the provided {@link ModuleRegistrationResource}.
+	 * Construct a {@code DetailedAppRegistrationResource} object based
+	 * on the provided {@link AppRegistrationResource}.
 	 *
-	 * @param resource {@code ModuleRegistrationResource} from which to obtain
-	 *                 module registration data
+	 * @param resource {@code AppRegistrationResource} from which to obtain
+	 *                 app registration data
 	 */
-	public DetailedModuleRegistrationResource(ModuleRegistrationResource resource) {
+	public DetailedAppRegistrationResource(AppRegistrationResource resource) {
 		super(resource.getName(), resource.getType(), resource.getUri());
 	}
 
 	/**
-	 * Add a module option.
+	 * Add an application option.
 	 *
-	 * @param option module option to add
+	 * @param option application option to add
 	 */
 	public void addOption(ConfigurationMetadataProperty option) {
 		options.add(option);
 	}
 
 	/**
-	 * Return a list of module options.
+	 * Return a list of application options.
 	 *
-	 * @return list of module options
+	 * @return list of application options
 	 */
 	public List<ConfigurationMetadataProperty> getOptions() {
 		return options;
 	}
 
 	/**
-	 * Set a description for this module.
+	 * Set a description for this application.
 	 *
-	 * @param shortDescription description for module
+	 * @param shortDescription description for application
 	 */
 	public void setShortDescription(String shortDescription) {
 		this.shortDescription = shortDescription;
 	}
 
 	/**
-	 * Return a description for this module.
+	 * Return a description for this application.
 	 *
-	 * @return description for this module
+	 * @return description for this application
 	 */
 	public String getShortDescription() {
 		return shortDescription;
@@ -110,7 +111,7 @@ public class DetailedModuleRegistrationResource extends ModuleRegistrationResour
 	/**
 	 * Dedicated subclass to workaround type erasure.
 	 */
-	public static class Page extends PagedResources<DetailedModuleRegistrationResource> {
+	public static class Page extends PagedResources<DetailedAppRegistrationResource> {
 	}
 
 }

@@ -41,7 +41,7 @@ public final class DeploymentPropertiesUtils {
 	/**
 	 * Pattern used for parsing a String of comma-delimited key=value pairs.
 	 */
-	private static final Pattern DEPLOYMENT_PROPERTIES_PATTERN = Pattern.compile(",\\s*module\\.[^\\.]+\\.[^=]+=");
+	private static final Pattern DEPLOYMENT_PROPERTIES_PATTERN = Pattern.compile(",\\s*app\\.[^\\.]+\\.[^=]+=");
 
 	/**
 	 * Pattern used for parsing a String of command-line arguments.
@@ -50,7 +50,7 @@ public final class DeploymentPropertiesUtils {
 
 	/**
 	 * Parses a String comprised of 0 or more comma-delimited key=value pairs where each key has the format:
-	 * {@code module.[modulename].[key]}.
+	 * {@code app.[appname].[key]}.
 	 * Values may themselves contain commas, since the split points will be based upon the key pattern.
 	 *
 	 * @param s the string to parse
