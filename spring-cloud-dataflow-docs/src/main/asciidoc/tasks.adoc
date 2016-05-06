@@ -198,3 +198,31 @@ spring:
     password: mypass
     driver-class-name:org.postgresql.Driver
 ```
+
+== Subscribing to Task/Batch events
+
+You can also tap into various task/batch events when the task is launched.
+If the task is enabled with generating task and batch events (with the additional dependency of `spring-cloud-task-stream`), those events are published during the task lifecycle.
+By default, the destination names for those published events on the broker (rabbit, kafka etc.,) are the event names themselves (for instance: `task-events`, `job-execution-events` etc.,).
+
+```
+dataflow:>task create myTask --definition “myBatchJob"
+dataflow:>task launch myTask
+dataflow:>stream create task-event-subscriber1 --definition ":task-events > log" --deploy
+```
+
+You can control the destination name for those events by specifying explicit names when launching the task as:
+
+```
+dataflow:>task launch myTask --properties "spring.cloud.stream.bindings.task-events.destination=myTaskEvents"
+dataflow:>stream create task-event-subscriber2 --definition ":myTaskEvents > log" --deploy
+```
+
+Various events that are published and the default destination names on the broker are:
+Task events (task-events)
+Job Execution events (job-execution-events)
+Step Execution events (step-execution-events)
+Item Read events (item-read-events)
+Item Process events (item-process-events)
+Item Write events (item-write-events)
+Skip events (skip-events)
