@@ -25,7 +25,6 @@ import javax.sql.DataSource;
 
 import org.h2.tools.Server;
 import org.slf4j.LoggerFactory;
-
 import org.springframework.batch.admin.service.JobService;
 import org.springframework.batch.admin.service.SimpleJobServiceFactoryBean;
 import org.springframework.batch.core.StepExecution;
@@ -47,7 +46,6 @@ import org.springframework.boot.autoconfigure.batch.BatchProperties;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
-import org.springframework.boot.autoconfigure.security.oauth2.OAuth2AutoConfiguration;
 import org.springframework.boot.autoconfigure.web.HttpMessageConverters;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.dataflow.completion.CompletionConfiguration;
@@ -55,6 +53,7 @@ import org.springframework.cloud.dataflow.completion.RecoveryStrategy;
 import org.springframework.cloud.dataflow.completion.StreamCompletionProvider;
 import org.springframework.cloud.dataflow.rest.job.support.ISO8601DateFormatWithMilliSeconds;
 import org.springframework.cloud.dataflow.server.completion.TapOnDestinationRecoveryStrategy;
+import org.springframework.cloud.dataflow.server.config.security.SecurityConfiguration;
 import org.springframework.cloud.dataflow.server.job.TaskExplorerFactoryBean;
 import org.springframework.cloud.dataflow.server.job.support.ExecutionContextJacksonMixIn;
 import org.springframework.cloud.dataflow.server.job.support.StepExecutionJacksonMixIn;
@@ -115,8 +114,8 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 @EnableHypermediaSupport(type = HAL)
 @EnableSpringDataWebSupport
 @Import(CompletionConfiguration.class)
-@ComponentScan(basePackageClasses = StreamDefinitionRepository.class)
-@EnableAutoConfiguration(exclude = OAuth2AutoConfiguration.class)
+@ComponentScan(basePackageClasses = {StreamDefinitionRepository.class, SecurityConfiguration.class})
+@EnableAutoConfiguration
 @EnableConfigurationProperties(BatchProperties.class)
 public class DataFlowServerConfiguration {
 

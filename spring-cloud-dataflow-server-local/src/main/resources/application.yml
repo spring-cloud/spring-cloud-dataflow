@@ -3,13 +3,35 @@ info:
     name: "@project.artifactId@"
     description: "@project.description@"
     version: "@project.version@"
-binder: kafka 
+binder: kafka
 spring:
   cloud:
     dataflow:
       registry:
         populator:
           locations: classpath:META-INF/${binder}-apps.properties
+
+#server:
+#  port: 8443
+#  ssl:
+#    enabled: true
+#    key-alias: dataflow
+#    key-store: "/your/path/to/dataflow.keystore"
+#    key-store-type: jks
+#    key-store-password: dataflow
+#    key-password: dataflow
+
+#security:
+#  basic:
+#    enabled: true
+#  oauth2:
+#    client:
+#      client-id: myclient
+#      client-secret: mysecret
+#      access-token-uri: http://127.0.0.1:9999/oauth/token
+#      user-authorization-uri: http://127.0.0.1:9999/oauth/authorize
+#    resource:
+#      user-info-uri: http://127.0.0.1:9999/me
 
 # If you prefer to use Eureka to locate the Config Server, you can do that by setting
 # spring.cloud.config.discovery.enabled=true (default "false"). The net result of that is

@@ -44,7 +44,7 @@ import org.springframework.cloud.dataflow.server.controller.RestControllerAdvice
 import org.springframework.cloud.dataflow.server.controller.RootController;
 import org.springframework.cloud.dataflow.server.controller.RuntimeModulesController;
 import org.springframework.cloud.dataflow.server.controller.RuntimeModulesController.AppInstanceController;
-import org.springframework.cloud.dataflow.server.controller.SecurityController;
+import org.springframework.cloud.dataflow.server.controller.security.SecurityController;
 import org.springframework.cloud.dataflow.server.controller.StreamDefinitionController;
 import org.springframework.cloud.dataflow.server.controller.StreamDeploymentController;
 import org.springframework.cloud.dataflow.server.controller.TaskDefinitionController;
