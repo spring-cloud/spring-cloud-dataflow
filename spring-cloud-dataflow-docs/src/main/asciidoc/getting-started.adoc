@@ -92,11 +92,135 @@ dataflow:>stream create --name httptest --definition "http --server.port=9000 | 
 NOTE: You will need to wait a little while until the apps are actually deployed successfully
 before posting data.  Look in the log file of the Data Flow server for the location of the log
 files for the `http` and `log` applications.  Tail the log file for each application to verify
-the application has started.  
+the application has started.
 +
 Now post some data
 ```
 dataflow:> http post --target http://localhost:9000 --data "hello world"
 ```
 Look to see if `hello world` ended up in log files for the `log` application.
+
+[[getting-started-security]]
+== Security
+
+By default, the Dataflow server is unsecured and runs on an unencrypted HTTP connection.
+You can secure your REST endpoints, as well as the Dataflow Dashboard by enabling HTTPS
+and requiring clients to authenticate.
+
+[[getting-started-security-enabling-https]]
+=== Enabling HTTPS
+
+By default, the dashboard, management, and health endpoints use HTTP as a transport.
+You can switch to HTTPS easily, by adding a certificate to your configuration in
+`application.yml`.
+
+[source,yaml]
+----
+server:
+  port: 8443                                         # <1>
+  ssl:
+    key-alias: yourKeyAlias                          # <2>
+    key-store: path/to/keystore                      # <3>
+    key-store-password: yourKeyStorePassword         # <4>
+    key-password: yourKeyPassword                    # <5>
+    trust-store: path/to/trust-store                 # <6>
+    trust-store-password: yourTrustStorePassword     # <7>
+----
+
+<1> As the default port is `9393`, you may choose to change the port to a more common HTTPs-typical port.
+<2> The alias (or name) under which the key is stored in the keystore.
+<3> The path to the keystore file. Classpath resources may also be specified, by using the classpath prefix: `classpath:path/to/keystore`
+<4> The password of the keystore.
+<5> The password of the key.
+<6> The path to the truststore file. Classpath resources may also be specified, by using the classpath prefix: `classpath:path/to/trust-store`
+<7> The password of the trust store.
+
+NOTE: If HTTPS is enabled, it will completely replace HTTP as the protocol over
+which the REST endpoints and the Dataflow Dashboard interact. Plain HTTP requests
+will fail - therefore, make sure that you configure your Shell accordingly.
+
+E.g. if for testing purposes you want to create a self-signed certificate, use
+the following command:
+
+[source,bash]
+----
+$ keytool -genkey -alias dataflow -storetype PKCS12 -keyalg RSA -keysize 2048 -keystore keystore.p12 -validity 3650 -dname "CN=spring.io, OU=Spring, O=Pivotal, L=Kailua-Kona, ST=HI, C=US" -keypass dataflow -storepass dataflow
+----
+
+The add the following to your `application.yml` file:
+
+[source,yaml]
+----
+server:
+  port: 8443
+  ssl:
+    enabled: true
+    key-alias: dataflow
+    key-store: "/your/path/to/keystore.p12"
+    key-store-type: PKCS12
+    key-store-password: dataflow
+    key-password: dataflow
+----
+
+[[getting-started-security-enabling-authentication]]
+=== Enabling Authentication
+
+By default, the REST endpoints (administration, management and health), as well
+as Dashboard UI do not require authenticated access. However, authentication can
+be provided via http://oauth.net/2/[OAuth 2.0], thus allowing you to also integrate Spring Cloud
+Data Flow into Single Sign On (SSO) environments. The following 2 OAuth2 Grant Types will be used:
+
+* _Authorization Code_ - Used for the GUI (Browser) integration. You will be redirected to your OAuth Service for authentication
+* _Password_ - Used by the shell (And the REST integration), so you can login using username and password
+
+The REST endpoints are secured via Basic Authentication but will use the Password
+Grand Type under the covers to authenticate with your OAuth2 service.
+
+NOTE: When authentication is set up, it is strongly recommended to enable HTTPS
+as well, especially in production environments.
+
+You can turn on authentication by adding the following to `application.yml` or via
+environment variables:
+
+[source,yaml]
+----
+security:
+  basic:
+    enabled: true                                                     # <1>
+    realm: Spring Cloud Data Flow                                     # <2>
+  oauth2:                                                             # <3>
+    client:
+      client-id: myclient
+      client-secret: mysecret
+      access-token-uri: http://127.0.0.1:9999/oauth/token
+      user-authorization-uri: http://127.0.0.1:9999/oauth/authorize
+    resource:
+      user-info-uri: http://127.0.0.1:9999/me
+----
+
+<1> Must be set to `true` for security to be enabled.
+<2> The realm for Basic authentication
+<3> OAuth Configuration Section
+
+NOTE: As of version 1.0 Spring Cloud Dataflow does not provide finer-grained authorization. Thus, once you are logged in, you have full access to all functionality.
+
+You can verify that basic authentication is working properly using _curl_:
+
+[source,bash]
+----
+$ curl -u myusername:mypassword http://localhost:9393/
+----
+
+As a result you should see a list of available REST endpoints.
+
+[[getting-started-security-enabling-authentication-cloud-foundry]]
+==== Authentication and Cloud Foundry
+
+When deploying Spring Cloud Data Flow to Cloud Foundry, we take advantage of the
+https://github.com/pivotal-cf/spring-cloud-sso-connector[_Spring Cloud Single Sign-On Connector_],
+which provides Cloud Foundry specific auto-configuration support for OAuth 2.0
+when used in conjunction with the _Pivotal Single Sign-On Service_.
+
+Simply set `security.basic.enabled` to `true` and in Cloud Foundry bind the SSO
+service to your Dataflow Server app and SSO will be enabled.
 
