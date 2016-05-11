@@ -16,17 +16,13 @@
 
 package org.springframework.cloud.dataflow.server.controller;
 
-import java.util.EnumSet;
-import java.util.Set;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import org.springframework.cloud.dataflow.core.ModuleDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.rest.resource.StreamDefinitionResource;
-import org.springframework.cloud.dataflow.server.repository.DeploymentKey;
 import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
+import org.springframework.cloud.dataflow.server.repository.DeploymentKey;
 import org.springframework.cloud.dataflow.server.repository.DuplicateStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.NoSuchStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
@@ -46,6 +42,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.EnumSet;
+import java.util.Set;
 
 /**
  * Controller for operations on {@link StreamDefinition}. This
@@ -137,9 +136,9 @@ public class StreamDefinitionController {
 	@RequestMapping(value = "", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
 	public void save(@RequestParam("name") String name,
-					@RequestParam("definition") String dsl,
-					@RequestParam(value = "deploy", defaultValue = "false")
-					boolean deploy) {
+					 @RequestParam("definition") String dsl,
+					 @RequestParam(value = "deploy", defaultValue = "false")
+					 boolean deploy) {
 		StreamDefinition stream = new StreamDefinition(name, dsl);
 		this.repository.save(stream);
 		if (deploy) {

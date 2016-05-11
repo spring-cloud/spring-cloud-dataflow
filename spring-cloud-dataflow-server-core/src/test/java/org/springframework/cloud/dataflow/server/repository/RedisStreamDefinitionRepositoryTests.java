@@ -169,10 +169,11 @@ public class RedisStreamDefinitionRepositoryTests {
 		assertThat(repository.count(), is(0L));
 	}
 
-	@Test
-	public void testUdate() {
+	@Test(expected = DuplicateStreamDefinitionException.class)
+	public void testUpdate() {
+		//TODO: This test will need to change once GH-331 is done
 		repository.save(new StreamDefinition("a", "time | log"));
+		assertThat(repository.findOne("a"), hasProperty("dslText", is("time | log")));
 		repository.save(new StreamDefinition("a", "time | file"));
-		assertThat(repository.findOne("a"), hasProperty("dslText", is("time | file")));
 	}
 }

@@ -16,15 +16,6 @@
 
 package org.springframework.cloud.dataflow.server.repository;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -34,6 +25,15 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.BoundHashOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 /**
  * A Redis implementation of {@link StreamDefinitionRepository}, storing each
@@ -73,7 +73,9 @@ public class RedisStreamDefinitionRepository implements StreamDefinitionReposito
 			results = Collections.emptyList();
 		}
 		else {
-			Collections.sort(allKeys, comparatorFor(pageable.getSort().getOrderFor("name").getDirection()));
+			if (pageable.getSort() != null) {
+				Collections.sort(allKeys, comparatorFor(pageable.getSort().getOrderFor("name").getDirection()));
+			}
 			int start = pageable.getOffset();
 			int end = Math.min(pageable.getOffset() + pageable.getPageSize(), total);
 
@@ -95,19 +97,24 @@ public class RedisStreamDefinitionRepository implements StreamDefinitionReposito
 	}
 
 	@Override
-	public <S extends StreamDefinition> S save(S entity) {
-		hashOperations.put(entity.getName(), entity.getDslText());
-		return entity;
+	public <S extends StreamDefinition> S save(S definition) {
+		if (findOne(definition.getName()) != null) {
+			throw new DuplicateStreamDefinitionException(
+					String.format("Cannot register stream definition %s because another one has already " +
+									"been registered with the same name",
+							definition.getName()));
+		}
+		hashOperations.put(definition.getName(), definition.getDslText());
+		return definition;
 	}
 
 	@Override
-	public <S extends StreamDefinition> Iterable<S> save(Iterable<S> entities) {
+	public <S extends StreamDefinition> Iterable<S> save(Iterable<S> definitions) {
 		Map<String, String> asMap = new HashMap<>();
-		for (StreamDefinition sd : entities) {
-			asMap.put(sd.getName(), sd.getDslText());
+		for (StreamDefinition sd : definitions) {
+			save(sd);
 		}
-		hashOperations.putAll(asMap);
-		return entities;
+		return definitions;
 	}
 
 	@Override
