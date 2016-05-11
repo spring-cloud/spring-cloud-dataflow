@@ -140,6 +140,9 @@ public class StreamDefinitionController {
 					 @RequestParam(value = "deploy", defaultValue = "false")
 					 boolean deploy) {
 		StreamDefinition stream = new StreamDefinition(name, dsl);
+		if (this.repository.findOne(stream.getName()) != null) {
+			throw new DuplicateStreamDefinitionException("Stream definition " + name + " already exists.");
+		}
 		this.repository.save(stream);
 		if (deploy) {
 			deploymentController.deploy(name, null);
