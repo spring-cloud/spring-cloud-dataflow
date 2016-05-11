@@ -17,6 +17,7 @@ package org.springframework.cloud.dataflow.server.service.impl;
 
 import java.net.URI;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.h2.util.Task;
@@ -145,7 +146,7 @@ public class DefaultTaskService implements TaskService {
 	}
 
 	@Override
-	public void executeTask(String taskName, Map<String, String> runtimeProperties) {
+	public void executeTask(String taskName, Map<String, String> runtimeProperties, List<String> runtimeParams) {
 
 		Assert.hasText(taskName, "The provided taskName must not be null or empty.");
 		Assert.notNull(runtimeProperties, "The provided runtimeProperties must not be null.");
@@ -163,7 +164,7 @@ public class DefaultTaskService implements TaskService {
 		AppDefinition definition = new AppDefinition(module.getLabel(), module.getParameters());
 		URI uri = this.registry.find(String.format("task.%s", module.getName()));
 		Resource resource = this.resourceLoader.getResource(uri.toString());
-		AppDeploymentRequest request = new AppDeploymentRequest(definition, resource, deploymentProperties);
+		AppDeploymentRequest request = new AppDeploymentRequest(definition, resource, deploymentProperties, runtimeParams);
 		String id = this.taskLauncher.launch(request);
 		this.deploymentIdRepository.save(DeploymentKey.forApp(module), id);
 	}

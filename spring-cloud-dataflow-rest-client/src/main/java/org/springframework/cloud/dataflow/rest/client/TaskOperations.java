@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.dataflow.rest.client;
 
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.cloud.dataflow.rest.resource.TaskDefinitionResource;
@@ -43,8 +44,8 @@ public interface TaskOperations {
 	/**
 	 * Launch an already created task.
 	 */
-	void launch(String name, Map<String, String> properties);
-	
+	void launch(String name, Map<String, String> properties, List<String> params);
+
 	/**
 	 * Destroy an existing task.
 	 */
