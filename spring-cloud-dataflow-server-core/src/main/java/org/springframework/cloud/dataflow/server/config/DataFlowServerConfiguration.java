@@ -59,9 +59,9 @@ import org.springframework.cloud.dataflow.server.job.TaskExplorerFactoryBean;
 import org.springframework.cloud.dataflow.server.job.support.ExecutionContextJacksonMixIn;
 import org.springframework.cloud.dataflow.server.job.support.StepExecutionJacksonMixIn;
 import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
-import org.springframework.cloud.dataflow.server.repository.InMemoryDeploymentIdRepository;
-import org.springframework.cloud.dataflow.server.repository.InMemoryStreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.InMemoryTaskDefinitionRepository;
+import org.springframework.cloud.dataflow.server.repository.RedisDeploymentIdRepository;
+import org.springframework.cloud.dataflow.server.repository.RedisStreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.TaskJobService;
@@ -162,8 +162,8 @@ public class DataFlowServerConfiguration {
 
 	@Bean
 	@ConditionalOnMissingBean
-	public StreamDefinitionRepository streamDefinitionRepository() {
-		return new InMemoryStreamDefinitionRepository();
+	public StreamDefinitionRepository streamDefinitionRepository(RedisConnectionFactory redisConnectionFactory) {
+		return new RedisStreamDefinitionRepository("stream-definitions", redisConnectionFactory);
 	}
 
 	@Bean
@@ -174,8 +174,8 @@ public class DataFlowServerConfiguration {
 
 	@Bean
 	@ConditionalOnMissingBean
-	public DeploymentIdRepository deploymentIdRepository() {
-		return new InMemoryDeploymentIdRepository();
+	public DeploymentIdRepository deploymentIdRepository(RedisConnectionFactory redisConnectionFactory) {
+		return new RedisDeploymentIdRepository("deployment-ids", redisConnectionFactory);
 	}
 
 	@Configuration
@@ -233,8 +233,9 @@ public class DataFlowServerConfiguration {
 
 	@Bean
 	@ConditionalOnMissingBean(TapOnDestinationRecoveryStrategy.class)
-	public RecoveryStrategy<?> tapOnDestinationExpansionStrategy(StreamCompletionProvider streamCompletionProvider) {
-		RecoveryStrategy<?> recoveryStrategy = new TapOnDestinationRecoveryStrategy(streamDefinitionRepository());
+	public RecoveryStrategy<?> tapOnDestinationExpansionStrategy(StreamCompletionProvider streamCompletionProvider,
+			RedisConnectionFactory redisConnectionFactory) {
+		RecoveryStrategy<?> recoveryStrategy = new TapOnDestinationRecoveryStrategy(streamDefinitionRepository(redisConnectionFactory));
 		streamCompletionProvider.addCompletionRecoveryStrategy(recoveryStrategy);
 		return recoveryStrategy;
 	}

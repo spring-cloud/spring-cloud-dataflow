@@ -73,7 +73,9 @@ public class RedisStreamDefinitionRepository implements StreamDefinitionReposito
 			results = Collections.emptyList();
 		}
 		else {
-			Collections.sort(allKeys, comparatorFor(pageable.getSort().getOrderFor("name").getDirection()));
+			if (pageable.getSort() != null) {
+				Collections.sort(allKeys, comparatorFor(pageable.getSort().getOrderFor("name").getDirection()));
+			}
 			int start = pageable.getOffset();
 			int end = Math.min(pageable.getOffset() + pageable.getPageSize(), total);
 
