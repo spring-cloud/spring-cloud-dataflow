@@ -7,18 +7,85 @@
 		<version>1.0.0.BUILD-SNAPSHOT</version>
 	</parent>
 	<artifactId>spring-cloud-dataflow-docs</artifactId>
-	<name>spring-cloud-dataflow-docs</name>
+	<name>Spring Cloud Data Flow Docs</name>
 	<description>Spring Cloud Data Flow Docs</description>
 	<properties>
 		<main.basedir>${basedir}/..</main.basedir>
 	</properties>
 	<dependencies>
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-dataflow-configuration-metadata</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-dataflow-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-dataflow-registry</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-dataflow-rest-resource</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-dataflow-server-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-dataflow-server-local</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-dataflow-rest-client</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-dataflow-shell</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-dataflow-completion</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-dataflow-server-local</artifactId>
+		</dependency>
 	</dependencies>
 	<profiles>
 		<profile>
 			<id>full</id>
 			<build>
 				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-javadoc-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>attach-javadocs</id>
+								<goals>
+									<goal>jar</goal>
+								</goals>
+								<phase>prepare-package</phase>
+								<configuration>
+									<includeDependencySources>true</includeDependencySources>
+									<dependencySourceIncludes>
+										<dependencySourceInclude>${project.groupId}:*</dependencySourceInclude>
+									</dependencySourceIncludes>
+									<attach>false</attach>
+									<quiet>true</quiet>
+									<stylesheetfile>${basedir}/src/main/javadoc/spring-javadoc.css</stylesheetfile>
+									<links>
+										<link>http://docs.spring.io/spring-framework/docs/${spring.version}/javadoc-api/</link>
+										<link>http://docs.spring.io/autorepo/docs/spring-security/${spring-security.version}/apidocs/</link>
+										<link>http://docs.spring.io/spring-shell/docs/current/api/</link>
+									</links>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
 					<plugin>
 						<groupId>org.asciidoctor</groupId>
 						<artifactId>asciidoctor-maven-plugin</artifactId>
