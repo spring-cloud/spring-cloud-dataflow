@@ -33,7 +33,6 @@ public interface DeploymentIdRepository extends org.springframework.data.reposit
 	 *
 	 * @param key the app deployment key
 	 * @param id the identifier
-	 * @return the saved key
 	 */
 	void save(String key, String id);
 
