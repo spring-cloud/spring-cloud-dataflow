@@ -50,16 +50,25 @@
 					<plugin>
 						<groupId>com.agilejava.docbkx</groupId>
 						<artifactId>docbkx-maven-plugin</artifactId>
-						<version>2.0.17</version>
+						<version>2.0.15</version>
 						<configuration>
 							<sourceDirectory>${basedir}/target/generated-docs</sourceDirectory>
+							<imgSrcPath></imgSrcPath>
+							<graphicsize.extension>0</graphicsize.extension>
 							<includes>index.xml</includes>
 							<xincludeSupported>true</xincludeSupported>
 							<chunkedOutput>false</chunkedOutput>
 							<foCustomization>${basedir}/src/main/docbook/xsl/pdf.xsl</foCustomization>
 							<useExtensions>1</useExtensions>
+							<admonGraphics>1</admonGraphics>
+
 							<highlightSource>1</highlightSource>
 							<highlightXslthlConfig>${basedir}/src/main/docbook/xsl/xslthl-config.xml</highlightXslthlConfig>
+							<preProcess>
+								<copy todir="${basedir}/target/generated-docs/images">
+									<fileset dir="${basedir}/src/main/docbook/images"/>
+								</copy>
+							</preProcess>
 						</configuration>
 						<dependencies>
 							<dependency>
@@ -92,21 +101,11 @@
 												<include name="**/*.html" />
 											</fileset>
 										</copy>
-										<copy todir="${basedir}/target/contents/reference/htmlsingle">
-											<fileset dir="${basedir}/src/main/docbook">
-												<include name="**/*.css" />
-												<include name="**/*.png" />
-												<include name="**/*.gif" />
-												<include name="**/*.jpg" />
-											</fileset>
+										<copy todir="${basedir}/target/contents/reference/htmlsingle/images">
+											<fileset dir="${basedir}/target/generated-docs/images"/>
 										</copy>
-										<copy todir="${basedir}/target/contents/reference/htmlsingle">
-											<fileset dir="${basedir}/src/main/asciidoc">
-												<include name="images/*.css" />
-												<include name="images/*.png" />
-												<include name="images/*.gif" />
-												<include name="images/*.jpg" />
-											</fileset>
+										<copy todir="${basedir}/target/contents/reference/htmlsingle/css">
+											<fileset dir="${basedir}/src/main/docbook/css"/>
 										</copy>
 									</postProcess>
 								</configuration>
@@ -127,21 +126,11 @@
 												<include name="**/*.html" />
 											</fileset>
 										</copy>
-										<copy todir="${basedir}/target/contents/reference/html">
-											<fileset dir="${basedir}/src/main/docbook">
-												<include name="**/*.css" />
-												<include name="**/*.png" />
-												<include name="**/*.gif" />
-												<include name="**/*.jpg" />
-											</fileset>
+										<copy todir="${basedir}/target/contents/reference/html/images">
+											<fileset dir="${basedir}/target/generated-docs/images"/>
 										</copy>
-										<copy todir="${basedir}/target/contents/reference/html">
-											<fileset dir="${basedir}/src/main/asciidoc">
-												<include name="images/*.css" />
-												<include name="images/*.png" />
-												<include name="images/*.gif" />
-												<include name="images/*.jpg" />
-											</fileset>
+										<copy todir="${basedir}/target/contents/reference/html/css">
+											<fileset dir="${basedir}/src/main/docbook/css"/>
 										</copy>
 									</postProcess>
 								</configuration>
@@ -174,6 +163,12 @@
 								<configuration>
 									<epubCustomization>${basedir}/src/main/docbook/xsl/epub.xsl</epubCustomization>
 									<targetDirectory>${basedir}/target/docbook/epub</targetDirectory>
+									<preProcess>
+										<copy todir="${basedir}/target/docbook/epub/images">
+											<fileset dir="${basedir}/src/main/docbook/images"/>
+											<fileset dir="${basedir}/src/main/asciidoc/images"/>
+										</copy>
+									</preProcess>
 									<postProcess>
 										<copy todir="${basedir}/target/contents/reference/epub">
 											<fileset dir="${basedir}/target/docbook">
