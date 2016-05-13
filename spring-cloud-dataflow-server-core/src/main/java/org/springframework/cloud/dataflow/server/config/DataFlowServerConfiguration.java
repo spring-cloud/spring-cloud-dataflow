@@ -16,16 +16,10 @@
 
 package org.springframework.cloud.dataflow.server.config;
 
-import static org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType.HAL;
-
-import java.sql.SQLException;
-import java.util.Arrays;
-
-import javax.sql.DataSource;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import org.h2.tools.Server;
 import org.slf4j.LoggerFactory;
-
 import org.springframework.batch.admin.service.JobService;
 import org.springframework.batch.admin.service.SimpleJobServiceFactoryBean;
 import org.springframework.batch.core.StepExecution;
@@ -58,12 +52,7 @@ import org.springframework.cloud.dataflow.server.completion.TapOnDestinationReco
 import org.springframework.cloud.dataflow.server.job.TaskExplorerFactoryBean;
 import org.springframework.cloud.dataflow.server.job.support.ExecutionContextJacksonMixIn;
 import org.springframework.cloud.dataflow.server.job.support.StepExecutionJacksonMixIn;
-import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
-import org.springframework.cloud.dataflow.server.repository.InMemoryTaskDefinitionRepository;
-import org.springframework.cloud.dataflow.server.repository.RedisDeploymentIdRepository;
-import org.springframework.cloud.dataflow.server.repository.RedisStreamDefinitionRepository;
-import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
-import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
+import org.springframework.cloud.dataflow.server.repository.*;
 import org.springframework.cloud.dataflow.server.service.TaskJobService;
 import org.springframework.cloud.dataflow.server.service.TaskService;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskJobService;
@@ -71,15 +60,13 @@ import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskService
 import org.springframework.cloud.deployer.resource.registry.UriRegistry;
 import org.springframework.cloud.deployer.resource.support.DelegatingResourceLoader;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
+import org.springframework.cloud.stream.app.metrics.AggregateCounterRepository;
 import org.springframework.cloud.stream.app.metrics.FieldValueCounterRepository;
+import org.springframework.cloud.stream.app.metrics.redis.RedisAggregateCounterRepository;
 import org.springframework.cloud.stream.app.metrics.redis.RedisFieldValueCounterRepository;
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.cloud.task.repository.support.TaskRepositoryInitializer;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.*;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
@@ -94,8 +81,11 @@ import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
+import javax.sql.DataSource;
+import java.sql.SQLException;
+import java.util.Arrays;
+
+import static org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType.HAL;
 
 /**
  * Configuration for the Data Flow Server application context. This includes support
@@ -137,6 +127,12 @@ public class DataFlowServerConfiguration {
 	@ConditionalOnMissingBean
 	public FieldValueCounterRepository fieldValueCounterReader(RedisConnectionFactory redisConnectionFactory) {
 		return new RedisFieldValueCounterRepository(redisConnectionFactory, new RetryTemplate());
+	}
+
+	@Bean
+	@ConditionalOnMissingBean
+	public AggregateCounterRepository aggregateCounterReader(RedisConnectionFactory redisConnectionFactory) {
+		return new RedisAggregateCounterRepository(redisConnectionFactory, new RetryTemplate());
 	}
 
 	@Bean

@@ -31,26 +31,8 @@ import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.registry.DataFlowUriRegistryPopulator;
 import org.springframework.cloud.dataflow.registry.DataFlowUriRegistryPopulatorProperties;
 import org.springframework.cloud.dataflow.registry.RedisUriRegistry;
-import org.springframework.cloud.dataflow.server.controller.CompletionController;
-import org.springframework.cloud.dataflow.server.controller.CounterController;
-import org.springframework.cloud.dataflow.server.controller.FieldValueCounterController;
-import org.springframework.cloud.dataflow.server.controller.JobExecutionController;
-import org.springframework.cloud.dataflow.server.controller.JobInstanceController;
-import org.springframework.cloud.dataflow.server.controller.JobStepExecutionController;
-import org.springframework.cloud.dataflow.server.controller.JobStepExecutionProgressController;
-import org.springframework.cloud.dataflow.server.controller.LibraryController;
-import org.springframework.cloud.dataflow.server.controller.ModuleController;
-import org.springframework.cloud.dataflow.server.controller.RestControllerAdvice;
-import org.springframework.cloud.dataflow.server.controller.RootController;
-import org.springframework.cloud.dataflow.server.controller.RuntimeModulesController;
+import org.springframework.cloud.dataflow.server.controller.*;
 import org.springframework.cloud.dataflow.server.controller.RuntimeModulesController.AppInstanceController;
-import org.springframework.cloud.dataflow.server.controller.SecurityController;
-import org.springframework.cloud.dataflow.server.controller.StreamDefinitionController;
-import org.springframework.cloud.dataflow.server.controller.StreamDeploymentController;
-import org.springframework.cloud.dataflow.server.controller.TaskDefinitionController;
-import org.springframework.cloud.dataflow.server.controller.TaskDeploymentController;
-import org.springframework.cloud.dataflow.server.controller.TaskExecutionController;
-import org.springframework.cloud.dataflow.server.controller.UiController;
 import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
@@ -63,6 +45,7 @@ import org.springframework.cloud.deployer.resource.registry.UriRegistryPopulator
 import org.springframework.cloud.deployer.resource.support.DelegatingResourceLoader;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
+import org.springframework.cloud.stream.app.metrics.AggregateCounterRepository;
 import org.springframework.cloud.stream.app.metrics.FieldValueCounterRepository;
 import org.springframework.cloud.stream.configuration.metadata.ModuleConfigurationMetadataResolver;
 import org.springframework.cloud.task.repository.TaskExplorer;
@@ -194,6 +177,11 @@ public class DataFlowControllerAutoConfiguration {
 	@Bean
 	public FieldValueCounterController fieldValueCounterController(FieldValueCounterRepository repository) {
 		return new FieldValueCounterController(repository);
+	}
+
+	@Bean
+	public AggregateCounterController aggregateCounterController(AggregateCounterRepository repository) {
+		return new AggregateCounterController(repository);
 	}
 
 	@Bean

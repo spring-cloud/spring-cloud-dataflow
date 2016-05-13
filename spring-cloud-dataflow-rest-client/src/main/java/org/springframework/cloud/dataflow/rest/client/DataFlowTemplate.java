@@ -16,14 +16,14 @@
 
 package org.springframework.cloud.dataflow.rest.client;
 
-import java.net.URI;
-import java.util.HashMap;
-import java.util.Map;
-
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.ResourceSupport;
 import org.springframework.hateoas.UriTemplate;
 import org.springframework.web.client.RestTemplate;
+
+import java.net.URI;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Implementation of DataFlowOperations delegating to sub-templates, discovered
@@ -64,6 +64,11 @@ public class DataFlowTemplate implements DataFlowOperations {
 	private final FieldValueCounterOperations fieldValueCounterOperations;
 
 	/**
+	 * REST client for aggregate counter operations.
+	 */
+	private final AggregateCounterOperations aggregateCounterOperations;
+
+	/**
 	 * REST client for task operations.
 	 */
 	private final TaskOperations taskOperations;
@@ -101,6 +106,7 @@ public class DataFlowTemplate implements DataFlowOperations {
 		this.streamOperations = new StreamTemplate(restTemplate, resourceSupport);
 		this.counterOperations = new CounterTemplate(restTemplate, resourceSupport);
 		this.fieldValueCounterOperations = new FieldValueCounterTemplate(restTemplate, resourceSupport);
+		this.aggregateCounterOperations = new AggregateCounterTemplate(restTemplate, resourceSupport);
 		this.taskOperations = new TaskTemplate(restTemplate, resourceSupport);
 		this.jobOperations = new JobTemplate(restTemplate, resourceSupport);
 		this.moduleOperations = new ModuleTemplate(restTemplate, resourceSupport);
@@ -131,6 +137,11 @@ public class DataFlowTemplate implements DataFlowOperations {
 	@Override
 	public FieldValueCounterOperations fieldValueCounterOperations() {
 		return fieldValueCounterOperations;
+	}
+
+	@Override
+	public AggregateCounterOperations aggregateCounterOperations() {
+		return aggregateCounterOperations;
 	}
 
 	@Override
