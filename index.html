@@ -37,30 +37,24 @@ badges:
 
 {% capture billboard_description %}
 
-A cloud native programming and operating model for composable data microservices 
-on a structured platform. With Spring Cloud Data Flow, developers can create, 
-orchestrate and refactor data pipelines through single programming model for common 
-use cases such as data ingest, real-time analytics, and data import/export.
+Spring Cloud Data Flow is a cloud-native orchestration service for composable data microservices on modern runtimes. With Spring Cloud Data Flow, developers can create and orchestrate data pipelines for common use cases such as data ingest, real-time analytics, and data import/export.
 
 {% endcapture %}
 
 {% capture main_content %}
 
-Spring Cloud Data Flow is the cloud native redesign of [Spring XD](http://projects.spring.io/spring-xd/) – a project that aimed to simplify development of Big Data applications. The integration and batch modules from Spring XD are refactored into Spring Boot data-microservices that are now autonomous deployment applications – thus enabling them to take 
-full advantage of platform capabilities "natively", and they can independently evolve 
-in isolation.
+Spring Cloud Data Flow is the cloud native redesign of [Spring XD](http://projects.spring.io/spring-xd/) – a project that aimed to simplify development of Big Data applications. The streaming and batch modules from Spring XD are refactored into Spring Boot based [data microservice](https://github.com/spring-cloud/spring-cloud-stream-app-starters) applications that are now autonomous deployment units and they can "natively" run in modern runtimes such as Cloud Foundry, Apache YARN, Apache Mesos, and Kubernetes.
 
-Spring Cloud Data Flow defines best practices for distributed stream and 
-batch microservice design patterns.
+Spring Cloud Data Flow offers a collection of patterns and best practices for microservices-based distributed streaming and batch data pipelines. 
 
 ## Features
 
-* Orchestrate applications across a variety of distributed runtime platforms 
-including: Cloud Foundry, Apache YARN, Apache Mesos, and Kubernetes
+* Orchestrate applications across a variety of distributed modern runtimes including: Cloud Foundry, Apache YARN, Apache Mesos, and Kubernetes
 * Separate runtime dependencies backed by ‘spring profiles’
-* Consume stream and batch data-microservices as maven dependency 
+* Consume streaming and batch data microservices as maven or docker artifacts
+* Create, unit-test, troubleshoot and manage data microservices in isolation
 * Develop using: DSL, Shell, REST-APIs, Admin-UI, and Flo
-* Take advantage of metrics, health checks and remote management of data-microservices
+* Take advantage of metrics, health checks, and remote management at each data microservice level
 * Scale stream and batch pipelines without interrupting data flows
 
 <span id="quick-start"></span>
