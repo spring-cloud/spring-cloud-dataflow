@@ -16,13 +16,14 @@
 
 package org.springframework.cloud.dataflow.rest.resource;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
 import java.util.Date;
 import java.util.SortedMap;
 import java.util.TreeMap;
+
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * The REST representation of an Aggregate Count.

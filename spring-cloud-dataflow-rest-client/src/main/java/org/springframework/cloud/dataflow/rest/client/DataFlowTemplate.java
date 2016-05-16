@@ -16,14 +16,14 @@
 
 package org.springframework.cloud.dataflow.rest.client;
 
+import java.net.URI;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.ResourceSupport;
 import org.springframework.hateoas.UriTemplate;
 import org.springframework.web.client.RestTemplate;
-
-import java.net.URI;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Implementation of DataFlowOperations delegating to sub-templates, discovered

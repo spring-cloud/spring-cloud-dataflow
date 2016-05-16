@@ -16,7 +16,14 @@
 
 package org.springframework.cloud.dataflow.shell.command;
 
+import java.text.NumberFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.LinkedHashMap;
+
 import org.joda.time.DateTimeConstants;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.dataflow.rest.client.AggregateCounterOperations;
 import org.springframework.cloud.dataflow.rest.resource.AggregateCounterResource;
@@ -28,14 +35,14 @@ import org.springframework.shell.core.CommandMarker;
 import org.springframework.shell.core.annotation.CliAvailabilityIndicator;
 import org.springframework.shell.core.annotation.CliCommand;
 import org.springframework.shell.core.annotation.CliOption;
-import org.springframework.shell.table.*;
+import org.springframework.shell.table.BeanListTableModel;
+import org.springframework.shell.table.CellMatchers;
+import org.springframework.shell.table.Formatter;
+import org.springframework.shell.table.SimpleHorizontalAligner;
+import org.springframework.shell.table.Table;
+import org.springframework.shell.table.TableBuilder;
+import org.springframework.shell.table.TableModel;
 import org.springframework.stereotype.Component;
-
-import java.text.NumberFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.LinkedHashMap;
 
 /**
  * Commands for interacting with aggregate counter analytics.

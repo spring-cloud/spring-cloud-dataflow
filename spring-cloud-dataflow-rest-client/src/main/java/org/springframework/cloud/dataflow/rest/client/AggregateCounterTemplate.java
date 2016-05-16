@@ -16,7 +16,10 @@
 
 package org.springframework.cloud.dataflow.rest.client;
 
+import java.util.Date;
+
 import org.joda.time.DateTime;
+
 import org.springframework.cloud.dataflow.rest.resource.AggregateCounterResource;
 import org.springframework.cloud.dataflow.rest.resource.MetricResource;
 import org.springframework.hateoas.PagedResources;
@@ -24,8 +27,6 @@ import org.springframework.hateoas.ResourceSupport;
 import org.springframework.util.Assert;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
-
-import java.util.Date;
 
 /**
  * Implementation for {@link AggregateCounterOperations} that interacts with the Spring Cloud Data Flow REST API.

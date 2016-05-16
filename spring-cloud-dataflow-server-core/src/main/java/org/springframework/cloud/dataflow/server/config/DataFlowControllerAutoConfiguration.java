@@ -31,8 +31,27 @@ import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.registry.DataFlowUriRegistryPopulator;
 import org.springframework.cloud.dataflow.registry.DataFlowUriRegistryPopulatorProperties;
 import org.springframework.cloud.dataflow.registry.RedisUriRegistry;
-import org.springframework.cloud.dataflow.server.controller.*;
+import org.springframework.cloud.dataflow.server.controller.AggregateCounterController;
+import org.springframework.cloud.dataflow.server.controller.CompletionController;
+import org.springframework.cloud.dataflow.server.controller.CounterController;
+import org.springframework.cloud.dataflow.server.controller.FieldValueCounterController;
+import org.springframework.cloud.dataflow.server.controller.JobExecutionController;
+import org.springframework.cloud.dataflow.server.controller.JobInstanceController;
+import org.springframework.cloud.dataflow.server.controller.JobStepExecutionController;
+import org.springframework.cloud.dataflow.server.controller.JobStepExecutionProgressController;
+import org.springframework.cloud.dataflow.server.controller.LibraryController;
+import org.springframework.cloud.dataflow.server.controller.ModuleController;
+import org.springframework.cloud.dataflow.server.controller.RestControllerAdvice;
+import org.springframework.cloud.dataflow.server.controller.RootController;
+import org.springframework.cloud.dataflow.server.controller.RuntimeModulesController;
 import org.springframework.cloud.dataflow.server.controller.RuntimeModulesController.AppInstanceController;
+import org.springframework.cloud.dataflow.server.controller.SecurityController;
+import org.springframework.cloud.dataflow.server.controller.StreamDefinitionController;
+import org.springframework.cloud.dataflow.server.controller.StreamDeploymentController;
+import org.springframework.cloud.dataflow.server.controller.TaskDefinitionController;
+import org.springframework.cloud.dataflow.server.controller.TaskDeploymentController;
+import org.springframework.cloud.dataflow.server.controller.TaskExecutionController;
+import org.springframework.cloud.dataflow.server.controller.UiController;
 import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
@@ -82,7 +101,8 @@ public class DataFlowControllerAutoConfiguration {
 	}
 
 	@Bean
-	public DataFlowUriRegistryPopulator dataflowUriRegistryPopulator(UriRegistry uriRegistry, DataFlowUriRegistryPopulatorProperties properties) {
+	public DataFlowUriRegistryPopulator dataflowUriRegistryPopulator(UriRegistry uriRegistry,
+			DataFlowUriRegistryPopulatorProperties properties) {
 		return new DataFlowUriRegistryPopulator(uriRegistry, uriRegistryPopulator(), properties);
 	}
 
@@ -104,7 +124,8 @@ public class DataFlowControllerAutoConfiguration {
 
 	@Bean
 	public StreamDefinitionController streamDefinitionController(StreamDefinitionRepository repository,
-			DeploymentIdRepository deploymentIdRepository, StreamDeploymentController deploymentController, AppDeployer deployer) {
+			DeploymentIdRepository deploymentIdRepository, StreamDeploymentController deploymentController,
+			AppDeployer deployer) {
 		return new StreamDefinitionController(repository, deploymentIdRepository, deploymentController, deployer);
 	}
 
@@ -160,7 +181,7 @@ public class DataFlowControllerAutoConfiguration {
 	}
 
 	@Bean
-	public JobInstanceController jobInstanceController(TaskJobService repository){
+	public JobInstanceController jobInstanceController(TaskJobService repository) {
 		return new JobInstanceController(repository);
 	}
 
@@ -190,7 +211,8 @@ public class DataFlowControllerAutoConfiguration {
 	}
 
 	@Bean
-	public ModuleController moduleController(AppRegistry appRegistry, ModuleConfigurationMetadataResolver metadataResolver) {
+	public ModuleController moduleController(AppRegistry appRegistry,
+			ModuleConfigurationMetadataResolver metadataResolver) {
 		return new ModuleController(appRegistry, metadataResolver);
 	}
 
