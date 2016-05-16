@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.dataflow.server.controller;
 
+import org.springframework.cloud.dataflow.rest.resource.AggregateCounterResource;
 import org.springframework.cloud.dataflow.rest.resource.AppInstanceStatusResource;
 import org.springframework.cloud.dataflow.rest.resource.AppStatusResource;
 import org.springframework.cloud.dataflow.rest.resource.CompletionProposalsResource;
@@ -110,6 +111,9 @@ public class RootController {
 
 		resourceSupport.add(entityLinks.linkToCollectionResource(FieldValueCounterResource.class).withRel("field-value-counters"));
 		resourceSupport.add(unescapeTemplateVariables(entityLinks.linkToSingleResource(FieldValueCounterResource.class, "{name}").withRel("field-value-counters/counter")));
+
+		resourceSupport.add(entityLinks.linkToCollectionResource(AggregateCounterResource.class).withRel("aggregate-counters"));
+		resourceSupport.add(unescapeTemplateVariables(entityLinks.linkToSingleResource(AggregateCounterResource.class, "{name}").withRel("aggregate-counters/counter")));
 
 		resourceSupport.add(entityLinks.linkToCollectionResource(ModuleRegistrationResource.class).withRel("modules"));
 
