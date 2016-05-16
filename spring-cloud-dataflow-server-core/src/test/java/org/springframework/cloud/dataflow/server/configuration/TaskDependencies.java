@@ -18,6 +18,9 @@ package org.springframework.cloud.dataflow.server.configuration;
 
 import javax.sql.DataSource;
 
+import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
+import org.springframework.cloud.dataflow.server.repository.support.DefinitionRepositoryInitializer;
+import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepositoryFactoryBean;
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.cloud.task.repository.support.SimpleTaskExplorer;
 import org.springframework.cloud.task.repository.support.TaskExecutionDaoFactoryBean;
@@ -46,4 +49,15 @@ public class TaskDependencies {
 		return new SimpleTaskExplorer(new TaskExecutionDaoFactoryBean(dataSource));
 	}
 
+	@Bean
+	public TaskDefinitionRepository taskDefinitionRepository(DataSource dataSource) throws Exception {
+		return (new TaskDefinitionRepositoryFactoryBean(dataSource)).getObject();
+	}
+
+	@Bean
+	public DefinitionRepositoryInitializer definitionRepositoryInitializer(DataSource dataSource) {
+		DefinitionRepositoryInitializer definitionRepositoryInitializer = new  DefinitionRepositoryInitializer();
+		definitionRepositoryInitializer.setDataSource(dataSource);
+		return definitionRepositoryInitializer;
+	}
 }

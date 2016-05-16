@@ -58,11 +58,12 @@ import org.springframework.cloud.dataflow.server.job.TaskExplorerFactoryBean;
 import org.springframework.cloud.dataflow.server.job.support.ExecutionContextJacksonMixIn;
 import org.springframework.cloud.dataflow.server.job.support.StepExecutionJacksonMixIn;
 import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
-import org.springframework.cloud.dataflow.server.repository.InMemoryTaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.RedisDeploymentIdRepository;
 import org.springframework.cloud.dataflow.server.repository.RedisStreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
+import org.springframework.cloud.dataflow.server.repository.support.DefinitionRepositoryInitializer;
+import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepositoryFactoryBean;
 import org.springframework.cloud.dataflow.server.service.TaskJobService;
 import org.springframework.cloud.dataflow.server.service.TaskService;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskJobService;
@@ -163,12 +164,6 @@ public class DataFlowServerConfiguration {
 	@ConditionalOnMissingBean
 	public StreamDefinitionRepository streamDefinitionRepository(RedisConnectionFactory redisConnectionFactory) {
 		return new RedisStreamDefinitionRepository("stream-definitions", redisConnectionFactory);
-	}
-
-	@Bean
-	@ConditionalOnMissingBean
-	public TaskDefinitionRepository taskDefinitionRepository() {
-		return new InMemoryTaskDefinitionRepository();
 	}
 
 	@Bean
@@ -306,6 +301,18 @@ public class DataFlowServerConfiguration {
 			return taskRepositoryInitializer;
 		}
 
+		@Bean
+		public DefinitionRepositoryInitializer definitionRepositoryInitializerForDefaultDB(DataSource dataSource, Server server) {
+			DefinitionRepositoryInitializer definitionRepositoryInitializer = new DefinitionRepositoryInitializer();
+			definitionRepositoryInitializer.setDataSource(dataSource);
+			return definitionRepositoryInitializer;
+		}
+
+		@Bean
+		@ConditionalOnMissingBean
+		public TaskDefinitionRepository taskDefinitionRepository(DataSource dataSource, Server server) throws Exception{
+			return (new TaskDefinitionRepositoryFactoryBean(dataSource)).getObject();
+		}
 	}
 
 	@Configuration
@@ -338,6 +345,18 @@ public class DataFlowServerConfiguration {
 			return taskRepositoryInitializer;
 		}
 
+		@Bean
+		public DefinitionRepositoryInitializer definitionRepositoryInitializerForDefaultDB(DataSource dataSource) {
+			DefinitionRepositoryInitializer definitionRepositoryInitializer = new DefinitionRepositoryInitializer();
+			definitionRepositoryInitializer.setDataSource(dataSource);
+			return definitionRepositoryInitializer;
+		}
+
+		@Bean
+		@ConditionalOnMissingBean
+		public TaskDefinitionRepository taskDefinitionRepository(DataSource dataSource) throws Exception{
+			return (new TaskDefinitionRepositoryFactoryBean(dataSource)).getObject();
+		}
 	}
 
 	@Bean(destroyMethod = "stop")
