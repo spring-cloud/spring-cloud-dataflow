@@ -206,7 +206,7 @@ public class DefaultTaskJobService implements TaskJobService {
 			throw new NoSuchTaskDefinitionException(taskExecution.getTaskName());
 		}
 
-		taskService.executeTask(taskDefinition.getName(), taskDefinition.getParameters());
+		taskService.executeTask(taskDefinition.getName(), taskDefinition.getParameters(), taskExecution.getParameters());
 
 	}
 

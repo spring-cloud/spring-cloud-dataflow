@@ -16,6 +16,8 @@
 
 package org.springframework.cloud.dataflow.server.controller;
 
+import java.util.List;
+
 import org.springframework.cloud.dataflow.rest.resource.TaskDeploymentResource;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
 import org.springframework.cloud.dataflow.server.service.TaskService;
@@ -63,11 +65,12 @@ public class TaskDeploymentController {
 	 * @param taskName the name of the existing task to be executed (required)
 	 * @param properties the runtime properties for the task, as a comma-delimited list of
 	 * 					 key=value pairs
+	 * @param params the runtime commandline arguments
 	 */
 	@RequestMapping(value = "/{name}", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
-	public void deploy(@PathVariable("name") String taskName, @RequestParam(required = false) String properties) {
-		this.taskService.executeTask(taskName, DeploymentPropertiesUtils.parse(properties));
+	public void deploy(@PathVariable("name") String taskName, @RequestParam(required = false) String properties,
+			@RequestParam(required = false) List<String> params) {
+		this.taskService.executeTask(taskName, DeploymentPropertiesUtils.parse(properties), DeploymentPropertiesUtils.parseParams(params));
 	}
-
 }

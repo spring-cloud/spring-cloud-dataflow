@@ -15,6 +15,7 @@
  */
 package org.springframework.cloud.dataflow.server.service;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -35,7 +36,8 @@ public interface TaskService {
 	 *
 	 * @param taskName Name of the task. Must not be null or empty.
 	 * @param runtimeProperties Optional runtime properties. Must not be null.
+	 * @param runtimeParams Optional runtime commandline arguments
 	 */
-	void executeTask(String taskName, Map<String, String> runtimeProperties);
+	void executeTask(String taskName, Map<String, String> runtimeProperties, List<String> runtimeParams);
 
 }
