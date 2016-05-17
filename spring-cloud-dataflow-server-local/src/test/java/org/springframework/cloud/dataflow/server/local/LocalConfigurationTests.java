@@ -26,6 +26,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.cloud.deployer.spi.local.LocalAppDeployer;
 import org.springframework.cloud.deployer.spi.local.LocalTaskLauncher;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.util.SocketUtils;
 
 /**
  * Tests for {@link LocalDataFlowServer}.
@@ -43,7 +44,10 @@ public class LocalConfigurationTests {
 	@Test
 	public void testConfig() {
 		SpringApplication app = new SpringApplication(LocalDataFlowServer.class);
-		ConfigurableApplicationContext context = app.run(new String[] { "--server.port=0" });
+		int randomPort = SocketUtils.findAvailableTcpPort();
+		String dataSourceUrl = String.format("jdbc:h2:tcp://localhost:%s/mem:dataflow", randomPort);
+		ConfigurableApplicationContext context = app.run(new String[] { "--server.port=0",
+				"--spring.datasource.url=" + dataSourceUrl});
 		assertThat(context.containsBean(APP_DEPLOYER_BEAN_NAME), is(true));
 		assertThat(context.getBean(APP_DEPLOYER_BEAN_NAME), instanceOf(LocalAppDeployer.class));
 		assertThat(context.containsBean(TASK_LAUNCHER_BEAN_NAME), is(true));
