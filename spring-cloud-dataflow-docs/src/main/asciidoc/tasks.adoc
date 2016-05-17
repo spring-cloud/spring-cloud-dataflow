@@ -115,12 +115,12 @@ includes:
 * Parameters
 
 A user can check the status of their task executions via the restful API or by the shell.
-To view the latest task executions via the shell use the `task execution list` command.
+To display the latest task executions via the shell use the `task execution list` command.
 
 To get a list of task executions for just one task definition, add `--name` and
 the task definition name, for example `task execution list --name foo`.  To retrieve full
-details for a task execution use the `task view` command with the id of the task execution
-, for example `task view --id 549`.
+details for a task execution use the `task display` command with the id of the task execution
+, for example `task display --id 549`.
 
 === Destroy a Task Definition
 Destroying a Task Definition will remove the definition from the definition repository.

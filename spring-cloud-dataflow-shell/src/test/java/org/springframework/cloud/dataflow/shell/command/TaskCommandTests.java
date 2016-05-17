@@ -113,8 +113,8 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 
 		long value = (long) result.getModel().getValue(1, 1);
 		logger.info("Looking up id " + value);
-		CommandResult cr = task().view(value);
-		assertTrue("task execution view command must be successful", cr.isSuccess());
+		CommandResult cr = task().display(value);
+		assertTrue("task execution display command must be successful", cr.isSuccess());
 		Table table = (Table) cr.getResult();
 		assertEquals("Number of columns returned was not expected", 2, table.getModel().getColumnCount());
 		assertEquals("First key should be Key", "Key ", table.getModel().getValue(0,0));
