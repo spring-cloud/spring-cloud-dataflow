@@ -60,26 +60,26 @@ public class JobCommandTemplate {
 
 	/**
 	 * Return the results of executing the shell command:
-	 * <code>dataflow: job execution view --id 1</code> where id is the id for the job
+	 * <code>dataflow: job execution display --id 1</code> where id is the id for the job
 	 * execution requested.
 	 *
 	 * @param id the identifier for the job execution.
 	 * @return the results of the shell command.
 	 */
 	public CommandResult executionView(long id) {
-		return shell.executeCommand("job execution view --id " + id);
+		return shell.executeCommand("job execution display --id " + id);
 	}
 
 	/**
 	 * Return the results of executing the shell command:
-	 * <code>dataflow: job instance view --id 1</code> where id is the id for the job
+	 * <code>dataflow: job instance display --id 1</code> where id is the id for the job
 	 * instance requested.
 	 *
 	 * @param id the identifier for the job instance.
 	 * @return the results of the shell command.
 	 */
 	public CommandResult instanceView(long id) {
-		return shell.executeCommand("job instance view --id " + id);
+		return shell.executeCommand("job instance display --id " + id);
 	}
 
 	/**
@@ -111,7 +111,7 @@ public class JobCommandTemplate {
 
 	/**
 	 * Return the results of executing the shell command:
-	 * <code>dataflow: job execution step view --id 1 --jobExecutionId 1</code> where
+	 * <code>dataflow: job execution step display --id 1 --jobExecutionId 1</code> where
 	 * id is the id for the step execution and jobExecutionId is for the jobExecution
 	 * requested.
 	 *
@@ -120,7 +120,7 @@ public class JobCommandTemplate {
 	 * @return the results of the shell command.
 	 */
 	public CommandResult jobStepExecutionView(long id, long jobExecutionId) {
-		return shell.executeCommand("job execution step view --id " + id
+		return shell.executeCommand("job execution step display --id " + id
 				+ " --jobExecutionId " + jobExecutionId);
 	}
 }

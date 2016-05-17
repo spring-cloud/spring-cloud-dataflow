@@ -131,7 +131,7 @@ public class TaskTemplate implements TaskOperations {
 	}
 
 	@Override
-	public TaskExecutionResource view(long id) {
+	public TaskExecutionResource display(long id) {
 		return restTemplate.getForObject(executionLink.expand(id).getHref(),
 				TaskExecutionResource.class);
 	}
