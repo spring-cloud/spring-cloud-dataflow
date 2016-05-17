@@ -259,7 +259,7 @@ public class TaskControllerTests {
 
 		mockMvc.perform(
 				post("/tasks/deployments/{name}", "myTask3")
-				.param("params", "--foobar=jee", "--foobar2=jee2")
+				.param("params", "--foobar=jee", "--foobar2=jee2", "--foobar3='jee3 jee3'")
 				.accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isCreated());
 
@@ -267,9 +267,10 @@ public class TaskControllerTests {
 		verify(this.taskLauncher, atLeast(1)).launch(argumentCaptor.capture());
 
 		AppDeploymentRequest request = argumentCaptor.getValue();
-		assertThat(request.getCommandlineArguments().size(), is(2));
+		assertThat(request.getCommandlineArguments().size(), is(3));
 		assertThat(request.getCommandlineArguments().get(0), is("--foobar=jee"));
 		assertThat(request.getCommandlineArguments().get(1), is("--foobar2=jee2"));
+		assertThat(request.getCommandlineArguments().get(2), is("--foobar3=jee3 jee3"));
 		assertThat(request.getResource(), instanceOf(MavenResource.class));
 		MavenResource mavenResource = (MavenResource) request.getResource();
 		assertEquals("org.springframework.cloud", mavenResource.getGroupId());
