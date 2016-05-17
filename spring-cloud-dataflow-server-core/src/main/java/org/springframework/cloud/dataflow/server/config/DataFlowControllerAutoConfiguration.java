@@ -99,7 +99,8 @@ public class DataFlowControllerAutoConfiguration {
 	}
 
 	@Bean
-	public DataFlowUriRegistryPopulator dataflowUriRegistryPopulator(UriRegistry uriRegistry, DataFlowUriRegistryPopulatorProperties properties) {
+	public DataFlowUriRegistryPopulator dataflowUriRegistryPopulator(UriRegistry uriRegistry,
+			DataFlowUriRegistryPopulatorProperties properties) {
 		return new DataFlowUriRegistryPopulator(uriRegistry, uriRegistryPopulator(), properties);
 	}
 
@@ -121,14 +122,15 @@ public class DataFlowControllerAutoConfiguration {
 
 	@Bean
 	public StreamDefinitionController streamDefinitionController(StreamDefinitionRepository repository,
-			DeploymentIdRepository deploymentIdRepository, StreamDeploymentController deploymentController, AppDeployer deployer) {
-		return new StreamDefinitionController(repository, deploymentIdRepository, deploymentController, deployer);
+			DeploymentIdRepository deploymentIdRepository, StreamDeploymentController deploymentController,
+			AppDeployer deployer, AppRegistry appRegistry) {
+		return new StreamDefinitionController(repository, deploymentIdRepository, deploymentController, deployer,
+				appRegistry);
 	}
 
 	@Bean
 	public StreamDeploymentController streamDeploymentController(StreamDefinitionRepository repository,
-			DeploymentIdRepository deploymentIdRepository, AppRegistry registry, AppDeployer deployer,
-			DelegatingResourceLoader resourceLoader) {
+			DeploymentIdRepository deploymentIdRepository, AppRegistry registry, AppDeployer deployer) {
 		return new StreamDeploymentController(repository, deploymentIdRepository, registry, deployer);
 	}
 
@@ -177,7 +179,7 @@ public class DataFlowControllerAutoConfiguration {
 	}
 
 	@Bean
-	public JobInstanceController jobInstanceController(TaskJobService repository){
+	public JobInstanceController jobInstanceController(TaskJobService repository) {
 		return new JobInstanceController(repository);
 	}
 
@@ -202,7 +204,8 @@ public class DataFlowControllerAutoConfiguration {
 	}
 
 	@Bean
-	public ModuleController moduleController(AppRegistry appRegistry, ModuleConfigurationMetadataResolver metadataResolver) {
+	public ModuleController moduleController(AppRegistry appRegistry,
+			ModuleConfigurationMetadataResolver metadataResolver) {
 		return new ModuleController(appRegistry, metadataResolver);
 	}
 

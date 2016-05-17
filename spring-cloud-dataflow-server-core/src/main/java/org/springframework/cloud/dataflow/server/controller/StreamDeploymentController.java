@@ -179,7 +179,7 @@ public class StreamDeploymentController {
 		long timestamp = System.currentTimeMillis();
 		while (iterator.hasNext()) {
 			ModuleDefinition currentModule = iterator.next();
-			ArtifactType type = determineModuleType(currentModule);
+			ArtifactType type = StreamDefinitionController.determineModuleType(currentModule);
 			Map<String, String> moduleDeploymentProperties = extractModuleDeploymentProperties(currentModule, streamDeploymentProperties);
 			moduleDeploymentProperties.put(AppDeployer.GROUP_PROPERTY_KEY, currentModule.getGroup());
 			if (moduleDeploymentProperties.containsKey(INSTANCE_COUNT_PROPERTY_KEY)) {
@@ -216,30 +216,6 @@ public class StreamDeploymentController {
 		}
 	}
 
-	/**
-	 * Return the {@link ArtifactType} for a {@link ModuleDefinition} in the context
-	 * of a defined stream.
-	 *
-	 * @param moduleDefinition the module for which to determine the type
-	 * @return {@link ArtifactType} for the given module
-	 */
-	private ArtifactType determineModuleType(ModuleDefinition moduleDefinition) {
-		// Parser has already taken care of source/sink destinations, etc
-		boolean hasOutput = moduleDefinition.getParameters().containsKey(BindingPropertyKeys.OUTPUT_DESTINATION);
-		boolean hasInput = moduleDefinition.getParameters().containsKey(BindingPropertyKeys.INPUT_DESTINATION);
-		if (hasInput && hasOutput) {
-			return ArtifactType.processor;
-		}
-		else if (hasInput) {
-			return ArtifactType.sink;
-		}
-		else if (hasOutput) {
-			return ArtifactType.source;
-		}
-		else {
-			throw new IllegalStateException(moduleDefinition + " had neither input nor output set");
-		}
-	}
 
 	/**
 	 * Extract and return a map of properties for a specific module within the
