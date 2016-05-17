@@ -43,17 +43,17 @@ import org.springframework.stereotype.Component;
 @Component
 public class JobCommands implements CommandMarker {
 
-	private static final String EXECUTION_VIEW = "job execution view";
+	private static final String EXECUTION_DISPLAY = "job execution display";
 
 	private static final String EXECUTION_LIST = "job execution list";
 
 	private static final String STEP_EXECUTION_LIST = "job execution step list";
 
-	private static final String INSTANCE_VIEW = "job instance view";
+	private static final String INSTANCE_DISPLAY = "job instance display";
 
 	private static final String STEP_EXECUTION_PROGRESS = "job execution step progress";
 
-	private static final String STEP_EXECUTION_VIEW = "job execution step view";
+	private static final String STEP_EXECUTION_DISPLAY = "job execution step display";
 
 	@Autowired
 	private DataFlowShell dataFlowShell;
@@ -93,9 +93,9 @@ public class JobCommands implements CommandMarker {
 	}
 
 
-	@CliCommand(value = EXECUTION_VIEW, help = "View the details of a specific job execution")
-	public Table executionView(
-			@CliOption(key = { "id" },
+	@CliCommand(value = EXECUTION_DISPLAY, help = "Display the details of a specific job execution")
+	public Table executionDisplay(
+			@CliOption(key = {"id"},
 					help = "the job execution id",
 					mandatory = true) long id) {
 
@@ -136,9 +136,9 @@ public class JobCommands implements CommandMarker {
 		return builder.build();
 	}
 
-	@CliCommand(value = INSTANCE_VIEW, help = "View the job executions for a specific job instance.")
-	public Table instanceView(
-			@CliOption(key = { "id" },
+	@CliCommand(value = INSTANCE_DISPLAY, help = "Display the job executions for a specific job instance.")
+	public Table instanceDisplay(
+			@CliOption(key = {"id"},
 					help = "the job instance id",
 					mandatory = true) long id) {
 
@@ -188,12 +188,12 @@ public class JobCommands implements CommandMarker {
 		return builder.build();
 	}
 
-	@CliCommand(value = STEP_EXECUTION_PROGRESS, help = "View the details of a specific step progress")
-	public Table stepProgressView(
-			@CliOption(key = { "id" },
+	@CliCommand(value = STEP_EXECUTION_PROGRESS, help = "Display the details of a specific step progress")
+	public Table stepProgressDisplay(
+			@CliOption(key = {"id"},
 					help = "the step execution id",
 					mandatory = true) long id,
-			@CliOption(key = { "jobExecutionId" },
+			@CliOption(key = {"jobExecutionId"},
 					help = "the job execution id",
 					mandatory = true) long jobExecutionId) {
 
@@ -215,12 +215,12 @@ public class JobCommands implements CommandMarker {
 		return builder.build();
 	}
 
-	@CliCommand(value = STEP_EXECUTION_VIEW, help = "View the details of a specific step execution")
-	public Table stepExecutionView(
-			@CliOption(key = { "id" },
+	@CliCommand(value = STEP_EXECUTION_DISPLAY, help = "Display the details of a specific step execution")
+	public Table stepExecutionDisplay(
+			@CliOption(key = {"id"},
 					help = "the step execution id",
 					mandatory = true) long id,
-			@CliOption(key = { "jobExecutionId" },
+			@CliOption(key = {"jobExecutionId"},
 					help = "the job execution id",
 					mandatory = true) long jobExecutionId) {
 

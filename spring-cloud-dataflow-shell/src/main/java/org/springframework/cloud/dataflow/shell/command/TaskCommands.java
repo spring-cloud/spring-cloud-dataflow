@@ -61,7 +61,7 @@ public class TaskCommands implements CommandMarker {
 
 	private static final String DESTROY = "task destroy";
 
-	private static final String VIEW = "task view";
+	private static final String DISPLAY = "task display";
 
 	private static final String PROPERTIES_OPTION = "properties";
 
@@ -163,13 +163,13 @@ public class TaskCommands implements CommandMarker {
 		return DataFlowTables.applyStyle(builder).build();
 	}
 
-	@CliCommand(value = VIEW, help = "View the details of a specific task execution")
-	public Table view(
+	@CliCommand(value = DISPLAY, help = "Display the details of a specific task execution")
+	public Table display(
 			@CliOption(key = { "id" },
 					help = "the task execution id",
 					mandatory = true) long id) {
 
-		TaskExecutionResource taskExecutionResource = taskOperations().view(id);
+		TaskExecutionResource taskExecutionResource = taskOperations().display(id);
 
 		TableModelBuilder<Object> modelBuilder = new TableModelBuilder<>();
 
