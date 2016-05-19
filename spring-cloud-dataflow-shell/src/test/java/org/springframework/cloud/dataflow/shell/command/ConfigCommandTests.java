@@ -63,8 +63,9 @@ public class ConfigCommandTests {
 		configCommands.setShellConfiguration(new ShellConfiguration());
 		configCommands.setCommandLine(commandLine);
 		configCommands.setRestTemplate(restTemplate);
-		configCommands.setShell(dataFlowShell);
-		configCommands.afterPropertiesSet();
+		configCommands.setDataFlowShell(dataFlowShell);
+		configCommands.setServerUri("http://localhost:9393");
+		configCommands.onApplicationEvent(null);
 	}
 
 	@Test

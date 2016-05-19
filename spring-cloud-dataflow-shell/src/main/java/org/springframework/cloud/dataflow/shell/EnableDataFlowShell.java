@@ -23,19 +23,19 @@ import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
-import org.springframework.cloud.dataflow.shell.autoconfigure.BootstrapConfiguration;
+import org.springframework.cloud.dataflow.shell.config.ShellCommandLineConfiguration;
 import org.springframework.context.annotation.Import;
 
 /**
  * Activates the Spring Cloud Data Flow shell.
  *
- * @author <a href="mailto:josh@joshlong.com">Josh Long</a>
+ * @author Josh Long
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Inherited
-@Import(BootstrapConfiguration.class)
+@Import(ShellCommandLineConfiguration.class)
 public @interface EnableDataFlowShell {
 
 }

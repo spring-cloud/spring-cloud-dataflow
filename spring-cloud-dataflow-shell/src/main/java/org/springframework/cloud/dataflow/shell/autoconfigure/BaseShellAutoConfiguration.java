@@ -18,15 +18,15 @@ package org.springframework.cloud.dataflow.shell.autoconfigure;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.cloud.dataflow.shell.ShellCommandLineParser;
+import org.springframework.cloud.dataflow.shell.ShellProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.ImportResource;
 import org.springframework.shell.CommandLine;
-import org.springframework.shell.SimpleShellCommandLineOptions;
 import org.springframework.shell.core.JLineShell;
 import org.springframework.shell.core.JLineShellComponent;
 
@@ -35,18 +35,31 @@ import javax.annotation.PostConstruct;
 /**
  * Configures the various commands that are part of the default Spring Shell experience.
  *
- * @author <a href="mailto:josh@joshlong.com">Josh Long</a>
+ * @author Josh Long
+ * @author Mark Pollack
  */
 @Configuration
-@ConditionalOnProperty(prefix = "spring.shell", name = "enabled", matchIfMissing = true, havingValue = "true")
+@ImportResource("classpath*:/META-INF/spring/spring-shell-plugin.xml")
 public class BaseShellAutoConfiguration {
 
 	private static final Logger logger = LoggerFactory.getLogger(BaseShellAutoConfiguration.class);
 
 	@Bean
+	public ShellCommandLineParser shellCommandLineParser() {
+		return new ShellCommandLineParser();
+	}
+
+	@Bean
+	public ShellProperties shellProperties() {
+		return new ShellProperties();
+	}
+
+	@Bean
 	@ConditionalOnMissingBean(CommandLine.class)
-	public CommandLine commandLine(ApplicationArguments args) throws Exception {
-		return SimpleShellCommandLineOptions.parseCommandLine(args.getSourceArgs());
+	public CommandLine commandLine(ShellCommandLineParser shellCommandLineParser,
+								   ShellProperties shellProperties,
+								   ApplicationArguments applicationArguments) throws Exception {
+		return shellCommandLineParser.parse(shellProperties, applicationArguments.getSourceArgs());
 	}
 
 	@Bean
@@ -67,14 +80,17 @@ public class BaseShellAutoConfiguration {
 	}
 
 	@Configuration
-	@ConditionalOnProperty(value = "disableInternalCommands", havingValue = "false",
-			matchIfMissing = true, relaxedNames = true)
-	@ComponentScan("org.springframework.shell.commands")
+	@ComponentScan({"org.springframework.shell.commands",
+			"org.springframework.cloud.dataflow.shell.command",
+			"org.springframework.cloud.dataflow.shell.converter",
+			"org.springframework.cloud.dataflow.shell.config"})
 	public static class RegisterInternalCommands {
 
 		@PostConstruct
 		public void log() {
-			logger.debug("internal (o.s.shell.commands) Spring Shell" +
+			logger.debug("(o.s.shell.commands) Spring Shell" +
+					" packages are being scanned");
+			logger.debug("(o.s.c.dataflow.shell.command) Spring Cloud Data Flow Shell" +
 					" packages are being scanned");
 		}
 	}
