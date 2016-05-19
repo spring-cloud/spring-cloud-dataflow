@@ -16,7 +16,6 @@
 
 package org.springframework.cloud.dataflow.shell;
 
-import org.springframework.cloud.dataflow.shell.EnableDataFlowShell;
 import org.springframework.boot.Banner;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -25,7 +24,7 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
  * Bootstrap class for spring shell.
  *
  * @author Ilayaperumal Gopinathan
- * @author <a href="mailto:josh@joshlong.com">Josh Long</a>
+ * @author Josh Long
  */
 @EnableDataFlowShell
 @SpringBootApplication

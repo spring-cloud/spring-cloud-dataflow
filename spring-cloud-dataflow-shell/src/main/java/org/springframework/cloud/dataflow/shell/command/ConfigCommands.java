@@ -16,9 +16,6 @@
 
 package org.springframework.cloud.dataflow.shell.command;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.ExitStatus;
@@ -30,6 +27,7 @@ import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.dataflow.rest.client.DataFlowServerException;
 import org.springframework.cloud.dataflow.rest.client.DataFlowTemplate;
 import org.springframework.cloud.dataflow.rest.client.VndErrorResponseErrorHandler;
@@ -50,15 +48,17 @@ import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType
 import org.springframework.hateoas.hal.Jackson2HalModule;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.shell.CommandLine;
 import org.springframework.shell.core.CommandMarker;
 import org.springframework.shell.core.annotation.CliCommand;
 import org.springframework.shell.core.annotation.CliOption;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
+import java.net.URI;
+
 /**
- * Configuration commands for the Shell.
+ * Configuration commands for the Shell.  The default Data Flow Server location is
+ * <code>http://localhost:9393</code>
  *
  * @author Gunnar Hillert
  * @author Marius Bogoevici
@@ -73,21 +73,21 @@ public class ConfigCommands implements CommandMarker, InitializingBean {
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
 	@Autowired
-	private CommandLine commandLine;
-
-	@Autowired
 	private DataFlowShell shell;
 
 	@Autowired
 	private RestTemplate restTemplate;
 
-	public static final String DEFAULT_SCHEME = "http";
+	@Value("${dataflow.uri:" + DEFAULT_TARGET + "}")
+	private String serverUri;
 
-	public static final String DEFAULT_HOST = "localhost";
+	@Value("${dataflow.user:#{null}")
+	private String user;
 
-	public static final int DEFAULT_PORT = 9393;
+	@Value("${dataflow.password:#{null}")
+	private String password;
 
-	public static final String DEFAULT_TARGET = DEFAULT_SCHEME + "://" + DEFAULT_HOST + ":" + DEFAULT_PORT + "/";
+	public static final String DEFAULT_TARGET = "http://localhost:9393/";
 
 	@CliCommand(value = {"dataflow config server"}, help = "Configure the Spring Cloud Data Flow REST server to use")
 	public String target(
@@ -122,32 +122,7 @@ public class ConfigCommands implements CommandMarker, InitializingBean {
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
-		target(getDefaultUri().toString());
-	}
-
-	private URI getDefaultUri() throws URISyntaxException {
-
-		int port = DEFAULT_PORT;
-		String host = DEFAULT_HOST;
-
-		if (commandLine.getArgs() != null) {
-			String[] args = commandLine.getArgs();
-			int i = 0;
-			while (i < args.length) {
-				String arg = args[i++];
-				if (arg.equals("--host")) {
-					host = args[i++];
-				}
-				else if (arg.equals("--port")) {
-					port = Integer.valueOf(args[i++]);
-				}
-				else {
-					i--;
-					break;
-				}
-			}
-		}
-		return new URI(DEFAULT_SCHEME, null, host, port, null, null, null);
+		target(new URI(serverUri).toString());
 	}
 
 	private void establishConverters(RestTemplate restTemplate){

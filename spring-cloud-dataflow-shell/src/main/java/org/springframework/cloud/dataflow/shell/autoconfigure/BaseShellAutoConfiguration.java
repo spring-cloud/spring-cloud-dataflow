@@ -18,15 +18,14 @@ package org.springframework.cloud.dataflow.shell.autoconfigure;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.cloud.dataflow.shell.ShellCommandLineParser;
+import org.springframework.cloud.dataflow.shell.ShellProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.shell.CommandLine;
-import org.springframework.shell.SimpleShellCommandLineOptions;
 import org.springframework.shell.core.JLineShell;
 import org.springframework.shell.core.JLineShellComponent;
 
@@ -35,18 +34,20 @@ import javax.annotation.PostConstruct;
 /**
  * Configures the various commands that are part of the default Spring Shell experience.
  *
- * @author <a href="mailto:josh@joshlong.com">Josh Long</a>
+ * @author Josh Long
+ * @author Mark Pollack
  */
 @Configuration
-@ConditionalOnProperty(prefix = "spring.shell", name = "enabled", matchIfMissing = true, havingValue = "true")
 public class BaseShellAutoConfiguration {
 
 	private static final Logger logger = LoggerFactory.getLogger(BaseShellAutoConfiguration.class);
 
 	@Bean
 	@ConditionalOnMissingBean(CommandLine.class)
-	public CommandLine commandLine(ApplicationArguments args) throws Exception {
-		return SimpleShellCommandLineOptions.parseCommandLine(args.getSourceArgs());
+	public CommandLine commandLine(ShellCommandLineParser shellCommandLineParser,
+								   ShellProperties shellProperties,
+								   ApplicationArguments applicationArguments) throws Exception {
+		return shellCommandLineParser.parse(shellProperties, applicationArguments.getSourceArgs());
 	}
 
 	@Bean
@@ -67,8 +68,6 @@ public class BaseShellAutoConfiguration {
 	}
 
 	@Configuration
-	@ConditionalOnProperty(value = "disableInternalCommands", havingValue = "false",
-			matchIfMissing = true, relaxedNames = true)
 	@ComponentScan("org.springframework.shell.commands")
 	public static class RegisterInternalCommands {
 

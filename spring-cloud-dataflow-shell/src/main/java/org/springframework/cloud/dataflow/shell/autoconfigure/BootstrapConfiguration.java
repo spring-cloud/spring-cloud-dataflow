@@ -19,6 +19,7 @@ package org.springframework.cloud.dataflow.shell.autoconfigure;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.ExitCodeGenerator;
 import org.springframework.boot.SpringApplication;
@@ -27,11 +28,13 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.ImportResource;
 import org.springframework.shell.CommandLine;
 import org.springframework.shell.ShellException;
 import org.springframework.shell.core.ExitShellRequest;
 import org.springframework.shell.core.JLineShellComponent;
 import org.springframework.shell.support.logging.HandlerUtils;
+import org.springframework.shell.support.util.FileUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StopWatch;
 
@@ -42,10 +45,17 @@ import java.util.logging.Logger;
  * but using Spring Boot's {@link CommandLineRunner} as a callback hook for initialization, instead
  * of squatting on the application's one {@code main(String[] args)} method.
  *
- * @author <a href="mailto:josh@joshlong.com">Josh Long</a>
+ * This configuration also uses Spring Boot to parse command line arguments instead of
+ * {@link org.springframework.shell.SimpleShellCommandLineOptions#parseCommandLine(String[])}.  This means that
+ * command line arguments use a different syntax than in Spring Shell.  Key value pairs for arguments need to be
+ * passed with an equal sign as the separator rather than a space.
+ *
+ * @author Josh Long
+ * @author Mark Pollack
  */
 @Configuration
 @ComponentScan(basePackageClasses = EnableDataFlowShell.class)
+@ImportResource("classpath*:/META-INF/spring/spring-shell-plugin.xml")
 public class BootstrapConfiguration {
 
 
@@ -62,6 +72,9 @@ public class BootstrapConfiguration {
 
 		@Autowired
 		private CommandLine commandLine;
+
+		@Autowired
+		private ApplicationArguments applicationArguments;
 
 		private static class ShellExitCodeGenerator implements ExitCodeGenerator {
 
@@ -106,6 +119,10 @@ public class BootstrapConfiguration {
 					if (successful) {
 						exitShellRequest = ExitShellRequest.NORMAL_EXIT;
 					}
+				}
+				else if (this.applicationArguments.containsOption("help")) {
+					System.out.println(FileUtils.readBanner(BootstrapConfiguration.class, "/usage.txt"));
+					exitShellRequest = ExitShellRequest.NORMAL_EXIT;
 				} else {
 					this.lineShellComponent.start();
 					this.lineShellComponent.promptLoop();
