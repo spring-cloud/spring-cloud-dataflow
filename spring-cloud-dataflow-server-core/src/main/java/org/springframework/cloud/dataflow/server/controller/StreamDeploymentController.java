@@ -35,6 +35,7 @@ import org.springframework.cloud.dataflow.registry.AppRegistration;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.rest.resource.StreamDeploymentResource;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
+import org.springframework.cloud.dataflow.server.DataFlowServerUtil;
 import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
 import org.springframework.cloud.dataflow.server.repository.DeploymentKey;
 import org.springframework.cloud.dataflow.server.repository.NoSuchStreamDefinitionException;
@@ -202,7 +203,7 @@ public class StreamDeploymentController {
 		boolean isDownStreamAppPartitioned = false;
 		while (iterator.hasNext()) {
 			StreamAppDefinition currentApp = iterator.next();
-			ApplicationType type = StreamDefinitionController.determineApplicationType(currentApp);
+			ApplicationType type = DataFlowServerUtil.determineApplicationType(currentApp);
 			Map<String, String> appDeploymentProperties = extractAppDeploymentProperties(currentApp, streamDeploymentProperties);
 			appDeploymentProperties.put(AppDeployer.GROUP_PROPERTY_KEY, currentApp.getStreamName());
 			if (appDeploymentProperties.containsKey(INSTANCE_COUNT_PROPERTY_KEY)) {

@@ -1,0 +1,45 @@
+{
+  "groups": [
+    {
+      "name": "some.long.prefix",
+      "type": "foo.bar.HdfsProperties",
+      "sourceType": "foo.bar.HdfsProperties"
+    },
+    {
+      "name": "some.long.prefix.nested",
+      "type": "foo.bar.OtherHdfsProperties",
+      "sourceType": "foo.bar.HdfsProperties"
+    }
+  ],
+  "properties": [
+    {
+      "name": "directory",
+      "type": "java.lang.String",
+      "description": "A path",
+      "sourceType": "com.foo.DifferentHdfsProperties",
+      "defaultValue": "/tmp"
+    },
+    {
+      "name": "some.long.prefix.option1",
+      "type": "java.lang.String",
+      "description": "An option",
+      "sourceType": "foo.bar.HdfsProperties",
+      "defaultValue": "foo"
+    },
+    {
+      "name": "some.long.prefix.option2",
+      "type": "java.lang.String",
+      "description": "Another option",
+      "sourceType": "foo.bar.HdfsProperties",
+      "defaultValue": "bar"
+    },
+    {
+      "name": "some.long.prefix.nested.itworks",
+      "type": "java.lang.String",
+      "description": "Nested option",
+      "sourceType": "foo.bar.HdfsProperties",
+      "defaultValue": "wizz"
+    }
+  ],
+  "hints": []
+}

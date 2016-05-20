@@ -66,6 +66,12 @@ public class AppParser {
 	 */
 	protected AppNode eatApp() {
 		Token label = null;
+		if (tokens.peek(TokenKind.COLON)) {
+			if (tokens.getTokenStream().size() == 1) {
+				tokens.raiseException(tokens.peek().startPos,
+						DSLMessage.EXPECTED_STREAM_NAME_AFTER_LABEL_COLON);
+			}
+		}
 		Token name = tokens.next();
 		if (!name.isKind(TokenKind.IDENTIFIER)) {
 			tokens.raiseException(name.startPos, DSLMessage.EXPECTED_APPNAME,
