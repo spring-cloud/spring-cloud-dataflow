@@ -34,9 +34,11 @@ import org.springframework.batch.core.explore.support.JobExplorerFactoryBean;
 import org.springframework.batch.core.launch.support.SimpleJobLauncher;
 import org.springframework.batch.core.repository.support.JobRepositoryFactoryBean;
 import org.springframework.batch.item.ExecutionContext;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.actuate.metrics.repository.MetricRepository;
 import org.springframework.boot.actuate.metrics.repository.redis.RedisMetricRepository;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -69,7 +71,9 @@ import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskService
 import org.springframework.cloud.deployer.resource.registry.UriRegistry;
 import org.springframework.cloud.deployer.resource.support.DelegatingResourceLoader;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
+import org.springframework.cloud.stream.app.metrics.AggregateCounterRepository;
 import org.springframework.cloud.stream.app.metrics.FieldValueCounterRepository;
+import org.springframework.cloud.stream.app.metrics.redis.RedisAggregateCounterRepository;
 import org.springframework.cloud.stream.app.metrics.redis.RedisFieldValueCounterRepository;
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.cloud.task.repository.support.TaskRepositoryInitializer;
@@ -160,7 +164,7 @@ public class DataFlowServerConfiguration {
 
 	@Bean
 	@ConditionalOnMissingBean
-	public RedisAggregateCounterRepository aggregateCounterReader(RedisConnectionFactory redisConnectionFactory) {
+	public AggregateCounterRepository aggregateCounterReader(RedisConnectionFactory redisConnectionFactory) {
 		return new RedisAggregateCounterRepository(redisConnectionFactory, new RetryTemplate());
 	}
 
