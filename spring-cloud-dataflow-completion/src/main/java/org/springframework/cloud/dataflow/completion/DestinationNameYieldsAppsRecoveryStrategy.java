@@ -37,7 +37,7 @@ class DestinationNameYieldsAppsRecoveryStrategy extends
 	private final AppRegistry appRegistry;
 
 	public DestinationNameYieldsAppsRecoveryStrategy(AppRegistry appRegistry) {
-		super(CheckPointedParseException.class, "queue:foo >", "queue:foo > ");
+		super(CheckPointedParseException.class, ":foo >", ":foo > ");
 		this.appRegistry = appRegistry;
 	}
 

@@ -171,27 +171,24 @@ public class StreamCompletionProviderTests {
 	}
 
 	@Test
-	// queue:foo > <TAB>  ==> add app names
+	// :foo > <TAB>  ==> add app names
 	public void testDestinationIntoApps() {
-		assertThat(completionProvider.complete("queue:foo >", 1), hasItems(
-				proposalThat(is("queue:foo > filter")),
-				proposalThat(is("queue:foo > log"))
+		assertThat(completionProvider.complete(":foo >", 1), hasItems(
+				proposalThat(is(":foo > filter")),
+				proposalThat(is(":foo > log"))
 		));
-		assertThat(completionProvider.complete("queue:foo >", 1), not(hasItems(
-				proposalThat(is("queue:foo > http"))
+		assertThat(completionProvider.complete(":foo >", 1), not(hasItems(
+				proposalThat(is(":foo > http"))
 		)));
 	}
 
 	@Test
-	// tap:stream:foo > <TAB>  ==> add app names
+	// :foo > <TAB>  ==> add app names
 	public void testDestinationIntoAppsVariant() {
-		assertThat(completionProvider.complete("tap:stream:foo >", 1), hasItems(
-				proposalThat(is("tap:stream:foo > filter")),
-				proposalThat(is("tap:stream:foo > log"))
+		assertThat(completionProvider.complete(":foo >", 1), hasItems(
+				proposalThat(is(":foo > filter")),
+				proposalThat(is(":foo > log"))
 		));
-		assertThat(completionProvider.complete("queue:foo >", 1), not(hasItems(
-				proposalThat(is("tap:stream:foo > http"))
-		)));
 	}
 
 	@Test
