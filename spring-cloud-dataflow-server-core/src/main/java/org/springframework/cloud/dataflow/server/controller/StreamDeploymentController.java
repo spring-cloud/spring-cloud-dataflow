@@ -364,6 +364,7 @@ public class StreamDeploymentController {
 				if (!EnumSet.of(DeploymentState.unknown, DeploymentState.undeployed)
 						.contains(status.getState())) {
 					this.deployer.undeploy(id);
+					this.deploymentIdRepository.delete(key);
 				}
 			}
 		}

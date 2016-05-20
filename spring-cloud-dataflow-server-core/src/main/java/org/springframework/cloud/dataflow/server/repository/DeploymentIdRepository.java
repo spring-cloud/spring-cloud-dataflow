@@ -23,6 +23,7 @@ import org.springframework.stereotype.Repository;
  *
  * @author Janne Valkealahti
  * @author Mark Fisher
+ * @author Ilayaperumal Gopinathan
  */
 @Repository
 public interface DeploymentIdRepository extends org.springframework.data.repository.Repository<String, String> {
@@ -43,4 +44,11 @@ public interface DeploymentIdRepository extends org.springframework.data.reposit
 	 * @return the identifier
 	 */
 	String findOne(String key);
+
+	/**
+	 * Delete the entries associated with the app deployment key.
+	 *
+	 * @param key the app deployment key
+	 */
+	void delete(String key);
 }

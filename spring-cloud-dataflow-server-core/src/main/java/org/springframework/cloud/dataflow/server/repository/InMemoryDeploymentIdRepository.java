@@ -26,6 +26,7 @@ import org.springframework.util.Assert;
  *
  * @author Janne Valkealahti
  * @author Mark Fisher
+ * @author Ilayaperumal Gopinathan
  */
 public class InMemoryDeploymentIdRepository implements DeploymentIdRepository {
 
@@ -43,5 +44,10 @@ public class InMemoryDeploymentIdRepository implements DeploymentIdRepository {
 	@Override
 	public String findOne(String key) {
 		return deployments.get(key);
+	}
+
+	@Override
+	public void delete(String key) {
+		deployments.remove(key);
 	}
 }

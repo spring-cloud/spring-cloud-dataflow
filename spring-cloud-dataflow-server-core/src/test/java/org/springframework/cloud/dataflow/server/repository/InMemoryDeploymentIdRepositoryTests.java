@@ -18,6 +18,7 @@ package org.springframework.cloud.dataflow.server.repository;
 
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
 
 import org.junit.Test;
@@ -29,6 +30,7 @@ import org.springframework.cloud.dataflow.core.TaskDefinition;
 /**
  * @author Janne Valkealahti
  * @author Mark Fisher
+ * @author Ilayaperumal Gopinathan
  */
 public class InMemoryDeploymentIdRepositoryTests {
 
@@ -72,5 +74,24 @@ public class InMemoryDeploymentIdRepositoryTests {
 		String findOne6 = repository.findOne(appDeploymentKey6);
 		assertThat(findOne6, notNullValue());
 		assertThat(findOne6, is("id3"));
+	}
+
+	@Test
+	public void testDeleteKey() {
+		StreamDefinition streamDefinition1 = new StreamDefinition("myStream1", "time | log");
+		ModuleDefinition[] moduleDefinitions1 = streamDefinition1.getModuleDefinitions().toArray(new ModuleDefinition[0]);
+		TaskDefinition taskDefinition1 = new TaskDefinition("myTask", "timestamp");
+		String appDeploymentKey1 = DeploymentKey.forApp(moduleDefinitions1[0]);
+		String appDeploymentKey2 = DeploymentKey.forApp(moduleDefinitions1[1]);
+		String appDeploymentKey3 = DeploymentKey.forApp(taskDefinition1.getModuleDefinition());
+
+		DeploymentIdRepository repository = new InMemoryDeploymentIdRepository();
+		repository.save(appDeploymentKey1, "id1");
+		repository.save(appDeploymentKey2, "id2");
+		repository.save(appDeploymentKey3, "id3");
+		repository.delete(appDeploymentKey1);
+		assertThat(repository.findOne(appDeploymentKey1), nullValue());
+		assertThat(repository.findOne(appDeploymentKey2), notNullValue());
+		assertThat(repository.findOne(appDeploymentKey3), notNullValue());
 	}
 }
