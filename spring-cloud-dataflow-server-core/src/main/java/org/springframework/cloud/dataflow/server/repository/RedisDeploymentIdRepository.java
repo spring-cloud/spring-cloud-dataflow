@@ -25,6 +25,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
  *
  * @author Janne Valkealahti
  * @author Mark Fisher
+ * @author Ilayaperumal Gopinathan
  */
 public class RedisDeploymentIdRepository implements DeploymentIdRepository {
 
@@ -49,5 +50,10 @@ public class RedisDeploymentIdRepository implements DeploymentIdRepository {
 	@Override
 	public String findOne(String key) {
 		return hashOperations.get(key);
+	}
+
+	@Override
+	public void delete(String key) {
+		hashOperations.delete(key);
 	}
 }

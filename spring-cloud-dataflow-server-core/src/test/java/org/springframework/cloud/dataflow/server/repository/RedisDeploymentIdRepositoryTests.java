@@ -16,10 +16,15 @@
 
 package org.springframework.cloud.dataflow.server.repository;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -27,12 +32,15 @@ import org.springframework.cloud.dataflow.core.ModuleDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.stream.test.junit.redis.RedisTestSupport;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 
 /**
  * Tests for {@link RedisDeploymentIdRepository}.
  *
  * @author Janne Valkealahti
  * @author Mark Fisher
+ * @author Ilayaperumal Gopinathan
  */
 public class RedisDeploymentIdRepositoryTests {
 
@@ -41,9 +49,17 @@ public class RedisDeploymentIdRepositoryTests {
 
 	private RedisDeploymentIdRepository repository;
 
+	private static final String DEPLOYMENT_ID_REPO_HASH_KEY = "RedisAppDeploymentRepositoryTests";
+
 	@Before
 	public void setUp() {
-		repository = new RedisDeploymentIdRepository("RedisAppDeploymentRepositoryTests", redisTestSupport.getResource());
+		repository = new RedisDeploymentIdRepository(DEPLOYMENT_ID_REPO_HASH_KEY, redisTestSupport.getResource());
+	}
+
+	@After
+	public void cleanup() {
+		RedisTemplate redisTemplate = new StringRedisTemplate(redisTestSupport.getResource());
+		redisTemplate.delete(DEPLOYMENT_ID_REPO_HASH_KEY);
 	}
 
 	@Test
@@ -60,6 +76,7 @@ public class RedisDeploymentIdRepositoryTests {
 		String appDeploymentKey4 = DeploymentKey.forApp(moduleDefinitions2[1]);
 		String appDeploymentKey5 = DeploymentKey.forApp(taskDefinition1.getModuleDefinition());
 		String appDeploymentKey6 = DeploymentKey.forApp(taskDefinition2.getModuleDefinition());
+
 
 		repository.save(appDeploymentKey1, "id1");
 		repository.save(appDeploymentKey2, "id2");
@@ -85,5 +102,24 @@ public class RedisDeploymentIdRepositoryTests {
 		String findOne6 = repository.findOne(appDeploymentKey6);
 		assertThat(findOne6, notNullValue());
 		assertThat(findOne6, is("id3"));
+	}
+
+	@Test
+	public void testDeleteKey() {
+		StreamDefinition streamDefinition1 = new StreamDefinition("myStream1", "time | log");
+		ModuleDefinition[] moduleDefinitions1 = streamDefinition1.getModuleDefinitions().toArray(new ModuleDefinition[0]);
+		TaskDefinition taskDefinition1 = new TaskDefinition("myTask", "timestamp");
+		String appDeploymentKey1 = DeploymentKey.forApp(moduleDefinitions1[0]);
+		String appDeploymentKey2 = DeploymentKey.forApp(moduleDefinitions1[1]);
+		String appDeploymentKey3 = DeploymentKey.forApp(taskDefinition1.getModuleDefinition());
+
+		DeploymentIdRepository repository = new InMemoryDeploymentIdRepository();
+		repository.save(appDeploymentKey1, "id1");
+		repository.save(appDeploymentKey2, "id2");
+		repository.save(appDeploymentKey3, "id3");
+		repository.delete(appDeploymentKey1);
+		assertThat(repository.findOne(appDeploymentKey1), nullValue());
+		assertThat(repository.findOne(appDeploymentKey2), notNullValue());
+		assertThat(repository.findOne(appDeploymentKey3), notNullValue());
 	}
 }

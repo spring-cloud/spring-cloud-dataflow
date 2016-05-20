@@ -104,10 +104,12 @@ public class TaskDefinitionController {
 	@RequestMapping(value = "/{name}", method = RequestMethod.DELETE)
 	@ResponseStatus(HttpStatus.OK)
 	public void destroyTask(@PathVariable("name") String name) {
-		if (repository.findOne(name) == null) {
+		TaskDefinition taskDefinition = repository.findOne(name);
+		if (taskDefinition == null) {
 			throw new NoSuchTaskDefinitionException(name);
 		}
 		repository.delete(name);
+		deploymentIdRepository.delete(DeploymentKey.forApp(taskDefinition.getModuleDefinition()));
 	}
 
 	/**
