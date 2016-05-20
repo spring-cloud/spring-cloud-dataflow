@@ -27,16 +27,24 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class DataFlowUriRegistryPopulatorProperties {
 
 	/**
-	 * Indicates whether to populate the registry on startup. Default is {@literal true}.
+	 * Indicates whether to populate the registry on startup.
+	 * Default is {@literal true}.
 	 */
 	private boolean enabled = true;
 
 	/**
-	 * Resource locations for one or more properties files where the keys are stream or task app
-	 * names (e.g. "source.foo" or "task.bar") and the values are Resource URIs. Default location
-	 * is {@code "classpath:META-INF/applications.properties"}.
+	 * Indicates whether to overwrite any apps that are already registered on startup.
+	 * Default is {@literal true}.
 	 */
-	private String[] locations = new String[] { "classpath:META-INF/applications.properties" };
+	private boolean overwrite = true;
+
+	/**
+	 * Resource locations for one or more (comma-delimited) properties files where the keys are
+	 * stream or task app names (e.g. "source.foo" or "task.bar") and the values are Resource URIs.
+	 * Default is an empty array. An example of a valid value for this property would be:
+	 * {@code "classpath:META-INF/stream-apps.properties,classpath:META-INF/task-apps.properties"}.
+	 */
+	private String[] locations = new String[] {};
 
 	public boolean isEnabled() {
 		return enabled;
@@ -44,6 +52,14 @@ public class DataFlowUriRegistryPopulatorProperties {
 
 	public void setEnabled(boolean enabled) {
 		this.enabled = enabled;
+	}
+
+	public boolean isOverwrite() {
+		return overwrite;
+	}
+
+	public void setOverwrite(boolean overwrite) {
+		this.overwrite = overwrite;
 	}
 
 	public String[] getLocations() {

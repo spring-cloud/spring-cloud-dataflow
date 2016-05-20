@@ -20,43 +20,10 @@
 			<build>
 				<plugins>
 					<plugin>
-						<groupId>org.codehaus.mojo</groupId>
-						<artifactId>xml-maven-plugin</artifactId>
-						<version>1.0</version>
-						<executions>
-							<execution>
-								<goals>
-									<goal>transform</goal>
-								</goals>
-							</execution>
-						</executions>
-						<configuration>
-							<transformationSets>
-								<transformationSet>
-									<dir>${project.build.directory}/external-resources</dir>
-									<stylesheet>src/main/xslt/dependencyVersions.xsl</stylesheet>
-									<fileMappers>
-										<fileMapper implementation="org.codehaus.plexus.components.io.filemappers.FileExtensionMapper">
-											<targetExtension>.adoc</targetExtension>
-										</fileMapper>
-									</fileMappers>
-									<outputDir>${project.build.directory}/generated-resources</outputDir>
-								</transformationSet>
-							</transformationSets>
-						</configuration>
-					</plugin>
-					<plugin>
 						<groupId>org.asciidoctor</groupId>
 						<artifactId>asciidoctor-maven-plugin</artifactId>
-						<version>1.5.2</version>
+						<version>1.5.3</version>
 						<dependencies>
-						  <dependency>
-						    <!-- Needed to resolve URI includes -->
-						    <!-- See https://github.com/asciidoctor/asciidoctor.js/issues/153 -->
-						    <groupId>org.jruby</groupId>
-						    <artifactId>jruby-complete</artifactId>
-						    <version>9.0.0.0</version>
-						  </dependency>
 						</dependencies>
 						<executions>
 							<execution>
@@ -71,13 +38,10 @@
 									<doctype>book</doctype>
 									<attributes>
 										<docinfo>true</docinfo>
-										<spring-boot-version>${project.version}</spring-boot-version>
-										<spring-boot-docs-version>${project.version}</spring-boot-docs-version>
-										<spring-boot-repo>${spring-boot-repo}</spring-boot-repo>
-										<spring-docs-version>${spring.version}</spring-docs-version>
-										<spring-security-docs-version>${spring-security.version}</spring-security-docs-version>
 										<allow-uri-read>true</allow-uri-read>
-										<github-tag>${github-tag}</github-tag>
+										<attribute-missing>warn</attribute-missing>
+										<project-version>${project.version}</project-version>
+										<project-artifactId>${project.artifactId}</project-artifactId>
 									</attributes>
 								</configuration>
 							</execution>
@@ -89,13 +53,22 @@
 						<version>2.0.15</version>
 						<configuration>
 							<sourceDirectory>${basedir}/target/generated-docs</sourceDirectory>
+							<imgSrcPath></imgSrcPath>
+							<graphicsize.extension>0</graphicsize.extension>
 							<includes>index.xml</includes>
 							<xincludeSupported>true</xincludeSupported>
 							<chunkedOutput>false</chunkedOutput>
 							<foCustomization>${basedir}/src/main/docbook/xsl/pdf.xsl</foCustomization>
 							<useExtensions>1</useExtensions>
+							<admonGraphics>1</admonGraphics>
+
 							<highlightSource>1</highlightSource>
 							<highlightXslthlConfig>${basedir}/src/main/docbook/xsl/xslthl-config.xml</highlightXslthlConfig>
+							<preProcess>
+								<copy todir="${basedir}/target/generated-docs/images">
+									<fileset dir="${basedir}/src/main/docbook/images"/>
+								</copy>
+							</preProcess>
 						</configuration>
 						<dependencies>
 							<dependency>
@@ -128,13 +101,11 @@
 												<include name="**/*.html" />
 											</fileset>
 										</copy>
-										<copy todir="${basedir}/target/contents/reference/htmlsingle">
-											<fileset dir="${basedir}/src/main/docbook">
-												<include name="**/*.css" />
-												<include name="**/*.png" />
-												<include name="**/*.gif" />
-												<include name="**/*.jpg" />
-											</fileset>
+										<copy todir="${basedir}/target/contents/reference/htmlsingle/images">
+											<fileset dir="${basedir}/target/generated-docs/images"/>
+										</copy>
+										<copy todir="${basedir}/target/contents/reference/htmlsingle/css">
+											<fileset dir="${basedir}/src/main/docbook/css"/>
 										</copy>
 									</postProcess>
 								</configuration>
@@ -155,13 +126,11 @@
 												<include name="**/*.html" />
 											</fileset>
 										</copy>
-										<copy todir="${basedir}/target/contents/reference/html">
-											<fileset dir="${basedir}/src/main/docbook">
-												<include name="**/*.css" />
-												<include name="**/*.png" />
-												<include name="**/*.gif" />
-												<include name="**/*.jpg" />
-											</fileset>
+										<copy todir="${basedir}/target/contents/reference/html/images">
+											<fileset dir="${basedir}/target/generated-docs/images"/>
+										</copy>
+										<copy todir="${basedir}/target/contents/reference/html/css">
+											<fileset dir="${basedir}/src/main/docbook/css"/>
 										</copy>
 									</postProcess>
 								</configuration>
@@ -194,6 +163,12 @@
 								<configuration>
 									<epubCustomization>${basedir}/src/main/docbook/xsl/epub.xsl</epubCustomization>
 									<targetDirectory>${basedir}/target/docbook/epub</targetDirectory>
+									<preProcess>
+										<copy todir="${basedir}/target/docbook/epub/images">
+											<fileset dir="${basedir}/src/main/docbook/images"/>
+											<fileset dir="${basedir}/src/main/asciidoc/images"/>
+										</copy>
+									</preProcess>
 									<postProcess>
 										<copy todir="${basedir}/target/contents/reference/epub">
 											<fileset dir="${basedir}/target/docbook">

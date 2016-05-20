@@ -16,17 +16,22 @@
 
 package org.springframework.cloud.dataflow.server.controller;
 
+import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.springframework.cloud.dataflow.core.ArtifactType;
+import org.springframework.cloud.dataflow.core.BindingPropertyKeys;
 import org.springframework.cloud.dataflow.core.ModuleDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
+import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.rest.resource.StreamDefinitionResource;
-import org.springframework.cloud.dataflow.server.repository.DeploymentKey;
 import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
+import org.springframework.cloud.dataflow.server.repository.DeploymentKey;
 import org.springframework.cloud.dataflow.server.repository.DuplicateStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.NoSuchStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
@@ -40,6 +45,7 @@ import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.mvc.ResourceAssemblerSupport;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -79,6 +85,11 @@ public class StreamDefinitionController {
 	private final AppDeployer deployer;
 
 	/**
+	 * The app registry this controller will use to lookup apps.
+	 */
+	private final AppRegistry appRegistry;
+
+	/**
 	 * Assembler for {@link StreamDefinitionResource} objects.
 	 */
 	private final Assembler streamDefinitionAssembler = new Assembler();
@@ -100,17 +111,20 @@ public class StreamDefinitionController {
 	 * @param deploymentIdRepository the repository this controller will use for deployment IDs
 	 * @param deploymentController the deployment controller to delegate deployment operations
 	 * @param deployer             the deployer this controller will use to compute deployment status
+	 * @param appRegistry          the app registry to look up registered apps
 	 */
 	public StreamDefinitionController(StreamDefinitionRepository repository, DeploymentIdRepository deploymentIdRepository,
-			StreamDeploymentController deploymentController, AppDeployer deployer) {
+			StreamDeploymentController deploymentController, AppDeployer deployer, AppRegistry appRegistry) {
 		Assert.notNull(repository, "StreamDefinitionRepository must not be null");
 		Assert.notNull(deploymentIdRepository, "DeploymentIdRepository must not be null");
 		Assert.notNull(deploymentController, "StreamDeploymentController must not be null");
 		Assert.notNull(deployer, "AppDeployer must not be null");
+		Assert.notNull(appRegistry, "AppRegistry must not be null");
 		this.deploymentController = deploymentController;
 		this.deploymentIdRepository = deploymentIdRepository;
 		this.repository = repository;
 		this.deployer = deployer;
+		this.appRegistry = appRegistry;
 	}
 
 	/**
@@ -137,13 +151,50 @@ public class StreamDefinitionController {
 	@RequestMapping(value = "", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
 	public void save(@RequestParam("name") String name,
-					@RequestParam("definition") String dsl,
-					@RequestParam(value = "deploy", defaultValue = "false")
-					boolean deploy) {
+					 @RequestParam("definition") String dsl,
+					 @RequestParam(value = "deploy", defaultValue = "false")
+					 boolean deploy) {
 		StreamDefinition stream = new StreamDefinition(name, dsl);
+		List<String> errorMessages = new ArrayList<>();
+		for (ModuleDefinition appDefintion: stream.getModuleDefinitions()) {
+			String appName = appDefintion.getName();
+			ArtifactType artifactType = determineModuleType(appDefintion);
+			if (appRegistry.find(appName, artifactType) == null) {
+				errorMessages.add(String.format("Application name '%s' with type '%s' does not exist in the app registry.",
+						appName, artifactType));
+			}
+		}
+		if (!errorMessages.isEmpty()) {
+			throw new IllegalArgumentException(StringUtils.collectionToDelimitedString(errorMessages, System.lineSeparator()));
+		}
 		this.repository.save(stream);
 		if (deploy) {
 			deploymentController.deploy(name, null);
+		}
+	}
+
+	/**
+	 * Return the {@link ArtifactType} for a {@link ModuleDefinition} in the context
+	 * of a defined stream.
+	 *
+	 * @param moduleDefinition the module for which to determine the type
+	 * @return {@link ArtifactType} for the given module
+	 */
+	 static ArtifactType determineModuleType(ModuleDefinition moduleDefinition) {
+		// Parser has already taken care of source/sink destinations, etc
+		boolean hasOutput = moduleDefinition.getParameters().containsKey(BindingPropertyKeys.OUTPUT_DESTINATION);
+		boolean hasInput = moduleDefinition.getParameters().containsKey(BindingPropertyKeys.INPUT_DESTINATION);
+		if (hasInput && hasOutput) {
+			return ArtifactType.processor;
+		}
+		else if (hasInput) {
+			return ArtifactType.sink;
+		}
+		else if (hasOutput) {
+			return ArtifactType.source;
+		}
+		else {
+			throw new IllegalStateException(moduleDefinition + " had neither input nor output set");
 		}
 	}
 

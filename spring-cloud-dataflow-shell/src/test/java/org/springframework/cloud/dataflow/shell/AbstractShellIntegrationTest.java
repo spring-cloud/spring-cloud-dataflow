@@ -107,12 +107,16 @@ public abstract class AbstractShellIntegrationTest {
 
 			SpringApplication application = new SpringApplicationBuilder(TestConfig.class).build();
 
+			int randomPort = SocketUtils.findAvailableTcpPort();
+			String dataSourceUrl = String.format("jdbc:h2:tcp://localhost:%s/mem:dataflow", randomPort);
 			applicationContext = application.run(
 					String.format("--server.port=%s", serverPort),
 					"--spring.jmx.default-domain=" + System.currentTimeMillis(),
 					"--spring.jmx.enabled=false",
 					"--security.basic.enabled=false",
-					"--spring.main.show_banner=false", "--spring.cloud.config.enabled=false");
+					"--spring.main.show_banner=false",
+					"--spring.cloud.config.enabled=false",
+					"--spring.datasource.url=" + dataSourceUrl);
 
 			JLineShellComponent shell = new Bootstrap(new String[]{"--port", String.valueOf(serverPort)})
 					.getJLineShellComponent();

@@ -16,9 +16,11 @@
 
 package org.springframework.cloud.dataflow.shell.command;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Properties;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
@@ -27,6 +29,11 @@ import org.springframework.cloud.dataflow.rest.client.ModuleOperations;
 import org.springframework.cloud.dataflow.rest.resource.DetailedModuleRegistrationResource;
 import org.springframework.cloud.dataflow.rest.resource.ModuleRegistrationResource;
 import org.springframework.cloud.dataflow.shell.config.DataFlowShell;
+import org.springframework.context.ResourceLoaderAware;
+import org.springframework.core.io.DefaultResourceLoader;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
+import org.springframework.core.io.support.PropertiesLoaderUtils;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.shell.core.CommandMarker;
 import org.springframework.shell.core.annotation.CliAvailabilityIndicator;
@@ -39,6 +46,7 @@ import org.springframework.shell.table.TableBuilder;
 import org.springframework.shell.table.TableModel;
 import org.springframework.shell.table.TableModelBuilder;
 import org.springframework.stereotype.Component;
+import org.springframework.util.Assert;
 
 /**
  * Commands for working with modules. Allows retrieval of information about
@@ -51,7 +59,7 @@ import org.springframework.stereotype.Component;
  * @author Patrick Peralta
  */
 @Component
-public class ModuleCommands implements CommandMarker {
+public class ModuleCommands implements CommandMarker, ResourceLoaderAware {
 
 	private final static String LIST_MODULES = "module list";
 
@@ -61,14 +69,24 @@ public class ModuleCommands implements CommandMarker {
 
 	private static final String REGISTER_MODULE = "module register";
 
+	private static final String IMPORT_MODULES = "module import";
+
 	private DataFlowShell dataFlowShell;
+
+	private ResourceLoader resourceLoader = new DefaultResourceLoader();
 
 	@Autowired
 	public void setDataFlowShell(DataFlowShell dataFlowShell) {
 		this.dataFlowShell = dataFlowShell;
 	}
 
-	@CliAvailabilityIndicator({LIST_MODULES, MODULE_INFO, UNREGISTER_MODULE, REGISTER_MODULE})
+	@Override
+	public void setResourceLoader(ResourceLoader resourceLoader) {
+		Assert.notNull(resourceLoader, "resourceLoader must not be null");
+		this.resourceLoader = resourceLoader;
+	}
+
+	@CliAvailabilityIndicator({LIST_MODULES, MODULE_INFO, UNREGISTER_MODULE, REGISTER_MODULE, IMPORT_MODULES})
 	public boolean available() {
 		return dataFlowShell.getDataFlowOperations() != null;
 	}
@@ -78,39 +96,43 @@ public class ModuleCommands implements CommandMarker {
 			@CliOption(mandatory = true,
 					key = {"", "name"},
 					help = "name of the module to query in the form of 'type:name'")
-			QualifiedModuleName module
-) {
+			QualifiedModuleName module) {
 		DetailedModuleRegistrationResource info = moduleOperations().info(module.name, module.type);
-		List<ConfigurationMetadataProperty> options = info.getOptions();
 		List<Object> result = new ArrayList<>();
-		result.add(String.format("Information about %s module '%s':", module.type, module.name));
+		if (info != null) {
+			List<ConfigurationMetadataProperty> options = info.getOptions();
+			result.add(String.format("Information about %s module '%s':", module.type, module.name));
 
-		result.add(String.format("Resource URI: %s", info.getUri()));
+			result.add(String.format("Resource URI: %s", info.getUri()));
 
-		if (info.getShortDescription() != null) {
-			result.add(info.getShortDescription());
-		}
-		if (options == null) {
-			result.add("Module options metadata is not available");
+			if (info.getShortDescription() != null) {
+				result.add(info.getShortDescription());
+			}
+			if (options == null) {
+				result.add("Module options metadata is not available");
+			}
+			else {
+				TableModelBuilder<Object> modelBuilder = new TableModelBuilder<>();
+				modelBuilder.addRow()
+						.addValue("Option Name")
+						.addValue("Description")
+						.addValue("Default")
+						.addValue("Type");
+				for (ConfigurationMetadataProperty option : options) {
+					modelBuilder.addRow()
+							.addValue(option.getId())
+							.addValue(option.getDescription() == null ? "<unknown>" : option.getDescription())
+							.addValue(prettyPrintDefaultValue(option))
+							.addValue(option.getType() == null ? "<unknown>" : option.getType());
+				}
+				TableBuilder builder = DataFlowTables.applyStyle(new TableBuilder(modelBuilder.build()))
+						.on(CellMatchers.table()).addSizer(new AbsoluteWidthSizeConstraints(30))
+						.and();
+				result.add(builder.build());
+			}
 		}
 		else {
-			TableModelBuilder<Object> modelBuilder = new TableModelBuilder<>();
-			modelBuilder.addRow()
-					.addValue("Option Name")
-					.addValue("Description")
-					.addValue("Default")
-					.addValue("Type");
-			for (ConfigurationMetadataProperty option : options) {
-				modelBuilder.addRow()
-						.addValue(option.getId())
-						.addValue(option.getDescription() == null ? "<unknown>" : option.getDescription())
-						.addValue(prettyPrintDefaultValue(option))
-						.addValue(option.getType() == null ? "<unknown>" : option.getType());
-			}
-			TableBuilder builder = DataFlowTables.applyStyle(new TableBuilder(modelBuilder.build()))
-					.on(CellMatchers.table()).addSizer(new AbsoluteWidthSizeConstraints(30))
-					.and();
-			result.add(builder.build());
+			result.add(String.format("Module info is not available for %s:%s", module.type, module.name));
 		}
 		return result;
 	}
@@ -191,12 +213,49 @@ public class ModuleCommands implements CommandMarker {
 				int currentRow = row - 1;
 				if (mappings.get(key).size() > currentRow) {
 					return mappings.get(key).get(currentRow);
-				} else {
+				}
+				else {
 					return null;
 				}
 			}
 		};
 		return DataFlowTables.applyStyle(new TableBuilder(model)).build();
+	}
+
+	@CliCommand(value = IMPORT_MODULES, help = "Register all modules listed in a properties file")
+	public String importFromResource(
+			@CliOption(mandatory = true,
+					key = {"", "uri"},
+					help = "URI for the properties file")
+			String uri,
+			@CliOption(key = "local",
+				help = "whether to resolve the URI locally (as opposed to on the server)",
+				specifiedDefaultValue = "true",
+				unspecifiedDefaultValue = "true")
+			boolean local,
+			@CliOption(key = "force",
+				help = "force update if any module already exists (only if not in use)",
+				specifiedDefaultValue = "true",
+				unspecifiedDefaultValue = "false")
+			boolean force) {
+		if (local) {
+			try {
+				Resource resource = this.resourceLoader.getResource(uri);
+				Properties modules = PropertiesLoaderUtils.loadProperties(resource);
+				PagedResources<ModuleRegistrationResource> registered = moduleOperations().registerAll(modules, force);
+				long numRegistered = registered.getMetadata().getTotalElements();
+				return (modules.keySet().size() == numRegistered)
+						? String.format("Successfully registered modules: %s", modules.keySet())
+						: String.format("Successfully registered %d modules from %s", numRegistered, modules.keySet());
+			}
+			catch (IOException e) {
+				throw new IllegalArgumentException(e);
+			}
+		}
+		else {
+			PagedResources<ModuleRegistrationResource> registered = moduleOperations().importFromResource(uri, force);
+			return String.format("Successfully registered %d modules from '%s'", registered.getMetadata().getTotalElements(), uri);
+		}
 	}
 
 	/**

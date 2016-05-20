@@ -12,6 +12,8 @@
 	</parent>
 	<properties>
 		<start-class>org.springframework.cloud.dataflow.server.local.LocalDataFlowServer</start-class>
+		<registry.app.defaultVersion>1.0.0.BUILD-SNAPSHOT</registry.app.defaultVersion>
+		<registry.app.defaultBinder>kafka</registry.app.defaultBinder>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -25,7 +27,9 @@
 				<directory>src/main/resources</directory>
 				<filtering>true</filtering>
 				<includes>
-					<include>dataflow-server.yml</include>
+					<include>application.yml</include>
+					<include>META-INF/kafka-apps.properties</include>
+					<include>META-INF/rabbit-apps.properties</include>
 				</includes>
 			</resource>
 		</resources>

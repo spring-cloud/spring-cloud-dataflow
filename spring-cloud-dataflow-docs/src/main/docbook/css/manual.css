@@ -342,3 +342,7 @@ div.navfooter {
 .title:focus>a,.title>a:focus,.title:focus>a:focus {
 	outline: 0;
 }
+
+.mediaobject img {
+	max-width: 100%;
+}

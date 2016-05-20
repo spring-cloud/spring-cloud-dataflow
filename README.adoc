@@ -1,4 +1,4 @@
-== Spring Cloud Data Flow image:https://build.spring.io/plugins/servlet/buildStatusImage/SCD-BMASTER[Build Status, link=https://build.spring.io/browse/SCD-BMASTER] image:https://badge.waffle.io/spring-cloud/spring-cloud-dataflow.svg?label=ready&title=Ready[Stories Ready, link=http://waffle.io/spring-cloud/spring-cloud-dataflow] image:https://badge.waffle.io/spring-cloud/spring-cloud-dataflow.svg?label=In%20Progress&title=In%20Progress[Stores In Progress, link=http://waffle.io/spring-cloud/spring-cloud-dataflow]
+== Spring Cloud Data Flow image:https://build.spring.io/plugins/servlet/buildStatusImage/SCD-BMASTER[Build Status, link=https://build.spring.io/browse/SCD-BMASTER] image:https://badge.waffle.io/spring-cloud/spring-cloud-dataflow.svg?label=ready&title=Ready[Stories Ready, link=http://waffle.io/spring-cloud/spring-cloud-dataflow] image:https://badge.waffle.io/spring-cloud/spring-cloud-dataflow.svg?label=In%20Progress&title=In%20Progress[Stories In Progress, link=http://waffle.io/spring-cloud/spring-cloud-dataflow]
 
 The Spring Cloud Data Flow project provides orchestration for data microservices, including long lived
 https://github.com/spring-cloud/spring-cloud-stream[stream] applications and
@@ -12,23 +12,36 @@ modules in a linear pipeline from a *source* to a *sink*, optionally including *
 in between. The domain also includes the concept of a *task*, which may be any process that does
 not run indefinitely, including https://github.com/spring-projects/spring-batch[Spring Batch] jobs.
 
-The https://github.com/spring-cloud/spring-cloud-dataflow/tree/master/spring-cloud-dataflow-artifact-registry[Module Registry] maintains the set of available modules, and their mappings to Maven coordinates.
+The https://github.com/spring-cloud/spring-cloud-dataflow/tree/master/spring-cloud-dataflow-registry[App Registry]
+maintains the set of available apps, and their mappings to URIs.
+For example, if relying on Maven coordinates, an app's URI would be of the format:
+`maven://<groupId>:<artifactId>:<version>`
 
-The https://github.com/spring-cloud/spring-cloud-dataflow/tree/master/spring-cloud-dataflow-module-deployer-spi[Module Deployer SPI] provides the abstraction layer for deploying the modules of a given stream across a variety of runtime environments.  Current SPI implementations support Local deployment, YARN, Cloud Foundry, Mesos and Kubernetes.
+The Data Flow Server is a Spring Boot application that provides a common REST API and UI. For each
+runtime environment there is a different version of the Data Flow Server that depends upon a
+deployer SPI implementation for that environment. The github locations for these Data Flow Servers are:
 
+* https://github.com/spring-cloud/spring-cloud-dataflow/tree/master/spring-cloud-dataflow-server-local[Local] (intended for development use only)
+* https://github.com/spring-cloud/spring-cloud-dataflow-server-cloudfoundry[Cloud Foundry]
+* https://github.com/spring-cloud/spring-cloud-dataflow-server-yarn[Apache YARN]
+* https://github.com/spring-cloud/spring-cloud-dataflow-server-mesos[Apache Mesos]
+* https://github.com/spring-cloud/spring-cloud-dataflow-server-kubernetes[Kubernetes]
 
-The Data Flow Server is a Spring Boot application that provides a common REST API, UI, and an implementation of the module deployer SPI interface for the runtime environment.  For each runtime environment there is a different version of the Data Flow server.  The github locations for these Data Flow servers are:
+The deployer SPI mentioned above is defined within the https://github.com/spring-cloud/spring-cloud-deployer[Spring Cloud Deployer]
+project. That provides an abstraction layer for deploying the apps of a given stream or task and managing their lifecycle.
+The github locations for the corresponding Spring Cloud Deployer SPI implementations are:
 
-* https://github.com/spring-cloud/spring-cloud-dataflow/tree/master/spring-cloud-dataflow-server-local[Local]
-* https://github.com/spring-cloud/spring-cloud-dataflow-admin-yarn[YARN]
-* https://github.com/spring-cloud/spring-cloud-dataflow-admin-cloudfoundry[Cloud Foundry]
-* https://github.com/spring-cloud/spring-cloud-dataflow-admin-mesos[Mesos]
-* https://github.com/spring-cloud/spring-cloud-dataflow-admin-kubernetes[Kubernetes]
+* https://github.com/spring-cloud/spring-cloud-deployer/tree/master/spring-cloud-deployer-local[Local]
+* https://github.com/spring-cloud/spring-cloud-deployer-cloudfoundry[Cloud Foundry]
+* https://github.com/spring-cloud/spring-cloud-deployer-yarn[Apache YARN]
+* https://github.com/spring-cloud/spring-cloud-deployer-mesos[Apache Mesos]
+* https://github.com/spring-cloud/spring-cloud-deployer-kubernetes[Kubernetes]
 
+The https://github.com/spring-cloud/spring-cloud-dataflow/tree/master/spring-cloud-dataflow-shell[Shell]
+connects to the Data Flow Server's REST API and supports a DSL that simplifies the process of
+defining a stream or task and managing its lifecycle.
 
-The https://github.com/spring-cloud/spring-cloud-dataflow/tree/master/spring-cloud-dataflow-shell[Shell] connects to the Admin's REST API and supports a DSL that simplifies the process of defining a stream and managing its lifecycle.
-
-Instructions to run the Admin Server for each runtime environments can be found in their respective github repositories.
+Instructions for running the Data Flow Server for each runtime environment can be found in their respective github repositories.
 
 === Contributing
 

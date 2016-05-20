@@ -31,7 +31,6 @@ import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.registry.DataFlowUriRegistryPopulator;
 import org.springframework.cloud.dataflow.registry.DataFlowUriRegistryPopulatorProperties;
 import org.springframework.cloud.dataflow.registry.RedisUriRegistry;
-import org.springframework.cloud.dataflow.server.controller.AggregateCounterController;
 import org.springframework.cloud.dataflow.server.controller.CompletionController;
 import org.springframework.cloud.dataflow.server.controller.CounterController;
 import org.springframework.cloud.dataflow.server.controller.FieldValueCounterController;
@@ -52,10 +51,11 @@ import org.springframework.cloud.dataflow.server.controller.TaskDefinitionContro
 import org.springframework.cloud.dataflow.server.controller.TaskDeploymentController;
 import org.springframework.cloud.dataflow.server.controller.TaskExecutionController;
 import org.springframework.cloud.dataflow.server.controller.UiController;
-import org.springframework.cloud.dataflow.server.job.TaskJobRepository;
 import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
+import org.springframework.cloud.dataflow.server.service.TaskJobService;
+import org.springframework.cloud.dataflow.server.service.TaskService;
 import org.springframework.cloud.deployer.resource.maven.MavenProperties;
 import org.springframework.cloud.deployer.resource.maven.MavenResourceLoader;
 import org.springframework.cloud.deployer.resource.registry.UriRegistry;
@@ -63,9 +63,9 @@ import org.springframework.cloud.deployer.resource.registry.UriRegistryPopulator
 import org.springframework.cloud.deployer.resource.support.DelegatingResourceLoader;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
+import org.springframework.cloud.stream.app.metrics.AggregateCounterRepository;
+import org.springframework.cloud.stream.app.metrics.FieldValueCounterRepository;
 import org.springframework.cloud.stream.configuration.metadata.ModuleConfigurationMetadataResolver;
-import org.springframework.cloud.stream.module.metrics.AggregateCounterRepository;
-import org.springframework.cloud.stream.module.metrics.FieldValueCounterRepository;
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -78,6 +78,7 @@ import org.springframework.hateoas.EntityLinks;
  * Configuration for the Data Flow Server Controllers.
  *
  * @author Mark Fisher
+ * @author Gunnar Hillert
  */
 @Configuration
 @ConditionalOnBean({ AppDeployer.class, TaskLauncher.class })
@@ -100,7 +101,8 @@ public class DataFlowControllerAutoConfiguration {
 	}
 
 	@Bean
-	public DataFlowUriRegistryPopulator dataflowUriRegistryPopulator(UriRegistry uriRegistry, DataFlowUriRegistryPopulatorProperties properties) {
+	public DataFlowUriRegistryPopulator dataflowUriRegistryPopulator(UriRegistry uriRegistry,
+			DataFlowUriRegistryPopulatorProperties properties) {
 		return new DataFlowUriRegistryPopulator(uriRegistry, uriRegistryPopulator(), properties);
 	}
 
@@ -111,8 +113,8 @@ public class DataFlowControllerAutoConfiguration {
 
 	@Bean
 	public RuntimeModulesController runtimeModulesController(StreamDefinitionRepository repository,
-			AppDeployer appDeployer) {
-		return new RuntimeModulesController(repository, appDeployer);
+			DeploymentIdRepository deploymentIdRepository, AppDeployer appDeployer) {
+		return new RuntimeModulesController(repository, deploymentIdRepository, appDeployer);
 	}
 
 	@Bean
@@ -122,14 +124,15 @@ public class DataFlowControllerAutoConfiguration {
 
 	@Bean
 	public StreamDefinitionController streamDefinitionController(StreamDefinitionRepository repository,
-			DeploymentIdRepository deploymentIdRepository, StreamDeploymentController deploymentController, AppDeployer deployer) {
-		return new StreamDefinitionController(repository, deploymentIdRepository, deploymentController, deployer);
+			DeploymentIdRepository deploymentIdRepository, StreamDeploymentController deploymentController,
+			AppDeployer deployer, AppRegistry appRegistry) {
+		return new StreamDefinitionController(repository, deploymentIdRepository, deploymentController, deployer,
+				appRegistry);
 	}
 
 	@Bean
 	public StreamDeploymentController streamDeploymentController(StreamDefinitionRepository repository,
-			DeploymentIdRepository deploymentIdRepository, AppRegistry registry, AppDeployer deployer,
-			DelegatingResourceLoader resourceLoader) {
+			DeploymentIdRepository deploymentIdRepository, AppRegistry registry, AppDeployer deployer) {
 		return new StreamDeploymentController(repository, deploymentIdRepository, registry, deployer);
 	}
 
@@ -141,11 +144,8 @@ public class DataFlowControllerAutoConfiguration {
 	@Bean
 	@ConditionalOnMissingBean(DelegatingResourceLoader.class)
 	public DelegatingResourceLoader delegatingResourceLoader(MavenResourceLoader mavenResourceLoader) {
-		DefaultResourceLoader defaultLoader = new DefaultResourceLoader();
 		Map<String, ResourceLoader> loaders = new HashMap<>();
 		loaders.put("maven", mavenResourceLoader);
-		loaders.put("file", defaultLoader);
-		loaders.put("http", defaultLoader);
 		return new DelegatingResourceLoader(loaders);
 	}
 
@@ -156,10 +156,8 @@ public class DataFlowControllerAutoConfiguration {
 	}
 
 	@Bean
-	public TaskDeploymentController taskDeploymentController(TaskDefinitionRepository repository,
-			DeploymentIdRepository deploymentIdRepository, UriRegistry registry, DelegatingResourceLoader resourceLoader,
-			TaskLauncher taskLauncher) {
-		return new TaskDeploymentController(repository, deploymentIdRepository, registry, resourceLoader, taskLauncher);
+	public TaskDeploymentController taskDeploymentController(TaskService taskService) {
+		return new TaskDeploymentController(taskService);
 	}
 
 	@Bean
@@ -168,7 +166,7 @@ public class DataFlowControllerAutoConfiguration {
 	}
 
 	@Bean
-	public JobExecutionController jobExecutionController(TaskJobRepository repository) {
+	public JobExecutionController jobExecutionController(TaskJobService repository) {
 		return new JobExecutionController(repository);
 	}
 
@@ -183,7 +181,7 @@ public class DataFlowControllerAutoConfiguration {
 	}
 
 	@Bean
-	public JobInstanceController jobInstanceController(TaskJobRepository repository){
+	public JobInstanceController jobInstanceController(TaskJobService repository) {
 		return new JobInstanceController(repository);
 	}
 
@@ -213,7 +211,8 @@ public class DataFlowControllerAutoConfiguration {
 	}
 
 	@Bean
-	public ModuleController moduleController(AppRegistry appRegistry, ModuleConfigurationMetadataResolver metadataResolver) {
+	public ModuleController moduleController(AppRegistry appRegistry,
+			ModuleConfigurationMetadataResolver metadataResolver) {
 		return new ModuleController(appRegistry, metadataResolver);
 	}
 

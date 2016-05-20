@@ -20,6 +20,8 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -74,6 +76,7 @@ import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
@@ -124,19 +127,19 @@ public class StreamControllerTests {
 	public void testConstructorMissingRepository() {
 		StreamDeploymentController deploymentController = new StreamDeploymentController(new InMemoryStreamDefinitionRepository(),
 				new InMemoryDeploymentIdRepository(), appRegistry, appDeployer);
-		new StreamDefinitionController(null, null, deploymentController, appDeployer);
+		new StreamDefinitionController(null, null, deploymentController, appDeployer, appRegistry);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testConstructorMissingDeploymentController() {
-		new StreamDefinitionController(new InMemoryStreamDefinitionRepository(), new InMemoryDeploymentIdRepository(), null, appDeployer);
+		new StreamDefinitionController(new InMemoryStreamDefinitionRepository(), new InMemoryDeploymentIdRepository(), null, appDeployer, appRegistry);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testConstructorMissingDeployer() {
 		StreamDeploymentController deploymentController = new StreamDeploymentController(new InMemoryStreamDefinitionRepository(),
 				new InMemoryDeploymentIdRepository(), appRegistry, appDeployer);
-		new StreamDefinitionController(new InMemoryStreamDefinitionRepository(), new InMemoryDeploymentIdRepository(), deploymentController, null);
+		new StreamDefinitionController(new InMemoryStreamDefinitionRepository(), new InMemoryDeploymentIdRepository(), deploymentController, null, appRegistry);
 	}
 
 	@Test
@@ -159,6 +162,16 @@ public class StreamControllerTests {
 		assertEquals(2, logDefinition.getParameters().size());
 		assertEquals("myStream.time", logDefinition.getParameters().get(BindingPropertyKeys.INPUT_DESTINATION));
 		assertEquals("myStream", logDefinition.getParameters().get(BindingPropertyKeys.INPUT_GROUP));
+	}
+
+	@Test
+	public void testSaveInvalidAppDefintions() throws Exception {
+		String response = mockMvc.perform(
+				post("/streams/definitions/").param("name", "myStream").param("definition", "foo | bar")
+							.accept(MediaType.APPLICATION_JSON)).andReturn().getResponse().getContentAsString();
+		assertTrue(response.contains("IllegalArgumentException"));
+		assertTrue(response.contains("Application name 'foo' with type 'source' does not exist in the app registry."));
+		assertTrue(response.contains("Application name 'bar' with type 'sink' does not exist in the app registry."));
 	}
 
 	@Test
@@ -506,6 +519,17 @@ public class StreamControllerTests {
 		assertThat(StreamDefinitionController.aggregateState(EnumSet.of(deployed, unknown)), is(partial));
 		assertThat(StreamDefinitionController.aggregateState(EnumSet.of(undeployed, unknown)), is(partial));
 		assertThat(StreamDefinitionController.aggregateState(EnumSet.of(unknown)), is(undeployed));
+	}
+
+	@Test
+	public void testAppDeploymentFailure() throws Exception {
+		when(appDeployer.deploy(any(AppDeploymentRequest.class))).thenThrow(new RuntimeException());
+		repository.save(new StreamDefinition("myStream", "time | log"));
+		mockMvc.perform(
+				post("/streams/deployments/myStream").accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isCreated());
+		ArgumentCaptor<AppDeploymentRequest> captor = ArgumentCaptor.forClass(AppDeploymentRequest.class);
+		verify(appDeployer, times(2)).deploy(captor.capture());
 	}
 
 }

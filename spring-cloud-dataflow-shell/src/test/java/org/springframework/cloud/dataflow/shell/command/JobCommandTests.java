@@ -119,7 +119,7 @@ public class JobCommandTests extends AbstractShellIntegrationTest {
 	public void testViewExecution() throws InterruptedException {
 		logger.info("Retrieve Job Execution Detail by Id");
 
-		Table table = getTable(job().executionView(getFirstJobExecutionIdFromTable()));
+		Table table = getTable(job().executionDisplay(getFirstJobExecutionIdFromTable()));
 		verifyColumnNumber(table, 2);
 		assertEquals("Number of expected rows returned from the table is incorrect",
 				18, table.getModel().getRowCount());
@@ -157,7 +157,7 @@ public class JobCommandTests extends AbstractShellIntegrationTest {
 	public void testViewInstance() throws InterruptedException {
 		logger.info("Retrieve Job Instance Detail by Id");
 
-		Table table = getTable(job().instanceView(jobInstances.get(0).getInstanceId()));
+		Table table = getTable(job().instanceDisplay(jobInstances.get(0).getInstanceId()));
 		verifyColumnNumber(table, 5);
 		checkCell(table ,0 , 0, "Name ");
 		checkCell(table ,0 , 1, "Execution ID ");
@@ -209,7 +209,7 @@ public class JobCommandTests extends AbstractShellIntegrationTest {
 		long jobExecutionId = getFirstJobExecutionIdFromTable();
 		long stepExecutionId = getFirstStepExecutionIdFromJobExecution(jobExecutionId);
 
-		Table table = getTable(job().jobStepExecutionView(stepExecutionId, jobExecutionId));
+		Table table = getTable(job().jobStepExecutionDisplay(stepExecutionId, jobExecutionId));
 
 		verifyColumnNumber(table, 2);
 		checkCell(table ,0 , 0, "Key ");
@@ -270,7 +270,7 @@ public class JobCommandTests extends AbstractShellIntegrationTest {
 
 	private long getFirstJobExecutionIdFromTable() {
 		Table result = getTable(job().jobExecutionList());
-		return (long) result.getModel().getValue(1, 1);
+		return (long) result.getModel().getValue(1, 0);
 	}
 
 	private long getFirstStepExecutionIdFromJobExecution(long jobExecutionId) {

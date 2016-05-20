@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Properties;
 
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
 import org.springframework.cloud.dataflow.core.ArtifactType;
@@ -38,6 +39,8 @@ import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.mvc.ResourceAssemblerSupport;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -111,10 +114,13 @@ public class ModuleController {
 		DetailedModuleRegistrationResource result = new DetailedModuleRegistrationResource(moduleAssembler.toResource(registration));
 		Resource resource = registration.getResource();
 
-		List<ConfigurationMetadataProperty> properties = metadataResolver.listProperties(resource);
-		for (ConfigurationMetadataProperty property : properties) {
-			result.addOption(property);
-		}
+		//TODO: Docker URIs will throw an exception, need another way to get the properties for them
+		try {
+			List<ConfigurationMetadataProperty> properties = metadataResolver.listProperties(resource);
+			for (ConfigurationMetadataProperty property : properties) {
+				result.addOption(property);
+			}
+		} catch (Exception ignore) {}
 		return result;
 	}
 
@@ -155,6 +161,42 @@ public class ModuleController {
 	public void unregister(@PathVariable("type") ArtifactType type, @PathVariable("name") String name) {
 		Assert.isTrue(type != ArtifactType.library, "Only modules are supported by this endpoint");
 		appRegistry.delete(name, type);
+	}
+
+	/**
+	 * Register all apps listed in a properties file or provided as key/value pairs.
+	 * @param uri         URI for the properties file
+	 * @param apps        key/value pairs representing apps, separated by newlines
+	 * @param force       if {@code true}, overwrites any pre-existing registrations
+	 */
+	@RequestMapping(method = RequestMethod.POST)
+	@ResponseStatus(HttpStatus.CREATED)
+	public PagedResources<? extends ModuleRegistrationResource> registerAll(
+			PagedResourcesAssembler<AppRegistration> assembler,
+			@RequestParam(value = "uri", required = false) String uri,
+			@RequestParam(value = "apps", required = false) Properties apps,
+			@RequestParam(value = "force", defaultValue = "false") boolean force) {
+		List<AppRegistration> registrations = new ArrayList<>();
+		if (StringUtils.hasText(uri)) {
+			registrations.addAll(appRegistry.importAll(force, uri));
+		}
+		else if (!CollectionUtils.isEmpty(apps)) {
+			for (String key : apps.stringPropertyNames()) {
+				String[] tokens = key.split("\\.", 2);
+				String name = tokens[1];
+				ArtifactType type = ArtifactType.valueOf(tokens[0]);
+				if (force || null == appRegistry.find(name, type)) {
+					try {
+						registrations.add(appRegistry.save(name, type, new URI(apps.getProperty(key))));
+					}
+					catch (URISyntaxException e) {
+						throw new IllegalArgumentException(e);
+					}
+				}
+			}
+		}
+		Collections.sort(registrations);
+		return assembler.toResource(new PageImpl<>(registrations), moduleAssembler);
 	}
 
 	class Assembler extends ResourceAssemblerSupport<AppRegistration, ModuleRegistrationResource> {

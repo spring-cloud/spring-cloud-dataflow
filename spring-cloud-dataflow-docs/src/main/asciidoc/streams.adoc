@@ -158,8 +158,28 @@ When providing a URI with the `maven` scheme, the format should conform to the f
 maven://<groupId>:<artifactId>[:<extension>[:<classifier>]]:<version>
 ```
 
-If a stream app is already registered with the provided name and type, it will not be overridden by default.
-If you would like to override the pre-existing stream app, then include the `--force` option.
+If you would like to register multiple apps at one time, you can store them in a properties file
+where the keys are formatted as `<type>.<name>` and the values are the URIs. For example, this
+would be a valid properties file:
+
+```
+source.foo=file:///tmp/foo.jar
+sink.bar=file:///tmp/bar.jar
+```
+
+Then use the `module import` command and provide the location of the properties file via `--uri`:
+
+```
+module import --uri file:///tmp/stream-apps.properties
+```
+
+You can also pass the `--local` option (which is TRUE by default) to indicate whether the
+properties file location should be resolved within the shell process itself. If the location should
+be resolved from the Data Flow Server process, specify `--local false`.
+
+When using either `module register` or `module import`, if a stream app is already registered with
+the provided name and type, it will not be overridden by default. If you would like to override the
+pre-existing stream app, then include the `--force` option.
 
 [NOTE]
 In some cases the Resource is resolved on the server side, whereas in others the

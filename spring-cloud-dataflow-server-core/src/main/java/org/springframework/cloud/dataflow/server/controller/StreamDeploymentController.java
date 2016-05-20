@@ -22,12 +22,15 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import org.springframework.cloud.dataflow.core.ArtifactType;
 import org.springframework.cloud.dataflow.core.BindingPropertyKeys;
 import org.springframework.cloud.dataflow.core.ModuleDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.StreamPropertyKeys;
-import org.springframework.cloud.dataflow.module.deployer.ModuleDeployer;
+import org.springframework.cloud.dataflow.registry.AppRegistration;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.rest.resource.StreamDeploymentResource;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
@@ -65,6 +68,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/streams/deployments")
 @ExposesResourceFor(StreamDeploymentResource.class)
 public class StreamDeploymentController {
+
+	private static Log loggger = LogFactory.getLog(StreamDeploymentController.class);
 
 	private static final String INSTANCE_COUNT_PROPERTY_KEY = "count";
 
@@ -174,10 +179,9 @@ public class StreamDeploymentController {
 		long timestamp = System.currentTimeMillis();
 		while (iterator.hasNext()) {
 			ModuleDefinition currentModule = iterator.next();
-			ArtifactType type = determineModuleType(currentModule);
+			ArtifactType type = StreamDefinitionController.determineModuleType(currentModule);
 			Map<String, String> moduleDeploymentProperties = extractModuleDeploymentProperties(currentModule, streamDeploymentProperties);
 			moduleDeploymentProperties.put(AppDeployer.GROUP_PROPERTY_KEY, currentModule.getGroup());
-			moduleDeploymentProperties.put(ModuleDeployer.GROUP_DEPLOYMENT_ID, currentModule.getGroup() + "-" + timestamp);
 			if (moduleDeploymentProperties.containsKey(INSTANCE_COUNT_PROPERTY_KEY)) {
 				moduleDeploymentProperties.put(AppDeployer.COUNT_PROPERTY_KEY,
 						moduleDeploymentProperties.get(INSTANCE_COUNT_PROPERTY_KEY));
@@ -195,37 +199,23 @@ public class StreamDeploymentController {
 			isDownStreamModulePartitioned = isPartitionedConsumer(currentModule, moduleDeploymentProperties,
 					upstreamModuleSupportsPartition);
 			AppDefinition definition = new AppDefinition(currentModule.getLabel(), currentModule.getParameters());
-			Resource resource = this.registry.find(currentModule.getName(), type).getResource();
+			AppRegistration registration = this.registry.find(currentModule.getName(), type);
+			Assert.notNull(registration, String.format("no application '%s' of type '%s' exists in the registry",
+					definition.getName(), type));
+			Resource resource = registration.getResource();
 			AppDeploymentRequest request = new AppDeploymentRequest(definition, resource, moduleDeploymentProperties);
-			String id = this.deployer.deploy(request);
-			this.deploymentIdRepository.save(DeploymentKey.forApp(currentModule), id);
+			try {
+				String id = this.deployer.deploy(request);
+				this.deploymentIdRepository.save(DeploymentKey.forApp(currentModule), id);
+			}
+			// If the deployer implementation handles the deployment request synchronously, log warning message if
+			// any exception is thrown out of the deployment and proceed to the next deployment.
+			catch (Exception e) {
+				loggger.warn(String.format("Exception when deploying the app %s: %s", currentModule, e.getMessage()));
+			}
 		}
 	}
 
-	/**
-	 * Return the {@link ArtifactType} for a {@link ModuleDefinition} in the context
-	 * of a defined stream.
-	 *
-	 * @param moduleDefinition the module for which to determine the type
-	 * @return {@link ArtifactType} for the given module
-	 */
-	private ArtifactType determineModuleType(ModuleDefinition moduleDefinition) {
-		// Parser has already taken care of source/sink destinations, etc
-		boolean hasOutput = moduleDefinition.getParameters().containsKey(BindingPropertyKeys.OUTPUT_DESTINATION);
-		boolean hasInput = moduleDefinition.getParameters().containsKey(BindingPropertyKeys.INPUT_DESTINATION);
-		if (hasInput && hasOutput) {
-			return ArtifactType.processor;
-		}
-		else if (hasInput) {
-			return ArtifactType.sink;
-		}
-		else if (hasOutput) {
-			return ArtifactType.source;
-		}
-		else {
-			throw new IllegalStateException(moduleDefinition + " had neither input nor output set");
-		}
-	}
 
 	/**
 	 * Extract and return a map of properties for a specific module within the

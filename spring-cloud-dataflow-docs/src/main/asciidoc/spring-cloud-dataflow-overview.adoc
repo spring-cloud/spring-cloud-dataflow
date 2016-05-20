@@ -44,19 +44,37 @@ maintains the set of available apps, and their mappings to a URI.
 For example, if relying on Maven coordinates, the URI would be of the format:
 `maven://<groupId>:<artifactId>:<version>`
 
-The link:https://github.com/spring-cloud/spring-cloud-dataflow/tree/master/spring-cloud-dataflow-deployer-spi[Deployer SPI] provides the abstraction layer for deploying the apps of a given stream across a variety of runtime environments, including:
+The link:https://github.com/spring-cloud/spring-cloud-dataflow/tree/master/spring-cloud-dataflow-server-core[Data Flow Server Core]
+provides the REST API and UI to be used in combination with an implementation of the Deployer SPI
+when creating a Data Flow Server for a given deployment environment.
 
-* link:https://github.com/spring-cloud/spring-cloud-dataflow/tree/master/spring-cloud-dataflow-server-local[Local]
+The link:https://github.com/spring-cloud/spring-cloud-dataflow/tree/master/spring-cloud-dataflow-shell[Shell]
+connects to the Data Flow Server's REST API and supports a DSL that simplifies the process of
+defining a stream and managing its lifecycle.
 
-* link:https://github.com/spring-cloud/spring-cloud-dataflow-admin-cloudfoundry[Cloud Foundry]
+Several Data Flow Server implementations exist, covering a range of runtime environments:
 
-* link:https://github.com/spring-cloud/spring-cloud-dataflow-admin-yarn[Apache Yarn]
+* link:https://github.com/spring-cloud/spring-cloud-dataflow/tree/master/spring-cloud-dataflow-server-local[Local] (intended for development only)
 
-* link:https://github.com/spring-cloud/spring-cloud-dataflow-admin-mesos[Apache Mesos]
+* link:https://github.com/spring-cloud/spring-cloud-dataflow-server-cloudfoundry[Cloud Foundry]
 
-* link:https://github.com/spring-cloud/spring-cloud-dataflow-admin-kubernetes[Kubernetes]
+* link:https://github.com/spring-cloud/spring-cloud-dataflow-server-yarn[Apache Yarn]
 
-The link:https://github.com/spring-cloud/spring-cloud-dataflow/tree/master/spring-cloud-dataflow-server-core[Data Flow Server Core] provides the REST API and UI to be used in combination with an implementation of the Deployer SPI when creating a Data Flow Server for a given deployment environment.
+* link:https://github.com/spring-cloud/spring-cloud-dataflow-server-mesos[Apache Mesos]
 
-The link:https://github.com/spring-cloud/spring-cloud-dataflow/tree/master/spring-cloud-dataflow-shell[Shell] connects to the Data Flow Server's REST API and supports a DSL that simplifies the process of defining a stream and managing its lifecycle.
+* link:https://github.com/spring-cloud/spring-cloud-dataflow-server-kubernetes[Kubernetes]
 
+As mentioned above, the Spring Cloud Data Flow Server implementations all rely upon corresponding
+implementations of the link:https://github.com/spring-cloud/spring-cloud-deployer[Spring Cloud Deployer]
+SPI, which provides the abstraction layer for deploying the apps of a given stream or task. The
+following are links to the deployer SPI projects that correspond to the Data Flow Servers listed above:
+
+* link:https://github.com/spring-cloud/spring-cloud-deployer/tree/master/spring-cloud-deployer-local[Local]
+
+* link:https://github.com/spring-cloud/spring-cloud-deployer-cloudfoundry[Cloud Foundry]
+
+* link:https://github.com/spring-cloud/spring-cloud-deployer-yarn[Apache Yarn]
+
+* link:https://github.com/spring-cloud/spring-cloud-deployer-mesos[Apache Mesos]
+
+* link:https://github.com/spring-cloud/spring-cloud-deployer-kubernetes[Kubernetes]

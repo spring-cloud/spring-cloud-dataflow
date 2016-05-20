@@ -19,8 +19,10 @@ package org.springframework.cloud.dataflow.shell.command;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
@@ -40,6 +42,7 @@ import org.springframework.shell.table.Table;
 import org.springframework.shell.table.TableBuilder;
 import org.springframework.shell.table.TableModelBuilder;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 /**
  * Task commands.
@@ -61,11 +64,13 @@ public class TaskCommands implements CommandMarker {
 
 	private static final String DESTROY = "task destroy";
 
-	private static final String VIEW = "task view";
+	private static final String DISPLAY = "task display";
 
 	private static final String PROPERTIES_OPTION = "properties";
 
 	private static final String PROPERTIES_FILE_OPTION = "propertiesFile";
+
+	private static final String PARAMS_OPTION = "params";
 
 	private static final String EXECUTION_LIST = "task execution list";
 
@@ -101,7 +106,8 @@ public class TaskCommands implements CommandMarker {
 	public String launch(
 			@CliOption(key = { "", "name" }, help = "the name of the task to launch", mandatory = true) String name,
 			@CliOption(key = { PROPERTIES_OPTION }, help = "the properties for this launch", mandatory = false) String properties,
-			@CliOption(key = { PROPERTIES_FILE_OPTION }, help = "the properties for this launch (as a File)", mandatory = false) File propertiesFile
+			@CliOption(key = { PROPERTIES_FILE_OPTION }, help = "the properties for this launch (as a File)", mandatory = false) File propertiesFile,
+			@CliOption(key = { PARAMS_OPTION }, help = "the commandline arguments for this launch", mandatory = false) String params
 			) throws IOException {
 		int which = Assertions.atMostOneOf(PROPERTIES_OPTION, properties, PROPERTIES_FILE_OPTION, propertiesFile);
 		Map<String, String> propertiesToUse;
@@ -122,10 +128,14 @@ public class TaskCommands implements CommandMarker {
 			default:
 				throw new AssertionError();
 		}
-		taskOperations().launch(name, propertiesToUse);
+		List<String> paramsToUse = new ArrayList<String>();
+		if (StringUtils.hasText(params)) {
+			paramsToUse.add(params);
+		}
+		taskOperations().launch(name, propertiesToUse, paramsToUse);
 		return String.format("Launched task '%s'", name);
 	}
-	
+
 	@CliCommand(value = DESTROY, help = "Destroy an existing task")
 	public String destroy(
 			@CliOption(key = { "", "name" }, help = "the name of the task to destroy", mandatory = true) String name) {
@@ -163,13 +173,13 @@ public class TaskCommands implements CommandMarker {
 		return DataFlowTables.applyStyle(builder).build();
 	}
 
-	@CliCommand(value = VIEW, help = "View the details of a specific task execution")
-	public Table view(
+	@CliCommand(value = DISPLAY, help = "Display the details of a specific task execution")
+	public Table display(
 			@CliOption(key = { "id" },
 					help = "the task execution id",
 					mandatory = true) long id) {
 
-		TaskExecutionResource taskExecutionResource = taskOperations().view(id);
+		TaskExecutionResource taskExecutionResource = taskOperations().display(id);
 
 		TableModelBuilder<Object> modelBuilder = new TableModelBuilder<>();
 

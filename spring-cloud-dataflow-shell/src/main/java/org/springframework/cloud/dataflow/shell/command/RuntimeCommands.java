@@ -46,6 +46,7 @@ import org.springframework.shell.table.TableModel;
 import org.springframework.shell.table.TableModelBuilder;
 import org.springframework.shell.table.Tables;
 import org.springframework.stereotype.Component;
+import org.springframework.util.Assert;
 
 /**
  * Commands for displaying the runtime state of deployed apps.
@@ -57,9 +58,14 @@ import org.springframework.stereotype.Component;
 public class RuntimeCommands implements CommandMarker {
 
 	private static final String LIST_MODULES = "runtime modules";
+	
+	private final DataFlowShell dataFlowShell;
 
 	@Autowired
-	private DataFlowShell dataFlowShell;
+	public RuntimeCommands(DataFlowShell dataFlowShell) {
+		Assert.notNull(dataFlowShell, "DataFlowShell must not be null");
+		this.dataFlowShell = dataFlowShell;
+	}
 
 	@CliAvailabilityIndicator({LIST_MODULES})
 	public boolean available() {

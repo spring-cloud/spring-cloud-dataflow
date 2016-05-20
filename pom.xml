@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
+	<groupId>org.springframework.cloud</groupId>
 	<artifactId>spring-cloud-dataflow-parent</artifactId>
 	<version>1.0.0.BUILD-SNAPSHOT</version>
 	<packaging>pom</packaging>
@@ -12,7 +13,7 @@
 	<parent>
 		<groupId>org.springframework.cloud</groupId>
 		<artifactId>spring-cloud-build</artifactId>
-		<version>1.1.0.BUILD-SNAPSHOT</version>
+		<version>1.1.0.RC2</version>
 		<relativePath />
 	</parent>
 	<scm>
@@ -24,16 +25,15 @@
 	<properties>
 		<java.version>1.7</java.version>
 		<spring-cloud-dataflow-ui.version>1.0.0.BUILD-SNAPSHOT</spring-cloud-dataflow-ui.version>
-		<spring-cloud-stream.version>1.0.0.BUILD-SNAPSHOT</spring-cloud-stream.version>
+		<spring-cloud-stream-app.version>1.0.0.BUILD-SNAPSHOT</spring-cloud-stream-app.version>
+		<spring-cloud-stream.version>1.1.0.BUILD-SNAPSHOT</spring-cloud-stream.version>
 		<spring-cloud-task.version>1.0.0.BUILD-SNAPSHOT</spring-cloud-task.version>
-		<spring-cloud-commons.version>1.1.0.BUILD-SNAPSHOT</spring-cloud-commons.version>
-		<spring-cloud-config.version>1.1.0.BUILD-SNAPSHOT</spring-cloud-config.version>
+		<spring-cloud-commons.version>1.1.0.RC3</spring-cloud-commons.version>
+		<spring-cloud-config.version>1.1.0.RC2</spring-cloud-config.version>
 		<spring-batch-admin-dependencies.version>1.3.1.RELEASE</spring-batch-admin-dependencies.version>
 	</properties>
 	<modules>
-		<module>spring-cloud-dataflow-app-launcher</module>
 		<module>spring-cloud-dataflow-configuration-metadata</module>
-		<module>spring-cloud-dataflow-deployer-spi</module>
 		<module>spring-cloud-dataflow-core</module>
 		<module>spring-cloud-dataflow-registry</module>
 		<module>spring-cloud-dataflow-rest-resource</module>
@@ -52,9 +52,9 @@
 				See https://github.com/spring-cloud/spring-cloud-stream-modules/issues/185
 			-->
 			<dependency>
-				<groupId>org.springframework.cloud.stream.module</groupId>
-				<artifactId>spring-cloud-stream-modules-analytics</artifactId>
-				<version>1.0.0.BUILD-SNAPSHOT</version>
+				<groupId>org.springframework.cloud.stream.app</groupId>
+				<artifactId>app-starters-common-analytics</artifactId>
+				<version>${spring-cloud-stream-app.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>

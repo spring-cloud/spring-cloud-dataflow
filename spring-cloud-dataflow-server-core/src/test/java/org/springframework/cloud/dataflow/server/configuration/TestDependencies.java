@@ -36,6 +36,8 @@ import org.springframework.cloud.dataflow.server.repository.InMemoryStreamDefini
 import org.springframework.cloud.dataflow.server.repository.InMemoryTaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
+import org.springframework.cloud.dataflow.server.service.TaskService;
+import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskService;
 import org.springframework.cloud.deployer.resource.maven.MavenProperties;
 import org.springframework.cloud.deployer.resource.maven.MavenResourceLoader;
 import org.springframework.cloud.deployer.resource.registry.InMemoryUriRegistry;
@@ -85,13 +87,13 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	@Bean
 	public StreamDefinitionController streamDefinitionController(StreamDefinitionRepository repository,
 			DeploymentIdRepository deploymentIdRepository, StreamDeploymentController deploymentController) {
-		return new StreamDefinitionController(repository, deploymentIdRepository, deploymentController, appDeployer());
+		return new StreamDefinitionController(repository, deploymentIdRepository, deploymentController, appDeployer(),
+				appRegistry());
 	}
 
 	@Bean
-	public TaskDeploymentController taskController(TaskDefinitionRepository repository, DeploymentIdRepository deploymentIdRepository,
-			UriRegistry registry) {
-		return new TaskDeploymentController(repository, deploymentIdRepository, registry, resourceLoader(), taskLauncher());
+	public TaskDeploymentController taskController() {
+		return new TaskDeploymentController(taskService());
 	}
 
 	@Bean
@@ -121,8 +123,9 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 
 	@Bean
 	public DataFlowUriRegistryPopulator dataflowUriRegistryPopulator() {
-		return new DataFlowUriRegistryPopulator(uriRegistry(), uriRegistryPopulator(),
-				new DataFlowUriRegistryPopulatorProperties());
+		DataFlowUriRegistryPopulatorProperties props = new DataFlowUriRegistryPopulatorProperties();
+		props.setLocations(new String[] { "classpath:META-INF/test-apps.properties" });
+		return new DataFlowUriRegistryPopulator(uriRegistry(), uriRegistryPopulator(), props);
 	}
 
 	@Bean
@@ -133,6 +136,11 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	@Bean
 	public TaskLauncher taskLauncher() {
 		return mock(TaskLauncher.class);
+	}
+
+	@Bean
+	public TaskService taskService() {
+		return new DefaultTaskService(taskDefinitionRepository(), deploymentIdRepository(), uriRegistry(), resourceLoader(), taskLauncher());
 	}
 
 	@Bean
