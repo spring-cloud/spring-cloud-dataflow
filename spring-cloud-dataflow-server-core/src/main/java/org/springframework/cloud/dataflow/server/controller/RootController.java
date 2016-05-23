@@ -112,10 +112,10 @@ public class RootController {
 
 		resourceSupport.add(entityLinks.linkToCollectionResource(AppRegistrationResource.class).withRel("apps"));
 
-		resourceSupport.add(entityLinks.linkToCollectionResource(AppStatusResource.class).withRel("runtime/modules"));
-		resourceSupport.add(unescapeTemplateVariables(entityLinks.linkForSingleResource(AppStatusResource.class, "{moduleId}").withRel("runtime/modules/module")));
+		resourceSupport.add(entityLinks.linkToCollectionResource(AppStatusResource.class).withRel("runtime/apps"));
+		resourceSupport.add(unescapeTemplateVariables(entityLinks.linkForSingleResource(AppStatusResource.class, "{appId}").withRel("runtime/apps/app")));
 
-		resourceSupport.add(unescapeTemplateVariables(entityLinks.linkFor(AppInstanceStatusResource.class, UriComponents.UriTemplateVariables.SKIP_VALUE).withRel("runtime/modules/instances")));
+		resourceSupport.add(unescapeTemplateVariables(entityLinks.linkFor(AppInstanceStatusResource.class, UriComponents.UriTemplateVariables.SKIP_VALUE).withRel("runtime/apps/instances")));
 
 		templated = entityLinks.linkFor(CompletionProposalsResource.class).withSelfRel().getHref() + ("/stream{?start,detailLevel}");
 		resourceSupport.add(new Link(templated).withRel("completions/stream"));

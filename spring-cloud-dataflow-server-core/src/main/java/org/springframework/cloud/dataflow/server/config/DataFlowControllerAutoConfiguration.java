@@ -41,8 +41,8 @@ import org.springframework.cloud.dataflow.server.controller.JobStepExecutionCont
 import org.springframework.cloud.dataflow.server.controller.JobStepExecutionProgressController;
 import org.springframework.cloud.dataflow.server.controller.RestControllerAdvice;
 import org.springframework.cloud.dataflow.server.controller.RootController;
-import org.springframework.cloud.dataflow.server.controller.RuntimeModulesController;
-import org.springframework.cloud.dataflow.server.controller.RuntimeModulesController.AppInstanceController;
+import org.springframework.cloud.dataflow.server.controller.RuntimeAppsController;
+import org.springframework.cloud.dataflow.server.controller.RuntimeAppsController.AppInstanceController;
 import org.springframework.cloud.dataflow.server.controller.security.SecurityController;
 import org.springframework.cloud.dataflow.server.controller.StreamDefinitionController;
 import org.springframework.cloud.dataflow.server.controller.StreamDeploymentController;
@@ -109,9 +109,9 @@ public class DataFlowControllerAutoConfiguration {
 	}
 
 	@Bean
-	public RuntimeModulesController runtimeModulesController(StreamDefinitionRepository repository,
+	public RuntimeAppsController runtimeAppsController(StreamDefinitionRepository repository,
 			DeploymentIdRepository deploymentIdRepository, AppDeployer appDeployer) {
-		return new RuntimeModulesController(repository, deploymentIdRepository, appDeployer);
+		return new RuntimeAppsController(repository, deploymentIdRepository, appDeployer);
 	}
 
 	@Bean
