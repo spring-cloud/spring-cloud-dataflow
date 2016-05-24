@@ -30,7 +30,7 @@ import org.springframework.cloud.dataflow.registry.AppRegistration;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.rest.resource.AppRegistrationResource;
 import org.springframework.cloud.dataflow.rest.resource.DetailedAppRegistrationResource;
-import org.springframework.cloud.stream.configuration.metadata.ModuleConfigurationMetadataResolver;
+import org.springframework.cloud.stream.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.web.PagedResourcesAssembler;
@@ -66,9 +66,9 @@ public class AppRegistryController {
 
 	private final AppRegistry appRegistry;
 
-	private ModuleConfigurationMetadataResolver metadataResolver;
+	private ApplicationConfigurationMetadataResolver metadataResolver;
 
-	public AppRegistryController(AppRegistry appRegistry, ModuleConfigurationMetadataResolver metadataResolver) {
+	public AppRegistryController(AppRegistry appRegistry, ApplicationConfigurationMetadataResolver metadataResolver) {
 		this.appRegistry = appRegistry;
 		this.metadataResolver = metadataResolver;
 	}

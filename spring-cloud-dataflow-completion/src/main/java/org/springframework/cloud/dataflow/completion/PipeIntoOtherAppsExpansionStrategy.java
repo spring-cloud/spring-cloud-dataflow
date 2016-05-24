@@ -21,23 +21,23 @@ import static org.springframework.cloud.dataflow.core.ApplicationType.sink;
 
 import java.util.List;
 
-import org.springframework.cloud.dataflow.core.ModuleDefinition;
+import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.registry.AppRegistration;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
 
 /**
- * Continues a well-formed stream definition by adding a pipe symbol and another module,
+ * Continues a well-formed stream definition by adding a pipe symbol and another app,
  * provided that the stream definition hasn't reached its end yet.
  *
  * @author Eric Bottard
  * @author Mark Fisher
  */
-public class PipeIntoOtherModulesExpansionStrategy implements ExpansionStrategy {
+public class PipeIntoOtherAppsExpansionStrategy implements ExpansionStrategy {
 
 	private final AppRegistry appRegistry;
 
-	public PipeIntoOtherModulesExpansionStrategy(AppRegistry appRegistry) {
+	public PipeIntoOtherAppsExpansionStrategy(AppRegistry appRegistry) {
 		this.appRegistry = appRegistry;
 	}
 
@@ -47,12 +47,12 @@ public class PipeIntoOtherModulesExpansionStrategy implements ExpansionStrategy 
 		if (text.isEmpty() || !text.endsWith(" ")) {
 			return false;
 		}
-		ModuleDefinition lastModule = parseResult.getDeploymentOrderIterator().next();
+		StreamAppDefinition lastApp = parseResult.getDeploymentOrderIterator().next();
 		// Consider "bar | foo". If there is indeed a sink named foo in the registry,
 		// "foo" may also be a processor, in which case we can continue
-		boolean couldBeASink = appRegistry.find(lastModule.getName(), sink) != null;
+		boolean couldBeASink = appRegistry.find(lastApp.getName(), sink) != null;
 		if (couldBeASink) {
-			boolean couldBeAProcessor = appRegistry.find(lastModule.getName(), processor) != null;
+			boolean couldBeAProcessor = appRegistry.find(lastApp.getName(), processor) != null;
 			if (!couldBeAProcessor) {
 				return false;
 			}

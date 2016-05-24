@@ -23,17 +23,17 @@ import org.springframework.cloud.dataflow.registry.AppRegistration;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
 
 /**
- * Proposes source module names when the user has typed nothing.
+ * Proposes source app names when the user has typed nothing.
  *
  * @author Eric Bottard
  * @author Mark Fisher
  */
-class EmptyStartYieldsSourceModulesRecoveryStrategy extends
+class EmptyStartYieldsSourceAppsRecoveryStrategy extends
 		StacktraceFingerprintingRecoveryStrategy<IllegalArgumentException> {
 
 	private final AppRegistry registry;
 
-	public EmptyStartYieldsSourceModulesRecoveryStrategy(AppRegistry registry) {
+	public EmptyStartYieldsSourceAppsRecoveryStrategy(AppRegistry registry) {
 		super(IllegalArgumentException.class, "");
 		this.registry = registry;
 	}
@@ -45,7 +45,7 @@ class EmptyStartYieldsSourceModulesRecoveryStrategy extends
 		for (AppRegistration app : this.registry.findAll()) {
 			if (app.getType() == ApplicationType.source) {
 				proposals.add(completionFactory.withSeparateTokens(app.getName(),
-						"Start with a source module"));
+						"Start with a source app"));
 			}
 		}
 	}

@@ -26,11 +26,11 @@ import org.springframework.boot.configurationmetadata.ConfigurationMetadataGroup
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataRepository;
 import org.springframework.cloud.dataflow.core.ApplicationType;
-import org.springframework.cloud.dataflow.core.ModuleDefinition;
+import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.registry.AppRegistration;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
-import org.springframework.cloud.stream.configuration.metadata.ModuleConfigurationMetadataResolver;
+import org.springframework.cloud.stream.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.core.io.Resource;
 
 /**
@@ -39,13 +39,13 @@ import org.springframework.core.io.Resource;
  * @author Eric Bottard
  * @author Mark Fisher
  */
-class AddModuleOptionsExpansionStrategy implements ExpansionStrategy {
+class AddAppOptionsExpansionStrategy implements ExpansionStrategy {
 
 	private final AppRegistry appRegistry;
 
-	private final ModuleConfigurationMetadataResolver metadataResolver;
+	private final ApplicationConfigurationMetadataResolver metadataResolver;
 
-	public AddModuleOptionsExpansionStrategy(AppRegistry appRegistry, ModuleConfigurationMetadataResolver metadataResolver) {
+	public AddAppOptionsExpansionStrategy(AppRegistry appRegistry, ApplicationConfigurationMetadataResolver metadataResolver) {
 		this.appRegistry = appRegistry;
 		this.metadataResolver = metadataResolver;
 	}
@@ -53,21 +53,21 @@ class AddModuleOptionsExpansionStrategy implements ExpansionStrategy {
 	@Override
 	public boolean addProposals(String text, StreamDefinition streamDefinition, int detailLevel,
 	                            List<CompletionProposal> collector) {
-		ModuleDefinition lastModule = streamDefinition.getDeploymentOrderIterator().next();
+		StreamAppDefinition lastApp = streamDefinition.getDeploymentOrderIterator().next();
 
-		String lastModuleName = lastModule.getName();
+		String lastAppName = lastApp.getName();
 		AppRegistration lastAppRegistration = null;
-		for (ApplicationType moduleType : CompletionUtils.determinePotentialTypes(lastModule)) {
-			lastAppRegistration = this.appRegistry.find(lastModuleName, moduleType);
+		for (ApplicationType appType : CompletionUtils.determinePotentialTypes(lastApp)) {
+			lastAppRegistration = this.appRegistry.find(lastAppName, appType);
 			if (lastAppRegistration != null) {
 				break;
 			}
 		}
 		if (lastAppRegistration == null) {
-			// Not a valid module name, do nothing
+			// Not a valid app name, do nothing
 			return false;
 		}
-		Set<String> alreadyPresentOptions = new HashSet<>(lastModule.getParameters().keySet());
+		Set<String> alreadyPresentOptions = new HashSet<>(lastApp.getProperties().keySet());
 
 		Resource jarFile = lastAppRegistration.getResource();
 
@@ -105,7 +105,6 @@ class AddModuleOptionsExpansionStrategy implements ExpansionStrategy {
 			}
 		}
 		return false;
-
 	}
 
 }

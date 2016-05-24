@@ -19,13 +19,13 @@ package org.springframework.cloud.dataflow.completion;
 import java.util.List;
 
 import org.springframework.boot.loader.archive.Archive;
-import org.springframework.cloud.stream.configuration.metadata.ModuleJarLauncher;
+import org.springframework.cloud.stream.configuration.metadata.AppJarLauncher;
 
 /**
- * Extension of {@link ModuleJarLauncher} used for exposing a {@link ClassLoader}
+ * Extension of {@link AppJarLauncher} used for exposing a {@link ClassLoader}
  * for the provided {@link Archive}.
  */
-class ClassLoaderExposingJarLauncher extends ModuleJarLauncher {
+class ClassLoaderExposingJarLauncher extends AppJarLauncher {
 
 	public ClassLoaderExposingJarLauncher(Archive archive) {
 		super(archive);

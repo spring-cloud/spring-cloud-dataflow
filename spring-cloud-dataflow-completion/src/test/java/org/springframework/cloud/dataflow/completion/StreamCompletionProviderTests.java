@@ -42,7 +42,7 @@ import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.registry.AppRegistration;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.deployer.resource.registry.InMemoryUriRegistry;
-import org.springframework.cloud.stream.configuration.metadata.ModuleConfigurationMetadataResolver;
+import org.springframework.cloud.stream.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.FileSystemResourceLoader;
@@ -55,7 +55,7 @@ import org.springframework.util.Assert;
  * Integration tests for StreamCompletionProvider.
  *
  * <p>These tests work hand in hand with a custom {@link AppRegistry} and
- * {@link ModuleConfigurationMetadataResolver} to provide completions for a fictional
+ * {@link ApplicationConfigurationMetadataResolver} to provide completions for a fictional
  * set of well known apps.</p>
  *
  * @author Eric Bottard
@@ -70,7 +70,7 @@ public class StreamCompletionProviderTests {
 
 	@Test
 	// <TAB> => file,http,etc
-	public void testEmptyStartShouldProposeSourceModules() {
+	public void testEmptyStartShouldProposeSourceApps() {
 		assertThat(completionProvider.complete("", 1), hasItems(
 				proposalThat(is("http")),
 				proposalThat(is("hdfs"))
@@ -82,7 +82,7 @@ public class StreamCompletionProviderTests {
 
 	@Test
 	// fi<TAB> => file
-	public void testUnfinishedModuleNameShouldReturnCompletions() {
+	public void testUnfinishedAppNameShouldReturnCompletions() {
 		assertThat(completionProvider.complete("h", 1), hasItems(
 				proposalThat(is("http")),
 				proposalThat(is("hdfs"))
@@ -108,7 +108,7 @@ public class StreamCompletionProviderTests {
 
 	@Test
 	// file | filter<TAB> => file | filter --foo=, etc
-	public void testValidSubStreamDefinitionShouldReturnModuleOptions() {
+	public void testValidSubStreamDefinitionShouldReturnAppOptions() {
 		assertThat(completionProvider.complete("http | filter ", 1), hasItems(
 				proposalThat(is("http | filter --expression=")),
 				proposalThat(is("http | filter --expresso="))
@@ -140,7 +140,7 @@ public class StreamCompletionProviderTests {
 
 	@Test
 	// file |<TAB> => file | foo,etc
-	public void testDanglingPipeShouldReturnExtraModules() {
+	public void testDanglingPipeShouldReturnExtraApps() {
 		assertThat(completionProvider.complete("http |", 1), hasItems(
 				proposalThat(is("http | filter"))
 		));
@@ -171,8 +171,8 @@ public class StreamCompletionProviderTests {
 	}
 
 	@Test
-	// queue:foo > <TAB>  ==> add module names
-	public void testDestinationIntoModules() {
+	// queue:foo > <TAB>  ==> add app names
+	public void testDestinationIntoApps() {
 		assertThat(completionProvider.complete("queue:foo >", 1), hasItems(
 				proposalThat(is("queue:foo > filter")),
 				proposalThat(is("queue:foo > log"))
@@ -183,8 +183,8 @@ public class StreamCompletionProviderTests {
 	}
 
 	@Test
-	// tap:stream:foo > <TAB>  ==> add module names
-	public void testDestinationIntoModulesVariant() {
+	// tap:stream:foo > <TAB>  ==> add app names
+	public void testDestinationIntoAppsVariant() {
 		assertThat(completionProvider.complete("tap:stream:foo >", 1), hasItems(
 				proposalThat(is("tap:stream:foo > filter")),
 				proposalThat(is("tap:stream:foo > log"))
@@ -196,7 +196,7 @@ public class StreamCompletionProviderTests {
 
 	@Test
 	// http<TAB> (no space) => NOT "http2: http"
-	public void testAutomaticModuleLabellingDoesNotGetInTheWay() {
+	public void testAutomaticAppLabellingDoesNotGetInTheWay() {
 		assertThat(completionProvider.complete("http", 1), not(hasItems(
 				proposalThat(is("http2: http"))
 		)));
@@ -240,7 +240,6 @@ public class StreamCompletionProviderTests {
 		assertThat(completionProvider.complete("http --use.ssl=tr", 1), not(hasItems(
 				proposalThat(startsWith("http --use.ssl=tr "))
 		)));
-
 	}
 
 	/*
@@ -276,7 +275,7 @@ public class StreamCompletionProviderTests {
 	}
 
 	/**
-	 * A set of mocks that consider the contents of the {@literal modules/} directory as module
+	 * A set of mocks that consider the contents of the {@literal apps/} directory as app
 	 * archives.
 	 *
 	 * @author Eric Bottard
@@ -285,7 +284,7 @@ public class StreamCompletionProviderTests {
 	@Configuration
 	public static class Mocks {
 
-		private static final File ROOT = new File("src/test/resources", Mocks.class.getPackage().getName().replace('.', '/') + "/modules");
+		private static final File ROOT = new File("src/test/resources", Mocks.class.getPackage().getName().replace('.', '/') + "/apps");
 
 		private static final FileFilter FILTER = new FileFilter() {
 			@Override
@@ -331,18 +330,18 @@ public class StreamCompletionProviderTests {
 		}
 
 		@Bean
-		public ModuleConfigurationMetadataResolver moduleConfigurationMetadataResolver() {
-			return new ModuleConfigurationMetadataResolver() {
+		public ApplicationConfigurationMetadataResolver moduleConfigurationMetadataResolver() {
+			return new ApplicationConfigurationMetadataResolver() {
 				// Narrow ClassLoader visibility for tests
 				@Override
 				protected ClassLoader createClassLoader(Archive archive) throws Exception {
-					ClassLoaderExposingJarLauncher moduleJarLauncher = new ClassLoaderExposingJarLauncher(archive) {
+					ClassLoaderExposingJarLauncher jarLauncher = new ClassLoaderExposingJarLauncher(archive) {
 						@Override
 						protected ClassLoader createClassLoader(URL[] urls) throws Exception {
 							return new LaunchedURLClassLoader(urls, null);
 						}
 					};
-					return moduleJarLauncher.createClassLoader();
+					return jarLauncher.createClassLoader();
 				}
 			};
 		}

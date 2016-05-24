@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2015-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package org.springframework.cloud.dataflow.core;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
@@ -24,23 +24,22 @@ import org.junit.Test;
  * @author Patrick Peralta
  * @author Mark Fisher
  */
-public class ModuleDefinitionTests {
+public class StreamApplicationDefinitionTests {
 
 	private static final String OUTPUT_BINDING_KEY = "spring.cloud.stream.bindings.output";
 
 	@Test
 	public void testBuilder() {
-		ModuleDefinition definition = new ModuleDefinition.Builder()
-				.setGroup("ticktock")
-				.setName("time")
+		StreamAppDefinition definition = new StreamAppDefinition.Builder()
+				.setRegisteredAppName("time")
 				.setLabel("label")
-				.setParameter(OUTPUT_BINDING_KEY, "channel").build();
+				.setProperty(OUTPUT_BINDING_KEY, "channel").build("ticktock");
 
-		assertEquals("ticktock", definition.getGroup());
-		assertEquals("time", definition.getName());
-		assertEquals("label", definition.getLabel());
-		assertEquals(1, definition.getParameters().size());
-		assertEquals("channel", definition.getParameters().get(OUTPUT_BINDING_KEY));
+		assertEquals("ticktock", definition.getStreamName());
+		assertEquals("time", definition.getRegisteredAppName());
+		assertEquals("label", definition.getName());
+		assertEquals(1, definition.getProperties().size());
+		assertEquals("channel", definition.getProperties().get(OUTPUT_BINDING_KEY));
 	}
 
 }

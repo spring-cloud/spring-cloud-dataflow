@@ -26,7 +26,7 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
 /**
- * A {@link JarLauncher} that supports launching module archive.
+ * A {@link JarLauncher} that supports launching an application archive.
  *
  * Also, it restricts the classloader of the launched application to the contents
  * of the uber-jar and the extension classloader of the JVM.
@@ -35,9 +35,9 @@ import org.springframework.util.ReflectionUtils;
  * @author Marius Bogoevici
  * @author Ilayaperumal Gopinathan
  */
-public class ModuleJarLauncher extends JarLauncher {
+public class AppJarLauncher extends JarLauncher {
 
-	public ModuleJarLauncher(Archive archive) {
+	public AppJarLauncher(Archive archive) {
 		super(archive);
 	}
 

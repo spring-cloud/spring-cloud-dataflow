@@ -26,19 +26,19 @@ import org.springframework.boot.configurationmetadata.ConfigurationMetadataGroup
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataRepository;
 import org.springframework.cloud.dataflow.core.ApplicationType;
-import org.springframework.cloud.dataflow.core.ModuleDefinition;
+import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.dsl.CheckPointedParseException;
 import org.springframework.cloud.dataflow.core.dsl.Token;
 import org.springframework.cloud.dataflow.core.dsl.TokenKind;
 import org.springframework.cloud.dataflow.registry.AppRegistration;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
-import org.springframework.cloud.stream.configuration.metadata.ModuleConfigurationMetadataResolver;
+import org.springframework.cloud.stream.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.core.io.Resource;
 
 /**
- * Provides completions for the case where the user has started to type a
- * module configuration property name but it is not typed in full yet.
+ * Provides completions for the case where the user has started to type
+ * an app configuration property name but it is not typed in full yet.
  *
  * @author Eric Bottard
  * @author Mark Fisher
@@ -48,10 +48,10 @@ public class UnfinishedConfigurationPropertyNameRecoveryStrategy
 
 	private final AppRegistry appRegistry;
 
-	private final ModuleConfigurationMetadataResolver metadataResolver;
+	private final ApplicationConfigurationMetadataResolver metadataResolver;
 
 	UnfinishedConfigurationPropertyNameRecoveryStrategy(AppRegistry appRegistry,
-			ModuleConfigurationMetadataResolver metadataResolver) {
+			ApplicationConfigurationMetadataResolver metadataResolver) {
 		super(CheckPointedParseException.class, "file --foo", "file | bar --quick", "file --foo.", "file | bar --quick.");
 		this.appRegistry = appRegistry;
 		this.metadataResolver = metadataResolver;
@@ -81,21 +81,21 @@ public class UnfinishedConfigurationPropertyNameRecoveryStrategy
 		String buffer = builder.toString();
 
 		StreamDefinition streamDefinition = new StreamDefinition("__dummy", safe);
-		ModuleDefinition lastModule = streamDefinition.getDeploymentOrderIterator().next();
+		StreamAppDefinition lastApp = streamDefinition.getDeploymentOrderIterator().next();
 
-		String lastModuleName = lastModule.getName();
+		String lastAppName = lastApp.getName();
 		AppRegistration lastAppRegistration = null;
-		for (ApplicationType moduleType : CompletionUtils.determinePotentialTypes(lastModule)) {
-			lastAppRegistration = appRegistry.find(lastModuleName, moduleType);
+		for (ApplicationType appType : CompletionUtils.determinePotentialTypes(lastApp)) {
+			lastAppRegistration = appRegistry.find(lastAppName, appType);
 			if (lastAppRegistration != null) {
 				break;
 			}
 		}
 		if (lastAppRegistration == null) {
-			// Not a valid module name, do nothing
+			// Not a valid app name, do nothing
 			return;
 		}
-		Set<String> alreadyPresentOptions = new HashSet<>(lastModule.getParameters().keySet());
+		Set<String> alreadyPresentOptions = new HashSet<>(lastApp.getProperties().keySet());
 
 		Resource jarFile = lastAppRegistration.getResource();
 

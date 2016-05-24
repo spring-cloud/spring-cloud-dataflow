@@ -26,17 +26,17 @@ import org.springframework.cloud.dataflow.registry.AppRegistration;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
 
 /**
- * Proposes module names when the user has typed a destination redirection.
+ * Proposes app names when the user has typed a destination redirection.
  *
  * @author Eric Bottard
  * @author Mark Fisher
  */
-class DestinationNameYieldsModulesRecoveryStrategy extends
+class DestinationNameYieldsAppsRecoveryStrategy extends
 		StacktraceFingerprintingRecoveryStrategy<CheckPointedParseException> {
 
 	private final AppRegistry appRegistry;
 
-	public DestinationNameYieldsModulesRecoveryStrategy(AppRegistry appRegistry) {
+	public DestinationNameYieldsAppsRecoveryStrategy(AppRegistry appRegistry) {
 		super(CheckPointedParseException.class, "queue:foo >", "queue:foo > ");
 		this.appRegistry = appRegistry;
 	}
@@ -58,7 +58,7 @@ class DestinationNameYieldsModulesRecoveryStrategy extends
 		for (AppRegistration appRegistration : appRegistry.findAll()) {
 			if (appRegistration.getType() == processor || appRegistration.getType() == sink) {
 				proposals.add(completionFactory.withSeparateTokens(appRegistration.getName(),
-						"Wire destination into a " + appRegistration.getType() + " module"));
+						"Wire destination into a " + appRegistration.getType() + " app"));
 			}
 		}
 	}

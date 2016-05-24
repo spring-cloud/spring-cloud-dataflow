@@ -27,7 +27,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.BindingPropertyKeys;
-import org.springframework.cloud.dataflow.core.ModuleDefinition;
+import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.StreamPropertyKeys;
 import org.springframework.cloud.dataflow.registry.AppRegistration;
@@ -41,7 +41,6 @@ import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepo
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.app.AppStatus;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
-import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.core.io.Resource;
 import org.springframework.hateoas.ExposesResourceFor;
@@ -173,146 +172,142 @@ public class StreamDeploymentController {
 		if (streamDeploymentProperties == null) {
 			streamDeploymentProperties = Collections.emptyMap();
 		}
-		Iterator<ModuleDefinition> iterator = stream.getDeploymentOrderIterator();
-		int nextModuleCount = 0;
-		boolean isDownStreamModulePartitioned = false;
-		long timestamp = System.currentTimeMillis();
+		Iterator<StreamAppDefinition> iterator = stream.getDeploymentOrderIterator();
+		int nextAppCount = 0;
+		boolean isDownStreamAppPartitioned = false;
 		while (iterator.hasNext()) {
-			ModuleDefinition currentModule = iterator.next();
-			ApplicationType type = StreamDefinitionController.determineModuleType(currentModule);
-			Map<String, String> moduleDeploymentProperties = extractModuleDeploymentProperties(currentModule, streamDeploymentProperties);
-			moduleDeploymentProperties.put(AppDeployer.GROUP_PROPERTY_KEY, currentModule.getGroup());
-			if (moduleDeploymentProperties.containsKey(INSTANCE_COUNT_PROPERTY_KEY)) {
-				moduleDeploymentProperties.put(AppDeployer.COUNT_PROPERTY_KEY,
-						moduleDeploymentProperties.get(INSTANCE_COUNT_PROPERTY_KEY));
+			StreamAppDefinition currentApp = iterator.next();
+			ApplicationType type = StreamDefinitionController.determineApplicationType(currentApp);
+			Map<String, String> appDeploymentProperties = extractAppDeploymentProperties(currentApp, streamDeploymentProperties);
+			appDeploymentProperties.put(AppDeployer.GROUP_PROPERTY_KEY, currentApp.getStreamName());
+			if (appDeploymentProperties.containsKey(INSTANCE_COUNT_PROPERTY_KEY)) {
+				appDeploymentProperties.put(AppDeployer.COUNT_PROPERTY_KEY,
+						appDeploymentProperties.get(INSTANCE_COUNT_PROPERTY_KEY));
 			}
-			boolean upstreamModuleSupportsPartition = upstreamModuleHasPartitionInfo(stream, currentModule, streamDeploymentProperties);
-			// consumer module partition properties
-			if (upstreamModuleSupportsPartition) {
-				updateConsumerPartitionProperties(moduleDeploymentProperties);
+			boolean upstreamAppSupportsPartition = upstreamAppHasPartitionInfo(stream, currentApp, streamDeploymentProperties);
+			// consumer app partition properties
+			if (upstreamAppSupportsPartition) {
+				updateConsumerPartitionProperties(appDeploymentProperties);
 			}
-			// producer module partition properties
-			if (isDownStreamModulePartitioned) {
-				updateProducerPartitionProperties(moduleDeploymentProperties, nextModuleCount);
+			// producer app partition properties
+			if (isDownStreamAppPartitioned) {
+				updateProducerPartitionProperties(appDeploymentProperties, nextAppCount);
 			}
-			nextModuleCount = getModuleCount(moduleDeploymentProperties);
-			isDownStreamModulePartitioned = isPartitionedConsumer(currentModule, moduleDeploymentProperties,
-					upstreamModuleSupportsPartition);
-			AppDefinition definition = new AppDefinition(currentModule.getLabel(), currentModule.getParameters());
-			AppRegistration registration = this.registry.find(currentModule.getName(), type);
+			nextAppCount = getInstanceCount(appDeploymentProperties);
+			isDownStreamAppPartitioned = isPartitionedConsumer(appDeploymentProperties,
+					upstreamAppSupportsPartition);
+			AppRegistration registration = this.registry.find(currentApp.getRegisteredAppName(), type);
 			Assert.notNull(registration, String.format("no application '%s' of type '%s' exists in the registry",
-					definition.getName(), type));
+					currentApp.getName(), type));
 			Resource resource = registration.getResource();
-			AppDeploymentRequest request = new AppDeploymentRequest(definition, resource, moduleDeploymentProperties);
+			AppDeploymentRequest request = currentApp.createDeploymentRequest(resource, appDeploymentProperties);
 			try {
 				String id = this.deployer.deploy(request);
-				this.deploymentIdRepository.save(DeploymentKey.forApp(currentModule), id);
+				this.deploymentIdRepository.save(DeploymentKey.forStreamAppDefinition(currentApp), id);
 			}
 			// If the deployer implementation handles the deployment request synchronously, log warning message if
 			// any exception is thrown out of the deployment and proceed to the next deployment.
 			catch (Exception e) {
-				loggger.warn(String.format("Exception when deploying the app %s: %s", currentModule, e.getMessage()));
+				loggger.warn(String.format("Exception when deploying the app %s: %s", currentApp, e.getMessage()));
 			}
 		}
 	}
 
 	/**
-	 * Extract and return a map of properties for a specific module within the
+	 * Extract and return a map of properties for a specific app within the
 	 * deployment properties of a stream.
 	 *
-	 * @param module module for which to return a map of properties
-	 * @param streamDeploymentProperties deployment properties for the stream that the module is defined in
-	 * @return map of properties for a module
+	 * @param appDefinition the {@link StreamAppDefinition} for which to return a map of properties
+	 * @param streamDeploymentProperties deployment properties for the stream that the app is defined in
+	 * @return map of properties for an app
 	 */
-	private Map<String, String> extractModuleDeploymentProperties(ModuleDefinition module,
+	private Map<String, String> extractAppDeploymentProperties(StreamAppDefinition appDefinition,
 			Map<String, String> streamDeploymentProperties) {
-		Map<String, String> moduleDeploymentProperties = new HashMap<>();
-		String wildCardProducerPropertyPrefix = "module.*.producer.";
-		String wildCardConsumerPropertyPrefix = "module.*.consumer.";
-		String wildCardPrefix = "module.*.";
+		Map<String, String> appDeploymentProperties = new HashMap<>();
+		String wildCardProducerPropertyPrefix = "app.*.producer.";
+		String wildCardConsumerPropertyPrefix = "app.*.consumer.";
+		String wildCardPrefix = "app.*.";
 		// first check for wild card prefix
 		for (Map.Entry<String, String> entry : streamDeploymentProperties.entrySet()) {
 			if (entry.getKey().startsWith(wildCardPrefix)) {
 				if (entry.getKey().startsWith(wildCardProducerPropertyPrefix)) {
-					moduleDeploymentProperties.put(BindingPropertyKeys.OUTPUT_BINDING_KEY_PREFIX +
+					appDeploymentProperties.put(BindingPropertyKeys.OUTPUT_BINDING_KEY_PREFIX +
 							entry.getKey().substring(wildCardPrefix.length()), entry.getValue());
 				}
 				else if (entry.getKey().startsWith(wildCardConsumerPropertyPrefix)) {
-					moduleDeploymentProperties.put(BindingPropertyKeys.INPUT_BINDING_KEY_PREFIX +
+					appDeploymentProperties.put(BindingPropertyKeys.INPUT_BINDING_KEY_PREFIX +
 							entry.getKey().substring(wildCardPrefix.length()), entry.getValue());
 				}
 				else {
-					moduleDeploymentProperties.put(entry.getKey().substring(wildCardPrefix.length()), entry.getValue());
+					appDeploymentProperties.put(entry.getKey().substring(wildCardPrefix.length()), entry.getValue());
 				}
 			}
 		}
-		String producerPropertyPrefix = String.format("module.%s.producer.", module.getLabel());
-		String consumerPropertyPrefix = String.format("module.%s.consumer.", module.getLabel());
-		String modulePrefix = String.format("module.%s.", module.getLabel());
+		String producerPropertyPrefix = String.format("app.%s.producer.", appDefinition.getName());
+		String consumerPropertyPrefix = String.format("app.%s.consumer.", appDefinition.getName());
+		String appPrefix = String.format("app.%s.", appDefinition.getName());
 		for (Map.Entry<String, String> entry : streamDeploymentProperties.entrySet()) {
-			if (entry.getKey().startsWith(modulePrefix)) {
+			if (entry.getKey().startsWith(appPrefix)) {
 				if (entry.getKey().startsWith(producerPropertyPrefix)) {
-					moduleDeploymentProperties.put(BindingPropertyKeys.OUTPUT_BINDING_KEY_PREFIX +
-							entry.getKey().substring(modulePrefix.length()), entry.getValue());
+					appDeploymentProperties.put(BindingPropertyKeys.OUTPUT_BINDING_KEY_PREFIX +
+							entry.getKey().substring(appPrefix.length()), entry.getValue());
 				}
 				else if (entry.getKey().startsWith(consumerPropertyPrefix)) {
-					moduleDeploymentProperties.put(BindingPropertyKeys.INPUT_BINDING_KEY_PREFIX +
-							entry.getKey().substring(modulePrefix.length()), entry.getValue());
+					appDeploymentProperties.put(BindingPropertyKeys.INPUT_BINDING_KEY_PREFIX +
+							entry.getKey().substring(appPrefix.length()), entry.getValue());
 				}
 				else {
-					moduleDeploymentProperties.put(entry.getKey().substring(modulePrefix.length()), entry.getValue());
+					appDeploymentProperties.put(entry.getKey().substring(appPrefix.length()), entry.getValue());
 				}
 			}
 		}
-		return moduleDeploymentProperties;
+		return appDeploymentProperties;
 	}
 
 	/**
-	 * Return {@code true} if the upstream module (the module that appears before
-	 * the provided module) contains partition related properties.
+	 * Return {@code true} if the upstream app (the app that appears before
+	 * the provided app) contains partition related properties.
 	 *
-	 * @param stream        stream for the module
-	 * @param currentModule module for which to determine if the upstream module
+	 * @param stream        stream for the app
+	 * @param currentApp    app for which to determine if the upstream app
 	 *                      has partition properties
 	 * @param streamDeploymentProperties deployment properties for the stream
-	 * @return true if the upstream module has partition properties
+	 * @return true if the upstream app has partition properties
 	 */
-	private boolean upstreamModuleHasPartitionInfo(StreamDefinition stream, ModuleDefinition currentModule,
+	private boolean upstreamAppHasPartitionInfo(StreamDefinition stream, StreamAppDefinition currentApp,
 			Map<String, String> streamDeploymentProperties) {
-		Iterator<ModuleDefinition> iterator = stream.getDeploymentOrderIterator();
+		Iterator<StreamAppDefinition> iterator = stream.getDeploymentOrderIterator();
 		while (iterator.hasNext()) {
-			ModuleDefinition module = iterator.next();
-			if (module.equals(currentModule) && iterator.hasNext()) {
-				ModuleDefinition prevModule = iterator.next();
-				Map<String, String> moduleDeploymentProperties = extractModuleDeploymentProperties(prevModule, streamDeploymentProperties);
-				return moduleDeploymentProperties.containsKey(BindingPropertyKeys.OUTPUT_PARTITION_KEY_EXPRESSION) ||
-						moduleDeploymentProperties.containsKey(BindingPropertyKeys.OUTPUT_PARTITION_KEY_EXTRACTOR_CLASS);
+			StreamAppDefinition app = iterator.next();
+			if (app.equals(currentApp) && iterator.hasNext()) {
+				StreamAppDefinition prevApp = iterator.next();
+				Map<String, String> appDeploymentProperties = extractAppDeploymentProperties(prevApp, streamDeploymentProperties);
+				return appDeploymentProperties.containsKey(BindingPropertyKeys.OUTPUT_PARTITION_KEY_EXPRESSION) ||
+						appDeploymentProperties.containsKey(BindingPropertyKeys.OUTPUT_PARTITION_KEY_EXTRACTOR_CLASS);
 			}
 		}
 		return false;
 	}
 
 	/**
-	 * Return {@code true} if the provided module is a consumer of partitioned data.
-	 * This is determined either by the deployment properties for the module
-	 * or whether the previous (upstream) module is publishing partitioned data.
+	 * Return {@code true} if an app is a consumer of partitioned data.
+	 * This is determined either by the deployment properties for the app
+	 * or whether the previous (upstream) app is publishing partitioned data.
 	 *
-	 * @param module module for which to determine if it is consuming partitioned data
-	 * @param moduleDeploymentProperties deployment properties for the module
-	 * @param upstreamModuleSupportsPartition if true, previous (upstream) module
+	 * @param appDeploymentProperties deployment properties for the app
+	 * @param upstreamAppSupportsPartition if true, previous (upstream) app
 	 * in the stream publishes partitioned data
-	 * @return true if this module consumes partitioned data
+	 * @return true if the app consumes partitioned data
 	 */
-	private boolean isPartitionedConsumer(ModuleDefinition module,
-			Map<String, String> moduleDeploymentProperties,
-			boolean upstreamModuleSupportsPartition) {
-		return upstreamModuleSupportsPartition ||
-				(moduleDeploymentProperties.containsKey(BindingPropertyKeys.INPUT_PARTITIONED) &&
-						moduleDeploymentProperties.get(BindingPropertyKeys.INPUT_PARTITIONED).equalsIgnoreCase("true"));
+	private boolean isPartitionedConsumer(Map<String, String> appDeploymentProperties,
+			boolean upstreamAppSupportsPartition) {
+		return upstreamAppSupportsPartition ||
+				(appDeploymentProperties.containsKey(BindingPropertyKeys.INPUT_PARTITIONED) &&
+						appDeploymentProperties.get(BindingPropertyKeys.INPUT_PARTITIONED).equalsIgnoreCase("true"));
 	}
 
 	/**
-	 * Add module properties for consuming partitioned data to the provided properties.
+	 * Add app properties for consuming partitioned data to the provided properties.
 	 *
 	 * @param properties properties to update
 	 */
@@ -324,26 +319,26 @@ public class StreamDeploymentController {
 	}
 
 	/**
-	 * Add module properties for producing partitioned data to the provided properties.
+	 * Add app properties for producing partitioned data to the provided properties.
 	 *
 	 * @param properties properties to update
-	 * @param nextModuleCount the number of module instances for the next (downstream) module in the stream
+	 * @param nextInstanceCount the number of instances for the next (downstream) app in the stream
 	 */
-	private void updateProducerPartitionProperties(Map<String, String> properties, int nextModuleCount) {
-		properties.put(BindingPropertyKeys.OUTPUT_PARTITION_COUNT, String.valueOf(nextModuleCount));
+	private void updateProducerPartitionProperties(Map<String, String> properties, int nextInstanceCount) {
+		properties.put(BindingPropertyKeys.OUTPUT_PARTITION_COUNT, String.valueOf(nextInstanceCount));
 		if (!properties.containsKey(BindingPropertyKeys.OUTPUT_PARTITION_KEY_EXPRESSION)) {
 			properties.put(BindingPropertyKeys.OUTPUT_PARTITION_KEY_EXPRESSION, DEFAULT_PARTITION_KEY_EXPRESSION);
 		}
 	}
 
 	/**
-	 * Return the module count indicated in the provided properties.
+	 * Return the app instance count indicated in the provided properties.
 	 *
-	 * @param properties properties for the module for which to determine the count
-	 * @return module count indicated in the provided properties;
-	 * if the properties do not contain a count a value of {@code 1} is returned
+	 * @param properties properties for the app for which to determine the count
+	 * @return instance count indicated in the provided properties;
+	 * if the properties do not contain a count, a value of {@code 1} is returned
 	 */
-	private int getModuleCount(Map<String, String> properties) {
+	private int getInstanceCount(Map<String, String> properties) {
 		return (properties.containsKey(INSTANCE_COUNT_PROPERTY_KEY)) ?
 				Integer.valueOf(properties.get(INSTANCE_COUNT_PROPERTY_KEY)) : 1;
 	}
@@ -354,8 +349,8 @@ public class StreamDeploymentController {
 	 * @param stream stream to undeploy
 	 */
 	private void undeployStream(StreamDefinition stream) {
-		for (ModuleDefinition module : stream.getModuleDefinitions()) {
-			String key = DeploymentKey.forApp(module);
+		for (StreamAppDefinition appDefinition : stream.getAppDefinitions()) {
+			String key = DeploymentKey.forStreamAppDefinition(appDefinition);
 			String id = this.deploymentIdRepository.findOne(key);
 			// if id is null, assume nothing is deployed
 			if (id != null) {

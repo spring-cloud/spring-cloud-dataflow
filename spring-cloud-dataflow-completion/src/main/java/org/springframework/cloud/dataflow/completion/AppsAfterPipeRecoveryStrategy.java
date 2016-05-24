@@ -28,17 +28,17 @@ import org.springframework.cloud.dataflow.registry.AppRegistry;
 
 /**
  * Provides completions for the case where the user has entered a pipe
- * symbol and a module reference is expected next.
+ * symbol and a app reference is expected next.
  *
  * @author Eric Bottard
  * @author Mark Fisher
  */
-public class ModulesAfterPipeRecoveryStrategy extends
+public class AppsAfterPipeRecoveryStrategy extends
 		StacktraceFingerprintingRecoveryStrategy<CheckPointedParseException> {
 
 	private final AppRegistry appRegistry;
 
-	ModulesAfterPipeRecoveryStrategy(AppRegistry appRegistry) {
+	AppsAfterPipeRecoveryStrategy(AppRegistry appRegistry) {
 		super(CheckPointedParseException.class, "foo |", "foo | ");
 		this.appRegistry = appRegistry;
 	}

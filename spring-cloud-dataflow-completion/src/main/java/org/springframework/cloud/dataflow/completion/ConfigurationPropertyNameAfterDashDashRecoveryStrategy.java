@@ -26,17 +26,17 @@ import org.springframework.boot.configurationmetadata.ConfigurationMetadataGroup
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataRepository;
 import org.springframework.cloud.dataflow.core.ApplicationType;
-import org.springframework.cloud.dataflow.core.ModuleDefinition;
+import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.dsl.CheckPointedParseException;
 import org.springframework.cloud.dataflow.registry.AppRegistration;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
-import org.springframework.cloud.stream.configuration.metadata.ModuleConfigurationMetadataResolver;
+import org.springframework.cloud.stream.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.core.io.Resource;
 
 /**
  * Provides completion proposals when the user has typed the two dashes that
- * precede a module configuration property.
+ * precede an app configuration property.
  *
  * @author Eric Bottard
  * @author Mark Fisher
@@ -46,10 +46,10 @@ class ConfigurationPropertyNameAfterDashDashRecoveryStrategy
 
 	private final AppRegistry appRegistry;
 
-	private final ModuleConfigurationMetadataResolver metadataResolver;
+	private final ApplicationConfigurationMetadataResolver metadataResolver;
 
 	ConfigurationPropertyNameAfterDashDashRecoveryStrategy(AppRegistry appRegistry,
-			ModuleConfigurationMetadataResolver metadataResolver) {
+			ApplicationConfigurationMetadataResolver metadataResolver) {
 		super(CheckPointedParseException.class, "file --", "file | foo --");
 		this.appRegistry = appRegistry;
 		this.metadataResolver = metadataResolver;
@@ -61,21 +61,21 @@ class ConfigurationPropertyNameAfterDashDashRecoveryStrategy
 
 		String safe = exception.getExpressionStringUntilCheckpoint();
 		StreamDefinition streamDefinition = new StreamDefinition("__dummy", safe);
-		ModuleDefinition lastModule = streamDefinition.getDeploymentOrderIterator().next();
+		StreamAppDefinition lastApp = streamDefinition.getDeploymentOrderIterator().next();
 
-		String lastModuleName = lastModule.getName();
+		String lastAppName = lastApp.getName();
 		AppRegistration lastAppRegistration = null;
-		for (ApplicationType moduleType : CompletionUtils.determinePotentialTypes(lastModule)) {
-			lastAppRegistration = appRegistry.find(lastModuleName, moduleType);
+		for (ApplicationType appType : CompletionUtils.determinePotentialTypes(lastApp)) {
+			lastAppRegistration = appRegistry.find(lastAppName, appType);
 			if (lastAppRegistration != null) {
 				break;
 			}
 		}
 		if (lastAppRegistration == null) {
-			// Not a valid module name, do nothing
+			// Not a valid app name, do nothing
 			return;
 		}
-		Set<String> alreadyPresentOptions = new HashSet<>(lastModule.getParameters().keySet());
+		Set<String> alreadyPresentOptions = new HashSet<>(lastApp.getProperties().keySet());
 
 		Resource jarFile = lastAppRegistration.getResource();
 

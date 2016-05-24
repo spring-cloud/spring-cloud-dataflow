@@ -22,23 +22,23 @@ import java.util.List;
 import java.util.Set;
 
 import org.springframework.cloud.dataflow.core.ApplicationType;
-import org.springframework.cloud.dataflow.core.ModuleDefinition;
+import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.registry.AppRegistration;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
 
 /**
- * Provides completions by finding modules whose name starts with a
- * prefix (which was assumed to be a correct module name, but wasn't).
+ * Provides completions by finding apps whose name starts with a
+ * prefix (which was assumed to be a correct app name, but wasn't).
  *
  * @author Eric Bottard
  * @author Mark Fisher
  */
-public class UnfinishedModuleNameExpansionStrategy implements ExpansionStrategy {
+public class UnfinishedAppNameExpansionStrategy implements ExpansionStrategy {
 
 	private final AppRegistry appRegistry;
 
-	UnfinishedModuleNameExpansionStrategy(AppRegistry appRegistry) {
+	UnfinishedAppNameExpansionStrategy(AppRegistry appRegistry) {
 		this.appRegistry = appRegistry;
 	}
 
@@ -46,19 +46,19 @@ public class UnfinishedModuleNameExpansionStrategy implements ExpansionStrategy 
 	public boolean addProposals(String text, StreamDefinition streamDefinition,
 			int detailLevel, List<CompletionProposal> collector) {
 
-		ModuleDefinition lastModule = streamDefinition.getDeploymentOrderIterator().next();
-		Set<String> parameterNames = new HashSet<>(lastModule.getParameters().keySet());
+		StreamAppDefinition lastApp = streamDefinition.getDeploymentOrderIterator().next();
+		Set<String> parameterNames = new HashSet<>(lastApp.getProperties().keySet());
 		parameterNames.removeAll(CompletionUtils.IMPLICIT_PARAMETER_NAMES);
-		if( !parameterNames.isEmpty() || !text.endsWith(lastModule.getName())) {
+		if( !parameterNames.isEmpty() || !text.endsWith(lastApp.getName())) {
 			return false;
 		}
 
 		// Actually add completions
 
-		String alreadyTyped = lastModule.getName();
+		String alreadyTyped = lastApp.getName();
 		CompletionProposal.Factory proposals = CompletionProposal.expanding(text);
 
-		List<ApplicationType> validTypesAtThisPosition = Arrays.asList(CompletionUtils.determinePotentialTypes(lastModule));
+		List<ApplicationType> validTypesAtThisPosition = Arrays.asList(CompletionUtils.determinePotentialTypes(lastApp));
 
 		for (AppRegistration appRegistration : appRegistry.findAll()) {
 			String candidateName = appRegistration.getName();

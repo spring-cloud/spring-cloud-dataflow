@@ -21,7 +21,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import org.springframework.cloud.dataflow.core.ModuleDefinition;
+import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.rest.resource.AppInstanceStatusResource;
 import org.springframework.cloud.dataflow.rest.resource.AppStatusResource;
@@ -46,7 +46,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Exposes runtime status of deployed modules.
+ * Exposes runtime status of deployed apps.
  *
  * @author Eric Bottard
  * @author Mark Fisher
@@ -102,8 +102,8 @@ public class RuntimeAppsController {
 	public PagedResources<AppStatusResource> list(PagedResourcesAssembler<AppStatus> assembler) {
 		List<AppStatus> values = new ArrayList<>();
 		for (StreamDefinition streamDefinition : this.streamDefinitionRepository.findAll()) {
-			for (ModuleDefinition moduleDefinition : streamDefinition.getModuleDefinitions()) {
-				String key = DeploymentKey.forApp(moduleDefinition);
+			for (StreamAppDefinition streamAppDefinition : streamDefinition.getAppDefinitions()) {
+				String key = DeploymentKey.forStreamAppDefinition(streamAppDefinition);
 				String id = this.deploymentIdRepository.findOne(key);
 				if (id != null) {
 					values.add(appDeployer.status(id));

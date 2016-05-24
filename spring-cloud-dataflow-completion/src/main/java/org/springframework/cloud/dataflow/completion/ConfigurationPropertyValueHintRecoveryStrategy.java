@@ -30,14 +30,14 @@ import org.springframework.boot.loader.archive.Archive;
 import org.springframework.boot.loader.archive.ExplodedArchive;
 import org.springframework.boot.loader.archive.JarFileArchive;
 import org.springframework.cloud.dataflow.core.ApplicationType;
-import org.springframework.cloud.dataflow.core.ModuleDefinition;
+import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.dsl.CheckPointedParseException;
 import org.springframework.cloud.dataflow.core.dsl.Token;
 import org.springframework.cloud.dataflow.core.dsl.TokenKind;
 import org.springframework.cloud.dataflow.registry.AppRegistration;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
-import org.springframework.cloud.stream.configuration.metadata.ModuleConfigurationMetadataResolver;
+import org.springframework.cloud.stream.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.core.io.Resource;
 
 /**
@@ -50,12 +50,12 @@ public class ConfigurationPropertyValueHintRecoveryStrategy extends StacktraceFi
 
 	private final AppRegistry appRegistry;
 
-	private final ModuleConfigurationMetadataResolver metadataResolver;
+	private final ApplicationConfigurationMetadataResolver metadataResolver;
 
 	@Autowired
 	private ValueHintProvider[] valueHintProviders = new ValueHintProvider[0];
 
-	ConfigurationPropertyValueHintRecoveryStrategy(AppRegistry appRegistry, ModuleConfigurationMetadataResolver metadataResolver) {
+	ConfigurationPropertyValueHintRecoveryStrategy(AppRegistry appRegistry, ApplicationConfigurationMetadataResolver metadataResolver) {
 		super(CheckPointedParseException.class, "foo --bar=", "foo | wizz --bar=");
 		this.appRegistry = appRegistry;
 		this.metadataResolver = metadataResolver;
@@ -112,12 +112,12 @@ public class ConfigurationPropertyValueHintRecoveryStrategy extends StacktraceFi
 	private AppRegistration lookupLastApp(CheckPointedParseException exception) {
 		String safe = exception.getExpressionStringUntilCheckpoint();
 		StreamDefinition streamDefinition = new StreamDefinition("__dummy", safe);
-		ModuleDefinition lastModule = streamDefinition.getDeploymentOrderIterator().next();
+		StreamAppDefinition lastApp = streamDefinition.getDeploymentOrderIterator().next();
 
-		String lastModuleName = lastModule.getName();
+		String lastAppName = lastApp.getName();
 		AppRegistration lastAppRegistration = null;
-		for (ApplicationType moduleType : CompletionUtils.determinePotentialTypes(lastModule)) {
-			lastAppRegistration = this.appRegistry.find(lastModuleName, moduleType);
+		for (ApplicationType appType : CompletionUtils.determinePotentialTypes(lastApp)) {
+			lastAppRegistration = this.appRegistry.find(lastAppName, appType);
 			if (lastAppRegistration != null) {
 				break;
 			}

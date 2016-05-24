@@ -42,51 +42,51 @@ public class StreamDefinitionTests {
 	@Test
 	public void testStreamCreation() {
 		StreamDefinition stream = new StreamDefinition("ticktock", "time | log");
-		assertEquals(2, stream.getModuleDefinitions().size());
-		ModuleDefinition time = stream.getModuleDefinitions().get(0);
+		assertEquals(2, stream.getAppDefinitions().size());
+		StreamAppDefinition time = stream.getAppDefinitions().get(0);
 		assertEquals("time", time.getName());
-		assertEquals("time", time.getLabel());
-		assertEquals("ticktock.time", time.getParameters().get(BindingPropertyKeys.OUTPUT_DESTINATION));
-		assertEquals("ticktock", time.getParameters().get(BindingPropertyKeys.OUTPUT_REQUIRED_GROUPS));
-		assertFalse(time.getParameters().containsKey(BindingPropertyKeys.INPUT_DESTINATION));
+		assertEquals("time", time.getRegisteredAppName());
+		assertEquals("ticktock.time", time.getProperties().get(BindingPropertyKeys.OUTPUT_DESTINATION));
+		assertEquals("ticktock", time.getProperties().get(BindingPropertyKeys.OUTPUT_REQUIRED_GROUPS));
+		assertFalse(time.getProperties().containsKey(BindingPropertyKeys.INPUT_DESTINATION));
 
-		ModuleDefinition log = stream.getModuleDefinitions().get(1);
+		StreamAppDefinition log = stream.getAppDefinitions().get(1);
 		assertEquals("log", log.getName());
-		assertEquals("log", log.getLabel());
-		assertEquals("ticktock.time", log.getParameters().get(BindingPropertyKeys.INPUT_DESTINATION));
-		assertEquals("ticktock", log.getParameters().get(BindingPropertyKeys.INPUT_GROUP));
-		assertFalse(log.getParameters().containsKey(BindingPropertyKeys.OUTPUT_DESTINATION));
+		assertEquals("log", log.getRegisteredAppName());
+		assertEquals("ticktock.time", log.getProperties().get(BindingPropertyKeys.INPUT_DESTINATION));
+		assertEquals("ticktock", log.getProperties().get(BindingPropertyKeys.INPUT_GROUP));
+		assertFalse(log.getProperties().containsKey(BindingPropertyKeys.OUTPUT_DESTINATION));
 	}
 
 	@Test
 	public void simpleStream() {
 		StreamDefinition streamDefinition = new StreamDefinition("test", "foo | bar");
-		List<ModuleDefinition> requests = streamDefinition.getModuleDefinitions(); 
+		List<StreamAppDefinition> requests = streamDefinition.getAppDefinitions(); 
 		assertEquals(2, requests.size());
-		ModuleDefinition source = requests.get(0);
-		ModuleDefinition sink = requests.get(1);
+		StreamAppDefinition source = requests.get(0);
+		StreamAppDefinition sink = requests.get(1);
 		assertEquals("foo", source.getName());
-		assertEquals("test", source.getGroup());
+		assertEquals("test", source.getStreamName());
 
-		assertEquals(2, source.getParameters().size());
-		assertEquals("test.foo", source.getParameters().get(BindingPropertyKeys.OUTPUT_DESTINATION));
-		assertEquals("test", source.getParameters().get(BindingPropertyKeys.OUTPUT_REQUIRED_GROUPS));
+		assertEquals(2, source.getProperties().size());
+		assertEquals("test.foo", source.getProperties().get(BindingPropertyKeys.OUTPUT_DESTINATION));
+		assertEquals("test", source.getProperties().get(BindingPropertyKeys.OUTPUT_REQUIRED_GROUPS));
 		assertEquals("bar", sink.getName());
-		assertEquals("test", sink.getGroup());
-		assertEquals(2, sink.getParameters().size());
-		assertEquals("test.foo", sink.getParameters().get(BindingPropertyKeys.INPUT_DESTINATION));
-		assertEquals("test", sink.getParameters().get(BindingPropertyKeys.INPUT_GROUP));
+		assertEquals("test", sink.getStreamName());
+		assertEquals(2, sink.getProperties().size());
+		assertEquals("test.foo", sink.getProperties().get(BindingPropertyKeys.INPUT_DESTINATION));
+		assertEquals("test", sink.getProperties().get(BindingPropertyKeys.INPUT_GROUP));
 	}
 
 	@Test
 	public void quotesInParams() {
 		StreamDefinition streamDefinition = new StreamDefinition("test", "foo --bar='payload.matches(''hello'')' | file");
-		List<ModuleDefinition> requests = streamDefinition.getModuleDefinitions();
+		List<StreamAppDefinition> requests = streamDefinition.getAppDefinitions();
 		assertEquals(2, requests.size());
-		ModuleDefinition source = requests.get(0);
+		StreamAppDefinition source = requests.get(0);
 		assertEquals("foo", source.getName());
-		assertEquals("test", source.getGroup());
-		Map<String, String> sourceParameters = source.getParameters();
+		assertEquals("test", source.getStreamName());
+		Map<String, String> sourceParameters = source.getProperties();
 		assertEquals(3, sourceParameters.size());
 		assertEquals("payload.matches('hello')", sourceParameters.get("bar"));
 	}
@@ -95,66 +95,66 @@ public class StreamDefinitionTests {
 	public void quotesInParams2() {
 		StreamDefinition streamDefinition = new StreamDefinition("test",
 				"http --port=9700 | filter --expression=payload.matches('hello world') | file");
-		List<ModuleDefinition> requests = streamDefinition.getModuleDefinitions();
+		List<StreamAppDefinition> requests = streamDefinition.getAppDefinitions();
 		assertEquals(3, requests.size());
-		ModuleDefinition filter = requests.get(1);
+		StreamAppDefinition filter = requests.get(1);
 		assertEquals("filter", filter.getName());
-		assertEquals("test", filter.getGroup());
-		Map<String, String> filterParameters = filter.getParameters();
+		assertEquals("test", filter.getStreamName());
+		Map<String, String> filterParameters = filter.getProperties();
 		assertEquals(5, filterParameters.size());
 		assertEquals("payload.matches('hello world')", filterParameters.get("expression"));
 	}
 
 	@Test
-	public void parameterizedModules() {
+	public void parameterizedApps() {
 		StreamDefinition streamDefinition = new StreamDefinition("test", "foo --x=1 --y=two | bar --z=3");
-		List<ModuleDefinition> requests = streamDefinition.getModuleDefinitions();
+		List<StreamAppDefinition> requests = streamDefinition.getAppDefinitions();
 		assertEquals(2, requests.size());
-		ModuleDefinition source = requests.get(0);
-		ModuleDefinition sink = requests.get(1);
+		StreamAppDefinition source = requests.get(0);
+		StreamAppDefinition sink = requests.get(1);
 		assertEquals("foo", source.getName());
-		assertEquals("test", source.getGroup());
-		Map<String, String> sourceParameters = source.getParameters();
+		assertEquals("test", source.getStreamName());
+		Map<String, String> sourceParameters = source.getProperties();
 		assertEquals(4, sourceParameters.size());
 		assertEquals("1", sourceParameters.get("x"));
 		assertEquals("two", sourceParameters.get("y"));
 		assertEquals("bar", sink.getName());
-		assertEquals("test", sink.getGroup());
-		Map<String, String> sinkParameters = sink.getParameters();
+		assertEquals("test", sink.getStreamName());
+		Map<String, String> sinkParameters = sink.getProperties();
 		assertEquals(3, sinkParameters.size());
 		assertEquals("3", sinkParameters.get("z"));
 	}
 
 	@Test
-	public void sourceDestinationNameIsAppliedToSourceModule() throws Exception {
+	public void sourceDestinationNameIsAppliedToSourceApp() throws Exception {
 		StreamDefinition streamDefinition = new StreamDefinition("test", ":foo > goo | blah | file");
-		List<ModuleDefinition> requests = streamDefinition.getModuleDefinitions();
+		List<StreamAppDefinition> requests = streamDefinition.getAppDefinitions();
 		assertEquals(3, requests.size());
-		assertEquals("foo", requests.get(0).getParameters().get(BindingPropertyKeys.INPUT_DESTINATION));
-		assertEquals("test", requests.get(0).getParameters().get(BindingPropertyKeys.INPUT_GROUP));
+		assertEquals("foo", requests.get(0).getProperties().get(BindingPropertyKeys.INPUT_DESTINATION));
+		assertEquals("test", requests.get(0).getProperties().get(BindingPropertyKeys.INPUT_GROUP));
 	}
 
 	@Test
-	public void sinkDestinationNameIsAppliedToSinkModule() throws Exception {
+	public void sinkDestinationNameIsAppliedToSinkApp() throws Exception {
 		StreamDefinition streamDefinition = new StreamDefinition("test", "boo | blah | aaak > :foo");
-		List<ModuleDefinition> requests = streamDefinition.getModuleDefinitions();
+		List<StreamAppDefinition> requests = streamDefinition.getAppDefinitions();
 		assertEquals(3, requests.size());
-		assertEquals("foo", requests.get(2).getParameters().get(BindingPropertyKeys.OUTPUT_DESTINATION));
+		assertEquals("foo", requests.get(2).getProperties().get(BindingPropertyKeys.OUTPUT_DESTINATION));
 	}
 
 	@Test
 	public void simpleSinkDestination() throws Exception {
 		StreamDefinition streamDefinition = new StreamDefinition("test", "bart > :foo");
-		List<ModuleDefinition> requests = streamDefinition.getModuleDefinitions();
+		List<StreamAppDefinition> requests = streamDefinition.getAppDefinitions();
 		assertEquals(1, requests.size());
-		assertEquals("foo", requests.get(0).getParameters().get(BindingPropertyKeys.OUTPUT_DESTINATION));
+		assertEquals("foo", requests.get(0).getProperties().get(BindingPropertyKeys.OUTPUT_DESTINATION));
 	}
 
 	@Test
-	public void moduleWithBadDestination() throws Exception {
+	public void appWithBadDestination() throws Exception {
 		boolean isException = false;
 		try {
-			new StreamDefinition("test", "module > foo");
+			new StreamDefinition("test", "app > foo");
 		}
 		catch (Exception e) {
 			isException = true;
@@ -165,14 +165,14 @@ public class StreamDefinitionTests {
 	@Test
 	public void simpleSourceDestination() throws Exception {
 		StreamDefinition streamDefinition = new StreamDefinition("test", ":foo > boot");
-		List<ModuleDefinition> requests = streamDefinition.getModuleDefinitions();
+		List<StreamAppDefinition> requests = streamDefinition.getAppDefinitions();
 		assertEquals(1, requests.size());
-		assertEquals("foo", requests.get(0).getParameters().get(BindingPropertyKeys.INPUT_DESTINATION));
-		assertEquals("test", requests.get(0).getParameters().get(BindingPropertyKeys.INPUT_GROUP));
+		assertEquals("foo", requests.get(0).getProperties().get(BindingPropertyKeys.INPUT_DESTINATION));
+		assertEquals("test", requests.get(0).getProperties().get(BindingPropertyKeys.INPUT_GROUP));
 	}
 
 	@Test
-	public void destinationsForbiddenInComposedModules() {
+	public void destinationsForbiddenInComposedApps() {
 		try {
 			new StreamDefinition("test", ":foo > boot");
 		}
@@ -192,44 +192,44 @@ public class StreamDefinitionTests {
 	}
 
 	@Test
-	public void testBindings2Modules() {
+	public void testBindings2Apps() {
 		StreamDefinition streamDefinition = new StreamDefinition("ticktock", "time | log");
-		List<ModuleDefinition> modules = streamDefinition.getModuleDefinitions();
-		ModuleDefinition source = modules.get(0);
-		ModuleDefinition sink = modules.get(1);
-		assertEquals("time", source.getLabel());
-		assertEquals("ticktock.time", source.getParameters().get(BindingPropertyKeys.OUTPUT_DESTINATION));
-		assertEquals("ticktock", source.getParameters().get(BindingPropertyKeys.OUTPUT_REQUIRED_GROUPS));
-		assertFalse(source.getParameters().containsKey(BindingPropertyKeys.INPUT_DESTINATION));
-		assertEquals("log", sink.getLabel());
-		assertEquals("ticktock.time", sink.getParameters().get(BindingPropertyKeys.INPUT_DESTINATION));
-		assertEquals("ticktock", sink.getParameters().get(BindingPropertyKeys.INPUT_GROUP));
-		assertFalse(sink.getParameters().containsKey(BindingPropertyKeys.OUTPUT_DESTINATION));
+		List<StreamAppDefinition> apps = streamDefinition.getAppDefinitions();
+		StreamAppDefinition source = apps.get(0);
+		StreamAppDefinition sink = apps.get(1);
+		assertEquals("time", source.getRegisteredAppName());
+		assertEquals("ticktock.time", source.getProperties().get(BindingPropertyKeys.OUTPUT_DESTINATION));
+		assertEquals("ticktock", source.getProperties().get(BindingPropertyKeys.OUTPUT_REQUIRED_GROUPS));
+		assertFalse(source.getProperties().containsKey(BindingPropertyKeys.INPUT_DESTINATION));
+		assertEquals("log", sink.getRegisteredAppName());
+		assertEquals("ticktock.time", sink.getProperties().get(BindingPropertyKeys.INPUT_DESTINATION));
+		assertEquals("ticktock", sink.getProperties().get(BindingPropertyKeys.INPUT_GROUP));
+		assertFalse(sink.getProperties().containsKey(BindingPropertyKeys.OUTPUT_DESTINATION));
 	}
 
 	@Test
-	public void testBindings3Modules() {
+	public void testBindings3Apps() {
 		StreamDefinition streamDefinition = new StreamDefinition("ticktock", "time | filter |log");
-		List<ModuleDefinition> modules = streamDefinition.getModuleDefinitions();
+		List<StreamAppDefinition> apps = streamDefinition.getAppDefinitions();
 
-		ModuleDefinition source = modules.get(0);
-		ModuleDefinition processor = modules.get(1);
-		ModuleDefinition sink = modules.get(2);
+		StreamAppDefinition source = apps.get(0);
+		StreamAppDefinition processor = apps.get(1);
+		StreamAppDefinition sink = apps.get(2);
 
-		assertEquals("time", source.getLabel());
-		assertEquals("ticktock.time", source.getParameters().get(BindingPropertyKeys.OUTPUT_DESTINATION));
-		assertEquals("ticktock", source.getParameters().get(BindingPropertyKeys.OUTPUT_REQUIRED_GROUPS));
-		assertFalse(source.getParameters().containsKey(BindingPropertyKeys.INPUT_DESTINATION));
+		assertEquals("time", source.getRegisteredAppName());
+		assertEquals("ticktock.time", source.getProperties().get(BindingPropertyKeys.OUTPUT_DESTINATION));
+		assertEquals("ticktock", source.getProperties().get(BindingPropertyKeys.OUTPUT_REQUIRED_GROUPS));
+		assertFalse(source.getProperties().containsKey(BindingPropertyKeys.INPUT_DESTINATION));
 
-		assertEquals("filter", processor.getLabel());
-		assertEquals("ticktock.time", processor.getParameters().get(BindingPropertyKeys.INPUT_DESTINATION));
-		assertEquals("ticktock", processor.getParameters().get(BindingPropertyKeys.INPUT_GROUP));
-		assertEquals("ticktock.filter", processor.getParameters().get(BindingPropertyKeys.OUTPUT_DESTINATION));
-		assertEquals("ticktock", processor.getParameters().get(BindingPropertyKeys.OUTPUT_REQUIRED_GROUPS));
+		assertEquals("filter", processor.getRegisteredAppName());
+		assertEquals("ticktock.time", processor.getProperties().get(BindingPropertyKeys.INPUT_DESTINATION));
+		assertEquals("ticktock", processor.getProperties().get(BindingPropertyKeys.INPUT_GROUP));
+		assertEquals("ticktock.filter", processor.getProperties().get(BindingPropertyKeys.OUTPUT_DESTINATION));
+		assertEquals("ticktock", processor.getProperties().get(BindingPropertyKeys.OUTPUT_REQUIRED_GROUPS));
 
-		assertEquals("log", sink.getLabel());
-		assertEquals("ticktock.filter", sink.getParameters().get(BindingPropertyKeys.INPUT_DESTINATION));
-		assertEquals("ticktock", sink.getParameters().get(BindingPropertyKeys.INPUT_GROUP));
-		assertFalse(sink.getParameters().containsKey(BindingPropertyKeys.OUTPUT_DESTINATION));
+		assertEquals("log", sink.getRegisteredAppName());
+		assertEquals("ticktock.filter", sink.getProperties().get(BindingPropertyKeys.INPUT_DESTINATION));
+		assertEquals("ticktock", sink.getProperties().get(BindingPropertyKeys.INPUT_GROUP));
+		assertFalse(sink.getProperties().containsKey(BindingPropertyKeys.OUTPUT_DESTINATION));
 	}
 }

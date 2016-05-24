@@ -21,8 +21,8 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
-import org.springframework.cloud.stream.configuration.metadata.ModuleConfigurationMetadataResolver;
-import org.springframework.cloud.stream.configuration.metadata.ModuleConfigurationMetadataResolverAutoConfiguration;
+import org.springframework.cloud.stream.configuration.metadata.ApplicationConfigurationMetadataResolver;
+import org.springframework.cloud.stream.configuration.metadata.ApplicationConfigurationMetadataResolverAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -35,30 +35,30 @@ import org.springframework.context.annotation.Import;
  * @author Mark Fisher
  */
 @Configuration
-@Import({ModuleConfigurationMetadataResolverAutoConfiguration.class})
+@Import({ApplicationConfigurationMetadataResolverAutoConfiguration.class})
 public class CompletionConfiguration {
 
 	@Autowired
 	private AppRegistry appRegistry;
 
 	@Autowired
-	private ModuleConfigurationMetadataResolver metadataResolver;
+	private ApplicationConfigurationMetadataResolver metadataResolver;
 
 	@Bean
 	public StreamCompletionProvider streamCompletionProvider() {
 		List<RecoveryStrategy<?>> recoveryStrategies = Arrays.<RecoveryStrategy<?>>asList(
-				emptyStartYieldsModulesRecoveryStrategy(),
+				emptyStartYieldsAppsRecoveryStrategy(),
 				expandOneDashToTwoDashesRecoveryStrategy(),
 				configurationPropertyNameAfterDashDashRecoveryStrategy(),
 				unfinishedConfigurationPropertyNameRecoveryStrategy(),
-				destinationNameYieldsModulesRecoveryStrategy(),
-				modulesAfterPipeRecoveryStrategy(),
+				destinationNameYieldsAppsRecoveryStrategy(),
+				appsAfterPipeRecoveryStrategy(),
 				configurationPropertyValueHintRecoveryStrategy()
 		);
 		List<ExpansionStrategy> expansionStrategies = Arrays.asList(
-				addModuleOptionsExpansionStrategy(),
-				pipeIntoOtherModulesExpansionStrategy(),
-				unfinishedModuleNameExpansionStrategy(),
+				addAppOptionsExpansionStrategy(),
+				pipeIntoOtherAppsExpansionStrategy(),
+				unfinishedAppNameExpansionStrategy(),
 				// Make sure this one runs last, as it may clear already computed proposals
 				// and return its own as the sole candidates
 				configurationPropertyValueHintExpansionStrategy()
@@ -68,8 +68,8 @@ public class CompletionConfiguration {
 	}
 
 	@Bean
-	public RecoveryStrategy<?> emptyStartYieldsModulesRecoveryStrategy() {
-		return new EmptyStartYieldsSourceModulesRecoveryStrategy(appRegistry);
+	public RecoveryStrategy<?> emptyStartYieldsAppsRecoveryStrategy() {
+		return new EmptyStartYieldsSourceAppsRecoveryStrategy(appRegistry);
 	}
 
 	@Bean
@@ -88,13 +88,13 @@ public class CompletionConfiguration {
 	}
 
 	@Bean
-	public RecoveryStrategy<?> modulesAfterPipeRecoveryStrategy() {
-		return new ModulesAfterPipeRecoveryStrategy(appRegistry);
+	public RecoveryStrategy<?> appsAfterPipeRecoveryStrategy() {
+		return new AppsAfterPipeRecoveryStrategy(appRegistry);
 	}
 
 	@Bean
-	public RecoveryStrategy<?> destinationNameYieldsModulesRecoveryStrategy() {
-		return new DestinationNameYieldsModulesRecoveryStrategy(appRegistry);
+	public RecoveryStrategy<?> destinationNameYieldsAppsRecoveryStrategy() {
+		return new DestinationNameYieldsAppsRecoveryStrategy(appRegistry);
 	}
 
 	@Bean
@@ -103,18 +103,18 @@ public class CompletionConfiguration {
 	}
 
 	@Bean
-	public ExpansionStrategy addModuleOptionsExpansionStrategy() {
-		return new AddModuleOptionsExpansionStrategy(appRegistry, metadataResolver);
+	public ExpansionStrategy addAppOptionsExpansionStrategy() {
+		return new AddAppOptionsExpansionStrategy(appRegistry, metadataResolver);
 	}
 
 	@Bean
-	public ExpansionStrategy unfinishedModuleNameExpansionStrategy() {
-		return new UnfinishedModuleNameExpansionStrategy(appRegistry);
+	public ExpansionStrategy unfinishedAppNameExpansionStrategy() {
+		return new UnfinishedAppNameExpansionStrategy(appRegistry);
 	}
 
 	@Bean
-	public ExpansionStrategy pipeIntoOtherModulesExpansionStrategy() {
-		return new PipeIntoOtherModulesExpansionStrategy(appRegistry);
+	public ExpansionStrategy pipeIntoOtherAppsExpansionStrategy() {
+		return new PipeIntoOtherAppsExpansionStrategy(appRegistry);
 	}
 
 	@Bean
