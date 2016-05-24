@@ -30,6 +30,7 @@
 					<include>application.yml</include>
 					<include>META-INF/kafka-apps.properties</include>
 					<include>META-INF/rabbit-apps.properties</include>
+					<include>META-INF/task-apps.properties</include>
 				</includes>
 			</resource>
 		</resources>
