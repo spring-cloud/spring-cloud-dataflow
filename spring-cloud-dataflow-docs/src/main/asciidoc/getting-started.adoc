@@ -139,15 +139,22 @@ NOTE: If HTTPS is enabled, it will completely replace HTTP as the protocol over
 which the REST endpoints and the Dataflow Dashboard interact. Plain HTTP requests
 will fail - therefore, make sure that you configure your Shell accordingly.
 
-E.g. if for testing purposes you want to create a self-signed certificate, use
-the following command:
+==== Using Self-Signed Certificates
+
+For testing purposes or during development it might be convenient to create self-signed certificates.
+To get started, execute the following command to create a certificate:
 
 [source,bash]
 ----
-$ keytool -genkey -alias dataflow -storetype PKCS12 -keyalg RSA -keysize 2048 -keystore keystore.p12 -validity 3650 -dname "CN=spring.io, OU=Spring, O=Pivotal, L=Kailua-Kona, ST=HI, C=US" -keypass dataflow -storepass dataflow
+$ keytool -genkey -alias dataflow -keyalg RSA -keystore dataflow.keystore \
+          -validity 3650 -storetype JKS \
+          -dname "CN=localhost, OU=Spring, O=Pivotal, L=Kailua-Kona, ST=HI, C=US"  # <1>
+          -keypass dataflow -storepass dataflow
 ----
 
-The add the following to your `application.yml` file:
+<1> _CN_ is the only important parameter here. It should match the domain you are trying to access, e.g. `localhost`.
+
+Then add the following to your `application.yml` file:
 
 [source,yaml]
 ----
@@ -156,10 +163,53 @@ server:
   ssl:
     enabled: true
     key-alias: dataflow
-    key-store: "/your/path/to/keystore.p12"
-    key-store-type: PKCS12
+    key-store: "/your/path/to/dataflow.keystore"
+    key-store-type: jks
     key-store-password: dataflow
     key-password: dataflow
+----
+
+This is all that's needed for the Dataflow Server. Once you start the server,
+you should be able to access it via https://localhost:8443/[https://localhost:8443/]. As this is a self-signed
+certificate, you will hit a warning in your browser, that you need to ignore.
+
+This issue also is relevant for the Dataflow Shell. Therefore additional steps are
+necessary to make the Shell work with self-signed certificates. First, we need to
+export the previously created certificate from the keystore:
+
+[source,bash]
+----
+$ keytool -export -alias dataflow -keystore dataflow.keystore -file dataflow_cert -storepass dataflow
+----
+
+Next, we need to create a truststore which the Shell will use:
+
+[source,bash]
+----
+$ keytool -importcert -keystore dataflow.truststore -alias dataflow -storepass dataflow -file dataflow_cert -noprompt
+----
+
+Now, you are ready to launch the Dataflow Shell using the following JVM arguments:
+
+[subs=attributes]
+```
+$ java -Djavax.net.ssl.trustStorePassword=dataflow \
+       -Djavax.net.ssl.trustStore=/path/to/dataflow.truststore \
+       -Djavax.net.ssl.trustStoreType=jks \
+       -jar spring-cloud-dataflow-shell-{project-version}.jar
+```
+
+[TIP]
+====
+In case you run into trouble establishing a connection via SSL, you can enable additional
+logging by using and setting the `javax.net.debug` JVM argument to `ssl`.
+====
+
+Don't forget to target the Dataflow Server with:
+
+[source,bash]
+----
+dataflow:> dataflow config server https://localhost:8443/
 ----
 
 [[getting-started-security-enabling-authentication]]
