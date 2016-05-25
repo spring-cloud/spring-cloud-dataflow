@@ -62,7 +62,10 @@ public class RestControllerAdvice {
 		return new VndErrors(logref, msg);
 	}
 
-	@ExceptionHandler({DuplicateStreamDefinitionException.class, DuplicateTaskException.class})
+	@ExceptionHandler({DuplicateStreamDefinitionException.class,
+			DuplicateTaskException.class,
+			StreamAlreadyDeployedException.class,
+			StreamIsBeingDeployedException.class})
 	@ResponseStatus(HttpStatus.CONFLICT)
 	@ResponseBody
 	public VndErrors onConflictException(Exception e) {

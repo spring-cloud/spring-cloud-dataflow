@@ -21,6 +21,7 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -160,7 +161,31 @@ public class StreamDeploymentController {
 		if (stream == null) {
 			throw new NoSuchStreamDefinitionException(name);
 		}
+		String status = calculateStreamState(name);
+		if (DeploymentState.deployed.equals(DeploymentState.valueOf(status))) {
+			throw new StreamAlreadyDeployedException(name);
+		}
+		else if (DeploymentState.deploying.equals(DeploymentState.valueOf(status))) {
+			throw new StreamIsBeingDeployedException(name);
+		}
 		deployStream(stream, DeploymentPropertiesUtils.parse(properties));
+	}
+
+	private String calculateStreamState(String name) {
+		Set<DeploymentState> moduleStates = EnumSet.noneOf(DeploymentState.class);
+		StreamDefinition stream = repository.findOne(name);
+		for (ModuleDefinition module : stream.getModuleDefinitions()) {
+			String key = DeploymentKey.forApp(module);
+			String id = deploymentIdRepository.findOne(key);
+			if (id != null) {
+				AppStatus status = deployer.status(id);
+				moduleStates.add(status.getState());
+			}
+			else {
+				moduleStates.add(DeploymentState.undeployed);
+			}
+		}
+		return StreamDefinitionController.aggregateState(moduleStates).toString();
 	}
 
 	/**
