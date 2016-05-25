@@ -23,31 +23,31 @@ You also need to have link:http://redis.io/[Redis] installed and running if you 
 === Deploying 'local'
 . Download the Spring Cloud Data Flow Server and Shell apps:
 +
-[subs=attributes]
-```
+[source,bash,subs=attributes]
+----
 wget http://repo.spring.io/milestone/org/springframework/cloud/spring-cloud-dataflow-server-local/{project-version}/spring-cloud-dataflow-server-local-{project-version}.jar
 
 wget http://repo.spring.io/milestone/org/springframework/cloud/spring-cloud-dataflow-shell/{project-version}/spring-cloud-dataflow-shell-{project-version}.jar
-```
+----
 +
 . Launch the Data Flow Server
 +
 .. Since the Data Flow Server is a Spring Boot application, you can run it just by using `java -jar`.
 +
-[subs=attributes]
-```
+[source,bash,subs=attributes]
+----
 $ java -jar spring-cloud-dataflow-server-local-{project-version}.jar
-```
+----
 +
 .. Running with Custom Maven Settings and/or Behind a Proxy
 If you want to override specific maven configuration properties (remote repositories, etc.) and/or run the Data Flow Server behind a proxy,
 you need to specify those properties as command line arguments when starting the Data Flow Server. For example:
 +
-[subs=attributes]
-```
+[source,bash,subs=attributes]
+----
 $ java -jar spring-cloud-dataflow-server-local-{project-version}.jar --maven.localRepository=mylocal --maven.remoteRepositories=repo1,repo2 --maven.offline=true
 --maven.proxy.protocol=https --maven.proxy.host=host1 --maven.proxy.port=8090 --maven.proxy.non_proxy_hosts='host2|host3' --maven.proxy.auth.username=user1 --maven.proxy.auth.password=passwd
-```
+----
 +
 By default, the protocol is set to `http`. You can omit the auth properties if the proxy doesn't need a username and password.
 +
@@ -56,7 +56,8 @@ and `https://repo.spring.io/libs-snapshot` will be the only remote repository.
 +
 You can also use environment variables to specify the maven/proxy properties:
 +
-```
+[source,bash]
+----
 export MAVEN_LOCAL_REPOSITORY=mylocalMavenRepo
 export MAVEN_REMOTE_REPOSITORIES=repo1,repo2
 export MAVEN_OFFLINE=true
@@ -66,28 +67,30 @@ export MAVEN_PROXY_PORT=8090
 export MAVEN_PROXY_NON_PROXY_HOSTS='host2|host3'
 export MAVEN_PROXY_AUTH_USERNAME=user1
 export MAVEN_PROXY_AUTH_PASSWORD=passwd
-```
+----
 +
 . Launch the shell:
 +
-[subs=attributes]
-```
+[source,bash,subs=attributes]
+----
 $ java -jar spring-cloud-dataflow-shell-{project-version}.jar
-```
+----
 +
 If the Data Flow Server and shell are not running on the same host, point the shell to the Data Flow server:
 +
-```
+[source,bash]
+----
 server-unknown:>dataflow config server http://dataflow-server.cfapps.io
 Successfully targeted http://dataflow-server.cfapps.io
 dataflow:>
-```
+----
 +
 . You can now use the shell commands to list available applications (source/processors/sink) and create streams. For example:
 +
-```
-dataflow:>stream create --name httptest --definition "http --server.port=9000 | log" --deploy
-```
+[source,bash]
+----
+dataflow:> stream create --name httptest --definition "http --server.port=9000 | log" --deploy
+----
 +
 NOTE: You will need to wait a little while until the apps are actually deployed successfully
 before posting data.  Look in the log file of the Data Flow server for the location of the log
@@ -95,9 +98,10 @@ files for the `http` and `log` applications.  Tail the log file for each applica
 the application has started.
 +
 Now post some data
-```
+[source,bash]
+----
 dataflow:> http post --target http://localhost:9000 --data "hello world"
-```
+----
 Look to see if `hello world` ended up in log files for the `log` application.
 
 [[getting-started-security]]
@@ -191,13 +195,13 @@ $ keytool -importcert -keystore dataflow.truststore -alias dataflow -storepass d
 
 Now, you are ready to launch the Dataflow Shell using the following JVM arguments:
 
-[subs=attributes]
-```
+[source,bash,subs=attributes]
+----
 $ java -Djavax.net.ssl.trustStorePassword=dataflow \
        -Djavax.net.ssl.trustStore=/path/to/dataflow.truststore \
        -Djavax.net.ssl.trustStoreType=jks \
        -jar spring-cloud-dataflow-shell-{project-version}.jar
-```
+----
 
 [TIP]
 ====

@@ -16,8 +16,8 @@ spring:
 #  ssl:
 #    enabled: true
 #    key-alias: dataflow
-#    key-store: "/path/to/keystore.p12"
-#    key-store-type: PKCS12
+#    key-store: "/your/path/to/dataflow.keystore"
+#    key-store-type: jks
 #    key-store-password: dataflow
 #    key-password: dataflow
 
