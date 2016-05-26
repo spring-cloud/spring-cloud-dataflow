@@ -79,11 +79,11 @@ public class InMemoryDeploymentIdRepositoryTests {
 	@Test
 	public void testDeleteKey() {
 		StreamDefinition streamDefinition1 = new StreamDefinition("myStream1", "time | log");
-		ModuleDefinition[] moduleDefinitions1 = streamDefinition1.getModuleDefinitions().toArray(new ModuleDefinition[0]);
+		StreamAppDefinition[] moduleDefinitions1 = streamDefinition1.getAppDefinitions().toArray(new StreamAppDefinition[0]);
 		TaskDefinition taskDefinition1 = new TaskDefinition("myTask", "timestamp");
-		String appDeploymentKey1 = DeploymentKey.forApp(moduleDefinitions1[0]);
-		String appDeploymentKey2 = DeploymentKey.forApp(moduleDefinitions1[1]);
-		String appDeploymentKey3 = DeploymentKey.forApp(taskDefinition1.getModuleDefinition());
+		String appDeploymentKey1 = DeploymentKey.forStreamAppDefinition(moduleDefinitions1[0]);
+		String appDeploymentKey2 = DeploymentKey.forStreamAppDefinition(moduleDefinitions1[1]);
+		String appDeploymentKey3 = DeploymentKey.forTaskDefinition(taskDefinition1);
 
 		DeploymentIdRepository repository = new InMemoryDeploymentIdRepository();
 		repository.save(appDeploymentKey1, "id1");
