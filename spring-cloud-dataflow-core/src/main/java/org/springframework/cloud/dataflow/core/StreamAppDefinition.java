@@ -94,7 +94,7 @@ public class StreamAppDefinition extends DataFlowAppDefinition {
 	}
 
 	/**
-	 * Builder object for {@code StreamApplicationDescriptor}.
+	 * Builder object for {@code StreamAppDefinition}.
 	 * This object is mutable to allow for flexibility in specifying application
 	 * fields/properties during parsing.
 	 */
@@ -106,7 +106,7 @@ public class StreamAppDefinition extends DataFlowAppDefinition {
 		private String streamName;
 
 		/**
-		 * @see ApplicationDescriptor#registeredAppName
+		 * @see DataFlowAppDefinition#registeredAppName
 		 */
 		private String registeredAppName;
 
@@ -161,7 +161,7 @@ public class StreamAppDefinition extends DataFlowAppDefinition {
 		 * @param name name of app in registry
 		 * @return this builder object
 		 *
-		 * @see ApplicationDescriptor#registeredAppName
+		 * @see DataFlowAppDefinition#registeredAppName
 		 */
 		public Builder setRegisteredAppName(String registeredAppName) {
 			this.registeredAppName = registeredAppName;
@@ -211,7 +211,7 @@ public class StreamAppDefinition extends DataFlowAppDefinition {
 		/**
 		 * Return a new instance of {@link StreamAppDefinition}.
 		 *
-		 * @return new instance of {@code StreamApplicationDescriptor}
+		 * @return new instance of {@code StreamAppDefinition}
 		 */
 		public StreamAppDefinition build(String streamName) {
 			if (this.label == null) {

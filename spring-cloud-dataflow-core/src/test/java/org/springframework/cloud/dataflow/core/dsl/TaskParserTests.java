@@ -38,37 +38,37 @@ public class TaskParserTests {
 	@Rule
 	public ExpectedException thrown = ExpectedException.none();
 
-	private ModuleNode mn;
+	private AppNode appNode;
 
 	@Test
-	public void oneModule() {
-		mn = parse("foo");
-		assertEquals("foo", mn.getName());
-		assertEquals(0, mn.getArguments().length);
-		assertEquals(0, mn.startPos);
-		assertEquals(3, mn.endPos);
+	public void oneApp() {
+		appNode = parse("foo");
+		assertEquals("foo", appNode.getName());
+		assertEquals(0, appNode.getArguments().length);
+		assertEquals(0, appNode.startPos);
+		assertEquals(3, appNode.endPos);
 	}
 
 	@Test
-	public void hyphenatedModuleName() {
-		mn = parse("gemfire-cq");
-		assertEquals("(ModuleNode:gemfire-cq:0>10)", mn.stringify(true));
+	public void hyphenatedAppName() {
+		appNode = parse("gemfire-cq");
+		assertEquals("(AppNode:gemfire-cq:0>10)", appNode.stringify(true));
 	}
 
-	// Modules can take parameters
+	// Apps can take parameters
 	@Test
-	public void oneModuleWithParam() {
-		ModuleNode ast = parse("foo --name=value");
-		assertEquals("(ModuleNode:foo --name=value:0>16)", ast.stringify(true));
+	public void oneAppWithParam() {
+		AppNode ast = parse("foo --name=value");
+		assertEquals("(AppNode:foo --name=value:0>16)", ast.stringify(true));
 	}
 
-	// Modules can take two parameters
+	// Apps can take two parameters
 	@Test
-	public void oneModuleWithTwoParams() {
-		ModuleNode mn = parse("foo --name=value --x=y");
+	public void oneAppWithTwoParams() {
+		AppNode appNode = parse("foo --name=value --x=y");
 
-		assertEquals("foo", mn.getName());
-		ArgumentNode[] args = mn.getArguments();
+		assertEquals("foo", appNode.getName());
+		ArgumentNode[] args = appNode.getArguments();
 		assertNotNull(args);
 		assertEquals(2, args.length);
 		assertEquals("name", args[0].getName());
@@ -76,14 +76,14 @@ public class TaskParserTests {
 		assertEquals("x", args[1].getName());
 		assertEquals("y", args[1].getValue());
 
-		assertEquals("(ModuleNode:foo --name=value --x=y:0>22)", mn.stringify(true));
+		assertEquals("(AppNode:foo --name=value --x=y:0>22)", appNode.stringify(true));
 	}
 
 	@Test
 	public void testParameters() {
 		String module = "gemfire-cq --query='Select * from /Stocks where symbol=''VMW''' --regionName=foo --foo=bar";
-		ModuleNode gemfireModule = parse(module);
-		Properties parameters = gemfireModule.getArgumentsAsProperties();
+		AppNode gemfireApp = parse(module);
+		Properties parameters = gemfireApp.getArgumentsAsProperties();
 		assertEquals(3, parameters.size());
 		assertEquals("Select * from /Stocks where symbol='VMW'", parameters.get("query"));
 		assertEquals("foo", parameters.get("regionName"));
@@ -121,7 +121,7 @@ public class TaskParserTests {
 	}
 
 	@Test
-	public void testInvalidModules() {
+	public void testInvalidApps() {
 		String config = "foo--x=13";
 		TaskParser parser = new TaskParser("t", config);
 		try {
@@ -135,8 +135,8 @@ public class TaskParserTests {
 
 	@Test
 	public void expressions_xd159() {
-		ModuleNode mn = parse("transform --expression=--payload");
-		Properties props = mn.getArgumentsAsProperties();
+		AppNode appNode = parse("transform --expression=--payload");
+		Properties props = appNode.getArgumentsAsProperties();
 		assertEquals("--payload", props.get("expression"));
 	}
 
@@ -162,18 +162,18 @@ public class TaskParserTests {
 
 	@Test
 	public void expressions_xd159_3() {
-		ModuleNode mn = parse("transform --expression='new StringBuilder(payload).reverse()'");
-		Properties props = mn.getArgumentsAsProperties();
+		AppNode appNode = parse("transform --expression='new StringBuilder(payload).reverse()'");
+		Properties props = appNode.getArgumentsAsProperties();
 		assertEquals("new StringBuilder(payload).reverse()", props.get("expression"));
 	}
 
 	@Test
 	public void expressions_xd159_4() {
-		ModuleNode mn = parse("transform --expression=\"'Hello, world!'\"");
-		Properties props = mn.getArgumentsAsProperties();
+		AppNode appNode = parse("transform --expression=\"'Hello, world!'\"");
+		Properties props = appNode.getArgumentsAsProperties();
 		assertEquals("'Hello, world!'", props.get("expression"));
-		mn = parse("transform --expression='''Hello, world!'''");
-		props = mn.getArgumentsAsProperties();
+		appNode = parse("transform --expression='''Hello, world!'''");
+		props = appNode.getArgumentsAsProperties();
 		assertEquals("'Hello, world!'", props.get("expression"));
 		// Prior to the change for XD-1613, this error should point to the comma:
 		// checkForParseError("foo |  transform --expression=''Hello, world!'' | bar", DSLMessage.UNEXPECTED_DATA,
@@ -184,22 +184,22 @@ public class TaskParserTests {
 
 	@Test
 	public void expressions_gh1() {
-		ModuleNode mn = parse("filter --expression=\"payload == 'foo'\"");
-		Properties props = mn.getArgumentsAsProperties();
+		AppNode appNode = parse("filter --expression=\"payload == 'foo'\"");
+		Properties props = appNode.getArgumentsAsProperties();
 		assertEquals("payload == 'foo'", props.get("expression"));
 	}
 
 	@Test
 	public void expressions_gh1_2() {
-		ModuleNode mn = parse("filter --expression='new Foo()'");
-		Properties props = mn.getArgumentsAsProperties();
+		AppNode appNode = parse("filter --expression='new Foo()'");
+		Properties props = appNode.getArgumentsAsProperties();
 		assertEquals("new Foo()", props.get("expression"));
 	}
 
 	@Test
 	public void errorCases01() {
-		checkForParseError(".", DSLMessage.EXPECTED_MODULENAME, 0, ".");
-		checkForParseError(";", DSLMessage.EXPECTED_MODULENAME, 0, ";");
+		checkForParseError(".", DSLMessage.EXPECTED_APPNAME, 0, ".");
+		checkForParseError(";", DSLMessage.EXPECTED_APPNAME, 0, ";");
 	}
 
 	@Test
@@ -217,7 +217,7 @@ public class TaskParserTests {
 
 	@Test
 	public void errorCases06() {
-		checkForParseError("|", DSLMessage.EXPECTED_MODULENAME, 0);
+		checkForParseError("|", DSLMessage.EXPECTED_APPNAME, 0);
 	}
 
 	// Parameters must be constructed via adjacent tokens
@@ -239,24 +239,24 @@ public class TaskParserTests {
 
 	@Test
 	public void testXD2416() {
-		ModuleNode mn = parse("transform --expression='payload.replace(\"abc\", \"\")'");
-		assertEquals(mn.getArgumentsAsProperties().get("expression"), "payload.replace(\"abc\", \"\")");
+		AppNode appNode = parse("transform --expression='payload.replace(\"abc\", \"\")'");
+		assertEquals(appNode.getArgumentsAsProperties().get("expression"), "payload.replace(\"abc\", \"\")");
 
-		mn = parse("transform --expression='payload.replace(\"abc\", '''')'");
-		assertEquals(mn.getArgumentsAsProperties().get("expression"), "payload.replace(\"abc\", '')");
+		appNode = parse("transform --expression='payload.replace(\"abc\", '''')'");
+		assertEquals(appNode.getArgumentsAsProperties().get("expression"), "payload.replace(\"abc\", '')");
 	}
 
-	ModuleNode parse(String taskDefinition) {
+	AppNode parse(String taskDefinition) {
 		return new TaskParser(taskDefinition).parse();
 	}
 
-	ModuleNode parse(String taskName, String taskDefinition) {
+	AppNode parse(String taskName, String taskDefinition) {
 		return new TaskParser(taskName, taskDefinition).parse();
 	}
 
 	private void checkForIllegalTaskName(String taskName, String taskDef) {
 		try {
-			ModuleNode sn = parse(taskName, taskDef);
+			AppNode sn = parse(taskName, taskDef);
 			fail("expected to fail but parsed " + sn.stringify());
 		}
 		catch (ParseException e) {
@@ -268,7 +268,7 @@ public class TaskParserTests {
 
 	private void checkForParseError(String task, DSLMessage msg, int pos, Object... inserts) {
 		try {
-			ModuleNode sn = parse(task);
+			AppNode sn = parse(task);
 			fail("expected to fail but parsed " + sn.stringify());
 		}
 		catch (ParseException e) {

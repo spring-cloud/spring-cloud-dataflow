@@ -23,7 +23,7 @@ import java.util.List;
 
 import org.springframework.cloud.dataflow.core.StreamAppDefinition.Builder;
 import org.springframework.cloud.dataflow.core.dsl.ArgumentNode;
-import org.springframework.cloud.dataflow.core.dsl.ModuleNode;
+import org.springframework.cloud.dataflow.core.dsl.AppNode;
 import org.springframework.cloud.dataflow.core.dsl.SinkDestinationNode;
 import org.springframework.cloud.dataflow.core.dsl.SourceDestinationNode;
 import org.springframework.cloud.dataflow.core.dsl.StreamNode;
@@ -65,9 +65,9 @@ class StreamApplicationDefinitionBuilder {
 	 */
 	public List<StreamAppDefinition> build() {
 		Deque<StreamAppDefinition.Builder> builders = new LinkedList<>();
-		List<ModuleNode> appNodes = streamNode.getModuleNodes();
+		List<AppNode> appNodes = streamNode.getAppNodes();
 		for (int m = appNodes.size() - 1; m >= 0; m--) {
-			ModuleNode appNode = appNodes.get(m);
+			AppNode appNode = appNodes.get(m);
 			StreamAppDefinition.Builder builder = (Builder)
 					new StreamAppDefinition.Builder()
 							.setRegisteredAppName(appNode.getName())
@@ -100,8 +100,8 @@ class StreamApplicationDefinitionBuilder {
 		}
 		SourceDestinationNode sourceDestination = streamNode.getSourceDestinationNode();
 		if (sourceDestination != null) {
-			StreamAppDefinition.Builder sourceModuleBuilder = builders.getLast();
-			sourceModuleBuilder.setProperty(BindingPropertyKeys.INPUT_DESTINATION, sourceDestination.getDestinationName());
+			StreamAppDefinition.Builder sourceAppBuilder = builders.getLast();
+			sourceAppBuilder.setProperty(BindingPropertyKeys.INPUT_DESTINATION, sourceDestination.getDestinationName());
 			String consumerGroupName = streamName;
 			if (sourceDestination.getArguments() != null) {
 				ArgumentNode[] argumentNodes = sourceDestination.getArguments();
@@ -111,7 +111,7 @@ class StreamApplicationDefinitionBuilder {
 					}
 				}
 			}
-			sourceModuleBuilder.setProperty(BindingPropertyKeys.INPUT_GROUP, consumerGroupName);
+			sourceAppBuilder.setProperty(BindingPropertyKeys.INPUT_GROUP, consumerGroupName);
 		}
 		SinkDestinationNode sinkDestination = streamNode.getSinkDestinationNode();
 		if (sinkDestination != null) {

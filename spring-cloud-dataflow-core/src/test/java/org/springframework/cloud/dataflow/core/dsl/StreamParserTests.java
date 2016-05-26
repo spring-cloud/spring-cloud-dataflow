@@ -45,85 +45,85 @@ public class StreamParserTests {
 	private StreamNode sn;
 
 
-	// This is not a well formed stream but we are testing single module parsing
+	// This is not a well formed stream but we are testing single app parsing
 	@Test
-	public void oneModule() {
+	public void oneApp() {
 		sn = parse("foo");
-		assertEquals(1, sn.getModuleNodes().size());
-		ModuleNode mn = sn.getModule("foo");
-		assertEquals("foo", mn.getName());
-		assertEquals(0, mn.getArguments().length);
-		assertEquals(0, mn.startPos);
-		assertEquals(3, mn.endPos);
+		assertEquals(1, sn.getAppNodes().size());
+		AppNode appNode = sn.getApp("foo");
+		assertEquals("foo", appNode.getName());
+		assertEquals(0, appNode.getArguments().length);
+		assertEquals(0, appNode.startPos);
+		assertEquals(3, appNode.endPos);
 	}
 
 	@Test
-	public void hyphenatedModuleName() {
+	public void hyphenatedAppName() {
 		sn = parse("gemfire-cq");
-		assertEquals("[(ModuleNode:gemfire-cq:0>10)]", sn.stringify(true));
+		assertEquals("[(AppNode:gemfire-cq:0>10)]", sn.stringify(true));
 	}
 
 	// Just to make the testing easier the parser supports stream naming easier.
 	@Test
 	public void streamNaming() {
 		sn = parse("mystream = foo");
-		assertEquals("[mystream = (ModuleNode:foo:11>14)]", sn.stringify(true));
+		assertEquals("[mystream = (AppNode:foo:11>14)]", sn.stringify(true));
 		assertEquals("mystream", sn.getName());
 	}
 
-	// Test if the DSLException thrown when the stream name is same as that of any of its modules' names.
+	// Test if the DSLException thrown when the stream name is same as that of any of its apps' names.
 	@Test
 	public void testInvalidStreamName() {
 		String streamName = "bar";
 		String stream = "foo | bar";
-		checkForParseError(streamName, stream, DSLMessage.STREAM_NAME_MATCHING_MODULE_NAME,
+		checkForParseError(streamName, stream, DSLMessage.STREAM_NAME_MATCHING_APP_NAME,
 				stream.indexOf(streamName), streamName);
 	}
 
-	// Pipes are used to connect modules
+	// Pipes are used to connect apps
 	@Test
-	public void twoModules() {
+	public void twoApps() {
 		StreamNode ast = parse("foo | bar");
-		assertEquals("[(ModuleNode:foo:0>3)(ModuleNode:bar:6>9)]", ast.stringify(true));
+		assertEquals("[(AppNode:foo:0>3)(AppNode:bar:6>9)]", ast.stringify(true));
 	}
 
-	// Modules can be labeled
+	// Apps can be labeled
 	@Test
-	public void moduleLabels() {
+	public void appLabels() {
 		StreamNode ast = parse("label: http");
-		assertEquals("[((Label:label:0>5) ModuleNode:http:0>11)]", ast.stringify(true));
+		assertEquals("[((Label:label:0>5) AppNode:http:0>11)]", ast.stringify(true));
 	}
 
 	@Test
-	public void moduleLabels3() {
+	public void appLabels3() {
 		StreamNode ast = parse("food = http | label3: foo");
 		assertEquals(
-				"[food = (ModuleNode:http:7>11)((Label:label3:14>20) ModuleNode:foo:14>25)]",
+				"[food = (AppNode:http:7>11)((Label:label3:14>20) AppNode:foo:14>25)]",
 				ast.stringify(true));
 
 		sn = parse("http | foo: bar | file");
-		assertEquals("[(ModuleNode:http)((Label:foo) ModuleNode:bar)(ModuleNode:file)]", sn.stringify());
+		assertEquals("[(AppNode:http)((Label:foo) AppNode:bar)(AppNode:file)]", sn.stringify());
 
 		checkForParseError("http | foo: goggle: bar | file", DSLMessage.UNEXPECTED_DATA_AFTER_STREAMDEF,
 				18);
 		checkForParseError("http | foo :bar | file", DSLMessage.NO_WHITESPACE_BETWEEN_LABEL_NAME_AND_COLON, 11);
 	}
 
-	// Modules can take parameters
+	// Apps can take parameters
 	@Test
-	public void oneModuleWithParam() {
+	public void oneAppWithParam() {
 		StreamNode ast = parse("foo --name=value");
-		assertEquals("[(ModuleNode:foo --name=value:0>16)]", ast.stringify(true));
+		assertEquals("[(AppNode:foo --name=value:0>16)]", ast.stringify(true));
 	}
 
-	// Modules can take two parameters
+	// Apps can take two parameters
 	@Test
-	public void oneModuleWithTwoParams() {
+	public void oneAppWithTwoParams() {
 		StreamNode sn = parse("foo --name=value --x=y");
-		List<ModuleNode> moduleNodes = sn.getModuleNodes();
-		assertEquals(1, moduleNodes.size());
+		List<AppNode> appNodes = sn.getAppNodes();
+		assertEquals(1, appNodes.size());
 
-		ModuleNode mn = moduleNodes.get(0);
+		AppNode mn = appNodes.get(0);
 		assertEquals("foo", mn.getName());
 		ArgumentNode[] args = mn.getArguments();
 		assertNotNull(args);
@@ -133,45 +133,45 @@ public class StreamParserTests {
 		assertEquals("x", args[1].getName());
 		assertEquals("y", args[1].getValue());
 
-		assertEquals("[(ModuleNode:foo --name=value --x=y:0>22)]", sn.stringify(true));
+		assertEquals("[(AppNode:foo --name=value --x=y:0>22)]", sn.stringify(true));
 	}
 
 	@Test
 	public void testParameters() {
-		String module = "gemfire-cq --query='Select * from /Stocks where symbol=''VMW''' --regionName=foo --foo=bar";
-		StreamNode ast = parse(module);
-		ModuleNode gemfireModule = ast.getModule("gemfire-cq");
-		Properties parameters = gemfireModule.getArgumentsAsProperties();
+		String app = "gemfire-cq --query='Select * from /Stocks where symbol=''VMW''' --regionName=foo --foo=bar";
+		StreamNode ast = parse(app);
+		AppNode gemfireApp = ast.getApp("gemfire-cq");
+		Properties parameters = gemfireApp.getArgumentsAsProperties();
 		assertEquals(3, parameters.size());
 		assertEquals("Select * from /Stocks where symbol='VMW'", parameters.get("query"));
 		assertEquals("foo", parameters.get("regionName"));
 		assertEquals("bar", parameters.get("foo"));
 
-		module = "test";
-		parameters = parse(module).getModule("test").getArgumentsAsProperties();
+		app = "test";
+		parameters = parse(app).getApp("test").getArgumentsAsProperties();
 		assertEquals(0, parameters.size());
 
-		module = "foo --x=1 --y=two ";
-		parameters = parse(module).getModule("foo").getArgumentsAsProperties();
+		app = "foo --x=1 --y=two ";
+		parameters = parse(app).getApp("foo").getArgumentsAsProperties();
 		assertEquals(2, parameters.size());
 		assertEquals("1", parameters.get("x"));
 		assertEquals("two", parameters.get("y"));
 
-		module = "foo --x=1a2b --y=two ";
-		parameters = parse(module).getModule("foo").getArgumentsAsProperties();
+		app = "foo --x=1a2b --y=two ";
+		parameters = parse(app).getApp("foo").getArgumentsAsProperties();
 		assertEquals(2, parameters.size());
 		assertEquals("1a2b", parameters.get("x"));
 		assertEquals("two", parameters.get("y"));
 
-		module = "foo --x=2";
-		parameters = parse(module).getModule("foo").getArgumentsAsProperties();
+		app = "foo --x=2";
+		parameters = parse(app).getApp("foo").getArgumentsAsProperties();
 		assertEquals(1, parameters.size());
 		assertEquals("2", parameters.get("x"));
 
-		module = "--foo = bar";
+		app = "--foo = bar";
 		try {
-			parse(module);
-			fail(module + " is invalid. Should throw exception");
+			parse(app);
+			fail(app + " is invalid. Should throw exception");
 		}
 		catch (Exception e) {
 			// success
@@ -179,7 +179,7 @@ public class StreamParserTests {
 	}
 
 	@Test
-	public void testInvalidModules() {
+	public void testInvalidApps() {
 		String config = "test | foo--x=13";
 		StreamParser parser = new StreamParser("t", config);
 		try {
@@ -196,22 +196,22 @@ public class StreamParserTests {
 		parse("mystream = http | filter | group1: transform | group2: transform | file");
 		StreamNode ast = parse(":mystream.group1 > file");
 
-		assertEquals("[(mystream.group1)>(ModuleNode:file)]", ast.stringify());
+		assertEquals("[(mystream.group1)>(AppNode:file)]", ast.stringify());
 		ast = parse(":mystream.group2 > file");
-		assertEquals("[(mystream.group2)>(ModuleNode:file)]", ast.stringify());
+		assertEquals("[(mystream.group2)>(AppNode:file)]", ast.stringify());
 	}
 
 	@Test
-	public void tapWithQualifiedModuleReference() {
+	public void tapWithQualifiedAppReference() {
 		parse("mystream = http | foobar | file");
 		StreamNode sn = parse(":mystream.foobar > file");
-		assertEquals("[(mystream.foobar:1>16)>(ModuleNode:file:19>23)]", sn.stringify(true));
+		assertEquals("[(mystream.foobar:1>16)>(AppNode:file:19>23)]", sn.stringify(true));
 	}
 
 	@Test
 	public void expressions_xd159() {
 		StreamNode ast = parse("foo | transform --expression=--payload | bar");
-		ModuleNode mn = ast.getModule("transform");
+		AppNode mn = ast.getApp("transform");
 		Properties props = mn.getArgumentsAsProperties();
 		assertEquals("--payload", props.get("expression"));
 	}
@@ -239,81 +239,81 @@ public class StreamParserTests {
 	@Test
 	public void expressions_xd159_3() {
 		StreamNode ast = parse("foo |  transform --expression='new StringBuilder(payload).reverse()' | bar");
-		ModuleNode mn = ast.getModule("transform");
+		AppNode mn = ast.getApp("transform");
 		Properties props = mn.getArgumentsAsProperties();
 		assertEquals("new StringBuilder(payload).reverse()", props.get("expression"));
 	}
 
 	@Test
-	public void moduleArguments_xd1613() {
+	public void appArguments_xd1613() {
 		StreamNode ast = null;
 
 		// notice no space between the ' and final >
 		ast = parse(":producer > transform --expression='payload.toUpperCase()' | filter --expression='payload.length() > 4'> :consumer");
-		assertEquals("payload.toUpperCase()", ast.getModule("transform").getArguments()[0].getValue());
-		assertEquals("payload.length() > 4", ast.getModule("filter").getArguments()[0].getValue());
+		assertEquals("payload.toUpperCase()", ast.getApp("transform").getArguments()[0].getValue());
+		assertEquals("payload.length() > 4", ast.getApp("filter").getArguments()[0].getValue());
 
 		ast = parse("time | transform --expression='T(org.joda.time.format.DateTimeFormat).forPattern(\"yyyy-MM-dd HH:mm:ss\").parseDateTime(payload)'");
 		assertEquals(
 				"T(org.joda.time.format.DateTimeFormat).forPattern(\"yyyy-MM-dd HH:mm:ss\").parseDateTime(payload)",
-				ast.getModule("transform").getArguments()[0].getValue());
+				ast.getApp("transform").getArguments()[0].getValue());
 
 		// allow for pipe/semicolon if quoted
 		ast = parse("http | transform --outputType='text/plain|charset=UTF-8'  | log");
-		assertEquals("text/plain|charset=UTF-8", ast.getModule("transform").getArguments()[0].getValue());
+		assertEquals("text/plain|charset=UTF-8", ast.getApp("transform").getArguments()[0].getValue());
 
 		ast = parse("http | transform --outputType='text/plain;charset=UTF-8'  | log");
-		assertEquals("text/plain;charset=UTF-8", ast.getModule("transform").getArguments()[0].getValue());
+		assertEquals("text/plain;charset=UTF-8", ast.getApp("transform").getArguments()[0].getValue());
 
 		// Want to treat all of 'hi'+payload as the argument value
 		ast = parse("http | transform --expression='hi'+payload | log");
-		assertEquals("'hi'+payload", ast.getModule("transform").getArguments()[0].getValue());
+		assertEquals("'hi'+payload", ast.getApp("transform").getArguments()[0].getValue());
 
 		// Want to treat all of payload+'hi' as the argument value
 		ast = parse("http | transform --expression=payload+'hi' | log");
-		assertEquals("payload+'hi'", ast.getModule("transform").getArguments()[0].getValue());
+		assertEquals("payload+'hi'", ast.getApp("transform").getArguments()[0].getValue());
 
 		// Alternatively, can quote all around it to achieve the same thing
 		ast = parse("http | transform --expression='payload+''hi''' | log");
-		assertEquals("payload+'hi'", ast.getModule("transform").getArguments()[0].getValue());
+		assertEquals("payload+'hi'", ast.getApp("transform").getArguments()[0].getValue());
 		ast = parse("http | transform --expression='''hi''+payload' | log");
-		assertEquals("'hi'+payload", ast.getModule("transform").getArguments()[0].getValue());
+		assertEquals("'hi'+payload", ast.getApp("transform").getArguments()[0].getValue());
 
 		ast = parse("http | transform --expression=\"payload+'hi'\" | log");
-		assertEquals("payload+'hi'", ast.getModule("transform").getArguments()[0].getValue());
+		assertEquals("payload+'hi'", ast.getApp("transform").getArguments()[0].getValue());
 		ast = parse("http | transform --expression=\"'hi'+payload\" | log");
-		assertEquals("'hi'+payload", ast.getModule("transform").getArguments()[0].getValue());
+		assertEquals("'hi'+payload", ast.getApp("transform").getArguments()[0].getValue());
 
 		ast = parse("http | transform --expression=payload+'hi'--param2='foobar' | log");
-		assertEquals("payload+'hi'--param2='foobar'", ast.getModule("transform").getArguments()[0].getValue());
+		assertEquals("payload+'hi'--param2='foobar'", ast.getApp("transform").getArguments()[0].getValue());
 
 		ast = parse("http | transform --expression='hi'+payload--param2='foobar' | log");
-		assertEquals("'hi'+payload--param2='foobar'", ast.getModule("transform").getArguments()[0].getValue());
+		assertEquals("'hi'+payload--param2='foobar'", ast.getApp("transform").getArguments()[0].getValue());
 
 		// This also works, which is cool
 		ast = parse("http | transform --expression='hi'+'world' | log");
-		assertEquals("'hi'+'world'", ast.getModule("transform").getArguments()[0].getValue());
+		assertEquals("'hi'+'world'", ast.getApp("transform").getArguments()[0].getValue());
 		ast = parse("http | transform --expression=\"'hi'+'world'\" | log");
-		assertEquals("'hi'+'world'", ast.getModule("transform").getArguments()[0].getValue());
+		assertEquals("'hi'+'world'", ast.getApp("transform").getArguments()[0].getValue());
 
 		ast = parse("http | filter --expression=payload.matches('hello world') | log");
-		assertEquals("payload.matches('hello world')", ast.getModule("filter").getArguments()[0].getValue());
+		assertEquals("payload.matches('hello world')", ast.getApp("filter").getArguments()[0].getValue());
 
 		ast = parse("http | transform --expression='''hi''' | log");
-		assertEquals("'hi'", ast.getModule("transform").getArguments()[0].getValue());
+		assertEquals("'hi'", ast.getApp("transform").getArguments()[0].getValue());
 
 		ast = parse("http | transform --expression=\"''''hi''''\" | log");
-		assertEquals("''''hi''''", ast.getModule("transform").getArguments()[0].getValue());
+		assertEquals("''''hi''''", ast.getApp("transform").getArguments()[0].getValue());
 	}
 
 	@Test
 	public void expressions_xd159_4() {
 		StreamNode ast = parse("foo |  transform --expression=\"'Hello, world!'\" | bar");
-		ModuleNode mn = ast.getModule("transform");
+		AppNode mn = ast.getApp("transform");
 		Properties props = mn.getArgumentsAsProperties();
 		assertEquals("'Hello, world!'", props.get("expression"));
 		ast = parse("foo |  transform --expression='''Hello, world!''' | bar");
-		mn = ast.getModule("transform");
+		mn = ast.getApp("transform");
 		props = mn.getArgumentsAsProperties();
 		assertEquals("'Hello, world!'", props.get("expression"));
 		// Prior to the change for XD-1613, this error should point to the comma:
@@ -326,7 +326,7 @@ public class StreamParserTests {
 	@Test
 	public void expressions_gh1() {
 		StreamNode ast = parse("http --port=9014 | filter --expression=\"payload == 'foo'\" | log");
-		ModuleNode mn = ast.getModule("filter");
+		AppNode mn = ast.getApp("filter");
 		Properties props = mn.getArgumentsAsProperties();
 		assertEquals("payload == 'foo'", props.get("expression"));
 	}
@@ -334,7 +334,7 @@ public class StreamParserTests {
 	@Test
 	public void expressions_gh1_2() {
 		StreamNode ast = parse("http --port=9014 | filter --expression='new Foo()' | log");
-		ModuleNode mn = ast.getModule("filter");
+		AppNode mn = ast.getApp("filter");
 		Properties props = mn.getArgumentsAsProperties();
 		assertEquals("new Foo()", props.get("expression"));
 	}
@@ -342,13 +342,13 @@ public class StreamParserTests {
 	@Test
 	public void sourceDestination() {
 		StreamNode sn = parse(":foobar > file");
-		assertEquals("[(foobar:1>7)>(ModuleNode:file:10>14)]", sn.stringify(true));
+		assertEquals("[(foobar:1>7)>(AppNode:file:10>14)]", sn.stringify(true));
 	}
 
 	@Test
 	public void sinkDestination() {
 		StreamNode sn = parse("http > :foo");
-		assertEquals("[(ModuleNode:http:0>4)>(foo:8>11)]", sn.stringify(true));
+		assertEquals("[(AppNode:http:0>4)>(foo:8>11)]", sn.stringify(true));
 	}
 
 	@Test
@@ -362,14 +362,14 @@ public class StreamParserTests {
 		checkForParseError(":boo.xx . yy > file", DSLMessage.NO_WHITESPACE_IN_DESTINATION_DEFINITION, 8);
 
 		sn = parse("wibble: http > :bar");
-		assertEquals("[((Label:wibble) ModuleNode:http)>(bar)]", sn.stringify());
+		assertEquals("[((Label:wibble) AppNode:http)>(bar)]", sn.stringify());
 	}
 
 	@Test
 	public void sourceDestination2() {
 		parse("foo = http | bar | file");
 		StreamNode ast = parse(":foo.bar > file");
-		assertEquals("[(foo.bar:1>8)>(ModuleNode:file:11>15)]", ast.stringify(true));
+		assertEquals("[(foo.bar:1>8)>(AppNode:file:11>15)]", ast.stringify(true));
 		assertEquals("foo.bar", ast.getSourceDestinationNode().getDestinationName());
 	}
 
@@ -378,7 +378,7 @@ public class StreamParserTests {
 		parse("mystream = http | file");
 		StreamNode ast = parse(":mystream.http > file");
 		assertEquals(
-				"[(mystream.http:1>14)>(ModuleNode:file:17>21)]",
+				"[(mystream.http:1>14)>(AppNode:file:17>21)]",
 				ast.stringify(true));
 		SourceDestinationNode sourceDestinationNode = ast.getSourceDestinationNode();
 		assertEquals("mystream.http", sourceDestinationNode.getDestinationName());
@@ -391,8 +391,8 @@ public class StreamParserTests {
 
 	@Test
 	public void errorCases01() {
-		checkForParseError(".", DSLMessage.EXPECTED_MODULENAME, 0, ".");
-		checkForParseError(";", DSLMessage.EXPECTED_MODULENAME, 0, ";");
+		checkForParseError(".", DSLMessage.EXPECTED_APPNAME, 0, ".");
+		checkForParseError(";", DSLMessage.EXPECTED_APPNAME, 0, ";");
 	}
 
 	@Test
@@ -410,20 +410,20 @@ public class StreamParserTests {
 
 	@Test
 	public void errorCases06() {
-		checkForParseError("|", DSLMessage.EXPECTED_MODULENAME, 0);
+		checkForParseError("|", DSLMessage.EXPECTED_APPNAME, 0);
 	}
 
 	@Test
 	public void errorCases07() {
 		checkForParseError("foo > bar", DSLMessage.EXPECTED_DESTINATION_PREFIX, 6, "bar");
 		checkForParseError(":foo >", DSLMessage.OOD, 6);
-		checkForParseError(":foo > --2323", DSLMessage.EXPECTED_MODULENAME, 7, "--");
+		checkForParseError(":foo > --2323", DSLMessage.EXPECTED_APPNAME, 7, "--");
 		checkForParseError(":foo > *", DSLMessage.UNEXPECTED_DATA, 7, "*");
 	}
 
 	@Test
 	public void errorCases08() {
-		checkForParseError(":foo | bar", DSLMessage.EXPECTED_MODULENAME, 0, ":");
+		checkForParseError(":foo | bar", DSLMessage.EXPECTED_APPNAME, 0, ":");
 	}
 
 	@Test
@@ -444,8 +444,8 @@ public class StreamParserTests {
 	@Test
 	public void addingALabelLiftsAmbiguity() {
 		StreamNode ast = parse("file | out: file");
-		assertEquals("file", ast.getModuleNodes().get(0).getLabelName());
-		assertEquals("out", ast.getModuleNodes().get(1).getLabelName());
+		assertEquals("file", ast.getAppNodes().get(0).getLabelName());
+		assertEquals("out", ast.getAppNodes().get(1).getLabelName());
 
 	}
 
@@ -465,13 +465,13 @@ public class StreamParserTests {
 	@Test
 	public void bridge01() {
 		StreamNode sn = parse(":bar > :boo");
-		assertEquals("[(bar:1>4)>(ModuleNode:bridge:5>6)>(boo:8>11)]", sn.stringify(true));
+		assertEquals("[(bar:1>4)>(AppNode:bridge:5>6)>(boo:8>11)]", sn.stringify(true));
 	}
 
 	@Test
 	public void testSourceDestinationArgs() {
 		StreamNode sn = parse(":test --group=test > file");
-		assertEquals("[(test:1>5 --group=test)>(ModuleNode:file:21>25)]", sn.stringify(true));
+		assertEquals("[(test:1>5 --group=test)>(AppNode:file:21>25)]", sn.stringify(true));
 	}
 
 	// Parameters must be constructed via adjacent tokens
@@ -494,10 +494,10 @@ public class StreamParserTests {
 	@Test
 	public void testXD2416() {
 		StreamNode ast = parse("http | transform --expression='payload.replace(\"abc\", \"\")' | log");
-		assertThat((String)ast.getModuleNodes().get(1).getArgumentsAsProperties().get("expression"), equalTo("payload.replace(\"abc\", \"\")"));
+		assertThat((String)ast.getAppNodes().get(1).getArgumentsAsProperties().get("expression"), equalTo("payload.replace(\"abc\", \"\")"));
 
 		ast = parse("http | transform --expression='payload.replace(\"abc\", '''')' | log");
-		assertThat((String) ast.getModuleNodes().get(1).getArgumentsAsProperties().get("expression"), equalTo("payload.replace(\"abc\", '')"));
+		assertThat((String) ast.getAppNodes().get(1).getArgumentsAsProperties().get("expression"), equalTo("payload.replace(\"abc\", '')"));
 	}
 
 	StreamNode parse(String streamDefinition) {

@@ -29,7 +29,7 @@ import java.util.Map;
  * @author Ilayaperumal Gopinathan
  * @author Mark Fisher
  */
-public class StreamParser extends ModuleParser {
+public class StreamParser extends AppParser {
 
 	/**
 	 * Stream name (may be {@code null}).
@@ -82,11 +82,11 @@ public class StreamParser extends ModuleParser {
 			throw new ParseException(name, 0, DSLMessage.ILLEGAL_STREAM_NAME, name);
 		}
 
-		// Check that each module has a unique label (either explicit or implicit)
-		Map<String, ModuleNode> alreadySeen = new LinkedHashMap<String, ModuleNode>();
-		for (int m = 0; m < ast.getModuleNodes().size(); m++) {
-			ModuleNode node = ast.getModuleNodes().get(m);
-			ModuleNode previous = alreadySeen.put(node.getLabelName(), node);
+		// Check that each app has a unique label (either explicit or implicit)
+		Map<String, AppNode> alreadySeen = new LinkedHashMap<String, AppNode>();
+		for (int m = 0; m < ast.getAppNodes().size(); m++) {
+			AppNode node = ast.getAppNodes().get(m);
+			AppNode previous = alreadySeen.put(node.getLabelName(), node);
 			if (previous != null) {
 				String duplicate = node.getLabelName();
 				int previousIndex = new ArrayList<String>(alreadySeen.keySet()).indexOf(duplicate);
@@ -95,11 +95,11 @@ public class StreamParser extends ModuleParser {
 			}
 		}
 
-		// Check if the stream name is same as that of any of its modules' names
-		// Can lead to infinite recursion during resolution, when parsing a composite module.
-		if (ast.getModule(name) != null) {
+		// Check if the stream name is same as that of any of its apps' names
+		// Can lead to infinite recursion during resolution, when parsing a composite app.
+		if (ast.getApp(name) != null) {
 			throw new ParseException(dsl, dsl.indexOf(name),
-					DSLMessage.STREAM_NAME_MATCHING_MODULE_NAME,
+					DSLMessage.STREAM_NAME_MATCHING_APP_NAME,
 					name);
 		}
 		Tokens tokens = getTokens();
@@ -140,7 +140,7 @@ public class StreamParser extends ModuleParser {
 	 * Return a {@link StreamNode} based on the tokens resulting from the parsed DSL.
 	 * <p>
 	 * Expected format:
-	 * {@code stream: (streamName) (sourceDestination) moduleList (sinkDestination)}
+	 * {@code stream: (streamName) (sourceDestination) appList (sinkDestination)}
 	 *
 	 * @return {@code StreamNode} based on parsed DSL
 	 */
@@ -148,7 +148,7 @@ public class StreamParser extends ModuleParser {
 		String streamName = eatStreamName();
 		SourceDestinationNode sourceDestinationNode = eatSourceDestination();
 		// This construct: :foo > :bar is a source then a sink destination
-		// with no module. Special handling for that is right here:
+		// with no app. Special handling for that is right here:
 		boolean bridge = false;
 		if (sourceDestinationNode != null) { // so if we are just after a '>'
 			if (looksLikeDestination() && noMorePipes()) {
@@ -156,15 +156,15 @@ public class StreamParser extends ModuleParser {
 			}
 		}
 		Tokens tokens = getTokens();
-		List<ModuleNode> moduleNodes = new ArrayList<>();
+		List<AppNode> appNodes = new ArrayList<>();
 		if (bridge) {
-			// Create a bridge module to hang the source/sink destinations off
+			// Create a bridge app to hang the source/sink destinations off
 			tokens.decrementPosition(); // Rewind so we can nicely eat the sink destination
-			moduleNodes.add(new ModuleNode(null, "bridge", tokens.peek().startPos,
+			appNodes.add(new AppNode(null, "bridge", tokens.peek().startPos,
 					tokens.peek().endPos, null));
 		}
 		else {
-			moduleNodes.addAll(eatModuleList());
+			appNodes.addAll(eatAppList());
 		}
 		SinkDestinationNode sinkDestinationNode = eatSinkDestination();
 
@@ -172,14 +172,14 @@ public class StreamParser extends ModuleParser {
 		if (tokens.hasNext()) {
 			Token t = tokens.peek();
 			DSLMessage errorMessage = DSLMessage.UNEXPECTED_DATA_AFTER_STREAMDEF;
-			if (!moduleNodes.isEmpty() && sinkDestinationNode == null &&
+			if (!appNodes.isEmpty() && sinkDestinationNode == null &&
 					tokens.getTokenStream().get(tokens.position() - 1).isKind(TokenKind.GT)) {
 				// Additional token where a destination is expected, but has no prefix
 				errorMessage = DSLMessage.EXPECTED_DESTINATION_PREFIX;
 			}
 			tokens.raiseException(t.startPos, errorMessage, toString(t));
 		}
-		return new StreamNode(tokens.getExpression(), streamName, moduleNodes,
+		return new StreamNode(tokens.getExpression(), streamName, appNodes,
 				sourceDestinationNode, sinkDestinationNode);
 	}
 
@@ -305,7 +305,7 @@ public class StreamParser extends ModuleParser {
 	 * Return a {@link DestinationNode} for the token at the current position.
 	 * <p>
 	 * A destination reference is the label component when referencing a specific
-	 * module/label in a stream definition.
+	 * app/label in a stream definition.
 	 *
 	 * Expected format:
 	 * {@code ':' identifier [ '.' identifier ]*}
@@ -339,37 +339,37 @@ public class StreamParser extends ModuleParser {
 		if (!destinationNameComponents.isEmpty()) {
 			endPos = destinationNameComponents.get(destinationNameComponents.size() - 1).endPos;
 		}
-		ArgumentNode[] argumentNodes = eatModuleArgs();
+		ArgumentNode[] argumentNodes = eatAppArgs();
 		return new DestinationNode(identifierToken.startPos, endPos, tokenListToStringList(destinationNameComponents),
 				argumentNodes);
 	}
 
 	/**
-	 * Return a list of {@link ModuleNode} starting from the current token position.
+	 * Return a list of {@link AppNode} starting from the current token position.
 	 * <p>
 	 * Expected format:
-	 * {@code moduleList: module (| module)*}
-	 * A stream may end in a module (if it is a sink) or be followed by a sink destination.
+	 * {@code appList: app (| app)*}
+	 * A stream may end in an app (if it is a sink) or be followed by a sink destination.
 	 *
-	 * @return a list of {@code ModuleNode}
+	 * @return a list of {@code AppNode}
 	 */
-	private List<ModuleNode> eatModuleList() {
+	private List<AppNode> eatAppList() {
 		Tokens tokens = getTokens();
-		List<ModuleNode> moduleNodes = new ArrayList<ModuleNode>();
+		List<AppNode> appNodes = new ArrayList<AppNode>();
 
-		moduleNodes.add(eatModule());
+		appNodes.add(eatApp());
 		while (tokens.hasNext()) {
 			Token t = tokens.peek();
 			if (t.kind == TokenKind.PIPE) {
 				tokens.next();
-				moduleNodes.add(eatModule());
+				appNodes.add(eatApp());
 			}
 			else {
 				// might be followed by sink destination
 				break;
 			}
 		}
-		return moduleNodes;
+		return appNodes;
 	}
 
 	@Override

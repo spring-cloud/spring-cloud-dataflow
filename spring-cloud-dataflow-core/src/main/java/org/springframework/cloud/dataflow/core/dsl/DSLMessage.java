@@ -37,6 +37,7 @@ import java.text.MessageFormat;
  *
  * @author Andy Clement
  * @author Ilayaperumal Gopinathan
+ * @author Mark Fisher
  */
 public enum DSLMessage {
 
@@ -53,45 +54,45 @@ public enum DSLMessage {
 	UNEXPECTED_ESCAPE_CHAR(ERROR, 114, "unexpected escape character."), //
 	UNEXPECTED_DATA(ERROR, 115, "unexpected data in stream definition ''{0}''"), //
 	UNRECOGNIZED_STREAM_REFERENCE(ERROR, 116, "unrecognized stream reference ''{0}''"), //
-	UNRECOGNIZED_MODULE_REFERENCE(ERROR, 117, "unrecognized module reference ''{0}''"), //
-	EXPECTED_MODULENAME(ERROR, 118, "expected module name but found ''{0}''"), //
-	EXPECTED_WHITESPACE_AFTER_MODULE_BEFORE_ARGUMENT(ERROR, 119,
-			"expected whitespace after module name and before argument"), //
+	UNRECOGNIZED_APP_REFERENCE(ERROR, 117, "unrecognized app reference ''{0}''"), //
+	EXPECTED_APPNAME(ERROR, 118, "expected app name but found ''{0}''"), //
+	EXPECTED_WHITESPACE_AFTER_APP_BEFORE_ARGUMENT(ERROR, 119,
+			"expected whitespace after app name and before argument"), //
 	ILLEGAL_STREAM_NAME(ERROR, 122, "illegal name for a stream ''{0}''"), //
 	ILLEGAL_TASK_NAME(ERROR, 123, "illegal name for a task ''{0}''"), //
 	MISSING_VALUE_FOR_VARIABLE(ERROR, 125, "no value specified for variable ''{0}'' when using substream"), //
 	VARIABLE_NOT_TERMINATED(ERROR, 126, "unable to find variable terminator ''}'' in argument ''{0}''"), //
-	AMBIGUOUS_MODULE_NAME(ERROR,
+	AMBIGUOUS_APP_NAME(ERROR,
 			129,
-			"ambiguous module name ''{0}'' in stream named ''{1}'', appears at both position {2} and {3}"), //
-	STREAM_NAME_MATCHING_MODULE_NAME(ERROR, 130,
-			"Stream name ''{0}'' same as that of its modules' names is not allowed."), //
-	CANNOT_USE_COMPOSEDMODULE_HERE_AS_IT_DEFINES_SOURCE_DESTINATION(ERROR,
+			"ambiguous app name ''{0}'' in stream named ''{1}'', appears at both position {2} and {3}"), //
+	STREAM_NAME_MATCHING_APP_NAME(ERROR, 130,
+			"Stream name ''{0}'' same as that of its apps' names is not allowed."), //
+	CANNOT_USE_COMPOSEDAPP_HERE_AS_IT_DEFINES_SOURCE_DESTINATION(ERROR,
 			135,
-			"cannot use composed module ''{0}'' here because it defines a source destination"), //
-	CANNOT_USE_COMPOSEDMODULE_HERE_AS_IT_DEFINES_SINK_DESTINATION(ERROR,
+			"cannot use composed app ''{0}'' here because it defines a source destination"), //
+	CANNOT_USE_COMPOSEDAPP_HERE_AS_IT_DEFINES_SINK_DESTINATION(ERROR,
 			136,
-			"cannot use composed module ''{0}'' here because it defines a sink destination"), //
-	CANNOT_USE_COMPOSEDMODULE_HERE_ALREADY_HAS_SOURCE_DESTINATION(ERROR,
+			"cannot use composed app ''{0}'' here because it defines a sink destination"), //
+	CANNOT_USE_COMPOSEDAPP_HERE_ALREADY_HAS_SOURCE_DESTINATION(ERROR,
 			137,
-			"cannot use composed module ''{0}'' here, both that composed module and this stream define a source destination"), //
-	CANNOT_USE_COMPOSEDMODULE_HERE_ALREADY_HAS_SINK_DESTINATION(ERROR,
+			"cannot use composed app ''{0}'' here, both that composed app and this stream define a source destination"), //
+	CANNOT_USE_COMPOSEDAPP_HERE_ALREADY_HAS_SINK_DESTINATION(ERROR,
 			138,
-			"cannot use composed module ''{0}'' here, both that composed module and this stream define a sink destination"), //
+			"cannot use composed app ''{0}'' here, both that composed app and this stream define a sink destination"), //
 	EXPECTED_DESTINATION_PREFIX(ERROR, 133, "Expected destination prefix but found ''{0}''"), //
 	NO_WHITESPACE_IN_DESTINATION_DEFINITION(ERROR, 139, "no whitespace allowed between components in a destination name"), //
 	NO_WHITESPACE_BETWEEN_LABEL_NAME_AND_COLON(ERROR, 140, "no whitespace allowed between label name and colon"), //
 	DUPLICATE_LABEL(ERROR,
 			143,
-			"label ''{0}'' should be unique but module ''{1}'' (at position {2}) and module ''{3}'' (at position {4}) both use it"), //
-	MODULE_REFERENCE_NOT_UNIQUE(ERROR,
+			"label ''{0}'' should be unique but app ''{1}'' (at position {2}) and app ''{3}'' (at position {4}) both use it"), //
+	APP_REFERENCE_NOT_UNIQUE(ERROR,
 			144,
-			"reference to ''{0}'' is not unique in the target stream ''{1}'', please label the relevant module and use the label, or use a suffix index to indicate which occurrence of the module, e.g. ''{0}.0''"), //
+			"reference to ''{0}'' is not unique in the target stream ''{1}'', please label the relevant app and use the label, or use a suffix index to indicate which occurrence of the app, e.g. ''{0}.0''"), //
 	NO_WHITESPACE_IN_DOTTED_NAME(ERROR,
 			145,
 			"no whitespace is allowed between dot and components of a name"),
 	DESTINATIONS_UNSUPPORTED_HERE(ERROR, 146, "a destination is not supported in this kind of definition"),
-	EXPECTED_WHITESPACE_AFTER_LABEL_COLON(ERROR, 147, "whitespace is expected after a module label"), //
+	EXPECTED_WHITESPACE_AFTER_LABEL_COLON(ERROR, 147, "whitespace is expected after an app label"), //
 	;
 
 	private Kind kind;

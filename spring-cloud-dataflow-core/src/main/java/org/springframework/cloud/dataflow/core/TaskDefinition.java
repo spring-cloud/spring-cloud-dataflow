@@ -20,7 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.cloud.dataflow.core.dsl.ArgumentNode;
-import org.springframework.cloud.dataflow.core.dsl.ModuleNode;
+import org.springframework.cloud.dataflow.core.dsl.AppNode;
 import org.springframework.cloud.dataflow.core.dsl.TaskParser;
 import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.core.style.ToStringCreator;
@@ -38,7 +38,7 @@ public class TaskDefinition extends DataFlowAppDefinition {
 
 	public TaskDefinition(String name, String dsl) {
 		this.dslText = dsl;
-		ModuleNode taskNode = new TaskParser(name, dsl).parse();
+		AppNode taskNode = new TaskParser(name, dsl).parse();
 		setRegisteredAppName(taskNode.getName());
 		Map<String, String> properties = new HashMap<>();
 		if (taskNode.hasArguments()) {
