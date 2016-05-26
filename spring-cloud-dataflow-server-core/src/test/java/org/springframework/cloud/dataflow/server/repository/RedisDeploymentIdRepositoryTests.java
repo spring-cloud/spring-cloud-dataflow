@@ -16,9 +16,6 @@
 
 package org.springframework.cloud.dataflow.server.repository;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
@@ -108,11 +105,11 @@ public class RedisDeploymentIdRepositoryTests {
 	@Test
 	public void testDeleteKey() {
 		StreamDefinition streamDefinition1 = new StreamDefinition("myStream1", "time | log");
-		ModuleDefinition[] moduleDefinitions1 = streamDefinition1.getModuleDefinitions().toArray(new ModuleDefinition[0]);
+		StreamAppDefinition[] appDefinitions1 = streamDefinition1.getAppDefinitions().toArray(new StreamAppDefinition[0]);
 		TaskDefinition taskDefinition1 = new TaskDefinition("myTask", "timestamp");
-		String appDeploymentKey1 = DeploymentKey.forApp(moduleDefinitions1[0]);
-		String appDeploymentKey2 = DeploymentKey.forApp(moduleDefinitions1[1]);
-		String appDeploymentKey3 = DeploymentKey.forApp(taskDefinition1.getModuleDefinition());
+		String appDeploymentKey1 = DeploymentKey.forStreamAppDefinition(appDefinitions1[0]);
+		String appDeploymentKey2 = DeploymentKey.forStreamAppDefinition(appDefinitions1[1]);
+		String appDeploymentKey3 = DeploymentKey.forTaskDefinition(taskDefinition1);
 
 		DeploymentIdRepository repository = new InMemoryDeploymentIdRepository();
 		repository.save(appDeploymentKey1, "id1");
