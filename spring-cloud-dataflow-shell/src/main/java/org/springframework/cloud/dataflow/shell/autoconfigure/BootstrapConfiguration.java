@@ -54,8 +54,6 @@ import java.util.logging.Logger;
  * @author Mark Pollack
  */
 @Configuration
-@ComponentScan(basePackageClasses = EnableDataFlowShell.class)
-@ImportResource("classpath*:/META-INF/spring/spring-shell-plugin.xml")
 public class BootstrapConfiguration {
 
 

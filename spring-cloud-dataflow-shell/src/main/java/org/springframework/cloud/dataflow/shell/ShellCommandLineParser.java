@@ -41,7 +41,6 @@ import java.util.List;
  * @author Mark Pollack
  *
  */
-@Component
 public class ShellCommandLineParser {
 
     private static final Logger logger = LoggerFactory.getLogger(ShellCommandLineParser.class);

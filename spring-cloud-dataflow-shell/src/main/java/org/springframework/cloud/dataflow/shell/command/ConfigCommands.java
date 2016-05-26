@@ -25,9 +25,9 @@ import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.item.ExecutionContext;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.cloud.dataflow.rest.client.DataFlowServerException;
 import org.springframework.cloud.dataflow.rest.client.DataFlowTemplate;
 import org.springframework.cloud.dataflow.rest.client.VndErrorResponseErrorHandler;
@@ -41,6 +41,7 @@ import org.springframework.cloud.dataflow.rest.client.support.StepExecutionHisto
 import org.springframework.cloud.dataflow.rest.client.support.StepExecutionJacksonMixIn;
 import org.springframework.cloud.dataflow.rest.job.StepExecutionHistory;
 import org.springframework.cloud.dataflow.shell.config.DataFlowShell;
+import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
@@ -64,11 +65,12 @@ import java.net.URI;
  * @author Marius Bogoevici
  * @author Ilayaperumal Gopinathan
  * @author Gary Russell
+ * @author Mark Pollack
  */
 @Component
 @Configuration
 @EnableHypermediaSupport(type = HypermediaType.HAL)
-public class ConfigCommands implements CommandMarker, InitializingBean {
+public class ConfigCommands implements CommandMarker, ApplicationListener<ApplicationReadyEvent > {
 
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -121,8 +123,8 @@ public class ConfigCommands implements CommandMarker, InitializingBean {
 	}
 
 	@Override
-	public void afterPropertiesSet() throws Exception {
-		target(new URI(serverUri).toString());
+	public void onApplicationEvent(ApplicationReadyEvent event) {
+		target(serverUri);
 	}
 
 	private void establishConverters(RestTemplate restTemplate){

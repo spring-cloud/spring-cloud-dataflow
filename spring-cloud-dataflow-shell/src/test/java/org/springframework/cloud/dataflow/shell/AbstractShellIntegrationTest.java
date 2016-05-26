@@ -16,8 +16,6 @@
 
 package org.springframework.cloud.dataflow.shell;
 
-import java.io.IOException;
-
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Rule;
@@ -32,13 +30,14 @@ import org.springframework.cloud.dataflow.shell.command.StreamCommandTemplate;
 import org.springframework.cloud.dataflow.shell.command.TaskCommandTemplate;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.shell.Bootstrap;
 import org.springframework.shell.core.CommandResult;
 import org.springframework.shell.core.JLineShellComponent;
 import org.springframework.util.AlternativeJdkIdGenerator;
 import org.springframework.util.Assert;
 import org.springframework.util.IdGenerator;
 import org.springframework.util.SocketUtils;
+
+import java.io.IOException;
 
 /**
  * Base class for shell integration tests. This class sets up and tears down
@@ -108,9 +107,11 @@ public abstract class AbstractShellIntegrationTest {
 			SpringApplication application = new SpringApplicationBuilder(TestConfig.class).build();
 
 			int randomPort = SocketUtils.findAvailableTcpPort();
+			String dataFlowUri = String.format("--dataflow.uri=http://localhost:%s", serverPort);
 			String dataSourceUrl = String.format("jdbc:h2:tcp://localhost:%s/mem:dataflow", randomPort);
 			applicationContext = application.run(
 					String.format("--server.port=%s", serverPort),
+					dataFlowUri,
 					"--spring.jmx.default-domain=" + System.currentTimeMillis(),
 					"--spring.jmx.enabled=false",
 					"--security.basic.enabled=false",
@@ -118,8 +119,7 @@ public abstract class AbstractShellIntegrationTest {
 					"--spring.cloud.config.enabled=false",
 					"--spring.datasource.url=" + dataSourceUrl);
 
-			JLineShellComponent shell = new Bootstrap(new String[]{"--port", String.valueOf(serverPort)})
-					.getJLineShellComponent();
+			JLineShellComponent shell = applicationContext.getBean(JLineShellComponent.class);
 			if (!shell.isRunning()) {
 				shell.start();
 			}

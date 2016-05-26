@@ -25,7 +25,6 @@ import org.springframework.stereotype.Component;
  *
  * @author Mark Pollack
  */
-@Component
 @ConfigurationProperties(prefix = "spring.shell")
 public class ShellProperties {
 
