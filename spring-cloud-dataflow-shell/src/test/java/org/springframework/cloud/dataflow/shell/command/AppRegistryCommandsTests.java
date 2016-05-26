@@ -69,7 +69,7 @@ public class AppRegistryCommandsTests {
 	@Test
 	public void testList() {
 
-		String[][] modules = new String[][] {
+		String[][] apps = new String[][] {
 				{"http", "source"},
 				{"filter", "processor"},
 				{"transform", "processor"},
@@ -79,8 +79,8 @@ public class AppRegistryCommandsTests {
 		};
 
 		Collection<AppRegistrationResource> data = new ArrayList<>();
-		for (String[] module : modules) {
-			data.add(new AppRegistrationResource(module[0], module[1], null));
+		for (String[] app : apps) {
+			data.add(new AppRegistrationResource(app[0], app[1], null));
 		}
 		PagedResources.PageMetadata metadata = new PagedResources.PageMetadata(data.size(), 1, data.size(), 1);
 		PagedResources<AppRegistrationResource> result = new PagedResources<>(data, metadata);

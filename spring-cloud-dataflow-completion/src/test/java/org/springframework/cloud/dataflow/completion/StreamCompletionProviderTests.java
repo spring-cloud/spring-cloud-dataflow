@@ -330,7 +330,7 @@ public class StreamCompletionProviderTests {
 		}
 
 		@Bean
-		public ApplicationConfigurationMetadataResolver moduleConfigurationMetadataResolver() {
+		public ApplicationConfigurationMetadataResolver configurationMetadataResolver() {
 			return new ApplicationConfigurationMetadataResolver() {
 				// Narrow ClassLoader visibility for tests
 				@Override

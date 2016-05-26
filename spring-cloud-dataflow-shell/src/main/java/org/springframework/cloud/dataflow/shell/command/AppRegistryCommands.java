@@ -164,11 +164,11 @@ public class AppRegistryCommands implements CommandMarker, ResourceLoaderAware {
 	public String unregister(
 			@CliOption(mandatory = true,
 					key = {"", "name"},
-					help = "name of the module to unregister")
+					help = "name of the application to unregister")
 			String name,
 			@CliOption(mandatory = false,
 					key = {"type"},
-					help = "type of the module to unregister")
+					help = "type of the application to unregister")
 			ApplicationType type) {
 
 		QualifiedApplicationName application = processArgs(name, type);
@@ -179,15 +179,15 @@ public class AppRegistryCommands implements CommandMarker, ResourceLoaderAware {
 
 	@CliCommand(value = LIST_APPLICATIONS, help = "List all registered applications")
 	public Table list() {
-		PagedResources<AppRegistrationResource> modules = appRegistryOperations().list();
+		PagedResources<AppRegistrationResource> appRegistrations = appRegistryOperations().list();
 		final LinkedHashMap<String, List<String>> mappings = new LinkedHashMap<>();
 		for (ApplicationType type : ApplicationType.values()) {
 			mappings.put(type.name(), new ArrayList<String>());
 		}
 		int max = 0;
-		for (AppRegistrationResource module : modules) {
-			List<String> column = mappings.get(module.getType());
-			column.add(module.getName());
+		for (AppRegistrationResource appRegistration : appRegistrations) {
+			List<String> column = mappings.get(appRegistration.getType());
+			column.add(appRegistration.getName());
 			max = Math.max(max, column.size());
 		}
 		final List<String> keys = new ArrayList<>(mappings.keySet());
