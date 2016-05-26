@@ -16,9 +16,6 @@
 
 package org.springframework.cloud.dataflow.server.repository;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
@@ -33,7 +30,6 @@ import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.stream.test.junit.redis.RedisTestSupport;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
 /**
@@ -59,7 +55,7 @@ public class RedisDeploymentIdRepositoryTests {
 
 	@After
 	public void cleanup() {
-		RedisTemplate redisTemplate = new StringRedisTemplate(redisTestSupport.getResource());
+		StringRedisTemplate redisTemplate = new StringRedisTemplate(redisTestSupport.getResource());
 		redisTemplate.delete(DEPLOYMENT_ID_REPO_HASH_KEY);
 	}
 
@@ -108,10 +104,10 @@ public class RedisDeploymentIdRepositoryTests {
 	@Test
 	public void testDeleteKey() {
 		StreamDefinition streamDefinition1 = new StreamDefinition("myStream1", "time | log");
-		StreamAppDefinition[] moduleDefinitions1 = streamDefinition1.getAppDefinitions().toArray(new StreamAppDefinition[0]);
+		StreamAppDefinition[] appDefinitions1 = streamDefinition1.getAppDefinitions().toArray(new StreamAppDefinition[0]);
 		TaskDefinition taskDefinition1 = new TaskDefinition("myTask", "timestamp");
-		String appDeploymentKey1 = DeploymentKey.forStreamAppDefinition(moduleDefinitions1[0]);
-		String appDeploymentKey2 = DeploymentKey.forStreamAppDefinition(moduleDefinitions1[1]);
+		String appDeploymentKey1 = DeploymentKey.forStreamAppDefinition(appDefinitions1[0]);
+		String appDeploymentKey2 = DeploymentKey.forStreamAppDefinition(appDefinitions1[1]);
 		String appDeploymentKey3 = DeploymentKey.forTaskDefinition(taskDefinition1);
 
 		DeploymentIdRepository repository = new InMemoryDeploymentIdRepository();
