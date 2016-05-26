@@ -165,26 +165,26 @@ public class StreamDeploymentController {
 			throw new StreamAlreadyDeployedException(name);
 		}
 		else if (DeploymentState.deploying.equals(DeploymentState.valueOf(status))) {
-			throw new StreamIsBeingDeployedException(name);
+			throw new StreamAlreadyDeployingException(name);
 		}
 		deployStream(stream, DeploymentPropertiesUtils.parse(properties));
 	}
 
 	private String calculateStreamState(String name) {
-		Set<DeploymentState> moduleStates = EnumSet.noneOf(DeploymentState.class);
+		Set<DeploymentState> appStates = EnumSet.noneOf(DeploymentState.class);
 		StreamDefinition stream = repository.findOne(name);
-		for (ModuleDefinition module : stream.getModuleDefinitions()) {
-			String key = DeploymentKey.forApp(module);
+		for (StreamAppDefinition appDefinition : stream.getAppDefinitions()) {
+			String key = DeploymentKey.forStreamAppDefinition(appDefinition);
 			String id = deploymentIdRepository.findOne(key);
 			if (id != null) {
 				AppStatus status = deployer.status(id);
-				moduleStates.add(status.getState());
+				appStates.add(status.getState());
 			}
 			else {
-				moduleStates.add(DeploymentState.undeployed);
+				appStates.add(DeploymentState.undeployed);
 			}
 		}
-		return StreamDefinitionController.aggregateState(moduleStates).toString();
+		return StreamDefinitionController.aggregateState(appStates).toString();
 	}
 
 	/**
