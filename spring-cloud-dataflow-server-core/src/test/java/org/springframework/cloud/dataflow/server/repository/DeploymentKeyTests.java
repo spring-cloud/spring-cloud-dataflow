@@ -21,7 +21,7 @@ import static org.junit.Assert.assertThat;
 
 import org.junit.Test;
 
-import org.springframework.cloud.dataflow.core.ModuleDefinition;
+import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 
@@ -34,13 +34,13 @@ public class DeploymentKeyTests {
 	@Test
 	public void testStreamAppDeploymentKeyEquals() {
 		StreamDefinition streamDefinition1 = new StreamDefinition("myStream1", "time | log");
-		ModuleDefinition[] moduleDefinitions1 = streamDefinition1.getModuleDefinitions().toArray(new ModuleDefinition[0]);
+		StreamAppDefinition[] appDefinitions1 = streamDefinition1.getAppDefinitions().toArray(new StreamAppDefinition[0]);
 		StreamDefinition streamDefinition2 = new StreamDefinition("myStream1", "time | log");
-		ModuleDefinition[] moduleDefinitions2 = streamDefinition2.getModuleDefinitions().toArray(new ModuleDefinition[0]);
-		String appDeploymentKey1 = DeploymentKey.forApp(moduleDefinitions1[0]);
-		String appDeploymentKey2 = DeploymentKey.forApp(moduleDefinitions1[1]);
-		String appDeploymentKey3 = DeploymentKey.forApp(moduleDefinitions2[0]);
-		String appDeploymentKey4 = DeploymentKey.forApp(moduleDefinitions2[1]);
+		StreamAppDefinition[] appDefinitions2 = streamDefinition2.getAppDefinitions().toArray(new StreamAppDefinition[0]);
+		String appDeploymentKey1 = DeploymentKey.forStreamAppDefinition(appDefinitions1[0]);
+		String appDeploymentKey2 = DeploymentKey.forStreamAppDefinition(appDefinitions1[1]);
+		String appDeploymentKey3 = DeploymentKey.forStreamAppDefinition(appDefinitions2[0]);
+		String appDeploymentKey4 = DeploymentKey.forStreamAppDefinition(appDefinitions2[1]);
 
 		assertThat(streamDefinition1.equals(streamDefinition2), is(true));
 		assertThat(appDeploymentKey1.equals(appDeploymentKey3), is(true));
@@ -50,13 +50,11 @@ public class DeploymentKeyTests {
 	@Test
 	public void testTaskAppDeploymentKeyEquals() {
 		TaskDefinition taskDefinition1 = new TaskDefinition("myTask1", "testTask");
-		ModuleDefinition moduleDefinition1 = taskDefinition1.getModuleDefinition();
 		TaskDefinition taskDefinition2 = new TaskDefinition("myTask1", "testTask");
-		ModuleDefinition moduleDefinition2 = taskDefinition1.getModuleDefinition();
-		String appDeploymentKey1 = DeploymentKey.forApp(moduleDefinition1);
-		String appDeploymentKey2 = DeploymentKey.forApp(moduleDefinition1);
-		String appDeploymentKey3 = DeploymentKey.forApp(moduleDefinition2);
-		String appDeploymentKey4 = DeploymentKey.forApp(moduleDefinition2);
+		String appDeploymentKey1 = DeploymentKey.forTaskDefinition(taskDefinition1);
+		String appDeploymentKey2 = DeploymentKey.forTaskDefinition(taskDefinition1);
+		String appDeploymentKey3 = DeploymentKey.forTaskDefinition(taskDefinition2);
+		String appDeploymentKey4 = DeploymentKey.forTaskDefinition(taskDefinition2);
 
 		assertThat(taskDefinition1.equals(taskDefinition2), is(true));
 		assertThat(appDeploymentKey1.equals(appDeploymentKey3), is(true));

@@ -38,13 +38,13 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
 import org.springframework.cloud.dataflow.server.repository.InMemoryTaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
-import org.springframework.cloud.deployer.resource.maven.MavenProperties;
 import org.springframework.cloud.deployer.resource.maven.MavenResource;
 import org.springframework.cloud.deployer.resource.registry.UriRegistry;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
@@ -80,8 +80,6 @@ public class TaskControllerTests {
 
 	@Autowired
 	private TaskLauncher taskLauncher;
-
-	private final MavenProperties mavenProperties = new MavenProperties();
 
 	@Before
 	public void setupMockMVC() {
@@ -124,8 +122,8 @@ public class TaskControllerTests {
 
 		TaskDefinition myTask = repository.findOne("myTask");
 
-		assertEquals(1, myTask.getParameters().size());
-		assertEquals("myTask", myTask.getParameters().get("spring.cloud.task.name"));
+		assertEquals(1, myTask.getProperties().size());
+		assertEquals("myTask", myTask.getProperties().get("spring.cloud.task.name"));
 		assertEquals("task", myTask.getDslText());
 		assertEquals("myTask", myTask.getName());
 	}
@@ -157,10 +155,10 @@ public class TaskControllerTests {
 
 		TaskDefinition myTask = repository.findOne("myTask");
 
-		assertEquals("bar", myTask.getParameters().get("foo"));
-		assertEquals("baz", myTask.getParameters().get("bar"));
+		assertEquals("bar", myTask.getProperties().get("foo"));
+		assertEquals("baz", myTask.getProperties().get("bar"));
 		assertEquals("task --foo=bar --bar=baz", myTask.getDslText());
-		assertEquals("task", myTask.getModuleDefinition().getName());
+		assertEquals("task", myTask.getRegisteredAppName());
 		assertEquals("myTask", myTask.getName());
 	}
 

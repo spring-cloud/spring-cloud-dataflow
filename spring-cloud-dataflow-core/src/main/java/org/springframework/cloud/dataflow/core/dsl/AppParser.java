@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2015-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,14 +21,15 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Parser for generating {@link ModuleNode ModuleNodes} from {@link Tokens}.
- * This class may serve as a base for higher level module processing, for instance
+ * Parser for generating {@link AppNode AppNodes} from {@link Tokens}.
+ * This class may serve as a base for higher level app processing, for instance
  * streams or tasks.
  *
  * @author Andy Clement
  * @author Patrick Peralta
+ * @author Mark Fisher
  */
-public class ModuleParser {
+public class AppParser {
 
 	/**
 	 * Tokens resulting from DSL parsing.
@@ -36,11 +37,11 @@ public class ModuleParser {
 	private final Tokens tokens;
 
 	/**
-	 * Construct a {@code ModuleParser} based on the provided {@link Tokens}.
+	 * Construct a {@code AppParser} based on the provided {@link Tokens}.
 	 *
 	 * @param tokens tokens from which to construct this parser
 	 */
-	public ModuleParser(Tokens tokens) {
+	public AppParser(Tokens tokens) {
 		this.tokens = tokens;
 	}
 
@@ -54,20 +55,20 @@ public class ModuleParser {
 	}
 
 	/**
-	 * Return a {@link ModuleNode} from the next token and advance
+	 * Return a {@link AppNode} from the next token and advance
 	 * the token position.
 	 * <p>
 	 * Expected format:
-	 * {@code module: [label':']? identifier (moduleArguments)*}
+	 * {@code app: [label':']? identifier (appArguments)*}
 	 * </p>
 	 *
-	 * @return a module node resulting from the next token
+	 * @return an app node resulting from the next token
 	 */
-	protected ModuleNode eatModule() {
+	protected AppNode eatApp() {
 		Token label = null;
 		Token name = tokens.next();
 		if (!name.isKind(TokenKind.IDENTIFIER)) {
-			tokens.raiseException(name.startPos, DSLMessage.EXPECTED_MODULENAME,
+			tokens.raiseException(name.startPos, DSLMessage.EXPECTED_APPNAME,
 					name.data != null ? name.data : new String(name.getKind().tokenChars));
 		}
 		if (tokens.peek(TokenKind.COLON)) {
@@ -83,11 +84,11 @@ public class ModuleParser {
 			label = name;
 			name = tokens.eat(TokenKind.IDENTIFIER);
 		}
-		Token moduleName = name;
+		Token appName = name;
 		tokens.checkpoint();
-		ArgumentNode[] args = eatModuleArgs();
-		int startPos = label != null ? label.startPos : moduleName.startPos;
-		return new ModuleNode(toLabelNode(label), moduleName.data, startPos, moduleName.endPos, args);
+		ArgumentNode[] args = eatAppArgs();
+		int startPos = label != null ? label.startPos : appName.startPos;
+		return new AppNode(toLabelNode(label), appName.data, startPos, appName.endPos, args);
 	}
 
 	/**
@@ -95,16 +96,16 @@ public class ModuleParser {
 	 * position if the next token(s) contain arguments.
 	 * <p>
 	 * Expected format:
-	 * {@code moduleArguments : DOUBLE_MINUS identifier(name) EQUALS identifier(value)}
+	 * {@code appArguments : DOUBLE_MINUS identifier(name) EQUALS identifier(value)}
 	 *
 	 * @return array of arguments or {@code null} if the next token(s) do not
 	 * contain arguments
 	 */
-	protected ArgumentNode[] eatModuleArgs() {
+	protected ArgumentNode[] eatAppArgs() {
 		List<ArgumentNode> args = null;
 		if (tokens.peek(TokenKind.DOUBLE_MINUS) && tokens.isNextAdjacent()) {
 			tokens.raiseException(tokens.peek().startPos,
-					DSLMessage.EXPECTED_WHITESPACE_AFTER_MODULE_BEFORE_ARGUMENT);
+					DSLMessage.EXPECTED_WHITESPACE_AFTER_APP_BEFORE_ARGUMENT);
 		}
 		while (tokens.peek(TokenKind.DOUBLE_MINUS)) {
 			Token dashDash = tokens.next(); // skip the '--'

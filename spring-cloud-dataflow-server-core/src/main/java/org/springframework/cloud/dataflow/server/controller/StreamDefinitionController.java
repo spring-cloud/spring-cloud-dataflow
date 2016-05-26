@@ -24,9 +24,9 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.springframework.cloud.dataflow.core.ArtifactType;
+import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.BindingPropertyKeys;
-import org.springframework.cloud.dataflow.core.ModuleDefinition;
+import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.rest.resource.StreamDefinitionResource;
@@ -38,6 +38,7 @@ import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepo
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.app.AppStatus;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
+import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.ExposesResourceFor;
@@ -156,12 +157,12 @@ public class StreamDefinitionController {
 					 boolean deploy) {
 		StreamDefinition stream = new StreamDefinition(name, dsl);
 		List<String> errorMessages = new ArrayList<>();
-		for (ModuleDefinition appDefintion: stream.getModuleDefinitions()) {
-			String appName = appDefintion.getName();
-			ArtifactType artifactType = determineModuleType(appDefintion);
-			if (appRegistry.find(appName, artifactType) == null) {
+		for (StreamAppDefinition streamAppDefinition: stream.getAppDefinitions()) {
+			String appName = streamAppDefinition.getRegisteredAppName();
+			ApplicationType appType = determineApplicationType(streamAppDefinition);
+			if (appRegistry.find(appName, appType) == null) {
 				errorMessages.add(String.format("Application name '%s' with type '%s' does not exist in the app registry.",
-						appName, artifactType));
+						appName, appType));
 			}
 		}
 		if (!errorMessages.isEmpty()) {
@@ -174,27 +175,27 @@ public class StreamDefinitionController {
 	}
 
 	/**
-	 * Return the {@link ArtifactType} for a {@link ModuleDefinition} in the context
+	 * Return the {@link ApplicationType} for a {@link AppDefinition} in the context
 	 * of a defined stream.
 	 *
-	 * @param moduleDefinition the module for which to determine the type
-	 * @return {@link ArtifactType} for the given module
+	 * @param appDefinition the app for which to determine the type
+	 * @return {@link ApplicationType} for the given app
 	 */
-	 static ArtifactType determineModuleType(ModuleDefinition moduleDefinition) {
+	static ApplicationType determineApplicationType(StreamAppDefinition appDefinition) {
 		// Parser has already taken care of source/sink destinations, etc
-		boolean hasOutput = moduleDefinition.getParameters().containsKey(BindingPropertyKeys.OUTPUT_DESTINATION);
-		boolean hasInput = moduleDefinition.getParameters().containsKey(BindingPropertyKeys.INPUT_DESTINATION);
+		boolean hasOutput = appDefinition.getProperties().containsKey(BindingPropertyKeys.OUTPUT_DESTINATION);
+		boolean hasInput = appDefinition.getProperties().containsKey(BindingPropertyKeys.INPUT_DESTINATION);
 		if (hasInput && hasOutput) {
-			return ArtifactType.processor;
+			return ApplicationType.processor;
 		}
 		else if (hasInput) {
-			return ArtifactType.sink;
+			return ApplicationType.sink;
 		}
 		else if (hasOutput) {
-			return ArtifactType.source;
+			return ApplicationType.source;
 		}
 		else {
-			throw new IllegalStateException(moduleDefinition + " had neither input nor output set");
+			throw new IllegalStateException(appDefinition.getName() + " had neither input nor output set");
 		}
 	}
 
@@ -236,7 +237,6 @@ public class StreamDefinitionController {
 		this.repository.deleteAll();
 	}
 
-
 	/**
 	 * Return a string that describes the state of the given stream.
 	 * @param name name of stream to determine state for
@@ -244,28 +244,28 @@ public class StreamDefinitionController {
 	 * @see DeploymentState
 	 */
 	private String calculateStreamState(String name) {
-		Set<DeploymentState> moduleStates = EnumSet.noneOf(DeploymentState.class);
+		Set<DeploymentState> appStates = EnumSet.noneOf(DeploymentState.class);
 		StreamDefinition stream = repository.findOne(name);
-		for (ModuleDefinition module : stream.getModuleDefinitions()) {
-			String key = DeploymentKey.forApp(module);
+		for (StreamAppDefinition appDefinition : stream.getAppDefinitions()) {
+			String key = DeploymentKey.forStreamAppDefinition(appDefinition);
 			String id = deploymentIdRepository.findOne(key);
 			if (id != null) {
 				AppStatus status = deployer.status(id);
-				moduleStates.add(status.getState());
+				appStates.add(status.getState());
 			}
 			else {
-				moduleStates.add(DeploymentState.undeployed);
+				appStates.add(DeploymentState.undeployed);
 			}
 		}
 
-		logger.debug("Module states for stream {}: {}", name, moduleStates);
-		return aggregateState(moduleStates).toString();
+		logger.debug("Application states for stream {}: {}", name, appStates);
+		return aggregateState(appStates).toString();
 	}
 
 	/**
-	 * Aggregate the set of module states into a single state for a stream.
-	 * @param states set of states for modules of a stream
-	 * @return stream state based on module states
+	 * Aggregate the set of app states into a single state for a stream.
+	 * @param states set of states for apps of a stream
+	 * @return stream state based on app states
 	 */
 	static DeploymentState aggregateState(Set<DeploymentState> states) {
 		if (states.size() == 1) {

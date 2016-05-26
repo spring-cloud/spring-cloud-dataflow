@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2015-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,14 +28,14 @@ import org.springframework.util.Assert;
 
 /**
  * Representation of a defined stream. A stream consists of an
- * ordered list of modules used to process data. Each module
+ * ordered list of apps used to process data. Each app
  * may contain configuration options provided at the time of
  * stream creation.
  * <p>
  * This stream definition does not include any deployment
  * or runtime configuration for a stream.
  *
- * @see ModuleDefinition
+ * @see StreamAppDefinition
  *
  * @author Patrick Peralta
  * @author Mark Fisher
@@ -53,10 +53,10 @@ public class StreamDefinition {
 	private final String dslText;
 
 	/**
-	 * Ordered list of {@link ModuleDefinition}s comprising this stream.
+	 * Ordered list of {@link StreamAppDefinition}s comprising this stream.
 	 * The source is the first entry and the sink is the last entry.
 	 */
-	private final LinkedList<ModuleDefinition> modules;
+	private final LinkedList<StreamAppDefinition> applicationDefinitions;
 
 	/**
 	 * Construct a {@code StreamDefinition}.
@@ -69,10 +69,10 @@ public class StreamDefinition {
 		Assert.hasText(dslText, "dslText is required");
 		this.name = name;
 		this.dslText = dslText;
-		this.modules = new LinkedList<>();
+		this.applicationDefinitions = new LinkedList<>();
 		StreamNode streamNode = new StreamParser(name, dslText).parse();
-		for (ModuleDefinition module : new ModuleDefinitionBuilder(name, streamNode).build()) {
-			this.modules.addFirst(module);
+		for (StreamAppDefinition appDefinition : new StreamApplicationDefinitionBuilder(name, streamNode).build()) {
+			this.applicationDefinitions.addFirst(appDefinition);
 		}
 	}
 
@@ -95,26 +95,25 @@ public class StreamDefinition {
 	}
 
 	/**
-	 * Return the ordered list of modules for this stream as a {@link List}.
-	 * This allows for retrieval of modules in the stream by index.
-	 * Modules are maintained in stream flow order (source is first, sink is last).
+	 * Return the ordered list of application definitions for this stream as a {@link List}.
+	 * This allows for retrieval of application definitions in the stream by index.
+	 * Application definitions are maintained in stream flow order (source is first, sink is last).
 	 *
-	 * @return list of module descriptors for this stream definition
+	 * @return list of application definitions for this stream definition
 	 */
-	public List<ModuleDefinition> getModuleDefinitions() {
-		return Collections.unmodifiableList(modules);
+	public List<StreamAppDefinition> getAppDefinitions() {
+		return Collections.unmodifiableList(this.applicationDefinitions);
 	}
 
 	/**
-	 * Return an iterator that indicates the order of module deployments for this
-	 * stream. The modules are returned in reverse order; i.e. the sink is returned
-	 * first followed by the processors in reverse order followed by the
-	 * source.
+	 * Return an iterator that indicates the order of application deployments for this
+	 * stream. The application definitions are returned in reverse order; i.e. the sink is returned
+	 * first followed by the processors in reverse order followed by the source.
 	 *
-	 * @return iterator that iterates over the modules in deployment order
+	 * @return iterator that iterates over the application definitions in deployment order
 	 */
-	public Iterator<ModuleDefinition> getDeploymentOrderIterator() {
-		return new ReadOnlyIterator<>(modules.descendingIterator());
+	public Iterator<StreamAppDefinition> getDeploymentOrderIterator() {
+		return new ReadOnlyIterator<>(this.applicationDefinitions.descendingIterator());
 	}
 
 	@Override
@@ -183,7 +182,6 @@ public class StreamDefinition {
 		public void remove() {
 			throw new UnsupportedOperationException();
 		}
-
 	}
 
 }

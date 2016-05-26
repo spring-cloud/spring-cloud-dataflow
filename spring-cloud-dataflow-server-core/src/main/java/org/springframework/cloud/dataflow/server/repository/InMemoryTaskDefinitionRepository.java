@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2015-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,15 +60,13 @@ public class InMemoryTaskDefinitionRepository implements TaskDefinitionRepositor
 
 	@Override
 	public <S extends TaskDefinition> S save(S definition) {
-		if(definitions.containsKey(definition.getName())) {
+		if (definitions.containsKey(definition.getName())) {
 			throw new DuplicateTaskException(
 					String.format("Cannot register task %s because another one has already " +
 							"been registered with the same name",
 							definition.getName()));
 		}
-
 		definitions.put(definition.getName(), definition);
-
 		return definition;
 	}
 

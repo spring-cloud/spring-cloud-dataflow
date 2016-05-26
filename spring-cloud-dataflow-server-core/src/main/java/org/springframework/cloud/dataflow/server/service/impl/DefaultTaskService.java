@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.dataflow.server.service.impl;
 
 import java.net.URI;
@@ -23,15 +24,14 @@ import java.util.Map;
 import org.h2.util.Task;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cloud.dataflow.core.ModuleDefinition;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
+import org.springframework.cloud.dataflow.core.TaskDefinition.TaskDefinitionBuilder;
 import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
 import org.springframework.cloud.dataflow.server.repository.DeploymentKey;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.TaskService;
 import org.springframework.cloud.deployer.resource.registry.UriRegistry;
-import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.core.io.Resource;
@@ -60,7 +60,6 @@ import org.springframework.util.StringUtils;
  * @author Mark Fisher
  * @author Janne Valkealahti
  * @author Gunnar Hillert
- *
  */
 public class DefaultTaskService implements TaskService {
 
@@ -124,21 +123,21 @@ public class DefaultTaskService implements TaskService {
 		this.resourceLoader = resourceLoader;
 	}
 
-	private ModuleDefinition updateTaskProperties(ModuleDefinition moduleDefinition, String taskDefinitionName) {
-		ModuleDefinition.Builder builder = ModuleDefinition.Builder.from(moduleDefinition);
-		builder.setParameter("spring.datasource.url",
+	private TaskDefinition updateTaskProperties(TaskDefinition taskDefinition) {
+		TaskDefinitionBuilder builder = TaskDefinitionBuilder.from(taskDefinition);
+		builder.setProperty("spring.datasource.url",
 				(StringUtils.hasText(dataSourceUrl)) ? dataSourceUrl :
 						DEFAULT_TASK_DATASOURCE_URL);
 
-		builder.setParameter("spring.datasource.username",
+		builder.setProperty("spring.datasource.username",
 				(StringUtils.hasText(dataSourceUserName)) ? dataSourceUserName :
 						DEFAULT_TASK_DATASOURCE_USER_NAME);
 
 		if(StringUtils.hasText(dataSourcePassword)) {//password may be empty
-			builder.setParameter("spring.datasource.password", dataSourcePassword );
+			builder.setProperty("spring.datasource.password", dataSourcePassword);
 		}
 
-		builder.setParameter("spring.datasource.driverClassName",
+		builder.setProperty("spring.datasource.driverClassName",
 				(StringUtils.hasText(dataSourceDriverClassName)) ? dataSourceDriverClassName :
 						DEFAULT_TASK_DATASOURCE_DRIVER_CLASS_NAME);
 
@@ -155,17 +154,15 @@ public class DefaultTaskService implements TaskService {
 		if (taskDefinition == null) {
 			throw new NoSuchTaskDefinitionException(taskName);
 		}
-		ModuleDefinition module = taskDefinition.getModuleDefinition();
 
 		Map<String, String> deploymentProperties = new HashMap<>();
-		module = this.updateTaskProperties(module, module.getName() );
+		taskDefinition = this.updateTaskProperties(taskDefinition);
 		deploymentProperties.putAll(runtimeProperties);
 
-		AppDefinition definition = new AppDefinition(module.getLabel(), module.getParameters());
-		URI uri = this.registry.find(String.format("task.%s", module.getName()));
+		URI uri = this.registry.find(String.format("task.%s", taskDefinition.getRegisteredAppName()));
 		Resource resource = this.resourceLoader.getResource(uri.toString());
-		AppDeploymentRequest request = new AppDeploymentRequest(definition, resource, deploymentProperties, runtimeParams);
+		AppDeploymentRequest request = taskDefinition.createDeploymentRequest(resource, deploymentProperties, runtimeParams);
 		String id = this.taskLauncher.launch(request);
-		this.deploymentIdRepository.save(DeploymentKey.forApp(module), id);
+		this.deploymentIdRepository.save(DeploymentKey.forTaskDefinition(taskDefinition), id);
 	}
 }

@@ -57,7 +57,7 @@ import org.springframework.util.Assert;
 @Component
 public class RuntimeCommands implements CommandMarker {
 
-	private static final String LIST_MODULES = "runtime modules";
+	private static final String LIST_APPS = "runtime apps";
 	
 	private final DataFlowShell dataFlowShell;
 
@@ -67,41 +67,41 @@ public class RuntimeCommands implements CommandMarker {
 		this.dataFlowShell = dataFlowShell;
 	}
 
-	@CliAvailabilityIndicator({LIST_MODULES})
+	@CliAvailabilityIndicator({LIST_APPS})
 	public boolean available() {
 		return dataFlowShell.getDataFlowOperations() != null;
 	}
 
-	@CliCommand(value = LIST_MODULES, help = "List runtime modules")
+	@CliCommand(value = LIST_APPS, help = "List runtime apps")
 	public Table list(
-			@CliOption(key = "summary", help = "whether to hide module instances details",
+			@CliOption(key = "summary", help = "whether to hide app instance details",
 					unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean summary,
-			@CliOption(key = {"moduleId", "moduleIds"}, help = "module id(s) to display, also supports '<group>.*' pattern") String[] moduleIds) {
+			@CliOption(key = {"appId", "appIds"}, help = "app id(s) to display, also supports '<group>.*' pattern") String[] appIds) {
 
 		Set<String> filter = null;
-		if (moduleIds != null) {
-			filter = new HashSet<>(Arrays.asList(moduleIds));
+		if (appIds != null) {
+			filter = new HashSet<>(Arrays.asList(appIds));
 		}
 
 		TableModelBuilder<Object> modelBuilder = new TableModelBuilder<>();
 		if (!summary) {
 			modelBuilder.addRow()
-					.addValue("Module Id / Instance Id")
+					.addValue("App Id / Instance Id")
 					.addValue("Unit Status")
 					.addValue("No. of Instances / Attributes");
 		}
 		else {
 			modelBuilder.addRow()
-					.addValue("Module Id")
+					.addValue("App Id")
 					.addValue("Unit Status")
 					.addValue("No. of Instances");
 		}
 
-		// In detailed mode, keep track of module vs instance lines, to use
+		// In detailed mode, keep track of app vs instance lines, to use
 		// a different border style later.
 		List<Integer> splits = new ArrayList<>();
 		int line = 1;
-		// Optimise for the 1 module case, which is likely less resource intensive on the server
+		// Optimise for the single app case, which is likely less resource intensive on the server
 		// than client side filtering
 		Iterable<AppStatusResource> statuses;
 		if (filter != null && filter.size() == 1 && !filter.iterator().next().endsWith(".*")) {

@@ -18,7 +18,7 @@ package org.springframework.cloud.dataflow.registry;
 
 import java.net.URI;
 
-import org.springframework.cloud.dataflow.core.ArtifactType;
+import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.util.Assert;
@@ -39,7 +39,7 @@ public class AppRegistration implements Comparable<AppRegistration> {
 	/**
 	 * App type.
 	 */
-	private final ArtifactType type;
+	private final ApplicationType type;
 
 	/**
 	 * URI for the app resource.
@@ -64,7 +64,7 @@ public class AppRegistration implements Comparable<AppRegistration> {
 	 * @param uri URI for the app resource
 	 * @param loader the {@link ResourceLoader} that loads the {@link Resource} for this app
 	 */
-	public AppRegistration(String name, ArtifactType type, URI uri, ResourceLoader loader) {
+	public AppRegistration(String name, ApplicationType type, URI uri, ResourceLoader loader) {
 		Assert.hasText(name, "name is required");
 		Assert.notNull(type, "type is required");
 		Assert.notNull(uri, "uri is required");
@@ -85,7 +85,7 @@ public class AppRegistration implements Comparable<AppRegistration> {
 	/**
 	 * @see #type
 	 */
-	public ArtifactType getType() {
+	public ApplicationType getType() {
 		return type;
 	}
 

@@ -24,10 +24,10 @@ import java.util.Properties;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
-import org.springframework.cloud.dataflow.core.ArtifactType;
-import org.springframework.cloud.dataflow.rest.client.ModuleOperations;
-import org.springframework.cloud.dataflow.rest.resource.DetailedModuleRegistrationResource;
-import org.springframework.cloud.dataflow.rest.resource.ModuleRegistrationResource;
+import org.springframework.cloud.dataflow.core.ApplicationType;
+import org.springframework.cloud.dataflow.rest.client.AppRegistryOperations;
+import org.springframework.cloud.dataflow.rest.resource.DetailedAppRegistrationResource;
+import org.springframework.cloud.dataflow.rest.resource.AppRegistrationResource;
 import org.springframework.cloud.dataflow.shell.config.DataFlowShell;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.core.io.DefaultResourceLoader;
@@ -49,27 +49,28 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 
 /**
- * Commands for working with modules. Allows retrieval of information about
- * available modules, as well as creating and removing module registrations.
+ * Commands for working with the application registry. Allows retrieval of information about
+ * available applications, as well as creating and removing application registrations.
  *
  * @author Glenn Renfro
  * @author Eric Bottard
  * @author Florent Biville
  * @author David Turanski
  * @author Patrick Peralta
+ * @author Mark Fisher
  */
 @Component
-public class ModuleCommands implements CommandMarker, ResourceLoaderAware {
+public class AppRegistryCommands implements CommandMarker, ResourceLoaderAware {
 
-	private final static String LIST_MODULES = "module list";
+	private final static String LIST_APPLICATIONS = "app list";
 
-	private final static String MODULE_INFO = "module info";
+	private final static String APPLICATION_INFO = "app info";
 
-	private final static String UNREGISTER_MODULE = "module unregister";
+	private final static String UNREGISTER_APPLICATION = "app unregister";
 
-	private static final String REGISTER_MODULE = "module register";
+	private static final String REGISTER_APPLICATION = "app register";
 
-	private static final String IMPORT_MODULES = "module import";
+	private static final String IMPORT_APPLICATIONS = "app import";
 
 	private DataFlowShell dataFlowShell;
 
@@ -86,30 +87,29 @@ public class ModuleCommands implements CommandMarker, ResourceLoaderAware {
 		this.resourceLoader = resourceLoader;
 	}
 
-	@CliAvailabilityIndicator({LIST_MODULES, MODULE_INFO, UNREGISTER_MODULE, REGISTER_MODULE, IMPORT_MODULES})
+	@CliAvailabilityIndicator({LIST_APPLICATIONS, APPLICATION_INFO, UNREGISTER_APPLICATION,
+		REGISTER_APPLICATION, IMPORT_APPLICATIONS})
 	public boolean available() {
 		return dataFlowShell.getDataFlowOperations() != null;
 	}
 
-	@CliCommand(value = MODULE_INFO, help = "Get information about a module")
+	@CliCommand(value = APPLICATION_INFO, help = "Get information about an application")
 	public List<Object> info(
 			@CliOption(mandatory = true,
 					key = {"", "name"},
-					help = "name of the module to query in the form of 'type:name'")
-			QualifiedModuleName module) {
-		DetailedModuleRegistrationResource info = moduleOperations().info(module.name, module.type);
+					help = "name of the application to query in the form of 'type:name'")
+			QualifiedApplicationName application) {
+		DetailedAppRegistrationResource info = appRegistryOperations().info(application.name, application.type);
 		List<Object> result = new ArrayList<>();
 		if (info != null) {
 			List<ConfigurationMetadataProperty> options = info.getOptions();
-			result.add(String.format("Information about %s module '%s':", module.type, module.name));
-
+			result.add(String.format("Information about %s application '%s':", application.type, application.name));
 			result.add(String.format("Resource URI: %s", info.getUri()));
-
 			if (info.getShortDescription() != null) {
 				result.add(info.getShortDescription());
 			}
 			if (options == null) {
-				result.add("Module options metadata is not available");
+				result.add("Application options metadata is not available");
 			}
 			else {
 				TableModelBuilder<Object> modelBuilder = new TableModelBuilder<>();
@@ -132,62 +132,62 @@ public class ModuleCommands implements CommandMarker, ResourceLoaderAware {
 			}
 		}
 		else {
-			result.add(String.format("Module info is not available for %s:%s", module.type, module.name));
+			result.add(String.format("Application info is not available for %s:%s", application.type, application.name));
 		}
 		return result;
 	}
 
-	@CliCommand(value = REGISTER_MODULE, help = "Register a new module")
+	@CliCommand(value = REGISTER_APPLICATION, help = "Register a new application")
 	public String register(
 			@CliOption(mandatory = true,
 					key = {"", "name"},
-					help = "the name for the registered module")
+					help = "the name for the registered application")
 			String name,
 			@CliOption(mandatory = true,
 					key = {"type"},
-					help = "the type for the registered module")
-			ArtifactType type,
+					help = "the type for the registered application")
+			ApplicationType type,
 			@CliOption(mandatory = true,
 					key = {"uri"},
-					help = "URI for the module artifact")
+					help = "URI for the application artifact")
 			String uri,
 			@CliOption(key = "force",
-					help = "force update if module already exists (only if not in use)",
+					help = "force update if application is already registered (only if not in use)",
 					specifiedDefaultValue = "true",
 					unspecifiedDefaultValue = "false")
 			boolean force) {
-		moduleOperations().register(name, type, uri, force);
-		return String.format(("Successfully registered module '%s:%s'"), type, name);
+		appRegistryOperations().register(name, type, uri, force);
+		return String.format(("Successfully registered application '%s:%s'"), type, name);
 	}
 
-	@CliCommand(value = UNREGISTER_MODULE, help = "Unregister a module")
+	@CliCommand(value = UNREGISTER_APPLICATION, help = "Unregister an application")
 	public String unregister(
 			@CliOption(mandatory = true,
 					key = {"", "name"},
-					help = "name of the module to unregister")
+					help = "name of the application to unregister")
 			String name,
 			@CliOption(mandatory = false,
 					key = {"type"},
-					help = "type of the module to unregister")
-			ArtifactType type) {
+					help = "type of the application to unregister")
+			ApplicationType type) {
 
-		QualifiedModuleName module = processArgs(name, type);
-		moduleOperations().unregister(module.name, module.type);
-		return String.format(("Successfully unregistered module '%s' with type %s"),
-				module.name, module.type);
+		QualifiedApplicationName application = processArgs(name, type);
+		appRegistryOperations().unregister(application.name, application.type);
+		return String.format(("Successfully unregistered application '%s' with type %s"),
+				application.name, application.type);
 	}
 
-	@CliCommand(value = LIST_MODULES, help = "List all modules")
+	@CliCommand(value = LIST_APPLICATIONS, help = "List all registered applications")
 	public Table list() {
-		PagedResources<ModuleRegistrationResource> modules = moduleOperations().list();
+		PagedResources<AppRegistrationResource> appRegistrations = appRegistryOperations().list();
 		final LinkedHashMap<String, List<String>> mappings = new LinkedHashMap<>();
-		for (ArtifactType type : ArtifactType.MODULE_TYPES) {
+		for (ApplicationType type : ApplicationType.values()) {
 			mappings.put(type.name(), new ArrayList<String>());
 		}
 		int max = 0;
-		for (ModuleRegistrationResource module : modules) {
-			List<String> column = mappings.get(module.getType());
-			column.add(module.getName());
+		for (AppRegistrationResource appRegistration : appRegistrations) {
+			List<String> column = mappings.get(appRegistration.getType());
+			column.add(appRegistration.getName());
 			max = Math.max(max, column.size());
 		}
 		final List<String> keys = new ArrayList<>(mappings.keySet());
@@ -222,7 +222,7 @@ public class ModuleCommands implements CommandMarker, ResourceLoaderAware {
 		return DataFlowTables.applyStyle(new TableBuilder(model)).build();
 	}
 
-	@CliCommand(value = IMPORT_MODULES, help = "Register all modules listed in a properties file")
+	@CliCommand(value = IMPORT_APPLICATIONS, help = "Register all applications listed in a properties file")
 	public String importFromResource(
 			@CliOption(mandatory = true,
 					key = {"", "uri"},
@@ -241,20 +241,20 @@ public class ModuleCommands implements CommandMarker, ResourceLoaderAware {
 		if (local) {
 			try {
 				Resource resource = this.resourceLoader.getResource(uri);
-				Properties modules = PropertiesLoaderUtils.loadProperties(resource);
-				PagedResources<ModuleRegistrationResource> registered = moduleOperations().registerAll(modules, force);
+				Properties applications = PropertiesLoaderUtils.loadProperties(resource);
+				PagedResources<AppRegistrationResource> registered = appRegistryOperations().registerAll(applications, force);
 				long numRegistered = registered.getMetadata().getTotalElements();
-				return (modules.keySet().size() == numRegistered)
-						? String.format("Successfully registered modules: %s", modules.keySet())
-						: String.format("Successfully registered %d modules from %s", numRegistered, modules.keySet());
+				return (applications.keySet().size() == numRegistered)
+						? String.format("Successfully registered applications: %s", applications.keySet())
+						: String.format("Successfully registered %d applications from %s", numRegistered, applications.keySet());
 			}
 			catch (IOException e) {
 				throw new IllegalArgumentException(e);
 			}
 		}
 		else {
-			PagedResources<ModuleRegistrationResource> registered = moduleOperations().importFromResource(uri, force);
-			return String.format("Successfully registered %d modules from '%s'", registered.getMetadata().getTotalElements(), uri);
+			PagedResources<AppRegistrationResource> registered = appRegistryOperations().importFromResource(uri, force);
+			return String.format("Successfully registered %d applications from '%s'", registered.getMetadata().getTotalElements(), uri);
 		}
 	}
 
@@ -272,43 +272,43 @@ public class ModuleCommands implements CommandMarker, ResourceLoaderAware {
 				.replace("\f", "\\f");
 	}
 
-	private ModuleOperations moduleOperations() {
-		return dataFlowShell.getDataFlowOperations().moduleOperations();
+	private AppRegistryOperations appRegistryOperations() {
+		return dataFlowShell.getDataFlowOperations().appRegistryOperations();
 	}
 
 	/**
-	 * Return a {@link QualifiedModuleName} for the given arguments.
-	 * If {@code type} is {@code null}, the module type may be obtained
-	 * from the module name if the module name is in the format
+	 * Return a {@link QualifiedApplicationName} for the given arguments.
+	 * If {@code type} is {@code null}, the application type may be obtained
+	 * from the application name if the application name is in the format
 	 * {@code name:type}.
-	 * @param name module name
-	 * @param type module type; may be {@code null}
-	 * @return {@code QualifiedModuleName} for the provided arguments
+	 * @param name application name
+	 * @param type application type; may be {@code null}
+	 * @return {@code QualifiedApplicationName} for the provided arguments
 	 */
-	private QualifiedModuleName processArgs(String name, ArtifactType type) {
+	private QualifiedApplicationName processArgs(String name, ApplicationType type) {
 		if (type == null) {
 			String[] split = name.split("\\:");
 			if (split.length != 2) {
 				throw new IllegalArgumentException(
-						String.format("Expected format of 'name:type' for module name %s", name));
+						String.format("Expected format of 'name:type' for application name %s", name));
 			}
-			return new QualifiedModuleName(split[0], ArtifactType.valueOf(split[1]));
+			return new QualifiedApplicationName(split[0], ApplicationType.valueOf(split[1]));
 		}
 		else {
-			return new QualifiedModuleName(name, type);
+			return new QualifiedApplicationName(name, type);
 		}
 	}
 
 	/**
-	 * Unique identifier for a module, including the name and type.
+	 * Unique identifier for an application, including the name and type.
 	 */
-	public static class QualifiedModuleName {
+	public static class QualifiedApplicationName {
 
-		public ArtifactType type;
+		public ApplicationType type;
 
 		public String name;
 
-		public QualifiedModuleName(String name, ArtifactType type) {
+		public QualifiedApplicationName(String name, ApplicationType type) {
 			this.name = name;
 			this.type = type;
 		}

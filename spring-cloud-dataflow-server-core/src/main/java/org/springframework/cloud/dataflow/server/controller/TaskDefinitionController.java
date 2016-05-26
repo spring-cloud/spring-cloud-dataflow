@@ -16,7 +16,6 @@
 
 package org.springframework.cloud.dataflow.server.controller;
 
-import org.springframework.cloud.dataflow.core.ModuleDefinition;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.rest.resource.TaskDefinitionResource;
 import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
@@ -109,7 +108,7 @@ public class TaskDefinitionController {
 			throw new NoSuchTaskDefinitionException(name);
 		}
 		repository.delete(name);
-		deploymentIdRepository.delete(DeploymentKey.forApp(taskDefinition.getModuleDefinition()));
+		deploymentIdRepository.delete(DeploymentKey.forTaskDefinition(taskDefinition));
 	}
 
 	/**
@@ -143,15 +142,15 @@ public class TaskDefinitionController {
 
 		@Override
 		public TaskDefinitionResource instantiateResource(TaskDefinition taskDefinition) {
-			ModuleDefinition module = taskDefinition.getModuleDefinition();
-			String key = DeploymentKey.forApp(module);
+			String key = DeploymentKey.forTaskDefinition(taskDefinition);
 			String id = deploymentIdRepository.findOne(key);
 			TaskStatus status = null;
 			if (id != null) {
 				status = taskLauncher.status(id);
 			}
 			String state = (status != null) ? status.getState().name() : "unknown";
-			TaskDefinitionResource taskDefinitionResource = new TaskDefinitionResource(taskDefinition.getName(),
+			TaskDefinitionResource taskDefinitionResource = new TaskDefinitionResource(
+					taskDefinition.getName(),
 					taskDefinition.getDslText());
 			taskDefinitionResource.setStatus(state);
 			return taskDefinitionResource;

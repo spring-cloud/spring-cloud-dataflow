@@ -16,13 +16,12 @@
 
 package org.springframework.cloud.dataflow.server.repository;
 
-import org.springframework.cloud.dataflow.core.ModuleDefinition;
+import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.util.Assert;
 
 /**
  * Utility methods for determining the key to be used in a {@link DeploymentIdRepository}.
- * Supports either {@link TaskDefinition} or {@link ModuleDefinition}.
  *
  * @author Janne Valkealahti
  * @author Mark Fisher
@@ -30,12 +29,22 @@ import org.springframework.util.Assert;
 public abstract class DeploymentKey {
 
 	/**
-	 * Determines a deployment key for an app.
+	 * Determines a deployment key for a stream application.
 	 *
-	 * @param moduleDefinition the module definition
+	 * @param streamAppDefinition the stream application definition
 	 */
-	public static String forApp(ModuleDefinition moduleDefinition) {
-		Assert.notNull(moduleDefinition, "moduleDefinition must not be null");
-		return String.format("%s.%s", moduleDefinition.getGroup(), moduleDefinition.getLabel());
+	public static String forStreamAppDefinition(StreamAppDefinition streamAppDefinition) {
+		Assert.notNull(streamAppDefinition, "streamAppDefinition must not be null");
+		return String.format("%s.%s", streamAppDefinition.getStreamName(), streamAppDefinition.getName());
+	}
+
+	/**
+	 * Determines a deployment key for a task application.
+	 *
+	 * @param taskDefinition the task application definition
+	 */
+	public static String forTaskDefinition(TaskDefinition taskDefinition) {
+		Assert.notNull(taskDefinition, "taskDefinition must not be null");
+		return String.format("%s.%s", taskDefinition.getRegisteredAppName(), taskDefinition.getName());
 	}
 }

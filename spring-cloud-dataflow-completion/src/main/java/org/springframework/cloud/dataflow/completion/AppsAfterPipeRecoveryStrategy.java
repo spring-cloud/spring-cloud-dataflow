@@ -16,51 +16,50 @@
 
 package org.springframework.cloud.dataflow.completion;
 
-import static org.springframework.cloud.dataflow.core.ArtifactType.processor;
-import static org.springframework.cloud.dataflow.core.ArtifactType.sink;
+import static org.springframework.cloud.dataflow.core.ApplicationType.processor;
+import static org.springframework.cloud.dataflow.core.ApplicationType.sink;
 
 import java.util.List;
 
+import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.dsl.CheckPointedParseException;
 import org.springframework.cloud.dataflow.registry.AppRegistration;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
 
 /**
- * Proposes module names when the user has typed a destination redirection.
+ * Provides completions for the case where the user has entered a pipe
+ * symbol and a app reference is expected next.
  *
  * @author Eric Bottard
  * @author Mark Fisher
  */
-class DestinationNameYieldsModulesRecoveryStrategy extends
+public class AppsAfterPipeRecoveryStrategy extends
 		StacktraceFingerprintingRecoveryStrategy<CheckPointedParseException> {
 
 	private final AppRegistry appRegistry;
 
-	public DestinationNameYieldsModulesRecoveryStrategy(AppRegistry appRegistry) {
-		super(CheckPointedParseException.class, "queue:foo >", "queue:foo > ");
+	AppsAfterPipeRecoveryStrategy(AppRegistry appRegistry) {
+		super(CheckPointedParseException.class, "foo |", "foo | ");
 		this.appRegistry = appRegistry;
 	}
 
-	@Override
-	public boolean shouldTrigger(String dslStart, Exception exception) {
-		if( !super.shouldTrigger(dslStart, exception)) {
-			return false;
-		}
-		// Cast is safe from call to super.
-		// Backtracking would return even before the destination
-		return ((CheckPointedParseException)exception).getExpressionStringUntilCheckpoint().trim().isEmpty();
-	}
 
 	@Override
 	public void addProposals(String dsl, CheckPointedParseException exception,
-			int detailLevel, List<CompletionProposal> proposals) {
-		CompletionProposal.Factory completionFactory = CompletionProposal.expanding(dsl);
+			int detailLevel, List<CompletionProposal> collector) {
+
+		StreamDefinition streamDefinition = new StreamDefinition("__dummy",
+				exception.getExpressionStringUntilCheckpoint());
+
+		CompletionProposal.Factory proposals = CompletionProposal.expanding(dsl);
+
+		// We only support full streams at the moment, so completions can only be processor or sink
 		for (AppRegistration appRegistration : appRegistry.findAll()) {
 			if (appRegistration.getType() == processor || appRegistration.getType() == sink) {
-				proposals.add(completionFactory.withSeparateTokens(appRegistration.getName(),
-						"Wire destination into a " + appRegistration.getType() + " module"));
+				String expansion = CompletionUtils.maybeQualifyWithLabel(appRegistration.getName(), streamDefinition);
+				collector.add(proposals.withSeparateTokens(expansion,
+						"Continue stream definition with a " + appRegistration.getType()));
 			}
 		}
 	}
-
 }

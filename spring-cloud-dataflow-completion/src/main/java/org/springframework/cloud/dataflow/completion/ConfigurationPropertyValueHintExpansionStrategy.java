@@ -31,15 +31,15 @@ import org.springframework.boot.configurationmetadata.ValueHint;
 import org.springframework.boot.loader.archive.Archive;
 import org.springframework.boot.loader.archive.ExplodedArchive;
 import org.springframework.boot.loader.archive.JarFileArchive;
-import org.springframework.cloud.dataflow.core.ArtifactType;
-import org.springframework.cloud.dataflow.core.ModuleDefinition;
+import org.springframework.cloud.dataflow.core.ApplicationType;
+import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.dsl.CheckPointedParseException;
 import org.springframework.cloud.dataflow.core.dsl.Token;
 import org.springframework.cloud.dataflow.core.dsl.TokenKind;
 import org.springframework.cloud.dataflow.registry.AppRegistration;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
-import org.springframework.cloud.stream.configuration.metadata.ModuleConfigurationMetadataResolver;
+import org.springframework.cloud.stream.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.core.io.Resource;
 
 /**
@@ -53,13 +53,13 @@ public class ConfigurationPropertyValueHintExpansionStrategy implements Expansio
 
 	private final AppRegistry appRegistry;
 
-	private final ModuleConfigurationMetadataResolver metadataResolver;
+	private final ApplicationConfigurationMetadataResolver metadataResolver;
 
 	@Autowired
 	private ValueHintProvider[] valueHintProviders = new ValueHintProvider[0];
 
 	ConfigurationPropertyValueHintExpansionStrategy(AppRegistry appRegistry,
-			ModuleConfigurationMetadataResolver metadataResolver) {
+			ApplicationConfigurationMetadataResolver metadataResolver) {
 		this.appRegistry = appRegistry;
 		this.metadataResolver = metadataResolver;
 	}
@@ -68,7 +68,7 @@ public class ConfigurationPropertyValueHintExpansionStrategy implements Expansio
 	public boolean addProposals(String text, StreamDefinition parseResult,
 			int detailLevel, List<CompletionProposal> collector) {
 		Set<String> propertyNames = new HashSet<>(parseResult.getDeploymentOrderIterator()
-				.next().getParameters().keySet());
+				.next().getProperties().keySet());
 		propertyNames.removeAll(CompletionUtils.IMPLICIT_PARAMETER_NAMES);
 		if (text.endsWith(" ") || propertyNames.isEmpty()) {
 			return false;
@@ -76,20 +76,20 @@ public class ConfigurationPropertyValueHintExpansionStrategy implements Expansio
 
 		String propertyName = recoverPropertyName(text);
 
-		ModuleDefinition lastModule = parseResult.getDeploymentOrderIterator().next();
-		String alreadyTyped = lastModule.getParameters().get(propertyName);
+		StreamAppDefinition lastApp = parseResult.getDeploymentOrderIterator().next();
+		String alreadyTyped = lastApp.getProperties().get(propertyName);
 
-		String lastModuleName = lastModule.getName();
+		String lastAppName = lastApp.getName();
 		AppRegistration lastAppRegistration = null;
-		for (ArtifactType moduleType : CompletionUtils.determinePotentialTypes(lastModule)) {
-			lastAppRegistration = appRegistry.find(lastModuleName, moduleType);
+		for (ApplicationType appType : CompletionUtils.determinePotentialTypes(lastApp)) {
+			lastAppRegistration = appRegistry.find(lastAppName, appType);
 			if (lastAppRegistration != null) {
 				break;
 			}
 		}
 
 		if (lastAppRegistration == null) {
-			// Not a valid module name, do nothing
+			// Not a valid app name, do nothing
 			return false;
 		}
 		Resource appResource = lastAppRegistration.getResource();

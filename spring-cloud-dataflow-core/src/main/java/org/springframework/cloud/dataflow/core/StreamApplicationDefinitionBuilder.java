@@ -21,15 +21,16 @@ import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.springframework.cloud.dataflow.core.StreamAppDefinition.Builder;
 import org.springframework.cloud.dataflow.core.dsl.ArgumentNode;
-import org.springframework.cloud.dataflow.core.dsl.ModuleNode;
+import org.springframework.cloud.dataflow.core.dsl.AppNode;
 import org.springframework.cloud.dataflow.core.dsl.SinkDestinationNode;
 import org.springframework.cloud.dataflow.core.dsl.SourceDestinationNode;
 import org.springframework.cloud.dataflow.core.dsl.StreamNode;
 import org.springframework.util.Assert;
 
 /**
- * Builds a list of {@link ModuleDefinition ModuleDefinitions} out of a parsed {@link StreamNode}.
+ * Builds a list of {@link StreamAppDefinition StreamAppDefinitions} out of a parsed {@link StreamNode}.
  *
  * @author Mark Fisher
  * @author Patrick Peralta
@@ -38,7 +39,7 @@ import org.springframework.util.Assert;
  * @author Marius Bogoevici
  * @author Ilayaperumal Gopinathan
  */
-class ModuleDefinitionBuilder {
+class StreamApplicationDefinitionBuilder {
 
 	private static final String CONSUMER_GROUP_PARAMETER = "group";
 
@@ -47,12 +48,12 @@ class ModuleDefinitionBuilder {
 	private final StreamNode streamNode;
 
 	/**
-	 * Create a ModuleDefinitionBuilder for the given stream.
+	 * Create a StreamAppDefinitionBuilder for the given stream.
 	 *
 	 * @param streamName the name of the stream
 	 * @param streamNode the AST construct representing the stream
 	 */
-	public ModuleDefinitionBuilder(String streamName, StreamNode streamNode) {
+	public StreamApplicationDefinitionBuilder(String streamName, StreamNode streamNode) {
 		Assert.hasText(streamName, "streamName is required");
 		Assert.notNull(streamNode, "streamNode must not be null");
 		this.streamName = streamName;
@@ -60,48 +61,47 @@ class ModuleDefinitionBuilder {
 	}
 
 	/**
-	 * Build a list of ModuleDefinitions out of the parsed StreamNode.
+	 * Build a list of {@link StreamAppDefinition}s out of the parsed StreamNode.
 	 */
-	public List<ModuleDefinition> build() {
-		Deque<ModuleDefinition.Builder> builders = new LinkedList<>();
-		List<ModuleNode> moduleNodes = streamNode.getModuleNodes();
-		for (int m = moduleNodes.size() - 1; m >= 0; m--) {
-			ModuleNode moduleNode = moduleNodes.get(m);
-			ModuleDefinition.Builder builder =
-					new ModuleDefinition.Builder()
-							.setGroup(streamName)
-							.setName(moduleNode.getName())
-							.setLabel(moduleNode.getLabelName());
-			if (moduleNode.hasArguments()) {
-				ArgumentNode[] arguments = moduleNode.getArguments();
+	public List<StreamAppDefinition> build() {
+		Deque<StreamAppDefinition.Builder> builders = new LinkedList<>();
+		List<AppNode> appNodes = streamNode.getAppNodes();
+		for (int m = appNodes.size() - 1; m >= 0; m--) {
+			AppNode appNode = appNodes.get(m);
+			StreamAppDefinition.Builder builder = (Builder)
+					new StreamAppDefinition.Builder()
+							.setRegisteredAppName(appNode.getName())
+							.setLabel(appNode.getLabelName());
+			if (appNode.hasArguments()) {
+				ArgumentNode[] arguments = appNode.getArguments();
 				for (ArgumentNode argument : arguments) {
 					if (argument.getName().equalsIgnoreCase("inputType")) {
-						builder.setParameter(BindingPropertyKeys.INPUT_CONTENT_TYPE, argument.getValue());
+						builder.setProperty(BindingPropertyKeys.INPUT_CONTENT_TYPE, argument.getValue());
 					}
 					else if (argument.getName().equalsIgnoreCase("outputType")) {
-						builder.setParameter(BindingPropertyKeys.OUTPUT_CONTENT_TYPE, argument.getValue());
+						builder.setProperty(BindingPropertyKeys.OUTPUT_CONTENT_TYPE, argument.getValue());
 					}
 					else {
-						builder.setParameter(argument.getName(), argument.getValue());
+						builder.setProperty(argument.getName(), argument.getValue());
 					}
 				}
 			}
 			if (m > 0) {
-				builder.setParameter(BindingPropertyKeys.INPUT_DESTINATION,
-						String.format("%s.%s", streamName, moduleNodes.get(m - 1).getLabelName()));
-				builder.setParameter(BindingPropertyKeys.INPUT_GROUP, streamName);
+				builder.setProperty(BindingPropertyKeys.INPUT_DESTINATION,
+						String.format("%s.%s", streamName, appNodes.get(m - 1).getLabelName()));
+				builder.setProperty(BindingPropertyKeys.INPUT_GROUP, streamName);
 			}
-			if (m < moduleNodes.size() - 1) {
-				builder.setParameter(BindingPropertyKeys.OUTPUT_DESTINATION,
-						String.format("%s.%s", streamName, moduleNode.getLabelName()));
-				builder.setParameter(BindingPropertyKeys.OUTPUT_REQUIRED_GROUPS, streamName);
+			if (m < appNodes.size() - 1) {
+				builder.setProperty(BindingPropertyKeys.OUTPUT_DESTINATION,
+						String.format("%s.%s", streamName, appNode.getLabelName()));
+				builder.setProperty(BindingPropertyKeys.OUTPUT_REQUIRED_GROUPS, streamName);
 			}
 			builders.add(builder);
 		}
 		SourceDestinationNode sourceDestination = streamNode.getSourceDestinationNode();
 		if (sourceDestination != null) {
-			ModuleDefinition.Builder sourceModuleBuilder = builders.getLast();
-			sourceModuleBuilder.setParameter(BindingPropertyKeys.INPUT_DESTINATION, sourceDestination.getDestinationName());
+			StreamAppDefinition.Builder sourceAppBuilder = builders.getLast();
+			sourceAppBuilder.setProperty(BindingPropertyKeys.INPUT_DESTINATION, sourceDestination.getDestinationName());
 			String consumerGroupName = streamName;
 			if (sourceDestination.getArguments() != null) {
 				ArgumentNode[] argumentNodes = sourceDestination.getArguments();
@@ -111,16 +111,16 @@ class ModuleDefinitionBuilder {
 					}
 				}
 			}
-			sourceModuleBuilder.setParameter(BindingPropertyKeys.INPUT_GROUP, consumerGroupName);
+			sourceAppBuilder.setProperty(BindingPropertyKeys.INPUT_GROUP, consumerGroupName);
 		}
 		SinkDestinationNode sinkDestination = streamNode.getSinkDestinationNode();
 		if (sinkDestination != null) {
-			builders.getFirst().setParameter(BindingPropertyKeys.OUTPUT_DESTINATION, sinkDestination.getDestinationName());
+			builders.getFirst().setProperty(BindingPropertyKeys.OUTPUT_DESTINATION, sinkDestination.getDestinationName());
 		}
-		List<ModuleDefinition> moduleDefinitions = new ArrayList<ModuleDefinition>(builders.size());
-		for (ModuleDefinition.Builder builder : builders) {
-			moduleDefinitions.add(builder.build());
+		List<StreamAppDefinition> streamAppDefinitions = new ArrayList<>(builders.size());
+		for (StreamAppDefinition.Builder builder : builders) {
+			streamAppDefinitions.add(builder.build(streamName));
 		}
-		return moduleDefinitions;
+		return streamAppDefinitions;
 	}
 }

@@ -21,7 +21,6 @@ import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -53,7 +52,7 @@ import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.cloud.dataflow.core.BindingPropertyKeys;
-import org.springframework.cloud.dataflow.core.ModuleDefinition;
+import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
@@ -76,7 +75,6 @@ import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
@@ -153,15 +151,15 @@ public class StreamControllerTests {
 		StreamDefinition myStream = repository.findOne("myStream");
 		assertEquals("time | log", myStream.getDslText());
 		assertEquals("myStream", myStream.getName());
-		assertEquals(2, myStream.getModuleDefinitions().size());
-		ModuleDefinition timeDefinition = myStream.getModuleDefinitions().get(0);
-		ModuleDefinition logDefinition = myStream.getModuleDefinitions().get(1);
-		assertEquals(2, timeDefinition.getParameters().size());
-		assertEquals("myStream.time", timeDefinition.getParameters().get(BindingPropertyKeys.OUTPUT_DESTINATION));
-		assertEquals("myStream", timeDefinition.getParameters().get(BindingPropertyKeys.OUTPUT_REQUIRED_GROUPS));
-		assertEquals(2, logDefinition.getParameters().size());
-		assertEquals("myStream.time", logDefinition.getParameters().get(BindingPropertyKeys.INPUT_DESTINATION));
-		assertEquals("myStream", logDefinition.getParameters().get(BindingPropertyKeys.INPUT_GROUP));
+		assertEquals(2, myStream.getAppDefinitions().size());
+		StreamAppDefinition timeDefinition = myStream.getAppDefinitions().get(0);
+		StreamAppDefinition logDefinition = myStream.getAppDefinitions().get(1);
+		assertEquals(2, timeDefinition.getProperties().size());
+		assertEquals("myStream.time", timeDefinition.getProperties().get(BindingPropertyKeys.OUTPUT_DESTINATION));
+		assertEquals("myStream", timeDefinition.getProperties().get(BindingPropertyKeys.OUTPUT_REQUIRED_GROUPS));
+		assertEquals(2, logDefinition.getProperties().size());
+		assertEquals("myStream.time", logDefinition.getProperties().get(BindingPropertyKeys.INPUT_DESTINATION));
+		assertEquals("myStream", logDefinition.getProperties().get(BindingPropertyKeys.INPUT_GROUP));
 	}
 
 	@Test
@@ -196,12 +194,12 @@ public class StreamControllerTests {
 				.andExpect(status().isCreated());
 		assertEquals(1, repository.count());
 		StreamDefinition myStream = repository.findOne("myStream");
-		ModuleDefinition timeDefinition = myStream.getModuleDefinitions().get(0);
-		ModuleDefinition logDefinition = myStream.getModuleDefinitions().get(1);
+		StreamAppDefinition timeDefinition = myStream.getAppDefinitions().get(0);
+		StreamAppDefinition logDefinition = myStream.getAppDefinitions().get(1);
 		assertEquals("time", timeDefinition.getName());
 		assertEquals("log", logDefinition.getName());
-		assertEquals("500", timeDefinition.getParameters().get("fixedDelay"));
-		assertEquals("milliseconds", timeDefinition.getParameters().get("timeUnit"));
+		assertEquals("500", timeDefinition.getProperties().get("fixedDelay"));
+		assertEquals("milliseconds", timeDefinition.getProperties().get("timeUnit"));
 		assertEquals(definition, myStream.getDslText());
 		assertEquals("myStream", myStream.getName());
 	}
@@ -218,25 +216,25 @@ public class StreamControllerTests {
 		StreamDefinition myStream = repository.findOne("myStream");
 		assertEquals(definition, myStream.getDslText());
 		assertEquals("myStream", myStream.getName());
-		assertEquals(3, myStream.getModuleDefinitions().size());
-		ModuleDefinition timeDefinition = myStream.getModuleDefinitions().get(0);
-		ModuleDefinition filterDefinition = myStream.getModuleDefinitions().get(1);
-		ModuleDefinition logDefinition = myStream.getModuleDefinitions().get(2);
-		assertEquals(2, timeDefinition.getParameters().size());
-		assertEquals("myStream.time", timeDefinition.getParameters().get(BindingPropertyKeys.OUTPUT_DESTINATION));
-		assertEquals("myStream", timeDefinition.getParameters().get(BindingPropertyKeys.OUTPUT_REQUIRED_GROUPS));
-		assertEquals(4, filterDefinition.getParameters().size());
-		assertEquals("myStream.time", filterDefinition.getParameters().get(BindingPropertyKeys.INPUT_DESTINATION));
-		assertEquals("myStream", filterDefinition.getParameters().get(BindingPropertyKeys.INPUT_GROUP));
-		assertEquals("myStream.filter", filterDefinition.getParameters().get(BindingPropertyKeys.OUTPUT_DESTINATION));
-		assertEquals("myStream", filterDefinition.getParameters().get(BindingPropertyKeys.OUTPUT_REQUIRED_GROUPS));
-		assertEquals(2, logDefinition.getParameters().size());
-		assertEquals("myStream.filter", logDefinition.getParameters().get(BindingPropertyKeys.INPUT_DESTINATION));
-		assertEquals("myStream", logDefinition.getParameters().get(BindingPropertyKeys.INPUT_GROUP));
+		assertEquals(3, myStream.getAppDefinitions().size());
+		StreamAppDefinition timeDefinition = myStream.getAppDefinitions().get(0);
+		StreamAppDefinition filterDefinition = myStream.getAppDefinitions().get(1);
+		StreamAppDefinition logDefinition = myStream.getAppDefinitions().get(2);
+		assertEquals(2, timeDefinition.getProperties().size());
+		assertEquals("myStream.time", timeDefinition.getProperties().get(BindingPropertyKeys.OUTPUT_DESTINATION));
+		assertEquals("myStream", timeDefinition.getProperties().get(BindingPropertyKeys.OUTPUT_REQUIRED_GROUPS));
+		assertEquals(4, filterDefinition.getProperties().size());
+		assertEquals("myStream.time", filterDefinition.getProperties().get(BindingPropertyKeys.INPUT_DESTINATION));
+		assertEquals("myStream", filterDefinition.getProperties().get(BindingPropertyKeys.INPUT_GROUP));
+		assertEquals("myStream.filter", filterDefinition.getProperties().get(BindingPropertyKeys.OUTPUT_DESTINATION));
+		assertEquals("myStream", filterDefinition.getProperties().get(BindingPropertyKeys.OUTPUT_REQUIRED_GROUPS));
+		assertEquals(2, logDefinition.getProperties().size());
+		assertEquals("myStream.filter", logDefinition.getProperties().get(BindingPropertyKeys.INPUT_DESTINATION));
+		assertEquals("myStream", logDefinition.getProperties().get(BindingPropertyKeys.INPUT_GROUP));
 	}
 
 	@Test
-	public void testSourceDestinationWithSingleModule() throws Exception {
+	public void testSourceDestinationWithSingleApp() throws Exception {
 		assertEquals(0, repository.count());
 		String definition = ":foo > log";
 		mockMvc.perform(
@@ -247,15 +245,15 @@ public class StreamControllerTests {
 		StreamDefinition myStream = repository.findOne("myStream");
 		assertEquals(definition, myStream.getDslText());
 		assertEquals("myStream", myStream.getName());
-		assertEquals(1, myStream.getModuleDefinitions().size());
-		ModuleDefinition logDefinition = myStream.getModuleDefinitions().get(0);
-		assertEquals(2, logDefinition.getParameters().size());
-		assertEquals("foo", logDefinition.getParameters().get(BindingPropertyKeys.INPUT_DESTINATION));
-		assertEquals("myStream", logDefinition.getParameters().get(BindingPropertyKeys.INPUT_GROUP));
+		assertEquals(1, myStream.getAppDefinitions().size());
+		StreamAppDefinition logDefinition = myStream.getAppDefinitions().get(0);
+		assertEquals(2, logDefinition.getProperties().size());
+		assertEquals("foo", logDefinition.getProperties().get(BindingPropertyKeys.INPUT_DESTINATION));
+		assertEquals("myStream", logDefinition.getProperties().get(BindingPropertyKeys.INPUT_GROUP));
 	}
 
 	@Test
-	public void testSourceDestinationWithTwoModules() throws Exception {
+	public void testSourceDestinationWithTwoApps() throws Exception {
 		assertEquals(0, repository.count());
 		String definition = ":foo > filter | log";
 		mockMvc.perform(
@@ -266,21 +264,21 @@ public class StreamControllerTests {
 		StreamDefinition myStream = repository.findOne("myStream");
 		assertEquals(definition, myStream.getDslText());
 		assertEquals("myStream", myStream.getName());
-		assertEquals(2, myStream.getModuleDefinitions().size());
-		ModuleDefinition filterDefinition = myStream.getModuleDefinitions().get(0);
-		assertEquals(4, filterDefinition.getParameters().size());
-		assertEquals("foo", filterDefinition.getParameters().get(BindingPropertyKeys.INPUT_DESTINATION));
-		assertEquals("myStream", filterDefinition.getParameters().get(BindingPropertyKeys.INPUT_GROUP));
-		assertEquals("myStream.filter", filterDefinition.getParameters().get(BindingPropertyKeys.OUTPUT_DESTINATION));
-		assertEquals("myStream", filterDefinition.getParameters().get(BindingPropertyKeys.OUTPUT_REQUIRED_GROUPS));
-		ModuleDefinition logDefinition = myStream.getModuleDefinitions().get(1);
-		assertEquals(2, logDefinition.getParameters().size());
-		assertEquals("myStream.filter", logDefinition.getParameters().get(BindingPropertyKeys.INPUT_DESTINATION));
-		assertEquals("myStream", logDefinition.getParameters().get(BindingPropertyKeys.INPUT_GROUP));
+		assertEquals(2, myStream.getAppDefinitions().size());
+		StreamAppDefinition filterDefinition = myStream.getAppDefinitions().get(0);
+		assertEquals(4, filterDefinition.getProperties().size());
+		assertEquals("foo", filterDefinition.getProperties().get(BindingPropertyKeys.INPUT_DESTINATION));
+		assertEquals("myStream", filterDefinition.getProperties().get(BindingPropertyKeys.INPUT_GROUP));
+		assertEquals("myStream.filter", filterDefinition.getProperties().get(BindingPropertyKeys.OUTPUT_DESTINATION));
+		assertEquals("myStream", filterDefinition.getProperties().get(BindingPropertyKeys.OUTPUT_REQUIRED_GROUPS));
+		StreamAppDefinition logDefinition = myStream.getAppDefinitions().get(1);
+		assertEquals(2, logDefinition.getProperties().size());
+		assertEquals("myStream.filter", logDefinition.getProperties().get(BindingPropertyKeys.INPUT_DESTINATION));
+		assertEquals("myStream", logDefinition.getProperties().get(BindingPropertyKeys.INPUT_GROUP));
 	}
 
 	@Test
-	public void testSinkDestinationWithSingleModule() throws Exception {
+	public void testSinkDestinationWithSingleApp() throws Exception {
 		assertEquals(0, repository.count());
 		String definition = "time > :foo";
 		mockMvc.perform(
@@ -291,14 +289,14 @@ public class StreamControllerTests {
 		StreamDefinition myStream = repository.findOne("myStream");
 		assertEquals(definition, myStream.getDslText());
 		assertEquals("myStream", myStream.getName());
-		assertEquals(1, myStream.getModuleDefinitions().size());
-		ModuleDefinition timeDefinition = myStream.getModuleDefinitions().get(0);
-		assertEquals(1, timeDefinition.getParameters().size());
-		assertEquals("foo", timeDefinition.getParameters().get(BindingPropertyKeys.OUTPUT_DESTINATION));
+		assertEquals(1, myStream.getAppDefinitions().size());
+		StreamAppDefinition timeDefinition = myStream.getAppDefinitions().get(0);
+		assertEquals(1, timeDefinition.getProperties().size());
+		assertEquals("foo", timeDefinition.getProperties().get(BindingPropertyKeys.OUTPUT_DESTINATION));
 	}
 
 	@Test
-	public void testSinkDestinationWithTwoModules() throws Exception {
+	public void testSinkDestinationWithTwoApps() throws Exception {
 		assertEquals(0, repository.count());
 		String definition = "time | filter > :foo";
 		mockMvc.perform(
@@ -309,16 +307,16 @@ public class StreamControllerTests {
 		StreamDefinition myStream = repository.findOne("myStream");
 		assertEquals(definition, myStream.getDslText());
 		assertEquals("myStream", myStream.getName());
-		assertEquals(2, myStream.getModuleDefinitions().size());
-		ModuleDefinition timeDefinition = myStream.getModuleDefinitions().get(0);
-		assertEquals(2, timeDefinition.getParameters().size());
-		assertEquals("myStream.time", timeDefinition.getParameters().get(BindingPropertyKeys.OUTPUT_DESTINATION));
-		assertEquals("myStream", timeDefinition.getParameters().get(BindingPropertyKeys.OUTPUT_REQUIRED_GROUPS));
-		ModuleDefinition filterDefinition = myStream.getModuleDefinitions().get(1);
-		assertEquals(3, filterDefinition.getParameters().size());
-		assertEquals("myStream.time", filterDefinition.getParameters().get(BindingPropertyKeys.INPUT_DESTINATION));
-		assertEquals("myStream", filterDefinition.getParameters().get(BindingPropertyKeys.INPUT_GROUP));
-		assertEquals("foo", filterDefinition.getParameters().get(BindingPropertyKeys.OUTPUT_DESTINATION));
+		assertEquals(2, myStream.getAppDefinitions().size());
+		StreamAppDefinition timeDefinition = myStream.getAppDefinitions().get(0);
+		assertEquals(2, timeDefinition.getProperties().size());
+		assertEquals("myStream.time", timeDefinition.getProperties().get(BindingPropertyKeys.OUTPUT_DESTINATION));
+		assertEquals("myStream", timeDefinition.getProperties().get(BindingPropertyKeys.OUTPUT_REQUIRED_GROUPS));
+		StreamAppDefinition filterDefinition = myStream.getAppDefinitions().get(1);
+		assertEquals(3, filterDefinition.getProperties().size());
+		assertEquals("myStream.time", filterDefinition.getProperties().get(BindingPropertyKeys.INPUT_DESTINATION));
+		assertEquals("myStream", filterDefinition.getProperties().get(BindingPropertyKeys.INPUT_GROUP));
+		assertEquals("foo", filterDefinition.getProperties().get(BindingPropertyKeys.OUTPUT_DESTINATION));
 	}
 
 	@Test
@@ -334,12 +332,12 @@ public class StreamControllerTests {
 		StreamDefinition myStream = repository.findOne("myStream");
 		assertEquals(definition, myStream.getDslText());
 		assertEquals("myStream", myStream.getName());
-		assertEquals(1, myStream.getModuleDefinitions().size());
-		ModuleDefinition filterDefinition = myStream.getModuleDefinitions().get(0);
-		assertEquals(3, filterDefinition.getParameters().size());
-		assertEquals("bar", filterDefinition.getParameters().get(BindingPropertyKeys.INPUT_DESTINATION));
-		assertEquals("myStream", filterDefinition.getParameters().get(BindingPropertyKeys.INPUT_GROUP));
-		assertEquals("foo", filterDefinition.getParameters().get(BindingPropertyKeys.OUTPUT_DESTINATION));
+		assertEquals(1, myStream.getAppDefinitions().size());
+		StreamAppDefinition filterDefinition = myStream.getAppDefinitions().get(0);
+		assertEquals(3, filterDefinition.getProperties().size());
+		assertEquals("bar", filterDefinition.getProperties().get(BindingPropertyKeys.INPUT_DESTINATION));
+		assertEquals("myStream", filterDefinition.getProperties().get(BindingPropertyKeys.INPUT_GROUP));
+		assertEquals("foo", filterDefinition.getProperties().get(BindingPropertyKeys.OUTPUT_DESTINATION));
 
 		ArgumentCaptor<AppDeploymentRequest> captor = ArgumentCaptor.forClass(AppDeploymentRequest.class);
 		verify(appDeployer).deploy(captor.capture());
@@ -353,9 +351,9 @@ public class StreamControllerTests {
 	public void testDestroyStream() throws Exception {
 		StreamDefinition streamDefinition1 = new StreamDefinition("myStream", "time | log");
 		repository.save(streamDefinition1);
-		for (ModuleDefinition moduleDefinition : streamDefinition1.getModuleDefinitions()) {
-			deploymentIdRepository.save(DeploymentKey.forApp(moduleDefinition),
-					streamDefinition1.getName() + "." + moduleDefinition.getName());
+		for (StreamAppDefinition appDefinition : streamDefinition1.getAppDefinitions()) {
+			deploymentIdRepository.save(DeploymentKey.forStreamAppDefinition(appDefinition),
+					streamDefinition1.getName() + "." + appDefinition.getName());
 		}
 		assertEquals(1, repository.count());
 		AppStatus status = mock(AppStatus.class);
@@ -374,9 +372,9 @@ public class StreamControllerTests {
 		StreamDefinition streamDefinition2 = new StreamDefinition("myStream1", "time | log");
 		repository.save(streamDefinition1);
 		repository.save(streamDefinition2);
-		for (ModuleDefinition moduleDefinition : streamDefinition1.getModuleDefinitions()) {
-			deploymentIdRepository.save(DeploymentKey.forApp(moduleDefinition),
-					streamDefinition1.getName() + "." + moduleDefinition.getName());
+		for (StreamAppDefinition appDefinition : streamDefinition1.getAppDefinitions()) {
+			deploymentIdRepository.save(DeploymentKey.forStreamAppDefinition(appDefinition),
+					streamDefinition1.getName() + "." + appDefinition.getName());
 		}
 		assertEquals(2, repository.count());
 		AppStatus status = mock(AppStatus.class);
@@ -392,9 +390,9 @@ public class StreamControllerTests {
 	@Test
 	public void testDisplaySingleStream() throws Exception {
 		StreamDefinition streamDefinition1 = new StreamDefinition("myStream", "time | log");
-		for (ModuleDefinition moduleDefinition : streamDefinition1.getModuleDefinitions()) {
-			deploymentIdRepository.save(DeploymentKey.forApp(moduleDefinition),
-					streamDefinition1.getName() + "." + moduleDefinition.getName());
+		for (StreamAppDefinition appDefinition : streamDefinition1.getAppDefinitions()) {
+			deploymentIdRepository.save(DeploymentKey.forStreamAppDefinition(appDefinition),
+					streamDefinition1.getName() + "." + appDefinition.getName());
 		}
 		repository.save(streamDefinition1);
 		assertEquals(1, repository.count());
@@ -459,9 +457,9 @@ public class StreamControllerTests {
 		repository.save(new StreamDefinition("myStream", "time | log"));
 		mockMvc.perform(
 				post("/streams/deployments/myStream").param("properties",
-						"module.time.producer.partitionKeyExpression=payload," +
-								"module.log.count=2," +
-								"module.log.consumer.concurrency=3")
+						"app.time.producer.partitionKeyExpression=payload," +
+								"app.log.count=2," +
+								"app.log.consumer.concurrency=3")
 						.accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isCreated());
 		ArgumentCaptor<AppDeploymentRequest> captor = ArgumentCaptor.forClass(AppDeploymentRequest.class);
@@ -487,9 +485,9 @@ public class StreamControllerTests {
 		repository.save(new StreamDefinition("myStream", "time | log"));
 		mockMvc.perform(
 				post("/streams/deployments/myStream").param("properties",
-						"module.*.producer.partitionKeyExpression=payload," +
-								"module.*.count=2," +
-								"module.*.consumer.concurrency=3")
+						"app.*.producer.partitionKeyExpression=payload," +
+								"app.*.count=2," +
+								"app.*.consumer.concurrency=3")
 						.accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isCreated());
 		ArgumentCaptor<AppDeploymentRequest> captor = ArgumentCaptor.forClass(AppDeploymentRequest.class);

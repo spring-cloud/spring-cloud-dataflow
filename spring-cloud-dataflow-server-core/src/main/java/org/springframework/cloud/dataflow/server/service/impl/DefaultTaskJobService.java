@@ -22,6 +22,7 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import org.springframework.batch.admin.service.JobService;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobInstance;
@@ -50,6 +51,7 @@ import org.springframework.util.Assert;
  *
  * @author Glenn Renfro.
  * @author Gunnar Hillert
+ * @author Mark Fisher
  */
 public class DefaultTaskJobService implements TaskJobService {
 
@@ -206,8 +208,7 @@ public class DefaultTaskJobService implements TaskJobService {
 			throw new NoSuchTaskDefinitionException(taskExecution.getTaskName());
 		}
 
-		taskService.executeTask(taskDefinition.getName(), taskDefinition.getParameters(), taskExecution.getParameters());
-
+		taskService.executeTask(taskDefinition.getName(), taskDefinition.getProperties(), taskExecution.getParameters());
 	}
 
 	@Override

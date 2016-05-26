@@ -21,6 +21,7 @@ package org.springframework.cloud.dataflow.rest.client;
  *
  * @author Ilayaperumal Gopinathan
  * @author Glenn Renfro
+ * @author Mark Fisher
  */
 public interface DataFlowOperations {
 
@@ -50,14 +51,9 @@ public interface DataFlowOperations {
 	JobOperations jobOperations();
 
 	/**
-	 * Module related operations.
+	 * Application registry related operations.
 	 */
-	ModuleOperations moduleOperations();
-
-	/**
-	 * Library related operations.
-	 */
-	LibraryOperations libraryOperations();
+	AppRegistryOperations appRegistryOperations();
 
 	/**
 	 * DSL Completion related operations.

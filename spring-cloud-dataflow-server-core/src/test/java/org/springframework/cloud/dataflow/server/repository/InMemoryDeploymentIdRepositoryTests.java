@@ -23,7 +23,7 @@ import static org.junit.Assert.assertThat;
 
 import org.junit.Test;
 
-import org.springframework.cloud.dataflow.core.ModuleDefinition;
+import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 
@@ -37,17 +37,17 @@ public class InMemoryDeploymentIdRepositoryTests {
 	@Test
 	public void testSimpleSaveFind() {
 		StreamDefinition streamDefinition1 = new StreamDefinition("myStream1", "time | log");
-		ModuleDefinition[] moduleDefinitions1 = streamDefinition1.getModuleDefinitions().toArray(new ModuleDefinition[0]);
+		StreamAppDefinition[] appDefinitions1 = streamDefinition1.getAppDefinitions().toArray(new StreamAppDefinition[0]);
 		StreamDefinition streamDefinition2 = new StreamDefinition("myStream1", "time | log");
-		ModuleDefinition[] moduleDefinitions2 = streamDefinition2.getModuleDefinitions().toArray(new ModuleDefinition[0]);
+		StreamAppDefinition[] appDefinitions2 = streamDefinition2.getAppDefinitions().toArray(new StreamAppDefinition[0]);
 		TaskDefinition taskDefinition1 = new TaskDefinition("myTask", "timestamp");
 		TaskDefinition taskDefinition2 = new TaskDefinition("myTask", "timestamp");
-		String appDeploymentKey1 = DeploymentKey.forApp(moduleDefinitions1[0]);
-		String appDeploymentKey2 = DeploymentKey.forApp(moduleDefinitions1[1]);
-		String appDeploymentKey3 = DeploymentKey.forApp(moduleDefinitions2[0]);
-		String appDeploymentKey4 = DeploymentKey.forApp(moduleDefinitions2[1]);
-		String appDeploymentKey5 = DeploymentKey.forApp(taskDefinition1.getModuleDefinition());
-		String appDeploymentKey6 = DeploymentKey.forApp(taskDefinition2.getModuleDefinition());
+		String appDeploymentKey1 = DeploymentKey.forStreamAppDefinition(appDefinitions1[0]);
+		String appDeploymentKey2 = DeploymentKey.forStreamAppDefinition(appDefinitions1[1]);
+		String appDeploymentKey3 = DeploymentKey.forStreamAppDefinition(appDefinitions2[0]);
+		String appDeploymentKey4 = DeploymentKey.forStreamAppDefinition(appDefinitions2[1]);
+		String appDeploymentKey5 = DeploymentKey.forTaskDefinition(taskDefinition1);
+		String appDeploymentKey6 = DeploymentKey.forTaskDefinition(taskDefinition2);
 
 		DeploymentIdRepository repository = new InMemoryDeploymentIdRepository();
 		repository.save(appDeploymentKey1, "id1");
@@ -79,11 +79,11 @@ public class InMemoryDeploymentIdRepositoryTests {
 	@Test
 	public void testDeleteKey() {
 		StreamDefinition streamDefinition1 = new StreamDefinition("myStream1", "time | log");
-		ModuleDefinition[] moduleDefinitions1 = streamDefinition1.getModuleDefinitions().toArray(new ModuleDefinition[0]);
+		StreamAppDefinition[] appDefinitions1 = streamDefinition1.getAppDefinitions().toArray(new StreamAppDefinition[0]);
 		TaskDefinition taskDefinition1 = new TaskDefinition("myTask", "timestamp");
-		String appDeploymentKey1 = DeploymentKey.forApp(moduleDefinitions1[0]);
-		String appDeploymentKey2 = DeploymentKey.forApp(moduleDefinitions1[1]);
-		String appDeploymentKey3 = DeploymentKey.forApp(taskDefinition1.getModuleDefinition());
+		String appDeploymentKey1 = DeploymentKey.forStreamAppDefinition(appDefinitions1[0]);
+		String appDeploymentKey2 = DeploymentKey.forStreamAppDefinition(appDefinitions1[1]);
+		String appDeploymentKey3 = DeploymentKey.forTaskDefinition(taskDefinition1);
 
 		DeploymentIdRepository repository = new InMemoryDeploymentIdRepository();
 		repository.save(appDeploymentKey1, "id1");
