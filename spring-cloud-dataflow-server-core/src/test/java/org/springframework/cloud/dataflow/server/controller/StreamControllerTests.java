@@ -66,6 +66,7 @@ import org.springframework.cloud.deployer.resource.maven.MavenResource;
 import org.springframework.cloud.deployer.resource.maven.MavenResourceLoader;
 import org.springframework.cloud.deployer.resource.registry.InMemoryUriRegistry;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
+import org.springframework.cloud.deployer.spi.app.AppInstanceStatus;
 import org.springframework.cloud.deployer.spi.app.AppStatus;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
@@ -429,6 +430,64 @@ public class StreamControllerTests {
 		assertThat(logRequest.getDefinition().getName(), is("log"));
 		AppDeploymentRequest timeRequest = requests.get(1);
 		assertThat(timeRequest.getDefinition().getName(), is("time"));
+	}
+
+	@Test
+	public void testDuplicateDeploy() throws Exception {
+		repository.save(new StreamDefinition("myStream", "time | log"));
+		mockMvc.perform(
+				post("/streams/deployments/myStream").accept(MediaType.APPLICATION_JSON)).andDo(print())
+				.andExpect(status().isCreated());
+		ArgumentCaptor<AppDeploymentRequest> captor = ArgumentCaptor.forClass(AppDeploymentRequest.class);
+		verify(appDeployer, times(2)).deploy(captor.capture());
+		when(appDeployer.status("testID")).thenReturn(AppStatus.of("testID").with(new AppInstanceStatus() {
+			@Override
+			public String getId() {
+				return "testID";
+			}
+
+			@Override
+			public DeploymentState getState() {
+				return DeploymentState.valueOf("deployed");
+			}
+
+			@Override
+			public Map<String, String> getAttributes() {
+				return null;
+			}
+		}).build());
+		mockMvc.perform(
+				post("/streams/deployments/myStream").accept(MediaType.APPLICATION_JSON)).andDo(print())
+				.andExpect(status().isConflict());
+	}
+
+	@Test
+	public void testDuplicateDeployWhenStreamIsBeingDeployed() throws Exception {
+		repository.save(new StreamDefinition("myStream", "time | log"));
+		mockMvc.perform(
+				post("/streams/deployments/myStream").accept(MediaType.APPLICATION_JSON)).andDo(print())
+				.andExpect(status().isCreated());
+		ArgumentCaptor<AppDeploymentRequest> captor = ArgumentCaptor.forClass(AppDeploymentRequest.class);
+		verify(appDeployer, times(2)).deploy(captor.capture());
+		when(appDeployer.status("testID")).thenReturn(AppStatus.of("testID").with(new AppInstanceStatus() {
+			@Override
+			public String getId() {
+				return "testID";
+			}
+
+			@Override
+			public DeploymentState getState() {
+				return DeploymentState.valueOf("deploying");
+			}
+
+			@Override
+			public Map<String, String> getAttributes() {
+				return null;
+			}
+		}).build());
+		mockMvc.perform(
+				post("/streams/deployments/myStream").accept(MediaType.APPLICATION_JSON)).andDo(print())
+				.andExpect(status().isConflict());
 	}
 
 	@Test
