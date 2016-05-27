@@ -24,12 +24,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
-import org.springframework.cloud.dataflow.server.EnableDataFlowServer;
+import org.springframework.cloud.dataflow.server.config.DataFlowServerConfiguration;
+import org.springframework.cloud.dataflow.shell.autoconfigure.BaseShellAutoConfiguration;
 import org.springframework.cloud.dataflow.shell.command.JobCommandTemplate;
 import org.springframework.cloud.dataflow.shell.command.StreamCommandTemplate;
 import org.springframework.cloud.dataflow.shell.command.TaskCommandTemplate;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.shell.core.CommandResult;
 import org.springframework.shell.core.JLineShellComponent;
 import org.springframework.util.AlternativeJdkIdGenerator;
@@ -104,7 +104,7 @@ public abstract class AbstractShellIntegrationTest {
 				shutdownAfterRun = Boolean.getBoolean(SHUTDOWN_AFTER_RUN);
 			}
 
-			SpringApplication application = new SpringApplicationBuilder(TestConfig.class).build();
+			SpringApplication application = new SpringApplicationBuilder(DataFlowServerConfiguration.class).build();
 
 			int randomPort = SocketUtils.findAvailableTcpPort();
 			String dataFlowUri = String.format("--dataflow.uri=http://localhost:%s", serverPort);
@@ -210,11 +210,4 @@ public abstract class AbstractShellIntegrationTest {
 		}
 	}
 
-	/**
-	 * Configuration for the Data Flow server that is specific to shell tests.
-	 */
-	@Configuration
-	@EnableDataFlowServer
-	public static class TestConfig {
-	}
 }

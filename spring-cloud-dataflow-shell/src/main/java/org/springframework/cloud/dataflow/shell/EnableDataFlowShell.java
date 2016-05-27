@@ -16,7 +16,7 @@
 
 package org.springframework.cloud.dataflow.shell;
 
-import org.springframework.cloud.dataflow.shell.autoconfigure.BootstrapConfiguration;
+import org.springframework.cloud.dataflow.shell.config.ShellCommandLineConfiguration;
 import org.springframework.context.annotation.Import;
 
 import java.lang.annotation.*;
@@ -24,13 +24,13 @@ import java.lang.annotation.*;
 /**
  * Activates the Spring Cloud Data Flow shell.
  *
- * @author <a href="mailto:josh@joshlong.com">Josh Long</a>
+ * @author Josh Long
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Inherited
-@Import(BootstrapConfiguration.class)
+@Import(ShellCommandLineConfiguration.class)
 public @interface EnableDataFlowShell {
 
 }
