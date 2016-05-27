@@ -98,7 +98,6 @@ public class ConfigCommands implements CommandMarker, ApplicationListener<Applic
 					unspecifiedDefaultValue = DEFAULT_TARGET) String targetUriString) {
 		try {
 			URI baseURI = URI.create(targetUriString);
-			establishConverters(this.restTemplate);
 			this.shell.setDataFlowOperations(new DataFlowTemplate(baseURI, this.restTemplate));
 			return(String.format("Successfully targeted %s", targetUriString));
 		}
@@ -127,7 +126,10 @@ public class ConfigCommands implements CommandMarker, ApplicationListener<Applic
 		target(serverUri);
 	}
 
-	private void establishConverters(RestTemplate restTemplate){
+	@Bean
+	public static RestTemplate restTemplate() {
+		RestTemplate restTemplate = new RestTemplate();
+		restTemplate.setErrorHandler(new VndErrorResponseErrorHandler(restTemplate.getMessageConverters()));
 		for(HttpMessageConverter converter : restTemplate.getMessageConverters()) {
 			if (converter instanceof MappingJackson2HttpMessageConverter) {
 				final MappingJackson2HttpMessageConverter jacksonConverter = (MappingJackson2HttpMessageConverter) converter;
@@ -143,12 +145,6 @@ public class ConfigCommands implements CommandMarker, ApplicationListener<Applic
 				jacksonConverter.getObjectMapper().registerModule(new Jackson2HalModule());
 			}
 		}
-	}
-
-	@Bean
-	public static RestTemplate restTemplate() {
-		RestTemplate restTemplate = new RestTemplate();
-		restTemplate.setErrorHandler(new VndErrorResponseErrorHandler(restTemplate.getMessageConverters()));
 		return restTemplate;
 	}
 
