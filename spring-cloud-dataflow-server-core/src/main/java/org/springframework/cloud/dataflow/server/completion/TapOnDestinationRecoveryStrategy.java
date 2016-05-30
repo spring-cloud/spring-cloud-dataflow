@@ -58,7 +58,9 @@ public class TapOnDestinationRecoveryStrategy implements RecoveryStrategy<ParseE
 		if (streamName.contains(".")) {
 			String[] splits = streamName.split("\\.");
 			streamName = splits[0];
-			appName = splits[1];
+			if (splits.length > 1) {
+				appName = splits[1];
+			}
 		}
 
 		StreamDefinition streamDefinition = streamDefinitionRepository.findOne(streamName);

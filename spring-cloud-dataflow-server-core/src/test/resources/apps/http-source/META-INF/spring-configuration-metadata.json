@@ -1,0 +1,25 @@
+{
+  "groups": [
+    {
+      "name": "",
+      "type": "foo.bar.HttpProperties",
+      "sourceType": "foo.bar.HttpProperties"
+    }
+  ],
+  "properties": [
+    {
+      "name": "port",
+      "type": "java.lang.Integer",
+      "description": "The port to listen on",
+      "sourceType": "foo.bar.HttpProperties",
+      "defaultValue": 8080
+    },
+    {
+      "name": "use.ssl",
+      "type": "java.lang.Boolean",
+      "description": "Whether to use SSL encryption or not",
+      "sourceType": "foo.bar.HttpProperties"
+    }
+  ],
+  "hints": []
+}
