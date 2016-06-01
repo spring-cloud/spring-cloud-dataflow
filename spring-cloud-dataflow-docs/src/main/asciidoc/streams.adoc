@@ -8,7 +8,7 @@ In this section you will learn all about Streams and how to use them with Spring
 
 == Introduction
 
-In Spring Cloud Data Flow, a basic stream defines the ingestion of event driven data from a _source_ to a _sink_ that passes through any number of _processors_. Streams are composed of spring-cloud-stream modules and the deployment of stream definitions is done via the Data Flow Server (REST API). The xref:getting-started#getting-started[Getting Started] section shows you how to start these servers and how to start and use the Spring Cloud Data Flow shell.
+In Spring Cloud Data Flow, a basic stream defines the ingestion of event driven data from a _source_ to a _sink_ that passes through any number of _processors_. Streams are composed of spring-cloud-stream applications and the deployment of stream definitions is done via the Data Flow Server (REST API). The xref:getting-started#getting-started[Getting Started] section shows you how to start these servers and how to start and use the Spring Cloud Data Flow shell.
 
 A high level DSL is used to create stream definitions. The DSL to define a stream that has an http source and a file sink (with no processors) is shown below
 
@@ -18,9 +18,9 @@ http | file
 The DSL mimics a UNIX pipes and filters syntax. Default values for ports and filenames are used in this example but can be overridden using `--` options, such as
 
 ```
-http --port=8091 | file --dir=/tmp/httpdata/
+http --server.port=8091 | file --directory=/tmp/httpdata/
 ```
-To create these stream definitions you make an HTTP POST request to the Spring Cloud Data Flow Server. More details can be found in the sections below.
+To create these stream definitions you use the shell or make an HTTP POST request to the Spring Cloud Data Flow Server. More details can be found in the sections below.
 
 == Creating a Simple Stream
 
@@ -38,22 +38,32 @@ Then to deploy the stream execute the following shell command (or alternatively 
 ```
 dataflow:> stream deploy --name ticktock
 ```
-The Admin Server resolves `time` and `log` to maven coordinates and uses those to launch the `time` and `log` applications of the stream.  In this simple example, the time source simply sends the current time as a message each second, and the log sink outputs it using the logging framework.
+The Data Flow Server resolves `time` and `log` to maven coordinates and uses those to launch the `time` and `log` applications of the stream.
 
 ```
-2016-01-13 10:41:15.398  INFO 65275 --- [nio-9393-exec-1] o.s.c.d.a.s.l.OutOfProcessModuleDeployer : deploying module org.springframework.cloud.stream.module:log-sink:jar:exec:1.0.0.BUILD-SNAPSHOT instance 0
-   Logs will be in /var/folders/hs/h87zy7z17qs6mcnl4hj8_dp00000gp/T/spring-cloud-data-flow-3652850284472151116/ticktock.log
-2016-01-13 10:41:15.433  INFO 65275 --- [nio-9393-exec-1] o.s.c.d.a.s.l.OutOfProcessModuleDeployer : deploying module org.springframework.cloud.stream.module:time-source:jar:exec:1.0.0.BUILD-SNAPSHOT instance 0
-   Logs will be in /var/folders/hs/h87zy7z17qs6mcnl4hj8_dp00000gp/T/spring-cloud-data-flow-3652850284472151116/ticktock.time
+2016-06-01 09:41:21.728  INFO 79016 --- [nio-9393-exec-6] o.s.c.d.spi.local.LocalAppDeployer       : deploying app ticktock.log instance 0
+   Logs will be in /var/folders/wn/8jxm_tbd1vj28c8vj37n900m0000gn/T/spring-cloud-dataflow-912434582726479179/ticktock-1464788481708/ticktock.log
+2016-06-01 09:41:21.914  INFO 79016 --- [nio-9393-exec-6] o.s.c.d.spi.local.LocalAppDeployer       : deploying app ticktock.time instance 0
+   Logs will be in /var/folders/wn/8jxm_tbd1vj28c8vj37n900m0000gn/T/spring-cloud-dataflow-912434582726479179/ticktock-1464788481910/ticktock.time
 ```
 
-If you would like to have multiple instances of a module in the stream, you can include a property with the deploy command:
+In this example, the time source simply sends the current time as a message each second, and the log sink outputs it using the logging framework.
+You can tail the `stdout` log (which has an "_<instance>" suffix). The log files are located within the directory displayed in the Data Flow Server's log output, as shown above.
 
 ```
-dataflow:> stream deploy --name ticktock --properties "module.time.count=3"
+$ tail -f /var/folders/wn/8jxm_tbd1vj28c8vj37n900m0000gn/T/spring-cloud-dataflow-912434582726479179/ticktock-1464788481708/ticktock.log/stdout_0.log
+2016-06-01 09:45:11.250  INFO 79194 --- [  kafka-binder-] log.sink    : 06/01/16 09:45:11
+2016-06-01 09:45:12.250  INFO 79194 --- [  kafka-binder-] log.sink    : 06/01/16 09:45:12
+2016-06-01 09:45:13.251  INFO 79194 --- [  kafka-binder-] log.sink    : 06/01/16 09:45:13
 ```
 
-IMPORTANT: See <<module-labels>>.
+If you would like to have multiple instances of an application in the stream, you can include a property with the deploy command:
+
+```
+dataflow:> stream deploy --name ticktock --properties "app.time.count=3"
+```
+
+IMPORTANT: See <<app-labels>>.
 
 == Deleting a Stream
 
@@ -62,6 +72,8 @@ You can delete a stream by issuing the `stream destroy` command from the shell:
 ```
 dataflow:> stream destroy --name ticktock
 ```
+
+If the stream was deployed, it will be undeployed before the stream definition is deleted.
 
 == Deploying and Undeploying Streams
 
@@ -83,15 +95,16 @@ dataflow:> stream create --definition "http | log" --name myhttpstream --deploy
 which will produce the following output from the server
 
 ```
-2016-01-13 18:42:19.162  INFO 19463 --- [nio-9393-exec-7] o.s.c.d.a.s.l.OutOfProcessModuleDeployer : deploying module org.springframework.cloud.stream.module:log-sink:jar:exec:1.0.0.BUILD-SNAPSHOT instance 0
-   Logs will be in /var/folders/hs/h87zy7z17qs6mcnl4hj8_dp00000gp/T/spring-cloud-data-flow-2185888994718649403/myhttpstream.log
-2016-01-13 18:42:19.180  INFO 19463 --- [nio-9393-exec-7] o.s.c.d.a.s.l.OutOfProcessModuleDeployer : deploying module org.springframework.cloud.stream.module:http-source:jar:exec:1.0.0.BUILD-SNAPSHOT instance 0
-   Logs will be in /var/folders/hs/h87zy7z17qs6mcnl4hj8_dp00000gp/T/spring-cloud-data-flow-2185888994718649403/myhttpstream.http
+2016-06-01 09:47:58.920  INFO 79016 --- [io-9393-exec-10] o.s.c.d.spi.local.LocalAppDeployer       : deploying app myhttpstream.log instance 0
+   Logs will be in /var/folders/wn/8jxm_tbd1vj28c8vj37n900m0000gn/T/spring-cloud-dataflow-912434582726479179/myhttpstream-1464788878747/myhttpstream.log
+2016-06-01 09:48:06.396  INFO 79016 --- [io-9393-exec-10] o.s.c.d.spi.local.LocalAppDeployer       : deploying app myhttpstream.http instance 0
+   Logs will be in /var/folders/wn/8jxm_tbd1vj28c8vj37n900m0000gn/T/spring-cloud-dataflow-912434582726479179/myhttpstream-1464788886383/myhttpstream.http
 ```
 
-Note that we don't see anydefin other output this time until we actually post some data (using shell command). In order to see the randomly assigned port on which the http source is listening, execute:
+Note that we don't see any other output this time until we actually post some data (using a shell command). In order to see the randomly assigned port on which the http source is listening, execute:
+
 ```
-dataflow:> runtime modules
+dataflow:> runtime apps
 ```
 You should see that the corresponding http source has a `url` property containing the host and port information on which it is listening. You are now ready to post to that url, e.g.:
 ```
@@ -101,11 +114,11 @@ dataflow:> http post --target http://localhost:1234 --data "goodbye"
 and the stream will then funnel the data from the http source to the output log implemented by the log sink
 
 ```
-2016-01-13 21:15:34.825  INFO 54348 --- [hannel-adapter1] log.sink                                 : hello
-2016-01-13 21:17:36.544  INFO 54348 --- [hannel-adapter1] log.sink                                 : goodbye
+2016-06-01 09:50:22.121  INFO 79654 --- [  kafka-binder-] log.sink    : hello
+2016-06-01 09:50:26.810  INFO 79654 --- [  kafka-binder-] log.sink    : goodbye
 ```
 
-Of course, we could also change the sink implementation. You could pipe the output to a file (`file`), to hadoop (`hdfs`) or to any of the other sink modules which are provided. You can also define your own modules.
+Of course, we could also change the sink implementation. You could pipe the output to a file (`file`), to hadoop (`hdfs`) or to any of the other sink apps which are available. You can also define your own apps.
 
 == Simple Stream Processing
 
@@ -117,39 +130,37 @@ To create this stream enter the following command in the shell
 ```
 dataflow:> stream create --definition "http | transform --expression=payload.toUpperCase() | log" --name mystream --deploy
 ```
-Posting some data (using shell command)
+Posting some data (using a shell command)
 ```
 dataflow:> http post --target http://localhost:1234 --data "hello"
 ```
-Will result in an uppercased 'hello' in the log
+Will result in an uppercased 'HELLO' in the log
 
 ```
-15:18:21,345  WARN ThreadPoolTaskScheduler-1 logger.myprocstream:141 - HELLO
+2016-06-01 09:54:37.749  INFO 80083 --- [  kafka-binder-] log.sink    : HELLO
 ```
-
-See the xref:processors#spring-cloud-stream-modules-processors[Processors] section for more information.
 
 == DSL Syntax
 
-In the examples above, we connected a source to a sink using the pipe symbol `|`. You can also pass parameters to the source and sink configurations. The parameter names will depend on the individual module implementations, but as an example, the `http` source module exposes a `server.port` setting which allows you to change the data ingestion port from the default value. To create the stream using port 8000, we would use
+In the examples above, we connected a source to a sink using the pipe symbol `|`. You can also pass properties to the source and sink configurations. The property names will depend on the individual app implementations, but as an example, the `http` source app exposes a `server.port` setting which allows you to change the data ingestion port from the default value. To create the stream using port 8000, we would use
 ```
 dataflow:> stream create --definition "http --server.port=8000 | log" --name myhttpstream
 ```
-The shell provides tab completion for module parameters and also the shell command `module info` provides some additional documentation.  For more comprehensive documentation on module parameters, please see the xref:modules#modules[Modules] chapter.
+The shell provides tab completion for application properties and also the shell command `app info` provides some additional documentation.
 
 === Register a Stream App
 
 Register a Stream App with the App Registry using the Spring Cloud Data Flow Shell
-`module register` command. You must provide a unique name and a URI that can be
+`app register` command. You must provide a unique name and a URI that can be
 resolved to the app artifact. For the type, specify "source", "processor", or "sink".
 Here are a few examples:
 
 ```
-dataflow:>module register --name mysource --type source --uri maven://com.example:mysource:0.0.1-SNAPSHOT
+dataflow:>app register --name mysource --type source --uri maven://com.example:mysource:0.0.1-SNAPSHOT
 
-dataflow:>module register --name myprocessor --type processor --uri file:///Users/example/myprocessor-1.2.3.jar
+dataflow:>app register --name myprocessor --type processor --uri file:///Users/example/myprocessor-1.2.3.jar
 
-dataflow:>module register --name mysink --type sink --uri http://example.com/mysink-2.0.1.jar
+dataflow:>app register --name mysink --type sink --uri http://example.com/mysink-2.0.1.jar
 ```
 
 When providing a URI with the `maven` scheme, the format should conform to the following:
@@ -167,17 +178,17 @@ source.foo=file:///tmp/foo.jar
 sink.bar=file:///tmp/bar.jar
 ```
 
-Then use the `module import` command and provide the location of the properties file via `--uri`:
+Then use the `app import` command and provide the location of the properties file via `--uri`:
 
 ```
-module import --uri file:///tmp/stream-apps.properties
+app import --uri file:///tmp/stream-apps.properties
 ```
 
 You can also pass the `--local` option (which is TRUE by default) to indicate whether the
 properties file location should be resolved within the shell process itself. If the location should
 be resolved from the Data Flow Server process, specify `--local false`.
 
-When using either `module register` or `module import`, if a stream app is already registered with
+When using either `app register` or `app import`, if a stream app is already registered with
 the provided name and type, it will not be overridden by default. If you would like to override the
 pre-existing stream app, then include the `--force` option.
 
@@ -188,12 +199,19 @@ the specific documentation of each Data Flow Server for more detail.
 
 == Advanced Features
 
-If directed graphs are needed instead of the simple linear streams described above, two features are relevant. First, named destinations may be used as a way to combine the output from multiple streams or for multiple consumers to share the output from a single stream.  This can be done using the DSL syntax `http > mydestination` or `mydestination > log`.  To learn more, refer to then section on Named Destinations.  Second, you may need to determine the output channel of a stream based on some information that is only known at runtime. To learn about such content-based routing, refer to the Dynamic Router section.
+If directed graphs are needed instead of the simple linear streams described above, two features are relevant.
 
-[[module-labels]]
-== Module Labels
+First, named destinations may be used as a way to combine the output from multiple streams or for multiple consumers to share the output from a single stream.
+This can be done using the DSL syntax `http > :mydestination` or `:mydestination > log`.
 
-When a stream is comprised of multiple modules with the same name, they must be qualified with labels:
+Second, you may need to determine the output channel of a stream based on some information that is only known at runtime.
+In that case, a router may be used in the sink position of a stream definition. For more information, refer to the Router Sink starter's
+link:https://github.com/spring-cloud/spring-cloud-stream-app-starters/tree/master/router/spring-cloud-starter-stream-sink-router[README].
+
+[[app-labels]]
+== App Labels
+
+When a stream is comprised of multiple apps with the same name, they must be qualified with labels:
 ```
 stream create --definition "http | firstLabel: transform --expression=payload.toUpperCase() | secondLabel: transform --expression=payload+'!' | log" --name myStreamWithLabels --deploy
 ```
@@ -211,7 +229,7 @@ taps can be created at the output of `http`, `step1` and `step2`.
 To create a stream that acts as a 'tap' on another stream requires to specify the `source destination name` for the tap stream. The syntax for source destination name is:
 
 ```
-`<stream-name>.<label/app-name>`
+`:<stream-name>.<label/app-name>`
 ```
 To create a tap at the output of `http` in the stream above, the source destination name is `mainstream.http`
 To create a tap at the output of the first transform app in the stream above, the source destination name is `mainstream.step1`
@@ -224,7 +242,7 @@ stream create --definition ":mainstream.http > counter" --name tap_at_http --dep
 stream create --definition ":mainstream.step1 > jdbc" --name tap_at_step1_transformer --deploy
 ```
 
-Note the colon (:) prefix before the destination names. The colon lets the parser parse this as the destination name instead of app name.
+Note the colon (:) prefix before the destination names. The colon allows the parser to recognize this as a destination name instead of an app name.
 
 [[explicit-destination-names]]
 == Connecting to explicit destination names at the broker
@@ -245,9 +263,9 @@ The following stream has the destination name at the `sink` position:
 ```
 stream create --definition "http > :myDestination" --name ingest_to_broker --deploy
 ```
-This stream sends the messages from `http` app to the destination `myDestination` located at the broker.
+This stream sends the messages from the `http` app to the destination `myDestination` located at the broker.
 
-From the above streams, notice that the `http` and `log` apps are interacting with each other via `broker` (through the destination `myDestination`) rather than having a pipe directly between `http` and `log` within a single stream.
+From the above streams, notice that the `http` and `log` apps are interacting with each other via the broker (through the destination `myDestination`) rather than having a pipe directly between `http` and `log` within a single stream.
 
 It is also possible to connect two different destinations (`source` and `sink` positions) at the broker in a stream.
 

@@ -107,8 +107,8 @@ Look to see if `hello world` ended up in log files for the `log` application.
 [[getting-started-security]]
 == Security
 
-By default, the Dataflow server is unsecured and runs on an unencrypted HTTP connection.
-You can secure your REST endpoints, as well as the Dataflow Dashboard by enabling HTTPS
+By default, the Data Flow server is unsecured and runs on an unencrypted HTTP connection.
+You can secure your REST endpoints, as well as the Data Flow Dashboard by enabling HTTPS
 and requiring clients to authenticate.
 
 [[getting-started-security-enabling-https]]
@@ -140,7 +140,7 @@ server:
 <7> The password of the trust store.
 
 NOTE: If HTTPS is enabled, it will completely replace HTTP as the protocol over
-which the REST endpoints and the Dataflow Dashboard interact. Plain HTTP requests
+which the REST endpoints and the Data Flow Dashboard interact. Plain HTTP requests
 will fail - therefore, make sure that you configure your Shell accordingly.
 
 ==== Using Self-Signed Certificates
@@ -173,11 +173,11 @@ server:
     key-password: dataflow
 ----
 
-This is all that's needed for the Dataflow Server. Once you start the server,
+This is all that's needed for the Data Flow Server. Once you start the server,
 you should be able to access it via https://localhost:8443/[https://localhost:8443/]. As this is a self-signed
 certificate, you will hit a warning in your browser, that you need to ignore.
 
-This issue also is relevant for the Dataflow Shell. Therefore additional steps are
+This issue also is relevant for the Data Flow Shell. Therefore additional steps are
 necessary to make the Shell work with self-signed certificates. First, we need to
 export the previously created certificate from the keystore:
 
@@ -193,7 +193,7 @@ Next, we need to create a truststore which the Shell will use:
 $ keytool -importcert -keystore dataflow.truststore -alias dataflow -storepass dataflow -file dataflow_cert -noprompt
 ----
 
-Now, you are ready to launch the Dataflow Shell using the following JVM arguments:
+Now, you are ready to launch the Data Flow Shell using the following JVM arguments:
 
 [source,bash,subs=attributes]
 ----
@@ -209,7 +209,7 @@ In case you run into trouble establishing a connection via SSL, you can enable a
 logging by using and setting the `javax.net.debug` JVM argument to `ssl`.
 ====
 
-Don't forget to target the Dataflow Server with:
+Don't forget to target the Data Flow Server with:
 
 [source,bash]
 ----
@@ -220,7 +220,7 @@ dataflow:> dataflow config server https://localhost:8443/
 === Enabling Authentication
 
 By default, the REST endpoints (administration, management and health), as well
-as Dashboard UI do not require authenticated access. However, authentication can
+as the Dashboard UI do not require authenticated access. However, authentication can
 be provided via http://oauth.net/2/[OAuth 2.0], thus allowing you to also integrate Spring Cloud
 Data Flow into Single Sign On (SSO) environments. The following 2 OAuth2 Grant Types will be used:
 
@@ -256,7 +256,7 @@ security:
 <2> The realm for Basic authentication
 <3> OAuth Configuration Section
 
-NOTE: As of version 1.0 Spring Cloud Dataflow does not provide finer-grained authorization. Thus, once you are logged in, you have full access to all functionality.
+NOTE: As of version 1.0 Spring Cloud Data Flow does not provide finer-grained authorization. Thus, once you are logged in, you have full access to all functionality.
 
 You can verify that basic authentication is working properly using _curl_:
 
@@ -276,5 +276,5 @@ which provides Cloud Foundry specific auto-configuration support for OAuth 2.0
 when used in conjunction with the _Pivotal Single Sign-On Service_.
 
 Simply set `security.basic.enabled` to `true` and in Cloud Foundry bind the SSO
-service to your Dataflow Server app and SSO will be enabled.
+service to your Data Flow Server app and SSO will be enabled.
 
