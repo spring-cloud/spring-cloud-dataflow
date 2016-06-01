@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016 the original author or authors.
+ * Copyright 2014-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,6 @@
 
 package org.springframework.cloud.dataflow.shell.command;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.Map;
-import java.util.TreeMap;
-
-import org.apache.commons.lang.ArrayUtils;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.impl.client.BasicCredentialsProvider;
@@ -38,8 +30,11 @@ import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.item.ExecutionContext;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.cloud.dataflow.rest.client.DataFlowServerException;
 import org.springframework.cloud.dataflow.rest.client.DataFlowTemplate;
 import org.springframework.cloud.dataflow.rest.client.VndErrorResponseErrorHandler;
@@ -54,8 +49,10 @@ import org.springframework.cloud.dataflow.rest.client.support.StepExecutionJacks
 import org.springframework.cloud.dataflow.rest.job.StepExecutionHistory;
 import org.springframework.cloud.dataflow.shell.ShellConfiguration;
 import org.springframework.cloud.dataflow.shell.Target;
-import org.springframework.cloud.dataflow.shell.Target.TargetStatus;
 import org.springframework.cloud.dataflow.shell.config.DataFlowShell;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
@@ -74,32 +71,59 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.Map;
+import java.util.TreeMap;
+
 /**
- * Configuration commands for the Shell.
+ * Configuration commands for the Shell.  The default Data Flow Server location is
+ * <code>http://localhost:9393</code>
  *
  * @author Gunnar Hillert
  * @author Marius Bogoevici
  * @author Ilayaperumal Gopinathan
  * @author Gary Russell
+ * @author Mark Pollack
  */
 @Component
 @Configuration
 @EnableHypermediaSupport(type = HypermediaType.HAL)
-public class ConfigCommands implements CommandMarker, InitializingBean {
+public class ConfigCommands implements CommandMarker,
+		InitializingBean,
+		ApplicationListener<ApplicationReadyEvent>,
+		ApplicationContextAware
+{
 
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
+
 	public static final String HORIZONTAL_LINE = "-------------------------------------------------------------------------------\n";
+
+	@Autowired
+	private DataFlowShell shell;
+
+	@Autowired
+	private RestTemplate restTemplate;
+
+	@Value("${dataflow.uri:" + Target.DEFAULT_TARGET + "}")
+	private String serverUri;
+
+	@Value("${dataflow.username:" + Target.DEFAULT_USERNAME + "}")
+	private String userName;
+
+	@Value("${dataflow.password:" + Target.DEFAULT_SPECIFIED_PASSWORD + "}")
+	private String password;
 
 	private CommandLine commandLine;
 
-	private RestTemplate restTemplate;
-
-	private DataFlowShell shell;
+	private UserInput userInput;
 
 	private ShellConfiguration shellConfiguration;
 
-	private UserInput userInput;
+	private ApplicationContext applicationContext;
+
+	private volatile boolean initialized;
 
 	@Autowired
 	public void setCommandLine(CommandLine commandLine) {
@@ -107,13 +131,8 @@ public class ConfigCommands implements CommandMarker, InitializingBean {
 	}
 
 	@Autowired
-	public void setRestTemplate(RestTemplate restTemplate) {
-		this.restTemplate = restTemplate;
-	}
-
-	@Autowired
-	public void setShell(DataFlowShell shell) {
-		this.shell = shell;
+	public void setUserInput(UserInput userInput) {
+		this.userInput = userInput;
 	}
 
 	@Autowired
@@ -121,16 +140,29 @@ public class ConfigCommands implements CommandMarker, InitializingBean {
 		this.shellConfiguration = shellConfiguration;
 	}
 
+	// These should be ctor injection
+
 	@Autowired
-	public void setUserInput(UserInput userInput) {
-		this.userInput = userInput;
+	public void setDataFlowShell(DataFlowShell shell) {
+		this.shell = shell;
+	}
+
+	@Autowired
+	public void setRestTemplate(RestTemplate restTemplate) {
+		this.restTemplate = restTemplate;
+	}
+
+	// This is for unit testing
+
+	public void setServerUri(String serverUri) {
+		this.serverUri = serverUri;
 	}
 
 	@CliCommand(value = {"dataflow config server"}, help = "Configure the Spring Cloud Data Flow REST server to use")
 	public String target(
 			@CliOption(mandatory = false, key = {"", "uri"},
 					help = "the location of the Spring Cloud Data Flow REST endpoint",
-					unspecifiedDefaultValue = Target.DEFAULT_TARGET) String targetUriString,
+					unspecifiedDefaultValue =  Target.DEFAULT_TARGET) String targetUriString,
 			@CliOption(mandatory = false, key = {"username"},
 					help = "the username for authenticated access to the Admin REST endpoint",
 					unspecifiedDefaultValue = Target.DEFAULT_USERNAME) String targetUsername,
@@ -139,20 +171,19 @@ public class ConfigCommands implements CommandMarker, InitializingBean {
 					specifiedDefaultValue = Target.DEFAULT_SPECIFIED_PASSWORD,
 					unspecifiedDefaultValue = Target.DEFAULT_UNSPECIFIED_PASSWORD) String targetPassword) {
 
-
 		if (!StringUtils.isEmpty(targetPassword) && StringUtils.isEmpty(targetUsername)) {
-			return "A password may be specified only together with a username";
+				return "A password may be specified only together with a username";
 		}
 		if (StringUtils.isEmpty(targetPassword) && !StringUtils.isEmpty(targetUsername)) {
 			// read password from the command line
 			targetPassword = userInput.prompt("Password", "", false);
 		}
 
-		this.shellConfiguration.setTarget(new Target(targetUriString, targetUsername, targetPassword));
 
-		establishConverters(this.restTemplate);
 
 		try {
+			this.shellConfiguration.setTarget(new Target(targetUriString, targetUsername, targetPassword));
+
 			if (StringUtils.hasText(targetUsername) && StringUtils.hasText(targetPassword)) {
 				final BasicCredentialsProvider credentialsProvider = new BasicCredentialsProvider();
 				credentialsProvider.setCredentials(AuthScope.ANY,
@@ -184,7 +215,7 @@ public class ConfigCommands implements CommandMarker, InitializingBean {
 			}
 			else {
 				return(String.format("Unable to contact Data Flow Server at '%s': '%s'.",
-								targetUriString, e.toString()));
+						targetUriString, e.toString()));
 			}
 		}
 	}
@@ -213,9 +244,9 @@ public class ConfigCommands implements CommandMarker, InitializingBean {
 
 		final StringBuilder sb = new StringBuilder(builder.build().render(66));
 
-		if (TargetStatus.ERROR.equals(target.getStatus())) {
+		if (Target.TargetStatus.ERROR.equals(target.getStatus())) {
 			sb.append(HORIZONTAL_LINE);
-			sb.append("An exception ocurred during targeting:\n");
+			sb.append("An exception occurred during targeting:\n");
 
 			final StringWriter stringWriter = new StringWriter();
 			target.getTargetException().printStackTrace(new PrintWriter(stringWriter));
@@ -225,71 +256,28 @@ public class ConfigCommands implements CommandMarker, InitializingBean {
 		return sb.toString();
 	}
 
-	/**
-	 * Initialize the default {@link Target} for the Dataflow Server. It will use
-	 * the constants {@link Target#DEFAULT_HOST}, {@link Target#DEFAULT_PORT}
-	 * and {@link Target#DEFAULT_SCHEME}.
-	 *
-	 * Alternatively, the host and port can also be set using the {@code --host}
-	 * and {@code --port} command line parameters.
-	 */
+
+	@Override
+	public void onApplicationEvent(ApplicationReadyEvent event) {
+		//Only invoke if the shell is executing in the same application context as the data flow server.
+		if (!initialized) {
+			target(this.serverUri, this.userName, this.password);
+		}
+	}
+
 	@Override
 	public void afterPropertiesSet() throws Exception {
-		target(getDefaultUri().toString(), getDefaultUsername(), getDefaultPassword());
-	}
-
-	private URI getDefaultUri() throws URISyntaxException {
-
-		int port = Target.DEFAULT_PORT;
-		String host = Target.DEFAULT_HOST;
-
-		if (commandLine.getArgs() != null) {
-			String[] args = commandLine.getArgs();
-			int i = 0;
-			while (i < args.length) {
-				String arg = args[i++];
-				if (arg.equals("--host")) {
-					host = args[i++];
-				}
-				else if (arg.equals("--port")) {
-					port = Integer.valueOf(args[i++]);
-				}
-				else {
-					i--;
-					break;
-				}
-			}
-		}
-		return new URI(Target.DEFAULT_SCHEME, null, host, port, null, null, null);
-	}
-
-	private String getDefaultUsername() {
-		int indexOfUserParameter = ArrayUtils.indexOf(commandLine.getArgs(), "--username");
-		// if '--username' exists and it is not the last in the list of arguments, the next argument is the password
-		if (indexOfUserParameter >= 0 && indexOfUserParameter < commandLine.getArgs().length - 1) {
-			return commandLine.getArgs()[indexOfUserParameter + 1];
-		}
-		else {
-			return Target.DEFAULT_USERNAME;
+		//Only invoke this lifecycle method if the shell is executing in stand-alone mode.
+		if (applicationContext != null && !applicationContext.containsBean("streamDefinitionRepository")) {
+			initialized = true;
+			target(this.serverUri, this.userName, this.password);
 		}
 	}
 
-	private String getDefaultPassword() {
-		int indexOfPasswordParameter = ArrayUtils.indexOf(commandLine.getArgs(), "--password");
-		// if '--password' exists and it is not the last in the list of arguments, the next argument is the password
-		if (indexOfPasswordParameter >= 0) {
-			if (indexOfPasswordParameter < commandLine.getArgs().length - 1) {
-				return commandLine.getArgs()[indexOfPasswordParameter + 1];
-			}
-			else {
-				return Target.DEFAULT_SPECIFIED_PASSWORD;
-			}
-		}
-		else {
-			return Target.DEFAULT_SPECIFIED_PASSWORD;
-		}
-	}
-	private void establishConverters(RestTemplate restTemplate){
+	@Bean
+	public static RestTemplate restTemplate() {
+		RestTemplate restTemplate = new RestTemplate();
+		restTemplate.setErrorHandler(new VndErrorResponseErrorHandler(restTemplate.getMessageConverters()));
 		for(HttpMessageConverter<?> converter : restTemplate.getMessageConverters()) {
 			if (converter instanceof MappingJackson2HttpMessageConverter) {
 				final MappingJackson2HttpMessageConverter jacksonConverter = (MappingJackson2HttpMessageConverter) converter;
@@ -305,13 +293,12 @@ public class ConfigCommands implements CommandMarker, InitializingBean {
 				jacksonConverter.getObjectMapper().registerModule(new Jackson2HalModule());
 			}
 		}
-	}
-
-	@Bean
-	public static RestTemplate restTemplate() {
-		RestTemplate restTemplate = new RestTemplate();
-		restTemplate.setErrorHandler(new VndErrorResponseErrorHandler(restTemplate.getMessageConverters()));
 		return restTemplate;
 	}
 
+
+	@Override
+	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+		this.applicationContext = applicationContext;
+	}
 }
