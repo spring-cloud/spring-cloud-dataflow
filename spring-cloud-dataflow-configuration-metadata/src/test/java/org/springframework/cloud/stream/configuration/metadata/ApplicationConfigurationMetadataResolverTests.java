@@ -41,28 +41,28 @@ public class ApplicationConfigurationMetadataResolverTests {
 
 	@Test
 	public void globalWhitelistedPropertiesShouldBeVisisble() {
-		List<ConfigurationMetadataProperty> properties = resolver.listProperties(new ClassPathResource("modules/filter-processor", getClass()));
+		List<ConfigurationMetadataProperty> properties = resolver.listProperties(new ClassPathResource("apps/filter-processor", getClass()));
 		assertThat(properties, hasItem(configPropertyIdentifiedAs("server.port")));
 	}
 
 	@Test
 	public void mainConfigurationClassesPropsShouldBeVisible() {
-		List<ConfigurationMetadataProperty> properties = resolver.listProperties(new ClassPathResource("modules/filter-processor", getClass()));
+		List<ConfigurationMetadataProperty> properties = resolver.listProperties(new ClassPathResource("apps/filter-processor", getClass()));
 		assertThat(properties, hasItem(configPropertyIdentifiedAs("expression")));
 	}
 
 	@Test
 	public void explicitPropsAndClassesShouldBeVisible() {
-		List<ConfigurationMetadataProperty> properties = resolver.listProperties(new ClassPathResource("modules/filter-processor", getClass()));
+		List<ConfigurationMetadataProperty> properties = resolver.listProperties(new ClassPathResource("apps/filter-processor", getClass()));
 		assertThat(properties, hasItem(configPropertyIdentifiedAs("some.other.whitelisted.prefix.expresso")));
 		assertThat(properties, hasItem(configPropertyIdentifiedAs("some.other.property.whitelisted.prefix.expresso2")));
 	}
 
 	@Test
 	public void otherPropertiesShouldOnlyBeVisibleInExtensiveCall() {
-		List<ConfigurationMetadataProperty> properties = resolver.listProperties(new ClassPathResource("modules/filter-processor", getClass()));
+		List<ConfigurationMetadataProperty> properties = resolver.listProperties(new ClassPathResource("apps/filter-processor", getClass()));
 		assertThat(properties, not(hasItem(configPropertyIdentifiedAs("some.prefix.hidden.by.default.secret"))));
-		properties = resolver.listProperties(new ClassPathResource("modules/filter-processor", getClass()), true);
+		properties = resolver.listProperties(new ClassPathResource("apps/filter-processor", getClass()), true);
 		assertThat(properties, hasItem(configPropertyIdentifiedAs("some.prefix.hidden.by.default.secret")));
 	}
 
