@@ -16,15 +16,16 @@
 
 package org.springframework.cloud.dataflow.server.config;
 
-import static org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType.HAL;
-
 import java.sql.SQLException;
 import java.util.Arrays;
 
 import javax.sql.DataSource;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import org.h2.tools.Server;
 import org.slf4j.LoggerFactory;
+
 import org.springframework.batch.admin.service.JobService;
 import org.springframework.batch.admin.service.SimpleJobServiceFactoryBean;
 import org.springframework.batch.core.StepExecution;
@@ -58,12 +59,14 @@ import org.springframework.cloud.dataflow.server.job.TaskExplorerFactoryBean;
 import org.springframework.cloud.dataflow.server.job.support.ExecutionContextJacksonMixIn;
 import org.springframework.cloud.dataflow.server.job.support.StepExecutionJacksonMixIn;
 import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
+import org.springframework.cloud.dataflow.server.repository.RdbmsDeploymentIdRepository;
+import org.springframework.cloud.dataflow.server.repository.RdbmsStreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.RedisDeploymentIdRepository;
 import org.springframework.cloud.dataflow.server.repository.RedisStreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
-import org.springframework.cloud.dataflow.server.repository.support.DefinitionRepositoryInitializer;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepositoryFactoryBean;
+import org.springframework.cloud.dataflow.server.repository.support.DefinitionRepositoryInitializer;
 import org.springframework.cloud.dataflow.server.service.TaskJobService;
 import org.springframework.cloud.dataflow.server.service.TaskService;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskJobService;
@@ -94,8 +97,7 @@ import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
+import static org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType.HAL;
 
 /**
  * Configuration for the Data Flow Server application context. This includes support
@@ -162,12 +164,28 @@ public class DataFlowServerConfiguration {
 
 	@Bean
 	@ConditionalOnMissingBean
-	public StreamDefinitionRepository streamDefinitionRepository(RedisConnectionFactory redisConnectionFactory) {
-		return new RedisStreamDefinitionRepository("stream-definitions", redisConnectionFactory);
+	@ConditionalOnExpression("#{'${serverStore:redis}'.equals('db')}")
+	public StreamDefinitionRepository rdbmsStreamDefinitionRepository(DataSource dataSource) {
+		return new RdbmsStreamDefinitionRepository(dataSource);
+	}
+
+	@Bean
+	@ConditionalOnExpression("#{'${serverStore:redis}'.equals('db')}")
+	public DeploymentIdRepository rdbmsDeploymentIdRepository(DataSource dataSource) {
+		return new RdbmsDeploymentIdRepository(dataSource);
 	}
 
 	@Bean
 	@ConditionalOnMissingBean
+	@ConditionalOnExpression("#{'${serverStore:redis}'.equals('redis')}")
+	public StreamDefinitionRepository streamDefinitionRepository(RedisConnectionFactory redisConnectionFactory) {
+		return new RedisStreamDefinitionRepository("stream-definitions", redisConnectionFactory);
+	}
+
+
+	@Bean
+	@ConditionalOnMissingBean
+	@ConditionalOnExpression("#{'${serverStore:redis}'.equals('redis')}")
 	public DeploymentIdRepository deploymentIdRepository(RedisConnectionFactory redisConnectionFactory) {
 		return new RedisDeploymentIdRepository("deployment-ids", redisConnectionFactory);
 	}
@@ -228,8 +246,8 @@ public class DataFlowServerConfiguration {
 	@Bean
 	@ConditionalOnMissingBean(TapOnDestinationRecoveryStrategy.class)
 	public RecoveryStrategy<?> tapOnDestinationExpansionStrategy(StreamCompletionProvider streamCompletionProvider,
-			RedisConnectionFactory redisConnectionFactory) {
-		RecoveryStrategy<?> recoveryStrategy = new TapOnDestinationRecoveryStrategy(streamDefinitionRepository(redisConnectionFactory));
+			StreamDefinitionRepository streamDefinitionRepository) {
+		RecoveryStrategy<?> recoveryStrategy = new TapOnDestinationRecoveryStrategy(streamDefinitionRepository);
 		streamCompletionProvider.addCompletionRecoveryStrategy(recoveryStrategy);
 		return recoveryStrategy;
 	}

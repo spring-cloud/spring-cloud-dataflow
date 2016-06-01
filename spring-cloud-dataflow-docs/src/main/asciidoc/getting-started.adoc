@@ -38,6 +38,10 @@ wget http://repo.spring.io/milestone/org/springframework/cloud/spring-cloud-data
 ----
 $ java -jar spring-cloud-dataflow-server-local-{project-version}.jar
 ----
+
+When starting the server you can specify the option `serverStore` to choose `redis` or `db` based repositories for StreamDefinition, ModuleDeploymentId repositories.
+By default, the `redis` based repositories are used.
+
 +
 .. Running with Custom Maven Settings and/or Behind a Proxy
 If you want to override specific maven configuration properties (remote repositories, etc.) and/or run the Data Flow Server behind a proxy,

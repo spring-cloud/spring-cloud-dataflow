@@ -10,7 +10,7 @@ spring:
       registry:
         populator:
           locations: classpath:META-INF/${binder}-apps.properties
-
+serverStore: redis
 #server:
 #  port: 8443
 #  ssl:

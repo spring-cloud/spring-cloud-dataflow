@@ -57,7 +57,7 @@ public class RdbmsTaskDefinitionRepositoryTests extends AbstractTaskDefinitionTe
 	@Before
 	public void setup() throws Exception{
 		template = new JdbcTemplate(dataSource);
-		template.execute("DELETE FROM TASK_DEFINITION");
+		template.execute("DELETE FROM TASK_DEFINITIONS");
 		repository = rdbmsRepository;
 	}
 
