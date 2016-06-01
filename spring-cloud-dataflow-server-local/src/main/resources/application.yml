@@ -9,7 +9,7 @@ spring:
     dataflow:
       registry:
         populator:
-          locations: classpath:META-INF/${binder}-apps.properties
+          locations: classpath:META-INF/${binder}-apps.properties,classpath:META-INF/task-apps.properties
 
 #server:
 #  port: 8443
