@@ -5,9 +5,9 @@
 --
 This section goes into more detail about how you can work with
 http://cloud.spring.io/spring-cloud-task/[Spring Cloud Tasks]. It covers topics such as
-creating and running task modules.
+creating and running task applications.
 
-If you're just starting out with Spring Cloud Dataflow, you should probably read the
+If you're just starting out with Spring Cloud Data Flow, you should probably read the
 _<<getting-started.adoc#getting-started, Getting Started>>_ guide before diving into
 this section.
 --
@@ -33,15 +33,15 @@ typical lifecycle for tasks in the context of Spring Cloud Data Flow:
 
 === Register a Task App
 Register a Task App with the App Registry using the Spring Cloud Data Flow Shell
-`module register` command. You must provide a unique name and a URI that can be
+`app register` command. You must provide a unique name and a URI that can be
 resolved to the app artifact. For the type, specify "task". Here are a few examples:
 
 ```
-dataflow:>module register --name task1 --type task --uri maven://com.example:mytask:1.0.2
+dataflow:>app register --name task1 --type task --uri maven://com.example:mytask:1.0.2
 
-dataflow:>module register --name task2 --type task --uri file:///Users/example/mytask-1.0.2.jar
+dataflow:>app register --name task2 --type task --uri file:///Users/example/mytask-1.0.2.jar
 
-dataflow:>module register --name task3 --type task --uri http://example.com/mytask-1.0.2.jar
+dataflow:>app register --name task3 --type task --uri http://example.com/mytask-1.0.2.jar
 ```
 
 When providing a URI with the `maven` scheme, the format should conform to the following:
@@ -59,17 +59,17 @@ task.foo=file:///tmp/foo.jar
 task.bar=file:///tmp/bar.jar
 ```
 
-Then use the `module import` command and provide the location of the properties file via `--uri`:
+Then use the `app import` command and provide the location of the properties file via `--uri`:
 
 ```
-module import --uri file:///tmp/task-apps.properties
+app import --uri file:///tmp/task-apps.properties
 ```
 
 You can also pass the `--local` option (which is TRUE by default) to indicate whether the
 properties file location should be resolved within the shell process itself. If the location should
 be resolved from the Data Flow Server process, specify `--local false`. 
 
-When using either `module register` or `module import`, if a task app is already registered with
+When using either `app register` or `app import`, if a task app is already registered with
 the provided name, it will not be overridden by default. If you would like to override the
 pre-existing task app, then include the `--force` option.
 
@@ -80,7 +80,7 @@ the specific documentation of each Data Flow Server for more detail.
 
 
 === Create a Task Definition
-Create a Task Definition from a Task Module by providing a definition name as well as
+Create a Task Definition from a Task App by providing a definition name as well as
 properties that apply to the task execution.  Creating a task definition can be done via
 the restful API or the shell.  To create a task definition using the shell, use the
 `task create` command to create the task definition.  For example:
@@ -140,13 +140,13 @@ removes the definition.
 
 == Task Repository
 
-Out of the box Spring Cloud Dataflow offers an embedded instance of the H2 database.
+Out of the box Spring Cloud Data Flow offers an embedded instance of the H2 database.
 The H2 is good for development purposes but is not recommended for production use.
 
 === Configuring the Task Execution Repository
 To add a driver for the database that will store the Task Execution information, a
 dependency for the driver will need to be added to a maven pom file and the
-Spring Cloud Dataflow will need to be rebuilt.  Since Spring Cloud Dataflow is comprised of an SPI for
+Spring Cloud Data Flow will need to be rebuilt.  Since Spring Cloud Data Flow is comprised of an SPI for
 each environment it supports, please review the SPI's documentation on which POM should be
 updated to add the dependency and how to build.  This document will cover how to setup the
 dependency for local SPI.
@@ -168,7 +168,7 @@ the sample below postgresql has been chosen.
 ```
 [start=3]
 1. Save the changed pom.xml
-2. Build the application as described here: <<appendix-building.adoc#building, Building Spring Cloud Dataflow>>
+2. Build the application as described here: <<appendix-building.adoc#building, Building Spring Cloud Data Flow>>
 
 === Datasource
 
