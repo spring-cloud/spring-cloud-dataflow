@@ -31,13 +31,13 @@ import org.springframework.boot.configurationmetadata.ConfigurationMetadataPrope
 import org.springframework.core.io.ClassPathResource;
 
 /**
- * Unit tests for {@link ModuleConfigurationMetadataResolver}.
+ * Unit tests for {@link ApplicationConfigurationMetadataResolver}.
  *
  * @author Eric Bottard
  */
-public class ModuleConfigurationMetadataResolverTests {
+public class ApplicationConfigurationMetadataResolverTests {
 
-	private ModuleConfigurationMetadataResolver resolver = new ModuleConfigurationMetadataResolver();
+	private ApplicationConfigurationMetadataResolver resolver = new ApplicationConfigurationMetadataResolver();
 
 	@Test
 	public void globalWhitelistedPropertiesShouldBeVisisble() {
