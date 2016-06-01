@@ -12,15 +12,15 @@ This section describe how to use the Dashboard of Spring Cloud Data Flow.
 Spring Cloud Data Flow provides a browser-based GUI which currently has 6 sections:
 
 * **Apps** Lists all available applications and provides the control to register/unregister them
-* **Runtime** Provides the Dataflow cluster view with the list of all running applications
+* **Runtime** Provides the Data Flow cluster view with the list of all running applications
 * **Streams** Deploy/undeploy Stream Definitions
 * **Tasks** List, create, launch and destroy Task Definitions
 * **Jobs** Perform Batch Job related functions
-* **Analytics** Create data visualizations for the various analytics modules
+* **Analytics** Create data visualizations for the various analytics applications
 
 Upon starting Spring Cloud Data Flow, the Dashboard is available at:
 
-`\http://<adminHost>:<adminPort>/admin-ui`
+`\http://<host>:<port>/admin-ui`
 
 For example: http://localhost:9393/admin-ui[http://localhost:9393/admin-ui]
 
@@ -45,10 +45,10 @@ image::dataflow-available-apps-list.png[List of available applications, scaledwi
 [[dashboard-runtime]]
 == Runtime
 The _Runtime_ section of the Dashboard application shows the Spring Cloud Data Flow
-cluster view with the list of all running applications. For each runtime module the
+cluster view with the list of all running applications. For each runtime app the
 state of the deployment and the number of deployed instances is shown.
 A list of the used deployment properties is available by clicking on the
-module id.
+app id.
 
 .List of Running Applications
 image::dataflow-runtime.png[List of running applications, scaledwidth="100%"]
@@ -68,45 +68,45 @@ image::dataflow-streams-list-definitions.png[List of Stream Definitions, scaledw
 
 The _Tasks_ section of the Dashboard currently has three tabs:
 
-* Modules
+* Apps
 * Definitions
 * Executions
 
-[[dashboard-tasks-modules]]
-=== Modules
+[[dashboard-tasks-apps]]
+=== Apps
 
-_Modules_ encapsulate a unit of work into a reusable component. Within the Dataflow
-runtime environment Modules allow users to create definitions for _Streams_ as
-well as _Tasks_. Consequently, the _Modules_ tab within the _Tasks_ section
+_Apps_ encapsulate a unit of work into a reusable component. Within the Data Flow
+runtime environment _Apps_ allow users to create definitions for _Streams_ as
+well as _Tasks_. Consequently, the _Apps_ tab within the _Tasks_ section
 allows users to create _Task_ definitions.
 
 **Note**: You will also use this tab to create Batch Jobs.
 
-.List of Task Modules
-image::dataflow-task-modules-list.png[List of Task Modules, scaledwidth="100%"]
+.List of Task Apps
+image::dataflow-task-apps-list.png[List of Task Apps, scaledwidth="100%"]
 
 On this screen you can perform the following actions:
 
-* View details such as the task module options.
-* Create a Task Definition from the respective Module.
+* View details such as the task app options.
+* Create a Task Definition from the respective App.
 
-==== Create a Task Definition from a selected Job Module
+==== Create a Task Definition from a selected Task App
 
 On this screen you can create a new Task Definition. As a minimum you must provide a
 name for the new definition. You will also have the option
-to specify various parameters that are used during the deployment of the definition.
+to specify various properties that are used during the deployment of the app.
 
 **Note**: Each parameter is only included if the _Include_ checkbox is selected.
 
-==== View Task Module Details
+==== View Task App Details
 
-On this page you can view the details of a selected task module. The pages lists
-the available options (properties) of the modules.
+On this page you can view the details of a selected task app,
+including the list of available options (properties) for that app.
 
 [[dashboard-task-definition]]
 === Definitions
 
-This page lists the Dataflow Task definitions and provides actions to *launch*
+This page lists the Data Flow Task definitions and provides actions to *launch*
 or *destroy* those tasks.
 
 .List of Task Definitions
@@ -194,7 +194,7 @@ image::dataflow-step-execution-history.png[Step Execution History, scaledwidth="
 == Analytics
 
 The _Analytics_ section of the Dashboard provided data visualization capabilities
-for the various analytics modules available in _Spring Cloud Data Flow_:
+for the various analytics applications available in _Spring Cloud Data Flow_:
 
 * Counters
 * Field-Value Counters
