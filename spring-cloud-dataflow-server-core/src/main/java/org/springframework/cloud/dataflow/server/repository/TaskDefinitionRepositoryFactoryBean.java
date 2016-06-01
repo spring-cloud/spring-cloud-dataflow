@@ -26,6 +26,7 @@ import org.springframework.util.Assert;
  * {@link TaskDefinitionRepositoryFactoryBean} based on the provided information.
  *
  * @author Glenn Renfro
+ * @author Ilayaperumal Gopinathan
  */
 public class TaskDefinitionRepositoryFactoryBean implements FactoryBean<TaskDefinitionRepository> {
 
@@ -51,7 +52,6 @@ public class TaskDefinitionRepositoryFactoryBean implements FactoryBean<TaskDefi
 	 */
 	public TaskDefinitionRepositoryFactoryBean(DataSource dataSource) {
 		Assert.notNull(dataSource, "A DataSource is required");
-
 		this.dataSource = dataSource;
 	}
 
@@ -79,18 +79,7 @@ public class TaskDefinitionRepositoryFactoryBean implements FactoryBean<TaskDefi
 		return true;
 	}
 
-	/**
-	 * Indicates a prefix for all of the task definition repository's tables if the jdbc option is
-	 * used.
-	 *
-	 * @param tablePrefix the string prefix for the task table names
-	 */
-	public void setTablePrefix(String tablePrefix) {
-		this.tablePrefix = tablePrefix;
-	}
-
 	private void buildTaskDefinitionRepository(DataSource dataSource) {
 		this.taskDefinitionRepository = new RdbmsTaskDefinitionRepository(dataSource);
-		((RdbmsTaskDefinitionRepository) this.taskDefinitionRepository).setTablePrefix(this.tablePrefix);
 	}
 }

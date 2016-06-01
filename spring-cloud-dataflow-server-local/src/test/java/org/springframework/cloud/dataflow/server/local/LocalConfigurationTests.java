@@ -16,10 +16,6 @@
 
 package org.springframework.cloud.dataflow.server.local;
 
-import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
-
 import org.junit.Test;
 
 import org.springframework.boot.SpringApplication;
@@ -27,6 +23,10 @@ import org.springframework.cloud.deployer.spi.local.LocalAppDeployer;
 import org.springframework.cloud.deployer.spi.local.LocalTaskLauncher;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.util.SocketUtils;
+
+import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
 
 /**
  * Tests for {@link LocalDataFlowServer}.

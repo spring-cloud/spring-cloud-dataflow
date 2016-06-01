@@ -22,35 +22,34 @@ import java.sql.Types;
 
 import javax.sql.DataSource;
 
-import org.springframework.cloud.dataflow.core.TaskDefinition;
+import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.util.Assert;
 
 /**
- * RDBMS implementation of {@link TaskDefinitionRepository}.
+ * RDBMS implementation of {@link StreamDefinitionRepository}.
  *
- * @author Glenn Renfro
  * @author Ilayaperumal Gopinathan
  */
-public class RdbmsTaskDefinitionRepository extends AbstractRdbmsKeyValueRepository<TaskDefinition> implements TaskDefinitionRepository {
+public class RdbmsStreamDefinitionRepository extends AbstractRdbmsKeyValueRepository<StreamDefinition> implements StreamDefinitionRepository {
 
-	public RdbmsTaskDefinitionRepository(DataSource dataSource) {
-		super(dataSource, "TASK_", "DEFINITIONS", new RowMapper<TaskDefinition>() {
+	public RdbmsStreamDefinitionRepository(DataSource dataSource) {
+		super(dataSource, "STREAM_", "DEFINITIONS", new RowMapper<StreamDefinition>() {
 			@Override
-			public TaskDefinition mapRow(ResultSet resultSet, int i) throws SQLException {
-				return new TaskDefinition(
+			public StreamDefinition mapRow(ResultSet resultSet, int i) throws SQLException {
+				return new StreamDefinition(
 						resultSet.getString("DEFINITION_NAME"), resultSet.getString("DEFINITION"));
 			}
 		}, "DEFINITION_NAME", "DEFINITION");
 	}
 
 	@Override
-	public TaskDefinition save(TaskDefinition definition) {
+	public StreamDefinition save(StreamDefinition definition) {
 		Assert.notNull(definition, "definition must not be null");
 		if (exists(definition.getName())) {
-			throw new DuplicateTaskException(
-					String.format("Cannot register task %s because another one has already " +
-									"been registered with the same name",
+			throw new DuplicateStreamDefinitionException(
+					String.format("Cannot create stream %s because another one has already " +
+									"been created with the same name",
 							definition.getName()));
 		}
 		Object[] insertParameters = new Object[]{definition.getName(), definition.getDslText()};
@@ -59,7 +58,7 @@ public class RdbmsTaskDefinitionRepository extends AbstractRdbmsKeyValueReposito
 	}
 
 	@Override
-	public void delete(TaskDefinition definition) {
+	public void delete(StreamDefinition definition) {
 		Assert.notNull(definition, "definition must not null");
 		delete(definition.getName());
 	}

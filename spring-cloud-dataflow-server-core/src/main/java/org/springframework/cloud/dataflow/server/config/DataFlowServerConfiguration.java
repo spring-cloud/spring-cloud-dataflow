@@ -25,6 +25,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import org.h2.tools.Server;
 import org.slf4j.LoggerFactory;
+
 import org.springframework.batch.admin.service.JobService;
 import org.springframework.batch.admin.service.SimpleJobServiceFactoryBean;
 import org.springframework.batch.core.StepExecution;
@@ -58,12 +59,12 @@ import org.springframework.cloud.dataflow.server.job.TaskExplorerFactoryBean;
 import org.springframework.cloud.dataflow.server.job.support.ExecutionContextJacksonMixIn;
 import org.springframework.cloud.dataflow.server.job.support.StepExecutionJacksonMixIn;
 import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
-import org.springframework.cloud.dataflow.server.repository.RedisDeploymentIdRepository;
-import org.springframework.cloud.dataflow.server.repository.RedisStreamDefinitionRepository;
+import org.springframework.cloud.dataflow.server.repository.RdbmsDeploymentIdRepository;
+import org.springframework.cloud.dataflow.server.repository.RdbmsStreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
-import org.springframework.cloud.dataflow.server.repository.support.DefinitionRepositoryInitializer;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepositoryFactoryBean;
+import org.springframework.cloud.dataflow.server.repository.support.DefinitionRepositoryInitializer;
 import org.springframework.cloud.dataflow.server.service.TaskJobService;
 import org.springframework.cloud.dataflow.server.service.TaskService;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskJobService;
@@ -169,14 +170,14 @@ public class DataFlowServerConfiguration {
 
 	@Bean
 	@ConditionalOnMissingBean
-	public StreamDefinitionRepository streamDefinitionRepository(RedisConnectionFactory redisConnectionFactory) {
-		return new RedisStreamDefinitionRepository("stream-definitions", redisConnectionFactory);
+	public StreamDefinitionRepository streamDefinitionRepository(DataSource dataSource) {
+		return new RdbmsStreamDefinitionRepository(dataSource);
 	}
 
 	@Bean
 	@ConditionalOnMissingBean
-	public DeploymentIdRepository deploymentIdRepository(RedisConnectionFactory redisConnectionFactory) {
-		return new RedisDeploymentIdRepository("deployment-ids", redisConnectionFactory);
+	public DeploymentIdRepository deploymentIdRepository(DataSource dataSource) {
+		return new RdbmsDeploymentIdRepository(dataSource);
 	}
 
 	@Configuration
@@ -235,8 +236,8 @@ public class DataFlowServerConfiguration {
 	@Bean
 	@ConditionalOnMissingBean(TapOnDestinationRecoveryStrategy.class)
 	public RecoveryStrategy<?> tapOnDestinationExpansionStrategy(StreamCompletionProvider streamCompletionProvider,
-			RedisConnectionFactory redisConnectionFactory) {
-		RecoveryStrategy<?> recoveryStrategy = new TapOnDestinationRecoveryStrategy(streamDefinitionRepository(redisConnectionFactory));
+			StreamDefinitionRepository streamDefinitionRepository) {
+		RecoveryStrategy<?> recoveryStrategy = new TapOnDestinationRecoveryStrategy(streamDefinitionRepository);
 		streamCompletionProvider.addCompletionRecoveryStrategy(recoveryStrategy);
 		return recoveryStrategy;
 	}
