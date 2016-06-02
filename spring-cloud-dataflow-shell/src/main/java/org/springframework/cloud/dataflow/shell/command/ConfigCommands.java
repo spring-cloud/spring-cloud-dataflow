@@ -119,7 +119,7 @@ public class ConfigCommands implements CommandMarker,
 
 	private UserInput userInput;
 
-	private TargetHolder shellConfiguration;
+	private TargetHolder targetHolder;
 
 	private ApplicationContext applicationContext;
 
@@ -136,8 +136,8 @@ public class ConfigCommands implements CommandMarker,
 	}
 
 	@Autowired
-	public void setShellConfiguration(TargetHolder shellConfiguration) {
-		this.shellConfiguration = shellConfiguration;
+	public void setTargetHolder(TargetHolder targetHolder) {
+		this.targetHolder = targetHolder;
 	}
 
 	// These should be ctor injection
@@ -182,25 +182,25 @@ public class ConfigCommands implements CommandMarker,
 
 
 		try {
-			this.shellConfiguration.setTarget(new Target(targetUriString, targetUsername, targetPassword));
+			this.targetHolder.setTarget(new Target(targetUriString, targetUsername, targetPassword));
 
 			if (StringUtils.hasText(targetUsername) && StringUtils.hasText(targetPassword)) {
 				final BasicCredentialsProvider credentialsProvider = new BasicCredentialsProvider();
 				credentialsProvider.setCredentials(AuthScope.ANY,
 						new UsernamePasswordCredentials(
-								shellConfiguration.getTarget().getTargetCredentials().getUsername(),
-								shellConfiguration.getTarget().getTargetCredentials().getPassword()));
+								targetHolder.getTarget().getTargetCredentials().getUsername(),
+								targetHolder.getTarget().getTargetCredentials().getPassword()));
 				final CloseableHttpClient httpClient = HttpClientBuilder.create().setDefaultCredentialsProvider(credentialsProvider).build();
 				final HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory(httpClient);
 
 				this.restTemplate.setRequestFactory(requestFactory);
 			}
 
-			this.shell.setDataFlowOperations(new DataFlowTemplate(shellConfiguration.getTarget().getTargetUri(), this.restTemplate));
+			this.shell.setDataFlowOperations(new DataFlowTemplate(targetHolder.getTarget().getTargetUri(), this.restTemplate));
 			return(String.format("Successfully targeted %s", targetUriString));
 		}
 		catch (Exception e) {
-			this.shellConfiguration.getTarget().setTargetException(e);
+			this.targetHolder.getTarget().setTargetException(e);
 			this.shell.setDataFlowOperations(null);
 			if (e instanceof DataFlowServerException) {
 				String message = String.format("Unable to parse server response: %s - at URI '%s'.", e.getMessage(),
@@ -225,7 +225,7 @@ public class ConfigCommands implements CommandMarker,
 
 		final Map<String, String> statusValues = new TreeMap<String, String>();
 
-		final Target target = shellConfiguration.getTarget();
+		final Target target = targetHolder.getTarget();
 
 		statusValues.put("Target", target.getTargetUriAsString());
 		if (target.getTargetCredentials() != null) {

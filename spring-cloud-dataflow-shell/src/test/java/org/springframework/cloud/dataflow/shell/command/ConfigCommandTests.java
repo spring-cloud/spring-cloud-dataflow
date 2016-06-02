@@ -60,7 +60,7 @@ public class ConfigCommandTests {
 		final Exception e = new RestClientException("FooBar");
 		when(restTemplate.getForObject(Mockito.any(URI.class), Mockito.eq(ResourceSupport.class))).thenThrow(e);
 
-		configCommands.setShellConfiguration(new TargetHolder());
+		configCommands.setTargetHolder(new TargetHolder());
 		configCommands.setCommandLine(commandLine);
 		configCommands.setRestTemplate(restTemplate);
 		configCommands.setDataFlowShell(dataFlowShell);
