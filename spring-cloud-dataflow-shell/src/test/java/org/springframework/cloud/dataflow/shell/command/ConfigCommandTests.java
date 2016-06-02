@@ -27,7 +27,7 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import org.springframework.cloud.dataflow.shell.ShellConfiguration;
+import org.springframework.cloud.dataflow.shell.TargetHolder;
 import org.springframework.cloud.dataflow.shell.config.DataFlowShell;
 import org.springframework.hateoas.ResourceSupport;
 import org.springframework.shell.CommandLine;
@@ -60,7 +60,7 @@ public class ConfigCommandTests {
 		final Exception e = new RestClientException("FooBar");
 		when(restTemplate.getForObject(Mockito.any(URI.class), Mockito.eq(ResourceSupport.class))).thenThrow(e);
 
-		configCommands.setShellConfiguration(new ShellConfiguration());
+		configCommands.setShellConfiguration(new TargetHolder());
 		configCommands.setCommandLine(commandLine);
 		configCommands.setRestTemplate(restTemplate);
 		configCommands.setDataFlowShell(dataFlowShell);

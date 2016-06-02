@@ -47,7 +47,7 @@ import org.springframework.cloud.dataflow.rest.client.support.JobParametersJacks
 import org.springframework.cloud.dataflow.rest.client.support.StepExecutionHistoryJacksonMixIn;
 import org.springframework.cloud.dataflow.rest.client.support.StepExecutionJacksonMixIn;
 import org.springframework.cloud.dataflow.rest.job.StepExecutionHistory;
-import org.springframework.cloud.dataflow.shell.ShellConfiguration;
+import org.springframework.cloud.dataflow.shell.TargetHolder;
 import org.springframework.cloud.dataflow.shell.Target;
 import org.springframework.cloud.dataflow.shell.config.DataFlowShell;
 import org.springframework.context.ApplicationContext;
@@ -119,7 +119,7 @@ public class ConfigCommands implements CommandMarker,
 
 	private UserInput userInput;
 
-	private ShellConfiguration shellConfiguration;
+	private TargetHolder shellConfiguration;
 
 	private ApplicationContext applicationContext;
 
@@ -136,7 +136,7 @@ public class ConfigCommands implements CommandMarker,
 	}
 
 	@Autowired
-	public void setShellConfiguration(ShellConfiguration shellConfiguration) {
+	public void setShellConfiguration(TargetHolder shellConfiguration) {
 		this.shellConfiguration = shellConfiguration;
 	}
 

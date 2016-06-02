@@ -22,7 +22,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
- * Encapsulates various data points related to the Admin Server Target, such as target URI, success/error state,
+ * Encapsulates various data points related to the Data Flow Server Target, such as target URI, success/error state,
  * exception messages that may have occurred.
  *
  * @author Gunnar Hillert

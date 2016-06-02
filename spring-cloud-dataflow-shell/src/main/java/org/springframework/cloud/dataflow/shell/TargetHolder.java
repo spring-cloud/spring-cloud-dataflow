@@ -21,27 +21,29 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 
 /**
- * Encapsulates various configuration properties for the shell such as {@link Target}.
+ * A target holder, wrapping a {@link Target} that encapsulates not only the Target URI but
+ * also success/error messages + status.
  *
  * @author Gunnar Hillert
  * @since 1.0
  *
+ * @see Target
+ *
  */
-@Component
-public class ShellConfiguration {
+public class TargetHolder {
 
 	private Target target;
 
 	/**
 	 * Constructor.
 	 */
-	public ShellConfiguration() {
+	public TargetHolder() {
 	}
 
 	/**
 	 * Return the {@link Target} which encapsulates not only the Target URI but also success/error messages + status.
 	 *
-	 * @return Should never be null. Initialized by {@link ConfigCommands#afterPropertiesSet()}.
+	 * @return Should never be null. Initialized by {@link ConfigCommands#afterPropertiesSet()}
 	 */
 	public Target getTarget() {
 		return target;

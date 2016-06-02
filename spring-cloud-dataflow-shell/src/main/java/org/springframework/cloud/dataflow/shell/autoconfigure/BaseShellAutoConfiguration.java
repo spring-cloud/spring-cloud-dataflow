@@ -22,6 +22,7 @@ import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.cloud.dataflow.shell.ShellCommandLineParser;
 import org.springframework.cloud.dataflow.shell.ShellProperties;
+import org.springframework.cloud.dataflow.shell.TargetHolder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -43,6 +44,11 @@ import javax.annotation.PostConstruct;
 public class BaseShellAutoConfiguration {
 
 	private static final Logger logger = LoggerFactory.getLogger(BaseShellAutoConfiguration.class);
+
+	@Bean
+	public TargetHolder targetHolder() {
+		return new TargetHolder();
+	}
 
 	@Bean
 	public ShellCommandLineParser shellCommandLineParser() {
