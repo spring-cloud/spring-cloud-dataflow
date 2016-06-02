@@ -23,6 +23,7 @@ import java.sql.Types;
 import javax.sql.DataSource;
 
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.util.Assert;
 
 /**
  * RDBMS implementation of {@link DeploymentIdRepository}.
@@ -49,5 +50,11 @@ public class RdbmsDeploymentIdRepository extends AbstractRdbmsKeyValueRepository
 	@Override
 	public String save(String key) {
 		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void delete(String name) {
+		Assert.hasText(name, "name must not be empty nor null");
+		jdbcTemplate.update(deleteFromTableByKey, name);
 	}
 }

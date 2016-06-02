@@ -28,6 +28,7 @@ import org.junit.runner.RunWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.PropertyPlaceholderAutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.jdbc.EmbeddedDataSourceConfiguration;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.server.repository.support.DefinitionRepositoryInitializer;
@@ -58,29 +59,13 @@ public class RdbmsDeploymentIdRepositoryTests {
 	@Autowired
 	private DataSource dataSource;
 
-	@Autowired
 	private DeploymentIdRepository repository;
 
 	private JdbcTemplate template;
 
-	@Configuration
-	static class TestConfig {
-
-		@Bean
-		public DefinitionRepositoryInitializer definitionRepositoryInitializer(DataSource dataSource) {
-			DefinitionRepositoryInitializer definitionRepositoryInitializer = new  DefinitionRepositoryInitializer();
-			definitionRepositoryInitializer.setDataSource(dataSource);
-			return definitionRepositoryInitializer;
-		}
-
-		@Bean
-		public DeploymentIdRepository rdbmsDeploymentIdRepository(DataSource dataSource) {
-			return new RdbmsDeploymentIdRepository(dataSource);
-		}
-	}
-
 	@Before
 	public void setup() throws Exception{
+		repository = new RdbmsDeploymentIdRepository(dataSource);
 		template = new JdbcTemplate(dataSource);
 		template.execute("DELETE FROM DEPLOYMENT_IDS");
 	}
@@ -101,5 +86,16 @@ public class RdbmsDeploymentIdRepositoryTests {
 		assertEquals("log.0", repository.findOne("key2"));
 		repository.delete("key2");
 		assertNull(repository.findOne("key2"));
+	}
+
+	@Configuration
+	protected static class TestConfig {
+
+		@Bean
+		public DefinitionRepositoryInitializer definitionRepositoryInitializer(DataSource dataSource) {
+			DefinitionRepositoryInitializer definitionRepositoryInitializer = new  DefinitionRepositoryInitializer();
+			definitionRepositoryInitializer.setDataSource(dataSource);
+			return definitionRepositoryInitializer;
+		}
 	}
 }

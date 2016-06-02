@@ -77,7 +77,7 @@ public abstract class AbstractRdbmsKeyValueRepository<D> implements PagingAndSor
 
 	private String deleteFromTableClause = "DELETE FROM " + tableName;
 
-	private String deleteFromTableByKey = deleteFromTableClause + whereClauseByKey;
+	protected String deleteFromTableByKey = deleteFromTableClause + whereClauseByKey;
 
 	protected String tablePrefix;
 

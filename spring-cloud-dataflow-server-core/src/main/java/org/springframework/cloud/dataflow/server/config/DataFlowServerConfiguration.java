@@ -82,6 +82,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Primary;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
@@ -164,30 +165,14 @@ public class DataFlowServerConfiguration {
 
 	@Bean
 	@ConditionalOnMissingBean
-	@ConditionalOnExpression("#{'${serverStore:redis}'.equals('db')}")
-	public StreamDefinitionRepository rdbmsStreamDefinitionRepository(DataSource dataSource) {
+	public StreamDefinitionRepository streamDefinitionRepository(DataSource dataSource) {
 		return new RdbmsStreamDefinitionRepository(dataSource);
 	}
 
 	@Bean
-	@ConditionalOnExpression("#{'${serverStore:redis}'.equals('db')}")
-	public DeploymentIdRepository rdbmsDeploymentIdRepository(DataSource dataSource) {
+	@ConditionalOnMissingBean
+	public DeploymentIdRepository deploymentIdRepository(DataSource dataSource) {
 		return new RdbmsDeploymentIdRepository(dataSource);
-	}
-
-	@Bean
-	@ConditionalOnMissingBean
-	@ConditionalOnExpression("#{'${serverStore:redis}'.equals('redis')}")
-	public StreamDefinitionRepository streamDefinitionRepository(RedisConnectionFactory redisConnectionFactory) {
-		return new RedisStreamDefinitionRepository("stream-definitions", redisConnectionFactory);
-	}
-
-
-	@Bean
-	@ConditionalOnMissingBean
-	@ConditionalOnExpression("#{'${serverStore:redis}'.equals('redis')}")
-	public DeploymentIdRepository deploymentIdRepository(RedisConnectionFactory redisConnectionFactory) {
-		return new RedisDeploymentIdRepository("deployment-ids", redisConnectionFactory);
 	}
 
 	@Configuration

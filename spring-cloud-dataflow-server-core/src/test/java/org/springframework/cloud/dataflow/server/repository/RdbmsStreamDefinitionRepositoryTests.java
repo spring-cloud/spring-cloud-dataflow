@@ -88,12 +88,16 @@ public class RdbmsStreamDefinitionRepositoryTests {
 	
 	@Test
 	public void testFindOne() {
-		StreamDefinition definition = new StreamDefinition("stream1", "time | log");
-		repository.save(definition);
-		repository.save(new StreamDefinition("stream2", "http | jdbc"));
-		repository.save(new StreamDefinition("stream3", "twitterstream | hdfs"));
+		StreamDefinition definition1 = new StreamDefinition("stream1", "time | log");
+		StreamDefinition definition2 = new StreamDefinition("stream2", "http | jdbc");
+		StreamDefinition definition3 = new StreamDefinition("stream3", "twitterstream | hdfs");
+		repository.save(definition1);
+		repository.save(definition2);
+		repository.save(definition3);
 
-		assertEquals(definition, repository.findOne("stream1"));
+		assertEquals(definition1, repository.findOne("stream1"));
+		assertEquals(definition2, repository.findOne("stream2"));
+		assertEquals(definition3, repository.findOne("stream3"));
 	}
 
 	@Test
