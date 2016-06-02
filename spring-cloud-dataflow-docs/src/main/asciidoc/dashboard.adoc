@@ -20,12 +20,12 @@ Spring Cloud Data Flow provides a browser-based GUI which currently has 6 sectio
 
 Upon starting Spring Cloud Data Flow, the Dashboard is available at:
 
-`\http://<host>:<port>/admin-ui`
+`\http://<host>:<port>/dashboard`
 
-For example: http://localhost:9393/admin-ui[http://localhost:9393/admin-ui]
+For example: http://localhost:9393/dashboard[http://localhost:9393/dashboard]
 
-If you have enabled https, then it will be located at `\https://localhost:9393/admin-ui`.
-If you have enabled security, a login form is available at `\http://localhost:9393/admin-ui/#/login`.
+If you have enabled https, then it will be located at `\https://localhost:9393/dashboard`.
+If you have enabled security, a login form is available at `\http://localhost:9393/dashboard/#/login`.
 
 **Note**: The default Dashboard server port is `9393`
 
