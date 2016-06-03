@@ -96,6 +96,7 @@ public abstract class AbstractRdbmsKeyValueRepository<D> implements PagingAndSor
 	public AbstractRdbmsKeyValueRepository(DataSource dataSource, String tablePrefix, String tableSuffix,
 			RowMapper<D> rowMapper, String keyColumn, String valueColumn) {
 		Assert.notNull(dataSource);
+		Assert.notNull(rowMapper);
 		this.jdbcTemplate = new JdbcTemplate(dataSource);
 		this.namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
 		this.dataSource = dataSource;

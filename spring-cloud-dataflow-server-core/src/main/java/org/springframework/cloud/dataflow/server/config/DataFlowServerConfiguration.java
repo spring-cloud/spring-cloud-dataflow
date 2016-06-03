@@ -61,8 +61,6 @@ import org.springframework.cloud.dataflow.server.job.support.StepExecutionJackso
 import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
 import org.springframework.cloud.dataflow.server.repository.RdbmsDeploymentIdRepository;
 import org.springframework.cloud.dataflow.server.repository.RdbmsStreamDefinitionRepository;
-import org.springframework.cloud.dataflow.server.repository.RedisDeploymentIdRepository;
-import org.springframework.cloud.dataflow.server.repository.RedisStreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepositoryFactoryBean;
@@ -82,7 +80,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Primary;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;

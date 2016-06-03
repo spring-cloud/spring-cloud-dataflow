@@ -146,23 +146,22 @@ public class DefaultTaskService implements TaskService {
 
 	@Override
 	public void executeTask(String taskName, Map<String, String> runtimeProperties, List<String> runtimeParams) {
-
 		Assert.hasText(taskName, "The provided taskName must not be null or empty.");
 		Assert.notNull(runtimeProperties, "The provided runtimeProperties must not be null.");
-
 		TaskDefinition taskDefinition = this.repository.findOne(taskName);
 		if (taskDefinition == null) {
 			throw new NoSuchTaskDefinitionException(taskName);
 		}
-
 		Map<String, String> deploymentProperties = new HashMap<>();
 		taskDefinition = this.updateTaskProperties(taskDefinition);
 		deploymentProperties.putAll(runtimeProperties);
-
 		URI uri = this.registry.find(String.format("task.%s", taskDefinition.getRegisteredAppName()));
 		Resource resource = this.resourceLoader.getResource(uri.toString());
 		AppDeploymentRequest request = taskDefinition.createDeploymentRequest(resource, deploymentProperties, runtimeParams);
 		String id = this.taskLauncher.launch(request);
-		this.deploymentIdRepository.save(DeploymentKey.forTaskDefinition(taskDefinition), id);
+		String deploymentKey = DeploymentKey.forTaskDefinition(taskDefinition);
+		if (deploymentIdRepository.findOne(deploymentKey) == null) {
+			this.deploymentIdRepository.save(deploymentKey, id);
+		}
 	}
 }
