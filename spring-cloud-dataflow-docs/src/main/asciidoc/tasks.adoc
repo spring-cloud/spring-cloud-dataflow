@@ -202,7 +202,7 @@ spring:
 == Subscribing to Task/Batch events
 
 You can also tap into various task/batch events when the task is launched.
-If the task is enabled to generate task and or batch events (with the additional dependency of `spring-cloud-task-stream`), those events are published during the task lifecycle.
+If the task is enabled to generate task and/or batch events (with the additional dependencies `spring-cloud-task-stream` and `spring-cloud-stream-binder-kafka`, in the case of Kafka as the binder), those events are published during the task lifecycle. 
 By default, the destination names for those published events on the broker (rabbit, kafka etc.,) are the event names themselves (for instance: `task-events`, `job-execution-events` etc.,).
 
 ```
