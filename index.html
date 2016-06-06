@@ -53,7 +53,7 @@ Spring Cloud Data Flow offers a collection of patterns and best practices for mi
 * Separate runtime dependencies backed by ‘spring profiles’
 * Consume streaming and batch data microservices as maven or docker artifacts
 * Create, unit-test, troubleshoot and manage data microservices in isolation
-* Develop using: DSL, Shell, REST-APIs, Admin-UI, and Flo
+* Develop using: DSL, Shell, REST-APIs, Dashboard, and Flo
 * Take advantage of metrics, health checks, and remote management at each data microservice level
 * Scale stream and batch pipelines without interrupting data flows
 
@@ -85,7 +85,7 @@ Step 6 - Create **‘ticktock’** Stream
 dataflow:>stream create ticktock --definition "time | log" --deploy
 ```
 
-Step 7 - Launch Admin UI at: http://localhost:9393/admin-ui
+Step 7 - Launch Dashboard at: http://localhost:9393/dashboard
 
 ## Release Trains
 
