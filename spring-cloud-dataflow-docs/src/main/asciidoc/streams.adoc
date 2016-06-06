@@ -169,19 +169,28 @@ When providing a URI with the `maven` scheme, the format should conform to the f
 maven://<groupId>:<artifactId>[:<extension>[:<classifier>]]:<version>
 ```
 
-If you would like to register multiple apps at one time, you can store them in a properties file
-where the keys are formatted as `<type>.<name>` and the values are the URIs. For example, this
-would be a valid properties file:
+For example, if you've have to register `SNAPSHOT` release of Rabbit binder based `http` and `log` applications, 
+you'd do the following.
 
 ```
-source.foo=file:///tmp/foo.jar
-sink.bar=file:///tmp/bar.jar
+dataflow:>app register --name http --type source --uri maven://org.springframework.cloud.stream.app:http-source-rabbit:1.0.0.BUILD-SNAPSHOT
+dataflow:>app register --name log --type sink --uri maven://org.springframework.cloud.stream.app:http-log-rabbit:1.0.0.BUILD-SNAPSHOT
+```
+
+If you would like to register multiple apps at one time, you can store them in a properties file
+where the keys are formatted as `<type>.<name>` and the values are the URIs. For example, if you've have to 
+register `SNAPSHOT` release of Rabbit binder based `http` and `log` applications, 
+you'd have the following in a property file [_eg: stream-apps.properties_] and import the apps in bulk.
+
+```
+source.http=maven://org.springframework.cloud.stream.app:http-source-rabbit:1.0.0.BUILD-SNAPSHOT
+sink.log=maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.0.0.BUILD-SNAPSHOT
 ```
 
 Then use the `app import` command and provide the location of the properties file via `--uri`:
 
 ```
-app import --uri file:///tmp/stream-apps.properties
+dataflow:>app import --uri file:///<YOUR_FILE_LOCATION>/stream-apps.properties
 ```
 
 You can also pass the `--local` option (which is TRUE by default) to indicate whether the
