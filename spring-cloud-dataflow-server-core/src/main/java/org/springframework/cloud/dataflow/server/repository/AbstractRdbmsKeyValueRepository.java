@@ -94,7 +94,7 @@ public abstract class AbstractRdbmsKeyValueRepository<D> implements PagingAndSor
 	protected final RowMapper<D> rowMapper;
 
 	public AbstractRdbmsKeyValueRepository(DataSource dataSource, String tablePrefix, String tableSuffix,
-			RowMapper<D> rowMapper, String keyColumn, String valueColumn) {
+										   RowMapper<D> rowMapper, String keyColumn, String valueColumn) {
 		Assert.notNull(dataSource);
 		Assert.notNull(rowMapper);
 		this.jdbcTemplate = new JdbcTemplate(dataSource);
@@ -230,7 +230,7 @@ public abstract class AbstractRdbmsKeyValueRepository<D> implements PagingAndSor
 	}
 
 	private Page<D> queryForPageableResults(Pageable pageable, String selectClause, String tableName,
-			String whereClause, Object[] queryParam, long totalCount) {
+											String whereClause, Object[] queryParam, long totalCount) {
 		// Possible performance improvement refactoring so factory isn't called everytime.
 		SqlPagingQueryProviderFactoryBean factoryBean = new SqlPagingQueryProviderFactoryBean();
 		factoryBean.setSelectClause(selectClause);
