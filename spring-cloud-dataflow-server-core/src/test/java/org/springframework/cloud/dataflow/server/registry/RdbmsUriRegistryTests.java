@@ -29,6 +29,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.PropertyPlaceholderAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.EmbeddedDataSourceConfiguration;
+import org.springframework.cloud.dataflow.registry.RdbmsUriRegistry;
 import org.springframework.cloud.dataflow.server.repository.support.DefinitionRepositoryInitializer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -58,7 +59,7 @@ public class RdbmsUriRegistryTests {
 	public void setup() throws Exception{
 		registry = new RdbmsUriRegistry(dataSource);
 		template = new JdbcTemplate(dataSource);
-		template.execute("DELETE FROM URI_APP_REGISTRY");
+		template.execute("DELETE FROM URI_REGISTRY");
 	}
 	
 	@Test

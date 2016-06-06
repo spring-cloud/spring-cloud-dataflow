@@ -65,7 +65,7 @@ public abstract class AbstractRdbmsKeyValueRepository<D> implements PagingAndSor
 
 	private String findAllQuery;
 
-	protected String findAllWhereClauseByKey;
+	private String findAllWhereClauseByKey;
 
 	protected String saveRow;
 
