@@ -22,14 +22,14 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.sql.DataSource;
 
-import org.springframework.cloud.dataflow.server.repository.AbstractRdbmsKeyValueRepository;
-import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
 import org.springframework.cloud.deployer.resource.registry.UriRegistry;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.util.Assert;
 
@@ -37,88 +37,78 @@ import org.springframework.util.Assert;
  * RDBMS implementation of {@link UriRegistry}.
  *
  * @author Ilayaperumal Gopinathan
+ * @author Mark Fisher
  */
-public class RdbmsUriRegistry extends AbstractRdbmsKeyValueRepository<String> implements UriRegistry {
+public class RdbmsUriRegistry implements UriRegistry {
 
-	public RdbmsUriRegistry(DataSource dataSource) {
-		super(dataSource, "URI_APP_", "REGISTRY", new RowMapper<String>() {
-			@Override
-			public String mapRow(ResultSet resultSet, int i) throws SQLException {
-				return resultSet.getString("NAME") + "=" + resultSet.getString("URI");
-			}
-		}, "NAME", "URI");
-	}
+    private static final String TABLE_NAME = "URI_APP_REGISTRY";
 
-	@Override
-	public URI find(String name) {
-		String entry = findOne(name);
-		if (entry == null) {
-			return null;
-		}
-		String[] splitEntries = entry.split("=");
-		return toUri(splitEntries[1]);
-	}
+    private static final String SELECT_URI_SQL = String.format("select URI from %s where NAME = ?", TABLE_NAME);
 
-	@Override
-	public Map<String, URI> findAll() {
-		Iterable<String> entries = findAllEntries();
-		Map<String, URI> map = new HashMap<>();
-		for (String entry : entries) {
-			String[] splitEntries = entry.split("=");
-			map.put(splitEntries[0], toUri(splitEntries[1]));
-		}
-		return map;
-	}
+    private static final String SELECT_ALL_SQL = String.format("select NAME, URI from %s", TABLE_NAME);
 
-	/**
-	 * Convert the provided string to a {@link URI}.
-	 *
-	 * @param s string to convert to URI
-	 * @return URI for string
-	 * @throws IllegalStateException if URI creation throws {@link URISyntaxException}
-	 */
-	private URI toUri(String s) {
-		try {
-			return new URI(s);
-		}
-		catch (URISyntaxException e) {
-			throw new IllegalStateException(e);
-		}
-	}
+    private static final String UPDATE_SQL = String.format("update %s set URI=? WHERE NAME=?", TABLE_NAME);
 
-	@Override
-	public void register(String name, URI uri) {
-		save(name, uri.toString());
-	}
+    private static final String INSERT_SQL = String.format("insert into %s (NAME, URI) values (?, ?)", TABLE_NAME);
 
-	@Override
-	public void unregister(String name) {
-		delete(name);
-	}
+    private static final String DELETE_SQL = String.format("delete from %s where NAME=?", TABLE_NAME);
 
-	public void save(String name, String uriString) {
-		if (find(name) != null) {
-			Object[] updateParameters = new Object[] { uriString, name };
-			jdbcTemplate.update(updateValue, updateParameters, new int[] { Types.VARCHAR, Types.VARCHAR });
-		}
-		else {
-			Object[] insertParameters = new Object[] { name, uriString };
-			jdbcTemplate.update(saveRow, insertParameters, new int[]{Types.VARCHAR, Types.VARCHAR});
-		}
-	}
+    private final JdbcTemplate jdbcTemplate;
 
-	public String findOne(String name) {
-		Assert.hasText(name, "name must not be empty nor null");
-		try {
-			return jdbcTemplate.queryForObject(findAllWhereClauseByKey, rowMapper, name);
-		}
-		catch (EmptyResultDataAccessException e) {
-			return null;
-		}
-	}
+    public RdbmsUriRegistry(DataSource dataSource) {
+        Assert.notNull(dataSource, "DataSource must not be null");
+        this.jdbcTemplate = new JdbcTemplate(dataSource);
+    }
 
-	public void delete(String name) {
-		Assert.hasText(name, "name must not be empty nor null");
-		jdbcTemplate.update(deleteFromTableByKey, name);
-	}
+    @Override
+    public URI find(String name) {
+        String uriString = null;
+        try {
+            uriString = jdbcTemplate.queryForObject(SELECT_URI_SQL, String.class, name);
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
+        return uriString != null ? toUri(uriString) : null;
+    }
+
+    @Override
+    public Map<String, URI> findAll() {
+        Map<String, URI> uriMap = new HashMap<>();
+        List<Map<String, Object>> result = jdbcTemplate.queryForList(SELECT_ALL_SQL);
+        for (Map<String, Object> map: result) {
+            uriMap.put(String.valueOf(map.get("NAME")), toUri(String.valueOf(map.get("URI"))));
+        }
+        return uriMap;
+    }
+
+    @Override
+    public void register(String name, URI uri) {
+        String uriString = uri.toString();
+        if (find(name) != null) {
+            jdbcTemplate.update(UPDATE_SQL, new Object[]{uriString, name}, new int[]{Types.VARCHAR, Types.VARCHAR});
+        } else {
+            jdbcTemplate.update(INSERT_SQL, new Object[]{name, uriString}, new int[]{Types.VARCHAR, Types.VARCHAR});
+        }
+    }
+
+    @Override
+    public void unregister(String name) {
+        Assert.hasText(name, "name must not be empty nor null");
+        jdbcTemplate.update(DELETE_SQL, name);
+    }
+
+    /**
+     * Convert the provided string to a {@link URI}.
+     *
+     * @param s string to convert to URI
+     * @return URI for string
+     * @throws IllegalStateException if URI creation throws {@link URISyntaxException}
+     */
+    private URI toUri(String s) {
+        try {
+            return new URI(s);
+        } catch (URISyntaxException e) {
+            throw new IllegalStateException(e);
+        }
+    }
 }
