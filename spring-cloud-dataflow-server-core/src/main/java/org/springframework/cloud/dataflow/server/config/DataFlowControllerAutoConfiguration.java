@@ -19,6 +19,8 @@ package org.springframework.cloud.dataflow.server.config;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.sql.DataSource;
+
 import org.springframework.batch.admin.service.JobService;
 import org.springframework.boot.actuate.metrics.repository.MetricRepository;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -30,7 +32,7 @@ import org.springframework.cloud.dataflow.completion.StreamCompletionProvider;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.registry.DataFlowUriRegistryPopulator;
 import org.springframework.cloud.dataflow.registry.DataFlowUriRegistryPopulatorProperties;
-import org.springframework.cloud.dataflow.registry.RedisUriRegistry;
+import org.springframework.cloud.dataflow.registry.RdbmsUriRegistry;
 import org.springframework.cloud.dataflow.server.controller.AggregateCounterController;
 import org.springframework.cloud.dataflow.server.controller.AppRegistryController;
 import org.springframework.cloud.dataflow.server.controller.CompletionController;
@@ -70,7 +72,6 @@ import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ResourceLoader;
-import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.hateoas.EntityLinks;
 
 /**
@@ -86,8 +87,8 @@ import org.springframework.hateoas.EntityLinks;
 public class DataFlowControllerAutoConfiguration {
 
 	@Bean
-	public UriRegistry uriRegistry(RedisConnectionFactory connectionFactory) {
-		return new RedisUriRegistry(connectionFactory);
+	public UriRegistry uriRegistry(DataSource dataSource) {
+		return new RdbmsUriRegistry(dataSource);
 	}
 
 	@Bean
