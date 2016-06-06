@@ -274,3 +274,54 @@ stream create --definition ":destination1 > :destination2" --name bridge_destina
 ```
 
 In the above stream, both the destinations (`destination1` and `destination2`) are located in the broker. The messages flow from the source destination to the sink destination via a `bridge` app that connects them.
+
+[[data-partitions]]
+== Stateful Stream Processing
+
+To demonstrate the data partitioning functionality, let's deploy the following stream with Kafka as the binder.
+
+```
+dataflow:>stream create words --definition "http --server.port=9900 | splitter --expression=payload.split(' ') | log"
+Created new stream 'words'
+
+dataflow:>stream deploy words --properties "app.splitter.producer.partitionKeyExpression=payload,app.log.count=2"
+Deployed stream 'words'
+
+dataflow:>http post --target http://localhost:9900 --data "How much wood would a woodchuck chuck if a woodchuck could chuck wood"
+> POST (text/plain;Charset=UTF-8) http://localhost:9900 How much wood would a woodchuck chuck if a woodchuck could chuck wood
+> 202 ACCEPTED
+```
+
+You'll see the following in the server logs.
+
+```
+2016-06-05 18:33:24.982  INFO 58039 --- [nio-9393-exec-9] o.s.c.d.spi.local.LocalAppDeployer       : deploying app words.log instance 0
+   Logs will be in /var/folders/c3/ctx7_rns6x30tq7rb76wzqwr0000gp/T/spring-cloud-dataflow-694182453710731989/words-1465176804970/words.log
+2016-06-05 18:33:24.988  INFO 58039 --- [nio-9393-exec-9] o.s.c.d.spi.local.LocalAppDeployer       : deploying app words.log instance 1
+   Logs will be in /var/folders/c3/ctx7_rns6x30tq7rb76wzqwr0000gp/T/spring-cloud-dataflow-694182453710731989/words-1465176804970/words.log
+```
+
+Review the `words.log instance 0` logs:
+
+```
+2016-06-05 18:35:47.047  INFO 58638 --- [  kafka-binder-] log.sink                                 : How
+2016-06-05 18:35:47.066  INFO 58638 --- [  kafka-binder-] log.sink                                 : chuck
+2016-06-05 18:35:47.066  INFO 58638 --- [  kafka-binder-] log.sink                                 : chuck
+```
+
+Review the `words.log instance 1` logs:
+
+```
+2016-06-05 18:35:47.047  INFO 58639 --- [  kafka-binder-] log.sink                                 : much
+2016-06-05 18:35:47.066  INFO 58639 --- [  kafka-binder-] log.sink                                 : wood
+2016-06-05 18:35:47.066  INFO 58639 --- [  kafka-binder-] log.sink                                 : would
+2016-06-05 18:35:47.066  INFO 58639 --- [  kafka-binder-] log.sink                                 : a
+2016-06-05 18:35:47.066  INFO 58639 --- [  kafka-binder-] log.sink                                 : woodchuck
+2016-06-05 18:35:47.067  INFO 58639 --- [  kafka-binder-] log.sink                                 : if
+2016-06-05 18:35:47.067  INFO 58639 --- [  kafka-binder-] log.sink                                 : a
+2016-06-05 18:35:47.067  INFO 58639 --- [  kafka-binder-] log.sink                                 : woodchuck
+2016-06-05 18:35:47.067  INFO 58639 --- [  kafka-binder-] log.sink                                 : could
+2016-06-05 18:35:47.067  INFO 58639 --- [  kafka-binder-] log.sink                                 : wood
+```
+
+This shows that payload splits that contain the same word are routed to the same application instance.
