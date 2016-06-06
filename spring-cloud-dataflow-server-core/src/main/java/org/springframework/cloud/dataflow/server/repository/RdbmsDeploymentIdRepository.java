@@ -22,6 +22,7 @@ import java.sql.Types;
 
 import javax.sql.DataSource;
 
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.util.Assert;
 
@@ -42,19 +43,25 @@ public class RdbmsDeploymentIdRepository extends AbstractRdbmsKeyValueRepository
 	}
 
 	@Override
-	public void save(String key, String deploymentId) {
-		Object[] insertParameters = new Object[]{key, deploymentId};
+	public String findOne(String deploymentKey) {
+		Assert.hasText(deploymentKey, "deploymentKey must not be empty nor null");
+		try {
+			return jdbcTemplate.queryForObject(findAllWhereClauseByKey, rowMapper, deploymentKey);
+		}
+		catch (EmptyResultDataAccessException e) {
+			return null;
+		}
+	}
+
+	@Override
+	public void save(String deploymentKey, String deploymentId) {
+		Object[] insertParameters = new Object[]{deploymentKey, deploymentId};
 		jdbcTemplate.update(saveRow, insertParameters, new int[]{Types.VARCHAR, Types.VARCHAR});
 	}
 
 	@Override
-	public String save(String key) {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public void delete(String name) {
-		Assert.hasText(name, "name must not be empty nor null");
-		jdbcTemplate.update(deleteFromTableByKey, name);
+	public void delete(String deploymentKey) {
+		Assert.hasText(deploymentKey, "deploymentKey must not be empty nor null");
+		jdbcTemplate.update(deleteFromTableByKey, deploymentKey);
 	}
 }

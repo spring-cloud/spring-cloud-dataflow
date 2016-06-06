@@ -32,7 +32,7 @@ import org.springframework.util.Assert;
  * @author Glenn Renfro
  * @author Ilayaperumal Gopinathan
  */
-public class RdbmsTaskDefinitionRepository extends AbstractRdbmsKeyValueRepository<TaskDefinition> implements TaskDefinitionRepository {
+public class RdbmsTaskDefinitionRepository extends AbstractRdbmsKeyValuePagingRepository<TaskDefinition> implements TaskDefinitionRepository {
 
 	public RdbmsTaskDefinitionRepository(DataSource dataSource) {
 		super(dataSource, "TASK_", "DEFINITIONS", new RowMapper<TaskDefinition>() {

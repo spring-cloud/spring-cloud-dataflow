@@ -16,8 +16,6 @@
 
 package org.springframework.cloud.dataflow.server.repository;
 
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -31,12 +29,9 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -47,7 +42,7 @@ import org.springframework.util.StringUtils;
  * @author Glenn Renfro
  * @author Ilayaperumal Gopinathan
  */
-public abstract class AbstractRdbmsKeyValueRepository<D> implements PagingAndSortingRepository<D, String> {
+public abstract class AbstractRdbmsKeyValueRepository<D> {
 
 	protected String keyColumn;
 
@@ -63,19 +58,21 @@ public abstract class AbstractRdbmsKeyValueRepository<D> implements PagingAndSor
 
 	protected String inClauseByKey;
 
-	private String findAllQuery;
+	protected String findAllQuery;
 
-	private String findAllWhereClauseByKey;
+	protected String findAllWhereClauseByKey;
 
 	protected String saveRow;
 
-	private String countAll;
+	protected String updateValue;
 
-	private String countByKey;
+	protected String countAll;
 
-	private String findAllWhereInClause = findAllQuery + whereClauseByKey;
+	protected String countByKey;
 
-	private String deleteFromTableClause = "DELETE FROM " + tableName;
+	protected String findAllWhereInClause = findAllQuery + whereClauseByKey;
+
+	protected String deleteFromTableClause = "DELETE FROM " + tableName;
 
 	protected String deleteFromTableByKey = deleteFromTableClause + whereClauseByKey;
 
@@ -114,6 +111,7 @@ public abstract class AbstractRdbmsKeyValueRepository<D> implements PagingAndSor
 		findAllQuery = "SELECT " + selectClause + "FROM " + tableName;
 		findAllWhereClauseByKey = findAllQuery + whereClauseByKey;
 		saveRow = "INSERT into " + tableName + "(" + keyColumn + ", " + valueColumn + ")" + "values (?, ?)";
+		updateValue = "UPDATE " + tableName + "SET " + valueColumn + "= ? WHERE " + keyColumn + "= ?";
 		countAll = "SELECT COUNT(*) FROM " + tableName;
 		countByKey = "SELECT COUNT(*) FROM " + tableName + whereClauseByKey;
 		findAllWhereInClause = findAllQuery + inClauseByKey;
@@ -121,107 +119,8 @@ public abstract class AbstractRdbmsKeyValueRepository<D> implements PagingAndSor
 		deleteFromTableByKey = deleteFromTableClause + whereClauseByKey;
 	}
 
-	@Override
-	public Iterable<D> findAll(Sort sort) {
-		Assert.notNull(sort, "sort must not be null");
-		Iterator<Sort.Order> iter = sort.iterator();
-		String query = findAllQuery + "ORDER BY ";
-
-		while (iter.hasNext()) {
-			Sort.Order order = iter.next();
-			query = query + order.getProperty() + " " + order.getDirection();
-			if (iter.hasNext()) {
-				query = query + ", ";
-			}
-		}
-		return jdbcTemplate.query(query, rowMapper);
-	}
-
-	@Override
-	public Page<D> findAll(Pageable pageable) {
-		Assert.notNull(pageable, "pageable must not be null");
-		return queryForPageableResults(pageable, selectClause, tableName, null, new Object[] {}, count());
-	}
-
-	@Override
-	public <S extends D> Iterable<S> save(Iterable<S> iterableDefinitions) {
-		Assert.notNull(iterableDefinitions, "iterableDefinitions must not be null");
-		for (S definition : iterableDefinitions) {
-			save(definition);
-		}
-		return iterableDefinitions;
-	}
-
-	@Override
-	public D findOne(String name) {
-		Assert.hasText(name, "name must not be empty nor null");
-		try {
-			return jdbcTemplate.queryForObject(findAllWhereClauseByKey, rowMapper, name);
-		}
-		catch (EmptyResultDataAccessException e) {
-			return null;
-		}
-	}
-
-	@Override
-	public boolean exists(String name) {
-		Assert.hasText(name, "name must not be empty nor null");
-		boolean result;
-		try {
-			result = (jdbcTemplate.queryForObject(countByKey, new Object[] { name }, Long.class) > 0) ? true : false;
-		}
-		catch (EmptyResultDataAccessException e) {
-			result = false;
-		}
-		return result;
-	}
-
-	@Override
-	public Iterable<D> findAll() {
+	public Iterable<D> findAllEntries() {
 		return jdbcTemplate.query(findAllQuery, rowMapper);
-	}
-
-	@Override
-	public Iterable<D> findAll(Iterable<String> names) {
-		Assert.notNull(names, "names must not be null");
-		List<String> listOfNames = new ArrayList<String>();
-		for (String name : names) {
-			listOfNames.add(name);
-		}
-
-		MapSqlParameterSource namedParameters = new MapSqlParameterSource();
-		namedParameters.addValue(LIST_OF_NAMES, listOfNames);
-
-		return namedParameterJdbcTemplate.query(findAllWhereInClause, namedParameters, rowMapper);
-	}
-
-	@Override
-	public long count() {
-		try {
-			return jdbcTemplate.queryForObject(countAll, new Object[] {}, Long.class);
-		}
-		catch (EmptyResultDataAccessException e) {
-			return 0;
-		}
-	}
-
-	@Override
-	public void delete(String name) {
-		Assert.hasText(name, "name must not be empty nor null");
-		jdbcTemplate.update(deleteFromTableByKey, name);
-	}
-
-	@Override
-	public void delete(Iterable<? extends D> definitions) {
-		Assert.notNull(definitions, "definitions must not null");
-		for (D definition : definitions) {
-			delete(definition);
-		}
-	}
-
-	@Override
-	public void deleteAll() {
-		jdbcTemplate.update(deleteFromTableClause);
 	}
 
 	private String updatePrefixSuffix(String base) {
@@ -229,7 +128,7 @@ public abstract class AbstractRdbmsKeyValueRepository<D> implements PagingAndSor
 		return StringUtils.replace(updatedPrefix, "%SUFFIX%", tableSuffix);
 	}
 
-	private Page<D> queryForPageableResults(Pageable pageable, String selectClause, String tableName,
+	protected Page<D> queryForPageableResults(Pageable pageable, String selectClause, String tableName,
 			String whereClause, Object[] queryParam, long totalCount) {
 		// Possible performance improvement refactoring so factory isn't called everytime.
 		SqlPagingQueryProviderFactoryBean factoryBean = new SqlPagingQueryProviderFactoryBean();
