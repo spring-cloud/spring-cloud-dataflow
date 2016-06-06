@@ -26,12 +26,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
-import java.util.regex.Pattern;
 
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataGroup;
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataRepositoryJsonBuilder;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.loader.archive.Archive;
 import org.springframework.boot.loader.archive.ExplodedArchive;
 import org.springframework.boot.loader.archive.JarFileArchive;
@@ -39,6 +37,7 @@ import org.springframework.boot.loader.jar.JarFile;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
@@ -47,18 +46,15 @@ import org.springframework.util.StringUtils;
  */
 public class ApplicationConfigurationMetadataResolver {
 
-	private static final String CONFIGURATION_METADATA_PATTERN = "classpath*:/META-INF/*spring-configuration-metadata.json";
+	private static final String CONFIGURATION_METADATA_PATTERN = "classpath*:/META-INF/spring-configuration-metadata.json";
 
 	private static final String DATAFLOW_PROPERTIES = "classpath*:/META-INF/dataflow.properties";
-
-	/**
-	 * A regex matching a {@link ConfigurationProperties#prefix()} that identifies the "main" configuration class.
-	 */
-	private static final Pattern MAIN_SPRING_CLOUD_STREAM_APP_PREFIX = Pattern.compile("spring\\.cloud\\.stream\\.app");
 
 	public static final String CONFIGURATION_CLASSES = "configuration.classes";
 
 	public static final String CONFIGURATION_PROPERTIES = "configuration.properties";
+
+	public static final String PRIMARY_PREFIX = "primary.prefix";
 
 	private final Set<String> globalWhiteListedProperties = new HashSet<>();
 
@@ -83,9 +79,8 @@ public class ApplicationConfigurationMetadataResolver {
 	 * Return metadata about configuration properties that are documented via
 	 * <a href="http://docs.spring.io/spring-boot/docs/current/reference/html/configuration-metadata.html">
 	 * Spring Boot configuration metadata</a> and visible in an app.
-	 *
 	 * @param app a Spring Cloud Stream app; typically a Boot uberjar,
-	 *               but directories are supported as well
+	 *            but directories are supported as well
 	 */
 	public List<ConfigurationMetadataProperty> listProperties(Resource app, boolean exhaustive) {
 		List<ConfigurationMetadataProperty> result = new ArrayList<>();
@@ -101,7 +96,7 @@ public class ApplicationConfigurationMetadataResolver {
 			Collection<String> whiteListedProperties = new HashSet<>(globalWhiteListedProperties);
 
 			loadWhiteLists(moduleResourceLoader.getResources(DATAFLOW_PROPERTIES), whiteListedClasses, whiteListedProperties);
-
+			String primaryPrefix = primaryPrefix(app);
 
 			ConfigurationMetadataRepositoryJsonBuilder builder = ConfigurationMetadataRepositoryJsonBuilder.create();
 			for (Resource r : moduleResourceLoader.getResources(CONFIGURATION_METADATA_PATTERN)) {
@@ -109,7 +104,7 @@ public class ApplicationConfigurationMetadataResolver {
 			}
 
 			for (ConfigurationMetadataGroup group : builder.build().getAllGroups().values()) {
-				if (isMainGroup(group)) {
+				if (group.getId().equals(primaryPrefix)) {
 					for (ConfigurationMetadataProperty property : group.getProperties().values()) {
 						result.add(unprefix(property));
 					}
@@ -121,7 +116,7 @@ public class ApplicationConfigurationMetadataResolver {
 					for (ConfigurationMetadataProperty property : group.getProperties().values()) {
 						int lastDot = property.getId().lastIndexOf('.');
 						String prefix = lastDot > 0 ? property.getId().substring(0, lastDot) : "";
-						if (MAIN_SPRING_CLOUD_STREAM_APP_PREFIX.matcher(prefix).matches()) {
+						if (prefix.equals(primaryPrefix)) {
 							result.add(unprefix(property));
 						}
 						else if (isWhiteListed(property, whiteListedProperties)) {
@@ -155,6 +150,41 @@ public class ApplicationConfigurationMetadataResolver {
 		return result;
 	}
 
+	public String primaryPrefix(Resource app) {
+		ClassLoader moduleClassLoader = null;
+		try {
+			File moduleFile = app.getFile();
+			Archive archive = moduleFile.isDirectory() ? new ExplodedArchive(moduleFile) : new JarFileArchive(moduleFile);
+			moduleClassLoader = createClassLoader(archive);
+			ResourcePatternResolver moduleResourceLoader = new PathMatchingResourcePatternResolver(moduleClassLoader);
+			String primaryPrefix = null;
+			for (Resource resource : moduleResourceLoader.getResources(DATAFLOW_PROPERTIES)) {
+				Properties properties = new Properties();
+				properties.load(resource.getInputStream());
+				String prefix = properties.getProperty(PRIMARY_PREFIX);
+				if (prefix != null) {
+					Assert.isNull(primaryPrefix, String.format("Multiple primary prefixes have been declared: '%s' and '%s'", prefix, primaryPrefix));
+					primaryPrefix = prefix;
+				}
+			}
+			return primaryPrefix;
+		}
+		catch (Exception e) {
+			throw new RuntimeException("An error occurred while reading app metadata", e);
+		}
+		finally {
+			if (moduleClassLoader instanceof Closeable) {
+				try {
+					((Closeable) moduleClassLoader).close();
+				}
+				catch (IOException e) {
+					// ignore
+				}
+			}
+		}
+
+	}
+
 	/**
 	 * For properties that are deemed to belong to the "main" group, return a copy that uses no qualifying prefix.
 	 */
@@ -181,10 +211,6 @@ public class ApplicationConfigurationMetadataResolver {
 			classes.addAll(Arrays.asList(StringUtils.delimitedListToStringArray(properties.getProperty(CONFIGURATION_CLASSES), ",", " ")));
 			props.addAll(Arrays.asList(StringUtils.delimitedListToStringArray(properties.getProperty(CONFIGURATION_PROPERTIES), ",", " ")));
 		}
-	}
-
-	private boolean isMainGroup(ConfigurationMetadataGroup group) {
-		return MAIN_SPRING_CLOUD_STREAM_APP_PREFIX.matcher(group.getId()).matches();
 	}
 
 	/**

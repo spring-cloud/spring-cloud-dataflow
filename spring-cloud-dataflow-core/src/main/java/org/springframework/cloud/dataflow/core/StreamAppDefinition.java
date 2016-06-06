@@ -32,11 +32,6 @@ import org.springframework.util.Assert;
 public class StreamAppDefinition extends DataFlowAppDefinition {
 
 	/**
-	 * The prefix that will be automatically added to dotless parameters.
-	 */
-	public static final String MAIN_PARAMETER_IMPLICIT_PREFIX = "spring.cloud.stream.app.";
-
-	/**
 	 * Name of stream unit this app instance belongs to.
 	 */
 	private final String streamName;
@@ -197,6 +192,20 @@ public class StreamAppDefinition extends DataFlowAppDefinition {
 		 */
 		public Builder setProperty(String name, String value) {
 			this.properties.put(name, value);
+			return this;
+		}
+
+		/**
+		 * Sets app properties.
+		 *
+		 * @param properties app properties
+		 * @return this builder object
+		 *
+		 * @see AppDefinition#getProperties()
+		 */
+		public Builder setProperties(Map<String, String> properties) {
+			this.properties.clear();
+			this.addProperties(properties);
 			return this;
 		}
 
