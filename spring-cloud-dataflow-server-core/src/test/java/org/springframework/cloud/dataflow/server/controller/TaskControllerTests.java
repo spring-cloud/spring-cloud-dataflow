@@ -230,7 +230,7 @@ public class TaskControllerTests {
 
 		mockMvc.perform(
 				post("/tasks/deployments/{name}", "myTask2")
-				.param("params", "--foobar=jee")
+				.param("arguments", "--foobar=jee")
 				.accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isCreated());
 
@@ -257,7 +257,7 @@ public class TaskControllerTests {
 
 		mockMvc.perform(
 				post("/tasks/deployments/{name}", "myTask3")
-				.param("params", "--foobar=jee", "--foobar2=jee2", "--foobar3='jee3 jee3'")
+				.param("arguments", "--foobar=jee", "--foobar2=jee2", "--foobar3='jee3 jee3'")
 				.accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isCreated());
 

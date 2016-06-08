@@ -65,12 +65,12 @@ public class TaskDeploymentController {
 	 * @param taskName the name of the existing task to be executed (required)
 	 * @param properties the runtime properties for the task, as a comma-delimited list of
 	 * 					 key=value pairs
-	 * @param params the runtime commandline arguments
+	 * @param arguments the runtime commandline arguments
 	 */
 	@RequestMapping(value = "/{name}", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
 	public void deploy(@PathVariable("name") String taskName, @RequestParam(required = false) String properties,
-			@RequestParam(required = false) List<String> params) {
-		this.taskService.executeTask(taskName, DeploymentPropertiesUtils.parse(properties), DeploymentPropertiesUtils.parseParams(params));
+			@RequestParam(required = false) List<String> arguments) {
+		this.taskService.executeTask(taskName, DeploymentPropertiesUtils.parse(properties), DeploymentPropertiesUtils.parseParams(arguments));
 	}
 }

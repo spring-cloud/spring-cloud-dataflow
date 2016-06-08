@@ -49,6 +49,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Glenn Renfro
  * @author Michael Minella
+ * @author Gunnar Hillert
  */
 @Component
 // todo: reenable optionContext attributes
@@ -70,7 +71,7 @@ public class TaskCommands implements CommandMarker {
 
 	private static final String PROPERTIES_FILE_OPTION = "propertiesFile";
 
-	private static final String PARAMS_OPTION = "params";
+	private static final String ARGUMENTS_OPTION = "arguments";
 
 	private static final String EXECUTION_LIST = "task execution list";
 
@@ -107,7 +108,7 @@ public class TaskCommands implements CommandMarker {
 			@CliOption(key = { "", "name" }, help = "the name of the task to launch", mandatory = true) String name,
 			@CliOption(key = { PROPERTIES_OPTION }, help = "the properties for this launch", mandatory = false) String properties,
 			@CliOption(key = { PROPERTIES_FILE_OPTION }, help = "the properties for this launch (as a File)", mandatory = false) File propertiesFile,
-			@CliOption(key = { PARAMS_OPTION }, help = "the commandline arguments for this launch", mandatory = false) String params
+			@CliOption(key = { ARGUMENTS_OPTION }, help = "the commandline arguments for this launch", mandatory = false) String arguments
 			) throws IOException {
 		int which = Assertions.atMostOneOf(PROPERTIES_OPTION, properties, PROPERTIES_FILE_OPTION, propertiesFile);
 		Map<String, String> propertiesToUse;
@@ -128,11 +129,11 @@ public class TaskCommands implements CommandMarker {
 			default:
 				throw new AssertionError();
 		}
-		List<String> paramsToUse = new ArrayList<String>();
-		if (StringUtils.hasText(params)) {
-			paramsToUse.add(params);
+		List<String> argumentsToUse = new ArrayList<String>();
+		if (StringUtils.hasText(arguments)) {
+			argumentsToUse.add(arguments);
 		}
-		taskOperations().launch(name, propertiesToUse, paramsToUse);
+		taskOperations().launch(name, propertiesToUse, argumentsToUse);
 		return String.format("Launched task '%s'", name);
 	}
 
@@ -186,7 +187,7 @@ public class TaskCommands implements CommandMarker {
 		modelBuilder.addRow().addValue("Key ").addValue("Value ");
 		modelBuilder.addRow().addValue("Id ").addValue(taskExecutionResource.getExecutionId());
 		modelBuilder.addRow().addValue("Name ").addValue(taskExecutionResource.getTaskName());
-		modelBuilder.addRow().addValue("Parameters ").addValue(taskExecutionResource.getParameters());
+		modelBuilder.addRow().addValue("Arguments ").addValue(taskExecutionResource.getArguments());
 		modelBuilder.addRow().addValue("Job Execution Ids ").addValue(taskExecutionResource.getJobExecutionIds());
 		modelBuilder.addRow().addValue("Start Time ").addValue(taskExecutionResource.getStartTime());
 		modelBuilder.addRow().addValue("End Time ").addValue(taskExecutionResource.getEndTime());

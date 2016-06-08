@@ -32,6 +32,7 @@ import org.springframework.util.Assert;
  * A HATEOAS representation of a TaskExecution.
  *
  * @author Glenn Renfro
+ * @author Gunnar Hillert
  */
 public class TaskExecutionResource extends ResourceSupport {
 
@@ -66,9 +67,9 @@ public class TaskExecutionResource extends ResourceSupport {
 	private String exitMessage;
 
 	/**
-	 * The parameters that were used for this task execution.
+	 * The command line arguments that were used for this task execution.
 	 */
-	private List<String> parameters;
+	private List<String> arguments;
 
 	/**
 	 * List of {@link JobExecution}s that are associated with this task.
@@ -76,7 +77,7 @@ public class TaskExecutionResource extends ResourceSupport {
 	private List<Long> jobExecutionIds;
 
 	public TaskExecutionResource() {
-		parameters = new ArrayList<>();
+		arguments = new ArrayList<>();
 	}
 
 	/**
@@ -90,7 +91,7 @@ public class TaskExecutionResource extends ResourceSupport {
 		this.exitCode = taskJobExecutionRel.getTaskExecution().getExitCode();
 		this.taskName = taskJobExecutionRel.getTaskExecution().getTaskName();
 		this.exitMessage = taskJobExecutionRel.getTaskExecution().getExitMessage();
-		this.parameters = Collections.unmodifiableList(taskJobExecutionRel.getTaskExecution().getParameters());
+		this.arguments = Collections.unmodifiableList(taskJobExecutionRel.getTaskExecution().getParameters());
 		this.startTime = taskJobExecutionRel.getTaskExecution().getStartTime();
 		this.endTime = taskJobExecutionRel.getTaskExecution().getEndTime();
 		if(taskJobExecutionRel.getJobExecutionIds() == null){
@@ -125,13 +126,13 @@ public class TaskExecutionResource extends ResourceSupport {
 	public Date getEndTime() {
 		return endTime;
 	}
-	
+
 	public String getExitMessage() {
 		return exitMessage;
 	}
 
-	public List<String> getParameters() {
-		return parameters;
+	public List<String> getArguments() {
+		return arguments;
 	}
 
 	public List<Long> getJobExecutionIds(){

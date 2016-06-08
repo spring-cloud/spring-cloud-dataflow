@@ -28,6 +28,7 @@ import org.springframework.hateoas.PagedResources;
  *
  * @author Glenn Renfro
  * @author Michael Minella
+ * @author Gunnar Hillert
  */
 public interface TaskOperations {
 
@@ -44,7 +45,7 @@ public interface TaskOperations {
 	/**
 	 * Launch an already created task.
 	 */
-	void launch(String name, Map<String, String> properties, List<String> params);
+	void launch(String name, Map<String, String> properties, List<String> arguments);
 
 	/**
 	 * Destroy an existing task.

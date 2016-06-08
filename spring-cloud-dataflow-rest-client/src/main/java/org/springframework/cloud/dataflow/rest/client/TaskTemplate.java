@@ -35,6 +35,7 @@ import org.springframework.web.client.RestTemplate;
  * Implementation for {@link org.springframework.cloud.dataflow.rest.client.TaskOperations}.
  * @author Glenn Renfro
  * @author Michael Minella
+ * @author Gunnar Hillert
  */
 public class TaskTemplate implements TaskOperations {
 
@@ -110,10 +111,10 @@ public class TaskTemplate implements TaskOperations {
 	}
 
 	@Override
-	public void launch(String name, Map<String, String> properties, List<String> params) {
+	public void launch(String name, Map<String, String> properties, List<String> arguments) {
 		MultiValueMap<String, Object> values = new LinkedMultiValueMap<String, Object>();
 		values.add("properties", DeploymentPropertiesUtils.format(properties));
-		values.add("params", StringUtils.collectionToDelimitedString(params, " "));
+		values.add("arguments", StringUtils.collectionToDelimitedString(arguments, " "));
 		restTemplate.postForObject(deploymentLink.expand(name).getHref(), values, Object.class, name);
 	}
 
