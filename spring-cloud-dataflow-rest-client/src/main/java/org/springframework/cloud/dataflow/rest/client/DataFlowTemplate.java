@@ -97,16 +97,34 @@ public class DataFlowTemplate implements DataFlowOperations {
 	public DataFlowTemplate(URI baseURI, RestTemplate restTemplate) {
 		this.restTemplate = restTemplate;
 		ResourceSupport resourceSupport = restTemplate.getForObject(baseURI, ResourceSupport.class);
-
-		this.streamOperations = new StreamTemplate(restTemplate, resourceSupport);
-		this.counterOperations = new CounterTemplate(restTemplate, resourceSupport);
-		this.fieldValueCounterOperations = new FieldValueCounterTemplate(restTemplate, resourceSupport);
-		this.aggregateCounterOperations = new AggregateCounterTemplate(restTemplate, resourceSupport);
-		this.taskOperations = new TaskTemplate(restTemplate, resourceSupport);
-		this.jobOperations = new JobTemplate(restTemplate, resourceSupport);
+		if (resourceSupport.hasLink(StreamTemplate.DEFINITIONS_REL)) {
+			this.streamOperations = new StreamTemplate(restTemplate, resourceSupport);
+			this.runtimeOperations = new RuntimeTemplate(restTemplate, resourceSupport);
+		}
+		else {
+			this.streamOperations = null;
+			this.runtimeOperations = null;
+		}
+		if (resourceSupport.hasLink(CounterTemplate.COUNTER_RELATION)) {
+			this.counterOperations = new CounterTemplate(restTemplate, resourceSupport);
+			this.fieldValueCounterOperations = new FieldValueCounterTemplate(restTemplate, resourceSupport);
+			this.aggregateCounterOperations = new AggregateCounterTemplate(restTemplate, resourceSupport);
+		}
+		else {
+			this.counterOperations = null;
+			this.fieldValueCounterOperations = null;
+			this.aggregateCounterOperations = null;
+		}
+		if (resourceSupport.hasLink(TaskTemplate.DEFINITIONS_RELATION)) {
+			this.taskOperations = new TaskTemplate(restTemplate, resourceSupport);
+			this.jobOperations = new JobTemplate(restTemplate, resourceSupport);
+		}
+		else {
+			this.taskOperations = null;
+			this.jobOperations = null;
+		}
 		this.appRegistryOperations = new AppRegistryTemplate(restTemplate, resourceSupport);
 		this.completionOperations = new CompletionTemplate(restTemplate, resourceSupport.getLink("completions/stream"));
-		this.runtimeOperations = new RuntimeTemplate(restTemplate, resourceSupport);
 	}
 
 	public Link getLink(ResourceSupport resourceSupport, String rel) {

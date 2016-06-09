@@ -28,15 +28,18 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.cloud.dataflow.completion.CompletionConfiguration;
 import org.springframework.cloud.dataflow.completion.StreamCompletionProvider;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.registry.DataFlowUriRegistryPopulator;
 import org.springframework.cloud.dataflow.registry.DataFlowUriRegistryPopulatorProperties;
 import org.springframework.cloud.dataflow.registry.RdbmsUriRegistry;
+import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
 import org.springframework.cloud.dataflow.server.controller.AggregateCounterController;
 import org.springframework.cloud.dataflow.server.controller.AppRegistryController;
 import org.springframework.cloud.dataflow.server.controller.CompletionController;
 import org.springframework.cloud.dataflow.server.controller.CounterController;
+import org.springframework.cloud.dataflow.server.controller.FeaturesController;
 import org.springframework.cloud.dataflow.server.controller.FieldValueCounterController;
 import org.springframework.cloud.dataflow.server.controller.JobExecutionController;
 import org.springframework.cloud.dataflow.server.controller.JobInstanceController;
@@ -71,6 +74,7 @@ import org.springframework.cloud.stream.configuration.metadata.ApplicationConfig
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.hateoas.EntityLinks;
 
@@ -79,11 +83,13 @@ import org.springframework.hateoas.EntityLinks;
  *
  * @author Mark Fisher
  * @author Gunnar Hillert
+ * @author Ilayaperumal Gopinathan
  */
 @SuppressWarnings("ALL")
 @Configuration
+@Import(CompletionConfiguration.class)
 @ConditionalOnBean({ AppDeployer.class, TaskLauncher.class })
-@EnableConfigurationProperties(DataFlowUriRegistryPopulatorProperties.class)
+@EnableConfigurationProperties({DataFlowUriRegistryPopulatorProperties.class, FeaturesProperties.class})
 public class DataFlowControllerAutoConfiguration {
 
 	@Bean
@@ -113,17 +119,12 @@ public class DataFlowControllerAutoConfiguration {
 	}
 
 	@Bean
-	public RuntimeAppsController runtimeAppsController(StreamDefinitionRepository repository,
-			DeploymentIdRepository deploymentIdRepository, AppDeployer appDeployer) {
-		return new RuntimeAppsController(repository, deploymentIdRepository, appDeployer);
-	}
-
-	@Bean
 	public AppInstanceController appInstanceController(AppDeployer appDeployer) {
 		return new AppInstanceController(appDeployer);
 	}
 
 	@Bean
+	@ConditionalOnBean(StreamDefinitionRepository.class)
 	public StreamDefinitionController streamDefinitionController(StreamDefinitionRepository repository,
 			DeploymentIdRepository deploymentIdRepository, StreamDeploymentController deploymentController,
 			AppDeployer deployer, AppRegistry appRegistry) {
@@ -132,9 +133,17 @@ public class DataFlowControllerAutoConfiguration {
 	}
 
 	@Bean
+	@ConditionalOnBean(StreamDefinitionRepository.class)
 	public StreamDeploymentController streamDeploymentController(StreamDefinitionRepository repository,
 			DeploymentIdRepository deploymentIdRepository, AppRegistry registry, AppDeployer deployer) {
 		return new StreamDeploymentController(repository, deploymentIdRepository, registry, deployer);
+	}
+
+	@Bean
+	@ConditionalOnBean(StreamDefinitionRepository.class)
+	public RuntimeAppsController runtimeAppsController(StreamDefinitionRepository repository,
+													   DeploymentIdRepository deploymentIdRepository, AppDeployer appDeployer) {
+		return new RuntimeAppsController(repository, deploymentIdRepository, appDeployer);
 	}
 
 	@Bean
@@ -151,44 +160,64 @@ public class DataFlowControllerAutoConfiguration {
 	}
 
 	@Bean
+	@ConditionalOnBean(TaskDefinitionRepository.class)
 	public TaskDefinitionController taskDefinitionController(TaskDefinitionRepository repository,
 			DeploymentIdRepository deploymentIdRepository, TaskLauncher taskLauncher) {
 		return new TaskDefinitionController(repository, deploymentIdRepository, taskLauncher);
 	}
 
 	@Bean
+	@ConditionalOnBean(TaskDefinitionRepository.class)
 	public TaskDeploymentController taskDeploymentController(TaskService taskService) {
 		return new TaskDeploymentController(taskService);
 	}
 
 	@Bean
+	@ConditionalOnBean(TaskDefinitionRepository.class)
 	public TaskExecutionController taskExecutionController(TaskExplorer explorer) {
 		return new TaskExecutionController(explorer);
 	}
 
 	@Bean
+	@ConditionalOnBean(TaskDefinitionRepository.class)
 	public JobExecutionController jobExecutionController(TaskJobService repository) {
 		return new JobExecutionController(repository);
 	}
 
 	@Bean
+	@ConditionalOnBean(TaskDefinitionRepository.class)
 	public JobStepExecutionController jobStepExecutionController(JobService service) {
 		return new JobStepExecutionController(service);
 	}
 
 	@Bean
+	@ConditionalOnBean(TaskDefinitionRepository.class)
 	public JobStepExecutionProgressController jobStepExecutionProgressController(JobService service) {
 		return new JobStepExecutionProgressController(service);
 	}
 
 	@Bean
+	@ConditionalOnBean(TaskDefinitionRepository.class)
 	public JobInstanceController jobInstanceController(TaskJobService repository) {
 		return new JobInstanceController(repository);
 	}
 
 	@Bean
+	@ConditionalOnBean(MetricRepository.class)
 	public CounterController counterController(MetricRepository metricRepository) {
 		return new CounterController(metricRepository);
+	}
+
+	@Bean
+	@ConditionalOnBean(FieldValueCounterRepository.class)
+	public FieldValueCounterController fieldValueCounterController(FieldValueCounterRepository repository) {
+		return new FieldValueCounterController(repository);
+	}
+
+	@Bean
+	@ConditionalOnBean(AggregateCounterRepository.class)
+	public AggregateCounterController aggregateCounterController(AggregateCounterRepository repository) {
+		return new AggregateCounterController(repository);
 	}
 
 	@Bean
@@ -197,23 +226,18 @@ public class DataFlowControllerAutoConfiguration {
 	}
 
 	@Bean
-	public FieldValueCounterController fieldValueCounterController(FieldValueCounterRepository repository) {
-		return new FieldValueCounterController(repository);
-	}
-
-	@Bean
 	public AppRegistryController appRegistryController(AppRegistry appRegistry, ApplicationConfigurationMetadataResolver metadataResolver) {
 		return new AppRegistryController(appRegistry, metadataResolver);
 	}
 
 	@Bean
-	public AggregateCounterController aggregateCounterController(AggregateCounterRepository repository) {
-		return new AggregateCounterController(repository);
+	public SecurityController securityController(SecurityProperties securityProperties) {
+		return new SecurityController(securityProperties);
 	}
 
 	@Bean
-	public SecurityController securityController(SecurityProperties securityProperties) {
-		return new SecurityController(securityProperties);
+	public FeaturesController featuresController(FeaturesProperties featuresProperties) {
+		return new FeaturesController(featuresProperties);
 	}
 
 	@Bean
