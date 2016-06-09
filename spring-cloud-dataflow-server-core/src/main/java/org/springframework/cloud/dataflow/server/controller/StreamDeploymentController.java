@@ -16,16 +16,20 @@
 
 package org.springframework.cloud.dataflow.server.controller;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.BindingPropertyKeys;
 import org.springframework.cloud.dataflow.core.StreamAppDefinition;
@@ -226,8 +230,7 @@ public class StreamDeploymentController {
 			Assert.notNull(registration, String.format("no application '%s' of type '%s' exists in the registry",
 					currentApp.getName(), type));
 			Resource resource = registration.getResource();
-			String primaryPrefix = metadataResolver.primaryPrefix(resource);
-			currentApp = qualifyParameters(currentApp, primaryPrefix);
+			currentApp = qualifyParameters(currentApp, resource);
 
 			AppDeploymentRequest request = currentApp.createDeploymentRequest(resource, appDeploymentProperties);
 			try {
@@ -243,18 +246,41 @@ public class StreamDeploymentController {
 	}
 
 	/**
-	 * Return a copy of a given app definition where short form parameters have been expanded
-	 * with the primary prefix if applicable.
+	 * Return a copy of a given app definition where short form parameters have been expanded to their long form
+	 * (amongst the whitelisted supported properties of the app) if applicable.
+	 * .
 	 */
-	private StreamAppDefinition qualifyParameters(StreamAppDefinition original, String primaryPrefix) {
+	private StreamAppDefinition qualifyParameters(StreamAppDefinition original, Resource resource) {
+		List<String> whiteList = new ArrayList<>();
+		List<String> allProps = new ArrayList<>();
+
+		for (ConfigurationMetadataProperty property : metadataResolver.listProperties(resource, false)) {
+			whiteList.add(property.getId());
+		}
+		for (ConfigurationMetadataProperty property : metadataResolver.listProperties(resource, true)) {
+			allProps.add(property.getId());
+		}
+
 		StreamAppDefinition.Builder builder = StreamAppDefinition.Builder.from(original);
 		Map<String, String> mutatedProps = new HashMap<>(original.getProperties().size());
 		for (Map.Entry<String, String> entry : original.getProperties().entrySet()) {
-			if (entry.getKey().contains(".") || primaryPrefix == null) {
+			if (!allProps.contains(entry.getKey())) {
+				Set<String> candidates = new HashSet<>();
+				for (String white : whiteList) {
+					if (white.endsWith(entry.getKey())) {
+						candidates.add(white);
+					}
+				}
+				// TODO: fail, or simply do nothing?
+				Assert.isTrue(candidates.size() <= 1, String.format("Ambiguous short form property '%s' could mean any of %s", entry.getKey(), candidates));
+				if (candidates.size() == 1) {
+					mutatedProps.put(candidates.iterator().next(), entry.getValue());
+				}
+				// TODO: also leave the original property?
 				mutatedProps.put(entry.getKey(), entry.getValue());
 			}
 			else {
-				mutatedProps.put(primaryPrefix + "." + entry.getKey(), entry.getValue());
+				mutatedProps.put(entry.getKey(), entry.getValue());
 			}
 		}
 		return builder.setProperties(mutatedProps).build(original.getStreamName());

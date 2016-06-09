@@ -37,7 +37,6 @@ import org.springframework.boot.loader.jar.JarFile;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
-import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
@@ -53,8 +52,6 @@ public class ApplicationConfigurationMetadataResolver {
 	public static final String CONFIGURATION_CLASSES = "configuration.classes";
 
 	public static final String CONFIGURATION_PROPERTIES = "configuration.properties";
-
-	public static final String PRIMARY_PREFIX = "primary.prefix";
 
 	private final Set<String> globalWhiteListedProperties = new HashSet<>();
 
@@ -96,7 +93,6 @@ public class ApplicationConfigurationMetadataResolver {
 			Collection<String> whiteListedProperties = new HashSet<>(globalWhiteListedProperties);
 
 			loadWhiteLists(moduleResourceLoader.getResources(DATAFLOW_PROPERTIES), whiteListedClasses, whiteListedProperties);
-			String primaryPrefix = primaryPrefix(app);
 
 			ConfigurationMetadataRepositoryJsonBuilder builder = ConfigurationMetadataRepositoryJsonBuilder.create();
 			for (Resource r : moduleResourceLoader.getResources(CONFIGURATION_METADATA_PATTERN)) {
@@ -104,22 +100,12 @@ public class ApplicationConfigurationMetadataResolver {
 			}
 
 			for (ConfigurationMetadataGroup group : builder.build().getAllGroups().values()) {
-				if (group.getId().equals(primaryPrefix)) {
-					for (ConfigurationMetadataProperty property : group.getProperties().values()) {
-						result.add(unprefix(property));
-					}
-				}
-				else if (exhaustive || isWhiteListed(group, whiteListedClasses)) {
+				if (exhaustive || isWhiteListed(group, whiteListedClasses)) {
 					result.addAll(group.getProperties().values());
 				} // Props in the root group have an id that looks prefixed itself. Handle here
 				else if ("_ROOT_GROUP_".equals(group.getId())) {
 					for (ConfigurationMetadataProperty property : group.getProperties().values()) {
-						int lastDot = property.getId().lastIndexOf('.');
-						String prefix = lastDot > 0 ? property.getId().substring(0, lastDot) : "";
-						if (prefix.equals(primaryPrefix)) {
-							result.add(unprefix(property));
-						}
-						else if (isWhiteListed(property, whiteListedProperties)) {
+						if (isWhiteListed(property, whiteListedProperties)) {
 							result.add(property);
 						}
 					}
@@ -132,7 +118,6 @@ public class ApplicationConfigurationMetadataResolver {
 					}
 				}
 			}
-
 		}
 		catch (Exception e) {
 			throw new RuntimeException("Exception trying to list configuration properties for application " + app, e);
@@ -147,57 +132,6 @@ public class ApplicationConfigurationMetadataResolver {
 				}
 			}
 		}
-		return result;
-	}
-
-	public String primaryPrefix(Resource app) {
-		ClassLoader moduleClassLoader = null;
-		try {
-			File moduleFile = app.getFile();
-			Archive archive = moduleFile.isDirectory() ? new ExplodedArchive(moduleFile) : new JarFileArchive(moduleFile);
-			moduleClassLoader = createClassLoader(archive);
-			ResourcePatternResolver moduleResourceLoader = new PathMatchingResourcePatternResolver(moduleClassLoader);
-			String primaryPrefix = null;
-			for (Resource resource : moduleResourceLoader.getResources(DATAFLOW_PROPERTIES)) {
-				Properties properties = new Properties();
-				properties.load(resource.getInputStream());
-				String prefix = properties.getProperty(PRIMARY_PREFIX);
-				if (prefix != null) {
-					Assert.isNull(primaryPrefix, String.format("Multiple primary prefixes have been declared: '%s' and '%s'", prefix, primaryPrefix));
-					primaryPrefix = prefix;
-				}
-			}
-			return primaryPrefix;
-		}
-		catch (Exception e) {
-			throw new RuntimeException("An error occurred while reading app metadata", e);
-		}
-		finally {
-			if (moduleClassLoader instanceof Closeable) {
-				try {
-					((Closeable) moduleClassLoader).close();
-				}
-				catch (IOException e) {
-					// ignore
-				}
-			}
-		}
-
-	}
-
-	/**
-	 * For properties that are deemed to belong to the "main" group, return a copy that uses no qualifying prefix.
-	 */
-	private ConfigurationMetadataProperty unprefix(ConfigurationMetadataProperty original) {
-		ConfigurationMetadataProperty result = new ConfigurationMetadataProperty();
-		result.setDefaultValue(original.getDefaultValue());
-		result.setDeprecation(original.getDeprecation());
-		result.setDescription(original.getDescription());
-		result.setName(original.getName());
-		int lastDot = original.getId().lastIndexOf('.');
-		result.setId(original.getId().substring(lastDot + 1)); // removes prefix, will be -1+1=0 if no dot
-		result.setShortDescription(original.getShortDescription());
-		result.setType(original.getType());
 		return result;
 	}
 
