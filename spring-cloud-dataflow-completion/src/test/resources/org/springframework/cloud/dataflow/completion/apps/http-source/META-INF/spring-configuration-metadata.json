@@ -1,21 +1,14 @@
 {
   "groups": [
     {
-      "name": "spring.cloud.stream.app",
+      "name": "http",
       "type": "foo.bar.HttpProperties",
       "sourceType": "foo.bar.HttpProperties"
     }
   ],
   "properties": [
     {
-      "name": "spring.cloud.stream.app.port",
-      "type": "java.lang.Integer",
-      "description": "The port to listen on",
-      "sourceType": "foo.bar.HttpProperties",
-      "defaultValue": 8080
-    },
-    {
-      "name": "spring.cloud.stream.app.use-ssl",
+      "name": "http.use-ssl",
       "type": "java.lang.Boolean",
       "description": "Whether to use SSL encryption or not",
       "sourceType": "foo.bar.HttpProperties"

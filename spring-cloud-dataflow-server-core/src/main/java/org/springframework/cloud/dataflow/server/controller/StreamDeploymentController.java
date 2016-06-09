@@ -255,10 +255,10 @@ public class StreamDeploymentController {
 		List<String> allProps = new ArrayList<>();
 
 		for (ConfigurationMetadataProperty property : metadataResolver.listProperties(resource, false)) {
-			whiteList.add(property.getId());
+			whiteList.add(property.getName()); // Use names here
 		}
 		for (ConfigurationMetadataProperty property : metadataResolver.listProperties(resource, true)) {
-			allProps.add(property.getId());
+			allProps.add(property.getId()); // But full ids here
 		}
 
 		StreamAppDefinition.Builder builder = StreamAppDefinition.Builder.from(original);
@@ -267,16 +267,15 @@ public class StreamDeploymentController {
 			if (!allProps.contains(entry.getKey())) {
 				Set<String> candidates = new HashSet<>();
 				for (String white : whiteList) {
-					if (white.endsWith(entry.getKey())) {
+					if (white.equals(entry.getKey())) {
 						candidates.add(white);
 					}
 				}
-				// TODO: fail, or simply do nothing?
 				Assert.isTrue(candidates.size() <= 1, String.format("Ambiguous short form property '%s' could mean any of %s", entry.getKey(), candidates));
 				if (candidates.size() == 1) {
 					mutatedProps.put(candidates.iterator().next(), entry.getValue());
 				}
-				// TODO: also leave the original property?
+				// Note that we also leave the original property
 				mutatedProps.put(entry.getKey(), entry.getValue());
 			}
 			else {

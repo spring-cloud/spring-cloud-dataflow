@@ -1,29 +1,18 @@
 {
   "groups": [
     {
-      "name": "spring.cloud.stream.app",
+      "name": "filter",
       "type": "foo.bar.FilterProperties",
       "sourceType": "foo.bar.FilterProperties"
-    },
-    {
-      "name": "some.other.whitelisted.prefix",
-      "type": "com.acme.SomeProperties",
-      "sourceType": "com.acme.SomeProperties"
     }
   ],
   "properties": [
     {
-      "name": "spring.cloud.stream.app.expression",
+      "name": "filter.expression",
       "type": "org.springframework.expression.Expression",
       "description": "A predicate to evaluate",
       "sourceType": "foo.bar.FilterProperties",
       "defaultValue": "true"
-    },
-    {
-      "name": "some.other.whitelisted.prefix.expresso",
-      "type": "org.springframework.cloud.dataflow.completion.Expresso",
-      "description": "A property of type enum and whose name starts like 'expression'",
-      "sourceType": "com.acme.SomeProperties"
     },
     {
       "name": "some.other.property.whitelisted.prefix.expresso2",

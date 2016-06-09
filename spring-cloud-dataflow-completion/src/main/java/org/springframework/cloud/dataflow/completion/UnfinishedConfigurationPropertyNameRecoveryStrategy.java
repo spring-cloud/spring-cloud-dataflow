@@ -99,10 +99,23 @@ public class UnfinishedConfigurationPropertyNameRecoveryStrategy
 
 		CompletionProposal.Factory proposals = expanding(safe);
 
+		// For whitelisted properties, use their simple name
 		for (ConfigurationMetadataProperty property : metadataResolver.listProperties(jarFile)) {
-			if (!alreadyPresentOptions.contains(property.getId()) && property.getId().startsWith(buffer)) {
-				collector.add(proposals.withSeparateTokens("--" + property.getId()
+			String name = property.getName();
+			if (!alreadyPresentOptions.contains(name) && name.startsWith(buffer)) {
+				collector.add(proposals.withSeparateTokens("--" + name
 						+ "=", property.getShortDescription()));
+			}
+		}
+
+		// For other props, use their full id
+		if (detailLevel > 1) {
+			for (ConfigurationMetadataProperty property : metadataResolver.listProperties(jarFile, true)) {
+				String id = property.getId();
+				if (!alreadyPresentOptions.contains(id) && id.startsWith(buffer)) {
+					collector.add(proposals.withSeparateTokens("--" + id
+							+ "=", property.getShortDescription()));
+				}
 			}
 		}
 	}

@@ -36,7 +36,6 @@ import org.springframework.core.io.Resource;
 /**
  * Provides completion proposals when the user has typed the two dashes that
  * precede an app configuration property.
- *
  * @author Eric Bottard
  * @author Mark Fisher
  */
@@ -80,9 +79,19 @@ class ConfigurationPropertyNameAfterDashDashRecoveryStrategy
 
 		CompletionProposal.Factory proposals = expanding(dsl);
 
+		// For whitelisted properties, use their shortname
 		for (ConfigurationMetadataProperty property : metadataResolver.listProperties(jarFile)) {
-			if (!alreadyPresentOptions.contains(property.getId())) {
-				collector.add(proposals.withSuffix(property.getId() + "=", property.getShortDescription()));
+			if (!alreadyPresentOptions.contains(property.getName())) {
+				collector.add(proposals.withSuffix(property.getName() + "=", property.getShortDescription()));
+			}
+		}
+
+		// For other properties, use their fully qualified name
+		if (detailLevel > 1) {
+			for (ConfigurationMetadataProperty property : metadataResolver.listProperties(jarFile, true)) {
+				if (!alreadyPresentOptions.contains(property.getId())) {
+					collector.add(proposals.withSuffix(property.getId() + "=", property.getShortDescription()));
+				}
 			}
 		}
 	}

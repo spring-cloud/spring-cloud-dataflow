@@ -70,10 +70,21 @@ class AddAppOptionsExpansionStrategy implements ExpansionStrategy {
 
 		CompletionProposal.Factory proposals = expanding(text);
 
+		// For whitelisted properties, use their simple name
 		for (ConfigurationMetadataProperty property : metadataResolver.listProperties(jarFile)) {
-			if (!alreadyPresentOptions.contains(property.getId())) {
-				collector.add(proposals.withSeparateTokens("--" + property.getId() + "=", property.getShortDescription()));
+			if (!alreadyPresentOptions.contains(property.getName())) {
+				collector.add(proposals.withSeparateTokens("--" + property.getName() + "=", property.getShortDescription()));
 			}
+		}
+
+		// For other properties (including WL'ed in full form), use their id
+		if (detailLevel > 1) {
+			for (ConfigurationMetadataProperty property : metadataResolver.listProperties(jarFile, true)) {
+				if (!alreadyPresentOptions.contains(property.getId())) {
+					collector.add(proposals.withSeparateTokens("--" + property.getId() + "=", property.getShortDescription()));
+				}
+			}
+
 		}
 
 		return false;

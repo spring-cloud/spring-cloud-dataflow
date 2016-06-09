@@ -46,15 +46,9 @@ public class ApplicationConfigurationMetadataResolverTests {
 	}
 
 	@Test
-	public void mainConfigurationClassesPropsShouldBeVisible() {
+	public void appSpecificWhitelistedPropsShouldBeVisible() {
 		List<ConfigurationMetadataProperty> properties = resolver.listProperties(new ClassPathResource("apps/filter-processor", getClass()));
-		assertThat(properties, hasItem(configPropertyIdentifiedAs("expression")));
-	}
-
-	@Test
-	public void explicitPropsAndClassesShouldBeVisible() {
-		List<ConfigurationMetadataProperty> properties = resolver.listProperties(new ClassPathResource("apps/filter-processor", getClass()));
-		assertThat(properties, hasItem(configPropertyIdentifiedAs("some.other.whitelisted.prefix.expresso")));
+		assertThat(properties, hasItem(configPropertyIdentifiedAs("filter.expression")));
 		assertThat(properties, hasItem(configPropertyIdentifiedAs("some.other.property.whitelisted.prefix.expresso2")));
 	}
 

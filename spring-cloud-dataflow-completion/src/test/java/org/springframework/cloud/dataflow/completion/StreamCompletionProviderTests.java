@@ -161,7 +161,7 @@ public class StreamCompletionProviderTests {
 	@Test
 	// file | counter --name=foo --inputType=bar<TAB> => we're done
 	public void testSinkWithAllOptionsSetCantGoFurther() {
-		assertThat(completionProvider.complete("http | log --server.port=1234 --level=debug", 1), empty());
+		assertThat(completionProvider.complete("http | log --port=1234 --level=debug", 1), empty());
 	}
 
 	@Test
@@ -226,7 +226,7 @@ public class StreamCompletionProviderTests {
 		assertThat(completionProvider.complete("foo --some-option", 1), empty());
 		assertThat(completionProvider.complete("foo --some-option=", 1), empty());
 		assertThat(completionProvider.complete("foo --some-option=prefix", 1), empty());
-		assertThat(completionProvider.complete("http | filter --expression=something --expresso=not-a-valid-prefix", 1), empty());
+		assertThat(completionProvider.complete("http | filter --port=12 --expression=something --expresso=not-a-valid-prefix", 1), empty());
 	}
 
 	/*
@@ -235,7 +235,7 @@ public class StreamCompletionProviderTests {
 	@Test
 	public void testClosedSetValuesShouldBeExclusive() {
 		assertThat(completionProvider.complete("http --use-ssl=tr", 1), not(hasItems(
-				proposalThat(startsWith("http --use-ssl=tr "))
+				proposalThat(startsWith("http --port=12 --use-ssl=tr "))
 		)));
 	}
 

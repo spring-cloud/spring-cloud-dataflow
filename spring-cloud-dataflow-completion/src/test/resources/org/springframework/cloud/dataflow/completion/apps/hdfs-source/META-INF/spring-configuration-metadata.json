@@ -11,14 +11,14 @@
       "sourceType": "foo.bar.HdfsProperties"
     },
     {
-      "name": "spring.cloud.stream.app",
+      "name": "hdfs",
       "type": "com.foo.DifferentHdfsProperties",
       "sourceType": "com.foo.DifferentHdfsProperties"
     }
   ],
   "properties": [
     {
-      "name": "spring.cloud.stream.app.directory",
+      "name": "hdfs.directory",
       "type": "java.lang.String",
       "description": "A path",
       "sourceType": "com.foo.DifferentHdfsProperties",

@@ -76,8 +76,10 @@ public class ConfigurationPropertyValueHintRecoveryStrategy extends StacktraceFi
 
 		CompletionProposal.Factory proposals = expanding(dsl);
 
-		for (ConfigurationMetadataProperty property : metadataResolver.listProperties(appResource)) {
-			if (property.getId().equals(propertyName)) {
+		List<ConfigurationMetadataProperty> whiteList = metadataResolver.listProperties(appResource);
+
+		for (ConfigurationMetadataProperty property : metadataResolver.listProperties(appResource, true)) {
+			if (CompletionUtils.isMatchingProperty(propertyName, property, whiteList)) {
 				ClassLoader classLoader = null;
 				try {
 
