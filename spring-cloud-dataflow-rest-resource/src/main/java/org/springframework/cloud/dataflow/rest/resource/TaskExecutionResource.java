@@ -91,7 +91,7 @@ public class TaskExecutionResource extends ResourceSupport {
 		this.exitCode = taskJobExecutionRel.getTaskExecution().getExitCode();
 		this.taskName = taskJobExecutionRel.getTaskExecution().getTaskName();
 		this.exitMessage = taskJobExecutionRel.getTaskExecution().getExitMessage();
-		this.arguments = Collections.unmodifiableList(taskJobExecutionRel.getTaskExecution().getParameters());
+		this.arguments = Collections.unmodifiableList(taskJobExecutionRel.getTaskExecution().getArguments());
 		this.startTime = taskJobExecutionRel.getTaskExecution().getStartTime();
 		this.endTime = taskJobExecutionRel.getTaskExecution().getEndTime();
 		if(taskJobExecutionRel.getJobExecutionIds() == null){
