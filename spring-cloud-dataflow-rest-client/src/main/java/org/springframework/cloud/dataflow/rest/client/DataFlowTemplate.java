@@ -51,62 +51,67 @@ public class DataFlowTemplate implements DataFlowOperations {
 	/**
 	 * REST client for stream operations.
 	 */
-	private final StreamOperations streamOperations;
+	private StreamOperations streamOperations;
 
 	/**
 	 * REST client for counter operations.
 	 */
-	private final CounterOperations counterOperations;
+	private CounterOperations counterOperations;
 
 	/**
 	 * REST client for field value counter operations.
 	 */
-	private final FieldValueCounterOperations fieldValueCounterOperations;
+	private FieldValueCounterOperations fieldValueCounterOperations;
 
 	/**
 	 * REST client for aggregate counter operations.
 	 */
-	private final AggregateCounterOperations aggregateCounterOperations;
+	private AggregateCounterOperations aggregateCounterOperations;
 
 	/**
 	 * REST client for task operations.
 	 */
-	private final TaskOperations taskOperations;
+	private TaskOperations taskOperations;
 
 	/**
 	 * REST client for job operations.
 	 */
-	private final JobOperations jobOperations;
+	private JobOperations jobOperations;
 
 	/**
 	 * REST client for app registry operations.
 	 */
-	private final AppRegistryOperations appRegistryOperations;
+	private AppRegistryOperations appRegistryOperations;
 
 	/**
 	 * REST client for completion operations.
 	 */
-	private final CompletionOperations completionOperations;
+	private CompletionOperations completionOperations;
 
 	/**
 	 * REST Client for runtime operations.
 	 */
-	private final RuntimeOperations runtimeOperations;
+	private RuntimeOperations runtimeOperations;
 
 
 	public DataFlowTemplate(URI baseURI, RestTemplate restTemplate) {
 		this.restTemplate = restTemplate;
 		ResourceSupport resourceSupport = restTemplate.getForObject(baseURI, ResourceSupport.class);
-
-		this.streamOperations = new StreamTemplate(restTemplate, resourceSupport);
-		this.counterOperations = new CounterTemplate(restTemplate, resourceSupport);
-		this.fieldValueCounterOperations = new FieldValueCounterTemplate(restTemplate, resourceSupport);
-		this.aggregateCounterOperations = new AggregateCounterTemplate(restTemplate, resourceSupport);
-		this.taskOperations = new TaskTemplate(restTemplate, resourceSupport);
-		this.jobOperations = new JobTemplate(restTemplate, resourceSupport);
+		if (resourceSupport.hasLink(StreamTemplate.DEFINITIONS_REL)) {
+			this.streamOperations = new StreamTemplate(restTemplate, resourceSupport);
+			this.runtimeOperations = new RuntimeTemplate(restTemplate, resourceSupport);
+		}
+		if (resourceSupport.hasLink(CounterTemplate.COUNTER_RELATION)) {
+			this.counterOperations = new CounterTemplate(restTemplate, resourceSupport);
+			this.fieldValueCounterOperations = new FieldValueCounterTemplate(restTemplate, resourceSupport);
+			this.aggregateCounterOperations = new AggregateCounterTemplate(restTemplate, resourceSupport);
+		}
+		if (resourceSupport.hasLink(TaskTemplate.DEFINITIONS_RELATION)) {
+			this.taskOperations = new TaskTemplate(restTemplate, resourceSupport);
+			this.jobOperations = new JobTemplate(restTemplate, resourceSupport);
+		}
 		this.appRegistryOperations = new AppRegistryTemplate(restTemplate, resourceSupport);
 		this.completionOperations = new CompletionTemplate(restTemplate, resourceSupport.getLink("completions/stream"));
-		this.runtimeOperations = new RuntimeTemplate(restTemplate, resourceSupport);
 	}
 
 	public Link getLink(ResourceSupport resourceSupport, String rel) {

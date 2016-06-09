@@ -28,9 +28,11 @@ import org.junit.runner.RunWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.PropertyPlaceholderAutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.jdbc.EmbeddedDataSourceConfiguration;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
-import org.springframework.cloud.dataflow.server.repository.support.DefinitionRepositoryInitializer;
+import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
+import org.springframework.cloud.dataflow.server.repository.support.DataflowRdbmsInitializer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.domain.Page;
@@ -68,13 +70,19 @@ public class RdbmsStreamDefinitionRepositoryTests {
 	static class TestConfig {
 
 		@Bean
-		public DefinitionRepositoryInitializer definitionRepositoryInitializer(DataSource dataSource) {
-			DefinitionRepositoryInitializer definitionRepositoryInitializer = new  DefinitionRepositoryInitializer();
+		public FeaturesProperties featuresProperties() {
+			return new FeaturesProperties();
+		}
+
+		@Bean
+		public DataflowRdbmsInitializer definitionRepositoryInitializer(DataSource dataSource) {
+			DataflowRdbmsInitializer definitionRepositoryInitializer = new DataflowRdbmsInitializer(featuresProperties());
 			definitionRepositoryInitializer.setDataSource(dataSource);
 			return definitionRepositoryInitializer;
 		}
 
 		@Bean
+		@ConditionalOnProperty(prefix = "spring.cloud.dataflow.features", name = "streams-enabled", matchIfMissing = true)
 		public StreamDefinitionRepository rdbmsStreamDefinitionRepository(DataSource dataSource) {
 			return new RdbmsStreamDefinitionRepository(dataSource);
 		}

@@ -39,7 +39,7 @@ public class ShellCommandLineConfiguration {
 	 * @return the interactive shell
 	 */
 	@Bean
-	@ConditionalOnMissingBean(type="org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository")
+	@ConditionalOnMissingBean(type="org.springframework.cloud.deployer.resource.registry.UriRegistry")
 	public ShellCommandLineRunner commandLineRunner() {
 		return new ShellCommandLineRunner();
 	}

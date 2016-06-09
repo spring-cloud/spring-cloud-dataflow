@@ -36,7 +36,7 @@ import org.springframework.web.client.RestTemplate;
  */
 public class StreamTemplate implements StreamOperations {
 
-	private static final String DEFINITIONS_REL = "streams/definitions";
+	public static final String DEFINITIONS_REL = "streams/definitions";
 
 	private static final String DEFINITION_REL = "streams/definitions/definition";
 

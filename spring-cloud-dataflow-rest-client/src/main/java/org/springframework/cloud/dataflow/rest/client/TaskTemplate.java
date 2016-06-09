@@ -39,7 +39,7 @@ import org.springframework.web.client.RestTemplate;
  */
 public class TaskTemplate implements TaskOperations {
 
-	private static final String DEFINITIONS_RELATION = "tasks/definitions";
+	public static final String DEFINITIONS_RELATION = "tasks/definitions";
 
 	private static final String DEFINITION_RELATION = "tasks/definitions/definition";
 
