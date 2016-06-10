@@ -22,6 +22,7 @@ import org.junit.Test;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.actuate.metrics.repository.MetricRepository;
+import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
 import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
@@ -77,7 +78,7 @@ public class LocalConfigurationTests {
 		int randomPort = SocketUtils.findAvailableTcpPort();
 		String dataSourceUrl = String.format("jdbc:h2:tcp://localhost:%s/mem:dataflow", randomPort);
 		context = app.run(new String[] { "--server.port=0",
-				"--spring.cloud.dataflow.features.streams-enabled=false"});
+				"--" + FeaturesProperties.FEATURES_PREFIX + "." + FeaturesProperties.STREAMS_ENABLED + "=false"});
 		assertNotNull(context.getBean(TaskDefinitionRepository.class));
 		assertNotNull(context.getBean(DeploymentIdRepository.class));
 		assertNotNull(context.getBean(MetricRepository.class));
@@ -95,7 +96,7 @@ public class LocalConfigurationTests {
 		int randomPort = SocketUtils.findAvailableTcpPort();
 		String dataSourceUrl = String.format("jdbc:h2:tcp://localhost:%s/mem:dataflow", randomPort);
 		context = app.run(new String[] { "--server.port=0",
-				"--spring.cloud.dataflow.features.tasks-enabled=false"});
+				"--" + FeaturesProperties.FEATURES_PREFIX + "." + FeaturesProperties.TASKS_ENABLED + "=false"});
 		assertNotNull(context.getBean(StreamDefinitionRepository.class));
 		assertNotNull(context.getBean(DeploymentIdRepository.class));
 		assertNotNull(context.getBean(MetricRepository.class));
@@ -112,8 +113,8 @@ public class LocalConfigurationTests {
 		SpringApplication app = new SpringApplication(LocalDataFlowServer.class);
 		int randomPort = SocketUtils.findAvailableTcpPort();
 		String dataSourceUrl = String.format("jdbc:h2:tcp://localhost:%s/mem:dataflow", randomPort);
-		context = app.run(new String[] { "--server.port=0",
-				"--spring.cloud.dataflow.features.analytics-enabled=false"});
+		context = app.run(new String[]{"--server.port=0",
+				"--" + FeaturesProperties.FEATURES_PREFIX + "." + FeaturesProperties.ANALYTICS_ENABLED + "=false"});;
 		assertNotNull(context.getBean(StreamDefinitionRepository.class));
 		assertNotNull(context.getBean(TaskDefinitionRepository.class));
 		assertNotNull(context.getBean(DeploymentIdRepository.class));

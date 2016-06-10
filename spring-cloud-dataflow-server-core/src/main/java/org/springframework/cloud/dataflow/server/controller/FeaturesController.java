@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @author Ilayaperumal Gopinathan
  */
 @RestController
-@RequestMapping("/features/info")
+@RequestMapping("/features")
 @ExposesResourceFor(FeaturesInfoResource.class)
 public class FeaturesController {
 

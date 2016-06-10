@@ -28,20 +28,21 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 /**
- * Configuration class that conditionally imports stream, task and anaytics configuration classes based on the
- * features that are enabled/disabled.
+ * Configuration class that imports analytics, stream and task configuration classes. Also
+ * holds any common beans on the above configuration classes.
  *
  * @author Ilayaperumal Gopinathan
  */
 @Configuration
-@Import({AnalyticsConfiguration.class, StreamConfiguration.class, TaskConfiguration.class})
+@Import({ AnalyticsConfiguration.class, StreamConfiguration.class, TaskConfiguration.class })
 public class FeaturesConfiguration {
 
-    @Bean
-    @ConditionalOnMissingBean
-    @ConditionalOnExpression("#{'${spring.cloud.dataflow.features.streams-enabled:true}'.equalsIgnoreCase('true') || " +
-            "'${spring.cloud.dataflow.features.tasks-enabled:true}'.equalsIgnoreCase('true') }")
-    public DeploymentIdRepository deploymentIdRepository(DataSource dataSource) {
-        return new RdbmsDeploymentIdRepository(dataSource);
-    }
+	@Bean
+	@ConditionalOnMissingBean
+	@ConditionalOnExpression("#{'${" + FeaturesProperties.FEATURES_PREFIX + "." + FeaturesProperties.STREAMS_ENABLED
+			+ ":true}'.equalsIgnoreCase('true') || " + "'${" + FeaturesProperties.FEATURES_PREFIX + "."
+			+ FeaturesProperties.TASKS_ENABLED + ":true}'.equalsIgnoreCase('true') }")
+	public DeploymentIdRepository deploymentIdRepository(DataSource dataSource) {
+		return new RdbmsDeploymentIdRepository(dataSource);
+	}
 }

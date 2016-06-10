@@ -56,109 +56,109 @@ import org.springframework.jdbc.datasource.DataSourceTransactionManager;
  * @author Ilayaperumal Gopinathan
  */
 @Configuration
-@ConditionalOnProperty(prefix = "spring.cloud.dataflow.features", name = "tasks-enabled", matchIfMissing = true)
+@ConditionalOnProperty(prefix = FeaturesProperties.FEATURES_PREFIX, name = FeaturesProperties.TASKS_ENABLED, matchIfMissing = true)
 public class TaskConfiguration {
 
-    @Bean
-    public TaskExplorerFactoryBean taskExplorerFactoryBean(DataSource dataSource) {
-        return new TaskExplorerFactoryBean(dataSource);
-    }
+	@Bean
+	public TaskExplorerFactoryBean taskExplorerFactoryBean(DataSource dataSource) {
+		return new TaskExplorerFactoryBean(dataSource);
+	}
 
-    @Bean
-    @ConditionalOnBean(TaskDefinitionRepository.class)
-    public TaskService taskService(TaskDefinitionRepository repository,
-                                   DeploymentIdRepository deploymentIdRepository, UriRegistry registry, DelegatingResourceLoader resourceLoader,
-                                   TaskLauncher taskLauncher) {
-        return new DefaultTaskService(repository, deploymentIdRepository, registry, resourceLoader, taskLauncher);
-    }
+	@Bean
+	@ConditionalOnBean(TaskDefinitionRepository.class)
+	public TaskService taskService(TaskDefinitionRepository repository, DeploymentIdRepository deploymentIdRepository,
+			UriRegistry registry, DelegatingResourceLoader resourceLoader, TaskLauncher taskLauncher) {
+		return new DefaultTaskService(repository, deploymentIdRepository, registry, resourceLoader, taskLauncher);
+	}
 
-    @Bean
-    @ConditionalOnBean(TaskDefinitionRepository.class)
-    public TaskJobService taskJobExecutionRepository(JobService service,
-                                                     TaskExplorer taskExplorer, TaskDefinitionRepository taskDefinitionRepository, TaskService taskService) {
-        return new DefaultTaskJobService(service, taskExplorer, taskDefinitionRepository, taskService);
-    }
+	@Bean
+	@ConditionalOnBean(TaskDefinitionRepository.class)
+	public TaskJobService taskJobExecutionRepository(JobService service, TaskExplorer taskExplorer,
+			TaskDefinitionRepository taskDefinitionRepository, TaskService taskService) {
+		return new DefaultTaskJobService(service, taskExplorer, taskDefinitionRepository, taskService);
+	}
 
-    @Bean
-    public SimpleJobServiceFactoryBean simpleJobServiceFactoryBean(DataSource dataSource,
-                                                                   JobRepositoryFactoryBean repositoryFactoryBean) throws Exception {
-        SimpleJobServiceFactoryBean factoryBean = new SimpleJobServiceFactoryBean();
-        factoryBean.setDataSource(dataSource);
-        factoryBean.setJobRepository(repositoryFactoryBean.getObject());
-        factoryBean.setJobLocator(new MapJobRegistry());
-        factoryBean.setJobLauncher(new SimpleJobLauncher());
-        factoryBean.setDataSource(dataSource);
-        return factoryBean;
-    }
+	@Bean
+	public SimpleJobServiceFactoryBean simpleJobServiceFactoryBean(DataSource dataSource,
+			JobRepositoryFactoryBean repositoryFactoryBean) throws Exception {
+		SimpleJobServiceFactoryBean factoryBean = new SimpleJobServiceFactoryBean();
+		factoryBean.setDataSource(dataSource);
+		factoryBean.setJobRepository(repositoryFactoryBean.getObject());
+		factoryBean.setJobLocator(new MapJobRegistry());
+		factoryBean.setJobLauncher(new SimpleJobLauncher());
+		factoryBean.setDataSource(dataSource);
+		return factoryBean;
+	}
 
-    @Bean
-    public JobExplorerFactoryBean jobExplorerFactoryBean(DataSource dataSource) {
-        JobExplorerFactoryBean jobExplorerFactoryBean = new JobExplorerFactoryBean();
-        jobExplorerFactoryBean.setDataSource(dataSource);
-        return jobExplorerFactoryBean;
-    }
+	@Bean
+	public JobExplorerFactoryBean jobExplorerFactoryBean(DataSource dataSource) {
+		JobExplorerFactoryBean jobExplorerFactoryBean = new JobExplorerFactoryBean();
+		jobExplorerFactoryBean.setDataSource(dataSource);
+		return jobExplorerFactoryBean;
+	}
 
-    @Configuration
-    @ConditionalOnExpression("#{'${spring.datasource.url:}'.startsWith('jdbc:h2:tcp://localhost:') && '${spring.datasource.url:}'.contains('/mem:')}")
-    public static class H2ServerConfiguration {
+	@Configuration
+	@ConditionalOnExpression("#{'${spring.datasource.url:}'.startsWith('jdbc:h2:tcp://localhost:') && '${spring.datasource.url:}'.contains('/mem:')}")
+	public static class H2ServerConfiguration {
 
-        @Bean
-        public JobRepositoryFactoryBean jobRepositoryFactoryBeanForServer(DataSource dataSource,
-                                                                          Server server, DataSourceTransactionManager dataSourceTransactionManager) {
-            JobRepositoryFactoryBean repositoryFactoryBean = new JobRepositoryFactoryBean();
-            repositoryFactoryBean.setDataSource(dataSource);
-            repositoryFactoryBean.setTransactionManager(dataSourceTransactionManager);
-            return repositoryFactoryBean;
-        }
+		@Bean
+		public JobRepositoryFactoryBean jobRepositoryFactoryBeanForServer(DataSource dataSource, Server server,
+				DataSourceTransactionManager dataSourceTransactionManager) {
+			JobRepositoryFactoryBean repositoryFactoryBean = new JobRepositoryFactoryBean();
+			repositoryFactoryBean.setDataSource(dataSource);
+			repositoryFactoryBean.setTransactionManager(dataSourceTransactionManager);
+			return repositoryFactoryBean;
+		}
 
-        @Bean
-        public BatchDatabaseInitializer batchRepositoryInitializerForDefaultDBForServer(DataSource dataSource, Server server) {
-            return new BatchDatabaseInitializer();
-        }
+		@Bean
+		public BatchDatabaseInitializer batchRepositoryInitializerForDefaultDBForServer(DataSource dataSource,
+				Server server) {
+			return new BatchDatabaseInitializer();
+		}
 
-        @Bean
-        public TaskRepositoryInitializer taskRepositoryInitializerForDefaultDB(DataSource dataSource, Server server) {
-            TaskRepositoryInitializer taskRepositoryInitializer = new TaskRepositoryInitializer();
-            taskRepositoryInitializer.setDataSource(dataSource);
-            return taskRepositoryInitializer;
-        }
+		@Bean
+		public TaskRepositoryInitializer taskRepositoryInitializerForDefaultDB(DataSource dataSource, Server server) {
+			TaskRepositoryInitializer taskRepositoryInitializer = new TaskRepositoryInitializer();
+			taskRepositoryInitializer.setDataSource(dataSource);
+			return taskRepositoryInitializer;
+		}
 
-        @Bean
-        @ConditionalOnMissingBean
-        public TaskDefinitionRepository taskDefinitionRepository(DataSource dataSource, Server server) throws Exception {
-            return (new TaskDefinitionRepositoryFactoryBean(dataSource)).getObject();
-        }
-    }
+		@Bean
+		@ConditionalOnMissingBean
+		public TaskDefinitionRepository taskDefinitionRepository(DataSource dataSource, Server server) throws Exception {
+			return (new TaskDefinitionRepositoryFactoryBean(dataSource)).getObject();
+		}
+	}
 
-    @Configuration
-    @ConditionalOnExpression("#{!'${spring.datasource.url:}'.startsWith('jdbc:h2:tcp://localhost:') && !'${spring.datasource.url:}'.contains('/mem:')}")
-    public static class NoH2ServerConfiguration {
+	@Configuration
+	@ConditionalOnExpression("#{!'${spring.datasource.url:}'.startsWith('jdbc:h2:tcp://localhost:') && !'${spring.datasource.url:}'.contains('/mem:')}")
+	public static class NoH2ServerConfiguration {
 
-        @Bean
-        public JobRepositoryFactoryBean jobRepositoryFactoryBean(DataSource dataSource,
-                                                                 DataSourceTransactionManager dataSourceTransactionManager) {
-            JobRepositoryFactoryBean repositoryFactoryBean = new JobRepositoryFactoryBean();
-            repositoryFactoryBean.setDataSource(dataSource);
-            repositoryFactoryBean.setTransactionManager(dataSourceTransactionManager);
-            return repositoryFactoryBean;
-        }
+		@Bean
+		public JobRepositoryFactoryBean jobRepositoryFactoryBean(DataSource dataSource,
+				DataSourceTransactionManager dataSourceTransactionManager) {
+			JobRepositoryFactoryBean repositoryFactoryBean = new JobRepositoryFactoryBean();
+			repositoryFactoryBean.setDataSource(dataSource);
+			repositoryFactoryBean.setTransactionManager(dataSourceTransactionManager);
+			return repositoryFactoryBean;
+		}
 
-        @Bean
-        public BatchDatabaseInitializer batchRepositoryInitializerForDefaultDB(DataSource dataSource) {
-            return new BatchDatabaseInitializer();
-        }
+		@Bean
+		public BatchDatabaseInitializer batchRepositoryInitializerForDefaultDB(DataSource dataSource) {
+			return new BatchDatabaseInitializer();
+		}
 
-        @Bean
-        public TaskRepositoryInitializer taskRepositoryInitializerForDB(DataSource dataSource) {
-            TaskRepositoryInitializer taskRepositoryInitializer = new TaskRepositoryInitializer();
-            taskRepositoryInitializer.setDataSource(dataSource);
-            return taskRepositoryInitializer;
-        }
+		@Bean
+		public TaskRepositoryInitializer taskRepositoryInitializerForDB(DataSource dataSource) {
+			TaskRepositoryInitializer taskRepositoryInitializer = new TaskRepositoryInitializer();
+			taskRepositoryInitializer.setDataSource(dataSource);
+			return taskRepositoryInitializer;
+		}
 
-        @Bean
-        @ConditionalOnMissingBean
-        public TaskDefinitionRepository taskDefinitionRepository(DataSource dataSource) throws Exception {
-            return (new TaskDefinitionRepositoryFactoryBean(dataSource)).getObject();
-        }
-    }
+		@Bean
+		@ConditionalOnMissingBean
+		public TaskDefinitionRepository taskDefinitionRepository(DataSource dataSource) throws Exception {
+			return (new TaskDefinitionRepositoryFactoryBean(dataSource)).getObject();
+		}
+	}
 }

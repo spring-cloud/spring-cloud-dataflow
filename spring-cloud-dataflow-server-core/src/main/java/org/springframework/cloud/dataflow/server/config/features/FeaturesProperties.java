@@ -22,8 +22,16 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  *
  * @author Ilayaperumal Gopinathan
  */
-@ConfigurationProperties(prefix = "spring.cloud.dataflow.features")
+@ConfigurationProperties(prefix = FeaturesProperties.FEATURES_PREFIX)
 public class FeaturesProperties {
+
+    public static final String FEATURES_PREFIX = "spring.cloud.dataflow.features";
+
+    public static final String STREAMS_ENABLED = "streams-enabled";
+
+    public static final String TASKS_ENABLED = "tasks-enabled";
+
+    public static final String ANALYTICS_ENABLED = "analytics-enabled";
 
     private boolean analyticsEnabled = true;
 
