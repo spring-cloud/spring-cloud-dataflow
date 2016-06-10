@@ -19,7 +19,7 @@ package org.springframework.cloud.dataflow.completion;
 import java.util.List;
 
 import org.springframework.boot.loader.archive.Archive;
-import org.springframework.cloud.stream.configuration.metadata.AppJarLauncher;
+import org.springframework.cloud.dataflow.configuration.metadata.AppJarLauncher;
 
 /**
  * Extension of {@link AppJarLauncher} used for exposing a {@link ClassLoader}
