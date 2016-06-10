@@ -196,6 +196,20 @@ public class StreamAppDefinition extends DataFlowAppDefinition {
 		}
 
 		/**
+		 * Sets app properties.
+		 *
+		 * @param properties app properties
+		 * @return this builder object
+		 *
+		 * @see AppDefinition#getProperties()
+		 */
+		public Builder setProperties(Map<String, String> properties) {
+			this.properties.clear();
+			this.addProperties(properties);
+			return this;
+		}
+
+		/**
 		 * Add the contents of the provided map to the map of app properties.
 		 *
 		 * @param properties app properties

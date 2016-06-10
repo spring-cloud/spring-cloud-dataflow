@@ -17,8 +17,10 @@
 package org.springframework.cloud.dataflow.completion;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
+import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.BindingPropertyKeys;
 import org.springframework.cloud.dataflow.core.StreamAppDefinition;
@@ -92,5 +94,23 @@ public class CompletionUtils {
 			result = String.format("%s: %s", candidate, appName);
 		}
 		return result;
+	}
+
+	/**
+	 * Return whether the given property name should be considered matching the candidate configuration property, also
+	 * taking into account the list of whitelist properties (which are tested on their short name).
+	 */
+	static boolean isMatchingProperty(String propertyName, ConfigurationMetadataProperty property, List<ConfigurationMetadataProperty> whiteListedProps) {
+		if (property.getId().equals(propertyName)) {
+			return true; // For any prop
+		} // Handle special case of short form for whitelist
+		else {
+			for (ConfigurationMetadataProperty white : whiteListedProps) {
+				if (property.getId().equals(white.getId())) { // prop#equals() not implemented
+					return property.getName().equals(propertyName);
+				}
+			}
+			return false;
+		}
 	}
 }

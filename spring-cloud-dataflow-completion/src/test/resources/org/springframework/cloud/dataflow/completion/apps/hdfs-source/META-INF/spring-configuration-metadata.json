@@ -9,11 +9,16 @@
       "name": "some.long.prefix.nested",
       "type": "foo.bar.OtherHdfsProperties",
       "sourceType": "foo.bar.HdfsProperties"
+    },
+    {
+      "name": "hdfs",
+      "type": "com.foo.DifferentHdfsProperties",
+      "sourceType": "com.foo.DifferentHdfsProperties"
     }
   ],
   "properties": [
     {
-      "name": "directory",
+      "name": "hdfs.directory",
       "type": "java.lang.String",
       "description": "A path",
       "sourceType": "com.foo.DifferentHdfsProperties",

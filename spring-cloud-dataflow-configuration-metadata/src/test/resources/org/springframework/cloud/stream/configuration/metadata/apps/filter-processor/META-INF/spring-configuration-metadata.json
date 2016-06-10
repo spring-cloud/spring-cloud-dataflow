@@ -5,7 +5,8 @@
       "type": "foo.bar.FilterProperties",
       "sourceType": "foo.bar.FilterProperties"
     }
-  ],"properties": [
+  ],
+  "properties": [
     {
       "name": "filter.expression",
       "type": "org.springframework.expression.Expression",
@@ -14,10 +15,16 @@
       "defaultValue": "true"
     },
     {
-      "name": "filter.expresso",
+      "name": "some.other.property.whitelisted.prefix.expresso2",
       "type": "org.springframework.cloud.dataflow.completion.Expresso",
       "description": "A property of type enum and whose name starts like 'expression'",
-      "sourceType": "foo.bar.FilterProperties"
+      "sourceType": "com.acme.SomeDifferentProperties"
+    },
+    {
+      "name": "some.prefix.hidden.by.default.secret",
+      "type": "java.lang.String",
+      "description": "Some hidden option",
+      "sourceType": "com.acme.OtherProperties"
     }
   ],
   "hints": []

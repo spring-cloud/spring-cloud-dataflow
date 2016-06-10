@@ -45,6 +45,7 @@ import org.springframework.cloud.deployer.resource.registry.UriRegistry;
 import org.springframework.cloud.deployer.resource.registry.UriRegistryPopulator;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
+import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -80,8 +81,9 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 
 	@Bean
 	public StreamDeploymentController streamDeploymentController(StreamDefinitionRepository repository,
-			DeploymentIdRepository deploymentIdRepository, AppRegistry registry) {
-		return new StreamDeploymentController(repository, deploymentIdRepository, registry, appDeployer());
+			DeploymentIdRepository deploymentIdRepository, AppRegistry registry,
+			                                                     ApplicationConfigurationMetadataResolver metadataResolver) {
+		return new StreamDeploymentController(repository, deploymentIdRepository, registry, appDeployer(), metadataResolver);
 	}
 
 	@Bean
