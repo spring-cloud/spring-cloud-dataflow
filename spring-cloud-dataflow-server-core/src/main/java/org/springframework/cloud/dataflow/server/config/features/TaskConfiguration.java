@@ -18,7 +18,6 @@ package org.springframework.cloud.dataflow.server.config.features;
 import javax.sql.DataSource;
 
 import org.h2.tools.Server;
-import org.slf4j.LoggerFactory;
 
 import org.springframework.batch.admin.service.JobService;
 import org.springframework.batch.admin.service.SimpleJobServiceFactoryBean;
@@ -33,8 +32,8 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cloud.dataflow.server.job.TaskExplorerFactoryBean;
 import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
+import org.springframework.cloud.dataflow.server.repository.RdbmsTaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
-import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepositoryFactoryBean;
 import org.springframework.cloud.dataflow.server.service.TaskJobService;
 import org.springframework.cloud.dataflow.server.service.TaskService;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskJobService;
@@ -126,7 +125,7 @@ public class TaskConfiguration {
 		@Bean
 		@ConditionalOnMissingBean
 		public TaskDefinitionRepository taskDefinitionRepository(DataSource dataSource, Server server) throws Exception {
-			return (new TaskDefinitionRepositoryFactoryBean(dataSource)).getObject();
+			return new RdbmsTaskDefinitionRepository(dataSource);
 		}
 	}
 
@@ -158,7 +157,7 @@ public class TaskConfiguration {
 		@Bean
 		@ConditionalOnMissingBean
 		public TaskDefinitionRepository taskDefinitionRepository(DataSource dataSource) throws Exception {
-			return (new TaskDefinitionRepositoryFactoryBean(dataSource)).getObject();
+			return new RdbmsTaskDefinitionRepository(dataSource);
 		}
 	}
 }
