@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.stream.configuration.metadata;
+package org.springframework.cloud.dataflow.configuration.metadata;
 
 import java.io.Closeable;
 import java.io.File;
