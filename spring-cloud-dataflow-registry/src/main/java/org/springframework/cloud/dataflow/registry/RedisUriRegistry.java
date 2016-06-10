@@ -34,6 +34,7 @@ import org.springframework.util.Assert;
  * @author Patrick Peralta
  * @author Mark Fisher
  */
+@Deprecated
 public class RedisUriRegistry implements UriRegistry {
 
 	/**
