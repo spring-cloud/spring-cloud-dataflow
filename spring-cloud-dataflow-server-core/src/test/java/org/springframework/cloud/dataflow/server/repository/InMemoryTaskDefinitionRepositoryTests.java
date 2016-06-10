@@ -34,8 +34,7 @@ public class InMemoryTaskDefinitionRepositoryTests extends AbstractTaskDefinitio
 
 	@Before
 	public void setUp() throws Exception{
-		TaskDefinitionRepositoryFactoryBean factoryBean = new TaskDefinitionRepositoryFactoryBean();
-		repository = factoryBean.getObject();
+		repository = new InMemoryTaskDefinitionRepository();
 	}
 
 }
