@@ -63,6 +63,21 @@ those stream definitions. Additionally you can remove the definition by clicking
 .List of Stream Definitions
 image::dataflow-streams-list-definitions.png[List of Stream Definitions, scaledwidth="100%"]
 
+[[dashboard-flo-streams-designer]]
+== Create Stream
+The _Create Stream_ section of the Dashboard includes the https://github.com/spring-projects/spring-flo[Spring Flo] designer tab that provides the canvas application, offering a interactive graphical interface for creating data pipelines.
+
+In this tab, you can:
+
+* Create, manage, and visualize stream pipelines using DSL, a graphical canvas, or both
+* Write pipelines via DSL with content-assist and auto-complete
+* Use auto-adjustment and grid-layout capabilities in the GUI for simpler and interactive organization of pipelines
+
+Watch this https://www.youtube.com/watch?v=78CgV46OstI[screencast] that highlights some of the "Flo for Spring Cloud Data Flow" capabilities. Spring Flo https://github.com/spring-projects/spring-flo/wiki[wiki] includes more detailed content on core Flo capabilities. 
+
+.Flo for Spring Cloud Data Flow
+image::dataflow-flo-create-stream.png[Flo for Spring Cloud Data Flo, scaledwidth="100%"]
+
 [[dashboard-tasks]]
 == Tasks
 
