@@ -26,6 +26,7 @@ import org.joda.time.DateTimeConstants;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.dataflow.rest.client.AggregateCounterOperations;
+import org.springframework.cloud.dataflow.rest.client.DataFlowOperations;
 import org.springframework.cloud.dataflow.rest.resource.AggregateCounterResource;
 import org.springframework.cloud.dataflow.rest.resource.MetricResource;
 import org.springframework.cloud.dataflow.shell.config.DataFlowShell;
@@ -67,7 +68,8 @@ public class AggregateCounterCommands extends AbstractMetricsCommands implements
 
 	@CliAvailabilityIndicator({ DISPLAY_AGGR_COUNTER, LIST_AGGR_COUNTERS, DELETE_AGGR_COUNTER })
 	public boolean available() {
-		return dataFlowShell.getDataFlowOperations() != null;
+		DataFlowOperations dataFlowOperations = dataFlowShell.getDataFlowOperations();
+		return dataFlowOperations != null && dataFlowOperations.aggregateCounterOperations() != null;
 	}
 
 	@CliCommand(value = DISPLAY_AGGR_COUNTER, help = "Display aggregate counter values by chosen interval and resolution(minute, hour)")
