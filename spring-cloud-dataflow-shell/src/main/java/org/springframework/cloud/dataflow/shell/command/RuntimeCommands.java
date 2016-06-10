@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.dataflow.rest.client.DataFlowOperations;
 import org.springframework.cloud.dataflow.rest.client.RuntimeOperations;
 import org.springframework.cloud.dataflow.rest.resource.AppInstanceStatusResource;
 import org.springframework.cloud.dataflow.rest.resource.AppStatusResource;
@@ -69,7 +70,8 @@ public class RuntimeCommands implements CommandMarker {
 
 	@CliAvailabilityIndicator({LIST_APPS})
 	public boolean available() {
-		return dataFlowShell.getDataFlowOperations() != null;
+		DataFlowOperations dataFlowOperations = dataFlowShell.getDataFlowOperations();
+		return dataFlowOperations != null && dataFlowOperations.runtimeOperations() != null;
 	}
 
 	@CliCommand(value = LIST_APPS, help = "List runtime apps")

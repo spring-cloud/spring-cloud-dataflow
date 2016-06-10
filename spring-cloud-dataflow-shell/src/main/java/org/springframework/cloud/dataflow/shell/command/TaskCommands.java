@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.dataflow.rest.client.DataFlowOperations;
 import org.springframework.cloud.dataflow.rest.client.TaskOperations;
 import org.springframework.cloud.dataflow.rest.resource.TaskDefinitionResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionResource;
@@ -50,6 +51,7 @@ import org.springframework.util.StringUtils;
  * @author Glenn Renfro
  * @author Michael Minella
  * @author Gunnar Hillert
+ * @author Ilayaperumal Gopinathan
  */
 @Component
 // todo: reenable optionContext attributes
@@ -79,9 +81,10 @@ public class TaskCommands implements CommandMarker {
 	@Autowired
 	private DataFlowShell dataFlowShell;
 
-	@CliAvailabilityIndicator({ LIST, CREATE, LAUNCH, STATUS, DESTROY })
+	@CliAvailabilityIndicator({ LIST, CREATE, LAUNCH, STATUS, DISPLAY, DESTROY, EXECUTION_LIST })
 	public boolean available() {
-		return dataFlowShell.getDataFlowOperations() != null;
+		DataFlowOperations dataFlowOperations = dataFlowShell.getDataFlowOperations();
+		return dataFlowOperations != null && dataFlowOperations.taskOperations() != null;
 	}
 
 	@CliCommand(value = LIST, help = "List created tasks")

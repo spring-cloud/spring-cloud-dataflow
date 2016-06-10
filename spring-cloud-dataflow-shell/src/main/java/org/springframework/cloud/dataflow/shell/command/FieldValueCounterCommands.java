@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2015-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.dataflow.rest.client.DataFlowOperations;
 import org.springframework.cloud.dataflow.rest.client.FieldValueCounterOperations;
 import org.springframework.cloud.dataflow.rest.resource.FieldValueCounterResource;
 import org.springframework.cloud.dataflow.rest.resource.MetricResource;
@@ -45,6 +46,7 @@ import org.springframework.stereotype.Component;
  * Commands for interacting with Field Value Counter analytics.
  * 
  * @author Eric Bottard
+ * @author Ilayaperumal Gopinathan
  */
 @Component
 public class FieldValueCounterCommands extends AbstractMetricsCommands implements CommandMarker {
@@ -64,7 +66,8 @@ public class FieldValueCounterCommands extends AbstractMetricsCommands implement
 
 	@CliAvailabilityIndicator({ LIST_COUNTERS, DISPLAY_COUNTER, RESET_COUNTER})
 	public boolean available() {
-		return dataFlowShell.getDataFlowOperations() != null;
+		DataFlowOperations dataFlowOperations = dataFlowShell.getDataFlowOperations();
+		return dataFlowOperations != null && dataFlowOperations.fieldValueCounterOperations() != null;
 	}
 
 	@CliCommand(value = DISPLAY_COUNTER, help = "Display the value of a field value counter")

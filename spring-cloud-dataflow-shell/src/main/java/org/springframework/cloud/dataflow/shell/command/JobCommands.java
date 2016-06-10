@@ -20,6 +20,7 @@ import java.util.Map;
 
 import org.springframework.batch.core.JobParameter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.dataflow.rest.client.DataFlowOperations;
 import org.springframework.cloud.dataflow.rest.client.JobOperations;
 import org.springframework.cloud.dataflow.rest.resource.JobExecutionResource;
 import org.springframework.cloud.dataflow.rest.resource.JobInstanceResource;
@@ -28,6 +29,7 @@ import org.springframework.cloud.dataflow.rest.resource.StepExecutionResource;
 import org.springframework.cloud.dataflow.shell.config.DataFlowShell;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.shell.core.CommandMarker;
+import org.springframework.shell.core.annotation.CliAvailabilityIndicator;
 import org.springframework.shell.core.annotation.CliCommand;
 import org.springframework.shell.core.annotation.CliOption;
 import org.springframework.shell.table.Table;
@@ -39,6 +41,7 @@ import org.springframework.stereotype.Component;
  * Job commands for the SCDF Shell.
  *
  * @author Glenn Renfro
+ * @author Ilayaperumal Gopinathan
  */
 @Component
 public class JobCommands implements CommandMarker {
@@ -57,6 +60,13 @@ public class JobCommands implements CommandMarker {
 
 	@Autowired
 	private DataFlowShell dataFlowShell;
+
+	@CliAvailabilityIndicator({EXECUTION_DISPLAY, EXECUTION_LIST, STEP_EXECUTION_LIST, INSTANCE_DISPLAY,
+			STEP_EXECUTION_PROGRESS, STEP_EXECUTION_DISPLAY})
+	public boolean available() {
+		DataFlowOperations dataFlowOperations = dataFlowShell.getDataFlowOperations();
+		return dataFlowOperations != null && dataFlowOperations.jobOperations() != null;
+	}
 
 	@CliCommand(value = EXECUTION_LIST,
 			help = "List created job executions filtered by jobName")

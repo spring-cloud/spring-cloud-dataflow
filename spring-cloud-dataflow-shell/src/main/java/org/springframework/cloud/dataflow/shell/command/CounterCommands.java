@@ -19,6 +19,7 @@ import java.text.NumberFormat;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.dataflow.rest.client.CounterOperations;
+import org.springframework.cloud.dataflow.rest.client.DataFlowOperations;
 import org.springframework.cloud.dataflow.rest.resource.CounterResource;
 import org.springframework.cloud.dataflow.rest.resource.MetricResource;
 import org.springframework.cloud.dataflow.shell.config.DataFlowShell;
@@ -55,7 +56,8 @@ public class CounterCommands extends AbstractMetricsCommands implements CommandM
 
 	@CliAvailabilityIndicator({ LIST_COUNTERS, DISPLAY_COUNTER, DELETE_COUNTER })
 	public boolean available() {
-		return dataFlowShell.getDataFlowOperations() != null;
+		DataFlowOperations dataFlowOperations = dataFlowShell.getDataFlowOperations();
+		return dataFlowOperations != null && dataFlowOperations.counterOperations() != null;
 	}
 
 	@CliCommand(value = DISPLAY_COUNTER, help = "Display the value of a counter")
