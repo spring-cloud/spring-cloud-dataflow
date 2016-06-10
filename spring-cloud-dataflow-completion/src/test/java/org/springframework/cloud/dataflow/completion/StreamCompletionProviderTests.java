@@ -161,7 +161,7 @@ public class StreamCompletionProviderTests {
 	@Test
 	// file | counter --name=foo --inputType=bar<TAB> => we're done
 	public void testSinkWithAllOptionsSetCantGoFurther() {
-		assertThat(completionProvider.complete("http | log --level=debug", 1), empty());
+		assertThat(completionProvider.complete("http | log --server.port=1234 --level=debug", 1), empty());
 	}
 
 	@Test
@@ -200,11 +200,11 @@ public class StreamCompletionProviderTests {
 	}
 
 	@Test
-	// http --use.ssl=<TAB> => propose true|false
+	// http --use-ssl=<TAB> => propose true|false
 	public void testValueHintForBooleans() {
-		assertThat(completionProvider.complete("http --use.ssl=", 1), hasItems(
-				proposalThat(is("http --use.ssl=true")),
-				proposalThat(is("http --use.ssl=false"))
+		assertThat(completionProvider.complete("http --use-ssl=", 1), hasItems(
+				proposalThat(is("http --use-ssl=true")),
+				proposalThat(is("http --use-ssl=false"))
 		));
 	}
 
@@ -230,37 +230,14 @@ public class StreamCompletionProviderTests {
 	}
 
 	/*
-	 * http --use.ssl=tr<TAB> => must be true or false, no need to present "...=tr --other.prop"
+	 * http --use-ssl=tr<TAB> => must be true or false, no need to present "...=tr --other.prop"
 	 */
 	@Test
 	public void testClosedSetValuesShouldBeExclusive() {
-		assertThat(completionProvider.complete("http --use.ssl=tr", 1), not(hasItems(
-				proposalThat(startsWith("http --use.ssl=tr "))
+		assertThat(completionProvider.complete("http --use-ssl=tr", 1), not(hasItems(
+				proposalThat(startsWith("http --use-ssl=tr "))
 		)));
 	}
-
-	/*
-	 *
-	 */
-	@Test
-	public void testCompletionStopsAtDots() {
-		assertThat(completionProvider.complete("hdfs --", 1), hasItems(
-				proposalThat(is("hdfs --directory=")),
-				proposalThat(is("hdfs --some."))
-		));
-		assertThat(completionProvider.complete("hdfs --", 1), not(hasItems(
-				proposalThat(startsWith("hdfs --some.l"))
-		)));
-		assertThat(completionProvider.complete("hdfs --some.long.prefix", 1), hasItems(
-				proposalThat(is("hdfs --some.long.prefix."))
-		));
-		assertThat(completionProvider.complete("hdfs --some.long.prefix.", 1), hasItems(
-				proposalThat(is("hdfs --some.long.prefix.option1=")),
-				proposalThat(is("hdfs --some.long.prefix.option2=")),
-				proposalThat(startsWith("hdfs --some.long.prefix.nested."))
-		));
-	}
-
 
 	private static org.hamcrest.Matcher<CompletionProposal> proposalThat(org.hamcrest.Matcher<String> matcher) {
 		return new FeatureMatcher<CompletionProposal, String>(matcher, "a proposal whose text", "text") {

@@ -44,6 +44,7 @@ import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.app.AppStatus;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
+import org.springframework.cloud.stream.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.core.io.Resource;
 import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.http.HttpStatus;
@@ -57,7 +58,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * Controller for deployment operations on {@link StreamDefinition}.
- *
  * @author Eric Bottard
  * @author Mark Fisher
  * @author Patrick Peralta
@@ -96,34 +96,36 @@ public class StreamDeploymentController {
 	 */
 	private final AppDeployer deployer;
 
+	private final ApplicationConfigurationMetadataResolver metadataResolver;
+
 	/**
 	 * Create a {@code StreamDeploymentController} that delegates
 	 * <ul>
-	 *     <li>CRUD operations to the provided {@link StreamDefinitionRepository}</li>
-	 *     <li>app retrieval to the provided {@link AppRegistry}</li>
-	 *     <li>deployment operations to the provided {@link AppDeployer}</li>
+	 * <li>CRUD operations to the provided {@link StreamDefinitionRepository}</li>
+	 * <li>app retrieval to the provided {@link AppRegistry}</li>
+	 * <li>deployment operations to the provided {@link AppDeployer}</li>
 	 * </ul>
-	 *
-	 * @param repository       the repository this controller will use for stream CRUD operations
+	 * @param repository             the repository this controller will use for stream CRUD operations
 	 * @param deploymentIdRepository the repository this controller will use for deployment IDs
-	 * @param registry         the registry this controller will use to lookup apps
-	 * @param deployer         the deployer this controller will use to deploy stream apps
+	 * @param registry               the registry this controller will use to lookup apps
+	 * @param deployer               the deployer this controller will use to deploy stream apps
 	 */
 	public StreamDeploymentController(StreamDefinitionRepository repository, DeploymentIdRepository deploymentIdRepository,
-			AppRegistry registry, AppDeployer deployer) {
+	                                  AppRegistry registry, AppDeployer deployer, ApplicationConfigurationMetadataResolver metadataResolver) {
 		Assert.notNull(repository, "StreamDefinitionRepository must not be null");
 		Assert.notNull(deploymentIdRepository, "DeploymentIdRepository must not be null");
 		Assert.notNull(registry, "AppRegistry must not be null");
 		Assert.notNull(deployer, "AppDeployer must not be null");
+		Assert.notNull(metadataResolver, "MetadataResolver must not be null");
 		this.repository = repository;
 		this.deploymentIdRepository = deploymentIdRepository;
 		this.registry = registry;
 		this.deployer = deployer;
+		this.metadataResolver = metadataResolver;
 	}
 
 	/**
 	 * Request un-deployment of an existing stream.
-	 *
 	 * @param name the name of an existing stream (required)
 	 */
 	@RequestMapping(value = "/{name}", method = RequestMethod.DELETE)
@@ -149,14 +151,13 @@ public class StreamDeploymentController {
 
 	/**
 	 * Request deployment of an existing stream definition.
-	 *
-	 * @param name the name of an existing stream definition (required)
+	 * @param name       the name of an existing stream definition (required)
 	 * @param properties the deployment properties for the stream as a comma-delimited list of key=value pairs
 	 */
 	@RequestMapping(value = "/{name}", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
 	public void deploy(@PathVariable("name") String name,
-			@RequestParam(required = false) String properties) {
+	                   @RequestParam(required = false) String properties) {
 		StreamDefinition stream = this.repository.findOne(name);
 		if (stream == null) {
 			throw new NoSuchStreamDefinitionException(name);
@@ -190,8 +191,7 @@ public class StreamDeploymentController {
 
 	/**
 	 * Deploy a stream as defined by its {@link StreamDefinition} and optional deployment properties.
-	 *
-	 * @param stream the stream to deploy
+	 * @param stream                     the stream to deploy
 	 * @param streamDeploymentProperties the deployment properties for the stream
 	 */
 	private void deployStream(StreamDefinition stream, Map<String, String> streamDeploymentProperties) {
@@ -226,6 +226,9 @@ public class StreamDeploymentController {
 			Assert.notNull(registration, String.format("no application '%s' of type '%s' exists in the registry",
 					currentApp.getName(), type));
 			Resource resource = registration.getResource();
+			String primaryPrefix = metadataResolver.primaryPrefix(resource);
+			currentApp = qualifyParameters(currentApp, primaryPrefix);
+
 			AppDeploymentRequest request = currentApp.createDeploymentRequest(resource, appDeploymentProperties);
 			try {
 				String id = this.deployer.deploy(request);
@@ -240,15 +243,33 @@ public class StreamDeploymentController {
 	}
 
 	/**
+	 * Return a copy of a given app definition where short form parameters have been expanded
+	 * with the primary prefix if applicable.
+	 */
+	private StreamAppDefinition qualifyParameters(StreamAppDefinition original, String primaryPrefix) {
+		StreamAppDefinition.Builder builder = StreamAppDefinition.Builder.from(original);
+		Map<String, String> mutatedProps = new HashMap<>(original.getProperties().size());
+		for (Map.Entry<String, String> entry : original.getProperties().entrySet()) {
+			if (entry.getKey().contains(".") || primaryPrefix == null) {
+				mutatedProps.put(entry.getKey(), entry.getValue());
+			}
+			else {
+				mutatedProps.put(primaryPrefix + "." + entry.getKey(), entry.getValue());
+			}
+		}
+		return builder.setProperties(mutatedProps).build(original.getStreamName());
+	}
+
+
+	/**
 	 * Extract and return a map of properties for a specific app within the
 	 * deployment properties of a stream.
-	 *
-	 * @param appDefinition the {@link StreamAppDefinition} for which to return a map of properties
+	 * @param appDefinition              the {@link StreamAppDefinition} for which to return a map of properties
 	 * @param streamDeploymentProperties deployment properties for the stream that the app is defined in
 	 * @return map of properties for an app
 	 */
 	private Map<String, String> extractAppDeploymentProperties(StreamAppDefinition appDefinition,
-			Map<String, String> streamDeploymentProperties) {
+	                                                           Map<String, String> streamDeploymentProperties) {
 		Map<String, String> appDeploymentProperties = new HashMap<>();
 		String wildCardProducerPropertyPrefix = "app.*.producer.";
 		String wildCardConsumerPropertyPrefix = "app.*.consumer.";
@@ -293,15 +314,14 @@ public class StreamDeploymentController {
 	/**
 	 * Return {@code true} if the upstream app (the app that appears before
 	 * the provided app) contains partition related properties.
-	 *
-	 * @param stream        stream for the app
-	 * @param currentApp    app for which to determine if the upstream app
-	 *                      has partition properties
+	 * @param stream                     stream for the app
+	 * @param currentApp                 app for which to determine if the upstream app
+	 *                                   has partition properties
 	 * @param streamDeploymentProperties deployment properties for the stream
 	 * @return true if the upstream app has partition properties
 	 */
 	private boolean upstreamAppHasPartitionInfo(StreamDefinition stream, StreamAppDefinition currentApp,
-			Map<String, String> streamDeploymentProperties) {
+	                                            Map<String, String> streamDeploymentProperties) {
 		Iterator<StreamAppDefinition> iterator = stream.getDeploymentOrderIterator();
 		while (iterator.hasNext()) {
 			StreamAppDefinition app = iterator.next();
@@ -319,14 +339,13 @@ public class StreamDeploymentController {
 	 * Return {@code true} if an app is a consumer of partitioned data.
 	 * This is determined either by the deployment properties for the app
 	 * or whether the previous (upstream) app is publishing partitioned data.
-	 *
-	 * @param appDeploymentProperties deployment properties for the app
+	 * @param appDeploymentProperties      deployment properties for the app
 	 * @param upstreamAppSupportsPartition if true, previous (upstream) app
-	 * in the stream publishes partitioned data
+	 *                                     in the stream publishes partitioned data
 	 * @return true if the app consumes partitioned data
 	 */
 	private boolean isPartitionedConsumer(Map<String, String> appDeploymentProperties,
-			boolean upstreamAppSupportsPartition) {
+	                                      boolean upstreamAppSupportsPartition) {
 		return upstreamAppSupportsPartition ||
 				(appDeploymentProperties.containsKey(BindingPropertyKeys.INPUT_PARTITIONED) &&
 						appDeploymentProperties.get(BindingPropertyKeys.INPUT_PARTITIONED).equalsIgnoreCase("true"));
@@ -334,7 +353,6 @@ public class StreamDeploymentController {
 
 	/**
 	 * Add app properties for consuming partitioned data to the provided properties.
-	 *
 	 * @param properties properties to update
 	 */
 	private void updateConsumerPartitionProperties(Map<String, String> properties) {
@@ -346,8 +364,7 @@ public class StreamDeploymentController {
 
 	/**
 	 * Add app properties for producing partitioned data to the provided properties.
-	 *
-	 * @param properties properties to update
+	 * @param properties        properties to update
 	 * @param nextInstanceCount the number of instances for the next (downstream) app in the stream
 	 */
 	private void updateProducerPartitionProperties(Map<String, String> properties, int nextInstanceCount) {
@@ -359,7 +376,6 @@ public class StreamDeploymentController {
 
 	/**
 	 * Return the app instance count indicated in the provided properties.
-	 *
 	 * @param properties properties for the app for which to determine the count
 	 * @return instance count indicated in the provided properties;
 	 * if the properties do not contain a count, a value of {@code 1} is returned
@@ -371,7 +387,6 @@ public class StreamDeploymentController {
 
 	/**
 	 * Undeploy the given stream.
-	 *
 	 * @param stream stream to undeploy
 	 */
 	private void undeployStream(StreamDefinition stream) {
