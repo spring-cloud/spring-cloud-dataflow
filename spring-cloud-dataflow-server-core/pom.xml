@@ -140,7 +140,6 @@
 				<directory>src/main/resources</directory>
 				<filtering>true</filtering>
 				<includes>
-					<include>META-INF/applications.properties</include>
 					<include>META-INF/spring.factories</include>
 					<include>banner.txt</include>
 					<include>schema-h2.sql</include>
