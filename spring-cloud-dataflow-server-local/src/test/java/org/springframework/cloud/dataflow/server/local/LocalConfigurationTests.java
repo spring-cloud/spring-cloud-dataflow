@@ -28,6 +28,7 @@ import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepo
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.deployer.spi.local.LocalAppDeployer;
 import org.springframework.cloud.deployer.spi.local.LocalTaskLauncher;
+import org.springframework.cloud.stream.app.metrics.FieldValueCounterRepository;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.util.SocketUtils;
 
@@ -81,7 +82,7 @@ public class LocalConfigurationTests {
 				"--" + FeaturesProperties.FEATURES_PREFIX + "." + FeaturesProperties.STREAMS_ENABLED + "=false"});
 		assertNotNull(context.getBean(TaskDefinitionRepository.class));
 		assertNotNull(context.getBean(DeploymentIdRepository.class));
-		assertNotNull(context.getBean(MetricRepository.class));
+		assertNotNull(context.getBean(FieldValueCounterRepository.class));
 		try {
 			context.getBean(StreamDefinitionRepository.class);
 			fail("Stream features should have been disabled.");
@@ -99,7 +100,7 @@ public class LocalConfigurationTests {
 				"--" + FeaturesProperties.FEATURES_PREFIX + "." + FeaturesProperties.TASKS_ENABLED + "=false"});
 		assertNotNull(context.getBean(StreamDefinitionRepository.class));
 		assertNotNull(context.getBean(DeploymentIdRepository.class));
-		assertNotNull(context.getBean(MetricRepository.class));
+		assertNotNull(context.getBean(FieldValueCounterRepository.class));
 		try {
 			context.getBean(TaskDefinitionRepository.class);
 			fail("Task features should have been disabled.");
@@ -119,7 +120,7 @@ public class LocalConfigurationTests {
 		assertNotNull(context.getBean(TaskDefinitionRepository.class));
 		assertNotNull(context.getBean(DeploymentIdRepository.class));
 		try {
-			context.getBean(MetricRepository.class);
+			context.getBean(FieldValueCounterRepository.class);
 			fail("Task features should have been disabled.");
 		}
 		catch (NoSuchBeanDefinitionException e) {
