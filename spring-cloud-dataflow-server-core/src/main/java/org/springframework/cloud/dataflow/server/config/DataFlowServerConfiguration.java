@@ -40,6 +40,7 @@ import org.springframework.cloud.dataflow.server.repository.support.DataflowRdbm
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.util.Assert;
@@ -96,13 +97,14 @@ public class DataFlowServerConfiguration {
 		}
 
 		@Bean
-		public DataSourceTransactionManager transactionManagerForServer(DataSource dataSource, Server server) {
+		@DependsOn("initH2TCPServer")
+		public DataSourceTransactionManager transactionManagerForServer(DataSource dataSource) {
 			return new DataSourceTransactionManager(dataSource);
 		}
 
 		@Bean
-		public DataflowRdbmsInitializer dataflowRdbmsInitializer(DataSource dataSource, Server server,
-																 FeaturesProperties featuresProperties) {
+		@DependsOn("initH2TCPServer")
+		public DataflowRdbmsInitializer dataflowRdbmsInitializer(DataSource dataSource, FeaturesProperties featuresProperties) {
 			DataflowRdbmsInitializer dataflowRdbmsInitializer = new DataflowRdbmsInitializer(featuresProperties);
 			dataflowRdbmsInitializer.setDataSource(dataSource);
 			return dataflowRdbmsInitializer;
