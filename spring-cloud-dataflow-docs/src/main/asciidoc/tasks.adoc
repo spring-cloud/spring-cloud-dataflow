@@ -12,6 +12,7 @@ _<<getting-started.adoc#getting-started, Getting Started>>_ guide before diving 
 this section.
 --
 
+[[spring-cloud-dataflow-task-intro]]
 == Introducing Spring Cloud Task
 A task executes a process on demand.  In this case a task is a
 http://projects.spring.io/spring-boot/[Spring Boot] application that is annotated with
@@ -138,6 +139,7 @@ remain in the task repository.
 *Note:* This will not stop any currently executing tasks for this definition, this just
 removes the definition.
 
+[[spring-cloud-dataflow-task-repository]]
 == Task Repository
 
 Out of the box Spring Cloud Data Flow offers an embedded instance of the H2 database.
@@ -199,6 +201,7 @@ spring:
     driver-class-name:org.postgresql.Driver
 ```
 
+[[spring-cloud-dataflow-task-events]]
 == Subscribing to Task/Batch events
 
 You can also tap into various task/batch events when the task is launched.
