@@ -6,6 +6,7 @@
 In this section you will learn all about Streams and how to use them with Spring Cloud Data Flow.
 --
 
+[[spring-cloud-dataflow-stream-intro]]
 == Introduction
 
 In Spring Cloud Data Flow, a basic stream defines the ingestion of event driven data from a _source_ to a _sink_ that passes through any number of _processors_. Streams are composed of spring-cloud-stream applications and the deployment of stream definitions is done via the Data Flow Server (REST API). The xref:getting-started#getting-started[Getting Started] section shows you how to start these servers and how to start and use the Spring Cloud Data Flow shell.
@@ -22,6 +23,7 @@ http --server.port=8091 | file --directory=/tmp/httpdata/
 ```
 To create these stream definitions you use the shell or make an HTTP POST request to the Spring Cloud Data Flow Server. More details can be found in the sections below.
 
+[[spring-cloud-dataflow-create-stream]]
 == Creating a Simple Stream
 
 The Spring Cloud Data Flow Server exposes a full RESTful API for managing the lifecycle of stream definitions, but the easiest way to use is it is via the Spring Cloud Data Flow shell. Start the shell as described in the xref:Getting-Started#getting-started[Getting Started] section.
@@ -63,8 +65,9 @@ If you would like to have multiple instances of an application in the stream, yo
 dataflow:> stream deploy --name ticktock --properties "app.time.count=3"
 ```
 
-IMPORTANT: See <<app-labels>>.
+IMPORTANT: See <<spring-cloud-dataflow-stream-app-labels>>.
 
+[[spring-cloud-dataflow-delete-stream]]
 == Deleting a Stream
 
 You can delete a stream by issuing the `stream destroy` command from the shell:
@@ -75,6 +78,7 @@ dataflow:> stream destroy --name ticktock
 
 If the stream was deployed, it will be undeployed before the stream definition is deleted.
 
+[[spring-cloud-dataflow-deploy—undeploy-stream]]
 == Deploying and Undeploying Streams
 
 Often you will want to stop a stream, but retain the name and definition for future use. In that case you can `undeploy` the stream by name and issue the `deploy` command at a later time to restart it.
@@ -83,6 +87,7 @@ dataflow:> stream undeploy --name ticktock
 dataflow:> stream deploy --name ticktock
 ```
 
+[[spring-cloud-dataflow-stream-app-types]]
 == Other Source and Sink Types
 
 Let's try something a bit more complicated and swap out the `time` source for something else. Another supported source type is `http`, which accepts data for ingestion over HTTP POSTs. Note that the `http` source accepts data on a different port from the Data Flow Server (default 8080). By default the port is randomly assigned.
@@ -120,6 +125,7 @@ and the stream will then funnel the data from the http source to the output log 
 
 Of course, we could also change the sink implementation. You could pipe the output to a file (`file`), to hadoop (`hdfs`) or to any of the other sink apps which are available. You can also define your own apps.
 
+[[spring-cloud-dataflow-simple-stream]]
 == Simple Stream Processing
 
 As an example of a simple processing step, we can transform the payload of the HTTP posted data to upper case using the stream definitions
@@ -148,7 +154,8 @@ dataflow:> stream create --definition "http --server.port=8000 | log" --name myh
 ```
 The shell provides tab completion for application properties and also the shell command `app info` provides some additional documentation.
 
-=== Register a Stream App
+[[spring-cloud-dataflow-register-apps]]
+== Register a Stream App
 
 Register a Stream App with the App Registry using the Spring Cloud Data Flow Shell
 `app register` command. You must provide a unique name and a URI that can be
@@ -226,6 +233,7 @@ configuration.classes=org.springframework.cloud.stream.app.file.sink.FileSinkPro
 configuration-properties.names=server.port
 ```
 
+[[spring-cloud-dataflow-stream-advanced]]
 == Advanced Features
 
 If directed graphs are needed instead of the simple linear streams described above, two features are relevant.
@@ -237,14 +245,15 @@ Second, you may need to determine the output channel of a stream based on some i
 In that case, a router may be used in the sink position of a stream definition. For more information, refer to the Router Sink starter's
 link:https://github.com/spring-cloud/spring-cloud-stream-app-starters/tree/master/router/spring-cloud-starter-stream-sink-router[README].
 
-[[app-labels]]
+[[spring-cloud-dataflow-stream-app-labels]]
 == App Labels
 
 When a stream is comprised of multiple apps with the same name, they must be qualified with labels:
 ```
 stream create --definition "http | firstLabel: transform --expression=payload.toUpperCase() | secondLabel: transform --expression=payload+'!' | log" --name myStreamWithLabels --deploy
 ```
-[[tap-dsl]]
+
+[[spring-cloud-dataflow-stream-tap-dsl]]
 == Tap DSL
 
 Taps can be created at various producer endpoints in a stream. For a stream like this:
@@ -273,7 +282,7 @@ stream create --definition ":mainstream.step1 > jdbc" --name tap_at_step1_transf
 
 Note the colon (:) prefix before the destination names. The colon allows the parser to recognize this as a destination name instead of an app name.
 
-[[explicit-destination-names]]
+[[spring-cloud-dataflow-stream-explicit-destination-names]]
 == Connecting to explicit destination names at the broker
 
 One can connect to a specific destination name located in the broker (Rabbit, Kafka etc.,) either at the `source` or at the `sink` position.
@@ -304,7 +313,7 @@ stream create --definition ":destination1 > :destination2" --name bridge_destina
 
 In the above stream, both the destinations (`destination1` and `destination2`) are located in the broker. The messages flow from the source destination to the sink destination via a `bridge` app that connects them.
 
-[[data-partitions]]
+[[spring-cloud-dataflow-stream-partitions]]
 == Stateful Stream Processing
 
 To demonstrate the data partitioning functionality, let's deploy the following stream with Kafka as the binder.
