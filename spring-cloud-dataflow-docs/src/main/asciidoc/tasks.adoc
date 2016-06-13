@@ -32,7 +32,7 @@ typical lifecycle for tasks in the context of Spring Cloud Data Flow:
 4. Task Execution
 5. Destroy a Task Definition
 
-=== Register a Task App
+=== Registering a Task Application
 Register a Task App with the App Registry using the Spring Cloud Data Flow Shell
 `app register` command. You must provide a unique name and a URI that can be
 resolved to the app artifact. For the type, specify "task". Here are a few examples:
@@ -80,7 +80,7 @@ URI will be passed to a runtime container instance where it is resolved. Consult
 the specific documentation of each Data Flow Server for more detail.
 
 
-=== Create a Task Definition
+=== Creating a Task
 Create a Task Definition from a Task App by providing a definition name as well as
 properties that apply to the task execution.  Creating a task definition can be done via
 the restful API or the shell.  To create a task definition using the shell, use the
@@ -94,7 +94,7 @@ dataflow:>task create mytask --definition "timestamp --format=\"yyyy\""
 A listing of the current task definitions can be obtained via the restful API or the
 shell.  To get the task definition list using the shell, use the `task list` command.
 
-=== Launch an ad-hoc Task
+=== Launching a Task
 An adhoc task can be launched via the restful API or via the shell.  To launch an ad-hoc
 task via the shell use the `task launch` command.  For Example:
 
@@ -103,7 +103,7 @@ dataflow:>task launch mytask
  Launched task 'mytask'
 ```
 
-=== Task Execution
+=== Reviewing Task Executions
 Once the task is launched the state of the task is stored in a relational DB.  The state
 includes:
 
@@ -123,7 +123,7 @@ the task definition name, for example `task execution list --name foo`.  To retr
 details for a task execution use the `task display` command with the id of the task execution
 , for example `task display --id 549`.
 
-=== Destroy a Task Definition
+=== Destroying a Task
 Destroying a Task Definition will remove the definition from the definition repository.
 This can be done via the restful API or via the shell.  To destroy a task via the shell
 use the `task destroy` command. For Example:
@@ -202,7 +202,7 @@ spring:
 ```
 
 [[spring-cloud-dataflow-task-events]]
-== Subscribing to Task/Batch events
+== Subscribing to Task/Batch Events
 
 You can also tap into various task/batch events when the task is launched.
 If the task is enabled to generate task and/or batch events (with the additional dependencies `spring-cloud-task-stream` and `spring-cloud-stream-binder-kafka`, in the case of Kafka as the binder), those events are published during the task lifecycle. 
