@@ -19,16 +19,12 @@ import org.springframework.cloud.dataflow.server.job.support.StepExecutionJackso
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
-import org.springframework.data.web.config.EnableSpringDataWebSupport;
-import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.hateoas.core.DefaultRelProvider;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
-
-import static org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType.HAL;
 
 /**
  * @author Mark Fisher
@@ -39,8 +35,6 @@ import static org.springframework.hateoas.config.EnableHypermediaSupport.Hyperme
  */
 @Configuration
 @ConditionalOnWebApplication
-@EnableHypermediaSupport(type = HAL)
-@EnableSpringDataWebSupport
 public class WebConfiguration {
 
     private static final String SPRING_HATEOAS_OBJECT_MAPPER = "_halObjectMapper";
