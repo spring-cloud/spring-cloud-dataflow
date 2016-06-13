@@ -13,6 +13,8 @@ Sabby Anandan; Marius Bogoevici; Eric Bottard; Mark Fisher; Ilayaperumal Gopinat
 :github-repo: spring-projects/spring-cloud-dataflow
 :github-code: http://github.com/{github-repo}
 
+:dataflow-asciidoc: https://raw.githubusercontent.com/spring-cloud/spring-cloud-dataflow/master/spring-cloud-dataflow-docs/src/main/asciidoc
+
 // ======================================================================================
 
 include::preface.adoc[]
