@@ -34,6 +34,7 @@ import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.registry.DataFlowUriRegistryPopulator;
 import org.springframework.cloud.dataflow.registry.DataFlowUriRegistryPopulatorProperties;
 import org.springframework.cloud.dataflow.registry.RdbmsUriRegistry;
+import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
 import org.springframework.cloud.dataflow.server.controller.AggregateCounterController;
 import org.springframework.cloud.dataflow.server.controller.AppRegistryController;
@@ -136,8 +137,8 @@ public class DataFlowControllerAutoConfiguration {
 	@ConditionalOnBean(StreamDefinitionRepository.class)
 	public StreamDeploymentController streamDeploymentController(StreamDefinitionRepository repository,
 			DeploymentIdRepository deploymentIdRepository, AppRegistry registry, AppDeployer deployer,
-             ApplicationConfigurationMetadataResolver metadataResolver) {
-		return new StreamDeploymentController(repository, deploymentIdRepository, registry, deployer, metadataResolver);
+             ApplicationConfigurationMetadataResolver metadataResolver, CommonApplicationProperties appsProperties) {
+		return new StreamDeploymentController(repository, deploymentIdRepository, registry, deployer, metadataResolver, appsProperties);
 	}
 
 	@Bean

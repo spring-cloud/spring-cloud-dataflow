@@ -25,12 +25,11 @@ import org.slf4j.LoggerFactory;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.autoconfigure.batch.BatchDatabaseInitializer;
 import org.springframework.boot.autoconfigure.batch.BatchProperties;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.dataflow.completion.CompletionConfiguration;
-import org.springframework.cloud.dataflow.server.config.features.AnalyticsConfiguration;
+import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.config.features.FeaturesConfiguration;
 import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
 import org.springframework.cloud.dataflow.server.config.security.SecurityConfiguration;
@@ -70,7 +69,7 @@ import static org.springframework.hateoas.config.EnableHypermediaSupport.Hyperme
 @Import({CompletionConfiguration.class, FeaturesConfiguration.class, WebConfiguration.class})
 @ComponentScan(basePackageClasses = { StreamDefinitionRepository.class, SecurityConfiguration.class})
 @EnableAutoConfiguration
-@EnableConfigurationProperties(BatchProperties.class)
+@EnableConfigurationProperties({BatchProperties.class, CommonApplicationProperties.class})
 public class DataFlowServerConfiguration {
 
 	@Configuration

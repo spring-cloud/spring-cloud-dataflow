@@ -20,10 +20,13 @@ import static org.mockito.Mockito.mock;
 import static org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType.HAL;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.dataflow.completion.CompletionConfiguration;
+import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.registry.DataFlowUriRegistryPopulator;
 import org.springframework.cloud.dataflow.registry.DataFlowUriRegistryPopulatorProperties;
+import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.controller.RestControllerAdvice;
 import org.springframework.cloud.dataflow.server.controller.StreamDefinitionController;
 import org.springframework.cloud.dataflow.server.controller.StreamDeploymentController;
@@ -45,7 +48,6 @@ import org.springframework.cloud.deployer.resource.registry.UriRegistry;
 import org.springframework.cloud.deployer.resource.registry.UriRegistryPopulator;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
-import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -65,6 +67,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupp
 @EnableHypermediaSupport(type = HAL)
 @Import(CompletionConfiguration.class)
 @EnableWebMvc
+@EnableConfigurationProperties(CommonApplicationProperties.class)
 public class TestDependencies extends WebMvcConfigurationSupport {
 
 	private final MavenProperties mavenProperties = new MavenProperties();
@@ -76,14 +79,16 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 
 	@Bean
 	public ResourceLoader resourceLoader() {
-		return new MavenResourceLoader(mavenProperties);
+		return new MavenResourceLoader(this.mavenProperties);
 	}
 
 	@Bean
 	public StreamDeploymentController streamDeploymentController(StreamDefinitionRepository repository,
 			DeploymentIdRepository deploymentIdRepository, AppRegistry registry,
-			                                                     ApplicationConfigurationMetadataResolver metadataResolver) {
-		return new StreamDeploymentController(repository, deploymentIdRepository, registry, appDeployer(), metadataResolver);
+			ApplicationConfigurationMetadataResolver metadataResolver,
+			CommonApplicationProperties applicationProperties) {
+		return new StreamDeploymentController(repository, deploymentIdRepository, registry, appDeployer(),
+				metadataResolver, applicationProperties);
 	}
 
 	@Bean
@@ -142,7 +147,8 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 
 	@Bean
 	public TaskService taskService() {
-		return new DefaultTaskService(taskDefinitionRepository(), deploymentIdRepository(), uriRegistry(), resourceLoader(), taskLauncher());
+		return new DefaultTaskService(taskDefinitionRepository(), deploymentIdRepository(), uriRegistry(),
+				resourceLoader(), taskLauncher());
 	}
 
 	@Bean

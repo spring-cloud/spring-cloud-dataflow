@@ -17,6 +17,7 @@
 package org.springframework.cloud.dataflow.server.controller;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
@@ -55,6 +56,7 @@ import org.springframework.cloud.dataflow.core.BindingPropertyKeys;
 import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
+import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
 import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
 import org.springframework.cloud.dataflow.server.repository.DeploymentKey;
@@ -108,6 +110,9 @@ public class StreamControllerTests {
 	@Autowired
 	private AppDeployer appDeployer;
 
+	@Autowired
+	private CommonApplicationProperties appsProperties;
+
 	private final AppRegistry appRegistry = new AppRegistry(
 			new InMemoryUriRegistry(),
 			new MavenResourceLoader(new MavenProperties())
@@ -128,8 +133,9 @@ public class StreamControllerTests {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testConstructorMissingRepository() {
-		StreamDeploymentController deploymentController = new StreamDeploymentController(new InMemoryStreamDefinitionRepository(),
-				new InMemoryDeploymentIdRepository(), appRegistry, appDeployer, metadataResolver);
+		StreamDeploymentController deploymentController = new StreamDeploymentController(
+				new InMemoryStreamDefinitionRepository(), new InMemoryDeploymentIdRepository(), appRegistry,
+				appDeployer, metadataResolver, new CommonApplicationProperties());
 		new StreamDefinitionController(null, null, deploymentController, appDeployer, appRegistry);
 	}
 
@@ -140,9 +146,11 @@ public class StreamControllerTests {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testConstructorMissingDeployer() {
-		StreamDeploymentController deploymentController = new StreamDeploymentController(new InMemoryStreamDefinitionRepository(),
-				new InMemoryDeploymentIdRepository(), appRegistry, appDeployer, metadataResolver);
-		new StreamDefinitionController(new InMemoryStreamDefinitionRepository(), new InMemoryDeploymentIdRepository(), deploymentController, null, appRegistry);
+		StreamDeploymentController deploymentController = new StreamDeploymentController(
+				new InMemoryStreamDefinitionRepository(), new InMemoryDeploymentIdRepository(), appRegistry,
+				appDeployer, metadataResolver, new CommonApplicationProperties());
+		new StreamDefinitionController(new InMemoryStreamDefinitionRepository(), new InMemoryDeploymentIdRepository(),
+				deploymentController, null, appRegistry);
 	}
 
 	@Test
@@ -569,6 +577,40 @@ public class StreamControllerTests {
 		Map<String, String> timeDeploymentProps = timeRequest.getEnvironmentProperties();
 		assertEquals(timeDeploymentProps.get("spring.cloud.stream.bindings.output.producer.partitionCount"), "2");
 		assertEquals(timeDeploymentProps.get("spring.cloud.stream.bindings.output.producer.partitionKeyExpression"), "payload");
+	}
+
+	@Test
+	public void testDeployWithCommonApplicationProperties() throws Exception {
+		repository.save(new StreamDefinition("myStream", "time | log"));
+		assertThat(appsProperties.getStream().values(), empty());
+		appsProperties.getStream().put("spring.cloud.stream.fake.binder.host","fakeHost");
+		appsProperties.getStream().put("spring.cloud.stream.fake.binder.port","fakePort");
+		mockMvc.perform(
+				post("/streams/deployments/myStream").param("properties",
+						"app.*.producer.partitionKeyExpression=payload," +
+								"app.*.count=2," +
+								"app.*.consumer.concurrency=3")
+						.accept(MediaType.APPLICATION_JSON)).andDo(print())
+				.andExpect(status().isCreated());
+		ArgumentCaptor<AppDeploymentRequest> captor = ArgumentCaptor.forClass(AppDeploymentRequest.class);
+		verify(appDeployer, times(2)).deploy(captor.capture());
+		List<AppDeploymentRequest> requests = captor.getAllValues();
+		assertEquals(2, requests.size());
+		AppDeploymentRequest logRequest = requests.get(0);
+		assertThat(logRequest.getDefinition().getName(), is("log"));
+		Map<String, String> logDeploymentProps = logRequest.getEnvironmentProperties();
+		assertEquals(logDeploymentProps.get("spring.cloud.stream.instanceCount"), "2");
+		assertEquals(logDeploymentProps.get("spring.cloud.stream.fake.binder.host"), "fakeHost");
+		assertEquals(logDeploymentProps.get("spring.cloud.stream.fake.binder.port"), "fakePort");
+		assertEquals(logDeploymentProps.get("spring.cloud.stream.bindings.input.consumer.partitioned"), "true");
+		assertEquals(logDeploymentProps.get("spring.cloud.stream.bindings.input.consumer.concurrency"), "3");
+		assertEquals(logDeploymentProps.get("count"), "2");
+		AppDeploymentRequest timeRequest = requests.get(1);
+		assertThat(timeRequest.getDefinition().getName(), is("time"));
+		Map<String, String> timeDeploymentProps = timeRequest.getEnvironmentProperties();
+		assertEquals(timeDeploymentProps.get("spring.cloud.stream.bindings.output.producer.partitionCount"), "2");
+		assertEquals(timeDeploymentProps.get("spring.cloud.stream.bindings.output.producer.partitionKeyExpression"), "payload");
+		appsProperties.getStream().clear();
 	}
 
 	@Test

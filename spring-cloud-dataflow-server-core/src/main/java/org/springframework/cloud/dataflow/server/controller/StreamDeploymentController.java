@@ -30,6 +30,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
+import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.BindingPropertyKeys;
 import org.springframework.cloud.dataflow.core.StreamAppDefinition;
@@ -40,6 +41,7 @@ import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.rest.resource.StreamDeploymentResource;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
 import org.springframework.cloud.dataflow.server.DataFlowServerUtil;
+import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
 import org.springframework.cloud.dataflow.server.repository.DeploymentKey;
 import org.springframework.cloud.dataflow.server.repository.NoSuchStreamDefinitionException;
@@ -48,7 +50,6 @@ import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.app.AppStatus;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
-import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.core.io.Resource;
 import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.http.HttpStatus;
@@ -103,6 +104,11 @@ public class StreamDeploymentController {
 	private final ApplicationConfigurationMetadataResolver metadataResolver;
 
 	/**
+	 * General properties to be applied to applications on deployment.
+	 */
+	private final CommonApplicationProperties commonApplicationProperties;
+
+	/**
 	 * Create a {@code StreamDeploymentController} that delegates
 	 * <ul>
 	 * <li>CRUD operations to the provided {@link StreamDefinitionRepository}</li>
@@ -113,19 +119,23 @@ public class StreamDeploymentController {
 	 * @param deploymentIdRepository the repository this controller will use for deployment IDs
 	 * @param registry               the registry this controller will use to lookup apps
 	 * @param deployer               the deployer this controller will use to deploy stream apps
+	 * @param commonProperties         common set of application properties
 	 */
-	public StreamDeploymentController(StreamDefinitionRepository repository, DeploymentIdRepository deploymentIdRepository,
-	                                  AppRegistry registry, AppDeployer deployer, ApplicationConfigurationMetadataResolver metadataResolver) {
+	public StreamDeploymentController(StreamDefinitionRepository repository,
+			DeploymentIdRepository deploymentIdRepository, AppRegistry registry, AppDeployer deployer,
+			ApplicationConfigurationMetadataResolver metadataResolver, CommonApplicationProperties commonProperties) {
 		Assert.notNull(repository, "StreamDefinitionRepository must not be null");
 		Assert.notNull(deploymentIdRepository, "DeploymentIdRepository must not be null");
 		Assert.notNull(registry, "AppRegistry must not be null");
 		Assert.notNull(deployer, "AppDeployer must not be null");
 		Assert.notNull(metadataResolver, "MetadataResolver must not be null");
+		Assert.notNull(commonProperties, "CommonApplicationProperties must not be null");
 		this.repository = repository;
 		this.deploymentIdRepository = deploymentIdRepository;
 		this.registry = registry;
 		this.deployer = deployer;
 		this.metadataResolver = metadataResolver;
+		this.commonApplicationProperties = commonProperties;
 	}
 
 	/**
@@ -178,12 +188,12 @@ public class StreamDeploymentController {
 
 	private String calculateStreamState(String name) {
 		Set<DeploymentState> appStates = EnumSet.noneOf(DeploymentState.class);
-		StreamDefinition stream = repository.findOne(name);
+		StreamDefinition stream = this.repository.findOne(name);
 		for (StreamAppDefinition appDefinition : stream.getAppDefinitions()) {
 			String key = DeploymentKey.forStreamAppDefinition(appDefinition);
-			String id = deploymentIdRepository.findOne(key);
+			String id = this.deploymentIdRepository.findOne(key);
 			if (id != null) {
-				AppStatus status = deployer.status(id);
+				AppStatus status = this.deployer.status(id);
 				appStates.add(status.getState());
 			}
 			else {
@@ -254,10 +264,10 @@ public class StreamDeploymentController {
 		List<String> whiteList = new ArrayList<>();
 		List<String> allProps = new ArrayList<>();
 
-		for (ConfigurationMetadataProperty property : metadataResolver.listProperties(resource, false)) {
+		for (ConfigurationMetadataProperty property : this.metadataResolver.listProperties(resource, false)) {
 			whiteList.add(property.getName()); // Use names here
 		}
-		for (ConfigurationMetadataProperty property : metadataResolver.listProperties(resource, true)) {
+		for (ConfigurationMetadataProperty property : this.metadataResolver.listProperties(resource, true)) {
 			allProps.add(property.getId()); // But full ids here
 		}
 
@@ -296,28 +306,26 @@ public class StreamDeploymentController {
 	private Map<String, String> extractAppDeploymentProperties(StreamAppDefinition appDefinition,
 	                                                           Map<String, String> streamDeploymentProperties) {
 		Map<String, String> appDeploymentProperties = new HashMap<>();
+		// add common properties first
+		appDeploymentProperties.putAll(this.commonApplicationProperties.getStream());
+		// add properties with wild card prefix
 		String wildCardProducerPropertyPrefix = "app.*.producer.";
 		String wildCardConsumerPropertyPrefix = "app.*.consumer.";
 		String wildCardPrefix = "app.*.";
-		// first check for wild card prefix
-		for (Map.Entry<String, String> entry : streamDeploymentProperties.entrySet()) {
-			if (entry.getKey().startsWith(wildCardPrefix)) {
-				if (entry.getKey().startsWith(wildCardProducerPropertyPrefix)) {
-					appDeploymentProperties.put(BindingPropertyKeys.OUTPUT_BINDING_KEY_PREFIX +
-							entry.getKey().substring(wildCardPrefix.length()), entry.getValue());
-				}
-				else if (entry.getKey().startsWith(wildCardConsumerPropertyPrefix)) {
-					appDeploymentProperties.put(BindingPropertyKeys.INPUT_BINDING_KEY_PREFIX +
-							entry.getKey().substring(wildCardPrefix.length()), entry.getValue());
-				}
-				else {
-					appDeploymentProperties.put(entry.getKey().substring(wildCardPrefix.length()), entry.getValue());
-				}
-			}
-		}
+		parseAndPopulateProperties(streamDeploymentProperties, appDeploymentProperties, wildCardProducerPropertyPrefix,
+				wildCardConsumerPropertyPrefix, wildCardPrefix);
+		// add application specific properties
 		String producerPropertyPrefix = String.format("app.%s.producer.", appDefinition.getName());
 		String consumerPropertyPrefix = String.format("app.%s.consumer.", appDefinition.getName());
 		String appPrefix = String.format("app.%s.", appDefinition.getName());
+		parseAndPopulateProperties(streamDeploymentProperties, appDeploymentProperties, producerPropertyPrefix,
+				consumerPropertyPrefix, appPrefix);
+		return appDeploymentProperties;
+	}
+
+	private void parseAndPopulateProperties(Map<String, String> streamDeploymentProperties,
+			Map<String, String> appDeploymentProperties, String producerPropertyPrefix, String consumerPropertyPrefix,
+			String appPrefix) {
 		for (Map.Entry<String, String> entry : streamDeploymentProperties.entrySet()) {
 			if (entry.getKey().startsWith(appPrefix)) {
 				if (entry.getKey().startsWith(producerPropertyPrefix)) {
@@ -333,7 +341,6 @@ public class StreamDeploymentController {
 				}
 			}
 		}
-		return appDeploymentProperties;
 	}
 
 	/**
