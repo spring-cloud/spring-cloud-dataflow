@@ -91,8 +91,28 @@ In some cases the Resource is resolved on the server side, whereas in others the
 URI will be passed to a runtime container instance where it is resolved. Consult
 the specific documentation of each Data Flow Server for more detail.
 
+[[spring-cloud-dataflow-stream-app-whitelisting]]
+=== Whitelisting application properties
+
+Stream applications are Spring Boot applications which are aware of many link:http://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#common-application-properties[common application properties], e.g. `server.port` but also families of properties such as those with the prefix `spring.jmx` and `logging`.  When creating your own application it is desirable to whitelist properties so that the shell and the UI can display them first as primary properties when presenting options via TAB completion or in drop-down boxes.
+
+To whitelist application properties create a file named `spring-configuration-metadata-whitelist.propreties` in the `META-INF` resource directory.  There are two property keys that can be used inside this file. The first key is named `configuration-properties.classes`.  The value is a comma separated list of fully qualified `@ConfigurationProperty` class names.  The second key is `configuration-properties.names` whose value is a comma separated list of property names.  This can contain the full name of propety, such as `server.port` or a partial name to whitelist a category of property names, e.g. `spring.jmx`.
+
+The link:https://github.com/spring-cloud/spring-cloud-stream-app-starters[Spring Cloud Stream application starters] are a good place to look for examples of usage.  Here is a simle example of the file source's `spring-configuration-metadata-whitelist.properties` file
+
+```
+configuration.classes=org.springframework.cloud.stream.app.file.sink.FileSinkProperties
+```
+
+If for some reason we also wanted to add `server.port` to this file, it would look like
+
+```
+configuration.classes=org.springframework.cloud.stream.app.file.sink.FileSinkProperties
+configuration-properties.names=server.port
+```
+
 [[spring-cloud-dataflow-create-stream]]
-== Creating a Simple Stream
+== Creating a Stream
 
 The Spring Cloud Data Flow Server exposes a full RESTful API for managing the lifecycle of stream definitions, but the easiest way to use is it is via the Spring Cloud Data Flow shell. Start the shell as described in the xref:Getting-Started#getting-started[Getting Started] section.
 
@@ -135,8 +155,8 @@ dataflow:> stream deploy --name ticktock --properties "app.time.count=3"
 
 IMPORTANT: See <<spring-cloud-dataflow-stream-app-labels>>.
 
-[[spring-cloud-dataflow-delete-stream]]
-== Deleting a Stream
+[[spring-cloud-dataflow-destroy-stream]]
+== Destroying a Stream
 
 You can delete a stream by issuing the `stream destroy` command from the shell:
 
@@ -344,23 +364,3 @@ This can be done using the DSL syntax `http > :mydestination` or `:mydestination
 Second, you may need to determine the output channel of a stream based on some information that is only known at runtime.
 In that case, a router may be used in the sink position of a stream definition. For more information, refer to the Router Sink starter's
 link:https://github.com/spring-cloud/spring-cloud-stream-app-starters/tree/master/router/spring-cloud-starter-stream-sink-router[README].
-
-[[spring-cloud-dataflow-stream-app-whitelisting]]
-=== Whitelisting application properties
-
-Stream applications are Spring Boot applications which are aware of many link:http://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#common-application-properties[common application properties], e.g. `server.port` but also families of properties such as those with the prefix `spring.jmx` and `logging`.  When creating your own application it is desirable to whitelist properties so that the shell and the UI can display them first as primary properties when presenting options via TAB completion or in drop-down boxes.
-
-To whitelist application properties create a file named `spring-configuration-metadata-whitelist.propreties` in the `META-INF` resource directory.  There are two property keys that can be used inside this file. The first key is named `configuration-properties.classes`.  The value is a comma separated list of fully qualified `@ConfigurationProperty` class names.  The second key is `configuration-properties.names` whose value is a comma separated list of property names.  This can contain the full name of propety, such as `server.port` or a partial name to whitelist a category of property names, e.g. `spring.jmx`.  
-
-The link:https://github.com/spring-cloud/spring-cloud-stream-app-starters[Spring Cloud Stream application starters] are a good place to look for examples of usage.  Here is a simle example of the file source's `spring-configuration-metadata-whitelist.properties` file
-
-```
-configuration.classes=org.springframework.cloud.stream.app.file.sink.FileSinkProperties
-```
-
-If for some reason we also wanted to add `server.port` to this file, it would look like
-
-```
-configuration.classes=org.springframework.cloud.stream.app.file.sink.FileSinkProperties
-configuration-properties.names=server.port
-```
