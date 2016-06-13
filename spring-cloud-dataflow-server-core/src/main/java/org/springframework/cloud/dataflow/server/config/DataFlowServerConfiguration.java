@@ -42,9 +42,13 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.web.config.EnableSpringDataWebSupport;
+import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
+
+import static org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType.HAL;
 
 /**
  * Configuration for the Data Flow Server application context. This includes support for
@@ -60,6 +64,8 @@ import org.springframework.util.StringUtils;
  * @author Michael Minella
  * @author Gunnar Hillert
  */
+@EnableHypermediaSupport(type = HAL)
+@EnableSpringDataWebSupport
 @Configuration
 @Import({CompletionConfiguration.class, FeaturesConfiguration.class, WebConfiguration.class})
 @ComponentScan(basePackageClasses = { StreamDefinitionRepository.class, SecurityConfiguration.class})
