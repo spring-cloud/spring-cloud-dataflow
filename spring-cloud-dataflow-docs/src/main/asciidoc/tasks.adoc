@@ -1,4 +1,4 @@
-[[spring-cloud-task-overview]]
+[[spring-cloud-task]]
 = Tasks
 
 [partintro]
