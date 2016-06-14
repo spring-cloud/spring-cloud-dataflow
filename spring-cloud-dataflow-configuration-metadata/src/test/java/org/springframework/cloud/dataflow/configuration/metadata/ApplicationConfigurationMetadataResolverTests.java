@@ -17,6 +17,7 @@
 package org.springframework.cloud.dataflow.configuration.metadata;
 
 import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.is;
@@ -65,6 +66,14 @@ public class ApplicationConfigurationMetadataResolverTests {
 	@Test
 	public void dontFailWithExceptionForNonFileResources() {
 		assertThat(resolver.listProperties(new DescriptiveResource("Doesn't resolve to a java.io.File")), empty());
+	}
+
+	@Test
+	public void shouldReturnEverythingWhenNoDescriptors() {
+		List<ConfigurationMetadataProperty> properties = resolver.listProperties(new ClassPathResource("apps/no-whitelist", getClass()));
+		List<ConfigurationMetadataProperty> full = resolver.listProperties(new ClassPathResource("apps/no-whitelist", getClass()), true);
+		assertThat( properties.size(), greaterThan(0));
+		assertThat(properties.size(), is(full.size()));
 	}
 
 	private Matcher<ConfigurationMetadataProperty> configPropertyIdentifiedAs(String name) {
