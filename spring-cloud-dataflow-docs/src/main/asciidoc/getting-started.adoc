@@ -15,9 +15,30 @@ we go.
 
 You need Java installed (Java 7 or better, we recommend Java 8), and to build, you need to have Maven installed as well.
 
-You also need to have link:http://redis.io/[Redis] installed and running if you plan on running the local server, or to run the included tests.  
+You need to have an RDBMS for storing stream, task and app states in the database. The `local` dataflow server by default uses embedded H2 database for this.
+
+You also need to have link:http://redis.io[Redis] running if you are running any streams that involve analytics applications. Redis may also be required run the unit/integration tests.
 
 For the deployed streams and tasks to communicate, either link:http://rabbitmq.com[RabbitMQ] or link:http://kafka.apache.org[Kafka] needs to be installed.  The local server registers sources, sink, processors and tasks the are published from the link:https://github.com/spring-cloud/spring-cloud-stream-app-starters[Spring Cloud Stream App Starters] and link:https://github.com/spring-cloud/spring-cloud-task-app-starters[Spring Cloud Task App Starters] repository.  By default the server registers these applications that use Kafka, but setting the property `binding` to `rabbit` will register a list of applications that use RabbitMQ as the message broker.
+
+[[enable-disable-specific-features]]
+== Controlling features with Dataflow server
+
+Dataflow server offers specific set of features that can be enabled/disabled when launching. These features include all the lifecycle operations, REST endpoints (server, client implementations including Shell and the UI) for:
+
+. Streams
+. Tasks
+. Analytics
+
+One can enable, disable these features by setting the following boolean properties when launching the dataflow server:
+
+* `spring.cloud.dataflow.features.streams-enabled`
+* `spring.cloud.dataflow.features.tasks-enabled`
+* `spring.cloud.dataflow.features.analytics-enabled`
+
+By default, all these features are enabled for `local` dataflow server.
+
+The REST endpoint `/features` provides information on the features enabled/disabled.
 
 [[getting-started-deploying-spring-cloud-dataflow]]
 == Deploying Spring Cloud Data Flow
