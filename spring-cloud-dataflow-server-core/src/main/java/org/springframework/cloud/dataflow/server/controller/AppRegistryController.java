@@ -112,13 +112,10 @@ public class AppRegistryController {
 		DetailedAppRegistrationResource result = new DetailedAppRegistrationResource(assembler.toResource(registration));
 		Resource resource = registration.getResource();
 
-		//TODO: Docker URIs will throw an exception, need another way to get the properties for them
-		try {
-			List<ConfigurationMetadataProperty> properties = metadataResolver.listProperties(resource);
-			for (ConfigurationMetadataProperty property : properties) {
-				result.addOption(property);
-			}
-		} catch (Exception ignore) {}
+		List<ConfigurationMetadataProperty> properties = metadataResolver.listProperties(resource);
+		for (ConfigurationMetadataProperty property : properties) {
+			result.addOption(property);
+		}
 		return result;
 	}
 

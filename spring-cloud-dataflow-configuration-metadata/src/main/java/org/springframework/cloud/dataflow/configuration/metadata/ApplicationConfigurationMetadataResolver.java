@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
@@ -83,7 +84,13 @@ public class ApplicationConfigurationMetadataResolver {
 		List<ConfigurationMetadataProperty> result = new ArrayList<>();
 		ClassLoader moduleClassLoader = null;
 		try {
-			File moduleFile = app.getFile();
+			File moduleFile = null;
+			try {
+				moduleFile = app.getFile();
+			}
+			catch (IOException e) {
+				return Collections.emptyList();
+			}
 			Archive archive = moduleFile.isDirectory() ? new ExplodedArchive(moduleFile) : new JarFileArchive(moduleFile);
 			moduleClassLoader = createClassLoader(archive);
 			ResourcePatternResolver moduleResourceLoader = new PathMatchingResourcePatternResolver(moduleClassLoader);
