@@ -99,7 +99,9 @@ public class ApplicationConfigurationMetadataResolver {
 			Collection<String> whiteListedClasses = new HashSet<>(globalWhiteListedClasses);
 			Collection<String> whiteListedProperties = new HashSet<>(globalWhiteListedProperties);
 
-			loadWhiteLists(moduleResourceLoader.getResources(WHITELIST_PROPERTIES), whiteListedClasses, whiteListedProperties);
+			Resource[] whitelistDescriptors = moduleResourceLoader.getResources(WHITELIST_PROPERTIES);
+			boolean include = (whitelistDescriptors.length == 0) || exhaustive; // when no descriptors, return everything
+			loadWhiteLists(whitelistDescriptors, whiteListedClasses, whiteListedProperties);
 
 			ConfigurationMetadataRepositoryJsonBuilder builder = ConfigurationMetadataRepositoryJsonBuilder.create();
 			for (Resource r : moduleResourceLoader.getResources(CONFIGURATION_METADATA_PATTERN)) {
@@ -107,7 +109,7 @@ public class ApplicationConfigurationMetadataResolver {
 			}
 
 			for (ConfigurationMetadataGroup group : builder.build().getAllGroups().values()) {
-				if (exhaustive || isWhiteListed(group, whiteListedClasses)) {
+				if (include || isWhiteListed(group, whiteListedClasses)) {
 					result.addAll(group.getProperties().values());
 				} // Props in the root group have an id that looks prefixed itself. Handle here
 				else if ("_ROOT_GROUP_".equals(group.getId())) {
