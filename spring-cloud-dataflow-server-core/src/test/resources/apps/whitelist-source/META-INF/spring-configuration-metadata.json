@@ -1,0 +1,46 @@
+{
+  "groups": [
+    {
+      "name": "time",
+      "type": "foo.TimeProperties",
+      "sourceType": "foo.TimeProperties"
+    },
+    {
+      "name": "date",
+      "type": "foo.DateProperties",
+      "sourceType": "foo.DateProperties"
+    },
+    {
+      "name": "something.else",
+      "type": "foo.SomethingElseProperties",
+      "sourceType": "foo.SomethingElseProperties"
+    }
+  ],
+  "properties": [
+    {
+      "name": "time.format",
+      "type": "java.lang.String",
+      "sourceType": "foo.TimeProperties",
+      "defaultValue": "ss"
+    },
+    {
+      "name": "date.format",
+      "type": "java.lang.String",
+      "sourceType": "foo.DateProperties",
+      "defaultValue": "dd"
+    },
+    {
+      "name": "date.timezone",
+      "type": "java.lang.String",
+      "sourceType": "foo.DateProperties",
+      "defaultValue": "GMT"
+    },
+    {
+      "name": "something.else.prop",
+      "type": "java.lang.String",
+      "sourceType": "foo.SomethingElseProperties",
+      "defaultValue": "whatever"
+    }
+  ],
+  "hints": []
+}

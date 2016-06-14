@@ -16,7 +16,6 @@
 
 package org.springframework.cloud.dataflow.server.controller;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -54,6 +53,8 @@ import org.springframework.core.io.Resource;
 import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -258,14 +259,13 @@ public class StreamDeploymentController {
 	/**
 	 * Return a copy of a given app definition where short form parameters have been expanded to their long form
 	 * (amongst the whitelisted supported properties of the app) if applicable.
-	 * .
 	 */
-	private StreamAppDefinition qualifyParameters(StreamAppDefinition original, Resource resource) {
-		List<String> whiteList = new ArrayList<>();
-		List<String> allProps = new ArrayList<>();
+	/*default*/ StreamAppDefinition qualifyParameters(StreamAppDefinition original, Resource resource) {
+		MultiValueMap<String, ConfigurationMetadataProperty> whiteList = new LinkedMultiValueMap<>();
+		Set<String> allProps = new HashSet<>();
 
 		for (ConfigurationMetadataProperty property : this.metadataResolver.listProperties(resource, false)) {
-			whiteList.add(property.getName()); // Use names here
+			whiteList.add(property.getName(), property);// Use names here
 		}
 		for (ConfigurationMetadataProperty property : this.metadataResolver.listProperties(resource, true)) {
 			allProps.add(property.getId()); // But full ids here
@@ -275,15 +275,10 @@ public class StreamDeploymentController {
 		Map<String, String> mutatedProps = new HashMap<>(original.getProperties().size());
 		for (Map.Entry<String, String> entry : original.getProperties().entrySet()) {
 			if (!allProps.contains(entry.getKey())) {
-				Set<String> candidates = new HashSet<>();
-				for (String white : whiteList) {
-					if (white.equals(entry.getKey())) {
-						candidates.add(white);
-					}
-				}
-				Assert.isTrue(candidates.size() <= 1, String.format("Ambiguous short form property '%s' could mean any of %s", entry.getKey(), candidates));
-				if (candidates.size() == 1) {
-					mutatedProps.put(candidates.iterator().next(), entry.getValue());
+				List<ConfigurationMetadataProperty> longForms = whiteList.get(entry.getKey());
+				if (longForms != null) {
+					assertNoAmbiguity(longForms);
+					mutatedProps.put(longForms.iterator().next().getId(), entry.getValue());
 				}
 				// Note that we also leave the original property
 				mutatedProps.put(entry.getKey(), entry.getValue());
@@ -293,6 +288,17 @@ public class StreamDeploymentController {
 			}
 		}
 		return builder.setProperties(mutatedProps).build(original.getStreamName());
+	}
+
+	private void assertNoAmbiguity(List<ConfigurationMetadataProperty> longForms) {
+		if (longForms.size() > 1) {
+			Set<String> ids = new HashSet<>(longForms.size());
+			for (ConfigurationMetadataProperty pty : longForms) {
+				ids.add(pty.getId());
+			}
+			throw new IllegalArgumentException(String.format("Ambiguous short form property '%s' could mean any of %s",
+					longForms.iterator().next().getName(), ids));
+		}
 	}
 
 
