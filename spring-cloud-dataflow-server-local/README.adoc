@@ -90,10 +90,6 @@ If you tail the `stdout_0.log` file from the directory mentioned, you should see
 2016-04-26 15:10:20.322  INFO 59890 --- [pool-1-thread-1] log.sink    : 04/26/16 15:10:20
 ----
 
-If you want to use RabbitMQ instead of Kafka as the binder, you can simply pass `--binder=rabbit` as a command line
-argument when starting the `spring-cloud-dataflow-server-local` JAR (and be sure to start the RabbitMQ server).
-
-
 ## Configuration
 
 ### Default
