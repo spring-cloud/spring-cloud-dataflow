@@ -98,8 +98,8 @@ public class AppRegistryCommands implements CommandMarker, ResourceLoaderAware {
 	@CliCommand(value = APPLICATION_INFO, help = "Get information about an application")
 	public List<Object> info(
 			@CliOption(mandatory = true,
-					key = {"", "name"},
-					help = "name of the application to query in the form of 'type:name'")
+					key = {"", "id"},
+					help = "id of the application to query in the form of 'type:name'")
 			QualifiedApplicationName application) {
 		DetailedAppRegistrationResource info = appRegistryOperations().info(application.name, application.type);
 		List<Object> result = new ArrayList<>();
