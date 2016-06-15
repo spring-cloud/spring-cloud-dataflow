@@ -357,7 +357,7 @@ public class StreamControllerTests {
 		AppDeploymentRequest request = captor.getValue();
 		assertThat(request.getDefinition().getName(), is("filter"));
 		assertThat(request.getResource(), instanceOf(MavenResource.class));
-		assertThat(((MavenResource) request.getResource()).getArtifactId(), is("filter-processor"));
+		assertThat(((MavenResource) request.getResource()).getArtifactId(), is("filter-processor-rabbit"));
 	}
 
 	@Test
