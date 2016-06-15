@@ -30,9 +30,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.dataflow.completion.CompletionConfiguration;
 import org.springframework.cloud.dataflow.completion.StreamCompletionProvider;
+import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
-import org.springframework.cloud.dataflow.registry.DataFlowUriRegistryPopulator;
-import org.springframework.cloud.dataflow.registry.DataFlowUriRegistryPopulatorProperties;
 import org.springframework.cloud.dataflow.registry.RdbmsUriRegistry;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
@@ -65,13 +64,11 @@ import org.springframework.cloud.dataflow.server.service.TaskService;
 import org.springframework.cloud.deployer.resource.maven.MavenProperties;
 import org.springframework.cloud.deployer.resource.maven.MavenResourceLoader;
 import org.springframework.cloud.deployer.resource.registry.UriRegistry;
-import org.springframework.cloud.deployer.resource.registry.UriRegistryPopulator;
 import org.springframework.cloud.deployer.resource.support.DelegatingResourceLoader;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.cloud.stream.app.metrics.AggregateCounterRepository;
 import org.springframework.cloud.stream.app.metrics.FieldValueCounterRepository;
-import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -86,11 +83,11 @@ import org.springframework.hateoas.EntityLinks;
  * @author Gunnar Hillert
  * @author Ilayaperumal Gopinathan
  */
-@SuppressWarnings("ALL")
+@SuppressWarnings("all")
 @Configuration
 @Import(CompletionConfiguration.class)
 @ConditionalOnBean({ AppDeployer.class, TaskLauncher.class })
-@EnableConfigurationProperties({DataFlowUriRegistryPopulatorProperties.class, FeaturesProperties.class})
+@EnableConfigurationProperties({ FeaturesProperties.class })
 public class DataFlowControllerAutoConfiguration {
 
 	@Bean
@@ -99,19 +96,8 @@ public class DataFlowControllerAutoConfiguration {
 	}
 
 	@Bean
-	public UriRegistryPopulator uriRegistryPopulator() {
-		return new UriRegistryPopulator();
-	}
-
-	@Bean
 	public AppRegistry appRegistry(UriRegistry uriRegistry, DelegatingResourceLoader resourceLoader) {
 		return new AppRegistry(uriRegistry, resourceLoader);
-	}
-
-	@Bean
-	public DataFlowUriRegistryPopulator dataflowUriRegistryPopulator(UriRegistry uriRegistry,
-			DataFlowUriRegistryPopulatorProperties properties) {
-		return new DataFlowUriRegistryPopulator(uriRegistry, uriRegistryPopulator(), properties);
 	}
 
 	@Bean

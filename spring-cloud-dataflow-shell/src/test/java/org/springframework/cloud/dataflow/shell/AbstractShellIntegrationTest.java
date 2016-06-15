@@ -16,12 +16,15 @@
 
 package org.springframework.cloud.dataflow.shell;
 
+import java.io.IOException;
+
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.rules.TestName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.cloud.dataflow.server.config.DataFlowServerConfiguration;
@@ -35,8 +38,6 @@ import org.springframework.util.AlternativeJdkIdGenerator;
 import org.springframework.util.Assert;
 import org.springframework.util.IdGenerator;
 import org.springframework.util.SocketUtils;
-
-import java.io.IOException;
 
 /**
  * Base class for shell integration tests. This class sets up and tears down

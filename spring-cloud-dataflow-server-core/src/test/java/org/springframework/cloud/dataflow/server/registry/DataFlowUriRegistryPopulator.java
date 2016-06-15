@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.dataflow.registry;
+package org.springframework.cloud.dataflow.server.registry;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.cloud.deployer.resource.registry.UriRegistry;
@@ -23,7 +23,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
 /**
- * A {@link UriRegistryPopulator} implementation that provides stream and task app URIs for a Data Flow Server.
+ * Populates the registry with stream and task app URIs.
  *
  * @author Mark Fisher
  */
@@ -33,29 +33,27 @@ public class DataFlowUriRegistryPopulator implements InitializingBean {
 
 	private final UriRegistryPopulator populator;
 
-	private final DataFlowUriRegistryPopulatorProperties properties;
+	private final String[] locations;
 
 	/**
-	 * Populates a {@link UriRegistry} on startup if
-	 * {@link DataFlowUriRegistryPopulatorProperties#isEnabled()} returns {@literal true}.
+	 * Populates a {@link UriRegistry} on startup.
 	 *
 	 * @param registry the {@link UriRegistry} to populate
-	 * @param populator the {@link UriRegistryPopulator} to invoke
-	 * @param properties the {@link DataFlowUriRegistryPopulatorProperties} to use
+	 * @param populator {@link DataFlowUriRegistryPopulator} to use 
+	 * @param locations the properties file(s) listing apps to import into the registry
 	 */
-	public DataFlowUriRegistryPopulator(UriRegistry registry, UriRegistryPopulator populator, DataFlowUriRegistryPopulatorProperties properties) {
-		Assert.notNull(registry, "registry must not be null");
-		Assert.notNull(populator, "populator must not be null");
-		Assert.notNull(properties, "properties must not be null");
+	public DataFlowUriRegistryPopulator(UriRegistry registry, UriRegistryPopulator populator, String... locations) {
+		Assert.notNull(registry, "UriRegistry must not be null");
+		Assert.notNull(populator, "UriRegistryPopulator must not be null");
 		this.registry = registry;
 		this.populator = populator;
-		this.properties = properties;
+		this.locations = locations;
 	}
 
 	@Override
 	public void afterPropertiesSet() {
-		if (this.properties.isEnabled() && !ObjectUtils.isEmpty(this.properties.getLocations())) {
-			this.populator.populateRegistry(this.properties.isOverwrite(), this.registry, this.properties.getLocations());
+		if (!ObjectUtils.isEmpty(this.locations)) {
+			this.populator.populateRegistry(true, this.registry, this.locations);
 		}
 	}
 

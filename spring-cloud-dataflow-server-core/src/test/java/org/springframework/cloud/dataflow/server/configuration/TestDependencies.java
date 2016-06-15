@@ -24,8 +24,6 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.cloud.dataflow.completion.CompletionConfiguration;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
-import org.springframework.cloud.dataflow.registry.DataFlowUriRegistryPopulator;
-import org.springframework.cloud.dataflow.registry.DataFlowUriRegistryPopulatorProperties;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.controller.RestControllerAdvice;
 import org.springframework.cloud.dataflow.server.controller.StreamDefinitionController;
@@ -33,6 +31,7 @@ import org.springframework.cloud.dataflow.server.controller.StreamDeploymentCont
 import org.springframework.cloud.dataflow.server.controller.TaskDefinitionController;
 import org.springframework.cloud.dataflow.server.controller.TaskDeploymentController;
 import org.springframework.cloud.dataflow.server.controller.TaskExecutionController;
+import org.springframework.cloud.dataflow.server.registry.DataFlowUriRegistryPopulator;
 import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
 import org.springframework.cloud.dataflow.server.repository.InMemoryDeploymentIdRepository;
 import org.springframework.cloud.dataflow.server.repository.InMemoryStreamDefinitionRepository;
@@ -130,9 +129,7 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 
 	@Bean
 	public DataFlowUriRegistryPopulator dataflowUriRegistryPopulator() {
-		DataFlowUriRegistryPopulatorProperties props = new DataFlowUriRegistryPopulatorProperties();
-		props.setLocations(new String[] { "classpath:META-INF/test-apps.properties" });
-		return new DataFlowUriRegistryPopulator(uriRegistry(), uriRegistryPopulator(), props);
+		return new DataFlowUriRegistryPopulator(uriRegistry(), uriRegistryPopulator(), new String[] { "classpath:META-INF/test-apps.properties" });
 	}
 
 	@Bean

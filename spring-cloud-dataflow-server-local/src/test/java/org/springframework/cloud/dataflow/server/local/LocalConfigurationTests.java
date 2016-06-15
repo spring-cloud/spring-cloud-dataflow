@@ -16,12 +16,17 @@
 
 package org.springframework.cloud.dataflow.server.local;
 
+import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
+
 import org.junit.After;
 import org.junit.Test;
 
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.actuate.metrics.repository.MetricRepository;
 import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
 import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
@@ -31,13 +36,6 @@ import org.springframework.cloud.deployer.spi.local.LocalTaskLauncher;
 import org.springframework.cloud.stream.app.metrics.FieldValueCounterRepository;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.util.SocketUtils;
-
-import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
 
 /**
  * Tests for {@link LocalDataFlowServer}.
@@ -76,8 +74,6 @@ public class LocalConfigurationTests {
 	@Test
 	public void testConfigWithStreamsDisabled() {
 		SpringApplication app = new SpringApplication(LocalDataFlowServer.class);
-		int randomPort = SocketUtils.findAvailableTcpPort();
-		String dataSourceUrl = String.format("jdbc:h2:tcp://localhost:%s/mem:dataflow", randomPort);
 		context = app.run(new String[] { "--server.port=0",
 				"--" + FeaturesProperties.FEATURES_PREFIX + "." + FeaturesProperties.STREAMS_ENABLED + "=false"});
 		assertNotNull(context.getBean(TaskDefinitionRepository.class));
@@ -94,8 +90,6 @@ public class LocalConfigurationTests {
 	@Test
 	public void testConfigWithTasksDisabled() {
 		SpringApplication app = new SpringApplication(LocalDataFlowServer.class);
-		int randomPort = SocketUtils.findAvailableTcpPort();
-		String dataSourceUrl = String.format("jdbc:h2:tcp://localhost:%s/mem:dataflow", randomPort);
 		context = app.run(new String[] { "--server.port=0",
 				"--" + FeaturesProperties.FEATURES_PREFIX + "." + FeaturesProperties.TASKS_ENABLED + "=false"});
 		assertNotNull(context.getBean(StreamDefinitionRepository.class));
@@ -112,8 +106,6 @@ public class LocalConfigurationTests {
 	@Test
 	public void testConfigWithAnalyticsDisabled() {
 		SpringApplication app = new SpringApplication(LocalDataFlowServer.class);
-		int randomPort = SocketUtils.findAvailableTcpPort();
-		String dataSourceUrl = String.format("jdbc:h2:tcp://localhost:%s/mem:dataflow", randomPort);
 		context = app.run(new String[]{"--server.port=0",
 				"--" + FeaturesProperties.FEATURES_PREFIX + "." + FeaturesProperties.ANALYTICS_ENABLED + "=false"});;
 		assertNotNull(context.getBean(StreamDefinitionRepository.class));
@@ -126,6 +118,5 @@ public class LocalConfigurationTests {
 		catch (NoSuchBeanDefinitionException e) {
 		}
 	}
-
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2015-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,33 @@
 
 package org.springframework.cloud.dataflow.shell.command;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.cloud.dataflow.shell.AbstractShellIntegrationTest;
+import org.springframework.cloud.deployer.resource.registry.UriRegistry;
+import org.springframework.cloud.deployer.resource.registry.UriRegistryPopulator;
+import org.springframework.core.io.DefaultResourceLoader;
 
 /**
  * @author Ilayaperumal Gopinathan
+ * @author Mark Fisher
  */
 public class StreamCommandTests extends AbstractShellIntegrationTest {
 
+	private static final String APPS_URI = "classpath:META-INF/test-stream-apps.properties";
+
 	private static final Logger logger = LoggerFactory.getLogger(StreamCommandTests.class);
+
+	@Before
+	public void registerApps() {
+		UriRegistry registry = applicationContext.getBean(UriRegistry.class);
+		UriRegistryPopulator populator = new UriRegistryPopulator();
+		populator.setResourceLoader(new DefaultResourceLoader());
+		populator.populateRegistry(true, registry, APPS_URI);
+	}
 
 	@Test
 	public void testStreamLifecycleForTickTock() throws InterruptedException {
