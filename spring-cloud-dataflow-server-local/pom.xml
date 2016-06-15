@@ -12,8 +12,8 @@
 	</parent>
 	<properties>
 		<start-class>org.springframework.cloud.dataflow.server.local.LocalDataFlowServer</start-class>
-		<registry.app.defaultVersion>1.0.0.BUILD-SNAPSHOT</registry.app.defaultVersion>
-		<registry.app.defaultBinder>kafka</registry.app.defaultBinder>
+		<registry.app.stream.defaultVersion>1.0.0.BUILD-SNAPSHOT</registry.app.stream.defaultVersion>
+		<registry.app.task.defaultVersion>1.0.0.BUILD-SNAPSHOT</registry.app.task.defaultVersion>
 	</properties>
 	<dependencies>
 		<dependency>
