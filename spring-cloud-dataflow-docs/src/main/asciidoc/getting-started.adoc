@@ -108,7 +108,7 @@ Successfully targeted http://dataflow-server.cfapps.io
 dataflow:>
 ----
 +
-By default, the application registry will be empty. If you would like to register all out-of-the-box stream applications built with the Kafka binder in bulk, you can with the following command. For more details, review how to link:http://docs.spring.io/spring-cloud-dataflow/docs/current-SNAPSHOT/reference/htmlsingle/#spring-cloud-dataflow-register-apps[register applications] section.
+By default, the application registry will be empty. If you would like to register all out-of-the-box stream applications built with the Kafka binder in bulk, you can with the following command. For more details, review how to link:{dataflow-asciidoc}/streams.adoc#spring-cloud-dataflow-register-apps[register applications].
 +
 [source,bash,subs=attributes]
 ----
