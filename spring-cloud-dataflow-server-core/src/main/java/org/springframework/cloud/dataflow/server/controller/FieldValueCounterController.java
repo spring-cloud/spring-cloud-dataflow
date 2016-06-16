@@ -19,11 +19,11 @@ package org.springframework.cloud.dataflow.server.controller;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.analytics.metrics.FieldValueCounter;
+import org.springframework.analytics.metrics.FieldValueCounterRepository;
 import org.springframework.boot.actuate.endpoint.mvc.MetricsMvcEndpoint;
 import org.springframework.cloud.dataflow.rest.resource.FieldValueCounterResource;
 import org.springframework.cloud.dataflow.rest.resource.MetricResource;
-import org.springframework.cloud.stream.app.metrics.FieldValueCounter;
-import org.springframework.cloud.stream.app.metrics.FieldValueCounterRepository;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.ExposesResourceFor;

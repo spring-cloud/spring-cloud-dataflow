@@ -15,14 +15,14 @@
  */
 package org.springframework.cloud.dataflow.server.config.features;
 
+import org.springframework.analytics.metrics.AggregateCounterRepository;
+import org.springframework.analytics.metrics.FieldValueCounterRepository;
+import org.springframework.analytics.metrics.redis.RedisAggregateCounterRepository;
+import org.springframework.analytics.metrics.redis.RedisFieldValueCounterRepository;
 import org.springframework.boot.actuate.metrics.repository.MetricRepository;
 import org.springframework.boot.actuate.metrics.repository.redis.RedisMetricRepository;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.cloud.stream.app.metrics.AggregateCounterRepository;
-import org.springframework.cloud.stream.app.metrics.FieldValueCounterRepository;
-import org.springframework.cloud.stream.app.metrics.redis.RedisAggregateCounterRepository;
-import org.springframework.cloud.stream.app.metrics.redis.RedisFieldValueCounterRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;

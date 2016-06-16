@@ -25,11 +25,11 @@ import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.joda.time.ReadablePeriod;
 
+import org.springframework.analytics.metrics.AggregateCounter;
+import org.springframework.analytics.metrics.AggregateCounterRepository;
+import org.springframework.analytics.metrics.AggregateCounterResolution;
 import org.springframework.boot.actuate.endpoint.mvc.MetricsMvcEndpoint;
 import org.springframework.cloud.dataflow.rest.resource.AggregateCounterResource;
-import org.springframework.cloud.stream.app.metrics.AggregateCounter;
-import org.springframework.cloud.stream.app.metrics.AggregateCounterRepository;
-import org.springframework.cloud.stream.app.metrics.AggregateCounterResolution;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;

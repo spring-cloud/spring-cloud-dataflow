@@ -29,9 +29,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import org.springframework.analytics.metrics.FieldValueCounterRepository;
+import org.springframework.analytics.metrics.memory.InMemoryFieldValueCounterRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.stream.app.metrics.FieldValueCounterRepository;
-import org.springframework.cloud.stream.app.metrics.memory.InMemoryFieldValueCounterRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;

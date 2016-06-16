@@ -25,6 +25,7 @@ import static org.junit.Assert.fail;
 import org.junit.After;
 import org.junit.Test;
 
+import org.springframework.analytics.metrics.FieldValueCounterRepository;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.boot.SpringApplication;
 import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
@@ -33,7 +34,6 @@ import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepo
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.deployer.spi.local.LocalAppDeployer;
 import org.springframework.cloud.deployer.spi.local.LocalTaskLauncher;
-import org.springframework.cloud.stream.app.metrics.FieldValueCounterRepository;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.util.SocketUtils;
 
