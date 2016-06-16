@@ -86,18 +86,18 @@ in it. It is recommended, however, to have a "focused" list of desired applicati
 
 List of available static property files:
 
-* Maven based Stream Applications with RabbitMQ Binder: http://bit.ly/rabbit-stream-apps-maven
-* Maven based Stream Applications with Kafka Binder: http://bit.ly/kafka-stream-apps-maven
-* Maven based Task Applications: http://bit.ly/task-apps-maven
-* Docker based Stream Applications with RabbitMQ Binder: http://bit.ly/rabbit-stream-apps-docker
-* Docker based Stream Applications with Kafka Binder: http://bit.ly/kafka-stream-apps-docker
-* Docker based Task Applications: http://bit.ly/task-apps-docker
+* Maven based Stream Applications with RabbitMQ Binder: http://bit.ly/stream-applications-rabbit-maven
+* Maven based Stream Applications with Kafka Binder: http://bit.ly/stream-applications-kafka-maven
+* Maven based Task Applications: http://bit.ly/task-applications-maven
+* Docker based Stream Applications with RabbitMQ Binder: http://bit.ly/stream-applications-rabbit-docker
+* Docker based Stream Applications with Kafka Binder: http://bit.ly/stream-applications-kafka-docker
+* Docker based Task Applications: http://bit.ly/task-applications-docker
 
 For example, if you would like to register all out-of-the-box stream applications built with the RabbitMQ binder in bulk, you can with
 the following command.
 
 ```
-dataflow:>app import --uri http://bit.ly/rabbit-stream-apps-maven
+dataflow:>app import --uri http://bit.ly/stream-applications-rabbit-maven
 ```
 
 You can also pass the `--local` option (which is TRUE by default) to indicate whether the
