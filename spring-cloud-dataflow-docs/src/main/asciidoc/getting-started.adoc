@@ -108,6 +108,13 @@ Successfully targeted http://dataflow-server.cfapps.io
 dataflow:>
 ----
 +
+By default, the application registry will be empty. If you would like to register all out-of-the-box stream applications built with the Kafka binder in bulk, you can with the following command. For more details, review how to <<streams.adoc#spring-cloud-dataflow-register-apps, register applications>>.
++
+[source,bash,subs=attributes]
+----
+$ dataflow:>app import --uri http://bit.ly/stream-applications-kafka-maven
+----
++
 . You can now use the shell commands to list available applications (source/processors/sink) and create streams. For example:
 +
 [source,bash]
