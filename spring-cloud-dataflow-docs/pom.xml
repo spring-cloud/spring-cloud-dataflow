@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.springframework.cloud</groupId>
 		<artifactId>spring-cloud-dataflow-parent</artifactId>
-		<version>1.0.0.BUILD-SNAPSHOT</version>
+		<version>1.0.0.RC1</version>
 	</parent>
 	<artifactId>spring-cloud-dataflow-docs</artifactId>
 	<name>Spring Cloud Data Flow Docs</name>
@@ -120,7 +120,7 @@
 						<version>2.0.15</version>
 						<configuration>
 							<sourceDirectory>${basedir}/target/generated-docs</sourceDirectory>
-							<imgSrcPath></imgSrcPath>
+							<imgSrcPath />
 							<graphicsize.extension>0</graphicsize.extension>
 							<includes>index.xml</includes>
 							<xincludeSupported>true</xincludeSupported>
@@ -133,7 +133,7 @@
 							<highlightXslthlConfig>${basedir}/src/main/docbook/xsl/xslthl-config.xml</highlightXslthlConfig>
 							<preProcess>
 								<copy todir="${basedir}/target/generated-docs/images">
-									<fileset dir="${basedir}/src/main/docbook/images"/>
+									<fileset dir="${basedir}/src/main/docbook/images" />
 								</copy>
 							</preProcess>
 						</configuration>
@@ -169,10 +169,10 @@
 											</fileset>
 										</copy>
 										<copy todir="${basedir}/target/contents/reference/htmlsingle/images">
-											<fileset dir="${basedir}/target/generated-docs/images"/>
+											<fileset dir="${basedir}/target/generated-docs/images" />
 										</copy>
 										<copy todir="${basedir}/target/contents/reference/htmlsingle/css">
-											<fileset dir="${basedir}/src/main/docbook/css"/>
+											<fileset dir="${basedir}/src/main/docbook/css" />
 										</copy>
 									</postProcess>
 								</configuration>
@@ -194,10 +194,10 @@
 											</fileset>
 										</copy>
 										<copy todir="${basedir}/target/contents/reference/html/images">
-											<fileset dir="${basedir}/target/generated-docs/images"/>
+											<fileset dir="${basedir}/target/generated-docs/images" />
 										</copy>
 										<copy todir="${basedir}/target/contents/reference/html/css">
-											<fileset dir="${basedir}/src/main/docbook/css"/>
+											<fileset dir="${basedir}/src/main/docbook/css" />
 										</copy>
 									</postProcess>
 								</configuration>
@@ -232,8 +232,8 @@
 									<targetDirectory>${basedir}/target/docbook/epub</targetDirectory>
 									<preProcess>
 										<copy todir="${basedir}/target/docbook/epub/images">
-											<fileset dir="${basedir}/src/main/docbook/images"/>
-											<fileset dir="${basedir}/src/main/asciidoc/images"/>
+											<fileset dir="${basedir}/src/main/docbook/images" />
+											<fileset dir="${basedir}/src/main/asciidoc/images" />
 										</copy>
 									</preProcess>
 									<postProcess>
