@@ -73,25 +73,11 @@ public class ApplicationConfigurationMetadataResolver {
 		return listProperties(app, false);
 	}
 
-	/**
-	 * Return metadata about configuration properties that are documented via
-	 * <a href="http://docs.spring.io/spring-boot/docs/current/reference/html/configuration-metadata.html">
-	 * Spring Boot configuration metadata</a> and visible in an app.
-	 * @param app a Spring Cloud Stream app; typically a Boot uberjar,
-	 *            but directories are supported as well
-	 */
-	public List<ConfigurationMetadataProperty> listProperties(Resource app, boolean exhaustive) {
-		List<ConfigurationMetadataProperty> result = new ArrayList<>();
+	public List<ConfigurationMetadataProperty> listProperties(Archive archive, boolean exhaustive) {
 		ClassLoader moduleClassLoader = null;
 		try {
-			File moduleFile = null;
-			try {
-				moduleFile = app.getFile();
-			}
-			catch (IOException e) {
-				return Collections.emptyList();
-			}
-			Archive archive = moduleFile.isDirectory() ? new ExplodedArchive(moduleFile) : new JarFileArchive(moduleFile);
+
+			List<ConfigurationMetadataProperty> result = new ArrayList<>();
 			moduleClassLoader = createClassLoader(archive);
 			ResourcePatternResolver moduleResourceLoader = new PathMatchingResourcePatternResolver(moduleClassLoader);
 
@@ -127,9 +113,10 @@ public class ApplicationConfigurationMetadataResolver {
 					}
 				}
 			}
+			return result;
 		}
 		catch (Exception e) {
-			throw new RuntimeException("Exception trying to list configuration properties for application " + app, e);
+			throw new RuntimeException("Exception trying to list configuration properties for application " + archive, e);
 		}
 		finally {
 			if (moduleClassLoader instanceof Closeable) {
@@ -141,7 +128,32 @@ public class ApplicationConfigurationMetadataResolver {
 				}
 			}
 		}
-		return result;
+
+	}
+
+	/**
+	 * Return metadata about configuration properties that are documented via
+	 * <a href="http://docs.spring.io/spring-boot/docs/current/reference/html/configuration-metadata.html">
+	 * Spring Boot configuration metadata</a> and visible in an app.
+	 * @param app a Spring Cloud Stream app; typically a Boot uberjar,
+	 *            but directories are supported as well
+	 */
+	public List<ConfigurationMetadataProperty> listProperties(Resource app, boolean exhaustive) {
+		File moduleFile = null;
+		try {
+			moduleFile = app.getFile();
+		}
+		catch (IOException e) {
+			return Collections.emptyList();
+		}
+		Archive archive = null;
+		try {
+			archive = moduleFile.isDirectory() ? new ExplodedArchive(moduleFile) : new JarFileArchive(moduleFile);
+			return listProperties(archive, exhaustive);
+		}
+		catch (IOException e) {
+			throw new RuntimeException("");
+		}
 	}
 
 	/**
