@@ -63,7 +63,7 @@ Spring Cloud Data Flow offers a collection of patterns and best practices for mi
 
 Step 1 - Clone [Spring Cloud Data Flow](https://github.com/spring-cloud/spring-cloud-dataflow) repository
 
-Step 2 - Start Redis [_for: analytics store_] and Kafka [_for: message bus_]  
+Step 2 - Start Kafka [_for: message bus_]  
 
 Step 3 - Build Project
 ```
@@ -80,12 +80,17 @@ Step 5 - Launch Shell [_spring-cloud-dataflow-shell/target_]
 java -jar spring-cloud-dataflow-shell-1.0.0.BUILD-SNAPSHOT.jar
 ```
 
-Step 6 - Create **‘ticktock’** Stream
+Step 6 - Import all the out-of-the-box application coordinates in bulk
+```
+dataflow:>app import --uri http://bit.ly/stream-applications-kafka-maven
+```
+
+Step 7 - Create **‘ticktock’** Stream
 ```
 dataflow:>stream create ticktock --definition "time | log" --deploy
 ```
 
-Step 7 - Launch Dashboard at: http://localhost:9393/dashboard
+Step 8 - Launch Dashboard at: http://localhost:9393/dashboard
 
 ## Spring Cloud Data Flow Server Implementations
 
