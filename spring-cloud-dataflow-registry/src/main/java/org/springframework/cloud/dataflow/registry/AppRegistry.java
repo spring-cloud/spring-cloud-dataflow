@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.cloud.dataflow.core.ApplicationType;
+import org.springframework.cloud.dataflow.registry.support.NoSuchAppRegistrationException;
 import org.springframework.cloud.deployer.resource.registry.UriRegistry;
 import org.springframework.cloud.deployer.resource.registry.UriRegistryPopulator;
 import org.springframework.core.io.Resource;
@@ -32,6 +33,7 @@ import org.springframework.core.io.ResourceLoader;
  * {@link AppRegistration} objects and supports on-demand loading of {@link Resource}s.
  *
  * @author Mark Fisher
+ * @author Gunnar Hillert
  */
 public class AppRegistry {
 
@@ -81,8 +83,22 @@ public class AppRegistry {
 		return apps;
 	}
 
+	/**
+	 * Deletes an {@link AppRegistration}. If the {@link AppRegistration} does not
+	 * exist, a {@link NoSuchAppRegistrationException} will be thrown.
+	 *
+	 * @param name Name of the AppRegistration to delete
+	 * @param type Type of the AppRegistration to delete
+	 */
 	public void delete(String name, ApplicationType type) {
-		this.uriRegistry.unregister(key(name, type));
+		final AppRegistration appRegistrationToDelete = this.find(name, type);
+
+		if (appRegistrationToDelete != null) {
+			this.uriRegistry.unregister(key(name, type));
+		}
+		else {
+			throw new NoSuchAppRegistrationException(name, type);
+		}
 	}
 
 	private String key(String name, ApplicationType type) {
