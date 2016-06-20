@@ -25,6 +25,7 @@ import org.springframework.cloud.dataflow.completion.CompletionConfiguration;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
+import org.springframework.cloud.dataflow.server.controller.AppRegistryController;
 import org.springframework.cloud.dataflow.server.controller.RestControllerAdvice;
 import org.springframework.cloud.dataflow.server.controller.StreamDefinitionController;
 import org.springframework.cloud.dataflow.server.controller.StreamDeploymentController;
@@ -60,6 +61,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupp
 /**
  * @author Michael Minella
  * @author Mark Fisher
+ * @author Gunnar Hillert
  */
 @Configuration
 @EnableSpringDataWebSupport
@@ -100,6 +102,11 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	@Bean
 	public TaskDeploymentController taskController() {
 		return new TaskDeploymentController(taskService());
+	}
+
+	@Bean
+	public AppRegistryController appRegistryController(AppRegistry registry, ApplicationConfigurationMetadataResolver metadataResolver) {
+		return new AppRegistryController(registry, metadataResolver);
 	}
 
 	@Bean

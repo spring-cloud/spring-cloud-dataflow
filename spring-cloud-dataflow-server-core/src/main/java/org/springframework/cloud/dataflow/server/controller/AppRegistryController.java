@@ -28,6 +28,7 @@ import org.springframework.boot.configurationmetadata.ConfigurationMetadataPrope
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.registry.AppRegistration;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
+import org.springframework.cloud.dataflow.registry.support.NoSuchAppRegistrationException;
 import org.springframework.cloud.dataflow.rest.resource.AppRegistrationResource;
 import org.springframework.cloud.dataflow.rest.resource.DetailedAppRegistrationResource;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
@@ -146,7 +147,9 @@ public class AppRegistryController {
 	}
 
 	/**
-	 * Unregister an application name and type.
+	 * Unregister an application by name and type. If the application does not
+	 * exist, a {@link NoSuchAppRegistrationException} will be thrown.
+	 *
 	 * @param type the application type
 	 * @param name the application name
 	 */
@@ -209,24 +212,4 @@ public class AppRegistryController {
 					registration.getType().name(), registration.getUri().toString());
 		}
 	}
-
-	@ResponseStatus(HttpStatus.CONFLICT)
-	public static class AppAlreadyRegisteredException extends IllegalStateException {
-
-		private final AppRegistration previous;
-
-		public AppAlreadyRegisteredException(AppRegistration previous) {
-			this.previous = previous;
-		}
-
-		@Override
-		public String getMessage() {
-			return String.format("The '%s:%s' application is already registered as %s", previous.getType(), previous.getName(), previous.getUri());
-		}
-
-		public AppRegistration getPrevious() {
-			return previous;
-		}
-	}
-
 }

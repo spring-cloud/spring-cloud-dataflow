@@ -24,6 +24,8 @@ import org.springframework.batch.core.launch.NoSuchJobException;
 import org.springframework.batch.core.launch.NoSuchJobExecutionException;
 import org.springframework.batch.core.launch.NoSuchJobInstanceException;
 import org.springframework.boot.actuate.endpoint.mvc.MetricsMvcEndpoint;
+import org.springframework.cloud.dataflow.registry.support.NoSuchAppRegistrationException;
+import org.springframework.cloud.dataflow.server.controller.AppAlreadyRegisteredException;
 import org.springframework.cloud.dataflow.server.job.support.JobNotRestartableException;
 import org.springframework.cloud.dataflow.server.repository.DuplicateStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.DuplicateTaskException;
@@ -62,7 +64,9 @@ public class RestControllerAdvice {
 		return new VndErrors(logref, msg);
 	}
 
-	@ExceptionHandler({DuplicateStreamDefinitionException.class,
+	@ExceptionHandler({
+			AppAlreadyRegisteredException.class,
+			DuplicateStreamDefinitionException.class,
 			DuplicateTaskException.class,
 			StreamAlreadyDeployedException.class,
 			StreamAlreadyDeployingException.class})
@@ -84,6 +88,7 @@ public class RestControllerAdvice {
 	}
 
 	@ExceptionHandler({NoSuchStreamDefinitionException.class,
+			NoSuchAppRegistrationException.class,
 			NoSuchTaskDefinitionException.class,
 			NoSuchTaskExecutionException.class,
 			NoSuchJobExecutionException.class,
