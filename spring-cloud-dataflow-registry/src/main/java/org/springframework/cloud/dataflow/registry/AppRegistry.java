@@ -91,9 +91,7 @@ public class AppRegistry {
 	 * @param type Type of the AppRegistration to delete
 	 */
 	public void delete(String name, ApplicationType type) {
-		final AppRegistration appRegistrationToDelete = this.find(name, type);
-
-		if (appRegistrationToDelete != null) {
+		if (this.find(name, type) != null) {
 			this.uriRegistry.unregister(key(name, type));
 		}
 		else {
