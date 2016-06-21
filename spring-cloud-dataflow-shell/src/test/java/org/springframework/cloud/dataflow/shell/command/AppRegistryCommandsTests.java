@@ -25,6 +25,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
 
+import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
@@ -32,11 +33,12 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import org.springframework.cloud.dataflow.core.ApplicationType;
-import org.springframework.cloud.dataflow.rest.client.DataFlowOperations;
 import org.springframework.cloud.dataflow.rest.client.AppRegistryOperations;
+import org.springframework.cloud.dataflow.rest.client.DataFlowOperations;
 import org.springframework.cloud.dataflow.rest.resource.AppRegistrationResource;
 import org.springframework.cloud.dataflow.shell.config.DataFlowShell;
 import org.springframework.hateoas.PagedResources;
+import org.springframework.shell.table.Table;
 import org.springframework.shell.table.TableModel;
 
 /**
@@ -67,6 +69,18 @@ public class AppRegistryCommandsTests {
 	}
 
 	@Test
+	public void testHintOnEmptyList() {
+		Collection<AppRegistrationResource> data = new ArrayList<>();
+		PagedResources.PageMetadata metadata = new PagedResources.PageMetadata(data.size(), 1, data.size(), 1);
+		PagedResources<AppRegistrationResource> result = new PagedResources<>(data, metadata);
+		when(appRegistryOperations.list()).thenReturn(result);
+
+		Object commandResult = appRegistryCommands.list();
+		assertThat((String) commandResult, CoreMatchers.containsString("app register"));
+		assertThat((String) commandResult, CoreMatchers.containsString("app import"));
+	}
+
+	@Test
 	public void testList() {
 
 		String[][] apps = new String[][] {
@@ -92,7 +106,7 @@ public class AppRegistryCommandsTests {
 				{"file", "transform", null, null},
 				{null, "moving-average", null, null},
 		};
-		TableModel model = appRegistryCommands.list().getModel();
+		TableModel model = ((Table)appRegistryCommands.list()).getModel();
 		for (int row = 0; row < expected.length; row++) {
 			for (int col = 0; col < expected[row].length; col++) {
 				assertThat(model.getValue(row, col), Matchers.is(expected[row][col]));
