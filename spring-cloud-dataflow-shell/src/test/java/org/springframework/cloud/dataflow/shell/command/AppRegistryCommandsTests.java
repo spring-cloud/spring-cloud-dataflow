@@ -77,6 +77,7 @@ public class AppRegistryCommandsTests {
 
 		Object commandResult = appRegistryCommands.list();
 		assertThat((String) commandResult, CoreMatchers.containsString("app register"));
+		assertThat((String) commandResult, CoreMatchers.containsString("app import"));
 	}
 
 	@Test

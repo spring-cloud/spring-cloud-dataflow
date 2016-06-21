@@ -192,8 +192,8 @@ public class AppRegistryCommands implements CommandMarker, ResourceLoaderAware {
 			max = Math.max(max, column.size());
 		}
 		if (max == 0) {
-			return String.format("There are no registered apps at the moment.%n" +
-					"You can register new apps with the '%s' command.", REGISTER_APPLICATION);
+			return String.format("No registered apps.%n" +
+					"You can register new apps with the '%s' and '%s' commands.", REGISTER_APPLICATION, IMPORT_APPLICATIONS);
 		}
 
 
