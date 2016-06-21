@@ -27,8 +27,8 @@ import org.springframework.boot.configurationmetadata.ConfigurationMetadataPrope
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.rest.client.AppRegistryOperations;
 import org.springframework.cloud.dataflow.rest.client.DataFlowOperations;
-import org.springframework.cloud.dataflow.rest.resource.DetailedAppRegistrationResource;
 import org.springframework.cloud.dataflow.rest.resource.AppRegistrationResource;
+import org.springframework.cloud.dataflow.rest.resource.DetailedAppRegistrationResource;
 import org.springframework.cloud.dataflow.shell.config.DataFlowShell;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.core.io.DefaultResourceLoader;
@@ -42,7 +42,6 @@ import org.springframework.shell.core.annotation.CliCommand;
 import org.springframework.shell.core.annotation.CliOption;
 import org.springframework.shell.table.AbsoluteWidthSizeConstraints;
 import org.springframework.shell.table.CellMatchers;
-import org.springframework.shell.table.Table;
 import org.springframework.shell.table.TableBuilder;
 import org.springframework.shell.table.TableModel;
 import org.springframework.shell.table.TableModelBuilder;
@@ -180,7 +179,7 @@ public class AppRegistryCommands implements CommandMarker, ResourceLoaderAware {
 	}
 
 	@CliCommand(value = LIST_APPLICATIONS, help = "List all registered applications")
-	public Table list() {
+	public Object list() {
 		PagedResources<AppRegistrationResource> appRegistrations = appRegistryOperations().list();
 		final LinkedHashMap<String, List<String>> mappings = new LinkedHashMap<>();
 		for (ApplicationType type : ApplicationType.values()) {
@@ -192,6 +191,12 @@ public class AppRegistryCommands implements CommandMarker, ResourceLoaderAware {
 			column.add(appRegistration.getName());
 			max = Math.max(max, column.size());
 		}
+		if (max == 0) {
+			return String.format("There are no registered apps at the moment.%n" +
+					"You can register new apps with the '%s' command.", REGISTER_APPLICATION);
+		}
+
+
 		final List<String> keys = new ArrayList<>(mappings.keySet());
 		final int rows = max + 1;
 		final TableModel model = new TableModel() {
