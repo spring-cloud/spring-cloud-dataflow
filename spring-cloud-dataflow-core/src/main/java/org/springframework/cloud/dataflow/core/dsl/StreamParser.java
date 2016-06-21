@@ -94,14 +94,6 @@ public class StreamParser extends AppParser {
 						duplicate, previous.getName(), previousIndex, node.getName(), m);
 			}
 		}
-
-		// Check if the stream name is same as that of any of its apps' names
-		// Can lead to infinite recursion during resolution, when parsing a composite app.
-		if (ast.getApp(name) != null) {
-			throw new ParseException(dsl, dsl.indexOf(name),
-					DSLMessage.STREAM_NAME_MATCHING_APP_NAME,
-					name);
-		}
 		Tokens tokens = getTokens();
 		if (tokens.hasNext()) {
 			tokens.raiseException(tokens.peek().startPos, DSLMessage.MORE_INPUT,

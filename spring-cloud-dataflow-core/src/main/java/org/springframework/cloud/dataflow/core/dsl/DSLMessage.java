@@ -65,8 +65,6 @@ public enum DSLMessage {
 	AMBIGUOUS_APP_NAME(ERROR,
 			129,
 			"ambiguous app name ''{0}'' in stream named ''{1}'', appears at both position {2} and {3}"), //
-	STREAM_NAME_MATCHING_APP_NAME(ERROR, 130,
-			"Stream name ''{0}'' same as that of its apps' names is not allowed."), //
 	CANNOT_USE_COMPOSEDAPP_HERE_AS_IT_DEFINES_SOURCE_DESTINATION(ERROR,
 			135,
 			"cannot use composed app ''{0}'' here because it defines a source destination"), //

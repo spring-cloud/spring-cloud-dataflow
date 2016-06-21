@@ -71,13 +71,12 @@ public class StreamParserTests {
 		assertEquals("mystream", sn.getName());
 	}
 
-	// Test if the DSLException thrown when the stream name is same as that of any of its apps' names.
 	@Test
-	public void testInvalidStreamName() {
+	public void testStreamNameAsAppName() {
 		String streamName = "bar";
-		String stream = "foo | bar";
-		checkForParseError(streamName, stream, DSLMessage.STREAM_NAME_MATCHING_APP_NAME,
-				stream.indexOf(streamName), streamName);
+		String stream = "bar = foo | bar";
+		sn = parse(stream);
+		assertEquals(streamName, sn.getName());
 	}
 
 	// Pipes are used to connect apps
