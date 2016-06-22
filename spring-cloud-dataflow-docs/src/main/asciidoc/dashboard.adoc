@@ -78,6 +78,7 @@ Watch this https://www.youtube.com/watch?v=78CgV46OstI[screencast] that highligh
 .Flo for Spring Cloud Data Flow
 image::{dataflow-asciidoc}/images/dataflow-flo-create-stream.png[Flo for Spring Cloud Data Flo, scaledwidth="100%"]
 
+ifndef::omit-tasks-docs[]
 [[dashboard-tasks]]
 == Tasks
 
@@ -204,6 +205,8 @@ counts* etc.
 
 .Step Execution History
 image::{dataflow-asciidoc}/images/dataflow-step-execution-history.png[Step Execution History, scaledwidth="100%"]
+endif::omit-tasks-docs[]
+
 
 [[dashboard-analytics]]
 == Analytics
