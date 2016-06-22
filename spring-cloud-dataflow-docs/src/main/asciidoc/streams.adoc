@@ -58,7 +58,7 @@ applications built with the RabbitMQ binder, you could do the following:
 
 ```
 dataflow:>app register --name http --type source --uri maven://org.springframework.cloud.stream.app:http-source-rabbit:1.0.0.BUILD-SNAPSHOT
-dataflow:>app register --name log --type sink --uri maven://org.springframework.cloud.stream.app:http-log-rabbit:1.0.0.BUILD-SNAPSHOT
+dataflow:>app register --name log --type sink --uri maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.0.0.BUILD-SNAPSHOT
 ```
 
 If you would like to register multiple apps at one time, you can store them in a properties file
