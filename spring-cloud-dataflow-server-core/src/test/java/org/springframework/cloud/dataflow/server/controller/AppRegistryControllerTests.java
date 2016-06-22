@@ -30,7 +30,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.cloud.dataflow.registry.AppRegistration;
+import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
+import org.springframework.cloud.dataflow.server.registry.DataFlowUriRegistryPopulator;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
@@ -42,6 +45,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 /**
  * @author Gunnar Hillert
+ * @author Ilayaperumal Gopinathan
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = TestDependencies.class)
@@ -54,10 +58,20 @@ public class AppRegistryControllerTests {
 	@Autowired
 	private WebApplicationContext wac;
 
+	@Autowired
+	private AppRegistry appRegistry;
+
+	@Autowired
+	private DataFlowUriRegistryPopulator uriRegistryPopulator;
+
 	@Before
 	public void setupMocks() {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(wac).defaultRequest(
 				get("/").accept(MediaType.APPLICATION_JSON)).build();
+		for (AppRegistration appRegistration: this.appRegistry.findAll()) {
+			this.appRegistry.delete(appRegistration.getName(), appRegistration.getType());
+		}
+		this.uriRegistryPopulator.afterPropertiesSet();
 	}
 
 	@Test
