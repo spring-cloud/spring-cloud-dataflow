@@ -14,7 +14,9 @@ Spring Cloud Data Flow provides a browser-based GUI which currently has 6 sectio
 * **Apps** Lists all available applications and provides the control to register/unregister them
 * **Runtime** Provides the Data Flow cluster view with the list of all running applications
 * **Streams** Deploy/undeploy Stream Definitions
+ifndef::omit-tasks-docs[]
 * **Tasks** List, create, launch and destroy Task Definitions
+endif::omit-tasks-docs[]
 * **Jobs** Perform Batch Job related functions
 * **Analytics** Create data visualizations for the various analytics applications
 
