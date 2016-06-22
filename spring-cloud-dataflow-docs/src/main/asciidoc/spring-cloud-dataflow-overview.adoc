@@ -35,8 +35,12 @@ The architecture for Spring Cloud Data Flow is separated into a number of distin
 The link:https://github.com/spring-cloud/spring-cloud-dataflow/tree/master/spring-cloud-dataflow-core[Core]
 domain model includes the concept of a **stream** that is a composition of spring-cloud-stream
 apps in a linear pipeline from a *source* to a *sink*, optionally including *processor* apps
-in between. The domain also includes the concept of a **task**, which may be any process that does
+in between. 
+ifndef::omit-tasks-docs[]
+The domain also includes the concept of a **task**, which may be any process that does
 not run indefinitely, including link:https://github.com/spring-projects/spring-batch[Spring Batch] jobs.
+endif::omit-tasks-docs[]
+
 
 The link:https://github.com/spring-cloud/spring-cloud-dataflow/tree/master/spring-cloud-dataflow-registry[App Registry]
 maintains the set of available apps, and their mappings to a URI.
@@ -65,8 +69,14 @@ Several Data Flow Server implementations exist, covering a range of runtime envi
 
 As mentioned above, the Spring Cloud Data Flow Server implementations all rely upon corresponding
 implementations of the link:https://github.com/spring-cloud/spring-cloud-deployer[Spring Cloud Deployer]
-SPI, which provides the abstraction layer for deploying the apps of a given stream or task. The
-following are links to the deployer SPI projects that correspond to the Data Flow Servers listed above:
+SPI, 
+ifndef::omit-tasks-docs[]
+which provides the abstraction layer for deploying the apps of a given stream.
+endif::omit-tasks-docs[]
+ifdef::omit-tasks-docs[]
+which provides the abstraction layer for deploying the apps of a given stream or task. 
+endif::omit-tasks-docs[]
+The following are links to the deployer SPI projects that correspond to the Data Flow Servers listed above:
 
 * link:https://github.com/spring-cloud/spring-cloud-deployer/tree/master/spring-cloud-deployer-local[Local]
 
