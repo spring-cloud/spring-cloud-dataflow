@@ -6,6 +6,8 @@
   </appender>
   <logger name="org.springframework.web.client.RestTemplate" level="ERROR"/>
   <logger name="org.apache.hadoop.util.NativeCodeLoader" level="ERROR"/>
+  <logger name="org.springframework.shell.core.JLineShellComponent.exceptions" level="ERROR"/>
+
   <root level="WARN">
     <appender-ref ref="stdout"/>
   </root>
