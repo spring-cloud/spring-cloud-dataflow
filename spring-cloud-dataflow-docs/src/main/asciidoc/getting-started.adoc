@@ -134,6 +134,19 @@ dataflow:> http post --target http://localhost:9000 --data "hello world"
 ----
 Look to see if `hello world` ended up in log files for the `log` application.
 
+[TIP]
+====
+In case you encounter unexpected errors when executing shell commands, you can
+retrieve more detailed error information by setting the exception logging level
+to `WARNING` in `logback.xml`:
+
+[source,xml]
+----
+<logger name="org.springframework.shell.core.JLineShellComponent.exceptions" level="WARNING"/>
+----
+
+====
+
 [[getting-started-security]]
 == Security
 
