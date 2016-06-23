@@ -13,6 +13,9 @@ security:
   basic:
     enabled: false
 
+maven:
+  remoteRepositories: https://repo.spring.io/libs-snapshot
+
 spring:
   application:
     name: spring-cloud-dataflow-server-local
