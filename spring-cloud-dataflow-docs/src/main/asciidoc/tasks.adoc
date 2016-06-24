@@ -265,7 +265,7 @@ will emit a message with a TaskLaunchRequest object containing the required laun
 would be to launch the timestamp task once every 5 seconds, the stream to implement this would look like:
 
 ```
-stream create foo --definition "triggertask --uri=maven://org.springframework.cloud.task.app:timestamp-task:jar:1.0.0.BUILD-SNAPSHOT --trigger.fixed-delay=5 | task-launcher-local" --deploy
+stream create foo --definition "triggertask --triggertask.uri=maven://org.springframework.cloud.task.app:timestamp-task:jar:1.0.0.BUILD-SNAPSHOT --trigger.fixed-delay=5 | task-launcher-local" --deploy
 ```
 
 === Translator
