@@ -79,7 +79,7 @@ dataflow:>app import --uri file:///<YOUR_FILE_LOCATION>/stream-apps.properties
 ```
 
 For convenience, we have the static files with application-URIs (for both maven and docker) available for all the out-of-the-box
-Stream and Task app-starters. You can point to this file and import all the application-URIs in bulk. Otherwise, as explained in
+Stream app-starters. You can point to this file and import all the application-URIs in bulk. Otherwise, as explained in
 previous paragraphs, you can register them individually or have your own custom property file with only the required application-URIs
 in it. It is recommended, however, to have a "focused" list of desired application-URIs in a custom property file.
 
@@ -88,10 +88,8 @@ List of available static property files:
 
 * Maven based Stream Applications with RabbitMQ Binder: http://bit.ly/stream-applications-rabbit-maven
 * Maven based Stream Applications with Kafka Binder: http://bit.ly/stream-applications-kafka-maven
-* Maven based Task Applications: http://bit.ly/task-applications-maven
 * Docker based Stream Applications with RabbitMQ Binder: http://bit.ly/stream-applications-rabbit-docker
 * Docker based Stream Applications with Kafka Binder: http://bit.ly/stream-applications-kafka-docker
-* Docker based Task Applications: http://bit.ly/task-applications-docker
 
 For example, if you would like to register all out-of-the-box stream applications built with the RabbitMQ binder in bulk, you can with
 the following command.
