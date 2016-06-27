@@ -149,6 +149,36 @@ to `WARNING` in `logback.xml`:
 
 ====
 
+[[configuring-rdbms]]
+== RDBMS configuration
+
+The JDBC drivers for MySQL (via MariaDB driver), HSQLDB, PostgreSQL along with embedded H2 are available out of the box.
+If you are using any other RDBMS, then the corresponding JDBC driver jar needs to be on the classpath of the server.
+
+The RDBMS properties can be passed as command-line arguments to the dataflow server.
+
+For instance,
+If you are using MySQL,
+
+```
+java -jar spring-cloud-dataflow-server-local/target/spring-cloud-dataflow-server-local-1.0.0.BUILD-SNAPSHOT.jar \
+ --spring.datasource.url=jdbc:mysql:<db-info> --spring.datasource.username=<user> --spring.datasource.password=<password> --spring.datasource.driver-class-name=org.mariadb.jdbc.Driver &
+```
+For PostgreSQL,
+
+```
+java -jar spring-cloud-dataflow-server-local/target/spring-cloud-dataflow-server-local-1.0.0.BUILD-SNAPSHOT.jar \
+--spring.datasource.url=jdbc:postgresql:<db-info> --spring.datasource.username=<user> --spring.datasource.password=<password> --spring.datasource.driver-class-name=org.postgresql.Driver &
+```
+
+For HSQLDB,
+
+```
+java -jar spring-cloud-dataflow-server-local/target/spring-cloud-dataflow-server-local-1.0.0.BUILD-SNAPSHOT.jar \
+--spring.datasource.url=jdbc:hsqldb:<db-info> --spring.datasource.username=SA --spring.datasource.driver-class-name=org.hsqldb.jdbc.JDBCDriver &
+```
+
+
 [[getting-started-security]]
 == Security
 
