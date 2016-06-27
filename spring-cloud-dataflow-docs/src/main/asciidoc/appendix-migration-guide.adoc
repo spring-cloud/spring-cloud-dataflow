@@ -23,7 +23,7 @@ along with the tips and tricks.
 
 === Modules to Applications
 If you have custom Spring XD modules, you’d have to refactor them to use Spring Cloud 
-Stream and Spring Cloud Task binding annotations, with updated dependencies and built as normal 
+Stream and Spring Cloud Task annotations, with updated dependencies and built as normal 
 Spring Boot "applications". 
 
 ==== Custom Applications
@@ -79,7 +79,7 @@ dependency in the classpath.
 <dependency>
     <groupId>org.springframework.cloud</groupId>
     <artifactId>spring-cloud-stream-binder-kafka</artifactId>
-    <version>1.0.0.BUILD-SNAPSHOT</version>
+    <version>1.0.2.RELEASE</version>
 </dependency>
 ----
 
@@ -87,7 +87,7 @@ dependency in the classpath.
 link:https://github.com/spring-cloud/spring-cloud-stream-binder-gemfire[Gemfire] binder implementation. All binder implementations are maintained and managed in their individual repositories
 * Every Stream/Task application can be built with a binder implementation of your choice. 
 All the out-of-the-box applications are pre-built for both Kafka and Rabbit and they’re 
-readily available for use as maven artifacts [link:http://repo.spring.io/libs-snapshot/org/springframework/cloud/stream/app/[stream] / link:http://repo.spring.io/libs-snapshot/org/springframework/cloud/task/app/[task]] or docker images [link:https://hub.docker.com/r/springcloudstream/[stream] / link:https://hub.docker.com/r/springcloudtask/[task]]
+readily available for use as maven artifacts [link:http://repo.spring.io/libs-milestone/org/springframework/cloud/stream/app/[stream] / link:http://repo.spring.io/libs-milestone/org/springframework/cloud/task/app/[task]] or docker images [link:https://hub.docker.com/r/springcloudstream/[stream] / link:https://hub.docker.com/r/springcloudtask/[task]]
 Changing the binder requires selecting the right binder link:https://github.com/spring-cloud/spring-cloud-stream/blob/master/spring-cloud-stream-docs%2Fsrc%2Fmain%2Fasciidoc%2Fspring-cloud-stream-overview.adoc#binder-selection[dependency]. Alternatively, you can download the pre-built application from this version of link:http://start-scs.cfapps.io/[Spring Initializr] with the desired “binder-starter” dependency
 
 ==== Named Channels
@@ -128,14 +128,14 @@ stream create r --definition "http | router --expression=payload.contains('a')?'
 
 === Batch to Tasks
 
-A Task by definition, is any process that does not run forever, including Spring Batch jobs, and they 
+A Task by definition, is any application that does not run forever, including Spring Batch jobs, and they 
 end/stop at some point. Task applications can be majorly used for on-demand use-cases such as database migration, machine learning, scheduled operations etc. Using link:http://cloud.spring.io/spring-cloud-task/[Spring Cloud Task], users can build Spring Batch jobs as microservice applications.
 
-* Spring Batch link:http://docs.spring.io/spring-xd/docs/current-SNAPSHOT/reference/html/#batch[jobs] 
+* Spring Batch link:http://docs.spring.io/spring-xd/docs/current-SNAPSHOT/reference/html/#jobs[jobs] 
 from Spring XD are being refactored to Spring Boot applications a.k.a link: Spring Cloud Task 
 link:https://github.com/spring-cloud/spring-cloud-task-app-starters[applications]
 * Unlike Spring XD, these “Tasks” don't require explicit deployment; instead, a task is ready to be 
-launched directly
+launched directly once the definition is declared
 
 === Shell/DSL Commands
 
