@@ -78,9 +78,9 @@ Then to import the apps in bulk, use the `app import` command and provide the lo
 dataflow:>app import --uri file:///<YOUR_FILE_LOCATION>/stream-apps.properties
 ```
 
-For convenience, we have the static files with application-URIs (for both maven and docker) available for all the out-of-the-box 
-Stream and Task app-starters. You can point to this file and import all the application-URIs in bulk. Otherwise, as explained in 
-previous paragraphs, you can register them individually or have your own custom property file with only the required application-URIs 
+For convenience, we have the static files with application-URIs (for both maven and docker) available for all the out-of-the-box
+Stream and Task app-starters. You can point to this file and import all the application-URIs in bulk. Otherwise, as explained in
+previous paragraphs, you can register them individually or have your own custom property file with only the required application-URIs
 in it. It is recommended, however, to have a "focused" list of desired application-URIs in a custom property file.
 
 
@@ -169,13 +169,101 @@ $ tail -f /var/folders/wn/8jxm_tbd1vj28c8vj37n900m0000gn/T/spring-cloud-dataflow
 2016-06-01 09:45:13.251  INFO 79194 --- [  kafka-binder-] log.sink    : 06/01/16 09:45:13
 ```
 
-If you would like to have multiple instances of an application in the stream, you can include a property with the deploy command:
+=== Passing application properties when deploying stream
 
-```
+When you execution `stream deploy` shell command, you can optionally provide a
+comma delimited list of key=value pairs known as `deployment properties`.
+These properties allow you to specify deployment instruction for each application
+in the stream.
+
+==== Passing instance count as deployment property
+
+If you would like to have multiple instances of an application in the stream, you
+can include a property with the deploy command:
+
+[source,bash,subs=attributes]
+----
 dataflow:> stream deploy --name ticktock --properties "app.time.count=3"
-```
+----
 
 IMPORTANT: See <<spring-cloud-dataflow-stream-app-labels>>.
+
+==== Passing stream partition properties
+A common pattern in stream processing is to partition the data as it is streamed.
+This entails deploying multiple instances of a message consuming app and using
+content-based routing so that messages containing the identical data value(s) are
+always routed to the same app instance. You can use the Deployment Properties to
+declaratively configure a partitioning strategy to route each message to a specific
+consumer instance.
+
+See below for examples of deploying partitioned streams:
+
+*app.[app/label name].producer.partitionKeyExtractorClass*::
+  The class name of a PartitionKeyExtractorStrategy (default `null`)
+
+*app.[app/label name].producer.partitionKeyExpression*::
+  A SpEL expression, evaluated against the message, to determine the partition key;
+  only applies if `partitionKeyExtractorClass` is null. If both are null, the app
+  is not partitioned (default `null`)
+
+*app.[app/label name].producer.partitionSelectorClass*::
+  The class name of a PartitionSelectorStrategy (default `null`)
+
+*app.[app/label name].producer.partitionSelectorExpression*::
+  A SpEL expression, evaluated against the partition key, to determine the partition
+  index to which the message will be routed. The final partition index will be the
+  return value (an integer) modulo `[nextModule].count`. If both the class and
+  expression are null, the underlying binder's default PartitionSelectorStrategy
+  will be applied to the key (default `null`)
+
+In summary, an app is partitioned if its count is > 1 and the previous app has a
+`partitionKeyExtractorClass` or `partitionKeyExpression` (class takes precedence).
+When a partition key is extracted, the partitioned app instance is determined by
+invoking the `partitionSelectorClass`, if present, or the `partitionSelectorExpression % partitionCount`,
+where `partitionCount` is count in the case of Redis and RabbitMQ, and the underlying
+partition count of the topic in the case of Kafka.
+
+If neither a `partitionSelectorClass` nor a `partitionSelectorExpression` is
+present the result is `key.hashCode() % partitionCount`.
+
+==== Inline vs file reference properties
+
+When using the Spring Cloud Dataflow Shell, there are two ways to provide deployment
+properties: either *inline* or via a *file reference*. Those two ways are exclusive
+and documented below:
+
+*Inline properties*::
+
+  use the `--properties` shell option and list properties as a comma separated
+  list of key=value pairs, like so:
+
+[source,bash,subs=attributes]
+----
+stream deploy foo
+    --properties "app.transform.count=2,app.transform.producer.partitionKeyExpression=payload"
+----
+
+*Using a file reference*::
+
+  use the `--propertiesFile` option and point it to a local Java `.properties` file
+  (i.e. that lives in the filesystem of the machine running the shell). Being read
+  as a `.properties` file, normal rules apply (ISO 8859-1 encoding, `=`, `<space>` or
+  `:` delimiter, etc.) although we recommend using `=` as a key-value pair delimiter
+  for consistency:
+
+[source,bash,subs=attributes]
+----
+stream deploy foo --propertiesFile myprops.properties
+----
+
+where `myprops.properties` contains:
+
+```
+app.transform.count=2
+app.transform.producer.partitionKeyExpression=payload
+```
+
+Both the above properties will be passed as deployment properties for the stream `foo` above.
 
 [[spring-cloud-dataflow-destroy-stream]]
 == Destroying a Stream
