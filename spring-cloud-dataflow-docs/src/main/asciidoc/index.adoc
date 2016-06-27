@@ -23,6 +23,7 @@ include::getting-started.adoc[]
 include::streams.adoc[]
 include::tasks.adoc[]
 include::dashboard.adoc[]
+include::howto.adoc[]
 include::appendix.adoc[]
 
 
