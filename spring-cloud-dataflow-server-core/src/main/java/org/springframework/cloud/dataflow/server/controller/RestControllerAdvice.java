@@ -74,6 +74,9 @@ public class RestControllerAdvice {
 	@ResponseStatus(HttpStatus.CONFLICT)
 	@ResponseBody
 	public VndErrors onConflictException(Exception e) {
+		if (logger.isTraceEnabled()) {
+			logTrace(e);
+		}
 		String logref = logError(e);
 		String msg = getExceptionMessage(e);
 		return new VndErrors(logref, msg);
@@ -83,6 +86,9 @@ public class RestControllerAdvice {
 	@ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
 	@ResponseBody
 	public VndErrors onUnprocessableEntityException(Exception e) {
+		if (logger.isTraceEnabled()) {
+			logTrace(e);
+		}
 		String logref = logError(e);
 		String msg = getExceptionMessage(e);
 		return new VndErrors(logref, msg);
@@ -100,6 +106,9 @@ public class RestControllerAdvice {
 	@ResponseStatus(HttpStatus.NOT_FOUND)
 	@ResponseBody
 	public VndErrors onNotFoundException(Exception e) {
+		if (logger.isTraceEnabled()) {
+			logTrace(e);
+		}
 		String logref = logError(e);
 		String msg = getExceptionMessage(e);
 		return new VndErrors(logref, msg);
@@ -108,6 +117,11 @@ public class RestControllerAdvice {
 	private String logError(Exception e) {
 		logger.error("Caught exception while handling a request: " + getExceptionMessage(e));
 		return e.getClass().getSimpleName();
+	}
+
+	private String logTrace(Throwable t) {
+		logger.error("Caught exception while handling a request", t);
+		return t.getClass().getSimpleName();
 	}
 
 	private String getExceptionMessage(Exception e) {
