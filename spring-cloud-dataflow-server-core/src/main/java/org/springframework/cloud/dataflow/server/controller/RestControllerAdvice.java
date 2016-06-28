@@ -59,8 +59,9 @@ public class RestControllerAdvice {
 	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
 	@ResponseBody
 	public VndErrors onException(Exception e) {
-		String logref = logError(e);
-		String msg = StringUtils.hasText(e.getMessage()) ? e.getMessage() : e.getClass().getSimpleName();
+		logger.error("Caught exception while handling a request", e);
+		String logref = e.getClass().getSimpleName();
+		String msg = getExceptionMessage(e);
 		return new VndErrors(logref, msg);
 	}
 
@@ -74,7 +75,7 @@ public class RestControllerAdvice {
 	@ResponseBody
 	public VndErrors onConflictException(Exception e) {
 		String logref = logError(e);
-		String msg = StringUtils.hasText(e.getMessage()) ? e.getMessage() : e.getClass().getSimpleName();
+		String msg = getExceptionMessage(e);
 		return new VndErrors(logref, msg);
 	}
 
@@ -83,7 +84,7 @@ public class RestControllerAdvice {
 	@ResponseBody
 	public VndErrors onUnprocessableEntityException(Exception e) {
 		String logref = logError(e);
-		String msg = StringUtils.hasText(e.getMessage()) ? e.getMessage() : e.getClass().getSimpleName();
+		String msg = getExceptionMessage(e);
 		return new VndErrors(logref, msg);
 	}
 
@@ -100,12 +101,16 @@ public class RestControllerAdvice {
 	@ResponseBody
 	public VndErrors onNotFoundException(Exception e) {
 		String logref = logError(e);
-		String msg = StringUtils.hasText(e.getMessage()) ? e.getMessage() : e.getClass().getSimpleName();
+		String msg = getExceptionMessage(e);
 		return new VndErrors(logref, msg);
 	}
 
-	private String logError(Throwable t) {
-		logger.error("Caught exception while handling a request", t);
-		return t.getClass().getSimpleName();
+	private String logError(Exception e) {
+		logger.error("Caught exception while handling a request: " + getExceptionMessage(e));
+		return e.getClass().getSimpleName();
+	}
+
+	private String getExceptionMessage(Exception e) {
+		return StringUtils.hasText(e.getMessage()) ? e.getMessage() : e.getClass().getSimpleName();
 	}
 }
