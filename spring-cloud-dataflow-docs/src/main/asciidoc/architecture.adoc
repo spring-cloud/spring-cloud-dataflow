@@ -1,0 +1,223 @@
+[[architecture]]
+= Architecture
+
+[[arch-intro]]
+== Introduction
+
+Spring Cloud Data Flow simplifies the development and deployment of applications focused on data processing use-cases.  The major concepts of the architecture are Applications, the Data Flow Server, and the target runtime.
+
+ifdef::omit-tasks-docs[]
+Applications are Long lived Stream applications where an unbounded amount of data is consumed or produced via messaging middleware.
+endif::omit-tasks-docs[]
+ifndef::omit-tasks-docs[]
+Applications come in two flavors
+
+* Long lived Stream applications where an unbounded amount of data is consumed or produced via messaging middleware.
+* Short lived Task applications that process a finite set of data and then terminate.
+endif::omit-tasks-docs[]
+
+Depending on the runtime, applications can be packaged in two ways
+
+* Maven
+* Docker
+
+The runtime is the place where applications execute.  The target runtimes for applications are platforms that you may already be using for other application deployments.  
+
+The supported runtimes are
+
+* Cloud Foundry
+* Apache YARN
+* Kubernetes
+* Apache Mesos
+* Local Server for development
+
+There is a deployer Service Provider Interface (SPI) that enables you to extend Data Flow to deploy onto other runtimes, for example to support Hashicorp’s Nomad or Docker Swarm. Contributions are welcome!
+
+The component that is responsible for deploying applications to a runtime is the Data Flow Server.  There is a Data Flow Server executable jar provided for each of the target runtimes.  The Data Flow server is responsible for interpreting
+
+* A stream DSL that describes the logical flow of data through multiple applications.
+* A deployment manifest that describes the mapping of applications onto the runtime. For example, to set the initial number of instances, memory requirements, and data partitioning. 
+
+As an example, the DSL to describe the flow of data from an http source to an Apache Cassandra sink would be written as “http | cassandra”.  These names in the DSL are registered with the Data Flow Server and map onto application artifacts that can be hosted in Maven or Docker repositories.  Many source, processor, and sink applications for common use-cases (e.g. jdbc, hdfs, http, router) are provided by the Spring Cloud Data Flow team.  The pipe symbol represents the communication between the two applications via messaging middleware. The two messaging middleware brokers that are supported are
+
+* Apache Kafka
+* RabbitMQ
+
+In the case of Kafka, when deploying the stream, the Data Flow server is responsible to create the topics that correspond to each pipe symbol and configure each application to produce or consume from the topics so the desired flow of data is achieved.
+
+The interaction of the main components is shown below 
+
+.The Spring Cloud Data High Level Architecure
+image::{dataflow-asciidoc}/images/dataflow-arch.png[The Spring Cloud Data Flow High Level Architecture, scaledwidth="100%"]
+
+In this diagram a DSL description of a stream is POSTed to the Data Flow Server.  Based on the mapping of DSL application names to Maven and Docker artifacts, the http source and cassandra sink application are deployed on the target runtime.  
+
+[[arch-microservice-style]]
+== Microservice Architectural Style
+
+The Data Flow Server deploys applications onto the target runtime that conform to the microservice architectural style.  For example, a stream represents a high level application that consists of multiple small microservice applications each running in their own process.  Each microservice application can be scaled up or down independent of the other and each has their own versioning lifecycle.  
+
+ifdef::omit-tasks-docs[]
+Both Streaming based microservice applications build upon Spring Boot as the foundational library.
+endif::omit-tasks-docs[]
+ifndef::omit-tasks-docs[]
+Both Streaming and Task based microservice applications build upon Spring Boot as the foundational library.
+endif::omit-tasks-docs[]
+This gives all microservice applications functionality such as health checks, security, configurable logging, monitoring and management functionality, as well as executable JAR packaging.
+
+It is important to emphasise that these microservice applications are ‘just apps’ that you can run by yourself using ‘java -jar’ and passing in appropriate configuration properties.  We provide many common microservice applications for common operations so you don’t have to start from scratch when addressing common use-cases which build upon the rich ecosystem of Spring Projects, e.g Spring Integration, Spring Data, Spring Hadoop and Spring Batch.  Creating your own microservice application is similar to creating other Spring Boot applications, you can start using the Spring Initialzr web site or the UI to create the basic scaffolding of either a Stream or Task based microservice.
+
+In addition to passing in the appropriate configuration to the applications, the Data Flow server is responsible for preparing the target platform’s infrastructure so that the application can be deployed.  For example, in Cloud Foundry it would be binding specified services to the applications and executing the ‘cf push’ command for each application.  For Kubernetes it would be creating the replication controller, service, and load balancer.
+
+The Data Flow Server helps simplify the deployment of multiple applications onto a target runtime, but one could also opt to deploy each of the microservice applications manually and not use Data Flow at all. This approach might be more appropriate to start out with for small scale deployments, gradually adopting the convenience and consistency of Data Flow as you develop more applications.  
+ifdef::omit-tasks-docs[]
+Manual deployment of Stream based microservices is also a useful educational exercise that will help you better understand some of the automatic applications configuration and platform targeting steps that the Data Flow Server provides. 
+endif::omit-tasks-docs[]
+ifndef::omit-tasks-docs[]
+Manual deployment of Stream and Task based microservices is also a useful educational exercise that will help you better understand some of the automatic applications configuration and platform targeting steps that the Data Flow Server provides. 
+endif::omit-tasks-docs[]
+
+[[arch-comparison]]
+=== Comparison to other Platform architectures
+
+Spring Cloud Data Flow’s architectural style is different than other Stream and Batch processing platforms.  For example in Apache Spark, Apache Flink, and Google Cloud Dataflow applications run on a dedicated compute engine cluster.  The nature of the compute engine gives these platforms a richer environment for performing complex calculations on the data as compared to Spring Cloud Data Flow, but it introduces complexity of another execution environment that is often not needed when creating data centric applications.  That doesn’t mean you cannot do real time data computations when using Spring Cloud Data Flow.  Refer to the analytics section which describes the integration of Redis to handle common counting based use-cases as well as the RxJava integration for functional API driven analytics use-cases, such as time-sliding-window and moving-average among others.
+
+Similarly, Apache Storm, Hortonworks DataFlow and Spring Cloud Data Flow’s predecessor, Spring XD, use a dedicated application execution cluster, unique to each product, that determines where your code should execute on the cluster and perform health checks to ensure that long lived applications are restarted if they fail.  Often, framework specific interfaces are required to be used in order to correctly “plug in” to the cluster’s execution framework. 
+ 
+As we discovered during the evolution of Spring XD, the rise of multiple container frameworks in 2015 made creating our own runtime a duplication of efforts.  There is no reason to build your own resource management mechanics, when there’s multiple runtime platforms that offer this functionality already.  Taking these considerations into account is what made us shift to the current architecture where we delegate the execution to popular runtimes, runtimes that you may already be using for other purposes.  This is an advantage in that it reduces the cognitive distance for creating and managing data centric applications as many of the same skills used for deploying other end-user/web applications are applicable.  
+
+[[arch-streaming-apps]]
+== Streaming Applications
+
+While Spring Boot provides the foundation for creating DevOps friendly microservice applications, other libraries in the Spring ecosystem help create Stream based microservice applications.  The most important of these is Spring Cloud Stream.  
+
+The essence of the Spring Cloud Stream programming model is to provide an easy way to describe multiple inputs and outputs of an application that communicate over messaging middleware.  These input and outputs map onto Kafka topics or Rabbit exchanges and queues.  Common application configuration for a Source that generates data, a Process that consumes and produces data and a Sink that consumes data is provided as part of the library.
+
+[[arch-streaming-imperative-programming]]
+=== Imperative Programming Model
+
+Spring Cloud Stream is most closely integrated with Spring Integration’s imperative "event at a time" programming model.  This means you write code that handles a single event callback.  For example, 
+
+[source,java]
+----
+@EnableBinding(Sink.class)
+public class LoggingSink {
+
+    @StreamListener(Sink.INPUT)
+    public void log(String message) {
+        System.out.println(message);
+    }
+}
+----
+
+In this case the String payload of a message coming on the input channel, is handed to the log method.  The `@EnableBinding` annotation is what is used to tie together the input channel to the external middleware.
+
+[[arch-streaming-functional-programming]]
+=== Functional Programming Model
+
+However, Spring Cloud Stream can support other programming styles.  There is initial support for functional style programming via link:http://docs.spring.io/spring-cloud-stream/docs/1.0.2.RELEASE/reference/htmlsingle/index.html#_rxjava_support[RxJava Observable APIs] and upcoming versions will support callback methods with Project Reactor’s Flux API and Apache Kafka’s KStream API.  
+
+[[arch-streams]]
+== Streams
+
+[[arch-streams-topologies]]
+=== Topologies
+The Stream DSL describes linear sequences of data flowing through the system.  For example, in the stream definition `http | transformer | cassandra`, each pipe symbol connects the application on the left to the one on the right.  Named channels can be used for routing and to fan out data to multiple messaging destinations.
+
+Taps can be used to ‘listen in’ to the data that if flowing across any of the pipe symbols.  Taps can be used as sources for new streams with an in independent life cycle.  
+
+[[arch-streams-concurrency]]
+=== Concurrency
+For an application that will consume events, Spring Cloud stream exposes a concurrency setting that controls the size of a thread pool used for dispatching incoming messages.  See the link:http://docs.spring.io/spring-cloud-stream/docs/1.0.2.RELEASE/reference/htmlsingle/index.html#_consumer_properties[Consumer properties] documentation for more information.
+
+[[arch-streams-delivery]]
+=== Message Delivery Guarantees
+
+For consumer applications, there is a retry policy for exceptions generated during message handling.  The default is to retry the callback method invocation 3 times and wait one second for the first retry.  A backoff multiplier of 2 is used for the second and third attempts.  All of these retry properties are configurable.  
+
+If there is still an exception on the last retry attempt, and dead letter queues are enabled, the message and exception message are published to the dead letter queue.  The dead letter queue is a destination and its nature depends on the messaging middleware (e.g in the case of Kafka it is a dedicated topic).  If dead letter functionality is not enabled, the message and exception is sent to the error channel, which by default logs the message and exception.
+
+Additional messaging delivery guarantees are those provided by the underlying messaging middleware that is chosen for the application for both producing and consuming applications.  Refer to the Kafka link:http://docs.spring.io/spring-cloud-stream/docs/1.0.2.RELEASE/reference/htmlsingle/index.html#_kafka_consumer_properties[Consumer] and link:http://docs.spring.io/spring-cloud-stream/docs/1.0.2.RELEASE/reference/htmlsingle/index.html#_kafka_producer_properties[Producer] and Rabbit link:http://docs.spring.io/spring-cloud-stream/docs/1.0.3.BUILD-SNAPSHOT/reference/htmlsingle/index.html#_rabbitmq_consumer_properties[Consumer] and link:http://docs.spring.io/spring-cloud-stream/docs/1.0.3.BUILD-SNAPSHOT/reference/htmlsingle/index.html#_rabbit_producer_properties[Producer] documentation for more details.  You will find there to be extensive declarative support for all the native QOS options.
+
+[[arch-analytics]]
+== Analytics
+Spring Cloud Data Flow is aware of certain Sink applications that will write counter data to Redis and provides an REST endpoint to read counter data.  The types of counters supported are
+
+* link:https://github.com/spring-cloud/spring-cloud-stream-app-starters/tree/master/metrics/spring-cloud-starter-stream-sink-counter[Counter] - Counts the number of messages it receives, optionally storing counts in a separate store such as redis.
+* link:https://github.com/spring-cloud/spring-cloud-stream-app-starters/tree/master/metrics/spring-cloud-starter-stream-sink-field-value-counter[Field Value Counter] - Counts occurrences of unique values for a named field in a message payload
+* link:https://github.com/spring-cloud/spring-cloud-stream-app-starters/tree/master/metrics/spring-cloud-starter-stream-sink-aggregate-counter[Aggregate Counter] - Stores total counts but also retains the total count values for each minute, hour day and month.
+
+It is important to note that the timestamp that is used in the aggregate counter can come from a field in the message itself so that out of order messages are properly accounted.
+
+ifdef::omit-tasks-docs[]
+[[arch-task]]
+== Task Applications
+
+The Spring Cloud Task programming model provides 
+
+* Persistence of the Task’s lifecycle events and exit code status.
+* Lifecycle hooks to execute code before or after a task execution.
+* Emit task events to a stream (as a source) during the task lifecycle.
+* Integration with Spring Batch Jobs.
+endif::omit-tasks-docs[]
+
+[[arch-data-flow-server]]
+== Data Flow Server
+
+[[arch-data-flow-server-endpoints]]
+=== Endpoints
+
+The Data Flow Server uses an embedded servlet container and exposes REST endpoints for creating, deploying, undeploying, and destroying streams and tasks, querying runtime state, analytics, and the like. The Data Flow Server is implemented using Spring’s MVC framework and the link:https://github.com/SpringSource/spring-hateoas[Spring HATEOAS] library to create REST representations that follow the HATEOAS principle.
+
+.The Spring Cloud Data Flow Server 
+image::{dataflow-asciidoc}/images/data-flow-server-arch.png[The Spring Cloud Data Flow Server Architecture, scaledwidth="100%"]
+
+[[arch-data-flow-server-customization]]
+=== Customization
+
+Each Data Flow Server executable jar targets a single runtime by delegating to the implementation of the deployer Service Provider Interface found on the classpath.  
+
+We provide a Data Flow Server executable jar that targets a single runtime.  The Data Flow server delegates to the implementation of the deployer Service Provider Interface found on the classpath.  In the current version, there are no endpoints specific to a target runtime, but may be available in future releases as a convenience to access runtime specific features 
+
+While we provide a server executable for each of the target runtimes you can also create your own customized server application using Spring Initialzr.   This let’s you add or remove functionality relative to the executable jar we provide.  For example, adding additional security implementations, custom endpoints, or removing Task or Analytics REST endpoints.  You can also enable or disable some features through the use of feature toggles.
+
+[[arch-data-flow-server-security]]
+=== Security
+
+The Data Flow Server executable jars support basic http and OAuth 2.0 authentication to access it endpoints.  Refer to the security section for more information.  
+
+Authorization via groups is planned for a future release.
+
+[[arch-runtime]]
+== Security
+
+[[arch-runtime-fault-tolerance]]
+=== Fault Tolerance
+
+The target runtimes supported by Data Flow all have the ability to restart a long lived application should it fail.  Spring Cloud Data Flow sets up whatever health probe is required by the runtime environment when deploying the application.
+
+The collective state of all applications that comprise the stream is used to determine the state of the stream.  If an application fails, the state of the stream will change from ‘deployed’ to ‘partial’.
+
+[[arch-runtime-resource-management]]
+=== Resource Management
+Each target runtime lets you control the amount of memory, disk and CPU that is allocated to each application.  These are passed as properties in the deployment manifest using key names that are unique to each runtime.  Refer to the each platforms server documentation for more information.
+
+[[arch-runtime-scaling]]
+=== Scaling
+When deploying a stream, you can set the instance count for each individual application that comprises the stream.  Each target runtime lets you control the target number of instances for each individual application at runtime.  Using the APIs, UIs, or command line tools for each runtime, you can scale up or down the number of instances as required.  Future work will provide a portable command in the Data Flow Server to perform this operation.  
+
+For partitioned streams (Kafka and RabbitMQ) you cannot scale partitioned streams since the partitioning used by SCDF is static.  When Kafka 0.9 is supported with Spring Cloud Stream, this restriction will be lifted.
+
+[[arch-application-versioning]]
+=== Application Versioning
+Application versioning, that is upgrading or downgrading an application from one version to another, is not directly supported by Spring Cloud Data Flow.  You must rely on specific target runtime features to perform these operational tasks.  
+
+The roadmap for Spring Cloud Data Flow will deploy applications that are compatible with Spinnaker to manage the complete application lifecycle.  This also includes automated canary analysis backed by  application metrics.  Portable commands in the Data Flow server to trigger pipelines in Spinnaker are also planned.
+
+
+
+
+
+
+
+
