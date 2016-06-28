@@ -15,14 +15,31 @@ We're also more than happy to extend this section; If you want to add a '`how-to
 can send us a {github-code}[pull request].
 --
 
-== Configure Remote Maven Repository
+== Configure Maven Properties
 
-If you'd like to connect to a "custom" remote maven repository, you can override the default
-repository location by passing the credentials via the following environment property:
+You can set the maven properties such as local maven repository location, remote maven repositories and their authentication credentials including
+the proxy server properties via commandline properties when starting the Dataflow server or using the `SPRING_APPLICATION_JSON` environment property
+for the Dataflow server.
+
+To pass the properties as commandline options:
+
+[source,bash]
+----
+$ java -jar <dataflow-server>.jar --maven.localRepository=mylocal
+--maven.remote-repositories.repo1.url=https://repo1
+--maven.remote-repositories.repo1.auth.username=repo1user
+--maven.remote-repositories.repo1.auth.password=repo1pass
+--maven.remote-repositories.repo2.url=https://repo2 --maven.proxy.host=proxyhost
+--maven.proxy.port=9018 --maven.proxy.auth.username=proxyuser
+--maven.proxy.auth.password=proxypass
+----
+
+or, using the `SPRING_APPLICATION_JSON` environment property:
 
 [source,json]
 ----
-export SPRING_APPLICATION_JSON='{ "maven": { "local-repository": null,"remote-repositories": { "repo1": { "url": "https://repo1", "auth": { "username": "repo1user", "password": "repo1pass" } }, "repo2": { "url": "https://repo2" } }, "proxy": { "host": "proxyhost", "port": 9018, "auth": { "username": "proxyuser", "password": "proxypass" } } } }'
+export SPRING_APPLICATION_JSON='{ "maven": { "local-repository": "local","remote-repositories": { "repo1": { "url": "https://repo1", "auth": { "username": "repo1user", "password": "repo1pass" } },
+"repo2": { "url": "https://repo2" } }, "proxy": { "host": "proxyhost", "port": 9018, "auth": { "username": "proxyuser", "password": "proxypass" } } } }'
 ----
 
 Formatted JSON:
@@ -31,7 +48,7 @@ Formatted JSON:
 ----
 SPRING_APPLICATION_JSON='{
   "maven": {
-    "local-repository": null,
+    "local-repository": "local",
     "remote-repositories": {
       "repo1": {
         "url": "https://repo1",
@@ -56,7 +73,7 @@ SPRING_APPLICATION_JSON='{
 }'
 ----
 
-NOTE: Depending on Spring Cloud Data Flow's server implementation, you may have to pass the
+NOTE: Depending on Spring Cloud Data Flow server implementation, you may have to pass the
 environment properties using the platform specific environment-setting capabilities. For instance,
 in Cloud Foundry, you'd be passing them as `cf set-env SPRING_APPLICATION_JSON`.
 

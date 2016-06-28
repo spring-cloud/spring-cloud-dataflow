@@ -69,7 +69,7 @@ you need to specify those properties as command line arguments when starting the
 [source,bash,subs=attributes]
 ----
 $ java -jar spring-cloud-dataflow-server-local-{project-version}.jar --maven.localRepository=mylocal
---maven.localRepository=mylocal --maven.remote-repositories.repo1.url=https://repo1
+--maven.remote-repositories.repo1.url=https://repo1
 --maven.remote-repositories.repo1.auth.username=user1
 --maven.remote-repositories.repo1.auth.password=pass1
 --maven.remote-repositories.repo2.url=https://repo2 --maven.proxy.host=proxy1
