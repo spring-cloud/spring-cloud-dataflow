@@ -4,8 +4,7 @@
 [partintro]
 --
 This section provides answers to some common '`how do I do that...`' type of questions
-that often arise when using Spring Cloud Data Flow. This is by no means an exhaustive list, but it
-does cover quite a lot.
+that often arise when using Spring Cloud Data Flow. 
 
 If you are having a specific problem that we don't cover here, you might want to check out
 http://stackoverflow.com/tags/spring-cloud-dataflow[stackoverflow.com] to see if someone has
@@ -18,33 +17,8 @@ can send us a {github-code}[pull request].
 
 == Configure Remote Maven Repository
 
-If you'd like to connect to your organization's internal maven repository, you can override the default
-repository location by passing the credentials via the following environment properties:
-
-[source,bash]
-----
-export MAVEN_LOCAL_REPOSITORY=mylocalMavenRepo
-export MAVEN_REMOTE_REPOSITORIES_REPO1_URL=https://repo1
-export MAVEN_REMOTE_REPOSITORIES_REPO1_AUTH_USERNAME=user1
-export MAVEN_REMOTE_REPOSITORIES_REPO1_AUTH_PASSWORD=pass1
-export MAVEN_REMOTE_REPOSITORIES_REPO2_URL=https://repo2
-----
-
-If you are running behind a proxy, then you need to specify the proxy settings via environment properties
-like this:
-
-[source,bash]
-----
-export MAVEN_PROXY_PROTOCOL=https
-export MAVEN_PROXY_HOST=host1
-export MAVEN_PROXY_PORT=8090
-export MAVEN_PROXY_NON_PROXY_HOSTS='host2|host3'
-export MAVEN_PROXY_AUTH_USERNAME=user1
-export MAVEN_PROXY_AUTH_PASSWORD=passwd
-----
-
-Alternatively, you can pass them wrapped inside `SPRING_APPLICATION_JSON` environment property like
-the following:
+If you'd like to connect to a "custom" remote maven repository, you can override the default
+repository location by passing the credentials via the following environment property:
 
 [source,json]
 ----
@@ -84,7 +58,6 @@ SPRING_APPLICATION_JSON='{
 
 NOTE: Depending on Spring Cloud Data Flow's server implementation, you may have to pass the
 environment properties using the platform specific environment-setting capabilities. For instance,
-in Cloud Foundry, you'd be passing them as `cf set-env SPRING_APPLICATION_JSON`,
-`cf set-env MAVEN_REMOTE_REPOSITORIES_REPO1_URL` etc.
+in Cloud Foundry, you'd be passing them as `cf set-env SPRING_APPLICATION_JSON`.
 
 
