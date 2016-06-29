@@ -16,6 +16,9 @@
 
 package org.springframework.cloud.dataflow.server.configuration;
 
+import java.util.Collections;
+import java.util.HashMap;
+
 import static org.mockito.Mockito.mock;
 import static org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType.HAL;
 
@@ -79,7 +82,8 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	@Bean
 	public ResourceLoader resourceLoader() {
 		MavenProperties mavenProperties = new MavenProperties();
-		mavenProperties.setRemoteRepositories(new String[] { "https://repo.spring.io/libs-snapshot" });
+		mavenProperties.setRemoteRepositories(new HashMap<>(Collections.singletonMap("mavenCentral",
+				new MavenProperties.RemoteRepository("https://repo.spring.io/libs-snapshot"))));
 		return new MavenResourceLoader(mavenProperties);
 	}
 

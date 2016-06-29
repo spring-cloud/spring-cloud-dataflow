@@ -14,7 +14,9 @@ security:
     enabled: false
 
 maven:
-  remoteRepositories: https://repo.spring.io/libs-snapshot
+  remoteRepositories:
+    springRepo:
+      url: https://repo.spring.io/libs-snapshot
 
 spring:
   application:
