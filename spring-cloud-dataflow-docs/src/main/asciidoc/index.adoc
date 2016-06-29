@@ -19,6 +19,7 @@ Sabby Anandan; Marius Bogoevici; Eric Bottard; Mark Fisher; Ilayaperumal Gopinat
 
 include::preface.adoc[]
 include::spring-cloud-dataflow-overview.adoc[]
+include::architecture.adoc[]
 include::getting-started.adoc[]
 include::streams.adoc[]
 include::tasks.adoc[]
