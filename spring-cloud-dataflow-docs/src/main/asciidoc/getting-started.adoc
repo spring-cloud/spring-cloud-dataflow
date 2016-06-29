@@ -80,8 +80,8 @@ $ java -jar spring-cloud-dataflow-server-local-{project-version}.jar --maven.loc
 By default, the protocol is set to `http`. You can omit the auth properties if the proxy doesn't need a username and password.
 +
 By default, the maven `localRepository` is set to `${user.home}/.m2/repository/`,
-and `https://repo.spring.io/libs-snapshot` is the default remote repository for `local` dataflow server.
-Like in the above example, the remote repositories can be specified along with their authentication (if needed). If the remote repositories are behind a proxy,
+and `https://repo.spring.io/libs-snapshot` will be the only remote repository. Like in the above example, the remote
+repositories can be specified along with their authentication (if needed). If the remote repositories are behind a proxy,
 then the proxy properties can be specified as above.
 +
 If you want to pass these properties as environment properties, then you need to use `SPRING_APPLICATION_JSON` to set
@@ -352,15 +352,3 @@ $ curl -u myusername:mypassword http://localhost:9393/
 ----
 
 As a result you should see a list of available REST endpoints.
-
-[[getting-started-security-enabling-authentication-cloud-foundry]]
-==== Authentication and Cloud Foundry
-
-When deploying Spring Cloud Data Flow to Cloud Foundry, we take advantage of the
-https://github.com/pivotal-cf/spring-cloud-sso-connector[_Spring Cloud Single Sign-On Connector_],
-which provides Cloud Foundry specific auto-configuration support for OAuth 2.0
-when used in conjunction with the _Pivotal Single Sign-On Service_.
-
-Simply set `security.basic.enabled` to `true` and in Cloud Foundry bind the SSO
-service to your Data Flow Server app and SSO will be enabled.
-
