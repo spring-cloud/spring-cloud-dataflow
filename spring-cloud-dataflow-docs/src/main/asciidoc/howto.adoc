@@ -21,6 +21,10 @@ You can set the maven properties such as local maven repository location, remote
 the proxy server properties via commandline properties when starting the Dataflow server or using the `SPRING_APPLICATION_JSON` environment property
 for the Dataflow server.
 
+The remote maven repositories need to be configured explicitly if the apps are resolved using maven repository as except `local` dataflow server, other
+ dataflow server implementations (that use maven resources for app artifacts resolution) have no default value for remote repositories.
+ The `local` server has `https://repo.spring.io/libs-snapshot` as the default remote repository.
+ 
 To pass the properties as commandline options:
 
 [source,bash]

@@ -16,6 +16,9 @@
 
 package org.springframework.cloud.dataflow.server.configuration;
 
+import java.util.Collections;
+import java.util.HashMap;
+
 import static org.mockito.Mockito.mock;
 import static org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType.HAL;
 
@@ -71,8 +74,6 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupp
 @EnableConfigurationProperties(CommonApplicationProperties.class)
 public class TestDependencies extends WebMvcConfigurationSupport {
 
-	private final MavenProperties mavenProperties = new MavenProperties();
-
 	@Bean
 	public RestControllerAdvice restControllerAdvice() {
 		return new RestControllerAdvice();
@@ -80,7 +81,10 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 
 	@Bean
 	public ResourceLoader resourceLoader() {
-		return new MavenResourceLoader(this.mavenProperties);
+		MavenProperties mavenProperties = new MavenProperties();
+		mavenProperties.setRemoteRepositories(new HashMap<>(Collections.singletonMap("springRepo",
+				new MavenProperties.RemoteRepository("https://repo.spring.io/libs-snapshot"))));
+		return new MavenResourceLoader(mavenProperties);
 	}
 
 	@Bean
