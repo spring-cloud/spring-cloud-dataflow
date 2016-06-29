@@ -80,8 +80,8 @@ $ java -jar spring-cloud-dataflow-server-local-{project-version}.jar --maven.loc
 By default, the protocol is set to `http`. You can omit the auth properties if the proxy doesn't need a username and password.
 +
 By default, the maven `localRepository` is set to `${user.home}/.m2/repository/`,
-and `https://repo.spring.io/libs-snapshot` will be the only remote repository. Like in the above example, the remote
-repositories can be specified along with their authentication (if needed). If the remote repositories are behind a proxy,
+and `http://repo1.maven.org/maven2` is the default remote repository. This default remote repository will not be used if user provides explicit remote repositories.
+Like in the above example, the remote repositories can be specified along with their authentication (if needed). If the remote repositories are behind a proxy,
 then the proxy properties can be specified as above.
 +
 If you want to pass these properties as environment properties, then you need to use `SPRING_APPLICATION_JSON` to set
