@@ -25,7 +25,6 @@ import org.springframework.batch.core.launch.NoSuchJobExecutionException;
 import org.springframework.batch.core.launch.NoSuchJobInstanceException;
 import org.springframework.boot.actuate.endpoint.mvc.MetricsMvcEndpoint;
 import org.springframework.cloud.dataflow.registry.support.NoSuchAppRegistrationException;
-import org.springframework.cloud.dataflow.server.controller.AppAlreadyRegisteredException;
 import org.springframework.cloud.dataflow.server.job.support.JobNotRestartableException;
 import org.springframework.cloud.dataflow.server.repository.DuplicateStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.DuplicateTaskException;
@@ -53,7 +52,7 @@ public class RestControllerAdvice {
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
 	/**
-	 * Handles the general error case. Report server-side error.
+	 * Handles the general error case. Log track trace at error level
 	 */
 	@ExceptionHandler(Exception.class)
 	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -65,6 +64,10 @@ public class RestControllerAdvice {
 		return new VndErrors(logref, msg);
 	}
 
+	/**
+	 * Log the exception message at warn level and stack trace as trace level.
+	 * Return response status HttpStatus.CONFLICT
+	 */
 	@ExceptionHandler({
 			AppAlreadyRegisteredException.class,
 			DuplicateStreamDefinitionException.class,
@@ -74,26 +77,34 @@ public class RestControllerAdvice {
 	@ResponseStatus(HttpStatus.CONFLICT)
 	@ResponseBody
 	public VndErrors onConflictException(Exception e) {
+		String logref = logWarnLevelExceptionMessage(e);
 		if (logger.isTraceEnabled()) {
-			logTrace(e);
+			logTraceLevelStrackTrace(e);
 		}
-		String logref = logError(e);
 		String msg = getExceptionMessage(e);
 		return new VndErrors(logref, msg);
 	}
 
+	/**
+	 * Log the exception message at warn level and stack trace as trace level.
+	 * Return response status HttpStatus.UNPROCESSABLE_ENTITY
+	 */
 	@ExceptionHandler({JobNotRestartableException.class, JobExecutionNotRunningException.class})
 	@ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
 	@ResponseBody
 	public VndErrors onUnprocessableEntityException(Exception e) {
+		String logref = logWarnLevelExceptionMessage(e);
 		if (logger.isTraceEnabled()) {
-			logTrace(e);
+			logTraceLevelStrackTrace(e);
 		}
-		String logref = logError(e);
 		String msg = getExceptionMessage(e);
 		return new VndErrors(logref, msg);
 	}
 
+	/**
+	 * Log the exception message at warn level and stack trace as trace level.
+	 * Return response status HttpStatus.NOT_FOUND
+	 */
 	@ExceptionHandler({NoSuchStreamDefinitionException.class,
 			NoSuchAppRegistrationException.class,
 			NoSuchTaskDefinitionException.class,
@@ -106,21 +117,21 @@ public class RestControllerAdvice {
 	@ResponseStatus(HttpStatus.NOT_FOUND)
 	@ResponseBody
 	public VndErrors onNotFoundException(Exception e) {
+		String logref = logWarnLevelExceptionMessage(e);
 		if (logger.isTraceEnabled()) {
-			logTrace(e);
+			logTraceLevelStrackTrace(e);
 		}
-		String logref = logError(e);
 		String msg = getExceptionMessage(e);
 		return new VndErrors(logref, msg);
 	}
 
-	private String logError(Exception e) {
-		logger.error("Caught exception while handling a request: " + getExceptionMessage(e));
+	private String logWarnLevelExceptionMessage(Exception e) {
+		logger.warn("Caught exception while handling a request: " + getExceptionMessage(e));
 		return e.getClass().getSimpleName();
 	}
 
-	private String logTrace(Throwable t) {
-		logger.error("Caught exception while handling a request", t);
+	private String logTraceLevelStrackTrace(Throwable t) {
+		logger.trace("Caught exception while handling a request", t);
 		return t.getClass().getSimpleName();
 	}
 
