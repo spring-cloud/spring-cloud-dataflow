@@ -20,6 +20,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
@@ -539,16 +540,22 @@ public class StreamControllerTests {
 		assertEquals(2, requests.size());
 		AppDeploymentRequest logRequest = requests.get(0);
 		assertThat(logRequest.getDefinition().getName(), is("log"));
+		Map<String, String> logAppProps = logRequest.getDefinition().getProperties();
+		assertEquals("2", logAppProps.get("spring.cloud.stream.instanceCount"));
+		assertEquals("true", logAppProps.get("spring.cloud.stream.bindings.input.consumer.partitioned"));
+		assertEquals("3", logAppProps.get("spring.cloud.stream.bindings.input.consumer.concurrency"));
+		assertEquals("2", logAppProps.get("count"));
 		Map<String, String> logDeploymentProps = logRequest.getDeploymentProperties();
-		assertEquals(logDeploymentProps.get("spring.cloud.stream.instanceCount"), "2");
-		assertEquals(logDeploymentProps.get("spring.cloud.stream.bindings.input.consumer.partitioned"), "true");
-		assertEquals(logDeploymentProps.get("spring.cloud.stream.bindings.input.consumer.concurrency"), "3");
-		assertEquals(logDeploymentProps.get("count"), "2");
+		assertEquals("2", logDeploymentProps.get(AppDeployer.COUNT_PROPERTY_KEY));
+		assertEquals("myStream", logDeploymentProps.get(AppDeployer.GROUP_PROPERTY_KEY));
 		AppDeploymentRequest timeRequest = requests.get(1);
 		assertThat(timeRequest.getDefinition().getName(), is("time"));
+		Map<String, String> timeAppProps = timeRequest.getDefinition().getProperties();
+		assertEquals("2", timeAppProps.get("spring.cloud.stream.bindings.output.producer.partitionCount"));
+		assertEquals("payload", timeAppProps.get("spring.cloud.stream.bindings.output.producer.partitionKeyExpression"));
 		Map<String, String> timeDeploymentProps = timeRequest.getDeploymentProperties();
-		assertEquals(timeDeploymentProps.get("spring.cloud.stream.bindings.output.producer.partitionCount"), "2");
-		assertEquals(timeDeploymentProps.get("spring.cloud.stream.bindings.output.producer.partitionKeyExpression"), "payload");
+		assertNull(timeDeploymentProps.get(AppDeployer.COUNT_PROPERTY_KEY));
+		assertEquals("myStream", timeDeploymentProps.get(AppDeployer.GROUP_PROPERTY_KEY));
 	}
 
 	@Test
@@ -567,16 +574,22 @@ public class StreamControllerTests {
 		assertEquals(2, requests.size());
 		AppDeploymentRequest logRequest = requests.get(0);
 		assertThat(logRequest.getDefinition().getName(), is("log"));
+		Map<String, String> logAppProps = logRequest.getDefinition().getProperties();
+		assertEquals("2", logAppProps.get("spring.cloud.stream.instanceCount"));
+		assertEquals("true", logAppProps.get("spring.cloud.stream.bindings.input.consumer.partitioned"));
+		assertEquals("3", logAppProps.get("spring.cloud.stream.bindings.input.consumer.concurrency"));
+		assertEquals("2", logAppProps.get("count"));
 		Map<String, String> logDeploymentProps = logRequest.getDeploymentProperties();
-		assertEquals(logDeploymentProps.get("spring.cloud.stream.instanceCount"), "2");
-		assertEquals(logDeploymentProps.get("spring.cloud.stream.bindings.input.consumer.partitioned"), "true");
-		assertEquals(logDeploymentProps.get("spring.cloud.stream.bindings.input.consumer.concurrency"), "3");
-		assertEquals(logDeploymentProps.get("count"), "2");
+		assertEquals("2", logDeploymentProps.get(AppDeployer.COUNT_PROPERTY_KEY));
+		assertEquals("myStream", logDeploymentProps.get(AppDeployer.GROUP_PROPERTY_KEY));
 		AppDeploymentRequest timeRequest = requests.get(1);
 		assertThat(timeRequest.getDefinition().getName(), is("time"));
+		Map<String, String> timeAppProps = timeRequest.getDefinition().getProperties();
+		assertEquals("2", timeAppProps.get("spring.cloud.stream.bindings.output.producer.partitionCount"));
+		assertEquals("payload", timeAppProps.get("spring.cloud.stream.bindings.output.producer.partitionKeyExpression"));
 		Map<String, String> timeDeploymentProps = timeRequest.getDeploymentProperties();
-		assertEquals(timeDeploymentProps.get("spring.cloud.stream.bindings.output.producer.partitionCount"), "2");
-		assertEquals(timeDeploymentProps.get("spring.cloud.stream.bindings.output.producer.partitionKeyExpression"), "payload");
+		assertEquals("2", timeDeploymentProps.get(AppDeployer.COUNT_PROPERTY_KEY));
+		assertEquals("myStream", timeDeploymentProps.get(AppDeployer.GROUP_PROPERTY_KEY));		
 	}
 
 	@Test
@@ -598,18 +611,24 @@ public class StreamControllerTests {
 		assertEquals(2, requests.size());
 		AppDeploymentRequest logRequest = requests.get(0);
 		assertThat(logRequest.getDefinition().getName(), is("log"));
+		Map<String, String> logAppProps = logRequest.getDefinition().getProperties();
+		assertEquals("2", logAppProps.get("spring.cloud.stream.instanceCount"));
+		assertEquals("fakeHost", logAppProps.get("spring.cloud.stream.fake.binder.host"));
+		assertEquals("fakePort", logAppProps.get("spring.cloud.stream.fake.binder.port"));
+		assertEquals("true", logAppProps.get("spring.cloud.stream.bindings.input.consumer.partitioned"));
+		assertEquals("3", logAppProps.get("spring.cloud.stream.bindings.input.consumer.concurrency"));
+		assertEquals("2", logAppProps.get("count"));
 		Map<String, String> logDeploymentProps = logRequest.getDeploymentProperties();
-		assertEquals(logDeploymentProps.get("spring.cloud.stream.instanceCount"), "2");
-		assertEquals(logDeploymentProps.get("spring.cloud.stream.fake.binder.host"), "fakeHost");
-		assertEquals(logDeploymentProps.get("spring.cloud.stream.fake.binder.port"), "fakePort");
-		assertEquals(logDeploymentProps.get("spring.cloud.stream.bindings.input.consumer.partitioned"), "true");
-		assertEquals(logDeploymentProps.get("spring.cloud.stream.bindings.input.consumer.concurrency"), "3");
-		assertEquals(logDeploymentProps.get("count"), "2");
+		assertEquals("2", logDeploymentProps.get(AppDeployer.COUNT_PROPERTY_KEY));
+		assertEquals("myStream", logDeploymentProps.get(AppDeployer.GROUP_PROPERTY_KEY));
 		AppDeploymentRequest timeRequest = requests.get(1);
 		assertThat(timeRequest.getDefinition().getName(), is("time"));
+		Map<String, String> timeAppProps = timeRequest.getDefinition().getProperties();
+		assertEquals("2", timeAppProps.get("spring.cloud.stream.bindings.output.producer.partitionCount"));
+		assertEquals("payload", timeAppProps.get("spring.cloud.stream.bindings.output.producer.partitionKeyExpression"));
 		Map<String, String> timeDeploymentProps = timeRequest.getDeploymentProperties();
-		assertEquals(timeDeploymentProps.get("spring.cloud.stream.bindings.output.producer.partitionCount"), "2");
-		assertEquals(timeDeploymentProps.get("spring.cloud.stream.bindings.output.producer.partitionKeyExpression"), "payload");
+		assertEquals("2", timeDeploymentProps.get(AppDeployer.COUNT_PROPERTY_KEY));
+		assertEquals("myStream", timeDeploymentProps.get(AppDeployer.GROUP_PROPERTY_KEY));
 		appsProperties.getStream().clear();
 	}
 

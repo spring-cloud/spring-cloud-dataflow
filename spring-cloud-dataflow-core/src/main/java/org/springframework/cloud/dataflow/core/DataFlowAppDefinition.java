@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.dataflow.core;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -101,22 +102,37 @@ abstract class DataFlowAppDefinition {
 	 * Create a deployment request for this app definition.
 	 *
 	 * @param resource the resource for the underlying artifact
-	 * @param deploymentProperties deployment properties
+	 * @param properties app and deployment properties
 	 * @return an {@link AppDeploymentRequest}
 	 */
-	public AppDeploymentRequest createDeploymentRequest(Resource resource, Map<String, String> deploymentProperties) {
-		return new AppDeploymentRequest(this.appDefinition, resource, deploymentProperties);
+	public AppDeploymentRequest createDeploymentRequest(Resource resource, Map<String, String> properties) {
+		return createDeploymentRequest(resource, properties, null);
 	}
 
 	/**
 	 * Create a deployment request for this app definition.
 	 *
 	 * @param resource the resource for the underlying artifact
-	 * @param deploymentProperties deployment properties
+	 * @param properties app and deployment properties
 	 * @param runtimeParams the runtime params for the app
 	 * @return an {@link AppDeploymentRequest}
 	 */
-	public AppDeploymentRequest createDeploymentRequest(Resource resource, Map<String, String> deploymentProperties, List<String> runtimeParams) {
-		return new AppDeploymentRequest(this.appDefinition, resource, deploymentProperties, runtimeParams);
+	public AppDeploymentRequest createDeploymentRequest(Resource resource, Map<String, String> properties, List<String> runtimeParams) {
+		Map<String, String> appProperties = new HashMap<>(this.appDefinition.getProperties());
+		Map<String, String> deploymentProperties = new HashMap<>();
+		for (Map.Entry<String, String> entry : properties.entrySet()) {
+			String key = entry.getKey();
+			String value = entry.getValue();
+			if (key.startsWith("spring.cloud.deployer.")) {
+				deploymentProperties.put(key, value);
+			}
+			else {
+				appProperties.put(key, value);
+			}
+		}
+		AppDefinition appDefinition = new AppDefinition(this.appDefinition.getName(), appProperties);
+		return (runtimeParams != null)
+				? new AppDeploymentRequest(appDefinition, resource, deploymentProperties, runtimeParams)
+				: new AppDeploymentRequest(appDefinition, resource, deploymentProperties);
 	}
 }
