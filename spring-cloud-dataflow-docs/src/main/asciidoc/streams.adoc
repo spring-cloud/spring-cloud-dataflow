@@ -131,6 +131,13 @@ configuration.classes=org.springframework.cloud.stream.app.file.sink.FileSinkPro
 configuration-properties.names=server.port
 ```
 
+[IMPORTANT]
+====
+As of Spring Cloud Data Flow `1.0.0.RELEASE` the whitelisting of application properties
+is only supported for Spring Boot `1.3.x` based application. Milestone releases
+of the upcoming `1.4.0` release are not supported, yet.
+====
+
 [[spring-cloud-dataflow-create-stream]]
 == Creating a Stream
 
