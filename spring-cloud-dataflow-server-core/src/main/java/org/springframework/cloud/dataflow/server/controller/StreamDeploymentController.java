@@ -78,8 +78,6 @@ public class StreamDeploymentController {
 
 	private static Log loggger = LogFactory.getLog(StreamDeploymentController.class);
 
-	private static final String INSTANCE_COUNT_PROPERTY_KEY = "count";
-
 	private static final String DEFAULT_PARTITION_KEY_EXPRESSION = "payload";
 
 	/**
@@ -221,10 +219,6 @@ public class StreamDeploymentController {
 			ApplicationType type = DataFlowServerUtil.determineApplicationType(currentApp);
 			Map<String, String> appDeploymentProperties = extractAppDeploymentProperties(currentApp, streamDeploymentProperties);
 			appDeploymentProperties.put(AppDeployer.GROUP_PROPERTY_KEY, currentApp.getStreamName());
-			if (appDeploymentProperties.containsKey(INSTANCE_COUNT_PROPERTY_KEY)) {
-				appDeploymentProperties.put(AppDeployer.COUNT_PROPERTY_KEY,
-						appDeploymentProperties.get(INSTANCE_COUNT_PROPERTY_KEY));
-			}
 			boolean upstreamAppSupportsPartition = upstreamAppHasPartitionInfo(stream, currentApp, streamDeploymentProperties);
 			// consumer app partition properties
 			if (upstreamAppSupportsPartition) {
@@ -342,6 +336,9 @@ public class StreamDeploymentController {
 					appDeploymentProperties.put(BindingPropertyKeys.INPUT_BINDING_KEY_PREFIX +
 							entry.getKey().substring(appPrefix.length()), entry.getValue());
 				}
+				else if ((appPrefix + "count").equals(entry.getKey())) {
+					appDeploymentProperties.put(AppDeployer.COUNT_PROPERTY_KEY, entry.getValue());
+				}
 				else {
 					appDeploymentProperties.put(entry.getKey().substring(appPrefix.length()), entry.getValue());
 				}
@@ -395,8 +392,8 @@ public class StreamDeploymentController {
 	 */
 	private void updateConsumerPartitionProperties(Map<String, String> properties) {
 		properties.put(BindingPropertyKeys.INPUT_PARTITIONED, "true");
-		if (properties.containsKey(INSTANCE_COUNT_PROPERTY_KEY)) {
-			properties.put(StreamPropertyKeys.INSTANCE_COUNT, properties.get(INSTANCE_COUNT_PROPERTY_KEY));
+		if (properties.containsKey(AppDeployer.COUNT_PROPERTY_KEY)) {
+			properties.put(StreamPropertyKeys.INSTANCE_COUNT, properties.get(AppDeployer.COUNT_PROPERTY_KEY));
 		}
 	}
 
@@ -419,8 +416,8 @@ public class StreamDeploymentController {
 	 * if the properties do not contain a count, a value of {@code 1} is returned
 	 */
 	private int getInstanceCount(Map<String, String> properties) {
-		return (properties.containsKey(INSTANCE_COUNT_PROPERTY_KEY)) ?
-				Integer.valueOf(properties.get(INSTANCE_COUNT_PROPERTY_KEY)) : 1;
+		return (properties.containsKey(AppDeployer.COUNT_PROPERTY_KEY)) ?
+				Integer.valueOf(properties.get(AppDeployer.COUNT_PROPERTY_KEY)) : 1;
 	}
 
 	/**
