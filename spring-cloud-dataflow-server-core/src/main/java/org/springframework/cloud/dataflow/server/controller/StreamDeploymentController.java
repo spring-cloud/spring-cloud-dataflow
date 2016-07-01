@@ -224,6 +224,8 @@ public class StreamDeploymentController {
 			if (appDeploymentProperties.containsKey(INSTANCE_COUNT_PROPERTY_KEY)) {
 				appDeploymentProperties.put(AppDeployer.COUNT_PROPERTY_KEY,
 						appDeploymentProperties.get(INSTANCE_COUNT_PROPERTY_KEY));
+				// delete the key `count` from appDeploymentProperties as it is no longer a valid app/deployment property now.
+				appDeploymentProperties.remove(INSTANCE_COUNT_PROPERTY_KEY);
 			}
 			boolean upstreamAppSupportsPartition = upstreamAppHasPartitionInfo(stream, currentApp, streamDeploymentProperties);
 			// consumer app partition properties
@@ -395,8 +397,8 @@ public class StreamDeploymentController {
 	 */
 	private void updateConsumerPartitionProperties(Map<String, String> properties) {
 		properties.put(BindingPropertyKeys.INPUT_PARTITIONED, "true");
-		if (properties.containsKey(INSTANCE_COUNT_PROPERTY_KEY)) {
-			properties.put(StreamPropertyKeys.INSTANCE_COUNT, properties.get(INSTANCE_COUNT_PROPERTY_KEY));
+		if (properties.containsKey(AppDeployer.COUNT_PROPERTY_KEY)) {
+			properties.put(StreamPropertyKeys.INSTANCE_COUNT, properties.get(AppDeployer.COUNT_PROPERTY_KEY));
 		}
 	}
 
@@ -419,8 +421,8 @@ public class StreamDeploymentController {
 	 * if the properties do not contain a count, a value of {@code 1} is returned
 	 */
 	private int getInstanceCount(Map<String, String> properties) {
-		return (properties.containsKey(INSTANCE_COUNT_PROPERTY_KEY)) ?
-				Integer.valueOf(properties.get(INSTANCE_COUNT_PROPERTY_KEY)) : 1;
+		return (properties.containsKey(AppDeployer.COUNT_PROPERTY_KEY)) ?
+				Integer.valueOf(properties.get(AppDeployer.COUNT_PROPERTY_KEY)) : 1;
 	}
 
 	/**
