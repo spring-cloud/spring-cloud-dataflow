@@ -134,8 +134,43 @@ configuration-properties.names=server.port
 [IMPORTANT]
 ====
 As of Spring Cloud Data Flow `1.0.0.RELEASE` the whitelisting of application properties
-is only supported for Spring Boot `1.3.x` based application. Milestone releases
-of the upcoming `1.4.0` release are not supported, yet.
+is only explicitly supported for Spring Boot `1.3.x` based application. Milestone releases
+of the upcoming `1.4.0` release are not explicitly supported, yet.
+
+The cause is in the used `spring-boot-maven-plugin`. As a result you will observe
+all available application properties being listed, not just the whitelisted ones. As a temporary
+workaround, you can override the managed version of your app's `spring-boot-maven-plugin`
+explicitly and revert to a version of the latest 1.3.x release:
+
+For example, if your app's `pom.xml` specifies to use Spring Boot `1.4.0.M3`:
+
+[source,xml]
+----
+…
+<parent>
+  <artifactId>spring-boot-starter-parent</artifactId>
+  <groupId>org.springframework.boot</groupId>
+  <version>1.4.0.M3</version>
+  <relativePath></relativePath>
+</parent>
+…
+----
+
+Then you can override the managed version of the `spring-boot-maven-plugin` with:
+
+[source,xml]
+----
+…
+<plugin>
+  <groupId>org.springframework.boot</groupId>
+  <artifactId>spring-boot-maven-plugin</artifactId>
+  <version>1.3.5.RELEASE</version>  <!--1-->
+</plugin>
+…
+----
+
+<1> Overriding the managed version `1.4.0.M3`.
+
 ====
 
 [[spring-cloud-dataflow-create-stream]]
