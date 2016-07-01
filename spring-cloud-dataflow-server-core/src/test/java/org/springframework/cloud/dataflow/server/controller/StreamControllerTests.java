@@ -544,7 +544,6 @@ public class StreamControllerTests {
 		assertEquals("2", logAppProps.get("spring.cloud.stream.instanceCount"));
 		assertEquals("true", logAppProps.get("spring.cloud.stream.bindings.input.consumer.partitioned"));
 		assertEquals("3", logAppProps.get("spring.cloud.stream.bindings.input.consumer.concurrency"));
-		assertEquals("2", logAppProps.get("count"));
 		Map<String, String> logDeploymentProps = logRequest.getDeploymentProperties();
 		assertEquals("2", logDeploymentProps.get(AppDeployer.COUNT_PROPERTY_KEY));
 		assertEquals("myStream", logDeploymentProps.get(AppDeployer.GROUP_PROPERTY_KEY));
@@ -578,7 +577,6 @@ public class StreamControllerTests {
 		assertEquals("2", logAppProps.get("spring.cloud.stream.instanceCount"));
 		assertEquals("true", logAppProps.get("spring.cloud.stream.bindings.input.consumer.partitioned"));
 		assertEquals("3", logAppProps.get("spring.cloud.stream.bindings.input.consumer.concurrency"));
-		assertEquals("2", logAppProps.get("count"));
 		Map<String, String> logDeploymentProps = logRequest.getDeploymentProperties();
 		assertEquals("2", logDeploymentProps.get(AppDeployer.COUNT_PROPERTY_KEY));
 		assertEquals("myStream", logDeploymentProps.get(AppDeployer.GROUP_PROPERTY_KEY));
@@ -617,7 +615,6 @@ public class StreamControllerTests {
 		assertEquals("fakePort", logAppProps.get("spring.cloud.stream.fake.binder.port"));
 		assertEquals("true", logAppProps.get("spring.cloud.stream.bindings.input.consumer.partitioned"));
 		assertEquals("3", logAppProps.get("spring.cloud.stream.bindings.input.consumer.concurrency"));
-		assertEquals("2", logAppProps.get("count"));
 		Map<String, String> logDeploymentProps = logRequest.getDeploymentProperties();
 		assertEquals("2", logDeploymentProps.get(AppDeployer.COUNT_PROPERTY_KEY));
 		assertEquals("myStream", logDeploymentProps.get(AppDeployer.GROUP_PROPERTY_KEY));
