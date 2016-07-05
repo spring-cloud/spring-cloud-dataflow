@@ -389,4 +389,50 @@ dataflow config info
 ║Result     │                                       ║
 ║Target     │http://localhost:9393                  ║
 ╚═══════════╧═══════════════════════════════════════╝
+=======
+=== Authentication Examples
+
+==== Local OAuth2 Server
+
+With http://projects.spring.io/spring-security-oauth/[Spring Security OAuth] you
+can easily create your own OAuth2 Server with the following 2 simple annotations:
+
+* @EnableResourceServer
+* @EnableAuthorizationServer
+
+A working example application can be found at:
+
+https://github.com/ghillert/oauth-test-server/
+
+Simply clone the project, built and start it. Furthermore configure Spring Cloud
+Data Flow with the respective _Client Id_ and _Client Secret_.
+
+==== Authentication using GitHub
+
+If you rather like to use an existing OAuth2 provider, here is an example for GitHub.
+First you need to **Register a new application** under your GitHub account at:
+
+https://github.com/settings/developers[https://github.com/settings/developers]
+
+When running a default version of Spring Cloud Data Flow locally, your GitHub configuration
+should look like the following:
+
+.Register an OAuth Application for GitHub
+image::dataflow-security-github.png[Register an OAuth Application for GitHub , scaledwidth="100%"]
+
+Configure Spring Cloud Data Flow with the GitHub relevant Client Id and Secret:
+
+[source,yaml]
+----
+security:
+  basic:
+    enabled: true
+  oauth2:
+    client:
+      client-id: your-github-client-id
+      client-secret: your-github-client-secret
+      access-token-uri: https://github.com/login/oauth/access_token
+      user-authorization-uri: https://github.com/login/oauth/authorize
+    resource:
+      user-info-uri: https://api.github.com/user
 ----
