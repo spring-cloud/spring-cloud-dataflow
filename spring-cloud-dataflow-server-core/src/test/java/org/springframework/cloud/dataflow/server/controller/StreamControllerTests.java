@@ -547,6 +547,7 @@ public class StreamControllerTests {
 		Map<String, String> logDeploymentProps = logRequest.getDeploymentProperties();
 		assertEquals("2", logDeploymentProps.get(AppDeployer.COUNT_PROPERTY_KEY));
 		assertEquals("myStream", logDeploymentProps.get(AppDeployer.GROUP_PROPERTY_KEY));
+		assertEquals("true", logDeploymentProps.get(AppDeployer.INDEXED_PROPERTY_KEY));
 		AppDeploymentRequest timeRequest = requests.get(1);
 		assertThat(timeRequest.getDefinition().getName(), is("time"));
 		Map<String, String> timeAppProps = timeRequest.getDefinition().getProperties();
@@ -555,6 +556,7 @@ public class StreamControllerTests {
 		Map<String, String> timeDeploymentProps = timeRequest.getDeploymentProperties();
 		assertNull(timeDeploymentProps.get(AppDeployer.COUNT_PROPERTY_KEY));
 		assertEquals("myStream", timeDeploymentProps.get(AppDeployer.GROUP_PROPERTY_KEY));
+		assertNull(timeDeploymentProps.get(AppDeployer.INDEXED_PROPERTY_KEY));
 	}
 
 	@Test
@@ -580,6 +582,7 @@ public class StreamControllerTests {
 		Map<String, String> logDeploymentProps = logRequest.getDeploymentProperties();
 		assertEquals("2", logDeploymentProps.get(AppDeployer.COUNT_PROPERTY_KEY));
 		assertEquals("myStream", logDeploymentProps.get(AppDeployer.GROUP_PROPERTY_KEY));
+		assertEquals("true", logDeploymentProps.get(AppDeployer.INDEXED_PROPERTY_KEY));
 		AppDeploymentRequest timeRequest = requests.get(1);
 		assertThat(timeRequest.getDefinition().getName(), is("time"));
 		Map<String, String> timeAppProps = timeRequest.getDefinition().getProperties();
@@ -587,7 +590,8 @@ public class StreamControllerTests {
 		assertEquals("payload", timeAppProps.get("spring.cloud.stream.bindings.output.producer.partitionKeyExpression"));
 		Map<String, String> timeDeploymentProps = timeRequest.getDeploymentProperties();
 		assertEquals("2", timeDeploymentProps.get(AppDeployer.COUNT_PROPERTY_KEY));
-		assertEquals("myStream", timeDeploymentProps.get(AppDeployer.GROUP_PROPERTY_KEY));		
+		assertEquals("myStream", timeDeploymentProps.get(AppDeployer.GROUP_PROPERTY_KEY));
+		assertNull(timeDeploymentProps.get(AppDeployer.INDEXED_PROPERTY_KEY));
 	}
 
 	@Test
@@ -618,6 +622,7 @@ public class StreamControllerTests {
 		Map<String, String> logDeploymentProps = logRequest.getDeploymentProperties();
 		assertEquals("2", logDeploymentProps.get(AppDeployer.COUNT_PROPERTY_KEY));
 		assertEquals("myStream", logDeploymentProps.get(AppDeployer.GROUP_PROPERTY_KEY));
+		assertEquals("true", logDeploymentProps.get(AppDeployer.INDEXED_PROPERTY_KEY));
 		AppDeploymentRequest timeRequest = requests.get(1);
 		assertThat(timeRequest.getDefinition().getName(), is("time"));
 		Map<String, String> timeAppProps = timeRequest.getDefinition().getProperties();
@@ -626,6 +631,7 @@ public class StreamControllerTests {
 		Map<String, String> timeDeploymentProps = timeRequest.getDeploymentProperties();
 		assertEquals("2", timeDeploymentProps.get(AppDeployer.COUNT_PROPERTY_KEY));
 		assertEquals("myStream", timeDeploymentProps.get(AppDeployer.GROUP_PROPERTY_KEY));
+		assertNull(timeDeploymentProps.get(AppDeployer.INDEXED_PROPERTY_KEY));
 		appsProperties.getStream().clear();
 	}
 

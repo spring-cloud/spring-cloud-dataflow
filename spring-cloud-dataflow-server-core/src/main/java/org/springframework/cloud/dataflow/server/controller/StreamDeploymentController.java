@@ -394,6 +394,7 @@ public class StreamDeploymentController {
 		properties.put(BindingPropertyKeys.INPUT_PARTITIONED, "true");
 		if (properties.containsKey(AppDeployer.COUNT_PROPERTY_KEY)) {
 			properties.put(StreamPropertyKeys.INSTANCE_COUNT, properties.get(AppDeployer.COUNT_PROPERTY_KEY));
+			properties.put(AppDeployer.INDEXED_PROPERTY_KEY, "true");
 		}
 	}
 
