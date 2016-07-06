@@ -28,6 +28,7 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.boot.bind.RelaxedNames;
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.core.ApplicationType;
@@ -170,7 +171,7 @@ public class StreamDeploymentController {
 	@RequestMapping(value = "/{name}", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
 	public void deploy(@PathVariable("name") String name,
-	                   @RequestParam(required = false) String properties) {
+			@RequestParam(required = false) String properties) {
 		StreamDefinition stream = this.repository.findOne(name);
 		if (stream == null) {
 			throw new NoSuchStreamDefinitionException(name);
@@ -268,17 +269,24 @@ public class StreamDeploymentController {
 		StreamAppDefinition.Builder builder = StreamAppDefinition.Builder.from(original);
 		Map<String, String> mutatedProps = new HashMap<>(original.getProperties().size());
 		for (Map.Entry<String, String> entry : original.getProperties().entrySet()) {
-			if (!allProps.contains(entry.getKey())) {
-				List<ConfigurationMetadataProperty> longForms = whiteList.get(entry.getKey());
+			String provided = entry.getKey();
+			if (!allProps.contains(provided)) {
+				List<ConfigurationMetadataProperty> longForms = null;
+				for (String relaxed : new RelaxedNames(provided)) {
+					longForms = whiteList.get(relaxed);
+					if (longForms != null) {
+						break;
+					}
+				}
 				if (longForms != null) {
 					assertNoAmbiguity(longForms);
 					mutatedProps.put(longForms.iterator().next().getId(), entry.getValue());
 				}
 				// Note that we also leave the original property
-				mutatedProps.put(entry.getKey(), entry.getValue());
+				mutatedProps.put(provided, entry.getValue());
 			}
 			else {
-				mutatedProps.put(entry.getKey(), entry.getValue());
+				mutatedProps.put(provided, entry.getValue());
 			}
 		}
 		return builder.setProperties(mutatedProps).build(original.getStreamName());
@@ -304,7 +312,7 @@ public class StreamDeploymentController {
 	 * @return map of properties for an app
 	 */
 	private Map<String, String> extractAppDeploymentProperties(StreamAppDefinition appDefinition,
-	                                                           Map<String, String> streamDeploymentProperties) {
+			Map<String, String> streamDeploymentProperties) {
 		Map<String, String> appDeploymentProperties = new HashMap<>();
 		// add common properties first
 		appDeploymentProperties.putAll(this.commonApplicationProperties.getStream());
@@ -356,7 +364,7 @@ public class StreamDeploymentController {
 	 * @return true if the upstream app has partition properties
 	 */
 	private boolean upstreamAppHasPartitionInfo(StreamDefinition stream, StreamAppDefinition currentApp,
-	                                            Map<String, String> streamDeploymentProperties) {
+			Map<String, String> streamDeploymentProperties) {
 		Iterator<StreamAppDefinition> iterator = stream.getDeploymentOrderIterator();
 		while (iterator.hasNext()) {
 			StreamAppDefinition app = iterator.next();
@@ -380,7 +388,7 @@ public class StreamDeploymentController {
 	 * @return true if the app consumes partitioned data
 	 */
 	private boolean isPartitionedConsumer(Map<String, String> appDeploymentProperties,
-	                                      boolean upstreamAppSupportsPartition) {
+			boolean upstreamAppSupportsPartition) {
 		return upstreamAppSupportsPartition ||
 				(appDeploymentProperties.containsKey(BindingPropertyKeys.INPUT_PARTITIONED) &&
 						appDeploymentProperties.get(BindingPropertyKeys.INPUT_PARTITIONED).equalsIgnoreCase("true"));

@@ -118,4 +118,18 @@ public class StreamDeploymentControllerTests {
 
 	}
 
+	@Test
+	public void testShorthandsAcceptRelaxedVariations() {
+		StreamAppDefinition appDefinition = new StreamAppDefinition.Builder()
+				.setRegisteredAppName("my-app")
+				.setProperty("someLongProperty", "yy") // Use camelCase here
+				.build("streamname");
+
+		Resource app = new ClassPathResource("/apps/whitelist-source");
+		StreamAppDefinition modified = controller.qualifyParameters(appDefinition, app);
+
+		Assert.assertThat(modified.getProperties(), IsMapContaining.hasEntry("date.some-long-property", "yy"));
+
+	}
+
 }

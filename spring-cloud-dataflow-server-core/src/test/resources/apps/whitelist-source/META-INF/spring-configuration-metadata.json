@@ -40,6 +40,12 @@
       "type": "java.lang.String",
       "sourceType": "foo.SomethingElseProperties",
       "defaultValue": "whatever"
+    },
+    {
+      "name": "date.some-long-property",
+      "type": "java.lang.String",
+      "sourceType": "foo.DateProperties",
+      "defaultValue": "whatever"
     }
   ],
   "hints": []
