@@ -130,7 +130,7 @@ public class TaskDefinition extends DataFlowAppDefinition {
 		/**
 		 * Set the name of the app in the registry.
 		 *
-		 * @param name name of app in registry
+		 * @param registeredAppName name of app in registry
 		 * @return this builder object
 		 *
 		 * @see DataFlowAppDefinition#registeredAppName
@@ -145,8 +145,6 @@ public class TaskDefinition extends DataFlowAppDefinition {
 		 *
 		 * @param label name of app label
 		 * @return this builder object
-		 *
-		 * @see DataFlowAppDefinition#label
 		 */
 		public TaskDefinitionBuilder setLabel(String label) {
 			this.label = label;

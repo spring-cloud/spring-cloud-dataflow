@@ -49,7 +49,7 @@ public class ShellCommandLineParser {
      * Parse {@link ShellProperties} and {@link ApplicationArguments} to create an instance of the
      * @param shellProperties the shell properties
      * @param applicationArguments the raw unprocessed arguments that were passed to the application.
-     * @return a new {@lnk CommandLine} instance.
+     * @return a new {@link CommandLine} instance.
      */
     public CommandLine parse(ShellProperties shellProperties, String[] applicationArguments) {
         List<String> commands = new ArrayList<String>();

@@ -158,7 +158,7 @@ public class StreamAppDefinition extends DataFlowAppDefinition {
 		/**
 		 * Set the name of the app in the registry.
 		 *
-		 * @param name name of app in registry
+		 * @param registeredAppName name of app in registry
 		 * @return this builder object
 		 *
 		 * @see DataFlowAppDefinition#registeredAppName
@@ -173,8 +173,6 @@ public class StreamAppDefinition extends DataFlowAppDefinition {
 		 *
 		 * @param label name of app label
 		 * @return this builder object
-		 *
-		 * @see DataFlowAppDefinition#label
 		 */
 		public Builder setLabel(String label) {
 			this.label = label;
