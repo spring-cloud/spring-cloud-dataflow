@@ -352,3 +352,41 @@ $ curl -u myusername:mypassword http://localhost:9393/
 ----
 
 As a result you should see a list of available REST endpoints.
+
+=== Authentication using the Spring Cloud Data Flow Shell
+
+If your OAuth2 provider supports the _Password_ Grant Type you can start the
+_Data Flow Shell_ with:
+
+[source,bash,subs=attributes]
+----
+$ java -jar spring-cloud-dataflow-shell-{project-version}.jar \
+  --dataflow.uri=http://localhost:9393 \
+  --dataflow.username=my_username --dataflow.password=my_password
+----
+
+NOTE: Keep in mind that when authentication for Spring Cloud Data Flow is enabled,
+the underlying OAuth2 provider *must* support the _Password_ OAuth2 Grant Type,
+if you want to use the Shell.
+
+From within the Data Flow Shell you can also provide credentials using:
+
+[source,bash,subs=attributes]
+----
+dataflow config server --uri http://localhost:9393 --username my_username --password my_password
+----
+
+Once successfully targeted, you should see the following output:
+
+[source,bash,subs=attributes]
+----
+dataflow:>dataflow config info
+dataflow config info
+
+╔═══════════╤═══════════════════════════════════════╗
+║Credentials│[username='my_username, password=****']║
+╠═══════════╪═══════════════════════════════════════╣
+║Result     │                                       ║
+║Target     │http://localhost:9393                  ║
+╚═══════════╧═══════════════════════════════════════╝
+----
