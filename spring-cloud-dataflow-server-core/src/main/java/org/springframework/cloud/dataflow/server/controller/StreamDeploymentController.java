@@ -282,8 +282,9 @@ public class StreamDeploymentController {
 					assertNoAmbiguity(longForms);
 					mutatedProps.put(longForms.iterator().next().getId(), entry.getValue());
 				}
-				// Note that we also leave the original property
-				mutatedProps.put(provided, entry.getValue());
+				else {
+					mutatedProps.put(provided, entry.getValue());
+				}
 			}
 			else {
 				mutatedProps.put(provided, entry.getValue());
