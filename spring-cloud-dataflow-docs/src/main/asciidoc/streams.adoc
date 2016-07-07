@@ -343,6 +343,10 @@ can include a property with the deploy command:
 dataflow:> stream deploy --name ticktock --properties "app.time.count=3"
 ----
 
+Note that `count` is the *reserved* property name by the underlying deployer. Hence, if the application also has a custom property named `count`, it is *not* supported
+ when specified during stream `deployment` as it conflicts with the `instance` count deployer property. Instead, the `count` as a custom application property can be
+ specified at the stream `creation` when it will be considered as an app property.
+
 IMPORTANT: See <<spring-cloud-dataflow-stream-app-labels>>.
 
 ==== Passing stream partition properties
