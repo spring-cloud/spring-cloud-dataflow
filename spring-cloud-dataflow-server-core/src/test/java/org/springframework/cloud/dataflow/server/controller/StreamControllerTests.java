@@ -446,6 +446,29 @@ public class StreamControllerTests {
 	}
 
 	@Test
+	public void testStreamWithShortformProperties() throws Exception {
+		repository.save(new StreamDefinition("myStream", "time --fixed-delay=2 | log --level=WARN"));
+		mockMvc.perform(
+				post("/streams/deployments/myStream")
+						.accept(MediaType.APPLICATION_JSON)).andDo(print())
+				.andExpect(status().isCreated());
+		ArgumentCaptor<AppDeploymentRequest> captor = ArgumentCaptor.forClass(AppDeploymentRequest.class);
+		verify(appDeployer, times(2)).deploy(captor.capture());
+		List<AppDeploymentRequest> requests = captor.getAllValues();
+		assertEquals(2, requests.size());
+		AppDeploymentRequest logRequest = requests.get(0);
+		assertThat(logRequest.getDefinition().getName(), is("log"));
+		Map<String, String> logAppProps = logRequest.getDefinition().getProperties();
+		assertEquals("WARN", logAppProps.get("log.level"));
+		assertNull(logAppProps.get("level"));
+		AppDeploymentRequest timeRequest = requests.get(1);
+		assertThat(timeRequest.getDefinition().getName(), is("time"));
+		Map<String, String> timeAppProps = timeRequest.getDefinition().getProperties();
+		assertEquals("2", timeAppProps.get("trigger.fixed-delay"));
+		assertNull(timeAppProps.get("fixed-delay"));
+	}
+
+	@Test
 	public void testDuplicateDeploy() throws Exception {
 		repository.save(new StreamDefinition("myStream", "time | log"));
 		mockMvc.perform(

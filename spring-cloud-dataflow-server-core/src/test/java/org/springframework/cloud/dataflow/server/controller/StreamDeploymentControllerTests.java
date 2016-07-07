@@ -16,6 +16,8 @@
 
 package org.springframework.cloud.dataflow.server.controller;
 
+import static org.hamcrest.CoreMatchers.not;
+
 import org.hamcrest.collection.IsMapContaining;
 import org.junit.Assert;
 import org.junit.Before;
@@ -83,6 +85,7 @@ public class StreamDeploymentControllerTests {
 		StreamAppDefinition modified = controller.qualifyParameters(appDefinition, app);
 
 		Assert.assertThat(modified.getProperties(), IsMapContaining.hasEntry("date.timezone", "GMT+2"));
+		Assert.assertThat(modified.getProperties(), not(IsMapContaining.hasKey("timezone")));
 	}
 
 	@Test
