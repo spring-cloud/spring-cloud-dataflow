@@ -469,6 +469,52 @@ public class StreamControllerTests {
 	}
 
 	@Test
+	public void testDeployWithAppPropertiesOverride() throws Exception {
+		repository.save(new StreamDefinition("myStream", "time --fixed-delay=2 | log --level=WARN"));
+		mockMvc.perform(
+				post("/streams/deployments/myStream").param("properties",
+						"app.time.fixed-delay=4," +
+								"app.log.level=ERROR")
+						.accept(MediaType.APPLICATION_JSON)).andDo(print())
+				.andExpect(status().isCreated());
+		ArgumentCaptor<AppDeploymentRequest> captor = ArgumentCaptor.forClass(AppDeploymentRequest.class);
+		verify(appDeployer, times(2)).deploy(captor.capture());
+		List<AppDeploymentRequest> requests = captor.getAllValues();
+		assertEquals(2, requests.size());
+		AppDeploymentRequest logRequest = requests.get(0);
+		assertThat(logRequest.getDefinition().getName(), is("log"));
+		Map<String, String> logAppProps = logRequest.getDefinition().getProperties();
+		assertEquals("ERROR", logAppProps.get("log.level"));
+		AppDeploymentRequest timeRequest = requests.get(1);
+		assertThat(timeRequest.getDefinition().getName(), is("time"));
+		Map<String, String> timeAppProps = timeRequest.getDefinition().getProperties();
+		assertEquals("4", timeAppProps.get("trigger.fixed-delay"));
+	}
+
+	@Test
+	public void testDeployWithAppPropertiesOverrideWithLabel() throws Exception {
+		repository.save(new StreamDefinition("myStream", "a: time --fixed-delay=2 | b: log --level=WARN"));
+		mockMvc.perform(
+				post("/streams/deployments/myStream").param("properties",
+						"app.a.fixed-delay=4," +
+								"app.b.level=ERROR")
+						.accept(MediaType.APPLICATION_JSON)).andDo(print())
+				.andExpect(status().isCreated());
+		ArgumentCaptor<AppDeploymentRequest> captor = ArgumentCaptor.forClass(AppDeploymentRequest.class);
+		verify(appDeployer, times(2)).deploy(captor.capture());
+		List<AppDeploymentRequest> requests = captor.getAllValues();
+		assertEquals(2, requests.size());
+		AppDeploymentRequest logRequest = requests.get(0);
+		assertThat(logRequest.getDefinition().getName(), is("b"));
+		Map<String, String> logAppProps = logRequest.getDefinition().getProperties();
+		assertEquals("ERROR", logAppProps.get("log.level"));
+		AppDeploymentRequest timeRequest = requests.get(1);
+		assertThat(timeRequest.getDefinition().getName(), is("a"));
+		Map<String, String> timeAppProps = timeRequest.getDefinition().getProperties();
+		assertEquals("4", timeAppProps.get("trigger.fixed-delay"));
+	}
+
+	@Test
 	public void testDuplicateDeploy() throws Exception {
 		repository.save(new StreamDefinition("myStream", "time | log"));
 		mockMvc.perform(
