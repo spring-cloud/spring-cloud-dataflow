@@ -277,8 +277,8 @@ These `short-form` property names are applicable only for the white-listed prope
 
 ==== Passing application properties when deploying stream
 
-The application properties can also be specified when deploying the stream. When specified during deployment, these application properties require fully qualified
-property names with "app.<app name/label>" as the prefix.
+The application properties can also be specified when deploying the stream. When specified during deployment, these application properties can either be specified as
+ `short-hand` property names (applicable for white-listed properties) or fully qualified property names. The application properties should have the prefix "app.<app name/label>".
 
 For example, the stream
 
@@ -287,16 +287,12 @@ For example, the stream
 dataflow:> stream create --definition "time | log" --name ticktock
 ----
 
-can be deployed with application properties as follows:
+can be deployed with application properties using the`short-hand` property names:
 
 [source,bash]
 ----
-dataflow:>stream deploy ticktock --properties "app.time.trigger.fixed-delay=4,app.log.log.level=ERROR"
+dataflow:>stream deploy ticktock --properties "app.time.fixed-delay=5,app.log.level=ERROR"
 ----
-
-Note the prefix `app.time` and `app.log` with the fully qualified properties (not the short-form properties we can define during stream creation)
- `trigger.fixed-delay` and `log.level` from the `app info` above.
-
 
 When using the app label,
 
@@ -309,7 +305,7 @@ the application properties can be defined as:
 
 [source,bash]
 ----
-stream deploy ticktock --properties "app.a.trigger.fixed-delay=4,app.b.log.level=ERROR"
+stream deploy ticktock --properties "app.a.fixed-delay=4,app.b.log.level=ERROR"
 ----
 
 
@@ -328,10 +324,8 @@ To override these application properties, one can specify the new property value
 
 [source,bash]
 ----
-dataflow:>stream deploy ticktock --properties "app.time.trigger.fixed-delay=4,app.log.log.level=ERROR"
+dataflow:>stream deploy ticktock --properties "app.time.fixed-delay=4,app.log.level=ERROR"
 ----
-
-Note the `short-form` and `fully qualified form` of white listed application properties in stream creation and deployment respectively.
 
 === Deployment properties
 
