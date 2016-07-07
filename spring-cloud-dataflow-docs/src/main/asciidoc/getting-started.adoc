@@ -420,6 +420,8 @@ should look like the following:
 .Register an OAuth Application for GitHub
 image::dataflow-security-github.png[Register an OAuth Application for GitHub , scaledwidth="100%"]
 
+NOTE: For the _Authorization callback URL_ you will enter Spring Cloud Data Flow's Login URL, e.g. `http://localhost:9393/login`.
+
 Configure Spring Cloud Data Flow with the GitHub relevant Client Id and Secret:
 
 [source,yaml]
@@ -436,3 +438,5 @@ security:
     resource:
       user-info-uri: https://api.github.com/user
 ----
+
+IMPORTANT: GitHub does not support the OAuth2 password grant type. As such you cannot use the Spring Cloud Data Flow Shell in conjunction with GitHub.
