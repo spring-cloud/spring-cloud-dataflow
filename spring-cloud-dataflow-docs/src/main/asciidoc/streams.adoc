@@ -208,20 +208,143 @@ $ tail -f /var/folders/wn/8jxm_tbd1vj28c8vj37n900m0000gn/T/spring-cloud-dataflow
 2016-06-01 09:45:12.250  INFO 79194 --- [  kafka-binder-] log.sink    : 06/01/16 09:45:12
 2016-06-01 09:45:13.251  INFO 79194 --- [  kafka-binder-] log.sink    : 06/01/16 09:45:13
 ```
+=== Application properties
 
-=== Passing application properties when deploying stream
+Application properties are the properties associated with each application in the stream. When the application is deployed, the application properties are applied to the application via
+command line arguments or environment variables based on the underlying deployment implementation.
 
-When you execution `stream deploy` shell command, you can optionally provide a
-comma delimited list of key=value pairs known as `deployment properties`.
-These properties allow you to specify deployment instruction for each application
-in the stream.
+==== Passing application properties when creating stream
+
+The following stream
+
+[source,bash]
+----
+dataflow:> stream create --definition "time | log" --name ticktock
+----
+
+can have application properties defined at the time of stream creation.
+
+The shell command `app info` helps viewing the white-listed application properties for the application.
+For more info on the property white listing refer <<spring-cloud-dataflow-stream-app-whitelisting>>
+
+Below is the white listed properties for the app `time`:
+
+[source,bash]
+----
+╔══════════════════════════════╤══════════════════════════════╤══════════════════════════════╤══════════════════════════════╗
+║         Option Name          │         Description          │           Default            │             Type             ║
+╠══════════════════════════════╪══════════════════════════════╪══════════════════════════════╪══════════════════════════════╣
+║trigger.time-unit             │The TimeUnit to apply to delay│<none>                        │java.util.concurrent.TimeUnit ║
+║                              │values.                       │                              │                              ║
+║trigger.fixed-delay           │Fixed delay for periodic      │1                             │java.lang.Integer             ║
+║                              │triggers.                     │                              │                              ║
+║trigger.cron                  │Cron expression value for the │<none>                        │java.lang.String              ║
+║                              │Cron Trigger.                 │                              │                              ║
+║trigger.initial-delay         │Initial delay for periodic    │0                             │java.lang.Integer             ║
+║                              │triggers.                     │                              │                              ║
+║trigger.max-messages          │Maximum messages per poll, -1 │1                             │java.lang.Long                ║
+║                              │means infinity.               │                              │                              ║
+║trigger.date-format           │Format for the date value.    │<none>                        │java.lang.String              ║
+╚══════════════════════════════╧══════════════════════════════╧══════════════════════════════╧══════════════════════════════╝
+----
+
+Below is the white listed properties for the app `log`:
+
+[source,bash]
+----
+╔══════════════════════════════╤══════════════════════════════╤══════════════════════════════╤══════════════════════════════╗
+║         Option Name          │         Description          │           Default            │             Type             ║
+╠══════════════════════════════╪══════════════════════════════╪══════════════════════════════╪══════════════════════════════╣
+║log.name                      │The name of the logger to use.│<none>                        │java.lang.String              ║
+║log.level                     │The level at which to log     │<none>                        │org.springframework.integratio║
+║                              │messages.                     │                              │n.handler.LoggingHandler$Level║
+║log.expression                │A SpEL expression (against the│payload                       │java.lang.String              ║
+║                              │incoming message) to evaluate │                              │                              ║
+║                              │as the logged message.        │                              │                              ║
+╚══════════════════════════════╧══════════════════════════════╧══════════════════════════════╧══════════════════════════════╝
+----
+
+The application properties for `time` and `log` apps can be specified at the time of `stream` creation as follows:
+
+[source,bash]
+----
+dataflow:> stream create --definition "time --fixed-delay=5 | log --level=WARN" --name ticktock
+----
+
+Note that the properties `fixed-delay` and `level` defined above for the apps `time` and `log` are the `short-form` property names provided by the shell completion.
+These `short-form` property names are applicable only for the white-listed properties and in all other cases, only `fully qualified` property names should be used.
+
+
+==== Passing application properties when deploying stream
+
+The application properties can also be specified when deploying the stream. When specified during deployment, these application properties require fully qualified
+property names with "app.<app name/label>" as the prefix.
+
+For example, the stream
+
+[source,bash]
+----
+dataflow:> stream create --definition "time | log" --name ticktock
+----
+
+can be deployed with application properties as follows:
+
+[source,bash]
+----
+dataflow:>stream deploy ticktock --properties "app.time.trigger.fixed-delay=4,app.log.log.level=ERROR"
+----
+
+Note the prefix `app.time` and `app.log` with the fully qualified properties (not the short-form properties we can define during stream creation)
+ `trigger.fixed-delay` and `log.level` from the `app info` above.
+
+
+When using the app label,
+
+[source,bash]
+----
+stream create ticktock --definition "a: time | b: log"
+----
+
+the application properties can be defined as:
+
+[source,bash]
+----
+stream deploy ticktock --properties "app.a.trigger.fixed-delay=4,app.b.log.level=ERROR"
+----
+
+
+==== Overriding application properties during stream deployment
+
+Application properties that are defined during deployment overrides the same properties defined during the stream creation.
+
+For example, the following stream has application properties defined during stream creation:
+
+[source,bash]
+----
+dataflow:> stream create --definition "time --fixed-delay=5 | log --level=WARN" --name ticktock
+----
+
+To override these application properties, one can specify the new property values during deployment:
+
+[source,bash]
+----
+dataflow:>stream deploy ticktock --properties "app.time.trigger.fixed-delay=4,app.log.log.level=ERROR"
+----
+
+Note the `short-form` and `fully qualified form` of white listed application properties in stream creation and deployment respectively.
+
+=== Deployment properties
+
+When deploying the stream, properties that control the deployment of the apps into the target platform are known as `deployment` properties.
+For instance, one can specify how many number of instances need to be deployed for the specific application defined in the stream using the deployment property called `count`.
+The stream partitioning properties are also passed as `deployment` properties during stream deployment. These properties are optionally provided as a comma delimted list of key=value pairs.
 
 ==== Passing instance count as deployment property
 
 If you would like to have multiple instances of an application in the stream, you
 can include a property with the deploy command:
 
-[source,bash,subs=attributes]
+[source,bash]
 ----
 dataflow:> stream deploy --name ticktock --properties "app.time.count=3"
 ----
@@ -277,7 +400,7 @@ and documented below:
   use the `--properties` shell option and list properties as a comma separated
   list of key=value pairs, like so:
 
-[source,bash,subs=attributes]
+[source,bash]
 ----
 stream deploy foo
     --properties "app.transform.count=2,app.transform.producer.partitionKeyExpression=payload"
@@ -291,7 +414,7 @@ stream deploy foo
   `:` delimiter, etc.) although we recommend using `=` as a key-value pair delimiter
   for consistency:
 
-[source,bash,subs=attributes]
+[source,bash]
 ----
 stream deploy foo --propertiesFile myprops.properties
 ----
