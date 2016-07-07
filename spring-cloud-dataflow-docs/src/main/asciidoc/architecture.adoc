@@ -133,7 +133,7 @@ For an application that will consume events, Spring Cloud stream exposes a concu
 [[arch-streams-partitioning]]
 === Partitioning
 In some situations (for example to benefit from scaling out), applications can be deployed using multiple instances and
-benefit from data partitioning (whereby a some subset of data always goes to the same instance according to some
+benefit from data partitioning (whereby some subset of data always goes to the same instance according to some
 business rule). Please refer to <<passing_stream_partition_properties>> to learn more.
 
 [[arch-streams-delivery]]
