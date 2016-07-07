@@ -82,7 +82,7 @@ public class StreamDeploymentControllerTests {
 				.build("streamname");
 
 		Resource app = new ClassPathResource("/apps/whitelist-source");
-		StreamAppDefinition modified = controller.qualifyParameters(appDefinition, app);
+		StreamAppDefinition modified = controller.qualifyProperties(appDefinition, app);
 
 		Assert.assertThat(modified.getProperties(), IsMapContaining.hasEntry("date.timezone", "GMT+2"));
 		Assert.assertThat(modified.getProperties(), not(IsMapContaining.hasKey("timezone")));
@@ -97,7 +97,7 @@ public class StreamDeploymentControllerTests {
 				.build("streamname");
 
 		Resource app = new ClassPathResource("/apps/whitelist-source");
-		StreamAppDefinition modified = controller.qualifyParameters(appDefinition, app);
+		StreamAppDefinition modified = controller.qualifyProperties(appDefinition, app);
 
 		Assert.assertThat(modified.getProperties(), IsMapContaining.hasEntry("date.format", "yy"));
 		Assert.assertThat(modified.getProperties(), IsMapContaining.hasEntry("time.format", "hh"));
@@ -117,7 +117,7 @@ public class StreamDeploymentControllerTests {
 		thrown.expectMessage("date.format");
 		thrown.expectMessage("time.format");
 
-		controller.qualifyParameters(appDefinition, app);
+		controller.qualifyProperties(appDefinition, app);
 
 	}
 
@@ -129,7 +129,7 @@ public class StreamDeploymentControllerTests {
 				.build("streamname");
 
 		Resource app = new ClassPathResource("/apps/whitelist-source");
-		StreamAppDefinition modified = controller.qualifyParameters(appDefinition, app);
+		StreamAppDefinition modified = controller.qualifyProperties(appDefinition, app);
 
 		Assert.assertThat(modified.getProperties(), IsMapContaining.hasEntry("date.some-long-property", "yy"));
 

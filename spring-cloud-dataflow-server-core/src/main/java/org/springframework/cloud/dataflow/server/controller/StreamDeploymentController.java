@@ -236,9 +236,9 @@ public class StreamDeploymentController {
 			Assert.notNull(registration, String.format("no application '%s' of type '%s' exists in the registry",
 					currentApp.getName(), type));
 			Resource resource = registration.getResource();
-			currentApp = qualifyParameters(currentApp, resource);
-
-			AppDeploymentRequest request = currentApp.createDeploymentRequest(resource, appDeploymentProperties);
+			currentApp = qualifyProperties(currentApp, resource);
+			AppDeploymentRequest request = currentApp.createDeploymentRequest(resource,
+					qualifyProperties(appDeploymentProperties, resource));
 			try {
 				String id = this.deployer.deploy(request);
 				this.deploymentIdRepository.save(DeploymentKey.forStreamAppDefinition(currentApp), id);
@@ -252,10 +252,10 @@ public class StreamDeploymentController {
 	}
 
 	/**
-	 * Return a copy of a given app definition where short form parameters have been expanded to their long form
+	 * Return a copy of app properties where shorthand form have been expanded to their long form
 	 * (amongst the whitelisted supported properties of the app) if applicable.
 	 */
-	/*default*/ StreamAppDefinition qualifyParameters(StreamAppDefinition original, Resource resource) {
+	private Map<String, String> qualifyProperties(Map<String, String> properties, Resource resource) {
 		MultiValueMap<String, ConfigurationMetadataProperty> whiteList = new LinkedMultiValueMap<>();
 		Set<String> allProps = new HashSet<>();
 
@@ -266,9 +266,8 @@ public class StreamDeploymentController {
 			allProps.add(property.getId()); // But full ids here
 		}
 
-		StreamAppDefinition.Builder builder = StreamAppDefinition.Builder.from(original);
-		Map<String, String> mutatedProps = new HashMap<>(original.getProperties().size());
-		for (Map.Entry<String, String> entry : original.getProperties().entrySet()) {
+		Map<String, String> mutatedProps = new HashMap<>(properties.size());
+		for (Map.Entry<String, String> entry : properties.entrySet()) {
 			String provided = entry.getKey();
 			if (!allProps.contains(provided)) {
 				List<ConfigurationMetadataProperty> longForms = null;
@@ -290,7 +289,16 @@ public class StreamDeploymentController {
 				mutatedProps.put(provided, entry.getValue());
 			}
 		}
-		return builder.setProperties(mutatedProps).build(original.getStreamName());
+		return mutatedProps;
+	}
+
+	/**
+	 * Return a copy of a given app definition where short form parameters have been expanded to their long form
+	 * (amongst the whitelisted supported properties of the app) if applicable.
+	 */
+	/*default*/ StreamAppDefinition qualifyProperties(StreamAppDefinition original, Resource resource) {
+		StreamAppDefinition.Builder builder = StreamAppDefinition.Builder.from(original);
+		return builder.setProperties(qualifyProperties(original.getProperties(), resource)).build(original.getStreamName());
 	}
 
 	private void assertNoAmbiguity(List<ConfigurationMetadataProperty> longForms) {
