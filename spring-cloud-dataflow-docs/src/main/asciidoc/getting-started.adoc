@@ -389,7 +389,7 @@ dataflow config info
 ║Result     │                                       ║
 ║Target     │http://localhost:9393                  ║
 ╚═══════════╧═══════════════════════════════════════╝
-=======
+----
 === Authentication Examples
 
 ==== Local OAuth2 Server
@@ -402,7 +402,7 @@ can easily create your own OAuth2 Server with the following 2 simple annotations
 
 A working example application can be found at:
 
-https://github.com/ghillert/oauth-test-server/
+https://github.com/ghillert/oauth-test-server/[https://github.com/ghillert/oauth-test-server/]
 
 Simply clone the project, built and start it. Furthermore configure Spring Cloud
 Data Flow with the respective _Client Id_ and _Client Secret_.
