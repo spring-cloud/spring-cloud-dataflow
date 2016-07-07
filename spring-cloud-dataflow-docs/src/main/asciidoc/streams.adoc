@@ -221,13 +221,14 @@ in the stream.
 If you would like to have multiple instances of an application in the stream, you
 can include a property with the deploy command:
 
-[source,bash,subs=attributes]
+[source,bash]
 ----
 dataflow:> stream deploy --name ticktock --properties "app.time.count=3"
 ----
 
 IMPORTANT: See <<spring-cloud-dataflow-stream-app-labels>>.
 
+[[passing_stream_partition_properties]]
 ==== Passing stream partition properties
 A common pattern in stream processing is to partition the data as it is streamed.
 This entails deploying multiple instances of a message consuming app and using

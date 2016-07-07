@@ -130,6 +130,12 @@ Taps can be used to ‘listen in’ to the data that if flowing across any of th
 === Concurrency
 For an application that will consume events, Spring Cloud stream exposes a concurrency setting that controls the size of a thread pool used for dispatching incoming messages.  See the link:http://docs.spring.io/spring-cloud-stream/docs/1.0.2.RELEASE/reference/htmlsingle/index.html#_consumer_properties[Consumer properties] documentation for more information.
 
+[[arch-streams-partitioning]]
+=== Partitioning
+In some situations (for example to benefit from scaling out), applications can be deployed using multiple instances and
+benefit from data partitioning (whereby some subset of data always goes to the same instance according to some
+business rule). Please refer to <<passing_stream_partition_properties>> to learn more.
+
 [[arch-streams-delivery]]
 === Message Delivery Guarantees
 
