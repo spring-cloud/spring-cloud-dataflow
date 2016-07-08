@@ -56,6 +56,7 @@ import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.cloud.dataflow.core.BindingPropertyKeys;
 import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
+import org.springframework.cloud.dataflow.core.StreamPropertyKeys;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
@@ -441,6 +442,7 @@ public class StreamControllerTests {
 		assertEquals(2, requests.size());
 		AppDeploymentRequest logRequest = requests.get(0);
 		assertThat(logRequest.getDefinition().getName(), is("log"));
+		assertEquals(logRequest.getDeploymentProperties().get("spring.cloud.deployer.indexed"), "true");
 		AppDeploymentRequest timeRequest = requests.get(1);
 		assertThat(timeRequest.getDefinition().getName(), is("time"));
 	}
@@ -613,6 +615,7 @@ public class StreamControllerTests {
 		assertEquals("2", logAppProps.get("spring.cloud.stream.instanceCount"));
 		assertEquals("true", logAppProps.get("spring.cloud.stream.bindings.input.consumer.partitioned"));
 		assertEquals("3", logAppProps.get("spring.cloud.stream.bindings.input.consumer.concurrency"));
+		assertEquals("2", logAppProps.get(StreamPropertyKeys.INSTANCE_COUNT));
 		Map<String, String> logDeploymentProps = logRequest.getDeploymentProperties();
 		assertEquals("2", logDeploymentProps.get(AppDeployer.COUNT_PROPERTY_KEY));
 		assertEquals("myStream", logDeploymentProps.get(AppDeployer.GROUP_PROPERTY_KEY));

@@ -221,6 +221,13 @@ public class StreamDeploymentController {
 			Map<String, String> appDeploymentProperties = extractAppDeploymentProperties(currentApp, streamDeploymentProperties);
 			appDeploymentProperties.put(AppDeployer.GROUP_PROPERTY_KEY, currentApp.getStreamName());
 			boolean upstreamAppSupportsPartition = upstreamAppHasPartitionInfo(stream, currentApp, streamDeploymentProperties);
+			// Set instance count property
+			if (appDeploymentProperties.containsKey(AppDeployer.COUNT_PROPERTY_KEY)) {
+				appDeploymentProperties.put(StreamPropertyKeys.INSTANCE_COUNT, appDeploymentProperties.get(AppDeployer.COUNT_PROPERTY_KEY));
+			}
+			if (!type.equals(ApplicationType.source)) {
+				appDeploymentProperties.put(AppDeployer.INDEXED_PROPERTY_KEY, "true");
+			}
 			// consumer app partition properties
 			if (upstreamAppSupportsPartition) {
 				updateConsumerPartitionProperties(appDeploymentProperties);
@@ -409,10 +416,6 @@ public class StreamDeploymentController {
 	 */
 	private void updateConsumerPartitionProperties(Map<String, String> properties) {
 		properties.put(BindingPropertyKeys.INPUT_PARTITIONED, "true");
-		if (properties.containsKey(AppDeployer.COUNT_PROPERTY_KEY)) {
-			properties.put(StreamPropertyKeys.INSTANCE_COUNT, properties.get(AppDeployer.COUNT_PROPERTY_KEY));
-			properties.put(AppDeployer.INDEXED_PROPERTY_KEY, "true");
-		}
 	}
 
 	/**
