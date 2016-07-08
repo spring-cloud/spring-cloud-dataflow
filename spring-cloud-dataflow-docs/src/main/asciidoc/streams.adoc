@@ -313,7 +313,7 @@ stream deploy ticktock --properties "app.a.fixed-delay=4,app.b.level=ERROR"
 ==== Passing stream partition properties during stream deployment
 A common pattern in stream processing is to partition the data as it is streamed.
 This entails deploying multiple instances of a message consuming app and using
-content-based routing so that messages with the given key (the key determined at runtime)
+content-based routing so that messages with a given key (as determined at runtime)
 are always routed to the same app instance. You can pass the partition properties during
 stream deployment to declaratively configure a partitioning strategy to route each
 message to a specific consumer instance.
