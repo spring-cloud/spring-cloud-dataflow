@@ -274,13 +274,13 @@ dataflow:> stream create --definition "time --fixed-delay=5 | log --level=WARN" 
 ----
 
 Note that the properties `fixed-delay` and `level` defined above for the apps `time` and `log` are the 'short-form' property names provided by the shell completion.
-These 'short-form' property names are applicable only for the white-listed properties and in all other cases, only 'fully qualified' property names should be used.
+These 'short-form' property names are applicable only for the white-listed properties and in all other cases, only _fully qualified_ property names should be used.
 
 
 ==== Passing application properties when deploying a stream
 
 The application properties can also be specified when deploying a stream. When specified during deployment, these application properties can either be specified as
- 'short-form' property names (applicable for white-listed properties) or fully qualified property names. The application properties should have the prefix "app.<appName/label>".
+ 'short-form' property names (applicable for white-listed properties) or _fully qualified_ property names. The application properties should have the prefix "app.<appName/label>".
 
 For example, the stream
 
@@ -384,8 +384,8 @@ dataflow:> stream deploy --name ticktock --properties "app.time.count=3"
 ----
 
 Note that `count` is the *reserved* property name used by the underlying deployer. Hence, if the application also has a custom property named `count`, it is *not* supported
- when specified in 'short-form' form during stream 'deployment' as it could conflict with the 'instance' count deployer property. Instead, the `count` as a custom application property can be
- specified in its 'fully qualified' form (example: `app.foo.bar.count`) during stream 'deployment' or it can be specified using 'short-form' or 'fully qualified' form during the stream 'creation'
+ when specified in 'short-form' form during stream _deployment_ as it could conflict with the _instance_ count deployer property. Instead, the `count` as a custom application property can be
+ specified in its _fully qualified_ form (example: `app.foo.bar.count`) during stream _deployment_ or it can be specified using qwshort-form' or _fully qualified_ form during the stream _creation_
  where it will be considered as an app property.
 
 IMPORTANT: See <<spring-cloud-dataflow-stream-app-labels>>.
