@@ -418,7 +418,7 @@ When running a default version of Spring Cloud Data Flow locally, your GitHub co
 should look like the following:
 
 .Register an OAuth Application for GitHub
-image::dataflow-security-github.png[Register an OAuth Application for GitHub , scaledwidth="100%"]
+image::{dataflow-asciidoc}/images/dataflow-security-github.png[Register an OAuth Application for GitHub , scaledwidth="100%"]
 
 NOTE: For the _Authorization callback URL_ you will enter Spring Cloud Data Flow's Login URL, e.g. `http://localhost:9393/login`.
 
