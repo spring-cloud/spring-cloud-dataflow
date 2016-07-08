@@ -213,7 +213,7 @@ $ tail -f /var/folders/wn/8jxm_tbd1vj28c8vj37n900m0000gn/T/spring-cloud-dataflow
 Application properties are the properties associated with each application in the stream. When the application is deployed, the application properties are applied to the application via
 command line arguments or environment variables based on the underlying deployment implementation.
 
-==== Passing application properties when creating stream
+==== Passing application properties when creating a stream
 
 The following stream
 
@@ -224,13 +224,14 @@ dataflow:> stream create --definition "time | log" --name ticktock
 
 can have application properties defined at the time of stream creation.
 
-The shell command `app info` helps viewing the white-listed application properties for the application.
-For more info on the property white listing refer <<spring-cloud-dataflow-stream-app-whitelisting>>
+The shell command `app info` displays the white-listed application properties for the application.
+For more info on the property white listing refer to <<spring-cloud-dataflow-stream-app-whitelisting>>
 
-Below is the white listed properties for the app `time`:
+Below are the white listed properties for the app `time`:
 
 [source,bash]
 ----
+dataflow:> app info source:time
 ╔══════════════════════════════╤══════════════════════════════╤══════════════════════════════╤══════════════════════════════╗
 ║         Option Name          │         Description          │           Default            │             Type             ║
 ╠══════════════════════════════╪══════════════════════════════╪══════════════════════════════╪══════════════════════════════╣
@@ -248,10 +249,11 @@ Below is the white listed properties for the app `time`:
 ╚══════════════════════════════╧══════════════════════════════╧══════════════════════════════╧══════════════════════════════╝
 ----
 
-Below is the white listed properties for the app `log`:
+Below are the white listed properties for the app `log`:
 
 [source,bash]
 ----
+dataflow:> app info sink:log
 ╔══════════════════════════════╤══════════════════════════════╤══════════════════════════════╤══════════════════════════════╗
 ║         Option Name          │         Description          │           Default            │             Type             ║
 ╠══════════════════════════════╪══════════════════════════════╪══════════════════════════════╪══════════════════════════════╣
@@ -264,21 +266,21 @@ Below is the white listed properties for the app `log`:
 ╚══════════════════════════════╧══════════════════════════════╧══════════════════════════════╧══════════════════════════════╝
 ----
 
-The application properties for `time` and `log` apps can be specified at the time of `stream` creation as follows:
+The application properties for the `time` and `log` apps can be specified at the time of `stream` creation as follows:
 
 [source,bash]
 ----
 dataflow:> stream create --definition "time --fixed-delay=5 | log --level=WARN" --name ticktock
 ----
 
-Note that the properties `fixed-delay` and `level` defined above for the apps `time` and `log` are the `short-form` property names provided by the shell completion.
-These `short-form` property names are applicable only for the white-listed properties and in all other cases, only `fully qualified` property names should be used.
+Note that the properties `fixed-delay` and `level` defined above for the apps `time` and `log` are the 'short-form' property names provided by the shell completion.
+These 'short-form' property names are applicable only for the white-listed properties and in all other cases, only 'fully qualified' property names should be used.
 
 
-==== Passing application properties when deploying stream
+==== Passing application properties when deploying a stream
 
-The application properties can also be specified when deploying the stream. When specified during deployment, these application properties can either be specified as
- `short-hand` property names (applicable for white-listed properties) or fully qualified property names. The application properties should have the prefix "app.<app name/label>".
+The application properties can also be specified when deploying a stream. When specified during deployment, these application properties can either be specified as
+ 'short-form' property names (applicable for white-listed properties) or fully qualified property names. The application properties should have the prefix "app.<appName/label>".
 
 For example, the stream
 
@@ -287,7 +289,7 @@ For example, the stream
 dataflow:> stream create --definition "time | log" --name ticktock
 ----
 
-can be deployed with application properties using the`short-hand` property names:
+can be deployed with application properties using the 'short-form' property names:
 
 [source,bash]
 ----
@@ -311,8 +313,8 @@ stream deploy ticktock --properties "app.a.fixed-delay=4,app.b.level=ERROR"
 ==== Passing stream partition properties during stream deployment
 A common pattern in stream processing is to partition the data as it is streamed.
 This entails deploying multiple instances of a message consuming app and using
-content-based routing so that messages containing the identical data value(s) are
-always routed to the same app instance. You can pass the partition properties during
+content-based routing so that messages with the given key (the key determined at runtime)
+are always routed to the same app instance. You can pass the partition properties during
 stream deployment to declaratively configure a partitioning strategy to route each
 message to a specific consumer instance.
 
@@ -349,7 +351,7 @@ present the result is `key.hashCode() % partitionCount`.
 
 ==== Overriding application properties during stream deployment
 
-Application properties that are defined during deployment overrides the same properties defined during the stream creation.
+Application properties that are defined during deployment override the same properties defined during the stream creation.
 
 For example, the following stream has application properties defined during stream creation:
 
@@ -369,7 +371,7 @@ dataflow:>stream deploy ticktock --properties "app.time.fixed-delay=4,app.log.le
 === Deployment properties
 
 When deploying the stream, properties that control the deployment of the apps into the target platform are known as `deployment` properties.
-For instance, one can specify how many number of instances need to be deployed for the specific application defined in the stream using the deployment property called `count`.
+For instance, one can specify how many instances need to be deployed for the specific application defined in the stream using the deployment property called `count`.
 
 ==== Passing instance count as deployment property
 
@@ -382,8 +384,8 @@ dataflow:> stream deploy --name ticktock --properties "app.time.count=3"
 ----
 
 Note that `count` is the *reserved* property name used by the underlying deployer. Hence, if the application also has a custom property named `count`, it is *not* supported
- when specified in `short-hand` form during stream `deployment` as it could conflict with the `instance` count deployer property. Instead, the `count` as a custom application property can be
- specified in its `fully qualified` form (example: `app.foo.bar.count`) during stream `deployment` or it can be specified using `short-hand` or `fully qualified` form during the stream `creation`
+ when specified in 'short-form' form during stream 'deployment' as it could conflict with the 'instance' count deployer property. Instead, the `count` as a custom application property can be
+ specified in its 'fully qualified' form (example: `app.foo.bar.count`) during stream 'deployment' or it can be specified using 'short-form' or 'fully qualified' form during the stream 'creation'
  where it will be considered as an app property.
 
 IMPORTANT: See <<spring-cloud-dataflow-stream-app-labels>>.
