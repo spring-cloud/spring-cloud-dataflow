@@ -305,57 +305,16 @@ the application properties can be defined as:
 
 [source,bash]
 ----
-stream deploy ticktock --properties "app.a.fixed-delay=4,app.b.log.level=ERROR"
+stream deploy ticktock --properties "app.a.fixed-delay=4,app.b.level=ERROR"
 ----
 
-
-==== Overriding application properties during stream deployment
-
-Application properties that are defined during deployment overrides the same properties defined during the stream creation.
-
-For example, the following stream has application properties defined during stream creation:
-
-[source,bash]
-----
-dataflow:> stream create --definition "time --fixed-delay=5 | log --level=WARN" --name ticktock
-----
-
-To override these application properties, one can specify the new property values during deployment:
-
-[source,bash]
-----
-dataflow:>stream deploy ticktock --properties "app.time.fixed-delay=4,app.log.level=ERROR"
-----
-
-=== Deployment properties
-
-When deploying the stream, properties that control the deployment of the apps into the target platform are known as `deployment` properties.
-For instance, one can specify how many number of instances need to be deployed for the specific application defined in the stream using the deployment property called `count`.
-The stream partitioning properties are also passed as `deployment` properties during stream deployment. These properties are optionally provided as a comma delimted list of key=value pairs.
-
-==== Passing instance count as deployment property
-
-If you would like to have multiple instances of an application in the stream, you
-can include a property with the deploy command:
-
-[source,bash]
-----
-dataflow:> stream deploy --name ticktock --properties "app.time.count=3"
-----
-
-Note that `count` is the *reserved* property name by the underlying deployer. Hence, if the application also has a custom property named `count`, it is *not* supported
- when specified during stream `deployment` as it conflicts with the `instance` count deployer property. Instead, the `count` as a custom application property can be
- specified at the stream `creation` when it will be considered as an app property.
-
-IMPORTANT: See <<spring-cloud-dataflow-stream-app-labels>>.
-
-==== Passing stream partition properties
+==== Passing stream partition properties during stream deployment
 A common pattern in stream processing is to partition the data as it is streamed.
 This entails deploying multiple instances of a message consuming app and using
 content-based routing so that messages containing the identical data value(s) are
-always routed to the same app instance. You can use the Deployment Properties to
-declaratively configure a partitioning strategy to route each message to a specific
-consumer instance.
+always routed to the same app instance. You can pass the partition properties during
+stream deployment to declaratively configure a partitioning strategy to route each
+message to a specific consumer instance.
 
 See below for examples of deploying partitioned streams:
 
@@ -386,6 +345,48 @@ partition count of the topic in the case of Kafka.
 
 If neither a `partitionSelectorClass` nor a `partitionSelectorExpression` is
 present the result is `key.hashCode() % partitionCount`.
+
+
+==== Overriding application properties during stream deployment
+
+Application properties that are defined during deployment overrides the same properties defined during the stream creation.
+
+For example, the following stream has application properties defined during stream creation:
+
+[source,bash]
+----
+dataflow:> stream create --definition "time --fixed-delay=5 | log --level=WARN" --name ticktock
+----
+
+To override these application properties, one can specify the new property values during deployment:
+
+[source,bash]
+----
+dataflow:>stream deploy ticktock --properties "app.time.fixed-delay=4,app.log.level=ERROR"
+----
+
+
+=== Deployment properties
+
+When deploying the stream, properties that control the deployment of the apps into the target platform are known as `deployment` properties.
+For instance, one can specify how many number of instances need to be deployed for the specific application defined in the stream using the deployment property called `count`.
+
+==== Passing instance count as deployment property
+
+If you would like to have multiple instances of an application in the stream, you
+can include a property with the deploy command:
+
+[source,bash]
+----
+dataflow:> stream deploy --name ticktock --properties "app.time.count=3"
+----
+
+Note that `count` is the *reserved* property name used by the underlying deployer. Hence, if the application also has a custom property named `count`, it is *not* supported
+ when specified in `short-hand` form during stream `deployment` as it could conflict with the `instance` count deployer property. Instead, the `count` as a custom application property can be
+ specified in its `fully qualified` form (example: `app.foo.bar.count`) during stream `deployment` or it can be specified using `short-hand` or `fully qualified` form during the stream `creation`
+ where it will be considered as an app property.
+
+IMPORTANT: See <<spring-cloud-dataflow-stream-app-labels>>.
 
 ==== Inline vs file reference properties
 
