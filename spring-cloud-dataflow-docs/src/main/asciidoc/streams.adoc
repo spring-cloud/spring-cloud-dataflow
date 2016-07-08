@@ -385,7 +385,7 @@ dataflow:> stream deploy --name ticktock --properties "app.time.count=3"
 
 Note that `count` is the *reserved* property name used by the underlying deployer. Hence, if the application also has a custom property named `count`, it is *not* supported
  when specified in 'short-form' form during stream _deployment_ as it could conflict with the _instance_ count deployer property. Instead, the `count` as a custom application property can be
- specified in its _fully qualified_ form (example: `app.foo.bar.count`) during stream _deployment_ or it can be specified using qwshort-form' or _fully qualified_ form during the stream _creation_
+ specified in its _fully qualified_ form (example: `app.foo.bar.count`) during stream _deployment_ or it can be specified using 'short-form' or _fully qualified_ form during the stream _creation_
  where it will be considered as an app property.
 
 IMPORTANT: See <<spring-cloud-dataflow-stream-app-labels>>.
