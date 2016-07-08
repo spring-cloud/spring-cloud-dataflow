@@ -442,7 +442,7 @@ public class StreamControllerTests {
 		assertEquals(2, requests.size());
 		AppDeploymentRequest logRequest = requests.get(0);
 		assertThat(logRequest.getDefinition().getName(), is("log"));
-		assertEquals(logRequest.getDeploymentProperties().get(AppDeployer.INDEXED_PROPERTY_KEY), "true");
+		assertEquals("true", logRequest.getDeploymentProperties().get(AppDeployer.INDEXED_PROPERTY_KEY));
 		AppDeploymentRequest timeRequest = requests.get(1);
 		assertThat(timeRequest.getDefinition().getName(), is("time"));
 	}
@@ -462,7 +462,7 @@ public class StreamControllerTests {
 		assertThat(logRequest.getDefinition().getName(), is("log"));
 		Map<String, String> logAppProps = logRequest.getDefinition().getProperties();
 		assertEquals("WARN", logAppProps.get("log.level"));
-		assertEquals(logRequest.getDeploymentProperties().get(AppDeployer.INDEXED_PROPERTY_KEY), "true");
+		assertEquals("true", logRequest.getDeploymentProperties().get(AppDeployer.INDEXED_PROPERTY_KEY));
 		assertNull(logAppProps.get("level"));
 		AppDeploymentRequest timeRequest = requests.get(1);
 		assertThat(timeRequest.getDefinition().getName(), is("time"));
@@ -487,7 +487,7 @@ public class StreamControllerTests {
 		AppDeploymentRequest logRequest = requests.get(0);
 		assertThat(logRequest.getDefinition().getName(), is("log"));
 		Map<String, String> logAppProps = logRequest.getDefinition().getProperties();
-		assertEquals(logRequest.getDeploymentProperties().get(AppDeployer.INDEXED_PROPERTY_KEY), "true");
+		assertEquals("true", logRequest.getDeploymentProperties().get(AppDeployer.INDEXED_PROPERTY_KEY));
 		assertEquals("ERROR", logAppProps.get("log.level"));
 		AppDeploymentRequest timeRequest = requests.get(1);
 		assertThat(timeRequest.getDefinition().getName(), is("time"));
@@ -510,7 +510,7 @@ public class StreamControllerTests {
 		assertEquals(2, requests.size());
 		AppDeploymentRequest logRequest = requests.get(0);
 		assertThat(logRequest.getDefinition().getName(), is("b"));
-		assertEquals(logRequest.getDeploymentProperties().get(AppDeployer.INDEXED_PROPERTY_KEY), "true");
+		assertEquals("true", logRequest.getDeploymentProperties().get(AppDeployer.INDEXED_PROPERTY_KEY));
 		Map<String, String> logAppProps = logRequest.getDefinition().getProperties();
 		assertEquals("ERROR", logAppProps.get("log.level"));
 		AppDeploymentRequest timeRequest = requests.get(1);
