@@ -132,7 +132,7 @@ For an application that will consume events, Spring Cloud stream exposes a concu
 
 [[arch-streams-partitioning]]
 === Partitioning
-A common pattern in stream processing is to partition the data as it moves from one application to the next.  Partitioning is a critical concept in stateful processing, for either performance or consistency reasons, to ensure that all related data is processed together. For example, in a time-windowed average calculation example, it is important that all measurements from any given sensor are processed by the same application instance.  Alternatively, you may want to cache some data related to the incoming events so that it can be enriched without making a remote procedure call to retried the related data.
+A common pattern in stream processing is to partition the data as it moves from one application to the next.  Partitioning is a critical concept in stateful processing, for either performance or consistency reasons, to ensure that all related data is processed together. For example, in a time-windowed average calculation example, it is important that all measurements from any given sensor are processed by the same application instance.  Alternatively, you may want to cache some data related to the incoming events so that it can be enriched without making a remote procedure call to retrieve the related data.
 
 Spring Cloud Data Flow supports partitioning by configuring Spring Cloud Stream's output and input bindings.  Spring Cloud Stream provides a common abstraction for implementing partitioned processing use cases in a uniform fashion across different types of middleware.  Partitioning can thus be used whether the broker itself is naturally partitioned (e.g., Kafka topics) or not (e.g., RabbitMQ).  The following image shows how data could be partitioned into two buckets, such that each instance of the average processor application consumes a unique set of data.
 
@@ -147,7 +147,7 @@ app.http.count=3
 app.averageprocessor.count=2
 app.http.producer.partitionKeyExpression=payload.sensorId
 ----
-will deploy the stream such that all the input and output destinations are configured for data to flow through the applications but also ensure that a unique set of data is always delivered to each averageprocessor instance.  In this case the default algorithm is to evalute `payload.sensorId % partitionCount` where the `partitionCount` is the application count in the case of RabbitMQ and the partition count of the topic in the case of Kafka.
+will deploy the stream such that all the input and output destinations are configured for data to flow through the applications but also ensure that a unique set of data is always delivered to each averageprocessor instance.  In this case the default algorithm is to evaluate `payload.sensorId % partitionCount` where the `partitionCount` is the application count in the case of RabbitMQ and the partition count of the topic in the case of Kafka.
 
 Please refer to <<passing_stream_partition_properties>> for additional strategies to partition streams during deployment and how they map onto the underlying link:http://docs.spring.io/spring-cloud-stream/docs/1.0.2.RELEASE/reference/htmlsingle/index.html#_partitioning[Spring Cloud Stream Partitioning properties].
 
