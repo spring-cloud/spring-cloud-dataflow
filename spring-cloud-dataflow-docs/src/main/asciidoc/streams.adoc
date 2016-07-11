@@ -310,6 +310,7 @@ the application properties can be defined as:
 stream deploy ticktock --properties "app.a.fixed-delay=4,app.b.level=ERROR"
 ----
 
+[[passing_stream_partition_properties]]
 ==== Passing stream partition properties during stream deployment
 A common pattern in stream processing is to partition the data as it is streamed.
 This entails deploying multiple instances of a message consuming app and using
@@ -342,7 +343,7 @@ In summary, an app is partitioned if its count is > 1 and the previous app has a
 `partitionKeyExtractorClass` or `partitionKeyExpression` (class takes precedence).
 When a partition key is extracted, the partitioned app instance is determined by
 invoking the `partitionSelectorClass`, if present, or the `partitionSelectorExpression % partitionCount`,
-where `partitionCount` is count in the case of Redis and RabbitMQ, and the underlying
+where `partitionCount` is application count in the case of RabbitMQ, and the underlying
 partition count of the topic in the case of Kafka.
 
 If neither a `partitionSelectorClass` nor a `partitionSelectorExpression` is
@@ -378,7 +379,7 @@ For instance, one can specify how many instances need to be deployed for the spe
 If you would like to have multiple instances of an application in the stream, you
 can include a property with the deploy command:
 
-[source,bash]
+[source,bash,subs=attributes]
 ----
 dataflow:> stream deploy --name ticktock --properties "app.time.count=3"
 ----
