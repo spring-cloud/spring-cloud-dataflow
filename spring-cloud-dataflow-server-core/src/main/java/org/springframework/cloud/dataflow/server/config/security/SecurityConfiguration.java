@@ -41,10 +41,13 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 	protected void configure(HttpSecurity http) throws Exception {
 		http.antMatcher("/**")
 			.authorizeRequests()
-				.antMatchers("/security/info**", "/login**").permitAll()
+				.antMatchers(
+					"/security/info**", "/login**", "/dashboard/logout-success.html",
+					"/dashboard/styles/**", "/dashboard/images/**", "/dashboard/fonts/**",
+					"/dashboard/lib/**").permitAll()
 				.anyRequest().authenticated()
 			.and().httpBasic()
-			.and().logout().logoutSuccessUrl("/").and().csrf().disable();
+			.and().logout().logoutSuccessUrl("/dashboard/logout-success.html").and().csrf().disable();
 	}
 
 	@Override
