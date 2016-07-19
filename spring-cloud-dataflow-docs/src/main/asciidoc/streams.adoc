@@ -121,13 +121,13 @@ To whitelist application properties create a file named `spring-configuration-me
 The link:https://github.com/spring-cloud/spring-cloud-stream-app-starters[Spring Cloud Stream application starters] are a good place to look for examples of usage.  Here is a simple example of the file source's `spring-configuration-metadata-whitelist.properties` file
 
 ```
-configuration.classes=org.springframework.cloud.stream.app.file.sink.FileSinkProperties
+configuration-classes=org.springframework.cloud.stream.app.file.sink.FileSinkProperties
 ```
 
 If for some reason we also wanted to add `file.prefix` to this file, it would look like
 
 ```
-configuration.classes=org.springframework.cloud.stream.app.file.sink.FileSinkProperties
+configuration-classes=org.springframework.cloud.stream.app.file.sink.FileSinkProperties
 configuration-properties.names=server.port
 ```
 
