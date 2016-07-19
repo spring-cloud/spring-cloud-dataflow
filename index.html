@@ -67,17 +67,17 @@ Step 2 - Start Kafka [_used as: messaging middleware_]
 
 Step 3 - Build Project
 ```
-mvn clean package
+mvn clean package -DskipTests
 ```
 
 Step 4 - Launch **‘Local’** Server [_spring-cloud-dataflow-server-local/target_] 
 ```
-java -jar spring-cloud-dataflow-server-local-1.0.0.BUILD-SNAPSHOT.jar 
+java -jar spring-cloud-dataflow-server-local-[VERSION].BUILD-SNAPSHOT.jar 
 ```
 
 Step 5 - Launch Shell [_spring-cloud-dataflow-shell/target_]
 ```
-java -jar spring-cloud-dataflow-shell-1.0.0.BUILD-SNAPSHOT.jar
+java -jar spring-cloud-dataflow-shell-[VERSION].BUILD-SNAPSHOT.jar
 ```
 
 Step 6 - Import all the out-of-the-box application coordinates in bulk
@@ -90,7 +90,21 @@ Step 7 - Create **‘ticktock’** Stream
 dataflow:>stream create ticktock --definition "time | log" --deploy
 ```
 
-Step 8 - Launch Dashboard at: http://localhost:9393/dashboard
+You'll notice the following in **‘Local’** Server console.
+
+```
+2016-07-18 22:08:24.777  INFO 73058 --- [nio-9393-exec-9] o.s.c.d.spi.local.LocalAppDeployer       : deploying app ticktock.log instance 0
+   Logs will be in /var/folders/c3/ctx7_rns6x30tq7rb76wzqwr0000gp/T/spring-cloud-dataflow-5011521526937452211/ticktock-1468904904769/ticktock.log
+2016-07-18 22:08:25.081  INFO 73058 --- [nio-9393-exec-9] o.s.c.d.spi.local.LocalAppDeployer       : deploying app ticktock.time instance 0
+   Logs will be in /var/folders/c3/ctx7_rns6x30tq7rb76wzqwr0000gp/T/spring-cloud-dataflow-5011521526937452211/ticktock-1468904905074/ticktock.time
+```
+
+Step 8 - Verify the **‘ticktocks’**:
+```
+tail -f /var/folders/ ... /ticktock.log/stdout_0.log
+```
+
+Step 9 - Launch Dashboard at: http://localhost:9393/dashboard
 
 ## Spring Cloud Data Flow Server Implementations
 
