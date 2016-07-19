@@ -26,12 +26,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import org.springframework.analytics.metrics.FieldValueCounterRepository;
 import org.springframework.analytics.metrics.memory.InMemoryFieldValueCounterRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.stream.test.junit.redis.RedisTestSupport;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
@@ -54,6 +56,9 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 @ContextConfiguration(classes = {FieldValueCounterControllerTests.Config.class})
 @WebAppConfiguration
 public class FieldValueCounterControllerTests {
+
+	@Rule
+	public RedisTestSupport redisTestSupport = new RedisTestSupport();
 
 	@Autowired
 	private FieldValueCounterRepository repository;
