@@ -46,7 +46,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/security/info")
 @ExposesResourceFor(SecurityInfoResource.class)
-@EnableConfigurationProperties(SecurityProperties.class)
 public class SecurityController {
 
 	private final SecurityProperties securityProperties;
