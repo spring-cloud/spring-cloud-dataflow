@@ -114,7 +114,7 @@ the specific documentation of each Data Flow Server for more detail.
 [[spring-cloud-dataflow-stream-app-whitelisting]]
 === Whitelisting application properties
 
-Stream applications are Spring Boot applications which are aware of many <spring-cloud-dataflow-global-properties>, e.g. `server.port` but also families of properties such as those with the prefix `spring.jmx` and `logging`.  When creating your own application it is desirable to whitelist properties so that the shell and the UI can display them first as primary properties when presenting options via TAB completion or in drop-down boxes.
+Stream applications are Spring Boot applications which are aware of many <<spring-cloud-dataflow-global-properties>>, e.g. `server.port` but also families of properties such as those with the prefix `spring.jmx` and `logging`.  When creating your own application it is desirable to whitelist properties so that the shell and the UI can display them first as primary properties when presenting options via TAB completion or in drop-down boxes.
 
 To whitelist application properties create a file named `spring-configuration-metadata-whitelist.properties` in the `META-INF` resource directory.  There are two property keys that can be used inside this file. The first key is named `configuration-properties.classes`.  The value is a comma separated list of fully qualified `@ConfigurationProperty` class names.  The second key is `configuration-properties.names` whose value is a comma separated list of property names.  This can contain the full name of property, such as `server.port` or a partial name to whitelist a category of property names, e.g. `spring.jmx`.
 
