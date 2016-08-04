@@ -39,7 +39,8 @@ public enum DatabaseType {
 	ORACLE("Oracle"),
 	MYSQL("MySQL"),
 	POSTGRES("PostgreSQL"),
-	SQLSERVER("Microsoft SQL Server");
+	SQLSERVER("Microsoft SQL Server"),
+	DB2("DB2");
 
 	private static final Map<String, DatabaseType> dbNameMap;
 

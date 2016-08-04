@@ -25,6 +25,7 @@ import org.springframework.jdbc.support.MetaDataAccessException;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
+import static org.springframework.cloud.dataflow.server.repository.support.DatabaseType.DB2;
 import static org.springframework.cloud.dataflow.server.repository.support.DatabaseType.H2;
 import static org.springframework.cloud.dataflow.server.repository.support.DatabaseType.HSQL;
 import static org.springframework.cloud.dataflow.server.repository.support.DatabaseType.MYSQL;
@@ -64,6 +65,7 @@ public class SqlPagingQueryProviderFactoryBean implements FactoryBean<PagingQuer
 		providers.put(POSTGRES, new PostgresPagingQueryProvider());
 		providers.put(ORACLE, new OraclePagingQueryProvider());
 		providers.put(SQLSERVER, new SqlServerPagingQueryProvider());
+		providers.put(DB2, new Db2PagingQueryProvider());
 	}
 
 	/**

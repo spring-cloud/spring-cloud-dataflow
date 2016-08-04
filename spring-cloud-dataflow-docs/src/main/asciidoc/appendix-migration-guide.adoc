@@ -200,7 +200,7 @@ ZooKeeper is not used in the new architecture.
 ==== RDBMS
 
 Spring Cloud Data Flow uses an RDBMS instead of Redis for stream/task definitions, application 
-registration, and for job repositories.The default configuration uses an embedded H2 instance, but Oracle, SqlServer, MySQL/MariaDB, PostgreSQL, H2, and HSQLDB databases are supported. To use Oracle and 
+registration, and for job repositories.The default configuration uses an embedded H2 instance, but Oracle, DB2, SqlServer, MySQL/MariaDB, PostgreSQL, H2, and HSQLDB databases are supported. To use Oracle, DB2 and
 SqlServer you will need to create your own Data Flow Server using link:https://start.spring.io/[Spring Initializr] and add the appropriate JDBC driver dependency.
 
 ==== Redis
