@@ -1,0 +1,113 @@
+[[api-guide]]
+= REST API Guide
+
+[partintro]
+--
+In this section you will learn all about Spring Cloud Data Flows REST API.
+--
+
+[[api-guide-overview]]
+== Overview
+
+[[api-guide-overview-http-verbs]]
+=== HTTP verbs
+
+Spring Cloud Dataflow tries to adhere as closely as possible to standard HTTP and REST conventions in its use of HTTP verbs.
+
+|===
+| Verb | Usage
+
+| `GET`
+| Used to retrieve a resource
+
+| `POST`
+| Used to create a new resource
+
+| `PUT`
+| Used to update an existing resource, including partial updates. Also used for
+resources that imply the concept of `restarts` such as Tasks.
+
+| `DELETE`
+| Used to delete an existing resource
+|===
+
+[[api-guide-overview-http-status-codes]]
+=== HTTP status codes
+
+RESTful notes tries to adhere as closely as possible to standard HTTP and REST conventions in its use of HTTP status codes.
+
+|===
+| Status code | Usage
+
+| `200 OK`
+| The request completed successfully
+
+| `201 Created`
+| A new resource has been created successfully. The resource's URI is available from the response's `Location` header
+
+| `204 No Content`
+| An update to an existing resource has been applied successfully
+
+| `400 Bad Request`
+| The request was malformed. The response body will include an error providing further information
+
+| `404 Not Found`
+| The requested resource did not exist
+
+| `409 Conflict`
+| The requested resource already exists, e.g. the task already exists or the stream
+was already being deployed
+
+| `422 Unprocessable Entity`
+| Returned in cases the Job Execution cannot be stopped or restarted
+
+|===
+
+[[api-guide-overview-headers]]
+=== Headers
+
+Every response has the following header(s):
+
+TBD
+
+[[api-guide-overview-errors]]
+=== Errors
+
+TBD
+
+[[api-guide-overview-hypermedia]]
+=== Hypermedia
+
+Spring Cloud Data Flow uses hypermedia and resources include links to other resources
+in their responses. Responses are in http://stateless.co/hal_specification.html[Hypertext Application from resource to resource Language (HAL)] format. Links can be found beneath the `_links` key. Users of the API should not create URIs themselves, instead they should use the above-described links to navigate.
+
+[[api-guide-resources]]
+== Resources
+
+[[api-guide-resources-index]]
+=== Index
+
+The index provides the entry point into the service.
+
+TBD
+
+[[resources-app-registry-list]]
+=== Listing Applications
+
+A `GET` request will list all of the service's notes.
+
+==== Request structure
+
+include::{snippets}/apps/http-request.adoc[]
+
+==== Request parameters
+
+include::{snippets}/apps/request-parameters.adoc[]
+
+==== Example request
+
+include::{snippets}/apps/curl-request.adoc[]
+
+==== Response structure
+
+include::{snippets}/apps/http-response.adoc[]

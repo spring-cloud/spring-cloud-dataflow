@@ -109,6 +109,7 @@
 										<attribute-missing>warn</attribute-missing>
 										<project-version>${project.version}</project-version>
 										<project-artifactId>${project.artifactId}</project-artifactId>
+										<snippets>${basedir}/../spring-cloud-dataflow-server-core/target/generated-snippets</snippets>
 									</attributes>
 								</configuration>
 							</execution>
