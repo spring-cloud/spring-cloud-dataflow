@@ -26,6 +26,7 @@ include::streams.adoc[]
 include::tasks.adoc[]
 include::dashboard.adoc[]
 include::howto.adoc[]
+include::api-guide.adoc[]
 include::appendix.adoc[]
 
 

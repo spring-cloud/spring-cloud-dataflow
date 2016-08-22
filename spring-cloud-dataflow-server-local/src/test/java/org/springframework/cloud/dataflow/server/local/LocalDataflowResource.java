@@ -85,4 +85,10 @@ public class LocalDataflowResource extends ExternalResource {
 	public String getDataflowPort() {
 		return dataflowPort;
 	}
+
+	public WebApplicationContext getWebApplicationContext() {
+		return configurableApplicationContext;
+	}
+
 }
+
