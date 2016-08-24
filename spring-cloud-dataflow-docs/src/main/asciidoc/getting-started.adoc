@@ -229,6 +229,7 @@ NOTE: If HTTPS is enabled, it will completely replace HTTP as the protocol over
 which the REST endpoints and the Data Flow Dashboard interact. Plain HTTP requests
 will fail - therefore, make sure that you configure your Shell accordingly.
 
+[[getting-started-security-self-signed-certificates]]
 ==== Using Self-Signed Certificates
 
 For testing purposes or during development it might be convenient to create self-signed certificates.
@@ -307,7 +308,73 @@ dataflow:> dataflow config server https://localhost:8443/
 
 By default, the REST endpoints (administration, management and health), as well
 as the Dashboard UI do not require authenticated access. However, authentication can
-be provided via http://oauth.net/2/[OAuth 2.0], thus allowing you to also integrate Spring Cloud
+be provided via:
+
+* http://oauth.net/2/[OAuth 2.0]
+* Basic Authentication
+
+[[getting-started-security-basic-authentication]]
+=== Basic Authentication
+
+https://en.wikipedia.org/wiki/Basic_access_authentication[Basic Authentication] can
+be enabled by adding the following to `application.yml` or via
+environment variables:
+
+[source,yaml]
+----
+security:
+  basic:
+    enabled: true                                                     # <1>
+    realm: Spring Cloud Data Flow                                     # <2>
+----
+
+<1> Enables basic authentication. Must be set to true for security to be enabled.
+<2> (Optional) The realm for Basic authentication. Will default to _Spring_ if not explicitly set.
+
+NOTE: Current versions of Chrome do not display the _realm_. Please see the following
+https://bugs.chromium.org/p/chromium/issues/detail?id=544244[Chromium issue ticket] for more information.
+
+In this use-case, the underlying Spring Boot will auto-create a user called _user_
+with an auto-generated password which will be printed out to the console upon startup.
+
+.Default Spring Boot user credentials
+image::{dataflow-asciidoc}/images/dataflow-security-default-user.png[Default Spring Boot user credentials , scaledwidth="100%"]
+
+NOTE: Please be aware of inherent issues of Basic Authentication and _logging out_, since the credentials are cached by the browser and simply browsing back to application pages will log you back in.
+
+If you need to define more than one file-based user account, please take a look at
+_File based authentication_.
+
+[[getting-started-security-file-based-authentication]]
+==== File based authentication
+
+By default Spring Boot allows you to only specify one single user. Spring Cloud
+Data Flow also supports the listing of more than one user in a configuration file,
+as described below. Each user must be assigned a password and one or more roles:
+
+[source,yaml]
+----
+dataflow:
+  security:
+    authentication:
+      file:
+        enabled: true                                                 # <1>
+        users:                                                        # <2>
+          bob: bobspassword, ROLE_ADMIN                               # <3>
+          alice: alicepwd, ROLE_VIEW, ROLE_CREATE
+----
+
+<1> Enables file based authentication
+<2> This is a yaml map of username to password
+<3> Each map `value` is made of a corresponding password and role(s), comma separated
+
+IMPORTANT: As of Spring Cloud Data Flow 1.1, roles are not supported, yet (specified roles are ignored). Due to an https://github.com/spring-projects/spring-security/issues/3403[issue] in
+Spring Security, though, at least one role must be provided.
+
+[[getting-started-security-oauth2]]
+=== OAuth 2.0
+
+http://oauth.net/2/[OAuth 2.0] allows you to integrate Spring Cloud
 Data Flow into Single Sign On (SSO) environments. The following 2 OAuth2 Grant Types will be used:
 
 * _Authorization Code_ - Used for the GUI (Browser) integration. You will be redirected to your OAuth Service for authentication
@@ -319,7 +386,7 @@ Grand Type under the covers to authenticate with your OAuth2 service.
 NOTE: When authentication is set up, it is strongly recommended to enable HTTPS
 as well, especially in production environments.
 
-You can turn on authentication by adding the following to `application.yml` or via
+You can turn on OAuth2 authentication by adding the following to `application.yml` or via
 environment variables:
 
 [source,yaml]
@@ -340,7 +407,7 @@ security:
 
 <1> Must be set to `true` for security to be enabled.
 <2> The realm for Basic authentication
-<3> OAuth Configuration Section
+<3> OAuth Configuration Section, if you leave off the OAuth2 section, Basic Authentication will be enabled instead.
 
 NOTE: As of version 1.0 Spring Cloud Data Flow does not provide finer-grained authorization. Thus, once you are logged in, you have full access to all functionality.
 
