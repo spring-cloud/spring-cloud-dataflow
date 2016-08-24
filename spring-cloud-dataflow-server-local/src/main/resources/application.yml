@@ -14,6 +14,18 @@ info:
 #    key-store-password: dataflow
 #    key-password: dataflow
 
+# Basic Authentication:
+
+#security:
+#  basic:
+#    enabled: true
+#    realm: Spring Cloud Data Flow
+#  user:
+#    name: ghillert
+#    password: ghillert
+
+# Oauth 2 support:
+
 #security:
 #  basic:
 #    enabled: true

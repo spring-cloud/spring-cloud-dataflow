@@ -160,7 +160,7 @@ Streams are composed of applications that use the Spring Cloud Stream library as
 
 The {spring-cloud-stream-docs}#_binders[Binder abstraction] in Spring Cloud Stream is what connects the application to the middleware.  There are several configuration properties of the binder that are portable across all binder implementations and some that are specific to the middleware.
 
-For consumer applications there is a retry policy for exceptions generated during message handling.  The retry policy is configured using the {spring-cloud-stream-docs}#_consumer_properties[common consumer properties] `maxAttempts`, `backOffInitialInterval`, `backOffMaxInterval`, and `backOffMultiplier`.  The default values of these properties will retry the callback method invocation 3 times and wait one second for the first retry.  A backoff multiplier of 2 is used for the second and third attempts.  
+For consumer applications there is a retry policy for exceptions generated during message handling.  The retry policy is configured using the {spring-cloud-stream-docs}#_consumer_properties[common consumer properties] `maxAttempts`, `backOffInitialInterval`, `backOffMaxInterval`, and `backOffMultiplier`.  The default values of these properties will retry the callback method invocation 3 times and wait one second for the first retry.  A backoff multiplier of 2 is used for the second and third attempts.
 
 When the number of number of retry attempts has exceeded the `maxAttempts` value, the exception and the failed message will become the payload of a message and be sent to the application's error channel.  By default, the default message handler for this error channel logs the message.  You can change the default behavior in your application by creating your own message handler that subscribes to the error channel.
 
@@ -213,7 +213,7 @@ While we provide a server executable for each of the target runtimes you can als
 [[arch-data-flow-server-security]]
 === Security
 
-The Data Flow Server executable jars support basic http and OAuth 2.0 authentication to access it endpoints.  Refer to the security section for more information.
+The Data Flow Server executable jars support basic http and OAuth 2.0 authentication to access its endpoints. Refer to the security section for more information.
 
 Authorization via groups is planned for a future release.
 

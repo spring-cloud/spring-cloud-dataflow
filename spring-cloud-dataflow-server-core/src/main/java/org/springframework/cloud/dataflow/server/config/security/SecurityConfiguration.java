@@ -15,14 +15,13 @@
  */
 package org.springframework.cloud.dataflow.server.config.security;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.autoconfigure.security.oauth2.client.EnableOAuth2Sso;
-import org.springframework.cloud.dataflow.server.service.impl.ManualOAuthAuthenticationProvider;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 
 /**
@@ -32,10 +31,13 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
  * @since 1.0
  *
  */
-@EnableOAuth2Sso
 @Configuration
 @ConditionalOnProperty("security.basic.enabled")
+@EnableWebSecurity
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
+
+	@Autowired(required=false)
+	private AuthenticationProvider authenticationProvider;
 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
@@ -52,12 +54,11 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
 	@Override
 	protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-		auth.authenticationProvider(authenticationProvider());
+		if (authenticationProvider != null) {
+			auth.authenticationProvider(this.authenticationProvider);
+		}
+		else {
+			super.configure(auth);
+		}
 	}
-
-	@Bean
-	public AuthenticationProvider authenticationProvider() {
-		return new ManualOAuthAuthenticationProvider();
-	}
-
 }
