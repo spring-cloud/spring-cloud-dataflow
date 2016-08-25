@@ -31,6 +31,7 @@ import org.springframework.cloud.dataflow.server.repository.DuplicateTaskExcepti
 import org.springframework.cloud.dataflow.server.repository.NoSuchStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskExecutionException;
+import org.springframework.cloud.dataflow.server.repository.TaskDeploymentIdNotAvailableException;
 import org.springframework.hateoas.VndErrors;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.StringUtils;
@@ -73,6 +74,7 @@ public class RestControllerAdvice {
 			DuplicateStreamDefinitionException.class,
 			DuplicateTaskException.class,
 			StreamAlreadyDeployedException.class,
+			TaskDeploymentIdNotAvailableException.class,
 			StreamAlreadyDeployingException.class})
 	@ResponseStatus(HttpStatus.CONFLICT)
 	@ResponseBody
