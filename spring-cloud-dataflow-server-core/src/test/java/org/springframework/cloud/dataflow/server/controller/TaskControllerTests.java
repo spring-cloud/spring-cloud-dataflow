@@ -22,6 +22,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.atLeast;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -61,6 +62,7 @@ import org.springframework.web.context.WebApplicationContext;
  * @author Mark Fisher
  * @author Glenn Renfro
  * @author Gunnar Hillert
+ * @author Ilayaperumal Gopinathan
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = TestDependencies.class)
@@ -107,6 +109,17 @@ public class TaskControllerTests {
 	@Test(expected = IllegalArgumentException.class)
 	public void testTaskDefinitionControllerConstructorMissingDeployer() {
 		new TaskDefinitionController(new InMemoryTaskDefinitionRepository(), null, null);
+	}
+
+	@Test
+	public void testTaskLaunchWithNullIDReturned() throws Exception {
+		when(taskLauncher.launch(any(AppDeploymentRequest.class))).thenReturn(null);
+		repository.save(new TaskDefinition("myTask", "foo"));
+		this.registry.register("task.foo", new URI("maven://org.springframework.cloud:foo:1"));
+
+		mockMvc.perform(
+				post("/tasks/deployments/{name}", "myTask").accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isInternalServerError());
 	}
 
 	@Test

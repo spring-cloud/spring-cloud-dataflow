@@ -159,6 +159,9 @@ public class DefaultTaskService implements TaskService {
 		Resource resource = this.resourceLoader.getResource(uri.toString());
 		AppDeploymentRequest request = taskDefinition.createDeploymentRequest(resource, deploymentProperties, runtimeParams);
 		String id = this.taskLauncher.launch(request);
+		if (!StringUtils.hasText(id)) {
+			throw new IllegalStateException("Deployment ID is null for the task:" + taskName);
+		}
 		String deploymentKey = DeploymentKey.forTaskDefinition(taskDefinition);
 		if (deploymentIdRepository.findOne(deploymentKey) == null) {
 			this.deploymentIdRepository.save(deploymentKey, id);
