@@ -178,6 +178,39 @@ public class StreamControllerTests {
 	}
 
 	@Test
+	public void testFindRelatedStreams() throws Exception {
+		assertEquals(0, repository.count());
+		mockMvc.perform(
+				post("/streams/definitions/").param("name", "myStream1").param("definition", "time | log")
+						.accept(MediaType.APPLICATION_JSON)).andDo(print())
+				.andExpect(status().isCreated());
+		mockMvc.perform(
+				post("/streams/definitions/").param("name", "myAnotherStream1").param("definition", "time | log")
+						.accept(MediaType.APPLICATION_JSON)).andDo(print())
+				.andExpect(status().isCreated());
+		mockMvc.perform(
+				post("/streams/definitions/").param("name", "myStream2").param("definition", ":myStream1 > log")
+						.accept(MediaType.APPLICATION_JSON)).andDo(print())
+				.andExpect(status().isCreated());
+		mockMvc.perform(
+				post("/streams/definitions/").param("name", "myStream3").param("definition", ":myStream1.time > log")
+						.accept(MediaType.APPLICATION_JSON)).andDo(print())
+				.andExpect(status().isCreated());
+		mockMvc.perform(
+				post("/streams/definitions/").param("name", "myStream4").param("definition", ":myAnotherStream1 > log")
+						.accept(MediaType.APPLICATION_JSON)).andDo(print())
+				.andExpect(status().isCreated());
+		assertEquals(5, repository.count());
+		String response = mockMvc.perform(
+				get("/streams/definitions/myStream1/related")
+						.accept(MediaType.APPLICATION_JSON)).andReturn().getResponse().getContentAsString();
+		assertTrue(response.contains(":myStream1 > log"));
+		assertTrue(response.contains(":myStream1.time > log"));
+		assertTrue(response.contains("time | log"));
+		assertTrue(response.contains("\"totalElements\":3"));
+	}
+
+	@Test
 	public void testSaveInvalidAppDefintions() throws Exception {
 		String response = mockMvc.perform(
 				post("/streams/definitions/").param("name", "myStream").param("definition", "foo | bar")

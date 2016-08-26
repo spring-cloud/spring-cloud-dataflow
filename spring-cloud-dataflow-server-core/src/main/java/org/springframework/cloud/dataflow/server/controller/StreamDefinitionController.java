@@ -25,7 +25,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.cloud.dataflow.core.ApplicationType;
-import org.springframework.cloud.dataflow.core.BindingPropertyKeys;
 import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
@@ -39,7 +38,7 @@ import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepo
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.app.AppStatus;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
-import org.springframework.cloud.deployer.spi.core.AppDefinition;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.ExposesResourceFor;
@@ -187,6 +186,40 @@ public class StreamDefinitionController {
 		}
 		deploymentController.undeploy(name);
 		this.repository.delete(name);
+	}
+
+	/**
+	 * Return a list of related stream definition resources based on the given stream name.
+	 * Related streams include the main stream and the tap stream(s) on the main stream.
+	 *
+	 * @param name the name of an existing stream definition (required)
+	 */
+	@RequestMapping(value = "/{name}/related", method = RequestMethod.GET)
+	@ResponseStatus(HttpStatus.OK)
+	public PagedResources<StreamDefinitionResource> listRelated(@PathVariable("name") String name,
+																PagedResourcesAssembler<StreamDefinition> assembler) {
+		List<StreamDefinition> relatedDefinitions = new ArrayList<>();
+		StreamDefinition currentStreamDefinition = repository.findOne(name);
+		if (currentStreamDefinition == null) {
+			throw new NoSuchStreamDefinitionException(name);
+		}
+		relatedDefinitions.add(currentStreamDefinition);
+		String tapNamePrefix = ":" + name;
+		Iterable<StreamDefinition> definitions = repository.findAll();
+
+		for (StreamDefinition definition: definitions) {
+			String dslText = definition.getDslText();
+			if (dslText.startsWith(tapNamePrefix)) {
+				String[] dslSplits = dslText.split(">");
+				if (dslText.startsWith(tapNamePrefix + ".")) {
+					relatedDefinitions.add(definition);
+				}
+				else if (dslSplits[0].trim().equalsIgnoreCase(tapNamePrefix)) {
+					relatedDefinitions.add(definition);
+				}
+			}
+		}
+		return assembler.toResource(new PageImpl<>(relatedDefinitions), streamDefinitionAssembler);
 	}
 
 	/**
