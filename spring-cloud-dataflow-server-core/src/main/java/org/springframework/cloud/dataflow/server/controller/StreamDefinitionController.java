@@ -18,6 +18,7 @@ package org.springframework.cloud.dataflow.server.controller;
 
 import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -25,9 +26,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.cloud.dataflow.core.ApplicationType;
-import org.springframework.cloud.dataflow.core.BindingPropertyKeys;
 import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
+import org.springframework.cloud.dataflow.core.dsl.StreamNode;
+import org.springframework.cloud.dataflow.core.dsl.StreamParser;
+import org.springframework.cloud.dataflow.core.dsl.TokenKind;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.rest.resource.StreamDefinitionResource;
 import org.springframework.cloud.dataflow.server.DataFlowServerUtil;
@@ -39,7 +42,7 @@ import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepo
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.app.AppStatus;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
-import org.springframework.cloud.deployer.spi.core.AppDefinition;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.ExposesResourceFor;
@@ -187,6 +190,48 @@ public class StreamDefinitionController {
 		}
 		deploymentController.undeploy(name);
 		this.repository.delete(name);
+	}
+
+	/**
+	 * Return a list of related stream definition resources based on the given stream name.
+	 * Related streams include the main stream and the tap stream(s) on the main stream.
+	 *
+	 * @param name the name of an existing stream definition (required)
+	 */
+	@RequestMapping(value = "/{name}/related", method = RequestMethod.GET)
+	@ResponseStatus(HttpStatus.OK)
+	public PagedResources<StreamDefinitionResource> listRelated(@PathVariable("name") String name,
+																@RequestParam(value="nested", required = false, defaultValue = "false") boolean nested,
+																PagedResourcesAssembler<StreamDefinition> assembler) {
+		Set<StreamDefinition> relatedDefinitions = new HashSet<>();
+		StreamDefinition currentStreamDefinition = repository.findOne(name);
+		if (currentStreamDefinition == null) {
+			throw new NoSuchStreamDefinitionException(name);
+		}
+		Iterable<StreamDefinition> definitions = repository.findAll();
+		List<StreamDefinition> result = new ArrayList<>(findRelatedDefinitions(currentStreamDefinition, definitions,
+				relatedDefinitions, nested));
+		return assembler.toResource(new PageImpl<>(result), streamDefinitionAssembler);
+	}
+
+	private Set<StreamDefinition> findRelatedDefinitions(StreamDefinition currentStreamDefinition, Iterable<StreamDefinition> definitions,
+														  Set<StreamDefinition> relatedDefinitions, boolean nested) {
+		relatedDefinitions.add(currentStreamDefinition);
+		String currentStreamName = currentStreamDefinition.getName();
+		String indexedStreamName = currentStreamName + ".";
+		for (StreamDefinition definition: definitions) {
+			StreamNode sn = new StreamParser(definition.getName(), definition.getDslText()).parse();
+			if (sn.getSourceDestinationNode() != null) {
+				String nameComponent = sn.getSourceDestinationNode().getDestinationName();
+				if (nameComponent.equals(currentStreamName) || nameComponent.startsWith(indexedStreamName)) {
+					relatedDefinitions.add(definition);
+					if (nested) {
+						findRelatedDefinitions(definition, definitions, relatedDefinitions, true);
+					}
+				}
+			}
+		}
+		return relatedDefinitions;
 	}
 
 	/**
