@@ -338,7 +338,7 @@ In this use-case, the underlying Spring Boot will auto-create a user called _use
 with an auto-generated password which will be printed out to the console upon startup.
 
 .Default Spring Boot user credentials
-image::images/dataflow-security-default-user.png[Default Spring Boot user credentials , scaledwidth="100%"]
+image::{dataflow-asciidoc}/images/dataflow-security-default-user.png[Default Spring Boot user credentials , scaledwidth="100%"]
 
 NOTE: Please be aware of inherent issues of Basic Authentication and _logging out_, since the credentials are cached by the browser and simply browsing back to application pages will log you back in.
 
@@ -485,7 +485,7 @@ When running a default version of Spring Cloud Data Flow locally, your GitHub co
 should look like the following:
 
 .Register an OAuth Application for GitHub
-image::images/dataflow-security-github.png[Register an OAuth Application for GitHub , scaledwidth="100%"]
+image::{dataflow-asciidoc}/images/dataflow-security-github.png[Register an OAuth Application for GitHub , scaledwidth="100%"]
 
 NOTE: For the _Authorization callback URL_ you will enter Spring Cloud Data Flow's Login URL, e.g. `http://localhost:9393/login`.
 
