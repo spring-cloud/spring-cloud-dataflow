@@ -328,15 +328,19 @@ security:
     realm: Spring Cloud Data Flow                                     # <2>
 ----
 
+<1> Enables basic authentication. Must be set to true for security to be enabled.
+<2> (Optional) The realm for Basic authentication. Will default to _Spring_ if not explicitly set.
+
+NOTE: Current versions of Chrome do not display the _realm_. Please see the following
+https://bugs.chromium.org/p/chromium/issues/detail?id=544244[Chromium issue ticket] for more information.
+
 In this use-case, the underlying Spring Boot will auto-create a user called _user_
 with an auto-generated password which will be printed out to the console upon startup.
 
 .Default Spring Boot user credentials
 image::images/dataflow-security-default-user.png[Default Spring Boot user credentials , scaledwidth="100%"]
 
-NOTE: Dedicated Basic Authentication support is available since Spring Cloud Data Flow 1.1.0. Also,
-please be aware of inherent issues of Basic Authentication and _logging out_, since the
-credentials are cached by the browser and simply browsing back to application pages will log you back in.
+NOTE: Please be aware of inherent issues of Basic Authentication and _logging out_, since the credentials are cached by the browser and simply browsing back to application pages will log you back in.
 
 If you need to define more than one file-based user account, please take a look at
 _File based authentication_.
@@ -346,7 +350,7 @@ _File based authentication_.
 
 By default Spring Boot allows you to only specify one single user. Spring Cloud
 Data Flow also supports the listing of more than one user in a configuration file,
-as described below. Each user must be assigned a password and a role:
+as described below. Each user must be assigned a password and one or more roles:
 
 [source,yaml]
 ----
@@ -357,14 +361,12 @@ dataflow:
         enabled: true                                                 # <1>
         users:                                                        # <2>
           bob: bobspassword, ROLE_ADMIN                               # <3>
-          alice: alicepwd, ROLE_ADMIN
+          alice: alicepwd, ROLE_VIEW, ROLE_CREATE
 ----
 
 <1> Enables file based authentication
 <2> This is a yaml map of username to password
-<3> Each map `value` is made of a corresponding password and role
-
-NOTE: File based authentication support is available since Spring Cloud Data Flow 1.1.0.
+<3> Each map `value` is made of a corresponding password and role(s), comma separated
 
 IMPORTANT: As of Spring Cloud Data Flow 1.1, roles are not supported, yet (specified roles are ignored). Due to an https://github.com/spring-projects/spring-security/issues/3403[issue] in
 Spring Security, though, at least one role must be provided.

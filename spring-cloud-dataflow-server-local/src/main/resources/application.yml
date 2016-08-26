@@ -21,8 +21,8 @@ info:
 #    enabled: true
 #    realm: Spring Cloud Data Flow
 #  user:
-#    name: ghillert
-#    password: ghillert
+#    name: your-username
+#    password: your-password
 
 # Oauth 2 support:
 

@@ -17,18 +17,27 @@ package org.springframework.cloud.dataflow.server.config.security;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.web.authentication.www.BasicAuthenticationEntryPoint;
+import org.springframework.security.web.util.matcher.AnyRequestMatcher;
 
 /**
- * Setup Spring Security OAuth for the Rest Endpoints of Spring Cloud Data Flow.
+ * Setup Spring Security for the Rest Endpoints of Spring Cloud Data Flow. For the
+ * OAuth2-specific configuration see {@link OAuthSecurityConfiguration}.
+ *
+ * An (optionally) injected {@link AuthenticationProvider} will be used if available,
+ * e.g. via OAuth2-specific configuration.
  *
  * @author Gunnar Hillert
  * @since 1.0
+ *
+ * @see OAuthSecurityConfiguration
  *
  */
 @Configuration
@@ -39,8 +48,16 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 	@Autowired(required=false)
 	private AuthenticationProvider authenticationProvider;
 
+	@Autowired
+	private SecurityProperties securityProperties;
+
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
+
+		final BasicAuthenticationEntryPoint basicAuthenticationEntryPoint = new BasicAuthenticationEntryPoint();
+		basicAuthenticationEntryPoint.setRealmName(securityProperties.getBasic().getRealm());
+		basicAuthenticationEntryPoint.afterPropertiesSet();
+
 		http.antMatcher("/**")
 			.authorizeRequests()
 				.antMatchers(
@@ -49,7 +66,11 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 					"/dashboard/lib/**").permitAll()
 				.anyRequest().authenticated()
 			.and().httpBasic()
-			.and().logout().logoutSuccessUrl("/dashboard/logout-success.html").and().csrf().disable();
+			.and().exceptionHandling()
+					.defaultAuthenticationEntryPointFor(basicAuthenticationEntryPoint,
+							AnyRequestMatcher.INSTANCE)
+			.and().logout().logoutSuccessUrl("/dashboard/logout-success.html")
+			.and().csrf().disable();
 	}
 
 	@Override
