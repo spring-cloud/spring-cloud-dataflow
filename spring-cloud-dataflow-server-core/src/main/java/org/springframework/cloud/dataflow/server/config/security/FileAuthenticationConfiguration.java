@@ -23,6 +23,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.authentication.configurers.GlobalAuthenticationConfigurerAdapter;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import org.springframework.util.Assert;
 
 /**
 * A security configuration that conditionally sets up in-memory users from a file.
@@ -32,11 +33,18 @@ import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 */
 @Configuration
 @ConditionalOnProperty("dataflow.security.authentication.file.enabled")
-@ConfigurationProperties(prefix = "dataflow.security.authentication.file")
+@ConfigurationProperties(prefix = FileAuthenticationConfiguration.CONFIGURATION_PROPERTIES_PREFIX)
 public class FileAuthenticationConfiguration extends GlobalAuthenticationConfigurerAdapter {
+
+	public static final String CONFIGURATION_PROPERTIES_PREFIX = "dataflow.security.authentication.file";
 
 	private Properties users;
 
+	/**
+	 * Set users as {@link Properties}. Value (String) of the property must be in the format e.g.:
+	 * {@code bobspassword, ROLE_NAME}.
+	 *
+	 */
 	public void setUsers(Properties users) {
 		this.users = users;
 	}
@@ -45,9 +53,21 @@ public class FileAuthenticationConfiguration extends GlobalAuthenticationConfigu
 		return users;
 	}
 
+	/**
+	 * Initializes the {@link AuthenticationManagerBuilder}. Creates an
+	 * {@link InMemoryUserDetailsManager} with the provided {@link FileAuthenticationConfiguration#getUsers()}.
+	 * {@link FileAuthenticationConfiguration#getUsers()} must contain at least 1 user.
+	 *
+	 * @throws IllegalArgumentException if {@link FileAuthenticationConfiguration#getUsers()} is empty.
+	 */
 	@Override
 	public void init(AuthenticationManagerBuilder auth) throws Exception {
-		InMemoryUserDetailsManager inMemory = new InMemoryUserDetailsManager(getUsers());
+
+		Assert.notEmpty(this.users,
+			String.format("No user specified. Please specify at least 1 user (e.g. via '%s')",
+				CONFIGURATION_PROPERTIES_PREFIX + ".users"));
+
+		final InMemoryUserDetailsManager inMemory = new InMemoryUserDetailsManager(getUsers());
 		auth.userDetailsService(inMemory);
 	}
 
