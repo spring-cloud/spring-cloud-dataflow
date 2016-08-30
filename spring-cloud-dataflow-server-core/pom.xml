@@ -54,6 +54,10 @@
 			<artifactId>spring-security-oauth2</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-ldap</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-dataflow-ui</artifactId>
 		</dependency>
@@ -144,7 +148,6 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-
 	</dependencies>
 	<build>
 		<resources>
