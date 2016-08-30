@@ -1,0 +1,20 @@
+management:
+  security:
+    enabled: true
+security:
+  basic:
+    enabled: true
+    realm: Spring Cloud Data Flow
+dataflow:
+  security:
+    authentication:
+      ldap:
+        enabled: true
+        url: ldap://localhost:${ldap.port}
+        managerDn: uid=bob,ou=people,dc=springframework,dc=org
+        managerPassword: bobspassword
+        userSearchBase: ou=otherpeople,dc=springframework,dc=org
+        userSearchFilter: uid={0}
+        groupSearchFilter: member={0}
+        groupRoleAttribute: cn
+        groupSearchBase: ou=groups,dc=springframework,dc=org

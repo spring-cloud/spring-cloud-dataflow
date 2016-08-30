@@ -1,0 +1,14 @@
+management:
+  security:
+    enabled: true
+security:
+  basic:
+    enabled: true
+    realm: Spring Cloud Data Flow
+dataflow:
+  security:
+    authentication:
+      ldap:
+        enabled: true
+        url: ldap://localhost:${ldap.port}
+        userDnPattern: uid={0},ou=otherpeople,dc=springframework,dc=org

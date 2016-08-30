@@ -195,7 +195,14 @@ java -jar spring-cloud-dataflow-server-local/target/spring-cloud-dataflow-server
 
 By default, the Data Flow server is unsecured and runs on an unencrypted HTTP connection.
 You can secure your REST endpoints, as well as the Data Flow Dashboard by enabling HTTPS
-and requiring clients to authenticate.
+and requiring clients to authenticate using either:
+
+* http://oauth.net/2/[OAuth 2.0]
+* Basic Authentication
+
+NOTE:
+By default, the REST endpoints (administration, management and health), as well
+as the Dashboard UI do not require authenticated access.
 
 [[getting-started-security-enabling-https]]
 === Enabling HTTPS
@@ -303,16 +310,6 @@ Don't forget to target the Data Flow Server with:
 dataflow:> dataflow config server https://localhost:8443/
 ----
 
-[[getting-started-security-enabling-authentication]]
-=== Enabling Authentication
-
-By default, the REST endpoints (administration, management and health), as well
-as the Dashboard UI do not require authenticated access. However, authentication can
-be provided via:
-
-* http://oauth.net/2/[OAuth 2.0]
-* Basic Authentication
-
 [[getting-started-security-basic-authentication]]
 === Basic Authentication
 
@@ -354,6 +351,10 @@ as described below. Each user must be assigned a password and one or more roles:
 
 [source,yaml]
 ----
+security:
+  basic:
+    enabled: true
+    realm: Spring Cloud Data Flow
 dataflow:
   security:
     authentication:
@@ -370,6 +371,76 @@ dataflow:
 
 IMPORTANT: As of Spring Cloud Data Flow 1.1, roles are not supported, yet (specified roles are ignored). Due to an https://github.com/spring-projects/spring-security/issues/3403[issue] in
 Spring Security, though, at least one role must be provided.
+
+[[getting-started-security-ldap-authentication]]
+==== LDAP Authentication
+
+Spring Cloud Data Flow also supports authentication against an LDAP server (Lightweight Directory Access Protocol), providing support for the following 2 modes:
+
+* Direct bind
+* Search and bind
+
+When the LDAP authentication option is activated, the default single user mode is
+turned off.
+
+In _direct bind mode_, a pattern is defined for the user’s distinguished name (DN),
+using a placeholder for the username. The authentication process derives the
+distinguished name of the user by replacing the placeholder and use it to authenticate
+a user against the LDAP server, along with the supplied password. You can set up
+LDAP direct bind as follows:
+
+[source,yaml]
+----
+security:
+  basic:
+    enabled: true
+    realm: Spring Cloud Data Flow
+dataflow:
+  security:
+    authentication:
+      ldap:
+        enabled: true                                                 # <1>
+        url: ldap://ldap.example.com:3309                             # <2>
+        userDnPattern: uid={0},ou=people,dc=example,dc=com            # <3>
+----
+
+<1> Enables LDAP authentication
+<2> The URL for the LDAP server
+<3> The distinguished name (DN) pattern for authenticating against the server
+
+The _search and bind_ mode involves connecting to an LDAP server, either anonymously
+or with a fixed account, and searching for the distinguished name of the authenticating
+user based on its username, and then using the resulting value and the supplied password
+for binding to the LDAP server. This option is configured as follows:
+
+[source,yaml]
+----
+security:
+  basic:
+    enabled: true
+    realm: Spring Cloud Data Flow
+dataflow:
+  security:
+    authentication:
+      ldap:
+        enabled: true                                                 # <1>
+        url: ldap://localhost:10389                                   # <2>
+        managerDn: uid=admin,ou=system                                # <3>
+        managerPassword: secret                                       # <4>
+        userSearchBase: ou=otherpeople,dc=example,dc=com              # <5>
+        userSearchFilter: uid={0}                                     # <6>
+----
+
+<1> Enables LDAP integration
+<2> The URL of the LDAP server
+<3> A DN for to authenticate to the LDAP server, if anonymous searches are not supported (optional, required together with next option)
+<4> A password to authenticate to the LDAP server, if anonymous searches are not supported (optional, required together with previous option)
+<5> The base for searching the DN of the authenticating user (serves to restrict the scope of the search)
+<6> The search filter for the DN of the authenticating user
+
+TIP: For more information, please also see the chapter
+http://docs.spring.io/spring-security/site/docs/current/reference/html/ldap.html[LDAP Authentication]
+of the Spring Security reference guide.
 
 [[getting-started-security-oauth2]]
 === OAuth 2.0
@@ -420,7 +491,7 @@ $ curl -u myusername:mypassword http://localhost:9393/
 
 As a result you should see a list of available REST endpoints.
 
-=== Authentication using the Spring Cloud Data Flow Shell
+==== Authentication using the Spring Cloud Data Flow Shell
 
 If your OAuth2 provider supports the _Password_ Grant Type you can start the
 _Data Flow Shell_ with:
@@ -457,9 +528,9 @@ dataflow config info
 ║Target     │http://localhost:9393                  ║
 ╚═══════════╧═══════════════════════════════════════╝
 ----
-=== Authentication Examples
+==== OAuth2 Authentication Examples
 
-==== Local OAuth2 Server
+===== Local OAuth2 Server
 
 With http://projects.spring.io/spring-security-oauth/[Spring Security OAuth] you
 can easily create your own OAuth2 Server with the following 2 simple annotations:
@@ -474,7 +545,7 @@ https://github.com/ghillert/oauth-test-server/[https://github.com/ghillert/oauth
 Simply clone the project, built and start it. Furthermore configure Spring Cloud
 Data Flow with the respective _Client Id_ and _Client Secret_.
 
-==== Authentication using GitHub
+===== Authentication using GitHub
 
 If you rather like to use an existing OAuth2 provider, here is an example for GitHub.
 First you need to **Register a new application** under your GitHub account at:
@@ -507,3 +578,20 @@ security:
 ----
 
 IMPORTANT: GitHub does not support the OAuth2 password grant type. As such you cannot use the Spring Cloud Data Flow Shell in conjunction with GitHub.
+
+=== Securing the Spring Boot Management Endpoints
+
+When enabling security, please also make sure that the http://docs.spring.io/spring-boot/docs/current/reference/html/production-ready-monitoring.html[Spring Boot HTTP Management Endpoints]
+are secured as well. You can enabled security for the management endpoints by adding the following to `application.yml`:
+
+[source,yaml]
+----
+management:
+  contextPath: /management
+  security:
+    enabled: true
+----
+
+IMPORTANT: If you don't explicitly enable security for the management endpoints,
+you may end up having unsecured REST endpoints, despite `security.basic.enabled`
+being set to `true`.

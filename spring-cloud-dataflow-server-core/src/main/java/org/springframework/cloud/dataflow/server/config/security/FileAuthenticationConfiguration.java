@@ -30,6 +30,8 @@ import org.springframework.util.Assert;
 *
 * @author Eric Bottard
 * @author Gunnar Hillert
+*
+* @since 1.1.0
 */
 @Configuration
 @ConditionalOnProperty("dataflow.security.authentication.file.enabled")
