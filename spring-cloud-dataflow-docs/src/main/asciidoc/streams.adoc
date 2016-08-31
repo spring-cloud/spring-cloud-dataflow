@@ -118,16 +118,16 @@ Stream applications are Spring Boot applications which are aware of many <<sprin
 
 To whitelist application properties create a file named `spring-configuration-metadata-whitelist.properties` in the `META-INF` resource directory.  There are two property keys that can be used inside this file. The first key is named `configuration-properties.classes`.  The value is a comma separated list of fully qualified `@ConfigurationProperty` class names.  The second key is `configuration-properties.names` whose value is a comma separated list of property names.  This can contain the full name of property, such as `server.port` or a partial name to whitelist a category of property names, e.g. `spring.jmx`.
 
-The link:https://github.com/spring-cloud/spring-cloud-stream-app-starters[Spring Cloud Stream application starters] are a good place to look for examples of usage.  Here is a simple example of the file source's `spring-configuration-metadata-whitelist.properties` file
+The link:https://github.com/spring-cloud/spring-cloud-stream-app-starters[Spring Cloud Stream application starters] are a good place to look for examples of usage.  Here is a simple example of the file sink's `spring-configuration-metadata-whitelist.properties` file
 
 ```
-configuration-classes=org.springframework.cloud.stream.app.file.sink.FileSinkProperties
+configuration-properties.classes=org.springframework.cloud.stream.app.file.sink.FileSinkProperties
 ```
 
-If for some reason we also wanted to add `file.prefix` to this file, it would look like
+If we also wanted to add `server.port` to be white listed, then it would look like this:
 
 ```
-configuration-classes=org.springframework.cloud.stream.app.file.sink.FileSinkProperties
+configuration-properties.classes=org.springframework.cloud.stream.app.file.sink.FileSinkProperties
 configuration-properties.names=server.port
 ```
 
