@@ -290,7 +290,6 @@ public class ConfigCommands implements CommandMarker,
 				jacksonConverter.getObjectMapper().addMixIn(StepExecution.class, StepExecutionJacksonMixIn.class);
 				jacksonConverter.getObjectMapper().addMixIn(ExecutionContext.class, ExecutionContextJacksonMixIn.class);
 				jacksonConverter.getObjectMapper().addMixIn(StepExecutionHistory.class, StepExecutionHistoryJacksonMixIn.class);
-				jacksonConverter.getObjectMapper().registerModule(new Jackson2HalModule());
 			}
 		}
 		return restTemplate;
