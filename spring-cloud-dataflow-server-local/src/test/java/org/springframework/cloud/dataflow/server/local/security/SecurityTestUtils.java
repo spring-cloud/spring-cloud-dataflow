@@ -15,14 +15,29 @@
  */
 package org.springframework.cloud.dataflow.server.local.security;
 
+import java.nio.charset.StandardCharsets;
+
 import org.springframework.security.crypto.codec.Base64;
+import org.springframework.util.Assert;
 
 /**
  * @author Marius Bogoevici
  * @author Gunnar Hillert
  */
 public class SecurityTestUtils {
+
+	/**
+	 * Returns a basic authorization header for the given username and password.
+	 *
+	 * @param username Must not be null
+	 * @param password Must not be null
+	 * @return Returns the header as String. Never returns null.
+	 */
 	public static String basicAuthorizationHeader(String username, String password) {
-		return "Basic " + new String(Base64.encode((username + ":" + password).getBytes()));
+		Assert.notNull(username, "The username must not be null.");
+		Assert.notNull(password, "The password must not be null.");
+
+		return "Basic " + new String(Base64.encode(
+			(username + ":" + password).getBytes(StandardCharsets.ISO_8859_1)));
 	}
 }

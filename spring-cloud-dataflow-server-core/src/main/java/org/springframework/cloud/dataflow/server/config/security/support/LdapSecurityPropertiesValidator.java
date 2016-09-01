@@ -20,6 +20,11 @@ import javax.validation.ConstraintValidatorContext;
 
 import org.springframework.util.StringUtils;
 
+/**
+ *
+ * @author Gunnar Hillert
+ *
+ */
 public class LdapSecurityPropertiesValidator implements ConstraintValidator<LdapSecurityPropertiesValid, Object> {
 
 	@Override

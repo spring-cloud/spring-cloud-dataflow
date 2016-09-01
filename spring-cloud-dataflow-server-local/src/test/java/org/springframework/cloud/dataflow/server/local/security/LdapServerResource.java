@@ -22,7 +22,6 @@ import org.junit.rules.ExternalResource;
 import org.junit.rules.TemporaryFolder;
 import org.springframework.security.ldap.server.ApacheDSContainer;
 import org.springframework.util.SocketUtils;
-import org.springframework.util.StringUtils;
 
 /**
  * @author Marius Bogoevici
