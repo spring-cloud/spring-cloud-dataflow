@@ -24,7 +24,7 @@ import org.springframework.context.annotation.Condition;
  * {@code true} and the property {@code security.oauth2} exists.
  *
  * @author Gunnar Hillert
- * @since 1.1
+ * @since 1.1.0
  *
  */
 public class OnSecurityEnabledAndOAuth2Enabled extends AllNestedConditions {

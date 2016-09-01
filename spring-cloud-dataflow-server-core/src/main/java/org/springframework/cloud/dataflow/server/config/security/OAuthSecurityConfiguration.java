@@ -27,7 +27,7 @@ import org.springframework.security.authentication.AuthenticationProvider;
  * Setup Spring Security OAuth for the Rest Endpoints of Spring Cloud Data Flow.
  *
  * @author Gunnar Hillert
- * @since 1.0
+ * @since 1.1.0
  *
  */
 @EnableOAuth2Sso

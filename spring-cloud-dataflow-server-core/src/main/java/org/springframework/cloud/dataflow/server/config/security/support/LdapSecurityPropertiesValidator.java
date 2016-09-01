@@ -23,6 +23,7 @@ import org.springframework.util.StringUtils;
 /**
  *
  * @author Gunnar Hillert
+ * @since 1.1.0
  *
  */
 public class LdapSecurityPropertiesValidator implements ConstraintValidator<LdapSecurityPropertiesValid, Object> {

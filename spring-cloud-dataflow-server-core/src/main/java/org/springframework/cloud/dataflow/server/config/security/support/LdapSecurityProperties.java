@@ -19,13 +19,13 @@ import java.net.URI;
 
 import javax.validation.constraints.NotNull;
 
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
  * Properties for the Ldap security aspects of an application.
  *
  * @author Gunnar Hillert
+ * @since 1.1.0
  */
 @ConfigurationProperties(prefix = "dataflow.security.authentication.ldap")
 @LdapSecurityPropertiesValid
