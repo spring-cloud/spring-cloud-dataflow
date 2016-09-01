@@ -16,6 +16,7 @@
 package org.springframework.cloud.dataflow.server.config.security;
 
 import org.springframework.boot.autoconfigure.security.oauth2.client.EnableOAuth2Sso;
+import org.springframework.cloud.dataflow.server.config.security.support.OnSecurityEnabledAndOAuth2Enabled;
 import org.springframework.cloud.dataflow.server.service.impl.ManualOAuthAuthenticationProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;

@@ -9,4 +9,3 @@ dataflow:
         enabled: true
         url: ldap://localhost:${ldap.port}
         userDnPattern: uid={0},ou=otherpeople,dc=springframework,dc=org
-

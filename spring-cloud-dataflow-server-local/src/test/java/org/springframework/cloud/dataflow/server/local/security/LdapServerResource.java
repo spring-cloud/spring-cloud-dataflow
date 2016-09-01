@@ -16,13 +16,13 @@
 package org.springframework.cloud.dataflow.server.local.security;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.UUID;
 
-import org.apache.commons.io.FileUtils;
 import org.junit.rules.ExternalResource;
+import org.junit.rules.TemporaryFolder;
 import org.springframework.security.ldap.server.ApacheDSContainer;
 import org.springframework.util.SocketUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * @author Marius Bogoevici
@@ -30,21 +30,31 @@ import org.springframework.util.SocketUtils;
  */
 public class LdapServerResource extends ExternalResource {
 
+	private String originalLdapPort;
+
 	private ApacheDSContainer apacheDSContainer;
+
+	private TemporaryFolder temporaryFolder = new TemporaryFolder();
 
 	private File workingDir;
 
+	private static final String LDAP_PORT_PROPERTY = "ldap.port";
+
 	@Override
 	protected void before() throws Throwable {
+
+		originalLdapPort = System.getProperty(LDAP_PORT_PROPERTY);
+
+		temporaryFolder.create();
 		apacheDSContainer = new ApacheDSContainer("dc=springframework,dc=org",
 				"classpath:org/springframework/cloud/dataflow/server/local/security/testUsers.ldif");
 		int ldapPort = SocketUtils.findAvailableTcpPort();
 		apacheDSContainer.setPort(ldapPort);
 		apacheDSContainer.afterPropertiesSet();
-		workingDir = new File(FileUtils.getTempDirectoryPath() + "/" + UUID.randomUUID().toString());
+		workingDir = new File(temporaryFolder.getRoot(), UUID.randomUUID().toString());
 		apacheDSContainer.setWorkingDirectory(workingDir);
 		apacheDSContainer.start();
-		System.setProperty("ldap.port", Integer.toString(ldapPort));
+		System.setProperty(LDAP_PORT_PROPERTY, Integer.toString(ldapPort));
 	}
 
 	@Override
@@ -56,11 +66,16 @@ public class LdapServerResource extends ExternalResource {
 		catch (Exception e) {
 			e.printStackTrace();
 		}
-		try {
-			FileUtils.deleteDirectory(workingDir);
-		}
-		catch (IOException e) {
-			e.printStackTrace();
+		finally {
+
+			if (originalLdapPort != null) {
+				System.setProperty(LDAP_PORT_PROPERTY, originalLdapPort);
+			}
+			else {
+				System.clearProperty(LDAP_PORT_PROPERTY);
+			}
+
+			temporaryFolder.delete();
 		}
 	}
 

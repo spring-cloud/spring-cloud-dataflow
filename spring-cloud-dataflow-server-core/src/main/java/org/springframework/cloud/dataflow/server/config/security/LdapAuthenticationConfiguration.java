@@ -18,8 +18,10 @@ package org.springframework.cloud.dataflow.server.config.security;
 import java.util.Collection;
 import java.util.Collections;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.cloud.dataflow.server.config.security.support.LdapSecurityProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.ldap.core.DirContextOperations;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -28,7 +30,6 @@ import org.springframework.security.config.annotation.authentication.configurers
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.ldap.userdetails.LdapAuthoritiesPopulator;
-import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
@@ -40,129 +41,37 @@ import org.springframework.util.StringUtils;
 * @since 1.1.0
 */
 @Configuration
-@ConfigurationProperties(prefix = "dataflow.security.authentication.ldap")
 @ConditionalOnProperty("dataflow.security.authentication.ldap.enabled")
+@EnableConfigurationProperties(LdapSecurityProperties.class)
 public class LdapAuthenticationConfiguration extends GlobalAuthenticationConfigurerAdapter {
 
-	private String url;
-
-	private String userDnPattern;
-
-	private String managerDn;
-
-	private String managerPassword;
-
-	private String userSearchBase = "";
-
-	private String userSearchFilter;
-
-	private String groupSearchFilter = "";
-
-	private String groupSearchBase = "";
-
-	private String groupRoleAttribute = "cn";
-
-	public String getUrl() {
-		return url;
-	}
-
-	public void setUrl(String url) {
-		this.url = url;
-	}
-
-	public String getUserDnPattern() {
-		return userDnPattern;
-	}
-
-	public void setUserDnPattern(String userDnPattern) {
-		this.userDnPattern = userDnPattern;
-	}
-
-	public String getManagerDn() {
-		return managerDn;
-	}
-
-	public void setManagerDn(String managerDn) {
-		this.managerDn = managerDn;
-	}
-
-	public String getManagerPassword() {
-		return managerPassword;
-	}
-
-	public void setManagerPassword(String managerPassword) {
-		this.managerPassword = managerPassword;
-	}
-
-	public String getUserSearchBase() {
-		return userSearchBase;
-	}
-
-	public void setUserSearchBase(String userSearchBase) {
-		this.userSearchBase = userSearchBase;
-	}
-
-	public String getUserSearchFilter() {
-		return userSearchFilter;
-	}
-
-	public void setUserSearchFilter(String userSearchFilter) {
-		this.userSearchFilter = userSearchFilter;
-	}
-
-	public String getGroupSearchFilter() {
-		return groupSearchFilter;
-	}
-
-	public void setGroupSearchFilter(String groupSearchFilter) {
-		this.groupSearchFilter = groupSearchFilter;
-	}
-
-	public String getGroupSearchBase() {
-		return groupSearchBase;
-	}
-
-	public void setGroupSearchBase(String groupSearchBase) {
-		this.groupSearchBase = groupSearchBase;
-	}
-
-	public String getGroupRoleAttribute() {
-		return groupRoleAttribute;
-	}
-
-	public void setGroupRoleAttribute(String groupRoleAttribute) {
-		this.groupRoleAttribute = groupRoleAttribute;
-	}
+	@Autowired
+	private LdapSecurityProperties ldapSecurityProperties;
 
 	@Override
 	public void init(AuthenticationManagerBuilder auth) throws Exception {
 
 		LdapAuthenticationProviderConfigurer<AuthenticationManagerBuilder> ldapConfigurer = auth.ldapAuthentication();
 
-		Assert.hasText(url, "'url' must not be empty");
-
-		Assert.isTrue(StringUtils.isEmpty(userDnPattern) ^ StringUtils.isEmpty(userSearchFilter),
-				"exactly one of 'userDnPattern' or 'userSearch' must be provided");
-
 		ldapConfigurer.contextSource()
-				.url(url)
-				.managerDn(managerDn)
-				.managerPassword(managerPassword);
+				.url(ldapSecurityProperties.getUrl().toString())
+				.managerDn(ldapSecurityProperties.getManagerDn())
+				.managerPassword(ldapSecurityProperties.getManagerPassword());
 
-		if (!StringUtils.isEmpty(userDnPattern)) {
-			ldapConfigurer.userDnPatterns(userDnPattern);
+		if (!StringUtils.isEmpty(ldapSecurityProperties.getUserDnPattern())) {
+			ldapConfigurer.userDnPatterns(ldapSecurityProperties.getUserDnPattern());
 		}
 
-		if (!StringUtils.isEmpty(userSearchFilter)) {
+		if (!StringUtils.isEmpty(ldapSecurityProperties.getUserSearchFilter())) {
 			ldapConfigurer
-					.userSearchBase(userSearchBase)
-					.userSearchFilter(userSearchFilter);
+					.userSearchBase(ldapSecurityProperties.getUserSearchBase())
+					.userSearchFilter(ldapSecurityProperties.getUserSearchFilter());
 		}
 
-		if (!StringUtils.isEmpty(groupSearchFilter)) {
-			ldapConfigurer.groupSearchBase(groupSearchBase)
-					.groupSearchFilter(groupSearchFilter)
-					.groupRoleAttribute(groupRoleAttribute);
+		if (!StringUtils.isEmpty(ldapSecurityProperties.getGroupSearchFilter())) {
+			ldapConfigurer.groupSearchBase(ldapSecurityProperties.getGroupSearchBase())
+					.groupSearchFilter(ldapSecurityProperties.getGroupSearchFilter())
+					.groupRoleAttribute(ldapSecurityProperties.getGroupRoleAttribute());
 		}
 		else {
 			ldapConfigurer.ldapAuthoritiesPopulator(new LdapAuthoritiesPopulator() {
