@@ -46,7 +46,6 @@ import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
 import org.springframework.cloud.dataflow.server.repository.InMemoryTaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
-import org.springframework.cloud.dataflow.server.repository.TaskDeploymentIdNotAvailableException;
 import org.springframework.cloud.deployer.resource.maven.MavenResource;
 import org.springframework.cloud.deployer.resource.registry.UriRegistry;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
@@ -63,6 +62,7 @@ import org.springframework.web.context.WebApplicationContext;
  * @author Mark Fisher
  * @author Glenn Renfro
  * @author Gunnar Hillert
+ * @author Ilayaperumal Gopinathan
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = TestDependencies.class)
@@ -119,7 +119,7 @@ public class TaskControllerTests {
 
 		mockMvc.perform(
 				post("/tasks/deployments/{name}", "myTask").accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isConflict());
+				.andExpect(status().isInternalServerError());
 	}
 
 	@Test

@@ -30,7 +30,6 @@ import org.springframework.cloud.dataflow.server.repository.DeploymentIdReposito
 import org.springframework.cloud.dataflow.server.repository.DeploymentKey;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
-import org.springframework.cloud.dataflow.server.repository.TaskDeploymentIdNotAvailableException;
 import org.springframework.cloud.dataflow.server.service.TaskService;
 import org.springframework.cloud.deployer.resource.registry.UriRegistry;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
@@ -161,7 +160,7 @@ public class DefaultTaskService implements TaskService {
 		AppDeploymentRequest request = taskDefinition.createDeploymentRequest(resource, deploymentProperties, runtimeParams);
 		String id = this.taskLauncher.launch(request);
 		if (!StringUtils.hasText(id)) {
-			throw new TaskDeploymentIdNotAvailableException(taskName);
+			throw new IllegalStateException("Deployment ID is null for the task:" + taskName);
 		}
 		String deploymentKey = DeploymentKey.forTaskDefinition(taskDefinition);
 		if (deploymentIdRepository.findOne(deploymentKey) == null) {
