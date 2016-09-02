@@ -659,3 +659,45 @@ This will cause the properties `spring.cloud.stream.kafka.binder.brokers` and `s
 [NOTE]
 Properties configured using this mechanism have lower precedence than stream deployment properties.
 They will be overridden if a property with the same key is specified at stream deployment time (e.g. `app.http.spring.cloud.stream.kafka.binder.brokers` will override the common property).
+
+[[spring-cloud-dataflow-stream-multi-binder]]
+== Stream applications with multiple binder configurations
+
+ In some cases, a stream can have its applications bound to multiple spring cloud stream binders when they are required to connect to different messaging
+middleware configurations. In those cases, it is important to make sure the applications are configured appropriately with their binder
+configurations. For example, let's consider the following stream:
+
+```
+http | transform --expression=payload.toUpperCase() | log
+```
+
+and in this stream, each application connects to messaging middleware in the following way:
+
+```
+Http source sends events to RabbitMQ (rabbit1)
+Transform processor receives events from RabbitMQ (rabbit1) and sends the processed events into Kafka (kafka1)
+Log sink receives events from Kafka (kafka1)
+```
+Here, `rabbit1` and `kafka1` are the binder names given in the spring cloud stream application properties.
+Based on this setup, the applications will have the following binder(s) in their classpath with the appropriate configuration:
+
+```
+Http - Rabbit binder
+Transform - Both Kafka and Rabbit binders
+Log - Kafka binder
+```
+The spring-cloud-stream `binder` configuration properties can be set within the applications themselves.
+If not, they can be passed via `deployment` properties when the stream is deployed.
+
+For example,
+
+```
+dataflow:>stream create --definition "http | transform --expression=payload.toUpperCase() | log" --name mystream
+```
+
+```
+dataflow:>stream deploy mystream --properties "app.http.spring.cloud.stream.bindings.output.binder=rabbit1,app.transform.spring.cloud.stream.bindings.input.binder=rabbit1,
+app.transform.spring.cloud.stream.bindings.output.binder=kafka1,app.log.spring.cloud.stream.bindings.input.binder=kafka1"
+```
+
+One can override any of the binder configuration properties by specifying them via deployment properties.
