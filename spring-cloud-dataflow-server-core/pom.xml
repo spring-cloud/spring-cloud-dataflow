@@ -100,7 +100,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
-			<artifactId>spring-cloud-stream-test-support-internal</artifactId>
+			<artifactId>spring-cloud-dataflow-test-support</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>

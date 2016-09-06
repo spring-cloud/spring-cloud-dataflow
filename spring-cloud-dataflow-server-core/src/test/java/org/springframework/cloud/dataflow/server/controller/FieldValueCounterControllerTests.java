@@ -33,7 +33,7 @@ import org.junit.runner.RunWith;
 import org.springframework.analytics.metrics.FieldValueCounterRepository;
 import org.springframework.analytics.metrics.memory.InMemoryFieldValueCounterRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.stream.test.junit.redis.RedisTestSupport;
+import org.springframework.cloud.dataflow.test.RedisTestSupport;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;

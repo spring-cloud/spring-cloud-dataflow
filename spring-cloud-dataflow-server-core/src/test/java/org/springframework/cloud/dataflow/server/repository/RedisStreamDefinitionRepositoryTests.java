@@ -31,7 +31,7 @@ import org.junit.Rule;
 import org.junit.Test;
 
 import org.springframework.cloud.dataflow.core.StreamDefinition;
-import org.springframework.cloud.stream.test.junit.redis.RedisTestSupport;
+import org.springframework.cloud.dataflow.test.RedisTestSupport;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 
