@@ -3,7 +3,7 @@
 
 [partintro]
 --
-In this section you will learn all about Spring Cloud Data Flows REST API.
+In this section you will learn all about the Spring Cloud Data Flow REST API.
 --
 
 [[api-guide-overview]]
@@ -12,7 +12,7 @@ In this section you will learn all about Spring Cloud Data Flows REST API.
 [[api-guide-overview-http-verbs]]
 === HTTP verbs
 
-Spring Cloud Dataflow tries to adhere as closely as possible to standard HTTP and REST conventions in its use of HTTP verbs.
+Spring Cloud Data Flow tries to adhere as closely as possible to standard HTTP and REST conventions in its use of HTTP verbs.
 
 |===
 | Verb | Usage

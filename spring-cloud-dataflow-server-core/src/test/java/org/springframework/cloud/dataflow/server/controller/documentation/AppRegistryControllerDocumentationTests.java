@@ -18,6 +18,8 @@ package org.springframework.cloud.dataflow.server.controller.documentation;
 
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
+import static org.springframework.restdocs.operation.preprocess.Preprocessors.preprocessResponse;
+import static org.springframework.restdocs.operation.preprocess.Preprocessors.prettyPrint;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
 import static org.springframework.restdocs.request.RequestDocumentation.requestParameters;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -36,6 +38,7 @@ import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
 import org.springframework.cloud.dataflow.server.registry.DataFlowUriRegistryPopulator;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.JUnitRestDocumentation;
+import org.springframework.restdocs.mockmvc.RestDocumentationResultHandler;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -51,13 +54,14 @@ import org.springframework.web.context.WebApplicationContext;
 @SpringApplicationConfiguration(classes = TestDependencies.class)
 @WebAppConfiguration
 @DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
-public class AppRegistryControllerDocumentation {
+public class AppRegistryControllerDocumentationTests {
 
 	@Rule
 	public JUnitRestDocumentation restDocumentation =
 			new JUnitRestDocumentation("target/generated-snippets");
 
 	private MockMvc mockMvc;
+	private RestDocumentationResultHandler documentationHandler;
 
 	@Autowired
 	private WebApplicationContext wac;
@@ -70,9 +74,11 @@ public class AppRegistryControllerDocumentation {
 
 	@Before
 	public void setupMocks() {
+		this.documentationHandler = document("{class-name}/{method-name}",
+				preprocessResponse(prettyPrint()));
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(wac)
 				.apply(documentationConfiguration(this.restDocumentation))
-				.alwaysDo(document("{method-name}/{step}/"))
+				.alwaysDo(this.documentationHandler)
 				.build();
 		for (AppRegistration appRegistration: this.appRegistry.findAll()) {
 			this.appRegistry.delete(appRegistration.getName(), appRegistration.getType());
@@ -86,7 +92,7 @@ public class AppRegistryControllerDocumentation {
 			.accept(MediaType.APPLICATION_JSON))
 			.andExpect(status().isOk())
 			.andDo(print())
-			.andDo(document("apps", requestParameters(
+			.andDo(this.documentationHandler.document(requestParameters(
 					parameterWithName("type").description("Restrict the returned apps to the type of the app."))));
 	}
 }

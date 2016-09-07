@@ -151,12 +151,12 @@
 		<dependency>
 			<groupId>org.springframework.restdocs</groupId>
 			<artifactId>spring-restdocs-mockmvc</artifactId>
-			<version>1.1.1.RELEASE</version>
+			<version>1.1.2.RELEASE</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.restdocs</groupId>
 			<artifactId>spring-restdocs-core</artifactId>
-			<version>1.1.1.RELEASE</version>
+			<version>1.1.2.RELEASE</version>
 		</dependency>
 	</dependencies>
 	<build>
@@ -173,18 +173,9 @@
 		</resources>
 		<plugins>
 			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-plugin</artifactId>
-				<configuration>
-					<includes>
-						<include>**/*Documentation.java</include>
-					</includes>
-				</configuration>
-			</plugin>
-			<plugin>
-	            <groupId>pl.project13.maven</groupId>
-	            <artifactId>git-commit-id-plugin</artifactId>
-	        </plugin>
-        </plugins>
+							<groupId>pl.project13.maven</groupId>
+							<artifactId>git-commit-id-plugin</artifactId>
+					</plugin>
+				</plugins>
 	</build>
 </project>
