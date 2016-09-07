@@ -38,15 +38,9 @@ import org.springframework.core.io.DescriptiveResource;
  *
  * @author Eric Bottard
  */
-public class ApplicationConfigurationMetadataResolverTests {
+public class BootApplicationConfigurationMetadataResolverTests {
 
-	private ApplicationConfigurationMetadataResolver resolver = new ApplicationConfigurationMetadataResolver();
-
-	@Test
-	public void globalWhitelistedPropertiesShouldBeVisisble() {
-		List<ConfigurationMetadataProperty> properties = resolver.listProperties(new ClassPathResource("apps/filter-processor", getClass()));
-		assertThat(properties, hasItem(configPropertyIdentifiedAs("server.port")));
-	}
+	private ApplicationConfigurationMetadataResolver resolver = new BootApplicationConfigurationMetadataResolver();
 
 	@Test
 	public void appSpecificWhitelistedPropsShouldBeVisible() {

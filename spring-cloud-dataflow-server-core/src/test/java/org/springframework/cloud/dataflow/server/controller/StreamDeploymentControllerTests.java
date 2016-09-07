@@ -29,6 +29,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
+import org.springframework.cloud.dataflow.configuration.metadata.BootApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
@@ -60,7 +61,7 @@ public class StreamDeploymentControllerTests {
 	@Mock
 	private AppDeployer appDeployer;
 
-	private ApplicationConfigurationMetadataResolver metadataResolver = new ApplicationConfigurationMetadataResolver();
+	private ApplicationConfigurationMetadataResolver metadataResolver = new BootApplicationConfigurationMetadataResolver();
 
 	@Mock
 	private CommonApplicationProperties commonApplicationProperties;

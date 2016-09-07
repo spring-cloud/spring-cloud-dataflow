@@ -4,6 +4,11 @@
       "name": "http",
       "type": "foo.bar.HttpProperties",
       "sourceType": "foo.bar.HttpProperties"
+    },
+    {
+      "name": "server",
+      "type": "foo.bar.ServerProperties",
+      "sourceType": "foo.bar.ServerProperties"
     }
   ],
   "properties": [
@@ -12,7 +17,14 @@
       "type": "java.lang.Boolean",
       "description": "Whether to use SSL encryption or not",
       "sourceType": "foo.bar.HttpProperties"
+    },
+    {
+      "name": "server.port",
+      "type": "java.lang.Integer",
+      "description": "The port to listen on",
+      "sourceType": "foo.bar.ServerProperties"
     }
   ],
+
   "hints": []
 }
