@@ -152,7 +152,7 @@ The streaming applications in Spring Cloud Data Flow are Spring Boot application
 independently setup with logging configurations. 
 
 For instance, if you'd have to troubleshoot the `header` and `payload` specifics that's being passed 
-around between source, processor and sink channels, you'd be deploying the streams with the following
+around between source, processor and sink channels, you'd be deploying the stream with the following
 options.
 
 
@@ -163,11 +163,3 @@ dataflow:>stream create foo --definition "http --logging.level.org.springframewo
 
 (_where, `org.springframework.integration` is the global package for everything Spring Integration related, 
 which is responsible for messaging channels_)
-
-
-
-
-
-
-
-
