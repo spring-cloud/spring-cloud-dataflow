@@ -31,6 +31,6 @@ public class ApplicationConfigurationMetadataResolverAutoConfiguration {
 	@Bean
 	@ConditionalOnMissingBean(ApplicationConfigurationMetadataResolver.class)
 	public ApplicationConfigurationMetadataResolver metadataResolver() {
-		return new ApplicationConfigurationMetadataResolver();
+		return new BootApplicationConfigurationMetadataResolver();
 	}
 }

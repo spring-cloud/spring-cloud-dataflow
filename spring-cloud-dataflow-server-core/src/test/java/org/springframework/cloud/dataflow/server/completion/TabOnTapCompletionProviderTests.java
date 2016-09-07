@@ -15,6 +15,10 @@
  */
 package org.springframework.cloud.dataflow.server.completion;
 
+import static org.hamcrest.Matchers.hasItems;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
+
 import java.io.File;
 import java.io.FileFilter;
 import java.net.URL;
@@ -34,6 +38,9 @@ import org.springframework.boot.loader.archive.Archive;
 import org.springframework.cloud.dataflow.completion.CompletionConfiguration;
 import org.springframework.cloud.dataflow.completion.CompletionProposal;
 import org.springframework.cloud.dataflow.completion.StreamCompletionProvider;
+import org.springframework.cloud.dataflow.configuration.metadata.AppJarLauncher;
+import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
+import org.springframework.cloud.dataflow.configuration.metadata.BootApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.registry.AppRegistration;
@@ -41,8 +48,6 @@ import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.server.repository.InMemoryStreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.deployer.resource.registry.InMemoryUriRegistry;
-import org.springframework.cloud.dataflow.configuration.metadata.AppJarLauncher;
-import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.FileSystemResourceLoader;
@@ -50,10 +55,6 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.util.Assert;
-
-import static org.hamcrest.Matchers.hasItems;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
 
 /**
  * @author Ilayaperumal Gopinathan
@@ -165,7 +166,7 @@ public class TabOnTapCompletionProviderTests {
 
 		@Bean
 		public ApplicationConfigurationMetadataResolver configurationMetadataResolver() {
-			return new ApplicationConfigurationMetadataResolver() {
+			return new BootApplicationConfigurationMetadataResolver() {
 				// Narrow ClassLoader visibility for tests
 				@Override
 				protected ClassLoader createClassLoader(Archive archive) throws Exception {

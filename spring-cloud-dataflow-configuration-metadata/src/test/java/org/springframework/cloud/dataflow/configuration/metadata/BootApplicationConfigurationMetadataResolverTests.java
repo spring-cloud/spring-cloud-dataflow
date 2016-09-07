@@ -38,9 +38,9 @@ import org.springframework.core.io.DescriptiveResource;
  *
  * @author Eric Bottard
  */
-public class ApplicationConfigurationMetadataResolverTests {
+public class BootApplicationConfigurationMetadataResolverTests {
 
-	private ApplicationConfigurationMetadataResolver resolver = new ApplicationConfigurationMetadataResolver();
+	private ApplicationConfigurationMetadataResolver resolver = new BootApplicationConfigurationMetadataResolver();
 
 	@Test
 	public void globalWhitelistedPropertiesShouldBeVisisble() {
