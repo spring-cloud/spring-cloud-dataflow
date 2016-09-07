@@ -28,6 +28,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
+import org.springframework.cloud.dataflow.core.dsl.StreamNode;
+import org.springframework.cloud.dataflow.core.dsl.StreamParser;
+import org.springframework.cloud.dataflow.core.dsl.TokenKind;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.rest.resource.StreamDefinitionResource;
 import org.springframework.cloud.dataflow.server.DataFlowServerUtil;
@@ -198,7 +201,7 @@ public class StreamDefinitionController {
 	@RequestMapping(value = "/{name}/related", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
 	public PagedResources<StreamDefinitionResource> listRelated(@PathVariable("name") String name,
-																@RequestParam("nested") boolean nested,
+																@RequestParam(value="nested", required = false, defaultValue = "false") boolean nested,
 																PagedResourcesAssembler<StreamDefinition> assembler) {
 		Set<StreamDefinition> relatedDefinitions = new HashSet<>();
 		StreamDefinition currentStreamDefinition = repository.findOne(name);
@@ -214,18 +217,13 @@ public class StreamDefinitionController {
 	private Set<StreamDefinition> findRelatedDefinitions(StreamDefinition currentStreamDefinition, Iterable<StreamDefinition> definitions,
 														  Set<StreamDefinition> relatedDefinitions, boolean nested) {
 		relatedDefinitions.add(currentStreamDefinition);
+		String currentStreamName = currentStreamDefinition.getName();
+		String indexedStreamName = currentStreamName + ".";
 		for (StreamDefinition definition: definitions) {
-			String tapNamePrefix = ":" + currentStreamDefinition.getName();
-			String dslText = definition.getDslText();
-			if (dslText.startsWith(tapNamePrefix)) {
-				String[] dslSplits = dslText.split(">");
-				if (dslText.startsWith(tapNamePrefix + ".")) {
-					relatedDefinitions.add(definition);
-					if (nested) {
-						findRelatedDefinitions(definition, definitions, relatedDefinitions, true);
-					}
-				}
-				else if (dslSplits[0].trim().equalsIgnoreCase(tapNamePrefix)) {
+			StreamNode sn = new StreamParser(definition.getName(), definition.getDslText()).parse();
+			if (sn.getSourceDestinationNode() != null) {
+				String nameComponent = sn.getSourceDestinationNode().getDestinationName();
+				if (nameComponent.equals(currentStreamName) || nameComponent.startsWith(indexedStreamName)) {
 					relatedDefinitions.add(definition);
 					if (nested) {
 						findRelatedDefinitions(definition, definitions, relatedDefinitions, true);
