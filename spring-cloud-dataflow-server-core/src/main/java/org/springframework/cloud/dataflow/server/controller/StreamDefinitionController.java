@@ -18,6 +18,7 @@ package org.springframework.cloud.dataflow.server.controller;
 
 import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -197,29 +198,42 @@ public class StreamDefinitionController {
 	@RequestMapping(value = "/{name}/related", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
 	public PagedResources<StreamDefinitionResource> listRelated(@PathVariable("name") String name,
+																@RequestParam("nested") boolean nested,
 																PagedResourcesAssembler<StreamDefinition> assembler) {
-		List<StreamDefinition> relatedDefinitions = new ArrayList<>();
+		Set<StreamDefinition> relatedDefinitions = new HashSet<>();
 		StreamDefinition currentStreamDefinition = repository.findOne(name);
 		if (currentStreamDefinition == null) {
 			throw new NoSuchStreamDefinitionException(name);
 		}
-		relatedDefinitions.add(currentStreamDefinition);
-		String tapNamePrefix = ":" + name;
 		Iterable<StreamDefinition> definitions = repository.findAll();
+		List<StreamDefinition> result = new ArrayList<>(findRelatedDefinitions(currentStreamDefinition, definitions,
+				relatedDefinitions, nested));
+		return assembler.toResource(new PageImpl<>(result), streamDefinitionAssembler);
+	}
 
+	private Set<StreamDefinition> findRelatedDefinitions(StreamDefinition currentStreamDefinition, Iterable<StreamDefinition> definitions,
+														  Set<StreamDefinition> relatedDefinitions, boolean nested) {
+		relatedDefinitions.add(currentStreamDefinition);
 		for (StreamDefinition definition: definitions) {
+			String tapNamePrefix = ":" + currentStreamDefinition.getName();
 			String dslText = definition.getDslText();
 			if (dslText.startsWith(tapNamePrefix)) {
 				String[] dslSplits = dslText.split(">");
 				if (dslText.startsWith(tapNamePrefix + ".")) {
 					relatedDefinitions.add(definition);
+					if (nested) {
+						findRelatedDefinitions(definition, definitions, relatedDefinitions, true);
+					}
 				}
 				else if (dslSplits[0].trim().equalsIgnoreCase(tapNamePrefix)) {
 					relatedDefinitions.add(definition);
+					if (nested) {
+						findRelatedDefinitions(definition, definitions, relatedDefinitions, true);
+					}
 				}
 			}
 		}
-		return assembler.toResource(new PageImpl<>(relatedDefinitions), streamDefinitionAssembler);
+		return relatedDefinitions;
 	}
 
 	/**
