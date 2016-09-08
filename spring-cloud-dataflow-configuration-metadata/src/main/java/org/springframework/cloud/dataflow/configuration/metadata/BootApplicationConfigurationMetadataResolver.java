@@ -72,8 +72,48 @@ public class BootApplicationConfigurationMetadataResolver extends ApplicationCon
 		}
 	}
 
-	public List<ConfigurationMetadataProperty> listProperties(Resource app) {
-		return listProperties(app, false);
+	@Override
+	public boolean supports(Resource app) {
+		File file = null;
+		try {
+			file = app.getFile();
+		}
+		catch (IOException e) {
+			return false;
+		}
+		Archive archive = null;
+		try {
+			archive = file.isDirectory() ? new ExplodedArchive(file) : new JarFileArchive(file);
+			return true;
+		}
+		catch (IOException | IllegalArgumentException e) {
+			return false;
+		}
+	}
+
+	/**
+	 * Return metadata about configuration properties that are documented via
+	 * <a href="http://docs.spring.io/spring-boot/docs/current/reference/html/configuration-metadata.html">
+	 * Spring Boot configuration metadata</a> and visible in an app.
+	 * @param app a Spring Cloud Stream app; typically a Boot uberjar,
+	 *            but directories are supported as well
+	 */
+	public List<ConfigurationMetadataProperty> listProperties(Resource app, boolean exhaustive) {
+		File moduleFile = null;
+		try {
+			moduleFile = app.getFile();
+		}
+		catch (IOException e) {
+			return Collections.emptyList();
+		}
+		Archive archive = null;
+		try {
+			archive = moduleFile.isDirectory() ? new ExplodedArchive(moduleFile) : new JarFileArchive(moduleFile);
+			return listProperties(archive, exhaustive);
+		}
+		catch (IOException e) {
+			throw new RuntimeException("");
+		}
 	}
 
 	public List<ConfigurationMetadataProperty> listProperties(Archive archive, boolean exhaustive) {
@@ -132,31 +172,6 @@ public class BootApplicationConfigurationMetadataResolver extends ApplicationCon
 			}
 		}
 
-	}
-
-	/**
-	 * Return metadata about configuration properties that are documented via
-	 * <a href="http://docs.spring.io/spring-boot/docs/current/reference/html/configuration-metadata.html">
-	 * Spring Boot configuration metadata</a> and visible in an app.
-	 * @param app a Spring Cloud Stream app; typically a Boot uberjar,
-	 *            but directories are supported as well
-	 */
-	public List<ConfigurationMetadataProperty> listProperties(Resource app, boolean exhaustive) {
-		File moduleFile = null;
-		try {
-			moduleFile = app.getFile();
-		}
-		catch (IOException e) {
-			return Collections.emptyList();
-		}
-		Archive archive = null;
-		try {
-			archive = moduleFile.isDirectory() ? new ExplodedArchive(moduleFile) : new JarFileArchive(moduleFile);
-			return listProperties(archive, exhaustive);
-		}
-		catch (IOException e) {
-			throw new RuntimeException("");
-		}
 	}
 
 	/**

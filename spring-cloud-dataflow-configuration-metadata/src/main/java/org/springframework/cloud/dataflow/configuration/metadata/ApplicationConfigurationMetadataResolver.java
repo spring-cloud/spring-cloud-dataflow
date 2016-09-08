@@ -28,6 +28,12 @@ import org.springframework.core.io.Resource;
  */
 public abstract class ApplicationConfigurationMetadataResolver {
 
+	/**
+	 * Returns whether this resolver supports the given app.
+	 */
+	public abstract boolean supports(Resource app);
+
+
 	public List<ConfigurationMetadataProperty> listProperties(Resource app) {
 		return listProperties(app, false);
 	}
