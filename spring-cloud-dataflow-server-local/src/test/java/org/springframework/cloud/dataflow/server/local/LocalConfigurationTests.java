@@ -18,9 +18,7 @@ package org.springframework.cloud.dataflow.server.local;
 
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 import org.junit.After;
 import org.junit.Test;
@@ -78,7 +76,6 @@ public class LocalConfigurationTests {
 				"--" + FeaturesProperties.FEATURES_PREFIX + "." + FeaturesProperties.STREAMS_ENABLED + "=false"});
 		assertNotNull(context.getBean(TaskDefinitionRepository.class));
 		assertNotNull(context.getBean(DeploymentIdRepository.class));
-		assertNotNull(context.getBean(FieldValueCounterRepository.class));
 		try {
 			context.getBean(StreamDefinitionRepository.class);
 			fail("Stream features should have been disabled.");
@@ -94,7 +91,6 @@ public class LocalConfigurationTests {
 				"--" + FeaturesProperties.FEATURES_PREFIX + "." + FeaturesProperties.TASKS_ENABLED + "=false"});
 		assertNotNull(context.getBean(StreamDefinitionRepository.class));
 		assertNotNull(context.getBean(DeploymentIdRepository.class));
-		assertNotNull(context.getBean(FieldValueCounterRepository.class));
 		try {
 			context.getBean(TaskDefinitionRepository.class);
 			fail("Task features should have been disabled.");

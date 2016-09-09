@@ -33,7 +33,7 @@ public class FeaturesProperties {
 
     public static final String ANALYTICS_ENABLED = "analytics-enabled";
 
-    private boolean analyticsEnabled = true;
+    private boolean analyticsEnabled;
 
     private boolean streamsEnabled = true;
 
