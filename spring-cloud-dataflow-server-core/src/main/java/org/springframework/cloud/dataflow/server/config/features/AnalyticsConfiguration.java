@@ -32,7 +32,7 @@ import org.springframework.retry.support.RetryTemplate;
  * @author Ilayaperumal Gopinathan
  */
 @Configuration
-@ConditionalOnProperty(prefix = FeaturesProperties.FEATURES_PREFIX, name = FeaturesProperties.ANALYTICS_ENABLED, matchIfMissing = true)
+@ConditionalOnProperty(prefix = FeaturesProperties.FEATURES_PREFIX, name = FeaturesProperties.ANALYTICS_ENABLED)
 public class AnalyticsConfiguration {
 
 	@Bean

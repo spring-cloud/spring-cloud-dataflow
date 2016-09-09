@@ -18,14 +18,17 @@ package org.springframework.cloud.dataflow.server.config.features;
 import javax.sql.DataSource;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.actuate.health.Health;
+import org.springframework.boot.actuate.health.RedisHealthIndicator;
+import org.springframework.boot.actuate.metrics.repository.MetricRepository;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
 import org.springframework.cloud.dataflow.server.repository.RdbmsDeploymentIdRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
 
 /**
  * Configuration class that imports analytics, stream and task configuration classes. Also
@@ -34,15 +37,43 @@ import org.springframework.context.annotation.Import;
  * @author Ilayaperumal Gopinathan
  */
 @Configuration
-@Import({ AnalyticsConfiguration.class, StreamConfiguration.class, TaskConfiguration.class })
+@Import({ AnalyticsConfiguration.class, StreamConfiguration.class,
+		TaskConfiguration.class })
 public class FeaturesConfiguration {
+
+	@Autowired
+	private RedisConnectionFactory redisConnectionFactory;
+
+	@Autowired(required = false)
+	private MetricRepository metricRepository;
 
 	@Bean
 	@ConditionalOnMissingBean
-	@ConditionalOnExpression("#{'${" + FeaturesProperties.FEATURES_PREFIX + "." + FeaturesProperties.STREAMS_ENABLED
-			+ ":true}'.equalsIgnoreCase('true') || " + "'${" + FeaturesProperties.FEATURES_PREFIX + "."
+	@ConditionalOnExpression("#{'${" + FeaturesProperties.FEATURES_PREFIX + "."
+			+ FeaturesProperties.STREAMS_ENABLED + ":true}'.equalsIgnoreCase('true') || "
+			+ "'${" + FeaturesProperties.FEATURES_PREFIX + "."
 			+ FeaturesProperties.TASKS_ENABLED + ":true}'.equalsIgnoreCase('true') }")
 	public DeploymentIdRepository deploymentIdRepository(DataSource dataSource) {
 		return new RdbmsDeploymentIdRepository(dataSource);
+	}
+
+	@Bean
+	RedisHealthIndicator redisHealthIndicator() {
+		return new CustomRedisHealthIndicator(redisConnectionFactory);
+	}
+
+	private class CustomRedisHealthIndicator extends RedisHealthIndicator {
+
+		public CustomRedisHealthIndicator(RedisConnectionFactory redisConnectionFactory) {
+			super(redisConnectionFactory);
+		}
+
+		@Override
+		protected void doHealthCheck(Health.Builder builder) throws Exception {
+			// Check Redis health only if analytics feature is enabled.
+			if (metricRepository != null) {
+				super.doHealthCheck(builder);
+			}
+		}
 	}
 }
