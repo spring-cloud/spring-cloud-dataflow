@@ -30,7 +30,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 /**
  * @author Gunnar Hillert
  */
-public class BaseDocumentation {
+public abstract class BaseDocumentation {
 
 	protected String TARGET_DIRECTORY = "target/generated-snippets";
 

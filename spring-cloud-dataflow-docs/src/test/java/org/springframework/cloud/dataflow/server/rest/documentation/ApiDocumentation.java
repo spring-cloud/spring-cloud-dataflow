@@ -16,23 +16,19 @@
 
 package org.springframework.cloud.dataflow.server.rest.documentation;
 
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
+import static org.springframework.restdocs.headers.HeaderDocumentation.responseHeaders;
 import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.linkWithRel;
 import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.links;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
-
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-
 import javax.servlet.RequestDispatcher;
-
-import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
-import static org.springframework.restdocs.headers.HeaderDocumentation.responseHeaders;
 
 import org.junit.Before;
 import org.junit.ClassRule;
@@ -63,7 +59,6 @@ public class ApiDocumentation extends BaseDocumentation {
 		this.mockMvc
 			.perform(get("/"))
 			.andExpect(status().isOk())
-			.andDo(print())
 			.andDo(this.documentationHandler.document(
 				responseHeaders(
 					headerWithName("Content-Type").description("The Content-Type of the payload, e.g. `application/hal+json`"))));
@@ -76,7 +71,6 @@ public class ApiDocumentation extends BaseDocumentation {
 				.requestAttr(RequestDispatcher.ERROR_STATUS_CODE, 400)
 				.requestAttr(RequestDispatcher.ERROR_REQUEST_URI, "/apps")
 				.requestAttr(RequestDispatcher.ERROR_MESSAGE, "The app 'http://localhost:8080/apps/123' does not exist"))
-			.andDo(print())
 			.andExpect(status().isBadRequest())
 			.andExpect(jsonPath("error", is("Bad Request")))
 			.andExpect(jsonPath("timestamp", is(notNullValue())))
@@ -95,7 +89,6 @@ public class ApiDocumentation extends BaseDocumentation {
 	public void index() throws Exception {
 		this.mockMvc.perform(get("/"))
 			.andExpect(status().isOk())
-			.andDo(print())
 			.andDo(this.documentationHandler.document(
 				links(
 					linkWithRel("apps").description("Handle registered applications"),
@@ -104,7 +97,7 @@ public class ApiDocumentation extends BaseDocumentation {
 					linkWithRel("jobs/executions/execution").description("Details for a specific JobExecution"),
 					linkWithRel("jobs/executions/execution/steps").description("All steps for a JobExecution"),
 					linkWithRel("jobs/executions/execution/steps/step").description("Details for a specific step"),
-					linkWithRel("jobs/executions/execution/steps/step/progress").description("Progress information for  a specific step"),
+					linkWithRel("jobs/executions/execution/steps/step/progress").description("Progress information for a specific step"),
 					linkWithRel("jobs/executions/name").description("Retrieve Job Executions by Job name"),
 					linkWithRel("jobs/instances/instance").description("Job instance resource for a specific job instance"),
 					linkWithRel("jobs/instances/name").description("Job instance resource for a specific job name"),
@@ -116,7 +109,7 @@ public class ApiDocumentation extends BaseDocumentation {
 					linkWithRel("tasks/deployments").description("Resource for deployment operations"),
 					linkWithRel("tasks/deployments/deployment").description("Launch a task"),
 					linkWithRel("tasks/executions").description("Returns Task executions"),
-					linkWithRel("tasks/executions/name").description("REturns all task execution for a given Task name"),
+					linkWithRel("tasks/executions/name").description("Returns all task executions for a given Task name"),
 					linkWithRel("tasks/executions/execution").description("Details for a specific task execution"),
 					linkWithRel("streams/definitions").description("The Streams resource"),
 					linkWithRel("streams/definitions/definition").description("Handle a specific Stream definition"),

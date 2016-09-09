@@ -19,7 +19,6 @@ package org.springframework.cloud.dataflow.server.rest.documentation;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
 import static org.springframework.restdocs.request.RequestDocumentation.requestParameters;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.junit.Before;
@@ -39,8 +38,7 @@ public class AppRegistryDocumentation extends BaseDocumentation {
 	public static TestRule springDataflowServer = localDataflowResource;
 
 	@Rule
-	public JUnitRestDocumentation restDocumentation =
-			new JUnitRestDocumentation(TARGET_DIRECTORY);
+	public JUnitRestDocumentation restDocumentation = new JUnitRestDocumentation(TARGET_DIRECTORY);
 
 	@Before
 	public void setupMocks() {
@@ -52,7 +50,6 @@ public class AppRegistryDocumentation extends BaseDocumentation {
 		this.mockMvc.perform(get("/apps").param("type", "source")
 			.accept(MediaType.APPLICATION_JSON))
 			.andExpect(status().isOk())
-			.andDo(print())
 			.andDo(this.documentationHandler.document(requestParameters(
 					parameterWithName("type").description("Restrict the returned apps to the type of the app."))));
 	}

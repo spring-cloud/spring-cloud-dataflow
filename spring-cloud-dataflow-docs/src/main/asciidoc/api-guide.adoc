@@ -87,7 +87,7 @@ in their responses. Responses are in http://stateless.co/hal_specification.html[
 [[api-guide-resources-index]]
 === Index
 
-The index provides the entry point into Spring Cloud Data Flow's REST Api.
+The index provides the entry point into Spring Cloud Data Flow's REST API.
 
 [[api-guide-resources-index-access]]
 ==== Accessing the index
@@ -113,7 +113,7 @@ include::{snippets}/api-documentation/index/http-response.adoc[]
 [[api-guide-resources-index-links]]
 ===== Links
 
-The main element of the index are the links as they allow you to traverse the Api
+The main element of the index are the links as they allow you to traverse the API
 and execute the desired functionality:
 
 include::{snippets}/api-documentation/index/links.adoc[]
