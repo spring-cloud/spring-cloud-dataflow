@@ -21,7 +21,6 @@ import static org.junit.Assert.assertThat;
 
 import java.io.File;
 import java.io.FileFilter;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -33,12 +32,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.loader.LaunchedURLClassLoader;
-import org.springframework.boot.loader.archive.Archive;
 import org.springframework.cloud.dataflow.completion.CompletionConfiguration;
 import org.springframework.cloud.dataflow.completion.CompletionProposal;
 import org.springframework.cloud.dataflow.completion.StreamCompletionProvider;
-import org.springframework.cloud.dataflow.configuration.metadata.AppJarLauncher;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.configuration.metadata.BootApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.core.ApplicationType;
@@ -166,32 +162,7 @@ public class TabOnTapCompletionProviderTests {
 
 		@Bean
 		public ApplicationConfigurationMetadataResolver configurationMetadataResolver() {
-			return new BootApplicationConfigurationMetadataResolver() {
-				// Narrow ClassLoader visibility for tests
-				@Override
-				protected ClassLoader createClassLoader(Archive archive) throws Exception {
-					ClassLoaderExposingJarLauncher jarLauncher = new ClassLoaderExposingJarLauncher(archive) {
-						@Override
-						protected ClassLoader createClassLoader(URL[] urls) throws Exception {
-							return new LaunchedURLClassLoader(urls, null);
-						}
-					};
-					return jarLauncher.createClassLoader();
-				}
-			};
+			return new BootApplicationConfigurationMetadataResolver(null);
 		}
 	}
-
-	private static class ClassLoaderExposingJarLauncher extends AppJarLauncher {
-
-		public ClassLoaderExposingJarLauncher(Archive archive) {
-			super(archive);
-		}
-
-		protected ClassLoader createClassLoader() throws Exception {
-			List<Archive> classPathArchives = getClassPathArchives();
-			return createClassLoader(classPathArchives);
-		}
-	}
-
 }

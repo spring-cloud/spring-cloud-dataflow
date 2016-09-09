@@ -61,7 +61,14 @@ public class BootApplicationConfigurationMetadataResolver extends ApplicationCon
 
 	private final Set<String> globalWhiteListedClasses = new HashSet<>();
 
+	private final ClassLoader parent;
+
 	public BootApplicationConfigurationMetadataResolver() {
+		this(null);
+	}
+
+	public BootApplicationConfigurationMetadataResolver(ClassLoader parent) {
+		this.parent = parent;
 		JarFile.registerUrlProtocolHandler();
 		try {
 			Resource[] globalResources = new PathMatchingResourcePatternResolver(ApplicationConfigurationMetadataResolver.class.getClassLoader()).getResources(WHITELIST_PROPERTIES);
@@ -121,7 +128,7 @@ public class BootApplicationConfigurationMetadataResolver extends ApplicationCon
 		try {
 
 			List<ConfigurationMetadataProperty> result = new ArrayList<>();
-			moduleClassLoader = createClassLoader(archive);
+			moduleClassLoader = new BootClassLoaderCreation(archive, parent).createClassLoader();
 			ResourcePatternResolver moduleResourceLoader = new PathMatchingResourcePatternResolver(moduleClassLoader);
 
 
@@ -201,31 +208,4 @@ public class BootApplicationConfigurationMetadataResolver extends ApplicationCon
 		return !sourceTypes.isEmpty() && classes.containsAll(sourceTypes);
 	}
 
-	/**
-	 * Return a {@link ClassLoader} for accessing resources in the provided
-	 * {@link Archive}. The caller is responsible for disposing of the
-	 * class loader.
-	 * @param archive the archive for which to return a class loader
-	 * @return class loader for the given archive
-	 * @throws Exception if the class loader cannot be created
-	 */
-	protected ClassLoader createClassLoader(Archive archive) throws Exception {
-		return new BootApplicationConfigurationMetadataResolver.ClassLoaderExposingJarLauncher(archive).createClassLoader();
-	}
-
-
-	/**
-	 * Extension of {@link AppJarLauncher} used for exposing a {@link ClassLoader}
-	 * for the provided {@link Archive}.
-	 */
-	private static class ClassLoaderExposingJarLauncher extends AppJarLauncher {
-
-		public ClassLoaderExposingJarLauncher(Archive archive) {
-			super(archive);
-		}
-
-		protected ClassLoader createClassLoader() throws Exception {
-			List<Archive> classPathArchives = getClassPathArchives();
-			return createClassLoader(classPathArchives);
-		}
-	}}
+}

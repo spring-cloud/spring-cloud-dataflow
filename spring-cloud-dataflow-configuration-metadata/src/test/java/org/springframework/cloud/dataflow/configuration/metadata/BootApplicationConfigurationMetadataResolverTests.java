@@ -43,12 +43,6 @@ public class BootApplicationConfigurationMetadataResolverTests {
 	private ApplicationConfigurationMetadataResolver resolver = new BootApplicationConfigurationMetadataResolver();
 
 	@Test
-	public void globalWhitelistedPropertiesShouldBeVisisble() {
-		List<ConfigurationMetadataProperty> properties = resolver.listProperties(new ClassPathResource("apps/filter-processor", getClass()));
-		assertThat(properties, hasItem(configPropertyIdentifiedAs("server.port")));
-	}
-
-	@Test
 	public void appSpecificWhitelistedPropsShouldBeVisible() {
 		List<ConfigurationMetadataProperty> properties = resolver.listProperties(new ClassPathResource("apps/filter-processor", getClass()));
 		assertThat(properties, hasItem(configPropertyIdentifiedAs("filter.expression")));

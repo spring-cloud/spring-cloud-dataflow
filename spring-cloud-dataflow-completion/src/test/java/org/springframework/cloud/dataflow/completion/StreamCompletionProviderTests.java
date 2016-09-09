@@ -25,7 +25,6 @@ import static org.junit.Assert.assertThat;
 
 import java.io.File;
 import java.io.FileFilter;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -36,8 +35,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.loader.LaunchedURLClassLoader;
-import org.springframework.boot.loader.archive.Archive;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.configuration.metadata.BootApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.core.ApplicationType;
@@ -305,22 +302,9 @@ public class StreamCompletionProviderTests {
 		}
 
 		@Bean
-		public ApplicationConfigurationMetadataResolver configurationMetadataResolver() {
-			return new BootApplicationConfigurationMetadataResolver() {
-				// Narrow ClassLoader visibility for tests
-				@Override
-				protected ClassLoader createClassLoader(Archive archive) throws Exception {
-					ClassLoaderExposingJarLauncher jarLauncher = new ClassLoaderExposingJarLauncher(archive) {
-						@Override
-						protected ClassLoader createClassLoader(URL[] urls) throws Exception {
-							return new LaunchedURLClassLoader(urls, null);
-						}
-					};
-					return jarLauncher.createClassLoader();
-				}
-			};
+		public ApplicationConfigurationMetadataResolver metadataResolver() {
+			return new BootApplicationConfigurationMetadataResolver(StreamCompletionProviderTests.class.getClassLoader());
 		}
-
 	}
 
 }

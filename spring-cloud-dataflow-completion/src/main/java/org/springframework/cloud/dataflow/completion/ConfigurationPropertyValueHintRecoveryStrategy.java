@@ -29,6 +29,8 @@ import org.springframework.boot.configurationmetadata.ValueHint;
 import org.springframework.boot.loader.archive.Archive;
 import org.springframework.boot.loader.archive.ExplodedArchive;
 import org.springframework.boot.loader.archive.JarFileArchive;
+import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
+import org.springframework.cloud.dataflow.configuration.metadata.BootClassLoaderCreation;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
@@ -37,7 +39,6 @@ import org.springframework.cloud.dataflow.core.dsl.Token;
 import org.springframework.cloud.dataflow.core.dsl.TokenKind;
 import org.springframework.cloud.dataflow.registry.AppRegistration;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
-import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.core.io.Resource;
 
 /**
@@ -85,7 +86,7 @@ public class ConfigurationPropertyValueHintRecoveryStrategy extends StacktraceFi
 
 					File appFile = appResource.getFile();
 					Archive jarFileArchive = appFile.isDirectory() ? new ExplodedArchive(appFile) : new JarFileArchive(appFile);
-					classLoader = new ClassLoaderExposingJarLauncher(jarFileArchive).createClassLoader();
+					classLoader = new BootClassLoaderCreation(jarFileArchive, Thread.currentThread().getContextClassLoader()).createClassLoader();
 
 					for (ValueHintProvider valueHintProvider : valueHintProviders) {
 						for (ValueHint valueHint : valueHintProvider.generateValueHints(property, classLoader)) {
