@@ -349,6 +349,40 @@ partition count of the topic in the case of Kafka.
 If neither a `partitionSelectorClass` nor a `partitionSelectorExpression` is
 present the result is `key.hashCode() % partitionCount`.
 
+[[passing_content_type_properties]]
+==== Passing application content type properties
+In a stream definition you can specify that the input or the output of an application need to be converted to a different type.
+You can use the `inputType` and `outputType` properties to specify the content type for the incoming data and outgoing data, respectively.
+
+For example, consider the following stream:
+
+```
+dataflow:>stream create tuple --definition "http | filter --inputType=application/x-spring-tuple
+ --expression=payload.hasFieldName('hello') | transform --expression=payload.getValue('hello').toUpperCase()
+ | log" --deploy
+```
+
+The `http` app is expected to send the data in JSON and the `filter` app receives the JSON data
+and processes it as a Spring Tuple.
+In order to do so, we use the `inputType` property on the filter app to convert the data into the expected Spring Tuple format.
+The `transform` application processes the Tuple data and sends the processed data to the downstream `log` application.
+
+When sending some data to the `http` application:
+
+```
+dataflow:>http post --data {"hello":"world","foo":"bar"} --contentType application/json --target http://localhost:<http-port>
+```
+
+At the log application you see the content as follows:
+
+```
+INFO 18745 --- [transform.tuple-1] log.sink                                 : WORLD
+```
+
+Depending on how applications are chained, the content type conversion can be specified either as via the `--outputType` in the upstream app or as an `--inputType` in the downstream app.
+For instance, in the above stream, instead of specifying the `--inputType` on the 'transform' application to convert, the option `--outputType=application/x-spring-tuple` can also be specified on the 'http' application.
+
+For the complete list of message conversion and message converters, please refer Spring Cloud Stream documentation.
 
 ==== Overriding application properties during stream deployment
 
