@@ -27,6 +27,7 @@ include::tasks.adoc[]
 include::dashboard.adoc[]
 include::howto.adoc[]
 include::api-guide.adoc[]
+include::dataflow-template.adoc[]
 include::appendix.adoc[]
 
 
