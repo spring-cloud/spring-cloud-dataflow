@@ -120,6 +120,13 @@ dataflow:>task launch mytask
  Launched task 'mytask'
 ```
 
+When a task is launched, any properties that need to be passed as the command line arguments
+to the task application can be set when launching the task as follows:
+
+```
+dataflow:>task launch mytask --arguments "--server.port=8080,--foo=bar"
+```
+
 === Reviewing Task Executions
 Once the task is launched the state of the task is stored in a relational DB.  The state
 includes:
