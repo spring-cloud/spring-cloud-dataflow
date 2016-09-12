@@ -16,6 +16,11 @@
 
 package org.springframework.cloud.dataflow.completion;
 
+import static org.hamcrest.CoreMatchers.hasItems;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
+import static org.springframework.cloud.dataflow.completion.Proposals.proposalThat;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -53,9 +58,35 @@ public class BootVersionsCompletionProviderTests {
 	@Test
 	public void testBoot13Layout() {
 		List<CompletionProposal> result = completionProvider.complete("boot13 --", 0);
-		System.out.println(result);
-		result = completionProvider.complete("boot14 --", 0);
-		System.out.println(result);
+		assertThat(result, hasItems(
+				proposalThat(is("boot13 --level=")),
+				proposalThat(is("boot13 --number=")),
+				proposalThat(is("boot13 --some-string="))
+		));
+
+		// Test that custom classes can also be loaded correctly
+		result = completionProvider.complete("boot13 --level=", 0);
+		assertThat(result, hasItems(
+				proposalThat(is("boot13 --level=low")),
+				proposalThat(is("boot13 --level=high"))
+		));
+	}
+
+	@Test
+	public void testBoot14Layout() {
+		List<CompletionProposal> result = completionProvider.complete("boot14 --", 0);
+		assertThat(result, hasItems(
+			//	proposalThat(is("boot14 --level=")),
+				proposalThat(is("boot14 --number=")),
+				proposalThat(is("boot14 --some-string="))
+		));
+
+		// Test that custom classes can also be loaded correctly
+		result = completionProvider.complete("boot14 --level=", 0);
+//		assertThat(result, hasItems(
+//				proposalThat(is("boot14 --level=very_low")),
+//				proposalThat(is("boot14 --level=very_high"))
+//		));
 	}
 
 
