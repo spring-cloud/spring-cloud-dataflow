@@ -6,6 +6,8 @@ exposed via REST endpoints. While you can use those endpoints directly, Spring C
 Data Flow also provides a Java-based API, which makes using those REST endpoints
 even easier.
 
+== Overview
+
 The central entrypoint is the `DataFlowTemplate` class in package `org.springframework.cloud.dataflow.rest.client`.
 
 This class implements the interface `DataFlowOperations` and delegates to sub-templates
@@ -48,3 +50,79 @@ via the REST relations, which are provided by HATEOAS.footnote:[HATEOAS stands f
 IMPORTANT: If a resource cannot be resolved, the respective sub-template will result
 in being _NULL_. A common cause is that Spring Cloud Data Flow offers for specific
 sets of features to be enabled/disabled when launching. For more information see <<enable-disable-specific-features>>.
+
+== Using the Data Flow Template
+
+When using the Data Flow Template the only needed Data Flow dependency is for the
+Spring Cloud Data Flow Rest Client:
+
+[source,xml,subs=attributes]
+----
+&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-cloud-dataflow-rest-client&lt;/artifactId&gt;
+  &lt;version&gt;{project-version}&lt;/version&gt;
+&lt;/dependency&gt;
+----
+
+With that dependency you will get the `DataFlowTemplate` class as well as all needed
+dependencies to make calls to a Spring Cloud Data Flow server.
+
+When instantiating the `DataFlowTemplate`, you will also pass in a `RestTemplate`.
+Please be aware that the needed `RestTemplate` requires some additional configuration
+to be valid in the context of the `DataFlowTemplate`. When declaring a `RestTemplate`
+as a bean, the following configuration will suffice:
+
+[source,java]
+----
+  @Bean
+  public static RestTemplate restTemplate() {
+    RestTemplate restTemplate = new RestTemplate();
+    restTemplate.setErrorHandler(new VndErrorResponseErrorHandler(restTemplate.getMessageConverters()));
+    for(HttpMessageConverter<?> converter : restTemplate.getMessageConverters()) {
+      if (converter instanceof MappingJackson2HttpMessageConverter) {
+        final MappingJackson2HttpMessageConverter jacksonConverter =
+            (MappingJackson2HttpMessageConverter) converter;
+        jacksonConverter.getObjectMapper()
+            .registerModule(new Jackson2HalModule())
+            .addMixIn(JobExecution.class, JobExecutionJacksonMixIn.class)
+            .addMixIn(JobParameters.class, JobParametersJacksonMixIn.class)
+            .addMixIn(JobParameter.class, JobParameterJacksonMixIn.class)
+            .addMixIn(JobInstance.class, JobInstanceJacksonMixIn.class)
+            .addMixIn(ExitStatus.class, ExitStatusJacksonMixIn.class)
+            .addMixIn(StepExecution.class, StepExecutionJacksonMixIn.class)
+            .addMixIn(ExecutionContext.class, ExecutionContextJacksonMixIn.class)
+            .addMixIn(StepExecutionHistory.class, StepExecutionHistoryJacksonMixIn.class);
+      }
+    }
+    return restTemplate;
+  }
+----
+
+Now you can instantiate the `DataFlowTemplate` with:
+
+[source,java]
+----
+DataFlowTemplate dataFlowTemplate = new DataFlowTemplate(
+    new URI("http://localhost:9393/"), restTemplate);         # <1>
+----
+
+<1> The `URI` points to the ROOT of your Spring Cloud Data Flow Server.
+
+Depending on your requirements, you can now make calls to the server. For instance,
+if you like to get a list of currently available applications you can execute:
+
+[source,java]
+----
+PagedResources<AppRegistrationResource> apps = dataFlowTemplate.appRegistryOperations().list();
+
+System.out.println(String.format("Retrieved %s application(s)",
+    apps.getContent().size()));
+
+for (AppRegistrationResource app : apps.getContent()) {
+  System.out.println(String.format("App Name: %s, App Type: %s, App URI: %s",
+    app.getName(),
+    app.getType(),
+    app.getUri()));
+}
+----
