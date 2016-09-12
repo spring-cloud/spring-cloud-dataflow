@@ -16,6 +16,8 @@
 
 package org.springframework.cloud.dataflow.configuration.metadata;
 
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.List;
 
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
@@ -36,6 +38,16 @@ public abstract class ApplicationConfigurationMetadataResolver {
 
 	public List<ConfigurationMetadataProperty> listProperties(Resource app) {
 		return listProperties(app, false);
+	}
+
+	/**
+	 * For resolvers that support it, create a new ClassLoader that is able to load classes for the given app.
+	 * The default implementation returns an empty classloader
+	 * @param app an app to create a ClassLoader for
+	 * @return a new ClassLoader. Callers are responsible for closing the returned class loader.
+	 */
+	public URLClassLoader createAppClassLoader(Resource app) {
+		return new URLClassLoader(new URL[0], null);
 	}
 
 	/**

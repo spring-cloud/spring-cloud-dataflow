@@ -16,13 +16,12 @@
 
 package org.springframework.cloud.dataflow.configuration.metadata;
 
-import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
+import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
@@ -53,9 +52,9 @@ public class BootApplicationConfigurationMetadataResolver extends ApplicationCon
 
 	private static final String WHITELIST_PROPERTIES = "classpath*:/META-INF/spring-configuration-metadata-whitelist.properties";
 
-	public static final String CONFIGURATION_PROPERTIES_CLASSES = "configuration-properties.classes";
+	private static final String CONFIGURATION_PROPERTIES_CLASSES = "configuration-properties.classes";
 
-	public static final String CONFIGURATION_PROPERTIES_NAMES = "configuration-properties.names";
+	private static final String CONFIGURATION_PROPERTIES_NAMES = "configuration-properties.names";
 
 	private final Set<String> globalWhiteListedProperties = new HashSet<>();
 
@@ -81,16 +80,8 @@ public class BootApplicationConfigurationMetadataResolver extends ApplicationCon
 
 	@Override
 	public boolean supports(Resource app) {
-		File file = null;
 		try {
-			file = app.getFile();
-		}
-		catch (IOException e) {
-			return false;
-		}
-		Archive archive = null;
-		try {
-			archive = file.isDirectory() ? new ExplodedArchive(file) : new JarFileArchive(file);
+			resolveAsArchive(app);
 			return true;
 		}
 		catch (IOException | IllegalArgumentException e) {
@@ -106,29 +97,18 @@ public class BootApplicationConfigurationMetadataResolver extends ApplicationCon
 	 *            but directories are supported as well
 	 */
 	public List<ConfigurationMetadataProperty> listProperties(Resource app, boolean exhaustive) {
-		File moduleFile = null;
 		try {
-			moduleFile = app.getFile();
-		}
-		catch (IOException e) {
-			return Collections.emptyList();
-		}
-		Archive archive = null;
-		try {
-			archive = moduleFile.isDirectory() ? new ExplodedArchive(moduleFile) : new JarFileArchive(moduleFile);
+			Archive archive = resolveAsArchive(app);
 			return listProperties(archive, exhaustive);
 		}
 		catch (IOException e) {
-			throw new RuntimeException("");
+			throw new RuntimeException("Failed to list properties for " + app, e);
 		}
 	}
 
 	public List<ConfigurationMetadataProperty> listProperties(Archive archive, boolean exhaustive) {
-		ClassLoader moduleClassLoader = null;
-		try {
-
+		try (URLClassLoader moduleClassLoader = new BootClassLoaderFactory(archive, parent).createClassLoader()) {
 			List<ConfigurationMetadataProperty> result = new ArrayList<>();
-			moduleClassLoader = new BootClassLoaderCreation(archive, parent).createClassLoader();
 			ResourcePatternResolver moduleResourceLoader = new PathMatchingResourcePatternResolver(moduleClassLoader);
 			Collection<String> whiteListedClasses = new HashSet<>(globalWhiteListedClasses);
 			Collection<String> whiteListedProperties = new HashSet<>(globalWhiteListedProperties);
@@ -163,16 +143,21 @@ public class BootApplicationConfigurationMetadataResolver extends ApplicationCon
 		catch (Exception e) {
 			throw new RuntimeException("Exception trying to list configuration properties for application " + archive, e);
 		}
-		finally {
-			if (moduleClassLoader instanceof Closeable) {
-				try {
-					((Closeable) moduleClassLoader).close();
-				}
-				catch (IOException e) {
-					// ignore
-				}
-			}
+	}
+
+	@Override
+	public URLClassLoader createAppClassLoader(Resource app) {
+		try {
+			return new BootClassLoaderFactory(resolveAsArchive(app), parent).createClassLoader();
 		}
+		catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	private Archive resolveAsArchive(Resource app) throws IOException {
+			File moduleFile = app.getFile();
+			return moduleFile.isDirectory() ? new ExplodedArchive(moduleFile) : new JarFileArchive(moduleFile);
 	}
 
 	/**

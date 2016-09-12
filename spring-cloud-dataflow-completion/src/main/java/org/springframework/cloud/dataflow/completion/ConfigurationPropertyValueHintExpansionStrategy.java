@@ -18,9 +18,8 @@ package org.springframework.cloud.dataflow.completion;
 
 import static org.springframework.cloud.dataflow.completion.CompletionProposal.expanding;
 
-import java.io.Closeable;
-import java.io.File;
 import java.io.IOException;
+import java.net.URLClassLoader;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -28,11 +27,7 @@ import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
 import org.springframework.boot.configurationmetadata.ValueHint;
-import org.springframework.boot.loader.archive.Archive;
-import org.springframework.boot.loader.archive.ExplodedArchive;
-import org.springframework.boot.loader.archive.JarFileArchive;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
-import org.springframework.cloud.dataflow.configuration.metadata.BootClassLoaderCreation;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
@@ -59,14 +54,14 @@ public class ConfigurationPropertyValueHintExpansionStrategy implements Expansio
 	private ValueHintProvider[] valueHintProviders = new ValueHintProvider[0];
 
 	ConfigurationPropertyValueHintExpansionStrategy(AppRegistry appRegistry,
-	                                                ApplicationConfigurationMetadataResolver metadataResolver) {
+			ApplicationConfigurationMetadataResolver metadataResolver) {
 		this.appRegistry = appRegistry;
 		this.metadataResolver = metadataResolver;
 	}
 
 	@Override
 	public boolean addProposals(String text, StreamDefinition parseResult,
-	                            int detailLevel, List<CompletionProposal> collector) {
+			int detailLevel, List<CompletionProposal> collector) {
 		Set<String> propertyNames = new HashSet<>(parseResult.getDeploymentOrderIterator()
 				.next().getProperties().keySet());
 		propertyNames.removeAll(CompletionUtils.IMPLICIT_PARAMETER_NAMES);
@@ -99,14 +94,13 @@ public class ConfigurationPropertyValueHintExpansionStrategy implements Expansio
 		List<ConfigurationMetadataProperty> allProps = metadataResolver.listProperties(appResource, true);
 		List<ConfigurationMetadataProperty> whiteListedProps = metadataResolver.listProperties(appResource);
 
-		for (ConfigurationMetadataProperty property : allProps) {
-			if (CompletionUtils.isMatchingProperty(propertyName, property, whiteListedProps)) {
-				ClassLoader classLoader = null;
-				try {
-					File file = appResource.getFile();
-					Archive jarFileArchive = file.isDirectory() ? new ExplodedArchive(file) : new JarFileArchive(file);
-					classLoader = new BootClassLoaderCreation(jarFileArchive, Thread.currentThread().getContextClassLoader()).createClassLoader();
-
+		URLClassLoader classLoader = null;
+		try {
+			for (ConfigurationMetadataProperty property : allProps) {
+				if (CompletionUtils.isMatchingProperty(propertyName, property, whiteListedProps)) {
+					if (classLoader == null) {
+						classLoader = metadataResolver.createAppClassLoader(appResource);
+					}
 					for (ValueHintProvider valueHintProvider : valueHintProviders) {
 						List<ValueHint> valueHints = valueHintProvider.generateValueHints(property, classLoader);
 						if (!valueHints.isEmpty() && valueHintProvider.isExclusive(property)) {
@@ -124,18 +118,18 @@ public class ConfigurationPropertyValueHintExpansionStrategy implements Expansio
 						}
 					}
 				}
-				catch (Exception e) {
-					throw new RuntimeException(e);
+			}
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+		finally {
+			if (classLoader != null) {
+				try {
+					classLoader.close();
 				}
-				finally {
-					if (classLoader instanceof Closeable) {
-						try {
-							((Closeable) classLoader).close();
-						}
-						catch (IOException e) {
-							// ignore
-						}
-					}
+				catch (IOException e) {
+					// ignore
 				}
 			}
 		}

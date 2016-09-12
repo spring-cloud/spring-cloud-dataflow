@@ -22,6 +22,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertThat;
+import static org.springframework.cloud.dataflow.completion.Proposals.proposalThat;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -30,7 +31,6 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.hamcrest.FeatureMatcher;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -235,15 +235,6 @@ public class StreamCompletionProviderTests {
 		assertThat(completionProvider.complete("http --use-ssl=tr", 1), not(hasItems(
 				proposalThat(startsWith("http --port=12 --use-ssl=tr "))
 		)));
-	}
-
-	private static org.hamcrest.Matcher<CompletionProposal> proposalThat(org.hamcrest.Matcher<String> matcher) {
-		return new FeatureMatcher<CompletionProposal, String>(matcher, "a proposal whose text", "text") {
-			@Override
-			protected String featureValueOf(CompletionProposal actual) {
-				return actual.getText();
-			}
-		};
 	}
 
 	/**

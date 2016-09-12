@@ -16,7 +16,6 @@
 
 package org.springframework.cloud.dataflow.configuration.metadata;
 
-import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasProperty;
@@ -31,7 +30,6 @@ import org.junit.Test;
 
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.DescriptiveResource;
 
 /**
  * Unit tests for {@link ApplicationConfigurationMetadataResolver}.
@@ -55,11 +53,6 @@ public class BootApplicationConfigurationMetadataResolverTests {
 		assertThat(properties, not(hasItem(configPropertyIdentifiedAs("some.prefix.hidden.by.default.secret"))));
 		properties = resolver.listProperties(new ClassPathResource("apps/filter-processor", getClass()), true);
 		assertThat(properties, hasItem(configPropertyIdentifiedAs("some.prefix.hidden.by.default.secret")));
-	}
-
-	@Test
-	public void dontFailWithExceptionForNonFileResources() {
-		assertThat(resolver.listProperties(new DescriptiveResource("Doesn't resolve to a java.io.File")), empty());
 	}
 
 	@Test
