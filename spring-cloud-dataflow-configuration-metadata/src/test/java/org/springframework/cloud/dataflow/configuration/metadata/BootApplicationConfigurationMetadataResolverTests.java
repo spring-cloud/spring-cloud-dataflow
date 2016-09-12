@@ -70,6 +70,22 @@ public class BootApplicationConfigurationMetadataResolverTests {
 		assertThat(properties.size(), is(full.size()));
 	}
 
+	@Test
+	public void testSupportsBoot13Layout() {
+		List<ConfigurationMetadataProperty> properties = resolver.listProperties(new ClassPathResource("apps/boot13-1.0.0.BUILD-SNAPSHOT.jar", getClass()));
+		for (ConfigurationMetadataProperty property : properties) {
+			System.out.println(property.getId());
+		}
+	}
+
+	@Test
+	public void testSupportsBoot14Layout() {
+		List<ConfigurationMetadataProperty> properties = resolver.listProperties(new ClassPathResource("apps/boot14-1.0.0.BUILD-SNAPSHOT.jar", getClass()));
+		for (ConfigurationMetadataProperty property : properties) {
+			System.out.println(property.getId());
+		}
+	}
+
 	private Matcher<ConfigurationMetadataProperty> configPropertyIdentifiedAs(String name) {
 		return hasProperty("id", is(name));
 	}
