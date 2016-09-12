@@ -25,7 +25,6 @@ import static org.junit.Assert.assertThat;
 
 import java.io.File;
 import java.io.FileFilter;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -36,13 +35,12 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.loader.LaunchedURLClassLoader;
-import org.springframework.boot.loader.archive.Archive;
+import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
+import org.springframework.cloud.dataflow.configuration.metadata.BootApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.registry.AppRegistration;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.deployer.resource.registry.InMemoryUriRegistry;
-import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.FileSystemResourceLoader;
@@ -304,22 +302,9 @@ public class StreamCompletionProviderTests {
 		}
 
 		@Bean
-		public ApplicationConfigurationMetadataResolver configurationMetadataResolver() {
-			return new ApplicationConfigurationMetadataResolver() {
-				// Narrow ClassLoader visibility for tests
-				@Override
-				protected ClassLoader createClassLoader(Archive archive) throws Exception {
-					ClassLoaderExposingJarLauncher jarLauncher = new ClassLoaderExposingJarLauncher(archive) {
-						@Override
-						protected ClassLoader createClassLoader(URL[] urls) throws Exception {
-							return new LaunchedURLClassLoader(urls, null);
-						}
-					};
-					return jarLauncher.createClassLoader();
-				}
-			};
+		public ApplicationConfigurationMetadataResolver metadataResolver() {
+			return new BootApplicationConfigurationMetadataResolver(StreamCompletionProviderTests.class.getClassLoader());
 		}
-
 	}
 
 }
