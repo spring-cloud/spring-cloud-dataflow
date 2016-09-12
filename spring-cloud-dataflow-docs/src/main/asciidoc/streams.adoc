@@ -349,6 +349,41 @@ partition count of the topic in the case of Kafka.
 If neither a `partitionSelectorClass` nor a `partitionSelectorExpression` is
 present the result is `key.hashCode() % partitionCount`.
 
+[[passing_content_type_properties]]
+==== Passing application content type properties
+It is useful to set the content-type to configure the type conversion between the apps inside the stream
+definition. The supported property names are `inputType` and `outputType` to specify the content type
+for the incoming data and outgoing data respectively.
+
+For example, in the following stream:
+
+```
+dataflow:>stream create tuple --definition "http | filter --inputType=application/x-spring-tuple
+ --expression=payload.hasFieldName('hello') | transform --expression=payload.getValue('hello').toUpperCase()
+ | log" --deploy
+```
+
+the `http` app is expected to send the data in JSON and the `filter` app receives the JSON data
+and processes as Spring Tuple(hence the inputType for the filter app). The `transform` processes the Tuple
+data and sends the processed data to the downstream `log` application.
+
+To send some data:
+
+```
+dataflow:>http post --data {"hello":"world","foo":"bar"} --contentType application/json --target http://localhost:<http-port>
+```
+
+At the log application you see the content as follows:
+
+```
+INFO 18745 --- [transform.tuple-1] log.sink                                 : WORLD
+```
+
+Based on the amount of processing involved, the contentType can be specified either as the `--outputType` in the upstream app or
+as the `--inputType` in the downstream app. For instance, in the above stream, instead of specifying the `--inputType`
+at the 'transform' application, the option `--outputType=application/x-spring-tuple` can be specified at the 'http' application.
+
+For the complete list of message conversion and message converters, please refer Spring Cloud Stream documentation.
 
 ==== Overriding application properties during stream deployment
 
