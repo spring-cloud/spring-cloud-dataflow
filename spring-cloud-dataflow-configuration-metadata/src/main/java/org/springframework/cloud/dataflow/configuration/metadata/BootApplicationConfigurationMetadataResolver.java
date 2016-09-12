@@ -130,20 +130,15 @@ public class BootApplicationConfigurationMetadataResolver extends ApplicationCon
 			List<ConfigurationMetadataProperty> result = new ArrayList<>();
 			moduleClassLoader = new BootClassLoaderCreation(archive, parent).createClassLoader();
 			ResourcePatternResolver moduleResourceLoader = new PathMatchingResourcePatternResolver(moduleClassLoader);
-
-
 			Collection<String> whiteListedClasses = new HashSet<>(globalWhiteListedClasses);
 			Collection<String> whiteListedProperties = new HashSet<>(globalWhiteListedProperties);
-
 			Resource[] whitelistDescriptors = moduleResourceLoader.getResources(WHITELIST_PROPERTIES);
 			boolean include = (whitelistDescriptors.length == 0) || exhaustive; // when no descriptors, return everything
 			loadWhiteLists(whitelistDescriptors, whiteListedClasses, whiteListedProperties);
-
 			ConfigurationMetadataRepositoryJsonBuilder builder = ConfigurationMetadataRepositoryJsonBuilder.create();
 			for (Resource r : moduleResourceLoader.getResources(CONFIGURATION_METADATA_PATTERN)) {
 				builder.withJsonResource(r.getInputStream());
 			}
-
 			for (ConfigurationMetadataGroup group : builder.build().getAllGroups().values()) {
 				if (include || isWhiteListed(group, whiteListedClasses)) {
 					result.addAll(group.getProperties().values());
@@ -178,7 +173,6 @@ public class BootApplicationConfigurationMetadataResolver extends ApplicationCon
 				}
 			}
 		}
-
 	}
 
 	/**

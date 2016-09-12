@@ -91,7 +91,5 @@ public class BootClassLoaderCreation {
 		protected void postProcessClassPathArchives(List<Archive> archives) throws Exception {
 			archives.add(0, getArchive());
 		}
-
-
 	}
 }
