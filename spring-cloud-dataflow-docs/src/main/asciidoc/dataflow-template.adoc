@@ -43,7 +43,7 @@ that provide the specific functionality for each feature-set:
 |===
 
 When the `DataFlowTemplate` is being initialized, the sub-templates will be discovered
-via the REST relations, which are provided by HATEOAS.footnote:[HATEOAS stands for Hypermedia as the Engine of Application State].
+via the REST relations, which are provided by HATEOAS.footnote:[HATEOAS stands for Hypermedia as the Engine of Application State]
 
 IMPORTANT: If a resource cannot be resolved, the respective sub-template will result
 in being _NULL_. A common cause is that Spring Cloud Data Flow offers for specific
