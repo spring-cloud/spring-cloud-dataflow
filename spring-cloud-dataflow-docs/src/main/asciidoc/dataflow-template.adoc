@@ -1,0 +1,50 @@
+[[dataflow-template]]
+= Data Flow Template
+
+As described in the previous chapter, Spring Data Flow's functionality is completely
+exposed via REST endpoints. While you can use those endpoints directly, Spring Cloud
+Data Flow also provides a Java-based API, which makes using those REST endpoints
+even easier.
+
+The central entrypoint is the `DataFlowTemplate` class in package `org.springframework.cloud.dataflow.rest.client`.
+
+This class implements the interface `DataFlowOperations` and delegates to sub-templates
+that provide the specific functionality for each feature-set:
+
+|===
+| Interface | Description
+
+| StreamOperations
+| REST client for stream operations
+
+| CounterOperations
+| REST client for counter operations
+
+| FieldValueCounterOperations
+| REST client for field value counter operations
+
+| AggregateCounterOperations
+| REST client for aggregate counter operations
+
+| TaskOperations
+| REST client for task operations
+
+| JobOperations
+| REST client for job operations
+
+| AppRegistryOperations
+| REST client for app registry operations
+
+| CompletionOperations
+| REST client for completion operations
+
+| RuntimeOperations
+| REST Client for runtime operations
+|===
+
+When the `DataFlowTemplate` is being initialized, the sub-templates will be discovered
+via the REST relations, which are provided by HATEOAS.footnote:[HATEOAS stands for Hypermedia as the Engine of Application State].
+
+IMPORTANT: If a resource cannot be resolved, the respective sub-template will result
+in being _NULL_. A common cause is that Spring Cloud Data Flow offers for specific
+sets of features to be enabled/disabled when launching. For more information see <<enable-disable-specific-features>>.
