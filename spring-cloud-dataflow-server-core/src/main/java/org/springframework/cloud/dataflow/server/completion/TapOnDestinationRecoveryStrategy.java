@@ -27,6 +27,7 @@ import org.springframework.cloud.dataflow.core.dsl.DSLMessage;
 import org.springframework.cloud.dataflow.core.dsl.ParseException;
 import org.springframework.cloud.dataflow.server.DataFlowServerUtil;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
+import org.springframework.util.StringUtils;
 
 /**
  * Expands constructs that start with {@literal :} to add stream name and app identifiers.
@@ -63,8 +64,11 @@ public class TapOnDestinationRecoveryStrategy implements RecoveryStrategy<ParseE
 			}
 		}
 
-		StreamDefinition streamDefinition = streamDefinitionRepository.findOne(streamName);
-		// User has started to type a module name, or at least the stream name is valid
+		StreamDefinition streamDefinition = null;
+		if (StringUtils.hasText(streamName)) {
+			streamDefinition = streamDefinitionRepository.findOne(streamName);
+		}
+		// User has started to type an app name, or at least the stream name is valid
 		if (streamDefinition != null) {
 			CompletionProposal.Factory proposals = CompletionProposal.expanding(":" + streamName + ".");
 			for (StreamAppDefinition streamAppDefinition : streamDefinition.getAppDefinitions()) {
