@@ -22,23 +22,13 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.junit.Before;
-import org.junit.ClassRule;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.TestRule;
 import org.springframework.http.MediaType;
-import org.springframework.restdocs.JUnitRestDocumentation;
 
 /**
  * @author Gunnar Hillert
  */
 public class AppRegistryDocumentation extends BaseDocumentation {
-
-	@ClassRule
-	public static TestRule springDataflowServer = localDataflowResource;
-
-	@Rule
-	public JUnitRestDocumentation restDocumentation = new JUnitRestDocumentation(TARGET_DIRECTORY);
 
 	@Before
 	public void setupMocks() {

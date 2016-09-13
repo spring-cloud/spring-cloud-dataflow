@@ -31,23 +31,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import javax.servlet.RequestDispatcher;
 
 import org.junit.Before;
-import org.junit.ClassRule;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.TestRule;
-import org.springframework.restdocs.JUnitRestDocumentation;
 
 /**
  * @author Gunnar Hillert
  */
 public class ApiDocumentation extends BaseDocumentation {
-
-	@ClassRule
-	public static TestRule springDataflowServer = localDataflowResource;
-
-	@Rule
-	public JUnitRestDocumentation restDocumentation =
-			new JUnitRestDocumentation(TARGET_DIRECTORY);
 
 	@Before
 	public void setupMocks() {
@@ -93,34 +82,34 @@ public class ApiDocumentation extends BaseDocumentation {
 				links(
 					linkWithRel("apps").description("Handle registered applications"),
 					linkWithRel("completions/stream").description("Exposes the DSL completion features"),
-					linkWithRel("jobs/executions").description("The JobExecution resource"),
-					linkWithRel("jobs/executions/execution").description("Details for a specific JobExecution"),
-					linkWithRel("jobs/executions/execution/steps").description("All steps for a JobExecution"),
-					linkWithRel("jobs/executions/execution/steps/step").description("Details for a specific step"),
-					linkWithRel("jobs/executions/execution/steps/step/progress").description("Progress information for a specific step"),
+					linkWithRel("jobs/executions").description("Provides the JobExecution resource"),
+					linkWithRel("jobs/executions/execution").description("Provides details for a specific JobExecution"),
+					linkWithRel("jobs/executions/execution/steps").description("Provides the steps for a JobExecution"),
+					linkWithRel("jobs/executions/execution/steps/step").description("Returns the details for a specific step"),
+					linkWithRel("jobs/executions/execution/steps/step/progress").description("Provides progress information for a specific step"),
 					linkWithRel("jobs/executions/name").description("Retrieve Job Executions by Job name"),
-					linkWithRel("jobs/instances/instance").description("Job instance resource for a specific job instance"),
-					linkWithRel("jobs/instances/name").description("Job instance resource for a specific job name"),
-					linkWithRel("runtime/apps").description("Runtime application resource"),
+					linkWithRel("jobs/instances/instance").description("Provides the job instance resource for a specific job instance"),
+					linkWithRel("jobs/instances/name").description("Provides the Job instance resource for a specific job name"),
+					linkWithRel("runtime/apps").description("Provides the runtime application resource"),
 					linkWithRel("runtime/apps/app").description("Exposes the runtime status for a specific app"),
-					linkWithRel("runtime/apps/instances").description("Status for an individual app instance"),
-					linkWithRel("tasks/definitions").description("Task definition resource"),
-					linkWithRel("tasks/definitions/definition").description("A specific task definition"),
-					linkWithRel("tasks/deployments").description("Resource for deployment operations"),
+					linkWithRel("runtime/apps/instances").description("Provides the status for app instances"),
+					linkWithRel("tasks/definitions").description("Provides the task definition resource"),
+					linkWithRel("tasks/definitions/definition").description("Provides details for a specific task definition"),
+					linkWithRel("tasks/deployments").description("Provides the resource for deployment operations"),
 					linkWithRel("tasks/deployments/deployment").description("Launch a task"),
 					linkWithRel("tasks/executions").description("Returns Task executions"),
 					linkWithRel("tasks/executions/name").description("Returns all task executions for a given Task name"),
-					linkWithRel("tasks/executions/execution").description("Details for a specific task execution"),
-					linkWithRel("streams/definitions").description("The Streams resource"),
+					linkWithRel("tasks/executions/execution").description("Provides details for a specific task execution"),
+					linkWithRel("streams/definitions").description("Exposes the Streams resource"),
 					linkWithRel("streams/definitions/definition").description("Handle a specific Stream definition"),
-					linkWithRel("streams/deployments").description("Resource for Stream deployment operations"),
+					linkWithRel("streams/deployments").description("Provides Stream deployment operations"),
 					linkWithRel("streams/deployments/deployment").description("Request (un-)deployment of an existing stream definition"),
-					linkWithRel("counters").description("Counter resource"),
-					linkWithRel("counters/counter").description(""),
-					linkWithRel("aggregate-counters").description(""),
-					linkWithRel("aggregate-counters/counter").description(""),
-					linkWithRel("field-value-counters").description(""),
-					linkWithRel("field-value-counters/counter").description("")),
+					linkWithRel("counters").description("Exposes the resource for dealing with Counters"),
+					linkWithRel("counters/counter").description("Handle a specific counter"),
+					linkWithRel("aggregate-counters").description("Provides the resource for dealing with aggregate counters"),
+					linkWithRel("aggregate-counters/counter").description("Handle a specific aggregate counter"),
+					linkWithRel("field-value-counters").description("Provides the resource for dealing with field-value-counters"),
+					linkWithRel("field-value-counters/counter").description("Handle a specific field-value-counter")),
 				responseFields(
 					fieldWithPath("_links").description("Links to other resources"))));
 	}

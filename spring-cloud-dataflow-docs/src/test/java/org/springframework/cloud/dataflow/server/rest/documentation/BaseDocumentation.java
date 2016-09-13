@@ -21,6 +21,8 @@ import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.docu
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.preprocessResponse;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.prettyPrint;
 
+import org.junit.ClassRule;
+import org.junit.Rule;
 import org.springframework.cloud.dataflow.server.local.LocalDataflowResource;
 import org.springframework.restdocs.JUnitRestDocumentation;
 import org.springframework.restdocs.mockmvc.RestDocumentationResultHandler;
@@ -34,7 +36,12 @@ public abstract class BaseDocumentation {
 
 	protected String TARGET_DIRECTORY = "target/generated-snippets";
 
-	protected final static LocalDataflowResource localDataflowResource =
+	@Rule
+	public JUnitRestDocumentation restDocumentation =
+			new JUnitRestDocumentation(TARGET_DIRECTORY);
+
+	@ClassRule
+	public final static LocalDataflowResource springDataflowServer =
 			new LocalDataflowResource(null);
 
 	protected MockMvc mockMvc;
@@ -43,7 +50,7 @@ public abstract class BaseDocumentation {
 	public void prepareDocumentationTests(JUnitRestDocumentation restDocumentation) {
 		this.documentationHandler = document("{class-name}/{method-name}",
 				preprocessResponse(prettyPrint()));
-		this.mockMvc = MockMvcBuilders.webAppContextSetup(localDataflowResource.getWebApplicationContext())
+		this.mockMvc = MockMvcBuilders.webAppContextSetup(springDataflowServer.getWebApplicationContext())
 				.apply(documentationConfiguration(restDocumentation))
 				.alwaysDo(this.documentationHandler)
 				.build();

@@ -9,6 +9,13 @@ In this section you will learn all about the Spring Cloud Data Flow REST API.
 [[api-guide-overview]]
 == Overview
 
+Spring Cloud Data Flow provides a  REST API allowing you to access all aspects of
+the server. In fact the Spring Cloud Data Flow Shell is a first-class consumer of
+that API.
+
+TIP: If you plan on using the REST API using Java, please also consider using the
+provided Java client (DataflowTemplate) that uses the REST API internally.
+
 [[api-guide-overview-http-verbs]]
 === HTTP verbs
 
