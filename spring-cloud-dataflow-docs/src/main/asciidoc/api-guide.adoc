@@ -1,0 +1,147 @@
+[[api-guide]]
+= REST API Guide
+
+[partintro]
+--
+In this section you will learn all about the Spring Cloud Data Flow REST API.
+--
+
+[[api-guide-overview]]
+== Overview
+
+Spring Cloud Data Flow provides a  REST API allowing you to access all aspects of
+the server. In fact the Spring Cloud Data Flow Shell is a first-class consumer of
+that API.
+
+TIP: If you plan on using the REST API using Java, please also consider using the
+provided Java client (DataflowTemplate) that uses the REST API internally.
+
+[[api-guide-overview-http-verbs]]
+=== HTTP verbs
+
+Spring Cloud Data Flow tries to adhere as closely as possible to standard HTTP and REST conventions in its use of HTTP verbs.
+
+|===
+| Verb | Usage
+
+| `GET`
+| Used to retrieve a resource
+
+| `POST`
+| Used to create a new resource
+
+| `PUT`
+| Used to update an existing resource, including partial updates. Also used for
+resources that imply the concept of `restarts` such as Tasks.
+
+| `DELETE`
+| Used to delete an existing resource
+|===
+
+[[api-guide-overview-http-status-codes]]
+=== HTTP status codes
+
+RESTful notes tries to adhere as closely as possible to standard HTTP and REST conventions in its use of HTTP status codes.
+
+|===
+| Status code | Usage
+
+| `200 OK`
+| The request completed successfully
+
+| `201 Created`
+| A new resource has been created successfully. The resource's URI is available from the response's `Location` header
+
+| `204 No Content`
+| An update to an existing resource has been applied successfully
+
+| `400 Bad Request`
+| The request was malformed. The response body will include an error providing further information
+
+| `404 Not Found`
+| The requested resource did not exist
+
+| `409 Conflict`
+| The requested resource already exists, e.g. the task already exists or the stream
+was already being deployed
+
+| `422 Unprocessable Entity`
+| Returned in cases the Job Execution cannot be stopped or restarted
+
+|===
+
+[[api-guide-overview-headers]]
+=== Headers
+
+Every response has the following header(s):
+
+include::{snippets}/api-documentation/headers/response-headers.adoc[]
+
+[[api-guide-overview-errors]]
+=== Errors
+
+include::{snippets}/api-documentation/errors/response-fields.adoc[]
+
+[[api-guide-overview-hypermedia]]
+=== Hypermedia
+
+Spring Cloud Data Flow uses hypermedia and resources include links to other resources
+in their responses. Responses are in http://stateless.co/hal_specification.html[Hypertext Application from resource to resource Language (HAL)] format. Links can be found beneath the `_links` key. Users of the API should not create URIs themselves, instead they should use the above-described links to navigate.
+
+[[api-guide-resources]]
+== Resources
+
+[[api-guide-resources-index]]
+=== Index
+
+The index provides the entry point into Spring Cloud Data Flow's REST API.
+
+[[api-guide-resources-index-access]]
+==== Accessing the index
+
+A `GET` request is used to access the index
+
+===== Request structure
+
+include::{snippets}/api-documentation/index/http-request.adoc[]
+
+===== Example request
+
+include::{snippets}/api-documentation/index/curl-request.adoc[]
+
+===== Response structure
+
+include::{snippets}/api-documentation/index/response-fields.adoc[]
+
+===== Example response
+
+include::{snippets}/api-documentation/index/http-response.adoc[]
+
+[[api-guide-resources-index-links]]
+===== Links
+
+The main element of the index are the links as they allow you to traverse the API
+and execute the desired functionality:
+
+include::{snippets}/api-documentation/index/links.adoc[]
+
+[[resources-app-registry-list]]
+=== Listing Applications
+
+A `GET` request will list all applications known to Spring Cloud Data Flow.
+
+==== Request structure
+
+include::{snippets}/app-registry-documentation/get-applications-filtered/http-request.adoc[]
+
+==== Request parameters
+
+include::{snippets}/app-registry-documentation/get-applications-filtered/request-parameters.adoc[]
+
+==== Example request
+
+include::{snippets}/app-registry-documentation/get-applications-filtered/curl-request.adoc[]
+
+==== Response structure
+
+include::{snippets}/app-registry-documentation/get-applications-filtered/http-response.adoc[]
