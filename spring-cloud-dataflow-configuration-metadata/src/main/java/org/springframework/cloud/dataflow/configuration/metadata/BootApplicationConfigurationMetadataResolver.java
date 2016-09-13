@@ -128,7 +128,7 @@ public class BootApplicationConfigurationMetadataResolver extends ApplicationCon
 		try {
 
 			List<ConfigurationMetadataProperty> result = new ArrayList<>();
-			moduleClassLoader = new BootClassLoaderCreation(archive, parent).createClassLoader();
+			moduleClassLoader = new BootClassLoaderFactory(archive, parent).createClassLoader();
 			ResourcePatternResolver moduleResourceLoader = new PathMatchingResourcePatternResolver(moduleClassLoader);
 			Collection<String> whiteListedClasses = new HashSet<>(globalWhiteListedClasses);
 			Collection<String> whiteListedProperties = new HashSet<>(globalWhiteListedProperties);

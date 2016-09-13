@@ -32,7 +32,7 @@ import org.springframework.boot.loader.archive.Archive;
 import org.springframework.boot.loader.archive.ExplodedArchive;
 import org.springframework.boot.loader.archive.JarFileArchive;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
-import org.springframework.cloud.dataflow.configuration.metadata.BootClassLoaderCreation;
+import org.springframework.cloud.dataflow.configuration.metadata.BootClassLoaderFactory;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
@@ -105,7 +105,7 @@ public class ConfigurationPropertyValueHintExpansionStrategy implements Expansio
 				try {
 					File file = appResource.getFile();
 					Archive jarFileArchive = file.isDirectory() ? new ExplodedArchive(file) : new JarFileArchive(file);
-					classLoader = new BootClassLoaderCreation(jarFileArchive, Thread.currentThread().getContextClassLoader()).createClassLoader();
+					classLoader = new BootClassLoaderFactory(jarFileArchive, Thread.currentThread().getContextClassLoader()).createClassLoader();
 
 					for (ValueHintProvider valueHintProvider : valueHintProviders) {
 						List<ValueHint> valueHints = valueHintProvider.generateValueHints(property, classLoader);

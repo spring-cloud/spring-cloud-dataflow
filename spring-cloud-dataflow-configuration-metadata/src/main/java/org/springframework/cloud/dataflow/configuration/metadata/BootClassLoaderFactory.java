@@ -31,7 +31,7 @@ import org.springframework.boot.loader.util.AsciiBytes;
  *
  * @author Eric Bottard
  */
-public class BootClassLoaderCreation {
+public class BootClassLoaderFactory {
 
 	private final Archive archive;
 
@@ -41,31 +41,42 @@ public class BootClassLoaderCreation {
 
 	private static final AsciiBytes BOOT_14_LIBS_LOCATION = new AsciiBytes("BOOT-INF/lib/");
 
-	public BootClassLoaderCreation(Archive archive, ClassLoader parent) {
+	private static final AsciiBytes BOOT_14_CLASSESS_LOCATION = new AsciiBytes("BOOT-INF/classes/");
+
+	/**
+	 * Create a new factory for dealing with the given boot uberjar archive.
+	 * @param archive a boot uberjar Archive
+	 * @param parent the parent classloader to set for new created ClassLoaders
+	 */
+	public BootClassLoaderFactory(Archive archive, ClassLoader parent) {
 		this.archive = archive;
 		this.parent = parent;
 	}
 
 	public URLClassLoader createClassLoader() {
-		AsciiBytes layout = BOOT_13_LIBS_LOCATION;
+		boolean useBoot14Layout = false;
 		for (Archive.Entry entry : archive.getEntries()) {
 			if (entry.getName().startsWith(BOOT_14_LIBS_LOCATION)) {
-				layout = BOOT_14_LIBS_LOCATION;
+				useBoot14Layout = true;
 				break;
 			}
 		}
-		ClassLoaderExposingLauncher launcher = new ClassLoaderExposingLauncher(layout);
+
+		ClassLoaderExposingLauncher launcher = useBoot14Layout
+				? new Boot14ClassLoaderExposingLauncher()
+				: new Boot13ClassLoaderExposingLauncher();
 
 		return launcher.createClassLoader();
 	}
 
-	private class ClassLoaderExposingLauncher extends ExecutableArchiveLauncher {
-
-		private final AsciiBytes libsLocation;
-
-		public ClassLoaderExposingLauncher(AsciiBytes libsLocation) {
+	private abstract class ClassLoaderExposingLauncher extends ExecutableArchiveLauncher {
+		public ClassLoaderExposingLauncher() {
 			super(archive);
-			this.libsLocation = libsLocation;
+		}
+
+		@Override
+		protected ClassLoader createClassLoader(URL[] urls) throws Exception {
+			return new LaunchedURLClassLoader(urls, parent);
 		}
 
 		public URLClassLoader createClassLoader() {
@@ -77,19 +88,27 @@ public class BootClassLoaderCreation {
 			}
 		}
 
-		@Override
-		protected boolean isNestedArchive(Archive.Entry entry) {
-			return !entry.isDirectory() && entry.getName().startsWith(libsLocation);
-		}
+	}
+
+	private class Boot13ClassLoaderExposingLauncher extends ClassLoaderExposingLauncher {
 
 		@Override
-		protected ClassLoader createClassLoader(URL[] urls) throws Exception {
-			return new LaunchedURLClassLoader(urls, parent);
+		protected boolean isNestedArchive(Archive.Entry entry) {
+			return !entry.isDirectory() && entry.getName().startsWith(BOOT_13_LIBS_LOCATION);
 		}
 
 		@Override
 		protected void postProcessClassPathArchives(List<Archive> archives) throws Exception {
 			archives.add(0, getArchive());
 		}
+	}
+
+	private class Boot14ClassLoaderExposingLauncher extends ClassLoaderExposingLauncher {
+		@Override
+		protected boolean isNestedArchive(Archive.Entry entry) {
+			return (!entry.isDirectory() && entry.getName().startsWith(BOOT_14_LIBS_LOCATION))
+					|| (entry.isDirectory() && entry.getName().equals(BOOT_14_CLASSESS_LOCATION));
+		}
+
 	}
 }
