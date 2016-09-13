@@ -16,9 +16,12 @@
 
 package com.acme.boot14;
 
+import org.springframework.boot.context.properties.ConfigurationProperties;
+
 /**
  * @author Eric Bottard
  */
+@ConfigurationProperties("boot14")
 public class MyConfigProperties14 {
 
 	private AnotherEnumClass14 level;

@@ -18,19 +18,14 @@ package org.springframework.cloud.dataflow.completion;
 
 import static org.springframework.cloud.dataflow.completion.CompletionProposal.expanding;
 
-import java.io.Closeable;
-import java.io.File;
 import java.io.IOException;
+import java.net.URLClassLoader;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
 import org.springframework.boot.configurationmetadata.ValueHint;
-import org.springframework.boot.loader.archive.Archive;
-import org.springframework.boot.loader.archive.ExplodedArchive;
-import org.springframework.boot.loader.archive.JarFileArchive;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
-import org.springframework.cloud.dataflow.configuration.metadata.BootClassLoaderFactory;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
@@ -79,36 +74,33 @@ public class ConfigurationPropertyValueHintRecoveryStrategy extends StacktraceFi
 
 		List<ConfigurationMetadataProperty> whiteList = metadataResolver.listProperties(appResource);
 
-		for (ConfigurationMetadataProperty property : metadataResolver.listProperties(appResource, true)) {
-			if (CompletionUtils.isMatchingProperty(propertyName, property, whiteList)) {
-				ClassLoader classLoader = null;
-				try {
-
-					File appFile = appResource.getFile();
-					Archive jarFileArchive = appFile.isDirectory() ? new ExplodedArchive(appFile) : new JarFileArchive(appFile);
-					classLoader = new BootClassLoaderFactory(jarFileArchive, Thread.currentThread().getContextClassLoader()).createClassLoader();
-
+		URLClassLoader classLoader = null;
+		try {
+			for (ConfigurationMetadataProperty property : metadataResolver.listProperties(appResource, true)) {
+				if (CompletionUtils.isMatchingProperty(propertyName, property, whiteList)) {
+					if (classLoader == null) {
+						classLoader = metadataResolver.createAppClassLoader(appResource);
+					}
 					for (ValueHintProvider valueHintProvider : valueHintProviders) {
 						for (ValueHint valueHint : valueHintProvider.generateValueHints(property, classLoader)) {
 							collector.add(proposals.withSuffix(String.valueOf(valueHint.getValue()), valueHint.getShortDescription()));
 						}
 					}
 				}
-				catch (Exception e) {
-					throw new RuntimeException(e);
+			}
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+		finally {
+			if (classLoader != null) {
+				try {
+					classLoader.close();
 				}
-				finally {
-					if (classLoader instanceof Closeable) {
-						try {
-							((Closeable)classLoader).close();
-						}
-						catch (IOException e) {
-							// ignore
-						}
-					}
+				catch (IOException e) {
+					// ignore
 				}
 			}
-
 		}
 	}
 

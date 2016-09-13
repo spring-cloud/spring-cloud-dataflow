@@ -76,17 +76,17 @@ public class BootVersionsCompletionProviderTests {
 	public void testBoot14Layout() {
 		List<CompletionProposal> result = completionProvider.complete("boot14 --", 0);
 		assertThat(result, hasItems(
-			//	proposalThat(is("boot14 --level=")),
+				proposalThat(is("boot14 --level=")),
 				proposalThat(is("boot14 --number=")),
 				proposalThat(is("boot14 --some-string="))
 		));
 
 		// Test that custom classes can also be loaded correctly
 		result = completionProvider.complete("boot14 --level=", 0);
-//		assertThat(result, hasItems(
-//				proposalThat(is("boot14 --level=very_low")),
-//				proposalThat(is("boot14 --level=very_high"))
-//		));
+		assertThat(result, hasItems(
+				proposalThat(is("boot14 --level=very_low")),
+				proposalThat(is("boot14 --level=very_high"))
+		));
 	}
 
 

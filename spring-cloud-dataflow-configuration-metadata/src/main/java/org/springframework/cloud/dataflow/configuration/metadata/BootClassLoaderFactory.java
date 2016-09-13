@@ -110,5 +110,9 @@ public class BootClassLoaderFactory {
 					|| (entry.isDirectory() && entry.getName().equals(BOOT_14_CLASSESS_LOCATION));
 		}
 
+		@Override
+		protected void postProcessClassPathArchives(List<Archive> archives) throws Exception {
+			archives.add(0, getArchive());
+		}
 	}
 }

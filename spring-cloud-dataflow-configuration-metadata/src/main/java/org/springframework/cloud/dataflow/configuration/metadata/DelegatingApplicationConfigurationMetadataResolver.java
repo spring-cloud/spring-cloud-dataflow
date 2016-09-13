@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.dataflow.configuration.metadata;
 
+import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -52,5 +53,15 @@ public class DelegatingApplicationConfigurationMetadataResolver extends Applicat
 			}
 		}
 		return Collections.emptyList();
+	}
+
+	@Override
+	public URLClassLoader createAppClassLoader(Resource app) {
+		for (ApplicationConfigurationMetadataResolver delegate : delegates) {
+			if (delegate.supports(app)) {
+				return delegate.createAppClassLoader(app);
+			}
+		}
+		return super.createAppClassLoader(app);
 	}
 }

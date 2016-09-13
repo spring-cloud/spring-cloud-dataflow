@@ -16,7 +16,6 @@
 
 package org.springframework.cloud.dataflow.configuration.metadata;
 
-import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasProperty;
@@ -31,7 +30,6 @@ import org.junit.Test;
 
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.DescriptiveResource;
 
 /**
  * Unit tests for {@link ApplicationConfigurationMetadataResolver}.
@@ -58,32 +56,11 @@ public class BootApplicationConfigurationMetadataResolverTests {
 	}
 
 	@Test
-	public void dontFailWithExceptionForNonFileResources() {
-		assertThat(resolver.listProperties(new DescriptiveResource("Doesn't resolve to a java.io.File")), empty());
-	}
-
-	@Test
 	public void shouldReturnEverythingWhenNoDescriptors() {
 		List<ConfigurationMetadataProperty> properties = resolver.listProperties(new ClassPathResource("apps/no-whitelist", getClass()));
 		List<ConfigurationMetadataProperty> full = resolver.listProperties(new ClassPathResource("apps/no-whitelist", getClass()), true);
 		assertThat( properties.size(), greaterThan(0));
 		assertThat(properties.size(), is(full.size()));
-	}
-
-	@Test
-	public void testSupportsBoot13Layout() {
-		List<ConfigurationMetadataProperty> properties = resolver.listProperties(new ClassPathResource("apps/boot13-1.0.0.BUILD-SNAPSHOT.jar", getClass()));
-		for (ConfigurationMetadataProperty property : properties) {
-			System.out.println(property.getId());
-		}
-	}
-
-	@Test
-	public void testSupportsBoot14Layout() {
-		List<ConfigurationMetadataProperty> properties = resolver.listProperties(new ClassPathResource("apps/boot14-1.0.0.BUILD-SNAPSHOT.jar", getClass()));
-		for (ConfigurationMetadataProperty property : properties) {
-			System.out.println(property.getId());
-		}
 	}
 
 	private Matcher<ConfigurationMetadataProperty> configPropertyIdentifiedAs(String name) {
