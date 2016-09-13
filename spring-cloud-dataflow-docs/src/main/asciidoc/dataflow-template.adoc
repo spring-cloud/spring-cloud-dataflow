@@ -53,7 +53,7 @@ sets of features to be enabled/disabled when launching. For more information see
 
 == Using the Data Flow Template
 
-When using the Data Flow Template the only needed Data Flow dependency is for the
+When using the Data Flow Template the only needed Data Flow dependency is the
 Spring Cloud Data Flow Rest Client:
 
 [source,xml,subs=attributes]
