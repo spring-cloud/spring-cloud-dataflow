@@ -70,6 +70,12 @@ public class BootVersionsCompletionProviderTests {
 				proposalThat(is("boot13 --level=low")),
 				proposalThat(is("boot13 --level=high"))
 		));
+
+		result = completionProvider.complete("boot13 --number=", 0);
+		assertThat(result, hasItems(
+				proposalThat(is("boot13 --number=one")),
+				proposalThat(is("boot13 --number=two"))
+		));
 	}
 
 	@Test
@@ -87,6 +93,13 @@ public class BootVersionsCompletionProviderTests {
 				proposalThat(is("boot14 --level=very_low")),
 				proposalThat(is("boot14 --level=very_high"))
 		));
+
+		result = completionProvider.complete("boot14 --number=", 0);
+		assertThat(result, hasItems(
+				proposalThat(is("boot14 --number=one")),
+				proposalThat(is("boot14 --number=two"))
+		));
+
 	}
 
 
