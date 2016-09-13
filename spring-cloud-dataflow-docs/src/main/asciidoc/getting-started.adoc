@@ -36,7 +36,7 @@ One can enable, disable these features by setting the following boolean properti
 * `spring.cloud.dataflow.features.tasks-enabled`
 * `spring.cloud.dataflow.features.analytics-enabled`
 
-By default, all these features except 'analytics' features are enabled.
+By default, all the features except 'analytics' are enabled.
 
 The REST endpoint `/features` provides information on the features enabled/disabled.
 

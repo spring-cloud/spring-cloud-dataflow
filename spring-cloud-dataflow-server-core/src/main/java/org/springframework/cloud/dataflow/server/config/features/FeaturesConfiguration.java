@@ -41,7 +41,7 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
 		TaskConfiguration.class })
 public class FeaturesConfiguration {
 
-	@Autowired()
+	@Autowired
 	private RedisConnectionFactory redisConnectionFactory;
 
 	@Autowired(required = false)
