@@ -21,6 +21,8 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
 
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -30,6 +32,8 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.cloud.dataflow.shell.TargetHolder;
 import org.springframework.cloud.dataflow.shell.config.DataFlowShell;
 import org.springframework.hateoas.ResourceSupport;
+import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.shell.CommandLine;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
@@ -57,6 +61,10 @@ public class ConfigCommandTests {
 
 		when(commandLine.getArgs()).thenReturn(null);
 
+		final List<HttpMessageConverter<?>> messageConverters = new ArrayList<>();
+		messageConverters.add(new  MappingJackson2HttpMessageConverter());
+
+		when(restTemplate.getMessageConverters()).thenReturn(messageConverters);
 		final Exception e = new RestClientException("FooBar");
 		when(restTemplate.getForObject(Mockito.any(URI.class), Mockito.eq(ResourceSupport.class))).thenThrow(e);
 
