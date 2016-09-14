@@ -32,7 +32,7 @@ import org.springframework.cloud.dataflow.completion.CompletionConfiguration;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.config.features.FeaturesConfiguration;
 import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
-import org.springframework.cloud.dataflow.server.config.security.SecurityConfiguration;
+import org.springframework.cloud.dataflow.server.config.security.BasicAuthSecurityConfiguration;
 import org.springframework.cloud.dataflow.server.config.security.support.LdapSecurityProperties;
 import org.springframework.cloud.dataflow.server.config.web.WebConfiguration;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
@@ -68,7 +68,7 @@ import static org.springframework.hateoas.config.EnableHypermediaSupport.Hyperme
 @EnableSpringDataWebSupport
 @Configuration
 @Import({CompletionConfiguration.class, FeaturesConfiguration.class, WebConfiguration.class})
-@ComponentScan(basePackageClasses = { StreamDefinitionRepository.class, SecurityConfiguration.class})
+@ComponentScan(basePackageClasses = { StreamDefinitionRepository.class, BasicAuthSecurityConfiguration.class})
 @EnableAutoConfiguration
 @EnableConfigurationProperties({BatchProperties.class, CommonApplicationProperties.class})
 public class DataFlowServerConfiguration {

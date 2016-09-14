@@ -15,41 +15,37 @@
  */
 package org.springframework.cloud.dataflow.server.config.security;
 
-import org.springframework.boot.autoconfigure.security.oauth2.client.EnableOAuth2Sso;
-import org.springframework.cloud.dataflow.server.config.security.support.OnSecurityEnabledAndOAuth2Enabled;
-import org.springframework.cloud.dataflow.server.service.impl.ManualOAuthAuthenticationProvider;
-import org.springframework.context.annotation.Bean;
+import org.springframework.cloud.dataflow.server.config.security.support.OnSecurityEnabledAndOAuth2Disabled;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 
 /**
- * Setup Spring Security OAuth for the Rest Endpoints of Spring Cloud Data Flow.
+ * Setup Spring Security with Basic Authentication for the Rest Endpoints and the
+ * Dashboard of Spring Cloud Data Flow.
+ *
+ * For the OAuth2-specific configuration see {@link OAuthSecurityConfiguration}.
+ *
+ * An (optionally) injected {@link AuthenticationProvider} will be used if available,
+ * e.g. via OAuth2-specific configuration.
  *
  * @author Gunnar Hillert
+ * @since 1.0
+ *
+ * @see OAuthSecurityConfiguration
  *
  */
-@EnableOAuth2Sso
 @Configuration
-@Conditional(OnSecurityEnabledAndOAuth2Enabled.class)
-public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
+@Conditional(OnSecurityEnabledAndOAuth2Disabled.class)
+@EnableWebSecurity
+public class BasicAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 		SharedSecurityConfigurator.configureSharedHttpSecurity(http);
-	}
-
-	@Override
-	protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-		auth.authenticationProvider(authenticationProvider());
-	}
-
-	@Bean
-	public AuthenticationProvider authenticationProvider() {
-		return new ManualOAuthAuthenticationProvider();
 	}
 
 }
