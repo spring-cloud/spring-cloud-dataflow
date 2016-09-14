@@ -32,7 +32,7 @@ import org.springframework.context.annotation.Conditional;
 public class OnSecurityEnabledAndOAuth2Disabled extends AllNestedConditions {
 
 	public OnSecurityEnabledAndOAuth2Disabled() {
-		super(ConfigurationPhase.PARSE_CONFIGURATION);
+		super(ConfigurationPhase.REGISTER_BEAN);
 	}
 
 	@ConditionalOnProperty("security.basic.enabled")
