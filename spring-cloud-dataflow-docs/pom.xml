@@ -144,6 +144,7 @@
 										<attribute-missing>warn</attribute-missing>
 										<project-version>${project.version}</project-version>
 										<project-artifactId>${project.artifactId}</project-artifactId>
+										<version-type-lowercase>${version-type-lowercase}</version-type-lowercase>
 										<snippets>${basedir}/target/generated-snippets</snippets>
 									</attributes>
 								</configuration>
@@ -343,11 +344,9 @@
 										<propertyregex property="version-type" override="true" input="${version-type}" regexp="(M)\d+" replace="MILESTONE" />
 										<propertyregex property="version-type" override="true" input="${version-type}" regexp="(RC)\d+" replace="MILESTONE" />
 										<propertyregex property="version-type" override="true" input="${version-type}" regexp="BUILD-(.*)" replace="SNAPSHOT" />
-										<stringutil string="${version-type}" property="spring-boot-repo">
+										<stringutil string="${version-type}" property="version-type-lowercase">
 											<lowercase />
 										</stringutil>
-										<var name="github-tag" value="v${project.version}" />
-										<propertyregex property="github-tag" override="true" input="${github-tag}" regexp=".*SNAPSHOT" replace="master" />
 									</target>
 								</configuration>
 							</execution>
