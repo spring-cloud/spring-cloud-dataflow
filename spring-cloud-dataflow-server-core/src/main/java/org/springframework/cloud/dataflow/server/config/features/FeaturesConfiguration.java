@@ -20,7 +20,6 @@ import javax.sql.DataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.RedisHealthIndicator;
-import org.springframework.boot.actuate.metrics.repository.MetricRepository;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
@@ -44,9 +43,6 @@ public class FeaturesConfiguration {
 	@Autowired
 	private RedisConnectionFactory redisConnectionFactory;
 
-	@Autowired(required = false)
-	private MetricRepository metricRepository;
-
 	@Bean
 	@ConditionalOnMissingBean
 	@ConditionalOnExpression("#{'${" + FeaturesProperties.FEATURES_PREFIX + "."
@@ -58,7 +54,9 @@ public class FeaturesConfiguration {
 	}
 
 	@Bean
-	RedisHealthIndicator redisHealthIndicator() {
+	@ConditionalOnExpression("#{'${" + FeaturesProperties.FEATURES_PREFIX + "."
+			+ FeaturesProperties.ANALYTICS_ENABLED + ":true}'.equalsIgnoreCase('false')}")
+	public RedisHealthIndicator redisHealthIndicator() {
 		return new CustomRedisHealthIndicator(redisConnectionFactory);
 	}
 
@@ -70,10 +68,7 @@ public class FeaturesConfiguration {
 
 		@Override
 		protected void doHealthCheck(Health.Builder builder) throws Exception {
-			// Check Redis health only if analytics feature is enabled.
-			if (metricRepository != null) {
-				super.doHealthCheck(builder);
-			}
+			// do nothing - status UNKNOWN
 		}
 	}
 }
