@@ -36,7 +36,10 @@ One can enable, disable these features by setting the following boolean properti
 * `spring.cloud.dataflow.features.tasks-enabled`
 * `spring.cloud.dataflow.features.analytics-enabled`
 
-By default, all the features except 'analytics' are enabled.
+By default, all the features are enabled.
+Note: Since analytics feature is enabled by default, the Data Flow server is expected to have a valid Redis store available as analytic repository.
+      This also means that the Data Flow server's `health` depends on the redis store availability as well.
+      Hence it is recommended to disable the analytics feature (using the property mentioned above) if redis store is not available.
 
 The REST endpoint `/features` provides information on the features enabled/disabled.
 
