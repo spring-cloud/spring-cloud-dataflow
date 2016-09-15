@@ -43,7 +43,7 @@ public abstract class BaseDocumentation {
 
 	@ClassRule
 	public final static LocalDataflowResource springDataflowServer =
-			new LocalDataflowResource(null);
+			new LocalDataflowResource("classpath:rest-docs-config.yml");
 
 	protected MockMvc mockMvc;
 	protected RestDocumentationResultHandler documentationHandler;

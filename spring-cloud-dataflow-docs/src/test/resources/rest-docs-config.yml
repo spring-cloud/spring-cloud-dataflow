@@ -1,0 +1,4 @@
+spring.cloud.dataflow.features:
+  streams-enabled: true
+  tasks-enabled: true
+  analytics-enabled: true
