@@ -18,7 +18,7 @@ package org.springframework.cloud.dataflow.server.controller;
 
 import java.util.ArrayList;
 import java.util.EnumSet;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -203,7 +203,7 @@ public class StreamDefinitionController {
 	public PagedResources<StreamDefinitionResource> listRelated(@PathVariable("name") String name,
 																@RequestParam(value="nested", required = false, defaultValue = "false") boolean nested,
 																PagedResourcesAssembler<StreamDefinition> assembler) {
-		Set<StreamDefinition> relatedDefinitions = new HashSet<>();
+		Set<StreamDefinition> relatedDefinitions = new LinkedHashSet<>();
 		StreamDefinition currentStreamDefinition = repository.findOne(name);
 		if (currentStreamDefinition == null) {
 			throw new NoSuchStreamDefinitionException(name);
