@@ -23,7 +23,6 @@ import java.util.List;
 import org.springframework.boot.loader.ExecutableArchiveLauncher;
 import org.springframework.boot.loader.LaunchedURLClassLoader;
 import org.springframework.boot.loader.archive.Archive;
-import org.springframework.boot.loader.util.AsciiBytes;
 
 /**
  * Strategy interface for creating a ClassLoader that mimics the one used when
@@ -37,11 +36,11 @@ public class BootClassLoaderFactory {
 
 	private final ClassLoader parent;
 
-	private static final AsciiBytes BOOT_13_LIBS_LOCATION = new AsciiBytes("lib/");
+	private static final String BOOT_13_LIBS_LOCATION = "lib/";
 
-	private static final AsciiBytes BOOT_14_LIBS_LOCATION = new AsciiBytes("BOOT-INF/lib/");
+	private static final String BOOT_14_LIBS_LOCATION = "BOOT-INF/lib/";
 
-	private static final AsciiBytes BOOT_14_CLASSESS_LOCATION = new AsciiBytes("BOOT-INF/classes/");
+	private static final String BOOT_14_CLASSESS_LOCATION = "BOOT-INF/classes/";
 
 	/**
 	 * Create a new factory for dealing with the given boot uberjar archive.
@@ -55,7 +54,7 @@ public class BootClassLoaderFactory {
 
 	public URLClassLoader createClassLoader() {
 		boolean useBoot14Layout = false;
-		for (Archive.Entry entry : archive.getEntries()) {
+		for (Archive.Entry entry : archive) {
 			if (entry.getName().startsWith(BOOT_14_LIBS_LOCATION)) {
 				useBoot14Layout = true;
 				break;
