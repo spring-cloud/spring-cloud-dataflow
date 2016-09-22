@@ -193,6 +193,11 @@ java -jar spring-cloud-dataflow-server-local/target/spring-cloud-dataflow-server
     --spring.datasource.driver-class-name=org.hsqldb.jdbc.JDBCDriver &
 ----
 
+NOTE: There is a schema update to the Spring Cloud Dataflow datastore when
+upgrading from version `1.0.x` to `1.1.x`.  Migration scripts for specific
+database types can be found
+https://github.com/spring-cloud/spring-cloud-task/tree/master/spring-cloud-task-core/src/main/resources/org/springframework/cloud/task/migration[here].
+
 [[getting-started-security]]
 == Security
 

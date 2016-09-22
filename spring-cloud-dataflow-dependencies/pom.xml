@@ -14,7 +14,7 @@
 	<description>Spring Cloud Data Flow Dependencies BOM designed to support consumption of Spring Cloud Data Flow from the Spring Initializr.</description>
 	<properties>
 		<spring-analytics.version>1.0.0.RELEASE</spring-analytics.version>
-		<spring-cloud-task.version>1.0.2.RELEASE</spring-cloud-task.version>
+		<spring-cloud-task.version>1.1.0.M1</spring-cloud-task.version>
 		<spring-cloud-commons.version>1.1.1.RELEASE</spring-cloud-commons.version>
 		<spring-cloud-config.version>1.1.3.RELEASE</spring-cloud-config.version>
 		<spring-batch-admin-dependencies.version>1.3.1.RELEASE</spring-batch-admin-dependencies.version>
