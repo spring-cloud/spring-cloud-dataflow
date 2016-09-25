@@ -24,6 +24,7 @@ import org.junit.Test;
 import org.junit.rules.RuleChain;
 import org.junit.rules.TestRule;
 import org.springframework.cloud.dataflow.server.local.LocalDataflowResource;
+
 import static org.springframework.cloud.dataflow.server.local.security.SecurityTestUtils.basicAuthorizationHeader;
 /**
  * @author Marius Bogoevici

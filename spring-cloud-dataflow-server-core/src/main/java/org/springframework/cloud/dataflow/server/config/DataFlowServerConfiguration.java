@@ -27,6 +27,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.batch.BatchProperties;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
+import org.springframework.boot.autoconfigure.session.SessionAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.dataflow.completion.CompletionConfiguration;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
@@ -69,7 +70,7 @@ import static org.springframework.hateoas.config.EnableHypermediaSupport.Hyperme
 @Configuration
 @Import({CompletionConfiguration.class, FeaturesConfiguration.class, WebConfiguration.class})
 @ComponentScan(basePackageClasses = { StreamDefinitionRepository.class, BasicAuthSecurityConfiguration.class})
-@EnableAutoConfiguration
+@EnableAutoConfiguration(exclude=SessionAutoConfiguration.class)
 @EnableConfigurationProperties({BatchProperties.class, CommonApplicationProperties.class})
 public class DataFlowServerConfiguration {
 

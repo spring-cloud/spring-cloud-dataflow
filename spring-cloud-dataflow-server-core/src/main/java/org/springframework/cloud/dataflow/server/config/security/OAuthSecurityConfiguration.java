@@ -39,7 +39,16 @@ public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
-		SharedSecurityConfigurator.configureSharedHttpSecurity(http);
+		http.antMatcher("/**")
+		.authorizeRequests()
+			.antMatchers(
+				"/security/info**", "/login**", "/dashboard/logout-success.html",
+				"/dashboard/styles/**", "/dashboard/images/**", "/dashboard/fonts/**",
+				"/dashboard/lib/**").permitAll()
+			.anyRequest().authenticated()
+		.and().httpBasic()
+		.and().logout().logoutSuccessUrl("/dashboard/logout-success-oauth.html")
+		.and().csrf().disable();
 	}
 
 	@Override
