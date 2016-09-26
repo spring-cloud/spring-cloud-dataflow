@@ -196,6 +196,19 @@ the sample below postgresql has been chosen.
 1. Save the changed pom.xml
 2. Build the application as described here: <<appendix-building.adoc#building, Building Spring Cloud Data Flow>>
 
+==== Task Application Repository
+
+When launching a task application be sure that the database driver that is being
+used by Spring Cloud Data Flow is also a dependency on the task application.  For
+example if your Spring Cloud Dataflow is set to use Postgresql be sure that
+the task application also has Postgresql as a dependency.
+
+NOTE: When executing tasks externally (i.e. command line) and you wish for
+Spring Cloud Data Flow to show the TaskExecutions in its UI, be sure that
+common datasource settings are shared among the both.   By default
+Spring Cloud Task will use a local H2 instance and the execution will
+not be recorded to the database used by Spring Cloud Data Flow.
+
 === Datasource
 
 To configure the datasource Add the following properties to the dataflow-server.yml or via
