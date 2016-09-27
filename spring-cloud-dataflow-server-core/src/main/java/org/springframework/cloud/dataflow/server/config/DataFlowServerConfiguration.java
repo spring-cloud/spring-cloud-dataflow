@@ -16,13 +16,14 @@
 
 package org.springframework.cloud.dataflow.server.config;
 
+import static org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType.HAL;
+
 import java.sql.SQLException;
 
 import javax.sql.DataSource;
 
 import org.h2.tools.Server;
 import org.slf4j.LoggerFactory;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.batch.BatchProperties;
@@ -34,7 +35,6 @@ import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationPr
 import org.springframework.cloud.dataflow.server.config.features.FeaturesConfiguration;
 import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
 import org.springframework.cloud.dataflow.server.config.security.BasicAuthSecurityConfiguration;
-import org.springframework.cloud.dataflow.server.config.security.support.LdapSecurityProperties;
 import org.springframework.cloud.dataflow.server.config.web.WebConfiguration;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.support.DataflowRdbmsInitializer;
@@ -48,8 +48,6 @@ import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
-
-import static org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType.HAL;
 
 /**
  * Configuration for the Data Flow Server application context. This includes support for

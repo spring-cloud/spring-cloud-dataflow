@@ -109,7 +109,7 @@ public class BasicAuthSecurityConfiguration extends WebSecurityConfigurerAdapter
 					AnyRequestMatcher.INSTANCE)
 		.and()
 			.authorizeRequests()
-			.anyRequest().denyAll();
+			.anyRequest().authenticated();
 
 		final SessionRepositoryFilter<ExpiringSession> sessionRepositoryFilter = new SessionRepositoryFilter<ExpiringSession>(
 				sessionRepository());
