@@ -53,10 +53,9 @@
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-starter-dataflow-server-local</artifactId>
 		</dependency>
-
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
-			<artifactId>spring-cloud-dataflow-server-local</artifactId>
+			<artifactId>spring-cloud-starter-dataflow-server-local</artifactId>
 			<version>1.1.0.BUILD-SNAPSHOT</version>
 			<type>test-jar</type>
 			<scope>test</scope>
@@ -89,7 +88,7 @@
 						<artifactId>maven-surefire-plugin</artifactId>
 						<configuration>
 							<includes>
-								<!--include>**/*Documentation.java</include-->
+								<include>**/*Documentation.java</include>
 								<include>**/*Tests.java</include>
 							</includes>
 						</configuration>

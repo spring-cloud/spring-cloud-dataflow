@@ -20,7 +20,6 @@ import java.util.Collection;
 import org.junit.rules.ExternalResource;
 import org.springframework.boot.SpringApplication;
 import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
-import org.springframework.cloud.dataflow.server.local.LocalDataFlowServer;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.util.StringUtils;
@@ -56,7 +55,7 @@ public class LocalDataflowResource extends ExternalResource {
 			System.setProperty("spring.config.location", configurationLocation);
 		}
 
-		app = new SpringApplication(LocalDataFlowServer.class);
+		app = new SpringApplication(LocalTestDataFlowServer.class);
 		configurableApplicationContext = (WebApplicationContext) app.run(new String[]{"--server.port=0",
 				"--" + FeaturesProperties.FEATURES_PREFIX + "." + FeaturesProperties.STREAMS_ENABLED + "=true"});;
 

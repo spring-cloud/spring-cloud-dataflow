@@ -38,7 +38,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.util.SocketUtils;
 
 /**
- * Tests for {@link LocalDataFlowServer}.
+ * Tests for {@link LocalTestDataFlowServer}.
  *
  * @author Janne Valkealahti
  * @author Eric Bottard
@@ -60,7 +60,7 @@ public class LocalConfigurationTests {
 
 	@Test
 	public void testConfig() {
-		SpringApplication app = new SpringApplication(LocalDataFlowServer.class);
+		SpringApplication app = new SpringApplication(LocalTestDataFlowServer.class);
 		int randomPort = SocketUtils.findAvailableTcpPort();
 		String dataSourceUrl = String.format("jdbc:h2:tcp://localhost:%s/mem:dataflow", randomPort);
 		context = app.run(new String[] { "--server.port=0",
@@ -73,7 +73,7 @@ public class LocalConfigurationTests {
 
 	@Test
 	public void testConfigWithStreamsDisabled() {
-		SpringApplication app = new SpringApplication(LocalDataFlowServer.class);
+		SpringApplication app = new SpringApplication(LocalTestDataFlowServer.class);
 		context = app.run(new String[] { "--server.port=0",
 				"--" + FeaturesProperties.FEATURES_PREFIX + "." + FeaturesProperties.STREAMS_ENABLED + "=false"});
 		assertNotNull(context.getBean(TaskDefinitionRepository.class));
@@ -89,7 +89,7 @@ public class LocalConfigurationTests {
 
 	@Test
 	public void testConfigWithTasksDisabled() {
-		SpringApplication app = new SpringApplication(LocalDataFlowServer.class);
+		SpringApplication app = new SpringApplication(LocalTestDataFlowServer.class);
 		context = app.run(new String[] { "--server.port=0",
 				"--" + FeaturesProperties.FEATURES_PREFIX + "." + FeaturesProperties.TASKS_ENABLED + "=false"});
 		assertNotNull(context.getBean(StreamDefinitionRepository.class));
@@ -105,7 +105,7 @@ public class LocalConfigurationTests {
 
 	@Test
 	public void testConfigWithAnalyticsDisabled() {
-		SpringApplication app = new SpringApplication(LocalDataFlowServer.class);
+		SpringApplication app = new SpringApplication(LocalTestDataFlowServer.class);
 		context = app.run(new String[]{"--server.port=0",
 				"--" + FeaturesProperties.FEATURES_PREFIX + "." + FeaturesProperties.ANALYTICS_ENABLED + "=false"});;
 		assertNotNull(context.getBean(StreamDefinitionRepository.class));
