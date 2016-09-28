@@ -55,6 +55,7 @@ import org.springframework.cloud.dataflow.server.controller.TaskDefinitionContro
 import org.springframework.cloud.dataflow.server.controller.TaskDeploymentController;
 import org.springframework.cloud.dataflow.server.controller.TaskExecutionController;
 import org.springframework.cloud.dataflow.server.controller.UiController;
+import org.springframework.cloud.dataflow.server.controller.security.LoginController;
 import org.springframework.cloud.dataflow.server.controller.security.SecurityController;
 import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
@@ -221,6 +222,11 @@ public class DataFlowControllerAutoConfiguration {
 	@Bean
 	public SecurityController securityController(SecurityProperties securityProperties) {
 		return new SecurityController(securityProperties);
+	}
+
+	@Bean
+	public LoginController loginController() {
+		return new LoginController();
 	}
 
 	@Bean

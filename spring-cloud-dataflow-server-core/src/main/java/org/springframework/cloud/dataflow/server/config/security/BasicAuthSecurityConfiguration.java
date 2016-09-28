@@ -15,22 +15,37 @@
  */
 package org.springframework.cloud.dataflow.server.config.security;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.cloud.dataflow.server.config.security.support.OnSecurityEnabledAndOAuth2Disabled;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.web.access.channel.ChannelProcessingFilter;
+import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
+import org.springframework.security.web.authentication.logout.HttpStatusReturningLogoutSuccessHandler;
+import org.springframework.security.web.authentication.www.BasicAuthenticationEntryPoint;
+import org.springframework.security.web.util.matcher.AnyRequestMatcher;
+import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
+import org.springframework.security.web.util.matcher.RequestMatcher;
+import org.springframework.session.ExpiringSession;
+import org.springframework.session.MapSessionRepository;
+import org.springframework.session.SessionRepository;
+import org.springframework.session.web.http.HeaderHttpSessionStrategy;
+import org.springframework.session.web.http.SessionRepositoryFilter;
+import org.springframework.web.accept.ContentNegotiationStrategy;
 
 /**
  * Setup Spring Security with Basic Authentication for the Rest Endpoints and the
  * Dashboard of Spring Cloud Data Flow.
  *
  * For the OAuth2-specific configuration see {@link OAuthSecurityConfiguration}.
- *
- * An (optionally) injected {@link AuthenticationProvider} will be used if available,
- * e.g. via OAuth2-specific configuration.
  *
  * @author Gunnar Hillert
  * @since 1.0
@@ -43,9 +58,67 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 @EnableWebSecurity
 public class BasicAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
+	@Bean
+	public SessionRepository<ExpiringSession> sessionRepository() {
+		return new MapSessionRepository();
+	}
+
+	@Autowired
+	private ContentNegotiationStrategy contentNegotiationStrategy;
+
+	@Autowired
+	private SecurityProperties securityProperties;
+
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
-		SharedSecurityConfigurator.configureSharedHttpSecurity(http);
+		final RequestMatcher textHtmlMatcher = new MediaTypeRequestMatcher(
+				contentNegotiationStrategy,
+				MediaType.TEXT_HTML);
+
+		final String loginPage = "/dashboard/#/login";
+
+		final BasicAuthenticationEntryPoint basicAuthenticationEntryPoint = new BasicAuthenticationEntryPoint();
+		basicAuthenticationEntryPoint.setRealmName(securityProperties.getBasic().getRealm());
+		basicAuthenticationEntryPoint.afterPropertiesSet();
+
+		http
+			.csrf()
+			.disable()
+			.authorizeRequests()
+			.antMatchers("/")
+			.authenticated()
+			.antMatchers(
+					"/dashboard/**",
+					"/authenticate",
+					"/security/info",
+					"/features",
+					"/assets/**").permitAll()
+		.and()
+			.formLogin().loginPage(loginPage)
+			.loginProcessingUrl("/dashboard/login")
+			.defaultSuccessUrl("/dashboard/").permitAll()
+		.and()
+			.logout().logoutUrl("/dashboard/logout").logoutSuccessUrl("/dashboard/logout-success.html")
+			.logoutSuccessHandler(new HttpStatusReturningLogoutSuccessHandler()).permitAll()
+		.and().httpBasic()
+			.and().exceptionHandling()
+			.defaultAuthenticationEntryPointFor(
+					new LoginUrlAuthenticationEntryPoint(loginPage),
+					textHtmlMatcher)
+			.defaultAuthenticationEntryPointFor(basicAuthenticationEntryPoint,
+					AnyRequestMatcher.INSTANCE)
+		.and()
+			.authorizeRequests()
+			.anyRequest().authenticated();
+
+		final SessionRepositoryFilter<ExpiringSession> sessionRepositoryFilter = new SessionRepositoryFilter<ExpiringSession>(
+				sessionRepository());
+		sessionRepositoryFilter
+				.setHttpSessionStrategy(new HeaderHttpSessionStrategy());
+
+		http.addFilterBefore(sessionRepositoryFilter,
+				ChannelProcessingFilter.class).csrf().disable();
+		http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED);
 	}
 
 }
