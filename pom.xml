@@ -38,6 +38,7 @@
 		<module>spring-cloud-dataflow-server-local</module>
 		<module>spring-cloud-dataflow-rest-client</module>
 		<module>spring-cloud-dataflow-shell</module>
+		<module>spring-cloud-dataflow-shell-core</module>
 		<module>spring-cloud-dataflow-test-support</module>
 		<module>spring-cloud-dataflow-docs</module>
 		<module>spring-cloud-dataflow-completion</module>
