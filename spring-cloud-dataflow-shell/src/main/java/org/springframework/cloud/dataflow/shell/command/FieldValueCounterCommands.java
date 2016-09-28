@@ -21,11 +21,11 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 
+import org.springframework.analytics.rest.domain.FieldValueCounterResource;
+import org.springframework.analytics.rest.domain.MetricResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.dataflow.rest.client.DataFlowOperations;
 import org.springframework.cloud.dataflow.rest.client.FieldValueCounterOperations;
-import org.springframework.cloud.dataflow.rest.resource.FieldValueCounterResource;
-import org.springframework.cloud.dataflow.rest.resource.MetricResource;
 import org.springframework.cloud.dataflow.shell.config.DataFlowShell;
 import org.springframework.cloud.dataflow.shell.converter.NumberFormatConverter;
 import org.springframework.hateoas.PagedResources;

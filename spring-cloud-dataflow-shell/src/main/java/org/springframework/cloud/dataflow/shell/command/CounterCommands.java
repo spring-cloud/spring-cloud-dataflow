@@ -17,11 +17,11 @@ package org.springframework.cloud.dataflow.shell.command;
 
 import java.text.NumberFormat;
 
+import org.springframework.analytics.rest.domain.CounterResource;
+import org.springframework.analytics.rest.domain.MetricResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.dataflow.rest.client.CounterOperations;
 import org.springframework.cloud.dataflow.rest.client.DataFlowOperations;
-import org.springframework.cloud.dataflow.rest.resource.CounterResource;
-import org.springframework.cloud.dataflow.rest.resource.MetricResource;
 import org.springframework.cloud.dataflow.shell.config.DataFlowShell;
 import org.springframework.cloud.dataflow.shell.converter.NumberFormatConverter;
 import org.springframework.hateoas.PagedResources;

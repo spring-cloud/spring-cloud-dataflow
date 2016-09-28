@@ -17,7 +17,7 @@ package org.springframework.cloud.dataflow.shell.command;
 
 import java.util.LinkedHashMap;
 
-import org.springframework.cloud.dataflow.rest.resource.MetricResource;
+import org.springframework.analytics.rest.domain.MetricResource;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.shell.table.BeanListTableModel;
 import org.springframework.shell.table.Table;

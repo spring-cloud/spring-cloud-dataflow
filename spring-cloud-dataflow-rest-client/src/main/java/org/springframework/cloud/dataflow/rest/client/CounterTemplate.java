@@ -15,8 +15,8 @@
 
 package org.springframework.cloud.dataflow.rest.client;
 
-import org.springframework.cloud.dataflow.rest.resource.CounterResource;
-import org.springframework.cloud.dataflow.rest.resource.MetricResource;
+import org.springframework.analytics.rest.domain.CounterResource;
+import org.springframework.analytics.rest.domain.MetricResource;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.ResourceSupport;
 import org.springframework.web.client.RestTemplate;
