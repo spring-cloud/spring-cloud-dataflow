@@ -42,7 +42,7 @@ public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 		http.antMatcher("/**")
 		.authorizeRequests()
 			.antMatchers(
-				"/security/info**", "/login**", "/dashboard/logout-success.html",
+				"/security/info**", "/login**", "/dashboard/logout-success-oauth.html",
 				"/dashboard/styles/**", "/dashboard/images/**", "/dashboard/fonts/**",
 				"/dashboard/lib/**").permitAll()
 			.anyRequest().authenticated()
