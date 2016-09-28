@@ -18,8 +18,8 @@ package org.springframework.cloud.dataflow.rest.client;
 
 import java.util.Date;
 
-import org.springframework.cloud.dataflow.rest.resource.AggregateCounterResource;
-import org.springframework.cloud.dataflow.rest.resource.MetricResource;
+import org.springframework.analytics.rest.domain.AggregateCounterResource;
+import org.springframework.analytics.rest.domain.MetricResource;
 import org.springframework.hateoas.PagedResources;
 
 /**
