@@ -27,7 +27,9 @@ import org.springframework.batch.core.configuration.support.MapJobRegistry;
 import org.springframework.batch.core.explore.support.JobExplorerFactoryBean;
 import org.springframework.batch.core.launch.support.SimpleJobLauncher;
 import org.springframework.batch.core.repository.support.JobRepositoryFactoryBean;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.batch.BatchDatabaseInitializer;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.cloud.dataflow.server.controller.JobExecutionController;
 import org.springframework.cloud.dataflow.server.controller.JobInstanceController;
 import org.springframework.cloud.dataflow.server.controller.JobStepExecutionController;
@@ -113,7 +115,8 @@ public class JobDependencies {
 	@Bean
 	public TaskService taskService(TaskDefinitionRepository repository, DeploymentIdRepository deploymentIdRepository,
 			UriRegistry registry, ResourceLoader resourceLoader, TaskLauncher taskLauncher) {
-		return new DefaultTaskService(repository, deploymentIdRepository, registry, resourceLoader, taskLauncher);
+		return new DefaultTaskService(new DataSourceProperties(), repository, deploymentIdRepository,
+				registry, resourceLoader, taskLauncher);
 	}
 
 	@Bean

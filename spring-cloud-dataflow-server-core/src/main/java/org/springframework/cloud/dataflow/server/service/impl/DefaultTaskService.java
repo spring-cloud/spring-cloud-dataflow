@@ -24,6 +24,7 @@ import java.util.Map;
 import org.h2.util.Task;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.core.TaskDefinition.TaskDefinitionBuilder;
 import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
@@ -40,16 +41,16 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
- * Default implementation of the {@link TaskService} interface. Provide service
- * methods for {@link Task}s.
+ * Default implementation of the {@link TaskService} interface. Provide service methods
+ * for {@link Task}s.
  *
  * Several properties in this class are annotated with {@link Value} annotations:
  *
  * <ul>
- *   <li>spring.datasource.url
- *   <li>spring.datasource.username
- *   <li>spring.datasource.password
- *   <li>spring.datasource.driverClassName
+ * <li>spring.datasource.url
+ * <li>spring.datasource.username
+ * <li>spring.datasource.password
+ * <li>spring.datasource.driverClassName
  * </ul>
  *
  * All four properties default to {@code null} if not set.
@@ -63,23 +64,7 @@ import org.springframework.util.StringUtils;
  */
 public class DefaultTaskService implements TaskService {
 
-	private static final String DEFAULT_TASK_DATASOURCE_URL = "jdbc:h2:tcp://localhost:19092/mem:dataflow";
-
-	private static final String DEFAULT_TASK_DATASOURCE_USER_NAME = "sa";
-
-	private static final String DEFAULT_TASK_DATASOURCE_DRIVER_CLASS_NAME = "org.h2.Driver";
-
-	@Value("${spring.datasource.url:#{null}}")
-	private String dataSourceUrl;
-
-	@Value("${spring.datasource.username:#{null}}")
-	private String dataSourceUserName;
-
-	@Value("${spring.datasource.password:#{null}}")
-	private String dataSourcePassword;
-
-	@Value("${spring.datasource.driverClassName:#{null}}")
-	private String dataSourceDriverClassName;
+	private final DataSourceProperties dataSourceProperties;
 
 	/**
 	 * The repository this service will use for deployment IDs.
@@ -103,19 +88,27 @@ public class DefaultTaskService implements TaskService {
 	/**
 	 * Initializes the {@link DefaultTaskService}.
 	 *
-	 * @param repository the {@link TaskDefinitionRepository} this service will use for task CRUD operations.
-	 * @param deploymentIdRepository the repository this service will use for deployment IDs
+	 * @param dataSourceProperties the data source properties.
+	 * @param repository the {@link TaskDefinitionRepository} this service will use for
+	 * task CRUD operations.
+	 * @param deploymentIdRepository the repository this service will use for deployment
+	 * IDs.
 	 * @param registry URI registry this service will use to look up app URIs.
-	 * @param resourceLoader the {@link ResourceLoader} that will resolve URIs to {@link Resource}s.
+	 * @param resourceLoader the {@link ResourceLoader} that will resolve URIs to
+	 * {@link Resource}s.
 	 * @param taskLauncher the launcher this service will use to launch task apps.
 	 */
-	public DefaultTaskService(TaskDefinitionRepository repository, DeploymentIdRepository deploymentIdRepository,
-			UriRegistry registry, ResourceLoader resourceLoader, TaskLauncher taskLauncher) {
+	public DefaultTaskService(DataSourceProperties dataSourceProperties,
+			TaskDefinitionRepository repository,
+			DeploymentIdRepository deploymentIdRepository, UriRegistry registry,
+			ResourceLoader resourceLoader, TaskLauncher taskLauncher) {
+		Assert.notNull(dataSourceProperties, "DataSourceProperties must not be null");
 		Assert.notNull(repository, "TaskDefinitionRepository must not be null");
 		Assert.notNull(deploymentIdRepository, "DeploymentIdRepository must not be null");
 		Assert.notNull(registry, "UriRegistry must not be null");
 		Assert.notNull(resourceLoader, "ResourceLoader must not be null");
 		Assert.notNull(taskLauncher, "TaskLauncher must not be null");
+		this.dataSourceProperties = dataSourceProperties;
 		this.repository = repository;
 		this.deploymentIdRepository = deploymentIdRepository;
 		this.registry = registry;
@@ -125,29 +118,25 @@ public class DefaultTaskService implements TaskService {
 
 	private TaskDefinition updateTaskProperties(TaskDefinition taskDefinition) {
 		TaskDefinitionBuilder builder = TaskDefinitionBuilder.from(taskDefinition);
-		builder.setProperty("spring.datasource.url",
-				(StringUtils.hasText(dataSourceUrl)) ? dataSourceUrl :
-						DEFAULT_TASK_DATASOURCE_URL);
-
+		builder.setProperty("spring.datasource.url", dataSourceProperties.getUrl());
 		builder.setProperty("spring.datasource.username",
-				(StringUtils.hasText(dataSourceUserName)) ? dataSourceUserName :
-						DEFAULT_TASK_DATASOURCE_USER_NAME);
-
-		if(StringUtils.hasText(dataSourcePassword)) {//password may be empty
-			builder.setProperty("spring.datasource.password", dataSourcePassword);
+				dataSourceProperties.getUsername());
+		// password may be empty
+		if (StringUtils.hasText(dataSourceProperties.getPassword())) {
+			builder.setProperty("spring.datasource.password",
+					dataSourceProperties.getPassword());
 		}
-
 		builder.setProperty("spring.datasource.driverClassName",
-				(StringUtils.hasText(dataSourceDriverClassName)) ? dataSourceDriverClassName :
-						DEFAULT_TASK_DATASOURCE_DRIVER_CLASS_NAME);
-
+				dataSourceProperties.getDriverClassName());
 		return builder.build();
 	}
 
 	@Override
-	public void executeTask(String taskName, Map<String, String> runtimeProperties, List<String> runtimeParams) {
+	public void executeTask(String taskName, Map<String, String> runtimeProperties,
+			List<String> runtimeParams) {
 		Assert.hasText(taskName, "The provided taskName must not be null or empty.");
-		Assert.notNull(runtimeProperties, "The provided runtimeProperties must not be null.");
+		Assert.notNull(runtimeProperties,
+				"The provided runtimeProperties must not be null.");
 		TaskDefinition taskDefinition = this.repository.findOne(taskName);
 		if (taskDefinition == null) {
 			throw new NoSuchTaskDefinitionException(taskName);
@@ -155,12 +144,15 @@ public class DefaultTaskService implements TaskService {
 		Map<String, String> deploymentProperties = new HashMap<>();
 		taskDefinition = this.updateTaskProperties(taskDefinition);
 		deploymentProperties.putAll(runtimeProperties);
-		URI uri = this.registry.find(String.format("task.%s", taskDefinition.getRegisteredAppName()));
+		URI uri = this.registry.find(String.format("task.%s",
+				taskDefinition.getRegisteredAppName()));
 		Resource resource = this.resourceLoader.getResource(uri.toString());
-		AppDeploymentRequest request = taskDefinition.createDeploymentRequest(resource, deploymentProperties, runtimeParams);
+		AppDeploymentRequest request = taskDefinition.createDeploymentRequest(resource,
+				deploymentProperties, runtimeParams);
 		String id = this.taskLauncher.launch(request);
 		if (!StringUtils.hasText(id)) {
-			throw new IllegalStateException("Deployment ID is null for the task:" + taskName);
+			throw new IllegalStateException("Deployment ID is null for the task:"
+					+ taskName);
 		}
 		String deploymentKey = DeploymentKey.forTaskDefinition(taskDefinition);
 		if (deploymentIdRepository.findOne(deploymentKey) == null) {

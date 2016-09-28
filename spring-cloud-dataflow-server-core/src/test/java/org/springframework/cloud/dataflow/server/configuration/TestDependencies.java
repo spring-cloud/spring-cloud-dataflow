@@ -22,7 +22,9 @@ import java.util.HashMap;
 import static org.mockito.Mockito.mock;
 import static org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType.HAL;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.dataflow.completion.CompletionConfiguration;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
@@ -155,7 +157,7 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 
 	@Bean
 	public TaskService taskService() {
-		return new DefaultTaskService(taskDefinitionRepository(), deploymentIdRepository(), uriRegistry(),
+		return new DefaultTaskService(new DataSourceProperties(), taskDefinitionRepository(), deploymentIdRepository(), uriRegistry(),
 				resourceLoader(), taskLauncher());
 	}
 
