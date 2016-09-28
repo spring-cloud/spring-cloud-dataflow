@@ -25,11 +25,13 @@ import org.springframework.batch.core.configuration.support.MapJobRegistry;
 import org.springframework.batch.core.explore.support.JobExplorerFactoryBean;
 import org.springframework.batch.core.launch.support.SimpleJobLauncher;
 import org.springframework.batch.core.repository.support.JobRepositoryFactoryBean;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.batch.BatchDatabaseInitializer;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.cloud.dataflow.server.job.TaskExplorerFactoryBean;
 import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
 import org.springframework.cloud.dataflow.server.repository.RdbmsTaskDefinitionRepository;
@@ -58,6 +60,9 @@ import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 @ConditionalOnProperty(prefix = FeaturesProperties.FEATURES_PREFIX, name = FeaturesProperties.TASKS_ENABLED, matchIfMissing = true)
 public class TaskConfiguration {
 
+	@Autowired
+	DataSourceProperties dataSourceProperties;
+
 	@Bean
 	public TaskExplorerFactoryBean taskExplorerFactoryBean(DataSource dataSource) {
 		return new TaskExplorerFactoryBean(dataSource);
@@ -67,7 +72,8 @@ public class TaskConfiguration {
 	@ConditionalOnBean(TaskDefinitionRepository.class)
 	public TaskService taskService(TaskDefinitionRepository repository, DeploymentIdRepository deploymentIdRepository,
 			UriRegistry registry, DelegatingResourceLoader resourceLoader, TaskLauncher taskLauncher) {
-		return new DefaultTaskService(repository, deploymentIdRepository, registry, resourceLoader, taskLauncher);
+		return new DefaultTaskService(dataSourceProperties,
+				repository, deploymentIdRepository, registry, resourceLoader, taskLauncher);
 	}
 
 	@Bean
