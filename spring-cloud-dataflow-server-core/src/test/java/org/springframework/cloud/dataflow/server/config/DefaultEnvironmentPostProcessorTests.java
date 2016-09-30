@@ -22,6 +22,7 @@ import org.junit.Test;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.session.SessionAutoConfiguration;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Configuration;
 
@@ -35,7 +36,7 @@ public class DefaultEnvironmentPostProcessorTests {
 	private static final String CONTRIBUTED_PATH = "/bar";
 
 	@Configuration
-	@EnableAutoConfiguration
+	@EnableAutoConfiguration(exclude=SessionAutoConfiguration.class)
 	public static class EmptyDefaultApp {
 	}
 
