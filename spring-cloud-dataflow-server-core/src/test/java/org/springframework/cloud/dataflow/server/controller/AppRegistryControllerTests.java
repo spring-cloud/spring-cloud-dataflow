@@ -30,6 +30,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.dataflow.registry.AppRegistration;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
@@ -48,7 +49,7 @@ import org.springframework.web.context.WebApplicationContext;
  * @author Ilayaperumal Gopinathan
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = TestDependencies.class)
+@SpringBootTest(classes = TestDependencies.class)
 @WebAppConfiguration
 @DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
 public class AppRegistryControllerTests {

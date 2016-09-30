@@ -117,6 +117,7 @@ public abstract class AbstractShellIntegrationTest {
 					"--security.basic.enabled=false",
 					"--spring.main.show_banner=false",
 					"--spring.cloud.config.enabled=false",
+					"--spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.session.SessionAutoConfiguration",
 					"--spring.datasource.url=" + dataSourceUrl);
 
 			JLineShellComponent shell = applicationContext.getBean(JLineShellComponent.class);
