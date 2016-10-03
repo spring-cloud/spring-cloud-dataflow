@@ -83,9 +83,16 @@ $ java -jar spring-cloud-dataflow-server-local-{project-version}.jar --maven.loc
 By default, the protocol is set to `http`. You can omit the auth properties if the proxy doesn't need a username and password.
 +
 By default, the maven `localRepository` is set to `${user.home}/.m2/repository/`,
-and `https://repo.spring.io/libs-snapshot` will be the only remote repository. Like in the above example, the remote
-repositories can be specified along with their authentication (if needed). If the remote repositories are behind a proxy,
-then the proxy properties can be specified as above.
+and if you'd want to use any or all of the supported out-of-the-box applications, you have to pass 
+Spring's maven repo via `--maven.remote-repositories.repo1.url=https://repo.spring.io/libs-snapshot` 
+as the remote repository. Like in the above example, the remote repositories can be specified along with their authentication (if needed). If the remote repositories are behind a proxy, then the proxy 
+properties can be specified as above.
++
+NOTE: Spring Cloud Data Flow server implementations (local, cf, mesos, yarn, or kubernetes) do not have 
+'any' default maven remote repository configured. This is intentionally designed to provide the flexibility for 
+the users, so they can override and point to a remote repository of their choice. The out-of-the-box 
+applications that are supported by Spring Cloud Data Flow are available in Spring's repository, 
+so if you want to use them, you 'must' set it as the remote repository as discussed above.
 +
 If you want to pass these properties as environment properties, then you need to use `SPRING_APPLICATION_JSON` to set
 these properties and pass `SPRING_APPLICATION_JSON` as environment variable as below:
@@ -93,8 +100,7 @@ these properties and pass `SPRING_APPLICATION_JSON` as environment variable as b
 [source,bash]
 ----
 $ SPRING_APPLICATION_JSON='{ "maven": { "local-repository": null,
-"remote-repositories": { "repo1": { "url": "https://repo1", "auth": { "username": "repo1user", "password": "repo1pass" } }, "repo2": { "url": "https://repo2" } },
-"proxy": { "host": "proxyhost", "port": 9018, "auth": { "username": "proxyuser", "password": "proxypass" } } } }' java -jar spring-cloud-dataflow-server-local-{project-version}.jar
+"remote-repositories": { "repo1": { "url": "https://repo.spring.io/libs-snapshot", "auth": { "username": "repo1user", "password": "repo1pass" } }, "repo2": { "url": "https://repo2" } }, "proxy": { "host": "proxyhost", "port": 9018, "auth": { "username": "proxyuser", "password": "proxypass" } } } }'
 ----
 +
 . Launch the shell:
