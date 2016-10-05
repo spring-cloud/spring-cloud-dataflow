@@ -56,19 +56,19 @@ Spring Cloud Data Flow is a cloud-native orchestration service for composable mi
 
 {% capture main_content %}
 
-Spring Cloud Data Flow is the cloud native redesign of [Spring XD](http://projects.spring.io/spring-xd/) – a project that aimed to simplify development of Big Data applications. The stream and batch modules from Spring XD are refactored as Spring Boot based [stream](http://cloud.spring.io/spring-cloud-stream-app-starters/) and [task](http://cloud.spring.io/spring-cloud-task-app-starters/) data microservice applications respectively. These applications are now autonomous deployment units and they can "natively" run in modern runtimes such as Cloud Foundry, Apache YARN, Apache Mesos, and Kubernetes.
+Spring Cloud Data Flow is the cloud-native redesign of [Spring XD](http://projects.spring.io/spring-xd/) – a project that aimed to simplify the development of Big Data applications. The stream and batch modules from Spring XD are refactored as Spring Boot based [stream](http://cloud.spring.io/spring-cloud-stream-app-starters/) and [task/batch](http://cloud.spring.io/spring-cloud-task-app-starters/) microservice applications respectively. These applications are now autonomous deployment units and they can "natively" run in modern runtimes such as Cloud Foundry, Apache YARN, Apache Mesos, and Kubernetes.
 
-Spring Cloud Data Flow offers a collection of patterns and best practices for microservices-based distributed streaming and batch data pipelines. 
+Spring Cloud Data Flow offers a collection of patterns and best practices for microservices-based distributed streaming and task/batch data pipelines. 
 
 ## Features
 
-* Orchestrate applications across a variety of distributed modern runtimes including: Cloud Foundry, Apache YARN, Apache Mesos, and Kubernetes
-* Separate runtime dependencies backed by ‘spring profiles’
-* Consume streaming and batch data microservices as maven or docker artifacts
-* Create, unit-test, troubleshoot and manage data microservices in isolation
-* Develop using: DSL, Shell, REST-APIs, Dashboard, and Flo
-* Take advantage of metrics, health checks, and remote management at each data microservice level
-* Scale stream and batch pipelines without interrupting data flows
+* Develop using DSL, REST-APIs, Dashboard, and the drag-and-drop GUI - Flo
+* Create, unit-test, troubleshoot and manage microservice applications in isolation
+* Build data pipelines rapidly using the out-of-the-box [stream](http://cloud.spring.io/spring-cloud-stream-app-starters/) and [task/batch](http://cloud.spring.io/spring-cloud-task-app-starters/) applications
+* Consume microservice applications as maven or docker artifacts
+* Scale data pipelines without interrupting data flows
+* Orchestrate data-centric applications on a variety of modern runtime platforms including Cloud Foundry, Apache YARN, Apache Mesos, and Kubernetes
+* Take advantage of metrics, health checks, and the remote management of each microservice application
 
 <span id="quick-start"></span>
 
@@ -80,7 +80,7 @@ Step 2 - Start Kafka [_used as: messaging middleware_]
 
 Step 3 - Build Project
 ```
-mvn clean package
+./mvnw clean install
 ```
 
 Step 4 - Launch **‘Local’** Server [_spring-cloud-dataflow-server-local/target_] 
