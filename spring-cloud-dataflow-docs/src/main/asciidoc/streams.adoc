@@ -133,44 +133,16 @@ configuration-properties.names=server.port
 
 [IMPORTANT]
 ====
-As of Spring Cloud Data Flow `1.0.0.RELEASE` the whitelisting of application properties
-is only explicitly supported for Spring Boot `1.3.x` based application. Milestone releases
-of the upcoming Spring Boot `1.4.0` release are not explicitly supported, yet.
-
-The `spring-boot-maven-plugin` used in `1.4.x` has a different approach in handling
-the nested archives inside the `jar`. As a result you will notice that the application properties
-are not listed using `app info` command at all. As a temporary workaround, you can override the managed
-version of your app's `spring-boot-maven-plugin`
-explicitly and revert to a version of the latest 1.3.x release:
-
-For example, if your app's `pom.xml` specifies to use Spring Boot `1.4.0.M3`:
+Make sure to add 'spring-boot-configuration-processor' as an optional dependency to generate configuration metadata file for the properties.
 
 [source,xml]
 ----
-<parent>
-  <artifactId>spring-boot-starter-parent</artifactId>
-  <groupId>org.springframework.boot</groupId>
-  <version>1.4.0.M3</version>
-  <relativePath></relativePath>
-</parent>
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-configuration-processor</artifactId>
+    <optional>true</optional>
+</dependency>
 ----
-
-Then you can override the managed version of the `spring-boot-maven-plugin` with:
-
-[source,xml]
-----
-<plugin>
-  <groupId>org.springframework.boot</groupId>
-  <artifactId>spring-boot-maven-plugin</artifactId>
-  <version>1.3.5.RELEASE</version>  <!--1-->
-</plugin>
-----
-
-<1> Overriding the managed version `1.4.0.M3`.
-
-
-Also, if you have your own `dataflow` server built using `@EnableDataflowServer` and using Spring Boot `1.4.x` in that,
-you would need to explicitly override the `spring-boot-maven-plugin` with any of `1.3.x` releases.
 ====
 
 [[spring-cloud-dataflow-create-stream]]
