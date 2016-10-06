@@ -61,9 +61,21 @@ image::{dataflow-asciidoc}/images/dataflow-runtime.png[List of running applicati
 The _Streams_ section of the Dashboard provides the _Definitions_ tab that provides
 a listing of Stream definitions. There you have the option to *deploy* or *undeploy*
 those stream definitions. Additionally you can remove the definition by clicking on *destroy*.
+Each row includes an arrow on the left which can be clicked to see a visual representation
+of the definition. Hovering over the boxes in the visual representation will show more details
+about the apps including any options passed to them. In this screenshot the timer stream has
+been expanded to show the visual representation:
 
 .List of Stream Definitions
 image::{dataflow-asciidoc}/images/dataflow-streams-list-definitions.png[List of Stream Definitions, scaledwidth="100%"]
+
+If the *details* button is clicked the view will change to show a visual representation of that
+stream and also any related streams.  In the above example, if clicking *details* for the timer stream, the
+view will change to the one shown below which clearly shows the relationship between the three streams (two of
+them are tapping into the timer stream).
+
+.Stream Details Page
+image::{dataflow-asciidoc}/images/dataflow-stream-details.png[Stream Details Page, scaledwidth="100%"]
 
 [[dashboard-flo-streams-designer]]
 == Create Stream
