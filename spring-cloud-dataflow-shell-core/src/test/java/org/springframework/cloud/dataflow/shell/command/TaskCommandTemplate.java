@@ -146,14 +146,14 @@ public class TaskCommandTemplate {
 
 	/**
 	 * Return the results of executing the shell command:
-	 * <code>dataflow: task display --id FOO</code> where FOO is the id for the task
+	 * <code>dataflow: task execution status --id 1</code> where 1 is the id for the task
 	 * execution requested.
 	 *
 	 * @param id the identifier for the task execution
 	 * @return the results of the shell command.
 	 */
-	public CommandResult display(long id) {
-		return shell.executeCommand("task display --id " + id);
+	public CommandResult taskExecutionStatus(long id) {
+		return shell.executeCommand("task execution status --id " + id);
 	}
 
 }

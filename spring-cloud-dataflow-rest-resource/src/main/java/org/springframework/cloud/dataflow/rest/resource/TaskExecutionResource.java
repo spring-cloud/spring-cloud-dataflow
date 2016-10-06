@@ -62,7 +62,7 @@ public class TaskExecutionResource extends ResourceSupport {
 	private Date endTime;
 
 	/**
-	 * Message returned from the task or stacktrace.parameters.
+	 * Message returned from the task.
 	 */
 	private String exitMessage;
 
@@ -75,6 +75,12 @@ public class TaskExecutionResource extends ResourceSupport {
 	 * List of {@link JobExecution}s that are associated with this task.
 	 */
 	private List<Long> jobExecutionIds;
+
+	/**
+	 * Error Message returned from a task execution.
+	 */
+	private String errorMessage;
+
 
 	public TaskExecutionResource() {
 		arguments = new ArrayList<>();
@@ -94,6 +100,7 @@ public class TaskExecutionResource extends ResourceSupport {
 		this.arguments = Collections.unmodifiableList(taskJobExecutionRel.getTaskExecution().getArguments());
 		this.startTime = taskJobExecutionRel.getTaskExecution().getStartTime();
 		this.endTime = taskJobExecutionRel.getTaskExecution().getEndTime();
+		this.errorMessage = taskJobExecutionRel.getTaskExecution().getErrorMessage();
 		if(taskJobExecutionRel.getJobExecutionIds() == null){
 			this.jobExecutionIds = Collections.emptyList();
 		}else{
@@ -139,4 +146,7 @@ public class TaskExecutionResource extends ResourceSupport {
 		return jobExecutionIds;
 	}
 
+	public String getErrorMessage() {
+		return errorMessage;
+	}
 }

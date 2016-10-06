@@ -63,11 +63,9 @@ public class TaskCommands implements CommandMarker {
 
 	private static final String LAUNCH = "task launch";
 
-	private static final String STATUS = "task status";
-
 	private static final String DESTROY = "task destroy";
 
-	private static final String DISPLAY = "task display";
+	private static final String TASK_EXECUTION_STATUS = "task execution status";
 
 	private static final String PROPERTIES_OPTION = "properties";
 
@@ -81,7 +79,7 @@ public class TaskCommands implements CommandMarker {
 	@Autowired
 	private DataFlowShell dataFlowShell;
 
-	@CliAvailabilityIndicator({ LIST, CREATE, LAUNCH, STATUS, DISPLAY, DESTROY, EXECUTION_LIST })
+	@CliAvailabilityIndicator({ LIST, CREATE, LAUNCH, TASK_EXECUTION_STATUS, DESTROY, EXECUTION_LIST })
 	public boolean available() {
 		DataFlowOperations dataFlowOperations = dataFlowShell.getDataFlowOperations();
 		return dataFlowOperations != null && dataFlowOperations.taskOperations() != null;
@@ -147,12 +145,6 @@ public class TaskCommands implements CommandMarker {
 		return String.format("Destroyed task '%s'", name);
 	}
 
-	@CliCommand(value = STATUS, help = "Retrieve status info on an existing task")
-	public String status(
-			@CliOption(key = { "", "name" }, help = "the name of the task ", mandatory = true) String name) {
-		return "Feature Not Available";
-	}
-
 	@CliCommand(value = EXECUTION_LIST,
 			help = "List created task executions filtered by taskName")
 	public Table executionListByName(
@@ -177,13 +169,13 @@ public class TaskCommands implements CommandMarker {
 		return DataFlowTables.applyStyle(builder).build();
 	}
 
-	@CliCommand(value = DISPLAY, help = "Display the details of a specific task execution")
+	@CliCommand(value = TASK_EXECUTION_STATUS, help = "Display the details of a specific task execution")
 	public Table display(
 			@CliOption(key = { "id" },
 					help = "the task execution id",
 					mandatory = true) long id) {
 
-		TaskExecutionResource taskExecutionResource = taskOperations().display(id);
+		TaskExecutionResource taskExecutionResource = taskOperations().taskExecutionStatus(id);
 
 		TableModelBuilder<Object> modelBuilder = new TableModelBuilder<>();
 
@@ -196,6 +188,7 @@ public class TaskCommands implements CommandMarker {
 		modelBuilder.addRow().addValue("End Time ").addValue(taskExecutionResource.getEndTime());
 		modelBuilder.addRow().addValue("Exit Code ").addValue(taskExecutionResource.getExitCode());
 		modelBuilder.addRow().addValue("Exit Message ").addValue(taskExecutionResource.getExitMessage());
+		modelBuilder.addRow().addValue("Error Message ").addValue(taskExecutionResource.getErrorMessage());
 
 		TableBuilder builder = new TableBuilder(modelBuilder.build());
 

@@ -69,6 +69,6 @@ public interface TaskOperations {
 	 * @param id identifier of the task execution
 	 * @return {@link TaskExecutionResource}
 	 */
-	TaskExecutionResource display(long id);
+	TaskExecutionResource taskExecutionStatus(long id);
 
 }
