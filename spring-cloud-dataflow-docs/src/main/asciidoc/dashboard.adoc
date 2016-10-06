@@ -38,11 +38,38 @@ image::{dataflow-asciidoc}/images/dataflow-dashboard-about.png[The Spring Cloud 
 == Apps
 
 The _Apps_ section of the Dashboard lists all the available applications and
-provides the control to register/unregister them (if applicable). By clicking on
-the magnifying glass, you will get a listing of available definition properties.
+provides the control to register/unregister them (if applicable). It is possible
+to import a number of applications at once using the *Bulk Import Applications* action.
 
 .List of Available Applications
 image::{dataflow-asciidoc}/images/dataflow-available-apps-list.png[List of available applications, scaledwidth="100%"]
+
+==== Bulk Import of Applications
+
+The bulk import applications page provides numerous options for defining and importing a set of
+applications in one go. For bulk import the application definitions are expected to be
+expressed in a properties style:
+
+`<type>.<name> = <coordinates>`
+
+For example:
+
+`task.timestamp=maven://org.springframework.cloud.task.app:timestamp-task:1.0.0.BUILD-SNAPSHOT`
+
+`processor.transform=maven://org.springframework.cloud.stream.app:transform-processor-rabbit:1.0.3.BUILD-SNAPSHOT`
+
+At the top of the bulk import page a _Uri_ can be specified that points to a properties file stored elsewhere, it
+should contain properties formatted as above. Alternatively, using the textbox labelled _Apps as Properties_
+it is possible to directly list each property string. Finally, if the properties are stored in a local file 
+the _Select Properties File_ option will open a local file browser to select the file. After setting your definitions
+via one of these routes, click *Import*.
+
+At the bottom of the page there are quick links to the property files for common groups of stream apps and 
+task apps. If those meet your needs, simply select your appropriate variant (rabbit, kafka, docker, etc) and
+click the *Import* action on those lines to immediately import all those applications.
+
+.Bulk Import Applications
+image::{dataflow-asciidoc}/images/dataflow-bulk-import-applications.png[Bulk Import Applications, scaledwidth="100%"]
 
 [[dashboard-runtime]]
 == Runtime
@@ -61,9 +88,21 @@ image::{dataflow-asciidoc}/images/dataflow-runtime.png[List of running applicati
 The _Streams_ section of the Dashboard provides the _Definitions_ tab that provides
 a listing of Stream definitions. There you have the option to *deploy* or *undeploy*
 those stream definitions. Additionally you can remove the definition by clicking on *destroy*.
+Each row includes an arrow on the left which can be clicked to see a visual representation
+of the definition. Hovering over the boxes in the visual representation will show more details
+about the apps including any options passed to them. In this screenshot the timer stream has
+been expanded to show the visual representation:
 
 .List of Stream Definitions
 image::{dataflow-asciidoc}/images/dataflow-streams-list-definitions.png[List of Stream Definitions, scaledwidth="100%"]
+
+If the *details* button is clicked the view will change to show a visual representation of that
+stream and also any related streams.  In the above example, if clicking *details* for the timer stream, the
+view will change to the one shown below which clearly shows the relationship between the three streams (two of
+them are tapping into the timer stream).
+
+.Stream Details Page
+image::{dataflow-asciidoc}/images/dataflow-stream-details.png[Stream Details Page, scaledwidth="100%"]
 
 [[dashboard-flo-streams-designer]]
 == Create Stream
@@ -125,10 +164,50 @@ including the list of available options (properties) for that app.
 === Definitions
 
 This page lists the Data Flow Task definitions and provides actions to *launch*
-or *destroy* those tasks.
+or *destroy* those tasks. It also provides a shortcut operation to define 
+one or more tasks using simple textual input, indicated by 
+the *bulk define tasks* button.
 
 .List of Task Definitions
 image::{dataflow-asciidoc}/images/dataflow-task-definitions-list.png[List of Task Definitions, scaledwidth="100%"]
+
+==== Creating Task Definitions using the bulk define interface
+
+After pressing *bulk define tasks*, the following screen will
+be shown.
+
+.Bulk Define Tasks
+image::{dataflow-asciidoc}/images/dataflow-bulk-define-tasks.png[Bulk Define Tasks, scaledwidth="100%"]
+
+It includes a textbox where one or more definitions can be entered
+and then various actions performed on those definitions.
+The required input text format for task definitions is very basic, each line should be
+of the form:
+
+`<task-definition-name> = <task-application> <options>`
+
+For example:
+
+`demo-timestamp = timestamp --format=hhmmss`
+
+After entering any data a validator will run asynchronously to
+verify both the syntax and that the application name entered is
+a valid application and it supports the options
+specified. If validation fails the editor will show the errors with more
+information via tooltips. 
+
+If the validator should not verify the applications or the options
+(for example if specifying non-whitelisted options to the
+applications) then turn off that part of validation by toggling the checkbox
+off on the *Verify Apps* button - the validator will then only perform
+syntax checking.  When correctly validated, the *create* button will
+be clickable and on pressing it the UI will proceed to create each task definition. If there
+are any errors during creation then after creation finishes the
+editor will show any lines of input which could not be used as task definitions.
+These can then be fixed up and creation repeated.  There is an
+*import file* button to open a file browser on the
+local file system if the definitions are in a file and it is easier
+to import than copy/paste.
 
 ==== Launching Tasks
 
