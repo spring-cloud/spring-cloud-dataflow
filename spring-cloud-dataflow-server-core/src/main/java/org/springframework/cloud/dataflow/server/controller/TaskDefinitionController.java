@@ -125,6 +125,21 @@ public class TaskDefinitionController {
 		return assembler.toResource(repository.findAll(pageable), taskAssembler);
 	}
 
+
+	/**
+	 * Return a given task definition resource.
+	 * @param name the name of an existing task definition (required)
+	 */
+	@RequestMapping(value = "/{name}", method = RequestMethod.GET)
+	@ResponseStatus(HttpStatus.OK)
+	public TaskDefinitionResource display(@PathVariable("name") String name) {
+		TaskDefinition definition = repository.findOne(name);
+		if (definition == null) {
+			throw new NoSuchTaskDefinitionException(name);
+		}
+		return taskAssembler.toResource(definition);
+	}
+
 	/**
 	 * {@link org.springframework.hateoas.ResourceAssembler} implementation
 	 * that converts {@link TaskDefinition}s to {@link TaskDefinitionResource}s.
