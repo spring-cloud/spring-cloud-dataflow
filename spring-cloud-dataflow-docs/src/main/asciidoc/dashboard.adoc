@@ -125,10 +125,50 @@ including the list of available options (properties) for that app.
 === Definitions
 
 This page lists the Data Flow Task definitions and provides actions to *launch*
-or *destroy* those tasks.
+or *destroy* those tasks. It also provides a shortcut operation to define 
+one or more tasks using simple textual input, indicated by 
+the *bulk define tasks* button.
 
 .List of Task Definitions
 image::{dataflow-asciidoc}/images/dataflow-task-definitions-list.png[List of Task Definitions, scaledwidth="100%"]
+
+==== Creating Task Definitions using the bulk define interface
+
+After pressing *bulk define tasks*, the following screen will
+be shown.
+
+.Bulk Define Tasks
+image::{dataflow-asciidoc}/images/dataflow-bulk-define-tasks.png[Bulk Define Tasks, scaledwidth="100%"]
+
+It includes a textbox where one or more definitions can be entered
+and then various actions performed on those definitions.
+The required input text format for task definitions is very basic, each line should be
+of the form:
+
+`<task-definition-name> = <task-application> <options>`
+
+For example:
+
+`demo-timestamp = timestamp --format=hhmmss`
+
+After entering any data a validator will run asynchronously to
+verify both the syntax and that the application name entered is
+a valid application and it supports the options
+specified. If validation fails the editor will show the errors with more
+information via tooltips. 
+
+If the validator should not verify the applications or the options
+(for example if specifying non-whitelisted options to the
+applications) then turn off that part of validation by toggling the checkbox
+off on the *Verify Apps* button - the validator will then only perform
+syntax checking.  When correctly validated, the *create* button will
+be clickable and on pressing it the UI will proceed to create each task definition. If there
+are any errors during creation then after creation finishes the
+editor will show any lines of input which could not be used as task definitions.
+These can then be fixed up and creation repeated.  There is an
+*import file* button to open a file browser on the
+local file system if the definitions are in a file and it is easier
+to import than copy/paste.
 
 ==== Launching Tasks
 
