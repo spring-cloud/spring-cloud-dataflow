@@ -32,6 +32,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
+import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.server.job.TaskExplorerFactoryBean;
 import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
 import org.springframework.cloud.dataflow.server.repository.RdbmsTaskDefinitionRepository;
@@ -71,9 +72,10 @@ public class TaskConfiguration {
 	@Bean
 	@ConditionalOnBean(TaskDefinitionRepository.class)
 	public TaskService taskService(TaskDefinitionRepository repository, DeploymentIdRepository deploymentIdRepository,
-			UriRegistry registry, DelegatingResourceLoader resourceLoader, TaskLauncher taskLauncher) {
-		return new DefaultTaskService(dataSourceProperties,
-				repository, deploymentIdRepository, registry, resourceLoader, taskLauncher);
+			UriRegistry registry, DelegatingResourceLoader resourceLoader, TaskLauncher taskLauncher,
+			ApplicationConfigurationMetadataResolver metadataResolver) {
+		return new DefaultTaskService(dataSourceProperties,	repository, deploymentIdRepository,
+				registry, resourceLoader, taskLauncher, metadataResolver);
 	}
 
 	@Bean

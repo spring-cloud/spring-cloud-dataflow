@@ -179,6 +179,20 @@ public class TaskDefinition extends DataFlowAppDefinition {
 		}
 
 		/**
+		 * Sets the contents of the provided map as the map of app properties.
+		 *
+		 * @param properties app properties
+		 * @return this builder object
+		 *
+		 * @see AppDefinition#getProperties()
+		 */
+		public TaskDefinitionBuilder setProperties(Map<String, String> properties) {
+			this.properties.clear();
+			this.addProperties(properties);
+			return this;
+		}
+
+		/**
 		 * Return name of task app in registry.
 		 *
 		 * @return task app name in registry

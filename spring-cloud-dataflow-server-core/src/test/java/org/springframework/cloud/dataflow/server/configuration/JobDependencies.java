@@ -30,6 +30,8 @@ import org.springframework.batch.core.repository.support.JobRepositoryFactoryBea
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.batch.BatchDatabaseInitializer;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
+import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
+import org.springframework.cloud.dataflow.configuration.metadata.BootApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.server.controller.JobExecutionController;
 import org.springframework.cloud.dataflow.server.controller.JobInstanceController;
 import org.springframework.cloud.dataflow.server.controller.JobStepExecutionController;
@@ -70,6 +72,11 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 @EnableHypermediaSupport(type = HAL)
 @EnableWebMvc
 public class JobDependencies {
+
+	@Bean
+	public ApplicationConfigurationMetadataResolver metadataResolver() {
+		return new BootApplicationConfigurationMetadataResolver();
+	}
 
 	@Bean
 	public JobExecutionController jobExecutionController(TaskJobService repository) {
@@ -114,9 +121,10 @@ public class JobDependencies {
 
 	@Bean
 	public TaskService taskService(TaskDefinitionRepository repository, DeploymentIdRepository deploymentIdRepository,
-			UriRegistry registry, ResourceLoader resourceLoader, TaskLauncher taskLauncher) {
+			UriRegistry registry, ResourceLoader resourceLoader, TaskLauncher taskLauncher,
+			ApplicationConfigurationMetadataResolver metadataResolver) {
 		return new DefaultTaskService(new DataSourceProperties(), repository, deploymentIdRepository,
-				registry, resourceLoader, taskLauncher);
+				registry, resourceLoader, taskLauncher, metadataResolver);
 	}
 
 	@Bean
