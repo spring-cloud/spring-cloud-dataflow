@@ -24,6 +24,7 @@ import org.springframework.cloud.dataflow.core.dsl.AppNode;
 import org.springframework.cloud.dataflow.core.dsl.TaskParser;
 import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.core.style.ToStringCreator;
+import org.springframework.util.Assert;
 
 /**
  * @author Michael Minella
@@ -175,6 +176,21 @@ public class TaskDefinition extends DataFlowAppDefinition {
 		 */
 		public TaskDefinitionBuilder addProperties(Map<String, String> properties) {
 			this.properties.putAll(properties);
+			return this;
+		}
+
+		/**
+		 * Sets the contents of the provided map as the map of app properties.
+		 *
+		 * @param properties app properties
+		 * @return this builder object
+		 *
+		 * @see AppDefinition#getProperties()
+		 */
+		public TaskDefinitionBuilder setProperties(Map<String, String> properties) {
+			Assert.notNull(properties, "properties must not be null");
+			this.properties.clear();
+			this.addProperties(properties);
 			return this;
 		}
 

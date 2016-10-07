@@ -23,10 +23,11 @@ import java.util.Map;
 
 import org.h2.util.Task;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
+import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.core.TaskDefinition.TaskDefinitionBuilder;
+import org.springframework.cloud.dataflow.server.controller.WhitelistProperties;
 import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
 import org.springframework.cloud.dataflow.server.repository.DeploymentKey;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;
@@ -43,17 +44,6 @@ import org.springframework.util.StringUtils;
 /**
  * Default implementation of the {@link TaskService} interface. Provide service methods
  * for {@link Task}s.
- *
- * Several properties in this class are annotated with {@link Value} annotations:
- *
- * <ul>
- * <li>spring.datasource.url
- * <li>spring.datasource.username
- * <li>spring.datasource.password
- * <li>spring.datasource.driverClassName
- * </ul>
- *
- * All four properties default to {@code null} if not set.
  *
  * @author Michael Minella
  * @author Marius Bogoevici
@@ -85,6 +75,8 @@ public class DefaultTaskService implements TaskService {
 
 	private final TaskDefinitionRepository repository;
 
+	private final WhitelistProperties whitelistProperties;
+
 	/**
 	 * Initializes the {@link DefaultTaskService}.
 	 *
@@ -101,19 +93,22 @@ public class DefaultTaskService implements TaskService {
 	public DefaultTaskService(DataSourceProperties dataSourceProperties,
 			TaskDefinitionRepository repository,
 			DeploymentIdRepository deploymentIdRepository, UriRegistry registry,
-			ResourceLoader resourceLoader, TaskLauncher taskLauncher) {
+			ResourceLoader resourceLoader, TaskLauncher taskLauncher,
+			ApplicationConfigurationMetadataResolver metaDataResolver) {
 		Assert.notNull(dataSourceProperties, "DataSourceProperties must not be null");
 		Assert.notNull(repository, "TaskDefinitionRepository must not be null");
 		Assert.notNull(deploymentIdRepository, "DeploymentIdRepository must not be null");
 		Assert.notNull(registry, "UriRegistry must not be null");
 		Assert.notNull(resourceLoader, "ResourceLoader must not be null");
 		Assert.notNull(taskLauncher, "TaskLauncher must not be null");
+		Assert.notNull(metaDataResolver, "metaDataResolver must not be null");
 		this.dataSourceProperties = dataSourceProperties;
 		this.repository = repository;
 		this.deploymentIdRepository = deploymentIdRepository;
 		this.registry = registry;
 		this.taskLauncher = taskLauncher;
 		this.resourceLoader = resourceLoader;
+		this.whitelistProperties = new WhitelistProperties(metaDataResolver);
 	}
 
 	private TaskDefinition updateTaskProperties(TaskDefinition taskDefinition) {
@@ -141,14 +136,19 @@ public class DefaultTaskService implements TaskService {
 		if (taskDefinition == null) {
 			throw new NoSuchTaskDefinitionException(taskName);
 		}
-		Map<String, String> deploymentProperties = new HashMap<>();
+
 		taskDefinition = this.updateTaskProperties(taskDefinition);
-		deploymentProperties.putAll(runtimeProperties);
+
+		Map<String, String> deploymentProperties = new HashMap<>(runtimeProperties);
 		URI uri = this.registry.find(String.format("task.%s",
 				taskDefinition.getRegisteredAppName()));
 		Resource resource = this.resourceLoader.getResource(uri.toString());
+
+		taskDefinition = qualifyProperties(taskDefinition, resource);
+
 		AppDeploymentRequest request = taskDefinition.createDeploymentRequest(resource,
 				deploymentProperties, runtimeParams);
+
 		String id = this.taskLauncher.launch(request);
 		if (!StringUtils.hasText(id)) {
 			throw new IllegalStateException("Deployment ID is null for the task:"
@@ -159,4 +159,14 @@ public class DefaultTaskService implements TaskService {
 			this.deploymentIdRepository.save(deploymentKey, id);
 		}
 	}
+
+	/**
+	 * Return a copy of a given task definition where short form parameters have been expanded to their long form
+	 * (amongst the whitelisted supported properties of the app) if applicable.
+	 */
+	/*default*/ TaskDefinition qualifyProperties(TaskDefinition original, Resource resource) {
+		TaskDefinition.TaskDefinitionBuilder builder = TaskDefinition.TaskDefinitionBuilder.from(original);
+		return builder.setProperties(whitelistProperties.qualifyProperties(original.getProperties(), resource)).build();
+	}
+
 }

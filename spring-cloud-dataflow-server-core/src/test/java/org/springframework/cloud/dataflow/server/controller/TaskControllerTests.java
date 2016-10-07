@@ -16,13 +16,12 @@
 
 package org.springframework.cloud.dataflow.server.controller;
 
-import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.atLeast;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -46,7 +45,6 @@ import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
 import org.springframework.cloud.dataflow.server.repository.InMemoryTaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
-import org.springframework.cloud.deployer.resource.maven.MavenResource;
 import org.springframework.cloud.deployer.resource.registry.UriRegistry;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
@@ -216,7 +214,7 @@ public class TaskControllerTests {
 	@Test
 	public void testLaunch() throws Exception {
 		repository.save(new TaskDefinition("myTask", "foo"));
-		this.registry.register("task.foo", new URI("maven://org.springframework.cloud:foo:1"));
+		this.registry.register("task.foo", new URI("file:src/test/resources/apps/foo-task"));
 
 		mockMvc.perform(
 				post("/tasks/deployments/{name}", "myTask").accept(MediaType.APPLICATION_JSON)).andDo(print())
@@ -226,24 +224,16 @@ public class TaskControllerTests {
 		verify(this.taskLauncher, atLeast(1)).launch(argumentCaptor.capture());
 
 		AppDeploymentRequest request = argumentCaptor.getValue();
-		assertThat(request.getResource(), instanceOf(MavenResource.class));
-		MavenResource mavenResource = (MavenResource) request.getResource();
-		assertEquals("org.springframework.cloud", mavenResource.getGroupId());
-		assertEquals("foo", mavenResource.getArtifactId());
-		assertEquals("", mavenResource.getClassifier());
-		assertEquals("jar", mavenResource.getExtension());
-		assertEquals("1", mavenResource.getVersion());
 		assertEquals("myTask", request.getDefinition().getProperties().get("spring.cloud.task.name"));
 	}
 
 	@Test
-	public void testLaunchWithParams1() throws Exception {
-		repository.save(new TaskDefinition("myTask2", "foo2"));
-		this.registry.register("task.foo2", new URI("maven://org.springframework.cloud:foo2:1"));
+	public void testLaunchWithAppProperties() throws Exception {
+		repository.save(new TaskDefinition("myTask2", "foo2 --common.prop2=wizz"));
+		this.registry.register("task.foo2", new URI("file:src/test/resources/apps/foo-task"));
 
 		mockMvc.perform(
 				post("/tasks/deployments/{name}", "myTask2")
-				.param("arguments", "--foobar=jee")
 				.accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isCreated());
 
@@ -251,22 +241,14 @@ public class TaskControllerTests {
 		verify(this.taskLauncher, atLeast(1)).launch(argumentCaptor.capture());
 
 		AppDeploymentRequest request = argumentCaptor.getValue();
-		assertThat(request.getCommandlineArguments().size(), is(1));
-		assertThat(request.getCommandlineArguments().get(0), is("--foobar=jee"));
-		assertThat(request.getResource(), instanceOf(MavenResource.class));
-		MavenResource mavenResource = (MavenResource) request.getResource();
-		assertEquals("org.springframework.cloud", mavenResource.getGroupId());
-		assertEquals("foo2", mavenResource.getArtifactId());
-		assertEquals("", mavenResource.getClassifier());
-		assertEquals("jar", mavenResource.getExtension());
-		assertEquals("1", mavenResource.getVersion());
+		assertThat(request.getDefinition().getProperties(), hasEntry("common.prop2", "wizz"));
 		assertEquals("myTask2", request.getDefinition().getProperties().get("spring.cloud.task.name"));
 	}
 
 	@Test
-	public void testLaunchWithParams2() throws Exception {
+	public void testLaunchWithArguments() throws Exception {
 		repository.save(new TaskDefinition("myTask3", "foo3"));
-		this.registry.register("task.foo3", new URI("maven://org.springframework.cloud:foo3:1"));
+		this.registry.register("task.foo3", new URI("file:src/test/resources/apps/foo-task"));
 
 		mockMvc.perform(
 				post("/tasks/deployments/{name}", "myTask3")
@@ -282,13 +264,6 @@ public class TaskControllerTests {
 		assertThat(request.getCommandlineArguments().get(0), is("--foobar=jee"));
 		assertThat(request.getCommandlineArguments().get(1), is("--foobar2=jee2"));
 		assertThat(request.getCommandlineArguments().get(2), is("--foobar3=jee3 jee3"));
-		assertThat(request.getResource(), instanceOf(MavenResource.class));
-		MavenResource mavenResource = (MavenResource) request.getResource();
-		assertEquals("org.springframework.cloud", mavenResource.getGroupId());
-		assertEquals("foo3", mavenResource.getArtifactId());
-		assertEquals("", mavenResource.getClassifier());
-		assertEquals("jar", mavenResource.getExtension());
-		assertEquals("1", mavenResource.getVersion());
 		assertEquals("myTask3", request.getDefinition().getProperties().get("spring.cloud.task.name"));
 	}
 }

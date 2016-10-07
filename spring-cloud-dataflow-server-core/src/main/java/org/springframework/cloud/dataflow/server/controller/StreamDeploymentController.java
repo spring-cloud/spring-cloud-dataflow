@@ -19,17 +19,13 @@ package org.springframework.cloud.dataflow.server.controller;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.boot.bind.RelaxedNames;
-import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.BindingPropertyKeys;
@@ -54,8 +50,6 @@ import org.springframework.core.io.Resource;
 import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -101,7 +95,7 @@ public class StreamDeploymentController {
 	 */
 	private final AppDeployer deployer;
 
-	private final ApplicationConfigurationMetadataResolver metadataResolver;
+	private final WhitelistProperties whitelistProperties;
 
 	/**
 	 * General properties to be applied to applications on deployment.
@@ -134,7 +128,7 @@ public class StreamDeploymentController {
 		this.deploymentIdRepository = deploymentIdRepository;
 		this.registry = registry;
 		this.deployer = deployer;
-		this.metadataResolver = metadataResolver;
+		this.whitelistProperties = new WhitelistProperties(metadataResolver);
 		this.commonApplicationProperties = commonProperties;
 	}
 
@@ -245,7 +239,7 @@ public class StreamDeploymentController {
 			Resource resource = registration.getResource();
 			currentApp = qualifyProperties(currentApp, resource);
 			AppDeploymentRequest request = currentApp.createDeploymentRequest(resource,
-					qualifyProperties(appDeploymentProperties, resource));
+					whitelistProperties.qualifyProperties(appDeploymentProperties, resource));
 			try {
 				String id = this.deployer.deploy(request);
 				this.deploymentIdRepository.save(DeploymentKey.forStreamAppDefinition(currentApp), id);
@@ -259,66 +253,13 @@ public class StreamDeploymentController {
 	}
 
 	/**
-	 * Return a copy of app properties where shorthand form have been expanded to their long form
-	 * (amongst the whitelisted supported properties of the app) if applicable.
-	 */
-	private Map<String, String> qualifyProperties(Map<String, String> properties, Resource resource) {
-		MultiValueMap<String, ConfigurationMetadataProperty> whiteList = new LinkedMultiValueMap<>();
-		Set<String> allProps = new HashSet<>();
-
-		for (ConfigurationMetadataProperty property : this.metadataResolver.listProperties(resource, false)) {
-			whiteList.add(property.getName(), property);// Use names here
-		}
-		for (ConfigurationMetadataProperty property : this.metadataResolver.listProperties(resource, true)) {
-			allProps.add(property.getId()); // But full ids here
-		}
-
-		Map<String, String> mutatedProps = new HashMap<>(properties.size());
-		for (Map.Entry<String, String> entry : properties.entrySet()) {
-			String provided = entry.getKey();
-			if (!allProps.contains(provided)) {
-				List<ConfigurationMetadataProperty> longForms = null;
-				for (String relaxed : new RelaxedNames(provided)) {
-					longForms = whiteList.get(relaxed);
-					if (longForms != null) {
-						break;
-					}
-				}
-				if (longForms != null) {
-					assertNoAmbiguity(longForms);
-					mutatedProps.put(longForms.iterator().next().getId(), entry.getValue());
-				}
-				else {
-					mutatedProps.put(provided, entry.getValue());
-				}
-			}
-			else {
-				mutatedProps.put(provided, entry.getValue());
-			}
-		}
-		return mutatedProps;
-	}
-
-	/**
 	 * Return a copy of a given app definition where short form parameters have been expanded to their long form
 	 * (amongst the whitelisted supported properties of the app) if applicable.
 	 */
 	/*default*/ StreamAppDefinition qualifyProperties(StreamAppDefinition original, Resource resource) {
 		StreamAppDefinition.Builder builder = StreamAppDefinition.Builder.from(original);
-		return builder.setProperties(qualifyProperties(original.getProperties(), resource)).build(original.getStreamName());
+		return builder.setProperties(whitelistProperties.qualifyProperties(original.getProperties(), resource)).build(original.getStreamName());
 	}
-
-	private void assertNoAmbiguity(List<ConfigurationMetadataProperty> longForms) {
-		if (longForms.size() > 1) {
-			Set<String> ids = new HashSet<>(longForms.size());
-			for (ConfigurationMetadataProperty pty : longForms) {
-				ids.add(pty.getId());
-			}
-			throw new IllegalArgumentException(String.format("Ambiguous short form property '%s' could mean any of %s",
-					longForms.iterator().next().getName(), ids));
-		}
-	}
-
 
 	/**
 	 * Extract and return a map of properties for a specific app within the
