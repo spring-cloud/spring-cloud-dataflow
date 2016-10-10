@@ -16,13 +16,13 @@
 
 package org.springframework.cloud.dataflow.server.configuration;
 
-import java.util.Collections;
-import java.util.HashMap;
-
 import static org.mockito.Mockito.mock;
 import static org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType.HAL;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -51,12 +51,14 @@ import org.springframework.cloud.deployer.resource.maven.MavenResourceLoader;
 import org.springframework.cloud.deployer.resource.registry.InMemoryUriRegistry;
 import org.springframework.cloud.deployer.resource.registry.UriRegistry;
 import org.springframework.cloud.deployer.resource.registry.UriRegistryPopulator;
+import org.springframework.cloud.deployer.resource.support.DelegatingResourceLoader;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.core.io.FileSystemResourceLoader;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
@@ -83,10 +85,18 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 
 	@Bean
 	public ResourceLoader resourceLoader() {
+
 		MavenProperties mavenProperties = new MavenProperties();
 		mavenProperties.setRemoteRepositories(new HashMap<>(Collections.singletonMap("springRepo",
 				new MavenProperties.RemoteRepository("https://repo.spring.io/libs-snapshot"))));
-		return new MavenResourceLoader(mavenProperties);
+
+
+		Map<String, ResourceLoader> resourceLoaders = new HashMap<>();
+		resourceLoaders.put("maven", new MavenResourceLoader(mavenProperties));
+		resourceLoaders.put("file", new FileSystemResourceLoader());
+
+		DelegatingResourceLoader delegatingResourceLoader = new DelegatingResourceLoader(resourceLoaders);
+		return delegatingResourceLoader;
 	}
 
 	@Bean
@@ -106,8 +116,8 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	}
 
 	@Bean
-	public TaskDeploymentController taskController() {
-		return new TaskDeploymentController(taskService());
+	public TaskDeploymentController taskController(ApplicationConfigurationMetadataResolver metadataResolver) {
+		return new TaskDeploymentController(taskService(metadataResolver));
 	}
 
 	@Bean
@@ -156,9 +166,9 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	}
 
 	@Bean
-	public TaskService taskService() {
-		return new DefaultTaskService(new DataSourceProperties(), taskDefinitionRepository(), deploymentIdRepository(), uriRegistry(),
-				resourceLoader(), taskLauncher());
+	public TaskService taskService(ApplicationConfigurationMetadataResolver metadataResolver) {
+		return new DefaultTaskService(new DataSourceProperties(), taskDefinitionRepository(), deploymentIdRepository(),
+				uriRegistry(), resourceLoader(), taskLauncher(), metadataResolver);
 	}
 
 	@Bean
