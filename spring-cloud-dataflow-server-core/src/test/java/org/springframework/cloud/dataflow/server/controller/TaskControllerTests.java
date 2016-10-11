@@ -40,7 +40,7 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
 import org.springframework.cloud.dataflow.server.repository.InMemoryTaskDefinitionRepository;
@@ -49,7 +49,7 @@ import org.springframework.cloud.deployer.resource.registry.UriRegistry;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -62,8 +62,8 @@ import org.springframework.web.context.WebApplicationContext;
  * @author Gunnar Hillert
  * @author Ilayaperumal Gopinathan
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = TestDependencies.class)
+@RunWith(SpringRunner.class)
+@SpringBootTest(classes = TestDependencies.class)
 @WebAppConfiguration
 public class TaskControllerTests {
 
@@ -266,4 +266,24 @@ public class TaskControllerTests {
 		assertThat(request.getCommandlineArguments().get(2), is("--foobar3=jee3 jee3"));
 		assertEquals("myTask3", request.getDefinition().getProperties().get("spring.cloud.task.name"));
 	}
+
+	@Test
+	public void testDisplaySingleTask() throws Exception {
+		TaskDefinition taskDefinition = new TaskDefinition("myTask", "timestamp");
+		repository.save(taskDefinition);
+		assertEquals(1, repository.count());
+		mockMvc.perform(
+				get("/tasks/definitions/myTask").accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk())
+				.andExpect(content().json("{name: \"myTask\"}"))
+				.andExpect(content().json("{dslText: \"timestamp\"}"));
+	}
+
+	@Test
+	public void testDisplaySingleTaskNotFound() throws Exception {
+		mockMvc.perform(
+				get("/tasks/definitions/myTask").accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isNotFound());
+	}
+
 }
