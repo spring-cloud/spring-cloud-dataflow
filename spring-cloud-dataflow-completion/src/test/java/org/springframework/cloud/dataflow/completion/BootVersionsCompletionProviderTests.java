@@ -29,6 +29,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.configuration.metadata.BootApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.core.ApplicationType;
@@ -39,8 +40,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.FileSystemResourceLoader;
 import org.springframework.core.io.ResourceLoader;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit4.SpringRunner;
 
 /**
  * Tests that the completion mechanism knows how to cope with different versions of Spring Boot, including
@@ -48,8 +48,8 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
  *
  * @author Eric Bottard
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = {CompletionConfiguration.class, BootVersionsCompletionProviderTests.Mocks.class})
+@RunWith(SpringRunner.class)
+@SpringBootTest(classes = {CompletionConfiguration.class, BootVersionsCompletionProviderTests.Mocks.class})
 public class BootVersionsCompletionProviderTests {
 
 	@Autowired
