@@ -25,13 +25,13 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.PropertyPlaceholderAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.EmbeddedDataSourceConfiguration;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
 import org.springframework.cloud.dataflow.server.repository.support.DataflowRdbmsInitializer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -39,8 +39,8 @@ import static org.junit.Assert.assertNull;
 /**
  * @author Ilayaperumal Gopinathan
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = {EmbeddedDataSourceConfiguration.class,
+@RunWith(SpringRunner.class)
+@SpringBootTest(classes = {EmbeddedDataSourceConfiguration.class,
 		PropertyPlaceholderAutoConfiguration.class, RdbmsDeploymentIdRepositoryTests.TestConfig.class})
 public class RdbmsDeploymentIdRepositoryTests {
 

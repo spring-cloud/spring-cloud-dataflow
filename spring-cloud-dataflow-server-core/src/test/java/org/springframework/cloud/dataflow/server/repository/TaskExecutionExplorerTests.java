@@ -31,20 +31,20 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.PropertyPlaceholderAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.EmbeddedDataSourceConfiguration;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.dataflow.server.configuration.TaskDependencies;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit4.SpringRunner;
 
 /**
  * @author Glenn Renfro
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = {TaskDependencies.class,
+@RunWith(SpringRunner.class)
+@SpringBootTest(classes = {TaskDependencies.class,
 		EmbeddedDataSourceConfiguration.class,
 		PropertyPlaceholderAutoConfiguration.class})
 @DirtiesContext

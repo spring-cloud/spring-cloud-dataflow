@@ -60,9 +60,8 @@ The `@Output` annotation is used to identify output channels (messages leaving t
 
 [source,java]
 ----
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = TimerSourceApplication.class)
-@WebAppConfiguration
+@RunWith(SpringRunner.class)
+@SpringBootTest(classes = TimerSourceApplication.class)
 @DirtiesContext
 public class TimerSourceApplicationTests {
 

@@ -32,6 +32,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.dataflow.completion.CompletionConfiguration;
 import org.springframework.cloud.dataflow.completion.CompletionProposal;
 import org.springframework.cloud.dataflow.completion.StreamCompletionProvider;
@@ -48,15 +49,14 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.FileSystemResourceLoader;
 import org.springframework.core.io.ResourceLoader;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.Assert;
 
 /**
  * @author Ilayaperumal Gopinathan
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = { CompletionConfiguration.class, TabOnTapCompletionProviderTests.Mocks.class })
+@RunWith(SpringRunner.class)
+@SpringBootTest(classes = { CompletionConfiguration.class, TabOnTapCompletionProviderTests.Mocks.class })
 public class TabOnTapCompletionProviderTests {
 
 	@Autowired
