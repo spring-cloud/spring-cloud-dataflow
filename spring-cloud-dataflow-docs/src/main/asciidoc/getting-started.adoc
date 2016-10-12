@@ -139,6 +139,14 @@ dataflow:> http post --target http://localhost:9000 --data "hello world"
 ----
 Look to see if `hello world` ended up in log files for the `log` application.
 
+[NOTE]
+====
+When deploying locally, each app (and each app instance, in case of `count>1`) gets a dynamically assigned `server.port`
+unless you explicitly assign one with `--server.port=x`. In both cases, this setting is propagated as a configuration
+property that will override any lower-level setting that you may have used (_e.g._ in `application.yml` files).
+====
+
+
 [TIP]
 ====
 In case you encounter unexpected errors when executing shell commands, you can
