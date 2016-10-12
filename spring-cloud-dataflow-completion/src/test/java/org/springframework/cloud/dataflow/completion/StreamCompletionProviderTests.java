@@ -35,6 +35,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.configuration.metadata.BootApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.core.ApplicationType;
@@ -45,8 +46,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.FileSystemResourceLoader;
 import org.springframework.core.io.ResourceLoader;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.Assert;
 
 /**
@@ -59,8 +59,8 @@ import org.springframework.util.Assert;
  * @author Eric Bottard
  * @author Mark Fisher
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = {CompletionConfiguration.class, StreamCompletionProviderTests.Mocks.class})
+@RunWith(SpringRunner.class)
+@SpringBootTest(classes = {CompletionConfiguration.class, StreamCompletionProviderTests.Mocks.class})
 public class StreamCompletionProviderTests {
 
 	@Autowired
