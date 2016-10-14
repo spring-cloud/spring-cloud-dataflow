@@ -89,11 +89,11 @@ public class TaskExecutionControllerTests {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(wac).defaultRequest(
 				get("/").accept(MediaType.APPLICATION_JSON)).build();
 		if (!initialized) {
-			dao.createTaskExecution(TASK_NAME_ORIG, new Date(), new ArrayList<String>());
-			dao.createTaskExecution(TASK_NAME_ORIG, new Date(), new ArrayList<String>());
-			dao.createTaskExecution(TASK_NAME_FOO, new Date(), new ArrayList<String>());
+			dao.createTaskExecution(TASK_NAME_ORIG, new Date(), new ArrayList<String>(), null);
+			dao.createTaskExecution(TASK_NAME_ORIG, new Date(), new ArrayList<String>(), null);
+			dao.createTaskExecution(TASK_NAME_FOO, new Date(), new ArrayList<String>(), null);
 			TaskExecution taskExecution = dao.createTaskExecution(TASK_NAME_FOOBAR,
-					new Date(), new ArrayList<String>());
+					new Date(), new ArrayList<String>(), null);
 			JobInstance instance = jobRepository.createJobInstance(TASK_NAME_FOOBAR,
 					new JobParameters());
 			JobExecution jobExecution = jobRepository.createJobExecution(

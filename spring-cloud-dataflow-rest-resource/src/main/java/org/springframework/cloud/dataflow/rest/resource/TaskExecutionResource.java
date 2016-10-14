@@ -81,6 +81,12 @@ public class TaskExecutionResource extends ResourceSupport {
 	 */
 	private String errorMessage;
 
+	/**
+	 * Task Execution ID that is set from an external source.  i.e. CloudFoundry
+	 * Deployment Id.
+	 */
+	private String externalExecutionId;
+
 
 	public TaskExecutionResource() {
 		arguments = new ArrayList<>();
@@ -101,6 +107,7 @@ public class TaskExecutionResource extends ResourceSupport {
 		this.startTime = taskJobExecutionRel.getTaskExecution().getStartTime();
 		this.endTime = taskJobExecutionRel.getTaskExecution().getEndTime();
 		this.errorMessage = taskJobExecutionRel.getTaskExecution().getErrorMessage();
+		this.externalExecutionId = taskJobExecutionRel.getTaskExecution().getExternalExecutionId();
 		if(taskJobExecutionRel.getJobExecutionIds() == null){
 			this.jobExecutionIds = Collections.emptyList();
 		}else{
@@ -148,5 +155,9 @@ public class TaskExecutionResource extends ResourceSupport {
 
 	public String getErrorMessage() {
 		return errorMessage;
+	}
+
+	public String getExternalExecutionId() {
+		return externalExecutionId;
 	}
 }

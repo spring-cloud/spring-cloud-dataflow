@@ -57,6 +57,8 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 
 	private static final Date endTime = new Date(startTime.getTime() + 5000);
 
+	private static final String EXTERNAL_EXECUTION_ID = "WOW22";
+
 	@BeforeClass
 	public static void setUp() {
 		template = new JdbcTemplate(applicationContext.getBean(DataSource.class));
@@ -69,8 +71,9 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 				"EXIT_CODE, " +
 				"EXIT_MESSAGE, " +
 				"LAST_UPDATED," +
-				"ERROR_MESSAGE)" +
-				"values (?, ?, ?, ?, ?, ?, ?, ?)",
+				"ERROR_MESSAGE, " +
+				"EXTERNAL_EXECUTION_ID)" +
+				"values (?, ?, ?, ?, ?, ?, ?, ?, ?)",
 				TASK_EXECUTION_ID,
 				startTime,
 				endTime,
@@ -78,7 +81,8 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 				EXIT_CODE,
 				EXIT_MESSAGE,
 				endTime,
-				ERROR_MESSAGE);
+				ERROR_MESSAGE,
+				EXTERNAL_EXECUTION_ID);
 	}
 
 	@Test
@@ -173,6 +177,8 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 				table.getModel().getValue(8, 0));
 		assertEquals("Tenth key should be Error Message ", "Error Message ",
 				table.getModel().getValue(9, 0));
+		assertEquals("Eleventh key should be External Execution Id ", "External Execution Id ",
+				table.getModel().getValue(10, 0));
 
 		assertEquals("Second value should be " + TASK_EXECUTION_ID,
 				TASK_EXECUTION_ID, table.getModel().getValue(1, 1));
@@ -188,5 +194,9 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 				table.getModel().getValue(8, 1));
 		assertEquals("Tenth value should be  " + ERROR_MESSAGE, ERROR_MESSAGE,
 				table.getModel().getValue(9, 1));
+		assertEquals("Eleventh value should be  " + EXTERNAL_EXECUTION_ID,
+				EXTERNAL_EXECUTION_ID,
+				table.getModel().getValue(10, 1));
+
 	}
 }

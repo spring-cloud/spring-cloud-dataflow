@@ -175,7 +175,7 @@ public class JobStepExecutionControllerTests {
 			jobRepository.add(stepExecution);
 		}
 		TaskExecution taskExecution = dao.createTaskExecution(
-				jobName, new Date(), new ArrayList<String>());
+				jobName, new Date(), new ArrayList<String>(), null);
 		taskBatchDao.saveRelationship(taskExecution, jobExecution);
 	}
 }
