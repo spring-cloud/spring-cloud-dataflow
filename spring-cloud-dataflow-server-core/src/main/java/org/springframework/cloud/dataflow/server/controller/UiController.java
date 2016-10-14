@@ -28,9 +28,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @Controller
 public class UiController {
 
-	@RequestMapping("/dashboard")
+	public static final String WEB_UI_INDEX_PAGE_NAME = "dashboard";
+
+	@RequestMapping("/" + WEB_UI_INDEX_PAGE_NAME)
 	public String index() {
-		return "redirect:/dashboard/index.html";
+		return "redirect:/" + WEB_UI_INDEX_PAGE_NAME + "/index.html";
 	}
 
 }

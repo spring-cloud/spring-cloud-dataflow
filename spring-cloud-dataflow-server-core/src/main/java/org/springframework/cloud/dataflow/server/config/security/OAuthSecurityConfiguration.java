@@ -17,6 +17,7 @@ package org.springframework.cloud.dataflow.server.config.security;
 
 import org.springframework.boot.autoconfigure.security.oauth2.client.EnableOAuth2Sso;
 import org.springframework.cloud.dataflow.server.config.security.support.OnSecurityEnabledAndOAuth2Enabled;
+import org.springframework.cloud.dataflow.server.controller.UiController;
 import org.springframework.cloud.dataflow.server.service.impl.ManualOAuthAuthenticationProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
@@ -42,12 +43,12 @@ public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 		http.antMatcher("/**")
 		.authorizeRequests()
 			.antMatchers(
-				"/security/info**", "/login**", "/dashboard/logout-success-oauth.html",
-				"/dashboard/styles/**", "/dashboard/images/**", "/dashboard/fonts/**",
-				"/dashboard/lib/**").permitAll()
+					"/security/info**", "/login**", "/"+ UiController.WEB_UI_INDEX_PAGE_NAME +"/logout-success-oauth.html",
+					"/"+ UiController.WEB_UI_INDEX_PAGE_NAME +"/styles/**", "/"+ UiController.WEB_UI_INDEX_PAGE_NAME +"/images/**",
+					"/"+ UiController.WEB_UI_INDEX_PAGE_NAME +"/fonts/**", "/"+ UiController.WEB_UI_INDEX_PAGE_NAME +"/lib/**").permitAll()
 			.anyRequest().authenticated()
 		.and().httpBasic()
-		.and().logout().logoutSuccessUrl("/dashboard/logout-success-oauth.html")
+		.and().logout().logoutSuccessUrl("/"+ UiController.WEB_UI_INDEX_PAGE_NAME +"/logout-success-oauth.html")
 		.and().csrf().disable();
 	}
 

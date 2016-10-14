@@ -18,11 +18,11 @@ package org.springframework.cloud.dataflow.server.config.security;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.cloud.dataflow.server.config.security.support.OnSecurityEnabledAndOAuth2Disabled;
+import org.springframework.cloud.dataflow.server.controller.UiController;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
-import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -75,7 +75,7 @@ public class BasicAuthSecurityConfiguration extends WebSecurityConfigurerAdapter
 				contentNegotiationStrategy,
 				MediaType.TEXT_HTML);
 
-		final String loginPage = "/dashboard/#/login";
+		final String loginPage = "/" + UiController.WEB_UI_INDEX_PAGE_NAME + "/#/login";
 
 		final BasicAuthenticationEntryPoint basicAuthenticationEntryPoint = new BasicAuthenticationEntryPoint();
 		basicAuthenticationEntryPoint.setRealmName(securityProperties.getBasic().getRealm());
@@ -88,17 +88,17 @@ public class BasicAuthSecurityConfiguration extends WebSecurityConfigurerAdapter
 			.antMatchers("/")
 			.authenticated()
 			.antMatchers(
-					"/dashboard/**",
+					"/" + UiController.WEB_UI_INDEX_PAGE_NAME + "/**",
 					"/authenticate",
 					"/security/info",
 					"/features",
 					"/assets/**").permitAll()
 		.and()
 			.formLogin().loginPage(loginPage)
-			.loginProcessingUrl("/dashboard/login")
-			.defaultSuccessUrl("/dashboard/").permitAll()
+			.loginProcessingUrl("/" + UiController.WEB_UI_INDEX_PAGE_NAME + "/login")
+			.defaultSuccessUrl("/" + UiController.WEB_UI_INDEX_PAGE_NAME + "/").permitAll()
 		.and()
-			.logout().logoutUrl("/dashboard/logout").logoutSuccessUrl("/dashboard/logout-success.html")
+			.logout().logoutUrl("/" + UiController.WEB_UI_INDEX_PAGE_NAME + "/logout").logoutSuccessUrl("/" + UiController.WEB_UI_INDEX_PAGE_NAME + "/logout-success.html")
 			.logoutSuccessHandler(new HttpStatusReturningLogoutSuccessHandler()).permitAll()
 		.and().httpBasic()
 			.and().exceptionHandling()
