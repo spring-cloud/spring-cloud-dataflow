@@ -146,7 +146,7 @@ public class JobInstanceControllerTests {
 	private void createSampleJob(String jobName, int jobExecutionCount){
 		JobInstance instance = jobRepository.createJobInstance(jobName, new JobParameters());
 		TaskExecution taskExecution = dao.createTaskExecution(
-				jobName, new Date(), new ArrayList<String>());
+				jobName, new Date(), new ArrayList<String>(), null);
 		JobExecution jobExecution = null;
 
 		for(int i = 0 ; i < jobExecutionCount; i++){

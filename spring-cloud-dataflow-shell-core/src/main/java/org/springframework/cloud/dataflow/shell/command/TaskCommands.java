@@ -189,6 +189,7 @@ public class TaskCommands implements CommandMarker {
 		modelBuilder.addRow().addValue("Exit Code ").addValue(taskExecutionResource.getExitCode());
 		modelBuilder.addRow().addValue("Exit Message ").addValue(taskExecutionResource.getExitMessage());
 		modelBuilder.addRow().addValue("Error Message ").addValue(taskExecutionResource.getErrorMessage());
+		modelBuilder.addRow().addValue("External Execution Id ").addValue(taskExecutionResource.getExternalExecutionId());
 
 		TableBuilder builder = new TableBuilder(modelBuilder.build());
 

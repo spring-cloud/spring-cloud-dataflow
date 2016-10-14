@@ -239,7 +239,7 @@ public class JobCommandTests extends AbstractShellIntegrationTest {
 		JobInstance instance = jobRepository.createJobInstance(jobName, new JobParameters());
 		jobInstances.add(instance);
 		TaskExecution taskExecution = dao.createTaskExecution(
-				jobName, new Date(), new ArrayList<String>());
+				jobName, new Date(), new ArrayList<String>(), null);
 		Map<String, JobParameter> jobParameterMap = new HashMap<>();
 		jobParameterMap.put("foo", new JobParameter("FOO", true));
 		jobParameterMap.put("bar", new JobParameter("BAR", false));
