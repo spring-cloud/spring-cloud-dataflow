@@ -74,6 +74,7 @@ public class ApiDocumentation extends BaseDocumentation {
 			.andExpect(status().isOk())
 			.andDo(this.documentationHandler.document(
 				links(
+					linkWithRel("dashboard").description("Access the dashboard UI"),
 					linkWithRel("apps").description("Handle registered applications"),
 					linkWithRel("completions/stream").description("Exposes the DSL completion features"),
 					linkWithRel("jobs/executions").description("Provides the JobExecution resource"),
