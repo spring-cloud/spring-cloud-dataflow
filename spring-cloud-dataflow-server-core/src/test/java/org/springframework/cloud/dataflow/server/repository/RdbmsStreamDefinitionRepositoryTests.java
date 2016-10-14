@@ -52,6 +52,7 @@ import static org.junit.Assert.assertTrue;
 /**
  * @author Glenn Renfro
  * @author Ilayaperumal Gopinathan
+ * @author Gunnar Hillert
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = {EmbeddedDataSourceConfiguration.class,
@@ -93,7 +94,7 @@ public class RdbmsStreamDefinitionRepositoryTests {
 		template = new JdbcTemplate(dataSource);
 		template.execute("DELETE FROM STREAM_DEFINITIONS");
 	}
-	
+
 	@Test
 	public void testFindOne() {
 		StreamDefinition definition1 = new StreamDefinition("stream1", "time | log");
@@ -275,8 +276,8 @@ public class RdbmsStreamDefinitionRepositoryTests {
 	}
 
 	protected void initializeRepositoryNotInOrder() {
-		repository.save(new StreamDefinition("stream3", "time | logA"));
 		repository.save(new StreamDefinition("stream2", "time | logB"));
+		repository.save(new StreamDefinition("stream3", "time | logA"));
 		repository.save(new StreamDefinition("stream1", "time | logC"));
 	}
 
@@ -288,10 +289,27 @@ public class RdbmsStreamDefinitionRepositoryTests {
 	}
 
 	@Test
+	public void findAllPageableTestASC() {
+		Sort sort = new Sort(new Sort.Order(Sort.Direction.ASC, "DEFINITION_NAME"), new Sort.Order(Sort.Direction.ASC, "DEFINITION"));
+		Pageable pageable = new PageRequest(0, 10, sort);
+		String[] names = new String[]{"stream1", "stream2", "stream3"};
+		findAllPageable(pageable, names);
+	}
+
+	@Test
 	public void findAllSortTestDESC() {
 		Sort sort = new Sort(new Sort.Order(Sort.Direction.DESC, "DEFINITION_NAME"), new Sort.Order(Sort.Direction.DESC, "DEFINITION"));
 		String[] names = new String[]{"stream3", "stream2", "stream1"};
 		findAllSort(sort, names);
+	}
+
+	@Test
+	public void findAllPageableTestDESC() {
+		Sort sort = new Sort(new Sort.Order(Sort.Direction.DESC, "DEFINITION_NAME"), new Sort.Order(Sort.Direction.DESC, "DEFINITION"));
+		Pageable pageable = new PageRequest(0, 10, sort);
+
+		String[] names = new String[]{"stream3", "stream2", "stream1"};
+		findAllPageable(pageable, names);
 	}
 
 	@Test
@@ -302,19 +320,75 @@ public class RdbmsStreamDefinitionRepositoryTests {
 	}
 
 	@Test
+	public void findAllPageableTestASCNameOnly() {
+		Sort sort = new Sort(new Sort.Order(Sort.Direction.ASC, "DEFINITION_NAME"));
+		Pageable pageable = new PageRequest(0, 10, sort);
+
+		String[] names = new String[]{"stream1", "stream2", "stream3"};
+		findAllPageable(pageable, names);
+	}
+
+	@Test
 	public void findAllSortTestASCDefinitionOnly() {
 		Sort sort = new Sort(new Sort.Order(Sort.Direction.DESC, "DEFINITION"));
 		String[] names = new String[]{"stream1", "stream2", "stream3"};
 		findAllSort(sort, names);
 	}
 
-	private void findAllSort(Sort sort, String[] expectedOrder) {
-		assertFalse(repository.findAll().iterator().hasNext());
+	@Test
+	public void findAllPageableTestASCDefinitionOnly() {
+		Sort sort = new Sort(new Sort.Order(Sort.Direction.DESC, "DEFINITION"));
+		Pageable pageable = new PageRequest(0, 10, sort);
 
+		String[] names = new String[]{"stream1", "stream2", "stream3"};
+		findAllPageable(pageable, names);
+	}
+
+	@Test
+	public void findAllPageablePage2TestASC() {
+		Sort sort = new Sort(new Sort.Order(Sort.Direction.ASC, "DEFINITION_NAME"), new Sort.Order(Sort.Direction.ASC, "DEFINITION"));
+		Pageable pageable = new PageRequest(1, 2, sort);
+		String[] names = new String[]{"stream3"};
+		findAllPageable(pageable, names);
+	}
+
+	@Test
+	public void findAllPageablePage2TestDESC() {
+		Sort sort = new Sort(new Sort.Order(Sort.Direction.DESC, "DEFINITION_NAME"), new Sort.Order(Sort.Direction.DESC, "DEFINITION"));
+		Pageable pageable = new PageRequest(1, 2, sort);
+		String[] names = new String[]{"stream1"};
+		findAllPageable(pageable, names);
+	}
+
+	@Test
+	public void findAllPageableDefinitionStringTestDESC() {
+		Sort sort = new Sort(new Sort.Order(Sort.Direction.DESC, "DEFINITION"));
+		Pageable pageable = new PageRequest(1, 1, sort);
+		String[] names = new String[]{"stream2"};
+		findAllPageable(pageable, names);
+	}
+
+	private void findAllPageable(Pageable pageable, String[] expectedOrder) {
+
+		assertFalse(repository.findAll().iterator().hasNext());
 		initializeRepositoryNotInOrder();
 
-		Iterable<StreamDefinition> items = repository.findAll(sort);
+		final Iterable<StreamDefinition> items = repository.findAll(pageable);
 
+		makeSortAssertions(items, expectedOrder);
+
+	}
+
+	private void findAllSort(Sort sort, String[] expectedOrder) {
+		assertFalse(repository.findAll().iterator().hasNext());
+		initializeRepositoryNotInOrder();
+
+		final Iterable<StreamDefinition> items = repository.findAll(sort);
+
+		makeSortAssertions(items, expectedOrder);
+	}
+
+	private void makeSortAssertions(Iterable<StreamDefinition> items, String[] expectedOrder) {
 		int count = 0;
 		List<StreamDefinition> definitions = new ArrayList<>();
 		for (StreamDefinition item : items) {
@@ -329,4 +403,5 @@ public class RdbmsStreamDefinitionRepositoryTests {
 					definitions.get(currentDefinitionOffset++).getName());
 		}
 	}
+
 }
