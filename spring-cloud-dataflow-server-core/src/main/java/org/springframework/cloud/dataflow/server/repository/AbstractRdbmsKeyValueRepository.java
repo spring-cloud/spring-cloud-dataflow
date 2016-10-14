@@ -18,9 +18,8 @@ package org.springframework.cloud.dataflow.server.repository;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
 
 import javax.sql.DataSource;
 
@@ -39,6 +38,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -46,6 +46,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Glenn Renfro
  * @author Ilayaperumal Gopinathan
+ * @author Gunnar Hillert
  */
 public abstract class AbstractRdbmsKeyValueRepository<D> implements PagingAndSortingRepository<D, String> {
 
@@ -89,7 +90,7 @@ public abstract class AbstractRdbmsKeyValueRepository<D> implements PagingAndSor
 
 	protected DataSource dataSource;
 
-	protected Map<String, Order> orderMap;
+	protected LinkedHashMap<String, Order> orderMap;
 
 	protected final RowMapper<D> rowMapper;
 
@@ -100,7 +101,7 @@ public abstract class AbstractRdbmsKeyValueRepository<D> implements PagingAndSor
 		this.jdbcTemplate = new JdbcTemplate(dataSource);
 		this.namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
 		this.dataSource = dataSource;
-		this.orderMap = new TreeMap<>();
+		this.orderMap = new LinkedHashMap<>();
 		this.orderMap.put(keyColumn, Order.ASCENDING);
 		this.tablePrefix = tablePrefix;
 		this.tableSuffix = tableSuffix;
@@ -231,19 +232,35 @@ public abstract class AbstractRdbmsKeyValueRepository<D> implements PagingAndSor
 
 	private Page<D> queryForPageableResults(Pageable pageable, String selectClause, String tableName,
 			String whereClause, Object[] queryParam, long totalCount) {
-		// Possible performance improvement refactoring so factory isn't called everytime.
+		//FIXME Possible performance improvement refactoring so factory isn't called every time.
 		SqlPagingQueryProviderFactoryBean factoryBean = new SqlPagingQueryProviderFactoryBean();
 		factoryBean.setSelectClause(selectClause);
 		factoryBean.setFromClause(tableName);
 		if (StringUtils.hasText(whereClause)) {
 			factoryBean.setWhereClause(whereClause);
 		}
-		factoryBean.setSortKeys(orderMap);
-		factoryBean.setDataSource(dataSource);
+
+		final Sort sort = pageable.getSort();
+		final LinkedHashMap<String, Order> sortOrderMap = new LinkedHashMap<>();
+
+		if (sort != null) {
+			for (Sort.Order sortOrder : sort) {
+				sortOrderMap.put(sortOrder.getProperty(), sortOrder.isAscending() ? Order.ASCENDING : Order.DESCENDING);
+			}
+		}
+
+		if (!CollectionUtils.isEmpty(sortOrderMap)) {
+			factoryBean.setSortKeys(sortOrderMap);
+		}
+		else {
+			factoryBean.setSortKeys(this.orderMap);
+		}
+
+		factoryBean.setDataSource(this.dataSource);
 		PagingQueryProvider pagingQueryProvider;
 		try {
 			pagingQueryProvider = factoryBean.getObject();
-			pagingQueryProvider.init(dataSource);
+			pagingQueryProvider.init(this.dataSource);
 		}
 		catch (Exception e) {
 			throw new IllegalStateException(e);
