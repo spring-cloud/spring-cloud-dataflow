@@ -15,6 +15,8 @@
  */
 package org.springframework.cloud.dataflow.server.config.security;
 
+import static org.springframework.cloud.dataflow.server.controller.UiController.dashboard;
+
 import org.springframework.boot.autoconfigure.security.oauth2.client.EnableOAuth2Sso;
 import org.springframework.cloud.dataflow.server.config.security.support.OnSecurityEnabledAndOAuth2Enabled;
 import org.springframework.cloud.dataflow.server.service.impl.ManualOAuthAuthenticationProvider;
@@ -30,6 +32,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
  * Setup Spring Security OAuth for the Rest Endpoints of Spring Cloud Data Flow.
  *
  * @author Gunnar Hillert
+ * @author Ilayaperumal Gopinathan
  *
  */
 @EnableOAuth2Sso
@@ -42,12 +45,18 @@ public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 		http.antMatcher("/**")
 		.authorizeRequests()
 			.antMatchers(
-				"/security/info**", "/login**", "/dashboard/logout-success-oauth.html",
-				"/dashboard/styles/**", "/dashboard/images/**", "/dashboard/fonts/**",
-				"/dashboard/lib/**").permitAll()
+					"/security/info**",
+					"/login**",
+					dashboard("/logout-success-oauth.html"),
+					dashboard("/styles/**"),
+					dashboard("/images/**"),
+					dashboard("/fonts/**"),
+					dashboard("/lib/**")
+
+					).permitAll()
 			.anyRequest().authenticated()
 		.and().httpBasic()
-		.and().logout().logoutSuccessUrl("/dashboard/logout-success-oauth.html")
+		.and().logout().logoutSuccessUrl(dashboard("/logout-success-oauth.html"))
 		.and().csrf().disable();
 	}
 

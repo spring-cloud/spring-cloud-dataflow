@@ -28,9 +28,18 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @Controller
 public class UiController {
 
-	@RequestMapping("/dashboard")
+	private static final String WEB_UI_INDEX_PAGE_ROUTE = "/dashboard";
+
+	@RequestMapping(WEB_UI_INDEX_PAGE_ROUTE)
 	public String index() {
-		return "redirect:/dashboard/index.html";
+		return "redirect:" + WEB_UI_INDEX_PAGE_ROUTE + "/index.html";
+	}
+
+	/**
+	 * Turn a relative link of the UI app to an absolute one, prepending its path.
+	 */
+	public static String dashboard(String path) {
+		return WEB_UI_INDEX_PAGE_ROUTE + path;
 	}
 
 }

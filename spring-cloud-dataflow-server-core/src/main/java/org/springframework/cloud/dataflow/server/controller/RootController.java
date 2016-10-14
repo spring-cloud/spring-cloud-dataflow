@@ -16,6 +16,8 @@
 
 package org.springframework.cloud.dataflow.server.controller;
 
+import static org.springframework.cloud.dataflow.server.controller.UiController.dashboard;
+
 import org.springframework.analytics.rest.domain.AggregateCounterResource;
 import org.springframework.analytics.rest.domain.CounterResource;
 import org.springframework.analytics.rest.domain.FieldValueCounterResource;
@@ -81,6 +83,7 @@ public class RootController {
 	@RequestMapping("/")
 	public ResourceSupport info() {
 		ResourceSupport resourceSupport = new ResourceSupport();
+		resourceSupport.add(new Link(dashboard(""), "dashboard"));
 		if (featuresProperties.isStreamsEnabled()) {
 			resourceSupport.add(entityLinks.linkToCollectionResource(StreamDefinitionResource.class).withRel("streams/definitions"));
 			resourceSupport.add(unescapeTemplateVariables(entityLinks.linkToSingleResource(StreamDefinitionResource.class, "{name}").withRel("streams/definitions/definition")));
