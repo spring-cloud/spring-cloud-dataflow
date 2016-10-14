@@ -26,11 +26,13 @@ import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.util.StringUtils;
 
 /**
  * Setup Spring Security OAuth for the Rest Endpoints of Spring Cloud Data Flow.
  *
  * @author Gunnar Hillert
+ * @author Ilayaperumal Gopinathan
  *
  */
 @EnableOAuth2Sso
@@ -43,13 +45,21 @@ public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 		http.antMatcher("/**")
 		.authorizeRequests()
 			.antMatchers(
-					"/security/info**", "/login**", "/"+ UiController.WEB_UI_INDEX_PAGE_NAME +"/logout-success-oauth.html",
-					"/"+ UiController.WEB_UI_INDEX_PAGE_NAME +"/styles/**", "/"+ UiController.WEB_UI_INDEX_PAGE_NAME +"/images/**",
-					"/"+ UiController.WEB_UI_INDEX_PAGE_NAME +"/fonts/**", "/"+ UiController.WEB_UI_INDEX_PAGE_NAME +"/lib/**").permitAll()
+					"/security/info**", "/login**", StringUtils.arrayToCommaDelimitedString(appendIndexPageRoute("/logout-success-oauth.html",
+							"/styles/**", "/images/**", "/fonts/**", "/lib/**"))).permitAll()
 			.anyRequest().authenticated()
 		.and().httpBasic()
-		.and().logout().logoutSuccessUrl("/"+ UiController.WEB_UI_INDEX_PAGE_NAME +"/logout-success-oauth.html")
+		.and().logout().logoutSuccessUrl(UiController.WEB_UI_INDEX_PAGE_ROUTE + "/logout-success-oauth.html")
 		.and().csrf().disable();
+	}
+
+	private String[] appendIndexPageRoute(String... patterns) {
+		String[] appendedResult = new String[patterns.length];
+		int i = 0;
+		for (String pattern: patterns) {
+			appendedResult[i] = UiController.WEB_UI_INDEX_PAGE_ROUTE + pattern;
+		}
+		return appendedResult;
 	}
 
 	@Override

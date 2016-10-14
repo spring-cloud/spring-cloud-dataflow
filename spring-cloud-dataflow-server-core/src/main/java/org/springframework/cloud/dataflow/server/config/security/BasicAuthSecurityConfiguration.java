@@ -75,7 +75,7 @@ public class BasicAuthSecurityConfiguration extends WebSecurityConfigurerAdapter
 				contentNegotiationStrategy,
 				MediaType.TEXT_HTML);
 
-		final String loginPage = "/" + UiController.WEB_UI_INDEX_PAGE_NAME + "/#/login";
+		final String loginPage = UiController.WEB_UI_INDEX_PAGE_ROUTE + "/#/login";
 
 		final BasicAuthenticationEntryPoint basicAuthenticationEntryPoint = new BasicAuthenticationEntryPoint();
 		basicAuthenticationEntryPoint.setRealmName(securityProperties.getBasic().getRealm());
@@ -88,17 +88,17 @@ public class BasicAuthSecurityConfiguration extends WebSecurityConfigurerAdapter
 			.antMatchers("/")
 			.authenticated()
 			.antMatchers(
-					"/" + UiController.WEB_UI_INDEX_PAGE_NAME + "/**",
+					UiController.WEB_UI_INDEX_PAGE_ROUTE + "/**",
 					"/authenticate",
 					"/security/info",
 					"/features",
 					"/assets/**").permitAll()
 		.and()
 			.formLogin().loginPage(loginPage)
-			.loginProcessingUrl("/" + UiController.WEB_UI_INDEX_PAGE_NAME + "/login")
-			.defaultSuccessUrl("/" + UiController.WEB_UI_INDEX_PAGE_NAME + "/").permitAll()
+			.loginProcessingUrl(UiController.WEB_UI_INDEX_PAGE_ROUTE + "/login")
+			.defaultSuccessUrl(UiController.WEB_UI_INDEX_PAGE_ROUTE + "/").permitAll()
 		.and()
-			.logout().logoutUrl("/" + UiController.WEB_UI_INDEX_PAGE_NAME + "/logout").logoutSuccessUrl("/" + UiController.WEB_UI_INDEX_PAGE_NAME + "/logout-success.html")
+			.logout().logoutUrl(UiController.WEB_UI_INDEX_PAGE_ROUTE + "/logout").logoutSuccessUrl(UiController.WEB_UI_INDEX_PAGE_ROUTE + "/logout-success.html")
 			.logoutSuccessHandler(new HttpStatusReturningLogoutSuccessHandler()).permitAll()
 		.and().httpBasic()
 			.and().exceptionHandling()
