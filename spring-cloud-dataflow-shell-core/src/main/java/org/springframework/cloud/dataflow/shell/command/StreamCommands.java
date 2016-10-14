@@ -24,12 +24,17 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Properties;
 
+import org.apache.commons.io.FilenameUtils;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
+import org.springframework.boot.env.YamlPropertySourceLoader;
 import org.springframework.cloud.dataflow.rest.client.DataFlowOperations;
 import org.springframework.cloud.dataflow.rest.client.StreamOperations;
 import org.springframework.cloud.dataflow.rest.resource.StreamDefinitionResource;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
 import org.springframework.cloud.dataflow.shell.config.DataFlowShell;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.shell.core.CommandMarker;
 import org.springframework.shell.core.annotation.CliAvailabilityIndicator;
@@ -116,9 +121,19 @@ public class StreamCommands implements CommandMarker {
 				propertiesToUse = DeploymentPropertiesUtils.parse(properties);
 				break;
 			case 1:
-				Properties props = new Properties();
-				try (FileInputStream fis = new FileInputStream(propertiesFile)) {
-					props.load(fis);
+				String extension = FilenameUtils.getExtension(propertiesFile.getName());
+				Properties props = null;
+				if (extension.equals("yaml") || extension.equals("yml")) {
+					YamlPropertiesFactoryBean yamlPropertiesFactoryBean = new YamlPropertiesFactoryBean();
+					yamlPropertiesFactoryBean.setResources(new FileSystemResource(propertiesFile));
+					yamlPropertiesFactoryBean.afterPropertiesSet();
+					props = yamlPropertiesFactoryBean.getObject();
+				}
+				else {
+					props = new Properties();
+					try (FileInputStream fis = new FileInputStream(propertiesFile)) {
+						props.load(fis);
+					}
 				}
 				propertiesToUse = DeploymentPropertiesUtils.convert(props);
 				break;

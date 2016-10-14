@@ -416,7 +416,7 @@ stream deploy foo
 
 *Using a file reference*::
 
-  use the `--propertiesFile` option and point it to a local Java `.properties` file
+  use the `--propertiesFile` option and point it to a local `.properties`, `.yaml` or `.yml` file
   (i.e. that lives in the filesystem of the machine running the shell). Being read
   as a `.properties` file, normal rules apply (ISO 8859-1 encoding, `=`, `<space>` or
   `:` delimiter, etc.) although we recommend using `=` as a key-value pair delimiter
@@ -433,8 +433,24 @@ where `myprops.properties` contains:
 app.transform.count=2
 app.transform.producer.partitionKeyExpression=payload
 ```
-
 Both the above properties will be passed as deployment properties for the stream `foo` above.
+
+In case of YAML file as the properties file,
+
+[source,bash]
+----
+stream deploy foo --propertiesFile myprops.yaml
+----
+
+where `myprops.yaml` contains:
+
+```
+app:
+  transform:
+    count: 2
+    producer:
+      partitionKeyExpression: payload
+```
 
 [[spring-cloud-dataflow-destroy-stream]]
 == Destroying a Stream
