@@ -336,7 +336,7 @@ public class RdbmsStreamDefinitionRepositoryTests {
 	}
 
 	@Test
-	public void findAllPageableTestASCDefinitionOnly() {
+	public void findAllPageableTestDESCDefinitionOnly() {
 		Sort sort = new Sort(new Sort.Order(Sort.Direction.DESC, "DEFINITION"));
 		Pageable pageable = new PageRequest(0, 10, sort);
 
@@ -363,8 +363,8 @@ public class RdbmsStreamDefinitionRepositoryTests {
 	@Test
 	public void findAllPageableDefinitionStringTestDESC() {
 		Sort sort = new Sort(new Sort.Order(Sort.Direction.DESC, "DEFINITION"));
-		Pageable pageable = new PageRequest(1, 1, sort);
-		String[] names = new String[]{"stream2"};
+		Pageable pageable = new PageRequest(1, 2, sort);
+		String[] names = new String[]{"stream3"};
 		findAllPageable(pageable, names);
 	}
 

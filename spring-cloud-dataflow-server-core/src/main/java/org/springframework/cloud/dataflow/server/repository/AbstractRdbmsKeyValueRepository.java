@@ -141,17 +141,7 @@ public abstract class AbstractRdbmsKeyValueRepository<D> implements PagingAndSor
 	@Override
 	public Page<D> findAll(Pageable pageable) {
 		Assert.notNull(pageable, "pageable must not be null");
-
-		final Sort sort = pageable.getSort();
-		final LinkedHashMap<String, Order> sortOrderMap = new LinkedHashMap<>();
-
-		if (sort != null) {
-			for (Sort.Order sortOrder : sort) {
-				sortOrderMap.put(sortOrder.getProperty(), sortOrder.isAscending() ? Order.ASCENDING : Order.DESCENDING);
-			}
-		}
-
-		return queryForPageableResults(pageable, selectClause, tableName, null, new Object[] {}, count(), sortOrderMap);
+		return queryForPageableResults(pageable, selectClause, tableName, null, new Object[] {}, count());
 	}
 
 	@Override
@@ -241,7 +231,7 @@ public abstract class AbstractRdbmsKeyValueRepository<D> implements PagingAndSor
 	}
 
 	private Page<D> queryForPageableResults(Pageable pageable, String selectClause, String tableName,
-			String whereClause, Object[] queryParam, long totalCount, LinkedHashMap<String, Order> sortOrderMap) {
+			String whereClause, Object[] queryParam, long totalCount) {
 		//FIXME Possible performance improvement refactoring so factory isn't called every time.
 		SqlPagingQueryProviderFactoryBean factoryBean = new SqlPagingQueryProviderFactoryBean();
 		factoryBean.setSelectClause(selectClause);
@@ -250,12 +240,22 @@ public abstract class AbstractRdbmsKeyValueRepository<D> implements PagingAndSor
 			factoryBean.setWhereClause(whereClause);
 		}
 
+		final Sort sort = pageable.getSort();
+		final LinkedHashMap<String, Order> sortOrderMap = new LinkedHashMap<>();
+
+		if (sort != null) {
+			for (Sort.Order sortOrder : sort) {
+				sortOrderMap.put(sortOrder.getProperty(), sortOrder.isAscending() ? Order.ASCENDING : Order.DESCENDING);
+			}
+		}
+
 		if (!CollectionUtils.isEmpty(sortOrderMap)) {
 			factoryBean.setSortKeys(sortOrderMap);
 		}
 		else {
 			factoryBean.setSortKeys(this.orderMap);
 		}
+
 		factoryBean.setDataSource(this.dataSource);
 		PagingQueryProvider pagingQueryProvider;
 		try {
