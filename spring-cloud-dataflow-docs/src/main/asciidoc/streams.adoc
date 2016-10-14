@@ -248,6 +248,66 @@ dataflow:> stream create --definition "time --fixed-delay=5 | log --level=WARN" 
 Note that the properties `fixed-delay` and `level` defined above for the apps `time` and `log` are the 'short-form' property names provided by the shell completion.
 These 'short-form' property names are applicable only for the white-listed properties and in all other cases, only _fully qualified_ property names should be used.
 
+=== Deployment properties
+
+When deploying the stream, properties that control the deployment of the apps into the target platform are known as `deployment` properties.
+For instance, one can specify how many instances need to be deployed for the specific application defined in the stream using the deployment property called `count`.
+
+==== Passing instance count as deployment property
+
+If you would like to have multiple instances of an application in the stream, you
+can include a property with the deploy command:
+
+[source,bash,subs=attributes]
+----
+dataflow:> stream deploy --name ticktock --properties "app.time.count=3"
+----
+
+Note that `count` is the *reserved* property name used by the underlying deployer. Hence, if the application also has a custom property named `count`, it is *not* supported
+ when specified in 'short-form' form during stream _deployment_ as it could conflict with the _instance_ count deployer property. Instead, the `count` as a custom application property can be
+ specified in its _fully qualified_ form (example: `app.foo.bar.count`) during stream _deployment_ or it can be specified using 'short-form' or _fully qualified_ form during the stream _creation_
+ where it will be considered as an app property.
+
+IMPORTANT: See <<spring-cloud-dataflow-stream-app-labels>>.
+
+==== Inline vs file reference properties
+
+When using the Spring Cloud Dataflow Shell, there are two ways to provide deployment
+properties: either *inline* or via a *file reference*. Those two ways are exclusive
+and documented below:
+
+*Inline properties*::
+
+  use the `--properties` shell option and list properties as a comma separated
+  list of key=value pairs, like so:
+
+[source,bash]
+----
+stream deploy foo
+    --properties "app.transform.count=2,app.transform.producer.partitionKeyExpression=payload"
+----
+
+*Using a file reference*::
+
+  use the `--propertiesFile` option and point it to a local Java `.properties` file
+  (i.e. that lives in the filesystem of the machine running the shell). Being read
+  as a `.properties` file, normal rules apply (ISO 8859-1 encoding, `=`, `<space>` or
+  `:` delimiter, etc.) although we recommend using `=` as a key-value pair delimiter
+  for consistency:
+
+[source,bash]
+----
+stream deploy foo --propertiesFile myprops.properties
+----
+
+where `myprops.properties` contains:
+
+```
+app.transform.count=2
+app.transform.producer.partitionKeyExpression=payload
+```
+
+Both the above properties will be passed as deployment properties for the stream `foo` above.
 
 ==== Passing application properties when deploying a stream
 
@@ -280,6 +340,56 @@ the application properties can be defined as:
 [source,bash]
 ----
 stream deploy ticktock --properties "app.a.fixed-delay=4,app.b.level=ERROR"
+----
+
+[[passing_producer_consumer_properties]]
+==== Passing Spring Cloud Stream properties for the application
+Spring Cloud Data Flow sets the `required` Spring Cloud Stream properties for the applications inside the stream. Most importantly, the `spring.cloud.stream.bindings.<input/output>.destination` is set internally for the apps to bind.
+
+If someone wants to override any of the Spring Cloud Stream properties, they can be set via deployment properties.
+
+For example, for the below stream
+
+[source,bash]
+----
+dataflow:> stream create --definition "http | transform --expression=payload.getValue('hello').toUpperCase() | log" --name ticktock
+----
+
+if there are multiple binders available in the classpath for each of the applications and the binder is chosen for each deployment then the stream can be deployed with the specific Spring Cloud Stream properties as:
+
+[source,bash]
+----
+dataflow:>stream deploy ticktock --properties "app.time.spring.cloud.stream.bindings.output.binder=kafka,app.transform.spring.cloud.stream.bindings.input.binder=kafka,app.transform.spring.cloud.stream.bindings.output.binder=rabbit,app.log.spring.cloud.stream.bindings.input.binder=rabbit"
+----
+
+NOTE: Overriding the destination names is not recommended as Spring Cloud Data Flow takes care of setting this internally.
+
+==== Passing per-binding producer consumer properties
+A Spring Cloud Stream application can have producer and consumer properties set `per-binding` basis.
+While Spring Cloud Data Flow supports specifying short-hand notation for per binding producer properties such as `partitionKeyExpression`, `partitionKeyExtractorClass` as described in <<passing_stream_partition_properties>>, all the supported Spring Cloud Stream producer/consumer properties can be set as Spring Cloud Stream properties for the app directly as well.
+
+The consumer properties can be set for the `inbound` channel name with the prefix `app.[app/label name].spring.cloud.stream.bindings.<channelName>.consumer.` and the producer properties can be set for the `outbound` channel name with the prefix `app.[app/label name].spring.cloud.stream.bindings.<channelName>.producer.`.
+For example, the stream
+
+[source,bash]
+----
+dataflow:> stream create --definition "time | log" --name ticktock
+----
+
+can be deployed with producer/consumer properties as:
+
+[source,bash]
+----
+dataflow:>stream deploy ticktock --properties "app.time.spring.cloud.stream.bindings.output.producer.requiredGroups=myGroup,app.time.spring.cloud.stream.bindings.output.producer.headerMode=raw,app.log.spring.cloud.stream.bindings.input.consumer.concurrency=3,app.log.spring.cloud.stream.bindings.input.consumer.maxAttempts=5"
+----
+
+The `binder` specific producer/consumer properties can also be specified in a similar way.
+
+For instance
+
+[source,bash]
+----
+dataflow:>stream deploy ticktock --properties "app.time.spring.cloud.stream.rabbit.bindings.output.producer.autoBindDlq=true,app.log.spring.cloud.stream.rabbit.bindings.input.consumer.transacted=true"
 ----
 
 [[passing_stream_partition_properties]]
@@ -373,68 +483,6 @@ To override these application properties, one can specify the new property value
 ----
 dataflow:>stream deploy ticktock --properties "app.time.fixed-delay=4,app.log.level=ERROR"
 ----
-
-
-=== Deployment properties
-
-When deploying the stream, properties that control the deployment of the apps into the target platform are known as `deployment` properties.
-For instance, one can specify how many instances need to be deployed for the specific application defined in the stream using the deployment property called `count`.
-
-==== Passing instance count as deployment property
-
-If you would like to have multiple instances of an application in the stream, you
-can include a property with the deploy command:
-
-[source,bash,subs=attributes]
-----
-dataflow:> stream deploy --name ticktock --properties "app.time.count=3"
-----
-
-Note that `count` is the *reserved* property name used by the underlying deployer. Hence, if the application also has a custom property named `count`, it is *not* supported
- when specified in 'short-form' form during stream _deployment_ as it could conflict with the _instance_ count deployer property. Instead, the `count` as a custom application property can be
- specified in its _fully qualified_ form (example: `app.foo.bar.count`) during stream _deployment_ or it can be specified using 'short-form' or _fully qualified_ form during the stream _creation_
- where it will be considered as an app property.
-
-IMPORTANT: See <<spring-cloud-dataflow-stream-app-labels>>.
-
-==== Inline vs file reference properties
-
-When using the Spring Cloud Dataflow Shell, there are two ways to provide deployment
-properties: either *inline* or via a *file reference*. Those two ways are exclusive
-and documented below:
-
-*Inline properties*::
-
-  use the `--properties` shell option and list properties as a comma separated
-  list of key=value pairs, like so:
-
-[source,bash]
-----
-stream deploy foo
-    --properties "app.transform.count=2,app.transform.producer.partitionKeyExpression=payload"
-----
-
-*Using a file reference*::
-
-  use the `--propertiesFile` option and point it to a local Java `.properties` file
-  (i.e. that lives in the filesystem of the machine running the shell). Being read
-  as a `.properties` file, normal rules apply (ISO 8859-1 encoding, `=`, `<space>` or
-  `:` delimiter, etc.) although we recommend using `=` as a key-value pair delimiter
-  for consistency:
-
-[source,bash]
-----
-stream deploy foo --propertiesFile myprops.properties
-----
-
-where `myprops.properties` contains:
-
-```
-app.transform.count=2
-app.transform.producer.partitionKeyExpression=payload
-```
-
-Both the above properties will be passed as deployment properties for the stream `foo` above.
 
 [[spring-cloud-dataflow-destroy-stream]]
 == Destroying a Stream
