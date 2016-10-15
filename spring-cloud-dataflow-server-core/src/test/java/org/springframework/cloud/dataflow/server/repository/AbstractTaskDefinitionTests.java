@@ -20,9 +20,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -221,9 +219,8 @@ public abstract class AbstractTaskDefinitionTests {
 	}
 
 	protected void initializeRepositoryNotInOrder() {
-		repository.save(new TaskDefinition("task3", "myTaskA"));
 		repository.save(new TaskDefinition("task2", "myTaskB"));
+		repository.save(new TaskDefinition("task3", "myTaskA"));
 		repository.save(new TaskDefinition("task1", "myTaskC"));
 	}
-
 }

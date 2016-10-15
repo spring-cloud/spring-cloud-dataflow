@@ -30,6 +30,8 @@ import org.springframework.boot.autoconfigure.jdbc.EmbeddedDataSourceConfigurati
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.server.configuration.TaskDependencies;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -39,6 +41,7 @@ import static org.junit.Assert.assertFalse;
 
 /**
  * @author Glenn Renfro
+ * @author Gunnar Hillert
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = {TaskDependencies.class,
@@ -69,10 +72,27 @@ public class RdbmsTaskDefinitionRepositoryTests extends AbstractTaskDefinitionTe
 	}
 
 	@Test
+	public void findAllPageableTestASC() {
+		Sort sort = new Sort(new Sort.Order(Sort.Direction.ASC, "DEFINITION_NAME"), new Sort.Order(Sort.Direction.ASC, "DEFINITION"));
+		Pageable pageable = new PageRequest(0, 10, sort);
+		String[] names = new String[]{"task1", "task2", "task3"};
+		findAllPageable(pageable, names);
+	}
+
+	@Test
 	public void findAllSortTestDESC() {
 		Sort sort = new Sort(new Sort.Order(Sort.Direction.DESC, "DEFINITION_NAME"), new Sort.Order(Sort.Direction.DESC, "DEFINITION"));
 		String[] names = new String[]{"task3", "task2", "task1"};
 		findAllSort(sort, names);
+	}
+
+	@Test
+	public void findAllPageableTestDESC() {
+		Sort sort = new Sort(new Sort.Order(Sort.Direction.DESC, "DEFINITION_NAME"), new Sort.Order(Sort.Direction.DESC, "DEFINITION"));
+		Pageable pageable = new PageRequest(0, 10, sort);
+
+		String[] names = new String[]{"task3", "task2", "task1"};
+		findAllPageable(pageable, names);
 	}
 
 	@Test
@@ -83,19 +103,75 @@ public class RdbmsTaskDefinitionRepositoryTests extends AbstractTaskDefinitionTe
 	}
 
 	@Test
+	public void findAllPageableTestASCNameOnly() {
+		Sort sort = new Sort(new Sort.Order(Sort.Direction.ASC, "DEFINITION_NAME"));
+		Pageable pageable = new PageRequest(0, 10, sort);
+
+		String[] names = new String[]{"task1", "task2", "task3"};
+		findAllPageable(pageable, names);
+	}
+
+	@Test
 	public void findAllSortTestASCDefinitionOnly() {
 		Sort sort = new Sort(new Sort.Order(Sort.Direction.DESC, "DEFINITION"));
 		String[] names = new String[]{"task1", "task2", "task3"};
 		findAllSort(sort, names);
 	}
 
-	private void findAllSort(Sort sort, String[] expectedOrder) {
-		assertFalse(repository.findAll().iterator().hasNext());
+	@Test
+	public void findAllPageableTestDESCDefinitionOnly() {
+		Sort sort = new Sort(new Sort.Order(Sort.Direction.DESC, "DEFINITION"));
+		Pageable pageable = new PageRequest(0, 10, sort);
 
+		String[] names = new String[]{"task1", "task2", "task3"};
+		findAllPageable(pageable, names);
+	}
+
+	@Test
+	public void findAllPageablePage2TestASC() {
+		Sort sort = new Sort(new Sort.Order(Sort.Direction.ASC, "DEFINITION_NAME"), new Sort.Order(Sort.Direction.ASC, "DEFINITION"));
+		Pageable pageable = new PageRequest(1, 2, sort);
+		String[] names = new String[]{"task3"};
+		findAllPageable(pageable, names);
+	}
+
+	@Test
+	public void findAllPageablePage2TestDESC() {
+		Sort sort = new Sort(new Sort.Order(Sort.Direction.DESC, "DEFINITION_NAME"), new Sort.Order(Sort.Direction.DESC, "DEFINITION"));
+		Pageable pageable = new PageRequest(1, 2, sort);
+		String[] names = new String[]{"task1"};
+		findAllPageable(pageable, names);
+	}
+
+	@Test
+	public void findAllPageableDefinitionStringTestDESC() {
+		Sort sort = new Sort(new Sort.Order(Sort.Direction.DESC, "DEFINITION"));
+		Pageable pageable = new PageRequest(1, 2, sort);
+		String[] names = new String[]{"task3"};
+		findAllPageable(pageable, names);
+	}
+
+	private void findAllPageable(Pageable pageable, String[] expectedOrder) {
+
+		assertFalse(repository.findAll().iterator().hasNext());
 		initializeRepositoryNotInOrder();
 
-		Iterable<TaskDefinition> items = repository.findAll(sort);
+		final Iterable<TaskDefinition> items = repository.findAll(pageable);
 
+		makeSortAssertions(items, expectedOrder);
+
+	}
+
+	private void findAllSort(Sort sort, String[] expectedOrder) {
+		assertFalse(repository.findAll().iterator().hasNext());
+		initializeRepositoryNotInOrder();
+
+		final Iterable<TaskDefinition> items = repository.findAll(sort);
+
+		makeSortAssertions(items, expectedOrder);
+	}
+
+	private void makeSortAssertions(Iterable<TaskDefinition> items, String[] expectedOrder) {
 		int count = 0;
 		List<TaskDefinition> definitions = new ArrayList<>();
 		for (TaskDefinition item : items) {
@@ -106,7 +182,7 @@ public class RdbmsTaskDefinitionRepositoryTests extends AbstractTaskDefinitionTe
 		assertEquals(expectedOrder.length, count);
 		int currentDefinitionOffset = 0;
 		for (String name : expectedOrder) {
-			assertEquals("definition name retrieve was not in the order expected", name,
+			assertEquals("definition name retrieved was not in the order expected", name,
 					definitions.get(currentDefinitionOffset++).getName());
 		}
 	}
