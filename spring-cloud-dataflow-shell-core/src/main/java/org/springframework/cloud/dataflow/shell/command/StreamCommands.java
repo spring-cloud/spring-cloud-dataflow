@@ -99,8 +99,11 @@ public class StreamCommands implements CommandMarker {
 			@CliOption(mandatory = true, key = { "definition" }, help = "a stream definition, using the DSL (e.g. \"http --port=9000 | hdfs\")", optionContext = "disable-string-converter completion-stream") String dsl,
 			@CliOption(key = "deploy", help = "whether to deploy the stream immediately", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean deploy) {
 		streamOperations().createStream(name, dsl, deploy);
-		return (deploy) ? String.format("Created and deployed new stream '%s'", name) : String.format(
-				"Created new stream '%s'", name);
+		String message = String.format("Created new stream '%s'", name);
+		if (deploy) {
+			message += "\nDeployment request has been sent";
+		}
+		return message;
 	}
 
 	@CliCommand(value = DEPLOY_STREAM, help = "Deploy a previously created stream")
@@ -129,7 +132,7 @@ public class StreamCommands implements CommandMarker {
 				throw new AssertionError();
 		}
 		streamOperations().deploy(name, propertiesToUse);
-		return String.format("Deployed stream '%s'", name);
+		return String.format("Deployment request has been sent for stream '%s'", name);
 	}
 
 	@CliCommand(value = UNDEPLOY_STREAM, help = "Un-deploy a previously deployed stream")

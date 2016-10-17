@@ -96,11 +96,11 @@ public class StreamCommandTemplate {
 //		}
 		// add the stream name to the streams list before assertion
 		streams.add(streamname);
-		String deployMsg = "Created";
+		String deployMsg = "Created new stream '" + streamname + "'";
 		if (deploy) {
-			deployMsg = "Created and deployed";
+			deployMsg += "\nDeployment request has been sent";
 		}
-		assertEquals(deployMsg + " new stream '" + streamname + "'", cr.getResult());
+		assertEquals(deployMsg, cr.getResult());
 
 		verifyExists(streamname, actualDefinition, deploy);
 	}
