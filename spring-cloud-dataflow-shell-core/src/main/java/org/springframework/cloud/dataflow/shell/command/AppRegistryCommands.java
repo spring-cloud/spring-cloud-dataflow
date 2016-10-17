@@ -166,16 +166,15 @@ public class AppRegistryCommands implements CommandMarker, ResourceLoaderAware {
 			@CliOption(mandatory = true,
 					key = {"", "name"},
 					help = "name of the application to unregister")
-			String name,
-			@CliOption(mandatory = false,
+					String name,
+			@CliOption(mandatory = true,
 					key = {"type"},
 					help = "type of the application to unregister")
-			ApplicationType type) {
+					ApplicationType type) {
 
-		QualifiedApplicationName application = processArgs(name, type);
-		appRegistryOperations().unregister(application.name, application.type);
+		appRegistryOperations().unregister(name, type);
 		return String.format(("Successfully unregistered application '%s' with type %s"),
-				application.name, application.type);
+				name, type);
 	}
 
 	@CliCommand(value = LIST_APPLICATIONS, help = "List all registered applications")
@@ -281,29 +280,6 @@ public class AppRegistryCommands implements CommandMarker, ResourceLoaderAware {
 
 	private AppRegistryOperations appRegistryOperations() {
 		return dataFlowShell.getDataFlowOperations().appRegistryOperations();
-	}
-
-	/**
-	 * Return a {@link QualifiedApplicationName} for the given arguments.
-	 * If {@code type} is {@code null}, the application type may be obtained
-	 * from the application name if the application name is in the format
-	 * {@code name:type}.
-	 * @param name application name
-	 * @param type application type; may be {@code null}
-	 * @return {@code QualifiedApplicationName} for the provided arguments
-	 */
-	private QualifiedApplicationName processArgs(String name, ApplicationType type) {
-		if (type == null) {
-			String[] split = name.split("\\:");
-			if (split.length != 2) {
-				throw new IllegalArgumentException(
-						String.format("Expected format of 'name:type' for application name %s", name));
-			}
-			return new QualifiedApplicationName(split[0], ApplicationType.valueOf(split[1]));
-		}
-		else {
-			return new QualifiedApplicationName(name, type);
-		}
 	}
 
 	/**
