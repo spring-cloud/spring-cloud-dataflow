@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.springframework.cloud</groupId>
 		<artifactId>spring-cloud-dataflow-parent</artifactId>
-		<version>1.1.0.BUILD-SNAPSHOT</version>
+		<version>1.1.0.M2</version>
 	</parent>
 	<artifactId>spring-cloud-dataflow-docs</artifactId>
 	<name>Spring Cloud Data Flow Docs</name>
@@ -56,7 +56,7 @@
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-starter-dataflow-server-local</artifactId>
-			<version>1.1.0.BUILD-SNAPSHOT</version>
+			<version>1.1.0.M2</version>
 			<type>test-jar</type>
 			<scope>test</scope>
 		</dependency>
