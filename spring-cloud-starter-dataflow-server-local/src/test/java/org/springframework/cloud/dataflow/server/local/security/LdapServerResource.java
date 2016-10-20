@@ -16,11 +16,14 @@
 package org.springframework.cloud.dataflow.server.local.security;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.util.UUID;
 
 import org.junit.rules.ExternalResource;
 import org.junit.rules.TemporaryFolder;
-import org.springframework.security.ldap.server.ApacheDSContainer;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.util.Assert;
+import org.springframework.util.FileCopyUtils;
 import org.springframework.util.SocketUtils;
 
 /**
@@ -31,7 +34,7 @@ public class LdapServerResource extends ExternalResource {
 
 	private String originalLdapPort;
 
-	private ApacheDSContainer apacheDSContainer;
+	private ApacheDSContainerWithSecurity apacheDSContainer;
 
 	private TemporaryFolder temporaryFolder = new TemporaryFolder();
 
@@ -39,15 +42,52 @@ public class LdapServerResource extends ExternalResource {
 
 	private static final String LDAP_PORT_PROPERTY = "ldap.port";
 
+	private static final ClassPathResource keyStoreResource   = new ClassPathResource("/org/springframework/cloud/dataflow/server/local/security/dataflow.keystore");
+	private static final ClassPathResource trustStoreResource = new ClassPathResource("/org/springframework/cloud/dataflow/server/local/security/dataflow.truststore");
+	private static final String TRUST_STORE_PASSWORD = "dataflow";
+	private static final String KEY_STORE_PASSWORD   = "dataflow";
+
+	private boolean enabledSsl = false;
+
+	public LdapServerResource() {
+		super();
+	}
+
+	public LdapServerResource(boolean enabledSsl) {
+		this.enabledSsl = true;
+	}
+
 	@Override
 	protected void before() throws Throwable {
 
 		originalLdapPort = System.getProperty(LDAP_PORT_PROPERTY);
 
 		temporaryFolder.create();
-		apacheDSContainer = new ApacheDSContainer("dc=springframework,dc=org",
+		apacheDSContainer = new ApacheDSContainerWithSecurity("dc=springframework,dc=org",
 				"classpath:org/springframework/cloud/dataflow/server/local/security/testUsers.ldif");
 		int ldapPort = SocketUtils.findAvailableTcpPort();
+
+		if (enabledSsl) {
+
+			apacheDSContainer.setEnabledLdapOverSsl(true);
+
+			final File temporaryKeyStoreFile   = new File(temporaryFolder.getRoot(), "dataflow.keystore");
+			final File temporaryTrustStoreFile = new File(temporaryFolder.getRoot(), "dataflow.truststore");
+
+			FileCopyUtils.copy(keyStoreResource.getInputStream(), new FileOutputStream(temporaryKeyStoreFile));
+			FileCopyUtils.copy(trustStoreResource.getInputStream(), new FileOutputStream(temporaryTrustStoreFile));
+
+			Assert.isTrue(temporaryKeyStoreFile.isFile());
+			Assert.isTrue(temporaryTrustStoreFile.isFile());
+
+			apacheDSContainer.setKeyStoreFile(temporaryKeyStoreFile);
+			apacheDSContainer.setKeyStorePassword(KEY_STORE_PASSWORD);
+
+			System.setProperty("javax.net.ssl.trustStorePassword", TRUST_STORE_PASSWORD);
+			System.setProperty("javax.net.ssl.trustStore", temporaryTrustStoreFile.getAbsolutePath());
+			System.setProperty("javax.net.ssl.trustStoreType", "jks");
+		}
+
 		apacheDSContainer.setPort(ldapPort);
 		apacheDSContainer.afterPropertiesSet();
 		workingDir = new File(temporaryFolder.getRoot(), UUID.randomUUID().toString());
@@ -73,6 +113,10 @@ public class LdapServerResource extends ExternalResource {
 			else {
 				System.clearProperty(LDAP_PORT_PROPERTY);
 			}
+
+			System.clearProperty("javax.net.ssl.trustStorePassword");
+			System.clearProperty("javax.net.ssl.trustStore");
+			System.clearProperty("javax.net.ssl.trustStoreType");
 
 			temporaryFolder.delete();
 		}
