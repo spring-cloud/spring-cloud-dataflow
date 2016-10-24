@@ -213,7 +213,7 @@ While we provide a server executable for each of the target runtimes you can als
 [[arch-data-flow-server-security]]
 === Security
 
-The Data Flow Server executable jars support basic http and OAuth 2.0 authentication to access its endpoints. Refer to the security section for more information.
+The Data Flow Server executable jars support basic http and OAuth 2.0 authentication to access its endpoints. Refer to the <<configuration-security,security section>> for more information.
 
 Authorization via groups is planned for a future release.
 
