@@ -32,3 +32,7 @@ spring:
   task:
     repo:
       initialize: true
+  dataflow:
+    embedded:
+      database:
+        enabled: true
