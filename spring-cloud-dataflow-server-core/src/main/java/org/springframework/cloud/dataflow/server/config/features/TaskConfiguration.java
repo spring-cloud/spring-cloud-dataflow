@@ -105,7 +105,8 @@ public class TaskConfiguration {
 	}
 
 	@Configuration
-	@ConditionalOnExpression("#{'${spring.datasource.url:}'.startsWith('jdbc:h2:tcp://localhost:') && '${spring.datasource.url:}'.contains('/mem:')}")
+	@ConditionalOnProperty(name = "spring.dataflow.embedded.database.enabled", havingValue = "true", matchIfMissing = true)
+	@ConditionalOnExpression("#{'${spring.datasource.url:}'.startsWith('jdbc:h2:tcp://localhost:')}")
 	public static class H2ServerConfiguration {
 
 		@Bean
@@ -138,7 +139,9 @@ public class TaskConfiguration {
 	}
 
 	@Configuration
-	@ConditionalOnExpression("#{!'${spring.datasource.url:}'.startsWith('jdbc:h2:tcp://localhost:') && !'${spring.datasource.url:}'.contains('/mem:')}")
+	@ConditionalOnExpression("#{!'${spring.datasource.url:}'.startsWith('jdbc:h2:tcp://localhost:') || " +
+			"('${spring.datasource.url:}'.startsWith('jdbc:h2:tcp://localhost:') &&" +
+			"'${spring.dataflow.embedded.database.enabled}'.equals('false'))}")
 	public static class NoH2ServerConfiguration {
 
 		@Bean

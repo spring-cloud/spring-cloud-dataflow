@@ -28,6 +28,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.batch.BatchProperties;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.session.SessionAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.dataflow.completion.CompletionConfiguration;
@@ -73,7 +74,8 @@ import org.springframework.util.StringUtils;
 public class DataFlowServerConfiguration {
 
 	@Configuration
-	@ConditionalOnExpression("#{'${spring.datasource.url:}'.startsWith('jdbc:h2:tcp://localhost:') && '${spring.datasource.url:}'.contains('/mem:')}")
+	@ConditionalOnProperty(name = "spring.dataflow.embedded.database.enabled", havingValue = "true", matchIfMissing = true)
+	@ConditionalOnExpression("#{'${spring.datasource.url:}'.startsWith('jdbc:h2:tcp://localhost:')}")
 	public static class H2ServerConfiguration {
 
 		private static final org.slf4j.Logger logger = LoggerFactory.getLogger(H2ServerConfiguration.class);
@@ -82,7 +84,6 @@ public class DataFlowServerConfiguration {
 		private String dataSourceUrl;
 
 		@Bean(destroyMethod = "stop")
-		@ConditionalOnExpression("#{'${spring.datasource.url:}'.startsWith('jdbc:h2:tcp://localhost:') && '${spring.datasource.url:}'.contains('/mem:')}")
 		public Server initH2TCPServer() {
 			Server server = null;
 			logger.info("Starting H2 Server with URL: " + dataSourceUrl);
@@ -117,7 +118,9 @@ public class DataFlowServerConfiguration {
 	}
 
 	@Configuration
-	@ConditionalOnExpression("#{!'${spring.datasource.url:}'.startsWith('jdbc:h2:tcp://localhost:') && !'${spring.datasource.url:}'.contains('/mem:')}")
+	@ConditionalOnExpression("#{!'${spring.datasource.url:}'.startsWith('jdbc:h2:tcp://localhost:') || " +
+			"('${spring.datasource.url:}'.startsWith('jdbc:h2:tcp://localhost:') &&" +
+			"'${spring.dataflow.embedded.database.enabled}'.equals('false'))}")
 	public static class NoH2ServerConfiguration {
 
 		@Bean
