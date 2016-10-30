@@ -139,5 +139,37 @@ to `WARNING` in `logback.xml`:
 
 ====
 
+[[getting-started-application-configuration]]
+== Application Configuration
+You can use the following configuration properties of the Data Flow server to customize how appliations are deployed.
 
+[source,properties,indent=0,subs="verbatim,attributes,macros"]
+----
+spring.cloud.deployer.local.workingDirectoriesRoot=java.io.tmpdir # Directory in which all created processes will run and create log files.
 
+spring.cloud.deployer.local.deleteFilesOnExit=true # Whether to delete created files and directories on JVM exit.
+
+spring.cloud.deployer.local.envVarsToInherit=TMP,LANG,LANGUAGE,"LC_.*. # Array of regular expression patterns for environment variables that will be passed to launched applications.
+
+spring.cloud.deployer.local.javaCmd=java # Command to run java.
+
+spring.cloud.deployer.local.shutdownTimeout=30 # Max number of seconds to wait for app shutdown.
+
+spring.cloud.deployer.local.javaOpts= # The Java options to pass to the JVN
+----
+
+When deploying the application you can also set deployer properties prefixed with `app.<name of application>`, So for example to set Java options for the time application in the `ticktock` stream, use the following stream deployment propertites.
+[source,bash]
+----
+dataflow:> stream create --name ticktock --definition "time --server.port=9000 | log"
+dataflow:> stream deploy --name ticktock --properties "app.time.spring.cloud.deployer.local.javaopts=-Xmx2048m -Dtest=foo"
+----
+
+As a convenience you can set the property `spring.cloud.deployer.local.memory` to set the Java option `-Xmx`.  So for example, 
+
+[source,bash]
+----
+dataflow:> stream deploy --name ticktock --properties "app.time.spring.cloud.deployer.local.memory=2048m"
+----
+
+At deployment time, if you specify a `-Xmx` options in the `javaOpts` property in addition to a value of the `memory` option, the value in the `javaOpts` property has precidence.  Also, the `javaOpts` property set when deploying the application has precidence over the Data Flow server's `javaOpts` property.
