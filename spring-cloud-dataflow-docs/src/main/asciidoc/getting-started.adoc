@@ -155,14 +155,14 @@ spring.cloud.deployer.local.javaCmd=java # Command to run java.
 
 spring.cloud.deployer.local.shutdownTimeout=30 # Max number of seconds to wait for app shutdown.
 
-spring.cloud.deployer.local.javaOpts= # The Java options to pass to the JVN
+spring.cloud.deployer.local.javaOpts= # The Java options to pass to the JVM
 ----
 
 When deploying the application you can also set deployer properties prefixed with `app.<name of application>`, So for example to set Java options for the time application in the `ticktock` stream, use the following stream deployment propertites.
 [source,bash]
 ----
 dataflow:> stream create --name ticktock --definition "time --server.port=9000 | log"
-dataflow:> stream deploy --name ticktock --properties "app.time.spring.cloud.deployer.local.javaopts=-Xmx2048m -Dtest=foo"
+dataflow:> stream deploy --name ticktock --properties "app.time.spring.cloud.deployer.local.javaOpts=-Xmx2048m -Dtest=foo"
 ----
 
 As a convenience you can set the property `spring.cloud.deployer.local.memory` to set the Java option `-Xmx`.  So for example, 
@@ -172,4 +172,4 @@ As a convenience you can set the property `spring.cloud.deployer.local.memory` t
 dataflow:> stream deploy --name ticktock --properties "app.time.spring.cloud.deployer.local.memory=2048m"
 ----
 
-At deployment time, if you specify a `-Xmx` options in the `javaOpts` property in addition to a value of the `memory` option, the value in the `javaOpts` property has precidence.  Also, the `javaOpts` property set when deploying the application has precidence over the Data Flow server's `javaOpts` property.
+At deployment time, if you specify a `-Xmx` option in the `javaOpts` property in addition to a value of the `memory` option, the value in the `javaOpts` property has precedence.  Also, the `javaOpts` property set when deploying the application has precedence over the Data Flow server's `javaOpts` property.
