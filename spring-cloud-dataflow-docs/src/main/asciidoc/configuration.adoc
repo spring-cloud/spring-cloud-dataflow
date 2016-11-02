@@ -74,6 +74,13 @@ upgrading from version `1.0.x` to `1.1.x`.  Migration scripts for specific
 database types can be found
 https://github.com/spring-cloud/spring-cloud-task/tree/master/spring-cloud-task-core/src/main/resources/org/springframework/cloud/task/migration[here].
 
+NOTE: If you wish to use an external H2 database instance instead of the one
+embedded with Spring Cloud Data Flow set the
+`spring.dataflow.embedded.database.enabled` property to false.  If
+`spring.dataflow.embedded.database.enabled` is set to false or a database
+other than h2 is specified as the datasource the embedded database will not
+start.
+
 [[configuration-security]]
 == Security
 
