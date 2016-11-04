@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.cloud.dataflow.core.TaskDefinition;
+import org.springframework.cloud.dataflow.server.repository.support.SearchPageable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -34,6 +35,7 @@ import org.springframework.data.domain.Sort;
  * @author Michael Minella
  * @author Mark Fisher
  * @author Patrick Peralta
+ * @author Gunnar Hillert
  */
 public class InMemoryTaskDefinitionRepository implements TaskDefinitionRepository {
 
@@ -123,4 +125,8 @@ public class InMemoryTaskDefinitionRepository implements TaskDefinitionRepositor
 		definitions.clear();
 	}
 
+	@Override
+	public Page<TaskDefinition> search(SearchPageable searchPageable) {
+		throw new UnsupportedOperationException();
+	}
 }
