@@ -1,0 +1,30 @@
+{
+  "groups": [
+    {
+      "name": "plum",
+      "type": "foo.bar.PlumProperties",
+      "sourceType": "foo.bar.PlumProperties"
+    },
+    {
+      "name": "server",
+      "type": "foo.bar.ServerProperties",
+      "sourceType": "foo.bar.ServerProperties"
+    }
+  ],
+  "properties": [
+    {
+      "name": "plum.use-ssl",
+      "type": "java.lang.Boolean",
+      "description": "Whether to use SSL encryption or not",
+      "sourceType": "foo.bar.PlumProperties"
+    },
+    {
+      "name": "server.port",
+      "type": "java.lang.Integer",
+      "description": "The port to listen on",
+      "sourceType": "foo.bar.ServerProperties"
+    }
+  ],
+
+  "hints": []
+}

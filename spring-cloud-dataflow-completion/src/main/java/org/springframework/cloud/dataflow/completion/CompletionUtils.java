@@ -25,6 +25,7 @@ import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.BindingPropertyKeys;
 import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
+import org.springframework.cloud.dataflow.core.TaskPropertyKeys;
 
 /**
  * Various utility methods used throughout the completion package.
@@ -39,12 +40,15 @@ public class CompletionUtils {
 	 * even though the user did not type them himself.
 	 */
 	static final Set<String> IMPLICIT_PARAMETER_NAMES = new HashSet<>();
+	static final Set<String> IMPLICIT_TASK_PARAMETER_NAMES = new HashSet<>();
 	static {
 		IMPLICIT_PARAMETER_NAMES.add(BindingPropertyKeys.INPUT_DESTINATION);
 		IMPLICIT_PARAMETER_NAMES.add(BindingPropertyKeys.INPUT_GROUP);
 		IMPLICIT_PARAMETER_NAMES.add(BindingPropertyKeys.OUTPUT_REQUIRED_GROUPS);
 		IMPLICIT_PARAMETER_NAMES.add(BindingPropertyKeys.OUTPUT_DESTINATION);
+		IMPLICIT_TASK_PARAMETER_NAMES.add(TaskPropertyKeys.TASK_NAME);
 	}
+
 
 	/**
 	 * Return the type(s) a given stream app definition <em>could</em> have, in the context of code completion.

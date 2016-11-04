@@ -33,6 +33,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.dataflow.completion.CompletionConfiguration;
 import org.springframework.cloud.dataflow.completion.StreamCompletionProvider;
+import org.springframework.cloud.dataflow.completion.TaskCompletionProvider;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.registry.RdbmsUriRegistry;
@@ -83,6 +84,7 @@ import org.springframework.hateoas.EntityLinks;
  * @author Mark Fisher
  * @author Gunnar Hillert
  * @author Ilayaperumal Gopinathan
+ * @author Andy Clement
  */
 @SuppressWarnings("all")
 @Configuration
@@ -210,8 +212,8 @@ public class DataFlowControllerAutoConfiguration {
 	}
 
 	@Bean
-	public CompletionController completionController(StreamCompletionProvider completionProvider) {
-		return new CompletionController(completionProvider);
+	public CompletionController completionController(StreamCompletionProvider completionProvider, TaskCompletionProvider taskCompletionProvider) {
+		return new CompletionController(completionProvider, taskCompletionProvider);
 	}
 
 	@Bean
