@@ -73,10 +73,15 @@ public class SearchPageable {
 	/**
 	 * Allows you to add additional columns.
 	 *
-	 * @param columns Must not be null
+	 * @param columns Must not be null or empty
 	 */
 	public void addColumns(String... columns) {
 		Assert.notEmpty(columns, "You must specify at least 1 column.");
+
+		for (String column : columns) {
+			Assert.hasText(column, "Column names cannot be null or empty.");
+		}
+
 		this.columns.addAll(Arrays.asList(columns));
 	}
 }
