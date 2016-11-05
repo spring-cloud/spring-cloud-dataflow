@@ -35,10 +35,11 @@ public class SearchPageable {
 	private final LinkedHashSet<String> columns = new LinkedHashSet<>(0);
 
 	/**
+	 * Initialize a {@link SearchPageable}. Must provide a {@link Pageable} and a searchQuery.
+	 * Don't forget to also provide the column names for the search using {@link #addColumns(String...)}.
 	 *
-	 * @param pageable
-	 * @param searchQuery
-	 * @param columns
+	 * @param pageable Must not be null
+	 * @param searchQuery Must not be empty
 	 */
 	public SearchPageable(Pageable pageable, String searchQuery) {
 		super();
