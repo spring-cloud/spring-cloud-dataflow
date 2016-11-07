@@ -126,6 +126,8 @@ public class RootController {
 		resourceSupport.add(entityLinks.linkToCollectionResource(AppRegistrationResource.class).withRel("apps"));
 		String completionStreamTemplated = entityLinks.linkFor(CompletionProposalsResource.class).withSelfRel().getHref() + ("/stream{?start,detailLevel}");
 		resourceSupport.add(new Link(completionStreamTemplated).withRel("completions/stream"));
+		String completionTaskTemplated = entityLinks.linkFor(CompletionProposalsResource.class).withSelfRel().getHref() + ("/task{?start,detailLevel}");
+		resourceSupport.add(new Link(completionTaskTemplated).withRel("completions/task"));
 		return resourceSupport;
 	}
 
