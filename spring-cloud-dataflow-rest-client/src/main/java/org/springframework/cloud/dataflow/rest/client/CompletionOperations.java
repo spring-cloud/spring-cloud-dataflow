@@ -28,16 +28,16 @@ public interface CompletionOperations {
 	/**
 	 * Return the list of streamCompletions that are compatible with the given DSL prefix.
 	 *
-	 * @param levelOfDetail 1 based integer allowing progressive disclosure of more and more
-	 * complex streamCompletions
+	 * @param prefix the provided prefix value from DSL
+	 * @param levelOfDetail integer value that specifies the level of detail user wants in stream completions
 	 */
 	CompletionProposalsResource streamCompletions(String prefix, int levelOfDetail);
 
 	/**
 	 * Return the list of taskCompletions that are compatible with the given DSL prefix.
 	 *
-	 * @param levelOfDetail 1 based integer allowing progressive disclosure of more and more
-	 * complex streamCompletions
+	 * @param prefix the provided prefix value from DSL
+	 * @param levelOfDetail integer value that specifies the level of detail user wants in task completions
 	 */
 	CompletionProposalsResource taskCompletions(String prefix, int levelOfDetail);
 }

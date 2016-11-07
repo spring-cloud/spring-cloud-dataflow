@@ -19,7 +19,7 @@ package com.acme.common;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
- * Created by ericbottard on 12/09/16.
+ * @author Eric Bottard
  */
 @ConfigurationProperties("common")
 public class ConfigProperties {

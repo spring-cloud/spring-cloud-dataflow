@@ -28,7 +28,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 /**
- * Include this Configuration class to expose a fully configured {@link StreamCompletionProvider}.
+ * Include this Configuration class to expose fully configured {@link StreamCompletionProvider} and
+ * {@link TaskCompletionProvider}.
  *
  * @author Eric Bottard
  * @author Ilayaperumal Gopinathan
