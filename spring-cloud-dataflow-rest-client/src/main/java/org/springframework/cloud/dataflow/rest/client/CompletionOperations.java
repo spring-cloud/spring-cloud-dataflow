@@ -32,4 +32,12 @@ public interface CompletionOperations {
 	 * complex streamCompletions
 	 */
 	CompletionProposalsResource streamCompletions(String prefix, int levelOfDetail);
+
+	/**
+	 * Return the list of taskCompletions that are compatible with the given DSL prefix.
+	 *
+	 * @param levelOfDetail 1 based integer allowing progressive disclosure of more and more
+	 * complex streamCompletions
+	 */
+	CompletionProposalsResource taskCompletions(String prefix, int levelOfDetail);
 }

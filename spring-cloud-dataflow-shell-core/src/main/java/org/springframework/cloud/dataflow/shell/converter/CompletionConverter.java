@@ -51,13 +51,17 @@ public class CompletionConverter implements Converter<String> {
 
 	@Override
 	public boolean supports(Class<?> type, String optionContext) {
+		return type == String.class && completionKind(optionContext) != null;
+	}
+
+	private String completionKind(String optionContext) {
 		String[] options = optionContext.split(" ");
 		for (String option : options) {
 			if (option.startsWith(COMPLETION_CONTEXT_PREFIX)) {
-				return type == String.class;
+				return option.substring(COMPLETION_CONTEXT_PREFIX.length());
 			}
 		}
-		return false;
+		return null;
 	}
 
 	@Override
@@ -73,8 +77,18 @@ public class CompletionConverter implements Converter<String> {
 
 		try {
 			int successiveInvocations = determineNumberOfInvocations(optionContext);
-			CompletionProposalsResource candidates = completionOperations()
-					.streamCompletions(start, successiveInvocations);
+			String kind = completionKind(optionContext);
+			CompletionProposalsResource candidates;
+			switch (kind) {
+				case "stream":
+					candidates = completionOperations().streamCompletions(start, successiveInvocations);
+					break;
+				case "task":
+					candidates = completionOperations().taskCompletions(start, successiveInvocations);
+					break;
+				default:
+					throw new IllegalArgumentException("Unsupported completion kind: " + kind);
+			}
 			for (CompletionProposalsResource.Proposal candidate : candidates.getProposals()) {
 				completions.add(new Completion(candidate.getText()));
 			}

@@ -126,7 +126,8 @@ public class DataFlowTemplate implements DataFlowOperations {
 	 * <li>sun.net.client.defaultReadTimeout
 	 * </ul><p>
 	 *
-	 * For more information see: {@link http://docs.oracle.com/javase/7/docs/technotes/guides/net/properties.html}
+	 * For more information see
+	 * <a href="http://docs.oracle.com/javase/7/docs/technotes/guides/net/properties.html">this link</a>
 	 *
 	 * @param baseURI Must not be null
 	 */
@@ -175,7 +176,9 @@ public class DataFlowTemplate implements DataFlowOperations {
 			this.jobOperations = null;
 		}
 		this.appRegistryOperations = new AppRegistryTemplate(restTemplate, resourceSupport);
-		this.completionOperations = new CompletionTemplate(restTemplate, resourceSupport.getLink("completions/stream"));
+		this.completionOperations = new CompletionTemplate(restTemplate,
+			resourceSupport.getLink("completions/stream"),
+			resourceSupport.getLink("completions/task"));
 	}
 
 	public Link getLink(ResourceSupport resourceSupport, String rel) {
