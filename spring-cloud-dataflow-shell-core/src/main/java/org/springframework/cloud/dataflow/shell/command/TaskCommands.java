@@ -99,7 +99,7 @@ public class TaskCommands implements CommandMarker {
 	@CliCommand(value = CREATE, help = "Create a new task definition")
 	public String create(
 			@CliOption(mandatory = true, key = { "", "name" }, help = "the name to give to the task") String name,
-			@CliOption(mandatory = true, key = { "definition" }, help = "a task definition, using the DSL (e.g. \"taskName\")") String dsl){
+			@CliOption(mandatory = true, key = { "definition" }, help = "a task definition, using the DSL (e.g. \"timestamp --format=YYYY\")", optionContext = "disable-string-converter completion-task") String dsl){
 		this.taskOperations().create(name, dsl);
 		return String.format("Created new task '%s'", name);
 	}

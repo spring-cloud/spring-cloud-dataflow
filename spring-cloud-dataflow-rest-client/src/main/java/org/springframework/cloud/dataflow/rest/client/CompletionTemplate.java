@@ -22,22 +22,33 @@ import org.springframework.hateoas.UriTemplate;
 import org.springframework.web.client.RestTemplate;
 
 /**
- * Created by ericbottard on 05/10/15.
+ * Implementation of {@link CompletionOperations} that uses a {@link RestTemplate} to issue commands to the Data Flow
+ * server.
+ *
+ * @author Eric Bottard
  */
 public class CompletionTemplate implements CompletionOperations {
 
 	private final RestTemplate restTemplate;
 
-	private final UriTemplate uriTemplate;
+	private final UriTemplate streamCompletionUriTemplate;
 
-	public CompletionTemplate(RestTemplate restTemplate, Link link) {
+	private final UriTemplate taskCompletionUriTemplate;
+
+	public CompletionTemplate(RestTemplate restTemplate, Link streamLink, Link taskLink) {
 		this.restTemplate = restTemplate;
-		this.uriTemplate = new UriTemplate(link.getHref());
+		this.streamCompletionUriTemplate = new UriTemplate(streamLink.getHref());
+		this.taskCompletionUriTemplate = new UriTemplate(taskLink.getHref());
 	}
 
 	@Override
 	public CompletionProposalsResource streamCompletions(String prefix, int levelOfDetail) {
-		return restTemplate.getForObject(uriTemplate.expand(prefix, levelOfDetail), CompletionProposalsResource.class);
+		return restTemplate.getForObject(streamCompletionUriTemplate.expand(prefix, levelOfDetail), CompletionProposalsResource.class);
+	}
+
+	@Override
+	public CompletionProposalsResource taskCompletions(String prefix, int levelOfDetail) {
+		return restTemplate.getForObject(taskCompletionUriTemplate.expand(prefix, levelOfDetail), CompletionProposalsResource.class);
 	}
 
 }
