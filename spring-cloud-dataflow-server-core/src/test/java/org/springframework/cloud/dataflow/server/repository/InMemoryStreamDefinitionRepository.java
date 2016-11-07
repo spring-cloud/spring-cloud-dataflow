@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.cloud.dataflow.core.StreamDefinition;
+import org.springframework.cloud.dataflow.server.repository.support.SearchPageable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -120,6 +121,11 @@ public class InMemoryStreamDefinitionRepository implements StreamDefinitionRepos
 	@Override
 	public void deleteAll() {
 		definitions.clear();
+	}
+
+	@Override
+	public Page<StreamDefinition> search(SearchPageable searchPageable) {
+		throw new UnsupportedOperationException();
 	}
 
 }

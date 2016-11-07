@@ -25,6 +25,7 @@ import javax.sql.DataSource;
 
 import org.springframework.cloud.dataflow.server.repository.support.Order;
 import org.springframework.cloud.dataflow.server.repository.support.PagingQueryProvider;
+import org.springframework.cloud.dataflow.server.repository.support.SearchPageable;
 import org.springframework.cloud.dataflow.server.repository.support.SqlPagingQueryProviderFactoryBean;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Page;
@@ -136,6 +137,26 @@ public abstract class AbstractRdbmsKeyValueRepository<D> implements PagingAndSor
 			}
 		}
 		return jdbcTemplate.query(query, rowMapper);
+	}
+
+	public Page<D>search(SearchPageable searchPageable) {
+		Assert.notNull(searchPageable, "searchPageable must not be null.");
+
+		final StringBuilder whereClause = new StringBuilder("WHERE ");
+		final List<String> params = new ArrayList<>();
+		final Iterator<String> columnIterator = searchPageable.getColumns().iterator();
+
+		while (columnIterator.hasNext()) {
+			whereClause.append("lower(" + columnIterator.next()).append(") like ")
+			.append("lower(?)");
+			params.add("%" + searchPageable.getSearchQuery() + "%");
+			if (columnIterator.hasNext()) {
+				whereClause.append(" OR ");
+			}
+		}
+
+		return queryForPageableResults(searchPageable.getPageable(), selectClause, tableName,
+				whereClause.toString(), params.toArray(), count());
 	}
 
 	@Override

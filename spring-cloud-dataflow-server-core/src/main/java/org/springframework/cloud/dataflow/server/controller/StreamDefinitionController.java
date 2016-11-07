@@ -24,13 +24,11 @@ import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.dsl.StreamNode;
 import org.springframework.cloud.dataflow.core.dsl.StreamParser;
-import org.springframework.cloud.dataflow.core.dsl.TokenKind;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.rest.resource.StreamDefinitionResource;
 import org.springframework.cloud.dataflow.server.DataFlowServerUtil;
@@ -39,6 +37,7 @@ import org.springframework.cloud.dataflow.server.repository.DeploymentKey;
 import org.springframework.cloud.dataflow.server.repository.DuplicateStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.NoSuchStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
+import org.springframework.cloud.dataflow.server.repository.support.SearchPageable;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.app.AppStatus;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
@@ -136,13 +135,21 @@ public class StreamDefinitionController {
 	 * Return a page-able list of {@link StreamDefinitionResource} defined streams.
 	 * @param pageable  page-able collection of {@code StreamDefinitionResource}s.
 	 * @param assembler assembler for {@link StreamDefinition}
+	 * @param search optional search parameter
 	 * @return list of stream definitions
 	 */
 	@RequestMapping(value = "", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
-	public PagedResources<StreamDefinitionResource> list(Pageable pageable,
+	public PagedResources<StreamDefinitionResource> list(Pageable pageable, @RequestParam(required=false) String search,
 			PagedResourcesAssembler<StreamDefinition> assembler) {
-		return assembler.toResource(repository.findAll(pageable), streamDefinitionAssembler);
+		if (search != null) {
+			final SearchPageable searchPageable = new SearchPageable(pageable, search);
+			searchPageable.addColumns("DEFINITION_NAME", "DEFINITION");
+			return assembler.toResource(repository.search(searchPageable), streamDefinitionAssembler);
+		}
+		else {
+			return assembler.toResource(repository.findAll(pageable), streamDefinitionAssembler);
+		}
 	}
 
 	/**

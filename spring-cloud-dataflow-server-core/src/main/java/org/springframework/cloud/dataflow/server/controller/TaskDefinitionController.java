@@ -22,6 +22,7 @@ import org.springframework.cloud.dataflow.server.repository.DeploymentIdReposito
 import org.springframework.cloud.dataflow.server.repository.DeploymentKey;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
+import org.springframework.cloud.dataflow.server.repository.support.SearchPageable;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.cloud.deployer.spi.task.TaskStatus;
 import org.springframework.data.domain.Pageable;
@@ -116,13 +117,22 @@ public class TaskDefinitionController {
 	 *
 	 * @param pageable  page-able collection of {@code TaskDefinitionResource}.
 	 * @param assembler assembler for the {@link TaskDefinition}
+	 * @param search optional search parameter
 	 * @return a list of task definitions
 	 */
 	@RequestMapping(value="", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
-	public PagedResources<TaskDefinitionResource> list(Pageable pageable,
+	public PagedResources<TaskDefinitionResource> list(Pageable pageable, @RequestParam(required=false) String search,
 			PagedResourcesAssembler<TaskDefinition> assembler) {
-		return assembler.toResource(repository.findAll(pageable), taskAssembler);
+
+		if (search != null) {
+			final SearchPageable searchPageable = new SearchPageable(pageable, search);
+			searchPageable.addColumns("DEFINITION_NAME", "DEFINITION");
+			return assembler.toResource(repository.search(searchPageable), taskAssembler);
+		}
+		else {
+			return assembler.toResource(repository.findAll(pageable), taskAssembler);
+		}
 	}
 
 
