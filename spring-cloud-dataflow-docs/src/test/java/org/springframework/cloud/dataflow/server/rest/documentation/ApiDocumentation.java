@@ -76,7 +76,8 @@ public class ApiDocumentation extends BaseDocumentation {
 				links(
 					linkWithRel("dashboard").description("Access the dashboard UI"),
 					linkWithRel("apps").description("Handle registered applications"),
-					linkWithRel("completions/stream").description("Exposes the DSL completion features"),
+					linkWithRel("completions/stream").description("Exposes the DSL completion features for Stream"),
+					linkWithRel("completions/task").description("Exposes the DSL completion features for Task"),
 					linkWithRel("jobs/executions").description("Provides the JobExecution resource"),
 					linkWithRel("jobs/executions/execution").description("Provides details for a specific JobExecution"),
 					linkWithRel("jobs/executions/execution/steps").description("Provides the steps for a JobExecution"),
