@@ -44,7 +44,7 @@ to import a number of applications at once using the *Bulk Import Applications* 
 .List of Available Applications
 image::{dataflow-asciidoc}/images/dataflow-available-apps-list.png[List of available applications, scaledwidth="100%"]
 
-==== Bulk Import of Applications
+=== Bulk Import of Applications
 
 The bulk import applications page provides numerous options for defining and importing a set of
 applications in one go. For bulk import the application definitions are expected to be
