@@ -115,7 +115,7 @@ In this case the String payload of a message coming on the input channel, is han
 [[arch-streaming-functional-programming]]
 === Functional Programming Model
 
-However, Spring Cloud Stream can support other programming styles.  There is initial support for functional style programming via {spring-cloud-stream-docs}#_rxjava_support[RxJava Observable APIs] and upcoming versions will support callback methods with Project Reactor’s Flux API and Apache Kafka’s KStream API.
+However, Spring Cloud Stream can support other programming styles.  There is initial support for functional style programming via {spring-cloud-stream-docs}#_rxjava_1_x_support[RxJava Observable APIs] and upcoming versions will support callback methods with Project Reactor’s Flux API and Apache Kafka’s KStream API.
 
 [[arch-streams]]
 == Streams
