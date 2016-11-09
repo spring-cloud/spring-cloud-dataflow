@@ -13,7 +13,7 @@ we go.
 [[getting-started-system-requirements]]
 == System Requirements
 
-You need Java installed (Java 7 or better, we recommend Java 8), and to build, you need to have Maven installed as well.
+You need Java installed (Java 8 or later), and to build, you need to have Maven installed as well.
 
 You need to have an RDBMS for storing stream, task and app states in the database. The `local` Data Flow server by default uses embedded H2 database for this.
 
