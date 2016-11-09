@@ -164,7 +164,7 @@ launched directly once the definition is declared
 |Old API |New API
 |/modules        |/apps
 |/runtime/modules       |/runtime/apps
-|/runtime/modules/(moduleId}       |/runtime/apps/{appId}
+|/runtime/modules/\{moduleId}       |/runtime/apps/\{appId}
 |/jobs/definitions        |/task/definitions
 |/jobs/deployments        |/task/deployments
 |======================
