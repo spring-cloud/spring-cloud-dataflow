@@ -1,5 +1,6 @@
 = Spring Cloud Data Flow Reference Guide
 Sabby Anandan; Marius Bogoevici; Eric Bottard; Mark Fisher; Ilayaperumal Gopinathan; Gunnar Hillert; Mark Pollack; Patrick Peralta; Glenn Renfro; Thomas Risberg; Dave Syer; David Turanski; Janne Valkealahti
+v{project-version}
 :doctype: book
 :toc:
 :toclevels: 4
@@ -7,6 +8,7 @@ Sabby Anandan; Marius Bogoevici; Eric Bottard; Mark Fisher; Ilayaperumal Gopinat
 :numbered:
 :icons: font
 :hide-uri-scheme:
+:title-logo-image: image:logo.png[top=10%, align=center, pdfwidth=6cm]
 
 :spring-cloud-dataflow-docs: http://docs.spring.io/spring-cloud-dataflow/docs/{project-version}/reference
 :spring-cloud-dataflow-docs-current: http://docs.spring.io/spring-cloud-dataflow/docs/current-SNAPSHOT/reference/html/
@@ -30,6 +32,5 @@ include::howto.adoc[]
 include::api-guide.adoc[]
 include::dataflow-template.adoc[]
 include::appendix.adoc[]
-
 
 // ======================================================================================
