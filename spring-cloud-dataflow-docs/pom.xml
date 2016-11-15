@@ -168,6 +168,8 @@
 									<backend>pdf</backend>
 									<sourceHighlighter>rouge</sourceHighlighter>
 									<attributes>
+										<pdf-stylesdir>${project.basedir}/src/main/asciidoc/pdf-theme</pdf-stylesdir>
+										<pdf-style>custom</pdf-style>
 										<icons>font</icons>
 										<pagenums />
 										<toc />
