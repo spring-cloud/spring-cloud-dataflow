@@ -68,7 +68,7 @@ import org.springframework.util.StringUtils;
 @EnableSpringDataWebSupport
 @Configuration
 @Import({CompletionConfiguration.class, FeaturesConfiguration.class, WebConfiguration.class})
-@ComponentScan(basePackageClasses = { StreamDefinitionRepository.class, BasicAuthSecurityConfiguration.class})
+@ComponentScan(basePackageClasses = {StreamDefinitionRepository.class, BasicAuthSecurityConfiguration.class})
 @EnableAutoConfiguration(exclude=SessionAutoConfiguration.class)
 @EnableConfigurationProperties({BatchProperties.class, CommonApplicationProperties.class})
 public class DataFlowServerConfiguration {

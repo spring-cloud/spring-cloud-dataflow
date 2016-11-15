@@ -38,10 +38,11 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
+import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
 import org.springframework.cloud.dataflow.server.repository.InMemoryTaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
@@ -79,6 +80,9 @@ public class TaskControllerTests {
 	@Autowired
 	private TaskLauncher taskLauncher;
 
+	@Autowired
+	private AppRegistry appRegistry;
+
 	@Before
 	public void setupMockMVC() {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(wac).defaultRequest(
@@ -99,12 +103,12 @@ public class TaskControllerTests {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testTaskDefinitionControllerConstructorMissingRepository() {
-		new TaskDefinitionController(null, null, taskLauncher);
+		new TaskDefinitionController(null, null, taskLauncher, appRegistry);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testTaskDefinitionControllerConstructorMissingDeployer() {
-		new TaskDefinitionController(new InMemoryTaskDefinitionRepository(), null, null);
+		new TaskDefinitionController(new InMemoryTaskDefinitionRepository(), null, null, appRegistry);
 	}
 
 	@Test
@@ -119,9 +123,21 @@ public class TaskControllerTests {
 	}
 
 	@Test
-	public void testSave() throws Exception {
+	public void testSaveErrorNotInRegistry() throws Exception {
 		assertEquals(0, repository.count());
 
+		mockMvc.perform(
+				post("/tasks/definitions/").param("name", "myTask").param("definition", "task")
+						.accept(MediaType.APPLICATION_JSON)).andDo(print())
+						.andExpect(status().is5xxServerError());
+
+		assertEquals(0, repository.count());
+	}
+
+	@Test
+	public void testSave() throws Exception {
+		assertEquals(0, repository.count());
+		appRegistry.save("task", ApplicationType.task, new URI("http://fake.example.com/"));
 		mockMvc.perform(
 				post("/tasks/definitions/").param("name", "myTask").param("definition", "task")
 						.accept(MediaType.APPLICATION_JSON)).andDo(print())
@@ -139,14 +155,11 @@ public class TaskControllerTests {
 
 	@Test
 	public void testSaveDuplicate() throws Exception {
-
 		repository.save(new TaskDefinition("myTask", "task"));
-
 		mockMvc.perform(
 				post("/tasks/definitions/").param("name", "myTask").param("definition", "task")
 						.accept(MediaType.APPLICATION_JSON)).andDo(print())
 						.andExpect(status().isConflict());
-
 		assertEquals(1, repository.count());
 	}
 
