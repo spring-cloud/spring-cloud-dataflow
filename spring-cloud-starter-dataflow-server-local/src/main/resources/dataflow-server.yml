@@ -19,6 +19,8 @@ maven:
       url: https://repo.spring.io/libs-snapshot
 
 spring:
+  profiles:
+    active: local
   application:
     name: spring-cloud-dataflow-server-local
   cloud:
