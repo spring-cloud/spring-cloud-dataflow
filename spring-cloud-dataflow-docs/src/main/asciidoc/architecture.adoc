@@ -31,7 +31,7 @@ The supported runtimes are
 * Apache Mesos
 * Local Server for development
 
-There is a deployer Service Provider Interface (SPI) that enables you to extend Data Flow to deploy onto other runtimes, for example to support Hashicorp’s Nomad or Docker Swarm. Contributions are welcome!
+There is a deployer Service Provider Interface (SPI) that enables you to extend Data Flow to deploy onto other runtimes, for example to support Docker Swarm. There are community implementations of Hashicorp's Nomad and RedHat Openshift is available. We look forward to working with the community for further contributions!
 
 The component that is responsible for deploying applications to a runtime is the Data Flow Server.  There is a Data Flow Server executable jar provided for each of the target runtimes.  The Data Flow server is responsible for interpreting
 
@@ -50,7 +50,7 @@ The interaction of the main components is shown below
 .The Spring Cloud Data High Level Architecure
 image::{dataflow-asciidoc}/images/dataflow-arch.png[The Spring Cloud Data Flow High Level Architecture, scaledwidth="60%"]
 
-In this diagram a DSL description of a stream is POSTed to the Data Flow Server.  Based on the mapping of DSL application names to Maven and Docker artifacts, the http source and cassandra sink application are deployed on the target runtime.
+In this diagram a DSL description of a stream is POSTed to the Data Flow Server.  Based on the mapping of DSL application names to Maven and Docker artifacts, the http-source and cassandra-sink applications are deployed on the target runtime.
 
 [[arch-microservice-style]]
 == Microservice Architectural Style
@@ -84,7 +84,7 @@ Spring Cloud Data Flow’s architectural style is different than other Stream an
 
 Similarly, Apache Storm, Hortonworks DataFlow and Spring Cloud Data Flow’s predecessor, Spring XD, use a dedicated application execution cluster, unique to each product, that determines where your code should execute on the cluster and perform health checks to ensure that long lived applications are restarted if they fail.  Often, framework specific interfaces are required to be used in order to correctly “plug in” to the cluster’s execution framework.
 
-As we discovered during the evolution of Spring XD, the rise of multiple container frameworks in 2015 made creating our own runtime a duplication of efforts.  There is no reason to build your own resource management mechanics, when there’s multiple runtime platforms that offer this functionality already.  Taking these considerations into account is what made us shift to the current architecture where we delegate the execution to popular runtimes, runtimes that you may already be using for other purposes.  This is an advantage in that it reduces the cognitive distance for creating and managing data centric applications as many of the same skills used for deploying other end-user/web applications are applicable.
+As we discovered during the evolution of Spring XD, the rise of multiple container frameworks in 2015 made creating our own runtime a duplication of efforts.  There is no reason to build your own resource management mechanics, when there are multiple runtime platforms that offer this functionality already.  Taking these considerations into account is what made us shift to the current architecture where we delegate the execution to popular runtimes, runtimes that you may already be using for other purposes.  This is an advantage in that it reduces the cognitive distance for creating and managing data centric applications as many of the same skills used for deploying other end-user/web applications are applicable.
 
 [[arch-streaming-apps]]
 == Streaming Applications
@@ -115,7 +115,7 @@ In this case the String payload of a message coming on the input channel, is han
 [[arch-streaming-functional-programming]]
 === Functional Programming Model
 
-However, Spring Cloud Stream can support other programming styles.  There is initial support for functional style programming via {spring-cloud-stream-docs}#_rxjava_1_x_support[RxJava Observable APIs] and upcoming versions will support callback methods with Project Reactor’s Flux API and Apache Kafka’s KStream API.
+However, Spring Cloud Stream can support other programming styles. The use of reactive APIs where incoming and outgoing data is handled as continuous data flows and it defines how each individual message should be handled. You can also use operators that describe functional transformations from inbound to outbound data flows. The upcoming versions will support Apache Kafka’s KStream API in the programming model.
 
 [[arch-streams]]
 == Streams
@@ -156,13 +156,13 @@ Also note, that you can't currently scale partitioned streams.  Read the section
 [[arch-streams-delivery]]
 === Message Delivery Guarantees
 
-Streams are composed of applications that use the Spring Cloud Stream library as the basis for communicating with the underlying messaging middlware product.  Spring Cloud Stream also provides an opinionated configuration of middleware from several vendors, in particular providing {spring-cloud-stream-docs}#_persistent_publish_subscribe_support[persistent publish-subscribe semantics].
+Streams are composed of applications that use the Spring Cloud Stream library as the basis for communicating with the underlying messaging middleware product.  Spring Cloud Stream also provides an opinionated configuration of middleware from several vendors, in particular providing {spring-cloud-stream-docs}#_persistent_publish_subscribe_support[persistent publish-subscribe semantics].
 
 The {spring-cloud-stream-docs}#_binders[Binder abstraction] in Spring Cloud Stream is what connects the application to the middleware.  There are several configuration properties of the binder that are portable across all binder implementations and some that are specific to the middleware.
 
 For consumer applications there is a retry policy for exceptions generated during message handling.  The retry policy is configured using the {spring-cloud-stream-docs}#_consumer_properties[common consumer properties] `maxAttempts`, `backOffInitialInterval`, `backOffMaxInterval`, and `backOffMultiplier`.  The default values of these properties will retry the callback method invocation 3 times and wait one second for the first retry.  A backoff multiplier of 2 is used for the second and third attempts.
 
-When the number of number of retry attempts has exceeded the `maxAttempts` value, the exception and the failed message will become the payload of a message and be sent to the application's error channel.  By default, the default message handler for this error channel logs the message.  You can change the default behavior in your application by creating your own message handler that subscribes to the error channel.
+When the number of retry attempts has exceeded the `maxAttempts` value, the exception and the failed message will become the payload of a message and be sent to the application's error channel.  By default, the default message handler for this error channel logs the message.  You can change the default behavior in your application by creating your own message handler that subscribes to the error channel.
 
 Spring Cloud Stream also supports a configuration option for both Kafka and RabbitMQ binder implementations that will send the failed message and stack trace to a dead letter queue.  The dead letter queue is a destination and its nature depends on the messaging middleware (e.g in the case of Kafka it is a dedicated topic).  To enable this for RabbitMQ set the {spring-cloud-stream-docs}#_rabbitmq_consumer_properties[consumer properties] `republishtoDlq` and `autoBindDlq` and the {spring-cloud-stream-docs}#_rabbit_producer_properties[producer property] `autoBindDlq` to true when deploying the stream.  To always apply these producer and consumer properties when deploying streams, configure them as <<spring-cloud-dataflow-global-properties,common application properties>> when starting the Data Flow server.
 
@@ -213,7 +213,7 @@ While we provide a server executable for each of the target runtimes you can als
 [[arch-data-flow-server-security]]
 === Security
 
-The Data Flow Server executable jars support basic http and OAuth 2.0 authentication to access its endpoints. Refer to the <<configuration-security,security section>> for more information.
+The Data Flow Server executable jars support basic http, LDAP(S), File-based, and OAuth 2.0 authentication to access its endpoints. Refer to the <<configuration-security,security section>> for more information.
 
 Authorization via groups is planned for a future release.
 

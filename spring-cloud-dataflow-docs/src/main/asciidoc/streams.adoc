@@ -16,7 +16,7 @@ A high level DSL is used to create stream definitions. The DSL to define a strea
 ```
 http | file
 ```
-The DSL mimics a UNIX pipes and filters syntax. Default values for ports and filenames are used in this example but can be overridden using `--` options, such as
+The DSL mimics UNIX pipes and filters syntax. Default values for ports and filenames are used in this example but can be overridden using `--` options, such as
 
 ```
 http --server.port=8091 | file --directory=/tmp/httpdata/
@@ -25,11 +25,13 @@ To create these stream definitions you use the shell or make an HTTP POST reques
 
 == Stream DSL
 
-In the examples above, we connected a source to a sink using the pipe symbol `|`. You can also pass properties to the source and sink configurations. The property names will depend on the individual app implementations, but as an example, the `http` source app exposes a `server.port` setting which allows you to change the data ingestion port from the default value. To create the stream using port 8000, we would use
+In the example above, we connected a source to a sink using the pipe symbol `|`. You can also pass properties to the source and sink configurations. The property names will depend on the individual app implementations, but as an example, the `http` source app exposes a `server.port` setting and it allows you to change the data ingestion port from the default value. To create the stream using port 8000, we would use
 ```
 dataflow:> stream create --definition "http --server.port=8000 | log" --name myhttpstream
 ```
-The shell provides tab completion for application properties and also the shell command `app info` provides some additional documentation.
+The shell provides tab completion for application properties and also the shell command `app info <appType>:<appName>` provides additional documentation for all the supported properties.
+
+NOTE: Supported Stream <appType>'s are: source, processor, and sink
 
 [[spring-cloud-dataflow-register-apps]]
 == Register a Stream App
@@ -129,7 +131,7 @@ Stream applications are Spring Boot applications which are aware of many <<sprin
 
 To whitelist application properties create a file named `spring-configuration-metadata-whitelist.properties` in the `META-INF` resource directory.  There are two property keys that can be used inside this file. The first key is named `configuration-properties.classes`.  The value is a comma separated list of fully qualified `@ConfigurationProperty` class names.  The second key is `configuration-properties.names` whose value is a comma separated list of property names.  This can contain the full name of property, such as `server.port` or a partial name to whitelist a category of property names, e.g. `spring.jmx`.
 
-The link:https://github.com/spring-cloud/spring-cloud-stream-app-starters[Spring Cloud Stream application starters] are a good place to look for examples of usage.  Here is a simple example of the file sink's `spring-configuration-metadata-whitelist.properties` file
+The link:https://github.com/spring-cloud-stream-app-starters[Spring Cloud Stream application starters] are a good place to look for examples of usage.  Here is a simple example of the file sink's `spring-configuration-metadata-whitelist.properties` file
 
 ```
 configuration-properties.classes=org.springframework.cloud.stream.app.file.sink.FileSinkProperties
@@ -161,7 +163,7 @@ Make sure to add 'spring-boot-configuration-processor' as an optional dependency
 
 The Spring Cloud Data Flow Server exposes a full RESTful API for managing the lifecycle of stream definitions, but the easiest way to use is it is via the Spring Cloud Data Flow shell. Start the shell as described in the xref:Getting-Started#getting-started[Getting Started] section.
 
-New streams are created by posting stream definitions. The definitions are built from a simple DSL. For example, let's walk through what happens if we execute the following shell command:
+New streams are created by with the help of stream definitions. The definitions are built from a simple DSL. For example, let's walk through what happens if we execute the following shell command:
 
 ```
 dataflow:> stream create --definition "time | log" --name ticktock
@@ -207,7 +209,7 @@ dataflow:> stream create --definition "time | log" --name ticktock
 
 can have application properties defined at the time of stream creation.
 
-The shell command `app info` displays the white-listed application properties for the application.
+The shell command `app info <appType>:<appName>` displays the white-listed application properties for the application.
 For more info on the property white listing refer to <<spring-cloud-dataflow-stream-app-whitelisting>>
 
 Below are the white listed properties for the app `time`:
@@ -283,7 +285,7 @@ IMPORTANT: See <<spring-cloud-dataflow-stream-app-labels>>.
 
 ==== Inline vs file reference properties
 
-When using the Spring Cloud Dataflow Shell, there are two ways to provide deployment
+When using the Spring Cloud Data Flow Shell, there are two ways to provide deployment
 properties: either *inline* or via a *file reference*. Those two ways are exclusive
 and documented below:
 
@@ -475,7 +477,7 @@ INFO 18745 --- [transform.tuple-1] log.sink                                 : WO
 Depending on how applications are chained, the content type conversion can be specified either as via the `--outputType` in the upstream app or as an `--inputType` in the downstream app.
 For instance, in the above stream, instead of specifying the `--inputType` on the 'transform' application to convert, the option `--outputType=application/x-spring-tuple` can also be specified on the 'http' application.
 
-For the complete list of message conversion and message converters, please refer Spring Cloud Stream documentation.
+For the complete list of message conversion and message converters, please refer to Spring Cloud Stream {spring-cloud-stream-docs}#contenttypemanagement[documentation].
 
 ==== Overriding application properties during stream deployment
 
@@ -519,7 +521,7 @@ IMPORTANT: See <<spring-cloud-dataflow-stream-app-labels>>.
 
 ==== Inline vs file reference properties
 
-When using the Spring Cloud Dataflow Shell, there are two ways to provide deployment
+When using the Spring Cloud Data Flow Shell, there are two ways to provide deployment
 properties: either *inline* or via a *file reference*. Those two ways are exclusive
 and documented below:
 
@@ -716,7 +718,7 @@ taps can be created at the output of `http`, `step1` and `step2`.
 To create a stream that acts as a 'tap' on another stream requires to specify the `source destination name` for the tap stream. The syntax for source destination name is:
 
 ```
-`:<stream-name>.<label/app-name>`
+`:<streamName>.<label/appName>`
 ```
 To create a tap at the output of `http` in the stream above, the source destination name is `mainstream.http`
 To create a tap at the output of the first transform app in the stream above, the source destination name is `mainstream.step1`
@@ -780,7 +782,7 @@ This can be done using the DSL syntax `http > :mydestination` or `:mydestination
 
 Second, you may need to determine the output channel of a stream based on some information that is only known at runtime.
 In that case, a router may be used in the sink position of a stream definition. For more information, refer to the Router Sink starter's
-link:https://github.com/spring-cloud/spring-cloud-stream-app-starters/tree/master/router/spring-cloud-starter-stream-sink-router[README].
+link:https://github.com/spring-cloud-stream-app-starters/router/tree/master/spring-cloud-starter-stream-sink-router[README].
 
 [[spring-cloud-dataflow-global-properties]]
 === Common application properties

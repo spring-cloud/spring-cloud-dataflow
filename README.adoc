@@ -3,9 +3,9 @@ image:https://spring.io/badges/spring-cloud-dataflow/snapshot.svg[Latest Snapsho
 
 == Spring Cloud Data Flow image:https://build.spring.io/plugins/servlet/buildStatusImage/SCD-BMASTER[Build Status, link=https://build.spring.io/browse/SCD-BMASTER] image:https://badge.waffle.io/spring-cloud/spring-cloud-dataflow.svg?label=ready&title=Ready[Stories Ready, link=http://waffle.io/spring-cloud/spring-cloud-dataflow] image:https://badge.waffle.io/spring-cloud/spring-cloud-dataflow.svg?label=In%20Progress&title=In%20Progress[Stories In Progress, link=http://waffle.io/spring-cloud/spring-cloud-dataflow]
 
-The Spring Cloud Data Flow project provides orchestration for data microservices, including long lived
-https://github.com/spring-cloud/spring-cloud-stream[stream] applications and
-short lived https://github.com/spring-cloud/spring-cloud-task[task] applications.
+The Spring Cloud Data Flow project provides orchestration for data microservices, including long-lived
+https://github.com/spring-cloud/spring-cloud-stream[Spring Cloud Stream] applications and
+short-lived https://github.com/spring-cloud/spring-cloud-task[Spring Cloud Task] applications.
 
 == Components
 
@@ -30,11 +30,13 @@ deployer SPI implementation for that environment. The github locations for these
 * https://github.com/spring-cloud/spring-cloud-dataflow-server-mesos[Apache Mesos]
 * https://github.com/spring-cloud/spring-cloud-dataflow-server-kubernetes[Kubernetes]
 
+_There are also community maintained Spring Cloud Data Flow implementations for Hashicorp's https://github.com/donovanmuller/spring-cloud-dataflow-server-nomad[Nomad] and RedHat's https://github.com/donovanmuller/spring-cloud-dataflow-server-openshift[Openshift]._
+
 The deployer SPI mentioned above is defined within the https://github.com/spring-cloud/spring-cloud-deployer[Spring Cloud Deployer]
 project. That provides an abstraction layer for deploying the apps of a given stream or task and managing their lifecycle.
 The github locations for the corresponding Spring Cloud Deployer SPI implementations are:
 
-* https://github.com/spring-cloud/spring-cloud-deployer/tree/master/spring-cloud-deployer-local[Local]
+* https://github.com/spring-cloud/spring-cloud-deployer-local[Local]
 * https://github.com/spring-cloud/spring-cloud-deployer-cloudfoundry[Cloud Foundry]
 * https://github.com/spring-cloud/spring-cloud-deployer-yarn[Apache YARN]
 * https://github.com/spring-cloud/spring-cloud-deployer-mesos[Apache Mesos]
@@ -58,7 +60,7 @@ For more information on building, see this https://github.com/spring-cloud/sprin
 
 === Contributing
 
-We love contributions.  Follow this https://github.com/spring-cloud/spring-cloud-dataflow/blob/master/spring-cloud-dataflow-docs/src/main/asciidoc/appendix-contributing.adoc[link] for more information on how to contribute.
+We welcome contributions! Follow this https://github.com/spring-cloud/spring-cloud-dataflow/blob/master/spring-cloud-dataflow-docs/src/main/asciidoc/appendix-contributing.adoc[link] for more information on how to contribute.
 
 
 

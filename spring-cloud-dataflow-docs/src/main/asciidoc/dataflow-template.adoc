@@ -1,7 +1,7 @@
 [[dataflow-template]]
 = Data Flow Template
 
-As described in the previous chapter, Spring Data Flow's functionality is completely
+As described in the previous chapter, Spring Cloud Data Flow's functionality is completely
 exposed via REST endpoints. While you can use those endpoints directly, Spring Cloud
 Data Flow also provides a Java-based API, which makes using those REST endpoints
 even easier.

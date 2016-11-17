@@ -9,11 +9,11 @@ This section describe how to use the Dashboard of Spring Cloud Data Flow.
 [[dashboard-introduction]]
 == Introduction
 
-Spring Cloud Data Flow provides a browser-based GUI which currently has 6 sections:
+Spring Cloud Data Flow provides a browser-based GUI and it currently includes 6 tabs:
 
 * **Apps** Lists all available applications and provides the control to register/unregister them
 * **Runtime** Provides the Data Flow cluster view with the list of all running applications
-* **Streams** Deploy/undeploy Stream Definitions
+* **Streams** List, create, deploy, and destroy Stream Definitions
 ifndef::omit-tasks-docs[]
 * **Tasks** List, create, launch and destroy Task Definitions
 endif::omit-tasks-docs[]
@@ -58,8 +58,8 @@ For example:
 
 `processor.transform=maven://org.springframework.cloud.stream.app:transform-processor-rabbit:1.0.3.BUILD-SNAPSHOT`
 
-At the top of the bulk import page a _Uri_ can be specified that points to a properties file stored elsewhere, it
-should contain properties formatted as above. Alternatively, using the textbox labelled _Apps as Properties_
+At the top of the bulk import page an _Uri_ can be specified that points to a properties file stored elsewhere, it
+should contain properties formatted as above. Alternatively, using the textbox labeled _Apps as Properties_
 it is possible to directly list each property string. Finally, if the properties are stored in a local file 
 the _Select Properties File_ option will open a local file browser to select the file. After setting your definitions
 via one of these routes, click *Import*.
@@ -88,7 +88,7 @@ image::{dataflow-asciidoc}/images/dataflow-runtime.png[List of running applicati
 The _Streams_ section of the Dashboard provides the _Definitions_ tab that provides
 a listing of Stream definitions. There you have the option to *deploy* or *undeploy*
 those stream definitions. Additionally you can remove the definition by clicking on *destroy*.
-Each row includes an arrow on the left which can be clicked to see a visual representation
+Each row includes an arrow on the left, which can be clicked to see a visual representation
 of the definition. Hovering over the boxes in the visual representation will show more details
 about the apps including any options passed to them. In this screenshot the timer stream has
 been expanded to show the visual representation:
@@ -203,7 +203,7 @@ off on the *Verify Apps* button - the validator will then only perform
 syntax checking.  When correctly validated, the *create* button will
 be clickable and on pressing it the UI will proceed to create each task definition. If there
 are any errors during creation then after creation finishes the
-editor will show any lines of input which could not be used as task definitions.
+editor will show any lines of input, as it cannot be used in task definitions.
 These can then be fixed up and creation repeated.  There is an
 *import file* button to open a file browser on the
 local file system if the definitions are in a file and it is easier
@@ -297,6 +297,7 @@ for the various analytics applications available in _Spring Cloud Data Flow_:
 
 * Counters
 * Field-Value Counters
+* Aggregate Counters
 
 For example, if you have created the `springtweets` stream and the corresponding
 counter in the <<counter, Counter chapter>>, you can now easily create the corresponding

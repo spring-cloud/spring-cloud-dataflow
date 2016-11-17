@@ -41,7 +41,7 @@ resources that imply the concept of `restarts` such as Tasks.
 [[api-guide-overview-http-status-codes]]
 === HTTP status codes
 
-RESTful notes tries to adhere as closely as possible to standard HTTP and REST conventions in its use of HTTP status codes.
+RESTful note tries to adhere as closely as possible to standard HTTP and REST conventions in its use of HTTP status codes.
 
 |===
 | Status code | Usage
@@ -114,6 +114,22 @@ include::{snippets}/api-documentation/index/curl-request.adoc[]
 include::{snippets}/api-documentation/index/response-fields.adoc[]
 
 ===== Example response
+
+include::{snippets}/api-documentation/index/http-response.adoc[]
+
+===== Example "stream create" request for a `ticktock` stream
+
+[source,bash]
+----
+curl -X POST -d "name=ticktock&definition=time | log" localhost:9393/streams/definitions?deploy=false
+----
+
+===== Example "stream deploy" request for a `ticktock` stream
+
+[source,bash]
+----
+curl -X POST http://localhost:9393/streams/deployments/ticktock
+----
 
 include::{snippets}/api-documentation/index/http-response.adoc[]
 
