@@ -117,18 +117,18 @@ include::{snippets}/api-documentation/index/response-fields.adoc[]
 
 include::{snippets}/api-documentation/index/http-response.adoc[]
 
-===== Example "stream create" request
+===== Example "stream create" request for a `ticktock` stream
 
 [source,bash]
 ----
 curl -X POST -d "name=ticktock&definition=time | log" localhost:9393/streams/definitions?deploy=false
 ----
 
-===== Example "stream deploy" request
+===== Example "stream deploy" request for a `ticktock` stream
 
 [source,bash]
 ----
-curl -X POST http://localhost:9393/streams/deployments/foo
+curl -X POST http://localhost:9393/streams/deployments/ticktock
 ----
 
 include::{snippets}/api-documentation/index/http-response.adoc[]

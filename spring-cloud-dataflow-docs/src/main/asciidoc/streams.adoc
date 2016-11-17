@@ -31,6 +31,8 @@ dataflow:> stream create --definition "http --server.port=8000 | log" --name myh
 ```
 The shell provides tab completion for application properties and also the shell command `app info <appType>:<appName>` provides additional documentation for all the supported properties.
 
+NOTE: Supported Stream <appType>'s are: source, processor, and sink
+
 [[spring-cloud-dataflow-register-apps]]
 == Register a Stream App
 

@@ -19,9 +19,7 @@ You need to have an RDBMS for storing stream, task and app states in the databas
 
 You also need to have link:http://redis.io[Redis] running if you are running any streams that involve analytics applications. Redis may also be required run the unit/integration tests.
 
-For the deployed streams and tasks to communicate, either link:http://rabbitmq.com[RabbitMQ] or link:http://kafka.apache.org[Kafka] needs to be installed.  The local server registers sources, sink, processors and tasks the are published from the link:https://github.com/spring-cloud-stream-app-starters[Spring Cloud Stream App Starters] and link:https://github.com/spring-cloud/spring-cloud-task-app-starters[Spring Cloud Task App Starters] repository.  By default the server registers these applications that use Kafka, but setting the property `binding` to `rabbit` will register a list of applications that use RabbitMQ as the message broker.
-
-
+For the deployed streams and tasks to communicate, either link:http://rabbitmq.com[RabbitMQ] or link:http://kafka.apache.org[Kafka] needs to be installed.
 
 [[getting-started-deploying-spring-cloud-dataflow]]
 == Deploying Spring Cloud Data Flow Local Server

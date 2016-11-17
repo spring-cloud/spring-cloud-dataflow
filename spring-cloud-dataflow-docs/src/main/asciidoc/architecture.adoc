@@ -115,7 +115,7 @@ In this case the String payload of a message coming on the input channel, is han
 [[arch-streaming-functional-programming]]
 === Functional Programming Model
 
-However, Spring Cloud Stream can support other programming styles. The use of reactive APIs where incoming and outgoing data is handled as continuous data flows and it define how each individual message should be handled. You can also use operators that describe functional transformations from inbound to outbound data flows. The upcoming versions will support Apache Kafka’s KStream API in the programming model.
+However, Spring Cloud Stream can support other programming styles. The use of reactive APIs where incoming and outgoing data is handled as continuous data flows and it defines how each individual message should be handled. You can also use operators that describe functional transformations from inbound to outbound data flows. The upcoming versions will support Apache Kafka’s KStream API in the programming model.
 
 [[arch-streams]]
 == Streams

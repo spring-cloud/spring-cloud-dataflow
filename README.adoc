@@ -30,7 +30,7 @@ deployer SPI implementation for that environment. The github locations for these
 * https://github.com/spring-cloud/spring-cloud-dataflow-server-mesos[Apache Mesos]
 * https://github.com/spring-cloud/spring-cloud-dataflow-server-kubernetes[Kubernetes]
 
-_There's also community maintained Spring Cloud Data Flow implementations for Hashicorp's https://github.com/donovanmuller/spring-cloud-dataflow-server-nomad[Nomad] and RedHat's https://github.com/donovanmuller/spring-cloud-dataflow-server-openshift[Openshift]._
+_There are also community maintained Spring Cloud Data Flow implementations for Hashicorp's https://github.com/donovanmuller/spring-cloud-dataflow-server-nomad[Nomad] and RedHat's https://github.com/donovanmuller/spring-cloud-dataflow-server-openshift[Openshift]._
 
 The deployer SPI mentioned above is defined within the https://github.com/spring-cloud/spring-cloud-deployer[Spring Cloud Deployer]
 project. That provides an abstraction layer for deploying the apps of a given stream or task and managing their lifecycle.
