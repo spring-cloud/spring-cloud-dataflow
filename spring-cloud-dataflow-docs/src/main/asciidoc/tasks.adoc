@@ -73,14 +73,18 @@ in it. It is recommended, however, to have a "focused" list of desired applicati
 
 List of available static property files:
 
-* Maven based Task Applications: http://bit.ly/task-applications-maven
-* Docker based Task Applications: http://bit.ly/task-applications-docker
+[width="100%",frame="topbot",options="header"]
+|======================
+|Artifact Type |Stable Release |SNAPSHOT Release
+|Maven   |link:http://bit.ly/1-0-1-GA-task-applications-maven[http://bit.ly/1-0-1-GA-task-applications-maven] |link:http://bit.ly/1-0-2-SNAPSHOT-task-applications-maven[http://bit.ly/1-0-2-SNAPSHOT-task-applications-maven]
+|Docker  |link:http://bit.ly/1-0-1-GA-task-applications-docker[http://bit.ly/1-0-1-GA-task-applications-docker] | link:http://bit.ly/1-0-2-SNAPSHOT-task-applications-docker[http://bit.ly/1-0-2-SNAPSHOT-task-applications-docker]
+|======================
 
 For example, if you would like to register all out-of-the-box task applications in bulk, you can with
 the following command.
 
 ```
-dataflow:>app import --uri http://bit.ly/task-applications-maven
+dataflow:>app import --uri http://bit.ly/1-0-1-GA-task-applications-maven
 ```
 
 You can also pass the `--local` option (which is TRUE by default) to indicate whether the
@@ -144,8 +148,8 @@ To display the latest task executions via the shell use the `task execution list
 
 To get a list of task executions for just one task definition, add `--name` and
 the task definition name, for example `task execution list --name foo`.  To retrieve full
-details for a task execution use the `task display` command with the id of the task execution
-, for example `task display --id 549`.
+details for a task execution use the `task display` command with the id of the task execution, 
+for example `task display --id 549`.
 
 === Destroying a Task
 Destroying a Task Definition will remove the definition from the definition repository.
@@ -160,8 +164,8 @@ dataflow:>task destroy mytask
 The task execution information for previously launched tasks for the definition will
 remain in the task repository.
 
-*Note:* This will not stop any currently executing tasks for this definition, this just
-removes the definition.
+*Note:* This will not stop any currently executing tasks for this definition, instead it just
+removes the task definition from the database.
 
 [[spring-cloud-dataflow-task-repository]]
 == Task Repository
@@ -199,13 +203,13 @@ the sample below postgresql has been chosen.
 ==== Task Application Repository
 
 When launching a task application be sure that the database driver that is being
-used by Spring Cloud Data Flow is also a dependency on the task application.  For
-example if your Spring Cloud Dataflow is set to use Postgresql be sure that
-the task application also has Postgresql as a dependency.
+used by Spring Cloud Data Flow is also a dependency on the task application. For
+example if your Spring Cloud Data Flow is set to use Postgresql, be sure that
+the task application _also_ has Postgresql as a dependency.
 
 NOTE: When executing tasks externally (i.e. command line) and you wish for
 Spring Cloud Data Flow to show the TaskExecutions in its UI, be sure that
-common datasource settings are shared among the both.   By default
+common datasource settings are shared among the both. By default
 Spring Cloud Task will use a local H2 instance and the execution will
 not be recorded to the database used by Spring Cloud Data Flow.
 
@@ -281,7 +285,7 @@ The default Task/Batch event and destination names on the broker are enumerated 
 == Launching Tasks from a Stream
 
 You can launch a task from a stream by using one of the available `task-launcher` sinks. Currently the only available
-`task-launcher` sink is the `task-launcher-local` which will launch a task on your local machine.
+`task-launcher` sink is the `task-launcher-local`, which will launch a task on your local machine.
 
 NOTE: `task-launcher-local` is meant for development purposes only.
 

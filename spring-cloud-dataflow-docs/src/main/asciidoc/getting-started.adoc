@@ -19,7 +19,7 @@ You need to have an RDBMS for storing stream, task and app states in the databas
 
 You also need to have link:http://redis.io[Redis] running if you are running any streams that involve analytics applications. Redis may also be required run the unit/integration tests.
 
-For the deployed streams and tasks to communicate, either link:http://rabbitmq.com[RabbitMQ] or link:http://kafka.apache.org[Kafka] needs to be installed.  The local server registers sources, sink, processors and tasks the are published from the link:https://github.com/spring-cloud/spring-cloud-stream-app-starters[Spring Cloud Stream App Starters] and link:https://github.com/spring-cloud/spring-cloud-task-app-starters[Spring Cloud Task App Starters] repository.  By default the server registers these applications that use Kafka, but setting the property `binding` to `rabbit` will register a list of applications that use RabbitMQ as the message broker.
+For the deployed streams and tasks to communicate, either link:http://rabbitmq.com[RabbitMQ] or link:http://kafka.apache.org[Kafka] needs to be installed.  The local server registers sources, sink, processors and tasks the are published from the link:https://github.com/spring-cloud-stream-app-starters[Spring Cloud Stream App Starters] and link:https://github.com/spring-cloud/spring-cloud-task-app-starters[Spring Cloud Task App Starters] repository.  By default the server registers these applications that use Kafka, but setting the property `binding` to `rabbit` will register a list of applications that use RabbitMQ as the message broker.
 
 
 
@@ -141,7 +141,7 @@ to `WARNING` in `logback.xml`:
 
 [[getting-started-application-configuration]]
 == Application Configuration
-You can use the following configuration properties of the Data Flow server to customize how appliations are deployed.
+You can use the following configuration properties of the Data Flow server to customize how applications are deployed.
 
 [source,properties,indent=0,subs="verbatim,attributes,macros"]
 ----
@@ -158,7 +158,7 @@ spring.cloud.deployer.local.shutdownTimeout=30 # Max number of seconds to wait f
 spring.cloud.deployer.local.javaOpts= # The Java options to pass to the JVM
 ----
 
-When deploying the application you can also set deployer properties prefixed with `app.<name of application>`, So for example to set Java options for the time application in the `ticktock` stream, use the following stream deployment propertites.
+When deploying the application you can also set deployer properties prefixed with `app.<name of application>`, So for example to set Java options for the time application in the `ticktock` stream, use the following stream deployment properties.
 [source,bash]
 ----
 dataflow:> stream create --name ticktock --definition "time --server.port=9000 | log"
@@ -172,4 +172,4 @@ As a convenience you can set the property `spring.cloud.deployer.local.memory` t
 dataflow:> stream deploy --name ticktock --properties "app.time.spring.cloud.deployer.local.memory=2048m"
 ----
 
-At deployment time, if you specify a `-Xmx` option in the `javaOpts` property in addition to a value of the `memory` option, the value in the `javaOpts` property has precedence.  Also, the `javaOpts` property set when deploying the application has precedence over the Data Flow server's `javaOpts` property.
+At deployment time, if you specify an `-Xmx` option in the `javaOpts` property in addition to a value of the `memory` option, the value in the `javaOpts` property has precedence.  Also, the `javaOpts` property set when deploying the application has precedence over the Data Flow server's `javaOpts` property.

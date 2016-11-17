@@ -29,7 +29,7 @@ The REST endpoint `/features` provides information on the features enabled/disab
 [[configuration-rdbms]]
 == Database Configuration
 
-Spring Cloud Data Flow provides schemas for H2, HSQLDB, MySQL, Oracle, Postgresql and SqlServer that will be automatically created when the server starts.
+Spring Cloud Data Flow provides schemas for H2, HSQLDB, MySQL, Oracle, Postgresql, DB2 and SqlServer that will be automatically created when the server starts.
 
 The JDBC drivers for *MySQL* (via MariaDB driver), *HSQLDB*, *PostgreSQL* along with embedded *H2* are available out of the box.
 If you are using any other database, then the corresponding JDBC driver jar needs to be on the classpath of the server.
@@ -69,7 +69,7 @@ java -jar spring-cloud-dataflow-server-local/target/spring-cloud-dataflow-server
     --spring.datasource.driver-class-name=org.hsqldb.jdbc.JDBCDriver &
 ----
 
-NOTE: There is a schema update to the Spring Cloud Dataflow datastore when
+NOTE: There is a schema update to the Spring Cloud Data Flow datastore when
 upgrading from version `1.0.x` to `1.1.x`.  Migration scripts for specific
 database types can be found
 https://github.com/spring-cloud/spring-cloud-task/tree/master/spring-cloud-task-core/src/main/resources/org/springframework/cloud/task/migration[here].
@@ -515,7 +515,7 @@ IMPORTANT: GitHub does not support the OAuth2 password grant type. As such you c
 === Securing the Spring Boot Management Endpoints
 
 When enabling security, please also make sure that the http://docs.spring.io/spring-boot/docs/current/reference/html/production-ready-monitoring.html[Spring Boot HTTP Management Endpoints]
-are secured as well. You can enabled security for the management endpoints by adding the following to `application.yml`:
+are secured as well. You can enable security for the management endpoints by adding the following to `application.yml`:
 
 [source,yaml]
 ----
@@ -532,8 +532,7 @@ being set to `true`.
 [[configuration-monitoring-management]]
 == Monitoring and Management
 The Spring Cloud Data Flow server is a Spring Boot application that includes the http://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#production-ready[Actuator 
-library] which adds several production ready features to help you monitor and manage your 
-application.  
+library], which adds several production ready features to help you monitor and manage your application.  
 
 The Actuator library adds http endpoints under the context path `/management` that is also 
 a discovery page for available endpoints.  For example, there is a `health` endpoint
@@ -543,10 +542,9 @@ endpoints are accessible.  The other endpoints are considered to be _sensitive_
 and need to be http://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#production-ready-customizing-endpoints[enabled explicitly via configuration].  If you are enabling
 _sensitive_ endpoints then you should also 
 <<configuration-security,secure the Data Flow server's endpoints>> so that
-information is not inadvertantly exposed to unauthenticated users.  The local Data Flow server has security disabled by default, so all actuator endpoints are available.
+information is not inadvertently exposed to unauthenticated users.  The local Data Flow server has security disabled by default, so all actuator endpoints are available.
 
-
-The Data Flow server requires the a relational database and if the feature toggled for
+The Data Flow server requires a relational database and if the feature toggled for
 analytics is enabled, a Redis server is also required.  The Data Flow server will 
 autoconfigure the https://github.com/spring-projects/spring-boot/blob/v1.4.1.RELEASE/spring-boot-actuator/src/main/java/org/springframework/boot/actuate/health/DataSourceHealthIndicator.java[DataSourceHealthIndicator] and https://github.com/spring-projects/spring-boot/blob/v1.4.1.RELEASE/spring-boot-actuator/src/main/java/org/springframework/boot/actuate/health/RedisHealthIndicator.java[RedisHealthIndicator] if needed.  The health of these two services is incorporated to the overall health status of the server through the `health` endpoint.
 
@@ -562,7 +560,7 @@ A simple way to have the Spring Cloud Data Flow server be a client to the Spring
 Admin Server is by adding a dependency to the Data Flow server's pom and an additional 
 configuration property as documented in http://codecentric.github.io/spring-boot-admin/1.4.3/#register-clients-via-spring-boot-admin[Registering Client Applications].
 
-This will result in a UI with a tabs for each of the actuator endpoints.
+This will result in a UI with tabs for each of the actuator endpoints.
 
 .Spring Boot Admin UI
 image::{dataflow-asciidoc}/images/spring-boot-admin.png[Spring Boot Admin UI, scaledwidth="80%"]  
