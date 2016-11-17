@@ -57,12 +57,18 @@
 		<java.version>1.8</java.version>
 		<spring-cloud-task.version>1.1.0.RC1</spring-cloud-task.version>
 		<spring-cloud.version>Camden.SR2</spring-cloud.version>
+		<spring-cloud-deployer.version>1.1.0.BUILD-SNAPSHOT</spring-cloud-deployer.version>
 	</properties>
 
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-starter-dataflow-server-local</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-deployer-resource-docker</artifactId>
+			<version>${spring-cloud-deployer.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
