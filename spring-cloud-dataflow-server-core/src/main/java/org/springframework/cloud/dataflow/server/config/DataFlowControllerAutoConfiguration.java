@@ -126,14 +126,14 @@ public class DataFlowControllerAutoConfiguration {
 	@ConditionalOnBean(StreamDefinitionRepository.class)
 	public StreamDeploymentController streamDeploymentController(StreamDefinitionRepository repository,
 			DeploymentIdRepository deploymentIdRepository, AppRegistry registry, AppDeployer deployer,
-             ApplicationConfigurationMetadataResolver metadataResolver, CommonApplicationProperties appsProperties) {
+			 ApplicationConfigurationMetadataResolver metadataResolver, CommonApplicationProperties appsProperties) {
 		return new StreamDeploymentController(repository, deploymentIdRepository, registry, deployer, metadataResolver, appsProperties);
 	}
 
 	@Bean
 	@ConditionalOnBean(StreamDefinitionRepository.class)
 	public RuntimeAppsController runtimeAppsController(StreamDefinitionRepository repository,
-													   DeploymentIdRepository deploymentIdRepository, AppDeployer appDeployer) {
+													DeploymentIdRepository deploymentIdRepository, AppDeployer appDeployer) {
 		return new RuntimeAppsController(repository, deploymentIdRepository, appDeployer);
 	}
 
@@ -153,8 +153,8 @@ public class DataFlowControllerAutoConfiguration {
 	@Bean
 	@ConditionalOnBean(TaskDefinitionRepository.class)
 	public TaskDefinitionController taskDefinitionController(TaskDefinitionRepository repository,
-			DeploymentIdRepository deploymentIdRepository, TaskLauncher taskLauncher) {
-		return new TaskDefinitionController(repository, deploymentIdRepository, taskLauncher);
+			DeploymentIdRepository deploymentIdRepository, TaskLauncher taskLauncher, AppRegistry appRegistry) {
+		return new TaskDefinitionController(repository, deploymentIdRepository, taskLauncher, appRegistry);
 	}
 
 	@Bean

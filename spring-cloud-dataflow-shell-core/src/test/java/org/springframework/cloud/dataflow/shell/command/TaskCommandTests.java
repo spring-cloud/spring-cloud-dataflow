@@ -24,12 +24,16 @@ import java.util.UUID;
 
 import javax.sql.DataSource;
 
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.cloud.dataflow.shell.AbstractShellIntegrationTest;
+import org.springframework.cloud.deployer.resource.registry.UriRegistry;
+import org.springframework.cloud.deployer.resource.registry.UriRegistryPopulator;
+import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.shell.core.CommandResult;
 import org.springframework.shell.table.Table;
@@ -38,6 +42,8 @@ import org.springframework.shell.table.Table;
  * @author Glenn Renfro
  */
 public class TaskCommandTests extends AbstractShellIntegrationTest {
+
+	private static final String APPS_URI = "classpath:META-INF/test-task-apps.properties";
 
 	private static final Logger logger = LoggerFactory.getLogger(TaskCommandTests.class);
 
@@ -58,6 +64,14 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 	private static final Date endTime = new Date(startTime.getTime() + 5000);
 
 	private static final String EXTERNAL_EXECUTION_ID = "WOW22";
+
+	@Before
+	public void registerApps() {
+		UriRegistry registry = applicationContext.getBean(UriRegistry.class);
+		UriRegistryPopulator populator = new UriRegistryPopulator();
+		populator.setResourceLoader(new DefaultResourceLoader());
+		populator.populateRegistry(true, registry, APPS_URI);
+	}
 
 	@BeforeClass
 	public static void setUp() {
@@ -89,7 +103,7 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 	public void testCreateTask() throws InterruptedException {
 		logger.info("Create Task Test");
 		String taskName = generateUniqueName();
-		task().create(taskName, "foobar");
+		task().create(taskName, "timestamp");
 	}
 
 	@Test

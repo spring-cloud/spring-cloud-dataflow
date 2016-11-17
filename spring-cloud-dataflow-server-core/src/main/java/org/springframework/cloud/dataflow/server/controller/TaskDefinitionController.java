@@ -16,7 +16,9 @@
 
 package org.springframework.cloud.dataflow.server.controller;
 
+import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
+import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.rest.resource.TaskDefinitionResource;
 import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
 import org.springframework.cloud.dataflow.server.repository.DeploymentKey;
@@ -64,6 +66,11 @@ public class TaskDefinitionController {
 	private TaskLauncher taskLauncher;
 
 	/**
+	 * The app registry this controller will use to lookup apps.
+	 */
+	private final AppRegistry appRegistry;
+
+	/**
 	 * Creates a {@code TaskDefinitionController} that delegates
 	 * <ul>
 	 *     <li>CRUD operations to the provided {@link TaskDefinitionRepository}</li>
@@ -73,15 +80,18 @@ public class TaskDefinitionController {
 	 * @param repository the repository this controller will use for task CRUD operations.
 	 * @param deploymentIdRepository the repository this controller will use for deployment IDs
 	 * @param taskLauncher the TaskLauncher this controller will use to check task status.
+	 * @param appRegistry          the app registry to look up registered apps
 	 */
 	public TaskDefinitionController(TaskDefinitionRepository repository, DeploymentIdRepository deploymentIdRepository,
-			TaskLauncher taskLauncher) {
+			TaskLauncher taskLauncher, AppRegistry appRegistry) {
 		Assert.notNull(repository, "repository must not be null");
 		Assert.notNull(deploymentIdRepository, "DeploymentIdRepository must not be null");
 		Assert.notNull(taskLauncher, "taskLauncher must not be null");
+		Assert.notNull(appRegistry, "AppRegistry must not be null");
 		this.repository = repository;
 		this.deploymentIdRepository = deploymentIdRepository;
 		this.taskLauncher = taskLauncher;
+		this.appRegistry = appRegistry;
 	}
 
 	/**
@@ -93,7 +103,13 @@ public class TaskDefinitionController {
 	@RequestMapping(value = "", method = RequestMethod.POST)
 	public void save(@RequestParam("name") String name,
 			@RequestParam("definition") String dsl) {
-		repository.save(new TaskDefinition(name, dsl));
+		TaskDefinition taskDefinition = new TaskDefinition(name, dsl);
+		String appName = taskDefinition.getRegisteredAppName();
+		if (appRegistry.find(appName, ApplicationType.task) == null) {
+			throw new IllegalArgumentException(String.format("Application name '%s' with type '%s' does not exist in the app registry.",
+					appName, ApplicationType.task));
+		}
+		repository.save(taskDefinition);
 	}
 
 	/**
