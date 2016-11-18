@@ -1,6 +1,5 @@
 = Spring Cloud Data Flow Reference Guide
 Sabby Anandan; Marius Bogoevici; Eric Bottard; Mark Fisher; Ilayaperumal Gopinathan; Gunnar Hillert; Mark Pollack; Patrick Peralta; Glenn Renfro; Thomas Risberg; Dave Syer; David Turanski; Janne Valkealahti
-v{project-version}
 :doctype: book
 :toc:
 :toclevels: 4
@@ -8,7 +7,6 @@ v{project-version}
 :numbered:
 :icons: font
 :hide-uri-scheme:
-:title-logo-image: image:logo.png[top=10%, align=center, pdfwidth=6cm]
 
 :spring-cloud-dataflow-docs: http://docs.spring.io/spring-cloud-dataflow/docs/{project-version}/reference
 :spring-cloud-dataflow-docs-current: http://docs.spring.io/spring-cloud-dataflow/docs/current-SNAPSHOT/reference/html/
@@ -21,60 +19,17 @@ v{project-version}
 // ======================================================================================
 
 include::preface.adoc[]
-
-ifdef::backend-pdf[]
-<<<
-endif::backend-pdf[]
 include::spring-cloud-dataflow-overview.adoc[]
-
-ifdef::backend-pdf[]
-<<<
-endif::backend-pdf[]
 include::architecture.adoc[]
-
-ifdef::backend-pdf[]
-<<<
-endif::backend-pdf[]
 include::getting-started.adoc[]
-
-ifdef::backend-pdf[]
-<<<
-endif::backend-pdf[]
 include::configuration.adoc[]
-
-ifdef::backend-pdf[]
-<<<
-endif::backend-pdf[]
 include::streams.adoc[]
-
-ifdef::backend-pdf[]
-<<<
-endif::backend-pdf[]
 include::tasks.adoc[]
-
-ifdef::backend-pdf[]
-<<<
-endif::backend-pdf[]
 include::dashboard.adoc[]
-
-ifdef::backend-pdf[]
-<<<
-endif::backend-pdf[]
 include::howto.adoc[]
-
-ifdef::backend-pdf[]
-<<<
-endif::backend-pdf[]
 include::api-guide.adoc[]
-
-ifdef::backend-pdf[]
-<<<
-endif::backend-pdf[]
 include::dataflow-template.adoc[]
-
-ifdef::backend-pdf[]
-<<<
-endif::backend-pdf[]
 include::appendix.adoc[]
+
 
 // ======================================================================================
