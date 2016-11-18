@@ -158,6 +158,428 @@ Make sure to add 'spring-boot-configuration-processor' as an optional dependency
 ----
 ====
 
+[[custom-applications]]
+== Creating custom applications
+
+While there are out of the box source, processor, sink applications available, one can extend these applications or write a custom link:https://github.com/spring-cloud/spring-cloud-stream[Spring Cloud Stream] application.
+
+To create any Spring Cloud Stream application, based on the requirement one or more Spring Cloud Stream binder dependencies need to be added as dependencies for the project.
+
+If there are multiple binders used by the application, refer the instructions <<passing_producer_consumer_properties>> on how to configure them.
+
+In the following section, step by step instructions are provided with an example on how to create custom source, processor and sink applications.
+
+[[custom-source-application]]
+=== Creating custom source
+
+Create a Spring Cloud Stream "Source" application that is responsible for sending the source events into the stream.
+
+To get started, let's assume this custom source application emits text messages at a configurable time interval and uses Spring Cloud Stream Kafka binder to send the messages to Kafka.
+
+The source application maven POM may look like this:
+
+[source,xml]
+----
+     <groupId>source</groupId>
+        <artifactId>custom-source</artifactId>
+        <version>1.0-SNAPSHOT</version>
+
+        <parent>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-parent</artifactId>
+            <version>1.4.0.RELEASE</version>
+        </parent>
+
+        <properties>
+            <start-class>custom.CustomSourceApplication</start-class>
+        </properties>
+
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-stream-binder-kafka</artifactId>
+                <version>1.1.0.BUILD-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-configuration-processor</artifactId>
+                <optional>true</optional>
+            </dependency>
+        </dependencies>
+
+        <build>
+            <plugins>
+                <plugin>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-maven-plugin</artifactId>
+                    <configuration>
+                        <classifier>exec</classifier>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </build>
+----
+
+The Spring Cloud Stream "Kafka" binder brings in the corresponding Spring Cloud Stream dependencies as well.
+
+The `configuration-processor` as an optional dependency is used for property white-listing <<spring-cloud-dataflow-stream-app-whitelisting>> and property editor content assists.
+
+NOTE: Make sure to add  `spring-boot-maven-plugin` to make the executable jar which will then be registered as a 'Source' application on Spring Cloud Data Flow Server.
+
+Following are the code snippets for the custom source that emits text messages based on the configured time delay. The text message being emitted can also be configured.
+
+[source,java]
+----
+@SpringBootApplication
+public class CustomSourceApplication {
+
+  public static void main(String[] args) {
+    SpringApplication.run(CustomSourceApplication.class, args);
+  }
+
+}
+----
+
+[source,java]
+----
+@Configuration
+@EnableBinding(Source.class)
+@EnableConfigurationProperties(CustomMessageSourceProperties.class)
+public class CustomMessageSource {
+
+	@Autowired
+	private CustomMessageSourceProperties properties;
+
+	@Bean
+	@InboundChannelAdapter(value = Source.OUTPUT, poller = @Poller(fixedDelay = "5000", maxMessagesPerPoll = "1"))
+	public MessageSource<String> sendTriggerMessage() {
+		return new MessageSource<String>() {
+			@Override
+			public Message<String> receive() {
+				return new GenericMessage<String>(properties.getText());
+			}
+		};
+	}
+}
+----
+
+[source,java]
+----
+@ConfigurationProperties("custom.prefix")
+public class CustomMessageSourceProperties {
+
+	private String text = "default";
+
+	public String getText() {
+		return text;
+	}
+
+	public void setText(String text) {
+		this.text = text;
+	}
+}
+----
+
+Now, we can register this custom source application with Spring Cloud Data Flow server as follows:
+
+```
+dataflow:>app register --name text-emitter --type source --uri maven://source:custom-source:jar:exec:1.0-SNAPSHOT
+Successfully registered application 'source:text-emitter'
+```
+For the custom applications, the maven 'artifacts' need to be available in the 'Remote' maven repository configured.
+If the application isn't yet uploaded into a remote repository and to proceed with locally installed maven artifact one can
+set the remote repository pointing to `local` maven repository where the applications' maven artifacts are installed.
+
+For example one can set the `remote` repository to point to maven local repository:
+
+```
+--maven.remoteRepositories.myLocal.url=file:///tmp/.m2/repository
+```
+
+White-listed properties can be displayed as follows:
+
+```
+dataflow:>app info source:text-emitter
+Information about source application 'text-emitter':
+Resource URI: maven://source:custom-source:jar:exec:1.0-SNAPSHOT
+╔══════════════════════════════╤══════════════════════════════╤══════════════════════════════╤══════════════════════════════╗
+║         Option Name          │         Description          │           Default            │             Type             ║
+╠══════════════════════════════╪══════════════════════════════╪══════════════════════════════╪══════════════════════════════╣
+║custom.prefix.text            │<unknown>                     │default                       │java.lang.String              ║
+╚══════════════════════════════╧══════════════════════════════╧══════════════════════════════╧══════════════════════════════╝
+```
+
+
+[[custom-processor-application]]
+=== Creating custom processor
+
+Similar to source application, the maven POM may look like this:
+
+[source,xml]
+----
+    <groupId>processor</groupId>
+    <artifactId>custom-processor</artifactId>
+    <version>1.0-SNAPSHOT</version>
+
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>1.4.0.RELEASE</version>
+    </parent>
+
+    <properties>
+        <start-class>custom.CustomProcessorApplication</start-class>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-stream-binder-kafka</artifactId>
+            <version>1.1.0.BUILD-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-configuration-processor</artifactId>
+            <optional>true</optional>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <classifier>exec</classifier>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+----
+
+Following are the code snippets for the custom Spring Cloud Stream "Processor" application that receives text messages from the 'source' and change the 'case' of the text message based on the configured property.
+
+[source,java]
+----
+@SpringBootApplication
+public class CustomProcessorApplication {
+
+	public static void main(String[] args) {
+		SpringApplication.run(CustomProcessorApplication.class, args);
+	}
+
+}
+----
+
+[source,java]
+----
+@ConfigurationProperties("custom.prefix")
+public class CustomMessageProcessorProperties {
+
+	private boolean toUpperCase;
+
+	public boolean isToUpperCase() {
+		return toUpperCase;
+	}
+
+	public void setToUpperCase(boolean toUpperCase) {
+		this.toUpperCase = toUpperCase;
+	}
+}
+----
+
+[source,java]
+----
+@Configuration
+@EnableBinding(Processor.class)
+@EnableConfigurationProperties(CustomMessageProcessorProperties.class)
+public class CustomMessageProcessor {
+
+	@Autowired
+	private CustomMessageProcessorProperties properties;
+
+	@StreamListener(Processor.INPUT)
+	@SendTo(Processor.OUTPUT)
+	public String changeCase(String textMessage) {
+		return (this.properties.isToUpperCase() ? textMessage.toUpperCase() : textMessage.toLowerCase());
+	}
+}
+----
+
+The application can be registered as:
+
+```
+dataflow:>app register --name text-case-changer --type processor --uri maven://processor:custom-processor:jar:exec:1.0-SNAPSHOT
+Successfully registered application 'processor:text-case-changer'
+```
+
+```
+dataflow:>app info processor:text-case-changer
+Information about processor application 'text-case-changer':
+Resource URI: maven://processor:custom-processor:jar:exec:1.0-SNAPSHOT
+╔══════════════════════════════╤══════════════════════════════╤══════════════════════════════╤══════════════════════════════╗
+║         Option Name          │         Description          │           Default            │             Type             ║
+╠══════════════════════════════╪══════════════════════════════╪══════════════════════════════╪══════════════════════════════╣
+║custom.prefix.to-upper-case   │<unknown>                     │false                         │java.lang.Boolean             ║
+╚══════════════════════════════╧══════════════════════════════╧══════════════════════════════╧══════════════════════════════╝
+```
+
+[[custom-sink-application]]
+=== Creating custom sink
+
+Sink application may have a maven POM look like this:
+
+[source,xml]
+----
+<groupId>sink</groupId>
+    <artifactId>custom-sink</artifactId>
+    <version>1.0-SNAPSHOT</version>
+
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>1.4.0.RELEASE</version>
+    </parent>
+
+    <properties>
+        <start-class>custom.CustomSinkApplication</start-class>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-stream-binder-kafka</artifactId>
+            <version>1.1.0.BUILD-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-configuration-processor</artifactId>
+            <optional>true</optional>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <classifier>exec</classifier>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+----
+
+This custom sink application receives the text message and logs it based on the logger level configured.
+
+The code snippets for this custom 'Sink' application are as follows:
+
+[source,java]
+----
+@SpringBootApplication
+public class CustomSinkApplication {
+
+	public static void main(String[] args) {
+		SpringApplication.run(CustomSinkApplication.class, args);
+	}
+
+}
+----
+
+[source,java]
+----
+@ConfigurationProperties("custom.prefix")
+public class CustomMessageSinkProperties {
+
+	private String logLevel = "INFO";
+
+	public String getLogLevel() {
+		return logLevel;
+	}
+
+	public void setLogLevel(String logLevel) {
+		this.logLevel = logLevel;
+	}
+
+}
+----
+
+[source,java]
+----
+@Configuration
+@EnableBinding(Sink.class)
+@EnableConfigurationProperties(CustomMessageSinkProperties.class)
+public class CustomMessageSink {
+
+	private final Log log = LogFactory.getLog(CustomMessageSink.class);
+
+	@Autowired
+	private CustomMessageSinkProperties properties;
+
+	@StreamListener(Processor.INPUT)
+	public void printMessage(String textMessage) {
+		if (this.properties.getLogLevel().equalsIgnoreCase("error")) {
+			log.error("Received message: " + textMessage);
+		}
+		else if (this.properties.getLogLevel().equalsIgnoreCase("debug")) {
+			log.debug("Received message: " + textMessage);
+		}
+		else {
+			log.info("Received message: " + textMessage);
+		}
+	}
+}
+----
+
+To register the sink application:
+
+```
+dataflow:>app register --name logger --type sink --uri maven://sink:custom-sink:jar:exec:1.0-SNAPSHOT
+Successfully registered application 'sink:logger'
+```
+
+```
+dataflow:>app info sink:logger
+Information about sink application 'logger':
+Resource URI: maven://sink:custom-sink:jar:exec:1.0-SNAPSHOT
+╔══════════════════════════════╤══════════════════════════════╤══════════════════════════════╤══════════════════════════════╗
+║         Option Name          │         Description          │           Default            │             Type             ║
+╠══════════════════════════════╪══════════════════════════════╪══════════════════════════════╪══════════════════════════════╣
+║custom.prefix.log-level       │<unknown>                     │INFO                          │java.lang.String              ║
+╚══════════════════════════════╧══════════════════════════════╧══════════════════════════════╧══════════════════════════════╝
+```
+
+Let's create a stream with the custom, source, processor applications above.
+Make sure that the applications are registered with Spring Cloud Data Flow Server:
+
+```
+dataflow:>app list
+╔════════════╤═════════════════╤══════╤════╗
+║   source   │    processor    │ sink │task║
+╠════════════╪═════════════════╪══════╪════╣
+║text-emitter│text-case-changer│logger│    ║
+╚════════════╧═════════════════╧══════╧════╝
+
+```
+
+```
+dataflow:>stream create a1 --definition "text-emitter --text=welcome | text-case-changer --to-upper-case=true | logger --log-level=error" --deploy
+Created new stream 'a1'
+Deployment request has been sent
+```
+
+The stream's logger app will have the below output:
+
+```
+2016-11-18 15:14:24.406 ERROR 11156 --- [afka-listener-2] custom.CustomMessageSink                 : Received message: WELCOME
+2016-11-18 15:14:29.406 ERROR 11156 --- [afka-listener-2] custom.CustomMessageSink                 : Received message: WELCOME
+2016-11-18 15:14:34.407 ERROR 11156 --- [afka-listener-2] custom.CustomMessageSink                 : Received message: WELCOME
+2016-11-18 15:14:39.409 ERROR 11156 --- [afka-listener-2] custom.CustomMessageSink                 : Received message: WELCOME
+```
+
+
 [[spring-cloud-dataflow-create-stream]]
 == Creating a Stream
 
