@@ -32,6 +32,35 @@ typical lifecycle for tasks in the context of Spring Cloud Data Flow:
 4. Task Execution
 5. Destroy a Task Definition
 
+=== Creating a custom Task Application
+While Spring Cloud Task does provide a number of out of the box applications (via the
+https://github.com/spring-cloud/spring-cloud-task-app-starters[spring-cloud-task-app-starters]),
+most task applications will be custom developed.  In order to create a custom task application:
+
+. Create a new project via http://start.spring.io[Spring Initializer] via either the
+website or your IDE making sure to select the following starters:
+.. `Cloud Task` - This dependency is the `spring-cloud-starter-task`.
+.. `JDBC` - This is the dependency for the `spring-jdbc` starter.
+. Within your new project, create a new class that will serve as your main class:
+
+```
+@EnableTask
+@SpringBootApplication
+public class MyTask {
+
+    public static void main(String[] args) {
+		SpringApplication.run(MyTask.class, args);
+	}
+}
+```
+[start=3]
+. With this, you'll need one or more `CommandLineRunner` or `ApplicationRunner` within
+your application.  You can either implement your own or use the ones provided by Spring
+Boot (there is one for running batch jobs for example).
+. Packaging your application up via Spring Boot into an über jar is done via the standard
+  Boot conventions.
+.  The packaged application can be registered and deployed as noted below.
+
 === Registering a Task Application
 Register a Task App with the App Registry using the Spring Cloud Data Flow Shell
 `app register` command. You must provide a unique name and a URI that can be
