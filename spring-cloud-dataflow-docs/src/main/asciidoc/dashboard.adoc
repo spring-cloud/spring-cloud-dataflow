@@ -196,6 +196,12 @@ a valid application and it supports the options
 specified. If validation fails the editor will show the errors with more
 information via tooltips. 
 
+To make it easier to enter definitions into the text area, content assist is
+supported. Pressing *Ctrl+Space* will invoke content assist to suggest
+simple task names (based on the line on which it is invoked), task applications
+and task application options. Press ESCape to close the content assist
+window without taking a selection.
+
 If the validator should not verify the applications or the options
 (for example if specifying non-whitelisted options to the
 applications) then turn off that part of validation by toggling the checkbox
