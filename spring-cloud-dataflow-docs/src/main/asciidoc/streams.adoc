@@ -158,6 +158,40 @@ Make sure to add 'spring-boot-configuration-processor' as an optional dependency
 ----
 ====
 
+[[custom-applications]]
+== Creating custom applications
+
+While there are out of the box source, processor, sink applications available, one can extend these applications or write a custom link:https://github.com/spring-cloud/spring-cloud-stream[Spring Cloud Stream] application.
+
+The process of creating Spring Cloud Stream applications via Spring Initializr is detailed in the Spring Cloud Stream {spring-cloud-stream-docs}#_getting_started[documentation].
+It is possible to include multiple binders to an application.
+If doing so, refer the instructions in <<passing_producer_consumer_properties>> on how to configure them.
+
+For supporting property whitelisting, Spring Cloud Stream applications running in Spring Cloud Data Flow may include the Spring Boot `configuration-processor` as an optional dependency, as in the following example.
+
+[source,xml]
+----
+<dependencies>
+  <!-- other dependencies -->
+  <dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-configuration-processor</artifactId>
+    <optional>true</optional>
+  </dependency>
+</dependencies>
+
+----
+
+[NOTE]
+====
+Make sure that the `spring-boot-maven-plugin` is included in the POM. 
+The plugin is necesary for creating the executable jar that will be registered with Spring Cloud Data Flow.
+Spring Initialzr will include the plugin in the generated POM.
+====
+
+Once a custom application has been created, it can be registered as described in <<spring-cloud-dataflow-register-appss>>.
+
+
 [[spring-cloud-dataflow-create-stream]]
 == Creating a Stream
 
