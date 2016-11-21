@@ -3,8 +3,9 @@
 
 [[dataflow-documentation-about]]
 == About the documentation
-The Spring Cloud Data Flow reference guide is available as {spring-cloud-dataflow-docs}/html[html] and
-{spring-cloud-dataflow-docs}/pdf/spring-cloud-dataflow-reference.pdf[pdf] documents. The latest copy
+The Spring Cloud Data Flow reference guide is available as {spring-cloud-dataflow-docs}/html[html],
+{spring-cloud-dataflow-docs}/pdf/spring-cloud-dataflow-reference.pdf[pdf]
+and {spring-cloud-dataflow-docs}/epub/spring-cloud-dataflow-reference.epub[epub] documents. The latest copy
 is available at {spring-cloud-dataflow-docs-current}.
 
 Copies of this document may be made for your own use and for
