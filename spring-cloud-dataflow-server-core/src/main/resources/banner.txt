@@ -9,4 +9,4 @@
  | |_| | (_| | || (_| | |  _| | | (_) \ V  V /  ${AnsiColor.BLUE}  / / / / / /${AnsiColor.DEFAULT}
  |____/ \__,_|\__\__,_| |_|   |_|\___/ \_/\_/   ${AnsiColor.BLUE} /_/_/_/_/_/${AnsiColor.DEFAULT}
 
- ${AnsiColor.GREEN}@project.version@${AnsiColor.DEFAULT}
+${application.title} ${AnsiColor.GREEN}${application.formatted-version}${AnsiColor.DEFAULT}
