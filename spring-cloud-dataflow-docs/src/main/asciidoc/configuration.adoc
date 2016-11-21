@@ -571,6 +571,34 @@ and `health` endpoints are available to unauthenticated users, you should enable
 the Data Flow Server and also http://codecentric.github.io/spring-boot-admin/1.4.3/#_securing_spring_boot_admin_server[configure Spring Boot Admin server's security] so that it 
 can securely access the actuator endpoints.
 
+=== Monitoring Deployed Applications
+
+The applications that are deployed by Spring Cloud Data Flow are based on Spring Boot which 
+contains several features for monitoring your application in production.  Each deployed
+application contains http://docs.spring.io/spring-boot/docs/current/reference/html/production-ready-endpoints.html[several web endpoints] for monitoring and interacting with Stream and Task applications.
+
+In particular, the metrics endpoint contains counters
+and gauges for HTTP requests, http://docs.spring.io/spring-boot/docs/current/reference/html/production-ready-metrics.html#production-ready-system-metrics[System Metrics] (such as JVM stats), http://docs.spring.io/spring-boot/docs/current/reference/html/production-ready-metrics.html#production-ready-datasource-metrics[DataSource Metrics] and http://docs.spring.io/spring-integration/reference/htmlsingle/#mgmt-channel-features[Message Channel Metrics] (such as message rates).  In turn, these metrics can be exported periodically to various application monitoring tools via 
+http://docs.spring.io/spring-boot/docs/current/reference/html/production-ready-metrics.html#production-ready-metric-writers[MetricWriter] implementations.  You can control how often and which Spring Boot metrics are exported though the use of include and exclude name filters.
+
+The project https://github.com/spring-cloud/spring-cloud-dataflow-metrics[Spring Cloud Data Flow Metrics] provides the foundation for 
+exporting Spring Boot metrics.  The main project provides Spring Boots AutoConfiguration to setup the exporting process and common 
+functionality such as defining a metric name prefix appropriate for your environement.  For example, you may want to include the
+region where the application is running in addition to the application's name and stream/task to which it belongs.  
+The main project also includes a `LogMetricWriter` so that
+metrics can be stored into the log file.  While very simple in approach, log files are often ingested into application monitoring tools
+(such as Splunk) where they can be further processed to create dashboards of an application's performance.  
+
+The project https://github.com/spring-cloud/spring-cloud-dataflow-metrics-datadog[Spring Cloud Data Flow Metrics Datadog Metrics] provides
+integration to export Spring Boot metrics to https://www.datadoghq.com/[Datadog]. 
+
+To make use of this functionality, you will need to add additional dependencies into your Stream and Task applications.  To customize
+the "out of the box" Task and Stream applications you can use the http://start-scs.cfapps.io/[Data Flow Initializr] to generate a 
+project and then add to the generated Maven pom file the MetricWriter implementation you want to use.  The documentation on the 
+Data Flow Metrics project pages provides the additional information you need to get started.
+
+
+
 
 
 
