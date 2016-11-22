@@ -7,7 +7,7 @@ management:
 info:
   app:
     name: "@project.artifactId@"
-    description: "@project.description@"
+    description: "@project.name@"
     version: "@project.version@"
 security:
   basic:
