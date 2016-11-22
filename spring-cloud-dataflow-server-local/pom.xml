@@ -5,7 +5,7 @@
 	<artifactId>spring-cloud-dataflow-server-local</artifactId>
 	<version>1.1.0.BUILD-SNAPSHOT</version>
 	<packaging>jar</packaging>
-	<name>spring-cloud-dataflow-server-local</name>
+	<name>Spring Cloud Data Flow Local Server</name>
 	<description>Spring Cloud Data Flow Local Server</description>
 	<url>https://http://cloud.spring.io/spring-cloud-dataflow/</url>
 	<parent>
