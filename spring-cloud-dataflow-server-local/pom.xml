@@ -15,6 +15,14 @@
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
 
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<java.version>1.8</java.version>
+		<spring-cloud-task.version>1.1.0.RELEASE</spring-cloud-task.version>
+		<spring-cloud.version>Camden.SR2</spring-cloud.version>
+	</properties>
+
 	<organization>
 		<name>Pivotal Software, Inc.</name>
 		<url>https://www.spring.io</url>
@@ -59,13 +67,7 @@
 			<organizationUrl>http://www.spring.io</organizationUrl>
 		</developer>
 	</developers>
-	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-		<java.version>1.8</java.version>
-		<spring-cloud-task.version>1.1.0.RC1</spring-cloud-task.version>
-		<spring-cloud.version>Camden.SR2</spring-cloud.version>
-	</properties>
+
 
 	<dependencies>
 		<dependency>
