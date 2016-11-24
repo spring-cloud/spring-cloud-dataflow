@@ -88,7 +88,7 @@ public class BindingPropertyKeys {
 	 */
 	public static final String OUTPUT_PARTITION_COUNT = OUTPUT_BINDING_KEY_PREFIX + "producer.partitionCount";
 
-	/**
+	 /**
 	 * Required groups for output binding. Ensures that if the producer is created first, consumers will still
 	 * receive data.
 	 */

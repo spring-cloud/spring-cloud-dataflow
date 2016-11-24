@@ -60,11 +60,7 @@ import org.springframework.cloud.dataflow.core.StreamPropertyKeys;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
-import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
-import org.springframework.cloud.dataflow.server.repository.DeploymentKey;
-import org.springframework.cloud.dataflow.server.repository.InMemoryDeploymentIdRepository;
-import org.springframework.cloud.dataflow.server.repository.InMemoryStreamDefinitionRepository;
-import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
+import org.springframework.cloud.dataflow.server.repository.*;
 import org.springframework.cloud.deployer.resource.maven.MavenProperties;
 import org.springframework.cloud.deployer.resource.maven.MavenResource;
 import org.springframework.cloud.deployer.resource.maven.MavenResourceLoader;
@@ -135,7 +131,7 @@ public class StreamControllerTests {
 	public void testConstructorMissingRepository() {
 		StreamDeploymentController deploymentController = new StreamDeploymentController(
 				new InMemoryStreamDefinitionRepository(), new InMemoryDeploymentIdRepository(), appRegistry,
-				appDeployer, metadataResolver, new CommonApplicationProperties());
+				appDeployer, metadataResolver, new CommonApplicationProperties(), new InMemoryStreamAppPropertiesRepository());
 		new StreamDefinitionController(null, null, deploymentController, appDeployer, appRegistry);
 	}
 
@@ -148,7 +144,7 @@ public class StreamControllerTests {
 	public void testConstructorMissingDeployer() {
 		StreamDeploymentController deploymentController = new StreamDeploymentController(
 				new InMemoryStreamDefinitionRepository(), new InMemoryDeploymentIdRepository(), appRegistry,
-				appDeployer, metadataResolver, new CommonApplicationProperties());
+				appDeployer, metadataResolver, new CommonApplicationProperties(),new InMemoryStreamAppPropertiesRepository());
 		new StreamDefinitionController(new InMemoryStreamDefinitionRepository(), new InMemoryDeploymentIdRepository(),
 				deploymentController, null, appRegistry);
 	}

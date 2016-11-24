@@ -34,6 +34,7 @@ import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
+import org.springframework.cloud.dataflow.server.repository.StreamAppPropertiesRepository;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.core.io.ClassPathResource;
@@ -61,6 +62,9 @@ public class StreamDeploymentControllerTests {
 	@Mock
 	private AppDeployer appDeployer;
 
+	@Mock
+	private StreamAppPropertiesRepository propertiesRepository;
+
 	private ApplicationConfigurationMetadataResolver metadataResolver = new BootApplicationConfigurationMetadataResolver();
 
 	@Mock
@@ -72,7 +76,7 @@ public class StreamDeploymentControllerTests {
 	@Before
 	public void setup() {
 		controller = new StreamDeploymentController(streamDefinitionRepository, deploymentIdRepository,
-				appRegistry, appDeployer, metadataResolver, commonApplicationProperties);
+				appRegistry, appDeployer, metadataResolver, commonApplicationProperties, propertiesRepository);
 	}
 
 	@Test

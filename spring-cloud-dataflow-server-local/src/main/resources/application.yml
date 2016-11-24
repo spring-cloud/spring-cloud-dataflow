@@ -3,6 +3,12 @@ info:
     name: "@project.artifactId@"
     description: "@project.name@"
     version: "@project.version@"
+spring:
+  datasource:
+    url: "jdbc:mysql://localhost:3306/spring_cloud_dataflow"
+    username: "root"
+    password: "root"
+    driver-class-name: "com.mysql.jdbc.Driver"
 
 #server:
 #  port: 8443

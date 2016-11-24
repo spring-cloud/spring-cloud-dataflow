@@ -38,12 +38,7 @@ import org.springframework.cloud.dataflow.server.controller.TaskDefinitionContro
 import org.springframework.cloud.dataflow.server.controller.TaskDeploymentController;
 import org.springframework.cloud.dataflow.server.controller.TaskExecutionController;
 import org.springframework.cloud.dataflow.server.registry.DataFlowUriRegistryPopulator;
-import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
-import org.springframework.cloud.dataflow.server.repository.InMemoryDeploymentIdRepository;
-import org.springframework.cloud.dataflow.server.repository.InMemoryStreamDefinitionRepository;
-import org.springframework.cloud.dataflow.server.repository.InMemoryTaskDefinitionRepository;
-import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
-import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
+import org.springframework.cloud.dataflow.server.repository.*;
 import org.springframework.cloud.dataflow.server.service.TaskService;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskService;
 import org.springframework.cloud.deployer.resource.maven.MavenProperties;
@@ -99,11 +94,11 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 
 	@Bean
 	public StreamDeploymentController streamDeploymentController(StreamDefinitionRepository repository,
-			DeploymentIdRepository deploymentIdRepository, AppRegistry registry,
-			ApplicationConfigurationMetadataResolver metadataResolver,
-			CommonApplicationProperties applicationProperties) {
+																 DeploymentIdRepository deploymentIdRepository, AppRegistry registry,
+																 ApplicationConfigurationMetadataResolver metadataResolver,
+																 CommonApplicationProperties applicationProperties, StreamAppPropertiesRepository proprepository) {
 		return new StreamDeploymentController(repository, deploymentIdRepository, registry, appDeployer(),
-				metadataResolver, applicationProperties);
+				metadataResolver, applicationProperties, proprepository);
 	}
 
 	@Bean

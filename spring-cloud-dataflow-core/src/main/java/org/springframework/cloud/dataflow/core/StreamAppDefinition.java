@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.dataflow.core;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -29,7 +30,7 @@ import org.springframework.util.Assert;
  *
  * @author Mark Fisher
  */
-public class StreamAppDefinition extends DataFlowAppDefinition {
+public class StreamAppDefinition extends DataFlowAppDefinition implements Serializable {
 
 	/**
 	 * Name of stream unit this app instance belongs to.

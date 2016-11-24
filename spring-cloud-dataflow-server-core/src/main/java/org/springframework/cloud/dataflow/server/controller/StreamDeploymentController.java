@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -38,10 +39,7 @@ import org.springframework.cloud.dataflow.rest.resource.StreamDeploymentResource
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
 import org.springframework.cloud.dataflow.server.DataFlowServerUtil;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
-import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
-import org.springframework.cloud.dataflow.server.repository.DeploymentKey;
-import org.springframework.cloud.dataflow.server.repository.NoSuchStreamDefinitionException;
-import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
+import org.springframework.cloud.dataflow.server.repository.*;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.app.AppStatus;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
@@ -56,6 +54,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+
+import static java.util.stream.Stream.concat;
 
 /**
  * Controller for deployment operations on {@link StreamDefinition}.
@@ -102,6 +102,9 @@ public class StreamDeploymentController {
 	 */
 	private final CommonApplicationProperties commonApplicationProperties;
 
+	private final StreamAppPropertiesRepository streamAppPropertiesRepository;
+
+
 	/**
 	 * Create a {@code StreamDeploymentController} that delegates
 	 * <ul>
@@ -114,22 +117,25 @@ public class StreamDeploymentController {
 	 * @param registry               the registry this controller will use to lookup apps
 	 * @param deployer               the deployer this controller will use to deploy stream apps
 	 * @param commonProperties         common set of application properties
+     * @param streamAppPropertiesRepository     the repository this controller will use for managing streamApp properties
 	 */
 	public StreamDeploymentController(StreamDefinitionRepository repository,
-			DeploymentIdRepository deploymentIdRepository, AppRegistry registry, AppDeployer deployer,
-			ApplicationConfigurationMetadataResolver metadataResolver, CommonApplicationProperties commonProperties) {
+                                      DeploymentIdRepository deploymentIdRepository, AppRegistry registry, AppDeployer deployer,
+                                      ApplicationConfigurationMetadataResolver metadataResolver, CommonApplicationProperties commonProperties, StreamAppPropertiesRepository streamAppPropertiesRepository) {
 		Assert.notNull(repository, "StreamDefinitionRepository must not be null");
 		Assert.notNull(deploymentIdRepository, "DeploymentIdRepository must not be null");
 		Assert.notNull(registry, "AppRegistry must not be null");
 		Assert.notNull(deployer, "AppDeployer must not be null");
 		Assert.notNull(metadataResolver, "MetadataResolver must not be null");
 		Assert.notNull(commonProperties, "CommonApplicationProperties must not be null");
+        Assert.notNull(repository, "RuntimeRepository must not be null");
 		this.repository = repository;
 		this.deploymentIdRepository = deploymentIdRepository;
 		this.registry = registry;
 		this.deployer = deployer;
 		this.whitelistProperties = new WhitelistProperties(metadataResolver);
 		this.commonApplicationProperties = commonProperties;
+        this.streamAppPropertiesRepository = streamAppPropertiesRepository;
 	}
 
 	/**
@@ -230,28 +236,60 @@ public class StreamDeploymentController {
 			if (isDownStreamAppPartitioned) {
 				updateProducerPartitionProperties(appDeploymentProperties, nextAppCount);
 			}
-			nextAppCount = getInstanceCount(appDeploymentProperties);
+
+            nextAppCount = getInstanceCount(appDeploymentProperties);
 			isDownStreamAppPartitioned = isPartitionedConsumer(appDeploymentProperties,
 					upstreamAppSupportsPartition);
-			AppRegistration registration = this.registry.find(currentApp.getRegisteredAppName(), type);
-			Assert.notNull(registration, String.format("no application '%s' of type '%s' exists in the registry",
-					currentApp.getName(), type));
-			Resource resource = registration.getResource();
-			currentApp = qualifyProperties(currentApp, resource);
-			AppDeploymentRequest request = currentApp.createDeploymentRequest(resource,
-					whitelistProperties.qualifyProperties(appDeploymentProperties, resource));
-			try {
-				String id = this.deployer.deploy(request);
-				this.deploymentIdRepository.save(DeploymentKey.forStreamAppDefinition(currentApp), id);
-			}
-			// If the deployer implementation handles the deployment request synchronously, log warning message if
-			// any exception is thrown out of the deployment and proceed to the next deployment.
-			catch (Exception e) {
-				loggger.warn(String.format("Exception when deploying the app %s: %s", currentApp, e.getMessage()));
-			}
+
+			this.deployStreamApplication(currentApp, appDeploymentProperties, false);
 		}
 	}
 
+	public void deployStreamApplication(String key, Integer count) {
+        StreamAppDefinition definition = streamAppPropertiesRepository.findOne(key);
+        Assert.notNull(definition, key + " application doesn't exist in the registry");
+        loggger.info("Scaling Application "+ key +" required ");
+        for(int i = 0; i < count; ++i)
+            deployStreamApplication(definition, definition.getProperties(), true);
+
+    }
+
+	private void deployStreamApplication(StreamAppDefinition currentApp, Map<String, String> appDeploymentProperties, boolean known) {
+        ApplicationType type = DataFlowServerUtil.determineApplicationType(currentApp);
+		AppRegistration registration = this.registry.find(currentApp.getRegisteredAppName(), type);
+		Assert.notNull(registration, String.format("no application '%s' of type '%s' exists in the registry",
+				currentApp.getName(), type));
+		Resource resource = registration.getResource();
+
+        String key = DeploymentKey.forStreamAppDefinition(currentApp);
+        if(!known) {
+            currentApp = StreamAppDefinition.Builder.from(currentApp).addProperties(appDeploymentProperties).build(currentApp.getStreamName());
+            streamAppPropertiesRepository.save(key, currentApp);
+        }
+        else {
+            currentApp = StreamAppDefinition
+                    .Builder
+                    .from(currentApp)
+                    .setProperty(AppDeployer.COUNT_PROPERTY_KEY, String.valueOf(this.getInstanceCount(currentApp.getProperties())+1))
+                    .setLabel(currentApp.getName()+currentApp.getProperties().get(AppDeployer.COUNT_PROPERTY_KEY))
+                    .build(currentApp.getStreamName());
+        }
+
+        if(!known)
+            currentApp = qualifyProperties(currentApp, resource);
+        AppDeploymentRequest request = currentApp.createDeploymentRequest(resource,
+                whitelistProperties.qualifyProperties(appDeploymentProperties, resource));
+		try {
+			String id = this.deployer.deploy(request);
+            if(!known)
+			    this.deploymentIdRepository.save(key, id);
+		}
+		// If the deployer implementation handles the deployment request synchronously, log warning message if
+		// any exception is thrown out of the deployment and proceed to the next deployment.
+		catch (Exception e) {
+			loggger.warn(String.format("Exception when deploying the app %s: %s", currentApp, e.getMessage()));
+		}
+	}
 	/**
 	 * Return a copy of a given app definition where short form parameters have been expanded to their long form
 	 * (amongst the whitelisted supported properties of the app) if applicable.
@@ -388,6 +426,7 @@ public class StreamDeploymentController {
 	 */
 	private void undeployStream(StreamDefinition stream) {
 		for (StreamAppDefinition appDefinition : stream.getAppDefinitions()) {
+            this.streamAppPropertiesRepository.delete(appDefinition.getStreamName()+appDefinition.getRegisteredAppName());
 			String key = DeploymentKey.forStreamAppDefinition(appDefinition);
 			String id = this.deploymentIdRepository.findOne(key);
 			// if id is null, assume nothing is deployed

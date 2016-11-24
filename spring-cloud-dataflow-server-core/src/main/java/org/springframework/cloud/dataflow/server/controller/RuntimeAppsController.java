@@ -16,27 +16,19 @@
 
 package org.springframework.cloud.dataflow.server.controller;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.rest.resource.AppInstanceStatusResource;
 import org.springframework.cloud.dataflow.rest.resource.AppStatusResource;
-import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
-import org.springframework.cloud.dataflow.server.repository.DeploymentKey;
-import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
+import org.springframework.cloud.dataflow.server.repository.*;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.app.AppInstanceStatus;
 import org.springframework.cloud.deployer.spi.app.AppStatus;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.web.PagedResourcesAssembler;
-import org.springframework.hateoas.ExposesResourceFor;
-import org.springframework.hateoas.PagedResources;
-import org.springframework.hateoas.ResourceAssembler;
-import org.springframework.hateoas.Resources;
+import org.springframework.hateoas.*;
 import org.springframework.hateoas.mvc.ResourceAssemblerSupport;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
@@ -83,20 +75,20 @@ public class RuntimeAppsController {
 
 	/**
 	 * Instantiates a new runtime apps controller.
-	 *
-	 * @param streamDefinitionRepository the repository this controller will use for stream CRUD operations
+	 *  @param streamDefinitionRepository the repository this controller will use for stream CRUD operations
 	 * @param deploymentIdRepository the repository this controller will use for deployment IDs
-	 * @param appDeployer the deployer this controller will use to deploy stream apps
-	 */
+     * @param appDeployer the deployer this controller will use to deploy stream apps
+     */
 	public RuntimeAppsController(StreamDefinitionRepository streamDefinitionRepository, DeploymentIdRepository deploymentIdRepository,
-			AppDeployer appDeployer) {
-		Assert.notNull(streamDefinitionRepository, "StreamDefinitionRepository must not be null");
+                                 AppDeployer appDeployer) {
+        Assert.notNull(streamDefinitionRepository, "StreamDefinitionRepository must not be null");
 		Assert.notNull(deploymentIdRepository, "DeploymentIdRepository must not be null");
 		Assert.notNull(appDeployer, "AppDeployer must not be null");
-		this.streamDefinitionRepository = streamDefinitionRepository;
+        this.streamDefinitionRepository = streamDefinitionRepository;
 		this.deploymentIdRepository = deploymentIdRepository;
 		this.appDeployer = appDeployer;
-	}
+
+    }
 
 	@RequestMapping
 	public PagedResources<AppStatusResource> list(PagedResourcesAssembler<AppStatus> assembler) {
@@ -161,8 +153,11 @@ public class RuntimeAppsController {
 
 		private final AppDeployer appDeployer;
 
-		public AppInstanceController(AppDeployer appDeployer) {
+		private final StreamDeploymentController controller;
+
+		public AppInstanceController(AppDeployer appDeployer, StreamDeploymentController controller) {
 			this.appDeployer = appDeployer;
+			this.controller = controller;
 		}
 
 		@RequestMapping
@@ -190,7 +185,12 @@ public class RuntimeAppsController {
 			throw new ResourceNotFoundException();
 		}
 
+		@RequestMapping("/scaleUp")
+        public void add(@PathVariable String appId) {
+			controller.deployStreamApplication(appId, 1);
+        }
 	}
+
 
 	@SuppressWarnings("serial")
 	@ResponseStatus(HttpStatus.NOT_FOUND)
