@@ -21,8 +21,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.springframework.util.StringUtils;
 
@@ -34,6 +39,8 @@ import org.springframework.util.StringUtils;
  */
 public final class DeploymentPropertiesUtils {
 
+	private static final Logger logger = LoggerFactory.getLogger(DeploymentPropertiesUtils.class);
+
 	private DeploymentPropertiesUtils() {
 		// prevent instantiation
 	}
@@ -41,7 +48,7 @@ public final class DeploymentPropertiesUtils {
 	/**
 	 * Pattern used for parsing a String of comma-delimited key=value pairs.
 	 */
-	private static final Pattern DEPLOYMENT_PROPERTIES_PATTERN = Pattern.compile(",\\s*app\\.[^\\.]+\\.[^=]+=");
+	private static final Pattern DEPLOYMENT_PROPERTIES_PATTERN = Pattern.compile(",\\s*(app|deployer)\\.[^\\.]+\\.[^=]+=");
 
 	/**
 	 * Pattern used for parsing a String of command-line arguments.
@@ -50,7 +57,7 @@ public final class DeploymentPropertiesUtils {
 
 	/**
 	 * Parses a String comprised of 0 or more comma-delimited key=value pairs where each key has the format:
-	 * {@code app.[appname].[key]}.
+	 * {@code app.[appname].[key]} or {@code deployer.[appname].[key]}.
 	 * Values may themselves contain commas, since the split points will be based upon the key pattern.
 	 *
 	 * @param s the string to parse
@@ -68,6 +75,78 @@ public final class DeploymentPropertiesUtils {
 			addKeyValuePairAsProperty(s.substring(start), deploymentProperties);
 		}
 		return deploymentProperties;
+	}
+
+	/**
+	 * Retain only properties that are meant for the <em>deployer</em> of a given app
+	 * (those that start with {@code deployer.[appname]} or {@code deployer.*})
+	 * and qualify all property values with the {@code spring.cloud.deployer.} prefix.
+	 */
+	public static Map<String, String> extractAndQualifyDeployerProperties(Map<String, String> input, String appName) {
+		final String wildcardPrefix = "deployer.*.";
+		final int wildcardLength = wildcardPrefix.length();
+		final String appPrefix = String.format("deployer.%s.", appName);
+		final int appLength = appPrefix.length();
+
+		// Using a TreeMap makes sure wildcard entries appear before app specific ones
+		Map<String, String> result = new TreeMap<>(input).entrySet().stream()
+			.filter(kv -> kv.getKey().startsWith(wildcardPrefix) || kv.getKey().startsWith(appPrefix))
+			.collect(Collectors.toMap(
+				kv -> kv.getKey().startsWith(wildcardPrefix)
+					? "spring.cloud.deployer." + kv.getKey().substring(wildcardLength)
+					: "spring.cloud.deployer." + kv.getKey().substring(appLength),
+				kv -> kv.getValue(),
+				(fromWildcard, fromApp) -> fromApp
+				)
+			);
+
+		Map<String, String> deprecated = extractDeprecatedDeployerProperties(input, appName);
+		// Also, 'count' used to be treated as a special case. Handle here
+		String deprecatedWildcardCound = input.get("app.*.count");
+		String deprecatedCount = input.getOrDefault("app." + appName + ".count", deprecatedWildcardCound);
+		if (deprecatedCount != null && deprecated.get("spring.cloud.deployer.count") == null) {
+			deprecated.put("spring.cloud.deployer.count", deprecatedCount);
+			logger.warn("Usage of application property 'app.{}.count' to specify number of instances has been deprecated and will be removed in a future release\n" +
+				"Instead, please use 'deployer.{}.count = {}'",
+				appName, appName, deprecatedCount);
+		}
+
+
+		if (deprecated.isEmpty()) {
+			return result;
+		} else {
+			deprecated.entrySet().forEach(kv -> {
+				logger.warn("Usage of application property prefix 'spring.cloud.deployer' to pass properties to the deployer has been deprecated and will be removed in a future release\n" +
+					"Instead of 'app.{}.{} = {}', please use\n" +
+					"           'deployer.{}.{} = {}'",
+					appName, kv.getKey(), kv.getValue(),
+					appName, kv.getKey().substring("spring.cloud.deployer.".length()), kv.getValue());
+			});
+			if (result.isEmpty()) {
+				return deprecated;
+			} else {
+				return result;
+			}
+		}
+
+	}
+
+	private static Map<String, String> extractDeprecatedDeployerProperties(Map<String, String> input, String appName) {
+		final String wildcardPrefix = "app.*.spring.cloud.deployer.";
+		final int wildcardLength = "app.*.".length();
+		final String appPrefix = String.format("app.%s.spring.cloud.deployer.", appName);
+		final int appLength = String.format("app.%s.", appName).length();
+
+		return new TreeMap<>(input).entrySet().stream()
+			.filter(kv -> kv.getKey().startsWith(wildcardPrefix) || kv.getKey().startsWith(appPrefix))
+			.collect(Collectors.toMap(
+				kv -> kv.getKey().startsWith(wildcardPrefix)
+					? kv.getKey().substring(wildcardLength)
+					: kv.getKey().substring(appLength),
+				kv -> kv.getValue(),
+				(fromWildcard, fromApp) -> fromApp
+				)
+			);
 	}
 
 	/**

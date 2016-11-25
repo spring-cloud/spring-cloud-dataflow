@@ -54,6 +54,7 @@ import org.mockito.ArgumentCaptor;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.core.BindingPropertyKeys;
 import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
@@ -75,7 +76,6 @@ import org.springframework.cloud.deployer.spi.app.AppInstanceStatus;
 import org.springframework.cloud.deployer.spi.app.AppStatus;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
-import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
@@ -724,7 +724,7 @@ public class StreamControllerTests {
 		mockMvc.perform(
 				post("/streams/deployments/myStream").param("properties",
 						"app.time.producer.partitionKeyExpression=payload," +
-								"app.log.count=2," +
+								"deployer.log.count=2," +
 								"app.log.consumer.concurrency=3")
 						.accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isCreated());
@@ -760,7 +760,7 @@ public class StreamControllerTests {
 		mockMvc.perform(
 				post("/streams/deployments/myStream").param("properties",
 						"app.*.producer.partitionKeyExpression=payload," +
-								"app.*.count=2," +
+								"deployer.*.count=2," +
 								"app.*.consumer.concurrency=3")
 						.accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isCreated());
@@ -798,7 +798,7 @@ public class StreamControllerTests {
 		mockMvc.perform(
 				post("/streams/deployments/myStream").param("properties",
 						"app.*.producer.partitionKeyExpression=payload," +
-								"app.*.count=2," +
+								"deployer.*.count=2," +
 								"app.*.consumer.concurrency=3")
 						.accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isCreated());

@@ -45,6 +45,7 @@ import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepo
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.app.AppStatus;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
+import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.core.io.Resource;
 import org.springframework.hateoas.ExposesResourceFor;
@@ -212,34 +213,46 @@ public class StreamDeploymentController {
 		while (iterator.hasNext()) {
 			StreamAppDefinition currentApp = iterator.next();
 			ApplicationType type = DataFlowServerUtil.determineApplicationType(currentApp);
-			Map<String, String> appDeploymentProperties = extractAppDeploymentProperties(currentApp, streamDeploymentProperties);
-			appDeploymentProperties.put(AppDeployer.GROUP_PROPERTY_KEY, currentApp.getStreamName());
-			boolean upstreamAppSupportsPartition = upstreamAppHasPartitionInfo(stream, currentApp, streamDeploymentProperties);
-			// Set instance count property
-			if (appDeploymentProperties.containsKey(AppDeployer.COUNT_PROPERTY_KEY)) {
-				appDeploymentProperties.put(StreamPropertyKeys.INSTANCE_COUNT, appDeploymentProperties.get(AppDeployer.COUNT_PROPERTY_KEY));
-			}
-			if (!type.equals(ApplicationType.source)) {
-				appDeploymentProperties.put(AppDeployer.INDEXED_PROPERTY_KEY, "true");
-			}
-			// consumer app partition properties
-			if (upstreamAppSupportsPartition) {
-				updateConsumerPartitionProperties(appDeploymentProperties);
-			}
-			// producer app partition properties
-			if (isDownStreamAppPartitioned) {
-				updateProducerPartitionProperties(appDeploymentProperties, nextAppCount);
-			}
-			nextAppCount = getInstanceCount(appDeploymentProperties);
-			isDownStreamAppPartitioned = isPartitionedConsumer(appDeploymentProperties,
-					upstreamAppSupportsPartition);
+
 			AppRegistration registration = this.registry.find(currentApp.getRegisteredAppName(), type);
 			Assert.notNull(registration, String.format("no application '%s' of type '%s' exists in the registry",
-					currentApp.getName(), type));
+				currentApp.getName(), type));
+
+
+			Map<String, String> appDeployTimeProperties = extractAppProperties(currentApp, streamDeploymentProperties);
+			Map<String, String> deployerDeploymentProperties = DeploymentPropertiesUtils.extractAndQualifyDeployerProperties(streamDeploymentProperties, currentApp.getName());
+			deployerDeploymentProperties.put(AppDeployer.GROUP_PROPERTY_KEY, currentApp.getStreamName());
+
+			boolean upstreamAppSupportsPartition = upstreamAppHasPartitionInfo(stream, currentApp, streamDeploymentProperties);
+			// Set instance count property
+			if (deployerDeploymentProperties.containsKey(AppDeployer.COUNT_PROPERTY_KEY)) {
+				appDeployTimeProperties.put(StreamPropertyKeys.INSTANCE_COUNT, deployerDeploymentProperties.get(AppDeployer.COUNT_PROPERTY_KEY));
+			}
+			if (!type.equals(ApplicationType.source)) {
+				deployerDeploymentProperties.put(AppDeployer.INDEXED_PROPERTY_KEY, "true");
+			}
+
+			// consumer app partition properties
+			if (upstreamAppSupportsPartition) {
+				updateConsumerPartitionProperties(appDeployTimeProperties);
+			}
+
+			// producer app partition properties
+			if (isDownStreamAppPartitioned) {
+				updateProducerPartitionProperties(appDeployTimeProperties, nextAppCount);
+			}
+
+			nextAppCount = getInstanceCount(deployerDeploymentProperties);
+			isDownStreamAppPartitioned = isPartitionedConsumer(appDeployTimeProperties,
+					upstreamAppSupportsPartition);
+
 			Resource resource = registration.getResource();
-			currentApp = qualifyProperties(currentApp, resource);
-			AppDeploymentRequest request = currentApp.createDeploymentRequest(resource,
-					whitelistProperties.qualifyProperties(appDeploymentProperties, resource));
+
+			// Merge *definition time* app properties with *deployment time* properties
+			// and expand them to their long form if applicable
+			AppDefinition revisedDefinition = mergeAndExpandAppProperties(currentApp, resource, appDeployTimeProperties);
+			AppDeploymentRequest request = new AppDeploymentRequest(revisedDefinition, resource, deployerDeploymentProperties);
+
 			try {
 				String id = this.deployer.deploy(request);
 				this.deploymentIdRepository.save(DeploymentKey.forStreamAppDefinition(currentApp), id);
@@ -253,12 +266,15 @@ public class StreamDeploymentController {
 	}
 
 	/**
-	 * Return a copy of a given app definition where short form parameters have been expanded to their long form
+	 * Return a new app definition where definition-time and deploy-time properties have been merged and
+	 * short form parameters have been expanded to their long form
 	 * (amongst the whitelisted supported properties of the app) if applicable.
 	 */
-	/*default*/ StreamAppDefinition qualifyProperties(StreamAppDefinition original, Resource resource) {
-		StreamAppDefinition.Builder builder = StreamAppDefinition.Builder.from(original);
-		return builder.setProperties(whitelistProperties.qualifyProperties(original.getProperties(), resource)).build(original.getStreamName());
+	/*default*/ AppDefinition mergeAndExpandAppProperties(StreamAppDefinition original, Resource resource, Map<String, String> appDeployTimeProperties) {
+		Map<String, String> merged = new HashMap<>(original.getProperties());
+		merged.putAll(appDeployTimeProperties);
+		merged = whitelistProperties.qualifyProperties(merged, resource);
+		return new AppDefinition(original.getName(), merged);
 	}
 
 	/**
@@ -268,7 +284,7 @@ public class StreamDeploymentController {
 	 * @param streamDeploymentProperties deployment properties for the stream that the app is defined in
 	 * @return map of properties for an app
 	 */
-	private Map<String, String> extractAppDeploymentProperties(StreamAppDefinition appDefinition,
+	private Map<String, String> extractAppProperties(StreamAppDefinition appDefinition,
 			Map<String, String> streamDeploymentProperties) {
 		Map<String, String> appDeploymentProperties = new HashMap<>();
 		// add common properties first
@@ -301,9 +317,6 @@ public class StreamDeploymentController {
 					appDeploymentProperties.put(BindingPropertyKeys.INPUT_BINDING_KEY_PREFIX +
 							entry.getKey().substring(appPrefix.length()), entry.getValue());
 				}
-				else if ((appPrefix + "count").equals(entry.getKey())) {
-					appDeploymentProperties.put(AppDeployer.COUNT_PROPERTY_KEY, entry.getValue());
-				}
 				else {
 					appDeploymentProperties.put(entry.getKey().substring(appPrefix.length()), entry.getValue());
 				}
@@ -327,7 +340,7 @@ public class StreamDeploymentController {
 			StreamAppDefinition app = iterator.next();
 			if (app.equals(currentApp) && iterator.hasNext()) {
 				StreamAppDefinition prevApp = iterator.next();
-				Map<String, String> appDeploymentProperties = extractAppDeploymentProperties(prevApp, streamDeploymentProperties);
+				Map<String, String> appDeploymentProperties = extractAppProperties(prevApp, streamDeploymentProperties);
 				return appDeploymentProperties.containsKey(BindingPropertyKeys.OUTPUT_PARTITION_KEY_EXPRESSION) ||
 						appDeploymentProperties.containsKey(BindingPropertyKeys.OUTPUT_PARTITION_KEY_EXTRACTOR_CLASS);
 			}
@@ -373,13 +386,12 @@ public class StreamDeploymentController {
 
 	/**
 	 * Return the app instance count indicated in the provided properties.
-	 * @param properties properties for the app for which to determine the count
+	 * @param properties deployer properties for the app for which to determine the count
 	 * @return instance count indicated in the provided properties;
 	 * if the properties do not contain a count, a value of {@code 1} is returned
 	 */
 	private int getInstanceCount(Map<String, String> properties) {
-		return (properties.containsKey(AppDeployer.COUNT_PROPERTY_KEY)) ?
-				Integer.valueOf(properties.get(AppDeployer.COUNT_PROPERTY_KEY)) : 1;
+		return Integer.valueOf(properties.getOrDefault(AppDeployer.COUNT_PROPERTY_KEY, "1"));
 	}
 
 	/**

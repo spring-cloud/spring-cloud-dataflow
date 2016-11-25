@@ -20,7 +20,7 @@ import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 import org.h2.util.Task;
 
@@ -28,6 +28,7 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.core.TaskDefinition.TaskDefinitionBuilder;
+import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
 import org.springframework.cloud.dataflow.server.controller.WhitelistProperties;
 import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
 import org.springframework.cloud.dataflow.server.repository.DeploymentKey;
@@ -35,6 +36,7 @@ import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinition
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.TaskService;
 import org.springframework.cloud.deployer.resource.registry.UriRegistry;
+import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.core.io.Resource;
@@ -128,10 +130,10 @@ public class DefaultTaskService implements TaskService {
 	}
 
 	@Override
-	public void executeTask(String taskName, Map<String, String> runtimeProperties,
-			List<String> runtimeParams) {
+	public void executeTask(String taskName, Map<String, String> taskDeploymentProperties,
+			List<String> commandLineArgs) {
 		Assert.hasText(taskName, "The provided taskName must not be null or empty.");
-		Assert.notNull(runtimeProperties,
+		Assert.notNull(taskDeploymentProperties,
 				"The provided runtimeProperties must not be null.");
 		TaskDefinition taskDefinition = this.repository.findOne(taskName);
 		if (taskDefinition == null) {
@@ -140,15 +142,14 @@ public class DefaultTaskService implements TaskService {
 
 		taskDefinition = this.updateTaskProperties(taskDefinition);
 
-		Map<String, String> deploymentProperties = extractAppDeploymentProperties(taskDefinition, runtimeProperties);
-		URI uri = this.registry.find(String.format("task.%s",
-				taskDefinition.getRegisteredAppName()));
+		URI uri = this.registry.find(String.format("task.%s", taskDefinition.getRegisteredAppName()));
 		Resource resource = this.resourceLoader.getResource(uri.toString());
 
-		taskDefinition = qualifyProperties(taskDefinition, resource);
 
-		AppDeploymentRequest request = taskDefinition.createDeploymentRequest(resource,
-				deploymentProperties, runtimeParams);
+		Map<String, String> appDeploymentProperties = extractAppProperties(taskDefinition.getRegisteredAppName(), taskDeploymentProperties);
+		Map<String, String> deployerDeploymentProperties = DeploymentPropertiesUtils.extractAndQualifyDeployerProperties(taskDeploymentProperties, taskDefinition.getRegisteredAppName());
+		AppDefinition revisedDefinition = mergeAndExpandAppProperties(taskDefinition, resource, appDeploymentProperties);
+		AppDeploymentRequest request = new AppDeploymentRequest(revisedDefinition, resource, deployerDeploymentProperties, commandLineArgs);
 
 		String id = this.taskLauncher.launch(request);
 		if (!StringUtils.hasText(id)) {
@@ -161,25 +162,25 @@ public class DefaultTaskService implements TaskService {
 		}
 	}
 
-	private static Map<String, String> extractAppDeploymentProperties(TaskDefinition taskDefinition,
-			Map<String, String> taskDeploymentProperties) {
-		String appPrefix = String.format("app.%s.", taskDefinition.getRegisteredAppName());
-		Map<String, String> deploymentProperties = new HashMap<>();
-		for (Entry<String, String> entry : taskDeploymentProperties.entrySet()) {
-			if (entry.getKey().startsWith(appPrefix)) {
-				deploymentProperties.put(entry.getKey().substring(appPrefix.length()), entry.getValue());
-			}
-		}
-		return deploymentProperties;
+	private Map<String, String> extractAppProperties(String name, Map<String, String> taskDeploymentProperties) {
+		final String prefix = "app." + name + ".";
+		return taskDeploymentProperties.entrySet().stream()
+			.filter(kv -> kv.getKey().startsWith(prefix))
+			.collect(Collectors.toMap(
+				kv -> kv.getKey().substring(prefix.length()),
+				kv -> kv.getValue()
+			));
 	}
 
 	/**
 	 * Return a copy of a given task definition where short form parameters have been expanded to their long form
 	 * (amongst the whitelisted supported properties of the app) if applicable.
 	 */
-	/*default*/ TaskDefinition qualifyProperties(TaskDefinition original, Resource resource) {
-		TaskDefinition.TaskDefinitionBuilder builder = TaskDefinition.TaskDefinitionBuilder.from(original);
-		return builder.setProperties(whitelistProperties.qualifyProperties(original.getProperties(), resource)).build();
+	private AppDefinition mergeAndExpandAppProperties(TaskDefinition original, Resource resource, Map<String, String> appDeploymentProperties) {
+		Map<String, String> merged = new HashMap<>(original.getProperties());
+		merged.putAll(appDeploymentProperties);
+		merged = whitelistProperties.qualifyProperties(merged, resource);
+		return new AppDefinition(original.getName(), merged);
 	}
 
 }
