@@ -113,14 +113,14 @@ abstract class DataFlowAppDefinition {
 	 * Create a deployment request for this app definition.
 	 *
 	 * @param resource the resource for the underlying artifact
-	 * @param properties app and deployment properties
+	 * @param deploymentTimeAppProperties app and deployment properties
 	 * @param runtimeParams the runtime params for the app
 	 * @return an {@link AppDeploymentRequest}
 	 */
-	public AppDeploymentRequest createDeploymentRequest(Resource resource, Map<String, String> properties, List<String> runtimeParams) {
+	public AppDeploymentRequest createDeploymentRequest(Resource resource, Map<String, String> deploymentTimeAppProperties, List<String> runtimeParams) {
 		Map<String, String> appProperties = new HashMap<>(this.appDefinition.getProperties());
 		Map<String, String> deploymentProperties = new HashMap<>();
-		for (Map.Entry<String, String> entry : properties.entrySet()) {
+		for (Map.Entry<String, String> entry : deploymentTimeAppProperties.entrySet()) {
 			String key = entry.getKey();
 			String value = entry.getValue();
 			if (key.startsWith("spring.cloud.deployer.")) {

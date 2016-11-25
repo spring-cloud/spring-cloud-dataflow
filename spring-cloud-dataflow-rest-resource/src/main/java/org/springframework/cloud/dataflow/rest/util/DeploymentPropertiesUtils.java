@@ -41,7 +41,7 @@ public final class DeploymentPropertiesUtils {
 	/**
 	 * Pattern used for parsing a String of comma-delimited key=value pairs.
 	 */
-	private static final Pattern DEPLOYMENT_PROPERTIES_PATTERN = Pattern.compile(",\\s*app\\.[^\\.]+\\.[^=]+=");
+	private static final Pattern DEPLOYMENT_PROPERTIES_PATTERN = Pattern.compile(",\\s*(app|deployer)\\.[^\\.]+\\.[^=]+=");
 
 	/**
 	 * Pattern used for parsing a String of command-line arguments.

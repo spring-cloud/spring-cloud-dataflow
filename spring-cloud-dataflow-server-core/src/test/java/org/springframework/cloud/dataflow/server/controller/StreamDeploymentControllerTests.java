@@ -18,6 +18,8 @@ package org.springframework.cloud.dataflow.server.controller;
 
 import static org.hamcrest.CoreMatchers.not;
 
+import java.util.HashMap;
+
 import org.hamcrest.collection.IsMapContaining;
 import org.junit.Assert;
 import org.junit.Before;
@@ -36,6 +38,7 @@ import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationPr
 import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
+import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 
@@ -83,7 +86,7 @@ public class StreamDeploymentControllerTests {
 				.build("streamname");
 
 		Resource app = new ClassPathResource("/apps/whitelist-source");
-		StreamAppDefinition modified = controller.qualifyProperties(appDefinition, app);
+		AppDefinition modified = controller.mergeAndExpandAppProperties(appDefinition, app, new HashMap<>());
 
 		Assert.assertThat(modified.getProperties(), IsMapContaining.hasEntry("date.timezone", "GMT+2"));
 		Assert.assertThat(modified.getProperties(), not(IsMapContaining.hasKey("timezone")));
@@ -98,7 +101,7 @@ public class StreamDeploymentControllerTests {
 				.build("streamname");
 
 		Resource app = new ClassPathResource("/apps/whitelist-source");
-		StreamAppDefinition modified = controller.qualifyProperties(appDefinition, app);
+		AppDefinition modified = controller.mergeAndExpandAppProperties(appDefinition, app, new HashMap<>());
 
 		Assert.assertThat(modified.getProperties(), IsMapContaining.hasEntry("date.format", "yy"));
 		Assert.assertThat(modified.getProperties(), IsMapContaining.hasEntry("time.format", "hh"));
@@ -118,7 +121,7 @@ public class StreamDeploymentControllerTests {
 		thrown.expectMessage("date.format");
 		thrown.expectMessage("time.format");
 
-		controller.qualifyProperties(appDefinition, app);
+		controller.mergeAndExpandAppProperties(appDefinition, app, new HashMap<>());
 
 	}
 
@@ -130,7 +133,7 @@ public class StreamDeploymentControllerTests {
 				.build("streamname");
 
 		Resource app = new ClassPathResource("/apps/whitelist-source");
-		StreamAppDefinition modified = controller.qualifyProperties(appDefinition, app);
+		AppDefinition modified = controller.mergeAndExpandAppProperties(appDefinition, app, new HashMap<>());
 
 		Assert.assertThat(modified.getProperties(), IsMapContaining.hasEntry("date.some-long-property", "yy"));
 
