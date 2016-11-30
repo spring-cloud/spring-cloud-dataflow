@@ -221,7 +221,7 @@ public class StreamDeploymentController {
 				currentApp.getName(), type));
 
 
-			Map<String, String> appDeployTimeProperties = extractAppDeploymentTimeProperties(currentApp, streamDeploymentProperties);
+			Map<String, String> appDeployTimeProperties = extractAppProperties(currentApp, streamDeploymentProperties);
 			Map<String, String> deployerDeploymentProperties = extractDeployerProperties(currentApp, streamDeploymentProperties);
 			deployerDeploymentProperties.put(AppDeployer.GROUP_PROPERTY_KEY, currentApp.getStreamName());
 
@@ -287,7 +287,7 @@ public class StreamDeploymentController {
 	 * @param streamDeploymentProperties deployment properties for the stream that the app is defined in
 	 * @return map of properties for an app
 	 */
-	private Map<String, String> extractAppDeploymentTimeProperties(StreamAppDefinition appDefinition,
+	private Map<String, String> extractAppProperties(StreamAppDefinition appDefinition,
 			Map<String, String> streamDeploymentProperties) {
 		Map<String, String> appDeploymentProperties = new HashMap<>();
 		// add common properties first
@@ -365,7 +365,7 @@ public class StreamDeploymentController {
 			StreamAppDefinition app = iterator.next();
 			if (app.equals(currentApp) && iterator.hasNext()) {
 				StreamAppDefinition prevApp = iterator.next();
-				Map<String, String> appDeploymentProperties = extractAppDeploymentTimeProperties(prevApp, streamDeploymentProperties);
+				Map<String, String> appDeploymentProperties = extractAppProperties(prevApp, streamDeploymentProperties);
 				return appDeploymentProperties.containsKey(BindingPropertyKeys.OUTPUT_PARTITION_KEY_EXPRESSION) ||
 						appDeploymentProperties.containsKey(BindingPropertyKeys.OUTPUT_PARTITION_KEY_EXTRACTOR_CLASS);
 			}
