@@ -28,6 +28,7 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.core.TaskDefinition.TaskDefinitionBuilder;
+import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
 import org.springframework.cloud.dataflow.server.controller.WhitelistProperties;
 import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
 import org.springframework.cloud.dataflow.server.repository.DeploymentKey;
@@ -146,7 +147,7 @@ public class DefaultTaskService implements TaskService {
 
 
 		Map<String, String> appDeploymentProperties = extractAppProperties(taskDefinition, taskDeploymentProperties);
-		Map<String, String> deployerDeploymentProperties = extractDeployerProperties(taskDefinition, taskDeploymentProperties);
+		Map<String, String> deployerDeploymentProperties = DeploymentPropertiesUtils.extractAndQualifyDeployerProperties(taskDeploymentProperties, taskDefinition.getName());
 		AppDefinition revisedDefinition = mergeAndExpandAppProperties(taskDefinition, resource, appDeploymentProperties);
 		AppDeploymentRequest request = new AppDeploymentRequest(revisedDefinition, resource, deployerDeploymentProperties, commandLineArgs);
 
@@ -163,16 +164,6 @@ public class DefaultTaskService implements TaskService {
 
 	private Map<String, String> extractAppProperties(TaskDefinition taskDefinition, Map<String, String> taskDeploymentProperties) {
 		final String prefix = "app." + taskDefinition.getName() + ".";
-		return taskDeploymentProperties.entrySet().stream()
-			.filter(kv -> kv.getKey().startsWith(prefix))
-			.collect(Collectors.toMap(
-				kv -> kv.getKey().substring(prefix.length()),
-				kv -> kv.getValue()
-			));
-	}
-
-	private Map<String, String> extractDeployerProperties(TaskDefinition taskDefinition, Map<String, String> taskDeploymentProperties) {
-		final String prefix = "deployer." + taskDefinition.getName() + ".";
 		return taskDeploymentProperties.entrySet().stream()
 			.filter(kv -> kv.getKey().startsWith(prefix))
 			.collect(Collectors.toMap(

@@ -21,8 +21,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.springframework.util.StringUtils;
 
@@ -50,7 +52,7 @@ public final class DeploymentPropertiesUtils {
 
 	/**
 	 * Parses a String comprised of 0 or more comma-delimited key=value pairs where each key has the format:
-	 * {@code app.[appname].[key]}.
+	 * {@code app.[appname].[key]} or {@code deployer.[appname].[key]}.
 	 * Values may themselves contain commas, since the split points will be based upon the key pattern.
 	 *
 	 * @param s the string to parse
@@ -68,6 +70,30 @@ public final class DeploymentPropertiesUtils {
 			addKeyValuePairAsProperty(s.substring(start), deploymentProperties);
 		}
 		return deploymentProperties;
+	}
+
+	/**
+	 * Retain only properties that are meant for the <em>deployer</em> of a given app
+	 * (those that start with {@code deployer.[appname]} or {@code deployer.*})
+	 * and qualify all property values with the {@code spring.cloud.deployer.} prefix.
+	 */
+	public static Map<String, String> extractAndQualifyDeployerProperties(Map<String, String> input, String appName) {
+		final String wildcardPrefix = "deployer.*.";
+		final int wildcardLength = wildcardPrefix.length();
+		final String appPrefix = String.format("deployer.%s.", appName);
+		final int appLength = appPrefix.length();
+
+		// Using a TreeMap makes sure wildcard entries appear before app specific ones
+		return new TreeMap<>(input).entrySet().stream()
+			.filter(kv -> kv.getKey().startsWith(wildcardPrefix) || kv.getKey().startsWith(appPrefix))
+			.collect(Collectors.toMap(
+				kv -> kv.getKey().startsWith(wildcardPrefix)
+					? "spring.cloud.deployer." + kv.getKey().substring(wildcardLength)
+					: "spring.cloud.deployer." + kv.getKey().substring(appLength),
+				kv -> kv.getValue(),
+				(fromWildcard, fromApp) -> fromApp
+				)
+			);
 	}
 
 	/**

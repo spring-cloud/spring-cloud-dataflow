@@ -22,8 +22,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
-import java.util.stream.Collectors;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -222,14 +220,13 @@ public class StreamDeploymentController {
 
 
 			Map<String, String> appDeployTimeProperties = extractAppProperties(currentApp, streamDeploymentProperties);
-			Map<String, String> deployerDeploymentProperties = extractDeployerProperties(currentApp, streamDeploymentProperties);
+			Map<String, String> deployerDeploymentProperties = DeploymentPropertiesUtils.extractAndQualifyDeployerProperties(streamDeploymentProperties, currentApp.getName());
 			deployerDeploymentProperties.put(AppDeployer.GROUP_PROPERTY_KEY, currentApp.getStreamName());
 
 			boolean upstreamAppSupportsPartition = upstreamAppHasPartitionInfo(stream, currentApp, streamDeploymentProperties);
 			// Set instance count property
-			if (deployerDeploymentProperties.containsKey("count")) {
-				appDeployTimeProperties.put(StreamPropertyKeys.INSTANCE_COUNT, deployerDeploymentProperties.get("count"));
-				deployerDeploymentProperties.put(AppDeployer.COUNT_PROPERTY_KEY, deployerDeploymentProperties.get("count"));
+			if (deployerDeploymentProperties.containsKey(AppDeployer.COUNT_PROPERTY_KEY)) {
+				appDeployTimeProperties.put(StreamPropertyKeys.INSTANCE_COUNT, deployerDeploymentProperties.get(AppDeployer.COUNT_PROPERTY_KEY));
 			}
 			if (!type.equals(ApplicationType.source)) {
 				deployerDeploymentProperties.put(AppDeployer.INDEXED_PROPERTY_KEY, "true");
@@ -305,28 +302,6 @@ public class StreamDeploymentController {
 		parseAndPopulateProperties(streamDeploymentProperties, appDeploymentProperties, producerPropertyPrefix,
 				consumerPropertyPrefix, appPrefix);
 		return appDeploymentProperties;
-	}
-
-	/**
-	 * Extract and return a map of properties that are targeted at the deployer that is going to deploy the app,
-	 * rather than the app itself. Those are properties that start with {@code deployer.* } or {@code deployer.<appname>},
-	 * minus those prefixes.
-	 */
-	private Map<String, String> extractDeployerProperties(StreamAppDefinition appDefinition, Map<String, String> streamDeploymentProperties) {
-		final String wildcardPrefix = "deployer.*.";
-		final int wildcardLength = wildcardPrefix.length();
-		final String appPrefix = String.format("deployer.%s.", appDefinition.getName());
-		final int appLength = appPrefix.length();
-
-		// Using a TreeMap makes sure wildcard entries appear before app specific ones
-		return new TreeMap<>(streamDeploymentProperties).entrySet().stream()
-			.filter(kv -> kv.getKey().startsWith(wildcardPrefix) || kv.getKey().startsWith(appPrefix))
-			.collect(Collectors.toMap(
-				kv -> kv.getKey().startsWith(wildcardPrefix) ? kv.getKey().substring(wildcardLength) : kv.getKey().substring(appLength),
-				kv -> kv.getValue(),
-				(fromWildcard, fromApp) -> fromApp
-				)
-			);
 	}
 
 	private void parseAndPopulateProperties(Map<String, String> streamDeploymentProperties,
@@ -416,8 +391,7 @@ public class StreamDeploymentController {
 	 * if the properties do not contain a count, a value of {@code 1} is returned
 	 */
 	private int getInstanceCount(Map<String, String> properties) {
-		return (properties.containsKey(AppDeployer.COUNT_PROPERTY_KEY)) ?
-				Integer.valueOf(properties.get(AppDeployer.COUNT_PROPERTY_KEY)) : 1;
+		return Integer.valueOf(properties.getOrDefault(AppDeployer.COUNT_PROPERTY_KEY, "1"));
 	}
 
 	/**
