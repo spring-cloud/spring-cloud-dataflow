@@ -35,9 +35,9 @@ public interface TaskService {
 	 * Execute a task with the provided task name and optional runtime properties.
 	 *
 	 * @param taskName Name of the task. Must not be null or empty.
-	 * @param runtimeProperties Optional runtime properties. Must not be null.
-	 * @param runtimeParams Optional runtime commandline arguments
+	 * @param taskDeploymentProperties Optional deployment properties. Must not be null.
+	 * @param commandLineArgs Optional runtime commandline arguments
 	 */
-	void executeTask(String taskName, Map<String, String> runtimeProperties, List<String> runtimeParams);
+	void executeTask(String taskName, Map<String, String> taskDeploymentProperties, List<String> commandLineArgs);
 
 }
