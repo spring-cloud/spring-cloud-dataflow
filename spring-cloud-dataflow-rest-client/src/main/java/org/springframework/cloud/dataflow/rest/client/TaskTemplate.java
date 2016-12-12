@@ -39,13 +39,9 @@ import org.springframework.web.client.RestTemplate;
  */
 public class TaskTemplate implements TaskOperations {
 
-	public static final String DEFINITIONS_RELATION = "tasks/definitions";
+	/*default*/ static final String DEFINITIONS_RELATION = "tasks/definitions";
 
 	private static final String DEFINITION_RELATION = "tasks/definitions/definition";
-
-	private static final String DEPLOYMENTS_RELATION = "tasks/deployments";
-
-	private static final String DEPLOYMENT_RELATION = "tasks/deployments/deployment";
 
 	private static final String EXECUTIONS_RELATION = "tasks/executions";
 
@@ -59,10 +55,6 @@ public class TaskTemplate implements TaskOperations {
 
 	private final Link definitionLink;
 
-	private final Link deploymentsLink;
-
-	private final Link deploymentLink;
-
 	private final Link executionsLink;
 
 	private final Link executionLink;
@@ -73,9 +65,7 @@ public class TaskTemplate implements TaskOperations {
 		Assert.notNull(resources, "URI Resources must not be be null");
 		Assert.notNull(resources.getLink(EXECUTIONS_RELATION), "Executions relation is required");
 		Assert.notNull(resources.getLink(DEFINITIONS_RELATION), "Definitions relation is required");
-		Assert.notNull(resources.getLink(DEPLOYMENTS_RELATION), "Deployments relation is required");
 		Assert.notNull(resources.getLink(DEFINITION_RELATION), "Definition relation is required");
-		Assert.notNull(resources.getLink(DEPLOYMENT_RELATION), "Deployment relation is required");
 		Assert.notNull(restTemplate, "RestTemplate must not be null");
 		Assert.notNull(resources.getLink(EXECUTIONS_RELATION), "Executions relation is required");
 		Assert.notNull(resources.getLink(EXECUTION_RELATION), "Execution relation is required");
@@ -85,8 +75,6 @@ public class TaskTemplate implements TaskOperations {
 		this.restTemplate = restTemplate;
 		this.definitionsLink = resources.getLink(DEFINITIONS_RELATION);
 		this.definitionLink = resources.getLink(DEFINITION_RELATION);
-		this.deploymentsLink = resources.getLink(DEPLOYMENTS_RELATION);
-		this.deploymentLink = resources.getLink(DEPLOYMENT_RELATION);
 		this.executionsLink = resources.getLink(EXECUTIONS_RELATION);
 		this.executionLink = resources.getLink(EXECUTION_RELATION);
 		this.executionByNameLink = resources.getLink(EXECUTION_RELATION_BY_NAME);
@@ -112,10 +100,10 @@ public class TaskTemplate implements TaskOperations {
 
 	@Override
 	public void launch(String name, Map<String, String> properties, List<String> arguments) {
-		MultiValueMap<String, Object> values = new LinkedMultiValueMap<String, Object>();
+		MultiValueMap<String, Object> values = new LinkedMultiValueMap<>();
 		values.add("properties", DeploymentPropertiesUtils.format(properties));
 		values.add("arguments", StringUtils.collectionToDelimitedString(arguments, " "));
-		restTemplate.postForObject(deploymentLink.expand(name).getHref(), values, Object.class, name);
+		restTemplate.postForObject(executionByNameLink.expand(name).getHref(), values, Object.class, name);
 	}
 
 	@Override
@@ -125,7 +113,7 @@ public class TaskTemplate implements TaskOperations {
 
 	@Override
 	public TaskExecutionResource.Page executionList() {
-		return restTemplate.getForObject(executionsLink.getHref().toString(),
+		return restTemplate.getForObject(executionsLink.getHref(),
 				TaskExecutionResource.Page.class);
 	}
 

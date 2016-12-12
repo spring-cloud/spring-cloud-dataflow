@@ -21,12 +21,13 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
+import org.springframework.analytics.metrics.AggregateCounterRepository;
+import org.springframework.analytics.metrics.FieldValueCounterRepository;
 import org.springframework.analytics.rest.controller.AggregateCounterController;
 import org.springframework.analytics.rest.controller.CounterController;
 import org.springframework.analytics.rest.controller.FieldValueCounterController;
 import org.springframework.batch.admin.service.JobService;
 import org.springframework.boot.actuate.metrics.repository.MetricRepository;
-import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -55,7 +56,6 @@ import org.springframework.cloud.dataflow.server.controller.RuntimeAppsControlle
 import org.springframework.cloud.dataflow.server.controller.StreamDefinitionController;
 import org.springframework.cloud.dataflow.server.controller.StreamDeploymentController;
 import org.springframework.cloud.dataflow.server.controller.TaskDefinitionController;
-import org.springframework.cloud.dataflow.server.controller.TaskDeploymentController;
 import org.springframework.cloud.dataflow.server.controller.TaskExecutionController;
 import org.springframework.cloud.dataflow.server.controller.UiController;
 import org.springframework.cloud.dataflow.server.controller.security.LoginController;
@@ -71,8 +71,6 @@ import org.springframework.cloud.deployer.resource.registry.UriRegistry;
 import org.springframework.cloud.deployer.resource.support.DelegatingResourceLoader;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
-import org.springframework.analytics.metrics.AggregateCounterRepository;
-import org.springframework.analytics.metrics.FieldValueCounterRepository;
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -162,14 +160,9 @@ public class DataFlowControllerAutoConfiguration {
 
 	@Bean
 	@ConditionalOnBean(TaskDefinitionRepository.class)
-	public TaskDeploymentController taskDeploymentController(TaskService taskService) {
-		return new TaskDeploymentController(taskService);
-	}
-
-	@Bean
-	@ConditionalOnBean(TaskDefinitionRepository.class)
-	public TaskExecutionController taskExecutionController(TaskExplorer explorer, TaskDefinitionRepository taskDefinitionRepository) {
-		return new TaskExecutionController(explorer, taskDefinitionRepository);
+	public TaskExecutionController taskExecutionController(TaskExplorer explorer, TaskService taskService,
+		TaskDefinitionRepository taskDefinitionRepository) {
+		return new TaskExecutionController(explorer, taskService, taskDefinitionRepository);
 	}
 
 	@Bean

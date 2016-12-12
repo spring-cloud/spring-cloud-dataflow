@@ -19,12 +19,13 @@ package org.springframework.cloud.dataflow.server.controller;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.rest.job.TaskJobExecutionRel;
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionResource;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskExecutionException;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
+import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
+import org.springframework.cloud.dataflow.server.service.TaskService;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.data.domain.Page;
@@ -58,6 +59,9 @@ public class TaskExecutionController {
 
 	private final Assembler taskAssembler = new Assembler();
 
+
+	private final TaskService taskService;
+
 	private final TaskExplorer explorer;
 
 	private final TaskDefinitionRepository taskDefinitionRepository;
@@ -68,11 +72,13 @@ public class TaskExecutionController {
 	 *
 	 * @param explorer the explorer this controller will use for retrieving
 	 *                   task execution information.
-	 * @param taskDefinitionRepository the task definition repository
+	 * @param taskService used to launch tasks
 	 */
-	public TaskExecutionController(TaskExplorer explorer, TaskDefinitionRepository taskDefinitionRepository) {
+	public TaskExecutionController(TaskExplorer explorer, TaskService taskService,
+		TaskDefinitionRepository taskDefinitionRepository) {
 		Assert.notNull(explorer, "explorer must not be null");
-		Assert.notNull(taskDefinitionRepository, "task definition repository must not be null");
+		Assert.notNull(taskService, "taskService must not be null");
+		this.taskService = taskService;
 		this.explorer = explorer;
 		this.taskDefinitionRepository = taskDefinitionRepository;
 	}
@@ -112,6 +118,23 @@ public class TaskExecutionController {
 		Page<TaskJobExecutionRel> result = getPageableRelationships(taskExecutions, pageable);
 		return assembler.toResource(result, taskAssembler);
 	}
+
+	/**
+	 * Request the launching of an existing task definition. The name must be
+	 * included in the path.
+	 *
+	 * @param taskName the name of the existing task to be executed (required)
+	 * @param properties the runtime properties for the task, as a comma-delimited list of
+	 * 					 key=value pairs
+	 * @param arguments the runtime commandline arguments
+	 */
+	@RequestMapping(value = "", method = RequestMethod.POST, params = "name")
+	@ResponseStatus(HttpStatus.CREATED)
+	public void launch(@RequestParam("name") String taskName, @RequestParam(required = false) String properties,
+		@RequestParam(required = false) List<String> arguments) {
+		this.taskService.executeTask(taskName, DeploymentPropertiesUtils.parse(properties), DeploymentPropertiesUtils.parseParams(arguments));
+	}
+
 
 	/**
 	 * View the details of a single task execution, specified by id.

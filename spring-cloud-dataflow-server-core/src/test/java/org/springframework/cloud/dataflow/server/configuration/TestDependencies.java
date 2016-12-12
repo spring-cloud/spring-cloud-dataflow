@@ -38,7 +38,6 @@ import org.springframework.cloud.dataflow.server.controller.RestControllerAdvice
 import org.springframework.cloud.dataflow.server.controller.StreamDefinitionController;
 import org.springframework.cloud.dataflow.server.controller.StreamDeploymentController;
 import org.springframework.cloud.dataflow.server.controller.TaskDefinitionController;
-import org.springframework.cloud.dataflow.server.controller.TaskDeploymentController;
 import org.springframework.cloud.dataflow.server.controller.TaskExecutionController;
 import org.springframework.cloud.dataflow.server.registry.DataFlowUriRegistryPopulator;
 import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
@@ -118,11 +117,6 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	}
 
 	@Bean
-	public TaskDeploymentController taskController(ApplicationConfigurationMetadataResolver metadataResolver) {
-		return new TaskDeploymentController(taskService(metadataResolver));
-	}
-
-	@Bean
 	public MethodValidationPostProcessor methodValidationPostProcessor() {
 		return new MethodValidationPostProcessor();
 	}
@@ -142,9 +136,11 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 			DeploymentIdRepository deploymentIdRepository) {
 		return new TaskDefinitionController(repository, deploymentIdRepository, taskLauncher(), appRegistry());
 	}
-
-	public TaskExecutionController taskExecutionController(TaskExplorer explorer, TaskDefinitionRepository repository) {
-		return new TaskExecutionController(explorer, repository);
+	@Bean
+	public TaskExecutionController taskExecutionController(TaskExplorer explorer,
+		ApplicationConfigurationMetadataResolver metadataResolver,
+		TaskDefinitionRepository taskDefinitionRepository) {
+		return new TaskExecutionController(explorer, taskService(metadataResolver), taskDefinitionRepository);
 	}
 
 	@Bean
@@ -175,6 +171,11 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	@Bean
 	public TaskLauncher taskLauncher() {
 		return mock(TaskLauncher.class);
+	}
+
+	@Bean
+	public TaskExplorer taskExplorer() {
+		return mock(TaskExplorer.class);
 	}
 
 	@Bean

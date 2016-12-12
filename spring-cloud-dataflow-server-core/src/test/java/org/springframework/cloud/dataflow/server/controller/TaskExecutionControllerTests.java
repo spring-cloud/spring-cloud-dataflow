@@ -30,6 +30,7 @@ import java.util.Date;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobInstance;
 import org.springframework.batch.core.JobParameters;
@@ -42,8 +43,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.server.configuration.JobDependencies;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
+import org.springframework.cloud.dataflow.server.service.TaskService;
 import org.springframework.cloud.task.batch.listener.TaskBatchDao;
 import org.springframework.cloud.task.repository.TaskExecution;
+import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.cloud.task.repository.dao.TaskExecutionDao;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
@@ -90,17 +93,23 @@ public class TaskExecutionControllerTests {
 	@Autowired
 	private WebApplicationContext wac;
 
+	@Autowired
+	private TaskExplorer taskExplorer;
+
+	@Autowired
+	private TaskService taskService;
+
 	@Before
 	public void setupMockMVC() {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(wac).defaultRequest(
 				get("/").accept(MediaType.APPLICATION_JSON)).build();
 		if (!initialized) {
 			taskDefinitionRepository.save(new TaskDefinition(TASK_NAME_ORIG, "demo"));
-			dao.createTaskExecution(TASK_NAME_ORIG, new Date(), new ArrayList<String>(), null);
-			dao.createTaskExecution(TASK_NAME_ORIG, new Date(), new ArrayList<String>(), null);
-			dao.createTaskExecution(TASK_NAME_FOO, new Date(), new ArrayList<String>(), null);
+			dao.createTaskExecution(TASK_NAME_ORIG, new Date(), new ArrayList<>(), null);
+			dao.createTaskExecution(TASK_NAME_ORIG, new Date(), new ArrayList<>(), null);
+			dao.createTaskExecution(TASK_NAME_FOO, new Date(), new ArrayList<>(), null);
 			TaskExecution taskExecution = dao.createTaskExecution(TASK_NAME_FOOBAR,
-					new Date(), new ArrayList<String>(), null);
+					new Date(), new ArrayList<>(), null);
 			JobInstance instance = jobRepository.createJobInstance(TASK_NAME_FOOBAR,
 					new JobParameters());
 			JobExecution jobExecution = jobRepository.createJobExecution(
@@ -113,7 +122,12 @@ public class TaskExecutionControllerTests {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testTaskExecutionControllerConstructorMissingExplorer() {
-		new TaskExecutionController(null, null);
+		new TaskExecutionController(null, taskService, taskDefinitionRepository);
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void testTaskExecutionControllerConstructorMissingTaskService() {
+		new TaskExecutionController(taskExplorer, null, taskDefinitionRepository);
 	}
 
 	@Test

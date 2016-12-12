@@ -34,7 +34,6 @@ import org.springframework.cloud.dataflow.rest.resource.StepExecutionResource;
 import org.springframework.cloud.dataflow.rest.resource.StreamDefinitionResource;
 import org.springframework.cloud.dataflow.rest.resource.StreamDeploymentResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskDefinitionResource;
-import org.springframework.cloud.dataflow.rest.resource.TaskDeploymentResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionResource;
 import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
 import org.springframework.hateoas.EntityLinks;
@@ -96,8 +95,6 @@ public class RootController {
 		if (featuresProperties.isTasksEnabled()) {
 			resourceSupport.add(entityLinks.linkToCollectionResource(TaskDefinitionResource.class).withRel("tasks/definitions"));
 			resourceSupport.add(unescapeTemplateVariables(entityLinks.linkToSingleResource(TaskDefinitionResource.class, "{name}").withRel("tasks/definitions/definition")));
-			resourceSupport.add(entityLinks.linkToCollectionResource(TaskDeploymentResource.class).withRel("tasks/deployments"));
-			resourceSupport.add(unescapeTemplateVariables(entityLinks.linkToSingleResource(TaskDeploymentResource.class, "{name}").withRel("tasks/deployments/deployment")));
 			resourceSupport.add(entityLinks.linkToCollectionResource(TaskExecutionResource.class).withRel("tasks/executions"));
 			String taskTemplated = entityLinks.linkToCollectionResource(TaskExecutionResource.class).getHref() + "{?name}";
 			resourceSupport.add(new Link(taskTemplated).withRel("tasks/executions/name"));
