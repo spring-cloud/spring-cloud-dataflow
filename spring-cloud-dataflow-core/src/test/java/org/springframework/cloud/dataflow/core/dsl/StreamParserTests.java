@@ -25,9 +25,7 @@ import static org.junit.Assert.fail;
 import java.util.List;
 import java.util.Properties;
 
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 /**
  * Parse streams and verify either the correct abstract syntax tree is produced or the current exception comes out.
@@ -36,11 +34,9 @@ import org.junit.rules.ExpectedException;
  * @author David Turanski
  * @author Ilayaperumal Gopinathan
  * @author Mark Fisher
+ * @author Eric Bottard
  */
 public class StreamParserTests {
-
-	@Rule
-	public ExpectedException thrown = ExpectedException.none();
 
 	private StreamNode sn;
 
@@ -241,6 +237,16 @@ public class StreamParserTests {
 		AppNode mn = ast.getApp("transform");
 		Properties props = mn.getArgumentsAsProperties();
 		assertEquals("new StringBuilder(payload).reverse()", props.get("expression"));
+	}
+
+	@Test
+	public void testUnbalancedSingleQuotes() {
+		checkForParseError("foo | bar --expression='select foo", DSLMessage.NON_TERMINATING_QUOTED_STRING, 23);
+	}
+
+	@Test
+	public void testUnbalancedDoubleQuotes() {
+		checkForParseError("foo | bar --expression=\"select foo", DSLMessage.NON_TERMINATING_DOUBLE_QUOTED_STRING, 23);
 	}
 
 	@Test
@@ -522,22 +528,6 @@ public class StreamParserTests {
 	private void checkForParseError(String stream, DSLMessage msg, int pos, Object... inserts) {
 		try {
 			StreamNode sn = parse(stream);
-			fail("expected to fail but parsed " + sn.stringify());
-		}
-		catch (ParseException e) {
-			assertEquals(msg, e.getMessageCode());
-			assertEquals(pos, e.getPosition());
-			if (inserts != null) {
-				for (int i = 0; i < inserts.length; i++) {
-					assertEquals(inserts[i], e.getInserts()[i]);
-				}
-			}
-		}
-	}
-
-	private void checkForParseError(String name, String stream, DSLMessage msg, int pos, String... inserts) {
-		try {
-			StreamNode sn = parse(name, stream);
 			fail("expected to fail but parsed " + sn.stringify());
 		}
 		catch (ParseException e) {

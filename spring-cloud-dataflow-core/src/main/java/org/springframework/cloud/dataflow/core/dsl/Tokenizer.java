@@ -25,6 +25,7 @@ import org.springframework.util.Assert;
  * Lex some input data into a stream of tokens that can then then be parsed.
  *
  * @author Andy Clement
+ * @author Eric Bottard
  */
 class Tokenizer {
 
@@ -272,7 +273,13 @@ class Tokenizer {
 		}
 		while (!isArgValueIdentifierTerminator(toProcess[pos], quoteOpen));
 		char[] subarray = null;
-		if (quoteClosedCount < 2 && sameQuotes(start, pos - 1)) {
+		if (quoteInUse != null && quoteInUse == '"' && quoteClosedCount == 0 ) {
+			throw new ParseException(expressionString, start,
+				DSLMessage.NON_TERMINATING_DOUBLE_QUOTED_STRING);
+		} else if (quoteInUse != null && quoteInUse == '\'' && quoteClosedCount == 0) {
+			throw new ParseException(expressionString, start,
+				DSLMessage.NON_TERMINATING_QUOTED_STRING);
+		} else if (quoteClosedCount == 1 && sameQuotes(start, pos - 1)) {
 			tokens.add(new Token(TokenKind.LITERAL_STRING,
 					subArray(start, pos), start, pos));
 		}

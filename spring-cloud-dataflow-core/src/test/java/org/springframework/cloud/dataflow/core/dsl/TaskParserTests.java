@@ -32,6 +32,7 @@ import org.junit.rules.ExpectedException;
  * @author Andy Clement
  * @author David Turanski
  * @author Michael Minella
+ * @author Eric Bottard
  */
 public class TaskParserTests {
 
@@ -245,6 +246,18 @@ public class TaskParserTests {
 		appNode = parse("transform --expression='payload.replace(\"abc\", '''')'");
 		assertEquals(appNode.getArgumentsAsProperties().get("expression"), "payload.replace(\"abc\", '')");
 	}
+
+	@Test
+	public void testUnbalancedSingleQuotes() {
+		checkForParseError("timestamp --format='YYYY", DSLMessage.NON_TERMINATING_QUOTED_STRING, 19);
+	}
+
+	@Test
+	public void testUnbalancedDoubleQuotes() {
+		checkForParseError("timestamp --format=\"YYYY", DSLMessage.NON_TERMINATING_DOUBLE_QUOTED_STRING, 19);
+	}
+
+
 
 	AppNode parse(String taskDefinition) {
 		return new TaskParser(taskDefinition).parse();
