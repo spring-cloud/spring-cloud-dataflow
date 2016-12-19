@@ -66,6 +66,11 @@
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-dataflow-server-local-autoconfig</artifactId>
+				<version>1.1.1.BUILD-SNAPSHOT</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-starter-dataflow-server-local</artifactId>
 				<version>1.1.1.BUILD-SNAPSHOT</version>
 			</dependency>

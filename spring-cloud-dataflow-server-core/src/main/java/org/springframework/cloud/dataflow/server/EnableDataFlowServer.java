@@ -23,7 +23,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.springframework.cloud.dataflow.server.config.DataFlowServerConfiguration;
+import org.springframework.cloud.dataflow.server.config.EnableDataFlowServerConfiguration;
 import org.springframework.context.annotation.Import;
 
 /**
@@ -35,6 +35,6 @@ import org.springframework.context.annotation.Import;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Inherited
-@Import(DataFlowServerConfiguration.class)
+@Import(EnableDataFlowServerConfiguration.class)
 public @interface EnableDataFlowServer {
 }

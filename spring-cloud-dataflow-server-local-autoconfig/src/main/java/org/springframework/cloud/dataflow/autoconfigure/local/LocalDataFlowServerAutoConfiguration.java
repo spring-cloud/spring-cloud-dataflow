@@ -14,24 +14,31 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.dataflow.server.local;
+package org.springframework.cloud.dataflow.autoconfigure.local;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.boot.autoconfigure.AutoConfigureBefore;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.cloud.dataflow.server.config.DataFlowControllerAutoConfiguration;
 import org.springframework.cloud.deployer.resource.docker.DockerResourceLoader;
 import org.springframework.cloud.deployer.resource.maven.MavenProperties;
 import org.springframework.cloud.deployer.resource.maven.MavenResourceLoader;
 import org.springframework.cloud.deployer.resource.support.DelegatingResourceLoader;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ResourceLoader;
 
 /**
- * Configuration class for Local Data Flow Server.
+ * Auto-configuration for local dataflow server.
  *
- * @author Ilayaperumal Gopinathan
+ * @author Janne Valkealahti
+ *
  */
-public class LocalDataFlowServerConfiguration {
+@Configuration
+@AutoConfigureBefore(DataFlowControllerAutoConfiguration.class)
+public class LocalDataFlowServerAutoConfiguration {
 
 	@Bean
 	public DelegatingResourceLoader delegatingResourceLoader(MavenProperties mavenProperties) {

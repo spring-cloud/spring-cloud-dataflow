@@ -49,6 +49,7 @@
 		<module>spring-cloud-dataflow-registry</module>
 		<module>spring-cloud-dataflow-rest-resource</module>
 		<module>spring-cloud-dataflow-server-core</module>
+		<module>spring-cloud-dataflow-server-local-autoconfig</module>
 		<module>spring-cloud-dataflow-server-local</module>
 		<module>spring-cloud-dataflow-rest-client</module>
 		<module>spring-cloud-dataflow-shell</module>
