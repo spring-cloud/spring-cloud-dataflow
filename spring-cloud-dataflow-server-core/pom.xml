@@ -151,6 +151,7 @@
 				<includes>
 					<include>META-INF/spring.factories</include>
 					<include>banner.txt</include>
+					<include>META-INF/dataflow-server-defaults.yml</include>
 					<include>*.sql</include>
 				</includes>
 			</resource>
