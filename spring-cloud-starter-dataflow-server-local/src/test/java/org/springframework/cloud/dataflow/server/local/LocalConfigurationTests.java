@@ -18,23 +18,30 @@ package org.springframework.cloud.dataflow.server.local;
 
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
+import java.util.Map;
+
 import org.junit.After;
 import org.junit.Test;
-
 import org.springframework.analytics.metrics.FieldValueCounterRepository;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.boot.SpringApplication;
+import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
+import org.springframework.cloud.dataflow.server.local.dataflowapp.LocalTestDataFlowServer;
+import org.springframework.cloud.dataflow.server.local.nodataflowapp.LocalTestNoDataFlowServer;
 import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
+import org.springframework.cloud.deployer.resource.support.DelegatingResourceLoader;
 import org.springframework.cloud.deployer.spi.local.LocalAppDeployer;
 import org.springframework.cloud.deployer.spi.local.LocalTaskLauncher;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.util.SocketUtils;
 
 /**
@@ -69,6 +76,21 @@ public class LocalConfigurationTests {
 		assertThat(context.getBean(APP_DEPLOYER_BEAN_NAME), instanceOf(LocalAppDeployer.class));
 		assertThat(context.containsBean(TASK_LAUNCHER_BEAN_NAME), is(true));
 		assertThat(context.getBean(TASK_LAUNCHER_BEAN_NAME), instanceOf(LocalTaskLauncher.class));
+		assertNotNull(context.getBean(AppRegistry.class));
+	}
+
+	@Test
+	public void testLocalAutoConfigApplied() throws Exception {
+		SpringApplication app = new SpringApplication(LocalTestDataFlowServer.class);
+		context = app.run(new String[] { "--server.port=0" });
+
+		// default on DataFlowControllerAutoConfiguration only adds maven,
+		// LocalDataFlowServerAutoConfiguration also adds docker so test on those.
+		DelegatingResourceLoader delegatingResourceLoader = context.getBean(DelegatingResourceLoader.class);
+		Map<String, ResourceLoader> loaders = TestUtils.readField("loaders", delegatingResourceLoader);
+		assertThat(loaders.size(), is(2));
+		assertThat(loaders.get("maven"), notNullValue());
+		assertThat(loaders.get("docker"), notNullValue());
 	}
 
 	@Test
@@ -119,4 +141,13 @@ public class LocalConfigurationTests {
 		}
 	}
 
+	@Test
+	public void testNoDataflowConfig() {
+		SpringApplication app = new SpringApplication(LocalTestNoDataFlowServer.class);
+		context = app.run(new String[] { "--server.port=0" });
+		// we still have deployer beans
+		assertThat(context.containsBean(APP_DEPLOYER_BEAN_NAME), is(true));
+		assertThat(context.containsBean(TASK_LAUNCHER_BEAN_NAME), is(true));
+		assertThat(context.containsBean("appRegistry"), is(false));
+	}
 }

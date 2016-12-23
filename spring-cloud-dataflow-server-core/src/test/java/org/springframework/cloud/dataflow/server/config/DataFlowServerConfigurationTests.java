@@ -26,6 +26,10 @@ import org.junit.Test;
 
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.boot.autoconfigure.PropertyPlaceholderAutoConfiguration;
+import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
+import org.springframework.boot.autoconfigure.security.SecurityAutoConfiguration;
+import org.springframework.cloud.dataflow.server.EnableDataFlowServer;
 import org.springframework.cloud.dataflow.server.service.TaskService;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskService;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
@@ -58,6 +62,11 @@ public class DataFlowServerConfigurationTests {
 		context.setId("testDataFlowConfig");
 		context.register(
 				DataFlowServerConfigurationTests.TestConfiguration.class,
+				RedisAutoConfiguration.class,
+				SecurityAutoConfiguration.class,
+				DataFlowServerAutoConfiguration.class,
+				DataFlowControllerAutoConfiguration.class,
+				DataSourceAutoConfiguration.class,
 				DataFlowServerConfiguration.class,
 				PropertyPlaceholderAutoConfiguration.class);
 		environment = new StandardEnvironment();
@@ -118,6 +127,7 @@ public class DataFlowServerConfigurationTests {
 		assertFalse(context.containsBean("initH2TCPServer"));
 	}
 
+	@EnableDataFlowServer
 	private static class TestConfiguration {
 
 		@Bean

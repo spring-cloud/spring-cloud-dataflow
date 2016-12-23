@@ -24,10 +24,10 @@ import org.junit.Rule;
 import org.junit.rules.TestName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
-import org.springframework.cloud.dataflow.server.config.DataFlowServerConfiguration;
+import org.springframework.cloud.dataflow.server.EnableDataFlowServer;
 import org.springframework.cloud.dataflow.shell.command.JobCommandTemplate;
 import org.springframework.cloud.dataflow.shell.command.StreamCommandTemplate;
 import org.springframework.cloud.dataflow.shell.command.TaskCommandTemplate;
@@ -104,7 +104,7 @@ public abstract class AbstractShellIntegrationTest {
 				shutdownAfterRun = Boolean.getBoolean(SHUTDOWN_AFTER_RUN);
 			}
 
-			SpringApplication application = new SpringApplicationBuilder(DataFlowServerConfiguration.class).build();
+			SpringApplication application = new SpringApplicationBuilder(TestConfig.class).build();
 
 			int randomPort = SocketUtils.findAvailableTcpPort();
 			String dataFlowUri = String.format("--dataflow.uri=http://localhost:%s", serverPort);
@@ -211,4 +211,8 @@ public abstract class AbstractShellIntegrationTest {
 		}
 	}
 
+	@EnableAutoConfiguration
+	@EnableDataFlowServer
+	public static class TestConfig {
+	}
 }

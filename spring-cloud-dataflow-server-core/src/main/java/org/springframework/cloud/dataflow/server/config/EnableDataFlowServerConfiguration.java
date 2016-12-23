@@ -14,20 +14,26 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.dataflow.server.local;
+package org.springframework.cloud.dataflow.server.config;
 
-import org.springframework.boot.SpringApplication;
 import org.springframework.cloud.dataflow.server.EnableDataFlowServer;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
 /**
- * Bootstrap class for the local Spring Cloud Data Flow Server.
+ * Configuration for {@link EnableDataFlowServer} which adds
+ * a marker bean which auto-config classes can use to conditionally
+ * check if auto configuration should be activated.
  *
- * @author Mark Fisher
+ * @author Janne Valkealahti
  */
-@EnableDataFlowServer
-public class LocalTestDataFlowServer {
+@Configuration
+public class EnableDataFlowServerConfiguration {
 
-	public static void main(String[] args) {
-		SpringApplication.run(LocalTestDataFlowServer.class, args);
+	@Bean
+	public Marker enableConfigServerMarker() {
+		return new Marker();
 	}
+
+	class Marker {}
 }

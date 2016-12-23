@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.dataflow.server.local;
+package org.springframework.cloud.dataflow.server.local.dataflowapp;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -23,15 +23,16 @@ import org.springframework.cloud.dataflow.server.EnableDataFlowServer;
 /**
  * Bootstrap class for the local Spring Cloud Data Flow Server.
  *
+ * Multiple SpringBootApplication's needs to be in
+ * their own directories due to component scanning.
+ *
  * @author Mark Fisher
- * @author Ilayaperumal Gopinathan
- * @author Janne Valkealahti
  */
 @SpringBootApplication
 @EnableDataFlowServer
-public class LocalDataFlowServer {
+public class LocalTestDataFlowServer {
 
 	public static void main(String[] args) {
-		SpringApplication.run(LocalDataFlowServer.class, args);
+		SpringApplication.run(LocalTestDataFlowServer.class, args);
 	}
 }

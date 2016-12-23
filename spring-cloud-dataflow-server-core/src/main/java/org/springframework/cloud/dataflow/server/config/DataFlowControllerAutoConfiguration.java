@@ -26,8 +26,10 @@ import org.springframework.analytics.rest.controller.CounterController;
 import org.springframework.analytics.rest.controller.FieldValueCounterController;
 import org.springframework.batch.admin.service.JobService;
 import org.springframework.boot.actuate.metrics.repository.MetricRepository;
+import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -89,8 +91,9 @@ import org.springframework.hateoas.EntityLinks;
 @SuppressWarnings("all")
 @Configuration
 @Import(CompletionConfiguration.class)
-@ConditionalOnBean({AppDeployer.class, TaskLauncher.class})
+@ConditionalOnBean({EnableDataFlowServerConfiguration.Marker.class, AppDeployer.class, TaskLauncher.class})
 @EnableConfigurationProperties({FeaturesProperties.class})
+@ConditionalOnProperty(prefix = "dataflow.server", name = "enabled", havingValue = "true", matchIfMissing = true)
 public class DataFlowControllerAutoConfiguration {
 
 	@Bean
