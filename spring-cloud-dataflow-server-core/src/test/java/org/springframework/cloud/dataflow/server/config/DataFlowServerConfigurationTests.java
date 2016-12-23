@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,11 @@
 package org.springframework.cloud.dataflow.server.config;
 
 import java.net.ConnectException;
+import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
+
+import javax.sql.DataSource;
 
 import org.junit.After;
 import org.junit.Before;
@@ -29,6 +32,7 @@ import org.springframework.boot.autoconfigure.PropertyPlaceholderAutoConfigurati
 import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.security.SecurityAutoConfiguration;
+import org.springframework.cloud.dataflow.registry.RdbmsUriRegistry;
 import org.springframework.cloud.dataflow.server.EnableDataFlowServer;
 import org.springframework.cloud.dataflow.server.service.TaskService;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskService;
@@ -42,8 +46,10 @@ import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.security.authentication.AuthenticationManager;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
@@ -86,12 +92,7 @@ public class DataFlowServerConfigurationTests {
 	 */
 	@Test
 	public void testStartEmbeddedH2Server(){
-		Map myMap = new HashMap();
-		myMap.put("spring.datasource.url", "jdbc:h2:tcp://localhost:19092/mem:dataflow");
-		propertySources.addFirst(new MapPropertySource("EnvrionmentTestPropsource", myMap));
-		context.setEnvironment(environment);
-
-		context.refresh();
+		setupH2EmbeddedDB();
 		assertTrue(context.containsBean("initH2TCPServer"));
 	}
 
@@ -125,6 +126,73 @@ public class DataFlowServerConfigurationTests {
 	public void testNoServer(){
 		context.refresh();
 		assertFalse(context.containsBean("initH2TCPServer"));
+	}
+
+	/**
+	 * Verify that ComposedTaskRunner is registered by default.
+	 */
+	@Test
+	public void testRegisterComposedTaskRunner(){
+		setupH2EmbeddedDB();
+		RdbmsUriRegistry rdbmsUriRegistry = new RdbmsUriRegistry(context.getBean(DataSource.class));
+		URI uri = rdbmsUriRegistry.find("task.composed-task-runner");
+		assertTrue(uri.getSchemeSpecificPart()
+				.contains("org.springframework.cloud:spring-cloud-dataflow-composed-task"));
+		assertEquals("maven", uri.getScheme());
+	}
+
+	/**
+	 * Verify that ComposedTaskRunner is registered by default.
+	 */
+	@Test
+	public void testRegisterComposedTaskRunnerBothPropertiesSet(){
+		Map properties = new HashMap();
+		properties.put("spring.cloud.dataflow.features.tasksEnabled", "true");
+		properties.put("spring.cloud.dataflow.composed.task.enabled", "true");
+		setupH2EmbeddedDB(properties);
+		RdbmsUriRegistry rdbmsUriRegistry = new RdbmsUriRegistry(context.getBean(DataSource.class));
+		URI uri = rdbmsUriRegistry.find("task.composed-task-runner");
+		assertTrue(uri.getSchemeSpecificPart()
+				.contains("org.springframework.cloud:spring-cloud-dataflow-composed-task"));
+		assertEquals("maven", uri.getScheme());
+	}
+
+	/**
+	 * Verify that ComposedTaskRunner is not registered.
+	 */
+	@Test
+	public void testRegisterComposedTaskRunnerTaskNotEnabled(){
+		Map properties = new HashMap();
+		properties.put("spring.cloud.dataflow.features.tasksEnabled", "false");
+		setupH2EmbeddedDB(properties);
+		RdbmsUriRegistry rdbmsUriRegistry = new RdbmsUriRegistry(context.getBean(DataSource.class));
+		URI uri = rdbmsUriRegistry.find("task.composed-task-runner");
+		assertNull(uri);
+	}
+
+	/**
+	 * Verify that ComposedTaskRunner is not registered.
+	 */
+	@Test
+	public void testRegisterComposedTaskRunnerNotEnabled(){
+		Map properties = new HashMap();
+		properties.put("spring.cloud.dataflow.composed.task.enabled", "false");
+		setupH2EmbeddedDB(properties);
+		RdbmsUriRegistry rdbmsUriRegistry = new RdbmsUriRegistry(context.getBean(DataSource.class));
+		URI uri = rdbmsUriRegistry.find("task.composed-task-runner");
+		assertNull(uri);
+	}
+
+	private void setupH2EmbeddedDB() {
+		Map properties = new HashMap();
+		setupH2EmbeddedDB(properties);
+	}
+
+	private void setupH2EmbeddedDB(Map properties) {
+		properties.put("spring.datasource.url", "jdbc:h2:tcp://localhost:19092/mem:dataflow");
+		propertySources.addFirst(new MapPropertySource("EnvrionmentTestPropsource", properties));
+		context.setEnvironment(environment);
+		context.refresh();
 	}
 
 	@EnableDataFlowServer
