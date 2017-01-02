@@ -19,6 +19,8 @@ package org.springframework.cloud.dataflow.server.controller;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.Mockito.verify;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -44,6 +46,7 @@ import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.server.configuration.JobDependencies;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.TaskService;
+import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.cloud.task.batch.listener.TaskBatchDao;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.TaskExplorer;
@@ -99,13 +102,16 @@ public class TaskExecutionControllerTests {
 	@Autowired
 	private TaskService taskService;
 
+	@Autowired
+	private TaskLauncher taskLauncher;
+
 	@Before
 	public void setupMockMVC() {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(wac).defaultRequest(
 				get("/").accept(MediaType.APPLICATION_JSON)).build();
 		if (!initialized) {
 			taskDefinitionRepository.save(new TaskDefinition(TASK_NAME_ORIG, "demo"));
-			dao.createTaskExecution(TASK_NAME_ORIG, new Date(), new ArrayList<>(), null);
+			dao.createTaskExecution(TASK_NAME_ORIG, new Date(), new ArrayList<>(), "foobar");
 			dao.createTaskExecution(TASK_NAME_ORIG, new Date(), new ArrayList<>(), null);
 			dao.createTaskExecution(TASK_NAME_FOO, new Date(), new ArrayList<>(), null);
 			TaskExecution taskExecution = dao.createTaskExecution(TASK_NAME_FOOBAR,
@@ -128,6 +134,11 @@ public class TaskExecutionControllerTests {
 	@Test(expected = IllegalArgumentException.class)
 	public void testTaskExecutionControllerConstructorMissingTaskService() {
 		new TaskExecutionController(taskExplorer, null, taskDefinitionRepository);
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void testTaskExecutionControllerConstructorMissingTaskDefinitionRepository() {
+		new TaskExecutionController(taskExplorer, taskService, null);
 	}
 
 	@Test
@@ -184,5 +195,22 @@ public class TaskExecutionControllerTests {
 				get("/tasks/executions/").param("name", "BAZ").accept(MediaType.APPLICATION_JSON)
 		).andExpect(status().is4xxClientError())
 				.andReturn().getResponse().getContentAsString().contains("NoSuchTaskException");
+	}
+
+	@Test
+	public void testCleanup() throws Exception{
+		mockMvc.perform(
+			delete("/tasks/executions/1")
+		).andExpect(status().is(200));
+
+		verify(taskLauncher).cleanup("foobar");
+	}
+
+	@Test
+	public void testCleanupByIdNotFound() throws Exception{
+		mockMvc.perform(
+			delete("/tasks/executions/10")
+		).andExpect(status().is(404))
+		.andReturn().getResponse().getContentAsString().contains("NoSuchTaskExecutionException");
 	}
 }

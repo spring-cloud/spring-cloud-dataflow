@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2016 the original author or authors.
+ * Copyright 2015-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,6 +67,8 @@ public class TaskCommands implements CommandMarker {
 
 	private static final String TASK_EXECUTION_STATUS = "task execution status";
 
+	private static final String TASK_EXECUTION_CLEANUP = "task execution cleanup";
+
 	private static final String PROPERTIES_OPTION = "properties";
 
 	private static final String PROPERTIES_FILE_OPTION = "propertiesFile";
@@ -79,7 +81,7 @@ public class TaskCommands implements CommandMarker {
 	@Autowired
 	private DataFlowShell dataFlowShell;
 
-	@CliAvailabilityIndicator({ LIST, CREATE, LAUNCH, TASK_EXECUTION_STATUS, DESTROY, EXECUTION_LIST })
+	@CliAvailabilityIndicator({ LIST, CREATE, LAUNCH, TASK_EXECUTION_STATUS, TASK_EXECUTION_CLEANUP,  DESTROY, EXECUTION_LIST })
 	public boolean available() {
 		DataFlowOperations dataFlowOperations = dataFlowShell.getDataFlowOperations();
 		return dataFlowOperations != null && dataFlowOperations.taskOperations() != null;
@@ -171,7 +173,7 @@ public class TaskCommands implements CommandMarker {
 
 	@CliCommand(value = TASK_EXECUTION_STATUS, help = "Display the details of a specific task execution")
 	public Table display(
-			@CliOption(key = { "id" },
+			@CliOption(key = { "", "id" },
 					help = "the task execution id",
 					mandatory = true) long id) {
 
@@ -196,6 +198,15 @@ public class TaskCommands implements CommandMarker {
 		DataFlowTables.applyStyle(builder);
 
 		return builder.build();
+	}
+
+	@CliCommand(value = TASK_EXECUTION_CLEANUP, help = "Clean up any platform specific resources linked to a task execution")
+	public String cleanup(
+		@CliOption(key = { "", "id" },
+			help = "the task execution id",
+			mandatory = true) long id) {
+		taskOperations().cleanup(id);
+		return String.format("Request to clean up resources for task execution %s has been submitted", id);
 	}
 
 	private TaskOperations taskOperations() {

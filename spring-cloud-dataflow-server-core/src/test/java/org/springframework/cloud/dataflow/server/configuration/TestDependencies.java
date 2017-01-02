@@ -57,6 +57,9 @@ import org.springframework.cloud.deployer.resource.support.DelegatingResourceLoa
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.cloud.task.repository.TaskExplorer;
+import org.springframework.cloud.task.repository.TaskRepository;
+import org.springframework.cloud.task.repository.support.SimpleTaskRepository;
+import org.springframework.cloud.task.repository.support.TaskExecutionDaoFactoryBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -137,10 +140,13 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 		return new TaskDefinitionController(repository, deploymentIdRepository, taskLauncher(), appRegistry());
 	}
 	@Bean
-	public TaskExecutionController taskExecutionController(TaskExplorer explorer,
-		ApplicationConfigurationMetadataResolver metadataResolver,
-		TaskDefinitionRepository taskDefinitionRepository) {
-		return new TaskExecutionController(explorer, taskService(metadataResolver), taskDefinitionRepository);
+	public TaskExecutionController taskExecutionController(TaskExplorer explorer, ApplicationConfigurationMetadataResolver metadataResolver) {
+		return new TaskExecutionController(explorer, taskService(metadataResolver, taskRepository()), taskDefinitionRepository());
+	}
+
+	@Bean
+	public TaskRepository taskRepository() {
+		return new SimpleTaskRepository(new TaskExecutionDaoFactoryBean());
 	}
 
 	@Bean
@@ -179,8 +185,8 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	}
 
 	@Bean
-	public TaskService taskService(ApplicationConfigurationMetadataResolver metadataResolver) {
-		return new DefaultTaskService(new DataSourceProperties(), taskDefinitionRepository(), deploymentIdRepository(),
+	public TaskService taskService(ApplicationConfigurationMetadataResolver metadataResolver, TaskRepository taskExecutionRepository) {
+		return new DefaultTaskService(new DataSourceProperties(), taskDefinitionRepository(), taskExplorer(), taskExecutionRepository,
 				uriRegistry(), resourceLoader(), taskLauncher(), metadataResolver);
 	}
 
