@@ -189,7 +189,7 @@ public abstract class AbstractShellIntegrationTest {
 	 * @return unique random stream/task name
 	 */
 	protected String generateUniqueName() {
-		return generateUniqueName(name.getMethodName().replace('[', '-').replaceAll("]", ""));
+		return generateUniqueName(name.getMethodName().replace('[', '-').replace("]", ""));
 	}
 
 

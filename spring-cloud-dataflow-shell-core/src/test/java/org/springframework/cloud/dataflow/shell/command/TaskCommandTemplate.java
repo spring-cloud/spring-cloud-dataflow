@@ -164,4 +164,7 @@ public class TaskCommandTemplate {
 		return shell.executeCommand("task execution status --id " + id);
 	}
 
+	public CommandResult taskExecutionCleanup(long id) {
+		return shell.executeCommand("task execution cleanup --id " + id);
+	}
 }

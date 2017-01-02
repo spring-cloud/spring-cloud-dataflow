@@ -51,7 +51,9 @@ import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.cloud.task.batch.listener.TaskBatchDao;
 import org.springframework.cloud.task.batch.listener.support.JdbcTaskBatchDao;
 import org.springframework.cloud.task.repository.TaskExplorer;
+import org.springframework.cloud.task.repository.TaskRepository;
 import org.springframework.cloud.task.repository.support.SimpleTaskExplorer;
+import org.springframework.cloud.task.repository.support.SimpleTaskRepository;
 import org.springframework.cloud.task.repository.support.TaskExecutionDaoFactoryBean;
 import org.springframework.cloud.task.repository.support.TaskRepositoryInitializer;
 import org.springframework.context.annotation.Bean;
@@ -120,11 +122,16 @@ public class JobDependencies {
 	}
 
 	@Bean
-	public TaskService taskService(TaskDefinitionRepository repository, DeploymentIdRepository deploymentIdRepository,
+	public TaskService taskService(TaskDefinitionRepository repository, TaskExplorer explorer,
 			UriRegistry registry, ResourceLoader resourceLoader, TaskLauncher taskLauncher,
 			ApplicationConfigurationMetadataResolver metadataResolver) {
-		return new DefaultTaskService(new DataSourceProperties(), repository, deploymentIdRepository,
+		return new DefaultTaskService(new DataSourceProperties(), repository, explorer, taskRepository(),
 				registry, resourceLoader, taskLauncher, metadataResolver);
+	}
+
+	@Bean
+	public TaskRepository taskRepository() {
+		return new SimpleTaskRepository(new TaskExecutionDaoFactoryBean());
 	}
 
 	@Bean

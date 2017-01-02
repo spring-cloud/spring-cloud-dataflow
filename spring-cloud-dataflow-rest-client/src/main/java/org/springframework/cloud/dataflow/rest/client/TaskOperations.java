@@ -71,4 +71,10 @@ public interface TaskOperations {
 	 */
 	TaskExecutionResource taskExecutionStatus(long id);
 
+	/**
+	 * Cleanup any resources associated with the execution for the id specified.
+	 *
+	 * @param id identifier of the task execution
+	 */
+	void cleanup(long id);
 }

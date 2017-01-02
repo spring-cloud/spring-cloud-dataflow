@@ -30,8 +30,6 @@ import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.core.TaskDefinition.TaskDefinitionBuilder;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
 import org.springframework.cloud.dataflow.server.controller.WhitelistProperties;
-import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
-import org.springframework.cloud.dataflow.server.repository.DeploymentKey;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.TaskService;
@@ -39,6 +37,9 @@ import org.springframework.cloud.deployer.resource.registry.UriRegistry;
 import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
+import org.springframework.cloud.task.repository.TaskExecution;
+import org.springframework.cloud.task.repository.TaskExplorer;
+import org.springframework.cloud.task.repository.TaskRepository;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.util.Assert;
@@ -60,10 +61,18 @@ public class DefaultTaskService implements TaskService {
 	private final DataSourceProperties dataSourceProperties;
 
 	/**
-	 * The repository this service will use for deployment IDs.
+	 * Used to create TaskExecutions.
 	 */
-	private final DeploymentIdRepository deploymentIdRepository;
+	private final TaskRepository taskExecutionRepository;
 
+	/**
+	 * Used to read TaskExecutions.
+	 */
+	private final TaskExplorer taskExplorer;
+
+	/**
+	 * Used to launch apps as tasks.
+	 */
 	private final TaskLauncher taskLauncher;
 
 	/**
@@ -76,7 +85,7 @@ public class DefaultTaskService implements TaskService {
 	 */
 	private final ResourceLoader resourceLoader;
 
-	private final TaskDefinitionRepository repository;
+	private final TaskDefinitionRepository taskDefinitionRepository;
 
 	private final WhitelistProperties whitelistProperties;
 
@@ -84,49 +93,38 @@ public class DefaultTaskService implements TaskService {
 	 * Initializes the {@link DefaultTaskService}.
 	 *
 	 * @param dataSourceProperties the data source properties.
-	 * @param repository the {@link TaskDefinitionRepository} this service will use for
+	 * @param taskDefinitionRepository the {@link TaskDefinitionRepository} this service will use for
 	 * task CRUD operations.
-	 * @param deploymentIdRepository the repository this service will use for deployment
+	 * @param taskExecutionRepository the repository this service will use for deployment
 	 * IDs.
+	 * @param taskExplorer the explorer this service will use to lookup task executions
 	 * @param registry URI registry this service will use to look up app URIs.
 	 * @param resourceLoader the {@link ResourceLoader} that will resolve URIs to
 	 * {@link Resource}s.
 	 * @param taskLauncher the launcher this service will use to launch task apps.
 	 */
 	public DefaultTaskService(DataSourceProperties dataSourceProperties,
-			TaskDefinitionRepository repository,
-			DeploymentIdRepository deploymentIdRepository, UriRegistry registry,
+			TaskDefinitionRepository taskDefinitionRepository,
+			TaskExplorer taskExplorer,
+			TaskRepository taskExecutionRepository, UriRegistry registry,
 			ResourceLoader resourceLoader, TaskLauncher taskLauncher,
 			ApplicationConfigurationMetadataResolver metaDataResolver) {
 		Assert.notNull(dataSourceProperties, "DataSourceProperties must not be null");
-		Assert.notNull(repository, "TaskDefinitionRepository must not be null");
-		Assert.notNull(deploymentIdRepository, "DeploymentIdRepository must not be null");
+		Assert.notNull(taskDefinitionRepository, "TaskDefinitionRepository must not be null");
+		Assert.notNull(taskExecutionRepository, "DeploymentIdRepository must not be null");
+		Assert.notNull(taskExplorer, "TaskExplorer must not be null");
 		Assert.notNull(registry, "UriRegistry must not be null");
 		Assert.notNull(resourceLoader, "ResourceLoader must not be null");
 		Assert.notNull(taskLauncher, "TaskLauncher must not be null");
 		Assert.notNull(metaDataResolver, "metaDataResolver must not be null");
 		this.dataSourceProperties = dataSourceProperties;
-		this.repository = repository;
-		this.deploymentIdRepository = deploymentIdRepository;
+		this.taskDefinitionRepository = taskDefinitionRepository;
+		this.taskExecutionRepository = taskExecutionRepository;
+		this.taskExplorer = taskExplorer;
 		this.registry = registry;
 		this.taskLauncher = taskLauncher;
 		this.resourceLoader = resourceLoader;
 		this.whitelistProperties = new WhitelistProperties(metaDataResolver);
-	}
-
-	private TaskDefinition updateTaskProperties(TaskDefinition taskDefinition) {
-		TaskDefinitionBuilder builder = TaskDefinitionBuilder.from(taskDefinition);
-		builder.setProperty("spring.datasource.url", dataSourceProperties.getUrl());
-		builder.setProperty("spring.datasource.username",
-				dataSourceProperties.getUsername());
-		// password may be empty
-		if (StringUtils.hasText(dataSourceProperties.getPassword())) {
-			builder.setProperty("spring.datasource.password",
-					dataSourceProperties.getPassword());
-		}
-		builder.setProperty("spring.datasource.driverClassName",
-				dataSourceProperties.getDriverClassName());
-		return builder.build();
 	}
 
 	@Override
@@ -135,20 +133,20 @@ public class DefaultTaskService implements TaskService {
 		Assert.hasText(taskName, "The provided taskName must not be null or empty.");
 		Assert.notNull(taskDeploymentProperties,
 				"The provided runtimeProperties must not be null.");
-		TaskDefinition taskDefinition = this.repository.findOne(taskName);
+		TaskDefinition taskDefinition = this.taskDefinitionRepository.findOne(taskName);
 		if (taskDefinition == null) {
 			throw new NoSuchTaskDefinitionException(taskName);
 		}
 
-		taskDefinition = this.updateTaskProperties(taskDefinition);
-
 		URI uri = this.registry.find(String.format("task.%s", taskDefinition.getRegisteredAppName()));
 		Resource resource = this.resourceLoader.getResource(uri.toString());
-
+		TaskExecution taskExecution = taskExecutionRepository.createTaskExecution();
+		taskDefinition = this.updateTaskProperties(taskDefinition, taskExecution);
 
 		Map<String, String> appDeploymentProperties = extractAppProperties(taskDefinition.getRegisteredAppName(), taskDeploymentProperties);
 		Map<String, String> deployerDeploymentProperties = DeploymentPropertiesUtils.extractAndQualifyDeployerProperties(taskDeploymentProperties, taskDefinition.getRegisteredAppName());
 		AppDefinition revisedDefinition = mergeAndExpandAppProperties(taskDefinition, resource, appDeploymentProperties);
+
 		AppDeploymentRequest request = new AppDeploymentRequest(revisedDefinition, resource, deployerDeploymentProperties, commandLineArgs);
 
 		String id = this.taskLauncher.launch(request);
@@ -156,10 +154,16 @@ public class DefaultTaskService implements TaskService {
 			throw new IllegalStateException("Deployment ID is null for the task:"
 					+ taskName);
 		}
-		String deploymentKey = DeploymentKey.forTaskDefinition(taskDefinition);
-		if (deploymentIdRepository.findOne(deploymentKey) == null) {
-			this.deploymentIdRepository.save(deploymentKey, id);
-		}
+		taskExecutionRepository.updateExternalExecutionId(taskExecution.getExecutionId(), id);
+	}
+
+	@Override
+	public void cleanupExecution(long id) {
+		TaskExecution taskExecution = taskExplorer.getTaskExecution(id);
+		Assert.notNull(taskExecution, "There was no task execution with id " + id);
+		String launchId = taskExecution.getExternalExecutionId();
+		Assert.hasLength(launchId, "The TaskExecution for id " + id + " did not have an externalExecutionId");
+		taskLauncher.cleanup(launchId);
 	}
 
 	private Map<String, String> extractAppProperties(String name, Map<String, String> taskDeploymentProperties) {
@@ -182,5 +186,23 @@ public class DefaultTaskService implements TaskService {
 		merged = whitelistProperties.qualifyProperties(merged, resource);
 		return new AppDefinition(original.getName(), merged);
 	}
+
+	private TaskDefinition updateTaskProperties(TaskDefinition taskDefinition, TaskExecution taskExecution) {
+		TaskDefinitionBuilder builder = TaskDefinitionBuilder.from(taskDefinition);
+		builder.setProperty("spring.datasource.url", dataSourceProperties.getUrl());
+		builder.setProperty("spring.datasource.username",
+			dataSourceProperties.getUsername());
+		// password may be empty
+		if (StringUtils.hasText(dataSourceProperties.getPassword())) {
+			builder.setProperty("spring.datasource.password",
+				dataSourceProperties.getPassword());
+		}
+		builder.setProperty("spring.datasource.driverClassName",
+			dataSourceProperties.getDriverClassName());
+
+		builder.setProperty("spring.cloud.task.executionid", String.valueOf(taskExecution.getExecutionId()));
+		return builder.build();
+	}
+
 
 }

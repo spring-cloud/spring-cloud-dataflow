@@ -45,6 +45,9 @@ import org.springframework.cloud.deployer.resource.registry.UriRegistry;
 import org.springframework.cloud.deployer.resource.support.DelegatingResourceLoader;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.cloud.task.repository.TaskExplorer;
+import org.springframework.cloud.task.repository.TaskRepository;
+import org.springframework.cloud.task.repository.support.SimpleTaskRepository;
+import org.springframework.cloud.task.repository.support.TaskExecutionDaoFactoryBean;
 import org.springframework.cloud.task.repository.support.TaskRepositoryInitializer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -70,11 +73,16 @@ public class TaskConfiguration {
 	}
 
 	@Bean
+	public TaskRepository taskRepository(DataSource dataSource) {
+		return new SimpleTaskRepository(new TaskExecutionDaoFactoryBean(dataSource));
+	}
+
+	@Bean
 	@ConditionalOnBean(TaskDefinitionRepository.class)
-	public TaskService taskService(TaskDefinitionRepository repository, DeploymentIdRepository deploymentIdRepository,
+	public TaskService taskService(TaskDefinitionRepository repository, TaskExplorer taskExplorer, TaskRepository taskExecutionRepository,
 			UriRegistry registry, DelegatingResourceLoader resourceLoader, TaskLauncher taskLauncher,
 			ApplicationConfigurationMetadataResolver metadataResolver) {
-		return new DefaultTaskService(dataSourceProperties, repository, deploymentIdRepository,
+		return new DefaultTaskService(dataSourceProperties, repository, taskExplorer, taskExecutionRepository,
 				registry, resourceLoader, taskLauncher, metadataResolver);
 	}
 

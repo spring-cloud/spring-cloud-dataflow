@@ -128,4 +128,8 @@ public class TaskTemplate implements TaskOperations {
 				TaskExecutionResource.class);
 	}
 
+	@Override
+	public void cleanup(long id) {
+		restTemplate.delete(executionLink.expand(id).getHref());
+	}
 }

@@ -16,6 +16,11 @@
 
 package org.springframework.cloud.dataflow.server.config;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+
 import java.net.ConnectException;
 import java.util.HashMap;
 import java.util.Map;
@@ -34,6 +39,7 @@ import org.springframework.cloud.dataflow.server.service.TaskService;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskService;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
+import org.springframework.cloud.task.repository.TaskRepository;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.env.ConfigurableEnvironment;
@@ -41,11 +47,6 @@ import org.springframework.core.env.MapPropertySource;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.security.authentication.AuthenticationManager;
-
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
 
 /**
  * @author Glenn Renfro
@@ -148,6 +149,11 @@ public class DataFlowServerConfigurationTests {
 		@Bean
 		public TaskService taskService() {
 			return mock(DefaultTaskService.class);
+		}
+
+		@Bean
+		public TaskRepository taskRepository() {
+			return mock(TaskRepository.class);
 		}
 	}
 }

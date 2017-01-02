@@ -40,4 +40,9 @@ public interface TaskService {
 	 */
 	void executeTask(String taskName, Map<String, String> taskDeploymentProperties, List<String> commandLineArgs);
 
+	/**
+	 * Cleanup the resources that resulted from running the task with the given execution id.
+	 */
+	void cleanupExecution(long id);
+
 }

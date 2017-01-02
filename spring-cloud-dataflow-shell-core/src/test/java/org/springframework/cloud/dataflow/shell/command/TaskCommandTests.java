@@ -16,7 +16,9 @@
 
 package org.springframework.cloud.dataflow.shell.command;
 
+import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Date;
@@ -212,6 +214,13 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 		assertEquals("Eleventh value should be  " + EXTERNAL_EXECUTION_ID,
 				EXTERNAL_EXECUTION_ID,
 				table.getModel().getValue(10, 1));
-
 	}
+
+	@Test
+	public void testTaskExecutionCleanupNotFound() throws InterruptedException {
+		CommandResult cr = task().taskExecutionCleanup(10000);
+		assertThat(cr.getResult(), is("Cleaned up resources for task execution 10000"));
+	}
+
+
 }
