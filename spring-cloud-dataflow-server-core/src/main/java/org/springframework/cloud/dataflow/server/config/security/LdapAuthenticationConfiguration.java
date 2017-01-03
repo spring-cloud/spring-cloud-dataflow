@@ -41,7 +41,7 @@ import org.springframework.util.StringUtils;
 * @since 1.1.0
 */
 @Configuration
-@ConditionalOnProperty("dataflow.security.authentication.ldap.enabled")
+@ConditionalOnProperty("spring.cloud.dataflow.security.authentication.ldap.enabled")
 @EnableConfigurationProperties(LdapSecurityProperties.class)
 public class LdapAuthenticationConfiguration extends GlobalAuthenticationConfigurerAdapter {
 
@@ -77,7 +77,7 @@ public class LdapAuthenticationConfiguration extends GlobalAuthenticationConfigu
 			ldapConfigurer.ldapAuthoritiesPopulator(new LdapAuthoritiesPopulator() {
 				@Override
 				public Collection<? extends GrantedAuthority> getGrantedAuthorities(DirContextOperations userData, String username) {
-					return Collections.singleton(new SimpleGrantedAuthority("ROLE_ADMIN"));
+					return Collections.singleton(new SimpleGrantedAuthority("ROLE_MANAGE"));
 				}
 			});
 		}

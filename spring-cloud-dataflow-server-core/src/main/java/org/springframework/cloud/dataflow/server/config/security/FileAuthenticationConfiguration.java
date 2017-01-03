@@ -34,11 +34,11 @@ import org.springframework.util.Assert;
 * @since 1.1.0
 */
 @Configuration
-@ConditionalOnProperty("dataflow.security.authentication.file.enabled")
+@ConditionalOnProperty("spring.cloud.dataflow.security.authentication.file.enabled")
 @ConfigurationProperties(prefix = FileAuthenticationConfiguration.CONFIGURATION_PROPERTIES_PREFIX)
 public class FileAuthenticationConfiguration extends GlobalAuthenticationConfigurerAdapter {
 
-	public static final String CONFIGURATION_PROPERTIES_PREFIX = "dataflow.security.authentication.file";
+	public static final String CONFIGURATION_PROPERTIES_PREFIX = "spring.cloud.dataflow.security.authentication.file";
 
 	private Properties users;
 

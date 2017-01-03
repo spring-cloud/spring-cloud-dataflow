@@ -39,7 +39,7 @@ public class FileAuthenticationConfigurationTests {
 		catch (IllegalArgumentException anIllegalArgumentException) {
 			assertThat(anIllegalArgumentException.getMessage(),
 					is("No user specified. Please specify at least 1 user (e.g. "
-							+ "via 'dataflow.security.authentication.file.users')"));
+							+ "via 'spring.cloud.dataflow.security.authentication.file.users')"));
 		}
 	}
 

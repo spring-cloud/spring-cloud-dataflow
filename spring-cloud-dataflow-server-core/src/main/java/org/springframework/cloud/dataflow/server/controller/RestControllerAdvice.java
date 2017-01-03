@@ -40,6 +40,7 @@ import org.springframework.hateoas.VndErrors;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.MissingServletRequestParameterException;
+import org.springframework.web.bind.UnsatisfiedServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -139,6 +140,7 @@ public class RestControllerAdvice {
 	 */
 	@ExceptionHandler({
 		MissingServletRequestParameterException.class,
+		UnsatisfiedServletRequestParameterException.class,
 		MethodArgumentTypeMismatchException.class,
 		InvalidStreamDefinitionException.class
 	})

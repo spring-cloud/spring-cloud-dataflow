@@ -1,0 +1,18 @@
+management:
+  security:
+    enabled: true
+security:
+  basic:
+    enabled: true
+    realm: Spring Cloud Data Flow
+spring:
+  cloud:
+    dataflow:
+      security:
+        authentication:
+          file:
+            enabled: true
+            users:
+              bob: bobspassword, ROLE_VIEW
+              alice: alicepwd, ROLE_MANAGE
+              cartman: cartmanpwd, ROLE_CREATE
