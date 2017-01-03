@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,6 +46,7 @@ import javax.net.ssl.X509TrustManager;
  *
  * @author Josh Long
  * @author Mark Pollack
+ * @author Eric Bottard
  */
 @Configuration
 @ImportResource("classpath*:/META-INF/spring/spring-shell-plugin.xml")
@@ -109,11 +110,10 @@ public class BaseShellAutoConfiguration {
 				sc.init(null, allTrustingManagers, new java.security.SecureRandom());
 				HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
 			} catch (Exception e) {
-				logger.error("Error while installing all trusting SSL factory", e);
+				logger.error("Error while installing all-trusting SSL factory", e);
 			}
 		}
 	}
-
 
 	@Configuration
 	@ComponentScan({"org.springframework.shell.converters", "org.springframework.shell.plugin.support"})

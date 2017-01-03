@@ -159,11 +159,23 @@ server:
 ----
 
 This is all that's needed for the Data Flow Server. Once you start the server,
-you should be able to access it via https://localhost:8443/[https://localhost:8443/]. As this is a self-signed
-certificate, you will hit a warning in your browser, that you need to ignore.
+you should be able to access it via https://localhost:8443/[https://localhost:8443/].
+As this is a self-signed certificate, you will hit a warning in your browser, that
+you need to ignore.
 
-This issue also is relevant for the Data Flow Shell. Therefore additional steps are
-necessary to make the Shell work with self-signed certificates. First, we need to
+[[configuration-security-self-signed-certificates-shell]]
+==== Self-Signed Certificates and the Shell
+
+By default self-signed certificates are an issue for the Shell and additional steps
+are necessary to make the Shell work with self-signed certificates. Two options
+are available:
+
+1. Add the self-signed certificate to the JVM truststore
+2. Skip certificate validation
+
+**Add the self-signed certificate to the JVM truststore**
+
+In order to use the JVM truststore option, we need to
 export the previously created certificate from the keystore:
 
 [source,bash]
@@ -200,6 +212,20 @@ Don't forget to target the Data Flow Server with:
 ----
 dataflow:> dataflow config server https://localhost:8443/
 ----
+
+**Skip Certificate Validation**
+
+Alternatively, you can also bypass the certification validation by providing the
+optional command-line parameter `--skip-ssl-validation`.
+
+Using this command-line parameter, the shell will accept any (self-signed) SSL
+certificate.
+
+[WARNING]
+====
+If possible you should avoid using this option. Disabling the trust manager
+defeats the purpose of SSL and makes you vulnerable to man-in-the-middle attacks.
+====
 
 [[configuration-security-basic-authentication]]
 === Basic Authentication
@@ -531,70 +557,70 @@ being set to `true`.
 
 [[configuration-monitoring-management]]
 == Monitoring and Management
-The Spring Cloud Data Flow server is a Spring Boot application that includes the http://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#production-ready[Actuator 
-library], which adds several production ready features to help you monitor and manage your application.  
+The Spring Cloud Data Flow server is a Spring Boot application that includes the http://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#production-ready[Actuator
+library], which adds several production ready features to help you monitor and manage your application.
 
-The Actuator library adds http endpoints under the context path `/management` that is also 
+The Actuator library adds http endpoints under the context path `/management` that is also
 a discovery page for available endpoints.  For example, there is a `health` endpoint
-that shows application health information and an `env` that lists properties from 
-Spring's `ConfigurableEnvironment`.  By default only the health and application info 
-endpoints are accessible.  The other endpoints are considered to be _sensitive_ 
+that shows application health information and an `env` that lists properties from
+Spring's `ConfigurableEnvironment`.  By default only the health and application info
+endpoints are accessible.  The other endpoints are considered to be _sensitive_
 and need to be http://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#production-ready-customizing-endpoints[enabled explicitly via configuration].  If you are enabling
-_sensitive_ endpoints then you should also 
+_sensitive_ endpoints then you should also
 <<configuration-security,secure the Data Flow server's endpoints>> so that
 information is not inadvertently exposed to unauthenticated users.  The local Data Flow server has security disabled by default, so all actuator endpoints are available.
 
 The Data Flow server requires a relational database and if the feature toggled for
-analytics is enabled, a Redis server is also required.  The Data Flow server will 
+analytics is enabled, a Redis server is also required.  The Data Flow server will
 autoconfigure the https://github.com/spring-projects/spring-boot/blob/v1.4.1.RELEASE/spring-boot-actuator/src/main/java/org/springframework/boot/actuate/health/DataSourceHealthIndicator.java[DataSourceHealthIndicator] and https://github.com/spring-projects/spring-boot/blob/v1.4.1.RELEASE/spring-boot-actuator/src/main/java/org/springframework/boot/actuate/health/RedisHealthIndicator.java[RedisHealthIndicator] if needed.  The health of these two services is incorporated to the overall health status of the server through the `health` endpoint.
 
 === Spring Boot Admin
-A nice way to visualize and interact with actuator endpoints is to incorporate the 
-https://github.com/codecentric/spring-boot-admin[Spring Boot Admin] client library into the Spring Cloud Data Flow server.  You can create the Spring Boot Admin application by following 
+A nice way to visualize and interact with actuator endpoints is to incorporate the
+https://github.com/codecentric/spring-boot-admin[Spring Boot Admin] client library into the Spring Cloud Data Flow server.  You can create the Spring Boot Admin application by following
 http://codecentric.github.io/spring-boot-admin/1.4.3/#set-up-admin-server[a few simple steps].
 
-An easy way to include the client library into the Data Flow server is to create a 
-new Data Flow Server project from http://start.spring.io.  Type 'flow' in the 
-"Search for dependencies" text box and select the server runtime you want to customize. 
+An easy way to include the client library into the Data Flow server is to create a
+new Data Flow Server project from http://start.spring.io.  Type 'flow' in the
+"Search for dependencies" text box and select the server runtime you want to customize.
 A simple way to have the Spring Cloud Data Flow server be a client to the Spring Boot
-Admin Server is by adding a dependency to the Data Flow server's pom and an additional 
+Admin Server is by adding a dependency to the Data Flow server's pom and an additional
 configuration property as documented in http://codecentric.github.io/spring-boot-admin/1.4.3/#register-clients-via-spring-boot-admin[Registering Client Applications].
 
 This will result in a UI with tabs for each of the actuator endpoints.
 
 .Spring Boot Admin UI
-image::{dataflow-asciidoc}/images/spring-boot-admin.png[Spring Boot Admin UI, scaledwidth="80%"]  
+image::{dataflow-asciidoc}/images/spring-boot-admin.png[Spring Boot Admin UI, scaledwidth="80%"]
 
 Additional configuration is required to interact with JMX beans and logging levels. Refer
 to the Spring Boot admin documentation for more information.  As only the `info`
 and `health` endpoints are available to unauthenticated users, you should enable security on
-the Data Flow Server and also http://codecentric.github.io/spring-boot-admin/1.4.3/#_securing_spring_boot_admin_server[configure Spring Boot Admin server's security] so that it 
+the Data Flow Server and also http://codecentric.github.io/spring-boot-admin/1.4.3/#_securing_spring_boot_admin_server[configure Spring Boot Admin server's security] so that it
 can securely access the actuator endpoints.
 
 === Monitoring Deployed Applications
 
-The applications that are deployed by Spring Cloud Data Flow are based on Spring Boot which 
+The applications that are deployed by Spring Cloud Data Flow are based on Spring Boot which
 contains several features for monitoring your application in production.  Each deployed
 application contains http://docs.spring.io/spring-boot/docs/current/reference/html/production-ready-endpoints.html[several web endpoints] for monitoring and interacting with Stream and Task applications.
 
 In particular, the metrics endpoint contains counters
-and gauges for HTTP requests, http://docs.spring.io/spring-boot/docs/current/reference/html/production-ready-metrics.html#production-ready-system-metrics[System Metrics] (such as JVM stats), http://docs.spring.io/spring-boot/docs/current/reference/html/production-ready-metrics.html#production-ready-datasource-metrics[DataSource Metrics] and http://docs.spring.io/spring-integration/reference/htmlsingle/#mgmt-channel-features[Message Channel Metrics] (such as message rates).  In turn, these metrics can be exported periodically to various application monitoring tools via 
+and gauges for HTTP requests, http://docs.spring.io/spring-boot/docs/current/reference/html/production-ready-metrics.html#production-ready-system-metrics[System Metrics] (such as JVM stats), http://docs.spring.io/spring-boot/docs/current/reference/html/production-ready-metrics.html#production-ready-datasource-metrics[DataSource Metrics] and http://docs.spring.io/spring-integration/reference/htmlsingle/#mgmt-channel-features[Message Channel Metrics] (such as message rates).  In turn, these metrics can be exported periodically to various application monitoring tools via
 http://docs.spring.io/spring-boot/docs/current/reference/html/production-ready-metrics.html#production-ready-metric-writers[MetricWriter] implementations.  You can control how often and which Spring Boot metrics are exported through the use of include and exclude name filters.
 
-The project https://github.com/spring-cloud/spring-cloud-dataflow-metrics[Spring Cloud Data Flow Metrics] provides the foundation for 
-exporting Spring Boot metrics.  The main project provides Spring Boots AutoConfiguration to setup the exporting process and common 
+The project https://github.com/spring-cloud/spring-cloud-dataflow-metrics[Spring Cloud Data Flow Metrics] provides the foundation for
+exporting Spring Boot metrics.  The main project provides Spring Boots AutoConfiguration to setup the exporting process and common
 functionality such as defining a metric name prefix appropriate for your environement.  For example, you may want to include the
-region where the application is running in addition to the application's name and stream/task to which it belongs.  
+region where the application is running in addition to the application's name and stream/task to which it belongs.
 The main project also includes a `LogMetricWriter` so that
 metrics can be stored into the log file.  While very simple in approach, log files are often ingested into application monitoring tools
-(such as Splunk) where they can be further processed to create dashboards of an application's performance.  
+(such as Splunk) where they can be further processed to create dashboards of an application's performance.
 
 The project https://github.com/spring-cloud/spring-cloud-dataflow-metrics-datadog[Spring Cloud Data Flow Metrics Datadog Metrics] provides
-integration to export Spring Boot metrics to https://www.datadoghq.com/[Datadog]. 
+integration to export Spring Boot metrics to https://www.datadoghq.com/[Datadog].
 
 To make use of this functionality, you will need to add additional dependencies into your Stream and Task applications.  To customize
-the "out of the box" Task and Stream applications you can use the http://start-scs.cfapps.io/[Data Flow Initializr] to generate a 
-project and then add to the generated Maven pom file the MetricWriter implementation you want to use.  The documentation on the 
+the "out of the box" Task and Stream applications you can use the http://start-scs.cfapps.io/[Data Flow Initializr] to generate a
+project and then add to the generated Maven pom file the MetricWriter implementation you want to use.  The documentation on the
 Data Flow Metrics project pages provides the additional information you need to get started.
 
 
