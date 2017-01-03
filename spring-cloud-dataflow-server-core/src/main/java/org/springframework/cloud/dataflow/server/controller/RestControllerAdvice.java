@@ -18,6 +18,7 @@ package org.springframework.cloud.dataflow.server.controller;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import org.springframework.batch.admin.service.NoSuchStepExecutionException;
 import org.springframework.batch.core.launch.JobExecutionNotRunningException;
 import org.springframework.batch.core.launch.NoSuchJobException;
@@ -34,6 +35,7 @@ import org.springframework.cloud.dataflow.server.repository.NoSuchTaskExecutionE
 import org.springframework.hateoas.VndErrors;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -117,6 +119,23 @@ public class RestControllerAdvice {
 	@ResponseStatus(HttpStatus.NOT_FOUND)
 	@ResponseBody
 	public VndErrors onNotFoundException(Exception e) {
+		String logref = logWarnLevelExceptionMessage(e);
+		if (logger.isTraceEnabled()) {
+			logTraceLevelStrackTrace(e);
+		}
+		String msg = getExceptionMessage(e);
+		return new VndErrors(logref, msg);
+	}
+
+	/**
+	 * Client did not formulate a correct request.
+	 * Log the exception message at warn level and stack trace as trace level.
+	 * Return response status HttpStatus.BAD_REQUEST (400).
+	 */
+	@ExceptionHandler({MissingServletRequestParameterException.class})
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	@ResponseBody
+	public VndErrors onClientGenericBadRequest(Exception e) {
 		String logref = logWarnLevelExceptionMessage(e);
 		if (logger.isTraceEnabled()) {
 			logTraceLevelStrackTrace(e);
