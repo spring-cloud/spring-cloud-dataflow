@@ -4,4 +4,5 @@ Data Flow Options:
   --dataflow.password=<PASSWORD>        Password of the Data Flow Server [no default].
   --spring.shell.historySize=<SIZE>     Default size of the shell log file [default: 3000]
   --spring.shell.commandFile=<FILE>     Data Flow Shell executes commands read from the file(s) and then exits.
+  --skip-ssl-validation                 Accept any SSL certificate (even self-signed)
   --help                                This message.

@@ -16,8 +16,12 @@
 
 package org.springframework.cloud.dataflow.shell.autoconfigure;
 
+import java.util.Arrays;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.cloud.dataflow.shell.ShellCommandLineParser;
@@ -32,6 +36,10 @@ import org.springframework.shell.core.JLineShell;
 import org.springframework.shell.core.JLineShellComponent;
 
 import javax.annotation.PostConstruct;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 
 /**
  * Configures the various commands that are part of the default Spring Shell experience.
@@ -44,6 +52,9 @@ import javax.annotation.PostConstruct;
 public class BaseShellAutoConfiguration {
 
 	private static final Logger logger = LoggerFactory.getLogger(BaseShellAutoConfiguration.class);
+
+	@Autowired
+	private CommandLine commandLine;
 
 	@Bean
 	public TargetHolder targetHolder() {
@@ -73,6 +84,36 @@ public class BaseShellAutoConfiguration {
 	public JLineShellComponent shell() {
 		return new JLineShellComponent();
 	}
+
+	@PostConstruct
+	public void skipSSLValidation() {
+		if (Arrays.asList(commandLine.getArgs()).contains("--skip-ssl-validation")) {
+			// Create a trust manager that does not validate certificate chains
+			TrustManager[] allTrustingManagers = new TrustManager[]{
+				new X509TrustManager() {
+					public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+						return null;
+					}
+					public void checkClientTrusted(
+						java.security.cert.X509Certificate[] certs, String authType) {
+					}
+					public void checkServerTrusted(
+						java.security.cert.X509Certificate[] certs, String authType) {
+					}
+				}
+			};
+
+			// Install it
+			try {
+				SSLContext sc = SSLContext.getInstance("SSL");
+				sc.init(null, allTrustingManagers, new java.security.SecureRandom());
+				HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+			} catch (Exception e) {
+				logger.error("Error while installing all trusting SSL factory", e);
+			}
+		}
+	}
+
 
 	@Configuration
 	@ComponentScan({"org.springframework.shell.converters", "org.springframework.shell.plugin.support"})
