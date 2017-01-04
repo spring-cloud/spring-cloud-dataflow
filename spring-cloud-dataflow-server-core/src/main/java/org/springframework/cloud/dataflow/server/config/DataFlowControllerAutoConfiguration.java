@@ -230,6 +230,7 @@ public class DataFlowControllerAutoConfiguration {
 	}
 
 	@Bean
+	@ConditionalOnProperty("security.basic.enabled")
 	public LoginController loginController() {
 		return new LoginController();
 	}
