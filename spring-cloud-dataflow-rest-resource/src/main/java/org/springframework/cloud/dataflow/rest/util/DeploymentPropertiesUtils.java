@@ -26,6 +26,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.springframework.util.StringUtils;
 
 /**
@@ -35,6 +38,8 @@ import org.springframework.util.StringUtils;
  * @author Mark Fisher
  */
 public final class DeploymentPropertiesUtils {
+
+	private static final Logger logger = LoggerFactory.getLogger(DeploymentPropertiesUtils.class);
 
 	private DeploymentPropertiesUtils() {
 		// prevent instantiation
@@ -84,12 +89,45 @@ public final class DeploymentPropertiesUtils {
 		final int appLength = appPrefix.length();
 
 		// Using a TreeMap makes sure wildcard entries appear before app specific ones
-		return new TreeMap<>(input).entrySet().stream()
+		Map<String, String> result = new TreeMap<>(input).entrySet().stream()
 			.filter(kv -> kv.getKey().startsWith(wildcardPrefix) || kv.getKey().startsWith(appPrefix))
 			.collect(Collectors.toMap(
 				kv -> kv.getKey().startsWith(wildcardPrefix)
 					? "spring.cloud.deployer." + kv.getKey().substring(wildcardLength)
 					: "spring.cloud.deployer." + kv.getKey().substring(appLength),
+				kv -> kv.getValue(),
+				(fromWildcard, fromApp) -> fromApp
+				)
+			);
+
+		Map<String, String> deprecated = extractDeprecatedDeployerProperties(input, appName);
+		if (deprecated.isEmpty()) {
+			return result;
+		} else {
+			deprecated.entrySet().forEach(kv -> {
+				logger.warn("Usage of application property prefix 'spring.cloud.deployer' to pass properties to the deployer has been deprecated and will be removed soon\n" +
+					"Instead of 'app.{}.{} = {}', please use\n" +
+					"           'deployer.{}.{} = {}'",
+					appName, kv.getKey(), kv.getValue(),
+					appName, kv.getKey().substring("spring.cloud.deployer.".length()), kv.getValue());
+			});
+			return deprecated;
+		}
+
+	}
+
+	private static Map<String, String> extractDeprecatedDeployerProperties(Map<String, String> input, String appName) {
+		final String wildcardPrefix = "app.*.spring.cloud.deployer.";
+		final int wildcardLength = "app.*.".length();
+		final String appPrefix = String.format("app.%s.spring.cloud.deployer.", appName);
+		final int appLength = String.format("app.%s.", appName).length();
+
+		return new TreeMap<>(input).entrySet().stream()
+			.filter(kv -> kv.getKey().startsWith(wildcardPrefix) || kv.getKey().startsWith(appPrefix))
+			.collect(Collectors.toMap(
+				kv -> kv.getKey().startsWith(wildcardPrefix)
+					? kv.getKey().substring(wildcardLength)
+					: kv.getKey().substring(appLength),
 				kv -> kv.getValue(),
 				(fromWildcard, fromApp) -> fromApp
 				)
