@@ -65,7 +65,7 @@ as binders.
 
 Similar to Spring XD, there’s an abstraction available to extend the binder interface. By default, 
 we take the opinionated view of link:https://github.com/spring-cloud/spring-cloud-stream-binder-kafka[Apache Kafka] and link:https://github.com/spring-cloud/spring-cloud-stream-binder-rabbit[RabbitMQ] as the 
-production-ready binders and are available as GA releases. We also have an experimental version of the link:https://github.com/spring-cloud/spring-cloud-stream-binder-gemfire[Gemfire] binder.
+production-ready binders and are available as GA releases.
 
 ==== Binders
 
@@ -83,8 +83,10 @@ dependency in the classpath.
 </dependency>
 ----
 
-* Spring Cloud Stream supports link:https://github.com/spring-cloud/spring-cloud-stream-binder-kafka[Apache Kafka], link:https://github.com/spring-cloud/spring-cloud-stream-binder-rabbit[RabbitMQ] and an experimental 
-link:https://github.com/spring-cloud/spring-cloud-stream-binder-gemfire[Gemfire] binder implementation. All binder implementations are maintained and managed in their individual repositories
+* Spring Cloud Stream supports link:https://github.com/spring-cloud/spring-cloud-stream-binder-kafka[Apache Kafka], link:https://github.com/spring-cloud/spring-cloud-stream-binder-rabbit[RabbitMQ] and experimental
+link:https://github.com/spring-cloud/spring-cloud-stream-binder-google-pubsub[Google PubSub] and
+link:https://github.com/spring-cloud/spring-cloud-stream-binder-solace[Solace JMS].  All binder implementations
+are maintained and managed in their individual repositories
 * Every Stream/Task application can be built with a binder implementation of your choice. 
 All the out-of-the-box applications are pre-built for both Kafka and Rabbit and they’re 
 readily available for use as maven artifacts [link:http://repo.spring.io/libs-milestone/org/springframework/cloud/stream/app/[Spring Cloud Stream] / link:http://repo.spring.io/libs-milestone/org/springframework/cloud/task/app/[Spring Cloud Task] or docker images [link:https://hub.docker.com/r/springcloudstream/[Spring Cloud Stream] / link:https://hub.docker.com/r/springcloudtask/[Spring Cloud Task]
