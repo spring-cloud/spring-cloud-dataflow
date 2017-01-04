@@ -42,38 +42,6 @@ wget http://repo.spring.io/{version-type-lowercase}/org/springframework/cloud/sp
 $ java -jar spring-cloud-dataflow-server-local-{project-version}.jar
 ----
 +
-.. Running with Custom Maven Settings and/or Behind a Proxy
-If you want to override specific maven configuration properties (remote repositories, etc.) and/or run the Data Flow Server behind a proxy,
-you need to specify those properties as command line arguments when starting the Data Flow Server. For example:
-+
-[source,bash,subs=attributes]
-----
-$ java -jar spring-cloud-dataflow-server-local-{project-version}.jar --maven.localRepository=mylocal
---maven.remote-repositories.repo1.url=https://repo1
---maven.remote-repositories.repo1.auth.username=user1
---maven.remote-repositories.repo1.auth.password=pass1
---maven.remote-repositories.repo2.url=https://repo2 --maven.proxy.host=proxy1
---maven.proxy.port=9010 --maven.proxy.auth.username=proxyuser1
---maven.proxy.auth.password=proxypass1
-----
-+
-By default, the protocol is set to `http`. You can omit the auth properties if the proxy doesn't need a username and password.
-+
-By default, the maven `localRepository` is set to `${user.home}/.m2/repository/`,
-and `https://repo.spring.io/libs-snapshot` will be the only remote repository. Like in the above example, the remote
-repositories can be specified along with their authentication (if needed). If the remote repositories are behind a proxy,
-then the proxy properties can be specified as above.
-+
-If you want to pass these properties as environment properties, then you need to use `SPRING_APPLICATION_JSON` to set
-these properties and pass `SPRING_APPLICATION_JSON` as environment variable as below:
-+
-[source,bash]
-----
-$ SPRING_APPLICATION_JSON='{ "maven": { "local-repository": null,
-"remote-repositories": { "repo1": { "url": "https://repo1", "auth": { "username": "repo1user", "password": "repo1pass" } }, "repo2": { "url": "https://repo2" } },
-"proxy": { "host": "proxyhost", "port": 9018, "auth": { "username": "proxyuser", "password": "proxypass" } } } }' java -jar spring-cloud-dataflow-server-local-{project-version}.jar
-----
-+
 . Launch the shell:
 +
 [source,bash,subs=attributes]
@@ -96,6 +64,9 @@ By default, the application registry will be empty. If you would like to registe
 ----
 $ dataflow:>app import --uri http://bit.ly/1-0-4-GA-stream-applications-kafka-maven
 ----
++
+NOTE: Depending on your environment, you may need to configure the Data Flow Server to point to a custom
+Maven repository location or configure proxy settings.  See <<getting-started-maven-configuration>> for more information.
 +
 . You can now use the shell commands to list available applications (source/processors/sink) and create streams. For example:
 +
@@ -136,6 +107,39 @@ to `WARNING` in `logback.xml`:
 ----
 
 ====
+
+[[getting-started-maven-configuration]]
+=== Maven Configuration
+If you want to override specific maven configuration properties (remote repositories, proxies, etc.) and/or run the Data Flow Server behind a proxy,
+you need to specify those properties as command line arguments when starting the Data Flow Server. For example:
++
+[source,bash,subs=attributes]
+----
+$ java -jar spring-cloud-dataflow-server-local-{project-version}.jar --maven.localRepository=mylocal
+--maven.remote-repositories.repo1.url=https://repo1
+--maven.remote-repositories.repo1.auth.username=user1
+--maven.remote-repositories.repo1.auth.password=pass1
+--maven.remote-repositories.repo2.url=https://repo2 --maven.proxy.host=proxy1
+--maven.proxy.port=9010 --maven.proxy.auth.username=proxyuser1
+--maven.proxy.auth.password=proxypass1
+----
++
+By default, the protocol is set to `http`. You can omit the auth properties if the proxy doesn't need a username and password.
++
+By default, the maven `localRepository` is set to `${user.home}/.m2/repository/`,
+and `https://repo.spring.io/libs-snapshot` will be the only remote repository. Like in the above example, the remote
+repositories can be specified along with their authentication (if needed). If the remote repositories are behind a proxy,
+then the proxy properties can be specified as above.
++
+If you want to pass these properties as environment properties, then you need to use `SPRING_APPLICATION_JSON` to set
+these properties and pass `SPRING_APPLICATION_JSON` as environment variable as below:
++
+[source,bash]
+----
+$ SPRING_APPLICATION_JSON='{ "maven": { "local-repository": null,
+"remote-repositories": { "repo1": { "url": "https://repo1", "auth": { "username": "repo1user", "password": "repo1pass" } }, "repo2": { "url": "https://repo2" } },
+"proxy": { "host": "proxyhost", "port": 9018, "auth": { "username": "proxyuser", "password": "proxypass" } } } }' java -jar spring-cloud-dataflow-server-local-{project-version}.jar
+----
 
 [[getting-started-application-configuration]]
 == Application Configuration
