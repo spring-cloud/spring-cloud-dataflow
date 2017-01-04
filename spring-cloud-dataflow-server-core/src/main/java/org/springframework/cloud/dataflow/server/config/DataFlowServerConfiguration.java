@@ -34,11 +34,13 @@ import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationPr
 import org.springframework.cloud.dataflow.server.config.features.FeaturesConfiguration;
 import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
 import org.springframework.cloud.dataflow.server.config.security.BasicAuthSecurityConfiguration;
+import org.springframework.cloud.dataflow.server.config.security.FileAuthenticationConfiguration;
+import org.springframework.cloud.dataflow.server.config.security.LdapAuthenticationConfiguration;
+import org.springframework.cloud.dataflow.server.config.security.OAuthSecurityConfiguration;
 import org.springframework.cloud.dataflow.server.config.web.WebConfiguration;
-import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
+import org.springframework.cloud.dataflow.server.repository.RepositoryConfiguration;
 import org.springframework.cloud.dataflow.server.repository.support.DataflowRdbmsInitializer;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Import;
@@ -65,10 +67,28 @@ import org.springframework.util.StringUtils;
 @EnableHypermediaSupport(type = HAL)
 @EnableSpringDataWebSupport
 @Configuration
-@Import({CompletionConfiguration.class, FeaturesConfiguration.class, WebConfiguration.class})
-@ComponentScan(basePackageClasses = {StreamDefinitionRepository.class, BasicAuthSecurityConfiguration.class})
+@Import({		RepositoryConfiguration.class, CompletionConfiguration.class, FeaturesConfiguration.class, WebConfiguration.class,
+		BasicAuthSecurityConfiguration.class, FileAuthenticationConfiguration.class,
+		LdapAuthenticationConfiguration.class, OAuthSecurityConfiguration.class})
+//@ComponentScan(basePackageClasses = {StreamDefinitionRepository.class})
 @EnableConfigurationProperties({BatchProperties.class, CommonApplicationProperties.class})
 public class DataFlowServerConfiguration {
+
+
+//	@Bean
+//	public DeploymentIdRepository deploymentIdRepository(DataSource dataSource) {
+//		return new RdbmsDeploymentIdRepository(dataSource);
+//	}
+//
+//	@Bean
+//	public StreamDefinitionRepository streamDefinitionRepository(DataSource dataSource) {
+//		return new RdbmsStreamDefinitionRepository(dataSource);
+//	}
+//
+//	@Bean
+//	public TaskDefinitionRepository taskDefinitionRepository(DataSource dataSource) {
+//		return new RdbmsTaskDefinitionRepository(dataSource);
+//	}
 
 	@Configuration
 	@ConditionalOnProperty(name = "spring.dataflow.embedded.database.enabled", havingValue = "true", matchIfMissing = true)
