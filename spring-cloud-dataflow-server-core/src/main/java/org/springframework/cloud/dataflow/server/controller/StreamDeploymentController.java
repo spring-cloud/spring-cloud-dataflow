@@ -244,10 +244,10 @@ public class StreamDeploymentController {
 				String id = this.deployer.deploy(request);
 				this.deploymentIdRepository.save(DeploymentKey.forStreamAppDefinition(currentApp), id);
 			}
-			// If the deployer implementation handles the deployment request synchronously, log warning message if
+			// If the deployer implementation handles the deployment request synchronously, log error message if
 			// any exception is thrown out of the deployment and proceed to the next deployment.
 			catch (Exception e) {
-				loggger.warn(String.format("Exception when deploying the app %s: %s", currentApp, e.getMessage()));
+				loggger.error(String.format("Exception when deploying the app %s: %s", currentApp, e.getMessage()), e);
 			}
 		}
 	}
