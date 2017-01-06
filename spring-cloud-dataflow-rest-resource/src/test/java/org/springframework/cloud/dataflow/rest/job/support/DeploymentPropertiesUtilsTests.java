@@ -106,6 +106,15 @@ public class DeploymentPropertiesUtilsTests {
 	}
 
 	@Test
+	// TO BE REMOVED once deprecated support is removed
+	public void testDeprecatedDeployerPropertyCount() {
+		Map<String, String> props = new LinkedHashMap<>();
+		props.put("app.myapp.count", "2");
+		Map<String, String> result = DeploymentPropertiesUtils.extractAndQualifyDeployerProperties(props, "myapp");
+		assertThat(result, hasEntry("spring.cloud.deployer.count", "2"));
+	}
+
+	@Test
 	public void testCommandLineParamsParsing() {
 		assertArrays(new String[] { "--format=yyyy-MM-dd" }, new String[] { "--format=yyyy-MM-dd" });
 		assertArrays(new String[] { "'--format=yyyy-MM-dd HH:mm:ss.SSS'" }, new String[] { "--format=yyyy-MM-dd HH:mm:ss.SSS" });

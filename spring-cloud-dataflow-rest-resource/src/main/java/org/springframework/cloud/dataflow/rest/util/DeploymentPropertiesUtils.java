@@ -101,6 +101,17 @@ public final class DeploymentPropertiesUtils {
 			);
 
 		Map<String, String> deprecated = extractDeprecatedDeployerProperties(input, appName);
+		// Also, 'count' used to be treated as a special case. Handle here
+		String deprecatedWildcardCound = input.get("app.*.count");
+		String deprecatedCount = input.getOrDefault("app." + appName + ".count", deprecatedWildcardCound);
+		if (deprecatedCount != null && deprecated.get("spring.cloud.deployer.count") == null) {
+			deprecated.put("spring.cloud.deployer.count", deprecatedCount);
+			logger.warn("Usage of application property 'app.{}.count' to specify number of instances has been deprecated and will be removed in a future release\n" +
+				"Instead, please use 'deployer.{}.count = {}'",
+				appName, appName, deprecatedCount);
+		}
+
+
 		if (deprecated.isEmpty()) {
 			return result;
 		} else {
