@@ -9,7 +9,7 @@ In this section you will learn all about Streams and how to use them with Spring
 [[spring-cloud-dataflow-stream-intro]]
 == Introduction
 
-In Spring Cloud Data Flow, a basic stream defines the ingestion of event driven data from a _source_ to a _sink_ that passes through any number of _processors_. Streams are composed of spring-cloud-stream applications and the deployment of stream definitions is done via the Data Flow Server (REST API). The xref:getting-started#getting-started[Getting Started] section shows you how to start these servers and how to start and use the Spring Cloud Data Flow shell.
+In Spring Cloud Data Flow, a basic stream defines the ingestion of event data from a _source_ to a _sink_ that passes through any number of _processors_. Streams are composed of http://cloud.spring.io/spring-cloud-stream/[Spring Cloud Stream] applications and the deployment of stream definitions is done via the Data Flow Server (REST API). The xref:getting-started#getting-started[Getting Started] section shows you how to start the server and how to start and use the Spring Cloud Data Flow shell.
 
 A high level DSL is used to create stream definitions. The DSL to define a stream that has an http source and a file sink (with no processors) is shown below
 
@@ -21,7 +21,7 @@ The DSL mimics UNIX pipes and filters syntax. Default values for ports and filen
 ```
 http --server.port=8091 | file --directory=/tmp/httpdata/
 ```
-To create these stream definitions you use the shell or make an HTTP POST request to the Spring Cloud Data Flow Server. More details can be found in the sections below.
+To create these stream definitions you use the shell or make an HTTP POST request to the Spring Cloud Data Flow Server.  For more information on making HTTP request directly to the server, consult the <<api-guide, REST API Guide>>.
 
 == Stream DSL
 
@@ -59,8 +59,8 @@ For example, if you would like to register the snapshot versions of the `http` a
 applications built with the RabbitMQ binder, you could do the following:
 
 ```
-dataflow:>app register --name http --type source --uri maven://org.springframework.cloud.stream.app:http-source-rabbit:1.0.0.BUILD-SNAPSHOT
-dataflow:>app register --name log --type sink --uri maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.0.0.BUILD-SNAPSHOT
+dataflow:>app register --name http --type source --uri maven://org.springframework.cloud.stream.app:http-source-rabbit:1.1.2.BUILD-SNAPSHOT
+dataflow:>app register --name log --type sink --uri maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.1.2.BUILD-SNAPSHOT
 ```
 
 If you would like to register multiple apps at one time, you can store them in a properties file
@@ -70,8 +70,8 @@ For example, if you would like to register the snapshot versions of the `http` a
 applications built with the RabbitMQ binder, you could have the following in a properties file [_eg: stream-apps.properties_]:
 
 ```
-source.http=maven://org.springframework.cloud.stream.app:http-source-rabbit:1.0.0.BUILD-SNAPSHOT
-sink.log=maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.0.0.BUILD-SNAPSHOT
+source.http=maven://org.springframework.cloud.stream.app:http-source-rabbit:1.1.2.BUILD-SNAPSHOT
+sink.log=maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.1.2.BUILD-SNAPSHOT
 ```
 
 Then to import the apps in bulk, use the `app import` command and provide the location of the properties file via `--uri`:
@@ -89,26 +89,32 @@ List of available Stream Application Starters:
 [width="100%",frame="topbot",options="header"]
 |======================
 |Artifact Type |Stable Release |SNAPSHOT Release
-|RabbitMQ + Maven |link:http://bit.ly/1-0-4-GA-stream-applications-rabbit-maven[http://bit.ly/1-0-4-GA-stream-applications-rabbit-maven] |link:http://bit.ly/1-1-0-SNAPSHOT-stream-applications-rabbit-maven[http://bit.ly/1-1-0-SNAPSHOT-stream-applications-rabbit-maven]
-|RabbitMQ + Docker|link:http://bit.ly/1-0-4-GA-stream-applications-rabbit-docker[http://bit.ly/1-0-4-GA-stream-applications-rabbit-docker] | link:http://bit.ly/1-1-0-SNAPSHOT-stream-applications-rabbit-docker[http://bit.ly/1-1-0-SNAPSHOT-stream-applications-rabbit-docker]
-|Kafka + Maven 	  |link:http://bit.ly/1-0-4-GA-stream-applications-kafka-maven[http://bit.ly/1-0-4-GA-stream-applications-kafka-maven] |link:http://bit.ly/1-1-0-SNAPSHOT-stream-applications-kafka-maven[http://bit.ly/1-1-0-SNAPSHOT-stream-applications-kafka-maven]
-|Kafka + Docker   |link:http://bit.ly/1-0-4-GA-stream-applications-kafka-docker[http://bit.ly/1-0-4-GA-stream-applications-kafka-docker] | link:http://bit.ly/1-1-0-SNAPSHOT-stream-applications-kafka-docker[http://bit.ly/1-1-0-SNAPSHOT-stream-applications-kafka-docker]
+|RabbitMQ + Maven |link:https://bit.ly/Avogadro-GA-stream-applications-rabbit-maven[https://bit.ly/Avogadro-GA-stream-applications-rabbit-maven] |link:https://bit.ly/Bacon-BUILD-SNAPSHOT-stream-applications-rabbit-maven[https://bit.ly/Bacon-BUILD-SNAPSHOT-stream-applications-rabbit-maven]
+|RabbitMQ + Docker|link:https://bit.ly/Avogadro-GA-stream-applications-rabbit-docker[https://bit.ly/Avogadro-GA-stream-applications-rabbit-docker] | N/A ]
+|Kafka 0.9 + Maven 	  |link:https://bit.ly/Avogadro-GA-stream-applications-kafka-09-maven[https://bit.ly/Avogadro-GA-stream-applications-kafka-09-maven] |link:https://bit.ly/Bacon-BUILD-SNAPSHOT-stream-applications-kafka-09-maven[https://bit.ly/Bacon-BUILD-SNAPSHOT-stream-applications-kafka-09-maven]
+|Kafka 0.9 + Docker   |link:https://bit.ly/Avogadro-GA-stream-applications-kafka-09-docker[https://bit.ly/Avogadro-GA-stream-applications-kafka-09-docker] | N/A ]
+|Kafka 0.10 + Maven 	  |link:https://bit.ly/Avogadro-GA-stream-applications-kafka-10-maven[https://bit.ly/Avogadro-GA-stream-applications-kafka-10-maven] |link:https://bit.ly/Bacon-BUILD-SNAPSHOT-stream-applications-kafka-10-maven[https://bit.ly/Bacon-BUILD-SNAPSHOT-stream-applications-kafka-10-maven]
+|Kafka 0.10 + Docker   |https://bit.ly/Avogadro-GA-stream-applications-kafka-10-docker[https://bit.ly/Avogadro-GA-stream-applications-kafka-10-docker] | N/A ]
 |======================
 
-List of available Task Applicaiton Starters:
+List of available Task Application Starters:
 
 [width="100%",frame="topbot",options="header"]
 |======================
 |Artifact Type |Stable Release |SNAPSHOT Release
-|Maven   |link:http://bit.ly/1-0-1-GA-task-applications-maven[http://bit.ly/1-0-1-GA-task-applications-maven] |link:http://bit.ly/1-0-2-SNAPSHOT-task-applications-maven[http://bit.ly/1-0-2-SNAPSHOT-task-applications-maven]
-|Docker  |link:http://bit.ly/1-0-1-GA-task-applications-docker[http://bit.ly/1-0-1-GA-task-applications-docker] | link:http://bit.ly/1-0-2-SNAPSHOT-task-applications-docker[http://bit.ly/1-0-2-SNAPSHOT-task-applications-docker]
+|Maven   |https://bit.ly/Addison-GA-task-applications-maven[https://bit.ly/Addison-GA-task-applications-maven] |link:https://bit.ly/Belmont-BUILD-SNAPSHOT-task-applications-maven[https://bit.ly/Belmont-BUILD-SNAPSHOT-task-applications-maven]
+|Docker  |link:https://bit.ly/Addison-GA-task-applications-docker[https://bit.ly/Addison-GA-task-applications-docker] | N/A ]
 |======================
 
-For example, if you would like to register all out-of-the-box stream applications built with the RabbitMQ binder in bulk, you can with
+You can find more information about the available task starters look the http://cloud.spring.io/spring-cloud-task-app-starters/[Task App Starters Project Page] and
+related reference documentation.  For more information about the available stream starters look at the http://cloud.spring.io/spring-cloud-stream-app-starters/[Stream App Starters Project Page]
+and related reference documentation.
+
+As an example, if you would like to register all out-of-the-box stream applications built with the RabbitMQ binder in bulk, you can with
 the following command.
 
 ```
-dataflow:>app import --uri http://bit.ly/1-0-4-GA-stream-applications-rabbit-maven
+dataflow:>app import --uri https://bit.ly/Avogadro-GA-stream-applications-rabbit-maven
 ```
 
 You can also pass the `--local` option (which is TRUE by default) to indicate whether the
@@ -336,11 +342,11 @@ stream deploy foo
 
 *Using a file reference*::
 
-  use the `--propertiesFile` option and point it to a local Java `.properties` file
-  (i.e. that lives in the filesystem of the machine running the shell). Being read
-  as a `.properties` file, normal rules apply (ISO 8859-1 encoding, `=`, `<space>` or
+  use the `--propertiesFile` option and point it to a local Java `.properties` file or 
+  `.yaml` or `.yml` file.  The file should be on the file system of the machine running the 
+  shell.  If using a `.properties` file, normal rules apply (ISO 8859-1 encoding, `=`, `<space>` or
   `:` delimiter, etc.) although we recommend using `=` as a key-value pair delimiter
-  for consistency:
+  for consistency.
 
 [source,bash]
 ----
