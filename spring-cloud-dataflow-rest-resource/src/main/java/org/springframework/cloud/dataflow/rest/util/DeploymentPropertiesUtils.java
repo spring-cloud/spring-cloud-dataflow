@@ -111,7 +111,11 @@ public final class DeploymentPropertiesUtils {
 					appName, kv.getKey(), kv.getValue(),
 					appName, kv.getKey().substring("spring.cloud.deployer.".length()), kv.getValue());
 			});
-			return deprecated;
+			if (result.isEmpty()) {
+				return deprecated;
+			} else {
+				return result;
+			}
 		}
 
 	}

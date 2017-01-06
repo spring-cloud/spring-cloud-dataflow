@@ -17,12 +17,17 @@
 package org.springframework.cloud.dataflow.rest.job.support;
 
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.hasEntry;
+import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertThat;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import org.junit.Test;
+
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
 
 /**
@@ -32,6 +37,73 @@ import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
  *
  */
 public class DeploymentPropertiesUtilsTests {
+
+	@Test
+	public void testDeploymentPropertiesParsing() {
+		Map<String, String> props = DeploymentPropertiesUtils.parse("app.foo.bar=v, app.foo.wizz=v2  , deployer.foo.pot=fern, app.other.key = value  , deployer.other.cow = meww");
+		System.out.println(props);
+		assertThat(props, hasEntry("app.foo.bar", "v"));
+		assertThat(props, hasEntry("app.other.key", "value"));
+		assertThat(props, hasEntry("app.foo.wizz", "v2"));
+		assertThat(props, hasEntry("deployer.foo.pot", "fern"));
+		assertThat(props, hasEntry("deployer.other.cow", "meww"));
+	}
+
+	@Test
+	public void testDeployerProperties() {
+		Map<String, String> props = new LinkedHashMap<>();
+		props.put("deployer.myapp.count", "2");
+		props.put("deployer.myapp.foo", "bar");
+		props.put("deployer.otherapp.count", "5");
+		props.put("deployer.*.precedence", "wildcard");
+		props.put("deployer.myapp.precedence", "app");
+		Map<String, String> result = DeploymentPropertiesUtils.extractAndQualifyDeployerProperties(props, "myapp");
+
+		assertThat(result, hasEntry("spring.cloud.deployer.count", "2"));
+		assertThat(result, hasEntry("spring.cloud.deployer.foo", "bar"));
+		assertThat(result, hasEntry("spring.cloud.deployer.precedence", "app"));
+	}
+
+	@Test
+	// TO BE REMOVED once deprecated support is removed
+	public void testDeprecatedDeployerProperties() {
+		Map<String, String> props = new LinkedHashMap<>();
+		props.put("app.myapp.spring.cloud.deployer.count", "2");
+		props.put("app.myapp.spring.cloud.deployer.foo", "bar");
+		props.put("app.otherapp.spring.cloud.deployer.count", "5");
+		props.put("app.*.spring.cloud.deployer.precedence", "wildcard");
+		props.put("app.myapp.spring.cloud.deployer.precedence", "app");
+		props.put("app.myapp.something.else", "not-considered-a-deployer-property");
+		props.put("deployer.myapp.count", "7");
+		props.put("deployer.myapp.foo", "wizz");
+		props.put("deployer.otherapp.count", "6");
+		props.put("deployer.*.precedence", "wildcard");
+		props.put("deployer.myapp.precedence", "the-app");
+
+		Map<String, String> result = DeploymentPropertiesUtils.extractAndQualifyDeployerProperties(props, "myapp");
+		assertThat(result.keySet(), hasSize(3));
+		assertThat(result, hasEntry("spring.cloud.deployer.count", "7"));
+		assertThat(result, hasEntry("spring.cloud.deployer.foo", "wizz"));
+		assertThat(result, hasEntry("spring.cloud.deployer.precedence", "the-app"));
+	}
+
+	@Test
+	// TO BE REMOVED once deprecated support is removed
+	public void testDeprecatedDeployerPropertiesMixed() {
+		Map<String, String> props = new LinkedHashMap<>();
+		props.put("app.myapp.spring.cloud.deployer.count", "2");
+		props.put("app.myapp.spring.cloud.deployer.foo", "bar");
+		props.put("app.otherapp.spring.cloud.deployer.count", "5");
+		props.put("app.*.spring.cloud.deployer.precedence", "wildcard");
+		props.put("app.myapp.spring.cloud.deployer.precedence", "app");
+		props.put("app.myapp.something.else", "not-considered-a-deployer-property");
+
+		Map<String, String> result = DeploymentPropertiesUtils.extractAndQualifyDeployerProperties(props, "myapp");
+		assertThat(result.keySet(), hasSize(3));
+		assertThat(result, hasEntry("spring.cloud.deployer.count", "2"));
+		assertThat(result, hasEntry("spring.cloud.deployer.foo", "bar"));
+		assertThat(result, hasEntry("spring.cloud.deployer.precedence", "app"));
+	}
 
 	@Test
 	public void testCommandLineParamsParsing() {
