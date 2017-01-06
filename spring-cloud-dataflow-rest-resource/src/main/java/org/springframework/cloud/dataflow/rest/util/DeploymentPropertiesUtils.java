@@ -105,7 +105,7 @@ public final class DeploymentPropertiesUtils {
 			return result;
 		} else {
 			deprecated.entrySet().forEach(kv -> {
-				logger.warn("Usage of application property prefix 'spring.cloud.deployer' to pass properties to the deployer has been deprecated and will be removed soon\n" +
+				logger.warn("Usage of application property prefix 'spring.cloud.deployer' to pass properties to the deployer has been deprecated and will be removed in a future release\n" +
 					"Instead of 'app.{}.{} = {}', please use\n" +
 					"           'deployer.{}.{} = {}'",
 					appName, kv.getKey(), kv.getValue(),
