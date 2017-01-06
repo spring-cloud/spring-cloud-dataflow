@@ -146,8 +146,8 @@ public class DefaultTaskService implements TaskService {
 		Resource resource = this.resourceLoader.getResource(uri.toString());
 
 
-		Map<String, String> appDeploymentProperties = extractAppProperties(taskDefinition, taskDeploymentProperties);
-		Map<String, String> deployerDeploymentProperties = DeploymentPropertiesUtils.extractAndQualifyDeployerProperties(taskDeploymentProperties, taskDefinition.getName());
+		Map<String, String> appDeploymentProperties = extractAppProperties(taskDefinition.getRegisteredAppName(), taskDeploymentProperties);
+		Map<String, String> deployerDeploymentProperties = DeploymentPropertiesUtils.extractAndQualifyDeployerProperties(taskDeploymentProperties, taskDefinition.getRegisteredAppName());
 		AppDefinition revisedDefinition = mergeAndExpandAppProperties(taskDefinition, resource, appDeploymentProperties);
 		AppDeploymentRequest request = new AppDeploymentRequest(revisedDefinition, resource, deployerDeploymentProperties, commandLineArgs);
 
@@ -162,8 +162,8 @@ public class DefaultTaskService implements TaskService {
 		}
 	}
 
-	private Map<String, String> extractAppProperties(TaskDefinition taskDefinition, Map<String, String> taskDeploymentProperties) {
-		final String prefix = "app." + taskDefinition.getName() + ".";
+	private Map<String, String> extractAppProperties(String name, Map<String, String> taskDeploymentProperties) {
+		final String prefix = "app." + name + ".";
 		return taskDeploymentProperties.entrySet().stream()
 			.filter(kv -> kv.getKey().startsWith(prefix))
 			.collect(Collectors.toMap(
@@ -176,7 +176,7 @@ public class DefaultTaskService implements TaskService {
 	 * Return a copy of a given task definition where short form parameters have been expanded to their long form
 	 * (amongst the whitelisted supported properties of the app) if applicable.
 	 */
-	/*default*/ AppDefinition mergeAndExpandAppProperties(TaskDefinition original, Resource resource, Map<String, String> appDeploymentProperties) {
+	private AppDefinition mergeAndExpandAppProperties(TaskDefinition original, Resource resource, Map<String, String> appDeploymentProperties) {
 		Map<String, String> merged = new HashMap<>(original.getProperties());
 		merged.putAll(appDeploymentProperties);
 		merged = whitelistProperties.qualifyProperties(merged, resource);
