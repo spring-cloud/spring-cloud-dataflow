@@ -49,12 +49,12 @@ $ java -jar spring-cloud-dataflow-server-local-{project-version}.jar
 $ java -jar spring-cloud-dataflow-shell-{project-version}.jar
 ----
 +
-If the Data Flow Server and shell are not running on the same host, point the shell to the Data Flow server:
+If the Data Flow Server and shell are not running on the same host, point the shell to the Data Flow server URL:
 +
 [source,bash]
 ----
-server-unknown:>dataflow config server http://dataflow-server.cfapps.io
-Successfully targeted http://dataflow-server.cfapps.io
+server-unknown:>dataflow config server http://198.51.100.0
+Successfully targeted http://198.51.100.0
 dataflow:>
 ----
 +
