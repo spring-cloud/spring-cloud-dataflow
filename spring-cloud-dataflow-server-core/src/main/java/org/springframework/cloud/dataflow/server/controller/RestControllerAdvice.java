@@ -40,6 +40,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 /**
  * Apply common behavior (exception handling etc.,) to all the REST controllers.
@@ -132,7 +133,10 @@ public class RestControllerAdvice {
 	 * Log the exception message at warn level and stack trace as trace level.
 	 * Return response status HttpStatus.BAD_REQUEST (400).
 	 */
-	@ExceptionHandler({MissingServletRequestParameterException.class})
+	@ExceptionHandler({
+		MissingServletRequestParameterException.class,
+		MethodArgumentTypeMismatchException.class
+	})
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	@ResponseBody
 	public VndErrors onClientGenericBadRequest(Exception e) {

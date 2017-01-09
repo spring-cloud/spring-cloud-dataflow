@@ -209,6 +209,14 @@ public class StreamControllerTests {
 	}
 
 	@Test
+	public void testMethodArgumentTypeMismatchFailure() throws Exception {
+		mockMvc.perform(get("/streams/definitions/myStream1/related")
+				.param("nested", "in-correct-value")
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().is4xxClientError());
+	}
+
+	@Test
 	public void testFindRelatedAndNestedStreams() throws Exception {
 		assertEquals(0, repository.count());
 		mockMvc.perform(
