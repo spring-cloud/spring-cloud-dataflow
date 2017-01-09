@@ -89,12 +89,12 @@ List of available Stream Application Starters:
 [width="100%",frame="topbot",options="header"]
 |======================
 |Artifact Type |Stable Release |SNAPSHOT Release
-|RabbitMQ + Maven |link:https://bit.ly/Avogadro-GA-stream-applications-rabbit-maven[https://bit.ly/Avogadro-GA-stream-applications-rabbit-maven] |link:https://bit.ly/Bacon-BUILD-SNAPSHOT-stream-applications-rabbit-maven[https://bit.ly/Bacon-BUILD-SNAPSHOT-stream-applications-rabbit-maven]
-|RabbitMQ + Docker|link:https://bit.ly/Avogadro-GA-stream-applications-rabbit-docker[https://bit.ly/Avogadro-GA-stream-applications-rabbit-docker] | N/A ]
-|Kafka 0.9 + Maven 	  |link:https://bit.ly/Avogadro-GA-stream-applications-kafka-09-maven[https://bit.ly/Avogadro-GA-stream-applications-kafka-09-maven] |link:https://bit.ly/Bacon-BUILD-SNAPSHOT-stream-applications-kafka-09-maven[https://bit.ly/Bacon-BUILD-SNAPSHOT-stream-applications-kafka-09-maven]
-|Kafka 0.9 + Docker   |link:https://bit.ly/Avogadro-GA-stream-applications-kafka-09-docker[https://bit.ly/Avogadro-GA-stream-applications-kafka-09-docker] | N/A ]
-|Kafka 0.10 + Maven 	  |link:https://bit.ly/Avogadro-GA-stream-applications-kafka-10-maven[https://bit.ly/Avogadro-GA-stream-applications-kafka-10-maven] |link:https://bit.ly/Bacon-BUILD-SNAPSHOT-stream-applications-kafka-10-maven[https://bit.ly/Bacon-BUILD-SNAPSHOT-stream-applications-kafka-10-maven]
-|Kafka 0.10 + Docker   |https://bit.ly/Avogadro-GA-stream-applications-kafka-10-docker[https://bit.ly/Avogadro-GA-stream-applications-kafka-10-docker] | N/A ]
+|RabbitMQ + Maven |link:http://bit.ly/Avogadro-GA-stream-applications-rabbit-maven[http://bit.ly/Avogadro-GA-stream-applications-rabbit-maven] |link:http://bit.ly/Bacon-BUILD-SNAPSHOT-stream-applications-rabbit-maven[http://bit.ly/Bacon-BUILD-SNAPSHOT-stream-applications-rabbit-maven]
+|RabbitMQ + Docker|link:http://bit.ly/Avogadro-GA-stream-applications-rabbit-docker[http://bit.ly/Avogadro-GA-stream-applications-rabbit-docker] | N/A ]
+|Kafka 0.9 + Maven 	  |link:http://bit.ly/Avogadro-GA-stream-applications-kafka-09-maven[http://bit.ly/Avogadro-GA-stream-applications-kafka-09-maven] |link:http://bit.ly/Bacon-BUILD-SNAPSHOT-stream-applications-kafka-09-maven[http://bit.ly/Bacon-BUILD-SNAPSHOT-stream-applications-kafka-09-maven]
+|Kafka 0.9 + Docker   |link:http://bit.ly/Avogadro-GA-stream-applications-kafka-09-docker[http://bit.ly/Avogadro-GA-stream-applications-kafka-09-docker] | N/A ]
+|Kafka 0.10 + Maven 	  |link:http://bit.ly/Avogadro-GA-stream-applications-kafka-10-maven[http://bit.ly/Avogadro-GA-stream-applications-kafka-10-maven] |link:http://bit.ly/Bacon-BUILD-SNAPSHOT-stream-applications-kafka-10-maven[http://bit.ly/Bacon-BUILD-SNAPSHOT-stream-applications-kafka-10-maven]
+|Kafka 0.10 + Docker   |http://bit.ly/Avogadro-GA-stream-applications-kafka-10-docker[http://bit.ly/Avogadro-GA-stream-applications-kafka-10-docker] | N/A ]
 |======================
 
 List of available Task Application Starters:
@@ -102,8 +102,8 @@ List of available Task Application Starters:
 [width="100%",frame="topbot",options="header"]
 |======================
 |Artifact Type |Stable Release |SNAPSHOT Release
-|Maven   |https://bit.ly/Addison-GA-task-applications-maven[https://bit.ly/Addison-GA-task-applications-maven] |link:https://bit.ly/Belmont-BUILD-SNAPSHOT-task-applications-maven[https://bit.ly/Belmont-BUILD-SNAPSHOT-task-applications-maven]
-|Docker  |link:https://bit.ly/Addison-GA-task-applications-docker[https://bit.ly/Addison-GA-task-applications-docker] | N/A ]
+|Maven   |http://bit.ly/Addison-GA-task-applications-maven[http://bit.ly/Addison-GA-task-applications-maven] |link:http://bit.ly/Belmont-BUILD-SNAPSHOT-task-applications-maven[http://bit.ly/Belmont-BUILD-SNAPSHOT-task-applications-maven]
+|Docker  |link:http://bit.ly/Addison-GA-task-applications-docker[http://bit.ly/Addison-GA-task-applications-docker] | N/A ]
 |======================
 
 You can find more information about the available task starters look the http://cloud.spring.io/spring-cloud-task-app-starters/[Task App Starters Project Page] and
@@ -114,7 +114,7 @@ As an example, if you would like to register all out-of-the-box stream applicati
 the following command.
 
 ```
-dataflow:>app import --uri https://bit.ly/Avogadro-GA-stream-applications-rabbit-maven
+dataflow:>app import --uri http://bit.ly/Avogadro-GA-stream-applications-rabbit-maven
 ```
 
 You can also pass the `--local` option (which is TRUE by default) to indicate whether the
