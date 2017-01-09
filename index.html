@@ -77,31 +77,29 @@ Spring Cloud Data Flow offers a collection of patterns and best practices for mi
 Step 1 - Download the Spring Cloud Data Flow Local Server and Shell apps:
 
 ```
-wget http://repo.spring.io/release/org/springframework/cloud/spring-cloud-dataflow-server-local/[VERSION]/spring-cloud-dataflow-server-local-[VERSION].jar
+wget http://repo.spring.io/release/org/springframework/cloud/spring-cloud-dataflow-server-local/1.1.1.RELEASE/spring-cloud-dataflow-server-local-1.1.1.RELEASE.jar
 ```
 
 ```
-wget http://repo.spring.io/release/org/springframework/cloud/spring-cloud-dataflow-shell/[VERSION]/spring-cloud-dataflow-shell-[VERSION].jar
+wget http://repo.spring.io/release/org/springframework/cloud/spring-cloud-dataflow-shell/1.1.1.RELEASE/spring-cloud-dataflow-shell-1.1.1.RELEASE.jar
 ```
-
-_eg: [VERSION] = 1.1.0.RELEASE_
 
 Step 2 - Download and Start Kafka 0.10 [_used as: messaging middleware_]  
 
 Step 3 - Launch the Data Flow Local Server
 ```
-java -jar spring-cloud-dataflow-server-local-[VERSION].jar
+java -jar spring-cloud-dataflow-server-local-1.1.1.RELEASE.jar
 ```
 
 Step 4 - Launch Shell on the same machine where the Data Flow Local Server is runnign
 ```
-java -jar spring-cloud-dataflow-shell-[VERSION].jar
+java -jar spring-cloud-dataflow-shell-1.1.1.RELEASE.jar
 ```
 
 Step 5 - Import all the out-of-the-box application coordinates in bulk
 
 ```
-dataflow:>app import --uri https://bit.ly/Avogadro-GA-stream-applications-kafka-10-maven
+dataflow:>app import --uri http://bit.ly/Avogadro-GA-stream-applications-kafka-10-maven
 ```
 
 Step 6 - Create **‘ticktock’** Stream
@@ -129,7 +127,7 @@ Step 8 - Launch Dashboard at: http://localhost:9393/dashboard
 
 | __Server Type__ | __Stable Release__ | __Milestone Release__ |
 | --------------- | ------------------ | -------------------- |
-| Local Server | [1.1.0.RELEASE](http://repo.spring.io/libs-release/org/springframework/cloud/spring-cloud-dataflow-server-local/1.1.0.RELEASE/spring-cloud-dataflow-server-local-1.1.0.RELEASE.jar)[[docs](http://docs.spring.io/spring-cloud-dataflow/docs/1.1.0.RELEASE/reference/htmlsingle/)] | [1.1.1.BUILD-SNAPSHOT](http://repo.spring.io/libs-snapshot/org/springframework/cloud/spring-cloud-dataflow-server-local/1.1.1.BUILD-SNAPSHOT/spring-cloud-dataflow-server-local-1.1.1.BUILD-SNAPSHOT.jar)[[docs](http://docs.spring.io/spring-cloud-dataflow/docs/1.1.1.BUILD-SNAPSHOT/reference/htmlsingle/)] |
+| Local Server | [1.1.1.RELEASE](http://repo.spring.io/libs-release/org/springframework/cloud/spring-cloud-dataflow-server-local/1.1.1.RELEASE/spring-cloud-dataflow-server-local-1.1.1.RELEASE.jar)[[docs](http://docs.spring.io/spring-cloud-dataflow/docs/1.1.1.RELEASE/reference/htmlsingle/)] | [1.1.2.BUILD-SNAPSHOT](http://repo.spring.io/libs-snapshot/org/springframework/cloud/spring-cloud-dataflow-server-local/1.1.2.BUILD-SNAPSHOT/spring-cloud-dataflow-server-local-1.1.2.BUILD-SNAPSHOT.jar)[[docs](http://docs.spring.io/spring-cloud-dataflow/docs/1.1.2.BUILD-SNAPSHOT/reference/htmlsingle/)] |
 | Cloud Foundry Server | [1.0.1.RELEASE](http://repo.spring.io/libs-release/org/springframework/cloud/spring-cloud-dataflow-server-cloudfoundry/1.0.1.RELEASE/spring-cloud-dataflow-server-cloudfoundry-1.0.1.RELEASE.jar)[[docs](http://docs.spring.io/spring-cloud-dataflow-server-cloudfoundry/docs/1.0.1.RELEASE/reference/htmlsingle/)] | [1.1.0.M1](http://repo.spring.io/libs-milestone/org/springframework/cloud/spring-cloud-dataflow-server-cloudfoundry/1.1.0.M1/spring-cloud-dataflow-server-cloudfoundry-1.1.0.M1.jar)[[docs](http://docs.spring.io/spring-cloud-dataflow-server-cloudfoundry/docs/1.1.0.M1/reference/htmlsingle/)] |
 | Apache YARN Server | [1.1.0.RELEASE](http://repo.spring.io/libs-release/org/springframework/cloud/spring-cloud-dataflow-server-yarn/1.1.0.RELEASE/spring-cloud-dataflow-server-yarn-1.1.0.RELEASE.jar)[[docs](http://docs.spring.io/spring-cloud-dataflow-server-yarn/docs/1.1.0.RELEASE/reference/htmlsingle/)] | [1.1.1.BUILD-SNAPSHOT](http://repo.spring.io/libs-snapshot/org/springframework/cloud/spring-cloud-dataflow-server-yarn/1.1.1.BUILD-SNAPSHOT/spring-cloud-dataflow-server-yarn-1.1.1.BUILD-SNAPSHOT.jar)[[docs](http://docs.spring.io/spring-cloud-dataflow-server-yarn/docs/1.1.1.BUILD-SNAPSHOT/reference/htmlsingle/)]  |
 | Kubernetes Server | [1.1.1.RELEASE](http://repo.spring.io/libs-release/org/springframework/cloud/spring-cloud-dataflow-server-kubernetes/1.1.1.RELEASE/spring-cloud-dataflow-server-kubernetes-1.1.1.RELEASE.jar)[[docs](http://docs.spring.io/spring-cloud-dataflow-server-kubernetes/docs/1.1.1.RELEASE/reference/htmlsingle/)] | [1.1.2.BUILD-SNAPSHOT](http://repo.spring.io/libs-snapshot/org/springframework/cloud/spring-cloud-dataflow-server-kubernetes/1.1.2.BUILD-SNAPSHOT/spring-cloud-dataflow-server-kubernetes-1.1.2.BUILD-SNAPSHOT.jar)[[docs](http://docs.spring.io/spring-cloud-dataflow-server-kubernetes/docs/1.1.2.BUILD-SNAPSHOT/reference/htmlsingle/)] |
