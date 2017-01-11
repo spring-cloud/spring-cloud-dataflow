@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2016 the original author or authors.
+ * Copyright 2015-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,6 +58,7 @@ import org.springframework.util.Assert;
  * @author David Turanski
  * @author Patrick Peralta
  * @author Mark Fisher
+ * @author Thomas Risberg
  */
 @Component
 public class AppRegistryCommands implements CommandMarker, ResourceLoaderAware {
@@ -248,7 +249,13 @@ public class AppRegistryCommands implements CommandMarker, ResourceLoaderAware {
 			try {
 				Resource resource = this.resourceLoader.getResource(uri);
 				Properties applications = PropertiesLoaderUtils.loadProperties(resource);
-				PagedResources<AppRegistrationResource> registered = appRegistryOperations().registerAll(applications, force);
+				PagedResources<AppRegistrationResource> registered = null;
+				try {
+					registered = appRegistryOperations().registerAll(applications, force);
+				}
+				catch (Exception e) {
+					return "Error when registering applications from " + uri + ": " + e.getMessage();
+				}
 				long numRegistered = registered.getMetadata().getTotalElements();
 				return (applications.keySet().size() == numRegistered)
 						? String.format("Successfully registered applications: %s", applications.keySet())
