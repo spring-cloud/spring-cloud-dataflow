@@ -114,7 +114,8 @@ public class AppRegistry {
 	private AppRegistration createAppRegistration(String key, URI uri) {
 		String[] tokens = key.split("\\.", 2);
 		if (tokens.length != 2) {
-			throw new IllegalArgumentException("Invalid application key: " + key);
+			throw new IllegalArgumentException("Invalid application key: " + key +
+					"; the expected format is <name>.<type>");
 		}
 		return new AppRegistration(tokens[1], ApplicationType.valueOf(tokens[0]), uri, this.resourceLoader);
 	}

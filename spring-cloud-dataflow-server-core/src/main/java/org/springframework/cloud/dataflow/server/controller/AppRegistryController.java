@@ -181,7 +181,8 @@ public class AppRegistryController {
 			for (String key : apps.stringPropertyNames()) {
 				String[] tokens = key.split("\\.", 2);
 				if (tokens.length != 2) {
-					throw new IllegalArgumentException("Invalid application key: " + key);
+					throw new IllegalArgumentException("Invalid application key: " + key +
+							"; the expected format is <name>.<type>");
 				}
 				String name = tokens[1];
 				ApplicationType type = ApplicationType.valueOf(tokens[0]);
