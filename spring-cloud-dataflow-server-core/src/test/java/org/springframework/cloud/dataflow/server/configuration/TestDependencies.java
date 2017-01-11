@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2016 the original author or authors.
+ * Copyright 2015-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,10 +27,13 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.dataflow.completion.CompletionConfiguration;
+import org.springframework.cloud.dataflow.completion.StreamCompletionProvider;
+import org.springframework.cloud.dataflow.completion.TaskCompletionProvider;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.controller.AppRegistryController;
+import org.springframework.cloud.dataflow.server.controller.CompletionController;
 import org.springframework.cloud.dataflow.server.controller.RestControllerAdvice;
 import org.springframework.cloud.dataflow.server.controller.StreamDefinitionController;
 import org.springframework.cloud.dataflow.server.controller.StreamDeploymentController;
@@ -62,6 +65,7 @@ import org.springframework.core.io.FileSystemResourceLoader;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
+import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
 
@@ -116,6 +120,16 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	@Bean
 	public TaskDeploymentController taskController(ApplicationConfigurationMetadataResolver metadataResolver) {
 		return new TaskDeploymentController(taskService(metadataResolver));
+	}
+
+	@Bean
+	public MethodValidationPostProcessor methodValidationPostProcessor() {
+		return new MethodValidationPostProcessor();
+	}
+
+	@Bean
+	public CompletionController completionController(StreamCompletionProvider streamCompletionProvider, TaskCompletionProvider taskCompletionProvider) {
+		return new CompletionController(streamCompletionProvider, taskCompletionProvider);
 	}
 
 	@Bean

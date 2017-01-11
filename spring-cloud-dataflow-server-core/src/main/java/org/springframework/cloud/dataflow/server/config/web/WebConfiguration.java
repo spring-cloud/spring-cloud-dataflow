@@ -22,6 +22,7 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.hateoas.core.DefaultRelProvider;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
 import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
@@ -107,4 +108,10 @@ public class WebConfiguration {
             }
         };
     }
+
+	@Bean
+	public MethodValidationPostProcessor methodValidationPostProcessor() {
+		return new MethodValidationPostProcessor();
+	}
+
 }

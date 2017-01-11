@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2016 the original author or authors.
+ * Copyright 2015-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,9 @@
  */
 
 package org.springframework.cloud.dataflow.server.controller;
+
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -142,6 +145,35 @@ public class RestControllerAdvice {
 		}
 		String msg = getExceptionMessage(e);
 		return new VndErrors(logref, msg);
+	}
+
+	/**
+	 * The exception handler is trigger if a JSR303 {@link ConstraintViolationException}
+	 * is being raised.
+	 *
+	 * Log the exception message at warn level and stack trace as trace level.
+	 * Return response status HttpStatus.BAD_REQUEST (400).
+	 */
+	@ExceptionHandler({ConstraintViolationException.class})
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	@ResponseBody
+	public VndErrors onConstraintViolationException(ConstraintViolationException e) {
+		String logref = logWarnLevelExceptionMessage(e);
+		if (logger.isTraceEnabled()) {
+			logTraceLevelStrackTrace(e);
+		}
+
+		final StringBuilder errorMessage = new StringBuilder();
+		boolean first = true;
+		for (ConstraintViolation<?> violation : e.getConstraintViolations()) {
+			if (!first) {
+				errorMessage.append("; ");
+			}
+			errorMessage.append(violation.getMessage());
+			first = false;
+		}
+
+		return new VndErrors(logref, errorMessage.toString());
 	}
 
 	private String logWarnLevelExceptionMessage(Exception e) {
