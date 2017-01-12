@@ -76,7 +76,7 @@ dataflow:> stream create --name httptest --definition "http --server.port=9000 |
 dataflow:> stream deploy --name httptest --properties "app.http.security.basic.enabled=false" 
 ----
 +
-NOTE: You will need to wait a little while until the apps are actually dstreployed successfully
+NOTE: You will need to wait a little while until the apps are actually deployed successfully
 before posting data.  Look in the log file of the Data Flow server for the location of the log
 files for the `http` and `log` applications.  Tail the log file for each application to verify
 the application has started.  The security is disabled due to a small bug in the http source that
