@@ -65,8 +65,8 @@ public class RdbmsUriRegistryTests {
 	
 	@Test
 	public void testFind() throws Exception {
-		URI test1URI = new URI("test1URI");
-		URI test2URI = new URI("test2URI");
+		URI test1URI = new URI("http://test1URI");
+		URI test2URI = new URI("http://test2URI");
 		registry.register("source.test1", test1URI);
 		registry.register("sink.test2", test2URI);
 		assertEquals(test1URI, registry.find("source.test1"));
@@ -75,8 +75,8 @@ public class RdbmsUriRegistryTests {
 
 	@Test
 	public void testFindAll() throws Exception {
-		URI test1URI = new URI("test1URI");
-		URI test2URI = new URI("test2URI");
+		URI test1URI = new URI("http://test1URI");
+		URI test2URI = new URI("http://test2URI");
 		Map<String, URI> map = new HashMap<>();
 		map.put("source.test1", test1URI);
 		map.put("sink.test2", test2URI);
@@ -87,8 +87,8 @@ public class RdbmsUriRegistryTests {
 
 	@Test
 	public void testRegisterOverwrite() throws Exception {
-		URI test1URI = new URI("test1URI");
-		URI test2URI = new URI("test2URI");
+		URI test1URI = new URI("http://test1URI");
+		URI test2URI = new URI("http://test2URI");
 		registry.register("source.test1", test1URI);
 		assertEquals(test1URI, registry.find("source.test1"));
 		registry.register("source.test1", test2URI);
@@ -97,8 +97,8 @@ public class RdbmsUriRegistryTests {
 
 	@Test
 	public void testUnregister() throws Exception {
-		URI test1URI = new URI("test1URI");
-		URI test2URI = new URI("test2URI");
+		URI test1URI = new URI("http://test1URI");
+		URI test2URI = new URI("http://test2URI");
 		registry.register("source.test1", test1URI);
 		registry.register("sink.test2", test2URI);
 		assertEquals(test1URI, registry.find("source.test1"));
