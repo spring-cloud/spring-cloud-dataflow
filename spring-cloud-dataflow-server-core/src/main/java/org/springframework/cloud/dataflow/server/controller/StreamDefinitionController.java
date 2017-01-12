@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2016 the original author or authors.
+ * Copyright 2015-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,12 +32,14 @@ import org.springframework.cloud.dataflow.core.dsl.StreamParser;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.rest.resource.StreamDefinitionResource;
 import org.springframework.cloud.dataflow.server.DataFlowServerUtil;
+import org.springframework.cloud.dataflow.server.controller.support.InvalidStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
 import org.springframework.cloud.dataflow.server.repository.DeploymentKey;
 import org.springframework.cloud.dataflow.server.repository.DuplicateStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.NoSuchStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.support.SearchPageable;
+import org.springframework.cloud.dataflow.server.support.CannotDetermineApplicationTypeException;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.app.AppStatus;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
@@ -65,6 +67,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @author Mark Fisher
  * @author Patrick Peralta
  * @author Ilayaperumal Gopinathan
+ * @author Gunnar Hillert
  */
 @RestController
 @RequestMapping("/streams/definitions")
@@ -169,15 +172,23 @@ public class StreamDefinitionController {
 		StreamDefinition stream = new StreamDefinition(name, dsl);
 		List<String> errorMessages = new ArrayList<>();
 		for (StreamAppDefinition streamAppDefinition: stream.getAppDefinitions()) {
-			String appName = streamAppDefinition.getRegisteredAppName();
-			ApplicationType appType = DataFlowServerUtil.determineApplicationType(streamAppDefinition);
+			final String appName = streamAppDefinition.getRegisteredAppName();
+			final ApplicationType appType;
+			try {
+				appType = DataFlowServerUtil.determineApplicationType(streamAppDefinition);
+			}
+			catch (CannotDetermineApplicationTypeException e) {
+				errorMessages.add(String.format("Cannot determine application type for application '%s': %s",
+						appName, e.getMessage()));
+				continue;
+			}
 			if (appRegistry.find(appName, appType) == null) {
 				errorMessages.add(String.format("Application name '%s' with type '%s' does not exist in the app registry.",
 						appName, appType));
 			}
 		}
 		if (!errorMessages.isEmpty()) {
-			throw new IllegalArgumentException(StringUtils.collectionToDelimitedString(errorMessages, System.lineSeparator()));
+			throw new InvalidStreamDefinitionException(StringUtils.collectionToDelimitedString(errorMessages, System.lineSeparator()));
 		}
 		this.repository.save(stream);
 		if (deploy) {
@@ -338,5 +349,4 @@ public class StreamDefinitionController {
 			return resource;
 		}
 	}
-
 }
