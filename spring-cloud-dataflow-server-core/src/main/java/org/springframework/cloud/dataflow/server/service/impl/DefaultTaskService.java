@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2016 the original author or authors.
+ * Copyright 2015-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.h2.util.Task;
 
@@ -139,7 +140,7 @@ public class DefaultTaskService implements TaskService {
 
 		taskDefinition = this.updateTaskProperties(taskDefinition);
 
-		Map<String, String> deploymentProperties = new HashMap<>(runtimeProperties);
+		Map<String, String> deploymentProperties = extractAppDeploymentProperties(taskDefinition, runtimeProperties);
 		URI uri = this.registry.find(String.format("task.%s",
 				taskDefinition.getRegisteredAppName()));
 		Resource resource = this.resourceLoader.getResource(uri.toString());
@@ -158,6 +159,18 @@ public class DefaultTaskService implements TaskService {
 		if (deploymentIdRepository.findOne(deploymentKey) == null) {
 			this.deploymentIdRepository.save(deploymentKey, id);
 		}
+	}
+
+	private static Map<String, String> extractAppDeploymentProperties(TaskDefinition taskDefinition,
+			Map<String, String> taskDeploymentProperties) {
+		String appPrefix = String.format("app.%s.", taskDefinition.getRegisteredAppName());
+		Map<String, String> deploymentProperties = new HashMap<>();
+		for (Entry<String, String> entry : taskDeploymentProperties.entrySet()) {
+			if (entry.getKey().startsWith(appPrefix)) {
+				deploymentProperties.put(entry.getKey().substring(appPrefix.length()), entry.getValue());
+			}
+		}
+		return deploymentProperties;
 	}
 
 	/**
