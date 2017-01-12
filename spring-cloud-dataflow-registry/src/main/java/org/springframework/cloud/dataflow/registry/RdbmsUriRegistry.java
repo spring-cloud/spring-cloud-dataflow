@@ -82,8 +82,11 @@ public class RdbmsUriRegistry implements UriRegistry {
 
 	@Override
 	public void register(String name, URI uri) {
-		Assert.notNull(uri, "Error when registering " + name + ": uri is required");
-		Assert.hasText(uri.toString(), "Error when registering " + name + ": uri must not be blank");
+		Assert.notNull(uri, "Error when registering " + name + ": URI is required");
+		Assert.hasText(uri.getScheme(), "Error when registering " + name + " with URI " + uri +
+				": URI scheme must be specified");
+		Assert.hasText(uri.getSchemeSpecificPart(), "Error when registering " + name + " with URI " + uri +
+				": URI scheme-specific part must be specified");
 		String uriString = uri.toString();
 		if (find(name) != null) {
 			jdbcTemplate.update(UPDATE_SQL, new Object[] { uriString, name },
