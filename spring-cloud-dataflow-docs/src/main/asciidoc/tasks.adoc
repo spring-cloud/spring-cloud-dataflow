@@ -160,6 +160,22 @@ to the task application can be set when launching the task as follows:
 dataflow:>task launch mytask --arguments "--server.port=8080,--foo=bar"
 ```
 
+Additional properties meant for a `TaskLauncher` itself can be passed
+in using a `--properties` option. Format of this option is a comma
+delimited string of properties prefixed with `app.<task definition
+name>.<property>`.
+
+If actual property is prefixed with `spring.cloud.deployer` it is
+passed to `TaskLauncher` as a deployment property and its meaning may
+be `TaskLauncher` implementation specific. Other properties are passed
+to `TaskLauncher` as application properties and it is up to an
+implementation to choose how those are passed into an actual task
+application.
+
+```
+dataflow:>task launch mytask --properties "app.timestamp.spring.cloud.deployer.foo1=bar1,app.timestamp.foo2=bar2"
+```
+
 === Reviewing Task Executions
 Once the task is launched the state of the task is stored in a relational DB.  The state
 includes:
