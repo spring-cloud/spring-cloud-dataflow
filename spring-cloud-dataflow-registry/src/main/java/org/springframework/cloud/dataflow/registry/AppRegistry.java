@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ import org.springframework.core.io.ResourceLoader;
  *
  * @author Mark Fisher
  * @author Gunnar Hillert
+ * @author Thomas Risberg
  */
 public class AppRegistry {
 
@@ -75,10 +76,17 @@ public class AppRegistry {
 
 	public List<AppRegistration> importAll(boolean overwrite, String... resourceUris) {
 		List<AppRegistration> apps = new ArrayList<>();
-		Map<String, URI> registered = this.uriRegistryPopulator.populateRegistry(
-				overwrite, this.uriRegistry, resourceUris);
-		for (Map.Entry<String, URI> entry : registered.entrySet()) {
-			apps.add(createAppRegistration(entry.getKey(), entry.getValue()));
+		for (String uri : resourceUris) {
+			try {
+				Map<String, URI> registered = this.uriRegistryPopulator.populateRegistry(
+						overwrite, this.uriRegistry, uri);
+				for (Map.Entry<String, URI> entry : registered.entrySet()) {
+					apps.add(createAppRegistration(entry.getKey(), entry.getValue()));
+				}
+			}
+			catch (Exception e) {
+				throw new IllegalStateException("Error when registering applications from " + uri + ": " + e.getMessage(), e);
+			}
 		}
 		return apps;
 	}
@@ -105,6 +113,10 @@ public class AppRegistry {
 
 	private AppRegistration createAppRegistration(String key, URI uri) {
 		String[] tokens = key.split("\\.", 2);
+		if (tokens.length != 2) {
+			throw new IllegalArgumentException("Invalid application key: " + key +
+					"; the expected format is <name>.<type>");
+		}
 		return new AppRegistration(tokens[1], ApplicationType.valueOf(tokens[0]), uri, this.resourceLoader);
 	}
 }

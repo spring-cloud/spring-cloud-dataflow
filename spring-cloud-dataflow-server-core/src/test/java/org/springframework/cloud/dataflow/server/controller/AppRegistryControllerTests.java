@@ -90,6 +90,20 @@ public class AppRegistryControllerTests {
 	}
 
 	@Test
+	public void testRegisterAll() throws Exception {
+		mockMvc.perform(
+				post("/apps").param("apps", "sink.foo=file:///bar").accept(MediaType.APPLICATION_JSON)).andDo(print())
+				.andExpect(status().isCreated());
+	}
+
+	@Test
+	public void testRegisterAllWithBadApplication() throws Exception {
+		mockMvc.perform(
+				post("/apps").param("apps", "sink-foo=file:///bar").accept(MediaType.APPLICATION_JSON)).andDo(print())
+				.andExpect(status().is5xxServerError());
+	}
+
+	@Test
 	public void testListApplications() throws Exception {
 		mockMvc.perform(
 				get("/apps").accept(MediaType.APPLICATION_JSON)).andDo(print())

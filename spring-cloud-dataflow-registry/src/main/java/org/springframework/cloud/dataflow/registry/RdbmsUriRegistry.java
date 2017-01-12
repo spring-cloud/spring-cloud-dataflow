@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ import org.springframework.util.Assert;
  *
  * @author Ilayaperumal Gopinathan
  * @author Mark Fisher
+ * @author Thomas Risberg
  */
 public class RdbmsUriRegistry implements UriRegistry {
 
@@ -81,6 +82,11 @@ public class RdbmsUriRegistry implements UriRegistry {
 
 	@Override
 	public void register(String name, URI uri) {
+		Assert.notNull(uri, "Error when registering " + name + ": URI is required");
+		Assert.hasText(uri.getScheme(), "Error when registering " + name + " with URI " + uri +
+				": URI scheme must be specified");
+		Assert.hasText(uri.getSchemeSpecificPart(), "Error when registering " + name + " with URI " + uri +
+				": URI scheme-specific part must be specified");
 		String uriString = uri.toString();
 		if (find(name) != null) {
 			jdbcTemplate.update(UPDATE_SQL, new Object[] { uriString, name },

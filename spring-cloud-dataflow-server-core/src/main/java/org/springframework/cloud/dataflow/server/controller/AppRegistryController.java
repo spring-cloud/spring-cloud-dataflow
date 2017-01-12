@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2016 the original author or authors.
+ * Copyright 2015-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,6 +57,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @author Eric Bottard
  * @author Gary Russell
  * @author Patrick Peralta
+ * @author Thomas Risberg
  */
 @RestController
 @RequestMapping("/apps")
@@ -179,6 +180,10 @@ public class AppRegistryController {
 		else if (!CollectionUtils.isEmpty(apps)) {
 			for (String key : apps.stringPropertyNames()) {
 				String[] tokens = key.split("\\.", 2);
+				if (tokens.length != 2) {
+					throw new IllegalArgumentException("Invalid application key: " + key +
+							"; the expected format is <name>.<type>");
+				}
 				String name = tokens[1];
 				ApplicationType type = ApplicationType.valueOf(tokens[0]);
 				if (force || null == appRegistry.find(name, type)) {
