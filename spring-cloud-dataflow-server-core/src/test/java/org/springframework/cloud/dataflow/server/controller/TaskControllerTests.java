@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2016 the original author or authors.
+ * Copyright 2015-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -263,6 +263,7 @@ public class TaskControllerTests {
 
 		mockMvc.perform(
 				post("/tasks/deployments/{name}", "myTask3")
+				.param("properties", "app.foo3.foo1=bar1,app.foo3.spring.cloud.deployer.foo2=bar2")
 				.param("arguments", "--foobar=jee", "--foobar2=jee2", "--foobar3='jee3 jee3'")
 				.accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isCreated());
@@ -276,6 +277,8 @@ public class TaskControllerTests {
 		assertThat(request.getCommandlineArguments().get(1), is("--foobar2=jee2"));
 		assertThat(request.getCommandlineArguments().get(2), is("--foobar3=jee3 jee3"));
 		assertEquals("myTask3", request.getDefinition().getProperties().get("spring.cloud.task.name"));
+		assertThat(request.getDefinition().getProperties().get("foo1"), is("bar1"));
+		assertThat(request.getDeploymentProperties().get("spring.cloud.deployer.foo2"), is("bar2"));
 	}
 
 	@Test
