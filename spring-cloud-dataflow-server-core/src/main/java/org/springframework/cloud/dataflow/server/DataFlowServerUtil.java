@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.cloud.dataflow.server;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.BindingPropertyKeys;
 import org.springframework.cloud.dataflow.core.StreamAppDefinition;
+import org.springframework.cloud.dataflow.server.support.CannotDetermineApplicationTypeException;
 import org.springframework.cloud.deployer.spi.core.AppDefinition;
 
 /**
@@ -25,31 +26,33 @@ import org.springframework.cloud.deployer.spi.core.AppDefinition;
  *
  * @author Mark Fisher
  * @author Ilayaperumal Gopinathan
+ * @author Gunnar Hillert
  */
 public class DataFlowServerUtil {
 
-    /**
-     * Return the {@link ApplicationType} for a {@link AppDefinition} in the context
-     * of a defined stream.
-     *
-     * @param appDefinition the app for which to determine the type
-     * @return {@link ApplicationType} for the given app
-     */
-    public static ApplicationType determineApplicationType(StreamAppDefinition appDefinition) {
-        // Parser has already taken care of source/sink destinations, etc
-        boolean hasOutput = appDefinition.getProperties().containsKey(BindingPropertyKeys.OUTPUT_DESTINATION);
-        boolean hasInput = appDefinition.getProperties().containsKey(BindingPropertyKeys.INPUT_DESTINATION);
-        if (hasInput && hasOutput) {
-            return ApplicationType.processor;
-        }
-        else if (hasInput) {
-            return ApplicationType.sink;
-        }
-        else if (hasOutput) {
-            return ApplicationType.source;
-        }
-        else {
-            throw new IllegalStateException(appDefinition.getName() + " had neither input nor output set");
-        }
-    }
+	/**
+	 * Return the {@link ApplicationType} for a {@link AppDefinition} in the context
+	 * of a defined stream.
+	 *
+	 * @param appDefinition the app for which to determine the type
+	 * @throws CannotDetermineApplicationTypeException Thrown if the {@link ApplicationType} cannot be determined
+	 * @return {@link ApplicationType} for the given app
+	 */
+	public static ApplicationType determineApplicationType(StreamAppDefinition appDefinition) {
+		// Parser has already taken care of source/sink destinations, etc
+		boolean hasOutput = appDefinition.getProperties().containsKey(BindingPropertyKeys.OUTPUT_DESTINATION);
+		boolean hasInput = appDefinition.getProperties().containsKey(BindingPropertyKeys.INPUT_DESTINATION);
+		if (hasInput && hasOutput) {
+			return ApplicationType.processor;
+		}
+		else if (hasInput) {
+			return ApplicationType.sink;
+		}
+		else if (hasOutput) {
+			return ApplicationType.source;
+		}
+		else {
+			throw new CannotDetermineApplicationTypeException(appDefinition.getName() + " had neither input nor output set");
+		}
+	}
 }

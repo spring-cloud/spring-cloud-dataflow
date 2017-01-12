@@ -16,7 +16,7 @@
 
 package org.springframework.cloud.dataflow.server.controller;
 
-import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.assertEquals;
@@ -39,6 +39,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.EnumSet;
@@ -87,6 +88,7 @@ import org.springframework.web.context.WebApplicationContext;
  * @author Mark Fisher
  * @author Ilayaperumal Gopinathan
  * @author Janne Valkealahti
+ * @author Gunnar Hillert
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestDependencies.class)
@@ -275,12 +277,34 @@ public class StreamControllerTests {
 
 	@Test
 	public void testSaveInvalidAppDefintions() throws Exception {
-		String response = mockMvc.perform(
-				post("/streams/definitions/").param("name", "myStream").param("definition", "foo | bar")
-							.accept(MediaType.APPLICATION_JSON)).andReturn().getResponse().getContentAsString();
-		assertTrue(response.contains("IllegalArgumentException"));
-		assertTrue(response.contains("Application name 'foo' with type 'source' does not exist in the app registry."));
-		assertTrue(response.contains("Application name 'bar' with type 'sink' does not exist in the app registry."));
+		mockMvc.perform(
+			post("/streams/definitions/").param("name", "myStream").param("definition", "foo | bar")
+				.accept(MediaType.APPLICATION_JSON))
+				.andDo(print())
+				.andExpect(status().isBadRequest())
+				.andExpect(
+					jsonPath("$[0].logref", is("InvalidStreamDefinitionException"))
+				)
+				.andExpect(
+					jsonPath("$[0].message", is("Application name 'foo' with type 'source' does not exist in the app "
+						+ "registry.\nApplication name 'bar' with type 'sink' does not exist in the app registry."))
+				);
+	}
+
+	@Test
+	public void testSaveIncorrectStream() throws Exception {
+		assertEquals(0, repository.count());
+		mockMvc.perform(post("/streams/definitions/").param("name", "myStream").param("definition", "foooooo")
+			.accept(MediaType.APPLICATION_JSON))
+			.andDo(print())
+			.andExpect(status().isBadRequest())
+			.andExpect(
+				jsonPath("$[0].logref", is("InvalidStreamDefinitionException"))
+			)
+			.andExpect(
+				jsonPath("$[0].message", is("Cannot determine application type for application 'foooooo': "
+					+ "foooooo had neither input nor output set"))
+			);
 	}
 
 	@Test
@@ -827,5 +851,4 @@ public class StreamControllerTests {
 		ArgumentCaptor<AppDeploymentRequest> captor = ArgumentCaptor.forClass(AppDeploymentRequest.class);
 		verify(appDeployer, times(2)).deploy(captor.capture());
 	}
-
 }
