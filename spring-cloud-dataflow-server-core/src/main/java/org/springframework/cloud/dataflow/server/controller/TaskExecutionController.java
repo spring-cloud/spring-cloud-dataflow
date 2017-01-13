@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,12 @@ package org.springframework.cloud.dataflow.server.controller;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.rest.job.TaskJobExecutionRel;
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionResource;
+import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskExecutionException;
+import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.data.domain.Page;
@@ -46,6 +49,7 @@ import org.springframework.web.bind.annotation.RestController;
  *
  * @author Glenn Renfro
  * @author Michael Minella
+ * @author Ilayaperumal Gopinathan
  */
 @RestController
 @RequestMapping("/tasks/executions")
@@ -54,7 +58,9 @@ public class TaskExecutionController {
 
 	private final Assembler taskAssembler = new Assembler();
 
-	private TaskExplorer explorer;
+	private final TaskExplorer explorer;
+
+	private final TaskDefinitionRepository taskDefinitionRepository;
 
 	/**
 	 * Creates a {@code TaskExecutionController} that retrieves Task Execution information
@@ -62,10 +68,13 @@ public class TaskExecutionController {
 	 *
 	 * @param explorer the explorer this controller will use for retrieving
 	 *                   task execution information.
+	 * @param taskDefinitionRepository the task definition repository
 	 */
-	public TaskExecutionController(TaskExplorer explorer) {
+	public TaskExecutionController(TaskExplorer explorer, TaskDefinitionRepository taskDefinitionRepository) {
 		Assert.notNull(explorer, "explorer must not be null");
+		Assert.notNull(taskDefinitionRepository, "task definition repository must not be null");
 		this.explorer = explorer;
+		this.taskDefinitionRepository = taskDefinitionRepository;
 	}
 
 	/**
@@ -96,6 +105,9 @@ public class TaskExecutionController {
 	public PagedResources<TaskExecutionResource> retrieveTasksByName(
 			@RequestParam("name") String taskName, Pageable pageable,
 				PagedResourcesAssembler<TaskJobExecutionRel> assembler) {
+		if (this.taskDefinitionRepository.findOne(taskName) == null) {
+			throw new NoSuchTaskDefinitionException(taskName);
+		}
 		Page<TaskExecution> taskExecutions = explorer.findTaskExecutionsByName(taskName, pageable);
 		Page<TaskJobExecutionRel> result = getPageableRelationships(taskExecutions, pageable);
 		return assembler.toResource(result, taskAssembler);

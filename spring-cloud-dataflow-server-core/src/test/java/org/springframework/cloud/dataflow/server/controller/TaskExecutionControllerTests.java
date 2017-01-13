@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,9 @@ import org.springframework.boot.autoconfigure.PropertyPlaceholderAutoConfigurati
 import org.springframework.boot.autoconfigure.batch.BatchProperties;
 import org.springframework.boot.autoconfigure.jdbc.EmbeddedDataSourceConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.server.configuration.JobDependencies;
+import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.task.batch.listener.TaskBatchDao;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.dao.TaskExecutionDao;
@@ -52,6 +54,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 /**
  * @author Glenn Renfro
+ * @author Ilayaperumal Gopinathan
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = {EmbeddedDataSourceConfiguration.class,
@@ -77,6 +80,9 @@ public class TaskExecutionControllerTests {
 	private JobRepository jobRepository;
 
 	@Autowired
+	private TaskDefinitionRepository taskDefinitionRepository;
+
+	@Autowired
 	private TaskBatchDao taskBatchDao;
 
 	private MockMvc mockMvc;
@@ -89,6 +95,7 @@ public class TaskExecutionControllerTests {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(wac).defaultRequest(
 				get("/").accept(MediaType.APPLICATION_JSON)).build();
 		if (!initialized) {
+			taskDefinitionRepository.save(new TaskDefinition(TASK_NAME_ORIG, "demo"));
 			dao.createTaskExecution(TASK_NAME_ORIG, new Date(), new ArrayList<String>(), null);
 			dao.createTaskExecution(TASK_NAME_ORIG, new Date(), new ArrayList<String>(), null);
 			dao.createTaskExecution(TASK_NAME_FOO, new Date(), new ArrayList<String>(), null);
@@ -106,7 +113,7 @@ public class TaskExecutionControllerTests {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testTaskExecutionControllerConstructorMissingExplorer() {
-		new TaskExecutionController(null);
+		new TaskExecutionController(null, null);
 	}
 
 	@Test
@@ -161,7 +168,7 @@ public class TaskExecutionControllerTests {
 	public void testGetExecutionsByNameNotFound() throws Exception{
 		mockMvc.perform(
 				get("/tasks/executions/").param("name", "BAZ").accept(MediaType.APPLICATION_JSON)
-		).andExpect(status().isOk())
-				.andExpect(jsonPath("$.content", hasSize(0)));
+		).andExpect(status().is4xxClientError())
+				.andReturn().getResponse().getContentAsString().contains("NoSuchTaskException");
 	}
 }
