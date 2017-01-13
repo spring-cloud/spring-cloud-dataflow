@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2015 the original author or authors.
+ * Copyright 2014-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,20 +16,25 @@
 
 package org.springframework.cloud.dataflow.shell.command;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+import java.util.Map;
+import java.util.TreeMap;
+
+import javax.net.ssl.SSLContext;
+
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.ssl.SSLContexts;
+import org.apache.http.ssl.TrustStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.batch.core.ExitStatus;
-import org.springframework.batch.core.JobExecution;
-import org.springframework.batch.core.JobInstance;
-import org.springframework.batch.core.JobParameter;
-import org.springframework.batch.core.JobParameters;
-import org.springframework.batch.core.StepExecution;
-import org.springframework.batch.item.ExecutionContext;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,30 +42,18 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.cloud.dataflow.rest.client.DataFlowServerException;
 import org.springframework.cloud.dataflow.rest.client.DataFlowTemplate;
-import org.springframework.cloud.dataflow.rest.client.VndErrorResponseErrorHandler;
-import org.springframework.cloud.dataflow.rest.client.support.ExecutionContextJacksonMixIn;
-import org.springframework.cloud.dataflow.rest.client.support.ExitStatusJacksonMixIn;
-import org.springframework.cloud.dataflow.rest.client.support.JobExecutionJacksonMixIn;
-import org.springframework.cloud.dataflow.rest.client.support.JobInstanceJacksonMixIn;
-import org.springframework.cloud.dataflow.rest.client.support.JobParameterJacksonMixIn;
-import org.springframework.cloud.dataflow.rest.client.support.JobParametersJacksonMixIn;
-import org.springframework.cloud.dataflow.rest.client.support.StepExecutionHistoryJacksonMixIn;
-import org.springframework.cloud.dataflow.rest.client.support.StepExecutionJacksonMixIn;
-import org.springframework.cloud.dataflow.rest.job.StepExecutionHistory;
-import org.springframework.cloud.dataflow.shell.TargetHolder;
 import org.springframework.cloud.dataflow.shell.Target;
+import org.springframework.cloud.dataflow.shell.TargetHolder;
 import org.springframework.cloud.dataflow.shell.config.DataFlowShell;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
-import org.springframework.hateoas.hal.Jackson2HalModule;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
-import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.shell.CommandLine;
 import org.springframework.shell.core.CommandMarker;
 import org.springframework.shell.core.annotation.CliCommand;
@@ -70,11 +63,6 @@ import org.springframework.shell.table.TableModelBuilder;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
-
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.util.Map;
-import java.util.TreeMap;
 
 /**
  * Configuration commands for the Shell.  The default Data Flow Server location is
@@ -125,6 +113,13 @@ public class ConfigCommands implements CommandMarker,
 
 	private volatile boolean initialized;
 
+	private Environment environment;
+
+	@Autowired
+	public void setEnvironment(Environment environment) {
+		this.environment = environment;
+	}
+
 	@Autowired
 	public void setCommandLine(CommandLine commandLine) {
 		this.commandLine = commandLine;
@@ -152,6 +147,11 @@ public class ConfigCommands implements CommandMarker,
 		this.restTemplate = restTemplate;
 	}
 
+	@Bean
+	public RestTemplate restTemplate(Environment ev) {
+		return DataFlowTemplate.getDefaultDataflowRestTemplate();
+	}
+
 	// This is for unit testing
 
 	public void setServerUri(String serverUri) {
@@ -169,20 +169,25 @@ public class ConfigCommands implements CommandMarker,
 			@CliOption(mandatory = false, key = {"password"},
 					help = "the password for authenticated access to the Admin REST endpoint (valid only with a username)",
 					specifiedDefaultValue = Target.DEFAULT_SPECIFIED_PASSWORD,
-					unspecifiedDefaultValue = Target.DEFAULT_UNSPECIFIED_PASSWORD) String targetPassword) {
+					unspecifiedDefaultValue = Target.DEFAULT_UNSPECIFIED_PASSWORD) String targetPassword,
+			@CliOption(mandatory = false, key = {"skip-ssl-validation"},
+					help = "accept any SSL certificate (even self-signed)",
+					specifiedDefaultValue = "false",
+					unspecifiedDefaultValue = Target.DEFAULT_UNSPECIFIED_PASSWORD) boolean skipSslValidation){
 
 		if (!StringUtils.isEmpty(targetPassword) && StringUtils.isEmpty(targetUsername)) {
 				return "A password may be specified only together with a username";
 		}
+
 		if (StringUtils.isEmpty(targetPassword) && !StringUtils.isEmpty(targetUsername)) {
 			// read password from the command line
 			targetPassword = userInput.prompt("Password", "", false);
 		}
 
-
-
 		try {
-			this.targetHolder.setTarget(new Target(targetUriString, targetUsername, targetPassword));
+			this.targetHolder.setTarget(new Target(targetUriString, targetUsername, targetPassword, skipSslValidation));
+
+			final HttpClientBuilder httpClientBuilder = HttpClientBuilder.create();
 
 			if (StringUtils.hasText(targetUsername) && StringUtils.hasText(targetPassword)) {
 				final BasicCredentialsProvider credentialsProvider = new BasicCredentialsProvider();
@@ -190,14 +195,29 @@ public class ConfigCommands implements CommandMarker,
 						new UsernamePasswordCredentials(
 								targetHolder.getTarget().getTargetCredentials().getUsername(),
 								targetHolder.getTarget().getTargetCredentials().getPassword()));
-				final CloseableHttpClient httpClient = HttpClientBuilder.create().setDefaultCredentialsProvider(credentialsProvider).build();
-				final HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory(httpClient);
-
-				this.restTemplate.setRequestFactory(requestFactory);
+				httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider);
 			}
 
+			if (skipSslValidation) {
+				SSLContext sslContext = SSLContexts
+						.custom()
+						.loadTrustMaterial(new TrustStrategy() {
+							@Override
+							public boolean isTrusted(X509Certificate[] arg0, String arg1) throws CertificateException {
+								return true;
+							}
+						})
+						.build();
+				httpClientBuilder.setSSLContext(sslContext);
+				httpClientBuilder.setSSLHostnameVerifier(new NoopHostnameVerifier());
+			}
+
+			final CloseableHttpClient httpClient = httpClientBuilder.build();
+			final HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory(httpClient);
+			this.restTemplate.setRequestFactory(requestFactory);
+
 			this.shell.setDataFlowOperations(new DataFlowTemplate(targetHolder.getTarget().getTargetUri(), this.restTemplate));
-			return(String.format("Successfully targeted %s", targetUriString));
+			this.targetHolder.getTarget().setTargetResultMessage(String.format("Successfully targeted %s", targetUriString));
 		}
 		catch (Exception e) {
 			this.targetHolder.getTarget().setTargetException(e);
@@ -211,13 +231,15 @@ public class ConfigCommands implements CommandMarker,
 				else {
 					logger.warn(message);
 				}
-				return message;
+				this.targetHolder.getTarget().setTargetResultMessage(message);
 			}
 			else {
-				return(String.format("Unable to contact Data Flow Server at '%s': '%s'.",
+				this.targetHolder.getTarget().setTargetResultMessage(String.format("Unable to contact Data Flow Server at '%s': '%s'.",
 						targetUriString, e.toString()));
 			}
 		}
+		return(this.targetHolder.getTarget().getTargetResultMessage());
+
 	}
 
 	@CliCommand(value = {"dataflow config info"}, help = "Show the Dataflow server being used")
@@ -228,6 +250,11 @@ public class ConfigCommands implements CommandMarker,
 		final Target target = targetHolder.getTarget();
 
 		statusValues.put("Target", target.getTargetUriAsString());
+
+		if (target.isSkipSslValidation()) {
+			statusValues.put("SSL Validation", "skipped");
+		}
+
 		if (target.getTargetCredentials() != null) {
 			statusValues.put("Credentials", target.getTargetCredentials().getDisplayableContents());
 		}
@@ -256,12 +283,11 @@ public class ConfigCommands implements CommandMarker,
 		return sb.toString();
 	}
 
-
 	@Override
 	public void onApplicationEvent(ApplicationReadyEvent event) {
 		//Only invoke if the shell is executing in the same application context as the data flow server.
 		if (!initialized) {
-			target(this.serverUri, this.userName, this.password);
+			target(this.serverUri, this.userName, this.password, isSkipSslValidation(this.environment));
 		}
 	}
 
@@ -270,17 +296,27 @@ public class ConfigCommands implements CommandMarker,
 		//Only invoke this lifecycle method if the shell is executing in stand-alone mode.
 		if (applicationContext != null && !applicationContext.containsBean("streamDefinitionRepository")) {
 			initialized = true;
-			target(this.serverUri, this.userName, this.password);
+			target(this.serverUri, this.userName, this.password, isSkipSslValidation(this.environment));
 		}
 	}
 
-	@Bean
-	public static RestTemplate restTemplate() {
-		return DataFlowTemplate.getDefaultDataflowRestTemplate();
+	private boolean isSkipSslValidation(Environment env) {
+		final boolean skipSslValidation;
+
+		if (env.containsProperty("skip-ssl-validation")
+			&& (env.getProperty("skip-ssl-validation").isEmpty() || env.getProperty("skip-ssl-validation").equalsIgnoreCase("true"))) {
+			skipSslValidation = true;
+		}
+		else {
+			skipSslValidation = false;
+		}
+
+		return skipSslValidation;
 	}
 
 	@Override
 	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
 		this.applicationContext = applicationContext;
 	}
+
 }
