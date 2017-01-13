@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -139,8 +139,8 @@ public class JobInstanceControllerTests {
 	public void testGetInstanceByNameNotFound() throws Exception{
 		mockMvc.perform(
 				get("/jobs/instances/").param("name", "BAZ").accept(MediaType.APPLICATION_JSON)
-		).andExpect(status().isOk())
-				.andExpect(jsonPath("$.content", hasSize(0)));
+		).andExpect(status().is4xxClientError())
+				.andReturn().getResponse().getContentAsString().contains("NoSuchJobException");
 	}
 
 	private void createSampleJob(String jobName, int jobExecutionCount){

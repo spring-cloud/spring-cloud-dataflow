@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -87,15 +87,8 @@ public class JobInstanceController {
 	public PagedResources<JobInstanceResource> list(@RequestParam("name") String jobName,
 			Pageable pageable, PagedResourcesAssembler<JobInstanceExecutions> assembler)
 			throws NoSuchJobException {
-		List<JobInstanceExecutions> jobInstances;
-		Page<JobInstanceExecutions> page;
-		try{
-			jobInstances = taskJobService.listTaskJobInstancesForJobName(pageable, jobName);
-			page = new PageImpl<>(jobInstances, pageable, taskJobService.countJobInstances(jobName));
-		}
-		catch (NoSuchJobException e){
-				page = new PageImpl<>(new ArrayList<JobInstanceExecutions>());
-		}
+		List<JobInstanceExecutions> jobInstances = taskJobService.listTaskJobInstancesForJobName(pageable, jobName);
+		Page<JobInstanceExecutions> page = new PageImpl<>(jobInstances, pageable, taskJobService.countJobInstances(jobName));
 		return assembler.toResource(page, jobAssembler);
 	}
 
