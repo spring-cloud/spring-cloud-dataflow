@@ -216,7 +216,7 @@ dataflow:> dataflow config server https://localhost:8443/
 **Skip Certificate Validation**
 
 Alternatively, you can also bypass the certification validation by providing the
-optional command-line parameter `--skip-ssl-validation`.
+optional command-line parameter `--dataflow.skip-ssl-validation=true`.
 
 Using this command-line parameter, the shell will accept any (self-signed) SSL
 certificate.
