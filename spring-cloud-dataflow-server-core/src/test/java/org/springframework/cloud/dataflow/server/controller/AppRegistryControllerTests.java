@@ -125,6 +125,13 @@ public class AppRegistryControllerTests {
 	}
 
 	@Test
+	public void testFindNonExistentApp() throws Exception {
+		mockMvc.perform(
+				get("/apps/source/foo").accept(MediaType.APPLICATION_JSON)).andDo(print())
+				.andExpect(status().is4xxClientError()).andReturn().getResponse().getContentAsString().contains("NoSuchAppRegistrationException");
+	}
+
+	@Test
 	public void testRegisterAndListApplications() throws Exception {
 		mockMvc.perform(
 				get("/apps").accept(MediaType.APPLICATION_JSON)).andDo(print())

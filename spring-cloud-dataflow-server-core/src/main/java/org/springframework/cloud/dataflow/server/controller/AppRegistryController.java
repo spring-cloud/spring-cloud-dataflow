@@ -109,7 +109,7 @@ public class AppRegistryController {
 			@PathVariable("name") String name) {
 		AppRegistration registration = appRegistry.find(name, type);
 		if (registration == null) {
-			return null;
+			throw new NoSuchAppRegistrationException(name, type);
 		}
 		DetailedAppRegistrationResource result = new DetailedAppRegistrationResource(assembler.toResource(registration));
 		Resource resource = registration.getResource();

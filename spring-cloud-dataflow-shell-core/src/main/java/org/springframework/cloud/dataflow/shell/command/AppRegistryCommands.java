@@ -101,39 +101,44 @@ public class AppRegistryCommands implements CommandMarker, ResourceLoaderAware {
 					key = {"", "id"},
 					help = "id of the application to query in the form of 'type:name'")
 			QualifiedApplicationName application) {
-		DetailedAppRegistrationResource info = appRegistryOperations().info(application.name, application.type);
 		List<Object> result = new ArrayList<>();
-		if (info != null) {
-			List<ConfigurationMetadataProperty> options = info.getOptions();
-			result.add(String.format("Information about %s application '%s':", application.type, application.name));
-			result.add(String.format("Resource URI: %s", info.getUri()));
-			if (info.getShortDescription() != null) {
-				result.add(info.getShortDescription());
-			}
-			if (options == null) {
-				result.add("Application options metadata is not available");
+		try {
+			DetailedAppRegistrationResource info = appRegistryOperations().info(application.name, application.type);
+			if (info != null) {
+				List<ConfigurationMetadataProperty> options = info.getOptions();
+				result.add(String.format("Information about %s application '%s':", application.type, application.name));
+				result.add(String.format("Resource URI: %s", info.getUri()));
+				if (info.getShortDescription() != null) {
+					result.add(info.getShortDescription());
+				}
+				if (options == null) {
+					result.add("Application options metadata is not available");
+				}
+				else {
+					TableModelBuilder<Object> modelBuilder = new TableModelBuilder<>();
+					modelBuilder.addRow()
+							.addValue("Option Name")
+							.addValue("Description")
+							.addValue("Default")
+							.addValue("Type");
+					for (ConfigurationMetadataProperty option : options) {
+						modelBuilder.addRow()
+								.addValue(option.getId())
+								.addValue(option.getDescription() == null ? "<unknown>" : option.getDescription())
+								.addValue(prettyPrintDefaultValue(option))
+								.addValue(option.getType() == null ? "<unknown>" : option.getType());
+					}
+					TableBuilder builder = DataFlowTables.applyStyle(new TableBuilder(modelBuilder.build()))
+							.on(CellMatchers.table()).addSizer(new AbsoluteWidthSizeConstraints(30))
+							.and();
+					result.add(builder.build());
+				}
 			}
 			else {
-				TableModelBuilder<Object> modelBuilder = new TableModelBuilder<>();
-				modelBuilder.addRow()
-						.addValue("Option Name")
-						.addValue("Description")
-						.addValue("Default")
-						.addValue("Type");
-				for (ConfigurationMetadataProperty option : options) {
-					modelBuilder.addRow()
-							.addValue(option.getId())
-							.addValue(option.getDescription() == null ? "<unknown>" : option.getDescription())
-							.addValue(prettyPrintDefaultValue(option))
-							.addValue(option.getType() == null ? "<unknown>" : option.getType());
-				}
-				TableBuilder builder = DataFlowTables.applyStyle(new TableBuilder(modelBuilder.build()))
-						.on(CellMatchers.table()).addSizer(new AbsoluteWidthSizeConstraints(30))
-						.and();
-				result.add(builder.build());
+				result.add(String.format("Application info is not available for %s:%s", application.type, application.name));
 			}
 		}
-		else {
+		catch (Exception e) {
 			result.add(String.format("Application info is not available for %s:%s", application.type, application.name));
 		}
 		return result;
