@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2015-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -139,7 +139,8 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 	@Test
 	public void testTaskExecutionListByName() throws InterruptedException {
 		logger.info("Retrieve Task Execution List By Name Test");
-		CommandResult cr = task().taskExecutionListByName();
+		task().create("mytask", "timestamp");
+		CommandResult cr = task().taskExecutionListByName("mytask");
 		assertTrue("task execution list by name command must be successful",
 				cr.isSuccess());
 		Table table = (Table) cr.getResult();

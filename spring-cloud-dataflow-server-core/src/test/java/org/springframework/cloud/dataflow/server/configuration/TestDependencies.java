@@ -143,8 +143,8 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 		return new TaskDefinitionController(repository, deploymentIdRepository, taskLauncher(), appRegistry());
 	}
 
-	public TaskExecutionController taskExecutionController(TaskExplorer explorer) {
-		return new TaskExecutionController(explorer);
+	public TaskExecutionController taskExecutionController(TaskExplorer explorer, TaskDefinitionRepository repository) {
+		return new TaskExecutionController(explorer, repository);
 	}
 
 	@Bean
