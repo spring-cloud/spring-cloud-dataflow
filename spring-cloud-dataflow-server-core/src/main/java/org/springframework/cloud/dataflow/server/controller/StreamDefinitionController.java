@@ -285,14 +285,19 @@ public class StreamDefinitionController {
 	private String calculateStreamState(String name) {
 		Set<DeploymentState> appStates = EnumSet.noneOf(DeploymentState.class);
 		StreamDefinition stream = repository.findOne(name);
+		logger.debug("Calcuating stream state for stream " + stream.getName());
 		for (StreamAppDefinition appDefinition : stream.getAppDefinitions()) {
 			String key = DeploymentKey.forStreamAppDefinition(appDefinition);
 			String id = deploymentIdRepository.findOne(key);
+			logger.debug("Stream Deployment Key = {},  Id = {}", key, id);
 			if (id != null) {
 				AppStatus status = deployer.status(id);
-				appStates.add(status.getState());
+				DeploymentState deploymentState = status.getState();
+				logger.debug("Stream Deployment Key = {}, Deployment State = {}", key, deploymentState);
+				appStates.add(deploymentState);
 			}
 			else {
+				logger.debug("Stream Deployment Key = {}, Deployment State = {}", key, DeploymentState.undeployed);
 				appStates.add(DeploymentState.undeployed);
 			}
 		}
@@ -309,21 +314,31 @@ public class StreamDefinitionController {
 	static DeploymentState aggregateState(Set<DeploymentState> states) {
 		if (states.size() == 1) {
 			DeploymentState state = states.iterator().next();
-
+			logger.debug("aggregateState: Deployment State Set Size = 1.  Deployment State " + state);
 			// a stream which is known to the stream definition repository
 			// but unknown to deployers is undeployed
-			return state == DeploymentState.unknown ? DeploymentState.undeployed : state;
+			if (state == DeploymentState.unknown) {
+				logger.debug("aggregateState: Returning " + DeploymentState.undeployed );
+				return  DeploymentState.undeployed;
+			} else {
+				logger.debug("aggregateState: Returning " + state );
+				return state;
+			}
 		}
 		if (states.isEmpty() || states.contains(DeploymentState.error)) {
+			logger.debug("aggregateState: Returning " + DeploymentState.error );
 			return DeploymentState.error;
 		}
 		if (states.contains(DeploymentState.failed)) {
+			logger.debug("aggregateState: Returning " + DeploymentState.failed );
 			return DeploymentState.failed;
 		}
 		if (states.contains(DeploymentState.deploying)) {
+			logger.debug("aggregateState: Returning " + DeploymentState.deploying );
 			return DeploymentState.deploying;
 		}
 
+		logger.debug("aggregateState: Returing " + DeploymentState.partial );
 		return DeploymentState.partial;
 	}
 
