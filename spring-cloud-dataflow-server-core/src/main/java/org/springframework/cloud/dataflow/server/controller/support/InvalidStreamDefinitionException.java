@@ -16,6 +16,8 @@
 package org.springframework.cloud.dataflow.server.controller.support;
 
 /**
+ * Thrown by controller classes to indicate issues with the provided stream
+ * definition.
  *
  * @author Gunnar Hillert
  *
