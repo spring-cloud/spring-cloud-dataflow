@@ -18,21 +18,9 @@ package org.springframework.cloud.dataflow.shell.command;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
 import java.util.Map;
 import java.util.TreeMap;
 
-import javax.net.ssl.SSLContext;
-
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.conn.ssl.NoopHostnameVerifier;
-import org.apache.http.impl.client.BasicCredentialsProvider;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.ssl.SSLContexts;
-import org.apache.http.ssl.TrustStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -44,6 +32,7 @@ import org.springframework.cloud.dataflow.rest.client.DataFlowServerException;
 import org.springframework.cloud.dataflow.rest.client.DataFlowTemplate;
 import org.springframework.cloud.dataflow.shell.Target;
 import org.springframework.cloud.dataflow.shell.TargetHolder;
+import org.springframework.cloud.dataflow.shell.command.support.HttpClientUtils;
 import org.springframework.cloud.dataflow.shell.config.DataFlowShell;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -53,8 +42,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
-import org.springframework.shell.CommandLine;
 import org.springframework.shell.core.CommandMarker;
 import org.springframework.shell.core.annotation.CliCommand;
 import org.springframework.shell.core.annotation.CliOption;
@@ -65,7 +52,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
 /**
- * Configuration commands for the Shell.  The default Data Flow Server location is
+ * Configuration commands for the Shell. The default Data Flow Server location is
  * <code>http://localhost:9393</code>
  *
  * @author Gunnar Hillert
@@ -103,7 +90,8 @@ public class ConfigCommands implements CommandMarker,
 	@Value("${dataflow.password:" + Target.DEFAULT_SPECIFIED_PASSWORD + "}")
 	private String password;
 
-	private CommandLine commandLine;
+	@Value("${dataflow.skip-ssl-validation:" + Target.DEFAULT_UNSPECIFIED_SKIP_SSL_VALIDATION + "}")
+	private boolean skipSslValidation;
 
 	private UserInput userInput;
 
@@ -112,18 +100,6 @@ public class ConfigCommands implements CommandMarker,
 	private ApplicationContext applicationContext;
 
 	private volatile boolean initialized;
-
-	private Environment environment;
-
-	@Autowired
-	public void setEnvironment(Environment environment) {
-		this.environment = environment;
-	}
-
-	@Autowired
-	public void setCommandLine(CommandLine commandLine) {
-		this.commandLine = commandLine;
-	}
 
 	@Autowired
 	public void setUserInput(UserInput userInput) {
@@ -172,8 +148,8 @@ public class ConfigCommands implements CommandMarker,
 					unspecifiedDefaultValue = Target.DEFAULT_UNSPECIFIED_PASSWORD) String targetPassword,
 			@CliOption(mandatory = false, key = {"skip-ssl-validation"},
 					help = "accept any SSL certificate (even self-signed)",
-					specifiedDefaultValue = "false",
-					unspecifiedDefaultValue = Target.DEFAULT_UNSPECIFIED_PASSWORD) boolean skipSslValidation){
+					specifiedDefaultValue = Target.DEFAULT_SPECIFIED_SKIP_SSL_VALIDATION,
+					unspecifiedDefaultValue = Target.DEFAULT_UNSPECIFIED_SKIP_SSL_VALIDATION) boolean skipSslValidation){
 
 		if (!StringUtils.isEmpty(targetPassword) && StringUtils.isEmpty(targetUsername)) {
 				return "A password may be specified only together with a username";
@@ -187,34 +163,8 @@ public class ConfigCommands implements CommandMarker,
 		try {
 			this.targetHolder.setTarget(new Target(targetUriString, targetUsername, targetPassword, skipSslValidation));
 
-			final HttpClientBuilder httpClientBuilder = HttpClientBuilder.create();
-
-			if (StringUtils.hasText(targetUsername) && StringUtils.hasText(targetPassword)) {
-				final BasicCredentialsProvider credentialsProvider = new BasicCredentialsProvider();
-				credentialsProvider.setCredentials(AuthScope.ANY,
-						new UsernamePasswordCredentials(
-								targetHolder.getTarget().getTargetCredentials().getUsername(),
-								targetHolder.getTarget().getTargetCredentials().getPassword()));
-				httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider);
-			}
-
-			if (skipSslValidation) {
-				SSLContext sslContext = SSLContexts
-						.custom()
-						.loadTrustMaterial(new TrustStrategy() {
-							@Override
-							public boolean isTrusted(X509Certificate[] arg0, String arg1) throws CertificateException {
-								return true;
-							}
-						})
-						.build();
-				httpClientBuilder.setSSLContext(sslContext);
-				httpClientBuilder.setSSLHostnameVerifier(new NoopHostnameVerifier());
-			}
-
-			final CloseableHttpClient httpClient = httpClientBuilder.build();
-			final HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory(httpClient);
-			this.restTemplate.setRequestFactory(requestFactory);
+			HttpClientUtils.prepareRestTemplate(this.restTemplate,
+					targetUsername, targetPassword, skipSslValidation);
 
 			this.shell.setDataFlowOperations(new DataFlowTemplate(targetHolder.getTarget().getTargetUri(), this.restTemplate));
 			this.targetHolder.getTarget().setTargetResultMessage(String.format("Successfully targeted %s", targetUriString));
@@ -287,7 +237,7 @@ public class ConfigCommands implements CommandMarker,
 	public void onApplicationEvent(ApplicationReadyEvent event) {
 		//Only invoke if the shell is executing in the same application context as the data flow server.
 		if (!initialized) {
-			target(this.serverUri, this.userName, this.password, isSkipSslValidation(this.environment));
+			target(this.serverUri, this.userName, this.password, this.skipSslValidation);
 		}
 	}
 
@@ -296,22 +246,8 @@ public class ConfigCommands implements CommandMarker,
 		//Only invoke this lifecycle method if the shell is executing in stand-alone mode.
 		if (applicationContext != null && !applicationContext.containsBean("streamDefinitionRepository")) {
 			initialized = true;
-			target(this.serverUri, this.userName, this.password, isSkipSslValidation(this.environment));
+			target(this.serverUri, this.userName, this.password, this.skipSslValidation);
 		}
-	}
-
-	private boolean isSkipSslValidation(Environment env) {
-		final boolean skipSslValidation;
-
-		if (env.containsProperty("skip-ssl-validation")
-			&& (env.getProperty("skip-ssl-validation").isEmpty() || env.getProperty("skip-ssl-validation").equalsIgnoreCase("true"))) {
-			skipSslValidation = true;
-		}
-		else {
-			skipSslValidation = false;
-		}
-
-		return skipSslValidation;
 	}
 
 	@Override

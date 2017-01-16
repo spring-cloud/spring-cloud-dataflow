@@ -34,7 +34,6 @@ import org.springframework.cloud.dataflow.shell.config.DataFlowShell;
 import org.springframework.hateoas.ResourceSupport;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.mock.env.MockEnvironment;
 import org.springframework.shell.CommandLine;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
@@ -70,8 +69,6 @@ public class ConfigCommandTests {
 		when(restTemplate.getForObject(Mockito.any(URI.class), Mockito.eq(ResourceSupport.class))).thenThrow(e);
 
 		configCommands.setTargetHolder(new TargetHolder());
-		configCommands.setCommandLine(commandLine);
-		configCommands.setEnvironment(new MockEnvironment());
 		configCommands.setRestTemplate(restTemplate);
 		configCommands.setDataFlowShell(dataFlowShell);
 		configCommands.setServerUri("http://localhost:9393");
