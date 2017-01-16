@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -83,9 +83,15 @@ public class Target {
 
 	public static final String DEFAULT_UNSPECIFIED_PASSWORD = "__NULL__";
 
+	public static final String DEFAULT_SPECIFIED_SKIP_SSL_VALIDATION = "true";
+
+	public static final String DEFAULT_UNSPECIFIED_SKIP_SSL_VALIDATION = "false";
+
 	public static final String DEFAULT_TARGET = DEFAULT_SCHEME + "://" + DEFAULT_HOST + ":" + DEFAULT_PORT + "/";
 
 	private final URI targetUri;
+
+	private final boolean skipSslValidation;
 
 	private final Credentials targetCredentials;
 
@@ -102,11 +108,14 @@ public class Target {
 	 * @param targetUriAsString Must not be empty
 	 * @param targetUsername    May be empty, if access is unauthenticated
 	 * @param targetPassword    May be empty
+	 * @param skipSslValidation
 	 * @throws IllegalArgumentException if the given string violates RFC 2396.
 	 */
-	public Target(String targetUriAsString, String targetUsername, String targetPassword) {
+	public Target(String targetUriAsString, String targetUsername, String targetPassword, boolean skipSslValidation) {
 		Assert.hasText(targetUriAsString, "The provided targetUriAsString must neither be null nor empty.");
 		this.targetUri = URI.create(targetUriAsString);
+		this.skipSslValidation = skipSslValidation;
+
 		if (StringUtils.isEmpty(targetUsername)) {
 			this.targetCredentials = null;
 		} else {
@@ -121,7 +130,7 @@ public class Target {
 	 * @throws IllegalArgumentException if the given string violates RFC 2396
 	 */
 	public Target(String targetUriAsString) {
-		this(targetUriAsString, null, null);
+		this(targetUriAsString, null, null, false);
 	}
 
 	/**
@@ -167,6 +176,14 @@ public class Target {
 	 */
 	public String getTargetUriAsString() {
 		return targetUri.toString();
+	}
+
+	/**
+	 *
+	 * @return
+	 */
+	public boolean isSkipSslValidation() {
+		return skipSslValidation;
 	}
 
 	/**

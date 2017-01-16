@@ -69,7 +69,6 @@ public class ConfigCommandTests {
 		when(restTemplate.getForObject(Mockito.any(URI.class), Mockito.eq(ResourceSupport.class))).thenThrow(e);
 
 		configCommands.setTargetHolder(new TargetHolder());
-		configCommands.setCommandLine(commandLine);
 		configCommands.setRestTemplate(restTemplate);
 		configCommands.setDataFlowShell(dataFlowShell);
 		configCommands.setServerUri("http://localhost:9393");

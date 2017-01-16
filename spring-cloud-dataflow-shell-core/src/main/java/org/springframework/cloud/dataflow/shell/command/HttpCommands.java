@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2015-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,8 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import org.springframework.cloud.dataflow.shell.Target;
+import org.springframework.cloud.dataflow.shell.command.support.HttpClientUtils;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -66,20 +68,28 @@ public class HttpCommands implements CommandMarker {
 
 	@CliCommand(value = { POST_HTTPSOURCE }, help = "POST data to http endpoint")
 	public String postHttp(
-			@CliOption(mandatory = false, key = { "", "target" }, help = "the location to post to", unspecifiedDefaultValue = "http://localhost:9000") String target,
-			@CliOption(mandatory = false, key = "data", help = "the text payload to post. exclusive with file. embedded double quotes are not supported if next to a space character") String data,
-			@CliOption(mandatory = false, key = "file", help = "filename to read data from. exclusive with data") File file,
-			@CliOption(mandatory = false, key = "contentType", help = "the content-type to use. file is also read using the specified charset", unspecifiedDefaultValue = DEFAULT_MEDIA_TYPE) MediaType mediaType)
+			@CliOption(mandatory = false, key = { "", "target" },      help = "the location to post to", unspecifiedDefaultValue = "http://localhost:9393") String target,
+			@CliOption(mandatory = false, key = "data",                help = "the text payload to post. exclusive with file. embedded double quotes are not supported if next to a space character") String data,
+			@CliOption(mandatory = false, key = "file",                help = "filename to read data from. exclusive with data") File file,
+			@CliOption(mandatory = false, key = "contentType",         help = "the content-type to use. file is also read using the specified charset", unspecifiedDefaultValue = DEFAULT_MEDIA_TYPE) MediaType mediaType,
+			@CliOption(mandatory = false, key = {"username"},          help = "the username for calls that require basic authentication",
+				unspecifiedDefaultValue = Target.DEFAULT_USERNAME) String targetUsername,
+			@CliOption(mandatory = false, key = {"password"},          help = "the password for calls that require basic authentication",
+				specifiedDefaultValue = Target.DEFAULT_SPECIFIED_PASSWORD,
+				unspecifiedDefaultValue = Target.DEFAULT_UNSPECIFIED_PASSWORD) String targetPassword,
+			@CliOption(mandatory = false, key = "skip-ssl-validation", help = "accept any SSL certificate (even self-signed)",
+				specifiedDefaultValue = Target.DEFAULT_SPECIFIED_SKIP_SSL_VALIDATION,
+				unspecifiedDefaultValue = Target.DEFAULT_UNSPECIFIED_SKIP_SSL_VALIDATION) boolean skipSslValidation)
 			throws IOException {
 		Assert.isTrue(file != null || data != null, "One of 'file' or 'data' must be set");
 		Assert.isTrue(file == null || data == null, "Only one of 'file' or 'data' must be set");
-		if (mediaType.getCharSet() == null) {
+		if (mediaType.getCharset() == null) {
 			mediaType = new MediaType(mediaType, Collections.singletonMap("charset",
 					Charset.defaultCharset().toString()));
 		}
 
 		if (file != null) {
-			InputStreamReader isr = new InputStreamReader(new FileInputStream(file), mediaType.getCharSet());
+			InputStreamReader isr = new InputStreamReader(new FileInputStream(file), mediaType.getCharset());
 			data = FileCopyUtils.copyToString(isr);
 		}
 
@@ -92,7 +102,11 @@ public class HttpCommands implements CommandMarker {
 
 		try {
 			outputRequest("POST", requestURI, mediaType, data, buffer);
-			ResponseEntity<String> response = createRestTemplate(buffer).postForEntity(requestURI, request, String.class);
+			final RestTemplate restTemplate = createRestTemplate(buffer);
+
+			HttpClientUtils.prepareRestTemplate(restTemplate, targetUsername, targetPassword, skipSslValidation);
+
+			ResponseEntity<String> response = restTemplate.postForEntity(requestURI, request, String.class);
 			outputResponse(response, buffer);
 			if (!response.getStatusCode().is2xxSuccessful()) {
 				buffer.append(OsUtils.LINE_SEPARATOR).append(
@@ -110,7 +124,15 @@ public class HttpCommands implements CommandMarker {
 
 	@CliCommand(value = { GET_HTTPSOURCE }, help = "Make GET request to http endpoint")
 	public String getHttp(
-			@CliOption(mandatory = false, key = { "", "target" }, help = "the URL to make the request to", unspecifiedDefaultValue = "http://localhost:9393") String target)
+			@CliOption(mandatory = false, key = { "", "target" }, help = "the URL to make the request to", unspecifiedDefaultValue = "http://localhost:9393") String target,
+			@CliOption(mandatory = false, key = {"username"},     help = "the username for calls that require basic authentication",
+				unspecifiedDefaultValue = Target.DEFAULT_USERNAME) String targetUsername,
+			@CliOption(mandatory = false, key = {"password"},     help = "the password for calls that require basic authentication",
+				specifiedDefaultValue = Target.DEFAULT_SPECIFIED_PASSWORD,
+				unspecifiedDefaultValue = Target.DEFAULT_UNSPECIFIED_PASSWORD) String targetPassword,
+			@CliOption(mandatory = false, key = "skip-ssl-validation", help = "accept any SSL certificate (even self-signed)",
+				specifiedDefaultValue = Target.DEFAULT_SPECIFIED_SKIP_SSL_VALIDATION,
+				unspecifiedDefaultValue = Target.DEFAULT_UNSPECIFIED_SKIP_SSL_VALIDATION) boolean skipSslValidation)
 			throws IOException {
 
 		final StringBuilder buffer = new StringBuilder();
@@ -118,7 +140,12 @@ public class HttpCommands implements CommandMarker {
 
 		try {
 			outputRequest("GET", requestURI, null, "", buffer);
-			ResponseEntity<String> response = createRestTemplate(buffer).getForEntity(requestURI, String.class);
+
+			final RestTemplate restTemplate = createRestTemplate(buffer);
+
+			HttpClientUtils.prepareRestTemplate(restTemplate, targetUsername, targetPassword, skipSslValidation);
+
+			ResponseEntity<String> response = restTemplate.getForEntity(requestURI, String.class);
 			outputResponse(response, buffer);
 			if (!response.getStatusCode().is2xxSuccessful()) {
 				buffer.append(OsUtils.LINE_SEPARATOR).append(
