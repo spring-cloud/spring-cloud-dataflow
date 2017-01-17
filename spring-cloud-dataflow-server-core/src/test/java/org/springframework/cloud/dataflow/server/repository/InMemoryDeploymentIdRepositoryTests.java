@@ -23,9 +23,9 @@ import static org.junit.Assert.assertThat;
 
 import org.junit.Test;
 
-import org.springframework.cloud.dataflow.core.StreamAppDefinition;
-import org.springframework.cloud.dataflow.core.StreamDefinition;
-import org.springframework.cloud.dataflow.core.TaskDefinition;
+import org.springframework.cloud.dashboard.core.StreamAppDefinition;
+import org.springframework.cloud.dashboard.core.StreamDefinition;
+import org.springframework.cloud.dashboard.core.TaskDefinition;
 
 /**
  * @author Janne Valkealahti

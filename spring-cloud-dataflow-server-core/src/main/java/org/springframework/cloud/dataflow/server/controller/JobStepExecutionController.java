@@ -25,7 +25,7 @@ import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.launch.NoSuchJobExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.dataflow.rest.resource.StepExecutionResource;
+import org.springframework.cloud.dashboard.rest.resource.StepExecutionResource;
 import org.springframework.cloud.dataflow.server.job.support.StepExecutionResourceBuilder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;

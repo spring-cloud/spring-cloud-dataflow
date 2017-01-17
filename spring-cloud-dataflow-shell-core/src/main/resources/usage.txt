@@ -1,8 +1,0 @@
-Data Flow Options:
-  --dataflow.uri=<uri>                          Address of the Data Flow Server [default: http://localhost:9393].
-  --dataflow.username=<USER>                    Username of the Data Flow Server [no default].
-  --dataflow.password=<PASSWORD>                Password of the Data Flow Server [no default].
-  --dataflow.skip-ssl-validation=<true|false>   Accept any SSL certificate (even self-signed) [default: no].
-  --spring.shell.historySize=<SIZE>             Default size of the shell log file [default: 3000].
-  --spring.shell.commandFile=<FILE>             Data Flow Shell executes commands read from the file(s) and then exits.
-  --help                                        This message.

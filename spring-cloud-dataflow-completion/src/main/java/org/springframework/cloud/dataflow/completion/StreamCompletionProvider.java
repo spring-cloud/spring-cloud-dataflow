@@ -19,7 +19,7 @@ package org.springframework.cloud.dataflow.completion;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.cloud.dataflow.core.StreamDefinition;
+import org.springframework.cloud.dashboard.core.StreamDefinition;
 
 /**
  * Provides code completion on a (maybe ill-formed) stream definition.

@@ -21,7 +21,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.springframework.cloud.dataflow.core.TaskDefinition;
+import org.springframework.cloud.dashboard.core.TaskDefinition;
 import org.springframework.util.Assert;
 
 /**

@@ -19,7 +19,7 @@ package org.springframework.cloud.dataflow.completion;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.cloud.dataflow.core.TaskDefinition;
+import org.springframework.cloud.dashboard.core.TaskDefinition;
 
 /**
  * Provides code completion on a (maybe ill-formed) task definition.

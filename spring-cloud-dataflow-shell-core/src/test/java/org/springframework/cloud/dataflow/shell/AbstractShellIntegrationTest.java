@@ -109,6 +109,7 @@ public abstract class AbstractShellIntegrationTest {
 			int randomPort = SocketUtils.findAvailableTcpPort();
 			String dataFlowUri = String.format("--dataflow.uri=http://localhost:%s", serverPort);
 			String dataSourceUrl = String.format("jdbc:h2:tcp://localhost:%s/mem:dataflow", randomPort);
+			System.out.println("XXX 11");
 			applicationContext = application.run(
 					String.format("--server.port=%s", serverPort),
 					dataFlowUri,

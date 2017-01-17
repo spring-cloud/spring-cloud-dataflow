@@ -18,8 +18,8 @@ package org.springframework.cloud.dataflow.completion;
 
 import java.util.List;
 
-import org.springframework.cloud.dataflow.core.ApplicationType;
-import org.springframework.cloud.dataflow.core.dsl.CheckPointedParseException;
+import org.springframework.cloud.dashboard.core.ApplicationType;
+import org.springframework.cloud.dashboard.core.dsl.CheckPointedParseException;
 import org.springframework.cloud.dataflow.registry.AppRegistration;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
 

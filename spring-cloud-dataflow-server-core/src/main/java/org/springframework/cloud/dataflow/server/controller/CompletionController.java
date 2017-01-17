@@ -20,10 +20,10 @@ import java.util.List;
 
 import javax.validation.constraints.Min;
 
+import org.springframework.cloud.dashboard.rest.resource.CompletionProposalsResource;
 import org.springframework.cloud.dataflow.completion.CompletionProposal;
 import org.springframework.cloud.dataflow.completion.StreamCompletionProvider;
 import org.springframework.cloud.dataflow.completion.TaskCompletionProvider;
-import org.springframework.cloud.dataflow.rest.resource.CompletionProposalsResource;
 import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.hateoas.mvc.ResourceAssemblerSupport;
 import org.springframework.validation.annotation.Validated;

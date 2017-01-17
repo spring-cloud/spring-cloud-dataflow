@@ -22,7 +22,7 @@ import java.sql.Types;
 
 import javax.sql.DataSource;
 
-import org.springframework.cloud.dataflow.core.StreamDefinition;
+import org.springframework.cloud.dashboard.core.StreamDefinition;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.util.Assert;
 

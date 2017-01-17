@@ -19,9 +19,8 @@ package org.springframework.cloud.dataflow.server.controller;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.cloud.dataflow.core.TaskDefinition;
-import org.springframework.cloud.dataflow.rest.job.TaskJobExecutionRel;
-import org.springframework.cloud.dataflow.rest.resource.TaskExecutionResource;
+import org.springframework.cloud.dashboard.rest.job.TaskJobExecutionRel;
+import org.springframework.cloud.dashboard.rest.resource.TaskExecutionResource;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskExecutionException;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;

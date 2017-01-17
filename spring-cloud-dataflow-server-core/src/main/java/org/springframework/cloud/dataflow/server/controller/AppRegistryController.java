@@ -25,12 +25,12 @@ import java.util.List;
 import java.util.Properties;
 
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
-import org.springframework.cloud.dataflow.core.ApplicationType;
+import org.springframework.cloud.dashboard.core.ApplicationType;
+import org.springframework.cloud.dashboard.rest.resource.AppRegistrationResource;
+import org.springframework.cloud.dashboard.rest.resource.DetailedAppRegistrationResource;
 import org.springframework.cloud.dataflow.registry.AppRegistration;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.registry.support.NoSuchAppRegistrationException;
-import org.springframework.cloud.dataflow.rest.resource.AppRegistrationResource;
-import org.springframework.cloud.dataflow.rest.resource.DetailedAppRegistrationResource;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.PageImpl;

@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.cloud.dataflow.core.ApplicationType;
+import org.springframework.cloud.dashboard.core.ApplicationType;
 import org.springframework.cloud.dataflow.registry.support.NoSuchAppRegistrationException;
 import org.springframework.cloud.deployer.resource.registry.UriRegistry;
 import org.springframework.cloud.deployer.resource.registry.UriRegistryPopulator;

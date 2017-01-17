@@ -18,13 +18,13 @@ package org.springframework.cloud.dataflow.server.completion;
 
 import java.util.List;
 
+import org.springframework.cloud.dashboard.core.ApplicationType;
+import org.springframework.cloud.dashboard.core.StreamAppDefinition;
+import org.springframework.cloud.dashboard.core.StreamDefinition;
+import org.springframework.cloud.dashboard.core.dsl.DSLMessage;
+import org.springframework.cloud.dashboard.core.dsl.ParseException;
 import org.springframework.cloud.dataflow.completion.CompletionProposal;
 import org.springframework.cloud.dataflow.completion.RecoveryStrategy;
-import org.springframework.cloud.dataflow.core.ApplicationType;
-import org.springframework.cloud.dataflow.core.StreamAppDefinition;
-import org.springframework.cloud.dataflow.core.StreamDefinition;
-import org.springframework.cloud.dataflow.core.dsl.DSLMessage;
-import org.springframework.cloud.dataflow.core.dsl.ParseException;
 import org.springframework.cloud.dataflow.server.DataFlowServerUtil;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.util.StringUtils;

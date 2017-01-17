@@ -16,10 +16,10 @@
 
 package org.springframework.cloud.dataflow.server.controller;
 
-import org.springframework.cloud.dataflow.core.ApplicationType;
-import org.springframework.cloud.dataflow.core.TaskDefinition;
+import org.springframework.cloud.dashboard.core.ApplicationType;
+import org.springframework.cloud.dashboard.core.TaskDefinition;
+import org.springframework.cloud.dashboard.rest.resource.TaskDefinitionResource;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
-import org.springframework.cloud.dataflow.rest.resource.TaskDefinitionResource;
 import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
 import org.springframework.cloud.dataflow.server.repository.DeploymentKey;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;

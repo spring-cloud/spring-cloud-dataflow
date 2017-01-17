@@ -27,12 +27,12 @@ import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
 import org.springframework.boot.configurationmetadata.ValueHint;
+import org.springframework.cloud.dashboard.core.ApplicationType;
+import org.springframework.cloud.dashboard.core.TaskDefinition;
+import org.springframework.cloud.dashboard.core.dsl.CheckPointedParseException;
+import org.springframework.cloud.dashboard.core.dsl.Token;
+import org.springframework.cloud.dashboard.core.dsl.TokenKind;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
-import org.springframework.cloud.dataflow.core.ApplicationType;
-import org.springframework.cloud.dataflow.core.TaskDefinition;
-import org.springframework.cloud.dataflow.core.dsl.CheckPointedParseException;
-import org.springframework.cloud.dataflow.core.dsl.Token;
-import org.springframework.cloud.dataflow.core.dsl.TokenKind;
 import org.springframework.cloud.dataflow.registry.AppRegistration;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.core.io.Resource;
@@ -71,7 +71,7 @@ public class ConfigurationPropertyValueHintTaskExpansionStrategy implements Task
 		String propertyName = recoverPropertyName(text);
 
 		String alreadyTyped = parseResult.getProperties().get(propertyName);
-		
+
 		String appName = parseResult.getRegisteredAppName();
 		AppRegistration appRegistration = appRegistry.find(appName, ApplicationType.task);
 		if (appRegistration == null) {

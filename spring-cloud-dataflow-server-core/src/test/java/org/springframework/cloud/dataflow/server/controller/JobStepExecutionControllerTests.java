@@ -41,7 +41,7 @@ import org.springframework.boot.autoconfigure.PropertyPlaceholderAutoConfigurati
 import org.springframework.boot.autoconfigure.batch.BatchProperties;
 import org.springframework.boot.autoconfigure.jdbc.EmbeddedDataSourceConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cloud.dataflow.rest.job.support.ISO8601DateFormatWithMilliSeconds;
+import org.springframework.cloud.dashboard.rest.job.support.ISO8601DateFormatWithMilliSeconds;
 import org.springframework.cloud.dataflow.server.configuration.JobDependencies;
 import org.springframework.cloud.dataflow.server.job.support.ExecutionContextJacksonMixIn;
 import org.springframework.cloud.dataflow.server.job.support.StepExecutionJacksonMixIn;

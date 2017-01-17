@@ -16,18 +16,14 @@
 
 package org.springframework.cloud.dataflow.server.controller.security;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.cloud.dataflow.rest.resource.security.SecurityInfoResource;
-import org.springframework.core.env.Environment;
+import org.springframework.cloud.dashboard.rest.resource.security.SecurityInfoResource;
 import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.hateoas.mvc.ControllerLinkBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
