@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,8 @@ package org.springframework.cloud.dataflow.server.registry;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.net.URI;
 import java.util.HashMap;
@@ -74,6 +76,17 @@ public class RdbmsUriRegistryTests {
 	}
 
 	@Test
+	public void testFindNonRegisteredURI() throws Exception {
+		try {
+			registry.find("source.foo");
+			fail("IllegalArgumentException is expected when finding non registered app.");
+		}
+		catch (IllegalArgumentException e) {
+			assertTrue(e.getMessage().contains("No URI is registered for [source.foo]"));
+		}
+	}
+
+	@Test
 	public void testFindAll() throws Exception {
 		URI test1URI = new URI("http://test1URI");
 		URI test2URI = new URI("http://test2URI");
@@ -103,7 +116,12 @@ public class RdbmsUriRegistryTests {
 		registry.register("sink.test2", test2URI);
 		assertEquals(test1URI, registry.find("source.test1"));
 		registry.unregister("source.test1");
-		assertNull(registry.find("source.test1"));
+		try {
+			registry.find("source.test1");
+			fail("[source.test1] should have been unregistered");
+		}
+		catch (IllegalArgumentException e) {
+		}
 		assertEquals(test2URI, registry.find("sink.test2"));
 	}
 
