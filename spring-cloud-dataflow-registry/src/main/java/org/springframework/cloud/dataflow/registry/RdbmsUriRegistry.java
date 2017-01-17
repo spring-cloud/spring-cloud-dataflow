@@ -89,11 +89,13 @@ public class RdbmsUriRegistry implements UriRegistry {
 		Assert.hasText(uri.getSchemeSpecificPart(), "Error when registering " + name + " with URI " + uri +
 				": URI scheme-specific part must be specified");
 		String uriString = uri.toString();
-		if (find(name) != null) {
-			jdbcTemplate.update(UPDATE_SQL, new Object[] { uriString, name },
-					new int[] { Types.VARCHAR, Types.VARCHAR });
+		try {
+			if (find(name) != null) {
+				jdbcTemplate.update(UPDATE_SQL, new Object[]{uriString, name},
+						new int[]{Types.VARCHAR, Types.VARCHAR});
+			}
 		}
-		else {
+		catch (IllegalArgumentException e) {
 			jdbcTemplate.update(INSERT_SQL, new Object[] { name, uriString },
 					new int[] { Types.VARCHAR, Types.VARCHAR });
 		}

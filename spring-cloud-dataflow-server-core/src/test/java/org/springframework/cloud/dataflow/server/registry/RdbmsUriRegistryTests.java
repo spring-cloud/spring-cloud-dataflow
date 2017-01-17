@@ -116,7 +116,12 @@ public class RdbmsUriRegistryTests {
 		registry.register("sink.test2", test2URI);
 		assertEquals(test1URI, registry.find("source.test1"));
 		registry.unregister("source.test1");
-		assertNull(registry.find("source.test1"));
+		try {
+			registry.find("source.test1");
+			fail("[source.test1] should have been unregistered");
+		}
+		catch (IllegalArgumentException e) {
+		}
 		assertEquals(test2URI, registry.find("sink.test2"));
 	}
 
