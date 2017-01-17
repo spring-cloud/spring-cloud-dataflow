@@ -23,12 +23,12 @@ import java.util.List;
 import java.util.Set;
 
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
-import org.springframework.cloud.dataflow.core.ApplicationType;
-import org.springframework.cloud.dataflow.core.StreamAppDefinition;
-import org.springframework.cloud.dataflow.core.StreamDefinition;
-import org.springframework.cloud.dataflow.core.dsl.CheckPointedParseException;
-import org.springframework.cloud.dataflow.core.dsl.Token;
-import org.springframework.cloud.dataflow.core.dsl.TokenKind;
+import org.springframework.cloud.dashboard.core.ApplicationType;
+import org.springframework.cloud.dashboard.core.StreamAppDefinition;
+import org.springframework.cloud.dashboard.core.StreamDefinition;
+import org.springframework.cloud.dashboard.core.dsl.CheckPointedParseException;
+import org.springframework.cloud.dashboard.core.dsl.Token;
+import org.springframework.cloud.dashboard.core.dsl.TokenKind;
 import org.springframework.cloud.dataflow.registry.AppRegistration;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
@@ -49,7 +49,7 @@ public class UnfinishedConfigurationPropertyNameRecoveryStrategy
 	private final ApplicationConfigurationMetadataResolver metadataResolver;
 
 	UnfinishedConfigurationPropertyNameRecoveryStrategy(AppRegistry appRegistry,
-	                                                    ApplicationConfigurationMetadataResolver metadataResolver) {
+														ApplicationConfigurationMetadataResolver metadataResolver) {
 		super(CheckPointedParseException.class, "file --foo", "file | bar --quick", "file --foo.", "file | bar --quick.");
 		this.appRegistry = appRegistry;
 		this.metadataResolver = metadataResolver;
@@ -57,7 +57,7 @@ public class UnfinishedConfigurationPropertyNameRecoveryStrategy
 
 	@Override
 	public void addProposals(String dsl, CheckPointedParseException exception,
-	                         int detailLevel, List<CompletionProposal> collector) {
+							 int detailLevel, List<CompletionProposal> collector) {
 
 		String safe = exception.getExpressionStringUntilCheckpoint();
 

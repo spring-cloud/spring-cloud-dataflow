@@ -54,10 +54,10 @@ import org.mockito.ArgumentCaptor;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cloud.dataflow.core.BindingPropertyKeys;
-import org.springframework.cloud.dataflow.core.StreamAppDefinition;
-import org.springframework.cloud.dataflow.core.StreamDefinition;
-import org.springframework.cloud.dataflow.core.StreamPropertyKeys;
+import org.springframework.cloud.dashboard.core.BindingPropertyKeys;
+import org.springframework.cloud.dashboard.core.StreamAppDefinition;
+import org.springframework.cloud.dashboard.core.StreamDefinition;
+import org.springframework.cloud.dashboard.core.StreamPropertyKeys;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.configuration.TestDependencies;

@@ -28,7 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.PropertyPlaceholderAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.EmbeddedDataSourceConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cloud.dataflow.core.TaskDefinition;
+import org.springframework.cloud.dashboard.core.TaskDefinition;
 import org.springframework.cloud.dataflow.server.configuration.TaskDependencies;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;

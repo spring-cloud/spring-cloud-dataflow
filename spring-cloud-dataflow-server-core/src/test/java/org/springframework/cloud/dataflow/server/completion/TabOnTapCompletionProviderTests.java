@@ -33,13 +33,13 @@ import org.junit.runner.RunWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cloud.dashboard.core.ApplicationType;
+import org.springframework.cloud.dashboard.core.StreamDefinition;
 import org.springframework.cloud.dataflow.completion.CompletionConfiguration;
 import org.springframework.cloud.dataflow.completion.CompletionProposal;
 import org.springframework.cloud.dataflow.completion.StreamCompletionProvider;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.configuration.metadata.BootApplicationConfigurationMetadataResolver;
-import org.springframework.cloud.dataflow.core.ApplicationType;
-import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.registry.AppRegistration;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.server.repository.InMemoryStreamDefinitionRepository;
@@ -70,14 +70,14 @@ public class TabOnTapCompletionProviderTests {
 		completionProvider.addCompletionRecoveryStrategy(new TapOnDestinationRecoveryStrategy(streamDefinitionRepository));
 	}
 
-    @Test
-    // :foo  ==> add appropriate app names
-    public void testAppNamesAfterStreamName() {
-        assertThat(completionProvider.complete(":foo", 1), hasItems(
+	@Test
+	// :foo  ==> add appropriate app names
+	public void testAppNamesAfterStreamName() {
+		assertThat(completionProvider.complete(":foo", 1), hasItems(
 				proposalThat(is(":foo.time")),
 				proposalThat(is(":foo.transform"))
 		));
-    }
+	}
 
 	@Test
 	// :foo.  ==> add appropriate app names

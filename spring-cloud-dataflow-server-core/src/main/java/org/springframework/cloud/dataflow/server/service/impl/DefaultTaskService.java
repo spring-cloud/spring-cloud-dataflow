@@ -25,9 +25,9 @@ import java.util.Map.Entry;
 import org.h2.util.Task;
 
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
+import org.springframework.cloud.dashboard.core.TaskDefinition;
+import org.springframework.cloud.dashboard.core.TaskDefinition.TaskDefinitionBuilder;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
-import org.springframework.cloud.dataflow.core.TaskDefinition;
-import org.springframework.cloud.dataflow.core.TaskDefinition.TaskDefinitionBuilder;
 import org.springframework.cloud.dataflow.server.controller.WhitelistProperties;
 import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
 import org.springframework.cloud.dataflow.server.repository.DeploymentKey;

@@ -23,8 +23,7 @@ import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
-import org.springframework.cloud.dataflow.shell.config.ShellCommandLineConfiguration;
-import org.springframework.context.annotation.Import;
+import org.springframework.cloud.dashboard.shell.EnableDashboardShell;
 
 /**
  * Activates the Spring Cloud Data Flow shell.
@@ -35,7 +34,6 @@ import org.springframework.context.annotation.Import;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Inherited
-@Import(ShellCommandLineConfiguration.class)
+@EnableDashboardShell
 public @interface EnableDataFlowShell {
-
 }

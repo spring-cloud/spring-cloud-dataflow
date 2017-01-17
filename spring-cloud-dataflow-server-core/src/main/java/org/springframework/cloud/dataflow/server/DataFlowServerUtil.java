@@ -15,9 +15,9 @@
  */
 package org.springframework.cloud.dataflow.server;
 
-import org.springframework.cloud.dataflow.core.ApplicationType;
-import org.springframework.cloud.dataflow.core.BindingPropertyKeys;
-import org.springframework.cloud.dataflow.core.StreamAppDefinition;
+import org.springframework.cloud.dashboard.core.ApplicationType;
+import org.springframework.cloud.dashboard.core.BindingPropertyKeys;
+import org.springframework.cloud.dashboard.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.server.support.CannotDetermineApplicationTypeException;
 import org.springframework.cloud.deployer.spi.core.AppDefinition;
 

@@ -1,5 +1,0 @@
-  --------------  --------------------
-  Key1            Lorem ipsum dolor si
-                  t posuere.
-  My super key 2  Lorem ipsum
-  --------------  --------------------

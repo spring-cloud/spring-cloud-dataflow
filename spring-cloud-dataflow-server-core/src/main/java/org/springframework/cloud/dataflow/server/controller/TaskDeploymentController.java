@@ -18,8 +18,8 @@ package org.springframework.cloud.dataflow.server.controller;
 
 import java.util.List;
 
-import org.springframework.cloud.dataflow.rest.resource.TaskDeploymentResource;
-import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
+import org.springframework.cloud.dashboard.rest.resource.TaskDeploymentResource;
+import org.springframework.cloud.dashboard.rest.util.DeploymentPropertiesUtils;
 import org.springframework.cloud.dataflow.server.service.TaskService;
 import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.http.HttpStatus;

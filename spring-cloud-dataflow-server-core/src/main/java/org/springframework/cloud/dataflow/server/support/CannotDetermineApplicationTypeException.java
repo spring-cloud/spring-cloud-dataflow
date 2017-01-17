@@ -15,8 +15,8 @@
  */
 package org.springframework.cloud.dataflow.server.support;
 
-import org.springframework.cloud.dataflow.core.ApplicationType;
-import org.springframework.cloud.dataflow.core.StreamAppDefinition;
+import org.springframework.cloud.dashboard.core.ApplicationType;
+import org.springframework.cloud.dashboard.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.server.DataFlowServerUtil;
 
 /**

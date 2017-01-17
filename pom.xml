@@ -48,15 +48,12 @@
 	</properties>
 	<modules>
 		<module>spring-cloud-dataflow-configuration-metadata</module>
-		<module>spring-cloud-dataflow-core</module>
 		<module>spring-cloud-dataflow-registry</module>
-		<module>spring-cloud-dataflow-rest-resource</module>
 		<module>spring-cloud-dataflow-server-core</module>
 		<module>spring-cloud-dataflow-server-local-autoconfig</module>
 		<module>spring-cloud-dataflow-server-local</module>
-		<module>spring-cloud-dataflow-rest-client</module>
-		<module>spring-cloud-dataflow-shell</module>
 		<module>spring-cloud-dataflow-shell-core</module>
+		<module>spring-cloud-dataflow-shell</module>
 		<module>spring-cloud-dataflow-docs</module>
 		<module>spring-cloud-dataflow-completion</module>
 		<module>spring-cloud-dataflow-dependencies</module>
@@ -68,6 +65,13 @@
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-dataflow-dependencies</artifactId>
 				<version>1.1.2.BUILD-SNAPSHOT</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-dashboard-dependencies</artifactId>
+				<version>1.0.0.BUILD-SNAPSHOT</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>

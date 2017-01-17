@@ -18,7 +18,7 @@ package org.springframework.cloud.dataflow.registry;
 
 import java.net.URI;
 
-import org.springframework.cloud.dataflow.core.ApplicationType;
+import org.springframework.cloud.dashboard.core.ApplicationType;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.util.Assert;

@@ -15,7 +15,7 @@
  */
 package org.springframework.cloud.dataflow.registry.support;
 
-import org.springframework.cloud.dataflow.core.ApplicationType;
+import org.springframework.cloud.dashboard.core.ApplicationType;
 import org.springframework.cloud.dataflow.registry.AppRegistration;
 
 /**

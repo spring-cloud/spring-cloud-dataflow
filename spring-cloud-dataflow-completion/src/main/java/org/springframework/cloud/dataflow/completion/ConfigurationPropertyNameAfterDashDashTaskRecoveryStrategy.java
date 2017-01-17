@@ -23,9 +23,9 @@ import java.util.List;
 import java.util.Set;
 
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
-import org.springframework.cloud.dataflow.core.ApplicationType;
-import org.springframework.cloud.dataflow.core.TaskDefinition;
-import org.springframework.cloud.dataflow.core.dsl.CheckPointedParseException;
+import org.springframework.cloud.dashboard.core.ApplicationType;
+import org.springframework.cloud.dashboard.core.TaskDefinition;
+import org.springframework.cloud.dashboard.core.dsl.CheckPointedParseException;
 import org.springframework.cloud.dataflow.registry.AppRegistration;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
@@ -47,7 +47,7 @@ class ConfigurationPropertyNameAfterDashDashTaskRecoveryStrategy
 	private final ApplicationConfigurationMetadataResolver metadataResolver;
 
 	ConfigurationPropertyNameAfterDashDashTaskRecoveryStrategy(AppRegistry appRegistry,
-	                                                       ApplicationConfigurationMetadataResolver metadataResolver) {
+														   ApplicationConfigurationMetadataResolver metadataResolver) {
 		super(CheckPointedParseException.class, "file --");
 		this.appRegistry = appRegistry;
 		this.metadataResolver = metadataResolver;
@@ -55,7 +55,7 @@ class ConfigurationPropertyNameAfterDashDashTaskRecoveryStrategy
 
 	@Override
 	public void addProposals(String dsl, CheckPointedParseException exception,
-	                         int detailLevel, List<CompletionProposal> collector) {
+							 int detailLevel, List<CompletionProposal> collector) {
 
 		String safe = exception.getExpressionStringUntilCheckpoint();
 		TaskDefinition taskDefinition = new TaskDefinition("__dummy", safe);
@@ -67,7 +67,7 @@ class ConfigurationPropertyNameAfterDashDashTaskRecoveryStrategy
 			return;
 		}
 		Set<String> alreadyPresentOptions = new HashSet<>(taskDefinition.getProperties().keySet());
-		
+
 		Resource jarFile = appRegistration.getResource();
 
 		CompletionProposal.Factory proposals = expanding(dsl);

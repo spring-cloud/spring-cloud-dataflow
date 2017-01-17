@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.springframework.cloud.dataflow.core.StreamDefinition;
+import org.springframework.cloud.dashboard.core.StreamDefinition;
 import org.springframework.cloud.dataflow.server.repository.support.SearchPageable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;

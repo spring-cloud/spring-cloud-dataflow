@@ -18,7 +18,7 @@ package org.springframework.cloud.dataflow.completion;
 
 import java.util.List;
 
-import org.springframework.cloud.dataflow.core.TaskDefinition;
+import org.springframework.cloud.dashboard.core.TaskDefinition;
 
 /**
  * Used to enhance a well formed task definition by adding yet more text to

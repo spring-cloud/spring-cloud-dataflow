@@ -23,9 +23,9 @@ import java.util.List;
 import java.util.Set;
 
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
+import org.springframework.cloud.dashboard.core.ApplicationType;
+import org.springframework.cloud.dashboard.core.TaskDefinition;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
-import org.springframework.cloud.dataflow.core.ApplicationType;
-import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.registry.AppRegistration;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.core.io.Resource;
@@ -49,7 +49,7 @@ class AddAppOptionsTaskExpansionStrategy implements TaskExpansionStrategy {
 
 	@Override
 	public boolean addProposals(String text, TaskDefinition taskDefinition, int detailLevel,
-	                            List<CompletionProposal> collector) {
+								List<CompletionProposal> collector) {
 		String appName = taskDefinition.getRegisteredAppName();
 		AppRegistration appRegistration = this.appRegistry.find(appName, ApplicationType.task);
 		if (appRegistration == null) {

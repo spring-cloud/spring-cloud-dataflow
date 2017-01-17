@@ -21,10 +21,10 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import org.springframework.cloud.dataflow.core.StreamAppDefinition;
-import org.springframework.cloud.dataflow.core.StreamDefinition;
-import org.springframework.cloud.dataflow.rest.resource.AppInstanceStatusResource;
-import org.springframework.cloud.dataflow.rest.resource.AppStatusResource;
+import org.springframework.cloud.dashboard.core.StreamAppDefinition;
+import org.springframework.cloud.dashboard.core.StreamDefinition;
+import org.springframework.cloud.dashboard.rest.resource.AppInstanceStatusResource;
+import org.springframework.cloud.dashboard.rest.resource.AppStatusResource;
 import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
 import org.springframework.cloud.dataflow.server.repository.DeploymentKey;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;

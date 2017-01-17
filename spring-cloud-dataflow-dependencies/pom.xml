@@ -16,12 +16,12 @@
 		<dependencies>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
-				<artifactId>spring-cloud-dataflow-shell</artifactId>
+				<artifactId>spring-cloud-dataflow-shell-core</artifactId>
 				<version>1.1.2.BUILD-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
-				<artifactId>spring-cloud-dataflow-shell-core</artifactId>
+				<artifactId>spring-cloud-dataflow-shell</artifactId>
 				<version>1.1.2.BUILD-SNAPSHOT</version>
 			</dependency>
 			<dependency>
@@ -31,22 +31,7 @@
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
-				<artifactId>spring-cloud-dataflow-core</artifactId>
-				<version>1.1.2.BUILD-SNAPSHOT</version>
-			</dependency>
-			<dependency>
-				<groupId>org.springframework.cloud</groupId>
-				<artifactId>spring-cloud-dataflow-rest-client</artifactId>
-				<version>1.1.2.BUILD-SNAPSHOT</version>
-			</dependency>
-			<dependency>
-				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-dataflow-configuration-metadata</artifactId>
-				<version>1.1.2.BUILD-SNAPSHOT</version>
-			</dependency>
-			<dependency>
-				<groupId>org.springframework.cloud</groupId>
-				<artifactId>spring-cloud-dataflow-rest-resource</artifactId>
 				<version>1.1.2.BUILD-SNAPSHOT</version>
 			</dependency>
 			<dependency>

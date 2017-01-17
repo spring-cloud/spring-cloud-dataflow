@@ -19,9 +19,9 @@ package org.springframework.cloud.dataflow.completion;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.dataflow.core.StreamDefinition;
-import org.springframework.cloud.dataflow.core.dsl.CheckPointedParseException;
-import org.springframework.cloud.dataflow.core.dsl.ParseException;
+import org.springframework.cloud.dashboard.core.StreamDefinition;
+import org.springframework.cloud.dashboard.core.dsl.CheckPointedParseException;
+import org.springframework.cloud.dashboard.core.dsl.ParseException;
 import org.springframework.util.Assert;
 
 /**

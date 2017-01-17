@@ -24,13 +24,13 @@ import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.cloud.dataflow.core.ApplicationType;
-import org.springframework.cloud.dataflow.core.StreamAppDefinition;
-import org.springframework.cloud.dataflow.core.StreamDefinition;
-import org.springframework.cloud.dataflow.core.dsl.StreamNode;
-import org.springframework.cloud.dataflow.core.dsl.StreamParser;
+import org.springframework.cloud.dashboard.core.ApplicationType;
+import org.springframework.cloud.dashboard.core.StreamAppDefinition;
+import org.springframework.cloud.dashboard.core.StreamDefinition;
+import org.springframework.cloud.dashboard.core.dsl.StreamNode;
+import org.springframework.cloud.dashboard.core.dsl.StreamParser;
+import org.springframework.cloud.dashboard.rest.resource.StreamDefinitionResource;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
-import org.springframework.cloud.dataflow.rest.resource.StreamDefinitionResource;
 import org.springframework.cloud.dataflow.server.DataFlowServerUtil;
 import org.springframework.cloud.dataflow.server.controller.support.InvalidStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
@@ -166,9 +166,9 @@ public class StreamDefinitionController {
 	@RequestMapping(value = "", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
 	public void save(@RequestParam("name") String name,
-					 @RequestParam("definition") String dsl,
-					 @RequestParam(value = "deploy", defaultValue = "false")
-					 boolean deploy) {
+					@RequestParam("definition") String dsl,
+					@RequestParam(value = "deploy", defaultValue = "false")
+					boolean deploy) {
 		StreamDefinition stream = new StreamDefinition(name, dsl);
 		List<String> errorMessages = new ArrayList<>();
 		for (StreamAppDefinition streamAppDefinition: stream.getAppDefinitions()) {
@@ -233,7 +233,7 @@ public class StreamDefinitionController {
 	}
 
 	private Set<StreamDefinition> findRelatedDefinitions(StreamDefinition currentStreamDefinition, Iterable<StreamDefinition> definitions,
-														  Set<StreamDefinition> relatedDefinitions, boolean nested) {
+														Set<StreamDefinition> relatedDefinitions, boolean nested) {
 		relatedDefinitions.add(currentStreamDefinition);
 		String currentStreamName = currentStreamDefinition.getName();
 		String indexedStreamName = currentStreamName + ".";

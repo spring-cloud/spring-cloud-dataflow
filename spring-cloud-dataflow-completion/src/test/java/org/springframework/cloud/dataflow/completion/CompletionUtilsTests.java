@@ -21,7 +21,7 @@ import static org.hamcrest.core.Is.is;
 import org.junit.Assert;
 import org.junit.Test;
 
-import org.springframework.cloud.dataflow.core.StreamDefinition;
+import org.springframework.cloud.dashboard.core.StreamDefinition;
 
 /**
  * Unit tests for CompletionUtils.

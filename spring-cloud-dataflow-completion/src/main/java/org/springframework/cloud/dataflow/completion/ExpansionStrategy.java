@@ -18,7 +18,7 @@ package org.springframework.cloud.dataflow.completion;
 
 import java.util.List;
 
-import org.springframework.cloud.dataflow.core.StreamDefinition;
+import org.springframework.cloud.dashboard.core.StreamDefinition;
 
 /**
  * Used to enhance a well formed stream definition by adding yet more text to

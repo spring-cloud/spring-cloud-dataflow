@@ -16,7 +16,7 @@
 
 package org.springframework.cloud.dataflow.server.repository;
 
-import org.springframework.cloud.dataflow.core.StreamDefinition;
+import org.springframework.cloud.dashboard.core.StreamDefinition;
 import org.springframework.cloud.dataflow.server.repository.support.SearchPageable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.repository.PagingAndSortingRepository;

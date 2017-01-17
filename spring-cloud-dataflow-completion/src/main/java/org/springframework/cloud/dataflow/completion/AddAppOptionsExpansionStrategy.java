@@ -23,9 +23,9 @@ import java.util.List;
 import java.util.Set;
 
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
-import org.springframework.cloud.dataflow.core.ApplicationType;
-import org.springframework.cloud.dataflow.core.StreamAppDefinition;
-import org.springframework.cloud.dataflow.core.StreamDefinition;
+import org.springframework.cloud.dashboard.core.ApplicationType;
+import org.springframework.cloud.dashboard.core.StreamAppDefinition;
+import org.springframework.cloud.dashboard.core.StreamDefinition;
 import org.springframework.cloud.dataflow.registry.AppRegistration;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
@@ -49,7 +49,7 @@ class AddAppOptionsExpansionStrategy implements ExpansionStrategy {
 
 	@Override
 	public boolean addProposals(String text, StreamDefinition streamDefinition, int detailLevel,
-	                            List<CompletionProposal> collector) {
+								List<CompletionProposal> collector) {
 		StreamAppDefinition lastApp = streamDefinition.getDeploymentOrderIterator().next();
 
 		String lastAppName = lastApp.getName();

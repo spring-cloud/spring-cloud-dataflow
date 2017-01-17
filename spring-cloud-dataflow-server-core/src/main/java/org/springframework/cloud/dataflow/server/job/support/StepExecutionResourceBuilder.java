@@ -19,9 +19,9 @@ package org.springframework.cloud.dataflow.server.job.support;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.step.tasklet.TaskletStep;
-import org.springframework.cloud.dataflow.rest.job.support.StepType;
-import org.springframework.cloud.dataflow.rest.job.support.TaskletType;
-import org.springframework.cloud.dataflow.rest.resource.StepExecutionResource;
+import org.springframework.cloud.dashboard.rest.job.support.StepType;
+import org.springframework.cloud.dashboard.rest.job.support.TaskletType;
+import org.springframework.cloud.dashboard.rest.resource.StepExecutionResource;
 import org.springframework.util.Assert;
 
 /**

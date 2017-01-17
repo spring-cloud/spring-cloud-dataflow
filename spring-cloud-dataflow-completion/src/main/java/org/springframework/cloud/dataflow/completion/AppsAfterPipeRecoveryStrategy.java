@@ -16,13 +16,13 @@
 
 package org.springframework.cloud.dataflow.completion;
 
-import static org.springframework.cloud.dataflow.core.ApplicationType.processor;
-import static org.springframework.cloud.dataflow.core.ApplicationType.sink;
+import static org.springframework.cloud.dashboard.core.ApplicationType.processor;
+import static org.springframework.cloud.dashboard.core.ApplicationType.sink;
 
 import java.util.List;
 
-import org.springframework.cloud.dataflow.core.StreamDefinition;
-import org.springframework.cloud.dataflow.core.dsl.CheckPointedParseException;
+import org.springframework.cloud.dashboard.core.StreamDefinition;
+import org.springframework.cloud.dashboard.core.dsl.CheckPointedParseException;
 import org.springframework.cloud.dataflow.registry.AppRegistration;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
 
