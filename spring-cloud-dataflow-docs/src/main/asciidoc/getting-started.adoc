@@ -114,7 +114,7 @@ to `WARNING` in `logback.xml`:
 === Maven Configuration
 If you want to override specific maven configuration properties (remote repositories, proxies, etc.) and/or run the Data Flow Server behind a proxy,
 you need to specify those properties as command line arguments when starting the Data Flow Server. For example:
-+
+
 [source,bash,subs=attributes]
 ----
 $ java -jar spring-cloud-dataflow-server-local-{project-version}.jar --maven.localRepository=mylocal
@@ -125,17 +125,17 @@ $ java -jar spring-cloud-dataflow-server-local-{project-version}.jar --maven.loc
 --maven.proxy.port=9010 --maven.proxy.auth.username=proxyuser1
 --maven.proxy.auth.password=proxypass1
 ----
-+
+
 By default, the protocol is set to `http`. You can omit the auth properties if the proxy doesn't need a username and password.
-+
+
 By default, the maven `localRepository` is set to `${user.home}/.m2/repository/`,
 and `https://repo.spring.io/libs-snapshot` will be the only remote repository. Like in the above example, the remote
 repositories can be specified along with their authentication (if needed). If the remote repositories are behind a proxy,
 then the proxy properties can be specified as above.
-+
+
 If you want to pass these properties as environment properties, then you need to use `SPRING_APPLICATION_JSON` to set
 these properties and pass `SPRING_APPLICATION_JSON` as environment variable as below:
-+
+
 [source,bash]
 ----
 $ SPRING_APPLICATION_JSON='{ "maven": { "local-repository": null,
