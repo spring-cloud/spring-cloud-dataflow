@@ -86,7 +86,7 @@ public class LocalServerSecurityWithUsersFileTests {
 			{ HttpMethod.GET,    HttpStatus.UNAUTHORIZED, "/apps", null, null },
 
 			{ HttpMethod.GET,    HttpStatus.FORBIDDEN,    "/apps/task/taskname", adminOnlyUser, null },
-			{ HttpMethod.GET,    HttpStatus.OK,           "/apps/task/taskname", viewOnlyUser, null }, //Should be `404` - See https://github.com/spring-cloud/spring-cloud-dataflow/issues/1070
+			{ HttpMethod.GET,    HttpStatus.NOT_FOUND,    "/apps/task/taskname", viewOnlyUser, null },
 			{ HttpMethod.GET,    HttpStatus.FORBIDDEN,    "/apps/task/taskname", createOnlyUser, null },
 			{ HttpMethod.GET,    HttpStatus.UNAUTHORIZED, "/apps/task/taskname", null, null },
 
@@ -123,16 +123,16 @@ public class LocalServerSecurityWithUsersFileTests {
 			{ HttpMethod.GET, HttpStatus.OK,           "/completions/task", createOnlyUser, ImmutableMap.of("start", "2") },
 			{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/completions/task", null, null },
 
-			{ HttpMethod.GET, HttpStatus.FORBIDDEN, "/completions/stream", adminOnlyUser, ImmutableMap.of("detailLevel", "2") },
-			{ HttpMethod.GET, HttpStatus.FORBIDDEN, "/completions/stream", viewOnlyUser, ImmutableMap.of("detailLevel", "2") },
-			{ HttpMethod.GET, HttpStatus.OK, "/completions/stream", createOnlyUser, ImmutableMap.of("start", "2", "detailLevel", "2") },
-			{ HttpMethod.GET, HttpStatus.OK, "/completions/stream", createOnlyUser, ImmutableMap.of("start", "2", "detailLevel", "-123") }, //Should be 400 - See https://github.com/spring-cloud/spring-cloud-dataflow/issues/1073
+			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/completions/stream", adminOnlyUser, ImmutableMap.of("detailLevel", "2") },
+			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/completions/stream", viewOnlyUser, ImmutableMap.of("detailLevel", "2") },
+			{ HttpMethod.GET, HttpStatus.OK,           "/completions/stream", createOnlyUser, ImmutableMap.of("start", "2", "detailLevel", "2") },
+			{ HttpMethod.GET, HttpStatus.BAD_REQUEST,  "/completions/stream", createOnlyUser, ImmutableMap.of("start", "2", "detailLevel", "-123") },
 			{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/completions/stream", null, ImmutableMap.of("detailLevel", "2") },
 
-			{ HttpMethod.GET, HttpStatus.FORBIDDEN, "/completions/task", adminOnlyUser, ImmutableMap.of("detailLevel", "2") },
-			{ HttpMethod.GET, HttpStatus.FORBIDDEN, "/completions/task", viewOnlyUser, ImmutableMap.of("detailLevel", "2") },
-			{ HttpMethod.GET, HttpStatus.OK, "/completions/task", createOnlyUser, ImmutableMap.of("start", "2", "detailLevel", "2") },
-			{ HttpMethod.GET, HttpStatus.OK, "/completions/task", createOnlyUser, ImmutableMap.of("start", "2", "detailLevel", "-123") }, //Should be 400 - See https://github.com/spring-cloud/spring-cloud-dataflow/issues/1073
+			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/completions/task", adminOnlyUser, ImmutableMap.of("detailLevel", "2") },
+			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/completions/task", viewOnlyUser, ImmutableMap.of("detailLevel", "2") },
+			{ HttpMethod.GET, HttpStatus.OK,           "/completions/task", createOnlyUser, ImmutableMap.of("start", "2", "detailLevel", "2") },
+			{ HttpMethod.GET, HttpStatus.BAD_REQUEST,  "/completions/task", createOnlyUser, ImmutableMap.of("start", "2", "detailLevel", "-123") },
 			{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/completions/task", null, ImmutableMap.of("detailLevel", "2") },
 
 			/* FeaturesController */
@@ -182,12 +182,12 @@ public class LocalServerSecurityWithUsersFileTests {
 			/* JobInstanceController */
 
 			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/jobs/instances", adminOnlyUser,  ImmutableMap.of("name", "my-job-name") },
-			{ HttpMethod.GET, HttpStatus.OK,           "/jobs/instances", viewOnlyUser,   ImmutableMap.of("name", "my-job-name") }, // Should be 404 (NOT_FOUND) - see also https://github.com/spring-cloud/spring-cloud-dataflow/issues/1074
+			{ HttpMethod.GET, HttpStatus.NOT_FOUND,    "/jobs/instances", viewOnlyUser,   ImmutableMap.of("name", "my-job-name") },
 			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/jobs/instances", createOnlyUser, ImmutableMap.of("name", "my-job-name") },
 			{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/jobs/instances", null,           ImmutableMap.of("name", "my-job-name") },
 
 			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/jobs/instances", adminOnlyUser,  ImmutableMap.of("name", "my-job-name", "page", "0", "size", "10") },
-			{ HttpMethod.GET, HttpStatus.OK,           "/jobs/instances", viewOnlyUser,   ImmutableMap.of("name", "my-job-name", "page", "0", "size", "10") }, // Should be 404 (NOT_FOUND) - see also https://github.com/spring-cloud/spring-cloud-dataflow/issues/1074
+			{ HttpMethod.GET, HttpStatus.NOT_FOUND,    "/jobs/instances", viewOnlyUser,   ImmutableMap.of("name", "my-job-name", "page", "0", "size", "10") },
 			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/jobs/instances", createOnlyUser, ImmutableMap.of("name", "my-job-name", "page", "0", "size", "10") },
 			{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/jobs/instances", null,           ImmutableMap.of("name", "my-job-name", "page", "0", "size", "10") },
 
@@ -209,7 +209,7 @@ public class LocalServerSecurityWithUsersFileTests {
 			{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/jobs/executions/123/steps", null,           null },
 
 			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/jobs/executions/abc/steps", adminOnlyUser,  null },
-			{ HttpMethod.GET, HttpStatus.INTERNAL_SERVER_ERROR, "/jobs/executions/abc/steps", viewOnlyUser,   null }, // should be 400, see also: https://github.com/spring-cloud/spring-cloud-dataflow/issues/1075
+			{ HttpMethod.GET, HttpStatus.BAD_REQUEST,  "/jobs/executions/abc/steps", viewOnlyUser,   null },
 			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/jobs/executions/abc/steps", createOnlyUser, null },
 			{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/jobs/executions/abc/steps", null,           null },
 
@@ -238,7 +238,7 @@ public class LocalServerSecurityWithUsersFileTests {
 			{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/runtime/apps", null,           null },
 
 			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/runtime/apps/123", adminOnlyUser,  null },
-			{ HttpMethod.GET, HttpStatus.OK,    "/runtime/apps/123", viewOnlyUser,   null }, //Should be 404 - See also: https://github.com/spring-cloud/spring-cloud-dataflow/issues/1077
+			{ HttpMethod.GET, HttpStatus.OK,           "/runtime/apps/123", viewOnlyUser,   null }, //Should be 404 - See also: https://github.com/spring-cloud/spring-cloud-dataflow/issues/1077
 			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/runtime/apps/123", createOnlyUser, null },
 			{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/runtime/apps/123", null,           null },
 
@@ -271,7 +271,7 @@ public class LocalServerSecurityWithUsersFileTests {
 
 			{ HttpMethod.POST, HttpStatus.FORBIDDEN,    "/streams/definitions", adminOnlyUser,  ImmutableMap.of("name", "myname", "definition", "fooo | baaar") },
 			{ HttpMethod.POST, HttpStatus.FORBIDDEN,    "/streams/definitions", viewOnlyUser,   ImmutableMap.of("name", "myname", "definition", "fooo | baaar") },
-			{ HttpMethod.POST, HttpStatus.INTERNAL_SERVER_ERROR, "/streams/definitions", createOnlyUser, ImmutableMap.of("name", "myname", "definition", "fooo | baaar") }, //Should be a `400` error - See also: https://github.com/spring-cloud/spring-cloud-dataflow/issues/1080
+			{ HttpMethod.POST, HttpStatus.BAD_REQUEST,  "/streams/definitions", createOnlyUser, ImmutableMap.of("name", "myname", "definition", "fooo | baaar") },
 			{ HttpMethod.POST, HttpStatus.UNAUTHORIZED, "/streams/definitions", null,           ImmutableMap.of("name", "myname", "definition", "fooo | baaar") },
 
 			{ HttpMethod.POST, HttpStatus.FORBIDDEN,    "/streams/definitions", adminOnlyUser,  ImmutableMap.of("name", "myname") },
@@ -290,7 +290,7 @@ public class LocalServerSecurityWithUsersFileTests {
 			{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/streams/definitions/my-stream/related", null,           null },
 
 			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/streams/definitions/my-stream/related", adminOnlyUser,  ImmutableMap.of("nested", "wrong-param")},
-			{ HttpMethod.GET, HttpStatus.INTERNAL_SERVER_ERROR, "/streams/definitions/my-stream/related", viewOnlyUser, ImmutableMap.of("nested", "wrong-param") }, //Should be a `400` error - See also: https://github.com/spring-cloud/spring-cloud-dataflow/issues/1101
+			{ HttpMethod.GET, HttpStatus.BAD_REQUEST,  "/streams/definitions/my-stream/related", viewOnlyUser, ImmutableMap.of("nested", "wrong-param") },
 			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/streams/definitions/my-stream/related", createOnlyUser, ImmutableMap.of("nested", "wrong-param") },
 			{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/streams/definitions/my-stream/related", null,           ImmutableMap.of("nested", "wrong-param") },
 
@@ -353,7 +353,7 @@ public class LocalServerSecurityWithUsersFileTests {
 			{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/tasks/executions", null,           ImmutableMap.of("page", "0", "size", "10") },
 
 			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/tasks/executions", adminOnlyUser,  ImmutableMap.of("name", "my-task-name") },
-			{ HttpMethod.GET, HttpStatus.OK,           "/tasks/executions", viewOnlyUser,   ImmutableMap.of("name", "my-task-name") }, //Should be a 404, see https://github.com/spring-cloud/spring-cloud-dataflow/issues/1089
+			{ HttpMethod.GET, HttpStatus.NOT_FOUND,    "/tasks/executions", viewOnlyUser,   ImmutableMap.of("name", "my-task-name") },
 			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/tasks/executions", createOnlyUser, ImmutableMap.of("name", "my-task-name") },
 			{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/tasks/executions", null,           ImmutableMap.of("name", "my-task-name") },
 
