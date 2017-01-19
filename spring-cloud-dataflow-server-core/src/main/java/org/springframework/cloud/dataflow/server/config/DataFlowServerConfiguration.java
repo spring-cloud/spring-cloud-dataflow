@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2016 the original author or authors.
+ * Copyright 2015-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,18 +18,23 @@ package org.springframework.cloud.dataflow.server.config;
 
 import static org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType.HAL;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.sql.SQLException;
 
 import javax.sql.DataSource;
 
 import org.h2.tools.Server;
 import org.slf4j.LoggerFactory;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.batch.BatchProperties;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.dataflow.completion.CompletionConfiguration;
+import org.springframework.cloud.dataflow.registry.RdbmsUriRegistry;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.config.features.FeaturesConfiguration;
 import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
@@ -43,6 +48,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
@@ -132,6 +139,34 @@ public class DataFlowServerConfiguration {
 			DataflowRdbmsInitializer dataflowRdbmsInitializer = new DataflowRdbmsInitializer(featuresProperties);
 			dataflowRdbmsInitializer.setDataSource(dataSource);
 			return dataflowRdbmsInitializer;
+		}
+	}
+
+	@Configuration
+	@ConditionalOnExpression("#{'${spring.cloud.dataflow.features.tasksEnabled:true}'.equals('true') && '${spring.cloud.dataflow.composed.task.enabled:true}'.equals('true')}")
+	public static class ComposedConfiguration {
+
+		private static final String COMPOSED_TASK_RUNNER_NAME =
+				"task.composed-task-runner";
+
+		private static final String COMPOSED_TASK_RUNNER_URI_BASE =
+				"maven://org.springframework.cloud:spring-cloud-dataflow-composed-task:";
+
+		@Autowired
+		private DataSource dataSource;
+
+		@EventListener
+		public void handleContextRefresh(ContextRefreshedEvent event) {
+			RdbmsUriRegistry registry = new RdbmsUriRegistry(dataSource);
+			try {
+				registry.register(COMPOSED_TASK_RUNNER_NAME, new URI(
+						COMPOSED_TASK_RUNNER_URI_BASE
+								+ registry.getClass().getPackage()
+								.getImplementationVersion()));
+			}
+			catch (URISyntaxException uriException) {
+				throw new IllegalStateException(uriException);
+			}
 		}
 	}
 }

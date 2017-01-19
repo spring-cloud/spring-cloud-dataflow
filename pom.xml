@@ -45,6 +45,7 @@
 		<spring-session.version>1.2.2.RELEASE</spring-session.version>
 		<jacoco-maven-plugin.version>0.7.7.201606060606</jacoco-maven-plugin.version>
 		<sonar-maven-plugin.version>3.0.2</sonar-maven-plugin.version>
+		<spring-cloud-dataflow-composed-task.version>1.1.0.BUILD-SNAPSHOT</spring-cloud-dataflow-composed-task.version>
 	</properties>
 	<modules>
 		<module>spring-cloud-dataflow-configuration-metadata</module>
@@ -61,6 +62,7 @@
 		<module>spring-cloud-dataflow-completion</module>
 		<module>spring-cloud-dataflow-dependencies</module>
 		<module>spring-cloud-starter-dataflow-server-local</module>
+		<module>spring-cloud-dataflow-composed-task</module>
 	</modules>
 	<dependencyManagement>
 		<dependencies>
@@ -134,6 +136,11 @@
 				<version>${spring-cloud.version}</version>
 				<type>pom</type>
 				<scope>import</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-dataflow-composed-task</artifactId>
+				<version>${spring-cloud-dataflow-composed-task.version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
