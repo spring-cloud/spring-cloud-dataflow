@@ -272,14 +272,16 @@ security:
   basic:
     enabled: true
     realm: Spring Cloud Data Flow
-dataflow:
-  security:
-    authentication:
-      file:
-        enabled: true                                                 # <1>
-        users:                                                        # <2>
-          bob: bobspassword, ROLE_ADMIN                               # <3>
-          alice: alicepwd, ROLE_VIEW, ROLE_CREATE
+spring:
+  cloud:
+    dataflow:
+      security:
+        authentication:
+          file:
+            enabled: true                                                 # <1>
+            users:                                                        # <2>
+              bob: bobspassword, ROLE_MANAGE                              # <3>
+              alice: alicepwd, ROLE_VIEW, ROLE_CREATE
 ----
 
 <1> Enables file based authentication
@@ -312,13 +314,15 @@ security:
   basic:
     enabled: true
     realm: Spring Cloud Data Flow
-dataflow:
-  security:
-    authentication:
-      ldap:
-        enabled: true                                                 # <1>
-        url: ldap://ldap.example.com:3309                             # <2>
-        userDnPattern: uid={0},ou=people,dc=example,dc=com            # <3>
+spring:
+  cloud:
+    dataflow:
+      security:
+        authentication:
+          ldap:
+            enabled: true                                                 # <1>
+            url: ldap://ldap.example.com:3309                             # <2>
+            userDnPattern: uid={0},ou=people,dc=example,dc=com            # <3>
 ----
 
 <1> Enables LDAP authentication
@@ -336,16 +340,18 @@ security:
   basic:
     enabled: true
     realm: Spring Cloud Data Flow
-dataflow:
-  security:
-    authentication:
-      ldap:
-        enabled: true                                                 # <1>
-        url: ldap://localhost:10389                                   # <2>
-        managerDn: uid=admin,ou=system                                # <3>
-        managerPassword: secret                                       # <4>
-        userSearchBase: ou=otherpeople,dc=example,dc=com              # <5>
-        userSearchFilter: uid={0}                                     # <6>
+spring:
+  cloud:
+    dataflow:
+      security:
+        authentication:
+          ldap:
+            enabled: true                                                 # <1>
+            url: ldap://localhost:10389                                   # <2>
+            managerDn: uid=admin,ou=system                                # <3>
+            managerPassword: secret                                       # <4>
+            userSearchBase: ou=otherpeople,dc=example,dc=com              # <5>
+            userSearchFilter: uid={0}                                     # <6>
 ----
 
 <1> Enables LDAP integration
@@ -400,6 +406,135 @@ tracker ticket] to track its implementation. You may also want to look at the
 Spring LDAP reference documentation chapter on
 http://docs.spring.io/spring-ldap/docs/current/reference/#custom-dircontext-authentication-processing[Custom DirContext Authentication Processing] for further details.
 
+[[customizing-authorization]]
+==== Customizing authorization
+
+All of the above deals with authentication, _i.e._ how to assess the identity of the user. Irrespective of the option chosen, you can also customize *authorization* _i.e._
+who can do what.
+
+The default scheme uses three roles to protect the xref:api-guide[REST endpoints]
+that Spring Cloud Data Flow exposes:
+
+* *ROLE_VIEW* for anything that relates to retrieving state
+* *ROLE_CREATE* for anything that involves creating, deleting or mutating the state of the system
+* *ROLE_MANAGE* for boot management endpoints.
+
+All of those defaults are specified in `dataflow-server-defaults.yml` which is
+part of the Spring Cloud Data Flow Core Module. Nonetheless, you can
+override those, if desired, e.g. in `application.yml`. The configuration takes
+the form of a YAML *list* (as some rules may have precedence over others) and so
+you'll need to copy/paste the whole list and tailor it to your needs (as there is no way to merge lists). Always refer to your version of `application.yml`, as the snippet reproduced
+below may be out-dated. The default rules are as such:
+
+[source,yaml]
+----
+spring:
+  ...
+  dataflow:
+    security:
+      authorization:
+        enabled: true
+        rules:
+          # Metrics
+
+          - GET    /metrics/**                     => hasRole('ROLE_VIEW')
+          - DELETE /metrics/**                     => hasRole('ROLE_CREATE')
+
+          # Boot Endpoints
+
+          - GET    /management/**                  => hasRole('ROLE_MANAGE')
+
+          # Apps
+
+          - GET    /apps                           => hasRole('ROLE_VIEW')
+          - GET    /apps/**                        => hasRole('ROLE_VIEW')
+          - DELETE /apps/**                        => hasRole('ROLE_CREATE')
+          - POST   /apps                           => hasRole('ROLE_CREATE')
+          - POST   /apps/**                        => hasRole('ROLE_CREATE')
+
+          # Completions
+
+          - GET /completions/**                    => hasRole('ROLE_CREATE')
+
+          # Job Executions & Batch Job Execution Steps && Job Step Execution Progress
+
+          - GET    /jobs/executions                => hasRole('ROLE_VIEW')
+          - PUT    /jobs/executions/**             => hasRole('ROLE_CREATE')
+          - GET    /jobs/executions/**             => hasRole('ROLE_VIEW')
+
+          # Batch Job Instances
+
+          - GET    /jobs/instances                 => hasRole('ROLE_VIEW')
+          - GET    /jobs/instances/*               => hasRole('ROLE_VIEW')
+
+          # Running Applications
+
+          - GET    /runtime/apps                   => hasRole('ROLE_VIEW')
+          - GET    /runtime/apps/**                => hasRole('ROLE_VIEW')
+
+          # Stream Definitions
+
+          - GET    /streams/definitions            => hasRole('ROLE_VIEW')
+          - GET    /streams/definitions/*          => hasRole('ROLE_VIEW')
+          - GET    /streams/definitions/*/related  => hasRole('ROLE_VIEW')
+          - POST   /streams/definitions            => hasRole('ROLE_CREATE')
+          - DELETE /streams/definitions/*          => hasRole('ROLE_CREATE')
+          - DELETE /streams/definitions            => hasRole('ROLE_CREATE')
+
+          # Stream Deployments
+
+          - DELETE /streams/deployments/*          => hasRole('ROLE_CREATE')
+          - DELETE /streams/deployments            => hasRole('ROLE_CREATE')
+          - POST   /streams/deployments/*          => hasRole('ROLE_CREATE')
+
+          # Task Definitions
+
+          - POST   /tasks/definitions              => hasRole('ROLE_CREATE')
+          - DELETE /tasks/definitions/*            => hasRole('ROLE_CREATE')
+          - GET    /tasks/definitions              => hasRole('ROLE_VIEW')
+          - GET    /tasks/definitions/*            => hasRole('ROLE_VIEW')
+
+          # Task Deployments
+
+          - POST   /tasks/deployments/*            => hasRole('ROLE_CREATE')
+
+          # Task Executions
+
+          - GET    /tasks/executions               => hasRole('ROLE_VIEW')
+          - GET    /tasks/executions/*             => hasRole('ROLE_VIEW')
+----
+
+The format of each line is the following:
+----
+HTTP_METHOD URL_PATTERN '=>' SECURITY_ATTRIBUTE
+----
+
+where
+
+* HTTP_METHOD is one http method, capital case
+* URL_PATTERN is an Ant style URL pattern
+* SECURITY_ATTRIBUTE is a SpEL expression (see http://docs.spring.io/spring-security/site/docs/current/reference/htmlsingle/#el-access)
+* each of those separated by one or several blank characters (spaces, tabs, _etc._)
+
+Be mindful that the above is indeed a YAML list, not a map (thus the use of '-' dashes at the start of each line) that lives under the `spring.cloud.dataflow.security.authorization.rules` key.
+
+[TIP]
+====
+In case you are solely interested in authentication but not authorization,
+for instance every user shall have have access to all endpoints, then you can also
+set `spring.cloud.dataflow.security.authorization.enabled=true`.
+====
+
+[[ldap-authorization-and-roles]]
+==== Authorization with Ldap
+
+When configuring Ldap for authentication, you can also specify the `group-role-attribute`
+in conjunction with `group-search-base` and `group-search-filter`.
+
+The _group role attribure_ contains the name of the role. If not specified, the
+`ROLE_MANAGE` role is populated by default.
+
+For further information, please refer to http://docs.spring.io/spring-security/site/docs/current/reference/htmlsingle/#loading-authorities[Configuring an LDAP Server] of the Spring Security reference guide.
 
 [[configuration-security-oauth2]]
 === OAuth 2.0
@@ -439,7 +574,9 @@ security:
 <2> The realm for Basic authentication
 <3> OAuth Configuration Section, if you leave off the OAuth2 section, Basic Authentication will be enabled instead.
 
-NOTE: As of version 1.0 Spring Cloud Data Flow does not provide finer-grained authorization. Thus, once you are logged in, you have full access to all functionality.
+NOTE: As of the current version, Spring Cloud Data Flow does not provide
+finer-grained authorization when OAUTH is used as authentication mechanism. Thus,
+once you are logged in, you have full access to all functionality.
 
 You can verify that basic authentication is working properly using _curl_:
 

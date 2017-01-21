@@ -179,7 +179,7 @@ public class BasicAuthSecurityConfiguration extends WebSecurityConfigurerAdapter
 			String urlPattern = matcher.group(2).trim();
 			String attribute = matcher.group(3).trim();
 
-			logger.error(">>>>Authorization '{}' | '{}' | '{}'", method, attribute, urlPattern);
+			logger.error("Authorization '{}' | '{}' | '{}'", method, attribute, urlPattern);
 			security = security.antMatchers(method, urlPattern).access(attribute);
 		}
 		return security;
@@ -191,7 +191,7 @@ public class BasicAuthSecurityConfiguration extends WebSecurityConfigurerAdapter
 	 * @author Eric Bottard
 	 * @author Gunnar Hillert
 	 */
-	@ConfigurationProperties(prefix = "spring.dataflow.security.authorization")
+	@ConfigurationProperties(prefix = "spring.cloud.dataflow.security.authorization")
 	public static class AuthorizationConfig {
 
 		private boolean enabled = true;
