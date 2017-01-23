@@ -111,7 +111,7 @@ public class DefaultTaskService implements TaskService {
 			ApplicationConfigurationMetadataResolver metaDataResolver) {
 		Assert.notNull(dataSourceProperties, "DataSourceProperties must not be null");
 		Assert.notNull(taskDefinitionRepository, "TaskDefinitionRepository must not be null");
-		Assert.notNull(taskExecutionRepository, "DeploymentIdRepository must not be null");
+		Assert.notNull(taskExecutionRepository, "TaskExecutionRepository must not be null");
 		Assert.notNull(taskExplorer, "TaskExplorer must not be null");
 		Assert.notNull(registry, "UriRegistry must not be null");
 		Assert.notNull(resourceLoader, "ResourceLoader must not be null");
