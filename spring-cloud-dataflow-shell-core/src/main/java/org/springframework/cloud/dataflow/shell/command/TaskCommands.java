@@ -206,7 +206,7 @@ public class TaskCommands implements CommandMarker {
 			help = "the task execution id",
 			mandatory = true) long id) {
 		taskOperations().cleanup(id);
-		return String.format("Cleaned up resources for task execution %s", id);
+		return String.format("Request to clean up resources for task execution %s has been submitted", id);
 	}
 
 	private TaskOperations taskOperations() {
