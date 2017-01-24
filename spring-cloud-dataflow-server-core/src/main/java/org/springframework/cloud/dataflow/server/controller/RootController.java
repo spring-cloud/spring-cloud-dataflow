@@ -25,6 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.dataflow.rest.resource.AppInstanceStatusResource;
 import org.springframework.cloud.dataflow.rest.resource.AppRegistrationResource;
+import org.springframework.cloud.dataflow.rest.resource.AppStartersInfoResource;
 import org.springframework.cloud.dataflow.rest.resource.AppStatusResource;
 import org.springframework.cloud.dataflow.rest.resource.CompletionProposalsResource;
 import org.springframework.cloud.dataflow.rest.resource.JobExecutionResource;
@@ -120,6 +121,7 @@ public class RootController {
 			resourceSupport.add(unescapeTemplateVariables(entityLinks
 					.linkToSingleResource(AggregateCounterResource.class, "{name}").withRel("aggregate-counters/counter")));
 		}
+		resourceSupport.add(entityLinks.linkToCollectionResource(AppStartersInfoResource.class).withRel("app-starters"));
 		resourceSupport.add(entityLinks.linkToCollectionResource(AppRegistrationResource.class).withRel("apps"));
 		String completionStreamTemplated = entityLinks.linkFor(CompletionProposalsResource.class).withSelfRel().getHref() + ("/stream{?start,detailLevel}");
 		resourceSupport.add(new Link(completionStreamTemplated).withRel("completions/stream"));

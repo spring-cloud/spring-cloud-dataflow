@@ -1,3 +1,20 @@
 spring:
   autoconfigure:
     exclude: org.springframework.boot.autoconfigure.session.SessionAutoConfiguration
+  cloud:
+    dataflow:
+      app-starters:
+        stream:
+          - name: "Maven based Stream Applications with RabbitMQ Binder"
+            uri:  "http://bit.ly/1-0-2-GA-stream-applications-rabbit-maven"
+          - name: "Maven based Stream Applications with Kafka Binder"
+            uri:  "http://bit.ly/1-0-2-GA-stream-applications-kafka-maven"
+          - name: "Docker based Stream Applications with RabbitMQ Binder"
+            uri:  "http://bit.ly/1-0-2-GA-stream-applications-rabbit-docker"
+          - name: "Docker based Stream Applications with Kafka Binder"
+            uri:  "http://bit.ly/1-0-2-GA-stream-applications-kafka-docker"
+        task:
+          - name: "Maven based Task Applications"
+            uri:  "http://bit.ly/1-0-1-GA-task-applications-maven"
+          - name: "Docker based Task Applications"
+            uri:  "http://bit.ly/1-0-1-GA-task-applications-docker"

@@ -41,8 +41,10 @@ import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConf
 import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.registry.RdbmsUriRegistry;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
+import org.springframework.cloud.dataflow.server.config.features.AppStartersProperties;
 import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
 import org.springframework.cloud.dataflow.server.controller.AppRegistryController;
+import org.springframework.cloud.dataflow.server.controller.AppStartersController;
 import org.springframework.cloud.dataflow.server.controller.CompletionController;
 import org.springframework.cloud.dataflow.server.controller.FeaturesController;
 import org.springframework.cloud.dataflow.server.controller.JobExecutionController;
@@ -90,7 +92,7 @@ import org.springframework.hateoas.EntityLinks;
 @Configuration
 @Import(CompletionConfiguration.class)
 @ConditionalOnBean({EnableDataFlowServerConfiguration.Marker.class, AppDeployer.class, TaskLauncher.class})
-@EnableConfigurationProperties({FeaturesProperties.class})
+@EnableConfigurationProperties({FeaturesProperties.class, AppStartersProperties.class})
 @ConditionalOnProperty(prefix = "dataflow.server", name = "enabled", havingValue = "true", matchIfMissing = true)
 public class DataFlowControllerAutoConfiguration {
 
@@ -226,6 +228,12 @@ public class DataFlowControllerAutoConfiguration {
 	@ConditionalOnProperty("security.basic.enabled")
 	public LoginController loginController() {
 		return new LoginController();
+	}
+
+	@Bean
+	public AppStartersController appStartersController(AppStartersProperties appStartersProperties,
+			FeaturesProperties featuresProperties) {
+		return new AppStartersController(appStartersProperties, featuresProperties);
 	}
 
 	@Bean
