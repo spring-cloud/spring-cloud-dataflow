@@ -78,6 +78,7 @@ public class TaskExecutionController {
 		TaskDefinitionRepository taskDefinitionRepository) {
 		Assert.notNull(explorer, "explorer must not be null");
 		Assert.notNull(taskService, "taskService must not be null");
+		Assert.notNull(taskDefinitionRepository, "taskDefinitionRepository must not be null");
 		this.taskService = taskService;
 		this.explorer = explorer;
 		this.taskDefinitionRepository = taskDefinitionRepository;
@@ -153,6 +154,21 @@ public class TaskExecutionController {
 				new ArrayList<>(explorer.getJobExecutionIdsByTaskExecutionId(
 						taskExecution.getExecutionId())));
 		return taskAssembler.toResource(taskJobExecutionRel);
+	}
+
+	/**
+	 * Cleanup resources associated with a single task execution, specified by id.
+	 *
+	 * @param id the id of the {@link TaskExecution} to clean up
+	 */
+	@RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
+	@ResponseStatus(HttpStatus.OK)
+	public void cleanup(@PathVariable("id") long id) {
+		TaskExecution taskExecution = this.explorer.getTaskExecution(id);
+		if(taskExecution == null){
+			throw new NoSuchTaskExecutionException(id);
+		}
+		this.taskService.cleanupExecution(id);
 	}
 
 	/**
