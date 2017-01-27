@@ -74,3 +74,5 @@ spring:
 
             - GET    /tasks/executions               => hasRole('ROLE_VIEW')
             - GET    /tasks/executions/*             => hasRole('ROLE_VIEW')
+            - POST   /tasks/executions               => hasRole('ROLE_CREATE')
+            - DELETE /tasks/executions/*             => hasRole('ROLE_CREATE')

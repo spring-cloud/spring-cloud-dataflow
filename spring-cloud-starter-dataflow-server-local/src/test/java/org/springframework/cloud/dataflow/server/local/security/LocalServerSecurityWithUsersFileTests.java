@@ -192,7 +192,7 @@ public class LocalServerSecurityWithUsersFileTests {
 			{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/jobs/instances", null,           ImmutableMap.of("name", "my-job-name", "page", "0", "size", "10") },
 
 			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/jobs/instances", adminOnlyUser,  null },
-			{ HttpMethod.GET, HttpStatus.INTERNAL_SERVER_ERROR, "/jobs/instances", viewOnlyUser,   null }, // Should be 400 (BAD_REQUEST) - see also https://github.com/spring-cloud/spring-cloud-dataflow/issues/1075
+			{ HttpMethod.GET, HttpStatus.BAD_REQUEST, "/jobs/instances", viewOnlyUser,   null },
 			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/jobs/instances", createOnlyUser, null },
 			{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/jobs/instances", null,           null },
 
@@ -361,6 +361,21 @@ public class LocalServerSecurityWithUsersFileTests {
 			{ HttpMethod.GET, HttpStatus.NOT_FOUND,    "/tasks/executions/123", viewOnlyUser,   null },
 			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/tasks/executions/123", createOnlyUser, null },
 			{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/tasks/executions/123", null,           null },
+
+			{ HttpMethod.DELETE, HttpStatus.FORBIDDEN,    "/tasks/executions/123", adminOnlyUser,  null },
+			{ HttpMethod.DELETE, HttpStatus.FORBIDDEN,    "/tasks/executions/123", viewOnlyUser,   null },
+			{ HttpMethod.DELETE, HttpStatus.NOT_FOUND,    "/tasks/executions/123", createOnlyUser, null },
+			{ HttpMethod.DELETE, HttpStatus.UNAUTHORIZED, "/tasks/executions/123", null,           null },
+
+			{ HttpMethod.POST, HttpStatus.FORBIDDEN,    "/tasks/executions", adminOnlyUser,  null },
+			{ HttpMethod.POST, HttpStatus.FORBIDDEN,    "/tasks/executions", viewOnlyUser,   null },
+			{ HttpMethod.POST, HttpStatus.BAD_REQUEST,  "/tasks/executions", createOnlyUser, null },
+			{ HttpMethod.POST, HttpStatus.UNAUTHORIZED, "/tasks/executions", null,           null },
+
+			{ HttpMethod.POST, HttpStatus.FORBIDDEN,    "/tasks/executions", adminOnlyUser,  ImmutableMap.of("name", "my-task-name") },
+			{ HttpMethod.POST, HttpStatus.FORBIDDEN,    "/tasks/executions", viewOnlyUser,   ImmutableMap.of("name", "my-task-name") },
+			{ HttpMethod.POST, HttpStatus.NOT_FOUND,    "/tasks/executions", createOnlyUser, ImmutableMap.of("name", "my-task-name") },
+			{ HttpMethod.POST, HttpStatus.UNAUTHORIZED, "/tasks/executions", null,           ImmutableMap.of("name", "my-task-name") },
 
 			/* UiController */
 
