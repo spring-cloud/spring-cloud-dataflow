@@ -179,7 +179,7 @@ public class BasicAuthSecurityConfiguration extends WebSecurityConfigurerAdapter
 			String urlPattern = matcher.group(2).trim();
 			String attribute = matcher.group(3).trim();
 
-			logger.error("Authorization '{}' | '{}' | '{}'", method, attribute, urlPattern);
+			logger.info("Authorization '{}' | '{}' | '{}'", method, attribute, urlPattern);
 			security = security.antMatchers(method, urlPattern).access(attribute);
 		}
 		return security;

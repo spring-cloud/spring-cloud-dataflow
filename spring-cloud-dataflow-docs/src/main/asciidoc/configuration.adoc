@@ -522,7 +522,7 @@ Be mindful that the above is indeed a YAML list, not a map (thus the use of '-' 
 ====
 In case you are solely interested in authentication but not authorization,
 for instance every user shall have have access to all endpoints, then you can also
-set `spring.cloud.dataflow.security.authorization.enabled=true`.
+set `spring.cloud.dataflow.security.authorization.enabled=false`.
 ====
 
 [[ldap-authorization-and-roles]]
