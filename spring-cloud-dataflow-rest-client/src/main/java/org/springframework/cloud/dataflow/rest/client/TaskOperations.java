@@ -44,8 +44,9 @@ public interface TaskOperations {
 
 	/**
 	 * Launch an already created task.
+	 * @return long containing the TaskExecutionId
 	 */
-	void launch(String name, Map<String, String> properties, List<String> arguments);
+	long launch(String name, Map<String, String> properties, List<String> arguments);
 
 	/**
 	 * Destroy an existing task.

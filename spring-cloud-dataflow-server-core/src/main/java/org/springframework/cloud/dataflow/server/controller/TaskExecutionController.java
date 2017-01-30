@@ -131,9 +131,9 @@ public class TaskExecutionController {
 	 */
 	@RequestMapping(value = "", method = RequestMethod.POST, params = "name")
 	@ResponseStatus(HttpStatus.CREATED)
-	public void launch(@RequestParam("name") String taskName, @RequestParam(required = false) String properties,
+	public long launch(@RequestParam("name") String taskName, @RequestParam(required = false) String properties,
 		@RequestParam(required = false) List<String> arguments) {
-		this.taskService.executeTask(taskName, DeploymentPropertiesUtils.parse(properties), DeploymentPropertiesUtils.parseParams(arguments));
+		return this.taskService.executeTask(taskName, DeploymentPropertiesUtils.parse(properties), DeploymentPropertiesUtils.parseParams(arguments));
 	}
 
 

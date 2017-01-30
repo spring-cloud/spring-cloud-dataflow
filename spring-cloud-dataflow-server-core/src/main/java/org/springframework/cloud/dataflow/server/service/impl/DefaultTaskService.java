@@ -128,7 +128,7 @@ public class DefaultTaskService implements TaskService {
 	}
 
 	@Override
-	public void executeTask(String taskName, Map<String, String> taskDeploymentProperties,
+	public long executeTask(String taskName, Map<String, String> taskDeploymentProperties,
 			List<String> commandLineArgs) {
 		Assert.hasText(taskName, "The provided taskName must not be null or empty.");
 		Assert.notNull(taskDeploymentProperties,
@@ -155,6 +155,7 @@ public class DefaultTaskService implements TaskService {
 					+ taskName);
 		}
 		taskExecutionRepository.updateExternalExecutionId(taskExecution.getExecutionId(), id);
+		return taskExecution.getExecutionId();
 	}
 
 	@Override
