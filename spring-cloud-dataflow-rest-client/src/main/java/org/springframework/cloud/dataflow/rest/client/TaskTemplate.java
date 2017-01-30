@@ -99,11 +99,11 @@ public class TaskTemplate implements TaskOperations {
 	}
 
 	@Override
-	public void launch(String name, Map<String, String> properties, List<String> arguments) {
+	public long launch(String name, Map<String, String> properties, List<String> arguments) {
 		MultiValueMap<String, Object> values = new LinkedMultiValueMap<>();
 		values.add("properties", DeploymentPropertiesUtils.format(properties));
 		values.add("arguments", StringUtils.collectionToDelimitedString(arguments, " "));
-		restTemplate.postForObject(executionByNameLink.expand(name).getHref(), values, Object.class, name);
+		return restTemplate.postForObject(executionByNameLink.expand(name).getHref(), values, Long.class, name);
 	}
 
 	@Override
