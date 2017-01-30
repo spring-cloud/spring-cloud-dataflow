@@ -229,7 +229,6 @@ public class TaskCompletionProviderTests {
 					Assert.isTrue(matcher.matches());
 					String name = matcher.group("name");
 					ApplicationType type = ApplicationType.valueOf(matcher.group("type"));
-					System.out.println("makeAppRegistration "+fileName);
 					return new AppRegistration(name, type, file.toURI(), resourceLoader);
 				}
 			};

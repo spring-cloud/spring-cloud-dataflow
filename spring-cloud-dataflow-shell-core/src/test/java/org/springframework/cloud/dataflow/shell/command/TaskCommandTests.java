@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.cloud.dataflow.shell.AbstractShellIntegrationTest;
 import org.springframework.cloud.deployer.resource.registry.UriRegistry;
 import org.springframework.cloud.deployer.resource.registry.UriRegistryPopulator;
-import org.springframework.core.io.DefaultResourceLoader;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.shell.core.CommandResult;
 import org.springframework.shell.table.Table;
@@ -45,7 +45,7 @@ import org.springframework.shell.table.Table;
  */
 public class TaskCommandTests extends AbstractShellIntegrationTest {
 
-	private static final String APPS_URI = "classpath:META-INF/test-task-apps.properties";
+	private static final String APPS_URI = "META-INF/test-task-apps.properties";
 
 	private static final Logger logger = LoggerFactory.getLogger(TaskCommandTests.class);
 
@@ -70,9 +70,7 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 	@Before
 	public void registerApps() {
 		UriRegistry registry = applicationContext.getBean(UriRegistry.class);
-		UriRegistryPopulator populator = new UriRegistryPopulator();
-		populator.setResourceLoader(new DefaultResourceLoader());
-		populator.populateRegistry(true, registry, APPS_URI);
+		UriRegistryPopulator.populateRegistry(true, registry, new ClassPathResource( APPS_URI));
 	}
 
 	@BeforeClass

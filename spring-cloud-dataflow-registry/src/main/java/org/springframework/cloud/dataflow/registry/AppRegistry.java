@@ -27,34 +27,45 @@ import org.springframework.cloud.deployer.resource.registry.UriRegistry;
 import org.springframework.cloud.deployer.resource.registry.UriRegistryPopulator;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.util.Assert;
 
 /**
  * Convenience wrapper for the {@link UriRegistry} that operates on higher level
  * {@link AppRegistration} objects and supports on-demand loading of {@link Resource}s.
  *
+ * <p>Stores AppRegistration with up to two keys:<ul>
+ *     <li>{@literal <type>.<name>}: URI for the actual app</li>
+ *     <li>{@literal <type>.<name>.metadata}: Optional URI for the app metadata</li>
+ * </ul></p>
+ *
  * @author Mark Fisher
  * @author Gunnar Hillert
  * @author Thomas Risberg
+ * @author Eric Bottard
  */
 public class AppRegistry {
 
-	private final UriRegistry uriRegistry;
+	public static final String METADATA_KEY_SUFFIX = "metadata";
 
-	private final UriRegistryPopulator uriRegistryPopulator;
+	private final UriRegistry uriRegistry;
 
 	private final ResourceLoader resourceLoader;
 
 	public AppRegistry(UriRegistry uriRegistry, ResourceLoader resourceLoader) {
 		this.uriRegistry = uriRegistry;
-		this.uriRegistryPopulator = new UriRegistryPopulator();
-		this.uriRegistryPopulator.setResourceLoader(resourceLoader);
 		this.resourceLoader = resourceLoader;
 	}
 
 	public AppRegistration find(String name, ApplicationType type) {
 		try {
 			URI uri = this.uriRegistry.find(key(name, type));
-			return new AppRegistration(name, type, uri, this.resourceLoader);
+			URI metadataUri = null;
+			try {
+				metadataUri = this.uriRegistry.find(metadataKey(name, type));
+			}
+			catch (IllegalArgumentException ignored) {
+			}
+			return new AppRegistration(name, type, uri, metadataUri, this.resourceLoader);
 		}
 		catch (IllegalArgumentException e) {
 			return null;
@@ -64,28 +75,56 @@ public class AppRegistry {
 	public List<AppRegistration> findAll() {
 		List<AppRegistration> apps = new ArrayList<>();
 		for (Map.Entry<String, URI> entry : this.uriRegistry.findAll().entrySet()) {
-			apps.add(createAppRegistration(entry.getKey(), entry.getValue()));
+			String[] tokens = entry.getKey().split("\\.");
+			if (tokens.length == 2) {
+				String name = tokens[1];
+				ApplicationType type = ApplicationType.valueOf(tokens[0]);
+				URI metadataUri = null;
+				try {
+					metadataUri = this.uriRegistry.find(entry.getKey() + "." + METADATA_KEY_SUFFIX);
+				}
+				catch (IllegalArgumentException ignored) {
+				}
+				apps.add(new AppRegistration(name, type, entry.getValue(), metadataUri, this.resourceLoader));
+			} else {
+				Assert.isTrue(tokens.length == 3
+						&& METADATA_KEY_SUFFIX.equals(tokens[2]),
+					"Invalid format for app key '" + entry.getKey() + "'in registry. Must be <type>.<name> or <type>.<name>.metadata");
+			}
 		}
 		return apps;
 	}
 
-	public AppRegistration save(String name, ApplicationType type, URI uri) {
+	public AppRegistration save(String name, ApplicationType type, URI uri, URI metadataUri) {
 		this.uriRegistry.register(key(name, type), uri);
-		return new AppRegistration(name, type, uri, this.resourceLoader);
+		if (metadataUri != null) {
+			this.uriRegistry.register(metadataKey(name, type), metadataUri);
+		}
+		return new AppRegistration(name, type, uri, metadataUri, this.resourceLoader);
 	}
 
-	public List<AppRegistration> importAll(boolean overwrite, String... resourceUris) {
+	public List<AppRegistration> importAll(boolean overwrite, Resource... resources) {
 		List<AppRegistration> apps = new ArrayList<>();
-		for (String uri : resourceUris) {
+		for (Resource resource :resources) {
 			try {
-				Map<String, URI> registered = this.uriRegistryPopulator.populateRegistry(
-						overwrite, this.uriRegistry, uri);
+				Map<String, URI> registered = UriRegistryPopulator.populateRegistry(
+					overwrite, this.uriRegistry, resource);
 				for (Map.Entry<String, URI> entry : registered.entrySet()) {
-					apps.add(createAppRegistration(entry.getKey(), entry.getValue()));
+					String[] tokens = entry.getKey().split("\\.");
+					if (tokens.length == 2) {
+						String name = tokens[1];
+						ApplicationType type = ApplicationType.valueOf(tokens[0]);
+						URI metadataUri = registered.get(entry.getKey() + "." + METADATA_KEY_SUFFIX); // can be null
+						apps.add(new AppRegistration(name, type, entry.getValue(), metadataUri, this.resourceLoader));
+					} else {
+						Assert.isTrue(tokens.length == 3
+							&& METADATA_KEY_SUFFIX.equals(tokens[2]),
+							"Invalid format for app key '" + entry.getKey() + "'in file. Must be <type>.<name> or <type>.<name>.metadata");
+					}
 				}
 			}
 			catch (Exception e) {
-				throw new IllegalStateException("Error when registering applications from " + uri + ": " + e.getMessage(), e);
+				throw new IllegalStateException("Error when registering applications from " + resource.getDescription() + ": " + e.getMessage(), e);
 			}
 		}
 		return apps;
@@ -101,6 +140,7 @@ public class AppRegistry {
 	public void delete(String name, ApplicationType type) {
 		if (this.find(name, type) != null) {
 			this.uriRegistry.unregister(key(name, type));
+			this.uriRegistry.unregister(metadataKey(name, type));
 		}
 		else {
 			throw new NoSuchAppRegistrationException(name, type);
@@ -111,12 +151,7 @@ public class AppRegistry {
 		return String.format("%s.%s", type, name);
 	}
 
-	private AppRegistration createAppRegistration(String key, URI uri) {
-		String[] tokens = key.split("\\.", 2);
-		if (tokens.length != 2) {
-			throw new IllegalArgumentException("Invalid application key: " + key +
-					"; the expected format is <name>.<type>");
-		}
-		return new AppRegistration(tokens[1], ApplicationType.valueOf(tokens[0]), uri, this.resourceLoader);
+	private String metadataKey(String name, ApplicationType type) {
+		return String.format("%s.%s.%s", type, name, METADATA_KEY_SUFFIX);
 	}
 }

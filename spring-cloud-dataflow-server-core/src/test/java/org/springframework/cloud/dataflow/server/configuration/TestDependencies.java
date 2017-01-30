@@ -52,7 +52,6 @@ import org.springframework.cloud.deployer.resource.maven.MavenProperties;
 import org.springframework.cloud.deployer.resource.maven.MavenResourceLoader;
 import org.springframework.cloud.deployer.resource.registry.InMemoryUriRegistry;
 import org.springframework.cloud.deployer.resource.registry.UriRegistry;
-import org.springframework.cloud.deployer.resource.registry.UriRegistryPopulator;
 import org.springframework.cloud.deployer.resource.support.DelegatingResourceLoader;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
@@ -160,13 +159,8 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	}
 
 	@Bean
-	public UriRegistryPopulator uriRegistryPopulator() {
-		return new UriRegistryPopulator();
-	}
-
-	@Bean
 	public DataFlowUriRegistryPopulator dataflowUriRegistryPopulator() {
-		return new DataFlowUriRegistryPopulator(uriRegistry(), uriRegistryPopulator(), new String[] { "classpath:META-INF/test-apps.properties" });
+		return new DataFlowUriRegistryPopulator(uriRegistry(), "classpath:META-INF/test-apps.properties");
 	}
 
 	@Bean
