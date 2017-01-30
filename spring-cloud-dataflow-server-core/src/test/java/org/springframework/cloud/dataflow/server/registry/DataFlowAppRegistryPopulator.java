@@ -17,8 +17,11 @@
 package org.springframework.cloud.dataflow.server.registry;
 
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.deployer.resource.registry.UriRegistry;
-import org.springframework.cloud.deployer.resource.registry.UriRegistryPopulator;
+import org.springframework.context.ResourceLoaderAware;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
@@ -27,34 +30,39 @@ import org.springframework.util.ObjectUtils;
  *
  * @author Mark Fisher
  */
-public class DataFlowUriRegistryPopulator implements InitializingBean {
+public class DataFlowAppRegistryPopulator implements InitializingBean, ResourceLoaderAware {
 
-	private final UriRegistry registry;
-
-	private final UriRegistryPopulator populator;
+	private final AppRegistry registry;
 
 	private final String[] locations;
 
+	private ResourceLoader resourceLoader;
+
 	/**
-	 * Populates a {@link UriRegistry} on startup.
+	 * Populates a {@link org.springframework.cloud.dataflow.registry.AppRegistry} on startup.
 	 *
 	 * @param registry the {@link UriRegistry} to populate
-	 * @param populator {@link DataFlowUriRegistryPopulator} to use 
 	 * @param locations the properties file(s) listing apps to import into the registry
 	 */
-	public DataFlowUriRegistryPopulator(UriRegistry registry, UriRegistryPopulator populator, String... locations) {
+	public DataFlowAppRegistryPopulator(AppRegistry registry, String... locations) {
 		Assert.notNull(registry, "UriRegistry must not be null");
-		Assert.notNull(populator, "UriRegistryPopulator must not be null");
 		this.registry = registry;
-		this.populator = populator;
 		this.locations = locations;
 	}
 
 	@Override
 	public void afterPropertiesSet() {
 		if (!ObjectUtils.isEmpty(this.locations)) {
-			this.populator.populateRegistry(true, this.registry, this.locations);
+			Resource[] resources = new Resource[locations.length];
+			for (int i = 0; i < resources.length; i++) {
+				resources[i] = resourceLoader.getResource(locations[i]);
+			}
+			registry.importAll(true, resources);
 		}
 	}
 
+	@Override
+	public void setResourceLoader(ResourceLoader resourceLoader) {
+		this.resourceLoader = resourceLoader;
+	}
 }

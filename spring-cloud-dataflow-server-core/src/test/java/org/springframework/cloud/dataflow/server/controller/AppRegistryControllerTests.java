@@ -18,6 +18,7 @@ package org.springframework.cloud.dataflow.server.controller;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -28,12 +29,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.registry.AppRegistration;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
-import org.springframework.cloud.dataflow.server.registry.DataFlowUriRegistryPopulator;
+import org.springframework.cloud.dataflow.server.registry.DataFlowAppRegistryPopulator;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
@@ -60,7 +63,7 @@ public class AppRegistryControllerTests {
 	private AppRegistry appRegistry;
 
 	@Autowired
-	private DataFlowUriRegistryPopulator uriRegistryPopulator;
+	private DataFlowAppRegistryPopulator uriRegistryPopulator;
 
 	@Before
 	public void setupMocks() {
@@ -77,6 +80,7 @@ public class AppRegistryControllerTests {
 		mockMvc.perform(
 				post("/apps/processor/blubba").param("uri", "file:///foo").accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isCreated());
+		assertThat(appRegistry.find("blubba", ApplicationType.processor).getUri().toString(), is("file:///foo"));
 	}
 
 	@Test
@@ -90,17 +94,13 @@ public class AppRegistryControllerTests {
 	}
 
 	@Test
-	public void testRegisterFromPropertyFile() throws Exception {
+	public void testRegisterFromPropertiesFile() throws Exception {
 		mockMvc.perform(
 				post("/apps").param("uri", "classpath:app-registry.properties").accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isCreated());
-	}
-
-	@Test
-	public void testRegisterFromBadPropertyFile() throws Exception {
-		mockMvc.perform(
-				post("/apps").param("uri", "classpath:app-registry-bad.properties").accept(MediaType.APPLICATION_JSON)).andDo(print())
-				.andExpect(status().is5xxServerError());
+		assertThat(appRegistry.find("foo", ApplicationType.sink).getUri().toString(), is("file:///bar"));
+		assertThat(appRegistry.find("foo", ApplicationType.sink).getMetadataUri().toString(), is("file:///bar-metadata"));
+		assertThat(appRegistry.find("bar", ApplicationType.source).getUri().toString(), is("file:///foo"));
 	}
 
 	@Test
@@ -108,6 +108,7 @@ public class AppRegistryControllerTests {
 		mockMvc.perform(
 				post("/apps").param("apps", "sink.foo=file:///bar").accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isCreated());
+		assertThat(appRegistry.find("foo", ApplicationType.sink).getUri().toString(), is("file:///bar"));
 	}
 
 	@Test

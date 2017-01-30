@@ -127,8 +127,8 @@ public class AppRegistryCommandsTests {
 		String uri = "file:///foo";
 		boolean force = false;
 		AppRegistrationResource resource = new AppRegistrationResource(name, type.name(), uri);
-		when(appRegistryOperations.register(name, type, uri, force)).thenReturn(resource);
-		String result = appRegistryCommands.register(name, type, uri, force);
+		when(appRegistryOperations.register(name, type, uri, null, force)).thenReturn(resource);
+		String result = appRegistryCommands.register(name, type, uri, null, force);
 		assertEquals("Successfully registered application 'sink:foo'", result);
 	}
 
