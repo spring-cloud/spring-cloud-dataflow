@@ -1,0 +1,77 @@
+/*
+ * Copyright 2017 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.springframework.cloud.dataflow.core.dsl;
+
+/**
+ * After parsing a composed task definition from a DSL string, the validation visitor may optionally run.
+ * Even though it parses successfully there may be issues with how the definition is constructed. The
+ * {@link ComposedTaskValidatorVisitor} will find those problems and report them as instances of
+ * {@link ComposedTaskValidationProblem}.
+ *
+ * @author Andy Clement
+ */
+public class ComposedTaskValidationProblem {
+
+	private final String composedTaskText;
+	private final int offset;
+	private final DSLMessage message;
+
+	public ComposedTaskValidationProblem(String composedTaskText, int offset, DSLMessage message) {
+		this.composedTaskText = composedTaskText;
+		this.offset = offset;
+		this.message = message;
+	}
+
+	public String toString() {
+		return message.formatMessage(offset);
+	}
+
+	public String toStringWithContext() {
+		StringBuilder s = new StringBuilder();
+		s.append(message.formatMessage(offset));
+		int startOfLine = getStartOfLine(offset);
+		if (composedTaskText != null && composedTaskText.length() > 0) {
+			s.append("\n").append(composedTaskText.substring(startOfLine)).append("\n");
+		}
+		int offsetOnLine = offset - startOfLine;
+		if (offsetOnLine >= 0) {
+			for (int i = 0; i < offsetOnLine; i++) {
+				s.append(' ');
+			}
+			s.append("^\n");
+		}
+		return s.toString();
+	}
+
+	public DSLMessage getMessage() {
+		return message;
+	}
+
+	public int getOffset() {
+		return offset;
+	}
+
+	private int getStartOfLine(int position) {
+		for (int p = 0; p < position; p++) {
+			if (composedTaskText.charAt(p) == '\n') {
+				return p + 1;
+			}
+		}
+		return 0;
+	}
+
+}

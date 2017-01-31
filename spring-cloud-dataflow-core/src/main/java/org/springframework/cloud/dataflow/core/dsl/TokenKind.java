@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2015-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,10 @@
 package org.springframework.cloud.dataflow.core.dsl;
 
 /**
- * Enumeration of all the token types that may be found in a DSL definition stream.
+ * Enumeration of all the token types that may be found in a DSL definition stream. DSL variants
+ * may use some subset of these tokens. For example stream DSL doesn't use the LT token, it is
+ * used by the composed task DSL. The tokenizer in use will decide which subset are built
+ * for a particular DSL.
  *
  * @author Andy Clement
  */
@@ -26,10 +29,17 @@ public enum TokenKind {
 	DOUBLE_MINUS("--"),
 	EQUALS("="),
 	AND("&"),
+	ANDAND("&&"),
+	OROR("||"),
+	ARROW("->"),
 	PIPE("|"),
+	OPEN_PAREN("("),
+	CLOSE_PAREN(")"),
 	NEWLINE("\n"),
+	STAR("*"),
 	COLON(":"),
 	GT(">"),
+	LT("<"),
 	SEMICOLON(";"),
 	REFERENCE("@"),
 	DOT("."),

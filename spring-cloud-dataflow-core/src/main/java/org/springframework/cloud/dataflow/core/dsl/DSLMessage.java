@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2016 the original author or authors.
+ * Copyright 2015-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -89,9 +89,22 @@ public enum DSLMessage {
 	NO_WHITESPACE_IN_DOTTED_NAME(ERROR,
 			145,
 			"no whitespace is allowed between dot and components of a name"),
-	DESTINATIONS_UNSUPPORTED_HERE(ERROR, 146, "a destination is not supported in this kind of definition"),
-	EXPECTED_WHITESPACE_AFTER_LABEL_COLON(ERROR, 147, "whitespace is expected after an app label"),
-	EXPECTED_STREAM_NAME_AFTER_LABEL_COLON(ERROR, 148, "stream name is expected after an app label")
+	DESTINATIONS_UNSUPPORTED_HERE(ERROR, 146, "a destination is not supported in this kind of definition"), //
+	EXPECTED_WHITESPACE_AFTER_LABEL_COLON(ERROR, 147, "whitespace is expected after an app label"), //
+	EXPECTED_STREAM_NAME_AFTER_LABEL_COLON(ERROR, 148, "stream name is expected after an app label"), //
+	// These relate specifically to the composed task DSL
+	COMPOSED_TASK_APPLICATIONS_DO_NOT_ALLOW_OPTIONS(ERROR, 149, "options cannot be specified for applications in composed task dsl"), //
+	COMPOSED_TASK_DOUBLE_AND_REQUIRED(ERROR, 150, "composed task dsl requires a pair of &, not just one."), //
+	COMPOSED_TASK_DOUBLE_OR_REQUIRED(ERROR, 151, "composed task dsl requires a pair of '|'."), //
+	COMPOSED_TASK_HYPHEN_EXPECTED_USE_FOR_TRANSITION(ERROR, 152, "expected '->' and not just the hyphen"), //
+	COMPOSED_TASK_MISSING_TRANSITION_ARROW(ERROR, 153, "expected '->' to follow state when specifying transition"), //
+	COMPOSED_TASK_UNQUOTED_TRANSITION_CHECK_MUST_BE_NUMBER(ERROR, 154, "transition conditions must be quoted literals, numerics or '*' but ''{0}'' is not"), //
+	COMPOSED_TASK_NO_LABELS_ON_PARENS(ERROR, 155, "labels cannot be specified on parenthesized groups"), //
+	COMPOSED_TASK_NO_DOUBLE_LABELS(ERROR, 156, "Double labels are not supported"), //
+	COMPOSED_TASK_ARROW_SHOULD_BE_PRECEDED_BY_CODE(ERROR, 157, "Transition arrow must be preceeded by the exit code that should drive the transition"), //
+	CT_VALIDATION_SECONDARY_SEQUENCES_MUST_BE_NAMED(ERROR, 158, "Secondary sequences must have labels or are unreachable"), //
+	CT_VALIDATION_DUPLICATE_LABEL(ERROR, 159, "This label has already been defined"), //
+	CT_VALIDATION_TRANSITION_TARGET_LABEL_UNDEFINED(ERROR, 160, "Transition specifies an undefined label")
 	;
 
 	private Kind kind;

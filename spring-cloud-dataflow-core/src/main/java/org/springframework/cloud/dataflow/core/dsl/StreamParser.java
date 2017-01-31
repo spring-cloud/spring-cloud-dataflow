@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2016 the original author or authors.
+ * Copyright 2015-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,7 +60,7 @@ public class StreamParser extends AppParser {
 	 * @param dsl  stream dsl text
 	 */
 	public StreamParser(String name, String dsl) {
-		super(new Tokens(dsl));
+		super(new Tokenizer().getTokens(dsl));
 		this.name = name;
 		this.dsl = dsl;
 	}
