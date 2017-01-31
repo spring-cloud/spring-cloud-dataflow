@@ -15,6 +15,8 @@
  */
 package org.springframework.cloud.dataflow.server.config.features;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import javax.sql.DataSource;
 
 import org.h2.tools.Server;
@@ -33,6 +35,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.server.job.TaskExplorerFactoryBean;
@@ -42,6 +45,7 @@ import org.springframework.cloud.dataflow.server.service.TaskJobService;
 import org.springframework.cloud.dataflow.server.service.TaskService;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskJobService;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskService;
+import org.springframework.cloud.deployer.resource.registry.UriRegistry;
 import org.springframework.cloud.deployer.resource.support.DelegatingResourceLoader;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.cloud.task.repository.TaskExplorer;
@@ -52,6 +56,8 @@ import org.springframework.cloud.task.repository.support.TaskRepositoryInitializ
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 
 /**
@@ -63,10 +69,17 @@ import org.springframework.jdbc.datasource.DataSourceTransactionManager;
  */
 @Configuration
 @ConditionalOnProperty(prefix = FeaturesProperties.FEATURES_PREFIX, name = FeaturesProperties.TASKS_ENABLED, matchIfMissing = true)
+@EnableConfigurationProperties({ComposedTaskProperties.class})
 public class TaskConfiguration {
 
 	@Autowired
 	DataSourceProperties dataSourceProperties;
+
+	@Autowired
+	private UriRegistry uriRegistry;
+
+	@Autowired
+	private ComposedTaskProperties composedTaskProperties;
 
 	@Bean
 	public TaskExplorerFactoryBean taskExplorerFactoryBean(DataSource dataSource) {
@@ -181,4 +194,17 @@ public class TaskConfiguration {
 			return new RdbmsTaskDefinitionRepository(dataSource);
 		}
 	}
+
+	@EventListener
+	public void handleContextRefresh(ContextRefreshedEvent event) {
+
+		try {
+			uriRegistry.register("task." + composedTaskProperties.getTaskName(),
+					new URI(composedTaskProperties.getComposedTaskRunnerUri()));
+		}
+		catch (URISyntaxException uriException) {
+			throw new IllegalStateException(uriException);
+		}
+	}
+
 }

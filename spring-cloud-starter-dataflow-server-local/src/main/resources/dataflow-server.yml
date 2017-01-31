@@ -24,6 +24,11 @@ spring:
   cloud:
     config:
       uri: http://localhost:8888
+    dataflow:
+      composed:
+        task:
+          composedTaskRunnerUri: maven://org.springframework.cloud.task.app:composedtaskrunner-task:1.0.0.BUILD-SNAPSHOT
+
   datasource:
     url: jdbc:h2:tcp://localhost:19092/mem:dataflow
     username: sa

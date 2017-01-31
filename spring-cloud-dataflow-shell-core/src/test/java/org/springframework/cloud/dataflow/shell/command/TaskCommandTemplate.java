@@ -64,6 +64,15 @@ public class TaskCommandTemplate {
 	public void create(String taskName, String taskDefinition, Object... values) {
 		doCreate(taskName, taskDefinition, true, values);
 	}
+	/**
+	 * Compose a task.
+	 *
+	 * @param taskName the name of the task
+	 * @param graph the compoed task definition DSL
+	 */
+	public void compose(String taskName, String graph) {
+		doCompose(taskName, graph);
+	}
 
 	/**
 	 * Executes a task execution list.
@@ -105,6 +114,23 @@ public class TaskCommandTemplate {
 
 		verifyExists(taskName, actualDefinition);
 	}
+
+	private void doCompose(String taskName, String taskDefinition) {
+		String actualDefinition = String.format(taskDefinition);
+		// Shell parser expects quotes to be escaped by \
+		String wholeCommand = String.format("task compose %s --graph \"%s\"", taskName,
+				actualDefinition.replaceAll("\"", "\\\\\""));
+		CommandResult cr = shell.executeCommand(wholeCommand);
+
+		// add the task name to the tasks list before assertion
+		tasks.add(taskName);
+		String createMsg = "Created";
+
+		assertEquals(createMsg + " new composed task '" + taskName + "'", cr.getResult());
+
+		verifyExists(taskName, "composed-task-runner --graph=\"" + actualDefinition + "\"");
+	}
+
 
 	/**
 	 * Destroy all tasks that were created using the 'create' method. Commonly called in a @After annotated method.

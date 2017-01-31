@@ -104,7 +104,7 @@ class ComposedTaskTokenizer extends AbstractTokenizer {
 					case '\\':
 						raiseException(DSLMessage.UNEXPECTED_ESCAPE_CHAR);
 					default:
-						raiseException(DSLMessage.UNEXPECTED_DATA,Character.valueOf(ch).toString());
+						raiseException(DSLMessage.COMPOSED_TASK_UNEXPECTED_DATA,Character.valueOf(ch).toString());
 				}
 			}
 		}

@@ -43,6 +43,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
+import org.springframework.cloud.dataflow.server.config.features.ComposedTaskProperties;
 import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
 import org.springframework.cloud.dataflow.server.repository.InMemoryTaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
@@ -83,6 +84,9 @@ public class TaskControllerTests {
 	@Autowired
 	private AppRegistry appRegistry;
 
+	@Autowired
+	private ComposedTaskProperties composedTaskProperties;
+
 	@Before
 	public void setupMockMVC() {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(wac).defaultRequest(
@@ -98,12 +102,14 @@ public class TaskControllerTests {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testTaskDefinitionControllerConstructorMissingRepository() {
-		new TaskDefinitionController(null, null, taskLauncher, appRegistry);
+		new TaskDefinitionController(null, null, taskLauncher, appRegistry,
+				composedTaskProperties);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testTaskDefinitionControllerConstructorMissingDeployer() {
-		new TaskDefinitionController(new InMemoryTaskDefinitionRepository(), null, null, appRegistry);
+		new TaskDefinitionController(new InMemoryTaskDefinitionRepository(),
+				null, null, appRegistry, composedTaskProperties);
 	}
 
 	@Test
@@ -148,6 +154,59 @@ public class TaskControllerTests {
 		assertEquals("myTask", myTask.getProperties().get("spring.cloud.task.name"));
 		assertEquals("task", myTask.getDslText());
 		assertEquals("myTask", myTask.getName());
+	}
+
+	@Test
+	public void testCompose() throws Exception {
+		assertEquals(0, repository.count());
+		TaskDefinition testTask = new TaskDefinition("task", "task");
+		repository.save(testTask);
+		appRegistry.save("task", ApplicationType.task, new URI("http://fake.example.com/"),null);
+		mockMvc.perform(
+				post("/tasks/definitions/compose").param("name", "myTask").param("definition", "task")
+						.accept(MediaType.APPLICATION_JSON)).andDo(print())
+				.andExpect(status().isOk());
+
+		assertEquals(2, repository.count());
+
+		TaskDefinition myTask = repository.findOne("myTask");
+
+		assertEquals(2, myTask.getProperties().size());
+		assertEquals("myTask", myTask.getProperties().get("spring.cloud.task.name"));
+		assertEquals("task", myTask.getProperties().get("graph"));
+		assertEquals("composed-task-runner --graph=\"task\"", myTask.getDslText());
+		assertEquals("myTask", myTask.getName());
+	}
+
+	@Test
+	public void testComposedInvalidParse() throws Exception {
+		assertEquals(0, repository.count());
+		appRegistry.save("task", ApplicationType.task, new URI("http://fake.example.com/"),null);
+		mockMvc.perform(
+				post("/tasks/definitions/compose").param("name", "myTask").
+						param("definition", "task%%$$")
+						.accept(MediaType.APPLICATION_JSON)).andDo(print())
+				.andExpect(status().is5xxServerError())
+				.andExpect(content().json(
+						"[{message: \"162E:(pos 4): unexpected data in " +
+								"composed task definition '%'\\ntask%%$$\\n    " +
+								"^\\n\"}]"));
+	}
+
+	@Test
+	public void testComposedMissingDefinition() throws Exception {
+		assertEquals(0, repository.count());
+		TaskDefinition testTask = new TaskDefinition("task", "task");
+		repository.save(testTask);
+		appRegistry.save("task", ApplicationType.task, new URI("http://fake.example.com/"),null);
+		mockMvc.perform(
+				post("/tasks/definitions/compose").param("name", "myTask").
+						param("definition", "task && faketask")
+						.accept(MediaType.APPLICATION_JSON)).andDo(print())
+				.andExpect(status().is5xxServerError())
+				.andExpect(content().json(
+						"[{message: \"Problems found when validating 'task && " +
+								"faketask': [161E:(pos 8): Task in composed task definition does not exist]\"}]"));
 	}
 
 	@Test

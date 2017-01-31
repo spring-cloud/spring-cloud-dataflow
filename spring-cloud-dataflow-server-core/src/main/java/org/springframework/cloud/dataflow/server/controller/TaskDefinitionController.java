@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,20 @@
 
 package org.springframework.cloud.dataflow.server.controller;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
+import org.springframework.cloud.dataflow.core.dsl.ComposedTaskNode;
+import org.springframework.cloud.dataflow.core.dsl.ComposedTaskParser;
+import org.springframework.cloud.dataflow.core.dsl.ComposedTaskValidationException;
+import org.springframework.cloud.dataflow.core.dsl.ComposedTaskValidationProblem;
+import org.springframework.cloud.dataflow.core.dsl.DSLMessage;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.rest.resource.TaskDefinitionResource;
+import org.springframework.cloud.dataflow.server.config.features.ComposedTaskProperties;
+import org.springframework.cloud.dataflow.server.controller.support.ComposedTaskValidator;
 import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
 import org.springframework.cloud.dataflow.server.repository.DeploymentKey;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;
@@ -71,6 +81,11 @@ public class TaskDefinitionController {
 	private final AppRegistry appRegistry;
 
 	/**
+	 * The properties used to configure composed task definitions.
+	 */
+	private final ComposedTaskProperties composedTaskProperties;
+
+	/**
 	 * Creates a {@code TaskDefinitionController} that delegates
 	 * <ul>
 	 *     <li>CRUD operations to the provided {@link TaskDefinitionRepository}</li>
@@ -83,20 +98,23 @@ public class TaskDefinitionController {
 	 * @param appRegistry          the app registry to look up registered apps
 	 */
 	public TaskDefinitionController(TaskDefinitionRepository repository, DeploymentIdRepository deploymentIdRepository,
-			TaskLauncher taskLauncher, AppRegistry appRegistry) {
+			TaskLauncher taskLauncher, AppRegistry appRegistry, ComposedTaskProperties composedTaskProperties) {
 		Assert.notNull(repository, "repository must not be null");
 		Assert.notNull(deploymentIdRepository, "DeploymentIdRepository must not be null");
 		Assert.notNull(taskLauncher, "taskLauncher must not be null");
 		Assert.notNull(appRegistry, "AppRegistry must not be null");
+		Assert.notNull(composedTaskProperties, "composedTaskProperties must not be null");
 		this.repository = repository;
 		this.deploymentIdRepository = deploymentIdRepository;
 		this.taskLauncher = taskLauncher;
 		this.appRegistry = appRegistry;
+		this.composedTaskProperties = composedTaskProperties;
 	}
 
 	/**
-	 * Register a task for future deployment/execution.
-	 *  @param name the name of the task
+	 * Register a task definition for future execution.
+	 *
+	 * @param name the name of the task
 	 * @param dsl DSL definition for the task
 	 */
 	@RequestMapping(value = "", method = RequestMethod.POST)
@@ -113,9 +131,50 @@ public class TaskDefinitionController {
 	}
 
 	/**
+	 * Register a composed task definition for future execution.
+	 *
+	 * @param name of the composed task
+	 * @param graph DSL definition for the composed task
+	 */
+	@RequestMapping(value = "/compose", method = RequestMethod.POST)
+	public TaskDefinitionResource saveComposedTask(@RequestParam("name") String name,
+			@RequestParam("definition") String graph) {
+		TaskDefinition taskDefinition = new TaskDefinition(name, graph, true);
+		TaskDefinition composedTaskDefinition = new TaskDefinition(
+				taskDefinition.getName(),getComposedDSL(taskDefinition.getDslText()));
+		validateTaskDefinitionExist(name, graph);
+		repository.save(composedTaskDefinition);
+		return taskAssembler.toResource(taskDefinition);
+	}
+
+	private void validateTaskDefinitionExist(String name, String graph) {
+		ComposedTaskValidator composedTaskValidator =
+				new ComposedTaskValidator(repository);
+		ComposedTaskNode composedTaskNode = new ComposedTaskParser().parse(name, graph);
+		composedTaskNode.accept(composedTaskValidator);
+		if(composedTaskValidator.getInvalidDefinitions().size() > 0) {
+			List<ComposedTaskValidationProblem> composedTaskValidationProblems =
+					new ArrayList<>();
+			for(String taskName : composedTaskValidator.getInvalidDefinitions().keySet()) {
+				composedTaskValidationProblems.add(
+						new ComposedTaskValidationProblem(graph,
+						composedTaskValidator.getInvalidDefinitions().get(taskName),
+								DSLMessage.COMPOSED_TASK_DEFINITION_NOT_PRESENT));
+			}
+			throw new ComposedTaskValidationException(composedTaskNode,
+					composedTaskValidationProblems);
+		}
+	}
+
+	private String getComposedDSL(String graph) {
+		return String.format("%s --graph=\"%s\"", composedTaskProperties.getTaskName(), graph);
+	}
+
+
+	/**
 	 * Delete the task from the repository so that it can no longer be executed.
 	 *
-	 * @param name name of the task to be deleted
+	 * @param name of the task to be deleted
 	 */
 	@RequestMapping(value = "/{name}", method = RequestMethod.DELETE)
 	@ResponseStatus(HttpStatus.OK)

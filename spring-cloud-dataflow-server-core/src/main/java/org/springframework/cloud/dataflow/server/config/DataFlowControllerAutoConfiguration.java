@@ -41,6 +41,7 @@ import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConf
 import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.registry.RdbmsUriRegistry;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
+import org.springframework.cloud.dataflow.server.config.features.ComposedTaskProperties;
 import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
 import org.springframework.cloud.dataflow.server.config.security.BasicAuthSecurityConfiguration.AuthorizationConfig;
 import org.springframework.cloud.dataflow.server.controller.AppRegistryController;
@@ -92,7 +93,7 @@ import org.springframework.scheduling.concurrent.ForkJoinPoolFactoryBean;
 @Configuration
 @Import(CompletionConfiguration.class)
 @ConditionalOnBean({EnableDataFlowServerConfiguration.Marker.class, AppDeployer.class, TaskLauncher.class})
-@EnableConfigurationProperties({AuthorizationConfig.class, FeaturesProperties.class})
+@EnableConfigurationProperties({AuthorizationConfig.class, FeaturesProperties.class, ComposedTaskProperties.class})
 @ConditionalOnProperty(prefix = "dataflow.server", name = "enabled", havingValue = "true", matchIfMissing = true)
 public class DataFlowControllerAutoConfiguration {
 
@@ -164,9 +165,13 @@ public class DataFlowControllerAutoConfiguration {
 
 	@Bean
 	@ConditionalOnBean(TaskDefinitionRepository.class)
-	public TaskDefinitionController taskDefinitionController(TaskDefinitionRepository repository,
-			DeploymentIdRepository deploymentIdRepository, TaskLauncher taskLauncher, AppRegistry appRegistry) {
-		return new TaskDefinitionController(repository, deploymentIdRepository, taskLauncher, appRegistry);
+	public TaskDefinitionController taskDefinitionController(
+			TaskDefinitionRepository repository,
+			DeploymentIdRepository deploymentIdRepository,
+			TaskLauncher taskLauncher, AppRegistry appRegistry,
+			ComposedTaskProperties composedTaskProperties) {
+		return new TaskDefinitionController(repository, deploymentIdRepository,
+				taskLauncher, appRegistry, composedTaskProperties);
 	}
 
 	@Bean

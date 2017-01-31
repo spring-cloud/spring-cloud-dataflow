@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2016 the original author or authors.
+ * Copyright 2015-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,8 @@ import java.util.Map;
 
 import org.springframework.cloud.dataflow.core.dsl.ArgumentNode;
 import org.springframework.cloud.dataflow.core.dsl.AppNode;
+import org.springframework.cloud.dataflow.core.dsl.ComposedTaskNode;
+import org.springframework.cloud.dataflow.core.dsl.ComposedTaskParser;
 import org.springframework.cloud.dataflow.core.dsl.TaskParser;
 import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.core.style.ToStringCreator;
@@ -29,6 +31,7 @@ import org.springframework.util.Assert;
 /**
  * @author Michael Minella
  * @author Mark Fisher
+ * @author Glenn Renfro
  */
 public class TaskDefinition extends DataFlowAppDefinition {
 
@@ -38,17 +41,7 @@ public class TaskDefinition extends DataFlowAppDefinition {
 	private final String dslText;
 
 	public TaskDefinition(String name, String dsl) {
-		this.dslText = dsl;
-		AppNode taskNode = new TaskParser(name, dsl).parse();
-		setRegisteredAppName(taskNode.getName());
-		Map<String, String> properties = new HashMap<>();
-		if (taskNode.hasArguments()) {
-			for (ArgumentNode argumentNode : taskNode.getArguments()) {
-				properties.put(argumentNode.getName(), argumentNode.getValue());
-			}
-		}
-		properties.put("spring.cloud.task.name", name);
-		this.appDefinition = new AppDefinition(name, properties);
+		this(name, dsl, false);
 	}
 
 	TaskDefinition(String registeredAppName, String label, Map<String, String> properties) {
@@ -56,6 +49,27 @@ public class TaskDefinition extends DataFlowAppDefinition {
 		this.dslText = "";
 		properties.put("spring.cloud.task.name", registeredAppName);
 	}
+
+	public TaskDefinition(String name, String dsl, boolean isComposedTask) {
+		this.dslText = dsl;
+		Map<String, String> properties = new HashMap<>();
+		if(isComposedTask) {
+			new ComposedTaskParser().parse(name, dsl);//validate taskName & dsl
+			setRegisteredAppName(name);
+		}
+		else {
+			AppNode taskNode = new TaskParser(name, dsl).parse();
+			setRegisteredAppName(taskNode.getName());
+			if (taskNode.hasArguments()) {
+				for (ArgumentNode argumentNode : taskNode.getArguments()) {
+					properties.put(argumentNode.getName(), argumentNode.getValue());
+				}
+			}
+		}
+		properties.put("spring.cloud.task.name", name);
+		this.appDefinition = new AppDefinition(name, properties);
+	}
+
 
 	public String getDslText() {
 		return dslText;

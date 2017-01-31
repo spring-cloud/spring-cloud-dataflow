@@ -41,6 +41,8 @@ public class TaskTemplate implements TaskOperations {
 
 	/*default*/ static final String DEFINITIONS_RELATION = "tasks/definitions";
 
+	private static final String COMPOSE_RELATION = "tasks/definitions/compose";
+
 	private static final String DEFINITION_RELATION = "tasks/definitions/definition";
 
 	private static final String EXECUTIONS_RELATION = "tasks/executions";
@@ -52,6 +54,8 @@ public class TaskTemplate implements TaskOperations {
 	private final RestTemplate restTemplate;
 
 	private final Link definitionsLink;
+
+	private final Link composeLink;
 
 	private final Link definitionLink;
 
@@ -66,6 +70,7 @@ public class TaskTemplate implements TaskOperations {
 		Assert.notNull(resources.getLink(EXECUTIONS_RELATION), "Executions relation is required");
 		Assert.notNull(resources.getLink(DEFINITIONS_RELATION), "Definitions relation is required");
 		Assert.notNull(resources.getLink(DEFINITION_RELATION), "Definition relation is required");
+		Assert.notNull(resources.getLink(COMPOSE_RELATION), "Compose relation is required");
 		Assert.notNull(restTemplate, "RestTemplate must not be null");
 		Assert.notNull(resources.getLink(EXECUTIONS_RELATION), "Executions relation is required");
 		Assert.notNull(resources.getLink(EXECUTION_RELATION), "Execution relation is required");
@@ -78,6 +83,7 @@ public class TaskTemplate implements TaskOperations {
 		this.executionsLink = resources.getLink(EXECUTIONS_RELATION);
 		this.executionLink = resources.getLink(EXECUTION_RELATION);
 		this.executionByNameLink = resources.getLink(EXECUTION_RELATION_BY_NAME);
+		this.composeLink = resources.getLink(COMPOSE_RELATION);
 
 	}
 
@@ -95,6 +101,16 @@ public class TaskTemplate implements TaskOperations {
 		values.add("definition", definition);
 		TaskDefinitionResource task = restTemplate.postForObject(
 				definitionsLink.expand().getHref(), values, TaskDefinitionResource.class);
+		return task;
+	}
+
+	@Override
+	public TaskDefinitionResource compose(String name, String definition) {
+		MultiValueMap<String, Object> values = new LinkedMultiValueMap<String, Object>();
+		values.add("name", name);
+		values.add("definition", definition);
+		TaskDefinitionResource task = restTemplate.postForObject(
+				composeLink.expand().getHref(), values, TaskDefinitionResource.class);
 		return task;
 	}
 

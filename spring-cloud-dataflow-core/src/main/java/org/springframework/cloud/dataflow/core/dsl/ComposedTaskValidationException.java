@@ -32,7 +32,7 @@ public class ComposedTaskValidationException extends RuntimeException {
 
 	private List<ComposedTaskValidationProblem> validationProblems;
 
-	ComposedTaskValidationException(ComposedTaskNode composedTaskNode, List<ComposedTaskValidationProblem> validationProblems) {
+	public ComposedTaskValidationException(ComposedTaskNode composedTaskNode, List<ComposedTaskValidationProblem> validationProblems) {
 		this.composedTaskNode = composedTaskNode;
 		this.validationProblems = validationProblems;
 	}
