@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2015-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,12 @@ public class Tokens {
 	private final List<Token> tokenStream;
 
 	/**
+	 * Position of linebreaks in the parsed string. Token positions are absolute from start
+	 * of string, so this array can be used to compute the line the token is on.
+	 */
+	private int[] linebreaks;
+	
+	/**
 	 * Index of stream token currently being processed.
 	 */
 	private int position = 0;
@@ -49,15 +55,19 @@ public class Tokens {
 	 */
 	private int lastGoodPosition = 0;
 
-
 	/**
-	 * Construct a {@code TokenProcessor} based on the provided string expression.
+	 * Create a new tokens holder that can be iterated over. Created by
+	 * the particular tokenizer instance (some concrete subclass of 
+	 * {@link AbstractTokenizer}).
 	 *
 	 * @param expression string expression to convert into {@link Token tokens}.
+	 * @param tokens the stream of tokens
+	 * @param linebreaks the offsets within the expression where newlines occur
 	 */
-	public Tokens(String expression) {
+	public Tokens(String expression, List<Token> tokens, int[] linebreaks) {
 		this.expression = expression;
-		this.tokenStream = Collections.unmodifiableList(new Tokenizer(expression).getTokens());
+		this.linebreaks = linebreaks;
+		this.tokenStream = Collections.unmodifiableList(tokens);		
 	}
 
 	/**
@@ -134,6 +144,21 @@ public class Tokens {
 	}
 
 	/**
+	 * Return the token at a specified distance beyond current position. If that
+	 * is off the end of the list of known tokens, return {@code null}.
+	 *
+	 * @return token at specified distance beyond current position or {@code null} if there are no more tokens
+	 */
+	protected Token peek(int howFarAhead) {
+		if ((position+howFarAhead)>=0 && (position+howFarAhead) < tokenStream.size()) {
+			return tokenStream.get(position+howFarAhead);
+		}
+		else {
+			return null;
+		}
+	}
+
+	/**
 	 * Return {@code true} if the indicated token matches the current token
 	 * position.
 	 *
@@ -197,7 +222,22 @@ public class Tokens {
 		if (t.kind != expectedKind) {
 			raiseException(t.startPos, DSLMessage.NOT_EXPECTED_TOKEN,
 					expectedKind.toString().toLowerCase(),
-					t.getKind().toString().toLowerCase() + (t.data == null ? "" : "(" + t.data + ")"));
+					(t.data == null)?new String(t.getKind().tokenChars).toLowerCase():t.data);
+		}
+		return t;
+	}
+	
+	/**
+	 * Consume the next token. Throw {@link CheckPointedParseException} if there
+	 * is nothing to consume.
+	 *
+	 * @return the next token
+	 * @throws CheckPointedParseException if there are no more tokens
+	 */
+	protected Token eat() {
+		Token t = next();
+		if (t == null) {
+			raiseException(expression.length(), DSLMessage.OOD);
 		}
 		return t;
 	}
@@ -239,6 +279,19 @@ public class Tokens {
 	protected void raiseException(int position, DSLMessage message, Object... inserts) {
 		throw new CheckPointedParseException(expression, position, this.position,
 				lastGoodPosition, tokenStream, message, inserts);
+	}
+
+	/**
+	 * @param token the token for which to determine the line
+	 * @return which line the token is on, starting from 0
+	 */
+	public int getLine(Token token) {
+		int tokenStart = token.startPos;
+		int lb = 0;
+		while (lb<linebreaks.length && linebreaks[lb]<tokenStart) {
+			lb++;
+		}
+		return lb;
 	}
 
 }

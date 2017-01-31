@@ -66,12 +66,14 @@ public class CheckPointedParseException extends ParseException {
 		else {
 			s.append(super.getMessage());
 		}
+		int startOfLine = getStartOfLine(position);
 		if (expressionString != null && expressionString.length() > 0) {
-			s.append("\n").append(expressionString).append("\n");
+			s.append("\n").append(expressionString.substring(startOfLine)).append("\n");
 		}
-		int offset = position;
-		if (checkpointPointer > 0 && offset >= 0) {
+		int offset = position - startOfLine;
+		if (checkpointPointer > 0  && offset >= 0 && (getStartOfLine(checkpointPointer)==startOfLine)) {
 			int checkpointPosition = getCheckpointPosition();
+			checkpointPosition = checkpointPosition - getStartOfLine(checkpointPosition);
 			offset -= checkpointPosition;
 			for (int i = 0; i < checkpointPosition; i++) {
 				s.append(' ');
@@ -87,6 +89,22 @@ public class CheckPointedParseException extends ParseException {
 		}
 		return s.toString();
 	}
+
+	/**
+	 * If there are newlines, need to ensure the place where the ^ will go is adjusted.
+	 * @param position the offset from the start of the string (ignoring newlines)
+	 * @return the offset from the start of the line
+	 */
+	private int getStartOfLine(int position) {
+		int lineStart = 0;
+		for (int p=0;p<position;p++) {
+			if (expressionString.charAt(p)=='\n') {
+				lineStart = p+1;
+			}
+		}
+		return lineStart;
+	}
+
 
 	public int getCheckpointPosition() {
 		return checkpointPointer == 0 ? 0 : tokens.get(checkpointPointer - 1).endPos;
