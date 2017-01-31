@@ -14,24 +14,28 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.dataflow.rest;
+package org.springframework.cloud.dataflow.rest.resource;
+
+import org.springframework.cloud.dataflow.core.TaskDefinition;
 
 /**
- * Used by clients and servers to assert API compatibility.
+ * A HATEOAS representation of a {@link TaskDefinition} as a dedicated
+ * resource for ComposedTasks.
  *
- * @author Eric Bottard
+ * @author Glenn Renfro
  */
-public class Version {
+public class ComposedTaskResource extends TaskDefinitionResource {
 
 	/**
-	 * Should be incremented each time the API evolves whether it's a breaking change or not.
+	 * Default constructor to be used by Jackson.
 	 */
-	public static final int REVISION = 11;
+	@SuppressWarnings("unused")
+	private ComposedTaskResource() {
 
-	public static final String REVISION_KEY = "api.revision";
+	}
 
-	private Version() {
-
+	public ComposedTaskResource(String taskName, String dslText) {
+		super(taskName, dslText);
 	}
 
 }

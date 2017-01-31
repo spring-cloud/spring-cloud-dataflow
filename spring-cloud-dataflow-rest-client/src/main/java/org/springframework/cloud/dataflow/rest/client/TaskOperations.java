@@ -19,6 +19,7 @@ package org.springframework.cloud.dataflow.rest.client;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.cloud.dataflow.rest.resource.ComposedTaskResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskDefinitionResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionResource;
 import org.springframework.hateoas.PagedResources;
@@ -41,6 +42,11 @@ public interface TaskOperations {
 	 * Create a new task.
 	 */
 	TaskDefinitionResource create(String name, String definition);
+
+	/**
+	 * Create a new composed task definition.
+	 */
+	ComposedTaskResource compose(String name, String definition);
 
 	/**
 	 * Launch an already created task.

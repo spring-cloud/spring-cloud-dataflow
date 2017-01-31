@@ -104,7 +104,10 @@ public enum DSLMessage {
 	COMPOSED_TASK_ARROW_SHOULD_BE_PRECEDED_BY_CODE(ERROR, 157, "Transition arrow must be preceeded by the exit code that should drive the transition"), //
 	CT_VALIDATION_SECONDARY_SEQUENCES_MUST_BE_NAMED(ERROR, 158, "Secondary sequences must have labels or are unreachable"), //
 	CT_VALIDATION_DUPLICATE_LABEL(ERROR, 159, "This label has already been defined"), //
-	CT_VALIDATION_TRANSITION_TARGET_LABEL_UNDEFINED(ERROR, 160, "Transition specifies an undefined label")
+	CT_VALIDATION_TRANSITION_TARGET_LABEL_UNDEFINED(ERROR, 160, "Transition specifies an undefined label"), //
+	CT_ELEMENT_IN_COMPOSED_DEFINITION_DOES_NOT_EXIST(ERROR, 161, "Task in composed task definition does not exist"), //
+	COMPOSED_TASK_UNEXPECTED_DATA(ERROR, 162, "Unexpected data in composed task definition ''{0}''"), //
+	COMPOSED_TASK_MORE_INPUT(ERROR, 163, "After parsing a valid composed task, there is still more data: ''{0}''") //
 	;
 
 	private Kind kind;

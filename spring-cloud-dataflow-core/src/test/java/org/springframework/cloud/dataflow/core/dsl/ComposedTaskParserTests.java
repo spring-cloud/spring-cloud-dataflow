@@ -953,12 +953,12 @@ public class ComposedTaskParserTests {
 	@Test
 	public void extraneousDataError() {
 		String jobSpecification = "<a || b> rubbish";
-		checkForParseError(jobSpecification, DSLMessage.MORE_INPUT, 9, "rubbish");
+		checkForParseError(jobSpecification, DSLMessage.COMPOSED_TASK_MORE_INPUT, 9, "rubbish");
 	}
 
 	@Test
 	public void incorrectTransition() {
-		checkForParseError("foo ||->bar", DSLMessage.MORE_INPUT, 4, "||");
+		checkForParseError("foo ||->bar", DSLMessage.COMPOSED_TASK_MORE_INPUT, 4, "||");
 	}
 	
 	// --

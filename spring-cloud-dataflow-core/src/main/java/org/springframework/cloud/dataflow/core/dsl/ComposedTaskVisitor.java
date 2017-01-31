@@ -104,7 +104,7 @@ public abstract class ComposedTaskVisitor {
 	}
 
 	/**
-	 * After <tt>visit(TaskApp)</tt> and before <tt>postVisit(TaskApp)</tt> the transitions (if there
+	 * After <tt>visit(TaskAppNode)</tt> and before <tt>postVisit(TaskAppNode)</tt> the transitions (if there
 	 * are any) are visited for that task app.
 	 * @param transition the transition
 	 * @return false to skip visiting this transition

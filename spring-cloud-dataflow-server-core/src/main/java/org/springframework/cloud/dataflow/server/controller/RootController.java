@@ -28,6 +28,7 @@ import org.springframework.cloud.dataflow.rest.resource.AppInstanceStatusResourc
 import org.springframework.cloud.dataflow.rest.resource.AppRegistrationResource;
 import org.springframework.cloud.dataflow.rest.resource.AppStatusResource;
 import org.springframework.cloud.dataflow.rest.resource.CompletionProposalsResource;
+import org.springframework.cloud.dataflow.rest.resource.ComposedTaskResource;
 import org.springframework.cloud.dataflow.rest.resource.JobExecutionResource;
 import org.springframework.cloud.dataflow.rest.resource.JobInstanceResource;
 import org.springframework.cloud.dataflow.rest.resource.RootResource;
@@ -101,6 +102,7 @@ public class RootController {
 		if (featuresProperties.isTasksEnabled()) {
 			root.add(entityLinks.linkToCollectionResource(TaskDefinitionResource.class).withRel("tasks/definitions"));
 			root.add(unescapeTemplateVariables(entityLinks.linkToSingleResource(TaskDefinitionResource.class, "{name}").withRel("tasks/definitions/definition")));
+			root.add(entityLinks.linkToCollectionResource(ComposedTaskResource.class).withRel("tasks/composed-definitions/compose"));
 			root.add(entityLinks.linkToCollectionResource(TaskExecutionResource.class).withRel("tasks/executions"));
 			String taskTemplated = entityLinks.linkToCollectionResource(TaskExecutionResource.class).getHref() + "{?name}";
 			root.add(new Link(taskTemplated).withRel("tasks/executions/name"));
