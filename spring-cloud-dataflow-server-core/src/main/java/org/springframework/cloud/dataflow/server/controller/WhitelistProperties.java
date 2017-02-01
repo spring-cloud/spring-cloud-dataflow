@@ -50,14 +50,14 @@ public class WhitelistProperties {
 	 * Return a copy of app properties where shorthand form have been expanded to their long form
 	 * (amongst the whitelisted supported properties of the app) if applicable.
 	 */
-	public Map<String, String> qualifyProperties(Map<String, String> properties, Resource resource) {
+	public Map<String, String> qualifyProperties(Map<String, String> properties, Resource metadataResource) {
 		MultiValueMap<String, ConfigurationMetadataProperty> whiteList = new LinkedMultiValueMap<>();
 		Set<String> allProps = new HashSet<>();
 
-		for (ConfigurationMetadataProperty property : this.metadataResolver.listProperties(resource, false)) {
+		for (ConfigurationMetadataProperty property : this.metadataResolver.listProperties(metadataResource, false)) {
 			whiteList.add(property.getName(), property);// Use names here
 		}
-		for (ConfigurationMetadataProperty property : this.metadataResolver.listProperties(resource, true)) {
+		for (ConfigurationMetadataProperty property : this.metadataResolver.listProperties(metadataResource, true)) {
 			allProps.add(property.getId()); // But full ids here
 		}
 

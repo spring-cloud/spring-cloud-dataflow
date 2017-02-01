@@ -246,12 +246,12 @@ public class StreamDeploymentController {
 			isDownStreamAppPartitioned = isPartitionedConsumer(appDeployTimeProperties,
 					upstreamAppSupportsPartition);
 
-			Resource resource = registration.getResource();
+			Resource metadataResource = registration.getMetadataResource();
 
 			// Merge *definition time* app properties with *deployment time* properties
 			// and expand them to their long form if applicable
-			AppDefinition revisedDefinition = mergeAndExpandAppProperties(currentApp, resource, appDeployTimeProperties);
-			AppDeploymentRequest request = new AppDeploymentRequest(revisedDefinition, resource, deployerDeploymentProperties);
+			AppDefinition revisedDefinition = mergeAndExpandAppProperties(currentApp, metadataResource, appDeployTimeProperties);
+			AppDeploymentRequest request = new AppDeploymentRequest(revisedDefinition, metadataResource, deployerDeploymentProperties);
 
 			try {
 				String id = this.deployer.deploy(request);
@@ -270,10 +270,10 @@ public class StreamDeploymentController {
 	 * short form parameters have been expanded to their long form
 	 * (amongst the whitelisted supported properties of the app) if applicable.
 	 */
-	/*default*/ AppDefinition mergeAndExpandAppProperties(StreamAppDefinition original, Resource resource, Map<String, String> appDeployTimeProperties) {
+	/*default*/ AppDefinition mergeAndExpandAppProperties(StreamAppDefinition original, Resource metadataResource, Map<String, String> appDeployTimeProperties) {
 		Map<String, String> merged = new HashMap<>(original.getProperties());
 		merged.putAll(appDeployTimeProperties);
-		merged = whitelistProperties.qualifyProperties(merged, resource);
+		merged = whitelistProperties.qualifyProperties(merged, metadataResource);
 		return new AppDefinition(original.getName(), merged);
 	}
 

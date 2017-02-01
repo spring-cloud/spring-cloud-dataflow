@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2015-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,8 +36,8 @@ public abstract class ApplicationConfigurationMetadataResolver {
 	public abstract boolean supports(Resource app);
 
 
-	public List<ConfigurationMetadataProperty> listProperties(Resource app) {
-		return listProperties(app, false);
+	public List<ConfigurationMetadataProperty> listProperties(Resource metadataResource) {
+		return listProperties(metadataResource, false);
 	}
 
 	/**
@@ -54,8 +54,8 @@ public abstract class ApplicationConfigurationMetadataResolver {
 	 * Return metadata about configuration properties that are documented via
 	 * <a href="http://docs.spring.io/spring-boot/docs/current/reference/html/configuration-metadata.html">
 	 * Spring Boot configuration metadata</a> and visible in an app.
-	 * @param app a Spring Cloud Stream app; typically a Boot uberjar,
-	 *            but directories are supported as well
+	 * @param metadataResource the metadata file that contains app specific configuration properties. Typically a JAR file
+	 *                         containing the configuration metadata files or the app that includes metadata files as well.
 	 */
-	public abstract List<ConfigurationMetadataProperty> listProperties(Resource app, boolean exhaustive);
+	public abstract List<ConfigurationMetadataProperty> listProperties(Resource metadataResource, boolean exhaustive);
 }

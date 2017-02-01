@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2016 the original author or authors.
+ * Copyright 2015-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -87,19 +87,19 @@ public class ConfigurationPropertyValueHintExpansionStrategy implements Expansio
 			// Not a valid app name, do nothing
 			return false;
 		}
-		Resource appResource = lastAppRegistration.getResource();
+		Resource metadataResource = lastAppRegistration.getMetadataResource();
 
 		CompletionProposal.Factory proposals = expanding(text);
 
-		List<ConfigurationMetadataProperty> allProps = metadataResolver.listProperties(appResource, true);
-		List<ConfigurationMetadataProperty> whiteListedProps = metadataResolver.listProperties(appResource);
+		List<ConfigurationMetadataProperty> allProps = metadataResolver.listProperties(metadataResource, true);
+		List<ConfigurationMetadataProperty> whiteListedProps = metadataResolver.listProperties(metadataResource);
 
 		URLClassLoader classLoader = null;
 		try {
 			for (ConfigurationMetadataProperty property : allProps) {
 				if (CompletionUtils.isMatchingProperty(propertyName, property, whiteListedProps)) {
 					if (classLoader == null) {
-						classLoader = metadataResolver.createAppClassLoader(appResource);
+						classLoader = metadataResolver.createAppClassLoader(metadataResource);
 					}
 					for (ValueHintProvider valueHintProvider : valueHintProviders) {
 						List<ValueHint> valueHints = valueHintProvider.generateValueHints(property, classLoader);

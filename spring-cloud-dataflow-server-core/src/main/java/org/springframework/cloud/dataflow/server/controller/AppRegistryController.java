@@ -120,9 +120,7 @@ public class AppRegistryController implements ResourceLoaderAware {
 			throw new NoSuchAppRegistrationException(name, type);
 		}
 		DetailedAppRegistrationResource result = new DetailedAppRegistrationResource(assembler.toResource(registration));
-		Resource resource = registration.getResource();
-
-		List<ConfigurationMetadataProperty> properties = metadataResolver.listProperties(resource);
+		List<ConfigurationMetadataProperty> properties = metadataResolver.listProperties(registration.getMetadataResource());
 		for (ConfigurationMetadataProperty property : properties) {
 			result.addOption(property);
 		}

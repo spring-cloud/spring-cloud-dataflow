@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2016 the original author or authors.
+ * Copyright 2015-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,18 +68,18 @@ public class ConfigurationPropertyValueHintRecoveryStrategy extends StacktraceFi
 			// Not a valid app name, do nothing
 			return;
 		}
-		Resource appResource = lastAppRegistration.getResource();
+		Resource metadataResource = lastAppRegistration.getMetadataResource();
 
 		CompletionProposal.Factory proposals = expanding(dsl);
 
-		List<ConfigurationMetadataProperty> whiteList = metadataResolver.listProperties(appResource);
+		List<ConfigurationMetadataProperty> whiteList = metadataResolver.listProperties(metadataResource);
 
 		URLClassLoader classLoader = null;
 		try {
-			for (ConfigurationMetadataProperty property : metadataResolver.listProperties(appResource, true)) {
+			for (ConfigurationMetadataProperty property : metadataResolver.listProperties(metadataResource, true)) {
 				if (CompletionUtils.isMatchingProperty(propertyName, property, whiteList)) {
 					if (classLoader == null) {
-						classLoader = metadataResolver.createAppClassLoader(appResource);
+						classLoader = metadataResolver.createAppClassLoader(metadataResource);
 					}
 					for (ValueHintProvider valueHintProvider : valueHintProviders) {
 						for (ValueHint valueHint : valueHintProvider.generateValueHints(property, classLoader)) {

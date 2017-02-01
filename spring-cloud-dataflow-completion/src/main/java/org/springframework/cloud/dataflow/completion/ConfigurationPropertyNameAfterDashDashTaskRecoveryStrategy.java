@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2016 the original author or authors.
+ * Copyright 2015-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,12 +68,12 @@ class ConfigurationPropertyNameAfterDashDashTaskRecoveryStrategy
 		}
 		Set<String> alreadyPresentOptions = new HashSet<>(taskDefinition.getProperties().keySet());
 		
-		Resource jarFile = appRegistration.getResource();
+		Resource metadataResource = appRegistration.getMetadataResource();
 
 		CompletionProposal.Factory proposals = expanding(dsl);
 
 		// For whitelisted properties, use their shortname
-		for (ConfigurationMetadataProperty property : metadataResolver.listProperties(jarFile)) {
+		for (ConfigurationMetadataProperty property : metadataResolver.listProperties(metadataResource)) {
 			if (!alreadyPresentOptions.contains(property.getName())) {
 				collector.add(proposals.withSuffix(property.getName() + "=", property.getShortDescription()));
 			}
@@ -81,7 +81,7 @@ class ConfigurationPropertyNameAfterDashDashTaskRecoveryStrategy
 
 		// For other properties, use their fully qualified name
 		if (detailLevel > 1) {
-			for (ConfigurationMetadataProperty property : metadataResolver.listProperties(jarFile, true)) {
+			for (ConfigurationMetadataProperty property : metadataResolver.listProperties(metadataResource, true)) {
 				if (!alreadyPresentOptions.contains(property.getId())) {
 					collector.add(proposals.withSuffix(property.getId() + "=", property.getShortDescription()));
 				}

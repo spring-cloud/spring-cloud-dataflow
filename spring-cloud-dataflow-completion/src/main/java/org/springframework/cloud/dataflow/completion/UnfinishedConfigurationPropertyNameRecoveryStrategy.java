@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2016 the original author or authors.
+ * Copyright 2015-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -95,12 +95,12 @@ public class UnfinishedConfigurationPropertyNameRecoveryStrategy
 		}
 		Set<String> alreadyPresentOptions = new HashSet<>(lastApp.getProperties().keySet());
 
-		Resource jarFile = lastAppRegistration.getResource();
+		Resource metadataResource = lastAppRegistration.getMetadataResource();
 
 		CompletionProposal.Factory proposals = expanding(safe);
 
 		// For whitelisted properties, use their simple name
-		for (ConfigurationMetadataProperty property : metadataResolver.listProperties(jarFile)) {
+		for (ConfigurationMetadataProperty property : metadataResolver.listProperties(metadataResource)) {
 			String name = property.getName();
 			if (!alreadyPresentOptions.contains(name) && name.startsWith(buffer)) {
 				collector.add(proposals.withSeparateTokens("--" + name
@@ -110,7 +110,7 @@ public class UnfinishedConfigurationPropertyNameRecoveryStrategy
 
 		// For other props, use their full id
 		if (detailLevel > 1) {
-			for (ConfigurationMetadataProperty property : metadataResolver.listProperties(jarFile, true)) {
+			for (ConfigurationMetadataProperty property : metadataResolver.listProperties(metadataResource, true)) {
 				String id = property.getId();
 				if (!alreadyPresentOptions.contains(id) && id.startsWith(buffer)) {
 					collector.add(proposals.withSeparateTokens("--" + id
