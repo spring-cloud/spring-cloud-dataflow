@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2016 the original author or authors.
+ * Copyright 2015-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package org.springframework.cloud.dataflow.server.controller;
 
-import static org.springframework.cloud.dataflow.server.controller.UiController.dashboard;
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 
 import org.springframework.analytics.rest.domain.AggregateCounterResource;
 import org.springframework.analytics.rest.domain.CounterResource;
@@ -50,6 +50,7 @@ import org.springframework.web.util.UriComponents;
  * @author Ilayaperumal Gopinathan
  * @author Glenn Renfro
  * @author Mark Fisher
+ * @author Gunnar Hillert
  */
 @RestController
 @EnableConfigurationProperties(FeaturesProperties.class)
@@ -82,7 +83,8 @@ public class RootController {
 	@RequestMapping("/")
 	public ResourceSupport info() {
 		ResourceSupport resourceSupport = new ResourceSupport();
-		resourceSupport.add(new Link(dashboard(""), "dashboard"));
+
+		resourceSupport.add(linkTo(UiController.class).withRel("dashboard"));
 		if (featuresProperties.isStreamsEnabled()) {
 			resourceSupport.add(entityLinks.linkToCollectionResource(StreamDefinitionResource.class).withRel("streams/definitions"));
 			resourceSupport.add(unescapeTemplateVariables(entityLinks.linkToSingleResource(StreamDefinitionResource.class, "{name}").withRel("streams/definitions/definition")));
