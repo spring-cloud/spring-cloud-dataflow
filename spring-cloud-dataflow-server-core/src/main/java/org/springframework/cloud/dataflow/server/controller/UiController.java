@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2016 the original author or authors.
+ * Copyright 2015-2017 the original author or authors.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,11 +26,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
  * @author Gunnar Hillert
  */
 @Controller
+@RequestMapping(UiController.WEB_UI_INDEX_PAGE_ROUTE)
 public class UiController {
 
-	private static final String WEB_UI_INDEX_PAGE_ROUTE = "/dashboard";
+	public static final String WEB_UI_INDEX_PAGE_ROUTE = "/dashboard";
 
-	@RequestMapping(WEB_UI_INDEX_PAGE_ROUTE)
+	@RequestMapping
 	public String index() {
 		return "redirect:" + WEB_UI_INDEX_PAGE_ROUTE + "/index.html";
 	}
