@@ -32,7 +32,10 @@ import org.springframework.cloud.dataflow.completion.TaskCompletionProvider;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
+import org.springframework.cloud.dataflow.server.config.features.AppStartersProperties;
+import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
 import org.springframework.cloud.dataflow.server.controller.AppRegistryController;
+import org.springframework.cloud.dataflow.server.controller.AppStartersController;
 import org.springframework.cloud.dataflow.server.controller.CompletionController;
 import org.springframework.cloud.dataflow.server.controller.RestControllerAdvice;
 import org.springframework.cloud.dataflow.server.controller.StreamDefinitionController;
@@ -81,7 +84,8 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupp
 @EnableHypermediaSupport(type = HAL)
 @Import(CompletionConfiguration.class)
 @EnableWebMvc
-@EnableConfigurationProperties(CommonApplicationProperties.class)
+@EnableConfigurationProperties({CommonApplicationProperties.class, FeaturesProperties.class,
+	AppStartersProperties.class})
 public class TestDependencies extends WebMvcConfigurationSupport {
 
 	@Bean
@@ -127,6 +131,12 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	@Bean
 	public CompletionController completionController(StreamCompletionProvider streamCompletionProvider, TaskCompletionProvider taskCompletionProvider) {
 		return new CompletionController(streamCompletionProvider, taskCompletionProvider);
+	}
+
+	@Bean
+	public AppStartersController appStartersController(AppStartersProperties appStartersProperties,
+			FeaturesProperties featuresProperties) {
+		return new AppStartersController(appStartersProperties, featuresProperties);
 	}
 
 	@Bean
