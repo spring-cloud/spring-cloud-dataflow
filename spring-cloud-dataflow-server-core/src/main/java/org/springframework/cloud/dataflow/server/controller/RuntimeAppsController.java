@@ -20,8 +20,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ForkJoinPool;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.rest.resource.AppInstanceStatusResource;
 import org.springframework.cloud.dataflow.rest.resource.AppStatusResource;
@@ -81,6 +84,8 @@ public class RuntimeAppsController {
 
 	private final ResourceAssembler<AppStatus, AppStatusResource> statusAssembler = new Assembler();
 
+	private ForkJoinPool forkJoinPool = new ForkJoinPool(8);
+
 	/**
 	 * Instantiates a new runtime apps controller.
 	 *
@@ -99,24 +104,26 @@ public class RuntimeAppsController {
 	}
 
 	@RequestMapping
-	public PagedResources<AppStatusResource> list(PagedResourcesAssembler<AppStatus> assembler) {
-		List<AppStatus> values = new ArrayList<>();
+	public PagedResources<AppStatusResource> list(PagedResourcesAssembler<AppStatus> assembler) throws ExecutionException, InterruptedException {
+		List<StreamDefinition> asList = new ArrayList<>();
 		for (StreamDefinition streamDefinition : this.streamDefinitionRepository.findAll()) {
-			for (StreamAppDefinition streamAppDefinition : streamDefinition.getAppDefinitions()) {
-				String key = DeploymentKey.forStreamAppDefinition(streamAppDefinition);
-				String id = this.deploymentIdRepository.findOne(key);
-				if (id != null) {
-					values.add(appDeployer.status(id));
-				}
-			}
+			asList.add(streamDefinition);
 		}
-		Collections.sort(values, new Comparator<AppStatus>() {
-			@Override
-			public int compare(AppStatus o1, AppStatus o2) {
-				return o1.getDeploymentId().compareTo(o2.getDeploymentId());
-			}
-		});
-		return assembler.toResource(new PageImpl<>(values), statusAssembler);
+
+		List<AppStatus> statuses = forkJoinPool.submit(() ->
+			asList.stream()
+				.flatMap(sd -> sd.getAppDefinitions().stream())
+				.flatMap(sad -> {
+					String key = DeploymentKey.forStreamAppDefinition(sad);
+					String id = this.deploymentIdRepository.findOne(key);
+					return id != null ? Stream.of(id) : Stream.empty();
+				})
+				.parallel()
+				.map(appDeployer::status)
+				.sorted((o1, o2) -> o1.getDeploymentId().compareTo(o2.getDeploymentId()))
+				.collect(Collectors.toList())
+		).get();
+		return assembler.toResource(new PageImpl<>(statuses), statusAssembler);
 	}
 
 	@RequestMapping("/{id}")
