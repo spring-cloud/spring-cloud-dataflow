@@ -27,7 +27,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  * @author Gunnar Hillert
  * @since 1.1.0
  */
-@ConfigurationProperties(prefix = "dataflow.security.authentication.ldap")
+@ConfigurationProperties(prefix = "spring.cloud.dataflow.security.authentication.ldap")
 @LdapSecurityPropertiesValid
 public class LdapSecurityProperties {
 

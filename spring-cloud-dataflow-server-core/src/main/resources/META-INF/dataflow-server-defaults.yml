@@ -1,3 +1,78 @@
 spring:
   autoconfigure:
     exclude: org.springframework.boot.autoconfigure.session.SessionAutoConfiguration
+  cloud:
+    dataflow:
+      security:
+        authorization:
+          enabled: true
+          rules:
+            # Metrics
+
+            - GET    /metrics/**                     => hasRole('ROLE_VIEW')
+            - DELETE /metrics/**                     => hasRole('ROLE_CREATE')
+
+            # Boot Endpoints
+
+            - GET    /management/**                  => hasRole('ROLE_MANAGE')
+
+            # Apps
+
+            - GET    /apps                           => hasRole('ROLE_VIEW')
+            - GET    /apps/**                        => hasRole('ROLE_VIEW')
+            - DELETE /apps/**                        => hasRole('ROLE_CREATE')
+            - POST   /apps                           => hasRole('ROLE_CREATE')
+            - POST   /apps/**                        => hasRole('ROLE_CREATE')
+
+            # Completions
+
+            - GET /completions/**                    => hasRole('ROLE_CREATE')
+
+            # Job Executions & Batch Job Execution Steps && Job Step Execution Progress
+
+            - GET    /jobs/executions                => hasRole('ROLE_VIEW')
+            - PUT    /jobs/executions/**             => hasRole('ROLE_CREATE')
+            - GET    /jobs/executions/**             => hasRole('ROLE_VIEW')
+
+            # Batch Job Instances
+
+            - GET    /jobs/instances                 => hasRole('ROLE_VIEW')
+            - GET    /jobs/instances/*               => hasRole('ROLE_VIEW')
+
+            # Running Applications
+
+            - GET    /runtime/apps                   => hasRole('ROLE_VIEW')
+            - GET    /runtime/apps/**                => hasRole('ROLE_VIEW')
+
+            # Stream Definitions
+
+            - GET    /streams/definitions            => hasRole('ROLE_VIEW')
+            - GET    /streams/definitions/*          => hasRole('ROLE_VIEW')
+            - GET    /streams/definitions/*/related  => hasRole('ROLE_VIEW')
+            - POST   /streams/definitions            => hasRole('ROLE_CREATE')
+            - DELETE /streams/definitions/*          => hasRole('ROLE_CREATE')
+            - DELETE /streams/definitions            => hasRole('ROLE_CREATE')
+
+            # Stream Deployments
+
+            - DELETE /streams/deployments/*          => hasRole('ROLE_CREATE')
+            - DELETE /streams/deployments            => hasRole('ROLE_CREATE')
+            - POST   /streams/deployments/*          => hasRole('ROLE_CREATE')
+
+            # Task Definitions
+
+            - POST   /tasks/definitions              => hasRole('ROLE_CREATE')
+            - DELETE /tasks/definitions/*            => hasRole('ROLE_CREATE')
+            - GET    /tasks/definitions              => hasRole('ROLE_VIEW')
+            - GET    /tasks/definitions/*            => hasRole('ROLE_VIEW')
+
+            # Task Deployments
+
+            - POST   /tasks/deployments/*            => hasRole('ROLE_CREATE')
+
+            # Task Executions
+
+            - GET    /tasks/executions               => hasRole('ROLE_VIEW')
+            - GET    /tasks/executions/*             => hasRole('ROLE_VIEW')
+            - POST   /tasks/executions               => hasRole('ROLE_CREATE')
+            - DELETE /tasks/executions/*             => hasRole('ROLE_CREATE')

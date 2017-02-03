@@ -5,10 +5,15 @@ security:
   basic:
     enabled: true
     realm: Spring Cloud Data Flow
-dataflow:
-  security:
-    authentication:
-      ldap:
-        enabled: true
-        url: ldap://localhost:${ldap.port}
-        userDnPattern: uid={0},ou=otherpeople,dc=springframework,dc=org
+spring:
+  cloud:
+    dataflow:
+      security:
+        authentication:
+          ldap:
+            enabled: true
+            url: ldap://localhost:${ldap.port}
+            userDnPattern: uid={0},ou=otherpeople,dc=springframework,dc=org
+            groupSearchFilter: member={0}
+            groupRoleAttribute: cn
+            groupSearchBase: ou=groups,dc=springframework,dc=org

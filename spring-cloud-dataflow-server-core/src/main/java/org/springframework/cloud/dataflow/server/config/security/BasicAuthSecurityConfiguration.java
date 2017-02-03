@@ -17,16 +17,26 @@ package org.springframework.cloud.dataflow.server.config.security;
 
 import static org.springframework.cloud.dataflow.server.controller.UiController.dashboard;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.cloud.dataflow.server.config.DataFlowServerConfiguration.H2ServerConfiguration;
 import org.springframework.cloud.dataflow.server.config.security.support.OnSecurityEnabledAndOAuth2Disabled;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.annotation.web.configurers.ExpressionUrlAuthorizationConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.access.channel.ChannelProcessingFilter;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
@@ -40,6 +50,8 @@ import org.springframework.session.MapSessionRepository;
 import org.springframework.session.SessionRepository;
 import org.springframework.session.web.http.HeaderHttpSessionStrategy;
 import org.springframework.session.web.http.SessionRepositoryFilter;
+import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 import org.springframework.web.accept.ContentNegotiationStrategy;
 
 /**
@@ -59,6 +71,17 @@ import org.springframework.web.accept.ContentNegotiationStrategy;
 @EnableWebSecurity
 public class BasicAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
+	private static final org.slf4j.Logger logger = LoggerFactory.getLogger(BasicAuthSecurityConfiguration.class);
+
+	public static final Pattern AUTHORIZATION_RULE;
+
+	static {
+		String methodsRegex = StringUtils.arrayToDelimitedString(HttpMethod.values(),
+				"|");
+		AUTHORIZATION_RULE = Pattern
+				.compile("(" + methodsRegex + ")\\s+(.+)\\s+=>\\s+(.+)");
+	}
+
 	@Bean
 	public SessionRepository<ExpiringSession> sessionRepository() {
 		return new MapSessionRepository();
@@ -69,6 +92,14 @@ public class BasicAuthSecurityConfiguration extends WebSecurityConfigurerAdapter
 
 	@Autowired
 	private SecurityProperties securityProperties;
+
+	@Autowired
+	private AuthorizationConfig authorizationConfig;
+
+	@Bean
+	public AuthorizationConfig config() {
+		return new AuthorizationConfig();
+	}
 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
@@ -82,7 +113,7 @@ public class BasicAuthSecurityConfiguration extends WebSecurityConfigurerAdapter
 		basicAuthenticationEntryPoint.setRealmName(securityProperties.getBasic().getRealm());
 		basicAuthenticationEntryPoint.afterPropertiesSet();
 
-		http
+		ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry security = http
 			.csrf()
 			.disable()
 			.authorizeRequests()
@@ -93,8 +124,13 @@ public class BasicAuthSecurityConfiguration extends WebSecurityConfigurerAdapter
 					"/authenticate",
 					"/security/info",
 					"/features",
-					"/assets/**").permitAll()
-		.and()
+					"/assets/**").permitAll();
+
+		if (authorizationConfig.isEnabled()) {
+			security = configureSimpleSecurity(security);
+		}
+
+		security.and()
 			.formLogin().loginPage(loginPage)
 			.loginProcessingUrl(dashboard("/login"))
 			.defaultSuccessUrl(dashboard("/")).permitAll()
@@ -108,10 +144,14 @@ public class BasicAuthSecurityConfiguration extends WebSecurityConfigurerAdapter
 					new LoginUrlAuthenticationEntryPoint(loginPage),
 					textHtmlMatcher)
 			.defaultAuthenticationEntryPointFor(basicAuthenticationEntryPoint,
-					AnyRequestMatcher.INSTANCE)
-		.and()
-			.authorizeRequests()
-			.anyRequest().authenticated();
+					AnyRequestMatcher.INSTANCE);
+
+		if (authorizationConfig.isEnabled()) {
+			security.anyRequest().denyAll();
+		}
+		else {
+			security.anyRequest().authenticated();
+		}
 
 		final SessionRepositoryFilter<ExpiringSession> sessionRepositoryFilter = new SessionRepositoryFilter<ExpiringSession>(
 				sessionRepository());
@@ -123,4 +163,55 @@ public class BasicAuthSecurityConfiguration extends WebSecurityConfigurerAdapter
 		http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED);
 	}
 
+	/**
+	 * Read the configuration for "simple" (that is, not ACL based) security and apply it.
+	 */
+	private ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry configureSimpleSecurity(
+			ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry security) {
+		for (String rule : authorizationConfig.getRules()) {
+			Matcher matcher = AUTHORIZATION_RULE.matcher(rule);
+			Assert.isTrue(matcher.matches(),
+					String.format(
+							"Unable to parse security rule [%s], expected format is 'HTTP_METHOD ANT_PATTERN => SECURITY_ATTRIBUTE(S)'",
+							rule));
+
+			HttpMethod method = HttpMethod.valueOf(matcher.group(1).trim());
+			String urlPattern = matcher.group(2).trim();
+			String attribute = matcher.group(3).trim();
+
+			logger.info("Authorization '{}' | '{}' | '{}'", method, attribute, urlPattern);
+			security = security.antMatchers(method, urlPattern).access(attribute);
+		}
+		return security;
+	}
+
+	/**
+	 * Holds configuration for the authorization aspects of security.
+	 *
+	 * @author Eric Bottard
+	 * @author Gunnar Hillert
+	 */
+	@ConfigurationProperties(prefix = "spring.cloud.dataflow.security.authorization")
+	public static class AuthorizationConfig {
+
+		private boolean enabled = true;
+		private List<String> rules = new ArrayList<>();
+
+		public List<String> getRules() {
+			return rules;
+		}
+
+		public void setRules(List<String> rules) {
+			this.rules = rules;
+		}
+
+		public boolean isEnabled() {
+			return enabled;
+		}
+
+		public void setEnabled(boolean enabled) {
+			this.enabled = enabled;
+		}
+
+	}
 }

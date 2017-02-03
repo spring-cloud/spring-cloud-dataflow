@@ -118,14 +118,14 @@ member: uid=joe,ou=otherpeople,dc=springframework,dc=org
 dn: cn=admin,ou=groups,dc=springframework,dc=org
 objectclass: top
 objectclass: groupOfNames
-cn: admin
-ou: admin
+cn: manage
+ou: manage
 member: uid=joe,ou=otherpeople,dc=springframework,dc=org
 
 dn: cn=managers,ou=groups,dc=springframework,dc=org
 objectclass: top
 objectclass: groupOfNames
-cn: managers
+cn: manager
 ou: manager
 member: uid=ben,ou=people,dc=springframework,dc=org
 member: cn=mouse\, jerry,ou=people,dc=springframework,dc=org
