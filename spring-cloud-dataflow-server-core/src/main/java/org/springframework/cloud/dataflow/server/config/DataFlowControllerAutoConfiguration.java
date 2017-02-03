@@ -77,6 +77,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.hateoas.EntityLinks;
+import org.springframework.scheduling.concurrent.ForkJoinPoolFactoryBean;
 
 /**
  * Configuration for the Data Flow Server Controllers.
@@ -135,7 +136,16 @@ public class DataFlowControllerAutoConfiguration {
 	@ConditionalOnBean(StreamDefinitionRepository.class)
 	public RuntimeAppsController runtimeAppsController(StreamDefinitionRepository repository,
 			DeploymentIdRepository deploymentIdRepository, AppDeployer appDeployer) {
-		return new RuntimeAppsController(repository, deploymentIdRepository, appDeployer);
+		return new RuntimeAppsController(repository, deploymentIdRepository, appDeployer, runtimeAppsStatusFJPFB().getObject());
+	}
+
+	@Bean
+	@ConditionalOnBean(StreamDefinitionRepository.class)
+	@ConditionalOnMissingBean(name = "runtimeAppsStatusFJPFB")
+	public ForkJoinPoolFactoryBean runtimeAppsStatusFJPFB() {
+		ForkJoinPoolFactoryBean forkJoinPoolFactoryBean = new ForkJoinPoolFactoryBean();
+		forkJoinPoolFactoryBean.setParallelism(8);
+		return forkJoinPoolFactoryBean;
 	}
 
 	@Bean
