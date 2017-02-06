@@ -333,13 +333,6 @@ public class LocalServerSecurityWithUsersFileTests {
 			{ HttpMethod.POST, HttpStatus.INTERNAL_SERVER_ERROR,    "/tasks/definitions", createOnlyUser, ImmutableMap.of("name", "my-name", "definition", "foo") }, //Should be a `400` error - See also: https://github.com/spring-cloud/spring-cloud-dataflow/issues/1075
 			{ HttpMethod.POST, HttpStatus.UNAUTHORIZED, "/tasks/definitions", null,           ImmutableMap.of("name", "my-name", "definition", "foo") },
 
-			/* TaskDeploymentController */
-
-			{ HttpMethod.POST, HttpStatus.FORBIDDEN,    "/tasks/deployments/my-task-name", adminOnlyUser,  null },
-			{ HttpMethod.POST, HttpStatus.FORBIDDEN,    "/tasks/deployments/my-task-name", viewOnlyUser,   null },
-			{ HttpMethod.POST, HttpStatus.NOT_FOUND,    "/tasks/deployments/my-task-name", createOnlyUser, null },
-			{ HttpMethod.POST, HttpStatus.UNAUTHORIZED, "/tasks/deployments/my-task-name", null,           null },
-
 			/* TaskExecutionController */
 
 			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/tasks/executions", adminOnlyUser,  null },

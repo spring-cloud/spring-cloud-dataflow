@@ -66,10 +66,6 @@ spring:
             - GET    /tasks/definitions              => hasRole('ROLE_VIEW')
             - GET    /tasks/definitions/*            => hasRole('ROLE_VIEW')
 
-            # Task Deployments
-
-            - POST   /tasks/deployments/*            => hasRole('ROLE_CREATE')
-
             # Task Executions
 
             - GET    /tasks/executions               => hasRole('ROLE_VIEW')
