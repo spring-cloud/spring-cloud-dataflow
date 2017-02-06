@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,15 @@
 
 package org.springframework.cloud.dataflow.server.controller.security;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.dataflow.rest.resource.security.SecurityInfoResource;
-import org.springframework.core.env.Environment;
 import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.hateoas.mvc.ControllerLinkBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -73,6 +70,9 @@ public class SecurityController {
 			if (!(authentication instanceof AnonymousAuthenticationToken)) {
 				securityInfo.setAuthenticated(authentication.isAuthenticated());
 				securityInfo.setUsername(authentication.getName());
+				for (GrantedAuthority authority : authentication.getAuthorities()) {
+					securityInfo.addRole(authority.getAuthority());
+				}
 			}
 		}
 

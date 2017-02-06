@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,14 @@
 
 package org.springframework.cloud.dataflow.rest.resource.security;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.hateoas.ResourceSupport;
 
 /**
- * Provides security related meta-information. E.g. is security enabled, username
- * etc.
+ * Provides security related meta-information. E.g. is security enabled, username,
+ * roles etc.
  *
  * @author Gunnar Hillert
  */
@@ -32,12 +35,17 @@ public class SecurityInfoResource extends ResourceSupport {
 
 	private String username;
 
+	private List<String> roles = new ArrayList<>(0);
+
 	/**
 	 * Default constructor for serialization frameworks.
 	 */
 	public SecurityInfoResource() {
 	}
 
+	/**
+	 * @return true if the authentication feature is enabled, false otherwise
+	 */
 	public boolean isAuthenticationEnabled() {
 		return authenticationEnabled;
 	}
@@ -46,6 +54,9 @@ public class SecurityInfoResource extends ResourceSupport {
 		this.authenticationEnabled = authenticationEnabled;
 	}
 
+	/**
+	 * @return True if the user is authenticated
+	 */
 	public boolean isAuthenticated() {
 		return authenticated;
 	}
@@ -54,6 +65,9 @@ public class SecurityInfoResource extends ResourceSupport {
 		this.authenticated = authenticated;
 	}
 
+	/**
+	 * @return The username of the authenticated user, null otherwise.
+	 */
 	public String getUsername() {
 		return username;
 	}
@@ -62,4 +76,22 @@ public class SecurityInfoResource extends ResourceSupport {
 		this.username = username;
 	}
 
+	/**
+	 * @return List of Roles, if no roles are associated, an empty collection is returned.
+	 */
+	public List<String> getRoles() {
+		return roles;
+	}
+
+	public void setRoles(List<String> roles) {
+		this.roles = roles;
+	}
+
+	/**
+	 * @param role Adds the role to {@link #roles}
+	 */
+	public SecurityInfoResource addRole(String role) {
+		this.roles.add(role);
+		return this;
+	}
 }
