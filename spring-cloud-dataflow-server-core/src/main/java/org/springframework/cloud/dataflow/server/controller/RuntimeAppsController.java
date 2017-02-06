@@ -84,7 +84,7 @@ public class RuntimeAppsController {
 
 	private final ResourceAssembler<AppStatus, AppStatusResource> statusAssembler = new Assembler();
 
-	private ForkJoinPool forkJoinPool = new ForkJoinPool(8);
+	private final ForkJoinPool forkJoinPool;
 
 	/**
 	 * Instantiates a new runtime apps controller.
@@ -92,15 +92,21 @@ public class RuntimeAppsController {
 	 * @param streamDefinitionRepository the repository this controller will use for stream CRUD operations
 	 * @param deploymentIdRepository the repository this controller will use for deployment IDs
 	 * @param appDeployer the deployer this controller will use to deploy stream apps
+	 * @param forkJoinPool a ForkJoinPool which will be used to query AppStatuses in parallel
 	 */
-	public RuntimeAppsController(StreamDefinitionRepository streamDefinitionRepository, DeploymentIdRepository deploymentIdRepository,
-			AppDeployer appDeployer) {
+	public RuntimeAppsController(StreamDefinitionRepository streamDefinitionRepository,
+		DeploymentIdRepository deploymentIdRepository,
+			AppDeployer appDeployer,
+			ForkJoinPool forkJoinPool
+		) {
 		Assert.notNull(streamDefinitionRepository, "StreamDefinitionRepository must not be null");
 		Assert.notNull(deploymentIdRepository, "DeploymentIdRepository must not be null");
 		Assert.notNull(appDeployer, "AppDeployer must not be null");
+		Assert.notNull(forkJoinPool, "ForkJoinPool must not be null");
 		this.streamDefinitionRepository = streamDefinitionRepository;
 		this.deploymentIdRepository = deploymentIdRepository;
 		this.appDeployer = appDeployer;
+		this.forkJoinPool = forkJoinPool;
 	}
 
 	@RequestMapping
@@ -110,6 +116,7 @@ public class RuntimeAppsController {
 			asList.add(streamDefinition);
 		}
 
+		// Running this this inside the FJP will make sure it is used by the parallel stream
 		List<AppStatus> statuses = forkJoinPool.submit(() ->
 			asList.stream()
 				.flatMap(sd -> sd.getAppDefinitions().stream())
