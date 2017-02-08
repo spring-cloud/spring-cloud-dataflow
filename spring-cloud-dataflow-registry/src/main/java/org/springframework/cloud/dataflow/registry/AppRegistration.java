@@ -47,6 +47,11 @@ public class AppRegistration implements Comparable<AppRegistration> {
 	private final URI uri;
 
 	/**
+	 * URI for the app metadata or {@literal null} if the app itself should be used as metadata source.
+	 */
+	private final URI metadataUri;
+
+	/**
 	 * {@link ResourceLoader} to load the Resource for this app.
 	 */
 	private final ResourceLoader loader;
@@ -65,6 +70,19 @@ public class AppRegistration implements Comparable<AppRegistration> {
 	 * @param loader the {@link ResourceLoader} that loads the {@link Resource} for this app
 	 */
 	public AppRegistration(String name, ApplicationType type, URI uri, ResourceLoader loader) {
+		this(name, type, uri, null, loader);
+	}
+
+	/**
+	 * Construct an {@code AppRegistration} object.
+	 *
+	 * @param name app name
+	 * @param type app type
+	 * @param uri URI for the app resource
+	 * @param metadataUri URI for the app metadata resource
+	 * @param loader the {@link ResourceLoader} that loads the {@link Resource} for this app
+	 */
+	public AppRegistration(String name, ApplicationType type, URI uri, URI metadataUri, ResourceLoader loader) {
 		Assert.hasText(name, "name is required");
 		Assert.notNull(type, "type is required");
 		Assert.notNull(uri, "uri is required");
@@ -72,6 +90,7 @@ public class AppRegistration implements Comparable<AppRegistration> {
 		this.name = name;
 		this.type = type;
 		this.uri = uri;
+		this.metadataUri = metadataUri;
 		this.loader = loader;
 	}
 
@@ -96,6 +115,15 @@ public class AppRegistration implements Comparable<AppRegistration> {
 		return uri;
 	}
 
+	public URI getMetadataUri() {
+		return metadataUri;
+	}
+
+	public Resource getMetadataResource() {
+		return metadataUri != null ? this.loader.getResource(this.metadataUri.toString())
+			: getResource();
+	}
+
 	public Resource getResource() {
 		if (this.resource == null) {
 			this.resource = this.loader.getResource(this.uri.toString());
@@ -109,6 +137,7 @@ public class AppRegistration implements Comparable<AppRegistration> {
 				"name='" + name + '\'' +
 				", type='" + type + '\'' +
 				", uri=" + uri +
+				", metadataUri=" + metadataUri +
 				'}';
 	}
 

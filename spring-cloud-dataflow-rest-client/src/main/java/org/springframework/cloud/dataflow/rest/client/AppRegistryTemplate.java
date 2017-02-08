@@ -86,9 +86,12 @@ public class AppRegistryTemplate implements AppRegistryOperations {
 
 	@Override
 	public AppRegistrationResource register(String name, ApplicationType type,
-			String uri, boolean force) {
+			String uri, String metadataUri, boolean force) {
 		MultiValueMap<String, Object> values = new LinkedMultiValueMap<String, Object>();
 		values.add("uri", uri);
+		if (metadataUri != null) {
+			values.add("metadata-uri", metadataUri);
+		}
 		values.add("force", Boolean.toString(force));
 
 		return restTemplate.postForObject(uriTemplate.toString() + "/{type}/{name}", values,

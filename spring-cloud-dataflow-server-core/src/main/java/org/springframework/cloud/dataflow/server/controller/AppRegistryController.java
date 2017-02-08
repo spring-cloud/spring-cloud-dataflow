@@ -16,6 +16,8 @@
 
 package org.springframework.cloud.dataflow.server.controller;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -25,14 +27,18 @@ import java.util.List;
 import java.util.Properties;
 
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
+import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.registry.AppRegistration;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.registry.support.NoSuchAppRegistrationException;
 import org.springframework.cloud.dataflow.rest.resource.AppRegistrationResource;
 import org.springframework.cloud.dataflow.rest.resource.DetailedAppRegistrationResource;
-import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
+import org.springframework.context.ResourceLoaderAware;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.ExposesResourceFor;
@@ -62,13 +68,15 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/apps")
 @ExposesResourceFor(AppRegistrationResource.class)
-public class AppRegistryController {
+public class AppRegistryController implements ResourceLoaderAware {
 
 	private final Assembler assembler = new Assembler();
 
 	private final AppRegistry appRegistry;
 
 	private ApplicationConfigurationMetadataResolver metadataResolver;
+
+	private ResourceLoader resourceLoader = new DefaultResourceLoader();
 
 	public AppRegistryController(AppRegistry appRegistry, ApplicationConfigurationMetadataResolver metadataResolver) {
 		this.appRegistry = appRegistry;
@@ -134,13 +142,14 @@ public class AppRegistryController {
 			@PathVariable("type") ApplicationType type,
 			@PathVariable("name") String name,
 			@RequestParam("uri") String uri,
+			@RequestParam(name = "metadata-uri", required = false) String metadataUri,
 			@RequestParam(value = "force", defaultValue = "false") boolean force) {
 		AppRegistration previous = appRegistry.find(name, type);
 		if (!force && previous != null) {
 			throw new AppAlreadyRegisteredException(previous);
 		}
 		try {
-			appRegistry.save(name, type, new URI(uri));
+			appRegistry.save(name, type, new URI(uri), metadataUri != null ? new URI(metadataUri) : null);
 		}
 		catch (URISyntaxException e) {
 			throw new IllegalArgumentException(e);
@@ -172,32 +181,24 @@ public class AppRegistryController {
 			PagedResourcesAssembler<AppRegistration> pagedResourcesAssembler,
 			@RequestParam(value = "uri", required = false) String uri,
 			@RequestParam(value = "apps", required = false) Properties apps,
-			@RequestParam(value = "force", defaultValue = "false") boolean force) {
+			@RequestParam(value = "force", defaultValue = "false") boolean force) throws IOException {
 		List<AppRegistration> registrations = new ArrayList<>();
 		if (StringUtils.hasText(uri)) {
-			registrations.addAll(appRegistry.importAll(force, uri));
+			registrations.addAll(appRegistry.importAll(force, resourceLoader.getResource(uri)));
 		}
 		else if (!CollectionUtils.isEmpty(apps)) {
-			for (String key : apps.stringPropertyNames()) {
-				String[] tokens = key.split("\\.", 2);
-				if (tokens.length != 2) {
-					throw new IllegalArgumentException("Invalid application key: " + key +
-							"; the expected format is <name>.<type>");
-				}
-				String name = tokens[1];
-				ApplicationType type = ApplicationType.valueOf(tokens[0]);
-				if (force || null == appRegistry.find(name, type)) {
-					try {
-						registrations.add(appRegistry.save(name, type, new URI(apps.getProperty(key))));
-					}
-					catch (URISyntaxException e) {
-						throw new IllegalArgumentException(e);
-					}
-				}
-			}
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			apps.store(baos, "");
+			ByteArrayResource bar = new ByteArrayResource(baos.toByteArray(), "Inline properties");
+			registrations.addAll(appRegistry.importAll(force, bar));
 		}
 		Collections.sort(registrations);
 		return pagedResourcesAssembler.toResource(new PageImpl<>(registrations), assembler);
+	}
+
+	@Override
+	public void setResourceLoader(ResourceLoader resourceLoader) {
+		this.resourceLoader = resourceLoader;
 	}
 
 	class Assembler extends ResourceAssemblerSupport<AppRegistration, AppRegistrationResource> {

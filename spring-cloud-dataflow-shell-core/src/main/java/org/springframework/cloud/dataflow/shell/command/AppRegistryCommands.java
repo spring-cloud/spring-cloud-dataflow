@@ -158,12 +158,16 @@ public class AppRegistryCommands implements CommandMarker, ResourceLoaderAware {
 					key = {"uri"},
 					help = "URI for the application artifact")
 			String uri,
+			@CliOption(
+					key = {"metadata-uri"},
+					help = "Metadata URI for the application artifact")
+			String metadataUri,
 			@CliOption(key = "force",
 					help = "force update if application is already registered (only if not in use)",
 					specifiedDefaultValue = "true",
 					unspecifiedDefaultValue = "false")
 			boolean force) {
-		appRegistryOperations().register(name, type, uri, force);
+		appRegistryOperations().register(name, type, uri, metadataUri, force);
 		return String.format(("Successfully registered application '%s:%s'"), type, name);
 	}
 

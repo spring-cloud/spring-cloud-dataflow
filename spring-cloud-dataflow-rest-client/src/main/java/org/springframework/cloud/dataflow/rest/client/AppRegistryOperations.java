@@ -65,10 +65,11 @@ public interface AppRegistryOperations {
 	 * @param name  application name
 	 * @param type  application type
 	 * @param uri   URI for the application artifact
+	 * @param metadataUri   URI for the application metadata artifact
 	 * @param force if {@code true}, overwrites a pre-existing registration
 	 */
 	AppRegistrationResource register(String name, ApplicationType type,
-			String uri, boolean force);
+			String uri, String metadataUri, boolean force);
 
 	/**
 	 * Unregister an application name and type.
