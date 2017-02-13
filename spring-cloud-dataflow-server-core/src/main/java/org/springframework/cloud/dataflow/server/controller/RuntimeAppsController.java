@@ -19,7 +19,9 @@ package org.springframework.cloud.dataflow.server.controller;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
@@ -31,6 +33,7 @@ import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepo
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.app.AppInstanceStatus;
 import org.springframework.cloud.deployer.spi.app.AppStatus;
+import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.ExposesResourceFor;
@@ -128,7 +131,17 @@ public class RuntimeAppsController {
 		throw new ResourceNotFoundException();
 	}
 
-	private class Assembler extends ResourceAssemblerSupport<AppStatus, AppStatusResource> {
+	private static class Assembler extends ResourceAssemblerSupport<AppStatus, AppStatusResource> {
+		private static final Map<DeploymentState, String> PRETTY_STATES = new EnumMap<>(DeploymentState.class);
+		static {
+			PRETTY_STATES.put(DeploymentState.deployed, "Deployed");
+			PRETTY_STATES.put(DeploymentState.deploying, "Deploying");
+			PRETTY_STATES.put(DeploymentState.error, "Error retrieving state");
+			PRETTY_STATES.put(DeploymentState.failed, "All instances failed");
+			PRETTY_STATES.put(DeploymentState.partial, "Some instances failed");
+			// unknown, undeployed not mapped on purpose
+			Assert.isTrue(PRETTY_STATES.size() == DeploymentState.values().length - 2);
+		}
 
 		public Assembler() {
 			super(RuntimeAppsController.class, AppStatusResource.class);
@@ -141,7 +154,7 @@ public class RuntimeAppsController {
 
 		@Override
 		protected AppStatusResource instantiateResource(AppStatus entity) {
-			AppStatusResource resource = new AppStatusResource(entity.getDeploymentId(), entity.getState().name());
+			AppStatusResource resource = new AppStatusResource(entity.getDeploymentId(), mapState(entity.getState()));
 			List<AppInstanceStatusResource> instanceStatusResources = new ArrayList<>();
 			InstanceAssembler instanceAssembler = new InstanceAssembler(entity);
 			List<AppInstanceStatus> instanceStatuses = new ArrayList<>(entity.getInstances().values());
@@ -152,6 +165,13 @@ public class RuntimeAppsController {
 			resource.setInstances(new Resources<>(instanceStatusResources));
 			return resource;
 		}
+
+		private String mapState(DeploymentState state) {
+			String result = PRETTY_STATES.get(state);
+			Assert.notNull(result, "Trying to display a DeploymentState that should not appear here: " + state);
+			return result;
+		}
+
 	}
 
 	@RestController
@@ -201,19 +221,35 @@ public class RuntimeAppsController {
 
 		private final AppStatus owningApp;
 
-		public InstanceAssembler(AppStatus owningApp) {
+		private static final Map<DeploymentState, String> PRETTY_STATES = new EnumMap<>(DeploymentState.class);
+		static {
+			PRETTY_STATES.put(DeploymentState.deployed, "Deployed");
+			PRETTY_STATES.put(DeploymentState.deploying, "Deploying");
+			PRETTY_STATES.put(DeploymentState.error, "Error retrieving state");
+			PRETTY_STATES.put(DeploymentState.failed, "Deployment failed");
+			// unknown, partial, undeployde not mapped on purpose
+			Assert.isTrue(PRETTY_STATES.size() == DeploymentState.values().length - 3);
+		}
+
+		InstanceAssembler(AppStatus owningApp) {
 			super(AppInstanceController.class, AppInstanceStatusResource.class);
 			this.owningApp = owningApp;
 		}
 
 		@Override
 		public AppInstanceStatusResource toResource(AppInstanceStatus entity) {
-			return createResourceWithId("/" + entity.getId(), entity, owningApp.getDeploymentId().toString());
+			return createResourceWithId("/" + entity.getId(), entity, owningApp.getDeploymentId());
 		}
 
 		@Override
 		protected AppInstanceStatusResource instantiateResource(AppInstanceStatus entity) {
-			return new AppInstanceStatusResource(entity.getId(), entity.getState().name(), entity.getAttributes());
+			return new AppInstanceStatusResource(entity.getId(), mapState(entity.getState()), entity.getAttributes());
+		}
+
+		private String mapState(DeploymentState state) {
+			String result = PRETTY_STATES.get(state);
+			Assert.notNull(result, "Trying to display a DeploymentState that should not appear here: " + state);
+			return result;
 		}
 	}
 }
