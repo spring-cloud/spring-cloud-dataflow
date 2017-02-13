@@ -17,8 +17,8 @@
 package org.springframework.cloud.dataflow.server.registry;
 
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.deployer.resource.registry.UriRegistry;
-import org.springframework.cloud.deployer.resource.registry.UriRegistryPopulator;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
@@ -30,21 +30,21 @@ import org.springframework.util.ObjectUtils;
  *
  * @author Mark Fisher
  */
-public class DataFlowUriRegistryPopulator implements InitializingBean, ResourceLoaderAware {
+public class DataFlowAppRegistryPopulator implements InitializingBean, ResourceLoaderAware {
 
-	private final UriRegistry registry;
+	private final AppRegistry registry;
 
 	private final String[] locations;
 
 	private ResourceLoader resourceLoader;
 
 	/**
-	 * Populates a {@link UriRegistry} on startup.
+	 * Populates a {@link org.springframework.cloud.dataflow.registry.AppRegistry} on startup.
 	 *
 	 * @param registry the {@link UriRegistry} to populate
 	 * @param locations the properties file(s) listing apps to import into the registry
 	 */
-	public DataFlowUriRegistryPopulator(UriRegistry registry, String... locations) {
+	public DataFlowAppRegistryPopulator(AppRegistry registry, String... locations) {
 		Assert.notNull(registry, "UriRegistry must not be null");
 		this.registry = registry;
 		this.locations = locations;
@@ -57,7 +57,7 @@ public class DataFlowUriRegistryPopulator implements InitializingBean, ResourceL
 			for (int i = 0; i < resources.length; i++) {
 				resources[i] = resourceLoader.getResource(locations[i]);
 			}
-			UriRegistryPopulator.populateRegistry(true, this.registry, resources);
+			registry.importAll(true, resources);
 		}
 	}
 

@@ -36,7 +36,7 @@ import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.registry.AppRegistration;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
-import org.springframework.cloud.dataflow.server.registry.DataFlowUriRegistryPopulator;
+import org.springframework.cloud.dataflow.server.registry.DataFlowAppRegistryPopulator;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
@@ -63,7 +63,7 @@ public class AppRegistryControllerTests {
 	private AppRegistry appRegistry;
 
 	@Autowired
-	private DataFlowUriRegistryPopulator uriRegistryPopulator;
+	private DataFlowAppRegistryPopulator uriRegistryPopulator;
 
 	@Before
 	public void setupMocks() {
