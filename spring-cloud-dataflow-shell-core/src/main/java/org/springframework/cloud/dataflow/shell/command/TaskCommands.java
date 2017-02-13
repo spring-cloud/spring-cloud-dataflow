@@ -27,11 +27,12 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.dataflow.rest.client.DataFlowOperations;
 import org.springframework.cloud.dataflow.rest.client.TaskOperations;
 import org.springframework.cloud.dataflow.rest.resource.TaskDefinitionResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionResource;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
+import org.springframework.cloud.dataflow.shell.command.support.OpsType;
+import org.springframework.cloud.dataflow.shell.command.support.RoleType;
 import org.springframework.cloud.dataflow.shell.config.DataFlowShell;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.shell.core.CommandMarker;
@@ -81,10 +82,14 @@ public class TaskCommands implements CommandMarker {
 	@Autowired
 	private DataFlowShell dataFlowShell;
 
-	@CliAvailabilityIndicator({ LIST, CREATE, LAUNCH, TASK_EXECUTION_STATUS, TASK_EXECUTION_CLEANUP,  DESTROY, EXECUTION_LIST })
-	public boolean available() {
-		DataFlowOperations dataFlowOperations = dataFlowShell.getDataFlowOperations();
-		return dataFlowOperations != null && dataFlowOperations.taskOperations() != null;
+	@CliAvailabilityIndicator({ LIST, TASK_EXECUTION_STATUS, EXECUTION_LIST })
+	public boolean availableWithViewRole() {
+		return dataFlowShell.hasAccess(RoleType.VIEW, OpsType.TASK);
+	}
+
+	@CliAvailabilityIndicator({ CREATE, LAUNCH, TASK_EXECUTION_CLEANUP, DESTROY })
+	public boolean availableWithCreateRole() {
+		return dataFlowShell.hasAccess(RoleType.CREATE, OpsType.TASK);
 	}
 
 	@CliCommand(value = LIST, help = "List created tasks")

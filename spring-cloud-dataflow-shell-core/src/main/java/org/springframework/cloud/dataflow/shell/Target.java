@@ -35,42 +35,6 @@ public class Target {
 		SUCCESS, ERROR
 	}
 
-	public class Credentials {
-
-		String username;
-
-		String password;
-
-		// for serialization/persistence
-		public Credentials() {
-		}
-
-		public Credentials(String username, String password) {
-			this.username = username;
-			this.password = password;
-		}
-
-		public String getUsername() {
-			return username;
-		}
-
-		public void setUsername(String username) {
-			this.username = username;
-		}
-
-		public String getPassword() {
-			return password;
-		}
-
-		public void setPassword(String password) {
-			this.password = password;
-		}
-
-		public String getDisplayableContents() {
-			return "[username='" + username +", password=****']";
-		}
-	}
-
 	public static final String DEFAULT_SCHEME = "http";
 
 	public static final String DEFAULT_HOST = "localhost";
@@ -93,13 +57,17 @@ public class Target {
 
 	private final boolean skipSslValidation;
 
-	private final Credentials targetCredentials;
+	private TargetCredentials targetCredentials;
 
 	private Exception targetException;
 
 	private String targetResultMessage;
 
 	private TargetStatus status;
+
+	private boolean authenticationEnabled;
+	private boolean authorizationEnabled = true;
+	private boolean authenticated;
 
 	/**
 	 * Construct a new Target. The passed in <code>targetUriAsString</code> String parameter will be converted to a {@link URI}.
@@ -119,8 +87,12 @@ public class Target {
 		if (StringUtils.isEmpty(targetUsername)) {
 			this.targetCredentials = null;
 		} else {
-			this.targetCredentials = new Credentials(targetUsername, targetPassword);
+			this.targetCredentials = new TargetCredentials(targetUsername, targetPassword);
 		}
+	}
+
+	public void setTargetCredentials(TargetCredentials targetCredentials) {
+		this.targetCredentials = targetCredentials;
 	}
 
 	/**
@@ -191,7 +163,7 @@ public class Target {
 	 *
 	 * @return The target credentials. May be null if there is no authentication
 	 */
-	public Credentials getTargetCredentials() {
+	public TargetCredentials getTargetCredentials() {
 		return targetCredentials;
 	}
 
@@ -215,6 +187,52 @@ public class Target {
 	public void setTargetResultMessage(String targetResultMessage) {
 		Assert.hasText(targetResultMessage, "The provided targetResultMessage must neither be null nor empty.");
 		this.targetResultMessage = targetResultMessage;
+	}
+
+	/**
+	 * Indicates whether authentication is enabled for this target.
+	 *
+	 * @return True if authentication is enabled, false otherwise
+	 */
+	public boolean isAuthenticationEnabled() {
+		return authenticationEnabled;
+	}
+
+	/**
+	 * @param authenticationEnabled False by default
+	 */
+	public void setAuthenticationEnabled(boolean authenticationEnabled) {
+		this.authenticationEnabled = authenticationEnabled;
+	}
+
+	/**
+	 * @return True if authorization is enabled, false otherwise
+	 */
+	public boolean isAuthorizationEnabled() {
+		return authorizationEnabled;
+	}
+
+	/**
+	 *
+	 * @param authorizationEnabled If not set, it defaults to true
+	 */
+	public void setAuthorizationEnabled(boolean authorizationEnabled) {
+		this.authorizationEnabled = authorizationEnabled;
+	}
+
+	/**
+	 *
+	 * @return True if the user is successfully authenticated with this Target
+	 */
+	public boolean isAuthenticated() {
+		return authenticated;
+	}
+
+	/**
+	 * Indicates whether a user is successfully authenticated with the Target
+	 */
+	public void setAuthenticated(boolean authenticated) {
+		this.authenticated = authenticated;
 	}
 
 	@Override

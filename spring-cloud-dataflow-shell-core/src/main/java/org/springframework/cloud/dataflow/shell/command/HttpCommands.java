@@ -104,7 +104,7 @@ public class HttpCommands implements CommandMarker {
 			outputRequest("POST", requestURI, mediaType, data, buffer);
 			final RestTemplate restTemplate = createRestTemplate(buffer);
 
-			HttpClientUtils.prepareRestTemplate(restTemplate, targetUsername, targetPassword, skipSslValidation);
+			HttpClientUtils.prepareRestTemplate(restTemplate, requestURI, targetUsername, targetPassword, skipSslValidation);
 
 			ResponseEntity<String> response = restTemplate.postForEntity(requestURI, request, String.class);
 			outputResponse(response, buffer);
@@ -143,7 +143,7 @@ public class HttpCommands implements CommandMarker {
 
 			final RestTemplate restTemplate = createRestTemplate(buffer);
 
-			HttpClientUtils.prepareRestTemplate(restTemplate, targetUsername, targetPassword, skipSslValidation);
+			HttpClientUtils.prepareRestTemplate(restTemplate, requestURI, targetUsername, targetPassword, skipSslValidation);
 
 			ResponseEntity<String> response = restTemplate.getForEntity(requestURI, String.class);
 			outputResponse(response, buffer);

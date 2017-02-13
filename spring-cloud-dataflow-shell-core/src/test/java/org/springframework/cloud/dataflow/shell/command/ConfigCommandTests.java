@@ -18,6 +18,7 @@ package org.springframework.cloud.dataflow.shell.command;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.net.URI;
@@ -29,6 +30,7 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.cloud.dataflow.shell.TargetHolder;
 import org.springframework.cloud.dataflow.shell.config.DataFlowShell;
 import org.springframework.hateoas.ResourceSupport;
@@ -72,7 +74,7 @@ public class ConfigCommandTests {
 		configCommands.setRestTemplate(restTemplate);
 		configCommands.setDataFlowShell(dataFlowShell);
 		configCommands.setServerUri("http://localhost:9393");
-		configCommands.onApplicationEvent(null);
+		configCommands.onApplicationEvent(mock(ApplicationReadyEvent.class));
 	}
 
 	@Test
