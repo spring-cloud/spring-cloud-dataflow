@@ -167,7 +167,7 @@ public class StreamCommandTemplate {
 
 		Table table = (org.springframework.shell.table.Table) cr.getResult();
 		TableModel model = table.getModel();
-		Collection<String> statuses = deployed ? Arrays.asList("deployed", "deploying") : Arrays.asList("undeployed");
+		Collection<String> statuses = deployed ? Arrays.asList("Deployed", "Deploying") : Arrays.asList("Undeployed");
 		for (int row = 0; row < model.getRowCount(); row++) {
 			if (streamName.equals(model.getValue(row, 0))
 					&& definition.replace("\\\\", "\\").equals(model.getValue(row, 1))
