@@ -19,7 +19,6 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<java.version>1.8</java.version>
-		<spring-cloud-deployer.version>1.1.4.BUILD-SNAPSHOT</spring-cloud-deployer.version>
 		<spring-cloud-task.version>1.1.2.RELEASE</spring-cloud-task.version>
 		<spring-cloud.version>Camden.SR3</spring-cloud.version>
 	</properties>
@@ -73,11 +72,6 @@
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-starter-dataflow-server-local</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.cloud</groupId>
-			<artifactId>spring-cloud-deployer-resource-docker</artifactId>
-			<version>${spring-cloud-deployer.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
