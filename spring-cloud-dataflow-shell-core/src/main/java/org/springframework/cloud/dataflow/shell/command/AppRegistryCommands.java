@@ -29,6 +29,8 @@ import org.springframework.cloud.dataflow.rest.client.AppRegistryOperations;
 import org.springframework.cloud.dataflow.rest.client.DataFlowOperations;
 import org.springframework.cloud.dataflow.rest.resource.AppRegistrationResource;
 import org.springframework.cloud.dataflow.rest.resource.DetailedAppRegistrationResource;
+import org.springframework.cloud.dataflow.shell.command.support.HasRole;
+import org.springframework.cloud.dataflow.shell.command.support.RoleType;
 import org.springframework.cloud.dataflow.shell.config.DataFlowShell;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.core.io.DefaultResourceLoader;
@@ -61,6 +63,7 @@ import org.springframework.util.Assert;
  * @author Thomas Risberg
  */
 @Component
+@HasRole(RoleType.VIEW)
 public class AppRegistryCommands implements CommandMarker, ResourceLoaderAware {
 
 	private final static String LIST_APPLICATIONS = "app list";

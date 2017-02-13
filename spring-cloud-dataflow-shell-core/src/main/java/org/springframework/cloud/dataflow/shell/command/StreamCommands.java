@@ -33,6 +33,8 @@ import org.springframework.cloud.dataflow.rest.client.DataFlowOperations;
 import org.springframework.cloud.dataflow.rest.client.StreamOperations;
 import org.springframework.cloud.dataflow.rest.resource.StreamDefinitionResource;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
+import org.springframework.cloud.dataflow.shell.command.support.HasRole;
+import org.springframework.cloud.dataflow.shell.command.support.RoleType;
 import org.springframework.cloud.dataflow.shell.config.DataFlowShell;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.hateoas.PagedResources;
@@ -52,6 +54,7 @@ import org.springframework.stereotype.Component;
  * @author Mark Fisher
  */
 @Component
+@HasRole(RoleType.VIEW)
 // todo: reenable optionContext attributes
 public class StreamCommands implements CommandMarker {
 

@@ -26,7 +26,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.cloud.dataflow.server.config.DataFlowServerConfiguration.H2ServerConfiguration;
 import org.springframework.cloud.dataflow.server.config.security.support.OnSecurityEnabledAndOAuth2Disabled;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
@@ -95,11 +94,6 @@ public class BasicAuthSecurityConfiguration extends WebSecurityConfigurerAdapter
 
 	@Autowired
 	private AuthorizationConfig authorizationConfig;
-
-	@Bean
-	public AuthorizationConfig config() {
-		return new AuthorizationConfig();
-	}
 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {

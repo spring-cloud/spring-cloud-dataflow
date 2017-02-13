@@ -29,6 +29,8 @@ import org.springframework.analytics.rest.domain.MetricResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.dataflow.rest.client.AggregateCounterOperations;
 import org.springframework.cloud.dataflow.rest.client.DataFlowOperations;
+import org.springframework.cloud.dataflow.shell.command.support.HasRole;
+import org.springframework.cloud.dataflow.shell.command.support.RoleType;
 import org.springframework.cloud.dataflow.shell.config.DataFlowShell;
 import org.springframework.cloud.dataflow.shell.converter.NumberFormatConverter;
 import org.springframework.hateoas.PagedResources;
@@ -51,6 +53,7 @@ import org.springframework.stereotype.Component;
  * @author Ilayaperumal Gopinathan
  */
 @Component
+@HasRole(RoleType.VIEW)
 public class AggregateCounterCommands extends AbstractMetricsCommands implements CommandMarker {
 
 	protected AggregateCounterCommands() {

@@ -17,6 +17,8 @@
 package org.springframework.cloud.dataflow.shell;
 
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -41,6 +43,8 @@ public class Target {
 
 		String password;
 
+		List<String> roles = new ArrayList<>(0);
+
 		// for serialization/persistence
 		public Credentials() {
 		}
@@ -48,6 +52,12 @@ public class Target {
 		public Credentials(String username, String password) {
 			this.username = username;
 			this.password = password;
+		}
+
+		public Credentials(String username, String password, List<String> roles) {
+			this.username = username;
+			this.password = password;
+			this.roles = roles;
 		}
 
 		public String getUsername() {

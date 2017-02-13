@@ -22,6 +22,8 @@ import org.springframework.analytics.rest.domain.MetricResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.dataflow.rest.client.CounterOperations;
 import org.springframework.cloud.dataflow.rest.client.DataFlowOperations;
+import org.springframework.cloud.dataflow.shell.command.support.HasRole;
+import org.springframework.cloud.dataflow.shell.command.support.RoleType;
 import org.springframework.cloud.dataflow.shell.config.DataFlowShell;
 import org.springframework.cloud.dataflow.shell.converter.NumberFormatConverter;
 import org.springframework.hateoas.PagedResources;
@@ -34,11 +36,12 @@ import org.springframework.stereotype.Component;
 
 /**
  * Commands for interacting with Counter analytics.
- * 
+ *
  * @author Eric Bottard
  * @author Ilayaperumal Gopinathan
  */
 @Component
+@HasRole(RoleType.VIEW)
 public class CounterCommands extends AbstractMetricsCommands implements CommandMarker {
 
 	protected CounterCommands() {

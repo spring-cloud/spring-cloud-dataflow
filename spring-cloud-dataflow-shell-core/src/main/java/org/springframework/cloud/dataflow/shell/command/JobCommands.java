@@ -26,6 +26,8 @@ import org.springframework.cloud.dataflow.rest.resource.JobExecutionResource;
 import org.springframework.cloud.dataflow.rest.resource.JobInstanceResource;
 import org.springframework.cloud.dataflow.rest.resource.StepExecutionProgressInfoResource;
 import org.springframework.cloud.dataflow.rest.resource.StepExecutionResource;
+import org.springframework.cloud.dataflow.shell.command.support.HasRole;
+import org.springframework.cloud.dataflow.shell.command.support.RoleType;
 import org.springframework.cloud.dataflow.shell.config.DataFlowShell;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.shell.core.CommandMarker;
@@ -44,6 +46,7 @@ import org.springframework.stereotype.Component;
  * @author Ilayaperumal Gopinathan
  */
 @Component
+@HasRole(RoleType.VIEW)
 public class JobCommands implements CommandMarker {
 
 	private static final String EXECUTION_DISPLAY = "job execution display";

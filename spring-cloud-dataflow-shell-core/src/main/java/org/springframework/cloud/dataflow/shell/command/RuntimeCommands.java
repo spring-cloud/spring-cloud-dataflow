@@ -36,6 +36,8 @@ import org.springframework.cloud.dataflow.rest.client.DataFlowOperations;
 import org.springframework.cloud.dataflow.rest.client.RuntimeOperations;
 import org.springframework.cloud.dataflow.rest.resource.AppInstanceStatusResource;
 import org.springframework.cloud.dataflow.rest.resource.AppStatusResource;
+import org.springframework.cloud.dataflow.shell.command.support.HasRole;
+import org.springframework.cloud.dataflow.shell.command.support.RoleType;
 import org.springframework.cloud.dataflow.shell.config.DataFlowShell;
 import org.springframework.shell.core.CommandMarker;
 import org.springframework.shell.core.annotation.CliAvailabilityIndicator;
@@ -56,10 +58,11 @@ import org.springframework.util.Assert;
  * @author Mark Fisher
  */
 @Component
+@HasRole(RoleType.VIEW)
 public class RuntimeCommands implements CommandMarker {
 
 	private static final String LIST_APPS = "runtime apps";
-	
+
 	private final DataFlowShell dataFlowShell;
 
 	@Autowired
