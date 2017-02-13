@@ -18,6 +18,7 @@ package org.springframework.cloud.dataflow.server.controller.security;
 
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.cloud.dataflow.rest.resource.security.SecurityInfoResource;
+import org.springframework.cloud.dataflow.server.config.security.BasicAuthSecurityConfiguration.AuthorizationConfig;
 import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.hateoas.mvc.ControllerLinkBuilder;
 import org.springframework.http.HttpStatus;
@@ -46,9 +47,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class SecurityController {
 
 	private final SecurityProperties securityProperties;
+	private final AuthorizationConfig authorizationConfig;
 
-	public SecurityController(SecurityProperties securityProperties) {
+	public SecurityController(SecurityProperties securityProperties, AuthorizationConfig authorizationConfig) {
 		this.securityProperties = securityProperties;
+		this.authorizationConfig = authorizationConfig;
 	}
 
 	/**
@@ -60,9 +63,11 @@ public class SecurityController {
 	public SecurityInfoResource getSecurityInfo() {
 
 		final boolean authenticationEnabled = securityProperties.getBasic().isEnabled();
+		final boolean authorizationEnabled = this.authorizationConfig.isEnabled();
 
 		final SecurityInfoResource securityInfo = new SecurityInfoResource();
 		securityInfo.setAuthenticationEnabled(authenticationEnabled);
+		securityInfo.setAuthorizationEnabled(authorizationEnabled);
 		securityInfo.add(ControllerLinkBuilder.linkTo(SecurityController.class).withSelfRel());
 
 		if (authenticationEnabled && SecurityContextHolder.getContext() != null) {
@@ -70,8 +75,11 @@ public class SecurityController {
 			if (!(authentication instanceof AnonymousAuthenticationToken)) {
 				securityInfo.setAuthenticated(authentication.isAuthenticated());
 				securityInfo.setUsername(authentication.getName());
-				for (GrantedAuthority authority : authentication.getAuthorities()) {
-					securityInfo.addRole(authority.getAuthority());
+
+				if (authorizationEnabled) {
+					for (GrantedAuthority authority : authentication.getAuthorities()) {
+						securityInfo.addRole(authority.getAuthority());
+					}
 				}
 			}
 		}

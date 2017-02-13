@@ -26,9 +26,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.rest.client.AppRegistryOperations;
-import org.springframework.cloud.dataflow.rest.client.DataFlowOperations;
 import org.springframework.cloud.dataflow.rest.resource.AppRegistrationResource;
 import org.springframework.cloud.dataflow.rest.resource.DetailedAppRegistrationResource;
+import org.springframework.cloud.dataflow.shell.command.support.OpsType;
+import org.springframework.cloud.dataflow.shell.command.support.RoleType;
 import org.springframework.cloud.dataflow.shell.config.DataFlowShell;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.core.io.DefaultResourceLoader;
@@ -59,6 +60,7 @@ import org.springframework.util.Assert;
  * @author Patrick Peralta
  * @author Mark Fisher
  * @author Thomas Risberg
+ * @author Gunnar Hillert
  */
 @Component
 public class AppRegistryCommands implements CommandMarker, ResourceLoaderAware {
@@ -88,11 +90,14 @@ public class AppRegistryCommands implements CommandMarker, ResourceLoaderAware {
 		this.resourceLoader = resourceLoader;
 	}
 
-	@CliAvailabilityIndicator({LIST_APPLICATIONS, APPLICATION_INFO, UNREGISTER_APPLICATION,
-		REGISTER_APPLICATION, IMPORT_APPLICATIONS})
-	public boolean available() {
-		DataFlowOperations dataFlowOperations = dataFlowShell.getDataFlowOperations();
-		return dataFlowOperations != null && dataFlowOperations.appRegistryOperations() != null;
+	@CliAvailabilityIndicator({ LIST_APPLICATIONS, APPLICATION_INFO })
+	public boolean availableWithViewRole() {
+		return dataFlowShell.hasAccess(RoleType.VIEW, OpsType.APP_REGISTRY);
+	}
+
+	@CliAvailabilityIndicator({ UNREGISTER_APPLICATION, REGISTER_APPLICATION, IMPORT_APPLICATIONS })
+	public boolean availableWithCreateRole() {
+		return dataFlowShell.hasAccess(RoleType.CREATE, OpsType.APP_REGISTRY);
 	}
 
 	@CliCommand(value = APPLICATION_INFO, help = "Get information about an application")

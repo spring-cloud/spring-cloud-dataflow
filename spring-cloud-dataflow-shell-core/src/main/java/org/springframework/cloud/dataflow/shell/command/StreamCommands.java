@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2015-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,14 +25,13 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.apache.commons.io.FilenameUtils;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
-import org.springframework.boot.env.YamlPropertySourceLoader;
-import org.springframework.cloud.dataflow.rest.client.DataFlowOperations;
 import org.springframework.cloud.dataflow.rest.client.StreamOperations;
 import org.springframework.cloud.dataflow.rest.resource.StreamDefinitionResource;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
+import org.springframework.cloud.dataflow.shell.command.support.OpsType;
+import org.springframework.cloud.dataflow.shell.command.support.RoleType;
 import org.springframework.cloud.dataflow.shell.config.DataFlowShell;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.hateoas.PagedResources;
@@ -50,6 +49,7 @@ import org.springframework.stereotype.Component;
  *
  * @author Ilayaperumal Gopinathan
  * @author Mark Fisher
+ * @author Gunnar Hillert
  */
 @Component
 // todo: reenable optionContext attributes
@@ -79,11 +79,15 @@ public class StreamCommands implements CommandMarker {
 	@Autowired
 	private UserInput userInput;
 
-	@CliAvailabilityIndicator({ LIST_STREAM, CREATE_STREAM, DEPLOY_STREAM, UNDEPLOY_STREAM, UNDEPLOY_STREAM_ALL,
+	@CliAvailabilityIndicator({ LIST_STREAM })
+	public boolean availableWithViewRole() {
+		return dataFlowShell.hasAccess(RoleType.VIEW, OpsType.STREAM);
+	}
+
+	@CliAvailabilityIndicator({ CREATE_STREAM, DEPLOY_STREAM, UNDEPLOY_STREAM, UNDEPLOY_STREAM_ALL,
 		DESTROY_STREAM, DESTROY_STREAM_ALL })
-	public boolean available() {
-		DataFlowOperations dataFlowOperations = dataFlowShell.getDataFlowOperations();
-		return dataFlowOperations != null && dataFlowOperations.streamOperations() != null;
+	public boolean availableWithCreateRole() {
+		return dataFlowShell.hasAccess(RoleType.CREATE, OpsType.STREAM);
 	}
 
 	@CliCommand(value = LIST_STREAM, help = "List created streams")

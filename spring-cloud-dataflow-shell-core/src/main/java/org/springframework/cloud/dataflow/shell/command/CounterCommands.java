@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2015-2017 the original author or authors.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,7 +21,8 @@ import org.springframework.analytics.rest.domain.CounterResource;
 import org.springframework.analytics.rest.domain.MetricResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.dataflow.rest.client.CounterOperations;
-import org.springframework.cloud.dataflow.rest.client.DataFlowOperations;
+import org.springframework.cloud.dataflow.shell.command.support.OpsType;
+import org.springframework.cloud.dataflow.shell.command.support.RoleType;
 import org.springframework.cloud.dataflow.shell.config.DataFlowShell;
 import org.springframework.cloud.dataflow.shell.converter.NumberFormatConverter;
 import org.springframework.hateoas.PagedResources;
@@ -34,9 +35,10 @@ import org.springframework.stereotype.Component;
 
 /**
  * Commands for interacting with Counter analytics.
- * 
+ *
  * @author Eric Bottard
  * @author Ilayaperumal Gopinathan
+ * @author Gunnar Hillert
  */
 @Component
 public class CounterCommands extends AbstractMetricsCommands implements CommandMarker {
@@ -54,10 +56,14 @@ public class CounterCommands extends AbstractMetricsCommands implements CommandM
 	@Autowired
 	private DataFlowShell dataFlowShell;
 
-	@CliAvailabilityIndicator({ LIST_COUNTERS, DISPLAY_COUNTER, DELETE_COUNTER })
-	public boolean available() {
-		DataFlowOperations dataFlowOperations = dataFlowShell.getDataFlowOperations();
-		return dataFlowOperations != null && dataFlowOperations.counterOperations() != null;
+	@CliAvailabilityIndicator({ LIST_COUNTERS, DISPLAY_COUNTER })
+	public boolean availableWithViewRole() {
+		return dataFlowShell.hasAccess(RoleType.VIEW, OpsType.COUNTER);
+	}
+
+	@CliAvailabilityIndicator({ DELETE_COUNTER })
+	public boolean availableWithCreateRole() {
+		return dataFlowShell.hasAccess(RoleType.CREATE, OpsType.COUNTER);
 	}
 
 	@CliCommand(value = DISPLAY_COUNTER, help = "Display the value of a counter")

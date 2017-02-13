@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,12 +20,13 @@ import java.util.Map;
 
 import org.springframework.batch.core.JobParameter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.dataflow.rest.client.DataFlowOperations;
 import org.springframework.cloud.dataflow.rest.client.JobOperations;
 import org.springframework.cloud.dataflow.rest.resource.JobExecutionResource;
 import org.springframework.cloud.dataflow.rest.resource.JobInstanceResource;
 import org.springframework.cloud.dataflow.rest.resource.StepExecutionProgressInfoResource;
 import org.springframework.cloud.dataflow.rest.resource.StepExecutionResource;
+import org.springframework.cloud.dataflow.shell.command.support.OpsType;
+import org.springframework.cloud.dataflow.shell.command.support.RoleType;
 import org.springframework.cloud.dataflow.shell.config.DataFlowShell;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.shell.core.CommandMarker;
@@ -42,6 +43,7 @@ import org.springframework.stereotype.Component;
  *
  * @author Glenn Renfro
  * @author Ilayaperumal Gopinathan
+ * @author Gunnar Hillert
  */
 @Component
 public class JobCommands implements CommandMarker {
@@ -61,11 +63,10 @@ public class JobCommands implements CommandMarker {
 	@Autowired
 	private DataFlowShell dataFlowShell;
 
-	@CliAvailabilityIndicator({EXECUTION_DISPLAY, EXECUTION_LIST, STEP_EXECUTION_LIST, INSTANCE_DISPLAY,
-			STEP_EXECUTION_PROGRESS, STEP_EXECUTION_DISPLAY})
-	public boolean available() {
-		DataFlowOperations dataFlowOperations = dataFlowShell.getDataFlowOperations();
-		return dataFlowOperations != null && dataFlowOperations.jobOperations() != null;
+	@CliAvailabilityIndicator({ EXECUTION_DISPLAY, EXECUTION_LIST, STEP_EXECUTION_LIST, INSTANCE_DISPLAY,
+		STEP_EXECUTION_PROGRESS, STEP_EXECUTION_DISPLAY })
+	public boolean availableWithViewRole() {
+		return dataFlowShell.hasAccess(RoleType.VIEW, OpsType.JOB);
 	}
 
 	@CliCommand(value = EXECUTION_LIST,

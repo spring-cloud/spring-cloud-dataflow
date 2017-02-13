@@ -23,22 +23,22 @@ import java.util.TreeMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.cloud.dataflow.rest.client.DataFlowServerException;
 import org.springframework.cloud.dataflow.rest.client.DataFlowTemplate;
+import org.springframework.cloud.dataflow.rest.resource.security.SecurityInfoResource;
 import org.springframework.cloud.dataflow.shell.Target;
 import org.springframework.cloud.dataflow.shell.TargetHolder;
 import org.springframework.cloud.dataflow.shell.command.support.HttpClientUtils;
+import org.springframework.cloud.dataflow.shell.command.support.RoleType;
 import org.springframework.cloud.dataflow.shell.config.DataFlowShell;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.env.Environment;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
@@ -65,9 +65,7 @@ import org.springframework.web.client.RestTemplate;
 @Configuration
 @EnableHypermediaSupport(type = HypermediaType.HAL)
 public class ConfigCommands implements CommandMarker,
-		InitializingBean,
-		ApplicationListener<ApplicationReadyEvent>,
-		ApplicationContextAware
+		ApplicationListener<ApplicationEvent>
 {
 
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -96,8 +94,6 @@ public class ConfigCommands implements CommandMarker,
 	private UserInput userInput;
 
 	private TargetHolder targetHolder;
-
-	private ApplicationContext applicationContext;
 
 	private volatile boolean initialized;
 
@@ -163,11 +159,24 @@ public class ConfigCommands implements CommandMarker,
 		try {
 			this.targetHolder.setTarget(new Target(targetUriString, targetUsername, targetPassword, skipSslValidation));
 
-			HttpClientUtils.prepareRestTemplate(this.restTemplate,
+			HttpClientUtils.prepareRestTemplate(this.restTemplate, this.targetHolder.getTarget().getTargetUri(),
 					targetUsername, targetPassword, skipSslValidation);
 
 			this.shell.setDataFlowOperations(new DataFlowTemplate(targetHolder.getTarget().getTargetUri(), this.restTemplate));
 			this.targetHolder.getTarget().setTargetResultMessage(String.format("Successfully targeted %s", targetUriString));
+
+			final SecurityInfoResource securityInfoResource = restTemplate.getForObject(targetUriString + "/security/info", SecurityInfoResource.class);
+
+			if (securityInfoResource.isAuthenticated() && this.targetHolder.getTarget().getTargetCredentials() != null) {
+				for (String roleAsString : securityInfoResource.getRoles()) {
+					this.targetHolder.getTarget().getTargetCredentials().getRoles().add(RoleType.fromKey(roleAsString));
+				}
+			}
+
+			this.targetHolder.getTarget().setAuthenticated(securityInfoResource.isAuthenticated());
+			this.targetHolder.getTarget().setAuthenticationEnabled(securityInfoResource.isAuthenticationEnabled());
+			this.targetHolder.getTarget().setAuthorizationEnabled(securityInfoResource.isAuthorizationEnabled());
+
 		}
 		catch (Exception e) {
 			this.targetHolder.getTarget().setTargetException(e);
@@ -187,7 +196,9 @@ public class ConfigCommands implements CommandMarker,
 				this.targetHolder.getTarget().setTargetResultMessage(String.format("Unable to contact Data Flow Server at '%s': '%s'.",
 						targetUriString, e.toString()));
 			}
+
 		}
+
 		return(this.targetHolder.getTarget().getTargetResultMessage());
 
 	}
@@ -234,25 +245,15 @@ public class ConfigCommands implements CommandMarker,
 	}
 
 	@Override
-	public void onApplicationEvent(ApplicationReadyEvent event) {
-		//Only invoke if the shell is executing in the same application context as the data flow server.
+	public void onApplicationEvent(ApplicationEvent event) {
 		if (!initialized) {
-			target(this.serverUri, this.userName, this.password, this.skipSslValidation);
+			if (event instanceof ContextRefreshedEvent) {
+				target(this.serverUri, this.userName, this.password, this.skipSslValidation);
+			}
+			else if (event instanceof ApplicationReadyEvent) {
+				target(this.serverUri, this.userName, this.password, this.skipSslValidation);
+			}
 		}
-	}
-
-	@Override
-	public void afterPropertiesSet() throws Exception {
-		//Only invoke this lifecycle method if the shell is executing in stand-alone mode.
-		if (applicationContext != null && !applicationContext.containsBean("streamDefinitionRepository")) {
-			initialized = true;
-			target(this.serverUri, this.userName, this.password, this.skipSslValidation);
-		}
-	}
-
-	@Override
-	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-		this.applicationContext = applicationContext;
 	}
 
 }

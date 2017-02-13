@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2015 the original author or authors.
+ * Copyright 2013-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.util.List;
 
 import org.springframework.hateoas.VndErrors;
 import org.springframework.hateoas.VndErrors.VndError;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.web.client.DefaultResponseErrorHandler;
@@ -31,24 +32,32 @@ import org.springframework.web.client.ResponseExtractor;
  * Extension of {@link DefaultResponseErrorHandler} that knows how to de-serialize a {@link VndError} structure.
  *
  * @author Eric Bottard
+ * @author Gunnar Hillert
  */
 public class VndErrorResponseErrorHandler extends DefaultResponseErrorHandler {
 
-	private ResponseExtractor<VndErrors> errorExtractor;
+	private ResponseExtractor<VndErrors> vndErrorsExtractor;
+	private ResponseExtractor<VndError> vndErrorExtractor;
 
 	public VndErrorResponseErrorHandler(List<HttpMessageConverter<?>> messageConverters) {
-		errorExtractor = new HttpMessageConverterExtractor<VndErrors>(VndErrors.class, messageConverters);
+		vndErrorsExtractor = new HttpMessageConverterExtractor<VndErrors>(VndErrors.class, messageConverters);
+		vndErrorExtractor = new HttpMessageConverterExtractor<VndError>(VndError.class, messageConverters);
 	}
 
 	@Override
 	public void handleError(ClientHttpResponse response) throws IOException {
-		VndErrors error = null;
+		VndErrors vndErrors = null;
 		try {
-			error = errorExtractor.extractData(response);
+			if (HttpStatus.FORBIDDEN.equals(response.getStatusCode())) {
+				vndErrors = new VndErrors(vndErrorExtractor.extractData(response));
+			}
+			else {
+				vndErrors = vndErrorsExtractor.extractData(response);
+			}
 		}
 		catch (Exception e) {
 			super.handleError(response);
 		}
-		throw new DataFlowClientException(error);
+		throw new DataFlowClientException(vndErrors);
 	}
 }
