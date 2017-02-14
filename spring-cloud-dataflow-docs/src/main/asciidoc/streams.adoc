@@ -372,9 +372,11 @@ stream deploy foo --propertiesFile myprops.yaml
 where `myprops.yaml` contains:
 
 ```
-app:
+deployer:
   transform:
     count: 2
+app:
+  transform:
     producer:
       partitionKeyExpression: payload
 ```
