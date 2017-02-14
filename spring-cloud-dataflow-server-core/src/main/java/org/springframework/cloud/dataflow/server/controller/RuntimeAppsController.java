@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2016 the original author or authors.
+ * Copyright 2015-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepo
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.app.AppInstanceStatus;
 import org.springframework.cloud.deployer.spi.app.AppStatus;
+import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.ExposesResourceFor;
@@ -54,6 +55,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @author Eric Bottard
  * @author Mark Fisher
  * @author Janne Valkealahti
+ * @author Ilayaperumal Gopinathan
  */
 @RestController
 @RequestMapping("/runtime/apps")
@@ -90,15 +92,15 @@ public class RuntimeAppsController {
 	 * Instantiates a new runtime apps controller.
 	 *
 	 * @param streamDefinitionRepository the repository this controller will use for stream CRUD operations
-	 * @param deploymentIdRepository the repository this controller will use for deployment IDs
-	 * @param appDeployer the deployer this controller will use to deploy stream apps
-	 * @param forkJoinPool a ForkJoinPool which will be used to query AppStatuses in parallel
+	 * @param deploymentIdRepository     the repository this controller will use for deployment IDs
+	 * @param appDeployer                the deployer this controller will use to deploy stream apps
+	 * @param forkJoinPool               a ForkJoinPool which will be used to query AppStatuses in parallel
 	 */
 	public RuntimeAppsController(StreamDefinitionRepository streamDefinitionRepository,
-		DeploymentIdRepository deploymentIdRepository,
+			DeploymentIdRepository deploymentIdRepository,
 			AppDeployer appDeployer,
 			ForkJoinPool forkJoinPool
-		) {
+	) {
 		Assert.notNull(streamDefinitionRepository, "StreamDefinitionRepository must not be null");
 		Assert.notNull(deploymentIdRepository, "DeploymentIdRepository must not be null");
 		Assert.notNull(appDeployer, "AppDeployer must not be null");
@@ -118,17 +120,17 @@ public class RuntimeAppsController {
 
 		// Running this this inside the FJP will make sure it is used by the parallel stream
 		List<AppStatus> statuses = forkJoinPool.submit(() ->
-			asList.stream()
-				.flatMap(sd -> sd.getAppDefinitions().stream())
-				.flatMap(sad -> {
-					String key = DeploymentKey.forStreamAppDefinition(sad);
-					String id = this.deploymentIdRepository.findOne(key);
-					return id != null ? Stream.of(id) : Stream.empty();
-				})
-				.parallel()
-				.map(appDeployer::status)
-				.sorted((o1, o2) -> o1.getDeploymentId().compareTo(o2.getDeploymentId()))
-				.collect(Collectors.toList())
+				asList.stream()
+						.flatMap(sd -> sd.getAppDefinitions().stream())
+						.flatMap(sad -> {
+							String key = DeploymentKey.forStreamAppDefinition(sad);
+							String id = this.deploymentIdRepository.findOne(key);
+							return id != null ? Stream.of(id) : Stream.empty();
+						})
+						.parallel()
+						.map(appDeployer::status)
+						.sorted((o1, o2) -> o1.getDeploymentId().compareTo(o2.getDeploymentId()))
+						.collect(Collectors.toList())
 		).get();
 		return assembler.toResource(new PageImpl<>(statuses), statusAssembler);
 	}
@@ -136,10 +138,10 @@ public class RuntimeAppsController {
 	@RequestMapping("/{id}")
 	public AppStatusResource display(@PathVariable String id) {
 		AppStatus status = appDeployer.status(id);
-		if (status != null) {
-			return statusAssembler.toResource(status);
+		if (status.getState().equals(DeploymentState.unknown)) {
+			throw new NoSuchAppException(id);
 		}
-		throw new ResourceNotFoundException();
+		return statusAssembler.toResource(status);
 	}
 
 	private class Assembler extends ResourceAssemblerSupport<AppStatus, AppStatusResource> {
@@ -183,32 +185,26 @@ public class RuntimeAppsController {
 		public PagedResources<AppInstanceStatusResource> list(@PathVariable String appId,
 				PagedResourcesAssembler<AppInstanceStatus> assembler) {
 			AppStatus status = appDeployer.status(appId);
-			if (status != null) {
-				List<AppInstanceStatus> appInstanceStatuses = new ArrayList<>(status.getInstances().values());
-				Collections.sort(appInstanceStatuses, INSTANCE_SORTER);
-				return assembler.toResource(new PageImpl<>(appInstanceStatuses), new InstanceAssembler(status));
+			if (status.getState().equals(DeploymentState.unknown)) {
+				throw new NoSuchAppException(appId);
 			}
-			throw new ResourceNotFoundException();
+			List<AppInstanceStatus> appInstanceStatuses = new ArrayList<>(status.getInstances().values());
+			Collections.sort(appInstanceStatuses, INSTANCE_SORTER);
+			return assembler.toResource(new PageImpl<>(appInstanceStatuses), new InstanceAssembler(status));
 		}
 
 		@RequestMapping("/{instanceId}")
 		public AppInstanceStatusResource display(@PathVariable String appId, @PathVariable String instanceId) {
 			AppStatus status = appDeployer.status(appId);
-			if (status != null) {
-				AppInstanceStatus appInstanceStatus = status.getInstances().get(instanceId);
-				if (appInstanceStatus == null) {
-					throw new ResourceNotFoundException();
-				}
-				return new InstanceAssembler(status).toResource(appInstanceStatus);
+			if (status.getState().equals(DeploymentState.unknown)) {
+				throw new NoSuchAppException(appId);
 			}
-			throw new ResourceNotFoundException();
+			AppInstanceStatus appInstanceStatus = status.getInstances().get(instanceId);
+			if (appInstanceStatus == null) {
+				throw new NoSuchAppInstanceException(instanceId);
+			}
+			return new InstanceAssembler(status).toResource(appInstanceStatus);
 		}
-
-	}
-
-	@SuppressWarnings("serial")
-	@ResponseStatus(HttpStatus.NOT_FOUND)
-	private static class ResourceNotFoundException extends RuntimeException {
 	}
 
 	private static class InstanceAssembler extends ResourceAssemblerSupport<AppInstanceStatus, AppInstanceStatusResource> {

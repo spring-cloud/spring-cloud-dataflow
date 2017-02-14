@@ -22,6 +22,7 @@ import static org.springframework.hateoas.config.EnableHypermediaSupport.Hyperme
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ForkJoinPool;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
@@ -35,6 +36,7 @@ import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationPr
 import org.springframework.cloud.dataflow.server.controller.AppRegistryController;
 import org.springframework.cloud.dataflow.server.controller.CompletionController;
 import org.springframework.cloud.dataflow.server.controller.RestControllerAdvice;
+import org.springframework.cloud.dataflow.server.controller.RuntimeAppsController;
 import org.springframework.cloud.dataflow.server.controller.StreamDefinitionController;
 import org.springframework.cloud.dataflow.server.controller.StreamDeploymentController;
 import org.springframework.cloud.dataflow.server.controller.TaskDefinitionController;
@@ -132,6 +134,16 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	@Bean
 	public AppRegistryController appRegistryController(AppRegistry registry, ApplicationConfigurationMetadataResolver metadataResolver) {
 		return new AppRegistryController(registry, metadataResolver);
+	}
+
+	@Bean
+	public RuntimeAppsController runtimeAppsController() {
+		return new RuntimeAppsController(streamDefinitionRepository(), deploymentIdRepository(), appDeployer(), new ForkJoinPool(2));
+	}
+
+	@Bean
+	public RuntimeAppsController.AppInstanceController appInstanceController() {
+		return new RuntimeAppsController.AppInstanceController(appDeployer());
 	}
 
 	@Bean
