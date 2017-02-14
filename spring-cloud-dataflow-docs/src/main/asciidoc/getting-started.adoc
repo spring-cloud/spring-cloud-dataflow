@@ -160,18 +160,18 @@ spring.cloud.deployer.local.shutdownTimeout=30 # Max number of seconds to wait f
 spring.cloud.deployer.local.javaOpts= # The Java options to pass to the JVM
 ----
 
-When deploying the application you can also set deployer properties prefixed with `app.<name of application>`, So for example to set Java options for the time application in the `ticktock` stream, use the following stream deployment properties.
+When deploying the application you can also set deployer properties prefixed with `deployer.<name of application>`, So for example to set Java options for the time application in the `ticktock` stream, use the following stream deployment properties.
 [source,bash]
 ----
 dataflow:> stream create --name ticktock --definition "time --server.port=9000 | log"
-dataflow:> stream deploy --name ticktock --properties "app.time.spring.cloud.deployer.local.javaOpts=-Xmx2048m -Dtest=foo"
+dataflow:> stream deploy --name ticktock --properties "deployer.time.local.javaOpts=-Xmx2048m -Dtest=foo"
 ----
 
-As a convenience you can set the property `spring.cloud.deployer.local.memory` to set the Java option `-Xmx`.  So for example, 
+As a convenience you can set the property `deployer.memory` to set the Java option `-Xmx`.  So for example, 
 
 [source,bash]
 ----
-dataflow:> stream deploy --name ticktock --properties "app.time.spring.cloud.deployer.local.memory=2048m"
+dataflow:> stream deploy --name ticktock --properties "deployer.time.memory=2048m"
 ----
 
-At deployment time, if you specify an `-Xmx` option in the `javaOpts` property in addition to a value of the `memory` option, the value in the `javaOpts` property has precedence.  Also, the `javaOpts` property set when deploying the application has precedence over the Data Flow server's `javaOpts` property.
+At deployment time, if you specify an `-Xmx` option in the `deployer.<app>.local.javaOpts` property in addition to a value of the `deployer.<app>.local.memory` option, the value in the `javaOpts` property has precedence.  Also, the `javaOpts` property set when deploying the application has precedence over the Data Flow server's `spring.cloud.deployer.local.javaOpts` property.

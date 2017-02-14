@@ -143,8 +143,8 @@ To use a simple partitioning strategy in Spring Cloud Data Flow, you only need s
 
 [source,bash]
 ----
-app.http.count=3
-app.averageprocessor.count=2
+deployer.http.count=3
+deployer.averageprocessor.count=2
 app.http.producer.partitionKeyExpression=payload.sensorId
 ----
 will deploy the stream such that all the input and output destinations are configured for data to flow through the applications but also ensure that a unique set of data is always delivered to each averageprocessor instance.  In this case the default algorithm is to evaluate `payload.sensorId % partitionCount` where the `partitionCount` is the application count in the case of RabbitMQ and the partition count of the topic in the case of Kafka.
