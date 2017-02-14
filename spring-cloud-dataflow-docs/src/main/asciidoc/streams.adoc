@@ -309,11 +309,11 @@ For instance, one can specify how many instances need to be deployed for the spe
 ==== Passing instance count as deployment property
 
 If you would like to have multiple instances of an application in the stream, you
-can include a property with the deploy command:
+can include a deployer property with the deploy command:
 
 [source,bash,subs=attributes]
 ----
-dataflow:> stream deploy --name ticktock --properties "app.time.count=3"
+dataflow:> stream deploy --name ticktock --properties "deployer.time.count=3"
 ----
 
 Note that `count` is the *reserved* property name used by the underlying deployer. Hence, if the application also has a custom property named `count`, it is *not* supported
@@ -337,7 +337,7 @@ and documented below:
 [source,bash]
 ----
 stream deploy foo
-    --properties "app.transform.count=2,app.transform.producer.partitionKeyExpression=payload"
+    --properties "deployer.transform.count=2,app.transform.producer.partitionKeyExpression=payload"
 ----
 
 *Using a file reference*::
@@ -356,7 +356,7 @@ stream deploy foo --propertiesFile myprops.properties
 where `myprops.properties` contains:
 
 ```
-app.transform.count=2
+deployer.transform.count=2
 app.transform.producer.partitionKeyExpression=payload
 ```
 
@@ -642,7 +642,7 @@ To demonstrate the data partitioning functionality, let's deploy the following s
 dataflow:>stream create --name words --definition "http --server.port=9900 | splitter --expression=payload.split(' ') | log"
 Created new stream 'words'
 
-dataflow:>stream deploy words --properties "app.splitter.producer.partitionKeyExpression=payload,app.log.count=2"
+dataflow:>stream deploy words --properties "app.splitter.producer.partitionKeyExpression=payload,deployer.log.count=2"
 Deployed stream 'words'
 
 dataflow:>http post --target http://localhost:9900 --data "How much wood would a woodchuck chuck if a woodchuck could chuck wood"
