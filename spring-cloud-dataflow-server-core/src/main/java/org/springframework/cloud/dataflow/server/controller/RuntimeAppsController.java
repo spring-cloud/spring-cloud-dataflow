@@ -154,7 +154,7 @@ public class RuntimeAppsController {
 			PRETTY_STATES.put(DeploymentState.failed, "All instances failed");
 			PRETTY_STATES.put(DeploymentState.partial, "Some instances failed");
 			PRETTY_STATES.put(DeploymentState.unknown, "Unknown app");
-			// unknown, undeployed not mapped on purpose
+			// undeployed not mapped on purpose
 			Assert.isTrue(PRETTY_STATES.size() == DeploymentState.values().length - 1);
 		}
 
