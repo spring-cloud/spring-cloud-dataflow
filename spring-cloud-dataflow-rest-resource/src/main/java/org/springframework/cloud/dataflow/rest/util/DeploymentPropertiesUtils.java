@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2016 the original author or authors.
+ * Copyright 2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.TreeMap;
 import java.util.regex.Matcher;
@@ -48,7 +49,7 @@ public final class DeploymentPropertiesUtils {
 	/**
 	 * Pattern used for parsing a String of comma-delimited key=value pairs.
 	 */
-	private static final Pattern DEPLOYMENT_PROPERTIES_PATTERN = Pattern.compile(",\\s*(app|deployer)\\.[^\\.]+\\.[^=]+=");
+	private static final Pattern DEPLOYMENT_PROPERTIES_PATTERN = Pattern.compile("(?:,{0,1}\\s*)((\\.*(\\w|\\*|-)+)+)(\\s*=\\s*)");
 
 	/**
 	 * Pattern used for parsing a String of command-line arguments.
@@ -60,21 +61,62 @@ public final class DeploymentPropertiesUtils {
 	 * {@code app.[appname].[key]} or {@code deployer.[appname].[key]}.
 	 * Values may themselves contain commas, since the split points will be based upon the key pattern.
 	 *
+	 *
+	 * Logic of this pattern to find boundaries of valid key=value pairs is:
+	 * 1. (?:,{0,1}\s*) is a non-capturing group which takes characters before a key.
+	 *    Needed so that capturing groups later will capture key boundaries correctly.
+	 * 2. ((\.*(\w|\*|-)+)+) is a capturing group finding an actual key. There is a recursive
+	 *    capturing groups inside of it as we assume key is formed from dots and words and
+	 *    we capture those as many time as needed. We get groups 1, 2 and 3 but we only use 1.
+	 * 3. (\s*=\s*) here we find boundary of '=' which may have empty characters around it.
+	 *    This becomes capturing group 4.
+	 * 4. Now we know where is key with group 1 and start of value with group 4.
+	 * 5. Now we can start to do matching. Need to match one ahead so that we
+	 *    know where next key possible is as that is then end of previous value.
+	 * 6. Lastly we have one pair left which is a same case if we only have
+	 *    one pair to parse.
+	 *
 	 * @param s the string to parse
 	 * @return the Map of parsed key value pairs
 	 */
 	public static Map<String, String> parse(String s) {
 		Map<String, String> deploymentProperties = new HashMap<String, String>();
 		if (!StringUtils.isEmpty(s)) {
-			Matcher matcher = DEPLOYMENT_PROPERTIES_PATTERN.matcher(s);
 			int start = 0;
+			int end = 0;
+			Matcher matcher = DEPLOYMENT_PROPERTIES_PATTERN.matcher(s);
 			while (matcher.find()) {
-				addKeyValuePairAsProperty(s.substring(start, matcher.start()), deploymentProperties);
-				start = matcher.start() + 1;
+				if (end > 0) {
+					// we don't know first value position until we've found second match
+					addKeyValuePairAsProperty(s.substring(start, matcher.start()), deploymentProperties);
+				}
+				start = matcher.start(1);
+				end = matcher.end(4);
 			}
+			// last match, we still have one left.
 			addKeyValuePairAsProperty(s.substring(start), deploymentProperties);
 		}
 		return deploymentProperties;
+	}
+
+	/**
+	 * Ensure that deployment properties doesn't have keys not starting with
+	 * either {@code app.} or {@code deployer.}. In case non supported key is found
+	 * {@link IllegalArgumentException} is thrown.
+	 *
+	 * @param properties the properties to check
+	 */
+	public static void ensureJustDeploymentProperties(Map<String, String> properties) {
+		if (properties == null) {
+			return;
+		}
+		for (Entry<String, String> property : properties.entrySet()) {
+			String key = property.getKey();
+			if (!key.startsWith("app.") && !key.startsWith("deployer.")) {
+				throw new IllegalArgumentException(
+						"Only deployment property keys starting with 'app.' or 'deployer.' allowed, got '" + key + "'");
+			}
+		}
 	}
 
 	/**

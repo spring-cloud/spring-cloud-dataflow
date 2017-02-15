@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.dataflow.rest.job.support;
 
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.hasSize;
@@ -41,12 +42,47 @@ public class DeploymentPropertiesUtilsTests {
 	@Test
 	public void testDeploymentPropertiesParsing() {
 		Map<String, String> props = DeploymentPropertiesUtils.parse("app.foo.bar=v, app.foo.wizz=v2  , deployer.foo.pot=fern, app.other.key = value  , deployer.other.cow = meww");
-		System.out.println(props);
 		assertThat(props, hasEntry("app.foo.bar", "v"));
 		assertThat(props, hasEntry("app.other.key", "value"));
 		assertThat(props, hasEntry("app.foo.wizz", "v2"));
 		assertThat(props, hasEntry("deployer.foo.pot", "fern"));
 		assertThat(props, hasEntry("deployer.other.cow", "meww"));
+
+		props = DeploymentPropertiesUtils.parse("f=v");
+		assertThat(props, hasEntry("f", "v"));
+
+		props = DeploymentPropertiesUtils.parse("foo1=bar1,app.foo2=bar2,foo3=bar3,xxx3");
+		assertThat(props, hasEntry("foo1", "bar1"));
+		assertThat(props, hasEntry("app.foo2", "bar2"));
+		assertThat(props, hasEntry("foo3", "bar3,xxx3"));
+
+		props = DeploymentPropertiesUtils.parse("foo1 = bar1 , app.foo2= bar2,  foo3  = bar3,xxx3");
+		assertThat(props, hasEntry("foo1", "bar1"));
+		assertThat(props, hasEntry("app.foo2", "bar2"));
+		assertThat(props, hasEntry("foo3", "bar3,xxx3"));
+
+		props = DeploymentPropertiesUtils.parse("app.*.count=1");
+		assertThat(props, hasEntry("app.*.count", "1"));
+
+		props = DeploymentPropertiesUtils.parse("app.*.my-count=1");
+		assertThat(props, hasEntry("app.*.my-count", "1"));
+
+		props = DeploymentPropertiesUtils.parse("app.transform.producer.partitionKeyExpression=fakeExpression('xxx')");
+		assertThat(props, hasEntry("app.transform.producer.partitionKeyExpression", "fakeExpression('xxx')"));
+
+		props = DeploymentPropertiesUtils.parse("invalidkeyvalue");
+		assertThat(props.size(), is(0));
+
+		props = DeploymentPropertiesUtils.parse("invalidkeyvalue1,invalidkeyvalue2");
+		assertThat(props.size(), is(0));
+
+		props = DeploymentPropertiesUtils.parse("invalidkeyvalue1,invalidkeyvalue2,foo=bar");
+		assertThat(props.size(), is(1));
+		assertThat(props, hasEntry("foo", "bar"));
+
+		props = DeploymentPropertiesUtils.parse("invalidkeyvalue1,foo=bar,invalidkeyvalue2");
+		assertThat(props.size(), is(1));
+		assertThat(props, hasEntry("foo", "bar,invalidkeyvalue2"));
 	}
 
 	@Test

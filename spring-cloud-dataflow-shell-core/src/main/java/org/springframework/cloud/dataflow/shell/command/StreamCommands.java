@@ -150,6 +150,7 @@ public class StreamCommands implements CommandMarker {
 			default:
 				throw new AssertionError();
 		}
+		DeploymentPropertiesUtils.ensureJustDeploymentProperties(propertiesToUse);
 		streamOperations().deploy(name, propertiesToUse);
 		return String.format("Deployment request has been sent for stream '%s'", name);
 	}

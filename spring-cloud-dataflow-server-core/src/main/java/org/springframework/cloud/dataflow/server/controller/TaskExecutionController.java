@@ -18,6 +18,7 @@ package org.springframework.cloud.dataflow.server.controller;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.cloud.dataflow.rest.job.TaskJobExecutionRel;
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionResource;
@@ -133,7 +134,9 @@ public class TaskExecutionController {
 	@ResponseStatus(HttpStatus.CREATED)
 	public long launch(@RequestParam("name") String taskName, @RequestParam(required = false) String properties,
 		@RequestParam(required = false) List<String> arguments) {
-		return this.taskService.executeTask(taskName, DeploymentPropertiesUtils.parse(properties), DeploymentPropertiesUtils.parseParams(arguments));
+		Map<String, String> propertiesToUse = DeploymentPropertiesUtils.parse(properties);
+		DeploymentPropertiesUtils.ensureJustDeploymentProperties(propertiesToUse);
+		return this.taskService.executeTask(taskName, propertiesToUse, DeploymentPropertiesUtils.parseParams(arguments));
 	}
 
 
