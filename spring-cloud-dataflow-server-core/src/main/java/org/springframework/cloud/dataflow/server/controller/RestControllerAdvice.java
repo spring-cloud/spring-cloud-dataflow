@@ -121,7 +121,9 @@ public class RestControllerAdvice {
 			NoSuchJobInstanceException.class,
 			NoSuchJobException.class,
 			NoSuchStepExecutionException.class,
-			MetricsMvcEndpoint.NoSuchMetricException.class})
+			MetricsMvcEndpoint.NoSuchMetricException.class,
+			NoSuchAppException.class,
+			NoSuchAppInstanceException.class})
 	@ResponseStatus(HttpStatus.NOT_FOUND)
 	@ResponseBody
 	public VndErrors onNotFoundException(Exception e) {
@@ -139,10 +141,10 @@ public class RestControllerAdvice {
 	 * Return response status HttpStatus.BAD_REQUEST (400).
 	 */
 	@ExceptionHandler({
-		MissingServletRequestParameterException.class,
-		UnsatisfiedServletRequestParameterException.class,
-		MethodArgumentTypeMismatchException.class,
-		InvalidStreamDefinitionException.class
+			MissingServletRequestParameterException.class,
+			UnsatisfiedServletRequestParameterException.class,
+			MethodArgumentTypeMismatchException.class,
+			InvalidStreamDefinitionException.class
 	})
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	@ResponseBody
@@ -158,7 +160,7 @@ public class RestControllerAdvice {
 	/**
 	 * The exception handler is trigger if a JSR303 {@link ConstraintViolationException}
 	 * is being raised.
-	 *
+	 * <p>
 	 * Log the exception message at warn level and stack trace as trace level.
 	 * Return response status HttpStatus.BAD_REQUEST (400).
 	 */

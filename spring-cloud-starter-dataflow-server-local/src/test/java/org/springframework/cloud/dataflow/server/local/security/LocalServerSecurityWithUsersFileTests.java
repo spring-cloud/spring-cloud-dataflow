@@ -238,17 +238,17 @@ public class LocalServerSecurityWithUsersFileTests {
 			{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/runtime/apps", null,           null },
 
 			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/runtime/apps/123", adminOnlyUser,  null },
-			{ HttpMethod.GET, HttpStatus.OK,           "/runtime/apps/123", viewOnlyUser,   null }, //Should be 404 - See also: https://github.com/spring-cloud/spring-cloud-dataflow/issues/1077
+			{ HttpMethod.GET, HttpStatus.NOT_FOUND,           "/runtime/apps/123", viewOnlyUser,   null },
 			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/runtime/apps/123", createOnlyUser, null },
 			{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/runtime/apps/123", null,           null },
 
 			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/runtime/apps/123/instances", adminOnlyUser,  null },
-			{ HttpMethod.GET, HttpStatus.OK,    "/runtime/apps/123/instances", viewOnlyUser,   null }, //Should be 404 - See also: https://github.com/spring-cloud/spring-cloud-dataflow/issues/1077
+			{ HttpMethod.GET, HttpStatus.NOT_FOUND,    "/runtime/apps/123/instances", viewOnlyUser,   null },
 			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/runtime/apps/123/instances", createOnlyUser, null },
 			{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/runtime/apps/123/instances", null,           null },
 
 			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/runtime/apps/123/instances/456", adminOnlyUser,  null },
-			{ HttpMethod.GET, HttpStatus.INTERNAL_SERVER_ERROR, "/runtime/apps/123/instances/456", viewOnlyUser,   null }, //Should be 404 - See also: https://github.com/spring-cloud/spring-cloud-dataflow/issues/1077
+			{ HttpMethod.GET, HttpStatus.NOT_FOUND, "/runtime/apps/123/instances/456", viewOnlyUser,   null },
 			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/runtime/apps/123/instances/456", createOnlyUser, null },
 			{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/runtime/apps/123/instances/456", null,           null },
 
