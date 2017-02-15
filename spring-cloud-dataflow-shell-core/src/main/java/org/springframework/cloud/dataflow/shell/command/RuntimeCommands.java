@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2016 the original author or authors.
+ * Copyright 2015-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,6 @@ import org.springframework.cloud.dataflow.rest.client.DataFlowOperations;
 import org.springframework.cloud.dataflow.rest.client.RuntimeOperations;
 import org.springframework.cloud.dataflow.rest.resource.AppInstanceStatusResource;
 import org.springframework.cloud.dataflow.rest.resource.AppStatusResource;
-import org.springframework.cloud.dataflow.shell.command.support.HasRole;
 import org.springframework.cloud.dataflow.shell.command.support.RoleType;
 import org.springframework.cloud.dataflow.shell.config.DataFlowShell;
 import org.springframework.shell.core.CommandMarker;
@@ -56,9 +55,9 @@ import org.springframework.util.Assert;
  *
  * @author Eric Bottard
  * @author Mark Fisher
+ * @author Gunnar Hillert
  */
 @Component
-@HasRole(RoleType.VIEW)
 public class RuntimeCommands implements CommandMarker {
 
 	private static final String LIST_APPS = "runtime apps";
@@ -71,10 +70,9 @@ public class RuntimeCommands implements CommandMarker {
 		this.dataFlowShell = dataFlowShell;
 	}
 
-	@CliAvailabilityIndicator({LIST_APPS})
-	public boolean available() {
-		DataFlowOperations dataFlowOperations = dataFlowShell.getDataFlowOperations();
-		return dataFlowOperations != null && dataFlowOperations.runtimeOperations() != null;
+	@CliAvailabilityIndicator({ LIST_APPS })
+	public boolean availableWithViewRole() {
+		return dataFlowShell.hasRole(RoleType.VIEW);
 	}
 
 	@CliCommand(value = LIST_APPS, help = "List runtime apps")

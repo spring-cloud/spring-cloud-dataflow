@@ -18,9 +18,6 @@ package org.springframework.cloud.dataflow.shell.command;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.lang.annotation.ElementType;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -35,9 +32,7 @@ import org.springframework.cloud.dataflow.rest.client.DataFlowTemplate;
 import org.springframework.cloud.dataflow.rest.resource.security.SecurityInfoResource;
 import org.springframework.cloud.dataflow.shell.Target;
 import org.springframework.cloud.dataflow.shell.TargetHolder;
-import org.springframework.cloud.dataflow.shell.command.support.HasRole;
 import org.springframework.cloud.dataflow.shell.command.support.HttpClientUtils;
-import org.springframework.cloud.dataflow.shell.command.support.RoleType;
 import org.springframework.cloud.dataflow.shell.config.DataFlowShell;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -46,7 +41,6 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.env.Environment;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
@@ -181,30 +175,11 @@ public class ConfigCommands implements CommandMarker,
 			this.targetHolder.getTarget().setTargetResultMessage(String.format("Successfully targeted %s", targetUriString));
 
 			final SecurityInfoResource securityInfoResource = restTemplate.getForObject(targetUriString + "/security/info", SecurityInfoResource.class);
+			this.targetHolder.getTarget().getTargetCredentials().setAuthenticated(securityInfoResource.isAuthenticated());
+			this.targetHolder.getTarget().getTargetCredentials().setAuthenticationEnabled(securityInfoResource.isAuthenticationEnabled());
+			this.targetHolder.getTarget().getTargetCredentials().setAuthorizationEnabled(securityInfoResource.isAuthorizationEnabled());
+			this.targetHolder.getTarget().getTargetCredentials().setRoles(securityInfoResource.getRoles());
 
-			if (securityInfoResource.isAuthenticationEnabled() && securityInfoResource.isAuthorizationEnabled()) {
-				List<CommandMarker> commandMarkersToRemove = new ArrayList<>(0);
-				for (CommandMarker commandMarker : jLineShellComponent.getSimpleParser().getCommandMarkers()) {
-					final HasRole hasRoleAnnotation = commandMarker.getClass().getAnnotation(HasRole.class);
-
-					if (hasRoleAnnotation != null && hasRoleAnnotation.value().length > 0) {
-						boolean found = false;
-						for (RoleType roleType : hasRoleAnnotation.value()) {
-							if (RoleType.VIEW.equals(roleType)) {
-								found = true;
-								break;
-							}
-						}
-						if (!found) {
-							commandMarkersToRemove.add(commandMarker);
-						}
-					}
-				}
-
-				for (CommandMarker commandMarker : commandMarkersToRemove) {
-					jLineShellComponent.getSimpleParser().remove(commandMarker);
-				}
-			}
 		}
 		catch (Exception e) {
 			this.targetHolder.getTarget().setTargetException(e);

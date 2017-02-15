@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2015-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,10 @@
 
 package org.springframework.cloud.dataflow.shell.config;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.dataflow.rest.client.DataFlowOperations;
+import org.springframework.cloud.dataflow.shell.TargetHolder;
+import org.springframework.cloud.dataflow.shell.command.support.RoleType;
 import org.springframework.stereotype.Component;
 
 /**
@@ -24,11 +27,16 @@ import org.springframework.stereotype.Component;
  * communicating with the Spring Cloud Data Flow REST server.
  *
  * @author Ilayaperumal Gopinathan
+ * @author Gunnar Hillert
  */
 @Component
 public class DataFlowShell {
 
+	//@Autowired
 	private DataFlowOperations dataFlowOperations;
+
+	//@Autowired
+	private TargetHolder targetHolder;
 
 	public DataFlowOperations getDataFlowOperations() {
 		return dataFlowOperations;
@@ -36,5 +44,9 @@ public class DataFlowShell {
 
 	public void setDataFlowOperations(DataFlowOperations dataFlowOperations) {
 		this.dataFlowOperations = dataFlowOperations;
+	}
+
+	public boolean hasRole(RoleType create) {
+		return this.dataFlowOperations != null && this.dataFlowOperations.streamOperations() != null;
 	}
 }

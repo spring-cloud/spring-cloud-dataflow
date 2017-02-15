@@ -20,6 +20,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.cloud.dataflow.shell.command.support.RoleType;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -39,25 +40,19 @@ public class Target {
 
 	public class Credentials {
 
-		String username;
+		private String username;
 
-		String password;
+		private String password;
 
-		List<String> roles = new ArrayList<>(0);
+		private boolean authenticationEnabled;
+		private boolean authorizationEnabled;
+		private boolean authenticated;
 
-		// for serialization/persistence
-		public Credentials() {
-		}
+		List<RoleType> roles = new ArrayList<>(0);
 
 		public Credentials(String username, String password) {
 			this.username = username;
 			this.password = password;
-		}
-
-		public Credentials(String username, String password, List<String> roles) {
-			this.username = username;
-			this.password = password;
-			this.roles = roles;
 		}
 
 		public String getUsername() {
@@ -78,6 +73,40 @@ public class Target {
 
 		public String getDisplayableContents() {
 			return "[username='" + username +", password=****']";
+		}
+
+		public boolean isAuthenticationEnabled() {
+			return authenticationEnabled;
+		}
+
+		public void setAuthenticationEnabled(boolean authenticationEnabled) {
+			this.authenticationEnabled = authenticationEnabled;
+		}
+
+		public boolean isAuthorizationEnabled() {
+			return authorizationEnabled;
+		}
+
+		public void setAuthorizationEnabled(boolean authorizationEnabled) {
+			this.authorizationEnabled = authorizationEnabled;
+		}
+
+		public boolean isAuthenticated() {
+			return authenticated;
+		}
+
+		public void setAuthenticated(boolean authenticated) {
+			this.authenticated = authenticated;
+		}
+
+		public List<RoleType> getRoles() {
+			return roles;
+		}
+
+		public void setRoles(List<String> roles) {
+			for (String roleAsString : roles) {
+				this.roles.add(RoleType.fromKey(roleAsString));
+			}
 		}
 	}
 

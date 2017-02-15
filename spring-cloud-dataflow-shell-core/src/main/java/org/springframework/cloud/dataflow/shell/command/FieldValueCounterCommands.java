@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2016 the original author or authors.
+ * Copyright 2015-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,8 +24,8 @@ import java.util.List;
 import org.springframework.analytics.rest.domain.FieldValueCounterResource;
 import org.springframework.analytics.rest.domain.MetricResource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.dataflow.rest.client.DataFlowOperations;
 import org.springframework.cloud.dataflow.rest.client.FieldValueCounterOperations;
+import org.springframework.cloud.dataflow.shell.command.support.RoleType;
 import org.springframework.cloud.dataflow.shell.config.DataFlowShell;
 import org.springframework.cloud.dataflow.shell.converter.NumberFormatConverter;
 import org.springframework.hateoas.PagedResources;
@@ -44,9 +44,10 @@ import org.springframework.stereotype.Component;
 
 /**
  * Commands for interacting with Field Value Counter analytics.
- * 
+ *
  * @author Eric Bottard
  * @author Ilayaperumal Gopinathan
+ * @author Gunnar Hillert
  */
 @Component
 public class FieldValueCounterCommands extends AbstractMetricsCommands implements CommandMarker {
@@ -64,10 +65,14 @@ public class FieldValueCounterCommands extends AbstractMetricsCommands implement
 	@Autowired
 	private DataFlowShell dataFlowShell;
 
-	@CliAvailabilityIndicator({ LIST_COUNTERS, DISPLAY_COUNTER, RESET_COUNTER})
-	public boolean available() {
-		DataFlowOperations dataFlowOperations = dataFlowShell.getDataFlowOperations();
-		return dataFlowOperations != null && dataFlowOperations.fieldValueCounterOperations() != null;
+	@CliAvailabilityIndicator({ LIST_COUNTERS, DISPLAY_COUNTER })
+	public boolean availableWithViewRole() {
+		return dataFlowShell.hasRole(RoleType.VIEW);
+	}
+
+	@CliAvailabilityIndicator({ RESET_COUNTER })
+	public boolean availableWithCreateRole() {
+		return dataFlowShell.hasRole(RoleType.CREATE);
 	}
 
 	@CliCommand(value = DISPLAY_COUNTER, help = "Display the value of a field value counter")
