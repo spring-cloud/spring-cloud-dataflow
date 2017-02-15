@@ -178,7 +178,9 @@ public class StreamDeploymentController {
 		else if (DeploymentState.deploying.equals(DeploymentState.valueOf(status))) {
 			throw new StreamAlreadyDeployingException(name);
 		}
-		deployStream(stream, DeploymentPropertiesUtils.parse(properties));
+		Map<String, String> propertiesToUse = DeploymentPropertiesUtils.parse(properties);
+		DeploymentPropertiesUtils.ensureJustDeploymentProperties(propertiesToUse);
+		deployStream(stream, propertiesToUse);
 	}
 
 	private String calculateStreamState(String name) {
