@@ -191,9 +191,11 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	}
 
 	@Bean
-	public TaskService taskService(ApplicationConfigurationMetadataResolver metadataResolver, TaskRepository taskExecutionRepository) {
+	public TaskService taskService(
+		ApplicationConfigurationMetadataResolver metadataResolver,
+		TaskRepository taskExecutionRepository) {
 		return new DefaultTaskService(new DataSourceProperties(), taskDefinitionRepository(), taskExplorer(), taskExecutionRepository,
-				uriRegistry(), resourceLoader(), taskLauncher(), metadataResolver);
+				appRegistry(), resourceLoader(), taskLauncher(), metadataResolver);
 	}
 
 	@Bean
