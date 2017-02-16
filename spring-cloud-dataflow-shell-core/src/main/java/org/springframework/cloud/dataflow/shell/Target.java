@@ -50,6 +50,10 @@ public class Target {
 
 		List<RoleType> roles = new ArrayList<>(0);
 
+		// for serialization/persistence
+		public Credentials() {
+		}
+
 		public Credentials(String username, String password) {
 			this.username = username;
 			this.password = password;
@@ -107,6 +111,25 @@ public class Target {
 			for (String roleAsString : roles) {
 				this.roles.add(RoleType.fromKey(roleAsString));
 			}
+		}
+
+		@Override
+		public String toString() {
+			StringBuilder builder = new StringBuilder();
+			builder.append("Credentials [username=");
+			builder.append(username);
+			builder.append(", password=");
+			builder.append("*********");
+			builder.append(", authenticationEnabled=");
+			builder.append(authenticationEnabled);
+			builder.append(", authorizationEnabled=");
+			builder.append(authorizationEnabled);
+			builder.append(", authenticated=");
+			builder.append(authenticated);
+			builder.append(", roles=");
+			builder.append(roles);
+			builder.append("]");
+			return builder.toString();
 		}
 	}
 

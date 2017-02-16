@@ -30,6 +30,7 @@ import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
 import org.springframework.cloud.dataflow.rest.client.StreamOperations;
 import org.springframework.cloud.dataflow.rest.resource.StreamDefinitionResource;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
+import org.springframework.cloud.dataflow.shell.command.support.OpsType;
 import org.springframework.cloud.dataflow.shell.command.support.RoleType;
 import org.springframework.cloud.dataflow.shell.config.DataFlowShell;
 import org.springframework.core.io.FileSystemResource;
@@ -80,13 +81,13 @@ public class StreamCommands implements CommandMarker {
 
 	@CliAvailabilityIndicator({ LIST_STREAM })
 	public boolean availableWithViewRole() {
-		return dataFlowShell.hasRole(RoleType.VIEW);
+		return dataFlowShell.hasRole(RoleType.VIEW, OpsType.STREAM);
 	}
 
 	@CliAvailabilityIndicator({ CREATE_STREAM, DEPLOY_STREAM, UNDEPLOY_STREAM, UNDEPLOY_STREAM_ALL,
 		DESTROY_STREAM, DESTROY_STREAM_ALL })
 	public boolean availableWithCreateRole() {
-		return dataFlowShell.hasRole(RoleType.CREATE);
+		return dataFlowShell.hasRole(RoleType.CREATE, OpsType.STREAM);
 	}
 
 	@CliCommand(value = LIST_STREAM, help = "List created streams")

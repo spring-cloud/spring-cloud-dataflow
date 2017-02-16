@@ -28,6 +28,7 @@ import org.springframework.analytics.rest.domain.MetricResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.dataflow.rest.client.AggregateCounterOperations;
 import org.springframework.cloud.dataflow.shell.command.support.RoleType;
+import org.springframework.cloud.dataflow.shell.command.support.OpsType;
 import org.springframework.cloud.dataflow.shell.config.DataFlowShell;
 import org.springframework.cloud.dataflow.shell.converter.NumberFormatConverter;
 import org.springframework.hateoas.PagedResources;
@@ -68,12 +69,12 @@ public class AggregateCounterCommands extends AbstractMetricsCommands implements
 
 	@CliAvailabilityIndicator({ DISPLAY_AGGR_COUNTER, LIST_AGGR_COUNTERS })
 	public boolean availableWithViewRole() {
-		return dataFlowShell.hasRole(RoleType.VIEW);
+		return dataFlowShell.hasRole(RoleType.VIEW, OpsType.AGGREGATE_COUNTER);
 	}
 
 	@CliAvailabilityIndicator({ DELETE_AGGR_COUNTER })
 	public boolean availableWithCreateRole() {
-		return dataFlowShell.hasRole(RoleType.CREATE);
+		return dataFlowShell.hasRole(RoleType.CREATE, OpsType.AGGREGATE_COUNTER);
 	}
 
 	@CliCommand(value = DISPLAY_AGGR_COUNTER, help = "Display aggregate counter values by chosen interval and resolution(minute, hour)")

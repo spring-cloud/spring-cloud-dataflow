@@ -25,6 +25,7 @@ import org.springframework.cloud.dataflow.rest.resource.JobExecutionResource;
 import org.springframework.cloud.dataflow.rest.resource.JobInstanceResource;
 import org.springframework.cloud.dataflow.rest.resource.StepExecutionProgressInfoResource;
 import org.springframework.cloud.dataflow.rest.resource.StepExecutionResource;
+import org.springframework.cloud.dataflow.shell.command.support.OpsType;
 import org.springframework.cloud.dataflow.shell.command.support.RoleType;
 import org.springframework.cloud.dataflow.shell.config.DataFlowShell;
 import org.springframework.hateoas.PagedResources;
@@ -65,7 +66,7 @@ public class JobCommands implements CommandMarker {
 	@CliAvailabilityIndicator({ EXECUTION_DISPLAY, EXECUTION_LIST, STEP_EXECUTION_LIST, INSTANCE_DISPLAY,
 		STEP_EXECUTION_PROGRESS, STEP_EXECUTION_DISPLAY })
 	public boolean availableWithViewRole() {
-		return dataFlowShell.hasRole(RoleType.VIEW);
+		return dataFlowShell.hasRole(RoleType.VIEW, OpsType.JOB);
 	}
 
 	@CliCommand(value = EXECUTION_LIST,

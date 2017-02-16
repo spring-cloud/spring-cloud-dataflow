@@ -28,6 +28,7 @@ import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.rest.client.AppRegistryOperations;
 import org.springframework.cloud.dataflow.rest.resource.AppRegistrationResource;
 import org.springframework.cloud.dataflow.rest.resource.DetailedAppRegistrationResource;
+import org.springframework.cloud.dataflow.shell.command.support.OpsType;
 import org.springframework.cloud.dataflow.shell.command.support.RoleType;
 import org.springframework.cloud.dataflow.shell.config.DataFlowShell;
 import org.springframework.context.ResourceLoaderAware;
@@ -91,12 +92,12 @@ public class AppRegistryCommands implements CommandMarker, ResourceLoaderAware {
 
 	@CliAvailabilityIndicator({ LIST_APPLICATIONS, APPLICATION_INFO })
 	public boolean availableWithViewRole() {
-		return dataFlowShell.hasRole(RoleType.VIEW);
+		return dataFlowShell.hasRole(RoleType.VIEW, OpsType.APP_REGISTRY);
 	}
 
 	@CliAvailabilityIndicator({ UNREGISTER_APPLICATION, REGISTER_APPLICATION, IMPORT_APPLICATIONS })
 	public boolean availableWithCreateRole() {
-		return dataFlowShell.hasRole(RoleType.CREATE);
+		return dataFlowShell.hasRole(RoleType.CREATE, OpsType.APP_REGISTRY);
 	}
 
 	@CliCommand(value = APPLICATION_INFO, help = "Get information about an application")

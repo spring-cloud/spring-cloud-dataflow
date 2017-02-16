@@ -21,6 +21,7 @@ import org.springframework.analytics.rest.domain.CounterResource;
 import org.springframework.analytics.rest.domain.MetricResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.dataflow.rest.client.CounterOperations;
+import org.springframework.cloud.dataflow.shell.command.support.OpsType;
 import org.springframework.cloud.dataflow.shell.command.support.RoleType;
 import org.springframework.cloud.dataflow.shell.config.DataFlowShell;
 import org.springframework.cloud.dataflow.shell.converter.NumberFormatConverter;
@@ -57,12 +58,12 @@ public class CounterCommands extends AbstractMetricsCommands implements CommandM
 
 	@CliAvailabilityIndicator({ LIST_COUNTERS, DISPLAY_COUNTER })
 	public boolean availableWithViewRole() {
-		return dataFlowShell.hasRole(RoleType.VIEW);
+		return dataFlowShell.hasRole(RoleType.VIEW, OpsType.COUNTER);
 	}
 
 	@CliAvailabilityIndicator({ DELETE_COUNTER })
 	public boolean availableWithCreateRole() {
-		return dataFlowShell.hasRole(RoleType.CREATE);
+		return dataFlowShell.hasRole(RoleType.CREATE, OpsType.COUNTER);
 	}
 
 	@CliCommand(value = DISPLAY_COUNTER, help = "Display the value of a counter")

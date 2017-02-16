@@ -16,9 +16,9 @@
 
 package org.springframework.cloud.dataflow.shell.config;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.dataflow.rest.client.DataFlowOperations;
 import org.springframework.cloud.dataflow.shell.TargetHolder;
+import org.springframework.cloud.dataflow.shell.command.support.OpsType;
 import org.springframework.cloud.dataflow.shell.command.support.RoleType;
 import org.springframework.stereotype.Component;
 
@@ -46,7 +46,33 @@ public class DataFlowShell {
 		this.dataFlowOperations = dataFlowOperations;
 	}
 
-	public boolean hasRole(RoleType create) {
-		return this.dataFlowOperations != null && this.dataFlowOperations.streamOperations() != null;
+	public boolean hasRole(RoleType create, OpsType opsType) {
+		if (this.dataFlowOperations != null) {
+			switch(opsType) {
+				case AGGREGATE_COUNTER:
+					return this.dataFlowOperations.aggregateCounterOperations() != null;
+				case APP_REGISTRY:
+					return this.dataFlowOperations.appRegistryOperations() != null;
+				case COMPLETION:
+					return this.dataFlowOperations.completionOperations() != null;
+				case COUNTER:
+					return this.dataFlowOperations.counterOperations() != null;
+				case FIELD_VALUE_COUNTER:
+					return this.dataFlowOperations.fieldValueCounterOperations() != null;
+				case JOB:
+					return this.dataFlowOperations.jobOperations() != null;
+				case RUNTIME:
+					return this.dataFlowOperations.runtimeOperations() != null;
+				case STREAM:
+					return this.dataFlowOperations.streamOperations() != null;
+				case TASK:
+					return this.dataFlowOperations.taskOperations() != null;
+				default:
+					throw new IllegalArgumentException("Unsupported OpsType");
+			}
+		}
+		else {
+			return false;
+		}
 	}
 }

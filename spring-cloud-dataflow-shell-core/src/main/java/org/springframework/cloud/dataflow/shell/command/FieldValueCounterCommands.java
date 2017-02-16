@@ -25,6 +25,7 @@ import org.springframework.analytics.rest.domain.FieldValueCounterResource;
 import org.springframework.analytics.rest.domain.MetricResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.dataflow.rest.client.FieldValueCounterOperations;
+import org.springframework.cloud.dataflow.shell.command.support.OpsType;
 import org.springframework.cloud.dataflow.shell.command.support.RoleType;
 import org.springframework.cloud.dataflow.shell.config.DataFlowShell;
 import org.springframework.cloud.dataflow.shell.converter.NumberFormatConverter;
@@ -67,12 +68,12 @@ public class FieldValueCounterCommands extends AbstractMetricsCommands implement
 
 	@CliAvailabilityIndicator({ LIST_COUNTERS, DISPLAY_COUNTER })
 	public boolean availableWithViewRole() {
-		return dataFlowShell.hasRole(RoleType.VIEW);
+		return dataFlowShell.hasRole(RoleType.VIEW, OpsType.FIELD_VALUE_COUNTER);
 	}
 
 	@CliAvailabilityIndicator({ RESET_COUNTER })
 	public boolean availableWithCreateRole() {
-		return dataFlowShell.hasRole(RoleType.CREATE);
+		return dataFlowShell.hasRole(RoleType.CREATE, OpsType.FIELD_VALUE_COUNTER);
 	}
 
 	@CliCommand(value = DISPLAY_COUNTER, help = "Display the value of a field value counter")
