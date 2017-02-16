@@ -209,7 +209,7 @@ public class TaskControllerTests {
 					.param("name", "myTask")
 					.accept(MediaType.APPLICATION_JSON)).andDo(print())
 			.andExpect(status().is5xxServerError())
-			.andExpect(content().json("[{message: \"No URI found for task.no-such-task-app\"}]"));
+			.andExpect(content().json("[{message: \"Unknown task app: no-such-task-app\"}]"));
 	}
 
 	@Test

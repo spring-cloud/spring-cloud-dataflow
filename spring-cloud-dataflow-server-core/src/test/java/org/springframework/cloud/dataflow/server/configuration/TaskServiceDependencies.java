@@ -34,7 +34,7 @@ import org.springframework.context.annotation.Configuration;
  */
 
 @Configuration
-public class TaskSeviceDependencies {
+public class TaskServiceDependencies {
 
 	@Bean
 	public TaskRepositoryInitializer taskExecutionRepository(DataSource dataSource) {

@@ -16,7 +16,6 @@
 
 package org.springframework.cloud.dataflow.server.service.impl;
 
-import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,14 +25,16 @@ import org.h2.util.Task;
 
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
+import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.core.TaskDefinition.TaskDefinitionBuilder;
+import org.springframework.cloud.dataflow.registry.AppRegistration;
+import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
 import org.springframework.cloud.dataflow.server.controller.WhitelistProperties;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.TaskService;
-import org.springframework.cloud.deployer.resource.registry.UriRegistry;
 import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
@@ -76,9 +77,9 @@ public class DefaultTaskService implements TaskService {
 	private final TaskLauncher taskLauncher;
 
 	/**
-	 * The {@link UriRegistry} this service will use to look up task app URIs.
+	 * The {@link AppRegistry} this service will use to look up task app URIs.
 	 */
-	private final UriRegistry registry;
+	private final AppRegistry registry;
 
 	/**
 	 * The {@link ResourceLoader} that will resolve URIs to {@link Resource}s.
@@ -106,7 +107,7 @@ public class DefaultTaskService implements TaskService {
 	public DefaultTaskService(DataSourceProperties dataSourceProperties,
 			TaskDefinitionRepository taskDefinitionRepository,
 			TaskExplorer taskExplorer,
-			TaskRepository taskExecutionRepository, UriRegistry registry,
+			TaskRepository taskExecutionRepository, AppRegistry registry,
 			ResourceLoader resourceLoader, TaskLauncher taskLauncher,
 			ApplicationConfigurationMetadataResolver metaDataResolver) {
 		Assert.notNull(dataSourceProperties, "DataSourceProperties must not be null");
@@ -138,16 +139,19 @@ public class DefaultTaskService implements TaskService {
 			throw new NoSuchTaskDefinitionException(taskName);
 		}
 
-		URI uri = this.registry.find(String.format("task.%s", taskDefinition.getRegisteredAppName()));
-		Resource resource = this.resourceLoader.getResource(uri.toString());
+		AppRegistration appRegistration = this.registry.find(taskDefinition.getRegisteredAppName(), ApplicationType.task);
+		Assert.notNull(appRegistration, "Unknown task app: " + taskDefinition.getRegisteredAppName());
+		Resource appResource = appRegistration.getResource();
+		Resource metadataResource = appRegistration.getMetadataResource();
+
 		TaskExecution taskExecution = taskExecutionRepository.createTaskExecution();
 		taskDefinition = this.updateTaskProperties(taskDefinition, taskExecution);
 
 		Map<String, String> appDeploymentProperties = extractAppProperties(taskDefinition.getRegisteredAppName(), taskDeploymentProperties);
 		Map<String, String> deployerDeploymentProperties = DeploymentPropertiesUtils.extractAndQualifyDeployerProperties(taskDeploymentProperties, taskDefinition.getRegisteredAppName());
-		AppDefinition revisedDefinition = mergeAndExpandAppProperties(taskDefinition, resource, appDeploymentProperties);
+		AppDefinition revisedDefinition = mergeAndExpandAppProperties(taskDefinition, metadataResource, appDeploymentProperties);
 
-		AppDeploymentRequest request = new AppDeploymentRequest(revisedDefinition, resource, deployerDeploymentProperties, commandLineArgs);
+		AppDeploymentRequest request = new AppDeploymentRequest(revisedDefinition, appResource, deployerDeploymentProperties, commandLineArgs);
 
 		String id = this.taskLauncher.launch(request);
 		if (!StringUtils.hasText(id)) {

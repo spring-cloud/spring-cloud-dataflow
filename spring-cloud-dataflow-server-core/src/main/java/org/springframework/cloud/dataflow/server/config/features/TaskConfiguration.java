@@ -33,15 +33,14 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
+import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.server.job.TaskExplorerFactoryBean;
-import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
 import org.springframework.cloud.dataflow.server.repository.RdbmsTaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.TaskJobService;
 import org.springframework.cloud.dataflow.server.service.TaskService;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskJobService;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskService;
-import org.springframework.cloud.deployer.resource.registry.UriRegistry;
 import org.springframework.cloud.deployer.resource.support.DelegatingResourceLoader;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.cloud.task.repository.TaskExplorer;
@@ -80,7 +79,7 @@ public class TaskConfiguration {
 	@Bean
 	@ConditionalOnBean(TaskDefinitionRepository.class)
 	public TaskService taskService(TaskDefinitionRepository repository, TaskExplorer taskExplorer, TaskRepository taskExecutionRepository,
-			UriRegistry registry, DelegatingResourceLoader resourceLoader, TaskLauncher taskLauncher,
+			AppRegistry registry, DelegatingResourceLoader resourceLoader, TaskLauncher taskLauncher,
 			ApplicationConfigurationMetadataResolver metadataResolver) {
 		return new DefaultTaskService(dataSourceProperties, repository, taskExplorer, taskExecutionRepository,
 				registry, resourceLoader, taskLauncher, metadataResolver);

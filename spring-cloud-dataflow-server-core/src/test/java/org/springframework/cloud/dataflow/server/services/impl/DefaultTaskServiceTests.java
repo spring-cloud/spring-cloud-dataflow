@@ -16,6 +16,15 @@
 
 package org.springframework.cloud.dataflow.server.services.impl;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyObject;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.springframework.cloud.dataflow.core.ApplicationType.task;
+
 import java.net.URI;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -30,13 +39,15 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.autoconfigure.jdbc.EmbeddedDataSourceConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
+import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
-import org.springframework.cloud.dataflow.server.configuration.TaskSeviceDependencies;
+import org.springframework.cloud.dataflow.registry.AppRegistration;
+import org.springframework.cloud.dataflow.registry.AppRegistry;
+import org.springframework.cloud.dataflow.server.configuration.TaskServiceDependencies;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.TaskService;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskService;
-import org.springframework.cloud.deployer.resource.registry.UriRegistry;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.cloud.task.repository.TaskRepository;
@@ -45,20 +56,13 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
 /**
  * @author Glenn Renfro
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = {EmbeddedDataSourceConfiguration.class,
 		PropertyPlaceholderAutoConfiguration.class,
-		TaskSeviceDependencies.class})
+		TaskServiceDependencies.class})
 public class DefaultTaskServiceTests {
 
 	private final static String BASE_TASK_NAME = "myTask";
@@ -77,7 +81,7 @@ public class DefaultTaskServiceTests {
 	@Autowired
 	private TaskExplorer taskExplorer;
 
-	private UriRegistry uriRegistry;
+	private AppRegistry appRegistry;
 
 	private ResourceLoader resourceLoader;
 
@@ -91,18 +95,18 @@ public class DefaultTaskServiceTests {
 	@Before
 	public void setupMockMVC() {
 		taskDefinitionRepository.save(new TaskDefinition(TASK_NAME_ORIG, "demo"));
-		uriRegistry = mock(UriRegistry.class);
+		appRegistry = mock(AppRegistry.class);
 		resourceLoader = mock(ResourceLoader.class);
 		metadataResolver = mock(ApplicationConfigurationMetadataResolver.class);
 		taskLauncher = mock(TaskLauncher.class);
-		when(this.uriRegistry.find(anyString())).thenReturn(
-				URI.create("http://helloworld"));
+		when(this.appRegistry.find(anyString(), any(ApplicationType.class))).thenReturn(
+			new AppRegistration("some-name", task, URI.create("http://helloworld"), resourceLoader));
 		when(this.resourceLoader.getResource(anyString())).
 				thenReturn(mock(Resource.class));
 		taskService =
 				new DefaultTaskService(dataSourceProperties,
 						taskDefinitionRepository, taskExplorer,
-						taskExecutionRepository, uriRegistry, resourceLoader,
+						taskExecutionRepository, appRegistry, resourceLoader,
 						taskLauncher, metadataResolver);
 	}
 
@@ -150,7 +154,7 @@ public class DefaultTaskServiceTests {
 		TaskService taskService =
 				new DefaultTaskService(this.dataSourceProperties,
 						mock(TaskDefinitionRepository.class), this.taskExplorer,
-						this.taskExecutionRepository, this.uriRegistry,
+						this.taskExecutionRepository, this.appRegistry,
 						this.resourceLoader, this.taskLauncher,
 						this.metadataResolver);
 		try {

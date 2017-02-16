@@ -31,6 +31,7 @@ import org.springframework.boot.autoconfigure.batch.BatchDatabaseInitializer;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.configuration.metadata.BootApplicationConfigurationMetadataResolver;
+import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.server.controller.JobExecutionController;
 import org.springframework.cloud.dataflow.server.controller.JobInstanceController;
 import org.springframework.cloud.dataflow.server.controller.JobStepExecutionController;
@@ -58,6 +59,7 @@ import org.springframework.cloud.task.repository.support.TaskExecutionDaoFactory
 import org.springframework.cloud.task.repository.support.TaskRepositoryInitializer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
@@ -123,7 +125,7 @@ public class JobDependencies {
 
 	@Bean
 	public TaskService taskService(TaskDefinitionRepository repository, TaskExplorer explorer,
-			UriRegistry registry, ResourceLoader resourceLoader, TaskLauncher taskLauncher,
+			AppRegistry registry, ResourceLoader resourceLoader, TaskLauncher taskLauncher,
 			ApplicationConfigurationMetadataResolver metadataResolver) {
 		return new DefaultTaskService(new DataSourceProperties(), repository, explorer, taskRepository(),
 				registry, resourceLoader, taskLauncher, metadataResolver);
@@ -202,6 +204,11 @@ public class JobDependencies {
 	@Bean
 	public UriRegistry uriRegistry() {
 		return new InMemoryUriRegistry();
+	}
+
+	@Bean
+	public AppRegistry appRegistry() {
+		return new AppRegistry(uriRegistry(), new DefaultResourceLoader());
 	}
 	@Bean
 	public TaskLauncher taskLauncher() {
