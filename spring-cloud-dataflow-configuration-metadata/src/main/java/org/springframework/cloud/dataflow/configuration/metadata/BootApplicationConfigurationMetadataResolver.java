@@ -22,6 +22,7 @@ import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
@@ -78,17 +79,6 @@ public class BootApplicationConfigurationMetadataResolver extends ApplicationCon
 		}
 	}
 
-	@Override
-	public boolean supports(Resource app) {
-		try {
-			resolveAsArchive(app);
-			return true;
-		}
-		catch (IOException | IllegalArgumentException e) {
-			return false;
-		}
-	}
-
 	/**
 	 * Return metadata about configuration properties that are documented via
 	 * <a href="http://docs.spring.io/spring-boot/docs/current/reference/html/configuration-metadata.html">
@@ -102,7 +92,7 @@ public class BootApplicationConfigurationMetadataResolver extends ApplicationCon
 			return listProperties(archive, exhaustive);
 		}
 		catch (IOException e) {
-			throw new RuntimeException("Failed to list properties for " + app, e);
+			return Collections.emptyList();
 		}
 	}
 

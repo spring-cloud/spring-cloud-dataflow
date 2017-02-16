@@ -246,12 +246,13 @@ public class StreamDeploymentController {
 			isDownStreamAppPartitioned = isPartitionedConsumer(appDeployTimeProperties,
 					upstreamAppSupportsPartition);
 
+			Resource appResource = registration.getResource();
 			Resource metadataResource = registration.getMetadataResource();
 
 			// Merge *definition time* app properties with *deployment time* properties
 			// and expand them to their long form if applicable
 			AppDefinition revisedDefinition = mergeAndExpandAppProperties(currentApp, metadataResource, appDeployTimeProperties);
-			AppDeploymentRequest request = new AppDeploymentRequest(revisedDefinition, metadataResource, deployerDeploymentProperties);
+			AppDeploymentRequest request = new AppDeploymentRequest(revisedDefinition, appResource, deployerDeploymentProperties);
 
 			try {
 				String id = this.deployer.deploy(request);
