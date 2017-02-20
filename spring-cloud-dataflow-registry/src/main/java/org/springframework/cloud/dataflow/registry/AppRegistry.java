@@ -99,7 +99,7 @@ public class AppRegistry {
 
 	public List<AppRegistration> importAll(boolean overwrite, Resource... resources) {
 
-		Set<String> keysAlreadyThere = overwrite ? uriRegistry.findAll().keySet() : Collections.emptySet();
+		Set<String> keysAlreadyThere = overwrite ? Collections.emptySet() : uriRegistry.findAll().keySet();
 
 		List<AppRegistration> apps = new ArrayList<>();
 		for (Resource resource : resources) {

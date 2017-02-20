@@ -37,6 +37,7 @@ import org.springframework.cloud.dataflow.registry.AppRegistration;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
 import org.springframework.cloud.dataflow.server.registry.DataFlowAppRegistryPopulator;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
@@ -109,6 +110,24 @@ public class AppRegistryControllerTests {
 				post("/apps").param("apps", "sink.foo=file:///bar").accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isCreated());
 		assertThat(appRegistry.find("foo", ApplicationType.sink).getUri().toString(), is("file:///bar"));
+	}
+
+	@Test
+	public void testRegisterAllWithoutForce() throws Exception {
+		appRegistry.importAll(false, new ClassPathResource("META-INF/test-apps-overwrite.properties"));
+		assertThat(appRegistry.find("time", ApplicationType.source).getUri().toString(), is("maven://org.springframework.cloud.stream.app:time-source-rabbit:1.0.0.BUILD-SNAPSHOT"));
+		assertThat(appRegistry.find("filter", ApplicationType.processor).getUri().toString(), is("maven://org.springframework.cloud.stream.app:filter-processor-rabbit:1.0.0.BUILD-SNAPSHOT"));
+		assertThat(appRegistry.find("log", ApplicationType.sink).getUri().toString(), is("maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.0.0.BUILD-SNAPSHOT"));
+		assertThat(appRegistry.find("timestamp", ApplicationType.task).getUri().toString(), is("maven://org.springframework.cloud.task.app:timestamp-task:1.0.0.BUILD-SNAPSHOT"));
+	}
+
+	@Test
+	public void testRegisterAllWithForce() throws Exception {
+		appRegistry.importAll(true, new ClassPathResource("META-INF/test-apps-overwrite.properties"));
+		assertThat(appRegistry.find("time", ApplicationType.source).getUri().toString(), is("maven://org.springframework.cloud.stream.app:time-source-kafka:1.0.0.BUILD-SNAPSHOT"));
+		assertThat(appRegistry.find("filter", ApplicationType.processor).getUri().toString(), is("maven://org.springframework.cloud.stream.app:filter-processor-kafka:1.0.0.BUILD-SNAPSHOT"));
+		assertThat(appRegistry.find("log", ApplicationType.sink).getUri().toString(), is("maven://org.springframework.cloud.stream.app:log-sink-kafka:1.0.0.BUILD-SNAPSHOT"));
+		assertThat(appRegistry.find("timestamp", ApplicationType.task).getUri().toString(), is("maven://org.springframework.cloud.task.app:timestamp-overwrite-task:1.0.0.BUILD-SNAPSHOT"));
 	}
 
 	@Test
