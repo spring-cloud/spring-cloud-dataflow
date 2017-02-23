@@ -26,8 +26,8 @@
 		<java.version>1.8</java.version>
 		<spring-cloud-dataflow-ui.version>1.2.0.M1</spring-cloud-dataflow-ui.version>
 
-		<spring-cloud-deployer.version>1.2.0.M1</spring-cloud-deployer.version>
-		<spring-cloud-deployer-local.version>1.2.0.M1</spring-cloud-deployer-local.version>
+		<spring-cloud-deployer.version>1.2.0.M2</spring-cloud-deployer.version>
+		<spring-cloud-deployer-local.version>1.2.0.M2</spring-cloud-deployer-local.version>
 
 		<!-- Note: Change ./spring-cloud-dataflow-server-local/pom.xml to match the spring-cloud-task.version -->
 		<spring-cloud-task.version>1.2.0.M1</spring-cloud-task.version>
