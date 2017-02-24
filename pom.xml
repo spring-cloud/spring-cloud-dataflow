@@ -30,7 +30,7 @@
 		<spring-cloud-deployer-local.version>1.2.0.M2</spring-cloud-deployer-local.version>
 
 		<!-- Note: Change ./spring-cloud-dataflow-server-local/pom.xml to match the spring-cloud-task.version -->
-		<spring-cloud-task.version>1.2.0.M1</spring-cloud-task.version>
+		<spring-cloud-task.version>1.2.0.BUILD-SNAPSHOT</spring-cloud-task.version>
 
 		<!-- Note: Change ./spring-cloud-dataflow-server-local/pom.xml to match the spring-cloud.version -->
 		<spring-cloud.version>Camden.SR3</spring-cloud.version>
