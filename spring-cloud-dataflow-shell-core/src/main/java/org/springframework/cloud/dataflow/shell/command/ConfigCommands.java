@@ -23,6 +23,8 @@ import java.util.TreeMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
@@ -34,11 +36,11 @@ import org.springframework.cloud.dataflow.shell.TargetHolder;
 import org.springframework.cloud.dataflow.shell.command.support.HttpClientUtils;
 import org.springframework.cloud.dataflow.shell.command.support.RoleType;
 import org.springframework.cloud.dataflow.shell.config.DataFlowShell;
-import org.springframework.context.ApplicationEvent;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.env.Environment;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
@@ -65,7 +67,9 @@ import org.springframework.web.client.RestTemplate;
 @Configuration
 @EnableHypermediaSupport(type = HypermediaType.HAL)
 public class ConfigCommands implements CommandMarker,
-		ApplicationListener<ApplicationEvent>
+				InitializingBean,
+				ApplicationListener<ApplicationReadyEvent>,
+				ApplicationContextAware
 {
 
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -94,6 +98,8 @@ public class ConfigCommands implements CommandMarker,
 	private UserInput userInput;
 
 	private TargetHolder targetHolder;
+
+	private ApplicationContext applicationContext;
 
 	private volatile boolean initialized;
 
@@ -245,15 +251,25 @@ public class ConfigCommands implements CommandMarker,
 	}
 
 	@Override
-	public void onApplicationEvent(ApplicationEvent event) {
+	public void onApplicationEvent(ApplicationReadyEvent event) {
+		//Only invoke if the shell is executing in the same application context as the data flow server.
 		if (!initialized) {
-			if (event instanceof ContextRefreshedEvent) {
-				target(this.serverUri, this.userName, this.password, this.skipSslValidation);
-			}
-			else if (event instanceof ApplicationReadyEvent) {
-				target(this.serverUri, this.userName, this.password, this.skipSslValidation);
-			}
+			target(this.serverUri, this.userName, this.password, this.skipSslValidation);
 		}
+	}
+
+	@Override
+	public void afterPropertiesSet() throws Exception {
+		//Only invoke this lifecycle method if the shell is executing in stand-alone mode.
+		if (applicationContext != null && !applicationContext.containsBean("streamDefinitionRepository")) {
+			initialized = true;
+			target(this.serverUri, this.userName, this.password, this.skipSslValidation);
+		}
+	}
+
+	@Override
+	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+		this.applicationContext = applicationContext;
 	}
 
 }
