@@ -15,6 +15,7 @@
  */
 package org.springframework.cloud.dataflow.shell.command.support;
 
+import java.net.URI;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -23,10 +24,14 @@ import java.security.cert.X509Certificate;
 
 import javax.net.ssl.SSLContext;
 
+import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.AuthCache;
 import org.apache.http.client.HttpClient;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
+import org.apache.http.impl.auth.BasicScheme;
+import org.apache.http.impl.client.BasicAuthCache;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -59,6 +64,7 @@ public class HttpClientUtils {
 	 */
 	public static void prepareRestTemplate(
 			RestTemplate restTemplate,
+			URI host,
 			String username,
 			String password,
 			boolean skipSslValidation) {
@@ -82,7 +88,9 @@ public class HttpClientUtils {
 		}
 
 		final CloseableHttpClient httpClient = httpClientBuilder.build();
-		final HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory(httpClient);
+		final HttpHost targetHost = new HttpHost(host.getHost(), host.getPort(), host.getScheme());
+
+		final HttpComponentsClientHttpRequestFactory requestFactory = new PreemptiveBasicAuthHttpComponentsClientHttpRequestFactory(httpClient, targetHost);
 		restTemplate.setRequestFactory(requestFactory);
 	}
 

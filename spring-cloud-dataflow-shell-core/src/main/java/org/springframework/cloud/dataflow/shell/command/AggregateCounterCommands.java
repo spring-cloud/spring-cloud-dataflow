@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,12 +23,12 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 
 import org.joda.time.DateTimeConstants;
-
 import org.springframework.analytics.rest.domain.AggregateCounterResource;
 import org.springframework.analytics.rest.domain.MetricResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.dataflow.rest.client.AggregateCounterOperations;
-import org.springframework.cloud.dataflow.rest.client.DataFlowOperations;
+import org.springframework.cloud.dataflow.shell.command.support.RoleType;
+import org.springframework.cloud.dataflow.shell.command.support.OpsType;
 import org.springframework.cloud.dataflow.shell.config.DataFlowShell;
 import org.springframework.cloud.dataflow.shell.converter.NumberFormatConverter;
 import org.springframework.hateoas.PagedResources;
@@ -49,6 +49,7 @@ import org.springframework.stereotype.Component;
  * Commands for interacting with aggregate counter analytics.
  *
  * @author Ilayaperumal Gopinathan
+ * @author Gunnar Hillert
  */
 @Component
 public class AggregateCounterCommands extends AbstractMetricsCommands implements CommandMarker {
@@ -66,10 +67,14 @@ public class AggregateCounterCommands extends AbstractMetricsCommands implements
 	@Autowired
 	private DataFlowShell dataFlowShell;
 
-	@CliAvailabilityIndicator({ DISPLAY_AGGR_COUNTER, LIST_AGGR_COUNTERS, DELETE_AGGR_COUNTER })
-	public boolean available() {
-		DataFlowOperations dataFlowOperations = dataFlowShell.getDataFlowOperations();
-		return dataFlowOperations != null && dataFlowOperations.aggregateCounterOperations() != null;
+	@CliAvailabilityIndicator({ DISPLAY_AGGR_COUNTER, LIST_AGGR_COUNTERS })
+	public boolean availableWithViewRole() {
+		return dataFlowShell.hasRole(RoleType.VIEW, OpsType.AGGREGATE_COUNTER);
+	}
+
+	@CliAvailabilityIndicator({ DELETE_AGGR_COUNTER })
+	public boolean availableWithCreateRole() {
+		return dataFlowShell.hasRole(RoleType.CREATE, OpsType.AGGREGATE_COUNTER);
 	}
 
 	@CliCommand(value = DISPLAY_AGGR_COUNTER, help = "Display aggregate counter values by chosen interval and resolution(minute, hour)")

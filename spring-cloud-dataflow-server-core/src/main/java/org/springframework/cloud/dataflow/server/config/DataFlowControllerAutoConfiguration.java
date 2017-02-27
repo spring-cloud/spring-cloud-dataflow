@@ -42,6 +42,7 @@ import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.registry.RdbmsUriRegistry;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
+import org.springframework.cloud.dataflow.server.config.security.BasicAuthSecurityConfiguration.AuthorizationConfig;
 import org.springframework.cloud.dataflow.server.controller.AppRegistryController;
 import org.springframework.cloud.dataflow.server.controller.CompletionController;
 import org.springframework.cloud.dataflow.server.controller.FeaturesController;
@@ -91,7 +92,7 @@ import org.springframework.scheduling.concurrent.ForkJoinPoolFactoryBean;
 @Configuration
 @Import(CompletionConfiguration.class)
 @ConditionalOnBean({EnableDataFlowServerConfiguration.Marker.class, AppDeployer.class, TaskLauncher.class})
-@EnableConfigurationProperties({FeaturesProperties.class})
+@EnableConfigurationProperties({AuthorizationConfig.class, FeaturesProperties.class})
 @ConditionalOnProperty(prefix = "dataflow.server", name = "enabled", havingValue = "true", matchIfMissing = true)
 public class DataFlowControllerAutoConfiguration {
 
@@ -228,8 +229,8 @@ public class DataFlowControllerAutoConfiguration {
 	}
 
 	@Bean
-	public SecurityController securityController(SecurityProperties securityProperties) {
-		return new SecurityController(securityProperties);
+	public SecurityController securityController(SecurityProperties securityProperties, AuthorizationConfig authorizationConfig) {
+		return new SecurityController(securityProperties, authorizationConfig);
 	}
 
 	@Bean

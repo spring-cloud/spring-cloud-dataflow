@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2015-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,9 @@
 package org.springframework.cloud.dataflow.shell.config;
 
 import org.springframework.cloud.dataflow.rest.client.DataFlowOperations;
+import org.springframework.cloud.dataflow.shell.TargetHolder;
+import org.springframework.cloud.dataflow.shell.command.support.OpsType;
+import org.springframework.cloud.dataflow.shell.command.support.RoleType;
 import org.springframework.stereotype.Component;
 
 /**
@@ -24,11 +27,16 @@ import org.springframework.stereotype.Component;
  * communicating with the Spring Cloud Data Flow REST server.
  *
  * @author Ilayaperumal Gopinathan
+ * @author Gunnar Hillert
  */
 @Component
 public class DataFlowShell {
 
+	//@Autowired
 	private DataFlowOperations dataFlowOperations;
+
+	//@Autowired
+	private TargetHolder targetHolder;
 
 	public DataFlowOperations getDataFlowOperations() {
 		return dataFlowOperations;
@@ -36,5 +44,35 @@ public class DataFlowShell {
 
 	public void setDataFlowOperations(DataFlowOperations dataFlowOperations) {
 		this.dataFlowOperations = dataFlowOperations;
+	}
+
+	public boolean hasRole(RoleType create, OpsType opsType) {
+		if (this.dataFlowOperations != null) {
+			switch(opsType) {
+				case AGGREGATE_COUNTER:
+					return this.dataFlowOperations.aggregateCounterOperations() != null;
+				case APP_REGISTRY:
+					return this.dataFlowOperations.appRegistryOperations() != null;
+				case COMPLETION:
+					return this.dataFlowOperations.completionOperations() != null;
+				case COUNTER:
+					return this.dataFlowOperations.counterOperations() != null;
+				case FIELD_VALUE_COUNTER:
+					return this.dataFlowOperations.fieldValueCounterOperations() != null;
+				case JOB:
+					return this.dataFlowOperations.jobOperations() != null;
+				case RUNTIME:
+					return this.dataFlowOperations.runtimeOperations() != null;
+				case STREAM:
+					return this.dataFlowOperations.streamOperations() != null;
+				case TASK:
+					return this.dataFlowOperations.taskOperations() != null;
+				default:
+					throw new IllegalArgumentException("Unsupported OpsType");
+			}
+		}
+		else {
+			return false;
+		}
 	}
 }
