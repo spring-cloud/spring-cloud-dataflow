@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.dataflow.server.controller.security;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.cloud.dataflow.rest.resource.security.SecurityInfoResource;
 import org.springframework.hateoas.ExposesResourceFor;
@@ -47,6 +48,9 @@ public class SecurityController {
 
 	private final SecurityProperties securityProperties;
 
+	@Value("${security.oauth2.client.client-id:#{null}}")
+	private String oauthClientId;
+
 	public SecurityController(SecurityProperties securityProperties) {
 		this.securityProperties = securityProperties;
 	}
@@ -72,6 +76,12 @@ public class SecurityController {
 				securityInfo.setUsername(authentication.getName());
 				for (GrantedAuthority authority : authentication.getAuthorities()) {
 					securityInfo.addRole(authority.getAuthority());
+				}
+				if (this.oauthClientId == null) {
+					securityInfo.setFormLogin(true);
+				}
+				else {
+					securityInfo.setFormLogin(false);
 				}
 			}
 		}
