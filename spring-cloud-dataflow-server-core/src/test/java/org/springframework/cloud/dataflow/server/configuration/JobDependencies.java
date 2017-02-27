@@ -28,6 +28,7 @@ import org.springframework.batch.core.explore.support.JobExplorerFactoryBean;
 import org.springframework.batch.core.launch.support.SimpleJobLauncher;
 import org.springframework.batch.core.repository.support.JobRepositoryFactoryBean;
 import org.springframework.boot.autoconfigure.batch.BatchDatabaseInitializer;
+import org.springframework.boot.autoconfigure.batch.BatchProperties;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.configuration.metadata.BootApplicationConfigurationMetadataResolver;
@@ -178,8 +179,9 @@ public class JobDependencies {
 	}
 
 	@Bean
-	public BatchDatabaseInitializer batchRepositoryInitializerForDefaultDBForServer(DataSource dataSource) {
-		return new BatchDatabaseInitializer();
+	public BatchDatabaseInitializer batchRepositoryInitializerForDefaultDBForServer(DataSource dataSource,
+				ResourceLoader resourceLoader, BatchProperties properties) {
+		return new BatchDatabaseInitializer(dataSource, resourceLoader, properties);
 	}
 
 	@Bean

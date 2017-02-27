@@ -27,6 +27,7 @@ import org.springframework.batch.core.launch.support.SimpleJobLauncher;
 import org.springframework.batch.core.repository.support.JobRepositoryFactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.batch.BatchDatabaseInitializer;
+import org.springframework.boot.autoconfigure.batch.BatchProperties;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -50,6 +51,7 @@ import org.springframework.cloud.task.repository.support.TaskExecutionDaoFactory
 import org.springframework.cloud.task.repository.support.TaskRepositoryInitializer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 
 /**
@@ -127,8 +129,8 @@ public class TaskConfiguration {
 
 		@Bean
 		public BatchDatabaseInitializer batchRepositoryInitializerForDefaultDBForServer(DataSource dataSource,
-				Server server) {
-			return new BatchDatabaseInitializer();
+				ResourceLoader resourceLoader, BatchProperties properties) {
+			return new BatchDatabaseInitializer(dataSource, resourceLoader, properties);
 		}
 
 		@Bean
@@ -161,8 +163,9 @@ public class TaskConfiguration {
 		}
 
 		@Bean
-		public BatchDatabaseInitializer batchRepositoryInitializerForDefaultDB(DataSource dataSource) {
-			return new BatchDatabaseInitializer();
+		public BatchDatabaseInitializer batchRepositoryInitializerForDefaultDB(DataSource dataSource,
+				ResourceLoader resourceLoader, BatchProperties properties) {
+			return new BatchDatabaseInitializer(dataSource, resourceLoader, properties);
 		}
 
 		@Bean

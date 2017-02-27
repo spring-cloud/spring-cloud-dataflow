@@ -1,3 +1,6 @@
+management:
+  security:
+    roles: ADMIN
 spring:
   autoconfigure:
     exclude: org.springframework.boot.autoconfigure.session.SessionAutoConfiguration

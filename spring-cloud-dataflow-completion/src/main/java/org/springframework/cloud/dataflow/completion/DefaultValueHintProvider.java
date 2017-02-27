@@ -32,12 +32,12 @@ public class DefaultValueHintProvider implements ValueHintProvider {
 
 	@Override
 	public List<ValueHint> generateValueHints(ConfigurationMetadataProperty property, ClassLoader classLoader) {
-		return property.getValueHints();
+		return property.getHints().getValueHints();
 	}
 
 	@Override
 	public boolean isExclusive(ConfigurationMetadataProperty property) {
-		for (ValueProvider valueProvider : property.getValueProviders()) {
+		for (ValueProvider valueProvider : property.getHints().getValueProviders()) {
 			if ("any".equals(valueProvider.getName())) {
 				return false;
 			}

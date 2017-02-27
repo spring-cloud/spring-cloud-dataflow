@@ -76,10 +76,10 @@ public class LocalServerSecurityWithLdapSimpleBindAndDefaultManagementTests {
 	}
 
 	@Test
-	public void testUnauthenticatedAccessToManagementEndpointSucceeds() throws Exception {
+	public void testUnauthenticatedAccessToManagementEndpointFails() throws Exception {
 		localDataflowResource.getMockMvc()
 				.perform(get("/management/metrics"))
-				.andExpect(status().isOk());
+				.andExpect(status().isUnauthorized());
 	}
 
 	@Test
