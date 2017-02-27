@@ -27,6 +27,7 @@ import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.item.ExecutionContext;
+import org.springframework.cloud.dataflow.rest.Version;
 import org.springframework.cloud.dataflow.rest.client.support.ExecutionContextJacksonMixIn;
 import org.springframework.cloud.dataflow.rest.client.support.ExitStatusJacksonMixIn;
 import org.springframework.cloud.dataflow.rest.client.support.JobExecutionJacksonMixIn;
@@ -148,6 +149,15 @@ public class DataFlowTemplate implements DataFlowOperations {
 		Assert.notNull(restTemplate, "The provided restTemplate must not be null.");
 
 		this.restTemplate = prepareRestTemplate(restTemplate);
+
+		Map<String, Object> info = restTemplate.getForObject(baseURI + "/management/info", Map.class);
+		String serverRevision = info != null ? (String) info.get(Version.REVISION_KEY) : "[unknown]";
+		if (!String.valueOf(Version.REVISION).equals(serverRevision)) {
+			throw new IllegalStateException(String.format("Incompatible version of Data Flow server detected. " +
+				"Trying to use shell which supports revision %s, while server revision is %s. Both revisions should be aligned",
+				Version.REVISION, serverRevision));
+		}
+
 		final ResourceSupport resourceSupport = restTemplate.getForObject(baseURI, ResourceSupport.class);
 		if (resourceSupport.hasLink(StreamTemplate.DEFINITIONS_REL)) {
 			this.streamOperations = new StreamTemplate(restTemplate, resourceSupport);
