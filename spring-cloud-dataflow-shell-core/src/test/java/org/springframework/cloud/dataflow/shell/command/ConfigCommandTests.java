@@ -22,13 +22,17 @@ import static org.mockito.Mockito.when;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+
+import org.springframework.cloud.dataflow.rest.Version;
 import org.springframework.cloud.dataflow.shell.TargetHolder;
 import org.springframework.cloud.dataflow.shell.config.DataFlowShell;
 import org.springframework.hateoas.ResourceSupport;
@@ -65,21 +69,36 @@ public class ConfigCommandTests {
 		messageConverters.add(new  MappingJackson2HttpMessageConverter());
 
 		when(restTemplate.getMessageConverters()).thenReturn(messageConverters);
-		final Exception e = new RestClientException("FooBar");
-		when(restTemplate.getForObject(Mockito.any(URI.class), Mockito.eq(ResourceSupport.class))).thenThrow(e);
 
 		configCommands.setTargetHolder(new TargetHolder());
 		configCommands.setRestTemplate(restTemplate);
 		configCommands.setDataFlowShell(dataFlowShell);
 		configCommands.setServerUri("http://localhost:9393");
-		configCommands.onApplicationEvent(null);
 	}
 
 	@Test
 	public void testInfo() {
+		when(restTemplate.getForObject(Mockito.endsWith("/management/info"), Mockito.eq(Map.class)))
+			.thenReturn(Collections.singletonMap(Version.REVISION_KEY, String.valueOf(Version.REVISION)));
+		final Exception e = new RestClientException("FooBar");
+		when(restTemplate.getForObject(Mockito.any(URI.class), Mockito.eq(ResourceSupport.class))).thenThrow(e);
+
+		configCommands.onApplicationEvent(null);
+
 		final String infoResult = configCommands.info();
 		assertThat(infoResult, containsString("Target│http://localhost:9393"));
 		assertThat(infoResult, containsString("RestClientException: FooBar"));
+	}
+
+	@Test
+	public void testApiRevisionMismatch() {
+		when(restTemplate.getForObject(Mockito.endsWith("/management/info"), Mockito.eq(Map.class)))
+			.thenReturn(Collections.singletonMap(Version.REVISION_KEY, "-12"));
+
+		configCommands.onApplicationEvent(null);
+
+		final String targetResult = configCommands.target("http://localhost:9393", null, null, false);
+		assertThat(targetResult, containsString("Incompatible version of Data Flow server detected"));
 	}
 
 }
