@@ -30,10 +30,13 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+
 import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.cloud.dataflow.rest.Version;
+import org.springframework.cloud.dataflow.rest.resource.RootResource;
 import org.springframework.cloud.dataflow.shell.TargetHolder;
 import org.springframework.cloud.dataflow.shell.config.DataFlowShell;
-import org.springframework.hateoas.ResourceSupport;
+import org.springframework.hateoas.Link;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.shell.CommandLine;
@@ -67,8 +70,6 @@ public class ConfigCommandTests {
 		messageConverters.add(new  MappingJackson2HttpMessageConverter());
 
 		when(restTemplate.getMessageConverters()).thenReturn(messageConverters);
-		final Exception e = new RestClientException("FooBar");
-		when(restTemplate.getForObject(Mockito.any(URI.class), Mockito.eq(ResourceSupport.class))).thenThrow(e);
 
 		configCommands.setTargetHolder(new TargetHolder());
 		configCommands.setRestTemplate(restTemplate);
@@ -79,9 +80,26 @@ public class ConfigCommandTests {
 
 	@Test
 	public void testInfo() {
+		final Exception e = new RestClientException("FooBar");
+		when(restTemplate.getForObject(Mockito.any(URI.class), Mockito.eq(RootResource.class))).thenThrow(e);
+
+		configCommands.onApplicationEvent(null);
+
 		final String infoResult = configCommands.info();
 		assertThat(infoResult, containsString("Target│http://localhost:9393"));
 		assertThat(infoResult, containsString("RestClientException: FooBar"));
+	}
+
+	@Test
+	public void testApiRevisionMismatch() {
+		RootResource value = new RootResource(-12);
+		value.add(new Link("http://localhost:9393/dashboard", "dashboard"));
+		when(restTemplate.getForObject(Mockito.any(URI.class), Mockito.eq(RootResource.class))).thenReturn(value);
+
+		configCommands.onApplicationEvent(null);
+
+		final String targetResult = configCommands.target("http://localhost:9393", null, null, false);
+		assertThat(targetResult, containsString("Incompatible version of Data Flow server detected"));
 	}
 
 }
