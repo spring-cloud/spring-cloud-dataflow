@@ -30,6 +30,7 @@ import org.springframework.hateoas.ResourceSupport;
 public class SecurityInfoResource extends ResourceSupport {
 
 	private boolean authenticationEnabled;
+	private boolean formLogin;
 
 	private boolean authenticated;
 
@@ -94,4 +95,20 @@ public class SecurityInfoResource extends ResourceSupport {
 		this.roles.add(role);
 		return this;
 	}
+
+	/**
+	 * Returns {@code true} if form-login is used. In case of OAuth2 authentication,
+	 * {@code false} is returned.
+	 *
+	 * @return True if form-login is, false if OAuth2 authentication is used
+	 * @see OnSecurityEnabledAndOAuth2Enabled
+	 */
+	public boolean isFormLogin() {
+		return formLogin;
+	}
+
+	public void setFormLogin(boolean formLogin) {
+		this.formLogin = formLogin;
+	}
+
 }
