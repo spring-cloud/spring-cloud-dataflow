@@ -22,9 +22,7 @@ import static org.mockito.Mockito.when;
 
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -32,10 +30,10 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
-import org.springframework.cloud.dataflow.rest.Version;
+import org.springframework.cloud.dataflow.rest.resource.RootResource;
 import org.springframework.cloud.dataflow.shell.TargetHolder;
 import org.springframework.cloud.dataflow.shell.config.DataFlowShell;
-import org.springframework.hateoas.ResourceSupport;
+import org.springframework.hateoas.Link;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.shell.CommandLine;
@@ -78,10 +76,8 @@ public class ConfigCommandTests {
 
 	@Test
 	public void testInfo() {
-		when(restTemplate.getForObject(Mockito.endsWith("/management/info"), Mockito.eq(Map.class)))
-			.thenReturn(Collections.singletonMap(Version.REVISION_KEY, String.valueOf(Version.REVISION)));
 		final Exception e = new RestClientException("FooBar");
-		when(restTemplate.getForObject(Mockito.any(URI.class), Mockito.eq(ResourceSupport.class))).thenThrow(e);
+		when(restTemplate.getForObject(Mockito.any(URI.class), Mockito.eq(RootResource.class))).thenThrow(e);
 
 		configCommands.onApplicationEvent(null);
 
@@ -92,8 +88,9 @@ public class ConfigCommandTests {
 
 	@Test
 	public void testApiRevisionMismatch() {
-		when(restTemplate.getForObject(Mockito.endsWith("/management/info"), Mockito.eq(Map.class)))
-			.thenReturn(Collections.singletonMap(Version.REVISION_KEY, "-12"));
+		RootResource value = new RootResource(-12);
+		value.add(new Link("http://localhost:9393/dashboard", "dashboard"));
+		when(restTemplate.getForObject(Mockito.any(URI.class), Mockito.eq(RootResource.class))).thenReturn(value);
 
 		configCommands.onApplicationEvent(null);
 

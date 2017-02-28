@@ -37,6 +37,7 @@ import org.springframework.cloud.dataflow.rest.client.support.JobParametersJacks
 import org.springframework.cloud.dataflow.rest.client.support.StepExecutionHistoryJacksonMixIn;
 import org.springframework.cloud.dataflow.rest.client.support.StepExecutionJacksonMixIn;
 import org.springframework.cloud.dataflow.rest.job.StepExecutionHistory;
+import org.springframework.cloud.dataflow.rest.resource.RootResource;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.ResourceSupport;
 import org.springframework.hateoas.UriTemplate;
@@ -150,15 +151,17 @@ public class DataFlowTemplate implements DataFlowOperations {
 
 		this.restTemplate = prepareRestTemplate(restTemplate);
 
-		Map<String, Object> info = restTemplate.getForObject(baseURI + "/management/info", Map.class);
-		String serverRevision = info != null ? (String) info.get(Version.REVISION_KEY) : "[unknown]";
+		final RootResource resourceSupport = restTemplate.getForObject(baseURI, RootResource.class);
+
+		String serverRevision = resourceSupport.getApiRevision() != null ? resourceSupport.getApiRevision().toString() : "[unknown]";
 		if (!String.valueOf(Version.REVISION).equals(serverRevision)) {
-			throw new IllegalStateException(String.format("Incompatible version of Data Flow server detected. " +
-				"Trying to use shell which supports revision %s, while server revision is %s. Both revisions should be aligned",
-				Version.REVISION, serverRevision));
+			String downloadURL = getLink(resourceSupport, "dashboard").getHref() + "#about";
+			throw new IllegalStateException(String.format("Incompatible version of Data Flow server detected.\n" +
+					"Trying to use shell which supports revision %s, while server revision is %s. Both revisions should be aligned.\n" +
+					"Follow instructions at %s to download a compatible version of the shell.",
+				Version.REVISION, serverRevision, downloadURL));
 		}
 
-		final ResourceSupport resourceSupport = restTemplate.getForObject(baseURI, ResourceSupport.class);
 		if (resourceSupport.hasLink(StreamTemplate.DEFINITIONS_REL)) {
 			this.streamOperations = new StreamTemplate(restTemplate, resourceSupport);
 			this.runtimeOperations = new RuntimeTemplate(restTemplate, resourceSupport);

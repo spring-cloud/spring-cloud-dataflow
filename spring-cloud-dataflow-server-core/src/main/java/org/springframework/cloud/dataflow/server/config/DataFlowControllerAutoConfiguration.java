@@ -27,8 +27,6 @@ import org.springframework.analytics.rest.controller.AggregateCounterController;
 import org.springframework.analytics.rest.controller.CounterController;
 import org.springframework.analytics.rest.controller.FieldValueCounterController;
 import org.springframework.batch.admin.service.JobService;
-import org.springframework.boot.actuate.info.InfoContributor;
-import org.springframework.boot.actuate.info.SimpleInfoContributor;
 import org.springframework.boot.actuate.metrics.repository.MetricRepository;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -42,7 +40,6 @@ import org.springframework.cloud.dataflow.completion.TaskCompletionProvider;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.registry.RdbmsUriRegistry;
-import org.springframework.cloud.dataflow.rest.Version;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
 import org.springframework.cloud.dataflow.server.controller.AppRegistryController;
@@ -263,10 +260,5 @@ public class DataFlowControllerAutoConfiguration {
 
 	@ConfigurationProperties(prefix = "maven")
 	static class MavenConfigurationProperties extends MavenProperties {
-	}
-
-	@Bean
-	public InfoContributor apiVersionInfoContributor() {
-		return new SimpleInfoContributor(Version.REVISION_KEY, "" + Version.REVISION);
 	}
 }
