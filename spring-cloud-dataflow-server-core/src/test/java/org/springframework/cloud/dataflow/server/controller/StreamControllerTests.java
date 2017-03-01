@@ -458,6 +458,9 @@ public class StreamControllerTests {
 	public void testDestinationsOnBothSides() throws Exception {
 		assertEquals(0, repository.count());
 		String definition = ":bar > filter > :foo";
+		AppStatus status = mock(AppStatus.class);
+		when(status.getState()).thenReturn(DeploymentState.unknown);
+		when(appDeployer.status("testID")).thenReturn(status);
 		mockMvc.perform(
 				post("/streams/definitions/").param("name", "myStream").param("definition", definition)
 						.param("deploy", "true")
