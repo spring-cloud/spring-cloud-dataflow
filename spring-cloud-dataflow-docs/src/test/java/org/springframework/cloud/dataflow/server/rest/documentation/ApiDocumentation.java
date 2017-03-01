@@ -108,7 +108,7 @@ public class ApiDocumentation extends BaseDocumentation {
 					linkWithRel("field-value-counters/counter").description("Handle a specific field-value-counter")),
 				responseFields(
 					fieldWithPath("_links").description("Links to other resources"),
-					fieldWithPath(Version.REVISION_KEY).description("Incremented each time a change is implemented in this REST API")
+					fieldWithPath("['"+Version.REVISION_KEY+"']").description("Incremented each time a change is implemented in this REST API")
 				)
 			));
 	}

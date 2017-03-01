@@ -28,7 +28,7 @@ public class Version {
 	 */
 	public static final int REVISION = 10;
 
-	public static final String REVISION_KEY = "api_revision";
+	public static final String REVISION_KEY = "api.revision";
 
 	private Version() {
 
