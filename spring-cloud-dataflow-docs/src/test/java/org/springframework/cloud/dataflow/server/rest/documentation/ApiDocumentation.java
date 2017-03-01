@@ -32,6 +32,8 @@ import javax.servlet.RequestDispatcher;
 
 import org.junit.Test;
 
+import org.springframework.cloud.dataflow.rest.Version;
+
 /**
  * @author Gunnar Hillert
  */
@@ -105,6 +107,9 @@ public class ApiDocumentation extends BaseDocumentation {
 					linkWithRel("field-value-counters").description("Provides the resource for dealing with field-value-counters"),
 					linkWithRel("field-value-counters/counter").description("Handle a specific field-value-counter")),
 				responseFields(
-					fieldWithPath("_links").description("Links to other resources"))));
+					fieldWithPath("_links").description("Links to other resources"),
+					fieldWithPath(Version.REVISION_KEY).description("Incremented each time a change is implemented in this REST API")
+				)
+			));
 	}
 }
