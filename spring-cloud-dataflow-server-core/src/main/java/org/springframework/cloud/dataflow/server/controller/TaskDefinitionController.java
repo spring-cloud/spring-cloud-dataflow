@@ -96,12 +96,11 @@ public class TaskDefinitionController {
 
 	/**
 	 * Register a task for future deployment/execution.
-	 *
-	 * @param name the name of the task
+	 *  @param name the name of the task
 	 * @param dsl DSL definition for the task
 	 */
 	@RequestMapping(value = "", method = RequestMethod.POST)
-	public void save(@RequestParam("name") String name,
+	public TaskDefinitionResource save(@RequestParam("name") String name,
 			@RequestParam("definition") String dsl) {
 		TaskDefinition taskDefinition = new TaskDefinition(name, dsl);
 		String appName = taskDefinition.getRegisteredAppName();
@@ -110,6 +109,7 @@ public class TaskDefinitionController {
 					appName, ApplicationType.task));
 		}
 		repository.save(taskDefinition);
+		return taskAssembler.toResource(taskDefinition);
 	}
 
 	/**

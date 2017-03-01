@@ -184,7 +184,7 @@ public class StreamDefinitionController {
 	 */
 	@RequestMapping(value = "", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
-	public void save(@RequestParam("name") String name,
+	public StreamDefinitionResource save(@RequestParam("name") String name,
 					 @RequestParam("definition") String dsl,
 					 @RequestParam(value = "deploy", defaultValue = "false")
 					 boolean deploy) {
@@ -213,6 +213,7 @@ public class StreamDefinitionController {
 		if (deploy) {
 			deploymentController.deploy(name, null);
 		}
+		return new Assembler(new PageImpl<>(Collections.singletonList(stream))).toResource(stream);
 	}
 
 	/**
