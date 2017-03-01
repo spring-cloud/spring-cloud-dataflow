@@ -306,6 +306,38 @@ These 'short-form' property names are applicable only for the white-listed prope
 When deploying the stream, properties that control the deployment of the apps into the target platform are known as `deployment` properties.
 For instance, one can specify how many instances need to be deployed for the specific application defined in the stream using the deployment property called `count`.
 
+==== Application properties versus Deployer properties
+
+Starting with version 1.2, the distinction between properties that are meant for the _deployed app_ and properties that
+govern _how_ this app is deployed (thanks to some implementation of a
+https://github.com/spring-cloud/spring-cloud-deployer/[spring cloud deployer]) is more explicit. The former should be
+passed using the syntax `app.<app-name>.<property-name>=<value>` while the latter use the
+`deployer.<app-name>.<short-property-name>=<value>`
+
+The following table recaps the difference in behavior between the two.
+
+|===
+| | Application Properties | Deployer Properties
+
+| *Example Syntax*
+| `app.filter.expression=foo`
+| `deployer.filter.count=3`
+
+| *What the application "sees"*
+| `expression=foo` or `<some-prefix>.expression=foo` if `expression` is one of the whitelisted properties
+| Nothing
+
+| *What the deployer "sees"*
+| Nothing
+| `spring.cloud.deployer.count=3` The `spring.cloud.deployer` prefix is automatically and always prepended to the property name
+
+| *Typical usage*
+| Passing/Overriding application properties, passing Spring Cloud Stream binder or partitionning properties
+| Setting the number of instances, memory, disk, etc.
+
+|===
+
+
 ==== Passing instance count as deployment property
 
 If you would like to have multiple instances of an application in the stream, you
