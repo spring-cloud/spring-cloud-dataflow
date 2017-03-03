@@ -201,7 +201,7 @@ Once a custom application has been created, it can be registered as described in
 [[spring-cloud-dataflow-create-stream]]
 == Creating a Stream
 
-The Spring Cloud Data Flow Server exposes a full RESTful API for managing the lifecycle of stream definitions, but the easiest way to use is it is via the Spring Cloud Data Flow shell. Start the shell as described in the xref:Getting-Started#getting-started[Getting Started] section.
+The Spring Cloud Data Flow Server exposes a full RESTful API for managing the lifecycle of stream definitions, but the easiest way to use is it is via the Spring Cloud Data Flow shell. Start the shell as described in the xref:getting-started#getting-started[Getting Started] section.
 
 New streams are created by with the help of stream definitions. The definitions are built from a simple DSL. For example, let's walk through what happens if we execute the following shell command:
 
@@ -821,7 +821,7 @@ They will be overridden if a property with the same key is specified at stream d
 [[spring-cloud-dataflow-stream-multi-binder]]
 == Stream applications with multiple binder configurations
 
- In some cases, a stream can have its applications bound to multiple spring cloud stream binders when they are required to connect to different messaging
+In some cases, a stream can have its applications bound to multiple spring cloud stream binders when they are required to connect to different messaging
 middleware configurations. In those cases, it is important to make sure the applications are configured appropriately with their binder
 configurations. For example, let's consider the following stream:
 
