@@ -30,7 +30,7 @@
 		<spring-cloud-deployer-local.version>1.2.0.BUILD-SNAPSHOT</spring-cloud-deployer-local.version>
 
 		<!-- Note: Change ./spring-cloud-dataflow-server-local/pom.xml to match the spring-boot.version -->
-		<spring-boot.version>1.5.2.BUILD-SNAPSHOT</spring-boot.version>
+		<spring-boot.version>1.5.2.RELEASE</spring-boot.version>
 
 		<!-- Note: Change ./spring-cloud-dataflow-server-local/pom.xml to match the spring-cloud-task.version -->
 		<spring-cloud-task.version>1.2.0.BUILD-SNAPSHOT</spring-cloud-task.version>
