@@ -362,6 +362,21 @@ app.transform.producer.partitionKeyExpression=payload
 
 Both the above properties will be passed as deployment properties for the stream `foo` above.
 
+[source,bash]
+----
+stream deploy foo --propertiesFile myprops.yaml
+----
+
+where `myprops.yaml` contains:
+
+```
+app:
+  transform:
+    count: 2
+    producer:
+      partitionKeyExpression: payload
+```
+
 ==== Passing application properties when deploying a stream
 
 The application properties can also be specified when deploying a stream. When specified during deployment, these application properties can either be specified as
@@ -536,83 +551,6 @@ To override these application properties, one can specify the new property value
 ----
 dataflow:>stream deploy ticktock --properties "app.time.fixed-delay=4,app.log.level=ERROR"
 ----
-
-=== Deployment properties
-
-When deploying the stream, properties that control the deployment of the apps into the target platform are known as `deployment` properties.
-For instance, one can specify how many instances need to be deployed for the specific application defined in the stream using the deployment property called `count`.
-
-==== Passing instance count as deployment property
-
-If you would like to have multiple instances of an application in the stream, you
-can include a property with the deploy command:
-
-[source,bash,subs=attributes]
-----
-dataflow:> stream deploy --name ticktock --properties "app.time.count=3"
-----
-
-Note that `count` is the *reserved* property name used by the underlying deployer. Hence, if the application also has a custom property named `count`, it is *not* supported
- when specified in 'short-form' form during stream _deployment_ as it could conflict with the _instance_ count deployer property. Instead, the `count` as a custom application property can be
- specified in its _fully qualified_ form (example: `app.foo.bar.count`) during stream _deployment_ or it can be specified using 'short-form' or _fully qualified_ form during the stream _creation_
- where it will be considered as an app property.
-
-IMPORTANT: See <<spring-cloud-dataflow-stream-app-labels>>.
-
-==== Inline vs file reference properties
-
-When using the Spring Cloud Data Flow Shell, there are two ways to provide deployment
-properties: either *inline* or via a *file reference*. Those two ways are exclusive
-and documented below:
-
-*Inline properties*::
-
-  use the `--properties` shell option and list properties as a comma separated
-  list of key=value pairs, like so:
-
-[source,bash]
-----
-stream deploy foo
-    --properties "app.transform.count=2,app.transform.producer.partitionKeyExpression=payload"
-----
-
-*Using a file reference*::
-
-  use the `--propertiesFile` option and point it to a local `.properties`, `.yaml` or `.yml` file
-  (i.e. that lives in the filesystem of the machine running the shell). Being read
-  as a `.properties` file, normal rules apply (ISO 8859-1 encoding, `=`, `<space>` or
-  `:` delimiter, etc.) although we recommend using `=` as a key-value pair delimiter
-  for consistency:
-
-[source,bash]
-----
-stream deploy foo --propertiesFile myprops.properties
-----
-
-where `myprops.properties` contains:
-
-```
-app.transform.count=2
-app.transform.producer.partitionKeyExpression=payload
-```
-Both the above properties will be passed as deployment properties for the stream `foo` above.
-
-In case of using YAML as the format for the deployment properties, use the `.yaml` or `.yml` file extention when deploying the stream,
-
-[source,bash]
-----
-stream deploy foo --propertiesFile myprops.yaml
-----
-
-where `myprops.yaml` contains:
-
-```
-app:
-  transform:
-    count: 2
-    producer:
-      partitionKeyExpression: payload
-```
 
 [[spring-cloud-dataflow-destroy-stream]]
 == Destroying a Stream
