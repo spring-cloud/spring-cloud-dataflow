@@ -785,7 +785,7 @@ They will be overridden if a property with the same key is specified at stream d
 [[spring-cloud-dataflow-stream-multi-binder]]
 == Stream applications with multiple binder configurations
 
- In some cases, a stream can have its applications bound to multiple spring cloud stream binders when they are required to connect to different messaging
+In some cases, a stream can have its applications bound to multiple spring cloud stream binders when they are required to connect to different messaging
 middleware configurations. In those cases, it is important to make sure the applications are configured appropriately with their binder
 configurations. For example, let's consider the following stream:
 
