@@ -53,7 +53,6 @@ public class CheckPointedParseException extends ParseException {
 		this.tokens = tokens;
 	}
 
-
 	/**
 	 * @return a formatted message with inserts applied.
 	 */
@@ -104,7 +103,6 @@ public class CheckPointedParseException extends ParseException {
 		}
 		return lineStart;
 	}
-
 
 	public int getCheckpointPosition() {
 		return checkpointPointer == 0 ? 0 : tokens.get(checkpointPointer - 1).endPos;

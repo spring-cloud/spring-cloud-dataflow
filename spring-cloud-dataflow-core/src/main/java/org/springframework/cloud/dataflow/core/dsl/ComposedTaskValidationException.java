@@ -29,10 +29,10 @@ import java.util.List;
 public class ComposedTaskValidationException extends RuntimeException {
 
 	private ComposedTaskNode composedTaskNode;
-	
+
 	private List<ComposedTaskValidationProblem> validationProblems;
 
-	public ComposedTaskValidationException(ComposedTaskNode composedTaskNode, List<ComposedTaskValidationProblem> validationProblems) {
+	ComposedTaskValidationException(ComposedTaskNode composedTaskNode, List<ComposedTaskValidationProblem> validationProblems) {
 		this.composedTaskNode = composedTaskNode;
 		this.validationProblems = validationProblems;
 	}
@@ -40,11 +40,11 @@ public class ComposedTaskValidationException extends RuntimeException {
 	public List<ComposedTaskValidationProblem> getValidationProblems() {
 		return validationProblems;
 	}
-	
+
 	public ComposedTaskNode getComposedTaskNode() {
 		return composedTaskNode;
 	}
-	
+
 	/**
 	 * @return a formatted message with inserts applied
 	 */

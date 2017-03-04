@@ -37,12 +37,12 @@ public class ComposedTaskValidatorVisitor extends ComposedTaskVisitor {
 	// Text of the AST being validated
 	private String composedTaskText;
 
-	private List<ComposedTaskValidationProblem> problems = new ArrayList<ComposedTaskValidationProblem>();
+	private List<ComposedTaskValidationProblem> problems = new ArrayList<>();
 
 	// At the end of the visit, verify any sequences that are never used
-	private List<LabelledComposedTaskNode> recordedSequences = new ArrayList<LabelledComposedTaskNode>();
+	private List<LabelledComposedTaskNode> recordedSequences = new ArrayList<>();
 	
-	private Set<Transition> transitionsTargetingLabels = new HashSet<>();
+	private Set<TransitionNode> transitionsTargetingLabels = new HashSet<>();
 	
 	private Set<String> labelsDefined = new HashSet<>();
 
@@ -51,11 +51,14 @@ public class ComposedTaskValidatorVisitor extends ComposedTaskVisitor {
 	}
 	
 	public boolean hasProblems() {
-		return problems.size()!=0;
+		return problems.size() != 0;
 	}
 	
 	public void reset() {
 		this.problems.clear();
+		this.recordedSequences.clear();
+		this.transitionsTargetingLabels.clear();
+		this.labelsDefined.clear();
 	}
 	
 	public void startVisit(String composedTaskText) {
@@ -65,35 +68,18 @@ public class ComposedTaskValidatorVisitor extends ComposedTaskVisitor {
 	@Override
 	public boolean preVisitSequence(LabelledComposedTaskNode firstNode, int sequenceNumber) {
 		if (sequenceNumber > 0 && !firstNode.hasLabel()) {
-			pushProblem(firstNode.getStartPos(), ComposedTaskValidationProblem.SECONDARY_SEQUENCES_MUST_BE_NAMED);
+			pushProblem(firstNode.getStartPos(), DSLMessage.CT_VALIDATION_SECONDARY_SEQUENCES_MUST_BE_NAMED);
 		}
 		recordedSequences.add(firstNode);
 		return true;
 	}
 
 	@Override
-	public void postVisitSequence(LabelledComposedTaskNode firstNode, int sequenceNumber) {
-	}
-
-	@Override
-	public boolean preVisit(Flow flow) {
-		return true;
-	}
-
-	@Override
-	public void visit(Flow flow) {
-	}
-
-	@Override
-	public void postVisit(Flow flow) {
-	}
-
-	@Override
-	public boolean preVisit(Split split) {
+	public boolean preVisit(SplitNode split) {
 		if (split.hasLabel()) {
 			String labelString = split.getLabelString();
 			if (labelsDefined.contains(labelString)) {
-				pushProblem(split.getLabel().startPos,ComposedTaskValidationProblem.DUPLICATE_LABEL);
+				pushProblem(split.getLabel().startPos,DSLMessage.CT_VALIDATION_DUPLICATE_LABEL);
 			}
 			labelsDefined.add(labelString);
 		}
@@ -101,62 +87,62 @@ public class ComposedTaskValidatorVisitor extends ComposedTaskVisitor {
 	}
 
 	@Override
-	public void visit(Split split) {
+	public void visit(SplitNode split) {
 		
 	}
 
 	@Override
-	public void postVisit(Split split) {
+	public void postVisit(SplitNode split) {
 	}
 
 	@Override
-	public boolean preVisit(TaskApp taskApp) {
+	public boolean preVisit(TaskAppNode taskApp) {
 		return true;
 	}
 
 	@Override
-	public void visit(TaskApp taskApp) {
+	public void visit(TaskAppNode taskApp) {
 		if (taskApp.hasLabel()) {
 			String labelString = taskApp.getLabelString();
 			if (labelsDefined.contains(labelString)) {
-				pushProblem(taskApp.getLabel().startPos,ComposedTaskValidationProblem.DUPLICATE_LABEL);
+				pushProblem(taskApp.getLabel().startPos, DSLMessage.CT_VALIDATION_DUPLICATE_LABEL);
 			}
 			labelsDefined.add(labelString);
 		}
 	}
 
 	@Override
-	public void postVisit(TaskApp taskApp) {
+	public void postVisit(TaskAppNode taskApp) {
 	}
 
 	@Override
-	public boolean preVisit(Transition transition) {
+	public boolean preVisit(TransitionNode transition) {
 		return true;
 	}
 
 	@Override
-	public void visit(Transition transition) {
+	public void visit(TransitionNode transition) {
 		if (!transition.isTargetApp()) {
 			transitionsTargetingLabels.add(transition);
 		}
 	}
 	
 	@Override
-	public void postVisit(Transition transition) {
+	public void postVisit(TransitionNode transition) {
 	}
 
 	@Override
 	public void endVisit() {
 		// Verify all targeted labels exist
-		for (Transition transitionTargetingLabel: transitionsTargetingLabels) {
+		for (TransitionNode transitionTargetingLabel: transitionsTargetingLabels) {
 			if (!labelsDefined.contains(transitionTargetingLabel.getTargetLabel())) {
-				pushProblem(transitionTargetingLabel.startPos,ComposedTaskValidationProblem.TRANSITION_TARGET_LABEL_UNDEFINED);
+				pushProblem(transitionTargetingLabel.startPos,DSLMessage.CT_VALIDATION_TRANSITION_TARGET_LABEL_UNDEFINED);
 			}
 		}
 		// TODO Verify all secondary sequences are visited
 	}
 	
-	private void pushProblem(int pos, String message) {
+	private void pushProblem(int pos, DSLMessage message) {
 		problems.add(new ComposedTaskValidationProblem(composedTaskText, pos, message));
 	}
 

@@ -64,7 +64,7 @@ public class Tokens {
 	 * @param tokens the stream of tokens
 	 * @param linebreaks the offsets within the expression where newlines occur
 	 */
-	public Tokens(String expression, List<Token> tokens, int[] linebreaks) {
+	Tokens(String expression, List<Token> tokens, int[] linebreaks) {
 		this.expression = expression;
 		this.linebreaks = linebreaks;
 		this.tokenStream = Collections.unmodifiableList(tokens);		
@@ -288,7 +288,7 @@ public class Tokens {
 	public int getLine(Token token) {
 		int tokenStart = token.startPos;
 		int lb = 0;
-		while (lb<linebreaks.length && linebreaks[lb]<tokenStart) {
+		while (lb < linebreaks.length && linebreaks[lb] < tokenStart) {
 			lb++;
 		}
 		return lb;

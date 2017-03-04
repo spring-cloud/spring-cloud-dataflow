@@ -44,9 +44,10 @@ public abstract class ComposedTaskVisitor {
 	 */
 	public void endVisit() {
 	}
-	
+
 	/**
-	 * @param the sequence number, where the primary sequence is 0
+	 * @param firstNode the first node in the sequence
+	 * @param sequenceNumber the sequence number, where the primary sequence is 0
 	 * @return false to skip visiting the specified sequence
 	 */
 	public boolean preVisitSequence(LabelledComposedTaskNode firstNode, int sequenceNumber) {
@@ -57,33 +58,31 @@ public abstract class ComposedTaskVisitor {
 	}
 
 	/**
-	 * @param label any label attached to the flow or null if no label
 	 * @param flow the flow which represents things to execute in sequence
 	 * @return false to skip visiting this flow
 	 */
-	public boolean preVisit(Flow flow) {
+	public boolean preVisit(FlowNode flow) {
 		return true;
 	}
 
-	public void visit(Flow flow) {
+	public void visit(FlowNode flow) {
 	}
 
-	public void postVisit(Flow flow) {
+	public void postVisit(FlowNode flow) {
 	}
 
 	/**
-	 * @param label any label attached to the split or null if no label
 	 * @param split the split which represents things to execute in parallel
 	 * @return false to skip visiting this split
 	 */
-	public boolean preVisit(Split split) {
+	public boolean preVisit(SplitNode split) {
 		return true;
 	}
 
-	public void visit(Split split) {
+	public void visit(SplitNode split) {
 	}
 
-	public void postVisit(Split split) {
+	public void postVisit(SplitNode split) {
 	}
 
 
@@ -91,18 +90,17 @@ public abstract class ComposedTaskVisitor {
 	 * <b>This preVisit/visit/postVisit sequence for taskApp is not invoked for inlined references to apps
 	 * in transitions, for example: <tt>appA 0->:foo 1->appB</tt>. The reference to <tt>appB</tt> would be
 	 * seen in the transition visit below.
-	 * @param label any label attached to the task app or null if no label
 	 * @param taskApp the use of a task app in a composed task dsl
 	 * @return false to skip visiting this taskApp
 	 */
-	public boolean preVisit(TaskApp taskApp) {
+	public boolean preVisit(TaskAppNode taskApp) {
 		return true;
 	}
 
-	public void visit(TaskApp taskApp) {
+	public void visit(TaskAppNode taskApp) {
 	}
 
-	public void postVisit(TaskApp taskApp) {
+	public void postVisit(TaskAppNode taskApp) {
 	}
 
 	/**
@@ -111,14 +109,14 @@ public abstract class ComposedTaskVisitor {
 	 * @param transition the transition
 	 * @return false to skip visiting this transition
 	 */
-	public boolean preVisit(Transition transition) {
+	public boolean preVisit(TransitionNode transition) {
 		return true;
 	}
 
-	public void visit(Transition transition) {
+	public void visit(TransitionNode transition) {
 	}
 	
-	public void postVisit(Transition transition) {
+	public void postVisit(TransitionNode transition) {
 	}
 	
 }

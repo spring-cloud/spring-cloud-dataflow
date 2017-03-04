@@ -101,7 +101,10 @@ public enum DSLMessage {
 	COMPOSED_TASK_UNQUOTED_TRANSITION_CHECK_MUST_BE_NUMBER(ERROR, 154, "transition conditions must be quoted literals, numerics or '*' but ''{0}'' is not"), //
 	COMPOSED_TASK_NO_LABELS_ON_PARENS(ERROR, 155, "labels cannot be specified on parenthesized groups"), //
 	COMPOSED_TASK_NO_DOUBLE_LABELS(ERROR, 156, "Double labels are not supported"), //
-	COMPOSED_TASK_ARROW_SHOULD_BE_PRECEDED_BY_CODE(ERROR, 157, "Transition arrow must be preceeded by the exit code that should drive the transition")
+	COMPOSED_TASK_ARROW_SHOULD_BE_PRECEDED_BY_CODE(ERROR, 157, "Transition arrow must be preceeded by the exit code that should drive the transition"), //
+	CT_VALIDATION_SECONDARY_SEQUENCES_MUST_BE_NAMED(ERROR, 158, "Secondary sequences must have labels or are unreachable"), //
+	CT_VALIDATION_DUPLICATE_LABEL(ERROR, 159, "This label has already been defined"), //
+	CT_VALIDATION_TRANSITION_TARGET_LABEL_UNDEFINED(ERROR, 160, "Transition specifies an undefined label")
 	;
 
 	private Kind kind;

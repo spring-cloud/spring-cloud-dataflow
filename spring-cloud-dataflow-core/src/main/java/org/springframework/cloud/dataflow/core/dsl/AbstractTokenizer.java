@@ -142,46 +142,29 @@ public abstract class AbstractTokenizer {
 
 	/**
 	 * Lex a string literal which uses single quotes as delimiters. To include
-	 * a single quote within the literal, use a pair ''
+	 * a single quote within the literal, use a pair ''.
 	 */
 	protected void lexQuotedStringLiteral() {
-		int start = pos;
-		boolean terminated = false;
-		while (!terminated) {
-			pos++;
-			char ch = toProcess[pos];
-			if (ch == '\'') {
-				// may not be the end if the char after is also a '
-				if (toProcess[pos + 1] == '\'') {
-					pos++; // skip over that too, and continue
-				}
-				else {
-					terminated = true;
-				}
-			}
-			if (ch == 0) {
-				throw new ParseException(expressionString, start,
-						DSLMessage.NON_TERMINATING_QUOTED_STRING);
-			}
-		}
-		pos++;
-		tokens.add(new Token(TokenKind.LITERAL_STRING,
-				subArray(start, pos), start, pos));
+		lexStringLiteral('\'',DSLMessage.NON_TERMINATING_QUOTED_STRING);
 	}
 
 	/**
 	 * Lex a string literal which uses double quotes as delimiters. To include
-	 * a single quote within the literal, use a pair ""
+	 * a single quote within the literal, use a pair "".
 	 */
 	protected void lexDoubleQuotedStringLiteral() {
+		lexStringLiteral('"',DSLMessage.NON_TERMINATING_DOUBLE_QUOTED_STRING);
+	}
+
+	private void lexStringLiteral(char quoteChar, DSLMessage messageOnNonTerminationError) {
 		int start = pos;
 		boolean terminated = false;
 		while (!terminated) {
 			pos++;
 			char ch = toProcess[pos];
-			if (ch == '"') {
-				// may not be the end if the char after is also a "
-				if (toProcess[pos + 1] == '"') {
+			if (ch == quoteChar) {
+				// may not be the end if the char after is also a quoteChar
+				if (toProcess[pos + 1] == quoteChar) {
 					pos++; // skip over that too, and continue
 				}
 				else {
@@ -189,13 +172,11 @@ public abstract class AbstractTokenizer {
 				}
 			}
 			if (ch == 0) {
-				throw new ParseException(expressionString, start,
-						DSLMessage.NON_TERMINATING_DOUBLE_QUOTED_STRING);
+				throw new ParseException(expressionString, start, messageOnNonTerminationError);
 			}
 		}
 		pos++;
-		tokens.add(new Token(TokenKind.LITERAL_STRING,
-				subArray(start, pos), start, pos));
+		tokens.add(new Token(TokenKind.LITERAL_STRING, subArray(start, pos), start, pos));
 	}
 
 	/**

@@ -25,23 +25,53 @@ package org.springframework.cloud.dataflow.core.dsl;
  * @author Andy Clement
  */
 public class ComposedTaskValidationProblem {
-	public final static String SECONDARY_SEQUENCES_MUST_BE_NAMED = "Secondary sequences must have labels or are unreachable";
-	public final static String DUPLICATE_LABEL = "This label has already been defined";
-	public final static String TRANSITION_TARGET_LABEL_UNDEFINED = "Transition specifies an undefined label";
 	
-	final String composedTaskText;
-	final int offset;
-	final String message;
+	private final String composedTaskText;
+	private final int offset;
+	private final DSLMessage message;
 	
-	public ComposedTaskValidationProblem(String composedTaskText, int offset, String message) {
+	public ComposedTaskValidationProblem(String composedTaskText, int offset, DSLMessage message) {
 		this.composedTaskText = composedTaskText;
 		this.offset = offset;
 		this.message = message;
 	}
 	
 	public String toString() {
+		return message.formatMessage(offset);
+	}
+	
+	public String toStringWithContext() {
 		StringBuilder s = new StringBuilder();
-		s.append(message).append(" @ ").append(offset);
+		s.append(message.formatMessage(offset));
+		int startOfLine = getStartOfLine(offset);
+		if (composedTaskText != null && composedTaskText.length() > 0) {
+			s.append("\n").append(composedTaskText.substring(startOfLine)).append("\n");
+		}
+		int offsetOnLine = offset - startOfLine;
+		if (offsetOnLine >= 0) {
+			for (int i = 0; i < offsetOnLine; i++) {
+				s.append(' ');
+			}
+			s.append("^\n");
+		}
 		return s.toString();
 	}
+	
+	public DSLMessage getMessage() {
+		return message;
+	}
+
+	public int getOffset() {
+		return offset;
+	}
+
+	private int getStartOfLine(int position) {
+		for (int p=0;p<position;p++) {
+			if (composedTaskText.charAt(p) == '\n') {
+				return p+1;
+			}
+		}
+		return 0;
+	}
+	
 }

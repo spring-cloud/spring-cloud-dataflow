@@ -21,14 +21,20 @@ import java.util.List;
 import java.util.Set;
 
 import org.springframework.cloud.dataflow.core.dsl.graph.Graph;
+import org.springframework.util.Assert;
 
 /**
  * The root AST node for any AST parsed from a composed task specification.
  *
- * Andy Clement
+ * @author Andy Clement
  */
 public class ComposedTaskNode extends AstNode {
 
+	/**
+	 * The name of the composed task.
+	 */
+	private String name;
+	
 	/**
 	 * The DSL text that was parsed to create this ComposedTaskNode.
 	 */
@@ -44,9 +50,10 @@ public class ComposedTaskNode extends AstNode {
 	 */
 	private Set<String> taskApps;
 
-	public ComposedTaskNode(String composedTaskSpecification, List<LabelledComposedTaskNode> sequences) {
+	ComposedTaskNode(String name, String composedTaskSpecification, List<LabelledComposedTaskNode> sequences) {
 		super((sequences.size()==0) ? 0 : sequences.get(0).getStartPos(), 
 				(sequences.size()==0) ? 0 : sequences.get(sequences.size()-1).getEndPos());
+		this.name = name;
 		this.composedTaskText = composedTaskSpecification;
 		this.sequences = sequences;
 	}
@@ -54,13 +61,11 @@ public class ComposedTaskNode extends AstNode {
 	@Override
 	public String stringify(boolean includePositionInfo) {
 		StringBuilder s = new StringBuilder();
-		if (sequences != null) {
-			for (int i=0;i<sequences.size();i++) {
-				if (i>0) {
-					s.append("\n");
-				}
-				s.append(sequences.get(i).stringify(includePositionInfo));
+		for (int i=0;i<sequences.size();i++) {
+			if (i>0) {
+				s.append("\n");
 			}
+			s.append(sequences.get(i).stringify(includePositionInfo));
 		}
 		return s.toString();
 	}
@@ -77,7 +82,15 @@ public class ComposedTaskNode extends AstNode {
 		return taskApps;
 	}
 	
+	/**
+	 * Walk the AST for the parsed composed task, calling the visitor for each element of interest.
+	 * See the {@link ComposedTaskVisitor} for all the events that can be received, since that is an
+	 * abstract class it can be extended and subclasses only need override methods to receive the
+	 * events of interest.
+	 * @param visitor a visitor to be called as the AST is walked
+	 */
 	public void accept(ComposedTaskVisitor visitor) {
+		Assert.notNull(visitor,"visitor expected to be non-null");
 		visitor.startVisit(this.composedTaskText);
 		int sequenceNumber = 0;
 		for (LabelledComposedTaskNode ctn: sequences) {
@@ -116,12 +129,12 @@ public class ComposedTaskNode extends AstNode {
 		Set<String> taskApps = new HashSet<String>();
 
 		@Override
-		public void visit(TaskApp taskApp) {
+		public void visit(TaskAppNode taskApp) {
 			taskApps.add(taskApp.getName());
 		}
 		
 		@Override
-		public void visit(Transition transition) {
+		public void visit(TransitionNode transition) {
 			if (transition.isTargetApp()) {
 				taskApps.add(transition.getTargetApp());
 			}
@@ -131,6 +144,10 @@ public class ComposedTaskNode extends AstNode {
 			return taskApps;
 		}
 
+	}
+	
+	public String getName() {
+		return this.name;
 	}
 	
 	public String getComposedTaskText() {
@@ -163,6 +180,7 @@ public class ComposedTaskNode extends AstNode {
 	 * @return the sequence with that label or null if there isn't one
 	 */
 	public LabelledComposedTaskNode getSequenceWithLabel(String label) {
+		Assert.hasText(label,"label is required");
 		for (LabelledComposedTaskNode ctn : sequences) {
 			if (ctn.hasLabel() && ctn.getLabelString().equals(label)) {
 				return ctn;

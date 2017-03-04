@@ -23,19 +23,19 @@ import java.util.List;
  *
  * @author Andy Clement
  */
-public class TaskApp extends LabelledComposedTaskNode {
+public class TaskAppNode extends LabelledComposedTaskNode {
 
 	private Token taskName;
 	
-	private List<Transition> transitions;
+	private List<TransitionNode> transitions;
 
-	public TaskApp(Token taskName, List<Transition> transitions) {
+	TaskAppNode(Token taskName, List<TransitionNode> transitions) {
 		super(taskName.startPos, (transitions == null || transitions.isEmpty())?taskName.endPos:transitions.get(transitions.size()-1).endPos);
 		this.taskName = taskName;
 		this.transitions = transitions;
 	}
 
-	void setTransitions(List<Transition> transitions) {
+	void setTransitions(List<TransitionNode> transitions) {
 		this.transitions = transitions;
 	}
 
@@ -49,7 +49,7 @@ public class TaskApp extends LabelledComposedTaskNode {
 		return true;
 	}
 
-	public List<Transition> getTransitions() {
+	public List<TransitionNode> getTransitions() {
 		return transitions;
 	}
 
@@ -70,7 +70,7 @@ public class TaskApp extends LabelledComposedTaskNode {
 		s.append(getName());
 		s.append(" ");
 		for (int i=0;i<transitions.size();i++) {
-			Transition t = transitions.get(i);
+			TransitionNode t = transitions.get(i);
 			if (i > 0) {
 				s.append(" ");
 			}
@@ -85,10 +85,10 @@ public class TaskApp extends LabelledComposedTaskNode {
 		if (!cont) {
 			return;
 		}
-        visitor.visit(this);
-        for (Transition transition: transitions) {
-        		transition.accept(visitor);
-        }
+		visitor.visit(this);
+		for (TransitionNode transition: transitions) {
+			transition.accept(visitor);
+		}
 		visitor.postVisit(this);
 	}
 

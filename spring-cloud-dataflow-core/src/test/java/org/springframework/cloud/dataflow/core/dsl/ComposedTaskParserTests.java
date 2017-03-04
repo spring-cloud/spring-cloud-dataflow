@@ -85,7 +85,7 @@ public class ComposedTaskParserTests {
 		assertFalse(node.isSplit());
 		assertTrue(node.isFlow());
 		assertFlow(node,"FooApp");
-		assertTrue(((Flow)node).getSeriesElement(0).isTaskApp());
+		assertTrue(((FlowNode)node).getSeriesElement(0).isTaskApp());
 	}
 	
 	@Test
@@ -102,7 +102,7 @@ public class ComposedTaskParserTests {
 		assertTrue(node.isFlow());
 		assertFalse(node.isTaskApp());
 		
-		Flow flow = (Flow)node;
+		FlowNode flow = (FlowNode)node;
 		List<LabelledComposedTaskNode> series = flow.getSeries();
 		assertEquals(2,series.size());
 		assertEquals(2,flow.getSeriesLength());
@@ -123,11 +123,11 @@ public class ComposedTaskParserTests {
 
 		LabelledComposedTaskNode node = ctn.getStart();
 		assertTrue(node.isFlow());
-		node = ((Flow)node).getSeriesElement(0);
+		node = ((FlowNode)node).getSeriesElement(0);
 		assertTrue(node.isSplit());
 		assertFalse(node.isTaskApp());
 		
-		Split split = (Split)node;
+		SplitNode split = (SplitNode)node;
 		List<LabelledComposedTaskNode> series = split.getSeries();
 		assertEquals(2,series.size());
 		assertEquals(2,split.getSeriesLength());
@@ -140,15 +140,16 @@ public class ComposedTaskParserTests {
 	@Test
 	public void appWithOneTransition() {
 		ctn = parse("App1 0->App2");
+		assertEquals("test",ctn.getName());
 		assertEquals("App1 0->App2", ctn.getComposedTaskText());
 		assertEquals(0, ctn.getStartPos());
 		assertEquals(12, ctn.getEndPos());
 		assertEquals("App1 0->App2", ctn.stringify());
 		LabelledComposedTaskNode firstNode = ctn.getStart();
 		assertTrue(firstNode.isFlow());
-		List<Transition> transitions = ((TaskApp)((Flow)firstNode).getSeriesElement(0)).getTransitions();
+		List<TransitionNode> transitions = ((TaskAppNode)((FlowNode)firstNode).getSeriesElement(0)).getTransitions();
 		assertEquals(1,transitions.size());
-		Transition transition = transitions.get(0);
+		TransitionNode transition = transitions.get(0);
 		assertEquals("0",transition.getStatusToCheck());
 		assertEquals("App2",transition.getTargetDslText());
 		assertEquals(5,transition.getStartPos());
@@ -164,10 +165,10 @@ public class ComposedTaskParserTests {
 		assertEquals("App1 0->App2 'abc'->App3", ctn.stringify());
 		LabelledComposedTaskNode node = ctn.getStart();
 		assertTrue(node.isFlow());
-		node = ((Flow)node).getSeriesElement(0);
-		List<Transition> transitions = ((TaskApp)node).getTransitions();
+		node = ((FlowNode)node).getSeriesElement(0);
+		List<TransitionNode> transitions = ((TaskAppNode)node).getTransitions();
 		assertEquals(2,transitions.size());
-		Transition transition = transitions.get(0);
+		TransitionNode transition = transitions.get(0);
 		assertEquals("0",transition.getStatusToCheck());
 		assertTrue(transition.isExitCodeCheck());
 		assertEquals("App2",transition.getTargetDslText());
@@ -189,12 +190,12 @@ public class ComposedTaskParserTests {
 		assertEquals(22, ctn.getEndPos());
 		assertEquals("App1 *->App2 '*'->App3", ctn.stringify());
 		LabelledComposedTaskNode node = ctn.getStart();
-		node = ((Flow)node).getSeriesElement(0);
+		node = ((FlowNode)node).getSeriesElement(0);
 		assertTrue(node.isTaskApp());
-		List<Transition> transitions = ((TaskApp)node).getTransitions();
+		List<TransitionNode> transitions = ((TaskAppNode)node).getTransitions();
 		assertEquals(2,transitions.size());
 		
-		Transition transition = transitions.get(0);
+		TransitionNode transition = transitions.get(0);
 		assertEquals("*",transition.getStatusToCheck());
 		assertTrue(transition.isExitCodeCheck());
 		assertEquals("App2",transition.getTargetDslText());
@@ -217,9 +218,9 @@ public class ComposedTaskParserTests {
 		assertEquals("App1 'foo'->:something", ctn.stringify());
 		LabelledComposedTaskNode firstNode = ctn.getStart();
 		assertFlow(firstNode,"App1");
-		List<Transition> transitions = ((TaskApp)((Flow)firstNode).getSeriesElement(0)).getTransitions();
+		List<TransitionNode> transitions = ((TaskAppNode)((FlowNode)firstNode).getSeriesElement(0)).getTransitions();
 		assertEquals(1,transitions.size());
-		Transition transition = transitions.get(0);
+		TransitionNode transition = transitions.get(0);
 		assertEquals("foo",transition.getStatusToCheck());
 		assertFalse(transition.isExitCodeCheck());
 		assertEquals(":something",transition.getTargetDslText());
@@ -241,9 +242,9 @@ public class ComposedTaskParserTests {
 		ctn = parse("FooApp\n 0\n->:a\n 1->:b\n &&\nBarApp 2->:c 3->:d", false);
 		assertFlow(ctn.getStart(),"FooApp","BarApp");
 		ctn = parse("<FooApp ||\nBarApp>");
-		assertSplit(((Flow)ctn.getStart()).getSeriesElement(0),"FooApp","BarApp");
+		assertSplit(((FlowNode)ctn.getStart()).getSeriesElement(0),"FooApp","BarApp");
 		ctn = parse("<\nFooApp ||\nBarApp\n>");
-		assertSplit(((Flow)ctn.getStart()).getSeriesElement(0),"FooApp","BarApp");
+		assertSplit(((FlowNode)ctn.getStart()).getSeriesElement(0),"FooApp","BarApp");
 	}
 
 	@Test
@@ -251,14 +252,14 @@ public class ComposedTaskParserTests {
 		ctn = parse("foo: appA");
 		LabelledComposedTaskNode start = ctn.getStart();
 		assertEquals("foo", start.getLabelString());
-		Flow f = (Flow)start;
+		FlowNode f = (FlowNode)start;
 		assertEquals("foo",f.getLabelString());
-		assertEquals("appA",((TaskApp)f.getSeriesElement(0)).getName());
+		assertEquals("appA",((TaskAppNode)f.getSeriesElement(0)).getName());
 
 		ctn = parse("foo: <appA || appB>");
 		start = ctn.getStart();
 		assertEquals("foo", start.getLabelString());
-		Split s = (Split) ((Flow)start).getSeriesElement(0);
+		SplitNode s = (SplitNode) ((FlowNode)start).getSeriesElement(0);
 		assertSplit(s, "appA", "appB");
 		
 		ctn = parse("foo: appA && appB");
@@ -317,18 +318,18 @@ public class ComposedTaskParserTests {
 
 	@Test
 	public void jumpingAround() {
-//		String spec = "one: aa && bb 'retry'->:one";
-//		assertGraph("[0:START][1:aa][2:bb][3:END][0-1][1-2]['retry':2-1][2-3]",spec);
-//		spec = "aa && one: bb && cc 'retry'->:one && dd";
-//		assertGraph("[0:START][1:aa][2:bb][3:cc][4:dd][5:END]"+
-//		            "[0-1][1-2][2-3]['retry':3-2][3-4][4-5]",spec);
-//		spec = "aa 0->:two && bb 0->:three && cc;two: dd;three:ee";
-//		assertGraph("[0:START][1:aa][2:bb][3:cc][4:END][11:dd][12:ee]"+
-//		            "[0-1][1-2][2-3][3-4][0:1-11][11-4][0:2-12][12-4]",spec);
-//		spec = "aa 'foo'->:two && bb && three: cc && dd;two: ee && ff '*'->:three";
-//		assertGraph("[0:START][1:aa][2:bb][3:cc][4:dd][5:END][10:ee][11:ff]"+
-//		            "[0-1][1-2][2-3][3-4][4-5]['foo':1-10][10-11][11-5]['*':11-3]",spec);
-		String spec = "aa 'foo'->:two && bb && four: cc && dd;two: ee && ff '*'->:three;three: gg '*'->:four";
+		String spec = "one: aa && bb 'retry'->:one";
+		assertGraph("[0:START][1:aa][2:bb][3:END][0-1][1-2]['retry':2-1][2-3]",spec);
+		spec = "aa && one: bb && cc 'retry'->:one && dd";
+		assertGraph("[0:START][1:aa][2:bb][3:cc][4:dd][5:END]"+
+		            "[0-1][1-2][2-3]['retry':3-2][3-4][4-5]",spec);
+		spec = "aa 0->:two && bb 0->:three && cc;two: dd;three:ee";
+		assertGraph("[0:START][1:aa][2:bb][3:cc][4:END][11:dd][12:ee]"+
+		            "[0-1][1-2][2-3][3-4][0:1-11][11-4][0:2-12][12-4]",spec);
+		spec = "aa 'foo'->:two && bb && three: cc && dd;two: ee && ff '*'->:three";
+		assertGraph("[0:START][1:aa][2:bb][3:cc][4:dd][5:END][10:ee][11:ff]"+
+		            "[0-1][1-2][2-3][3-4][4-5]['foo':1-10][10-11][11-5]['*':11-3]",spec);
+		spec = "aa 'foo'->:two && bb && four: cc && dd;two: ee && ff '*'->:three;three: gg '*'->:four";
 		ComposedTaskNode parse = parse(spec);
 		System.out.println(parse);
 		assertGraph("[0:START][1:aa][2:bb][3:cc][4:dd][5:END][13:ee][14:ff][15:gg]" +
@@ -341,15 +342,15 @@ public class ComposedTaskParserTests {
 		ComposedTaskNode ctn = parse(spec,false);
 		List<ComposedTaskValidationProblem> validationProblems = ctn.validate();
 		assertEquals(1, validationProblems.size());
-		assertEquals(ComposedTaskValidationProblem.TRANSITION_TARGET_LABEL_UNDEFINED, validationProblems.get(0).message);
-		assertEquals(3, validationProblems.get(0).offset);
+		assertEquals(DSLMessage.CT_VALIDATION_TRANSITION_TARGET_LABEL_UNDEFINED, validationProblems.get(0).getMessage());
+		assertEquals(3, validationProblems.get(0).getOffset());
 		
 		spec = "<aa 'foo'->:split && bb && cc || dd>";
 		ctn = parse(spec,false);
 		validationProblems = ctn.validate();
 		assertEquals(1, validationProblems.size());
-		assertEquals(ComposedTaskValidationProblem.TRANSITION_TARGET_LABEL_UNDEFINED, validationProblems.get(0).message);
-		assertEquals(4, validationProblems.get(0).offset);
+		assertEquals(DSLMessage.CT_VALIDATION_TRANSITION_TARGET_LABEL_UNDEFINED, validationProblems.get(0).getMessage());
+		assertEquals(4, validationProblems.get(0).getOffset());
 	}
 	
 	@Test
@@ -435,13 +436,25 @@ public class ComposedTaskParserTests {
 		ctn.accept(validator);
 		List<ComposedTaskValidationProblem> problems = validator.getProblems();
 		assertEquals(1,problems.size());
-		assertEquals(ComposedTaskValidationProblem.SECONDARY_SEQUENCES_MUST_BE_NAMED,problems.get(0).message);
-		assertEquals(5,problems.get(0).offset);
-		
+		assertEquals(DSLMessage.CT_VALIDATION_SECONDARY_SEQUENCES_MUST_BE_NAMED,problems.get(0).getMessage());
+		assertEquals(5,problems.get(0).getOffset());
+		assertEquals("158E:(pos 5): Secondary sequences must have labels or are unreachable",problems.get(0).toString());
+		assertEquals("158E:(pos 5): Secondary sequences must have labels or are unreachable\nappA;appB\n     ^\n",problems.get(0).toStringWithContext());
+
 		validator.reset();
 		ctn = parse("appA;foo: appB");
 		ctn.accept(validator);
 		assertFalse(validator.hasProblems());
+
+		validator.reset();
+		ctn = parse("appA;foo: appB\nappC",false);
+		ctn.accept(validator);
+		problems = validator.getProblems();
+		assertEquals(1,problems.size());
+		assertEquals(DSLMessage.CT_VALIDATION_SECONDARY_SEQUENCES_MUST_BE_NAMED,problems.get(0).getMessage());
+		assertEquals(15,problems.get(0).getOffset());
+		assertEquals("158E:(pos 15): Secondary sequences must have labels or are unreachable",problems.get(0).toString());
+		assertEquals("158E:(pos 15): Secondary sequences must have labels or are unreachable\nappC\n^\n",problems.get(0).toStringWithContext());
 	}
 	
 	@Test
@@ -450,28 +463,28 @@ public class ComposedTaskParserTests {
 		ctn = parse("aaa: appA");
 		LabelledComposedTaskNode flow = ctn.getStart();
 		assertEquals("aaa",flow.getLabelString());
-		TaskApp taskApp = (TaskApp)((Flow)flow).getSeriesElement(0);
+		TaskAppNode taskApp = (TaskAppNode)((FlowNode)flow).getSeriesElement(0);
 		assertEquals("aaa",taskApp.getLabelString());
 		
 		// flows
 		ctn = parse("aaa: appA && bbb: appB");
-		taskApp = (TaskApp)((Flow) ctn.getStart()).getSeriesElement(1);
+		taskApp = (TaskAppNode)((FlowNode) ctn.getStart()).getSeriesElement(1);
 		assertEquals("bbb",taskApp.getLabelString());
 		
 		// splits
 		ctn = parse("outer:<aaa: appA || bbb: appB>");
-		flow = (Flow)ctn.getStart();
+		flow = (FlowNode)ctn.getStart();
 		assertEquals("outer",flow.getLabelString());
-		Split s = (Split)flow.getSeriesElement(0);
+		SplitNode s = (SplitNode)flow.getSeriesElement(0);
 		assertEquals("outer",s.getLabelString());
-		taskApp = (TaskApp)(((Flow)s.getSeriesElement(0)).getSeriesElement(0));
+		taskApp = (TaskAppNode)(((FlowNode)s.getSeriesElement(0)).getSeriesElement(0));
 		assertEquals("aaa",taskApp.getLabelString());
-		taskApp = (TaskApp)(((Flow)s.getSeriesElement(1)).getSeriesElement(0));
+		taskApp = (TaskAppNode)(((FlowNode)s.getSeriesElement(1)).getSeriesElement(0));
 		assertEquals("bbb",taskApp.getLabelString());
 		
 		// parentheses
 		ctn = parse("(aaa: appA && appB)");
-		taskApp = (TaskApp)((Flow) ctn.getStart()).getSeriesElement(0);
+		taskApp = (TaskAppNode)((FlowNode) ctn.getStart()).getSeriesElement(0);
 		assertEquals("aaa", taskApp.getLabelString());
 		
 		checkForParseError("aaa: (appA)", DSLMessage.COMPOSED_TASK_NO_LABELS_ON_PARENS, 5);
@@ -701,11 +714,11 @@ public class ComposedTaskParserTests {
 		ComposedTaskNode ctn = parse("<<jobA || jobB> || jobC>");
 		assertEquals("<<jobA || jobB> || jobC>", ctn.stringify());
 		LabelledComposedTaskNode start = ctn.getStart();
-		assertTrue(start instanceof Flow);
-		Split split = (Split)((Flow)start).getSeriesElement(0);
-		LabelledComposedTaskNode seriesElement = ((Flow)split.getSeriesElement(0)).getSeriesElement(0);
-		assertTrue(seriesElement instanceof Split);
-		Split split2 = (Split)seriesElement;
+		assertTrue(start instanceof FlowNode);
+		SplitNode split = (SplitNode)((FlowNode)start).getSeriesElement(0);
+		LabelledComposedTaskNode seriesElement = ((FlowNode)split.getSeriesElement(0)).getSeriesElement(0);
+		assertTrue(seriesElement instanceof SplitNode);
+		SplitNode split2 = (SplitNode)seriesElement;
 		assertEquals(2,split2.getSeriesLength());
 	}
 
@@ -715,24 +728,24 @@ public class ComposedTaskParserTests {
 		assertEquals("<jobA || <jobB || jobC> || jobD>", ctn.stringify());
 		LabelledComposedTaskNode start = ctn.getStart();
 		assertTrue(start.isFlow());
-		Split split = (Split)((Flow)start).getSeriesElement(0);
+		SplitNode split = (SplitNode)((FlowNode)start).getSeriesElement(0);
 		assertEquals(3,split.getSeriesLength());
 		LabelledComposedTaskNode seriesElement = split.getSeriesElement(1);
-		Split splitSeriesElement = (Split)((Flow)seriesElement).getSeriesElement(0);
+		SplitNode splitSeriesElement = (SplitNode)((FlowNode)seriesElement).getSeriesElement(0);
 		assertTrue(splitSeriesElement.isSplit());
 		assertEquals(2,splitSeriesElement.getSeriesLength());
 		assertEquals("<jobB || jobC>",splitSeriesElement.stringify());
-		assertEquals("jobB",((TaskApp)((Flow)splitSeriesElement.getSeriesElement(0)).getSeriesElement(0)).getName());
+		assertEquals("jobB",((TaskAppNode)((FlowNode)splitSeriesElement.getSeriesElement(0)).getSeriesElement(0)).getName());
 	}
 
 	@Test
 	public void singleTransition() {
 		ComposedTaskNode ctn = parse("foo 'completed'->bar");
 		LabelledComposedTaskNode start = ctn.getStart();
-		start = ((Flow)start).getSeriesElement(0);
-		assertTrue(start instanceof TaskApp);
-		TaskApp ta = (TaskApp) start;
-		List<Transition> transitions = ta.getTransitions();
+		start = ((FlowNode)start).getSeriesElement(0);
+		assertTrue(start instanceof TaskAppNode);
+		TaskAppNode ta = (TaskAppNode) start;
+		List<TransitionNode> transitions = ta.getTransitions();
 		assertEquals(1, transitions.size());
 		assertEquals("completed", transitions.get(0).getStatusToCheck());
 		assertEquals("bar", transitions.get(0).getTargetApp());
@@ -743,8 +756,8 @@ public class ComposedTaskParserTests {
 		ComposedTaskNode ctn = parse("foo 'completed'->bar 'wibble'->wobble");
 		LabelledComposedTaskNode start = ctn.getStart();
 		assertFlow(start,"foo");
-		TaskApp ta = (TaskApp) ((Flow)start).getSeriesElement(0);
-		List<Transition> transitions = ta.getTransitions();
+		TaskAppNode ta = (TaskAppNode) ((FlowNode)start).getSeriesElement(0);
+		List<TransitionNode> transitions = ta.getTransitions();
 		assertEquals(2, transitions.size());
 		assertEquals("completed", transitions.get(0).getStatusToCheck());
 		assertEquals("bar", transitions.get(0).getTargetApp());
@@ -936,30 +949,6 @@ public class ComposedTaskParserTests {
 		assertGraph("[0:START][1:foo][2:bbb][3:bar][4:END][0-1]['failed':1-2]['error':1-2][1-3]['failed':3-2][3-4][2-4]", spec);
 		checkDSLToGraphAndBackToDSL(spec);
 	}
-
-//	@Test
-//	public void lotsOfTransitions() {
-//		js = parse("aaa | 'FAILED'=iii ||< bbb | 'FAILED'=iii & ccc | 'FAILED'=jjj> ||" +
-//				"ddd| 'FAILED'=iii||eee| 'FAILED'=iii||fff| 'FAILED'=iii||<ggg| 'FAILED'=kkk & hhh| 'FAILED'=kkk>");
-//		assertEquals(
-//				"aaa | 'FAILED' = iii || <bbb | 'FAILED' = iii & ccc | 'FAILED' = jjj> || "
-//						+
-//						"ddd | 'FAILED' = iii || eee | 'FAILED' = iii || fff | 'FAILED' = iii || <ggg | 'FAILED' = kkk & hhh | 'FAILED' = kkk>",
-//				js.stringify());
-//		assertXml("lotsOfTransitions", js.toXML("lotsOfTransitions", true));
-//	}
-//
-//	@Test
-//	public void lotsOfTransitions2() {
-//		js = parse("aaa | 'FAILED'=iii ||< bbb | 'FAILED'=iii|| zzz  & ccc | 'FAILED'=jjj> ||" +
-//				"ddd| 'FAILED'=iii||eee| 'FAILED'=iii||fff| 'FAILED'=iii||<ggg| 'FAILED'=kkk & hhh| 'FAILED'=kkk>");
-//		assertEquals(
-//				"aaa | 'FAILED' = iii || <bbb | 'FAILED' = iii || zzz & ccc | 'FAILED' = jjj> || "
-//						+
-//						"ddd | 'FAILED' = iii || eee | 'FAILED' = iii || fff | 'FAILED' = iii || <ggg | 'FAILED' = kkk & hhh | 'FAILED' = kkk>",
-//				js.stringify());
-//		assertXml("lotsOfTransitions2", js.toXML("lotsOfTransitions2", true));
-//	}
 	
 	@Test
 	public void extraneousDataError() {
@@ -979,12 +968,12 @@ public class ComposedTaskParserTests {
 	}
 
 	private ComposedTaskNode parse(String dsltext) {
-		ComposedTaskNode ctn = getParser().parse(dsltext,true);
+		ComposedTaskNode ctn = getParser().parse("test", dsltext, true);
 		return ctn;
 	}
 
 	private ComposedTaskNode parse(String dsltext, boolean validate) {
-		ComposedTaskNode ctn = getParser().parse(dsltext,validate);
+		ComposedTaskNode ctn = getParser().parse("test", dsltext,validate);
 		return ctn;
 	}
 
@@ -1003,12 +992,12 @@ public class ComposedTaskParserTests {
 
 	private void assertTaskApp(LabelledComposedTaskNode node, String taskAppName) {
 		assertTrue(node.isTaskApp());
-		assertEquals(((TaskApp)node).getName(),taskAppName);
+		assertEquals(((TaskAppNode)node).getName(),taskAppName);
 	}
 	
 	private void assertFlow(LabelledComposedTaskNode node, String... expectedApps) {
-		assertTrue(node instanceof Flow);
-		Flow flow = (Flow)node;
+		assertTrue(node instanceof FlowNode);
+		FlowNode flow = (FlowNode)node;
 		List<LabelledComposedTaskNode> series = flow.getSeries();
 		assertEquals(expectedApps.length,series.size());
 		assertEquals(expectedApps.length,flow.getSeriesLength());
@@ -1018,13 +1007,13 @@ public class ComposedTaskParserTests {
 	}
 
 	private void assertSplit(LabelledComposedTaskNode node, String... expectedApps) {
-		assertTrue(node instanceof Split);
-		Split split = (Split)node;
+		assertTrue(node instanceof SplitNode);
+		SplitNode split = (SplitNode)node;
 		List<LabelledComposedTaskNode> series = split.getSeries();
 		assertEquals(expectedApps.length,series.size());
 		assertEquals(expectedApps.length,split.getSeriesLength());
 		for (int a=0;a<expectedApps.length;a++) {
-			Flow f = (Flow)series.get(a);
+			FlowNode f = (FlowNode)series.get(a);
 			assertEquals(1,f.getSeriesLength());
 			assertTaskApp(f.getSeriesElement(0),expectedApps[a]);
 		}
@@ -1103,60 +1092,60 @@ public class ComposedTaskParserTests {
 		}
 		
 		@Override
-		public boolean preVisit(Flow flow) {
+		public boolean preVisit(FlowNode flow) {
 			s.append(">F ");
 			return true;
 		}
 
 		@Override
-		public void visit(Flow flow) {
+		public void visit(FlowNode flow) {
 			s.append("=F"+(flow.hasLabel()?"["+flow.getLabelString()+":]":"")+" ");
 		}
 
 		@Override
-		public void postVisit(Flow flow) {
+		public void postVisit(FlowNode flow) {
 			s.append("<F ");
 		}
 
 		@Override
-		public boolean preVisit(Split split) {
+		public boolean preVisit(SplitNode split) {
 			s.append(">S ");
 			return true;
 		}
 
 		@Override
-		public void visit(Split split) {
+		public void visit(SplitNode split) {
 			s.append("=S"+(split.hasLabel()?"["+split.getLabelString()+":]":"")+" ");
 		}
 
 		@Override
-		public void postVisit(Split split) {
+		public void postVisit(SplitNode split) {
 			s.append("<S ");
 		}
 		
 		@Override
-		public boolean preVisit(TaskApp taskApp) {
+		public boolean preVisit(TaskAppNode taskApp) {
 			s.append(">TA ");
 			return true;
 		}
 
 		@Override
-		public void visit(TaskApp taskApp) {
+		public void visit(TaskAppNode taskApp) {
 			s.append("=TA["+(taskApp.hasLabel()?taskApp.getLabelString()+": ":"")+taskApp.getName()+"] ");
 		}
 
 		@Override
-		public void postVisit(TaskApp taskApp) {
+		public void postVisit(TaskAppNode taskApp) {
 			s.append("<TA ");
 		}
 		@Override
-		public boolean preVisit(Transition transition) {
+		public boolean preVisit(TransitionNode transition) {
 			s.append(">T ");
 			return true;
 		}
 
 		@Override
-		public void visit(Transition transition) {
+		public void visit(TransitionNode transition) {
 			s.append("=T["+
 					(transition.isExitCodeCheck()?transition.getStatusToCheck():"'"+transition.getStatusToCheck()+"'")+
 					"->"+
@@ -1164,7 +1153,7 @@ public class ComposedTaskParserTests {
 		}
 		
 		@Override
-		public void postVisit(Transition transition) {
+		public void postVisit(TransitionNode transition) {
 			s.append("<T ");
 		}
 		

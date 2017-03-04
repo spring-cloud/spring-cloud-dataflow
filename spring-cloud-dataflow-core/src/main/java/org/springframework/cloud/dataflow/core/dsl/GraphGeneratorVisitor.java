@@ -55,6 +55,8 @@ public class GraphGeneratorVisitor extends ComposedTaskVisitor {
 	// recently visited
 	String currentTaskAppId;
 
+	Map<String, Node> existingNodesToReuse;
+
 	// Gathers knowledge about a sequence during visiting
 	static class Sequence {
 
@@ -73,9 +75,9 @@ public class GraphGeneratorVisitor extends ComposedTaskVisitor {
 		// Transitions made from inside this sequence which are not satisfied
 		final List<Context.TransitionTarget> outstandingTransitions = new ArrayList<>();
 		
-		Flow primaryFlow;
+		FlowNode primaryFlow;
 		
-		final Map<Flow,Map<String,Node>> labeledNodesInEachFlow = new HashMap<>();
+		final Map<FlowNode,Map<String,Node>> labeledNodesInEachFlow = new HashMap<>();
 		
 		public Sequence(int sequenceNumber, String label, Node sequenceStartNode) {
 			this.sequenceNumber = sequenceNumber;
@@ -146,8 +148,8 @@ public class GraphGeneratorVisitor extends ComposedTaskVisitor {
 			this.containingNode = split;
 		}
 
-		public void addDanglingNodes(boolean replace, String... is) {
-			if (replace) {
+		public void addDanglingNodes(boolean replaceExisting, String... is) {
+			if (replaceExisting) {
 				currentDanglingNodes.clear();
 			}
 			for (String i : is) {
@@ -194,7 +196,7 @@ public class GraphGeneratorVisitor extends ComposedTaskVisitor {
 			// joined to, the inserted stuff will need to be joined to
 			String lastNodeId;
 			// Which flow was this transition in
-			Flow flow;
+			FlowNode flow;
 			
 			public String toString() {
 				StringBuilder s = new StringBuilder();
@@ -275,8 +277,6 @@ public class GraphGeneratorVisitor extends ComposedTaskVisitor {
 		}
 	}
 
-	private static final boolean DEBUG = false;
-
 	@Override
 	public void endVisit() {
 		if (sequences.size() > 0) {
@@ -284,12 +284,6 @@ public class GraphGeneratorVisitor extends ComposedTaskVisitor {
 			// iterate until nothing left to do
 			int tooMany = 0;
 			while (!mainSequence.outstandingTransitions.isEmpty() && tooMany<50) {
-				if (DEBUG) {
-					System.out.println("Iterating..."+tooMany);
-					for (GraphGeneratorVisitor.Sequence s : sequences) {
-						System.out.println(s);
-					}
-				}
 				List<Context.TransitionTarget> nextTransitions = findNextTransitions(
 						mainSequence.outstandingTransitions);
 				mainSequence.outstandingTransitions.removeAll(nextTransitions);
@@ -299,16 +293,10 @@ public class GraphGeneratorVisitor extends ComposedTaskVisitor {
 				}
 				inline(mainSequence, sequence, nextTransitions);
 				// Some transitions might be satisfiable now
-				if (DEBUG) {
-					System.out.println("Attempting outstanding transition resolution on main sequence for "+mainSequence.outstandingTransitions);
-				}
 				Iterator<TransitionTarget> iter = mainSequence.outstandingTransitions.iterator();
 				while (iter.hasNext()) {
 					TransitionTarget transitionTarget = iter.next();
-					Flow flowInWhichTransitionOccurring = transitionTarget.flow;
-					if (DEBUG) {
-						System.out.println("For "+transitionTarget+" occurring in flow "+flowInWhichTransitionOccurring);
-					}
+					FlowNode flowInWhichTransitionOccurring = transitionTarget.flow;
 					Map<String,Node> candidates = mainSequence.labeledNodesInEachFlow.get(flowInWhichTransitionOccurring);
 					for (Map.Entry<String,Node> candidate: candidates.entrySet()) {
 						if (candidate.getKey().equals(transitionTarget.label)) {
@@ -321,15 +309,8 @@ public class GraphGeneratorVisitor extends ComposedTaskVisitor {
 				tooMany++;
 			}
 			// TODO if still stuff to do we were probably in infinite loop
-			if (!sequences.get(0).outstandingTransitions.isEmpty()) {
-				// TODO error!
-			}
-		}
-		if (DEBUG) {
-			System.out.println("After inlining:");
-			for (GraphGeneratorVisitor.Sequence s : sequences) {
-				System.out.println(s);
-			}
+//			if (!sequences.get(0).outstandingTransitions.isEmpty()) {
+//			}
 		}
 	}
 
@@ -414,9 +395,6 @@ public class GraphGeneratorVisitor extends ComposedTaskVisitor {
 		}
 		// After inlining the sequence, the mainSequence may have inherited new
 		// outstanding transitions
-		if (DEBUG) {
-			System.out.println("Main sequence inheriting outstanding transitions: "+sequence.outstandingTransitions);
-		}
 		List<Context.TransitionTarget> rewrittenTransitions = new ArrayList<>();
 		for (Context.TransitionTarget looseEnd : sequence.outstandingTransitions) {
 			Context.TransitionTarget tt = new Context.TransitionTarget(nodeIds.get(looseEnd.nodeId), looseEnd.onState,
@@ -424,18 +402,15 @@ public class GraphGeneratorVisitor extends ComposedTaskVisitor {
 			// They should have the same 'flow' as the sequence they are injected into
 			tt.flow = transitionTargets.get(0).flow;
 			tt.lastNodeId = transitionTargets.get(0).lastNodeId;//nodeIds.get(looseEnd.lastNodeId);
-			if (DEBUG) {
-				System.out.println("Remapped "+looseEnd+" to "+tt);
-			}
 			rewrittenTransitions.add(tt);
 		}
 		mainSequence.outstandingTransitions.addAll(rewrittenTransitions);
 		// The copy of this secondary sequence is being inserted into a particular flow.
-		Flow flowBeingInsertedInto = transitionTargets.get(0).flow;
+		FlowNode flowBeingInsertedInto = transitionTargets.get(0).flow;
 		Map<String,Node> relevantFlowMapToUpdate = mainSequence.labeledNodesInEachFlow.get(flowBeingInsertedInto);
-		Map<Flow,Map<String,Node>> labeledNodesInSequenceBeingInlined = sequence.labeledNodesInEachFlow;
-		Flow primaryFlowInSequenceBeingInlined = sequence.primaryFlow;
-		for (Map.Entry<Flow, Map<String,Node>> entry: labeledNodesInSequenceBeingInlined.entrySet()) {
+		Map<FlowNode,Map<String,Node>> labeledNodesInSequenceBeingInlined = sequence.labeledNodesInEachFlow;
+		FlowNode primaryFlowInSequenceBeingInlined = sequence.primaryFlow;
+		for (Map.Entry<FlowNode, Map<String,Node>> entry: labeledNodesInSequenceBeingInlined.entrySet()) {
 			if (entry.getKey() == primaryFlowInSequenceBeingInlined) {
 				// these should be remapped
 				for (Map.Entry<String,Node> entry2: entry.getValue().entrySet()) {
@@ -459,7 +434,7 @@ public class GraphGeneratorVisitor extends ComposedTaskVisitor {
 	}
 
 	@Override
-	public boolean preVisit(Split split) {
+	public boolean preVisit(SplitNode split) {
 		List<String> open = currentContext().getDanglingNodes();
 		String startId = (open.size() == 0 ? currentContext().startNodeId : open.get(0));
 		// If there are multiple open nodes, we need a sync node !
@@ -477,23 +452,26 @@ public class GraphGeneratorVisitor extends ComposedTaskVisitor {
 	}
 
 	@Override
-	public void postVisit(Split split) {
+	public void postVisit(SplitNode split) {
 		List<String> openAtEndOfFlow = currentContext().getDanglingNodes();
 		contexts.pop();
 		currentContext().addDanglingNodes(true, openAtEndOfFlow);
 	}
 
 	@Override
-	public boolean preVisit(Flow flow) {
+	public boolean preVisit(FlowNode flow) {
 		contexts.push(new Context(true, false, currentContext().startNodeId, flow));
 		currentSequence().primaryFlow = flow;
 		return true;
 	}
 
 	@Override
-	public void postVisit(Flow flow) {
+	public void postVisit(FlowNode flow) {
 		// What label references were not resolved within the flow?
 		List<Context.TransitionTarget> transitionTargets = currentContext().getTransitionTargets();
+		// For all outstanding transitions, mark them indicating which flow they came from
+		// and the last node of that flow. Thus when they are processed later, after the
+		// transition completes it knows where to join the output to.
 		for (Context.TransitionTarget tt : transitionTargets) {
 			tt.lastNodeId = currentContext().getDanglingNodes().get(0);
 			tt.flow = flow;
@@ -507,12 +485,6 @@ public class GraphGeneratorVisitor extends ComposedTaskVisitor {
 		currentContext().addDanglingNodes(false, otherExitNodes);
 	}
 
-	@Override
-	public void visit(Split split) {
-	}
-
-	Map<String, Node> existingNodesToReuse;
-
 	private Node findOrMakeNode(String name) {
 		Node node = existingNodesToReuse.get(name);
 		if (node == null) {
@@ -524,7 +496,7 @@ public class GraphGeneratorVisitor extends ComposedTaskVisitor {
 	}
 
 	@Override
-	public void visit(Transition transition) {
+	public void visit(TransitionNode transition) {
 		if (transition.isTargetApp()) {
 			if (transition.isSpecialTransition()) {
 				if (transition.isFailTransition()) {
@@ -584,7 +556,7 @@ public class GraphGeneratorVisitor extends ComposedTaskVisitor {
 	}
 
 	@Override
-	public void visit(TaskApp taskApp) {
+	public void visit(TaskAppNode taskApp) {
 		String nextId = nextId();
 		currentTaskAppId = nextId;
 		Node node = new Node(nextId, taskApp.getName());
@@ -597,6 +569,7 @@ public class GraphGeneratorVisitor extends ComposedTaskVisitor {
 			// Are there any outstanding transitions that need to be connected
 			// to this?
 			if (taskApp.hasLabel()) {
+				// If this one has a label, try to connect hanging transitions to it
 				for (Iterator<Context.TransitionTarget> iterator = currentContext().getTransitionTargets()
 						.iterator(); iterator.hasNext();) {
 					Context.TransitionTarget tt = iterator.next();
@@ -609,16 +582,14 @@ public class GraphGeneratorVisitor extends ComposedTaskVisitor {
 			}
 			List<String> danglingNodes = currentContext().getDanglingNodes();
 			if (danglingNodes.size() == 0) {
-				// first entry
+				// This app is the first in the flow and will create the first dangling node
 				addLink(new Link(currentContext().startNodeId, nextId));
-				currentContext().addDanglingNodes(true, nextId);
 			} else {
+				// Everything outstanding needs joining to this node
 				for (int i = 0; i < danglingNodes.size(); i++) {
 					addLink(new Link(danglingNodes.get(i), nextId));
 				}
-				currentContext().addDanglingNodes(true, nextId);
 			}
-			currentContext().clearDanglingNodes();
 			currentContext().addDanglingNodes(true, nextId);
 		} else if (currentContext().isSplit) {
 			// Any flow containing this split can transition to this split if it

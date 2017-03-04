@@ -20,17 +20,17 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * The AST node representing a split. A split is a series of jobs to execute in parallel. Those jobs
- * can themselves be individual jobs or further splits. In DSL form a split is expressed like this:
+ * The AST node representing a split. A split is a series of things to execute in parallel. Those things
+ * can themselves be individual flows or further splits. In DSL form a split is expressed like this:
  * <pre><tt><aa || bb></tt></pre>.
  *
  * @author Andy Clement
  */
-public class Split extends LabelledComposedTaskNode {
+public class SplitNode extends LabelledComposedTaskNode {
 
 	private List<LabelledComposedTaskNode> parallelTaskApps;
 
-	public Split(int startpos, int endpos, List<LabelledComposedTaskNode> parallelSequences) {
+	SplitNode(int startpos, int endpos, List<LabelledComposedTaskNode> parallelSequences) {
 		super(startpos, endpos);
 		this.parallelTaskApps = Collections.unmodifiableList(parallelSequences);
 	}
@@ -71,7 +71,7 @@ public class Split extends LabelledComposedTaskNode {
 	}
 
 	@Override
-	boolean isSplit() {
+	public boolean isSplit() {
 		return true;
 	}
 

@@ -20,6 +20,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.springframework.util.Assert;
+
 import static org.springframework.cloud.dataflow.core.dsl.TokenKind.*;
 
 /**
@@ -37,31 +39,34 @@ public class ComposedTaskParser {
 	/**
 	 * Parse a composed task definition into an abstract syntax tree (AST).
 	 *
-	 * @param composedTaskSpecification the textual composed task specification
-	 * @param validate if true then extra validation will be performed on parsed AST
+	 * @param composedTaskName the name of the composed task
+	 * @param composedTaskDefinition the textual composed task definition
 	 * @return the AST for the parsed composed task
-	 * @throws ComposedTaskSpecificationException if any problems occur during parsing
+	 * @throws ComposedTaskValidationException if any problems occur during parsing
 	 */
-	public ComposedTaskNode parse(String composedTaskSpecification) {
-		return parse(composedTaskSpecification, true);
+	public ComposedTaskNode parse(String composedTaskName, String composedTaskDefinition) {
+		return parse(composedTaskName, composedTaskDefinition, true);
 	}
 	
 	/**
 	 * Parse a composed task definition into an abstract syntax tree (AST).
 	 *
-	 * @param composedTaskSpecification the textual composed task specification
+	 * @param composedTaskName the name of the composed task
+	 * @param composedTaskDefinition the textual composed task definition
 	 * @param validate if true then extra validation will be performed on the AST
 	 * @return the AST for the parsed composed task
-	 * @throws ComposedTaskSpecificationException if any problems occur during parsing
+	 * @throws ComposedTaskValidationException if any problems occur during parsing
 	 */
-	public ComposedTaskNode parse(String composedTaskSpecification, boolean validate) {
-		composedTaskSpecification = composedTaskSpecification.trim();
-		if (composedTaskSpecification.length() == 0) {
-			return new ComposedTaskNode(composedTaskSpecification, Collections.emptyList());
+	public ComposedTaskNode parse(String composedTaskName, String composedTaskDefinition, boolean validate) {
+		Assert.notNull(composedTaskName, "composedTaskName must be a non-null string");
+		Assert.notNull(composedTaskDefinition, "composedTaskDefinition must be a non-null string");
+		composedTaskDefinition = composedTaskDefinition.trim();
+		if (composedTaskDefinition.length() == 0) {
+			return new ComposedTaskNode(composedTaskName, composedTaskDefinition, Collections.emptyList());
 		}
-		tokens = new ComposedTaskTokenizer().getTokens(composedTaskSpecification);
+		tokens = new ComposedTaskTokenizer().getTokens(composedTaskDefinition);
 		List<LabelledComposedTaskNode> sequence = eatSequence();
-		ComposedTaskNode composedTaskNode = new ComposedTaskNode(composedTaskSpecification, sequence);
+		ComposedTaskNode composedTaskNode = new ComposedTaskNode(composedTaskName, composedTaskDefinition, sequence);
 		if (tokens.hasNext()) {
 			tokens.raiseException(tokens.peek().startPos, DSLMessage.MORE_INPUT,
 					toString(tokens.next()));
@@ -82,14 +87,14 @@ public class ComposedTaskParser {
 	 * newlines or semi-colons.
 	 */
 	private List<LabelledComposedTaskNode> eatSequence() {
-		List<LabelledComposedTaskNode> sequence = new ArrayList<>();		
+		List<LabelledComposedTaskNode> sequence = new ArrayList<>();
 		sequence.add(parseComposedTaskNode());
 		while (tokens.hasNext() && (nextTokenIsOnNewline() || maybeEat(SEMICOLON))) {
 			sequence.add(parseComposedTaskNode());
 		}
 		return sequence;
 	}
-	
+
 	private boolean nextTokenIsOnNewline() {
 		Token nextToken = peek();
 		Token lastToken = peek(-1);
@@ -131,27 +136,27 @@ public class ComposedTaskParser {
 			// is the split part of a flow? "<..> && b"
 			return parseFlow(node);
 		}
-		TaskApp app = eatTaskApp();
+		TaskAppNode app = eatTaskApp();
 		app.setLabel(label);
 		// Handle a potential flow "a && b"
 		return parseFlow(app);
 	}
 
-	private Flow parseFlow(LabelledComposedTaskNode firstJobNodeInFlow) {
-		List<LabelledComposedTaskNode> jobNodes = new ArrayList<>();
-		jobNodes.add(firstJobNodeInFlow);
+	private FlowNode parseFlow(LabelledComposedTaskNode firstNodeInFlow) {
+		List<LabelledComposedTaskNode> nodes = new ArrayList<>();
+		nodes.add(firstNodeInFlow);
 		while (maybeEat(ANDAND)) {
 			LabelledComposedTaskNode nextNode = parseComposedTaskNode();
 			// If nextNode is a Flow node, merge it with this one
-			if (nextNode instanceof Flow) {
-				jobNodes.addAll(nextNode.getSeries());
+			if (nextNode instanceof FlowNode) {
+				nodes.addAll(nextNode.getSeries());
 			}
 			else {
-				jobNodes.add(nextNode);
+				nodes.add(nextNode);
 			}
 		}
-		Flow f = new Flow(jobNodes);
-		f.setLabel(firstJobNodeInFlow.getLabel());
+		FlowNode f = new FlowNode(nodes);
+		f.setLabel(firstNodeInFlow.getLabel());
 		return f;
 	}
 
@@ -164,7 +169,7 @@ public class ComposedTaskParser {
 			flows.add(parseComposedTaskNode());
 		}
 		Token endSplit = eat(GT);
-		return new Split(startSplit.startPos, endSplit.endPos, flows);
+		return new SplitNode(startSplit.startPos, endSplit.endPos, flows);
 	}
 
 	// App1
@@ -172,15 +177,15 @@ public class ComposedTaskParser {
 	// App1 0 -> App2 1 -> App3
 	// App1 'a' -> App2
 	// App1 'a' -> App2 '*' -> App3
-	private TaskApp eatTaskApp() {
+	private TaskAppNode eatTaskApp() {
 		Token taskName = eat(IDENTIFIER);
 		tokens.checkpoint();
-		List<Transition> transitions = maybeEatTransitions();
-		return new TaskApp(taskName,transitions);
+		List<TransitionNode> transitions = maybeEatTransitions();
+		return new TaskAppNode(taskName,transitions);
 	}
 
-	private List<Transition> maybeEatTransitions() {
-		List<Transition> transitions = new ArrayList<>();
+	private List<TransitionNode> maybeEatTransitions() {
+		List<TransitionNode> transitions = new ArrayList<>();
 		Token transitionOn = null;
 		while (true) {
 			if (peek(ARROW)) {
@@ -202,14 +207,14 @@ public class ComposedTaskParser {
 			if (!maybeEat(ARROW)) {
 				tokens.raiseException(transitionOn.startPos, DSLMessage.COMPOSED_TASK_MISSING_TRANSITION_ARROW);
 			}
-			Transition t = null;
+			TransitionNode t = null;
 			if (maybeEat(COLON)) {
 				Token labelReference = eat(IDENTIFIER);
-				t = Transition.toLabelReference(transitionOn, labelReference);
+				t = TransitionNode.toLabelReference(transitionOn, labelReference);
 			}
 			else {
 				Token taskName = eat(IDENTIFIER);
-				t = Transition.toAnotherTask(transitionOn, taskName);
+				t = TransitionNode.toAnotherTask(transitionOn, taskName);
 			}
 			if (t.isExitCodeCheck() && !t.getStatusToCheck().equals("*")) {
 				// If an exit code check, must be a number

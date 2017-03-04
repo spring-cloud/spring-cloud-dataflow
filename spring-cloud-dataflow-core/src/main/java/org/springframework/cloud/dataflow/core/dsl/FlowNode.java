@@ -20,20 +20,20 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * The AST node representing a flow. A flow is a series of jobs to execute sequentially. Those jobs
- * can themselves be individual jobs or splits. In DSL form a flow is expressed like this:
- * <pre><tt>aa || bb</tt></pre>.
+ * The AST node representing a flow. A flow is a series of things to execute sequentially. Those things
+ * can themselves be individual task applications or splits. In DSL form a flow is expressed like this:
+ * <pre><tt>aa && bb</tt></pre>.
  *
  * @author Andy Clement
  */
-public class Flow extends LabelledComposedTaskNode {
+public class FlowNode extends LabelledComposedTaskNode {
 
 	private List<LabelledComposedTaskNode> series;
 
-	public Flow(List<LabelledComposedTaskNode> jobDefOrRefsWithConditions) {
-		super(jobDefOrRefsWithConditions.get(0).getStartPos(),
-				jobDefOrRefsWithConditions.get(jobDefOrRefsWithConditions.size() - 1).getEndPos());
-		this.series = Collections.unmodifiableList(jobDefOrRefsWithConditions);
+	FlowNode(List<LabelledComposedTaskNode> nodes) {
+		super(nodes.get(0).getStartPos(),
+				nodes.get(nodes.size() - 1).getEndPos());
+		this.series = Collections.unmodifiableList(nodes);
 	}
 
 	@Override
@@ -64,7 +64,7 @@ public class Flow extends LabelledComposedTaskNode {
 	}
 
 	@Override
-	boolean isFlow() {
+	public boolean isFlow() {
 		return true;
 	}
 
@@ -79,7 +79,7 @@ public class Flow extends LabelledComposedTaskNode {
 		if (!cont) {
 			return;
 		}
-        visitor.visit(this);
+		visitor.visit(this);
 		for (LabelledComposedTaskNode labelledComposedTaskNode : series) {
 			labelledComposedTaskNode.accept(visitor);
 		}

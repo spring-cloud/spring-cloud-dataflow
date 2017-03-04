@@ -19,7 +19,7 @@ package org.springframework.cloud.dataflow.core.dsl;
 import static org.springframework.cloud.dataflow.core.dsl.TokenKind.*;
 
 /**
- * An AST node representing a transition found in the parsed Job specification. A transition
+ * An AST node representing a transition found in a parsed composed task specification. A transition
  * is expressed in the form "<tt>STATE->TARGET</tt>". If <tt>STATE</tt> is unquoted it is considered a reference
  * to the exit code of the preceding app (where <tt>*</tt> means 'any exit code'). If <tt>STATE</tt> is quoted it is considered
  * a reference to the exit status of the preceding app (where <tt>'*'</tt> means 'any exit status').
@@ -27,7 +27,7 @@ import static org.springframework.cloud.dataflow.core.dsl.TokenKind.*;
  *
  * @author Andy Clement
  */
-public class Transition extends AstNode {
+public class TransitionNode extends AstNode {
 
 	public final static String FAIL = "$FAIL";
 
@@ -54,7 +54,7 @@ public class Transition extends AstNode {
 	 * @param statusToken the token representing the status check
 	 * @param endPos used to indicate the end of the transition spec in the original source dsl
 	 */
-	private Transition(Token statusToken, int endPos) {
+	private TransitionNode(Token statusToken, int endPos) {
 		super(statusToken.startPos, endPos);
 		this.statusToken = statusToken;
 		// If it is quoted, strip them off to determine real status
@@ -67,7 +67,7 @@ public class Transition extends AstNode {
 		else {
 			isExitCodeCheck = true;
 			if (statusToken.isKind(STAR)) {
-				this.status="*";
+				this.status = "*";
 			}
 			else {
 				this.status = this.statusToken.stringValue();
@@ -75,14 +75,14 @@ public class Transition extends AstNode {
 		}
 	}
 
-	public static Transition toLabelReference(Token transitionOnToken, Token labelReference) {
-		Transition t = new Transition(transitionOnToken,labelReference.endPos);
+	static TransitionNode toLabelReference(Token transitionOnToken, Token labelReference) {
+		TransitionNode t = new TransitionNode(transitionOnToken,labelReference.endPos);
 		t.targetLabel = labelReference;
 		return t;
 	}
 
-	public static Transition toAnotherTask(Token transitionOnToken, Token taskName) {
-		Transition t = new Transition(transitionOnToken,taskName.endPos);
+	static TransitionNode toAnotherTask(Token transitionOnToken, Token taskName) {
+		TransitionNode t = new TransitionNode(transitionOnToken,taskName.endPos);
 		t.targetApp = taskName;
 		return t;
 	}

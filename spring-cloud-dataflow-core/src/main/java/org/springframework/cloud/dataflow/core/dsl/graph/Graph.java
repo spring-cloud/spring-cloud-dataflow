@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.springframework.cloud.dataflow.core.dsl.Transition;
+import org.springframework.cloud.dataflow.core.dsl.TransitionNode;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
@@ -353,10 +353,10 @@ public class Graph {
 				Node transitionTarget = findNodeById(l.to);
 				String transitionTargetName = transitionTarget.name;
 				if (transitionTargetName.equals("FAIL")) {
-					transitionTargetName = Transition.FAIL;
+					transitionTargetName = TransitionNode.FAIL;
 				}
 				else if (transitionTargetName.equals("END")) {
-					transitionTargetName = Transition.END;
+					transitionTargetName = TransitionNode.END;
 				}
 				else if (transitionTarget.getLabel()!=null) {
 					transitionTargetName = ":"+transitionTarget.getLabel();

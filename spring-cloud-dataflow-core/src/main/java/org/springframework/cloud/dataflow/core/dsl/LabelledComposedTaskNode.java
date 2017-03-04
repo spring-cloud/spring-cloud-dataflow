@@ -19,30 +19,30 @@ package org.springframework.cloud.dataflow.core.dsl;
 import java.util.List;
 
 /**
- * The main composed task supertype AST node. Other nodes like {@link Flow} and {@link Split}
+ * The main composed task supertype AST node. Other nodes like {@link FlowNode} and {@link SplitNode}
  * extend this one, relying on this one for common functionality.
  * 
  * @author Andy Clement
  */
 public abstract class LabelledComposedTaskNode extends AstNode {
 
-	Token label;
+	private Token label;
 	
-	public LabelledComposedTaskNode(int startPos, int endPos) {
+	LabelledComposedTaskNode(int startPos, int endPos) {
 		super(startPos, endPos);
 	}
 
 	/**
 	 * @return true if this node represents a flow (a number of jobs to run in sequence)
 	 */
-	boolean isFlow() {
+	public boolean isFlow() {
 		return false;
 	}
 
 	/**
 	 * @return true if this node represents a split (a number of jobs to run in parallel)
 	 */
-	boolean isSplit() {
+	public boolean isSplit() {
 		return false;
 	}
 

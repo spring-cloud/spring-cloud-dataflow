@@ -26,7 +26,8 @@ class ComposedTaskTokenizer extends AbstractTokenizer {
 
 	public ComposedTaskTokenizer() {
 	}
-	
+
+	@Override
 	protected void process() {
 		while (pos < max) {
 			char ch = toProcess[pos];
@@ -126,14 +127,15 @@ class ComposedTaskTokenizer extends AbstractTokenizer {
 	/**
 	 * @return true if an identifier for this tokenizer variant can start with the specified char
 	 */
-	protected boolean isIdentifierStart(char ch) {
+	private boolean isIdentifierStart(char ch) {
 		return isAlphabetic(ch) || isDigit(ch) || ch == '_' || ch == '$';
 	}
-	
+
 	/**
 	 * @return true if an identifier for this tokenizer variant can contain (after the first char)
 	 *  the specified char
 	 */
+	@Override
 	protected boolean isIdentifier(char ch) {
 		return super.isIdentifier(ch) || ch == '.';
 	}
