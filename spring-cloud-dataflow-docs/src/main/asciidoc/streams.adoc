@@ -89,12 +89,30 @@ List of available Stream Application Starters:
 [width="100%",frame="topbot",options="header"]
 |======================
 |Artifact Type |Stable Release |SNAPSHOT Release
-|RabbitMQ + Maven |link:http://bit.ly/Avogadro-SR1-stream-applications-rabbit-maven[http://bit.ly/Avogadro-SR1-stream-applications-rabbit-maven] |link:http://bit.ly/Bacon-BUILD-SNAPSHOT-stream-applications-rabbit-maven[http://bit.ly/Bacon-BUILD-SNAPSHOT-stream-applications-rabbit-maven]
-|RabbitMQ + Docker|link:http://bit.ly/Avogadro-SR1-stream-applications-rabbit-docker[http://bit.ly/Avogadro-SR1-stream-applications-rabbit-docker] | N/A ]
-|Kafka 0.9 + Maven 	  |link:http://bit.ly/Avogadro-SR1-stream-applications-kafka-09-maven[http://bit.ly/Avogadro-SR1-stream-applications-kafka-09-maven] |link:http://bit.ly/Bacon-BUILD-SNAPSHOT-stream-applications-kafka-09-maven[http://bit.ly/Bacon-BUILD-SNAPSHOT-stream-applications-kafka-09-maven]
-|Kafka 0.9 + Docker   |link:http://bit.ly/Avogadro-SR1-stream-applications-kafka-09-docker[http://bit.ly/Avogadro-SR1-stream-applications-kafka-09-docker] | N/A ]
-|Kafka 0.10 + Maven 	  |link:http://bit.ly/Avogadro-SR1-stream-applications-kafka-10-maven[http://bit.ly/Avogadro-SR1-stream-applications-kafka-10-maven] |link:http://bit.ly/Bacon-BUILD-SNAPSHOT-stream-applications-kafka-10-maven[http://bit.ly/Bacon-BUILD-SNAPSHOT-stream-applications-kafka-10-maven]
-|Kafka 0.10 + Docker   |http://bit.ly/Avogadro-SR1-stream-applications-kafka-10-docker[http://bit.ly/Avogadro-SR1-stream-applications-kafka-10-docker] | N/A ]
+
+|RabbitMQ + Maven
+|http://bit.ly/Avogadro-SR1-stream-applications-rabbit-maven
+|http://bit.ly/Bacon-BUILD-SNAPSHOT-stream-applications-rabbit-maven
+
+|RabbitMQ + Docker
+|http://bit.ly/Avogadro-SR1-stream-applications-rabbit-docker
+|N/A
+
+|Kafka 0.9 + Maven
+|http://bit.ly/Avogadro-SR1-stream-applications-kafka-09-maven
+|http://bit.ly/Bacon-BUILD-SNAPSHOT-stream-applications-kafka-09-maven
+
+|Kafka 0.9 + Docker
+|http://bit.ly/Avogadro-SR1-stream-applications-kafka-09-docker
+|N/A
+
+|Kafka 0.10 + Maven
+|http://bit.ly/Avogadro-SR1-stream-applications-kafka-10-maven
+|http://bit.ly/Bacon-BUILD-SNAPSHOT-stream-applications-kafka-10-maven
+
+|Kafka 0.10 + Docker
+|http://bit.ly/Avogadro-SR1-stream-applications-kafka-10-docker
+|N/A
 |======================
 
 List of available Task Application Starters:
@@ -102,11 +120,17 @@ List of available Task Application Starters:
 [width="100%",frame="topbot",options="header"]
 |======================
 |Artifact Type |Stable Release |SNAPSHOT Release
-|Maven   |http://bit.ly/Addison-GA-task-applications-maven[http://bit.ly/Addison-GA-task-applications-maven] |link:http://bit.ly/Belmont-BUILD-SNAPSHOT-task-applications-maven[http://bit.ly/Belmont-BUILD-SNAPSHOT-task-applications-maven]
-|Docker  |link:http://bit.ly/Addison-GA-task-applications-docker[http://bit.ly/Addison-GA-task-applications-docker] | N/A ]
+
+|Maven
+|http://bit.ly/Addison-GA-task-applications-maven
+|http://bit.ly/Belmont-BUILD-SNAPSHOT-task-applications-maven
+
+|Docker
+|http://bit.ly/Addison-GA-task-applications-docker
+|N/A
 |======================
 
-You can find more information about the available task starters look the http://cloud.spring.io/spring-cloud-task-app-starters/[Task App Starters Project Page] and
+You can find more information about the available task starters in the http://cloud.spring.io/spring-cloud-task-app-starters/[Task App Starters Project Page] and
 related reference documentation.  For more information about the available stream starters look at the http://cloud.spring.io/spring-cloud-stream-app-starters/[Stream App Starters Project Page]
 and related reference documentation.
 
@@ -117,7 +141,7 @@ the following command.
 dataflow:>app import --uri http://bit.ly/Avogadro-SR1-stream-applications-rabbit-maven
 ```
 
-You can also pass the `--local` option (which is TRUE by default) to indicate whether the
+You can also pass the `--local` option (which is `true` by default) to indicate whether the
 properties file location should be resolved within the shell process itself. If the location should
 be resolved from the Data Flow Server process, specify `--local false`.
 
@@ -133,7 +157,7 @@ the specific documentation of each Data Flow Server for more detail.
 [[spring-cloud-dataflow-stream-app-whitelisting]]
 === Whitelisting application properties
 
-Stream applications are Spring Boot applications which are aware of many <<spring-cloud-dataflow-global-properties>>, e.g. `server.port` but also families of properties such as those with the prefix `spring.jmx` and `logging`.  When creating your own application it is desirable to whitelist properties so that the shell and the UI can display them first as primary properties when presenting options via TAB completion or in drop-down boxes.
+Stream and Task applications are Spring Boot applications which are aware of many <<spring-cloud-dataflow-global-properties>>, e.g. `server.port` but also families of properties such as those with the prefix `spring.jmx` and `logging`.  When creating your own application it is desirable to whitelist properties so that the shell and the UI can display them first as primary properties when presenting options via TAB completion or in drop-down boxes.
 
 To whitelist application properties create a file named `spring-configuration-metadata-whitelist.properties` in the `META-INF` resource directory.  There are two property keys that can be used inside this file. The first key is named `configuration-properties.classes`.  The value is a comma separated list of fully qualified `@ConfigurationProperty` class names.  The second key is `configuration-properties.names` whose value is a comma separated list of property names.  This can contain the full name of property, such as `server.port` or a partial name to whitelist a category of property names, e.g. `spring.jmx`.
 
@@ -163,6 +187,86 @@ Make sure to add 'spring-boot-configuration-processor' as an optional dependency
 </dependency>
 ----
 ====
+
+
+[[spring-cloud-dataflow-stream-app-metadata-artifact]]
+=== Creating and using a dedicated metadata artifact
+You can go a step further in the process of describing the main properties that your stream or task app supports by
+creating a so-called metadata companion artifact. This simple jar file contains only the Spring boot JSON file about
+configuration properties metadata, as well as the whitelisting file described in the previous section.
+
+Here is the contents of such an artifact, for the canonical `log` sink:
+
+[source, bash]
+----
+$ jar tvf log-sink-rabbit-1.2.0.BUILD-SNAPSHOT-metadata.jar
+373848 META-INF/spring-configuration-metadata.json
+   174 META-INF/spring-configuration-metadata-whitelist.properties
+----
+
+Note that the `spring-configuration-metadata.json` file is quite large. This is because it contains the concatenation of _all_ the properties that
+are available at runtime to the `log` sink (some of them come from `spring-boot-actuator.jar`, some of them come from
+`spring-boot-autoconfigure.jar`, even some more from `spring-cloud-starter-stream-sink-log.jar`, _etc._) Data Flow
+always relies on all those properties, even when a companion artifact is not available, but here all have been merged
+into a single file.
+
+To help with that (as a matter of fact, you don't want to try to craft this giant JSON file by hand), you can use the
+following plugin in your build:
+
+[source, xml]
+----
+<plugin>
+ 	<groupId>org.springframework.cloud</groupId>
+ 	<artifactId>spring-cloud-app-starter-metadata-maven-plugin</artifactId>
+ 	<executions>
+ 		<execution>
+ 			<id>aggregate-metadata</id>
+ 			<phase>compile</phase>
+ 			<goals>
+ 				<goal>aggregate-metadata</goal>
+ 			</goals>
+ 		</execution>
+ 	</executions>
+ </plugin>
+----
+
+NOTE: This plugin comes in _addition_ to the `spring-boot-configuration-processor` that creates the individual JSON files.
+Be sure to configure the two!
+
+The benefits of a companion artifact are manifold:
+
+1. being way lighter (usually a few kilobytes, as opposed to megabytes for the actual app), they are quicker to download,
+allowing quicker feedback when using _e.g._ `app info`
+2. as a consequence of the above, they can be used in resource constrained environments (such as PaaS) when metadata is
+the only piece of information needed
+3. finally, for environments that don't deal with boot uberjars directly (for example for Docker based runtimes), this
+is the only way to provide metadata about the properties supported by the app.
+
+Remember though, that this is entirely optional when dealing with uberjars. The uberjar itself is a source of metadata.
+
+==== Using the companion artifact
+Once you have a companion artifact at hand, you need to make the system aware of it so that it can be used.
+
+When registering a single app _via_ `app register`, you can use the optional `--metadata-uri` option in the shell, like so:
+
+[source]
+----
+dataflow:>app register --name log --type sink
+    --uri maven://org.springframework.cloud.stream.app:log-sink-kafka-10:1.2.0.RELEASE
+    --metadata-uri=maven://org.springframework.cloud.stream.app:log-sink-kafka-10:jar:metadata:1.2.0.BUILD-SNAPSHOT
+----
+
+When registering several files using the `app import` command, the file should contain a `<type>.<name>.metadata` line
+in addition to each `<type>.<name>` line. This is optional (_i.e._ if some apps have it but some others don't, that's fine).
+Here is an example for a Dockerized app:
+
+[source, properties]
+----
+...
+source.http=docker:springcloudstream/http-source-rabbit:latest
+source.http.metadata=maven://org.springframework.cloud.stream.app:http-source-rabbit:jar:metadata:1.2.0.BUILD-SNAPSHOT
+...
+----
 
 [[custom-applications]]
 == Creating custom applications
