@@ -521,6 +521,24 @@ for instance every user shall have have access to all endpoints, then you can al
 set `spring.cloud.dataflow.security.authorization.enabled=false`.
 ====
 
+[[authorization-shell-and-dashboard]]
+==== Authorization - Shell and Dashboard Behavior
+
+When authorization is enabled, the _Dashboard_ and the _Shell_ will be _role-aware_,
+meaning that depending on the assigned role(s), not all functionality may be visible.
+
+For instance, Shell commands, for which the user does not have the necessary roles
+for, will be marked as unavailable.
+
+[IMPORTANT]
+====
+Currently, the Shell's `help` command will list commands that are unavailable.
+Please track the following issue: https://github.com/spring-projects/spring-shell/issues/115
+====
+
+Similarly for the _Dashboard_, the UI will not show pages, or page elements, for
+which the user is not authorized for.
+
 [[ldap-authorization-and-roles]]
 ==== Authorization with Ldap
 
