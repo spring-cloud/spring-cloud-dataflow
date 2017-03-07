@@ -110,10 +110,10 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 	public void testComposeTask() throws InterruptedException {
 		logger.info("Compose Task Test");
 		String taskName = generateUniqueName();
-		task().create("AAA778877", "timestamp");
-		task().create("BBB889988", "timestamp");
+		task().create("AAA", "timestamp");
+		task().create("BBB", "timestamp");
 
-		task().compose(taskName, "AAA778877 && BBB889988");
+		task().compose(taskName, "AAA && BBB");
 	}
 
 	@Test

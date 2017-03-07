@@ -20,6 +20,7 @@ import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.verify;
@@ -32,6 +33,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 
 import org.junit.After;
 import org.junit.Before;
@@ -53,6 +55,7 @@ import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
@@ -159,38 +162,151 @@ public class TaskControllerTests {
 	@Test
 	public void testCompose() throws Exception {
 		assertEquals(0, repository.count());
-		TaskDefinition testTask = new TaskDefinition("task", "task");
-		repository.save(testTask);
-		appRegistry.save("task", ApplicationType.task, new URI("http://fake.example.com/"),null);
+		createTaskDefinition("AAA");
+		createTaskDefinition("BBB");
 		mockMvc.perform(
-				post("/tasks/definitions/compose").param("name", "myTask").param("definition", "task")
-						.accept(MediaType.APPLICATION_JSON)).andDo(print())
+				post("/tasks/definitions/compose").param("name", "myTask").param("definition", "AAA && BBB")
+						.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk());
 
-		assertEquals(2, repository.count());
+		assertEquals(3, repository.count());
 
 		TaskDefinition myTask = repository.findOne("myTask");
 
 		assertEquals(2, myTask.getProperties().size());
 		assertEquals("myTask", myTask.getProperties().get("spring.cloud.task.name"));
-		assertEquals("task", myTask.getProperties().get("graph"));
-		assertEquals("composed-task-runner --graph=\"task\"", myTask.getDslText());
+		assertEquals("AAA && BBB", myTask.getProperties().get("graph"));
+		assertEquals("composed-task-runner --graph=\"AAA && BBB\"", myTask.getDslText());
 		assertEquals("myTask", myTask.getName());
+	}
+
+	@Test
+	public void testComposeWithDoubleQuotes() throws Exception {
+		assertEquals(0, repository.count());
+		createTaskDefinition("AAA");
+		createTaskDefinition("BBB");
+		createTaskDefinition("CCC");
+		mockMvc.perform(
+				post("/tasks/definitions/compose").param("name", "myTask").param("definition", "AAA \"FAILED\" -> CCC && BBB")
+						.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk());
+
+		assertEquals(4, repository.count());
+
+		TaskDefinition myTask = repository.findOne("myTask");
+
+		assertEquals(2, myTask.getProperties().size());
+		assertEquals("myTask", myTask.getProperties().get("spring.cloud.task.name"));
+		assertEquals("\"AAA \"FAILED\" -> CCC && BBB\"", myTask.getProperties().get("graph"));
+		assertEquals("composed-task-runner --graph=\"AAA \"FAILED\" -> CCC && BBB\"", myTask.getDslText());
+		assertEquals("myTask", myTask.getName());
+	}
+
+	@Test
+	public void testComposeWithDoubleQuotesWithEmbeddedSingleQuotes() throws Exception {
+		assertEquals(0, repository.count());
+		createTaskDefinition("AAA");
+		createTaskDefinition("BBB");
+		createTaskDefinition("CCC");
+		mockMvc.perform(
+				post("/tasks/definitions/compose").param("name", "myTask").param("definition", "AAA \"'FAILED'\" -> CCC && BBB")
+						.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk());
+
+		assertEquals(4, repository.count());
+
+		TaskDefinition myTask = repository.findOne("myTask");
+
+		assertEquals(2, myTask.getProperties().size());
+		assertEquals("myTask", myTask.getProperties().get("spring.cloud.task.name"));
+		assertEquals("\"AAA \"'FAILED'\" -> CCC && BBB\"", myTask.getProperties().get("graph"));
+		assertEquals("composed-task-runner --graph=\"AAA \"'FAILED'\" -> CCC && BBB\"", myTask.getDslText());
+		assertEquals("myTask", myTask.getName());
+	}
+
+	@Test
+	public void testComposeWithSingleQuotesWithEmbeddedDoubleQuotes() throws Exception {
+		assertEquals(0, repository.count());
+		createTaskDefinition("AAA");
+		createTaskDefinition("BBB");
+		createTaskDefinition("CCC");
+		mockMvc.perform(
+				post("/tasks/definitions/compose").param("name", "myTask").param("definition", "AAA '\"FAILED\"' -> CCC && BBB")
+						.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk());
+
+		assertEquals(4, repository.count());
+
+		TaskDefinition myTask = repository.findOne("myTask");
+
+		assertEquals(2, myTask.getProperties().size());
+		assertEquals("myTask", myTask.getProperties().get("spring.cloud.task.name"));
+		assertEquals("\"AAA '\"FAILED\"' -> CCC && BBB\"", myTask.getProperties().get("graph"));
+		assertEquals("composed-task-runner --graph=\"AAA '\"FAILED\"' -> CCC && BBB\"", myTask.getDslText());
+		assertEquals("myTask", myTask.getName());
+	}
+
+	@Test
+	public void testComposeWithSingleQuotes() throws Exception {
+		assertEquals(0, repository.count());
+		createTaskDefinition("AAA");
+		createTaskDefinition("BBB");
+		createTaskDefinition("CCC");
+
+		mockMvc.perform(
+				post("/tasks/definitions/compose").param("name", "myTask").param("definition", "AAA 'FAILED' -> CCC && BBB")
+						.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk());
+
+		assertEquals(4, repository.count());
+
+		TaskDefinition myTask = repository.findOne("myTask");
+
+		assertEquals(2, myTask.getProperties().size());
+		assertEquals("myTask", myTask.getProperties().get("spring.cloud.task.name"));
+		assertEquals("AAA 'FAILED' -> CCC && BBB", myTask.getProperties().get("graph"));
+		assertEquals("composed-task-runner --graph=\"AAA 'FAILED' -> CCC && BBB\"", myTask.getDslText());
+		assertEquals("myTask", myTask.getName());
+	}
+
+	@Test
+	public void testComposeUnexpectedQuote() throws Exception {
+		assertEquals(0, repository.count());
+		createTaskDefinition("AAA");
+		createTaskDefinition("BBB");
+		createTaskDefinition("CCC");
+
+		String result = mockMvc.perform(
+				post("/tasks/definitions/compose").param("name", "myTask").param("definition", "AAA ''FAILED'' -> CCC && BBB")
+						.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().is5xxServerError()).andReturn()
+				.getResponse().getContentAsString();
+
+		assertTrue("Error code was invalid or not found",
+				result.contains("163E"));
+		assertTrue("Error position was invalid or not found in result message",
+				result.contains("pos 4"));
+		assertTrue("Error message was invalid or not found in result message",
+				result.contains("After parsing a valid composed task, there is still more data"));
 	}
 
 	@Test
 	public void testComposedInvalidParse() throws Exception {
 		assertEquals(0, repository.count());
 		appRegistry.save("task", ApplicationType.task, new URI("http://fake.example.com/"),null);
-		mockMvc.perform(
+		String result = mockMvc.perform(
 				post("/tasks/definitions/compose").param("name", "myTask").
 						param("definition", "task%%$$")
-						.accept(MediaType.APPLICATION_JSON)).andDo(print())
-				.andExpect(status().is5xxServerError())
-				.andExpect(content().json(
-						"[{message: \"162E:(pos 4): unexpected data in " +
-								"composed task definition '%'\\ntask%%$$\\n    " +
-								"^\\n\"}]"));
+						.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().is5xxServerError()).andReturn()
+				.getResponse().getContentAsString();
+
+		assertTrue("Error code was invalid or not found",
+				result.contains("162E"));
+		assertTrue("Error position was invalid or not found in result message",
+				result.contains("pos 4"));
+		assertTrue("Error message was invalid or not found in result message",
+				result.contains("Unexpected data in composed task definition"));
 	}
 
 	@Test
@@ -199,14 +315,18 @@ public class TaskControllerTests {
 		TaskDefinition testTask = new TaskDefinition("task", "task");
 		repository.save(testTask);
 		appRegistry.save("task", ApplicationType.task, new URI("http://fake.example.com/"),null);
-		mockMvc.perform(
+		String result = mockMvc.perform(
 				post("/tasks/definitions/compose").param("name", "myTask").
 						param("definition", "task && faketask")
-						.accept(MediaType.APPLICATION_JSON)).andDo(print())
-				.andExpect(status().is5xxServerError())
-				.andExpect(content().json(
-						"[{message: \"Problems found when validating 'task && " +
-								"faketask': [161E:(pos 8): Task in composed task definition does not exist]\"}]"));
+						.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().is5xxServerError()).andReturn()
+				.getResponse().getContentAsString();
+		assertTrue("Error code was invalid or not found",
+				result.contains("161E"));
+		assertTrue("Error position was invalid or not found in result message",
+				result.contains("pos 8"));
+		assertTrue("Error message was invalid or not found in result message",
+				result.contains("Task in composed task definition does not exist"));
 	}
 
 	@Test
@@ -214,7 +334,7 @@ public class TaskControllerTests {
 		repository.save(new TaskDefinition("myTask", "task"));
 		mockMvc.perform(
 				post("/tasks/definitions/").param("name", "myTask").param("definition", "task")
-						.accept(MediaType.APPLICATION_JSON)).andDo(print())
+						.accept(MediaType.APPLICATION_JSON))
 						.andExpect(status().isConflict());
 		assertEquals(1, repository.count());
 	}
@@ -360,4 +480,11 @@ public class TaskControllerTests {
 				.andExpect(status().isNotFound());
 	}
 
+
+
+	private void createTaskDefinition(String taskName) throws URISyntaxException {
+		String taskAppName = "faketask" + taskName;
+		repository.save(new TaskDefinition(taskName, taskAppName));
+		appRegistry.save(taskAppName, ApplicationType.task, new URI("http://fake.example.com/"),null);
+	}
 }

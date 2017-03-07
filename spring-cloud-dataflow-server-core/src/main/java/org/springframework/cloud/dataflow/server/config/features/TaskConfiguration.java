@@ -37,6 +37,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
+import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.server.job.TaskExplorerFactoryBean;
 import org.springframework.cloud.dataflow.server.repository.RdbmsTaskDefinitionRepository;
@@ -45,7 +46,6 @@ import org.springframework.cloud.dataflow.server.service.TaskJobService;
 import org.springframework.cloud.dataflow.server.service.TaskService;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskJobService;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskService;
-import org.springframework.cloud.deployer.resource.registry.UriRegistry;
 import org.springframework.cloud.deployer.resource.support.DelegatingResourceLoader;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.cloud.task.repository.TaskExplorer;
@@ -76,7 +76,7 @@ public class TaskConfiguration {
 	DataSourceProperties dataSourceProperties;
 
 	@Autowired
-	private UriRegistry uriRegistry;
+	private AppRegistry appRegistry;
 
 	@Autowired
 	private ComposedTaskProperties composedTaskProperties;
@@ -197,14 +197,7 @@ public class TaskConfiguration {
 
 	@EventListener
 	public void handleContextRefresh(ContextRefreshedEvent event) {
-
-		try {
-			uriRegistry.register("task." + composedTaskProperties.getTaskName(),
-					new URI(composedTaskProperties.getComposedTaskRunnerUri()));
-		}
-		catch (URISyntaxException uriException) {
-			throw new IllegalStateException(uriException);
-		}
+		appRegistry.save(composedTaskProperties.getTaskName(), ApplicationType.task, composedTaskProperties.getComposedTaskRunnerUri(), null);
 	}
 
 }

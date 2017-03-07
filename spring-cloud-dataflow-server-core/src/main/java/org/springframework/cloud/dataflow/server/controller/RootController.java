@@ -101,7 +101,7 @@ public class RootController {
 		if (featuresProperties.isTasksEnabled()) {
 			root.add(entityLinks.linkToCollectionResource(TaskDefinitionResource.class).withRel("tasks/definitions"));
 			root.add(unescapeTemplateVariables(entityLinks.linkToSingleResource(TaskDefinitionResource.class, "{name}").withRel("tasks/definitions/definition")));
-			root.add(unescapeTemplateVariables(entityLinks.linkToSingleResource(TaskDefinitionResource.class, "/compose").withRel("tasks/definitions/compose")));
+			root.add(entityLinks.linkToSingleResource(TaskDefinitionResource.class, "/compose").withRel("tasks/definitions/compose"));
 			root.add(entityLinks.linkToCollectionResource(TaskExecutionResource.class).withRel("tasks/executions"));
 			String taskTemplated = entityLinks.linkToCollectionResource(TaskExecutionResource.class).getHref() + "{?name}";
 			root.add(new Link(taskTemplated).withRel("tasks/executions/name"));

@@ -68,7 +68,7 @@ public class ComposedTaskParser {
 		List<LabelledComposedTaskNode> sequence = eatSequence();
 		ComposedTaskNode composedTaskNode = new ComposedTaskNode(composedTaskName, composedTaskDefinition, sequence);
 		if (tokens.hasNext()) {
-			tokens.raiseException(tokens.peek().startPos, DSLMessage.MORE_INPUT,
+			tokens.raiseException(tokens.peek().startPos, DSLMessage.COMPOSED_TASK_MORE_INPUT,
 					toString(tokens.next()));
 		}
 		if (validate) {

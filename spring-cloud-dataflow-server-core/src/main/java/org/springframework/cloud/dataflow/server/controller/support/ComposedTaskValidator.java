@@ -17,7 +17,11 @@
 package org.springframework.cloud.dataflow.server.controller.support;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.core.dsl.ComposedTaskVisitor;
@@ -37,15 +41,22 @@ public class ComposedTaskValidator extends ComposedTaskVisitor {
 
 	private Map<String, Integer> invalidDefinitions = new HashMap<>();
 
+	Set<String> availableDefinitionNames;
+
 	public ComposedTaskValidator(TaskDefinitionRepository repository) {
 		Assert.notNull(repository, "repository must not be null");
 		this.repository = repository;
+		availableDefinitionNames = new HashSet();
+
+		Stream<TaskDefinition> taskDefinitionStream =
+				StreamSupport.stream(repository.findAll().spliterator(), false);
+		taskDefinitionStream.forEach(taskDefinition ->
+				availableDefinitionNames.add(taskDefinition.getName()));
 	}
 
 	@Override
 	public void visit(TaskAppNode taskApp) {
-		TaskDefinition taskDefinition = repository.findOne(taskApp.getName());
-		if (taskDefinition == null) {
+		if (!availableDefinitionNames.contains(taskApp.getName())) {
 			invalidDefinitions.put(taskApp.getName(), taskApp.getStartPos());
 		}
 	}

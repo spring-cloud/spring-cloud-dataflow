@@ -114,7 +114,7 @@ public class TaskDefinitionController {
 	/**
 	 * Register a task definition for future execution.
 	 *
-	 * @param name the name of the task
+	 * @param name name the name of the task
 	 * @param dsl DSL definition for the task
 	 */
 	@RequestMapping(value = "", method = RequestMethod.POST)
@@ -141,13 +141,13 @@ public class TaskDefinitionController {
 			@RequestParam("definition") String graph) {
 		TaskDefinition taskDefinition = new TaskDefinition(name, graph, true);
 		TaskDefinition composedTaskDefinition = new TaskDefinition(
-				taskDefinition.getName(),getComposedDSL(taskDefinition.getDslText()));
-		validateTaskDefinitionExist(name, graph);
+				taskDefinition.getName(),getComposedArgs(taskDefinition.getDslText()));
+		validateComposedTaskElementsExist(name, graph);
 		repository.save(composedTaskDefinition);
 		return taskAssembler.toResource(taskDefinition);
 	}
 
-	private void validateTaskDefinitionExist(String name, String graph) {
+	private void validateComposedTaskElementsExist(String name, String graph) {
 		ComposedTaskValidator composedTaskValidator =
 				new ComposedTaskValidator(repository);
 		ComposedTaskNode composedTaskNode = new ComposedTaskParser().parse(name, graph);
@@ -155,18 +155,18 @@ public class TaskDefinitionController {
 		if(composedTaskValidator.getInvalidDefinitions().size() > 0) {
 			List<ComposedTaskValidationProblem> composedTaskValidationProblems =
 					new ArrayList<>();
-			for(String taskName : composedTaskValidator.getInvalidDefinitions().keySet()) {
-				composedTaskValidationProblems.add(
-						new ComposedTaskValidationProblem(graph,
-						composedTaskValidator.getInvalidDefinitions().get(taskName),
-								DSLMessage.COMPOSED_TASK_DEFINITION_NOT_PRESENT));
-			}
+			composedTaskValidator.getInvalidDefinitions().keySet().stream().
+					forEach(s -> composedTaskValidationProblems.add(
+					new ComposedTaskValidationProblem(graph,
+							composedTaskValidator.getInvalidDefinitions().get(s),
+							DSLMessage.CT_ELEMENT_IN_COMPOSED_DEFINITION_DOES_NOT_EXIST))
+							);
 			throw new ComposedTaskValidationException(composedTaskNode,
 					composedTaskValidationProblems);
 		}
 	}
 
-	private String getComposedDSL(String graph) {
+	private String getComposedArgs(String graph) {
 		return String.format("%s --graph=\"%s\"", composedTaskProperties.getTaskName(), graph);
 	}
 
