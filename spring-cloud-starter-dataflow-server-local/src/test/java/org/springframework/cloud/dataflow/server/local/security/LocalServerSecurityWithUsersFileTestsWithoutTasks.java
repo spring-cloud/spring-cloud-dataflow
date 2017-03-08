@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2017 the original author or authors.
+ * Copyright 2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,22 +48,25 @@ import org.springframework.util.CollectionUtils;
 import com.google.common.collect.ImmutableMap;
 
 /**
- * Tests for security configuration backed by a file-based user list.
+ * Tests for security configuration backed by a file-based user list. This test-suite
+ * is basically the same as {@link LocalServerSecurityWithUsersFileTests} but with the
+ * Task feature disabled. Therefore any REST endpoints related to Jobs and Tasks should
+ * return a 404 (Not Found) HTTP status code.
  *
- * @author Eric Bottard
  * @author Gunnar Hillert
  */
 @RunWith(Parameterized.class)
-public class LocalServerSecurityWithUsersFileTests {
+public class LocalServerSecurityWithUsersFileTestsWithoutTasks {
 
 	private static UserCredentials viewOnlyUser   = new UserCredentials("bob", "bobspassword");
 	private static UserCredentials adminOnlyUser  = new UserCredentials("alice", "alicepwd");
 	private static UserCredentials createOnlyUser = new UserCredentials("cartman", "cartmanpwd");
 
-	private final static Logger logger = LoggerFactory.getLogger(LocalServerSecurityWithUsersFileTests.class);
+	private final static Logger logger = LoggerFactory.getLogger(LocalServerSecurityWithUsersFileTestsWithoutTasks.class);
 
 	private final static LocalDataflowResource localDataflowResource =
-		new LocalDataflowResource("classpath:org/springframework/cloud/dataflow/server/local/security/fileBasedUsers.yml");
+		new LocalDataflowResource("classpath:org/springframework/cloud/dataflow/server/local/security/fileBasedUsers.yml",
+			true, false);
 
 	@ClassRule
 	public static TestRule springDataflowAndLdapServer = RuleChain
@@ -145,12 +148,12 @@ public class LocalServerSecurityWithUsersFileTests {
 			/* JobExecutionController */
 
 			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/jobs/executions",     adminOnlyUser, null },
-			{ HttpMethod.GET, HttpStatus.OK,           "/jobs/executions",     viewOnlyUser, null },
+			{ HttpMethod.GET, HttpStatus.NOT_FOUND,           "/jobs/executions",     viewOnlyUser, null },
 			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/jobs/executions",     createOnlyUser, null },
 			{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/jobs/executions",     null, null },
 
 			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/jobs/executions",     adminOnlyUser,  ImmutableMap.of("page", "0", "size", "10") },
-			{ HttpMethod.GET, HttpStatus.OK,           "/jobs/executions",     viewOnlyUser,   ImmutableMap.of("page", "0", "size", "10") },
+			{ HttpMethod.GET, HttpStatus.NOT_FOUND,    "/jobs/executions",     viewOnlyUser,   ImmutableMap.of("page", "0", "size", "10") },
 			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/jobs/executions",     createOnlyUser, ImmutableMap.of("page", "0", "size", "10") },
 			{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/jobs/executions",     null,           ImmutableMap.of("page", "0", "size", "10") },
 
@@ -192,7 +195,7 @@ public class LocalServerSecurityWithUsersFileTests {
 			{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/jobs/instances", null,           ImmutableMap.of("name", "my-job-name", "page", "0", "size", "10") },
 
 			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/jobs/instances", adminOnlyUser,  null },
-			{ HttpMethod.GET, HttpStatus.BAD_REQUEST, "/jobs/instances", viewOnlyUser,   null },
+			{ HttpMethod.GET, HttpStatus.NOT_FOUND,    "/jobs/instances", viewOnlyUser,   null },
 			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/jobs/instances", createOnlyUser, null },
 			{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/jobs/instances", null,           null },
 
@@ -209,7 +212,7 @@ public class LocalServerSecurityWithUsersFileTests {
 			{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/jobs/executions/123/steps", null,           null },
 
 			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/jobs/executions/abc/steps", adminOnlyUser,  null },
-			{ HttpMethod.GET, HttpStatus.BAD_REQUEST,  "/jobs/executions/abc/steps", viewOnlyUser,   null },
+			{ HttpMethod.GET, HttpStatus.NOT_FOUND,    "/jobs/executions/abc/steps", viewOnlyUser,   null },
 			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/jobs/executions/abc/steps", createOnlyUser, null },
 			{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/jobs/executions/abc/steps", null,           null },
 
@@ -325,23 +328,23 @@ public class LocalServerSecurityWithUsersFileTests {
 
 			{ HttpMethod.POST, HttpStatus.FORBIDDEN,    "/tasks/definitions", adminOnlyUser,  ImmutableMap.of("name", "my-name") },
 			{ HttpMethod.POST, HttpStatus.FORBIDDEN,    "/tasks/definitions", viewOnlyUser,   ImmutableMap.of("name", "my-name") },
-			{ HttpMethod.POST, HttpStatus.BAD_REQUEST,  "/tasks/definitions", createOnlyUser, ImmutableMap.of("name", "my-name") },
+			{ HttpMethod.POST, HttpStatus.NOT_FOUND,    "/tasks/definitions", createOnlyUser, ImmutableMap.of("name", "my-name") },
 			{ HttpMethod.POST, HttpStatus.UNAUTHORIZED, "/tasks/definitions", null,           ImmutableMap.of("name", "my-name") },
 
 			{ HttpMethod.POST, HttpStatus.FORBIDDEN,    "/tasks/definitions", adminOnlyUser,  ImmutableMap.of("name", "my-name", "definition", "foo") },
 			{ HttpMethod.POST, HttpStatus.FORBIDDEN,    "/tasks/definitions", viewOnlyUser,   ImmutableMap.of("name", "my-name", "definition", "foo") },
-			{ HttpMethod.POST, HttpStatus.INTERNAL_SERVER_ERROR,    "/tasks/definitions", createOnlyUser, ImmutableMap.of("name", "my-name", "definition", "foo") }, //Should be a `400` error - See also: https://github.com/spring-cloud/spring-cloud-dataflow/issues/1075
+			{ HttpMethod.POST, HttpStatus.NOT_FOUND,    "/tasks/definitions", createOnlyUser, ImmutableMap.of("name", "my-name", "definition", "foo") }, //Should be a `400` error - See also: https://github.com/spring-cloud/spring-cloud-dataflow/issues/1075
 			{ HttpMethod.POST, HttpStatus.UNAUTHORIZED, "/tasks/definitions", null,           ImmutableMap.of("name", "my-name", "definition", "foo") },
 
 			/* TaskExecutionController */
 
 			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/tasks/executions", adminOnlyUser,  null },
-			{ HttpMethod.GET, HttpStatus.OK,           "/tasks/executions", viewOnlyUser,   null },
+			{ HttpMethod.GET, HttpStatus.NOT_FOUND,    "/tasks/executions", viewOnlyUser,   null },
 			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/tasks/executions", createOnlyUser, null },
 			{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/tasks/executions", null,           null },
 
 			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/tasks/executions", adminOnlyUser,  ImmutableMap.of("page", "0", "size", "10") },
-			{ HttpMethod.GET, HttpStatus.OK,           "/tasks/executions", viewOnlyUser,   ImmutableMap.of("page", "0", "size", "10") },
+			{ HttpMethod.GET, HttpStatus.NOT_FOUND,    "/tasks/executions", viewOnlyUser,   ImmutableMap.of("page", "0", "size", "10") },
 			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/tasks/executions", createOnlyUser, ImmutableMap.of("page", "0", "size", "10") },
 			{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/tasks/executions", null,           ImmutableMap.of("page", "0", "size", "10") },
 
@@ -362,7 +365,7 @@ public class LocalServerSecurityWithUsersFileTests {
 
 			{ HttpMethod.POST, HttpStatus.FORBIDDEN,    "/tasks/executions", adminOnlyUser,  null },
 			{ HttpMethod.POST, HttpStatus.FORBIDDEN,    "/tasks/executions", viewOnlyUser,   null },
-			{ HttpMethod.POST, HttpStatus.BAD_REQUEST,  "/tasks/executions", createOnlyUser, null },
+			{ HttpMethod.POST, HttpStatus.NOT_FOUND,    "/tasks/executions", createOnlyUser, null },
 			{ HttpMethod.POST, HttpStatus.UNAUTHORIZED, "/tasks/executions", null,           null },
 
 			{ HttpMethod.POST, HttpStatus.FORBIDDEN,    "/tasks/executions", adminOnlyUser,  ImmutableMap.of("name", "my-task-name") },

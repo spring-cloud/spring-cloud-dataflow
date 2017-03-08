@@ -6,6 +6,10 @@ spring:
     exclude: org.springframework.boot.autoconfigure.session.SessionAutoConfiguration
   cloud:
     dataflow:
+      version-info:
+        dataflow-shell-version: "@spring-shell.version@"
+        dataflow-dashboard-version: "@spring-cloud-dataflow-ui.version@"
+        dataflow-core-version: "@project.version@"
       security:
         authorization:
           enabled: true
