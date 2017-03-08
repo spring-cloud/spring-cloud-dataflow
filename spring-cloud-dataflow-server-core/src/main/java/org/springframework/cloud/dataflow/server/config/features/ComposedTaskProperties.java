@@ -27,6 +27,11 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = ComposedTaskProperties.COMPOSED_TASK_PREFIX)
 public class ComposedTaskProperties {
 
+	public static final String COMPOSED_TASK_PREFIX = "spring.cloud.dataflow.composed.task";
+
+	private URI composedTaskRunnerUri;
+
+	private String taskName = "composed-task-runner";
 
 	public ComposedTaskProperties() {
 		try {
@@ -38,26 +43,12 @@ public class ComposedTaskProperties {
 		}
 	}
 
-	public static final String COMPOSED_TASK_PREFIX = "spring.cloud.dataflow.composed.task";
-
-	private URI composedTaskRunnerUri;
-
-
-	private String taskName = "composed-task-runner";
-
 	public URI getComposedTaskRunnerUri() {
 		return composedTaskRunnerUri;
 	}
 
-	public void setComposedTaskRunnerUri(String composedTaskRunnerUri) {
-		try {
-			this.composedTaskRunnerUri = new URI(composedTaskRunnerUri);
-		}
-		catch (URISyntaxException e) {
-			throw new IllegalStateException(
-					"Invalid URI specified for composedTaskRunnerUri");
-		}
-
+	public void setComposedTaskRunnerUri(URI composedTaskRunnerUri) {
+			this.composedTaskRunnerUri = composedTaskRunnerUri;
 	}
 
 	public String getTaskName() {

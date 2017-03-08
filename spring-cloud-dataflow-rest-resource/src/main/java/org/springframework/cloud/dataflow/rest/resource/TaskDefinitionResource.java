@@ -36,7 +36,11 @@ public class TaskDefinitionResource extends ResourceSupport {
 	 */
 	private String status;
 
-	TaskDefinitionResource() {
+	/**
+	 * Default constructor to be used by Jackson.
+	 */
+	@SuppressWarnings("unused")
+	protected TaskDefinitionResource() {
 	}
 
 	public TaskDefinitionResource(String name, String dslText) {

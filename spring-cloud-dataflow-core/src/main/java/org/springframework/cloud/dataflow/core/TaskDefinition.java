@@ -35,6 +35,7 @@ import org.springframework.util.Assert;
  */
 public class TaskDefinition extends DataFlowAppDefinition {
 
+	public static final String SPRING_CLOUD_TASK_NAME = "spring.cloud.task.name";
 	/**
 	 * DSL text for the module.
 	 */
@@ -47,7 +48,7 @@ public class TaskDefinition extends DataFlowAppDefinition {
 	TaskDefinition(String registeredAppName, String label, Map<String, String> properties) {
 		super(registeredAppName, label, properties);
 		this.dslText = "";
-		properties.put("spring.cloud.task.name", registeredAppName);
+		properties.put(SPRING_CLOUD_TASK_NAME, registeredAppName);
 	}
 
 	public TaskDefinition(String name, String dsl, boolean isComposedTask) {
@@ -66,7 +67,7 @@ public class TaskDefinition extends DataFlowAppDefinition {
 				}
 			}
 		}
-		properties.put("spring.cloud.task.name", name);
+		properties.put(SPRING_CLOUD_TASK_NAME, name);
 		this.appDefinition = new AppDefinition(name, properties);
 	}
 

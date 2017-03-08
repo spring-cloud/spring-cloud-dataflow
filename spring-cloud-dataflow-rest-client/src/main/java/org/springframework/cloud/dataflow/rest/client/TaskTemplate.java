@@ -20,6 +20,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.cloud.dataflow.rest.resource.ComposedTaskResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskDefinitionResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionResource;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
@@ -41,7 +42,7 @@ public class TaskTemplate implements TaskOperations {
 
 	/*default*/ static final String DEFINITIONS_RELATION = "tasks/definitions";
 
-	private static final String COMPOSE_RELATION = "tasks/definitions/compose";
+	private static final String COMPOSE_RELATION = "tasks/composed-definitions/compose";
 
 	private static final String DEFINITION_RELATION = "tasks/definitions/definition";
 
@@ -105,12 +106,12 @@ public class TaskTemplate implements TaskOperations {
 	}
 
 	@Override
-	public TaskDefinitionResource compose(String name, String definition) {
+	public ComposedTaskResource compose(String name, String definition) {
 		MultiValueMap<String, Object> values = new LinkedMultiValueMap<String, Object>();
 		values.add("name", name);
 		values.add("definition", definition);
-		TaskDefinitionResource task = restTemplate.postForObject(
-				composeLink.expand().getHref(), values, TaskDefinitionResource.class);
+		ComposedTaskResource task = restTemplate.postForObject(
+				composeLink.expand().getHref(), values, ComposedTaskResource.class);
 		return task;
 	}
 

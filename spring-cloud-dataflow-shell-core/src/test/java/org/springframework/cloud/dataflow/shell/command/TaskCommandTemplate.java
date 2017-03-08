@@ -71,7 +71,18 @@ public class TaskCommandTemplate {
 	 * @param graph the compoed task definition DSL
 	 */
 	public void compose(String taskName, String graph) {
-		doCompose(taskName, graph);
+		String actualDefinition = String.format(graph);
+		String wholeCommand = String.format("task compose %s --graph \"%s\"", taskName,
+				actualDefinition);
+		CommandResult cr = shell.executeCommand(wholeCommand);
+
+		// add the task name to the tasks list before assertion
+		tasks.add(taskName);
+		String createMsg = "Created";
+
+		assertEquals(createMsg + " new composed task '" + taskName + "'", cr.getResult());
+
+		verifyExists(taskName, "composed-task-runner --graph=\"" + actualDefinition + "\"");
 	}
 
 	/**
@@ -113,22 +124,6 @@ public class TaskCommandTemplate {
 		assertEquals(createMsg + " new task '" + taskName + "'", cr.getResult());
 
 		verifyExists(taskName, actualDefinition);
-	}
-
-	private void doCompose(String taskName, String taskDefinition) {
-		String actualDefinition = String.format(taskDefinition);
-		// Shell parser expects quotes to be escaped by \
-		String wholeCommand = String.format("task compose %s --graph \"%s\"", taskName,
-				actualDefinition.replaceAll("\"", "\\\\\""));
-		CommandResult cr = shell.executeCommand(wholeCommand);
-
-		// add the task name to the tasks list before assertion
-		tasks.add(taskName);
-		String createMsg = "Created";
-
-		assertEquals(createMsg + " new composed task '" + taskName + "'", cr.getResult());
-
-		verifyExists(taskName, "composed-task-runner --graph=\"" + actualDefinition + "\"");
 	}
 
 

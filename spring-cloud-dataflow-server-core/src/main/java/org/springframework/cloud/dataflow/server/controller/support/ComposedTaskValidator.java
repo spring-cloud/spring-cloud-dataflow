@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -37,21 +38,18 @@ import org.springframework.util.Assert;
  */
 public class ComposedTaskValidator extends ComposedTaskVisitor {
 
-	private TaskDefinitionRepository repository;
-
 	private Map<String, Integer> invalidDefinitions = new HashMap<>();
 
 	Set<String> availableDefinitionNames;
 
 	public ComposedTaskValidator(TaskDefinitionRepository repository) {
 		Assert.notNull(repository, "repository must not be null");
-		this.repository = repository;
 		availableDefinitionNames = new HashSet();
 
 		Stream<TaskDefinition> taskDefinitionStream =
 				StreamSupport.stream(repository.findAll().spliterator(), false);
-		taskDefinitionStream.forEach(taskDefinition ->
-				availableDefinitionNames.add(taskDefinition.getName()));
+		availableDefinitionNames = taskDefinitionStream.map(taskDefinition ->
+				taskDefinition.getName()).collect(Collectors.toSet());
 	}
 
 	@Override

@@ -18,6 +18,7 @@ package org.springframework.cloud.dataflow.server.controller;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
@@ -131,50 +132,9 @@ public class TaskDefinitionController {
 	}
 
 	/**
-	 * Register a composed task definition for future execution.
-	 *
-	 * @param name of the composed task
-	 * @param graph DSL definition for the composed task
-	 */
-	@RequestMapping(value = "/compose", method = RequestMethod.POST)
-	public TaskDefinitionResource saveComposedTask(@RequestParam("name") String name,
-			@RequestParam("definition") String graph) {
-		TaskDefinition taskDefinition = new TaskDefinition(name, graph, true);
-		TaskDefinition composedTaskDefinition = new TaskDefinition(
-				taskDefinition.getName(),getComposedArgs(taskDefinition.getDslText()));
-		validateComposedTaskElementsExist(name, graph);
-		repository.save(composedTaskDefinition);
-		return taskAssembler.toResource(taskDefinition);
-	}
-
-	private void validateComposedTaskElementsExist(String name, String graph) {
-		ComposedTaskValidator composedTaskValidator =
-				new ComposedTaskValidator(repository);
-		ComposedTaskNode composedTaskNode = new ComposedTaskParser().parse(name, graph);
-		composedTaskNode.accept(composedTaskValidator);
-		if(composedTaskValidator.getInvalidDefinitions().size() > 0) {
-			List<ComposedTaskValidationProblem> composedTaskValidationProblems =
-					new ArrayList<>();
-			composedTaskValidator.getInvalidDefinitions().keySet().stream().
-					forEach(s -> composedTaskValidationProblems.add(
-					new ComposedTaskValidationProblem(graph,
-							composedTaskValidator.getInvalidDefinitions().get(s),
-							DSLMessage.CT_ELEMENT_IN_COMPOSED_DEFINITION_DOES_NOT_EXIST))
-							);
-			throw new ComposedTaskValidationException(composedTaskNode,
-					composedTaskValidationProblems);
-		}
-	}
-
-	private String getComposedArgs(String graph) {
-		return String.format("%s --graph=\"%s\"", composedTaskProperties.getTaskName(), graph);
-	}
-
-
-	/**
 	 * Delete the task from the repository so that it can no longer be executed.
 	 *
-	 * @param name of the task to be deleted
+	 * @param name name of the task to be deleted
 	 */
 	@RequestMapping(value = "/{name}", method = RequestMethod.DELETE)
 	@ResponseStatus(HttpStatus.OK)

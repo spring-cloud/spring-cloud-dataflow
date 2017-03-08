@@ -18,7 +18,6 @@ package org.springframework.cloud.dataflow.server.config;
 
 import java.util.HashMap;
 import java.util.Map;
-
 import javax.sql.DataSource;
 
 import org.springframework.analytics.metrics.AggregateCounterRepository;
@@ -46,6 +45,7 @@ import org.springframework.cloud.dataflow.server.config.features.FeaturesPropert
 import org.springframework.cloud.dataflow.server.config.security.BasicAuthSecurityConfiguration.AuthorizationConfig;
 import org.springframework.cloud.dataflow.server.controller.AppRegistryController;
 import org.springframework.cloud.dataflow.server.controller.CompletionController;
+import org.springframework.cloud.dataflow.server.controller.ComposedTaskController;
 import org.springframework.cloud.dataflow.server.controller.FeaturesController;
 import org.springframework.cloud.dataflow.server.controller.JobExecutionController;
 import org.springframework.cloud.dataflow.server.controller.JobInstanceController;
@@ -88,6 +88,7 @@ import org.springframework.scheduling.concurrent.ForkJoinPoolFactoryBean;
  * @author Gunnar Hillert
  * @author Ilayaperumal Gopinathan
  * @author Andy Clement
+ * @author Glenn Renfro
  */
 @SuppressWarnings("all")
 @Configuration
@@ -172,6 +173,17 @@ public class DataFlowControllerAutoConfiguration {
 			ComposedTaskProperties composedTaskProperties) {
 		return new TaskDefinitionController(repository, deploymentIdRepository,
 				taskLauncher, appRegistry, composedTaskProperties);
+	}
+
+	@Bean
+	@ConditionalOnBean(TaskDefinitionRepository.class)
+	public ComposedTaskController composedTaskController(
+			TaskDefinitionRepository repository,
+			DeploymentIdRepository deploymentIdRepository,
+			TaskLauncher taskLauncher, AppRegistry appRegistry,
+			ComposedTaskProperties composedTaskProperties) {
+		return new ComposedTaskController(repository, deploymentIdRepository,
+				taskLauncher, composedTaskProperties);
 	}
 
 	@Bean

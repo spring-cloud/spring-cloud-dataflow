@@ -110,9 +110,21 @@ public class TaskControllerTests {
 	}
 
 	@Test(expected = IllegalArgumentException.class)
+	public void testComposedTaskControllerConstructorMissingRepository() {
+		new ComposedTaskController(null, null, taskLauncher,
+				composedTaskProperties);
+	}
+
+	@Test(expected = IllegalArgumentException.class)
 	public void testTaskDefinitionControllerConstructorMissingDeployer() {
 		new TaskDefinitionController(new InMemoryTaskDefinitionRepository(),
 				null, null, appRegistry, composedTaskProperties);
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void testComposedTaskControllerConstructorMissingDeployer() {
+		new ComposedTaskController(new InMemoryTaskDefinitionRepository(),
+				null, null, composedTaskProperties);
 	}
 
 	@Test
@@ -165,7 +177,7 @@ public class TaskControllerTests {
 		createTaskDefinition("AAA");
 		createTaskDefinition("BBB");
 		mockMvc.perform(
-				post("/tasks/definitions/compose").param("name", "myTask").param("definition", "AAA && BBB")
+				post("/tasks/composed-definitions/compose").param("name", "myTask").param("definition", "AAA && BBB")
 						.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk());
 
@@ -187,7 +199,7 @@ public class TaskControllerTests {
 		createTaskDefinition("BBB");
 		createTaskDefinition("CCC");
 		mockMvc.perform(
-				post("/tasks/definitions/compose").param("name", "myTask").param("definition", "AAA \"FAILED\" -> CCC && BBB")
+				post("/tasks/composed-definitions/compose").param("name", "myTask").param("definition", "AAA \"FAILED\" -> CCC && BBB")
 						.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk());
 
@@ -197,8 +209,8 @@ public class TaskControllerTests {
 
 		assertEquals(2, myTask.getProperties().size());
 		assertEquals("myTask", myTask.getProperties().get("spring.cloud.task.name"));
-		assertEquals("\"AAA \"FAILED\" -> CCC && BBB\"", myTask.getProperties().get("graph"));
-		assertEquals("composed-task-runner --graph=\"AAA \"FAILED\" -> CCC && BBB\"", myTask.getDslText());
+		assertEquals("\"AAA \\\"FAILED\\\" -> CCC && BBB\"", myTask.getProperties().get("graph"));
+		assertEquals("composed-task-runner --graph=\"AAA \\\"FAILED\\\" -> CCC && BBB\"", myTask.getDslText());
 		assertEquals("myTask", myTask.getName());
 	}
 
@@ -209,7 +221,7 @@ public class TaskControllerTests {
 		createTaskDefinition("BBB");
 		createTaskDefinition("CCC");
 		mockMvc.perform(
-				post("/tasks/definitions/compose").param("name", "myTask").param("definition", "AAA \"'FAILED'\" -> CCC && BBB")
+				post("/tasks/composed-definitions/compose").param("name", "myTask").param("definition", "AAA \"'FAILED'\" -> CCC && BBB")
 						.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk());
 
@@ -219,8 +231,8 @@ public class TaskControllerTests {
 
 		assertEquals(2, myTask.getProperties().size());
 		assertEquals("myTask", myTask.getProperties().get("spring.cloud.task.name"));
-		assertEquals("\"AAA \"'FAILED'\" -> CCC && BBB\"", myTask.getProperties().get("graph"));
-		assertEquals("composed-task-runner --graph=\"AAA \"'FAILED'\" -> CCC && BBB\"", myTask.getDslText());
+		assertEquals("\"AAA \\\"'FAILED'\\\" -> CCC && BBB\"", myTask.getProperties().get("graph"));
+		assertEquals("composed-task-runner --graph=\"AAA \\\"'FAILED'\\\" -> CCC && BBB\"", myTask.getDslText());
 		assertEquals("myTask", myTask.getName());
 	}
 
@@ -231,7 +243,7 @@ public class TaskControllerTests {
 		createTaskDefinition("BBB");
 		createTaskDefinition("CCC");
 		mockMvc.perform(
-				post("/tasks/definitions/compose").param("name", "myTask").param("definition", "AAA '\"FAILED\"' -> CCC && BBB")
+				post("/tasks/composed-definitions/compose").param("name", "myTask").param("definition", "AAA '\"FAILED\"' -> CCC && BBB")
 						.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk());
 
@@ -241,8 +253,8 @@ public class TaskControllerTests {
 
 		assertEquals(2, myTask.getProperties().size());
 		assertEquals("myTask", myTask.getProperties().get("spring.cloud.task.name"));
-		assertEquals("\"AAA '\"FAILED\"' -> CCC && BBB\"", myTask.getProperties().get("graph"));
-		assertEquals("composed-task-runner --graph=\"AAA '\"FAILED\"' -> CCC && BBB\"", myTask.getDslText());
+		assertEquals("\"AAA '\\\"FAILED\\\"' -> CCC && BBB\"", myTask.getProperties().get("graph"));
+		assertEquals("composed-task-runner --graph=\"AAA '\\\"FAILED\\\"' -> CCC && BBB\"", myTask.getDslText());
 		assertEquals("myTask", myTask.getName());
 	}
 
@@ -254,7 +266,7 @@ public class TaskControllerTests {
 		createTaskDefinition("CCC");
 
 		mockMvc.perform(
-				post("/tasks/definitions/compose").param("name", "myTask").param("definition", "AAA 'FAILED' -> CCC && BBB")
+				post("/tasks/composed-definitions/compose").param("name", "myTask").param("definition", "AAA 'FAILED' -> CCC && BBB")
 						.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk());
 
@@ -277,7 +289,7 @@ public class TaskControllerTests {
 		createTaskDefinition("CCC");
 
 		String result = mockMvc.perform(
-				post("/tasks/definitions/compose").param("name", "myTask").param("definition", "AAA ''FAILED'' -> CCC && BBB")
+				post("/tasks/composed-definitions/compose").param("name", "myTask").param("definition", "AAA ''FAILED'' -> CCC && BBB")
 						.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().is5xxServerError()).andReturn()
 				.getResponse().getContentAsString();
@@ -295,7 +307,7 @@ public class TaskControllerTests {
 		assertEquals(0, repository.count());
 		appRegistry.save("task", ApplicationType.task, new URI("http://fake.example.com/"),null);
 		String result = mockMvc.perform(
-				post("/tasks/definitions/compose").param("name", "myTask").
+				post("/tasks/composed-definitions/compose").param("name", "myTask").
 						param("definition", "task%%$$")
 						.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().is5xxServerError()).andReturn()
@@ -316,7 +328,7 @@ public class TaskControllerTests {
 		repository.save(testTask);
 		appRegistry.save("task", ApplicationType.task, new URI("http://fake.example.com/"),null);
 		String result = mockMvc.perform(
-				post("/tasks/definitions/compose").param("name", "myTask").
+				post("/tasks/composed-definitions/compose").param("name", "myTask").
 						param("definition", "task && faketask")
 						.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().is5xxServerError()).andReturn()
