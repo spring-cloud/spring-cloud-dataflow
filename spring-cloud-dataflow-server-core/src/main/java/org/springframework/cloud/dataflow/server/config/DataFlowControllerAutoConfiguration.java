@@ -33,6 +33,9 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.info.BuildProperties;
+import org.springframework.boot.info.GitProperties;
+import org.springframework.boot.info.InfoProperties;
 import org.springframework.cloud.dataflow.completion.CompletionConfiguration;
 import org.springframework.cloud.dataflow.completion.StreamCompletionProvider;
 import org.springframework.cloud.dataflow.completion.TaskCompletionProvider;
@@ -43,6 +46,7 @@ import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationPr
 import org.springframework.cloud.dataflow.server.config.features.ComposedTaskProperties;
 import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
 import org.springframework.cloud.dataflow.server.config.security.BasicAuthSecurityConfiguration.AuthorizationConfig;
+import org.springframework.cloud.dataflow.server.controller.AboutController;
 import org.springframework.cloud.dataflow.server.controller.AppRegistryController;
 import org.springframework.cloud.dataflow.server.controller.CompletionController;
 import org.springframework.cloud.dataflow.server.controller.ComposedTaskController;
@@ -94,7 +98,7 @@ import org.springframework.scheduling.concurrent.ForkJoinPoolFactoryBean;
 @Configuration
 @Import(CompletionConfiguration.class)
 @ConditionalOnBean({EnableDataFlowServerConfiguration.Marker.class, AppDeployer.class, TaskLauncher.class})
-@EnableConfigurationProperties({AuthorizationConfig.class, FeaturesProperties.class, ComposedTaskProperties.class})
+@EnableConfigurationProperties({AuthorizationConfig.class, FeaturesProperties.class, ComposedTaskProperties.class, VersionInfoProperties.class})
 @ConditionalOnProperty(prefix = "dataflow.server", name = "enabled", havingValue = "true", matchIfMissing = true)
 public class DataFlowControllerAutoConfiguration {
 
@@ -267,6 +271,17 @@ public class DataFlowControllerAutoConfiguration {
 	@Bean
 	public FeaturesController featuresController(FeaturesProperties featuresProperties) {
 		return new FeaturesController(featuresProperties);
+	}
+
+	@Bean
+	public AboutController aboutController(
+			AppDeployer appDeployer,
+			TaskLauncher taskLauncher,
+			FeaturesProperties featuresProperties,
+			VersionInfoProperties versionInfoProperties,
+			SecurityProperties securityProperties,
+			AuthorizationConfig authorizationConfig) {
+		return new AboutController(appDeployer, taskLauncher, featuresProperties, versionInfoProperties, securityProperties, authorizationConfig);
 	}
 
 	@Bean

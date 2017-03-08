@@ -141,6 +141,32 @@ and execute the desired functionality:
 
 include::{snippets}/api-documentation/index/links.adoc[]
 
+[[resources-about]]
+=== Server Meta Information
+
+A `GET` request will return meta information for Spring Cloud Data Flow. This includes:
+
+* Runtime Environment Information
+* Information regarding which features are enabled
+* Dependency information of Spring Cloud Data Flow Server
+* Security information
+
+==== Request structure
+
+include::{snippets}/about-documentation/get-meta-information/http-request.adoc[]
+
+==== Request parameters
+
+include::{snippets}/about-documentation/get-meta-information/request-parameters.adoc[]
+
+==== Example request
+
+include::{snippets}/about-documentation/get-meta-information/curl-request.adoc[]
+
+==== Response structure
+
+include::{snippets}/about-documentation/get-meta-information/http-response.adoc[]
+
 [[resources-app-registry-list]]
 === Listing Applications
 
