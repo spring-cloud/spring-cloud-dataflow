@@ -21,10 +21,15 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.ForkJoinPool;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
@@ -37,7 +42,6 @@ import org.springframework.cloud.dataflow.rest.resource.DetailedAppRegistrationR
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.DefaultResourceLoader;
-import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.web.PagedResourcesAssembler;
@@ -70,6 +74,8 @@ import org.springframework.web.bind.annotation.RestController;
 @ExposesResourceFor(AppRegistrationResource.class)
 public class AppRegistryController implements ResourceLoaderAware {
 
+	private static final Logger logger = LoggerFactory.getLogger(AppRegistryController.class);
+
 	private final Assembler assembler = new Assembler();
 
 	private final AppRegistry appRegistry;
@@ -78,9 +84,14 @@ public class AppRegistryController implements ResourceLoaderAware {
 
 	private ResourceLoader resourceLoader = new DefaultResourceLoader();
 
-	public AppRegistryController(AppRegistry appRegistry, ApplicationConfigurationMetadataResolver metadataResolver) {
+	private ForkJoinPool forkJoinPool;
+
+	public AppRegistryController(AppRegistry appRegistry,
+		ApplicationConfigurationMetadataResolver metadataResolver,
+		ForkJoinPool forkJoinPool) {
 		this.appRegistry = appRegistry;
 		this.metadataResolver = metadataResolver;
+		this.forkJoinPool = forkJoinPool;
 	}
 
 	/**
@@ -147,7 +158,8 @@ public class AppRegistryController implements ResourceLoaderAware {
 			throw new AppAlreadyRegisteredException(previous);
 		}
 		try {
-			appRegistry.save(name, type, new URI(uri), metadataUri != null ? new URI(metadataUri) : null);
+			AppRegistration registration = appRegistry.save(name, type, new URI(uri), metadataUri != null ? new URI(metadataUri) : null);
+			prefetchMetadata(Arrays.asList(registration));
 		}
 		catch (URISyntaxException e) {
 			throw new IllegalArgumentException(e);
@@ -191,7 +203,29 @@ public class AppRegistryController implements ResourceLoaderAware {
 			registrations.addAll(appRegistry.importAll(force, bar));
 		}
 		Collections.sort(registrations);
+		prefetchMetadata(registrations);
 		return pagedResourcesAssembler.toResource(new PageImpl<>(registrations), assembler);
+	}
+
+	/**
+	 * Trigger early resolution of the metadata resource of registrations that have an explicit metadata artifact.
+	 * This assumes usage of {@link org.springframework.cloud.deployer.resource.support.DelegatingResourceLoader}.
+	 */
+	private void prefetchMetadata(List<AppRegistration> appRegistrations) {
+		forkJoinPool.execute(() -> {
+			appRegistrations.stream()
+				.filter(r -> r.getMetadataUri() != null)
+				.parallel()
+				.forEach(r -> {
+					logger.info("Eagerly fetching {}", r.getMetadataUri());
+					try {
+						r.getMetadataResource();
+					}
+					catch (Exception e) {
+						logger.warn("Could not fetch " + r.getMetadataUri(), e);
+					}
+				});
+		});
 	}
 
 	@Override

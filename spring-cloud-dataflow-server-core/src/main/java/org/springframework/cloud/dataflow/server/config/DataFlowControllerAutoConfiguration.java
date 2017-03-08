@@ -241,8 +241,16 @@ public class DataFlowControllerAutoConfiguration {
 	}
 
 	@Bean
+	@ConditionalOnMissingBean(name = "appRegistryFJPFB")
+	public ForkJoinPoolFactoryBean appRegistryFJPFB() {
+		ForkJoinPoolFactoryBean forkJoinPoolFactoryBean = new ForkJoinPoolFactoryBean();
+		forkJoinPoolFactoryBean.setParallelism(4);
+		return forkJoinPoolFactoryBean;
+	}
+
+	@Bean
 	public AppRegistryController appRegistryController(AppRegistry appRegistry, ApplicationConfigurationMetadataResolver metadataResolver) {
-		return new AppRegistryController(appRegistry, metadataResolver);
+		return new AppRegistryController(appRegistry, metadataResolver, appRegistryFJPFB().getObject());
 	}
 
 	@Bean

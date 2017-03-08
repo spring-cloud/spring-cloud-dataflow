@@ -134,7 +134,7 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 
 	@Bean
 	public AppRegistryController appRegistryController(AppRegistry registry, ApplicationConfigurationMetadataResolver metadataResolver) {
-		return new AppRegistryController(registry, metadataResolver);
+		return new AppRegistryController(registry, metadataResolver, new ForkJoinPool(2));
 	}
 
 	@Bean
