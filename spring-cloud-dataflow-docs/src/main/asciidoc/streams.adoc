@@ -236,13 +236,14 @@ Be sure to configure the two!
 The benefits of a companion artifact are manifold:
 
 1. being way lighter (usually a few kilobytes, as opposed to megabytes for the actual app), they are quicker to download,
-allowing quicker feedback when using _e.g._ `app info`
+allowing quicker feedback when using _e.g._ `app info` or the Dashboard UI
 2. as a consequence of the above, they can be used in resource constrained environments (such as PaaS) when metadata is
 the only piece of information needed
-3. finally, for environments that don't deal with boot uberjars directly (for example for Docker based runtimes), this
-is the only way to provide metadata about the properties supported by the app.
+3. finally, for environments that don't deal with boot uberjars directly (for example, Docker-based runtimes such as
+Kubernetes or Mesos), this is the only way to provide metadata about the properties supported by the app.
 
-Remember though, that this is entirely optional when dealing with uberjars. The uberjar itself is a source of metadata.
+Remember though, that this is entirely optional when dealing with uberjars. The uberjar itself _also_ includes the
+metadata in it already.
 
 ==== Using the companion artifact
 Once you have a companion artifact at hand, you need to make the system aware of it so that it can be used.
@@ -258,7 +259,9 @@ dataflow:>app register --name log --type sink
 
 When registering several files using the `app import` command, the file should contain a `<type>.<name>.metadata` line
 in addition to each `<type>.<name>` line. This is optional (_i.e._ if some apps have it but some others don't, that's fine).
-Here is an example for a Dockerized app:
+
+Here is an example for a Dockerized app, where the metadata artifact is being hosted in a Maven repository (but retrieving
+it _via_ `http://` or `file://` would be equally possible).
 
 [source, properties]
 ----
