@@ -177,7 +177,7 @@ public class TaskControllerTests {
 		createTaskDefinition("AAA");
 		createTaskDefinition("BBB");
 		mockMvc.perform(
-				post("/tasks/composed-definitions/compose").param("name", "myTask").param("definition", "AAA && BBB")
+				post("/tasks/composed-definitions").param("name", "myTask").param("definition", "AAA && BBB")
 						.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk());
 
@@ -199,7 +199,7 @@ public class TaskControllerTests {
 		createTaskDefinition("BBB");
 		createTaskDefinition("CCC");
 		mockMvc.perform(
-				post("/tasks/composed-definitions/compose").param("name", "myTask").param("definition", "AAA \"FAILED\" -> CCC && BBB")
+				post("/tasks/composed-definitions").param("name", "myTask").param("definition", "AAA \"FAILED\" -> CCC && BBB")
 						.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk());
 
@@ -221,7 +221,7 @@ public class TaskControllerTests {
 		createTaskDefinition("BBB");
 		createTaskDefinition("CCC");
 		mockMvc.perform(
-				post("/tasks/composed-definitions/compose").param("name", "myTask").param("definition", "AAA \"'FAILED'\" -> CCC && BBB")
+				post("/tasks/composed-definitions").param("name", "myTask").param("definition", "AAA \"'FAILED'\" -> CCC && BBB")
 						.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk());
 
@@ -243,7 +243,7 @@ public class TaskControllerTests {
 		createTaskDefinition("BBB");
 		createTaskDefinition("CCC");
 		mockMvc.perform(
-				post("/tasks/composed-definitions/compose").param("name", "myTask").param("definition", "AAA '\"FAILED\"' -> CCC && BBB")
+				post("/tasks/composed-definitions").param("name", "myTask").param("definition", "AAA '\"FAILED\"' -> CCC && BBB")
 						.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk());
 
@@ -266,7 +266,7 @@ public class TaskControllerTests {
 		createTaskDefinition("CCC");
 
 		mockMvc.perform(
-				post("/tasks/composed-definitions/compose").param("name", "myTask").param("definition", "AAA 'FAILED' -> CCC && BBB")
+				post("/tasks/composed-definitions").param("name", "myTask").param("definition", "AAA 'FAILED' -> CCC && BBB")
 						.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk());
 
@@ -289,7 +289,7 @@ public class TaskControllerTests {
 		createTaskDefinition("CCC");
 
 		String result = mockMvc.perform(
-				post("/tasks/composed-definitions/compose").param("name", "myTask").param("definition", "AAA ''FAILED'' -> CCC && BBB")
+				post("/tasks/composed-definitions").param("name", "myTask").param("definition", "AAA ''FAILED'' -> CCC && BBB")
 						.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().is5xxServerError()).andReturn()
 				.getResponse().getContentAsString();
@@ -307,7 +307,7 @@ public class TaskControllerTests {
 		assertEquals(0, repository.count());
 		appRegistry.save("task", ApplicationType.task, new URI("http://fake.example.com/"),null);
 		String result = mockMvc.perform(
-				post("/tasks/composed-definitions/compose").param("name", "myTask").
+				post("/tasks/composed-definitions").param("name", "myTask").
 						param("definition", "task%%$$")
 						.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().is5xxServerError()).andReturn()
@@ -328,7 +328,7 @@ public class TaskControllerTests {
 		repository.save(testTask);
 		appRegistry.save("task", ApplicationType.task, new URI("http://fake.example.com/"),null);
 		String result = mockMvc.perform(
-				post("/tasks/composed-definitions/compose").param("name", "myTask").
+				post("/tasks/composed-definitions").param("name", "myTask").
 						param("definition", "task && faketask")
 						.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().is5xxServerError()).andReturn()

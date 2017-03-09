@@ -99,7 +99,7 @@ public class ComposedTaskController {
 	 * @param name name of the composed task
 	 * @param graph DSL definition for the composed task
 	 */
-	@RequestMapping(value = "/compose", method = RequestMethod.POST)
+	@RequestMapping(value = "", method = RequestMethod.POST)
 	public ComposedTaskResource saveComposedTask(@RequestParam("name") String name,
 			@RequestParam("definition") String graph) {
 		TaskDefinition taskDefinition = new TaskDefinition(name, graph, true);
@@ -115,22 +115,25 @@ public class ComposedTaskController {
 				new ComposedTaskValidator(repository);
 		ComposedTaskNode composedTaskNode = new ComposedTaskParser().parse(name, graph);
 		composedTaskNode.accept(composedTaskValidator);
-		if(composedTaskValidator.getInvalidDefinitions().size() > 0) {
-			List<ComposedTaskValidationProblem> composedTaskValidationProblems =
-					composedTaskValidator.getInvalidDefinitions()
-							.values().stream()
-							.map(pos -> new ComposedTaskValidationProblem(
-									graph, pos, DSLMessage.CT_ELEMENT_IN_COMPOSED_DEFINITION_DOES_NOT_EXIST))
-							.collect(Collectors.toList());
-			if (!composedTaskValidationProblems.isEmpty()) {
-				throw new ComposedTaskValidationException(
-						composedTaskNode, composedTaskValidationProblems);
-			}
+		List<ComposedTaskValidationProblem> composedTaskValidationProblems =
+				composedTaskValidator.getInvalidDefinitions()
+						.values().stream()
+						.map(pos -> new ComposedTaskValidationProblem(
+								graph, pos, DSLMessage.CT_ELEMENT_IN_COMPOSED_DEFINITION_DOES_NOT_EXIST))
+						.collect(Collectors.toList());
+		if (!composedTaskValidationProblems.isEmpty()) {
+			throw new ComposedTaskValidationException(
+					composedTaskNode, composedTaskValidationProblems);
 		}
 	}
 
 	private String getComposedArgs(String graph) {
-		return String.format("%s --graph=\"%s\"", composedTaskProperties.getTaskName(), graph.replaceAll("\"", "\\\\\""));
+		return String.format("%s --graph=\"%s\"",
+				composedTaskProperties.getTaskName(), escapeQuotes(graph));
+	}
+
+	private String escapeQuotes(String graph) {
+		return graph.replace("\"", "\\\"");
 	}
 
 	/**
