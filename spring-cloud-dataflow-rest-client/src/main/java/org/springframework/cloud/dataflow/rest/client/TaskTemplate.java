@@ -42,7 +42,7 @@ public class TaskTemplate implements TaskOperations {
 
 	/*default*/ static final String DEFINITIONS_RELATION = "tasks/definitions";
 
-	private static final String COMPOSE_RELATION = "tasks/composed-definitions";
+	private static final String COMPOSE_RELATION = "tasks/composed-definitions/compose";
 
 	private static final String DEFINITION_RELATION = "tasks/definitions/definition";
 
