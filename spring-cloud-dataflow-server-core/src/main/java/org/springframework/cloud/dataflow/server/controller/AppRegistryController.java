@@ -217,7 +217,6 @@ public class AppRegistryController implements ResourceLoaderAware {
 				.filter(r -> r.getMetadataUri() != null)
 				.parallel()
 				.forEach(r -> {
-					System.out.println("Getting " + r.getMetadataUri());
 					logger.info("Eagerly fetching {}", r.getMetadataUri());
 					try {
 						r.getMetadataResource();
