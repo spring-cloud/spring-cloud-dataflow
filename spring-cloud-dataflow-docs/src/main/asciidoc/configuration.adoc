@@ -539,10 +539,6 @@ Please track the following issue: https://github.com/spring-projects/spring-shel
 Similarly for the _Dashboard_, the UI will not show pages, or page elements, for
 which the user is not authorized for.
 
-For both the _Shell_ and the _Dashboard_, the `/security/info` REST Endpoint will be
-used. That particular REST endpoint contains a property `roles` detailing the assigned
-authorizations.
-
 [[ldap-authorization-and-roles]]
 ==== Authorization with Ldap
 
