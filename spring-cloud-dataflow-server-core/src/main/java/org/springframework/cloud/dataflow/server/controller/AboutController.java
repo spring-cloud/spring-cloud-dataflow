@@ -21,9 +21,9 @@ import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.boot.info.GitProperties;
 import org.springframework.cloud.dataflow.rest.resource.about.AboutResource;
 import org.springframework.cloud.dataflow.rest.resource.about.Dependency;
-import org.springframework.cloud.dataflow.rest.resource.about.RuntimeEnvironmentDetails;
 import org.springframework.cloud.dataflow.rest.resource.about.FeatureInfo;
 import org.springframework.cloud.dataflow.rest.resource.about.RuntimeEnvironment;
+import org.springframework.cloud.dataflow.rest.resource.about.RuntimeEnvironmentDetails;
 import org.springframework.cloud.dataflow.rest.resource.about.SecurityInfo;
 import org.springframework.cloud.dataflow.rest.resource.about.VersionInfo;
 import org.springframework.cloud.dataflow.server.config.VersionInfoProperties;
@@ -41,12 +41,12 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * REST controller that provides features that are enabled/disabled on the dataflow server.
+ * REST controller that provides meta information regarding the dataflow server and
+ * its deployers.
  *
  * @author Gunnar Hillert
  */
@@ -92,9 +92,8 @@ public class AboutController {
 	}
 
 	/**
-	 * Return features that are enabled/disabled on the dataflow server.
+	 * Return meta information about the dataflow server.
 	 */
-	@ResponseBody
 	@RequestMapping(method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
 	public AboutResource getAboutResource() {
