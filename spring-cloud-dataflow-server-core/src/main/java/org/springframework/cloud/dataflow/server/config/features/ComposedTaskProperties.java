@@ -16,9 +16,6 @@
 
 package org.springframework.cloud.dataflow.server.config.features;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
@@ -29,27 +26,7 @@ public class ComposedTaskProperties {
 
 	public static final String COMPOSED_TASK_PREFIX = "spring.cloud.dataflow.composed.task";
 
-	private URI composedTaskRunnerUri;
-
 	private String taskName = "composed-task-runner";
-
-	public ComposedTaskProperties() {
-		try {
-			composedTaskRunnerUri = new URI("maven://org.springframework.cloud.task.app:composedtaskrunner-task:1.0.0.BUILD-SNAPSHOT");
-		}
-		catch (URISyntaxException e) {
-			throw new IllegalStateException(
-					"Invalid URI specified for composedTaskRunnerUri");
-		}
-	}
-
-	public URI getComposedTaskRunnerUri() {
-		return composedTaskRunnerUri;
-	}
-
-	public void setComposedTaskRunnerUri(URI composedTaskRunnerUri) {
-			this.composedTaskRunnerUri = composedTaskRunnerUri;
-	}
 
 	public String getTaskName() {
 		return taskName;
