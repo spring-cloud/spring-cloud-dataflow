@@ -15,8 +15,6 @@
  */
 package org.springframework.cloud.dataflow.server.config.features;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 import javax.sql.DataSource;
 
 import org.h2.tools.Server;
@@ -37,7 +35,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
-import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.server.job.TaskExplorerFactoryBean;
 import org.springframework.cloud.dataflow.server.repository.RdbmsTaskDefinitionRepository;
@@ -56,8 +53,6 @@ import org.springframework.cloud.task.repository.support.TaskRepositoryInitializ
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ResourceLoader;
-import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.context.event.EventListener;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 
 /**
@@ -74,12 +69,6 @@ public class TaskConfiguration {
 
 	@Autowired
 	DataSourceProperties dataSourceProperties;
-
-	@Autowired
-	private AppRegistry appRegistry;
-
-	@Autowired
-	private ComposedTaskProperties composedTaskProperties;
 
 	@Bean
 	public TaskExplorerFactoryBean taskExplorerFactoryBean(DataSource dataSource) {
@@ -193,11 +182,6 @@ public class TaskConfiguration {
 		public TaskDefinitionRepository taskDefinitionRepository(DataSource dataSource) throws Exception {
 			return new RdbmsTaskDefinitionRepository(dataSource);
 		}
-	}
-
-	@EventListener
-	public void handleContextRefresh(ContextRefreshedEvent event) {
-		appRegistry.save(composedTaskProperties.getTaskName(), ApplicationType.task, composedTaskProperties.getComposedTaskRunnerUri(), null);
 	}
 
 }
