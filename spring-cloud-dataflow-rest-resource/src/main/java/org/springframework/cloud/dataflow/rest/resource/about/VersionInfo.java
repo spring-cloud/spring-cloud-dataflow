@@ -18,6 +18,10 @@ package org.springframework.cloud.dataflow.rest.resource.about;
 
 import java.util.Date;
 
+import org.springframework.cloud.dataflow.rest.Version;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
  * Provides version information about core libraries used.
  *
@@ -39,6 +43,12 @@ public class VersionInfo {
 	private String commitId;
 	private Date   commitTime;
 	private String branch;
+
+	private int restApiRevision = Version.REVISION;
+
+	public Integer getRestApiRevision() {
+		return this.restApiRevision;
+	}
 
 	public Dependency getCore() {
 		return core;
