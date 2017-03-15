@@ -52,9 +52,9 @@ import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -166,7 +166,7 @@ public class StreamDeploymentController {
 	@RequestMapping(value = "/{name}", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
 	public void deploy(@PathVariable("name") String name,
-			@RequestParam(required = false) String properties) {
+			@RequestBody(required = false) Map<String, String> properties) {
 		StreamDefinition stream = this.repository.findOne(name);
 		if (stream == null) {
 			throw new NoSuchStreamDefinitionException(name);
@@ -178,9 +178,8 @@ public class StreamDeploymentController {
 		else if (DeploymentState.deploying.equals(DeploymentState.valueOf(status))) {
 			throw new StreamAlreadyDeployingException(name);
 		}
-		Map<String, String> propertiesToUse = DeploymentPropertiesUtils.parse(properties);
-		DeploymentPropertiesUtils.ensureJustDeploymentProperties(propertiesToUse);
-		deployStream(stream, propertiesToUse);
+		DeploymentPropertiesUtils.ensureJustDeploymentProperties(properties);
+		deployStream(stream, properties);
 	}
 
 	private String calculateStreamState(String name) {

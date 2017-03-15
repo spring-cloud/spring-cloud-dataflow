@@ -16,9 +16,9 @@
 
 package org.springframework.cloud.dataflow.server.controller;
 
-import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
@@ -43,9 +43,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -597,12 +599,14 @@ public class StreamControllerTests {
 	@Test
 	public void testDeployWithAppPropertiesOverride() throws Exception {
 		repository.save(new StreamDefinition("myStream", "time --fixed-delay=2 | log --level=WARN"));
+		Map<String, String> properties = new HashMap<>();
+		properties.put("app.time.fixed-delay", "4");
+		properties.put("app.log.level", "ERROR");
 		mockMvc.perform(
-				post("/streams/deployments/myStream").param("properties",
-						"app.time.fixed-delay=4," +
-								"app.log.level=ERROR")
-						.accept(MediaType.APPLICATION_JSON)).andDo(print())
-				.andExpect(status().isCreated());
+			post("/streams/deployments/myStream")
+				.content(new ObjectMapper().writeValueAsBytes(properties))
+				.contentType(MediaType.APPLICATION_JSON))
+			.andExpect(status().isCreated());
 		ArgumentCaptor<AppDeploymentRequest> captor = ArgumentCaptor.forClass(AppDeploymentRequest.class);
 		verify(appDeployer, times(2)).deploy(captor.capture());
 		List<AppDeploymentRequest> requests = captor.getAllValues();
@@ -621,12 +625,14 @@ public class StreamControllerTests {
 	@Test
 	public void testDeployWithAppPropertiesOverrideWithLabel() throws Exception {
 		repository.save(new StreamDefinition("myStream", "a: time --fixed-delay=2 | b: log --level=WARN"));
+		Map<String, String> properties = new HashMap<>();
+		properties.put("app.a.fixed-delay", "4");
+		properties.put("app.b.level", "ERROR");
 		mockMvc.perform(
-				post("/streams/deployments/myStream").param("properties",
-						"app.a.fixed-delay=4," +
-								"app.b.level=ERROR")
-						.accept(MediaType.APPLICATION_JSON)).andDo(print())
-				.andExpect(status().isCreated());
+				post("/streams/deployments/myStream")
+					.content(new ObjectMapper().writeValueAsBytes(properties))
+					.contentType(MediaType.APPLICATION_JSON))
+			.andExpect(status().isCreated());
 		ArgumentCaptor<AppDeploymentRequest> captor = ArgumentCaptor.forClass(AppDeploymentRequest.class);
 		verify(appDeployer, times(2)).deploy(captor.capture());
 		List<AppDeploymentRequest> requests = captor.getAllValues();
@@ -724,13 +730,16 @@ public class StreamControllerTests {
 	@Test
 	public void testDeployWithProperties() throws Exception {
 		repository.save(new StreamDefinition("myStream", "time | log"));
+		Map<String, String> properties = new HashMap<>();
+		properties.put("app.*.producer.partitionKeyExpression", "payload");
+		properties.put("deployer.log.count", "2");
+		properties.put("app.*.consumer.concurrency", "3");
+
 		mockMvc.perform(
-				post("/streams/deployments/myStream").param("properties",
-						"app.time.producer.partitionKeyExpression=payload," +
-								"deployer.log.count=2," +
-								"app.log.consumer.concurrency=3")
-						.accept(MediaType.APPLICATION_JSON)).andDo(print())
-				.andExpect(status().isCreated());
+			post("/streams/deployments/myStream")
+				.content(new ObjectMapper().writeValueAsBytes(properties))
+				.contentType(MediaType.APPLICATION_JSON))
+			.andExpect(status().isCreated());
 		ArgumentCaptor<AppDeploymentRequest> captor = ArgumentCaptor.forClass(AppDeploymentRequest.class);
 		verify(appDeployer, times(2)).deploy(captor.capture());
 		List<AppDeploymentRequest> requests = captor.getAllValues();
@@ -760,13 +769,15 @@ public class StreamControllerTests {
 	@Test
 	public void testDeployWithWildcardProperties() throws Exception {
 		repository.save(new StreamDefinition("myStream", "time | log"));
+		Map<String, String> properties = new HashMap<>();
+		properties.put("app.*.producer.partitionKeyExpression", "payload");
+		properties.put("deployer.*.count", "2");
+		properties.put("app.*.consumer.concurrency", "3");
 		mockMvc.perform(
-				post("/streams/deployments/myStream").param("properties",
-						"app.*.producer.partitionKeyExpression=payload," +
-								"deployer.*.count=2," +
-								"app.*.consumer.concurrency=3")
-						.accept(MediaType.APPLICATION_JSON)).andDo(print())
-				.andExpect(status().isCreated());
+			post("/streams/deployments/myStream")
+				.content(new ObjectMapper().writeValueAsBytes(properties))
+				.contentType(MediaType.APPLICATION_JSON)
+		).andExpect(status().isCreated());
 		ArgumentCaptor<AppDeploymentRequest> captor = ArgumentCaptor.forClass(AppDeploymentRequest.class);
 		verify(appDeployer, times(2)).deploy(captor.capture());
 		List<AppDeploymentRequest> requests = captor.getAllValues();
@@ -798,13 +809,17 @@ public class StreamControllerTests {
 		assertThat(appsProperties.getStream().values(), empty());
 		appsProperties.getStream().put("spring.cloud.stream.fake.binder.host","fakeHost");
 		appsProperties.getStream().put("spring.cloud.stream.fake.binder.port","fakePort");
+		Map<String, String> properties = new HashMap<>();
+		properties.put("app.*.producer.partitionKeyExpression", "payload");
+		properties.put("deployer.*.count", "2");
+		properties.put("app.*.consumer.concurrency", "3");
+
 		mockMvc.perform(
-				post("/streams/deployments/myStream").param("properties",
-						"app.*.producer.partitionKeyExpression=payload," +
-								"deployer.*.count=2," +
-								"app.*.consumer.concurrency=3")
-						.accept(MediaType.APPLICATION_JSON)).andDo(print())
-				.andExpect(status().isCreated());
+			post("/streams/deployments/myStream")
+				.content(new ObjectMapper().writeValueAsBytes(properties))
+				.contentType(MediaType.APPLICATION_JSON)
+		)
+			.andExpect(status().isCreated());
 		ArgumentCaptor<AppDeploymentRequest> captor = ArgumentCaptor.forClass(AppDeploymentRequest.class);
 		verify(appDeployer, times(2)).deploy(captor.capture());
 		List<AppDeploymentRequest> requests = captor.getAllValues();
