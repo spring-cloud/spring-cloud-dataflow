@@ -19,7 +19,6 @@ package org.springframework.cloud.dataflow.rest.client;
 import java.util.Map;
 
 import org.springframework.cloud.dataflow.rest.resource.StreamDefinitionResource;
-import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.ResourceSupport;
 import org.springframework.util.Assert;
@@ -87,9 +86,7 @@ public class StreamTemplate implements StreamOperations {
 
 	@Override
 	public void deploy(String name, Map<String, String> properties) {
-		MultiValueMap<String, Object> values = new LinkedMultiValueMap<>();
-		values.add("properties", DeploymentPropertiesUtils.format(properties));
-		restTemplate.postForObject(deploymentLink.expand(name).getHref(), values, Object.class);
+		restTemplate.postForObject(deploymentLink.expand(name).getHref(), properties, Object.class);
 	}
 
 	@Override
