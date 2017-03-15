@@ -165,7 +165,7 @@ public class AboutController {
 			deployerInfo.setSpringBootVersion(deployerEnvironmentInfo.getSpringBootVersion());
 			deployerInfo.setSpringVersion(deployerEnvironmentInfo.getSpringVersion());
 
-			runtimeEnvironment.setDeployer(deployerInfo);
+			runtimeEnvironment.setAppDeployer(deployerInfo);
 		}
 
 		if (this.taskLauncher != null) {

@@ -30,9 +30,9 @@ public class RuntimeEnvironment {
 	}
 
 	/**
-	 * The {@link RuntimeEnvironmentDetails} of the deployer.
+	 * The {@link RuntimeEnvironmentDetails} of the app deployer.
 	 */
-	private RuntimeEnvironmentDetails deployer;
+	private RuntimeEnvironmentDetails appDeployer;
 
 	/**
 	 * The {@link RuntimeEnvironmentDetails} of the task launcher.
@@ -42,12 +42,12 @@ public class RuntimeEnvironment {
 	/**
 	 * @return Null, if the stream feature is disabled
 	 */
-	public RuntimeEnvironmentDetails getDeployer() {
-		return deployer;
+	public RuntimeEnvironmentDetails getAppDeployer() {
+		return appDeployer;
 	}
 
-	public void setDeployer(RuntimeEnvironmentDetails deployer) {
-		this.deployer = deployer;
+	public void setAppDeployer(RuntimeEnvironmentDetails appDeployer) {
+		this.appDeployer = appDeployer;
 	}
 
 	/**
