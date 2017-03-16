@@ -112,6 +112,7 @@ public class AboutController {
 
 		versionInfo.setBranch(this.gitProperties.getBranch());
 		versionInfo.setCommitId(this.gitProperties.getCommitId());
+		versionInfo.setShortCommitId(this.gitProperties.getShortCommitId());
 		versionInfo.setCommitTime(this.gitProperties.getCommitTime());
 
 		aboutResource.setFeatureInfo(featureInfo);

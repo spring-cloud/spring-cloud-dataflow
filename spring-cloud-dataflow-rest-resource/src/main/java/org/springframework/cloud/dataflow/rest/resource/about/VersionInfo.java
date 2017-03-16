@@ -20,8 +20,6 @@ import java.util.Date;
 
 import org.springframework.cloud.dataflow.rest.Version;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 /**
  * Provides version information about core libraries used.
  *
@@ -41,6 +39,7 @@ public class VersionInfo {
 	private Dependency shell;
 
 	private String commitId;
+	private String shortCommitId;
 	private Date   commitTime;
 	private String branch;
 
@@ -84,6 +83,14 @@ public class VersionInfo {
 
 	public void setCommitId(String commitId) {
 		this.commitId = commitId;
+	}
+
+	public String getShortCommitId() {
+		return shortCommitId;
+	}
+
+	public void setShortCommitId(String shortCommitId) {
+		this.shortCommitId = shortCommitId;
 	}
 
 	public Date getCommitTime() {
