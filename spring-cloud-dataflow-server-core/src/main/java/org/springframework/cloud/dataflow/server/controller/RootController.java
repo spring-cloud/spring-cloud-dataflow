@@ -38,6 +38,7 @@ import org.springframework.cloud.dataflow.rest.resource.StreamDefinitionResource
 import org.springframework.cloud.dataflow.rest.resource.StreamDeploymentResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskDefinitionResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionResource;
+import org.springframework.cloud.dataflow.rest.resource.about.AboutResource;
 import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
 import org.springframework.hateoas.EntityLinks;
 import org.springframework.hateoas.ExposesResourceFor;
@@ -129,6 +130,8 @@ public class RootController {
 					.linkToSingleResource(AggregateCounterResource.class, "{name}").withRel("aggregate-counters/counter")));
 		}
 		root.add(entityLinks.linkToCollectionResource(AppRegistrationResource.class).withRel("apps"));
+		root.add(entityLinks.linkToCollectionResource(AboutResource.class).withRel("about"));
+
 		String completionStreamTemplated = entityLinks.linkFor(CompletionProposalsResource.class).withSelfRel().getHref() + ("/stream{?start,detailLevel}");
 		root.add(new Link(completionStreamTemplated).withRel("completions/stream"));
 		String completionTaskTemplated = entityLinks.linkFor(CompletionProposalsResource.class).withSelfRel().getHref() + ("/task{?start,detailLevel}");

@@ -76,6 +76,7 @@ public class ApiDocumentation extends BaseDocumentation {
 			.andExpect(status().isOk())
 			.andDo(this.documentationHandler.document(
 				links(
+					linkWithRel("about").description("Access meta information, including enabled features, security info, version information"),
 					linkWithRel("dashboard").description("Access the dashboard UI"),
 					linkWithRel("apps").description("Handle registered applications"),
 					linkWithRel("completions/stream").description("Exposes the DSL completion features for Stream"),

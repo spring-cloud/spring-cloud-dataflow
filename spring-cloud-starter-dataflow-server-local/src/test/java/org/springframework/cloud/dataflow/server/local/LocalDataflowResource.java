@@ -45,8 +45,19 @@ public class LocalDataflowResource extends ExternalResource {
 
 	private WebApplicationContext configurableApplicationContext;
 
+	final boolean streamsEnabled;
+	final boolean tasksEnabled;
+
 	public LocalDataflowResource(String configurationLocation) {
 		this.configurationLocation = configurationLocation;
+		this.streamsEnabled = true;
+		this.tasksEnabled = true;
+	}
+
+	public LocalDataflowResource(String configurationLocation, boolean streamsEnabled, boolean tasksEnabled) {
+		this.configurationLocation = configurationLocation;
+		this.streamsEnabled = streamsEnabled;
+		this.tasksEnabled = tasksEnabled;
 	}
 
 	@Override
@@ -58,7 +69,8 @@ public class LocalDataflowResource extends ExternalResource {
 
 		app = new SpringApplication(LocalTestDataFlowServer.class);
 		configurableApplicationContext = (WebApplicationContext) app.run(new String[]{"--server.port=0",
-				"--" + FeaturesProperties.FEATURES_PREFIX + "." + FeaturesProperties.STREAMS_ENABLED + "=true",
+				"--" + FeaturesProperties.FEATURES_PREFIX + "." + FeaturesProperties.STREAMS_ENABLED + "=" + this.streamsEnabled,
+				"--" + FeaturesProperties.FEATURES_PREFIX + "." + FeaturesProperties.TASKS_ENABLED + "=" + this.tasksEnabled,
 				"--" + FeaturesProperties.FEATURES_PREFIX + "." + FeaturesProperties.ANALYTICS_ENABLED + "=true"});
 
 		Collection<Filter> filters = configurableApplicationContext.getBeansOfType(Filter.class).values();
