@@ -83,6 +83,22 @@ public class DeploymentPropertiesUtilsTests {
 		props = DeploymentPropertiesUtils.parse("invalidkeyvalue1,foo=bar,invalidkeyvalue2");
 		assertThat(props.size(), is(1));
 		assertThat(props, hasEntry("foo", "bar,invalidkeyvalue2"));
+
+		props = DeploymentPropertiesUtils.parse("foo.bar1=jee1,jee2,jee3,foo.bar2=jee4,jee5,jee6");
+		assertThat(props, hasEntry("foo.bar1", "jee1,jee2,jee3"));
+		assertThat(props, hasEntry("foo.bar2", "jee4,jee5,jee6"));
+
+		props = DeploymentPropertiesUtils.parse("foo.bar1=xxx=1,foo.bar2=xxx=2");
+		assertThat(props, hasEntry("foo.bar1", "xxx=1"));
+		assertThat(props, hasEntry("foo.bar2", "xxx=2"));
+	}
+
+	@Test
+	public void testLongDeploymentPropertyValues() {
+		Map<String, String> props = DeploymentPropertiesUtils.parse("app.foo.bar=FoooooooooooooooooooooBar,app.foo.bar2=FoooooooooooooooooooooBar");
+		assertThat(props, hasEntry("app.foo.bar", "FoooooooooooooooooooooBar"));
+		props = DeploymentPropertiesUtils.parse("app.foo.bar=FooooooooooooooooooooooooooooooooooooooooooooooooooooBar");
+		assertThat(props, hasEntry("app.foo.bar", "FooooooooooooooooooooooooooooooooooooooooooooooooooooBar"));
 	}
 
 	@Test

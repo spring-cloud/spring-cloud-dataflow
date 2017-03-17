@@ -47,11 +47,6 @@ public final class DeploymentPropertiesUtils {
 	}
 
 	/**
-	 * Pattern used for parsing a String of comma-delimited key=value pairs.
-	 */
-	private static final Pattern DEPLOYMENT_PROPERTIES_PATTERN = Pattern.compile("(?:,{0,1}\\s*)((\\.*(\\w|\\*|-)+)+)(\\s*=\\s*)");
-
-	/**
 	 * Pattern used for parsing a String of command-line arguments.
 	 */
 	private static final Pattern DEPLOYMENT_PARAMS_PATTERN = Pattern.compile("(\\s(?=([^\\\"']*[\\\"'][^\\\"']*[\\\"'])*[^\\\"']*$))");
@@ -61,40 +56,40 @@ public final class DeploymentPropertiesUtils {
 	 * {@code app.[appname].[key]} or {@code deployer.[appname].[key]}.
 	 * Values may themselves contain commas, since the split points will be based upon the key pattern.
 	 *
-	 *
-	 * Logic of this pattern to find boundaries of valid key=value pairs is:
-	 * 1. (?:,{0,1}\s*) is a non-capturing group which takes characters before a key.
-	 *    Needed so that capturing groups later will capture key boundaries correctly.
-	 * 2. ((\.*(\w|\*|-)+)+) is a capturing group finding an actual key. There is a recursive
-	 *    capturing groups inside of it as we assume key is formed from dots and words and
-	 *    we capture those as many time as needed. We get groups 1, 2 and 3 but we only use 1.
-	 * 3. (\s*=\s*) here we find boundary of '=' which may have empty characters around it.
-	 *    This becomes capturing group 4.
-	 * 4. Now we know where is key with group 1 and start of value with group 4.
-	 * 5. Now we can start to do matching. Need to match one ahead so that we
-	 *    know where next key possible is as that is then end of previous value.
-	 * 6. Lastly we have one pair left which is a same case if we only have
-	 *    one pair to parse.
+	 * Logic of parsing key/value pairs from a string is based on few rules and assumptions
+	 * 1. keys will not have commas or equals.
+	 * 2. First raw split is done by commas which will need to be fixed later
+	 *    if value is a comma-delimited list.
 	 *
 	 * @param s the string to parse
 	 * @return the Map of parsed key value pairs
 	 */
 	public static Map<String, String> parse(String s) {
 		Map<String, String> deploymentProperties = new HashMap<String, String>();
-		if (!StringUtils.isEmpty(s)) {
-			int start = 0;
-			int end = 0;
-			Matcher matcher = DEPLOYMENT_PROPERTIES_PATTERN.matcher(s);
-			while (matcher.find()) {
-				if (end > 0) {
-					// we don't know first value position until we've found second match
-					addKeyValuePairAsProperty(s.substring(start, matcher.start()), deploymentProperties);
-				}
-				start = matcher.start(1);
-				end = matcher.end(4);
+		ArrayList<String> pairs = new ArrayList<>();
+
+		// get raw candidates as simple comma split
+		String[] candidates = StringUtils.commaDelimitedListToStringArray(s);
+		for (int i = 0; i < candidates.length; i++) {
+			if (i > 0 && !candidates[i].contains("=")) {
+				// we don't have '=' so this has to be latter parts of
+				// a comma delimited value, append it to previously added
+				// key/value pair.
+				// we skip first as we would not have anything to append to. this
+				// would happen if dep prop string is malformed and first given
+				// key/value pair is not actually a key/value.
+				pairs.set(pairs.size()-1, pairs.get(pairs.size()-1) + "," + candidates[i]);
 			}
-			// last match, we still have one left.
-			addKeyValuePairAsProperty(s.substring(start), deploymentProperties);
+			else {
+				// we have a key/value pair having '=', or malformed first pair
+				pairs.add(candidates[i]);
+			}
+		}
+
+		// add what we got, addKeyValuePairAsProperty
+		// handles rest as trimming, etc
+		for (String pair : pairs) {
+			addKeyValuePairAsProperty(pair, deploymentProperties);
 		}
 		return deploymentProperties;
 	}
