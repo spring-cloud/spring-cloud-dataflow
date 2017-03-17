@@ -16,17 +16,11 @@
 
 package org.springframework.cloud.dataflow.server.local;
 
-import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
-
 import java.util.Map;
 
 import org.junit.After;
 import org.junit.Test;
+
 import org.springframework.analytics.metrics.FieldValueCounterRepository;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.boot.SpringApplication;
@@ -43,6 +37,13 @@ import org.springframework.cloud.deployer.spi.local.LocalTaskLauncher;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.util.SocketUtils;
+
+import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 /**
  * Tests for {@link LocalTestDataFlowServer}.

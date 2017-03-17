@@ -62,7 +62,8 @@ public class AggregateCounterTemplate implements AggregateCounterOperations {
 		return restTemplate.getForObject(uriString, AggregateCounterResource.class);
 	}
 
-	@Override public PagedResources<MetricResource> list() {
+	@Override
+	public PagedResources<MetricResource> list() {
 		return restTemplate.getForObject(links.getLink(AGGREGATE_COUNTER_COLLECTION_RELATION).getHref(), MetricResource.Page.class);
 	}
 

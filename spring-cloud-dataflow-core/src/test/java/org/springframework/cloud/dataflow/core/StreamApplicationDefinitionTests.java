@@ -16,9 +16,9 @@
 
 package org.springframework.cloud.dataflow.core;
 
-import static org.junit.Assert.assertEquals;
-
 import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author Patrick Peralta

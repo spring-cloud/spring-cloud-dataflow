@@ -16,14 +16,14 @@
 
 package org.springframework.cloud.dataflow.completion;
 
-import static org.springframework.cloud.dataflow.core.ApplicationType.processor;
-import static org.springframework.cloud.dataflow.core.ApplicationType.sink;
-
 import java.util.List;
 
 import org.springframework.cloud.dataflow.core.dsl.CheckPointedParseException;
 import org.springframework.cloud.dataflow.registry.AppRegistration;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
+
+import static org.springframework.cloud.dataflow.core.ApplicationType.processor;
+import static org.springframework.cloud.dataflow.core.ApplicationType.sink;
 
 /**
  * Proposes app names when the user has typed a destination redirection.

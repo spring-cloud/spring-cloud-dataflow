@@ -16,6 +16,12 @@
 
 package org.springframework.cloud.dataflow.server.rest.documentation;
 
+import javax.servlet.RequestDispatcher;
+
+import org.junit.Test;
+
+import org.springframework.cloud.dataflow.rest.Version;
+
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
@@ -27,12 +33,6 @@ import static org.springframework.restdocs.payload.PayloadDocumentation.response
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import javax.servlet.RequestDispatcher;
-
-import org.junit.Test;
-
-import org.springframework.cloud.dataflow.rest.Version;
 
 /**
  * @author Gunnar Hillert

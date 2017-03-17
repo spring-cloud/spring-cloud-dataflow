@@ -18,6 +18,7 @@ package org.springframework.cloud.dataflow.server.config;
 
 import java.util.HashMap;
 import java.util.Map;
+
 import javax.sql.DataSource;
 
 import org.springframework.analytics.metrics.AggregateCounterRepository;

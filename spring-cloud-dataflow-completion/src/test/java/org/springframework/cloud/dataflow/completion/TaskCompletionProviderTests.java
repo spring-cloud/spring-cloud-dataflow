@@ -16,14 +16,6 @@
 
 package org.springframework.cloud.dataflow.completion;
 
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.hasItems;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.startsWith;
-import static org.junit.Assert.assertThat;
-import static org.springframework.cloud.dataflow.completion.Proposals.proposalThat;
-
 import java.io.File;
 import java.io.FileFilter;
 import java.util.ArrayList;
@@ -48,6 +40,14 @@ import org.springframework.core.io.FileSystemResourceLoader;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.Assert;
+
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.hasItems;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.startsWith;
+import static org.junit.Assert.assertThat;
+import static org.springframework.cloud.dataflow.completion.Proposals.proposalThat;
 
 /**
  * Integration tests for TaskCompletionProvider.

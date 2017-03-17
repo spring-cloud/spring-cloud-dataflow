@@ -16,14 +16,6 @@
 
 package org.springframework.cloud.dataflow.shell.command;
 
-import static org.springframework.shell.table.BorderSpecification.TOP;
-import static org.springframework.shell.table.BorderStyle.fancy_light;
-import static org.springframework.shell.table.BorderStyle.fancy_light_quadruple_dash;
-import static org.springframework.shell.table.CellMatchers.column;
-import static org.springframework.shell.table.CellMatchers.ofType;
-import static org.springframework.shell.table.SimpleHorizontalAligner.center;
-import static org.springframework.shell.table.SimpleVerticalAligner.middle;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -49,6 +41,14 @@ import org.springframework.shell.table.TableModelBuilder;
 import org.springframework.shell.table.Tables;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
+
+import static org.springframework.shell.table.BorderSpecification.TOP;
+import static org.springframework.shell.table.BorderStyle.fancy_light;
+import static org.springframework.shell.table.BorderStyle.fancy_light_quadruple_dash;
+import static org.springframework.shell.table.CellMatchers.column;
+import static org.springframework.shell.table.CellMatchers.ofType;
+import static org.springframework.shell.table.SimpleHorizontalAligner.center;
+import static org.springframework.shell.table.SimpleVerticalAligner.middle;
 
 /**
  * Commands for displaying the runtime state of deployed apps.

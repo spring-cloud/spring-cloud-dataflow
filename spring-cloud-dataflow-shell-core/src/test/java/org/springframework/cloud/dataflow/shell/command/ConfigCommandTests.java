@@ -16,12 +16,6 @@
 
 package org.springframework.cloud.dataflow.shell.command;
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URI;
@@ -48,6 +42,12 @@ import org.springframework.shell.CommandLine;
 import org.springframework.shell.table.Table;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.web.client.RestTemplate;
+
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * Unit tests for {@link ConfigCommands}.

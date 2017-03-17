@@ -16,9 +16,6 @@
 
 package org.springframework.cloud.dataflow.shell.command;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -31,6 +28,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobInstance;
 import org.springframework.batch.core.JobParameter;
@@ -47,6 +45,9 @@ import org.springframework.cloud.task.repository.support.TaskExecutionDaoFactory
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.shell.core.CommandResult;
 import org.springframework.shell.table.Table;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Glenn Renfro

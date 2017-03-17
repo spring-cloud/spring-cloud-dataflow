@@ -16,9 +16,9 @@
 
 package org.springframework.cloud.dataflow.shell.command;
 
-import static org.junit.Assert.assertEquals;
-
 import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author Mark Fisher

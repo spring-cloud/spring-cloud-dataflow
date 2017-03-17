@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,9 +16,9 @@
 
 package org.springframework.cloud.dataflow.core.dsl;
 
-import static org.springframework.cloud.dataflow.core.dsl.DSLMessage.Kind.ERROR;
-
 import java.text.MessageFormat;
+
+import static org.springframework.cloud.dataflow.core.dsl.DSLMessage.Kind.ERROR;
 
 /**
  * Contains all the messages that can be produced during Spring Cloud Data Flow
@@ -28,11 +28,11 @@ import java.text.MessageFormat;
  * and the tests to run successfully in different locales.
  * <p>
  * When a message is formatted, it will have this kind of form
- *
+ * <p>
  * <pre class="code">
  * 105E: (pos 34): Expected an argument value but was ' '
  * </pre>
- *
+ * <p>
  * </code> The prefix captures the code and the error kind, whilst the position is included if it is known.
  *
  * @author Andy Clement
@@ -120,7 +120,7 @@ public enum DSLMessage {
 
 	private String message;
 
-	private DSLMessage(Kind kind, int code, String message) {
+	DSLMessage(Kind kind, int code, String message) {
 		this.kind = kind;
 		this.code = code;
 		this.message = message;
@@ -130,7 +130,7 @@ public enum DSLMessage {
 	 * Produce a complete message including the prefix, the position (if known) and with the inserts applied to the
 	 * message.
 	 *
-	 * @param pos the position, if less than zero it is ignored and not included in the message
+	 * @param pos     the position, if less than zero it is ignored and not included in the message
 	 * @param inserts the inserts to put into the formatted message
 	 * @return a formatted message
 	 */
@@ -160,7 +160,7 @@ public enum DSLMessage {
 		return kind;
 	}
 
-	public static enum Kind {
+	public enum Kind {
 		INFO, WARNING, ERROR
 	}
 

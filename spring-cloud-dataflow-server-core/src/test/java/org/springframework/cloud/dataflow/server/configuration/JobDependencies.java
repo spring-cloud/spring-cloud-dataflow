@@ -16,9 +16,6 @@
 
 package org.springframework.cloud.dataflow.server.configuration;
 
-import static org.mockito.Mockito.mock;
-import static org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType.HAL;
-
 import javax.sql.DataSource;
 
 import org.springframework.batch.admin.service.JobService;
@@ -45,9 +42,9 @@ import org.springframework.cloud.dataflow.server.repository.InMemoryTaskDefiniti
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.TaskJobService;
 import org.springframework.cloud.dataflow.server.service.TaskService;
-import org.springframework.cloud.dataflow.server.service.impl.TaskConfigurationProperties;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskJobService;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskService;
+import org.springframework.cloud.dataflow.server.service.impl.TaskConfigurationProperties;
 import org.springframework.cloud.deployer.resource.registry.InMemoryUriRegistry;
 import org.springframework.cloud.deployer.resource.registry.UriRegistry;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
@@ -67,6 +64,9 @@ import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+
+import static org.mockito.Mockito.mock;
+import static org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType.HAL;
 
 /**
  * @author Glenn Renfro

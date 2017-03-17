@@ -16,10 +16,6 @@
 
 package org.springframework.cloud.dataflow.shell.command;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,6 +23,10 @@ import org.springframework.shell.core.CommandResult;
 import org.springframework.shell.core.JLineShellComponent;
 import org.springframework.shell.table.Table;
 import org.springframework.shell.table.TableModel;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * Helper methods for task commands to execute in the shell.

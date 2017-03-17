@@ -57,7 +57,7 @@ public enum StepType {
 	private final String className;
 	private final String displayName;
 
-	private StepType(String className, String displayName) {
+	StepType(String className, String displayName) {
 		this.className = className;
 		this.displayName = displayName;
 	}

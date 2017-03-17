@@ -16,14 +16,14 @@
 
 package org.springframework.cloud.dataflow.server.rest.documentation;
 
+import org.junit.Test;
+
+import org.springframework.http.MediaType;
+
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
 import static org.springframework.restdocs.request.RequestDocumentation.requestParameters;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.springframework.http.MediaType;
 
 /**
  * @author Gunnar Hillert

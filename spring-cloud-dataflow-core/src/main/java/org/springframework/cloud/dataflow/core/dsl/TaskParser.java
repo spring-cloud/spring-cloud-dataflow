@@ -16,11 +16,17 @@
 
 package org.springframework.cloud.dataflow.core.dsl;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import org.springframework.util.Assert;
+
 import static org.springframework.cloud.dataflow.core.dsl.TokenKind.ANDAND;
 import static org.springframework.cloud.dataflow.core.dsl.TokenKind.ARROW;
 import static org.springframework.cloud.dataflow.core.dsl.TokenKind.CLOSE_PAREN;
-import static org.springframework.cloud.dataflow.core.dsl.TokenKind.DOUBLE_MINUS;
 import static org.springframework.cloud.dataflow.core.dsl.TokenKind.COLON;
+import static org.springframework.cloud.dataflow.core.dsl.TokenKind.DOUBLE_MINUS;
 import static org.springframework.cloud.dataflow.core.dsl.TokenKind.GT;
 import static org.springframework.cloud.dataflow.core.dsl.TokenKind.IDENTIFIER;
 import static org.springframework.cloud.dataflow.core.dsl.TokenKind.LITERAL_STRING;
@@ -29,12 +35,6 @@ import static org.springframework.cloud.dataflow.core.dsl.TokenKind.OPEN_PAREN;
 import static org.springframework.cloud.dataflow.core.dsl.TokenKind.OROR;
 import static org.springframework.cloud.dataflow.core.dsl.TokenKind.SEMICOLON;
 import static org.springframework.cloud.dataflow.core.dsl.TokenKind.STAR;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-import org.springframework.util.Assert;
 
 /**
  * Parse a single or composed task specification.

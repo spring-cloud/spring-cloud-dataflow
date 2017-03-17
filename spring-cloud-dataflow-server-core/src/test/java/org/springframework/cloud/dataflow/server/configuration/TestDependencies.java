@@ -16,9 +16,6 @@
 
 package org.springframework.cloud.dataflow.server.configuration;
 
-import static org.mockito.Mockito.mock;
-import static org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType.HAL;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -82,6 +79,9 @@ import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
+
+import static org.mockito.Mockito.mock;
+import static org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType.HAL;
 
 /**
  * @author Michael Minella

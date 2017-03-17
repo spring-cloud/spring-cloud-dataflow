@@ -16,15 +16,15 @@
 
 package org.springframework.cloud.dataflow.completion;
 
-import static org.springframework.cloud.dataflow.core.ApplicationType.processor;
-import static org.springframework.cloud.dataflow.core.ApplicationType.sink;
-
 import java.util.List;
 
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.dsl.CheckPointedParseException;
 import org.springframework.cloud.dataflow.registry.AppRegistration;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
+
+import static org.springframework.cloud.dataflow.core.ApplicationType.processor;
+import static org.springframework.cloud.dataflow.core.ApplicationType.sink;
 
 /**
  * Provides completions for the case where the user has entered a pipe

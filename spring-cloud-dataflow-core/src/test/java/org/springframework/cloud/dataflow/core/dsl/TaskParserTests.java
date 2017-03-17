@@ -16,7 +16,25 @@
 
 package org.springframework.cloud.dataflow.core.dsl;
 
-import static org.junit.Assert.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.junit.Ignore;
+import org.junit.Test;
+
+import org.springframework.cloud.dataflow.core.dsl.graph.Graph;
+import org.springframework.cloud.dataflow.core.dsl.graph.Link;
+import org.springframework.cloud.dataflow.core.dsl.graph.Node;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.springframework.cloud.dataflow.core.dsl.TokenKind.ANDAND;
 import static org.springframework.cloud.dataflow.core.dsl.TokenKind.ARROW;
 import static org.springframework.cloud.dataflow.core.dsl.TokenKind.CLOSE_PAREN;
@@ -26,18 +44,6 @@ import static org.springframework.cloud.dataflow.core.dsl.TokenKind.IDENTIFIER;
 import static org.springframework.cloud.dataflow.core.dsl.TokenKind.LITERAL_STRING;
 import static org.springframework.cloud.dataflow.core.dsl.TokenKind.LT;
 import static org.springframework.cloud.dataflow.core.dsl.TokenKind.OPEN_PAREN;
-
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import org.junit.Ignore;
-import org.junit.Test;
-import org.springframework.cloud.dataflow.core.dsl.graph.Graph;
-import org.springframework.cloud.dataflow.core.dsl.graph.Link;
-import org.springframework.cloud.dataflow.core.dsl.graph.Node;
 
 /**
  * Test the parser and visitor infrastructure. Check it accepts expected data and 

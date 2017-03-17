@@ -16,16 +16,16 @@
 
 package org.springframework.cloud.dataflow.core.dsl;
 
+import java.util.List;
+import java.util.Properties;
+
+import org.junit.Test;
+
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
-
-import java.util.List;
-import java.util.Properties;
-
-import org.junit.Test;
 
 /**
  * Parse streams and verify either the correct abstract syntax tree is produced or the current exception comes out.

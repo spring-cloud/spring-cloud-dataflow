@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -79,7 +79,7 @@ public class GraphGeneratorVisitor extends TaskVisitor {
 
 		final Map<FlowNode, Map<String, Node>> labeledNodesInEachFlow = new HashMap<>();
 
-		public Sequence(int sequenceNumber, String label, Node sequenceStartNode) {
+		Sequence(int sequenceNumber, String label, Node sequenceStartNode) {
 			this.sequenceNumber = sequenceNumber;
 			this.label = label;
 			nodes.add(sequenceStartNode);
@@ -204,7 +204,7 @@ public class GraphGeneratorVisitor extends TaskVisitor {
 				return s.toString();
 			}
 
-			public TransitionTarget(String fromNodeId, String fromOnState, String targetLabel) {
+			TransitionTarget(String fromNodeId, String fromOnState, String targetLabel) {
 				this.nodeId = fromNodeId;
 				this.onState = fromOnState;
 				this.label = targetLabel;
