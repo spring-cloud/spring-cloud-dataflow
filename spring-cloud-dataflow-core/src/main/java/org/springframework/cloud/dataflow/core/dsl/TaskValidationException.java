@@ -19,30 +19,30 @@ package org.springframework.cloud.dataflow.core.dsl;
 import java.util.List;
 
 /**
- * If a parsed composed task AST is validated, if there are any validation errors
+ * If a parsed task AST is validated, if there are any validation errors
  * this exception will be thrown, it contains a list of the validation errors
  * found.
  *
  * @author Andy Clement
  */
 @SuppressWarnings("serial")
-public class ComposedTaskValidationException extends RuntimeException {
+public class TaskValidationException extends RuntimeException {
 
-	private ComposedTaskNode composedTaskNode;
+	private TaskNode taskNode;
 
-	private List<ComposedTaskValidationProblem> validationProblems;
+	private List<TaskValidationProblem> validationProblems;
 
-	public ComposedTaskValidationException(ComposedTaskNode composedTaskNode, List<ComposedTaskValidationProblem> validationProblems) {
-		this.composedTaskNode = composedTaskNode;
+	public TaskValidationException(TaskNode taskNode, List<TaskValidationProblem> validationProblems) {
+		this.taskNode = taskNode;
 		this.validationProblems = validationProblems;
 	}
 
-	public List<ComposedTaskValidationProblem> getValidationProblems() {
+	public List<TaskValidationProblem> getValidationProblems() {
 		return validationProblems;
 	}
 
-	public ComposedTaskNode getComposedTaskNode() {
-		return composedTaskNode;
+	public TaskNode getTaskNode() {
+		return taskNode;
 	}
 
 	/**
@@ -51,7 +51,7 @@ public class ComposedTaskValidationException extends RuntimeException {
 	@Override
 	public String getMessage() {
 		StringBuilder s = new StringBuilder();
-		s.append("Problems found when validating '").append(composedTaskNode.getComposedTaskText()).append("': ");
+		s.append("Problems found when validating '").append(taskNode.getTaskText()).append("': ");
 		s.append(validationProblems);
 		return s.toString();
 	}

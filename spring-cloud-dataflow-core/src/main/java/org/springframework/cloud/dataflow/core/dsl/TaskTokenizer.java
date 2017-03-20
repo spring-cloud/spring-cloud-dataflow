@@ -18,47 +18,66 @@ package org.springframework.cloud.dataflow.core.dsl;
 
 /**
  * Lex some input data into a stream of tokens that can then then be parsed.
- * This tokenizer recognizes the composed task DSL variant.
+ * This tokenizer recognizes the task DSL - both the simple (single task)
+ * and composed task cases.
  *
  * @author Andy Clement
  */
-class ComposedTaskTokenizer extends AbstractTokenizer {
+class TaskTokenizer extends AbstractTokenizer {
 
-	public ComposedTaskTokenizer() {
+	public TaskTokenizer() {
 	}
 
 	@Override
 	protected void process() {
+		boolean justProcessedEquals = false;
 		while (pos < max) {
 			char ch = toProcess[pos];
-			if (isIdentifierStart(ch)) {
+
+			if (justProcessedEquals) {
+				if (!isWhitespace(ch) && ch != 0) {
+					// following an '=' we commence a variant of regular tokenization,
+					// here we consume everything up to the next special char.
+					// This allows SpEL expressions to be used without quoting in many
+					// situations.
+					lexArgValueIdentifier();
+				}
+				justProcessedEquals = false;
+				continue;
+			}
+			
+			// Difference between stream and task here, $ is allowed identifier prefix to allow
+			// for $END/$FAIL
+			if (isAlphabetic(ch) || isDigit(ch) || ch == '_' || ch == '$') {
 				lexIdentifier();
 			}
 			else {
 				switch (ch) {
 					case '-':
 						if (isTwoCharToken(TokenKind.DOUBLE_MINUS)) {
-							raiseException(DSLMessage.COMPOSED_TASK_APPLICATIONS_DO_NOT_ALLOW_OPTIONS);
+							pushPairToken(TokenKind.DOUBLE_MINUS);
 						}
 						else if (isTwoCharToken(TokenKind.ARROW)) {
 							pushPairToken(TokenKind.ARROW);
 						}
 						else {
-							raiseException(DSLMessage.COMPOSED_TASK_HYPHEN_EXPECTED_USE_FOR_TRANSITION);
+							throw new ParseException(
+									expressionString, pos,
+									DSLMessage.MISSING_CHARACTER, "-");
 						}
 						break;
 					case '&':
 						if (isTwoCharToken(TokenKind.ANDAND)) {
 							pushPairToken(TokenKind.ANDAND);
 						} else {
-							raiseException(DSLMessage.COMPOSED_TASK_DOUBLE_AND_REQUIRED);
+							raiseException(DSLMessage.TASK_DOUBLE_AND_REQUIRED);
 						}
 						break;
 					case '|':
 						if (isTwoCharToken(TokenKind.OROR)) {
 							pushPairToken(TokenKind.OROR);
 						} else {
-							raiseException(DSLMessage.COMPOSED_TASK_DOUBLE_OR_REQUIRED);
+							raiseException(DSLMessage.TASK_DOUBLE_OR_REQUIRED);
 						}
 						break;
 					case ' ':
@@ -66,6 +85,9 @@ class ComposedTaskTokenizer extends AbstractTokenizer {
 					case '\r':
 						// drift over white space
 						pos++;
+						break;
+					case '.':
+						pushCharToken(TokenKind.DOT);
 						break;
 					case '\n':
 						addLinebreak();
@@ -91,6 +113,10 @@ class ComposedTaskTokenizer extends AbstractTokenizer {
 					case ':':
 						pushCharToken(TokenKind.COLON);
 						break;
+					case '=':
+						justProcessedEquals = true;
+						pushCharToken(TokenKind.EQUALS);
+						break;
 					case '*':
 						pushCharToken(TokenKind.STAR);
 						break;
@@ -104,7 +130,7 @@ class ComposedTaskTokenizer extends AbstractTokenizer {
 					case '\\':
 						raiseException(DSLMessage.UNEXPECTED_ESCAPE_CHAR);
 					default:
-						raiseException(DSLMessage.COMPOSED_TASK_UNEXPECTED_DATA,Character.valueOf(ch).toString());
+						raiseException(DSLMessage.TASK_UNEXPECTED_DATA,Character.valueOf(ch).toString());
 				}
 			}
 		}
@@ -122,22 +148,6 @@ class ComposedTaskTokenizer extends AbstractTokenizer {
 		while (isIdentifier(toProcess[pos]));
 		char[] subarray = subArray(start, pos);
 		tokens.add(new Token(TokenKind.IDENTIFIER, subarray, start, pos));
-	}
-
-	/**
-	 * @return true if an identifier for this tokenizer variant can start with the specified char
-	 */
-	private boolean isIdentifierStart(char ch) {
-		return isAlphabetic(ch) || isDigit(ch) || ch == '_' || ch == '$';
-	}
-
-	/**
-	 * @return true if an identifier for this tokenizer variant can contain (after the first char)
-	 *  the specified char
-	 */
-	@Override
-	protected boolean isIdentifier(char ch) {
-		return super.isIdentifier(ch) || ch == '.';
 	}
 
 }

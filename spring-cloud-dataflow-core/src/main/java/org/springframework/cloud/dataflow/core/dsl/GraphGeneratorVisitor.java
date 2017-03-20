@@ -31,13 +31,13 @@ import org.springframework.cloud.dataflow.core.dsl.graph.Link;
 import org.springframework.cloud.dataflow.core.dsl.graph.Node;
 
 /**
- * Visitor that produces a Graph representation of a parsed composed task
+ * Visitor that produces a Graph representation of a parsed task
  * definition. This is suprisingly complicated due to the ability to use
  * labels.
  *
  * @author Andy Clement
  */
-public class GraphGeneratorVisitor extends ComposedTaskVisitor {
+public class GraphGeneratorVisitor extends TaskVisitor {
 
 	private int nextNodeId = 0;
 
@@ -124,7 +124,7 @@ public class GraphGeneratorVisitor extends ComposedTaskVisitor {
 
 		// When processing apps in a real Flow or Split, this is the Ast node
 		// for that Flow or Split.
-		LabelledComposedTaskNode containingNode;
+		LabelledTaskNode containingNode;
 
 		// Nodes in this sequence that are labeled are recorded here
 		final Map<String, Node> nodesWithLabels = new HashMap<>();
@@ -141,7 +141,7 @@ public class GraphGeneratorVisitor extends ComposedTaskVisitor {
 
 		public Map<String, Node> extraNodes = new HashMap<>();
 
-		Context(boolean isFlow, boolean isSplit, String startNodeId, LabelledComposedTaskNode split) {
+		Context(boolean isFlow, boolean isSplit, String startNodeId, LabelledTaskNode split) {
 			this.isFlow = isFlow;
 			this.isSplit = isSplit;
 			this.startNodeId = startNodeId;
@@ -236,17 +236,13 @@ public class GraphGeneratorVisitor extends ComposedTaskVisitor {
 			return g;
 		}
 	}
-
-	@Override
-	public void startVisit(String composedTaskText) {
-	}
-
+	
 	private String nextId() {
 		return Integer.toString(nextNodeId++);
 	}
 
 	@Override
-	public boolean preVisitSequence(LabelledComposedTaskNode firstNode, int sequenceNumber) {
+	public boolean preVisitSequence(LabelledTaskNode firstNode, int sequenceNumber) {
 		Node sequenceStartNode = new Node(nextId(), "START");
 		currentSequence = sequenceNumber;
 		sequences.add(new Sequence(sequenceNumber, firstNode.getLabelString(), sequenceStartNode));
@@ -255,7 +251,7 @@ public class GraphGeneratorVisitor extends ComposedTaskVisitor {
 	}
 
 	@Override
-	public void postVisitSequence(LabelledComposedTaskNode firstNode, int sequenceNumber) {
+	public void postVisitSequence(LabelledTaskNode firstNode, int sequenceNumber) {
 		String endId = nextId();
 		Node endNode = new Node(endId, "END");
 		addLinks(endId);
@@ -502,20 +498,24 @@ public class GraphGeneratorVisitor extends ComposedTaskVisitor {
 			if (transition.isSpecialTransition()) {
 				if (transition.isFailTransition()) {
 					Node failNode = findOrMakeNode("$FAIL");
-					addLink(new Link(currentTaskAppId, failNode.id, transition.getStateNameInDSLForm()));
+					addLink(new Link(currentTaskAppId, failNode.id, transition.getStatusToCheckInDSLForm()));
 				}
 				else if (transition.isEndTransition()) {
 					Node endNode = findOrMakeNode("$END");
-					addLink(new Link(currentTaskAppId, endNode.id, transition.getStateNameInDSLForm()));
+					addLink(new Link(currentTaskAppId, endNode.id, transition.getStatusToCheckInDSLForm()));
 				}
 			}
 			else {
-				Node n = existingNodesToReuse.get(transition.getTargetApp());
+				String key = toKey(transition.getTargetApp());
+				Node n = existingNodesToReuse.get(key);
 				boolean isCreated = false;
 				if (n == null) {
 					String nextId = nextId();
-					n = new Node(nextId, transition.getTargetApp());
-					existingNodesToReuse.put(transition.getTargetApp(), n);
+					n = new Node(nextId, transition.getTargetApp().getName(), toMap(transition.getTargetApp().getArguments()));
+					if (transition.getTargetApp().hasLabel()) {
+						n.setLabel(transition.getTargetApp().getLabelString());
+					}
+					existingNodesToReuse.put(key, n);
 					addNode(n);
 					isCreated = true;
 				}
@@ -544,6 +544,32 @@ public class GraphGeneratorVisitor extends ComposedTaskVisitor {
 		}
 	}
 
+	private Map<String, String> toMap(ArgumentNode[] arguments) {
+		if (arguments == null) {
+			return null;
+		}
+		Map<String,String> argumentsMap = new HashMap<>();
+		for (ArgumentNode argument: arguments) {
+			argumentsMap.put(argument.getName(), argument.getValue());
+		}
+		return argumentsMap;
+	}
+
+	/**
+	 * Create a unique map key for a given target app and options.
+	 */
+	private String toKey(TaskAppNode targetApp) {
+		StringBuilder key = new StringBuilder();
+		if (targetApp.hasLabel()) {
+			key.append(targetApp.getLabel()).append(">");
+		}
+		key.append(targetApp.getName());
+		for (Map.Entry<String, String> argument: targetApp.getArgumentsAsMap().entrySet()) {
+			key.append(":").append(argument.getKey()).append("=").append(argument.getValue());
+		}
+		return key.toString();
+	}
+
 	public GraphGeneratorVisitor.Context currentContext() {
 		return contexts.peek();
 	}
@@ -565,7 +591,7 @@ public class GraphGeneratorVisitor extends ComposedTaskVisitor {
 	public void visit(TaskAppNode taskApp) {
 		String nextId = nextId();
 		currentTaskAppId = nextId;
-		Node node = new Node(nextId, taskApp.getName());
+		Node node = new Node(nextId, taskApp.getName(), toMap(taskApp.getArguments()));
 		addNode(node);
 		if (taskApp.hasLabel()) {
 			node.setLabel(taskApp.getLabelString());

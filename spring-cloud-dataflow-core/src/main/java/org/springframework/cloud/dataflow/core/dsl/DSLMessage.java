@@ -93,21 +93,25 @@ public enum DSLMessage {
 	EXPECTED_WHITESPACE_AFTER_LABEL_COLON(ERROR, 147, "whitespace is expected after an app label"), //
 	EXPECTED_STREAM_NAME_AFTER_LABEL_COLON(ERROR, 148, "stream name is expected after an app label"), //
 	// These relate specifically to the composed task DSL
-	COMPOSED_TASK_APPLICATIONS_DO_NOT_ALLOW_OPTIONS(ERROR, 149, "options cannot be specified for applications in composed task dsl"), //
-	COMPOSED_TASK_DOUBLE_AND_REQUIRED(ERROR, 150, "composed task dsl requires a pair of &, not just one."), //
-	COMPOSED_TASK_DOUBLE_OR_REQUIRED(ERROR, 151, "composed task dsl requires a pair of '|'."), //
-	COMPOSED_TASK_HYPHEN_EXPECTED_USE_FOR_TRANSITION(ERROR, 152, "expected '->' and not just the hyphen"), //
-	COMPOSED_TASK_MISSING_TRANSITION_ARROW(ERROR, 153, "expected '->' to follow state when specifying transition"), //
-	COMPOSED_TASK_UNQUOTED_TRANSITION_CHECK_MUST_BE_NUMBER(ERROR, 154, "transition conditions must be quoted literals, numerics or '*' but ''{0}'' is not"), //
-	COMPOSED_TASK_NO_LABELS_ON_PARENS(ERROR, 155, "labels cannot be specified on parenthesized groups"), //
-	COMPOSED_TASK_NO_DOUBLE_LABELS(ERROR, 156, "Double labels are not supported"), //
-	COMPOSED_TASK_ARROW_SHOULD_BE_PRECEDED_BY_CODE(ERROR, 157, "Transition arrow must be preceeded by the exit code that should drive the transition"), //
-	CT_VALIDATION_SECONDARY_SEQUENCES_MUST_BE_NAMED(ERROR, 158, "Secondary sequences must have labels or are unreachable"), //
-	CT_VALIDATION_DUPLICATE_LABEL(ERROR, 159, "This label has already been defined"), //
-	CT_VALIDATION_TRANSITION_TARGET_LABEL_UNDEFINED(ERROR, 160, "Transition specifies an undefined label"), //
-	CT_ELEMENT_IN_COMPOSED_DEFINITION_DOES_NOT_EXIST(ERROR, 161, "Task in composed task definition does not exist"), //
-	COMPOSED_TASK_UNEXPECTED_DATA(ERROR, 162, "Unexpected data in composed task definition ''{0}''"), //
-	COMPOSED_TASK_MORE_INPUT(ERROR, 163, "After parsing a valid composed task, there is still more data: ''{0}''") //
+	TASK_DOUBLE_AND_REQUIRED(ERROR, 150, "task dsl flow requires a pair of &, not just one."), //
+	TASK_DOUBLE_OR_REQUIRED(ERROR, 151, "task dsl requires a pair of '|'."), //
+	TASK_HYPHEN_EXPECTED_USE_FOR_TRANSITION(ERROR, 152, "expected '->' and not just the hyphen"), //
+	TASK_MISSING_TRANSITION_ARROW(ERROR, 153, "expected '->' to follow state when specifying transition"), //
+	TASK_UNQUOTED_TRANSITION_CHECK_MUST_BE_NUMBER(ERROR, 154, "transition conditions must be quoted literals, numerics or '*' but ''{0}'' is not"), //
+	TASK_NO_LABELS_ON_PARENS(ERROR, 155, "labels cannot be specified on parenthesized groups"), //
+	TASK_NO_DOUBLE_LABELS(ERROR, 156, "Double labels are not supported"), //
+	TASK_ARROW_SHOULD_BE_PRECEDED_BY_CODE(ERROR, 157, "Transition arrow must be preceeded by the exit code that should drive the transition"), //
+	TASK_VALIDATION_SECONDARY_SEQUENCES_MUST_BE_NAMED(ERROR, 158, "Secondary sequences must have labels or are unreachable"), //
+	TASK_VALIDATION_DUPLICATE_LABEL(ERROR, 159, "This label has already been defined"), //
+	TASK_VALIDATION_TRANSITION_TARGET_LABEL_UNDEFINED(ERROR, 160, "Transition specifies an undefined label"), //
+	TASK_ELEMENT_IN_COMPOSED_DEFINITION_DOES_NOT_EXIST(ERROR, 161, "Task in composed task definition does not exist"), //
+	TASK_UNEXPECTED_DATA(ERROR, 162, "Unexpected data in task definition ''{0}''"), //
+	TASK_MORE_INPUT(ERROR, 163, "After parsing a valid task, there is still more data: ''{0}''"), //
+	TASK_VALIDATION_LABEL_CLASHES_WITH_TASKAPP_NAME(ERROR, 164, "The label clashes with an existing unlabeled task application name"), //
+	TASK_VALIDATION_APP_NAME_CLASHES_WITH_LABEL(ERROR, 165, "The app name clashes with an existing label"), //
+	TASK_VALIDATION_APP_NAME_ALREADY_IN_USE(ERROR, 166, "Duplicate app name. Use a label to ensure uniqueness"), //
+	TASK_VALIDATION_SPLIT_WITH_ONE_FLOW(ERROR, 167, "Unnecessary use of split construct when only one flow to execute in parallel"), //
+	TASK_ARGUMENTS_NOT_ALLOWED_UNLESS_IN_APP_MODE(ERROR, 168, "Arguments not allowed unless parser is in app mode"), //
 	;
 
 	private Kind kind;

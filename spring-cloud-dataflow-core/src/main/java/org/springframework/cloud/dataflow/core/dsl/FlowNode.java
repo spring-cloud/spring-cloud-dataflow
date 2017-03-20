@@ -26,11 +26,11 @@ import java.util.List;
  *
  * @author Andy Clement
  */
-public class FlowNode extends LabelledComposedTaskNode {
+public class FlowNode extends LabelledTaskNode {
 
-	private List<LabelledComposedTaskNode> series;
+	private List<LabelledTaskNode> series;
 
-	FlowNode(List<LabelledComposedTaskNode> nodes) {
+	FlowNode(List<LabelledTaskNode> nodes) {
 		super(nodes.get(0).getStartPos(),
 				nodes.get(nodes.size() - 1).getEndPos());
 		this.series = Collections.unmodifiableList(nodes);
@@ -54,12 +54,12 @@ public class FlowNode extends LabelledComposedTaskNode {
 	}
 
 	@Override
-	public List<LabelledComposedTaskNode> getSeries() {
+	public List<LabelledTaskNode> getSeries() {
 		return series;
 	}
 
 	@Override
-	public LabelledComposedTaskNode getSeriesElement(int index) {
+	public LabelledTaskNode getSeriesElement(int index) {
 		return series.get(index);
 	}
 
@@ -74,14 +74,14 @@ public class FlowNode extends LabelledComposedTaskNode {
 	}
 	
 	@Override
-	public void accept(ComposedTaskVisitor visitor) {
+	public void accept(TaskVisitor visitor) {
 		boolean cont = visitor.preVisit(this);
 		if (!cont) {
 			return;
 		}
 		visitor.visit(this);
-		for (LabelledComposedTaskNode labelledComposedTaskNode : series) {
-			labelledComposedTaskNode.accept(visitor);
+		for (LabelledTaskNode labelledTaskNode : series) {
+			labelledTaskNode.accept(visitor);
 		}
 		visitor.postVisit(this);
 	}

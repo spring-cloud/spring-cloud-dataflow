@@ -26,11 +26,11 @@ import java.util.List;
  *
  * @author Andy Clement
  */
-public class SplitNode extends LabelledComposedTaskNode {
+public class SplitNode extends LabelledTaskNode {
 
-	private List<LabelledComposedTaskNode> parallelTaskApps;
+	private List<LabelledTaskNode> parallelTaskApps;
 
-	SplitNode(int startpos, int endpos, List<LabelledComposedTaskNode> parallelSequences) {
+	SplitNode(int startpos, int endpos, List<LabelledTaskNode> parallelSequences) {
 		super(startpos, endpos);
 		this.parallelTaskApps = Collections.unmodifiableList(parallelSequences);
 	}
@@ -44,7 +44,7 @@ public class SplitNode extends LabelledComposedTaskNode {
 			StringBuilder s = new StringBuilder();
 			s.append(TokenKind.LT.tokenChars);
 			for (int i = 0; i < parallelTaskApps.size(); i++) {
-				LabelledComposedTaskNode jn = parallelTaskApps.get(i);
+				LabelledTaskNode jn = parallelTaskApps.get(i);
 				if (i > 0) {
 					s.append(" ").append(TokenKind.OROR.tokenChars).append(" ");
 				}
@@ -61,12 +61,12 @@ public class SplitNode extends LabelledComposedTaskNode {
 	}
 
 	@Override
-	public LabelledComposedTaskNode getSeriesElement(int index) {
+	public LabelledTaskNode getSeriesElement(int index) {
 		return parallelTaskApps.get(index);
 	}
 
 	@Override
-	public List<LabelledComposedTaskNode> getSeries() {
+	public List<LabelledTaskNode> getSeries() {
 		return parallelTaskApps;
 	}
 
@@ -81,14 +81,14 @@ public class SplitNode extends LabelledComposedTaskNode {
 	}
 
 	@Override
-	public void accept(ComposedTaskVisitor visitor) {
+	public void accept(TaskVisitor visitor) {
 		boolean cont = visitor.preVisit(this);
 		if (!cont) {
 			return;
 		}
         visitor.visit(this);
-		for (LabelledComposedTaskNode labelledComposedTaskNode : parallelTaskApps) {
-			labelledComposedTaskNode.accept(visitor);
+		for (LabelledTaskNode labelledTaskNode : parallelTaskApps) {
+			labelledTaskNode.accept(visitor);
 		}
         visitor.postVisit(this);
 	}

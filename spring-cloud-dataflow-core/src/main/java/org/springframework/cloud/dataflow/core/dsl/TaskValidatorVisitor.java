@@ -22,31 +22,36 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Visitor for a parsed composed task that verifies it is coherent. Rules being checked:
+ * Visitor for a parsed task that verifies it is coherent. Rules being checked:
  * <ul>
  * <li>Any secondary sequences are labeled (otherwise they are unreachable).
  * <li>Cannot label two things with the same string.
  * <li>All target labels used on transitions must exist.
+ * <li>Two references to the same app must be labeled to differentiate them
+ * <li>Do not use split construct with only one flow inside
  * <li>TODO much more!
  * </ul>
  *
  * @author Andy Clement
  */
-public class ComposedTaskValidatorVisitor extends ComposedTaskVisitor {
+public class TaskValidatorVisitor extends TaskVisitor {
 
 	// Text of the AST being validated
-	private String composedTaskText;
+	private String taskDsl;
 
-	private List<ComposedTaskValidationProblem> problems = new ArrayList<>();
+	private List<TaskValidationProblem> problems = new ArrayList<>();
 
 	// At the end of the visit, verify any sequences that are never used
-	private List<LabelledComposedTaskNode> recordedSequences = new ArrayList<>();
+	private List<LabelledTaskNode> recordedSequences = new ArrayList<>();
 	
 	private Set<TransitionNode> transitionsTargetingLabels = new HashSet<>();
 	
 	private Set<String> labelsDefined = new HashSet<>();
+	
+	private Set<String> taskAppNamesWithoutLabels = new HashSet<>();
+	
 
-	public List<ComposedTaskValidationProblem> getProblems() {
+	public List<TaskValidationProblem> getProblems() {
 		return problems;
 	}
 	
@@ -59,16 +64,18 @@ public class ComposedTaskValidatorVisitor extends ComposedTaskVisitor {
 		this.recordedSequences.clear();
 		this.transitionsTargetingLabels.clear();
 		this.labelsDefined.clear();
-	}
-	
-	public void startVisit(String composedTaskText) {
-		this.composedTaskText = composedTaskText;
+		this.taskAppNamesWithoutLabels.clear();
 	}
 	
 	@Override
-	public boolean preVisitSequence(LabelledComposedTaskNode firstNode, int sequenceNumber) {
+	public void startVisit(String taskName, String taskDsl) {
+		this.taskDsl = taskDsl;
+	}
+	
+	@Override
+	public boolean preVisitSequence(LabelledTaskNode firstNode, int sequenceNumber) {
 		if (sequenceNumber > 0 && !firstNode.hasLabel()) {
-			pushProblem(firstNode.getStartPos(), DSLMessage.CT_VALIDATION_SECONDARY_SEQUENCES_MUST_BE_NAMED);
+			pushProblem(firstNode.getStartPos(), DSLMessage.TASK_VALIDATION_SECONDARY_SEQUENCES_MUST_BE_NAMED);
 		}
 		recordedSequences.add(firstNode);
 		return true;
@@ -76,27 +83,16 @@ public class ComposedTaskValidatorVisitor extends ComposedTaskVisitor {
 
 	@Override
 	public boolean preVisit(SplitNode split) {
+		if (split.getSeriesLength() == 1) {
+			pushProblem(split.startPos,DSLMessage.TASK_VALIDATION_SPLIT_WITH_ONE_FLOW);
+		}
 		if (split.hasLabel()) {
 			String labelString = split.getLabelString();
 			if (labelsDefined.contains(labelString)) {
-				pushProblem(split.getLabel().startPos,DSLMessage.CT_VALIDATION_DUPLICATE_LABEL);
+				pushProblem(split.getLabel().startPos,DSLMessage.TASK_VALIDATION_DUPLICATE_LABEL);
 			}
 			labelsDefined.add(labelString);
 		}
-		return true;
-	}
-
-	@Override
-	public void visit(SplitNode split) {
-		
-	}
-
-	@Override
-	public void postVisit(SplitNode split) {
-	}
-
-	@Override
-	public boolean preVisit(TaskAppNode taskApp) {
 		return true;
 	}
 
@@ -105,19 +101,23 @@ public class ComposedTaskValidatorVisitor extends ComposedTaskVisitor {
 		if (taskApp.hasLabel()) {
 			String labelString = taskApp.getLabelString();
 			if (labelsDefined.contains(labelString)) {
-				pushProblem(taskApp.getLabel().startPos, DSLMessage.CT_VALIDATION_DUPLICATE_LABEL);
+				pushProblem(taskApp.getLabel().startPos, DSLMessage.TASK_VALIDATION_DUPLICATE_LABEL);
 			}
 			labelsDefined.add(labelString);
+			if (taskAppNamesWithoutLabels.contains(labelString)) {
+				pushProblem(taskApp.getLabel().startPos,DSLMessage.TASK_VALIDATION_LABEL_CLASHES_WITH_TASKAPP_NAME);
+			}
 		}
-	}
-
-	@Override
-	public void postVisit(TaskAppNode taskApp) {
-	}
-
-	@Override
-	public boolean preVisit(TransitionNode transition) {
-		return true;
+		else {
+			String name = taskApp.getName();
+			if (labelsDefined.contains(name)) {
+				pushProblem(taskApp.startPos,DSLMessage.TASK_VALIDATION_APP_NAME_CLASHES_WITH_LABEL);
+			}
+			if (taskAppNamesWithoutLabels.contains(name)) {
+				pushProblem(taskApp.startPos,DSLMessage.TASK_VALIDATION_APP_NAME_ALREADY_IN_USE);
+			}
+			taskAppNamesWithoutLabels.add(taskApp.getName());
+		}
 	}
 
 	@Override
@@ -128,22 +128,18 @@ public class ComposedTaskValidatorVisitor extends ComposedTaskVisitor {
 	}
 	
 	@Override
-	public void postVisit(TransitionNode transition) {
-	}
-
-	@Override
 	public void endVisit() {
 		// Verify all targeted labels exist
 		for (TransitionNode transitionTargetingLabel: transitionsTargetingLabels) {
 			if (!labelsDefined.contains(transitionTargetingLabel.getTargetLabel())) {
-				pushProblem(transitionTargetingLabel.startPos,DSLMessage.CT_VALIDATION_TRANSITION_TARGET_LABEL_UNDEFINED);
+				pushProblem(transitionTargetingLabel.startPos,DSLMessage.TASK_VALIDATION_TRANSITION_TARGET_LABEL_UNDEFINED);
 			}
 		}
 		// TODO Verify all secondary sequences are visited
 	}
 	
 	private void pushProblem(int pos, DSLMessage message) {
-		problems.add(new ComposedTaskValidationProblem(composedTaskText, pos, message));
+		problems.add(new TaskValidationProblem(taskDsl, pos, message));
 	}
 
 }

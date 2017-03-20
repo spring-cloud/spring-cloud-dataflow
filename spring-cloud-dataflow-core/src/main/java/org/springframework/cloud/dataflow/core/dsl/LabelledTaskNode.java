@@ -19,16 +19,16 @@ package org.springframework.cloud.dataflow.core.dsl;
 import java.util.List;
 
 /**
- * The main composed task supertype AST node. Other nodes like {@link FlowNode} and {@link SplitNode}
+ * The main task supertype AST node. Other nodes like {@link FlowNode} and {@link SplitNode}
  * extend this one, relying on this one for common functionality.
  * 
  * @author Andy Clement
  */
-public abstract class LabelledComposedTaskNode extends AstNode {
+public abstract class LabelledTaskNode extends AstNode {
 
 	private Token label;
 	
-	LabelledComposedTaskNode(int startPos, int endPos) {
+	LabelledTaskNode(int startPos, int endPos) {
 		super(startPos, endPos);
 	}
 
@@ -70,7 +70,7 @@ public abstract class LabelledComposedTaskNode extends AstNode {
 	 * @param index the element of interest
 	 * @return the indicated series or null if this is not a flow/split node
 	 */
-	public LabelledComposedTaskNode getSeriesElement(int index) {
+	public LabelledTaskNode getSeriesElement(int index) {
 		return null;
 	}
 
@@ -80,7 +80,7 @@ public abstract class LabelledComposedTaskNode extends AstNode {
 	 *
 	 * @return the series of elements for this flow/split, or null if not a flow/split node
 	 */
-	public List<LabelledComposedTaskNode> getSeries() {
+	public List<LabelledTaskNode> getSeries() {
 		return null;
 	}
 
@@ -100,6 +100,6 @@ public abstract class LabelledComposedTaskNode extends AstNode {
 		return this.label;
 	}
 
-	public abstract void accept(ComposedTaskVisitor visitor);
+	public abstract void accept(TaskVisitor visitor);
 
 }
