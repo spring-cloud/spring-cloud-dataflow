@@ -17,8 +17,8 @@
 package org.springframework.cloud.dataflow.core.dsl;
 
 /**
- * Basic visitor pattern for a composed task. Provide a concrete implementation to participate in the
- * visit and pass it to a parsed ComposedTaskNode. A simple composed task only has one sequence, for
+ * Basic visitor pattern for a parsed task. Provide a concrete implementation to participate in the
+ * visit and pass it to a parsed TaskNode. A simple task only has one sequence, for
  * example: <tt>appA && appB && appC</tt>. In this situation <tt> preVisit(int)</tt> and <tt>postVisit(int)</tt>
  * will only be called with 0. A more complex situation would be:<pre></code>
  * appA && appB 0->:foo *->appC
@@ -30,13 +30,14 @@ package org.springframework.cloud.dataflow.core.dsl;
  *
  * @author Andy Clement
  */
-public abstract class ComposedTaskVisitor {
+public abstract class TaskVisitor {
 
 	/**
 	 * The first call made to a visitor.
-	 * @param composedTaskText the textual definition of the AST being visited
+	 * @param taskName the name of the task definition
+	 * @param taskText the textual definition of the AST being visited
 	 */
-	public void startVisit(String composedTaskText) {
+	public void startVisit(String taskName, String taskText) {
 	}
 
 	/**
@@ -50,11 +51,11 @@ public abstract class ComposedTaskVisitor {
 	 * @param sequenceNumber the sequence number, where the primary sequence is 0
 	 * @return false to skip visiting the specified sequence
 	 */
-	public boolean preVisitSequence(LabelledComposedTaskNode firstNode, int sequenceNumber) {
+	public boolean preVisitSequence(LabelledTaskNode firstNode, int sequenceNumber) {
 		return true;
 	}
 
-	public void postVisitSequence(LabelledComposedTaskNode firstNode, int sequenceNumber) {
+	public void postVisitSequence(LabelledTaskNode firstNode, int sequenceNumber) {
 	}
 
 	/**

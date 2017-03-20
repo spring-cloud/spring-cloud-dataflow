@@ -16,7 +16,8 @@
 
 package org.springframework.cloud.dataflow.core.dsl;
 
-import static org.springframework.cloud.dataflow.core.dsl.TokenKind.*;
+import static org.springframework.cloud.dataflow.core.dsl.TokenKind.LITERAL_STRING;
+import static org.springframework.cloud.dataflow.core.dsl.TokenKind.STAR;
 
 /**
  * An AST node representing a transition found in a parsed composed task specification. A transition
@@ -45,8 +46,8 @@ public class TransitionNode extends AstNode {
 	// Either the targetLabel or targetApp is set. Target label is for 'App1 0->:target'
 	private Token targetLabel;
 
-	// Either the targetLabel or targetApp is set. Target app is for 'App1 0->App2'
-	private Token targetApp;
+	// Either the targetLabel or targetApp is set. Target app is for 'App1 0-> Foo --p1=v1'
+	private TaskAppNode targetApp;
 
 	/**
 	 * Private constructor, use the toXXX factory methods below depending on the
@@ -81,9 +82,9 @@ public class TransitionNode extends AstNode {
 		return t;
 	}
 
-	static TransitionNode toAnotherTask(Token transitionOnToken, Token taskName) {
-		TransitionNode t = new TransitionNode(transitionOnToken,taskName.endPos);
-		t.targetApp = taskName;
+	static TransitionNode toAnotherTask(Token transitionOnToken, TaskAppNode targetApp) {
+		TransitionNode t = new TransitionNode(transitionOnToken,targetApp.endPos);
+		t.targetApp = targetApp;
 		return t;
 	}
 
@@ -94,7 +95,7 @@ public class TransitionNode extends AstNode {
 		if (targetLabel!=null) {
 			s.append(":").append(targetLabel.stringValue());
 		} else {
-			s.append(targetApp.stringValue());
+			s.append(targetApp.stringify(includePositionInfo));
 		}
 		return s.toString();
 	}
@@ -137,8 +138,8 @@ public class TransitionNode extends AstNode {
 		return targetLabel==null?null:targetLabel.stringValue();
 	}
 
-	public String getTargetApp() {
-		return targetApp==null?null:targetApp.stringValue();
+	public TaskAppNode getTargetApp() {
+		return targetApp;
 	}
 
 	/**
@@ -165,14 +166,14 @@ public class TransitionNode extends AstNode {
 	 * @return is the target of the transition $FAIL
 	 */
 	public boolean isFailTransition() {
-		return getTargetApp().equals(FAIL);
+		return getTargetApp().getName().equals(FAIL);
 	}
 
 	/**
 	 * @return is the target of the transition $END
 	 */
 	public boolean isEndTransition() {
-		return getTargetApp().equals(END);
+		return getTargetApp().getName().equals(END);
 	}
 	
 	/**
@@ -187,14 +188,14 @@ public class TransitionNode extends AstNode {
 	 */
 	public String getTargetDslText() {
 		if (targetLabel==null) {
-			return targetApp.stringValue();
+			return targetApp.toDslText();
 		}
 		else {
 			return ":"+targetLabel.stringValue();
 		}
 	}
 
-	public void accept(ComposedTaskVisitor visitor) {
+	public void accept(TaskVisitor visitor) {
 		boolean cont = visitor.preVisit(this);
 		if (!cont) {
 			return;

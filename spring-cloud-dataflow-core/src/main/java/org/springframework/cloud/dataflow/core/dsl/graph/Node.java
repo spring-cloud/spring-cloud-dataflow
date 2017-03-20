@@ -30,16 +30,17 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Node {
 
-	public static final String PROPERTY_LABEL = "label";
-	public static final String METADATAKEY_JOBMODULENAME = "jobModuleName";
+	public static final String METADATA_LABEL = "composedtask.label";
 
 	public String id;
 
 	public String name;
 
-	public Map<String, String> metadata;
-
+	// Properties are those supported by the node
 	public Map<String, String> properties;
+	
+	// Metadata is other information about the node (e.g. any label in use)
+	public Map<String, String> metadata;
 
 	Node() {
 	}
@@ -62,9 +63,6 @@ public class Node {
 		s.append("Node[id=").append(id).append(",name=").append(name);
 		if (properties != null) {
 			s.append(",properties=").append(properties);
-		}
-		if (metadata != null) {
-			s.append(",metadata=").append(metadata);
 		}
 		s.append("]");
 		return s.toString();
@@ -91,18 +89,18 @@ public class Node {
 	}
 
 	public void setLabel(String label) {
-		if (properties==null) {
-			properties = new HashMap<>();
+		if (metadata == null) {
+			metadata = new HashMap<>();
 		}
-		properties.put(PROPERTY_LABEL, label);
+		metadata.put(METADATA_LABEL, label);
 	}
 	
 	public String getLabel() {
-		if (properties == null) {
+		if (metadata == null) {
 			return null;
 		}
 		else {
-			return properties.get(PROPERTY_LABEL);
+			return metadata.get(METADATA_LABEL);
 		}
 	}
 }

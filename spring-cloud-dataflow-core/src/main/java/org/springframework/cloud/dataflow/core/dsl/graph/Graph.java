@@ -19,6 +19,7 @@ package org.springframework.cloud.dataflow.core.dsl.graph;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.cloud.dataflow.core.dsl.TransitionNode;
 
@@ -62,7 +63,13 @@ public class Graph {
 	public String toVerboseString() {
 		StringBuilder s = new StringBuilder();
 		for (Node n: nodes) {
-			s.append("[").append(n.id).append(":").append(n.name).append("]");
+			s.append("[").append(n.id).append(":").append(n.name);
+			if (n.properties != null) {
+				for (Map.Entry<String,String> property: n.properties.entrySet()) {
+					s.append(":").append(property.getKey()).append("=").append(property.getValue());
+				}
+			}
+			s.append("]");
 		}
 		for (Link l: links) {
 			s.append("["+(l.getTransitionName()==null?"":l.getTransitionName()+":")+l.from+"-"+l.to+"]");
@@ -320,8 +327,8 @@ public class Graph {
 //		}
 //		else {
 			String nameInDSL = node.name;
-			if (node.properties!=null && node.properties.get(Node.PROPERTY_LABEL)!=null) {
-				graphText.append(node.properties.get(Node.PROPERTY_LABEL)).append(": ");
+			if (node.getLabel()!=null) {
+				graphText.append(node.getLabel()).append(": ");
 			}
 			graphText.append(nameInDSL);
 //			if (node.properties != null) {

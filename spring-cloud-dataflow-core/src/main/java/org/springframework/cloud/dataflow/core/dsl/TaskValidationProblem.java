@@ -19,18 +19,18 @@ package org.springframework.cloud.dataflow.core.dsl;
 /**
  * After parsing a composed task definition from a DSL string, the validation visitor may optionally run.
  * Even though it parses successfully there may be issues with how the definition is constructed. The
- * {@link ComposedTaskValidatorVisitor} will find those problems and report them as instances of
- * {@link ComposedTaskValidationProblem}.
+ * {@link TaskValidatorVisitor} will find those problems and report them as instances of
+ * {@link TaskValidationProblem}.
  *
  * @author Andy Clement
  */
-public class ComposedTaskValidationProblem {
+public class TaskValidationProblem {
 
 	private final String composedTaskText;
 	private final int offset;
 	private final DSLMessage message;
 
-	public ComposedTaskValidationProblem(String composedTaskText, int offset, DSLMessage message) {
+	public TaskValidationProblem(String composedTaskText, int offset, DSLMessage message) {
 		this.composedTaskText = composedTaskText;
 		this.offset = offset;
 		this.message = message;
