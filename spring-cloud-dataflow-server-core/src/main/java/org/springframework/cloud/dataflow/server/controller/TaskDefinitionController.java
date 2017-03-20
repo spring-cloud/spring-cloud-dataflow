@@ -16,21 +16,11 @@
 
 package org.springframework.cloud.dataflow.server.controller;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
-import org.springframework.cloud.dataflow.core.dsl.ComposedTaskNode;
-import org.springframework.cloud.dataflow.core.dsl.ComposedTaskParser;
-import org.springframework.cloud.dataflow.core.dsl.ComposedTaskValidationException;
-import org.springframework.cloud.dataflow.core.dsl.ComposedTaskValidationProblem;
-import org.springframework.cloud.dataflow.core.dsl.DSLMessage;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.rest.resource.TaskDefinitionResource;
 import org.springframework.cloud.dataflow.server.config.features.ComposedTaskProperties;
-import org.springframework.cloud.dataflow.server.controller.support.ComposedTaskValidator;
 import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
 import org.springframework.cloud.dataflow.server.repository.DeploymentKey;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;
@@ -144,6 +134,7 @@ public class TaskDefinitionController {
 			throw new NoSuchTaskDefinitionException(name);
 		}
 		repository.delete(name);
+		taskLauncher.destroy(name);
 		deploymentIdRepository.delete(DeploymentKey.forTaskDefinition(taskDefinition));
 	}
 
