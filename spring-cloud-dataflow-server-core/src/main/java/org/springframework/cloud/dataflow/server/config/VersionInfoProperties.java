@@ -28,7 +28,6 @@ public class VersionInfoProperties {
 	public static final String VERSION_INFO_PREFIX = "spring.cloud.dataflow.version-info";
 
 	private String dataflowCoreVersion;
-	private String dataflowShellVersion;
 	private String dataflowDashboardVersion;
 
 	public String getDataflowCoreVersion() {
@@ -36,12 +35,6 @@ public class VersionInfoProperties {
 	}
 	public void setDataflowCoreVersion(String dataflowCoreVersion) {
 		this.dataflowCoreVersion = dataflowCoreVersion;
-	}
-	public String getDataflowShellVersion() {
-		return dataflowShellVersion;
-	}
-	public void setDataflowShellVersion(String dataflowShellVersion) {
-		this.dataflowShellVersion = dataflowShellVersion;
 	}
 	public String getDataflowDashboardVersion() {
 		return dataflowDashboardVersion;
