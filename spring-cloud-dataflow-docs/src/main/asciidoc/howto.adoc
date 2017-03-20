@@ -4,7 +4,7 @@
 [partintro]
 --
 This section provides answers to some common '`how do I do that...`' type of questions
-that often arise when using Spring Cloud Data Flow. 
+that often arise when using Spring Cloud Data Flow.
 
 If you are having a specific problem that we don't cover here, you might want to check out
 http://stackoverflow.com/tags/spring-cloud-dataflow[stackoverflow.com] to see if someone has
@@ -24,7 +24,7 @@ for the Dataflow server.
 The remote maven repositories need to be configured explicitly if the apps are resolved using maven repository except for `local` Data Flow server. The other
  Data Flow server implementations (that use maven resources for app artifacts resolution) have no default value for remote repositories.
  The `local` server has `https://repo.spring.io/libs-snapshot` as the default remote repository.
- 
+
 To pass the properties as commandline options:
 
 [source,bash]
@@ -84,21 +84,21 @@ in Cloud Foundry, you'd be passing them as `cf set-env SPRING_APPLICATION_JSON`.
 
 == Logging
 
-Spring Cloud Data Flow is built upon several Spring projects, but ultimately the dataflow-server is a 
+Spring Cloud Data Flow is built upon several Spring projects, but ultimately the dataflow-server is a
 Spring Boot app, so the logging techniques that apply to any link:http://docs.spring.io/spring-boot/docs/current/reference/html/howto-logging.html#howto-logging[Spring Boot]
 application are applicable here as well.
 
 
-While troubleshooting, following are the two primary areas where enabling the DEBUG logs could be 
+While troubleshooting, following are the two primary areas where enabling the DEBUG logs could be
 useful.
 
 === Deployment Logs
-Spring Cloud Data Flow builds upon link:https://github.com/spring-cloud/spring-cloud-deployer[Spring Cloud Deployer] SPI 
-and the platform specific dataflow-server uses the respective link:https://github.com/spring-cloud?utf8=%E2%9C%93&query=deployer[SPI implementations]. 
-Specifically, if we were to troubleshoot deployment specific issues; such as the network errors, it'd 
+Spring Cloud Data Flow builds upon link:https://github.com/spring-cloud/spring-cloud-deployer[Spring Cloud Deployer] SPI
+and the platform specific dataflow-server uses the respective link:https://github.com/spring-cloud?utf8=%E2%9C%93&query=deployer[SPI implementations].
+Specifically, if we were to troubleshoot deployment specific issues; such as the network errors, it'd
 be useful to enable the DEBUG logs at the underlying deployer and the libraries used by it.
 
-. For instance, if you'd like to enable DEBUG logs for the link:https://github.com/spring-cloud/spring-cloud-deployer/tree/master/spring-cloud-deployer-local[local-deployer], 
+. For instance, if you'd like to enable DEBUG logs for the link:https://github.com/spring-cloud/spring-cloud-deployer-local[local-deployer], 
 you'd be starting the server with following.
 
 +
@@ -111,11 +111,11 @@ $ java -jar <dataflow-server>.jar --logging.level.org.springframework.cloud.depl
 (_where, `org.springframework.cloud.deployer.spi.local` is the global package for everything local-deployer
 related_)
 
-. For instance, if you'd like to enable DEBUG logs for the link:https://github.com/spring-cloud/spring-cloud-deployer-cloudfoundry[cloudfoundry-deployer], 
-you'd be setting the following environment variable and upon restaging the dataflow-server, we will 
-see more logs around request, response and the elaborate stack traces (_upon failures_). The cloudfoundry-deployer 
-uses link:https://github.com/cloudfoundry/cf-java-client[cf-java-client], so we will have to enable DEBUG 
-logs for this library. 
+. For instance, if you'd like to enable DEBUG logs for the link:https://github.com/spring-cloud/spring-cloud-deployer-cloudfoundry[cloudfoundry-deployer],
+you'd be setting the following environment variable and upon restaging the dataflow-server, we will
+see more logs around request, response and the elaborate stack traces (_upon failures_). The cloudfoundry-deployer
+uses link:https://github.com/cloudfoundry/cf-java-client[cf-java-client], so we will have to enable DEBUG
+logs for this library.
 
 
 +
@@ -128,7 +128,7 @@ $ cf restage dataflow-server
 
 (_where, `cloudfoundry-client` is the global package for everything `cf-java-client` related_)
 
-. If there's a need to review Reactor logs, which is used by the `cf-java-client`, then the following 
+. If there's a need to review Reactor logs, which is used by the `cf-java-client`, then the following
 would be helpful.
 
 +
@@ -143,13 +143,13 @@ $ cf restage dataflow-server
 
 NOTE: Similar to the `local-deployer` and `cloudfoundry-deployer` options as discussed above, there
 are equivalent settings available for Apache YARN, Apache Mesos and Kubernetes variants, too. Check out the
-respective link:https://github.com/spring-cloud?utf8=%E2%9C%93&query=deployer[SPI implementations] to 
+respective link:https://github.com/spring-cloud?utf8=%E2%9C%93&query=deployer[SPI implementations] to
 find out more details about the packages to configure for logging.
 
 === Application Logs
 
-The streaming applications in Spring Cloud Data Flow are Spring Boot applications and they can be 
-independently setup with logging configurations. 
+The streaming applications in Spring Cloud Data Flow are Spring Boot applications and they can be
+independently setup with logging configurations.
 
 For instance, if you'd have to troubleshoot the `header` and `payload` specifics that are being passed
 around source, processor and sink channels, you'd be deploying the stream with the following
@@ -161,7 +161,7 @@ options.
 dataflow:>stream create foo --definition "http --logging.level.org.springframework.integration=DEBUG | transform --logging.level.org.springframework.integration=DEBUG | log --logging.level.org.springframework.integration=DEBUG" --deploy
 ----
 
-(_where, `org.springframework.integration` is the global package for everything Spring Integration related, 
+(_where, `org.springframework.integration` is the global package for everything Spring Integration related,
 which is responsible for messaging channels_)
 
 These properties can also be specified via `deployment` properties when deploying the stream.
