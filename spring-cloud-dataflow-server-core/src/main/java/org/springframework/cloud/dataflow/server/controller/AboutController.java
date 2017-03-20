@@ -110,10 +110,12 @@ public class AboutController {
 		versionInfo.setShell(new Dependency("Spring Cloud Data Flow Shell",versionInfoProperties.getDataflowShellVersion()));
 		versionInfo.setDashboard(new Dependency("Spring Cloud Dataflow UI", versionInfoProperties.getDataflowDashboardVersion()));
 
-		versionInfo.setBranch(this.gitProperties.getBranch());
-		versionInfo.setCommitId(this.gitProperties.getCommitId());
-		versionInfo.setShortCommitId(this.gitProperties.getShortCommitId());
-		versionInfo.setCommitTime(this.gitProperties.getCommitTime());
+		if (this.gitProperties != null) {
+			versionInfo.setBranch(this.gitProperties.getBranch());
+			versionInfo.setCommitId(this.gitProperties.getCommitId());
+			versionInfo.setShortCommitId(this.gitProperties.getShortCommitId());
+			versionInfo.setCommitTime(this.gitProperties.getCommitTime());
+		}
 
 		aboutResource.setFeatureInfo(featureInfo);
 		aboutResource.setVersionInfo(versionInfo);

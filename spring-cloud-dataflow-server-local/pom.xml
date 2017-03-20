@@ -123,7 +123,6 @@
 			</plugin>
 			<plugin>
 				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>2.10.4</version>
 				<executions>
 					<execution>
 						<id>javadoc</id>
@@ -139,7 +138,6 @@
 			</plugin>
 			<plugin>
 				<artifactId>maven-source-plugin</artifactId>
-				<version>2.4</version>
 				<executions>
 					<execution>
 						<id>attach-sources</id>
@@ -149,6 +147,10 @@
 						<phase>package</phase>
 					</execution>
 				</executions>
+			</plugin>
+			<plugin>
+				<groupId>pl.project13.maven</groupId>
+				<artifactId>git-commit-id-plugin</artifactId>
 			</plugin>
 		</plugins>
 	</build>
