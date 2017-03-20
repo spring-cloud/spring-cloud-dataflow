@@ -107,7 +107,6 @@ public class AboutController {
 
 		versionInfo.setImplementation(new Dependency(this.implementationName, this.implementationVersion));
 		versionInfo.setCore(new Dependency("Spring Cloud Data Flow Core", versionInfoProperties.getDataflowCoreVersion()));
-		versionInfo.setShell(new Dependency("Spring Cloud Data Flow Shell",versionInfoProperties.getDataflowShellVersion()));
 		versionInfo.setDashboard(new Dependency("Spring Cloud Dataflow UI", versionInfoProperties.getDataflowDashboardVersion()));
 
 		versionInfo.setBranch(this.gitProperties.getBranch());

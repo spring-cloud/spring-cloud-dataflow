@@ -34,7 +34,6 @@ public class VersionInfo {
 	private Dependency implementation;
 	private Dependency core;
 	private Dependency dashboard;
-	private Dependency shell;
 
 	private String commitId;
 	private String shortCommitId;
@@ -61,12 +60,6 @@ public class VersionInfo {
 	}
 	public void setDashboard(Dependency dashboard) {
 		this.dashboard = dashboard;
-	}
-	public Dependency getShell() {
-		return shell;
-	}
-	public void setShell(Dependency shell) {
-		this.shell = shell;
 	}
 
 	public String getCommitId() {
