@@ -133,9 +133,9 @@ public class TaskDefinitionController {
 		if (taskDefinition == null) {
 			throw new NoSuchTaskDefinitionException(name);
 		}
-		repository.delete(name);
 		taskLauncher.destroy(name);
 		deploymentIdRepository.delete(DeploymentKey.forTaskDefinition(taskDefinition));
+		repository.delete(name);
 	}
 
 	/**
