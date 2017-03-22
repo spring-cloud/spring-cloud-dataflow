@@ -38,17 +38,16 @@ import org.springframework.cloud.deployer.spi.app.AppInstanceStatus;
 import org.springframework.cloud.deployer.spi.app.AppStatus;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.ResourceAssembler;
 import org.springframework.hateoas.Resources;
 import org.springframework.hateoas.mvc.ResourceAssemblerSupport;
-import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -114,27 +113,38 @@ public class RuntimeAppsController {
 	}
 
 	@RequestMapping
-	public PagedResources<AppStatusResource> list(PagedResourcesAssembler<AppStatus> assembler) throws ExecutionException, InterruptedException {
+	public PagedResources<AppStatusResource> list(Pageable pageable, PagedResourcesAssembler<AppStatus> assembler)
+			throws ExecutionException, InterruptedException {
 		List<StreamDefinition> asList = new ArrayList<>();
 		for (StreamDefinition streamDefinition : this.streamDefinitionRepository.findAll()) {
 			asList.add(streamDefinition);
 		}
 
+		// First build a sorted list of deployment id's so that we have
+		// a predictable paging order.
+		List<String> deploymentIds = asList.stream()
+				.flatMap(sd -> sd.getAppDefinitions().stream())
+				.flatMap(sad -> {
+					String key = DeploymentKey.forStreamAppDefinition(sad);
+					String id = this.deploymentIdRepository.findOne(key);
+					return id != null ? Stream.of(id) : Stream.empty();
+				})
+				.sorted((o1, o2) -> o1.compareTo(o2))
+				.collect(Collectors.toList());
+
 		// Running this this inside the FJP will make sure it is used by the parallel stream
+		// Skip first items depending on page size, then take page and discard rest.
 		List<AppStatus> statuses = forkJoinPool.submit(() ->
-				asList.stream()
-						.flatMap(sd -> sd.getAppDefinitions().stream())
-						.flatMap(sad -> {
-							String key = DeploymentKey.forStreamAppDefinition(sad);
-							String id = this.deploymentIdRepository.findOne(key);
-							return id != null ? Stream.of(id) : Stream.empty();
-						})
+				deploymentIds.stream()
+						.skip(pageable.getPageNumber() * pageable.getPageSize())
+						.limit(pageable.getPageSize())
 						.parallel()
 						.map(appDeployer::status)
-						.sorted((o1, o2) -> o1.getDeploymentId().compareTo(o2.getDeploymentId()))
 						.collect(Collectors.toList())
 		).get();
-		return assembler.toResource(new PageImpl<>(statuses), statusAssembler);
+
+		// finally, pass in pageable and tell how many items we have in all pages
+		return assembler.toResource(new PageImpl<>(statuses, pageable, deploymentIds.size()), statusAssembler);
 	}
 
 	@RequestMapping("/{id}")

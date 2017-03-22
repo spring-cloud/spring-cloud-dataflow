@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2016 the original author or authors.
+ * Copyright 2015-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,7 +50,9 @@ public class RuntimeTemplate implements RuntimeOperations {
 
 	@Override
 	public PagedResources<AppStatusResource> status() {
-		return restTemplate.getForObject(appStatusesUriTemplate.expand().getHref(), AppStatusResource.Page.class);
+		String uriTemplate = appStatusesUriTemplate.expand().getHref();
+		uriTemplate = uriTemplate + "?size=10000";
+		return restTemplate.getForObject(uriTemplate, AppStatusResource.Page.class);
 	}
 
 	@Override
