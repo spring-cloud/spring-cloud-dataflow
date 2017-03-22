@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.dataflow.server.service.impl;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -145,13 +146,15 @@ public class DefaultTaskService implements TaskService {
 		Resource metadataResource = appRegistration.getMetadataResource();
 
 		TaskExecution taskExecution = taskExecutionRepository.createTaskExecution();
-		taskDefinition = this.updateTaskProperties(taskDefinition, taskExecution);
+		taskDefinition = this.updateTaskProperties(taskDefinition);
 
 		Map<String, String> appDeploymentProperties = extractAppProperties(taskDefinition.getRegisteredAppName(), taskDeploymentProperties);
 		Map<String, String> deployerDeploymentProperties = DeploymentPropertiesUtils.extractAndQualifyDeployerProperties(taskDeploymentProperties, taskDefinition.getRegisteredAppName());
 		AppDefinition revisedDefinition = mergeAndExpandAppProperties(taskDefinition, metadataResource, appDeploymentProperties);
 
-		AppDeploymentRequest request = new AppDeploymentRequest(revisedDefinition, appResource, deployerDeploymentProperties, commandLineArgs);
+		List<String> updatedCmdLineArgs = new ArrayList<>(commandLineArgs);
+		updatedCmdLineArgs.add("--spring.cloud.task.executionid=" + taskExecution.getExecutionId());
+		AppDeploymentRequest request = new AppDeploymentRequest(revisedDefinition, appResource, deployerDeploymentProperties, updatedCmdLineArgs);
 
 		String id = this.taskLauncher.launch(request);
 		if (!StringUtils.hasText(id)) {
@@ -192,7 +195,7 @@ public class DefaultTaskService implements TaskService {
 		return new AppDefinition(original.getName(), merged);
 	}
 
-	private TaskDefinition updateTaskProperties(TaskDefinition taskDefinition, TaskExecution taskExecution) {
+	private TaskDefinition updateTaskProperties(TaskDefinition taskDefinition) {
 		TaskDefinitionBuilder builder = TaskDefinitionBuilder.from(taskDefinition);
 		builder.setProperty("spring.datasource.url", dataSourceProperties.getUrl());
 		builder.setProperty("spring.datasource.username",
@@ -205,7 +208,6 @@ public class DefaultTaskService implements TaskService {
 		builder.setProperty("spring.datasource.driverClassName",
 			dataSourceProperties.getDriverClassName());
 
-		builder.setProperty("spring.cloud.task.executionid", String.valueOf(taskExecution.getExecutionId()));
 		return builder.build();
 	}
 
