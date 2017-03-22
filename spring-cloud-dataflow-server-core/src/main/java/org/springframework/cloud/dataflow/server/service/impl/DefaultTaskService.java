@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.h2.util.Task;
 
@@ -145,13 +146,14 @@ public class DefaultTaskService implements TaskService {
 		Resource metadataResource = appRegistration.getMetadataResource();
 
 		TaskExecution taskExecution = taskExecutionRepository.createTaskExecution();
-		taskDefinition = this.updateTaskProperties(taskDefinition, taskExecution);
+		taskDefinition = this.updateTaskProperties(taskDefinition);
 
 		Map<String, String> appDeploymentProperties = extractAppProperties(taskDefinition.getRegisteredAppName(), taskDeploymentProperties);
 		Map<String, String> deployerDeploymentProperties = DeploymentPropertiesUtils.extractAndQualifyDeployerProperties(taskDeploymentProperties, taskDefinition.getRegisteredAppName());
 		AppDefinition revisedDefinition = mergeAndExpandAppProperties(taskDefinition, metadataResource, appDeploymentProperties);
 
-		AppDeploymentRequest request = new AppDeploymentRequest(revisedDefinition, appResource, deployerDeploymentProperties, commandLineArgs);
+		List<String> updatedCmdLineArgs = this.updateCommandLineArgs(commandLineArgs, taskExecution);
+		AppDeploymentRequest request = new AppDeploymentRequest(revisedDefinition, appResource, deployerDeploymentProperties, updatedCmdLineArgs);
 
 		String id = this.taskLauncher.launch(request);
 		if (!StringUtils.hasText(id)) {
@@ -160,6 +162,13 @@ public class DefaultTaskService implements TaskService {
 		}
 		taskExecutionRepository.updateExternalExecutionId(taskExecution.getExecutionId(), id);
 		return taskExecution.getExecutionId();
+	}
+
+	private List<String> updateCommandLineArgs(List<String> commandLineArgs, TaskExecution taskExecution) {
+		return Stream.concat(
+			commandLineArgs.stream().filter(a -> !a.startsWith("--spring.cloud.task.executionid=")),
+			Stream.of("--spring.cloud.task.executionid=" + taskExecution.getExecutionId())
+		).collect(Collectors.toList());
 	}
 
 	@Override
@@ -192,7 +201,7 @@ public class DefaultTaskService implements TaskService {
 		return new AppDefinition(original.getName(), merged);
 	}
 
-	private TaskDefinition updateTaskProperties(TaskDefinition taskDefinition, TaskExecution taskExecution) {
+	private TaskDefinition updateTaskProperties(TaskDefinition taskDefinition) {
 		TaskDefinitionBuilder builder = TaskDefinitionBuilder.from(taskDefinition);
 		builder.setProperty("spring.datasource.url", dataSourceProperties.getUrl());
 		builder.setProperty("spring.datasource.username",
@@ -205,7 +214,6 @@ public class DefaultTaskService implements TaskService {
 		builder.setProperty("spring.datasource.driverClassName",
 			dataSourceProperties.getDriverClassName());
 
-		builder.setProperty("spring.cloud.task.executionid", String.valueOf(taskExecution.getExecutionId()));
 		return builder.build();
 	}
 
