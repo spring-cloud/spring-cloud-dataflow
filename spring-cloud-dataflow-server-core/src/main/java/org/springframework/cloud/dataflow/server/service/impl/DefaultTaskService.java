@@ -16,11 +16,11 @@
 
 package org.springframework.cloud.dataflow.server.service.impl;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.h2.util.Task;
 
@@ -152,8 +152,7 @@ public class DefaultTaskService implements TaskService {
 		Map<String, String> deployerDeploymentProperties = DeploymentPropertiesUtils.extractAndQualifyDeployerProperties(taskDeploymentProperties, taskDefinition.getRegisteredAppName());
 		AppDefinition revisedDefinition = mergeAndExpandAppProperties(taskDefinition, metadataResource, appDeploymentProperties);
 
-		List<String> updatedCmdLineArgs = new ArrayList<>(commandLineArgs);
-		updatedCmdLineArgs.add("--spring.cloud.task.executionid=" + taskExecution.getExecutionId());
+		List<String> updatedCmdLineArgs = this.updateCommandLineArgs(commandLineArgs, taskExecution);
 		AppDeploymentRequest request = new AppDeploymentRequest(revisedDefinition, appResource, deployerDeploymentProperties, updatedCmdLineArgs);
 
 		String id = this.taskLauncher.launch(request);
@@ -163,6 +162,13 @@ public class DefaultTaskService implements TaskService {
 		}
 		taskExecutionRepository.updateExternalExecutionId(taskExecution.getExecutionId(), id);
 		return taskExecution.getExecutionId();
+	}
+
+	private List<String> updateCommandLineArgs(List<String> commandLineArgs, TaskExecution taskExecution) {
+		return Stream.concat(
+			commandLineArgs.stream().filter(a -> !a.startsWith("--spring.cloud.task.executionid=")),
+			Stream.of("--spring.cloud.task.executionid=" + taskExecution.getExecutionId())
+		).collect(Collectors.toList());
 	}
 
 	@Override
