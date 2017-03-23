@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.dataflow.server.controller;
 
+import static org.hamcrest.Matchers.anyOf;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
@@ -288,8 +289,10 @@ public class StreamControllerTests {
 					jsonPath("$[0].logref", is("InvalidStreamDefinitionException"))
 				)
 				.andExpect(
-					jsonPath("$[0].message", is("Application name 'foo' with type 'source' does not exist in the app "
-						+ "registry.\nApplication name 'bar' with type 'sink' does not exist in the app registry."))
+						jsonPath("$[0].message", anyOf(is("Application name 'foo' with type 'source' does not exist in the app "
+						          + "registry.\nApplication name 'bar' with type 'sink' does not exist in the app registry."),
+							                       is("Application name 'foo' with type 'source' does not exist in the app "
+						          + "registry.\r\nApplication name 'bar' with type 'sink' does not exist in the app registry.")))
 				);
 	}
 

@@ -22,8 +22,10 @@ import org.h2.tools.Server;
 import org.springframework.batch.admin.service.JobService;
 import org.springframework.batch.admin.service.SimpleJobServiceFactoryBean;
 import org.springframework.batch.core.configuration.support.MapJobRegistry;
+import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.explore.support.JobExplorerFactoryBean;
 import org.springframework.batch.core.launch.support.SimpleJobLauncher;
+import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.repository.support.JobRepositoryFactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.batch.BatchDatabaseInitializer;
@@ -63,6 +65,7 @@ import org.springframework.jdbc.datasource.DataSourceTransactionManager;
  * @author Glenn Renfro
  * @author Michael Minella
  * @author Ilayaperumal Gopinathan
+ * @author Jason Laber
  */
 @Configuration
 @ConditionalOnProperty(prefix = FeaturesProperties.FEATURES_PREFIX, name = FeaturesProperties.TASKS_ENABLED, matchIfMissing = true)
@@ -73,17 +76,20 @@ public class TaskConfiguration {
 	DataSourceProperties dataSourceProperties;
 
 	@Bean
+	@ConditionalOnMissingBean(TaskExplorer.class)
 	public TaskExplorerFactoryBean taskExplorerFactoryBean(DataSource dataSource) {
 		return new TaskExplorerFactoryBean(dataSource);
 	}
 
 	@Bean
+	@ConditionalOnMissingBean
 	public TaskRepository taskRepository(DataSource dataSource) {
 		return new SimpleTaskRepository(new TaskExecutionDaoFactoryBean(dataSource));
 	}
 
 	@Bean
 	@ConditionalOnBean(TaskDefinitionRepository.class)
+	@ConditionalOnMissingBean
 	public TaskService taskService(TaskDefinitionRepository repository, TaskExplorer taskExplorer, TaskRepository taskExecutionRepository,
 			AppRegistry registry, DelegatingResourceLoader resourceLoader, TaskLauncher taskLauncher,
 			ApplicationConfigurationMetadataResolver metadataResolver,
@@ -96,12 +102,14 @@ public class TaskConfiguration {
 
 	@Bean
 	@ConditionalOnBean(TaskDefinitionRepository.class)
+	@ConditionalOnMissingBean
 	public TaskJobService taskJobExecutionRepository(JobService service, TaskExplorer taskExplorer,
 			TaskDefinitionRepository taskDefinitionRepository, TaskService taskService) {
 		return new DefaultTaskJobService(service, taskExplorer, taskDefinitionRepository, taskService);
 	}
 
 	@Bean
+	@ConditionalOnMissingBean(JobService.class)
 	public SimpleJobServiceFactoryBean simpleJobServiceFactoryBean(DataSource dataSource,
 			JobRepositoryFactoryBean repositoryFactoryBean) throws Exception {
 		SimpleJobServiceFactoryBean factoryBean = new SimpleJobServiceFactoryBean();
@@ -114,6 +122,7 @@ public class TaskConfiguration {
 	}
 
 	@Bean
+	@ConditionalOnMissingBean(JobExplorer.class)
 	public JobExplorerFactoryBean jobExplorerFactoryBean(DataSource dataSource) {
 		JobExplorerFactoryBean jobExplorerFactoryBean = new JobExplorerFactoryBean();
 		jobExplorerFactoryBean.setDataSource(dataSource);
@@ -126,6 +135,7 @@ public class TaskConfiguration {
 	public static class H2ServerConfiguration {
 
 		@Bean
+		@ConditionalOnMissingBean(JobRepository.class)
 		public JobRepositoryFactoryBean jobRepositoryFactoryBeanForServer(DataSource dataSource, Server server,
 				DataSourceTransactionManager dataSourceTransactionManager) {
 			JobRepositoryFactoryBean repositoryFactoryBean = new JobRepositoryFactoryBean();
@@ -135,12 +145,14 @@ public class TaskConfiguration {
 		}
 
 		@Bean
+		@ConditionalOnMissingBean
 		public BatchDatabaseInitializer batchRepositoryInitializerForDefaultDBForServer(DataSource dataSource,
 				ResourceLoader resourceLoader, BatchProperties properties) {
 			return new BatchDatabaseInitializer(dataSource, resourceLoader, properties);
 		}
 
 		@Bean
+		@ConditionalOnMissingBean
 		public TaskRepositoryInitializer taskRepositoryInitializerForDefaultDB(DataSource dataSource, Server server) {
 			TaskRepositoryInitializer taskRepositoryInitializer = new TaskRepositoryInitializer();
 			taskRepositoryInitializer.setDataSource(dataSource);
@@ -161,6 +173,7 @@ public class TaskConfiguration {
 	public static class NoH2ServerConfiguration {
 
 		@Bean
+		@ConditionalOnMissingBean(JobRepository.class)
 		public JobRepositoryFactoryBean jobRepositoryFactoryBean(DataSource dataSource,
 				DataSourceTransactionManager dataSourceTransactionManager) {
 			JobRepositoryFactoryBean repositoryFactoryBean = new JobRepositoryFactoryBean();
@@ -170,12 +183,14 @@ public class TaskConfiguration {
 		}
 
 		@Bean
+		@ConditionalOnMissingBean
 		public BatchDatabaseInitializer batchRepositoryInitializerForDefaultDB(DataSource dataSource,
 				ResourceLoader resourceLoader, BatchProperties properties) {
 			return new BatchDatabaseInitializer(dataSource, resourceLoader, properties);
 		}
 
 		@Bean
+		@ConditionalOnMissingBean
 		public TaskRepositoryInitializer taskRepositoryInitializerForDB(DataSource dataSource) {
 			TaskRepositoryInitializer taskRepositoryInitializer = new TaskRepositoryInitializer();
 			taskRepositoryInitializer.setDataSource(dataSource);
