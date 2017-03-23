@@ -62,8 +62,6 @@ public class TaskCommands implements CommandMarker {
 
 	private static final String CREATE = "task create";
 
-	private static final String COMPOSE = "task compose";
-
 	private static final String LAUNCH = "task launch";
 
 	private static final String DESTROY = "task destroy";
@@ -89,7 +87,7 @@ public class TaskCommands implements CommandMarker {
 		return dataFlowShell.hasAccess(RoleType.VIEW, OpsType.TASK);
 	}
 
-	@CliAvailabilityIndicator({ CREATE, COMPOSE, LAUNCH, TASK_EXECUTION_CLEANUP, DESTROY })
+	@CliAvailabilityIndicator({ CREATE, LAUNCH, TASK_EXECUTION_CLEANUP, DESTROY })
 	public boolean availableWithCreateRole() {
 		return dataFlowShell.hasAccess(RoleType.CREATE, OpsType.TASK);
 	}
@@ -111,14 +109,6 @@ public class TaskCommands implements CommandMarker {
 			@CliOption(mandatory = true, key = { "definition" }, help = "a task definition, using the DSL (e.g. \"timestamp --format=YYYY\")", optionContext = "disable-string-converter completion-task") String dsl){
 		this.taskOperations().create(name, dsl);
 		return String.format("Created new task '%s'", name);
-	}
-
-	@CliCommand(value = COMPOSE, help = "Create a new composed task")
-	public String compose(
-			@CliOption(mandatory = true, key = { "", "name" }, help = "the name to give to the composed task") String name,
-			@CliOption(mandatory = true, key = { "graph" }, help = "a composed task definition, using the DSL (e.g. \"timestamp && myTask\")") String graph){
-		this.taskOperations().compose(name, graph);
-		return String.format("Created new composed task '%s'", name);
 	}
 
 	@CliCommand(value = LAUNCH, help = "Launch a previously created task")

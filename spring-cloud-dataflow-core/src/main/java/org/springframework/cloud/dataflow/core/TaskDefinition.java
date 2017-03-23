@@ -21,8 +21,6 @@ import java.util.Map;
 
 import org.springframework.cloud.dataflow.core.dsl.ArgumentNode;
 import org.springframework.cloud.dataflow.core.dsl.AppNode;
-import org.springframework.cloud.dataflow.core.dsl.ComposedTaskNode;
-import org.springframework.cloud.dataflow.core.dsl.ComposedTaskParser;
 import org.springframework.cloud.dataflow.core.dsl.TaskParser;
 import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.core.style.ToStringCreator;
@@ -41,24 +39,15 @@ public class TaskDefinition extends DataFlowAppDefinition {
 	 */
 	private final String dslText;
 
-	public TaskDefinition(String name, String dsl) {
-		this(name, dsl, false);
-	}
-
 	TaskDefinition(String registeredAppName, String label, Map<String, String> properties) {
 		super(registeredAppName, label, properties);
 		this.dslText = "";
 		properties.put(SPRING_CLOUD_TASK_NAME, registeredAppName);
 	}
 
-	public TaskDefinition(String name, String dsl, boolean isComposedTask) {
+	public TaskDefinition(String name, String dsl) {
 		this.dslText = dsl;
 		Map<String, String> properties = new HashMap<>();
-		if(isComposedTask) {
-			new ComposedTaskParser().parse(name, dsl);//validate taskName & dsl
-			setRegisteredAppName(name);
-		}
-		else {
 			AppNode taskNode = new TaskParser(name, dsl).parse();
 			setRegisteredAppName(taskNode.getName());
 			if (taskNode.hasArguments()) {
@@ -66,7 +55,6 @@ public class TaskDefinition extends DataFlowAppDefinition {
 					properties.put(argumentNode.getName(), argumentNode.getValue());
 				}
 			}
-		}
 		properties.put(SPRING_CLOUD_TASK_NAME, name);
 		this.appDefinition = new AppDefinition(name, properties);
 	}

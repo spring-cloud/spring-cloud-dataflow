@@ -105,17 +105,6 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 		task().create(taskName, "timestamp");
 	}
 
-
-	@Test
-	public void testComposeTask() throws InterruptedException {
-		logger.info("Compose Task Test");
-		String taskName = generateUniqueName();
-		task().create("AAA", "timestamp");
-		task().create("BBB", "timestamp");
-
-		task().compose(taskName, "AAA && BBB");
-	}
-
 	@Test
 	public void testTaskExecutionList() throws InterruptedException {
 		logger.info("Retrieve Task Execution List Test");

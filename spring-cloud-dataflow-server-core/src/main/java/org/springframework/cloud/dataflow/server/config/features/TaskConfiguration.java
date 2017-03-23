@@ -33,7 +33,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.server.job.TaskExplorerFactoryBean;
@@ -64,7 +63,6 @@ import org.springframework.jdbc.datasource.DataSourceTransactionManager;
  */
 @Configuration
 @ConditionalOnProperty(prefix = FeaturesProperties.FEATURES_PREFIX, name = FeaturesProperties.TASKS_ENABLED, matchIfMissing = true)
-@EnableConfigurationProperties({ComposedTaskProperties.class})
 public class TaskConfiguration {
 
 	@Autowired

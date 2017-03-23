@@ -33,10 +33,8 @@ import org.springframework.cloud.dataflow.completion.TaskCompletionProvider;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
-import org.springframework.cloud.dataflow.server.config.features.ComposedTaskProperties;
 import org.springframework.cloud.dataflow.server.controller.AppRegistryController;
 import org.springframework.cloud.dataflow.server.controller.CompletionController;
-import org.springframework.cloud.dataflow.server.controller.ComposedTaskController;
 import org.springframework.cloud.dataflow.server.controller.RestControllerAdvice;
 import org.springframework.cloud.dataflow.server.controller.RuntimeAppsController;
 import org.springframework.cloud.dataflow.server.controller.StreamDefinitionController;
@@ -84,7 +82,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupp
 @EnableHypermediaSupport(type = HAL)
 @Import(CompletionConfiguration.class)
 @EnableWebMvc
-@EnableConfigurationProperties({CommonApplicationProperties.class, ComposedTaskProperties.class})
+@EnableConfigurationProperties({CommonApplicationProperties.class})
 public class TestDependencies extends WebMvcConfigurationSupport {
 
 	@Bean
@@ -149,18 +147,9 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 
 	@Bean
 	public TaskDefinitionController taskDefinitionController(TaskDefinitionRepository repository,
-			DeploymentIdRepository deploymentIdRepository,
-			ComposedTaskProperties composedTaskProperties) {
+			DeploymentIdRepository deploymentIdRepository) {
 		return new TaskDefinitionController(repository, deploymentIdRepository,
-				taskLauncher(), appRegistry(), composedTaskProperties);
-	}
-
-	@Bean
-	public ComposedTaskController composedTaskController(TaskDefinitionRepository repository,
-			DeploymentIdRepository deploymentIdRepository,
-			ComposedTaskProperties composedTaskProperties) {
-		return new ComposedTaskController(repository, deploymentIdRepository,
-				taskLauncher(), composedTaskProperties);
+				taskLauncher(), appRegistry());
 	}
 
 	@Bean

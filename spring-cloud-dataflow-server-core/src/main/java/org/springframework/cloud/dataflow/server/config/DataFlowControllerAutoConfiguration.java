@@ -33,9 +33,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.boot.info.BuildProperties;
-import org.springframework.boot.info.GitProperties;
-import org.springframework.boot.info.InfoProperties;
 import org.springframework.cloud.dataflow.completion.CompletionConfiguration;
 import org.springframework.cloud.dataflow.completion.StreamCompletionProvider;
 import org.springframework.cloud.dataflow.completion.TaskCompletionProvider;
@@ -43,13 +40,11 @@ import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConf
 import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.registry.RdbmsUriRegistry;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
-import org.springframework.cloud.dataflow.server.config.features.ComposedTaskProperties;
 import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
 import org.springframework.cloud.dataflow.server.config.security.BasicAuthSecurityConfiguration.AuthorizationConfig;
 import org.springframework.cloud.dataflow.server.controller.AboutController;
 import org.springframework.cloud.dataflow.server.controller.AppRegistryController;
 import org.springframework.cloud.dataflow.server.controller.CompletionController;
-import org.springframework.cloud.dataflow.server.controller.ComposedTaskController;
 import org.springframework.cloud.dataflow.server.controller.FeaturesController;
 import org.springframework.cloud.dataflow.server.controller.JobExecutionController;
 import org.springframework.cloud.dataflow.server.controller.JobInstanceController;
@@ -98,7 +93,7 @@ import org.springframework.scheduling.concurrent.ForkJoinPoolFactoryBean;
 @Configuration
 @Import(CompletionConfiguration.class)
 @ConditionalOnBean({EnableDataFlowServerConfiguration.Marker.class, AppDeployer.class, TaskLauncher.class})
-@EnableConfigurationProperties({AuthorizationConfig.class, FeaturesProperties.class, ComposedTaskProperties.class, VersionInfoProperties.class})
+@EnableConfigurationProperties({AuthorizationConfig.class, FeaturesProperties.class, VersionInfoProperties.class})
 @ConditionalOnProperty(prefix = "dataflow.server", name = "enabled", havingValue = "true", matchIfMissing = true)
 public class DataFlowControllerAutoConfiguration {
 
@@ -173,21 +168,9 @@ public class DataFlowControllerAutoConfiguration {
 	public TaskDefinitionController taskDefinitionController(
 			TaskDefinitionRepository repository,
 			DeploymentIdRepository deploymentIdRepository,
-			TaskLauncher taskLauncher, AppRegistry appRegistry,
-			ComposedTaskProperties composedTaskProperties) {
+			TaskLauncher taskLauncher, AppRegistry appRegistry) {
 		return new TaskDefinitionController(repository, deploymentIdRepository,
-				taskLauncher, appRegistry, composedTaskProperties);
-	}
-
-	@Bean
-	@ConditionalOnBean(TaskDefinitionRepository.class)
-	public ComposedTaskController composedTaskController(
-			TaskDefinitionRepository repository,
-			DeploymentIdRepository deploymentIdRepository,
-			TaskLauncher taskLauncher, AppRegistry appRegistry,
-			ComposedTaskProperties composedTaskProperties) {
-		return new ComposedTaskController(repository, deploymentIdRepository,
-				taskLauncher, composedTaskProperties);
+				taskLauncher, appRegistry);
 	}
 
 	@Bean

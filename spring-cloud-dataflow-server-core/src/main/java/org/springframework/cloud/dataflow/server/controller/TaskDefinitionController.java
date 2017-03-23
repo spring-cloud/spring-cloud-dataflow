@@ -20,7 +20,6 @@ import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.rest.resource.TaskDefinitionResource;
-import org.springframework.cloud.dataflow.server.config.features.ComposedTaskProperties;
 import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
 import org.springframework.cloud.dataflow.server.repository.DeploymentKey;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;
@@ -72,11 +71,6 @@ public class TaskDefinitionController {
 	private final AppRegistry appRegistry;
 
 	/**
-	 * The properties used to configure composed task definitions.
-	 */
-	private final ComposedTaskProperties composedTaskProperties;
-
-	/**
 	 * Creates a {@code TaskDefinitionController} that delegates
 	 * <ul>
 	 *     <li>CRUD operations to the provided {@link TaskDefinitionRepository}</li>
@@ -89,17 +83,15 @@ public class TaskDefinitionController {
 	 * @param appRegistry          the app registry to look up registered apps
 	 */
 	public TaskDefinitionController(TaskDefinitionRepository repository, DeploymentIdRepository deploymentIdRepository,
-			TaskLauncher taskLauncher, AppRegistry appRegistry, ComposedTaskProperties composedTaskProperties) {
+			TaskLauncher taskLauncher, AppRegistry appRegistry) {
 		Assert.notNull(repository, "repository must not be null");
 		Assert.notNull(deploymentIdRepository, "DeploymentIdRepository must not be null");
 		Assert.notNull(taskLauncher, "taskLauncher must not be null");
 		Assert.notNull(appRegistry, "AppRegistry must not be null");
-		Assert.notNull(composedTaskProperties, "composedTaskProperties must not be null");
 		this.repository = repository;
 		this.deploymentIdRepository = deploymentIdRepository;
 		this.taskLauncher = taskLauncher;
 		this.appRegistry = appRegistry;
-		this.composedTaskProperties = composedTaskProperties;
 	}
 
 	/**

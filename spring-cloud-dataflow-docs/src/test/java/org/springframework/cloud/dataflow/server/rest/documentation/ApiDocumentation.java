@@ -94,7 +94,6 @@ public class ApiDocumentation extends BaseDocumentation {
 					linkWithRel("runtime/apps/instances").description("Provides the status for app instances"),
 					linkWithRel("tasks/definitions").description("Provides the task definition resource"),
 					linkWithRel("tasks/definitions/definition").description("Provides details for a specific task definition"),
-					linkWithRel("tasks/composed-definitions/compose").description("Requests the creation of a composed task definition"),
 					linkWithRel("tasks/executions").description("Returns Task executions and allows lanching of tasks"),
 					linkWithRel("tasks/executions/name").description("Returns all task executions for a given Task name"),
 					linkWithRel("tasks/executions/execution").description("Provides details for a specific task execution"),
