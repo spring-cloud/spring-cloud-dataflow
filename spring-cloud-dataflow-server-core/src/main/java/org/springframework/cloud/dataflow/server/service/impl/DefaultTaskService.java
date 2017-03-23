@@ -166,8 +166,8 @@ public class DefaultTaskService implements TaskService {
 
 	private List<String> updateCommandLineArgs(List<String> commandLineArgs, TaskExecution taskExecution) {
 		return Stream.concat(
-			commandLineArgs.stream().filter(a -> !a.startsWith("--spring.cloud.task.executionid=")),
-			Stream.of("--spring.cloud.task.executionid=" + taskExecution.getExecutionId())
+			commandLineArgs.stream().filter(a -> !a.startsWith("spring.cloud.task.executionid=")),
+			Stream.of("spring.cloud.task.executionid=" + taskExecution.getExecutionId())
 		).collect(Collectors.toList());
 	}
 
