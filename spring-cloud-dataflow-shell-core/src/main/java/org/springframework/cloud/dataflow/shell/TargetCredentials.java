@@ -51,7 +51,7 @@ public class TargetCredentials {
 	}
 
 	public String getDisplayableContents() {
-		return "[username='" + username +", password=****']";
+		return "[username='" + username +"', password='********']";
 	}
 
 	public List<RoleType> getRoles() {

@@ -32,12 +32,12 @@ public class RuntimeEnvironment {
 	/**
 	 * The {@link RuntimeEnvironmentDetails} of the app deployer.
 	 */
-	private RuntimeEnvironmentDetails appDeployer;
+	private RuntimeEnvironmentDetails appDeployer = new RuntimeEnvironmentDetails();
 
 	/**
 	 * The {@link RuntimeEnvironmentDetails} of the task launcher.
 	 */
-	private RuntimeEnvironmentDetails taskLauncher;
+	private RuntimeEnvironmentDetails taskLauncher = new RuntimeEnvironmentDetails();
 
 	/**
 	 * @return Null, if the stream feature is disabled

@@ -29,9 +29,9 @@ public class VersionInfo {
 	public VersionInfo() {
 	}
 
-	private Dependency implementation;
-	private Dependency core;
-	private Dependency dashboard;
+	private Dependency implementation = new Dependency();
+	private Dependency core = new Dependency();
+	private Dependency dashboard = new Dependency();
 
 	public Dependency getCore() {
 		return core;

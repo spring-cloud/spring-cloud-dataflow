@@ -31,10 +31,10 @@ public class AboutResource extends ResourceSupport {
 	public AboutResource() {
 	}
 
-	private FeatureInfo featureInfo;
-	private VersionInfo versionInfo;
-	private SecurityInfo securityInfo;
-	private RuntimeEnvironment runtimeEnvironment;
+	private FeatureInfo featureInfo = new FeatureInfo();
+	private VersionInfo versionInfo = new VersionInfo();
+	private SecurityInfo securityInfo = new SecurityInfo();
+	private RuntimeEnvironment runtimeEnvironment = new RuntimeEnvironment();
 
 	public FeatureInfo getFeatureInfo() {
 		return featureInfo;

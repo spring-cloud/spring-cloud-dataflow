@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2015-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,16 @@
 
 package org.springframework.cloud.dataflow.shell.command;
 
+import java.beans.PropertyDescriptor;
+import java.util.Arrays;
+import java.util.Collection;
+
+import org.springframework.beans.BeanWrapper;
+import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.shell.table.BorderSpecification;
 import org.springframework.shell.table.BorderStyle;
 import org.springframework.shell.table.CellMatchers;
+import org.springframework.shell.table.Formatter;
 import org.springframework.shell.table.SimpleHorizontalAligner;
 import org.springframework.shell.table.SimpleVerticalAligner;
 import org.springframework.shell.table.TableBuilder;
@@ -54,4 +61,45 @@ public class DataFlowTables {
 		return Tables.configureKeyValueRendering(builder, " = ");
 	}
 
+	/**
+	 * A formatter that collects bean property names and turns them into capitalized, separated words.
+	 *
+	 * @author Eric Bottard
+	 */
+	public static class BeanWrapperFormatter implements Formatter {
+
+		private final Collection<String> includes;
+
+		private final Collection<String> excludes;
+
+		private final String delimiter;
+
+		public BeanWrapperFormatter(String delimiter) {
+			this(delimiter, null, Arrays.asList("class"));
+		}
+
+		public BeanWrapperFormatter(String delimiter, Collection<String> includes, Collection<String> excludes) {
+			this.delimiter = delimiter;
+			this.includes = includes;
+			this.excludes = excludes;
+		}
+
+		@Override
+		public String[] format(Object value) {
+			if (value == null) {
+				return new String[0];
+			} else {
+				BeanWrapper beanWrapper = new BeanWrapperImpl(value);
+				return Arrays.stream(beanWrapper.getPropertyDescriptors())
+					.map(PropertyDescriptor::getName)
+					.filter(n -> (includes == null || includes.contains(n)) && (excludes == null || !excludes.contains(n)))
+					.map(n -> title(n) + delimiter + beanWrapper.getPropertyValue(n))
+					.toArray(String[]::new);
+			}
+		}
+
+		private String title(String n) {
+			return Character.toUpperCase(n.charAt(0)) + n.substring(1).replaceAll("([A-Z])", " $1");
+		}
+	}
 }

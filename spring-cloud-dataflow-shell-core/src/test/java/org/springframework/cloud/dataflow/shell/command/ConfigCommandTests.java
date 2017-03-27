@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,13 @@
 package org.springframework.cloud.dataflow.shell.command;
 
 import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,14 +35,18 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.cloud.dataflow.rest.Version;
+import org.springframework.cloud.dataflow.rest.client.AboutOperations;
+import org.springframework.cloud.dataflow.rest.client.DataFlowOperations;
 import org.springframework.cloud.dataflow.rest.resource.RootResource;
+import org.springframework.cloud.dataflow.rest.resource.about.AboutResource;
 import org.springframework.cloud.dataflow.shell.TargetHolder;
 import org.springframework.cloud.dataflow.shell.config.DataFlowShell;
 import org.springframework.hateoas.Link;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.shell.CommandLine;
+import org.springframework.shell.table.Table;
+import org.springframework.util.FileCopyUtils;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
@@ -47,6 +54,7 @@ import org.springframework.web.client.RestTemplate;
  * Unit tests for {@link ConfigCommands}.
  *
  * @author Gunnar Hillert
+ * @author Eric Bottard
  *
  */
 public class ConfigCommandTests {
@@ -71,6 +79,7 @@ public class ConfigCommandTests {
 
 		when(restTemplate.getMessageConverters()).thenReturn(messageConverters);
 
+
 		configCommands.setTargetHolder(new TargetHolder());
 		configCommands.setRestTemplate(restTemplate);
 		configCommands.setDataFlowShell(dataFlowShell);
@@ -79,15 +88,30 @@ public class ConfigCommandTests {
 	}
 
 	@Test
-	public void testInfo() {
+	public void testInfo() throws IOException {
 		final Exception e = new RestClientException("FooBar");
 		when(restTemplate.getForObject(Mockito.any(URI.class), Mockito.eq(RootResource.class))).thenThrow(e);
 
 		configCommands.onApplicationEvent(null);
 
-		final String infoResult = configCommands.info();
-		assertThat(infoResult, containsString("Target│http://localhost:9393"));
-		assertThat(infoResult, containsString("RestClientException: FooBar"));
+		DataFlowOperations dataFlowOperations = mock(DataFlowOperations.class);
+		AboutOperations aboutOperations = mock(AboutOperations.class);
+		when(dataFlowOperations.aboutOperation()).thenReturn(aboutOperations);
+		AboutResource aboutResource = new AboutResource();
+		when(aboutOperations.get()).thenReturn(aboutResource);
+		dataFlowShell.setDataFlowOperations(dataFlowOperations);
+
+		aboutResource.getFeatureInfo().setTasksEnabled(false);
+		aboutResource.getVersionInfo().getCore().setName("Foo Core");
+		aboutResource.getVersionInfo().getCore().setVersion("1.2.3.BUILD-SNAPSHOT");
+		aboutResource.getSecurityInfo().setAuthenticationEnabled(true);
+		aboutResource.getRuntimeEnvironment().getAppDeployer().setJavaVersion("1.8");
+		aboutResource.getRuntimeEnvironment().getAppDeployer().getPlatformSpecificInfo().put("Some", "Stuff");
+		aboutResource.getRuntimeEnvironment().getTaskLauncher().setDeployerSpiVersion("6.4");
+
+		final Table infoResult = (Table) configCommands.info().get(0);
+		String expectedOutput = FileCopyUtils.copyToString(new InputStreamReader(getClass().getResourceAsStream(ConfigCommandTests.class.getSimpleName() + "-testInfo.txt"), "UTF-8"));
+		assertThat(infoResult.render(80), is(expectedOutput));
 	}
 
 	@Test
