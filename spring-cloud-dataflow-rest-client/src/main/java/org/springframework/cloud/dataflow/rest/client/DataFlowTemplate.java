@@ -117,6 +117,11 @@ public class DataFlowTemplate implements DataFlowOperations {
 	private final RuntimeOperations runtimeOperations;
 
 	/**
+	 * REST Client for "about" operations.
+	 */
+	private final AboutOperations aboutOperations;
+
+	/**
 	 * Setup a {@link DataFlowTemplate} using the provided baseURI. Will create a {@link RestTemplate} implicitly with
 	 * the required set of Jackson MixIns. For more information, please see {@link #prepareRestTemplate(RestTemplate)}.
 	 *
@@ -161,6 +166,8 @@ public class DataFlowTemplate implements DataFlowOperations {
 					"Follow instructions at %s to download a compatible version of the shell.",
 				Version.REVISION, serverRevision, downloadURL));
 		}
+
+		this.aboutOperations = new AboutTemplate(restTemplate, resourceSupport.getLink(AboutTemplate.ABOUT_REL));
 
 		if (resourceSupport.hasLink(StreamTemplate.DEFINITIONS_REL)) {
 			this.streamOperations = new StreamTemplate(restTemplate, resourceSupport);
@@ -246,6 +253,11 @@ public class DataFlowTemplate implements DataFlowOperations {
 	@Override
 	public RuntimeOperations runtimeOperations() {
 		return runtimeOperations;
+	}
+
+	@Override
+	public AboutOperations aboutOperation() {
+		return aboutOperations;
 	}
 
 	/**

@@ -1,0 +1,42 @@
+╔═════════╤═══════════════════════════════════════════════════════════════════╗
+║ Target  │                       http://localhost:9393                       ║
+╟─────────┼───────────────────────────────────────────────────────────────────╢
+║ Result  │  Unable to contact Data Flow Server at 'http://localhost:9393':   ║
+║         │   'org.springframework.web.client.RestClientException: FooBar'.   ║
+╟─────────┼───────────────────────────────────────────────────────────────────╢
+║         │Analytics Enabled: true                                            ║
+║Features │  Streams Enabled: true                                            ║
+║         │    Tasks Enabled: false                                           ║
+╟─────────┼───────────────────────────────────────────────────────────────────╢
+║Versions │Foo Core: 1.2.3.BUILD-SNAPSHOT                                     ║
+╟─────────┼───────────────────────────────────────────────────────────────────╢
+║         │         Authenticated: false                                      ║
+║Security │Authentication Enabled: true                                       ║
+║         │ Authorization Enabled: false                                      ║
+║         │            Form Login: false                                      ║
+╟─────────┼───────────────────────────────────────────────────────────────────╢
+║         │Deployer Implementation Version: null                              ║
+║         │                  Deployer Name: null                              ║
+║         │           Deployer Spi Version: null                              ║
+║         │                   Java Version: 1.8                               ║
+║   App   │           Platform Api Version: null                              ║
+║Deployer │        Platform Client Version: null                              ║
+║         │          Platform Host Version: null                              ║
+║         │                  Platform Type: null                              ║
+║         │            Spring Boot Version: null                              ║
+║         │                 Spring Version: null                              ║
+╟┈┈┈┈┈┈┈┈┈┼┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈╢
+║Platform │Some: Stuff                                                        ║
+║Specific │                                                                   ║
+╟─────────┼───────────────────────────────────────────────────────────────────╢
+║         │Deployer Implementation Version: null                              ║
+║         │                  Deployer Name: null                              ║
+║         │           Deployer Spi Version: 6.4                               ║
+║         │                   Java Version: null                              ║
+║  Task   │           Platform Api Version: null                              ║
+║Launcher │        Platform Client Version: null                              ║
+║         │          Platform Host Version: null                              ║
+║         │                  Platform Type: null                              ║
+║         │            Spring Boot Version: null                              ║
+║         │                 Spring Version: null                              ║
+╚═════════╧═══════════════════════════════════════════════════════════════════╝

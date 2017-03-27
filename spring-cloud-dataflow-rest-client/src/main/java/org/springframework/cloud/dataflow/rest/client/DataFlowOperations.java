@@ -66,7 +66,12 @@ public interface DataFlowOperations {
 	CompletionOperations completionOperations();
 
 	/**
-	 * Runtime related opertations.
+	 * Runtime related operations.
 	 */
 	RuntimeOperations runtimeOperations();
+
+	/**
+	 * "About" related operations.
+	 */
+	AboutOperations aboutOperation();
 }

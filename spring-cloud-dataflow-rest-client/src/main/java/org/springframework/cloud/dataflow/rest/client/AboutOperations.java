@@ -14,24 +14,19 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.dataflow.rest;
+package org.springframework.cloud.dataflow.rest.client;
+
+import org.springframework.cloud.dataflow.rest.resource.about.AboutResource;
 
 /**
- * Used by clients and servers to assert API compatibility.
+ * Interface defining operations to query information about the server and runtime environment.
  *
  * @author Eric Bottard
  */
-public class Version {
+public interface AboutOperations {
 
 	/**
-	 * Should be incremented each time the API evolves whether it's a breaking change or not.
+	 * Return various pieces of information about the server, such as version and deployer runtime.
 	 */
-	public static final int REVISION = 14;
-
-	public static final String REVISION_KEY = "api.revision";
-
-	private Version() {
-
-	}
-
+	AboutResource get();
 }
