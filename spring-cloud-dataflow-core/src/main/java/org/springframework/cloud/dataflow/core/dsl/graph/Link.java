@@ -21,6 +21,8 @@ import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 /**
  * Represents a link in a {@link Graph} object that Flo will display as a link.
@@ -28,6 +30,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
  * @author Andy Clement
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(Include.NON_EMPTY)
 public class Link {
 
 	public final static String PROPERTY_TRANSITION_NAME = "transitionName";
