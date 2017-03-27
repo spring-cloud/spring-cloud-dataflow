@@ -58,6 +58,7 @@ import org.springframework.cloud.dataflow.server.controller.StreamDefinitionCont
 import org.springframework.cloud.dataflow.server.controller.StreamDeploymentController;
 import org.springframework.cloud.dataflow.server.controller.TaskDefinitionController;
 import org.springframework.cloud.dataflow.server.controller.TaskExecutionController;
+import org.springframework.cloud.dataflow.server.controller.ToolsController;
 import org.springframework.cloud.dataflow.server.controller.UiController;
 import org.springframework.cloud.dataflow.server.controller.security.LoginController;
 import org.springframework.cloud.dataflow.server.controller.security.SecurityController;
@@ -225,6 +226,11 @@ public class DataFlowControllerAutoConfiguration {
 	@Bean
 	public CompletionController completionController(StreamCompletionProvider completionProvider, TaskCompletionProvider taskCompletionProvider) {
 		return new CompletionController(completionProvider, taskCompletionProvider);
+	}
+
+	@Bean
+	public ToolsController toolsController() {
+		return new ToolsController();
 	}
 
 	@Bean

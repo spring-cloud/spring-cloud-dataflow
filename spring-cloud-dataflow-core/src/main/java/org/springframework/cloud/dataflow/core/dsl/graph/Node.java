@@ -21,6 +21,8 @@ import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 /**
  * Represents a node in a {@link Graph} object that Flo will display as a block.
@@ -28,9 +30,10 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
  * @author Andy Clement
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(Include.NON_EMPTY)
 public class Node {
 
-	public static final String METADATA_LABEL = "composedtask.label";
+	public static final String METADATA_LABEL = "label";
 
 	public String id;
 
@@ -88,6 +91,7 @@ public class Node {
 		return name.equals("SYNC");
 	}
 
+	@JsonIgnore
 	public void setLabel(String label) {
 		if (metadata == null) {
 			metadata = new HashMap<>();
@@ -95,6 +99,7 @@ public class Node {
 		metadata.put(METADATA_LABEL, label);
 	}
 	
+	@JsonIgnore
 	public String getLabel() {
 		if (metadata == null) {
 			return null;

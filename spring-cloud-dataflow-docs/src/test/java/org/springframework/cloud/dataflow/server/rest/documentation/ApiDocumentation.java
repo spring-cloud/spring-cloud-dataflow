@@ -106,10 +106,13 @@ public class ApiDocumentation extends BaseDocumentation {
 					linkWithRel("aggregate-counters").description("Provides the resource for dealing with aggregate counters"),
 					linkWithRel("aggregate-counters/counter").description("Handle a specific aggregate counter"),
 					linkWithRel("field-value-counters").description("Provides the resource for dealing with field-value-counters"),
-					linkWithRel("field-value-counters/counter").description("Handle a specific field-value-counter")),
+					linkWithRel("field-value-counters/counter").description("Handle a specific field-value-counter"),
+					linkWithRel("tools/parseTaskTextToGraph").description("Parse a task definition into a graph structure"),
+					linkWithRel("tools/convertTaskGraphToText").description("Convert a graph format into DSL text format")),
 				responseFields(
 					fieldWithPath("_links").description("Links to other resources"),
 					fieldWithPath("['"+Version.REVISION_KEY+"']").description("Incremented each time a change is implemented in this REST API")
+
 				)
 			));
 	}
