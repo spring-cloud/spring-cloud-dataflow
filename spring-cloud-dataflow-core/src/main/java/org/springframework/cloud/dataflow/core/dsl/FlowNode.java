@@ -80,8 +80,8 @@ public class FlowNode extends LabelledTaskNode {
 			return;
 		}
 		visitor.visit(this);
-		for (LabelledTaskNode labelledComposedTaskNode : series) {
-			labelledComposedTaskNode.accept(visitor);
+		for (LabelledTaskNode labelledTaskNode : series) {
+			labelledTaskNode.accept(visitor);
 		}
 		visitor.postVisit(this);
 	}

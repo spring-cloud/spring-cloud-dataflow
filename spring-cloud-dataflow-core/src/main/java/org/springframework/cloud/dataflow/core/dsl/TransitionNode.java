@@ -20,7 +20,7 @@ import static org.springframework.cloud.dataflow.core.dsl.TokenKind.LITERAL_STRI
 import static org.springframework.cloud.dataflow.core.dsl.TokenKind.STAR;
 
 /**
- * An AST node representing a transition found in a parsed composed task specification. A transition
+ * An AST node representing a transition found in a parsed task specification. A transition
  * is expressed in the form "<tt>STATE->TARGET</tt>". If <tt>STATE</tt> is unquoted it is considered a reference
  * to the exit code of the preceding app (where <tt>*</tt> means 'any exit code'). If <tt>STATE</tt> is quoted it is considered
  * a reference to the exit status of the preceding app (where <tt>'*'</tt> means 'any exit status').

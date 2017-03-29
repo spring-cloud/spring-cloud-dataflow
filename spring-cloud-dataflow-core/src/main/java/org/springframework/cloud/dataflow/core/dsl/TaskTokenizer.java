@@ -18,7 +18,8 @@ package org.springframework.cloud.dataflow.core.dsl;
 
 /**
  * Lex some input data into a stream of tokens that can then then be parsed.
- * This tokenizer recognizes the composed task DSL variant.
+ * This tokenizer recognizes the task DSL - both the simple (single task)
+ * and composed task cases.
  *
  * @author Andy Clement
  */

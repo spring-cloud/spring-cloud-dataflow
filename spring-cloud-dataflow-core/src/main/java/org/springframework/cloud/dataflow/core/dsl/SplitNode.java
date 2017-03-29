@@ -87,8 +87,8 @@ public class SplitNode extends LabelledTaskNode {
 			return;
 		}
         visitor.visit(this);
-		for (LabelledTaskNode labelledComposedTaskNode : parallelTaskApps) {
-			labelledComposedTaskNode.accept(visitor);
+		for (LabelledTaskNode labelledTaskNode : parallelTaskApps) {
+			labelledTaskNode.accept(visitor);
 		}
         visitor.postVisit(this);
 	}

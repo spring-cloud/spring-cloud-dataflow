@@ -31,7 +31,7 @@ import org.springframework.cloud.dataflow.core.dsl.graph.Link;
 import org.springframework.cloud.dataflow.core.dsl.graph.Node;
 
 /**
- * Visitor that produces a Graph representation of a parsed composed task
+ * Visitor that produces a Graph representation of a parsed task
  * definition. This is suprisingly complicated due to the ability to use
  * labels.
  *

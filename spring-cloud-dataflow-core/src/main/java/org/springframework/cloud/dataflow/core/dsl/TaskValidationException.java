@@ -32,8 +32,8 @@ public class TaskValidationException extends RuntimeException {
 
 	private List<TaskValidationProblem> validationProblems;
 
-	public TaskValidationException(TaskNode composedTaskNode, List<TaskValidationProblem> validationProblems) {
-		this.taskNode = composedTaskNode;
+	public TaskValidationException(TaskNode taskNode, List<TaskValidationProblem> validationProblems) {
+		this.taskNode = taskNode;
 		this.validationProblems = validationProblems;
 	}
 
@@ -41,7 +41,7 @@ public class TaskValidationException extends RuntimeException {
 		return validationProblems;
 	}
 
-	public TaskNode getComposedTaskNode() {
+	public TaskNode getTaskNode() {
 		return taskNode;
 	}
 

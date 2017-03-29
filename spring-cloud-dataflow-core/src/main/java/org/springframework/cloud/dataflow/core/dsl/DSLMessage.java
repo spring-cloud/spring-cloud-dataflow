@@ -105,8 +105,8 @@ public enum DSLMessage {
 	TASK_VALIDATION_DUPLICATE_LABEL(ERROR, 159, "This label has already been defined"), //
 	TASK_VALIDATION_TRANSITION_TARGET_LABEL_UNDEFINED(ERROR, 160, "Transition specifies an undefined label"), //
 	TASK_ELEMENT_IN_COMPOSED_DEFINITION_DOES_NOT_EXIST(ERROR, 161, "Task in composed task definition does not exist"), //
-	TASK_UNEXPECTED_DATA(ERROR, 162, "Unexpected data in composed task definition ''{0}''"), //
-	TASK_MORE_INPUT(ERROR, 163, "After parsing a valid composed task, there is still more data: ''{0}''"), //
+	TASK_UNEXPECTED_DATA(ERROR, 162, "Unexpected data in task definition ''{0}''"), //
+	TASK_MORE_INPUT(ERROR, 163, "After parsing a valid task, there is still more data: ''{0}''"), //
 	TASK_VALIDATION_LABEL_CLASHES_WITH_TASKAPP_NAME(ERROR, 164, "The label clashes with an existing unlabeled task application name"), //
 	TASK_VALIDATION_APP_NAME_CLASHES_WITH_LABEL(ERROR, 165, "The app name clashes with an existing label"), //
 	TASK_VALIDATION_APP_NAME_ALREADY_IN_USE(ERROR, 166, "Duplicate app name. Use a label to ensure uniqueness"), //

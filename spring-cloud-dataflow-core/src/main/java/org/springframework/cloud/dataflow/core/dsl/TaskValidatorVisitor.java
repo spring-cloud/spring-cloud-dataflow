@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Visitor for a parsed composed task that verifies it is coherent. Rules being checked:
+ * Visitor for a parsed task that verifies it is coherent. Rules being checked:
  * <ul>
  * <li>Any secondary sequences are labeled (otherwise they are unreachable).
  * <li>Cannot label two things with the same string.
@@ -37,7 +37,7 @@ import java.util.Set;
 public class TaskValidatorVisitor extends TaskVisitor {
 
 	// Text of the AST being validated
-	private String composedTaskText;
+	private String taskDsl;
 
 	private List<TaskValidationProblem> problems = new ArrayList<>();
 
@@ -68,8 +68,8 @@ public class TaskValidatorVisitor extends TaskVisitor {
 	}
 	
 	@Override
-	public void startVisit(String composedTaskName, String composedTaskText) {
-		this.composedTaskText = composedTaskText;
+	public void startVisit(String taskName, String taskDsl) {
+		this.taskDsl = taskDsl;
 	}
 	
 	@Override
@@ -139,7 +139,7 @@ public class TaskValidatorVisitor extends TaskVisitor {
 	}
 	
 	private void pushProblem(int pos, DSLMessage message) {
-		problems.add(new TaskValidationProblem(composedTaskText, pos, message));
+		problems.add(new TaskValidationProblem(taskDsl, pos, message));
 	}
 
 }

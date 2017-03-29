@@ -17,6 +17,7 @@
 package org.springframework.cloud.dataflow.core.dsl;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Stack;
 
@@ -24,37 +25,37 @@ import org.springframework.cloud.dataflow.core.dsl.graph.Graph;
 import org.springframework.util.Assert;
 
 /**
- * The root AST node for any AST parsed from a composed task specification.
+ * The root AST node for any entity parsed from task DSL.
  *
  * @author Andy Clement
  */
 public class TaskNode extends AstNode {
 
 	/**
-	 * The name of the composed task.
+	 * The name of the task.
 	 */
 	private String name;
 	
 	/**
-	 * The DSL text that was parsed to create this ComposedTaskNode.
+	 * The DSL text that was parsed to create this TaskNode.
 	 */
-	private String composedTaskText;
+	private String taskDSL;
 
 	/**
-	 * The sequence of LabelledNodes parsed from the specification.
+	 * The sequence of LabelledNodes parsed from the dsl.
 	 */
 	private List<LabelledTaskNode> sequences;
 
 	/**
-	 * All the apps mentioned in the composed task definition.
+	 * All the apps mentioned in the task dsl.
 	 */
 	private List<TaskApp> taskApps;
 	
-	TaskNode(String name, String composedTaskSpecification, List<LabelledTaskNode> sequences, boolean inAppMode) {
+	TaskNode(String name, String taskDSL, List<LabelledTaskNode> sequences, boolean inAppMode) {
 		super((sequences.size()==0) ? 0 : sequences.get(0).getStartPos(), 
 				(sequences.size()==0) ? 0 : sequences.get(sequences.size()-1).getEndPos());
 		this.name = name;
-		this.composedTaskText = composedTaskSpecification;
+		this.taskDSL = taskDSL;
 		this.sequences = sequences;
 		// TODO use inAppMode to police what can be called on this node?
 	}
@@ -72,7 +73,7 @@ public class TaskNode extends AstNode {
 	}
 
 	/**
-	 * @return all the apps referenced in the composed task.
+	 * @return all the apps referenced in the task.
 	 */
 	public List<TaskApp> getTaskApps() {
 		if (taskApps == null) {
@@ -84,7 +85,7 @@ public class TaskNode extends AstNode {
 	}
 	
 	/**
-	 * Walk the AST for the parsed composed task, calling the visitor for each element of interest.
+	 * Walk the AST for the parsed task, calling the visitor for each element of interest.
 	 * See the {@link TaskVisitor} for all the events that can be received, since that is an
 	 * abstract class it can be extended and subclasses only need override methods to receive the
 	 * events of interest.
@@ -92,7 +93,7 @@ public class TaskNode extends AstNode {
 	 */
 	public void accept(TaskVisitor visitor) {
 		Assert.notNull(visitor,"visitor expected to be non-null");
-		visitor.startVisit(this.name, this.composedTaskText);
+		visitor.startVisit(this.name, this.taskDSL);
 		int sequenceNumber = 0;
 		for (LabelledTaskNode ctn: sequences) {
 			if (visitor.preVisitSequence(ctn, sequenceNumber)) {
@@ -123,28 +124,28 @@ public class TaskNode extends AstNode {
 	}
 	
 	/**
-	 * Simple visitor that discovers all the tasks in use in the composed task definition.
+	 * Simple visitor that discovers all the tasks in use in the task definition.
 	 */
 	class TaskAppsCollector extends TaskVisitor {
 
-		private String composedTaskName;
+		private String taskName;
 		
 		private List<TaskApp> taskApps = new ArrayList<>();
 		
 		@Override
-		public void startVisit(String name, String composedTaskText) {
-			composedTaskName = name;
+		public void startVisit(String taskName, String taskDSL) {
+			this.taskName = taskName;
 		}
 		
 		@Override
 		public void visit(TaskAppNode taskApp) {
-			taskApps.add(new TaskApp(composedTaskName, taskApp));
+			taskApps.add(new TaskApp(taskName, taskApp));
 		}
 		
 		@Override
 		public void visit(TransitionNode transition) {
 			if (transition.isTargetApp()) {
-				taskApps.add(new TaskApp(composedTaskName, transition.getTargetApp()));
+				taskApps.add(new TaskApp(taskName, transition.getTargetApp()));
 			}
 		}
 		
@@ -159,11 +160,11 @@ public class TaskNode extends AstNode {
 	}
 	
 	public String getTaskText() {
-		return this.composedTaskText;
+		return this.taskDSL;
 	}
 	
 	/**
-	 * Shortcut to return the first node in the first sequence. Many composed tasks
+	 * Shortcut to return the first node in the first sequence. Many tasks
 	 * will have just one sequence so do not force the consumer to dig through that
 	 * sequence.
 	 * 
@@ -179,7 +180,7 @@ public class TaskNode extends AstNode {
 	}
 	
 	public List<LabelledTaskNode> getSequences() {
-		return sequences;
+		return Collections.unmodifiableList(sequences);
 	}
 
 	/**
@@ -198,7 +199,7 @@ public class TaskNode extends AstNode {
 	}
 
 	/**
-	 * @return the DSL representation of this composed task Ast
+	 * @return the DSL representation of this task Ast
 	 */
 	public String toDSL() {
 		return stringify(false);
@@ -214,9 +215,9 @@ public class TaskNode extends AstNode {
 
 		private final String PREFIX = "_";
 		
-		StringBuilder dsl = new StringBuilder();
+		private StringBuilder dsl = new StringBuilder();
 		
-		private String composedTaskName;
+		private String taskName;
 		
 		private Stack<Integer> state = new Stack<>();
 
@@ -226,8 +227,8 @@ public class TaskNode extends AstNode {
 		private int IN_SPLIT=3;
 		
 		@Override
-		public void startVisit(String name, String composedTaskText) {
-			this.composedTaskName = name;
+		public void startVisit(String taskName, String taskDSL) {
+			this.taskName = taskName;
 		}
 
 		@Override
@@ -293,7 +294,7 @@ public class TaskNode extends AstNode {
 
 		private String toExecutableDSLTaskName(TaskAppNode taskApp) {
 			StringBuilder taskDefName = new StringBuilder();
-			taskDefName.append(PREFIX).append(composedTaskName).append(".");
+			taskDefName.append(PREFIX).append(taskName).append(".");
 			if (taskApp.hasLabel()) {
 				taskDefName.append(taskApp.getLabelString());
 			}
@@ -310,7 +311,7 @@ public class TaskNode extends AstNode {
 	}
 	
 	/**
-	 * @return true if the definition containined more than just a single task app
+	 * @return true if the dsl contained more than just a single task app/reference
 	 */
 	public boolean isComposed() {
 		return !(sequences.size() == 1 && sequences.get(0).isFlow() &&
@@ -319,7 +320,7 @@ public class TaskNode extends AstNode {
 	}
 	
 	/**
-	 * @return the single task contained in this definition (for non composed task definitions), or
+	 * @return the single task contained in the dsl (for non composed task definitions), or
 	 * 	null if it is a composed task
 	 */
 	public TaskAppNode getTaskApp() {
@@ -328,7 +329,7 @@ public class TaskNode extends AstNode {
 	
 	public String toString() {
 		StringBuilder s = new StringBuilder();
-		s.append("ComposedTaskNode for ").append(composedTaskText.replaceAll("\n", ";"));
+		s.append("TaskNode for ").append(taskDSL.replaceAll("\n", ";"));
 		s.append("\n").append(sequences);
 		return s.toString();
 	}

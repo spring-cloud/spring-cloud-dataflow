@@ -662,8 +662,7 @@ public class TaskParserTests {
 		assertGraph("[0:START][1:aa][2:bb][3:cc][4:dd][5:END][10:ee][11:ff]"+
 		            "[0-1][1-2][2-3][3-4][4-5]['foo':1-10][10-11][11-5]['*':11-3]",spec);
 		spec = "aa 'foo'->:two && bb && four: cc && dd;two: ee && ff '*'->:three;three: gg '*'->:four";
-		TaskNode parse = parse(spec);
-		System.out.println(parse);
+		parse(spec);
 		assertGraph("[0:START][1:aa][2:bb][3:cc][4:dd][5:END][13:ee][14:ff][15:gg]" +
 				    "[0-1][1-2][2-3][3-4][4-5]['foo':1-13][13-14][14-5]['*':14-15][15-5]['*':15-3]",spec);
 	}
@@ -747,8 +746,8 @@ public class TaskParserTests {
 		LabelledTaskNode start = ctn.getStart(); // get the root of the AST starting appA
 		assertNotNull(start);
 		List<LabelledTaskNode> sequences = ctn.getSequences();
-		LabelledTaskNode labelledComposedTaskNode = sequences.get(1);
-		assertEquals("foo",labelledComposedTaskNode.getLabelString());
+		LabelledTaskNode labelledTaskNode = sequences.get(1);
+		assertEquals("foo",labelledTaskNode.getLabelString());
 		LabelledTaskNode fooSequence = ctn.getSequenceWithLabel("foo"); // get the AST for foo: ...
 		assertNotNull(fooSequence);
 		TestVisitor tv = new TestVisitor();
@@ -1174,13 +1173,7 @@ public class TaskParserTests {
 	public void toGraph$END() {
 		TaskNode ctn = parse("foo 'oranges'->$END");
 		assertEquals("foo 'oranges'->$END", ctn.toDSL());
-
-		// Graph creation
 		assertGraph("[0:START][1:foo][2:$END][3:END][0-1]['oranges':1-2][1-3]", "foo 'oranges'->$END");
-//		assertEquals(toExpectedGraph("n:0:START,n:1:foo,n:3:END,l:0:1,l:1:3:transitionName=oranges"),
-//				js.toGraph().toJSON());
-
-		// Graph to DSL
 		checkDSLToGraphAndBackToDSL("foo 'oranges'->$END");
 	}
 	
@@ -1188,12 +1181,6 @@ public class TaskParserTests {
 	public void toGraph$END2() {
 		String definition = "aaa 'foo'->$END 'B'->bbb '*'->ccc && bbb && ccc";
 		assertParseAndBackToDSL(definition);
-		// {"nodes":[{"id":"0","name":"START"},{"id":"1","name":"aaa"},{"id":"3","name":"bbb"},{"id":"4","name":"ccc"},
-		//           {"id":"5","name":"END"}],
-		//  "links":[{"from":"0","to":"1"},{"from":"1","to":"5","properties":{"transitionName":"foo"}},
-		//           {"from":"1","to":"3","properties":{"transitionName":"B"}},
-		//           {"from":"1","to":"4","properties":{"transitionName":"'*'"}},
-		//           {"from":"3","to":"4"},{"from":"4","to":"5"}]}
 		assertGraph("[0:START][1:aaa][2:$END][3:bbb][4:ccc][5:bbb][6:ccc][7:END]"+
 		            "[0-1]['foo':1-2]['B':1-3]['*':1-4][1-5][5-6][6-7][3-7][4-7]",definition);
 		checkDSLToGraphAndBackToDSL("aaa 'foo'->$END 'B'->bbb '*'->ccc && bbb && ccc");
@@ -1203,15 +1190,7 @@ public class TaskParserTests {
 	public void toGraph$END3() {
 		// The trailing 'bbb' is redundant here...
 		String spec = "aaa 'foo'->$END 'B'->bbb '*'->$END && bbb";
-
 		assertEquals(spec,parse(spec).toDSL());
-
-		// Graph creation
-		//		assertEquals(
-		//				toExpectedGraph("n:0:START,n:1:aaa,n:2:bbb,n:3:ccc,n:4:END," +
-		//						"l:0:1,l:2:3,l:1:4:transitionName=foo,l:1:2:transitionName=B,l:1:3:transitionName='*',l:3:4"),
-		//				js.toGraph().toJSON());
-
 		// TODO should the $ENDs just be joined to END?
 		assertGraph("[0:START][1:aaa][2:$END][3:bbb][4:bbb][5:END]"+
 		            "[0-1]['foo':1-2]['B':1-3]['*':1-2][1-4][4-5][3-5]",spec);
@@ -1393,7 +1372,6 @@ public class TaskParserTests {
 			return null;
 		}
 		catch (ParseException e) {
-			System.out.println(e);
 			assertEquals(msg, e.getMessageCode());
 			assertEquals(pos, e.getPosition());
 			if (inserts != null) {

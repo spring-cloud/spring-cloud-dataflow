@@ -35,9 +35,9 @@ public abstract class TaskVisitor {
 	/**
 	 * The first call made to a visitor.
 	 * @param taskName the name of the task definition
-	 * @param taskText the textual definition of the AST being visited
+	 * @param taskDsl the textual definition of the AST being visited
 	 */
-	public void startVisit(String taskName, String taskText) {
+	public void startVisit(String taskName, String taskDsl) {
 	}
 
 	/**
@@ -86,12 +86,11 @@ public abstract class TaskVisitor {
 	public void postVisit(SplitNode split) {
 	}
 
-
 	/**
 	 * <b>This preVisit/visit/postVisit sequence for taskApp is not invoked for inlined references to apps
 	 * in transitions, for example: <tt>appA 0->:foo 1->appB</tt>. The reference to <tt>appB</tt> would be
 	 * seen in the transition visit below.
-	 * @param taskApp the use of a task app in a composed task dsl
+	 * @param taskApp the use of a task app in a task dsl
 	 * @return false to skip visiting this taskApp
 	 */
 	public boolean preVisit(TaskAppNode taskApp) {

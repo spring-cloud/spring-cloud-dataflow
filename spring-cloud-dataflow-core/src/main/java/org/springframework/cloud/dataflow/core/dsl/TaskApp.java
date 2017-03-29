@@ -18,9 +18,11 @@ package org.springframework.cloud.dataflow.core.dsl;
 
 import java.util.Map;
 
+import org.springframework.util.Assert;
+
 /**
  * Represents the use of a task application in a DSL string. These are specific to the
- * composed task definition they were contained in - the name of that composed task
+ * task definition they were contained in - the name of that task
  * definition is used to compute the unique name see {@link #getExecutableDSLName()}.
  *
  * @author Andy Clement
@@ -29,7 +31,7 @@ public class TaskApp {
 
 	private final static String PREFIX = "_";
 	
-	private String composedTaskName;
+	private String taskDefinitionName;
 	
 	private String name;
 	
@@ -37,15 +39,16 @@ public class TaskApp {
 	
 	private String label;
 
-	TaskApp(String composedTaskName, TaskAppNode taskAppNode) {
-		this.composedTaskName = composedTaskName;
+	TaskApp(String taskDefinitionName, TaskAppNode taskAppNode) {
+		Assert.notNull(taskAppNode,"taskAppNode not expected to be null");
+		this.taskDefinitionName = taskDefinitionName;
 		this.name = taskAppNode.getName();
 		this.arguments = taskAppNode.getArgumentsAsMap();
 		this.label = taskAppNode.getLabelString();
 	}
 	
-	public String getComposedTaskName() {
-		return composedTaskName;
+	public String getTaskName() {
+		return taskDefinitionName;
 	}
 
 	public String getName() {
@@ -62,11 +65,11 @@ public class TaskApp {
 	
 	public String toString() {
 		StringBuilder s = new StringBuilder();
-		if (label!=null) {
+		if (label != null) {
 			s.append(label).append(": ");
 		}
 		s.append(name);
-		if (arguments.size()!=0) {
+		if (arguments.size() != 0) {
 			s.append(" ");
 			for (Map.Entry<String,String> argument: arguments.entrySet()) {
 				s.append("--").append(argument.getKey()).append("=").append(argument.getValue());
@@ -77,7 +80,7 @@ public class TaskApp {
 
 	public String getExecutableDSLName() {
 		StringBuilder s = new StringBuilder();
-		s.append(PREFIX).append(composedTaskName).append(".");
+		s.append(PREFIX).append(taskDefinitionName).append(".");
 		s.append(label==null?name:label);
 		return s.toString();
 	}

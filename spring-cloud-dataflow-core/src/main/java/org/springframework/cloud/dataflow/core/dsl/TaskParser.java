@@ -113,7 +113,7 @@ public class TaskParser extends AppParser {
 	}
 
 	/**
-	 * Process a potential sequence of composed task nodes. Sequences are separated by
+	 * Process a potential sequence of task definitions. Sequences are separated by
 	 * newlines or semi-colons.
 	 */
 	private List<LabelledTaskNode> eatSequences() {
@@ -234,7 +234,7 @@ public class TaskParser extends AppParser {
 	 * @return array of arguments or {@code null} if the next token(s) do not
 	 * contain arguments
 	 */
-	protected ArgumentNode[] maybeEatAppArgs() {
+	private ArgumentNode[] maybeEatAppArgs() {
 		Tokens tokens = getTokens();
 		List<ArgumentNode> args = null;
 		if (tokens.peek(TokenKind.DOUBLE_MINUS) && tokens.isNextAdjacent()) {
