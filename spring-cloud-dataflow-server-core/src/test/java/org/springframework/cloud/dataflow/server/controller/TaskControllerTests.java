@@ -49,6 +49,7 @@ import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
 import org.springframework.cloud.dataflow.server.repository.InMemoryTaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
+import org.springframework.cloud.dataflow.server.service.TaskService;
 import org.springframework.cloud.deployer.resource.registry.UriRegistry;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
@@ -86,6 +87,9 @@ public class TaskControllerTests {
 	@Autowired
 	private AppRegistry appRegistry;
 
+	@Autowired
+	TaskService taskService;
+
 	@Before
 	public void setupMockMVC() {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(wac).defaultRequest(
@@ -101,14 +105,15 @@ public class TaskControllerTests {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testTaskDefinitionControllerConstructorMissingRepository() {
-		new TaskDefinitionController(null, null, taskLauncher, appRegistry);
+		new TaskDefinitionController(null, null, taskLauncher, appRegistry,
+				taskService);
 	}
 
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testTaskDefinitionControllerConstructorMissingDeployer() {
 		new TaskDefinitionController(new InMemoryTaskDefinitionRepository(),
-				null, null, appRegistry);
+				null, null, appRegistry, taskService);
 	}
 
 	@Test

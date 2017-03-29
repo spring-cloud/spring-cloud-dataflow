@@ -45,6 +45,7 @@ import org.springframework.cloud.dataflow.server.repository.InMemoryTaskDefiniti
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.TaskJobService;
 import org.springframework.cloud.dataflow.server.service.TaskService;
+import org.springframework.cloud.dataflow.server.service.impl.TaskConfigurationProperties;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskJobService;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskService;
 import org.springframework.cloud.deployer.resource.registry.InMemoryUriRegistry;
@@ -127,9 +128,12 @@ public class JobDependencies {
 	@Bean
 	public TaskService taskService(TaskDefinitionRepository repository, TaskExplorer explorer,
 			AppRegistry registry, ResourceLoader resourceLoader, TaskLauncher taskLauncher,
-			ApplicationConfigurationMetadataResolver metadataResolver) {
-		return new DefaultTaskService(new DataSourceProperties(), repository, explorer, taskRepository(),
-				registry, resourceLoader, taskLauncher, metadataResolver);
+			ApplicationConfigurationMetadataResolver metadataResolver,
+			DeploymentIdRepository deploymentIdRepository) {
+		return new DefaultTaskService(new DataSourceProperties(), repository,
+				explorer, taskRepository(),
+				registry, resourceLoader, taskLauncher, metadataResolver,
+				new TaskConfigurationProperties(), deploymentIdRepository);
 	}
 
 	@Bean

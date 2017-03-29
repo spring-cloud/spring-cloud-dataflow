@@ -16,7 +16,10 @@
 
 package org.springframework.cloud.dataflow.server.services.impl;
 
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyObject;
@@ -34,7 +37,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.PropertyPlaceholderAutoConfiguration;
+import org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.autoconfigure.jdbc.EmbeddedDataSourceConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -44,9 +47,11 @@ import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.registry.AppRegistration;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.server.configuration.TaskServiceDependencies;
+import org.springframework.cloud.dataflow.server.repository.InMemoryDeploymentIdRepository;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.TaskService;
+import org.springframework.cloud.dataflow.server.service.impl.TaskConfigurationProperties;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskService;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.cloud.task.repository.TaskExplorer;
@@ -107,7 +112,9 @@ public class DefaultTaskServiceTests {
 				new DefaultTaskService(dataSourceProperties,
 						taskDefinitionRepository, taskExplorer,
 						taskExecutionRepository, appRegistry, resourceLoader,
-						taskLauncher, metadataResolver);
+						taskLauncher, metadataResolver,
+						new TaskConfigurationProperties(),
+						new InMemoryDeploymentIdRepository());
 	}
 
 	@Test
@@ -156,7 +163,8 @@ public class DefaultTaskServiceTests {
 						mock(TaskDefinitionRepository.class), this.taskExplorer,
 						this.taskExecutionRepository, this.appRegistry,
 						this.resourceLoader, this.taskLauncher,
-						this.metadataResolver);
+						this.metadataResolver, new TaskConfigurationProperties(),
+						new InMemoryDeploymentIdRepository());
 		try {
 			taskService.executeTask(TASK_NAME_ORIG, new HashMap<>(),
 					new LinkedList<>());
@@ -168,5 +176,68 @@ public class DefaultTaskServiceTests {
 		if(!errorCaught) {
 			fail();
 		}
+	}
+
+	@Test
+	@DirtiesContext
+	public void createSequenceComposedTask() {
+		taskService.saveTaskDefinition("seqTask", "AAA && BBB");
+		verifyTaskExistsInRepo("seqTask",
+				"composed-task-runner --graph=\"_seqTask_AAA && _seqTask_BBB\"");
+
+		verifyTaskExistsInRepo("_seqTask_AAA", "AAA");
+		verifyTaskExistsInRepo("_seqTask_BBB", "BBB");
+	}
+
+	@Test
+	@DirtiesContext
+	public void createSplitComposedTask() {
+		taskService.saveTaskDefinition("splitTask", "<AAA || BBB>");
+		verifyTaskExistsInRepo("splitTask",
+				"composed-task-runner --graph=\"<_splitTask_AAA || _splitTask_BBB>\"");
+
+		verifyTaskExistsInRepo("_splitTask_AAA", "AAA");
+		verifyTaskExistsInRepo("_splitTask_BBB", "BBB");
+	}
+
+	@Test
+	@DirtiesContext
+	public void createTransitionComposedTask() {
+		taskService.saveTaskDefinition("transitionTask", "AAA 'FAILED' -> BBB '*' -> CCC");
+		verifyTaskExistsInRepo("transitionTask",
+				"composed-task-runner --graph=\"_transitionTask_AAA 'FAILED'->_transitionTask_BBB '*'->_transitionTask_CCC\"");
+
+		verifyTaskExistsInRepo("_transitionTask_AAA", "AAA");
+		verifyTaskExistsInRepo("_transitionTask_BBB", "BBB");
+	}
+
+	@Test
+	@DirtiesContext
+	public void createSimpleTask() {
+		taskService.saveTaskDefinition("simpleTask", "AAA --foo=bar");
+		verifyTaskExistsInRepo("simpleTask", "AAA --foo=bar");
+	}
+
+	@Test
+	@DirtiesContext
+	public void deleteComposedTask() {
+		taskService.saveTaskDefinition("deleteTask", "AAA && BBB && CCC");
+		verifyTaskExistsInRepo("_deleteTask_AAA", "AAA");
+		verifyTaskExistsInRepo("_deleteTask_BBB", "BBB");
+		verifyTaskExistsInRepo("_deleteTask_CCC", "CCC");
+		verifyTaskExistsInRepo("deleteTask", "composed-task-runner --graph=\"_deleteTask_AAA && _deleteTask_BBB && _deleteTask_CCC\"");
+
+		long preDeleteSize = taskDefinitionRepository.count();
+		taskService.deleteTaskDefinition("deleteTask");
+		assertThat(preDeleteSize - 4,
+				is(equalTo(taskDefinitionRepository.count())));
+	}
+
+
+	private void verifyTaskExistsInRepo(String taskName, String dsl) {
+		TaskDefinition taskDefinition = taskDefinitionRepository.findOne(taskName);
+
+		assertThat(taskDefinition.getName(), is(equalTo(taskName)));
+		assertThat(taskDefinition.getDslText(),is(equalTo(dsl)));
 	}
 }
