@@ -145,7 +145,7 @@ public class DefaultTaskService implements TaskService {
 		Resource appResource = appRegistration.getResource();
 		Resource metadataResource = appRegistration.getMetadataResource();
 
-		TaskExecution taskExecution = taskExecutionRepository.createTaskExecution();
+		TaskExecution taskExecution = taskExecutionRepository.createTaskExecution(taskName);
 		taskDefinition = this.updateTaskProperties(taskDefinition);
 
 		Map<String, String> appDeploymentProperties = extractAppProperties(taskDefinition.getRegisteredAppName(), taskDeploymentProperties);
