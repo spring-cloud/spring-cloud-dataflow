@@ -15,10 +15,8 @@
  */
 package org.springframework.cloud.dataflow.server.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
-import org.springframework.boot.info.GitProperties;
 import org.springframework.cloud.dataflow.rest.resource.about.AboutResource;
 import org.springframework.cloud.dataflow.rest.resource.about.Dependency;
 import org.springframework.cloud.dataflow.rest.resource.about.FeatureInfo;
@@ -57,9 +55,6 @@ public class AboutController {
 
 	private final FeaturesProperties featuresProperties;
 	private final VersionInfoProperties versionInfoProperties;
-
-	@Autowired(required=false)
-	private GitProperties gitProperties;
 
 	private final SecurityProperties securityProperties;
 	private final AuthorizationConfig authorizationConfig;
@@ -108,13 +103,6 @@ public class AboutController {
 		versionInfo.setImplementation(new Dependency(this.implementationName, this.implementationVersion));
 		versionInfo.setCore(new Dependency("Spring Cloud Data Flow Core", versionInfoProperties.getDataflowCoreVersion()));
 		versionInfo.setDashboard(new Dependency("Spring Cloud Dataflow UI", versionInfoProperties.getDataflowDashboardVersion()));
-
-		if (this.gitProperties != null) {
-			versionInfo.setBranch(this.gitProperties.getBranch());
-			versionInfo.setCommitId(this.gitProperties.getCommitId());
-			versionInfo.setShortCommitId(this.gitProperties.getShortCommitId());
-			versionInfo.setCommitTime(this.gitProperties.getCommitTime());
-		}
 
 		aboutResource.setFeatureInfo(featureInfo);
 		aboutResource.setVersionInfo(versionInfo);

@@ -16,8 +16,6 @@
 
 package org.springframework.cloud.dataflow.rest.resource.about;
 
-import java.util.Date;
-
 /**
  * Provides version information about core libraries used.
  *
@@ -34,11 +32,6 @@ public class VersionInfo {
 	private Dependency implementation;
 	private Dependency core;
 	private Dependency dashboard;
-
-	private String commitId;
-	private String shortCommitId;
-	private Date   commitTime;
-	private String branch;
 
 	public Dependency getCore() {
 		return core;
@@ -61,37 +54,4 @@ public class VersionInfo {
 	public void setDashboard(Dependency dashboard) {
 		this.dashboard = dashboard;
 	}
-
-	public String getCommitId() {
-		return commitId;
-	}
-
-	public void setCommitId(String commitId) {
-		this.commitId = commitId;
-	}
-
-	public String getShortCommitId() {
-		return shortCommitId;
-	}
-
-	public void setShortCommitId(String shortCommitId) {
-		this.shortCommitId = shortCommitId;
-	}
-
-	public Date getCommitTime() {
-		return commitTime;
-	}
-
-	public void setCommitTime(Date commitTime) {
-		this.commitTime = commitTime;
-	}
-
-	public String getBranch() {
-		return branch;
-	}
-
-	public void setBranch(String branch) {
-		this.branch = branch;
-	}
-
 }
