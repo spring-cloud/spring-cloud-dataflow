@@ -29,10 +29,14 @@ import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConf
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.core.TaskDefinition.TaskDefinitionBuilder;
+import org.springframework.cloud.dataflow.core.dsl.TaskNode;
+import org.springframework.cloud.dataflow.core.dsl.TaskParser;
 import org.springframework.cloud.dataflow.registry.AppRegistration;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
 import org.springframework.cloud.dataflow.server.controller.WhitelistProperties;
+import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
+import org.springframework.cloud.dataflow.server.repository.DeploymentKey;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.TaskService;
@@ -91,6 +95,10 @@ public class DefaultTaskService implements TaskService {
 
 	private final WhitelistProperties whitelistProperties;
 
+	private final ComposedTaskProperties composedTaskProperties;
+
+	private final DeploymentIdRepository deploymentIdRepository;
+
 	/**
 	 * Initializes the {@link DefaultTaskService}.
 	 *
@@ -110,7 +118,9 @@ public class DefaultTaskService implements TaskService {
 			TaskExplorer taskExplorer,
 			TaskRepository taskExecutionRepository, AppRegistry registry,
 			ResourceLoader resourceLoader, TaskLauncher taskLauncher,
-			ApplicationConfigurationMetadataResolver metaDataResolver) {
+			ApplicationConfigurationMetadataResolver metaDataResolver,
+			ComposedTaskProperties composedTaskProperties,
+			DeploymentIdRepository deploymentIdRepository) {
 		Assert.notNull(dataSourceProperties, "DataSourceProperties must not be null");
 		Assert.notNull(taskDefinitionRepository, "TaskDefinitionRepository must not be null");
 		Assert.notNull(taskExecutionRepository, "TaskExecutionRepository must not be null");
@@ -119,6 +129,8 @@ public class DefaultTaskService implements TaskService {
 		Assert.notNull(resourceLoader, "ResourceLoader must not be null");
 		Assert.notNull(taskLauncher, "TaskLauncher must not be null");
 		Assert.notNull(metaDataResolver, "metaDataResolver must not be null");
+		Assert.notNull(composedTaskProperties, "composedTaskProperties must not be null");
+		Assert.notNull(deploymentIdRepository, "deploymentIdRepository must not be null");
 		this.dataSourceProperties = dataSourceProperties;
 		this.taskDefinitionRepository = taskDefinitionRepository;
 		this.taskExecutionRepository = taskExecutionRepository;
@@ -127,6 +139,8 @@ public class DefaultTaskService implements TaskService {
 		this.taskLauncher = taskLauncher;
 		this.resourceLoader = resourceLoader;
 		this.whitelistProperties = new WhitelistProperties(metaDataResolver);
+		this.composedTaskProperties = composedTaskProperties;
+		this.deploymentIdRepository = deploymentIdRepository;
 	}
 
 	@Override
@@ -217,5 +231,78 @@ public class DefaultTaskService implements TaskService {
 		return builder.build();
 	}
 
+	@Override
+	public void saveTaskDefinition(String name, String dsl) {
+		TaskParser taskParser = new TaskParser(name,
+				dsl, true, true);
+		TaskNode taskNode = taskParser.parse();
+		if(taskNode.isComposed()) {
+			//Create the child task definitions needed for the composed task
+			taskNode.getTaskApps().stream().forEach(task -> {
+				//Add arguments to child task definitions
+				String generatedTaskDSL = task.getName() +
+						task.getArguments().entrySet().stream()
+						.map(argument->String.format(" --%s=%s",
+								argument.getKey() ,argument.getValue()))
+				.collect(Collectors.joining());
+				TaskDefinition composedTaskDefinition = new TaskDefinition(
+						task.getExecutableDSLName(), generatedTaskDSL);
+				saveStandardTaskDefinition(composedTaskDefinition);
+			});
+			taskDefinitionRepository.save(
+					new TaskDefinition(
+							name,
+							createComposedTaskDefinition(
+									taskNode.toExecutableDSL())));
+		}
+		else {
+			saveStandardTaskDefinition(new TaskDefinition(name, dsl));
+		}
+
+	}
+
+	private void saveStandardTaskDefinition(TaskDefinition taskDefinition) {
+		String appName = taskDefinition.getRegisteredAppName();
+		if (registry.find(appName, ApplicationType.task) == null) {
+			throw new IllegalArgumentException(String.format(
+					"Application name '%s' with type '%s' does not exist in the app registry.",
+					appName, ApplicationType.task));
+		}
+		taskDefinitionRepository.save(taskDefinition);
+	}
+
+	private String createComposedTaskDefinition(String graph) {
+		return String.format("%s --graph=\"%s\"",
+				composedTaskProperties.getTaskName(), graph);
+	}
+
+	@Override
+	public void deleteTaskDefinition(String name) {
+		TaskDefinition taskDefinition = taskDefinitionRepository.findOne(name);
+		if (taskDefinition == null) {
+			throw new NoSuchTaskDefinitionException(name);
+		}
+		//if composed-task-runner definition then destroy all child tasks associated with it.
+		if(taskDefinition.getDslText().startsWith(composedTaskProperties.getTaskName()))
+		{
+			String childTaskPrefix = String.format("_%s_",name);
+			taskDefinitionRepository.findAll().forEach(
+					childDefinition -> {
+						if(childDefinition.getName().startsWith(childTaskPrefix)) {
+							destroyTask(childDefinition.getName());
+						}
+					}
+			);
+		}
+		//destroy normal task or composed-task
+		destroyTask(name);
+	}
+
+	private void destroyTask(String name) {
+		TaskDefinition taskDefinition = taskDefinitionRepository.findOne(name);
+		taskLauncher.destroy(name);
+		deploymentIdRepository.delete(DeploymentKey.forTaskDefinition(taskDefinition));
+		taskDefinitionRepository.delete(name);
+	}
 
 }

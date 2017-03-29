@@ -168,9 +168,9 @@ public class DataFlowControllerAutoConfiguration {
 	public TaskDefinitionController taskDefinitionController(
 			TaskDefinitionRepository repository,
 			DeploymentIdRepository deploymentIdRepository,
-			TaskLauncher taskLauncher, AppRegistry appRegistry) {
+			TaskLauncher taskLauncher, AppRegistry appRegistry, TaskService taskService) {
 		return new TaskDefinitionController(repository, deploymentIdRepository,
-				taskLauncher, appRegistry);
+				taskLauncher, appRegistry, taskService);
 	}
 
 	@Bean
