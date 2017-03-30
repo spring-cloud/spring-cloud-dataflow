@@ -213,7 +213,7 @@ public class TaskNode extends AstNode {
 	
 	static class ExecutableDSLVisitor extends TaskVisitor {
 
-		private final String PREFIX = "_";
+		private final String EXECUTABLE_DSL_JOIN_CHAR = "_";
 		
 		private StringBuilder dsl = new StringBuilder();
 		
@@ -294,7 +294,7 @@ public class TaskNode extends AstNode {
 
 		private String toExecutableDSLTaskName(TaskAppNode taskApp) {
 			StringBuilder taskDefName = new StringBuilder();
-			taskDefName.append(PREFIX).append(taskName).append(".");
+			taskDefName.append(EXECUTABLE_DSL_JOIN_CHAR).append(taskName).append(EXECUTABLE_DSL_JOIN_CHAR);
 			if (taskApp.hasLabel()) {
 				taskDefName.append(taskApp.getLabelString());
 			}

@@ -86,13 +86,6 @@ public class TaskParser extends AppParser {
 
 	public TaskNode parse() {
 		List<LabelledTaskNode> sequences = eatSequences();
-		boolean nameIsInDSL = sequences.size() != 0 &&  sequences.get(0).getLabelString() != null;
-		if (nameIsInDSL) {
-			String name = sequences.get(0).getLabelString();
-			if (!isValidName(name)) {
-				throw new ParseException(name, 0, DSLMessage.ILLEGAL_TASK_NAME, name);
-			}
-		}
 		if (taskName != null && !isValidName(taskName)) {
 			throw new ParseException(taskName, 0, DSLMessage.ILLEGAL_TASK_NAME, taskName);
 		}

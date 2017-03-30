@@ -29,7 +29,8 @@ import org.springframework.util.Assert;
  */
 public class TaskApp {
 
-	private final static String PREFIX = "_";
+	// Used when building the executable dsl name for a task app
+	private final static String EXECUTABLE_DSL_JOIN_CHAR = "_";
 	
 	private String taskDefinitionName;
 	
@@ -80,7 +81,7 @@ public class TaskApp {
 
 	public String getExecutableDSLName() {
 		StringBuilder s = new StringBuilder();
-		s.append(PREFIX).append(taskDefinitionName).append(".");
+		s.append(EXECUTABLE_DSL_JOIN_CHAR).append(taskDefinitionName).append(EXECUTABLE_DSL_JOIN_CHAR);
 		s.append(label==null?name:label);
 		return s.toString();
 	}

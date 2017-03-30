@@ -310,51 +310,51 @@ public class TaskParserTests {
 		TaskNode ctn = parse("foo","appA && appB",true);
 		List<TaskApp> taskApps = ctn.getTaskApps();
 		assertEquals("appA",taskApps.get(0).getName());
-		assertEquals("_foo.appA",taskApps.get(0).getExecutableDSLName());
+		assertEquals("_foo_appA",taskApps.get(0).getExecutableDSLName());
 		assertEquals("appB",taskApps.get(1).getName());
-		assertEquals("_foo.appB",taskApps.get(1).getExecutableDSLName());
+		assertEquals("_foo_appB",taskApps.get(1).getExecutableDSLName());
 		
 		ctn = parse("bar","appC && goo: appC",true);
 		taskApps = ctn.getTaskApps();
 		assertEquals("appC",taskApps.get(0).getName());
-		assertEquals("_bar.appC",taskApps.get(0).getExecutableDSLName());
+		assertEquals("_bar_appC",taskApps.get(0).getExecutableDSLName());
 		assertEquals("appC",taskApps.get(1).getName());
-		assertEquals("_bar.goo",taskApps.get(1).getExecutableDSLName());
+		assertEquals("_bar_goo",taskApps.get(1).getExecutableDSLName());
 
 		// flows
-		assertEquals("_foo.appA",parse("foo","appA",true).toExecutableDSL());
-		assertEquals("_foo.appA && _foo.appB",parse("foo","appA && appB",true).toExecutableDSL());
-		assertEquals("_foo.appA && _foo.appB && _foo.appC",parse("foo","appA && appB && appC",true).toExecutableDSL());
+		assertEquals("_foo_appA",parse("foo","appA",true).toExecutableDSL());
+		assertEquals("_foo_appA && _foo_appB",parse("foo","appA && appB",true).toExecutableDSL());
+		assertEquals("_foo_appA && _foo_appB && _foo_appC",parse("foo","appA && appB && appC",true).toExecutableDSL());
 
-		assertTaskApps("foo","appA","_foo.appA");
-		assertTaskApps("foo","appA && appB","_foo.appA","_foo.appB");
-		assertTaskApps("foo","appA && appB && appC","_foo.appA","_foo.appB","_foo.appC");
+		assertTaskApps("foo","appA","_foo_appA");
+		assertTaskApps("foo","appA && appB","_foo_appA","_foo_appB");
+		assertTaskApps("foo","appA && appB && appC","_foo_appA","_foo_appB","_foo_appC");
 		
 		// arguments
-		assertEquals("_foo.appA",parse("foo","appA --p1=v1 --p2=v2",true).toExecutableDSL());
-		assertEquals("_foo.appA && _foo.appB",parse("foo","appA --p2=v2 && appB --p3=v3",true).toExecutableDSL());
-		assertTaskApps("foo","appA --p1=v2","_foo.appA:p1=v2");
-		assertTaskApps("foo","appA --p1=v2 && goo: appB --p2=v2","_foo.appA:p1=v2","_foo.goo:p2=v2");
-		assertTaskApps("foo","appA 0->x:appA --p1=v1","_foo.appA","_foo.x:p1=v1");
+		assertEquals("_foo_appA",parse("foo","appA --p1=v1 --p2=v2",true).toExecutableDSL());
+		assertEquals("_foo_appA && _foo_appB",parse("foo","appA --p2=v2 && appB --p3=v3",true).toExecutableDSL());
+		assertTaskApps("foo","appA --p1=v2","_foo_appA:p1=v2");
+		assertTaskApps("foo","appA --p1=v2 && goo: appB --p2=v2","_foo_appA:p1=v2","_foo_goo:p2=v2");
+		assertTaskApps("foo","appA 0->x:appA --p1=v1","_foo_appA","_foo_x:p1=v1");
 		
 		// labels
-		assertEquals("_bar.goo",parse("bar","goo:appA",true).toExecutableDSL());
-		assertEquals("_fo.aaa && _fo.bbb",parse("fo","aaa: appA && bbb: appA",true).toExecutableDSL());
+		assertEquals("_bar_goo",parse("bar","goo:appA",true).toExecutableDSL());
+		assertEquals("_fo_aaa && _fo_bbb",parse("fo","aaa: appA && bbb: appA",true).toExecutableDSL());
 
-		assertTaskApps("bar","goo:appA","_bar.goo");
-		assertTaskApps("bar","appA && goo: appA","_bar.appA","_bar.goo");
+		assertTaskApps("bar","goo:appA","_bar_goo");
+		assertTaskApps("bar","appA && goo: appA","_bar_appA","_bar_goo");
 
 		// transitions
-		assertEquals("_foo.appA 'c'->_foo.appC && _foo.appB",parse("foo","appA 'c'->appC && appB",true).toExecutableDSL());
-		assertEquals("_foo.appA 'c'->_foo.appC 'd'->_foo.appD && _foo.appB",parse("foo","appA 'c'->appC 'd'->appD && appB",true).toExecutableDSL());
-		assertEquals("_foo.appA 1->_foo.appC 2->_foo.appD && _foo.appB",parse("foo","appA 1->appC 2->appD && appB",true).toExecutableDSL());
-		assertEquals("_foo.aaa 1->_foo.appC 2->:aaa",parse("foo","aaa: appA 1->appC 2->:aaa",true).toExecutableDSL());
+		assertEquals("_foo_appA 'c'->_foo_appC && _foo_appB",parse("foo","appA 'c'->appC && appB",true).toExecutableDSL());
+		assertEquals("_foo_appA 'c'->_foo_appC 'd'->_foo_appD && _foo_appB",parse("foo","appA 'c'->appC 'd'->appD && appB",true).toExecutableDSL());
+		assertEquals("_foo_appA 1->_foo_appC 2->_foo_appD && _foo_appB",parse("foo","appA 1->appC 2->appD && appB",true).toExecutableDSL());
+		assertEquals("_foo_aaa 1->_foo_appC 2->:aaa",parse("foo","aaa: appA 1->appC 2->:aaa",true).toExecutableDSL());
 
 		// splits
-		assertEquals("<_foo.appA || _foo.appB>",parse("foo","<appA || appB>",true).toExecutableDSL());
-		assertEquals("<_foo.appA || _foo.appB && _foo.appC>",parse("foo","<appA || appB && appC>",true).toExecutableDSL());
-		assertEquals("<<_foo.appA && _foo.appD || _foo.appE> || _foo.appB>",parse("foo","<<appA && appD || appE> || appB>",true).toExecutableDSL());
-		assertEquals("<<_foo.appA || _foo.x> || _foo.appB>",parse("foo","<<appA || x: appA> || appB>",true).toExecutableDSL());
+		assertEquals("<_foo_appA || _foo_appB>",parse("foo","<appA || appB>",true).toExecutableDSL());
+		assertEquals("<_foo_appA || _foo_appB && _foo_appC>",parse("foo","<appA || appB && appC>",true).toExecutableDSL());
+		assertEquals("<<_foo_appA && _foo_appD || _foo_appE> || _foo_appB>",parse("foo","<<appA && appD || appE> || appB>",true).toExecutableDSL());
+		assertEquals("<<_foo_appA || _foo_x> || _foo_appB>",parse("foo","<<appA || x: appA> || appB>",true).toExecutableDSL());
 	}
 	
 	@Test
