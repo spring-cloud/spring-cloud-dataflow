@@ -96,7 +96,7 @@ public class StreamCommands implements CommandMarker {
 		LinkedHashMap<String, Object> headers = new LinkedHashMap<>();
 		headers.put("name", "Stream Name");
 		headers.put("dslText", "Stream Definition");
-		headers.put("status", "Status");
+		headers.put("statusDescription", "Status");
 		BeanListTableModel<StreamDefinitionResource> model = new BeanListTableModel<>(streams, headers);
 		return DataFlowTables.applyStyle(new TableBuilder(model))
 				.build();
