@@ -21,7 +21,10 @@ import org.springframework.hateoas.Link;
 import org.springframework.web.client.RestTemplate;
 
 /**
- * Created by ericbottard on 27/03/2017.
+ * Implementation of {@link AboutOperations} that uses {@link RestTemplate}
+ * to issue commands to the Data Flow server.
+ *
+ * @author Eric Bottard
  */
 public class AboutTemplate implements AboutOperations {
 

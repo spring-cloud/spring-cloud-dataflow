@@ -81,6 +81,7 @@ import org.springframework.web.client.RestTemplate;
  * @author Ilayaperumal Gopinathan
  * @author Gary Russell
  * @author Mark Pollack
+ * @author Eric Bottard
  */
 @Component
 @Configuration
