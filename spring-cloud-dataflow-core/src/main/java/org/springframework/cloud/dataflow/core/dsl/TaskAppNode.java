@@ -16,22 +16,34 @@
 
 package org.springframework.cloud.dataflow.core.dsl;
 
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
- * Common AST base class for nodes representing job definitions or job references.
+ * Represents either a task application or task definition reference. Task application references
+ * can have arguments.
  *
  * @author Andy Clement
  */
-public class TaskAppNode extends LabelledComposedTaskNode {
+public class TaskAppNode extends LabelledTaskNode {
 
 	private Token taskName;
 	
+	private ArgumentNode[] arguments;
+	
+	private Map<String,String> argumentsMap;
+	
 	private List<TransitionNode> transitions;
-
-	TaskAppNode(Token taskName, List<TransitionNode> transitions) {
-		super(taskName.startPos, (transitions == null || transitions.isEmpty())?taskName.endPos:transitions.get(transitions.size()-1).endPos);
+	
+	TaskAppNode(Token taskName, ArgumentNode[] arguments, List<TransitionNode> transitions) {
+		super(taskName.startPos, 
+				(transitions == null || transitions.isEmpty())?
+						arguments==null || arguments.length==0?taskName.endPos:arguments[arguments.length-1].endPos:
+						transitions.get(transitions.size()-1).endPos);
 		this.taskName = taskName;
+		this.arguments = arguments;
 		this.transitions = transitions;
 	}
 
@@ -60,6 +72,29 @@ public class TaskAppNode extends LabelledComposedTaskNode {
 	public String getName() {
 		return taskName.stringValue();
 	}
+	
+	public boolean hasArguments() {
+		return arguments != null && arguments.length != 0;
+	}
+	
+	public ArgumentNode[] getArguments() {
+		return arguments;
+	}
+	
+	public Map<String,String> getArgumentsAsMap() {
+		if (argumentsMap == null) {
+			if (arguments == null || arguments.length == 0) {
+				argumentsMap = Collections.emptyMap();
+			}
+			else {
+				argumentsMap = new LinkedHashMap<String,String>();
+				for (ArgumentNode argument: arguments) {
+					argumentsMap.put(argument.getName(), argument.getValue());
+				}
+			}
+		}
+		return argumentsMap;
+	}
 
 	@Override
 	public String stringify(boolean includePositionInfo) {
@@ -68,6 +103,14 @@ public class TaskAppNode extends LabelledComposedTaskNode {
 			s.append(getLabelString()).append(": ");
 		}
 		s.append(getName());
+		if (arguments != null) {
+			for (ArgumentNode argument: arguments) {
+				s.append(" ").append("--").append(argument.getName()).append("=").append(argument.getValue());
+			}
+		}
+		if (includePositionInfo) {
+			s.append(":").append(startPos).append(">").append(endPos);
+		}
 		s.append(" ");
 		for (int i=0;i<transitions.size();i++) {
 			TransitionNode t = transitions.get(i);
@@ -80,7 +123,7 @@ public class TaskAppNode extends LabelledComposedTaskNode {
 	}
 
 	@Override
-	public void accept(ComposedTaskVisitor visitor) {
+	public void accept(TaskVisitor visitor) {
 		boolean cont = visitor.preVisit(this);
 		if (!cont) {
 			return;
@@ -92,4 +135,19 @@ public class TaskAppNode extends LabelledComposedTaskNode {
 		visitor.postVisit(this);
 	}
 
+	public String toDslText() {
+		StringBuilder s = new StringBuilder();
+		if (getLabel() != null) {
+			s.append(getLabelString()).append(": ");
+		}
+		s.append(taskName.stringValue());
+		if (getArgumentsAsMap().size() != 0) {
+			s.append(" ");
+			for (Map.Entry<String, String> argument: argumentsMap.entrySet()) {
+				s.append("--").append(argument.getKey()).append("=").append(argument.getValue());
+			}
+		}
+		return s.toString();
+	}
+	
 }

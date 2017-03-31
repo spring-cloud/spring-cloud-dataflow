@@ -20,7 +20,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.cloud.dataflow.core.dsl.ArgumentNode;
-import org.springframework.cloud.dataflow.core.dsl.AppNode;
+import org.springframework.cloud.dataflow.core.dsl.TaskAppNode;
+import org.springframework.cloud.dataflow.core.dsl.TaskNode;
 import org.springframework.cloud.dataflow.core.dsl.TaskParser;
 import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.core.style.ToStringCreator;
@@ -30,6 +31,7 @@ import org.springframework.util.Assert;
  * @author Michael Minella
  * @author Mark Fisher
  * @author Glenn Renfro
+ * @author Andy Clement
  */
 public class TaskDefinition extends DataFlowAppDefinition {
 
@@ -48,13 +50,19 @@ public class TaskDefinition extends DataFlowAppDefinition {
 	public TaskDefinition(String name, String dsl) {
 		this.dslText = dsl;
 		Map<String, String> properties = new HashMap<>();
-			AppNode taskNode = new TaskParser(name, dsl).parse();
-			setRegisteredAppName(taskNode.getName());
-			if (taskNode.hasArguments()) {
-				for (ArgumentNode argumentNode : taskNode.getArguments()) {
+		TaskNode taskNode = new TaskParser(name, dsl, true, true).parse();
+		if (taskNode.isComposed()) {
+			setRegisteredAppName(name);
+		}
+		else {
+			TaskAppNode singleTaskApp = taskNode.getTaskApp();
+			setRegisteredAppName(singleTaskApp.getName());
+			if (singleTaskApp.hasArguments()) {
+				for (ArgumentNode argumentNode : singleTaskApp.getArguments()) {
 					properties.put(argumentNode.getName(), argumentNode.getValue());
 				}
 			}
+		}
 		properties.put(SPRING_CLOUD_TASK_NAME, name);
 		this.appDefinition = new AppDefinition(name, properties);
 	}

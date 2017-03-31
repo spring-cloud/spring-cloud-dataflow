@@ -19,7 +19,7 @@ package org.springframework.cloud.dataflow.core.dsl;
 /**
  * Enumeration of all the token types that may be found in a DSL definition stream. DSL variants
  * may use some subset of these tokens. For example stream DSL doesn't use the LT token, it is
- * used by the composed task DSL. The tokenizer in use will decide which subset are built
+ * used by the task DSL. The tokenizer in use will decide which subset are built
  * for a particular DSL.
  *
  * @author Andy Clement
