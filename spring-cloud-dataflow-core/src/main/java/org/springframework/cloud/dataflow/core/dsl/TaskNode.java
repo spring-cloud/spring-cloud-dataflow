@@ -214,6 +214,10 @@ public class TaskNode extends AstNode {
 	static class ExecutableDSLVisitor extends TaskVisitor {
 
 		private final String EXECUTABLE_DSL_JOIN_CHAR = "_";
+		private final static int START_OF_FLOW=0;
+		private final static int START_OF_SPLIT=1;
+		private final static int IN_FLOW=2;
+		private final static int IN_SPLIT=3;
 		
 		private StringBuilder dsl = new StringBuilder();
 		
@@ -221,11 +225,6 @@ public class TaskNode extends AstNode {
 		
 		private Stack<Integer> state = new Stack<>();
 
-		private int START_OF_FLOW=0;
-		private int START_OF_SPLIT=1;
-		private int IN_FLOW=2;
-		private int IN_SPLIT=3;
-		
 		@Override
 		public void startVisit(String taskName, String taskDSL) {
 			this.taskName = taskName;
@@ -252,6 +251,14 @@ public class TaskNode extends AstNode {
 
 		@Override
 		public boolean preVisit(SplitNode split) {
+			// Hitting a split at the start of a flow should also flip it from START to IN
+			if (state.peek() == START_OF_FLOW) {
+				state.pop();
+				state.push(IN_FLOW);
+			}
+			else if (state.peek() == IN_FLOW) {
+				dsl.append(" && ");
+			}
 			state.push(START_OF_SPLIT);
 			dsl.append("<");
 			return true;
@@ -311,12 +318,20 @@ public class TaskNode extends AstNode {
 	}
 	
 	/**
-	 * @return true if the dsl contained more than just a single task app/reference
+	 * @return true if the dsl contained more than just a single task app/reference or a single
+	 * task has transitions
 	 */
 	public boolean isComposed() {
-		return !(sequences.size() == 1 && sequences.get(0).isFlow() &&
+		// Is there just one task
+		boolean isOneTask = (sequences.size() == 1 && sequences.get(0).isFlow() &&
 				((FlowNode)sequences.get(0)).getSeriesLength() == 1 &&
 				((FlowNode)sequences.get(0)).getSeriesElement(0).isTaskApp());
+		if (!isOneTask) {
+			return true;
+		}
+		// Does the one task have transitions?
+		TaskAppNode singleNode = (TaskAppNode)(((FlowNode)sequences.get(0)).getSeriesElement(0));
+		return singleNode.hasTransitions();
 	}
 	
 	/**
@@ -324,7 +339,7 @@ public class TaskNode extends AstNode {
 	 * 	null if it is a composed task
 	 */
 	public TaskAppNode getTaskApp() {
-		return (isComposed()?null:(TaskAppNode)((FlowNode)sequences.get(0)).getSeriesElement(0));
+		return (isComposed()?null:(TaskAppNode)(((FlowNode)sequences.get(0)).getSeriesElement(0)));
 	}
 	
 	public String toString() {

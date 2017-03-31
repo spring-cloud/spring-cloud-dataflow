@@ -16,11 +16,7 @@
 
 package org.springframework.cloud.dataflow.core.dsl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 import static org.springframework.cloud.dataflow.core.dsl.TokenKind.ANDAND;
 import static org.springframework.cloud.dataflow.core.dsl.TokenKind.ARROW;
 import static org.springframework.cloud.dataflow.core.dsl.TokenKind.CLOSE_PAREN;
@@ -355,7 +351,27 @@ public class TaskParserTests {
 		assertEquals("<_foo_appA || _foo_appB && _foo_appC>",parse("foo","<appA || appB && appC>",true).toExecutableDSL());
 		assertEquals("<<_foo_appA && _foo_appD || _foo_appE> || _foo_appB>",parse("foo","<<appA && appD || appE> || appB>",true).toExecutableDSL());
 		assertEquals("<<_foo_appA || _foo_x> || _foo_appB>",parse("foo","<<appA || x: appA> || appB>",true).toExecutableDSL());
+		
+		// splits and flows
+		assertEquals("_foo_AAA && _foo_FFF 'FAILED'->_foo_EEE && <_foo_BBB || _foo_CCC> && _foo_DDD",parse("foo","AAA && FFF 'FAILED' -> EEE && <BBB||CCC> && DDD",true).toExecutableDSL());
+		assertTaskApps("foo","AAA && FFF 'FAILED' -> EEE && <BBB||CCC> && DDD","_foo_AAA","_foo_FFF","_foo_EEE","_foo_BBB","_foo_CCC","_foo_DDD");
+		assertEquals("<_test_A || _test_B> && <_test_C || _test_D>",parse("<A || B> && <C||D>",true).toExecutableDSL());
+		assertEquals("<_test_A || _test_B || _test_C> && <_test_D || _test_E>",parse("<A || B || C> && <D||E>",true).toExecutableDSL());
+		assertEquals("<_test_A || _test_B || _test_C> && _test_D",parse("<A || B || C> && D",true).toExecutableDSL());
+		assertEquals("<_test_A || <_test_B && _test_C || _test_D>>",parse("<A || <B && C || D>>",true).toExecutableDSL());
+		assertEquals("<_test_A || <_test_B || _test_D && _test_E>>",parse("<A || <B || D && E>>",true).toExecutableDSL());
 	}
+	
+	@Test
+	public void isComposedTask() {
+		ctn = parse("appA 'foo' -> appB");
+		assertTrue(ctn.isComposed());
+		assertNull(ctn.getTaskApp());
+		assertGraph("[0:START][1:appA][2:appB][3:END][0-1]['foo':1-2][1-3][2-3]", "appA 'foo' -> appB");
+		ctn = parse("appA");
+		assertFalse(ctn.isComposed());
+		assertNotNull(ctn.getTaskApp());
+	}	
 	
 	@Test
 	public void basics() {
