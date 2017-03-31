@@ -25,7 +25,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-import org.springframework.cloud.dataflow.rest.resource.DeploymentStatus;
+import org.springframework.cloud.dataflow.rest.resource.StreamDeploymentStatus;
 import org.springframework.shell.core.CommandResult;
 import org.springframework.shell.core.JLineShellComponent;
 import org.springframework.shell.table.Table;
@@ -168,7 +168,7 @@ public class StreamCommandTemplate {
 
 		Table table = (org.springframework.shell.table.Table) cr.getResult();
 		TableModel model = table.getModel();
-		Collection<String> statuses = deployed ? Arrays.asList(DeploymentStatus.DEPLOYED.getKey(), DeploymentStatus.DEPLOYING.getKey()) : Arrays.asList(DeploymentStatus.UNDEPLOYED.getKey());
+		Collection<String> statuses = deployed ? Arrays.asList(StreamDeploymentStatus.DEPLOYED.getKey(), StreamDeploymentStatus.DEPLOYING.getKey()) : Arrays.asList(StreamDeploymentStatus.UNDEPLOYED.getKey());
 		for (int row = 0; row < model.getRowCount(); row++) {
 			if (streamName.equals(model.getValue(row, 0))
 					&& definition.replace("\\\\", "\\").equals(model.getValue(row, 1))

@@ -38,7 +38,7 @@ import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.dsl.StreamNode;
 import org.springframework.cloud.dataflow.core.dsl.StreamParser;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
-import org.springframework.cloud.dataflow.rest.resource.DeploymentStatus;
+import org.springframework.cloud.dataflow.rest.resource.StreamDeploymentStatus;
 import org.springframework.cloud.dataflow.rest.resource.StreamDefinitionResource;
 import org.springframework.cloud.dataflow.server.DataFlowServerUtil;
 import org.springframework.cloud.dataflow.server.controller.support.ControllerUtils;
@@ -380,7 +380,7 @@ public class StreamDefinitionController {
 		@Override
 		public StreamDefinitionResource instantiateResource(StreamDefinition stream) {
 			final StreamDefinitionResource resource = new StreamDefinitionResource(stream.getName(), stream.getDslText());
-			final DeploymentStatus deploymentStatus = ControllerUtils.mapState(streamDeploymentStates.get(stream));
+			final StreamDeploymentStatus deploymentStatus = ControllerUtils.mapState(streamDeploymentStates.get(stream));
 			resource.setStatus(deploymentStatus.getKey());
 			resource.setStatusDescription(deploymentStatus.getDescription());
 			return resource;

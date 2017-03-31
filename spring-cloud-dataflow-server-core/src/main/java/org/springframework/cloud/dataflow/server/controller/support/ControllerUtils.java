@@ -15,7 +15,7 @@
  */
 package org.springframework.cloud.dataflow.server.controller.support;
 
-import org.springframework.cloud.dataflow.rest.resource.DeploymentStatus;
+import org.springframework.cloud.dataflow.rest.resource.StreamDeploymentStatus;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.util.Assert;
 
@@ -27,14 +27,14 @@ import org.springframework.util.Assert;
 public class ControllerUtils {
 
 	/**
-	 * Maps the {@link DeploymentState} from the Deployer SPI to a {@link DeploymentStatus}
+	 * Maps the {@link DeploymentState} from the Deployer SPI to a {@link StreamDeploymentStatus}
 	 * which is used by the REST API.
 	 *
 	 * @param state Must not be null
-	 * @return a DeploymentStatus, never null
+	 * @return a StreamDeploymentStatus, never null
 	 */
-	public static DeploymentStatus mapState(DeploymentState state) {
-		DeploymentStatus result = DeploymentStatus.fromKey(state.name());
+	public static StreamDeploymentStatus mapState(DeploymentState state) {
+		StreamDeploymentStatus result = StreamDeploymentStatus.fromKey(state.name());
 		Assert.notNull(result, "Trying to display a DeploymentState that should not appear here: " + state);
 		return result;
 	}

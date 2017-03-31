@@ -21,12 +21,14 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 
 /**
  * Provides a typed enumeration of deployment statuses for Streams.
+ * Currently, this class is used more as a helper class, and is not serialized
+ * via the REST API as of now, this may change however with the next major release.
  *
  * @author Gunnar Hillert
  *
  */
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
-public enum DeploymentStatus {
+public enum StreamDeploymentStatus {
 
 	DEPLOYING("deploying", "Deploying" ,"The app or group is being deployed."),
 	DEPLOYED("deployed", "Deployed", "All apps have been successfully deployed"),
@@ -43,7 +45,7 @@ public enum DeploymentStatus {
 	/**
 	 * Constructor.
 	 */
-	DeploymentStatus(final String key, final String displayName, final String description) {
+	StreamDeploymentStatus(final String key, final String displayName, final String description) {
 		this.key = key;
 		this.displayName = displayName;
 		this.description = description;
@@ -61,11 +63,11 @@ public enum DeploymentStatus {
 		return description;
 	}
 
-	public static DeploymentStatus fromKey(String deploymentStatusKey) {
+	public static StreamDeploymentStatus fromKey(String deploymentStatusKey) {
 
 		Assert.hasText(deploymentStatusKey, "Parameter deploymentStatusKey must not be null or empty.");
 
-		for (DeploymentStatus deploymentStatus : DeploymentStatus.values()) {
+		for (StreamDeploymentStatus deploymentStatus : StreamDeploymentStatus.values()) {
 			if (deploymentStatus.getKey().equals(deploymentStatusKey)) {
 				return deploymentStatus;
 			}

@@ -36,7 +36,7 @@ public class DeploymentStatusSerializationTests {
 
 		final ObjectMapper objectMapper = new ObjectMapper();
 
-		final DeploymentStatus deploymentStatus = DeploymentStatus.DEPLOYED;
+		final StreamDeploymentStatus deploymentStatus = StreamDeploymentStatus.DEPLOYED;
 		final String result = objectMapper.writeValueAsString(deploymentStatus);
 
 		final DocumentContext documentContext = JsonPath.parse(result);
