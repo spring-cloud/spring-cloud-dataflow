@@ -282,25 +282,7 @@ public class TaskParserTests {
 			assertEquals(taskName, e.getInserts()[0]);
 		}
 	}
-
-//			private void checkForParseError(String task, DSLMessage msg, int pos, Object... inserts) {
-//				try {
-//					AppNode sn = parse(task);
-//					fail("expected to fail but parsed " + sn.stringify());
-//				}
-//				catch (ParseException e) {
-//					assertEquals(msg, e.getMessageCode());
-//					assertEquals(pos, e.getPosition());
-//					if (inserts != null) {
-//						for (int i = 0; i < inserts.length; i++) {
-//							assertEquals(inserts[i], e.getInserts()[i]);
-//						}
-//					}
-//				}
-//			}
-//			
-			
-			//----=-=-=-=-=-=-=-=-	
+	
 	@Test
 	public void executableDsl() {
 		TaskNode ctn = parse("foo","appA && appB",true);
@@ -360,8 +342,25 @@ public class TaskParserTests {
 		assertEquals("<_test_A || _test_B || _test_C> && _test_D",parse("<A || B || C> && D",true).toExecutableDSL());
 		assertEquals("<_test_A || <_test_B && _test_C || _test_D>>",parse("<A || <B && C || D>>",true).toExecutableDSL());
 		assertEquals("<_test_A || <_test_B || _test_D && _test_E>>",parse("<A || <B || D && E>>",true).toExecutableDSL());
+		
+		ctn = parse("AAA 0->BBB");
+		List<TransitionNode> transitions = ((TaskAppNode)((FlowNode)ctn.getSequences().get(0)).getSeriesElement(0)).getTransitions();
+		assertEquals("0",transitions.get(0).getStatusToCheckInDSLForm());
+		
+		ctn = parse("AAA '0'->BBB");
+		transitions = ((TaskAppNode)((FlowNode)ctn.getSequences().get(0)).getSeriesElement(0)).getTransitions();
+		assertEquals("'0'",transitions.get(0).getStatusToCheckInDSLForm());
+
+		ctn = parse("AAA *->BBB '*'->CCC");
+		transitions = ((TaskAppNode)((FlowNode)ctn.getSequences().get(0)).getSeriesElement(0)).getTransitions();
+		assertEquals("*",transitions.get(0).getStatusToCheckInDSLForm());
+		assertEquals("'*'",transitions.get(1).getStatusToCheckInDSLForm());
+
+		assertEquals("_test_AAA 'failed'->_test_BBB *->_test_CCC",parse("AAA 'failed' -> BBB * -> CCC").toExecutableDSL());
+		assertEquals("_test_AAA 'failed'->_test_BBB '*'->_test_CCC",parse("AAA 'failed' -> BBB '*' -> CCC").toExecutableDSL());
+		assertEquals("_test_AAA 1->_test_BBB 2->_test_CCC",parse("AAA 1 -> BBB 2 -> CCC").toExecutableDSL());
 	}
-	
+
 	@Test
 	public void isComposedTask() {
 		ctn = parse("appA 'foo' -> appB");

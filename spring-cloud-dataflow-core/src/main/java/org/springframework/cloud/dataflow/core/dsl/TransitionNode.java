@@ -143,17 +143,6 @@ public class TransitionNode extends AstNode {
 	}
 
 	/**
-	 * Basic names do not need wrapping in quotes but special characters, like
-	 * asterisk do. This returns the state name in a form suitable for inclusion
-	 * in DSL text (so with the quotes if that's how it was specified
-	 * when the Transition object was built).
-	 * @return the transition name suitable for inclusion in the DSL
-	 */
-	public String getStateNameInDSLForm() {
-		return statusToken.data;
-	}
-
-	/**
 	 * Some target names for a transition are 'well known' like $FAIL and $END - these
 	 * do not indicate a following job step, they instead indicate a termination state.
 	 * @return true if the target of this transition is a special state ($FAIL/$END)

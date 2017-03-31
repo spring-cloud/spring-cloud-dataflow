@@ -498,11 +498,11 @@ public class GraphGeneratorVisitor extends TaskVisitor {
 			if (transition.isSpecialTransition()) {
 				if (transition.isFailTransition()) {
 					Node failNode = findOrMakeNode("$FAIL");
-					addLink(new Link(currentTaskAppId, failNode.id, transition.getStateNameInDSLForm()));
+					addLink(new Link(currentTaskAppId, failNode.id, transition.getStatusToCheckInDSLForm()));
 				}
 				else if (transition.isEndTransition()) {
 					Node endNode = findOrMakeNode("$END");
-					addLink(new Link(currentTaskAppId, endNode.id, transition.getStateNameInDSLForm()));
+					addLink(new Link(currentTaskAppId, endNode.id, transition.getStatusToCheckInDSLForm()));
 				}
 			}
 			else {

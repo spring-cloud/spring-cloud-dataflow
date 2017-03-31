@@ -288,7 +288,7 @@ public class TaskNode extends AstNode {
 			List<TransitionNode> transitions = taskApp.getTransitions();
 			for (TransitionNode transition: transitions) {
 				dsl.append(" ");
-				dsl.append(transition.getStateNameInDSLForm());
+				dsl.append(transition.getStatusToCheckInDSLForm());
 				dsl.append("->");
 				if (transition.isTargetApp()) {
 					dsl.append(toExecutableDSLTaskName(transition.getTargetApp()));
