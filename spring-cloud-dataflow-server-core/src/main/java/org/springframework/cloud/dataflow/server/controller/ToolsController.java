@@ -17,15 +17,18 @@
  */
 package org.springframework.cloud.dataflow.server.controller;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.cloud.dataflow.core.dsl.ParseException;
 import org.springframework.cloud.dataflow.core.dsl.TaskParser;
 import org.springframework.cloud.dataflow.core.dsl.graph.Graph;
+import org.springframework.cloud.dataflow.rest.resource.TaskDslResource;
+import org.springframework.cloud.dataflow.rest.resource.TaskGraphResource;
+import org.springframework.hateoas.mvc.ResourceAssemblerSupport;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -37,55 +40,101 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/tools")
 public class ToolsController {
 	
-	private final static String COMPOSED_TASK_NAME_KEY = "name";
+	private TaskGraphAssembler taskGraphAssembler = new TaskGraphAssembler();
 	
-	private final static String COMPOSED_TASK_DSL_TEXT_KEY = "dsl";
-
-	private final static String RESULT_GRAPH_KEY = "graph";
+	private TaskDslAssembler taskDslAssembler = new TaskDslAssembler();
 	
-	private final static String RESULT_ERROR_KEY = "error";
-	
-	private final static String RESULT_DSL_TEXT_KEY = "text";
-
 	/**
-	 * Parse a single task definition into a graph structure. The definition map is expected to have
+	 * Parse a task definition into a graph structure. The definition map is expected to have
 	 * a 'dsl' key containing the composed task DSL and optionally a 'name' key indicating the name of the
 	 * composed task.
 	 * 
 	 * @return a map with either a 'graph' or 'error' key set 
 	 */
-	@RequestMapping(value = "/parseTaskTextToGraph", method = RequestMethod.POST)
-	public Map<String, Object> parseTaskTextToGraph(@RequestBody Map<String, String> definition) {
-		Map<String, Object> response = new HashMap<>();
+	@RequestMapping(value = "/parseTaskTextToGraph", method = RequestMethod.GET)
+	public TaskGraphResource parseTaskTextToGraph(@RequestParam(value = "name", defaultValue = "__dummy") String name,
+			@RequestParam("definition") String dsl) {
+		Graph graph = null;
+		Map<String,Object> error = null;
 		try {
-			TaskParser taskParser = new TaskParser(definition.get(COMPOSED_TASK_NAME_KEY),
-				definition.get(COMPOSED_TASK_DSL_TEXT_KEY), true, true);
-			Graph graph = taskParser.parse().toGraph();
-			response.put(RESULT_GRAPH_KEY, graph);
+			TaskParser taskParser = new TaskParser(name, dsl, true, true);
+			graph = taskParser.parse().toGraph();
 		}
 		catch (ParseException pe) {
-			response.put(RESULT_ERROR_KEY, pe.toExceptionDescriptor());
+			error = pe.toExceptionDescriptor();
 		}
-		return response;
+		return taskGraphAssembler.toResource(new ParsedGraphOutput(graph,error));
 	}
 	
 	/**
 	 * Convert a graph format into DSL text format.
 	 */
-	@RequestMapping(value = "/convertTaskGraphToText", method = RequestMethod.POST)
-	public Map<String, Object> convertTaskGraphToText(@RequestBody Graph graph) {
-		Map<String, Object> response = new HashMap<>();
+	@RequestMapping(value = "/convertTaskGraphToText", method = RequestMethod.GET)
+	public TaskDslResource convertTaskGraphToText(@RequestBody Graph graph) {
+		String dsl = null;
+		Map<String,Object>  error = null;
 		try {
-			String dslText = graph.toDSLText();
-			response.put(RESULT_DSL_TEXT_KEY, dslText);
+			dsl = graph.toDSLText();
 		}
 		catch (ParseException pe) {
-			response.put("error", pe.toExceptionDescriptor());
+			error = pe.toExceptionDescriptor();
 		}
-		catch (Throwable e) {
-			response.put(RESULT_ERROR_KEY, e.toString());
+		return taskDslAssembler.toResource(new GraphToDslOutput(dsl, error));
+	}
+
+
+	private static class ParsedGraphOutput {
+		final Graph graph;
+		
+		final Map<String,Object> error;
+		
+		public ParsedGraphOutput(Graph graph, Map<String, Object> error) {
+			this.graph = graph;
+			this.error = error;
 		}
-		return response;
+	}
+
+	private static class GraphToDslOutput {
+		final String dsl;
+		
+		final Map<String,Object> error;
+		
+		public GraphToDslOutput(String dsl, Map<String, Object> error) {
+			this.dsl = dsl;
+			this.error = error;
+		}
+	}
+
+	/**
+	 * {@link org.springframework.hateoas.ResourceAssembler} implementation
+	 * that converts a {@link ParsedGraphOutput} to a {@link GraphResource}.
+	 */
+	static class TaskGraphAssembler extends ResourceAssemblerSupport<ParsedGraphOutput, TaskGraphResource> {
+
+		public TaskGraphAssembler() {
+			super(ToolsController.class, TaskGraphResource.class);
+		}
+
+		@Override
+		public TaskGraphResource toResource(ParsedGraphOutput graph) {
+			return new TaskGraphResource(graph.graph, graph.error);
+		}
+	}
+
+	/**
+	 * {@link org.springframework.hateoas.ResourceAssembler} implementation
+	 * that converts a {@link GraphToDslOutput} to a {@link TaskDslResource}.
+	 */
+	static class TaskDslAssembler extends ResourceAssemblerSupport<GraphToDslOutput, TaskDslResource> {
+
+		public TaskDslAssembler() {
+			super(ToolsController.class, TaskDslResource.class);
+		}
+
+		@Override
+		public TaskDslResource toResource(GraphToDslOutput output) {
+			return new TaskDslResource(output.dsl, output.error);
+		}
 	}
 
 }

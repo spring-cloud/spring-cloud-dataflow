@@ -36,7 +36,9 @@ import org.springframework.cloud.dataflow.rest.resource.StepExecutionResource;
 import org.springframework.cloud.dataflow.rest.resource.StreamDefinitionResource;
 import org.springframework.cloud.dataflow.rest.resource.StreamDeploymentResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskDefinitionResource;
+import org.springframework.cloud.dataflow.rest.resource.TaskDslResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionResource;
+import org.springframework.cloud.dataflow.rest.resource.TaskGraphResource;
 import org.springframework.cloud.dataflow.rest.resource.about.AboutResource;
 import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
 import org.springframework.hateoas.EntityLinks;
@@ -134,6 +136,12 @@ public class RootController {
 		root.add(new Link(completionStreamTemplated).withRel("completions/stream"));
 		String completionTaskTemplated = entityLinks.linkFor(CompletionProposalsResource.class).withSelfRel().getHref() + ("/task{?start,detailLevel}");
 		root.add(new Link(completionTaskTemplated).withRel("completions/task"));
+
+		// Should this be in the isTasksEnabled() block above? Why are the completions endpoints not guarded by feature checks?
+		String taskTextToGraphTemplated = entityLinks.linkFor(TaskGraphResource.class).withSelfRel().getHref() + ("/parseTaskTextToGraph{?name,definition}");
+		root.add(new Link(taskTextToGraphTemplated).withRel("tools/parseTaskTextToGraph"));
+		root.add(entityLinks.linkFor(TaskDslResource.class).withRel("tools/convertTaskGraphToText"));
+
 		return root;
 	}
 
