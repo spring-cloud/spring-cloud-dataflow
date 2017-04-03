@@ -51,7 +51,7 @@ import org.springframework.cloud.dataflow.server.repository.InMemoryDeploymentId
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.TaskService;
-import org.springframework.cloud.dataflow.server.service.impl.ComposedTaskProperties;
+import org.springframework.cloud.dataflow.server.service.impl.TaskConfigurationProperties;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskService;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.cloud.task.repository.TaskExplorer;
@@ -113,7 +113,7 @@ public class DefaultTaskServiceTests {
 						taskDefinitionRepository, taskExplorer,
 						taskExecutionRepository, appRegistry, resourceLoader,
 						taskLauncher, metadataResolver,
-						new ComposedTaskProperties(),
+						new TaskConfigurationProperties(),
 						new InMemoryDeploymentIdRepository());
 	}
 
@@ -163,7 +163,7 @@ public class DefaultTaskServiceTests {
 						mock(TaskDefinitionRepository.class), this.taskExplorer,
 						this.taskExecutionRepository, this.appRegistry,
 						this.resourceLoader, this.taskLauncher,
-						this.metadataResolver, new ComposedTaskProperties(),
+						this.metadataResolver, new TaskConfigurationProperties(),
 						new InMemoryDeploymentIdRepository());
 		try {
 			taskService.executeTask(TASK_NAME_ORIG, new HashMap<>(),

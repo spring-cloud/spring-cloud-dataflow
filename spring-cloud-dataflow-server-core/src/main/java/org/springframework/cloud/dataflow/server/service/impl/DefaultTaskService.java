@@ -95,7 +95,7 @@ public class DefaultTaskService implements TaskService {
 
 	private final WhitelistProperties whitelistProperties;
 
-	private final ComposedTaskProperties composedTaskProperties;
+	private final TaskConfigurationProperties taskConfigurationProperties;
 
 	private final DeploymentIdRepository deploymentIdRepository;
 
@@ -119,7 +119,7 @@ public class DefaultTaskService implements TaskService {
 			TaskRepository taskExecutionRepository, AppRegistry registry,
 			ResourceLoader resourceLoader, TaskLauncher taskLauncher,
 			ApplicationConfigurationMetadataResolver metaDataResolver,
-			ComposedTaskProperties composedTaskProperties,
+			TaskConfigurationProperties taskConfigurationProperties,
 			DeploymentIdRepository deploymentIdRepository) {
 		Assert.notNull(dataSourceProperties, "DataSourceProperties must not be null");
 		Assert.notNull(taskDefinitionRepository, "TaskDefinitionRepository must not be null");
@@ -129,7 +129,7 @@ public class DefaultTaskService implements TaskService {
 		Assert.notNull(resourceLoader, "ResourceLoader must not be null");
 		Assert.notNull(taskLauncher, "TaskLauncher must not be null");
 		Assert.notNull(metaDataResolver, "metaDataResolver must not be null");
-		Assert.notNull(composedTaskProperties, "composedTaskProperties must not be null");
+		Assert.notNull(taskConfigurationProperties, "taskConfigurationProperties must not be null");
 		Assert.notNull(deploymentIdRepository, "deploymentIdRepository must not be null");
 		this.dataSourceProperties = dataSourceProperties;
 		this.taskDefinitionRepository = taskDefinitionRepository;
@@ -139,7 +139,7 @@ public class DefaultTaskService implements TaskService {
 		this.taskLauncher = taskLauncher;
 		this.resourceLoader = resourceLoader;
 		this.whitelistProperties = new WhitelistProperties(metaDataResolver);
-		this.composedTaskProperties = composedTaskProperties;
+		this.taskConfigurationProperties = taskConfigurationProperties;
 		this.deploymentIdRepository = deploymentIdRepository;
 	}
 
@@ -273,7 +273,7 @@ public class DefaultTaskService implements TaskService {
 
 	private String createComposedTaskDefinition(String graph) {
 		return String.format("%s --graph=\"%s\"",
-				composedTaskProperties.getTaskName(), graph);
+				taskConfigurationProperties.getComposedTaskRunnerName(), graph);
 	}
 
 	@Override
@@ -283,7 +283,7 @@ public class DefaultTaskService implements TaskService {
 			throw new NoSuchTaskDefinitionException(name);
 		}
 		//if composed-task-runner definition then destroy all child tasks associated with it.
-		if(taskDefinition.getDslText().startsWith(composedTaskProperties.getTaskName()))
+		if(taskDefinition.getDslText().startsWith(taskConfigurationProperties.getComposedTaskRunnerName()))
 		{
 			String childTaskPrefix = String.format("_%s_",name);
 			taskDefinitionRepository.findAll().forEach(
@@ -300,6 +300,9 @@ public class DefaultTaskService implements TaskService {
 
 	private void destroyTask(String name) {
 		TaskDefinition taskDefinition = taskDefinitionRepository.findOne(name);
+		if (taskDefinition == null) {
+			throw new NoSuchTaskDefinitionException(name);
+		}
 		taskLauncher.destroy(name);
 		deploymentIdRepository.delete(DeploymentKey.forTaskDefinition(taskDefinition));
 		taskDefinitionRepository.delete(name);
