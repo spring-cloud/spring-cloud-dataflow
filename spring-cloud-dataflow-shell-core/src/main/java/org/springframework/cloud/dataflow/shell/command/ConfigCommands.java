@@ -16,13 +16,19 @@
 
 package org.springframework.cloud.dataflow.shell.command;
 
+import static org.springframework.shell.table.BorderSpecification.TOP;
+
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +36,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.cloud.dataflow.rest.client.DataFlowServerException;
 import org.springframework.cloud.dataflow.rest.client.DataFlowTemplate;
+import org.springframework.cloud.dataflow.rest.resource.about.AboutResource;
+import org.springframework.cloud.dataflow.rest.resource.about.FeatureInfo;
+import org.springframework.cloud.dataflow.rest.resource.about.RuntimeEnvironmentDetails;
+import org.springframework.cloud.dataflow.rest.resource.about.SecurityInfo;
 import org.springframework.cloud.dataflow.rest.resource.security.SecurityInfoResource;
 import org.springframework.cloud.dataflow.shell.Target;
 import org.springframework.cloud.dataflow.shell.TargetHolder;
@@ -47,8 +57,17 @@ import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType
 import org.springframework.shell.core.CommandMarker;
 import org.springframework.shell.core.annotation.CliCommand;
 import org.springframework.shell.core.annotation.CliOption;
+import org.springframework.shell.table.BorderSpecification;
+import org.springframework.shell.table.BorderStyle;
+import org.springframework.shell.table.CellMatchers;
+import org.springframework.shell.table.KeyValueHorizontalAligner;
+import org.springframework.shell.table.KeyValueSizeConstraints;
+import org.springframework.shell.table.KeyValueTextWrapper;
+import org.springframework.shell.table.SimpleHorizontalAligner;
+import org.springframework.shell.table.SimpleVerticalAligner;
 import org.springframework.shell.table.TableBuilder;
 import org.springframework.shell.table.TableModelBuilder;
+import org.springframework.shell.table.Tables;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
@@ -62,6 +81,7 @@ import org.springframework.web.client.RestTemplate;
  * @author Ilayaperumal Gopinathan
  * @author Gary Russell
  * @author Mark Pollack
+ * @author Eric Bottard
  */
 @Component
 @Configuration
@@ -210,44 +230,112 @@ public class ConfigCommands implements CommandMarker,
 	}
 
 	@CliCommand(value = {"dataflow config info"}, help = "Show the Dataflow server being used")
-	public String info() {
+	public List<Object> info() {
+		Target target = targetHolder.getTarget();
+		AboutResource about = this.shell.getDataFlowOperations().aboutOperation().get();
 
-		final Map<String, String> statusValues = new TreeMap<String, String>();
+		List<Object> result = new ArrayList<>();
+		int rowIndex = 0;
+		List<Integer> rowsWithThinSeparators = new ArrayList<>();
 
-		final Target target = targetHolder.getTarget();
+		TableModelBuilder<Object> modelBuilder = new TableModelBuilder<>();
+		modelBuilder.addRow().addValue("Target").addValue(target.getTargetUriAsString());
+		rowIndex++;
 
-		statusValues.put("Target", target.getTargetUriAsString());
+		if (target.getTargetResultMessage() != null) {
+			modelBuilder.addRow().addValue("Result").addValue(target.getTargetResultMessage());
+			rowIndex++;
+		}
+		modelBuilder.addRow().addValue("Features").addValue(about.getFeatureInfo());
+		rowIndex++;
 
-		if (target.isSkipSslValidation()) {
-			statusValues.put("SSL Validation", "skipped");
+		Map<String, String> versions = new LinkedHashMap<>();
+		modelBuilder.addRow().addValue("Versions").addValue(versions);
+		rowIndex++;
+		versions.compute(
+			about.getVersionInfo().getImplementation().getName(),
+			(k, v) -> about.getVersionInfo().getImplementation().getVersion()
+		);
+		versions.compute(
+			about.getVersionInfo().getCore().getName(),
+			(k, v) -> about.getVersionInfo().getCore().getVersion()
+		);
+		versions.compute(
+			about.getVersionInfo().getDashboard().getName(),
+			(k, v) -> about.getVersionInfo().getDashboard().getVersion()
+		);
+
+		SecurityInfo securityInfo = about.getSecurityInfo();
+		modelBuilder.addRow().addValue("Security").addValue(securityInfo);
+		rowIndex++;
+		if (securityInfo.isAuthenticated()) {
+			modelBuilder.addRow().addValue("Roles").addValue(securityInfo.getRoles());
+			rowsWithThinSeparators.add(rowIndex++);
 		}
 
-		if (target.getTargetCredentials() != null) {
-			statusValues.put("Credentials", target.getTargetCredentials().getDisplayableContents());
+		RuntimeEnvironmentDetails appDeployer = about.getRuntimeEnvironment().getAppDeployer();
+		RuntimeEnvironmentDetails taskLauncher = about.getRuntimeEnvironment().getTaskLauncher();
+		modelBuilder.addRow().addValue("App Deployer").addValue(appDeployer);
+		rowIndex++;
+		if (!appDeployer.getPlatformSpecificInfo().isEmpty()) {
+			modelBuilder.addRow().addValue("Platform Specific").addValue(appDeployer.getPlatformSpecificInfo());
+			rowsWithThinSeparators.add(rowIndex++);
 		}
-		statusValues.put("Result", target.getTargetResultMessage() != null ? target.getTargetResultMessage() : "");
-
-		final TableModelBuilder<Object> modelBuilder = new TableModelBuilder<>();
-
-		for (Map.Entry<String, String> row : statusValues.entrySet()) {
-			modelBuilder.addRow().addValue(row.getKey()).addValue(row.getValue());
+		modelBuilder.addRow().addValue("Task Launcher").addValue(taskLauncher);
+		rowIndex++;
+		if (!taskLauncher.getPlatformSpecificInfo().isEmpty()) {
+			modelBuilder.addRow().addValue("Platform Specific").addValue(taskLauncher.getPlatformSpecificInfo());
+			rowsWithThinSeparators.add(rowIndex++);
 		}
 
-		final TableBuilder builder = new TableBuilder(modelBuilder.build());
-		DataFlowTables.applyStyle(builder);
 
-		final StringBuilder sb = new StringBuilder(builder.build().render(66));
+		TableBuilder builder = new TableBuilder(modelBuilder.build());
+		builder
+			.addOutlineBorder(BorderStyle.fancy_double)
+			.paintBorder(BorderStyle.fancy_light, BorderSpecification.INNER).fromTopLeft().toBottomRight()
+			.on(CellMatchers.table())
+				.addAligner(SimpleHorizontalAligner.center)
+			.on(CellMatchers.table())
+				.addAligner(SimpleVerticalAligner.middle)
+		;
+
+		Tables.configureKeyValueRendering(builder, ": ");
+
+		builder.on(CellMatchers.ofType(FeatureInfo.class))
+			.addFormatter(new DataFlowTables.BeanWrapperFormatter(": "))
+			.addAligner(new KeyValueHorizontalAligner(":"))
+			.addSizer(new KeyValueSizeConstraints(": "))
+			.addWrapper(new KeyValueTextWrapper(": "));
+		List<String> excludes = securityInfo.isAuthenticated()
+			? Arrays.asList("roles", "class")
+			: Arrays.asList("roles", "class", "username");
+		builder.on(CellMatchers.ofType(SecurityInfo.class))
+			.addFormatter(new DataFlowTables.BeanWrapperFormatter(": ", null, excludes))
+			.addAligner(new KeyValueHorizontalAligner(":"))
+			.addSizer(new KeyValueSizeConstraints(": "))
+			.addWrapper(new KeyValueTextWrapper(": "));
+		builder.on(CellMatchers.ofType(List.class)).addFormatter(value -> ((List<String>) value).toArray(new String[0]));
+		builder.on(CellMatchers.ofType(RuntimeEnvironmentDetails.class))
+			.addFormatter(new DataFlowTables.BeanWrapperFormatter(": ", null, Arrays.asList("class", "platformSpecificInfo")))
+			.addAligner(new KeyValueHorizontalAligner(":"))
+			.addSizer(new KeyValueSizeConstraints(": "))
+			.addWrapper(new KeyValueTextWrapper(": "));
+		rowsWithThinSeparators.forEach(row -> builder.paintBorder(BorderStyle.fancy_light_quadruple_dash, TOP)
+			.fromRowColumn(row, 0).toRowColumn(row + 1, builder.getModel().getColumnCount()));
+
+
+		result.add(builder.build());
+
+
 
 		if (Target.TargetStatus.ERROR.equals(target.getStatus())) {
-			sb.append(HORIZONTAL_LINE);
-			sb.append("An exception occurred during targeting:\n");
-
-			final StringWriter stringWriter = new StringWriter();
+			StringWriter stringWriter = new StringWriter();
+			stringWriter.write("\nAn exception occurred during targeting:\n");
 			target.getTargetException().printStackTrace(new PrintWriter(stringWriter));
 
-			sb.append(stringWriter.toString());
+			result.add(stringWriter.toString());
 		}
-		return sb.toString();
+		return result;
 	}
 
 	@Override
