@@ -43,24 +43,27 @@ import org.springframework.web.bind.annotation.RestController;
 @ExposesResourceFor(TaskToolsResource.class)
 public class ToolsController {
 	
+	private final static String TASK_NAME = "name";
+	
+	private final static String TASK_DEFINITION = "dsl";
+	
 	private TaskToolsAssembler taskGraphAssembler = new TaskToolsAssembler();
 	
 	private TaskDslAssembler taskDslAssembler = new TaskDslAssembler();
 	
 	/**
 	 * Parse a task definition into a graph structure. The definition map is expected to have
-	 * a 'dsl' key containing the composed task DSL and optionally a 'name' key indicating the name of the
-	 * composed task.
+	 * a 'dsl' key containing the composed task DSL and a 'name'
+	 * key indicating the name of the composed task.
 	 * 
-	 * @return a map with either a 'graph' or 'error' key set 
+	 * @return a resource with the graph property set
 	 */
-	@RequestMapping(value = "/parseTaskTextToGraph", method = RequestMethod.GET)
-	public TaskToolsResource parseTaskTextToGraph(@RequestParam(value = "name", defaultValue = "__dummy") String name,
-			@RequestParam(value = "definition", required = true) String dsl) {
+	@RequestMapping(value = "/parseTaskTextToGraph", method = RequestMethod.POST)
+	public TaskToolsResource parseTaskTextToGraph	(@RequestBody Map<String, String> definition) {
 		Graph graph = null;
 		Map<String,Object> error = null;
 		try {
-			TaskParser taskParser = new TaskParser(name, dsl, true, true);
+			TaskParser taskParser = new TaskParser(definition.get(TASK_NAME), definition.get(TASK_DEFINITION), true, true);
 			graph = taskParser.parse().toGraph();
 		}
 		catch (ParseException pe) {
@@ -71,8 +74,10 @@ public class ToolsController {
 	
 	/**
 	 * Convert a graph format into DSL text format.
+	 * 
+ 	 * @return a resource with the dsl property set
 	 */
-	@RequestMapping(value = "/convertTaskGraphToText", method = RequestMethod.GET)
+	@RequestMapping(value = "/convertTaskGraphToText", method = RequestMethod.POST)
 	public TaskToolsResource convertTaskGraphToText(@RequestBody Graph graph) {
 		String dsl = null;
 		Map<String,Object>  error = null;
