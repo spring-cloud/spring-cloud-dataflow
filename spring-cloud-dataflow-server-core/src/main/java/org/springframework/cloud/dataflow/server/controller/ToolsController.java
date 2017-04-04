@@ -19,6 +19,8 @@ package org.springframework.cloud.dataflow.server.controller;
 
 import java.util.Map;
 
+import javax.servlet.http.HttpServletResponse;
+
 import org.springframework.cloud.dataflow.core.dsl.ParseException;
 import org.springframework.cloud.dataflow.core.dsl.TaskParser;
 import org.springframework.cloud.dataflow.core.dsl.graph.Graph;
@@ -59,17 +61,25 @@ public class ToolsController {
 	 * @return a resource with the graph property set
 	 */
 	@RequestMapping(value = "/parseTaskTextToGraph", method = RequestMethod.POST)
-	public TaskToolsResource parseTaskTextToGraph	(@RequestBody Map<String, String> definition) {
+	public TaskToolsResource parseTaskTextToGraph	(HttpServletResponse response, @RequestBody Map<String, String> definition) {
 		Graph graph = null;
 		Map<String,Object> error = null;
-		try {
-			TaskParser taskParser = new TaskParser(definition.get(TASK_NAME), definition.get(TASK_DEFINITION), true, true);
-			graph = taskParser.parse().toGraph();
-		}
-		catch (ParseException pe) {
-			error = pe.toExceptionDescriptor();
-		}
-		return taskGraphAssembler.toResource(new ParsedGraphOutput(graph,error));
+//		if (definition == null) {
+//			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+//		}
+//		else {
+			try {
+				TaskParser taskParser = new TaskParser(definition.get(TASK_NAME), definition.get(TASK_DEFINITION), true, true);
+				graph = taskParser.parse().toGraph();
+			}
+			catch (ParseException pe) {
+				error = pe.toExceptionDescriptor();
+	//		}
+	//		catch (Exception e) {
+				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+			}
+			return taskGraphAssembler.toResource(new ParsedGraphOutput(graph,error));
+//		}
 	}
 	
 	/**
