@@ -42,7 +42,6 @@ import org.springframework.web.bind.annotation.RestController;
  * @author Gunnar Hillert
  * @author Ilayaperumal Gopinathan
  * @since 1.0
- * @deprecated Functionality now provided by {@link AboutController}
  */
 @RestController
 @RequestMapping("/security/info")
