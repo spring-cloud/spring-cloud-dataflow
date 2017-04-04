@@ -64,22 +64,14 @@ public class ToolsController {
 	public TaskToolsResource parseTaskTextToGraph	(HttpServletResponse response, @RequestBody Map<String, String> definition) {
 		Graph graph = null;
 		Map<String,Object> error = null;
-//		if (definition == null) {
-//			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-//		}
-//		else {
-			try {
-				TaskParser taskParser = new TaskParser(definition.get(TASK_NAME), definition.get(TASK_DEFINITION), true, true);
-				graph = taskParser.parse().toGraph();
-			}
-			catch (ParseException pe) {
-				error = pe.toExceptionDescriptor();
-	//		}
-	//		catch (Exception e) {
-				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-			}
-			return taskGraphAssembler.toResource(new ParsedGraphOutput(graph,error));
-//		}
+		try {
+			TaskParser taskParser = new TaskParser(definition.get(TASK_NAME), definition.get(TASK_DEFINITION), true, true);
+			graph = taskParser.parse().toGraph();
+		}
+		catch (ParseException pe) {
+			error = pe.toExceptionDescriptor();
+		}
+		return taskGraphAssembler.toResource(new ParsedGraphOutput(graph,error));
 	}
 	
 	/**
