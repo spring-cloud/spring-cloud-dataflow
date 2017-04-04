@@ -52,12 +52,13 @@ import com.google.common.collect.ImmutableMap;
  *
  * @author Eric Bottard
  * @author Gunnar Hillert
+ * @author Ilayaperumal Gopinathan
  */
 @RunWith(Parameterized.class)
 public class LocalServerSecurityWithUsersFileTests {
 
 	private static UserCredentials viewOnlyUser   = new UserCredentials("bob", "bobspassword");
-	private static UserCredentials adminOnlyUser  = new UserCredentials("alice", "alicepwd");
+	private static UserCredentials manageOnlyUser = new UserCredentials("alice", "alicepwd");
 	private static UserCredentials createOnlyUser = new UserCredentials("cartman", "cartmanpwd");
 
 	private final static Logger logger = LoggerFactory.getLogger(LocalServerSecurityWithUsersFileTests.class);
@@ -73,35 +74,35 @@ public class LocalServerSecurityWithUsersFileTests {
 	public static Collection<Object[]> data() {
 		return Arrays.asList(new Object[][] {
 
-			{ HttpMethod.GET, HttpStatus.OK,           "/", adminOnlyUser, null },
+			{ HttpMethod.GET, HttpStatus.OK,           "/", manageOnlyUser, null },
 			{ HttpMethod.GET, HttpStatus.OK,           "/", viewOnlyUser, null },
 			{ HttpMethod.GET, HttpStatus.OK,           "/", createOnlyUser, null },
 			{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/", null, null },
 
 			/* AppRegistryController */
 
-			{ HttpMethod.GET,    HttpStatus.FORBIDDEN,    "/apps", adminOnlyUser, null },
+			{ HttpMethod.GET,    HttpStatus.FORBIDDEN,    "/apps", manageOnlyUser, null },
 			{ HttpMethod.GET,    HttpStatus.OK,           "/apps", viewOnlyUser, null },
 			{ HttpMethod.GET,    HttpStatus.FORBIDDEN,    "/apps", createOnlyUser, null },
 			{ HttpMethod.GET,    HttpStatus.UNAUTHORIZED, "/apps", null, null },
 
-			{ HttpMethod.GET,    HttpStatus.FORBIDDEN,    "/apps/task/taskname", adminOnlyUser, null },
+			{ HttpMethod.GET,    HttpStatus.FORBIDDEN,    "/apps/task/taskname", manageOnlyUser, null },
 			{ HttpMethod.GET,    HttpStatus.NOT_FOUND,    "/apps/task/taskname", viewOnlyUser, null },
 			{ HttpMethod.GET,    HttpStatus.FORBIDDEN,    "/apps/task/taskname", createOnlyUser, null },
 			{ HttpMethod.GET,    HttpStatus.UNAUTHORIZED, "/apps/task/taskname", null, null },
 
-			{ HttpMethod.POST,   HttpStatus.FORBIDDEN,    "/apps/task/taskname", adminOnlyUser, null },
+			{ HttpMethod.POST,   HttpStatus.FORBIDDEN,    "/apps/task/taskname", manageOnlyUser, null },
 			{ HttpMethod.POST,   HttpStatus.FORBIDDEN,    "/apps/task/taskname", viewOnlyUser, null },
 			{ HttpMethod.POST,   HttpStatus.BAD_REQUEST,  "/apps/task/taskname", createOnlyUser, null },
 			{ HttpMethod.POST,   HttpStatus.CREATED,      "/apps/task/taskname", createOnlyUser, ImmutableMap.of("uri", "maven://io.spring.cloud:scdf-sample-app:jar:1.0.0.BUILD-SNAPSHOT", "force", "false") },
 			{ HttpMethod.POST,   HttpStatus.UNAUTHORIZED, "/apps/task/taskname", null, null },
 
-			{ HttpMethod.DELETE, HttpStatus.FORBIDDEN,    "/apps/task/taskname", adminOnlyUser, null },
+			{ HttpMethod.DELETE, HttpStatus.FORBIDDEN,    "/apps/task/taskname", manageOnlyUser, null },
 			{ HttpMethod.DELETE, HttpStatus.FORBIDDEN,    "/apps/task/taskname", viewOnlyUser, null },
 			{ HttpMethod.DELETE, HttpStatus.OK,           "/apps/task/taskname", createOnlyUser, null }, //Should be 404 - See https://github.com/spring-cloud/spring-cloud-dataflow/issues/1071
 			{ HttpMethod.DELETE, HttpStatus.UNAUTHORIZED, "/apps/task/taskname", null, null },
 
-			{ HttpMethod.POST,   HttpStatus.FORBIDDEN,    "/apps", adminOnlyUser, ImmutableMap.of("uri", "???", "apps", "??", "force", "true")},
+			{ HttpMethod.POST,   HttpStatus.FORBIDDEN,    "/apps", manageOnlyUser, ImmutableMap.of("uri", "???", "apps", "??", "force", "true")},
 			{ HttpMethod.POST,   HttpStatus.FORBIDDEN,    "/apps", viewOnlyUser,  ImmutableMap.of("uri", "???", "apps", "??", "force", "true")},
 			{ HttpMethod.POST,   HttpStatus.CREATED,      "/apps", createOnlyUser, ImmutableMap.of("uri", "http://bit.ly/1-0-2-GA-stream-applications-rabbit-maven", "apps", "app=is_ignored", "force", "false")}, //Should be 400 - See https://github.com/spring-cloud/spring-cloud-dataflow/issues/1071
 			{ HttpMethod.POST,   HttpStatus.CREATED,      "/apps", createOnlyUser, ImmutableMap.of("uri", "http://bit.ly/1-0-2-GA-stream-applications-rabbit-maven", "force", "false")},
@@ -111,25 +112,25 @@ public class LocalServerSecurityWithUsersFileTests {
 
 			/* CompletionController */
 
-			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/completions/stream", adminOnlyUser, null },
+			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/completions/stream", manageOnlyUser, null },
 			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/completions/stream", viewOnlyUser, null },
 			{ HttpMethod.GET, HttpStatus.BAD_REQUEST,  "/completions/stream", createOnlyUser, null },
 			{ HttpMethod.GET, HttpStatus.OK,           "/completions/stream", createOnlyUser, ImmutableMap.of("start", "2") },
 			{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/completions/stream", null, null },
 
-			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/completions/task", adminOnlyUser, null },
+			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/completions/task", manageOnlyUser, null },
 			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/completions/task", viewOnlyUser, null },
 			{ HttpMethod.GET, HttpStatus.BAD_REQUEST,  "/completions/task", createOnlyUser, null },
 			{ HttpMethod.GET, HttpStatus.OK,           "/completions/task", createOnlyUser, ImmutableMap.of("start", "2") },
 			{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/completions/task", null, null },
 
-			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/completions/stream", adminOnlyUser, ImmutableMap.of("detailLevel", "2") },
+			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/completions/stream", manageOnlyUser, ImmutableMap.of("detailLevel", "2") },
 			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/completions/stream", viewOnlyUser, ImmutableMap.of("detailLevel", "2") },
 			{ HttpMethod.GET, HttpStatus.OK,           "/completions/stream", createOnlyUser, ImmutableMap.of("start", "2", "detailLevel", "2") },
 			{ HttpMethod.GET, HttpStatus.BAD_REQUEST,  "/completions/stream", createOnlyUser, ImmutableMap.of("start", "2", "detailLevel", "-123") },
 			{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/completions/stream", null, ImmutableMap.of("detailLevel", "2") },
 
-			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/completions/task", adminOnlyUser, ImmutableMap.of("detailLevel", "2") },
+			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/completions/task", manageOnlyUser, ImmutableMap.of("detailLevel", "2") },
 			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/completions/task", viewOnlyUser, ImmutableMap.of("detailLevel", "2") },
 			{ HttpMethod.GET, HttpStatus.OK,           "/completions/task", createOnlyUser, ImmutableMap.of("start", "2", "detailLevel", "2") },
 			{ HttpMethod.GET, HttpStatus.BAD_REQUEST,  "/completions/task", createOnlyUser, ImmutableMap.of("start", "2", "detailLevel", "-123") },
@@ -137,300 +138,300 @@ public class LocalServerSecurityWithUsersFileTests {
 
 			/* ToolsController */
 
-			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/tools/parseTaskTextToGraph", adminOnlyUser, null },
+			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/tools/parseTaskTextToGraph", manageOnlyUser, null },
 			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/tools/parseTaskTextToGraph", viewOnlyUser, null },
 			{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/tools/parseTaskTextToGraph", null, null },
 
-			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/tools/convertTaskGraphToText", adminOnlyUser, null },
+			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/tools/convertTaskGraphToText", manageOnlyUser, null },
 			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/tools/convertTaskGraphToText", viewOnlyUser, null },
 			{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/tools/convertTaskGraphToText", null, null },
 
-			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/tools/parseTaskTextToGraph", adminOnlyUser, ImmutableMap.of("definition", "fooApp") },
+			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/tools/parseTaskTextToGraph", manageOnlyUser, ImmutableMap.of("definition", "fooApp") },
 			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/tools/parseTaskTextToGraph", viewOnlyUser, ImmutableMap.of("definition", "fooApp") },
 			{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/tools/parseTaskTextToGraph", null, ImmutableMap.of("definition", "fooApp") },
 
-			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/tools/convertTaskGraphToText", adminOnlyUser, ImmutableMap.of("detailLevel", "2") },
+			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/tools/convertTaskGraphToText", manageOnlyUser, ImmutableMap.of("detailLevel", "2") },
 			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/tools/convertTaskGraphToText", viewOnlyUser, ImmutableMap.of("detailLevel", "2") },
 			{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/tools/convertTaskGraphToText", null, ImmutableMap.of("detailLevel", "2") },
 
 			/* FeaturesController */
 
-			{ HttpMethod.GET, HttpStatus.OK, "/features", adminOnlyUser, null },
+			{ HttpMethod.GET, HttpStatus.OK, "/features", manageOnlyUser, null },
 			{ HttpMethod.GET, HttpStatus.OK, "/features", viewOnlyUser, null },
 			{ HttpMethod.GET, HttpStatus.OK, "/features", createOnlyUser, null },
 			{ HttpMethod.GET, HttpStatus.OK, "/features", null, null },
 
 			/* JobExecutionController */
 
-			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/jobs/executions",     adminOnlyUser, null },
+			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/jobs/executions", manageOnlyUser, null },
 			{ HttpMethod.GET, HttpStatus.OK,           "/jobs/executions",     viewOnlyUser, null },
 			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/jobs/executions",     createOnlyUser, null },
 			{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/jobs/executions",     null, null },
 
-			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/jobs/executions",     adminOnlyUser,  ImmutableMap.of("page", "0", "size", "10") },
+			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/jobs/executions", manageOnlyUser,  ImmutableMap.of("page", "0", "size", "10") },
 			{ HttpMethod.GET, HttpStatus.OK,           "/jobs/executions",     viewOnlyUser,   ImmutableMap.of("page", "0", "size", "10") },
 			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/jobs/executions",     createOnlyUser, ImmutableMap.of("page", "0", "size", "10") },
 			{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/jobs/executions",     null,           ImmutableMap.of("page", "0", "size", "10") },
 
-			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/jobs/executions",     adminOnlyUser,  ImmutableMap.of("name", "myname") },
+			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/jobs/executions", manageOnlyUser,  ImmutableMap.of("name", "myname") },
 			{ HttpMethod.GET, HttpStatus.NOT_FOUND,    "/jobs/executions",     viewOnlyUser,   ImmutableMap.of("name", "myname") },
 			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/jobs/executions",     createOnlyUser, ImmutableMap.of("name", "myname") },
 			{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/jobs/executions",     null,           ImmutableMap.of("name", "myname") },
 
-			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/jobs/executions",     adminOnlyUser,  ImmutableMap.of("name", "myname", "page", "0", "size", "10") },
+			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/jobs/executions", manageOnlyUser,  ImmutableMap.of("name", "myname", "page", "0", "size", "10") },
 			{ HttpMethod.GET, HttpStatus.NOT_FOUND,    "/jobs/executions",     viewOnlyUser,   ImmutableMap.of("name", "myname", "page", "0", "size", "10") },
 			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/jobs/executions",     createOnlyUser, ImmutableMap.of("name", "myname", "page", "0", "size", "10") },
 			{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/jobs/executions",     null,           ImmutableMap.of("name", "myname", "page", "0", "size", "10") },
 
-			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/jobs/executions/123", adminOnlyUser,  null},
+			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/jobs/executions/123", manageOnlyUser,  null},
 			{ HttpMethod.GET, HttpStatus.NOT_FOUND,    "/jobs/executions/123", viewOnlyUser,   null},
 			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/jobs/executions/123", createOnlyUser, null},
 			{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/jobs/executions/123", null,           null},
 
-			{ HttpMethod.PUT, HttpStatus.FORBIDDEN,    "/jobs/executions/123", adminOnlyUser,  ImmutableMap.of("stop", "true") },
+			{ HttpMethod.PUT, HttpStatus.FORBIDDEN,    "/jobs/executions/123", manageOnlyUser,  ImmutableMap.of("stop", "true") },
 			{ HttpMethod.PUT, HttpStatus.FORBIDDEN,    "/jobs/executions/123", viewOnlyUser,   ImmutableMap.of("stop", "true") },
 			{ HttpMethod.PUT, HttpStatus.NOT_FOUND,    "/jobs/executions/123", createOnlyUser, ImmutableMap.of("stop", "true") },
 			{ HttpMethod.PUT, HttpStatus.UNAUTHORIZED, "/jobs/executions/123", null,           ImmutableMap.of("stop", "true") },
 
-			{ HttpMethod.PUT, HttpStatus.FORBIDDEN,    "/jobs/executions/123", adminOnlyUser,  ImmutableMap.of("restart", "true") },
+			{ HttpMethod.PUT, HttpStatus.FORBIDDEN,    "/jobs/executions/123", manageOnlyUser,  ImmutableMap.of("restart", "true") },
 			{ HttpMethod.PUT, HttpStatus.FORBIDDEN,    "/jobs/executions/123", viewOnlyUser,   ImmutableMap.of("restart", "true") },
 			{ HttpMethod.PUT, HttpStatus.NOT_FOUND,    "/jobs/executions/123", createOnlyUser, ImmutableMap.of("restart", "true") },
 			{ HttpMethod.PUT, HttpStatus.UNAUTHORIZED, "/jobs/executions/123", null,           ImmutableMap.of("restart", "true") },
 
 			/* JobInstanceController */
 
-			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/jobs/instances", adminOnlyUser,  ImmutableMap.of("name", "my-job-name") },
+			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/jobs/instances", manageOnlyUser,  ImmutableMap.of("name", "my-job-name") },
 			{ HttpMethod.GET, HttpStatus.NOT_FOUND,    "/jobs/instances", viewOnlyUser,   ImmutableMap.of("name", "my-job-name") },
 			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/jobs/instances", createOnlyUser, ImmutableMap.of("name", "my-job-name") },
 			{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/jobs/instances", null,           ImmutableMap.of("name", "my-job-name") },
 
-			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/jobs/instances", adminOnlyUser,  ImmutableMap.of("name", "my-job-name", "page", "0", "size", "10") },
+			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/jobs/instances", manageOnlyUser,  ImmutableMap.of("name", "my-job-name", "page", "0", "size", "10") },
 			{ HttpMethod.GET, HttpStatus.NOT_FOUND,    "/jobs/instances", viewOnlyUser,   ImmutableMap.of("name", "my-job-name", "page", "0", "size", "10") },
 			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/jobs/instances", createOnlyUser, ImmutableMap.of("name", "my-job-name", "page", "0", "size", "10") },
 			{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/jobs/instances", null,           ImmutableMap.of("name", "my-job-name", "page", "0", "size", "10") },
 
-			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/jobs/instances", adminOnlyUser,  null },
+			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/jobs/instances", manageOnlyUser,  null },
 			{ HttpMethod.GET, HttpStatus.BAD_REQUEST, "/jobs/instances", viewOnlyUser,   null },
 			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/jobs/instances", createOnlyUser, null },
 			{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/jobs/instances", null,           null },
 
-			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/jobs/instances/123", adminOnlyUser,  null },
+			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/jobs/instances/123", manageOnlyUser,  null },
 			{ HttpMethod.GET, HttpStatus.NOT_FOUND,    "/jobs/instances/123", viewOnlyUser,   null },
 			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/jobs/instances/123", createOnlyUser, null },
 			{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/jobs/instances/123", null,           null },
 
 			/* JobStepExecutionController */
 
-			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/jobs/executions/123/steps", adminOnlyUser,  null },
+			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/jobs/executions/123/steps", manageOnlyUser,  null },
 			{ HttpMethod.GET, HttpStatus.NOT_FOUND,    "/jobs/executions/123/steps", viewOnlyUser,   null },
 			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/jobs/executions/123/steps", createOnlyUser, null },
 			{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/jobs/executions/123/steps", null,           null },
 
-			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/jobs/executions/abc/steps", adminOnlyUser,  null },
+			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/jobs/executions/abc/steps", manageOnlyUser,  null },
 			{ HttpMethod.GET, HttpStatus.BAD_REQUEST,  "/jobs/executions/abc/steps", viewOnlyUser,   null },
 			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/jobs/executions/abc/steps", createOnlyUser, null },
 			{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/jobs/executions/abc/steps", null,           null },
 
-			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/jobs/executions/123/steps", adminOnlyUser,  ImmutableMap.of("name", "my-job-name", "page", "0", "size", "10") },
+			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/jobs/executions/123/steps", manageOnlyUser,  ImmutableMap.of("name", "my-job-name", "page", "0", "size", "10") },
 			{ HttpMethod.GET, HttpStatus.NOT_FOUND,    "/jobs/executions/123/steps", viewOnlyUser,   ImmutableMap.of("name", "my-job-name", "page", "0", "size", "10") },
 			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/jobs/executions/123/steps", createOnlyUser, ImmutableMap.of("name", "my-job-name", "page", "0", "size", "10") },
 			{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/jobs/executions/123/steps", null,           ImmutableMap.of("name", "my-job-name", "page", "0", "size", "10") },
 
-			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/jobs/executions/123/steps/1", adminOnlyUser,  null },
+			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/jobs/executions/123/steps/1", manageOnlyUser,  null },
 			{ HttpMethod.GET, HttpStatus.NOT_FOUND,    "/jobs/executions/123/steps/1", viewOnlyUser,   null },
 			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/jobs/executions/123/steps/1", createOnlyUser, null },
 			{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/jobs/executions/123/steps/1", null,           null },
 
 			/* JobStepExecutionProgressController */
 
-			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/jobs/executions/123/steps/1/progress", adminOnlyUser,  null },
+			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/jobs/executions/123/steps/1/progress", manageOnlyUser,  null },
 			{ HttpMethod.GET, HttpStatus.NOT_FOUND,    "/jobs/executions/123/steps/1/progress", viewOnlyUser,   null },
 			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/jobs/executions/123/steps/1/progress", createOnlyUser, null },
 			{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/jobs/executions/123/steps/1/progress", null,           null },
 
 			/* RuntimeAppsController */
 
-			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/runtime/apps", adminOnlyUser,  null },
+			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/runtime/apps", manageOnlyUser,  null },
 			{ HttpMethod.GET, HttpStatus.OK,           "/runtime/apps", viewOnlyUser,   null },
 			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/runtime/apps", createOnlyUser, null },
 			{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/runtime/apps", null,           null },
 
-			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/runtime/apps/123", adminOnlyUser,  null },
+			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/runtime/apps/123", manageOnlyUser,  null },
 			{ HttpMethod.GET, HttpStatus.NOT_FOUND,           "/runtime/apps/123", viewOnlyUser,   null },
 			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/runtime/apps/123", createOnlyUser, null },
 			{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/runtime/apps/123", null,           null },
 
-			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/runtime/apps/123/instances", adminOnlyUser,  null },
+			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/runtime/apps/123/instances", manageOnlyUser,  null },
 			{ HttpMethod.GET, HttpStatus.NOT_FOUND,    "/runtime/apps/123/instances", viewOnlyUser,   null },
 			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/runtime/apps/123/instances", createOnlyUser, null },
 			{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/runtime/apps/123/instances", null,           null },
 
-			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/runtime/apps/123/instances/456", adminOnlyUser,  null },
+			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/runtime/apps/123/instances/456", manageOnlyUser,  null },
 			{ HttpMethod.GET, HttpStatus.NOT_FOUND, "/runtime/apps/123/instances/456", viewOnlyUser,   null },
 			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/runtime/apps/123/instances/456", createOnlyUser, null },
 			{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/runtime/apps/123/instances/456", null,           null },
 
 			/* StreamDefinitionController */
 
-			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/streams/definitions", adminOnlyUser,  null },
+			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/streams/definitions", manageOnlyUser,  null },
 			{ HttpMethod.GET, HttpStatus.OK,           "/streams/definitions", viewOnlyUser,   null },
 			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/streams/definitions", createOnlyUser, null },
 			{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/streams/definitions", null,           null },
 
-			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/streams/definitions", adminOnlyUser,  ImmutableMap.of("page", "0", "size", "10") },
+			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/streams/definitions", manageOnlyUser,  ImmutableMap.of("page", "0", "size", "10") },
 			{ HttpMethod.GET, HttpStatus.OK,           "/streams/definitions", viewOnlyUser,   ImmutableMap.of("page", "0", "size", "10") },
 			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/streams/definitions", createOnlyUser, ImmutableMap.of("page", "0", "size", "10") },
 			{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/streams/definitions", null,           ImmutableMap.of("page", "0", "size", "10") },
 
-			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/streams/definitions", adminOnlyUser,  ImmutableMap.of("search", "mysearch") },
+			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/streams/definitions", manageOnlyUser,  ImmutableMap.of("search", "mysearch") },
 			{ HttpMethod.GET, HttpStatus.OK,           "/streams/definitions", viewOnlyUser,   ImmutableMap.of("search", "mysearch") },
 			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/streams/definitions", createOnlyUser, ImmutableMap.of("search", "mysearch") },
 			{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/streams/definitions", null,           ImmutableMap.of("search", "mysearch") },
 
-			{ HttpMethod.POST, HttpStatus.FORBIDDEN,    "/streams/definitions", adminOnlyUser,  ImmutableMap.of("name", "myname", "definition", "fooo | baaar") },
+			{ HttpMethod.POST, HttpStatus.FORBIDDEN,    "/streams/definitions", manageOnlyUser,  ImmutableMap.of("name", "myname", "definition", "fooo | baaar") },
 			{ HttpMethod.POST, HttpStatus.FORBIDDEN,    "/streams/definitions", viewOnlyUser,   ImmutableMap.of("name", "myname", "definition", "fooo | baaar") },
 			{ HttpMethod.POST, HttpStatus.BAD_REQUEST,  "/streams/definitions", createOnlyUser, ImmutableMap.of("name", "myname", "definition", "fooo | baaar") },
 			{ HttpMethod.POST, HttpStatus.UNAUTHORIZED, "/streams/definitions", null,           ImmutableMap.of("name", "myname", "definition", "fooo | baaar") },
 
-			{ HttpMethod.POST, HttpStatus.FORBIDDEN,    "/streams/definitions", adminOnlyUser,  ImmutableMap.of("name", "myname") },
+			{ HttpMethod.POST, HttpStatus.FORBIDDEN,    "/streams/definitions", manageOnlyUser,  ImmutableMap.of("name", "myname") },
 			{ HttpMethod.POST, HttpStatus.FORBIDDEN,    "/streams/definitions", viewOnlyUser,   ImmutableMap.of("name", "myname") },
 			{ HttpMethod.POST, HttpStatus.BAD_REQUEST, "/streams/definitions", createOnlyUser,  ImmutableMap.of("name", "myname") },
 			{ HttpMethod.POST, HttpStatus.UNAUTHORIZED, "/streams/definitions", null,           ImmutableMap.of("name", "myname") },
 
-			{ HttpMethod.DELETE, HttpStatus.FORBIDDEN,    "/streams/definitions/delete-me", adminOnlyUser,  null },
+			{ HttpMethod.DELETE, HttpStatus.FORBIDDEN,    "/streams/definitions/delete-me", manageOnlyUser,  null },
 			{ HttpMethod.DELETE, HttpStatus.FORBIDDEN,    "/streams/definitions/delete-me", viewOnlyUser,   null },
 			{ HttpMethod.DELETE, HttpStatus.NOT_FOUND,    "/streams/definitions/delete-me", createOnlyUser, null },
 			{ HttpMethod.DELETE, HttpStatus.UNAUTHORIZED, "/streams/definitions/delete-me", null,           null },
 
-			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/streams/definitions/my-stream/related", adminOnlyUser,  null },
+			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/streams/definitions/my-stream/related", manageOnlyUser,  null },
 			{ HttpMethod.GET, HttpStatus.NOT_FOUND,    "/streams/definitions/my-stream/related", viewOnlyUser,   null },
 			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/streams/definitions/my-stream/related", createOnlyUser, null },
 			{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/streams/definitions/my-stream/related", null,           null },
 
-			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/streams/definitions/my-stream/related", adminOnlyUser,  ImmutableMap.of("nested", "wrong-param")},
+			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/streams/definitions/my-stream/related", manageOnlyUser,  ImmutableMap.of("nested", "wrong-param")},
 			{ HttpMethod.GET, HttpStatus.BAD_REQUEST,  "/streams/definitions/my-stream/related", viewOnlyUser, ImmutableMap.of("nested", "wrong-param") },
 			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/streams/definitions/my-stream/related", createOnlyUser, ImmutableMap.of("nested", "wrong-param") },
 			{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/streams/definitions/my-stream/related", null,           ImmutableMap.of("nested", "wrong-param") },
 
-			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/streams/definitions/my-stream", adminOnlyUser,  null },
+			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/streams/definitions/my-stream", manageOnlyUser,  null },
 			{ HttpMethod.GET, HttpStatus.NOT_FOUND,    "/streams/definitions/my-stream", viewOnlyUser,   null },
 			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/streams/definitions/my-stream", createOnlyUser, null },
 			{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/streams/definitions/my-stream", null,           null },
 
-			{ HttpMethod.DELETE, HttpStatus.FORBIDDEN,    "/streams/definitions", adminOnlyUser,  null },
+			{ HttpMethod.DELETE, HttpStatus.FORBIDDEN,    "/streams/definitions", manageOnlyUser,  null },
 			{ HttpMethod.DELETE, HttpStatus.FORBIDDEN,    "/streams/definitions", viewOnlyUser,   null },
 			{ HttpMethod.DELETE, HttpStatus.OK,           "/streams/definitions", createOnlyUser, null },
 			{ HttpMethod.DELETE, HttpStatus.UNAUTHORIZED, "/streams/definitions", null,           null },
 
 			/* StreamDeploymentController */
 
-			{ HttpMethod.DELETE, HttpStatus.FORBIDDEN,    "/streams/deployments", adminOnlyUser,  null },
+			{ HttpMethod.DELETE, HttpStatus.FORBIDDEN,    "/streams/deployments", manageOnlyUser,  null },
 			{ HttpMethod.DELETE, HttpStatus.FORBIDDEN,    "/streams/deployments", viewOnlyUser,   null },
 			{ HttpMethod.DELETE, HttpStatus.OK,           "/streams/deployments", createOnlyUser, null },
 			{ HttpMethod.DELETE, HttpStatus.UNAUTHORIZED, "/streams/deployments", null,           null },
 
-			{ HttpMethod.DELETE, HttpStatus.FORBIDDEN,    "/streams/deployments/my-stream", adminOnlyUser,  null },
+			{ HttpMethod.DELETE, HttpStatus.FORBIDDEN,    "/streams/deployments/my-stream", manageOnlyUser,  null },
 			{ HttpMethod.DELETE, HttpStatus.FORBIDDEN,    "/streams/deployments/my-stream", viewOnlyUser,   null },
 			{ HttpMethod.DELETE, HttpStatus.NOT_FOUND,    "/streams/deployments/my-stream", createOnlyUser, null },
 			{ HttpMethod.DELETE, HttpStatus.UNAUTHORIZED, "/streams/deployments/my-stream", null,           null },
 
-			{ HttpMethod.POST, HttpStatus.FORBIDDEN,    "/streams/deployments/my-stream", adminOnlyUser,  null },
+			{ HttpMethod.POST, HttpStatus.FORBIDDEN,    "/streams/deployments/my-stream", manageOnlyUser,  null },
 			{ HttpMethod.POST, HttpStatus.FORBIDDEN,    "/streams/deployments/my-stream", viewOnlyUser,   null },
 			{ HttpMethod.POST, HttpStatus.NOT_FOUND,    "/streams/deployments/my-stream", createOnlyUser, null },
 			{ HttpMethod.POST, HttpStatus.UNAUTHORIZED, "/streams/deployments/my-stream", null,           null },
 
 			/* TaskDefinitionController */
 
-			{ HttpMethod.POST, HttpStatus.FORBIDDEN,    "/tasks/definitions", adminOnlyUser,  ImmutableMap.of("name", "my-name") },
+			{ HttpMethod.POST, HttpStatus.FORBIDDEN,    "/tasks/definitions", manageOnlyUser,  ImmutableMap.of("name", "my-name") },
 			{ HttpMethod.POST, HttpStatus.FORBIDDEN,    "/tasks/definitions", viewOnlyUser,   ImmutableMap.of("name", "my-name") },
 			{ HttpMethod.POST, HttpStatus.BAD_REQUEST,  "/tasks/definitions", createOnlyUser, ImmutableMap.of("name", "my-name") },
 			{ HttpMethod.POST, HttpStatus.UNAUTHORIZED, "/tasks/definitions", null,           ImmutableMap.of("name", "my-name") },
 
-			{ HttpMethod.POST, HttpStatus.FORBIDDEN,    "/tasks/definitions", adminOnlyUser,  ImmutableMap.of("name", "my-name", "definition", "foo") },
+			{ HttpMethod.POST, HttpStatus.FORBIDDEN,    "/tasks/definitions", manageOnlyUser,  ImmutableMap.of("name", "my-name", "definition", "foo") },
 			{ HttpMethod.POST, HttpStatus.FORBIDDEN,    "/tasks/definitions", viewOnlyUser,   ImmutableMap.of("name", "my-name", "definition", "foo") },
 			{ HttpMethod.POST, HttpStatus.INTERNAL_SERVER_ERROR,    "/tasks/definitions", createOnlyUser, ImmutableMap.of("name", "my-name", "definition", "foo") }, //Should be a `400` error - See also: https://github.com/spring-cloud/spring-cloud-dataflow/issues/1075
 			{ HttpMethod.POST, HttpStatus.UNAUTHORIZED, "/tasks/definitions", null,           ImmutableMap.of("name", "my-name", "definition", "foo") },
 
 			/* TaskExecutionController */
 
-			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/tasks/executions", adminOnlyUser,  null },
+			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/tasks/executions", manageOnlyUser,  null },
 			{ HttpMethod.GET, HttpStatus.OK,           "/tasks/executions", viewOnlyUser,   null },
 			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/tasks/executions", createOnlyUser, null },
 			{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/tasks/executions", null,           null },
 
-			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/tasks/executions", adminOnlyUser,  ImmutableMap.of("page", "0", "size", "10") },
+			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/tasks/executions", manageOnlyUser,  ImmutableMap.of("page", "0", "size", "10") },
 			{ HttpMethod.GET, HttpStatus.OK,           "/tasks/executions", viewOnlyUser,   ImmutableMap.of("page", "0", "size", "10") },
 			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/tasks/executions", createOnlyUser, ImmutableMap.of("page", "0", "size", "10") },
 			{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/tasks/executions", null,           ImmutableMap.of("page", "0", "size", "10") },
 
-			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/tasks/executions", adminOnlyUser,  ImmutableMap.of("name", "my-task-name") },
+			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/tasks/executions", manageOnlyUser,  ImmutableMap.of("name", "my-task-name") },
 			{ HttpMethod.GET, HttpStatus.NOT_FOUND,    "/tasks/executions", viewOnlyUser,   ImmutableMap.of("name", "my-task-name") },
 			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/tasks/executions", createOnlyUser, ImmutableMap.of("name", "my-task-name") },
 			{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/tasks/executions", null,           ImmutableMap.of("name", "my-task-name") },
 
-			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/tasks/executions/123", adminOnlyUser,  null },
+			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/tasks/executions/123", manageOnlyUser,  null },
 			{ HttpMethod.GET, HttpStatus.NOT_FOUND,    "/tasks/executions/123", viewOnlyUser,   null },
 			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/tasks/executions/123", createOnlyUser, null },
 			{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/tasks/executions/123", null,           null },
 
-			{ HttpMethod.DELETE, HttpStatus.FORBIDDEN,    "/tasks/executions/123", adminOnlyUser,  null },
+			{ HttpMethod.DELETE, HttpStatus.FORBIDDEN,    "/tasks/executions/123", manageOnlyUser,  null },
 			{ HttpMethod.DELETE, HttpStatus.FORBIDDEN,    "/tasks/executions/123", viewOnlyUser,   null },
 			{ HttpMethod.DELETE, HttpStatus.NOT_FOUND,    "/tasks/executions/123", createOnlyUser, null },
 			{ HttpMethod.DELETE, HttpStatus.UNAUTHORIZED, "/tasks/executions/123", null,           null },
 
-			{ HttpMethod.POST, HttpStatus.FORBIDDEN,    "/tasks/executions", adminOnlyUser,  null },
+			{ HttpMethod.POST, HttpStatus.FORBIDDEN,    "/tasks/executions", manageOnlyUser,  null },
 			{ HttpMethod.POST, HttpStatus.FORBIDDEN,    "/tasks/executions", viewOnlyUser,   null },
 			{ HttpMethod.POST, HttpStatus.BAD_REQUEST,  "/tasks/executions", createOnlyUser, null },
 			{ HttpMethod.POST, HttpStatus.UNAUTHORIZED, "/tasks/executions", null,           null },
 
-			{ HttpMethod.POST, HttpStatus.FORBIDDEN,    "/tasks/executions", adminOnlyUser,  ImmutableMap.of("name", "my-task-name") },
+			{ HttpMethod.POST, HttpStatus.FORBIDDEN,    "/tasks/executions", manageOnlyUser,  ImmutableMap.of("name", "my-task-name") },
 			{ HttpMethod.POST, HttpStatus.FORBIDDEN,    "/tasks/executions", viewOnlyUser,   ImmutableMap.of("name", "my-task-name") },
 			{ HttpMethod.POST, HttpStatus.NOT_FOUND,    "/tasks/executions", createOnlyUser, ImmutableMap.of("name", "my-task-name") },
 			{ HttpMethod.POST, HttpStatus.UNAUTHORIZED, "/tasks/executions", null,           ImmutableMap.of("name", "my-task-name") },
 
 			/* UiController */
 
-			{ HttpMethod.GET, HttpStatus.FOUND,    "/dashboard", adminOnlyUser,  null },
+			{ HttpMethod.GET, HttpStatus.FOUND,    "/dashboard", manageOnlyUser,  null },
 			{ HttpMethod.GET, HttpStatus.FOUND,    "/dashboard", viewOnlyUser,   null },
 			{ HttpMethod.GET, HttpStatus.FOUND,    "/dashboard", createOnlyUser, null },
 			{ HttpMethod.GET, HttpStatus.FOUND,    "/dashboard", null,           null },
 
-			{ HttpMethod.GET, HttpStatus.OK,       "/about", adminOnlyUser,  null },
+			{ HttpMethod.GET, HttpStatus.FORBIDDEN,       "/about", manageOnlyUser,  null },
 			{ HttpMethod.GET, HttpStatus.OK,       "/about", viewOnlyUser,   null },
-			{ HttpMethod.GET, HttpStatus.OK,       "/about", createOnlyUser, null },
-			{ HttpMethod.GET, HttpStatus.OK,       "/about", null,           null },
+			{ HttpMethod.GET, HttpStatus.FORBIDDEN,       "/about", createOnlyUser, null },
+			{ HttpMethod.GET, HttpStatus.UNAUTHORIZED,       "/about", null,           null },
 
-			{ HttpMethod.GET, HttpStatus.OK,           "/management", adminOnlyUser,  null },
+			{ HttpMethod.GET, HttpStatus.OK,           "/management", manageOnlyUser,  null },
 			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/management", viewOnlyUser,   null },
 			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/management", createOnlyUser, null },
 			{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/management", null,           null },
 
-			{ HttpMethod.GET, HttpStatus.OK,           "/management/info", adminOnlyUser,  null },
+			{ HttpMethod.GET, HttpStatus.OK,           "/management/info", manageOnlyUser,  null },
 			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/management/info", viewOnlyUser,   null },
 			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/management/info", createOnlyUser, null },
 			{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/management/info", null,           null },
 
-			{ HttpMethod.GET, HttpStatus.NOT_FOUND,    "/management/does-not-exist", adminOnlyUser,  null },
+			{ HttpMethod.GET, HttpStatus.NOT_FOUND,    "/management/does-not-exist", manageOnlyUser,  null },
 			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/management/does-not-exist", viewOnlyUser,   null },
 			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/management/does-not-exist", createOnlyUser, null },
 			{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/management/does-not-exist", null,           null },
 
 // Requires Redis
-//			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/metrics/counters", adminOnlyUser,  null },
+//			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/metrics/counters", manageOnlyUser,  null },
 //			{ HttpMethod.GET, HttpStatus.OK,           "/metrics/counters", viewOnlyUser,   null },
 //			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/metrics/counters", createOnlyUser, null },
 //			{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/metrics/counters", null,           null },
 
 			/* LoginController */
 
-			{ HttpMethod.POST, HttpStatus.INTERNAL_SERVER_ERROR, "/authenticate", adminOnlyUser,  null },
+			{ HttpMethod.POST, HttpStatus.INTERNAL_SERVER_ERROR, "/authenticate", manageOnlyUser,  null },
 			{ HttpMethod.POST, HttpStatus.INTERNAL_SERVER_ERROR, "/authenticate", viewOnlyUser,   null },
 			{ HttpMethod.POST, HttpStatus.INTERNAL_SERVER_ERROR, "/authenticate", createOnlyUser, null },
 			{ HttpMethod.POST, HttpStatus.INTERNAL_SERVER_ERROR, "/authenticate", null,           null },
 
 			/* SecurityController */
 
-			{ HttpMethod.GET, HttpStatus.OK, "/security/info", adminOnlyUser,  null },
+			{ HttpMethod.GET, HttpStatus.OK, "/security/info", manageOnlyUser,  null },
 			{ HttpMethod.GET, HttpStatus.OK, "/security/info", viewOnlyUser,   null },
 			{ HttpMethod.GET, HttpStatus.OK, "/security/info", createOnlyUser, null },
 			{ HttpMethod.GET, HttpStatus.OK, "/security/info", null,           null }

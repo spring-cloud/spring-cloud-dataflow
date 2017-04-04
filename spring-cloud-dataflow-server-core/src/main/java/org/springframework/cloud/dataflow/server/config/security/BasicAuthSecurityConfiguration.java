@@ -118,7 +118,6 @@ public class BasicAuthSecurityConfiguration extends WebSecurityConfigurerAdapter
 					"/authenticate",
 					"/security/info",
 					"/dashboard",
-					"/about",
 					"/features",
 					"/assets/**").permitAll();
 
