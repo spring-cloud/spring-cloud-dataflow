@@ -18,27 +18,43 @@ package org.springframework.cloud.dataflow.rest.resource;
 
 import java.util.Map;
 
+import org.springframework.cloud.dataflow.core.dsl.graph.Graph;
 import org.springframework.hateoas.ResourceSupport;
 
 /**
- * Represents a parsed task definition converted to a graph representation for front end tools.
+ * Represents a response from the tools endpoint. Depending on whether the request was to
+ * parse a DSL string into a graph or convert a graph to DSL, the different fields of the
+ * response will be filled in.
  *
  * @author Andy Clement
  */
-public class TaskDslResource extends ResourceSupport {
+public class TaskToolsResource extends ResourceSupport {
 
+	private Graph graph;
+	
 	private String dsl;
 	
-	private Map<String,Object> error; 
+	private Map<String,Object> error;
 
-	public TaskDslResource() {
+	public TaskToolsResource() {
 	}
 
-	public TaskDslResource(String dsl, Map<String,Object> error) {
+	public TaskToolsResource(Graph graph, Map<String,Object> error) {
+		this.graph = graph;
+		this.dsl = null;
+		this.error = error;
+	}
+
+	public TaskToolsResource(String dsl, Map<String,Object> error) {
+		this.graph = null;
 		this.dsl = dsl;
 		this.error = error;
 	}
 
+	public Graph getGraph() {
+		return graph;
+	}
+	
 	public String getDsl() {
 		return dsl;
 	}

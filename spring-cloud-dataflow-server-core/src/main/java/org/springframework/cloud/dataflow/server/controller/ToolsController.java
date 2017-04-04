@@ -22,9 +22,10 @@ import java.util.Map;
 import org.springframework.cloud.dataflow.core.dsl.ParseException;
 import org.springframework.cloud.dataflow.core.dsl.TaskParser;
 import org.springframework.cloud.dataflow.core.dsl.graph.Graph;
-import org.springframework.cloud.dataflow.rest.resource.TaskDslResource;
-import org.springframework.cloud.dataflow.rest.resource.TaskGraphResource;
+import org.springframework.cloud.dataflow.rest.resource.TaskToolsResource;
+import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.hateoas.mvc.ResourceAssemblerSupport;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -38,9 +39,11 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/tools")
+@Validated
+@ExposesResourceFor(TaskToolsResource.class)
 public class ToolsController {
 	
-	private TaskGraphAssembler taskGraphAssembler = new TaskGraphAssembler();
+	private TaskToolsAssembler taskGraphAssembler = new TaskToolsAssembler();
 	
 	private TaskDslAssembler taskDslAssembler = new TaskDslAssembler();
 	
@@ -52,8 +55,8 @@ public class ToolsController {
 	 * @return a map with either a 'graph' or 'error' key set 
 	 */
 	@RequestMapping(value = "/parseTaskTextToGraph", method = RequestMethod.GET)
-	public TaskGraphResource parseTaskTextToGraph(@RequestParam(value = "name", defaultValue = "__dummy") String name,
-			@RequestParam("definition") String dsl) {
+	public TaskToolsResource parseTaskTextToGraph(@RequestParam(value = "name", defaultValue = "__dummy") String name,
+			@RequestParam(value = "definition", required = true) String dsl) {
 		Graph graph = null;
 		Map<String,Object> error = null;
 		try {
@@ -70,7 +73,7 @@ public class ToolsController {
 	 * Convert a graph format into DSL text format.
 	 */
 	@RequestMapping(value = "/convertTaskGraphToText", method = RequestMethod.GET)
-	public TaskDslResource convertTaskGraphToText(@RequestBody Graph graph) {
+	public TaskToolsResource convertTaskGraphToText(@RequestBody Graph graph) {
 		String dsl = null;
 		Map<String,Object>  error = null;
 		try {
@@ -81,7 +84,6 @@ public class ToolsController {
 		}
 		return taskDslAssembler.toResource(new GraphToDslOutput(dsl, error));
 	}
-
 
 	private static class ParsedGraphOutput {
 		final Graph graph;
@@ -107,33 +109,33 @@ public class ToolsController {
 
 	/**
 	 * {@link org.springframework.hateoas.ResourceAssembler} implementation
-	 * that converts a {@link ParsedGraphOutput} to a {@link GraphResource}.
+	 * that converts a {@link ParsedGraphOutput} to a {@link TaskToolsResource}.
 	 */
-	static class TaskGraphAssembler extends ResourceAssemblerSupport<ParsedGraphOutput, TaskGraphResource> {
+	static class TaskToolsAssembler extends ResourceAssemblerSupport<ParsedGraphOutput, TaskToolsResource> {
 
-		public TaskGraphAssembler() {
-			super(ToolsController.class, TaskGraphResource.class);
+		public TaskToolsAssembler() {
+			super(ToolsController.class, TaskToolsResource.class);
 		}
 
 		@Override
-		public TaskGraphResource toResource(ParsedGraphOutput graph) {
-			return new TaskGraphResource(graph.graph, graph.error);
+		public TaskToolsResource toResource(ParsedGraphOutput graph) {
+			return new TaskToolsResource(graph.graph, graph.error);
 		}
 	}
 
 	/**
 	 * {@link org.springframework.hateoas.ResourceAssembler} implementation
-	 * that converts a {@link GraphToDslOutput} to a {@link TaskDslResource}.
+	 * that converts a {@link GraphToDslOutput} to a {@link TaskToolsResource}.
 	 */
-	static class TaskDslAssembler extends ResourceAssemblerSupport<GraphToDslOutput, TaskDslResource> {
+	static class TaskDslAssembler extends ResourceAssemblerSupport<GraphToDslOutput, TaskToolsResource> {
 
 		public TaskDslAssembler() {
-			super(ToolsController.class, TaskDslResource.class);
+			super(ToolsController.class, TaskToolsResource.class);
 		}
 
 		@Override
-		public TaskDslResource toResource(GraphToDslOutput output) {
-			return new TaskDslResource(output.dsl, output.error);
+		public TaskToolsResource toResource(GraphToDslOutput output) {
+			return new TaskToolsResource(output.dsl, output.error);
 		}
 	}
 
