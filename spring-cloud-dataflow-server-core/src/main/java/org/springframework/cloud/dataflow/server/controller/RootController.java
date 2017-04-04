@@ -137,7 +137,7 @@ public class RootController {
 		root.add(new Link(completionTaskTemplated).withRel("completions/task"));
 
 		// Should this be in the isTasksEnabled() block above? Why are the completions endpoints not guarded by feature checks?
-		String taskTextToGraphTemplated = entityLinks.linkFor(TaskToolsResource.class).withSelfRel().getHref() + ("/parseTaskTextToGraph{?name,definition}");
+		String taskTextToGraphTemplated = entityLinks.linkFor(TaskToolsResource.class).withSelfRel().getHref() + ("/parseTaskTextToGraph");
 		root.add(new Link(taskTextToGraphTemplated).withRel("tools/parseTaskTextToGraph"));
 		root.add(entityLinks.linkFor(TaskToolsResource.class).withRel("tools/convertTaskGraphToText"));
 
