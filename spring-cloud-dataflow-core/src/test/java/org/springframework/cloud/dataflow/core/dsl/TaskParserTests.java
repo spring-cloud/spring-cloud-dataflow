@@ -784,8 +784,8 @@ public class TaskParserTests {
 		assertEquals(1,problems.size());
 		assertEquals(DSLMessage.TASK_VALIDATION_SECONDARY_SEQUENCES_MUST_BE_NAMED,problems.get(0).getMessage());
 		assertEquals(5,problems.get(0).getOffset());
-		assertEquals("158E:(pos 5): Secondary sequences must have labels or are unreachable",problems.get(0).toString());
-		assertEquals("158E:(pos 5): Secondary sequences must have labels or are unreachable\nappA;appB\n     ^\n",problems.get(0).toStringWithContext());
+		assertEquals("158E:(pos 5): secondary sequences must have labels or are unreachable",problems.get(0).toString());
+		assertEquals("158E:(pos 5): secondary sequences must have labels or are unreachable\nappA;appB\n     ^\n",problems.get(0).toStringWithContext());
 
 		validator.reset();
 		ctn = parse("appA;foo: appB");
@@ -799,8 +799,8 @@ public class TaskParserTests {
 		assertEquals(1,problems.size());
 		assertEquals(DSLMessage.TASK_VALIDATION_SECONDARY_SEQUENCES_MUST_BE_NAMED,problems.get(0).getMessage());
 		assertEquals(15,problems.get(0).getOffset());
-		assertEquals("158E:(pos 15): Secondary sequences must have labels or are unreachable",problems.get(0).toString());
-		assertEquals("158E:(pos 15): Secondary sequences must have labels or are unreachable\nappC\n^\n",problems.get(0).toStringWithContext());
+		assertEquals("158E:(pos 15): secondary sequences must have labels or are unreachable",problems.get(0).toString());
+		assertEquals("158E:(pos 15): secondary sequences must have labels or are unreachable\nappC\n^\n",problems.get(0).toStringWithContext());
 
 		validator.reset();
 		ctn = parse("<appA>",false);
@@ -809,7 +809,7 @@ public class TaskParserTests {
 		assertEquals(1,problems.size());
 		assertEquals(DSLMessage.TASK_VALIDATION_SPLIT_WITH_ONE_FLOW,problems.get(0).getMessage());
 		assertEquals(0,problems.get(0).getOffset());
-		assertEquals("167E:(pos 0): Unnecessary use of split construct when only one flow to execute in parallel",problems.get(0).toString());
+		assertEquals("167E:(pos 0): unnecessary use of split construct when only one flow to execute in parallel",problems.get(0).toString());
 	}
 	
 	@Test

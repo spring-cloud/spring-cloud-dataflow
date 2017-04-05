@@ -17,12 +17,16 @@
  */
 package org.springframework.cloud.dataflow.server.controller;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.cloud.dataflow.core.dsl.ParseException;
 import org.springframework.cloud.dataflow.core.dsl.TaskParser;
+import org.springframework.cloud.dataflow.core.dsl.TaskValidationException;
+import org.springframework.cloud.dataflow.core.dsl.TaskValidationProblem;
 import org.springframework.cloud.dataflow.core.dsl.graph.Graph;
 import org.springframework.cloud.dataflow.rest.resource.TaskToolsResource;
 import org.springframework.hateoas.ExposesResourceFor;
@@ -31,7 +35,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -63,15 +66,20 @@ public class ToolsController {
 	@RequestMapping(value = "/parseTaskTextToGraph", method = RequestMethod.POST)
 	public TaskToolsResource parseTaskTextToGraph	(HttpServletResponse response, @RequestBody Map<String, String> definition) {
 		Graph graph = null;
-		Map<String,Object> error = null;
+		List<Map<String,Object>> errors = new ArrayList<>();
 		try {
 			TaskParser taskParser = new TaskParser(definition.get(TASK_NAME), definition.get(TASK_DEFINITION), true, true);
 			graph = taskParser.parse().toGraph();
 		}
 		catch (ParseException pe) {
-			error = pe.toExceptionDescriptor();
+			errors.add(pe.toExceptionDescriptor());
 		}
-		return taskGraphAssembler.toResource(new ParsedGraphOutput(graph,error));
+		catch (TaskValidationException tve) {
+			for (TaskValidationProblem problem: tve.getValidationProblems()) {
+				errors.add(problem.toExceptionDescriptor());
+			}
+		}
+		return taskGraphAssembler.toResource(new ParsedGraphOutput(graph, errors));
 	}
 	
 	/**
@@ -82,35 +90,35 @@ public class ToolsController {
 	@RequestMapping(value = "/convertTaskGraphToText", method = RequestMethod.POST)
 	public TaskToolsResource convertTaskGraphToText(@RequestBody Graph graph) {
 		String dsl = null;
-		Map<String,Object>  error = null;
+		List<Map<String,Object>> errors = new ArrayList<>();
 		try {
 			dsl = graph.toDSLText();
 		}
 		catch (ParseException pe) {
-			error = pe.toExceptionDescriptor();
+			errors.add(pe.toExceptionDescriptor());
 		}
-		return taskDslAssembler.toResource(new GraphToDslOutput(dsl, error));
+		return taskDslAssembler.toResource(new GraphToDslOutput(dsl, errors));
 	}
 
 	private static class ParsedGraphOutput {
 		final Graph graph;
 		
-		final Map<String,Object> error;
+		final List<Map<String,Object>> errors;
 		
-		public ParsedGraphOutput(Graph graph, Map<String, Object> error) {
+		public ParsedGraphOutput(Graph graph, List<Map<String, Object>> errors) {
 			this.graph = graph;
-			this.error = error;
+			this.errors = errors;
 		}
 	}
 
 	private static class GraphToDslOutput {
 		final String dsl;
 		
-		final Map<String,Object> error;
+		final List<Map<String,Object>> errors;
 		
-		public GraphToDslOutput(String dsl, Map<String, Object> error) {
+		public GraphToDslOutput(String dsl, List<Map<String, Object>> errors) {
 			this.dsl = dsl;
-			this.error = error;
+			this.errors = errors;
 		}
 	}
 
@@ -126,7 +134,7 @@ public class ToolsController {
 
 		@Override
 		public TaskToolsResource toResource(ParsedGraphOutput graph) {
-			return new TaskToolsResource(graph.graph, graph.error);
+			return new TaskToolsResource(graph.graph, graph.errors);
 		}
 	}
 
@@ -142,7 +150,7 @@ public class ToolsController {
 
 		@Override
 		public TaskToolsResource toResource(GraphToDslOutput output) {
-			return new TaskToolsResource(output.dsl, output.error);
+			return new TaskToolsResource(output.dsl, output.errors);
 		}
 	}
 

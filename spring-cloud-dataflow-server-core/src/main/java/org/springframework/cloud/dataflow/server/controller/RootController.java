@@ -117,6 +117,8 @@ public class RootController {
 			taskTemplated = entityLinks.linkToCollectionResource(JobInstanceResource.class).getHref() + "{?name}";
 			root.add(new Link(taskTemplated).withRel("jobs/instances/name"));
 			root.add(unescapeTemplateVariables(entityLinks.linkToSingleResource(JobInstanceResource.class, "{id}").withRel("jobs/instances/instance")));
+			root.add(entityLinks.linkFor(TaskToolsResource.class).withRel("tools/parseTaskTextToGraph"));
+			root.add(entityLinks.linkFor(TaskToolsResource.class).withRel("tools/convertTaskGraphToText"));
 		}
 		if (featuresProperties.isAnalyticsEnabled()) {
 			root.add(entityLinks.linkToCollectionResource(CounterResource.class).withRel("counters"));
@@ -135,11 +137,6 @@ public class RootController {
 		root.add(new Link(completionStreamTemplated).withRel("completions/stream"));
 		String completionTaskTemplated = entityLinks.linkFor(CompletionProposalsResource.class).withSelfRel().getHref() + ("/task{?start,detailLevel}");
 		root.add(new Link(completionTaskTemplated).withRel("completions/task"));
-
-		// Should this be in the isTasksEnabled() block above? Why are the completions endpoints not guarded by feature checks?
-		String taskTextToGraphTemplated = entityLinks.linkFor(TaskToolsResource.class).withSelfRel().getHref() + ("/parseTaskTextToGraph");
-		root.add(new Link(taskTextToGraphTemplated).withRel("tools/parseTaskTextToGraph"));
-		root.add(entityLinks.linkFor(TaskToolsResource.class).withRel("tools/convertTaskGraphToText"));
 
 		return root;
 	}

@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.dataflow.rest.resource;
 
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.cloud.dataflow.core.dsl.graph.Graph;
@@ -34,21 +35,22 @@ public class TaskToolsResource extends ResourceSupport {
 	
 	private String dsl;
 	
-	private Map<String,Object> error;
+	// A list of errors, each entry is a map with keys for position and message text
+	private List<Map<String, Object>> errors;
 
 	public TaskToolsResource() {
 	}
 
-	public TaskToolsResource(Graph graph, Map<String,Object> error) {
+	public TaskToolsResource(Graph graph, List<Map<String, Object>> errors) {
 		this.graph = graph;
 		this.dsl = null;
-		this.error = error;
+		this.errors = errors;
 	}
 
-	public TaskToolsResource(String dsl, Map<String,Object> error) {
+	public TaskToolsResource(String dsl, List<Map<String,Object>> errors) {
 		this.graph = null;
 		this.dsl = dsl;
-		this.error = error;
+		this.errors = errors;
 	}
 
 	public Graph getGraph() {
@@ -59,8 +61,8 @@ public class TaskToolsResource extends ResourceSupport {
 		return dsl;
 	}
 	
-	public Map<String,Object> getError() {
-		return error;
+	public List<Map<String,Object>> getErrors() {
+		return errors;
 	}
 
 }
