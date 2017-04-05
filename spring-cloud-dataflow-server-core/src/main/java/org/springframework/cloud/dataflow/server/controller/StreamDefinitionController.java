@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.EnumMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -39,8 +38,10 @@ import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.dsl.StreamNode;
 import org.springframework.cloud.dataflow.core.dsl.StreamParser;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
+import org.springframework.cloud.dataflow.rest.resource.DeploymentStateResource;
 import org.springframework.cloud.dataflow.rest.resource.StreamDefinitionResource;
 import org.springframework.cloud.dataflow.server.DataFlowServerUtil;
+import org.springframework.cloud.dataflow.server.controller.support.ControllerUtils;
 import org.springframework.cloud.dataflow.server.controller.support.InvalidStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
 import org.springframework.cloud.dataflow.server.repository.DeploymentKey;
@@ -110,18 +111,6 @@ public class StreamDefinitionController {
 	 * This deployment controller is used as a delegate when stream creation is immediately followed by deployment.
 	 */
 	private final StreamDeploymentController deploymentController;
-
-	private static final Map<DeploymentState, String> PRETTY_STATES = new EnumMap<>(DeploymentState.class);
-	static {
-		PRETTY_STATES.put(DeploymentState.deployed, "Deployed");
-		PRETTY_STATES.put(DeploymentState.deploying, "Deploying");
-		PRETTY_STATES.put(DeploymentState.undeployed, "Undeployed");
-		PRETTY_STATES.put(DeploymentState.error, "Error retrieving state");
-		PRETTY_STATES.put(DeploymentState.failed, "Failed");
-		PRETTY_STATES.put(DeploymentState.partial, "Partial");
-		// unknown not mapped on purpose
-		Assert.isTrue(PRETTY_STATES.size() == DeploymentState.values().length - 1);
-	}
 
 	/**
 	 * Create a {@code StreamDefinitionController} that delegates
@@ -390,15 +379,12 @@ public class StreamDefinitionController {
 
 		@Override
 		public StreamDefinitionResource instantiateResource(StreamDefinition stream) {
-			StreamDefinitionResource resource = new StreamDefinitionResource(stream.getName(), stream.getDslText());
-			resource.setStatus(mapState(streamDeploymentStates.get(stream)));
+			final StreamDefinitionResource resource = new StreamDefinitionResource(stream.getName(), stream.getDslText());
+			final DeploymentStateResource deploymentStateResource = ControllerUtils.mapState(streamDeploymentStates.get(stream));
+			resource.setStatus(deploymentStateResource.getKey());
+			resource.setStatusDescription(deploymentStateResource.getDescription());
 			return resource;
 		}
 
-		private String mapState(DeploymentState state) {
-			String result = PRETTY_STATES.get(state);
-			Assert.notNull(result, "Trying to display a DeploymentState that should not appear here: " + state);
-			return result;
-		}
 	}
 }

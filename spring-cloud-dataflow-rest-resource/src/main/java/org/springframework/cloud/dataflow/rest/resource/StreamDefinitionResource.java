@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2015-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import org.springframework.hateoas.ResourceSupport;
  *
  * @author Patrick Peralta
  * @author Ilayaperumal Gopinathan
+ * @author Gunnar Hillert
  */
 public class StreamDefinitionResource extends ResourceSupport {
 
@@ -46,6 +47,11 @@ public class StreamDefinitionResource extends ResourceSupport {
 	 * Stream status (i.e. deployed, undeployed, etc).
 	 */
 	private String status;
+
+	/**
+	 * Description of the Stream status.
+	 */
+	private String statusDescription;
 
 	/**
 	 * Default constructor for serialization frameworks.
@@ -98,6 +104,29 @@ public class StreamDefinitionResource extends ResourceSupport {
 	 */
 	public void setStatus(String status) {
 		this.status = status;
+	}
+
+	/**
+	 *
+	 * Get a descriptive text of the stream's deployment status. See also
+	 * {@link DeploymentStateResource}.
+	 *
+	 * @return a descriptive text of the stream's deployment status
+	 */
+	public String getStatusDescription() {
+		return statusDescription;
+	}
+
+	/**
+	 *
+	 * Set the descriptive text of the stream's deployment status. See also
+	 * {@link DeploymentStateResource}
+	 *
+	 * @param statusDescription the stream's deployment status description
+	 *
+	 */
+	public void setStatusDescription(String statusDescription) {
+		this.statusDescription = statusDescription;
 	}
 
 	public static class Page extends PagedResources<StreamDefinitionResource> {
