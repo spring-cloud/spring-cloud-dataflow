@@ -109,7 +109,7 @@ public class StreamDefinitionResource extends ResourceSupport {
 	/**
 	 *
 	 * Get a descriptive text of the stream's deployment status. See also
-	 * {@link StreamDeploymentStatus}.
+	 * {@link DeploymentStateResource}.
 	 *
 	 * @return a descriptive text of the stream's deployment status
 	 */
@@ -120,7 +120,7 @@ public class StreamDefinitionResource extends ResourceSupport {
 	/**
 	 *
 	 * Set the descriptive text of the stream's deployment status. See also
-	 * {@link StreamDeploymentStatus}
+	 * {@link DeploymentStateResource}
 	 *
 	 * @param statusDescription the stream's deployment status description
 	 *

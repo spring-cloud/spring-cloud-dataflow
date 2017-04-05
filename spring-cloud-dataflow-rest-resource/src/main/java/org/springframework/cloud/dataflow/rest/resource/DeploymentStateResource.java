@@ -28,7 +28,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
  *
  */
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
-public enum StreamDeploymentStatus {
+public enum DeploymentStateResource {
 
 	DEPLOYING("deploying", "Deploying" ,"The app or group is being deployed."),
 	DEPLOYED("deployed", "Deployed", "All apps have been successfully deployed"),
@@ -45,7 +45,7 @@ public enum StreamDeploymentStatus {
 	/**
 	 * Constructor.
 	 */
-	StreamDeploymentStatus(final String key, final String displayName, final String description) {
+	DeploymentStateResource(final String key, final String displayName, final String description) {
 		this.key = key;
 		this.displayName = displayName;
 		this.description = description;
@@ -63,13 +63,13 @@ public enum StreamDeploymentStatus {
 		return description;
 	}
 
-	public static StreamDeploymentStatus fromKey(String deploymentStatusKey) {
+	public static DeploymentStateResource fromKey(String deploymentStateResourceKey) {
 
-		Assert.hasText(deploymentStatusKey, "Parameter deploymentStatusKey must not be null or empty.");
+		Assert.hasText(deploymentStateResourceKey, "Parameter deploymentStateResourceKey must not be null or empty.");
 
-		for (StreamDeploymentStatus deploymentStatus : StreamDeploymentStatus.values()) {
-			if (deploymentStatus.getKey().equals(deploymentStatusKey)) {
-				return deploymentStatus;
+		for (DeploymentStateResource deploymentStateResource : DeploymentStateResource.values()) {
+			if (deploymentStateResource.getKey().equals(deploymentStateResourceKey)) {
+				return deploymentStateResource;
 			}
 		}
 

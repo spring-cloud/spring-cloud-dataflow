@@ -29,15 +29,15 @@ import com.jayway.jsonpath.JsonPath;
 /**
  * @author Gunnar Hillert
  */
-public class DeploymentStatusSerializationTests {
+public class DeploymentStateResourceTests {
 
 	@Test
 	public void testSerializationOfSingleStepExecution() throws JsonProcessingException {
 
 		final ObjectMapper objectMapper = new ObjectMapper();
 
-		final StreamDeploymentStatus deploymentStatus = StreamDeploymentStatus.DEPLOYED;
-		final String result = objectMapper.writeValueAsString(deploymentStatus);
+		final DeploymentStateResource deploymentStateResource = DeploymentStateResource.DEPLOYED;
+		final String result = objectMapper.writeValueAsString(deploymentStateResource);
 
 		final DocumentContext documentContext = JsonPath.parse(result);
 
