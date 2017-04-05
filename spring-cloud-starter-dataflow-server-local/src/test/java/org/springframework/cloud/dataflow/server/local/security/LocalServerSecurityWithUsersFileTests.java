@@ -135,6 +135,24 @@ public class LocalServerSecurityWithUsersFileTests {
 			{ HttpMethod.GET, HttpStatus.BAD_REQUEST,  "/completions/task", createOnlyUser, ImmutableMap.of("start", "2", "detailLevel", "-123") },
 			{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/completions/task", null, ImmutableMap.of("detailLevel", "2") },
 
+			/* ToolsController */
+
+			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/tools/parseTaskTextToGraph", adminOnlyUser, null },
+			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/tools/parseTaskTextToGraph", viewOnlyUser, null },
+			{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/tools/parseTaskTextToGraph", null, null },
+
+			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/tools/convertTaskGraphToText", adminOnlyUser, null },
+			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/tools/convertTaskGraphToText", viewOnlyUser, null },
+			{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/tools/convertTaskGraphToText", null, null },
+
+			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/tools/parseTaskTextToGraph", adminOnlyUser, ImmutableMap.of("definition", "fooApp") },
+			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/tools/parseTaskTextToGraph", viewOnlyUser, ImmutableMap.of("definition", "fooApp") },
+			{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/tools/parseTaskTextToGraph", null, ImmutableMap.of("definition", "fooApp") },
+
+			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/tools/convertTaskGraphToText", adminOnlyUser, ImmutableMap.of("detailLevel", "2") },
+			{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/tools/convertTaskGraphToText", viewOnlyUser, ImmutableMap.of("detailLevel", "2") },
+			{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/tools/convertTaskGraphToText", null, ImmutableMap.of("detailLevel", "2") },
+
 			/* FeaturesController */
 
 			{ HttpMethod.GET, HttpStatus.OK, "/features", adminOnlyUser, null },

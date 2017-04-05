@@ -16,6 +16,9 @@
 
 package org.springframework.cloud.dataflow.core.dsl;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * After parsing a task definition from a DSL string, the validation visitor may optionally run.
  * Even though it parses successfully there may be issues with how the definition is constructed. The
@@ -72,6 +75,19 @@ public class TaskValidationProblem {
 			}
 		}
 		return 0;
+	}
+	
+	/**
+	 * Produce a simple map of information about the exception that
+	 * can be sent to the client for display.
+	 * @return map of simple information including message and position
+	 */
+	public Map<String, Object> toExceptionDescriptor() {
+		Map<String, Object> descriptor = new HashMap<>();
+		String text = message.formatMessage(offset);
+		descriptor.put("message", text);
+		descriptor.put("position", offset);
+		return descriptor;
 	}
 
 }
