@@ -1,0 +1,18 @@
+spring:
+  application:
+    name: my-app-name
+  jmx:
+    default-domain: my-app-name
+server:
+  port: ${oauth2.port}
+security:
+  user:
+    password: secret10
+  oauth2:
+    client:
+      clientId: myclient
+      clientSecret: mysecret
+      scope: access
+      auto-approve-scopes: '.*'
+    authorization:
+      checkTokenAccess: permitAll()

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2017 the original author or authors.
+ * Copyright 2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,24 +15,35 @@
  */
 package org.springframework.cloud.dataflow.server.config.security.support;
 
-import org.springframework.boot.autoconfigure.condition.AllNestedConditions;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.context.annotation.Condition;
-
 /**
- * {@link Condition} that is only valid if the property
- * {@code security.oauth2.client.client-id} exists.
+ * State-holder for computed security meta-information.
  *
  * @author Gunnar Hillert
- * @since 1.1.0
  *
  */
-public class OnSecurityEnabledAndOAuth2Enabled extends AllNestedConditions {
+public class SecurityStateBean {
 
-	public OnSecurityEnabledAndOAuth2Enabled() {
-		super(ConfigurationPhase.REGISTER_BEAN);
+	private boolean authenticationEnabled;
+	private boolean authorizationEnabled;
+
+	public SecurityStateBean() {
+		super();
 	}
 
-	@ConditionalOnProperty(name = "security.oauth2.client.client-id")
-	static class OAuth2Enabled { }
+	public boolean isAuthenticationEnabled() {
+		return authenticationEnabled;
+	}
+
+	public boolean isAuthorizationEnabled() {
+		return authorizationEnabled;
+	}
+
+	public void setAuthenticationEnabled(boolean authenticationEnabled) {
+		this.authenticationEnabled = authenticationEnabled;
+	}
+
+	public void setAuthorizationEnabled(boolean authorizationEnabled) {
+		this.authorizationEnabled = authorizationEnabled;
+	}
+
 }

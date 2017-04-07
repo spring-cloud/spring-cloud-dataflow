@@ -68,6 +68,7 @@ public class LocalDataflowResource extends ExternalResource {
 		}
 
 		app = new SpringApplication(LocalTestDataFlowServer.class);
+
 		configurableApplicationContext = (WebApplicationContext) app.run(new String[]{"--server.port=0",
 				"--" + FeaturesProperties.FEATURES_PREFIX + "." + FeaturesProperties.STREAMS_ENABLED + "=" + this.streamsEnabled,
 				"--" + FeaturesProperties.FEATURES_PREFIX + "." + FeaturesProperties.TASKS_ENABLED + "=" + this.tasksEnabled,

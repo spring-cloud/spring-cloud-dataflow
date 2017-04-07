@@ -43,6 +43,7 @@ import org.springframework.cloud.dataflow.registry.RdbmsUriRegistry;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
 import org.springframework.cloud.dataflow.server.config.security.BasicAuthSecurityConfiguration.AuthorizationConfig;
+import org.springframework.cloud.dataflow.server.config.security.support.SecurityStateBean;
 import org.springframework.cloud.dataflow.server.controller.AboutController;
 import org.springframework.cloud.dataflow.server.controller.AppRegistryController;
 import org.springframework.cloud.dataflow.server.controller.CompletionController;
@@ -263,8 +264,8 @@ public class DataFlowControllerAutoConfiguration {
 	}
 
 	@Bean
-	public SecurityController securityController(SecurityProperties securityProperties, AuthorizationConfig authorizationConfig) {
-		return new SecurityController(securityProperties, authorizationConfig);
+	public SecurityController securityController(SecurityStateBean securityStateBean) {
+		return new SecurityController(securityStateBean);
 	}
 
 	@Bean
@@ -284,9 +285,9 @@ public class DataFlowControllerAutoConfiguration {
 			TaskLauncher taskLauncher,
 			FeaturesProperties featuresProperties,
 			VersionInfoProperties versionInfoProperties,
-			SecurityProperties securityProperties,
-			AuthorizationConfig authorizationConfig) {
-		return new AboutController(appDeployer, taskLauncher, featuresProperties, versionInfoProperties, securityProperties, authorizationConfig);
+			SecurityStateBean securityStateBean) {
+		return new AboutController(appDeployer, taskLauncher, featuresProperties, versionInfoProperties,
+			securityStateBean);
 	}
 
 	@Bean
@@ -306,5 +307,10 @@ public class DataFlowControllerAutoConfiguration {
 
 	@ConfigurationProperties(prefix = "maven")
 	static class MavenConfigurationProperties extends MavenProperties {
+	}
+
+	@Bean
+	SecurityStateBean securityStateBean() {
+		return new SecurityStateBean();
 	}
 }

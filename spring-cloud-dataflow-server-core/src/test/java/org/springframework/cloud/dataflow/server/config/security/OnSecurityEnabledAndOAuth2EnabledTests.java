@@ -71,6 +71,22 @@ public class OnSecurityEnabledAndOAuth2EnabledTests {
 	}
 
 	@Test
+	public void clientIdOnly() throws Exception {
+		AnnotationConfigApplicationContext context = load(Config.class,
+			"security.oauth2.client.client-id:12345");
+		assertThat(context.containsBean("myBean"), equalTo(true));
+		context.close();
+	}
+
+	@Test
+	public void clientIdOnlyWithNoValue() throws Exception {
+		AnnotationConfigApplicationContext context = load(Config.class,
+			"security.oauth2.client.client-id");
+		assertThat(context.containsBean("myBean"), equalTo(true));
+		context.close();
+	}
+
+	@Test
 	public void both3() throws Exception {
 		AnnotationConfigApplicationContext context = load(Config.class,
 			"security.basic.enabled:true", "security.oauth2.client.client-id");
@@ -83,6 +99,14 @@ public class OnSecurityEnabledAndOAuth2EnabledTests {
 		AnnotationConfigApplicationContext context = load(Config.class,
 			"security.basic.enabled:false", "security.oauth2");
 		assertThat(context.containsBean("myBean"), equalTo(false));
+		context.close();
+	}
+
+	@Test
+	public void oneTrueOneFalse2() throws Exception {
+		AnnotationConfigApplicationContext context = load(Config.class,
+			"security.basic.enabled:false", "security.oauth2.client.client-id:12345");
+		assertThat(context.containsBean("myBean"), equalTo(true));
 		context.close();
 	}
 
