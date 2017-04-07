@@ -48,8 +48,15 @@ public class OnSecurityEnabledAndOAuth2DisabledTests {
 	}
 
 	@Test
-	public void basicSecurityEnabledAndOauth2Enabled() throws Exception {
+	public void basicSecurityDefaultAndOauth2Enabled() throws Exception {
 		AnnotationConfigApplicationContext context = load(Config.class, "security.oauth2.client.client-id:12345");
+		assertThat(context.containsBean("myBean"), equalTo(false));
+		context.close();
+	}
+
+	@Test
+	public void basicSecurityEnabledAndOauth2Enabled() throws Exception {
+		AnnotationConfigApplicationContext context = load(Config.class, "security.basic.enabled:true", "security.oauth2.client.client-id:12345");
 		assertThat(context.containsBean("myBean"), equalTo(false));
 		context.close();
 	}

@@ -1,0 +1,21 @@
+management:
+  security:
+    enabled: true
+security:
+  oauth2:
+    authorization:
+      check-token-access: isAuthenticated()
+    client:
+      client-id: myclient
+      client-secret: mysecret
+      access-token-uri: http://127.0.0.1:${oauth2.port}/oauth/token
+      user-authorization-uri: http://127.0.0.1:${oauth2.port}/oauth/authorize
+    resource:
+      user-info-uri: http://127.0.0.1:${oauth2.port}/me
+      filter-order: 1
+spring:
+  cloud:
+    dataflow:
+      security:
+        authorization:
+          enabled: false

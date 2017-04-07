@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,16 +17,21 @@ package org.springframework.cloud.dataflow.server.config.security;
 
 import static org.springframework.cloud.dataflow.server.controller.UiController.dashboard;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.oauth2.client.EnableOAuth2Sso;
 import org.springframework.cloud.dataflow.server.config.security.support.OnSecurityEnabledAndOAuth2Enabled;
 import org.springframework.cloud.dataflow.server.service.impl.ManualOAuthAuthenticationProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationManager;
+import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationProcessingFilter;
+import org.springframework.security.oauth2.provider.token.ResourceServerTokenServices;
+import org.springframework.security.web.authentication.preauth.AbstractPreAuthenticatedProcessingFilter;
 
 /**
  * Setup Spring Security OAuth for the Rest Endpoints of Spring Cloud Data Flow.
@@ -40,10 +45,13 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 @Conditional(OnSecurityEnabledAndOAuth2Enabled.class)
 public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
+	@Autowired
+	private ResourceServerTokenServices tokenServices;
+
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
-		http.antMatcher("/**")
-		.authorizeRequests()
+		http.addFilterBefore(oAuth2AuthenticationProcessingFilter(), AbstractPreAuthenticatedProcessingFilter.class);
+		http.authorizeRequests()
 			.antMatchers(
 					"/security/info**",
 					"/login**",
@@ -60,14 +68,21 @@ public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 		.and().csrf().disable();
 	}
 
-	@Override
-	protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-		auth.authenticationProvider(authenticationProvider());
-	}
-
 	@Bean
 	public AuthenticationProvider authenticationProvider() {
 		return new ManualOAuthAuthenticationProvider();
 	}
 
+	private OAuth2AuthenticationProcessingFilter oAuth2AuthenticationProcessingFilter() {
+		final OAuth2AuthenticationProcessingFilter oAuth2AuthenticationProcessingFilter = new OAuth2AuthenticationProcessingFilter();
+		oAuth2AuthenticationProcessingFilter.setAuthenticationManager(oauthAuthenticationManager());
+		oAuth2AuthenticationProcessingFilter.setStateless(false);
+		return oAuth2AuthenticationProcessingFilter;
+	}
+
+	private AuthenticationManager oauthAuthenticationManager() {
+		final OAuth2AuthenticationManager oauthAuthenticationManager = new OAuth2AuthenticationManager();
+		oauthAuthenticationManager.setTokenServices(tokenServices);
+		return oauthAuthenticationManager;
+	}
 }

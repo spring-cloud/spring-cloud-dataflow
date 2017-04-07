@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,9 +32,6 @@ public class OnSecurityEnabledAndOAuth2Enabled extends AllNestedConditions {
 	public OnSecurityEnabledAndOAuth2Enabled() {
 		super(ConfigurationPhase.REGISTER_BEAN);
 	}
-
-	@ConditionalOnProperty(name = "security.basic.enabled", havingValue = "true")
-	static class SecurityEnabled { }
 
 	@ConditionalOnProperty(name = "security.oauth2.client.client-id")
 	static class OAuth2Enabled { }
