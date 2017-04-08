@@ -156,8 +156,9 @@ public class DataFlowControllerAutoConfiguration {
 	@Bean
 	@ConditionalOnBean(StreamDefinitionRepository.class)
 	public RuntimeAppsController runtimeAppsController(StreamDefinitionRepository repository,
-			DeploymentIdRepository deploymentIdRepository, AppDeployer appDeployer) {
-		return new RuntimeAppsController(repository, deploymentIdRepository, appDeployer, runtimeAppsStatusFJPFB().getObject());
+			DeploymentIdRepository deploymentIdRepository, AppDeployer appDeployer, MetricStore metricStore) {
+		return new RuntimeAppsController(repository, deploymentIdRepository, appDeployer, metricStore,
+				runtimeAppsStatusFJPFB().getObject());
 	}
 
 	@Bean

@@ -150,9 +150,11 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 		return new AppRegistryController(registry, metadataResolver, new ForkJoinPool(2));
 	}
 
+
+
 	@Bean
-	public RuntimeAppsController runtimeAppsController() {
-		return new RuntimeAppsController(streamDefinitionRepository(), deploymentIdRepository(), appDeployer(), new ForkJoinPool(2));
+	public RuntimeAppsController runtimeAppsController(MetricStore metricStore) {
+		return new RuntimeAppsController(streamDefinitionRepository(), deploymentIdRepository(), appDeployer(), metricStore, new ForkJoinPool(2));
 	}
 
 	@Bean

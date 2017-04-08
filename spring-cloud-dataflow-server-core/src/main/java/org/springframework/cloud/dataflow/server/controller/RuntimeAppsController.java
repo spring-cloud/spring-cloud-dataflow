@@ -16,10 +16,7 @@
 
 package org.springframework.cloud.dataflow.server.controller;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ForkJoinPool;
 import java.util.stream.Collectors;
@@ -27,8 +24,11 @@ import java.util.stream.Stream;
 
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.rest.resource.AppInstanceStatusResource;
+import org.springframework.cloud.dataflow.rest.resource.AppMetricResource;
 import org.springframework.cloud.dataflow.rest.resource.AppStatusResource;
+import org.springframework.cloud.dataflow.server.controller.support.ApplicationsMetrics;
 import org.springframework.cloud.dataflow.server.controller.support.ControllerUtils;
+import org.springframework.cloud.dataflow.server.controller.support.MetricStore;
 import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
 import org.springframework.cloud.dataflow.server.repository.DeploymentKey;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
@@ -87,6 +87,8 @@ public class RuntimeAppsController {
 
 	private final ResourceAssembler<AppStatus, AppStatusResource> statusAssembler = new Assembler();
 
+	private final MetricStore metricStore;
+
 	private final ForkJoinPool forkJoinPool;
 
 	/**
@@ -100,6 +102,7 @@ public class RuntimeAppsController {
 	public RuntimeAppsController(StreamDefinitionRepository streamDefinitionRepository,
 			DeploymentIdRepository deploymentIdRepository,
 			AppDeployer appDeployer,
+			MetricStore metricStore,
 			ForkJoinPool forkJoinPool
 	) {
 		Assert.notNull(streamDefinitionRepository, "StreamDefinitionRepository must not be null");
@@ -109,6 +112,7 @@ public class RuntimeAppsController {
 		this.streamDefinitionRepository = streamDefinitionRepository;
 		this.deploymentIdRepository = deploymentIdRepository;
 		this.appDeployer = appDeployer;
+		this.metricStore = metricStore;
 		this.forkJoinPool = forkJoinPool;
 	}
 
@@ -143,8 +147,35 @@ public class RuntimeAppsController {
 						.collect(Collectors.toList())
 		).get();
 
+		enrichWithMetrics(statuses);
+
 		// finally, pass in pageable and tell how many items we have in all pages
 		return assembler.toResource(new PageImpl<>(statuses, pageable, deploymentIds.size()), statusAssembler);
+	}
+
+	private void enrichWithMetrics(List<AppStatus> statuses) {
+		List<ApplicationsMetrics> metricsIn = metricStore.getMetrics();
+		Map<String, ApplicationsMetrics.Instance> metricsInstanceMap = new HashMap<>();
+		for (ApplicationsMetrics am : metricsIn) {
+			for (ApplicationsMetrics.Application a : am.getApplications()) {
+				for (ApplicationsMetrics.Instance i : a.getInstances()) {
+					metricsInstanceMap.put(i.getGuid(), i);
+				}
+			}
+		}
+
+		for (AppStatus appStatus : statuses) {
+			Map<String, AppInstanceStatus> appInstanceStatusMap = appStatus.getInstances();
+			appInstanceStatusMap.forEach((k,appInstanceStatus) -> {
+				String trackingKey = appInstanceStatus.getAttributes().get("trackingKey");
+				if (metricsInstanceMap.containsKey(trackingKey)) {
+					ApplicationsMetrics.Instance metricsAppInstance = metricsInstanceMap.get(trackingKey);
+					appInstanceStatus.getAttributes().put("incomingRate", Double.toString(metricsAppInstance.getIncomingRate()));
+					appInstanceStatus.getAttributes().put("outgoingRate", Double.toString(metricsAppInstance.getOutgoingRate()));
+				}
+			});
+		}
+
 	}
 
 	@RequestMapping("/{id}")
