@@ -889,6 +889,10 @@ public class TaskParserTests {
 		checkDSLToGraphAndBackToDSL("<foojob || bbb && ccc>");
 		checkDSLToGraphAndBackToDSL("<a || b> && c");
 		checkDSLToGraphAndBackToDSL("a && <b || c>");
+		// Test that even though two transitions specify the same app and are in the same flow, the
+		// targets are different because the 'names' (i.e. labels) make them different.
+		assertGraph("[0:START][1:AppA][2:AppB][3:x:AppC][4:AppD][5:y:AppC][6:END][0-1][1-2][0:2-3][2-4][0:4-5][4-6][3-6][5-6]",
+				"AppA && AppB 0->x: AppC && AppD 0->y: AppC");
 	}
 	
 	@Test
