@@ -20,6 +20,7 @@ import static org.springframework.cloud.dataflow.server.controller.UiController.
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.oauth2.client.EnableOAuth2Sso;
 import org.springframework.cloud.dataflow.server.config.security.support.OnSecurityEnabledAndOAuth2Enabled;
+import org.springframework.cloud.dataflow.server.config.security.support.SecurityStateBean;
 import org.springframework.cloud.dataflow.server.service.impl.ManualOAuthAuthenticationProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
@@ -48,6 +49,9 @@ public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 	@Autowired
 	private ResourceServerTokenServices tokenServices;
 
+	@Autowired
+	private SecurityStateBean securityStateBean;
+
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 		http.addFilterBefore(oAuth2AuthenticationProcessingFilter(), AbstractPreAuthenticatedProcessingFilter.class);
@@ -66,6 +70,9 @@ public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 		.and().httpBasic()
 		.and().logout().logoutSuccessUrl(dashboard("/logout-success-oauth.html"))
 		.and().csrf().disable();
+
+		securityStateBean.setAuthenticationEnabled(true);
+		securityStateBean.setAuthorizationEnabled(false);
 	}
 
 	@Bean

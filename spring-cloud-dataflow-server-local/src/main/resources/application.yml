@@ -26,8 +26,6 @@ info:
 # Oauth 2 support:
 
 #security:
-#  basic:
-#    enabled: true
 #  oauth2:
 #    client:
 #      client-id: myclient

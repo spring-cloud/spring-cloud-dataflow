@@ -16,7 +16,6 @@
 package org.springframework.cloud.dataflow.server.controller;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.cloud.dataflow.rest.resource.about.AboutResource;
 import org.springframework.cloud.dataflow.rest.resource.about.Dependency;
 import org.springframework.cloud.dataflow.rest.resource.about.FeatureInfo;
@@ -26,7 +25,7 @@ import org.springframework.cloud.dataflow.rest.resource.about.SecurityInfo;
 import org.springframework.cloud.dataflow.rest.resource.about.VersionInfo;
 import org.springframework.cloud.dataflow.server.config.VersionInfoProperties;
 import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
-import org.springframework.cloud.dataflow.server.config.security.BasicAuthSecurityConfiguration.AuthorizationConfig;
+import org.springframework.cloud.dataflow.server.config.security.support.SecurityStateBean;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.core.RuntimeEnvironmentInfo;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
@@ -56,8 +55,7 @@ public class AboutController {
 	private final FeaturesProperties featuresProperties;
 	private final VersionInfoProperties versionInfoProperties;
 
-	private final SecurityProperties securityProperties;
-	private final AuthorizationConfig authorizationConfig;
+	private final SecurityStateBean securityStateBean;
 
 	@Value("${security.oauth2.client.client-id:#{null}}")
 	private String oauthClientId;
@@ -76,14 +74,12 @@ public class AboutController {
 			TaskLauncher taskLauncher,
 			FeaturesProperties featuresProperties,
 			VersionInfoProperties versionInfoProperties,
-			SecurityProperties securityProperties,
-			AuthorizationConfig authorizationConfig) {
+			SecurityStateBean securityStateBean) {
 		this.appDeployer = appDeployer;
 		this.taskLauncher = taskLauncher;
 		this.featuresProperties = featuresProperties;
 		this.versionInfoProperties = versionInfoProperties;
-		this.securityProperties = securityProperties;
-		this.authorizationConfig = authorizationConfig;
+		this.securityStateBean = securityStateBean;
 	}
 
 	/**
@@ -107,8 +103,8 @@ public class AboutController {
 		aboutResource.setFeatureInfo(featureInfo);
 		aboutResource.setVersionInfo(versionInfo);
 
-		final boolean authenticationEnabled = securityProperties.getBasic().isEnabled();
-		final boolean authorizationEnabled = this.authorizationConfig.isEnabled();
+		final boolean authenticationEnabled = securityStateBean.isAuthenticationEnabled();
+		final boolean authorizationEnabled = securityStateBean.isAuthorizationEnabled();
 
 		final SecurityInfo securityInfo = new SecurityInfo();
 		securityInfo.setAuthenticationEnabled(authenticationEnabled);

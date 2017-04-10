@@ -28,6 +28,7 @@ import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.cloud.dataflow.core.DataFlowPropertyKeys;
 import org.springframework.cloud.dataflow.server.config.security.support.OnSecurityEnabledAndOAuth2Disabled;
+import org.springframework.cloud.dataflow.server.config.security.support.SecurityStateBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
@@ -96,6 +97,9 @@ public class BasicAuthSecurityConfiguration extends WebSecurityConfigurerAdapter
 	@Autowired
 	private AuthorizationConfig authorizationConfig;
 
+	@Autowired
+	private SecurityStateBean securityStateBean;
+
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 		final RequestMatcher textHtmlMatcher = new MediaTypeRequestMatcher(
@@ -157,6 +161,9 @@ public class BasicAuthSecurityConfiguration extends WebSecurityConfigurerAdapter
 		http.addFilterBefore(sessionRepositoryFilter,
 				ChannelProcessingFilter.class).csrf().disable();
 		http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED);
+
+		securityStateBean.setAuthenticationEnabled(true);
+		securityStateBean.setAuthorizationEnabled(true);
 	}
 
 	/**

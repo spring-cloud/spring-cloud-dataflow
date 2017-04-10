@@ -17,9 +17,8 @@
 package org.springframework.cloud.dataflow.server.controller.security;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.cloud.dataflow.rest.resource.security.SecurityInfoResource;
-import org.springframework.cloud.dataflow.server.config.security.BasicAuthSecurityConfiguration.AuthorizationConfig;
+import org.springframework.cloud.dataflow.server.config.security.support.SecurityStateBean;
 import org.springframework.cloud.dataflow.server.controller.AboutController;
 import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.hateoas.mvc.ControllerLinkBuilder;
@@ -48,15 +47,13 @@ import org.springframework.web.bind.annotation.RestController;
 @ExposesResourceFor(SecurityInfoResource.class)
 public class SecurityController {
 
-	private final SecurityProperties securityProperties;
-	private final AuthorizationConfig authorizationConfig;
+	private final SecurityStateBean securityStateBean;
 
 	@Value("${security.oauth2.client.client-id:#{null}}")
 	private String oauthClientId;
 
-	public SecurityController(SecurityProperties securityProperties, AuthorizationConfig authorizationConfig) {
-		this.securityProperties = securityProperties;
-		this.authorizationConfig = authorizationConfig;
+	public SecurityController(SecurityStateBean securityStateBean) {
+		this.securityStateBean = securityStateBean;
 	}
 
 	/**
@@ -67,8 +64,8 @@ public class SecurityController {
 	@ResponseStatus(HttpStatus.OK)
 	public SecurityInfoResource getSecurityInfo() {
 
-		final boolean authenticationEnabled = securityProperties.getBasic().isEnabled();
-		final boolean authorizationEnabled = this.authorizationConfig.isEnabled();
+		final boolean authenticationEnabled = securityStateBean.isAuthenticationEnabled();
+		final boolean authorizationEnabled = securityStateBean.isAuthorizationEnabled();
 
 		final SecurityInfoResource securityInfo = new SecurityInfoResource();
 		securityInfo.setAuthenticationEnabled(authenticationEnabled);

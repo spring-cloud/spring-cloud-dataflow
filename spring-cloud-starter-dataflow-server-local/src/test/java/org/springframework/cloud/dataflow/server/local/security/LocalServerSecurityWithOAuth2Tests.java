@@ -15,9 +15,11 @@
  */
 package org.springframework.cloud.dataflow.server.local.security;
 
+import static org.hamcrest.CoreMatchers.is;
 import static org.springframework.cloud.dataflow.server.local.security.SecurityTestUtils.basicAuthorizationHeader;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.junit.ClassRule;
@@ -69,7 +71,7 @@ public class LocalServerSecurityWithOAuth2Tests {
 	}
 
 	@Test
-	public void testAccessRootUrlWithOauth2AccessToken() throws Exception {
+	public void testAccessRootUrlWithOAuth2AccessToken() throws Exception {
 
 		final ClientCredentialsResourceDetails resourceDetails = new ClientCredentialsResourceDetails();
 		resourceDetails.setClientId("myclient");
@@ -89,7 +91,30 @@ public class LocalServerSecurityWithOAuth2Tests {
 	}
 
 	@Test
-	public void testAccessRootUrlWithWrongOauth2AccessToken() throws Exception {
+	public void testAccessSexurityInfoUrlWithOAuth2AccessToken() throws Exception {
+
+		final ClientCredentialsResourceDetails resourceDetails = new ClientCredentialsResourceDetails();
+		resourceDetails.setClientId("myclient");
+		resourceDetails.setClientSecret("mysecret");
+		resourceDetails.setGrantType("client_credentials");
+		resourceDetails.setAccessTokenUri("http://localhost:" + oAuth2ServerResource.getOauth2ServerPort() + "/oauth/token");
+
+		final OAuth2RestTemplate oAuth2RestTemplate = new OAuth2RestTemplate(resourceDetails);
+		final OAuth2AccessToken accessToken = oAuth2RestTemplate.getAccessToken();
+
+		final String accessTokenAsString = accessToken.getValue();
+
+		localDataflowResource.getMockMvc()
+				.perform(get("/security/info").header("Authorization", "bearer " + accessTokenAsString))
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.authorizationEnabled", is(Boolean.FALSE)))
+				.andExpect(jsonPath("$.authenticated", is(Boolean.TRUE)))
+				.andExpect(jsonPath("$.authenticationEnabled", is(Boolean.TRUE)));
+	}
+
+	@Test
+	public void testAccessRootUrlWithWrongOAuth2AccessToken() throws Exception {
 		localDataflowResource.getMockMvc()
 				.perform(get("/").header("Authorization", "bearer 123456"))
 				.andDo(print())
