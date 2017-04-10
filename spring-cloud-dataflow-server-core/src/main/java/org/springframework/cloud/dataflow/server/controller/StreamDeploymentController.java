@@ -250,6 +250,20 @@ public class StreamDeploymentController {
 			Resource appResource = registration.getResource();
 			Resource metadataResource = registration.getMetadataResource();
 
+			// add properties needed for metrics system
+			appDeployTimeProperties.put("spring.cloud.dataflow.stream.name", currentApp.getStreamName());
+			appDeployTimeProperties.put("spring.cloud.dataflow.stream.app.label", currentApp.getName());
+			appDeployTimeProperties.put("spring.cloud.dataflow.stream.app.type", type.toString());
+			StringBuilder sb = new StringBuilder()
+					.append(currentApp.getStreamName()).append(".")
+					.append(currentApp.getName()).append(".")
+					.append("${spring.cloud.application.guid}");
+			appDeployTimeProperties.put("spring.cloud.stream.metrics.key", sb.toString());
+			//TODO allow user to specify SPRING_CLOUD_STREAM_METRICS_PROPERTIES
+			//TODO Default should be spring.application.*,spring.cloud.application.*,spring.cloud.dataflow.*
+			//     Leaving it as spring* for development purposes ATM
+			appDeployTimeProperties.put("spring.cloud.stream.metrics.properties", "spring*");
+
 			// Merge *definition time* app properties with *deployment time* properties
 			// and expand them to their long form if applicable
 			AppDefinition revisedDefinition = mergeAndExpandAppProperties(currentApp, metadataResource, appDeployTimeProperties);
