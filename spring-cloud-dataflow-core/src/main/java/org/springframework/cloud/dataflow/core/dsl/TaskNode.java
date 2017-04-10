@@ -28,7 +28,6 @@ import org.springframework.util.Assert;
  * The root AST node for any entity parsed from task DSL.
  *
  * @author Andy Clement
- * @author Thomas Risberg
  */
 public class TaskNode extends AstNode {
 
@@ -216,7 +215,6 @@ public class TaskNode extends AstNode {
 
 	static class ExecutableDSLVisitor extends TaskVisitor {
 
-		private final String EXECUTABLE_DSL_JOIN_CHAR = "-";
 		private final static int START_OF_FLOW = 0;
 		private final static int START_OF_SPLIT = 1;
 		private final static int IN_FLOW = 2;
@@ -304,7 +302,7 @@ public class TaskNode extends AstNode {
 
 		private String toExecutableDSLTaskName(TaskAppNode taskApp) {
 			StringBuilder taskDefName = new StringBuilder();
-			taskDefName.append(taskName).append(EXECUTABLE_DSL_JOIN_CHAR);
+			taskDefName.append(getTaskPrefix(taskName));
 			if (taskApp.hasLabel()) {
 				taskDefName.append(taskApp.getLabelString());
 			}
@@ -318,6 +316,16 @@ public class TaskNode extends AstNode {
 			return dsl.toString();
 		}
 
+	}
+
+	/**
+	 * Create the prefix to be added to task names created for task app references
+	 * in composed task DSL.
+	 * @param taskName the name of the composed task
+	 * @return a prefix to include ahead of the name/label of an app name
+	 */
+	public static String getTaskPrefix(String taskName) {
+		return taskName + "-";
 	}
 
 	/**

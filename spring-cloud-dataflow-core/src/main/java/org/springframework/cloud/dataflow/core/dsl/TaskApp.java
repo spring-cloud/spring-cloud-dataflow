@@ -26,12 +26,8 @@ import org.springframework.util.Assert;
  * definition is used to compute the unique name see {@link #getExecutableDSLName()}.
  *
  * @author Andy Clement
- * @author Thomas Risberg
  */
 public class TaskApp {
-
-	// Used when building the executable dsl name for a task app
-	private final static String EXECUTABLE_DSL_JOIN_CHAR = "-";
 
 	private String taskDefinitionName;
 
@@ -82,7 +78,7 @@ public class TaskApp {
 
 	public String getExecutableDSLName() {
 		StringBuilder s = new StringBuilder();
-		s.append(taskDefinitionName).append(EXECUTABLE_DSL_JOIN_CHAR);
+		s.append(TaskNode.getTaskPrefix(taskDefinitionName));
 		s.append(label == null ? name : label);
 		return s.toString();
 	}

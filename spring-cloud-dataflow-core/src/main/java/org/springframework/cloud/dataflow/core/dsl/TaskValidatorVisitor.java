@@ -125,6 +125,29 @@ public class TaskValidatorVisitor extends TaskVisitor {
 		if (!transition.isTargetApp()) {
 			transitionsTargetingLabels.add(transition);
 		}
+		if (transition.isTargetApp()) {
+			TaskAppNode taskApp = transition.getTargetApp();
+			if (taskApp.hasLabel()) {
+				String labelString = taskApp.getLabelString();
+				if (labelsDefined.contains(labelString)) {
+					pushProblem(taskApp.getLabel().startPos, DSLMessage.TASK_VALIDATION_DUPLICATE_LABEL);
+				}
+				labelsDefined.add(labelString);
+				if (taskAppNamesWithoutLabels.contains(labelString)) {
+					pushProblem(taskApp.getLabel().startPos,DSLMessage.TASK_VALIDATION_LABEL_CLASHES_WITH_TASKAPP_NAME);
+				}
+			}
+			else {
+				String name = taskApp.getName();
+				if (labelsDefined.contains(name)) {
+					pushProblem(taskApp.startPos,DSLMessage.TASK_VALIDATION_APP_NAME_CLASHES_WITH_LABEL);
+				}
+				if (taskAppNamesWithoutLabels.contains(name)) {
+					pushProblem(taskApp.startPos,DSLMessage.TASK_VALIDATION_APP_NAME_ALREADY_IN_USE);
+				}
+				taskAppNamesWithoutLabels.add(taskApp.getName());
+			}
+		}
 	}
 	
 	@Override

@@ -498,11 +498,11 @@ public class GraphGeneratorVisitor extends TaskVisitor {
 			if (transition.isSpecialTransition()) {
 				if (transition.isFailTransition()) {
 					Node failNode = findOrMakeNode("$FAIL");
-					addLink(new Link(currentTaskAppId, failNode.id, transition.getStatusToCheckInDSLForm()));
+					addLink(new Link(currentTaskAppId, failNode.id, transition.getStatusToCheck()));
 				}
 				else if (transition.isEndTransition()) {
 					Node endNode = findOrMakeNode("$END");
-					addLink(new Link(currentTaskAppId, endNode.id, transition.getStatusToCheckInDSLForm()));
+					addLink(new Link(currentTaskAppId, endNode.id, transition.getStatusToCheck()));
 				}
 			}
 			else {
@@ -519,7 +519,7 @@ public class GraphGeneratorVisitor extends TaskVisitor {
 					addNode(n);
 					isCreated = true;
 				}
-				addLink(new Link(currentTaskAppId, n.id, transition.getStatusToCheckInDSLForm()));
+				addLink(new Link(currentTaskAppId, n.id, transition.getStatusToCheck()));
 				if (isCreated) {
 					if (currentContext().isFlow) {
 						currentContext().addOtherExit(n.id);
@@ -534,11 +534,11 @@ public class GraphGeneratorVisitor extends TaskVisitor {
 			// Check if it is a transition to something labeled earlier in this flow
 			Node existingNode = currentContext().getNodeLabeled(transition.getTargetLabel());
 			if (existingNode != null) {
-				addLink(new Link(currentTaskAppId, existingNode.id, transition.getStatusToCheckInDSLForm()));
+				addLink(new Link(currentTaskAppId, existingNode.id, transition.getStatusToCheck()));
 			}
 			else {
 				// Record a new transition attempted
-				currentContext().addTransitionTarget(currentTaskAppId, transition.getStatusToCheckInDSLForm(),
+				currentContext().addTransitionTarget(currentTaskAppId, transition.getStatusToCheck(),
 						transition.getTargetLabel());
 			}
 		}
