@@ -27,6 +27,7 @@ import static org.springframework.cloud.dataflow.core.dsl.TokenKind.LITERAL_STRI
 import static org.springframework.cloud.dataflow.core.dsl.TokenKind.LT;
 import static org.springframework.cloud.dataflow.core.dsl.TokenKind.OPEN_PAREN;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -35,6 +36,8 @@ import java.util.Set;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.cloud.dataflow.core.dsl.graph.Graph;
+import org.springframework.cloud.dataflow.core.dsl.graph.Link;
+import org.springframework.cloud.dataflow.core.dsl.graph.Node;
 
 /**
  * Test the parser and visitor infrastructure. Check it accepts expected data and 
@@ -366,7 +369,7 @@ public class TaskParserTests {
 		ctn = parse("appA 'foo' -> appB");
 		assertTrue(ctn.isComposed());
 		assertNull(ctn.getTaskApp());
-		assertGraph("[0:START][1:appA][2:appB][3:END][0-1]['foo':1-2][1-3][2-3]", "appA 'foo' -> appB");
+		assertGraph("[0:START][1:appA][2:appB][3:END][0-1][foo:1-2][1-3][2-3]", "appA 'foo' -> appB");
 		ctn = parse("appA");
 		assertFalse(ctn.isComposed());
 		assertNotNull(ctn.getTaskApp());
@@ -450,12 +453,7 @@ public class TaskParserTests {
 		spec = "<FooApp || BarApp --p1=v1>";
 		assertGraph("[0:START][1:FooApp][2:BarApp:p1=v1][3:END][0-1][0-2][1-3][2-3]",spec);
 		spec = "FooApp --p1=v1 'something' -> GooApp --p2=v2 && SooApp --p3=v3";
-		assertGraph("[0:START][1:FooApp:p1=v1][2:GooApp:p2=v2][3:SooApp:p3=v3][4:END][0-1]['something':1-2][1-3][3-4][2-4]",spec);
-		spec = "FooApp --p1=v1 'something' -> GooApp --p2=v2 && SooApp --p3=v3 'something' -> GooApp --p2=v2";
-		assertGraph("[0:START][1:FooApp:p1=v1][2:GooApp:p2=v2][3:SooApp:p3=v3][4:END][0-1]['something':1-2][1-3]['something':3-2][3-4][2-4]",spec);
-		// Two references to the same app in the same flow are not the same if the properties are different:
-		spec = "FooApp --p1=v1 'something' -> GooApp --p2=v2 && SooApp --p3=v3 'something' -> GooApp --p3=v3";
-		assertGraph("[0:START][1:FooApp:p1=v1][2:GooApp:p2=v2][3:SooApp:p3=v3][4:GooApp:p3=v3][5:END][0-1]['something':1-2][1-3]['something':3-4][3-5][2-5][4-5]",spec);
+		assertGraph("[0:START][1:FooApp:p1=v1][2:GooApp:p2=v2][3:SooApp:p3=v3][4:END][0-1][something:1-2][1-3][3-4][2-4]",spec);
 	}
 
 	@Test
@@ -624,34 +622,24 @@ public class TaskParserTests {
 	}
 	
 	@Test
-	public void transitionsToLaterInFlow() {
-		String spec ="appA 'foo'->:bar && appB && bar: appC";
-		assertGraph("[0:START][1:appA][2:appB][3:appC][4:END][0-1][1-2]['foo':1-3][2-3][3-4]",spec);
-		checkDSLToGraphAndBackToDSL(spec);
-		spec ="appA 'foo'->:bar && appB && bar: appC && appD";
-		assertGraph("[0:START][1:appA][2:appB][3:appC][4:appD][5:END][0-1][1-2]['foo':1-3][2-3][3-4][4-5]",spec);
-		checkDSLToGraphAndBackToDSL(spec);
-	}
-	
-	@Test
 	public void transitionToOtherSequence() {
 		String spec =" appA 'fail'->:two && appB && appC;two: appD && appE";
 		assertGraph("[0:START][1:appA][2:appB][3:appC][4:END][9:appD][10:appE]"+
-		            "[0-1][1-2][2-3][3-4]['fail':1-9][9-10][10-4]",spec);
+		            "[0-1][1-2][2-3][3-4][fail:1-9][9-10][10-4]",spec);
 	}
 
 	@Test
 	public void secondarySequencesHaveFurtherTransitions() {
 		String spec =" appA 'fail'->:two && appB;two: appD 'fail2'->:three && appE;three: appF && appG";
 		assertGraph("[0:START][1:appA][2:appB][3:END][12:appD][13:appE][14:appF][15:appG]"+
-		            "[0-1][1-2][2-3]['fail':1-12][12-13][13-3]['fail2':12-14][14-15][15-3]",spec);
+		            "[0-1][1-2][2-3][fail:1-12][12-13][13-3][fail2:12-14][14-15][15-3]",spec);
 	}
 
 	@Test
 	public void twoReferencesToSecondarySequence() {
 		String spec = "appA 'fail'->:two && appB 'fail2'->:two && appC;two: appD && appE";
 		assertGraph("[0:START][1:appA][2:appB][3:appC][4:END][9:appD][10:appE]"+
-		            "[0-1][1-2][2-3][3-4]['fail':1-9]['fail2':2-9][9-10][10-4]",spec);
+		            "[0-1][1-2][2-3][3-4][fail:1-9][fail2:2-9][9-10][10-4]",spec);
 	}
 	
 	@Ignore
@@ -661,25 +649,6 @@ public class TaskParserTests {
 		// TODO lets consider this a limitation for now.
 		assertGraph("[0:START][1:aa][2:bb][3:cc][4:dd][5:ee][6:END]"+
 		            "[0-1][1-2]['foo':1-3][2-3][2-4][3-5][4-5][5-6]",spec);
-	}
-
-	@Test
-	public void jumpingAround() {
-		String spec = "one: aa && bb 'retry'->:one";
-		assertGraph("[0:START][1:aa][2:bb][3:END][0-1][1-2]['retry':2-1][2-3]",spec);
-		spec = "aa && one: bb && cc 'retry'->:one && dd";
-		assertGraph("[0:START][1:aa][2:bb][3:cc][4:dd][5:END]"+
-		            "[0-1][1-2][2-3]['retry':3-2][3-4][4-5]",spec);
-		spec = "aa 0->:two && bb 0->:three && cc;two: dd;three:ee";
-		assertGraph("[0:START][1:aa][2:bb][3:cc][4:END][11:dd][12:ee]"+
-		            "[0-1][1-2][2-3][3-4][0:1-11][11-4][0:2-12][12-4]",spec);
-		spec = "aa 'foo'->:two && bb && three: cc && dd;two: ee && ff '*'->:three";
-		assertGraph("[0:START][1:aa][2:bb][3:cc][4:dd][5:END][10:ee][11:ff]"+
-		            "[0-1][1-2][2-3][3-4][4-5]['foo':1-10][10-11][11-5]['*':11-3]",spec);
-		spec = "aa 'foo'->:two && bb && four: cc && dd;two: ee && ff '*'->:three;three: gg '*'->:four";
-		parse(spec);
-		assertGraph("[0:START][1:aa][2:bb][3:cc][4:dd][5:END][13:ee][14:ff][15:gg]" +
-				    "[0-1][1-2][2-3][3-4][4-5]['foo':1-13][13-14][14-5]['*':14-15][15-5]['*':15-3]",spec);
 	}
 	
 	@Test
@@ -810,6 +779,42 @@ public class TaskParserTests {
 		assertEquals(DSLMessage.TASK_VALIDATION_SPLIT_WITH_ONE_FLOW,problems.get(0).getMessage());
 		assertEquals(0,problems.get(0).getOffset());
 		assertEquals("167E:(pos 0): unnecessary use of split construct when only one flow to execute in parallel",problems.get(0).toString());
+		
+		validator.reset();
+		ctn = parse("appA && appA", false);
+		ctn.accept(validator);
+		problems = validator.getProblems();
+		assertEquals(1,problems.size());
+		assertEquals(DSLMessage.TASK_VALIDATION_APP_NAME_ALREADY_IN_USE,problems.get(0).getMessage());
+		assertEquals(8,problems.get(0).getOffset());
+		validator.reset();
+		ctn = parse("appA 'foo' -> appA", false);
+		ctn.accept(validator);
+		problems = validator.getProblems();
+		assertEquals(1,problems.size());
+		assertEquals(DSLMessage.TASK_VALIDATION_APP_NAME_ALREADY_IN_USE,problems.get(0).getMessage());
+		assertEquals(14,problems.get(0).getOffset());
+		validator.reset();
+		ctn = parse("appA 'foo' -> appA: appB", false);
+		ctn.accept(validator);
+		problems = validator.getProblems();
+		assertEquals(1,problems.size());
+		assertEquals(DSLMessage.TASK_VALIDATION_LABEL_CLASHES_WITH_TASKAPP_NAME,problems.get(0).getMessage());
+		assertEquals(14,problems.get(0).getOffset());
+		validator.reset();
+		ctn = parse("label1: appA 'foo' -> label1: appB", false);
+		ctn.accept(validator);
+		problems = validator.getProblems();
+		assertEquals(1,problems.size());
+		assertEquals(DSLMessage.TASK_VALIDATION_DUPLICATE_LABEL,problems.get(0).getMessage());
+		assertEquals(22,problems.get(0).getOffset());
+		validator.reset();
+		ctn = parse("label1: appA 'foo' -> label1", false);
+		ctn.accept(validator);
+		problems = validator.getProblems();
+		assertEquals(1,problems.size());
+		assertEquals(DSLMessage.TASK_VALIDATION_APP_NAME_CLASHES_WITH_LABEL,problems.get(0).getMessage());
+		assertEquals(22,problems.get(0).getOffset());
 	}
 	
 	@Test
@@ -895,8 +900,10 @@ public class TaskParserTests {
 		assertGraph("[0:START][1:AppA][2:AppE][3:AppB][4:AppC][5:AppD][6:END][0-1][0:1-2][1-3][3-4][3-5][4-6][5-6][2-6]",
 		          "AppA 0->AppE && AppB && <AppC || AppD>");
 		checkDSLToGraphAndBackToDSL("AppA 0->AppE && AppB && <AppC || AppD>");
-		checkDSLToGraphAndBackToDSL("aaa 'FOO'->XXX 'B'->bbb '*'->ccc && bbb && ccc");
+		checkDSLToGraphAndBackToDSL("aaa 'FOO'->XXX 'B'->bbb1 *->ccc1 && bbb2 && ccc2");
+		assertGraph("[0:START][1:x:AppA][2:y:AppB][3:END][0-1][0:1-2][1-3][2-3]","x: AppA 0->y: AppB");
 	}
+	
 
 
 	@Test
@@ -943,38 +950,24 @@ public class TaskParserTests {
 	}
 
 	@Test
-	public void transitionsWithSameTarget() {
-		// Not quoted transition names
-		checkForParseError("<foojob completed->killjob || barjob 'completed'->killjob>", DSLMessage.TASK_UNQUOTED_TRANSITION_CHECK_MUST_BE_NUMBER,8);
-		// Rule: In the same flow, references to the same transition target are the same node
-		assertGraph("[0:START][1:foojob][2:killjob][3:barjob][4:END][0-1]['completed':1-2][1-3]['completed':3-2][3-4][2-4]",
-				    "foojob 'completed'->killjob && barjob 'completed'->killjob");
-		// Rule: Across splits, references to the same transition target are different instances
-		assertGraph("[0:START][1:foojob][2:killjob][3:barjob][4:killjob][5:END]"+
-		            "[0-1]['completed':1-2][0-3]['completed':3-4][1-5][2-5][3-5][4-5]",
-				    "<foojob 'completed'->killjob || barjob 'completed'->killjob>");
-		checkDSLToGraphAndBackToDSL("<foojob 'completed'->killjob || barjob 'completed'->killjob>");
-	}
-
-	@Test
 	public void toDSLTextTransitions() {
 		// [SHOULD-VALIDATE] There is no real route to bbb
-		String spec = "aaa '*'->$END && bbb";
+		String spec = "aaa *->$END && bbb";
 		assertEquals(spec, parse(spec).toDSL());
 		assertGraph("[0:START][1:aaa][2:$END][3:bbb][4:END]"+
-		            "[0-1]['*':1-2][1-3][3-4]", spec);
+		            "[0-1][*:1-2][1-3][3-4]", spec);
 		checkDSLToGraphAndBackToDSL(spec);
 	}
 
 	@Test
 	// You can't draw this on the graph, it would end up looking like "aaa | '*' = $END || bbb || ccc
 	public void toDSLTextTransitionsSplit() {
-		checkDSLToGraphAndBackToDSL("aaa '*'->$END && <bbb || ccc>");
+		checkDSLToGraphAndBackToDSL("aaa *->$END && <bbb || ccc>");
 	}
 
 	@Test
 	public void toDSLTextTransitionsFlow() {
-		checkDSLToGraphAndBackToDSL("aaa '*'->$END && bbb && ccc");
+		checkDSLToGraphAndBackToDSL("aaa *->$END && bbb && ccc");
 	}
 
 	@Test
@@ -986,17 +979,15 @@ public class TaskParserTests {
 
 	@Test
 	public void toDSLTextFlowTransitions() {
-		checkDSLToGraphAndBackToDSL("aaa 'COMPLETED'->kill 'FOO'->kill");
+		checkDSLToGraphAndBackToDSL("aaa 'COMPLETED'->kill1 'FOO'->kill2");
 		checkDSLToGraphAndBackToDSL("aaa 'COMPLETED'->kill && bbb && ccc");
-		checkDSLToGraphAndBackToDSL("aaa 'COMPLETED'->kill && bbb 'COMPLETED'->kill && ccc");
-		checkDSLToGraphAndBackToDSL("aaa 'COMPLETED'->kill 'FOO'->bar && bbb 'COMPLETED'->kill && ccc");
+		checkDSLToGraphAndBackToDSL("aaa 'COMPLETED'->kill1 && bbb 'COMPLETED'->kill2 && ccc");
+		checkDSLToGraphAndBackToDSL("aaa 'COMPLETED'->x: kill 'FOO'->bar && bbb 'COMPLETED'->y: kill && ccc");
 	}
 
 	@Test
 	public void toDSLTextSplitTransitions() {
 		checkDSLToGraphAndBackToDSL("<aaa 'COMPLETED'->kill || bbb> && ccc");
-		checkDSLToGraphAndBackToDSL("<aaa 'COMPLETED'->kill || bbb 'COMPLETED'->kill> && ccc");
-		//		checkDSLToGraphAndBackToDSL("<aaa | COMPLETED = kill | '*' = kill2 & bbb | COMPLETED = kill> || ccc");
 	}
 
 
@@ -1012,28 +1003,6 @@ public class TaskParserTests {
 		checkDSLToGraphAndBackToDSL(spec);
 		assertGraph("[0:START][1:a][2:b][3:SYNC][4:c][5:d][6:END]"+
 		            "[0-1][0-2][1-3][2-3][3-4][3-5][4-6][5-6]", spec);
-	}
-
-	@Test
-	public void toDSLTextSqoop() {
-		String spec = "<(sqoop-6e44 'FAILED'->kill1" +
-				"  && sqoop-e07a 'FAILED'->kill1) & " +
-				" (sqoop-035f 'FAILED'->kill2" +
-				"  && sqoop-9408 'FAILED'->kill2" +
-				"  && sqoop-a6e0 'FAILED'->kill2" +
-				"  && sqoop-e522 'FAILED'->kill2" +
-				"  && shell-b521 'FAILED'->kill2) || " +
-				" (sqoop-6420 'FAILED'->kill3)>";
-		// DSL text right now doesn't include parentheses (they aren't necessary)
-		spec = "<sqoop-6e44 'FAILED'->kill1" +
-				" && sqoop-e07a 'FAILED'->kill1 ||" +
-				" sqoop-035f 'FAILED'->kill2" +
-				" && sqoop-9408 'FAILED'->kill2" +
-				" && sqoop-a6e0 'FAILED'->kill2" +
-				" && sqoop-e522 'FAILED'->kill2" +
-				" && shell-b521 'FAILED'->kill2 ||" +
-				" sqoop-6420 'FAILED'->kill3>";
-		checkDSLToGraphAndBackToDSL(spec);
 	}
 
 	@Test
@@ -1054,7 +1023,7 @@ public class TaskParserTests {
 	@Test
 	public void endTransition() {
 		String spec = "aaa 'broken'->$END";
-		assertGraph("[0:START][1:aaa][2:$END][3:END][0-1]['broken':1-2][1-3]",spec);
+		assertGraph("[0:START][1:aaa][2:$END][3:END][0-1][broken:1-2][1-3]",spec);
 		checkDSLToGraphAndBackToDSL(spec);
 	}
 
@@ -1177,48 +1146,18 @@ public class TaskParserTests {
 	}
 
 	@Test
-	public void complexToGraphAndBack() {
-		ctn = parse(
-				"aaa 'FAILED'->iii && <bbb 'FAILED'->iii '*'->$END || ccc 'FAILED'->jjj '*'->$END> &&ddd 'FAILED'->iii&&eee 'FAILED'->iii&&fff 'FAILED'->iii && <ggg 'FAILED'->kkk '*'->$END|| hhh 'FAILED'->kkk '*'->$END>    ");
-		checkDSLToGraphAndBackToDSL(
-				"aaa 'FAILED'->iii && <bbb 'FAILED'->iii '*'->$END || ccc 'FAILED'->jjj '*'->$END> && ddd 'FAILED'->iii && eee 'FAILED'->iii && fff 'FAILED'->iii && <ggg 'FAILED'->kkk '*'->$END || hhh 'FAILED'->kkk '*'->$END>");
-	}
-
-	@Test
 	public void toGraph$END() {
 		TaskNode ctn = parse("foo 'oranges'->$END");
 		assertEquals("foo 'oranges'->$END", ctn.toDSL());
-		assertGraph("[0:START][1:foo][2:$END][3:END][0-1]['oranges':1-2][1-3]", "foo 'oranges'->$END");
+		assertGraph("[0:START][1:foo][2:$END][3:END][0-1][oranges:1-2][1-3]", "foo 'oranges'->$END");
 		checkDSLToGraphAndBackToDSL("foo 'oranges'->$END");
 	}
-	
-	@Test
-	public void toGraph$END2() {
-		String definition = "aaa 'foo'->$END 'B'->bbb '*'->ccc && bbb && ccc";
-		assertParseAndBackToDSL(definition);
-		assertGraph("[0:START][1:aaa][2:$END][3:bbb][4:ccc][5:bbb][6:ccc][7:END]"+
-		            "[0-1]['foo':1-2]['B':1-3]['*':1-4][1-5][5-6][6-7][3-7][4-7]",definition);
-		checkDSLToGraphAndBackToDSL("aaa 'foo'->$END 'B'->bbb '*'->ccc && bbb && ccc");
-	}
-
-	@Test
-	public void toGraph$END3() {
-		// The trailing 'bbb' is redundant here...
-		String spec = "aaa 'foo'->$END 'B'->bbb '*'->$END && bbb";
-		assertEquals(spec,parse(spec).toDSL());
-		// TODO should the $ENDs just be joined to END?
-		assertGraph("[0:START][1:aaa][2:$END][3:bbb][4:bbb][5:END]"+
-		            "[0-1]['foo':1-2]['B':1-3]['*':1-2][1-4][4-5][3-5]",spec);
-
-		checkDSLToGraphAndBackToDSL(spec);
-	}
-
 
 	@Test
 	public void toGraph$FAIL() {
 		String spec = "foo 'oranges'->$FAIL";
 		assertEquals(spec,parse(spec).toDSL());
-		assertGraph("[0:START][1:foo][2:$FAIL][3:END][0-1]['oranges':1-2][1-3]",spec);
+		assertGraph("[0:START][1:foo][2:$FAIL][3:END][0-1][oranges:1-2][1-3]",spec);
 		checkDSLToGraphAndBackToDSL(spec);
 	}
 
@@ -1226,85 +1165,63 @@ public class TaskParserTests {
 	// 	js = parse("<foo | completed=boo& bar> || boo");
 
 	@Test
-	public void toGraphWithTransition() throws Exception {
-		// Should be two different goo nodes
-		String spec = "<foo 'completed'->goo || bar> && boo && goo";
-		assertGraph("[0:START][1:foo][2:goo][3:bar][4:boo][5:goo][6:END]"+
-		            "[0-1]['completed':1-2][0-3][1-4][2-4][3-4][4-5][5-6]",spec);
-	}
-
-	@Test
 	public void toGraphWithTransition2() {
 		// The target transition node hoo is not elsewhere on the list
 		String definition = "<foo 'completed'->hoo || bar> && boo && goo";
 		assertGraph("[0:START][1:foo][2:hoo][3:bar][4:boo][5:goo][6:END]"+
-		            "[0-1]['completed':1-2][0-3][1-4][2-4][3-4][4-5][5-6]",definition);
+		            "[0-1][completed:1-2][0-3][1-4][2-4][3-4][4-5][5-6]",definition);
 		checkDSLToGraphAndBackToDSL(definition);
 	}
-
+	
 	@Test
-	public void sqoopExample() {
-		String spec =
-			    "<(sqoop-6e44 'FAILED'->kill1\n" +
-				"  && sqoop-e07a 'FAILED'->kill1) || \n" +
-				" (sqoop-035f 'FAILED'->kill2\n" +
-				"  && sqoop-9408 'FAILED'->kill2\n" +
-				"  && sqoop-a6e0 'FAILED'->kill2\n" +
-				"  && sqoop-e522 'FAILED' ->kill2\n" +
-				"  && shell-b521 'FAILED'->kill2) || \n" +
-				" (sqoop-6420 'FAILED'->kill3)>";
-		// TODO note parentheses and newlines removed
-		assertEquals("<sqoop-6e44 'FAILED'->kill1 && sqoop-e07a 'FAILED'->kill1 || sqoop-035f 'FAILED'->kill2 && sqoop-9408 'FAILED'->kill2 && sqoop-a6e0 'FAILED'->kill2 && sqoop-e522 'FAILED'->kill2 && shell-b521 'FAILED'->kill2 || sqoop-6420 'FAILED'->kill3>",parse(spec).toDSL());
-	}
+	public void spacesInProperties() {
+		// If a property value in the graph has a space in, quote it when creating dsl
+		// If a transition code in the graph is not numeric or * then quote it
+		Graph graph = parse("aaa").toGraph();
+		Node n = graph.nodes.get(1);
 
-	@Test
-	public void transitionsAcrossSplit() {
-		// As the boo references are across a split, should be different Boo instances
-		String spec = "<foo 'failed'->boo || bar 'failed'->boo>";
-		// There should be only one 'boo' here, that the two things in the same flow will map to.
-		assertGraph("[0:START][1:foo][2:boo][3:bar][4:boo][5:END]"+
-		            "[0-1]['failed':1-2][0-3]['failed':3-4][1-5][2-5][3-5][4-5]",spec);
-	}
+		// Set a property with space in it, if not quoted it should get quoted in conversion
+		Map<String,String> properties = new HashMap<>();
+		properties.put("one", "bar");
+		properties.put("two", "b ar");
+		Node newNode = new Node(n.id,n.name,properties);
+		graph.nodes.set(1, newNode);
+		assertEquals("aaa --one=bar --two='b ar'",graph.toDSLText());
+		
+		graph.nodes.add(new Node("3","bbb"));
+		graph.links.add(new Link("1","3","tname"));
+		assertEquals("aaa --one=bar --two='b ar' 'tname'->bbb",graph.toDSLText());
 
-	@Test
-	public void forwardReferenceInFlow() {
-		String spec = "aaa 'failed'->:foo && bbb && foo: ccc && ddd";
-		assertGraph("[0:START][1:aaa][2:bbb][3:ccc][4:ddd][5:END]"+
-				    "[0-1][1-2]['failed':1-3][2-3][3-4][4-5]", spec);
-		checkDSLToGraphAndBackToDSL(spec);
-	}
+		graph.nodes.add(new Node("4","ccc"));
+		graph.links.add(new Link("1","4","*"));
+		assertEquals("aaa --one=bar --two='b ar' 'tname'->bbb *->ccc",graph.toDSLText());
 
-	@Test
-	public void splitWithSimilarTransitions() {
-		// Two instances of boo in the graph, one for each 'branch'
-		String spec = "<foo 'failed'->boo 'error'->boo || bar 'failed'->boo>";
-		assertGraph("[0:START][1:foo][2:boo][3:bar][4:boo][5:END]"+
-				    "[0-1]['failed':1-2]['error':1-2][0-3]['failed':3-4][1-5][2-5][3-5][4-5]", spec);
-		checkDSLToGraphAndBackToDSL(spec);
-	}
-
-	@Test
-	public void complexSplitWithTransitionsToCommonApps() {
-		String spec = "<foo 'failed'->boo 'error'->boo && goo || bar 'failed'->boo>";
-		assertGraph("[0:START][1:foo][2:boo][3:goo][4:bar][5:boo][6:END]"+
-		            "[0-1]['failed':1-2]['error':1-2][1-3][0-4]['failed':4-5][3-6][2-6][4-6][5-6]", spec);
-		checkDSLToGraphAndBackToDSL(spec);
+		graph.nodes.add(new Node("5","ddd"));
+		graph.links.add(new Link("1","5","3"));
+		assertEquals("aaa --one=bar --two='b ar' 'tname'->bbb *->ccc 3->ddd",graph.toDSLText());
+		
+		// When going from DSL to graph, unquote property values and exit codes
+		
+		String dsl = "aaa --one=bar --two='b ar' 'tname'->bbb *->ccc 3->ddd";
+		graph = parse(dsl).toGraph();
+		n = graph.nodes.get(1);
+		assertEquals("b ar",n.properties.get("two"));
+		Link l = graph.links.get(1);
+		assertEquals("tname",l.getTransitionName());
+		l = graph.links.get(2);
+		assertEquals("*",l.getTransitionName());
+		l = graph.links.get(3);
+		assertEquals("3",l.getTransitionName());
+		assertEquals(dsl,graph.toDSLText());
 	}
 
 	@Test
 	public void multiTransitionToSameTarget() {
-		String spec = "foo 'failed'->bbb && bar 'failed'->bbb";
-		assertGraph("[0:START][1:foo][2:bbb][3:bar][4:END][0-1]['failed':1-2][1-3]['failed':3-2][3-4][2-4]", spec);
+		String spec = "foo 'failed'->bbb && bar 'failed'->bbc";
+		assertGraph("[0:START][1:foo][2:bbb][3:bar][4:bbc][5:END][0-1][failed:1-2][1-3][failed:3-4][3-5][2-5][4-5]", spec);
 		checkDSLToGraphAndBackToDSL(spec);
 	}
 
-	@Test
-	public void multiTransitionOnSameJobToSameTarget() {
-		String spec = "foo 'failed'->bbb 'error'->bbb && bar 'failed'->bbb";
-		assertGraph("[0:START][1:foo][2:bbb][3:bar][4:END][0-1]['failed':1-2]['error':1-2][1-3]['failed':3-2][3-4][2-4]", spec);
-		checkDSLToGraphAndBackToDSL(spec);
-	}
-	
 	@Test
 	public void extraneousDataError() {
 		String jobSpecification = "<a || b> rubbish";
@@ -1433,10 +1350,6 @@ public class TaskParserTests {
 		TaskNode ctn = parse(dsl);
 		Graph graph = ctn.toGraph();
 		assertEquals(expectedGraph,graph.toVerboseString());
-	}
-
-	private void assertParseAndBackToDSL(String definition) {
-		assertEquals(definition,parse(definition).toDSL());
 	}
 
 	static class TestVisitor extends TaskVisitor {
