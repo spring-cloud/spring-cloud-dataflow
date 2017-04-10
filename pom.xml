@@ -27,7 +27,7 @@
 		<spring-cloud-dataflow-ui.version>1.2.0.BUILD-SNAPSHOT</spring-cloud-dataflow-ui.version>
 
 		<spring-cloud-deployer.version>1.2.0.M3</spring-cloud-deployer.version>
-		<spring-cloud-deployer-local.version>1.2.0.M3</spring-cloud-deployer-local.version>
+		<spring-cloud-deployer-local.version>1.2.0.BUILD-SNAPSHOT</spring-cloud-deployer-local.version>
 
 		<!-- Note: Change ./spring-cloud-dataflow-server-local/pom.xml to match the spring-boot.version -->
 		<spring-boot.version>1.5.2.RELEASE</spring-boot.version>
