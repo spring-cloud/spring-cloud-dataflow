@@ -33,9 +33,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.boot.info.BuildProperties;
-import org.springframework.boot.info.GitProperties;
-import org.springframework.boot.info.InfoProperties;
 import org.springframework.cloud.client.circuitbreaker.EnableCircuitBreaker;
 import org.springframework.cloud.dataflow.completion.CompletionConfiguration;
 import org.springframework.cloud.dataflow.completion.StreamCompletionProvider;
@@ -54,7 +51,6 @@ import org.springframework.cloud.dataflow.server.controller.JobExecutionControll
 import org.springframework.cloud.dataflow.server.controller.JobInstanceController;
 import org.springframework.cloud.dataflow.server.controller.JobStepExecutionController;
 import org.springframework.cloud.dataflow.server.controller.JobStepExecutionProgressController;
-import org.springframework.cloud.dataflow.server.controller.MetricsController;
 import org.springframework.cloud.dataflow.server.controller.RestControllerAdvice;
 import org.springframework.cloud.dataflow.server.controller.RootController;
 import org.springframework.cloud.dataflow.server.controller.RuntimeAppsController;
@@ -129,11 +125,6 @@ public class DataFlowControllerAutoConfiguration {
 	@Bean
 	public MetricStore metricStore(MetricsProperties metricsProperties) {
 		return new MetricStore(metricsProperties);
-	}
-
-	@Bean
-	public MetricsController metricsController(MetricStore metricStore) {
-		return new MetricsController(metricStore);
 	}
 
 	@Bean

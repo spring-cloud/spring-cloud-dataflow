@@ -24,7 +24,6 @@ import java.util.stream.Stream;
 
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.rest.resource.AppInstanceStatusResource;
-import org.springframework.cloud.dataflow.rest.resource.AppMetricResource;
 import org.springframework.cloud.dataflow.rest.resource.AppStatusResource;
 import org.springframework.cloud.dataflow.server.controller.support.ApplicationsMetrics;
 import org.springframework.cloud.dataflow.server.controller.support.ControllerUtils;
@@ -167,11 +166,13 @@ public class RuntimeAppsController {
 		for (AppStatus appStatus : statuses) {
 			Map<String, AppInstanceStatus> appInstanceStatusMap = appStatus.getInstances();
 			appInstanceStatusMap.forEach((k,appInstanceStatus) -> {
-				String trackingKey = appInstanceStatus.getAttributes().get("trackingKey");
+				String trackingKey = appInstanceStatus.getAttributes().get("guid");
 				if (metricsInstanceMap.containsKey(trackingKey)) {
 					ApplicationsMetrics.Instance metricsAppInstance = metricsInstanceMap.get(trackingKey);
-					appInstanceStatus.getAttributes().put("incomingRate", Double.toString(metricsAppInstance.getIncomingRate()));
-					appInstanceStatus.getAttributes().put("outgoingRate", Double.toString(metricsAppInstance.getOutgoingRate()));
+					appInstanceStatus.getAttributes().put("metrics.integration.channel.input.receiveRate",
+							String.format("%.2f", metricsAppInstance.getIncomingRate()));
+					appInstanceStatus.getAttributes().put("metrics.integration.channel.output.sendRate",
+							String.format("%.2f", metricsAppInstance.getOutgoingRate()));
 				}
 			});
 		}
