@@ -525,6 +525,20 @@ for instance every user shall have have access to all endpoints, then you can al
 set `spring.cloud.dataflow.security.authorization.enabled=false`.
 ====
 
+If you are using basic security configuration by using security properties then it is important to set the roles for the users.
+
+For instance,
+
+[source,bash]
+----
+java -jar spring-cloud-dataflow-server-local/target/spring-cloud-dataflow-server-local-<version>.jar \
+    --security.basic.enabled=true \
+    --security.user.name=test \
+    --security.user.password=pass \
+    --security.user.role=VIEW &
+----
+
+
 [[authorization-shell-and-dashboard]]
 ==== Authorization - Shell and Dashboard Behavior
 
