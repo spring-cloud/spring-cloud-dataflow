@@ -39,6 +39,7 @@ import org.springframework.cloud.dataflow.rest.client.AboutOperations;
 import org.springframework.cloud.dataflow.rest.client.DataFlowOperations;
 import org.springframework.cloud.dataflow.rest.resource.RootResource;
 import org.springframework.cloud.dataflow.rest.resource.about.AboutResource;
+import org.springframework.cloud.dataflow.shell.Target;
 import org.springframework.cloud.dataflow.shell.TargetHolder;
 import org.springframework.cloud.dataflow.shell.config.DataFlowShell;
 import org.springframework.hateoas.Link;
@@ -55,6 +56,7 @@ import org.springframework.web.client.RestTemplate;
  *
  * @author Gunnar Hillert
  * @author Eric Bottard
+ * @author Ilayaperumal Gopinathan
  *
  */
 public class ConfigCommandTests {
@@ -79,21 +81,16 @@ public class ConfigCommandTests {
 
 		when(restTemplate.getMessageConverters()).thenReturn(messageConverters);
 
-
-		configCommands.setTargetHolder(new TargetHolder());
+		TargetHolder targetHolder = new TargetHolder();
+		targetHolder.setTarget(new Target("http://localhost:9393"));
+		configCommands.setTargetHolder(targetHolder);
 		configCommands.setRestTemplate(restTemplate);
 		configCommands.setDataFlowShell(dataFlowShell);
 		configCommands.setServerUri("http://localhost:9393");
-		configCommands.onApplicationEvent(mock(ApplicationReadyEvent.class));
 	}
 
 	@Test
 	public void testInfo() throws IOException {
-		final Exception e = new RestClientException("FooBar");
-		when(restTemplate.getForObject(Mockito.any(URI.class), Mockito.eq(RootResource.class))).thenThrow(e);
-
-		configCommands.onApplicationEvent(null);
-
 		DataFlowOperations dataFlowOperations = mock(DataFlowOperations.class);
 		AboutOperations aboutOperations = mock(AboutOperations.class);
 		when(dataFlowOperations.aboutOperation()).thenReturn(aboutOperations);
@@ -108,7 +105,6 @@ public class ConfigCommandTests {
 		aboutResource.getRuntimeEnvironment().getAppDeployer().setJavaVersion("1.8");
 		aboutResource.getRuntimeEnvironment().getAppDeployer().getPlatformSpecificInfo().put("Some", "Stuff");
 		aboutResource.getRuntimeEnvironment().getTaskLauncher().setDeployerSpiVersion("6.4");
-
 		final Table infoResult = (Table) configCommands.info().get(0);
 		String expectedOutput = FileCopyUtils.copyToString(new InputStreamReader(getClass().getResourceAsStream(ConfigCommandTests.class.getSimpleName() + "-testInfo.txt"), "UTF-8"));
 		assertThat(infoResult.render(80), is(expectedOutput));
