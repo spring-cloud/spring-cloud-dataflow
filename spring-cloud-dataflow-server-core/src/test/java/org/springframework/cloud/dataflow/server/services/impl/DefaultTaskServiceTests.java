@@ -183,10 +183,10 @@ public class DefaultTaskServiceTests {
 	public void createSequenceComposedTask() {
 		taskService.saveTaskDefinition("seqTask", "AAA && BBB");
 		verifyTaskExistsInRepo("seqTask",
-				"composed-task-runner --graph=\"_seqTask_AAA && _seqTask_BBB\"");
+				"composed-task-runner --graph=\"seqTask-AAA && seqTask-BBB\"");
 
-		verifyTaskExistsInRepo("_seqTask_AAA", "AAA");
-		verifyTaskExistsInRepo("_seqTask_BBB", "BBB");
+		verifyTaskExistsInRepo("seqTask-AAA", "AAA");
+		verifyTaskExistsInRepo("seqTask-BBB", "BBB");
 	}
 
 	@Test
@@ -194,10 +194,10 @@ public class DefaultTaskServiceTests {
 	public void createSplitComposedTask() {
 		taskService.saveTaskDefinition("splitTask", "<AAA || BBB>");
 		verifyTaskExistsInRepo("splitTask",
-				"composed-task-runner --graph=\"<_splitTask_AAA || _splitTask_BBB>\"");
+				"composed-task-runner --graph=\"<splitTask-AAA || splitTask-BBB>\"");
 
-		verifyTaskExistsInRepo("_splitTask_AAA", "AAA");
-		verifyTaskExistsInRepo("_splitTask_BBB", "BBB");
+		verifyTaskExistsInRepo("splitTask-AAA", "AAA");
+		verifyTaskExistsInRepo("splitTask-BBB", "BBB");
 	}
 
 	@Test
@@ -205,10 +205,10 @@ public class DefaultTaskServiceTests {
 	public void createTransitionComposedTask() {
 		taskService.saveTaskDefinition("transitionTask", "AAA 'FAILED' -> BBB '*' -> CCC");
 		verifyTaskExistsInRepo("transitionTask",
-				"composed-task-runner --graph=\"_transitionTask_AAA 'FAILED'->_transitionTask_BBB '*'->_transitionTask_CCC\"");
+				"composed-task-runner --graph=\"transitionTask-AAA 'FAILED'->transitionTask-BBB '*'->transitionTask-CCC\"");
 
-		verifyTaskExistsInRepo("_transitionTask_AAA", "AAA");
-		verifyTaskExistsInRepo("_transitionTask_BBB", "BBB");
+		verifyTaskExistsInRepo("transitionTask-AAA", "AAA");
+		verifyTaskExistsInRepo("transitionTask-BBB", "BBB");
 	}
 
 	@Test
@@ -222,10 +222,10 @@ public class DefaultTaskServiceTests {
 	@DirtiesContext
 	public void deleteComposedTask() {
 		taskService.saveTaskDefinition("deleteTask", "AAA && BBB && CCC");
-		verifyTaskExistsInRepo("_deleteTask_AAA", "AAA");
-		verifyTaskExistsInRepo("_deleteTask_BBB", "BBB");
-		verifyTaskExistsInRepo("_deleteTask_CCC", "CCC");
-		verifyTaskExistsInRepo("deleteTask", "composed-task-runner --graph=\"_deleteTask_AAA && _deleteTask_BBB && _deleteTask_CCC\"");
+		verifyTaskExistsInRepo("deleteTask-AAA", "AAA");
+		verifyTaskExistsInRepo("deleteTask-BBB", "BBB");
+		verifyTaskExistsInRepo("deleteTask-CCC", "CCC");
+		verifyTaskExistsInRepo("deleteTask", "composed-task-runner --graph=\"deleteTask-AAA && deleteTask-BBB && deleteTask-CCC\"");
 
 		long preDeleteSize = taskDefinitionRepository.count();
 		taskService.deleteTaskDefinition("deleteTask");
