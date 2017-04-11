@@ -63,7 +63,11 @@ public class Graph {
 	public String toVerboseString() {
 		StringBuilder s = new StringBuilder();
 		for (Node n: nodes) {
-			s.append("[").append(n.id).append(":").append(n.name);
+			s.append("[").append(n.id).append(":");
+			if (n.getLabel() != null) {
+				s.append(n.getLabel()).append(":");
+			}
+			s.append(n.name);
 			if (n.properties != null) {
 				for (Map.Entry<String,String> property: n.properties.entrySet()) {
 					s.append(":").append(property.getKey()).append("=").append(property.getValue());
@@ -318,7 +322,11 @@ public class Graph {
 		if (node.properties != null) {
 			for (Map.Entry<String, String> entry : node.properties.entrySet()) {
 				graphText.append(" ");
-				graphText.append("--").append(entry.getKey()).append("=").append(entry.getValue());
+				String propertyValue = entry.getValue();
+				if (propertyValue.contains(" ") && !propertyValue.startsWith("'")) {
+					propertyValue = "'" + propertyValue + "'";
+				}
+				graphText.append("--").append(entry.getKey()).append("=").append(propertyValue);
 			}
 		}
 	}
@@ -340,6 +348,21 @@ public class Graph {
 			if (l.hasTransitionSet()) {
 				// capture the target of this link as a simple transition
 				String transitionName = l.getTransitionName();
+				boolean isStatusText = true;
+				if (transitionName.equals("*")) {
+					isStatusText = false;
+				}
+				else {
+					try {
+						Integer.parseInt(transitionName);
+						isStatusText = false;
+					} catch (NumberFormatException nfe) {
+						// it is text
+					}
+				}
+				if (isStatusText && !transitionName.startsWith("'")) {
+					transitionName = "'"+transitionName+"'";
+				}
 				Node transitionTarget = findNodeById(l.to);
 				String transitionTargetName = transitionTarget.name;
 				if (transitionTargetName.equals("FAIL")) {
@@ -349,7 +372,7 @@ public class Graph {
 					transitionTargetName = TransitionNode.END;
 				}
 				else if (transitionTarget.getLabel()!=null) {
-					transitionTargetName = ":"+transitionTarget.getLabel();
+					transitionTargetName = transitionTarget.getLabel()+": "+transitionTargetName;
 				}
 				graphText.append(" ").append(transitionName).append("->").append(transitionTargetName);
 				unfollowedLinks.remove(l);
