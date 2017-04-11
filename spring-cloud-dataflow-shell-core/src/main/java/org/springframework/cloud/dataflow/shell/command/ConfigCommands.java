@@ -16,8 +16,6 @@
 
 package org.springframework.cloud.dataflow.shell.command;
 
-import static org.springframework.shell.table.BorderSpecification.TOP;
-
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
@@ -69,8 +67,11 @@ import org.springframework.shell.table.TableBuilder;
 import org.springframework.shell.table.TableModelBuilder;
 import org.springframework.shell.table.Tables;
 import org.springframework.stereotype.Component;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
+
+import static org.springframework.shell.table.BorderSpecification.TOP;
 
 /**
  * Configuration commands for the Shell. The default Data Flow Server location is
@@ -172,7 +173,6 @@ public class ConfigCommands implements CommandMarker,
 					help = "accept any SSL certificate (even self-signed)",
 					specifiedDefaultValue = Target.DEFAULT_SPECIFIED_SKIP_SSL_VALIDATION,
 					unspecifiedDefaultValue = Target.DEFAULT_UNSPECIFIED_SKIP_SSL_VALIDATION) boolean skipSslValidation){
-
 		if (!StringUtils.isEmpty(targetPassword) && StringUtils.isEmpty(targetUsername)) {
 				return "A password may be specified only together with a username";
 		}
@@ -207,24 +207,8 @@ public class ConfigCommands implements CommandMarker,
 		catch (Exception e) {
 			this.targetHolder.getTarget().setTargetException(e);
 			this.shell.setDataFlowOperations(null);
-			if (e instanceof DataFlowServerException) {
-				String message = String.format("Unable to parse server response: %s - at URI '%s'.", e.getMessage(),
-						targetUriString);
-				if (logger.isDebugEnabled()) {
-					logger.debug(message, e);
-				}
-				else {
-					logger.warn(message);
-				}
-				this.targetHolder.getTarget().setTargetResultMessage(message);
-			}
-			else {
-				this.targetHolder.getTarget().setTargetResultMessage(String.format("Unable to contact Data Flow Server at '%s': '%s'.",
-						targetUriString, e.toString()));
-			}
-
+			handleTargetException(this.targetHolder.getTarget());
 		}
-
 		return(this.targetHolder.getTarget().getTargetResultMessage());
 
 	}
@@ -232,6 +216,10 @@ public class ConfigCommands implements CommandMarker,
 	@CliCommand(value = {"dataflow config info"}, help = "Show the Dataflow server being used")
 	public List<Object> info() {
 		Target target = targetHolder.getTarget();
+		if (target.getTargetException() != null) {
+			handleTargetException(target);
+			throw new DataFlowServerException(this.targetHolder.getTarget().getTargetResultMessage());
+		}
 		AboutResource about = this.shell.getDataFlowOperations().aboutOperation().get();
 
 		List<Object> result = new ArrayList<>();
@@ -336,6 +324,27 @@ public class ConfigCommands implements CommandMarker,
 			result.add(stringWriter.toString());
 		}
 		return result;
+	}
+
+	private void handleTargetException(Target target) {
+		Exception targetException = target.getTargetException();
+		Assert.isTrue(targetException != null, "TargetException must not be null");
+		if (targetException instanceof DataFlowServerException) {
+			String message = String.format("Unable to parse server response: %s - at URI '%s'.", targetException.getMessage(),
+					target.getTargetUriAsString());
+			if (logger.isDebugEnabled()) {
+				logger.debug(message, targetException);
+			}
+			else {
+				logger.warn(message);
+			}
+			this.targetHolder.getTarget().setTargetResultMessage(message);
+		}
+		else {
+			this.targetHolder.getTarget().setTargetResultMessage(String.format("Unable to contact Data Flow Server at '%s': '%s'.",
+					target.getTargetUriAsString(), targetException.toString()));
+		}
+
 	}
 
 	@Override

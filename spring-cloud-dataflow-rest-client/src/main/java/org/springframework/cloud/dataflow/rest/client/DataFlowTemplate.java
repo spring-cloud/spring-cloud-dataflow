@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2016 the original author or authors.
+ * Copyright 2015-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -158,47 +158,61 @@ public class DataFlowTemplate implements DataFlowOperations {
 
 		final RootResource resourceSupport = restTemplate.getForObject(baseURI, RootResource.class);
 
-		String serverRevision = resourceSupport.getApiRevision() != null ? resourceSupport.getApiRevision().toString() : "[unknown]";
-		if (!String.valueOf(Version.REVISION).equals(serverRevision)) {
-			String downloadURL = getLink(resourceSupport, "dashboard").getHref() + "#about";
-			throw new IllegalStateException(String.format("Incompatible version of Data Flow server detected.\n" +
-					"Trying to use shell which supports revision %s, while server revision is %s. Both revisions should be aligned.\n" +
-					"Follow instructions at %s to download a compatible version of the shell.",
-				Version.REVISION, serverRevision, downloadURL));
-		}
+		if (resourceSupport != null) {
+			String serverRevision = resourceSupport.getApiRevision() != null ? resourceSupport.getApiRevision().toString() : "[unknown]";
+			if (!String.valueOf(Version.REVISION).equals(serverRevision)) {
+				String downloadURL = getLink(resourceSupport, "dashboard").getHref() + "#about";
+				throw new IllegalStateException(String.format("Incompatible version of Data Flow server detected.\n" +
+								"Trying to use shell which supports revision %s, while server revision is %s. Both revisions should be aligned.\n" +
+								"Follow instructions at %s to download a compatible version of the shell.",
+						Version.REVISION, serverRevision, downloadURL));
+			}
 
-		this.aboutOperations = new AboutTemplate(restTemplate, resourceSupport.getLink(AboutTemplate.ABOUT_REL));
+			this.aboutOperations = new AboutTemplate(restTemplate, resourceSupport.getLink(AboutTemplate.ABOUT_REL));
 
-		if (resourceSupport.hasLink(StreamTemplate.DEFINITIONS_REL)) {
-			this.streamOperations = new StreamTemplate(restTemplate, resourceSupport);
-			this.runtimeOperations = new RuntimeTemplate(restTemplate, resourceSupport);
+			if (resourceSupport.hasLink(StreamTemplate.DEFINITIONS_REL)) {
+				this.streamOperations = new StreamTemplate(restTemplate, resourceSupport);
+				this.runtimeOperations = new RuntimeTemplate(restTemplate, resourceSupport);
+			}
+			else {
+				this.streamOperations = null;
+				this.runtimeOperations = null;
+			}
+			if (resourceSupport.hasLink(CounterTemplate.COUNTER_RELATION)) {
+				this.counterOperations = new CounterTemplate(restTemplate, resourceSupport);
+				this.fieldValueCounterOperations = new FieldValueCounterTemplate(restTemplate, resourceSupport);
+				this.aggregateCounterOperations = new AggregateCounterTemplate(restTemplate, resourceSupport);
+			}
+			else {
+				this.counterOperations = null;
+				this.fieldValueCounterOperations = null;
+				this.aggregateCounterOperations = null;
+			}
+			if (resourceSupport.hasLink(TaskTemplate.DEFINITIONS_RELATION)) {
+				this.taskOperations = new TaskTemplate(restTemplate, resourceSupport);
+				this.jobOperations = new JobTemplate(restTemplate, resourceSupport);
+			}
+			else {
+				this.taskOperations = null;
+				this.jobOperations = null;
+			}
+			this.appRegistryOperations = new AppRegistryTemplate(restTemplate, resourceSupport);
+			this.completionOperations = new CompletionTemplate(restTemplate,
+					resourceSupport.getLink("completions/stream"),
+					resourceSupport.getLink("completions/task"));
 		}
 		else {
+			this.aboutOperations = null;
 			this.streamOperations = null;
 			this.runtimeOperations = null;
-		}
-		if (resourceSupport.hasLink(CounterTemplate.COUNTER_RELATION)) {
-			this.counterOperations = new CounterTemplate(restTemplate, resourceSupport);
-			this.fieldValueCounterOperations = new FieldValueCounterTemplate(restTemplate, resourceSupport);
-			this.aggregateCounterOperations = new AggregateCounterTemplate(restTemplate, resourceSupport);
-		}
-		else {
 			this.counterOperations = null;
 			this.fieldValueCounterOperations = null;
 			this.aggregateCounterOperations = null;
-		}
-		if (resourceSupport.hasLink(TaskTemplate.DEFINITIONS_RELATION)) {
-			this.taskOperations = new TaskTemplate(restTemplate, resourceSupport);
-			this.jobOperations = new JobTemplate(restTemplate, resourceSupport);
-		}
-		else {
 			this.taskOperations = null;
 			this.jobOperations = null;
+			this.appRegistryOperations = null;
+			this.completionOperations = null;
 		}
-		this.appRegistryOperations = new AppRegistryTemplate(restTemplate, resourceSupport);
-		this.completionOperations = new CompletionTemplate(restTemplate,
-			resourceSupport.getLink("completions/stream"),
-			resourceSupport.getLink("completions/task"));
 	}
 
 	public Link getLink(ResourceSupport resourceSupport, String rel) {
