@@ -61,6 +61,7 @@ import org.springframework.util.StringUtils;
  * @author Mark Fisher
  * @author Janne Valkealahti
  * @author Gunnar Hillert
+ * @author Thomas Risberg
  */
 public class DefaultTaskService implements TaskService {
 
@@ -285,7 +286,7 @@ public class DefaultTaskService implements TaskService {
 		//if composed-task-runner definition then destroy all child tasks associated with it.
 		if(taskDefinition.getDslText().startsWith(taskConfigurationProperties.getComposedTaskRunnerName()))
 		{
-			String childTaskPrefix = String.format("_%s_",name);
+			String childTaskPrefix = String.format("%s-",name);
 			taskDefinitionRepository.findAll().forEach(
 					childDefinition -> {
 						if(childDefinition.getName().startsWith(childTaskPrefix)) {

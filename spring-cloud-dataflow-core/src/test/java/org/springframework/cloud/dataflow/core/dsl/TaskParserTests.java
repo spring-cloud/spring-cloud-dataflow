@@ -288,60 +288,60 @@ public class TaskParserTests {
 		TaskNode ctn = parse("foo","appA && appB",true);
 		List<TaskApp> taskApps = ctn.getTaskApps();
 		assertEquals("appA",taskApps.get(0).getName());
-		assertEquals("_foo_appA",taskApps.get(0).getExecutableDSLName());
+		assertEquals("foo-appA",taskApps.get(0).getExecutableDSLName());
 		assertEquals("appB",taskApps.get(1).getName());
-		assertEquals("_foo_appB",taskApps.get(1).getExecutableDSLName());
+		assertEquals("foo-appB",taskApps.get(1).getExecutableDSLName());
 		
 		ctn = parse("bar","appC && goo: appC",true);
 		taskApps = ctn.getTaskApps();
 		assertEquals("appC",taskApps.get(0).getName());
-		assertEquals("_bar_appC",taskApps.get(0).getExecutableDSLName());
+		assertEquals("bar-appC",taskApps.get(0).getExecutableDSLName());
 		assertEquals("appC",taskApps.get(1).getName());
-		assertEquals("_bar_goo",taskApps.get(1).getExecutableDSLName());
+		assertEquals("bar-goo",taskApps.get(1).getExecutableDSLName());
 
 		// flows
-		assertEquals("_foo_appA",parse("foo","appA",true).toExecutableDSL());
-		assertEquals("_foo_appA && _foo_appB",parse("foo","appA && appB",true).toExecutableDSL());
-		assertEquals("_foo_appA && _foo_appB && _foo_appC",parse("foo","appA && appB && appC",true).toExecutableDSL());
+		assertEquals("foo-appA",parse("foo","appA",true).toExecutableDSL());
+		assertEquals("foo-appA && foo-appB",parse("foo","appA && appB",true).toExecutableDSL());
+		assertEquals("foo-appA && foo-appB && foo-appC",parse("foo","appA && appB && appC",true).toExecutableDSL());
 
-		assertTaskApps("foo","appA","_foo_appA");
-		assertTaskApps("foo","appA && appB","_foo_appA","_foo_appB");
-		assertTaskApps("foo","appA && appB && appC","_foo_appA","_foo_appB","_foo_appC");
+		assertTaskApps("foo","appA","foo-appA");
+		assertTaskApps("foo","appA && appB","foo-appA","foo-appB");
+		assertTaskApps("foo","appA && appB && appC","foo-appA","foo-appB","foo-appC");
 		
 		// arguments
-		assertEquals("_foo_appA",parse("foo","appA --p1=v1 --p2=v2",true).toExecutableDSL());
-		assertEquals("_foo_appA && _foo_appB",parse("foo","appA --p2=v2 && appB --p3=v3",true).toExecutableDSL());
-		assertTaskApps("foo","appA --p1=v2","_foo_appA:p1=v2");
-		assertTaskApps("foo","appA --p1=v2 && goo: appB --p2=v2","_foo_appA:p1=v2","_foo_goo:p2=v2");
-		assertTaskApps("foo","appA 0->x:appA --p1=v1","_foo_appA","_foo_x:p1=v1");
+		assertEquals("foo-appA",parse("foo","appA --p1=v1 --p2=v2",true).toExecutableDSL());
+		assertEquals("foo-appA && foo-appB",parse("foo","appA --p2=v2 && appB --p3=v3",true).toExecutableDSL());
+		assertTaskApps("foo","appA --p1=v2","foo-appA:p1=v2");
+		assertTaskApps("foo","appA --p1=v2 && goo: appB --p2=v2","foo-appA:p1=v2","foo-goo:p2=v2");
+		assertTaskApps("foo","appA 0->x:appA --p1=v1","foo-appA","foo-x:p1=v1");
 		
 		// labels
-		assertEquals("_bar_goo",parse("bar","goo:appA",true).toExecutableDSL());
-		assertEquals("_fo_aaa && _fo_bbb",parse("fo","aaa: appA && bbb: appA",true).toExecutableDSL());
+		assertEquals("bar-goo",parse("bar","goo:appA",true).toExecutableDSL());
+		assertEquals("fo-aaa && fo-bbb",parse("fo","aaa: appA && bbb: appA",true).toExecutableDSL());
 
-		assertTaskApps("bar","goo:appA","_bar_goo");
-		assertTaskApps("bar","appA && goo: appA","_bar_appA","_bar_goo");
+		assertTaskApps("bar","goo:appA","bar-goo");
+		assertTaskApps("bar","appA && goo: appA","bar-appA","bar-goo");
 
 		// transitions
-		assertEquals("_foo_appA 'c'->_foo_appC && _foo_appB",parse("foo","appA 'c'->appC && appB",true).toExecutableDSL());
-		assertEquals("_foo_appA 'c'->_foo_appC 'd'->_foo_appD && _foo_appB",parse("foo","appA 'c'->appC 'd'->appD && appB",true).toExecutableDSL());
-		assertEquals("_foo_appA 1->_foo_appC 2->_foo_appD && _foo_appB",parse("foo","appA 1->appC 2->appD && appB",true).toExecutableDSL());
-		assertEquals("_foo_aaa 1->_foo_appC 2->:aaa",parse("foo","aaa: appA 1->appC 2->:aaa",true).toExecutableDSL());
+		assertEquals("foo-appA 'c'->foo-appC && foo-appB",parse("foo","appA 'c'->appC && appB",true).toExecutableDSL());
+		assertEquals("foo-appA 'c'->foo-appC 'd'->foo-appD && foo-appB",parse("foo","appA 'c'->appC 'd'->appD && appB",true).toExecutableDSL());
+		assertEquals("foo-appA 1->foo-appC 2->foo-appD && foo-appB",parse("foo","appA 1->appC 2->appD && appB",true).toExecutableDSL());
+		assertEquals("foo-aaa 1->foo-appC 2->:aaa",parse("foo","aaa: appA 1->appC 2->:aaa",true).toExecutableDSL());
 
 		// splits
-		assertEquals("<_foo_appA || _foo_appB>",parse("foo","<appA || appB>",true).toExecutableDSL());
-		assertEquals("<_foo_appA || _foo_appB && _foo_appC>",parse("foo","<appA || appB && appC>",true).toExecutableDSL());
-		assertEquals("<<_foo_appA && _foo_appD || _foo_appE> || _foo_appB>",parse("foo","<<appA && appD || appE> || appB>",true).toExecutableDSL());
-		assertEquals("<<_foo_appA || _foo_x> || _foo_appB>",parse("foo","<<appA || x: appA> || appB>",true).toExecutableDSL());
+		assertEquals("<foo-appA || foo-appB>",parse("foo","<appA || appB>",true).toExecutableDSL());
+		assertEquals("<foo-appA || foo-appB && foo-appC>",parse("foo","<appA || appB && appC>",true).toExecutableDSL());
+		assertEquals("<<foo-appA && foo-appD || foo-appE> || foo-appB>",parse("foo","<<appA && appD || appE> || appB>",true).toExecutableDSL());
+		assertEquals("<<foo-appA || foo-x> || foo-appB>",parse("foo","<<appA || x: appA> || appB>",true).toExecutableDSL());
 		
 		// splits and flows
-		assertEquals("_foo_AAA && _foo_FFF 'FAILED'->_foo_EEE && <_foo_BBB || _foo_CCC> && _foo_DDD",parse("foo","AAA && FFF 'FAILED' -> EEE && <BBB||CCC> && DDD",true).toExecutableDSL());
-		assertTaskApps("foo","AAA && FFF 'FAILED' -> EEE && <BBB||CCC> && DDD","_foo_AAA","_foo_FFF","_foo_EEE","_foo_BBB","_foo_CCC","_foo_DDD");
-		assertEquals("<_test_A || _test_B> && <_test_C || _test_D>",parse("<A || B> && <C||D>",true).toExecutableDSL());
-		assertEquals("<_test_A || _test_B || _test_C> && <_test_D || _test_E>",parse("<A || B || C> && <D||E>",true).toExecutableDSL());
-		assertEquals("<_test_A || _test_B || _test_C> && _test_D",parse("<A || B || C> && D",true).toExecutableDSL());
-		assertEquals("<_test_A || <_test_B && _test_C || _test_D>>",parse("<A || <B && C || D>>",true).toExecutableDSL());
-		assertEquals("<_test_A || <_test_B || _test_D && _test_E>>",parse("<A || <B || D && E>>",true).toExecutableDSL());
+		assertEquals("foo-AAA && foo-FFF 'FAILED'->foo-EEE && <foo-BBB || foo-CCC> && foo-DDD",parse("foo","AAA && FFF 'FAILED' -> EEE && <BBB||CCC> && DDD",true).toExecutableDSL());
+		assertTaskApps("foo","AAA && FFF 'FAILED' -> EEE && <BBB||CCC> && DDD","foo-AAA","foo-FFF","foo-EEE","foo-BBB","foo-CCC","foo-DDD");
+		assertEquals("<test-A || test-B> && <test-C || test-D>",parse("<A || B> && <C||D>",true).toExecutableDSL());
+		assertEquals("<test-A || test-B || test-C> && <test-D || test-E>",parse("<A || B || C> && <D||E>",true).toExecutableDSL());
+		assertEquals("<test-A || test-B || test-C> && test-D",parse("<A || B || C> && D",true).toExecutableDSL());
+		assertEquals("<test-A || <test-B && test-C || test-D>>",parse("<A || <B && C || D>>",true).toExecutableDSL());
+		assertEquals("<test-A || <test-B || test-D && test-E>>",parse("<A || <B || D && E>>",true).toExecutableDSL());
 		
 		ctn = parse("AAA 0->BBB");
 		List<TransitionNode> transitions = ((TaskAppNode)((FlowNode)ctn.getSequences().get(0)).getSeriesElement(0)).getTransitions();
@@ -356,9 +356,9 @@ public class TaskParserTests {
 		assertEquals("*",transitions.get(0).getStatusToCheckInDSLForm());
 		assertEquals("'*'",transitions.get(1).getStatusToCheckInDSLForm());
 
-		assertEquals("_test_AAA 'failed'->_test_BBB *->_test_CCC",parse("AAA 'failed' -> BBB * -> CCC").toExecutableDSL());
-		assertEquals("_test_AAA 'failed'->_test_BBB '*'->_test_CCC",parse("AAA 'failed' -> BBB '*' -> CCC").toExecutableDSL());
-		assertEquals("_test_AAA 1->_test_BBB 2->_test_CCC",parse("AAA 1 -> BBB 2 -> CCC").toExecutableDSL());
+		assertEquals("test-AAA 'failed'->test-BBB *->test-CCC",parse("AAA 'failed' -> BBB * -> CCC").toExecutableDSL());
+		assertEquals("test-AAA 'failed'->test-BBB '*'->test-CCC",parse("AAA 'failed' -> BBB '*' -> CCC").toExecutableDSL());
+		assertEquals("test-AAA 1->test-BBB 2->test-CCC",parse("AAA 1 -> BBB 2 -> CCC").toExecutableDSL());
 	}
 
 	@Test
