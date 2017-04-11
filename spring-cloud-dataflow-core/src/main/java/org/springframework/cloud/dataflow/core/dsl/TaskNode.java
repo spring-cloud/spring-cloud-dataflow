@@ -28,6 +28,7 @@ import org.springframework.util.Assert;
  * The root AST node for any entity parsed from task DSL.
  *
  * @author Andy Clement
+ * @author Thomas Risberg
  */
 public class TaskNode extends AstNode {
 
@@ -215,7 +216,7 @@ public class TaskNode extends AstNode {
 
 	static class ExecutableDSLVisitor extends TaskVisitor {
 
-		private final String EXECUTABLE_DSL_JOIN_CHAR = "_";
+		private final String EXECUTABLE_DSL_JOIN_CHAR = "-";
 		private final static int START_OF_FLOW = 0;
 		private final static int START_OF_SPLIT = 1;
 		private final static int IN_FLOW = 2;
@@ -303,7 +304,7 @@ public class TaskNode extends AstNode {
 
 		private String toExecutableDSLTaskName(TaskAppNode taskApp) {
 			StringBuilder taskDefName = new StringBuilder();
-			taskDefName.append(EXECUTABLE_DSL_JOIN_CHAR).append(taskName).append(EXECUTABLE_DSL_JOIN_CHAR);
+			taskDefName.append(taskName).append(EXECUTABLE_DSL_JOIN_CHAR);
 			if (taskApp.hasLabel()) {
 				taskDefName.append(taskApp.getLabelString());
 			}
