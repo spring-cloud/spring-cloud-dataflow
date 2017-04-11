@@ -16,6 +16,7 @@
 package org.springframework.cloud.dataflow.server.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.cloud.dataflow.core.DataFlowPropertyKeys;
 
 /**
  * Properties for version information of core dependencies.
@@ -25,7 +26,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = VersionInfoProperties.VERSION_INFO_PREFIX)
 public class VersionInfoProperties {
 
-	public static final String VERSION_INFO_PREFIX = "spring.cloud.dataflow.version-info";
+	public static final String VERSION_INFO_PREFIX = DataFlowPropertyKeys.PREFIX + "version-info";
 
 	private String dataflowCoreVersion;
 	private String dataflowDashboardVersion;

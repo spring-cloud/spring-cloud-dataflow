@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.cloud.dataflow.core.DataFlowPropertyKeys;
 import org.springframework.cloud.dataflow.server.config.security.support.OnSecurityEnabledAndOAuth2Disabled;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
@@ -186,7 +187,7 @@ public class BasicAuthSecurityConfiguration extends WebSecurityConfigurerAdapter
 	 * @author Eric Bottard
 	 * @author Gunnar Hillert
 	 */
-	@ConfigurationProperties(prefix = "spring.cloud.dataflow.security.authorization")
+	@ConfigurationProperties(prefix = DataFlowPropertyKeys.PREFIX + "security.authorization")
 	public static class AuthorizationConfig {
 
 		private boolean enabled = true;

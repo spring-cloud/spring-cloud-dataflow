@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ import java.util.Properties;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.cloud.dataflow.core.DataFlowPropertyKeys;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.authentication.configurers.GlobalAuthenticationConfigurerAdapter;
@@ -34,11 +35,11 @@ import org.springframework.util.Assert;
 * @since 1.1.0
 */
 @Configuration
-@ConditionalOnProperty("spring.cloud.dataflow.security.authentication.file.enabled")
+@ConditionalOnProperty(DataFlowPropertyKeys.PREFIX + "security.authentication.file.enabled")
 @ConfigurationProperties(prefix = FileAuthenticationConfiguration.CONFIGURATION_PROPERTIES_PREFIX)
 public class FileAuthenticationConfiguration extends GlobalAuthenticationConfigurerAdapter {
 
-	public static final String CONFIGURATION_PROPERTIES_PREFIX = "spring.cloud.dataflow.security.authentication.file";
+	public static final String CONFIGURATION_PROPERTIES_PREFIX = DataFlowPropertyKeys.PREFIX + "security.authentication.file";
 
 	private Properties users;
 

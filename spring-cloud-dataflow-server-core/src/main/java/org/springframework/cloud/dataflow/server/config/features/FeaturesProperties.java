@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 package org.springframework.cloud.dataflow.server.config.features;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.cloud.dataflow.core.DataFlowPropertyKeys;
 
 /**
  * Configuration properties for all the features that need to be enabled/disabled at the dataflow server.
@@ -25,7 +26,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = FeaturesProperties.FEATURES_PREFIX)
 public class FeaturesProperties {
 
-    public static final String FEATURES_PREFIX = "spring.cloud.dataflow.features";
+    public static final String FEATURES_PREFIX = DataFlowPropertyKeys.PREFIX + "features";
 
     public static final String STREAMS_ENABLED = "streams-enabled";
 

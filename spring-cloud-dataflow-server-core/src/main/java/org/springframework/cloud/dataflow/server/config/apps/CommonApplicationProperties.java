@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,13 +20,14 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.cloud.dataflow.core.DataFlowPropertyKeys;
 
 /**
  * Common properties for applications deployed via Spring Cloud Data Flow.
  *
  * @author Marius Bogoevici
  */
-@ConfigurationProperties("spring.cloud.dataflow.applicationProperties")
+@ConfigurationProperties(DataFlowPropertyKeys.PREFIX + "applicationProperties")
 public class CommonApplicationProperties {
 
 	private Map<String,String> stream = new ConcurrentHashMap<>();

@@ -16,6 +16,7 @@
 package org.springframework.cloud.dataflow.server.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.cloud.dataflow.core.DataFlowPropertyKeys;
 
 /**
  * Configuration properties for namespace 'spring.cloud.dataflow.metrics'.
@@ -26,7 +27,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = MetricsProperties.PREFIX)
 public class MetricsProperties {
 
-	public static final String PREFIX = "spring.cloud.dataflow.metrics";
+	public static final String PREFIX = DataFlowPropertyKeys.PREFIX + "metrics";
 
 	private Collector collector = new Collector();
 
