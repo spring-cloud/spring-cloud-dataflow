@@ -154,6 +154,11 @@ public class DefaultTaskService implements TaskService {
 		if (taskDefinition == null) {
 			throw new NoSuchTaskDefinitionException(taskName);
 		}
+		// if composed task definition add composed task runner to prefix.
+		if(isComposedDefinition(taskDefinition)) {
+			taskDefinition = new TaskDefinition(taskDefinition.getName(),
+					createComposedTaskDefinition(taskDefinition.getDslText()));
+		}
 
 		AppRegistration appRegistration = this.registry.find(taskDefinition.getRegisteredAppName(), ApplicationType.task);
 		Assert.notNull(appRegistration, "Unknown task app: " + taskDefinition.getRegisteredAppName());
@@ -184,6 +189,13 @@ public class DefaultTaskService implements TaskService {
 			commandLineArgs.stream().filter(a -> !a.startsWith("--spring.cloud.task.executionid=")),
 			Stream.of("--spring.cloud.task.executionid=" + taskExecution.getExecutionId())
 		).collect(Collectors.toList());
+	}
+
+	private boolean isComposedDefinition(TaskDefinition taskDefinition) {
+		TaskParser taskParser = new TaskParser(taskDefinition.getName(),
+				taskDefinition.getDslText(), true, true);
+		return taskParser.parse().isComposed();
+
 	}
 
 	@Override
@@ -251,10 +263,7 @@ public class DefaultTaskService implements TaskService {
 				saveStandardTaskDefinition(composedTaskDefinition);
 			});
 			taskDefinitionRepository.save(
-					new TaskDefinition(
-							name,
-							createComposedTaskDefinition(
-									taskNode.toExecutableDSL())));
+					new TaskDefinition(name, taskNode.toExecutableDSL()));
 		}
 		else {
 			saveStandardTaskDefinition(new TaskDefinition(name, dsl));
@@ -284,7 +293,7 @@ public class DefaultTaskService implements TaskService {
 			throw new NoSuchTaskDefinitionException(name);
 		}
 		//if composed-task-runner definition then destroy all child tasks associated with it.
-		if(taskDefinition.getDslText().startsWith(taskConfigurationProperties.getComposedTaskRunnerName()))
+		if(isComposedDefinition(taskDefinition))
 		{
 			String childTaskPrefix = TaskNode.getTaskPrefix(name);
 			taskDefinitionRepository.findAll().forEach(
