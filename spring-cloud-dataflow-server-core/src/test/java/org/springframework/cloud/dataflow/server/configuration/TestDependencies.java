@@ -38,6 +38,7 @@ import org.springframework.cloud.dataflow.server.config.MetricsProperties;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.controller.AppRegistryController;
 import org.springframework.cloud.dataflow.server.controller.CompletionController;
+import org.springframework.cloud.dataflow.server.controller.MetricsController;
 import org.springframework.cloud.dataflow.server.controller.RestControllerAdvice;
 import org.springframework.cloud.dataflow.server.controller.RuntimeAppsController;
 import org.springframework.cloud.dataflow.server.controller.StreamDefinitionController;
@@ -149,7 +150,10 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 		return new AppRegistryController(registry, metadataResolver, new ForkJoinPool(2));
 	}
 
-
+	@Bean
+	public MetricsController metricsController(MetricStore metricStore) {
+		return new MetricsController(metricStore);
+	}
 
 	@Bean
 	public RuntimeAppsController runtimeAppsController(MetricStore metricStore) {

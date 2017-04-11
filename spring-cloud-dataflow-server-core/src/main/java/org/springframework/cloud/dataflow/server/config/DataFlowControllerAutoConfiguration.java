@@ -51,6 +51,7 @@ import org.springframework.cloud.dataflow.server.controller.JobExecutionControll
 import org.springframework.cloud.dataflow.server.controller.JobInstanceController;
 import org.springframework.cloud.dataflow.server.controller.JobStepExecutionController;
 import org.springframework.cloud.dataflow.server.controller.JobStepExecutionProgressController;
+import org.springframework.cloud.dataflow.server.controller.MetricsController;
 import org.springframework.cloud.dataflow.server.controller.RestControllerAdvice;
 import org.springframework.cloud.dataflow.server.controller.RootController;
 import org.springframework.cloud.dataflow.server.controller.RuntimeAppsController;
@@ -150,6 +151,11 @@ public class DataFlowControllerAutoConfiguration {
 			DeploymentIdRepository deploymentIdRepository, AppDeployer appDeployer, MetricStore metricStore) {
 		return new RuntimeAppsController(repository, deploymentIdRepository, appDeployer, metricStore,
 				runtimeAppsStatusFJPFB().getObject());
+	}
+
+	@Bean
+	public MetricsController metricsController(MetricStore metricStore) {
+		return new MetricsController(metricStore);
 	}
 
 	@Bean

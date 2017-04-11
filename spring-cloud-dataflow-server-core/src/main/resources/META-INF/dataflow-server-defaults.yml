@@ -13,6 +13,10 @@ spring:
         authorization:
           enabled: true
           rules:
+            # Metrics
+
+            - GET    /metrics/streams                => hasRole('ROLE_VIEW')
+
             # About
 
             - GET    /about                          => hasRole('ROLE_VIEW')
