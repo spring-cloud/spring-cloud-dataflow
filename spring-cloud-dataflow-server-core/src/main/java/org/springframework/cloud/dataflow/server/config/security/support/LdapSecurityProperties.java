@@ -20,6 +20,7 @@ import java.net.URI;
 import javax.validation.constraints.NotNull;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.cloud.dataflow.core.DataFlowPropertyKeys;
 
 /**
  * Properties for the Ldap security aspects of an application.
@@ -27,7 +28,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  * @author Gunnar Hillert
  * @since 1.1.0
  */
-@ConfigurationProperties(prefix = "spring.cloud.dataflow.security.authentication.ldap")
+@ConfigurationProperties(prefix = DataFlowPropertyKeys.PREFIX + "security.authentication.ldap")
 @LdapSecurityPropertiesValid
 public class LdapSecurityProperties {
 

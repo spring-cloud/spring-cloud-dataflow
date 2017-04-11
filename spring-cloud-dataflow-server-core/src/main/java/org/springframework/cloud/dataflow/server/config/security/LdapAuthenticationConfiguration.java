@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.util.Collections;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.cloud.dataflow.core.DataFlowPropertyKeys;
 import org.springframework.cloud.dataflow.server.config.security.support.LdapSecurityProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.ldap.core.DirContextOperations;
@@ -41,7 +42,7 @@ import org.springframework.util.StringUtils;
 * @since 1.1.0
 */
 @Configuration
-@ConditionalOnProperty("spring.cloud.dataflow.security.authentication.ldap.enabled")
+@ConditionalOnProperty(DataFlowPropertyKeys.PREFIX + "security.authentication.ldap.enabled")
 @EnableConfigurationProperties(LdapSecurityProperties.class)
 public class LdapAuthenticationConfiguration extends GlobalAuthenticationConfigurerAdapter {
 

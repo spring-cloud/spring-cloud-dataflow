@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.dataflow.core.DataFlowPropertyKeys;
 import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.jdbc.datasource.init.DatabasePopulatorUtils;
@@ -65,7 +66,7 @@ public final class DataflowRdbmsInitializer implements InitializingBean {
 
 	private ResourceLoader resourceLoader;
 
-	@Value("${spring.cloud.dataflow.rdbms.initialize.enable:true}")
+	@Value("${" + DataFlowPropertyKeys.PREFIX + "rdbms.initialize.enable:true}")
 	private boolean definitionInitializationEnable;
 
 	private final FeaturesProperties featuresProperties;
