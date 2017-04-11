@@ -19,8 +19,10 @@ package org.springframework.cloud.dataflow.server.configuration;
 import static org.mockito.Mockito.mock;
 import static org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType.HAL;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ForkJoinPool;
 
@@ -32,6 +34,7 @@ import org.springframework.cloud.dataflow.completion.StreamCompletionProvider;
 import org.springframework.cloud.dataflow.completion.TaskCompletionProvider;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
+import org.springframework.cloud.dataflow.server.config.MetricsProperties;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.controller.AppRegistryController;
 import org.springframework.cloud.dataflow.server.controller.CompletionController;
@@ -42,6 +45,10 @@ import org.springframework.cloud.dataflow.server.controller.StreamDeploymentCont
 import org.springframework.cloud.dataflow.server.controller.TaskDefinitionController;
 import org.springframework.cloud.dataflow.server.controller.TaskExecutionController;
 import org.springframework.cloud.dataflow.server.controller.ToolsController;
+import org.springframework.cloud.dataflow.server.controller.support.ApplicationsMetrics;
+import org.springframework.cloud.dataflow.server.controller.support.ApplicationsMetrics.Application;
+import org.springframework.cloud.dataflow.server.controller.support.ApplicationsMetrics.Instance;
+import org.springframework.cloud.dataflow.server.controller.support.MetricStore;
 import org.springframework.cloud.dataflow.server.registry.DataFlowAppRegistryPopulator;
 import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
 import org.springframework.cloud.dataflow.server.repository.InMemoryDeploymentIdRepository;
@@ -84,7 +91,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupp
 @EnableHypermediaSupport(type = HAL)
 @Import(CompletionConfiguration.class)
 @EnableWebMvc
-@EnableConfigurationProperties({CommonApplicationProperties.class})
+@EnableConfigurationProperties({CommonApplicationProperties.class, MetricsProperties.class})
 public class TestDependencies extends WebMvcConfigurationSupport {
 
 	@Bean
@@ -142,14 +149,44 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 		return new AppRegistryController(registry, metadataResolver, new ForkJoinPool(2));
 	}
 
+
+
 	@Bean
-	public RuntimeAppsController runtimeAppsController() {
-		return new RuntimeAppsController(streamDefinitionRepository(), deploymentIdRepository(), appDeployer(), new ForkJoinPool(2));
+	public RuntimeAppsController runtimeAppsController(MetricStore metricStore) {
+		return new RuntimeAppsController(streamDefinitionRepository(), deploymentIdRepository(), appDeployer(), metricStore, new ForkJoinPool(2));
 	}
 
 	@Bean
 	public RuntimeAppsController.AppInstanceController appInstanceController() {
 		return new RuntimeAppsController.AppInstanceController(appDeployer());
+	}
+
+	@Bean
+	public MetricStore metricStore(MetricsProperties metricsProperties) {
+		return new MetricStore(metricsProperties) {
+			@Override
+			public List<ApplicationsMetrics> getMetrics() {
+				List<ApplicationsMetrics> metrics = new ArrayList<>();
+				ApplicationsMetrics am = new ApplicationsMetrics();
+				am.setName("ticktock1");
+				List<Application> applications = new ArrayList<>();
+				Application a = new Application();
+				a.setName("time");
+				a.setIncomingRate(111);
+				a.setOutgoingRate(222);
+				List<Instance> instances = new ArrayList<>();
+				Instance i = new Instance();
+				i.setIncomingRate(333);
+				i.setOutgoingRate(444);
+				i.setGuid("34215");
+				instances.add(i);
+				a.setInstances(instances);
+				applications.add(a);
+				am.setApplications(applications);
+				metrics.add(am);
+				return metrics;
+			}
+		};
 	}
 
 	@Bean

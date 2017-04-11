@@ -33,6 +33,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.cloud.client.circuitbreaker.EnableCircuitBreaker;
 import org.springframework.cloud.dataflow.completion.CompletionConfiguration;
 import org.springframework.cloud.dataflow.completion.StreamCompletionProvider;
 import org.springframework.cloud.dataflow.completion.TaskCompletionProvider;
@@ -62,6 +63,7 @@ import org.springframework.cloud.dataflow.server.controller.ToolsController;
 import org.springframework.cloud.dataflow.server.controller.UiController;
 import org.springframework.cloud.dataflow.server.controller.security.LoginController;
 import org.springframework.cloud.dataflow.server.controller.security.SecurityController;
+import org.springframework.cloud.dataflow.server.controller.support.MetricStore;
 import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
@@ -94,8 +96,10 @@ import org.springframework.scheduling.concurrent.ForkJoinPoolFactoryBean;
 @Configuration
 @Import(CompletionConfiguration.class)
 @ConditionalOnBean({EnableDataFlowServerConfiguration.Marker.class, AppDeployer.class, TaskLauncher.class})
-@EnableConfigurationProperties({AuthorizationConfig.class, FeaturesProperties.class, VersionInfoProperties.class})
+@EnableConfigurationProperties({ AuthorizationConfig.class, FeaturesProperties.class,
+		VersionInfoProperties.class, MetricsProperties.class })
 @ConditionalOnProperty(prefix = "dataflow.server", name = "enabled", havingValue = "true", matchIfMissing = true)
+@EnableCircuitBreaker
 public class DataFlowControllerAutoConfiguration {
 
 	@Bean
@@ -119,6 +123,11 @@ public class DataFlowControllerAutoConfiguration {
 	}
 
 	@Bean
+	public MetricStore metricStore(MetricsProperties metricsProperties) {
+		return new MetricStore(metricsProperties);
+	}
+
+	@Bean
 	@ConditionalOnBean(StreamDefinitionRepository.class)
 	public StreamDefinitionController streamDefinitionController(StreamDefinitionRepository repository,
 			DeploymentIdRepository deploymentIdRepository, StreamDeploymentController deploymentController,
@@ -138,8 +147,9 @@ public class DataFlowControllerAutoConfiguration {
 	@Bean
 	@ConditionalOnBean(StreamDefinitionRepository.class)
 	public RuntimeAppsController runtimeAppsController(StreamDefinitionRepository repository,
-			DeploymentIdRepository deploymentIdRepository, AppDeployer appDeployer) {
-		return new RuntimeAppsController(repository, deploymentIdRepository, appDeployer, runtimeAppsStatusFJPFB().getObject());
+			DeploymentIdRepository deploymentIdRepository, AppDeployer appDeployer, MetricStore metricStore) {
+		return new RuntimeAppsController(repository, deploymentIdRepository, appDeployer, metricStore,
+				runtimeAppsStatusFJPFB().getObject());
 	}
 
 	@Bean
