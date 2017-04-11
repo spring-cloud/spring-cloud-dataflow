@@ -28,7 +28,7 @@ public class DataFlowPropertyKeys {
 	/**
 	 * Data Flow Stream property key prefix.
 	 */
-	public static final String STREAM_PREFIX = PREFIX + "stream.";
+	private static final String STREAM_PREFIX = PREFIX + "stream.";
 
 	/**
 	 * Stream name property key.
@@ -38,7 +38,7 @@ public class DataFlowPropertyKeys {
 	/**
 	 * Data Flow Stream app key prefix.
 	 */
-	public static final String STREAM_APP_PREFIX = STREAM_PREFIX + "app.";
+	private static final String STREAM_APP_PREFIX = STREAM_PREFIX + "app.";
 
 	/**
 	 * Stream app label property key.
