@@ -215,6 +215,20 @@ These can then be fixed up and creation repeated.  There is an
 local file system if the definitions are in a file and it is easier
 to import than copy/paste.
 
+==== Creating Composed Task Definitions
+The dashboard includes the Create Composed Task tab that provides the canvas
+application, offering a interactive graphical interface for creating
+composed tasks.
+
+In this tab, you can:
+
+* Create and visualize composed tasks using DSL, a graphical canvas, or both
+* Use auto-adjustment and grid-layout capabilities in the GUI for simpler and
+interactive organization of the composed task
+
+.Composed Task Designer
+image::{dataflow-asciidoc}/images/dataflow-ctr-flo-tab.png[Composed Task Designer, scaledwidth="100%"]
+
 ==== Launching Tasks
 
 Once the task definition is created, they can be launched through the Dashboard

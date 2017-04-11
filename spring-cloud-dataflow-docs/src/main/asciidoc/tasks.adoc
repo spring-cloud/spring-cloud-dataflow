@@ -146,7 +146,7 @@ shell.  To get the task definition list using the shell, use the `task list` com
 
 === Launching a Task
 An adhoc task can be launched via the restful API or via the shell.  To launch an ad-hoc
-task via the shell use the `task launch` command.  For Example:
+task via the shell use the `task launch` command.  For example:
 
 ```
 dataflow:>task launch mytask
@@ -197,7 +197,7 @@ for example `task display --id 549`.
 === Destroying a Task
 Destroying a Task Definition will remove the definition from the definition repository.
 This can be done via the restful API or via the shell.  To destroy a task via the shell
-use the `task destroy` command. For Example:
+use the `task destroy` command. For example:
 
 ```
 dataflow:>task destroy mytask
@@ -360,3 +360,212 @@ Another option to start a task using the `task-launcher` would be to create a st
 ```
 http --server.port=9000 | my-task-processor | task-launcher-local
 ```
+
+[[spring-cloud-dataflow-composed-tasks]]
+== Composed Tasks
+
+Spring Cloud Data Flow allows a user to create a directed graph where each node
+of the graph is a task application.  This is done by using the DSL for composed
+tasks.  A composed task can be created via the RESTful API, the Spring Cloud
+Data Flow Shell, or the Spring Cloud Data Flow UI.
+
+=== Creating, Launching, and Destroying a Composed Task
+==== Creating a Composed Task
+The DSL for the composed tasks is used when creating a task definition via the
+task create command. For example:
+```
+dataflow:> app register --name timestamp --type task --uri maven://org.springframework.cloud.task.app:timestamp-task:1.2.0.RELEASE
+dataflow:> app register --name mytaskapp --type task --uri file:///home/tasks/mytask.jar
+dataflow:> task create my-composed-task --definition "mytaskapp && timestamp"
+dataflow:> task launch my-composed-task
+```
+In the example above we assume that the applications to be used by our composed
+task have not been registered yet.  So the first two steps we register two task
+applications.  We then create our composed task definition by using the task
+create command.  The composed task DSL in the example above will, when launched,
+execute mytaskapp and then execute the timestamp application.
+
+But before we launch the my-composed-task definition,  we can view what
+Spring Cloud Data Flow generated for us.  This can be done by executing the
+task list command.
+
+```
+dataflow:>task list
+╔══════════════════════════╤═══════════════════════════════════════════════════════════════
+║        Task Name         │                      Task Definition
+╠══════════════════════════╪═══════════════════════════════════════════════════════════════
+║my-composed-task          │mytaskapp && timestamp
+║my-composed-task-mytaskapp│mytaskapp
+║my-composed-task-timestamp│timestamp
+```
+Spring Cloud Data Flow created three task definitions, one for each of the
+applications that comprises our composed task as well as the composed task
+definition.  We also see that each of the generated
+names for the child tasks is comprised of the name of the composed task and
+the name of the application separated by a dash `-`.  i.e. _my-composed-task_ `-`
+_mytaskapp_.
+
+===== Task Application Parameters
+The task applications that comprise the composed task definition can also
+contain parameters.  For example:
+```
+dataflow:> task create my-composed-task --definition "mytaskapp --displayMessage=hello && timestamp --format=YYYY"
+```
+
+==== Launching a Composed Task
+Launching a composed task is done the same way as launching a stand-alone task.
+i.e.
+```
+task launch my-composed-task
+```
+Once the task is launched and assuming all the tasks complete successfully you will
+see three task executions when executing a `task execution list`.  For example:
+```
+dataflow:>task execution list
+╔══════════════════════════╤═══╤════════════════════════════╤════════════════════════════╤═════════╗
+║        Task Name         │ID │         Start Time         │          End Time          │Exit Code║
+╠══════════════════════════╪═══╪════════════════════════════╪════════════════════════════╪═════════╣
+║my-composed-task-timestamp│713│Wed Apr 12 16:43:07 EDT 2017│Wed Apr 12 16:43:07 EDT 2017│0        ║
+║my-composed-task-mytaskapp│712│Wed Apr 12 16:42:57 EDT 2017│Wed Apr 12 16:42:57 EDT 2017│0        ║
+║my-composed-task          │711│Wed Apr 12 16:42:55 EDT 2017│Wed Apr 12 16:43:15 EDT 2017│0        ║
+╚══════════════════════════╧═══╧════════════════════════════╧════════════════════════════╧═════════╝
+```
+In the example above we see that my-compose-task launched and it also launched
+the other tasks in sequential order.
+
+==== Destroying a Composed Task
+The same command used to destroy a stand-alone task is the same as destroying a
+composed task.  The only difference is that destroying a composed task will
+also destroy the child tasks associated with it.   For example
+
+```
+dataflow:>task list
+╔══════════════════════════╤═══════════════════════════════════════════════════════════════
+║        Task Name         │                      Task Definition
+╠══════════════════════════╪═══════════════════════════════════════════════════════════════
+║my-composed-task          │mytaskapp && timestamp
+║my-composed-task-mytaskapp│mytaskapp
+║my-composed-task-timestamp│timestamp
+
+...
+dataflow:>task destroy my-composed-task
+dataflow:>task list
+╔══════════════════════════╤═══════════════════════════════════════════════════════════════
+║        Task Name         │                      Task Definition
+╠══════════════════════════╪═══════════════════════════════════════════════════════════════
+╚══════════════════════════╧═══════════════════════════════════════════════════════════════
+```
+
+=== Composed Task DSL
+
+==== Conditional Execution
+Conditional execution is expressed using a double ampersand symbol &&.
+This allows each task in the sequence to be launched only if the previous task
+successfully completed. For example:
+```
+task create my-composed-task --definition "foo && bar"
+```
+.Conditional Execution
+image::{dataflow-asciidoc}/images/dataflow-ctr-conditional-execution.png[Composed Task Conditional Execution, scaledwidth="50%"]
+
+When the composed task my-composed-task is launched, it will launch the
+task `foo` and if it completes successfully, then the task `bar` will be
+launched. If the `foo` task fails, then the task `bar` will not launch.
+
+==== Transitional Execution
+The DSL supports fine grained control over the transitions taken during the
+execution of the directed graph. Transitions are specified by providing a
+condition for equality based on the exit status of the previous task.
+A task transition is represented by the following symbol `->`.
+
+===== Basic Transition
+A basic transition would look like the following:
+
+```
+task create my-transition-composed-task --definition "foo 'FAILED' -> bar 'COMPLETED' -> baz"
+```
+
+.Basic Transition
+image::{dataflow-asciidoc}/images/dataflow-ctr-transition-basic.png[Composed Task Basic Transition, scaledwidth="50%"]
+
+In the example above `foo` would launch and if it had an exit status of `FAILED`,
+then the `bar` task would launch. If the exit status of `foo` was `COMPLETED`
+then `baz` would launch. All other statuses returned by `foo` will have no effect
+and task would terminate normally.
+
+===== Transition With a Wildcard
+Wildcards are supported for transitions by the DSL for example:
+```
+task create my-transition-composed-task --definition "foo 'FAILED' -> bar '*' -> baz"
+```
+.Basic Transition With Wildcard
+image::{dataflow-asciidoc}/images/dataflow-ctr-transition-basic-wildcard.png[Composed Task Basic Transition with Wildcard, scaledwidth="50%"]
+
+In the example above `foo` would launch and if it had an exit status of `FAILED`,
+then the `bar` task would launch. Any exit status of `foo` other than `FAILED`
+then `baz` would launch.
+
+===== Transition With a Following Conditional Execution
+A transition can be followed by a conditional execution so long as the wildcard
+is not used. For example:
+```
+task create my-transition-conditional-execution-task --definition "foo 'FAILED' -> bar 'UNKNOWN' -> baz && qux && quux"
+```
+.Transition With Conditional Execution
+image::{dataflow-asciidoc}/images/dataflow-ctr-transition-conditional-execution.png[Composed Task Transition with Conditional Execution, scaledwidth="50%"]
+
+In the example above `foo` would launch and if it had an exit status of `FAILED`,
+then the `bar` task would launch.  If `foo` had an exit status of `UNKNOWN` then
+`baz` would launch.  Any exit status of `foo` other than `FAILED` or `UNKNOWN`
+then `qux` would launch and upon successful completion `quux` would launch.
+
+==== Split Execution
+Splits allow for multiple tasks within a composed task to be run in parallel.
+It is denoted by using angle brackets <> to group tasks and flows that are to
+be run in parallel. These tasks and flows are separated by the double pipe `||`
+. For example:
+```
+task create my-split-task --definition "<foo || bar || baz>"
+```
+.Split
+image::{dataflow-asciidoc}/images/dataflow-ctr-split.png[Composed Task Split, scaledwidth="50%"]
+The example above will launch tasks `foo`, `bar` and `baz` in parallel.
+With the task DSL a user may also execute multiple split groups
+in succession. For example:
+```
+task create my-split-task --definition "<foo || bar || baz> && <qux || quux>"
+```
+
+.Split as a part of a conditional execution
+image::{dataflow-asciidoc}/images/dataflow-ctr-multiple-splits.png[Composed Task Split, scaledwidth="50%"]
+In the example above tasks `foo`, `bar` and `baz` will be launched in parallel,
+once they all complete then tasks `qux`, `quux` will be launched in parallel.
+Once they complete the composed task will end.   However if `foo`, `bar`, or
+`baz` fails then, the split containing `qux` and `quux` will not launch.
+
+===== Split Containing Conditional Execution
+A split can also have a conditional execution within the angle brackets.  For
+example:
+```
+task create my-split-task --definition "<foo && bar || baz>"
+```
+.Split with conditional execution
+image::{dataflow-asciidoc}/images/dataflow-ctr-split-contains-conditional.png[Composed Task Split With Conditional Execution, scaledwidth="50%"]
+
+In the example above we see that `foo` and `baz` will be launched in parallel,
+however `bar` will not launch until `foo` completes successfully.
+
+=== Configuring Composed Task in Spring Cloud Data Flow
+Composed tasks are executed via a task application called the https://github.com/spring-cloud-task-app-starters/composed-task-runner[Composed Task Runner].
+Out of the box this application is not registered with Spring Cloud Data Flow
+by default.  So to create composed tasks we must first register the Composed
+Task Runner as an application with Spring Cloud Data Flow as follows:
+```
+app register --name composed-task-runner --type task --uri maven://org.springframework.cloud.task.app:composedtaskrunner-task:1.2.0.RELEASE
+```
+You can also configure Spring Cloud Data Flow to use a different task definition
+name for the composed task runner.  This can be done by setting the following
+property `spring.cloud.dataflow.task.composedTaskRunnerName` to the name
+of your choice.  You can then register the composed task runner application with
+the name you set using the property.
+
