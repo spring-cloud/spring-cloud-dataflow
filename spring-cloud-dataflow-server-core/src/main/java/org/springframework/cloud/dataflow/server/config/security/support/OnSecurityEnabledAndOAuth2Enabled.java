@@ -20,8 +20,8 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Condition;
 
 /**
- * {@link Condition} that is only valid if {@code security.basic.enabled} is
- * {@code true} and the property {@code security.oauth2.client.client-id} exists.
+ * {@link Condition} that is only valid if the property
+ * {@code security.oauth2.client.client-id} exists.
  *
  * @author Gunnar Hillert
  * @since 1.1.0
