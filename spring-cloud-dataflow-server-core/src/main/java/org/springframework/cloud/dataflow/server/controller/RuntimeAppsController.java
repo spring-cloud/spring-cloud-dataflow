@@ -26,6 +26,7 @@ import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.rest.resource.AppInstanceStatusResource;
 import org.springframework.cloud.dataflow.rest.resource.AppStatusResource;
 import org.springframework.cloud.dataflow.server.controller.support.ApplicationsMetrics;
+import org.springframework.cloud.dataflow.server.controller.support.ApplicationsMetrics.Metrics;
 import org.springframework.cloud.dataflow.server.controller.support.ControllerUtils;
 import org.springframework.cloud.dataflow.server.controller.support.MetricStore;
 import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
@@ -44,6 +45,7 @@ import org.springframework.hateoas.ResourceAssembler;
 import org.springframework.hateoas.Resources;
 import org.springframework.hateoas.mvc.ResourceAssemblerSupport;
 import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -169,10 +171,18 @@ public class RuntimeAppsController {
 				String trackingKey = appInstanceStatus.getAttributes().get("guid");
 				if (metricsInstanceMap.containsKey(trackingKey)) {
 					ApplicationsMetrics.Instance metricsAppInstance = metricsInstanceMap.get(trackingKey);
-					appInstanceStatus.getAttributes().put("metrics.integration.channel.input.receiveRate",
-							String.format("%.2f", metricsAppInstance.getIncomingRate()));
-					appInstanceStatus.getAttributes().put("metrics.integration.channel.output.sendRate",
-							String.format("%.2f", metricsAppInstance.getOutgoingRate()));
+					List<Metrics> metrics = metricsAppInstance.getMetrics();
+					if (metrics != null) {
+						for (Metrics m : metrics) {
+							if (ObjectUtils.nullSafeEquals("integration.channel.input.send.mean", m.getName())) {
+								appInstanceStatus.getAttributes().put("metrics.integration.channel.input.receiveRate",
+										String.format("%.2f", m.getValue()));
+							} else if (ObjectUtils.nullSafeEquals("integration.channel.output.send.mean", m.getName())) {
+								appInstanceStatus.getAttributes().put("metrics.integration.channel.output.sendRate",
+										String.format("%.2f", m.getValue()));
+							}
+						}
+					}
 				}
 			});
 		}
