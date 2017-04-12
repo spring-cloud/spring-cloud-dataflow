@@ -50,8 +50,6 @@ public class ApplicationsMetrics {
 
 		private String name;
 		private List<Instance> instances;
-		private double incomingRate;
-		private double outgoingRate;
 
 		public String getName() {
 			return name;
@@ -68,22 +66,6 @@ public class ApplicationsMetrics {
 		public void setInstances(List<Instance> instances) {
 			this.instances = instances;
 		}
-
-		public double getIncomingRate() {
-			return incomingRate;
-		}
-
-		public void setIncomingRate(double incomingRate) {
-			this.incomingRate = incomingRate;
-		}
-
-		public double getOutgoingRate() {
-			return outgoingRate;
-		}
-
-		public void setOutgoingRate(double outgoingRate) {
-			this.outgoingRate = outgoingRate;
-		}
 	}
 
 	public static class Instance {
@@ -91,8 +73,7 @@ public class ApplicationsMetrics {
 		private String guid;
 		private int index;
 		private Map<String, Object> properties;
-		private double incomingRate;
-		private double outgoingRate;
+		private List<Metrics> metrics;
 
 		public String getGuid() {
 			return guid;
@@ -118,20 +99,34 @@ public class ApplicationsMetrics {
 			this.properties = properties;
 		}
 
-		public double getIncomingRate() {
-			return incomingRate;
+		public List<Metrics> getMetrics() {
+			return metrics;
 		}
 
-		public void setIncomingRate(double incomingRate) {
-			this.incomingRate = incomingRate;
+		public void setMetrics(List<Metrics> metrics) {
+			this.metrics = metrics;
+		}
+	}
+
+	public static class Metrics {
+
+		private String name;
+		private Object value;
+
+		public String getName() {
+			return name;
 		}
 
-		public double getOutgoingRate() {
-			return outgoingRate;
+		public void setName(String name) {
+			this.name = name;
 		}
 
-		public void setOutgoingRate(double outgoingRate) {
-			this.outgoingRate = outgoingRate;
+		public Object getValue() {
+			return value;
+		}
+
+		public void setValue(Object value) {
+			this.value = value;
 		}
 	}
 }

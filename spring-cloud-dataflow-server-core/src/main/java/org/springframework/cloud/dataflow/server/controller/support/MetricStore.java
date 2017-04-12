@@ -17,16 +17,23 @@
 package org.springframework.cloud.dataflow.server.controller.support;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.cloud.dataflow.server.config.MetricsProperties;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.hateoas.PagedResources;
+import org.springframework.hateoas.hal.Jackson2HalModule;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 
 /**
@@ -50,7 +57,13 @@ public class MetricStore {
 	 */
 	public MetricStore(MetricsProperties metricsProperties) {
 		this.metricsProperties = metricsProperties;
-		restTemplate = new RestTemplate();
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+		mapper.registerModule(new Jackson2HalModule());
+		MappingJackson2HttpMessageConverter messageConverter = new MappingJackson2HttpMessageConverter();
+		messageConverter.setSupportedMediaTypes(MediaType.parseMediaTypes("application/hal+json"));
+		messageConverter.setObjectMapper(mapper);
+		restTemplate = new RestTemplate(Arrays.asList(messageConverter));
 	}
 
 	@HystrixCommand(fallbackMethod = "defaultMetrics")
@@ -58,9 +71,10 @@ public class MetricStore {
 		List<ApplicationsMetrics> metrics = null;
 		if (StringUtils.hasText(metricsProperties.getCollector().getUrl())) {
 			try {
-				metrics = restTemplate.exchange(metricsProperties.getCollector().getUrl(), HttpMethod.GET, null,
-						new ParameterizedTypeReference<List<ApplicationsMetrics>>() {
+				PagedResources<ApplicationsMetrics> response = restTemplate.exchange(metricsProperties.getCollector().getUrl(),
+						HttpMethod.GET, null, new ParameterizedTypeReference<PagedResources<ApplicationsMetrics>>() {
 						}).getBody();
+				metrics = new ArrayList<>(response.getContent());
 			} catch (Exception e) {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Error requesting metrics from url " + metricsProperties.getCollector().getUrl(), e);
