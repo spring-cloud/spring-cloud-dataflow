@@ -69,6 +69,7 @@ import org.springframework.shell.table.Tables;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import static org.springframework.shell.table.BorderSpecification.TOP;
@@ -341,8 +342,14 @@ public class ConfigCommands implements CommandMarker,
 			this.targetHolder.getTarget().setTargetResultMessage(message);
 		}
 		else {
-			this.targetHolder.getTarget().setTargetResultMessage(String.format("Unable to contact Data Flow Server at '%s': '%s'.",
-					target.getTargetUriAsString(), targetException.toString()));
+			if (targetException instanceof HttpClientErrorException && targetException.getMessage().startsWith("401")) {
+				this.targetHolder.getTarget().setTargetResultMessage(String.format("Unable to access Data Flow Server at '%s': '%s'. Unauthorized, did you forget to authenticate?",
+						target.getTargetUriAsString(), targetException.toString()));
+			}
+			else {
+				this.targetHolder.getTarget().setTargetResultMessage(String.format("Unable to contact Data Flow Server at '%s': '%s'.",
+						target.getTargetUriAsString(), targetException.toString()));
+			}
 		}
 
 	}
