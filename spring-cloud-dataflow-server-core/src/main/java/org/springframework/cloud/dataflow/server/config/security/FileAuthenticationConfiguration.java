@@ -64,7 +64,6 @@ public class FileAuthenticationConfiguration extends GlobalAuthenticationConfigu
 	 */
 	@Override
 	public void init(AuthenticationManagerBuilder auth) throws Exception {
-
 		Assert.notEmpty(this.users,
 			String.format("No user specified. Please specify at least 1 user (e.g. via '%s')",
 				CONFIGURATION_PROPERTIES_PREFIX + ".users"));
