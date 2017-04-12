@@ -74,7 +74,7 @@ import org.springframework.web.bind.annotation.RestController;
 @ExposesResourceFor(StreamDeploymentResource.class)
 public class StreamDeploymentController {
 
-	private static Log loggger = LogFactory.getLog(StreamDeploymentController.class);
+	private static Log logger = LogFactory.getLog(StreamDeploymentController.class);
 
 	private static final String DEFAULT_PARTITION_KEY_EXPRESSION = "payload";
 
@@ -274,15 +274,20 @@ public class StreamDeploymentController {
 			// and expand them to their long form if applicable
 			AppDefinition revisedDefinition = mergeAndExpandAppProperties(currentApp, metadataResource, appDeployTimeProperties);
 			AppDeploymentRequest request = new AppDeploymentRequest(revisedDefinition, appResource, deployerDeploymentProperties);
-
 			try {
+				String loggingString = String.format("Deploying the app '%s.%s'", currentApp.getStreamName(),
+						request.getDefinition().getName());
+				if (request.getResource().getFilename() != null) {
+					loggingString = String.format(loggingString + " using the resource '%s'", request.getResource().getFilename());
+				}
+				logger.info(loggingString);
 				String id = this.deployer.deploy(request);
 				this.deploymentIdRepository.save(DeploymentKey.forStreamAppDefinition(currentApp), id);
 			}
 			// If the deployer implementation handles the deployment request synchronously, log error message if
 			// any exception is thrown out of the deployment and proceed to the next deployment.
 			catch (Exception e) {
-				loggger.error(String.format("Exception when deploying the app %s: %s", currentApp, e.getMessage()), e);
+				logger.error(String.format("Exception when deploying the app %s: %s", currentApp, e.getMessage()), e);
 			}
 		}
 	}
