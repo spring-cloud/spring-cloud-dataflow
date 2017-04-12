@@ -274,10 +274,10 @@ public class StreamDeploymentController {
 			AppDefinition revisedDefinition = mergeAndExpandAppProperties(currentApp, metadataResource, appDeployTimeProperties);
 			AppDeploymentRequest request = new AppDeploymentRequest(revisedDefinition, appResource, deployerDeploymentProperties);
 			try {
-				String loggingString = String.format("Deploying the app '%s.%s'", currentApp.getStreamName(),
-						request.getDefinition().getName());
-				if (request.getResource().getFilename() != null) {
-					loggingString = String.format(loggingString + " using the resource '%s'", request.getResource().getFilename());
+				String loggingString = String.format("Deploying application named [%s] as part of stream named [%s]",
+						request.getDefinition().getName(), currentApp.getStreamName());
+				if (registration.getUri() != null) {
+					loggingString = String.format(loggingString + " using the resource '%s'", registration.getUri());
 				}
 				logger.info(loggingString);
 				String id = this.deployer.deploy(request);
