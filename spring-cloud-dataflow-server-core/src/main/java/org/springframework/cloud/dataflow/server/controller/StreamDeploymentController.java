@@ -105,6 +105,9 @@ public class StreamDeploymentController {
 	 */
 	private final CommonApplicationProperties commonApplicationProperties;
 
+	private static String deployLoggingString = "Deploying application named [%s] as part of stream named [%s] " +
+			"with resource URI [%s]";
+
 	/**
 	 * Create a {@code StreamDeploymentController} that delegates
 	 * <ul>
@@ -253,6 +256,7 @@ public class StreamDeploymentController {
 			isDownStreamAppPartitioned = isPartitionedConsumer(appDeployTimeProperties,
 					upstreamAppSupportsPartition);
 
+			logger.info(String.format("Downloading resource URI [%s]", registration.getUri()));
 			Resource appResource = registration.getResource();
 			Resource metadataResource = registration.getMetadataResource();
 
@@ -275,12 +279,8 @@ public class StreamDeploymentController {
 			AppDefinition revisedDefinition = mergeAndExpandAppProperties(currentApp, metadataResource, appDeployTimeProperties);
 			AppDeploymentRequest request = new AppDeploymentRequest(revisedDefinition, appResource, deployerDeploymentProperties);
 			try {
-				String loggingString = String.format("Deploying the app '%s.%s'", currentApp.getStreamName(),
-						request.getDefinition().getName());
-				if (request.getResource().getFilename() != null) {
-					loggingString = String.format(loggingString + " using the resource '%s'", request.getResource().getFilename());
-				}
-				logger.info(loggingString);
+				logger.info(String.format(deployLoggingString, request.getDefinition().getName(),
+						currentApp.getStreamName(), registration.getUri()) );
 				String id = this.deployer.deploy(request);
 				this.deploymentIdRepository.save(DeploymentKey.forStreamAppDefinition(currentApp), id);
 			}
