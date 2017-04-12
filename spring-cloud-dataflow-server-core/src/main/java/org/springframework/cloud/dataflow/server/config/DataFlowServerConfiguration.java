@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2016 the original author or authors.
+ * Copyright 2015-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationPr
 import org.springframework.cloud.dataflow.server.config.features.FeaturesConfiguration;
 import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
 import org.springframework.cloud.dataflow.server.config.security.BasicAuthSecurityConfiguration;
+import org.springframework.cloud.dataflow.server.config.security.DefaultBootUserAuthenticationConfiguration;
 import org.springframework.cloud.dataflow.server.config.security.FileAuthenticationConfiguration;
 import org.springframework.cloud.dataflow.server.config.security.LdapAuthenticationConfiguration;
 import org.springframework.cloud.dataflow.server.config.security.OAuthSecurityConfiguration;
@@ -68,6 +69,7 @@ import org.springframework.util.StringUtils;
 @Configuration
 @Import({CompletionConfiguration.class, FeaturesConfiguration.class, WebConfiguration.class,
 		BasicAuthSecurityConfiguration.class, FileAuthenticationConfiguration.class,
+		DefaultBootUserAuthenticationConfiguration.class,
 		LdapAuthenticationConfiguration.class, OAuthSecurityConfiguration.class})
 @EnableConfigurationProperties({BatchProperties.class, CommonApplicationProperties.class})
 public class DataFlowServerConfiguration {
