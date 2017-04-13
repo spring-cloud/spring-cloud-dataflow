@@ -36,7 +36,7 @@
 		<spring-cloud-task.version>1.2.0.BUILD-SNAPSHOT</spring-cloud-task.version>
 
 		<!-- Note: Change ./spring-cloud-dataflow-server-local/pom.xml to match the spring-cloud.version -->
-		<spring-cloud.version>Dalston.RC1</spring-cloud.version>
+		<spring-cloud.version>Dalston.RELEASE</spring-cloud.version>
 
 		<spring-framework.version>4.3.6.RELEASE</spring-framework.version>
 		<spring-analytics.version>1.1.1.RELEASE</spring-analytics.version>
