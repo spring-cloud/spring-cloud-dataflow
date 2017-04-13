@@ -748,14 +748,11 @@ A nice way to visualize and interact with actuator endpoints is to incorporate t
 https://github.com/codecentric/spring-boot-admin[Spring Boot Admin] client library into the Spring Cloud Data Flow server.  You can create the Spring Boot Admin application by following
 http://codecentric.github.io/spring-boot-admin/1.4.3/#set-up-admin-server[a few simple steps].
 
-An easy way to include the client library into the Data Flow server is to create a
-new Data Flow Server project from http://start.spring.io.  Type 'flow' in the
-"Search for dependencies" text box and select the server runtime you want to customize.
 A simple way to have the Spring Cloud Data Flow server be a client to the Spring Boot
-Admin Server is by adding a dependency to the Data Flow server's pom and an additional
-configuration property as documented in http://codecentric.github.io/spring-boot-admin/1.4.3/#register-clients-via-spring-boot-admin[Registering Client Applications].
+Admin Server is by adding a dependency to the Data Flow server's Maven pom.xml file and an additional
+configuration property as documented in http://codecentric.github.io/spring-boot-admin/1.4.3/#register-clients-via-spring-boot-admin[Registering Client Applications].  You will need to clone the github repository for the Spring Cloud Data Flow server in order to modify the Maven pom.  There are tags in the repository for each release.  
 
-This will result in a UI with tabs for each of the actuator endpoints.
+Adding this dependency will result in a UI with tabs for each of the actuator endpoints.
 
 .Spring Boot Admin UI
 image::{dataflow-asciidoc}/images/spring-boot-admin.png[Spring Boot Admin UI, scaledwidth="80%"]
@@ -772,25 +769,136 @@ The applications that are deployed by Spring Cloud Data Flow are based on Spring
 contains several features for monitoring your application in production.  Each deployed
 application contains http://docs.spring.io/spring-boot/docs/current/reference/html/production-ready-endpoints.html[several web endpoints] for monitoring and interacting with Stream and Task applications.
 
-In particular, the metrics endpoint contains counters
-and gauges for HTTP requests, http://docs.spring.io/spring-boot/docs/current/reference/html/production-ready-metrics.html#production-ready-system-metrics[System Metrics] (such as JVM stats), http://docs.spring.io/spring-boot/docs/current/reference/html/production-ready-metrics.html#production-ready-datasource-metrics[DataSource Metrics] and http://docs.spring.io/spring-integration/reference/htmlsingle/#mgmt-channel-features[Message Channel Metrics] (such as message rates).  In turn, these metrics can be exported periodically to various application monitoring tools via
-http://docs.spring.io/spring-boot/docs/current/reference/html/production-ready-metrics.html#production-ready-metric-writers[MetricWriter] implementations.  You can control how often and which Spring Boot metrics are exported through the use of include and exclude name filters.
+In particular, the `/metrics` endpoint contains counters
+and gauges for HTTP requests, http://docs.spring.io/spring-boot/docs/current/reference/html/production-ready-metrics.html#production-ready-system-metrics[System Metrics] (such as JVM stats), http://docs.spring.io/spring-boot/docs/current/reference/html/production-ready-metrics.html#production-ready-datasource-metrics[DataSource Metrics] and http://docs.spring.io/spring-integration/reference/htmlsingle/#mgmt-channel-features[Message Channel Metrics] (such as message rates).
+Spring Boot lets you http://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#production-ready-public-metrics[add your own metrics] to the `/metrics` endpoint either by registering an implementation of the `PublicMetrics` interface or through it's integration with http://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#production-ready-dropwizard-metrics[Dropwizard].
 
-The project https://github.com/spring-cloud/spring-cloud-dataflow-metrics[Spring Cloud Data Flow Metrics] provides the foundation for
-exporting Spring Boot metrics.  The main project provides Spring Boots AutoConfiguration to setup the exporting process and common
-functionality such as defining a metric name prefix appropriate for your environement.  For example, you may want to include the
-region where the application is running in addition to the application's name and stream/task to which it belongs.
-The main project also includes a `LogMetricWriter` so that
-metrics can be stored into the log file.  While very simple in approach, log files are often ingested into application monitoring tools
-(such as Splunk) where they can be further processed to create dashboards of an application's performance.
+The Spring Boot interfaces `MetricWriter` and `Exporter` are used to send the
+metrics data to a place where they can be displayed and analyzed.  There are
+implementations in Spring Boot to export metrics to Redis, Open TSDB, Statsd,
+and JMX.
 
-The project https://github.com/spring-cloud/spring-cloud-dataflow-metrics-datadog[Spring Cloud Data Flow Metrics Datadog Metrics] provides
-integration to export Spring Boot metrics to https://www.datadoghq.com/[Datadog].
+There are a few additional Spring projects that provide support for sending
+metrics data to external systems.
 
-To make use of this functionality, you will need to add additional dependencies into your Stream and Task applications.  To customize
-the "out of the box" Task and Stream applications you can use the http://start-scs.cfapps.io/[Data Flow Initializr] to generate a
-project and then add to the generated Maven pom file the MetricWriter implementation you want to use.  The documentation on the
-Data Flow Metrics project pages provides the additional information you need to get started.
+* http://cloud.spring.io/spring-cloud-stream/[Spring Cloud Stream] provides
+`ApplicationMetricsExporter` which  publishes metrics via an https://github.com/spring-cloud/spring-cloud-stream/blob/v1.2.1.RELEASE/spring-cloud-stream-metrics/src/main/java/org/springframework/cloud/stream/metrics/config/Emitter.java[Emitter] to a messaging middleware destination.
+* https://github.com/spring-cloud/spring-cloud-dataflow-metrics-collector[Spring Cloud Data Flow Metrics Collector] subscribes to the metrics destination and
+aggregates metric  messages published by the Spring Cloud Stream applications.
+It has an HTTP endpoint to access the aggregated metrics.
+* https://github.com/spring-cloud/spring-cloud-dataflow-metrics[Spring Cloud Data Flow Metrics] provides `LogMetricWriter` that writes to the log.  
+* https://github.com/spring-cloud/spring-cloud-dataflow-metrics-datadog[Spring Cloud Data Flow Metrics Datadog Metrics] provides `DatadogMetricWriter` that writes to https://www.datadoghq.com/[Datadog].
+
+
+The Spring Cloud Stream http://docs.spring.io/spring-cloud-stream/docs/Chelsea.SR1/reference/htmlsingle/index.html#_metrics_emitter[Emitter] is used
+by the http://cloud.spring.io/spring-cloud-stream-app-starters/[Spring Cloud Stream App Starters] project that provides the most commonly used applications
+when creating Data Flow Streams.
+
+The architecture when using Spring Cloud Stream's `Emitter`, the
+Data Flow Metrics Collector, and the Data Flow server is shown below.
+
+.Spring Cloud Data Flow Metrics Architecture
+image::{dataflow-asciidoc}/images/dataflow-metrics-arch.png[Spring Cloud Data Flow Metrics Architecture , scaledwidth="100%"]
+
+As with the App Starters, there is a Spring Boot uber jar artifact of the
+Metrics Collector for Kafka 0.9, Kafka 0.10, and RabbitMQ.  You can find
+more information on building and running the Metrics Collector on its 
+https://github.com/spring-cloud/spring-cloud-dataflow-metrics-collector[project
+page].
+
+The metrics
+for each application are published when the property `spring.cloud.stream.bindings.applicationMetrics.destination` is set.  This can be set as any other
+application property when deploying an application in Data Flow.  Since
+it is quite common to want all applications in a stream to emit metrics,
+setting it at the Data Flow server level is a good way to achieve that.
+
+[source,bash]
+----
+spring.cloud.dataflow.applicationProperties.stream.spring.cloud.stream.bindings.applicationMetrics.destination=metrics
+----
+
+Using the destination name `metrics` is a good choice as the Metrics
+Collector subscribes to that name by default.
+
+The next most common way to configure the metrics destination is using
+deployment properties.  Here is an example for the `ticktock` stream that
+uses the App Starters `time` and `log` applications.
+
+[source,bash]
+----
+app register --name time --type source --uri maven://org.springframework.cloud.stream.app:time-source-rabbit:1.2.0.RELEASE
+
+app register --name log --type sink --uri maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.2.0.RELEASE
+
+stream create --name foostream --definition "time | log"
+
+stream deploy --name foostream --properties "app.*.spring.cloud.stream.bindings.applicationMetrics.destination=metrics,deployer.*.count=2"
+----
+
+The Metrics Collector exposes aggregated metrics under the HTTP endpoint
+`/collector/metrics` in JSON format.  The Data Flow server accesses this
+endpoint in two distinct ways.  The first is by exposing a `/metrics/streams`
+HTTP endpoint that acts as a proxy to the Metrics Collector endpoint.  This
+is accessed by the UI when overlaying message rates on the Flo diagrams for
+each stream.  It is also accessed to enrich the Data Flow `/runtime/apps`
+endpoint that is exposed in the UI via the `Runtime` tab and in the shell
+through the `runtime apps` command with message rates.
+
+By default, Data Flow will set the property
+
+[source,bash]
+----
+spring.cloud.stream.metrics.properties=spring.application.name,spring.application.index,spring.cloud.application.*,spring.cloud.dataflow.*
+----
+Which is the set of application properties values needed to perform aggregation.
+It will also set the property
+
+[source,bash]
+----
+spring.metrics.export.triggers.application.includes=integration**`
+----
+since Data Flow will only display instantaneous input and output channel
+message rates.  By default, all metric values in the `/metric` endpoint
+are sent so restricting it reduces the size of the message payload without
+impacting the functionality. Data Flow also exposes a `guid` property when
+displaying metric data which is used track back to the specific application
+instance that generated the metric. The `guid` value is platform dependent.
+
+Note that you can override these defaults by setting then as you would any
+application property value.
+
+Data Flow will not provide it's own implementation to store and visualize
+historical metrics data.  We will integrate with existing ALM
+system by providing an Exporter application that consumes messages from the
+same destination as the Metrics Collector and writes them to an existing ALM
+system.  Which specific ALM system we will support is driven by user demand.
+However, to serve as an example, we will develop an Elastic Search exporter
+with a Graphana front end since it is open source.
+
+=== Log and DataDog MetricWriter
+If you prefer to have deployed applications bypass the centralized collection
+of metrics via the Metrics Collector, you can use the MetricWriters in https://github.com/spring-cloud/spring-cloud-dataflow-metrics[Spring Cloud Data Flow
+Metrics] and https://github.com/spring-cloud/spring-cloud-dataflow-metrics-datadog[Spring Cloud Data Flow Metrics Datadog Metrics].
+
+The Data Flow Metrics project provides the foundation for exporting Spring Boot
+metrics via MetricWriters.  It provides Spring Boots AutoConfiguration to setup
+the writing process and common functionality such as defining a metric name
+prefix appropriate for your environement.  For example, you may want to
+includes the region where the application is running in addition to the
+application's name and stream/task to which it belongs.  It also includes a
+`LogMetricWriter` so that metrics can be stored into the log file.  While very
+simple in approach, log files are often ingested into application monitoring
+tools (such as Splunk) where they can be further processed to create dashboards
+of an application's performance.
+
+To make use of this functionality, you will need to add additional dependencies
+into your Stream and Task applications.  To customize the "out of the box" Task
+and Stream applications you can use the
+http://start-scs.cfapps.io/[Data Flow Initializr] to generate a project and
+then add to the generated Maven pom file the MetricWriter implementation you
+want to use.  The documentation on the Data Flow Metrics project pages provides
+the additional information you need to get started.
+
 
 
 
