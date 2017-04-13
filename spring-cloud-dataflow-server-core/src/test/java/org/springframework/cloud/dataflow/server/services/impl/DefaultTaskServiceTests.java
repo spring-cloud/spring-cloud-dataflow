@@ -19,7 +19,9 @@ package org.springframework.cloud.dataflow.server.services.impl;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyObject;
@@ -198,6 +200,21 @@ public class DefaultTaskServiceTests {
 
 		verifyTaskExistsInRepo("splitTask-AAA", "AAA");
 		verifyTaskExistsInRepo("splitTask-BBB", "BBB");
+	}
+
+	@Test
+	@DirtiesContext
+	public void verifyComposedTaskFlag() {
+		String composedTaskDsl = "<AAA || BBB>";
+		assertTrue("Expected true for composed task", taskService.isComposedDefinition(composedTaskDsl));
+		composedTaskDsl = "AAA 'FAILED' -> BBB '*' -> CCC";
+		assertTrue("Expected true for composed task", taskService.isComposedDefinition(composedTaskDsl));
+		composedTaskDsl = "AAA && BBB && CCC";
+		assertTrue("Expected true for composed task", taskService.isComposedDefinition(composedTaskDsl));
+		String nonComposedTaskDsl = "AAA";
+		assertFalse("Expected false for non-composed task" , taskService.isComposedDefinition(nonComposedTaskDsl));
+		nonComposedTaskDsl = "AAA --foo=bar";
+		assertFalse("Expected false for non-composed task" , taskService.isComposedDefinition(nonComposedTaskDsl));
 	}
 
 	@Test
