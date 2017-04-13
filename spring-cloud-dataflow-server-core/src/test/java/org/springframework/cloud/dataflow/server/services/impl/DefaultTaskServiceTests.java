@@ -181,9 +181,9 @@ public class DefaultTaskServiceTests {
 	@Test
 	@DirtiesContext
 	public void createSequenceComposedTask() {
-		taskService.saveTaskDefinition("seqTask", "AAA && BBB");
-		verifyTaskExistsInRepo("seqTask",
-				"seqTask-AAA && seqTask-BBB");
+		String dsl = "AAA && BBB";
+		taskService.saveTaskDefinition("seqTask", dsl);
+		verifyTaskExistsInRepo("seqTask", dsl);
 
 		verifyTaskExistsInRepo("seqTask-AAA", "AAA");
 		verifyTaskExistsInRepo("seqTask-BBB", "BBB");
@@ -192,9 +192,9 @@ public class DefaultTaskServiceTests {
 	@Test
 	@DirtiesContext
 	public void createSplitComposedTask() {
-		taskService.saveTaskDefinition("splitTask", "<AAA || BBB>");
-		verifyTaskExistsInRepo("splitTask",
-				"<splitTask-AAA || splitTask-BBB>");
+		String dsl = "<AAA || BBB>";
+		taskService.saveTaskDefinition("splitTask", dsl);
+		verifyTaskExistsInRepo("splitTask", dsl);
 
 		verifyTaskExistsInRepo("splitTask-AAA", "AAA");
 		verifyTaskExistsInRepo("splitTask-BBB", "BBB");
@@ -203,9 +203,9 @@ public class DefaultTaskServiceTests {
 	@Test
 	@DirtiesContext
 	public void createTransitionComposedTask() {
-		taskService.saveTaskDefinition("transitionTask", "AAA 'FAILED' -> BBB '*' -> CCC");
-		verifyTaskExistsInRepo("transitionTask",
-				"transitionTask-AAA 'FAILED'->transitionTask-BBB '*'->transitionTask-CCC");
+		String dsl = "AAA 'FAILED' -> BBB '*' -> CCC";
+		taskService.saveTaskDefinition("transitionTask", dsl);
+		verifyTaskExistsInRepo("transitionTask", dsl);
 
 		verifyTaskExistsInRepo("transitionTask-AAA", "AAA");
 		verifyTaskExistsInRepo("transitionTask-BBB", "BBB");
@@ -221,11 +221,12 @@ public class DefaultTaskServiceTests {
 	@Test
 	@DirtiesContext
 	public void deleteComposedTask() {
-		taskService.saveTaskDefinition("deleteTask", "AAA && BBB && CCC");
+		String dsl = "AAA && BBB && CCC";
+		taskService.saveTaskDefinition("deleteTask", dsl);
 		verifyTaskExistsInRepo("deleteTask-AAA", "AAA");
 		verifyTaskExistsInRepo("deleteTask-BBB", "BBB");
 		verifyTaskExistsInRepo("deleteTask-CCC", "CCC");
-		verifyTaskExistsInRepo("deleteTask", "deleteTask-AAA && deleteTask-BBB && deleteTask-CCC");
+		verifyTaskExistsInRepo("deleteTask", dsl);
 
 		long preDeleteSize = taskDefinitionRepository.count();
 		taskService.deleteTaskDefinition("deleteTask");

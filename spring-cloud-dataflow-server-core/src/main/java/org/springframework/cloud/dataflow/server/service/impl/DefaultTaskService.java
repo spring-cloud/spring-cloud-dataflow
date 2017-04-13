@@ -154,10 +154,13 @@ public class DefaultTaskService implements TaskService {
 		if (taskDefinition == null) {
 			throw new NoSuchTaskDefinitionException(taskName);
 		}
-		// if composed task definition add composed task runner to prefix.
-		if(isComposedDefinition(taskDefinition)) {
+		TaskParser taskParser = new TaskParser(taskDefinition.getName(),
+				taskDefinition.getDslText(), true, true);
+		TaskNode taskNode = taskParser.parse();
+		// if composed task definition replace definition with  with one composed task runner and executable graph.
+		if(taskNode.isComposed()) {
 			taskDefinition = new TaskDefinition(taskDefinition.getName(),
-					createComposedTaskDefinition(taskDefinition.getDslText()));
+					createComposedTaskDefinition(taskNode.toExecutableDSL()));
 		}
 
 		AppRegistration appRegistration = this.registry.find(taskDefinition.getRegisteredAppName(), ApplicationType.task);
@@ -191,11 +194,11 @@ public class DefaultTaskService implements TaskService {
 		).collect(Collectors.toList());
 	}
 
-	private boolean isComposedDefinition(TaskDefinition taskDefinition) {
-		TaskParser taskParser = new TaskParser(taskDefinition.getName(),
-				taskDefinition.getDslText(), true, true);
+	@Override
+	public boolean isComposedDefinition(String dsl) {
+		Assert.hasText(dsl, "dsl must not be empty nor null");
+		TaskParser taskParser = new TaskParser("__dummy", dsl, true, true);
 		return taskParser.parse().isComposed();
-
 	}
 
 	@Override
@@ -263,7 +266,7 @@ public class DefaultTaskService implements TaskService {
 				saveStandardTaskDefinition(composedTaskDefinition);
 			});
 			taskDefinitionRepository.save(
-					new TaskDefinition(name, taskNode.toExecutableDSL()));
+					new TaskDefinition(name, dsl));
 		}
 		else {
 			saveStandardTaskDefinition(new TaskDefinition(name, dsl));
@@ -293,8 +296,7 @@ public class DefaultTaskService implements TaskService {
 			throw new NoSuchTaskDefinitionException(name);
 		}
 		//if composed-task-runner definition then destroy all child tasks associated with it.
-		if(isComposedDefinition(taskDefinition))
-		{
+		if (isComposedDefinition(taskDefinition.getDslText())) {
 			String childTaskPrefix = TaskNode.getTaskPrefix(name);
 			taskDefinitionRepository.findAll().forEach(
 					childDefinition -> {

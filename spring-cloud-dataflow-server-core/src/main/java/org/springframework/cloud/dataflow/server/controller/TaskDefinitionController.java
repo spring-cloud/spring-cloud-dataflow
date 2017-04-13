@@ -182,6 +182,7 @@ public class TaskDefinitionController {
 		public TaskDefinitionResource instantiateResource(TaskDefinition taskDefinition) {
 			String key = DeploymentKey.forTaskDefinition(taskDefinition);
 			String id = deploymentIdRepository.findOne(key);
+			boolean composed = taskService.isComposedDefinition(taskDefinition.getDslText());
 			TaskStatus status = null;
 			if (id != null) {
 				status = taskLauncher.status(id);
@@ -190,6 +191,7 @@ public class TaskDefinitionController {
 			TaskDefinitionResource taskDefinitionResource = new TaskDefinitionResource(
 					taskDefinition.getName(),
 					taskDefinition.getDslText());
+			taskDefinitionResource.setComposed(composed);
 			taskDefinitionResource.setStatus(state);
 			return taskDefinitionResource;
 		}

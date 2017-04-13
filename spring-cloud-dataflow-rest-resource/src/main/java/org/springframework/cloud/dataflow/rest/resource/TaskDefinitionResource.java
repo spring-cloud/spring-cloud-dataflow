@@ -32,6 +32,11 @@ public class TaskDefinitionResource extends ResourceSupport {
 	private String dslText;
 
 	/**
+	 * Indicates whether this is a composed task.
+	 */
+	private boolean composed;
+
+	/**
 	 * Stream status (i.e. running, complete, etc).
 	 */
 	private String status;
@@ -54,6 +59,24 @@ public class TaskDefinitionResource extends ResourceSupport {
 
 	public String getDslText() {
 		return dslText;
+	}
+
+	/**
+	 * Return if this task is a composed task
+	 *
+	 * @return composed
+	 */
+	public boolean isComposed() {
+		return composed;
+	}
+
+	/**
+	 * Set if this task is a composed task
+	 *
+	 * @param composed is task a composed task
+	 */
+	public void setComposed(boolean composed) {
+		this.composed = composed;
 	}
 
 	/**
