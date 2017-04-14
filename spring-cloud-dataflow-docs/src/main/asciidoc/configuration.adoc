@@ -89,11 +89,26 @@ You can secure your REST endpoints, as well as the Data Flow Dashboard by enabli
 and requiring clients to authenticate using either:
 
 * http://oauth.net/2/[OAuth 2.0]
-* Basic Authentication
+* Traditional Authentication (Incl. Basic Authentication)
+
+.Authentication Options
+image::{dataflow-asciidoc}/images/dataflow-authentication-options.png[Authentication Options, scaledwidth="80%"]
+
+When choosing _traditional authentication_, the Spring Cloud Data Flow server will
+be the main authentication point, using Spring Security under the covers. When
+selecting this option, users then need to further define their preferred authentication
+mechanism aka select the desired authentication backing store:
+
+* <<configuration-security-single-user-authentication,Single User Authentication>>
+* <<configuration-security-ldap-authentication,Ldap Authentication>>
+* <<configuration-security-file-based-authentication,File-based authentication>>
+
+When choosing between _traditional authentication_ or _OAuth2_, keep in mind that
+both options are mutually exclusive. Please refer to the sub-chapters below for
+a more detailed discussion.
 
 NOTE:
-By default, the REST endpoints (administration, management and health), as well
-as the Dashboard UI do not require authenticated access.
+By default, the REST endpoints (administration, management and health), as well as the Dashboard UI do not require authenticated access.
 
 [[configuration-security-enabling-https]]
 === Enabling HTTPS
@@ -228,10 +243,25 @@ defeats the purpose of SSL and makes you vulnerable to man-in-the-middle attacks
 ====
 
 [[configuration-security-basic-authentication]]
-=== Basic Authentication
+=== Traditional Authentication
 
-https://en.wikipedia.org/wiki/Basic_access_authentication[Basic Authentication] can
-be enabled by adding the following to `application.yml` or via
+When using _traditional authentication_ Spring Cloud Data Flow will be the sole
+authentication provider. In that case Dataflow REST API users would use
+https://en.wikipedia.org/wiki/Basic_access_authentication[Basic Authentication]
+to access the endpoints.
+
+When using that option, users have a choice of 3 backing stores for authentication
+details:
+
+* **Single User Authentication** using Spring Boot properties
+* **File-based authentication** for multiple users using a Yaml file
+* **Ldap Authentication**
+
+[[configuration-security-single-user-authentication]]
+==== Single User Authentication
+
+This is the simplest option and mimics the behavior of the default Spring Boot user
+user-experience. It can be enabled by adding the following to `application.yml` or via
 environment variables:
 
 [source,yaml]
@@ -251,20 +281,47 @@ https://bugs.chromium.org/p/chromium/issues/detail?id=544244[Chromium issue tick
 In this use-case, the underlying Spring Boot will auto-create a user called _user_
 with an auto-generated password which will be printed out to the console upon startup.
 
+With this setup, the generated user will have all main roles assigned:
+
+* VIEW
+* CREATE
+* MANAGE
+
 .Default Spring Boot user credentials
 image::{dataflow-asciidoc}/images/dataflow-security-default-user.png[Default Spring Boot user credentials , scaledwidth="100%"]
 
+You can customize the user yourself using the following properties:
+
+```
+security.user.name=user # Default user name.
+security.user.password= # Password for the default user name. A random password is logged on startup by default.
+security.user.role=VIEW, CREATE, MANAGE # Granted roles for the default user name.
+```
+
 NOTE: Please be aware of inherent issues of Basic Authentication and _logging out_, since the credentials are cached by the browser and simply browsing back to application pages will log you back in.
 
-If you need to define more than one file-based user account, please take a look at
-_File based authentication_.
+Of course, you can also pass in credentials using system properties, environment
+variables or command-line arguments as this is standard Spring Boot behavior. For
+instance in the following example, command-line arguments are used to specify the
+user credentials:
+
+[source,bash,subs=attributes]
+----
+$ java -jar spring-cloud-dataflow-server-local-{project-version}.jar\
+    --security.basic.enabled=true \
+    --security.user.name=test \
+    --security.user.password=pass \
+    --security.user.role=VIEW
+----
+
+If you need to define more than one file-based user account, please take a look
+at <<configuration-security-file-based-authentication,File based authentication>>.
 
 [[configuration-security-file-based-authentication]]
 ==== File based authentication
 
 By default Spring Boot allows you to only specify one single user. Spring Cloud
-Data Flow also supports the listing of more than one user in a configuration file,
-as described below. Each user must be assigned a password and one or more roles:
+Data Flow also supports the listing of more than one user in a configuration file, as described below. Each user must be assigned a password and one or more roles:
 
 [source,yaml]
 ----
@@ -287,9 +344,6 @@ spring:
 <1> Enables file based authentication
 <2> This is a yaml map of username to password
 <3> Each map `value` is made of a corresponding password and role(s), comma separated
-
-IMPORTANT: As of Spring Cloud Data Flow 1.1, roles are not supported, yet (specified roles are ignored). Due to an https://github.com/spring-projects/spring-security/issues/3403[issue] in
-Spring Security, though, at least one role must be provided.
 
 [[configuration-security-ldap-authentication]]
 ==== LDAP Authentication
@@ -458,8 +512,7 @@ All of those defaults are specified in `dataflow-server-defaults.yml` which is
 part of the Spring Cloud Data Flow Core Module. Nonetheless, you can
 override those, if desired, e.g. in `application.yml`. The configuration takes
 the form of a YAML *list* (as some rules may have precedence over others) and so
-you'll need to copy/paste the whole list and tailor it to your needs (as there is no way to merge lists). Always refer to your version of `application.yml`, as the snippet reproduced
-below may be out-dated. The default rules are as such:
+you'll need to copy/paste the whole list and tailor it to your needs (as there is no way to merge lists). Always refer to your version of `application.yml`, as the snippet reproduced below may be out-dated. The default rules are as such:
 
 [source,yaml]
 ----
@@ -470,6 +523,10 @@ spring:
         authorization:
           enabled: true
           rules:
+            # Metrics
+
+            - GET    /metrics/streams                => hasRole('ROLE_VIEW')
+
             # About
 
             - GET    /about                          => hasRole('ROLE_VIEW')
@@ -537,6 +594,8 @@ spring:
 
             - GET    /tasks/executions               => hasRole('ROLE_VIEW')
             - GET    /tasks/executions/*             => hasRole('ROLE_VIEW')
+            - POST   /tasks/executions               => hasRole('ROLE_CREATE')
+            - DELETE /tasks/executions/*             => hasRole('ROLE_CREATE')
 ----
 
 The format of each line is the following:
@@ -573,7 +632,6 @@ java -jar spring-cloud-dataflow-server-local/target/spring-cloud-dataflow-server
     --security.user.role=VIEW
 ----
 
-
 [[authorization-shell-and-dashboard]]
 ==== Authorization - Shell and Dashboard Behavior
 
@@ -607,13 +665,16 @@ For further information, please refer to http://docs.spring.io/spring-security/s
 === OAuth 2.0
 
 http://oauth.net/2/[OAuth 2.0] allows you to integrate Spring Cloud
-Data Flow into Single Sign On (SSO) environments. The following 2 OAuth2 Grant Types will be used:
+Data Flow into Single Sign On (SSO) environments. The following 3 OAuth2 Grant Types will be used:
 
 * _Authorization Code_ - Used for the GUI (Browser) integration. You will be redirected to your OAuth Service for authentication
 * _Password_ - Used by the shell (And the REST integration), so you can login using username and password
+* _Client Credentials_ - Retrieve an Access Token directly from your OAuth provider and pass it to the Dataflow server using the _Authorization_ Http header.
 
-The REST endpoints are secured via Basic Authentication but will use the Password
-Grand Type under the covers to authenticate with your OAuth2 service.
+The REST endpoints can be accessed using 2 ways:
+
+* Basic Authentication which will use the _Password Grant Type_ under the covers to authenticate with your OAuth2 service
+* Access Token which will use the _Client Credentials Grant Type_ under the covers
 
 NOTE: When authentication is set up, it is strongly recommended to enable HTTPS
 as well, especially in production environments.
@@ -624,12 +685,9 @@ environment variables:
 [source,yaml]
 ----
 security:
-  basic:
-    enabled: true                                                     # <1>
-    realm: Spring Cloud Data Flow                                     # <2>
-  oauth2:                                                             # <3>
+  oauth2:
     client:
-      client-id: myclient
+      client-id: myclient                                             # <1>
       client-secret: mysecret
       access-token-uri: http://127.0.0.1:9999/oauth/token
       user-authorization-uri: http://127.0.0.1:9999/oauth/authorize
@@ -637,9 +695,7 @@ security:
       user-info-uri: http://127.0.0.1:9999/me
 ----
 
-<1> Must be set to `true` for security to be enabled.
-<2> The realm for Basic authentication
-<3> OAuth Configuration Section, if you leave off the OAuth2 section, Basic Authentication will be enabled instead.
+<1> Providing the Client Id in the OAuth Configuration Section will activate OAuth2 security
 
 NOTE: As of the current version, Spring Cloud Data Flow does not provide
 finer-grained authorization when OAUTH is used as authentication mechanism. Thus,
@@ -653,6 +709,15 @@ $ curl -u myusername:mypassword http://localhost:9393/
 ----
 
 As a result you should see a list of available REST endpoints.
+
+Besides Basic Authentication, you can also provide an Access Token in order to
+access the REST Api. In order to make that happen, you would retrieve an
+OAuth2 Access Token from your OAuth2 provider first, and then pass that Access Token to
+the REST Api using the **Authorization** Http header:
+
+```
+$ curl -H "Authorization: Bearer <ACCESS_TOKEN>" http://localhost:9393/
+```
 
 [[configuration-security-oauth2-shell]]
 ==== OAuth Authentication using the Spring Cloud Data Flow Shell
