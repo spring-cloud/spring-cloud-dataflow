@@ -17,6 +17,7 @@ package org.springframework.cloud.dataflow.server.config.security.support;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.NoneNestedConditions;
+import org.springframework.cloud.dataflow.core.DataFlowPropertyKeys;
 import org.springframework.context.annotation.Condition;
 
 /**
@@ -32,9 +33,9 @@ public class OnDefaultBootUserAuthenticationEnabled extends NoneNestedConditions
 		super(ConfigurationPhase.REGISTER_BEAN);
 	}
 
-	@ConditionalOnProperty("spring.cloud.dataflow.security.authentication.file.enabled")
+	@ConditionalOnProperty(DataFlowPropertyKeys.PREFIX + "security.authentication.file.enabled")
 	static class fileAuthenticationEnabled { }
 
-	@ConditionalOnProperty("spring.cloud.dataflow.security.authentication.ldap.enabled")
+	@ConditionalOnProperty(DataFlowPropertyKeys.PREFIX + "security.authentication.ldap.enabled")
 	static class ldapAuthenticationEnabled { }
 }
