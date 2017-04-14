@@ -295,18 +295,22 @@ public class DefaultTaskService implements TaskService {
 		if (taskDefinition == null) {
 			throw new NoSuchTaskDefinitionException(name);
 		}
+		TaskParser taskParser = new TaskParser(taskDefinition.getName(),
+				taskDefinition.getDslText(), true, true);
+		TaskNode taskNode = taskParser.parse();
 		//if composed-task-runner definition then destroy all child tasks associated with it.
-		if (isComposedDefinition(taskDefinition.getDslText())) {
+		if (taskNode.isComposed()) {
 			String childTaskPrefix = TaskNode.getTaskPrefix(name);
-			taskDefinitionRepository.findAll().forEach(
-					childDefinition -> {
-						if(childDefinition.getName().startsWith(childTaskPrefix)) {
-							destroyTask(childDefinition.getName());
-						}
-					}
-			);
+			//destroy composed child tasks
+			taskNode.getTaskApps().stream().forEach(task -> {
+				String childName = task.getName();
+				if (task.getLabel() != null) {
+					childName = task.getLabel();
+				}
+				destroyTask(childTaskPrefix + childName);
+			});
 		}
-		//destroy normal task or composed-task
+		//destroy normal task or composed parent task
 		destroyTask(name);
 	}
 
