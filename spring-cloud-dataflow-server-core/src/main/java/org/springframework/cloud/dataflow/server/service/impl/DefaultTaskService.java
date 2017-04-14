@@ -180,7 +180,7 @@ public class DefaultTaskService implements TaskService {
 
 		Map<String, String> appDeploymentProperties = extractAppProperties(taskDefinition.getRegisteredAppName(), taskDeploymentProperties);
 		Map<String, String> deployerDeploymentProperties = DeploymentPropertiesUtils.extractAndQualifyDeployerProperties(taskDeploymentProperties, taskDefinition.getRegisteredAppName());
-		if (StringUtils.hasText(this.dataFlowUri)) {
+		if (StringUtils.hasText(this.dataFlowUri) && taskNode.isComposed()) {
 			updateDataFlowUriIfNeeded(appDeploymentProperties, commandLineArgs);
 		}
 		AppDefinition revisedDefinition = mergeAndExpandAppProperties(taskDefinition, metadataResource, appDeploymentProperties);
@@ -318,8 +318,8 @@ public class DefaultTaskService implements TaskService {
 	}
 
 	private String createComposedTaskDefinition(String graph) {
-		return String.format(String.format("%s --graph=\"%s\""),
-				taskConfigurationProperties.getComposedTaskRunnerName(), graph);
+		return String.format(String.format("%s --graph=\"%s\"",
+				taskConfigurationProperties.getComposedTaskRunnerName(), graph));
 	}
 
 	@Override
