@@ -19,6 +19,7 @@ package org.springframework.cloud.dataflow.server.controller;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
@@ -290,6 +291,22 @@ public class StreamControllerTests {
 				.andExpect(
 					jsonPath("$[0].message", is("Application name 'foo' with type 'source' does not exist in the app "
 						+ "registry.\nApplication name 'bar' with type 'sink' does not exist in the app registry."))
+				);
+	}
+
+	@Test
+	public void testSaveInvalidAppDefintionsDueToParseException() throws Exception {
+		mockMvc.perform(
+				post("/streams/definitions/").param("name", "myStream")
+						.param("definition", "foo --.spring.cloud.stream.metrics.properties=spring* | bar")
+						.accept(MediaType.APPLICATION_JSON))
+				.andDo(print())
+				.andExpect(status().isBadRequest())
+				.andExpect(
+						jsonPath("$[0].logref", is("InvalidStreamDefinitionException"))
+				)
+				.andExpect(
+						jsonPath("$[0].message", startsWith("111E:(pos 6): Unexpected token.  Expected '.' but was"))
 				);
 	}
 
