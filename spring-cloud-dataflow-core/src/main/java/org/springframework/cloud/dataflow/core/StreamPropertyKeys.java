@@ -45,4 +45,11 @@ public class StreamPropertyKeys {
 	 */
 	public static final String METRICS_PROPERTIES = METRICS_PREFIX + "properties";
 
+	/**
+	 * This is the spring boot property key that Spring Cloud Stream uses to filter
+	 * the metrics to import when the specific Spring Cloud Stream "applicaiton" trigger is
+	 * fired for metrics export.
+	 */
+	public static final String METRICS_TRIGGER_INCLUDES = "spring.metrics.export.triggers.application.includes";
+
 }
