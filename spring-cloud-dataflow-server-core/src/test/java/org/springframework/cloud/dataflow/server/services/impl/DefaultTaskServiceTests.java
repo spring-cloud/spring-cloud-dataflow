@@ -16,24 +16,11 @@
 
 package org.springframework.cloud.dataflow.server.services.impl;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.springframework.cloud.dataflow.core.ApplicationType.task;
-
 import java.lang.reflect.Method;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -54,8 +41,8 @@ import org.springframework.cloud.dataflow.server.repository.InMemoryDeploymentId
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.TaskService;
-import org.springframework.cloud.dataflow.server.service.impl.TaskConfigurationProperties;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskService;
+import org.springframework.cloud.dataflow.server.service.impl.TaskConfigurationProperties;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.cloud.task.repository.TaskRepository;
@@ -64,6 +51,20 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.ReflectionUtils;
+
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyObject;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.springframework.cloud.dataflow.core.ApplicationType.task;
 
 /**
  * @author Glenn Renfro
@@ -266,9 +267,27 @@ public class DefaultTaskServiceTests {
 						this.metadataResolver, new TaskConfigurationProperties(),
 						new InMemoryDeploymentIdRepository(), "http://myserver:9191");
 		String graph = "AAA && BBB && CCC";
-		Method method = ReflectionUtils.findMethod(DefaultTaskService.class, "createComposedTaskDefinition", String.class);
+		Method method = ReflectionUtils.findMethod(DefaultTaskService.class, "updateDataFlowUriIfNeeded", Map.class);
 		ReflectionUtils.makeAccessible(method);
-		assertEquals("composed-task-runner --graph=\"AAA && BBB && CCC\" --dataFlowUri=http://myserver:9191", method.invoke(taskService, graph));
+		Map<String, String> appDeploymentProperties = new HashMap<>();
+		method.invoke(taskService, appDeploymentProperties);
+		assertTrue(appDeploymentProperties.containsKey("dataFlowUri"));
+		assertTrue("dataFlowURI is expected to be in the app deployment properties", appDeploymentProperties.get("dataFlowUri").equals("http://myserver:9191"));
+		appDeploymentProperties.clear();
+		appDeploymentProperties.put("data-flow-uri", "http://localhost:8080");
+		method.invoke(taskService, appDeploymentProperties);
+		assertTrue(!appDeploymentProperties.containsKey("dataFlowUri"));
+		assertTrue("dataFlowURI is incorrect", appDeploymentProperties.get("data-flow-uri").equals("http://localhost:8080"));
+		appDeploymentProperties.clear();
+		appDeploymentProperties.put("dataFlowUri", "http://localhost:8191");
+		method.invoke(taskService, appDeploymentProperties);
+		assertTrue(appDeploymentProperties.containsKey("dataFlowUri"));
+		assertTrue("dataFlowURI is incorrect", appDeploymentProperties.get("dataFlowUri").equals("http://localhost:8191"));
+		appDeploymentProperties.clear();
+		appDeploymentProperties.put("DATA_FLOW_URI", "http://localhost:9000");
+		method.invoke(taskService, appDeploymentProperties);
+		assertTrue(!appDeploymentProperties.containsKey("dataFlowUri"));
+		assertTrue("dataFlowURI is incorrect", appDeploymentProperties.get("DATA_FLOW_URI").equals("http://localhost:9000"));
 	}
 
 

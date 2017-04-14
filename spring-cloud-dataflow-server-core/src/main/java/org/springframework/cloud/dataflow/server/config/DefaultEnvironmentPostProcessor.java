@@ -16,8 +16,6 @@
 
 package org.springframework.cloud.dataflow.server.config;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -29,7 +27,6 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.env.EnvironmentPostProcessor;
-import org.springframework.cloud.dataflow.core.DataFlowPropertyKeys;
 import org.springframework.core.Ordered;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.MapPropertySource;
@@ -37,7 +34,6 @@ import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertySource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
-import org.springframework.util.StringUtils;
 
 /**
  * Contributes the values from {@code META-INF/dataflow-server-defaults.yml} and
@@ -64,17 +60,6 @@ public class DefaultEnvironmentPostProcessor implements EnvironmentPostProcessor
 
 		contributeDefaults(internalDefaults, serverDefaultsResource);
 		contributeDefaults(defaults, serverResource);
-		String hostName = null;
-		try {
-			hostName = InetAddress.getLocalHost().getHostAddress();
-		}
-		catch (UnknownHostException e) {
-			// ignore
-		}
-		String dataflowServerPort = environment.getProperty("server.port");
-		if (StringUtils.hasText(hostName) && StringUtils.hasText(dataflowServerPort)) {
-			defaults.put(DataFlowPropertyKeys.PREFIX + "server.uri", String.format("http://%s:%s", hostName, dataflowServerPort));
-		}
 		String defaultPropertiesKey = "defaultProperties";
 
 		if (!existingPropertySources.contains(defaultPropertiesKey) ||

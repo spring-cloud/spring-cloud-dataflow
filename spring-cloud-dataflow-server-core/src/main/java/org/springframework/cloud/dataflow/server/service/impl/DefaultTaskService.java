@@ -25,6 +25,7 @@ import java.util.stream.Stream;
 import org.h2.util.Task;
 
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
+import org.springframework.boot.bind.RelaxedNames;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
@@ -179,6 +180,7 @@ public class DefaultTaskService implements TaskService {
 
 		Map<String, String> appDeploymentProperties = extractAppProperties(taskDefinition.getRegisteredAppName(), taskDeploymentProperties);
 		Map<String, String> deployerDeploymentProperties = DeploymentPropertiesUtils.extractAndQualifyDeployerProperties(taskDeploymentProperties, taskDefinition.getRegisteredAppName());
+		updateDataFlowUriIfNeeded(appDeploymentProperties);
 		AppDefinition revisedDefinition = mergeAndExpandAppProperties(taskDefinition, metadataResource, appDeploymentProperties);
 
 		List<String> updatedCmdLineArgs = this.updateCommandLineArgs(commandLineArgs, taskExecution);
@@ -191,6 +193,20 @@ public class DefaultTaskService implements TaskService {
 		}
 		taskExecutionRepository.updateExternalExecutionId(taskExecution.getExecutionId(), id);
 		return taskExecution.getExecutionId();
+	}
+
+	private void updateDataFlowUriIfNeeded(Map<String, String> appDeploymentProperties) {
+		RelaxedNames relaxedNames = new RelaxedNames("dataFlowUri");
+		boolean dataFlowUriPropertyExists = false;
+		for (String dataFlowUriKey: relaxedNames) {
+			if (appDeploymentProperties.containsKey(dataFlowUriKey)) {
+				dataFlowUriPropertyExists = true;
+				break;
+			}
+		}
+		if (StringUtils.hasText(this.dataFlowUri) && !dataFlowUriPropertyExists) {
+			appDeploymentProperties.put("dataFlowUri", this.dataFlowUri);
+		}
 	}
 
 	private List<String> updateCommandLineArgs(List<String> commandLineArgs, TaskExecution taskExecution) {
@@ -291,9 +307,8 @@ public class DefaultTaskService implements TaskService {
 	}
 
 	private String createComposedTaskDefinition(String graph) {
-		String composedTaskDefinition = StringUtils.hasText(this.dataFlowUri) ? "%s --graph=\"%s\" --dataFlowUri=%s" : "%s --graph=\"%s\"";
-		return String.format(composedTaskDefinition,
-				taskConfigurationProperties.getComposedTaskRunnerName(), graph, this.dataFlowUri);
+		return String.format(String.format("%s --graph=\"%s\""),
+				taskConfigurationProperties.getComposedTaskRunnerName(), graph);
 	}
 
 	@Override
