@@ -303,7 +303,11 @@ public class DefaultTaskService implements TaskService {
 			String childTaskPrefix = TaskNode.getTaskPrefix(name);
 			//destroy composed child tasks
 			taskNode.getTaskApps().stream().forEach(task -> {
-				destroyTask(childTaskPrefix + task.getName());
+				String childName = task.getName();
+				if (task.getLabel() != null) {
+					childName = task.getLabel();
+				}
+				destroyTask(childTaskPrefix + childName);
 			});
 		}
 		//destroy normal task or composed parent task

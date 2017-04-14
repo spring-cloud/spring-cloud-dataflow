@@ -269,6 +269,21 @@ public class DefaultTaskServiceTests {
 		verifyTaskExistsInRepo("deleteTask-AAA", "AAA");
 	}
 
+	@Test
+	@DirtiesContext
+	public void deleteComposedTaskWithLabel() {
+		String dsl = "LLL: AAA && BBB";
+		taskService.saveTaskDefinition("deleteTask", dsl);
+		verifyTaskExistsInRepo("deleteTask-LLL", "AAA");
+		verifyTaskExistsInRepo("deleteTask-BBB", "BBB");
+		verifyTaskExistsInRepo("deleteTask", dsl);
+
+		long preDeleteSize = taskDefinitionRepository.count();
+		taskService.deleteTaskDefinition("deleteTask");
+		assertThat(preDeleteSize - 3,
+				is(equalTo(taskDefinitionRepository.count())));
+	}
+
 
 	private void verifyTaskExistsInRepo(String taskName, String dsl) {
 		TaskDefinition taskDefinition = taskDefinitionRepository.findOne(taskName);
