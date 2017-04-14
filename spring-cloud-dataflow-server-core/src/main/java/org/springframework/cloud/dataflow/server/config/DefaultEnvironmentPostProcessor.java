@@ -44,7 +44,6 @@ import org.springframework.core.io.Resource;
  *
  * @author Josh Long
  * @author Janne Valkealahti
- * @author Ilayaperumal Gopinathan
  */
 public class DefaultEnvironmentPostProcessor implements EnvironmentPostProcessor, Ordered {
 
