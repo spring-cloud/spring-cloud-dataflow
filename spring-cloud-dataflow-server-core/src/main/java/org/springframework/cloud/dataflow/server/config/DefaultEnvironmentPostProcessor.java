@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2016 the original author or authors.
+ * Copyright 2015-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package org.springframework.cloud.dataflow.server.config;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -23,9 +25,11 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.env.EnvironmentPostProcessor;
+import org.springframework.cloud.dataflow.core.DataFlowPropertyKeys;
 import org.springframework.core.Ordered;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.MapPropertySource;
@@ -33,6 +37,7 @@ import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertySource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.util.StringUtils;
 
 /**
  * Contributes the values from {@code META-INF/dataflow-server-defaults.yml} and
@@ -43,6 +48,7 @@ import org.springframework.core.io.Resource;
  *
  * @author Josh Long
  * @author Janne Valkealahti
+ * @author Ilayaperumal Gopinathan
  */
 public class DefaultEnvironmentPostProcessor implements EnvironmentPostProcessor, Ordered {
 
@@ -58,7 +64,17 @@ public class DefaultEnvironmentPostProcessor implements EnvironmentPostProcessor
 
 		contributeDefaults(internalDefaults, serverDefaultsResource);
 		contributeDefaults(defaults, serverResource);
-
+		String hostName = null;
+		try {
+			hostName = InetAddress.getLocalHost().getHostAddress();
+		}
+		catch (UnknownHostException e) {
+			// ignore
+		}
+		String dataflowServerPort = environment.getProperty("server.port");
+		if (StringUtils.hasText(hostName) && StringUtils.hasText(dataflowServerPort)) {
+			defaults.put(DataFlowPropertyKeys.PREFIX + "server.uri", String.format("http://%s:%s", hostName, dataflowServerPort));
+		}
 		String defaultPropertiesKey = "defaultProperties";
 
 		if (!existingPropertySources.contains(defaultPropertiesKey) ||

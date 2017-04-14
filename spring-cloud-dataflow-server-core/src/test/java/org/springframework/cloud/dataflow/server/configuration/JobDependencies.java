@@ -133,7 +133,7 @@ public class JobDependencies {
 		return new DefaultTaskService(new DataSourceProperties(), repository,
 				explorer, taskRepository(),
 				registry, resourceLoader, taskLauncher, metadataResolver,
-				new TaskConfigurationProperties(), deploymentIdRepository);
+				new TaskConfigurationProperties(), deploymentIdRepository, null);
 	}
 
 	@Bean

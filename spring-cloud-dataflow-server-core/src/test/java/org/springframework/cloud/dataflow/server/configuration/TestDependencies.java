@@ -257,7 +257,7 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 				taskDefinitionRepository(), taskExplorer(), taskExecutionRepository,
 				appRegistry(), resourceLoader(), taskLauncher(),
 				metadataResolver, new TaskConfigurationProperties(),
-				deploymentIdRepository);
+				deploymentIdRepository, null);
 	}
 
 	@Bean

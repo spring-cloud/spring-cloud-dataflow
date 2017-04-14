@@ -62,6 +62,7 @@ import org.springframework.util.StringUtils;
  * @author Janne Valkealahti
  * @author Gunnar Hillert
  * @author Thomas Risberg
+ * @author Ilayaperumal Gopinathan
  */
 public class DefaultTaskService implements TaskService {
 
@@ -100,6 +101,8 @@ public class DefaultTaskService implements TaskService {
 
 	private final DeploymentIdRepository deploymentIdRepository;
 
+	private final String dataFlowUri;
+
 	/**
 	 * Initializes the {@link DefaultTaskService}.
 	 *
@@ -113,6 +116,7 @@ public class DefaultTaskService implements TaskService {
 	 * @param resourceLoader the {@link ResourceLoader} that will resolve URIs to
 	 * {@link Resource}s.
 	 * @param taskLauncher the launcher this service will use to launch task apps.
+	 * @param dataFlowUri the data flow server URI
 	 */
 	public DefaultTaskService(DataSourceProperties dataSourceProperties,
 			TaskDefinitionRepository taskDefinitionRepository,
@@ -121,7 +125,8 @@ public class DefaultTaskService implements TaskService {
 			ResourceLoader resourceLoader, TaskLauncher taskLauncher,
 			ApplicationConfigurationMetadataResolver metaDataResolver,
 			TaskConfigurationProperties taskConfigurationProperties,
-			DeploymentIdRepository deploymentIdRepository) {
+			DeploymentIdRepository deploymentIdRepository,
+			String dataFlowUri) {
 		Assert.notNull(dataSourceProperties, "DataSourceProperties must not be null");
 		Assert.notNull(taskDefinitionRepository, "TaskDefinitionRepository must not be null");
 		Assert.notNull(taskExecutionRepository, "TaskExecutionRepository must not be null");
@@ -142,6 +147,7 @@ public class DefaultTaskService implements TaskService {
 		this.whitelistProperties = new WhitelistProperties(metaDataResolver);
 		this.taskConfigurationProperties = taskConfigurationProperties;
 		this.deploymentIdRepository = deploymentIdRepository;
+		this.dataFlowUri = dataFlowUri;
 	}
 
 	@Override
@@ -285,8 +291,9 @@ public class DefaultTaskService implements TaskService {
 	}
 
 	private String createComposedTaskDefinition(String graph) {
-		return String.format("%s --graph=\"%s\"",
-				taskConfigurationProperties.getComposedTaskRunnerName(), graph);
+		String composedTaskDefinition = StringUtils.hasText(this.dataFlowUri) ? "%s --graph=\"%s\" --dataFlowUri=%s" : "%s --graph=\"%s\"";
+		return String.format(composedTaskDefinition,
+				taskConfigurationProperties.getComposedTaskRunnerName(), graph, this.dataFlowUri);
 	}
 
 	@Override
