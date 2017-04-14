@@ -35,6 +35,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
+import org.springframework.cloud.dataflow.core.dsl.ParseException;
 import org.springframework.cloud.dataflow.core.dsl.StreamNode;
 import org.springframework.cloud.dataflow.core.dsl.StreamParser;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
@@ -170,6 +171,8 @@ public class StreamDefinitionController {
 	 * @param dsl    DSL definition for stream
 	 * @param deploy if {@code true}, the stream is deployed upon creation (default is {@code false})
 	 * @throws DuplicateStreamDefinitionException if a stream definition with the same name already exists
+	 * @throws InvalidStreamDefinitionException if there errors in parsing the strem DSL, resolving the name,
+	 * or type of applications in the stream
 	 */
 	@RequestMapping(value = "", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
@@ -177,7 +180,12 @@ public class StreamDefinitionController {
 					 @RequestParam("definition") String dsl,
 					 @RequestParam(value = "deploy", defaultValue = "false")
 					 boolean deploy) {
-		StreamDefinition stream = new StreamDefinition(name, dsl);
+		StreamDefinition stream;
+		try {
+			stream = new StreamDefinition(name, dsl);
+		} catch (ParseException ex) {
+			throw new InvalidStreamDefinitionException(ex.getMessage());
+		}
 		List<String> errorMessages = new ArrayList<>();
 		for (StreamAppDefinition streamAppDefinition: stream.getAppDefinitions()) {
 			final String appName = streamAppDefinition.getRegisteredAppName();
