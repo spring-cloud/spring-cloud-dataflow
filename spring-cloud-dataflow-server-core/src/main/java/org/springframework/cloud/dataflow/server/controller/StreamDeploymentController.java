@@ -79,6 +79,13 @@ public class StreamDeploymentController {
 	private static final String DEFAULT_PARTITION_KEY_EXPRESSION = "payload";
 
 	/**
+	 * This is the spring boot property key that Spring Cloud Stream uses to filter
+	 * the metrics to import when the specific Spring Cloud Stream "applicaiton" trigger is
+	 * fired for metrics export.
+	 */
+	private static final String METRICS_TRIGGER_INCLUDES = "spring.metrics.export.triggers.application.includes";
+
+	/**
 	 * The repository this controller will use for stream CRUD operations.
 	 */
 	private final StreamDefinitionRepository repository;
@@ -270,14 +277,12 @@ public class StreamDeploymentController {
 					.append(currentApp.getName()).append(".")
 					.append("${spring.cloud.application.guid}");
 			appDeployTimeProperties.put(StreamPropertyKeys.METRICS_KEY, sb.toString());
-			//TODO allow user to specify SPRING_CLOUD_STREAM_METRICS_PROPERTIES
-			//TODO Default should be spring.application.*,spring.cloud.application.*,spring.cloud.dataflow.*
-			//     Leaving it as spring* for development purposes ATM
-			appDeployTimeProperties.put(StreamPropertyKeys.METRICS_PROPERTIES, "spring*");
 
 			// Merge *definition time* app properties with *deployment time* properties
 			// and expand them to their long form if applicable
 			AppDefinition revisedDefinition = mergeAndExpandAppProperties(currentApp, metadataResource, appDeployTimeProperties);
+
+
 			AppDeploymentRequest request = new AppDeploymentRequest(revisedDefinition, appResource, deployerDeploymentProperties);
 			try {
 				logger.info(String.format(deployLoggingString, request.getDefinition().getName(),
@@ -302,6 +307,12 @@ public class StreamDeploymentController {
 		Map<String, String> merged = new HashMap<>(original.getProperties());
 		merged.putAll(appDeployTimeProperties);
 		merged = whitelistProperties.qualifyProperties(merged, metadataResource);
+
+		merged.putIfAbsent(StreamPropertyKeys.METRICS_PROPERTIES,
+				"spring.application.name,spring.application.index," +
+						"spring.cloud.application.*,spring.cloud.dataflow.*");
+		merged.putIfAbsent(METRICS_TRIGGER_INCLUDES, "integration**");
+
 		return new AppDefinition(original.getName(), merged);
 	}
 
