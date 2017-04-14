@@ -25,6 +25,7 @@ import java.util.stream.Stream;
 import org.h2.util.Task;
 
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
+import org.springframework.boot.bind.RelaxedNames;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
@@ -62,6 +63,7 @@ import org.springframework.util.StringUtils;
  * @author Janne Valkealahti
  * @author Gunnar Hillert
  * @author Thomas Risberg
+ * @author Ilayaperumal Gopinathan
  */
 public class DefaultTaskService implements TaskService {
 
@@ -100,6 +102,8 @@ public class DefaultTaskService implements TaskService {
 
 	private final DeploymentIdRepository deploymentIdRepository;
 
+	private final String dataFlowUri;
+
 	/**
 	 * Initializes the {@link DefaultTaskService}.
 	 *
@@ -113,6 +117,7 @@ public class DefaultTaskService implements TaskService {
 	 * @param resourceLoader the {@link ResourceLoader} that will resolve URIs to
 	 * {@link Resource}s.
 	 * @param taskLauncher the launcher this service will use to launch task apps.
+	 * @param dataFlowUri the data flow server URI
 	 */
 	public DefaultTaskService(DataSourceProperties dataSourceProperties,
 			TaskDefinitionRepository taskDefinitionRepository,
@@ -121,7 +126,8 @@ public class DefaultTaskService implements TaskService {
 			ResourceLoader resourceLoader, TaskLauncher taskLauncher,
 			ApplicationConfigurationMetadataResolver metaDataResolver,
 			TaskConfigurationProperties taskConfigurationProperties,
-			DeploymentIdRepository deploymentIdRepository) {
+			DeploymentIdRepository deploymentIdRepository,
+			String dataFlowUri) {
 		Assert.notNull(dataSourceProperties, "DataSourceProperties must not be null");
 		Assert.notNull(taskDefinitionRepository, "TaskDefinitionRepository must not be null");
 		Assert.notNull(taskExecutionRepository, "TaskExecutionRepository must not be null");
@@ -142,6 +148,7 @@ public class DefaultTaskService implements TaskService {
 		this.whitelistProperties = new WhitelistProperties(metaDataResolver);
 		this.taskConfigurationProperties = taskConfigurationProperties;
 		this.deploymentIdRepository = deploymentIdRepository;
+		this.dataFlowUri = dataFlowUri;
 	}
 
 	@Override
@@ -173,11 +180,12 @@ public class DefaultTaskService implements TaskService {
 
 		Map<String, String> appDeploymentProperties = extractAppProperties(taskDefinition.getRegisteredAppName(), taskDeploymentProperties);
 		Map<String, String> deployerDeploymentProperties = DeploymentPropertiesUtils.extractAndQualifyDeployerProperties(taskDeploymentProperties, taskDefinition.getRegisteredAppName());
+		if (StringUtils.hasText(this.dataFlowUri) && taskNode.isComposed()) {
+			updateDataFlowUriIfNeeded(appDeploymentProperties, commandLineArgs);
+		}
 		AppDefinition revisedDefinition = mergeAndExpandAppProperties(taskDefinition, metadataResource, appDeploymentProperties);
-
 		List<String> updatedCmdLineArgs = this.updateCommandLineArgs(commandLineArgs, taskExecution);
 		AppDeploymentRequest request = new AppDeploymentRequest(revisedDefinition, appResource, deployerDeploymentProperties, updatedCmdLineArgs);
-
 		String id = this.taskLauncher.launch(request);
 		if (!StringUtils.hasText(id)) {
 			throw new IllegalStateException("Deployment ID is null for the task:"
@@ -185,6 +193,24 @@ public class DefaultTaskService implements TaskService {
 		}
 		taskExecutionRepository.updateExternalExecutionId(taskExecution.getExecutionId(), id);
 		return taskExecution.getExecutionId();
+	}
+
+	private void updateDataFlowUriIfNeeded(Map<String, String> appDeploymentProperties, List<String> commandLineArgs) {
+		if (StringUtils.isEmpty(this.dataFlowUri)) {
+			return;
+		}
+		RelaxedNames relaxedNames = new RelaxedNames("dataFlowUri");
+		for (String dataFlowUriKey: relaxedNames) {
+			if (appDeploymentProperties.containsKey(dataFlowUriKey)) {
+				return;
+			}
+			for (String cmdLineArg : commandLineArgs) {
+				if (cmdLineArg.contains(dataFlowUriKey + "=")) {
+					return;
+				}
+			}
+		}
+		appDeploymentProperties.put("dataFlowUri", this.dataFlowUri);
 	}
 
 	private List<String> updateCommandLineArgs(List<String> commandLineArgs, TaskExecution taskExecution) {
@@ -285,8 +311,8 @@ public class DefaultTaskService implements TaskService {
 	}
 
 	private String createComposedTaskDefinition(String graph) {
-		return String.format("%s --graph=\"%s\"",
-				taskConfigurationProperties.getComposedTaskRunnerName(), graph);
+		return String.format(String.format("%s --graph=\"%s\"",
+				taskConfigurationProperties.getComposedTaskRunnerName(), graph));
 	}
 
 	@Override

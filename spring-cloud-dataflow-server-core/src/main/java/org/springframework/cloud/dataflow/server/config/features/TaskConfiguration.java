@@ -26,6 +26,7 @@ import org.springframework.batch.core.explore.support.JobExplorerFactoryBean;
 import org.springframework.batch.core.launch.support.SimpleJobLauncher;
 import org.springframework.batch.core.repository.support.JobRepositoryFactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.batch.BatchDatabaseInitializer;
 import org.springframework.boot.autoconfigure.batch.BatchProperties;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -72,6 +73,9 @@ public class TaskConfiguration {
 	@Autowired
 	DataSourceProperties dataSourceProperties;
 
+	@Value("${spring.cloud.dataflow.server.uri:}")
+	private String dataFlowUri;
+
 	@Bean
 	public TaskExplorerFactoryBean taskExplorerFactoryBean(DataSource dataSource) {
 		return new TaskExplorerFactoryBean(dataSource);
@@ -91,7 +95,7 @@ public class TaskConfiguration {
 			DeploymentIdRepository deploymentIdRepository) {
 		return new DefaultTaskService(dataSourceProperties, repository, taskExplorer, taskExecutionRepository,
 				registry, resourceLoader, taskLauncher, metadataResolver,
-				taskConfigurationProperties, deploymentIdRepository);
+				taskConfigurationProperties, deploymentIdRepository, this.dataFlowUri);
 	}
 
 	@Bean
