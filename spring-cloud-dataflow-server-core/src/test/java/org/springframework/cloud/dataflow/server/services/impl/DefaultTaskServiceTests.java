@@ -30,6 +30,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.cloud.dataflow.core.ApplicationType.task;
 
+import java.lang.reflect.Method;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -62,9 +63,11 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * @author Glenn Renfro
+ * @author Ilayaperumal Gopinathan
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = {EmbeddedDataSourceConfiguration.class,
@@ -116,7 +119,7 @@ public class DefaultTaskServiceTests {
 						taskExecutionRepository, appRegistry, resourceLoader,
 						taskLauncher, metadataResolver,
 						new TaskConfigurationProperties(),
-						new InMemoryDeploymentIdRepository());
+						new InMemoryDeploymentIdRepository(), null);
 	}
 
 	@Test
@@ -166,7 +169,7 @@ public class DefaultTaskServiceTests {
 						this.taskExecutionRepository, this.appRegistry,
 						this.resourceLoader, this.taskLauncher,
 						this.metadataResolver, new TaskConfigurationProperties(),
-						new InMemoryDeploymentIdRepository());
+						new InMemoryDeploymentIdRepository(), null);
 		try {
 			taskService.executeTask(TASK_NAME_ORIG, new HashMap<>(),
 					new LinkedList<>());
@@ -249,6 +252,23 @@ public class DefaultTaskServiceTests {
 		taskService.deleteTaskDefinition("deleteTask");
 		assertThat(preDeleteSize - 4,
 				is(equalTo(taskDefinitionRepository.count())));
+	}
+
+	@Test
+	@DirtiesContext
+	public void verifyDataFlowUriProperty() throws Exception {
+		when(this.taskLauncher.launch(anyObject())).thenReturn("0");
+		TaskService taskService =
+				new DefaultTaskService(this.dataSourceProperties,
+						mock(TaskDefinitionRepository.class), this.taskExplorer,
+						this.taskExecutionRepository, this.appRegistry,
+						this.resourceLoader, this.taskLauncher,
+						this.metadataResolver, new TaskConfigurationProperties(),
+						new InMemoryDeploymentIdRepository(), "http://myserver:9191");
+		String graph = "AAA && BBB && CCC";
+		Method method = ReflectionUtils.findMethod(DefaultTaskService.class, "createComposedTaskDefinition", String.class);
+		ReflectionUtils.makeAccessible(method);
+		assertEquals("composed-task-runner --graph=\"AAA && BBB && CCC\" --dataFlowUri=http://myserver:9191", method.invoke(taskService, graph));
 	}
 
 
