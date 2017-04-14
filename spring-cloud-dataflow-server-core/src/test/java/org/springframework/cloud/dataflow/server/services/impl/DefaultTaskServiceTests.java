@@ -18,8 +18,10 @@ package org.springframework.cloud.dataflow.server.services.impl;
 
 import java.lang.reflect.Method;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.Before;
@@ -266,28 +268,37 @@ public class DefaultTaskServiceTests {
 						this.resourceLoader, this.taskLauncher,
 						this.metadataResolver, new TaskConfigurationProperties(),
 						new InMemoryDeploymentIdRepository(), "http://myserver:9191");
-		String graph = "AAA && BBB && CCC";
-		Method method = ReflectionUtils.findMethod(DefaultTaskService.class, "updateDataFlowUriIfNeeded", Map.class);
+		List<String> cmdLineArgs = new ArrayList<>();
+		Method method = ReflectionUtils.findMethod(DefaultTaskService.class, "updateDataFlowUriIfNeeded", Map.class, List.class);
 		ReflectionUtils.makeAccessible(method);
 		Map<String, String> appDeploymentProperties = new HashMap<>();
-		method.invoke(taskService, appDeploymentProperties);
+		method.invoke(taskService, appDeploymentProperties, cmdLineArgs);
 		assertTrue(appDeploymentProperties.containsKey("dataFlowUri"));
 		assertTrue("dataFlowURI is expected to be in the app deployment properties", appDeploymentProperties.get("dataFlowUri").equals("http://myserver:9191"));
 		appDeploymentProperties.clear();
 		appDeploymentProperties.put("data-flow-uri", "http://localhost:8080");
-		method.invoke(taskService, appDeploymentProperties);
+		method.invoke(taskService, appDeploymentProperties, cmdLineArgs);
 		assertTrue(!appDeploymentProperties.containsKey("dataFlowUri"));
 		assertTrue("dataFlowURI is incorrect", appDeploymentProperties.get("data-flow-uri").equals("http://localhost:8080"));
 		appDeploymentProperties.clear();
 		appDeploymentProperties.put("dataFlowUri", "http://localhost:8191");
-		method.invoke(taskService, appDeploymentProperties);
+		method.invoke(taskService, appDeploymentProperties, cmdLineArgs);
 		assertTrue(appDeploymentProperties.containsKey("dataFlowUri"));
 		assertTrue("dataFlowURI is incorrect", appDeploymentProperties.get("dataFlowUri").equals("http://localhost:8191"));
 		appDeploymentProperties.clear();
 		appDeploymentProperties.put("DATA_FLOW_URI", "http://localhost:9000");
-		method.invoke(taskService, appDeploymentProperties);
+		method.invoke(taskService, appDeploymentProperties, cmdLineArgs);
 		assertTrue(!appDeploymentProperties.containsKey("dataFlowUri"));
 		assertTrue("dataFlowURI is incorrect", appDeploymentProperties.get("DATA_FLOW_URI").equals("http://localhost:9000"));
+		appDeploymentProperties.clear();
+		cmdLineArgs.add("--dataFlowUri=http://localhost:8383");
+		method.invoke(taskService, appDeploymentProperties, cmdLineArgs);
+		assertTrue(!appDeploymentProperties.containsKey("dataFlowUri"));
+		cmdLineArgs.clear();
+		cmdLineArgs.add("DATA_FLOW_URI=http://localhost:8383");
+		method.invoke(taskService, appDeploymentProperties, cmdLineArgs);
+		assertTrue(!appDeploymentProperties.containsKey("dataFlowUri"));
+		assertTrue(!appDeploymentProperties.containsKey("DATA-FLOW-URI"));
 	}
 
 

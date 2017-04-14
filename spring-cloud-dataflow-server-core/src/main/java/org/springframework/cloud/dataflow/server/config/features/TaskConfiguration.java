@@ -73,7 +73,7 @@ public class TaskConfiguration {
 	@Autowired
 	DataSourceProperties dataSourceProperties;
 
-	@Value("${spring.cloud.dataflow.server.uri}")
+	@Value("${spring.cloud.dataflow.server.uri:}")
 	private String dataFlowUri;
 
 	@Bean
