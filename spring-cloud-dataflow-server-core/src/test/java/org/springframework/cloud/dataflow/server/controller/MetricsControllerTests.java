@@ -58,7 +58,6 @@ public class MetricsControllerTests {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(wac).defaultRequest(get("/").accept(MediaType.APPLICATION_JSON)).build();
 	}
 
-
 	@Test
 	public void testGetResponse() throws Exception {
 		MockHttpServletResponse responseString = mockMvc.perform(
@@ -66,5 +65,6 @@ public class MetricsControllerTests {
 				.andExpect(status().isOk()).andReturn().getResponse();
 		// for now we just get dummy mocked response
 		assertThat(responseString.getContentAsString(), containsString("ticktock1"));
+		assertThat(responseString.getContentAsString(), containsString("aggregateMetrics"));
 	}
 }

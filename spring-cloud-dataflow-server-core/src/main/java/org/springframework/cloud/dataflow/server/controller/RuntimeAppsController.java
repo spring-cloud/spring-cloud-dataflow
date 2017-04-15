@@ -26,7 +26,6 @@ import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.rest.resource.AppInstanceStatusResource;
 import org.springframework.cloud.dataflow.rest.resource.AppStatusResource;
 import org.springframework.cloud.dataflow.server.controller.support.ApplicationsMetrics;
-import org.springframework.cloud.dataflow.server.controller.support.ApplicationsMetrics.Metrics;
 import org.springframework.cloud.dataflow.server.controller.support.ControllerUtils;
 import org.springframework.cloud.dataflow.server.controller.support.MetricStore;
 import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
@@ -172,9 +171,9 @@ public class RuntimeAppsController {
 				String trackingKey = appInstanceStatus.getAttributes().get("guid");
 				if (metricsInstanceMap.containsKey(trackingKey)) {
 					ApplicationsMetrics.Instance metricsAppInstance = metricsInstanceMap.get(trackingKey);
-					List<Metrics> metrics = metricsAppInstance.getMetrics();
+					List<ApplicationsMetrics.Metric> metrics = metricsAppInstance.getMetrics();
 					if (metrics != null) {
-						for (Metrics m : metrics) {
+						for (ApplicationsMetrics.Metric m : metrics) {
 							if (ObjectUtils.nullSafeEquals("integration.channel.input.send.mean", m.getName())) {
 								appInstanceStatus.getAttributes().put("metrics.integration.channel.input.receiveRate",
 										String.format("%.2f", m.getValue()));
