@@ -105,6 +105,7 @@ public class TaskDefinitionController {
 	 *
 	 * @param name name the name of the task
 	 * @param dsl DSL definition for the task
+	 * @return the task definition
 	 */
 	@RequestMapping(value = "", method = RequestMethod.POST)
 	public TaskDefinitionResource save(@RequestParam("name") String name,
@@ -152,6 +153,7 @@ public class TaskDefinitionController {
 	/**
 	 * Return a given task definition resource.
 	 * @param name the name of an existing task definition (required)
+	 * @return the task definition
 	 */
 	@RequestMapping(value = "/{name}", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)

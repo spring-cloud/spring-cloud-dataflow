@@ -106,6 +106,7 @@ public class SecurityInfo {
 
 	/**
 	 * @param role Adds the role to {@link #roles}
+	 * @return the security related meta-information
 	 */
 	public SecurityInfo addRole(String role) {
 		this.roles.add(role);
@@ -117,7 +118,6 @@ public class SecurityInfo {
 	 * {@code false} is returned.
 	 *
 	 * @return True if form-login is, false if OAuth2 authentication is used
-	 * @see OnSecurityEnabledAndOAuth2Enabled
 	 */
 	public boolean isFormLogin() {
 		return formLogin;

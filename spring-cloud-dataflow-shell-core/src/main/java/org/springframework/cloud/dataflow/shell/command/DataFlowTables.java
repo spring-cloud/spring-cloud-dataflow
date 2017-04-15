@@ -46,6 +46,9 @@ public class DataFlowTables {
 	 *     <li>first row is assumed to be a header and is centered horizontally and vertically</li>
 	 *     <li>cells containing Map values are rendered as {@literal key = value} lines, trying to align on equal signs</li>
 	 * </ul>
+	 *
+	 * @param builder the table builder to use
+	 * @return the configured table builder
 	 */
 	public static TableBuilder applyStyle(TableBuilder builder) {
 		builder.addOutlineBorder(BorderStyle.fancy_double)

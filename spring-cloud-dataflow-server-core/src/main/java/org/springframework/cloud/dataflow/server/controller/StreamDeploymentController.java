@@ -120,6 +120,7 @@ public class StreamDeploymentController {
 	 * @param deploymentIdRepository the repository this controller will use for deployment IDs
 	 * @param registry               the registry this controller will use to lookup apps
 	 * @param deployer               the deployer this controller will use to deploy stream apps
+	 * @param metadataResolver       the application metadata resolver
 	 * @param commonProperties       common set of application properties
 	 */
 	public StreamDeploymentController(StreamDefinitionRepository repository,

@@ -67,6 +67,7 @@ public interface AppRegistryOperations {
 	 * @param uri   URI for the application artifact
 	 * @param metadataUri   URI for the application metadata artifact
 	 * @param force if {@code true}, overwrites a pre-existing registration
+	 * @return the new app registration
 	 */
 	AppRegistrationResource register(String name, ApplicationType type,
 			String uri, String metadataUri, boolean force);
@@ -84,6 +85,7 @@ public interface AppRegistryOperations {
 	 *
 	 * @param uri   URI for the properties file
 	 * @param force if {@code true}, overwrites any pre-existing registrations
+	 * @return the paged list of new app registrations
 	 */
 	PagedResources<AppRegistrationResource> importFromResource(String uri, boolean force);
 
@@ -92,6 +94,7 @@ public interface AppRegistryOperations {
 	 *
 	 * @param apps   the apps as key/value pairs where key is "type.name" and value is a URI
 	 * @param force if {@code true}, overwrites any pre-existing registrations
+	 * @return the paged list of new app registrations
 	 */
 	PagedResources<AppRegistrationResource> registerAll(Properties apps, boolean force);
 

@@ -63,21 +63,21 @@ public class AppRegistrationResource extends ResourceSupport {
 	}
 
 	/**
-	 * @see #name
+	 * @return the name of the app
 	 */
 	public String getName() {
 		return name;
 	}
 
 	/**
-	 * @see #type
+	 * @return type type of the app
 	 */
 	public String getType() {
 		return type;
 	}
 
 	/**
-	 * @see #uri
+	 * @return type URI for the app resource
 	 */
 	public String getUri() {
 		return uri;

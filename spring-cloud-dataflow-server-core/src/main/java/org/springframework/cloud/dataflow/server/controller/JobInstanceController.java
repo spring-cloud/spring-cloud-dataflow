@@ -78,6 +78,7 @@ public class JobInstanceController {
 	/**
 	 * Return a page-able list of {@link JobInstanceResource} defined jobs.
 	 *
+	 * @param jobName the name of the job
 	 * @param pageable  page-able collection of {@link JobInstance}s.
 	 * @param assembler for the {@link JobInstance}s
 	 * @return a list of Job Instance

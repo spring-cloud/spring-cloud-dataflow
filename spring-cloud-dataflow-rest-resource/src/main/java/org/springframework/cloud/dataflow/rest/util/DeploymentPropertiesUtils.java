@@ -118,6 +118,7 @@ public final class DeploymentPropertiesUtils {
 	 * Retain only properties that are meant for the <em>deployer</em> of a given app
 	 * (those that start with {@code deployer.[appname]} or {@code deployer.*})
 	 * and qualify all property values with the {@code spring.cloud.deployer.} prefix.
+	 *
 	 */
 	public static Map<String, String> extractAndQualifyDeployerProperties(Map<String, String> input, String appName) {
 		final String wildcardPrefix = "deployer.*.";

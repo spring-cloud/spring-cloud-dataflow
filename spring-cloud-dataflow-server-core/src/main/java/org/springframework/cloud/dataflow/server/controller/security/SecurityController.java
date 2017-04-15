@@ -58,6 +58,8 @@ public class SecurityController {
 
 	/**
 	 * Return security information. E.g. is security enabled? Which user do you represent?
+	 *
+	 * @return the security info
 	 */
 	@ResponseBody
 	@RequestMapping(method = RequestMethod.GET)

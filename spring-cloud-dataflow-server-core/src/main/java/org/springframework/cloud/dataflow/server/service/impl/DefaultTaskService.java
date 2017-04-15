@@ -117,6 +117,9 @@ public class DefaultTaskService implements TaskService {
 	 * @param resourceLoader the {@link ResourceLoader} that will resolve URIs to
 	 * {@link Resource}s.
 	 * @param taskLauncher the launcher this service will use to launch task apps.
+	 * @param metaDataResolver the metadata resolver
+	 * @param taskConfigurationProperties  the properties used to define the behavior of tasks
+	 * @param deploymentIdRepository the repository that maps deployment keys to IDs
 	 * @param dataFlowUri the data flow server URI
 	 */
 	public DefaultTaskService(DataSourceProperties dataSourceProperties,

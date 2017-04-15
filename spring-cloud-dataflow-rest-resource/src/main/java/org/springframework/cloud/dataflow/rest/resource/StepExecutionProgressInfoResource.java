@@ -46,9 +46,12 @@ public class StepExecutionProgressInfoResource extends ResourceSupport {
 	}
 
 	/**
-	 *
-	 * @param stepExecution Must not be null
-	 * @param stepExecutionHistory Must not be null
+	 * Create a new StepExecutionProgressInfoResource
+	 * @param stepExecution the step execution, must not be null
+	 * @param stepExecutionHistory the step execution history, must not be null
+	 * @param percentageComplete the percentage complete of the step
+	 * @param isFinished whether the step execution is finished
+	 * @param duration the duration of the step in milliseconds
 	 */
 	public StepExecutionProgressInfoResource(StepExecution stepExecution, StepExecutionHistory stepExecutionHistory,
 			double percentageComplete, boolean isFinished, double duration) {

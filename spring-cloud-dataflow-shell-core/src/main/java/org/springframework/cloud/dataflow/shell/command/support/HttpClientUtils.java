@@ -57,10 +57,11 @@ public class HttpClientUtils {
 	 * Furthermore, you can set the underlying {@link SSLContext} of the {@link HttpClient} allowing you to accept self-signed
 	 * certificates.
 	 *
-	 * @param restTemplate Must not be null
-	 * @param username Can be null
-	 * @param password Can be null
-	 * @param skipSslValidation Use with caution! If true certificate warnings will be ignored.
+	 * @param restTemplate the rest template, must not be null
+	 * @param host the target host URI
+	 * @param username the username for authentication, can be null
+	 * @param password the password for authentication, can be null
+	 * @param skipSslValidation whether to skip ssl validation. Use with caution! If true certificate warnings will be ignored.
 	 */
 	public static void prepareRestTemplate(
 			RestTemplate restTemplate,

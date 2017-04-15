@@ -30,12 +30,13 @@ import org.springframework.hateoas.PagedResources;
 public interface JobOperations {
 
 	/**
-	 * List job executions known to the system.
+	 * @return the list job executions known to the system.
 	 */
 	PagedResources<JobExecutionResource> executionList();
 
 	/**
-	 * List job instances for the specified jobName.
+	 * @return the list job instances for the specified jobName.
+	 * @param jobName the name of the job
 	 */
 	PagedResources<JobInstanceResource> instanceList(String jobName);
 
@@ -43,6 +44,7 @@ public interface JobOperations {
 	 * List job executions known to the system filtered by job name.
 	 *
 	 * @param jobName of the executions.
+	 * @return the list of job executions
 	 */
 	PagedResources<JobExecutionResource> executionListByJobName(String jobName);
 
@@ -66,6 +68,7 @@ public interface JobOperations {
 	 * List step executions known for a specific job execution id.
 	 *
 	 * @param jobExecutionId the id of the job execution.
+	 * @return the paged list of step executions
 	 */
 	PagedResources<StepExecutionResource> stepExecutionList(long jobExecutionId);
 
@@ -75,6 +78,7 @@ public interface JobOperations {
 	 *
 	 * @param jobExecutionId  the id of the job execution for the step to be returned.
 	 * @param stepExecutionId the id step execution to be returned.
+	 * @return the step execution progress info
 	 */
 	StepExecutionProgressInfoResource stepExecutionProgress(long jobExecutionId,
 			long stepExecutionId);

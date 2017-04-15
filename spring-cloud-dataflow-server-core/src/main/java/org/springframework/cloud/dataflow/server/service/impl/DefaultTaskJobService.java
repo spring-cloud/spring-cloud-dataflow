@@ -180,7 +180,7 @@ public class DefaultTaskJobService implements TaskJobService {
 	 * Retrieves the total number {@link JobExecution} that match a specific job name.
 	 * @param jobName the job name to search.
 	 * @return the number of {@link JobExecution}s that match the job name.
-	 * @throws NoSuchJobException
+	 * @throws NoSuchJobException if the job with the given name is not available
 	 */
 	@Override
 	public int countJobExecutionsForJob(String jobName) throws NoSuchJobException{
