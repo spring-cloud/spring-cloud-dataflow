@@ -96,6 +96,10 @@ public class AppRegistryController implements ResourceLoaderAware {
 
 	/**
 	 * List app registrations.
+	 * @param pagedResourcesAssembler the resource assembler for app registrations
+	 * @param type the application type: source, sink, processor
+	 * @param detailed provide detailed information (if available) for the application
+	 * @return the list of registered applications
 	 */
 	@RequestMapping(method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
@@ -143,6 +147,7 @@ public class AppRegistryController implements ResourceLoaderAware {
 	 * @param type        module type
 	 * @param name        module name
 	 * @param uri         URI for the module artifact (e.g. {@literal maven://group:artifact:version})
+	 * @param metadataUri URI for the metadata artifact
 	 * @param force       if {@code true}, overwrites a pre-existing registration
 	 */
 	@RequestMapping(value = "/{type}/{name}", method = RequestMethod.POST)
@@ -181,9 +186,12 @@ public class AppRegistryController implements ResourceLoaderAware {
 
 	/**
 	 * Register all applications listed in a properties file or provided as key/value pairs.
+	 * @param pagedResourcesAssembler the resource asembly for app registrations
 	 * @param uri         URI for the properties file
 	 * @param apps        key/value pairs representing applications, separated by newlines
 	 * @param force       if {@code true}, overwrites any pre-existing registrations
+	 * @return the collection of registered applications
+	 * @throws IOException if can't store the Properties object to byte output stream
 	 */
 	@RequestMapping(method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
