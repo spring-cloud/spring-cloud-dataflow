@@ -46,10 +46,11 @@ import org.springframework.util.StringUtils;
  * Convenience wrapper for the {@link UriRegistry} that operates on higher level
  * {@link AppRegistration} objects and supports on-demand loading of {@link Resource}s.
  *
- * <p>Stores AppRegistration with up to two keys:<ul>
+ * <p>Stores AppRegistration with up to two keys:</p>
+ * <ul>
  *     <li>{@literal <type>.<name>}: URI for the actual app</li>
  *     <li>{@literal <type>.<name>.metadata}: Optional URI for the app metadata</li>
- * </ul></p>
+ * </ul>
  *
  * @author Mark Fisher
  * @author Gunnar Hillert

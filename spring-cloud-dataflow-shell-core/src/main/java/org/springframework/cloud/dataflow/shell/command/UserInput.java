@@ -30,6 +30,7 @@ public interface UserInput {
 	 * @param prompt the a message to prompt the user with
 	 * @param defaultValue the default value to be returned if the user simply presses Enter
 	 * @param options valid input option set
+	 * @return the prompt text to display to the user
 	 */
 	public String promptWithOptions(String prompt, String defaultValue, String... options);
 
@@ -39,6 +40,7 @@ public interface UserInput {
 	 * @param prompt the a message to prompt the user with
 	 * @param defaultValue the default value to be returned if the user simply presses Enter
 	 * @param echo echo the input to output (set to false for sensitive input, e.g. passwords)
+	 * @return the prompt text to display to the user
 	 */
 	public String prompt(String prompt, String defaultValue, boolean echo);
 

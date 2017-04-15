@@ -35,7 +35,7 @@ public class NoSuchStreamDefinitionException extends RuntimeException {
 	}
 
 	/**
-	 * Return the name of the stream definition that could not be found.
+	 * @return the name of the stream definition that could not be found
 	 */
 	public String getName() {
 		return name;

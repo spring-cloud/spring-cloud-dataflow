@@ -44,7 +44,7 @@ public class FeaturesController {
 	}
 
 	/**
-	 * Return features that are enabled/disabled on the dataflow server.
+	 * @return the features that are enabled/disabled on the dataflow server.
 	 */
 	@ResponseBody
 	@RequestMapping(method = RequestMethod.GET)

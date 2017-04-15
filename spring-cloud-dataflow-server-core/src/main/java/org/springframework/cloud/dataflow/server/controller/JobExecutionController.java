@@ -81,6 +81,7 @@ public class JobExecutionController {
 	 * @param pageable  page-able collection of {@code TaskJobExecution}s.
 	 * @param assembler for the {@link TaskJobExecution}s
 	 * @return a list of Task/Job executions
+	 * @throws NoSuchJobExecutionException if
 	 */
 	@RequestMapping(value = "", method = RequestMethod.GET, produces = "application/json")
 	@ResponseStatus(HttpStatus.OK)

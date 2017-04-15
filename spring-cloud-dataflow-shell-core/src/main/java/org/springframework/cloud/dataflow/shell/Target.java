@@ -73,11 +73,11 @@ public class Target {
 	 * Construct a new Target. The passed in <code>targetUriAsString</code> String parameter will be converted to a {@link URI}.
 	 * This method allows for providing a username and password for authentication.
 	 *
-	 * @param targetUriAsString Must not be empty
-	 * @param targetUsername    May be empty, if access is unauthenticated
-	 * @param targetPassword    May be empty
-	 * @param skipSslValidation
-	 * @throws IllegalArgumentException if the given string violates RFC 2396.
+	 * @param targetUriAsString the data flow server URI, must not be empty
+	 * @param targetUsername    the username, may be empty, if access is unauthenticated
+	 * @param targetPassword    the password, may be empty
+	 * @param skipSslValidation whether or not we skip SSL validation.
+	 * @throws IllegalArgumentException if the given URI string violates RFC 2396.
 	 */
 	public Target(String targetUriAsString, String targetUsername, String targetPassword, boolean skipSslValidation) {
 		Assert.hasText(targetUriAsString, "The provided targetUriAsString must neither be null nor empty.");
@@ -151,8 +151,8 @@ public class Target {
 	}
 
 	/**
-	 *
-	 * @return
+	 * Returns if sslValidation should be skipped
+	 * @return Return whether or not we skip SSL validation.
 	 */
 	public boolean isSkipSslValidation() {
 		return skipSslValidation;
@@ -229,7 +229,7 @@ public class Target {
 	}
 
 	/**
-	 * Indicates whether a user is successfully authenticated with the Target
+	 * @param authenticated whether a user is successfully authenticated with the Target
 	 */
 	public void setAuthenticated(boolean authenticated) {
 		this.authenticated = authenticated;

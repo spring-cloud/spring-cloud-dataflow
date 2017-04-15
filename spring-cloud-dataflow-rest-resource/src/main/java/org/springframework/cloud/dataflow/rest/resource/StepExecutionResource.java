@@ -33,8 +33,10 @@ public class StepExecutionResource extends ResourceSupport {
 	private final String stepType;
 
 	/**
-	 * @param jobExecutionId Must not be null
-	 * @param stepExecution  Must not be null
+	 * Create a new StepExecutionResource
+	 * @param jobExecutionId the job execution id, must not be null
+	 * @param stepExecution  the step execution, must not be null
+	 * @param stepType the step type
 	 */
 	public StepExecutionResource(
 			Long jobExecutionId,

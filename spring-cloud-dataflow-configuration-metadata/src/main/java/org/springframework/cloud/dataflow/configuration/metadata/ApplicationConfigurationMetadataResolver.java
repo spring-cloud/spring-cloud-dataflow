@@ -50,6 +50,8 @@ public abstract class ApplicationConfigurationMetadataResolver {
 	 * Spring Boot configuration metadata</a> and visible in an app.
 	 * @param metadataResource the metadata file that contains app specific configuration properties. Typically a JAR file
 	 *                         containing the configuration metadata files or the app that includes metadata files as well.
+	 * @param exhaustive return all metadata, including common Spring Boot properties
+	 * @return the list of configuration metdata properties
 	 */
 	public abstract List<ConfigurationMetadataProperty> listProperties(Resource metadataResource, boolean exhaustive);
 }

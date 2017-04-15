@@ -123,6 +123,9 @@ public class StreamAppDefinition extends DataFlowAppDefinition {
 		/**
 		 * Create a new builder that is initialized with properties of the given definition.
 		 * Useful for "mutating" a definition by building a slightly different copy.
+		 * @param definition the StreamAppDefinition to create a new Builder instance with
+		 *                   stream name, registeredAppName, label, and properties populated
+		 * @return a StreamAppDefinition builder
 		 */
 		public static Builder from(StreamAppDefinition definition) {
 			Builder builder = new Builder();
@@ -222,7 +225,7 @@ public class StreamAppDefinition extends DataFlowAppDefinition {
 
 		/**
 		 * Return a new instance of {@link StreamAppDefinition}.
-		 *
+		 * @param streamName the name of the stream
 		 * @return new instance of {@code StreamAppDefinition}
 		 */
 		public StreamAppDefinition build(String streamName) {

@@ -55,8 +55,10 @@ public class DefaultBootUserAuthenticationConfiguration extends GlobalAuthentica
 
 	/**
 	 * Initializes the {@link AuthenticationManagerBuilder}. Creates an
-	 * {@link InMemoryUserDetailsManager} with the provided {@link DefaultBootUserAuthenticationConfiguration#getUsers()}.
-	 * {@link DefaultBootUserAuthenticationConfiguration#getUsers()} must contain at least 1 user.
+	 * {@link InMemoryUserDetailsManager} with the provided {@link AuthenticationManagerBuilder}.
+	 * {@link SecurityProperties#getUser()} must contain 1 user.
+	 *
+	 * @param auth the authentication manager builder
 	 */
 	@Override
 	public void init(AuthenticationManagerBuilder auth) throws Exception {

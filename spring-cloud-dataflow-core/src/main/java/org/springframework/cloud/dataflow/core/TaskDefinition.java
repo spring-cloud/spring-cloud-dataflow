@@ -129,6 +129,8 @@ public class TaskDefinition extends DataFlowAppDefinition {
 		/**
 		 * Create a new builder that is initialized with properties of the given definition.
 		 * Useful for "mutating" a definition by building a slightly different copy.
+		 * @param definition the DataFlowAppDefinition to use when creating the builder
+		 * @return a task definition builder
 		 */
 		public static TaskDefinitionBuilder from(DataFlowAppDefinition definition) {
 			TaskDefinitionBuilder builder = new TaskDefinitionBuilder();

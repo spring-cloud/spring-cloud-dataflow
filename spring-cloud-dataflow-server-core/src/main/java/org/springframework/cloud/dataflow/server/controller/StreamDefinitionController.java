@@ -173,6 +173,7 @@ public class StreamDefinitionController {
 	 * @throws DuplicateStreamDefinitionException if a stream definition with the same name already exists
 	 * @throws InvalidStreamDefinitionException if there errors in parsing the strem DSL, resolving the name,
 	 * or type of applications in the stream
+	 * @return the created stream definition
 	 */
 	@RequestMapping(value = "", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
@@ -232,6 +233,9 @@ public class StreamDefinitionController {
 	 * Related streams include the main stream and the tap stream(s) on the main stream.
 	 *
 	 * @param name the name of an existing stream definition (required)
+	 * @param nested if should recursively search for related stream definitions
+	 * @param assembler resource assembler for stream definition
+	 * @return a list of related stream definitions
 	 */
 	@RequestMapping(value = "/{name}/related", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
@@ -273,6 +277,7 @@ public class StreamDefinitionController {
 	/**
 	 * Return a given stream definition resource.
 	 * @param name the name of an existing stream definition (required)
+	 * @return the stream definition
 	 */
 	@RequestMapping(value = "/{name}", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
@@ -289,7 +294,7 @@ public class StreamDefinitionController {
 	 */
 	@RequestMapping(value = "", method = RequestMethod.DELETE)
 	@ResponseStatus(HttpStatus.OK)
-	public void deleteAll() throws Exception {
+	public void deleteAll() {
 		deploymentController.undeployAll();
 		this.repository.deleteAll();
 	}
@@ -297,7 +302,7 @@ public class StreamDefinitionController {
 	/**
 	 * Aggregate the set of app states into a single state for a stream.
 	 * @param states set of states for apps of a stream
-	 * @return stream state based on app states
+	 * @return the stream state based on app states
 	 */
 	static DeploymentState aggregateState(Set<DeploymentState> states) {
 		if (states.size() == 1) {

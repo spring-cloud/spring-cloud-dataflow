@@ -27,52 +27,52 @@ package org.springframework.cloud.dataflow.rest.client;
 public interface DataFlowOperations {
 
 	/**
-	 * Stream related operations.
+	 * @return Stream related operations.
 	 */
 	StreamOperations streamOperations();
 
 	/**
-	 * Counter related operations.
+	 * @return Counter related operations.
 	 */
 	CounterOperations counterOperations();
 
 	/**
-	 * Field Value Counter related operations.
+	 * @return Field Value Counter related operations.
 	 */
 	FieldValueCounterOperations fieldValueCounterOperations();
 
 	/**
-	 * Aggregate Counter related operations.
+	 * @return Aggregate Counter related operations.
 	 */
 	AggregateCounterOperations aggregateCounterOperations();
 
 	/**
-	 * Task related operations.
+	 * @return Task related operations.
 	 */
 	TaskOperations taskOperations();
 
 	/**
-	 * Job related operations.
+	 * @return Job related operations.
 	 */
 	JobOperations jobOperations();
 
 	/**
-	 * Application registry related operations.
+	 * @return Application registry related operations.
 	 */
 	AppRegistryOperations appRegistryOperations();
 
 	/**
-	 * DSL Completion related operations.
+	 * @return DSL Completion related operations.
 	 */
 	CompletionOperations completionOperations();
 
 	/**
-	 * Runtime related operations.
+	 * @return Runtime related operations.
 	 */
 	RuntimeOperations runtimeOperations();
 
 	/**
-	 * "About" related operations.
+	 * @return "About" related operations.
 	 */
 	AboutOperations aboutOperation();
 }

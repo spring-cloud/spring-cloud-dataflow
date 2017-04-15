@@ -33,34 +33,42 @@ import org.springframework.hateoas.PagedResources;
 public interface TaskOperations {
 
 	/**
-	 * List tasks known to the system.
+	 * @return the list tasks known to the system.
 	 */
 	PagedResources<TaskDefinitionResource> list();
 
 	/**
-	 * Create a new task.
+	 * Create a new task definition
+	 * @param name the name of the task
+	 * @param definition the task definition DSL
+	 * @return the task definition
 	 */
 	TaskDefinitionResource create(String name, String definition);
 
 	/**
 	 * Launch an already created task.
+	 * @param name the name of the task
+	 * @param properties the deployment properties
+	 * @param arguments the command line arguments
 	 * @return long containing the TaskExecutionId
 	 */
 	long launch(String name, Map<String, String> properties, List<String> arguments);
 
 	/**
 	 * Destroy an existing task.
+	 * @param name the name of the task
 	 */
 	void destroy(String name);
 
 	/**
-	 * List task executions known to the system.
+	 * @return the list task executions known to the system.
 	 */
 	PagedResources<TaskExecutionResource> executionList();
 
 	/**
 	 * List task executions known to the system filtered by task name.
 	 * @param taskName of the executions.
+	 * @return the paged list of task executions
 	 */
 	PagedResources<TaskExecutionResource> executionListByTaskName(String taskName);
 
