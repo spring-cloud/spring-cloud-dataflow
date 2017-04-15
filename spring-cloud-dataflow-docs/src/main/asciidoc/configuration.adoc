@@ -797,6 +797,9 @@ when creating Data Flow Streams.
 The architecture when using Spring Cloud Stream's `Emitter`, the
 Data Flow Metrics Collector, and the Data Flow server is shown below.
 
+.Spring Cloud Data Flow Metrics Architecture
+image::{dataflow-asciidoc}/images/dataflow-metrics-arch.png[Spring Cloud Data Flow Metrics Architecture , scaledwidth="100%"]
+
 As with the App Starters, there is a Spring Boot uber jar artifact of the
 Metrics Collector for Kafka 0.9, Kafka 0.10, and RabbitMQ.  The metrics
 for each application are published when the property `spring.cloud.stream.bindings.applicationMetrics.destination` is set.  This can be set as any other
