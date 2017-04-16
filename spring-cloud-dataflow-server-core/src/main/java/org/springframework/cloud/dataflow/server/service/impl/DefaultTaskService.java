@@ -311,8 +311,7 @@ public class DefaultTaskService implements TaskService {
 	}
 
 	private String createComposedTaskDefinition(String graph) {
-		return String.format(String.format("%s --graph=\"%s\"",
-				taskConfigurationProperties.getComposedTaskRunnerName(), graph));
+		return String.format("%s --graph=\"%s\"", taskConfigurationProperties.getComposedTaskRunnerName(), graph);
 	}
 
 	@Override
