@@ -369,12 +369,26 @@ of the graph is a task application.  This is done by using the DSL for composed
 tasks.  A composed task can be created via the RESTful API, the Spring Cloud
 Data Flow Shell, or the Spring Cloud Data Flow UI.
 
+=== Configuring Composed Task in Spring Cloud Data Flow
+Composed tasks are executed via a task application called the https://github.com/spring-cloud-task-app-starters/composed-task-runner[Composed Task Runner].
+Out of the box this application is not registered with Spring Cloud Data Flow
+by default.  So to create composed tasks we must first register the Composed
+Task Runner as an application with Spring Cloud Data Flow as follows:
+```
+app register --name composed-task-runner --type task --uri maven://org.springframework.cloud.task.app:composedtaskrunner-task:1.2.0.RELEASE
+```
+You can also configure Spring Cloud Data Flow to use a different task definition
+name for the composed task runner.  This can be done by setting the following
+property `spring.cloud.dataflow.task.composedTaskRunnerName` to the name
+of your choice.  You can then register the composed task runner application with
+the name you set using the property.
+
 === Creating, Launching, and Destroying a Composed Task
 ==== Creating a Composed Task
 The DSL for the composed tasks is used when creating a task definition via the
 task create command. For example:
 ```
-dataflow:> app register --name timestamp --type task --uri maven://org.springframework.cloud.task.app:timestamp-task:1.2.0.RELEASE
+dataflow:> app register --name timestamp --type task --uri maven://org.springframework.cloud.task.app:timestamp-task:<DESIRED_VERSION>
 dataflow:> app register --name mytaskapp --type task --uri file:///home/tasks/mytask.jar
 dataflow:> task create my-composed-task --definition "mytaskapp && timestamp"
 dataflow:> task launch my-composed-task
@@ -399,7 +413,8 @@ dataflow:>task list
 ║my-composed-task-timestamp│timestamp
 ```
 Spring Cloud Data Flow created three task definitions, one for each of the
-applications that comprises our composed task as well as the composed task
+applications that comprises our composed task (`my-composed-task-mytaskapp` and
+`my-composed-task-timestamp`) as well as the composed task (`my-composed-task`)
 definition.  We also see that each of the generated
 names for the child tasks is comprised of the name of the composed task and
 the name of the application separated by a dash `-`.  i.e. _my-composed-task_ `-`
@@ -431,7 +446,8 @@ dataflow:>task execution list
 ╚══════════════════════════╧═══╧════════════════════════════╧════════════════════════════╧═════════╝
 ```
 In the example above we see that my-compose-task launched and it also launched
-the other tasks in sequential order.
+the other tasks in sequential order and all of them executed successfully with
+"Exit Code" as `0`.
 
 ==== Destroying a Composed Task
 The same command used to destroy a stand-alone task is the same as destroying a
@@ -459,18 +475,41 @@ dataflow:>task list
 === Composed Task DSL
 
 ==== Conditional Execution
-Conditional execution is expressed using a double ampersand symbol &&.
+Conditional execution is expressed using a double ampersand symbol `&&`.
 This allows each task in the sequence to be launched only if the previous task
 successfully completed. For example:
 ```
 task create my-composed-task --definition "foo && bar"
 ```
-.Conditional Execution
-image::{dataflow-asciidoc}/images/dataflow-ctr-conditional-execution.png[Composed Task Conditional Execution, scaledwidth="50%"]
 
 When the composed task my-composed-task is launched, it will launch the
 task `foo` and if it completes successfully, then the task `bar` will be
 launched. If the `foo` task fails, then the task `bar` will not launch.
+
+You can also use the Spring Cloud Data Flow Dashboard to create your conditional
+execution. By using the designer to drag and drop applications
+that are required, and connecting them together to create your directed graph.
+For example:
+
+.Conditional Execution
+image::{dataflow-asciidoc}/images/dataflow-ctr-conditional-execution.png[Composed Task Conditional Execution, scaledwidth="50%"]
+
+The diagram above is a screen capture of the directed graph as it being created
+using the Spring Cloud Data Flow Dashboard.  We see that are 4 components
+in the diagram that comprise a conditional execution:
+
+* Start icon - All directed graphs start from this symbol.  There will
+only be one.
+* Task icon - Represents each task in the directed graph.
+* End icon - Represents the termination of a directed graph.
+* Solid line arrow - Represents the flow conditional execution flow
+between:
+** Two applications
+** The start control node and an application
+** An application and the end control node
+
+NOTE:  You can view a diagram of your directed graph by clicking the detail
+button next to the composed task definition on the definitions tab.
 
 ==== Transitional Execution
 The DSL supports fine grained control over the transitions taken during the
@@ -485,25 +524,47 @@ A basic transition would look like the following:
 task create my-transition-composed-task --definition "foo 'FAILED' -> bar 'COMPLETED' -> baz"
 ```
 
-.Basic Transition
-image::{dataflow-asciidoc}/images/dataflow-ctr-transition-basic.png[Composed Task Basic Transition, scaledwidth="50%"]
-
 In the example above `foo` would launch and if it had an exit status of `FAILED`,
 then the `bar` task would launch. If the exit status of `foo` was `COMPLETED`
 then `baz` would launch. All other statuses returned by `foo` will have no effect
 and task would terminate normally.
+
+Using the Spring Cloud Data Flow Dashboard to create  the same "basic
+transition" would look like:
+
+.Basic Transition
+image::{dataflow-asciidoc}/images/dataflow-ctr-transition-basic.png[Composed Task Basic Transition, scaledwidth="50%"]
+
+The diagram above is a screen capture of the directed graph as it being created
+using the Spring Cloud Data Flow Dashboard.  Notice that there are 2 different
+types of connectors:
+
+* Dashed line - Is the line used to represent transitions from the application
+to one of the possible destination applications.
+* Solid line - Used to connect applications in a conditional execution or a
+connection between the application and a control node (end, start).
+
+When creating a transition, link the application to each of possible
+destination using the connector.  Once complete go to each connection and
+select it by clicking it.  A bolt icon should appear, click that icon and
+enter the exit status required for that connector.  The solid line for that
+connector will turn to a dashed line.
 
 ===== Transition With a Wildcard
 Wildcards are supported for transitions by the DSL for example:
 ```
 task create my-transition-composed-task --definition "foo 'FAILED' -> bar '*' -> baz"
 ```
-.Basic Transition With Wildcard
-image::{dataflow-asciidoc}/images/dataflow-ctr-transition-basic-wildcard.png[Composed Task Basic Transition with Wildcard, scaledwidth="50%"]
 
 In the example above `foo` would launch and if it had an exit status of `FAILED`,
 then the `bar` task would launch. Any exit status of `foo` other than `FAILED`
 then `baz` would launch.
+
+Using the Spring Cloud Data Flow Dashboard to create the same
+"transition with wildcard" would look like:
+
+.Basic Transition With Wildcard
+image::{dataflow-asciidoc}/images/dataflow-ctr-transition-basic-wildcard.png[Composed Task Basic Transition with Wildcard, scaledwidth="50%"]
 
 ===== Transition With a Following Conditional Execution
 A transition can be followed by a conditional execution so long as the wildcard
@@ -511,13 +572,21 @@ is not used. For example:
 ```
 task create my-transition-conditional-execution-task --definition "foo 'FAILED' -> bar 'UNKNOWN' -> baz && qux && quux"
 ```
-.Transition With Conditional Execution
-image::{dataflow-asciidoc}/images/dataflow-ctr-transition-conditional-execution.png[Composed Task Transition with Conditional Execution, scaledwidth="50%"]
 
 In the example above `foo` would launch and if it had an exit status of `FAILED`,
 then the `bar` task would launch.  If `foo` had an exit status of `UNKNOWN` then
 `baz` would launch.  Any exit status of `foo` other than `FAILED` or `UNKNOWN`
 then `qux` would launch and upon successful completion `quux` would launch.
+
+Using the Spring Cloud Data Flow Dashboard to create the same
+"transition with conditional execution" would look like:
+
+.Transition With Conditional Execution
+image::{dataflow-asciidoc}/images/dataflow-ctr-transition-conditional-execution.png[Composed Task Transition with Conditional Execution, scaledwidth="50%"]
+
+NOTE:  In this diagram we see the dashed line (transition) connecting the `foo` application
+to the target applications, but a solid line connecting the conditional executions
+between `foo`, `qux`, and  `quux`.
 
 ==== Split Execution
 Splits allow for multiple tasks within a composed task to be run in parallel.
@@ -527,21 +596,33 @@ be run in parallel. These tasks and flows are separated by the double pipe `||`
 ```
 task create my-split-task --definition "<foo || bar || baz>"
 ```
+The example above will launch tasks `foo`, `bar` and `baz` in parallel.
+
+Using the Spring Cloud Data Flow Dashboard to create the same
+"split execution" would look like:
+
 .Split
 image::{dataflow-asciidoc}/images/dataflow-ctr-split.png[Composed Task Split, scaledwidth="50%"]
-The example above will launch tasks `foo`, `bar` and `baz` in parallel.
+
 With the task DSL a user may also execute multiple split groups
 in succession. For example:
 ```
 task create my-split-task --definition "<foo || bar || baz> && <qux || quux>"
 ```
 
-.Split as a part of a conditional execution
-image::{dataflow-asciidoc}/images/dataflow-ctr-multiple-splits.png[Composed Task Split, scaledwidth="50%"]
 In the example above tasks `foo`, `bar` and `baz` will be launched in parallel,
 once they all complete then tasks `qux`, `quux` will be launched in parallel.
 Once they complete the composed task will end.   However if `foo`, `bar`, or
 `baz` fails then, the split containing `qux` and `quux` will not launch.
+
+Using the Spring Cloud Data Flow Dashboard to create the same
+"split with multiple groups" would look like:
+
+.Split as a part of a conditional execution
+image::{dataflow-asciidoc}/images/dataflow-ctr-multiple-splits.png[Composed Task Split, scaledwidth="50%"]
+
+Notice that there is a `SYNC` control node that is by the designer when
+connecting two consecutive splits.
 
 ===== Split Containing Conditional Execution
 A split can also have a conditional execution within the angle brackets.  For
@@ -549,23 +630,13 @@ example:
 ```
 task create my-split-task --definition "<foo && bar || baz>"
 ```
-.Split with conditional execution
-image::{dataflow-asciidoc}/images/dataflow-ctr-split-contains-conditional.png[Composed Task Split With Conditional Execution, scaledwidth="50%"]
-
 In the example above we see that `foo` and `baz` will be launched in parallel,
 however `bar` will not launch until `foo` completes successfully.
 
-=== Configuring Composed Task in Spring Cloud Data Flow
-Composed tasks are executed via a task application called the https://github.com/spring-cloud-task-app-starters/composed-task-runner[Composed Task Runner].
-Out of the box this application is not registered with Spring Cloud Data Flow
-by default.  So to create composed tasks we must first register the Composed
-Task Runner as an application with Spring Cloud Data Flow as follows:
-```
-app register --name composed-task-runner --type task --uri maven://org.springframework.cloud.task.app:composedtaskrunner-task:1.2.0.RELEASE
-```
-You can also configure Spring Cloud Data Flow to use a different task definition
-name for the composed task runner.  This can be done by setting the following
-property `spring.cloud.dataflow.task.composedTaskRunnerName` to the name
-of your choice.  You can then register the composed task runner application with
-the name you set using the property.
+Using the Spring Cloud Data Flow Dashboard to create the same
+"split containing conditional execution" would look like:
+
+.Split with conditional execution
+image::{dataflow-asciidoc}/images/dataflow-ctr-split-contains-conditional.png[Composed Task Split With Conditional Execution, scaledwidth="50%"]
+
 
