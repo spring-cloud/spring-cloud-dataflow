@@ -98,6 +98,7 @@ public class RuntimeAppsController {
 	 * @param streamDefinitionRepository the repository this controller will use for stream CRUD operations
 	 * @param deploymentIdRepository     the repository this controller will use for deployment IDs
 	 * @param appDeployer                the deployer this controller will use to deploy stream apps
+	 * @param metricStore                the proxy to the metrics collector
 	 * @param forkJoinPool               a ForkJoinPool which will be used to query AppStatuses in parallel
 	 */
 	public RuntimeAppsController(StreamDefinitionRepository streamDefinitionRepository,

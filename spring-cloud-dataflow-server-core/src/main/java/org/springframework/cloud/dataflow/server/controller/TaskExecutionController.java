@@ -74,6 +74,7 @@ public class TaskExecutionController {
 	 * @param explorer the explorer this controller will use for retrieving
 	 *                   task execution information.
 	 * @param taskService used to launch tasks
+	 * @param taskDefinitionRepository the task definition repository
 	 */
 	public TaskExecutionController(TaskExplorer explorer, TaskService taskService,
 		TaskDefinitionRepository taskDefinitionRepository) {
@@ -107,6 +108,7 @@ public class TaskExecutionController {
 	 * @param taskName name of the task
 	 * @param pageable  page-able collection of {@code TaskExecution}s.
 	 * @param assembler for the {@link TaskExecution}s
+	 * @return the paged list of task executions
 	 */
 	@RequestMapping(value = "", method = RequestMethod.GET, params = "name")
 	@ResponseStatus(HttpStatus.OK)
@@ -129,6 +131,7 @@ public class TaskExecutionController {
 	 * @param properties the runtime properties for the task, as a comma-delimited list of
 	 * 					 key=value pairs
 	 * @param arguments the runtime commandline arguments
+	 * @return the taskExecutionId for the executed task
 	 */
 	@RequestMapping(value = "", method = RequestMethod.POST, params = "name")
 	@ResponseStatus(HttpStatus.CREATED)

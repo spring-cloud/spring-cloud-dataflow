@@ -128,10 +128,10 @@ public class DataFlowTemplate implements DataFlowOperations {
 	 * Please be aware that the created RestTemplate will use the JDK's default timeout values. Consider passing in
 	 * a custom {@link RestTemplate} or, depending on your JDK implementation, set System properties such as:
 	 *
-	 * <p><ul>
+	 * <ul>
 	 * <li>sun.net.client.defaultConnectTimeout
 	 * <li>sun.net.client.defaultReadTimeout
-	 * </ul><p>
+	 * </ul>
 	 *
 	 * For more information see
 	 * <a href="http://docs.oracle.com/javase/7/docs/technotes/guides/net/properties.html">this link</a>
@@ -278,7 +278,7 @@ public class DataFlowTemplate implements DataFlowOperations {
 	 * Will augment the provided {@link RestTemplate} with the Jackson Mixins required by Spring Cloud Data Flow,
 	 * specifically:
 	 *
-	 * <p><ul>
+	 * <ul>
 	 * <li>{@link JobExecutionJacksonMixIn}
 	 * <li>{@link JobParametersJacksonMixIn}
 	 * <li>{@link JobParameterJacksonMixIn}
@@ -287,7 +287,7 @@ public class DataFlowTemplate implements DataFlowOperations {
 	 * <li>{@link StepExecutionJacksonMixIn}
 	 * <li>{@link ExecutionContextJacksonMixIn}
 	 * <li>{@link StepExecutionHistoryJacksonMixIn}
-	 * </ul><p>
+	 * </ul>
 	 *
 	 * Furthermore, this method will also register the {@link Jackson2HalModule}
 	 *

@@ -71,6 +71,8 @@ public class JobStepExecutionController {
 	 * List all step executions.
 	 *
 	 * @param id the {@link JobExecution}.
+	 * @param pageable the pagination information
+	 * @param assembler the resource assembler for step executions
 	 * @return Collection of {@link StepExecutionResource} for the given jobExecutionId
 	 */
 	@RequestMapping(value = { "" }, method = RequestMethod.GET)

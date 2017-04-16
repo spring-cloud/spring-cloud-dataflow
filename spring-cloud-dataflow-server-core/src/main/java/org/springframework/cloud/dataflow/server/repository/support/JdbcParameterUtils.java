@@ -42,6 +42,9 @@ public class JdbcParameterUtils {
 	 * class.
 	 *
 	 * @param sql String to search in. Returns 0 if the given String is <code>null</code>.
+	 * @param namedParameterHolder the list of parameter placehholder names
+	 * @return the number of parameter placeholder and adds to the namedParameterHolder list any parsed
+	 * namedParameters from the sql
 	 */
 	public static int countParameterPlaceholders(String sql, List<String> namedParameterHolder ) {
 		if (sql == null) {

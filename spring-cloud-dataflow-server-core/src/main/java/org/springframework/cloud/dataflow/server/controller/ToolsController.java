@@ -61,10 +61,11 @@ public class ToolsController {
 	 * a 'dsl' key containing the composed task DSL and a 'name'
 	 * key indicating the name of the composed task.
 	 *
+	 * @param definition the map containing the task definition DSL and task name
 	 * @return a resource with the graph property set
 	 */
 	@RequestMapping(value = "/parseTaskTextToGraph", method = RequestMethod.POST)
-	public TaskToolsResource parseTaskTextToGraph	(HttpServletResponse response, @RequestBody Map<String, String> definition) {
+	public TaskToolsResource parseTaskTextToGraph(@RequestBody Map<String, String> definition) {
 		Graph graph = null;
 		List<Map<String,Object>> errors = new ArrayList<>();
 		try {
@@ -85,6 +86,7 @@ public class ToolsController {
 	/**
 	 * Convert a graph format into DSL text format.
 	 *
+	 * @param graph the Flo Graph
 	 * @return a resource with the dsl property set
 	 */
 	@RequestMapping(value = "/convertTaskGraphToText", method = RequestMethod.POST)

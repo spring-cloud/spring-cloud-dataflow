@@ -38,6 +38,8 @@ public class UiController {
 
 	/**
 	 * Turn a relative link of the UI app to an absolute one, prepending its path.
+	 * @param path relative UI path
+	 * @return the absolute UI path
 	 */
 	public static String dashboard(String path) {
 		return WEB_UI_INDEX_PAGE_ROUTE + path;

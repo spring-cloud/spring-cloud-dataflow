@@ -51,6 +51,8 @@ public class CompletionController {
 
 	/**
 	 * Create a controller for the provided {@link StreamCompletionProvider} and {@link TaskCompletionProvider}.
+	 * @param completionProvider the stream completion provider
+	 * @param taskCompletionProvider the task completion provider
 	 */
 	public CompletionController(StreamCompletionProvider completionProvider, TaskCompletionProvider taskCompletionProvider) {
 		this.completionProvider = completionProvider;
@@ -63,6 +65,7 @@ public class CompletionController {
 	 * @param start the amount of text written so far
 	 * @param detailLevel the level of detail the user wants in completions, starting at 1.
 	 * Higher values request more detail, with values typically in the range [1..5]
+	 * @return the list of completion proposals
 	 */
 	@RequestMapping(value = "/stream")
 	public CompletionProposalsResource completions(
@@ -78,6 +81,7 @@ public class CompletionController {
 	 * @param start the amount of text written so far
 	 * @param detailLevel the level of detail the user wants in completions, starting at 1.
 	 * Higher values request more detail, with values typically in the range [1..5]
+	 * @return the list of completion proposals
 	 */
 	@RequestMapping(value = "/task")
 	public CompletionProposalsResource taskCompletions(

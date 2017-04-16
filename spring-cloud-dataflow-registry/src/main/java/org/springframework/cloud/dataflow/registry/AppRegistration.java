@@ -95,21 +95,21 @@ public class AppRegistration implements Comparable<AppRegistration> {
 	}
 
 	/**
-	 * @see #name
+	 * @return the name of the app
 	 */
 	public String getName() {
 		return name;
 	}
 
 	/**
-	 * @see #type
+	 * @return the type of the app
 	 */
 	public ApplicationType getType() {
 		return type;
 	}
 
 	/**
-	 * @see #uri
+	 * @return the URI of the app
 	 */
 	public URI getUri() {
 		return uri;

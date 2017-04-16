@@ -42,6 +42,8 @@ public abstract class AbstractMetricsCommands {
 
 	/**
 	 * Render a table with information about a list of metrics
+	 * @param list a list of metrics
+	 * @return the table to use for displaying the list of metrics
 	 */
 	protected Table displayMetrics(PagedResources<MetricResource> list) {
 		LinkedHashMap<String, Object> headers = new LinkedHashMap<>();

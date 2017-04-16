@@ -84,6 +84,8 @@ public class AboutController {
 
 	/**
 	 * Return meta information about the dataflow server.
+	 * @return Detailed information about the enabled features, versions of implementation libraries, and security
+	 * configuration
 	 */
 	@RequestMapping(method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)

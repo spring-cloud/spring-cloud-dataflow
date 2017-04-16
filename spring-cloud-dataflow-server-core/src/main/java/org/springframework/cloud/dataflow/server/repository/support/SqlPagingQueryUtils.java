@@ -69,6 +69,8 @@ public class SqlPagingQueryUtils {
 	 * Generates WHERE clause for queries that require sub selects.
 	 *
 	 * @param provider the paging query provider that will provide the base where clause
+	 * @param remainingPageQuery whether there is a page query
+	 * @param sql the sql to append the WHERE clause
 	 */
 	public static void buildWhereClause( AbstractSqlPagingQueryProvider provider,
 										 boolean remainingPageQuery, StringBuilder sql) {

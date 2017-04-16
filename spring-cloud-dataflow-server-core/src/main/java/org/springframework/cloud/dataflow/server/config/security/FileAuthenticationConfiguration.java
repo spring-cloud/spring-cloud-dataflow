@@ -46,7 +46,7 @@ public class FileAuthenticationConfiguration extends GlobalAuthenticationConfigu
 	/**
 	 * Set users as {@link Properties}. Value (String) of the property must be in the format e.g.:
 	 * {@code bobspassword, ROLE_NAME}.
-	 *
+	 * @param users the property object with user password and roles
 	 */
 	public void setUsers(Properties users) {
 		this.users = users;
