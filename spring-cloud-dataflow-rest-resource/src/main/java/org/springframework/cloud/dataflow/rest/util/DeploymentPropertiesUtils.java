@@ -119,6 +119,9 @@ public final class DeploymentPropertiesUtils {
 	 * (those that start with {@code deployer.[appname]} or {@code deployer.*})
 	 * and qualify all property values with the {@code spring.cloud.deployer.} prefix.
 	 *
+	 * @param input the deplopyment properties
+	 * @param appName the app name
+	 * @return deployment properties for the spepcific app name
 	 */
 	public static Map<String, String> extractAndQualifyDeployerProperties(Map<String, String> input, String appName) {
 		final String wildcardPrefix = "deployer.*.";
@@ -206,6 +209,8 @@ public final class DeploymentPropertiesUtils {
 
 	/**
 	 * Convert Properties to a Map with String keys and values. Entries whose key or value is not a String are omitted.
+	 * @param properties the properties object
+	 * @return the equivalent {@code Map<String,String>}
 	 */
 	public static Map<String, String> convert(Properties properties) {
 		Map<String, String> result  = new HashMap<>(properties.size());

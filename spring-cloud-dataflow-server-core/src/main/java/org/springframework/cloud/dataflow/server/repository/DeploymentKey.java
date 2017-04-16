@@ -32,6 +32,7 @@ public abstract class DeploymentKey {
 	 * Determines a deployment key for a stream application.
 	 *
 	 * @param streamAppDefinition the stream application definition
+	 * @return the deployment key
 	 */
 	public static String forStreamAppDefinition(StreamAppDefinition streamAppDefinition) {
 		Assert.notNull(streamAppDefinition, "streamAppDefinition must not be null");
@@ -42,6 +43,7 @@ public abstract class DeploymentKey {
 	 * Determines a deployment key for a task application.
 	 *
 	 * @param taskDefinition the task application definition
+	 * @return the deployment key
 	 */
 	public static String forTaskDefinition(TaskDefinition taskDefinition) {
 		Assert.notNull(taskDefinition, "taskDefinition must not be null");

@@ -95,6 +95,8 @@ public class CompletionProposal {
 		 * Add a suffix as a new token, that is, make sure there is a space before it.
 		 *
 		 * A space is not appended if this is the very first token.
+		 * @param suffix the suffix to add
+		 * @return a new completion proposal
 		 */
 		public CompletionProposal withSeparateTokens(String suffix) {
 			return withSeparateTokens(suffix, null);
