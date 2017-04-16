@@ -102,7 +102,9 @@ public class DefaultTaskService implements TaskService {
 
 	private final DeploymentIdRepository deploymentIdRepository;
 
-	private final String dataFlowUri;
+	private final String dataflowServerUri;
+
+	private static final String DATAFLOW_SERVER_URI_KEY = "dataflowServerUri";
 
 	/**
 	 * Initializes the {@link DefaultTaskService}.
@@ -117,7 +119,7 @@ public class DefaultTaskService implements TaskService {
 	 * @param resourceLoader the {@link ResourceLoader} that will resolve URIs to
 	 * {@link Resource}s.
 	 * @param taskLauncher the launcher this service will use to launch task apps.
-	 * @param dataFlowUri the data flow server URI
+	 * @param dataflowServerUri the data flow server URI
 	 */
 	public DefaultTaskService(DataSourceProperties dataSourceProperties,
 			TaskDefinitionRepository taskDefinitionRepository,
@@ -127,7 +129,7 @@ public class DefaultTaskService implements TaskService {
 			ApplicationConfigurationMetadataResolver metaDataResolver,
 			TaskConfigurationProperties taskConfigurationProperties,
 			DeploymentIdRepository deploymentIdRepository,
-			String dataFlowUri) {
+			String dataflowServerUri) {
 		Assert.notNull(dataSourceProperties, "DataSourceProperties must not be null");
 		Assert.notNull(taskDefinitionRepository, "TaskDefinitionRepository must not be null");
 		Assert.notNull(taskExecutionRepository, "TaskExecutionRepository must not be null");
@@ -148,7 +150,7 @@ public class DefaultTaskService implements TaskService {
 		this.whitelistProperties = new WhitelistProperties(metaDataResolver);
 		this.taskConfigurationProperties = taskConfigurationProperties;
 		this.deploymentIdRepository = deploymentIdRepository;
-		this.dataFlowUri = dataFlowUri;
+		this.dataflowServerUri = dataflowServerUri;
 	}
 
 	@Override
@@ -180,7 +182,7 @@ public class DefaultTaskService implements TaskService {
 
 		Map<String, String> appDeploymentProperties = extractAppProperties(taskDefinition.getRegisteredAppName(), taskDeploymentProperties);
 		Map<String, String> deployerDeploymentProperties = DeploymentPropertiesUtils.extractAndQualifyDeployerProperties(taskDeploymentProperties, taskDefinition.getRegisteredAppName());
-		if (StringUtils.hasText(this.dataFlowUri) && taskNode.isComposed()) {
+		if (StringUtils.hasText(this.dataflowServerUri) && taskNode.isComposed()) {
 			updateDataFlowUriIfNeeded(appDeploymentProperties, commandLineArgs);
 		}
 		AppDefinition revisedDefinition = mergeAndExpandAppProperties(taskDefinition, metadataResource, appDeploymentProperties);
@@ -196,10 +198,10 @@ public class DefaultTaskService implements TaskService {
 	}
 
 	private void updateDataFlowUriIfNeeded(Map<String, String> appDeploymentProperties, List<String> commandLineArgs) {
-		if (StringUtils.isEmpty(this.dataFlowUri)) {
+		if (StringUtils.isEmpty(this.dataflowServerUri)) {
 			return;
 		}
-		RelaxedNames relaxedNames = new RelaxedNames("dataFlowUri");
+		RelaxedNames relaxedNames = new RelaxedNames(DATAFLOW_SERVER_URI_KEY);
 		for (String dataFlowUriKey: relaxedNames) {
 			if (appDeploymentProperties.containsKey(dataFlowUriKey)) {
 				return;
@@ -210,7 +212,7 @@ public class DefaultTaskService implements TaskService {
 				}
 			}
 		}
-		appDeploymentProperties.put("dataFlowUri", this.dataFlowUri);
+		appDeploymentProperties.put(DATAFLOW_SERVER_URI_KEY, this.dataflowServerUri);
 	}
 
 	private List<String> updateCommandLineArgs(List<String> commandLineArgs, TaskExecution taskExecution) {
