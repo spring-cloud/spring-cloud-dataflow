@@ -74,7 +74,7 @@ public class TaskConfiguration {
 	DataSourceProperties dataSourceProperties;
 
 	@Value("${spring.cloud.dataflow.server.uri:}")
-	private String dataFlowUri;
+	private String dataflowServerUri;
 
 	@Bean
 	public TaskExplorerFactoryBean taskExplorerFactoryBean(DataSource dataSource) {
@@ -95,7 +95,7 @@ public class TaskConfiguration {
 			DeploymentIdRepository deploymentIdRepository) {
 		return new DefaultTaskService(dataSourceProperties, repository, taskExplorer, taskExecutionRepository,
 				registry, resourceLoader, taskLauncher, metadataResolver,
-				taskConfigurationProperties, deploymentIdRepository, this.dataFlowUri);
+				taskConfigurationProperties, deploymentIdRepository, this.dataflowServerUri);
 	}
 
 	@Bean
