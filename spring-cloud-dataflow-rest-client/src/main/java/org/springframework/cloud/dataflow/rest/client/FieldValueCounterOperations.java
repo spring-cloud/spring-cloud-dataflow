@@ -29,7 +29,7 @@ public interface FieldValueCounterOperations {
 
 	/**
 	 * Retrieve information about the given named counter.
-	 * @param name the name fo the field value counter
+	 * @param name the name of the field value counter
 	 * @return the field value counter
 	 */
 	FieldValueCounterResource retrieve(String name);

@@ -97,7 +97,7 @@ public class AppRegistryController implements ResourceLoaderAware {
 	/**
 	 * List app registrations.
 	 * @param pagedResourcesAssembler the resource assembler for app registrations
-	 * @param type the application type: source, sink, processor
+	 * @param type the application type: source, sink, processor, task
 	 * @param detailed provide detailed information (if available) for the application
 	 * @return the list of registered applications
 	 */

@@ -33,8 +33,8 @@ public interface RuntimeOperations {
 	PagedResources<AppStatusResource> status();
 
 	/**
-	 * @return the runtime information about a single app deployment.
 	 * @param deploymentId the deployment id
+	 * @return the runtime information about a single app deployment.
 	 */
 	AppStatusResource status(String deploymentId);
 }

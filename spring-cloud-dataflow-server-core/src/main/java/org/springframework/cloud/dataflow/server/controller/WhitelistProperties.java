@@ -51,7 +51,7 @@ public class WhitelistProperties {
 	 * (amongst the whitelisted supported properties of the app) if applicable.
 	 *
 	 * @param properties the application properties in shorthand form
-	 * @param metadataResource the metadata that cen be used to expand shorthand property names to long form names
+	 * @param metadataResource the metadata that can be used to expand shorthand property names to long form names
 	 * @return the application properties with expanded long form property names
 	 */
 	public Map<String, String> qualifyProperties(Map<String, String> properties, Resource metadataResource) {

@@ -68,7 +68,7 @@ public interface TaskOperations {
 	/**
 	 * List task executions known to the system filtered by task name.
 	 * @param taskName of the executions.
-	 * @return the paged list of task executions
+	 * @return the paged list of task executions for the given task name
 	 */
 	PagedResources<TaskExecutionResource> executionListByTaskName(String taskName);
 
