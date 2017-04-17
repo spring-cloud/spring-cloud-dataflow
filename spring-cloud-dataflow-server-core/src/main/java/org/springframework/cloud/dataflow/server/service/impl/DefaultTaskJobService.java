@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.batch.admin.service.JobService;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobInstance;
+import org.springframework.batch.core.Step;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.launch.JobExecutionNotRunningException;
 import org.springframework.batch.core.launch.NoSuchJobException;
@@ -52,6 +53,7 @@ import org.springframework.util.Assert;
  * @author Glenn Renfro.
  * @author Gunnar Hillert
  * @author Mark Fisher
+ * @author Ilayaperumal Gopinathan
  */
 public class DefaultTaskJobService implements TaskJobService {
 
@@ -91,8 +93,14 @@ public class DefaultTaskJobService implements TaskJobService {
 				jobService.listJobExecutions(pageable.getOffset(),
 				pageable.getPageSize()));
 		for (JobExecution jobExecution : jobExecutions){
-			jobExecution.addStepExecutions(
-					new ArrayList<StepExecution>(jobService.getStepExecutions(jobExecution.getId())));
+			Collection<StepExecution> stepExecutions = jobService.getStepExecutions(jobExecution.getId());
+			List<StepExecution> validStepExecutions = new ArrayList<>();
+			for (StepExecution stepExecution: stepExecutions) {
+				if (stepExecution.getId() != null) {
+					validStepExecutions.add(stepExecution);
+				}
+			}
+			jobExecution.addStepExecutions(validStepExecutions);
 		}
 
 		return getTaskJobExecutionsForList(jobExecutions);
