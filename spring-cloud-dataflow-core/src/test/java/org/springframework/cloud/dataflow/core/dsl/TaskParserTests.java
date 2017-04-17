@@ -904,11 +904,10 @@ public class TaskParserTests {
 		assertGraph("[0:START][1:AppA][2:AppE][3:AppB][4:AppC][5:AppD][6:END][0-1][0:1-2][1-3][3-4][3-5][4-6][5-6][2-6]",
 		          "AppA 0->AppE && AppB && <AppC || AppD>");
 		checkDSLToGraphAndBackToDSL("AppA 0->AppE && AppB && <AppC || AppD>");
-		checkDSLToGraphAndBackToDSL("aaa 'FOO'->XXX 'B'->bbb1 *->ccc1 && bbb2 && ccc2");
+		checkDSLToGraphAndBackToDSL("aaa 'FOO'->XXX 'B'->bbb1 '*'->ccc1 && bbb2 && ccc2");
 		assertGraph("[0:START][1:x:AppA][2:y:AppB][3:END][0-1][0:1-2][1-3][2-3]","x: AppA 0->y: AppB");
 	}
 	
-
 
 	@Test
 	public void graphToTextSplitWithTransition() {
@@ -956,7 +955,7 @@ public class TaskParserTests {
 	@Test
 	public void toDSLTextTransitions() {
 		// [SHOULD-VALIDATE] There is no real route to bbb
-		String spec = "aaa *->$END && bbb";
+		String spec = "aaa '*'->$END && bbb";
 		assertEquals(spec, parse(spec).toDSL());
 		assertGraph("[0:START][1:aaa][2:$END][3:bbb][4:END]"+
 		            "[0-1][*:1-2][1-3][3-4]", spec);
@@ -966,12 +965,12 @@ public class TaskParserTests {
 	@Test
 	// You can't draw this on the graph, it would end up looking like "aaa | '*' = $END || bbb || ccc
 	public void toDSLTextTransitionsSplit() {
-		checkDSLToGraphAndBackToDSL("aaa *->$END && <bbb || ccc>");
+		checkDSLToGraphAndBackToDSL("aaa '*'->$END && <bbb || ccc>");
 	}
 
 	@Test
 	public void toDSLTextTransitionsFlow() {
-		checkDSLToGraphAndBackToDSL("aaa *->$END && bbb && ccc");
+		checkDSLToGraphAndBackToDSL("aaa '*'->$END && bbb && ccc");
 	}
 
 	@Test
@@ -1198,18 +1197,33 @@ public class TaskParserTests {
 
 		graph.nodes.add(new Node("4","ccc"));
 		graph.links.add(new Link("1","4","*"));
-		assertEquals("aaa --one=bar --two='b ar' 'tname'->bbb *->ccc",graph.toDSLText());
+		assertEquals("aaa --one=bar --two='b ar' 'tname'->bbb '*'->ccc",graph.toDSLText());
 
 		graph.nodes.add(new Node("5","ddd"));
 		graph.links.add(new Link("1","5","3"));
-		assertEquals("aaa --one=bar --two='b ar' 'tname'->bbb *->ccc 3->ddd",graph.toDSLText());
+		assertEquals("aaa --one=bar --two='b ar' 'tname'->bbb '*'->ccc 3->ddd",graph.toDSLText());
 		
 		// When going from DSL to graph, unquote property values and exit codes
 		
-		String dsl = "aaa --one=bar --two='b ar' 'tname'->bbb *->ccc 3->ddd";
+		String dsl = "aaa --one=bar --two='b ar' 'tname'->bbb '*'->ccc 3->ddd";
 		graph = parse(dsl).toGraph();
 		n = graph.nodes.get(1);
 		assertEquals("b ar",n.properties.get("two"));
+		Link l = graph.links.get(1);
+		assertEquals("tname",l.getTransitionName());
+		l = graph.links.get(2);
+		assertEquals("*",l.getTransitionName());
+		l = graph.links.get(3);
+		assertEquals("3",l.getTransitionName());
+		assertEquals(dsl,graph.toDSLText());
+	}
+
+	@Test
+	public void wildcardTransitions() {
+		// When going from DSL to graph, unquote property values and exit codes
+		String dsl = "aaa 'tname'->bbb '*'->ccc 3->ddd";
+		assertGraph("[0:START][1:aaa][2:bbb][3:ccc][4:ddd][5:END][0-1][tname:1-2][*:1-3][3:1-4][1-5][2-5][3-5][4-5]", dsl);
+		Graph graph = parse(dsl).toGraph();
 		Link l = graph.links.get(1);
 		assertEquals("tname",l.getTransitionName());
 		l = graph.links.get(2);

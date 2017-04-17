@@ -349,16 +349,11 @@ public class Graph {
 				// capture the target of this link as a simple transition
 				String transitionName = l.getTransitionName();
 				boolean isStatusText = true;
-				if (transitionName.equals("*")) {
+				try {
+					Integer.parseInt(transitionName);
 					isStatusText = false;
-				}
-				else {
-					try {
-						Integer.parseInt(transitionName);
-						isStatusText = false;
-					} catch (NumberFormatException nfe) {
-						// it is text
-					}
+				} catch (NumberFormatException nfe) {
+					// it is text
 				}
 				if (isStatusText && !transitionName.startsWith("'")) {
 					transitionName = "'"+transitionName+"'";
