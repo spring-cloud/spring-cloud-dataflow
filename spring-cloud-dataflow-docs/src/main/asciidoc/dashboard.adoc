@@ -215,6 +215,8 @@ These can then be fixed up and creation repeated.  There is an
 local file system if the definitions are in a file and it is easier
 to import than copy/paste.
 
+NOTE: Bulk loading of composed task definitions is not currently supported.
+
 ==== Creating Composed Task Definitions
 The dashboard includes the Create Composed Task tab that provides the canvas
 application, offering a interactive graphical interface for creating
