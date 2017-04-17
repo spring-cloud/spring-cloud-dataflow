@@ -1,4 +1,4 @@
-o[[configuration]]
+[[configuration]]
 = Server Configuration
 [partintro]
 --
@@ -801,7 +801,12 @@ Data Flow Metrics Collector, and the Data Flow server is shown below.
 image::{dataflow-asciidoc}/images/dataflow-metrics-arch.png[Spring Cloud Data Flow Metrics Architecture , scaledwidth="100%"]
 
 As with the App Starters, there is a Spring Boot uber jar artifact of the
-Metrics Collector for Kafka 0.9, Kafka 0.10, and RabbitMQ.  The metrics
+Metrics Collector for Kafka 0.9, Kafka 0.10, and RabbitMQ.  You can find
+more information on building and running the Metrics Collector on its 
+https://github.com/spring-cloud/spring-cloud-dataflow-metrics-collector[project
+page].
+
+The metrics
 for each application are published when the property `spring.cloud.stream.bindings.applicationMetrics.destination` is set.  This can be set as any other
 application property when deploying an application in Data Flow.  Since
 it is quite common to want all applications in a stream to emit metrics,
@@ -821,9 +826,13 @@ uses the App Starters `time` and `log` applications.
 
 [source,bash]
 ----
+app register --name time --type source --uri maven://org.springframework.cloud.stream.app:time-source-rabbit:1.2.0.RELEASE
+
+app register --name log --type sink --uri maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.2.0.RELEASE
+
 stream create --name foostream --definition "time | log"
 
-stream deploy --name foostream --properties "app.*.spring.cloud.stream.bindings.applicationMetrics.destination=metrics"
+stream deploy --name foostream --properties "app.*.spring.cloud.stream.bindings.applicationMetrics.destination=metrics,deployer.*.count=2"
 ----
 
 The Metrics Collector exposes aggregated metrics under the HTTP endpoint
