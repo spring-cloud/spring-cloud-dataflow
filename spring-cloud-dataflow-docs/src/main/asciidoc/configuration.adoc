@@ -750,7 +750,7 @@ http://codecentric.github.io/spring-boot-admin/1.4.3/#set-up-admin-server[a few 
 
 A simple way to have the Spring Cloud Data Flow server be a client to the Spring Boot
 Admin Server is by adding a dependency to the Data Flow server's Maven pom.xml file and an additional
-configuration property as documented in http://codecentric.github.io/spring-boot-admin/1.4.3/#register-clients-via-spring-boot-admin[Registering Client Applications].  You will need to clone the github repository for the Spring Cloud Data Flow server in order to modify the Maven pom.  There are tags in the repository for each release.  
+configuration property as documented in http://codecentric.github.io/spring-boot-admin/1.4.3/#register-clients-via-spring-boot-admin[Registering Client Applications].  You will need to clone the github repository for the Spring Cloud Data Flow server in order to modify the Maven pom.  There are tags in the repository for each release.
 
 Adding this dependency will result in a UI with tabs for each of the actuator endpoints.
 
@@ -786,7 +786,7 @@ metrics data to external systems.
 * https://github.com/spring-cloud/spring-cloud-dataflow-metrics-collector[Spring Cloud Data Flow Metrics Collector] subscribes to the metrics destination and
 aggregates metric  messages published by the Spring Cloud Stream applications.
 It has an HTTP endpoint to access the aggregated metrics.
-* https://github.com/spring-cloud/spring-cloud-dataflow-metrics[Spring Cloud Data Flow Metrics] provides `LogMetricWriter` that writes to the log.  
+* https://github.com/spring-cloud/spring-cloud-dataflow-metrics[Spring Cloud Data Flow Metrics] provides `LogMetricWriter` that writes to the log.
 * https://github.com/spring-cloud/spring-cloud-dataflow-metrics-datadog[Spring Cloud Data Flow Metrics Datadog Metrics] provides `DatadogMetricWriter` that writes to https://www.datadoghq.com/[Datadog].
 
 
@@ -802,7 +802,7 @@ image::{dataflow-asciidoc}/images/dataflow-metrics-arch.png[Spring Cloud Data Fl
 
 As with the App Starters, there is a Spring Boot uber jar artifact of the
 Metrics Collector for Kafka 0.9, Kafka 0.10, and RabbitMQ.  You can find
-more information on building and running the Metrics Collector on its 
+more information on building and running the Metrics Collector on its
 https://github.com/spring-cloud/spring-cloud-dataflow-metrics-collector[project
 page].
 
@@ -843,6 +843,9 @@ is accessed by the UI when overlaying message rates on the Flo diagrams for
 each stream.  It is also accessed to enrich the Data Flow `/runtime/apps`
 endpoint that is exposed in the UI via the `Runtime` tab and in the shell
 through the `runtime apps` command with message rates.
+
+.Stream Message Rates
+image::{dataflow-asciidoc}/images/dataflow-metrics-message-rates.png[Stream Message Rates, scaledwidth="100%"]
 
 By default, Data Flow will set the property
 
