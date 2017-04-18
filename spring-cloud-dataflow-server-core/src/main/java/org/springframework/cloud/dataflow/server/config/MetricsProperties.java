@@ -40,14 +40,14 @@ public class MetricsProperties {
 	}
 
 	public static class Collector {
-		private String url;
+		private String uri;
 
-		public String getUrl() {
-			return url;
+		public String getUri() {
+			return uri;
 		}
 
-		public void setUrl(String url) {
-			this.url = url;
+		public void setUri(String uri) {
+			this.uri = uri;
 		}
 	}
 }

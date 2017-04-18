@@ -16,6 +16,8 @@
 
 package org.springframework.cloud.dataflow.server.controller.support;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -31,6 +33,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -49,12 +52,8 @@ public class MetricStore {
 	private final RestTemplate restTemplate;
 	private final MetricsProperties metricsProperties;
 	private final static List<ApplicationsMetrics> EMPTY_RESPONSE = new ArrayList<ApplicationsMetrics>();
+	private String collectorEndpoint;
 
-	/**
-	 * Instantiates a new metric store.
-	 *
-	 * @param metricsProperties the metrics properties
-	 */
 	public MetricStore(MetricsProperties metricsProperties) {
 		this.metricsProperties = metricsProperties;
 		ObjectMapper mapper = new ObjectMapper();
@@ -64,20 +63,30 @@ public class MetricStore {
 		messageConverter.setSupportedMediaTypes(MediaType.parseMediaTypes("application/hal+json"));
 		messageConverter.setObjectMapper(mapper);
 		restTemplate = new RestTemplate(Arrays.asList(messageConverter));
+		String baseURI = metricsProperties.getCollector().getUri();
+		if(StringUtils.hasText(baseURI)){
+			try {
+				URI uri = new URI(baseURI);
+				this.collectorEndpoint = UriComponentsBuilder.fromUri(uri).path("/collector/metrics/streams").build().toString();
+			}
+			catch (URISyntaxException e) {
+				logger.warn("Could not parse collector URI, stream metrics monitoring will not be available");
+			}
+		}
 	}
 
 	@HystrixCommand(fallbackMethod = "defaultMetrics")
 	public List<ApplicationsMetrics> getMetrics() {
 		List<ApplicationsMetrics> metrics = null;
-		if (StringUtils.hasText(metricsProperties.getCollector().getUrl())) {
+		if (StringUtils.hasText(this.collectorEndpoint)) {
 			try {
-				PagedResources<ApplicationsMetrics> response = restTemplate.exchange(metricsProperties.getCollector().getUrl(),
+				PagedResources<ApplicationsMetrics> response = restTemplate.exchange(this.collectorEndpoint,
 						HttpMethod.GET, null, new ParameterizedTypeReference<PagedResources<ApplicationsMetrics>>() {
 						}).getBody();
 				metrics = new ArrayList<>(response.getContent());
 			} catch (Exception e) {
 				if (logger.isDebugEnabled()) {
-					logger.debug("Error requesting metrics from url " + metricsProperties.getCollector().getUrl(), e);
+					logger.debug("Error requesting metrics from url " +this.collectorEndpoint, e);
 				}
 				throw e;
 			}

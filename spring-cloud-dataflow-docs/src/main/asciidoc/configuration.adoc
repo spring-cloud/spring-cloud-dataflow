@@ -801,10 +801,20 @@ Data Flow Metrics Collector, and the Data Flow server is shown below.
 image::{dataflow-asciidoc}/images/dataflow-metrics-arch.png[Spring Cloud Data Flow Metrics Architecture , scaledwidth="100%"]
 
 As with the App Starters, there is a Spring Boot uber jar artifact of the
-Metrics Collector for Kafka 0.9, Kafka 0.10, and RabbitMQ.  You can find
-more information on building and running the Metrics Collector on its
+
+Metrics Collector for all of the supported binders.  You can find
+more information on building and running the Metrics Collector on its 
+
 https://github.com/spring-cloud/spring-cloud-dataflow-metrics-collector[project
 page].
+
+The dataflow server now accepts an optional property `spring.cloud.dataflow.metrics.collector.uri`, this property should point to the URI of your deployed
+metrics collector app. For example, if you are running the metrics collector locally on port `8080` then start the server (local example) with the following command:
+
+[source,bash,subs=attributes]
+----
+$ java -jar spring-cloud-dataflow-server-local-{project-version}.jar --spring.cloud.dataflow.metrics.collector.uri=http://localhost:8080
+----
 
 The metrics
 for each application are published when the property `spring.cloud.stream.bindings.applicationMetrics.destination` is set.  This can be set as any other
@@ -876,7 +886,7 @@ system by providing an Exporter application that consumes messages from the
 same destination as the Metrics Collector and writes them to an existing ALM
 system.  Which specific ALM system we will support is driven by user demand.
 However, to serve as an example, we will develop an Elastic Search exporter
-with a Graphana front end since it is open source.
+with a Grafana front end since it is open source.
 
 === Log and DataDog MetricWriter
 If you prefer to have deployed applications bypass the centralized collection
