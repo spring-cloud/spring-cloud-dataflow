@@ -176,10 +176,10 @@ public class RuntimeAppsController {
 						for (ApplicationsMetrics.Metric m : metrics) {
 							if (ObjectUtils.nullSafeEquals("integration.channel.input.send.mean", m.getName())) {
 								appInstanceStatus.getAttributes().put("metrics.integration.channel.input.receiveRate",
-										String.format("%.2f", m.getValue()));
+										String.format(Locale.US, "%.2f", m.getValue()));
 							} else if (ObjectUtils.nullSafeEquals("integration.channel.output.send.mean", m.getName())) {
 								appInstanceStatus.getAttributes().put("metrics.integration.channel.output.sendRate",
-										String.format("%.2f", m.getValue()));
+										String.format(Locale.US, "%.2f", m.getValue()));
 							}
 						}
 					}
