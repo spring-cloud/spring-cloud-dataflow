@@ -71,6 +71,30 @@ public class LocalServerSecurityWithOAuth2Tests {
 	}
 
 	@Test
+	public void testThatAccessToActuatorEndpointPromptsSecurity() throws Exception {
+		localDataflowResource.getMockMvc()
+				.perform(get("/management/env"))
+				.andDo(print())
+				.andExpect(status().isUnauthorized());
+	}
+
+	@Test
+	public void testAccessToActuatorEndpointWithBasicAuthCredentialsWrongPassword() throws Exception {
+		localDataflowResource.getMockMvc()
+				.perform(get("/management/env").header("Authorization", basicAuthorizationHeader("user", "wrong-password")))
+				.andDo(print())
+				.andExpect(status().isUnauthorized());
+	}
+
+	@Test
+	public void testThatAccessToActuatorEndpointWithBasicAuthCredentialsSucceeds() throws Exception {
+		localDataflowResource.getMockMvc()
+				.perform(get("/management/env").header("Authorization", basicAuthorizationHeader("user", "secret10")))
+				.andDo(print())
+				.andExpect(status().isOk());
+	}
+
+	@Test
 	public void testAccessRootUrlWithOAuth2AccessToken() throws Exception {
 
 		final ClientCredentialsResourceDetails resourceDetails = new ClientCredentialsResourceDetails();
@@ -91,7 +115,7 @@ public class LocalServerSecurityWithOAuth2Tests {
 	}
 
 	@Test
-	public void testAccessSexurityInfoUrlWithOAuth2AccessToken() throws Exception {
+	public void testAccessSecurityInfoUrlWithOAuth2AccessToken() throws Exception {
 
 		final ClientCredentialsResourceDetails resourceDetails = new ClientCredentialsResourceDetails();
 		resourceDetails.setClientId("myclient");

@@ -28,6 +28,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationManager;
 import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationProcessingFilter;
@@ -43,6 +44,7 @@ import org.springframework.security.web.authentication.preauth.AbstractPreAuthen
  */
 @EnableOAuth2Sso
 @Configuration
+@EnableWebSecurity
 @Conditional(OnSecurityEnabledAndOAuth2Enabled.class)
 public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
