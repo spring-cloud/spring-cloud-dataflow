@@ -17,7 +17,6 @@ package org.springframework.cloud.dataflow.shell;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.shell.SimpleShellCommandLineOptions;
-import org.springframework.stereotype.Component;
 
 /**
  * Spring Boot {@link ConfigurationProperties} to specify well known Spring Shell properties.

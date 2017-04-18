@@ -112,7 +112,7 @@
             <property name="tokens" value="METHOD_DEF"/>
         </module>
         -->
-        <!--<module name="UnusedImports"/>-->
+        <module name="UnusedImports"/>
 
         <!-- Miscellaneous -->
         <!--<module name="CommentsIndentation"/>-->

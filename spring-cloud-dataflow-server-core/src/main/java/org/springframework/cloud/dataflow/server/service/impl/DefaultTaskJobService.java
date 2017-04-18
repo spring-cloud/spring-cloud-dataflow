@@ -101,7 +101,7 @@ public class DefaultTaskJobService implements TaskJobService {
 				}
 			}
 			jobExecution.addStepExecutions(validStepExecutions);
-		}	
+		}
 		return getTaskJobExecutionsForList(jobExecutions);
 	}
 
