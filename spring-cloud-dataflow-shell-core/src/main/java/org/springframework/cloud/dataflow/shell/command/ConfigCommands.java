@@ -258,12 +258,8 @@ public class ConfigCommands implements CommandMarker,
 		modelBuilder.addRow().addValue("Security").addValue(securityInfo);
 		rowIndex++;
 
-		if (securityInfo.isAuthenticated() && securityInfo.isAuthorizationEnabled()) {
-			final List<String> roles = securityInfo.getRoles();
-			if (roles.isEmpty()) {
-				roles.add("No roles assigned");
-			}
-			modelBuilder.addRow().addValue("Roles").addValue(roles);
+		if (securityInfo.isAuthorizationEnabled()) {
+			modelBuilder.addRow().addValue("Roles").addValue(securityInfo.getRoles());
 			rowsWithThinSeparators.add(rowIndex++);
 		}
 
