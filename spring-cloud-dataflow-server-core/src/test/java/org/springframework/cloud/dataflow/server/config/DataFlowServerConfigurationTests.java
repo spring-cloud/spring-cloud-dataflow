@@ -99,6 +99,7 @@ public class DataFlowServerConfigurationTests {
 	/**
 	 * Verify that embedded h2 does not start if h2 url is specified with
 	 * with the spring.dataflow.embedded.database.enabled is set to false.
+	 * @throws Throwable if any error occurs and should be handled by the caller.
 	 */
 	@Test (expected = ConnectException.class)
 	public void testDoNotStartEmbeddedH2Server() throws Throwable{

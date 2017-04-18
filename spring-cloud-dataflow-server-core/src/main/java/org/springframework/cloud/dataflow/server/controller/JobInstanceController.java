@@ -82,6 +82,7 @@ public class JobInstanceController {
 	 * @param pageable  page-able collection of {@link JobInstance}s.
 	 * @param assembler for the {@link JobInstance}s
 	 * @return a list of Job Instance
+	 * @throws NoSuchJobException if the job for jobName specified does not exist.
 	 */
 	@RequestMapping(value = "", method = RequestMethod.GET, params = "name")
 	@ResponseStatus(HttpStatus.OK)
@@ -98,6 +99,8 @@ public class JobInstanceController {
 	 *
 	 * @param id the id of the requested {@link JobInstance}
 	 * @return the {@link JobInstance}
+	 * @throws NoSuchJobInstanceException if job instance for the id does not exist.
+	 * @throws NoSuchJobException if the job for the job instance does not exist.
 	 */
 	@RequestMapping(value = "/{id}", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)

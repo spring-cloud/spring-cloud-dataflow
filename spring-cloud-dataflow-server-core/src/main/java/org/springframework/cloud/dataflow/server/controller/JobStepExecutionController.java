@@ -71,9 +71,10 @@ public class JobStepExecutionController {
 	 * List all step executions.
 	 *
 	 * @param id the {@link JobExecution}.
-	 * @param pageable the pagination information
-	 * @param assembler the resource assembler for step executions
-	 * @return Collection of {@link StepExecutionResource} for the given jobExecutionId
+	 * @param pageable the pagination information.
+	 * @param assembler the resource assembler for step executions.
+	 * @return Collection of {@link StepExecutionResource} for the given jobExecutionId.
+	 * @throws NoSuchJobExecutionException if the job execution for the id specified does not exist.
 	 */
 	@RequestMapping(value = { "" }, method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
@@ -90,7 +91,9 @@ public class JobStepExecutionController {
 	 *
 	 * @param id the {@link JobExecution} id.
 	 * @param stepId the {@link StepExecution} id.
-	 * @return Collection of {@link StepExecutionResource} for the given jobExecutionId
+	 * @return Collection of {@link StepExecutionResource} for the given jobExecutionId.
+	 * @throws NoSuchStepExecutionException if the stepId specified does not exist.
+	 * @throws NoSuchJobExecutionException if the job execution for the id specified does not exist.
 	 */
 	@RequestMapping(value = { "/{stepExecutionId}" }, method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
