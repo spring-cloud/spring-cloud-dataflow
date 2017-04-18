@@ -480,9 +480,9 @@ via the:
 clicking the stop button by the job execution that needs to be stopped.
 
 The composed task run will be stopped
-when the currently running child task completes.  The child task that
-was running at the time that the composed task was stopped will be marked as
-`STOPPED` as well as the composed task run.
+when the currently running child task completes.  The step associated with the
+child task that was running at the time that the composed task was stopped will
+be marked as `STOPPED` as well as the composed task job execution.
 
 ==== Restarting a Composed Task
 In cases where a composed task fails during execution and the status of the
