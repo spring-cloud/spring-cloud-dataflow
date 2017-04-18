@@ -81,6 +81,9 @@ public class JobExecutionController {
 	 * @param pageable  page-able collection of {@code TaskJobExecution}s.
 	 * @param assembler for the {@link TaskJobExecution}s
 	 * @return a list of Task/Job executions
+	 * @throws NoSuchJobExecutionException in the event that a job execution id specified
+	 * is not present when looking up stepExecutions for the result.
+
 	 */
 	@RequestMapping(value = "", method = RequestMethod.GET, produces = "application/json")
 	@ResponseStatus(HttpStatus.OK)
@@ -97,6 +100,8 @@ public class JobExecutionController {
 	 * @param jobName   name of the job
 	 * @param pageable  page-able collection of {@code TaskJobExecution}s.
 	 * @param assembler for the {@link TaskJobExecution}s
+	 * @return list task/job executions with the specified jobName.
+	 * @throws NoSuchJobException if the job with the given name does not exist.
 	 */
 	@RequestMapping(value = "", method = RequestMethod.GET, params = "name", produces = "application/json")
 	@ResponseStatus(HttpStatus.OK)
@@ -115,6 +120,7 @@ public class JobExecutionController {
 	 *
 	 * @param id the id of the requested {@link JobExecution}
 	 * @return the {@link JobExecution}
+	 * @throws NoSuchJobExecutionException if the specified job execution for the id does not exist.
 	 */
 	@RequestMapping(value = "/{id}", method = RequestMethod.GET, produces = "application/json")
 	@ResponseStatus(HttpStatus.OK)
@@ -131,9 +137,9 @@ public class JobExecutionController {
 	 * you must provide the request parameter {@code stop=true} in order to invoke
 	 * this endpoint.
 	 *
-	 * @param jobExecutionId the executionId of the job execution to stop
-	 * @throws JobExecutionNotRunningException
-	 * @throws NoSuchJobExecutionException
+	 * @param jobExecutionId the executionId of the job execution to stop.
+	 * @throws JobExecutionNotRunningException if a stop is requested on a job that is not running.
+	 * @throws NoSuchJobExecutionException if the job execution id specified does not exist.
 	 */
 	@RequestMapping(value = { "/{executionId}" }, method = RequestMethod.PUT, params = "stop=true")
 	@ResponseStatus(HttpStatus.OK)
@@ -147,7 +153,7 @@ public class JobExecutionController {
 	 * to invoke this endpoint.
 	 *
 	 * @param jobExecutionId the executionId of the job execution to restart
-	 * @throws NoSuchJobExecutionException
+	 * @throws NoSuchJobExecutionException if the job execution for the jobExecutionId specified does not exist.
 	 */
 	@RequestMapping(value = { "/{executionId}" }, method = RequestMethod.PUT, params = "restart=true")
 	@ResponseStatus(HttpStatus.OK)

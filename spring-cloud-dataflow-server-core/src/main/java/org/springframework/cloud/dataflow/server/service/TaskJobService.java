@@ -45,6 +45,8 @@ public interface TaskJobService {
 	 * the data with a task id.
 	 * @param pageable enumerates the data to be returned.
 	 * @return List containing {@link TaskJobExecution}s.
+	 * @throws NoSuchJobExecutionException in the event that a job execution id specified
+	 * is not present when looking up stepExecutions for the result.
 	 */
 	List<TaskJobExecution> listJobExecutions(Pageable pageable)
 			throws NoSuchJobExecutionException;
@@ -55,6 +57,7 @@ public interface TaskJobService {
 	 * @param pageable enumerates the data to be returned.
 	 * @param jobName the name of the job for which to search.
 	 * @return List containing {@link TaskJobExecution}s.
+	 * @throws NoSuchJobException if the job with the given name does not exist.
 	 */
 	List<TaskJobExecution> listJobExecutionsForJob (Pageable pageable,
 			String jobName) throws NoSuchJobException;
@@ -63,6 +66,7 @@ public interface TaskJobService {
 	 * Retrieves a JobExecution from the JobRepository and matches it with a task id.
 	 * @param id the id of the {@link JobExecution}
 	 * @return the {@link TaskJobExecution}s associated with the id.
+	 * @throws NoSuchJobExecutionException if the specified job execution for the id does not exist.
 	 */
 	TaskJobExecution getJobExecution(long id) throws NoSuchJobExecutionException;
 
@@ -72,6 +76,7 @@ public interface TaskJobService {
 	 * @param pageable enumerates the data to be returned.
 	 * @param jobName the name of the job for which to search.
 	 * @return List containing {@link JobInstanceExecutions}.
+	 * @throws NoSuchJobException if the job for the jobName specified does not exist.
 	 */
 	List<JobInstanceExecutions> listTaskJobInstancesForJobName(Pageable pageable,
 			String jobName) throws NoSuchJobException;
@@ -81,6 +86,8 @@ public interface TaskJobService {
 	 * {@link JobExecution}s.
 	 * @param id the id of the {@link JobInstance}
 	 * @return the {@link JobInstanceExecutions} associated with the id.
+	 * @throws NoSuchJobInstanceException if job instance id does not exist.
+	 * @throws NoSuchJobException if the job for the job instance does not exist.
 	 */
 	JobInstanceExecutions getJobInstance(long id)
 			throws NoSuchJobInstanceException, NoSuchJobException;
@@ -88,11 +95,15 @@ public interface TaskJobService {
 	/**
 	 * Retrieves the total number of job instances for a job name.
 	 * @param jobName the name of the job instance.
+	 * @return the number of job instances associated with the jobName.
+	 * @throws NoSuchJobException if the job for jobName specified does not exist.
+
 	 */
 	int countJobInstances(String jobName) throws NoSuchJobException;
 
 	/**
 	 * Retrieves the total number of the job executions.
+	 * @return the total number of job executions.
 	 */
 	int countJobExecutions();
 
@@ -100,7 +111,7 @@ public interface TaskJobService {
 	 * Retrieves the total number {@link JobExecution} that match a specific job name.
 	 * @param jobName the job name to search.
 	 * @return the number of {@link JobExecution}s that match the job name.
-	 * @throws NoSuchJobException
+	 * @throws NoSuchJobException if the job for the jobName does not exist.
 	 */
 	int countJobExecutionsForJob(String jobName) throws NoSuchJobException;
 
@@ -109,8 +120,8 @@ public interface TaskJobService {
 	 * is actually deemed restartable. Otherwise a {@link JobNotRestartableException}
 	 * is being thrown.
 	 *
-	 * @param jobExecutionId The id of the JobExecution to restart
-	 * @throws NoSuchJobExecutionException Thrown if the JobExecution for the provided id does not exist
+	 * @param jobExecutionId The id of the JobExecution to restart.
+	 * @throws NoSuchJobExecutionException if the JobExecution for the provided id does not exist.
 	 */
 	void restartJobExecution(long jobExecutionId) throws NoSuchJobExecutionException;
 
@@ -126,8 +137,8 @@ public interface TaskJobService {
 	 * @see org.springframework.batch.admin.service.JobService#stop(Long)
 	 *
 	 * @param jobExecutionId The id of the {@link JobExecution} to stop
-	 * @throws NoSuchJobExecutionException
-	 * @throws JobExecutionNotRunningException
+	 * @throws NoSuchJobExecutionException if no job execution exists for the jobExecutionId.
+	 * @throws JobExecutionNotRunningException if a stop is requested on a job that is not running.
 	 */
 	void stopJobExecution(long jobExecutionId) throws NoSuchJobExecutionException, JobExecutionNotRunningException;
 }
