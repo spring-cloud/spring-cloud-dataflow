@@ -54,6 +54,11 @@ public class MetricStore {
 	private final static List<ApplicationsMetrics> EMPTY_RESPONSE = new ArrayList<ApplicationsMetrics>();
 	private String collectorEndpoint;
 
+	/**
+	 * Instantiates a new metric store.
+	 *
+	 * @param metricsProperties the metrics properties
+	 */
 	public MetricStore(MetricsProperties metricsProperties) {
 		this.metricsProperties = metricsProperties;
 		ObjectMapper mapper = new ObjectMapper();
