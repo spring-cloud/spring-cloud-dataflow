@@ -99,6 +99,7 @@ public class RootController {
 			root.add(entityLinks.linkToCollectionResource(AppStatusResource.class).withRel("runtime/apps"));
 			root.add(unescapeTemplateVariables(entityLinks.linkForSingleResource(AppStatusResource.class, "{appId}").withRel("runtime/apps/app")));
 			root.add(unescapeTemplateVariables(entityLinks.linkFor(AppInstanceStatusResource.class, UriComponents.UriTemplateVariables.SKIP_VALUE).withRel("runtime/apps/instances")));
+			root.add(linkTo(MetricsController.class).withRel("metrics/streams"));
 		}
 		if (featuresProperties.isTasksEnabled()) {
 			root.add(entityLinks.linkToCollectionResource(TaskDefinitionResource.class).withRel("tasks/definitions"));
