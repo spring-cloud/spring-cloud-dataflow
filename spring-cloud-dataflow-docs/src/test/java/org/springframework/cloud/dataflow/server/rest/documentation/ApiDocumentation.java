@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -81,6 +81,7 @@ public class ApiDocumentation extends BaseDocumentation {
 					linkWithRel("apps").description("Handle registered applications"),
 					linkWithRel("completions/stream").description("Exposes the DSL completion features for Stream"),
 					linkWithRel("completions/task").description("Exposes the DSL completion features for Task"),
+					linkWithRel("metrics/streams").description("Exposes metrics for the stream applications"),
 					linkWithRel("jobs/executions").description("Provides the JobExecution resource"),
 					linkWithRel("jobs/executions/execution").description("Provides details for a specific JobExecution"),
 					linkWithRel("jobs/executions/execution/steps").description("Provides the steps for a JobExecution"),
