@@ -41,7 +41,7 @@ public class StepExecutionJacksonMixInTests {
 	 * Assert that without using the {@link ExecutionContextJacksonMixIn} Jackson does not render the Step Execution
 	 * Context correctly (Missing values).
 	 *
-	 * @throws JsonProcessingException
+	 * @throws JsonProcessingException if a Json generation error occurs.
 	 */
 	@Test(expected = JsonMappingException.class)
 	public void testSerializationOfSingleStepExecutionWithoutMixin() throws JsonProcessingException {
@@ -58,7 +58,7 @@ public class StepExecutionJacksonMixInTests {
 	 * Assert that by using the {@link ExecutionContextJacksonMixIn} Jackson renders the Step Execution Context
 	 * correctly.
 	 *
-	 * @throws JsonProcessingException
+	 * @throws JsonProcessingException if a Json generation error occurs.
 	 */
 	@Test
 	public void testSerializationOfSingleStepExecution() throws JsonProcessingException {
