@@ -99,7 +99,8 @@ public class TaskDefinition extends DataFlowAppDefinition {
 		if (dslText == null) {
 			if (other.dslText != null)
 				return false;
-		} else if (!dslText.equals(other.dslText))
+		}
+		else if (!dslText.equals(other.dslText))
 			return false;
 		return true;
 	}
@@ -135,8 +136,8 @@ public class TaskDefinition extends DataFlowAppDefinition {
 		public static TaskDefinitionBuilder from(DataFlowAppDefinition definition) {
 			TaskDefinitionBuilder builder = new TaskDefinitionBuilder();
 			builder.setRegisteredAppName(definition.getRegisteredAppName())
-				.setLabel(definition.getName())
-				.addProperties(definition.getProperties());
+					.setLabel(definition.getName())
+					.addProperties(definition.getProperties());
 			return builder;
 		}
 
@@ -146,7 +147,6 @@ public class TaskDefinition extends DataFlowAppDefinition {
 		 *
 		 * @param registeredAppName name of app in registry
 		 * @return this builder object
-		 *
 		 * @see DataFlowAppDefinition#registeredAppName
 		 */
 		public TaskDefinitionBuilder setRegisteredAppName(String registeredAppName) {
@@ -168,10 +168,9 @@ public class TaskDefinition extends DataFlowAppDefinition {
 		/**
 		 * Set an app property.
 		 *
-		 * @param name property name
+		 * @param name  property name
 		 * @param value property value
 		 * @return this builder object
-		 *
 		 * @see AppDefinition#getProperties()
 		 */
 		public TaskDefinitionBuilder setProperty(String name, String value) {
@@ -184,7 +183,6 @@ public class TaskDefinition extends DataFlowAppDefinition {
 		 *
 		 * @param properties app properties
 		 * @return this builder object
-		 *
 		 * @see AppDefinition#getProperties()
 		 */
 		public TaskDefinitionBuilder addProperties(Map<String, String> properties) {
@@ -197,7 +195,6 @@ public class TaskDefinition extends DataFlowAppDefinition {
 		 *
 		 * @param properties app properties
 		 * @return this builder object
-		 *
 		 * @see AppDefinition#getProperties()
 		 */
 		public TaskDefinitionBuilder setProperties(Map<String, String> properties) {

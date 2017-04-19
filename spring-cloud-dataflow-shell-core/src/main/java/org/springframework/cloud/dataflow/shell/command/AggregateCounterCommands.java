@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,12 +23,13 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 
 import org.joda.time.DateTimeConstants;
+
 import org.springframework.analytics.rest.domain.AggregateCounterResource;
 import org.springframework.analytics.rest.domain.MetricResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.dataflow.rest.client.AggregateCounterOperations;
-import org.springframework.cloud.dataflow.shell.command.support.RoleType;
 import org.springframework.cloud.dataflow.shell.command.support.OpsType;
+import org.springframework.cloud.dataflow.shell.command.support.RoleType;
 import org.springframework.cloud.dataflow.shell.config.DataFlowShell;
 import org.springframework.cloud.dataflow.shell.converter.NumberFormatConverter;
 import org.springframework.hateoas.PagedResources;
@@ -147,7 +148,8 @@ public class AggregateCounterCommands extends AbstractMetricsCommands implements
 		Table table = DataFlowTables.applyStyle(new TableBuilder(model))
 				.on(CellMatchers.ofType(Long.class))
 				.addFormatter(new Formatter() {
-					@Override public String[] format(Object value) {
+					@Override
+					public String[] format(Object value) {
 						return new String[] { pattern.format(value) };
 					}
 				})

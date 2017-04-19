@@ -16,11 +16,6 @@
 
 package org.springframework.cloud.dataflow.server.config;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
-
 import java.net.ConnectException;
 import java.util.HashMap;
 import java.util.Map;
@@ -47,6 +42,11 @@ import org.springframework.core.env.MapPropertySource;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.security.authentication.AuthenticationManager;
+
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
 
 /**
  * @author Glenn Renfro

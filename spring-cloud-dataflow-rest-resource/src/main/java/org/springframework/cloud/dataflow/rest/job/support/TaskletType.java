@@ -59,7 +59,7 @@ public enum TaskletType {
 	private final String className;
 	private final String displayName;
 
-	private TaskletType(String className, String displayName) {
+	TaskletType(String className, String displayName) {
 		this.className = className;
 		this.displayName = displayName;
 	}

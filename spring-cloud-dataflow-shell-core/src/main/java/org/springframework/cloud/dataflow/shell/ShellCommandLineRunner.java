@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 package org.springframework.cloud.dataflow.shell;
+
+import java.util.logging.Logger;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,8 +32,6 @@ import org.springframework.shell.core.JLineShellComponent;
 import org.springframework.shell.support.logging.HandlerUtils;
 import org.springframework.shell.support.util.FileUtils;
 import org.springframework.util.StopWatch;
-
-import java.util.logging.Logger;
 
 /**
  * This does basically the same thing as {@link org.springframework.shell.Bootstrap} in Spring Shell,

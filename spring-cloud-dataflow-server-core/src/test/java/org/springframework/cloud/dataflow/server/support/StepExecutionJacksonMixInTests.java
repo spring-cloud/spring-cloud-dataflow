@@ -16,19 +16,20 @@
 
 package org.springframework.cloud.dataflow.server.support;
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.CoreMatchers.not;
-import static org.junit.Assert.assertThat;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
+
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.cloud.dataflow.server.job.support.ExecutionContextJacksonMixIn;
 import org.springframework.cloud.dataflow.server.job.support.StepExecutionJacksonMixIn;
+
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.not;
+import static org.junit.Assert.assertThat;
 
 /**
  * Tests that the {@link ExecutionContextJacksonMixIn} works as expected.

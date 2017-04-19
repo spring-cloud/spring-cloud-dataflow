@@ -29,7 +29,6 @@ import org.springframework.cloud.deployer.resource.registry.UriRegistry;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 
 /**
  * RDBMS implementation of {@link UriRegistry}.

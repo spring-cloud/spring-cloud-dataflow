@@ -15,15 +15,16 @@
  */
 package org.springframework.cloud.dataflow.server.completion;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
-
 import org.junit.Test;
+
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.server.DataFlowServerUtil;
 import org.springframework.cloud.dataflow.server.support.CannotDetermineApplicationTypeException;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 /**
  *

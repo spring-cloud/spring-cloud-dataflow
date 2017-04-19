@@ -18,6 +18,7 @@ package org.springframework.cloud.dataflow.server.config;
 
 import java.util.HashMap;
 import java.util.Map;
+
 import javax.sql.DataSource;
 
 import org.springframework.analytics.metrics.AggregateCounterRepository;
@@ -30,7 +31,6 @@ import org.springframework.boot.actuate.metrics.repository.MetricRepository;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.client.circuitbreaker.EnableCircuitBreaker;

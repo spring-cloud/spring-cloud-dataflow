@@ -62,5 +62,22 @@ For more information on building, see this https://github.com/spring-cloud/sprin
 
 We welcome contributions! Follow this https://github.com/spring-cloud/spring-cloud-dataflow/blob/master/spring-cloud-dataflow-docs/src/main/asciidoc/appendix-contributing.adoc[link] for more information on how to contribute.
 
+=== Code formatting guidelines
 
+* Use the Spring Boot code formatter from https://github.com/spring-projects/spring-boot/blob/master/eclipse/eclipse-code-formatter.xml[here]
+* If you are using `IntelliJ` then Go to Preferences -> Editor -> Code Style -> Java -> Manage and import the formatter file
 
+  ** Go to Import settings in Preferences -> Editor -> Code Style -> Java -> Import and set
+  `Class count to use import with '\*'` and `Names count to use static import with '*'` to high values (say 999) to avoid using this property
+  ** In the same page, set the Import order with the following settings
+
+    import java.*
+    <blank line>
+    import javax.*
+    <blank line>
+    import all other imports
+    <blank line>
+    import org.springframework.*
+    <blank line>
+    import static all other imports
+    <blank line>

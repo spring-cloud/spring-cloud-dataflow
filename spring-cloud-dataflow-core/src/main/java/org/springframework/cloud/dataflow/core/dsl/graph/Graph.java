@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,9 +21,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.cloud.dataflow.core.dsl.TransitionNode;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+import org.springframework.cloud.dataflow.core.dsl.TransitionNode;
 
 /**
  * Represents a Graph that Flo will display. A graph consists of simple {@link Node} and {@link Link} objects.
@@ -59,7 +59,7 @@ public class Graph {
 	public String toString() {
 		return "Graph:  nodes=#" + nodes.size() + "  links=#" + links.size() + "\n" + nodes + "\n" + links;
 	}
-	
+
 	public String toVerboseString() {
 		StringBuilder s = new StringBuilder();
 		for (Node n: nodes) {

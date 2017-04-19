@@ -164,7 +164,7 @@ public class StreamDefinition {
 	private static class ReadOnlyIterator<T> implements Iterator<T> {
 		private final Iterator<T> wrapped;
 
-		public ReadOnlyIterator(Iterator<T> wrapped) {
+		ReadOnlyIterator(Iterator<T> wrapped) {
 			this.wrapped = wrapped;
 		}
 

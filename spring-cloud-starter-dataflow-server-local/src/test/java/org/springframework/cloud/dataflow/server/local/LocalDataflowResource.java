@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,7 +17,10 @@ package org.springframework.cloud.dataflow.server.local;
 
 import java.util.Collection;
 
+import javax.servlet.Filter;
+
 import org.junit.rules.ExternalResource;
+
 import org.springframework.boot.SpringApplication;
 import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
 import org.springframework.cloud.dataflow.server.local.dataflowapp.LocalTestDataFlowServer;
@@ -25,7 +28,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.WebApplicationContext;
-import javax.servlet.Filter;
 
 /**
  * @author Marius Bogoevici

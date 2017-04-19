@@ -23,6 +23,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
 import org.junit.Test;
+
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobInstance;

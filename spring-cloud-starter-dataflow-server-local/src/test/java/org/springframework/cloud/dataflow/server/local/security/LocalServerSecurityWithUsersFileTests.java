@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,18 +15,11 @@
  */
 package org.springframework.cloud.dataflow.server.local.security;
 
-import static org.springframework.cloud.dataflow.server.local.security.SecurityTestUtils.basicAuthorizationHeader;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 
+import com.google.common.collect.ImmutableMap;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.rules.RuleChain;
@@ -37,6 +30,7 @@ import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import org.springframework.cloud.dataflow.server.local.LocalDataflowResource;
 import org.springframework.data.authentication.UserCredentials;
 import org.springframework.http.HttpMethod;
@@ -45,7 +39,13 @@ import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.util.CollectionUtils;
 
-import com.google.common.collect.ImmutableMap;
+import static org.springframework.cloud.dataflow.server.local.security.SecurityTestUtils.basicAuthorizationHeader;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
  * Tests for security configuration backed by a file-based user list.

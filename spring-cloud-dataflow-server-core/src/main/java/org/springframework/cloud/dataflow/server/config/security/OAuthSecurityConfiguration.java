@@ -15,8 +15,6 @@
  */
 package org.springframework.cloud.dataflow.server.config.security;
 
-import static org.springframework.cloud.dataflow.server.controller.UiController.dashboard;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.oauth2.client.EnableOAuth2Sso;
 import org.springframework.cloud.dataflow.server.config.security.support.OnSecurityEnabledAndOAuth2Enabled;
@@ -34,6 +32,8 @@ import org.springframework.security.oauth2.provider.authentication.OAuth2Authent
 import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationProcessingFilter;
 import org.springframework.security.oauth2.provider.token.ResourceServerTokenServices;
 import org.springframework.security.web.authentication.preauth.AbstractPreAuthenticatedProcessingFilter;
+
+import static org.springframework.cloud.dataflow.server.controller.UiController.dashboard;
 
 /**
  * Setup Spring Security OAuth for the Rest Endpoints of Spring Cloud Data Flow.

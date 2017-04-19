@@ -16,13 +16,6 @@
 
 package org.springframework.cloud.dataflow.configuration.metadata;
 
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.hasProperty;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertThat;
-
 import java.util.List;
 
 import org.hamcrest.Matcher;
@@ -30,6 +23,13 @@ import org.junit.Test;
 
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
 import org.springframework.core.io.ClassPathResource;
+
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasProperty;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
+import static org.junit.Assert.assertThat;
 
 /**
  * Unit tests for {@link ApplicationConfigurationMetadataResolver}.
@@ -59,7 +59,7 @@ public class BootApplicationConfigurationMetadataResolverTests {
 	public void shouldReturnEverythingWhenNoDescriptors() {
 		List<ConfigurationMetadataProperty> properties = resolver.listProperties(new ClassPathResource("apps/no-whitelist", getClass()));
 		List<ConfigurationMetadataProperty> full = resolver.listProperties(new ClassPathResource("apps/no-whitelist", getClass()), true);
-		assertThat( properties.size(), greaterThan(0));
+		assertThat(properties.size(), greaterThan(0));
 		assertThat(properties.size(), is(full.size()));
 	}
 

@@ -17,7 +17,6 @@
 package org.springframework.cloud.dataflow.shell.config;
 
 
-import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.cloud.dataflow.shell.ShellCommandLineRunner;
 import org.springframework.context.annotation.Bean;

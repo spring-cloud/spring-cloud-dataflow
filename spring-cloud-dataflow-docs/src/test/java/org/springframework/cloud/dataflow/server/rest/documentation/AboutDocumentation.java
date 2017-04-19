@@ -16,14 +16,15 @@
 
 package org.springframework.cloud.dataflow.server.rest.documentation;
 
+import org.junit.Test;
+
+import org.springframework.http.MediaType;
+import org.springframework.restdocs.payload.JsonFieldType;
+
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import org.junit.Test;
-import org.springframework.http.MediaType;
-import org.springframework.restdocs.payload.JsonFieldType;
 
 /**
  * @author Gunnar Hillert

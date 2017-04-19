@@ -18,6 +18,7 @@ package org.springframework.cloud.dataflow.shell.config;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
+
 import org.springframework.cloud.dataflow.rest.client.AggregateCounterOperations;
 import org.springframework.cloud.dataflow.rest.client.DataFlowOperations;
 import org.springframework.cloud.dataflow.shell.Target;

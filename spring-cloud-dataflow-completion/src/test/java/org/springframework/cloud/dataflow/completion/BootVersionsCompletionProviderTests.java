@@ -16,11 +16,6 @@
 
 package org.springframework.cloud.dataflow.completion;
 
-import static org.hamcrest.CoreMatchers.hasItems;
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-import static org.springframework.cloud.dataflow.completion.Proposals.proposalThat;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -41,6 +36,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.FileSystemResourceLoader;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.test.context.junit4.SpringRunner;
+
+import static org.hamcrest.CoreMatchers.hasItems;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
+import static org.springframework.cloud.dataflow.completion.Proposals.proposalThat;
 
 /**
  * Tests that the completion mechanism knows how to cope with different versions of Spring Boot, including

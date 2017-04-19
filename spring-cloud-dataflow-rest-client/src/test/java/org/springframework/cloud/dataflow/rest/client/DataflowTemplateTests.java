@@ -15,11 +15,6 @@
  */
 package org.springframework.cloud.dataflow.rest.client;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Iterator;
@@ -41,6 +36,11 @@ import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  *

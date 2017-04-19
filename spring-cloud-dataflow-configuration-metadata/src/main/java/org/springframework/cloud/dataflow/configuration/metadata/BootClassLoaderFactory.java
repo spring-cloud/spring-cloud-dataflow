@@ -69,7 +69,7 @@ public class BootClassLoaderFactory {
 	}
 
 	private abstract class ClassLoaderExposingLauncher extends ExecutableArchiveLauncher {
-		public ClassLoaderExposingLauncher() {
+		ClassLoaderExposingLauncher() {
 			super(archive);
 		}
 

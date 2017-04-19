@@ -19,7 +19,6 @@ import javax.sql.DataSource;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.dataflow.completion.RecoveryStrategy;
 import org.springframework.cloud.dataflow.completion.StreamCompletionProvider;
 import org.springframework.cloud.dataflow.server.completion.TapOnDestinationRecoveryStrategy;

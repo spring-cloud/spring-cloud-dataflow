@@ -15,14 +15,13 @@
  */
 package org.springframework.cloud.dataflow.server.config.security;
 
-import static org.springframework.cloud.dataflow.server.controller.UiController.dashboard;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.slf4j.LoggerFactory;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -54,6 +53,8 @@ import org.springframework.session.web.http.SessionRepositoryFilter;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.accept.ContentNegotiationStrategy;
+
+import static org.springframework.cloud.dataflow.server.controller.UiController.dashboard;
 
 /**
  * Setup Spring Security with Basic Authentication for the Rest Endpoints and the

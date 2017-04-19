@@ -16,8 +16,6 @@
 
 package org.springframework.cloud.dataflow.server.controller;
 
-import static org.hamcrest.CoreMatchers.not;
-
 import java.util.HashMap;
 
 import org.hamcrest.collection.IsMapContaining;
@@ -41,6 +39,8 @@ import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+
+import static org.hamcrest.CoreMatchers.not;
 
 /**
  * Unit tests for StreamDeploymentController.

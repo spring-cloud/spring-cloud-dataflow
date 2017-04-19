@@ -19,8 +19,8 @@ package org.springframework.cloud.dataflow.rest.client;
 import java.util.Properties;
 
 import org.springframework.cloud.dataflow.core.ApplicationType;
-import org.springframework.cloud.dataflow.rest.resource.DetailedAppRegistrationResource;
 import org.springframework.cloud.dataflow.rest.resource.AppRegistrationResource;
+import org.springframework.cloud.dataflow.rest.resource.DetailedAppRegistrationResource;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.ResourceSupport;
 import org.springframework.hateoas.UriTemplate;

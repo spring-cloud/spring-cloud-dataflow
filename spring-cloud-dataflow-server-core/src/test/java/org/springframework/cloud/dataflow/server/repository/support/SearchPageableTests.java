@@ -16,6 +16,10 @@
 
 package org.springframework.cloud.dataflow.server.repository.support;
 
+import org.junit.Test;
+
+import org.springframework.data.domain.PageRequest;
+
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.empty;
@@ -24,9 +28,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
-
-import org.junit.Test;
-import org.springframework.data.domain.PageRequest;
 
 /**
  * @author Gunnar Hillert

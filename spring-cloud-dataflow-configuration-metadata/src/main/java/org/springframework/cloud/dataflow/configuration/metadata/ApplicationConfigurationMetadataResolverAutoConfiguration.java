@@ -17,8 +17,8 @@
 package org.springframework.cloud.dataflow.configuration.metadata;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
 /**
  * Automatically exposes an {@link ApplicationConfigurationMetadataResolver} if none is already registered.

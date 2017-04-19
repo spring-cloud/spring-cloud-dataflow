@@ -16,12 +16,12 @@
 
 package org.springframework.cloud.dataflow.completion;
 
-import static org.hamcrest.core.Is.is;
-
 import org.junit.Assert;
 import org.junit.Test;
 
 import org.springframework.cloud.dataflow.core.StreamDefinition;
+
+import static org.hamcrest.core.Is.is;
 
 /**
  * Unit tests for CompletionUtils.

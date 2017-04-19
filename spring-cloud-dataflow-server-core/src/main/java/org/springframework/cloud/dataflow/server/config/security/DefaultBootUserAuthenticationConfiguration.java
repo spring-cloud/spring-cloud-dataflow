@@ -16,6 +16,7 @@
 package org.springframework.cloud.dataflow.server.config.security;
 
 import org.slf4j.LoggerFactory;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.autoconfigure.ManagementServerProperties;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;

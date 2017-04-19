@@ -20,8 +20,8 @@ import java.util.Arrays;
 import java.util.Date;
 
 import org.springframework.batch.core.StepExecution;
-import org.springframework.cloud.dataflow.rest.job.StepExecutionHistory;
 import org.springframework.cloud.dataflow.rest.job.CumulativeHistory;
+import org.springframework.cloud.dataflow.rest.job.StepExecutionHistory;
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.util.StringUtils;

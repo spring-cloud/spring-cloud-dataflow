@@ -15,9 +15,9 @@
  */
 package org.springframework.cloud.dataflow.rest.resource;
 
-import org.springframework.util.Assert;
-
 import com.fasterxml.jackson.annotation.JsonFormat;
+
+import org.springframework.util.Assert;
 
 /**
  * Provides a typed enumeration of deployment statuses for Streams.

@@ -16,10 +16,6 @@
 
 package org.springframework.cloud.dataflow.shell.command;
 
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.when;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -39,6 +35,10 @@ import org.springframework.cloud.dataflow.rest.resource.AppStatusResource;
 import org.springframework.cloud.dataflow.shell.config.DataFlowShell;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.shell.table.TableModel;
+
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.when;
 
 /**
  * Unit tests for {@link RuntimeCommands}.

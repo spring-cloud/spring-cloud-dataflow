@@ -16,8 +16,6 @@
 
 package org.springframework.cloud.dataflow.completion;
 
-import static org.springframework.cloud.dataflow.completion.CompletionProposal.expanding;
-
 import java.io.IOException;
 import java.net.URLClassLoader;
 import java.util.List;
@@ -35,6 +33,8 @@ import org.springframework.cloud.dataflow.core.dsl.TokenKind;
 import org.springframework.cloud.dataflow.registry.AppRegistration;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.core.io.Resource;
+
+import static org.springframework.cloud.dataflow.completion.CompletionProposal.expanding;
 
 /**
  * Attempts to fill in possible values after a {@literal --foo=} dangling construct in the DSL.

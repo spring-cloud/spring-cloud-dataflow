@@ -16,9 +16,9 @@
 
 package org.springframework.cloud.dataflow.server.repository.support;
 
-import java.util.Map;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Helper methods for SQL statement parameter parsing.

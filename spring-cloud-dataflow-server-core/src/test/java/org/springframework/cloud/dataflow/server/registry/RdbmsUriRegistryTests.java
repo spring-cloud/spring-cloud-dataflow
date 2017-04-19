@@ -16,11 +16,6 @@
 
 package org.springframework.cloud.dataflow.server.registry;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
@@ -42,6 +37,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.junit4.SpringRunner;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * @author Ilayaperumal Gopinathan

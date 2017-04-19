@@ -16,9 +16,6 @@
 
 package org.springframework.cloud.dataflow.server.config;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.mock;
-
 import org.junit.Test;
 
 import org.springframework.boot.SpringApplication;
@@ -35,6 +32,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.authentication.AuthenticationManager;
+
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
 
 /**
  * @author Josh Long

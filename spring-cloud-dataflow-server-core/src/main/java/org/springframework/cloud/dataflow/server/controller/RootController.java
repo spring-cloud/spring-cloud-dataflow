@@ -16,8 +16,6 @@
 
 package org.springframework.cloud.dataflow.server.controller;
 
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
-
 import org.springframework.analytics.rest.domain.AggregateCounterResource;
 import org.springframework.analytics.rest.domain.CounterResource;
 import org.springframework.analytics.rest.domain.FieldValueCounterResource;
@@ -47,6 +45,8 @@ import org.springframework.hateoas.ResourceSupport;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponents;
+
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 
 /**
  * Controller for the root resource of the Data Flow server.
