@@ -73,10 +73,13 @@ public class MetricStore {
 			try {
 				URI uri = new URI(baseURI);
 				this.collectorEndpoint = UriComponentsBuilder.fromUri(uri).path("/collector/metrics/streams").build().toString();
+				logger.info("Metrics Collector URI = [" + collectorEndpoint + "]");
 			}
 			catch (URISyntaxException e) {
 				logger.warn("Could not parse collector URI, stream metrics monitoring will not be available");
 			}
+		} else {
+			logger.info("Metrics Collector URI = []");
 		}
 	}
 
