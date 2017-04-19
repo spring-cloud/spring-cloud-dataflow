@@ -24,6 +24,7 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.cloud.dataflow.rest.util.HttpUtils;
 import org.springframework.cloud.dataflow.server.config.MetricsProperties;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.PagedResources;
@@ -74,6 +75,18 @@ public class MetricStore {
 				URI uri = new URI(baseURI);
 				this.collectorEndpoint = UriComponentsBuilder.fromUri(uri).path("/collector/metrics/streams").build().toString();
 				logger.info("Metrics Collector URI = [" + collectorEndpoint + "]");
+				validateUsernamePassword(metricsProperties.getCollector().getUserName(),
+						metricsProperties.getCollector().getPassword());
+				if (StringUtils.hasText(metricsProperties.getCollector().getUserName()) &&
+						StringUtils.hasText(metricsProperties.getCollector().getPassword())) {
+					HttpUtils.prepareRestTemplate(this.restTemplate, new URI(collectorEndpoint),
+							metricsProperties.getCollector().getUserName(),
+							metricsProperties.getCollector().getPassword(),
+							metricsProperties.getCollector().isSkipSslValidation());
+					logger.debug("Configured basic security for Metrics Collector endpoint");
+				} else {
+					logger.debug("Not configuring basic security for Metrics Collector endpoint");
+				}
 			}
 			catch (URISyntaxException e) {
 				logger.warn("Could not parse collector URI, stream metrics monitoring will not be available");
@@ -92,6 +105,9 @@ public class MetricStore {
 						HttpMethod.GET, null, new ParameterizedTypeReference<PagedResources<ApplicationsMetrics>>() {
 						}).getBody();
 				metrics = new ArrayList<>(response.getContent());
+				if (logger.isDebugEnabled()) {
+					logger.debug("Metrics = " + metrics);
+				}
 			} catch (Exception e) {
 				logger.warn("Failure while requesting metrics from url " +this.collectorEndpoint + ": " + e.getMessage());
 				if (logger.isDebugEnabled()) {
@@ -107,5 +123,16 @@ public class MetricStore {
 
 	public List<ApplicationsMetrics> defaultMetrics() {
 		return EMPTY_RESPONSE;
+	}
+
+
+	private void validateUsernamePassword(String userName, String password) {
+		if (!StringUtils.isEmpty(password) && StringUtils.isEmpty(userName)) {
+			logger.warn("A password may be specified only together with a username");
+		}
+
+		if (StringUtils.isEmpty(password) && !StringUtils.isEmpty(userName)) {
+			logger.warn("A username may be specified only together with a password");
+		}
 	}
 }

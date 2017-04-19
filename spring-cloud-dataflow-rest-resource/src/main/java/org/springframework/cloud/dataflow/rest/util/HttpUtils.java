@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.cloud.dataflow.shell.command.support;
+package org.springframework.cloud.dataflow.rest.util;
 
 import java.net.URI;
 import java.security.KeyManagementException;
@@ -27,11 +27,8 @@ import javax.net.ssl.SSLContext;
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.AuthCache;
 import org.apache.http.client.HttpClient;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
-import org.apache.http.impl.auth.BasicScheme;
-import org.apache.http.impl.client.BasicAuthCache;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -43,12 +40,12 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
 /**
- * Provides utilities for the Apache {@link HttpClient}, used to make REST calls by the Shell.
+ * Provides utilities for the Apache {@link HttpClient}, used to make REST calls
  *
  * @author Gunnar Hillert
  *
  */
-public class HttpClientUtils {
+public class HttpUtils {
 
 	/**
 	 * Ensures that the passed-in {@link RestTemplate} is using the Apache HTTP Client. If the optional {@code username} AND
@@ -84,7 +81,7 @@ public class HttpClientUtils {
 		}
 
 		if (skipSslValidation) {
-			httpClientBuilder.setSSLContext(HttpClientUtils.buildCertificateIgnoringSslContext());
+			httpClientBuilder.setSSLContext(HttpUtils.buildCertificateIgnoringSslContext());
 			httpClientBuilder.setSSLHostnameVerifier(new NoopHostnameVerifier());
 		}
 
