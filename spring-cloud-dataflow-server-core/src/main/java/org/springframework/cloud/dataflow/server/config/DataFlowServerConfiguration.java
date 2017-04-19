@@ -50,6 +50,8 @@ import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
+import static org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType.HAL;
+
 /**
  * Configuration for the Data Flow Server application context. This includes support for
  * the REST API framework configuration.
