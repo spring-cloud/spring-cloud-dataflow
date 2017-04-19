@@ -463,6 +463,17 @@ In the example above we see that my-compose-task launched and it also launched
 the other tasks in sequential order and all of them executed successfully with
 "Exit Code" as `0`.
 
+===== Exit Statuses
+
+The following list shows how the Exit Status will be set for each step (task)
+contained in the composed task following each step execution.
+
+* If the `TaskExecution` has an `ExitMessage` that will be used as the `ExitStatus`
+* If no `ExitMessage` is present and the `ExitCode` is set to zero then the `ExitStatus`
+for the step will be `COMPLETED`.
+* If no `ExitMessage` is present and the `ExitCode` is set to any non zero number
+then the `ExitStatus` for the step will be `FAILED`.
+
 ==== Destroying a Composed Task
 The same command used to destroy a stand-alone task is the same as destroying a
 composed task.  The only difference is that destroying a composed task will
