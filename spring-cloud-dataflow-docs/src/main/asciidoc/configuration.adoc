@@ -816,6 +816,8 @@ metrics collector app. For example, if you are running the metrics collector loc
 $ java -jar spring-cloud-dataflow-server-local-{project-version}.jar --spring.cloud.dataflow.metrics.collector.uri=http://localhost:8080
 ----
 
+The Metrics Collector can be secured with 'basic' authentication that requires a username and password.  To set the username and password, use the properties `spring.cloud.dataflow.metrics.collector.username` and `spring.cloud.dataflow.metrics.collector.password`.
+
 The metrics
 for each application are published when the property `spring.cloud.stream.bindings.applicationMetrics.destination` is set.  This can be set as any other
 application property when deploying an application in Data Flow.  Since
