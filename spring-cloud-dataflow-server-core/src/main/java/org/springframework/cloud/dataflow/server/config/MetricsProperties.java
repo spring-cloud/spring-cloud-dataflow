@@ -15,6 +15,7 @@
  */
 package org.springframework.cloud.dataflow.server.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.cloud.dataflow.core.DataFlowPropertyKeys;
 
@@ -42,12 +43,42 @@ public class MetricsProperties {
 	public static class Collector {
 		private String uri;
 
+		private String userName;
+
+		private String password;
+
+		private boolean skipSslValidation;
+
 		public String getUri() {
 			return uri;
 		}
 
 		public void setUri(String uri) {
 			this.uri = uri;
+		}
+
+		public String getUserName() {
+			return userName;
+		}
+
+		public void setUserName(String userName) {
+			this.userName = userName;
+		}
+
+		public String getPassword() {
+			return password;
+		}
+
+		public void setPassword(String password) {
+			this.password = password;
+		}
+
+		public boolean isSkipSslValidation() {
+			return skipSslValidation;
+		}
+
+		public void setSkipSslValidation(boolean skipSslValidation) {
+			this.skipSslValidation = skipSslValidation;
 		}
 	}
 }

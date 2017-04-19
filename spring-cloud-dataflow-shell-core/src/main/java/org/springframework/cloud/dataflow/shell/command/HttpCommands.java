@@ -29,8 +29,8 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import org.springframework.cloud.dataflow.rest.util.HttpUtils;
 import org.springframework.cloud.dataflow.shell.Target;
-import org.springframework.cloud.dataflow.shell.command.support.HttpClientUtils;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -104,7 +104,7 @@ public class HttpCommands implements CommandMarker {
 			outputRequest("POST", requestURI, mediaType, data, buffer);
 			final RestTemplate restTemplate = createRestTemplate(buffer);
 
-			HttpClientUtils.prepareRestTemplate(restTemplate, requestURI, targetUsername, targetPassword, skipSslValidation);
+			HttpUtils.prepareRestTemplate(restTemplate, requestURI, targetUsername, targetPassword, skipSslValidation);
 
 			ResponseEntity<String> response = restTemplate.postForEntity(requestURI, request, String.class);
 			outputResponse(response, buffer);
@@ -143,7 +143,7 @@ public class HttpCommands implements CommandMarker {
 
 			final RestTemplate restTemplate = createRestTemplate(buffer);
 
-			HttpClientUtils.prepareRestTemplate(restTemplate, requestURI, targetUsername, targetPassword, skipSslValidation);
+			HttpUtils.prepareRestTemplate(restTemplate, requestURI, targetUsername, targetPassword, skipSslValidation);
 
 			ResponseEntity<String> response = restTemplate.getForEntity(requestURI, String.class);
 			outputResponse(response, buffer);

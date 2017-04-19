@@ -39,9 +39,9 @@ import org.springframework.cloud.dataflow.rest.resource.about.FeatureInfo;
 import org.springframework.cloud.dataflow.rest.resource.about.RuntimeEnvironmentDetails;
 import org.springframework.cloud.dataflow.rest.resource.about.SecurityInfo;
 import org.springframework.cloud.dataflow.rest.resource.security.SecurityInfoResource;
+import org.springframework.cloud.dataflow.rest.util.HttpUtils;
 import org.springframework.cloud.dataflow.shell.Target;
 import org.springframework.cloud.dataflow.shell.TargetHolder;
-import org.springframework.cloud.dataflow.shell.command.support.HttpClientUtils;
 import org.springframework.cloud.dataflow.shell.command.support.RoleType;
 import org.springframework.cloud.dataflow.shell.config.DataFlowShell;
 import org.springframework.context.ApplicationContext;
@@ -186,7 +186,7 @@ public class ConfigCommands implements CommandMarker,
 		try {
 			this.targetHolder.setTarget(new Target(targetUriString, targetUsername, targetPassword, skipSslValidation));
 
-			HttpClientUtils.prepareRestTemplate(this.restTemplate, this.targetHolder.getTarget().getTargetUri(),
+			HttpUtils.prepareRestTemplate(this.restTemplate, this.targetHolder.getTarget().getTargetUri(),
 					targetUsername, targetPassword, skipSslValidation);
 
 			this.shell.setDataFlowOperations(new DataFlowTemplate(targetHolder.getTarget().getTargetUri(), this.restTemplate));
