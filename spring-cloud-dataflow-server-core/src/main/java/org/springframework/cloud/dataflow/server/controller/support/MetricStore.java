@@ -93,8 +93,9 @@ public class MetricStore {
 						}).getBody();
 				metrics = new ArrayList<>(response.getContent());
 			} catch (Exception e) {
+				logger.warn("Failure while requesting metrics from url " +this.collectorEndpoint + ": " + e.getMessage());
 				if (logger.isDebugEnabled()) {
-					logger.debug("Error requesting metrics from url " +this.collectorEndpoint, e);
+					logger.debug("The metrics request failed with", e);
 				}
 				throw e;
 			}
