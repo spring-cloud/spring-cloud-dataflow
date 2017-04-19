@@ -33,6 +33,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.util.StringUtils;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -75,12 +76,12 @@ public class MetricStore {
 				URI uri = new URI(baseURI);
 				this.collectorEndpoint = UriComponentsBuilder.fromUri(uri).path("/collector/metrics/streams").build().toString();
 				logger.info("Metrics Collector URI = [" + collectorEndpoint + "]");
-				validateUsernamePassword(metricsProperties.getCollector().getUserName(),
+				validateUsernamePassword(metricsProperties.getCollector().getUsername(),
 						metricsProperties.getCollector().getPassword());
-				if (StringUtils.hasText(metricsProperties.getCollector().getUserName()) &&
+				if (StringUtils.hasText(metricsProperties.getCollector().getUsername()) &&
 						StringUtils.hasText(metricsProperties.getCollector().getPassword())) {
 					HttpUtils.prepareRestTemplate(this.restTemplate, new URI(collectorEndpoint),
-							metricsProperties.getCollector().getUserName(),
+							metricsProperties.getCollector().getUsername(),
 							metricsProperties.getCollector().getPassword(),
 							metricsProperties.getCollector().isSkipSslValidation());
 					logger.debug("Configured basic security for Metrics Collector endpoint");
@@ -109,9 +110,18 @@ public class MetricStore {
 					logger.debug("Metrics = " + metrics);
 				}
 			} catch (Exception e) {
-				logger.warn("Failure while requesting metrics from url " +this.collectorEndpoint + ": " + e.getMessage());
+				if (e instanceof HttpClientErrorException && e.getMessage().startsWith("401")) {
+					logger.warn(String.format(
+							"Failure while requesting metrics from url '%s': '%s'. "
+									+ "Unauthorized, please provide valid credentials.",
+							this.collectorEndpoint, e.getMessage()));
+				}
+				else {
+					logger.warn(String.format("Failure while requesting metrics from url '%s': %s",
+							this.collectorEndpoint ,e.getMessage()));
+				}
 				if (logger.isDebugEnabled()) {
-					logger.debug("The metrics request failed with", e);
+					logger.debug("The metrics request failed with:", e);
 				}
 				throw e;
 			}
