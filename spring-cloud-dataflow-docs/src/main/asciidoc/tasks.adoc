@@ -520,8 +520,9 @@ via the:
 clicking the restart button by the job execution that needs to be restarted.
 
 NOTE: Restarting a Composed Task job that has been stopped (via the
-Spring Cloud Data Flow Dashboard or RESTful API), will not pick up
-from the `STOPPED` child task, but rather rerun the entire composed task.
+Spring Cloud Data Flow Dashboard or RESTful API), will relaunch  the
+`STOPPED` child task, and then launch the remaining (unlaunched) child tasks
+in the specified order.
 
 === Composed Task DSL
 
