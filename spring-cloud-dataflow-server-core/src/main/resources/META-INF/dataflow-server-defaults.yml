@@ -1,6 +1,15 @@
 management:
   security:
     roles: ADMIN
+logging:
+  level:
+    org.springframework.beans: 'WARN'
+    org.springframework.context: 'WARN'
+    org.springframework.jmx: 'WARN'
+    org.springframework.web: 'WARN'
+    org.springframework.security: 'WARN'
+    org.springframework.integration: 'WARN'
+    org.springframework.boot: 'WARN'
 spring:
   autoconfigure:
     exclude: org.springframework.boot.autoconfigure.session.SessionAutoConfiguration
