@@ -61,6 +61,22 @@
 					</execution>
 				</executions>
 			</plugin>
+			<plugin>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>javadoc</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+						<phase>package</phase>
+					</execution>
+				</executions>
+				<configuration>
+					<quiet>true</quiet>
+					<sourcepath>${basedir}/src/test/java/org/springframework/cloud/dataflow/server/local/dataflowapp</sourcepath>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
 </project>
