@@ -174,6 +174,17 @@ configuration-properties.classes=org.springframework.cloud.stream.app.file.sink.
 configuration-properties.names=server.port
 ```
 
+IMPORTANT: Make sure to add 'spring-boot-configuration-processor' as an optional dependency to generate configuration metadata file for the properties.
+
+```
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-configuration-processor</artifactId>
+    <optional>true</optional>
+</dependency>
+```
+
+
 [IMPORTANT]
 ====
 Make sure to add 'spring-boot-configuration-processor' as an optional dependency to generate configuration metadata file for the properties.
