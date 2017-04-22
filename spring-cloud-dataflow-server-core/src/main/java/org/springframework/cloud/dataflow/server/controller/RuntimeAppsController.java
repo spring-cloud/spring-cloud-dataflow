@@ -236,7 +236,7 @@ public class RuntimeAppsController {
 		}
 
 		@RequestMapping
-		public PagedResources<AppInstanceStatusResource> list(@PathVariable String appId,
+		public PagedResources<AppInstanceStatusResource> list(Pageable pageable, @PathVariable String appId,
 				PagedResourcesAssembler<AppInstanceStatus> assembler) {
 			AppStatus status = appDeployer.status(appId);
 			if (status.getState().equals(DeploymentState.unknown)) {
@@ -244,7 +244,8 @@ public class RuntimeAppsController {
 			}
 			List<AppInstanceStatus> appInstanceStatuses = new ArrayList<>(status.getInstances().values());
 			Collections.sort(appInstanceStatuses, INSTANCE_SORTER);
-			return assembler.toResource(new PageImpl<>(appInstanceStatuses), new InstanceAssembler(status));
+			return assembler.toResource(new PageImpl<>(appInstanceStatuses, pageable,
+					appInstanceStatuses.size()), new InstanceAssembler(status));
 		}
 
 		@RequestMapping("/{instanceId}")

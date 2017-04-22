@@ -85,7 +85,7 @@ public class TaskTemplate implements TaskOperations {
 	@Override
 	public TaskDefinitionResource.Page list() {
 		String uriTemplate = definitionsLink.getHref().toString();
-		uriTemplate = uriTemplate + "?size=10000";
+		uriTemplate = uriTemplate + "?size=2000";
 		return restTemplate.getForObject(uriTemplate, TaskDefinitionResource.Page.class);
 	}
 
