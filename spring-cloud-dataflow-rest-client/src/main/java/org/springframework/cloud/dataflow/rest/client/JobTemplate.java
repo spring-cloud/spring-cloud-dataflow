@@ -95,7 +95,7 @@ public class JobTemplate implements JobOperations {
 	@Override
 	public PagedResources<JobExecutionResource> executionList() {
 		String uriTemplate = executionsLink.getHref().toString();
-		uriTemplate = uriTemplate + "?size=10000";
+		uriTemplate = uriTemplate + "?size=2000";
 
 		return restTemplate.getForObject(uriTemplate, JobExecutionResource.Page.class);
 	}

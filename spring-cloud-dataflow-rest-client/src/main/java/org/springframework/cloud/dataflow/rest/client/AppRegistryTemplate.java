@@ -68,7 +68,7 @@ public class AppRegistryTemplate implements AppRegistryOperations {
 
 	@Override
 	public PagedResources<AppRegistrationResource> list(ApplicationType type) {
-		String uri = uriTemplate + "?size=10000" + ((type == null) ? "" : "&type=" + type.name());
+		String uri = uriTemplate + "?size=2000" + ((type == null) ? "" : "&type=" + type.name());
 		return restTemplate.getForObject(uri, AppRegistrationResource.Page.class);
 	}
 
