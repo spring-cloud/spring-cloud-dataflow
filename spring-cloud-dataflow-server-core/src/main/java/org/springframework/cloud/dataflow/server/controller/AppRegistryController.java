@@ -30,7 +30,6 @@ import java.util.concurrent.ForkJoinPool;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.core.ApplicationType;
@@ -117,6 +116,7 @@ public class AppRegistryController implements ResourceLoaderAware {
 			}
 		}
 		return pagedResourcesAssembler.toResource(pagedRegistrations, this.assembler);
+
 	}
 
 	/**
