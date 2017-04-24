@@ -145,9 +145,20 @@ You can also pass the `--local` option (which is `true` by default) to indicate 
 properties file location should be resolved within the shell process itself. If the location should
 be resolved from the Data Flow Server process, specify `--local false`.
 
-When using either `app register` or `app import`, if a stream app is already registered with
+[WARNING]
+====
+When using either `app register` or `app import`, if an app is already registered with
 the provided name and type, it will not be overridden by default. If you would like to override the
-pre-existing stream app, then include the `--force` option.
+pre-existing app coordinates, then include the `--force` option.
+
+Note however that once downloaded, applications may be cached locally on the Data Flow server, based on the resource
+location. If the resource location doesn't change (even though the actual resource _bytes_ may be different), then it
+won't be re-downloaded. When using `maven://` resources on the other hand, using a constant location still may circumvent
+caching (if using `-SNAPSHOT` versions).
+
+Moreover, if a stream is already deployed and using some version of a registered app, then (forcibly) re-registering a
+different app will have no effect until the stream is deployed anew.
+====
 
 [NOTE]
 In some cases the Resource is resolved on the server side, whereas in others the
