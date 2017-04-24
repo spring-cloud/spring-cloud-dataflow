@@ -97,7 +97,7 @@ public class TaskExecutionController {
 	@ResponseStatus(HttpStatus.OK)
 	public PagedResources<TaskExecutionResource> list(Pageable pageable,
 			PagedResourcesAssembler<TaskJobExecutionRel> assembler) {
-		Page<TaskExecution> taskExecutions = explorer.findAll(pageable);
+		Page<TaskExecution> taskExecutions = this.taskService.findAll(pageable);
 		Page<TaskJobExecutionRel> result = getPageableRelationships(taskExecutions, pageable);
 		return assembler.toResource(result, taskAssembler);
 	}
@@ -118,7 +118,7 @@ public class TaskExecutionController {
 		if (this.taskDefinitionRepository.findOne(taskName) == null) {
 			throw new NoSuchTaskDefinitionException(taskName);
 		}
-		Page<TaskExecution> taskExecutions = explorer.findTaskExecutionsByName(taskName, pageable);
+		Page<TaskExecution> taskExecutions = this.taskService.findTaskExecutionsByName(taskName, pageable);
 		Page<TaskJobExecutionRel> result = getPageableRelationships(taskExecutions, pageable);
 		return assembler.toResource(result, taskAssembler);
 	}
@@ -152,10 +152,7 @@ public class TaskExecutionController {
 	@RequestMapping(value = "/{id}", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
 	public TaskExecutionResource view(@PathVariable("id") long id) {
-		TaskExecution taskExecution = this.explorer.getTaskExecution(id);
-		if(taskExecution == null){
-			throw new NoSuchTaskExecutionException(id);
-		}
+		TaskExecution taskExecution = this.taskService.viewTaskExecution(id);
 		TaskJobExecutionRel taskJobExecutionRel = new TaskJobExecutionRel(taskExecution,
 				new ArrayList<>(explorer.getJobExecutionIdsByTaskExecutionId(
 						taskExecution.getExecutionId())));

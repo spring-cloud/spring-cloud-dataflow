@@ -39,6 +39,7 @@ import org.springframework.cloud.dataflow.server.controller.WhitelistProperties;
 import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
 import org.springframework.cloud.dataflow.server.repository.DeploymentKey;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;
+import org.springframework.cloud.dataflow.server.repository.NoSuchTaskExecutionException;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.TaskService;
 import org.springframework.cloud.deployer.spi.core.AppDefinition;
@@ -49,6 +50,8 @@ import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.cloud.task.repository.TaskRepository;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -239,6 +242,42 @@ public class DefaultTaskService implements TaskService {
 		String launchId = taskExecution.getExternalExecutionId();
 		Assert.hasLength(launchId, "The TaskExecution for id " + id + " did not have an externalExecutionId");
 		taskLauncher.cleanup(launchId);
+	}
+
+	@Override
+	public Page<TaskExecution> findAll(Pageable pageable) {
+		Page<TaskExecution> pagedResult = this.taskExplorer.findAll(pageable);
+		pagedResult.getContent().stream().forEach( taskExecution ->
+					sanitizePotentialSensitiveKeys(taskExecution));
+		return pagedResult;
+	}
+
+	@Override
+	public TaskExecution viewTaskExecution(long id) {
+		TaskExecution taskExecution = this.taskExplorer.getTaskExecution(id);
+		if(taskExecution == null){
+			throw new NoSuchTaskExecutionException(id);
+		}
+		return sanitizePotentialSensitiveKeys(taskExecution);
+	}
+
+	@Override
+	public Page<TaskExecution> findTaskExecutionsByName(String taskName,
+			Pageable pageable){
+		Page<TaskExecution> pagedResult =
+				this.taskExplorer.findTaskExecutionsByName(taskName, pageable);
+		pagedResult.getContent().stream().forEach( taskExecution ->
+				sanitizePotentialSensitiveKeys(taskExecution));
+		return pagedResult;
+	}
+
+	private TaskExecution sanitizePotentialSensitiveKeys(TaskExecution taskExecution) {
+		ArgumentSanitizer argumentSanitizer = new ArgumentSanitizer();
+		List<String> args = taskExecution.getArguments().stream()
+				.map(argument -> (argumentSanitizer.sanitize(argument)))
+				.collect(Collectors.toList());
+		taskExecution.setArguments(args);
+		return taskExecution;
 	}
 
 	private Map<String, String> extractAppProperties(String name, Map<String, String> taskDeploymentProperties) {

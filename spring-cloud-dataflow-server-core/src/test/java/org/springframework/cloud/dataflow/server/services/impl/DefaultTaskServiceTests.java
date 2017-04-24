@@ -19,10 +19,15 @@ package org.springframework.cloud.dataflow.server.services.impl;
 import java.lang.reflect.Method;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+
+import javax.sql.DataSource;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -46,15 +51,22 @@ import org.springframework.cloud.dataflow.server.service.TaskService;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskService;
 import org.springframework.cloud.dataflow.server.service.impl.TaskConfigurationProperties;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
+import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.cloud.task.repository.TaskRepository;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.ReflectionUtils;
 
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -82,6 +94,12 @@ public class DefaultTaskServiceTests {
 
 	private final static String TASK_NAME_ORIG = BASE_TASK_NAME + "_ORIG";
 
+	private final static String TASK_NAME_EXEC_ONE = BASE_TASK_NAME + "_ONE";
+
+	private final static String TASK_NAME_EXEC_TWO = BASE_TASK_NAME + "_TWO";
+
+	private final static String TASK_NAME_EXEC_THREE = BASE_TASK_NAME + "_THREE";
+
 	@Autowired
 	private TaskDefinitionRepository taskDefinitionRepository;
 
@@ -94,6 +112,9 @@ public class DefaultTaskServiceTests {
 	@Autowired
 	private TaskExplorer taskExplorer;
 
+	@Autowired
+	private DataSource dataSource;
+
 	private AppRegistry appRegistry;
 
 	private ResourceLoader resourceLoader;
@@ -104,9 +125,24 @@ public class DefaultTaskServiceTests {
 
 	private TaskService taskService;
 
+	private JdbcTemplate template;
+
+	private List sampleArgumentList;
+
+	private List sampleCleansedArgumentList;
+
+	private boolean initialized = false;
+
+	private Map<Long, TaskExecution> taskExecutionsMap;
+
+	private Pageable defaultPageable;
+
 
 	@Before
 	public void setupMockMVC() {
+		this.template = new JdbcTemplate(dataSource);
+		this.template.execute("DELETE FROM task_execution");
+
 		taskDefinitionRepository.save(new TaskDefinition(TASK_NAME_ORIG, "demo"));
 		appRegistry = mock(AppRegistry.class);
 		resourceLoader = mock(ResourceLoader.class);
@@ -123,13 +159,56 @@ public class DefaultTaskServiceTests {
 						taskLauncher, metadataResolver,
 						new TaskConfigurationProperties(),
 						new InMemoryDeploymentIdRepository(), null);
+
+		if(!this.initialized) {
+			this.initialized = true;
+			this.sampleArgumentList = new LinkedList<String>();
+			this.sampleArgumentList.add("--password=foo");
+			this.sampleArgumentList.add("password=bar");
+			this.sampleArgumentList.add("org.woot.password=baz");
+			this.sampleArgumentList.add("foo.bar=foo");
+			this.sampleArgumentList.add("bar.baz = boo");
+			this.sampleArgumentList.add("foo.credentials.boo=bar");
+			this.sampleArgumentList.add("spring.datasource.username=dbuser");
+			this.sampleArgumentList.add("spring.datasource.password=dbpass");
+
+			this.sampleCleansedArgumentList = new LinkedList<String>();
+			this.sampleCleansedArgumentList.add("--password=******");
+			this.sampleCleansedArgumentList.add("password=******");
+			this.sampleCleansedArgumentList.add("org.woot.password=******");
+			this.sampleCleansedArgumentList.add("foo.bar=foo");
+			this.sampleCleansedArgumentList.add("bar.baz = boo");
+			this.sampleCleansedArgumentList.add("foo.credentials.boo=******");
+			this.sampleCleansedArgumentList.add("spring.datasource.username=dbuser");
+			this.sampleCleansedArgumentList.add("spring.datasource.password=******");
+
+			this.defaultPageable = new PageRequest(0, 10);
+			this.taskExecutionsMap = new HashMap<>();
+			this.taskExecutionsMap.put(1L,  new TaskExecution(1L,
+					0, TASK_NAME_EXEC_ONE, new Date(), null, null,
+					new LinkedList<>(), null, "EXTERNAL_EXEC_ID", 45L));
+
+			this.taskExecutionsMap.put(2L,  new TaskExecution(2L,
+					0, TASK_NAME_EXEC_TWO, new Date(), null, null,
+					this.sampleArgumentList, null, "EXTERNAL_EXEC_ID", 45L));
+
+			this.taskExecutionsMap.put(3L,  new TaskExecution(3L,
+					0, TASK_NAME_EXEC_THREE, new Date(), null, null,
+					new LinkedList<>(), null, "EXTERNAL_EXEC_ID", 45L));
+			
+			this.taskExecutionsMap = Collections.unmodifiableMap(this.taskExecutionsMap);
+		}
+
+		this.taskExecutionRepository.createTaskExecution(this.taskExecutionsMap.get(1L));
+		this.taskExecutionRepository.createTaskExecution(this.taskExecutionsMap.get(2L));
+		this.taskExecutionRepository.createTaskExecution(this.taskExecutionsMap.get(3L));
 	}
 
 	@Test
 	@DirtiesContext
 	public void executeSingleTaskTest() {
 		when(taskLauncher.launch(anyObject())).thenReturn("0");
-		assertEquals(0L, taskService.executeTask(TASK_NAME_ORIG,
+		assertEquals(4L, this.taskService.executeTask(TASK_NAME_ORIG,
 				new HashMap<>(), new LinkedList<>()));
 	}
 
@@ -137,10 +216,93 @@ public class DefaultTaskServiceTests {
 	@DirtiesContext
 	public void executeMultipleTasksTest() {
 		when(taskLauncher.launch(anyObject())).thenReturn("0");
-		assertEquals(0L, taskService.executeTask(TASK_NAME_ORIG,
+		assertEquals(4L, this.taskService.executeTask(TASK_NAME_ORIG,
 				new HashMap<>(), new LinkedList<>()));
-		assertEquals(1L, taskService.executeTask(TASK_NAME_ORIG,
+		assertEquals(5L, this.taskService.executeTask(TASK_NAME_ORIG,
 				new HashMap<>(), new LinkedList<>()));
+	}
+
+	@Test
+	@DirtiesContext
+	public void viewTaskExecutionWithArgs() {
+		final long EXECUTION_ID = 2L;
+		TaskExecution actual = this.taskService.viewTaskExecution(EXECUTION_ID);
+		verifyTaskExecution(this.taskExecutionsMap.get(EXECUTION_ID), actual,
+				this.sampleCleansedArgumentList);
+	}
+
+	@Test
+	@DirtiesContext
+	public void viewTaskExecutionWithEmptyArg() {
+		final long EXECUTION_ID = 1L;
+		TaskExecution actual = this.taskService.viewTaskExecution(EXECUTION_ID);
+		verifyTaskExecution(this.taskExecutionsMap.get(EXECUTION_ID), actual,
+				new LinkedList<>());
+	}
+
+	@Test
+	@DirtiesContext
+	public void findAllTests() {
+		Page<TaskExecution> taskExecutions =
+				this.taskService.findAll(this.defaultPageable);
+		Iterator<TaskExecution> taskExecutionIterator = taskExecutions.iterator();
+		while(taskExecutionIterator.hasNext()) {
+			TaskExecution actual = taskExecutionIterator.next();
+			verifyTaskExecution(this.taskExecutionsMap.get(actual.getExecutionId()),
+					actual, (actual.getExecutionId() == 2L) ?
+							this.sampleCleansedArgumentList : new LinkedList<>());
+		}
+	}
+
+	@Test
+	@DirtiesContext
+	public void findTaskExecutionsByNameTests() {
+		verifyFindByName(TASK_NAME_EXEC_ONE, 1L, new LinkedList<>());
+		verifyFindByName(TASK_NAME_EXEC_TWO, 2L, this.sampleCleansedArgumentList);
+		verifyFindByName(TASK_NAME_EXEC_THREE, 3L, new LinkedList<>());
+	}
+
+	private void verifyFindByName(String taskName, long expectedExecutionId, List<String> expectedArgList) {
+		Page<TaskExecution> taskExecutions =
+				this.taskService.findTaskExecutionsByName(taskName,
+						this.defaultPageable);
+		List<TaskExecution> taskExecutionList = taskExecutions.getContent();
+		assertThat(taskExecutionList.size(), is(1));
+		verifyTaskExecution(this.taskExecutionsMap.get(expectedExecutionId),
+				taskExecutionList.get(0), expectedArgList);
+	}
+
+	private void verifyTaskExecution(TaskExecution expected,
+			TaskExecution actual, List<String> expectedArgList) {
+		assertThat(actual, notNullValue());
+		assertThat(expected, notNullValue());
+		assertThat(actual.getExecutionId(),is(expected.getExecutionId()));
+
+		if(expected.getEndTime() == null) {
+			assertThat(actual.getEndTime(), nullValue());
+		}
+		else {
+			assertThat(actual.getEndTime().getTime(), is(expected.getEndTime().getTime()));
+		}
+		if(expected.getStartTime() == null) {
+			assertThat(actual.getStartTime(), nullValue());
+		}
+		else {
+			assertThat(actual.getStartTime().getTime(), is(expected.getStartTime().getTime()));
+		}
+		assertThat(actual.getExitCode(), is(expected.getExitCode()));
+		assertThat(actual.getExitMessage(), is(expected.getExitMessage()));
+		assertThat(actual.getErrorMessage(), is(expected.getErrorMessage()));
+		assertThat(actual.getParentExecutionId(),
+				is(expected.getParentExecutionId()));
+		assertThat(actual.getExternalExecutionId(),
+				is(expected.getExternalExecutionId()));
+
+		assertThat(actual.getArguments().size(),
+				is(expected.getArguments().size()));
+		expectedArgList.stream().forEach(
+				expectedArg -> assertThat(actual.getArguments()
+						.contains(expectedArg),is(true)));
 	}
 
 	@Test
