@@ -19,6 +19,7 @@ package org.springframework.cloud.dataflow.server.controller;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.cloud.dataflow.rest.job.TaskJobExecutionRel;
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionResource;
@@ -27,6 +28,7 @@ import org.springframework.cloud.dataflow.server.repository.NoSuchTaskExecutionE
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
 import org.springframework.cloud.dataflow.server.service.TaskService;
+import org.springframework.cloud.dataflow.server.controller.support.ArgumentSanitizer;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.data.domain.Page;
@@ -60,12 +62,13 @@ public class TaskExecutionController {
 
 	private final Assembler taskAssembler = new Assembler();
 
-
 	private final TaskService taskService;
 
 	private final TaskExplorer explorer;
 
 	private final TaskDefinitionRepository taskDefinitionRepository;
+
+	private final ArgumentSanitizer argumentSanitizer = new ArgumentSanitizer();
 
 	/**
 	 * Creates a {@code TaskExecutionController} that retrieves Task Execution information
@@ -97,9 +100,9 @@ public class TaskExecutionController {
 	@ResponseStatus(HttpStatus.OK)
 	public PagedResources<TaskExecutionResource> list(Pageable pageable,
 			PagedResourcesAssembler<TaskJobExecutionRel> assembler) {
-		Page<TaskExecution> taskExecutions = explorer.findAll(pageable);
+		Page<TaskExecution> taskExecutions = this.explorer.findAll(pageable);
 		Page<TaskJobExecutionRel> result = getPageableRelationships(taskExecutions, pageable);
-		return assembler.toResource(result, taskAssembler);
+		return assembler.toResource(result, this.taskAssembler);
 	}
 
 	/**
@@ -118,9 +121,9 @@ public class TaskExecutionController {
 		if (this.taskDefinitionRepository.findOne(taskName) == null) {
 			throw new NoSuchTaskDefinitionException(taskName);
 		}
-		Page<TaskExecution> taskExecutions = explorer.findTaskExecutionsByName(taskName, pageable);
+		Page<TaskExecution> taskExecutions = this.explorer.findTaskExecutionsByName(taskName, pageable);
 		Page<TaskJobExecutionRel> result = getPageableRelationships(taskExecutions, pageable);
-		return assembler.toResource(result, taskAssembler);
+		return assembler.toResource(result, this.taskAssembler);
 	}
 
 	/**
@@ -156,10 +159,11 @@ public class TaskExecutionController {
 		if(taskExecution == null){
 			throw new NoSuchTaskExecutionException(id);
 		}
+		taskExecution = sanitizePotentialSensitiveKeys(taskExecution);
 		TaskJobExecutionRel taskJobExecutionRel = new TaskJobExecutionRel(taskExecution,
-				new ArrayList<>(explorer.getJobExecutionIdsByTaskExecutionId(
+				new ArrayList<>(this.explorer.getJobExecutionIdsByTaskExecutionId(
 						taskExecution.getExecutionId())));
-		return taskAssembler.toResource(taskJobExecutionRel);
+		return this.taskAssembler.toResource(taskJobExecutionRel);
 	}
 
 	/**
@@ -201,10 +205,19 @@ public class TaskExecutionController {
 	private Page<TaskJobExecutionRel> getPageableRelationships(Page<TaskExecution> taskExecutions, Pageable pageable){
 		List<TaskJobExecutionRel> taskJobExecutionRels = new ArrayList<>();
 		for(TaskExecution taskExecution: taskExecutions.getContent()) {
-			taskJobExecutionRels.add( new TaskJobExecutionRel(taskExecution,
-					new ArrayList<>(explorer.getJobExecutionIdsByTaskExecutionId(
+			taskJobExecutionRels.add( new TaskJobExecutionRel(sanitizePotentialSensitiveKeys(taskExecution),
+					new ArrayList<>(this.explorer.getJobExecutionIdsByTaskExecutionId(
 							taskExecution.getExecutionId()))));
 		}
 		return new PageImpl<>(taskJobExecutionRels,pageable,taskExecutions.getTotalElements());
 	}
+
+	private TaskExecution sanitizePotentialSensitiveKeys(TaskExecution taskExecution) {
+		List<String> args = taskExecution.getArguments().stream()
+				.map(argument -> (this.argumentSanitizer.sanitize(argument)))
+				.collect(Collectors.toList());
+		taskExecution.setArguments(args);
+		return taskExecution;
+	}
+
 }

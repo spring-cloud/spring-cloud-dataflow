@@ -104,7 +104,6 @@ public class DefaultTaskServiceTests {
 
 	private TaskService taskService;
 
-
 	@Before
 	public void setupMockMVC() {
 		taskDefinitionRepository.save(new TaskDefinition(TASK_NAME_ORIG, "demo"));
@@ -129,7 +128,7 @@ public class DefaultTaskServiceTests {
 	@DirtiesContext
 	public void executeSingleTaskTest() {
 		when(taskLauncher.launch(anyObject())).thenReturn("0");
-		assertEquals(0L, taskService.executeTask(TASK_NAME_ORIG,
+		assertEquals(1L, this.taskService.executeTask(TASK_NAME_ORIG,
 				new HashMap<>(), new LinkedList<>()));
 	}
 
@@ -137,9 +136,9 @@ public class DefaultTaskServiceTests {
 	@DirtiesContext
 	public void executeMultipleTasksTest() {
 		when(taskLauncher.launch(anyObject())).thenReturn("0");
-		assertEquals(0L, taskService.executeTask(TASK_NAME_ORIG,
+		assertEquals(1L, this.taskService.executeTask(TASK_NAME_ORIG,
 				new HashMap<>(), new LinkedList<>()));
-		assertEquals(1L, taskService.executeTask(TASK_NAME_ORIG,
+		assertEquals(2L, this.taskService.executeTask(TASK_NAME_ORIG,
 				new HashMap<>(), new LinkedList<>()));
 	}
 
