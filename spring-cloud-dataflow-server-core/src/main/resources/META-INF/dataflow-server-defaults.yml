@@ -10,6 +10,8 @@ logging:
     org.springframework.security: 'WARN'
     org.springframework.integration: 'WARN'
     org.springframework.boot: 'WARN'
+    # The following INFO is to log the generated password when using basic security
+    org.springframework.boot.autoconfigure.security: 'INFO'
 spring:
   autoconfigure:
     exclude: org.springframework.boot.autoconfigure.session.SessionAutoConfiguration
