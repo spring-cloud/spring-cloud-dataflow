@@ -170,3 +170,31 @@ These properties can also be specified via `deployment` properties when deployin
 ----
 dataflow:>stream deploy foo --properties "app.*.logging.level.org.springframework.integration=DEBUG"
 ----
+
+=== Advanced SpEL expressions with stream
+
+One of the powerful features of SpEL expressions is http://docs.spring.io/spring/docs/current/spring-framework-reference/html/expressions.html#expressions-ref-functions[functions].
+Spring Integration provides `jsonPath()` and `xpath()` out-of-the-box http://docs.spring.io/spring-integration/reference/html/spel.html#spel-functions[SpEL-functions], if appropriate libraries are in the classpath.
+All the provided Spring Cloud Stream application starters are supplied with the `json-path` and `spring-integration-xml` jars, thus we can use those SpEL-functions in Spring Cloud Data Flow streams whenever expressions are possible.
+For example we can transform JSON-aware `payload` from the HTTP request using some `jsonPath()` expression:
+
+[source,bash]
+----
+dataflow:>stream create jsonPathTransform --definition "http | transform --expression=#jsonPath(payload,'$.price') | log" --deploy
+...
+dataflow:> http post --target http://localhost:8080 --data {"symbol":"SCDF","price":72.04}
+dataflow:> http post --target http://localhost:8080 --data {"symbol":"SCDF","price":72.06}
+dataflow:> http post --target http://localhost:8080 --data {"symbol":"SCDF","price":72.08}
+----
+In this sample we apply jsonPath for the incoming payload to extract just only the `price` field value.
+Similar syntax can be used with `splitter` or `filter` `expression` options.
+Actually any available SpEL-based option has access to the built-in SpEL-functions.
+For example we can extract some value from JSON data to calculate the `partitionKey` before sending output to the Binder:
+
+[source,bash]
+----
+dataflow:>stream deploy foo --properties "deployer.transform.count=2,app.transform.producer.partitionKeyExpression=#jsonPath(payload,'$.symbol')"
+----
+The same syntax can be applied for `xpath()` SpEL-function when you deal with XML data.
+Any other custom SpEL-function can also be used, but for this purpose you should build a library with the `@Configuration` class containing an appropriate `SpelFunctionFactoryBean` `@Bean` definition.
+The target Spring Cloud Stream application starter should be re-packaged to supply such a custom extension via built-in Spring Boot `@ComponentScan` mechanism or auto-configuration hook.
