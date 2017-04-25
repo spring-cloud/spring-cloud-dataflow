@@ -31,6 +31,7 @@ import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
@@ -238,10 +239,9 @@ public class StreamDefinitionController {
 	 */
 	@RequestMapping(value = "/{name}/related", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
-	public PagedResources<StreamDefinitionResource> listRelated(Pageable pageable,
-			@PathVariable("name") String name,
-			@RequestParam(value = "nested", required = false, defaultValue = "false") boolean nested,
-			PagedResourcesAssembler<StreamDefinition> assembler) {
+	public PagedResources<StreamDefinitionResource> listRelated(@PathVariable("name") String name,
+																@RequestParam(value="nested", required = false, defaultValue = "false") boolean nested,
+																PagedResourcesAssembler<StreamDefinition> assembler) {
 		Set<StreamDefinition> relatedDefinitions = new LinkedHashSet<>();
 		StreamDefinition currentStreamDefinition = repository.findOne(name);
 		if (currentStreamDefinition == null) {
@@ -250,8 +250,7 @@ public class StreamDefinitionController {
 		Iterable<StreamDefinition> definitions = repository.findAll();
 		List<StreamDefinition> result = new ArrayList<>(findRelatedDefinitions(currentStreamDefinition, definitions,
 				relatedDefinitions, nested));
-		Page<StreamDefinition> page = new PageImpl<>(result, pageable,
-				definitions.spliterator().getExactSizeIfKnown());
+		Page<StreamDefinition> page = new PageImpl<>(result);
 		return assembler.toResource(page, new Assembler(page));
 	}
 

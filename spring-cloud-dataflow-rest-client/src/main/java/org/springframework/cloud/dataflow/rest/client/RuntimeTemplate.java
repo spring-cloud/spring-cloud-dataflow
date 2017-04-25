@@ -51,7 +51,7 @@ public class RuntimeTemplate implements RuntimeOperations {
 	@Override
 	public PagedResources<AppStatusResource> status() {
 		String uriTemplate = appStatusesUriTemplate.expand().getHref();
-		uriTemplate = uriTemplate + "?size=2000";
+		uriTemplate = uriTemplate + "?size=10000";
 		return restTemplate.getForObject(uriTemplate, AppStatusResource.Page.class);
 	}
 
