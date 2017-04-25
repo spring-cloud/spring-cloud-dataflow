@@ -118,7 +118,7 @@ public class AppRegistryController implements ResourceLoaderAware {
 		}
 		Collections.sort(list);
 		return pagedResourcesAssembler
-				.toResource(new PageImpl<>(list, pageable, appRegistry.findAll().size()), assembler);
+				.toResource(new PageImpl<>(list, pageable, list.size()), assembler);
 	}
 
 	/**
