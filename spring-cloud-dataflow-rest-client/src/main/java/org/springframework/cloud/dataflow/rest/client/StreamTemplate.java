@@ -69,7 +69,7 @@ public class StreamTemplate implements StreamOperations {
 	@Override
 	public StreamDefinitionResource.Page list() {
 		String uriTemplate = definitionsLink.expand().getHref();
-		uriTemplate = uriTemplate + "?size=10000";
+		uriTemplate = uriTemplate + "?size=2000";
 		return restTemplate.getForObject(uriTemplate, StreamDefinitionResource.Page.class);
 	}
 
