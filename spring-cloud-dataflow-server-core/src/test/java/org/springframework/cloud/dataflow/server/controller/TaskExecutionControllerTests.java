@@ -16,8 +16,9 @@
 
 package org.springframework.cloud.dataflow.server.controller;
 
-import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -45,6 +46,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
@@ -105,17 +107,41 @@ public class TaskExecutionControllerTests {
 	@Autowired
 	private TaskLauncher taskLauncher;
 
+	private static List sampleArgumentList;
+
+	private static List sampleCleansedArgumentList;
+
 	@Before
 	public void setupMockMVC() {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(wac).defaultRequest(
 				get("/").accept(MediaType.APPLICATION_JSON)).build();
 		if (!initialized) {
+			this.sampleArgumentList = new LinkedList<String>();
+			this.sampleArgumentList.add("--password=foo");
+			this.sampleArgumentList.add("password=bar");
+			this.sampleArgumentList.add("org.woot.password=baz");
+			this.sampleArgumentList.add("foo.bar=foo");
+			this.sampleArgumentList.add("bar.baz = boo");
+			this.sampleArgumentList.add("foo.credentials.boo=bar");
+			this.sampleArgumentList.add("spring.datasource.username=dbuser");
+			this.sampleArgumentList.add("spring.datasource.password=dbpass");
+
+			this.sampleCleansedArgumentList = new LinkedList<String>();
+			this.sampleCleansedArgumentList.add("--password=******");
+			this.sampleCleansedArgumentList.add("password=******");
+			this.sampleCleansedArgumentList.add("org.woot.password=******");
+			this.sampleCleansedArgumentList.add("foo.bar=foo");
+			this.sampleCleansedArgumentList.add("bar.baz = boo");
+			this.sampleCleansedArgumentList.add("foo.credentials.boo=******");
+			this.sampleCleansedArgumentList.add("spring.datasource.username=dbuser");
+			this.sampleCleansedArgumentList.add("spring.datasource.password=******");
+
 			taskDefinitionRepository.save(new TaskDefinition(TASK_NAME_ORIG, "demo"));
-			dao.createTaskExecution(TASK_NAME_ORIG, new Date(), new ArrayList<>(), "foobar");
-			dao.createTaskExecution(TASK_NAME_ORIG, new Date(), new ArrayList<>(), null);
-			dao.createTaskExecution(TASK_NAME_FOO, new Date(), new ArrayList<>(), null);
+			dao.createTaskExecution(TASK_NAME_ORIG, new Date(), this.sampleArgumentList, "foobar");
+			dao.createTaskExecution(TASK_NAME_ORIG, new Date(), this.sampleArgumentList, null);
+			dao.createTaskExecution(TASK_NAME_FOO, new Date(), this.sampleArgumentList, null);
 			TaskExecution taskExecution = dao.createTaskExecution(TASK_NAME_FOOBAR,
-					new Date(), new ArrayList<>(), null);
+					new Date(), this.sampleArgumentList, null);
 			JobInstance instance = jobRepository.createJobInstance(TASK_NAME_FOOBAR,
 					new JobParameters());
 			JobExecution jobExecution = jobRepository.createJobExecution(
@@ -150,11 +176,11 @@ public class TaskExecutionControllerTests {
 
 	@Test
 	public void testGetExecution() throws Exception{
-		mockMvc.perform(
+		verifyTaskArgs(sampleCleansedArgumentList, "", mockMvc.perform(
 				get("/tasks/executions/1").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
 				.andExpect(content().json("{taskName: \"" + TASK_NAME_ORIG + "\"}"))
-				.andExpect(jsonPath("jobExecutionIds", hasSize(0)));
+				.andExpect(jsonPath("jobExecutionIds", hasSize(0))));
 	}
 
 	@Test
@@ -169,24 +195,25 @@ public class TaskExecutionControllerTests {
 
 	@Test
 	public void testGetAllExecutions() throws Exception{
-		mockMvc.perform(
-				get("/tasks/executions/").accept(MediaType.APPLICATION_JSON)
-		).andExpect(status().isOk())
+		verifyTaskArgs(this.sampleCleansedArgumentList, "$.content[0].",mockMvc.perform(
+				get("/tasks/executions/").accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.content[*].executionId",
 						containsInAnyOrder(4, 3, 2, 1)))
-				.andExpect(jsonPath("$.content", hasSize(4)));
+				.andExpect(jsonPath("$.content", hasSize(4))));
 	}
 
 	@Test
 	public void testGetExecutionsByName() throws Exception{
-		mockMvc.perform(
-				get("/tasks/executions/").param("name", TASK_NAME_ORIG).accept(MediaType.APPLICATION_JSON)
-		).andExpect(status().isOk())
+		verifyTaskArgs(this.sampleCleansedArgumentList, "$.content[0].", mockMvc.perform(
+				get("/tasks/executions/").param("name", TASK_NAME_ORIG)
+						.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.content[0].taskName", is(TASK_NAME_ORIG)))
 				.andExpect(jsonPath("$.content[1].taskName", is(TASK_NAME_ORIG)))
 				.andExpect(jsonPath("$.content[0].jobExecutionIds", hasSize(0)))
 				.andExpect(jsonPath("$.content[1].jobExecutionIds", hasSize(0)))
-				.andExpect(jsonPath("$.content", hasSize(2)));
+				.andExpect(jsonPath("$.content", hasSize(2))));
 	}
 
 	@Test
@@ -212,5 +239,13 @@ public class TaskExecutionControllerTests {
 			delete("/tasks/executions/10")
 		).andExpect(status().is(404))
 		.andReturn().getResponse().getContentAsString().contains("NoSuchTaskExecutionException");
+	}
+
+	private ResultActions verifyTaskArgs(List<String> expectedArgs, String prefix, ResultActions ra) throws Exception{
+		ra.andExpect(jsonPath(prefix + "arguments", hasSize(expectedArgs.size())));
+		for (int argCount = 0 ; argCount < expectedArgs.size(); argCount++) {
+			ra.andExpect(jsonPath(String.format(prefix + "arguments[%d]", argCount), is(expectedArgs.get(argCount))));
+		}
+		return ra;
 	}
 }

@@ -18,10 +18,6 @@ package org.springframework.cloud.dataflow.server.service;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.cloud.task.repository.TaskExecution;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-
 /**
  * Provides Task related services.
  *
@@ -74,34 +70,5 @@ public interface TaskService {
 	 * @return true if it is composed task definition else false.
 	 */
 	boolean isComposedDefinition(String dsl) ;
-
-	/**
-	 * Returns a {@link TaskExecution} for the taskExecution. Arguments with
-	 * potentially sensitive information will be redacted.
-	 *
-	 * @param id of the {@link TaskExecution} to be returned.
-	 * @return the {@link TaskExecution} for the id.
-	 */
-	TaskExecution viewTaskExecution(long id);
-
-	/**
-	 * Retrieves all the task executions within the pageable constraints sorted
-	 * by start date descending, taskExecution id descending.  Arguments with
-	 * potentially sensitive information will be redacted.
-	 *
-	 * @param pageable the constraints for the search
-	 * @return page containing the results from the search
-	 */
-	Page<TaskExecution> findAll(Pageable pageable);
-
-	/**
-	 * Get a collection/page of executions.  Arguments with potentially
-	 * sensitive information will be redacted.
-	 *
-	 * @param taskName the name of the task to be searched
-	 * @param pageable the constraints for the search
-	 * @return list of task executions
-	 */
-	Page<TaskExecution> findTaskExecutionsByName(String taskName, Pageable pageable);
 
 }
