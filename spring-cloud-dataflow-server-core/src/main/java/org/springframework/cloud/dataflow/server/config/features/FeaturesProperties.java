@@ -19,48 +19,49 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.cloud.dataflow.core.DataFlowPropertyKeys;
 
 /**
- * Configuration properties for all the features that need to be enabled/disabled at the dataflow server.
+ * Configuration properties for all the features that need to be enabled/disabled at the
+ * dataflow server.
  *
  * @author Ilayaperumal Gopinathan
  */
 @ConfigurationProperties(prefix = FeaturesProperties.FEATURES_PREFIX)
 public class FeaturesProperties {
 
-    public static final String FEATURES_PREFIX = DataFlowPropertyKeys.PREFIX + "features";
+	public static final String FEATURES_PREFIX = DataFlowPropertyKeys.PREFIX + "features";
 
-    public static final String STREAMS_ENABLED = "streams-enabled";
+	public static final String STREAMS_ENABLED = "streams-enabled";
 
-    public static final String TASKS_ENABLED = "tasks-enabled";
+	public static final String TASKS_ENABLED = "tasks-enabled";
 
-    public static final String ANALYTICS_ENABLED = "analytics-enabled";
+	public static final String ANALYTICS_ENABLED = "analytics-enabled";
 
-    private boolean analyticsEnabled = true;
+	private boolean analyticsEnabled = true;
 
-    private boolean streamsEnabled = true;
+	private boolean streamsEnabled = true;
 
-    private boolean tasksEnabled = true;
+	private boolean tasksEnabled = true;
 
-    public boolean isAnalyticsEnabled() {
-        return this.analyticsEnabled;
-    }
+	public boolean isAnalyticsEnabled() {
+		return this.analyticsEnabled;
+	}
 
-    public void setAnalyticsEnabled(boolean analyticsEnabled) {
-        this.analyticsEnabled = analyticsEnabled;
-    }
+	public void setAnalyticsEnabled(boolean analyticsEnabled) {
+		this.analyticsEnabled = analyticsEnabled;
+	}
 
-    public boolean isStreamsEnabled() {
-        return this.streamsEnabled;
-    }
+	public boolean isStreamsEnabled() {
+		return this.streamsEnabled;
+	}
 
-    public void setStreamsEnabled(boolean streamsEnabled) {
-        this.streamsEnabled = streamsEnabled;
-    }
+	public void setStreamsEnabled(boolean streamsEnabled) {
+		this.streamsEnabled = streamsEnabled;
+	}
 
-    public boolean isTasksEnabled() {
-        return this.tasksEnabled;
-    }
+	public boolean isTasksEnabled() {
+		return this.tasksEnabled;
+	}
 
-    public void setTasksEnabled(boolean tasksEnabled) {
-        this.tasksEnabled = tasksEnabled;
-    }
+	public void setTasksEnabled(boolean tasksEnabled) {
+		this.tasksEnabled = tasksEnabled;
+	}
 }

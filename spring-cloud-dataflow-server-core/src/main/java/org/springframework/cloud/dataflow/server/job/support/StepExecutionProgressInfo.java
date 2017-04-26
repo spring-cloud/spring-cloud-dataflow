@@ -20,8 +20,8 @@ import java.util.Arrays;
 import java.util.Date;
 
 import org.springframework.batch.core.StepExecution;
-import org.springframework.cloud.dataflow.rest.job.StepExecutionHistory;
 import org.springframework.cloud.dataflow.rest.job.CumulativeHistory;
+import org.springframework.cloud.dataflow.rest.job.StepExecutionHistory;
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.util.StringUtils;
@@ -36,52 +36,14 @@ import org.springframework.util.StringUtils;
  */
 public class StepExecutionProgressInfo {
 
-	private enum PercentCompleteBasis {
-
-		UNKNOWN("unknown"), NOINFORMATION(
-				"percent.no.information,no.information", "no information"), ENDTIME(
-				"percent.end.time,end.time", "end time (already finished)"), DURATION(
-				"percent.duration,duration", "extrapolated duration"), READCOUNT(
-				"percent.read.count,read.count", "extrapolated read count"), NOHISTORY(
-				"percent.no.history,no.history", "no history");
-
-		private final String[] codes;
-
-		private final String message;
-
-		private PercentCompleteBasis(String code) {
-			this(code, code);
-		}
-
-		private PercentCompleteBasis(String codes, String message) {
-			this(StringUtils.commaDelimitedListToStringArray(codes), message);
-		}
-
-		private PercentCompleteBasis(String[] code, String message) {
-			this.codes = Arrays.copyOf(code, code.length);
-			this.message = message;
-		}
-
-		public MessageSourceResolvable getMessage() {
-			return new DefaultMessageSourceResolvable(codes, message);
-		}
-
-	}
-
 	private final StepExecution stepExecution;
-
 	private final StepExecutionHistory stepExecutionHistory;
-
 	private double duration = 0;
-
 	private double percentageComplete = 0.5;
-
 	private boolean isFinished = false;
-
 	private PercentCompleteBasis percentCompleteBasis = PercentCompleteBasis.UNKNOWN;
 
-	public StepExecutionProgressInfo(StepExecution stepExecution,
-			StepExecutionHistory stepExecutionHistory) {
+	public StepExecutionProgressInfo(StepExecution stepExecution, StepExecutionHistory stepExecutionHistory) {
 		this.stepExecution = stepExecution;
 		this.stepExecutionHistory = stepExecutionHistory;
 		Date startTime = stepExecution.getStartTime();
@@ -101,16 +63,13 @@ public class StepExecutionProgressInfo {
 
 	public MessageSourceResolvable getEstimatedPercentCompleteMessage() {
 
-		String defaultMessage = String
-				.format(
-						"This execution is estimated to be %.0f%% complete after %.0f ms based on %s",
-						percentageComplete * 100, duration,
-						percentCompleteBasis.getMessage().getDefaultMessage());
+		String defaultMessage = String.format(
+				"This execution is estimated to be %.0f%% complete after %.0f ms based on %s", percentageComplete * 100,
+				duration, percentCompleteBasis.getMessage().getDefaultMessage());
 
 		DefaultMessageSourceResolvable message = new DefaultMessageSourceResolvable(
 				new String[] { "step.execution.estimated.progress" },
-				new Object[] { percentageComplete, duration,
-						percentCompleteBasis.getMessage() }, defaultMessage);
+				new Object[] { percentageComplete, duration, percentCompleteBasis.getMessage() }, defaultMessage);
 
 		return message;
 
@@ -173,5 +132,35 @@ public class StepExecutionProgressInfo {
 
 	public StepExecutionHistory getStepExecutionHistory() {
 		return stepExecutionHistory;
+	}
+
+	private enum PercentCompleteBasis {
+
+		UNKNOWN("unknown"), NOINFORMATION("percent.no.information,no.information", "no information"), ENDTIME(
+				"percent.end.time,end.time", "end time (already finished)"), DURATION("percent.duration,duration",
+						"extrapolated duration"), READCOUNT("percent.read.count,read.count",
+								"extrapolated read count"), NOHISTORY("percent.no.history,no.history", "no history");
+
+		private final String[] codes;
+
+		private final String message;
+
+		private PercentCompleteBasis(String code) {
+			this(code, code);
+		}
+
+		private PercentCompleteBasis(String codes, String message) {
+			this(StringUtils.commaDelimitedListToStringArray(codes), message);
+		}
+
+		private PercentCompleteBasis(String[] code, String message) {
+			this.codes = Arrays.copyOf(code, code.length);
+			this.message = message;
+		}
+
+		public MessageSourceResolvable getMessage() {
+			return new DefaultMessageSourceResolvable(codes, message);
+		}
+
 	}
 }

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,9 +21,8 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Parser for generating {@link AppNode AppNodes} from {@link Tokens}.
- * This class may serve as a base for higher level app processing, for instance
- * streams or tasks.
+ * Parser for generating {@link AppNode AppNodes} from {@link Tokens}. This class may
+ * serve as a base for higher level app processing, for instance streams or tasks.
  *
  * @author Andy Clement
  * @author Patrick Peralta
@@ -55,11 +54,9 @@ public class AppParser {
 	}
 
 	/**
-	 * Return a {@link AppNode} from the next token and advance
-	 * the token position.
+	 * Return a {@link AppNode} from the next token and advance the token position.
 	 * <p>
-	 * Expected format:
-	 * {@code app: [label':']? identifier (appArguments)*}
+	 * Expected format: {@code app: [label':']? identifier (appArguments)*}
 	 * </p>
 	 *
 	 * @return an app node resulting from the next token
@@ -68,8 +65,7 @@ public class AppParser {
 		Token label = null;
 		if (tokens.peek(TokenKind.COLON)) {
 			if (tokens.getTokenStream().size() == 1) {
-				tokens.raiseException(tokens.peek().startPos,
-						DSLMessage.EXPECTED_STREAM_NAME_AFTER_LABEL_COLON);
+				tokens.raiseException(tokens.peek().startPos, DSLMessage.EXPECTED_STREAM_NAME_AFTER_LABEL_COLON);
 			}
 		}
 		Token name = tokens.next();
@@ -79,13 +75,11 @@ public class AppParser {
 		}
 		if (tokens.peek(TokenKind.COLON)) {
 			if (!tokens.isNextAdjacent()) {
-				tokens.raiseException(tokens.peek().startPos,
-						DSLMessage.NO_WHITESPACE_BETWEEN_LABEL_NAME_AND_COLON);
+				tokens.raiseException(tokens.peek().startPos, DSLMessage.NO_WHITESPACE_BETWEEN_LABEL_NAME_AND_COLON);
 			}
 			tokens.next(); // swallow colon
 			if (tokens.isNextAdjacent()) {
-				tokens.raiseException(tokens.peek().startPos,
-						DSLMessage.EXPECTED_WHITESPACE_AFTER_LABEL_COLON);
+				tokens.raiseException(tokens.peek().startPos, DSLMessage.EXPECTED_WHITESPACE_AFTER_LABEL_COLON);
 			}
 			label = name;
 			name = tokens.eat(TokenKind.IDENTIFIER);
@@ -98,36 +92,32 @@ public class AppParser {
 	}
 
 	/**
-	 * Return an array of {@link ArgumentNode} and advance the token
-	 * position if the next token(s) contain arguments.
+	 * Return an array of {@link ArgumentNode} and advance the token position if the next
+	 * token(s) contain arguments.
 	 * <p>
 	 * Expected format:
 	 * {@code appArguments : DOUBLE_MINUS identifier(name) EQUALS identifier(value)}
 	 *
-	 * @return array of arguments or {@code null} if the next token(s) do not
-	 * contain arguments
+	 * @return array of arguments or {@code null} if the next token(s) do not contain
+	 * arguments
 	 */
 	protected ArgumentNode[] eatAppArgs() {
 		List<ArgumentNode> args = null;
 		if (tokens.peek(TokenKind.DOUBLE_MINUS) && tokens.isNextAdjacent()) {
-			tokens.raiseException(tokens.peek().startPos,
-					DSLMessage.EXPECTED_WHITESPACE_AFTER_APP_BEFORE_ARGUMENT);
+			tokens.raiseException(tokens.peek().startPos, DSLMessage.EXPECTED_WHITESPACE_AFTER_APP_BEFORE_ARGUMENT);
 		}
 		while (tokens.peek(TokenKind.DOUBLE_MINUS)) {
 			Token dashDash = tokens.next(); // skip the '--'
 			if (tokens.peek(TokenKind.IDENTIFIER) && !tokens.isNextAdjacent()) {
-				tokens.raiseException(tokens.peek().startPos,
-						DSLMessage.NO_WHITESPACE_BEFORE_ARG_NAME);
+				tokens.raiseException(tokens.peek().startPos, DSLMessage.NO_WHITESPACE_BEFORE_ARG_NAME);
 			}
 			List<Token> argNameComponents = eatDottedName();
 			if (tokens.peek(TokenKind.EQUALS) && !tokens.isNextAdjacent()) {
-				tokens.raiseException(tokens.peek().startPos,
-						DSLMessage.NO_WHITESPACE_BEFORE_ARG_EQUALS);
+				tokens.raiseException(tokens.peek().startPos, DSLMessage.NO_WHITESPACE_BEFORE_ARG_EQUALS);
 			}
 			tokens.eat(TokenKind.EQUALS);
 			if (tokens.peek(TokenKind.IDENTIFIER) && !tokens.isNextAdjacent()) {
-				tokens.raiseException(tokens.peek().startPos,
-						DSLMessage.NO_WHITESPACE_BEFORE_ARG_VALUE);
+				tokens.raiseException(tokens.peek().startPos, DSLMessage.NO_WHITESPACE_BEFORE_ARG_VALUE);
 			}
 			// Process argument value:
 			Token t = tokens.peek();
@@ -136,8 +126,7 @@ public class AppParser {
 			if (args == null) {
 				args = new ArrayList<ArgumentNode>();
 			}
-			args.add(new ArgumentNode(toData(argNameComponents), argValue,
-					dashDash.startPos, t.endPos));
+			args.add(new ArgumentNode(toData(argNameComponents), argValue, dashDash.startPos, t.endPos));
 		}
 		return args == null ? null : args.toArray(new ArgumentNode[args.size()]);
 	}
@@ -145,8 +134,7 @@ public class AppParser {
 	/**
 	 * Return the argument value from the next token and advance the token position.
 	 * <p>
-	 * Expected format:
-	 * {@code argValue: identifier | literal_string}
+	 * Expected format: {@code argValue: identifier | literal_string}
 	 *
 	 * @return argument value
 	 */
@@ -158,8 +146,7 @@ public class AppParser {
 		}
 		else if (t.getKind() == TokenKind.LITERAL_STRING) {
 			String quotesUsed = t.data.substring(0, 1);
-			argValue = t.data.substring(1, t.data.length() - 1)
-					.replace(quotesUsed + quotesUsed, quotesUsed);
+			argValue = t.data.substring(1, t.data.length() - 1).replace(quotesUsed + quotesUsed, quotesUsed);
 		}
 		else {
 			tokens.raiseException(t.startPos, DSLMessage.EXPECTED_ARGUMENT_VALUE, t.data);
@@ -170,8 +157,8 @@ public class AppParser {
 	/**
 	 * Return an array of {@link Token} that are separated by a dot.
 	 * <p>
-	 * Expected format:
-	 * {@code identifier [DOT identifier]*}
+	 * Expected format: {@code identifier [DOT identifier]*}
+	 *
 	 * @return array of tokens separated by a dot
 	 */
 	protected List<Token> eatDottedName() {
@@ -184,13 +171,11 @@ public class AppParser {
 		result.add(name);
 		while (tokens.peek(TokenKind.DOT)) {
 			if (!tokens.isNextAdjacent()) {
-				tokens.raiseException(tokens.peek().startPos,
-						DSLMessage.NO_WHITESPACE_IN_DOTTED_NAME);
+				tokens.raiseException(tokens.peek().startPos, DSLMessage.NO_WHITESPACE_IN_DOTTED_NAME);
 			}
 			result.add(tokens.next()); // consume dot
 			if (tokens.peek(TokenKind.IDENTIFIER) && !tokens.isNextAdjacent()) {
-				tokens.raiseException(tokens.peek().startPos,
-						DSLMessage.NO_WHITESPACE_IN_DOTTED_NAME);
+				tokens.raiseException(tokens.peek().startPos, DSLMessage.NO_WHITESPACE_IN_DOTTED_NAME);
 			}
 			result.add(tokens.eat(TokenKind.IDENTIFIER));
 		}
@@ -201,8 +186,8 @@ public class AppParser {
 	 * Create a new {@link LabelNode} based on the provided token.
 	 *
 	 * @param label token containing the label; may be {@code null}
-	 * @return new {@code LabelNode} instance based on the provided token,
-	 * or {@code null} if the provided token is {@code null}
+	 * @return new {@code LabelNode} instance based on the provided token, or {@code null}
+	 * if the provided token is {@code null}
 	 */
 	protected LabelNode toLabelNode(Token label) {
 		return label == null ? null : new LabelNode(label.data, label.startPos, label.endPos);
@@ -234,7 +219,7 @@ public class AppParser {
 	 */
 	protected List<String> tokenListToStringList(List<Token> tokens) {
 		if (tokens.isEmpty()) {
-			return Collections.<String> emptyList();
+			return Collections.<String>emptyList();
 		}
 		List<String> data = new ArrayList<String>();
 		for (Token token : tokens) {
@@ -254,9 +239,9 @@ public class AppParser {
 	}
 
 	/**
-	 * Verify the supplied name is a valid name. Valid names must follow the same
-	 * rules as Java identifiers, with the additional option to use a hyphen ('-')
-	 * after the first character.
+	 * Verify the supplied name is a valid name. Valid names must follow the same rules as
+	 * Java identifiers, with the additional option to use a hyphen ('-') after the first
+	 * character.
 	 *
 	 * @param name the name to validate
 	 * @return true if name is valid

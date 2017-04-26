@@ -23,8 +23,8 @@ import org.springframework.boot.configurationmetadata.ValueHint;
 import org.springframework.boot.configurationmetadata.ValueProvider;
 
 /**
- * A default {@link ValueHintProvider} that returns hints explicitly
- * defined by a property.
+ * A default {@link ValueHintProvider} that returns hints explicitly defined by a
+ * property.
  *
  * @author Eric Bottard
  */

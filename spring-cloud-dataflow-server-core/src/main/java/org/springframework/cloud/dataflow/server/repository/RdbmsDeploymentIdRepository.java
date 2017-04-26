@@ -30,7 +30,8 @@ import org.springframework.util.Assert;
  *
  * @author Ilayaperumal Gopinathan
  */
-public class RdbmsDeploymentIdRepository extends AbstractRdbmsKeyValueRepository<String> implements DeploymentIdRepository {
+public class RdbmsDeploymentIdRepository extends AbstractRdbmsKeyValueRepository<String>
+		implements DeploymentIdRepository {
 
 	public RdbmsDeploymentIdRepository(DataSource dataSource) {
 		super(dataSource, "DEPLOYMENT_", "IDS", new RowMapper<String>() {
@@ -43,8 +44,8 @@ public class RdbmsDeploymentIdRepository extends AbstractRdbmsKeyValueRepository
 
 	@Override
 	public void save(String key, String deploymentId) {
-		Object[] insertParameters = new Object[]{key, deploymentId};
-		jdbcTemplate.update(saveRow, insertParameters, new int[]{Types.VARCHAR, Types.VARCHAR});
+		Object[] insertParameters = new Object[] { key, deploymentId };
+		jdbcTemplate.update(saveRow, insertParameters, new int[] { Types.VARCHAR, Types.VARCHAR });
 	}
 
 	@Override

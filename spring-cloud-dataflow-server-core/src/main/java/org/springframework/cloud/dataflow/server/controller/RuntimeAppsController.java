@@ -94,18 +94,18 @@ public class RuntimeAppsController {
 	/**
 	 * Instantiates a new runtime apps controller.
 	 *
-	 * @param streamDefinitionRepository the repository this controller will use for stream CRUD operations
-	 * @param deploymentIdRepository     the repository this controller will use for deployment IDs
-	 * @param appDeployer                the deployer this controller will use to deploy stream apps
-	 * @param metricStore                the proxy to the metrics collector
-	 * @param forkJoinPool               a ForkJoinPool which will be used to query AppStatuses in parallel
+	 * @param streamDefinitionRepository the repository this controller will use for
+	 * stream CRUD operations
+	 * @param deploymentIdRepository the repository this controller will use for
+	 * deployment IDs
+	 * @param appDeployer the deployer this controller will use to deploy stream apps
+	 * @param metricStore the proxy to the metrics collector
+	 * @param forkJoinPool a ForkJoinPool which will be used to query AppStatuses in
+	 * parallel
 	 */
 	public RuntimeAppsController(StreamDefinitionRepository streamDefinitionRepository,
-			DeploymentIdRepository deploymentIdRepository,
-			AppDeployer appDeployer,
-			MetricStore metricStore,
-			ForkJoinPool forkJoinPool
-	) {
+			DeploymentIdRepository deploymentIdRepository, AppDeployer appDeployer, MetricStore metricStore,
+			ForkJoinPool forkJoinPool) {
 		Assert.notNull(streamDefinitionRepository, "StreamDefinitionRepository must not be null");
 		Assert.notNull(deploymentIdRepository, "DeploymentIdRepository must not be null");
 		Assert.notNull(appDeployer, "AppDeployer must not be null");
@@ -127,26 +127,19 @@ public class RuntimeAppsController {
 
 		// First build a sorted list of deployment id's so that we have
 		// a predictable paging order.
-		List<String> deploymentIds = asList.stream()
-				.flatMap(sd -> sd.getAppDefinitions().stream())
-				.flatMap(sad -> {
-					String key = DeploymentKey.forStreamAppDefinition(sad);
-					String id = this.deploymentIdRepository.findOne(key);
-					return id != null ? Stream.of(id) : Stream.empty();
-				})
-				.sorted((o1, o2) -> o1.compareTo(o2))
-				.collect(Collectors.toList());
+		List<String> deploymentIds = asList.stream().flatMap(sd -> sd.getAppDefinitions().stream()).flatMap(sad -> {
+			String key = DeploymentKey.forStreamAppDefinition(sad);
+			String id = this.deploymentIdRepository.findOne(key);
+			return id != null ? Stream.of(id) : Stream.empty();
+		}).sorted((o1, o2) -> o1.compareTo(o2)).collect(Collectors.toList());
 
-		// Running this this inside the FJP will make sure it is used by the parallel stream
+		// Running this this inside the FJP will make sure it is used by the parallel
+		// stream
 		// Skip first items depending on page size, then take page and discard rest.
-		List<AppStatus> statuses = forkJoinPool.submit(() ->
-				deploymentIds.stream()
-						.skip(pageable.getPageNumber() * pageable.getPageSize())
-						.limit(pageable.getPageSize())
-						.parallel()
-						.map(appDeployer::status)
-						.collect(Collectors.toList())
-		).get();
+		List<AppStatus> statuses = forkJoinPool
+				.submit(() -> deploymentIds.stream().skip(pageable.getPageNumber() * pageable.getPageSize())
+						.limit(pageable.getPageSize()).parallel().map(appDeployer::status).collect(Collectors.toList()))
+				.get();
 
 		enrichWithMetrics(statuses);
 
@@ -167,7 +160,7 @@ public class RuntimeAppsController {
 
 		for (AppStatus appStatus : statuses) {
 			Map<String, AppInstanceStatus> appInstanceStatusMap = appStatus.getInstances();
-			appInstanceStatusMap.forEach((k,appInstanceStatus) -> {
+			appInstanceStatusMap.forEach((k, appInstanceStatus) -> {
 				String trackingKey = appInstanceStatus.getAttributes().get("guid");
 				if (metricsInstanceMap.containsKey(trackingKey)) {
 					ApplicationsMetrics.Instance metricsAppInstance = metricsInstanceMap.get(trackingKey);
@@ -177,7 +170,8 @@ public class RuntimeAppsController {
 							if (ObjectUtils.nullSafeEquals("integration.channel.input.send.mean", m.getName())) {
 								appInstanceStatus.getAttributes().put("metrics.integration.channel.input.receiveRate",
 										String.format(Locale.US, "%.2f", m.getValue()));
-							} else if (ObjectUtils.nullSafeEquals("integration.channel.output.send.mean", m.getName())) {
+							}
+							else if (ObjectUtils.nullSafeEquals("integration.channel.output.send.mean", m.getName())) {
 								appInstanceStatus.getAttributes().put("metrics.integration.channel.output.sendRate",
 										String.format(Locale.US, "%.2f", m.getValue()));
 							}
@@ -210,7 +204,8 @@ public class RuntimeAppsController {
 
 		@Override
 		protected AppStatusResource instantiateResource(AppStatus entity) {
-			AppStatusResource resource = new AppStatusResource(entity.getDeploymentId(), ControllerUtils.mapState(entity.getState()).getKey());
+			AppStatusResource resource = new AppStatusResource(entity.getDeploymentId(),
+					ControllerUtils.mapState(entity.getState()).getKey());
 			List<AppInstanceStatusResource> instanceStatusResources = new ArrayList<>();
 			InstanceAssembler instanceAssembler = new InstanceAssembler(entity);
 			List<AppInstanceStatus> instanceStatuses = new ArrayList<>(entity.getInstances().values());
@@ -260,7 +255,8 @@ public class RuntimeAppsController {
 		}
 	}
 
-	private static class InstanceAssembler extends ResourceAssemblerSupport<AppInstanceStatus, AppInstanceStatusResource> {
+	private static class InstanceAssembler
+			extends ResourceAssemblerSupport<AppInstanceStatus, AppInstanceStatusResource> {
 
 		private final AppStatus owningApp;
 
@@ -276,7 +272,8 @@ public class RuntimeAppsController {
 
 		@Override
 		protected AppInstanceStatusResource instantiateResource(AppInstanceStatus entity) {
-			return new AppInstanceStatusResource(entity.getId(), ControllerUtils.mapState(entity.getState()).getKey(), entity.getAttributes());
+			return new AppInstanceStatusResource(entity.getId(), ControllerUtils.mapState(entity.getState()).getKey(),
+					entity.getAttributes());
 		}
 	}
 }

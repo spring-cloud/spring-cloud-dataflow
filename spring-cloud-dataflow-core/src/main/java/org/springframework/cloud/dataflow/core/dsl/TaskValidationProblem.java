@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,10 +20,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * After parsing a task definition from a DSL string, the validation visitor may optionally run.
- * Even though it parses successfully there may be issues with how the definition is constructed. The
- * {@link TaskValidatorVisitor} will find those problems and report them as instances of
- * {@link TaskValidationProblem}.
+ * After parsing a task definition from a DSL string, the validation visitor may
+ * optionally run. Even though it parses successfully there may be issues with how the
+ * definition is constructed. The {@link TaskValidatorVisitor} will find those problems
+ * and report them as instances of {@link TaskValidationProblem}.
  *
  * @author Andy Clement
  */
@@ -78,8 +78,9 @@ public class TaskValidationProblem {
 	}
 
 	/**
-	 * Produce a simple map of information about the exception that
-	 * can be sent to the client for display.
+	 * Produce a simple map of information about the exception that can be sent to the
+	 * client for display.
+	 *
 	 * @return map of simple information including message and position
 	 */
 	public Map<String, Object> toExceptionDescriptor() {

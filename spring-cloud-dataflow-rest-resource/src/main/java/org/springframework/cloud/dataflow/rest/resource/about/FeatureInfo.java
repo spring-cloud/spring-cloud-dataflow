@@ -24,17 +24,15 @@ package org.springframework.cloud.dataflow.rest.resource.about;
  */
 public class FeatureInfo {
 
+	private boolean analyticsEnabled = true;
+	private boolean streamsEnabled = true;
+	private boolean tasksEnabled = true;
+
 	/**
 	 * Default constructor for serialization frameworks.
 	 */
 	public FeatureInfo() {
 	}
-
-	private boolean analyticsEnabled = true;
-
-	private boolean streamsEnabled = true;
-
-	private boolean tasksEnabled = true;
 
 	public boolean isAnalyticsEnabled() {
 		return this.analyticsEnabled;

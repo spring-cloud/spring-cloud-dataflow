@@ -16,14 +16,14 @@
 
 package org.springframework.cloud.dataflow.completion;
 
-import static org.springframework.cloud.dataflow.core.ApplicationType.processor;
-import static org.springframework.cloud.dataflow.core.ApplicationType.sink;
-
 import java.util.List;
 
 import org.springframework.cloud.dataflow.core.dsl.CheckPointedParseException;
 import org.springframework.cloud.dataflow.registry.AppRegistration;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
+
+import static org.springframework.cloud.dataflow.core.ApplicationType.processor;
+import static org.springframework.cloud.dataflow.core.ApplicationType.sink;
 
 /**
  * Proposes app names when the user has typed a destination redirection.
@@ -31,8 +31,8 @@ import org.springframework.cloud.dataflow.registry.AppRegistry;
  * @author Eric Bottard
  * @author Mark Fisher
  */
-class DestinationNameYieldsAppsRecoveryStrategy extends
-		StacktraceFingerprintingRecoveryStrategy<CheckPointedParseException> {
+class DestinationNameYieldsAppsRecoveryStrategy
+		extends StacktraceFingerprintingRecoveryStrategy<CheckPointedParseException> {
 
 	private final AppRegistry appRegistry;
 
@@ -43,17 +43,17 @@ class DestinationNameYieldsAppsRecoveryStrategy extends
 
 	@Override
 	public boolean shouldTrigger(String dslStart, Exception exception) {
-		if( !super.shouldTrigger(dslStart, exception)) {
+		if (!super.shouldTrigger(dslStart, exception)) {
 			return false;
 		}
 		// Cast is safe from call to super.
 		// Backtracking would return even before the destination
-		return ((CheckPointedParseException)exception).getExpressionStringUntilCheckpoint().trim().isEmpty();
+		return ((CheckPointedParseException) exception).getExpressionStringUntilCheckpoint().trim().isEmpty();
 	}
 
 	@Override
-	public void addProposals(String dsl, CheckPointedParseException exception,
-			int detailLevel, List<CompletionProposal> proposals) {
+	public void addProposals(String dsl, CheckPointedParseException exception, int detailLevel,
+			List<CompletionProposal> proposals) {
 		CompletionProposal.Factory completionFactory = CompletionProposal.expanding(dsl);
 		for (AppRegistration appRegistration : appRegistry.findAll()) {
 			if (appRegistration.getType() == processor || appRegistration.getType() == sink) {

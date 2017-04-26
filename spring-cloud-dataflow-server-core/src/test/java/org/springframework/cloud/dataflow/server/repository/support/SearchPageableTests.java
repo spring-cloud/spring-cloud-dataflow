@@ -16,6 +16,10 @@
 
 package org.springframework.cloud.dataflow.server.repository.support;
 
+import org.junit.Test;
+
+import org.springframework.data.domain.PageRequest;
+
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.empty;
@@ -25,16 +29,13 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
-import org.junit.Test;
-import org.springframework.data.domain.PageRequest;
-
 /**
  * @author Gunnar Hillert
  */
 public class SearchPageableTests {
 
 	@Test
-	public void initializeSearchPageableWithNullPageable() throws Exception{
+	public void initializeSearchPageableWithNullPageable() throws Exception {
 		try {
 			new SearchPageable(null, null);
 		}
@@ -47,7 +48,7 @@ public class SearchPageableTests {
 	}
 
 	@Test
-	public void initializeSearchPageableWithNullSearchQuery() throws Exception{
+	public void initializeSearchPageableWithNullSearchQuery() throws Exception {
 		final PageRequest pageable = new PageRequest(1, 5);
 		try {
 			new SearchPageable(pageable, null);
@@ -61,7 +62,7 @@ public class SearchPageableTests {
 	}
 
 	@Test
-	public void initializeSearchPageableWithEmptySearchQuery() throws Exception{
+	public void initializeSearchPageableWithEmptySearchQuery() throws Exception {
 		final PageRequest pageable = new PageRequest(1, 5);
 		try {
 			new SearchPageable(pageable, "  ");
@@ -75,12 +76,12 @@ public class SearchPageableTests {
 	}
 
 	@Test
-	public void addNullCollumn() throws Exception{
+	public void addNullCollumn() throws Exception {
 		final PageRequest pageable = new PageRequest(1, 5);
 		final SearchPageable searchPageable = new SearchPageable(pageable, "search query");
 
 		try {
-			searchPageable.addColumns(new String[]{});
+			searchPageable.addColumns(new String[] {});
 		}
 		catch (IllegalArgumentException e) {
 			assertEquals("You must specify at least 1 column.", e.getMessage());
@@ -91,7 +92,7 @@ public class SearchPageableTests {
 	}
 
 	@Test
-	public void addNullCollumn2() throws Exception{
+	public void addNullCollumn2() throws Exception {
 		final PageRequest pageable = new PageRequest(1, 5);
 		final SearchPageable searchPageable = new SearchPageable(pageable, "search query");
 
@@ -107,7 +108,7 @@ public class SearchPageableTests {
 	}
 
 	@Test
-	public void addWhitespaceCollumn() throws Exception{
+	public void addWhitespaceCollumn() throws Exception {
 		final PageRequest pageable = new PageRequest(1, 5);
 		final SearchPageable searchPageable = new SearchPageable(pageable, "search query");
 
@@ -123,7 +124,7 @@ public class SearchPageableTests {
 	}
 
 	@Test
-	public void testSearchPageableGetters() throws Exception{
+	public void testSearchPageableGetters() throws Exception {
 		final PageRequest pageable = new PageRequest(1, 5);
 		final SearchPageable searchPageable = new SearchPageable(pageable, "search query");
 

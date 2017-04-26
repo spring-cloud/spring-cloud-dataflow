@@ -45,7 +45,8 @@ public class JobTemplate implements JobOperations {
 
 	private static final String STEP_EXECUTION_RELATION_BY_ID = "jobs/executions/execution/steps";
 
-	private static final String STEP_EXECUTION_PROGRESS_RELATION_BY_ID = "jobs/executions/execution/steps/step/progress";
+	private static final String STEP_EXECUTION_PROGRESS_RELATION_BY_ID =
+			"jobs/executions/execution/steps/step/progress";
 
 	private final RestTemplate restTemplate;
 
@@ -65,7 +66,6 @@ public class JobTemplate implements JobOperations {
 
 	private final Link stepExecutionLink;
 
-
 	JobTemplate(RestTemplate restTemplate, ResourceSupport resources) {
 		Assert.notNull(resources, "URI Resources must not be be null");
 		Assert.notNull(restTemplate, "RestTemplate must not be null");
@@ -75,9 +75,10 @@ public class JobTemplate implements JobOperations {
 		Assert.notNull(resources.getLink(INSTANCE_RELATION), "Instance relation is required");
 		Assert.notNull(resources.getLink(INSTANCE_RELATION_BY_NAME), "Instance by name relation is required");
 		Assert.notNull(resources.getLink(STEP_EXECUTION_RELATION_BY_ID), "Step Execution by id relation is required");
-		Assert.notNull(resources.getLink(STEP_EXECUTION_PROGRESS_RELATION_BY_ID), "Step Execution Progress by id relation is required");
-		Assert.notNull(resources.getLink(STEP_EXECUTION_PROGRESS_RELATION_BY_ID), "Step Execution View by id relation is required");
-
+		Assert.notNull(resources.getLink(STEP_EXECUTION_PROGRESS_RELATION_BY_ID),
+				"Step Execution Progress by id " + "relation is required");
+		Assert.notNull(resources.getLink(STEP_EXECUTION_PROGRESS_RELATION_BY_ID),
+				"Step Execution View by id relation" + " is required");
 
 		this.restTemplate = restTemplate;
 		this.executionsLink = resources.getLink(EXECUTIONS_RELATION);
@@ -91,7 +92,6 @@ public class JobTemplate implements JobOperations {
 
 	}
 
-
 	@Override
 	public PagedResources<JobExecutionResource> executionList() {
 		String uriTemplate = executionsLink.getHref().toString();
@@ -102,8 +102,7 @@ public class JobTemplate implements JobOperations {
 
 	@Override
 	public PagedResources<JobInstanceResource> instanceList(String jobName) {
-		return restTemplate.getForObject(instanceByNameLink.expand(jobName).getHref(),
-				JobInstanceResource.Page.class);
+		return restTemplate.getForObject(instanceByNameLink.expand(jobName).getHref(), JobInstanceResource.Page.class);
 	}
 
 	@Override
@@ -114,14 +113,12 @@ public class JobTemplate implements JobOperations {
 
 	@Override
 	public JobExecutionResource jobExecution(long id) {
-		return restTemplate.getForObject(executionLink.expand(id).getHref(),
-				JobExecutionResource.class);
+		return restTemplate.getForObject(executionLink.expand(id).getHref(), JobExecutionResource.class);
 	}
 
 	@Override
 	public JobInstanceResource jobInstance(long id) {
-		return restTemplate.getForObject(instanceLink.expand(id).getHref(),
-				JobInstanceResource.class);
+		return restTemplate.getForObject(instanceLink.expand(id).getHref(), JobInstanceResource.class);
 	}
 
 	@Override
@@ -135,6 +132,5 @@ public class JobTemplate implements JobOperations {
 		return restTemplate.getForObject(stepExecutionProgressLink.expand(jobExecutionId, stepExecutionId).getHref(),
 				StepExecutionProgressInfoResource.class);
 	}
-
 
 }

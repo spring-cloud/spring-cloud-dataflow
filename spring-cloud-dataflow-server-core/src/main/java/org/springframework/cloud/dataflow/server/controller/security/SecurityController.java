@@ -19,7 +19,6 @@ package org.springframework.cloud.dataflow.server.controller.security;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.dataflow.rest.resource.security.SecurityInfoResource;
 import org.springframework.cloud.dataflow.server.config.security.support.SecurityStateBean;
-import org.springframework.cloud.dataflow.server.controller.AboutController;
 import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.hateoas.mvc.ControllerLinkBuilder;
 import org.springframework.http.HttpStatus;
@@ -34,9 +33,9 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Provides security-related meta information. Provides one REST endpoint at present
- * time {@code /security/info} that provides information such as whether security
- * is enabled and if so what is the username of the currently logged in user etc.
+ * Provides security-related meta information. Provides one REST endpoint at present time
+ * {@code /security/info} that provides information such as whether security is enabled
+ * and if so what is the username of the currently logged in user etc.
  *
  * @author Gunnar Hillert
  * @author Ilayaperumal Gopinathan

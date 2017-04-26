@@ -16,19 +16,20 @@
 
 package org.springframework.cloud.dataflow.core.dsl;
 
+import java.util.List;
+import java.util.Properties;
+
+import org.junit.Test;
+
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
-import java.util.List;
-import java.util.Properties;
-
-import org.junit.Test;
-
 /**
- * Parse streams and verify either the correct abstract syntax tree is produced or the current exception comes out.
+ * Parse streams and verify either the correct abstract syntax tree is produced or the
+ * current exception comes out.
  *
  * @author Andy Clement
  * @author David Turanski
@@ -39,7 +40,6 @@ import org.junit.Test;
 public class StreamParserTests {
 
 	private StreamNode sn;
-
 
 	// This is not a well formed stream but we are testing single app parsing
 	@Test
@@ -92,15 +92,12 @@ public class StreamParserTests {
 	@Test
 	public void appLabels3() {
 		StreamNode ast = parse("food = http | label3: foo");
-		assertEquals(
-				"[food = (AppNode:http:7>11)((Label:label3:14>20) AppNode:foo:14>25)]",
-				ast.stringify(true));
+		assertEquals("[food = (AppNode:http:7>11)((Label:label3:14>20) AppNode:foo:14>25)]", ast.stringify(true));
 
 		sn = parse("http | foo: bar | file");
 		assertEquals("[(AppNode:http)((Label:foo) AppNode:bar)(AppNode:file)]", sn.stringify());
 
-		checkForParseError("http | foo: goggle: bar | file", DSLMessage.UNEXPECTED_DATA_AFTER_STREAMDEF,
-				18);
+		checkForParseError("http | foo: goggle: bar | file", DSLMessage.UNEXPECTED_DATA_AFTER_STREAMDEF, 18);
 		checkForParseError("http | foo :bar | file", DSLMessage.NO_WHITESPACE_BETWEEN_LABEL_NAME_AND_COLON, 11);
 	}
 
@@ -254,11 +251,13 @@ public class StreamParserTests {
 		StreamNode ast = null;
 
 		// notice no space between the ' and final >
-		ast = parse(":producer > transform --expression='payload.toUpperCase()' | filter --expression='payload.length() > 4'> :consumer");
+		ast = parse(":producer > transform --expression='payload.toUpperCase()' | filter --expression='payload.length"
+				+ "() > 4'> :consumer");
 		assertEquals("payload.toUpperCase()", ast.getApp("transform").getArguments()[0].getValue());
 		assertEquals("payload.length() > 4", ast.getApp("filter").getArguments()[0].getValue());
 
-		ast = parse("time | transform --expression='T(org.joda.time.format.DateTimeFormat).forPattern(\"yyyy-MM-dd HH:mm:ss\").parseDateTime(payload)'");
+		ast = parse("time | transform --expression='T(org.joda.time.format.DateTimeFormat).forPattern(\"yyyy-MM-dd "
+				+ "HH:mm:ss\").parseDateTime(payload)'");
 		assertEquals(
 				"T(org.joda.time.format.DateTimeFormat).forPattern(\"yyyy-MM-dd HH:mm:ss\").parseDateTime(payload)",
 				ast.getApp("transform").getArguments()[0].getValue());
@@ -322,7 +321,8 @@ public class StreamParserTests {
 		props = mn.getArgumentsAsProperties();
 		assertEquals("'Hello, world!'", props.get("expression"));
 		// Prior to the change for XD-1613, this error should point to the comma:
-		// checkForParseError("foo |  transform --expression=''Hello, world!'' | bar", DSLMessage.UNEXPECTED_DATA,
+		// checkForParseError("foo | transform --expression=''Hello, world!'' | bar",
+		// DSLMessage.UNEXPECTED_DATA,
 		// 37);
 		// but now it points to the !
 		checkForParseError("foo |  transform --expression=''Hello, world!'' | bar", DSLMessage.UNEXPECTED_DATA, 44);
@@ -382,9 +382,7 @@ public class StreamParserTests {
 	public void sourceTapDestination() {
 		parse("mystream = http | file");
 		StreamNode ast = parse(":mystream.http > file");
-		assertEquals(
-				"[(mystream.http:1>14)>(AppNode:file:17>21)]",
-				ast.stringify(true));
+		assertEquals("[(mystream.http:1>14)>(AppNode:file:17>21)]", ast.stringify(true));
 		SourceDestinationNode sourceDestinationNode = ast.getSourceDestinationNode();
 		assertEquals("mystream.http", sourceDestinationNode.getDestinationName());
 	}
@@ -440,8 +438,8 @@ public class StreamParserTests {
 	@Test
 	public void duplicateExplicitLabels() {
 		checkForParseError("xxx: http | xxx: file", DSLMessage.DUPLICATE_LABEL, 12, "xxx", "http", 0, "file", 1);
-		checkForParseError("xxx: http | yyy: filter | transform | xxx: transform | file",
-				DSLMessage.DUPLICATE_LABEL, 38, "xxx", "http", 0, "transform", 3);
+		checkForParseError("xxx: http | yyy: filter | transform | xxx: transform | file", DSLMessage.DUPLICATE_LABEL,
+				38, "xxx", "http", 0, "transform", 3);
 		checkForParseError("xxx: http | yyy: filter | transform | xxx: transform | xxx: file",
 				DSLMessage.DUPLICATE_LABEL, 38, "xxx", "http", 0, "transform", 3);
 	}
@@ -456,8 +454,8 @@ public class StreamParserTests {
 
 	@Test
 	public void duplicateImplicitLabels() {
-		checkForParseError("http | filter | transform | transform | file",
-				DSLMessage.DUPLICATE_LABEL, 28, "transform", "transform", 2, "transform", 3);
+		checkForParseError("http | filter | transform | transform | file", DSLMessage.DUPLICATE_LABEL, 28, "transform",
+				"transform", 2, "transform", 3);
 	}
 
 	@Test
@@ -499,10 +497,12 @@ public class StreamParserTests {
 	@Test
 	public void testXD2416() {
 		StreamNode ast = parse("http | transform --expression='payload.replace(\"abc\", \"\")' | log");
-		assertThat((String)ast.getAppNodes().get(1).getArgumentsAsProperties().get("expression"), equalTo("payload.replace(\"abc\", \"\")"));
+		assertThat((String) ast.getAppNodes().get(1).getArgumentsAsProperties().get("expression"),
+				equalTo("payload" + ".replace(\"abc\", \"\")"));
 
 		ast = parse("http | transform --expression='payload.replace(\"abc\", '''')' | log");
-		assertThat((String) ast.getAppNodes().get(1).getArgumentsAsProperties().get("expression"), equalTo("payload.replace(\"abc\", '')"));
+		assertThat((String) ast.getAppNodes().get(1).getArgumentsAsProperties().get("expression"),
+				equalTo("payload" + ".replace(\"abc\", '')"));
 	}
 
 	StreamNode parse(String streamDefinition) {

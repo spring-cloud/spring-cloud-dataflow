@@ -16,19 +16,20 @@
 
 package org.springframework.cloud.dataflow.server.support;
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.CoreMatchers.not;
-import static org.junit.Assert.assertThat;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
+
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.cloud.dataflow.server.job.support.ExecutionContextJacksonMixIn;
 import org.springframework.cloud.dataflow.server.job.support.StepExecutionJacksonMixIn;
+
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.not;
+import static org.junit.Assert.assertThat;
 
 /**
  * Tests that the {@link ExecutionContextJacksonMixIn} works as expected.
@@ -38,8 +39,8 @@ import org.springframework.cloud.dataflow.server.job.support.StepExecutionJackso
 public class StepExecutionJacksonMixInTests {
 
 	/**
-	 * Assert that without using the {@link ExecutionContextJacksonMixIn} Jackson does not render the Step Execution
-	 * Context correctly (Missing values).
+	 * Assert that without using the {@link ExecutionContextJacksonMixIn} Jackson does not
+	 * render the Step Execution Context correctly (Missing values).
 	 *
 	 * @throws JsonProcessingException if a Json generation error occurs.
 	 */
@@ -55,8 +56,8 @@ public class StepExecutionJacksonMixInTests {
 	}
 
 	/**
-	 * Assert that by using the {@link ExecutionContextJacksonMixIn} Jackson renders the Step Execution Context
-	 * correctly.
+	 * Assert that by using the {@link ExecutionContextJacksonMixIn} Jackson renders the
+	 * Step Execution Context correctly.
 	 *
 	 * @throws JsonProcessingException if a Json generation error occurs.
 	 */
@@ -83,7 +84,7 @@ public class StepExecutionJacksonMixInTests {
 	}
 
 	private StepExecution getStepExecution() {
-		JobExecution jobExecution = new JobExecution(1L,null,"hi");
+		JobExecution jobExecution = new JobExecution(1L, null, "hi");
 		final StepExecution stepExecution = new StepExecution("step1", jobExecution);
 		jobExecution.createStepExecution("step1");
 		final ExecutionContext executionContext = stepExecution.getExecutionContext();

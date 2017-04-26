@@ -47,8 +47,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Controller for operations on {@link org.springframework.batch.core.JobExecution}.
- * This includes obtaining Job execution information from the job explorer.
+ * Controller for operations on {@link org.springframework.batch.core.JobExecution}. This
+ * includes obtaining Job execution information from the job explorer.
  *
  * @author Glenn Renfro
  * @author Gunnar Hillert
@@ -66,8 +66,8 @@ public class JobExecutionController {
 	 * Creates a {@code JobExecutionController} that retrieves Job Execution information
 	 * from a the {@link JobService}
 	 *
-	 * @param taskJobService the service this controller will use for retrieving
-	 * job execution information. Must not be null.
+	 * @param taskJobService the service this controller will use for retrieving job
+	 * execution information. Must not be null.
 	 */
 	@Autowired
 	public JobExecutionController(TaskJobService taskJobService) {
@@ -78,12 +78,11 @@ public class JobExecutionController {
 	/**
 	 * Return a page-able list of {@link JobExecutionResource} defined jobs.
 	 *
-	 * @param pageable  page-able collection of {@code TaskJobExecution}s.
+	 * @param pageable page-able collection of {@code TaskJobExecution}s.
 	 * @param assembler for the {@link TaskJobExecution}s
 	 * @return a list of Task/Job executions
 	 * @throws NoSuchJobExecutionException in the event that a job execution id specified
 	 * is not present when looking up stepExecutions for the result.
-
 	 */
 	@RequestMapping(value = "", method = RequestMethod.GET, produces = "application/json")
 	@ResponseStatus(HttpStatus.OK)
@@ -97,19 +96,17 @@ public class JobExecutionController {
 	/**
 	 * Retrieve all task job executions with the task name specified
 	 *
-	 * @param jobName   name of the job
-	 * @param pageable  page-able collection of {@code TaskJobExecution}s.
+	 * @param jobName name of the job
+	 * @param pageable page-able collection of {@code TaskJobExecution}s.
 	 * @param assembler for the {@link TaskJobExecution}s
 	 * @return list task/job executions with the specified jobName.
 	 * @throws NoSuchJobException if the job with the given name does not exist.
 	 */
 	@RequestMapping(value = "", method = RequestMethod.GET, params = "name", produces = "application/json")
 	@ResponseStatus(HttpStatus.OK)
-	public PagedResources<JobExecutionResource> retrieveJobsByName(
-			@RequestParam("name") String jobName, Pageable pageable,
-			PagedResourcesAssembler<TaskJobExecution> assembler)
-			throws NoSuchJobException {
-		List<TaskJobExecution> jobExecutions  = taskJobService.listJobExecutionsForJob(pageable, jobName);
+	public PagedResources<JobExecutionResource> retrieveJobsByName(@RequestParam("name") String jobName,
+			Pageable pageable, PagedResourcesAssembler<TaskJobExecution> assembler) throws NoSuchJobException {
+		List<TaskJobExecution> jobExecutions = taskJobService.listJobExecutionsForJob(pageable, jobName);
 		Page<TaskJobExecution> page = new PageImpl<>(jobExecutions, pageable,
 				taskJobService.countJobExecutionsForJob(jobName));
 		return assembler.toResource(page, jobAssembler);
@@ -120,7 +117,8 @@ public class JobExecutionController {
 	 *
 	 * @param id the id of the requested {@link JobExecution}
 	 * @return the {@link JobExecution}
-	 * @throws NoSuchJobExecutionException if the specified job execution for the id does not exist.
+	 * @throws NoSuchJobExecutionException if the specified job execution for the id does
+	 * not exist.
 	 */
 	@RequestMapping(value = "/{id}", method = RequestMethod.GET, produces = "application/json")
 	@ResponseStatus(HttpStatus.OK)
@@ -133,41 +131,49 @@ public class JobExecutionController {
 	}
 
 	/**
-	 * Stop a Job Execution with the given jobExecutionId. Please be aware that
-	 * you must provide the request parameter {@code stop=true} in order to invoke
-	 * this endpoint.
+	 * Stop a Job Execution with the given jobExecutionId. Please be aware that you must
+	 * provide the request parameter {@code stop=true} in order to invoke this endpoint.
 	 *
 	 * @param jobExecutionId the executionId of the job execution to stop.
-	 * @throws JobExecutionNotRunningException if a stop is requested on a job that is not running.
-	 * @throws NoSuchJobExecutionException if the job execution id specified does not exist.
+	 * @throws JobExecutionNotRunningException if a stop is requested on a job that is not
+	 * running.
+	 * @throws NoSuchJobExecutionException if the job execution id specified does not
+	 * exist.
 	 */
 	@RequestMapping(value = { "/{executionId}" }, method = RequestMethod.PUT, params = "stop=true")
 	@ResponseStatus(HttpStatus.OK)
-	public void stopJobExecution(@PathVariable("executionId") long jobExecutionId) throws NoSuchJobExecutionException, JobExecutionNotRunningException {
+	public void stopJobExecution(@PathVariable("executionId") long jobExecutionId)
+			throws NoSuchJobExecutionException, JobExecutionNotRunningException {
 		taskJobService.stopJobExecution(jobExecutionId);
 	}
 
 	/**
-	 * Restart the Job Execution with the given jobExecutionId. Please be aware
-	 * that you must provide the request parameter {@code restart=true} in order
-	 * to invoke this endpoint.
+	 * Restart the Job Execution with the given jobExecutionId. Please be aware that you
+	 * must provide the request parameter {@code restart=true} in order to invoke this
+	 * endpoint.
 	 *
 	 * @param jobExecutionId the executionId of the job execution to restart
-	 * @throws NoSuchJobExecutionException if the job execution for the jobExecutionId specified does not exist.
+	 * @throws NoSuchJobExecutionException if the job execution for the jobExecutionId
+	 * specified does not exist.
 	 */
 	@RequestMapping(value = { "/{executionId}" }, method = RequestMethod.PUT, params = "restart=true")
 	@ResponseStatus(HttpStatus.OK)
-	public void restartJobExecution(@PathVariable("executionId") long jobExecutionId) throws NoSuchJobExecutionException {
+	public void restartJobExecution(@PathVariable("executionId") long jobExecutionId)
+			throws NoSuchJobExecutionException {
 		taskJobService.restartJobExecution(jobExecutionId);
 	}
 
 	/**
-	 * {@link org.springframework.hateoas.ResourceAssembler} implementation
-	 * that converts {@link JobExecution}s to {@link JobExecutionResource}s.
+	 * {@link org.springframework.hateoas.ResourceAssembler} implementation that converts
+	 * {@link JobExecution}s to {@link JobExecutionResource}s.
 	 */
 	private static class Assembler extends ResourceAssemblerSupport<TaskJobExecution, JobExecutionResource> {
 
 		private TimeZone timeZone = TimeUtils.getDefaultTimeZone();
+
+		public Assembler() {
+			super(JobExecutionController.class, JobExecutionResource.class);
+		}
 
 		/**
 		 * @param timeZone the timeZone to set
@@ -176,10 +182,6 @@ public class JobExecutionController {
 		@Qualifier("userTimeZone")
 		public void setTimeZone(TimeZone timeZone) {
 			this.timeZone = timeZone;
-		}
-
-		public Assembler() {
-			super(JobExecutionController.class, JobExecutionResource.class);
 		}
 
 		@Override

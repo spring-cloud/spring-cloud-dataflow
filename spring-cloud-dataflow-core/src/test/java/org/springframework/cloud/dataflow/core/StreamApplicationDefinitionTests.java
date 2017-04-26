@@ -16,9 +16,9 @@
 
 package org.springframework.cloud.dataflow.core;
 
-import static org.junit.Assert.assertEquals;
-
 import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author Patrick Peralta
@@ -30,10 +30,8 @@ public class StreamApplicationDefinitionTests {
 
 	@Test
 	public void testBuilder() {
-		StreamAppDefinition definition = new StreamAppDefinition.Builder()
-				.setRegisteredAppName("time")
-				.setLabel("label")
-				.setProperty(OUTPUT_BINDING_KEY, "channel").build("ticktock");
+		StreamAppDefinition definition = new StreamAppDefinition.Builder().setRegisteredAppName("time")
+				.setLabel("label").setProperty(OUTPUT_BINDING_KEY, "channel").build("ticktock");
 
 		assertEquals("ticktock", definition.getStreamName());
 		assertEquals("time", definition.getRegisteredAppName());

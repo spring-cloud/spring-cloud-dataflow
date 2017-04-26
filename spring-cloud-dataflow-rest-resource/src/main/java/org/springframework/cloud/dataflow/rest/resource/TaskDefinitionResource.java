@@ -97,5 +97,6 @@ public class TaskDefinitionResource extends ResourceSupport {
 		this.status = status;
 	}
 
-	public static class Page extends PagedResources<TaskDefinitionResource>{}
+	public static class Page extends PagedResources<TaskDefinitionResource> {
+	}
 }

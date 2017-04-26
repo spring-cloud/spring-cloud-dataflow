@@ -34,13 +34,12 @@ import org.springframework.security.ldap.userdetails.LdapAuthoritiesPopulator;
 import org.springframework.util.StringUtils;
 
 /**
-* A security configuration that conditionally sets up in-memory users from a file.
-*
-* @author Marius Bogoevici
-* @author Gunnar Hillert
-*
-* @since 1.1.0
-*/
+ * A security configuration that conditionally sets up in-memory users from a file.
+ *
+ * @author Marius Bogoevici
+ * @author Gunnar Hillert
+ * @since 1.1.0
+ */
 @Configuration
 @ConditionalOnProperty(DataFlowPropertyKeys.PREFIX + "security.authentication.ldap.enabled")
 @EnableConfigurationProperties(LdapSecurityProperties.class)
@@ -54,8 +53,7 @@ public class LdapAuthenticationConfiguration extends GlobalAuthenticationConfigu
 
 		LdapAuthenticationProviderConfigurer<AuthenticationManagerBuilder> ldapConfigurer = auth.ldapAuthentication();
 
-		ldapConfigurer.contextSource()
-				.url(ldapSecurityProperties.getUrl().toString())
+		ldapConfigurer.contextSource().url(ldapSecurityProperties.getUrl().toString())
 				.managerDn(ldapSecurityProperties.getManagerDn())
 				.managerPassword(ldapSecurityProperties.getManagerPassword());
 
@@ -64,8 +62,7 @@ public class LdapAuthenticationConfiguration extends GlobalAuthenticationConfigu
 		}
 
 		if (!StringUtils.isEmpty(ldapSecurityProperties.getUserSearchFilter())) {
-			ldapConfigurer
-					.userSearchBase(ldapSecurityProperties.getUserSearchBase())
+			ldapConfigurer.userSearchBase(ldapSecurityProperties.getUserSearchBase())
 					.userSearchFilter(ldapSecurityProperties.getUserSearchFilter());
 		}
 
@@ -77,7 +74,8 @@ public class LdapAuthenticationConfiguration extends GlobalAuthenticationConfigu
 		else {
 			ldapConfigurer.ldapAuthoritiesPopulator(new LdapAuthoritiesPopulator() {
 				@Override
-				public Collection<? extends GrantedAuthority> getGrantedAuthorities(DirContextOperations userData, String username) {
+				public Collection<? extends GrantedAuthority> getGrantedAuthorities(DirContextOperations userData,
+						String username) {
 					return Collections.singleton(new SimpleGrantedAuthority("ROLE_MANAGE"));
 				}
 			});

@@ -88,17 +88,11 @@ import static org.springframework.shell.table.BorderSpecification.TOP;
 @Component
 @Configuration
 @EnableHypermediaSupport(type = HypermediaType.HAL)
-public class ConfigCommands implements CommandMarker,
-				InitializingBean,
-				ApplicationListener<ApplicationReadyEvent>,
-				ApplicationContextAware
-{
-
-	private final Logger logger = LoggerFactory.getLogger(this.getClass());
-
+public class ConfigCommands implements CommandMarker, InitializingBean, ApplicationListener<ApplicationReadyEvent>,
+		ApplicationContextAware {
 
 	public static final String HORIZONTAL_LINE = "-------------------------------------------------------------------------------\n";
-
+	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 	@Autowired
 	private DataFlowShell shell;
 
@@ -158,24 +152,19 @@ public class ConfigCommands implements CommandMarker,
 		this.serverUri = serverUri;
 	}
 
-	@CliCommand(value = {"dataflow config server"}, help = "Configure the Spring Cloud Data Flow REST server to use")
+	@CliCommand(value = { "dataflow config server" }, help = "Configure the Spring Cloud Data Flow REST server to use")
 	public String target(
-			@CliOption(mandatory = false, key = {"", "uri"},
-					help = "the location of the Spring Cloud Data Flow REST endpoint",
-					unspecifiedDefaultValue =  Target.DEFAULT_TARGET) String targetUriString,
-			@CliOption(mandatory = false, key = {"username"},
-					help = "the username for authenticated access to the Admin REST endpoint",
-					unspecifiedDefaultValue = Target.DEFAULT_USERNAME) String targetUsername,
-			@CliOption(mandatory = false, key = {"password"},
-					help = "the password for authenticated access to the Admin REST endpoint (valid only with a username)",
-					specifiedDefaultValue = Target.DEFAULT_SPECIFIED_PASSWORD,
-					unspecifiedDefaultValue = Target.DEFAULT_UNSPECIFIED_PASSWORD) String targetPassword,
-			@CliOption(mandatory = false, key = {"skip-ssl-validation"},
-					help = "accept any SSL certificate (even self-signed)",
-					specifiedDefaultValue = Target.DEFAULT_SPECIFIED_SKIP_SSL_VALIDATION,
-					unspecifiedDefaultValue = Target.DEFAULT_UNSPECIFIED_SKIP_SSL_VALIDATION) boolean skipSslValidation){
+			@CliOption(mandatory = false, key = { "",
+					"uri" }, help = "the location of the Spring Cloud Data Flow REST endpoint", unspecifiedDefaultValue = Target.DEFAULT_TARGET) String targetUriString,
+			@CliOption(mandatory = false, key = {
+					"username" }, help = "the username for authenticated access to the Admin REST endpoint", unspecifiedDefaultValue = Target.DEFAULT_USERNAME) String targetUsername,
+			@CliOption(mandatory = false, key = {
+					"password" }, help = "the password for authenticated access to the Admin REST endpoint (valid only with a "
+							+ "username)", specifiedDefaultValue = Target.DEFAULT_SPECIFIED_PASSWORD, unspecifiedDefaultValue = Target.DEFAULT_UNSPECIFIED_PASSWORD) String targetPassword,
+			@CliOption(mandatory = false, key = {
+					"skip-ssl-validation" }, help = "accept any SSL certificate (even self-signed)", specifiedDefaultValue = Target.DEFAULT_SPECIFIED_SKIP_SSL_VALIDATION, unspecifiedDefaultValue = Target.DEFAULT_UNSPECIFIED_SKIP_SSL_VALIDATION) boolean skipSslValidation) {
 		if (!StringUtils.isEmpty(targetPassword) && StringUtils.isEmpty(targetUsername)) {
-				return "A password may be specified only together with a username";
+			return "A password may be specified only together with a username";
 		}
 
 		if (StringUtils.isEmpty(targetPassword) && !StringUtils.isEmpty(targetUsername)) {
@@ -189,12 +178,16 @@ public class ConfigCommands implements CommandMarker,
 			HttpUtils.prepareRestTemplate(this.restTemplate, this.targetHolder.getTarget().getTargetUri(),
 					targetUsername, targetPassword, skipSslValidation);
 
-			this.shell.setDataFlowOperations(new DataFlowTemplate(targetHolder.getTarget().getTargetUri(), this.restTemplate));
-			this.targetHolder.getTarget().setTargetResultMessage(String.format("Successfully targeted %s", targetUriString));
+			this.shell.setDataFlowOperations(
+					new DataFlowTemplate(targetHolder.getTarget().getTargetUri(), this.restTemplate));
+			this.targetHolder.getTarget()
+					.setTargetResultMessage(String.format("Successfully targeted %s", targetUriString));
 
-			final SecurityInfoResource securityInfoResource = restTemplate.getForObject(targetUriString + "/security/info", SecurityInfoResource.class);
+			final SecurityInfoResource securityInfoResource = restTemplate
+					.getForObject(targetUriString + "/security/info", SecurityInfoResource.class);
 
-			if (securityInfoResource.isAuthenticated() && this.targetHolder.getTarget().getTargetCredentials() != null) {
+			if (securityInfoResource.isAuthenticated()
+					&& this.targetHolder.getTarget().getTargetCredentials() != null) {
 				for (String roleAsString : securityInfoResource.getRoles()) {
 					this.targetHolder.getTarget().getTargetCredentials().getRoles().add(RoleType.fromKey(roleAsString));
 				}
@@ -210,11 +203,11 @@ public class ConfigCommands implements CommandMarker,
 			this.shell.setDataFlowOperations(null);
 			handleTargetException(this.targetHolder.getTarget());
 		}
-		return(this.targetHolder.getTarget().getTargetResultMessage());
+		return (this.targetHolder.getTarget().getTargetResultMessage());
 
 	}
 
-	@CliCommand(value = {"dataflow config info"}, help = "Show the Dataflow server being used")
+	@CliCommand(value = { "dataflow config info" }, help = "Show the Dataflow server being used")
 	public List<Object> info() {
 		Target target = targetHolder.getTarget();
 		if (target.getTargetException() != null) {
@@ -241,18 +234,12 @@ public class ConfigCommands implements CommandMarker,
 		Map<String, String> versions = new LinkedHashMap<>();
 		modelBuilder.addRow().addValue("Versions").addValue(versions);
 		rowIndex++;
-		versions.compute(
-			about.getVersionInfo().getImplementation().getName(),
-			(k, v) -> about.getVersionInfo().getImplementation().getVersion()
-		);
-		versions.compute(
-			about.getVersionInfo().getCore().getName(),
-			(k, v) -> about.getVersionInfo().getCore().getVersion()
-		);
-		versions.compute(
-			about.getVersionInfo().getDashboard().getName(),
-			(k, v) -> about.getVersionInfo().getDashboard().getVersion()
-		);
+		versions.compute(about.getVersionInfo().getImplementation().getName(),
+				(k, v) -> about.getVersionInfo().getImplementation().getVersion());
+		versions.compute(about.getVersionInfo().getCore().getName(),
+				(k, v) -> about.getVersionInfo().getCore().getVersion());
+		versions.compute(about.getVersionInfo().getDashboard().getName(),
+				(k, v) -> about.getVersionInfo().getDashboard().getVersion());
 
 		SecurityInfo securityInfo = about.getSecurityInfo();
 		modelBuilder.addRow().addValue("Security").addValue(securityInfo);
@@ -278,45 +265,34 @@ public class ConfigCommands implements CommandMarker,
 			rowsWithThinSeparators.add(rowIndex++);
 		}
 
-
 		TableBuilder builder = new TableBuilder(modelBuilder.build());
-		builder
-			.addOutlineBorder(BorderStyle.fancy_double)
-			.paintBorder(BorderStyle.fancy_light, BorderSpecification.INNER).fromTopLeft().toBottomRight()
-			.on(CellMatchers.table())
-				.addAligner(SimpleHorizontalAligner.center)
-			.on(CellMatchers.table())
-				.addAligner(SimpleVerticalAligner.middle)
-		;
+		builder.addOutlineBorder(BorderStyle.fancy_double)
+				.paintBorder(BorderStyle.fancy_light, BorderSpecification.INNER).fromTopLeft().toBottomRight()
+				.on(CellMatchers.table()).addAligner(SimpleHorizontalAligner.center).on(CellMatchers.table())
+				.addAligner(SimpleVerticalAligner.middle);
 
 		Tables.configureKeyValueRendering(builder, ": ");
 
-		builder.on(CellMatchers.ofType(FeatureInfo.class))
-			.addFormatter(new DataFlowTables.BeanWrapperFormatter(": "))
-			.addAligner(new KeyValueHorizontalAligner(":"))
-			.addSizer(new KeyValueSizeConstraints(": "))
-			.addWrapper(new KeyValueTextWrapper(": "));
-		List<String> excludes = securityInfo.isAuthenticated()
-			? Arrays.asList("roles", "class")
-			: Arrays.asList("roles", "class", "username");
+		builder.on(CellMatchers.ofType(FeatureInfo.class)).addFormatter(new DataFlowTables.BeanWrapperFormatter(": "))
+				.addAligner(new KeyValueHorizontalAligner(":")).addSizer(new KeyValueSizeConstraints(": "))
+				.addWrapper(new KeyValueTextWrapper(": "));
+		List<String> excludes = securityInfo.isAuthenticated() ? Arrays.asList("roles", "class")
+				: Arrays.asList("roles", "class", "username");
 		builder.on(CellMatchers.ofType(SecurityInfo.class))
-			.addFormatter(new DataFlowTables.BeanWrapperFormatter(": ", null, excludes))
-			.addAligner(new KeyValueHorizontalAligner(":"))
-			.addSizer(new KeyValueSizeConstraints(": "))
-			.addWrapper(new KeyValueTextWrapper(": "));
-		builder.on(CellMatchers.ofType(List.class)).addFormatter(value -> ((List<String>) value).toArray(new String[0]));
+				.addFormatter(new DataFlowTables.BeanWrapperFormatter(": ", null, excludes))
+				.addAligner(new KeyValueHorizontalAligner(":")).addSizer(new KeyValueSizeConstraints(": "))
+				.addWrapper(new KeyValueTextWrapper(": "));
+		builder.on(CellMatchers.ofType(List.class))
+				.addFormatter(value -> ((List<String>) value).toArray(new String[0]));
 		builder.on(CellMatchers.ofType(RuntimeEnvironmentDetails.class))
-			.addFormatter(new DataFlowTables.BeanWrapperFormatter(": ", null, Arrays.asList("class", "platformSpecificInfo")))
-			.addAligner(new KeyValueHorizontalAligner(":"))
-			.addSizer(new KeyValueSizeConstraints(": "))
-			.addWrapper(new KeyValueTextWrapper(": "));
+				.addFormatter(new DataFlowTables.BeanWrapperFormatter(": ", null,
+						Arrays.asList("class", "platformSpecificInfo")))
+				.addAligner(new KeyValueHorizontalAligner(":")).addSizer(new KeyValueSizeConstraints(": "))
+				.addWrapper(new KeyValueTextWrapper(": "));
 		rowsWithThinSeparators.forEach(row -> builder.paintBorder(BorderStyle.fancy_light_quadruple_dash, TOP)
-			.fromRowColumn(row, 0).toRowColumn(row + 1, builder.getModel().getColumnCount()));
-
+				.fromRowColumn(row, 0).toRowColumn(row + 1, builder.getModel().getColumnCount()));
 
 		result.add(builder.build());
-
-
 
 		if (Target.TargetStatus.ERROR.equals(target.getStatus())) {
 			StringWriter stringWriter = new StringWriter();
@@ -332,8 +308,8 @@ public class ConfigCommands implements CommandMarker,
 		Exception targetException = target.getTargetException();
 		Assert.isTrue(targetException != null, "TargetException must not be null");
 		if (targetException instanceof DataFlowServerException) {
-			String message = String.format("Unable to parse server response: %s - at URI '%s'.", targetException.getMessage(),
-					target.getTargetUriAsString());
+			String message = String.format("Unable to parse server response: %s - at URI '%s'.",
+					targetException.getMessage(), target.getTargetUriAsString());
 			if (logger.isDebugEnabled()) {
 				logger.debug(message, targetException);
 			}
@@ -344,12 +320,16 @@ public class ConfigCommands implements CommandMarker,
 		}
 		else {
 			if (targetException instanceof HttpClientErrorException && targetException.getMessage().startsWith("401")) {
-				this.targetHolder.getTarget().setTargetResultMessage(String.format("Unable to access Data Flow Server at '%s': '%s'. Unauthorized, did you forget to authenticate?",
-						target.getTargetUriAsString(), targetException.toString()));
+				this.targetHolder.getTarget()
+						.setTargetResultMessage(String.format(
+								"Unable to access Data Flow Server"
+										+ " at '%s': '%s'. Unauthorized, did you forget to authenticate?",
+								target.getTargetUriAsString(), targetException.toString()));
 			}
 			else {
-				this.targetHolder.getTarget().setTargetResultMessage(String.format("Unable to contact Data Flow Server at '%s': '%s'.",
-						target.getTargetUriAsString(), targetException.toString()));
+				this.targetHolder.getTarget()
+						.setTargetResultMessage(String.format("Unable to contact Data Flow " + "Server at '%s': '%s'.",
+								target.getTargetUriAsString(), targetException.toString()));
 			}
 		}
 
@@ -357,7 +337,8 @@ public class ConfigCommands implements CommandMarker,
 
 	@Override
 	public void onApplicationEvent(ApplicationReadyEvent event) {
-		//Only invoke if the shell is executing in the same application context as the data flow server.
+		// Only invoke if the shell is executing in the same application context as the
+		// data flow server.
 		if (!initialized) {
 			target(this.serverUri, this.userName, this.password, this.skipSslValidation);
 		}
@@ -365,7 +346,8 @@ public class ConfigCommands implements CommandMarker,
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
-		//Only invoke this lifecycle method if the shell is executing in stand-alone mode.
+		// Only invoke this lifecycle method if the shell is executing in stand-alone
+		// mode.
 		if (applicationContext != null && !applicationContext.containsBean("streamDefinitionRepository")) {
 			initialized = true;
 			target(this.serverUri, this.userName, this.password, this.skipSslValidation);

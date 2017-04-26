@@ -24,14 +24,15 @@ import org.springframework.boot.configurationmetadata.ConfigurationMetadataPrope
 import org.springframework.boot.configurationmetadata.ValueHint;
 
 /**
- * Returns the closed set of {@literal true} and {@literal false} for properties
- * that are of type Boolean.
+ * Returns the closed set of {@literal true} and {@literal false} for properties that are
+ * of type Boolean.
  *
  * @author Eric Bottard
  */
 public class BooleanValueHintProvider implements ValueHintProvider {
 
 	private static final List<ValueHint> BOOLEANS;
+
 	static {
 		ValueHint yes = new ValueHint();
 		yes.setValue(true);
@@ -42,9 +43,7 @@ public class BooleanValueHintProvider implements ValueHintProvider {
 
 	@Override
 	public List<ValueHint> generateValueHints(ConfigurationMetadataProperty property, ClassLoader classLoader) {
-		return "java.lang.Boolean".equals(property.getType())
-				? BOOLEANS
-				: Collections.<ValueHint>emptyList();
+		return "java.lang.Boolean".equals(property.getType()) ? BOOLEANS : Collections.<ValueHint>emptyList();
 	}
 
 	@Override

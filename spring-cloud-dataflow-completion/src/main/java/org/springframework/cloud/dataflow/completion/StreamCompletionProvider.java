@@ -33,18 +33,17 @@ public class StreamCompletionProvider {
 
 	private final List<ExpansionStrategy> completionExpansionStrategies;
 
-	public StreamCompletionProvider(
-			List<RecoveryStrategy<?>> completionRecoveryStrategies,
+	public StreamCompletionProvider(List<RecoveryStrategy<?>> completionRecoveryStrategies,
 			List<ExpansionStrategy> completionExpansionStrategies) {
 		this.completionRecoveryStrategies = new ArrayList<>(completionRecoveryStrategies);
 		this.completionExpansionStrategies = new ArrayList<>(completionExpansionStrategies);
 	}
 
 	/*
-	 * Attempt to parse the text the user has already typed in. This either succeeds,
-	 * in which case we may propose to expand what she has typed, or it fails
-	 * (most likely because this is not well formed), in which case we try to
-	 * recover from the parsing failure and still add proposals.
+	 * Attempt to parse the text the user has already typed in. This either succeeds, in
+	 * which case we may propose to expand what she has typed, or it fails (most likely
+	 * because this is not well formed), in which case we try to recover from the parsing
+	 * failure and still add proposals.
 	 */
 	@SuppressWarnings("unchecked")
 	public List<CompletionProposal> complete(String dslStart, int detailLevel) {

@@ -16,8 +16,6 @@
 
 package org.springframework.cloud.dataflow.completion;
 
-import static org.springframework.cloud.dataflow.completion.CompletionProposal.expanding;
-
 import java.io.IOException;
 import java.net.URLClassLoader;
 import java.util.List;
@@ -36,13 +34,17 @@ import org.springframework.cloud.dataflow.registry.AppRegistration;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.core.io.Resource;
 
+import static org.springframework.cloud.dataflow.completion.CompletionProposal.expanding;
+
 /**
- * Attempts to fill in possible values after a {@literal --foo=} dangling construct in the DSL.
+ * Attempts to fill in possible values after a {@literal --foo=} dangling construct in the
+ * DSL.
  *
  * @author Eric Bottard
  * @author Mark Fisher
  */
-public class ConfigurationPropertyValueHintRecoveryStrategy extends StacktraceFingerprintingRecoveryStrategy<CheckPointedParseException> {
+public class ConfigurationPropertyValueHintRecoveryStrategy
+		extends StacktraceFingerprintingRecoveryStrategy<CheckPointedParseException> {
 
 	private final AppRegistry appRegistry;
 
@@ -51,14 +53,16 @@ public class ConfigurationPropertyValueHintRecoveryStrategy extends StacktraceFi
 	@Autowired
 	private ValueHintProvider[] valueHintProviders = new ValueHintProvider[0];
 
-	ConfigurationPropertyValueHintRecoveryStrategy(AppRegistry appRegistry, ApplicationConfigurationMetadataResolver metadataResolver) {
+	ConfigurationPropertyValueHintRecoveryStrategy(AppRegistry appRegistry,
+			ApplicationConfigurationMetadataResolver metadataResolver) {
 		super(CheckPointedParseException.class, "foo --bar=", "foo | wizz --bar=");
 		this.appRegistry = appRegistry;
 		this.metadataResolver = metadataResolver;
 	}
 
 	@Override
-	public void addProposals(String dsl, CheckPointedParseException exception, int detailLevel, List<CompletionProposal> collector) {
+	public void addProposals(String dsl, CheckPointedParseException exception, int detailLevel,
+			List<CompletionProposal> collector) {
 
 		String propertyName = recoverPropertyName(exception);
 
@@ -83,7 +87,8 @@ public class ConfigurationPropertyValueHintRecoveryStrategy extends StacktraceFi
 					}
 					for (ValueHintProvider valueHintProvider : valueHintProviders) {
 						for (ValueHint valueHint : valueHintProvider.generateValueHints(property, classLoader)) {
-							collector.add(proposals.withSuffix(String.valueOf(valueHint.getValue()), valueHint.getShortDescription()));
+							collector.add(proposals.withSuffix(String.valueOf(valueHint.getValue()),
+									valueHint.getShortDescription()));
 						}
 					}
 				}

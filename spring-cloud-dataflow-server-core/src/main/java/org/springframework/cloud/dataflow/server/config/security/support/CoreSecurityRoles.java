@@ -23,13 +23,11 @@ import org.springframework.util.Assert;
  * Defines the core security roles supported by Spring Cloud Data Flow.
  *
  * @author Gunnar Hillert
- *
  */
 public enum CoreSecurityRoles {
 
-	VIEW("VIEW", "view role"),
-	CREATE("CREATE", "role for create operations"),
-	MANAGE("MANAGE", "role for the boot management endpoints");
+	VIEW("VIEW", "view role"), CREATE("CREATE", "role for create operations"), MANAGE("MANAGE",
+			"role for the boot management endpoints");
 
 	private String key;
 	private String name;
@@ -37,14 +35,6 @@ public enum CoreSecurityRoles {
 	CoreSecurityRoles(final String key, final String name) {
 		this.key = key;
 		this.name = name;
-	}
-
-	public String getKey() {
-		return key;
-	}
-
-	public String getName() {
-		return name;
 	}
 
 	public static CoreSecurityRoles fromKey(String role) {
@@ -62,11 +52,20 @@ public enum CoreSecurityRoles {
 
 	/**
 	 * Helper class that will return all role names as a string array.
+	 *
 	 * @return Never null
 	 */
 	public static String[] getAllRolesAsStringArray() {
-		return Arrays.stream(CoreSecurityRoles.values())
-			.map(CoreSecurityRoles::getKey).toArray(size -> new String[size]);
+		return Arrays.stream(CoreSecurityRoles.values()).map(CoreSecurityRoles::getKey)
+				.toArray(size -> new String[size]);
+	}
+
+	public String getKey() {
+		return key;
+	}
+
+	public String getName() {
+		return name;
 	}
 
 }

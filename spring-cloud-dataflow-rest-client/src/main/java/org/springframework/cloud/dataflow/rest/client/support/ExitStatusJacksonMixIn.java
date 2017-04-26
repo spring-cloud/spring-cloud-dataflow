@@ -18,6 +18,7 @@ package org.springframework.cloud.dataflow.rest.client.support;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 import org.springframework.batch.core.ExitStatus;
 
 /**

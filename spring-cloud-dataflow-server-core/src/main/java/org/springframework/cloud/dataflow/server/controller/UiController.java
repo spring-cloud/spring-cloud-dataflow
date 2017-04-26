@@ -1,5 +1,6 @@
 /*
  * Copyright 2015-2017 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,18 +32,19 @@ public class UiController {
 
 	public static final String WEB_UI_INDEX_PAGE_ROUTE = "/dashboard";
 
-	@RequestMapping
-	public String index() {
-		return "redirect:" + WEB_UI_INDEX_PAGE_ROUTE + "/index.html";
-	}
-
 	/**
 	 * Turn a relative link of the UI app to an absolute one, prepending its path.
+	 *
 	 * @param path relative UI path
 	 * @return the absolute UI path
 	 */
 	public static String dashboard(String path) {
 		return WEB_UI_INDEX_PAGE_ROUTE + path;
+	}
+
+	@RequestMapping
+	public String index() {
+		return "redirect:" + WEB_UI_INDEX_PAGE_ROUTE + "/index.html";
 	}
 
 }

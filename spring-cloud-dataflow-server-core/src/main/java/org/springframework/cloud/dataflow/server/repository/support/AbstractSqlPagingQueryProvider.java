@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
 import javax.sql.DataSource;
 
 import org.springframework.dao.InvalidDataAccessApiUsageException;
@@ -27,15 +28,15 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
- * Abstract SQL Paging Query Provider to serve as a base class for all provided
- * SQL paging query providers.
- *
- * Any implementation must provide a way to specify the select clause, from
- * clause and optionally a where clause. It is recommended that there should be an index for
- * the sort key to provide better performance.
- *
- * Provides properties and preparation for the mandatory "selectClause" and
- * "fromClause" as well as for the optional "whereClause".
+ * Abstract SQL Paging Query Provider to serve as a base class for all provided SQL paging
+ * query providers.
+ * <p>
+ * Any implementation must provide a way to specify the select clause, from clause and
+ * optionally a where clause. It is recommended that there should be an index for the sort
+ * key to provide better performance.
+ * <p>
+ * Provides properties and preparation for the mandatory "selectClause" and "fromClause"
+ * as well as for the optional "whereClause".
  *
  * @author Glenn Renfro
  */
@@ -54,6 +55,13 @@ public abstract class AbstractSqlPagingQueryProvider implements PagingQueryProvi
 	private boolean usingNamedParameters;
 
 	/**
+	 * @return SQL SELECT clause part of SQL query string
+	 */
+	protected String getSelectClause() {
+		return selectClause;
+	}
+
+	/**
 	 * @param selectClause SELECT clause part of SQL query string
 	 */
 	public void setSelectClause(String selectClause) {
@@ -61,11 +69,10 @@ public abstract class AbstractSqlPagingQueryProvider implements PagingQueryProvi
 	}
 
 	/**
-	 *
-	 * @return SQL SELECT clause part of SQL query string
+	 * @return SQL FROM clause part of SQL query string
 	 */
-	protected String getSelectClause() {
-		return selectClause;
+	protected String getFromClause() {
+		return fromClause;
 	}
 
 	/**
@@ -76,11 +83,10 @@ public abstract class AbstractSqlPagingQueryProvider implements PagingQueryProvi
 	}
 
 	/**
-	 *
-	 * @return SQL FROM clause part of SQL query string
+	 * @return SQL WHERE clause part of SQL query string
 	 */
-	protected String getFromClause() {
-		return fromClause;
+	protected String getWhereClause() {
+		return whereClause;
 	}
 
 	/**
@@ -96,11 +102,14 @@ public abstract class AbstractSqlPagingQueryProvider implements PagingQueryProvi
 	}
 
 	/**
+	 * A Map&lt;String, Order&gt; of sort columns as the key and {@link Order} for
+	 * ascending/descending.
 	 *
-	 * @return SQL WHERE clause part of SQL query string
+	 * @return sortKey key to use to sort and limit page content
 	 */
-	protected String getWhereClause() {
-		return whereClause;
+	@Override
+	public Map<String, Order> getSortKeys() {
+		return sortKeys;
 	}
 
 	/**
@@ -108,16 +117,6 @@ public abstract class AbstractSqlPagingQueryProvider implements PagingQueryProvi
 	 */
 	public void setSortKeys(Map<String, Order> sortKeys) {
 		this.sortKeys = sortKeys;
-	}
-
-	/**
-	 * A Map&lt;String, Order&gt; of sort columns as the key and {@link Order} for ascending/descending.
-	 *
-	 * @return sortKey key to use to sort and limit page content
-	 */
-	@Override
-	public Map<String, Order> getSortKeys() {
-		return sortKeys;
 	}
 
 	@Override
@@ -152,6 +151,7 @@ public abstract class AbstractSqlPagingQueryProvider implements PagingQueryProvi
 			usingNamedParameters = true;
 		}
 	}
+
 	private String removeKeyWord(String keyWord, String clause) {
 		String temp = clause.trim();
 		String keyWordString = keyWord + " ";
@@ -163,4 +163,3 @@ public abstract class AbstractSqlPagingQueryProvider implements PagingQueryProvi
 		}
 	}
 }
-

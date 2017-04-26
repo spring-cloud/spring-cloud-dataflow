@@ -31,8 +31,10 @@ import org.springframework.util.StringUtils;
 
 /**
  * Expands constructs that start with {@literal :} to add stream name and app identifiers.
- *
- * <p>Lives in this package as it needs access to a {@link StreamDefinitionRepository}.</p>
+ * <p>
+ * <p>
+ * Lives in this package as it needs access to a {@link StreamDefinitionRepository}.
+ * </p>
  *
  * @author Eric Bottard
  * @author Ilayaperumal Gopinathan
@@ -47,13 +49,14 @@ public class TapOnDestinationRecoveryStrategy implements RecoveryStrategy<ParseE
 
 	@Override
 	public boolean shouldTrigger(String dslStart, Exception exception) {
-		return dslStart.startsWith(":") && !dslStart.contains(" ") &&
-				(((ParseException)exception).getMessageCode() == DSLMessage.EXPECTED_STREAM_NAME_AFTER_LABEL_COLON ||
-						((ParseException)exception).getMessageCode() == DSLMessage.EXPECTED_APPNAME);
+		return dslStart.startsWith(":") && !dslStart.contains(" ")
+				&& (((ParseException) exception).getMessageCode() == DSLMessage.EXPECTED_STREAM_NAME_AFTER_LABEL_COLON
+						|| ((ParseException) exception).getMessageCode() == DSLMessage.EXPECTED_APPNAME);
 	}
 
 	@Override
-	public void addProposals(String dsl, ParseException exception, int detailLevel, List<CompletionProposal> collector) {
+	public void addProposals(String dsl, ParseException exception, int detailLevel,
+			List<CompletionProposal> collector) {
 		String streamName = dsl.substring(":".length());
 		String appName = "";
 		if (streamName.contains(".")) {
@@ -73,7 +76,8 @@ public class TapOnDestinationRecoveryStrategy implements RecoveryStrategy<ParseE
 			CompletionProposal.Factory proposals = CompletionProposal.expanding(":" + streamName + ".");
 			for (StreamAppDefinition streamAppDefinition : streamDefinition.getAppDefinitions()) {
 				ApplicationType applicationType = DataFlowServerUtil.determineApplicationType(streamAppDefinition);
-				if (streamAppDefinition.getName().startsWith(appName) && !applicationType.equals(ApplicationType.sink)) {
+				if (streamAppDefinition.getName().startsWith(appName)
+						&& !applicationType.equals(ApplicationType.sink)) {
 					collector.add(proposals.withSuffix(streamAppDefinition.getName()));
 				}
 			}

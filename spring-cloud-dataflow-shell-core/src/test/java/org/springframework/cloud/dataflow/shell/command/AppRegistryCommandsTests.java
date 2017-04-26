@@ -16,10 +16,6 @@
 
 package org.springframework.cloud.dataflow.shell.command;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.when;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -40,6 +36,10 @@ import org.springframework.cloud.dataflow.shell.config.DataFlowShell;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.shell.table.Table;
 import org.springframework.shell.table.TableModel;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.when;
 
 /**
  * Unit tests for {@link AppRegistryCommands}.
@@ -83,14 +83,9 @@ public class AppRegistryCommandsTests {
 	@Test
 	public void testList() {
 
-		String[][] apps = new String[][] {
-				{"http", "source"},
-				{"filter", "processor"},
-				{"transform", "processor"},
-				{"file", "source"},
-				{"log", "sink"},
-				{"moving-average", "processor"}
-		};
+		String[][] apps = new String[][] { { "http", "source" }, { "filter", "processor" },
+				{ "transform", "processor" }, { "file", "source" }, { "log", "sink" },
+				{ "moving-average", "processor" } };
 
 		Collection<AppRegistrationResource> data = new ArrayList<>();
 		for (String[] app : apps) {
@@ -100,13 +95,10 @@ public class AppRegistryCommandsTests {
 		PagedResources<AppRegistrationResource> result = new PagedResources<>(data, metadata);
 		when(appRegistryOperations.list()).thenReturn(result);
 
-		Object[][] expected = new String[][] {
-				{"source", "processor", "sink", "task"},
-				{"http", "filter", "log", null},
-				{"file", "transform", null, null},
-				{null, "moving-average", null, null},
-		};
-		TableModel model = ((Table)appRegistryCommands.list()).getModel();
+		Object[][] expected = new String[][] { { "source", "processor", "sink", "task" },
+				{ "http", "filter", "log", null }, { "file", "transform", null, null },
+				{ null, "moving-average", null, null }, };
+		TableModel model = ((Table) appRegistryCommands.list()).getModel();
 		for (int row = 0; row < expected.length; row++) {
 			for (int col = 0; col < expected[row].length; col++) {
 				assertThat(model.getValue(row, col), Matchers.is(expected[row][col]));
@@ -116,7 +108,8 @@ public class AppRegistryCommandsTests {
 
 	@Test
 	public void testUnknownModule() {
-		List<Object> result = appRegistryCommands.info(new AppRegistryCommands.QualifiedApplicationName("unknown", ApplicationType.processor));
+		List<Object> result = appRegistryCommands
+				.info(new AppRegistryCommands.QualifiedApplicationName("unknown", ApplicationType.processor));
 		assertEquals((String) result.get(0), "Application info is not available for processor:unknown");
 	}
 

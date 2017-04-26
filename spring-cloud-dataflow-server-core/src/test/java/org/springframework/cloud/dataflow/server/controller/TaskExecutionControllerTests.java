@@ -65,9 +65,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Ilayaperumal Gopinathan
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = {EmbeddedDataSourceConfiguration.class,
-		JobDependencies.class,
-		PropertyPlaceholderAutoConfiguration.class, BatchProperties.class})
+@SpringBootTest(classes = { EmbeddedDataSourceConfiguration.class, JobDependencies.class,
+		PropertyPlaceholderAutoConfiguration.class, BatchProperties.class })
 @DirtiesContext
 public class TaskExecutionControllerTests {
 
@@ -113,8 +112,8 @@ public class TaskExecutionControllerTests {
 
 	@Before
 	public void setupMockMVC() {
-		this.mockMvc = MockMvcBuilders.webAppContextSetup(wac).defaultRequest(
-				get("/").accept(MediaType.APPLICATION_JSON)).build();
+		this.mockMvc = MockMvcBuilders.webAppContextSetup(wac)
+				.defaultRequest(get("/").accept(MediaType.APPLICATION_JSON)).build();
 		if (!initialized) {
 			this.sampleArgumentList = new LinkedList<String>();
 			this.sampleArgumentList.add("--password=foo");
@@ -147,7 +146,6 @@ public class TaskExecutionControllerTests {
 			JobExecution jobExecution = jobRepository.createJobExecution(
 					instance, new JobParameters(), null);
 			taskBatchDao.saveRelationship(taskExecution,jobExecution);
-
 			initialized = true;
 		}
 	}
@@ -168,10 +166,9 @@ public class TaskExecutionControllerTests {
 	}
 
 	@Test
-	public void testGetExecutionNotFound() throws Exception{
-		mockMvc.perform(
-				get("/tasks/executions/1345345345345").accept(MediaType.APPLICATION_JSON)
-		).andExpect(status().isNotFound());
+	public void testGetExecutionNotFound() throws Exception {
+		mockMvc.perform(get("/tasks/executions/1345345345345").accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isNotFound());
 	}
 
 	@Test
@@ -184,13 +181,10 @@ public class TaskExecutionControllerTests {
 	}
 
 	@Test
-	public void testGetExecutionForJob() throws Exception{
-		mockMvc.perform(
-				get("/tasks/executions/4").accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk())
+	public void testGetExecutionForJob() throws Exception {
+		mockMvc.perform(get("/tasks/executions/4").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
 				.andExpect(content().json("{taskName: \"" + TASK_NAME_FOOBAR + "\"}"))
-				.andExpect(jsonPath("jobExecutionIds[0]", is(1)))
-				.andExpect(jsonPath("jobExecutionIds", hasSize(1)));
+				.andExpect(jsonPath("jobExecutionIds[0]", is(1))).andExpect(jsonPath("jobExecutionIds", hasSize(1)));
 	}
 
 	@Test
@@ -217,28 +211,23 @@ public class TaskExecutionControllerTests {
 	}
 
 	@Test
-	public void testGetExecutionsByNameNotFound() throws Exception{
-		mockMvc.perform(
-				get("/tasks/executions/").param("name", "BAZ").accept(MediaType.APPLICATION_JSON)
-		).andExpect(status().is4xxClientError())
-				.andReturn().getResponse().getContentAsString().contains("NoSuchTaskException");
+	public void testGetExecutionsByNameNotFound() throws Exception {
+		mockMvc.perform(get("/tasks/executions/").param("name", "BAZ").accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().is4xxClientError()).andReturn().getResponse().getContentAsString()
+				.contains("NoSuchTaskException");
 	}
 
 	@Test
-	public void testCleanup() throws Exception{
-		mockMvc.perform(
-			delete("/tasks/executions/1")
-		).andExpect(status().is(200));
+	public void testCleanup() throws Exception {
+		mockMvc.perform(delete("/tasks/executions/1")).andExpect(status().is(200));
 
 		verify(taskLauncher).cleanup("foobar");
 	}
 
 	@Test
-	public void testCleanupByIdNotFound() throws Exception{
-		mockMvc.perform(
-			delete("/tasks/executions/10")
-		).andExpect(status().is(404))
-		.andReturn().getResponse().getContentAsString().contains("NoSuchTaskExecutionException");
+	public void testCleanupByIdNotFound() throws Exception {
+		mockMvc.perform(delete("/tasks/executions/10")).andExpect(status().is(404)).andReturn().getResponse()
+				.getContentAsString().contains("NoSuchTaskExecutionException");
 	}
 
 	private ResultActions verifyTaskArgs(List<String> expectedArgs, String prefix, ResultActions ra) throws Exception{

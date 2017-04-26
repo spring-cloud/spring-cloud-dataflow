@@ -29,7 +29,6 @@ import org.springframework.cloud.deployer.resource.registry.UriRegistry;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 
 /**
  * RDBMS implementation of {@link UriRegistry}.
@@ -66,7 +65,7 @@ public class RdbmsUriRegistry implements UriRegistry {
 			uriString = jdbcTemplate.queryForObject(SELECT_URI_SQL, String.class, name);
 		}
 		catch (EmptyResultDataAccessException e) {
-			throw new IllegalArgumentException("No URI is registered for ["+ name + "] "+ e);
+			throw new IllegalArgumentException("No URI is registered for [" + name + "] " + e);
 		}
 		return toUri(uriString);
 	}
@@ -84,15 +83,15 @@ public class RdbmsUriRegistry implements UriRegistry {
 	@Override
 	public void register(String name, URI uri) {
 		Assert.notNull(uri, "Error when registering " + name + ": URI is required");
-		Assert.hasText(uri.getScheme(), "Error when registering " + name + " with URI " + uri +
-				": URI scheme must be specified");
-		Assert.hasText(uri.getSchemeSpecificPart(), "Error when registering " + name + " with URI " + uri +
-				": URI scheme-specific part must be specified");
+		Assert.hasText(uri.getScheme(),
+				"Error when registering " + name + " with URI " + uri + ": URI scheme must be specified");
+		Assert.hasText(uri.getSchemeSpecificPart(),
+				"Error when registering " + name + " with URI " + uri + ": URI scheme-specific part must be specified");
 		String uriString = uri.toString();
 		try {
 			if (find(name) != null) {
-				jdbcTemplate.update(UPDATE_SQL, new Object[]{uriString, name},
-						new int[]{Types.VARCHAR, Types.VARCHAR});
+				jdbcTemplate.update(UPDATE_SQL, new Object[] { uriString, name },
+						new int[] { Types.VARCHAR, Types.VARCHAR });
 			}
 		}
 		catch (IllegalArgumentException e) {

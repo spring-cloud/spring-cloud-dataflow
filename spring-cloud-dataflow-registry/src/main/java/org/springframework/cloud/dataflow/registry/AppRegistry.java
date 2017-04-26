@@ -45,11 +45,13 @@ import org.springframework.util.StringUtils;
 /**
  * Convenience wrapper for the {@link UriRegistry} that operates on higher level
  * {@link AppRegistration} objects and supports on-demand loading of {@link Resource}s.
- *
- * <p>Stores AppRegistration with up to two keys:</p>
+ * <p>
+ * <p>
+ * Stores AppRegistration with up to two keys:
+ * </p>
  * <ul>
- *     <li>{@literal <type>.<name>}: URI for the actual app</li>
- *     <li>{@literal <type>.<name>.metadata}: Optional URI for the app metadata</li>
+ * <li>{@literal <type>.<name>}: URI for the actual app</li>
+ * <li>{@literal <type>.<name>.metadata}: Optional URI for the app metadata</li>
  * </ul>
  *
  * @author Mark Fisher
@@ -85,9 +87,8 @@ public class AppRegistry {
 	}
 
 	public List<AppRegistration> findAll() {
-		return this.uriRegistry.findAll().entrySet().stream()
-			.flatMap(toValidAppRegistration(metadataUriFromRegistry()))
-			.collect(Collectors.toList());
+		return this.uriRegistry.findAll().entrySet().stream().flatMap(toValidAppRegistration(metadataUriFromRegistry()))
+				.collect(Collectors.toList());
 	}
 
 	public AppRegistration save(String name, ApplicationType type, URI uri, URI metadataUri) {
@@ -108,12 +109,12 @@ public class AppRegistry {
 			try (InputStream is = resource.getInputStream()) {
 				properties.load(is);
 
-				properties.entrySet().stream()
-					.map(toStringAndUri())
-					.flatMap(toValidAppRegistration(metadataUriFromProperties(properties)))
-					.filter(ar -> !keysAlreadyThere.contains(key(ar.getName(), ar.getType())))
-					.collect(Collectors.toList()) // Force eager evaluation to fail early
-					.forEach(ar -> apps.add(save(ar.getName(), ar.getType(), ar.getUri(), ar.getMetadataUri())));
+				properties.entrySet().stream().map(toStringAndUri())
+						.flatMap(toValidAppRegistration(metadataUriFromProperties(properties)))
+						.filter(ar -> !keysAlreadyThere.contains(key(ar.getName(), ar.getType())))
+						.collect(Collectors.toList()) // Force eager evaluation to fail
+														// early
+						.forEach(ar -> apps.add(save(ar.getName(), ar.getType(), ar.getUri(), ar.getMetadataUri())));
 			}
 			catch (IOException e) {
 				throw new RuntimeException("Error reading from " + resource.getDescription(), e);
@@ -126,7 +127,7 @@ public class AppRegistry {
 	private Function<Map.Entry<Object, Object>, AbstractMap.SimpleImmutableEntry<String, URI>> toStringAndUri() {
 		return kv -> {
 			try {
-				return new AbstractMap.SimpleImmutableEntry<>((String) kv.getKey(), new URI((String)kv.getValue()));
+				return new AbstractMap.SimpleImmutableEntry<>((String) kv.getKey(), new URI((String) kv.getValue()));
 			}
 			catch (URISyntaxException e) {
 				throw new IllegalArgumentException(e);
@@ -134,16 +135,19 @@ public class AppRegistry {
 		};
 	}
 
-
 	/**
-	 * Returns a Function that either <ul>
+	 * Returns a Function that either
+	 * <ul>
 	 * <li>turns a key/value mapping into a valid AppRegistration (1 element Stream),</li>
 	 * <li>silently ignores well formed metadata entries (0 element Stream) or</li>
 	 * <li>fails otherwise.</li>
 	 * </ul>
-	 * @param metadataUriExtractor a Function able to compute the (possibly null) metadataUri from a given app key
+	 *
+	 * @param metadataUriExtractor a Function able to compute the (possibly null)
+	 * metadataUri from a given app key
 	 */
-	private Function<Map.Entry<String, URI>, Stream<AppRegistration>> toValidAppRegistration(Function<String, URI> metadataUriExtractor) {
+	private Function<Map.Entry<String, URI>, Stream<AppRegistration>> toValidAppRegistration(
+			Function<String, URI> metadataUriExtractor) {
 		return (Map.Entry<String, URI> kv) -> {
 			String key = kv.getKey();
 			String[] tokens = key.split("\\.");
@@ -154,10 +158,11 @@ public class AppRegistry {
 				URI metadataURI = metadataUriExtractor.apply(key);
 				return Stream.of(new AppRegistration(name, type, appURI, metadataURI, resourceLoader));
 
-			} else {
-				Assert.isTrue(tokens.length == 3
-						&& METADATA_KEY_SUFFIX.equals(tokens[2]),
-					"Invalid format for app key '" + key + "'in file. Must be <type>.<name> or <type>.<name>.metadata");
+			}
+			else {
+				Assert.isTrue(tokens.length == 3 && METADATA_KEY_SUFFIX.equals(tokens[2]),
+						"Invalid format for app key '" + key + "'in file. Must be <type>.<name> or <type>.<name>"
+								+ ".metadata");
 				return Stream.empty();
 			}
 		};
@@ -187,8 +192,8 @@ public class AppRegistry {
 	}
 
 	/**
-	 * Deletes an {@link AppRegistration}. If the {@link AppRegistration} does not
-	 * exist, a {@link NoSuchAppRegistrationException} will be thrown.
+	 * Deletes an {@link AppRegistration}. If the {@link AppRegistration} does not exist,
+	 * a {@link NoSuchAppRegistrationException} will be thrown.
 	 *
 	 * @param name Name of the AppRegistration to delete
 	 * @param type Type of the AppRegistration to delete
@@ -220,10 +225,13 @@ public class AppRegistry {
 			logger.warn(String.format("Error when registering '%s': URI is required", key));
 		}
 		else if (!StringUtils.hasText(uri.getScheme())) {
-			logger.warn(String.format("Error when registering '%s' with URI %s: URI scheme must be specified", key, uri));
+			logger.warn(
+					String.format("Error when registering '%s' with URI %s: URI scheme must be specified", key, uri));
 		}
 		else if (!StringUtils.hasText(uri.getSchemeSpecificPart())) {
-			logger.warn(String.format("Error when registering '%s' with URI %s: URI scheme-specific part must be specified", key, uri));
+			logger.warn(String.format(
+					"Error when registering '%s' with URI %s: URI scheme-specific part must be " + "specified", key,
+					uri));
 		}
 		return uri;
 	}

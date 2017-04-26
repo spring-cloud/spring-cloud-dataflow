@@ -58,8 +58,8 @@ public class JobStepExecutionController {
 	 * Creates a {@code JobStepExecutionsController} that retrieves Job Step Execution
 	 * information from a the {@link JobService}
 	 *
-	 * @param jobService the service this controller will use for retrieving
-	 *  job step execution information.
+	 * @param jobService the service this controller will use for retrieving job step
+	 * execution information.
 	 */
 	@Autowired
 	public JobStepExecutionController(JobService jobService) {
@@ -74,16 +74,17 @@ public class JobStepExecutionController {
 	 * @param pageable the pagination information.
 	 * @param assembler the resource assembler for step executions.
 	 * @return Collection of {@link StepExecutionResource} for the given jobExecutionId.
-	 * @throws NoSuchJobExecutionException if the job execution for the id specified does not exist.
+	 * @throws NoSuchJobExecutionException if the job execution for the id specified does
+	 * not exist.
 	 */
 	@RequestMapping(value = { "" }, method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
-	public PagedResources<StepExecutionResource> stepExecutions(
-			@PathVariable("jobExecutionId") long id, Pageable pageable, PagedResourcesAssembler<StepExecution> assembler) throws NoSuchJobExecutionException{
+	public PagedResources<StepExecutionResource> stepExecutions(@PathVariable("jobExecutionId") long id,
+			Pageable pageable, PagedResourcesAssembler<StepExecution> assembler) throws NoSuchJobExecutionException {
 		List<StepExecution> result;
-			result = new ArrayList<>(jobService.getStepExecutions(id));
+		result = new ArrayList<>(jobService.getStepExecutions(id));
 		Page<StepExecution> page = new PageImpl<>(result, pageable, result.size());
-		return assembler.toResource(page,stepAssembler);
+		return assembler.toResource(page, stepAssembler);
 	}
 
 	/**
@@ -93,20 +94,20 @@ public class JobStepExecutionController {
 	 * @param stepId the {@link StepExecution} id.
 	 * @return Collection of {@link StepExecutionResource} for the given jobExecutionId.
 	 * @throws NoSuchStepExecutionException if the stepId specified does not exist.
-	 * @throws NoSuchJobExecutionException if the job execution for the id specified does not exist.
+	 * @throws NoSuchJobExecutionException if the job execution for the id specified does
+	 * not exist.
 	 */
 	@RequestMapping(value = { "/{stepExecutionId}" }, method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
-	public StepExecutionResource getStepExecution(
-			@PathVariable("jobExecutionId") Long id,
-			@PathVariable("stepExecutionId") Long stepId) throws
-			NoSuchStepExecutionException, NoSuchJobExecutionException {
+	public StepExecutionResource getStepExecution(@PathVariable("jobExecutionId") Long id,
+			@PathVariable("stepExecutionId") Long stepId)
+			throws NoSuchStepExecutionException, NoSuchJobExecutionException {
 		return stepAssembler.toResource(jobService.getStepExecution(id, stepId));
 	}
 
 	/**
-	 * {@link org.springframework.hateoas.ResourceAssembler} implementation
-	 * that converts {@link StepExecution}s to {@link StepExecutionResource}s.
+	 * {@link org.springframework.hateoas.ResourceAssembler} implementation that converts
+	 * {@link StepExecution}s to {@link StepExecutionResource}s.
 	 */
 	private static class Assembler extends ResourceAssemblerSupport<StepExecution, StepExecutionResource> {
 

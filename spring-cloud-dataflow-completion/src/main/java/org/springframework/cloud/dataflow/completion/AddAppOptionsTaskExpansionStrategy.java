@@ -16,8 +16,6 @@
 
 package org.springframework.cloud.dataflow.completion;
 
-import static org.springframework.cloud.dataflow.completion.CompletionProposal.expanding;
-
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -30,8 +28,12 @@ import org.springframework.cloud.dataflow.registry.AppRegistration;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.core.io.Resource;
 
+import static org.springframework.cloud.dataflow.completion.CompletionProposal.expanding;
+
 /**
- * Adds missing application configuration properties at the end of a well formed task definition.
+ * Adds missing application configuration properties at the end of a well formed task
+ * definition.
+ *
  * @author Eric Bottard
  * @author Mark Fisher
  * @author Andy Clement
@@ -42,14 +44,15 @@ class AddAppOptionsTaskExpansionStrategy implements TaskExpansionStrategy {
 
 	private final ApplicationConfigurationMetadataResolver metadataResolver;
 
-	public AddAppOptionsTaskExpansionStrategy(AppRegistry appRegistry, ApplicationConfigurationMetadataResolver metadataResolver) {
+	public AddAppOptionsTaskExpansionStrategy(AppRegistry appRegistry,
+			ApplicationConfigurationMetadataResolver metadataResolver) {
 		this.appRegistry = appRegistry;
 		this.metadataResolver = metadataResolver;
 	}
 
 	@Override
 	public boolean addProposals(String text, TaskDefinition taskDefinition, int detailLevel,
-	                            List<CompletionProposal> collector) {
+			List<CompletionProposal> collector) {
 		String appName = taskDefinition.getRegisteredAppName();
 		AppRegistration appRegistration = this.appRegistry.find(appName, ApplicationType.task);
 		if (appRegistration == null) {
@@ -63,7 +66,8 @@ class AddAppOptionsTaskExpansionStrategy implements TaskExpansionStrategy {
 		// For whitelisted properties, use their simple name
 		for (ConfigurationMetadataProperty property : metadataResolver.listProperties(metadataResource)) {
 			if (!alreadyPresentOptions.contains(property.getName())) {
-				collector.add(proposals.withSeparateTokens("--" + property.getName() + "=", property.getShortDescription()));
+				collector.add(
+						proposals.withSeparateTokens("--" + property.getName() + "=", property.getShortDescription()));
 			}
 		}
 
@@ -71,7 +75,8 @@ class AddAppOptionsTaskExpansionStrategy implements TaskExpansionStrategy {
 		if (detailLevel > 1) {
 			for (ConfigurationMetadataProperty property : metadataResolver.listProperties(metadataResource, true)) {
 				if (!alreadyPresentOptions.contains(property.getId())) {
-					collector.add(proposals.withSeparateTokens("--" + property.getId() + "=", property.getShortDescription()));
+					collector.add(proposals.withSeparateTokens("--" + property.getId() + "=",
+							property.getShortDescription()));
 				}
 			}
 

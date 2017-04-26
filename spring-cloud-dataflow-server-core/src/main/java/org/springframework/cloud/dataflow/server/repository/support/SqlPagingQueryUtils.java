@@ -19,20 +19,20 @@ package org.springframework.cloud.dataflow.server.repository.support;
 import java.util.Map;
 
 /**
- * Utility class that generates the actual SQL statements used by query
- * providers.
+ * Utility class that generates the actual SQL statements used by query providers.
  *
  * @author Glenn Renfro
  */
 public class SqlPagingQueryUtils {
 
-	private SqlPagingQueryUtils(){}
+	private SqlPagingQueryUtils() {
+	}
 
 	/**
 	 * Generate SQL query string using a LIMIT clause
 	 *
-	 * @param provider {@link AbstractSqlPagingQueryProvider} providing the
-	 * implementation specifics
+	 * @param provider {@link AbstractSqlPagingQueryProvider} providing the implementation
+	 * specifics
 	 * @param limitClause the implementation specific top clause to be used
 	 * @return the generated query
 	 */
@@ -50,8 +50,8 @@ public class SqlPagingQueryUtils {
 	/**
 	 * Generate SQL query string using a TOP clause
 	 *
-	 * @param provider {@link AbstractSqlPagingQueryProvider} providing the
-	 * implementation specifics
+	 * @param provider {@link AbstractSqlPagingQueryProvider} providing the implementation
+	 * specifics
 	 * @param topClause the implementation specific top clause to be used
 	 * @return the generated query
 	 */
@@ -72,8 +72,8 @@ public class SqlPagingQueryUtils {
 	 * @param remainingPageQuery whether there is a page query
 	 * @param sql the sql to append the WHERE clause
 	 */
-	public static void buildWhereClause( AbstractSqlPagingQueryProvider provider,
-										 boolean remainingPageQuery, StringBuilder sql) {
+	public static void buildWhereClause(AbstractSqlPagingQueryProvider provider, boolean remainingPageQuery,
+			StringBuilder sql) {
 		if (remainingPageQuery) {
 			sql.append(" WHERE ");
 			if (provider.getWhereClause() != null) {
@@ -90,8 +90,8 @@ public class SqlPagingQueryUtils {
 	/**
 	 * Generates ORDER BY attributes based on the sort keys.
 	 *
-	 * @param provider {@link AbstractSqlPagingQueryProvider} providing the
-	 * implementation specifics
+	 * @param provider {@link AbstractSqlPagingQueryProvider} providing the implementation
+	 * specifics
 	 * @return a String that can be appended to an ORDER BY clause.
 	 */
 	public static String buildSortClause(AbstractSqlPagingQueryProvider provider) {
@@ -115,7 +115,7 @@ public class SqlPagingQueryUtils {
 
 			builder.append(sortKey.getKey());
 
-			if(sortKey.getValue() != null && sortKey.getValue() == Order.DESCENDING) {
+			if (sortKey.getValue() != null && sortKey.getValue() == Order.DESCENDING) {
 				builder.append(" DESC");
 			}
 			else {

@@ -19,8 +19,8 @@ import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.registry.AppRegistration;
 
 /**
- * Thrown when an {@link AppRegistration} of a given name and {@link ApplicationType}
- * was expected but did not exist.
+ * Thrown when an {@link AppRegistration} of a given name and {@link ApplicationType} was
+ * expected but did not exist.
  *
  * @author Gunnar Hillert
  */

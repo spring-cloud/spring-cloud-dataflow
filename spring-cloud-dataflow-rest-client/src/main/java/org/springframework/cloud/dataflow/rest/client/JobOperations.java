@@ -35,8 +35,8 @@ public interface JobOperations {
 	PagedResources<JobExecutionResource> executionList();
 
 	/**
-	 * @return the list job instances for the specified jobName.
 	 * @param jobName the name of the job
+	 * @return the list job instances for the specified jobName.
 	 */
 	PagedResources<JobInstanceResource> instanceList(String jobName);
 
@@ -73,14 +73,13 @@ public interface JobOperations {
 	PagedResources<StepExecutionResource> stepExecutionList(long jobExecutionId);
 
 	/**
-	 * Return StepExecutionProgressInfoResource for a specific job execution id and
-	 * step execution Id.
+	 * Return StepExecutionProgressInfoResource for a specific job execution id and step
+	 * execution Id.
 	 *
-	 * @param jobExecutionId  the id of the job execution for the step to be returned.
+	 * @param jobExecutionId the id of the job execution for the step to be returned.
 	 * @param stepExecutionId the id step execution to be returned.
 	 * @return the step execution progress info
 	 */
-	StepExecutionProgressInfoResource stepExecutionProgress(long jobExecutionId,
-			long stepExecutionId);
+	StepExecutionProgressInfoResource stepExecutionProgress(long jobExecutionId, long stepExecutionId);
 
 }

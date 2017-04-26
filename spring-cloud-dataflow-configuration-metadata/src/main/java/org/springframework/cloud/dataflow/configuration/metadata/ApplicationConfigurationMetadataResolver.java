@@ -24,7 +24,8 @@ import org.springframework.boot.configurationmetadata.ConfigurationMetadataPrope
 import org.springframework.core.io.Resource;
 
 /**
- * Used to retrieve metadata about the configuration properties that can alter an application's behavior.
+ * Used to retrieve metadata about the configuration properties that can alter an
+ * application's behavior.
  *
  * @author Eric Bottard
  */
@@ -35,23 +36,28 @@ public abstract class ApplicationConfigurationMetadataResolver {
 	}
 
 	/**
-	 * For resolvers that support it, create a new ClassLoader that is able to load classes for the given app.
-	 * The default implementation returns an empty classloader
+	 * For resolvers that support it, create a new ClassLoader that is able to load
+	 * classes for the given app. The default implementation returns an empty classloader
+	 *
 	 * @param app an app to create a ClassLoader for
-	 * @return a new ClassLoader. Callers are responsible for closing the returned class loader.
+	 * @return a new ClassLoader. Callers are responsible for closing the returned class
+	 * loader.
 	 */
 	public URLClassLoader createAppClassLoader(Resource app) {
 		return new URLClassLoader(new URL[0], null);
 	}
 
 	/**
-	 * Return metadata about configuration properties that are documented via
-	 * <a href="http://docs.spring.io/spring-boot/docs/current/reference/html/configuration-metadata.html">
+	 * Return metadata about configuration properties that are documented via <a href=
+	 * "http://docs.spring.io/spring-boot/docs/current/reference/html/configuration-metadata.html">
 	 * Spring Boot configuration metadata</a> and visible in an app.
-	 * @param metadataResource the metadata file that contains app specific configuration properties. Typically a JAR file
-	 *                         containing the configuration metadata files or the app that includes metadata files as well.
+	 *
+	 * @param metadataResource the metadata file that contains app specific configuration
+	 * properties. Typically a JAR file containing the configuration metadata files or the
+	 * app that includes metadata files as well.
 	 * @param exhaustive return all metadata, including common Spring Boot properties
 	 * @return the list of configuration metdata properties
 	 */
-	public abstract List<ConfigurationMetadataProperty> listProperties(Resource metadataResource, boolean exhaustive);
+	public abstract List<ConfigurationMetadataProperty> listProperties(Resource metadataResource,
+			boolean exhaustive);
 }

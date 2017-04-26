@@ -24,7 +24,9 @@ import org.springframework.batch.core.JobInstance;
 import org.springframework.util.Assert;
 
 /**
- * Enumerates the relationship between a {@link JobInstance} and its {@link JobExecution}s.
+ * Enumerates the relationship between a {@link JobInstance} and its
+ * {@link JobExecution}s.
+ *
  * @author Glenn Renfro
  */
 public class JobInstanceExecutions {
@@ -51,8 +53,8 @@ public class JobInstanceExecutions {
 	}
 
 	/**
-	 * @return a list ot TaskJobExecutions that are associated with the Job Instance
-	 * for this relationship.
+	 * @return a list ot TaskJobExecutions that are associated with the Job Instance for
+	 * this relationship.
 	 */
 	public List<TaskJobExecution> getTaskJobExecutions() {
 		return taskJobExecutions;

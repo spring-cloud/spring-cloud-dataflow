@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,16 +17,22 @@
 package org.springframework.cloud.dataflow.core.dsl;
 
 /**
- * Basic visitor pattern for a parsed task. Provide a concrete implementation to participate in the
- * visit and pass it to a parsed TaskNode. A simple task only has one sequence, for
- * example: <tt>appA && appB && appC</tt>. In this situation <tt> preVisit(int)</tt> and <tt>postVisit(int)</tt>
- * will only be called with 0. A more complex situation would be:<pre></code>
+ * Basic visitor pattern for a parsed task. Provide a concrete implementation to
+ * participate in the visit and pass it to a parsed TaskNode. A simple task only has one
+ * sequence, for example: <tt>appA && appB && appC</tt>. In this situation
+ * <tt> preVisit(int)</tt> and <tt>postVisit(int)</tt> will only be called with 0. A more
+ * complex situation would be:
+ *
+ * <pre>
+ * </code>
  * appA && appB 0->:foo *->appC
  * foo: appD && appE
- * </code></pre>
- * This includes two sequences - as in two separate definitions. The primary definition references other
- * definitions where it would be too messy to inline them. In this case <tt>preVisit(int)</tt> would be called
- * for both 0 and 1.
+ * </code>
+ * </pre>
+ *
+ * This includes two sequences - as in two separate definitions. The primary definition
+ * references other definitions where it would be too messy to inline them. In this case
+ * <tt>preVisit(int)</tt> would be called for both 0 and 1.
  *
  * @author Andy Clement
  */
@@ -34,6 +40,7 @@ public abstract class TaskVisitor {
 
 	/**
 	 * The first call made to a visitor.
+	 *
 	 * @param taskName the name of the task definition
 	 * @param taskDsl the textual definition of the AST being visited
 	 */
@@ -87,9 +94,10 @@ public abstract class TaskVisitor {
 	}
 
 	/**
-	 * <b>This preVisit/visit/postVisit sequence for taskApp is not invoked for inlined references to apps
-	 * in transitions, for example: <tt>appA 0->:foo 1->appB</tt>. The reference to <tt>appB</tt> would be
-	 * seen in the transition visit below.
+	 * <b>This preVisit/visit/postVisit sequence for taskApp is not invoked for inlined
+	 * references to apps in transitions, for example: <tt>appA 0->:foo 1->appB</tt>. The
+	 * reference to <tt>appB</tt> would be seen in the transition visit below.
+	 *
 	 * @param taskApp the use of a task app in a task dsl
 	 * @return false to skip visiting this taskApp
 	 */
@@ -104,8 +112,9 @@ public abstract class TaskVisitor {
 	}
 
 	/**
-	 * After <tt>visit(TaskAppNode)</tt> and before <tt>postVisit(TaskAppNode)</tt> the transitions (if there
-	 * are any) are visited for that task app.
+	 * After <tt>visit(TaskAppNode)</tt> and before <tt>postVisit(TaskAppNode)</tt> the
+	 * transitions (if there are any) are visited for that task app.
+	 *
 	 * @param transition the transition
 	 * @return false to skip visiting this transition
 	 */
@@ -115,8 +124,8 @@ public abstract class TaskVisitor {
 
 	public void visit(TransitionNode transition) {
 	}
-	
+
 	public void postVisit(TransitionNode transition) {
 	}
-	
+
 }

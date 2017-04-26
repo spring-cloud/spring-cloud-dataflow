@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Test;
+
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -40,6 +41,8 @@ import static org.junit.Assert.assertTrue;
  * @author Glenn Renfro
  */
 public abstract class AbstractTaskDefinitionTests {
+	protected TaskDefinitionRepository repository;
+
 	@Test
 	public void testFindOne() {
 		TaskDefinition definition = new TaskDefinition("task1", "myTask");
@@ -49,8 +52,6 @@ public abstract class AbstractTaskDefinitionTests {
 
 		assertEquals(definition, repository.findOne("task1"));
 	}
-
-	protected TaskDefinitionRepository repository;
 
 	@Test
 	public void testFindAllNone() {
@@ -122,7 +123,8 @@ public abstract class AbstractTaskDefinitionTests {
 		Iterable<TaskDefinition> items = repository.findAll();
 
 		int count = 0;
-		for (@SuppressWarnings("unused") TaskDefinition item : items) {
+		for (@SuppressWarnings("unused")
+		TaskDefinition item : items) {
 			count++;
 		}
 
@@ -142,7 +144,8 @@ public abstract class AbstractTaskDefinitionTests {
 		Iterable<TaskDefinition> items = repository.findAll(names);
 
 		int count = 0;
-		for (@SuppressWarnings("unused") TaskDefinition item : items) {
+		for (@SuppressWarnings("unused")
+		TaskDefinition item : items) {
 			count++;
 		}
 

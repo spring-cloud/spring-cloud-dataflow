@@ -15,8 +15,6 @@
  */
 package org.springframework.cloud.dataflow.server.config.security;
 
-import static org.springframework.cloud.dataflow.server.controller.UiController.dashboard;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.oauth2.client.EnableOAuth2Sso;
 import org.springframework.cloud.dataflow.server.config.security.support.OnSecurityEnabledAndOAuth2Enabled;
@@ -35,12 +33,13 @@ import org.springframework.security.oauth2.provider.authentication.OAuth2Authent
 import org.springframework.security.oauth2.provider.token.ResourceServerTokenServices;
 import org.springframework.security.web.authentication.preauth.AbstractPreAuthenticatedProcessingFilter;
 
+import static org.springframework.cloud.dataflow.server.controller.UiController.dashboard;
+
 /**
  * Setup Spring Security OAuth for the Rest Endpoints of Spring Cloud Data Flow.
  *
  * @author Gunnar Hillert
  * @author Ilayaperumal Gopinathan
- *
  */
 @EnableOAuth2Sso
 @Configuration
@@ -57,21 +56,11 @@ public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 		http.addFilterBefore(oAuth2AuthenticationProcessingFilter(), AbstractPreAuthenticatedProcessingFilter.class);
-		http.authorizeRequests()
-			.antMatchers(
-					"/security/info**",
-					"/login**",
-					dashboard("/logout-success-oauth.html"),
-					dashboard("/styles/**"),
-					dashboard("/images/**"),
-					dashboard("/fonts/**"),
-					dashboard("/lib/**")
+		http.authorizeRequests().antMatchers("/security/info**", "/login**", dashboard("/logout-success-oauth.html"),
+				dashboard("/styles/**"), dashboard("/images/**"), dashboard("/fonts/**"), dashboard("/lib/**")
 
-					).permitAll()
-			.anyRequest().authenticated()
-		.and().httpBasic()
-		.and().logout().logoutSuccessUrl(dashboard("/logout-success-oauth.html"))
-		.and().csrf().disable();
+		).permitAll().anyRequest().authenticated().and().httpBasic().and().logout()
+				.logoutSuccessUrl(dashboard("/logout-success-oauth.html")).and().csrf().disable();
 
 		securityStateBean.setAuthenticationEnabled(true);
 		securityStateBean.setAuthorizationEnabled(false);
@@ -83,7 +72,8 @@ public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 	}
 
 	private OAuth2AuthenticationProcessingFilter oAuth2AuthenticationProcessingFilter() {
-		final OAuth2AuthenticationProcessingFilter oAuth2AuthenticationProcessingFilter = new OAuth2AuthenticationProcessingFilter();
+		final OAuth2AuthenticationProcessingFilter oAuth2AuthenticationProcessingFilter =
+				new OAuth2AuthenticationProcessingFilter();
 		oAuth2AuthenticationProcessingFilter.setAuthenticationManager(oauthAuthenticationManager());
 		oAuth2AuthenticationProcessingFilter.setStateless(false);
 		return oAuth2AuthenticationProcessingFilter;

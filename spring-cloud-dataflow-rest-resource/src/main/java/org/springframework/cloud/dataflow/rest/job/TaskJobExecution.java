@@ -16,13 +16,11 @@
 
 package org.springframework.cloud.dataflow.rest.job;
 
-
 import org.springframework.batch.core.JobExecution;
 import org.springframework.util.Assert;
 
 /**
- * The relation a {@link JobExecution} has with its associated task
- * execution id.
+ * The relation a {@link JobExecution} has with its associated task execution id.
  *
  * @author Glenn Renfro
  */

@@ -32,7 +32,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Exposes the DSL completion features of {@link StreamCompletionProvider} and {@link TaskCompletionProvider} as a REST API.
+ * Exposes the DSL completion features of {@link StreamCompletionProvider} and
+ * {@link TaskCompletionProvider} as a REST API.
  *
  * @author Eric Bottard
  * @author Andy Clement
@@ -50,50 +51,53 @@ public class CompletionController {
 	private final Assembler assembler = new Assembler();
 
 	/**
-	 * Create a controller for the provided {@link StreamCompletionProvider} and {@link TaskCompletionProvider}.
+	 * Create a controller for the provided {@link StreamCompletionProvider} and
+	 * {@link TaskCompletionProvider}.
+	 *
 	 * @param completionProvider the stream completion provider
 	 * @param taskCompletionProvider the task completion provider
 	 */
-	public CompletionController(StreamCompletionProvider completionProvider, TaskCompletionProvider taskCompletionProvider) {
+	public CompletionController(StreamCompletionProvider completionProvider,
+			TaskCompletionProvider taskCompletionProvider) {
 		this.completionProvider = completionProvider;
 		this.taskCompletionProvider = taskCompletionProvider;
 	}
 
 	/**
-	 * Return a list of possible completions given a prefix string that the user has started typing.
+	 * Return a list of possible completions given a prefix string that the user has
+	 * started typing.
 	 *
 	 * @param start the amount of text written so far
-	 * @param detailLevel the level of detail the user wants in completions, starting at 1.
-	 * Higher values request more detail, with values typically in the range [1..5]
+	 * @param detailLevel the level of detail the user wants in completions, starting at
+	 * 1. Higher values request more detail, with values typically in the range [1..5]
 	 * @return the list of completion proposals
 	 */
 	@RequestMapping(value = "/stream")
-	public CompletionProposalsResource completions(
-			@RequestParam("start") String start,
+	public CompletionProposalsResource completions(@RequestParam("start") String start,
 			@RequestParam(value = "detailLevel", defaultValue = "1")
-			@Min(value=1, message="The provided detail level must be greater than zero.") int detailLevel) {
+			@Min(value = 1, message = "The provided detail level must be greater than zero.") int detailLevel) {
 		return assembler.toResource(completionProvider.complete(start, detailLevel));
 	}
 
 	/**
-	 * Return a list of possible completions given a prefix string that the user has started typing.
+	 * Return a list of possible completions given a prefix string that the user has
+	 * started typing.
 	 *
 	 * @param start the amount of text written so far
-	 * @param detailLevel the level of detail the user wants in completions, starting at 1.
-	 * Higher values request more detail, with values typically in the range [1..5]
+	 * @param detailLevel the level of detail the user wants in completions, starting at
+	 * 1. Higher values request more detail, with values typically in the range [1..5]
 	 * @return the list of completion proposals
 	 */
 	@RequestMapping(value = "/task")
-	public CompletionProposalsResource taskCompletions(
-			@RequestParam("start") String start,
+	public CompletionProposalsResource taskCompletions(@RequestParam("start") String start,
 			@RequestParam(value = "detailLevel", defaultValue = "1")
-			@Min(value=1, message="The provided detail level must be greater than zero.") int detailLevel) {
+			@Min(value = 1, message = "The provided detail level must be greater than zero.") int detailLevel) {
 		return assembler.toResource(taskCompletionProvider.complete(start, detailLevel));
 	}
 
 	/**
-	 * {@link org.springframework.hateoas.ResourceAssembler} implementation
-	 * that converts {@link CompletionProposal}s to {@link CompletionProposalsResource}s.
+	 * {@link org.springframework.hateoas.ResourceAssembler} implementation that converts
+	 * {@link CompletionProposal}s to {@link CompletionProposalsResource}s.
 	 */
 	static class Assembler extends ResourceAssemblerSupport<List<CompletionProposal>, CompletionProposalsResource> {
 

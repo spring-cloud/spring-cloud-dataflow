@@ -15,20 +15,19 @@
  */
 package org.springframework.cloud.dataflow.server.completion;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
-
 import org.junit.Test;
+
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.server.DataFlowServerUtil;
 import org.springframework.cloud.dataflow.server.support.CannotDetermineApplicationTypeException;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+
 /**
- *
  * @author Gunnar Hillert
- *
  */
 public class DataFlowServerUtilTests {
 
@@ -43,7 +42,8 @@ public class DataFlowServerUtilTests {
 		final StreamAppDefinition streamAppDefinitionSink = streamDefinition.getAppDefinitions().get(2);
 
 		assertEquals(ApplicationType.source, DataFlowServerUtil.determineApplicationType(streamAppDefinitionSource));
-		assertEquals(ApplicationType.processor, DataFlowServerUtil.determineApplicationType(streamAppDefinitionProcessor));
+		assertEquals(ApplicationType.processor,
+				DataFlowServerUtil.determineApplicationType(streamAppDefinitionProcessor));
 		assertEquals(ApplicationType.sink, DataFlowServerUtil.determineApplicationType(streamAppDefinitionSink));
 
 		assertEquals("foo", streamAppDefinitionSource.getName());
@@ -58,7 +58,7 @@ public class DataFlowServerUtilTests {
 		assertEquals(Integer.valueOf(1), Integer.valueOf(streamDefinition.getAppDefinitions().size()));
 
 		try {
-			for (StreamAppDefinition streamAppDefinition: streamDefinition.getAppDefinitions()) {
+			for (StreamAppDefinition streamAppDefinition : streamDefinition.getAppDefinitions()) {
 				DataFlowServerUtil.determineApplicationType(streamAppDefinition);
 			}
 		}

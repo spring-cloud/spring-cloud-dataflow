@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -43,22 +43,21 @@ public class TaskValidatorVisitor extends TaskVisitor {
 
 	// At the end of the visit, verify any sequences that are never used
 	private List<LabelledTaskNode> recordedSequences = new ArrayList<>();
-	
+
 	private Set<TransitionNode> transitionsTargetingLabels = new HashSet<>();
-	
+
 	private Set<String> labelsDefined = new HashSet<>();
-	
+
 	private Set<String> taskAppNamesWithoutLabels = new HashSet<>();
-	
 
 	public List<TaskValidationProblem> getProblems() {
 		return problems;
 	}
-	
+
 	public boolean hasProblems() {
 		return problems.size() != 0;
 	}
-	
+
 	public void reset() {
 		this.problems.clear();
 		this.recordedSequences.clear();
@@ -66,12 +65,12 @@ public class TaskValidatorVisitor extends TaskVisitor {
 		this.labelsDefined.clear();
 		this.taskAppNamesWithoutLabels.clear();
 	}
-	
+
 	@Override
 	public void startVisit(String taskName, String taskDsl) {
 		this.taskDsl = taskDsl;
 	}
-	
+
 	@Override
 	public boolean preVisitSequence(LabelledTaskNode firstNode, int sequenceNumber) {
 		if (sequenceNumber > 0 && !firstNode.hasLabel()) {
@@ -84,12 +83,12 @@ public class TaskValidatorVisitor extends TaskVisitor {
 	@Override
 	public boolean preVisit(SplitNode split) {
 		if (split.getSeriesLength() == 1) {
-			pushProblem(split.startPos,DSLMessage.TASK_VALIDATION_SPLIT_WITH_ONE_FLOW);
+			pushProblem(split.startPos, DSLMessage.TASK_VALIDATION_SPLIT_WITH_ONE_FLOW);
 		}
 		if (split.hasLabel()) {
 			String labelString = split.getLabelString();
 			if (labelsDefined.contains(labelString)) {
-				pushProblem(split.getLabel().startPos,DSLMessage.TASK_VALIDATION_DUPLICATE_LABEL);
+				pushProblem(split.getLabel().startPos, DSLMessage.TASK_VALIDATION_DUPLICATE_LABEL);
 			}
 			labelsDefined.add(labelString);
 		}
@@ -105,16 +104,16 @@ public class TaskValidatorVisitor extends TaskVisitor {
 			}
 			labelsDefined.add(labelString);
 			if (taskAppNamesWithoutLabels.contains(labelString)) {
-				pushProblem(taskApp.getLabel().startPos,DSLMessage.TASK_VALIDATION_LABEL_CLASHES_WITH_TASKAPP_NAME);
+				pushProblem(taskApp.getLabel().startPos, DSLMessage.TASK_VALIDATION_LABEL_CLASHES_WITH_TASKAPP_NAME);
 			}
 		}
 		else {
 			String name = taskApp.getName();
 			if (labelsDefined.contains(name)) {
-				pushProblem(taskApp.startPos,DSLMessage.TASK_VALIDATION_APP_NAME_CLASHES_WITH_LABEL);
+				pushProblem(taskApp.startPos, DSLMessage.TASK_VALIDATION_APP_NAME_CLASHES_WITH_LABEL);
 			}
 			if (taskAppNamesWithoutLabels.contains(name)) {
-				pushProblem(taskApp.startPos,DSLMessage.TASK_VALIDATION_APP_NAME_ALREADY_IN_USE);
+				pushProblem(taskApp.startPos, DSLMessage.TASK_VALIDATION_APP_NAME_ALREADY_IN_USE);
 			}
 			taskAppNamesWithoutLabels.add(taskApp.getName());
 		}
@@ -134,33 +133,35 @@ public class TaskValidatorVisitor extends TaskVisitor {
 				}
 				labelsDefined.add(labelString);
 				if (taskAppNamesWithoutLabels.contains(labelString)) {
-					pushProblem(taskApp.getLabel().startPos,DSLMessage.TASK_VALIDATION_LABEL_CLASHES_WITH_TASKAPP_NAME);
+					pushProblem(taskApp.getLabel().startPos,
+							DSLMessage.TASK_VALIDATION_LABEL_CLASHES_WITH_TASKAPP_NAME);
 				}
 			}
 			else {
 				String name = taskApp.getName();
 				if (labelsDefined.contains(name)) {
-					pushProblem(taskApp.startPos,DSLMessage.TASK_VALIDATION_APP_NAME_CLASHES_WITH_LABEL);
+					pushProblem(taskApp.startPos, DSLMessage.TASK_VALIDATION_APP_NAME_CLASHES_WITH_LABEL);
 				}
 				if (taskAppNamesWithoutLabels.contains(name)) {
-					pushProblem(taskApp.startPos,DSLMessage.TASK_VALIDATION_APP_NAME_ALREADY_IN_USE);
+					pushProblem(taskApp.startPos, DSLMessage.TASK_VALIDATION_APP_NAME_ALREADY_IN_USE);
 				}
 				taskAppNamesWithoutLabels.add(taskApp.getName());
 			}
 		}
 	}
-	
+
 	@Override
 	public void endVisit() {
 		// Verify all targeted labels exist
-		for (TransitionNode transitionTargetingLabel: transitionsTargetingLabels) {
+		for (TransitionNode transitionTargetingLabel : transitionsTargetingLabels) {
 			if (!labelsDefined.contains(transitionTargetingLabel.getTargetLabel())) {
-				pushProblem(transitionTargetingLabel.startPos,DSLMessage.TASK_VALIDATION_TRANSITION_TARGET_LABEL_UNDEFINED);
+				pushProblem(transitionTargetingLabel.startPos,
+						DSLMessage.TASK_VALIDATION_TRANSITION_TARGET_LABEL_UNDEFINED);
 			}
 		}
 		// TODO Verify all secondary sequences are visited
 	}
-	
+
 	private void pushProblem(int pos, DSLMessage message) {
 		problems.add(new TaskValidationProblem(taskDsl, pos, message));
 	}

@@ -16,9 +16,6 @@
 
 package org.springframework.cloud.dataflow.server.configuration;
 
-import static org.mockito.Mockito.mock;
-import static org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType.HAL;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -83,6 +80,9 @@ import org.springframework.validation.beanvalidation.MethodValidationPostProcess
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
 
+import static org.mockito.Mockito.mock;
+import static org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType.HAL;
+
 /**
  * @author Michael Minella
  * @author Mark Fisher
@@ -93,7 +93,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupp
 @EnableHypermediaSupport(type = HAL)
 @Import(CompletionConfiguration.class)
 @EnableWebMvc
-@EnableConfigurationProperties({CommonApplicationProperties.class, MetricsProperties.class})
+@EnableConfigurationProperties({ CommonApplicationProperties.class, MetricsProperties.class })
 public class TestDependencies extends WebMvcConfigurationSupport {
 
 	@Bean
@@ -137,7 +137,8 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	}
 
 	@Bean
-	public CompletionController completionController(StreamCompletionProvider streamCompletionProvider, TaskCompletionProvider taskCompletionProvider) {
+	public CompletionController completionController(StreamCompletionProvider streamCompletionProvider,
+			TaskCompletionProvider taskCompletionProvider) {
 		return new CompletionController(streamCompletionProvider, taskCompletionProvider);
 	}
 
@@ -147,7 +148,8 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	}
 
 	@Bean
-	public AppRegistryController appRegistryController(AppRegistry registry, ApplicationConfigurationMetadataResolver metadataResolver) {
+	public AppRegistryController appRegistryController(AppRegistry registry,
+			ApplicationConfigurationMetadataResolver metadataResolver) {
 		return new AppRegistryController(registry, metadataResolver, new ForkJoinPool(2));
 	}
 
@@ -158,7 +160,8 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 
 	@Bean
 	public RuntimeAppsController runtimeAppsController(MetricStore metricStore) {
-		return new RuntimeAppsController(streamDefinitionRepository(), deploymentIdRepository(), appDeployer(), metricStore, new ForkJoinPool(2));
+		return new RuntimeAppsController(streamDefinitionRepository(), deploymentIdRepository(), appDeployer(),
+				metricStore, new ForkJoinPool(2));
 	}
 
 	@Bean
@@ -206,22 +209,16 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 
 	@Bean
 	public TaskDefinitionController taskDefinitionController(TaskDefinitionRepository repository,
-			DeploymentIdRepository deploymentIdRepository,
-			ApplicationConfigurationMetadataResolver metadataResolver) {
-		return new TaskDefinitionController(repository, deploymentIdRepository,
-				taskLauncher(), appRegistry(),
-				taskService(metadataResolver, taskRepository(),
-						deploymentIdRepository));
+			DeploymentIdRepository deploymentIdRepository, ApplicationConfigurationMetadataResolver metadataResolver) {
+		return new TaskDefinitionController(repository, deploymentIdRepository, taskLauncher(), appRegistry(),
+				taskService(metadataResolver, taskRepository(), deploymentIdRepository));
 	}
 
 	@Bean
-	public TaskExecutionController taskExecutionController(
-			TaskExplorer explorer,
-			ApplicationConfigurationMetadataResolver metadataResolver,
-			DeploymentIdRepository deploymentIdRepository) {
+	public TaskExecutionController taskExecutionController(TaskExplorer explorer,
+			ApplicationConfigurationMetadataResolver metadataResolver, DeploymentIdRepository deploymentIdRepository) {
 		return new TaskExecutionController(explorer,
-				taskService(metadataResolver, taskRepository(),
-						deploymentIdRepository), taskDefinitionRepository());
+				taskService(metadataResolver, taskRepository(), deploymentIdRepository), taskDefinitionRepository());
 	}
 
 	@Bean
@@ -260,15 +257,11 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	}
 
 	@Bean
-	public TaskService taskService(
-		ApplicationConfigurationMetadataResolver metadataResolver,
-		TaskRepository taskExecutionRepository,
-			DeploymentIdRepository deploymentIdRepository) {
-		return new DefaultTaskService(new DataSourceProperties(),
-				taskDefinitionRepository(), taskExplorer(), taskExecutionRepository,
-				appRegistry(), resourceLoader(), taskLauncher(),
-				metadataResolver, new TaskConfigurationProperties(),
-				deploymentIdRepository, null);
+	public TaskService taskService(ApplicationConfigurationMetadataResolver metadataResolver,
+			TaskRepository taskExecutionRepository, DeploymentIdRepository deploymentIdRepository) {
+		return new DefaultTaskService(new DataSourceProperties(), taskDefinitionRepository(), taskExplorer(),
+				taskExecutionRepository, appRegistry(), resourceLoader(), taskLauncher(), metadataResolver,
+				new TaskConfigurationProperties(), deploymentIdRepository, null);
 	}
 
 	@Bean

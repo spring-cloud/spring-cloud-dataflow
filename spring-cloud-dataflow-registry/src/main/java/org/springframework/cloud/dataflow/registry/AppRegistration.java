@@ -24,7 +24,8 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.util.Assert;
 
 /**
- * This maps a (name + type) pair to a URI and provides on-demand access to the {@link Resource}.
+ * This maps a (name + type) pair to a URI and provides on-demand access to the
+ * {@link Resource}.
  *
  * @author Patrick Peralta
  * @author Mark Fisher
@@ -47,7 +48,8 @@ public class AppRegistration implements Comparable<AppRegistration> {
 	private final URI uri;
 
 	/**
-	 * URI for the app metadata or {@literal null} if the app itself should be used as metadata source.
+	 * URI for the app metadata or {@literal null} if the app itself should be used as
+	 * metadata source.
 	 */
 	private final URI metadataUri;
 
@@ -67,7 +69,8 @@ public class AppRegistration implements Comparable<AppRegistration> {
 	 * @param name app name
 	 * @param type app type
 	 * @param uri URI for the app resource
-	 * @param loader the {@link ResourceLoader} that loads the {@link Resource} for this app
+	 * @param loader the {@link ResourceLoader} that loads the {@link Resource} for this
+	 * app
 	 */
 	public AppRegistration(String name, ApplicationType type, URI uri, ResourceLoader loader) {
 		this(name, type, uri, null, loader);
@@ -80,7 +83,8 @@ public class AppRegistration implements Comparable<AppRegistration> {
 	 * @param type app type
 	 * @param uri URI for the app resource
 	 * @param metadataUri URI for the app metadata resource
-	 * @param loader the {@link ResourceLoader} that loads the {@link Resource} for this app
+	 * @param loader the {@link ResourceLoader} that loads the {@link Resource} for this
+	 * app
 	 */
 	public AppRegistration(String name, ApplicationType type, URI uri, URI metadataUri, ResourceLoader loader) {
 		Assert.hasText(name, "name is required");
@@ -120,8 +124,7 @@ public class AppRegistration implements Comparable<AppRegistration> {
 	}
 
 	public Resource getMetadataResource() {
-		return metadataUri != null ? this.loader.getResource(this.metadataUri.toString())
-			: getResource();
+		return metadataUri != null ? this.loader.getResource(this.metadataUri.toString()) : getResource();
 	}
 
 	public Resource getResource() {
@@ -133,12 +136,8 @@ public class AppRegistration implements Comparable<AppRegistration> {
 
 	@Override
 	public String toString() {
-		return "AppRegistration{" +
-				"name='" + name + '\'' +
-				", type='" + type + '\'' +
-				", uri=" + uri +
-				", metadataUri=" + metadataUri +
-				'}';
+		return "AppRegistration{" + "name='" + name + '\'' + ", type='" + type + '\'' + ", uri=" + uri
+				+ ", metadataUri=" + metadataUri + '}';
 	}
 
 	@Override

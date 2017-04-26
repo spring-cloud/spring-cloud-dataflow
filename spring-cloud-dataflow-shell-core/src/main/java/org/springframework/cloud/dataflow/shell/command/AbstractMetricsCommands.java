@@ -1,5 +1,6 @@
 /*
  * Copyright 2015 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,13 +27,14 @@ import org.springframework.shell.table.TableModel;
 
 /**
  * Base class to factor out similar behavior for all related metrics commands.
- * 
+ *
  * @author Eric Bottard
  */
 public abstract class AbstractMetricsCommands {
 
 	/**
-	 * The Capitalized, singular name of the kind of metrics we're dealing with (e.g. Counter, Field Value Counter)
+	 * The Capitalized, singular name of the kind of metrics we're dealing with (e.g.
+	 * Counter, Field Value Counter)
 	 */
 	private String kind;
 
@@ -42,6 +44,7 @@ public abstract class AbstractMetricsCommands {
 
 	/**
 	 * Render a table with information about a list of metrics
+	 *
 	 * @param list a list of metrics
 	 * @return the table to use for displaying the list of metrics
 	 */

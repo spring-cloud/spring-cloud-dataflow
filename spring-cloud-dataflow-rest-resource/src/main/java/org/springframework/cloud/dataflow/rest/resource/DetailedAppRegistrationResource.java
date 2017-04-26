@@ -23,8 +23,8 @@ import org.springframework.boot.configurationmetadata.ConfigurationMetadataPrope
 import org.springframework.hateoas.PagedResources;
 
 /**
- * Extension of {@link AppRegistrationResource} that contains application options
- * and other detailed application information.
+ * Extension of {@link AppRegistrationResource} that contains application options and
+ * other detailed application information.
  *
  * @author Eric Bottard
  * @author Gunnar Hillert
@@ -34,15 +34,13 @@ import org.springframework.hateoas.PagedResources;
 public class DetailedAppRegistrationResource extends AppRegistrationResource {
 
 	/**
-	 * Optional short description of the application.
-	 */
-	private String shortDescription;
-
-	/**
 	 * List of application options.
 	 */
 	private final List<ConfigurationMetadataProperty> options = new ArrayList<>();
-
+	/**
+	 * Optional short description of the application.
+	 */
+	private String shortDescription;
 
 	/**
 	 * Default constructor for serialization frameworks.
@@ -62,11 +60,11 @@ public class DetailedAppRegistrationResource extends AppRegistrationResource {
 	}
 
 	/**
-	 * Construct a {@code DetailedAppRegistrationResource} object based
-	 * on the provided {@link AppRegistrationResource}.
+	 * Construct a {@code DetailedAppRegistrationResource} object based on the provided
+	 * {@link AppRegistrationResource}.
 	 *
-	 * @param resource {@code AppRegistrationResource} from which to obtain
-	 *                 app registration data
+	 * @param resource {@code AppRegistrationResource} from which to obtain app
+	 * registration data
 	 */
 	public DetailedAppRegistrationResource(AppRegistrationResource resource) {
 		super(resource.getName(), resource.getType(), resource.getUri());
@@ -91,21 +89,21 @@ public class DetailedAppRegistrationResource extends AppRegistrationResource {
 	}
 
 	/**
-	 * Set a description for this application.
-	 *
-	 * @param shortDescription description for application
-	 */
-	public void setShortDescription(String shortDescription) {
-		this.shortDescription = shortDescription;
-	}
-
-	/**
 	 * Return a description for this application.
 	 *
 	 * @return description for this application
 	 */
 	public String getShortDescription() {
 		return shortDescription;
+	}
+
+	/**
+	 * Set a description for this application.
+	 *
+	 * @param shortDescription description for application
+	 */
+	public void setShortDescription(String shortDescription) {
+		this.shortDescription = shortDescription;
 	}
 
 	/**

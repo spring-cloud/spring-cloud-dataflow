@@ -37,7 +37,7 @@ import org.springframework.util.Assert;
 public class TaskExecutionResource extends ResourceSupport {
 
 	/**
-	 * The unique id  associated with the task execution.
+	 * The unique id associated with the task execution.
 	 */
 	private long executionId;
 
@@ -82,20 +82,21 @@ public class TaskExecutionResource extends ResourceSupport {
 	private String errorMessage;
 
 	/**
-	 * Task Execution ID that is set from an external source.  i.e. CloudFoundry
-	 * Deployment Id.
+	 * Task Execution ID that is set from an external source. i.e. CloudFoundry Deployment
+	 * Id.
 	 */
 	private String externalExecutionId;
-
 
 	public TaskExecutionResource() {
 		arguments = new ArrayList<>();
 	}
 
 	/**
-	 * Constructor to initialize the TaskExecutionResource using {@link TaskJobExecutionRel}.
-	 * @param taskJobExecutionRel contains the {@link TaskExecution} but also a list
-	 * of the Job ExecutionIds that were associated with this task if applicable.
+	 * Constructor to initialize the TaskExecutionResource using
+	 * {@link TaskJobExecutionRel}.
+	 *
+	 * @param taskJobExecutionRel contains the {@link TaskExecution} but also a list of
+	 * the Job ExecutionIds that were associated with this task if applicable.
 	 */
 	public TaskExecutionResource(TaskJobExecutionRel taskJobExecutionRel) {
 		Assert.notNull(taskJobExecutionRel, "taskJobExecutionDTO must not be null");
@@ -108,14 +109,14 @@ public class TaskExecutionResource extends ResourceSupport {
 		this.endTime = taskJobExecutionRel.getTaskExecution().getEndTime();
 		this.errorMessage = taskJobExecutionRel.getTaskExecution().getErrorMessage();
 		this.externalExecutionId = taskJobExecutionRel.getTaskExecution().getExternalExecutionId();
-		if(taskJobExecutionRel.getJobExecutionIds() == null){
+		if (taskJobExecutionRel.getJobExecutionIds() == null) {
 			this.jobExecutionIds = Collections.emptyList();
-		}else{
-			this.jobExecutionIds = Collections.unmodifiableList(new ArrayList<>(taskJobExecutionRel.getJobExecutionIds()));
+		}
+		else {
+			this.jobExecutionIds = Collections
+					.unmodifiableList(new ArrayList<>(taskJobExecutionRel.getJobExecutionIds()));
 		}
 	}
-
-	public static class Page extends PagedResources<TaskExecutionResource> {}
 
 	public long getExecutionId() {
 		return executionId;
@@ -149,7 +150,7 @@ public class TaskExecutionResource extends ResourceSupport {
 		return arguments;
 	}
 
-	public List<Long> getJobExecutionIds(){
+	public List<Long> getJobExecutionIds() {
 		return jobExecutionIds;
 	}
 
@@ -159,5 +160,8 @@ public class TaskExecutionResource extends ResourceSupport {
 
 	public String getExternalExecutionId() {
 		return externalExecutionId;
+	}
+
+	public static class Page extends PagedResources<TaskExecutionResource> {
 	}
 }

@@ -42,7 +42,6 @@ public class RedisUriRegistry implements UriRegistry {
 	 */
 	private final RedisOperations<String, String> redisOperations;
 
-
 	/**
 	 * Construct a {@code RedisArtifactRegistry} with the provided
 	 * {@link RedisConnectionFactory}.

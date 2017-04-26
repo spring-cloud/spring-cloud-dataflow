@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,7 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.dataflow.server.local.security;
+
+import org.junit.ClassRule;
+import org.junit.Test;
+import org.junit.rules.RuleChain;
+import org.junit.rules.TestRule;
+
+import org.springframework.cloud.dataflow.server.local.LocalDataflowResource;
+import org.springframework.security.oauth2.client.OAuth2RestTemplate;
+import org.springframework.security.oauth2.client.token.grant.client.ClientCredentialsResourceDetails;
+import org.springframework.security.oauth2.common.OAuth2AccessToken;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.springframework.cloud.dataflow.server.local.security.SecurityTestUtils.basicAuthorizationHeader;
@@ -22,43 +33,29 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import org.junit.ClassRule;
-import org.junit.Test;
-import org.junit.rules.RuleChain;
-import org.junit.rules.TestRule;
-import org.springframework.cloud.dataflow.server.local.LocalDataflowResource;
-import org.springframework.security.oauth2.client.OAuth2RestTemplate;
-import org.springframework.security.oauth2.client.token.grant.client.ClientCredentialsResourceDetails;
-import org.springframework.security.oauth2.common.OAuth2AccessToken;
 /**
  * @author Gunnar Hillert
  */
 public class LocalServerSecurityWithOAuth2Tests {
 
-	private final static OAuth2ServerResource oAuth2ServerResource =
-			new OAuth2ServerResource();
+	private final static OAuth2ServerResource oAuth2ServerResource = new OAuth2ServerResource();
 
-	private final static LocalDataflowResource localDataflowResource =
-		new LocalDataflowResource("classpath:org/springframework/cloud/dataflow/server/local/security/oauthConfig.yml");
+	private final static LocalDataflowResource localDataflowResource = new LocalDataflowResource(
+			"classpath:org/springframework/cloud/dataflow/server/local/security/oauthConfig" + ".yml");
 
 	@ClassRule
-	public static TestRule springDataflowAndLdapServer = RuleChain
-			.outerRule(oAuth2ServerResource)
+	public static TestRule springDataflowAndLdapServer = RuleChain.outerRule(oAuth2ServerResource)
 			.around(localDataflowResource);
 
 	@Test
 	public void testAccessRootUrlWithoutCredentials() throws Exception {
-		localDataflowResource.getMockMvc()
-				.perform(get("/"))
-				.andDo(print())
-				.andExpect(status().isUnauthorized());
+		localDataflowResource.getMockMvc().perform(get("/")).andDo(print()).andExpect(status().isUnauthorized());
 	}
 
 	@Test
 	public void testAccessRootUrlWithBasicAuthCredentials() throws Exception {
 		localDataflowResource.getMockMvc()
-				.perform(get("/").header("Authorization", basicAuthorizationHeader("user", "secret10")))
-				.andDo(print())
+				.perform(get("/").header("Authorization", basicAuthorizationHeader("user", "secret10"))).andDo(print())
 				.andExpect(status().isOk());
 	}
 
@@ -66,32 +63,28 @@ public class LocalServerSecurityWithOAuth2Tests {
 	public void testAccessRootUrlWithBasicAuthCredentialsWrongPassword() throws Exception {
 		localDataflowResource.getMockMvc()
 				.perform(get("/").header("Authorization", basicAuthorizationHeader("user", "wrong-password")))
-				.andDo(print())
-				.andExpect(status().isUnauthorized());
+				.andDo(print()).andExpect(status().isUnauthorized());
 	}
 
 	@Test
 	public void testThatAccessToActuatorEndpointPromptsSecurity() throws Exception {
-		localDataflowResource.getMockMvc()
-				.perform(get("/management/env"))
-				.andDo(print())
+		localDataflowResource.getMockMvc().perform(get("/management/env")).andDo(print())
 				.andExpect(status().isUnauthorized());
 	}
 
 	@Test
 	public void testAccessToActuatorEndpointWithBasicAuthCredentialsWrongPassword() throws Exception {
 		localDataflowResource.getMockMvc()
-				.perform(get("/management/env").header("Authorization", basicAuthorizationHeader("user", "wrong-password")))
-				.andDo(print())
-				.andExpect(status().isUnauthorized());
+				.perform(get("/management/env").header("Authorization",
+						basicAuthorizationHeader("user", "wrong-password")))
+				.andDo(print()).andExpect(status().isUnauthorized());
 	}
 
 	@Test
 	public void testThatAccessToActuatorEndpointWithBasicAuthCredentialsSucceeds() throws Exception {
 		localDataflowResource.getMockMvc()
 				.perform(get("/management/env").header("Authorization", basicAuthorizationHeader("user", "secret10")))
-				.andDo(print())
-				.andExpect(status().isOk());
+				.andDo(print()).andExpect(status().isOk());
 	}
 
 	@Test
@@ -101,17 +94,16 @@ public class LocalServerSecurityWithOAuth2Tests {
 		resourceDetails.setClientId("myclient");
 		resourceDetails.setClientSecret("mysecret");
 		resourceDetails.setGrantType("client_credentials");
-		resourceDetails.setAccessTokenUri("http://localhost:" + oAuth2ServerResource.getOauth2ServerPort() + "/oauth/token");
+		resourceDetails
+				.setAccessTokenUri("http://localhost:" + oAuth2ServerResource.getOauth2ServerPort() + "/oauth/token");
 
 		final OAuth2RestTemplate oAuth2RestTemplate = new OAuth2RestTemplate(resourceDetails);
 		final OAuth2AccessToken accessToken = oAuth2RestTemplate.getAccessToken();
 
 		final String accessTokenAsString = accessToken.getValue();
 
-		localDataflowResource.getMockMvc()
-				.perform(get("/").header("Authorization", "bearer " + accessTokenAsString))
-				.andDo(print())
-				.andExpect(status().isOk());
+		localDataflowResource.getMockMvc().perform(get("/").header("Authorization", "bearer " + accessTokenAsString))
+				.andDo(print()).andExpect(status().isOk());
 	}
 
 	@Test
@@ -121,7 +113,8 @@ public class LocalServerSecurityWithOAuth2Tests {
 		resourceDetails.setClientId("myclient");
 		resourceDetails.setClientSecret("mysecret");
 		resourceDetails.setGrantType("client_credentials");
-		resourceDetails.setAccessTokenUri("http://localhost:" + oAuth2ServerResource.getOauth2ServerPort() + "/oauth/token");
+		resourceDetails
+				.setAccessTokenUri("http://localhost:" + oAuth2ServerResource.getOauth2ServerPort() + "/oauth/token");
 
 		final OAuth2RestTemplate oAuth2RestTemplate = new OAuth2RestTemplate(resourceDetails);
 		final OAuth2AccessToken accessToken = oAuth2RestTemplate.getAccessToken();
@@ -129,19 +122,15 @@ public class LocalServerSecurityWithOAuth2Tests {
 		final String accessTokenAsString = accessToken.getValue();
 
 		localDataflowResource.getMockMvc()
-				.perform(get("/security/info").header("Authorization", "bearer " + accessTokenAsString))
-				.andDo(print())
-				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.authorizationEnabled", is(Boolean.FALSE)))
+				.perform(get("/security/info").header("Authorization", "bearer " + accessTokenAsString)).andDo(print())
+				.andExpect(status().isOk()).andExpect(jsonPath("$.authorizationEnabled", is(Boolean.FALSE)))
 				.andExpect(jsonPath("$.authenticated", is(Boolean.TRUE)))
 				.andExpect(jsonPath("$.authenticationEnabled", is(Boolean.TRUE)));
 	}
 
 	@Test
 	public void testAccessRootUrlWithWrongOAuth2AccessToken() throws Exception {
-		localDataflowResource.getMockMvc()
-				.perform(get("/").header("Authorization", "bearer 123456"))
-				.andDo(print())
+		localDataflowResource.getMockMvc().perform(get("/").header("Authorization", "bearer 123456")).andDo(print())
 				.andExpect(status().isUnauthorized());
 	}
 

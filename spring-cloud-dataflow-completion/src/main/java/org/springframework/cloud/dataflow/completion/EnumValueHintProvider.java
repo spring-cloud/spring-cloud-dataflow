@@ -24,8 +24,8 @@ import org.springframework.boot.configurationmetadata.ValueHint;
 import org.springframework.util.ClassUtils;
 
 /**
- * A {@link ValueHintProvider} that returns possible values when the
- * property is an {@link Enum}.
+ * A {@link ValueHintProvider} that returns possible values when the property is an
+ * {@link Enum}.
  *
  * @author Eric Bottard
  */

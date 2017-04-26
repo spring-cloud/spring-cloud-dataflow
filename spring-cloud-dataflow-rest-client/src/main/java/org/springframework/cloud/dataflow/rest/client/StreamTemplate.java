@@ -79,8 +79,8 @@ public class StreamTemplate implements StreamOperations {
 		values.add("name", name);
 		values.add("definition", definition);
 		values.add("deploy", Boolean.toString(deploy));
-		StreamDefinitionResource stream = restTemplate.postForObject(
-				definitionsLink.expand().getHref(), values, StreamDefinitionResource.class);
+		StreamDefinitionResource stream = restTemplate.postForObject(definitionsLink.expand().getHref(), values,
+				StreamDefinitionResource.class);
 		return stream;
 	}
 

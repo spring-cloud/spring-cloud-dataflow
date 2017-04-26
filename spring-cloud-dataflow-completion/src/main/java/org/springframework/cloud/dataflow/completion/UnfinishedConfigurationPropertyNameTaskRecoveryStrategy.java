@@ -16,13 +16,12 @@
 
 package org.springframework.cloud.dataflow.completion;
 
-import static org.springframework.cloud.dataflow.completion.CompletionProposal.expanding;
-
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
+import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.core.dsl.CheckPointedParseException;
@@ -30,13 +29,14 @@ import org.springframework.cloud.dataflow.core.dsl.Token;
 import org.springframework.cloud.dataflow.core.dsl.TokenKind;
 import org.springframework.cloud.dataflow.registry.AppRegistration;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
-import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.core.io.Resource;
 
+import static org.springframework.cloud.dataflow.completion.CompletionProposal.expanding;
 
 /**
- * Provides completions for the case where the user has started to type
- * an app configuration property name but it is not typed in full yet.
+ * Provides completions for the case where the user has started to type an app
+ * configuration property name but it is not typed in full yet.
+ *
  * @author Eric Bottard
  * @author Mark Fisher
  * @author Andy Clement
@@ -49,15 +49,15 @@ public class UnfinishedConfigurationPropertyNameTaskRecoveryStrategy
 	private final ApplicationConfigurationMetadataResolver metadataResolver;
 
 	UnfinishedConfigurationPropertyNameTaskRecoveryStrategy(AppRegistry appRegistry,
-	                                                    ApplicationConfigurationMetadataResolver metadataResolver) {
+			ApplicationConfigurationMetadataResolver metadataResolver) {
 		super(CheckPointedParseException.class, "file --foo", "file --foo.");
 		this.appRegistry = appRegistry;
 		this.metadataResolver = metadataResolver;
 	}
 
 	@Override
-	public void addProposals(String dsl, CheckPointedParseException exception,
-	                         int detailLevel, List<CompletionProposal> collector) {
+	public void addProposals(String dsl, CheckPointedParseException exception, int detailLevel,
+			List<CompletionProposal> collector) {
 
 		String safe = exception.getExpressionStringUntilCheckpoint();
 
@@ -96,8 +96,7 @@ public class UnfinishedConfigurationPropertyNameTaskRecoveryStrategy
 		for (ConfigurationMetadataProperty property : metadataResolver.listProperties(metadataResource)) {
 			String name = property.getName();
 			if (!alreadyPresentOptions.contains(name) && name.startsWith(buffer)) {
-				collector.add(proposals.withSeparateTokens("--" + name
-						+ "=", property.getShortDescription()));
+				collector.add(proposals.withSeparateTokens("--" + name + "=", property.getShortDescription()));
 			}
 		}
 
@@ -106,8 +105,7 @@ public class UnfinishedConfigurationPropertyNameTaskRecoveryStrategy
 			for (ConfigurationMetadataProperty property : metadataResolver.listProperties(metadataResource, true)) {
 				String id = property.getId();
 				if (!alreadyPresentOptions.contains(id) && id.startsWith(buffer)) {
-					collector.add(proposals.withSeparateTokens("--" + id
-							+ "=", property.getShortDescription()));
+					collector.add(proposals.withSeparateTokens("--" + id + "=", property.getShortDescription()));
 				}
 			}
 		}

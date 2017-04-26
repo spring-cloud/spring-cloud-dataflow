@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,9 +21,8 @@ import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.ResourceSupport;
 
 /**
- * A HATEOAS representation of a {@link StreamDefinition}.
- * This class also includes a description of the
- * {@link #status stream status}.
+ * A HATEOAS representation of a {@link StreamDefinition}. This class also includes a
+ * description of the {@link #status stream status}.
  * <p>
  * Note: this implementation is not thread safe.
  *
@@ -107,7 +106,6 @@ public class StreamDefinitionResource extends ResourceSupport {
 	}
 
 	/**
-	 *
 	 * Get a descriptive text of the stream's deployment status. See also
 	 * {@link DeploymentStateResource}.
 	 *
@@ -118,12 +116,10 @@ public class StreamDefinitionResource extends ResourceSupport {
 	}
 
 	/**
-	 *
 	 * Set the descriptive text of the stream's deployment status. See also
 	 * {@link DeploymentStateResource}
 	 *
 	 * @param statusDescription the stream's deployment status description
-	 *
 	 */
 	public void setStatusDescription(String statusDescription) {
 		this.statusDescription = statusDescription;

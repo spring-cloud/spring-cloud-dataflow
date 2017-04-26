@@ -20,7 +20,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cloud.dataflow.server.config.DataFlowControllerAutoConfiguration;
 import org.springframework.cloud.deployer.resource.docker.DockerResourceLoader;
 import org.springframework.cloud.deployer.resource.maven.MavenProperties;
@@ -34,7 +33,6 @@ import org.springframework.core.io.ResourceLoader;
  * Auto-configuration for local dataflow server.
  *
  * @author Janne Valkealahti
- *
  */
 @Configuration
 @AutoConfigureBefore(DataFlowControllerAutoConfiguration.class)

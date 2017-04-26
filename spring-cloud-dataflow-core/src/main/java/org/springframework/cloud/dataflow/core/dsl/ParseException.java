@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,10 +20,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Root exception for DSL parsing related exceptions. Rather than holding a
- * hard coded string indicating the problem, it records a message key and
- * the inserts for the message. See {@link DSLMessage} for the list of all
- * possible messages that can occur.
+ * Root exception for DSL parsing related exceptions. Rather than holding a hard coded
+ * string indicating the problem, it records a message key and the inserts for the
+ * message. See {@link DSLMessage} for the list of all possible messages that can occur.
  *
  * @author Andy Clement
  */
@@ -32,7 +31,8 @@ public class ParseException extends RuntimeException {
 
 	protected String expressionString;
 
-	protected int position; // -1 if not known - but should be known in all reasonable cases
+	protected int position; // -1 if not known - but should be known in all reasonable
+							// cases
 
 	protected DSLMessage message;
 
@@ -99,8 +99,9 @@ public class ParseException extends RuntimeException {
 	}
 
 	/**
-	 * Produce a simple map of information about the exception that
-	 * can be sent to the client for display.
+	 * Produce a simple map of information about the exception that can be sent to the
+	 * client for display.
+	 *
 	 * @return map of simple information including message and position
 	 */
 	public Map<String, Object> toExceptionDescriptor() {

@@ -21,11 +21,11 @@ import org.springframework.cloud.dataflow.core.DataFlowPropertyKeys;
 import org.springframework.context.annotation.Condition;
 
 /**
- * {@link Condition} that is valid if neither file authentication nor Ldap authentication are enabled.
+ * {@link Condition} that is valid if neither file authentication nor Ldap authentication
+ * are enabled.
  *
  * @author Gunnar Hillert
  * @since 1.2.0
- *
  */
 public class OnDefaultBootUserAuthenticationEnabled extends NoneNestedConditions {
 
@@ -34,8 +34,10 @@ public class OnDefaultBootUserAuthenticationEnabled extends NoneNestedConditions
 	}
 
 	@ConditionalOnProperty(DataFlowPropertyKeys.PREFIX + "security.authentication.file.enabled")
-	static class fileAuthenticationEnabled { }
+	static class fileAuthenticationEnabled {
+	}
 
 	@ConditionalOnProperty(DataFlowPropertyKeys.PREFIX + "security.authentication.ldap.enabled")
-	static class ldapAuthenticationEnabled { }
+	static class ldapAuthenticationEnabled {
+	}
 }

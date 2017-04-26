@@ -17,7 +17,8 @@
 package org.springframework.cloud.dataflow.server.controller;
 
 /**
- * Thrown when a stream is already being deployed when the controller gets a request to deploy it.
+ * Thrown when a stream is already being deployed when the controller gets a request to
+ * deploy it.
  *
  * @author Ilayaperumal Gopinathan
  */

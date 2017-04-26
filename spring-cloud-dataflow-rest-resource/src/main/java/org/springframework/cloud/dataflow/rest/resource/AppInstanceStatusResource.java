@@ -48,20 +48,20 @@ public class AppInstanceStatusResource extends ResourceSupport {
 		return instanceId;
 	}
 
-	public String getState() {
-		return state;
-	}
-
-	public Map<String, String> getAttributes() {
-		return attributes;
-	}
-
 	public void setInstanceId(String instanceId) {
 		this.instanceId = instanceId;
 	}
 
+	public String getState() {
+		return state;
+	}
+
 	public void setState(String state) {
 		this.state = state;
+	}
+
+	public Map<String, String> getAttributes() {
+		return attributes;
 	}
 
 	public void setAttributes(Map<String, String> attributes) {

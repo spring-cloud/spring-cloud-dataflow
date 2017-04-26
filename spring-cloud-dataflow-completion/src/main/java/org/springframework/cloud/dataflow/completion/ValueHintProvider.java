@@ -31,24 +31,22 @@ public interface ValueHintProvider {
 	/**
 	 * For a given property, return a list of {@link ValueHint} that may apply.
 	 *
-	 * @param property     property for which to generate value hints
-	 * @param classLoader  class loader for the artifact/module that this
-	 * property applies to; this may be used to load other classes/resources
-	 * for generating value hints
+	 * @param property property for which to generate value hints
+	 * @param classLoader class loader for the artifact/module that this property applies
+	 * to; this may be used to load other classes/resources for generating value hints
 	 * @return list of value hints for the provided property
 	 */
 	List<ValueHint> generateValueHints(ConfigurationMetadataProperty property, ClassLoader classLoader);
 
 	/**
-	 * Return {@code true} if the values returned by this provider
-	 * are the only values that apply as completion proposals. If this
-	 * returns {@code true}, then no other kind of completion
-	 * applies until one of the returned values has been typed in full.
+	 * Return {@code true} if the values returned by this provider are the only values
+	 * that apply as completion proposals. If this returns {@code true}, then no other
+	 * kind of completion applies until one of the returned values has been typed in full.
 	 *
-	 * @param property property for which to determine if the values
-	 * returned by this provider are exclusive
-	 * @return {@code true} if the values returned by this provider are exclusive,
-	 * thus requiring one of these values to be provided before any other
+	 * @param property property for which to determine if the values returned by this
+	 * provider are exclusive
+	 * @return {@code true} if the values returned by this provider are exclusive, thus
+	 * requiring one of these values to be provided before any other
 	 * {@code ValueHintProvider} may be applied
 	 */
 	boolean isExclusive(ConfigurationMetadataProperty property);

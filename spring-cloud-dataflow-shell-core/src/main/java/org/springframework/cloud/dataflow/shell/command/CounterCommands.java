@@ -1,5 +1,6 @@
 /*
  * Copyright 2015-2017 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -43,18 +44,15 @@ import org.springframework.stereotype.Component;
 @Component
 public class CounterCommands extends AbstractMetricsCommands implements CommandMarker {
 
+	private static final String DISPLAY_COUNTER = "counter display";
+	private static final String LIST_COUNTERS = "counter list";
+	private static final String DELETE_COUNTER = "counter reset";
+	@Autowired
+	private DataFlowShell dataFlowShell;
+
 	protected CounterCommands() {
 		super("Counter");
 	}
-
-	private static final String DISPLAY_COUNTER = "counter display";
-
-	private static final String LIST_COUNTERS = "counter list";
-
-	private static final String DELETE_COUNTER = "counter reset";
-
-	@Autowired
-	private DataFlowShell dataFlowShell;
 
 	@CliAvailabilityIndicator({ LIST_COUNTERS, DISPLAY_COUNTER })
 	public boolean availableWithViewRole() {
@@ -67,11 +65,9 @@ public class CounterCommands extends AbstractMetricsCommands implements CommandM
 	}
 
 	@CliCommand(value = DISPLAY_COUNTER, help = "Display the value of a counter")
-	public String display(
-			@CliOption(key = { "", "name" }, help = "the name of the counter to display", mandatory = true
-					/*,optionContext = "existing-counter disable-string-converter"*/) String name,
-			@CliOption(key = "pattern", help = "the pattern used to format the value (see DecimalFormat)",
-					mandatory = false, unspecifiedDefaultValue = NumberFormatConverter.DEFAULT) NumberFormat pattern) {
+	public String display(@CliOption(key = { "", "name" }, help = "the name of the counter to display", mandatory = true
+	/* ,optionContext = "existing-counter disable-string-converter" */) String name,
+			@CliOption(key = "pattern", help = "the pattern used to format the value (see DecimalFormat)", mandatory = false, unspecifiedDefaultValue = NumberFormatConverter.DEFAULT) NumberFormat pattern) {
 		CounterResource counter = counterOperations().retrieve(name);
 
 		return pattern.format(counter.getValue());
@@ -84,9 +80,8 @@ public class CounterCommands extends AbstractMetricsCommands implements CommandM
 	}
 
 	@CliCommand(value = DELETE_COUNTER, help = "Reset the counter with the given name")
-	public String reset(
-			@CliOption(mandatory = true, key = { "", "name" }, help = "the name of the counter to reset"
-					/*, optionContext = "existing-counter disable-string-converter"*/) String name) {
+	public String reset(@CliOption(mandatory = true, key = { "", "name" }, help = "the name of the counter to reset"
+	/* , optionContext = "existing-counter disable-string-converter" */) String name) {
 		counterOperations().reset(name);
 		return String.format("Deleted counter '%s'", name);
 	}

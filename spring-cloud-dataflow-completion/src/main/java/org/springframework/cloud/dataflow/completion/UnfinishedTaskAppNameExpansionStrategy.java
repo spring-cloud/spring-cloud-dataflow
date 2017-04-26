@@ -27,8 +27,8 @@ import org.springframework.cloud.dataflow.registry.AppRegistration;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
 
 /**
- * Provides completions by finding apps whose name starts with a
- * prefix (which was assumed to be a correct app name, but wasn't).
+ * Provides completions by finding apps whose name starts with a prefix (which was assumed
+ * to be a correct app name, but wasn't).
  *
  * @author Eric Bottard
  * @author Mark Fisher
@@ -43,12 +43,12 @@ public class UnfinishedTaskAppNameExpansionStrategy implements TaskExpansionStra
 	}
 
 	@Override
-	public boolean addProposals(String text, TaskDefinition taskDefinition,
-			int detailLevel, List<CompletionProposal> collector) {
+	public boolean addProposals(String text, TaskDefinition taskDefinition, int detailLevel,
+			List<CompletionProposal> collector) {
 
 		Set<String> parameterNames = new HashSet<>(taskDefinition.getProperties().keySet());
 		parameterNames.removeAll(CompletionUtils.IMPLICIT_TASK_PARAMETER_NAMES);
-		if( !parameterNames.isEmpty() || !text.endsWith(taskDefinition.getRegisteredAppName())) {
+		if (!parameterNames.isEmpty() || !text.endsWith(taskDefinition.getRegisteredAppName())) {
 			return false;
 		}
 
@@ -61,9 +61,10 @@ public class UnfinishedTaskAppNameExpansionStrategy implements TaskExpansionStra
 
 		for (AppRegistration appRegistration : appRegistry.findAll()) {
 			String candidateName = appRegistration.getName();
-			if (validTypesAtThisPosition.contains(appRegistration.getType())
-					&& !alreadyTyped.equals(candidateName) && candidateName.startsWith(alreadyTyped)) {
-				String expansion = appRegistration.getName();//CompletionUtils.maybeQualifyWithLabel(appRegistration.getName(), taskDefinition);
+			if (validTypesAtThisPosition.contains(appRegistration.getType()) && !alreadyTyped.equals(candidateName)
+					&& candidateName.startsWith(alreadyTyped)) {
+				String expansion = appRegistration.getName();// CompletionUtils.maybeQualifyWithLabel(appRegistration
+				// .getName(), taskDefinition);
 
 				collector.add(proposals.withSuffix(expansion.substring(alreadyTyped.length())));
 			}

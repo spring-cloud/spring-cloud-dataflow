@@ -27,7 +27,7 @@ import org.springframework.util.Assert;
 /**
  * Factory bean to create a Task Explorer.
  *
- * @author  Glenn Renfro
+ * @author Glenn Renfro
  */
 public class TaskExplorerFactoryBean implements FactoryBean<TaskExplorer> {
 
@@ -35,14 +35,14 @@ public class TaskExplorerFactoryBean implements FactoryBean<TaskExplorer> {
 
 	private TaskExplorer taskExplorer;
 
-	public TaskExplorerFactoryBean(DataSource dataSource){
+	public TaskExplorerFactoryBean(DataSource dataSource) {
 		Assert.notNull(dataSource, "dataSource must not be null");
 		this.dataSource = dataSource;
 	}
 
 	@Override
 	public TaskExplorer getObject() throws Exception {
-		if(taskExplorer == null){
+		if (taskExplorer == null) {
 			taskExplorer = new SimpleTaskExplorer(new TaskExecutionDaoFactoryBean(dataSource));
 		}
 		return taskExplorer;

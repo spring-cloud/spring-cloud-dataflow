@@ -25,16 +25,16 @@ import org.springframework.hateoas.ResourceSupport;
  */
 public class AboutResource extends ResourceSupport {
 
+	private FeatureInfo featureInfo = new FeatureInfo();
+	private VersionInfo versionInfo = new VersionInfo();
+	private SecurityInfo securityInfo = new SecurityInfo();
+	private RuntimeEnvironment runtimeEnvironment = new RuntimeEnvironment();
+
 	/**
 	 * Default constructor for serialization frameworks.
 	 */
 	public AboutResource() {
 	}
-
-	private FeatureInfo featureInfo = new FeatureInfo();
-	private VersionInfo versionInfo = new VersionInfo();
-	private SecurityInfo securityInfo = new SecurityInfo();
-	private RuntimeEnvironment runtimeEnvironment = new RuntimeEnvironment();
 
 	public FeatureInfo getFeatureInfo() {
 		return featureInfo;

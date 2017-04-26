@@ -41,16 +41,13 @@ import org.springframework.web.bind.annotation.ResponseBody;
 public class LoginController {
 
 	@Autowired
-	private AuthenticationManager authenticationManager;
-
-	@Autowired
 	ApplicationContext applicationContext;
+	@Autowired
+	private AuthenticationManager authenticationManager;
 
 	@RequestMapping(value = "/authenticate", method = { RequestMethod.POST })
 	@ResponseBody
-	public String authorize(
-			@RequestBody AuthenticationRequest authenticationRequest,
-			HttpServletRequest request) {
+	public String authorize(@RequestBody AuthenticationRequest authenticationRequest, HttpServletRequest request) {
 
 		final UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(
 				authenticationRequest.getUsername(), authenticationRequest.getPassword());

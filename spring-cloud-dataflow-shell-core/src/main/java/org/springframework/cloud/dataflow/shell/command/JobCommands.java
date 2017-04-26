@@ -64,17 +64,14 @@ public class JobCommands implements CommandMarker {
 	private DataFlowShell dataFlowShell;
 
 	@CliAvailabilityIndicator({ EXECUTION_DISPLAY, EXECUTION_LIST, STEP_EXECUTION_LIST, INSTANCE_DISPLAY,
-		STEP_EXECUTION_PROGRESS, STEP_EXECUTION_DISPLAY })
+			STEP_EXECUTION_PROGRESS, STEP_EXECUTION_DISPLAY })
 	public boolean availableWithViewRole() {
 		return dataFlowShell.hasAccess(RoleType.VIEW, OpsType.JOB);
 	}
 
-	@CliCommand(value = EXECUTION_LIST,
-			help = "List created job executions filtered by jobName")
+	@CliCommand(value = EXECUTION_LIST, help = "List created job executions filtered by jobName")
 	public Table executionList(
-			@CliOption(key = { "name" },
-					help = "the job name to be used as a filter",
-					mandatory = false) String name) {
+			@CliOption(key = { "name" }, help = "the job name to be used as a filter", mandatory = false) String name) {
 
 		final PagedResources<JobExecutionResource> jobs;
 		if (name == null) {
@@ -86,11 +83,10 @@ public class JobCommands implements CommandMarker {
 
 		TableModelBuilder<Object> modelBuilder = new TableModelBuilder<>();
 
-		modelBuilder.addRow().addValue("ID ").addValue("Task ID").addValue("Job Name ")
-				.addValue("Start Time ").addValue("Step Execution Count ").addValue("Definition Status ");
+		modelBuilder.addRow().addValue("ID ").addValue("Task ID").addValue("Job Name ").addValue("Start Time ")
+				.addValue("Step Execution Count ").addValue("Definition Status ");
 		for (JobExecutionResource job : jobs) {
-			modelBuilder.addRow().addValue(job.getExecutionId())
-					.addValue(job.getTaskExecutionId())
+			modelBuilder.addRow().addValue(job.getExecutionId()).addValue(job.getTaskExecutionId())
 					.addValue(job.getJobExecution().getJobInstance().getJobName())
 					.addValue(job.getJobExecution().getStartTime())
 					.addValue(job.getJobExecution().getStepExecutions().size())
@@ -103,12 +99,8 @@ public class JobCommands implements CommandMarker {
 		return builder.build();
 	}
 
-
 	@CliCommand(value = EXECUTION_DISPLAY, help = "Display the details of a specific job execution")
-	public Table executionDisplay(
-			@CliOption(key = {"id"},
-					help = "the job execution id",
-					mandatory = true) long id) {
+	public Table executionDisplay(@CliOption(key = { "id" }, help = "the job execution id", mandatory = true) long id) {
 
 		JobExecutionResource jobExecutionResource = jobOperations().jobExecution(id);
 
@@ -117,27 +109,34 @@ public class JobCommands implements CommandMarker {
 		modelBuilder.addRow().addValue("Key ").addValue("Value ");
 		modelBuilder.addRow().addValue("Job Execution Id ").addValue(jobExecutionResource.getExecutionId());
 		modelBuilder.addRow().addValue("Task Execution Id ").addValue(jobExecutionResource.getTaskExecutionId());
-		modelBuilder.addRow().addValue("Task Instance Id ").addValue(jobExecutionResource.getJobExecution().getJobInstance().getInstanceId());
-		modelBuilder.addRow().addValue("Job Name ").addValue(jobExecutionResource.getJobExecution().getJobInstance().getJobName());
+		modelBuilder.addRow().addValue("Task Instance Id ")
+				.addValue(jobExecutionResource.getJobExecution().getJobInstance().getInstanceId());
+		modelBuilder.addRow().addValue("Job Name ")
+				.addValue(jobExecutionResource.getJobExecution().getJobInstance().getJobName());
 		modelBuilder.addRow().addValue("Create Time ").addValue(jobExecutionResource.getJobExecution().getCreateTime());
 		modelBuilder.addRow().addValue("Start Time ").addValue(jobExecutionResource.getJobExecution().getStartTime());
 		modelBuilder.addRow().addValue("End Time ").addValue(jobExecutionResource.getJobExecution().getEndTime());
 		modelBuilder.addRow().addValue("Running ").addValue(jobExecutionResource.getJobExecution().isRunning());
 		modelBuilder.addRow().addValue("Stopping ").addValue(jobExecutionResource.getJobExecution().isStopping());
-		modelBuilder.addRow().addValue("Step Execution Count ").addValue(jobExecutionResource.getJobExecution().getStepExecutions().size());
-		modelBuilder.addRow().addValue("Execution Status ").addValue(jobExecutionResource.getJobExecution().getStatus().name());
-		modelBuilder.addRow().addValue("Exit Status ").addValue(jobExecutionResource.getJobExecution().getExitStatus().getExitCode());
-		modelBuilder.addRow().addValue("Exit Message ").addValue(jobExecutionResource.getJobExecution().getExitStatus().getExitDescription());
-		modelBuilder.addRow().addValue("Definition Status ").addValue(jobExecutionResource.isDefined() ? "Created" : "Destroyed");
+		modelBuilder.addRow().addValue("Step Execution Count ")
+				.addValue(jobExecutionResource.getJobExecution().getStepExecutions().size());
+		modelBuilder.addRow().addValue("Execution Status ")
+				.addValue(jobExecutionResource.getJobExecution().getStatus().name());
+		modelBuilder.addRow().addValue("Exit Status ")
+				.addValue(jobExecutionResource.getJobExecution().getExitStatus().getExitCode());
+		modelBuilder.addRow().addValue("Exit Message ")
+				.addValue(jobExecutionResource.getJobExecution().getExitStatus().getExitDescription());
+		modelBuilder.addRow().addValue("Definition Status ")
+				.addValue(jobExecutionResource.isDefined() ? "Created" : "Destroyed");
 		modelBuilder.addRow().addValue("Job Parameters ").addValue("");
-		for (Map.Entry<String, JobParameter> jobParameterEntry : jobExecutionResource.getJobExecution().getJobParameters().getParameters().entrySet()) {
+		for (Map.Entry<String, JobParameter> jobParameterEntry : jobExecutionResource.getJobExecution()
+				.getJobParameters().getParameters().entrySet()) {
 			String key = org.springframework.util.StringUtils.trimLeadingCharacter(jobParameterEntry.getKey(), '-');
 			if (!jobParameterEntry.getValue().isIdentifying()) {
 				key = "-" + key;
 			}
 			key = String.format("%s(%s) ", key, jobParameterEntry.getValue().getType().name());
-			modelBuilder.addRow().addValue(key)
-					.addValue(String.valueOf(jobParameterEntry.getValue()));
+			modelBuilder.addRow().addValue(key).addValue(String.valueOf(jobParameterEntry.getValue()));
 		}
 
 		TableBuilder builder = new TableBuilder(modelBuilder.build());
@@ -148,10 +147,7 @@ public class JobCommands implements CommandMarker {
 	}
 
 	@CliCommand(value = INSTANCE_DISPLAY, help = "Display the job executions for a specific job instance.")
-	public Table instanceDisplay(
-			@CliOption(key = {"id"},
-					help = "the job instance id",
-					mandatory = true) long id) {
+	public Table instanceDisplay(@CliOption(key = { "id" }, help = "the job instance id", mandatory = true) long id) {
 
 		JobInstanceResource jobInstanceResource = jobOperations().jobInstance(id);
 
@@ -159,10 +155,8 @@ public class JobCommands implements CommandMarker {
 		modelBuilder.addRow().addValue("Name ").addValue("Execution ID ").addValue("Step Execution Count ")
 				.addValue("Status ").addValue("Job Parameters ");
 		for (JobExecutionResource job : jobInstanceResource.getJobExecutions()) {
-			modelBuilder.addRow().addValue(jobInstanceResource.getJobName())
-					.addValue(job.getExecutionId())
-					.addValue(job.getStepExecutionCount())
-					.addValue(job.getJobExecution().getStatus().name())
+			modelBuilder.addRow().addValue(jobInstanceResource.getJobName()).addValue(job.getExecutionId())
+					.addValue(job.getStepExecutionCount()).addValue(job.getJobExecution().getStatus().name())
 					.addValue(job.getJobParametersString());
 		}
 		TableBuilder builder = new TableBuilder(modelBuilder.build());
@@ -171,25 +165,20 @@ public class JobCommands implements CommandMarker {
 		return builder.build();
 	}
 
-	@CliCommand(value = STEP_EXECUTION_LIST,
-			help = "List step executions filtered by jobExecutionId")
-	public Table stepExecutionList(
-			@CliOption(key = { "id" },
-					help = "the job execution id to be used as a filter",
-					mandatory = true) long id) {
+	@CliCommand(value = STEP_EXECUTION_LIST, help = "List step executions filtered by jobExecutionId")
+	public Table stepExecutionList(@CliOption(key = {
+			"id" }, help = "the job execution id to be used as a filter", mandatory = true) long id) {
 
 		final PagedResources<StepExecutionResource> steps = jobOperations().stepExecutionList(id);
 
 		TableModelBuilder<Object> modelBuilder = new TableModelBuilder<>();
 
-		modelBuilder.addRow().addValue("ID ").addValue("Step Name ").addValue("Job Exec Id ")
-				.addValue("Start Time ").addValue("End Time ").addValue("Status ");
+		modelBuilder.addRow().addValue("ID ").addValue("Step Name ").addValue("Job Exec Id ").addValue("Start Time ")
+				.addValue("End Time ").addValue("Status ");
 		for (StepExecutionResource step : steps) {
 			modelBuilder.addRow().addValue(step.getStepExecution().getId())
-					.addValue(step.getStepExecution().getStepName())
-					.addValue(id)
-					.addValue(step.getStepExecution().getStartTime())
-					.addValue(step.getStepExecution().getEndTime())
+					.addValue(step.getStepExecution().getStepName()).addValue(id)
+					.addValue(step.getStepExecution().getStartTime()).addValue(step.getStepExecution().getEndTime())
 					.addValue(step.getStepExecution().getStatus().name());
 		}
 		TableBuilder builder = new TableBuilder(modelBuilder.build());
@@ -201,22 +190,17 @@ public class JobCommands implements CommandMarker {
 
 	@CliCommand(value = STEP_EXECUTION_PROGRESS, help = "Display the details of a specific step progress")
 	public Table stepProgressDisplay(
-			@CliOption(key = {"id"},
-					help = "the step execution id",
-					mandatory = true) long id,
-			@CliOption(key = {"jobExecutionId"},
-					help = "the job execution id",
-					mandatory = true) long jobExecutionId) {
+			@CliOption(key = { "id" }, help = "the step execution id", mandatory = true) long id, @CliOption(key = {
+					"jobExecutionId" }, help = "the job execution id", mandatory = true) long jobExecutionId) {
 
-		StepExecutionProgressInfoResource progressInfoResource =
-				jobOperations().stepExecutionProgress(jobExecutionId, id);
+		StepExecutionProgressInfoResource progressInfoResource = jobOperations().stepExecutionProgress(jobExecutionId,
+				id);
 
 		TableModelBuilder<Object> modelBuilder = new TableModelBuilder<>();
-		modelBuilder.addRow().addValue("ID ").addValue("Step Name ").addValue("Complete ")
-				.addValue("Duration ");
+		modelBuilder.addRow().addValue("ID ").addValue("Step Name ").addValue("Complete ").addValue("Duration ");
 
-		modelBuilder.addRow().addValue(progressInfoResource.getStepExecution().getId()).
-				addValue(progressInfoResource.getStepExecution().getStepName())
+		modelBuilder.addRow().addValue(progressInfoResource.getStepExecution().getId())
+				.addValue(progressInfoResource.getStepExecution().getStepName())
 				.addValue(progressInfoResource.getPercentageComplete() * 100 + "%")
 				.addValue(progressInfoResource.getDuration() + " ms");
 
@@ -228,14 +212,11 @@ public class JobCommands implements CommandMarker {
 
 	@CliCommand(value = STEP_EXECUTION_DISPLAY, help = "Display the details of a specific step execution")
 	public Table stepExecutionDisplay(
-			@CliOption(key = {"id"},
-					help = "the step execution id",
-					mandatory = true) long id,
-			@CliOption(key = {"jobExecutionId"},
-					help = "the job execution id",
-					mandatory = true) long jobExecutionId) {
+			@CliOption(key = { "id" }, help = "the step execution id", mandatory = true) long id, @CliOption(key = {
+					"jobExecutionId" }, help = "the job execution id", mandatory = true) long jobExecutionId) {
 
-		StepExecutionProgressInfoResource progressInfoResource = jobOperations().stepExecutionProgress(jobExecutionId, id);
+		StepExecutionProgressInfoResource progressInfoResource = jobOperations().stepExecutionProgress(jobExecutionId,
+				id);
 
 		TableModelBuilder<Object> modelBuilder = new TableModelBuilder<>();
 		modelBuilder.addRow().addValue("Key ").addValue("Value ");
@@ -246,18 +227,30 @@ public class JobCommands implements CommandMarker {
 		modelBuilder.addRow().addValue("End Time ").addValue(progressInfoResource.getStepExecution().getEndTime());
 		modelBuilder.addRow().addValue("Duration ").addValue(progressInfoResource.getDuration() + " ms");
 		modelBuilder.addRow().addValue("Status ").addValue(progressInfoResource.getStepExecution().getStatus().name());
-		modelBuilder.addRow().addValue("Last Updated ").addValue(progressInfoResource.getStepExecution().getLastUpdated());
-		modelBuilder.addRow().addValue("Read Count ").addValue(progressInfoResource.getStepExecutionHistory().getReadCount().getCount());
-		modelBuilder.addRow().addValue("Write Count ").addValue(progressInfoResource.getStepExecutionHistory().getWriteCount().getCount());
-		modelBuilder.addRow().addValue("Filter Count ").addValue(progressInfoResource.getStepExecutionHistory().getFilterCount().getCount());
-		modelBuilder.addRow().addValue("Read Skip Count ").addValue(progressInfoResource.getStepExecutionHistory().getReadSkipCount().getCount());
-		modelBuilder.addRow().addValue("Write Skip Count ").addValue(progressInfoResource.getStepExecutionHistory().getWriteSkipCount().getCount());
-		modelBuilder.addRow().addValue("Process Skip Count ").addValue(progressInfoResource.getStepExecutionHistory().getProcessSkipCount().getCount());
-		modelBuilder.addRow().addValue("Read Skip Count ").addValue(progressInfoResource.getStepExecutionHistory().getReadSkipCount().getCount());
-		modelBuilder.addRow().addValue("Commit Count ").addValue(progressInfoResource.getStepExecutionHistory().getCommitCount().getCount());
-		modelBuilder.addRow().addValue("Rollback Count ").addValue(progressInfoResource.getStepExecutionHistory().getRollbackCount().getCount());
-		modelBuilder.addRow().addValue("Exit Status ").addValue(progressInfoResource.getStepExecution().getExitStatus().getExitCode());
-		modelBuilder.addRow().addValue("Exit Description ").addValue(progressInfoResource.getStepExecution().getExitStatus().getExitDescription());
+		modelBuilder.addRow().addValue("Last Updated ")
+				.addValue(progressInfoResource.getStepExecution().getLastUpdated());
+		modelBuilder.addRow().addValue("Read Count ")
+				.addValue(progressInfoResource.getStepExecutionHistory().getReadCount().getCount());
+		modelBuilder.addRow().addValue("Write Count ")
+				.addValue(progressInfoResource.getStepExecutionHistory().getWriteCount().getCount());
+		modelBuilder.addRow().addValue("Filter Count ")
+				.addValue(progressInfoResource.getStepExecutionHistory().getFilterCount().getCount());
+		modelBuilder.addRow().addValue("Read Skip Count ")
+				.addValue(progressInfoResource.getStepExecutionHistory().getReadSkipCount().getCount());
+		modelBuilder.addRow().addValue("Write Skip Count ")
+				.addValue(progressInfoResource.getStepExecutionHistory().getWriteSkipCount().getCount());
+		modelBuilder.addRow().addValue("Process Skip Count ")
+				.addValue(progressInfoResource.getStepExecutionHistory().getProcessSkipCount().getCount());
+		modelBuilder.addRow().addValue("Read Skip Count ")
+				.addValue(progressInfoResource.getStepExecutionHistory().getReadSkipCount().getCount());
+		modelBuilder.addRow().addValue("Commit Count ")
+				.addValue(progressInfoResource.getStepExecutionHistory().getCommitCount().getCount());
+		modelBuilder.addRow().addValue("Rollback Count ")
+				.addValue(progressInfoResource.getStepExecutionHistory().getRollbackCount().getCount());
+		modelBuilder.addRow().addValue("Exit Status ")
+				.addValue(progressInfoResource.getStepExecution().getExitStatus().getExitCode());
+		modelBuilder.addRow().addValue("Exit Description ")
+				.addValue(progressInfoResource.getStepExecution().getExitStatus().getExitDescription());
 
 		TableBuilder builder = new TableBuilder(modelBuilder.build());
 

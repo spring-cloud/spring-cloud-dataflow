@@ -19,7 +19,8 @@ package org.springframework.cloud.dataflow.server.repository.support;
 import org.springframework.data.domain.Pageable;
 
 /**
- * Postgres implementation of a  {@link PagingQueryProvider} using database specific features.
+ * Postgres implementation of a {@link PagingQueryProvider} using database specific
+ * features.
  *
  * @author Glenn Renfro
  */
@@ -27,9 +28,8 @@ public class PostgresPagingQueryProvider extends AbstractSqlPagingQueryProvider 
 
 	@Override
 	public String getPageQuery(Pageable pageable) {
-		String limitClause = new StringBuilder().append("LIMIT ").
-				append(pageable.getPageSize()).append(" OFFSET ").
-				append(pageable.getOffset()).toString();
+		String limitClause = new StringBuilder().append("LIMIT ").append(pageable.getPageSize()).append(" OFFSET ")
+				.append(pageable.getOffset()).toString();
 		return SqlPagingQueryUtils.generateLimitJumpToQuery(this, limitClause);
 	}
 }

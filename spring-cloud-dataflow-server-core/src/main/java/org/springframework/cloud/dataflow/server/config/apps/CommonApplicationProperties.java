@@ -30,7 +30,7 @@ import org.springframework.cloud.dataflow.core.DataFlowPropertyKeys;
 @ConfigurationProperties(DataFlowPropertyKeys.PREFIX + "applicationProperties")
 public class CommonApplicationProperties {
 
-	private Map<String,String> stream = new ConcurrentHashMap<>();
+	private Map<String, String> stream = new ConcurrentHashMap<>();
 
 	public Map<String, String> getStream() {
 		return this.stream;

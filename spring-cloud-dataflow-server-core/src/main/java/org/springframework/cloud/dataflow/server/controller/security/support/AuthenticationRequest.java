@@ -16,9 +16,7 @@
 package org.springframework.cloud.dataflow.server.controller.security.support;
 
 /**
- *
  * @author Gunnar Hillert
- *
  */
 public class AuthenticationRequest {
 

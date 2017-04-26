@@ -48,8 +48,16 @@ public class AppStatusResource extends ResourceSupport {
 		return deploymentId;
 	}
 
+	public void setDeploymentId(String deploymentId) {
+		this.deploymentId = deploymentId;
+	}
+
 	public String getState() {
 		return state;
+	}
+
+	public void setState(String state) {
+		this.state = state;
 	}
 
 	public Resources<AppInstanceStatusResource> getInstances() {
@@ -62,13 +70,5 @@ public class AppStatusResource extends ResourceSupport {
 
 	public static class Page extends PagedResources<AppStatusResource> {
 
-	}
-
-	public void setDeploymentId(String deploymentId) {
-		this.deploymentId = deploymentId;
-	}
-
-	public void setState(String state) {
-		this.state = state;
 	}
 }

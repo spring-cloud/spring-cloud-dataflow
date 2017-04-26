@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,32 +22,29 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Represents either a task application or task definition reference. Task application references
- * can have arguments.
+ * Represents either a task application or task definition reference. Task application
+ * references can have arguments.
  *
  * @author Andy Clement
  */
 public class TaskAppNode extends LabelledTaskNode {
 
 	private Token taskName;
-	
+
 	private ArgumentNode[] arguments;
-	
-	private Map<String,String> argumentsMap;
-	
+
+	private Map<String, String> argumentsMap;
+
 	private List<TransitionNode> transitions;
-	
+
 	TaskAppNode(Token taskName, ArgumentNode[] arguments, List<TransitionNode> transitions) {
-		super(taskName.startPos, 
-				(transitions == null || transitions.isEmpty())?
-						arguments==null || arguments.length==0?taskName.endPos:arguments[arguments.length-1].endPos:
-						transitions.get(transitions.size()-1).endPos);
+		super(taskName.startPos,
+				(transitions == null || transitions.isEmpty())
+						? arguments == null || arguments.length == 0 ? taskName.endPos
+								: arguments[arguments.length - 1].endPos
+						: transitions.get(transitions.size() - 1).endPos);
 		this.taskName = taskName;
 		this.arguments = arguments;
-		this.transitions = transitions;
-	}
-
-	void setTransitions(List<TransitionNode> transitions) {
 		this.transitions = transitions;
 	}
 
@@ -65,6 +62,10 @@ public class TaskAppNode extends LabelledTaskNode {
 		return transitions;
 	}
 
+	void setTransitions(List<TransitionNode> transitions) {
+		this.transitions = transitions;
+	}
+
 	public boolean hasTransitions() {
 		return transitions != null && !transitions.isEmpty();
 	}
@@ -72,23 +73,23 @@ public class TaskAppNode extends LabelledTaskNode {
 	public String getName() {
 		return taskName.stringValue();
 	}
-	
+
 	public boolean hasArguments() {
 		return arguments != null && arguments.length != 0;
 	}
-	
+
 	public ArgumentNode[] getArguments() {
 		return arguments;
 	}
-	
-	public Map<String,String> getArgumentsAsMap() {
+
+	public Map<String, String> getArgumentsAsMap() {
 		if (argumentsMap == null) {
 			if (arguments == null || arguments.length == 0) {
 				argumentsMap = Collections.emptyMap();
 			}
 			else {
-				argumentsMap = new LinkedHashMap<String,String>();
-				for (ArgumentNode argument: arguments) {
+				argumentsMap = new LinkedHashMap<String, String>();
+				for (ArgumentNode argument : arguments) {
 					argumentsMap.put(argument.getName(), argument.getValue());
 				}
 			}
@@ -104,7 +105,7 @@ public class TaskAppNode extends LabelledTaskNode {
 		}
 		s.append(getName());
 		if (arguments != null) {
-			for (ArgumentNode argument: arguments) {
+			for (ArgumentNode argument : arguments) {
 				s.append(" ").append("--").append(argument.getName()).append("=").append(argument.getValue());
 			}
 		}
@@ -112,7 +113,7 @@ public class TaskAppNode extends LabelledTaskNode {
 			s.append(":").append(startPos).append(">").append(endPos);
 		}
 		s.append(" ");
-		for (int i=0;i<transitions.size();i++) {
+		for (int i = 0; i < transitions.size(); i++) {
 			TransitionNode t = transitions.get(i);
 			if (i > 0) {
 				s.append(" ");
@@ -129,7 +130,7 @@ public class TaskAppNode extends LabelledTaskNode {
 			return;
 		}
 		visitor.visit(this);
-		for (TransitionNode transition: transitions) {
+		for (TransitionNode transition : transitions) {
 			transition.accept(visitor);
 		}
 		visitor.postVisit(this);
@@ -143,11 +144,11 @@ public class TaskAppNode extends LabelledTaskNode {
 		s.append(taskName.stringValue());
 		if (getArgumentsAsMap().size() != 0) {
 			s.append(" ");
-			for (Map.Entry<String, String> argument: argumentsMap.entrySet()) {
+			for (Map.Entry<String, String> argument : argumentsMap.entrySet()) {
 				s.append("--").append(argument.getKey()).append("=").append(argument.getValue());
 			}
 		}
 		return s.toString();
 	}
-	
+
 }

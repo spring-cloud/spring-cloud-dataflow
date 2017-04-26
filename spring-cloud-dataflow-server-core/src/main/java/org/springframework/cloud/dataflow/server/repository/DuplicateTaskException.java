@@ -17,8 +17,8 @@
 package org.springframework.cloud.dataflow.server.repository;
 
 /**
- * Thrown to indicate that the creation of a task failed
- * because a task with the given name already exists.
+ * Thrown to indicate that the creation of a task failed because a task with the given
+ * name already exists.
  *
  * @author Michael Minella
  */

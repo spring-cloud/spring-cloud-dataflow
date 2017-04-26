@@ -34,12 +34,15 @@ public class VersionInfoProperties {
 	public String getDataflowCoreVersion() {
 		return dataflowCoreVersion;
 	}
+
 	public void setDataflowCoreVersion(String dataflowCoreVersion) {
 		this.dataflowCoreVersion = dataflowCoreVersion;
 	}
+
 	public String getDataflowDashboardVersion() {
 		return dataflowDashboardVersion;
 	}
+
 	public void setDataflowDashboardVersion(String dataflowDashboardVersion) {
 		this.dataflowDashboardVersion = dataflowDashboardVersion;
 	}

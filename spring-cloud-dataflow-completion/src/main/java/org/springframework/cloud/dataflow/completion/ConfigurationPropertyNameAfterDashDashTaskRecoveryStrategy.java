@@ -16,25 +16,25 @@
 
 package org.springframework.cloud.dataflow.completion;
 
-import static org.springframework.cloud.dataflow.completion.CompletionProposal.expanding;
-
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
+import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.core.dsl.CheckPointedParseException;
 import org.springframework.cloud.dataflow.registry.AppRegistration;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
-import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.core.io.Resource;
 
+import static org.springframework.cloud.dataflow.completion.CompletionProposal.expanding;
 
 /**
- * Provides completion proposals when the user has typed the two dashes that
- * precede an app configuration property.
+ * Provides completion proposals when the user has typed the two dashes that precede an
+ * app configuration property.
+ *
  * @author Eric Bottard
  * @author Mark Fisher
  * @author Andy Clement
@@ -47,15 +47,15 @@ class ConfigurationPropertyNameAfterDashDashTaskRecoveryStrategy
 	private final ApplicationConfigurationMetadataResolver metadataResolver;
 
 	ConfigurationPropertyNameAfterDashDashTaskRecoveryStrategy(AppRegistry appRegistry,
-	                                                       ApplicationConfigurationMetadataResolver metadataResolver) {
+			ApplicationConfigurationMetadataResolver metadataResolver) {
 		super(CheckPointedParseException.class, "file --");
 		this.appRegistry = appRegistry;
 		this.metadataResolver = metadataResolver;
 	}
 
 	@Override
-	public void addProposals(String dsl, CheckPointedParseException exception,
-	                         int detailLevel, List<CompletionProposal> collector) {
+	public void addProposals(String dsl, CheckPointedParseException exception, int detailLevel,
+			List<CompletionProposal> collector) {
 
 		String safe = exception.getExpressionStringUntilCheckpoint();
 		TaskDefinition taskDefinition = new TaskDefinition("__dummy", safe);
@@ -67,7 +67,7 @@ class ConfigurationPropertyNameAfterDashDashTaskRecoveryStrategy
 			return;
 		}
 		Set<String> alreadyPresentOptions = new HashSet<>(taskDefinition.getProperties().keySet());
-		
+
 		Resource metadataResource = appRegistration.getMetadataResource();
 
 		CompletionProposal.Factory proposals = expanding(dsl);

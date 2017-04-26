@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,12 +23,13 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 
 import org.joda.time.DateTimeConstants;
+
 import org.springframework.analytics.rest.domain.AggregateCounterResource;
 import org.springframework.analytics.rest.domain.MetricResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.dataflow.rest.client.AggregateCounterOperations;
-import org.springframework.cloud.dataflow.shell.command.support.RoleType;
 import org.springframework.cloud.dataflow.shell.command.support.OpsType;
+import org.springframework.cloud.dataflow.shell.command.support.RoleType;
 import org.springframework.cloud.dataflow.shell.config.DataFlowShell;
 import org.springframework.cloud.dataflow.shell.converter.NumberFormatConverter;
 import org.springframework.hateoas.PagedResources;
@@ -54,18 +55,15 @@ import org.springframework.stereotype.Component;
 @Component
 public class AggregateCounterCommands extends AbstractMetricsCommands implements CommandMarker {
 
+	private static final String DISPLAY_AGGR_COUNTER = "aggregate-counter display";
+	private static final String LIST_AGGR_COUNTERS = "aggregate-counter list";
+	private static final String DELETE_AGGR_COUNTER = "aggregate-counter delete";
+	@Autowired
+	private DataFlowShell dataFlowShell;
+
 	protected AggregateCounterCommands() {
 		super("AggregateCounter");
 	}
-
-	private static final String DISPLAY_AGGR_COUNTER = "aggregate-counter display";
-
-	private static final String LIST_AGGR_COUNTERS = "aggregate-counter list";
-
-	private static final String DELETE_AGGR_COUNTER = "aggregate-counter delete";
-
-	@Autowired
-	private DataFlowShell dataFlowShell;
 
 	@CliAvailabilityIndicator({ DISPLAY_AGGR_COUNTER, LIST_AGGR_COUNTERS })
 	public boolean availableWithViewRole() {
@@ -77,11 +75,14 @@ public class AggregateCounterCommands extends AbstractMetricsCommands implements
 		return dataFlowShell.hasAccess(RoleType.CREATE, OpsType.AGGREGATE_COUNTER);
 	}
 
-	@CliCommand(value = DISPLAY_AGGR_COUNTER, help = "Display aggregate counter values by chosen interval and resolution(minute, hour)")
+	@CliCommand(value = DISPLAY_AGGR_COUNTER, help = "Display aggregate counter values by chosen interval and "
+			+ "resolution(minute, hour)")
 	public Table display(
-			@CliOption(key = { "", "name" }, help = "the name of the aggregate counter to display", mandatory = true) String name,
+			@CliOption(key = { "",
+					"name" }, help = "the name of the aggregate counter to display", mandatory = true) String name,
 			@CliOption(key = "from", help = "start-time for the interval. format: 'yyyy-MM-dd HH:mm:ss'", mandatory = false) String from,
-			@CliOption(key = "to", help = "end-time for the interval. format: 'yyyy-MM-dd HH:mm:ss'. defaults to now", mandatory = false) String to,
+			@CliOption(key = "to", help = "end-time for the interval. format: 'yyyy-MM-dd HH:mm:ss'. defaults to "
+					+ "now", mandatory = false) String to,
 			@CliOption(key = "lastHours", help = "set the interval to last 'n' hours", mandatory = false) Integer lastHours,
 			@CliOption(key = "lastDays", help = "set the interval to last 'n' days", mandatory = false) Integer lastDays,
 			@CliOption(key = "resolution", help = "the size of the bucket to aggregate (minute, hour, day, month)", mandatory = false, unspecifiedDefaultValue = "hour") AggregateCounterOperations.Resolution resolution,
@@ -90,19 +91,16 @@ public class AggregateCounterCommands extends AbstractMetricsCommands implements
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		try {
 			Date fromDate;
-			switch (Assertions
-					.atMostOneOf("from", from, "lastHours", lastHours, "lastDays",
-							lastDays)) {
+			switch (Assertions.atMostOneOf("from", from, "lastHours", lastHours, "lastDays", lastDays)) {
 			case 0:
 				fromDate = dateFormat.parse(from);
 				break;
 			case 1:
-				fromDate = new Date(System.currentTimeMillis()
-						- ((long) lastHours) * DateTimeConstants.MILLIS_PER_HOUR);
+				fromDate = new Date(
+						System.currentTimeMillis() - ((long) lastHours) * DateTimeConstants.MILLIS_PER_HOUR);
 				break;
 			case 2:
-				fromDate = new Date(System.currentTimeMillis()
-						- ((long) lastDays) * DateTimeConstants.MILLIS_PER_DAY);
+				fromDate = new Date(System.currentTimeMillis() - ((long) lastDays) * DateTimeConstants.MILLIS_PER_DAY);
 				break;
 			default:
 				fromDate = null;
@@ -110,8 +108,8 @@ public class AggregateCounterCommands extends AbstractMetricsCommands implements
 			}
 
 			Date toDate = (to == null) ? null : dateFormat.parse(to);
-			AggregateCounterResource aggResource = aggregateCounterOperations()
-					.retrieve(name, fromDate, toDate, resolution);
+			AggregateCounterResource aggResource = aggregateCounterOperations().retrieve(name, fromDate, toDate,
+					resolution);
 			return displayAggrCounter(aggResource, pattern);
 		}
 		catch (ParseException pe) {
@@ -130,7 +128,7 @@ public class AggregateCounterCommands extends AbstractMetricsCommands implements
 	@CliCommand(value = DELETE_AGGR_COUNTER, help = "Delete an aggregate counter")
 	public String delete(
 			@CliOption(key = { "", "name" }, help = "the name of the aggregate counter to delete", mandatory = true
-			/*, optionContext = "existing-aggregate-counter disable-string-converter" */) String name) {
+			/* , optionContext = "existing-aggregate-counter disable-string-converter" */) String name) {
 		aggregateCounterOperations().reset(name);
 		return String.format("Deleted aggregatecounter '%s'", name);
 	}
@@ -144,15 +142,13 @@ public class AggregateCounterCommands extends AbstractMetricsCommands implements
 		headers.put("key", "TIME");
 		headers.put("value", "COUNT");
 		TableModel model = new BeanListTableModel<>(aggResource.getValues().entrySet(), headers);
-		Table table = DataFlowTables.applyStyle(new TableBuilder(model))
-				.on(CellMatchers.ofType(Long.class))
+		Table table = DataFlowTables.applyStyle(new TableBuilder(model)).on(CellMatchers.ofType(Long.class))
 				.addFormatter(new Formatter() {
-					@Override public String[] format(Object value) {
+					@Override
+					public String[] format(Object value) {
 						return new String[] { pattern.format(value) };
 					}
-				})
-				.addAligner(SimpleHorizontalAligner.right)
-				.build();
+				}).addAligner(SimpleHorizontalAligner.right).build();
 		return table;
 	}
 

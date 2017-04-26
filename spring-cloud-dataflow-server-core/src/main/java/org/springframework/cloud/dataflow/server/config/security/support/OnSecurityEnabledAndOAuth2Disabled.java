@@ -21,13 +21,11 @@ import org.springframework.context.annotation.Condition;
 import org.springframework.context.annotation.Conditional;
 
 /**
- * {@link Condition} that is only valid if {@code security.basic.enabled} is
- * {@code true} and the property {@code security.oauth2.client.client-id}
- * does NOT exists.
+ * {@link Condition} that is only valid if {@code security.basic.enabled} is {@code true}
+ * and the property {@code security.oauth2.client.client-id} does NOT exists.
  *
  * @author Gunnar Hillert
  * @since 1.1.0
- *
  */
 public class OnSecurityEnabledAndOAuth2Disabled extends AllNestedConditions {
 
@@ -36,8 +34,10 @@ public class OnSecurityEnabledAndOAuth2Disabled extends AllNestedConditions {
 	}
 
 	@ConditionalOnProperty("security.basic.enabled")
-	static class BasicSecurityEnabledEnabled { }
+	static class BasicSecurityEnabledEnabled {
+	}
 
 	@Conditional(OnOAuth2Disabled.class)
-	static class OauthEnabled { }
+	static class OauthEnabled {
+	}
 }

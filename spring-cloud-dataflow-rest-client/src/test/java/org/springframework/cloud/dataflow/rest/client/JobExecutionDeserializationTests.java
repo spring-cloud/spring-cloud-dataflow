@@ -23,6 +23,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
 import org.junit.Test;
+
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobInstance;
@@ -57,8 +58,8 @@ public class JobExecutionDeserializationTests {
 
 		final ObjectMapper objectMapper = new ObjectMapper();
 
-		final InputStream inputStream =
-				JobExecutionDeserializationTests.class.getResourceAsStream("/JobExecutionJson.txt");
+		final InputStream inputStream = JobExecutionDeserializationTests.class
+				.getResourceAsStream("/JobExecutionJson.txt");
 
 		final String json = new String(StreamUtils.copyToByteArray(inputStream));
 
@@ -73,7 +74,8 @@ public class JobExecutionDeserializationTests {
 		objectMapper.addMixIn(ExitStatus.class, ExitStatusJacksonMixIn.class);
 
 		PagedResources<Resource<JobExecutionResource>> paged = objectMapper.readValue(json,
-				new TypeReference<PagedResources<Resource<JobExecutionResource>>>() {});
+				new TypeReference<PagedResources<Resource<JobExecutionResource>>>() {
+				});
 		JobExecutionResource jobExecutionResource = paged.getContent().iterator().next().getContent();
 		Assert.assertEquals("Expect 1 JobExecutionInfoResource", 6, paged.getContent().size());
 		Assert.assertEquals(Long.valueOf(6), jobExecutionResource.getJobId());
@@ -88,7 +90,8 @@ public class JobExecutionDeserializationTests {
 		final ObjectMapper objectMapper = new ObjectMapper();
 		objectMapper.registerModule(new Jackson2HalModule());
 
-		final InputStream inputStream = JobExecutionDeserializationTests.class.getResourceAsStream("/SingleJobExecutionJson.txt");
+		final InputStream inputStream = JobExecutionDeserializationTests.class
+				.getResourceAsStream("/SingleJobExecutionJson.txt");
 
 		final String json = new String(StreamUtils.copyToByteArray(inputStream));
 
@@ -102,8 +105,7 @@ public class JobExecutionDeserializationTests {
 		objectMapper.addMixIn(ExitStatus.class, ExitStatusJacksonMixIn.class);
 		objectMapper.setDateFormat(new ISO8601DateFormatWithMilliSeconds());
 
-		final JobExecutionResource jobExecutionInfoResource = objectMapper.readValue(json,
-				JobExecutionResource.class);
+		final JobExecutionResource jobExecutionInfoResource = objectMapper.readValue(json, JobExecutionResource.class);
 
 		Assert.assertNotNull(jobExecutionInfoResource);
 		Assert.assertEquals(Long.valueOf(1), jobExecutionInfoResource.getJobId());

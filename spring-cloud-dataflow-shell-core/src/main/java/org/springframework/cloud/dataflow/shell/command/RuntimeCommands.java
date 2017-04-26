@@ -16,14 +16,6 @@
 
 package org.springframework.cloud.dataflow.shell.command;
 
-import static org.springframework.shell.table.BorderSpecification.TOP;
-import static org.springframework.shell.table.BorderStyle.fancy_light;
-import static org.springframework.shell.table.BorderStyle.fancy_light_quadruple_dash;
-import static org.springframework.shell.table.CellMatchers.column;
-import static org.springframework.shell.table.CellMatchers.ofType;
-import static org.springframework.shell.table.SimpleHorizontalAligner.center;
-import static org.springframework.shell.table.SimpleVerticalAligner.middle;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -49,6 +41,14 @@ import org.springframework.shell.table.TableModelBuilder;
 import org.springframework.shell.table.Tables;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
+
+import static org.springframework.shell.table.BorderSpecification.TOP;
+import static org.springframework.shell.table.BorderStyle.fancy_light;
+import static org.springframework.shell.table.BorderStyle.fancy_light_quadruple_dash;
+import static org.springframework.shell.table.CellMatchers.column;
+import static org.springframework.shell.table.CellMatchers.ofType;
+import static org.springframework.shell.table.SimpleHorizontalAligner.center;
+import static org.springframework.shell.table.SimpleVerticalAligner.middle;
 
 /**
  * Commands for displaying the runtime state of deployed apps.
@@ -77,9 +77,9 @@ public class RuntimeCommands implements CommandMarker {
 
 	@CliCommand(value = LIST_APPS, help = "List runtime apps")
 	public Table list(
-			@CliOption(key = "summary", help = "whether to hide app instance details",
-					unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean summary,
-			@CliOption(key = {"appId", "appIds"}, help = "app id(s) to display, also supports '<group>.*' pattern") String[] appIds) {
+			@CliOption(key = "summary", help = "whether to hide app instance details", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean summary,
+			@CliOption(key = { "appId",
+					"appIds" }, help = "app id(s) to display, also supports '<group>.*' pattern") String[] appIds) {
 
 		Set<String> filter = null;
 		if (appIds != null) {
@@ -88,23 +88,19 @@ public class RuntimeCommands implements CommandMarker {
 
 		TableModelBuilder<Object> modelBuilder = new TableModelBuilder<>();
 		if (!summary) {
-			modelBuilder.addRow()
-					.addValue("App Id / Instance Id")
-					.addValue("Unit Status")
+			modelBuilder.addRow().addValue("App Id / Instance Id").addValue("Unit Status")
 					.addValue("No. of Instances / Attributes");
 		}
 		else {
-			modelBuilder.addRow()
-					.addValue("App Id")
-					.addValue("Unit Status")
-					.addValue("No. of Instances");
+			modelBuilder.addRow().addValue("App Id").addValue("Unit Status").addValue("No. of Instances");
 		}
 
 		// In detailed mode, keep track of app vs instance lines, to use
 		// a different border style later.
 		List<Integer> splits = new ArrayList<>();
 		int line = 1;
-		// Optimise for the single app case, which is likely less resource intensive on the server
+		// Optimise for the single app case, which is likely less resource intensive on
+		// the server
 		// than client side filtering
 		Iterable<AppStatusResource> statuses;
 		if (filter != null && filter.size() == 1 && !filter.iterator().next().endsWith(".*")) {
@@ -117,16 +113,13 @@ public class RuntimeCommands implements CommandMarker {
 			if (filter != null && !shouldRetain(filter, appStatusResource)) {
 				continue;
 			}
-			modelBuilder.addRow()
-					.addValue(appStatusResource.getDeploymentId())
-					.addValue(appStatusResource.getState())
+			modelBuilder.addRow().addValue(appStatusResource.getDeploymentId()).addValue(appStatusResource.getState())
 					.addValue(appStatusResource.getInstances().getContent().size());
 			splits.add(line);
 			line++;
 			if (!summary) {
 				for (AppInstanceStatusResource appInstanceStatusResource : appStatusResource.getInstances()) {
-					modelBuilder.addRow()
-							.addValue(appInstanceStatusResource.getInstanceId())
+					modelBuilder.addRow().addValue(appInstanceStatusResource.getInstanceId())
 							.addValue(appInstanceStatusResource.getState())
 							.addValue(appInstanceStatusResource.getAttributes());
 					line++;
@@ -137,12 +130,9 @@ public class RuntimeCommands implements CommandMarker {
 		TableModel model = modelBuilder.build();
 		final TableBuilder builder = new TableBuilder(model);
 		DataFlowTables.applyStyle(builder);
-		builder.on(column(0)).addAligner(middle)
-				.on(column(1)).addAligner(middle)
-				.on(column(1)).addAligner(center)
+		builder.on(column(0)).addAligner(middle).on(column(1)).addAligner(middle).on(column(1)).addAligner(center)
 				// This will match the "number of instances" cells only
 				.on(ofType(Integer.class)).addAligner(center);
-
 
 		Tables.configureKeyValueRendering(builder, " = ");
 		for (int i = 2; i < model.getRowCount(); i++) {
@@ -150,7 +140,8 @@ public class RuntimeCommands implements CommandMarker {
 				builder.paintBorder(fancy_light, TOP).fromRowColumn(i, 0).toRowColumn(i + 1, model.getColumnCount());
 			}
 			else {
-				builder.paintBorder(fancy_light_quadruple_dash, TOP).fromRowColumn(i, 0).toRowColumn(i + 1, model.getColumnCount());
+				builder.paintBorder(fancy_light_quadruple_dash, TOP).fromRowColumn(i, 0).toRowColumn(i + 1,
+						model.getColumnCount());
 			}
 		}
 

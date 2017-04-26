@@ -21,7 +21,7 @@ import org.springframework.cloud.task.repository.TaskExecution;
 /**
  * @author Glenn Renfro
  */
-public class NoSuchTaskExecutionException extends RuntimeException{
+public class NoSuchTaskExecutionException extends RuntimeException {
 
 	/**
 	 * Create a new exception.

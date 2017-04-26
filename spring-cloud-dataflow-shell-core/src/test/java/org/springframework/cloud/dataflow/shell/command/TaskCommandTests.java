@@ -16,11 +16,6 @@
 
 package org.springframework.cloud.dataflow.shell.command;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-
 import java.util.Date;
 import java.util.UUID;
 
@@ -39,6 +34,11 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.shell.core.CommandResult;
 import org.springframework.shell.table.Table;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+
 /**
  * @author Glenn Renfro
  */
@@ -47,55 +47,33 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 	private static final String APPS_URI = "META-INF/test-task-apps.properties";
 
 	private static final Logger logger = LoggerFactory.getLogger(TaskCommandTests.class);
-
-	private static JdbcTemplate template;
-
 	private static final String TASK_NAME = "foo" + UUID.randomUUID().toString();
-
 	private static final String EXIT_MESSAGE = "exit";
-
 	private static final String ERROR_MESSAGE = "error";
-
 	private static final int EXIT_CODE = 20;
-
 	private static final long TASK_EXECUTION_ID = 10000;
-
 	private static final Date startTime = new Date();
-
 	private static final Date endTime = new Date(startTime.getTime() + 5000);
-
 	private static final String EXTERNAL_EXECUTION_ID = "WOW22";
-
-	@Before
-	public void registerApps() {
-		AppRegistry registry = applicationContext.getBean(AppRegistry.class);
-		registry.importAll(true, new ClassPathResource(APPS_URI));
-	}
+	private static JdbcTemplate template;
 
 	@BeforeClass
 	public static void setUp() {
 		template = new JdbcTemplate(applicationContext.getBean(DataSource.class));
 		template.afterPropertiesSet();
 
-		template.update("INSERT into TASK_EXECUTION(TASK_EXECUTION_ID, " +
-				"START_TIME, " +
-				"END_TIME, " +
-				"TASK_NAME, " +
-				"EXIT_CODE, " +
-				"EXIT_MESSAGE, " +
-				"LAST_UPDATED," +
-				"ERROR_MESSAGE, " +
-				"EXTERNAL_EXECUTION_ID)" +
-				"values (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-				TASK_EXECUTION_ID,
-				startTime,
-				endTime,
-				TASK_NAME,
-				EXIT_CODE,
-				EXIT_MESSAGE,
-				endTime,
-				ERROR_MESSAGE,
+		template.update(
+				"INSERT into TASK_EXECUTION(TASK_EXECUTION_ID, " + "START_TIME, " + "END_TIME, " + "TASK_NAME, "
+						+ "EXIT_CODE, " + "EXIT_MESSAGE, " + "LAST_UPDATED," + "ERROR_MESSAGE, "
+						+ "EXTERNAL_EXECUTION_ID)" + "values (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+				TASK_EXECUTION_ID, startTime, endTime, TASK_NAME, EXIT_CODE, EXIT_MESSAGE, endTime, ERROR_MESSAGE,
 				EXTERNAL_EXECUTION_ID);
+	}
+
+	@Before
+	public void registerApps() {
+		AppRegistry registry = applicationContext.getBean(AppRegistry.class);
+		registry.importAll(true, new ClassPathResource(APPS_URI));
 	}
 
 	@Test
@@ -111,28 +89,20 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 		CommandResult cr = task().taskExecutionList();
 		assertTrue("task execution list command must be successful", cr.isSuccess());
 		Table table = (Table) cr.getResult();
-		assertEquals("Number of columns returned was not expected", 5,
-				table.getModel().getColumnCount());
-		assertEquals("First column should be Task Name", "Task Name",
-				table.getModel().getValue(0,0));
-		assertEquals("Second column should be ID", "ID",
-				table.getModel().getValue(0,1));
-		assertEquals("Third column should be Start Time", "Start Time",
-				table.getModel().getValue(0,2));
-		assertEquals("Fourth column should be End Time", "End Time",
-				table.getModel().getValue(0,3));
-		assertEquals("Fifth column should be Exit Code", "Exit Code",
-				table.getModel().getValue(0,4));
-		assertEquals("First column, second row should be " + TASK_NAME,
-				TASK_NAME, table.getModel().getValue(1,0));
-		assertEquals("Second column, second row should be " + TASK_EXECUTION_ID,
-				TASK_EXECUTION_ID, table.getModel().getValue(1,1));
-		assertEquals("Third column, second row should be " + startTime,
-				startTime, table.getModel().getValue(1,2));
-		assertEquals("Fourth column, second row should be End Time" + endTime,
-				endTime, table.getModel().getValue(1,3));
-		assertEquals("Fifth column, second row should be Exit Code" + EXIT_CODE,
-				EXIT_CODE, table.getModel().getValue(1,4));
+		assertEquals("Number of columns returned was not expected", 5, table.getModel().getColumnCount());
+		assertEquals("First column should be Task Name", "Task Name", table.getModel().getValue(0, 0));
+		assertEquals("Second column should be ID", "ID", table.getModel().getValue(0, 1));
+		assertEquals("Third column should be Start Time", "Start Time", table.getModel().getValue(0, 2));
+		assertEquals("Fourth column should be End Time", "End Time", table.getModel().getValue(0, 3));
+		assertEquals("Fifth column should be Exit Code", "Exit Code", table.getModel().getValue(0, 4));
+		assertEquals("First column, second row should be " + TASK_NAME, TASK_NAME, table.getModel().getValue(1, 0));
+		assertEquals("Second column, second row should be " + TASK_EXECUTION_ID, TASK_EXECUTION_ID,
+				table.getModel().getValue(1, 1));
+		assertEquals("Third column, second row should be " + startTime, startTime, table.getModel().getValue(1, 2));
+		assertEquals("Fourth column, second row should be End Time" + endTime, endTime,
+				table.getModel().getValue(1, 3));
+		assertEquals("Fifth column, second row should be Exit Code" + EXIT_CODE, EXIT_CODE,
+				table.getModel().getValue(1, 4));
 	}
 
 	@Test
@@ -140,21 +110,14 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 		logger.info("Retrieve Task Execution List By Name Test");
 		task().create("mytask", "timestamp");
 		CommandResult cr = task().taskExecutionListByName("mytask");
-		assertTrue("task execution list by name command must be successful",
-				cr.isSuccess());
+		assertTrue("task execution list by name command must be successful", cr.isSuccess());
 		Table table = (Table) cr.getResult();
-		assertEquals("Number of columns returned was not expected", 5,
-				table.getModel().getColumnCount());
-		assertEquals("First column should be Task Name", "Task Name",
-				table.getModel().getValue(0,0));
-		assertEquals("Second column should be ID", "ID",
-				table.getModel().getValue(0,1));
-		assertEquals("Third column should be Start Time", "Start Time",
-				table.getModel().getValue(0,2));
-		assertEquals("Fourth column should be End Time", "End Time",
-				table.getModel().getValue(0,3));
-		assertEquals("Fifth column should be Exit Code", "Exit Code",
-				table.getModel().getValue(0,4));
+		assertEquals("Number of columns returned was not expected", 5, table.getModel().getColumnCount());
+		assertEquals("First column should be Task Name", "Task Name", table.getModel().getValue(0, 0));
+		assertEquals("Second column should be ID", "ID", table.getModel().getValue(0, 1));
+		assertEquals("Third column should be Start Time", "Start Time", table.getModel().getValue(0, 2));
+		assertEquals("Fourth column should be End Time", "End Time", table.getModel().getValue(0, 3));
+		assertEquals("Fifth column should be Exit Code", "Exit Code", table.getModel().getValue(0, 4));
 	}
 
 	@Test
@@ -169,47 +132,28 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 		CommandResult cr = task().taskExecutionStatus(value);
 		assertTrue("task execution status command must be successful", cr.isSuccess());
 		Table table = (Table) cr.getResult();
-		assertEquals("Number of columns returned was not expected", 2,
-				table.getModel().getColumnCount());
-		assertEquals("First key should be Key", "Key ",
-				table.getModel().getValue(0, 0));
-		assertEquals("Second key should be Id ", "Id ",
-				table.getModel().getValue(1, 0));
-		assertEquals("Third key should be Name ", "Name ",
-				table.getModel().getValue(2, 0));
-		assertEquals("Fourth key should be Arguments", "Arguments ",
-				table.getModel().getValue(3, 0));
-		assertEquals("Fifth key should be Job Execution Ids  ",
-				"Job Execution Ids ", table.getModel().getValue(4, 0));
-		assertEquals("Sixth key should be Start Time  ", "Start Time ",
-				table.getModel().getValue(5, 0));
-		assertEquals("Seventh key should be End Time ", "End Time ",
-				table.getModel().getValue(6, 0));
-		assertEquals("Eighth key should be Exit Code ", "Exit Code ",
-				table.getModel().getValue(7, 0));
-		assertEquals("Nineth key should be Exit Message ", "Exit Message ",
-				table.getModel().getValue(8, 0));
-		assertEquals("Tenth key should be Error Message ", "Error Message ",
-				table.getModel().getValue(9, 0));
+		assertEquals("Number of columns returned was not expected", 2, table.getModel().getColumnCount());
+		assertEquals("First key should be Key", "Key ", table.getModel().getValue(0, 0));
+		assertEquals("Second key should be Id ", "Id ", table.getModel().getValue(1, 0));
+		assertEquals("Third key should be Name ", "Name ", table.getModel().getValue(2, 0));
+		assertEquals("Fourth key should be Arguments", "Arguments ", table.getModel().getValue(3, 0));
+		assertEquals("Fifth key should be Job Execution Ids  ", "Job Execution Ids ", table.getModel().getValue(4, 0));
+		assertEquals("Sixth key should be Start Time  ", "Start Time ", table.getModel().getValue(5, 0));
+		assertEquals("Seventh key should be End Time ", "End Time ", table.getModel().getValue(6, 0));
+		assertEquals("Eighth key should be Exit Code ", "Exit Code ", table.getModel().getValue(7, 0));
+		assertEquals("Nineth key should be Exit Message ", "Exit Message ", table.getModel().getValue(8, 0));
+		assertEquals("Tenth key should be Error Message ", "Error Message ", table.getModel().getValue(9, 0));
 		assertEquals("Eleventh key should be External Execution Id ", "External Execution Id ",
 				table.getModel().getValue(10, 0));
 
-		assertEquals("Second value should be " + TASK_EXECUTION_ID,
-				TASK_EXECUTION_ID, table.getModel().getValue(1, 1));
-		assertEquals("Third value should be " + TASK_NAME, TASK_NAME,
-				table.getModel().getValue(2, 1));
-		assertEquals("Sixth value should be " + startTime, startTime,
-				table.getModel().getValue(5, 1));
-		assertEquals("Seventh value should be " + endTime, endTime,
-				table.getModel().getValue(6, 1));
-		assertEquals("Eighth value should be " + EXIT_CODE, EXIT_CODE,
-				table.getModel().getValue(7, 1));
-		assertEquals("Nineth value should be " + EXIT_MESSAGE, EXIT_MESSAGE,
-				table.getModel().getValue(8, 1));
-		assertEquals("Tenth value should be  " + ERROR_MESSAGE, ERROR_MESSAGE,
-				table.getModel().getValue(9, 1));
-		assertEquals("Eleventh value should be  " + EXTERNAL_EXECUTION_ID,
-				EXTERNAL_EXECUTION_ID,
+		assertEquals("Second value should be " + TASK_EXECUTION_ID, TASK_EXECUTION_ID, table.getModel().getValue(1, 1));
+		assertEquals("Third value should be " + TASK_NAME, TASK_NAME, table.getModel().getValue(2, 1));
+		assertEquals("Sixth value should be " + startTime, startTime, table.getModel().getValue(5, 1));
+		assertEquals("Seventh value should be " + endTime, endTime, table.getModel().getValue(6, 1));
+		assertEquals("Eighth value should be " + EXIT_CODE, EXIT_CODE, table.getModel().getValue(7, 1));
+		assertEquals("Nineth value should be " + EXIT_MESSAGE, EXIT_MESSAGE, table.getModel().getValue(8, 1));
+		assertEquals("Tenth value should be  " + ERROR_MESSAGE, ERROR_MESSAGE, table.getModel().getValue(9, 1));
+		assertEquals("Eleventh value should be  " + EXTERNAL_EXECUTION_ID, EXTERNAL_EXECUTION_ID,
 				table.getModel().getValue(10, 1));
 	}
 
@@ -218,6 +162,5 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 		CommandResult cr = task().taskExecutionCleanup(10000);
 		assertThat(cr.getResult(), is("Request to clean up resources for task execution 10000 has been submitted"));
 	}
-
 
 }

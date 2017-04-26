@@ -16,23 +16,25 @@
 
 package org.springframework.cloud.dataflow.completion;
 
-import static org.springframework.cloud.dataflow.completion.CompletionProposal.expanding;
-
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
+import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.registry.AppRegistration;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
-import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.core.io.Resource;
 
+import static org.springframework.cloud.dataflow.completion.CompletionProposal.expanding;
+
 /**
- * Adds missing application configuration properties at the end of a well formed stream definition.
+ * Adds missing application configuration properties at the end of a well formed stream
+ * definition.
+ *
  * @author Eric Bottard
  * @author Mark Fisher
  */
@@ -42,14 +44,15 @@ class AddAppOptionsExpansionStrategy implements ExpansionStrategy {
 
 	private final ApplicationConfigurationMetadataResolver metadataResolver;
 
-	public AddAppOptionsExpansionStrategy(AppRegistry appRegistry, ApplicationConfigurationMetadataResolver metadataResolver) {
+	public AddAppOptionsExpansionStrategy(AppRegistry appRegistry,
+			ApplicationConfigurationMetadataResolver metadataResolver) {
 		this.appRegistry = appRegistry;
 		this.metadataResolver = metadataResolver;
 	}
 
 	@Override
 	public boolean addProposals(String text, StreamDefinition streamDefinition, int detailLevel,
-	                            List<CompletionProposal> collector) {
+			List<CompletionProposal> collector) {
 		StreamAppDefinition lastApp = streamDefinition.getDeploymentOrderIterator().next();
 
 		String lastAppName = lastApp.getName();
@@ -73,7 +76,8 @@ class AddAppOptionsExpansionStrategy implements ExpansionStrategy {
 		// For whitelisted properties, use their simple name
 		for (ConfigurationMetadataProperty property : metadataResolver.listProperties(metadataResource)) {
 			if (!alreadyPresentOptions.contains(property.getName())) {
-				collector.add(proposals.withSeparateTokens("--" + property.getName() + "=", property.getShortDescription()));
+				collector.add(
+						proposals.withSeparateTokens("--" + property.getName() + "=", property.getShortDescription()));
 			}
 		}
 
@@ -81,7 +85,8 @@ class AddAppOptionsExpansionStrategy implements ExpansionStrategy {
 		if (detailLevel > 1) {
 			for (ConfigurationMetadataProperty property : metadataResolver.listProperties(metadataResource, true)) {
 				if (!alreadyPresentOptions.contains(property.getId())) {
-					collector.add(proposals.withSeparateTokens("--" + property.getId() + "=", property.getShortDescription()));
+					collector.add(proposals.withSeparateTokens("--" + property.getId() + "=",
+							property.getShortDescription()));
 				}
 			}
 

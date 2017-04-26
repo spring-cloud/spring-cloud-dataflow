@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,48 +21,65 @@ import java.util.List;
 import org.springframework.util.Assert;
 
 /**
- * The base class for tokenizers. Knows about tokenization in general but
- * not specific to a DSL variant. Provides state management and utility methods
- * to real tokenizer subclasses.
+ * The base class for tokenizers. Knows about tokenization in general but not specific to
+ * a DSL variant. Provides state management and utility methods to real tokenizer
+ * subclasses.
  *
  * @author Andy Clement
  */
 public abstract class AbstractTokenizer {
 
+	private static final byte[] flags = new byte[256];
+	private static final byte IS_DIGIT = 0x01;
+	private static final byte IS_HEXDIGIT = 0x02;
+	private static final byte IS_ALPHA = 0x04;
+
+	static {
+		for (int ch = '0'; ch <= '9'; ch++) {
+			flags[ch] |= IS_DIGIT | IS_HEXDIGIT;
+		}
+		for (int ch = 'A'; ch <= 'F'; ch++) {
+			flags[ch] |= IS_HEXDIGIT;
+		}
+		for (int ch = 'a'; ch <= 'f'; ch++) {
+			flags[ch] |= IS_HEXDIGIT;
+		}
+		for (int ch = 'A'; ch <= 'Z'; ch++) {
+			flags[ch] |= IS_ALPHA;
+		}
+		for (int ch = 'a'; ch <= 'z'; ch++) {
+			flags[ch] |= IS_ALPHA;
+		}
+	}
+
 	private final int[] NO_LINEBREAKS = new int[0];
-	
 	/**
 	 * The string to be tokenized.
 	 */
 	protected String expressionString;
-
 	/**
 	 * The expressionString as a char array.
 	 */
 	protected char[] toProcess;
-
 	/**
 	 * Length of input data.
 	 */
 	protected int max;
-
 	/**
 	 * Current lexing position in the input data.
 	 */
 	protected int pos;
-
 	/**
 	 * Output stream of tokens.
 	 */
 	protected List<Token> tokens = new ArrayList<Token>();
-	
 	/**
 	 * Positions of linebreaks in the parsed string.
 	 */
 	protected int[] linebreaks = NO_LINEBREAKS;
 
 	abstract void process();
-	
+
 	public Tokens getTokens(String inputData) {
 		this.expressionString = inputData;
 		this.toProcess = (inputData + "\0").toCharArray();
@@ -141,19 +158,19 @@ public abstract class AbstractTokenizer {
 	}
 
 	/**
-	 * Lex a string literal which uses single quotes as delimiters. To include
-	 * a single quote within the literal, use a pair ''.
+	 * Lex a string literal which uses single quotes as delimiters. To include a single
+	 * quote within the literal, use a pair ''.
 	 */
 	protected void lexQuotedStringLiteral() {
-		lexStringLiteral('\'',DSLMessage.NON_TERMINATING_QUOTED_STRING);
+		lexStringLiteral('\'', DSLMessage.NON_TERMINATING_QUOTED_STRING);
 	}
 
 	/**
-	 * Lex a string literal which uses double quotes as delimiters. To include
-	 * a single quote within the literal, use a pair "".
+	 * Lex a string literal which uses double quotes as delimiters. To include a single
+	 * quote within the literal, use a pair "".
 	 */
 	protected void lexDoubleQuotedStringLiteral() {
-		lexStringLiteral('"',DSLMessage.NON_TERMINATING_DOUBLE_QUOTED_STRING);
+		lexStringLiteral('"', DSLMessage.NON_TERMINATING_DOUBLE_QUOTED_STRING);
 	}
 
 	private void lexStringLiteral(char quoteChar, DSLMessage messageOnNonTerminationError) {
@@ -180,37 +197,37 @@ public abstract class AbstractTokenizer {
 	}
 
 	/**
-	 * For the variant tokenizer (used following an '=' to parse an
-	 * argument value) we only terminate that identifier if
-	 * encountering a small set of characters. If the argument has
-	 * included a ' to put something in quotes, we remember
-	 * that and don't allow ' ' (space) and '\t' (tab) to terminate
-	 * the value.
+	 * For the variant tokenizer (used following an '=' to parse an argument value) we
+	 * only terminate that identifier if encountering a small set of characters. If the
+	 * argument has included a ' to put something in quotes, we remember that and don't
+	 * allow ' ' (space) and '\t' (tab) to terminate the value.
 	 */
 	protected boolean isArgValueIdentifierTerminator(char ch, boolean quoteOpen) {
 		return (ch == '|' && !quoteOpen) || (ch == ';' && !quoteOpen) || ch == '\0' || (ch == ' ' && !quoteOpen)
-				|| (ch == '\t' && !quoteOpen) || (ch == '>' && !quoteOpen)
-				|| ch == '\r' || ch == '\n';
+				|| (ch == '\t' && !quoteOpen) || (ch == '>' && !quoteOpen) || ch == '\r' || ch == '\n';
 	}
 
 	/**
-	 * To prevent the need to quote all argument values, this identifier
-	 * lexing function is used just after an '=' when we are about to
-	 * digest an arg value. It is much more relaxed about what it will
-	 * include in the identifier.
+	 * To prevent the need to quote all argument values, this identifier lexing function
+	 * is used just after an '=' when we are about to digest an arg value. It is much more
+	 * relaxed about what it will include in the identifier.
 	 */
 	protected void lexArgValueIdentifier() {
 		// Much of the complexity in here relates to supporting cases like these:
 		// 'hi'+payload
 		// 'hi'+'world'
 		// In these situations it looks like a quoted string and that perhaps the entire
-		// argument value is being quoted, but in fact half way through it is discovered that the
-		// entire value is not quoted, only the first part of the argument value is a string literal.
-	
+		// argument value is being quoted, but in fact half way through it is discovered
+		// that the
+		// entire value is not quoted, only the first part of the argument value is a
+		// string literal.
+
 		int start = pos;
 		boolean quoteOpen = false;
-		int quoteClosedCount = 0; // Enables identification of this pattern: 'hello'+'world'
-		Character quoteInUse = null; // If set, indicates this is being treated as a quoted string
+		int quoteClosedCount = 0; // Enables identification of this pattern:
+									// 'hello'+'world'
+		Character quoteInUse = null; // If set, indicates this is being treated as a
+										// quoted string
 		if (isQuote(toProcess[pos])) {
 			quoteOpen = true;
 			quoteInUse = toProcess[pos++];
@@ -232,15 +249,14 @@ public abstract class AbstractTokenizer {
 		}
 		while (!isArgValueIdentifierTerminator(toProcess[pos], quoteOpen));
 		char[] subarray = null;
-		if (quoteInUse != null && quoteInUse == '"' && quoteClosedCount == 0 ) {
-			throw new ParseException(expressionString, start,
-				DSLMessage.NON_TERMINATING_DOUBLE_QUOTED_STRING);
-		} else if (quoteInUse != null && quoteInUse == '\'' && quoteClosedCount == 0) {
-			throw new ParseException(expressionString, start,
-				DSLMessage.NON_TERMINATING_QUOTED_STRING);
-		} else if (quoteClosedCount == 1 && sameQuotes(start, pos - 1)) {
-			tokens.add(new Token(TokenKind.LITERAL_STRING,
-					subArray(start, pos), start, pos));
+		if (quoteInUse != null && quoteInUse == '"' && quoteClosedCount == 0) {
+			throw new ParseException(expressionString, start, DSLMessage.NON_TERMINATING_DOUBLE_QUOTED_STRING);
+		}
+		else if (quoteInUse != null && quoteInUse == '\'' && quoteClosedCount == 0) {
+			throw new ParseException(expressionString, start, DSLMessage.NON_TERMINATING_QUOTED_STRING);
+		}
+		else if (quoteClosedCount == 1 && sameQuotes(start, pos - 1)) {
+			tokens.add(new Token(TokenKind.LITERAL_STRING, subArray(start, pos), start, pos));
 		}
 		else {
 			subarray = subArray(start, pos);
@@ -275,37 +291,11 @@ public abstract class AbstractTokenizer {
 	}
 
 	protected void addLinebreak() {
-		int[] newLinebreaks = new int[linebreaks.length+1];
+		int[] newLinebreaks = new int[linebreaks.length + 1];
 		System.arraycopy(linebreaks, 0, newLinebreaks, 0, linebreaks.length);
 		newLinebreaks[linebreaks.length] = pos;
 		linebreaks = newLinebreaks;
 		pos++;
-	}
-
-	private static final byte flags[] = new byte[256];
-
-	private static final byte IS_DIGIT = 0x01;
-
-	private static final byte IS_HEXDIGIT = 0x02;
-
-	private static final byte IS_ALPHA = 0x04;
-
-	static {
-		for (int ch = '0'; ch <= '9'; ch++) {
-			flags[ch] |= IS_DIGIT | IS_HEXDIGIT;
-		}
-		for (int ch = 'A'; ch <= 'F'; ch++) {
-			flags[ch] |= IS_HEXDIGIT;
-		}
-		for (int ch = 'a'; ch <= 'f'; ch++) {
-			flags[ch] |= IS_HEXDIGIT;
-		}
-		for (int ch = 'A'; ch <= 'Z'; ch++) {
-			flags[ch] |= IS_ALPHA;
-		}
-		for (int ch = 'a'; ch <= 'z'; ch++) {
-			flags[ch] |= IS_ALPHA;
-		}
 	}
 
 }

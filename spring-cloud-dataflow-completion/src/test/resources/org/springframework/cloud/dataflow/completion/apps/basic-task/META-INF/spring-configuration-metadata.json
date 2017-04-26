@@ -5,7 +5,8 @@
       "type": "foo.bar.BasicProperties",
       "sourceType": "foo.bar.BasicProperties"
     }
-  ],"properties": [
+  ],
+  "properties": [
     {
       "name": "basic.expression",
       "type": "org.springframework.expression.Expression",

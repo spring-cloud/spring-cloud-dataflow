@@ -16,10 +16,6 @@
 
 package org.springframework.cloud.dataflow.shell.command;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,6 +23,10 @@ import org.springframework.shell.core.CommandResult;
 import org.springframework.shell.core.JLineShellComponent;
 import org.springframework.shell.table.Table;
 import org.springframework.shell.table.TableModel;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * Helper methods for task commands to execute in the shell.
@@ -53,13 +53,14 @@ public class TaskCommandTemplate {
 
 	/**
 	 * Create a task.
-	 *
-	 * Note the name of the task will be stored so that when the method destroyCreatedTasks is called, the task
-	 * will be destroyed.
+	 * <p>
+	 * Note the name of the task will be stored so that when the method
+	 * destroyCreatedTasks is called, the task will be destroyed.
 	 *
 	 * @param taskName the name of the task
 	 * @param taskDefinition the task definition DSL
-	 * @param values will be injected into taskdefinition according to {@link String#format(String, Object...)} syntax
+	 * @param values will be injected into taskdefinition according to
+	 * {@link String#format(String, Object...)} syntax
 	 */
 	public void create(String taskName, String taskDefinition, Object... values) {
 		doCreate(taskName, taskDefinition, true, values);
@@ -85,7 +86,7 @@ public class TaskCommandTemplate {
 	 * Lists task executions by given name.
 	 */
 	public CommandResult taskExecutionListByName(String name) {
-		return shell.executeCommand("task execution list --name "+ name);
+		return shell.executeCommand("task execution list --name " + name);
 
 	}
 
@@ -95,7 +96,7 @@ public class TaskCommandTemplate {
 		String wholeCommand = String.format("task create %s --definition \"%s\"", taskName,
 				actualDefinition.replaceAll("\"", "\\\\\""));
 		CommandResult cr = shell.executeCommand(wholeCommand);
-		//todo: Add launch and verifier
+		// todo: Add launch and verifier
 
 		// add the task name to the tasks list before assertion
 		tasks.add(taskName);
@@ -106,17 +107,16 @@ public class TaskCommandTemplate {
 		verifyExists(taskName, actualDefinition);
 	}
 
-
 	/**
-	 * Destroy all tasks that were created using the 'create' method. Commonly called in a @After annotated method.
+	 * Destroy all tasks that were created using the 'create' method. Commonly called in
+	 * a @After annotated method.
 	 */
 	public void destroyCreatedTasks() {
 		for (int s = tasks.size() - 1; s >= 0; s--) {
 			String taskname = tasks.get(s);
 			CommandResult cr = shell.executeCommand("task destroy --name " + taskname);
-			//stateVerifier.waitForDestroy(taskname);
-			assertTrue("Failure to destroy task " + taskname + ".  CommandResult = " + cr.toString(),
-					cr.isSuccess());
+			// stateVerifier.waitForDestroy(taskname);
+			assertTrue("Failure to destroy task " + taskname + ".  CommandResult = " + cr.toString(), cr.isSuccess());
 		}
 	}
 
@@ -127,9 +127,8 @@ public class TaskCommandTemplate {
 	 */
 	public void destroyTask(String task) {
 		CommandResult cr = shell.executeCommand("task destroy --name " + task);
-		//stateVerifier.waitForDestroy(task);
-		assertTrue("Failure to destroy task " + task + ".  CommandResult = " + cr.toString(),
-				cr.isSuccess());
+		// stateVerifier.waitForDestroy(task);
+		assertTrue("Failure to destroy task " + task + ".  CommandResult = " + cr.toString(), cr.isSuccess());
 		tasks.remove(task);
 	}
 

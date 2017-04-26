@@ -18,6 +18,7 @@ package org.springframework.cloud.dataflow.shell.config;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
+
 import org.springframework.cloud.dataflow.rest.client.AggregateCounterOperations;
 import org.springframework.cloud.dataflow.rest.client.DataFlowOperations;
 import org.springframework.cloud.dataflow.shell.Target;
@@ -26,9 +27,7 @@ import org.springframework.cloud.dataflow.shell.command.support.OpsType;
 import org.springframework.cloud.dataflow.shell.command.support.RoleType;
 
 /**
- *
  * @author Gunnar Hillert
- *
  */
 public class DataFlowShellTests {
 

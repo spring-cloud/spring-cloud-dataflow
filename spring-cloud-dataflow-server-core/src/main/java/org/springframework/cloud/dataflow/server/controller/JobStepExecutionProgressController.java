@@ -51,8 +51,8 @@ public class JobStepExecutionProgressController {
 	 * Creates a {@code JobStepProgressInfoExecutionsController} that retrieves Job Step
 	 * Progress Execution information from a the {@link JobService}
 	 *
-	 * @param jobService the service this controller will use for retrieving
-	 *  job step progress execution information.
+	 * @param jobService the service this controller will use for retrieving job step
+	 * progress execution information.
 	 */
 	@Autowired
 	public JobStepExecutionProgressController(JobService jobService) {
@@ -63,17 +63,19 @@ public class JobStepExecutionProgressController {
 	/**
 	 * Get the step execution progress for the given jobExecutions step.
 	 *
-	 * @param jobExecutionId  Id of the {@link JobExecution}, must not be null
+	 * @param jobExecutionId Id of the {@link JobExecution}, must not be null
 	 * @param stepExecutionId Id of the {@link StepExecution}, must not be null
-	 * @return {@link StepExecutionProgressInfoResource} that has the progress info on the given {@link StepExecution}.
-	 * @throws NoSuchJobExecutionException  Thrown if the respective {@link JobExecution} does not exist
-	 * @throws NoSuchStepExecutionException Thrown if the respective {@link StepExecution} does not exist
+	 * @return {@link StepExecutionProgressInfoResource} that has the progress info on the
+	 * given {@link StepExecution}.
+	 * @throws NoSuchJobExecutionException Thrown if the respective {@link JobExecution}
+	 * does not exist
+	 * @throws NoSuchStepExecutionException Thrown if the respective {@link StepExecution}
+	 * does not exist
 	 */
 	@RequestMapping(value = "/{stepExecutionId}/progress", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
 	public StepExecutionProgressInfoResource progress(@PathVariable long jobExecutionId,
-			@PathVariable long stepExecutionId) throws NoSuchStepExecutionException,
-			NoSuchJobExecutionException {
+			@PathVariable long stepExecutionId) throws NoSuchStepExecutionException, NoSuchJobExecutionException {
 		try {
 			StepExecution stepExecution = jobService.getStepExecution(jobExecutionId, stepExecutionId);
 			String stepName = stepExecution.getStepName();
@@ -83,8 +85,7 @@ public class JobStepExecutionProgressController {
 			}
 			String jobName = stepExecution.getJobExecution().getJobInstance().getJobName();
 			StepExecutionHistory stepExecutionHistory = computeHistory(jobName, stepName);
-			return stepAssembler.toResource(new StepExecutionProgressInfo(stepExecution,
-					stepExecutionHistory));
+			return stepAssembler.toResource(new StepExecutionProgressInfo(stepExecution, stepExecutionHistory));
 		}
 		catch (NoSuchStepExecutionException e) {
 			throw new NoSuchStepExecutionException(String.valueOf(stepExecutionId));
@@ -113,11 +114,11 @@ public class JobStepExecutionProgressController {
 	}
 
 	/**
-	 * {@link org.springframework.hateoas.ResourceAssembler} implementation
-	 * that converts {@link StepExecutionProgressInfo}s to a
-	 * {@link StepExecutionProgressInfoResource}.
+	 * {@link org.springframework.hateoas.ResourceAssembler} implementation that converts
+	 * {@link StepExecutionProgressInfo}s to a {@link StepExecutionProgressInfoResource}.
 	 */
-	private static class Assembler extends ResourceAssemblerSupport<StepExecutionProgressInfo, StepExecutionProgressInfoResource> {
+	private static class Assembler
+			extends ResourceAssemblerSupport<StepExecutionProgressInfo, StepExecutionProgressInfoResource> {
 
 		public Assembler() {
 			super(JobStepExecutionProgressController.class, StepExecutionProgressInfoResource.class);
@@ -125,7 +126,8 @@ public class JobStepExecutionProgressController {
 
 		@Override
 		public StepExecutionProgressInfoResource toResource(StepExecutionProgressInfo entity) {
-			return createResourceWithId(entity.getStepExecutionId(), entity, entity.getStepExecution().getJobExecutionId());
+			return createResourceWithId(entity.getStepExecutionId(), entity,
+					entity.getStepExecution().getJobExecutionId());
 		}
 
 		@Override

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,9 +20,15 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * The AST node representing a split. A split is a series of things to execute in parallel. Those things
- * can themselves be individual flows or further splits. In DSL form a split is expressed like this:
- * <pre><tt><aa || bb></tt></pre>.
+ * The AST node representing a split. A split is a series of things to execute in
+ * parallel. Those things can themselves be individual flows or further splits. In DSL
+ * form a split is expressed like this:
+ *
+ * <pre>
+ * <tt><aa || bb></tt>
+ * </pre>
+ *
+ * .
  *
  * @author Andy Clement
  */
@@ -86,10 +92,10 @@ public class SplitNode extends LabelledTaskNode {
 		if (!cont) {
 			return;
 		}
-        visitor.visit(this);
+		visitor.visit(this);
 		for (LabelledTaskNode labelledTaskNode : parallelTaskApps) {
 			labelledTaskNode.accept(visitor);
 		}
-        visitor.postVisit(this);
+		visitor.postVisit(this);
 	}
 }

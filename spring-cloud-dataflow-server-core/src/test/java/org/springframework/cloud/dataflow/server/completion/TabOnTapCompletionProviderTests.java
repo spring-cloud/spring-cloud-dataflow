@@ -15,10 +15,6 @@
  */
 package org.springframework.cloud.dataflow.server.completion;
 
-import static org.hamcrest.Matchers.hasItems;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
-
 import java.io.File;
 import java.io.FileFilter;
 import java.util.ArrayList;
@@ -52,6 +48,10 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.Assert;
 
+import static org.hamcrest.Matchers.hasItems;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
+
 /**
  * @author Ilayaperumal Gopinathan
  */
@@ -62,41 +62,6 @@ public class TabOnTapCompletionProviderTests {
 	@Autowired
 	private StreamCompletionProvider completionProvider;
 
-	@Before
-	public void setup() {
-		StreamDefinitionRepository streamDefinitionRepository = new InMemoryStreamDefinitionRepository();
-		streamDefinitionRepository.save(new StreamDefinition("foo", "time | transform | log"));
-		streamDefinitionRepository.save(new StreamDefinition("bar", "time | log"));
-		completionProvider.addCompletionRecoveryStrategy(new TapOnDestinationRecoveryStrategy(streamDefinitionRepository));
-	}
-
-    @Test
-    // :foo  ==> add appropriate app names
-    public void testAppNamesAfterStreamName() {
-        assertThat(completionProvider.complete(":foo", 1), hasItems(
-				proposalThat(is(":foo.time")),
-				proposalThat(is(":foo.transform"))
-		));
-    }
-
-	@Test
-	// :foo.  ==> add appropriate app names
-	public void testAppNamesAfterStreamNameWithDotAfterStreamName() {
-		assertThat(completionProvider.complete(":foo.", 1), hasItems(
-				proposalThat(is(":foo.time")),
-				proposalThat(is(":foo.transform"))
-		));
-	}
-
-	@Test
-	// :  ==> add stream name
-	public void testStreamNameAfterColon() {
-		assertThat(completionProvider.complete(":", 1), hasItems(
-				proposalThat(is(":foo")),
-				proposalThat(is(":bar"))
-		));
-	}
-
 	private static org.hamcrest.Matcher<CompletionProposal> proposalThat(org.hamcrest.Matcher<String> matcher) {
 		return new FeatureMatcher<CompletionProposal, String>(matcher, "a proposal whose text", "text") {
 			@Override
@@ -104,6 +69,35 @@ public class TabOnTapCompletionProviderTests {
 				return actual.getText();
 			}
 		};
+	}
+
+	@Before
+	public void setup() {
+		StreamDefinitionRepository streamDefinitionRepository = new InMemoryStreamDefinitionRepository();
+		streamDefinitionRepository.save(new StreamDefinition("foo", "time | transform | log"));
+		streamDefinitionRepository.save(new StreamDefinition("bar", "time | log"));
+		completionProvider
+				.addCompletionRecoveryStrategy(new TapOnDestinationRecoveryStrategy(streamDefinitionRepository));
+	}
+
+	@Test
+	// :foo ==> add appropriate app names
+	public void testAppNamesAfterStreamName() {
+		assertThat(completionProvider.complete(":foo", 1),
+				hasItems(proposalThat(is(":foo.time")), proposalThat(is(":foo.transform"))));
+	}
+
+	@Test
+	// :foo. ==> add appropriate app names
+	public void testAppNamesAfterStreamNameWithDotAfterStreamName() {
+		assertThat(completionProvider.complete(":foo.", 1),
+				hasItems(proposalThat(is(":foo.time")), proposalThat(is(":foo.transform"))));
+	}
+
+	@Test
+	// : ==> add stream name
+	public void testStreamNameAfterColon() {
+		assertThat(completionProvider.complete(":", 1), hasItems(proposalThat(is(":foo")), proposalThat(is(":bar"))));
 	}
 
 	/**
@@ -135,7 +129,8 @@ public class TabOnTapCompletionProviderTests {
 					File file = new File(ROOT, filename);
 					if (file.exists()) {
 						return new AppRegistration(name, type, file.toURI(), resourceLoader);
-					} else {
+					}
+					else {
 						return null;
 					}
 				}

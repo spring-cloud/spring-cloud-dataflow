@@ -19,7 +19,8 @@ package org.springframework.cloud.dataflow.server.repository.support;
 import org.springframework.data.domain.Pageable;
 
 /**
- * Oracle implementation of a {@link PagingQueryProvider} using database specific features.
+ * Oracle implementation of a {@link PagingQueryProvider} using database specific
+ * features.
  *
  * @author Glenn Renfro
  */
@@ -27,17 +28,16 @@ public class OraclePagingQueryProvider extends AbstractSqlPagingQueryProvider {
 
 	@Override
 	public String getPageQuery(Pageable pageable) {
-		int offset = pageable.getOffset()+1;
-		return generateRowNumSqlQueryWithNesting(getSelectClause(), false, "TMP_ROW_NUM >= "
-				+ offset + " AND TMP_ROW_NUM < " + (offset+pageable.getPageSize()));
+		int offset = pageable.getOffset() + 1;
+		return generateRowNumSqlQueryWithNesting(getSelectClause(), false,
+				"TMP_ROW_NUM >= " + offset + " AND TMP_ROW_NUM < " + (offset + pageable.getPageSize()));
 	}
 
-	private String generateRowNumSqlQueryWithNesting(String selectClause,
-			boolean remainingPageQuery,
+	private String generateRowNumSqlQueryWithNesting(String selectClause, boolean remainingPageQuery,
 			String rowNumClause) {
 		StringBuilder sql = new StringBuilder();
-		sql.append("SELECT ").append(selectClause).append(" FROM (SELECT ").append(selectClause)
-				.append(", ").append("ROWNUM as TMP_ROW_NUM");
+		sql.append("SELECT ").append(selectClause).append(" FROM (SELECT ").append(selectClause).append(", ")
+				.append("ROWNUM as TMP_ROW_NUM");
 		sql.append(" FROM (SELECT ").append(selectClause).append(" FROM ").append(this.getFromClause());
 		SqlPagingQueryUtils.buildWhereClause(this, remainingPageQuery, sql);
 		sql.append(" ORDER BY ").append(SqlPagingQueryUtils.buildSortClause(this));

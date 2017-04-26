@@ -16,14 +16,14 @@
 
 package org.springframework.cloud.dataflow.server.repository;
 
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
-
 import org.junit.Test;
 
 import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
+
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
 
 /**
  * @author Janne Valkealahti
@@ -34,9 +34,11 @@ public class DeploymentKeyTests {
 	@Test
 	public void testStreamAppDeploymentKeyEquals() {
 		StreamDefinition streamDefinition1 = new StreamDefinition("myStream1", "time | log");
-		StreamAppDefinition[] appDefinitions1 = streamDefinition1.getAppDefinitions().toArray(new StreamAppDefinition[0]);
+		StreamAppDefinition[] appDefinitions1 = streamDefinition1.getAppDefinitions()
+				.toArray(new StreamAppDefinition[0]);
 		StreamDefinition streamDefinition2 = new StreamDefinition("myStream1", "time | log");
-		StreamAppDefinition[] appDefinitions2 = streamDefinition2.getAppDefinitions().toArray(new StreamAppDefinition[0]);
+		StreamAppDefinition[] appDefinitions2 = streamDefinition2.getAppDefinitions()
+				.toArray(new StreamAppDefinition[0]);
 		String appDeploymentKey1 = DeploymentKey.forStreamAppDefinition(appDefinitions1[0]);
 		String appDeploymentKey2 = DeploymentKey.forStreamAppDefinition(appDefinitions1[1]);
 		String appDeploymentKey3 = DeploymentKey.forStreamAppDefinition(appDefinitions2[0]);

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,6 +21,7 @@ import java.util.UUID;
 
 import org.junit.rules.ExternalResource;
 import org.junit.rules.TemporaryFolder;
+
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.util.Assert;
 import org.springframework.util.FileCopyUtils;
@@ -32,21 +33,17 @@ import org.springframework.util.SocketUtils;
  */
 public class LdapServerResource extends ExternalResource {
 
-	private String originalLdapPort;
-
-	private ApacheDSContainerWithSecurity apacheDSContainer;
-
-	private TemporaryFolder temporaryFolder = new TemporaryFolder();
-
-	private File workingDir;
-
 	private static final String LDAP_PORT_PROPERTY = "ldap.port";
-
-	private static final ClassPathResource keyStoreResource   = new ClassPathResource("/org/springframework/cloud/dataflow/server/local/security/dataflow.keystore");
-	private static final ClassPathResource trustStoreResource = new ClassPathResource("/org/springframework/cloud/dataflow/server/local/security/dataflow.truststore");
+	private static final ClassPathResource keyStoreResource = new ClassPathResource(
+			"/org/springframework/cloud/dataflow/server/local/security/dataflow.keystore");
+	private static final ClassPathResource trustStoreResource = new ClassPathResource(
+			"/org/springframework/cloud/dataflow/server/local/security/dataflow.truststore");
 	private static final String TRUST_STORE_PASSWORD = "dataflow";
-	private static final String KEY_STORE_PASSWORD   = "dataflow";
-
+	private static final String KEY_STORE_PASSWORD = "dataflow";
+	private String originalLdapPort;
+	private ApacheDSContainerWithSecurity apacheDSContainer;
+	private TemporaryFolder temporaryFolder = new TemporaryFolder();
+	private File workingDir;
 	private boolean enabledSsl = false;
 
 	public LdapServerResource() {
@@ -71,7 +68,7 @@ public class LdapServerResource extends ExternalResource {
 
 			apacheDSContainer.setEnabledLdapOverSsl(true);
 
-			final File temporaryKeyStoreFile   = new File(temporaryFolder.getRoot(), "dataflow.keystore");
+			final File temporaryKeyStoreFile = new File(temporaryFolder.getRoot(), "dataflow.keystore");
 			final File temporaryTrustStoreFile = new File(temporaryFolder.getRoot(), "dataflow.truststore");
 
 			FileCopyUtils.copy(keyStoreResource.getInputStream(), new FileOutputStream(temporaryKeyStoreFile));

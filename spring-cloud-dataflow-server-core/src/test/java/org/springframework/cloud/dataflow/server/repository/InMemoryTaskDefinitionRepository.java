@@ -63,10 +63,9 @@ public class InMemoryTaskDefinitionRepository implements TaskDefinitionRepositor
 	@Override
 	public <S extends TaskDefinition> S save(S definition) {
 		if (definitions.containsKey(definition.getName())) {
-			throw new DuplicateTaskException(
-					String.format("Cannot register task %s because another one has already " +
-							"been registered with the same name",
-							definition.getName()));
+			throw new DuplicateTaskException(String.format(
+					"Cannot register task %s because another one has already " + "been registered with the same name",
+					definition.getName()));
 		}
 		definitions.put(definition.getName(), definition);
 		return definition;
@@ -91,7 +90,7 @@ public class InMemoryTaskDefinitionRepository implements TaskDefinitionRepositor
 	public Iterable<TaskDefinition> findAll(Iterable<String> names) {
 		List<TaskDefinition> results = new ArrayList<>();
 		for (String s : names) {
-			if (definitions.containsKey(s)){
+			if (definitions.containsKey(s)) {
 				results.add(definitions.get(s));
 			}
 		}
@@ -115,7 +114,7 @@ public class InMemoryTaskDefinitionRepository implements TaskDefinitionRepositor
 
 	@Override
 	public void delete(Iterable<? extends TaskDefinition> definitions) {
-		for (TaskDefinition definition : definitions){
+		for (TaskDefinition definition : definitions) {
 			delete(definition);
 		}
 	}

@@ -54,12 +54,12 @@ public class TaskServiceDependencies {
 	}
 
 	@Bean
-	public TaskExplorer taskExplorer(TaskExecutionDaoFactoryBean daoFactoryBean){
+	public TaskExplorer taskExplorer(TaskExecutionDaoFactoryBean daoFactoryBean) {
 		return new SimpleTaskExplorer(daoFactoryBean);
 	}
 
 	@Bean
-	public TaskExecutionDaoFactoryBean taskExecutionDaoFactoryBean(DataSource dataSource){
+	public TaskExecutionDaoFactoryBean taskExecutionDaoFactoryBean(DataSource dataSource) {
 		return new TaskExecutionDaoFactoryBean(dataSource);
 	}
 

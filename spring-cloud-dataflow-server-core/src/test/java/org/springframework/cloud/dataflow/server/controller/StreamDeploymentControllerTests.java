@@ -16,8 +16,6 @@
 
 package org.springframework.cloud.dataflow.server.controller;
 
-import static org.hamcrest.CoreMatchers.not;
-
 import java.util.HashMap;
 
 import org.hamcrest.collection.IsMapContaining;
@@ -42,6 +40,8 @@ import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 
+import static org.hamcrest.CoreMatchers.not;
+
 /**
  * Unit tests for StreamDeploymentController.
  *
@@ -50,40 +50,32 @@ import org.springframework.core.io.Resource;
 @RunWith(MockitoJUnitRunner.class)
 public class StreamDeploymentControllerTests {
 
+	@Rule
+	public ExpectedException thrown = ExpectedException.none();
 	private StreamDeploymentController controller;
-
 	@Mock
 	private StreamDefinitionRepository streamDefinitionRepository;
-
 	@Mock
 	private DeploymentIdRepository deploymentIdRepository;
-
 	@Mock
 	private AppRegistry appRegistry;
-
 	@Mock
 	private AppDeployer appDeployer;
-
-	private ApplicationConfigurationMetadataResolver metadataResolver = new BootApplicationConfigurationMetadataResolver();
-
+	private ApplicationConfigurationMetadataResolver metadataResolver =
+			new BootApplicationConfigurationMetadataResolver();
 	@Mock
 	private CommonApplicationProperties commonApplicationProperties;
 
-	@Rule
-	public ExpectedException thrown= ExpectedException.none();
-
 	@Before
 	public void setup() {
-		controller = new StreamDeploymentController(streamDefinitionRepository, deploymentIdRepository,
-				appRegistry, appDeployer, metadataResolver, commonApplicationProperties);
+		controller = new StreamDeploymentController(streamDefinitionRepository, deploymentIdRepository, appRegistry,
+				appDeployer, metadataResolver, commonApplicationProperties);
 	}
 
 	@Test
 	public void testRequalifyShortWhiteListedProperty() {
-		StreamAppDefinition appDefinition = new StreamAppDefinition.Builder()
-				.setRegisteredAppName("my-app")
-				.setProperty("timezone", "GMT+2")
-				.build("streamname");
+		StreamAppDefinition appDefinition = new StreamAppDefinition.Builder().setRegisteredAppName("my-app")
+				.setProperty("timezone", "GMT+2").build("streamname");
 
 		Resource app = new ClassPathResource("/apps/whitelist-source");
 		AppDefinition modified = controller.mergeAndExpandAppProperties(appDefinition, app, new HashMap<>());
@@ -94,11 +86,8 @@ public class StreamDeploymentControllerTests {
 
 	@Test
 	public void testSameNamePropertiesOKAsLongAsNotUsedAsShorthand() {
-		StreamAppDefinition appDefinition = new StreamAppDefinition.Builder()
-				.setRegisteredAppName("my-app")
-				.setProperty("time.format", "hh")
-				.setProperty("date.format", "yy")
-				.build("streamname");
+		StreamAppDefinition appDefinition = new StreamAppDefinition.Builder().setRegisteredAppName("my-app")
+				.setProperty("time.format", "hh").setProperty("date.format", "yy").build("streamname");
 
 		Resource app = new ClassPathResource("/apps/whitelist-source");
 		AppDefinition modified = controller.mergeAndExpandAppProperties(appDefinition, app, new HashMap<>());
@@ -109,10 +98,8 @@ public class StreamDeploymentControllerTests {
 
 	@Test
 	public void testSameNamePropertiesKOWhenShorthand() {
-		StreamAppDefinition appDefinition = new StreamAppDefinition.Builder()
-				.setRegisteredAppName("my-app")
-				.setProperty("format", "hh")
-				.build("streamname");
+		StreamAppDefinition appDefinition = new StreamAppDefinition.Builder().setRegisteredAppName("my-app")
+				.setProperty("format", "hh").build("streamname");
 
 		Resource app = new ClassPathResource("/apps/whitelist-source");
 
@@ -127,8 +114,7 @@ public class StreamDeploymentControllerTests {
 
 	@Test
 	public void testShorthandsAcceptRelaxedVariations() {
-		StreamAppDefinition appDefinition = new StreamAppDefinition.Builder()
-				.setRegisteredAppName("my-app")
+		StreamAppDefinition appDefinition = new StreamAppDefinition.Builder().setRegisteredAppName("my-app")
 				.setProperty("someLongProperty", "yy") // Use camelCase here
 				.build("streamname");
 

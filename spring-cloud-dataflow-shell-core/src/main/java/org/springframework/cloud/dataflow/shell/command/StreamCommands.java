@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.apache.commons.io.FilenameUtils;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
 import org.springframework.cloud.dataflow.rest.client.StreamOperations;
@@ -84,8 +85,8 @@ public class StreamCommands implements CommandMarker {
 		return dataFlowShell.hasAccess(RoleType.VIEW, OpsType.STREAM);
 	}
 
-	@CliAvailabilityIndicator({ CREATE_STREAM, DEPLOY_STREAM, UNDEPLOY_STREAM, UNDEPLOY_STREAM_ALL,
-		DESTROY_STREAM, DESTROY_STREAM_ALL })
+	@CliAvailabilityIndicator({ CREATE_STREAM, DEPLOY_STREAM, UNDEPLOY_STREAM, UNDEPLOY_STREAM_ALL, DESTROY_STREAM,
+			DESTROY_STREAM_ALL })
 	public boolean availableWithCreateRole() {
 		return dataFlowShell.hasAccess(RoleType.CREATE, OpsType.STREAM);
 	}
@@ -98,14 +99,14 @@ public class StreamCommands implements CommandMarker {
 		headers.put("dslText", "Stream Definition");
 		headers.put("statusDescription", "Status");
 		BeanListTableModel<StreamDefinitionResource> model = new BeanListTableModel<>(streams, headers);
-		return DataFlowTables.applyStyle(new TableBuilder(model))
-				.build();
+		return DataFlowTables.applyStyle(new TableBuilder(model)).build();
 	}
 
 	@CliCommand(value = CREATE_STREAM, help = "Create a new stream definition")
 	public String createStream(
 			@CliOption(mandatory = true, key = { "", "name" }, help = "the name to give to the stream") String name,
-			@CliOption(mandatory = true, key = { "definition" }, help = "a stream definition, using the DSL (e.g. \"http --port=9000 | hdfs\")", optionContext = "disable-string-converter completion-stream") String dsl,
+			@CliOption(mandatory = true, key = { "definition" }, help = "a stream definition, using the DSL (e.g. "
+					+ "\"http --port=9000 | hdfs\")", optionContext = "disable-string-converter completion-stream") String dsl,
 			@CliOption(key = "deploy", help = "whether to deploy the stream immediately", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean deploy) {
 		streamOperations().createStream(name, dsl, deploy);
 		String message = String.format("Created new stream '%s'", name);
@@ -117,55 +118,65 @@ public class StreamCommands implements CommandMarker {
 
 	@CliCommand(value = DEPLOY_STREAM, help = "Deploy a previously created stream")
 	public String deployStream(
-			@CliOption(key = { "", "name" }, help = "the name of the stream to deploy", mandatory = true/*, optionContext = "existing-stream undeployed disable-string-converter"*/) String name,
-			@CliOption(key = { PROPERTIES_OPTION }, help = "the properties for this deployment", mandatory = false) String properties,
-			@CliOption(key = { PROPERTIES_FILE_OPTION }, help = "the properties for this deployment (as a File)", mandatory = false) File propertiesFile
-			) throws IOException {
+			@CliOption(key = { "", "name" }, help = "the name of the stream to deploy", mandatory = true/*
+																										 * ,
+																										 * optionContext
+																										 * =
+																										 * "existing-stream undeployed disable-string-converter"
+																										 */) String name,
+			@CliOption(key = {
+					PROPERTIES_OPTION }, help = "the properties for this deployment", mandatory = false) String properties,
+			@CliOption(key = {
+					PROPERTIES_FILE_OPTION }, help = "the properties for this deployment (as a File)", mandatory = false) File propertiesFile)
+			throws IOException {
 		int which = Assertions.atMostOneOf(PROPERTIES_OPTION, properties, PROPERTIES_FILE_OPTION, propertiesFile);
 		Map<String, String> propertiesToUse;
 		switch (which) {
-			case 0:
-				propertiesToUse = DeploymentPropertiesUtils.parse(properties);
-				break;
-			case 1:
-				String extension = FilenameUtils.getExtension(propertiesFile.getName());
-				Properties props = null;
-				if (extension.equals("yaml") || extension.equals("yml")) {
-					YamlPropertiesFactoryBean yamlPropertiesFactoryBean = new YamlPropertiesFactoryBean();
-					yamlPropertiesFactoryBean.setResources(new FileSystemResource(propertiesFile));
-					yamlPropertiesFactoryBean.afterPropertiesSet();
-					props = yamlPropertiesFactoryBean.getObject();
+		case 0:
+			propertiesToUse = DeploymentPropertiesUtils.parse(properties);
+			break;
+		case 1:
+			String extension = FilenameUtils.getExtension(propertiesFile.getName());
+			Properties props = null;
+			if (extension.equals("yaml") || extension.equals("yml")) {
+				YamlPropertiesFactoryBean yamlPropertiesFactoryBean = new YamlPropertiesFactoryBean();
+				yamlPropertiesFactoryBean.setResources(new FileSystemResource(propertiesFile));
+				yamlPropertiesFactoryBean.afterPropertiesSet();
+				props = yamlPropertiesFactoryBean.getObject();
+			}
+			else {
+				props = new Properties();
+				try (FileInputStream fis = new FileInputStream(propertiesFile)) {
+					props.load(fis);
 				}
-				else {
-					props = new Properties();
-					try (FileInputStream fis = new FileInputStream(propertiesFile)) {
-						props.load(fis);
-					}
-				}
-				propertiesToUse = DeploymentPropertiesUtils.convert(props);
-				break;
-			case -1: // Neither option specified
-				propertiesToUse = Collections.<String, String> emptyMap();
-				break;
-			default:
-				throw new AssertionError();
+			}
+			propertiesToUse = DeploymentPropertiesUtils.convert(props);
+			break;
+		case -1: // Neither option specified
+			propertiesToUse = Collections.<String, String>emptyMap();
+			break;
+		default:
+			throw new AssertionError();
 		}
 		streamOperations().deploy(name, propertiesToUse);
 		return String.format("Deployment request has been sent for stream '%s'", name);
 	}
 
 	@CliCommand(value = UNDEPLOY_STREAM, help = "Un-deploy a previously deployed stream")
-	public String undeployStream(
-			@CliOption(key = { "", "name" }, help = "the name of the stream to un-deploy", mandatory = true/*, optionContext = "existing-stream deployed disable-string-converter"*/) String name
-			) {
+	public String undeployStream(@CliOption(key = { "",
+			"name" }, help = "the name of the stream to un-deploy", mandatory = true/*
+																					 * ,
+																					 * optionContext
+																					 * =
+																					 * "existing-stream deployed disable-string-converter"
+																					 */) String name) {
 		streamOperations().undeploy(name);
 		return String.format("Un-deployed stream '%s'", name);
 	}
 
 	@CliCommand(value = UNDEPLOY_STREAM_ALL, help = "Un-deploy all previously deployed stream")
 	public String undeployAllStreams(
-			@CliOption(key = "force", help = "bypass confirmation prompt", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean force
-			) {
+			@CliOption(key = "force", help = "bypass confirmation prompt", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean force) {
 		if (force || "y".equalsIgnoreCase(userInput.promptWithOptions("Really undeploy all streams?", "n", "y", "n"))) {
 			streamOperations().undeployAll();
 			return String.format("Un-deployed all the streams");
@@ -176,8 +187,13 @@ public class StreamCommands implements CommandMarker {
 	}
 
 	@CliCommand(value = DESTROY_STREAM, help = "Destroy an existing stream")
-	public String destroyStream(
-			@CliOption(key = { "", "name" }, help = "the name of the stream to destroy", mandatory = true/*, optionContext = "existing-stream disable-string-converter"*/) String name) {
+	public String destroyStream(@CliOption(key = { "",
+			"name" }, help = "the name of the stream to destroy", mandatory = true/*
+																					 * ,
+																					 * optionContext
+																					 * =
+																					 * "existing-stream disable-string-converter"
+																					 */) String name) {
 		streamOperations().destroy(name);
 		return String.format("Destroyed stream '%s'", name);
 	}

@@ -16,12 +16,6 @@
 
 package org.springframework.cloud.dataflow.shell.command;
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URI;
@@ -49,13 +43,18 @@ import org.springframework.shell.table.Table;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.web.client.RestTemplate;
 
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 /**
  * Unit tests for {@link ConfigCommands}.
  *
  * @author Gunnar Hillert
  * @author Eric Bottard
  * @author Ilayaperumal Gopinathan
- *
  */
 public class ConfigCommandTests {
 
@@ -75,7 +74,7 @@ public class ConfigCommandTests {
 		when(commandLine.getArgs()).thenReturn(null);
 
 		final List<HttpMessageConverter<?>> messageConverters = new ArrayList<>();
-		messageConverters.add(new  MappingJackson2HttpMessageConverter());
+		messageConverters.add(new MappingJackson2HttpMessageConverter());
 
 		when(restTemplate.getMessageConverters()).thenReturn(messageConverters);
 
@@ -104,7 +103,8 @@ public class ConfigCommandTests {
 		aboutResource.getRuntimeEnvironment().getAppDeployer().getPlatformSpecificInfo().put("Some", "Stuff");
 		aboutResource.getRuntimeEnvironment().getTaskLauncher().setDeployerSpiVersion("6.4");
 		final Table infoResult = (Table) configCommands.info().get(0);
-		String expectedOutput = FileCopyUtils.copyToString(new InputStreamReader(getClass().getResourceAsStream(ConfigCommandTests.class.getSimpleName() + "-testInfo.txt"), "UTF-8"));
+		String expectedOutput = FileCopyUtils.copyToString(new InputStreamReader(
+				getClass().getResourceAsStream(ConfigCommandTests.class.getSimpleName() + "-testInfo.txt"), "UTF-8"));
 		assertThat(infoResult.render(80), is(expectedOutput));
 	}
 

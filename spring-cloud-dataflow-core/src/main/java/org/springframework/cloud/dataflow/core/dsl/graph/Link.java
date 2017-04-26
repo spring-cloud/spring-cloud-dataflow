@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -38,16 +38,15 @@ public class Link {
 	public String from;
 
 	public String to;
+	/**
+	 * Properties on a link can capture the name of a potential transition that would lead
+	 * to this link being taken when the 'from' job completes.
+	 */
+	public Map<String, String> properties = null;
 
 	Link() {
 
 	}
-
-	/**
-	 * Properties on a link can capture the name of a potential transition that
-	 * would lead to this link being taken when the 'from' job completes.
-	 */
-	public Map<String, String> properties = null;
 
 	public Link(String sourceId, String targetId) {
 		this.from = sourceId;
@@ -80,11 +79,11 @@ public class Link {
 	public String getTransitionName() {
 		return properties != null ? properties.get(PROPERTY_TRANSITION_NAME) : null;
 	}
-	
+
 	public void updateFrom(String newFrom) {
 		this.from = newFrom;
 	}
-	
+
 	public void updateTo(String newTo) {
 		this.to = newTo;
 	}

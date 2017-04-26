@@ -16,14 +16,13 @@
 
 package org.springframework.cloud.dataflow.server.config;
 
-import static org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType.HAL;
-
 import java.sql.SQLException;
 
 import javax.sql.DataSource;
 
 import org.h2.tools.Server;
 import org.slf4j.LoggerFactory;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.batch.BatchProperties;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
@@ -50,6 +49,8 @@ import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
+import static org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType.HAL;
+
 /**
  * Configuration for the Data Flow Server application context. This includes support for
  * the REST API framework configuration.
@@ -67,15 +68,16 @@ import org.springframework.util.StringUtils;
 @EnableHypermediaSupport(type = HAL)
 @EnableSpringDataWebSupport
 @Configuration
-@Import({CompletionConfiguration.class, FeaturesConfiguration.class, WebConfiguration.class,
+@Import({ CompletionConfiguration.class, FeaturesConfiguration.class, WebConfiguration.class,
 		BasicAuthSecurityConfiguration.class, FileAuthenticationConfiguration.class,
-		DefaultBootUserAuthenticationConfiguration.class,
-		LdapAuthenticationConfiguration.class, OAuthSecurityConfiguration.class})
-@EnableConfigurationProperties({BatchProperties.class, CommonApplicationProperties.class})
+		DefaultBootUserAuthenticationConfiguration.class, LdapAuthenticationConfiguration.class,
+		OAuthSecurityConfiguration.class })
+@EnableConfigurationProperties({ BatchProperties.class, CommonApplicationProperties.class })
 public class DataFlowServerConfiguration {
 
 	@Configuration
-	@ConditionalOnProperty(name = "spring.dataflow.embedded.database.enabled", havingValue = "true", matchIfMissing = true)
+	@ConditionalOnProperty(name = "spring.dataflow.embedded.database.enabled", havingValue = "true",
+			matchIfMissing = true)
 	@ConditionalOnExpression("#{'${spring.datasource.url:}'.startsWith('jdbc:h2:tcp://localhost:')}")
 	public static class H2ServerConfiguration {
 
@@ -89,9 +91,10 @@ public class DataFlowServerConfiguration {
 			Server server = null;
 			logger.info("Starting H2 Server with URL: " + dataSourceUrl);
 			try {
-				server = Server.createTcpServer("-tcp", "-tcpAllowOthers", "-tcpPort",
-						getH2Port(dataSourceUrl)).start();
-			} catch (SQLException e) {
+				server = Server.createTcpServer("-tcp", "-tcpAllowOthers", "-tcpPort", getH2Port(dataSourceUrl))
+						.start();
+			}
+			catch (SQLException e) {
 				throw new IllegalStateException(e);
 			}
 			return server;
@@ -111,7 +114,8 @@ public class DataFlowServerConfiguration {
 
 		@Bean
 		@DependsOn("initH2TCPServer")
-		public DataflowRdbmsInitializer dataflowRdbmsInitializer(DataSource dataSource, FeaturesProperties featuresProperties) {
+		public DataflowRdbmsInitializer dataflowRdbmsInitializer(DataSource dataSource,
+				FeaturesProperties featuresProperties) {
 			DataflowRdbmsInitializer dataflowRdbmsInitializer = new DataflowRdbmsInitializer(featuresProperties);
 			dataflowRdbmsInitializer.setDataSource(dataSource);
 			return dataflowRdbmsInitializer;
@@ -119,9 +123,9 @@ public class DataFlowServerConfiguration {
 	}
 
 	@Configuration
-	@ConditionalOnExpression("#{!'${spring.datasource.url:}'.startsWith('jdbc:h2:tcp://localhost:') || " +
-			"('${spring.datasource.url:}'.startsWith('jdbc:h2:tcp://localhost:') &&" +
-			"'${spring.dataflow.embedded.database.enabled}'.equals('false'))}")
+	@ConditionalOnExpression("#{!'${spring.datasource.url:}'.startsWith('jdbc:h2:tcp://localhost:') || "
+			+ "('${spring.datasource.url:}'.startsWith('jdbc:h2:tcp://localhost:') &&"
+			+ "'${spring.dataflow.embedded.database.enabled}'.equals('false'))}")
 	public static class NoH2ServerConfiguration {
 
 		@Bean
@@ -130,7 +134,8 @@ public class DataFlowServerConfiguration {
 		}
 
 		@Bean
-		public DataflowRdbmsInitializer dataflowRdbmsInitializer(DataSource dataSource, FeaturesProperties featuresProperties) {
+		public DataflowRdbmsInitializer dataflowRdbmsInitializer(DataSource dataSource,
+				FeaturesProperties featuresProperties) {
 			DataflowRdbmsInitializer dataflowRdbmsInitializer = new DataflowRdbmsInitializer(featuresProperties);
 			dataflowRdbmsInitializer.setDataSource(dataSource);
 			return dataflowRdbmsInitializer;

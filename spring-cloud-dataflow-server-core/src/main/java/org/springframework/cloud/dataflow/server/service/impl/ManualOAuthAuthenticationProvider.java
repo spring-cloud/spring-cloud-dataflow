@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import org.slf4j.LoggerFactory;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.security.oauth2.OAuth2ClientProperties;
@@ -44,7 +45,6 @@ import org.springframework.web.client.ResourceAccessException;
  * (username and password) against an OAuth Server using a {@code password grant}.
  *
  * @author Gunnar Hillert
- *
  */
 public class ManualOAuthAuthenticationProvider implements AuthenticationProvider {
 
@@ -76,10 +76,9 @@ public class ManualOAuthAuthenticationProvider implements AuthenticationProvider
 		resource.setClientSecret(oAuth2ClientProperties.getClientSecret());
 		resource.setGrantType("password");
 
-		final OAuth2RestTemplate template =
-				new OAuth2RestTemplate(resource,
-						new DefaultOAuth2ClientContext(new DefaultAccessTokenRequest()));
-				template.setAccessTokenProvider(userAccessTokenProvider());
+		final OAuth2RestTemplate template = new OAuth2RestTemplate(resource,
+				new DefaultOAuth2ClientContext(new DefaultAccessTokenRequest()));
+		template.setAccessTokenProvider(userAccessTokenProvider());
 
 		try {
 			logger.warn("Authenticating user '{}' using accessTokenUri '{}'.", username, accessTokenUri);
@@ -87,20 +86,22 @@ public class ManualOAuthAuthenticationProvider implements AuthenticationProvider
 		}
 		catch (OAuth2AccessDeniedException e) {
 			if (e.getCause() instanceof ResourceAccessException) {
-				final String errorMessage = String.format("While authenticating user '%s': "
-					+ "Unable to access accessTokenUri '%s'.", username, accessTokenUri);
-				logger.error(errorMessage +  " Error message: {}.", e.getCause().getMessage());
+				final String errorMessage = String.format(
+						"While authenticating user '%s': " + "Unable to access accessTokenUri '%s'.", username,
+						accessTokenUri);
+				logger.error(errorMessage + " Error message: {}.", e.getCause().getMessage());
 				throw new AuthenticationServiceException(errorMessage, e);
 			}
 			throw new BadCredentialsException(String.format("Access denied for user '%s'.", username), e);
 		}
 		catch (OAuth2Exception e) {
-			throw new AuthenticationServiceException(String.format(
-				"Unable to perform OAuth authentication for user '%s'.", username), e);
+			throw new AuthenticationServiceException(
+					String.format("Unable to perform OAuth authentication for user '%s'.", username), e);
 		}
 
 		final Collection<GrantedAuthority> authorities = new ArrayList<>();
-		UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(username, password, authorities);
+		UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(username, password,
+				authorities);
 		return token;
 	}
 

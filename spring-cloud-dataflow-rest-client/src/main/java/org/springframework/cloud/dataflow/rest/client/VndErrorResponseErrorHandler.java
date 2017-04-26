@@ -29,7 +29,8 @@ import org.springframework.web.client.HttpMessageConverterExtractor;
 import org.springframework.web.client.ResponseExtractor;
 
 /**
- * Extension of {@link DefaultResponseErrorHandler} that knows how to de-serialize a {@link VndError} structure.
+ * Extension of {@link DefaultResponseErrorHandler} that knows how to de-serialize a
+ * {@link VndError} structure.
  *
  * @author Eric Bottard
  * @author Gunnar Hillert

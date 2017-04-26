@@ -49,8 +49,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Controller for operations on {@link JobInstance}.
- * This includes obtaining Job Instance information from the job service.
+ * Controller for operations on {@link JobInstance}. This includes obtaining Job Instance
+ * information from the job service.
  *
  * @author Glenn Renfro
  * @author Gunnar Hillert
@@ -67,7 +67,8 @@ public class JobInstanceController {
 	/**
 	 * Creates a {@code JobInstanceController} that retrieves Job Instance information.
 	 *
-	 * @param taskJobService the {@link TaskJobService} used for retrieving batch instance data.
+	 * @param taskJobService the {@link TaskJobService} used for retrieving batch instance
+	 * data.
 	 */
 	@Autowired
 	public JobInstanceController(TaskJobService taskJobService) {
@@ -79,18 +80,18 @@ public class JobInstanceController {
 	 * Return a page-able list of {@link JobInstanceResource} defined jobs.
 	 *
 	 * @param jobName the name of the job
-	 * @param pageable  page-able collection of {@link JobInstance}s.
+	 * @param pageable page-able collection of {@link JobInstance}s.
 	 * @param assembler for the {@link JobInstance}s
 	 * @return a list of Job Instance
 	 * @throws NoSuchJobException if the job for jobName specified does not exist.
 	 */
 	@RequestMapping(value = "", method = RequestMethod.GET, params = "name")
 	@ResponseStatus(HttpStatus.OK)
-	public PagedResources<JobInstanceResource> list(@RequestParam("name") String jobName,
-			Pageable pageable, PagedResourcesAssembler<JobInstanceExecutions> assembler)
-			throws NoSuchJobException {
+	public PagedResources<JobInstanceResource> list(@RequestParam("name") String jobName, Pageable pageable,
+			PagedResourcesAssembler<JobInstanceExecutions> assembler) throws NoSuchJobException {
 		List<JobInstanceExecutions> jobInstances = taskJobService.listTaskJobInstancesForJobName(pageable, jobName);
-		Page<JobInstanceExecutions> page = new PageImpl<>(jobInstances, pageable, taskJobService.countJobInstances(jobName));
+		Page<JobInstanceExecutions> page = new PageImpl<>(jobInstances, pageable,
+				taskJobService.countJobInstances(jobName));
 		return assembler.toResource(page, jobAssembler);
 	}
 
@@ -104,19 +105,22 @@ public class JobInstanceController {
 	 */
 	@RequestMapping(value = "/{id}", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
-	public JobInstanceResource view(@PathVariable("id") long id)
-			throws NoSuchJobInstanceException, NoSuchJobException {
+	public JobInstanceResource view(@PathVariable("id") long id) throws NoSuchJobInstanceException, NoSuchJobException {
 		JobInstanceExecutions jobInstance = taskJobService.getJobInstance(id);
 		return jobAssembler.toResource(jobInstance);
 	}
 
 	/**
-	 * {@link org.springframework.hateoas.ResourceAssembler} implementation
-	 * that converts {@link JobInstance}s to {@link JobInstanceResource}s.
+	 * {@link org.springframework.hateoas.ResourceAssembler} implementation that converts
+	 * {@link JobInstance}s to {@link JobInstanceResource}s.
 	 */
 	private static class Assembler extends ResourceAssemblerSupport<JobInstanceExecutions, JobInstanceResource> {
 
 		private TimeZone timeZone = TimeUtils.getDefaultTimeZone();
+
+		public Assembler() {
+			super(JobInstanceController.class, JobInstanceResource.class);
+		}
 
 		/**
 		 * @param timeZone the timeZone to set
@@ -127,10 +131,6 @@ public class JobInstanceController {
 			this.timeZone = timeZone;
 		}
 
-		public Assembler() {
-			super(JobInstanceController.class, JobInstanceResource.class);
-		}
-
 		@Override
 		public JobInstanceResource toResource(JobInstanceExecutions jobInstance) {
 			return createResourceWithId(jobInstance.getJobInstance().getInstanceId(), jobInstance);
@@ -139,12 +139,12 @@ public class JobInstanceController {
 		@Override
 		public JobInstanceResource instantiateResource(JobInstanceExecutions jobInstance) {
 			List<JobExecutionResource> jobExecutions = new ArrayList<>();
-			for(TaskJobExecution taskJobExecution: jobInstance.getTaskJobExecutions()){
+			for (TaskJobExecution taskJobExecution : jobInstance.getTaskJobExecutions()) {
 				jobExecutions.add(new JobExecutionResource(taskJobExecution, timeZone));
 			}
 			jobExecutions = Collections.unmodifiableList(jobExecutions);
 			return new JobInstanceResource(jobInstance.getJobInstance().getJobName(),
-							jobInstance.getJobInstance().getInstanceId(), jobExecutions);
+					jobInstance.getJobInstance().getInstanceId(), jobExecutions);
 		}
 	}
 }

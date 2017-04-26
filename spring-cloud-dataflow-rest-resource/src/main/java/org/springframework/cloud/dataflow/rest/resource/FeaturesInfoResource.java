@@ -24,17 +24,15 @@ import org.springframework.hateoas.ResourceSupport;
  * @author Ilayaperumal Gopinathan
  */
 public class FeaturesInfoResource extends ResourceSupport {
+	private boolean analyticsEnabled = true;
+	private boolean streamsEnabled = true;
+	private boolean tasksEnabled = true;
+
 	/**
 	 * Default constructor for serialization frameworks.
 	 */
 	public FeaturesInfoResource() {
 	}
-
-	private boolean analyticsEnabled = true;
-
-	private boolean streamsEnabled = true;
-
-	private boolean tasksEnabled = true;
 
 	public boolean isAnalyticsEnabled() {
 		return this.analyticsEnabled;
@@ -59,6 +57,5 @@ public class FeaturesInfoResource extends ResourceSupport {
 	public void setTasksEnabled(boolean tasksEnabled) {
 		this.tasksEnabled = tasksEnabled;
 	}
-
 
 }

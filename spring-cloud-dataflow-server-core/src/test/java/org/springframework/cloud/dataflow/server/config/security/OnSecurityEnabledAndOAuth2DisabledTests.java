@@ -15,10 +15,8 @@
  */
 package org.springframework.cloud.dataflow.server.config.security;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.assertThat;
-
 import org.junit.Test;
+
 import org.springframework.boot.test.util.EnvironmentTestUtils;
 import org.springframework.cloud.dataflow.server.config.security.support.OnSecurityEnabledAndOAuth2Disabled;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -26,11 +24,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 
+import static org.hamcrest.Matchers.equalTo;
+import static org.junit.Assert.assertThat;
+
 /**
-*
-* @author Gunnar Hillert
-*
-*/
+ * @author Gunnar Hillert
+ */
 public class OnSecurityEnabledAndOAuth2DisabledTests {
 
 	@Test
@@ -56,9 +55,18 @@ public class OnSecurityEnabledAndOAuth2DisabledTests {
 
 	@Test
 	public void basicSecurityEnabledAndOauth2Enabled() throws Exception {
-		AnnotationConfigApplicationContext context = load(Config.class, "security.basic.enabled:true", "security.oauth2.client.client-id:12345");
+		AnnotationConfigApplicationContext context = load(Config.class, "security.basic.enabled:true",
+				"security" + ".oauth2.client.client-id:12345");
 		assertThat(context.containsBean("myBean"), equalTo(false));
 		context.close();
+	}
+
+	private AnnotationConfigApplicationContext load(Class<?> config, String... env) {
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+		EnvironmentTestUtils.addEnvironment(context, env);
+		context.register(config);
+		context.refresh();
+		return context;
 	}
 
 	@Configuration
@@ -68,13 +76,5 @@ public class OnSecurityEnabledAndOAuth2DisabledTests {
 		public String myBean() {
 			return "myBean";
 		}
-	}
-
-	private AnnotationConfigApplicationContext load(Class<?> config, String... env) {
-		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
-		EnvironmentTestUtils.addEnvironment(context, env);
-		context.register(config);
-		context.refresh();
-		return context;
 	}
 }

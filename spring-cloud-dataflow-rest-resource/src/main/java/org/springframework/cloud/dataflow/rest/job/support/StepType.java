@@ -23,7 +23,8 @@ import org.springframework.batch.core.step.tasklet.TaskletStep;
 import org.springframework.util.StringUtils;
 
 /**
- * The types of Spring Batch {@link org.springframework.batch.core.Step} implementations that are known to the system.
+ * The types of Spring Batch {@link org.springframework.batch.core.Step} implementations
+ * that are known to the system.
  *
  * @author Michael Minella
  * @since 1.0
@@ -57,13 +58,14 @@ public enum StepType {
 	private final String className;
 	private final String displayName;
 
-	private StepType(String className, String displayName) {
+	StepType(String className, String displayName) {
 		this.className = className;
 		this.displayName = displayName;
 	}
 
 	/**
-	 * @param className the fully qualified name of the {@link org.springframework.batch.core.Step} implementation
+	 * @param className the fully qualified name of the
+	 * {@link org.springframework.batch.core.Step} implementation
 	 * @return the type if known, otherwise {@link #UNKNOWN}
 	 */
 	public static StepType fromClassName(String className) {

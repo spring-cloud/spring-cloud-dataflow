@@ -17,12 +17,14 @@
 package org.springframework.cloud.dataflow.server.repository.support;
 
 import java.util.Map;
+
 import javax.sql.DataSource;
 
 import org.springframework.data.domain.Pageable;
 
 /**
  * Interface defining the functionality to be provided for generating paging queries.
+ *
  * @author Glenn Renfro
  */
 public interface PagingQueryProvider {
@@ -37,6 +39,7 @@ public interface PagingQueryProvider {
 
 	/**
 	 * The number of parameters that are declared in the query
+	 *
 	 * @return number of parameters
 	 */
 	int getParameterCount();
@@ -49,15 +52,14 @@ public interface PagingQueryProvider {
 	boolean isUsingNamedParameters();
 
 	/**
-	 * The sort keys.  A Map of the columns that make up the key and a Boolean indicating ascending or descending
-	 * (ascending = true).
+	 * The sort keys. A Map of the columns that make up the key and a Boolean indicating
+	 * ascending or descending (ascending = true).
 	 *
 	 * @return the sort keys used to order the query
 	 */
 	Map<String, Order> getSortKeys();
 
 	/**
-	 *
 	 * Generate the query that will provide the jump to item query.
 	 *
 	 * @param pageable the coordinates to pull the next page from the datasource

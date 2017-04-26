@@ -47,7 +47,7 @@ public class TaskToolsResource extends ResourceSupport {
 		this.errors = errors;
 	}
 
-	public TaskToolsResource(String dsl, List<Map<String,Object>> errors) {
+	public TaskToolsResource(String dsl, List<Map<String, Object>> errors) {
 		this.graph = null;
 		this.dsl = dsl;
 		this.errors = errors;
@@ -61,7 +61,7 @@ public class TaskToolsResource extends ResourceSupport {
 		return dsl;
 	}
 
-	public List<Map<String,Object>> getErrors() {
+	public List<Map<String, Object>> getErrors() {
 		return errors;
 	}
 

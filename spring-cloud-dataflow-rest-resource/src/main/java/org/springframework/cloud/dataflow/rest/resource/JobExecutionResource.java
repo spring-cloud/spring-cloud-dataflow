@@ -39,7 +39,6 @@ import org.springframework.util.Assert;
  *
  * @author Glenn Renfro
  * @author Gunnar Hillert
- *
  */
 public class JobExecutionResource extends ResourceSupport {
 
@@ -93,7 +92,7 @@ public class JobExecutionResource extends ResourceSupport {
 
 	}
 
-	public JobExecutionResource( TaskJobExecution taskJobExecution, TimeZone timeZone) {
+	public JobExecutionResource(TaskJobExecution taskJobExecution, TimeZone timeZone) {
 		Assert.notNull(taskJobExecution, "taskJobExecution must not be null");
 		this.taskExecutionId = taskJobExecution.getTaskId();
 		this.jobExecution = taskJobExecution.getJobExecution();
@@ -128,8 +127,6 @@ public class JobExecutionResource extends ResourceSupport {
 		}
 
 	}
-
-	public static class Page extends PagedResources<JobExecutionResource> {}
 
 	public TimeZone getTimeZone() {
 		return timeZone;
@@ -187,19 +184,20 @@ public class JobExecutionResource extends ResourceSupport {
 		return jobParameters;
 	}
 
-	public long getTaskExecutionId(){
+	public long getTaskExecutionId() {
 		return taskExecutionId;
 	}
 
 	public boolean isDefined() {
 		return defined;
 	}
+
 	/**
 	 * @param oldParameters the latest job parameters
-	 * @return a String representation for rendering the job parameters from the
-	 * last instance
+	 * @return a String representation for rendering the job parameters from the last
+	 * instance
 	 */
-	private  String fromJobParameters(JobParameters oldParameters) {
+	private String fromJobParameters(JobParameters oldParameters) {
 
 		String properties = PropertiesConverter.propertiesToString(converter.getProperties(oldParameters));
 		if (properties.startsWith("#")) {
@@ -208,5 +206,8 @@ public class JobExecutionResource extends ResourceSupport {
 		properties = properties.replace("\\:", ":");
 		return properties;
 
+	}
+
+	public static class Page extends PagedResources<JobExecutionResource> {
 	}
 }

@@ -17,12 +17,14 @@
 package org.springframework.cloud.dataflow.server.job.support;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.StepExecution;
 
 /**
- * Jackson MixIn for {@link StepExecution} serialization. This MixIn excludes the {@link JobExecution} from being
- * serialized. This is due to the fact that it would cause a {@link StackOverflowError} due to a circular reference.
+ * Jackson MixIn for {@link StepExecution} serialization. This MixIn excludes the
+ * {@link JobExecution} from being serialized. This is due to the fact that it would cause
+ * a {@link StackOverflowError} due to a circular reference.
  *
  * @author Gunnar Hillert
  * @since 1.0

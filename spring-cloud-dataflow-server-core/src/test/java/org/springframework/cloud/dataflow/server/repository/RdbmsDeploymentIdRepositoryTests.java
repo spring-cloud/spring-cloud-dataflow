@@ -40,8 +40,8 @@ import static org.junit.Assert.assertNull;
  * @author Ilayaperumal Gopinathan
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = {EmbeddedDataSourceConfiguration.class,
-		PropertyPlaceholderAutoConfiguration.class, RdbmsDeploymentIdRepositoryTests.TestConfig.class})
+@SpringBootTest(classes = { EmbeddedDataSourceConfiguration.class, PropertyPlaceholderAutoConfiguration.class,
+		RdbmsDeploymentIdRepositoryTests.TestConfig.class })
 public class RdbmsDeploymentIdRepositoryTests {
 
 	@Autowired
@@ -52,12 +52,12 @@ public class RdbmsDeploymentIdRepositoryTests {
 	private JdbcTemplate template;
 
 	@Before
-	public void setup() throws Exception{
+	public void setup() throws Exception {
 		repository = new RdbmsDeploymentIdRepository(dataSource);
 		template = new JdbcTemplate(dataSource);
 		template.execute("DELETE FROM DEPLOYMENT_IDS");
 	}
-	
+
 	@Test
 	public void testFindOne() {
 		repository.save("key1", "time.1");
@@ -86,7 +86,8 @@ public class RdbmsDeploymentIdRepositoryTests {
 
 		@Bean
 		public DataflowRdbmsInitializer definitionRepositoryInitializer(DataSource dataSource) {
-			DataflowRdbmsInitializer definitionRepositoryInitializer = new DataflowRdbmsInitializer(featuresProperties());
+			DataflowRdbmsInitializer definitionRepositoryInitializer = new DataflowRdbmsInitializer(
+					featuresProperties());
 			definitionRepositoryInitializer.setDataSource(dataSource);
 			return definitionRepositoryInitializer;
 		}

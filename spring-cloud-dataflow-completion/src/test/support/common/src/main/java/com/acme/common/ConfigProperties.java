@@ -41,8 +41,6 @@ public class ConfigProperties {
 		this.someString = someString;
 	}
 
-
-
 	public SomeEnum getNumber() {
 		return number;
 	}

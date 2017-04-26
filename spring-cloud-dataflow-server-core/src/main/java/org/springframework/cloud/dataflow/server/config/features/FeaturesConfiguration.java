@@ -36,8 +36,7 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
  * @author Ilayaperumal Gopinathan
  */
 @Configuration
-@Import({ AnalyticsConfiguration.class, StreamConfiguration.class,
-		TaskConfiguration.class })
+@Import({ AnalyticsConfiguration.class, StreamConfiguration.class, TaskConfiguration.class })
 public class FeaturesConfiguration {
 
 	@Autowired
@@ -45,17 +44,16 @@ public class FeaturesConfiguration {
 
 	@Bean
 	@ConditionalOnMissingBean
-	@ConditionalOnExpression("#{'${" + FeaturesProperties.FEATURES_PREFIX + "."
-			+ FeaturesProperties.STREAMS_ENABLED + ":true}'.equalsIgnoreCase('true') || "
-			+ "'${" + FeaturesProperties.FEATURES_PREFIX + "."
+	@ConditionalOnExpression("#{'${" + FeaturesProperties.FEATURES_PREFIX + "." + FeaturesProperties.STREAMS_ENABLED
+			+ ":true}'.equalsIgnoreCase('true') || " + "'${" + FeaturesProperties.FEATURES_PREFIX + "."
 			+ FeaturesProperties.TASKS_ENABLED + ":true}'.equalsIgnoreCase('true') }")
 	public DeploymentIdRepository deploymentIdRepository(DataSource dataSource) {
 		return new RdbmsDeploymentIdRepository(dataSource);
 	}
 
 	@Bean
-	@ConditionalOnExpression("#{'${" + FeaturesProperties.FEATURES_PREFIX + "."
-			+ FeaturesProperties.ANALYTICS_ENABLED + ":true}'.equalsIgnoreCase('false')}")
+	@ConditionalOnExpression("#{'${" + FeaturesProperties.FEATURES_PREFIX + "." + FeaturesProperties.ANALYTICS_ENABLED
+			+ ":true}'.equalsIgnoreCase('false')}")
 	public RedisHealthIndicator redisHealthIndicator() {
 		return new CustomRedisHealthIndicator(redisConnectionFactory);
 	}

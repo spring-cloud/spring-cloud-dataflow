@@ -22,8 +22,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.cloud.dataflow.rest.util.HttpUtils;
 import org.springframework.cloud.dataflow.server.config.MetricsProperties;
 import org.springframework.core.ParameterizedTypeReference;
@@ -37,23 +41,18 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
-
 /**
- * Store implementation returning metrics info from a collector application.
- * Implemented via hystrix command having a fallback to empty response.
+ * Store implementation returning metrics info from a collector application. Implemented
+ * via hystrix command having a fallback to empty response.
  *
  * @author Janne Valkealahti
- *
  */
 public class MetricStore {
 
+	private final static List<ApplicationsMetrics> EMPTY_RESPONSE = new ArrayList<ApplicationsMetrics>();
 	private static Log logger = LogFactory.getLog(MetricStore.class);
 	private final RestTemplate restTemplate;
 	private final MetricsProperties metricsProperties;
-	private final static List<ApplicationsMetrics> EMPTY_RESPONSE = new ArrayList<ApplicationsMetrics>();
 	private String collectorEndpoint;
 
 	/**
@@ -71,28 +70,31 @@ public class MetricStore {
 		messageConverter.setObjectMapper(mapper);
 		restTemplate = new RestTemplate(Arrays.asList(messageConverter));
 		String baseURI = metricsProperties.getCollector().getUri();
-		if(StringUtils.hasText(baseURI)){
+		if (StringUtils.hasText(baseURI)) {
 			try {
 				URI uri = new URI(baseURI);
-				this.collectorEndpoint = UriComponentsBuilder.fromUri(uri).path("/collector/metrics/streams").build().toString();
+				this.collectorEndpoint = UriComponentsBuilder.fromUri(uri).path("/collector/metrics/streams").build()
+						.toString();
 				logger.info("Metrics Collector URI = [" + collectorEndpoint + "]");
 				validateUsernamePassword(metricsProperties.getCollector().getUsername(),
 						metricsProperties.getCollector().getPassword());
-				if (StringUtils.hasText(metricsProperties.getCollector().getUsername()) &&
-						StringUtils.hasText(metricsProperties.getCollector().getPassword())) {
+				if (StringUtils.hasText(metricsProperties.getCollector().getUsername())
+						&& StringUtils.hasText(metricsProperties.getCollector().getPassword())) {
 					HttpUtils.prepareRestTemplate(this.restTemplate, new URI(collectorEndpoint),
 							metricsProperties.getCollector().getUsername(),
 							metricsProperties.getCollector().getPassword(),
 							metricsProperties.getCollector().isSkipSslValidation());
 					logger.debug("Configured basic security for Metrics Collector endpoint");
-				} else {
+				}
+				else {
 					logger.debug("Not configuring basic security for Metrics Collector endpoint");
 				}
 			}
 			catch (URISyntaxException e) {
 				logger.warn("Could not parse collector URI, stream metrics monitoring will not be available");
 			}
-		} else {
+		}
+		else {
 			logger.info("Metrics Collector URI = []");
 		}
 	}
@@ -109,7 +111,8 @@ public class MetricStore {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Metrics = " + metrics);
 				}
-			} catch (Exception e) {
+			}
+			catch (Exception e) {
 				if (e instanceof HttpClientErrorException && e.getMessage().startsWith("401")) {
 					logger.warn(String.format(
 							"Failure while requesting metrics from url '%s': '%s'. "
@@ -118,14 +121,15 @@ public class MetricStore {
 				}
 				else {
 					logger.warn(String.format("Failure while requesting metrics from url '%s': %s",
-							this.collectorEndpoint ,e.getMessage()));
+							this.collectorEndpoint, e.getMessage()));
 				}
 				if (logger.isDebugEnabled()) {
 					logger.debug("The metrics request failed with:", e);
 				}
 				throw e;
 			}
-		} else {
+		}
+		else {
 			metrics = defaultMetrics();
 		}
 		return metrics;
@@ -134,7 +138,6 @@ public class MetricStore {
 	public List<ApplicationsMetrics> defaultMetrics() {
 		return EMPTY_RESPONSE;
 	}
-
 
 	private void validateUsernamePassword(String userName, String password) {
 		if (!StringUtils.isEmpty(password) && StringUtils.isEmpty(userName)) {

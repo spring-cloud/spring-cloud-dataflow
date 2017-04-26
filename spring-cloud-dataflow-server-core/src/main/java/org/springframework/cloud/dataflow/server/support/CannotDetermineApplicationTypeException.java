@@ -20,12 +20,11 @@ import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.server.DataFlowServerUtil;
 
 /**
- * Exception is thrown by {@link DataFlowServerUtil} to indicate that
- * the {@link ApplicationType} for a provided {@link StreamAppDefinition} cannot be
+ * Exception is thrown by {@link DataFlowServerUtil} to indicate that the
+ * {@link ApplicationType} for a provided {@link StreamAppDefinition} cannot be
  * determined.
  *
  * @author Gunnar Hillert
- *
  */
 public class CannotDetermineApplicationTypeException extends RuntimeException {
 

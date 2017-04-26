@@ -17,8 +17,8 @@
 package org.springframework.cloud.dataflow.server.repository;
 
 /**
- * Thrown to indicate that the creation of a stream failed
- * because a stream with the given name already exists.
+ * Thrown to indicate that the creation of a stream failed because a stream with the given
+ * name already exists.
  *
  * @author Mark Fisher
  */

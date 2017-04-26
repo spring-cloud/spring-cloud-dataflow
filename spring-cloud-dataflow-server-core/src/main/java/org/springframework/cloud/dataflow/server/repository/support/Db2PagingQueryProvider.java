@@ -19,9 +19,9 @@ package org.springframework.cloud.dataflow.server.repository.support;
 import org.springframework.data.domain.Pageable;
 
 /**
- * IBM DB2 implementation of a {@link PagingQueryProvider} using database
- * specific features.
- * 
+ * IBM DB2 implementation of a {@link PagingQueryProvider} using database specific
+ * features.
+ *
  * @author Thomas Schuettel
  */
 public class Db2PagingQueryProvider extends AbstractSqlPagingQueryProvider {

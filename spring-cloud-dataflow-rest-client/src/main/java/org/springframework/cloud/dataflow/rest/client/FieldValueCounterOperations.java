@@ -22,13 +22,14 @@ import org.springframework.hateoas.PagedResources;
 
 /**
  * Interface defining operations available when dealing with Field Value Counters.
- * 
+ *
  * @author Eric Bottard
  */
 public interface FieldValueCounterOperations {
 
 	/**
 	 * Retrieve information about the given named counter.
+	 *
 	 * @param name the name of the field value counter
 	 * @return the field value counter
 	 */
@@ -36,12 +37,14 @@ public interface FieldValueCounterOperations {
 
 	/**
 	 * Retrieve basic information (i.e. names) for existing counters.
+	 *
 	 * @return a pages list of field value counters
 	 */
 	PagedResources<MetricResource> list();
 
 	/**
 	 * Delete the counter with given name.
+	 *
 	 * @param name the name of the field value counter
 	 */
 	void reset(String name);

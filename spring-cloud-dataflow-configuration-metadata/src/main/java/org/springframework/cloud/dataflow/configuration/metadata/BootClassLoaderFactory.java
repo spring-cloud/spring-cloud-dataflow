@@ -25,25 +25,22 @@ import org.springframework.boot.loader.LaunchedURLClassLoader;
 import org.springframework.boot.loader.archive.Archive;
 
 /**
- * Strategy interface for creating a ClassLoader that mimics the one used when
- * a boot uber-jar runs.
+ * Strategy interface for creating a ClassLoader that mimics the one used when a boot
+ * uber-jar runs.
  *
  * @author Eric Bottard
  */
 public class BootClassLoaderFactory {
 
-	private final Archive archive;
-
-	private final ClassLoader parent;
-
 	private static final String BOOT_13_LIBS_LOCATION = "lib/";
-
 	private static final String BOOT_14_LIBS_LOCATION = "BOOT-INF/lib/";
-
 	private static final String BOOT_14_CLASSESS_LOCATION = "BOOT-INF/classes/";
+	private final Archive archive;
+	private final ClassLoader parent;
 
 	/**
 	 * Create a new factory for dealing with the given boot uberjar archive.
+	 *
 	 * @param archive a boot uberjar Archive
 	 * @param parent the parent classloader to set for new created ClassLoaders
 	 */
@@ -61,15 +58,14 @@ public class BootClassLoaderFactory {
 			}
 		}
 
-		ClassLoaderExposingLauncher launcher = useBoot14Layout
-				? new Boot14ClassLoaderExposingLauncher()
+		ClassLoaderExposingLauncher launcher = useBoot14Layout ? new Boot14ClassLoaderExposingLauncher()
 				: new Boot13ClassLoaderExposingLauncher();
 
 		return launcher.createClassLoader();
 	}
 
 	private abstract class ClassLoaderExposingLauncher extends ExecutableArchiveLauncher {
-		public ClassLoaderExposingLauncher() {
+		ClassLoaderExposingLauncher() {
 			super(archive);
 		}
 

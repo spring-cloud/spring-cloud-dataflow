@@ -17,15 +17,15 @@ package org.springframework.cloud.dataflow.server.config.security;
 
 import org.junit.Test;
 
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 
 /**
-*
-* @author Gunnar Hillert
-*/
+ * @author Gunnar Hillert
+ */
 public class FileAuthenticationConfigurationTests {
 
 	@Test

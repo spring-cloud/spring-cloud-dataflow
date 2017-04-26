@@ -31,7 +31,10 @@ import javax.validation.Payload;
 @Retention(RetentionPolicy.RUNTIME)
 @Constraint(validatedBy = LdapSecurityPropertiesValidator.class)
 public @interface LdapSecurityPropertiesValid {
-	String message() default "{org.springframework.cloud.dataflow.server.config.security.support.LdapSecurityPropertiesValid.message}";
+	String message() default "{org.springframework.cloud.dataflow.server.config.security.support"
+			+ ".LdapSecurityPropertiesValid.message}";
+
 	Class<?>[] groups() default {};
+
 	Class<? extends Payload>[] payload() default {};
 }

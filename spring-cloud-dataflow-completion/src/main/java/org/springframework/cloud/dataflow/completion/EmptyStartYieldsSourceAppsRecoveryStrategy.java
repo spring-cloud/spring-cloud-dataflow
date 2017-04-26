@@ -28,8 +28,8 @@ import org.springframework.cloud.dataflow.registry.AppRegistry;
  * @author Eric Bottard
  * @author Mark Fisher
  */
-class EmptyStartYieldsSourceAppsRecoveryStrategy extends
-		StacktraceFingerprintingRecoveryStrategy<IllegalArgumentException> {
+class EmptyStartYieldsSourceAppsRecoveryStrategy
+		extends StacktraceFingerprintingRecoveryStrategy<IllegalArgumentException> {
 
 	private final AppRegistry registry;
 
@@ -39,13 +39,12 @@ class EmptyStartYieldsSourceAppsRecoveryStrategy extends
 	}
 
 	@Override
-	public void addProposals(String dsl, IllegalArgumentException exception,
-			int detailLevel, List<CompletionProposal> proposals) {
+	public void addProposals(String dsl, IllegalArgumentException exception, int detailLevel,
+			List<CompletionProposal> proposals) {
 		CompletionProposal.Factory completionFactory = CompletionProposal.expanding(dsl);
 		for (AppRegistration app : this.registry.findAll()) {
 			if (app.getType() == ApplicationType.source) {
-				proposals.add(completionFactory.withSeparateTokens(app.getName(),
-						"Start with a source app"));
+				proposals.add(completionFactory.withSeparateTokens(app.getName(), "Start with a source app"));
 			}
 		}
 	}

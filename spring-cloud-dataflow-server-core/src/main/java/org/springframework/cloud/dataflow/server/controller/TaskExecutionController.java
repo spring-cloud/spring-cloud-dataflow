@@ -23,12 +23,12 @@ import java.util.stream.Collectors;
 
 import org.springframework.cloud.dataflow.rest.job.TaskJobExecutionRel;
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionResource;
+import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
+import org.springframework.cloud.dataflow.server.controller.support.ArgumentSanitizer;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskExecutionException;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
-import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
 import org.springframework.cloud.dataflow.server.service.TaskService;
-import org.springframework.cloud.dataflow.server.controller.support.ArgumentSanitizer;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.data.domain.Page;
@@ -48,8 +48,9 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Controller for operations on {@link org.springframework.cloud.task.repository.TaskExecution}.
- * This includes obtaining task execution information from the task explorer.
+ * Controller for operations on
+ * {@link org.springframework.cloud.task.repository.TaskExecution}. This includes
+ * obtaining task execution information from the task explorer.
  *
  * @author Glenn Renfro
  * @author Michael Minella
@@ -74,13 +75,13 @@ public class TaskExecutionController {
 	 * Creates a {@code TaskExecutionController} that retrieves Task Execution information
 	 * from a the {@link TaskExplorer}
 	 *
-	 * @param explorer the explorer this controller will use for retrieving
-	 *                   task execution information.
+	 * @param explorer the explorer this controller will use for retrieving task execution
+	 * information.
 	 * @param taskService used to launch tasks
 	 * @param taskDefinitionRepository the task definition repository
 	 */
 	public TaskExecutionController(TaskExplorer explorer, TaskService taskService,
-		TaskDefinitionRepository taskDefinitionRepository) {
+			TaskDefinitionRepository taskDefinitionRepository) {
 		Assert.notNull(explorer, "explorer must not be null");
 		Assert.notNull(taskService, "taskService must not be null");
 		Assert.notNull(taskDefinitionRepository, "taskDefinitionRepository must not be null");
@@ -92,7 +93,7 @@ public class TaskExecutionController {
 	/**
 	 * Return a page-able list of {@link TaskExecutionResource} defined tasks.
 	 *
-	 * @param pageable  page-able collection of {@code TaskExecution}s.
+	 * @param pageable page-able collection of {@code TaskExecution}s.
 	 * @param assembler for the {@link TaskExecution}s
 	 * @return a list of task executions
 	 */
@@ -109,15 +110,14 @@ public class TaskExecutionController {
 	 * Retrieve all task executions with the task name specified
 	 *
 	 * @param taskName name of the task
-	 * @param pageable  page-able collection of {@code TaskExecution}s.
+	 * @param pageable page-able collection of {@code TaskExecution}s.
 	 * @param assembler for the {@link TaskExecution}s
 	 * @return the paged list of task executions
 	 */
 	@RequestMapping(value = "", method = RequestMethod.GET, params = "name")
 	@ResponseStatus(HttpStatus.OK)
-	public PagedResources<TaskExecutionResource> retrieveTasksByName(
-			@RequestParam("name") String taskName, Pageable pageable,
-				PagedResourcesAssembler<TaskJobExecutionRel> assembler) {
+	public PagedResources<TaskExecutionResource> retrieveTasksByName(@RequestParam("name") String taskName,
+			Pageable pageable, PagedResourcesAssembler<TaskJobExecutionRel> assembler) {
 		if (this.taskDefinitionRepository.findOne(taskName) == null) {
 			throw new NoSuchTaskDefinitionException(taskName);
 		}
@@ -127,24 +127,24 @@ public class TaskExecutionController {
 	}
 
 	/**
-	 * Request the launching of an existing task definition. The name must be
-	 * included in the path.
+	 * Request the launching of an existing task definition. The name must be included in
+	 * the path.
 	 *
 	 * @param taskName the name of the existing task to be executed (required)
 	 * @param properties the runtime properties for the task, as a comma-delimited list of
-	 * 					 key=value pairs
+	 * key=value pairs
 	 * @param arguments the runtime commandline arguments
 	 * @return the taskExecutionId for the executed task
 	 */
 	@RequestMapping(value = "", method = RequestMethod.POST, params = "name")
 	@ResponseStatus(HttpStatus.CREATED)
 	public long launch(@RequestParam("name") String taskName, @RequestParam(required = false) String properties,
-		@RequestParam(required = false) List<String> arguments) {
+			@RequestParam(required = false) List<String> arguments) {
 		Map<String, String> propertiesToUse = DeploymentPropertiesUtils.parse(properties);
 		DeploymentPropertiesUtils.ensureJustDeploymentProperties(propertiesToUse);
-		return this.taskService.executeTask(taskName, propertiesToUse, DeploymentPropertiesUtils.parseParams(arguments));
+		return this.taskService.executeTask(taskName, propertiesToUse,
+				DeploymentPropertiesUtils.parseParams(arguments));
 	}
-
 
 	/**
 	 * View the details of a single task execution, specified by id.
@@ -156,7 +156,7 @@ public class TaskExecutionController {
 	@ResponseStatus(HttpStatus.OK)
 	public TaskExecutionResource view(@PathVariable("id") long id) {
 		TaskExecution taskExecution = this.explorer.getTaskExecution(id);
-		if(taskExecution == null){
+		if (taskExecution == null) {
 			throw new NoSuchTaskExecutionException(id);
 		}
 		taskExecution = sanitizePotentialSensitiveKeys(taskExecution);
@@ -175,15 +175,15 @@ public class TaskExecutionController {
 	@ResponseStatus(HttpStatus.OK)
 	public void cleanup(@PathVariable("id") long id) {
 		TaskExecution taskExecution = this.explorer.getTaskExecution(id);
-		if(taskExecution == null){
+		if (taskExecution == null) {
 			throw new NoSuchTaskExecutionException(id);
 		}
 		this.taskService.cleanupExecution(id);
 	}
 
 	/**
-	 * {@link org.springframework.hateoas.ResourceAssembler} implementation
-	 * that converts {@link TaskJobExecutionRel}s to {@link TaskExecutionResource}s.
+	 * {@link org.springframework.hateoas.ResourceAssembler} implementation that converts
+	 * {@link TaskJobExecutionRel}s to {@link TaskExecutionResource}s.
 	 */
 	private static class Assembler extends ResourceAssemblerSupport<TaskJobExecutionRel, TaskExecutionResource> {
 

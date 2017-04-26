@@ -31,14 +31,14 @@ import org.springframework.util.Assert;
  *
  * @author Ilayaperumal Gopinathan
  */
-public class RdbmsStreamDefinitionRepository extends AbstractRdbmsKeyValueRepository<StreamDefinition> implements StreamDefinitionRepository {
+public class RdbmsStreamDefinitionRepository extends AbstractRdbmsKeyValueRepository<StreamDefinition>
+		implements StreamDefinitionRepository {
 
 	public RdbmsStreamDefinitionRepository(DataSource dataSource) {
 		super(dataSource, "STREAM_", "DEFINITIONS", new RowMapper<StreamDefinition>() {
 			@Override
 			public StreamDefinition mapRow(ResultSet resultSet, int i) throws SQLException {
-				return new StreamDefinition(
-						resultSet.getString("DEFINITION_NAME"), resultSet.getString("DEFINITION"));
+				return new StreamDefinition(resultSet.getString("DEFINITION_NAME"), resultSet.getString("DEFINITION"));
 			}
 		}, "DEFINITION_NAME", "DEFINITION");
 	}
@@ -47,13 +47,12 @@ public class RdbmsStreamDefinitionRepository extends AbstractRdbmsKeyValueReposi
 	public StreamDefinition save(StreamDefinition definition) {
 		Assert.notNull(definition, "definition must not be null");
 		if (exists(definition.getName())) {
-			throw new DuplicateStreamDefinitionException(
-					String.format("Cannot create stream %s because another one has already " +
-									"been created with the same name",
-							definition.getName()));
+			throw new DuplicateStreamDefinitionException(String.format(
+					"Cannot create stream %s because another one has already " + "been created with the same name",
+					definition.getName()));
 		}
-		Object[] insertParameters = new Object[]{definition.getName(), definition.getDslText()};
-		jdbcTemplate.update(saveRow, insertParameters, new int[]{Types.VARCHAR, Types.CLOB});
+		Object[] insertParameters = new Object[] { definition.getName(), definition.getDslText() };
+		jdbcTemplate.update(saveRow, insertParameters, new int[] { Types.VARCHAR, Types.CLOB });
 		return definition;
 	}
 

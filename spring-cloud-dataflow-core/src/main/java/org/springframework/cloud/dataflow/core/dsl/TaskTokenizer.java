@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,16 +17,13 @@
 package org.springframework.cloud.dataflow.core.dsl;
 
 /**
- * Lex some input data into a stream of tokens that can then then be parsed.
- * This tokenizer recognizes the task DSL - both the simple (single task)
- * and composed task cases.
+ * Lex some input data into a stream of tokens that can then then be parsed. This
+ * tokenizer recognizes the task DSL - both the simple (single task) and composed task
+ * cases.
  *
  * @author Andy Clement
  */
 class TaskTokenizer extends AbstractTokenizer {
-
-	public TaskTokenizer() {
-	}
 
 	@Override
 	protected void process() {
@@ -45,92 +42,93 @@ class TaskTokenizer extends AbstractTokenizer {
 				justProcessedEquals = false;
 				continue;
 			}
-			
-			// Difference between stream and task here, $ is allowed identifier prefix to allow
+
+			// Difference between stream and task here, $ is allowed identifier prefix to
+			// allow
 			// for $END/$FAIL
 			if (isAlphabetic(ch) || isDigit(ch) || ch == '_' || ch == '$') {
 				lexIdentifier();
 			}
 			else {
 				switch (ch) {
-					case '-':
-						if (isTwoCharToken(TokenKind.DOUBLE_MINUS)) {
-							pushPairToken(TokenKind.DOUBLE_MINUS);
-						}
-						else if (isTwoCharToken(TokenKind.ARROW)) {
-							pushPairToken(TokenKind.ARROW);
-						}
-						else {
-							throw new ParseException(
-									expressionString, pos,
-									DSLMessage.MISSING_CHARACTER, "-");
-						}
-						break;
-					case '&':
-						if (isTwoCharToken(TokenKind.ANDAND)) {
-							pushPairToken(TokenKind.ANDAND);
-						} else {
-							raiseException(DSLMessage.TASK_DOUBLE_AND_REQUIRED);
-						}
-						break;
-					case '|':
-						if (isTwoCharToken(TokenKind.OROR)) {
-							pushPairToken(TokenKind.OROR);
-						} else {
-							raiseException(DSLMessage.TASK_DOUBLE_OR_REQUIRED);
-						}
-						break;
-					case ' ':
-					case '\t':
-					case '\r':
-						// drift over white space
-						pos++;
-						break;
-					case '.':
-						pushCharToken(TokenKind.DOT);
-						break;
-					case '\n':
-						addLinebreak();
-						break;
-					case '<':
-						pushCharToken(TokenKind.LT);
-						break;
-					case '>':
-						pushCharToken(TokenKind.GT);
-						break;
-					case '(':
-						pushCharToken(TokenKind.OPEN_PAREN);
-						break;
-					case ')':
-						pushCharToken(TokenKind.CLOSE_PAREN);
-						break;
-					case '\'':
-						lexQuotedStringLiteral();
-						break;
-					case '"':
-						lexDoubleQuotedStringLiteral();
-						break;
-					case ':':
-						pushCharToken(TokenKind.COLON);
-						break;
-					case '=':
-						justProcessedEquals = true;
-						pushCharToken(TokenKind.EQUALS);
-						break;
-					case '*':
-						pushCharToken(TokenKind.STAR);
-						break;
-					case ';':
-						pushCharToken(TokenKind.SEMICOLON);
-						break;
-					case 0:
-						// hit sentinel at end of char data
-						pos++; // will take us to the end
-						break;
-					case '\\':
-						raiseException(DSLMessage.UNEXPECTED_ESCAPE_CHAR);
-					default:
-						raiseException(DSLMessage.TASK_UNEXPECTED_DATA,Character.valueOf(ch).toString());
+				case '-':
+					if (isTwoCharToken(TokenKind.DOUBLE_MINUS)) {
+						pushPairToken(TokenKind.DOUBLE_MINUS);
+					}
+					else if (isTwoCharToken(TokenKind.ARROW)) {
+						pushPairToken(TokenKind.ARROW);
+					}
+					else {
+						throw new ParseException(expressionString, pos, DSLMessage.MISSING_CHARACTER, "-");
+					}
+					break;
+				case '&':
+					if (isTwoCharToken(TokenKind.ANDAND)) {
+						pushPairToken(TokenKind.ANDAND);
+					}
+					else {
+						raiseException(DSLMessage.TASK_DOUBLE_AND_REQUIRED);
+					}
+					break;
+				case '|':
+					if (isTwoCharToken(TokenKind.OROR)) {
+						pushPairToken(TokenKind.OROR);
+					}
+					else {
+						raiseException(DSLMessage.TASK_DOUBLE_OR_REQUIRED);
+					}
+					break;
+				case ' ':
+				case '\t':
+				case '\r':
+					// drift over white space
+					pos++;
+					break;
+				case '.':
+					pushCharToken(TokenKind.DOT);
+					break;
+				case '\n':
+					addLinebreak();
+					break;
+				case '<':
+					pushCharToken(TokenKind.LT);
+					break;
+				case '>':
+					pushCharToken(TokenKind.GT);
+					break;
+				case '(':
+					pushCharToken(TokenKind.OPEN_PAREN);
+					break;
+				case ')':
+					pushCharToken(TokenKind.CLOSE_PAREN);
+					break;
+				case '\'':
+					lexQuotedStringLiteral();
+					break;
+				case '"':
+					lexDoubleQuotedStringLiteral();
+					break;
+				case ':':
+					pushCharToken(TokenKind.COLON);
+					break;
+				case '=':
+					justProcessedEquals = true;
+					pushCharToken(TokenKind.EQUALS);
+					break;
+				case '*':
+					pushCharToken(TokenKind.STAR);
+					break;
+				case ';':
+					pushCharToken(TokenKind.SEMICOLON);
+					break;
+				case 0:
+					// hit sentinel at end of char data
+					pos++; // will take us to the end
+					break;
+				case '\\':
+					raiseException(DSLMessage.UNEXPECTED_ESCAPE_CHAR);
+				default:
+					raiseException(DSLMessage.TASK_UNEXPECTED_DATA, Character.valueOf(ch).toString());
 				}
 			}
 		}
@@ -140,8 +138,9 @@ class TaskTokenizer extends AbstractTokenizer {
 		int start = pos;
 		do {
 			pos++;
-			if (toProcess[pos]=='-' && toProcess[pos+1]=='>') {
-				// When hitting '0->' treat '->' as an arrow and end marker of the identifier '0'
+			if (toProcess[pos] == '-' && toProcess[pos + 1] == '>') {
+				// When hitting '0->' treat '->' as an arrow and end marker of the
+				// identifier '0'
 				break;
 			}
 		}

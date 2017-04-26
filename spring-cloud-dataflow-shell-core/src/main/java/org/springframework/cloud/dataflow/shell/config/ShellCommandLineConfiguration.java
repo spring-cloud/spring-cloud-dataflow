@@ -16,8 +16,6 @@
 
 package org.springframework.cloud.dataflow.shell.config;
 
-
-import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.cloud.dataflow.shell.ShellCommandLineRunner;
 import org.springframework.context.annotation.Bean;
@@ -33,13 +31,14 @@ import org.springframework.context.annotation.Configuration;
 public class ShellCommandLineConfiguration {
 
 	/**
-	 * Return the interactive command line runner.  The {@link ConditionalOnMissingBean} annotation is used so that
-	 * this interactive command line runner is not created when running the shell in the same process as the
-	 * Data Flow server.
+	 * Return the interactive command line runner. The {@link ConditionalOnMissingBean}
+	 * annotation is used so that this interactive command line runner is not created when
+	 * running the shell in the same process as the Data Flow server.
+	 *
 	 * @return the interactive shell
 	 */
 	@Bean
-	@ConditionalOnMissingBean(type="org.springframework.cloud.deployer.resource.registry.UriRegistry")
+	@ConditionalOnMissingBean(type = "org.springframework.cloud.deployer.resource.registry.UriRegistry")
 	public ShellCommandLineRunner commandLineRunner() {
 		return new ShellCommandLineRunner();
 	}

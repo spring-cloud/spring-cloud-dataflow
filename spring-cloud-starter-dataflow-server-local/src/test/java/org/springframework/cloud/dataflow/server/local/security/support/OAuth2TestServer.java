@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.dataflow.server.local.security.support;
 
 import java.security.Principal;
@@ -43,26 +44,22 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- *
  * @author Gunnar Hillert
- *
  */
 @RestController
-@SpringBootApplication(exclude={
-		DataSourceAutoConfiguration.class,
-		DataSourceTransactionManagerAutoConfiguration.class,
-		JmxAutoConfiguration.class,
-		IntegrationAutoConfiguration.class})
+@SpringBootApplication(exclude = { DataSourceAutoConfiguration.class,
+		DataSourceTransactionManagerAutoConfiguration.class, JmxAutoConfiguration.class,
+		IntegrationAutoConfiguration.class })
 public class OAuth2TestServer {
 
 	public static void main(String[] args) {
 		new SpringApplicationBuilder(OAuth2TestServer.class)
-		.properties("server.port:" + SocketUtils.findAvailableTcpPort())
-		.build()
-		.run("--debug --spring.config.location=classpath:/org/springframework/cloud/dataflow/server/local/security/support/oauth2TestServerConfig.yml");
+				.properties("server.port:" + SocketUtils.findAvailableTcpPort()).build()
+				.run("--debug --spring.config.location=classpath:/org/springframework/cloud/dataflow/server/local"
+						+ "/security/support/oauth2TestServerConfig.yml");
 	}
 
-	@RequestMapping({"/user", "/me"})
+	@RequestMapping({ "/user", "/me" })
 	public Map<String, String> user(Principal principal) {
 		return Collections.singletonMap("name", principal.getName());
 	}
@@ -85,8 +82,7 @@ public class OAuth2TestServer {
 
 	@Configuration
 	@EnableResourceServer
-	protected static class ResourceServerConfiguration
-			extends ResourceServerConfigurerAdapter {
+	protected static class ResourceServerConfiguration extends ResourceServerConfigurerAdapter {
 		@Override
 		public void configure(HttpSecurity http) throws Exception {
 			http.antMatcher("/me").authorizeRequests().anyRequest().authenticated();

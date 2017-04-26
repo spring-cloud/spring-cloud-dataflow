@@ -25,15 +25,14 @@ import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.client.BasicAuthCache;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HttpContext;
+
 import org.springframework.http.HttpMethod;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 
 /**
  * @author Gunnar Hillert
- *
  */
-public class PreemptiveBasicAuthHttpComponentsClientHttpRequestFactory
-	extends HttpComponentsClientHttpRequestFactory {
+public class PreemptiveBasicAuthHttpComponentsClientHttpRequestFactory extends HttpComponentsClientHttpRequestFactory {
 
 	private final HttpHost host;
 

@@ -16,11 +16,6 @@
 
 package org.springframework.cloud.dataflow.server.registry;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
@@ -43,12 +38,16 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 /**
  * @author Ilayaperumal Gopinathan
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = {EmbeddedDataSourceConfiguration.class,
-		PropertyPlaceholderAutoConfiguration.class, RdbmsUriRegistryTests.TestConfig.class})
+@SpringBootTest(classes = { EmbeddedDataSourceConfiguration.class, PropertyPlaceholderAutoConfiguration.class,
+		RdbmsUriRegistryTests.TestConfig.class })
 public class RdbmsUriRegistryTests {
 
 	@Autowired
@@ -59,12 +58,12 @@ public class RdbmsUriRegistryTests {
 	private JdbcTemplate template;
 
 	@Before
-	public void setup() throws Exception{
+	public void setup() throws Exception {
 		registry = new RdbmsUriRegistry(dataSource);
 		template = new JdbcTemplate(dataSource);
 		template.execute("DELETE FROM URI_REGISTRY");
 	}
-	
+
 	@Test
 	public void testFind() throws Exception {
 		URI test1URI = new URI("http://test1URI");
@@ -135,7 +134,8 @@ public class RdbmsUriRegistryTests {
 
 		@Bean
 		public DataflowRdbmsInitializer definitionRepositoryInitializer(DataSource dataSource) {
-			DataflowRdbmsInitializer definitionRepositoryInitializer = new DataflowRdbmsInitializer(featuresProperties());
+			DataflowRdbmsInitializer definitionRepositoryInitializer = new DataflowRdbmsInitializer(
+					featuresProperties());
 			definitionRepositoryInitializer.setDataSource(dataSource);
 			return definitionRepositoryInitializer;
 		}

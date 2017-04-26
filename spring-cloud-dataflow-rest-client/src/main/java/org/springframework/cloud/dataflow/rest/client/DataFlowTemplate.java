@@ -48,16 +48,16 @@ import org.springframework.util.Assert;
 import org.springframework.web.client.RestTemplate;
 
 /**
- * Implementation of DataFlowOperations delegating to sub-templates, discovered
- * via REST relations.
+ * Implementation of DataFlowOperations delegating to sub-templates, discovered via REST
+ * relations.
  *
- *  @author Ilayaperumal Gopinathan
- *  @author Mark Fisher
- *  @author Glenn Renfro
- *  @author Patrick Peralta
- *  @author Gary Russell
- *  @author Eric Bottard
- *  @author Gunnar Hillert
+ * @author Ilayaperumal Gopinathan
+ * @author Mark Fisher
+ * @author Glenn Renfro
+ * @author Patrick Peralta
+ * @author Gary Russell
+ * @author Eric Bottard
+ * @author Gunnar Hillert
  */
 public class DataFlowTemplate implements DataFlowOperations {
 
@@ -122,19 +122,22 @@ public class DataFlowTemplate implements DataFlowOperations {
 	private final AboutOperations aboutOperations;
 
 	/**
-	 * Setup a {@link DataFlowTemplate} using the provided baseURI. Will create a {@link RestTemplate} implicitly with
-	 * the required set of Jackson MixIns. For more information, please see {@link #prepareRestTemplate(RestTemplate)}.
-	 *
-	 * Please be aware that the created RestTemplate will use the JDK's default timeout values. Consider passing in
-	 * a custom {@link RestTemplate} or, depending on your JDK implementation, set System properties such as:
-	 *
+	 * Setup a {@link DataFlowTemplate} using the provided baseURI. Will create a
+	 * {@link RestTemplate} implicitly with the required set of Jackson MixIns. For more
+	 * information, please see {@link #prepareRestTemplate(RestTemplate)}.
+	 * <p>
+	 * Please be aware that the created RestTemplate will use the JDK's default timeout
+	 * values. Consider passing in a custom {@link RestTemplate} or, depending on your JDK
+	 * implementation, set System properties such as:
+	 * <p>
 	 * <ul>
 	 * <li>sun.net.client.defaultConnectTimeout
 	 * <li>sun.net.client.defaultReadTimeout
 	 * </ul>
-	 *
-	 * For more information see
-	 * <a href="http://docs.oracle.com/javase/7/docs/technotes/guides/net/properties.html">this link</a>
+	 * <p>
+	 * For more information see <a href=
+	 * "http://docs.oracle.com/javase/7/docs/technotes/guides/net/properties.html">this
+	 * link</a>
 	 *
 	 * @param baseURI Must not be null
 	 */
@@ -143,8 +146,9 @@ public class DataFlowTemplate implements DataFlowOperations {
 	}
 
 	/**
-	 * Setup a {@link DataFlowTemplate} using the provide {@link RestTemplate}. Any missing Mixins for Jackson will be
-	 * added implicitly. For more information, please see {@link #prepareRestTemplate(RestTemplate)}.
+	 * Setup a {@link DataFlowTemplate} using the provide {@link RestTemplate}. Any
+	 * missing Mixins for Jackson will be added implicitly. For more information, please
+	 * see {@link #prepareRestTemplate(RestTemplate)}.
 	 *
 	 * @param baseURI Must not be null
 	 * @param restTemplate Must not be null
@@ -159,12 +163,15 @@ public class DataFlowTemplate implements DataFlowOperations {
 		final RootResource resourceSupport = restTemplate.getForObject(baseURI, RootResource.class);
 
 		if (resourceSupport != null) {
-			String serverRevision = resourceSupport.getApiRevision() != null ? resourceSupport.getApiRevision().toString() : "[unknown]";
+			String serverRevision = resourceSupport.getApiRevision() != null
+					? resourceSupport.getApiRevision().toString() : "[unknown]";
 			if (!String.valueOf(Version.REVISION).equals(serverRevision)) {
 				String downloadURL = getLink(resourceSupport, "dashboard").getHref() + "#about";
-				throw new IllegalStateException(String.format("Incompatible version of Data Flow server detected.\n" +
-								"Trying to use shell which supports revision %s, while server revision is %s. Both revisions should be aligned.\n" +
-								"Follow instructions at %s to download a compatible version of the shell.",
+				throw new IllegalStateException(String.format(
+						"Incompatible version of Data Flow server detected.\n"
+								+ "Trying to use shell which supports revision %s, while server revision is %s. Both "
+								+ "revisions should be aligned.\n"
+								+ "Follow instructions at %s to download a compatible version of the shell.",
 						Version.REVISION, serverRevision, downloadURL));
 			}
 
@@ -198,8 +205,7 @@ public class DataFlowTemplate implements DataFlowOperations {
 			}
 			this.appRegistryOperations = new AppRegistryTemplate(restTemplate, resourceSupport);
 			this.completionOperations = new CompletionTemplate(restTemplate,
-					resourceSupport.getLink("completions/stream"),
-					resourceSupport.getLink("completions/task"));
+					resourceSupport.getLink("completions/stream"), resourceSupport.getLink("completions/task"));
 		}
 		else {
 			this.aboutOperations = null;
@@ -215,11 +221,73 @@ public class DataFlowTemplate implements DataFlowOperations {
 		}
 	}
 
+	/**
+	 * Will augment the provided {@link RestTemplate} with the Jackson Mixins required by
+	 * Spring Cloud Data Flow, specifically:
+	 * <p>
+	 * <ul>
+	 * <li>{@link JobExecutionJacksonMixIn}
+	 * <li>{@link JobParametersJacksonMixIn}
+	 * <li>{@link JobParameterJacksonMixIn}
+	 * <li>{@link JobInstanceJacksonMixIn}
+	 * <li>{@link ExitStatusJacksonMixIn}
+	 * <li>{@link StepExecutionJacksonMixIn}
+	 * <li>{@link ExecutionContextJacksonMixIn}
+	 * <li>{@link StepExecutionHistoryJacksonMixIn}
+	 * </ul>
+	 * <p>
+	 * Furthermore, this method will also register the {@link Jackson2HalModule}
+	 *
+	 * @param restTemplate Can be null. Instantiates a new {@link RestTemplate} if null
+	 * @return RestTemplate with the required Jackson Mixins
+	 */
+	public static RestTemplate prepareRestTemplate(RestTemplate restTemplate) {
+		if (restTemplate == null) {
+			restTemplate = new RestTemplate();
+		}
+
+		restTemplate.setErrorHandler(new VndErrorResponseErrorHandler(restTemplate.getMessageConverters()));
+
+		boolean containsMappingJackson2HttpMessageConverter = false;
+
+		for (HttpMessageConverter<?> converter : restTemplate.getMessageConverters()) {
+			if (converter instanceof MappingJackson2HttpMessageConverter) {
+				containsMappingJackson2HttpMessageConverter = true;
+				final MappingJackson2HttpMessageConverter jacksonConverter =
+						(MappingJackson2HttpMessageConverter) converter;
+				jacksonConverter.getObjectMapper().registerModule(new Jackson2HalModule())
+						.addMixIn(JobExecution.class, JobExecutionJacksonMixIn.class)
+						.addMixIn(JobParameters.class, JobParametersJacksonMixIn.class)
+						.addMixIn(JobParameter.class, JobParameterJacksonMixIn.class)
+						.addMixIn(JobInstance.class, JobInstanceJacksonMixIn.class)
+						.addMixIn(ExitStatus.class, ExitStatusJacksonMixIn.class)
+						.addMixIn(StepExecution.class, StepExecutionJacksonMixIn.class)
+						.addMixIn(ExecutionContext.class, ExecutionContextJacksonMixIn.class)
+						.addMixIn(StepExecutionHistory.class, StepExecutionHistoryJacksonMixIn.class);
+			}
+		}
+
+		if (!containsMappingJackson2HttpMessageConverter) {
+			throw new IllegalArgumentException(
+					"The RestTemplate does not contain a required " + "MappingJackson2HttpMessageConverter.");
+		}
+		return restTemplate;
+	}
+
+	/**
+	 * Invokes {@link #prepareRestTemplate(RestTemplate)}.
+	 *
+	 * @return RestTemplate with the required Jackson MixIns applied
+	 */
+	public static RestTemplate getDefaultDataflowRestTemplate() {
+		return prepareRestTemplate(null);
+	}
+
 	public Link getLink(ResourceSupport resourceSupport, String rel) {
 		Link link = resourceSupport.getLink(rel);
 		if (link == null) {
-			throw new DataFlowServerException("Server did not return a link for '" + rel + "', links: '"
-					+ resourceSupport + "'");
+			throw new DataFlowServerException(
+					"Server did not return a link for '" + rel + "', links: '" + resourceSupport + "'");
 		}
 		return link;
 	}
@@ -272,67 +340,6 @@ public class DataFlowTemplate implements DataFlowOperations {
 	@Override
 	public AboutOperations aboutOperation() {
 		return aboutOperations;
-	}
-
-	/**
-	 * Will augment the provided {@link RestTemplate} with the Jackson Mixins required by Spring Cloud Data Flow,
-	 * specifically:
-	 *
-	 * <ul>
-	 * <li>{@link JobExecutionJacksonMixIn}
-	 * <li>{@link JobParametersJacksonMixIn}
-	 * <li>{@link JobParameterJacksonMixIn}
-	 * <li>{@link JobInstanceJacksonMixIn}
-	 * <li>{@link ExitStatusJacksonMixIn}
-	 * <li>{@link StepExecutionJacksonMixIn}
-	 * <li>{@link ExecutionContextJacksonMixIn}
-	 * <li>{@link StepExecutionHistoryJacksonMixIn}
-	 * </ul>
-	 *
-	 * Furthermore, this method will also register the {@link Jackson2HalModule}
-	 *
-	 * @param restTemplate Can be null. Instantiates a new {@link RestTemplate} if null
-	 * @return RestTemplate with the required Jackson Mixins
-	 */
-	public static RestTemplate prepareRestTemplate(RestTemplate restTemplate) {
-		if (restTemplate == null) {
-			restTemplate = new RestTemplate();
-		}
-
-		restTemplate.setErrorHandler(new VndErrorResponseErrorHandler(restTemplate.getMessageConverters()));
-
-		boolean containsMappingJackson2HttpMessageConverter = false;
-
-		for(HttpMessageConverter<?> converter : restTemplate.getMessageConverters()) {
-			if (converter instanceof MappingJackson2HttpMessageConverter) {
-				containsMappingJackson2HttpMessageConverter = true;
-				final MappingJackson2HttpMessageConverter jacksonConverter = (MappingJackson2HttpMessageConverter) converter;
-				jacksonConverter.getObjectMapper()
-					.registerModule(new Jackson2HalModule())
-					.addMixIn(JobExecution.class, JobExecutionJacksonMixIn.class)
-					.addMixIn(JobParameters.class, JobParametersJacksonMixIn.class)
-					.addMixIn(JobParameter.class, JobParameterJacksonMixIn.class)
-					.addMixIn(JobInstance.class, JobInstanceJacksonMixIn.class)
-					.addMixIn(ExitStatus.class, ExitStatusJacksonMixIn.class)
-					.addMixIn(StepExecution.class, StepExecutionJacksonMixIn.class)
-					.addMixIn(ExecutionContext.class, ExecutionContextJacksonMixIn.class)
-					.addMixIn(StepExecutionHistory.class, StepExecutionHistoryJacksonMixIn.class);
-			}
-		}
-
-		if (!containsMappingJackson2HttpMessageConverter) {
-			throw new IllegalArgumentException("The RestTemplate does not contain a required MappingJackson2HttpMessageConverter.");
-		}
-		return restTemplate;
-	}
-
-	/**
-	 * Invokes {@link #prepareRestTemplate(RestTemplate)}.
-	 *
-	 * @return RestTemplate with the required Jackson MixIns applied
-	 */
-	public static RestTemplate getDefaultDataflowRestTemplate() {
-		return prepareRestTemplate(null);
 	}
 
 	/**

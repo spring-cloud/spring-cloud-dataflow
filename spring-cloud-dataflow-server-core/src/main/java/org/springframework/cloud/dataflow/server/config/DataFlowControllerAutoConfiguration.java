@@ -18,6 +18,7 @@ package org.springframework.cloud.dataflow.server.config;
 
 import java.util.HashMap;
 import java.util.Map;
+
 import javax.sql.DataSource;
 
 import org.springframework.analytics.metrics.AggregateCounterRepository;
@@ -30,7 +31,6 @@ import org.springframework.boot.actuate.metrics.repository.MetricRepository;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.client.circuitbreaker.EnableCircuitBreaker;
@@ -97,9 +97,9 @@ import org.springframework.scheduling.concurrent.ForkJoinPoolFactoryBean;
 @SuppressWarnings("all")
 @Configuration
 @Import(CompletionConfiguration.class)
-@ConditionalOnBean({EnableDataFlowServerConfiguration.Marker.class, AppDeployer.class, TaskLauncher.class})
-@EnableConfigurationProperties({ AuthorizationConfig.class, FeaturesProperties.class,
-		VersionInfoProperties.class, MetricsProperties.class })
+@ConditionalOnBean({ EnableDataFlowServerConfiguration.Marker.class, AppDeployer.class, TaskLauncher.class })
+@EnableConfigurationProperties({ AuthorizationConfig.class, FeaturesProperties.class, VersionInfoProperties.class,
+		MetricsProperties.class })
 @ConditionalOnProperty(prefix = "dataflow.server", name = "enabled", havingValue = "true", matchIfMissing = true)
 @EnableCircuitBreaker
 public class DataFlowControllerAutoConfiguration {
@@ -143,7 +143,8 @@ public class DataFlowControllerAutoConfiguration {
 	public StreamDeploymentController streamDeploymentController(StreamDefinitionRepository repository,
 			DeploymentIdRepository deploymentIdRepository, AppRegistry registry, AppDeployer deployer,
 			ApplicationConfigurationMetadataResolver metadataResolver, CommonApplicationProperties appsProperties) {
-		return new StreamDeploymentController(repository, deploymentIdRepository, registry, deployer, metadataResolver, appsProperties);
+		return new StreamDeploymentController(repository, deploymentIdRepository, registry, deployer, metadataResolver,
+				appsProperties);
 	}
 
 	@Bean
@@ -183,18 +184,16 @@ public class DataFlowControllerAutoConfiguration {
 
 	@Bean
 	@ConditionalOnBean(TaskDefinitionRepository.class)
-	public TaskDefinitionController taskDefinitionController(
-			TaskDefinitionRepository repository,
-			DeploymentIdRepository deploymentIdRepository,
-			TaskLauncher taskLauncher, AppRegistry appRegistry, TaskService taskService) {
-		return new TaskDefinitionController(repository, deploymentIdRepository,
-				taskLauncher, appRegistry, taskService);
+	public TaskDefinitionController taskDefinitionController(TaskDefinitionRepository repository,
+			DeploymentIdRepository deploymentIdRepository, TaskLauncher taskLauncher, AppRegistry appRegistry,
+			TaskService taskService) {
+		return new TaskDefinitionController(repository, deploymentIdRepository, taskLauncher, appRegistry, taskService);
 	}
 
 	@Bean
 	@ConditionalOnBean(TaskDefinitionRepository.class)
 	public TaskExecutionController taskExecutionController(TaskExplorer explorer, TaskService taskService,
-		TaskDefinitionRepository taskDefinitionRepository) {
+			TaskDefinitionRepository taskDefinitionRepository) {
 		return new TaskExecutionController(explorer, taskService, taskDefinitionRepository);
 	}
 
@@ -241,7 +240,8 @@ public class DataFlowControllerAutoConfiguration {
 	}
 
 	@Bean
-	public CompletionController completionController(StreamCompletionProvider completionProvider, TaskCompletionProvider taskCompletionProvider) {
+	public CompletionController completionController(StreamCompletionProvider completionProvider,
+			TaskCompletionProvider taskCompletionProvider) {
 		return new CompletionController(completionProvider, taskCompletionProvider);
 	}
 
@@ -259,7 +259,8 @@ public class DataFlowControllerAutoConfiguration {
 	}
 
 	@Bean
-	public AppRegistryController appRegistryController(AppRegistry appRegistry, ApplicationConfigurationMetadataResolver metadataResolver) {
+	public AppRegistryController appRegistryController(AppRegistry appRegistry,
+			ApplicationConfigurationMetadataResolver metadataResolver) {
 		return new AppRegistryController(appRegistry, metadataResolver, appRegistryFJPFB().getObject());
 	}
 
@@ -280,14 +281,11 @@ public class DataFlowControllerAutoConfiguration {
 	}
 
 	@Bean
-	public AboutController aboutController(
-			AppDeployer appDeployer,
-			TaskLauncher taskLauncher,
-			FeaturesProperties featuresProperties,
-			VersionInfoProperties versionInfoProperties,
+	public AboutController aboutController(AppDeployer appDeployer, TaskLauncher taskLauncher,
+			FeaturesProperties featuresProperties, VersionInfoProperties versionInfoProperties,
 			SecurityStateBean securityStateBean) {
 		return new AboutController(appDeployer, taskLauncher, featuresProperties, versionInfoProperties,
-			securityStateBean);
+				securityStateBean);
 	}
 
 	@Bean
@@ -305,12 +303,12 @@ public class DataFlowControllerAutoConfiguration {
 		return new MavenConfigurationProperties();
 	}
 
-	@ConfigurationProperties(prefix = "maven")
-	static class MavenConfigurationProperties extends MavenProperties {
-	}
-
 	@Bean
 	SecurityStateBean securityStateBean() {
 		return new SecurityStateBean();
+	}
+
+	@ConfigurationProperties(prefix = "maven")
+	static class MavenConfigurationProperties extends MavenProperties {
 	}
 }

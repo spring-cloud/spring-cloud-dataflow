@@ -16,9 +16,6 @@
 
 package org.springframework.cloud.dataflow.server.configuration;
 
-import static org.mockito.Mockito.mock;
-import static org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType.HAL;
-
 import javax.sql.DataSource;
 
 import org.springframework.batch.admin.service.JobService;
@@ -45,9 +42,9 @@ import org.springframework.cloud.dataflow.server.repository.InMemoryTaskDefiniti
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.TaskJobService;
 import org.springframework.cloud.dataflow.server.service.TaskService;
-import org.springframework.cloud.dataflow.server.service.impl.TaskConfigurationProperties;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskJobService;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskService;
+import org.springframework.cloud.dataflow.server.service.impl.TaskConfigurationProperties;
 import org.springframework.cloud.deployer.resource.registry.InMemoryUriRegistry;
 import org.springframework.cloud.deployer.resource.registry.UriRegistry;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
@@ -67,6 +64,9 @@ import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+
+import static org.mockito.Mockito.mock;
+import static org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType.HAL;
 
 /**
  * @author Glenn Renfro
@@ -92,6 +92,7 @@ public class JobDependencies {
 	public JobStepExecutionController jobStepExecutionController(JobService jobService) {
 		return new JobStepExecutionController(jobService);
 	}
+
 	@Bean
 	public JobStepExecutionProgressController jobStepExecutionProgressController(JobService jobService) {
 		return new JobStepExecutionProgressController(jobService);
@@ -101,9 +102,10 @@ public class JobDependencies {
 	public JobInstanceController jobInstanceController(TaskJobService repository) {
 		return new JobInstanceController(repository);
 	}
+
 	@Bean
 	public TaskExecutionController taskExecutionController(TaskExplorer explorer, TaskService taskService,
-		TaskDefinitionRepository taskDefinitionRepository) {
+			TaskDefinitionRepository taskDefinitionRepository) {
 		return new TaskExecutionController(explorer, taskService, taskDefinitionRepository);
 	}
 
@@ -115,8 +117,8 @@ public class JobDependencies {
 	}
 
 	@Bean
-	public TaskJobService taskJobExecutionRepository(JobService jobService,
-			TaskExplorer taskExplorer, TaskDefinitionRepository taskDefinitionRepository, TaskService taskService){
+	public TaskJobService taskJobExecutionRepository(JobService jobService, TaskExplorer taskExplorer,
+			TaskDefinitionRepository taskDefinitionRepository, TaskService taskService) {
 		return new DefaultTaskJobService(jobService, taskExplorer, taskDefinitionRepository, taskService);
 	}
 
@@ -126,14 +128,12 @@ public class JobDependencies {
 	}
 
 	@Bean
-	public TaskService taskService(TaskDefinitionRepository repository, TaskExplorer explorer,
-			AppRegistry registry, ResourceLoader resourceLoader, TaskLauncher taskLauncher,
-			ApplicationConfigurationMetadataResolver metadataResolver,
-			DeploymentIdRepository deploymentIdRepository) {
-		return new DefaultTaskService(new DataSourceProperties(), repository,
-				explorer, taskRepository(),
-				registry, resourceLoader, taskLauncher, metadataResolver,
-				new TaskConfigurationProperties(), deploymentIdRepository, null);
+	public TaskService taskService(TaskDefinitionRepository repository, TaskExplorer explorer, AppRegistry registry,
+			ResourceLoader resourceLoader, TaskLauncher taskLauncher,
+			ApplicationConfigurationMetadataResolver metadataResolver, DeploymentIdRepository deploymentIdRepository) {
+		return new DefaultTaskService(new DataSourceProperties(), repository, explorer, taskRepository(), registry,
+				resourceLoader, taskLauncher, metadataResolver, new TaskConfigurationProperties(),
+				deploymentIdRepository, null);
 	}
 
 	@Bean
@@ -142,7 +142,7 @@ public class JobDependencies {
 	}
 
 	@Bean
-	public TaskBatchDao taskBatchDao(DataSource dataSource){
+	public TaskBatchDao taskBatchDao(DataSource dataSource) {
 		return new JdbcTaskBatchDao(dataSource);
 	}
 
@@ -163,7 +163,8 @@ public class JobDependencies {
 	}
 
 	@Bean
-	public JobRepositoryFactoryBean jobRepositoryFactoryBeanForServer(DataSource dataSource, DataSourceTransactionManager dataSourceTransactionManager){
+	public JobRepositoryFactoryBean jobRepositoryFactoryBeanForServer(DataSource dataSource,
+			DataSourceTransactionManager dataSourceTransactionManager) {
 		JobRepositoryFactoryBean repositoryFactoryBean = new JobRepositoryFactoryBean();
 		repositoryFactoryBean.setDataSource(dataSource);
 		repositoryFactoryBean.setTransactionManager(dataSourceTransactionManager);
@@ -171,12 +172,12 @@ public class JobDependencies {
 	}
 
 	@Bean
-	public DataSourceTransactionManager transactionManagerForServer(DataSource dataSource){
+	public DataSourceTransactionManager transactionManagerForServer(DataSource dataSource) {
 		return new DataSourceTransactionManager(dataSource);
 	}
 
 	@Bean
-	public JobExplorerFactoryBean jobExplorerFactoryBeanForServer(DataSource dataSource){
+	public JobExplorerFactoryBean jobExplorerFactoryBeanForServer(DataSource dataSource) {
 		JobExplorerFactoryBean jobExplorerFactoryBean = new JobExplorerFactoryBean();
 		jobExplorerFactoryBean.setDataSource(dataSource);
 		return jobExplorerFactoryBean;
@@ -184,17 +185,17 @@ public class JobDependencies {
 
 	@Bean
 	public BatchDatabaseInitializer batchRepositoryInitializerForDefaultDBForServer(DataSource dataSource,
-				ResourceLoader resourceLoader, BatchProperties properties) {
+			ResourceLoader resourceLoader, BatchProperties properties) {
 		return new BatchDatabaseInitializer(dataSource, resourceLoader, properties);
 	}
 
 	@Bean
-	public TaskExplorer taskExplorer(TaskExecutionDaoFactoryBean daoFactoryBean){
+	public TaskExplorer taskExplorer(TaskExecutionDaoFactoryBean daoFactoryBean) {
 		return new SimpleTaskExplorer(daoFactoryBean);
 	}
 
 	@Bean
-	public TaskExecutionDaoFactoryBean taskExecutionDaoFactoryBean(DataSource dataSource){
+	public TaskExecutionDaoFactoryBean taskExecutionDaoFactoryBean(DataSource dataSource) {
 		return new TaskExecutionDaoFactoryBean(dataSource);
 	}
 
@@ -207,6 +208,7 @@ public class JobDependencies {
 	public DeploymentIdRepository deploymentIdRepository() {
 		return new InMemoryDeploymentIdRepository();
 	}
+
 	@Bean
 	public UriRegistry uriRegistry() {
 		return new InMemoryUriRegistry();
@@ -216,6 +218,7 @@ public class JobDependencies {
 	public AppRegistry appRegistry() {
 		return new AppRegistry(uriRegistry(), new DefaultResourceLoader());
 	}
+
 	@Bean
 	public TaskLauncher taskLauncher() {
 		return mock(TaskLauncher.class);

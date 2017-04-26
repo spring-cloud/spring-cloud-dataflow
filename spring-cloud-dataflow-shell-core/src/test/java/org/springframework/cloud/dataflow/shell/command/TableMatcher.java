@@ -24,8 +24,9 @@ import org.springframework.shell.table.Table;
 import org.springframework.shell.table.TableModel;
 
 /**
- * A Hamcrest matcher to help with assertions on {@link org.springframework.shell.table.Table}s
- * without resorting to rendering them to a String.
+ * A Hamcrest matcher to help with assertions on
+ * {@link org.springframework.shell.table.Table}s without resorting to rendering them to a
+ * String.
  *
  * @author Eric Bottard
  */
@@ -36,9 +37,9 @@ public class TableMatcher {
 			@Override
 			protected boolean matches(Object item, Description mismatchDescription) {
 				TableModel model = ((Table) item).getModel();
-				outer: for (int row = 0 ; row < model.getRowCount() ; row++) {
+				outer: for (int row = 0; row < model.getRowCount(); row++) {
 					mismatchDescription.appendText("\nRow " + row + ": ");
-					for (int col = 0; col < cells.length ; col++) {
+					for (int col = 0; col < cells.length; col++) {
 						mismatchDescription.appendText("\n  Column " + col + ": ");
 						cells[col].describeMismatch(model.getValue(row, col), mismatchDescription);
 						if (!cells[col].matches(model.getValue(row, col))) {
@@ -53,7 +54,7 @@ public class TableMatcher {
 			@Override
 			public void describeTo(Description description) {
 				description.appendText("a table having at least one row that\n");
-				for (int col = 0 ; col < cells.length ; col++) {
+				for (int col = 0; col < cells.length; col++) {
 					description.appendText("column " + col + ": ");
 					cells[col].describeTo(description);
 					description.appendText("\n");

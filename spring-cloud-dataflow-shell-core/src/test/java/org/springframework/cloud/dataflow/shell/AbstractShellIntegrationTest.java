@@ -24,6 +24,7 @@ import org.junit.Rule;
 import org.junit.rules.TestName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -40,12 +41,13 @@ import org.springframework.util.IdGenerator;
 import org.springframework.util.SocketUtils;
 
 /**
- * Base class for shell integration tests. This class sets up and tears down
- * the infrastructure required for executing shell tests - in particular, the Data Flow server.
+ * Base class for shell integration tests. This class sets up and tears down the
+ * infrastructure required for executing shell tests - in particular, the Data Flow
+ * server.
  * <p>
- * Extensions of this class may obtain instances of command templates.
- * For example, call {@link #stream} to obtain a {@link StreamCommandTemplate}
- * in order to perform stream operations.
+ * Extensions of this class may obtain instances of command templates. For example, call
+ * {@link #stream} to obtain a {@link StreamCommandTemplate} in order to perform stream
+ * operations.
  *
  * @author Ilayaperumal Gopinathan
  * @author Patrick Peralta
@@ -53,44 +55,37 @@ import org.springframework.util.SocketUtils;
  */
 public abstract class AbstractShellIntegrationTest {
 
-	private static final Logger logger = LoggerFactory.getLogger(AbstractShellIntegrationTest.class);
-
 	/**
-	 * Generator used to create random stream names.
-	 */
-	private final IdGenerator idGenerator = new AlternativeJdkIdGenerator();
-
-	/**
-	 * System property indicating whether the test infrastructure should
-	 * be shut down after all tests are executed. If running in a test
-	 * suite, this system property should be set to {@code false} to allow
-	 * multiple tests to execute with the same Data Flow server.
+	 * System property indicating whether the test infrastructure should be shut down
+	 * after all tests are executed. If running in a test suite, this system property
+	 * should be set to {@code false} to allow multiple tests to execute with the same
+	 * Data Flow server.
 	 */
 	public static final String SHUTDOWN_AFTER_RUN = "shutdown.after.run";
-
-	/**
-	 * Indicates whether the test infrastructure should be shut down
-	 * after all tests are executed.
-	 *
-	 * @see #SHUTDOWN_AFTER_RUN
-	 */
-	private static boolean shutdownAfterRun = false;
-
-	/**
-	 * Application context for server application.
-	 */
-	protected static ApplicationContext applicationContext;
-
-	/**
-	 * Instance of shell to execute commands for testing.
-	 */
-	private static DataFlowShell dataFlowShell;
-
+	private static final Logger logger = LoggerFactory.getLogger(AbstractShellIntegrationTest.class);
 	/**
 	 * TCP port for the server.
 	 */
 	private static final int serverPort = SocketUtils.findAvailableTcpPort();
-
+	/**
+	 * Application context for server application.
+	 */
+	protected static ApplicationContext applicationContext;
+	/**
+	 * Indicates whether the test infrastructure should be shut down after all tests are
+	 * executed.
+	 *
+	 * @see #SHUTDOWN_AFTER_RUN
+	 */
+	private static boolean shutdownAfterRun = false;
+	/**
+	 * Instance of shell to execute commands for testing.
+	 */
+	private static DataFlowShell dataFlowShell;
+	/**
+	 * Generator used to create random stream names.
+	 */
+	private final IdGenerator idGenerator = new AlternativeJdkIdGenerator();
 	/**
 	 * Used to capture currently executing test method.
 	 */
@@ -109,15 +104,12 @@ public abstract class AbstractShellIntegrationTest {
 			int randomPort = SocketUtils.findAvailableTcpPort();
 			String dataFlowUri = String.format("--dataflow.uri=http://localhost:%s", serverPort);
 			String dataSourceUrl = String.format("jdbc:h2:tcp://localhost:%s/mem:dataflow", randomPort);
-			applicationContext = application.run(
-					String.format("--server.port=%s", serverPort),
-					dataFlowUri,
-					"--spring.jmx.default-domain=" + System.currentTimeMillis(),
-					"--spring.jmx.enabled=false",
-					"--security.basic.enabled=false",
-					"--spring.main.show_banner=false",
+			applicationContext = application.run(String.format("--server.port=%s", serverPort), dataFlowUri,
+					"--spring.jmx.default-domain=" + System.currentTimeMillis(), "--spring.jmx.enabled=false",
+					"--security.basic.enabled=false", "--spring.main.show_banner=false",
 					"--spring.cloud.config.enabled=false",
-					"--spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.session.SessionAutoConfiguration",
+					"--spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.session"
+							+ ".SessionAutoConfiguration",
 					"--spring.datasource.url=" + dataSourceUrl);
 
 			JLineShellComponent shell = applicationContext.getBean(JLineShellComponent.class);
@@ -191,7 +183,6 @@ public abstract class AbstractShellIntegrationTest {
 	protected String generateUniqueName() {
 		return generateUniqueName(name.getMethodName().replace('[', '-').replace("]", ""));
 	}
-
 
 	private static class DataFlowShell extends JLineShellComponent {
 

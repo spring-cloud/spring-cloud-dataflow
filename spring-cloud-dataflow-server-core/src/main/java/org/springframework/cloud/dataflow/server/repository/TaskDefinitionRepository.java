@@ -25,5 +25,5 @@ import org.springframework.data.repository.PagingAndSortingRepository;
  * @author Gunnar Hillert
  */
 public interface TaskDefinitionRepository extends PagingAndSortingRepository<TaskDefinition, String> {
-	Page<TaskDefinition>search(SearchPageable searchPageable);
+	Page<TaskDefinition> search(SearchPageable searchPageable);
 }

@@ -67,16 +67,14 @@ public class TaskDefinition extends DataFlowAppDefinition {
 		this.appDefinition = new AppDefinition(name, properties);
 	}
 
-
 	public String getDslText() {
 		return dslText;
 	}
 
 	@Override
 	public String toString() {
-		return new ToStringCreator(this)
-				.append("dslText", this.dslText)
-				.append("appDefinition", this.appDefinition).toString();
+		return new ToStringCreator(this).append("dslText", this.dslText).append("appDefinition", this.appDefinition)
+				.toString();
 	}
 
 	@Override
@@ -99,59 +97,100 @@ public class TaskDefinition extends DataFlowAppDefinition {
 		if (dslText == null) {
 			if (other.dslText != null)
 				return false;
-		} else if (!dslText.equals(other.dslText))
+		}
+		else if (!dslText.equals(other.dslText))
 			return false;
 		return true;
 	}
 
 	/**
-	 * Builder object for {@code TaskDefinition}.
-	 * This object is mutable to allow for flexibility in specifying application
-	 * fields/properties during parsing.
+	 * Builder object for {@code TaskDefinition}. This object is mutable to allow for
+	 * flexibility in specifying application fields/properties during parsing.
 	 */
 	public static class TaskDefinitionBuilder {
 
 		/**
+		 * @see AppDefinition#getProperties()
+		 */
+		private final Map<String, String> properties = new HashMap<String, String>();
+		/**
 		 * @see DataFlowAppDefinition#registeredAppName
 		 */
 		private String registeredAppName;
-
 		/**
 		 * @see AppDefinition#getName()
 		 */
 		private String label;
 
 		/**
-		 * @see AppDefinition#getProperties()
-		 */
-		private final Map<String, String> properties = new HashMap<String, String>();
-
-		/**
-		 * Create a new builder that is initialized with properties of the given definition.
-		 * Useful for "mutating" a definition by building a slightly different copy.
+		 * Create a new builder that is initialized with properties of the given
+		 * definition. Useful for "mutating" a definition by building a slightly different
+		 * copy.
+		 *
 		 * @param definition the DataFlowAppDefinition to use when creating the builder
 		 * @return a task definition builder
 		 */
 		public static TaskDefinitionBuilder from(DataFlowAppDefinition definition) {
 			TaskDefinitionBuilder builder = new TaskDefinitionBuilder();
-			builder.setRegisteredAppName(definition.getRegisteredAppName())
-				.setLabel(definition.getName())
-				.addProperties(definition.getProperties());
+			builder.setRegisteredAppName(definition.getRegisteredAppName()).setLabel(definition.getName())
+					.addProperties(definition.getProperties());
 			return builder;
 		}
 
+		/**
+		 * Set an app property.
+		 *
+		 * @param name property name
+		 * @param value property value
+		 * @return this builder object
+		 * @see AppDefinition#getProperties()
+		 */
+		public TaskDefinitionBuilder setProperty(String name, String value) {
+			this.properties.put(name, value);
+			return this;
+		}
+
+		/**
+		 * Add the contents of the provided map to the map of app properties.
+		 *
+		 * @param properties app properties
+		 * @return this builder object
+		 * @see AppDefinition#getProperties()
+		 */
+		public TaskDefinitionBuilder addProperties(Map<String, String> properties) {
+			this.properties.putAll(properties);
+			return this;
+		}
+
+		/**
+		 * Return name of task app in registry.
+		 *
+		 * @return task app name in registry
+		 */
+		public String getRegisteredAppName() {
+			return registeredAppName;
+		}
 
 		/**
 		 * Set the name of the app in the registry.
 		 *
 		 * @param registeredAppName name of app in registry
 		 * @return this builder object
-		 *
 		 * @see DataFlowAppDefinition#registeredAppName
 		 */
 		public TaskDefinitionBuilder setRegisteredAppName(String registeredAppName) {
 			this.registeredAppName = registeredAppName;
 			return this;
+		}
+
+		/**
+		 * Return symbolic name of a task. If not provided, it will be the same as the
+		 * task name.
+		 *
+		 * @return app label
+		 */
+		public String getLabel() {
+			return label;
 		}
 
 		/**
@@ -166,30 +205,13 @@ public class TaskDefinition extends DataFlowAppDefinition {
 		}
 
 		/**
-		 * Set an app property.
+		 * Return properties for the task. Note that the contents of this map are
+		 * <b>mutable</b>.
 		 *
-		 * @param name property name
-		 * @param value property value
-		 * @return this builder object
-		 *
-		 * @see AppDefinition#getProperties()
+		 * @return map of app properties
 		 */
-		public TaskDefinitionBuilder setProperty(String name, String value) {
-			this.properties.put(name, value);
-			return this;
-		}
-
-		/**
-		 * Add the contents of the provided map to the map of app properties.
-		 *
-		 * @param properties app properties
-		 * @return this builder object
-		 *
-		 * @see AppDefinition#getProperties()
-		 */
-		public TaskDefinitionBuilder addProperties(Map<String, String> properties) {
-			this.properties.putAll(properties);
-			return this;
+		public Map<String, String> getProperties() {
+			return properties;
 		}
 
 		/**
@@ -197,7 +219,6 @@ public class TaskDefinition extends DataFlowAppDefinition {
 		 *
 		 * @param properties app properties
 		 * @return this builder object
-		 *
 		 * @see AppDefinition#getProperties()
 		 */
 		public TaskDefinitionBuilder setProperties(Map<String, String> properties) {
@@ -205,34 +226,6 @@ public class TaskDefinition extends DataFlowAppDefinition {
 			this.properties.clear();
 			this.addProperties(properties);
 			return this;
-		}
-
-		/**
-		 * Return name of task app in registry.
-		 *
-		 * @return task app name in registry
-		 */
-		public String getRegisteredAppName() {
-			return registeredAppName;
-		}
-
-		/**
-		 * Return symbolic name of a task. If not provided, it will be the same as the task name.
-		 *
-		 * @return app label
-		 */
-		public String getLabel() {
-			return label;
-		}
-
-		/**
-		 * Return properties for the task.
-		 * Note that the contents of this map are <b>mutable</b>.
-		 *
-		 * @return map of app properties
-		 */
-		public Map<String, String> getProperties() {
-			return properties;
 		}
 
 		/**

@@ -16,8 +16,6 @@
 
 package org.springframework.cloud.dataflow.completion;
 
-import static org.springframework.cloud.dataflow.completion.CompletionProposal.expanding;
-
 import java.io.IOException;
 import java.net.URLClassLoader;
 import java.util.HashSet;
@@ -37,9 +35,12 @@ import org.springframework.cloud.dataflow.registry.AppRegistration;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.core.io.Resource;
 
+import static org.springframework.cloud.dataflow.completion.CompletionProposal.expanding;
+
 /**
- * Attempts to fill in possible values after a {@literal --foo=prefix}
- * (syntactically valid) construct in the DSL.
+ * Attempts to fill in possible values after a {@literal --foo=prefix} (syntactically
+ * valid) construct in the DSL.
+ *
  * @author Eric Bottard
  * @author Mark Fisher
  * @author Andy Clement
@@ -60,8 +61,8 @@ public class ConfigurationPropertyValueHintTaskExpansionStrategy implements Task
 	}
 
 	@Override
-	public boolean addProposals(String text, TaskDefinition parseResult,
-			int detailLevel, List<CompletionProposal> collector) {
+	public boolean addProposals(String text, TaskDefinition parseResult, int detailLevel,
+			List<CompletionProposal> collector) {
 		Set<String> propertyNames = new HashSet<>(parseResult.getProperties().keySet());
 		propertyNames.removeAll(CompletionUtils.IMPLICIT_TASK_PARAMETER_NAMES);
 		if (text.endsWith(" ") || propertyNames.isEmpty()) {
@@ -71,7 +72,7 @@ public class ConfigurationPropertyValueHintTaskExpansionStrategy implements Task
 		String propertyName = recoverPropertyName(text);
 
 		String alreadyTyped = parseResult.getProperties().get(propertyName);
-		
+
 		String appName = parseResult.getRegisteredAppName();
 		AppRegistration appRegistration = appRegistry.find(appName, ApplicationType.task);
 		if (appRegistration == null) {
@@ -136,7 +137,8 @@ public class ConfigurationPropertyValueHintTaskExpansionStrategy implements Task
 		}
 		catch (CheckPointedParseException exception) {
 			List<Token> tokens = exception.getTokens();
-			int end = tokens.size() - 1 - 2; // -2 for skipping dangling -- and space preceding it
+			int end = tokens.size() - 1 - 2; // -2 for skipping dangling -- and space
+												// preceding it
 			int tokenPointer = end;
 			while (!tokens.get(tokenPointer - 1).isKind(TokenKind.DOUBLE_MINUS)) {
 				tokenPointer--;

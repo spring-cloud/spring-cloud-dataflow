@@ -22,7 +22,7 @@ package org.springframework.cloud.dataflow.core;
  * @author Ilayaperumal Gopinathan
  */
 public class DataFlowPropertyKeys {
-	
+
 	public static final String PREFIX = "spring.cloud.dataflow.";
 
 	/**
@@ -49,7 +49,5 @@ public class DataFlowPropertyKeys {
 	 * Stream app type property key.
 	 */
 	public static final String STREAM_APP_TYPE = STREAM_APP_PREFIX + "type";
-
-
 
 }

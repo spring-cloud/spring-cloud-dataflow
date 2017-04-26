@@ -25,7 +25,6 @@ import org.springframework.util.ReflectionUtils;
  * Utils for tests.
  *
  * @author Janne Valkealahti
- *
  */
 public class TestUtils {
 
@@ -36,15 +35,17 @@ public class TestUtils {
 		do {
 			try {
 				field = clazz.getDeclaredField(name);
-			} catch (Exception ex) {
+			}
+			catch (Exception ex) {
 			}
 
 			clazz = clazz.getSuperclass();
-		} while (field == null && !clazz.equals(Object.class));
+		}
+		while (field == null && !clazz.equals(Object.class));
 
 		if (field == null)
-			throw new IllegalArgumentException("Cannot find field '" + name + "' in the class hierarchy of "
-					+ target.getClass());
+			throw new IllegalArgumentException(
+					"Cannot find field '" + name + "' in the class hierarchy of " + target.getClass());
 		field.setAccessible(true);
 		return (T) field.get(target);
 	}
@@ -55,8 +56,8 @@ public class TestUtils {
 		Method method = ReflectionUtils.findMethod(clazz, name);
 
 		if (method == null)
-			throw new IllegalArgumentException("Cannot find method '" + method + "' in the class hierarchy of "
-					+ target.getClass());
+			throw new IllegalArgumentException(
+					"Cannot find method '" + method + "' in the class hierarchy of " + target.getClass());
 		method.setAccessible(true);
 		return (T) ReflectionUtils.invokeMethod(method, target);
 	}
@@ -67,15 +68,17 @@ public class TestUtils {
 		do {
 			try {
 				field = clazz.getDeclaredField(name);
-			} catch (Exception ex) {
+			}
+			catch (Exception ex) {
 			}
 
 			clazz = clazz.getSuperclass();
-		} while (field == null && !clazz.equals(Object.class));
+		}
+		while (field == null && !clazz.equals(Object.class));
 
 		if (field == null)
-			throw new IllegalArgumentException("Cannot find field '" + name + "' in the class hierarchy of "
-					+ target.getClass());
+			throw new IllegalArgumentException(
+					"Cannot find field '" + name + "' in the class hierarchy of " + target.getClass());
 		field.setAccessible(true);
 		field.set(target, value);
 	}
@@ -86,8 +89,8 @@ public class TestUtils {
 		Method method = ReflectionUtils.findMethod(clazz, name, argsTypes);
 
 		if (method == null)
-			throw new IllegalArgumentException("Cannot find method '" + method + "' in the class hierarchy of "
-					+ target.getClass());
+			throw new IllegalArgumentException(
+					"Cannot find method '" + method + "' in the class hierarchy of " + target.getClass());
 		method.setAccessible(true);
 		return (T) ReflectionUtils.invokeMethod(method, target, args);
 	}

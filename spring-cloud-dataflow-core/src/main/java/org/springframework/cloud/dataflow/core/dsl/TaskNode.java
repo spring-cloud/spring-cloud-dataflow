@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -60,6 +60,17 @@ public class TaskNode extends AstNode {
 		// TODO use inAppMode to police what can be called on this node?
 	}
 
+	/**
+	 * Create the prefix to be added to task names created for task app references in
+	 * composed task DSL.
+	 *
+	 * @param taskName the name of the composed task
+	 * @return a prefix to include ahead of the name/label of an app name
+	 */
+	public static String getTaskPrefix(String taskName) {
+		return taskName + "-";
+	}
+
 	@Override
 	public String stringify(boolean includePositionInfo) {
 		StringBuilder s = new StringBuilder();
@@ -86,9 +97,9 @@ public class TaskNode extends AstNode {
 
 	/**
 	 * Walk the AST for the parsed task, calling the visitor for each element of interest.
-	 * See the {@link TaskVisitor} for all the events that can be received, since that is an
-	 * abstract class it can be extended and subclasses only need override methods to receive the
-	 * events of interest.
+	 * See the {@link TaskVisitor} for all the events that can be received, since that is
+	 * an abstract class it can be extended and subclasses only need override methods to
+	 * receive the events of interest.
 	 *
 	 * @param visitor a visitor to be called as the AST is walked
 	 */
@@ -124,38 +135,6 @@ public class TaskNode extends AstNode {
 		return validator.getProblems();
 	}
 
-	/**
-	 * Simple visitor that discovers all the tasks in use in the task definition.
-	 */
-	class TaskAppsCollector extends TaskVisitor {
-
-		private String taskName;
-
-		private List<TaskApp> taskApps = new ArrayList<>();
-
-		@Override
-		public void startVisit(String taskName, String taskDSL) {
-			this.taskName = taskName;
-		}
-
-		@Override
-		public void visit(TaskAppNode taskApp) {
-			taskApps.add(new TaskApp(taskName, taskApp));
-		}
-
-		@Override
-		public void visit(TransitionNode transition) {
-			if (transition.isTargetApp()) {
-				taskApps.add(new TaskApp(taskName, transition.getTargetApp()));
-			}
-		}
-
-		public List<TaskApp> getTaskApps() {
-			return taskApps;
-		}
-
-	}
-
 	public String getName() {
 		return this.name;
 	}
@@ -165,9 +144,8 @@ public class TaskNode extends AstNode {
 	}
 
 	/**
-	 * Shortcut to return the first node in the first sequence. Many tasks
-	 * will have just one sequence so do not force the consumer to dig through that
-	 * sequence.
+	 * Shortcut to return the first node in the first sequence. Many tasks will have just
+	 * one sequence so do not force the consumer to dig through that sequence.
 	 *
 	 * @return the first node in the first sequence.
 	 */
@@ -211,6 +189,38 @@ public class TaskNode extends AstNode {
 		ExecutableDSLVisitor v = new ExecutableDSLVisitor();
 		accept(v);
 		return v.getDSL();
+	}
+
+	/**
+	 * @return true if the dsl contained more than just a single task app/reference or a
+	 * single task has transitions
+	 */
+	public boolean isComposed() {
+		// Is there just one task
+		boolean isOneTask = (sequences.size() == 1 && sequences.get(0).isFlow()
+				&& ((FlowNode) sequences.get(0)).getSeriesLength() == 1
+				&& ((FlowNode) sequences.get(0)).getSeriesElement(0).isTaskApp());
+		if (!isOneTask) {
+			return true;
+		}
+		// Does the one task have transitions?
+		TaskAppNode singleNode = (TaskAppNode) (((FlowNode) sequences.get(0)).getSeriesElement(0));
+		return singleNode.hasTransitions();
+	}
+
+	/**
+	 * @return the single task contained in the dsl (for non composed task definitions),
+	 * or null if it is a composed task
+	 */
+	public TaskAppNode getTaskApp() {
+		return (isComposed() ? null : (TaskAppNode) (((FlowNode) sequences.get(0)).getSeriesElement(0)));
+	}
+
+	public String toString() {
+		StringBuilder s = new StringBuilder();
+		s.append("TaskNode for ").append(taskDSL.replaceAll("\n", ";"));
+		s.append("\n").append(sequences);
+		return s.toString();
 	}
 
 	static class ExecutableDSLVisitor extends TaskVisitor {
@@ -319,45 +329,35 @@ public class TaskNode extends AstNode {
 	}
 
 	/**
-	 * Create the prefix to be added to task names created for task app references
-	 * in composed task DSL.
-	 * @param taskName the name of the composed task
-	 * @return a prefix to include ahead of the name/label of an app name
+	 * Simple visitor that discovers all the tasks in use in the task definition.
 	 */
-	public static String getTaskPrefix(String taskName) {
-		return taskName + "-";
-	}
+	class TaskAppsCollector extends TaskVisitor {
 
-	/**
-	 * @return true if the dsl contained more than just a single task app/reference or a single
-	 * task has transitions
-	 */
-	public boolean isComposed() {
-		// Is there just one task
-		boolean isOneTask = (sequences.size() == 1 && sequences.get(0).isFlow() &&
-				((FlowNode) sequences.get(0)).getSeriesLength() == 1 &&
-				((FlowNode) sequences.get(0)).getSeriesElement(0).isTaskApp());
-		if (!isOneTask) {
-			return true;
+		private String taskName;
+
+		private List<TaskApp> taskApps = new ArrayList<>();
+
+		@Override
+		public void startVisit(String taskName, String taskDSL) {
+			this.taskName = taskName;
 		}
-		// Does the one task have transitions?
-		TaskAppNode singleNode = (TaskAppNode) (((FlowNode) sequences.get(0)).getSeriesElement(0));
-		return singleNode.hasTransitions();
-	}
 
-	/**
-	 * @return the single task contained in the dsl (for non composed task definitions), or
-	 * null if it is a composed task
-	 */
-	public TaskAppNode getTaskApp() {
-		return (isComposed() ? null : (TaskAppNode) (((FlowNode) sequences.get(0)).getSeriesElement(0)));
-	}
+		@Override
+		public void visit(TaskAppNode taskApp) {
+			taskApps.add(new TaskApp(taskName, taskApp));
+		}
 
-	public String toString() {
-		StringBuilder s = new StringBuilder();
-		s.append("TaskNode for ").append(taskDSL.replaceAll("\n", ";"));
-		s.append("\n").append(sequences);
-		return s.toString();
+		@Override
+		public void visit(TransitionNode transition) {
+			if (transition.isTargetApp()) {
+				taskApps.add(new TaskApp(taskName, transition.getTargetApp()));
+			}
+		}
+
+		public List<TaskApp> getTaskApps() {
+			return taskApps;
+		}
+
 	}
 
 }

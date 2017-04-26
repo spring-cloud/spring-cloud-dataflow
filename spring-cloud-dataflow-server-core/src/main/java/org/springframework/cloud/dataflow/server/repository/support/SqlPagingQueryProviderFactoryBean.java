@@ -18,6 +18,7 @@ package org.springframework.cloud.dataflow.server.repository.support;
 
 import java.util.HashMap;
 import java.util.Map;
+
 import javax.sql.DataSource;
 
 import org.springframework.beans.factory.FactoryBean;
@@ -33,11 +34,10 @@ import static org.springframework.cloud.dataflow.server.repository.support.Datab
 import static org.springframework.cloud.dataflow.server.repository.support.DatabaseType.POSTGRES;
 import static org.springframework.cloud.dataflow.server.repository.support.DatabaseType.SQLSERVER;
 
-
 /**
- * Factory bean for {@link PagingQueryProvider} interface. The database type
- * will be determined from the data source if not provided explicitly. Valid
- * types are given by the {@link DatabaseType} enum.
+ * Factory bean for {@link PagingQueryProvider} interface. The database type will be
+ * determined from the data source if not provided explicitly. Valid types are given by
+ * the {@link DatabaseType} enum.
  *
  * @author Glenn Renfro
  */
@@ -55,8 +55,8 @@ public class SqlPagingQueryProviderFactoryBean implements FactoryBean<PagingQuer
 
 	private Map<String, Order> sortKeys;
 
-	private Map<DatabaseType, AbstractSqlPagingQueryProvider> providers = new HashMap<DatabaseType, AbstractSqlPagingQueryProvider>();
-
+	private Map<DatabaseType, AbstractSqlPagingQueryProvider> providers =
+			new HashMap<DatabaseType, AbstractSqlPagingQueryProvider>();
 
 	{
 		providers.put(HSQL, new HsqlPagingQueryProvider());
@@ -115,8 +115,8 @@ public class SqlPagingQueryProviderFactoryBean implements FactoryBean<PagingQuer
 	}
 
 	/**
-	 * Get a {@link PagingQueryProvider} instance using the provided properties
-	 * and appropriate for the given database type.
+	 * Get a {@link PagingQueryProvider} instance using the provided properties and
+	 * appropriate for the given database type.
 	 *
 	 * @see FactoryBean#getObject()
 	 */
@@ -125,8 +125,8 @@ public class SqlPagingQueryProviderFactoryBean implements FactoryBean<PagingQuer
 
 		DatabaseType type;
 		try {
-			type = databaseType != null ? DatabaseType.valueOf(databaseType.toUpperCase()) : DatabaseType
-					.fromMetaData(dataSource);
+			type = databaseType != null ? DatabaseType.valueOf(databaseType.toUpperCase())
+					: DatabaseType.fromMetaData(dataSource);
 		}
 		catch (MetaDataAccessException e) {
 			throw new IllegalArgumentException(

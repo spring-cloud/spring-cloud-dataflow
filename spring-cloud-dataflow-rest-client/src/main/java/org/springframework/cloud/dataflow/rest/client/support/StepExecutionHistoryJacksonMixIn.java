@@ -28,7 +28,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * @since 1.0
  */
 
-@JsonIgnoreProperties({ "count",  "durationPerRead" })
+@JsonIgnoreProperties({ "count", "durationPerRead" })
 public abstract class StepExecutionHistoryJacksonMixIn {
 
 	@JsonCreator()

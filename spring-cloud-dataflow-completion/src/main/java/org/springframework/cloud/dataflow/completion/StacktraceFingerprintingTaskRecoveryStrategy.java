@@ -25,36 +25,33 @@ import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.util.Assert;
 
 /**
- * A recovery strategy that will trigger if the parser failure is similar
- * to that of some sample unfinished task definition. The match is decided
- * by analyzing the top frames of the stack trace emitted by the parser when it
- * encounters the ill formed input. Multiple fingerprints are supported, as the
- * control flow in the parser code may be different depending on the form of the
- * expression. See {@link StacktraceFingerprintingRecoveryStrategy}.
+ * A recovery strategy that will trigger if the parser failure is similar to that of some
+ * sample unfinished task definition. The match is decided by analyzing the top frames of
+ * the stack trace emitted by the parser when it encounters the ill formed input. Multiple
+ * fingerprints are supported, as the control flow in the parser code may be different
+ * depending on the form of the expression. See
+ * {@link StacktraceFingerprintingRecoveryStrategy}.
  *
  * @author Eric Bottard
  * @author Andy Clement
  */
-public abstract class StacktraceFingerprintingTaskRecoveryStrategy<E extends Exception> implements
-		RecoveryStrategy<E> {
+public abstract class StacktraceFingerprintingTaskRecoveryStrategy<E extends Exception> implements RecoveryStrategy<E> {
 
 	private final Set<List<StackTraceElement>> fingerprints = new LinkedHashSet<>();
 
 	private final Class<E> exceptionClass;
 
 	/**
-	 * Construct a new StacktraceFingerprintingTaskRecoveryStrategy given the parser,
-	 * and the expected exception class to be thrown for sample fragments of a
-	 * task definition that is to be parsed.
+	 * Construct a new StacktraceFingerprintingTaskRecoveryStrategy given the parser, and
+	 * the expected exception class to be thrown for sample fragments of a task definition
+	 * that is to be parsed.
 	 *
-	 * @param exceptionClass the expected exception that results from parsing
-	 * the sample fragment stream definitions. Stack frames from the thrown
-	 * exception are used to store the fingerprint of this exception thrown
-	 * by the parser.
+	 * @param exceptionClass the expected exception that results from parsing the sample
+	 * fragment stream definitions. Stack frames from the thrown exception are used to
+	 * store the fingerprint of this exception thrown by the parser.
 	 * @param samples the sample fragments of task definitions.
 	 */
-	public StacktraceFingerprintingTaskRecoveryStrategy(Class<E> exceptionClass,
-			String... samples) {
+	public StacktraceFingerprintingTaskRecoveryStrategy(Class<E> exceptionClass, String... samples) {
 		Assert.notNull(exceptionClass, "exceptionClass should not be null");
 		Assert.notEmpty(samples, "samples should not be null or empty");
 		this.exceptionClass = exceptionClass;
@@ -79,8 +76,8 @@ public abstract class StacktraceFingerprintingTaskRecoveryStrategy<E extends Exc
 	}
 
 	/**
-	 * Extract the top frames (until the call to the {@link TaskDefinition}
-	 * constructor appears) of the given exception.
+	 * Extract the top frames (until the call to the {@link TaskDefinition} constructor
+	 * appears) of the given exception.
 	 */
 	private void addFingerprintForException(E exception) {
 		boolean seenParserClass = false;
@@ -97,8 +94,7 @@ public abstract class StacktraceFingerprintingTaskRecoveryStrategy<E extends Exc
 		fingerprints.add(fingerPrint);
 	}
 
-	private boolean fingerprintMatches(E exception,
-			List<StackTraceElement> fingerPrint) {
+	private boolean fingerprintMatches(E exception, List<StackTraceElement> fingerPrint) {
 		int i = 0;
 		StackTraceElement[] stackTrace = exception.getStackTrace();
 		for (StackTraceElement frame : fingerPrint) {

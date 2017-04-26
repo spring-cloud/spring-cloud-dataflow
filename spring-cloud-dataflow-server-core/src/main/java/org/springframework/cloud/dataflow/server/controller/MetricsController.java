@@ -29,7 +29,6 @@ import org.springframework.web.bind.annotation.RestController;
  * Controller handling metrics requests for as a passthrough to collector.
  *
  * @author Janne Valkealahti
- *
  */
 @RestController
 @RequestMapping("/metrics/streams")

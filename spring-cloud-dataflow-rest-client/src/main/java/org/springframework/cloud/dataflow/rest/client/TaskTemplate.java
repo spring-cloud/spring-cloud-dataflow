@@ -32,14 +32,16 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
 /**
- * Implementation for {@link org.springframework.cloud.dataflow.rest.client.TaskOperations}.
+ * Implementation for
+ * {@link org.springframework.cloud.dataflow.rest.client.TaskOperations}.
+ *
  * @author Glenn Renfro
  * @author Michael Minella
  * @author Gunnar Hillert
  */
 public class TaskTemplate implements TaskOperations {
 
-	/*default*/ static final String DEFINITIONS_RELATION = "tasks/definitions";
+	/* default */ static final String DEFINITIONS_RELATION = "tasks/definitions";
 
 	private static final String DEFINITION_RELATION = "tasks/definitions/definition";
 
@@ -71,7 +73,6 @@ public class TaskTemplate implements TaskOperations {
 		Assert.notNull(resources.getLink(EXECUTION_RELATION), "Execution relation is required");
 		Assert.notNull(resources.getLink(EXECUTION_RELATION_BY_NAME), "Execution by name relation is required");
 
-
 		this.restTemplate = restTemplate;
 		this.definitionsLink = resources.getLink(DEFINITIONS_RELATION);
 		this.definitionLink = resources.getLink(DEFINITION_RELATION);
@@ -93,8 +94,8 @@ public class TaskTemplate implements TaskOperations {
 		MultiValueMap<String, Object> values = new LinkedMultiValueMap<String, Object>();
 		values.add("name", name);
 		values.add("definition", definition);
-		TaskDefinitionResource task = restTemplate.postForObject(
-				definitionsLink.expand().getHref(), values, TaskDefinitionResource.class);
+		TaskDefinitionResource task = restTemplate.postForObject(definitionsLink.expand().getHref(), values,
+				TaskDefinitionResource.class);
 		return task;
 	}
 
@@ -113,19 +114,18 @@ public class TaskTemplate implements TaskOperations {
 
 	@Override
 	public TaskExecutionResource.Page executionList() {
-		return restTemplate.getForObject(executionsLink.getHref(),
-				TaskExecutionResource.Page.class);
+		return restTemplate.getForObject(executionsLink.getHref(), TaskExecutionResource.Page.class);
 	}
 
 	@Override
 	public TaskExecutionResource.Page executionListByTaskName(String taskName) {
-		return restTemplate.getForObject(executionByNameLink.expand(taskName).getHref(), TaskExecutionResource.Page.class);
+		return restTemplate.getForObject(executionByNameLink.expand(taskName).getHref(),
+				TaskExecutionResource.Page.class);
 	}
 
 	@Override
 	public TaskExecutionResource taskExecutionStatus(long id) {
-		return restTemplate.getForObject(executionLink.expand(id).getHref(),
-				TaskExecutionResource.class);
+		return restTemplate.getForObject(executionLink.expand(id).getHref(), TaskExecutionResource.class);
 	}
 
 	@Override

@@ -17,7 +17,8 @@
 package org.springframework.cloud.dataflow.completion;
 
 /**
- * An enum value used as a configuration property value in {@link StreamCompletionProviderTests}.
+ * An enum value used as a configuration property value in
+ * {@link StreamCompletionProviderTests}.
  *
  * @author Eric Bottard
  */

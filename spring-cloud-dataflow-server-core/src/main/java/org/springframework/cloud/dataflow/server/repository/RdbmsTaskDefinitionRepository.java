@@ -32,14 +32,14 @@ import org.springframework.util.Assert;
  * @author Glenn Renfro
  * @author Ilayaperumal Gopinathan
  */
-public class RdbmsTaskDefinitionRepository extends AbstractRdbmsKeyValueRepository<TaskDefinition> implements TaskDefinitionRepository {
+public class RdbmsTaskDefinitionRepository extends AbstractRdbmsKeyValueRepository<TaskDefinition>
+		implements TaskDefinitionRepository {
 
 	public RdbmsTaskDefinitionRepository(DataSource dataSource) {
 		super(dataSource, "TASK_", "DEFINITIONS", new RowMapper<TaskDefinition>() {
 			@Override
 			public TaskDefinition mapRow(ResultSet resultSet, int i) throws SQLException {
-				return new TaskDefinition(
-						resultSet.getString("DEFINITION_NAME"), resultSet.getString("DEFINITION"));
+				return new TaskDefinition(resultSet.getString("DEFINITION_NAME"), resultSet.getString("DEFINITION"));
 			}
 		}, "DEFINITION_NAME", "DEFINITION");
 	}
@@ -48,13 +48,12 @@ public class RdbmsTaskDefinitionRepository extends AbstractRdbmsKeyValueReposito
 	public TaskDefinition save(TaskDefinition definition) {
 		Assert.notNull(definition, "definition must not be null");
 		if (exists(definition.getName())) {
-			throw new DuplicateTaskException(
-					String.format("Cannot register task %s because another one has already " +
-									"been registered with the same name",
-							definition.getName()));
+			throw new DuplicateTaskException(String.format(
+					"Cannot register task %s because another one has already " + "been registered with the same name",
+					definition.getName()));
 		}
-		Object[] insertParameters = new Object[]{definition.getName(), definition.getDslText()};
-		jdbcTemplate.update(saveRow, insertParameters, new int[]{Types.VARCHAR, Types.CLOB});
+		Object[] insertParameters = new Object[] { definition.getName(), definition.getDslText() };
+		jdbcTemplate.update(saveRow, insertParameters, new int[] { Types.VARCHAR, Types.CLOB });
 		return definition;
 	}
 

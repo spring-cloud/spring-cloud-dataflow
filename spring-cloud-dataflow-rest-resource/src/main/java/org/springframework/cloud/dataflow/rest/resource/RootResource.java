@@ -22,8 +22,8 @@ import org.springframework.cloud.dataflow.rest.Version;
 import org.springframework.hateoas.ResourceSupport;
 
 /**
- * Describes the other available resource endpoints, as well as provides information about the server itself, such as
- * API revision number.
+ * Describes the other available resource endpoints, as well as provides information about
+ * the server itself, such as API revision number.
  *
  * @author Eric Bottard
  */

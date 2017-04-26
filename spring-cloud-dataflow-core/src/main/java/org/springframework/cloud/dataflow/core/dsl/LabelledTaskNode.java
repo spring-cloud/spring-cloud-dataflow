@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,15 +19,15 @@ package org.springframework.cloud.dataflow.core.dsl;
 import java.util.List;
 
 /**
- * The main task supertype AST node. Other nodes like {@link FlowNode} and {@link SplitNode}
- * extend this one, relying on this one for common functionality.
- * 
+ * The main task supertype AST node. Other nodes like {@link FlowNode} and
+ * {@link SplitNode} extend this one, relying on this one for common functionality.
+ *
  * @author Andy Clement
  */
 public abstract class LabelledTaskNode extends AstNode {
 
 	private Token label;
-	
+
 	LabelledTaskNode(int startPos, int endPos) {
 		super(startPos, endPos);
 	}
@@ -47,7 +47,8 @@ public abstract class LabelledTaskNode extends AstNode {
 	}
 
 	/**
-	 * @return true if this node represents a inlined job definition or simple job reference, otherwise false
+	 * @return true if this node represents a inlined job definition or simple job
+	 * reference, otherwise false
 	 */
 	public boolean isTaskApp() {
 		return false;
@@ -64,8 +65,8 @@ public abstract class LabelledTaskNode extends AstNode {
 	}
 
 	/**
-	 * For nodes representing a flow or a split, return a specific element in the
-	 * series of things that will run either sequentially or in parallel.
+	 * For nodes representing a flow or a split, return a specific element in the series
+	 * of things that will run either sequentially or in parallel.
 	 *
 	 * @param index the element of interest
 	 * @return the indicated series or null if this is not a flow/split node
@@ -75,10 +76,11 @@ public abstract class LabelledTaskNode extends AstNode {
 	}
 
 	/**
-	 * For nodes representing a flow or a split, return the series of
-	 * elements to run in sequence/parallel.
+	 * For nodes representing a flow or a split, return the series of elements to run in
+	 * sequence/parallel.
 	 *
-	 * @return the series of elements for this flow/split, or null if not a flow/split node
+	 * @return the series of elements for this flow/split, or null if not a flow/split
+	 * node
 	 */
 	public List<LabelledTaskNode> getSeries() {
 		return null;
@@ -89,15 +91,15 @@ public abstract class LabelledTaskNode extends AstNode {
 	}
 
 	protected String getLabelString() {
-		return hasLabel()?this.label.stringValue():null;
-	}
-
-	public void setLabel(Token label) {
-		this.label = label;
+		return hasLabel() ? this.label.stringValue() : null;
 	}
 
 	public Token getLabel() {
 		return this.label;
+	}
+
+	public void setLabel(Token label) {
+		this.label = label;
 	}
 
 	public abstract void accept(TaskVisitor visitor);

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,9 +20,15 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * The AST node representing a flow. A flow is a series of things to execute sequentially. Those things
- * can themselves be individual task applications or splits. In DSL form a flow is expressed like this:
- * <pre><tt>aa && bb</tt></pre>.
+ * The AST node representing a flow. A flow is a series of things to execute sequentially.
+ * Those things can themselves be individual task applications or splits. In DSL form a
+ * flow is expressed like this:
+ *
+ * <pre>
+ * <tt>aa && bb</tt>
+ * </pre>
+ *
+ * .
  *
  * @author Andy Clement
  */
@@ -31,8 +37,7 @@ public class FlowNode extends LabelledTaskNode {
 	private List<LabelledTaskNode> series;
 
 	FlowNode(List<LabelledTaskNode> nodes) {
-		super(nodes.get(0).getStartPos(),
-				nodes.get(nodes.size() - 1).getEndPos());
+		super(nodes.get(0).getStartPos(), nodes.get(nodes.size() - 1).getEndPos());
 		this.series = Collections.unmodifiableList(nodes);
 	}
 
@@ -72,7 +77,7 @@ public class FlowNode extends LabelledTaskNode {
 	public String toString() {
 		return "[Flow:" + stringify(true) + "]";
 	}
-	
+
 	@Override
 	public void accept(TaskVisitor visitor) {
 		boolean cont = visitor.preVisit(this);

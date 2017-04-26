@@ -31,7 +31,7 @@ import org.springframework.context.annotation.Import;
  *
  * @author Josh Long
  */
-@Target({ElementType.TYPE})
+@Target({ ElementType.TYPE })
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Inherited

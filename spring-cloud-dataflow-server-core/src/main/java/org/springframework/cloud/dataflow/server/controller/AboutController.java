@@ -42,8 +42,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * REST controller that provides meta information regarding the dataflow server and
- * its deployers.
+ * REST controller that provides meta information regarding the dataflow server and its
+ * deployers.
  *
  * @author Gunnar Hillert
  */
@@ -69,12 +69,8 @@ public class AboutController {
 	private AppDeployer appDeployer;
 	private TaskLauncher taskLauncher;
 
-	public AboutController(
-			AppDeployer appDeployer,
-			TaskLauncher taskLauncher,
-			FeaturesProperties featuresProperties,
-			VersionInfoProperties versionInfoProperties,
-			SecurityStateBean securityStateBean) {
+	public AboutController(AppDeployer appDeployer, TaskLauncher taskLauncher, FeaturesProperties featuresProperties,
+			VersionInfoProperties versionInfoProperties, SecurityStateBean securityStateBean) {
 		this.appDeployer = appDeployer;
 		this.taskLauncher = taskLauncher;
 		this.featuresProperties = featuresProperties;
@@ -84,8 +80,9 @@ public class AboutController {
 
 	/**
 	 * Return meta information about the dataflow server.
-	 * @return Detailed information about the enabled features, versions of implementation libraries, and security
-	 * configuration
+	 *
+	 * @return Detailed information about the enabled features, versions of implementation
+	 * libraries, and security configuration
 	 */
 	@RequestMapping(method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
@@ -99,8 +96,10 @@ public class AboutController {
 		final VersionInfo versionInfo = new VersionInfo();
 
 		versionInfo.setImplementation(new Dependency(this.implementationName, this.implementationVersion));
-		versionInfo.setCore(new Dependency("Spring Cloud Data Flow Core", versionInfoProperties.getDataflowCoreVersion()));
-		versionInfo.setDashboard(new Dependency("Spring Cloud Dataflow UI", versionInfoProperties.getDataflowDashboardVersion()));
+		versionInfo
+				.setCore(new Dependency("Spring Cloud Data Flow Core", versionInfoProperties.getDataflowCoreVersion()));
+		versionInfo.setDashboard(
+				new Dependency("Spring Cloud Dataflow UI", versionInfoProperties.getDataflowDashboardVersion()));
 
 		aboutResource.setFeatureInfo(featureInfo);
 		aboutResource.setVersionInfo(versionInfo);
@@ -182,4 +181,3 @@ public class AboutController {
 		return aboutResource;
 	}
 }
-

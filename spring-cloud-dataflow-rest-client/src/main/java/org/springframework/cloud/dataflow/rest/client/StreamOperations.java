@@ -37,6 +37,7 @@ public interface StreamOperations {
 
 	/**
 	 * Create a new stream, optionally deploying it.
+	 *
 	 * @param name the name of the stream
 	 * @param definition the stream definition DSL
 	 * @param deploy whether to deploy the stream after creating its definition
@@ -46,6 +47,7 @@ public interface StreamOperations {
 
 	/**
 	 * Deploy an already created stream.
+	 *
 	 * @param name the name of the stream
 	 * @param properties the deployment properties
 	 */
@@ -53,6 +55,7 @@ public interface StreamOperations {
 
 	/**
 	 * Undeploy a deployed stream, retaining its definition.
+	 *
 	 * @param name the name of the stream
 	 */
 	public void undeploy(String name);
@@ -64,6 +67,7 @@ public interface StreamOperations {
 
 	/**
 	 * Destroy an existing stream.
+	 *
 	 * @param name the name of the stream
 	 */
 	public void destroy(String name);

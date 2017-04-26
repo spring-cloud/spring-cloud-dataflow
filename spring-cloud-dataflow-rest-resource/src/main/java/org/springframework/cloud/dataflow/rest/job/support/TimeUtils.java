@@ -21,8 +21,8 @@ import java.text.SimpleDateFormat;
 import java.util.TimeZone;
 
 /**
- * Provides a commons set of time-related helper methods and also defines common
- * date/time formats.
+ * Provides a commons set of time-related helper methods and also defines common date/time
+ * formats.
  *
  * @author Gunnar Hillert
  * @author Glenn Renfro
@@ -40,13 +40,15 @@ public final class TimeUtils {
 
 	public static final String DEFAULT_DATAFLOW_TIMEZONE_ID = "UTC";
 
-	/** Prevent instantiation. */
+	/**
+	 * Prevent instantiation.
+	 */
 	private TimeUtils() {
 		throw new AssertionError();
 	}
 
 	/**
-	 * @return Default Spring Cloud DataFLow  {@link TimeZone} using ID
+	 * @return Default Spring Cloud DataFLow {@link TimeZone} using ID
 	 */
 	public static TimeZone getDefaultTimeZone() {
 		return TimeZone.getTimeZone(DEFAULT_DATAFLOW_TIMEZONE_ID);
@@ -77,15 +79,16 @@ public final class TimeUtils {
 
 	/**
 	 * @return The Default Spring Cloud Data Flow date/time format using
-	 * {@link DateFormat} pattern {@link TimeUtils#DEFAULT_DATAFLOW_DATE_TIME_FORMAT_PATTERN}
+	 * {@link DateFormat} pattern
+	 * {@link TimeUtils#DEFAULT_DATAFLOW_DATE_TIME_FORMAT_PATTERN}
 	 */
 	public static DateFormat getDefaultDateTimeFormat() {
 		return new SimpleDateFormat(DEFAULT_DATAFLOW_DATE_TIME_FORMAT_PATTERN);
 	}
 
 	/**
-	 * @return The Default Spring Cloud Data Flow duration format using
-	 * {@link DateFormat} pattern {@link TimeUtils#DEFAULT_DATAFLOW_DURATION_FORMAT_PATTERN}
+	 * @return The Default Spring Cloud Data Flow duration format using {@link DateFormat}
+	 * pattern {@link TimeUtils#DEFAULT_DATAFLOW_DURATION_FORMAT_PATTERN}
 	 */
 	public static DateFormat getDefaultDurationFormat() {
 		return new SimpleDateFormat(DEFAULT_DATAFLOW_DURATION_FORMAT_PATTERN);

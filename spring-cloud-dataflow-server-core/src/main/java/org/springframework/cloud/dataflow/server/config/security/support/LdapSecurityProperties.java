@@ -32,7 +32,7 @@ import org.springframework.cloud.dataflow.core.DataFlowPropertyKeys;
 @LdapSecurityPropertiesValid
 public class LdapSecurityProperties {
 
-	@NotNull(message="Provide a valid url to your Ldap server")
+	@NotNull(message = "Provide a valid url to your Ldap server")
 	private URI url;
 
 	private String userDnPattern;

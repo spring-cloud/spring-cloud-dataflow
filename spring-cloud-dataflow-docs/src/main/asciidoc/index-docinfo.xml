@@ -1,28 +1,28 @@
 <productname>Spring Cloud Data Flow</productname>
 <releaseinfo>{project-version}</releaseinfo>
 <copyright>
-	<year>2013-2017</year>
-	<holder>Pivotal Software, Inc.</holder>
+<year>2013-2017</year>
+<holder>Pivotal Software, Inc.</holder>
 </copyright>
 <legalnotice>
-	<para>
-		Copies of this document may be made for your own use and for distribution to
-		others, provided that you do not charge any fee for such copies and further
-		provided that each copy contains this Copyright Notice, whether distributed in
-		print or electronically.
-	</para>
+<para>
+    Copies of this document may be made for your own use and for distribution to
+    others, provided that you do not charge any fee for such copies and further
+    provided that each copy contains this Copyright Notice, whether distributed in
+    print or electronically.
+</para>
 </legalnotice>
 
 <cover>
-	<mediaobject>
-		<imageobject>
-			<imagedata fileref="images/cover.png">
-				<info>
-					<othercredit>
-						<orgname>Pivotal Software, Inc.</orgname>
-					</othercredit>
-				</info>
-			</imagedata>
-		</imageobject>
-	</mediaobject>
+<mediaobject>
+    <imageobject>
+        <imagedata fileref="images/cover.png">
+            <info>
+                <othercredit>
+                    <orgname>Pivotal Software, Inc.</orgname>
+                </othercredit>
+            </info>
+        </imagedata>
+    </imageobject>
+</mediaobject>
 </cover>

@@ -22,9 +22,9 @@ import org.springframework.cloud.dataflow.server.EnableDataFlowServer;
 
 /**
  * Bootstrap class for the local Spring Cloud Data Flow Server.
- *
- * Multiple SpringBootApplication's needs to be in
- * their own directories due to component scanning.
+ * <p>
+ * Multiple SpringBootApplication's needs to be in their own directories due to component
+ * scanning.
  *
  * @author Mark Fisher
  */

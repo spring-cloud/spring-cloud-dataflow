@@ -18,14 +18,12 @@ package org.springframework.cloud.dataflow.server.controller;
 import org.springframework.cloud.dataflow.registry.AppRegistration;
 
 /**
- *
  * @author Glenn Renfro
  * @author Mark Fisher
  * @author Gunnar Hillert
  * @author Eric Bottard
  * @author Gary Russell
  * @author Patrick Peralta
- *
  */
 public class AppAlreadyRegisteredException extends IllegalStateException {
 
@@ -39,7 +37,8 @@ public class AppAlreadyRegisteredException extends IllegalStateException {
 
 	@Override
 	public String getMessage() {
-		return String.format("The '%s:%s' application is already registered as %s", previous.getType(), previous.getName(), previous.getUri());
+		return String.format("The '%s:%s' application is already registered as %s", previous.getType(),
+				previous.getName(), previous.getUri());
 	}
 
 	public AppRegistration getPrevious() {

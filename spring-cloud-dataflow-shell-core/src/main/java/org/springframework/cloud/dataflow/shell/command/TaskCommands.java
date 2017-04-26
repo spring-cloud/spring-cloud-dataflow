@@ -78,7 +78,6 @@ public class TaskCommands implements CommandMarker {
 
 	private static final String EXECUTION_LIST = "task execution list";
 
-
 	@Autowired
 	private DataFlowShell dataFlowShell;
 
@@ -106,7 +105,8 @@ public class TaskCommands implements CommandMarker {
 	@CliCommand(value = CREATE, help = "Create a new task definition")
 	public String create(
 			@CliOption(mandatory = true, key = { "", "name" }, help = "the name to give to the task") String name,
-			@CliOption(mandatory = true, key = { "definition" }, help = "a task definition, using the DSL (e.g. \"timestamp --format=YYYY\")", optionContext = "disable-string-converter completion-task") String dsl){
+			@CliOption(mandatory = true, key = { "definition" }, help = "a task definition, using the DSL (e.g. "
+					+ "\"timestamp --format=YYYY\")", optionContext = "disable-string-converter completion-task") String dsl) {
 		this.taskOperations().create(name, dsl);
 		return String.format("Created new task '%s'", name);
 	}
@@ -114,28 +114,31 @@ public class TaskCommands implements CommandMarker {
 	@CliCommand(value = LAUNCH, help = "Launch a previously created task")
 	public String launch(
 			@CliOption(key = { "", "name" }, help = "the name of the task to launch", mandatory = true) String name,
-			@CliOption(key = { PROPERTIES_OPTION }, help = "the properties for this launch", mandatory = false) String properties,
-			@CliOption(key = { PROPERTIES_FILE_OPTION }, help = "the properties for this launch (as a File)", mandatory = false) File propertiesFile,
-			@CliOption(key = { ARGUMENTS_OPTION }, help = "the commandline arguments for this launch", mandatory = false) String arguments
-			) throws IOException {
+			@CliOption(key = {
+					PROPERTIES_OPTION }, help = "the properties for this launch", mandatory = false) String properties,
+			@CliOption(key = {
+					PROPERTIES_FILE_OPTION }, help = "the properties for this launch (as a File)", mandatory = false) File propertiesFile,
+			@CliOption(key = {
+					ARGUMENTS_OPTION }, help = "the commandline arguments for this launch", mandatory = false) String arguments)
+			throws IOException {
 		int which = Assertions.atMostOneOf(PROPERTIES_OPTION, properties, PROPERTIES_FILE_OPTION, propertiesFile);
 		Map<String, String> propertiesToUse;
 		switch (which) {
-			case 0:
-				propertiesToUse = DeploymentPropertiesUtils.parse(properties);
-				break;
-			case 1:
-				Properties props = new Properties();
-				try (FileInputStream fis = new FileInputStream(propertiesFile)) {
-					props.load(fis);
-				}
-				propertiesToUse = DeploymentPropertiesUtils.convert(props);
-				break;
-			case -1: // Neither option specified
-				propertiesToUse = Collections.emptyMap();
-				break;
-			default:
-				throw new AssertionError();
+		case 0:
+			propertiesToUse = DeploymentPropertiesUtils.parse(properties);
+			break;
+		case 1:
+			Properties props = new Properties();
+			try (FileInputStream fis = new FileInputStream(propertiesFile)) {
+				props.load(fis);
+			}
+			propertiesToUse = DeploymentPropertiesUtils.convert(props);
+			break;
+		case -1: // Neither option specified
+			propertiesToUse = Collections.emptyMap();
+			break;
+		default:
+			throw new AssertionError();
 		}
 		List<String> argumentsToUse = new ArrayList<String>();
 		if (StringUtils.hasText(arguments)) {
@@ -153,18 +156,15 @@ public class TaskCommands implements CommandMarker {
 		return String.format("Destroyed task '%s'", name);
 	}
 
-	@CliCommand(value = EXECUTION_LIST,
-			help = "List created task executions filtered by taskName")
-	public Table executionListByName(
-			@CliOption(key = { "name" },
-					help = "the task name to be used as a filter",
-					mandatory = false) String name) {
+	@CliCommand(value = EXECUTION_LIST, help = "List created task executions filtered by taskName")
+	public Table executionListByName(@CliOption(key = {
+			"name" }, help = "the task name to be used as a filter", mandatory = false) String name) {
 
 		final PagedResources<TaskExecutionResource> tasks;
-		if(name == null){
+		if (name == null) {
 			tasks = taskOperations().executionList();
 		}
-		else{
+		else {
 			tasks = taskOperations().executionListByTaskName(name);
 		}
 		LinkedHashMap<String, Object> headers = new LinkedHashMap<>();
@@ -178,10 +178,7 @@ public class TaskCommands implements CommandMarker {
 	}
 
 	@CliCommand(value = TASK_EXECUTION_STATUS, help = "Display the details of a specific task execution")
-	public Table display(
-			@CliOption(key = { "", "id" },
-					help = "the task execution id",
-					mandatory = true) long id) {
+	public Table display(@CliOption(key = { "", "id" }, help = "the task execution id", mandatory = true) long id) {
 
 		TaskExecutionResource taskExecutionResource = taskOperations().taskExecutionStatus(id);
 
@@ -197,7 +194,8 @@ public class TaskCommands implements CommandMarker {
 		modelBuilder.addRow().addValue("Exit Code ").addValue(taskExecutionResource.getExitCode());
 		modelBuilder.addRow().addValue("Exit Message ").addValue(taskExecutionResource.getExitMessage());
 		modelBuilder.addRow().addValue("Error Message ").addValue(taskExecutionResource.getErrorMessage());
-		modelBuilder.addRow().addValue("External Execution Id ").addValue(taskExecutionResource.getExternalExecutionId());
+		modelBuilder.addRow().addValue("External Execution Id ")
+				.addValue(taskExecutionResource.getExternalExecutionId());
 
 		TableBuilder builder = new TableBuilder(modelBuilder.build());
 
@@ -206,11 +204,9 @@ public class TaskCommands implements CommandMarker {
 		return builder.build();
 	}
 
-	@CliCommand(value = TASK_EXECUTION_CLEANUP, help = "Clean up any platform specific resources linked to a task execution")
-	public String cleanup(
-		@CliOption(key = { "", "id" },
-			help = "the task execution id",
-			mandatory = true) long id) {
+	@CliCommand(value = TASK_EXECUTION_CLEANUP, help = "Clean up any platform specific resources linked to a task "
+			+ "execution")
+	public String cleanup(@CliOption(key = { "", "id" }, help = "the task execution id", mandatory = true) long id) {
 		taskOperations().cleanup(id);
 		return String.format("Request to clean up resources for task execution %s has been submitted", id);
 	}

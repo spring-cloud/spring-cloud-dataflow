@@ -73,24 +73,19 @@ import static org.springframework.cloud.dataflow.core.ApplicationType.task;
  * @author Ilayaperumal Gopinathan
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = {EmbeddedDataSourceConfiguration.class,
-		PropertyPlaceholderAutoConfiguration.class,
-		TaskServiceDependencies.class})
+@SpringBootTest(classes = { EmbeddedDataSourceConfiguration.class, PropertyPlaceholderAutoConfiguration.class,
+		TaskServiceDependencies.class })
 public class DefaultTaskServiceTests {
 
 	private final static String BASE_TASK_NAME = "myTask";
 
 	private final static String TASK_NAME_ORIG = BASE_TASK_NAME + "_ORIG";
-
-	@Autowired
-	private TaskDefinitionRepository taskDefinitionRepository;
-
 	@Autowired
 	TaskRepository taskExecutionRepository;
-
 	@Autowired
 	DataSourceProperties dataSourceProperties;
-
+	@Autowired
+	private TaskDefinitionRepository taskDefinitionRepository;
 	@Autowired
 	private TaskExplorer taskExplorer;
 
@@ -111,17 +106,12 @@ public class DefaultTaskServiceTests {
 		resourceLoader = mock(ResourceLoader.class);
 		metadataResolver = mock(ApplicationConfigurationMetadataResolver.class);
 		taskLauncher = mock(TaskLauncher.class);
-		when(this.appRegistry.find(anyString(), any(ApplicationType.class))).thenReturn(
-			new AppRegistration("some-name", task, URI.create("http://helloworld"), resourceLoader));
-		when(this.resourceLoader.getResource(anyString())).
-				thenReturn(mock(Resource.class));
-		taskService =
-				new DefaultTaskService(dataSourceProperties,
-						taskDefinitionRepository, taskExplorer,
-						taskExecutionRepository, appRegistry, resourceLoader,
-						taskLauncher, metadataResolver,
-						new TaskConfigurationProperties(),
-						new InMemoryDeploymentIdRepository(), null);
+		when(this.appRegistry.find(anyString(), any(ApplicationType.class)))
+				.thenReturn(new AppRegistration("some-name", task, URI.create("http://helloworld"), resourceLoader));
+		when(this.resourceLoader.getResource(anyString())).thenReturn(mock(Resource.class));
+		taskService = new DefaultTaskService(dataSourceProperties, taskDefinitionRepository, taskExplorer,
+				taskExecutionRepository, appRegistry, resourceLoader, taskLauncher, metadataResolver,
+				new TaskConfigurationProperties(), new InMemoryDeploymentIdRepository(), null);
 	}
 
 	@Test
@@ -148,14 +138,13 @@ public class DefaultTaskServiceTests {
 		boolean errorCaught = false;
 		when(this.taskLauncher.launch(anyObject())).thenReturn(null);
 		try {
-			taskService.executeTask(TASK_NAME_ORIG, new HashMap<>(),
-					new LinkedList<>());
+			taskService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>());
 		}
-		catch(IllegalStateException ise) {
+		catch (IllegalStateException ise) {
 			errorCaught = true;
 			assertEquals("Deployment ID is null for the task:myTask_ORIG", ise.getMessage());
 		}
-		if(!errorCaught) {
+		if (!errorCaught) {
 			fail();
 		}
 	}
@@ -165,22 +154,18 @@ public class DefaultTaskServiceTests {
 	public void executeTaskWithNullDefinitionTest() {
 		boolean errorCaught = false;
 		when(this.taskLauncher.launch(anyObject())).thenReturn("0");
-		TaskService taskService =
-				new DefaultTaskService(this.dataSourceProperties,
-						mock(TaskDefinitionRepository.class), this.taskExplorer,
-						this.taskExecutionRepository, this.appRegistry,
-						this.resourceLoader, this.taskLauncher,
-						this.metadataResolver, new TaskConfigurationProperties(),
-						new InMemoryDeploymentIdRepository(), null);
+		TaskService taskService = new DefaultTaskService(this.dataSourceProperties,
+				mock(TaskDefinitionRepository.class), this.taskExplorer, this.taskExecutionRepository, this.appRegistry,
+				this.resourceLoader, this.taskLauncher, this.metadataResolver, new TaskConfigurationProperties(),
+				new InMemoryDeploymentIdRepository(), null);
 		try {
-			taskService.executeTask(TASK_NAME_ORIG, new HashMap<>(),
-					new LinkedList<>());
+			taskService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>());
 		}
-		catch(NoSuchTaskDefinitionException ise) {
+		catch (NoSuchTaskDefinitionException ise) {
 			errorCaught = true;
 			assertEquals("Could not find task definition named myTask_ORIG", ise.getMessage());
 		}
-		if(!errorCaught) {
+		if (!errorCaught) {
 			fail();
 		}
 	}
@@ -217,9 +202,9 @@ public class DefaultTaskServiceTests {
 		composedTaskDsl = "AAA && BBB && CCC";
 		assertTrue("Expected true for composed task", taskService.isComposedDefinition(composedTaskDsl));
 		String nonComposedTaskDsl = "AAA";
-		assertFalse("Expected false for non-composed task" , taskService.isComposedDefinition(nonComposedTaskDsl));
+		assertFalse("Expected false for non-composed task", taskService.isComposedDefinition(nonComposedTaskDsl));
 		nonComposedTaskDsl = "AAA --foo=bar";
-		assertFalse("Expected false for non-composed task" , taskService.isComposedDefinition(nonComposedTaskDsl));
+		assertFalse("Expected false for non-composed task", taskService.isComposedDefinition(nonComposedTaskDsl));
 	}
 
 	@Test
@@ -252,8 +237,7 @@ public class DefaultTaskServiceTests {
 
 		long preDeleteSize = taskDefinitionRepository.count();
 		taskService.deleteTaskDefinition("deleteTask");
-		assertThat(preDeleteSize - 4,
-				is(equalTo(taskDefinitionRepository.count())));
+		assertThat(preDeleteSize - 4, is(equalTo(taskDefinitionRepository.count())));
 	}
 
 	@Test
@@ -269,8 +253,7 @@ public class DefaultTaskServiceTests {
 
 		long preDeleteSize = taskDefinitionRepository.count();
 		taskService.deleteTaskDefinition("deleteTask");
-		assertThat(preDeleteSize - 3,
-				is(equalTo(taskDefinitionRepository.count())));
+		assertThat(preDeleteSize - 3, is(equalTo(taskDefinitionRepository.count())));
 		verifyTaskExistsInRepo("deleteTask-AAA", "AAA");
 	}
 
@@ -285,43 +268,44 @@ public class DefaultTaskServiceTests {
 
 		long preDeleteSize = taskDefinitionRepository.count();
 		taskService.deleteTaskDefinition("deleteTask");
-		assertThat(preDeleteSize - 3,
-				is(equalTo(taskDefinitionRepository.count())));
+		assertThat(preDeleteSize - 3, is(equalTo(taskDefinitionRepository.count())));
 	}
 
 	@Test
 	@DirtiesContext
 	public void verifyDataFlowUriProperty() throws Exception {
 		when(this.taskLauncher.launch(anyObject())).thenReturn("0");
-		TaskService taskService =
-				new DefaultTaskService(this.dataSourceProperties,
-						mock(TaskDefinitionRepository.class), this.taskExplorer,
-						this.taskExecutionRepository, this.appRegistry,
-						this.resourceLoader, this.taskLauncher,
-						this.metadataResolver, new TaskConfigurationProperties(),
-						new InMemoryDeploymentIdRepository(), "http://myserver:9191");
+		TaskService taskService = new DefaultTaskService(this.dataSourceProperties,
+				mock(TaskDefinitionRepository.class), this.taskExplorer, this.taskExecutionRepository, this.appRegistry,
+				this.resourceLoader, this.taskLauncher, this.metadataResolver, new TaskConfigurationProperties(),
+				new InMemoryDeploymentIdRepository(), "http://myserver:9191");
 		List<String> cmdLineArgs = new ArrayList<>();
-		Method method = ReflectionUtils.findMethod(DefaultTaskService.class, "updateDataFlowUriIfNeeded", Map.class, List.class);
+		Method method = ReflectionUtils.findMethod(DefaultTaskService.class, "updateDataFlowUriIfNeeded", Map.class,
+				List.class);
 		ReflectionUtils.makeAccessible(method);
 		Map<String, String> appDeploymentProperties = new HashMap<>();
 		method.invoke(taskService, appDeploymentProperties, cmdLineArgs);
 		assertTrue(appDeploymentProperties.containsKey("dataflowServerUri"));
-		assertTrue("dataflowServerUri is expected to be in the app deployment properties", appDeploymentProperties.get("dataflowServerUri").equals("http://myserver:9191"));
+		assertTrue("dataflowServerUri is expected to be in the app deployment properties",
+				appDeploymentProperties.get("dataflowServerUri").equals("http://myserver:9191"));
 		appDeploymentProperties.clear();
 		appDeploymentProperties.put("dataflow-server-uri", "http://localhost:8080");
 		method.invoke(taskService, appDeploymentProperties, cmdLineArgs);
 		assertTrue(!appDeploymentProperties.containsKey("dataflowServerUri"));
-		assertTrue("dataflowServerUri is incorrect", appDeploymentProperties.get("dataflow-server-uri").equals("http://localhost:8080"));
+		assertTrue("dataflowServerUri is incorrect",
+				appDeploymentProperties.get("dataflow-server-uri").equals("http://localhost:8080"));
 		appDeploymentProperties.clear();
 		appDeploymentProperties.put("dataflowServerUri", "http://localhost:8191");
 		method.invoke(taskService, appDeploymentProperties, cmdLineArgs);
 		assertTrue(appDeploymentProperties.containsKey("dataflowServerUri"));
-		assertTrue("dataflowServerUri is incorrect", appDeploymentProperties.get("dataflowServerUri").equals("http://localhost:8191"));
+		assertTrue("dataflowServerUri is incorrect",
+				appDeploymentProperties.get("dataflowServerUri").equals("http://localhost:8191"));
 		appDeploymentProperties.clear();
 		appDeploymentProperties.put("DATAFLOW_SERVER_URI", "http://localhost:9000");
 		method.invoke(taskService, appDeploymentProperties, cmdLineArgs);
 		assertTrue(!appDeploymentProperties.containsKey("dataflowServerUri"));
-		assertTrue("dataflowServerUri is incorrect", appDeploymentProperties.get("DATAFLOW_SERVER_URI").equals("http://localhost:9000"));
+		assertTrue("dataflowServerUri is incorrect",
+				appDeploymentProperties.get("DATAFLOW_SERVER_URI").equals("http://localhost:9000"));
 		appDeploymentProperties.clear();
 		cmdLineArgs.add("--dataflowServerUri=http://localhost:8383");
 		method.invoke(taskService, appDeploymentProperties, cmdLineArgs);
@@ -333,11 +317,10 @@ public class DefaultTaskServiceTests {
 		assertTrue(!appDeploymentProperties.containsKey("DATAFLOW-SERVER-URI"));
 	}
 
-
 	private void verifyTaskExistsInRepo(String taskName, String dsl) {
 		TaskDefinition taskDefinition = taskDefinitionRepository.findOne(taskName);
 
 		assertThat(taskDefinition.getName(), is(equalTo(taskName)));
-		assertThat(taskDefinition.getDslText(),is(equalTo(dsl)));
+		assertThat(taskDefinition.getDslText(), is(equalTo(dsl)));
 	}
 }

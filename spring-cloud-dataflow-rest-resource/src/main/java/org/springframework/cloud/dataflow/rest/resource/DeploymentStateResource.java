@@ -15,28 +15,30 @@
  */
 package org.springframework.cloud.dataflow.rest.resource;
 
-import org.springframework.util.Assert;
-
 import com.fasterxml.jackson.annotation.JsonFormat;
 
+import org.springframework.util.Assert;
+
 /**
- * Provides a typed enumeration of deployment statuses for Streams.
- * Currently, this class is used more as a helper class, and is not serialized
- * via the REST API as of now, this may change however with the next major release.
+ * Provides a typed enumeration of deployment statuses for Streams. Currently, this class
+ * is used more as a helper class, and is not serialized via the REST API as of now, this
+ * may change however with the next major release.
  *
  * @author Gunnar Hillert
- *
  */
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 public enum DeploymentStateResource {
 
-	DEPLOYING("deploying", "Deploying" ,"The app or group is being deployed."),
-	DEPLOYED("deployed", "Deployed", "All apps have been successfully deployed"),
-	UNDEPLOYED("undeployed", "Undeployed", "The app or group is known to the system, but is not currently deployed"),
-	PARTIAL("partial", "Partial", "In the case of multiple apps, some have successfully deployed, while others have not"),
-	FAILED("failed", "Failed", "All apps have failed deployment"),
-	ERROR("error", "Error", "A system error occurred trying to determine deployment status"),
-	UNKNOWN("unknown", "Unknown", "The app or group deployment is not known to the system");
+	DEPLOYING("deploying", "Deploying", "The app or group is being deployed."), DEPLOYED("deployed", "Deployed",
+			"All apps have been successfully deployed"), UNDEPLOYED("undeployed", "Undeployed",
+					"The app or group is known to the system, but is not currently deployed"), PARTIAL("partial",
+							"Partial",
+							"In the case of multiple apps, some have successfully deployed, while others have "
+									+ "not"), FAILED("failed", "Failed", "All apps have failed deployment"), ERROR(
+											"error", "Error",
+											"A system error occurred trying to determine deployment status"), UNKNOWN(
+													"unknown", "Unknown",
+													"The app or group deployment is not known to the system");
 
 	private final String key;
 	private final String displayName;
@@ -51,18 +53,6 @@ public enum DeploymentStateResource {
 		this.description = description;
 	}
 
-	public String getKey() {
-		return key;
-	}
-
-	public String getDisplayName() {
-		return displayName;
-	}
-
-	public String getDescription() {
-		return description;
-	}
-
 	public static DeploymentStateResource fromKey(String deploymentStateResourceKey) {
 
 		Assert.hasText(deploymentStateResourceKey, "Parameter deploymentStateResourceKey must not be null or empty.");
@@ -74,5 +64,17 @@ public enum DeploymentStateResource {
 		}
 
 		return null;
+	}
+
+	public String getKey() {
+		return key;
+	}
+
+	public String getDisplayName() {
+		return displayName;
+	}
+
+	public String getDescription() {
+		return description;
 	}
 }

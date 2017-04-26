@@ -5,7 +5,8 @@
       "type": "foo.bar.FilterProperties",
       "sourceType": "foo.bar.FilterProperties"
     }
-  ],"properties": [
+  ],
+  "properties": [
     {
       "name": "filter.expression",
       "type": "org.springframework.expression.Expression",

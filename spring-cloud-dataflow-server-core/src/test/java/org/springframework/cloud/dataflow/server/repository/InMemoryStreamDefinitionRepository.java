@@ -60,11 +60,10 @@ public class InMemoryStreamDefinitionRepository implements StreamDefinitionRepos
 
 	@Override
 	public <S extends StreamDefinition> S save(S definition) {
-		if(definitions.containsKey(definition.getName())) {
+		if (definitions.containsKey(definition.getName())) {
 			throw new DuplicateTaskException(
-					String.format("Cannot register stream definition %s because another one has already " +
-									"been registered with the same name",
-							definition.getName()));
+					String.format("Cannot register stream definition %s because another one has already "
+							+ "been registered with the same name", definition.getName()));
 		}
 		definitions.put(definition.getName(), definition);
 		return definition;
@@ -89,7 +88,7 @@ public class InMemoryStreamDefinitionRepository implements StreamDefinitionRepos
 	public Iterable<StreamDefinition> findAll(Iterable<String> names) {
 		List<StreamDefinition> results = new ArrayList<>();
 		for (String s : names) {
-			if (definitions.containsKey(s)){
+			if (definitions.containsKey(s)) {
 				results.add(definitions.get(s));
 			}
 		}
@@ -113,7 +112,7 @@ public class InMemoryStreamDefinitionRepository implements StreamDefinitionRepos
 
 	@Override
 	public void delete(Iterable<? extends StreamDefinition> definitions) {
-		for (StreamDefinition definition : definitions){
+		for (StreamDefinition definition : definitions) {
 			delete(definition);
 		}
 	}

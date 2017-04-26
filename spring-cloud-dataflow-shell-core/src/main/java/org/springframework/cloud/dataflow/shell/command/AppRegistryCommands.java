@@ -50,8 +50,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 
 /**
- * Commands for working with the application registry. Allows retrieval of information about
- * available applications, as well as creating and removing application registrations.
+ * Commands for working with the application registry. Allows retrieval of information
+ * about available applications, as well as creating and removing application
+ * registrations.
  *
  * @author Glenn Renfro
  * @author Eric Bottard
@@ -101,11 +102,8 @@ public class AppRegistryCommands implements CommandMarker, ResourceLoaderAware {
 	}
 
 	@CliCommand(value = APPLICATION_INFO, help = "Get information about an application")
-	public List<Object> info(
-			@CliOption(mandatory = true,
-					key = {"", "id"},
-					help = "id of the application to query in the form of 'type:name'")
-			QualifiedApplicationName application) {
+	public List<Object> info(@CliOption(mandatory = true, key = { "",
+			"id" }, help = "id of the application to query in the form of 'type:name'") QualifiedApplicationName application) {
 		List<Object> result = new ArrayList<>();
 		try {
 			DetailedAppRegistrationResource info = appRegistryOperations().info(application.name, application.type);
@@ -121,75 +119,53 @@ public class AppRegistryCommands implements CommandMarker, ResourceLoaderAware {
 				}
 				else {
 					TableModelBuilder<Object> modelBuilder = new TableModelBuilder<>();
-					modelBuilder.addRow()
-							.addValue("Option Name")
-							.addValue("Description")
-							.addValue("Default")
+					modelBuilder.addRow().addValue("Option Name").addValue("Description").addValue("Default")
 							.addValue("Type");
 					for (ConfigurationMetadataProperty option : options) {
-						modelBuilder.addRow()
-								.addValue(option.getId())
+						modelBuilder.addRow().addValue(option.getId())
 								.addValue(option.getDescription() == null ? "<unknown>" : option.getDescription())
 								.addValue(prettyPrintDefaultValue(option))
 								.addValue(option.getType() == null ? "<unknown>" : option.getType());
 					}
 					TableBuilder builder = DataFlowTables.applyStyle(new TableBuilder(modelBuilder.build()))
-							.on(CellMatchers.table()).addSizer(new AbsoluteWidthSizeConstraints(30))
-							.and();
+							.on(CellMatchers.table()).addSizer(new AbsoluteWidthSizeConstraints(30)).and();
 					result.add(builder.build());
 				}
 			}
 			else {
-				result.add(String.format("Application info is not available for %s:%s", application.type, application.name));
+				result.add(String.format("Application info is not available for %s:%s", application.type,
+						application.name));
 			}
 		}
 		catch (Exception e) {
-			result.add(String.format("Application info is not available for %s:%s", application.type, application.name));
+			result.add(
+					String.format("Application info is not available for %s:%s", application.type, application.name));
 		}
 		return result;
 	}
 
 	@CliCommand(value = REGISTER_APPLICATION, help = "Register a new application")
 	public String register(
-			@CliOption(mandatory = true,
-					key = {"", "name"},
-					help = "the name for the registered application")
-			String name,
-			@CliOption(mandatory = true,
-					key = {"type"},
-					help = "the type for the registered application")
-			ApplicationType type,
-			@CliOption(mandatory = true,
-					key = {"uri"},
-					help = "URI for the application artifact")
-			String uri,
-			@CliOption(
-					key = {"metadata-uri"},
-					help = "Metadata URI for the application artifact")
-			String metadataUri,
-			@CliOption(key = "force",
-					help = "force update if application is already registered (only if not in use)",
-					specifiedDefaultValue = "true",
-					unspecifiedDefaultValue = "false")
-			boolean force) {
+			@CliOption(mandatory = true, key = { "",
+					"name" }, help = "the name for the registered application") String name,
+			@CliOption(mandatory = true, key = {
+					"type" }, help = "the type for the registered application") ApplicationType type,
+			@CliOption(mandatory = true, key = { "uri" }, help = "URI for the application artifact") String uri,
+			@CliOption(key = { "metadata-uri" }, help = "Metadata URI for the application artifact") String metadataUri,
+			@CliOption(key = "force", help = "force update if application is already registered (only if not in use)", specifiedDefaultValue = "true", unspecifiedDefaultValue = "false") boolean force) {
 		appRegistryOperations().register(name, type, uri, metadataUri, force);
 		return String.format(("Successfully registered application '%s:%s'"), type, name);
 	}
 
 	@CliCommand(value = UNREGISTER_APPLICATION, help = "Unregister an application")
 	public String unregister(
-			@CliOption(mandatory = true,
-					key = {"", "name"},
-					help = "name of the application to unregister")
-					String name,
-			@CliOption(mandatory = true,
-					key = {"type"},
-					help = "type of the application to unregister")
-					ApplicationType type) {
+			@CliOption(mandatory = true, key = { "",
+					"name" }, help = "name of the application to unregister") String name,
+			@CliOption(mandatory = true, key = {
+					"type" }, help = "type of the application to unregister") ApplicationType type) {
 
 		appRegistryOperations().unregister(name, type);
-		return String.format(("Successfully unregistered application '%s' with type %s"),
-				name, type);
+		return String.format(("Successfully unregistered application '%s' with type %s"), name, type);
 	}
 
 	@CliCommand(value = LIST_APPLICATIONS, help = "List all registered applications")
@@ -206,10 +182,9 @@ public class AppRegistryCommands implements CommandMarker, ResourceLoaderAware {
 			max = Math.max(max, column.size());
 		}
 		if (max == 0) {
-			return String.format("No registered apps.%n" +
-					"You can register new apps with the '%s' and '%s' commands.", REGISTER_APPLICATION, IMPORT_APPLICATIONS);
+			return String.format("No registered apps.%n" + "You can register new apps with the '%s' and '%s' commands.",
+					REGISTER_APPLICATION, IMPORT_APPLICATIONS);
 		}
-
 
 		final List<String> keys = new ArrayList<>(mappings.keySet());
 		final int rows = max + 1;
@@ -245,20 +220,9 @@ public class AppRegistryCommands implements CommandMarker, ResourceLoaderAware {
 
 	@CliCommand(value = IMPORT_APPLICATIONS, help = "Register all applications listed in a properties file")
 	public String importFromResource(
-			@CliOption(mandatory = true,
-					key = {"", "uri"},
-					help = "URI for the properties file")
-			String uri,
-			@CliOption(key = "local",
-				help = "whether to resolve the URI locally (as opposed to on the server)",
-				specifiedDefaultValue = "true",
-				unspecifiedDefaultValue = "true")
-			boolean local,
-			@CliOption(key = "force",
-				help = "force update if any module already exists (only if not in use)",
-				specifiedDefaultValue = "true",
-				unspecifiedDefaultValue = "false")
-			boolean force) {
+			@CliOption(mandatory = true, key = { "", "uri" }, help = "URI for the properties file") String uri,
+			@CliOption(key = "local", help = "whether to resolve the URI locally (as opposed to on the server)", specifiedDefaultValue = "true", unspecifiedDefaultValue = "true") boolean local,
+			@CliOption(key = "force", help = "force update if any module already exists (only if not in use)", specifiedDefaultValue = "true", unspecifiedDefaultValue = "false") boolean force) {
 		if (local) {
 			try {
 				Resource resource = this.resourceLoader.getResource(uri);
@@ -273,7 +237,8 @@ public class AppRegistryCommands implements CommandMarker, ResourceLoaderAware {
 				long numRegistered = registered.getMetadata().getTotalElements();
 				return (applications.keySet().size() == numRegistered)
 						? String.format("Successfully registered applications: %s", applications.keySet())
-						: String.format("Successfully registered %d applications from %s", numRegistered, applications.keySet());
+						: String.format("Successfully registered %d applications from %s", numRegistered,
+								applications.keySet());
 			}
 			catch (IOException e) {
 				throw new IllegalArgumentException(e);
@@ -281,22 +246,20 @@ public class AppRegistryCommands implements CommandMarker, ResourceLoaderAware {
 		}
 		else {
 			PagedResources<AppRegistrationResource> registered = appRegistryOperations().importFromResource(uri, force);
-			return String.format("Successfully registered %d applications from '%s'", registered.getMetadata().getTotalElements(), uri);
+			return String.format("Successfully registered %d applications from '%s'",
+					registered.getMetadata().getTotalElements(), uri);
 		}
 	}
 
 	/**
-	 * Escapes some special values so that they don't disturb console
-	 * rendering and are easier to read.
+	 * Escapes some special values so that they don't disturb console rendering and are
+	 * easier to read.
 	 */
 	private String prettyPrintDefaultValue(ConfigurationMetadataProperty o) {
 		if (o.getDefaultValue() == null) {
 			return "<none>";
 		}
-		return o.getDefaultValue().toString()
-				.replace("\n", "\\n")
-				.replace("\t", "\\t")
-				.replace("\f", "\\f");
+		return o.getDefaultValue().toString().replace("\n", "\\n").replace("\t", "\\t").replace("\f", "\\f");
 	}
 
 	private AppRegistryOperations appRegistryOperations() {

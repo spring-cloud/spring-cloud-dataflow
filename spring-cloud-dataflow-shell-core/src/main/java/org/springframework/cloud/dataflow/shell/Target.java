@@ -22,60 +22,41 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
- * Encapsulates various data points related to the Data Flow Server Target, such as target URI, success/error state,
- * exception messages that may have occurred.
+ * Encapsulates various data points related to the Data Flow Server Target, such as target
+ * URI, success/error state, exception messages that may have occurred.
  *
  * @author Gunnar Hillert
  * @since 1.0
- *
  */
 public class Target {
 
-	public enum TargetStatus {
-		SUCCESS, ERROR
-	}
-
 	public static final String DEFAULT_SCHEME = "http";
-
 	public static final String DEFAULT_HOST = "localhost";
-
 	public static final int DEFAULT_PORT = 9393;
-
 	public static final String DEFAULT_USERNAME = "";
-
 	public static final String DEFAULT_SPECIFIED_PASSWORD = "";
-
 	public static final String DEFAULT_UNSPECIFIED_PASSWORD = "__NULL__";
-
 	public static final String DEFAULT_SPECIFIED_SKIP_SSL_VALIDATION = "true";
-
 	public static final String DEFAULT_UNSPECIFIED_SKIP_SSL_VALIDATION = "false";
-
 	public static final String DEFAULT_TARGET = DEFAULT_SCHEME + "://" + DEFAULT_HOST + ":" + DEFAULT_PORT + "/";
-
 	private final URI targetUri;
-
 	private final boolean skipSslValidation;
-
 	private TargetCredentials targetCredentials;
-
 	private Exception targetException;
-
 	private String targetResultMessage;
-
 	private TargetStatus status;
-
 	private boolean authenticationEnabled;
 	private boolean authorizationEnabled = true;
 	private boolean authenticated;
 
 	/**
-	 * Construct a new Target. The passed in <code>targetUriAsString</code> String parameter will be converted to a {@link URI}.
-	 * This method allows for providing a username and password for authentication.
+	 * Construct a new Target. The passed in <code>targetUriAsString</code> String
+	 * parameter will be converted to a {@link URI}. This method allows for providing a
+	 * username and password for authentication.
 	 *
 	 * @param targetUriAsString the data flow server URI, must not be empty
-	 * @param targetUsername    the username, may be empty, if access is unauthenticated
-	 * @param targetPassword    the password, may be empty
+	 * @param targetUsername the username, may be empty, if access is unauthenticated
+	 * @param targetPassword the password, may be empty
 	 * @param skipSslValidation whether or not we skip SSL validation.
 	 * @throws IllegalArgumentException if the given URI string violates RFC 2396.
 	 */
@@ -86,17 +67,15 @@ public class Target {
 
 		if (StringUtils.isEmpty(targetUsername)) {
 			this.targetCredentials = null;
-		} else {
+		}
+		else {
 			this.targetCredentials = new TargetCredentials(targetUsername, targetPassword);
 		}
 	}
 
-	public void setTargetCredentials(TargetCredentials targetCredentials) {
-		this.targetCredentials = targetCredentials;
-	}
-
 	/**
-	 * Construct a new Target. The passed in <code>targetUriAsString</code> String parameter will be converted to a {@link URI}.
+	 * Construct a new Target. The passed in <code>targetUriAsString</code> String
+	 * parameter will be converted to a {@link URI}.
 	 *
 	 * @param targetUriAsString Must not be empty
 	 * @throws IllegalArgumentException if the given string violates RFC 2396
@@ -115,8 +94,8 @@ public class Target {
 	}
 
 	/**
-	 * If during targeting an error occurred, the resulting {@link Exception} is made available for further
-	 * introspection.
+	 * If during targeting an error occurred, the resulting {@link Exception} is made
+	 * available for further introspection.
 	 *
 	 * @return If present, returns the Exception, otherwise null is returned.
 	 */
@@ -125,13 +104,36 @@ public class Target {
 	}
 
 	/**
-	 * Provides a result message indicating whether the provide {@link #getTargetUri()} was successfully targeted or
-	 * not.
+	 * Sets the exception in case an error occurred during targeting. Will also set the
+	 * respective {@link TargetStatus} to {@link TargetStatus#ERROR}.
+	 *
+	 * @param targetException Must not be null.
+	 */
+	public void setTargetException(Exception targetException) {
+		Assert.notNull(targetException, "The provided targetException must not be null.");
+		this.targetException = targetException;
+		this.status = TargetStatus.ERROR;
+	}
+
+	/**
+	 * Provides a result message indicating whether the provide {@link #getTargetUri()}
+	 * was successfully targeted or not.
 	 *
 	 * @return The formatted result message.
 	 */
 	public String getTargetResultMessage() {
 		return targetResultMessage;
+	}
+
+	/**
+	 * Set the result messages indicating the success or failure while targeting the
+	 * Spring XD Admin Server.
+	 *
+	 * @param targetResultMessage Must not be empty.
+	 */
+	public void setTargetResultMessage(String targetResultMessage) {
+		Assert.hasText(targetResultMessage, "The provided targetResultMessage must neither be null nor empty.");
+		this.targetResultMessage = targetResultMessage;
 	}
 
 	/**
@@ -152,6 +154,7 @@ public class Target {
 
 	/**
 	 * Returns if sslValidation should be skipped
+	 *
 	 * @return Return whether or not we skip SSL validation.
 	 */
 	public boolean isSkipSslValidation() {
@@ -167,26 +170,8 @@ public class Target {
 		return targetCredentials;
 	}
 
-	/**
-	 * Sets the exception in case an error occurred during targeting. Will also set the respective {@link TargetStatus}
-	 * to {@link TargetStatus#ERROR}.
-	 *
-	 * @param targetException Must not be null.
-	 */
-	public void setTargetException(Exception targetException) {
-		Assert.notNull(targetException, "The provided targetException must not be null.");
-		this.targetException = targetException;
-		this.status = TargetStatus.ERROR;
-	}
-
-	/**
-	 * Set the result messages indicating the success or failure while targeting the Spring XD Admin Server.
-	 *
-	 * @param targetResultMessage Must not be empty.
-	 */
-	public void setTargetResultMessage(String targetResultMessage) {
-		Assert.hasText(targetResultMessage, "The provided targetResultMessage must neither be null nor empty.");
-		this.targetResultMessage = targetResultMessage;
+	public void setTargetCredentials(TargetCredentials targetCredentials) {
+		this.targetCredentials = targetCredentials;
 	}
 
 	/**
@@ -213,7 +198,6 @@ public class Target {
 	}
 
 	/**
-	 *
 	 * @param authorizationEnabled If not set, it defaults to true
 	 */
 	public void setAuthorizationEnabled(boolean authorizationEnabled) {
@@ -221,7 +205,6 @@ public class Target {
 	}
 
 	/**
-	 *
 	 * @return True if the user is successfully authenticated with this Target
 	 */
 	public boolean isAuthenticated() {
@@ -239,6 +222,10 @@ public class Target {
 	public String toString() {
 		return "Target [targetUri=" + targetUri + ", targetException=" + targetException + ", targetResultMessage="
 				+ targetResultMessage + ", status=" + status + "]";
+	}
+
+	public enum TargetStatus {
+		SUCCESS, ERROR
 	}
 
 }

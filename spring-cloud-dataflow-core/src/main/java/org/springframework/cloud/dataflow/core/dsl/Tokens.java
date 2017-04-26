@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,9 +20,9 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Class that converts an expression into a list of {@link Token tokens}.
- * Furthermore, this class provides methods to process the tokens and
- * keeps track of the current token being processed.
+ * Class that converts an expression into a list of {@link Token tokens}. Furthermore,
+ * this class provides methods to process the tokens and keeps track of the current token
+ * being processed.
  *
  * @author Andy Clement
  * @author Patrick Peralta
@@ -40,11 +40,11 @@ public class Tokens {
 	private final List<Token> tokenStream;
 
 	/**
-	 * Position of linebreaks in the parsed string. Token positions are absolute from start
-	 * of string, so this array can be used to compute the line the token is on.
+	 * Position of linebreaks in the parsed string. Token positions are absolute from
+	 * start of string, so this array can be used to compute the line the token is on.
 	 */
 	private int[] linebreaks;
-	
+
 	/**
 	 * Index of stream token currently being processed.
 	 */
@@ -56,9 +56,8 @@ public class Tokens {
 	private int lastGoodPosition = 0;
 
 	/**
-	 * Create a new tokens holder that can be iterated over. Created by
-	 * the particular tokenizer instance (some concrete subclass of 
-	 * {@link AbstractTokenizer}).
+	 * Create a new tokens holder that can be iterated over. Created by the particular
+	 * tokenizer instance (some concrete subclass of {@link AbstractTokenizer}).
 	 *
 	 * @param expression string expression to convert into {@link Token tokens}.
 	 * @param tokens the stream of tokens
@@ -67,7 +66,7 @@ public class Tokens {
 	Tokens(String expression, List<Token> tokens, int[] linebreaks) {
 		this.expression = expression;
 		this.linebreaks = linebreaks;
-		this.tokenStream = Collections.unmodifiableList(tokens);		
+		this.tokenStream = Collections.unmodifiableList(tokens);
 	}
 
 	/**
@@ -107,9 +106,8 @@ public class Tokens {
 	}
 
 	/**
-	 * Return {@code true} if the token in the position indicated
-	 * by {@link #position} + {@code distance} matches
-	 * the token indicated by {@code desiredTokenKind}.
+	 * Return {@code true} if the token in the position indicated by {@link #position} +
+	 * {@code distance} matches the token indicated by {@code desiredTokenKind}.
 	 *
 	 * @param distance number of token positions past the current position
 	 * @param desiredTokenKind the token to check for
@@ -134,8 +132,8 @@ public class Tokens {
 	}
 
 	/**
-	 * Return the token at the current position. If there are no more tokens,
-	 * return {@code null}.
+	 * Return the token at the current position. If there are no more tokens, return
+	 * {@code null}.
 	 *
 	 * @return token at current position or {@code null} if there are no more tokens
 	 */
@@ -144,14 +142,15 @@ public class Tokens {
 	}
 
 	/**
-	 * Return the token at a specified distance beyond current position. If that
-	 * is off the end of the list of known tokens, return {@code null}.
+	 * Return the token at a specified distance beyond current position. If that is off
+	 * the end of the list of known tokens, return {@code null}.
 	 *
-	 * @return token at specified distance beyond current position or {@code null} if there are no more tokens
+	 * @return token at specified distance beyond current position or {@code null} if
+	 * there are no more tokens
 	 */
 	protected Token peek(int howFarAhead) {
-		if ((position+howFarAhead)>=0 && (position+howFarAhead) < tokenStream.size()) {
-			return tokenStream.get(position+howFarAhead);
+		if ((position + howFarAhead) >= 0 && (position + howFarAhead) < tokenStream.size()) {
+			return tokenStream.get(position + howFarAhead);
 		}
 		else {
 			return null;
@@ -159,8 +158,7 @@ public class Tokens {
 	}
 
 	/**
-	 * Return {@code true} if the indicated token matches the current token
-	 * position.
+	 * Return {@code true} if the indicated token matches the current token position.
 	 *
 	 * @param desiredTokenKind token to match
 	 * @return true if the current token kind matches the provided token kind
@@ -170,8 +168,7 @@ public class Tokens {
 	}
 
 	/**
-	 * Return {@code true} if the indicated token matches the current token
-	 * position.
+	 * Return {@code true} if the indicated token matches the current token position.
 	 *
 	 * @param desiredTokenKind token to match
 	 * @param consumeIfMatched if {@code true}, advance the current token position
@@ -206,13 +203,13 @@ public class Tokens {
 	}
 
 	/**
-	 * Consume the next token if it matches the indicated token kind;
-	 * otherwise throw {@link CheckPointedParseException}.
+	 * Consume the next token if it matches the indicated token kind; otherwise throw
+	 * {@link CheckPointedParseException}.
 	 *
 	 * @param expectedKind the expected token kind
 	 * @return the next token
-	 * @throws CheckPointedParseException if the next token does not match
-	 * the expected token kind
+	 * @throws CheckPointedParseException if the next token does not match the expected
+	 * token kind
 	 */
 	protected Token eat(TokenKind expectedKind) {
 		Token t = next();
@@ -220,16 +217,15 @@ public class Tokens {
 			raiseException(expression.length(), DSLMessage.OOD);
 		}
 		if (t.kind != expectedKind) {
-			raiseException(t.startPos, DSLMessage.NOT_EXPECTED_TOKEN,
-					expectedKind.toString().toLowerCase(),
-					(t.data == null)?new String(t.getKind().tokenChars).toLowerCase():t.data);
+			raiseException(t.startPos, DSLMessage.NOT_EXPECTED_TOKEN, expectedKind.toString().toLowerCase(),
+					(t.data == null) ? new String(t.getKind().tokenChars).toLowerCase() : t.data);
 		}
 		return t;
 	}
-	
+
 	/**
-	 * Consume the next token. Throw {@link CheckPointedParseException} if there
-	 * is nothing to consume.
+	 * Consume the next token. Throw {@link CheckPointedParseException} if there is
+	 * nothing to consume.
 	 *
 	 * @return the next token
 	 * @throws CheckPointedParseException if there are no more tokens
@@ -243,11 +239,11 @@ public class Tokens {
 	}
 
 	/**
-	 * Return {@code true} if the first character of the token at the current position
-	 * is the same as the last character of the token at the previous position.
+	 * Return {@code true} if the first character of the token at the current position is
+	 * the same as the last character of the token at the previous position.
 	 *
-	 * @return true if the first character of the current token matches the last
-	 * character of the previous token
+	 * @return true if the first character of the current token matches the last character
+	 * of the previous token
 	 */
 	protected boolean isNextAdjacent() {
 		if (!hasNext()) {
@@ -269,16 +265,16 @@ public class Tokens {
 	}
 
 	/**
-	 * Throw a new {@link CheckPointedParseException} based on the current and
-	 * last successfully processed token position.
+	 * Throw a new {@link CheckPointedParseException} based on the current and last
+	 * successfully processed token position.
 	 *
 	 * @param position position where parse error occurred
-	 * @param message  parse exception message
-	 * @param inserts  variables that may be inserted in the error message
+	 * @param message parse exception message
+	 * @param inserts variables that may be inserted in the error message
 	 */
 	protected void raiseException(int position, DSLMessage message, Object... inserts) {
-		throw new CheckPointedParseException(expression, position, this.position,
-				lastGoodPosition, tokenStream, message, inserts);
+		throw new CheckPointedParseException(expression, position, this.position, lastGoodPosition, tokenStream,
+				message, inserts);
 	}
 
 	/**

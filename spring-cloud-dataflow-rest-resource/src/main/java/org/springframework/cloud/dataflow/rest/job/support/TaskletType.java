@@ -24,8 +24,8 @@ import org.springframework.util.StringUtils;
 
 /**
  * Types of {@link org.springframework.batch.core.step.tasklet.Tasklet} implementations
- * known by Spring Task.  These
- * include tasklets provided by Spring Batch and Spring for Apache Hadoop.
+ * known by Spring Task. These include tasklets provided by Spring Batch and Spring for
+ * Apache Hadoop.
  *
  * @author Michael Minella
  * @author Glenn Renfro
@@ -48,35 +48,36 @@ public enum TaskletType {
 	/**
 	 * {@link org.springframework.batch.core.step.tasklet.MethodInvokingTaskletAdapter}
 	 */
-	METHOD_INVOKING_TASKLET_ADAPTER(MethodInvokingTaskletAdapter.class.getName(), "Method Invoking Tasklet Adapter Step"),
+	METHOD_INVOKING_TASKLET_ADAPTER(MethodInvokingTaskletAdapter.class.getName(),
+			"Method Invoking Tasklet Adapter " + "Step"),
 	/**
 	 * Used when the type of tasklet is unknown to the system
 	 */
 	UNKNOWN("", "");
 
-	//TODO: Add Hadoop Types
+	// TODO: Add Hadoop Types
 
 	private final String className;
 	private final String displayName;
 
-	private TaskletType(String className, String displayName) {
+	TaskletType(String className, String displayName) {
 		this.className = className;
 		this.displayName = displayName;
 	}
 
 	/**
-	 * @param className the fully qualified name of the {@link org.springframework.batch.core.step.tasklet.Tasklet}
-	 *                     implementation
+	 * @param className the fully qualified name of the
+	 * {@link org.springframework.batch.core.step.tasklet.Tasklet} implementation
 	 * @return the type if known, otherwise {@link #UNKNOWN}
 	 */
 	public static TaskletType fromClassName(String className) {
 		TaskletType type = UNKNOWN;
 
-		if(StringUtils.hasText(className)) {
+		if (StringUtils.hasText(className)) {
 			String name = className.trim();
 
 			for (TaskletType curType : values()) {
-				if(curType.className.equals(name)) {
+				if (curType.className.equals(name)) {
 					type = curType;
 					break;
 				}

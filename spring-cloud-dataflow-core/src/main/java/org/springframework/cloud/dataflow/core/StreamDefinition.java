@@ -27,18 +27,16 @@ import org.springframework.core.style.ToStringCreator;
 import org.springframework.util.Assert;
 
 /**
- * Representation of a defined stream. A stream consists of an
- * ordered list of apps used to process data. Each app
- * may contain configuration options provided at the time of
+ * Representation of a defined stream. A stream consists of an ordered list of apps used
+ * to process data. Each app may contain configuration options provided at the time of
  * stream creation.
  * <p>
- * This stream definition does not include any deployment
- * or runtime configuration for a stream.
- *
- * @see StreamAppDefinition
+ * This stream definition does not include any deployment or runtime configuration for a
+ * stream.
  *
  * @author Patrick Peralta
  * @author Mark Fisher
+ * @see StreamAppDefinition
  */
 public class StreamDefinition {
 
@@ -53,16 +51,16 @@ public class StreamDefinition {
 	private final String dslText;
 
 	/**
-	 * Ordered list of {@link StreamAppDefinition}s comprising this stream.
-	 * The source is the first entry and the sink is the last entry.
+	 * Ordered list of {@link StreamAppDefinition}s comprising this stream. The source is
+	 * the first entry and the sink is the last entry.
 	 */
 	private final LinkedList<StreamAppDefinition> applicationDefinitions;
 
 	/**
 	 * Construct a {@code StreamDefinition}.
 	 *
-	 * @param name     name of stream
-	 * @param dslText  DSL definition for stream
+	 * @param name name of stream
+	 * @param dslText DSL definition for stream
 	 */
 	public StreamDefinition(String name, String dslText) {
 		Assert.hasText(name, "name is required");
@@ -95,9 +93,10 @@ public class StreamDefinition {
 	}
 
 	/**
-	 * Return the ordered list of application definitions for this stream as a {@link List}.
-	 * This allows for retrieval of application definitions in the stream by index.
-	 * Application definitions are maintained in stream flow order (source is first, sink is last).
+	 * Return the ordered list of application definitions for this stream as a
+	 * {@link List}. This allows for retrieval of application definitions in the stream by
+	 * index. Application definitions are maintained in stream flow order (source is
+	 * first, sink is last).
 	 *
 	 * @return list of application definitions for this stream definition
 	 */
@@ -107,8 +106,8 @@ public class StreamDefinition {
 
 	/**
 	 * Return an iterator that indicates the order of application deployments for this
-	 * stream. The application definitions are returned in reverse order; i.e. the sink is returned
-	 * first followed by the processors in reverse order followed by the source.
+	 * stream. The application definitions are returned in reverse order; i.e. the sink is
+	 * returned first followed by the processors in reverse order followed by the source.
 	 *
 	 * @return iterator that iterates over the application definitions in deployment order
 	 */
@@ -137,24 +136,22 @@ public class StreamDefinition {
 		if (dslText == null) {
 			if (other.dslText != null)
 				return false;
-		} else if (!dslText.equals(other.dslText))
+		}
+		else if (!dslText.equals(other.dslText))
 			return false;
 		if (name == null) {
 			if (other.name != null)
 				return false;
-		} else if (!name.equals(other.name))
+		}
+		else if (!name.equals(other.name))
 			return false;
 		return true;
 	}
 
 	@Override
 	public String toString() {
-		return new ToStringCreator(this)
-				.append("name", this.name)
-				.append("definition", this.dslText)
-				.toString();
+		return new ToStringCreator(this).append("name", this.name).append("definition", this.dslText).toString();
 	}
-
 
 	/**
 	 * Iterator that prevents mutation of its backing data structure.
@@ -164,7 +161,7 @@ public class StreamDefinition {
 	private static class ReadOnlyIterator<T> implements Iterator<T> {
 		private final Iterator<T> wrapped;
 
-		public ReadOnlyIterator(Iterator<T> wrapped) {
+		ReadOnlyIterator(Iterator<T> wrapped) {
 			this.wrapped = wrapped;
 		}
 

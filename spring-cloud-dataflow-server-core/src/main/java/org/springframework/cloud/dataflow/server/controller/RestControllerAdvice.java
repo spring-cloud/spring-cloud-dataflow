@@ -63,7 +63,8 @@ public class RestControllerAdvice {
 	 * Handles the general error case. Log track trace at error level
 	 *
 	 * @param e the exception not handled by other exception handler methods
-	 * @return the error response in JSON format with media type application/vnd.error+json
+	 * @return the error response in JSON format with media type
+	 * application/vnd.error+json
 	 */
 	@ExceptionHandler(Exception.class)
 	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -76,20 +77,18 @@ public class RestControllerAdvice {
 	}
 
 	/**
-	 * Log the exception message at warn level and stack trace as trace level.
-	 * Return response status HttpStatus.CONFLICT
-	 * 
-	 * @param e one of the exceptions, {@link AppAlreadyRegisteredException}, {@link DuplicateStreamDefinitionException},
-	 *          {@link DuplicateTaskException}, {@link StreamAlreadyDeployedException}, {@link StreamAlreadyDeployingException},
-	 *          or {@link StreamAlreadyDeployingException}
-	 * @return the error response in JSON format with media type application/vnd.error+json
+	 * Log the exception message at warn level and stack trace as trace level. Return
+	 * response status HttpStatus.CONFLICT
+	 *
+	 * @param e one of the exceptions, {@link AppAlreadyRegisteredException},
+	 * {@link DuplicateStreamDefinitionException}, {@link DuplicateTaskException},
+	 * {@link StreamAlreadyDeployedException}, {@link StreamAlreadyDeployingException}, or
+	 * {@link StreamAlreadyDeployingException}
+	 * @return the error response in JSON format with media type
+	 * application/vnd.error+json
 	 */
-	@ExceptionHandler({
-			AppAlreadyRegisteredException.class,
-			DuplicateStreamDefinitionException.class,
-			DuplicateTaskException.class,
-			StreamAlreadyDeployedException.class,
-			StreamAlreadyDeployingException.class})
+	@ExceptionHandler({ AppAlreadyRegisteredException.class, DuplicateStreamDefinitionException.class,
+			DuplicateTaskException.class, StreamAlreadyDeployedException.class, StreamAlreadyDeployingException.class })
 	@ResponseStatus(HttpStatus.CONFLICT)
 	@ResponseBody
 	public VndErrors onConflictException(Exception e) {
@@ -102,13 +101,15 @@ public class RestControllerAdvice {
 	}
 
 	/**
-	 * Log the exception message at warn level and stack trace as trace level.
-	 * Return response status HttpStatus.UNPROCESSABLE_ENTITY
+	 * Log the exception message at warn level and stack trace as trace level. Return
+	 * response status HttpStatus.UNPROCESSABLE_ENTITY
 	 *
-	 * @param e one of the exceptions, {@link JobNotRestartableException} or {@link JobExecutionNotRunningException}
-	 * @return the error response in JSON format with media type application/vnd.error+json
+	 * @param e one of the exceptions, {@link JobNotRestartableException} or
+	 * {@link JobExecutionNotRunningException}
+	 * @return the error response in JSON format with media type
+	 * application/vnd.error+json
 	 */
-	@ExceptionHandler({JobNotRestartableException.class, JobExecutionNotRunningException.class})
+	@ExceptionHandler({ JobNotRestartableException.class, JobExecutionNotRunningException.class })
 	@ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
 	@ResponseBody
 	public VndErrors onUnprocessableEntityException(Exception e) {
@@ -121,27 +122,24 @@ public class RestControllerAdvice {
 	}
 
 	/**
-	 * Log the exception message at warn level and stack trace as trace level.
-	 * Return response status HttpStatus.NOT_FOUND
-	 * 
-	 * @param e one of the exceptions, {@link NoSuchStreamDefinitionException}, {@link NoSuchAppRegistrationException},
-	 *          {@link NoSuchTaskDefinitionException}, {@link NoSuchTaskExecutionException}, {@link NoSuchJobExecutionException},
-	 *          {@link NoSuchJobInstanceException}, {@link NoSuchJobException}, {@link NoSuchStepExecutionException},
-	 *          {@link MetricsMvcEndpoint.NoSuchMetricException}, {@link NoSuchAppException}, or
-	 *          {@link NoSuchAppInstanceException}
-	 * @return the error response in JSON format with media type application/vnd.error+json         
+	 * Log the exception message at warn level and stack trace as trace level. Return
+	 * response status HttpStatus.NOT_FOUND
+	 *
+	 * @param e one of the exceptions, {@link NoSuchStreamDefinitionException},
+	 * {@link NoSuchAppRegistrationException}, {@link NoSuchTaskDefinitionException},
+	 * {@link NoSuchTaskExecutionException}, {@link NoSuchJobExecutionException},
+	 * {@link NoSuchJobInstanceException}, {@link NoSuchJobException},
+	 * {@link NoSuchStepExecutionException},
+	 * {@link MetricsMvcEndpoint.NoSuchMetricException}, {@link NoSuchAppException}, or
+	 * {@link NoSuchAppInstanceException}
+	 * @return the error response in JSON format with media type
+	 * application/vnd.error+json
 	 */
-	@ExceptionHandler({NoSuchStreamDefinitionException.class,
-			NoSuchAppRegistrationException.class,
-			NoSuchTaskDefinitionException.class,
-			NoSuchTaskExecutionException.class,
-			NoSuchJobExecutionException.class,
-			NoSuchJobInstanceException.class,
-			NoSuchJobException.class,
-			NoSuchStepExecutionException.class,
-			MetricsMvcEndpoint.NoSuchMetricException.class,
-			NoSuchAppException.class,
-			NoSuchAppInstanceException.class})
+	@ExceptionHandler({ NoSuchStreamDefinitionException.class, NoSuchAppRegistrationException.class,
+			NoSuchTaskDefinitionException.class, NoSuchTaskExecutionException.class, NoSuchJobExecutionException.class,
+			NoSuchJobInstanceException.class, NoSuchJobException.class, NoSuchStepExecutionException.class,
+			MetricsMvcEndpoint.NoSuchMetricException.class, NoSuchAppException.class,
+			NoSuchAppInstanceException.class })
 	@ResponseStatus(HttpStatus.NOT_FOUND)
 	@ResponseBody
 	public VndErrors onNotFoundException(Exception e) {
@@ -154,20 +152,20 @@ public class RestControllerAdvice {
 	}
 
 	/**
-	 * Client did not formulate a correct request.
-	 * Log the exception message at warn level and stack trace as trace level.
-	 * Return response status HttpStatus.BAD_REQUEST (400).
-	 * 
-	 * @param e one of the exceptions, {@link MissingServletRequestParameterException}, {@link UnsatisfiedServletRequestParameterException},
-	 *          {@link MethodArgumentTypeMismatchException}, or {@link InvalidStreamDefinitionException}
-	 * @return the error response in JSON format with media type application/vnd.error+json	 
+	 * Client did not formulate a correct request. Log the exception message at warn level
+	 * and stack trace as trace level. Return response status HttpStatus.BAD_REQUEST
+	 * (400).
+	 *
+	 * @param e one of the exceptions, {@link MissingServletRequestParameterException},
+	 * {@link UnsatisfiedServletRequestParameterException},
+	 * {@link MethodArgumentTypeMismatchException}, or
+	 * {@link InvalidStreamDefinitionException}
+	 * @return the error response in JSON format with media type
+	 * application/vnd.error+json
 	 */
-	@ExceptionHandler({
-			MissingServletRequestParameterException.class,
-			UnsatisfiedServletRequestParameterException.class,
-			MethodArgumentTypeMismatchException.class,
-			InvalidStreamDefinitionException.class
-	})
+	@ExceptionHandler({ MissingServletRequestParameterException.class,
+			UnsatisfiedServletRequestParameterException.class, MethodArgumentTypeMismatchException.class,
+			InvalidStreamDefinitionException.class })
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	@ResponseBody
 	public VndErrors onClientGenericBadRequest(Exception e) {
@@ -183,13 +181,14 @@ public class RestControllerAdvice {
 	 * The exception handler is trigger if a JSR303 {@link ConstraintViolationException}
 	 * is being raised.
 	 * <p>
-	 * Log the exception message at warn level and stack trace as trace level.
-	 * Return response status HttpStatus.BAD_REQUEST (400).
+	 * Log the exception message at warn level and stack trace as trace level. Return
+	 * response status HttpStatus.BAD_REQUEST (400).
 	 *
 	 * @param e the exceptions, {@link ConstraintViolationException}
-	 * @return the error response in JSON format with media type application/vnd.error+json	 	 
+	 * @return the error response in JSON format with media type
+	 * application/vnd.error+json
 	 */
-	@ExceptionHandler({ConstraintViolationException.class})
+	@ExceptionHandler({ ConstraintViolationException.class })
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	@ResponseBody
 	public VndErrors onConstraintViolationException(ConstraintViolationException e) {

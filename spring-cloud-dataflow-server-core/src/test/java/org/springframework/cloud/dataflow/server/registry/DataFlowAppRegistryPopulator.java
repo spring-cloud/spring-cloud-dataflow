@@ -39,7 +39,8 @@ public class DataFlowAppRegistryPopulator implements InitializingBean, ResourceL
 	private ResourceLoader resourceLoader;
 
 	/**
-	 * Populates a {@link org.springframework.cloud.dataflow.registry.AppRegistry} on startup.
+	 * Populates a {@link org.springframework.cloud.dataflow.registry.AppRegistry} on
+	 * startup.
 	 *
 	 * @param registry the {@link UriRegistry} to populate
 	 * @param locations the properties file(s) listing apps to import into the registry

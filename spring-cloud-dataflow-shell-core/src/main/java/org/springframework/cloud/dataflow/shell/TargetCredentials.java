@@ -22,20 +22,18 @@ import java.util.List;
 import org.springframework.cloud.dataflow.shell.command.support.RoleType;
 
 /**
- * Encapsulates the credentials to the Data Flow Server Target, such as
- * {@link #username} and {@link #password}. Maybe also, depending on security settings,
- * include a list of {@link #roles}s that are associated with the user account.
+ * Encapsulates the credentials to the Data Flow Server Target, such as {@link #username}
+ * and {@link #password}. Maybe also, depending on security settings, include a list of
+ * {@link #roles}s that are associated with the user account.
  *
  * @author Gunnar Hillert
  * @since 1.0
- *
  */
 public class TargetCredentials {
 
+	final List<RoleType> roles = new ArrayList<>(0);
 	private final String username;
 	private final String password;
-
-	final List<RoleType> roles = new ArrayList<>(0);
 
 	public TargetCredentials(String username, String password) {
 		this.username = username;
@@ -51,7 +49,7 @@ public class TargetCredentials {
 	}
 
 	public String getDisplayableContents() {
-		return "[username='" + username +"', password='********']";
+		return "[username='" + username + "', password='********']";
 	}
 
 	public List<RoleType> getRoles() {

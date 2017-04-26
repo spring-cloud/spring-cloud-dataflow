@@ -19,11 +19,9 @@ package org.springframework.cloud.dataflow.rest.resource.about;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.hateoas.ResourceSupport;
-
 /**
- * Provides security related meta-information. E.g. is security enabled, username,
- * roles etc.
+ * Provides security related meta-information. E.g. is security enabled, username, roles
+ * etc.
  *
  * @author Gunnar Hillert
  */

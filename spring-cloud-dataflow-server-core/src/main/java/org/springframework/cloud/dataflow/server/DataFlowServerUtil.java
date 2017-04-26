@@ -31,12 +31,13 @@ import org.springframework.cloud.deployer.spi.core.AppDefinition;
 public class DataFlowServerUtil {
 
 	/**
-	 * Return the {@link ApplicationType} for a {@link AppDefinition} in the context
-	 * of a defined stream.
+	 * Return the {@link ApplicationType} for a {@link AppDefinition} in the context of a
+	 * defined stream.
 	 *
 	 * @param appDefinition the app for which to determine the type
-	 * @throws CannotDetermineApplicationTypeException Thrown if the {@link ApplicationType} cannot be determined
 	 * @return {@link ApplicationType} for the given app
+	 * @throws CannotDetermineApplicationTypeException Thrown if the
+	 * {@link ApplicationType} cannot be determined
 	 */
 	public static ApplicationType determineApplicationType(StreamAppDefinition appDefinition) {
 		// Parser has already taken care of source/sink destinations, etc
@@ -52,7 +53,8 @@ public class DataFlowServerUtil {
 			return ApplicationType.source;
 		}
 		else {
-			throw new CannotDetermineApplicationTypeException(appDefinition.getName() + " had neither input nor output set");
+			throw new CannotDetermineApplicationTypeException(
+					appDefinition.getName() + " had neither input nor " + "output set");
 		}
 	}
 }

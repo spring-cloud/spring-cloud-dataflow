@@ -28,8 +28,8 @@ import org.springframework.cloud.dataflow.registry.AppRegistration;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
 
 /**
- * Provides completions by finding apps whose name starts with a
- * prefix (which was assumed to be a correct app name, but wasn't).
+ * Provides completions by finding apps whose name starts with a prefix (which was assumed
+ * to be a correct app name, but wasn't).
  *
  * @author Eric Bottard
  * @author Mark Fisher
@@ -43,13 +43,13 @@ public class UnfinishedAppNameExpansionStrategy implements ExpansionStrategy {
 	}
 
 	@Override
-	public boolean addProposals(String text, StreamDefinition streamDefinition,
-			int detailLevel, List<CompletionProposal> collector) {
+	public boolean addProposals(String text, StreamDefinition streamDefinition, int detailLevel,
+			List<CompletionProposal> collector) {
 
 		StreamAppDefinition lastApp = streamDefinition.getDeploymentOrderIterator().next();
 		Set<String> parameterNames = new HashSet<>(lastApp.getProperties().keySet());
 		parameterNames.removeAll(CompletionUtils.IMPLICIT_PARAMETER_NAMES);
-		if( !parameterNames.isEmpty() || !text.endsWith(lastApp.getName())) {
+		if (!parameterNames.isEmpty() || !text.endsWith(lastApp.getName())) {
 			return false;
 		}
 
@@ -58,12 +58,13 @@ public class UnfinishedAppNameExpansionStrategy implements ExpansionStrategy {
 		String alreadyTyped = lastApp.getName();
 		CompletionProposal.Factory proposals = CompletionProposal.expanding(text);
 
-		List<ApplicationType> validTypesAtThisPosition = Arrays.asList(CompletionUtils.determinePotentialTypes(lastApp));
+		List<ApplicationType> validTypesAtThisPosition = Arrays
+				.asList(CompletionUtils.determinePotentialTypes(lastApp));
 
 		for (AppRegistration appRegistration : appRegistry.findAll()) {
 			String candidateName = appRegistration.getName();
-			if (validTypesAtThisPosition.contains(appRegistration.getType())
-					&& !alreadyTyped.equals(candidateName) && candidateName.startsWith(alreadyTyped)) {
+			if (validTypesAtThisPosition.contains(appRegistration.getType()) && !alreadyTyped.equals(candidateName)
+					&& candidateName.startsWith(alreadyTyped)) {
 				String expansion = CompletionUtils.maybeQualifyWithLabel(appRegistration.getName(), streamDefinition);
 
 				collector.add(proposals.withSuffix(expansion.substring(alreadyTyped.length())));

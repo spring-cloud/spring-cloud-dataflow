@@ -12,16 +12,13 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
- *
  */
+
 package org.springframework.cloud.dataflow.server.controller;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
-import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.cloud.dataflow.core.dsl.ParseException;
 import org.springframework.cloud.dataflow.core.dsl.TaskParser;
@@ -57,9 +54,9 @@ public class ToolsController {
 	private TaskDslAssembler taskDslAssembler = new TaskDslAssembler();
 
 	/**
-	 * Parse a task definition into a graph structure. The definition map is expected to have
-	 * a 'dsl' key containing the composed task DSL and a 'name'
-	 * key indicating the name of the composed task.
+	 * Parse a task definition into a graph structure. The definition map is expected to
+	 * have a 'dsl' key containing the composed task DSL and a 'name' key indicating the
+	 * name of the composed task.
 	 *
 	 * @param definition the map containing the task definition DSL and task name
 	 * @return a resource with the graph property set
@@ -67,16 +64,17 @@ public class ToolsController {
 	@RequestMapping(value = "/parseTaskTextToGraph", method = RequestMethod.POST)
 	public TaskToolsResource parseTaskTextToGraph(@RequestBody Map<String, String> definition) {
 		Graph graph = null;
-		List<Map<String,Object>> errors = new ArrayList<>();
+		List<Map<String, Object>> errors = new ArrayList<>();
 		try {
-			TaskParser taskParser = new TaskParser(definition.get(TASK_NAME), definition.get(TASK_DEFINITION), true, true);
+			TaskParser taskParser = new TaskParser(definition.get(TASK_NAME), definition.get(TASK_DEFINITION), true,
+					true);
 			graph = taskParser.parse().toGraph();
 		}
 		catch (ParseException pe) {
 			errors.add(pe.toExceptionDescriptor());
 		}
 		catch (TaskValidationException tve) {
-			for (TaskValidationProblem problem: tve.getValidationProblems()) {
+			for (TaskValidationProblem problem : tve.getValidationProblems()) {
 				errors.add(problem.toExceptionDescriptor());
 			}
 		}
@@ -92,7 +90,7 @@ public class ToolsController {
 	@RequestMapping(value = "/convertTaskGraphToText", method = RequestMethod.POST)
 	public TaskToolsResource convertTaskGraphToText(@RequestBody Graph graph) {
 		String dsl = null;
-		List<Map<String,Object>> errors = new ArrayList<>();
+		List<Map<String, Object>> errors = new ArrayList<>();
 		try {
 			dsl = graph.toDSLText();
 		}
@@ -105,7 +103,7 @@ public class ToolsController {
 	private static class ParsedGraphOutput {
 		final Graph graph;
 
-		final List<Map<String,Object>> errors;
+		final List<Map<String, Object>> errors;
 
 		public ParsedGraphOutput(Graph graph, List<Map<String, Object>> errors) {
 			this.graph = graph;
@@ -116,7 +114,7 @@ public class ToolsController {
 	private static class GraphToDslOutput {
 		final String dsl;
 
-		final List<Map<String,Object>> errors;
+		final List<Map<String, Object>> errors;
 
 		public GraphToDslOutput(String dsl, List<Map<String, Object>> errors) {
 			this.dsl = dsl;
@@ -125,8 +123,8 @@ public class ToolsController {
 	}
 
 	/**
-	 * {@link org.springframework.hateoas.ResourceAssembler} implementation
-	 * that converts a {@link ParsedGraphOutput} to a {@link TaskToolsResource}.
+	 * {@link org.springframework.hateoas.ResourceAssembler} implementation that converts
+	 * a {@link ParsedGraphOutput} to a {@link TaskToolsResource}.
 	 */
 	static class TaskToolsAssembler extends ResourceAssemblerSupport<ParsedGraphOutput, TaskToolsResource> {
 
@@ -141,8 +139,8 @@ public class ToolsController {
 	}
 
 	/**
-	 * {@link org.springframework.hateoas.ResourceAssembler} implementation
-	 * that converts a {@link GraphToDslOutput} to a {@link TaskToolsResource}.
+	 * {@link org.springframework.hateoas.ResourceAssembler} implementation that converts
+	 * a {@link GraphToDslOutput} to a {@link TaskToolsResource}.
 	 */
 	static class TaskDslAssembler extends ResourceAssemblerSupport<GraphToDslOutput, TaskToolsResource> {
 

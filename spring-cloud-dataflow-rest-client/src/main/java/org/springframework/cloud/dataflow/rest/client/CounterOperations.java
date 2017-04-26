@@ -1,5 +1,6 @@
 /*
  * Copyright 2015 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.springframework.cloud.dataflow.rest.client;
 
 import org.springframework.analytics.rest.domain.CounterResource;
@@ -21,13 +21,14 @@ import org.springframework.hateoas.PagedResources;
 
 /**
  * Interface defining operations available when dealing with Counters.
- * 
+ *
  * @author Eric Bottard
  */
 public interface CounterOperations {
 
 	/**
 	 * Retrieve information about the given named counter.
+	 *
 	 * @param name the name of the counter
 	 * @return the counter
 	 */
@@ -35,12 +36,14 @@ public interface CounterOperations {
 
 	/**
 	 * Retrieve basic information (i.e. names) for existing counters.
+	 *
 	 * @return the paged list of counters
 	 */
 	PagedResources<MetricResource> list();
 
 	/**
 	 * Delete the counter with given name.
+	 *
 	 * @param name the name of the counter
 	 */
 	void reset(String name);

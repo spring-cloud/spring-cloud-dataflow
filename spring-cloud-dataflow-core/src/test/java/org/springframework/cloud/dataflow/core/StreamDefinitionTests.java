@@ -16,19 +16,19 @@
 
 package org.springframework.cloud.dataflow.core;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-
 import java.util.List;
 import java.util.Map;
 
 import org.junit.Test;
 
 import org.springframework.cloud.dataflow.core.dsl.ParseException;
+
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Mark Fisher
@@ -61,7 +61,7 @@ public class StreamDefinitionTests {
 	@Test
 	public void simpleStream() {
 		StreamDefinition streamDefinition = new StreamDefinition("test", "foo | bar");
-		List<StreamAppDefinition> requests = streamDefinition.getAppDefinitions(); 
+		List<StreamAppDefinition> requests = streamDefinition.getAppDefinitions();
 		assertEquals(2, requests.size());
 		StreamAppDefinition source = requests.get(0);
 		StreamAppDefinition sink = requests.get(1);
@@ -80,7 +80,8 @@ public class StreamDefinitionTests {
 
 	@Test
 	public void quotesInParams() {
-		StreamDefinition streamDefinition = new StreamDefinition("test", "foo --bar='payload.matches(''hello'')' | file");
+		StreamDefinition streamDefinition = new StreamDefinition("test",
+				"foo --bar='payload.matches(''hello'')' | " + "file");
 		List<StreamAppDefinition> requests = streamDefinition.getAppDefinitions();
 		assertEquals(2, requests.size());
 		StreamAppDefinition source = requests.get(0);

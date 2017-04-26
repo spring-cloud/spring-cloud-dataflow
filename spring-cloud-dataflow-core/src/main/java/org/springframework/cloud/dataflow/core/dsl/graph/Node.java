@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -41,7 +41,7 @@ public class Node {
 
 	// Properties are those supported by the node
 	public Map<String, String> properties;
-	
+
 	// Metadata is other information about the node (e.g. any label in use)
 	public Map<String, String> metadata;
 
@@ -92,14 +92,6 @@ public class Node {
 	}
 
 	@JsonIgnore
-	public void setLabel(String label) {
-		if (metadata == null) {
-			metadata = new HashMap<>();
-		}
-		metadata.put(METADATA_LABEL, label);
-	}
-	
-	@JsonIgnore
 	public String getLabel() {
 		if (metadata == null) {
 			return null;
@@ -107,5 +99,13 @@ public class Node {
 		else {
 			return metadata.get(METADATA_LABEL);
 		}
+	}
+
+	@JsonIgnore
+	public void setLabel(String label) {
+		if (metadata == null) {
+			metadata = new HashMap<>();
+		}
+		metadata.put(METADATA_LABEL, label);
 	}
 }

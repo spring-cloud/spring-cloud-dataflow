@@ -20,8 +20,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.cloud.dataflow.core.DataFlowPropertyKeys;
 
 /**
- * Properties used to define the behavior of tasks created by
- * Spring Cloud Data Flow.
+ * Properties used to define the behavior of tasks created by Spring Cloud Data Flow.
  *
  * @author Glenn Renfro
  */

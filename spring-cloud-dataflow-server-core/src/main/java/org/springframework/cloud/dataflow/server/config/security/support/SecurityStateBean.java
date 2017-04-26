@@ -19,7 +19,6 @@ package org.springframework.cloud.dataflow.server.config.security.support;
  * State-holder for computed security meta-information.
  *
  * @author Gunnar Hillert
- *
  */
 public class SecurityStateBean {
 
@@ -34,12 +33,12 @@ public class SecurityStateBean {
 		return authenticationEnabled;
 	}
 
-	public boolean isAuthorizationEnabled() {
-		return authorizationEnabled;
-	}
-
 	public void setAuthenticationEnabled(boolean authenticationEnabled) {
 		this.authenticationEnabled = authenticationEnabled;
+	}
+
+	public boolean isAuthorizationEnabled() {
+		return authorizationEnabled;
 	}
 
 	public void setAuthorizationEnabled(boolean authorizationEnabled) {

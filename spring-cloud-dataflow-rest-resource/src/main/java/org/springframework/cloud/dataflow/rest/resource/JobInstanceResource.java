@@ -39,7 +39,7 @@ public class JobInstanceResource extends ResourceSupport {
 	/**
 	 * Default constructor to be used by Jackson.
 	 */
-	private JobInstanceResource(){
+	private JobInstanceResource() {
 
 	}
 
@@ -47,15 +47,14 @@ public class JobInstanceResource extends ResourceSupport {
 		Assert.hasText(jobName, "jobName must not be empty nor null");
 		this.jobName = jobName;
 		this.jobInstanceId = jobInstanceId;
-		if(taskJobExecutions == null){
+		if (taskJobExecutions == null) {
 			this.jobExecutions = Collections.emptyList();
-		}else {
+		}
+		else {
 			this.jobExecutions = taskJobExecutions;
 			this.jobExecutions = Collections.unmodifiableList(this.jobExecutions);
 		}
 	}
-
-	public static class Page extends PagedResources<JobInstanceResource> {}
 
 	public String getJobName() {
 		return jobName;
@@ -67,5 +66,8 @@ public class JobInstanceResource extends ResourceSupport {
 
 	public List<JobExecutionResource> getJobExecutions() {
 		return jobExecutions;
+	}
+
+	public static class Page extends PagedResources<JobInstanceResource> {
 	}
 }

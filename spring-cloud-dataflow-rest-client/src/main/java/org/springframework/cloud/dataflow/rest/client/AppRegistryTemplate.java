@@ -19,8 +19,8 @@ package org.springframework.cloud.dataflow.rest.client;
 import java.util.Properties;
 
 import org.springframework.cloud.dataflow.core.ApplicationType;
-import org.springframework.cloud.dataflow.rest.resource.DetailedAppRegistrationResource;
 import org.springframework.cloud.dataflow.rest.resource.AppRegistrationResource;
+import org.springframework.cloud.dataflow.rest.resource.DetailedAppRegistrationResource;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.ResourceSupport;
 import org.springframework.hateoas.UriTemplate;
@@ -29,8 +29,8 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 /**
- * Implementation of {@link AppRegistryOperations} that uses {@link RestTemplate}
- * to issue commands to the Data Flow server.
+ * Implementation of {@link AppRegistryOperations} that uses {@link RestTemplate} to issue
+ * commands to the Data Flow server.
  *
  * @author Eric Bottard
  * @author Glenn Renfro
@@ -41,14 +41,13 @@ import org.springframework.web.client.RestTemplate;
 public class AppRegistryTemplate implements AppRegistryOperations {
 
 	/**
-	 * Template used for http interaction.
-	 */
-	protected RestTemplate restTemplate;
-
-	/**
 	 * Template for URI creation.
 	 */
 	private final UriTemplate uriTemplate;
+	/**
+	 * Template used for http interaction.
+	 */
+	protected RestTemplate restTemplate;
 
 	/**
 	 * Construct a {@code AppRegistryTemplate} object.
@@ -85,8 +84,8 @@ public class AppRegistryTemplate implements AppRegistryOperations {
 	}
 
 	@Override
-	public AppRegistrationResource register(String name, ApplicationType type,
-			String uri, String metadataUri, boolean force) {
+	public AppRegistrationResource register(String name, ApplicationType type, String uri, String metadataUri,
+			boolean force) {
 		MultiValueMap<String, Object> values = new LinkedMultiValueMap<String, Object>();
 		values.add("uri", uri);
 		if (metadataUri != null) {
@@ -103,8 +102,7 @@ public class AppRegistryTemplate implements AppRegistryOperations {
 		MultiValueMap<String, Object> values = new LinkedMultiValueMap<String, Object>();
 		values.add("uri", uri);
 		values.add("force", Boolean.toString(force));
-		return restTemplate.postForObject(uriTemplate.toString(), values,
-				AppRegistrationResource.Page.class);
+		return restTemplate.postForObject(uriTemplate.toString(), values, AppRegistrationResource.Page.class);
 	}
 
 	@Override
@@ -116,7 +114,6 @@ public class AppRegistryTemplate implements AppRegistryOperations {
 		}
 		values.add("apps", buffer.toString());
 		values.add("force", Boolean.toString(force));
-		return restTemplate.postForObject(uriTemplate.toString(), values,
-				AppRegistrationResource.Page.class);
+		return restTemplate.postForObject(uriTemplate.toString(), values, AppRegistrationResource.Page.class);
 	}
 }

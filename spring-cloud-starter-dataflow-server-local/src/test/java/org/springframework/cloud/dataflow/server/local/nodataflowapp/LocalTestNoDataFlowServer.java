@@ -20,11 +20,10 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 /**
- * Bootstrap class for dummy spring boot app having
- * no enabled dataflow server configs.
- *
- * Multiple SpringBootApplication's needs to be in
- * their own directories due to component scanning.
+ * Bootstrap class for dummy spring boot app having no enabled dataflow server configs.
+ * <p>
+ * Multiple SpringBootApplication's needs to be in their own directories due to component
+ * scanning.
  *
  * @author Janne Valkealahti
  */

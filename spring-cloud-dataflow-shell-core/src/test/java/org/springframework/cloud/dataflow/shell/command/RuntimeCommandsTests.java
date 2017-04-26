@@ -16,10 +16,6 @@
 
 package org.springframework.cloud.dataflow.shell.command;
 
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.when;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -39,6 +35,10 @@ import org.springframework.cloud.dataflow.rest.resource.AppStatusResource;
 import org.springframework.cloud.dataflow.shell.config.DataFlowShell;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.shell.table.TableModel;
+
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.when;
 
 /**
  * Unit tests for {@link RuntimeCommands}.
@@ -77,7 +77,8 @@ public class RuntimeCommandsTests {
 		List<AppInstanceStatusResource> instanceStatusResources1 = new ArrayList<>();
 		instanceStatusResources1.add(instanceStatusResource1);
 		instanceStatusResources1.add(instanceStatusResource2);
-		PagedResources.PageMetadata metadata1 = new PagedResources.PageMetadata(instanceStatusResources1.size(), 1, instanceStatusResources1.size(), 1);
+		PagedResources.PageMetadata metadata1 = new PagedResources.PageMetadata(instanceStatusResources1.size(), 1,
+				instanceStatusResources1.size(), 1);
 		PagedResources<AppInstanceStatusResource> resources = new PagedResources<>(instanceStatusResources1, metadata1);
 		appStatusResource1.setInstances(resources);
 		appStatusResource2 = new AppStatusResource("2", "undeployed");
@@ -86,8 +87,10 @@ public class RuntimeCommandsTests {
 		List<AppInstanceStatusResource> instanceStatusResources2 = new ArrayList<>();
 		instanceStatusResources1.add(instanceStatusResource3);
 		instanceStatusResources1.add(instanceStatusResource4);
-		PagedResources.PageMetadata metadata3 = new PagedResources.PageMetadata(instanceStatusResources2.size(), 1, instanceStatusResources2.size(), 1);
-		PagedResources<AppInstanceStatusResource> resources2 = new PagedResources<>(instanceStatusResources2, metadata3);
+		PagedResources.PageMetadata metadata3 = new PagedResources.PageMetadata(instanceStatusResources2.size(), 1,
+				instanceStatusResources2.size(), 1);
+		PagedResources<AppInstanceStatusResource> resources2 = new PagedResources<>(instanceStatusResources2,
+				metadata3);
 		appStatusResource2.setInstances(resources2);
 		appStatusResource3 = new AppStatusResource("3", "failed");
 		AppInstanceStatusResource instanceStatusResource5 = new AppInstanceStatusResource("50", "failed", null);
@@ -95,8 +98,10 @@ public class RuntimeCommandsTests {
 		List<AppInstanceStatusResource> instanceStatusResources3 = new ArrayList<>();
 		instanceStatusResources1.add(instanceStatusResource5);
 		instanceStatusResources1.add(instanceStatusResource6);
-		PagedResources.PageMetadata metadata4 = new PagedResources.PageMetadata(instanceStatusResources3.size(), 1, instanceStatusResources3.size(), 1);
-		PagedResources<AppInstanceStatusResource> resources3 = new PagedResources<>(instanceStatusResources3, metadata4);
+		PagedResources.PageMetadata metadata4 = new PagedResources.PageMetadata(instanceStatusResources3.size(), 1,
+				instanceStatusResources3.size(), 1);
+		PagedResources<AppInstanceStatusResource> resources3 = new PagedResources<>(instanceStatusResources3,
+				metadata4);
 		appStatusResource3.setInstances(resources3);
 	}
 
@@ -109,11 +114,8 @@ public class RuntimeCommandsTests {
 		PagedResources.PageMetadata metadata = new PagedResources.PageMetadata(data.size(), 1, data.size(), 1);
 		PagedResources<AppStatusResource> result = new PagedResources<>(data, metadata);
 		when(runtimeOperations.status()).thenReturn(result);
-		Object[][] expected = new String[][] {
-				{"1", "deployed", "2"},
-				{"2", "undeployed", "0"},
-				{"3", "failed", "0"}
-		};
+		Object[][] expected = new String[][] { { "1", "deployed", "2" }, { "2", "undeployed", "0" },
+				{ "3", "failed", "0" } };
 		TableModel model = runtimeCommands.list(true, null).getModel();
 		for (int row = 0; row < expected.length; row++) {
 			for (int col = 0; col < expected[row].length; col++) {
@@ -130,12 +132,8 @@ public class RuntimeCommandsTests {
 		PagedResources.PageMetadata metadata = new PagedResources.PageMetadata(data.size(), 1, data.size(), 1);
 		PagedResources<AppStatusResource> result = new PagedResources<>(data, metadata);
 		when(runtimeOperations.status()).thenReturn(result);
-		Object[][] expected = new String[][] {
-				{"1", "deployed", "2"},
-				{"10", "deployed"},
-				{"20", "deployed"},
-				{"2", "undeployed", "0"}
-		};
+		Object[][] expected = new String[][] { { "1", "deployed", "2" }, { "10", "deployed" }, { "20", "deployed" },
+				{ "2", "undeployed", "0" } };
 		TableModel model = runtimeCommands.list(false, null).getModel();
 		for (int row = 0; row < expected.length; row++) {
 			for (int col = 0; col < expected[row].length; col++) {
@@ -147,12 +145,8 @@ public class RuntimeCommandsTests {
 	@Test
 	public void testStatusByModuleId() {
 		when(runtimeOperations.status("1")).thenReturn(appStatusResource1);
-		Object[][] expected = new String[][] {
-				{"1", "deployed", "2"},
-				{"10", "deployed"},
-				{"20", "deployed"}
-		};
-		TableModel model = runtimeCommands.list(false, new String[] {"1"}).getModel();
+		Object[][] expected = new String[][] { { "1", "deployed", "2" }, { "10", "deployed" }, { "20", "deployed" } };
+		TableModel model = runtimeCommands.list(false, new String[] { "1" }).getModel();
 		assertTrue(model.getRowCount() == 4);
 		for (int row = 0; row < expected.length; row++) {
 			for (int col = 0; col < expected[row].length; col++) {

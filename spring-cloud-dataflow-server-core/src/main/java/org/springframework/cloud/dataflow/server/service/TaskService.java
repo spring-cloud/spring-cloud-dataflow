@@ -27,7 +27,6 @@ import java.util.Map;
  * @author Mark Fisher
  * @author Janne Valkealahti
  * @author Gunnar Hillert
- *
  */
 public interface TaskService {
 
@@ -42,14 +41,16 @@ public interface TaskService {
 	long executeTask(String taskName, Map<String, String> taskDeploymentProperties, List<String> commandLineArgs);
 
 	/**
-	 * Cleanup the resources that resulted from running the task with the given execution id.
+	 * Cleanup the resources that resulted from running the task with the given execution
+	 * id.
+	 *
 	 * @param id the execution id
 	 */
 	void cleanupExecution(long id);
 
 	/**
-	 * Saves the task definition. If it is a Composed Task then the task
-	 * definitions required for a ComposedTaskRunner task are also created.
+	 * Saves the task definition. If it is a Composed Task then the task definitions
+	 * required for a ComposedTaskRunner task are also created.
 	 *
 	 * @param name The name of the task.
 	 * @param dsl The dsl that comprises the task.
@@ -57,8 +58,8 @@ public interface TaskService {
 	void saveTaskDefinition(String name, String dsl);
 
 	/**
-	 * Destroy the task definition. If it is a Composed Task then the task
-	 * definitions required for a ComposedTaskRunner task are also destroyed.
+	 * Destroy the task definition. If it is a Composed Task then the task definitions
+	 * required for a ComposedTaskRunner task are also destroyed.
 	 *
 	 * @param name The name of the task.
 	 */
@@ -66,9 +67,10 @@ public interface TaskService {
 
 	/**
 	 * Determines if the DSL is a composed DSL definition.
+	 *
 	 * @param dsl the Task DSL to evaluate
 	 * @return true if it is composed task definition else false.
 	 */
-	boolean isComposedDefinition(String dsl) ;
+	boolean isComposedDefinition(String dsl);
 
 }

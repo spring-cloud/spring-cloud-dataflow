@@ -33,8 +33,8 @@ import org.springframework.stereotype.Component;
 public class ConsoleUserInput implements UserInput {
 
 	/**
-	 * Loops until one of the {@code options} is provided. Pressing return is equivalent to returning
-	 * {@code defaultValue}.
+	 * Loops until one of the {@code options} is provided. Pressing return is equivalent
+	 * to returning {@code defaultValue}.
 	 */
 	@Override
 	public String promptWithOptions(String prompt, String defaultValue, String... options) {
@@ -58,10 +58,11 @@ public class ConsoleUserInput implements UserInput {
 	}
 
 	/**
-	 *  Reads a single line of input from the console.
+	 * Reads a single line of input from the console.
 	 *
-	 *  @param console input
-	 *  @param echo whether the input should be echoed (e.g. false for passwords, other sensitive data)
+	 * @param console input
+	 * @param echo whether the input should be echoed (e.g. false for passwords, other
+	 * sensitive data)
 	 */
 	private String read(InputStreamReader console, boolean echo) {
 		StringBuilder builder = new StringBuilder();

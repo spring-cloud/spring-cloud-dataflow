@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,9 +19,9 @@ package org.springframework.cloud.dataflow.core.dsl;
 import java.util.List;
 
 /**
- * An extension of {@link ParseException} that keeps track of the last position up to which
- * parsing was successful. Backtracking to that position and attempting a parse again is guaranteed
- * to be successful.
+ * An extension of {@link ParseException} that keeps track of the last position up to
+ * which parsing was successful. Backtracking to that position and attempting a parse
+ * again is guaranteed to be successful.
  *
  * @author Eric Bottard
  */
@@ -70,7 +70,7 @@ public class CheckPointedParseException extends ParseException {
 			s.append("\n").append(expressionString.substring(startOfLine)).append("\n");
 		}
 		int offset = position - startOfLine;
-		if (checkpointPointer > 0  && offset >= 0 && (getStartOfLine(checkpointPointer)==startOfLine)) {
+		if (checkpointPointer > 0 && offset >= 0 && (getStartOfLine(checkpointPointer) == startOfLine)) {
 			int checkpointPosition = getCheckpointPosition();
 			checkpointPosition = checkpointPosition - getStartOfLine(checkpointPosition);
 			offset -= checkpointPosition;
@@ -91,14 +91,15 @@ public class CheckPointedParseException extends ParseException {
 
 	/**
 	 * If there are newlines, need to ensure the place where the ^ will go is adjusted.
+	 *
 	 * @param position the offset from the start of the string (ignoring newlines)
 	 * @return the offset from the start of the line
 	 */
 	private int getStartOfLine(int position) {
 		int lineStart = 0;
-		for (int p=0;p<position;p++) {
-			if (expressionString.charAt(p)=='\n') {
-				lineStart = p+1;
+		for (int p = 0; p < position; p++) {
+			if (expressionString.charAt(p) == '\n') {
+				lineStart = p + 1;
 			}
 		}
 		return lineStart;
@@ -109,8 +110,8 @@ public class CheckPointedParseException extends ParseException {
 	}
 
 	/**
-	 * Return the parsed expression until the last known, well formed position.
-	 * Attempting to re-parse that expression is guaranteed to not fail.
+	 * Return the parsed expression until the last known, well formed position. Attempting
+	 * to re-parse that expression is guaranteed to not fail.
 	 */
 	public String getExpressionStringUntilCheckpoint() {
 		return expressionString.substring(0, getCheckpointPosition());
@@ -120,11 +121,9 @@ public class CheckPointedParseException extends ParseException {
 		return checkpointPointer;
 	}
 
-
 	public List<Token> getTokens() {
 		return tokens;
 	}
-
 
 	public int getTokenPointer() {
 		return tokenPointer;

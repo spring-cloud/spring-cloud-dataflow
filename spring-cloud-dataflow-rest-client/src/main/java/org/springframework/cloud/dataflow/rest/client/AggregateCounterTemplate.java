@@ -29,7 +29,8 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 /**
- * Implementation for {@link AggregateCounterOperations} that interacts with the Spring Cloud Data Flow REST API.
+ * Implementation for {@link AggregateCounterOperations} that interacts with the Spring
+ * Cloud Data Flow REST API.
  *
  * @author Ilayaperumal Gopinathan
  */
@@ -51,19 +52,20 @@ public class AggregateCounterTemplate implements AggregateCounterOperations {
 	@Override
 	public AggregateCounterResource retrieve(String name, Date from, Date to, Resolution resolution) {
 		Assert.notNull(resolution, "Resolution must not be null");
-		DateTime fromParam = from == null?null:new DateTime(from.getTime());
-		DateTime toParam = to == null?null:new DateTime(to.getTime());
+		DateTime fromParam = from == null ? null : new DateTime(from.getTime());
+		DateTime toParam = to == null ? null : new DateTime(to.getTime());
 		String url = links.getLink(AGGREGATE_COUNTER_RELATION).expand(name).getHref();
-		String uriString = UriComponentsBuilder
-				.fromUriString(url)
+		String uriString = UriComponentsBuilder.fromUriString(url)
 				.queryParam("resolution", new Object[] { resolution.toString() })
-				.queryParam("from", new Object[]{fromParam })
-				.queryParam("to", new Object[]{toParam }).build().toUriString();
+				.queryParam("from", new Object[] { fromParam }).queryParam("to", new Object[] { toParam }).build()
+				.toUriString();
 		return restTemplate.getForObject(uriString, AggregateCounterResource.class);
 	}
 
-	@Override public PagedResources<MetricResource> list() {
-		return restTemplate.getForObject(links.getLink(AGGREGATE_COUNTER_COLLECTION_RELATION).getHref(), MetricResource.Page.class);
+	@Override
+	public PagedResources<MetricResource> list() {
+		return restTemplate.getForObject(links.getLink(AGGREGATE_COUNTER_COLLECTION_RELATION).getHref(),
+				MetricResource.Page.class);
 	}
 
 	@Override

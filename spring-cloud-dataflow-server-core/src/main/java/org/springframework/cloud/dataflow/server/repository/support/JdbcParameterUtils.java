@@ -16,13 +16,13 @@
 
 package org.springframework.cloud.dataflow.server.repository.support;
 
-import java.util.Map;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Helper methods for SQL statement parameter parsing.
- *
+ * <p>
  * Only intended for internal use.
  *
  * @author Thomas Risberg
@@ -32,21 +32,20 @@ public class JdbcParameterUtils {
 
 	/**
 	 * Count the occurrences of the character placeholder in an SQL string
-	 * <code>sql</code>. The character placeholder is not counted if it appears
-	 * within a literal, that is, surrounded by single or double quotes. This method will
-	 * count traditional placeholders in the form of a question mark ('?') as well as
-	 * named parameters indicated with a leading ':' or '&amp;'.
-	 *
+	 * <code>sql</code>. The character placeholder is not counted if it appears within a
+	 * literal, that is, surrounded by single or double quotes. This method will count
+	 * traditional placeholders in the form of a question mark ('?') as well as named
+	 * parameters indicated with a leading ':' or '&amp;'.
+	 * <p>
 	 * The code for this method is taken from an early version of the
-	 * {@link org.springframework.jdbc.core.namedparam.NamedParameterUtils}
-	 * class.
+	 * {@link org.springframework.jdbc.core.namedparam.NamedParameterUtils} class.
 	 *
 	 * @param sql String to search in. Returns 0 if the given String is <code>null</code>.
 	 * @param namedParameterHolder the list of parameter placehholder names
-	 * @return the number of parameter placeholder and adds to the namedParameterHolder list any parsed
-	 * namedParameters from the sql
+	 * @return the number of parameter placeholder and adds to the namedParameterHolder
+	 * list any parsed namedParameters from the sql
 	 */
-	public static int countParameterPlaceholders(String sql, List<String> namedParameterHolder ) {
+	public static int countParameterPlaceholders(String sql, List<String> namedParameterHolder) {
 		if (sql == null) {
 			return 0;
 		}
@@ -101,15 +100,16 @@ public class JdbcParameterUtils {
 	}
 
 	/**
-	 * Determine whether a parameter name continues at the current position,
-	 * that is, does not end delimited by any whitespace character yet.
+	 * Determine whether a parameter name continues at the current position, that is, does
+	 * not end delimited by any whitespace character yet.
+	 *
 	 * @param statement the SQL statement
 	 * @param pos the position within the statement
 	 */
 	private static boolean parameterNameContinues(char[] statement, int pos) {
-		return (statement[pos] != ' ' && statement[pos] != ',' && statement[pos] != ')' &&
-				statement[pos] != '"' && statement[pos] != '\'' && statement[pos] != '|' &&
-				statement[pos] != ';' && statement[pos] != '\n' && statement[pos] != '\r');
+		return (statement[pos] != ' ' && statement[pos] != ',' && statement[pos] != ')' && statement[pos] != '"'
+				&& statement[pos] != '\'' && statement[pos] != '|' && statement[pos] != ';' && statement[pos] != '\n'
+				&& statement[pos] != '\r');
 	}
 
 }

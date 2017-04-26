@@ -28,18 +28,22 @@ public interface UserInput {
 	 * Display a prompt text to the user and expect one of {@code options} in return.
 	 *
 	 * @param prompt the a message to prompt the user with
-	 * @param defaultValue the default value to be returned if the user simply presses Enter
+	 * @param defaultValue the default value to be returned if the user simply presses
+	 * Enter
 	 * @param options valid input option set
 	 * @return the prompt text to display to the user
 	 */
 	public String promptWithOptions(String prompt, String defaultValue, String... options);
 
 	/**
-	 * Display a prompt text to the user and expect them to enter a free-form value. Optionally, the input is echoed.
+	 * Display a prompt text to the user and expect them to enter a free-form value.
+	 * Optionally, the input is echoed.
 	 *
 	 * @param prompt the a message to prompt the user with
-	 * @param defaultValue the default value to be returned if the user simply presses Enter
-	 * @param echo echo the input to output (set to false for sensitive input, e.g. passwords)
+	 * @param defaultValue the default value to be returned if the user simply presses
+	 * Enter
+	 * @param echo echo the input to output (set to false for sensitive input, e.g.
+	 * passwords)
 	 * @return the prompt text to display to the user
 	 */
 	public String prompt(String prompt, String defaultValue, boolean echo);

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,8 +17,8 @@
 package org.springframework.cloud.dataflow.core.dsl;
 
 /**
- * Holder for a kind of token, the associated data and its position in the
- * input data stream (start/end).
+ * Holder for a kind of token, the associated data and its position in the input data
+ * stream (start/end).
  *
  * @author Andy Clement
  */
@@ -54,8 +54,8 @@ public class Token {
 	}
 
 	/**
-	 * Constructor for use when there is extra data to associate with a token. For example the text for an identifier
-	 * token.
+	 * Constructor for use when there is extra data to associate with a token. For example
+	 * the text for an identifier token.
 	 */
 	Token(TokenKind tokenKind, char[] tokenData, int pos, int endPos) {
 		this(tokenKind, pos, endPos);
@@ -88,8 +88,8 @@ public class Token {
 
 	@Override
 	public int hashCode() {
-		return this.kind.ordinal() * 37 + (this.startPos + this.endPos) * 37 +
-				(this.kind.hasPayload() ? this.data.hashCode() : 0);
+		return this.kind.ordinal() * 37 + (this.startPos + this.endPos) * 37
+				+ (this.kind.hasPayload() ? this.data.hashCode() : 0);
 	}
 
 	@Override
@@ -98,8 +98,7 @@ public class Token {
 			return false;
 		}
 		Token token = (Token) o;
-		boolean basicMatch = this.kind == token.kind &&
-				this.startPos == token.startPos && this.endPos == token.endPos;
+		boolean basicMatch = this.kind == token.kind && this.startPos == token.startPos && this.endPos == token.endPos;
 		if (!basicMatch)
 			return false;
 		if (this.kind.hasPayload()) {

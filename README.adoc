@@ -62,5 +62,10 @@ For more information on building, see this https://github.com/spring-cloud/sprin
 
 We welcome contributions! Follow this https://github.com/spring-cloud/spring-cloud-dataflow/blob/master/spring-cloud-dataflow-docs/src/main/asciidoc/appendix-contributing.adoc[link] for more information on how to contribute.
 
+=== Code formatting guidelines
 
+* The directory ./src/eclipse has two files for use with code formatting, `eclipse-code-formatter.xml` for the majority of the code formatting rules and `eclipse.importorder` to order the import statements.
 
+* In eclipse you import these files by navigating `Windows -> Preferences` and then the menu items `Preferences > Java > Code Style > Formatter` and `Preferences > Java > Code Style > Organize Imports` respectfully.
+
+* In `IntelliJ`, install the plugin `Eclipse Code Formatter`.  You can find it doing a plugin search within `IntelliJ`.  Then navigate `File -> Other Settings -> Default Settings` and select the Eclipse Code Formatter.  Select the the `eclipse-code-formatter.xml` file for the field `Eclipse Java Formatter config file` and the file `eclipse.importorder` for the field `Import order`.

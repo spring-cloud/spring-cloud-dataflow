@@ -32,14 +32,16 @@ public class Assertions {
 	}
 
 	/**
-	 * Accepts 2*N arguments, even ones being names and odd ones being values for those names. Asserts that exactly only
-	 * one value is non null (or non-false, Boolean.FALSE being treated as false), or throws an exception with a
-	 * descriptive message otherwise.
+	 * Accepts 2*N arguments, even ones being names and odd ones being values for those
+	 * names. Asserts that exactly only one value is non null (or non-false, Boolean.FALSE
+	 * being treated as false), or throws an exception with a descriptive message
+	 * otherwise.
 	 *
 	 * @param namesAndValues the list of names and values
 	 * @return the index of the "pair" that was not {@code null}
 	 * @throws IllegalStateException if more than one argument is non null
-	 * @throws IllegalArgumentException if the method is called with invalid values (e.g. non even number of args)
+	 * @throws IllegalArgumentException if the method is called with invalid values (e.g.
+	 * non even number of args)
 	 */
 	public static int exactlyOneOf(Object... namesAndValues) {
 		int index = atMostOneOf(namesAndValues);
@@ -48,22 +50,24 @@ public class Assertions {
 	}
 
 	/**
-	 * Accepts 2*N arguments, even ones being names and odd ones being values for those names. Asserts that at most one
-	 * value is non null (or non-false, Boolean.FALSE being treated as false), or throws an exception with a descriptive
-	 * message otherwise.
+	 * Accepts 2*N arguments, even ones being names and odd ones being values for those
+	 * names. Asserts that at most one value is non null (or non-false, Boolean.FALSE
+	 * being treated as false), or throws an exception with a descriptive message
+	 * otherwise.
 	 *
 	 * @param namesAndValues the list of names and values
 	 * @return the index of the "pair" that was not {@code null}, or -1 if none was set
 	 * @throws IllegalStateException if more than one argument is non null
-	 * @throws IllegalArgumentException if the method is called with invalid values (e.g. non even number of args)
+	 * @throws IllegalArgumentException if the method is called with invalid values (e.g.
+	 * non even number of args)
 	 */
 	public static int atMostOneOf(Object... namesAndValues) {
 		int index = -1;
 		Assert.isTrue(namesAndValues.length % 2 == 0,
 				"Expected even number of arguments: " + Arrays.asList(namesAndValues));
 		for (int i = 0; i < namesAndValues.length / 2; i++) {
-			Assert.isTrue(namesAndValues[i * 2] instanceof String, "Argument at position " + i
-					+ " should be argument name");
+			Assert.isTrue(namesAndValues[i * 2] instanceof String,
+					"Argument at position " + i + " should be argument name");
 			if (namesAndValues[i * 2 + 1] != null && namesAndValues[i * 2 + 1] != Boolean.FALSE) {
 				if (index != -1) {
 					throw new IllegalStateException(String.format("You cannot specify both '%s' and '%s'",

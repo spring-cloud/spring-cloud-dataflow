@@ -21,9 +21,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * Configuration for {@link EnableDataFlowServer} which adds
- * a marker bean which auto-config classes can use to conditionally
- * check if auto configuration should be activated.
+ * Configuration for {@link EnableDataFlowServer} which adds a marker bean which
+ * auto-config classes can use to conditionally check if auto configuration should be
+ * activated.
  *
  * @author Janne Valkealahti
  */
@@ -35,5 +35,6 @@ public class EnableDataFlowServerConfiguration {
 		return new Marker();
 	}
 
-	class Marker {}
+	class Marker {
+	}
 }

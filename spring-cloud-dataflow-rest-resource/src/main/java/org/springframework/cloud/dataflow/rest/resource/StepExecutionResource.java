@@ -34,14 +34,12 @@ public class StepExecutionResource extends ResourceSupport {
 
 	/**
 	 * Create a new StepExecutionResource
+	 *
 	 * @param jobExecutionId the job execution id, must not be null
-	 * @param stepExecution  the step execution, must not be null
+	 * @param stepExecution the step execution, must not be null
 	 * @param stepType the step type
 	 */
-	public StepExecutionResource(
-			Long jobExecutionId,
-			StepExecution stepExecution,
-			String stepType) {
+	public StepExecutionResource(Long jobExecutionId, StepExecution stepExecution, String stepType) {
 
 		Assert.notNull(jobExecutionId, "jobExecutionId must not be null.");
 		Assert.notNull(stepExecution, "stepExecution must not be null.");
@@ -78,6 +76,7 @@ public class StepExecutionResource extends ResourceSupport {
 		return this.stepType;
 	}
 
-	public static class Page extends PagedResources<StepExecutionResource> {}
+	public static class Page extends PagedResources<StepExecutionResource> {
+	}
 
 }

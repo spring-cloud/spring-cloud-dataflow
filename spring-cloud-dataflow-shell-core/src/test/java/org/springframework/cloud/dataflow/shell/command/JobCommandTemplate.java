@@ -84,8 +84,8 @@ public class JobCommandTemplate {
 
 	/**
 	 * Return the results of executing the shell command:
-	 * <code>dataflow: job execution step list --id 1</code> where id is the id for the job
-	 * execution requested.
+	 * <code>dataflow: job execution step list --id 1</code> where id is the id for the
+	 * job execution requested.
 	 *
 	 * @param id the identifier for the job execution.
 	 * @return the results of the shell command.
@@ -105,8 +105,7 @@ public class JobCommandTemplate {
 	 * @return the results of the shell command.
 	 */
 	public CommandResult jobStepExecutionProgress(long id, long jobExecutionId) {
-		return shell.executeCommand("job execution step progress --id " + id
-		+ " --jobExecutionId " + jobExecutionId);
+		return shell.executeCommand("job execution step progress --id " + id + " --jobExecutionId " + jobExecutionId);
 	}
 
 	/**
@@ -120,7 +119,6 @@ public class JobCommandTemplate {
 	 * @return the results of the shell command.
 	 */
 	public CommandResult jobStepExecutionDisplay(long id, long jobExecutionId) {
-		return shell.executeCommand("job execution step display --id " + id
-				+ " --jobExecutionId " + jobExecutionId);
+		return shell.executeCommand("job execution step display --id " + id + " --jobExecutionId " + jobExecutionId);
 	}
 }

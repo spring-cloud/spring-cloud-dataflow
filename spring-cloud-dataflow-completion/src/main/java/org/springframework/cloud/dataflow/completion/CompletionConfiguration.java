@@ -20,23 +20,23 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolverAutoConfiguration;
+import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 /**
- * Include this Configuration class to expose fully configured {@link StreamCompletionProvider} and
- * {@link TaskCompletionProvider}.
+ * Include this Configuration class to expose fully configured
+ * {@link StreamCompletionProvider} and {@link TaskCompletionProvider}.
  *
  * @author Eric Bottard
  * @author Ilayaperumal Gopinathan
  * @author Mark Fisher
  */
 @Configuration
-@Import({ApplicationConfigurationMetadataResolverAutoConfiguration.class})
+@Import({ ApplicationConfigurationMetadataResolverAutoConfiguration.class })
 public class CompletionConfiguration {
 
 	@Autowired
@@ -48,22 +48,16 @@ public class CompletionConfiguration {
 	@Bean
 	public StreamCompletionProvider streamCompletionProvider() {
 		List<RecoveryStrategy<?>> recoveryStrategies = Arrays.<RecoveryStrategy<?>>asList(
-				emptyStartYieldsAppsRecoveryStrategy(),
-				expandOneDashToTwoDashesRecoveryStrategy(),
+				emptyStartYieldsAppsRecoveryStrategy(), expandOneDashToTwoDashesRecoveryStrategy(),
 				configurationPropertyNameAfterDashDashRecoveryStrategy(),
-				unfinishedConfigurationPropertyNameRecoveryStrategy(),
-				destinationNameYieldsAppsRecoveryStrategy(),
-				appsAfterPipeRecoveryStrategy(),
-				configurationPropertyValueHintRecoveryStrategy()
-		);
-		List<ExpansionStrategy> expansionStrategies = Arrays.asList(
-				addAppOptionsExpansionStrategy(),
-				pipeIntoOtherAppsExpansionStrategy(),
-				unfinishedAppNameExpansionStrategy(),
-				// Make sure this one runs last, as it may clear already computed proposals
+				unfinishedConfigurationPropertyNameRecoveryStrategy(), destinationNameYieldsAppsRecoveryStrategy(),
+				appsAfterPipeRecoveryStrategy(), configurationPropertyValueHintRecoveryStrategy());
+		List<ExpansionStrategy> expansionStrategies = Arrays.asList(addAppOptionsExpansionStrategy(),
+				pipeIntoOtherAppsExpansionStrategy(), unfinishedAppNameExpansionStrategy(),
+				// Make sure this one runs last, as it may clear already computed
+				// proposals
 				// and return its own as the sole candidates
-				configurationPropertyValueHintExpansionStrategy()
-		);
+				configurationPropertyValueHintExpansionStrategy());
 
 		return new StreamCompletionProvider(recoveryStrategies, expansionStrategies);
 	}
@@ -79,7 +73,8 @@ public class CompletionConfiguration {
 	}
 
 	@Bean
-	public ConfigurationPropertyNameAfterDashDashRecoveryStrategy configurationPropertyNameAfterDashDashRecoveryStrategy() {
+	public ConfigurationPropertyNameAfterDashDashRecoveryStrategy
+				configurationPropertyNameAfterDashDashRecoveryStrategy() {
 		return new ConfigurationPropertyNameAfterDashDashRecoveryStrategy(appRegistry, metadataResolver);
 	}
 
@@ -137,27 +132,24 @@ public class CompletionConfiguration {
 	public ValueHintProvider booleanValueHintProvider() {
 		return new BooleanValueHintProvider();
 	}
-	
+
 	@Bean
 	public TaskCompletionProvider taskCompletionProvider() {
 		List<RecoveryStrategy<?>> recoveryStrategies = Arrays.<RecoveryStrategy<?>>asList(
-				emptyStartYieldsAppsTaskRecoveryStrategy(),
-				expandOneDashToTwoDashesTaskRecoveryStrategy(),
+				emptyStartYieldsAppsTaskRecoveryStrategy(), expandOneDashToTwoDashesTaskRecoveryStrategy(),
 				configurationPropertyNameAfterDashDashTaskRecoveryStrategy(),
 				unfinishedConfigurationPropertyNameTaskRecoveryStrategy(),
-				configurationPropertyValueHintTaskRecoveryStrategy()
-		);
-		List<TaskExpansionStrategy> expansionStrategies = Arrays.asList(
-				addTaskAppOptionsExpansionStrategy(),
+				configurationPropertyValueHintTaskRecoveryStrategy());
+		List<TaskExpansionStrategy> expansionStrategies = Arrays.asList(addTaskAppOptionsExpansionStrategy(),
 				unfinishedTaskAppNameExpansionStrategy(),
-				// Make sure this one runs last, as it may clear already computed proposals
+				// Make sure this one runs last, as it may clear already computed
+				// proposals
 				// and return its own as the sole candidates
-				taskConfigurationPropertyValueHintExpansionStrategy()
-		);
+				taskConfigurationPropertyValueHintExpansionStrategy());
 
 		return new TaskCompletionProvider(recoveryStrategies, expansionStrategies);
 	}
-	
+
 	@Bean
 	public RecoveryStrategy<?> emptyStartYieldsAppsTaskRecoveryStrategy() {
 		return new EmptyStartYieldsSourceAppsTaskRecoveryStrategy(appRegistry);
@@ -182,9 +174,10 @@ public class CompletionConfiguration {
 	public RecoveryStrategy<?> expandOneDashToTwoDashesTaskRecoveryStrategy() {
 		return new ExpandOneDashToTwoDashesTaskRecoveryStrategy();
 	}
-	
+
 	@Bean
-	public ConfigurationPropertyNameAfterDashDashTaskRecoveryStrategy configurationPropertyNameAfterDashDashTaskRecoveryStrategy() {
+	public ConfigurationPropertyNameAfterDashDashTaskRecoveryStrategy
+					configurationPropertyNameAfterDashDashTaskRecoveryStrategy() {
 		return new ConfigurationPropertyNameAfterDashDashTaskRecoveryStrategy(appRegistry, metadataResolver);
 	}
 

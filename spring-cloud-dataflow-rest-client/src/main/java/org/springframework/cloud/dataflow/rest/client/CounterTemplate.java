@@ -1,5 +1,6 @@
 /*
  * Copyright 2015 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,7 +23,8 @@ import org.springframework.hateoas.ResourceSupport;
 import org.springframework.web.client.RestTemplate;
 
 /**
- * Implementation for {@link CounterOperations} that interacts with the Spring Cloud Data Flow REST API.
+ * Implementation for {@link CounterOperations} that interacts with the Spring Cloud Data
+ * Flow REST API.
  *
  * @author Eric Bottard
  */
@@ -48,7 +50,8 @@ public class CounterTemplate implements CounterOperations {
 
 	@Override
 	public PagedResources<MetricResource> list() {
-		return restTemplate.getForObject(links.getLink(COUNTERS_COLLECTION_RELATION).getHref(), MetricResource.Page.class);
+		return restTemplate.getForObject(links.getLink(COUNTERS_COLLECTION_RELATION).getHref(),
+				MetricResource.Page.class);
 	}
 
 	@Override

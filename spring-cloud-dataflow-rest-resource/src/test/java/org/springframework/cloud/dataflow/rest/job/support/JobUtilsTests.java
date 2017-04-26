@@ -15,23 +15,25 @@
  */
 package org.springframework.cloud.dataflow.rest.job.support;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 import org.junit.Test;
+
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * @author Gunnar Hillert
  * @since 1.0
- *
  */
 public class JobUtilsTests {
 
 	/**
-	 * Test method for {@link org.springframework.cloud.dataflow.rest.job.support.JobUtils#isJobExecutionRestartable(org.springframework.batch.core.JobExecution)}.
+	 * Test method for
+	 * {@link JobUtils#isJobExecutionRestartable(org.springframework.batch.core.JobExecution)}.
 	 */
 	@Test
 	public void testIsJobExecutionRestartable() {
@@ -40,7 +42,8 @@ public class JobUtilsTests {
 	}
 
 	/**
-	 * Test method for {@link org.springframework.cloud.dataflow.rest.job.support.JobUtils#isJobExecutionAbandonable(org.springframework.batch.core.JobExecution)}.
+	 * Test method for
+	 * {@link JobUtils#isJobExecutionAbandonable(org.springframework.batch.core.JobExecution)}.
 	 */
 	@Test
 	public void testIsJobExecutionAbandonable() {
@@ -49,7 +52,8 @@ public class JobUtilsTests {
 	}
 
 	/**
-	 * Test method for {@link org.springframework.cloud.dataflow.rest.job.support.JobUtils#isJobExecutionStoppable(org.springframework.batch.core.JobExecution)}.
+	 * Test method for
+	 * {@link JobUtils#isJobExecutionStoppable(org.springframework.batch.core.JobExecution)}.
 	 */
 	@Test
 	public void testIsJobExecutionStoppable() {
@@ -89,6 +93,7 @@ public class JobUtilsTests {
 			assertEquals("The provided jobExecution must not be null.", e.getMessage());
 		}
 	}
+
 	@Test
 	public void testIsJobExecutionRestartableWithNullBatchStatus() {
 		try {

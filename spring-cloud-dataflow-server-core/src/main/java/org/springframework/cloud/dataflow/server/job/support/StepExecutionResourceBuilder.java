@@ -25,7 +25,8 @@ import org.springframework.cloud.dataflow.rest.resource.StepExecutionResource;
 import org.springframework.util.Assert;
 
 /**
- * Knows how to build a StepExecutionResource out of our domain model {@link StepExecution}.
+ * Knows how to build a StepExecutionResource out of our domain model
+ * {@link StepExecution}.
  *
  * @author Glenn Renfro
  * @since 1.0
@@ -39,22 +40,22 @@ public class StepExecutionResourceBuilder {
 	private static String generateStepType(StepExecution stepExecution) {
 		Assert.notNull(stepExecution, "stepExecution must not be null");
 		String stepType = StepType.UNKNOWN.getDisplayName();
-		if(stepExecution.getExecutionContext().containsKey(TaskletStep.TASKLET_TYPE_KEY)) {
+		if (stepExecution.getExecutionContext().containsKey(TaskletStep.TASKLET_TYPE_KEY)) {
 			String taskletClassName = stepExecution.getExecutionContext().getString(TaskletStep.TASKLET_TYPE_KEY);
 			TaskletType type = TaskletType.fromClassName(taskletClassName);
 
-			if(type == TaskletType.UNKNOWN) {
+			if (type == TaskletType.UNKNOWN) {
 				stepType = taskletClassName;
 			}
 			else {
 				stepType = type.getDisplayName();
 			}
 		}
-		else if(stepExecution.getExecutionContext().containsKey(Step.STEP_TYPE_KEY)) {
+		else if (stepExecution.getExecutionContext().containsKey(Step.STEP_TYPE_KEY)) {
 			String stepClassName = stepExecution.getExecutionContext().getString(Step.STEP_TYPE_KEY);
 			StepType type = StepType.fromClassName(stepClassName);
 
-			if(type == StepType.UNKNOWN) {
+			if (type == StepType.UNKNOWN) {
 				stepType = stepClassName;
 			}
 			else {

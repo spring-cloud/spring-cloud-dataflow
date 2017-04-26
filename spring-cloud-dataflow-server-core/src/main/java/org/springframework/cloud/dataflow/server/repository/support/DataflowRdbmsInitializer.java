@@ -35,7 +35,7 @@ import org.springframework.jdbc.support.MetaDataAccessException;
  * Utility for initializing the Definition Repository's datasource. If a single
  * {@link DataSource} is available in the current context, and functionality is enabled
  * (as it is by default), this will initialize the database.
- *
+ * <p>
  * By default, initialization of the database can be disabled by configuring the property
  * <code>spring.cloud.dataflow.rdbms.initialize.enable</code> to false.
  *
@@ -61,15 +61,11 @@ public final class DataflowRdbmsInitializer implements InitializingBean {
 	 * Path to the SQL file to use to initialize the database schema.
 	 */
 	private static String schema = DEFAULT_SCHEMA_LOCATION;
-
+	private final FeaturesProperties featuresProperties;
 	private DataSource dataSource;
-
 	private ResourceLoader resourceLoader;
-
 	@Value("${" + DataFlowPropertyKeys.PREFIX + "rdbms.initialize.enable:true}")
 	private boolean definitionInitializationEnable;
-
-	private final FeaturesProperties featuresProperties;
 
 	public DataflowRdbmsInitializer(FeaturesProperties featuresProperties) {
 		this.featuresProperties = featuresProperties;
@@ -102,28 +98,26 @@ public final class DataflowRdbmsInitializer implements InitializingBean {
 			schemaLocation = schemaLocation.replace("@@platform@@", platform);
 			String commonSchemaLocation = schemaLocation;
 			commonSchemaLocation = commonSchemaLocation.replace("@@suffix@@", COMMON_SCHEMA_SUFFIX);
-			logger.info(String.format("Adding dataflow schema %s for %s database", commonSchemaLocation,
-					platform));
+			logger.info(String.format("Adding dataflow schema %s for %s database", commonSchemaLocation, platform));
 			populator.addScript(resourceLoader.getResource(commonSchemaLocation));
 			if (featuresProperties.isStreamsEnabled()) {
 				String streamsSchemaLocation = schemaLocation;
 				streamsSchemaLocation = streamsSchemaLocation.replace("@@suffix@@", STREAMS_SCHEMA_SUFFIX);
-				logger.info(String.format("Adding dataflow schema %s for %s database", streamsSchemaLocation,
-						platform));
+				logger.info(
+						String.format("Adding dataflow schema %s for %s database", streamsSchemaLocation, platform));
 				populator.addScript(resourceLoader.getResource(streamsSchemaLocation));
 			}
 			if (featuresProperties.isTasksEnabled()) {
 				String tasksSchemaLocation = schemaLocation;
 				tasksSchemaLocation = tasksSchemaLocation.replace("@@suffix@@", TASKS_SCHEMA_SUFFIX);
-				logger.info(String.format("Adding dataflow schema %s for %s database", tasksSchemaLocation,
-						platform));
+				logger.info(String.format("Adding dataflow schema %s for %s database", tasksSchemaLocation, platform));
 				populator.addScript(resourceLoader.getResource(tasksSchemaLocation));
 			}
 			if (featuresProperties.isStreamsEnabled() || featuresProperties.isTasksEnabled()) {
 				String deploymentSchemaLocation = schemaLocation;
 				deploymentSchemaLocation = deploymentSchemaLocation.replace("@@suffix@@", DEPLOYMENT_SCHEMA_SUFFIX);
-				logger.info(String.format("Adding dataflow schema %s for %s database", deploymentSchemaLocation,
-						platform));
+				logger.info(
+						String.format("Adding dataflow schema %s for %s database", deploymentSchemaLocation, platform));
 				populator.addScript(resourceLoader.getResource(deploymentSchemaLocation));
 			}
 			populator.setContinueOnError(true);

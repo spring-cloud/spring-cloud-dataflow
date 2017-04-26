@@ -24,20 +24,19 @@ package org.springframework.cloud.dataflow.rest.resource.about;
 public class RuntimeEnvironment {
 
 	/**
-	 * Default constructor for serialization frameworks.
-	 */
-	public RuntimeEnvironment() {
-	}
-
-	/**
 	 * The {@link RuntimeEnvironmentDetails} of the app deployer.
 	 */
 	private RuntimeEnvironmentDetails appDeployer = new RuntimeEnvironmentDetails();
-
 	/**
 	 * The {@link RuntimeEnvironmentDetails} of the task launcher.
 	 */
 	private RuntimeEnvironmentDetails taskLauncher = new RuntimeEnvironmentDetails();
+
+	/**
+	 * Default constructor for serialization frameworks.
+	 */
+	public RuntimeEnvironment() {
+	}
 
 	/**
 	 * @return Null, if the stream feature is disabled

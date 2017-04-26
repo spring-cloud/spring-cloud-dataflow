@@ -15,17 +15,10 @@
  */
 package org.springframework.cloud.dataflow.server.controller;
 
-import static org.hamcrest.Matchers.is;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
@@ -37,6 +30,14 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
+
+import static org.hamcrest.Matchers.is;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
  * @author Vinicius Carvalho
@@ -57,8 +58,8 @@ public class CompletionControllerTests {
 
 	@Before
 	public void setupMocks() {
-		this.mockMvc = MockMvcBuilders.webAppContextSetup(wac).defaultRequest(
-				get("/").accept(MediaType.APPLICATION_JSON)).build();
+		this.mockMvc = MockMvcBuilders.webAppContextSetup(wac)
+				.defaultRequest(get("/").accept(MediaType.APPLICATION_JSON)).build();
 		when(appDeployer.deploy(any(AppDeploymentRequest.class))).thenReturn("testID");
 	}
 
@@ -71,40 +72,28 @@ public class CompletionControllerTests {
 
 	@Test
 	public void testNegativeDetailLevelFailureForStreamCompletion() throws Exception {
-		mockMvc.perform(get("/completions/stream")
-				.param("start", "abc")
-				.param("detailLevel", "-123")
-				.accept(MediaType.APPLICATION_JSON)).andDo(print())
-				.andExpect(status().isBadRequest())
+		mockMvc.perform(get("/completions/stream").param("start", "abc").param("detailLevel", "-123")
+				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isBadRequest())
 				.andExpect(jsonPath("$[0].message", is("The provided detail level must be greater than zero.")));
 	}
 
 	@Test
 	public void testPositiveDetailLevelForStreamCompletion() throws Exception {
-		mockMvc.perform(get("/completions/stream")
-				.param("start", "abc")
-				.param("detailLevel", "2")
-				.accept(MediaType.APPLICATION_JSON)).andDo(print())
-				.andExpect(status().isOk());
+		mockMvc.perform(get("/completions/stream").param("start", "abc").param("detailLevel", "2")
+				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk());
 	}
 
 	@Test
 	public void testNegativeDetailLevelFailureForTaskCompletion() throws Exception {
-		mockMvc.perform(get("/completions/task")
-				.param("start", "abc")
-				.param("detailLevel", "-123")
-				.accept(MediaType.APPLICATION_JSON)).andDo(print())
-				.andExpect(status().isBadRequest())
+		mockMvc.perform(get("/completions/task").param("start", "abc").param("detailLevel", "-123")
+				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isBadRequest())
 				.andExpect(jsonPath("$[0].message", is("The provided detail level must be greater than zero.")));
 	}
 
 	@Test
 	public void testPositiveDetailLevelForTaskCompletion() throws Exception {
-		mockMvc.perform(get("/completions/task")
-				.param("start", "abc")
-				.param("detailLevel", "2")
-				.accept(MediaType.APPLICATION_JSON)).andDo(print())
-				.andExpect(status().isOk());
+		mockMvc.perform(get("/completions/task").param("start", "abc").param("detailLevel", "2")
+				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk());
 	}
 
 }

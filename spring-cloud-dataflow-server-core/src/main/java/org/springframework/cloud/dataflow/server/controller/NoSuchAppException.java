@@ -15,8 +15,6 @@
  */
 package org.springframework.cloud.dataflow.server.controller;
 
-import org.springframework.cloud.dataflow.core.ApplicationType;
-
 /**
  * @author Ilayaperumal Gopinathan
  */

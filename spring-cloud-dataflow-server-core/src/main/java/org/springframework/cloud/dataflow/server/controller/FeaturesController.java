@@ -26,7 +26,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * REST controller that provides features that are enabled/disabled on the dataflow server.
+ * REST controller that provides features that are enabled/disabled on the dataflow
+ * server.
  *
  * @author Ilayaperumal Gopinathan
  * @author Gunnar Hillert

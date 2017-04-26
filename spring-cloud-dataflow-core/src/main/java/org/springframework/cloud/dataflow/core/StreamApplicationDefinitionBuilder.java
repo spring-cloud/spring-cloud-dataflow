@@ -22,15 +22,16 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.springframework.cloud.dataflow.core.StreamAppDefinition.Builder;
-import org.springframework.cloud.dataflow.core.dsl.ArgumentNode;
 import org.springframework.cloud.dataflow.core.dsl.AppNode;
+import org.springframework.cloud.dataflow.core.dsl.ArgumentNode;
 import org.springframework.cloud.dataflow.core.dsl.SinkDestinationNode;
 import org.springframework.cloud.dataflow.core.dsl.SourceDestinationNode;
 import org.springframework.cloud.dataflow.core.dsl.StreamNode;
 import org.springframework.util.Assert;
 
 /**
- * Builds a list of {@link StreamAppDefinition StreamAppDefinitions} out of a parsed {@link StreamNode}.
+ * Builds a list of {@link StreamAppDefinition StreamAppDefinitions} out of a parsed
+ * {@link StreamNode}.
  *
  * @author Mark Fisher
  * @author Patrick Peralta
@@ -53,7 +54,7 @@ class StreamApplicationDefinitionBuilder {
 	 * @param streamName the name of the stream
 	 * @param streamNode the AST construct representing the stream
 	 */
-	public StreamApplicationDefinitionBuilder(String streamName, StreamNode streamNode) {
+	StreamApplicationDefinitionBuilder(String streamName, StreamNode streamNode) {
 		Assert.hasText(streamName, "streamName is required");
 		Assert.notNull(streamNode, "streamNode must not be null");
 		this.streamName = streamName;
@@ -68,10 +69,8 @@ class StreamApplicationDefinitionBuilder {
 		List<AppNode> appNodes = streamNode.getAppNodes();
 		for (int m = appNodes.size() - 1; m >= 0; m--) {
 			AppNode appNode = appNodes.get(m);
-			StreamAppDefinition.Builder builder = (Builder)
-					new StreamAppDefinition.Builder()
-							.setRegisteredAppName(appNode.getName())
-							.setLabel(appNode.getLabelName());
+			StreamAppDefinition.Builder builder = (Builder) new StreamAppDefinition.Builder()
+					.setRegisteredAppName(appNode.getName()).setLabel(appNode.getLabelName());
 			if (appNode.hasArguments()) {
 				ArgumentNode[] arguments = appNode.getArguments();
 				for (ArgumentNode argument : arguments) {
@@ -105,7 +104,7 @@ class StreamApplicationDefinitionBuilder {
 			String consumerGroupName = streamName;
 			if (sourceDestination.getArguments() != null) {
 				ArgumentNode[] argumentNodes = sourceDestination.getArguments();
-				for (ArgumentNode argument: argumentNodes) {
+				for (ArgumentNode argument : argumentNodes) {
 					if (argument.getName().equalsIgnoreCase(CONSUMER_GROUP_PARAMETER)) {
 						consumerGroupName = argument.getValue();
 					}
@@ -115,7 +114,8 @@ class StreamApplicationDefinitionBuilder {
 		}
 		SinkDestinationNode sinkDestination = streamNode.getSinkDestinationNode();
 		if (sinkDestination != null) {
-			builders.getFirst().setProperty(BindingPropertyKeys.OUTPUT_DESTINATION, sinkDestination.getDestinationName());
+			builders.getFirst().setProperty(BindingPropertyKeys.OUTPUT_DESTINATION,
+					sinkDestination.getDestinationName());
 		}
 		List<StreamAppDefinition> streamAppDefinitions = new ArrayList<>(builders.size());
 		for (StreamAppDefinition.Builder builder : builders) {

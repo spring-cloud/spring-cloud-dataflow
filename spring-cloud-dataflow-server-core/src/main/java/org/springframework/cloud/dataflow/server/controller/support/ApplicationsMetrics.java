@@ -23,7 +23,6 @@ import java.util.Map;
  * Support domain class to map metrics response from a collector.
  *
  * @author Janne Valkealahti
- *
  */
 public class ApplicationsMetrics {
 

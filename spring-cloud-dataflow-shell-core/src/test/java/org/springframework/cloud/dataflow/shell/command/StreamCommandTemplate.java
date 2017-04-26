@@ -16,10 +16,6 @@
 
 package org.springframework.cloud.dataflow.shell.command;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -30,6 +26,10 @@ import org.springframework.shell.core.CommandResult;
 import org.springframework.shell.core.JLineShellComponent;
 import org.springframework.shell.table.Table;
 import org.springframework.shell.table.TableModel;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * Helper methods for stream commands to execute in the shell.
@@ -58,25 +58,28 @@ public class StreamCommandTemplate {
 
 	/**
 	 * Create and deploy a stream.
-	 *
-	 * Note the name of the stream will be stored so that when the method destroyCreatedStreams is called, the stream
-	 * will be destroyed.
+	 * <p>
+	 * Note the name of the stream will be stored so that when the method
+	 * destroyCreatedStreams is called, the stream will be destroyed.
 	 *
 	 * @param streamname the name of the stream
 	 * @param streamdefinition the stream definition DSL
-	 * @param values will be injected into streamdefinition according to {@link String#format(String, Object...)} syntax
+	 * @param values will be injected into streamdefinition according to
+	 * {@link String#format(String, Object...)} syntax
 	 */
 	public void create(String streamname, String streamdefinition, Object... values) {
 		doCreate(streamname, streamdefinition, true, values);
 	}
 
 	/**
-	 * Execute stream create (but don't deploy) for the supplied stream name/definition, and verify the command result.
+	 * Execute stream create (but don't deploy) for the supplied stream name/definition,
+	 * and verify the command result.
+	 * <p>
+	 * Note the name of the stream will be stored so that when the method
+	 * destroyCreatedStreams is called, the stream will be destroyed.
 	 *
-	 * Note the name of the stream will be stored so that when the method destroyCreatedStreams is called, the stream
-	 * will be destroyed.
-	 *
-	 * @param values will be injected into streamdefinition according to {@link String#format(String, Object...)} syntax
+	 * @param values will be injected into streamdefinition according to
+	 * {@link String#format(String, Object...)} syntax
 	 */
 	public void createDontDeploy(String streamname, String streamdefinition, Object... values) {
 		doCreate(streamname, streamdefinition, false, values);
@@ -88,13 +91,13 @@ public class StreamCommandTemplate {
 		String wholeCommand = String.format("stream create %s --definition \"%s\" --deploy %s", streamname,
 				actualDefinition.replaceAll("\"", "\\\\\""), deploy);
 		CommandResult cr = shell.executeCommand(wholeCommand);
-		//todo: Add deployment and verifier
-//		if (deploy) {
-//			stateVerifier.waitForDeploy(streamname);
-//		}
-//		else {
-//			stateVerifier.waitForCreate(streamname);
-//		}
+		// todo: Add deployment and verifier
+		// if (deploy) {
+		// stateVerifier.waitForDeploy(streamname);
+		// }
+		// else {
+		// stateVerifier.waitForCreate(streamname);
+		// }
 		// add the stream name to the streams list before assertion
 		streams.add(streamname);
 		String deployMsg = "Created new stream '" + streamname + "'";
@@ -113,19 +116,20 @@ public class StreamCommandTemplate {
 	 */
 	public void deploy(String streamname) {
 		CommandResult cr = shell.executeCommand("stream deploy --name " + streamname);
-		//stateVerifier.waitForDeploy(streamname);
+		// stateVerifier.waitForDeploy(streamname);
 		assertTrue("Failure.  CommandResult = " + cr.toString(), cr.isSuccess());
 		assertEquals("Deployed stream '" + streamname + "'", cr.getResult());
 	}
 
 	/**
-	 * Destroy all streams that were created using the 'create' method. Commonly called in a @After annotated method
+	 * Destroy all streams that were created using the 'create' method. Commonly called in
+	 * a @After annotated method
 	 */
 	public void destroyCreatedStreams() {
 		for (int s = streams.size() - 1; s >= 0; s--) {
 			String streamname = streams.get(s);
 			CommandResult cr = shell.executeCommand("stream destroy --name " + streamname);
-			//stateVerifier.waitForDestroy(streamname);
+			// stateVerifier.waitForDestroy(streamname);
 			assertTrue("Failure to destroy stream " + streamname + ".  CommandResult = " + cr.toString(),
 					cr.isSuccess());
 		}
@@ -138,9 +142,8 @@ public class StreamCommandTemplate {
 	 */
 	public void destroyStream(String stream) {
 		CommandResult cr = shell.executeCommand("stream destroy --name " + stream);
-		//stateVerifier.waitForDestroy(stream);
-		assertTrue("Failure to destroy stream " + stream + ".  CommandResult = " + cr.toString(),
-				cr.isSuccess());
+		// stateVerifier.waitForDestroy(stream);
+		assertTrue("Failure to destroy stream " + stream + ".  CommandResult = " + cr.toString(), cr.isSuccess());
 		streams.remove(stream);
 	}
 
@@ -151,7 +154,7 @@ public class StreamCommandTemplate {
 	 */
 	public void undeploy(String streamname) {
 		CommandResult cr = shell.executeCommand("stream undeploy --name " + streamname);
-		//stateVerifier.waitForUndeploy(streamname);
+		// stateVerifier.waitForUndeploy(streamname);
 		assertTrue(cr.isSuccess());
 		assertEquals("Un-deployed stream '" + streamname + "'", cr.getResult());
 	}
@@ -168,7 +171,10 @@ public class StreamCommandTemplate {
 
 		Table table = (org.springframework.shell.table.Table) cr.getResult();
 		TableModel model = table.getModel();
-		Collection<String> statuses = deployed ? Arrays.asList(DeploymentStateResource.DEPLOYED.getDescription(), DeploymentStateResource.DEPLOYING.getDescription()) : Arrays.asList(DeploymentStateResource.UNDEPLOYED.getDescription());
+		Collection<String> statuses = deployed
+				? Arrays.asList(DeploymentStateResource.DEPLOYED.getDescription(),
+						DeploymentStateResource.DEPLOYING.getDescription())
+				: Arrays.asList(DeploymentStateResource.UNDEPLOYED.getDescription());
 		for (int row = 0; row < model.getRowCount(); row++) {
 			if (streamName.equals(model.getValue(row, 0))
 					&& definition.replace("\\\\", "\\").equals(model.getValue(row, 1))

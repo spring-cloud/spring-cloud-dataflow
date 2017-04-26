@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -41,10 +41,9 @@ public class StreamParser extends AppParser {
 	 */
 	private final String dsl;
 
-
 	/**
-	 * Construct a {@code StreamParser} without supplying the stream name up front.
-	 * The stream name may be embedded in the definition; for example:
+	 * Construct a {@code StreamParser} without supplying the stream name up front. The
+	 * stream name may be embedded in the definition; for example:
 	 * {@code mystream = http | file}.
 	 *
 	 * @param dsl the stream definition DSL text
@@ -57,7 +56,7 @@ public class StreamParser extends AppParser {
 	 * Construct a {@code StreamParser} for a stream with the provided name.
 	 *
 	 * @param name stream name
-	 * @param dsl  stream dsl text
+	 * @param dsl stream dsl text
 	 */
 	public StreamParser(String name, String dsl) {
 		super(new Tokenizer().getTokens(dsl));
@@ -90,25 +89,23 @@ public class StreamParser extends AppParser {
 			if (previous != null) {
 				String duplicate = node.getLabelName();
 				int previousIndex = new ArrayList<String>(alreadySeen.keySet()).indexOf(duplicate);
-				throw new ParseException(dsl, node.startPos, DSLMessage.DUPLICATE_LABEL,
-						duplicate, previous.getName(), previousIndex, node.getName(), m);
+				throw new ParseException(dsl, node.startPos, DSLMessage.DUPLICATE_LABEL, duplicate, previous.getName(),
+						previousIndex, node.getName(), m);
 			}
 		}
 		Tokens tokens = getTokens();
 		if (tokens.hasNext()) {
-			tokens.raiseException(tokens.peek().startPos, DSLMessage.MORE_INPUT,
-					toString(tokens.next()));
+			tokens.raiseException(tokens.peek().startPos, DSLMessage.MORE_INPUT, toString(tokens.next()));
 		}
 
 		return ast;
 	}
 
 	/**
-	 * If a stream name is present, return it and advance the token position -
-	 * otherwise return {@code null}.
+	 * If a stream name is present, return it and advance the token position - otherwise
+	 * return {@code null}.
 	 * <p>
-	 * Expected format:
-	 * {@code name =}
+	 * Expected format: {@code name =}
 	 *
 	 * @return stream name if present
 	 */
@@ -121,8 +118,7 @@ public class StreamParser extends AppParser {
 				tokens.next(); // skip '='
 			}
 			else {
-				tokens.raiseException(tokens.peek().startPos, DSLMessage.ILLEGAL_STREAM_NAME,
-						toString(tokens.peek()));
+				tokens.raiseException(tokens.peek().startPos, DSLMessage.ILLEGAL_STREAM_NAME, toString(tokens.peek()));
 			}
 		}
 		return streamName;
@@ -151,9 +147,9 @@ public class StreamParser extends AppParser {
 		List<AppNode> appNodes = new ArrayList<>();
 		if (bridge) {
 			// Create a bridge app to hang the source/sink destinations off
-			tokens.decrementPosition(); // Rewind so we can nicely eat the sink destination
-			appNodes.add(new AppNode(null, "bridge", tokens.peek().startPos,
-					tokens.peek().endPos, null));
+			tokens.decrementPosition(); // Rewind so we can nicely eat the sink
+										// destination
+			appNodes.add(new AppNode(null, "bridge", tokens.peek().startPos, tokens.peek().endPos, null));
 		}
 		else {
 			appNodes.addAll(eatAppList());
@@ -164,15 +160,14 @@ public class StreamParser extends AppParser {
 		if (tokens.hasNext()) {
 			Token t = tokens.peek();
 			DSLMessage errorMessage = DSLMessage.UNEXPECTED_DATA_AFTER_STREAMDEF;
-			if (!appNodes.isEmpty() && sinkDestinationNode == null &&
-					tokens.getTokenStream().get(tokens.position() - 1).isKind(TokenKind.GT)) {
+			if (!appNodes.isEmpty() && sinkDestinationNode == null
+					&& tokens.getTokenStream().get(tokens.position() - 1).isKind(TokenKind.GT)) {
 				// Additional token where a destination is expected, but has no prefix
 				errorMessage = DSLMessage.EXPECTED_DESTINATION_PREFIX;
 			}
 			tokens.raiseException(t.startPos, errorMessage, toString(t));
 		}
-		return new StreamNode(tokens.getExpression(), streamName, appNodes,
-				sourceDestinationNode, sinkDestinationNode);
+		return new StreamNode(tokens.getExpression(), streamName, appNodes, sourceDestinationNode, sinkDestinationNode);
 	}
 
 	/**
@@ -202,21 +197,23 @@ public class StreamParser extends AppParser {
 	}
 
 	/**
-	 * Return {@code true} if the current token position appears to be pointing
-	 * at a destination.
+	 * Return {@code true} if the current token position appears to be pointing at a
+	 * destination.
 	 *
-	 * @return {@code true} if the current token position appears to be pointing
-	 * at a destination
+	 * @return {@code true} if the current token position appears to be pointing at a
+	 * destination
 	 */
 	private boolean looksLikeDestination() {
 		return looksLikeDestination(getTokens().position());
 	}
 
 	/**
-	 * Return {@code true} if the indicated position appears to be pointing at a destination.
+	 * Return {@code true} if the indicated position appears to be pointing at a
+	 * destination.
 	 *
 	 * @param position token position to check
-	 * @return {@code true} if the indicated position appears to be pointing at a destination.
+	 * @return {@code true} if the indicated position appears to be pointing at a
+	 * destination.
 	 */
 	private boolean looksLikeDestination(int position) {
 		Tokens tokens = getTokens();
@@ -231,15 +228,13 @@ public class StreamParser extends AppParser {
 
 	/**
 	 * If the current token position contains a source destination, return a
-	 * {@link SourceDestinationNode} and advance the token position; otherwise
-	 * return {@code null}.
+	 * {@link SourceDestinationNode} and advance the token position; otherwise return
+	 * {@code null}.
 	 * <p>
-	 * Expected format:
-	 * {@code ':' identifier >}
-	 * {@code ':' identifier '.' identifier >}
+	 * Expected format: {@code ':' identifier >} {@code ':' identifier '.' identifier >}
 	 *
-	 * @return a {@code SourceDestinationNode} or {@code null} if the token
-	 * position is not pointing at a source destination
+	 * @return a {@code SourceDestinationNode} or {@code null} if the token position is
+	 * not pointing at a source destination
 	 */
 	private SourceDestinationNode eatSourceDestination() {
 		Tokens tokens = getTokens();
@@ -270,14 +265,13 @@ public class StreamParser extends AppParser {
 
 	/**
 	 * If the current token position contains a sink destination, return a
-	 * {@link SinkDestinationNode} and advance the token position; otherwise
-	 * return {@code null}.
+	 * {@link SinkDestinationNode} and advance the token position; otherwise return
+	 * {@code null}.
 	 * <p>
-	 * Expected format:
-	 * {@code '>' ':' identifier}
+	 * Expected format: {@code '>' ':' identifier}
 	 *
-	 * @return a {@code SinkDestinationNode} or {@code null} if the token
-	 * position is not pointing at a sink destination
+	 * @return a {@code SinkDestinationNode} or {@code null} if the token position is not
+	 * pointing at a sink destination
 	 */
 	private SinkDestinationNode eatSinkDestination() {
 		Tokens tokens = getTokens();
@@ -298,9 +292,8 @@ public class StreamParser extends AppParser {
 	 * <p>
 	 * A destination reference is the label component when referencing a specific
 	 * app/label in a stream definition.
-	 *
-	 * Expected format:
-	 * {@code ':' identifier [ '.' identifier ]*}
+	 * <p>
+	 * Expected format: {@code ':' identifier [ '.' identifier ]*}
 	 * <p>
 	 *
 	 * @return {@code DestinationNode} representing the destination reference
@@ -317,13 +310,11 @@ public class StreamParser extends AppParser {
 		destinationNameComponents.add(identifierToken);
 		while (tokens.peek(TokenKind.DOT)) {
 			if (!tokens.isNextAdjacent()) {
-				tokens.raiseException(tokens.peek().startPos,
-						DSLMessage.NO_WHITESPACE_IN_DESTINATION_DEFINITION);
+				tokens.raiseException(tokens.peek().startPos, DSLMessage.NO_WHITESPACE_IN_DESTINATION_DEFINITION);
 			}
 			tokens.next(); // skip dot
 			if (!tokens.isNextAdjacent()) {
-				tokens.raiseException(tokens.peek().startPos,
-						DSLMessage.NO_WHITESPACE_IN_DESTINATION_DEFINITION);
+				tokens.raiseException(tokens.peek().startPos, DSLMessage.NO_WHITESPACE_IN_DESTINATION_DEFINITION);
 			}
 			destinationNameComponents.add(tokens.eat(TokenKind.IDENTIFIER));
 		}
@@ -339,9 +330,8 @@ public class StreamParser extends AppParser {
 	/**
 	 * Return a list of {@link AppNode} starting from the current token position.
 	 * <p>
-	 * Expected format:
-	 * {@code appList: app (| app)*}
-	 * A stream may end in an app (if it is a sink) or be followed by a sink destination.
+	 * Expected format: {@code appList: app (| app)*} A stream may end in an app (if it is
+	 * a sink) or be followed by a sink destination.
 	 *
 	 * @return a list of {@code AppNode}
 	 */
@@ -367,8 +357,7 @@ public class StreamParser extends AppParser {
 	@Override
 	public String toString() {
 		Tokens tokens = getTokens();
-		return String.valueOf(tokens.getTokenStream()) + "\n" +
-				"tokenStreamPointer=" + tokens.position() + "\n";
+		return String.valueOf(tokens.getTokenStream()) + "\n" + "tokenStreamPointer=" + tokens.position() + "\n";
 	}
 
 }

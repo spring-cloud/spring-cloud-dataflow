@@ -16,14 +16,6 @@
 
 package org.springframework.cloud.dataflow.completion;
 
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.hasItems;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.startsWith;
-import static org.junit.Assert.assertThat;
-import static org.springframework.cloud.dataflow.completion.Proposals.proposalThat;
-
 import java.io.File;
 import java.io.FileFilter;
 import java.util.ArrayList;
@@ -49,18 +41,28 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.Assert;
 
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.hasItems;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.startsWith;
+import static org.junit.Assert.assertThat;
+import static org.springframework.cloud.dataflow.completion.Proposals.proposalThat;
+
 /**
  * Integration tests for StreamCompletionProvider.
- *
- * <p>These tests work hand in hand with a custom {@link AppRegistry} and
+ * <p>
+ * <p>
+ * These tests work hand in hand with a custom {@link AppRegistry} and
  * {@link ApplicationConfigurationMetadataResolver} to provide completions for a fictional
- * set of well known apps.</p>
+ * set of well known apps.
+ * </p>
  *
  * @author Eric Bottard
  * @author Mark Fisher
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = {CompletionConfiguration.class, StreamCompletionProviderTests.Mocks.class})
+@SpringBootTest(classes = { CompletionConfiguration.class, StreamCompletionProviderTests.Mocks.class })
 public class StreamCompletionProviderTests {
 
 	@Autowired
@@ -69,91 +71,62 @@ public class StreamCompletionProviderTests {
 	@Test
 	// <TAB> => file,http,etc
 	public void testEmptyStartShouldProposeSourceApps() {
-		assertThat(completionProvider.complete("", 1), hasItems(
-				proposalThat(is("http")),
-				proposalThat(is("hdfs"))
-		));
-		assertThat(completionProvider.complete("", 1), not(hasItems(
-				proposalThat(is("log"))
-		)));
+		assertThat(completionProvider.complete("", 1), hasItems(proposalThat(is("http")), proposalThat(is("hdfs"))));
+		assertThat(completionProvider.complete("", 1), not(hasItems(proposalThat(is("log")))));
 	}
 
 	@Test
 	// fi<TAB> => file
 	public void testUnfinishedAppNameShouldReturnCompletions() {
-		assertThat(completionProvider.complete("h", 1), hasItems(
-				proposalThat(is("http")),
-				proposalThat(is("hdfs"))
-		));
-		assertThat(completionProvider.complete("ht", 1), hasItems(
-				proposalThat(is("http"))
-		));
-		assertThat(completionProvider.complete("ht", 1), not(hasItems(
-				proposalThat(is("hdfs"))
-		)));
+		assertThat(completionProvider.complete("h", 1), hasItems(proposalThat(is("http")), proposalThat(is("hdfs"))));
+		assertThat(completionProvider.complete("ht", 1), hasItems(proposalThat(is("http"))));
+		assertThat(completionProvider.complete("ht", 1), not(hasItems(proposalThat(is("hdfs")))));
 	}
 
 	@Test
 	// file | filter <TAB> => file | filter | foo, etc
 	public void testValidSubStreamDefinitionShouldReturnPipe() {
-		assertThat(completionProvider.complete("http | filter ", 1), hasItems(
-				proposalThat(is("http | filter | log"))
-		));
-		assertThat(completionProvider.complete("http | filter ", 1), not(hasItems(
-				proposalThat(is("http | filter | http"))
-		)));
+		assertThat(completionProvider.complete("http | filter ", 1), hasItems(proposalThat(is("http | filter | log"))));
+		assertThat(completionProvider.complete("http | filter ", 1),
+				not(hasItems(proposalThat(is("http | filter | http")))));
 	}
 
 	@Test
 	// file | filter<TAB> => file | filter --foo=, etc
 	public void testValidSubStreamDefinitionShouldReturnAppOptions() {
 		assertThat(completionProvider.complete("http | filter ", 1), hasItems(
-				proposalThat(is("http | filter --expression=")),
-				proposalThat(is("http | filter --expresso="))
-		));
+				proposalThat(is("http | filter --expression=")), proposalThat(is("http | filter --expresso="))));
 		// Same as above, no final space
 		assertThat(completionProvider.complete("http | filter", 1), hasItems(
-				proposalThat(is("http | filter --expression=")),
-				proposalThat(is("http | filter --expresso="))
-		));
+				proposalThat(is("http | filter --expression=")), proposalThat(is("http | filter --expresso="))));
 	}
 
 	@Test
 	// file | filter -<TAB> => file | filter --foo,etc
 	public void testOneDashShouldReturnTwoDashes() {
 		assertThat(completionProvider.complete("http | filter -", 1), hasItems(
-				proposalThat(is("http | filter --expression=")),
-				proposalThat(is("http | filter --expresso="))
-		));
+				proposalThat(is("http | filter --expression=")), proposalThat(is("http | filter --expresso="))));
 	}
 
 	@Test
 	// file | filter --<TAB> => file | filter --foo,etc
 	public void testTwoDashesShouldReturnOptions() {
 		assertThat(completionProvider.complete("http | filter --", 1), hasItems(
-				proposalThat(is("http | filter --expression=")),
-				proposalThat(is("http | filter --expresso="))
-		));
+				proposalThat(is("http | filter --expression=")), proposalThat(is("http | filter --expresso="))));
 	}
 
 	@Test
 	// file |<TAB> => file | foo,etc
 	public void testDanglingPipeShouldReturnExtraApps() {
-		assertThat(completionProvider.complete("http |", 1), hasItems(
-				proposalThat(is("http | filter"))
-		));
-		assertThat(completionProvider.complete("http | filter |", 1), hasItems(
-				proposalThat(is("http | filter | log")),
-				proposalThat(is("http | filter | filter2: filter"))
-		));
+		assertThat(completionProvider.complete("http |", 1), hasItems(proposalThat(is("http | filter"))));
+		assertThat(completionProvider.complete("http | filter |", 1),
+				hasItems(proposalThat(is("http | filter | log")), proposalThat(is("http | filter | filter2: filter"))));
 	}
 
 	@Test
 	// file --p<TAB> => file --preventDuplicates=, file --pattern=
 	public void testUnfinishedOptionNameShouldComplete() {
-		assertThat(completionProvider.complete("http --p", 1), hasItems(
-				proposalThat(is("http --port="))
-		));
+		assertThat(completionProvider.complete("http --p", 1), hasItems(proposalThat(is("http --port="))));
 	}
 
 	@Test
@@ -169,50 +142,39 @@ public class StreamCompletionProviderTests {
 	}
 
 	@Test
-	// :foo > <TAB>  ==> add app names
+	// :foo > <TAB> ==> add app names
 	public void testDestinationIntoApps() {
-		assertThat(completionProvider.complete(":foo >", 1), hasItems(
-				proposalThat(is(":foo > filter")),
-				proposalThat(is(":foo > log"))
-		));
-		assertThat(completionProvider.complete(":foo >", 1), not(hasItems(
-				proposalThat(is(":foo > http"))
-		)));
+		assertThat(completionProvider.complete(":foo >", 1),
+				hasItems(proposalThat(is(":foo > filter")), proposalThat(is(":foo > log"))));
+		assertThat(completionProvider.complete(":foo >", 1), not(hasItems(proposalThat(is(":foo > http")))));
 	}
 
 	@Test
-	// :foo > <TAB>  ==> add app names
+	// :foo > <TAB> ==> add app names
 	public void testDestinationIntoAppsVariant() {
-		assertThat(completionProvider.complete(":foo >", 1), hasItems(
-				proposalThat(is(":foo > filter")),
-				proposalThat(is(":foo > log"))
-		));
+		assertThat(completionProvider.complete(":foo >", 1),
+				hasItems(proposalThat(is(":foo > filter")), proposalThat(is(":foo > log"))));
 	}
 
 	@Test
 	// http<TAB> (no space) => NOT "http2: http"
 	public void testAutomaticAppLabellingDoesNotGetInTheWay() {
-		assertThat(completionProvider.complete("http", 1), not(hasItems(
-				proposalThat(is("http2: http"))
-		)));
+		assertThat(completionProvider.complete("http", 1), not(hasItems(proposalThat(is("http2: http")))));
 	}
 
 	@Test
 	// http --use-ssl=<TAB> => propose true|false
 	public void testValueHintForBooleans() {
-		assertThat(completionProvider.complete("http --use-ssl=", 1), hasItems(
-				proposalThat(is("http --use-ssl=true")),
-				proposalThat(is("http --use-ssl=false"))
-		));
+		assertThat(completionProvider.complete("http --use-ssl=", 1),
+				hasItems(proposalThat(is("http --use-ssl=true")), proposalThat(is("http --use-ssl=false"))));
 	}
 
 	@Test
 	// .. foo --enum-value=<TAB> => propose enum values
 	public void testValueHintForEnums() {
-		assertThat(completionProvider.complete("http | filter --expresso=", 1), hasItems(
-				proposalThat(is("http | filter --expresso=SINGLE")),
-				proposalThat(is("http | filter --expresso=DOUBLE"))
-		));
+		assertThat(completionProvider.complete("http | filter --expresso=", 1),
+				hasItems(proposalThat(is("http | filter --expresso=SINGLE")),
+						proposalThat(is("http | filter --expresso=DOUBLE"))));
 	}
 
 	@Test
@@ -224,17 +186,20 @@ public class StreamCompletionProviderTests {
 		assertThat(completionProvider.complete("foo --some-option", 1), empty());
 		assertThat(completionProvider.complete("foo --some-option=", 1), empty());
 		assertThat(completionProvider.complete("foo --some-option=prefix", 1), empty());
-		assertThat(completionProvider.complete("http | filter --port=12 --expression=something --expresso=not-a-valid-prefix", 1), empty());
+		assertThat(
+				completionProvider.complete(
+						"http | filter --port=12 --expression=something " + "--expresso=not-a-valid-prefix", 1),
+				empty());
 	}
 
 	/*
-	 * http --use-ssl=tr<TAB> => must be true or false, no need to present "...=tr --other.prop"
+	 * http --use-ssl=tr<TAB> => must be true or false, no need to present
+	 * "...=tr --other.prop"
 	 */
 	@Test
 	public void testClosedSetValuesShouldBeExclusive() {
-		assertThat(completionProvider.complete("http --use-ssl=tr", 1), not(hasItems(
-				proposalThat(startsWith("http --use-ssl=tr --port"))
-		)));
+		assertThat(completionProvider.complete("http --use-ssl=tr", 1),
+				not(hasItems(proposalThat(startsWith("http --use-ssl=tr --port")))));
 	}
 
 	/**
@@ -247,7 +212,8 @@ public class StreamCompletionProviderTests {
 	@Configuration
 	public static class Mocks {
 
-		private static final File ROOT = new File("src/test/resources", Mocks.class.getPackage().getName().replace('.', '/') + "/apps");
+		private static final File ROOT = new File("src/test/resources",
+				Mocks.class.getPackage().getName().replace('.', '/') + "/apps");
 
 		private static final FileFilter FILTER = new FileFilter() {
 			@Override
@@ -294,7 +260,8 @@ public class StreamCompletionProviderTests {
 
 		@Bean
 		public ApplicationConfigurationMetadataResolver metadataResolver() {
-			return new BootApplicationConfigurationMetadataResolver(StreamCompletionProviderTests.class.getClassLoader());
+			return new BootApplicationConfigurationMetadataResolver(
+					StreamCompletionProviderTests.class.getClassLoader());
 		}
 	}
 

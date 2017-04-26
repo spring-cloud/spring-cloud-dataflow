@@ -16,33 +16,6 @@
 
 package org.springframework.cloud.dataflow.server.controller;
 
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.startsWith;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.springframework.cloud.deployer.spi.app.DeploymentState.deployed;
-import static org.springframework.cloud.deployer.spi.app.DeploymentState.error;
-import static org.springframework.cloud.deployer.spi.app.DeploymentState.failed;
-import static org.springframework.cloud.deployer.spi.app.DeploymentState.partial;
-import static org.springframework.cloud.deployer.spi.app.DeploymentState.undeployed;
-import static org.springframework.cloud.deployer.spi.app.DeploymentState.unknown;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
@@ -87,6 +60,33 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.startsWith;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.cloud.deployer.spi.app.DeploymentState.deployed;
+import static org.springframework.cloud.deployer.spi.app.DeploymentState.error;
+import static org.springframework.cloud.deployer.spi.app.DeploymentState.failed;
+import static org.springframework.cloud.deployer.spi.app.DeploymentState.partial;
+import static org.springframework.cloud.deployer.spi.app.DeploymentState.undeployed;
+import static org.springframework.cloud.deployer.spi.app.DeploymentState.unknown;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 /**
  * @author Mark Fisher
  * @author Ilayaperumal Gopinathan
@@ -98,35 +98,26 @@ import org.springframework.web.context.WebApplicationContext;
 @DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
 public class StreamControllerTests {
 
+	private final AppRegistry appRegistry = new AppRegistry(new InMemoryUriRegistry(),
+			new MavenResourceLoader(new MavenProperties()));
 	@Autowired
 	private StreamDefinitionRepository repository;
-
 	@Autowired
 	private DeploymentIdRepository deploymentIdRepository;
-
 	@Autowired
 	private ApplicationConfigurationMetadataResolver metadataResolver;
-
 	private MockMvc mockMvc;
-
 	@Autowired
 	private WebApplicationContext wac;
-
 	@Autowired
 	private AppDeployer appDeployer;
-
 	@Autowired
 	private CommonApplicationProperties appsProperties;
 
-	private final AppRegistry appRegistry = new AppRegistry(
-			new InMemoryUriRegistry(),
-			new MavenResourceLoader(new MavenProperties())
-	);
-
 	@Before
 	public void setupMocks() {
-		this.mockMvc = MockMvcBuilders.webAppContextSetup(wac).defaultRequest(
-				get("/").accept(MediaType.APPLICATION_JSON)).build();
+		this.mockMvc = MockMvcBuilders.webAppContextSetup(wac)
+				.defaultRequest(get("/").accept(MediaType.APPLICATION_JSON)).build();
 		when(appDeployer.deploy(any(AppDeploymentRequest.class))).thenReturn("testID");
 	}
 
@@ -146,7 +137,8 @@ public class StreamControllerTests {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testConstructorMissingDeploymentController() {
-		new StreamDefinitionController(new InMemoryStreamDefinitionRepository(), new InMemoryDeploymentIdRepository(), null, appDeployer, appRegistry);
+		new StreamDefinitionController(new InMemoryStreamDefinitionRepository(), new InMemoryDeploymentIdRepository(),
+				null, appDeployer, appRegistry);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
@@ -161,10 +153,8 @@ public class StreamControllerTests {
 	@Test
 	public void testSave() throws Exception {
 		assertEquals(0, repository.count());
-		mockMvc.perform(
-				post("/streams/definitions/").param("name", "myStream").param("definition", "time | log")
-						.accept(MediaType.APPLICATION_JSON)).andDo(print())
-						.andExpect(status().isCreated());
+		mockMvc.perform(post("/streams/definitions/").param("name", "myStream").param("definition", "time | log")
+				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isCreated());
 		assertEquals(1, repository.count());
 		StreamDefinition myStream = repository.findOne("myStream");
 		assertEquals("time | log", myStream.getDslText());
@@ -183,30 +173,23 @@ public class StreamControllerTests {
 	@Test
 	public void testFindRelatedStreams() throws Exception {
 		assertEquals(0, repository.count());
-		mockMvc.perform(
-				post("/streams/definitions/").param("name", "myStream1").param("definition", "time | log")
-						.accept(MediaType.APPLICATION_JSON)).andDo(print())
+		mockMvc.perform(post("/streams/definitions/").param("name", "myStream1").param("definition", "time | log")
+				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isCreated());
+		mockMvc.perform(post("/streams/definitions/").param("name", "myAnotherStream1")
+				.param("definition", "time | log").accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isCreated());
-		mockMvc.perform(
-				post("/streams/definitions/").param("name", "myAnotherStream1").param("definition", "time | log")
-						.accept(MediaType.APPLICATION_JSON)).andDo(print())
+		mockMvc.perform(post("/streams/definitions/").param("name", "myStream2").param("definition", ":myStream1 > log")
+				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isCreated());
+		mockMvc.perform(post("/streams/definitions/").param("name", "myStream3")
+				.param("definition", ":myStream1.time > log").accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isCreated());
-		mockMvc.perform(
-				post("/streams/definitions/").param("name", "myStream2").param("definition", ":myStream1 > log")
-						.accept(MediaType.APPLICATION_JSON)).andDo(print())
-				.andExpect(status().isCreated());
-		mockMvc.perform(
-				post("/streams/definitions/").param("name", "myStream3").param("definition", ":myStream1.time > log")
-						.accept(MediaType.APPLICATION_JSON)).andDo(print())
-				.andExpect(status().isCreated());
-		mockMvc.perform(
-				post("/streams/definitions/").param("name", "myStream4").param("definition", ":myAnotherStream1 > log")
-						.accept(MediaType.APPLICATION_JSON)).andDo(print())
+		mockMvc.perform(post("/streams/definitions/").param("name", "myStream4")
+				.param("definition", ":myAnotherStream1 > log").accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isCreated());
 		assertEquals(5, repository.count());
-		String response = mockMvc.perform(
-				get("/streams/definitions/myStream1/related")
-						.accept(MediaType.APPLICATION_JSON)).andReturn().getResponse().getContentAsString();
+		String response = mockMvc
+				.perform(get("/streams/definitions/myStream1/related").accept(MediaType.APPLICATION_JSON)).andReturn()
+				.getResponse().getContentAsString();
 		assertTrue(response.contains(":myStream1 > log"));
 		assertTrue(response.contains(":myStream1.time > log"));
 		assertTrue(response.contains("time | log"));
@@ -215,64 +198,52 @@ public class StreamControllerTests {
 
 	@Test
 	public void testMethodArgumentTypeMismatchFailure() throws Exception {
-		mockMvc.perform(get("/streams/definitions/myStream1/related")
-				.param("nested", "in-correct-value")
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().is4xxClientError());
+		mockMvc.perform(get("/streams/definitions/myStream1/related").param("nested", "in-correct-value")
+				.accept(MediaType.APPLICATION_JSON)).andExpect(status().is4xxClientError());
 	}
 
 	@Test
 	public void testFindRelatedAndNestedStreams() throws Exception {
 		assertEquals(0, repository.count());
-		mockMvc.perform(
-				post("/streams/definitions/").param("name", "myStream1").param("definition", "time | log")
-						.accept(MediaType.APPLICATION_JSON)).andDo(print())
+		mockMvc.perform(post("/streams/definitions/").param("name", "myStream1").param("definition", "time | log")
+				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isCreated());
+		mockMvc.perform(post("/streams/definitions/").param("name", "myAnotherStream1")
+				.param("definition", "time | log").accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isCreated());
-		mockMvc.perform(
-				post("/streams/definitions/").param("name", "myAnotherStream1").param("definition", "time | log")
-						.accept(MediaType.APPLICATION_JSON)).andDo(print())
+		mockMvc.perform(post("/streams/definitions/").param("name", "myStream2").param("definition", ":myStream1 > log")
+				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isCreated());
+		mockMvc.perform(post("/streams/definitions/").param("name", "TapOnmyStream2")
+				.param("definition", ":myStream2 > log").accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isCreated());
-		mockMvc.perform(
-				post("/streams/definitions/").param("name", "myStream2").param("definition", ":myStream1 > log")
-						.accept(MediaType.APPLICATION_JSON)).andDo(print())
+		mockMvc.perform(post("/streams/definitions/").param("name", "myStream3")
+				.param("definition", ":myStream1.time > log").accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isCreated());
-		mockMvc.perform(
-				post("/streams/definitions/").param("name", "TapOnmyStream2").param("definition", ":myStream2 > log")
-						.accept(MediaType.APPLICATION_JSON)).andDo(print())
+		mockMvc.perform(post("/streams/definitions/").param("name", "TapOnMyStream3")
+				.param("definition", ":myStream3 > log").accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isCreated());
-		mockMvc.perform(
-				post("/streams/definitions/").param("name", "myStream3").param("definition", ":myStream1.time > log")
-						.accept(MediaType.APPLICATION_JSON)).andDo(print())
+		mockMvc.perform(post("/streams/definitions/").param("name", "MultipleNestedTaps")
+				.param("definition", ":TapOnMyStream3 > log").accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isCreated());
-		mockMvc.perform(
-				post("/streams/definitions/").param("name", "TapOnMyStream3").param("definition", ":myStream3 > log")
-						.accept(MediaType.APPLICATION_JSON)).andDo(print())
-				.andExpect(status().isCreated());
-		mockMvc.perform(
-				post("/streams/definitions/").param("name", "MultipleNestedTaps").param("definition", ":TapOnMyStream3 > log")
-						.accept(MediaType.APPLICATION_JSON)).andDo(print())
-				.andExpect(status().isCreated());
-		mockMvc.perform(
-				post("/streams/definitions/").param("name", "myStream4").param("definition", ":myAnotherStream1 > log")
-						.accept(MediaType.APPLICATION_JSON)).andDo(print())
+		mockMvc.perform(post("/streams/definitions/").param("name", "myStream4")
+				.param("definition", ":myAnotherStream1 > log").accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isCreated());
 		assertEquals(8, repository.count());
-		String response = mockMvc.perform(
-				get("/streams/definitions/myStream1/related?nested=true")
-						.accept(MediaType.APPLICATION_JSON)).andReturn().getResponse().getContentAsString();
+		String response = mockMvc
+				.perform(get("/streams/definitions/myStream1/related?nested=true").accept(MediaType.APPLICATION_JSON))
+				.andReturn().getResponse().getContentAsString();
 		assertTrue(response.contains(":myStream1 > log"));
 		assertTrue(response.contains(":myStream1.time > log"));
 		assertTrue(response.contains("time | log"));
 		assertTrue(response.contains("\"totalElements\":6"));
 		String response2 = mockMvc.perform(
-				get("/streams/definitions/myAnotherStream1/related?nested=true")
-						.accept(MediaType.APPLICATION_JSON)).andReturn().getResponse().getContentAsString();
+				get("/streams/definitions/myAnotherStream1/related?nested=true").accept(MediaType.APPLICATION_JSON))
+				.andReturn().getResponse().getContentAsString();
 		assertTrue(response2.contains(":myAnotherStream1 > log"));
 		assertTrue(response2.contains("time | log"));
 		assertTrue(response2.contains("\"totalElements\":2"));
-		String response3 = mockMvc.perform(
-				get("/streams/definitions/myStream2/related?nested=true")
-						.accept(MediaType.APPLICATION_JSON)).andReturn().getResponse().getContentAsString();
+		String response3 = mockMvc
+				.perform(get("/streams/definitions/myStream2/related?nested=true").accept(MediaType.APPLICATION_JSON))
+				.andReturn().getResponse().getContentAsString();
 		assertTrue(response3.contains(":myStream1 > log"));
 		assertTrue(response3.contains(":myStream2 > log"));
 		assertTrue(response3.contains("\"totalElements\":2"));
@@ -280,60 +251,40 @@ public class StreamControllerTests {
 
 	@Test
 	public void testSaveInvalidAppDefintions() throws Exception {
-		mockMvc.perform(
-			post("/streams/definitions/").param("name", "myStream").param("definition", "foo | bar")
-				.accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
-				.andExpect(status().isBadRequest())
-				.andExpect(
-					jsonPath("$[0].logref", is("InvalidStreamDefinitionException"))
-				)
-				.andExpect(
-					jsonPath("$[0].message", is("Application name 'foo' with type 'source' does not exist in the app "
-						+ "registry.\nApplication name 'bar' with type 'sink' does not exist in the app registry."))
-				);
+		mockMvc.perform(post("/streams/definitions/").param("name", "myStream").param("definition", "foo | bar")
+				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$[0].logref", is("InvalidStreamDefinitionException")))
+				.andExpect(jsonPath("$[0].message",
+						is("Application name 'foo' with type 'source' does not exist in the " + "app "
+								+ "registry.\nApplication name 'bar' with type 'sink' does not exist in the app "
+								+ "registry.")));
 	}
 
 	@Test
 	public void testSaveInvalidAppDefintionsDueToParseException() throws Exception {
-		mockMvc.perform(
-				post("/streams/definitions/").param("name", "myStream")
-						.param("definition", "foo --.spring.cloud.stream.metrics.properties=spring* | bar")
-						.accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
-				.andExpect(status().isBadRequest())
-				.andExpect(
-						jsonPath("$[0].logref", is("InvalidStreamDefinitionException"))
-				)
-				.andExpect(
-						jsonPath("$[0].message", startsWith("111E:(pos 6): Unexpected token.  Expected '.' but was"))
-				);
+		mockMvc.perform(post("/streams/definitions/").param("name", "myStream")
+				.param("definition", "foo --.spring.cloud.stream.metrics.properties=spring* | bar")
+				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$[0].logref", is("InvalidStreamDefinitionException"))).andExpect(
+						jsonPath("$[0].message", startsWith("111E:(pos 6): Unexpected token.  Expected '.' but was")));
 	}
 
 	@Test
 	public void testSaveIncorrectStream() throws Exception {
 		assertEquals(0, repository.count());
 		mockMvc.perform(post("/streams/definitions/").param("name", "myStream").param("definition", "foooooo")
-			.accept(MediaType.APPLICATION_JSON))
-			.andDo(print())
-			.andExpect(status().isBadRequest())
-			.andExpect(
-				jsonPath("$[0].logref", is("InvalidStreamDefinitionException"))
-			)
-			.andExpect(
-				jsonPath("$[0].message", is("Cannot determine application type for application 'foooooo': "
-					+ "foooooo had neither input nor output set"))
-			);
+				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$[0].logref", is("InvalidStreamDefinitionException")))
+				.andExpect(jsonPath("$[0].message", is("Cannot determine application type for application 'foooooo': "
+						+ "foooooo had neither input nor output set")));
 	}
 
 	@Test
 	public void testSaveDuplicate() throws Exception {
 		repository.save(new StreamDefinition("myStream", "time | log"));
 		assertEquals(1, repository.count());
-		mockMvc.perform(
-				post("/streams/definitions/").param("name", "myStream").param("definition", "time | log")
-						.accept(MediaType.APPLICATION_JSON)).andDo(print())
-						.andExpect(status().isConflict());
+		mockMvc.perform(post("/streams/definitions/").param("name", "myStream").param("definition", "time | log")
+				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isConflict());
 		assertEquals(1, repository.count());
 	}
 
@@ -341,11 +292,8 @@ public class StreamControllerTests {
 	public void testSaveWithParameters() throws Exception {
 		assertEquals(0, repository.count());
 		String definition = "time --fixedDelay=500 --timeUnit=milliseconds | log";
-		mockMvc.perform(
-				post("/streams/definitions/").param("name", "myStream")
-						.param("definition", definition)
-						.accept(MediaType.APPLICATION_JSON)).andDo(print())
-				.andExpect(status().isCreated());
+		mockMvc.perform(post("/streams/definitions/").param("name", "myStream").param("definition", definition)
+				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isCreated());
 		assertEquals(1, repository.count());
 		StreamDefinition myStream = repository.findOne("myStream");
 		StreamAppDefinition timeDefinition = myStream.getAppDefinitions().get(0);
@@ -362,10 +310,8 @@ public class StreamControllerTests {
 	public void testStreamWithProcessor() throws Exception {
 		assertEquals(0, repository.count());
 		String definition = "time | filter | log";
-		mockMvc.perform(
-				post("/streams/definitions/").param("name", "myStream").param("definition", definition)
-						.accept(MediaType.APPLICATION_JSON)).andDo(print())
-						.andExpect(status().isCreated());
+		mockMvc.perform(post("/streams/definitions/").param("name", "myStream").param("definition", definition)
+				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isCreated());
 		assertEquals(1, repository.count());
 		StreamDefinition myStream = repository.findOne("myStream");
 		assertEquals(definition, myStream.getDslText());
@@ -391,10 +337,8 @@ public class StreamControllerTests {
 	public void testSourceDestinationWithSingleApp() throws Exception {
 		assertEquals(0, repository.count());
 		String definition = ":foo > log";
-		mockMvc.perform(
-				post("/streams/definitions/").param("name", "myStream").param("definition", definition)
-						.accept(MediaType.APPLICATION_JSON)).andDo(print())
-						.andExpect(status().isCreated());
+		mockMvc.perform(post("/streams/definitions/").param("name", "myStream").param("definition", definition)
+				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isCreated());
 		assertEquals(1, repository.count());
 		StreamDefinition myStream = repository.findOne("myStream");
 		assertEquals(definition, myStream.getDslText());
@@ -410,10 +354,8 @@ public class StreamControllerTests {
 	public void testSourceDestinationWithTwoApps() throws Exception {
 		assertEquals(0, repository.count());
 		String definition = ":foo > filter | log";
-		mockMvc.perform(
-				post("/streams/definitions/").param("name", "myStream").param("definition", definition)
-						.accept(MediaType.APPLICATION_JSON)).andDo(print())
-						.andExpect(status().isCreated());
+		mockMvc.perform(post("/streams/definitions/").param("name", "myStream").param("definition", definition)
+				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isCreated());
 		assertEquals(1, repository.count());
 		StreamDefinition myStream = repository.findOne("myStream");
 		assertEquals(definition, myStream.getDslText());
@@ -435,10 +377,8 @@ public class StreamControllerTests {
 	public void testSinkDestinationWithSingleApp() throws Exception {
 		assertEquals(0, repository.count());
 		String definition = "time > :foo";
-		mockMvc.perform(
-				post("/streams/definitions/").param("name", "myStream").param("definition", definition)
-						.accept(MediaType.APPLICATION_JSON)).andDo(print())
-						.andExpect(status().isCreated());
+		mockMvc.perform(post("/streams/definitions/").param("name", "myStream").param("definition", definition)
+				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isCreated());
 		assertEquals(1, repository.count());
 		StreamDefinition myStream = repository.findOne("myStream");
 		assertEquals(definition, myStream.getDslText());
@@ -453,10 +393,8 @@ public class StreamControllerTests {
 	public void testSinkDestinationWithTwoApps() throws Exception {
 		assertEquals(0, repository.count());
 		String definition = "time | filter > :foo";
-		mockMvc.perform(
-				post("/streams/definitions/").param("name", "myStream").param("definition", definition)
-						.accept(MediaType.APPLICATION_JSON)).andDo(print())
-						.andExpect(status().isCreated());
+		mockMvc.perform(post("/streams/definitions/").param("name", "myStream").param("definition", definition)
+				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isCreated());
 		assertEquals(1, repository.count());
 		StreamDefinition myStream = repository.findOne("myStream");
 		assertEquals(definition, myStream.getDslText());
@@ -480,11 +418,9 @@ public class StreamControllerTests {
 		AppStatus status = mock(AppStatus.class);
 		when(status.getState()).thenReturn(DeploymentState.unknown);
 		when(appDeployer.status("testID")).thenReturn(status);
-		mockMvc.perform(
-				post("/streams/definitions/").param("name", "myStream").param("definition", definition)
-						.param("deploy", "true")
-						.accept(MediaType.APPLICATION_JSON)).andDo(print())
-						.andExpect(status().isCreated());
+		mockMvc.perform(post("/streams/definitions/").param("name", "myStream").param("definition", definition)
+				.param("deploy", "true").accept(MediaType.APPLICATION_JSON)).andDo(print())
+				.andExpect(status().isCreated());
 		assertEquals(1, repository.count());
 		StreamDefinition myStream = repository.findOne("myStream");
 		assertEquals(definition, myStream.getDslText());
@@ -517,8 +453,7 @@ public class StreamControllerTests {
 		when(status.getState()).thenReturn(DeploymentState.unknown);
 		when(appDeployer.status("myStream.time")).thenReturn(status);
 		when(appDeployer.status("myStream.log")).thenReturn(status);
-		mockMvc.perform(
-				delete("/streams/definitions/myStream").accept(MediaType.APPLICATION_JSON)).andDo(print())
+		mockMvc.perform(delete("/streams/definitions/myStream").accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isOk());
 		assertEquals(0, repository.count());
 	}
@@ -538,8 +473,7 @@ public class StreamControllerTests {
 		when(status.getState()).thenReturn(DeploymentState.unknown);
 		when(appDeployer.status("myStream.time")).thenReturn(status);
 		when(appDeployer.status("myStream.log")).thenReturn(status);
-		mockMvc.perform(
-				delete("/streams/definitions/myStream").accept(MediaType.APPLICATION_JSON)).andDo(print())
+		mockMvc.perform(delete("/streams/definitions/myStream").accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isOk());
 		assertEquals(1, repository.count());
 	}
@@ -557,17 +491,14 @@ public class StreamControllerTests {
 		when(status.getState()).thenReturn(DeploymentState.unknown);
 		when(appDeployer.status("myStream.time")).thenReturn(status);
 		when(appDeployer.status("myStream.log")).thenReturn(status);
-		mockMvc.perform(
-				get("/streams/definitions/myStream").accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk())
-				.andExpect(content().json("{name: \"myStream\"}"))
+		mockMvc.perform(get("/streams/definitions/myStream").accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk()).andExpect(content().json("{name: \"myStream\"}"))
 				.andExpect(content().json("{dslText: \"time | log\"}"));
 	}
 
 	@Test
 	public void testDestroyStreamNotFound() throws Exception {
-		mockMvc.perform(
-				delete("/streams/definitions/myStream").accept(MediaType.APPLICATION_JSON)).andDo(print())
+		mockMvc.perform(delete("/streams/definitions/myStream").accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isNotFound());
 		assertEquals(0, repository.count());
 	}
@@ -575,8 +506,7 @@ public class StreamControllerTests {
 	@Test
 	public void testDeploy() throws Exception {
 		repository.save(new StreamDefinition("myStream", "time | log"));
-		mockMvc.perform(
-				post("/streams/deployments/myStream").accept(MediaType.APPLICATION_JSON)).andDo(print())
+		mockMvc.perform(post("/streams/deployments/myStream").accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isCreated());
 		ArgumentCaptor<AppDeploymentRequest> captor = ArgumentCaptor.forClass(AppDeploymentRequest.class);
 		verify(appDeployer, times(2)).deploy(captor.capture());
@@ -592,9 +522,7 @@ public class StreamControllerTests {
 	@Test
 	public void testStreamWithShortformProperties() throws Exception {
 		repository.save(new StreamDefinition("myStream", "time --fixed-delay=2 | log --level=WARN"));
-		mockMvc.perform(
-				post("/streams/deployments/myStream")
-						.accept(MediaType.APPLICATION_JSON)).andDo(print())
+		mockMvc.perform(post("/streams/deployments/myStream").accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isCreated());
 		ArgumentCaptor<AppDeploymentRequest> captor = ArgumentCaptor.forClass(AppDeploymentRequest.class);
 		verify(appDeployer, times(2)).deploy(captor.capture());
@@ -619,11 +547,8 @@ public class StreamControllerTests {
 		Map<String, String> properties = new HashMap<>();
 		properties.put("app.time.fixed-delay", "4");
 		properties.put("app.log.level", "ERROR");
-		mockMvc.perform(
-			post("/streams/deployments/myStream")
-				.content(new ObjectMapper().writeValueAsBytes(properties))
-				.contentType(MediaType.APPLICATION_JSON))
-			.andExpect(status().isCreated());
+		mockMvc.perform(post("/streams/deployments/myStream").content(new ObjectMapper().writeValueAsBytes(properties))
+				.contentType(MediaType.APPLICATION_JSON)).andExpect(status().isCreated());
 		ArgumentCaptor<AppDeploymentRequest> captor = ArgumentCaptor.forClass(AppDeploymentRequest.class);
 		verify(appDeployer, times(2)).deploy(captor.capture());
 		List<AppDeploymentRequest> requests = captor.getAllValues();
@@ -645,11 +570,8 @@ public class StreamControllerTests {
 		Map<String, String> properties = new HashMap<>();
 		properties.put("app.a.fixed-delay", "4");
 		properties.put("app.b.level", "ERROR");
-		mockMvc.perform(
-				post("/streams/deployments/myStream")
-					.content(new ObjectMapper().writeValueAsBytes(properties))
-					.contentType(MediaType.APPLICATION_JSON))
-			.andExpect(status().isCreated());
+		mockMvc.perform(post("/streams/deployments/myStream").content(new ObjectMapper().writeValueAsBytes(properties))
+				.contentType(MediaType.APPLICATION_JSON)).andExpect(status().isCreated());
 		ArgumentCaptor<AppDeploymentRequest> captor = ArgumentCaptor.forClass(AppDeploymentRequest.class);
 		verify(appDeployer, times(2)).deploy(captor.capture());
 		List<AppDeploymentRequest> requests = captor.getAllValues();
@@ -668,8 +590,7 @@ public class StreamControllerTests {
 	@Test
 	public void testDuplicateDeploy() throws Exception {
 		repository.save(new StreamDefinition("myStream", "time | log"));
-		mockMvc.perform(
-				post("/streams/deployments/myStream").accept(MediaType.APPLICATION_JSON)).andDo(print())
+		mockMvc.perform(post("/streams/deployments/myStream").accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isCreated());
 		ArgumentCaptor<AppDeploymentRequest> captor = ArgumentCaptor.forClass(AppDeploymentRequest.class);
 		verify(appDeployer, times(2)).deploy(captor.capture());
@@ -689,16 +610,14 @@ public class StreamControllerTests {
 				return null;
 			}
 		}).build());
-		mockMvc.perform(
-				post("/streams/deployments/myStream").accept(MediaType.APPLICATION_JSON)).andDo(print())
+		mockMvc.perform(post("/streams/deployments/myStream").accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isConflict());
 	}
 
 	@Test
 	public void testDuplicateDeployWhenStreamIsBeingDeployed() throws Exception {
 		repository.save(new StreamDefinition("myStream", "time | log"));
-		mockMvc.perform(
-				post("/streams/deployments/myStream").accept(MediaType.APPLICATION_JSON)).andDo(print())
+		mockMvc.perform(post("/streams/deployments/myStream").accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isCreated());
 		ArgumentCaptor<AppDeploymentRequest> captor = ArgumentCaptor.forClass(AppDeploymentRequest.class);
 		verify(appDeployer, times(2)).deploy(captor.capture());
@@ -718,16 +637,14 @@ public class StreamControllerTests {
 				return null;
 			}
 		}).build());
-		mockMvc.perform(
-				post("/streams/deployments/myStream").accept(MediaType.APPLICATION_JSON)).andDo(print())
+		mockMvc.perform(post("/streams/deployments/myStream").accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isConflict());
 	}
 
 	@Test
 	public void testUndeployNonDeployedStream() throws Exception {
 		repository.save(new StreamDefinition("myStream", "time | log"));
-		mockMvc.perform(
-				delete("/streams/deployments/myStream").accept(MediaType.APPLICATION_JSON)).andDo(print())
+		mockMvc.perform(delete("/streams/deployments/myStream").accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isOk());
 		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
 		verify(appDeployer, times(0)).undeploy(captor.capture());
@@ -737,8 +654,7 @@ public class StreamControllerTests {
 	public void testUndeployAllNonDeployedStream() throws Exception {
 		repository.save(new StreamDefinition("myStream1", "time | log"));
 		repository.save(new StreamDefinition("myStream2", "time | log"));
-		mockMvc.perform(
-				delete("/streams/deployments").accept(MediaType.APPLICATION_JSON)).andDo(print())
+		mockMvc.perform(delete("/streams/deployments").accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isOk());
 		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
 		verify(appDeployer, times(0)).undeploy(captor.capture());
@@ -752,11 +668,8 @@ public class StreamControllerTests {
 		properties.put("deployer.log.count", "2");
 		properties.put("app.*.consumer.concurrency", "3");
 
-		mockMvc.perform(
-			post("/streams/deployments/myStream")
-				.content(new ObjectMapper().writeValueAsBytes(properties))
-				.contentType(MediaType.APPLICATION_JSON))
-			.andExpect(status().isCreated());
+		mockMvc.perform(post("/streams/deployments/myStream").content(new ObjectMapper().writeValueAsBytes(properties))
+				.contentType(MediaType.APPLICATION_JSON)).andExpect(status().isCreated());
 		ArgumentCaptor<AppDeploymentRequest> captor = ArgumentCaptor.forClass(AppDeploymentRequest.class);
 		verify(appDeployer, times(2)).deploy(captor.capture());
 		List<AppDeploymentRequest> requests = captor.getAllValues();
@@ -776,7 +689,8 @@ public class StreamControllerTests {
 		assertThat(timeRequest.getDefinition().getName(), is("time"));
 		Map<String, String> timeAppProps = timeRequest.getDefinition().getProperties();
 		assertEquals("2", timeAppProps.get("spring.cloud.stream.bindings.output.producer.partitionCount"));
-		assertEquals("payload", timeAppProps.get("spring.cloud.stream.bindings.output.producer.partitionKeyExpression"));
+		assertEquals("payload",
+				timeAppProps.get("spring.cloud.stream.bindings.output.producer" + ".partitionKeyExpression"));
 		Map<String, String> timeDeploymentProps = timeRequest.getDeploymentProperties();
 		assertNull(timeDeploymentProps.get(AppDeployer.COUNT_PROPERTY_KEY));
 		assertEquals("myStream", timeDeploymentProps.get(AppDeployer.GROUP_PROPERTY_KEY));
@@ -790,11 +704,8 @@ public class StreamControllerTests {
 		properties.put("app.*.producer.partitionKeyExpression", "payload");
 		properties.put("deployer.*.count", "2");
 		properties.put("app.*.consumer.concurrency", "3");
-		mockMvc.perform(
-			post("/streams/deployments/myStream")
-				.content(new ObjectMapper().writeValueAsBytes(properties))
-				.contentType(MediaType.APPLICATION_JSON)
-		).andExpect(status().isCreated());
+		mockMvc.perform(post("/streams/deployments/myStream").content(new ObjectMapper().writeValueAsBytes(properties))
+				.contentType(MediaType.APPLICATION_JSON)).andExpect(status().isCreated());
 		ArgumentCaptor<AppDeploymentRequest> captor = ArgumentCaptor.forClass(AppDeploymentRequest.class);
 		verify(appDeployer, times(2)).deploy(captor.capture());
 		List<AppDeploymentRequest> requests = captor.getAllValues();
@@ -813,7 +724,8 @@ public class StreamControllerTests {
 		assertThat(timeRequest.getDefinition().getName(), is("time"));
 		Map<String, String> timeAppProps = timeRequest.getDefinition().getProperties();
 		assertEquals("2", timeAppProps.get("spring.cloud.stream.bindings.output.producer.partitionCount"));
-		assertEquals("payload", timeAppProps.get("spring.cloud.stream.bindings.output.producer.partitionKeyExpression"));
+		assertEquals("payload",
+				timeAppProps.get("spring.cloud.stream.bindings.output.producer" + ".partitionKeyExpression"));
 		Map<String, String> timeDeploymentProps = timeRequest.getDeploymentProperties();
 		assertEquals("2", timeDeploymentProps.get(AppDeployer.COUNT_PROPERTY_KEY));
 		assertEquals("myStream", timeDeploymentProps.get(AppDeployer.GROUP_PROPERTY_KEY));
@@ -824,19 +736,15 @@ public class StreamControllerTests {
 	public void testDeployWithCommonApplicationProperties() throws Exception {
 		repository.save(new StreamDefinition("myStream", "time | log"));
 		assertThat(appsProperties.getStream().values(), empty());
-		appsProperties.getStream().put("spring.cloud.stream.fake.binder.host","fakeHost");
-		appsProperties.getStream().put("spring.cloud.stream.fake.binder.port","fakePort");
+		appsProperties.getStream().put("spring.cloud.stream.fake.binder.host", "fakeHost");
+		appsProperties.getStream().put("spring.cloud.stream.fake.binder.port", "fakePort");
 		Map<String, String> properties = new HashMap<>();
 		properties.put("app.*.producer.partitionKeyExpression", "payload");
 		properties.put("deployer.*.count", "2");
 		properties.put("app.*.consumer.concurrency", "3");
 
-		mockMvc.perform(
-			post("/streams/deployments/myStream")
-				.content(new ObjectMapper().writeValueAsBytes(properties))
-				.contentType(MediaType.APPLICATION_JSON)
-		)
-			.andExpect(status().isCreated());
+		mockMvc.perform(post("/streams/deployments/myStream").content(new ObjectMapper().writeValueAsBytes(properties))
+				.contentType(MediaType.APPLICATION_JSON)).andExpect(status().isCreated());
 		ArgumentCaptor<AppDeploymentRequest> captor = ArgumentCaptor.forClass(AppDeploymentRequest.class);
 		verify(appDeployer, times(2)).deploy(captor.capture());
 		List<AppDeploymentRequest> requests = captor.getAllValues();
@@ -857,7 +765,8 @@ public class StreamControllerTests {
 		assertThat(timeRequest.getDefinition().getName(), is("time"));
 		Map<String, String> timeAppProps = timeRequest.getDefinition().getProperties();
 		assertEquals("2", timeAppProps.get("spring.cloud.stream.bindings.output.producer.partitionCount"));
-		assertEquals("payload", timeAppProps.get("spring.cloud.stream.bindings.output.producer.partitionKeyExpression"));
+		assertEquals("payload",
+				timeAppProps.get("spring.cloud.stream.bindings.output.producer" + ".partitionKeyExpression"));
 		Map<String, String> timeDeploymentProps = timeRequest.getDeploymentProperties();
 		assertEquals("2", timeDeploymentProps.get(AppDeployer.COUNT_PROPERTY_KEY));
 		assertEquals("myStream", timeDeploymentProps.get(AppDeployer.GROUP_PROPERTY_KEY));
@@ -880,8 +789,7 @@ public class StreamControllerTests {
 	public void testAppDeploymentFailure() throws Exception {
 		when(appDeployer.deploy(any(AppDeploymentRequest.class))).thenThrow(new RuntimeException());
 		repository.save(new StreamDefinition("myStream", "time | log"));
-		mockMvc.perform(
-				post("/streams/deployments/myStream").accept(MediaType.APPLICATION_JSON))
+		mockMvc.perform(post("/streams/deployments/myStream").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isCreated());
 		ArgumentCaptor<AppDeploymentRequest> captor = ArgumentCaptor.forClass(AppDeploymentRequest.class);
 		verify(appDeployer, times(2)).deploy(captor.capture());

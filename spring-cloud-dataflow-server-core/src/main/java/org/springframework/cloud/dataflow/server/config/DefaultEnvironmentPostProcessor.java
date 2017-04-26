@@ -23,6 +23,7 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.env.EnvironmentPostProcessor;
@@ -37,9 +38,9 @@ import org.springframework.core.io.Resource;
 /**
  * Contributes the values from {@code META-INF/dataflow-server-defaults.yml} and
  * {@code dataflow-server.yml} if it exists, before any of Spring Boot's normal
- * configuration contributions apply. This has the effect of supplying overridable defaults to the
- * various Spring Cloud Data Flow Deployer SPI implementations that in turn override the defaults
- * provided by Spring Boot.
+ * configuration contributions apply. This has the effect of supplying overridable
+ * defaults to the various Spring Cloud Data Flow Deployer SPI implementations that in
+ * turn override the defaults provided by Spring Boot.
  *
  * @author Josh Long
  * @author Janne Valkealahti
@@ -49,6 +50,19 @@ public class DefaultEnvironmentPostProcessor implements EnvironmentPostProcessor
 	private static Log logger = LogFactory.getLog(DefaultEnvironmentPostProcessor.class);
 	private final Resource serverResource = new ClassPathResource("/dataflow-server.yml");
 	private final Resource serverDefaultsResource = new ClassPathResource("META-INF/dataflow-server-defaults.yml");
+
+	private static void contributeDefaults(Map<String, Object> defaults, Resource resource) {
+		if (resource.exists()) {
+			YamlPropertiesFactoryBean yamlPropertiesFactoryBean = new YamlPropertiesFactoryBean();
+			yamlPropertiesFactoryBean.setResources(resource);
+			yamlPropertiesFactoryBean.afterPropertiesSet();
+			Properties p = yamlPropertiesFactoryBean.getObject();
+			for (Object k : p.keySet()) {
+				String key = k.toString();
+				defaults.put(key, p.get(key));
+			}
+		}
+	}
 
 	@Override
 	public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
@@ -61,8 +75,8 @@ public class DefaultEnvironmentPostProcessor implements EnvironmentPostProcessor
 
 		String defaultPropertiesKey = "defaultProperties";
 
-		if (!existingPropertySources.contains(defaultPropertiesKey) ||
-				existingPropertySources.get(defaultPropertiesKey) == null) {
+		if (!existingPropertySources.contains(defaultPropertiesKey)
+				|| existingPropertySources.get(defaultPropertiesKey) == null) {
 			existingPropertySources.addLast(new MapPropertySource(defaultPropertiesKey, internalDefaults));
 			existingPropertySources.addLast(new MapPropertySource(defaultPropertiesKey, defaults));
 		}
@@ -91,18 +105,5 @@ public class DefaultEnvironmentPostProcessor implements EnvironmentPostProcessor
 	@Override
 	public int getOrder() {
 		return 0;
-	}
-
-	private static void contributeDefaults(Map<String, Object> defaults, Resource resource) {
-		if (resource.exists()) {
-			YamlPropertiesFactoryBean yamlPropertiesFactoryBean = new YamlPropertiesFactoryBean();
-			yamlPropertiesFactoryBean.setResources(resource);
-			yamlPropertiesFactoryBean.afterPropertiesSet();
-			Properties p = yamlPropertiesFactoryBean.getObject();
-			for (Object k : p.keySet()) {
-				String key = k.toString();
-				defaults.put(key, p.get(key));
-			}
-		}
 	}
 }

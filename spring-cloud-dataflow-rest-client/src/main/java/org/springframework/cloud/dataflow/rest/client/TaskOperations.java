@@ -39,6 +39,7 @@ public interface TaskOperations {
 
 	/**
 	 * Create a new task definition
+	 *
 	 * @param name the name of the task
 	 * @param definition the task definition DSL
 	 * @return the task definition
@@ -47,6 +48,7 @@ public interface TaskOperations {
 
 	/**
 	 * Launch an already created task.
+	 *
 	 * @param name the name of the task
 	 * @param properties the deployment properties
 	 * @param arguments the command line arguments
@@ -56,6 +58,7 @@ public interface TaskOperations {
 
 	/**
 	 * Destroy an existing task.
+	 *
 	 * @param name the name of the task
 	 */
 	void destroy(String name);
@@ -67,6 +70,7 @@ public interface TaskOperations {
 
 	/**
 	 * List task executions known to the system filtered by task name.
+	 *
 	 * @param taskName of the executions.
 	 * @return the paged list of task executions for the given task name
 	 */

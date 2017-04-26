@@ -51,49 +51,28 @@ import org.springframework.util.StringUtils;
  */
 public abstract class AbstractRdbmsKeyValueRepository<D> implements PagingAndSortingRepository<D, String> {
 
-	protected String keyColumn;
-
-	protected String valueColumn;
-
-	protected String selectClause;
-
-	protected String tableName = "%PREFIX%%SUFFIX% ";
-
 	protected final String LIST_OF_NAMES = "listnames";
-
-	protected String whereClauseByKey;
-
-	protected String inClauseByKey;
-
-	private String findAllQuery;
-
-	private String findAllWhereClauseByKey;
-
-	protected String saveRow;
-
-	private String countAll;
-
-	private String countByKey;
-
-	private String findAllWhereInClause = findAllQuery + whereClauseByKey;
-
-	private String deleteFromTableClause = "DELETE FROM " + tableName;
-
-	protected String deleteFromTableByKey = deleteFromTableClause + whereClauseByKey;
-
-	protected String tablePrefix;
-
-	protected String tableSuffix;
-
-	protected JdbcOperations jdbcTemplate;
-
-	protected NamedParameterJdbcTemplate namedParameterJdbcTemplate;
-
-	protected DataSource dataSource;
-
-	protected LinkedHashMap<String, Order> orderMap;
-
 	protected final RowMapper<D> rowMapper;
+	protected String keyColumn;
+	protected String valueColumn;
+	protected String selectClause;
+	protected String tableName = "%PREFIX%%SUFFIX% ";
+	protected String whereClauseByKey;
+	protected String inClauseByKey;
+	protected String saveRow;
+	protected String tablePrefix;
+	protected String tableSuffix;
+	protected JdbcOperations jdbcTemplate;
+	protected NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+	protected DataSource dataSource;
+	protected LinkedHashMap<String, Order> orderMap;
+	private String findAllQuery;
+	private String findAllWhereClauseByKey;
+	private String countAll;
+	private String countByKey;
+	private String findAllWhereInClause = findAllQuery + whereClauseByKey;
+	private String deleteFromTableClause = "DELETE FROM " + tableName;
+	protected String deleteFromTableByKey = deleteFromTableClause + whereClauseByKey;
 
 	public AbstractRdbmsKeyValueRepository(DataSource dataSource, String tablePrefix, String tableSuffix,
 			RowMapper<D> rowMapper, String keyColumn, String valueColumn) {
@@ -139,7 +118,7 @@ public abstract class AbstractRdbmsKeyValueRepository<D> implements PagingAndSor
 		return jdbcTemplate.query(query, rowMapper);
 	}
 
-	public Page<D>search(SearchPageable searchPageable) {
+	public Page<D> search(SearchPageable searchPageable) {
 		Assert.notNull(searchPageable, "searchPageable must not be null.");
 
 		final StringBuilder whereClause = new StringBuilder("WHERE ");
@@ -147,16 +126,15 @@ public abstract class AbstractRdbmsKeyValueRepository<D> implements PagingAndSor
 		final Iterator<String> columnIterator = searchPageable.getColumns().iterator();
 
 		while (columnIterator.hasNext()) {
-			whereClause.append("lower(" + columnIterator.next()).append(") like ")
-			.append("lower(?)");
+			whereClause.append("lower(" + columnIterator.next()).append(") like ").append("lower(?)");
 			params.add("%" + searchPageable.getSearchQuery() + "%");
 			if (columnIterator.hasNext()) {
 				whereClause.append(" OR ");
 			}
 		}
 
-		return queryForPageableResults(searchPageable.getPageable(), selectClause, tableName,
-				whereClause.toString(), params.toArray(), count());
+		return queryForPageableResults(searchPageable.getPageable(), selectClause, tableName, whereClause.toString(),
+				params.toArray(), count());
 	}
 
 	@Override
@@ -253,7 +231,8 @@ public abstract class AbstractRdbmsKeyValueRepository<D> implements PagingAndSor
 
 	private Page<D> queryForPageableResults(Pageable pageable, String selectClause, String tableName,
 			String whereClause, Object[] queryParam, long totalCount) {
-		//FIXME Possible performance improvement refactoring so factory isn't called every time.
+		// FIXME Possible performance improvement refactoring so factory isn't called
+		// every time.
 		SqlPagingQueryProviderFactoryBean factoryBean = new SqlPagingQueryProviderFactoryBean();
 		factoryBean.setSelectClause(selectClause);
 		factoryBean.setFromClause(tableName);

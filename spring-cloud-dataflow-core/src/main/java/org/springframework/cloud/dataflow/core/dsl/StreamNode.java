@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -43,7 +43,9 @@ public class StreamNode extends AstNode {
 		this.sinkDestinationNode = sinkDestinationNode;
 	}
 
-	/** @inheritDoc */
+	/**
+	 * @inheritDoc
+	 */
 	@Override
 	public String stringify(boolean includePositionalInfo) {
 		StringBuilder s = new StringBuilder();
@@ -104,8 +106,9 @@ public class StreamNode extends AstNode {
 	}
 
 	/**
-	 * Find the first reference to the named app in the stream. If the same app is referred to multiple times the
-	 * secondary references cannot be accessed via this method.
+	 * Find the first reference to the named app in the stream. If the same app is
+	 * referred to multiple times the secondary references cannot be accessed via this
+	 * method.
 	 *
 	 * @return the first occurrence of the named app in the stream
 	 */

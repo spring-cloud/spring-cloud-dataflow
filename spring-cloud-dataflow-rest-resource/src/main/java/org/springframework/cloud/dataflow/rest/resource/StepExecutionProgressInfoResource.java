@@ -47,6 +47,7 @@ public class StepExecutionProgressInfoResource extends ResourceSupport {
 
 	/**
 	 * Create a new StepExecutionProgressInfoResource
+	 *
 	 * @param stepExecution the step execution, must not be null
 	 * @param stepExecutionHistory the step execution history, must not be null
 	 * @param percentageComplete the percentage complete of the step
@@ -86,5 +87,6 @@ public class StepExecutionProgressInfoResource extends ResourceSupport {
 		return stepExecutionHistory;
 	}
 
-	public static class Page extends PagedResources<StepExecutionProgressInfoResource> {}
+	public static class Page extends PagedResources<StepExecutionProgressInfoResource> {
+	}
 }

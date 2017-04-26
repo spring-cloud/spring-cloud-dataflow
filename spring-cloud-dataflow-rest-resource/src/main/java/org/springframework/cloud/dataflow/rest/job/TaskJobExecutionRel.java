@@ -24,7 +24,8 @@ import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.util.Assert;
 
 /**
- * Enumerates the relation a {@link TaskExecution} has with its associate Job Execution Ids.
+ * Enumerates the relation a {@link TaskExecution} has with its associate Job Execution
+ * Ids.
  *
  * @author Glenn Renfro
  */
@@ -37,15 +38,17 @@ public class TaskJobExecutionRel {
 	/**
 	 * Constructor that establishes the relationship between a {@link TaskExecution} and
 	 * the Job Execution Ids of the jobs that were executed within it.
+	 *
 	 * @param taskExecution to be associated with the job execution ids.
 	 * @param jobExecutionIds to be associated with the task execution.
 	 */
 	public TaskJobExecutionRel(TaskExecution taskExecution, List<Long> jobExecutionIds) {
 		Assert.notNull(taskExecution, "taskExecution must not be null");
 		this.taskExecution = taskExecution;
-		if(jobExecutionIds == null) {
+		if (jobExecutionIds == null) {
 			this.jobExecutionIds = Collections.emptyList();
-		} else {
+		}
+		else {
 			this.jobExecutionIds = Collections.unmodifiableList(new ArrayList<>(jobExecutionIds));
 		}
 	}

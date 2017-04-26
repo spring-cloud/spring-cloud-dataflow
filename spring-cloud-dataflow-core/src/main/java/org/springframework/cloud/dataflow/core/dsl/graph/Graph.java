@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,12 +21,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.cloud.dataflow.core.dsl.TransitionNode;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import org.springframework.cloud.dataflow.core.dsl.TransitionNode;
+
 /**
- * Represents a Graph that Flo will display. A graph consists of simple {@link Node} and {@link Link} objects.
+ * Represents a Graph that Flo will display. A graph consists of simple {@link Node} and
+ * {@link Link} objects.
  *
  * @author Andy Clement
  */
@@ -59,45 +60,47 @@ public class Graph {
 	public String toString() {
 		return "Graph:  nodes=#" + nodes.size() + "  links=#" + links.size() + "\n" + nodes + "\n" + links;
 	}
-	
+
 	public String toVerboseString() {
 		StringBuilder s = new StringBuilder();
-		for (Node n: nodes) {
+		for (Node n : nodes) {
 			s.append("[").append(n.id).append(":");
 			if (n.getLabel() != null) {
 				s.append(n.getLabel()).append(":");
 			}
 			s.append(n.name);
 			if (n.properties != null) {
-				for (Map.Entry<String,String> property: n.properties.entrySet()) {
+				for (Map.Entry<String, String> property : n.properties.entrySet()) {
 					s.append(":").append(property.getKey()).append("=").append(property.getValue());
 				}
 			}
 			s.append("]");
 		}
-		for (Link l: links) {
-			s.append("["+(l.getTransitionName()==null?"":l.getTransitionName()+":")+l.from+"-"+l.to+"]");
+		for (Link l : links) {
+			s.append("[" + (l.getTransitionName() == null ? "" : l.getTransitionName() + ":") + l.from + "-" + l.to
+					+ "]");
 		}
 		return s.toString();
 	}
 
 	// TODO reactivate when we need to transmit this to the front end
-//	public String toJSON() {
-//		Graph g = new Graph(nodes, links, properties);
-//		ObjectMapper mapper = new ObjectMapper();
-//		mapper.setSerializationInclusion(Include.NON_NULL);
-//		try {
-//			return mapper.writeValueAsString(g);
-//		}
-//		catch (IOException e) {
-//			throw new IllegalStateException("Unexpected problem creating JSON from Graph", e);
-//		}
-//	}
+	// public String toJSON() {
+	// Graph g = new Graph(nodes, links, properties);
+	// ObjectMapper mapper = new ObjectMapper();
+	// mapper.setSerializationInclusion(Include.NON_NULL);
+	// try {
+	// return mapper.writeValueAsString(g);
+	// }
+	// catch (IOException e) {
+	// throw new IllegalStateException("Unexpected problem creating JSON from Graph", e);
+	// }
+	// }
 
 	// TODO this does not correctly handle use of secondary sequences yet
+
 	/**
-	 * Produce the DSL representation of the graph.
-	 * To make this process easier we can assume there is a START and an END node.
+	 * Produce the DSL representation of the graph. To make this process easier we can
+	 * assume there is a START and an END node.
 	 *
 	 * @return DSL string version of the graph
 	 */
@@ -124,7 +127,8 @@ public class Graph {
 		// This will build the main part of the DSL text based on walking the graph
 		followLinks(graphText, toFollow, null, unvisitedNodes, unfollowedLinks);
 
-		// This will follow up any loose ends that were not reachable down the regular path
+		// This will follow up any loose ends that were not reachable down the regular
+		// path
 		// from the START node (eg. reachable only by transition).
 		// For example: aa | foo=bb | '*' = cc || bb || cc
 		// There is no implied link from aa to bb because aa is mapping the exit space
@@ -136,15 +140,19 @@ public class Graph {
 				Node nextHead = findAHead(unvisitedNodes, unfollowedLinks);
 				unvisitedNodes.remove(nextHead);
 				toFollow = findLinksFrom(nextHead, false);
-				// If the new head we find has no links to anything, we don't need to mention it in the DSL.
-				// Transitions will refer to it and it will get a step in the XML but there is no need
-				// to explicitly mention in the DSL. This might change once the job references support properties.
+				// If the new head we find has no links to anything, we don't need to
+				// mention it in the DSL.
+				// Transitions will refer to it and it will get a step in the XML but
+				// there is no need
+				// to explicitly mention in the DSL. This might change once the job
+				// references support properties.
 				if (toFollow.size() != 0) {
 					graphText.append(" && ");
 					printNode(graphText, nextHead, unvisitedNodes);
 					followLinks(graphText, toFollow, null, unvisitedNodes, unfollowedLinks);
 				}
-				loopCount++; // Just a guard on malformed input - a good graph will not trigger this
+				loopCount++; // Just a guard on malformed input - a good graph will not
+								// trigger this
 			}
 		}
 
@@ -262,7 +270,8 @@ public class Graph {
 			}
 			else {
 				if (countLinksWithoutTransitions(links) == 0 || countLinksWithoutTransitions(links) == 1) {
-					// Assert: it doesn't therefore matter which one is chosen, they will come together at
+					// Assert: it doesn't therefore matter which one is chosen, they will
+					// come together at
 					// the same place
 					nextCandidate = findNodeById(links.get(0).to);
 				}
@@ -291,7 +300,8 @@ public class Graph {
 		if (targetNode == candidate) {
 			return true;
 		}
-		// This algorithm relies on a nicely structured graph with well defined flows and splits (no weird cross links
+		// This algorithm relies on a nicely structured graph with well defined flows and
+		// splits (no weird cross links
 		// across flows/splits)
 		List<Link> outboundLinks = findLinksFrom(targetNode, true);
 		for (Link lnk : outboundLinks) {
@@ -331,8 +341,8 @@ public class Graph {
 		}
 	}
 
-	private void followLink(StringBuilder graphText, Link link, Node nodeToFinishFollowingAt,
-			List<Node> unvisitedNodes, List<Link> unfollowedLinks) {
+	private void followLink(StringBuilder graphText, Link link, Node nodeToFinishFollowingAt, List<Node> unvisitedNodes,
+			List<Link> unfollowedLinks) {
 		unfollowedLinks.remove(link);
 		Node target = findNodeById(link.to);
 		printNode(graphText, target, unvisitedNodes);
@@ -352,11 +362,12 @@ public class Graph {
 				try {
 					Integer.parseInt(transitionName);
 					isStatusText = false;
-				} catch (NumberFormatException nfe) {
+				}
+				catch (NumberFormatException nfe) {
 					// it is text
 				}
 				if (isStatusText && !transitionName.startsWith("'")) {
-					transitionName = "'"+transitionName+"'";
+					transitionName = "'" + transitionName + "'";
 				}
 				Node transitionTarget = findNodeById(l.to);
 				String transitionTargetName = transitionTarget.name;
@@ -366,12 +377,13 @@ public class Graph {
 				else if (transitionTargetName.equals("END")) {
 					transitionTargetName = TransitionNode.END;
 				}
-				else if (transitionTarget.getLabel()!=null) {
-					transitionTargetName = transitionTarget.getLabel()+": "+transitionTargetName;
+				else if (transitionTarget.getLabel() != null) {
+					transitionTargetName = transitionTarget.getLabel() + ": " + transitionTargetName;
 				}
 				graphText.append(" ").append(transitionName).append("->").append(transitionTargetName);
 				unfollowedLinks.remove(l);
-				// We only want to consider it 'visited' if this node doesn't go anywhere after this
+				// We only want to consider it 'visited' if this node doesn't go anywhere
+				// after this
 				List<Link> linksFromTheTransitionTarget = findLinksFrom(transitionTarget, false);
 				if (linksFromTheTransitionTarget.isEmpty()
 						|| allLinksTarget(linksFromTheTransitionTarget, nodeToFinishFollowingAt)) {

@@ -22,11 +22,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.util.Assert;
 
 /**
- * Simple class that is composed of a {@link Pageable}
- * and several properties to encapsulate search queries.
+ * Simple class that is composed of a {@link Pageable} and several properties to
+ * encapsulate search queries.
  *
  * @author Gunnar Hillert
- *
  */
 public class SearchPageable {
 
@@ -35,8 +34,9 @@ public class SearchPageable {
 	private final LinkedHashSet<String> columns = new LinkedHashSet<>(0);
 
 	/**
-	 * Initialize a {@link SearchPageable}. Must provide a {@link Pageable} and a searchQuery.
-	 * Don't forget to also provide the column names for the search using {@link #addColumns(String...)}.
+	 * Initialize a {@link SearchPageable}. Must provide a {@link Pageable} and a
+	 * searchQuery. Don't forget to also provide the column names for the search using
+	 * {@link #addColumns(String...)}.
 	 *
 	 * @param pageable Must not be null
 	 * @param searchQuery Must not be empty

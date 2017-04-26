@@ -16,35 +16,32 @@
 
 package org.springframework.cloud.dataflow.server.rest.documentation;
 
-import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
-import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
-import static org.springframework.restdocs.operation.preprocess.Preprocessors.preprocessResponse;
-import static org.springframework.restdocs.operation.preprocess.Preprocessors.prettyPrint;
-
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Rule;
+
 import org.springframework.cloud.dataflow.server.local.LocalDataflowResource;
 import org.springframework.restdocs.JUnitRestDocumentation;
 import org.springframework.restdocs.mockmvc.RestDocumentationResultHandler;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
+import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
+import static org.springframework.restdocs.operation.preprocess.Preprocessors.preprocessResponse;
+import static org.springframework.restdocs.operation.preprocess.Preprocessors.prettyPrint;
+
 /**
  * @author Gunnar Hillert
  */
 public abstract class BaseDocumentation {
 
-	protected String TARGET_DIRECTORY = "target/generated-snippets";
-
-	@Rule
-	public JUnitRestDocumentation restDocumentation =
-			new JUnitRestDocumentation(TARGET_DIRECTORY);
-
 	@ClassRule
-	public final static LocalDataflowResource springDataflowServer =
-			new LocalDataflowResource("classpath:rest-docs-config.yml");
-
+	public final static LocalDataflowResource springDataflowServer = new LocalDataflowResource(
+			"classpath:rest-docs-config.yml");
+	protected String TARGET_DIRECTORY = "target/generated-snippets";
+	@Rule
+	public JUnitRestDocumentation restDocumentation = new JUnitRestDocumentation(TARGET_DIRECTORY);
 	protected MockMvc mockMvc;
 	protected RestDocumentationResultHandler documentationHandler;
 
@@ -54,12 +51,9 @@ public abstract class BaseDocumentation {
 	}
 
 	protected void prepareDocumentationTests(JUnitRestDocumentation restDocumentation) {
-		this.documentationHandler = document("{class-name}/{method-name}",
-				preprocessResponse(prettyPrint()));
+		this.documentationHandler = document("{class-name}/{method-name}", preprocessResponse(prettyPrint()));
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(springDataflowServer.getWebApplicationContext())
-				.apply(documentationConfiguration(restDocumentation))
-				.alwaysDo(this.documentationHandler)
-				.build();
+				.apply(documentationConfiguration(restDocumentation)).alwaysDo(this.documentationHandler).build();
 	}
 
 }

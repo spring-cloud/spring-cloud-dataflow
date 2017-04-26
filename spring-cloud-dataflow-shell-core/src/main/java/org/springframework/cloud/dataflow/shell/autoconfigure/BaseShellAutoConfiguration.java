@@ -20,6 +20,7 @@ import javax.annotation.PostConstruct;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -67,9 +68,8 @@ public class BaseShellAutoConfiguration {
 
 	@Bean
 	@ConditionalOnMissingBean(CommandLine.class)
-	public CommandLine commandLine(ShellCommandLineParser shellCommandLineParser,
-								   ShellProperties shellProperties,
-								   ApplicationArguments applicationArguments) throws Exception {
+	public CommandLine commandLine(ShellCommandLineParser shellCommandLineParser, ShellProperties shellProperties,
+			ApplicationArguments applicationArguments) throws Exception {
 		return shellCommandLineParser.parse(shellProperties, applicationArguments.getSourceArgs());
 	}
 
@@ -80,29 +80,25 @@ public class BaseShellAutoConfiguration {
 	}
 
 	@Configuration
-	@ComponentScan({"org.springframework.shell.converters", "org.springframework.shell.plugin.support"})
+	@ComponentScan({ "org.springframework.shell.converters", "org.springframework.shell.plugin.support" })
 	public static class DefaultShellComponents {
 
 		@PostConstruct
 		public void log() {
-			logger.debug("default (o.s.shell.{converters,plugin.support})" +
-					" Spring Shell packages are being scanned");
+			logger.debug(
+					"default (o.s.shell.{converters,plugin.support})" + " Spring Shell packages are being scanned");
 		}
 	}
 
 	@Configuration
-	@ComponentScan({"org.springframework.shell.commands",
-			"org.springframework.cloud.dataflow.shell.command",
-			"org.springframework.cloud.dataflow.shell.converter",
-			"org.springframework.cloud.dataflow.shell.config"})
+	@ComponentScan({ "org.springframework.shell.commands", "org.springframework.cloud.dataflow.shell.command",
+			"org.springframework.cloud.dataflow.shell.converter", "org.springframework.cloud.dataflow.shell.config" })
 	public static class RegisterInternalCommands {
 
 		@PostConstruct
 		public void log() {
-			logger.debug("(o.s.shell.commands) Spring Shell" +
-					" packages are being scanned");
-			logger.debug("(o.s.c.dataflow.shell.command) Spring Cloud Data Flow Shell" +
-					" packages are being scanned");
+			logger.debug("(o.s.shell.commands) Spring Shell" + " packages are being scanned");
+			logger.debug("(o.s.c.dataflow.shell.command) Spring Cloud Data Flow Shell" + " packages are being scanned");
 		}
 	}
 }

@@ -68,24 +68,25 @@ public class HttpCommands implements CommandMarker {
 
 	@CliCommand(value = { POST_HTTPSOURCE }, help = "POST data to http endpoint")
 	public String postHttp(
-			@CliOption(mandatory = false, key = { "", "target" },      help = "the location to post to", unspecifiedDefaultValue = "http://localhost:9393") String target,
-			@CliOption(mandatory = false, key = "data",                help = "the text payload to post. exclusive with file. embedded double quotes are not supported if next to a space character") String data,
-			@CliOption(mandatory = false, key = "file",                help = "filename to read data from. exclusive with data") File file,
-			@CliOption(mandatory = false, key = "contentType",         help = "the content-type to use. file is also read using the specified charset", unspecifiedDefaultValue = DEFAULT_MEDIA_TYPE) MediaType mediaType,
-			@CliOption(mandatory = false, key = {"username"},          help = "the username for calls that require basic authentication",
-				unspecifiedDefaultValue = Target.DEFAULT_USERNAME) String targetUsername,
-			@CliOption(mandatory = false, key = {"password"},          help = "the password for calls that require basic authentication",
-				specifiedDefaultValue = Target.DEFAULT_SPECIFIED_PASSWORD,
-				unspecifiedDefaultValue = Target.DEFAULT_UNSPECIFIED_PASSWORD) String targetPassword,
-			@CliOption(mandatory = false, key = "skip-ssl-validation", help = "accept any SSL certificate (even self-signed)",
-				specifiedDefaultValue = Target.DEFAULT_SPECIFIED_SKIP_SSL_VALIDATION,
-				unspecifiedDefaultValue = Target.DEFAULT_UNSPECIFIED_SKIP_SSL_VALIDATION) boolean skipSslValidation)
+			@CliOption(mandatory = false, key = { "",
+					"target" }, help = "the location to post to", unspecifiedDefaultValue = "http://localhost:9393") String target,
+			@CliOption(mandatory = false, key = "data", help = "the text payload to post. exclusive with file. "
+					+ "embedded double quotes are not supported if next to a space character") String data,
+			@CliOption(mandatory = false, key = "file", help = "filename to read data from. exclusive with data") File file,
+			@CliOption(mandatory = false, key = "contentType", help = "the content-type to use. file is also read "
+					+ "using the specified charset", unspecifiedDefaultValue = DEFAULT_MEDIA_TYPE) MediaType mediaType,
+			@CliOption(mandatory = false, key = { "username" }, help = "the username for calls that require basic "
+					+ "authentication", unspecifiedDefaultValue = Target.DEFAULT_USERNAME) String targetUsername,
+			@CliOption(mandatory = false, key = { "password" }, help = "the password for calls that require basic "
+					+ "authentication", specifiedDefaultValue = Target.DEFAULT_SPECIFIED_PASSWORD, unspecifiedDefaultValue = Target.DEFAULT_UNSPECIFIED_PASSWORD) String targetPassword,
+			@CliOption(mandatory = false, key = "skip-ssl-validation", help = "accept any SSL certificate (even "
+					+ "self-signed)", specifiedDefaultValue = Target.DEFAULT_SPECIFIED_SKIP_SSL_VALIDATION, unspecifiedDefaultValue = Target.DEFAULT_UNSPECIFIED_SKIP_SSL_VALIDATION) boolean skipSslValidation)
 			throws IOException {
 		Assert.isTrue(file != null || data != null, "One of 'file' or 'data' must be set");
 		Assert.isTrue(file == null || data == null, "Only one of 'file' or 'data' must be set");
 		if (mediaType.getCharset() == null) {
-			mediaType = new MediaType(mediaType, Collections.singletonMap("charset",
-					Charset.defaultCharset().toString()));
+			mediaType = new MediaType(mediaType,
+					Collections.singletonMap("charset", Charset.defaultCharset().toString()));
 		}
 
 		if (file != null) {
@@ -109,8 +110,8 @@ public class HttpCommands implements CommandMarker {
 			ResponseEntity<String> response = restTemplate.postForEntity(requestURI, request, String.class);
 			outputResponse(response, buffer);
 			if (!response.getStatusCode().is2xxSuccessful()) {
-				buffer.append(OsUtils.LINE_SEPARATOR).append(
-						String.format("Error sending data '%s' to '%s'", data, target));
+				buffer.append(OsUtils.LINE_SEPARATOR)
+						.append(String.format("Error sending data '%s' to '%s'", data, target));
 			}
 			return buffer.toString();
 		}
@@ -124,15 +125,14 @@ public class HttpCommands implements CommandMarker {
 
 	@CliCommand(value = { GET_HTTPSOURCE }, help = "Make GET request to http endpoint")
 	public String getHttp(
-			@CliOption(mandatory = false, key = { "", "target" }, help = "the URL to make the request to", unspecifiedDefaultValue = "http://localhost:9393") String target,
-			@CliOption(mandatory = false, key = {"username"},     help = "the username for calls that require basic authentication",
-				unspecifiedDefaultValue = Target.DEFAULT_USERNAME) String targetUsername,
-			@CliOption(mandatory = false, key = {"password"},     help = "the password for calls that require basic authentication",
-				specifiedDefaultValue = Target.DEFAULT_SPECIFIED_PASSWORD,
-				unspecifiedDefaultValue = Target.DEFAULT_UNSPECIFIED_PASSWORD) String targetPassword,
-			@CliOption(mandatory = false, key = "skip-ssl-validation", help = "accept any SSL certificate (even self-signed)",
-				specifiedDefaultValue = Target.DEFAULT_SPECIFIED_SKIP_SSL_VALIDATION,
-				unspecifiedDefaultValue = Target.DEFAULT_UNSPECIFIED_SKIP_SSL_VALIDATION) boolean skipSslValidation)
+			@CliOption(mandatory = false, key = { "",
+					"target" }, help = "the URL to make the request to", unspecifiedDefaultValue = "http://localhost:9393") String target,
+			@CliOption(mandatory = false, key = { "username" }, help = "the username for calls that require basic "
+					+ "authentication", unspecifiedDefaultValue = Target.DEFAULT_USERNAME) String targetUsername,
+			@CliOption(mandatory = false, key = { "password" }, help = "the password for calls that require basic "
+					+ "authentication", specifiedDefaultValue = Target.DEFAULT_SPECIFIED_PASSWORD, unspecifiedDefaultValue = Target.DEFAULT_UNSPECIFIED_PASSWORD) String targetPassword,
+			@CliOption(mandatory = false, key = "skip-ssl-validation", help = "accept any SSL certificate (even "
+					+ "self-signed)", specifiedDefaultValue = Target.DEFAULT_SPECIFIED_SKIP_SSL_VALIDATION, unspecifiedDefaultValue = Target.DEFAULT_UNSPECIFIED_SKIP_SSL_VALIDATION) boolean skipSslValidation)
 			throws IOException {
 
 		final StringBuilder buffer = new StringBuilder();
@@ -148,8 +148,7 @@ public class HttpCommands implements CommandMarker {
 			ResponseEntity<String> response = restTemplate.getForEntity(requestURI, String.class);
 			outputResponse(response, buffer);
 			if (!response.getStatusCode().is2xxSuccessful()) {
-				buffer.append(OsUtils.LINE_SEPARATOR).append(
-						String.format("Error sending request to '%s'", target));
+				buffer.append(OsUtils.LINE_SEPARATOR).append(String.format("Error sending request to '%s'", target));
 			}
 			return buffer.toString();
 		}
@@ -168,8 +167,7 @@ public class HttpCommands implements CommandMarker {
 			@Override
 			public boolean hasError(ClientHttpResponse response) throws IOException {
 				HttpStatus status = response.getStatusCode();
-				return (status == HttpStatus.BAD_GATEWAY
-						|| status == HttpStatus.GATEWAY_TIMEOUT
+				return (status == HttpStatus.BAD_GATEWAY || status == HttpStatus.GATEWAY_TIMEOUT
 						|| status == HttpStatus.INTERNAL_SERVER_ERROR);
 			}
 
@@ -192,8 +190,8 @@ public class HttpCommands implements CommandMarker {
 	}
 
 	private void outputResponse(ResponseEntity<String> response, StringBuilder buffer) {
-		buffer.append("> ").append(response.getStatusCode().value()).append(" ").append(response.getStatusCode().name()).append(
-				OsUtils.LINE_SEPARATOR);
+		buffer.append("> ").append(response.getStatusCode().value()).append(" ").append(response.getStatusCode().name())
+				.append(OsUtils.LINE_SEPARATOR);
 		String maybeJson = response.getBody();
 		if (maybeJson != null) {
 			buffer.append(prettyPrintIfJson(maybeJson));
@@ -203,7 +201,8 @@ public class HttpCommands implements CommandMarker {
 	private String prettyPrintIfJson(String maybeJson) {
 		JsonFactory factory = new JsonFactory();
 		ObjectMapper mapper = new ObjectMapper(factory);
-		TypeReference<HashMap<String,Object>> typeRef = new TypeReference<HashMap<String,Object>>() {};
+		TypeReference<HashMap<String, Object>> typeRef = new TypeReference<HashMap<String, Object>>() {
+		};
 		try {
 			return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(mapper.readValue(maybeJson, typeRef));
 		}

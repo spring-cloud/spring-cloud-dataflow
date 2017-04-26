@@ -42,16 +42,16 @@ public class StepExecutionHistory {
 	}
 
 	public void append(StepExecution stepExecution) {
-		if (stepExecution.getEndTime()==null) {
+		if (stepExecution.getEndTime() == null) {
 			// ignore unfinished executions
 			return;
 		}
 		Date startTime = stepExecution.getStartTime();
 		Date endTime = stepExecution.getEndTime();
-		long time = endTime.getTime()-startTime.getTime();
+		long time = endTime.getTime() - startTime.getTime();
 		duration.append(time);
-		if (stepExecution.getReadCount()>0) {
-			durationPerRead.append(time/stepExecution.getReadCount());
+		if (stepExecution.getReadCount() > 0) {
+			durationPerRead.append(time / stepExecution.getReadCount());
 		}
 		count++;
 		commitCount.append(stepExecution.getCommitCount());

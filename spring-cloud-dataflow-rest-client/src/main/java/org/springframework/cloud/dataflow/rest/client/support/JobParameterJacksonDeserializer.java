@@ -27,8 +27,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.batch.core.JobParameter;
 
+import org.springframework.batch.core.JobParameter;
 
 /**
  * Jackson Deserializer for {@link JobParameter} de-serialization.
@@ -42,8 +42,7 @@ public class JobParameterJacksonDeserializer extends JsonDeserializer<JobParamet
 
 	@Override
 	public JobParameter deserialize(JsonParser jsonParser, DeserializationContext deserializationContext)
-			throws IOException,
-			JsonProcessingException {
+			throws IOException, JsonProcessingException {
 		ObjectCodec oc = jsonParser.getCodec();
 		JsonNode node = oc.readTree(jsonParser);
 
@@ -55,7 +54,7 @@ public class JobParameterJacksonDeserializer extends JsonDeserializer<JobParamet
 
 		if (!type.isEmpty() && !type.equalsIgnoreCase("STRING")) {
 			if ("DATE".equalsIgnoreCase(type)) {
-				//TODO: when upgraded to Java8 use java DateTime
+				// TODO: when upgraded to Java8 use java DateTime
 				jobParameter = new JobParameter(DateTime.parse(value).toDate(), identifying);
 			}
 			else if ("DOUBLE".equalsIgnoreCase(type)) {

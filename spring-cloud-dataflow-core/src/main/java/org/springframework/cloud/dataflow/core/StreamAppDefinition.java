@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,9 +23,9 @@ import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.util.Assert;
 
 /**
- * Representation of an application, including properties provided via the DSL
- * definition. This does not include any information required at deployment
- * time (such as the number of app instances).
+ * Representation of an application, including properties provided via the DSL definition.
+ * This does not include any information required at deployment time (such as the number
+ * of app instances).
  *
  * @author Mark Fisher
  */
@@ -45,7 +45,8 @@ public class StreamAppDefinition extends DataFlowAppDefinition {
 	 * @param streamName name of the stream this app belongs to
 	 * @param properties app properties; may be {@code null}
 	 */
-	private StreamAppDefinition(String registeredAppName, String label, String streamName, Map<String, String> properties) {
+	private StreamAppDefinition(String registeredAppName, String label, String streamName,
+			Map<String, String> properties) {
 		super(registeredAppName, label, properties);
 		Assert.notNull(streamName, "stream name must not be null");
 		this.streamName = streamName;
@@ -80,73 +81,56 @@ public class StreamAppDefinition extends DataFlowAppDefinition {
 		if (streamName == null) {
 			if (other.streamName != null)
 				return false;
-		} else if (!streamName.equals(other.streamName))
+		}
+		else if (!streamName.equals(other.streamName))
 			return false;
 		return true;
 	}
 
 	@Override
 	public String toString() {
-		return "StreamAppDefinition [streamName=" + streamName
-				+ ", name=" + this.appDefinition.getName()
-				+ ", registeredAppName=" + getRegisteredAppName()
-				+ ", properties=" + this.appDefinition.getProperties() + "]";
+		return "StreamAppDefinition [streamName=" + streamName + ", name=" + this.appDefinition.getName()
+				+ ", registeredAppName=" + getRegisteredAppName() + ", properties=" + this.appDefinition.getProperties()
+				+ "]";
 	}
 
 	/**
-	 * Builder object for {@code StreamAppDefinition}.
-	 * This object is mutable to allow for flexibility in specifying application
-	 * fields/properties during parsing.
+	 * Builder object for {@code StreamAppDefinition}. This object is mutable to allow for
+	 * flexibility in specifying application fields/properties during parsing.
 	 */
 	public static class Builder {
 
 		/**
+		 * @see AppDefinition#getProperties()
+		 */
+		private final Map<String, String> properties = new HashMap<String, String>();
+		/**
 		 * @see StreamAppDefinition#streamName
 		 */
 		private String streamName;
-
 		/**
 		 * @see DataFlowAppDefinition#registeredAppName
 		 */
 		private String registeredAppName;
-
 		/**
 		 * @see AppDefinition#getName()
 		 */
 		private String label;
 
 		/**
-		 * @see AppDefinition#getProperties()
-		 */
-		private final Map<String, String> properties = new HashMap<String, String>();
-
-		/**
-		 * Create a new builder that is initialized with properties of the given definition.
-		 * Useful for "mutating" a definition by building a slightly different copy.
+		 * Create a new builder that is initialized with properties of the given
+		 * definition. Useful for "mutating" a definition by building a slightly different
+		 * copy.
+		 *
 		 * @param definition the StreamAppDefinition to create a new Builder instance with
-		 *                   stream name, registeredAppName, label, and properties populated
+		 * stream name, registeredAppName, label, and properties populated
 		 * @return a StreamAppDefinition builder
 		 */
 		public static Builder from(StreamAppDefinition definition) {
 			Builder builder = new Builder();
-			builder.setStreamName(definition.getStreamName())
-				.setRegisteredAppName(definition.getRegisteredAppName())
-				.setLabel(definition.getName())
-				.addProperties(definition.getProperties());
+			builder.setStreamName(definition.getStreamName()).setRegisteredAppName(definition.getRegisteredAppName())
+					.setLabel(definition.getName()).addProperties(definition.getProperties());
 			return builder;
-		}
-
-		/**
-		 * Set the stream name this app belongs to.
-		 *
-		 * @param streamName name
-		 * @return this builder object
-		 *
-		 * @see StreamAppDefinition#streamName
-		 */
-		public Builder setStreamName(String streamName) {
-			this.streamName = streamName;
-			return this;
 		}
 
 		/**
@@ -159,11 +143,22 @@ public class StreamAppDefinition extends DataFlowAppDefinition {
 		}
 
 		/**
+		 * Set the stream name this app belongs to.
+		 *
+		 * @param streamName name
+		 * @return this builder object
+		 * @see StreamAppDefinition#streamName
+		 */
+		public Builder setStreamName(String streamName) {
+			this.streamName = streamName;
+			return this;
+		}
+
+		/**
 		 * Set the name of the app in the registry.
 		 *
 		 * @param registeredAppName name of app in registry
 		 * @return this builder object
-		 *
 		 * @see DataFlowAppDefinition#registeredAppName
 		 */
 		public Builder setRegisteredAppName(String registeredAppName) {
@@ -188,7 +183,6 @@ public class StreamAppDefinition extends DataFlowAppDefinition {
 		 * @param name property name
 		 * @param value property value
 		 * @return this builder object
-		 *
 		 * @see AppDefinition#getProperties()
 		 */
 		public Builder setProperty(String name, String value) {
@@ -201,7 +195,6 @@ public class StreamAppDefinition extends DataFlowAppDefinition {
 		 *
 		 * @param properties app properties
 		 * @return this builder object
-		 *
 		 * @see AppDefinition#getProperties()
 		 */
 		public Builder setProperties(Map<String, String> properties) {
@@ -215,7 +208,6 @@ public class StreamAppDefinition extends DataFlowAppDefinition {
 		 *
 		 * @param properties app properties
 		 * @return this builder object
-		 *
 		 * @see AppDefinition#getProperties()
 		 */
 		public Builder addProperties(Map<String, String> properties) {
@@ -225,6 +217,7 @@ public class StreamAppDefinition extends DataFlowAppDefinition {
 
 		/**
 		 * Return a new instance of {@link StreamAppDefinition}.
+		 *
 		 * @param streamName the name of the stream
 		 * @return new instance of {@code StreamAppDefinition}
 		 */
@@ -232,8 +225,7 @@ public class StreamAppDefinition extends DataFlowAppDefinition {
 			if (this.label == null) {
 				this.setLabel(this.registeredAppName);
 			}
-			return new StreamAppDefinition(this.registeredAppName,
-					this.label, streamName, this.properties);
+			return new StreamAppDefinition(this.registeredAppName, this.label, streamName, this.properties);
 		}
 	}
 

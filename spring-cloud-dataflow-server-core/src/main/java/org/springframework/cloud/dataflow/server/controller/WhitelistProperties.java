@@ -30,8 +30,8 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 /**
- * Knows how to expand app properties into their full form if whitelist properties
- * (short hand form) have been used.
+ * Knows how to expand app properties into their full form if whitelist properties (short
+ * hand form) have been used.
  *
  * @author Eric Bottard
  */
@@ -47,11 +47,12 @@ public class WhitelistProperties {
 	}
 
 	/**
-	 * Return a copy of app properties where shorthand form have been expanded to their long form
-	 * (amongst the whitelisted supported properties of the app) if applicable.
+	 * Return a copy of app properties where shorthand form have been expanded to their
+	 * long form (amongst the whitelisted supported properties of the app) if applicable.
 	 *
 	 * @param properties the application properties in shorthand form
-	 * @param metadataResource the metadata that can be used to expand shorthand property names to long form names
+	 * @param metadataResource the metadata that can be used to expand shorthand property
+	 * names to long form names
 	 * @return the application properties with expanded long form property names
 	 */
 	public Map<String, String> qualifyProperties(Map<String, String> properties, Resource metadataResource) {
@@ -101,6 +102,5 @@ public class WhitelistProperties {
 					longForms.iterator().next().getName(), ids));
 		}
 	}
-
 
 }

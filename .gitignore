@@ -6,6 +6,7 @@ _site/
 .factorypath
 .gradletasknamecache
 .DS_Store
+.checkstyle
 /application.yml
 /application.properties
 asciidoctor.css

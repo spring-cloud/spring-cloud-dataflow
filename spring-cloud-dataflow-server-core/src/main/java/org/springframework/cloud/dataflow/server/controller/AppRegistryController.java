@@ -86,9 +86,8 @@ public class AppRegistryController implements ResourceLoaderAware {
 
 	private ForkJoinPool forkJoinPool;
 
-	public AppRegistryController(AppRegistry appRegistry,
-		ApplicationConfigurationMetadataResolver metadataResolver,
-		ForkJoinPool forkJoinPool) {
+	public AppRegistryController(AppRegistry appRegistry, ApplicationConfigurationMetadataResolver metadataResolver,
+			ForkJoinPool forkJoinPool) {
 		this.appRegistry = appRegistry;
 		this.metadataResolver = metadataResolver;
 		this.forkJoinPool = forkJoinPool;
@@ -96,6 +95,7 @@ public class AppRegistryController implements ResourceLoaderAware {
 
 	/**
 	 * List app registrations.
+	 *
 	 * @param pagedResourcesAssembler the resource assembler for app registrations
 	 * @param type the application type: source, sink, processor, task
 	 * @param detailed provide detailed information (if available) for the application
@@ -121,21 +121,23 @@ public class AppRegistryController implements ResourceLoaderAware {
 
 	/**
 	 * Retrieve detailed information about a particular application.
+	 *
 	 * @param type application type
 	 * @param name application name
 	 * @return detailed application information
 	 */
 	@RequestMapping(value = "/{type}/{name}", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
-	public DetailedAppRegistrationResource info(
-			@PathVariable("type") ApplicationType type,
+	public DetailedAppRegistrationResource info(@PathVariable("type") ApplicationType type,
 			@PathVariable("name") String name) {
 		AppRegistration registration = appRegistry.find(name, type);
 		if (registration == null) {
 			throw new NoSuchAppRegistrationException(name, type);
 		}
-		DetailedAppRegistrationResource result = new DetailedAppRegistrationResource(assembler.toResource(registration));
-		List<ConfigurationMetadataProperty> properties = metadataResolver.listProperties(registration.getMetadataResource());
+		DetailedAppRegistrationResource result = new DetailedAppRegistrationResource(
+				assembler.toResource(registration));
+		List<ConfigurationMetadataProperty> properties = metadataResolver
+				.listProperties(registration.getMetadataResource());
 		for (ConfigurationMetadataProperty property : properties) {
 			result.addOption(property);
 		}
@@ -144,26 +146,26 @@ public class AppRegistryController implements ResourceLoaderAware {
 
 	/**
 	 * Register a module name and type with its URI.
-	 * @param type        module type
-	 * @param name        module name
-	 * @param uri         URI for the module artifact (e.g. {@literal maven://group:artifact:version})
+	 *
+	 * @param type module type
+	 * @param name module name
+	 * @param uri URI for the module artifact (e.g.
+	 * {@literal maven://group:artifact:version})
 	 * @param metadataUri URI for the metadata artifact
-	 * @param force       if {@code true}, overwrites a pre-existing registration
+	 * @param force if {@code true}, overwrites a pre-existing registration
 	 */
 	@RequestMapping(value = "/{type}/{name}", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
-	public void register(
-			@PathVariable("type") ApplicationType type,
-			@PathVariable("name") String name,
-			@RequestParam("uri") String uri,
-			@RequestParam(name = "metadata-uri", required = false) String metadataUri,
+	public void register(@PathVariable("type") ApplicationType type, @PathVariable("name") String name,
+			@RequestParam("uri") String uri, @RequestParam(name = "metadata-uri", required = false) String metadataUri,
 			@RequestParam(value = "force", defaultValue = "false") boolean force) {
 		AppRegistration previous = appRegistry.find(name, type);
 		if (!force && previous != null) {
 			throw new AppAlreadyRegisteredException(previous);
 		}
 		try {
-			AppRegistration registration = appRegistry.save(name, type, new URI(uri), metadataUri != null ? new URI(metadataUri) : null);
+			AppRegistration registration = appRegistry.save(name, type, new URI(uri),
+					metadataUri != null ? new URI(metadataUri) : null);
 			prefetchMetadata(Arrays.asList(registration));
 		}
 		catch (URISyntaxException e) {
@@ -172,8 +174,8 @@ public class AppRegistryController implements ResourceLoaderAware {
 	}
 
 	/**
-	 * Unregister an application by name and type. If the application does not
-	 * exist, a {@link NoSuchAppRegistrationException} will be thrown.
+	 * Unregister an application by name and type. If the application does not exist, a
+	 * {@link NoSuchAppRegistrationException} will be thrown.
 	 *
 	 * @param type the application type
 	 * @param name the application name
@@ -185,11 +187,13 @@ public class AppRegistryController implements ResourceLoaderAware {
 	}
 
 	/**
-	 * Register all applications listed in a properties file or provided as key/value pairs.
+	 * Register all applications listed in a properties file or provided as key/value
+	 * pairs.
+	 *
 	 * @param pagedResourcesAssembler the resource asembly for app registrations
-	 * @param uri         URI for the properties file
-	 * @param apps        key/value pairs representing applications, separated by newlines
-	 * @param force       if {@code true}, overwrites any pre-existing registrations
+	 * @param uri URI for the properties file
+	 * @param apps key/value pairs representing applications, separated by newlines
+	 * @param force if {@code true}, overwrites any pre-existing registrations
 	 * @return the collection of registered applications
 	 * @throws IOException if can't store the Properties object to byte output stream
 	 */
@@ -216,23 +220,21 @@ public class AppRegistryController implements ResourceLoaderAware {
 	}
 
 	/**
-	 * Trigger early resolution of the metadata resource of registrations that have an explicit metadata artifact.
-	 * This assumes usage of {@link org.springframework.cloud.deployer.resource.support.DelegatingResourceLoader}.
+	 * Trigger early resolution of the metadata resource of registrations that have an
+	 * explicit metadata artifact. This assumes usage of
+	 * {@link org.springframework.cloud.deployer.resource.support.DelegatingResourceLoader}.
 	 */
 	private void prefetchMetadata(List<AppRegistration> appRegistrations) {
 		forkJoinPool.execute(() -> {
-			appRegistrations.stream()
-				.filter(r -> r.getMetadataUri() != null)
-				.parallel()
-				.forEach(r -> {
-					logger.info("Eagerly fetching {}", r.getMetadataUri());
-					try {
-						r.getMetadataResource();
-					}
-					catch (Exception e) {
-						logger.warn("Could not fetch " + r.getMetadataUri(), e);
-					}
-				});
+			appRegistrations.stream().filter(r -> r.getMetadataUri() != null).parallel().forEach(r -> {
+				logger.info("Eagerly fetching {}", r.getMetadataUri());
+				try {
+					r.getMetadataResource();
+				}
+				catch (Exception e) {
+					logger.warn("Could not fetch " + r.getMetadataUri(), e);
+				}
+			});
 		});
 	}
 
@@ -249,13 +251,14 @@ public class AppRegistryController implements ResourceLoaderAware {
 
 		@Override
 		public AppRegistrationResource toResource(AppRegistration registration) {
-			return createResourceWithId(String.format("%s/%s", registration.getType(), registration.getName()), registration);
+			return createResourceWithId(String.format("%s/%s", registration.getType(), registration.getName()),
+					registration);
 		}
 
 		@Override
 		protected AppRegistrationResource instantiateResource(AppRegistration registration) {
-			return new AppRegistrationResource(registration.getName(),
-					registration.getType().name(), registration.getUri().toString());
+			return new AppRegistrationResource(registration.getName(), registration.getType().name(),
+					registration.getUri().toString());
 		}
 	}
 }

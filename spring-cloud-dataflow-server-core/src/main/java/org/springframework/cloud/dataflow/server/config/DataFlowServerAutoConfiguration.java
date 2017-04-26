@@ -27,7 +27,6 @@ import org.springframework.context.annotation.Import;
  * Auto-configuration for dataflow server.
  *
  * @author Janne Valkealahti
- *
  */
 @Configuration
 @AutoConfigureBefore(value = JacksonAutoConfiguration.class)

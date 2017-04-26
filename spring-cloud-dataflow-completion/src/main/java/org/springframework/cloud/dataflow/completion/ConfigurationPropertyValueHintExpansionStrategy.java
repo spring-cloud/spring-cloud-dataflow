@@ -16,8 +16,6 @@
 
 package org.springframework.cloud.dataflow.completion;
 
-import static org.springframework.cloud.dataflow.completion.CompletionProposal.expanding;
-
 import java.io.IOException;
 import java.net.URLClassLoader;
 import java.util.HashSet;
@@ -38,9 +36,12 @@ import org.springframework.cloud.dataflow.registry.AppRegistration;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.core.io.Resource;
 
+import static org.springframework.cloud.dataflow.completion.CompletionProposal.expanding;
+
 /**
- * Attempts to fill in possible values after a {@literal --foo=prefix}
- * (syntactically valid) construct in the DSL.
+ * Attempts to fill in possible values after a {@literal --foo=prefix} (syntactically
+ * valid) construct in the DSL.
+ *
  * @author Eric Bottard
  * @author Mark Fisher
  */
@@ -60,10 +61,10 @@ public class ConfigurationPropertyValueHintExpansionStrategy implements Expansio
 	}
 
 	@Override
-	public boolean addProposals(String text, StreamDefinition parseResult,
-			int detailLevel, List<CompletionProposal> collector) {
-		Set<String> propertyNames = new HashSet<>(parseResult.getDeploymentOrderIterator()
-				.next().getProperties().keySet());
+	public boolean addProposals(String text, StreamDefinition parseResult, int detailLevel,
+			List<CompletionProposal> collector) {
+		Set<String> propertyNames = new HashSet<>(
+				parseResult.getDeploymentOrderIterator().next().getProperties().keySet());
 		propertyNames.removeAll(CompletionUtils.IMPLICIT_PARAMETER_NAMES);
 		if (text.endsWith(" ") || propertyNames.isEmpty()) {
 			return false;
@@ -145,7 +146,8 @@ public class ConfigurationPropertyValueHintExpansionStrategy implements Expansio
 		}
 		catch (CheckPointedParseException exception) {
 			List<Token> tokens = exception.getTokens();
-			int end = tokens.size() - 1 - 2; // -2 for skipping dangling -- and space preceding it
+			int end = tokens.size() - 1 - 2; // -2 for skipping dangling -- and space
+												// preceding it
 			int tokenPointer = end;
 			while (!tokens.get(tokenPointer - 1).isKind(TokenKind.DOUBLE_MINUS)) {
 				tokenPointer--;

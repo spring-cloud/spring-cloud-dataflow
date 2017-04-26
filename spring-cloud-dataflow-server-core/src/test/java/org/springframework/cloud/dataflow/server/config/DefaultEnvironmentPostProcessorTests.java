@@ -16,9 +16,6 @@
 
 package org.springframework.cloud.dataflow.server.config;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.mock;
-
 import org.junit.Test;
 
 import org.springframework.boot.SpringApplication;
@@ -36,6 +33,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.authentication.AuthenticationManager;
 
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
+
 /**
  * @author Josh Long
  */
@@ -44,13 +44,6 @@ public class DefaultEnvironmentPostProcessorTests {
 	private static final String MANAGEMENT_CONTEXT_PATH = "management.contextPath";
 
 	private static final String CONTRIBUTED_PATH = "/bar";
-
-	@Configuration
-	@Import(TestConfiguration.class)
-	@EnableAutoConfiguration(exclude=SessionAutoConfiguration.class)
-	@EnableDataFlowServer
-	public static class EmptyDefaultApp {
-	}
 
 	@Test
 	public void testDefaultsBeingContributedByServerModule() throws Exception {
@@ -67,6 +60,13 @@ public class DefaultEnvironmentPostProcessorTests {
 			String cp = ctx.getEnvironment().getProperty(MANAGEMENT_CONTEXT_PATH);
 			assertEquals(cp, "/foo");
 		}
+	}
+
+	@Configuration
+	@Import(TestConfiguration.class)
+	@EnableAutoConfiguration(exclude = SessionAutoConfiguration.class)
+	@EnableDataFlowServer
+	public static class EmptyDefaultApp {
 	}
 
 	private static class TestConfiguration {

@@ -22,7 +22,6 @@ import org.springframework.cloud.dataflow.core.DataFlowPropertyKeys;
  * Configuration properties for namespace 'spring.cloud.dataflow.metrics'.
  *
  * @author Janne Valkealahti
- *
  */
 @ConfigurationProperties(prefix = MetricsProperties.PREFIX)
 public class MetricsProperties {

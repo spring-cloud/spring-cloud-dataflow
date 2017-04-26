@@ -24,7 +24,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import org.springframework.hateoas.ResourceSupport;
 
 /**
- * Represents a list of completion proposals for the DSL when using <i>e.g.</i> TAB completion in the Shell.
+ * Represents a list of completion proposals for the DSL when using <i>e.g.</i> TAB
+ * completion in the Shell.
  *
  * @author Eric Bottard
  */
@@ -41,7 +42,8 @@ public class CompletionProposalsResource extends ResourceSupport {
 	}
 
 	/**
-	 * Represents a completion proposal for the DSL when using <i>e.g.</i> TAB completion in the Shell.
+	 * Represents a completion proposal for the DSL when using <i>e.g.</i> TAB completion
+	 * in the Shell.
 	 *
 	 * @author Eric Bottard
 	 */

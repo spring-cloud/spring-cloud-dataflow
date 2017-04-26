@@ -20,14 +20,12 @@ import org.springframework.cloud.dataflow.shell.command.ConfigCommands;
 import org.springframework.util.Assert;
 
 /**
- * A target holder, wrapping a {@link Target} that encapsulates not only the Target URI but
- * also success/error messages + status.
+ * A target holder, wrapping a {@link Target} that encapsulates not only the Target URI
+ * but also success/error messages + status.
  *
  * @author Gunnar Hillert
- * @since 1.0
- *
  * @see Target
- *
+ * @since 1.0
  */
 public class TargetHolder {
 
@@ -40,9 +38,11 @@ public class TargetHolder {
 	}
 
 	/**
-	 * Return the {@link Target} which encapsulates not only the Target URI but also success/error messages + status.
+	 * Return the {@link Target} which encapsulates not only the Target URI but also
+	 * success/error messages + status.
 	 *
-	 * @return Should never be null. Initialized by {@link ConfigCommands#afterPropertiesSet()}
+	 * @return Should never be null. Initialized by
+	 * {@link ConfigCommands#afterPropertiesSet()}
 	 */
 	public Target getTarget() {
 		return target;

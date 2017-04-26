@@ -43,9 +43,9 @@ import org.springframework.cloud.dataflow.server.repository.RdbmsTaskDefinitionR
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.TaskJobService;
 import org.springframework.cloud.dataflow.server.service.TaskService;
-import org.springframework.cloud.dataflow.server.service.impl.TaskConfigurationProperties;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskJobService;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskService;
+import org.springframework.cloud.dataflow.server.service.impl.TaskConfigurationProperties;
 import org.springframework.cloud.deployer.resource.support.DelegatingResourceLoader;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.cloud.task.repository.TaskExplorer;
@@ -66,8 +66,9 @@ import org.springframework.jdbc.datasource.DataSourceTransactionManager;
  * @author Ilayaperumal Gopinathan
  */
 @Configuration
-@ConditionalOnProperty(prefix = FeaturesProperties.FEATURES_PREFIX, name = FeaturesProperties.TASKS_ENABLED, matchIfMissing = true)
-@EnableConfigurationProperties({TaskConfigurationProperties.class})
+@ConditionalOnProperty(prefix = FeaturesProperties.FEATURES_PREFIX, name = FeaturesProperties.TASKS_ENABLED,
+		matchIfMissing = true)
+@EnableConfigurationProperties({ TaskConfigurationProperties.class })
 public class TaskConfiguration {
 
 	@Autowired
@@ -88,14 +89,13 @@ public class TaskConfiguration {
 
 	@Bean
 	@ConditionalOnBean(TaskDefinitionRepository.class)
-	public TaskService taskService(TaskDefinitionRepository repository, TaskExplorer taskExplorer, TaskRepository taskExecutionRepository,
-			AppRegistry registry, DelegatingResourceLoader resourceLoader, TaskLauncher taskLauncher,
-			ApplicationConfigurationMetadataResolver metadataResolver,
-			TaskConfigurationProperties taskConfigurationProperties,
-			DeploymentIdRepository deploymentIdRepository) {
-		return new DefaultTaskService(dataSourceProperties, repository, taskExplorer, taskExecutionRepository,
-				registry, resourceLoader, taskLauncher, metadataResolver,
-				taskConfigurationProperties, deploymentIdRepository, this.dataflowServerUri);
+	public TaskService taskService(TaskDefinitionRepository repository, TaskExplorer taskExplorer,
+			TaskRepository taskExecutionRepository, AppRegistry registry, DelegatingResourceLoader resourceLoader,
+			TaskLauncher taskLauncher, ApplicationConfigurationMetadataResolver metadataResolver,
+			TaskConfigurationProperties taskConfigurationProperties, DeploymentIdRepository deploymentIdRepository) {
+		return new DefaultTaskService(dataSourceProperties, repository, taskExplorer, taskExecutionRepository, registry,
+				resourceLoader, taskLauncher, metadataResolver, taskConfigurationProperties, deploymentIdRepository,
+				this.dataflowServerUri);
 	}
 
 	@Bean
@@ -125,7 +125,8 @@ public class TaskConfiguration {
 	}
 
 	@Configuration
-	@ConditionalOnProperty(name = "spring.dataflow.embedded.database.enabled", havingValue = "true", matchIfMissing = true)
+	@ConditionalOnProperty(name = "spring.dataflow.embedded.database.enabled", havingValue = "true",
+			matchIfMissing = true)
 	@ConditionalOnExpression("#{'${spring.datasource.url:}'.startsWith('jdbc:h2:tcp://localhost:')}")
 	public static class H2ServerConfiguration {
 
@@ -153,15 +154,16 @@ public class TaskConfiguration {
 
 		@Bean
 		@ConditionalOnMissingBean
-		public TaskDefinitionRepository taskDefinitionRepository(DataSource dataSource, Server server) throws Exception {
+		public TaskDefinitionRepository taskDefinitionRepository(DataSource dataSource, Server server)
+				throws Exception {
 			return new RdbmsTaskDefinitionRepository(dataSource);
 		}
 	}
 
 	@Configuration
-	@ConditionalOnExpression("#{!'${spring.datasource.url:}'.startsWith('jdbc:h2:tcp://localhost:') || " +
-			"('${spring.datasource.url:}'.startsWith('jdbc:h2:tcp://localhost:') &&" +
-			"'${spring.dataflow.embedded.database.enabled}'.equals('false'))}")
+	@ConditionalOnExpression("#{!'${spring.datasource.url:}'.startsWith('jdbc:h2:tcp://localhost:') || "
+			+ "('${spring.datasource.url:}'.startsWith('jdbc:h2:tcp://localhost:') &&"
+			+ "'${spring.dataflow.embedded.database.enabled}'.equals('false'))}")
 	public static class NoH2ServerConfiguration {
 
 		@Bean

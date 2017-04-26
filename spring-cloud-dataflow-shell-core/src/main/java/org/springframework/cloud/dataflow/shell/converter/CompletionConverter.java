@@ -30,24 +30,23 @@ import org.springframework.shell.core.MethodTarget;
 import org.springframework.stereotype.Component;
 
 /**
- * A converter that provides DSL completion wherever parts of stream definitions may appear.
+ * A converter that provides DSL completion wherever parts of stream definitions may
+ * appear.
  *
  * @author Eric Bottard
  */
 @Component
 public class CompletionConverter implements Converter<String> {
 
-	private static final Pattern NUMBER_OF_INVOCATIONS_CAPTURE = Pattern.compile(String.format(".*%s(\\d+).*",
-			TAB_COMPLETION_COUNT_PREFIX));
-
-	@Autowired
-	private DataFlowShell dataFlowShell;
-
+	private static final Pattern NUMBER_OF_INVOCATIONS_CAPTURE = Pattern
+			.compile(String.format(".*%s(\\d+).*", TAB_COMPLETION_COUNT_PREFIX));
 	/**
-	 * To appear in the optionContext. Triggers the use of this converter and
-	 * specifies which kind of completion is expected.
+	 * To appear in the optionContext. Triggers the use of this converter and specifies
+	 * which kind of completion is expected.
 	 */
 	private static final String COMPLETION_CONTEXT_PREFIX = "completion-";
+	@Autowired
+	private DataFlowShell dataFlowShell;
 
 	@Override
 	public boolean supports(Class<?> type, String optionContext) {
@@ -80,14 +79,14 @@ public class CompletionConverter implements Converter<String> {
 			String kind = completionKind(optionContext);
 			CompletionProposalsResource candidates;
 			switch (kind) {
-				case "stream":
-					candidates = completionOperations().streamCompletions(start, successiveInvocations);
-					break;
-				case "task":
-					candidates = completionOperations().taskCompletions(start, successiveInvocations);
-					break;
-				default:
-					throw new IllegalArgumentException("Unsupported completion kind: " + kind);
+			case "stream":
+				candidates = completionOperations().streamCompletions(start, successiveInvocations);
+				break;
+			case "task":
+				candidates = completionOperations().taskCompletions(start, successiveInvocations);
+				break;
+			default:
+				throw new IllegalArgumentException("Unsupported completion kind: " + kind);
 			}
 			for (CompletionProposalsResource.Proposal candidate : candidates.getProposals()) {
 				completions.add(new Completion(candidate.getText()));
@@ -101,8 +100,8 @@ public class CompletionConverter implements Converter<String> {
 	}
 
 	/**
-	 * Reads the {@link Converter#TAB_COMPLETION_COUNT_PREFIX} information and determines how many
-	 * times the user has pressed the TAB key.
+	 * Reads the {@link Converter#TAB_COMPLETION_COUNT_PREFIX} information and determines
+	 * how many times the user has pressed the TAB key.
 	 */
 	private int determineNumberOfInvocations(String optionContext) {
 		Matcher matcher = NUMBER_OF_INVOCATIONS_CAPTURE.matcher(optionContext);

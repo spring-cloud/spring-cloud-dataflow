@@ -16,11 +16,6 @@
 
 package org.springframework.cloud.dataflow.server.config;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
-
 import java.net.ConnectException;
 import java.util.HashMap;
 import java.util.Map;
@@ -48,6 +43,11 @@ import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.security.authentication.AuthenticationManager;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+
 /**
  * @author Glenn Renfro
  */
@@ -61,32 +61,26 @@ public class DataFlowServerConfigurationTests {
 	public void setup() {
 		context = new AnnotationConfigApplicationContext();
 		context.setId("testDataFlowConfig");
-		context.register(
-				DataFlowServerConfigurationTests.TestConfiguration.class,
-				RedisAutoConfiguration.class,
-				SecurityAutoConfiguration.class,
-				DataFlowServerAutoConfiguration.class,
-				DataFlowControllerAutoConfiguration.class,
-				DataSourceAutoConfiguration.class,
-				DataFlowServerConfiguration.class,
-				PropertyPlaceholderAutoConfiguration.class);
+		context.register(DataFlowServerConfigurationTests.TestConfiguration.class, RedisAutoConfiguration.class,
+				SecurityAutoConfiguration.class, DataFlowServerAutoConfiguration.class,
+				DataFlowControllerAutoConfiguration.class, DataSourceAutoConfiguration.class,
+				DataFlowServerConfiguration.class, PropertyPlaceholderAutoConfiguration.class);
 		environment = new StandardEnvironment();
 		propertySources = environment.getPropertySources();
 	}
 
 	@After
 	public void teardown() {
-		if(context != null && context.isActive()) {
+		if (context != null && context.isActive()) {
 			context.close();
 		}
 	}
 
 	/**
-	 * Verify that embedded server starts if h2 url is specified with default
-	 * properties.
+	 * Verify that embedded server starts if h2 url is specified with default properties.
 	 */
 	@Test
-	public void testStartEmbeddedH2Server(){
+	public void testStartEmbeddedH2Server() {
 		Map myMap = new HashMap();
 		myMap.put("spring.datasource.url", "jdbc:h2:tcp://localhost:19092/mem:dataflow");
 		propertySources.addFirst(new MapPropertySource("EnvrionmentTestPropsource", myMap));
@@ -97,12 +91,13 @@ public class DataFlowServerConfigurationTests {
 	}
 
 	/**
-	 * Verify that embedded h2 does not start if h2 url is specified with
-	 * with the spring.dataflow.embedded.database.enabled is set to false.
+	 * Verify that embedded h2 does not start if h2 url is specified with with the
+	 * spring.dataflow.embedded.database.enabled is set to false.
+	 *
 	 * @throws Throwable if any error occurs and should be handled by the caller.
 	 */
-	@Test (expected = ConnectException.class)
-	public void testDoNotStartEmbeddedH2Server() throws Throwable{
+	@Test(expected = ConnectException.class)
+	public void testDoNotStartEmbeddedH2Server() throws Throwable {
 		Throwable exceptionResult = null;
 		Map myMap = new HashMap();
 		myMap.put("spring.datasource.url", "jdbc:h2:tcp://localhost:19092/mem:dataflow");
@@ -120,11 +115,10 @@ public class DataFlowServerConfigurationTests {
 	}
 
 	/**
-	 * 	Verify that the embedded server is not started if h2 string is not
-	 * 	specified.
+	 * Verify that the embedded server is not started if h2 string is not specified.
 	 */
 	@Test
-	public void testNoServer(){
+	public void testNoServer() {
 		context.refresh();
 		assertFalse(context.containsBean("initH2TCPServer"));
 	}

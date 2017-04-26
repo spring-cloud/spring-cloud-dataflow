@@ -34,18 +34,17 @@ public class TaskCompletionProvider {
 
 	private final List<TaskExpansionStrategy> completionExpansionStrategies;
 
-	public TaskCompletionProvider(
-			List<RecoveryStrategy<?>> completionRecoveryStrategies,
+	public TaskCompletionProvider(List<RecoveryStrategy<?>> completionRecoveryStrategies,
 			List<TaskExpansionStrategy> completionExpansionStrategies) {
 		this.completionRecoveryStrategies = new ArrayList<>(completionRecoveryStrategies);
 		this.completionExpansionStrategies = new ArrayList<>(completionExpansionStrategies);
 	}
 
 	/*
-	 * Attempt to parse the text the user has already typed in. This either succeeds,
-	 * in which case we may propose to expand what she has typed, or it fails
-	 * (most likely because this is not well formed), in which case we try to
-	 * recover from the parsing failure and still add proposals.
+	 * Attempt to parse the text the user has already typed in. This either succeeds, in
+	 * which case we may propose to expand what she has typed, or it fails (most likely
+	 * because this is not well formed), in which case we try to recover from the parsing
+	 * failure and still add proposals.
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public List<CompletionProposal> complete(String dslStart, int detailLevel) {

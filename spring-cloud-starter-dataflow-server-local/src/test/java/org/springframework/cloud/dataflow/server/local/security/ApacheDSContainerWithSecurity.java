@@ -38,6 +38,7 @@ import org.apache.directory.server.protocol.shared.store.LdifFileLoader;
 import org.apache.directory.server.protocol.shared.transport.TcpTransport;
 import org.apache.directory.shared.ldap.exception.LdapNameNotFoundException;
 import org.apache.directory.shared.ldap.name.LdapDN;
+
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
@@ -50,18 +51,18 @@ import org.springframework.security.ldap.server.ApacheDSContainer;
 import org.springframework.util.Assert;
 
 /**
- * This class has been copied from {@link ApacheDSContainer}. Once the relevant Spring Security issue has
- * been addressed, we can remove this class. See also:
- *
+ * This class has been copied from {@link ApacheDSContainer}. Once the relevant Spring
+ * Security issue has been addressed, we can remove this class. See also:
+ * <p>
  * https://github.com/spring-projects/spring-security/issues/4096
- *
+ * <p>
  * Provides lifecycle services for the embedded apacheDS server defined by the supplied
  * configuration. Used by {code LdapServerBeanDefinitionParser}. An instance will be
  * stored in the application context for each embedded server instance. It will start the
  * server when the context is initialized and shut it down when it is closed. It is
  * intended for temporary embedded use and will not retain changes across start/stop
  * boundaries. The working directory is deleted on shutdown.
- *
+ * <p>
  * <p>
  * If used repeatedly in a single JVM process with the same configuration (for example,
  * when repeatedly loading an application context during testing), it's important that the
@@ -74,20 +75,17 @@ import org.springframework.util.Assert;
  * @author Luke Taylor
  * @author Rob Winch
  */
-public class ApacheDSContainerWithSecurity implements InitializingBean, DisposableBean, Lifecycle,
-		ApplicationContextAware {
-	private final Log logger = LogFactory.getLog(getClass());
-
+public class ApacheDSContainerWithSecurity
+		implements InitializingBean, DisposableBean, Lifecycle, ApplicationContextAware {
 	final DefaultDirectoryService service;
-	LdapServer server;
-
-	private ApplicationContext ctxt;
-	private File workingDir;
-
-	private boolean running;
+	private final Log logger = LogFactory.getLog(getClass());
 	private final String ldifResources;
 	private final JdbmPartition partition;
 	private final String root;
+	LdapServer server;
+	private ApplicationContext ctxt;
+	private File workingDir;
+	private boolean running;
 	private int port = 53389;
 
 	private boolean enabledLdapOverSsl;
@@ -162,24 +160,20 @@ public class ApacheDSContainerWithSecurity implements InitializingBean, Disposab
 		stop();
 	}
 
-	public void setApplicationContext(ApplicationContext applicationContext)
-			throws BeansException {
+	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
 		ctxt = applicationContext;
 	}
 
 	public void setWorkingDirectory(File workingDir) {
 		Assert.notNull(workingDir);
 
-		logger.info("Setting working directory for LDAP_PROVIDER: "
-				+ workingDir.getAbsolutePath());
+		logger.info("Setting working directory for LDAP_PROVIDER: " + workingDir.getAbsolutePath());
 
 		if (workingDir.exists()) {
-			throw new IllegalArgumentException(
-					"The specified working directory '"
-							+ workingDir.getAbsolutePath()
-							+ "' already exists. Another directory service instance may be using it or it may be from a "
-							+ " previous unclean shutdown. Please confirm and delete it or configure a different "
-							+ "working directory");
+			throw new IllegalArgumentException("The specified working directory '" + workingDir.getAbsolutePath()
+					+ "' already exists. Another directory service instance may be using it or it may be from" + " a "
+					+ " previous unclean shutdown. Please confirm and delete it or configure a different "
+					+ "working directory");
 		}
 
 		this.workingDir = workingDir;
@@ -313,14 +307,13 @@ public class ApacheDSContainerWithSecurity implements InitializingBean, Disposab
 				ldifFile = ldifs[0].getURI().toString();
 			}
 			logger.info("Loading LDIF file: " + ldifFile);
-			LdifFileLoader loader = new LdifFileLoader(service.getAdminSession(),
-					new File(ldifFile), null, getClass().getClassLoader());
+			LdifFileLoader loader = new LdifFileLoader(service.getAdminSession(), new File(ldifFile), null,
+					getClass().getClassLoader());
 			loader.execute();
 		}
 		else {
-			throw new IllegalArgumentException(
-					"More than one LDIF resource found with the supplied pattern:"
-							+ ldifResources + " Got " + Arrays.toString(ldifs));
+			throw new IllegalArgumentException("More than one LDIF resource found with the supplied pattern:"
+					+ ldifResources + " Got " + Arrays.toString(ldifs));
 		}
 	}
 
@@ -337,8 +330,8 @@ public class ApacheDSContainerWithSecurity implements InitializingBean, Disposab
 			fileName = fileNamePrefix + "~" + i;
 		}
 
-		throw new IOException("Failed to create a temporary directory for file at "
-				+ new File(parentTempDir, fileNamePrefix));
+		throw new IOException(
+				"Failed to create a temporary directory for file at " + new File(parentTempDir, fileNamePrefix));
 	}
 
 	private boolean deleteDir(File dir) {
@@ -359,4 +352,3 @@ public class ApacheDSContainerWithSecurity implements InitializingBean, Disposab
 		return running;
 	}
 }
-

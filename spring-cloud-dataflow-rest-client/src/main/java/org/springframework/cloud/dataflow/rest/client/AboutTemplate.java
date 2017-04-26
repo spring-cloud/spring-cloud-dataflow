@@ -21,8 +21,8 @@ import org.springframework.hateoas.Link;
 import org.springframework.web.client.RestTemplate;
 
 /**
- * Implementation of {@link AboutOperations} that uses {@link RestTemplate}
- * to issue commands to the Data Flow server.
+ * Implementation of {@link AboutOperations} that uses {@link RestTemplate} to issue
+ * commands to the Data Flow server.
  *
  * @author Eric Bottard
  */
@@ -38,6 +38,7 @@ public class AboutTemplate implements AboutOperations {
 		this.restTemplate = restTemplate;
 		this.link = link;
 	}
+
 	@Override
 	public AboutResource get() {
 		return restTemplate.getForObject(link.getHref(), AboutResource.class);

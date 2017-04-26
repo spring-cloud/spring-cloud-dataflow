@@ -42,7 +42,8 @@ public interface AppRegistryOperations {
 	PagedResources<AppRegistrationResource> list();
 
 	/**
-	 * Return a list of all application registrations for the given {@link ApplicationType}.
+	 * Return a list of all application registrations for the given
+	 * {@link ApplicationType}.
 	 *
 	 * @param type application type for which to return a list of registrations
 	 * @return list of all application registrations for the given application type
@@ -54,7 +55,6 @@ public interface AppRegistryOperations {
 	 *
 	 * @param name name of application
 	 * @param type application type
-	 *
 	 * @return detailed information about an application registration
 	 */
 	DetailedAppRegistrationResource info(String name, ApplicationType type);
@@ -62,28 +62,27 @@ public interface AppRegistryOperations {
 	/**
 	 * Register an application name and type with its Maven coordinates.
 	 *
-	 * @param name  application name
-	 * @param type  application type
-	 * @param uri   URI for the application artifact
-	 * @param metadataUri   URI for the application metadata artifact
+	 * @param name application name
+	 * @param type application type
+	 * @param uri URI for the application artifact
+	 * @param metadataUri URI for the application metadata artifact
 	 * @param force if {@code true}, overwrites a pre-existing registration
 	 * @return the new app registration
 	 */
-	AppRegistrationResource register(String name, ApplicationType type,
-			String uri, String metadataUri, boolean force);
+	AppRegistrationResource register(String name, ApplicationType type, String uri, String metadataUri, boolean force);
 
 	/**
 	 * Unregister an application name and type.
 	 *
-	 * @param name  application name
-	 * @param type  application type
+	 * @param name application name
+	 * @param type application type
 	 */
 	void unregister(String name, ApplicationType type);
 
 	/**
 	 * Register all applications listed in a properties file.
 	 *
-	 * @param uri   URI for the properties file
+	 * @param uri URI for the properties file
 	 * @param force if {@code true}, overwrites any pre-existing registrations
 	 * @return the paged list of new app registrations
 	 */
@@ -92,7 +91,7 @@ public interface AppRegistryOperations {
 	/**
 	 * Register all applications provided as key/value pairs.
 	 *
-	 * @param apps   the apps as key/value pairs where key is "type.name" and value is a URI
+	 * @param apps the apps as key/value pairs where key is "type.name" and value is a URI
 	 * @param force if {@code true}, overwrites any pre-existing registrations
 	 * @return the paged list of new app registrations
 	 */

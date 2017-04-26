@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -41,25 +41,25 @@ import org.springframework.util.StringUtils;
 public final class DeploymentPropertiesUtils {
 
 	private static final Logger logger = LoggerFactory.getLogger(DeploymentPropertiesUtils.class);
+	/**
+	 * Pattern used for parsing a String of command-line arguments.
+	 */
+	private static final Pattern DEPLOYMENT_PARAMS_PATTERN = Pattern
+			.compile("(\\s(?=" + "([^\\\"']*[\\\"'][^\\\"']*[\\\"'])*[^\\\"']*$))");
 
 	private DeploymentPropertiesUtils() {
 		// prevent instantiation
 	}
 
 	/**
-	 * Pattern used for parsing a String of command-line arguments.
-	 */
-	private static final Pattern DEPLOYMENT_PARAMS_PATTERN = Pattern.compile("(\\s(?=([^\\\"']*[\\\"'][^\\\"']*[\\\"'])*[^\\\"']*$))");
-
-	/**
-	 * Parses a String comprised of 0 or more comma-delimited key=value pairs where each key has the format:
-	 * {@code app.[appname].[key]} or {@code deployer.[appname].[key]}.
-	 * Values may themselves contain commas, since the split points will be based upon the key pattern.
-	 *
-	 * Logic of parsing key/value pairs from a string is based on few rules and assumptions
-	 * 1. keys will not have commas or equals.
-	 * 2. First raw split is done by commas which will need to be fixed later
-	 *    if value is a comma-delimited list.
+	 * Parses a String comprised of 0 or more comma-delimited key=value pairs where each
+	 * key has the format: {@code app.[appname].[key]} or
+	 * {@code deployer.[appname].[key]}. Values may themselves contain commas, since the
+	 * split points will be based upon the key pattern.
+	 * <p>
+	 * Logic of parsing key/value pairs from a string is based on few rules and
+	 * assumptions 1. keys will not have commas or equals. 2. First raw split is done by
+	 * commas which will need to be fixed later if value is a comma-delimited list.
 	 *
 	 * @param s the string to parse
 	 * @return the Map of parsed key value pairs
@@ -78,7 +78,7 @@ public final class DeploymentPropertiesUtils {
 				// we skip first as we would not have anything to append to. this
 				// would happen if dep prop string is malformed and first given
 				// key/value pair is not actually a key/value.
-				pairs.set(pairs.size()-1, pairs.get(pairs.size()-1) + "," + candidates[i]);
+				pairs.set(pairs.size() - 1, pairs.get(pairs.size() - 1) + "," + candidates[i]);
 			}
 			else {
 				// we have a key/value pair having '=', or malformed first pair
@@ -95,8 +95,8 @@ public final class DeploymentPropertiesUtils {
 	}
 
 	/**
-	 * Ensure that deployment properties doesn't have keys not starting with
-	 * either {@code app.} or {@code deployer.}. In case non supported key is found
+	 * Ensure that deployment properties doesn't have keys not starting with either
+	 * {@code app.} or {@code deployer.}. In case non supported key is found
 	 * {@link IllegalArgumentException} is thrown.
 	 *
 	 * @param properties the properties to check
@@ -116,8 +116,8 @@ public final class DeploymentPropertiesUtils {
 
 	/**
 	 * Retain only properties that are meant for the <em>deployer</em> of a given app
-	 * (those that start with {@code deployer.[appname]} or {@code deployer.*})
-	 * and qualify all property values with the {@code spring.cloud.deployer.} prefix.
+	 * (those that start with {@code deployer.[appname]} or {@code deployer.*}) and
+	 * qualify all property values with the {@code spring.cloud.deployer.} prefix.
 	 *
 	 * @param input the deplopyment properties
 	 * @param appName the app name
@@ -131,15 +131,11 @@ public final class DeploymentPropertiesUtils {
 
 		// Using a TreeMap makes sure wildcard entries appear before app specific ones
 		Map<String, String> result = new TreeMap<>(input).entrySet().stream()
-			.filter(kv -> kv.getKey().startsWith(wildcardPrefix) || kv.getKey().startsWith(appPrefix))
-			.collect(Collectors.toMap(
-				kv -> kv.getKey().startsWith(wildcardPrefix)
-					? "spring.cloud.deployer." + kv.getKey().substring(wildcardLength)
-					: "spring.cloud.deployer." + kv.getKey().substring(appLength),
-				kv -> kv.getValue(),
-				(fromWildcard, fromApp) -> fromApp
-				)
-			);
+				.filter(kv -> kv.getKey().startsWith(wildcardPrefix) || kv.getKey().startsWith(appPrefix))
+				.collect(Collectors.toMap(kv -> kv.getKey().startsWith(wildcardPrefix)
+						? "spring.cloud.deployer." + kv.getKey().substring(wildcardLength)
+						: "spring.cloud.deployer." + kv.getKey().substring(appLength), kv -> kv.getValue(),
+						(fromWildcard, fromApp) -> fromApp));
 
 		Map<String, String> deprecated = extractDeprecatedDeployerProperties(input, appName);
 		// Also, 'count' used to be treated as a special case. Handle here
@@ -147,25 +143,27 @@ public final class DeploymentPropertiesUtils {
 		String deprecatedCount = input.getOrDefault("app." + appName + ".count", deprecatedWildcardCound);
 		if (deprecatedCount != null && deprecated.get("spring.cloud.deployer.count") == null) {
 			deprecated.put("spring.cloud.deployer.count", deprecatedCount);
-			logger.warn("Usage of application property 'app.{}.count' to specify number of instances has been deprecated and will be removed in a future release\n" +
-				"Instead, please use 'deployer.{}.count = {}'",
-				appName, appName, deprecatedCount);
+			logger.warn("Usage of application property 'app.{}.count' to specify number of instances has been "
+					+ "deprecated and will be removed in a future release\n"
+					+ "Instead, please use 'deployer.{}.count = {}'", appName, appName, deprecatedCount);
 		}
-
 
 		if (deprecated.isEmpty()) {
 			return result;
-		} else {
+		}
+		else {
 			deprecated.entrySet().forEach(kv -> {
-				logger.warn("Usage of application property prefix 'spring.cloud.deployer' to pass properties to the deployer has been deprecated and will be removed in a future release\n" +
-					"Instead of 'app.{}.{} = {}', please use\n" +
-					"           'deployer.{}.{} = {}'",
-					appName, kv.getKey(), kv.getValue(),
-					appName, kv.getKey().substring("spring.cloud.deployer.".length()), kv.getValue());
+				logger.warn(
+						"Usage of application property prefix 'spring.cloud.deployer' to pass properties to the "
+								+ "deployer has been deprecated and will be removed in a future release\n"
+								+ "Instead of 'app.{}.{} = {}', please use\n" + "           'deployer.{}.{} = {}'",
+						appName, kv.getKey(), kv.getValue(), appName,
+						kv.getKey().substring("spring.cloud.deployer.".length()), kv.getValue());
 			});
 			if (result.isEmpty()) {
 				return deprecated;
-			} else {
+			}
+			else {
 				return result;
 			}
 		}
@@ -179,19 +177,16 @@ public final class DeploymentPropertiesUtils {
 		final int appLength = String.format("app.%s.", appName).length();
 
 		return new TreeMap<>(input).entrySet().stream()
-			.filter(kv -> kv.getKey().startsWith(wildcardPrefix) || kv.getKey().startsWith(appPrefix))
-			.collect(Collectors.toMap(
-				kv -> kv.getKey().startsWith(wildcardPrefix)
-					? kv.getKey().substring(wildcardLength)
-					: kv.getKey().substring(appLength),
-				kv -> kv.getValue(),
-				(fromWildcard, fromApp) -> fromApp
-				)
-			);
+				.filter(kv -> kv.getKey().startsWith(wildcardPrefix) || kv.getKey().startsWith(appPrefix))
+				.collect(Collectors.toMap(
+						kv -> kv.getKey().startsWith(wildcardPrefix) ? kv.getKey().substring(wildcardLength)
+								: kv.getKey().substring(appLength),
+						kv -> kv.getValue(), (fromWildcard, fromApp) -> fromApp));
 	}
 
 	/**
-	 * Returns a String representation of deployment properties as a comma separated list of key=value pairs.
+	 * Returns a String representation of deployment properties as a comma separated list
+	 * of key=value pairs.
 	 *
 	 * @param properties the properties to format
 	 * @return the properties formatted as a String
@@ -208,12 +203,14 @@ public final class DeploymentPropertiesUtils {
 	}
 
 	/**
-	 * Convert Properties to a Map with String keys and values. Entries whose key or value is not a String are omitted.
+	 * Convert Properties to a Map with String keys and values. Entries whose key or value
+	 * is not a String are omitted.
+	 *
 	 * @param properties the properties object
 	 * @return the equivalent {@code Map<String,String>}
 	 */
 	public static Map<String, String> convert(Properties properties) {
-		Map<String, String> result  = new HashMap<>(properties.size());
+		Map<String, String> result = new HashMap<>(properties.size());
 		for (String key : properties.stringPropertyNames()) {
 			result.put(key, properties.getProperty(key));
 		}
@@ -235,8 +232,8 @@ public final class DeploymentPropertiesUtils {
 	}
 
 	/**
-	 * Parses a list of command line parameters and returns a list of parameters
-	 * which doesn't contain any special quoting either for values or whole parameter.
+	 * Parses a list of command line parameters and returns a list of parameters which
+	 * doesn't contain any special quoting either for values or whole parameter.
 	 *
 	 * @param params the params
 	 * @return the list
@@ -281,8 +278,8 @@ public final class DeploymentPropertiesUtils {
 
 	private static String removeQuote(String param, char c) {
 		if (param != null && param.length() > 1) {
-			if (param.charAt(0) == c && param.charAt(param.length()-1) == c) {
-				param = param.substring(1, param.length()-1);
+			if (param.charAt(0) == c && param.charAt(param.length() - 1) == c) {
+				param = param.substring(1, param.length() - 1);
 			}
 		}
 		return param;

@@ -20,13 +20,15 @@ import java.util.Map;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.item.ExecutionContext;
 
 /**
- * Jackson MixIn for the JSON serialization of the {@link ExecutionContext} class, which is used by the
- * {@link StepExecution} class. By default, meaning without the {@link ExecutionContextJacksonMixIn} applied, Jackson
- * will not render the values of the {@link ExecutionContext}.
+ * Jackson MixIn for the JSON serialization of the {@link ExecutionContext} class, which
+ * is used by the {@link StepExecution} class. By default, meaning without the
+ * {@link ExecutionContextJacksonMixIn} applied, Jackson will not render the values of the
+ * {@link ExecutionContext}.
  *
  * @author Gunnar Hillert
  * @since 1.0

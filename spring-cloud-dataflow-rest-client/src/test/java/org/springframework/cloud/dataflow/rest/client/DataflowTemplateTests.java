@@ -15,11 +15,6 @@
  */
 package org.springframework.cloud.dataflow.rest.client;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Iterator;
@@ -42,10 +37,13 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 /**
- *
  * @author Gunnar Hillert
- *
  */
 public class DataflowTemplateTests {
 
@@ -75,7 +73,7 @@ public class DataflowTemplateTests {
 
 	@Test(expected = ResourceAccessException.class)
 	public void testDataFlowTemplateContructorWithNonExistingUri() throws URISyntaxException {
-			new DataFlowTemplate(new URI("http://doesnotexist:1234"));
+		new DataFlowTemplate(new URI("http://doesnotexist:1234"));
 	}
 
 	@Test
@@ -92,11 +90,12 @@ public class DataflowTemplateTests {
 	private void assertCorrectMixins(RestTemplate restTemplate) {
 		boolean containsMappingJackson2HttpMessageConverter = false;
 
-		for(HttpMessageConverter<?> converter : restTemplate.getMessageConverters()) {
+		for (HttpMessageConverter<?> converter : restTemplate.getMessageConverters()) {
 			if (converter instanceof MappingJackson2HttpMessageConverter) {
 				containsMappingJackson2HttpMessageConverter = true;
 
-				final MappingJackson2HttpMessageConverter jacksonConverter = (MappingJackson2HttpMessageConverter) converter;
+				final MappingJackson2HttpMessageConverter jacksonConverter =
+						(MappingJackson2HttpMessageConverter) converter;
 				final ObjectMapper objectMapper = jacksonConverter.getObjectMapper();
 
 				assertNotNull(objectMapper.findMixInClassFor(JobExecution.class));
@@ -111,7 +110,8 @@ public class DataflowTemplateTests {
 		}
 
 		if (!containsMappingJackson2HttpMessageConverter) {
-			fail("Expected that the restTemplate's list of Message Converters contained a MappingJackson2HttpMessageConverter");
+			fail("Expected that the restTemplate's list of Message Converters contained a "
+					+ "MappingJackson2HttpMessageConverter");
 		}
 	}
 
@@ -146,7 +146,7 @@ public class DataflowTemplateTests {
 		try {
 			DataFlowTemplate.prepareRestTemplate(providedRestTemplate);
 		}
-		catch(IllegalArgumentException e) {
+		catch (IllegalArgumentException e) {
 			assertEquals("'messageConverters' must not be empty", e.getMessage());
 			return;
 		}
@@ -159,8 +159,8 @@ public class DataflowTemplateTests {
 		final RestTemplate providedRestTemplate = new RestTemplate();
 		final Iterator<HttpMessageConverter<?>> iterator = providedRestTemplate.getMessageConverters().iterator();
 
-		while(iterator.hasNext()){
-			if(iterator.next() instanceof MappingJackson2HttpMessageConverter) {
+		while (iterator.hasNext()) {
+			if (iterator.next() instanceof MappingJackson2HttpMessageConverter) {
 				iterator.remove();
 			}
 		}
@@ -168,8 +168,9 @@ public class DataflowTemplateTests {
 		try {
 			DataFlowTemplate.prepareRestTemplate(providedRestTemplate);
 		}
-		catch(IllegalArgumentException e) {
-			assertEquals("The RestTemplate does not contain a required MappingJackson2HttpMessageConverter.", e.getMessage());
+		catch (IllegalArgumentException e) {
+			assertEquals("The RestTemplate does not contain a required MappingJackson2HttpMessageConverter.",
+					e.getMessage());
 			return;
 		}
 

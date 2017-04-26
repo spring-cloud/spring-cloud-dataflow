@@ -16,21 +16,6 @@
 
 package org.springframework.cloud.dataflow.server.controller;
 
-import static org.hamcrest.Matchers.hasEntry;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.atLeast;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -59,6 +44,21 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import static org.hamcrest.Matchers.hasEntry;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.atLeast;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 /**
  * @author Michael Minella
  * @author Mark Fisher
@@ -71,29 +71,23 @@ import org.springframework.web.context.WebApplicationContext;
 public class TaskControllerTests {
 
 	@Autowired
+	TaskService taskService;
+	@Autowired
 	private TaskDefinitionRepository repository;
-
 	@Autowired
 	private UriRegistry registry;
-
 	private MockMvc mockMvc;
-
 	@Autowired
 	private WebApplicationContext wac;
-
 	@Autowired
 	private TaskLauncher taskLauncher;
-
 	@Autowired
 	private AppRegistry appRegistry;
 
-	@Autowired
-	TaskService taskService;
-
 	@Before
 	public void setupMockMVC() {
-		this.mockMvc = MockMvcBuilders.webAppContextSetup(wac).defaultRequest(
-				get("/").accept(MediaType.APPLICATION_JSON)).build();
+		this.mockMvc = MockMvcBuilders.webAppContextSetup(wac)
+				.defaultRequest(get("/").accept(MediaType.APPLICATION_JSON)).build();
 		when(taskLauncher.launch(any(AppDeploymentRequest.class))).thenReturn("testID");
 	}
 
@@ -105,15 +99,12 @@ public class TaskControllerTests {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testTaskDefinitionControllerConstructorMissingRepository() {
-		new TaskDefinitionController(null, null, taskLauncher, appRegistry,
-				taskService);
+		new TaskDefinitionController(null, null, taskLauncher, appRegistry, taskService);
 	}
-
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testTaskDefinitionControllerConstructorMissingDeployer() {
-		new TaskDefinitionController(new InMemoryTaskDefinitionRepository(),
-				null, null, appRegistry, taskService);
+		new TaskDefinitionController(new InMemoryTaskDefinitionRepository(), null, null, appRegistry, taskService);
 	}
 
 	@Test
@@ -122,10 +113,7 @@ public class TaskControllerTests {
 		repository.save(new TaskDefinition("myTask", "foo"));
 		this.registry.register("task.foo", new URI("maven://org.springframework.cloud:foo:1"));
 
-		mockMvc.perform(
-				post("/tasks/executions")
-					.param("name", "myTask")
-					.accept(MediaType.APPLICATION_JSON))
+		mockMvc.perform(post("/tasks/executions").param("name", "myTask").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isInternalServerError());
 	}
 
@@ -133,10 +121,8 @@ public class TaskControllerTests {
 	public void testSaveErrorNotInRegistry() throws Exception {
 		assertEquals(0, repository.count());
 
-		mockMvc.perform(
-				post("/tasks/definitions/").param("name", "myTask").param("definition", "task")
-						.accept(MediaType.APPLICATION_JSON)).andDo(print())
-						.andExpect(status().is5xxServerError());
+		mockMvc.perform(post("/tasks/definitions/").param("name", "myTask").param("definition", "task")
+				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().is5xxServerError());
 
 		assertEquals(0, repository.count());
 	}
@@ -145,10 +131,8 @@ public class TaskControllerTests {
 	public void testSave() throws Exception {
 		assertEquals(0, repository.count());
 		appRegistry.save("task", ApplicationType.task, new URI("http://fake.example.com/"), null);
-		mockMvc.perform(
-				post("/tasks/definitions/").param("name", "myTask").param("definition", "task")
-						.accept(MediaType.APPLICATION_JSON)).andDo(print())
-						.andExpect(status().isOk());
+		mockMvc.perform(post("/tasks/definitions/").param("name", "myTask").param("definition", "task")
+				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk());
 
 		assertEquals(1, repository.count());
 
@@ -163,10 +147,8 @@ public class TaskControllerTests {
 	@Test
 	public void testSaveDuplicate() throws Exception {
 		repository.save(new TaskDefinition("myTask", "task"));
-		mockMvc.perform(
-				post("/tasks/definitions/").param("name", "myTask").param("definition", "task")
-						.accept(MediaType.APPLICATION_JSON))
-						.andExpect(status().isConflict());
+		mockMvc.perform(post("/tasks/definitions/").param("name", "myTask").param("definition", "task")
+				.accept(MediaType.APPLICATION_JSON)).andExpect(status().isConflict());
 		assertEquals(1, repository.count());
 	}
 
@@ -174,10 +156,8 @@ public class TaskControllerTests {
 	public void testSaveWithParameters() throws Exception {
 		assertEquals(0, repository.count());
 
-		mockMvc.perform(
-				post("/tasks/definitions/").param("name", "myTask")
-						.param("definition", "task --foo=bar --bar=baz")
-						.accept(MediaType.APPLICATION_JSON)).andDo(print())
+		mockMvc.perform(post("/tasks/definitions/").param("name", "myTask")
+				.param("definition", "task --foo=bar --bar=baz").accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isOk());
 
 		assertEquals(1, repository.count());
@@ -195,8 +175,7 @@ public class TaskControllerTests {
 	public void testDestroyTask() throws Exception {
 		repository.save(new TaskDefinition("myTask", "task"));
 
-		mockMvc.perform(
-				delete("/tasks/definitions/myTask").accept(MediaType.APPLICATION_JSON)).andDo(print())
+		mockMvc.perform(delete("/tasks/definitions/myTask").accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isOk());
 
 		assertEquals(0, repository.count());
@@ -205,8 +184,7 @@ public class TaskControllerTests {
 
 	@Test
 	public void testDestroyTaskNotFound() throws Exception {
-		mockMvc.perform(
-				delete("/tasks/definitions/myTask").accept(MediaType.APPLICATION_JSON)).andDo(print())
+		mockMvc.perform(delete("/tasks/definitions/myTask").accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isNotFound());
 		assertEquals(0, repository.count());
 	}
@@ -215,22 +193,16 @@ public class TaskControllerTests {
 	public void testMissingApplication() throws Exception {
 		repository.save(new TaskDefinition("myTask", "no-such-task-app"));
 
-		mockMvc.perform(
-				post("/tasks/executions")
-					.param("name", "myTask")
-					.accept(MediaType.APPLICATION_JSON)).andDo(print())
-			.andExpect(status().is5xxServerError())
-			.andExpect(content().json("[{message: \"Unknown task app: no-such-task-app\"}]"));
+		mockMvc.perform(post("/tasks/executions").param("name", "myTask").accept(MediaType.APPLICATION_JSON))
+				.andDo(print()).andExpect(status().is5xxServerError())
+				.andExpect(content().json("[{message: \"Unknown task app: no-such-task-app\"}]"));
 	}
 
 	@Test
 	public void testTaskNotDefined() throws Exception {
-		mockMvc.perform(
-				post("/tasks/executions")
-					.param("name", "myFoo")
-					.accept(MediaType.APPLICATION_JSON)).andDo(print())
-			.andExpect(status().isNotFound())
-			.andExpect(content().json("[{message: \"Could not find task definition named myFoo\"}]"));
+		mockMvc.perform(post("/tasks/executions").param("name", "myFoo").accept(MediaType.APPLICATION_JSON))
+				.andDo(print()).andExpect(status().isNotFound())
+				.andExpect(content().json("[{message: \"Could not find task definition named myFoo\"}]"));
 	}
 
 	@Test
@@ -238,11 +210,8 @@ public class TaskControllerTests {
 		repository.save(new TaskDefinition("myTask", "foo"));
 		this.registry.register("task.foo", new URI("file:src/test/resources/apps/foo-task"));
 
-		mockMvc.perform(
-				post("/tasks/executions")
-					.param("name", "myTask")
-					.accept(MediaType.APPLICATION_JSON)).andDo(print())
-				.andExpect(status().isCreated());
+		mockMvc.perform(post("/tasks/executions").param("name", "myTask").accept(MediaType.APPLICATION_JSON))
+				.andDo(print()).andExpect(status().isCreated());
 
 		ArgumentCaptor<AppDeploymentRequest> argumentCaptor = ArgumentCaptor.forClass(AppDeploymentRequest.class);
 		verify(this.taskLauncher, atLeast(1)).launch(argumentCaptor.capture());
@@ -256,11 +225,8 @@ public class TaskControllerTests {
 		repository.save(new TaskDefinition("myTask2", "foo2 --common.prop2=wizz"));
 		this.registry.register("task.foo2", new URI("file:src/test/resources/apps/foo-task"));
 
-		mockMvc.perform(
-				post("/tasks/executions")
-				.param("name", "myTask2")
-				.accept(MediaType.APPLICATION_JSON)).andDo(print())
-				.andExpect(status().isCreated());
+		mockMvc.perform(post("/tasks/executions").param("name", "myTask2").accept(MediaType.APPLICATION_JSON))
+				.andDo(print()).andExpect(status().isCreated());
 
 		ArgumentCaptor<AppDeploymentRequest> argumentCaptor = ArgumentCaptor.forClass(AppDeploymentRequest.class);
 		verify(this.taskLauncher, atLeast(1)).launch(argumentCaptor.capture());
@@ -275,18 +241,16 @@ public class TaskControllerTests {
 		repository.save(new TaskDefinition("myTask3", "foo3"));
 		this.registry.register("task.foo3", new URI("file:src/test/resources/apps/foo-task"));
 
-		mockMvc.perform(
-				post("/tasks/executions")
-				.param("name", "myTask3")
+		mockMvc.perform(post("/tasks/executions").param("name", "myTask3")
 				.param("arguments", "--foobar=jee", "--foobar2=jee2", "--foobar3='jee3 jee3'")
-				.accept(MediaType.APPLICATION_JSON)).andDo(print())
-				.andExpect(status().isCreated());
+				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isCreated());
 
 		ArgumentCaptor<AppDeploymentRequest> argumentCaptor = ArgumentCaptor.forClass(AppDeploymentRequest.class);
 		verify(this.taskLauncher, atLeast(1)).launch(argumentCaptor.capture());
 
 		AppDeploymentRequest request = argumentCaptor.getValue();
-		assertThat(request.getCommandlineArguments().size(), is(3 + 1)); // +1 for spring.cloud.task.executionid
+		assertThat(request.getCommandlineArguments().size(), is(3 + 1)); // +1 for
+																			// spring.cloud.task.executionid
 		assertThat(request.getCommandlineArguments().get(0), is("--foobar=jee"));
 		assertThat(request.getCommandlineArguments().get(1), is("--foobar2=jee2"));
 		assertThat(request.getCommandlineArguments().get(2), is("--foobar3=jee3 jee3"));
@@ -298,25 +262,19 @@ public class TaskControllerTests {
 		TaskDefinition taskDefinition = new TaskDefinition("myTask", "timestamp");
 		repository.save(taskDefinition);
 		assertEquals(1, repository.count());
-		mockMvc.perform(
-				get("/tasks/definitions/myTask").accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk())
-				.andExpect(content().json("{name: \"myTask\"}"))
-				.andExpect(content().json("{dslText: \"timestamp\"}"));
+		mockMvc.perform(get("/tasks/definitions/myTask").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
+				.andExpect(content().json("{name: \"myTask\"}")).andExpect(content().json("{dslText: \"timestamp\"}"));
 	}
 
 	@Test
 	public void testDisplaySingleTaskNotFound() throws Exception {
-		mockMvc.perform(
-				get("/tasks/definitions/myTask").accept(MediaType.APPLICATION_JSON))
+		mockMvc.perform(get("/tasks/definitions/myTask").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isNotFound());
 	}
-
-
 
 	private void createTaskDefinition(String taskName) throws URISyntaxException {
 		String taskAppName = "faketask" + taskName;
 		repository.save(new TaskDefinition(taskName, taskAppName));
-		appRegistry.save(taskAppName, ApplicationType.task, new URI("http://fake.example.com/"),null);
+		appRegistry.save(taskAppName, ApplicationType.task, new URI("http://fake.example.com/"), null);
 	}
 }
