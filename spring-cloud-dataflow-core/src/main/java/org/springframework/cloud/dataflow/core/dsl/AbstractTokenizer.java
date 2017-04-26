@@ -77,8 +77,8 @@ public abstract class AbstractTokenizer {
 	 * Check if this might be a two character token.
 	 */
 	protected boolean isTwoCharToken(TokenKind kind) {
-		Assert.isTrue(kind.tokenChars.length == 2);
-		Assert.isTrue(toProcess[pos] == kind.tokenChars[0]);
+		Assert.isTrue(kind.tokenChars.length == 2, "The token kind being looked for should be of length 2");
+		Assert.isTrue(toProcess[pos] == kind.tokenChars[0], "Expected these characters to have already been tested for equality");
 		return toProcess[pos + 1] == kind.tokenChars[1];
 	}
 
