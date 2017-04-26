@@ -208,7 +208,7 @@ The target Spring Cloud Stream application starter should be re-packaged to supp
 The JDBC-sink can be used to insert message payload data into a relational database table. By default,
 it inserts the entire payload into a table named after `spring.application.name` value set at the
 application level, and if it is not set, by default the application expects the table with the name
-`messages`. To alter this behavior, the JDBC sink accepts link:https://github.com/spring-cloud-stream-app-starters/jdbc/blob/master/spring-cloud-starter-stream-sink-jdbc/README.adoc[several options] that you can pass using the --foo=bar notation in the stream, or change globally. You should also change the `jdbc.initialize` property to true to have this script execute when the sink starts up.
+`messages`. To alter this behavior, the JDBC sink accepts link:https://github.com/spring-cloud-stream-app-starters/jdbc/blob/master/spring-cloud-starter-stream-sink-jdbc/README.adoc[several options] that you can pass using the --foo=bar notation in the stream, or change globally.
 
 A stream definition using `jdbc` sink relying on all defaults with MySQL as the backing database looks
 like the following. In this example, the system time is persisted in MySQL for every second.
@@ -258,12 +258,12 @@ mysql> select * from test.messages;
 [[dataflow-multiple-brokers]]
 === How to use multiple message-binders?
 For situations where the data is consumed and processed between two different message brokers, Spring
-Cloud Data Flow provides easy to override global configurations, out-of-the-box `bridge-processor`,
-and DSL primitives to build this type of topologies.
+Cloud Data Flow provides easy to override global configurations, out-of-the-box link:https://github.com/spring-cloud-stream-app-starters/bridge[`bridge-processor`],
+and DSL primitives to build these type of topologies.
 
 Let's assume we have data queueing up in RabbitMQ _(e.g., queue = `fooRabbit`)_ and the requirement
 is to consume all the payloads and publish them to Apache Kafka _(e.g., topic = `barKafka`)_, as the
-destination for downstream consumption.
+destination for downstream processing.
 
 Follow the global application of <<streams.adoc#spring-cloud-dataflow-global-properties, configurations>>
 to define multiple binder configurations.
@@ -284,7 +284,7 @@ spring.cloud.dataflow.applicationProperties.stream.spring.cloud.stream.binders.r
 NOTE: In this example, both the message brokers are running locally and reachable at `localhost`
 with respective ports.
 
-These properties can be supplied in a `.properties` file either to the server directly or via 
+These properties can be supplied in a ".properties" file that is accessible to the server directly or via
 `config-server`.
 
 [source,bash]
@@ -301,22 +301,22 @@ link:http://docs.spring.io/spring-cloud-stream-app-starters/docs/Bacon.RELEASE/r
 Specifically, for the `bridge-processor`, you'd have to import the `BridgeProcessorConfiguration`
 provided by the starter.
 
-Once you have the necessary adjustments, you can build the application. Let's register name of the
-application with `multiBinderBridge`.
+Once you have the necessary adjustments, you can build the application. Let's register the name of the
+application as `multiBinderBridge`.
 
 [source,bash]
 ----
 dataflow:>app register --type processor --name multiBinderBridge --uri file:///<PATH-TO-FILE>/multipleBinderBridge-0.0.1-SNAPSHOT.jar
 ----
 
-It is time to create a stream definition with the newly registered application.
+It is time to create a stream definition with the newly registered processor application.
 
 [source,bash]
 ----
 dataflow:>stream create fooRabbitToBarKafka --definition ":fooRabbit > multiBinderBridge --spring.cloud.stream.bindings.input.binder=rabbit1 --spring.cloud.stream.bindings.output.binder=kafka1 > :barKafka" --deploy
 ----
 
-NOTE: Since we are to consume messages from RabbitMQ _(i.e., identified by `raabit1`)_ and then
+NOTE: Since we are to consume messages from RabbitMQ _(i.e., identified by `rabbit1`)_ and then
 publish the payload to Apache Kafka _(i.e., identified by `kafka1`)_, we are supplying them as `input`
 and `output` channel settings respectively.
 
