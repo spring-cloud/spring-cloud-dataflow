@@ -155,6 +155,9 @@ Note however that once downloaded, applications may be cached locally on the Dat
 location. If the resource location doesn't change (even though the actual resource _bytes_ may be different), then it
 won't be re-downloaded. When using `maven://` resources on the other hand, using a constant location still may circumvent
 caching (if using `-SNAPSHOT` versions).
+
+Moreover, if a stream is already deployed and using some version of a registered app, then (forcibly) re-registering a
+different app will have no effect until the stream is deployed anew.
 ====
 
 [NOTE]
