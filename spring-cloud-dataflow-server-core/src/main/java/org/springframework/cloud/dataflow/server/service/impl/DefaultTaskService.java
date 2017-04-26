@@ -22,8 +22,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.h2.util.Task;
-
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.bind.RelaxedNames;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
@@ -54,7 +52,7 @@ import org.springframework.util.StringUtils;
 
 /**
  * Default implementation of the {@link TaskService} interface. Provide service methods
- * for {@link Task}s.
+ * for Tasks.
  *
  * @author Michael Minella
  * @author Marius Bogoevici
