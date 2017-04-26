@@ -24,6 +24,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import javax.sql.DataSource;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -50,6 +52,7 @@ import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.cloud.task.repository.TaskRepository;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.ReflectionUtils;
@@ -94,6 +97,9 @@ public class DefaultTaskServiceTests {
 	@Autowired
 	private TaskExplorer taskExplorer;
 
+	@Autowired
+	private DataSource dataSource;
+
 	private AppRegistry appRegistry;
 
 	private ResourceLoader resourceLoader;
@@ -104,9 +110,13 @@ public class DefaultTaskServiceTests {
 
 	private TaskService taskService;
 
+	private JdbcTemplate template;
 
 	@Before
 	public void setupMockMVC() {
+		this.template = new JdbcTemplate(dataSource);
+		this.template.execute("DELETE FROM task_execution");
+
 		taskDefinitionRepository.save(new TaskDefinition(TASK_NAME_ORIG, "demo"));
 		appRegistry = mock(AppRegistry.class);
 		resourceLoader = mock(ResourceLoader.class);
@@ -129,7 +139,7 @@ public class DefaultTaskServiceTests {
 	@DirtiesContext
 	public void executeSingleTaskTest() {
 		when(taskLauncher.launch(anyObject())).thenReturn("0");
-		assertEquals(0L, taskService.executeTask(TASK_NAME_ORIG,
+		assertEquals(1L, this.taskService.executeTask(TASK_NAME_ORIG,
 				new HashMap<>(), new LinkedList<>()));
 	}
 
@@ -137,9 +147,9 @@ public class DefaultTaskServiceTests {
 	@DirtiesContext
 	public void executeMultipleTasksTest() {
 		when(taskLauncher.launch(anyObject())).thenReturn("0");
-		assertEquals(0L, taskService.executeTask(TASK_NAME_ORIG,
+		assertEquals(1L, this.taskService.executeTask(TASK_NAME_ORIG,
 				new HashMap<>(), new LinkedList<>()));
-		assertEquals(1L, taskService.executeTask(TASK_NAME_ORIG,
+		assertEquals(2L, this.taskService.executeTask(TASK_NAME_ORIG,
 				new HashMap<>(), new LinkedList<>()));
 	}
 

@@ -49,8 +49,8 @@ public class TaskServiceDependencies {
 	}
 
 	@Bean
-	public TaskRepository taskRepository() {
-		return new SimpleTaskRepository(new TaskExecutionDaoFactoryBean());
+	public TaskRepository taskRepository(TaskExecutionDaoFactoryBean daoFactoryBean) {
+		return new SimpleTaskRepository(daoFactoryBean);
 	}
 
 	@Bean
