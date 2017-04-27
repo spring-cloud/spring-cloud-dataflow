@@ -38,7 +38,6 @@ public class TaskDefinitionsDocumentation extends BaseDocumentation {
 				.param("uri", "maven://org.springframework.cloud.task.app:timestamp-task:1.1.0.RELEASE")
 		)
 		.andExpect(status().isCreated());
-
 	}
 
 	@Test

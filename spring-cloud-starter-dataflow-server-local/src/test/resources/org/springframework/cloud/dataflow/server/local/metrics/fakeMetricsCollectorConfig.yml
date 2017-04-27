@@ -1,0 +1,17 @@
+spring:
+  dataflow:
+    embedded:
+      database:
+        enabled: false
+  cloud:
+    dataflow:
+      features:
+        analytics-enabled: false
+        tasks-enabled: false
+  application:
+    name: my-metrics-collector
+  jmx:
+    default-domain: my-metrics-collector
+server:
+  port: ${fakeMetricsCollector.port}
+

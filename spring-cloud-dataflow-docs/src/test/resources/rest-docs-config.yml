@@ -1,4 +1,8 @@
-spring.cloud.dataflow.features:
-  streams-enabled: true
-  tasks-enabled: true
-  analytics-enabled: true
+spring.cloud.dataflow:
+  features:
+    streams-enabled: true
+    tasks-enabled: true
+    analytics-enabled: true
+  metrics:
+    collector:
+      uri: http://localhost:${fakeMetricsCollector.port}

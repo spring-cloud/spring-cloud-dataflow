@@ -233,3 +233,48 @@ include::{snippets}/task-executions-documentation/launch-task/curl-request.adoc[
 ===== Response structure
 
 include::{snippets}/task-executions-documentation/launch-task/http-response.adoc[]
+
+[[resources-metrics-stream-applications]]
+=== Metrics for Stream Applications
+
+This REST endpoint exposes metrics for stream applications. This REST enpoint requires
+the https://github.com/spring-cloud/spring-cloud-dataflow-metrics-collector[Metrics Collector]
+application to be running as a separate service. If not running, this endpoint will
+return an empty response.
+
+NOTE: In order to learn more about the Metrics Collector, please also refer to chapter
+<<configuration-monitoring-deployed-applications>>
+
+===== Request structure
+
+For example, a typical request may look like:
+
+include::{snippets}/metrics-for-stream-apps-without-collector-documentation/get-metrics-without-collector-running/http-request.adoc[]
+
+===== Example request
+
+include::{snippets}/metrics-for-stream-apps-without-collector-documentation/get-metrics-without-collector-running/curl-request.adoc[]
+
+===== Response structure
+
+This REST endpoint uses https://github.com/Netflix/Hystrix[Hystrix] via the
+https://github.com/spring-cloud/spring-cloud-netflix[Spring Cloud Netflix] project
+under the covers to make a proxy HTTP request to the Metrics Collector.
+
+===== Example response
+
+Therefore, the endpoint will not generate an error in case the
+Metrics Collector is not running, but rather gracefully degrade and return an
+empty response such as the following:
+
+include::{snippets}/metrics-for-stream-apps-without-collector-documentation/get-metrics-without-collector-running/http-response.adoc[]
+
+However, if metrics are being collected and the Metrics Collector is running you
+should see a response similar to the listing below. The metrics data returned in
+the listing below is based on the example stream definition created
+in chapter <<configuration-monitoring-deployed-applications>> `time | log` with
+two instances of each application deployed.
+
+include::{snippets}/metrics-for-stream-apps-documentation/get-metrics-with-collector-running/http-response.adoc[]
+
+

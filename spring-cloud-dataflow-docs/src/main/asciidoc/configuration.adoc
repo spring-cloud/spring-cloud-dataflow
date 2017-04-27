@@ -864,6 +864,7 @@ and `health` endpoints are available to unauthenticated users, you should enable
 the Data Flow Server and also http://codecentric.github.io/spring-boot-admin/1.4.3/#_securing_spring_boot_admin_server[configure Spring Boot Admin server's security] so that it
 can securely access the actuator endpoints.
 
+[[configuration-monitoring-deployed-applications]]
 === Monitoring Deployed Applications
 
 The applications that are deployed by Spring Cloud Data Flow are based on Spring Boot which

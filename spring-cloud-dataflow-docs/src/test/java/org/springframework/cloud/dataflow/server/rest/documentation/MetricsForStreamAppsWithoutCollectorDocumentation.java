@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2017 the original author or authors.
+ * Copyright 2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,20 +20,19 @@ import org.junit.Test;
 
 import org.springframework.http.MediaType;
 
-import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
-import static org.springframework.restdocs.request.RequestDocumentation.requestParameters;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
  * @author Gunnar Hillert
  */
-public class AppRegistryDocumentation extends BaseDocumentation {
+public class MetricsForStreamAppsWithoutCollectorDocumentation extends BaseDocumentation {
 
 	@Test
-	public void getApplicationsFiltered() throws Exception {
-		this.mockMvc.perform(get("/apps").param("type", "source").accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk()).andDo(this.documentationHandler.document(requestParameters(
-						parameterWithName("type").description("Restrict the returned apps to the type of the app."))));
+	public void getMetricsWithoutCollectorRunning() throws Exception {
+		this.mockMvc.perform(get("/metrics/streams")
+			.accept(MediaType.APPLICATION_JSON))
+			.andExpect(status().isOk());
 	}
+
 }
