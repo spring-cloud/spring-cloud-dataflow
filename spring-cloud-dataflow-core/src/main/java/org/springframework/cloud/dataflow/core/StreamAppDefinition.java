@@ -104,14 +104,17 @@ public class StreamAppDefinition extends DataFlowAppDefinition {
 		 * @see AppDefinition#getProperties()
 		 */
 		private final Map<String, String> properties = new HashMap<String, String>();
+
 		/**
 		 * @see StreamAppDefinition#streamName
 		 */
 		private String streamName;
+
 		/**
 		 * @see DataFlowAppDefinition#registeredAppName
 		 */
 		private String registeredAppName;
+
 		/**
 		 * @see AppDefinition#getName()
 		 */

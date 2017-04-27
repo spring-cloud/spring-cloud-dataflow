@@ -72,6 +72,7 @@ import static org.springframework.cloud.dataflow.server.controller.UiController.
 public class BasicAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
 	public static final Pattern AUTHORIZATION_RULE;
+
 	private static final org.slf4j.Logger logger = LoggerFactory.getLogger(BasicAuthSecurityConfiguration.class);
 
 	static {
@@ -81,10 +82,13 @@ public class BasicAuthSecurityConfiguration extends WebSecurityConfigurerAdapter
 
 	@Autowired
 	private ContentNegotiationStrategy contentNegotiationStrategy;
+
 	@Autowired
 	private SecurityProperties securityProperties;
+
 	@Autowired
 	private AuthorizationConfig authorizationConfig;
+
 	@Autowired
 	private SecurityStateBean securityStateBean;
 
@@ -128,8 +132,8 @@ public class BasicAuthSecurityConfiguration extends WebSecurityConfigurerAdapter
 			security.anyRequest().authenticated();
 		}
 
-		final SessionRepositoryFilter<ExpiringSession> sessionRepositoryFilter =
-				new SessionRepositoryFilter<ExpiringSession>(sessionRepository());
+		final SessionRepositoryFilter<ExpiringSession> sessionRepositoryFilter = new SessionRepositoryFilter<ExpiringSession>(
+				sessionRepository());
 		sessionRepositoryFilter.setHttpSessionStrategy(new HeaderHttpSessionStrategy());
 
 		http.addFilterBefore(sessionRepositoryFilter, ChannelProcessingFilter.class).csrf().disable();
@@ -170,6 +174,7 @@ public class BasicAuthSecurityConfiguration extends WebSecurityConfigurerAdapter
 	public static class AuthorizationConfig {
 
 		private boolean enabled = true;
+
 		private List<String> rules = new ArrayList<>();
 
 		public List<String> getRules() {

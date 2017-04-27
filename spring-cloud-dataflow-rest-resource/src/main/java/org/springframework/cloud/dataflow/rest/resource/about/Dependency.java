@@ -24,6 +24,7 @@ package org.springframework.cloud.dataflow.rest.resource.about;
 public class Dependency {
 
 	private String name;
+
 	private String version;
 
 	/**

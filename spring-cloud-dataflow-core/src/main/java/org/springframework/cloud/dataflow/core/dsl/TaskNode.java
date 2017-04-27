@@ -226,8 +226,11 @@ public class TaskNode extends AstNode {
 	static class ExecutableDSLVisitor extends TaskVisitor {
 
 		private final static int START_OF_FLOW = 0;
+
 		private final static int START_OF_SPLIT = 1;
+
 		private final static int IN_FLOW = 2;
+
 		private final static int IN_SPLIT = 3;
 
 		private StringBuilder dsl = new StringBuilder();

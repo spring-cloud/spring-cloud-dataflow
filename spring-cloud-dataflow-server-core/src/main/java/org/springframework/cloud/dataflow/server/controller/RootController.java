@@ -66,6 +66,7 @@ public class RootController {
 	 * Contains links pointing to controllers backing an entity type (such as streams).
 	 */
 	private final EntityLinks entityLinks;
+
 	@Autowired
 	private FeaturesProperties featuresProperties;
 

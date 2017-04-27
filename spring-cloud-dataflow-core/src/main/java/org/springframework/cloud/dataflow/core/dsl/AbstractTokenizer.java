@@ -30,8 +30,11 @@ import org.springframework.util.Assert;
 public abstract class AbstractTokenizer {
 
 	private static final byte[] flags = new byte[256];
+
 	private static final byte IS_DIGIT = 0x01;
+
 	private static final byte IS_HEXDIGIT = 0x02;
+
 	private static final byte IS_ALPHA = 0x04;
 
 	static {
@@ -53,26 +56,32 @@ public abstract class AbstractTokenizer {
 	}
 
 	private final int[] NO_LINEBREAKS = new int[0];
+
 	/**
 	 * The string to be tokenized.
 	 */
 	protected String expressionString;
+
 	/**
 	 * The expressionString as a char array.
 	 */
 	protected char[] toProcess;
+
 	/**
 	 * Length of input data.
 	 */
 	protected int max;
+
 	/**
 	 * Current lexing position in the input data.
 	 */
 	protected int pos;
+
 	/**
 	 * Output stream of tokens.
 	 */
 	protected List<Token> tokens = new ArrayList<Token>();
+
 	/**
 	 * Positions of linebreaks in the parsed string.
 	 */
@@ -95,7 +104,8 @@ public abstract class AbstractTokenizer {
 	 */
 	protected boolean isTwoCharToken(TokenKind kind) {
 		Assert.isTrue(kind.tokenChars.length == 2, "The token kind being looked for should be of length 2");
-		Assert.isTrue(toProcess[pos] == kind.tokenChars[0], "Expected these characters to have already been tested for equality");
+		Assert.isTrue(toProcess[pos] == kind.tokenChars[0],
+				"Expected these characters to have already been tested for equality");
 		return toProcess[pos + 1] == kind.tokenChars[1];
 	}
 

@@ -72,15 +72,21 @@ public class TaskControllerTests {
 
 	@Autowired
 	TaskService taskService;
+
 	@Autowired
 	private TaskDefinitionRepository repository;
+
 	@Autowired
 	private UriRegistry registry;
+
 	private MockMvc mockMvc;
+
 	@Autowired
 	private WebApplicationContext wac;
+
 	@Autowired
 	private TaskLauncher taskLauncher;
+
 	@Autowired
 	private AppRegistry appRegistry;
 

@@ -51,7 +51,9 @@ import org.springframework.util.StopWatch;
 public class ShellCommandLineRunner implements CommandLineRunner, ApplicationContextAware {
 
 	private StopWatch stopWatch = new StopWatch("Spring Shell");
+
 	private Logger logger = Logger.getLogger(getClass().getName());
+
 	private ApplicationContext applicationContext;
 
 	@Autowired

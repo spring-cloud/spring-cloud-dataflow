@@ -30,7 +30,9 @@ import java.util.Map;
 public class TaskValidationProblem {
 
 	private final String taskDsl;
+
 	private final int offset;
+
 	private final DSLMessage message;
 
 	public TaskValidationProblem(String taskDsl, int offset, DSLMessage message) {

@@ -45,16 +45,14 @@ public class BootApplicationConfigurationMetadataResolverTests {
 		List<ConfigurationMetadataProperty> properties = resolver
 				.listProperties(new ClassPathResource("apps/filter-processor", getClass()));
 		assertThat(properties, hasItem(configPropertyIdentifiedAs("filter.expression")));
-		assertThat(properties, hasItem(
-				configPropertyIdentifiedAs("some.other.property.whitelisted.prefix.expresso2")));
+		assertThat(properties, hasItem(configPropertyIdentifiedAs("some.other.property.whitelisted.prefix.expresso2")));
 	}
 
 	@Test
 	public void otherPropertiesShouldOnlyBeVisibleInExtensiveCall() {
 		List<ConfigurationMetadataProperty> properties = resolver
 				.listProperties(new ClassPathResource("apps/filter-processor", getClass()));
-		assertThat(properties, not(hasItem(
-				configPropertyIdentifiedAs("some.prefix.hidden.by.default.secret"))));
+		assertThat(properties, not(hasItem(configPropertyIdentifiedAs("some.prefix.hidden.by.default.secret"))));
 		properties = resolver.listProperties(new ClassPathResource("apps/filter-processor", getClass()), true);
 		assertThat(properties, hasItem(configPropertyIdentifiedAs("some.prefix.hidden.by.default.secret")));
 	}

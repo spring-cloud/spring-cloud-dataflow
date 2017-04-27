@@ -41,7 +41,9 @@ public enum DeploymentStateResource {
 													"The app or group deployment is not known to the system");
 
 	private final String key;
+
 	private final String displayName;
+
 	private final String description;
 
 	/**

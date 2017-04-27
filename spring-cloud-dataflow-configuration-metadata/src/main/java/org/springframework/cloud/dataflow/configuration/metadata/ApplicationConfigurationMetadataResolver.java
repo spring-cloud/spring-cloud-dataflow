@@ -58,6 +58,5 @@ public abstract class ApplicationConfigurationMetadataResolver {
 	 * @param exhaustive return all metadata, including common Spring Boot properties
 	 * @return the list of configuration metdata properties
 	 */
-	public abstract List<ConfigurationMetadataProperty> listProperties(Resource metadataResource,
-			boolean exhaustive);
+	public abstract List<ConfigurationMetadataProperty> listProperties(Resource metadataResource, boolean exhaustive);
 }

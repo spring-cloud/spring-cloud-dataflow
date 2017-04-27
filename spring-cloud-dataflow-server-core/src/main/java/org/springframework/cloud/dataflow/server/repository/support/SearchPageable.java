@@ -30,7 +30,9 @@ import org.springframework.util.Assert;
 public class SearchPageable {
 
 	private final Pageable pageable;
+
 	private final String searchQuery;
+
 	private final LinkedHashSet<String> columns = new LinkedHashSet<>(0);
 
 	/**

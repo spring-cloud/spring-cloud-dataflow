@@ -25,7 +25,9 @@ import org.springframework.hateoas.ResourceSupport;
  */
 public class FeaturesInfoResource extends ResourceSupport {
 	private boolean analyticsEnabled = true;
+
 	private boolean streamsEnabled = true;
+
 	private boolean tasksEnabled = true;
 
 	/**

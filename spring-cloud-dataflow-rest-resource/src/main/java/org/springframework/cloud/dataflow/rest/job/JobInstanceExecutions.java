@@ -32,6 +32,7 @@ import org.springframework.util.Assert;
 public class JobInstanceExecutions {
 
 	private final JobInstance jobInstance;
+
 	private final List<TaskJobExecution> taskJobExecutions;
 
 	public JobInstanceExecutions(JobInstance jobInstance, List<TaskJobExecution> taskJobExecutions) {

@@ -62,15 +62,19 @@ public abstract class AbstractShellIntegrationTest {
 	 * Data Flow server.
 	 */
 	public static final String SHUTDOWN_AFTER_RUN = "shutdown.after.run";
+
 	private static final Logger logger = LoggerFactory.getLogger(AbstractShellIntegrationTest.class);
+
 	/**
 	 * TCP port for the server.
 	 */
 	private static final int serverPort = SocketUtils.findAvailableTcpPort();
+
 	/**
 	 * Application context for server application.
 	 */
 	protected static ApplicationContext applicationContext;
+
 	/**
 	 * Indicates whether the test infrastructure should be shut down after all tests are
 	 * executed.
@@ -78,14 +82,17 @@ public abstract class AbstractShellIntegrationTest {
 	 * @see #SHUTDOWN_AFTER_RUN
 	 */
 	private static boolean shutdownAfterRun = false;
+
 	/**
 	 * Instance of shell to execute commands for testing.
 	 */
 	private static DataFlowShell dataFlowShell;
+
 	/**
 	 * Generator used to create random stream names.
 	 */
 	private final IdGenerator idGenerator = new AlternativeJdkIdGenerator();
+
 	/**
 	 * Used to capture currently executing test method.
 	 */

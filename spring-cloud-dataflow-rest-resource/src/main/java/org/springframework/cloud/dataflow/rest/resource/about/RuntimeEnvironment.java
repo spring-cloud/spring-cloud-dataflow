@@ -27,6 +27,7 @@ public class RuntimeEnvironment {
 	 * The {@link RuntimeEnvironmentDetails} of the app deployer.
 	 */
 	private RuntimeEnvironmentDetails appDeployer = new RuntimeEnvironmentDetails();
+
 	/**
 	 * The {@link RuntimeEnvironmentDetails} of the task launcher.
 	 */

@@ -32,7 +32,9 @@ import org.springframework.cloud.dataflow.shell.command.support.RoleType;
 public class TargetCredentials {
 
 	final List<RoleType> roles = new ArrayList<>(0);
+
 	private final String username;
+
 	private final String password;
 
 	public TargetCredentials(String username, String password) {

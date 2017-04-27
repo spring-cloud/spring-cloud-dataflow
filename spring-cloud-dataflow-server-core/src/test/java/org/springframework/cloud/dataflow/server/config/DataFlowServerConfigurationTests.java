@@ -54,7 +54,9 @@ import static org.mockito.Mockito.mock;
 public class DataFlowServerConfigurationTests {
 
 	private AnnotationConfigApplicationContext context;
+
 	private ConfigurableEnvironment environment;
+
 	private MutablePropertySources propertySources;
 
 	@Before

@@ -25,8 +25,8 @@ import java.util.regex.Pattern;
 public class ArgumentSanitizer {
 	private static final String[] REGEX_PARTS = { "*", "$", "^", "+" };
 
-	private static final String[] KEYS_TO_SANITIZE = {"password", "secret",
-			"key", "token", ".*credentials.*", "vcap_services"};
+	private static final String[] KEYS_TO_SANITIZE = { "password", "secret", "key", "token", ".*credentials.*",
+			"vcap_services" };
 
 	private Pattern[] keysToSanitize;
 
@@ -60,7 +60,7 @@ public class ArgumentSanitizer {
 	 */
 	public String sanitize(String argument) {
 		int indexOfFirstEqual = argument.indexOf("=");
-		if(indexOfFirstEqual == -1) {
+		if (indexOfFirstEqual == -1) {
 			return argument;
 		}
 		String key = argument.substring(0, indexOfFirstEqual);

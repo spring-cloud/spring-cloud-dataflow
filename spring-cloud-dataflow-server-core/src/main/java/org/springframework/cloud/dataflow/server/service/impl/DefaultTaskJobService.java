@@ -57,9 +57,13 @@ import org.springframework.util.Assert;
 public class DefaultTaskJobService implements TaskJobService {
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultTaskJobService.class);
+
 	private final TaskService taskService;
+
 	private TaskExplorer taskExplorer;
+
 	private JobService jobService;
+
 	private TaskDefinitionRepository taskDefinitionRepository;
 
 	public DefaultTaskJobService(JobService jobService, TaskExplorer taskExplorer,

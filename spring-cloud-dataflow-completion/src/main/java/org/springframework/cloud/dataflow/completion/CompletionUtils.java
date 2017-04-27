@@ -40,6 +40,7 @@ public class CompletionUtils {
 	 * even though the user did not type them himself.
 	 */
 	static final Set<String> IMPLICIT_PARAMETER_NAMES = new HashSet<>();
+
 	static final Set<String> IMPLICIT_TASK_PARAMETER_NAMES = new HashSet<>();
 
 	static {

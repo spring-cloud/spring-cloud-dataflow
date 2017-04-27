@@ -38,6 +38,7 @@ import org.springframework.web.client.ResponseExtractor;
 public class VndErrorResponseErrorHandler extends DefaultResponseErrorHandler {
 
 	private ResponseExtractor<VndErrors> vndErrorsExtractor;
+
 	private ResponseExtractor<VndError> vndErrorExtractor;
 
 	public VndErrorResponseErrorHandler(List<HttpMessageConverter<?>> messageConverters) {

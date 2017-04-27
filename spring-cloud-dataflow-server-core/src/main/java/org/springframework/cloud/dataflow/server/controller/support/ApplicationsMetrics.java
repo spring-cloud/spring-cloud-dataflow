@@ -27,6 +27,7 @@ import java.util.Map;
 public class ApplicationsMetrics {
 
 	private String name;
+
 	private List<Application> applications;
 
 	public String getName() {
@@ -48,7 +49,9 @@ public class ApplicationsMetrics {
 	public static class Application {
 
 		private String name;
+
 		private List<Instance> instances;
+
 		private List<Metric> aggregateMetrics;
 
 		public String getName() {
@@ -79,8 +82,11 @@ public class ApplicationsMetrics {
 	public static class Instance {
 
 		private String guid;
+
 		private int index;
+
 		private Map<String, Object> properties;
+
 		private List<Metric> metrics;
 
 		public String getGuid() {
@@ -119,6 +125,7 @@ public class ApplicationsMetrics {
 	public static class Metric {
 
 		private String name;
+
 		private Object value;
 
 		public String getName() {

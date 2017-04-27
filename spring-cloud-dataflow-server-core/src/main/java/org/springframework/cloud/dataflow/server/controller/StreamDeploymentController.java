@@ -75,32 +75,41 @@ import org.springframework.web.bind.annotation.RestController;
 public class StreamDeploymentController {
 
 	private static final String DEFAULT_PARTITION_KEY_EXPRESSION = "payload";
+
 	/**
 	 * This is the spring boot property key that Spring Cloud Stream uses to filter the
 	 * metrics to import when the specific Spring Cloud Stream "applicaiton" trigger is
 	 * fired for metrics export.
 	 */
 	private static final String METRICS_TRIGGER_INCLUDES = "spring.metrics.export.triggers.application.includes";
+
 	private static Log logger = LogFactory.getLog(StreamDeploymentController.class);
+
 	private static String deployLoggingString = "Deploying application named [%s] as part of stream named [%s] "
 			+ "with resource URI [%s]";
+
 	/**
 	 * The repository this controller will use for stream CRUD operations.
 	 */
 	private final StreamDefinitionRepository repository;
+
 	/**
 	 * The repository this controller will use for deployment IDs.
 	 */
 	private final DeploymentIdRepository deploymentIdRepository;
+
 	/**
 	 * The app registry this controller will use to lookup apps.
 	 */
 	private final AppRegistry registry;
+
 	/**
 	 * The deployer this controller will use to deploy stream apps.
 	 */
 	private final AppDeployer deployer;
+
 	private final WhitelistProperties whitelistProperties;
+
 	/**
 	 * General properties to be applied to applications on deployment.
 	 */

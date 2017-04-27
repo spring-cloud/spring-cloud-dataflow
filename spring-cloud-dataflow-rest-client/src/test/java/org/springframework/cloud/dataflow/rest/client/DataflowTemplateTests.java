@@ -94,8 +94,7 @@ public class DataflowTemplateTests {
 			if (converter instanceof MappingJackson2HttpMessageConverter) {
 				containsMappingJackson2HttpMessageConverter = true;
 
-				final MappingJackson2HttpMessageConverter jacksonConverter =
-						(MappingJackson2HttpMessageConverter) converter;
+				final MappingJackson2HttpMessageConverter jacksonConverter = (MappingJackson2HttpMessageConverter) converter;
 				final ObjectMapper objectMapper = jacksonConverter.getObjectMapper();
 
 				assertNotNull(objectMapper.findMixInClassFor(JobExecution.class));

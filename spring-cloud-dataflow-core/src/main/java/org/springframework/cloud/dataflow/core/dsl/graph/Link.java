@@ -38,6 +38,7 @@ public class Link {
 	public String from;
 
 	public String to;
+
 	/**
 	 * Properties on a link can capture the name of a potential transition that would lead
 	 * to this link being taken when the 'from' job completes.

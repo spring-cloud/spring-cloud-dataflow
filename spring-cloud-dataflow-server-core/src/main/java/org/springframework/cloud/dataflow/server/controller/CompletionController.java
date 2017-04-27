@@ -74,8 +74,7 @@ public class CompletionController {
 	 */
 	@RequestMapping(value = "/stream")
 	public CompletionProposalsResource completions(@RequestParam("start") String start,
-			@RequestParam(value = "detailLevel", defaultValue = "1")
-			@Min(value = 1, message = "The provided detail level must be greater than zero.") int detailLevel) {
+			@RequestParam(value = "detailLevel", defaultValue = "1") @Min(value = 1, message = "The provided detail level must be greater than zero.") int detailLevel) {
 		return assembler.toResource(completionProvider.complete(start, detailLevel));
 	}
 
@@ -90,8 +89,7 @@ public class CompletionController {
 	 */
 	@RequestMapping(value = "/task")
 	public CompletionProposalsResource taskCompletions(@RequestParam("start") String start,
-			@RequestParam(value = "detailLevel", defaultValue = "1")
-			@Min(value = 1, message = "The provided detail level must be greater than zero.") int detailLevel) {
+			@RequestParam(value = "detailLevel", defaultValue = "1") @Min(value = 1, message = "The provided detail level must be greater than zero.") int detailLevel) {
 		return assembler.toResource(taskCompletionProvider.complete(start, detailLevel));
 	}
 

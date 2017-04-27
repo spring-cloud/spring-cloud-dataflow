@@ -30,6 +30,7 @@ public enum CoreSecurityRoles {
 			"role for the boot management endpoints");
 
 	private String key;
+
 	private String name;
 
 	CoreSecurityRoles(final String key, final String name) {

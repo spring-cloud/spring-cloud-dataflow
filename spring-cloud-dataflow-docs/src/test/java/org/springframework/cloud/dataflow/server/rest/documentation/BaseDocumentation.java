@@ -39,10 +39,14 @@ public abstract class BaseDocumentation {
 	@ClassRule
 	public final static LocalDataflowResource springDataflowServer = new LocalDataflowResource(
 			"classpath:rest-docs-config.yml");
+
 	protected String TARGET_DIRECTORY = "target/generated-snippets";
+
 	@Rule
 	public JUnitRestDocumentation restDocumentation = new JUnitRestDocumentation(TARGET_DIRECTORY);
+
 	protected MockMvc mockMvc;
+
 	protected RestDocumentationResultHandler documentationHandler;
 
 	@Before

@@ -24,7 +24,9 @@ package org.springframework.cloud.dataflow.rest.resource.about;
 public class VersionInfo {
 
 	private Dependency implementation = new Dependency();
+
 	private Dependency core = new Dependency();
+
 	private Dependency dashboard = new Dependency();
 
 	/**

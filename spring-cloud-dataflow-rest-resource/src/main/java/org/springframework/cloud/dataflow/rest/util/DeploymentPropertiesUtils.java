@@ -41,6 +41,7 @@ import org.springframework.util.StringUtils;
 public final class DeploymentPropertiesUtils {
 
 	private static final Logger logger = LoggerFactory.getLogger(DeploymentPropertiesUtils.class);
+
 	/**
 	 * Pattern used for parsing a String of command-line arguments.
 	 */

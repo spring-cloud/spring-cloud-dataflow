@@ -61,9 +61,13 @@ public final class DataflowRdbmsInitializer implements InitializingBean {
 	 * Path to the SQL file to use to initialize the database schema.
 	 */
 	private static String schema = DEFAULT_SCHEMA_LOCATION;
+
 	private final FeaturesProperties featuresProperties;
+
 	private DataSource dataSource;
+
 	private ResourceLoader resourceLoader;
+
 	@Value("${" + DataFlowPropertyKeys.PREFIX + "rdbms.initialize.enable:true}")
 	private boolean definitionInitializationEnable;
 

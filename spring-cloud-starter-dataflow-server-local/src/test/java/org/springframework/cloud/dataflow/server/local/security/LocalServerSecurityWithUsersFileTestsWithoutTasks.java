@@ -60,21 +60,31 @@ public class LocalServerSecurityWithUsersFileTestsWithoutTasks {
 
 	private final static Logger logger = LoggerFactory
 			.getLogger(LocalServerSecurityWithUsersFileTestsWithoutTasks.class);
+
 	private final static LocalDataflowResource localDataflowResource = new LocalDataflowResource(
 			"classpath:org/springframework/cloud/dataflow/server/local/security" + "/fileBasedUsers.yml", true, false);
+
 	@ClassRule
 	public static TestRule springDataflowAndLdapServer = RuleChain.outerRule(localDataflowResource);
+
 	private static UserCredentials viewOnlyUser = new UserCredentials("bob", "bobspassword");
+
 	private static UserCredentials adminOnlyUser = new UserCredentials("alice", "alicepwd");
+
 	private static UserCredentials createOnlyUser = new UserCredentials("cartman", "cartmanpwd");
+
 	@Parameter(value = 0)
 	public HttpMethod httpMethod;
+
 	@Parameter(value = 1)
 	public HttpStatus expectedHttpStatus;
+
 	@Parameter(value = 2)
 	public String url;
+
 	@Parameter(value = 3)
 	public UserCredentials userCredentials;
+
 	@Parameter(value = 4)
 	public Map<String, String> urlParameters;
 

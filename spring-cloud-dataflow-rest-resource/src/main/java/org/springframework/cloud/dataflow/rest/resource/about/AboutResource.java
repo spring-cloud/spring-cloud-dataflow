@@ -26,8 +26,11 @@ import org.springframework.hateoas.ResourceSupport;
 public class AboutResource extends ResourceSupport {
 
 	private FeatureInfo featureInfo = new FeatureInfo();
+
 	private VersionInfo versionInfo = new VersionInfo();
+
 	private SecurityInfo securityInfo = new SecurityInfo();
+
 	private RuntimeEnvironment runtimeEnvironment = new RuntimeEnvironment();
 
 	/**

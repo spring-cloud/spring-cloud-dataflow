@@ -72,8 +72,7 @@ public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 	}
 
 	private OAuth2AuthenticationProcessingFilter oAuth2AuthenticationProcessingFilter() {
-		final OAuth2AuthenticationProcessingFilter oAuth2AuthenticationProcessingFilter =
-				new OAuth2AuthenticationProcessingFilter();
+		final OAuth2AuthenticationProcessingFilter oAuth2AuthenticationProcessingFilter = new OAuth2AuthenticationProcessingFilter();
 		oAuth2AuthenticationProcessingFilter.setAuthenticationManager(oauthAuthenticationManager());
 		oAuth2AuthenticationProcessingFilter.setStateless(false);
 		return oAuth2AuthenticationProcessingFilter;

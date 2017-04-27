@@ -78,18 +78,29 @@ import org.springframework.util.Assert;
 public class ApacheDSContainerWithSecurity
 		implements InitializingBean, DisposableBean, Lifecycle, ApplicationContextAware {
 	final DefaultDirectoryService service;
+
 	private final Log logger = LogFactory.getLog(getClass());
+
 	private final String ldifResources;
+
 	private final JdbmPartition partition;
+
 	private final String root;
+
 	LdapServer server;
+
 	private ApplicationContext ctxt;
+
 	private File workingDir;
+
 	private boolean running;
+
 	private int port = 53389;
 
 	private boolean enabledLdapOverSsl;
+
 	private File keyStoreFile;
+
 	private String keyStorePassword;
 
 	public ApacheDSContainerWithSecurity(String root, String ldifs) throws Exception {

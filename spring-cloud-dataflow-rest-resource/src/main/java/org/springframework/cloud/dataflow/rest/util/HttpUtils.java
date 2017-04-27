@@ -84,8 +84,8 @@ public class HttpUtils {
 		final CloseableHttpClient httpClient = httpClientBuilder.build();
 		final HttpHost targetHost = new HttpHost(host.getHost(), host.getPort(), host.getScheme());
 
-		final HttpComponentsClientHttpRequestFactory requestFactory =
-				new PreemptiveBasicAuthHttpComponentsClientHttpRequestFactory(httpClient, targetHost);
+		final HttpComponentsClientHttpRequestFactory requestFactory = new PreemptiveBasicAuthHttpComponentsClientHttpRequestFactory(
+				httpClient, targetHost);
 		restTemplate.setRequestFactory(requestFactory);
 	}
 

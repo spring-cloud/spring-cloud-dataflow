@@ -33,9 +33,13 @@ import org.springframework.boot.loader.archive.Archive;
 public class BootClassLoaderFactory {
 
 	private static final String BOOT_13_LIBS_LOCATION = "lib/";
+
 	private static final String BOOT_14_LIBS_LOCATION = "BOOT-INF/lib/";
+
 	private static final String BOOT_14_CLASSESS_LOCATION = "BOOT-INF/classes/";
+
 	private final Archive archive;
+
 	private final ClassLoader parent;
 
 	/**

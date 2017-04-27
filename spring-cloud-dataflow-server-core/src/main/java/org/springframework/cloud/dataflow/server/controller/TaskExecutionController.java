@@ -161,8 +161,7 @@ public class TaskExecutionController {
 		}
 		taskExecution = sanitizePotentialSensitiveKeys(taskExecution);
 		TaskJobExecutionRel taskJobExecutionRel = new TaskJobExecutionRel(taskExecution,
-				new ArrayList<>(this.explorer.getJobExecutionIdsByTaskExecutionId(
-						taskExecution.getExecutionId())));
+				new ArrayList<>(this.explorer.getJobExecutionIdsByTaskExecutionId(taskExecution.getExecutionId())));
 		return this.taskAssembler.toResource(taskJobExecutionRel);
 	}
 
@@ -179,6 +178,23 @@ public class TaskExecutionController {
 			throw new NoSuchTaskExecutionException(id);
 		}
 		this.taskService.cleanupExecution(id);
+	}
+
+	private Page<TaskJobExecutionRel> getPageableRelationships(Page<TaskExecution> taskExecutions, Pageable pageable) {
+		List<TaskJobExecutionRel> taskJobExecutionRels = new ArrayList<>();
+		for (TaskExecution taskExecution : taskExecutions.getContent()) {
+			taskJobExecutionRels
+					.add(new TaskJobExecutionRel(sanitizePotentialSensitiveKeys(taskExecution), new ArrayList<>(
+							this.explorer.getJobExecutionIdsByTaskExecutionId(taskExecution.getExecutionId()))));
+		}
+		return new PageImpl<>(taskJobExecutionRels, pageable, taskExecutions.getTotalElements());
+	}
+
+	private TaskExecution sanitizePotentialSensitiveKeys(TaskExecution taskExecution) {
+		List<String> args = taskExecution.getArguments().stream()
+				.map(argument -> (this.argumentSanitizer.sanitize(argument))).collect(Collectors.toList());
+		taskExecution.setArguments(args);
+		return taskExecution;
 	}
 
 	/**
@@ -200,24 +216,6 @@ public class TaskExecutionController {
 		public TaskExecutionResource instantiateResource(TaskJobExecutionRel taskJobExecutionRel) {
 			return new TaskExecutionResource(taskJobExecutionRel);
 		}
-	}
-
-	private Page<TaskJobExecutionRel> getPageableRelationships(Page<TaskExecution> taskExecutions, Pageable pageable){
-		List<TaskJobExecutionRel> taskJobExecutionRels = new ArrayList<>();
-		for(TaskExecution taskExecution: taskExecutions.getContent()) {
-			taskJobExecutionRels.add( new TaskJobExecutionRel(sanitizePotentialSensitiveKeys(taskExecution),
-					new ArrayList<>(this.explorer.getJobExecutionIdsByTaskExecutionId(
-							taskExecution.getExecutionId()))));
-		}
-		return new PageImpl<>(taskJobExecutionRels,pageable,taskExecutions.getTotalElements());
-	}
-
-	private TaskExecution sanitizePotentialSensitiveKeys(TaskExecution taskExecution) {
-		List<String> args = taskExecution.getArguments().stream()
-				.map(argument -> (this.argumentSanitizer.sanitize(argument)))
-				.collect(Collectors.toList());
-		taskExecution.setArguments(args);
-		return taskExecution;
 	}
 
 }

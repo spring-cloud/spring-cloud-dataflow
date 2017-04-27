@@ -32,6 +32,7 @@ abstract class DataFlowAppDefinition {
 	 * The underlying {@link AppDefinition}.
 	 */
 	protected volatile AppDefinition appDefinition;
+
 	/**
 	 * The name of the registered app.
 	 */

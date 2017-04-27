@@ -100,17 +100,24 @@ public class StreamControllerTests {
 
 	private final AppRegistry appRegistry = new AppRegistry(new InMemoryUriRegistry(),
 			new MavenResourceLoader(new MavenProperties()));
+
 	@Autowired
 	private StreamDefinitionRepository repository;
+
 	@Autowired
 	private DeploymentIdRepository deploymentIdRepository;
+
 	@Autowired
 	private ApplicationConfigurationMetadataResolver metadataResolver;
+
 	private MockMvc mockMvc;
+
 	@Autowired
 	private WebApplicationContext wac;
+
 	@Autowired
 	private AppDeployer appDeployer;
+
 	@Autowired
 	private CommonApplicationProperties appsProperties;
 

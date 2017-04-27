@@ -33,9 +33,13 @@ import org.springframework.util.SocketUtils;
 public class OAuth2ServerResource extends ExternalResource {
 
 	private static final String OAUTH2_PORT_PROPERTY = "oauth2.port";
+
 	private final Log LOGGER = LogFactory.getLog(OAuth2ServerResource.class);
+
 	private String originalOAuth2Port;
+
 	private int oauth2ServerPort;
+
 	private ConfigurableApplicationContext application;
 
 	public OAuth2ServerResource() {

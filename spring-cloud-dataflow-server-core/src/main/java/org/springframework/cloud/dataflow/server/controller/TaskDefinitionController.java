@@ -55,16 +55,21 @@ import org.springframework.web.bind.annotation.RestController;
 public class TaskDefinitionController {
 
 	private final Assembler taskAssembler = new Assembler();
+
 	/**
 	 * The repository this controller will use for deployment IDs.
 	 */
 	private final DeploymentIdRepository deploymentIdRepository;
+
 	/**
 	 * The app registry this controller will use to lookup apps.
 	 */
 	private final AppRegistry appRegistry;
+
 	private TaskDefinitionRepository repository;
+
 	private TaskLauncher taskLauncher;
+
 	private TaskService taskService;
 
 	/**
@@ -142,7 +147,6 @@ public class TaskDefinitionController {
 			return assembler.toResource(repository.findAll(pageable), taskAssembler);
 		}
 	}
-
 
 	/**
 	 * Return a given task definition resource.

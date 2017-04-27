@@ -47,14 +47,23 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 	private static final String APPS_URI = "META-INF/test-task-apps.properties";
 
 	private static final Logger logger = LoggerFactory.getLogger(TaskCommandTests.class);
+
 	private static final String TASK_NAME = "foo" + UUID.randomUUID().toString();
+
 	private static final String EXIT_MESSAGE = "exit";
+
 	private static final String ERROR_MESSAGE = "error";
+
 	private static final int EXIT_CODE = 20;
+
 	private static final long TASK_EXECUTION_ID = 10000;
+
 	private static final Date startTime = new Date();
+
 	private static final Date endTime = new Date(startTime.getTime() + 5000);
+
 	private static final String EXTERNAL_EXECUTION_ID = "WOW22";
+
 	private static JdbcTemplate template;
 
 	@BeforeClass

@@ -31,8 +31,7 @@ import org.springframework.context.annotation.Configuration;
  * @author Ilayaperumal Gopinathan
  */
 @Configuration
-@ConditionalOnProperty(prefix = FeaturesProperties.FEATURES_PREFIX, name = FeaturesProperties.STREAMS_ENABLED,
-		matchIfMissing = true)
+@ConditionalOnProperty(prefix = FeaturesProperties.FEATURES_PREFIX, name = FeaturesProperties.STREAMS_ENABLED, matchIfMissing = true)
 public class StreamConfiguration {
 
 	@Bean

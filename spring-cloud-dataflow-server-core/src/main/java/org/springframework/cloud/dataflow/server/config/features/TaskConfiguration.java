@@ -66,8 +66,7 @@ import org.springframework.jdbc.datasource.DataSourceTransactionManager;
  * @author Ilayaperumal Gopinathan
  */
 @Configuration
-@ConditionalOnProperty(prefix = FeaturesProperties.FEATURES_PREFIX, name = FeaturesProperties.TASKS_ENABLED,
-		matchIfMissing = true)
+@ConditionalOnProperty(prefix = FeaturesProperties.FEATURES_PREFIX, name = FeaturesProperties.TASKS_ENABLED, matchIfMissing = true)
 @EnableConfigurationProperties({ TaskConfigurationProperties.class })
 public class TaskConfiguration {
 
@@ -125,8 +124,7 @@ public class TaskConfiguration {
 	}
 
 	@Configuration
-	@ConditionalOnProperty(name = "spring.dataflow.embedded.database.enabled", havingValue = "true",
-			matchIfMissing = true)
+	@ConditionalOnProperty(name = "spring.dataflow.embedded.database.enabled", havingValue = "true", matchIfMissing = true)
 	@ConditionalOnExpression("#{'${spring.datasource.url:}'.startsWith('jdbc:h2:tcp://localhost:')}")
 	public static class H2ServerConfiguration {
 

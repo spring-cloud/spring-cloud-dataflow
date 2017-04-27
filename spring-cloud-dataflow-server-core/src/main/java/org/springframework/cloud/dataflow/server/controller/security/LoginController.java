@@ -42,6 +42,7 @@ public class LoginController {
 
 	@Autowired
 	ApplicationContext applicationContext;
+
 	@Autowired
 	private AuthenticationManager authenticationManager;
 

@@ -26,7 +26,9 @@ import org.springframework.util.Assert;
  */
 public class TaskJobExecution {
 	private final long taskId;
+
 	private final boolean isTaskDefined;
+
 	private final JobExecution jobExecution;
 
 	public TaskJobExecution(long taskId, JobExecution jobExecution, boolean isTaskDefined) {

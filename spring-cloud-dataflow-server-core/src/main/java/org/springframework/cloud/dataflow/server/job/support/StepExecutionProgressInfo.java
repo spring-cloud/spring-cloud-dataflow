@@ -37,10 +37,15 @@ import org.springframework.util.StringUtils;
 public class StepExecutionProgressInfo {
 
 	private final StepExecution stepExecution;
+
 	private final StepExecutionHistory stepExecutionHistory;
+
 	private double duration = 0;
+
 	private double percentageComplete = 0.5;
+
 	private boolean isFinished = false;
+
 	private PercentCompleteBasis percentCompleteBasis = PercentCompleteBasis.UNKNOWN;
 
 	public StepExecutionProgressInfo(StepExecution stepExecution, StepExecutionHistory stepExecutionHistory) {

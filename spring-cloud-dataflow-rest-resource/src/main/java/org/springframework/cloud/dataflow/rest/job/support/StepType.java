@@ -56,6 +56,7 @@ public enum StepType {
 	UNKNOWN("", "");
 
 	private final String className;
+
 	private final String displayName;
 
 	StepType(String className, String displayName) {

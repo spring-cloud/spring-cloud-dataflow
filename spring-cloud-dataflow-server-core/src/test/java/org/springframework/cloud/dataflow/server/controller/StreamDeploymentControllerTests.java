@@ -52,17 +52,23 @@ public class StreamDeploymentControllerTests {
 
 	@Rule
 	public ExpectedException thrown = ExpectedException.none();
+
 	private StreamDeploymentController controller;
+
 	@Mock
 	private StreamDefinitionRepository streamDefinitionRepository;
+
 	@Mock
 	private DeploymentIdRepository deploymentIdRepository;
+
 	@Mock
 	private AppRegistry appRegistry;
+
 	@Mock
 	private AppDeployer appDeployer;
-	private ApplicationConfigurationMetadataResolver metadataResolver =
-			new BootApplicationConfigurationMetadataResolver();
+
+	private ApplicationConfigurationMetadataResolver metadataResolver = new BootApplicationConfigurationMetadataResolver();
+
 	@Mock
 	private CommonApplicationProperties commonApplicationProperties;
 

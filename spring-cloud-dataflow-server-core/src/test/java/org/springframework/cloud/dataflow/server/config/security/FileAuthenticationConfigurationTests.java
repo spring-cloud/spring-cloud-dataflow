@@ -32,8 +32,7 @@ public class FileAuthenticationConfigurationTests {
 	public void testInitAuthenticationManagerBuilder() throws Exception {
 
 		try {
-			final FileAuthenticationConfiguration fileAuthenticationConfiguration =
-					new FileAuthenticationConfiguration();
+			final FileAuthenticationConfiguration fileAuthenticationConfiguration = new FileAuthenticationConfiguration();
 			fileAuthenticationConfiguration.init(mock(AuthenticationManagerBuilder.class));
 		}
 		catch (IllegalArgumentException anIllegalArgumentException) {

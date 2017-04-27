@@ -92,7 +92,9 @@ public class ConfigCommands implements CommandMarker, InitializingBean, Applicat
 		ApplicationContextAware {
 
 	public static final String HORIZONTAL_LINE = "-------------------------------------------------------------------------------\n";
+
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
+
 	@Autowired
 	private DataFlowShell shell;
 

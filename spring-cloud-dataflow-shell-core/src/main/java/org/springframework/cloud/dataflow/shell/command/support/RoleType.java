@@ -26,6 +26,7 @@ public enum RoleType {
 			"role for the boot management endpoints");
 
 	private String key;
+
 	private String name;
 
 	/**

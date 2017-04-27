@@ -50,9 +50,13 @@ import org.springframework.web.util.UriComponentsBuilder;
 public class MetricStore {
 
 	private final static List<ApplicationsMetrics> EMPTY_RESPONSE = new ArrayList<ApplicationsMetrics>();
+
 	private static Log logger = LogFactory.getLog(MetricStore.class);
+
 	private final RestTemplate restTemplate;
+
 	private final MetricsProperties metricsProperties;
+
 	private String collectorEndpoint;
 
 	/**

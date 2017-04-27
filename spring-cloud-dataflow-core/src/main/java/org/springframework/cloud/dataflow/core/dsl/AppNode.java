@@ -26,8 +26,11 @@ import java.util.Properties;
 public class AppNode extends AstNode {
 
 	private static final ArgumentNode[] NO_ARGUMENTS = new ArgumentNode[0];
+
 	private final String appName;
+
 	private LabelNode label;
+
 	private ArgumentNode[] arguments;
 
 	public AppNode(LabelNode label, String appName, int startPos, int endPos, ArgumentNode[] arguments) {

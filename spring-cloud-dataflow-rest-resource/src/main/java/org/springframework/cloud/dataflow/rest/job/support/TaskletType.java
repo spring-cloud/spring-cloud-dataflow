@@ -48,8 +48,7 @@ public enum TaskletType {
 	/**
 	 * {@link org.springframework.batch.core.step.tasklet.MethodInvokingTaskletAdapter}
 	 */
-	METHOD_INVOKING_TASKLET_ADAPTER(MethodInvokingTaskletAdapter.class.getName(),
-			"Method Invoking Tasklet Adapter " + "Step"),
+	METHOD_INVOKING_TASKLET_ADAPTER(MethodInvokingTaskletAdapter.class.getName(), "Method Invoking Tasklet Adapter " + "Step"),
 	/**
 	 * Used when the type of tasklet is unknown to the system
 	 */
@@ -58,6 +57,7 @@ public enum TaskletType {
 	// TODO: Add Hadoop Types
 
 	private final String className;
+
 	private final String displayName;
 
 	TaskletType(String className, String displayName) {

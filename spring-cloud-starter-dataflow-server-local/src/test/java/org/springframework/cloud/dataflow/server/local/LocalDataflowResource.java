@@ -36,12 +36,19 @@ import org.springframework.web.context.WebApplicationContext;
 public class LocalDataflowResource extends ExternalResource {
 
 	final boolean streamsEnabled;
+
 	final boolean tasksEnabled;
+
 	private String originalConfigLocation = null;
+
 	private SpringApplication app;
+
 	private MockMvc mockMvc;
+
 	private String dataflowPort;
+
 	private String configurationLocation;
+
 	private WebApplicationContext configurableApplicationContext;
 
 	public LocalDataflowResource(String configurationLocation) {

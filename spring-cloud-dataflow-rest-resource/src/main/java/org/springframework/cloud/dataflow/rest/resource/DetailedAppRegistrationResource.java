@@ -37,6 +37,7 @@ public class DetailedAppRegistrationResource extends AppRegistrationResource {
 	 * List of application options.
 	 */
 	private final List<ConfigurationMetadataProperty> options = new ArrayList<>();
+
 	/**
 	 * Optional short description of the application.
 	 */

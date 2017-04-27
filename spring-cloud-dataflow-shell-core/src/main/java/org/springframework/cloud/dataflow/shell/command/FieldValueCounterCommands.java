@@ -54,8 +54,11 @@ import org.springframework.stereotype.Component;
 public class FieldValueCounterCommands extends AbstractMetricsCommands implements CommandMarker {
 
 	private static final String DISPLAY_COUNTER = "field-value-counter display";
+
 	private static final String LIST_COUNTERS = "field-value-counter list";
+
 	private static final String RESET_COUNTER = "field-value-counter reset";
+
 	@Autowired
 	private DataFlowShell dataFlowShell;
 

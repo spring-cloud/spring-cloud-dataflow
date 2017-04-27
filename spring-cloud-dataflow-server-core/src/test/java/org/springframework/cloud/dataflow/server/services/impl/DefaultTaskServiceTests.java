@@ -80,12 +80,16 @@ public class DefaultTaskServiceTests {
 	private final static String BASE_TASK_NAME = "myTask";
 
 	private final static String TASK_NAME_ORIG = BASE_TASK_NAME + "_ORIG";
+
 	@Autowired
 	TaskRepository taskExecutionRepository;
+
 	@Autowired
 	DataSourceProperties dataSourceProperties;
+
 	@Autowired
 	private TaskDefinitionRepository taskDefinitionRepository;
+
 	@Autowired
 	private TaskExplorer taskExplorer;
 
@@ -118,18 +122,15 @@ public class DefaultTaskServiceTests {
 	@DirtiesContext
 	public void executeSingleTaskTest() {
 		when(taskLauncher.launch(anyObject())).thenReturn("0");
-		assertEquals(1L, this.taskService.executeTask(TASK_NAME_ORIG,
-				new HashMap<>(), new LinkedList<>()));
+		assertEquals(1L, this.taskService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>()));
 	}
 
 	@Test
 	@DirtiesContext
 	public void executeMultipleTasksTest() {
 		when(taskLauncher.launch(anyObject())).thenReturn("0");
-		assertEquals(1L, this.taskService.executeTask(TASK_NAME_ORIG,
-				new HashMap<>(), new LinkedList<>()));
-		assertEquals(2L, this.taskService.executeTask(TASK_NAME_ORIG,
-				new HashMap<>(), new LinkedList<>()));
+		assertEquals(1L, this.taskService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>()));
+		assertEquals(2L, this.taskService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>()));
 	}
 
 	@Test

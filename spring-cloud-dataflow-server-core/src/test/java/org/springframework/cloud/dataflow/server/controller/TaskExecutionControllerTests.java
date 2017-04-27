@@ -79,36 +79,25 @@ public class TaskExecutionControllerTests {
 	private final static String TASK_NAME_FOOBAR = BASE_TASK_NAME + "_FOOBAR";
 
 	private static boolean initialized = false;
-
+	private static List sampleArgumentList;
+	private static List sampleCleansedArgumentList;
 	@Autowired
 	private TaskExecutionDao dao;
-
 	@Autowired
 	private JobRepository jobRepository;
-
 	@Autowired
 	private TaskDefinitionRepository taskDefinitionRepository;
-
 	@Autowired
 	private TaskBatchDao taskBatchDao;
-
 	private MockMvc mockMvc;
-
 	@Autowired
 	private WebApplicationContext wac;
-
 	@Autowired
 	private TaskExplorer taskExplorer;
-
 	@Autowired
 	private TaskService taskService;
-
 	@Autowired
 	private TaskLauncher taskLauncher;
-
-	private static List sampleArgumentList;
-
-	private static List sampleCleansedArgumentList;
 
 	@Before
 	public void setupMockMVC() {
@@ -139,13 +128,11 @@ public class TaskExecutionControllerTests {
 			dao.createTaskExecution(TASK_NAME_ORIG, new Date(), this.sampleArgumentList, "foobar");
 			dao.createTaskExecution(TASK_NAME_ORIG, new Date(), this.sampleArgumentList, null);
 			dao.createTaskExecution(TASK_NAME_FOO, new Date(), this.sampleArgumentList, null);
-			TaskExecution taskExecution = dao.createTaskExecution(TASK_NAME_FOOBAR,
-					new Date(), this.sampleArgumentList, null);
-			JobInstance instance = jobRepository.createJobInstance(TASK_NAME_FOOBAR,
-					new JobParameters());
-			JobExecution jobExecution = jobRepository.createJobExecution(
-					instance, new JobParameters(), null);
-			taskBatchDao.saveRelationship(taskExecution,jobExecution);
+			TaskExecution taskExecution = dao.createTaskExecution(TASK_NAME_FOOBAR, new Date(), this.sampleArgumentList,
+					null);
+			JobInstance instance = jobRepository.createJobInstance(TASK_NAME_FOOBAR, new JobParameters());
+			JobExecution jobExecution = jobRepository.createJobExecution(instance, new JobParameters(), null);
+			taskBatchDao.saveRelationship(taskExecution, jobExecution);
 			initialized = true;
 		}
 	}
@@ -172,12 +159,11 @@ public class TaskExecutionControllerTests {
 	}
 
 	@Test
-	public void testGetExecution() throws Exception{
-		verifyTaskArgs(sampleCleansedArgumentList, "", mockMvc.perform(
-				get("/tasks/executions/1").accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk())
-				.andExpect(content().json("{taskName: \"" + TASK_NAME_ORIG + "\"}"))
-				.andExpect(jsonPath("jobExecutionIds", hasSize(0))));
+	public void testGetExecution() throws Exception {
+		verifyTaskArgs(sampleCleansedArgumentList, "",
+				mockMvc.perform(get("/tasks/executions/1").accept(MediaType.APPLICATION_JSON))
+						.andExpect(status().isOk()).andExpect(content().json("{taskName: \"" + TASK_NAME_ORIG + "\"}"))
+						.andExpect(jsonPath("jobExecutionIds", hasSize(0))));
 	}
 
 	@Test
@@ -188,22 +174,18 @@ public class TaskExecutionControllerTests {
 	}
 
 	@Test
-	public void testGetAllExecutions() throws Exception{
-		verifyTaskArgs(this.sampleCleansedArgumentList, "$.content[0].",mockMvc.perform(
-				get("/tasks/executions/").accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.content[*].executionId",
-						containsInAnyOrder(4, 3, 2, 1)))
-				.andExpect(jsonPath("$.content", hasSize(4))));
+	public void testGetAllExecutions() throws Exception {
+		verifyTaskArgs(this.sampleCleansedArgumentList, "$.content[0].",
+				mockMvc.perform(get("/tasks/executions/").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
+						.andExpect(jsonPath("$.content[*].executionId", containsInAnyOrder(4, 3, 2, 1)))
+						.andExpect(jsonPath("$.content", hasSize(4))));
 	}
 
 	@Test
-	public void testGetExecutionsByName() throws Exception{
-		verifyTaskArgs(this.sampleCleansedArgumentList, "$.content[0].", mockMvc.perform(
-				get("/tasks/executions/").param("name", TASK_NAME_ORIG)
-						.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.content[0].taskName", is(TASK_NAME_ORIG)))
+	public void testGetExecutionsByName() throws Exception {
+		verifyTaskArgs(this.sampleCleansedArgumentList, "$.content[0].", mockMvc
+				.perform(get("/tasks/executions/").param("name", TASK_NAME_ORIG).accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk()).andExpect(jsonPath("$.content[0].taskName", is(TASK_NAME_ORIG)))
 				.andExpect(jsonPath("$.content[1].taskName", is(TASK_NAME_ORIG)))
 				.andExpect(jsonPath("$.content[0].jobExecutionIds", hasSize(0)))
 				.andExpect(jsonPath("$.content[1].jobExecutionIds", hasSize(0)))
@@ -230,9 +212,9 @@ public class TaskExecutionControllerTests {
 				.getContentAsString().contains("NoSuchTaskExecutionException");
 	}
 
-	private ResultActions verifyTaskArgs(List<String> expectedArgs, String prefix, ResultActions ra) throws Exception{
+	private ResultActions verifyTaskArgs(List<String> expectedArgs, String prefix, ResultActions ra) throws Exception {
 		ra.andExpect(jsonPath(prefix + "arguments", hasSize(expectedArgs.size())));
-		for (int argCount = 0 ; argCount < expectedArgs.size(); argCount++) {
+		for (int argCount = 0; argCount < expectedArgs.size(); argCount++) {
 			ra.andExpect(jsonPath(String.format(prefix + "arguments[%d]", argCount), is(expectedArgs.get(argCount))));
 		}
 		return ra;

@@ -53,6 +53,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class AboutController {
 
 	private final FeaturesProperties featuresProperties;
+
 	private final VersionInfoProperties versionInfoProperties;
 
 	private final SecurityStateBean securityStateBean;
@@ -67,6 +68,7 @@ public class AboutController {
 	private String implementationVersion;
 
 	private AppDeployer appDeployer;
+
 	private TaskLauncher taskLauncher;
 
 	public AboutController(AppDeployer appDeployer, TaskLauncher taskLauncher, FeaturesProperties featuresProperties,

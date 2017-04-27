@@ -48,7 +48,9 @@ import org.springframework.core.io.Resource;
 public class DefaultEnvironmentPostProcessor implements EnvironmentPostProcessor, Ordered {
 
 	private static Log logger = LogFactory.getLog(DefaultEnvironmentPostProcessor.class);
+
 	private final Resource serverResource = new ClassPathResource("/dataflow-server.yml");
+
 	private final Resource serverDefaultsResource = new ClassPathResource("META-INF/dataflow-server-defaults.yml");
 
 	private static void contributeDefaults(Map<String, Object> defaults, Resource resource) {

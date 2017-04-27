@@ -29,6 +29,7 @@ public class VersionInfoProperties {
 	public static final String VERSION_INFO_PREFIX = DataFlowPropertyKeys.PREFIX + "version-info";
 
 	private String dataflowCoreVersion;
+
 	private String dataflowDashboardVersion;
 
 	public String getDataflowCoreVersion() {

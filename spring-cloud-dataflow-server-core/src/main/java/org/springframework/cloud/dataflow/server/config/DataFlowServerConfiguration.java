@@ -76,8 +76,7 @@ import static org.springframework.hateoas.config.EnableHypermediaSupport.Hyperme
 public class DataFlowServerConfiguration {
 
 	@Configuration
-	@ConditionalOnProperty(name = "spring.dataflow.embedded.database.enabled", havingValue = "true",
-			matchIfMissing = true)
+	@ConditionalOnProperty(name = "spring.dataflow.embedded.database.enabled", havingValue = "true", matchIfMissing = true)
 	@ConditionalOnExpression("#{'${spring.datasource.url:}'.startsWith('jdbc:h2:tcp://localhost:')}")
 	public static class H2ServerConfiguration {
 

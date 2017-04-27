@@ -25,6 +25,7 @@ package org.springframework.cloud.dataflow.core;
  */
 public class BindingPropertyKeys {
 
+
 	// @formatter:off (not working...)
     private static final String ROOT_PREFIX = StreamPropertyKeys.PREFIX;
 
@@ -55,8 +56,6 @@ public class BindingPropertyKeys {
 	 * Group property key for input binding.
 	 */
 	public static final String INPUT_GROUP = INPUT_BINDING_KEY_PREFIX + "group";
-
-    // @formatter:on
 	/**
 	 * Partitioned property key for input binding.
 	 */
@@ -76,11 +75,14 @@ public class BindingPropertyKeys {
 	public static final String OUTPUT_PARTITION_KEY_EXTRACTOR_CLASS = OUTPUT_BINDING_KEY_PREFIX
 			+ "producer.partitionKeyExtractorClass";
 
+
 	private static final String CONTENT_TYPE = "contentType";
+
 	/**
 	 * Content Type property key for input binding.
 	 */
 	public static final String INPUT_CONTENT_TYPE = INPUT_BINDING_KEY_PREFIX + CONTENT_TYPE;
+
 	/**
 	 * Content Type property key for output binding.
 	 */

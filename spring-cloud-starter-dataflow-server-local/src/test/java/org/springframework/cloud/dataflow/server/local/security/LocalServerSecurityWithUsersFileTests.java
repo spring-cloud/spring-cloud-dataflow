@@ -58,21 +58,31 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class LocalServerSecurityWithUsersFileTests {
 
 	private final static Logger logger = LoggerFactory.getLogger(LocalServerSecurityWithUsersFileTests.class);
+
 	private final static LocalDataflowResource localDataflowResource = new LocalDataflowResource(
 			"classpath:org/springframework/cloud/dataflow/server/local/security" + "/fileBasedUsers.yml");
+
 	@ClassRule
 	public static TestRule springDataflowAndLdapServer = RuleChain.outerRule(localDataflowResource);
+
 	private static UserCredentials viewOnlyUser = new UserCredentials("bob", "bobspassword");
+
 	private static UserCredentials manageOnlyUser = new UserCredentials("alice", "alicepwd");
+
 	private static UserCredentials createOnlyUser = new UserCredentials("cartman", "cartmanpwd");
+
 	@Parameter(value = 0)
 	public HttpMethod httpMethod;
+
 	@Parameter(value = 1)
 	public HttpStatus expectedHttpStatus;
+
 	@Parameter(value = 2)
 	public String url;
+
 	@Parameter(value = 3)
 	public UserCredentials userCredentials;
+
 	@Parameter(value = 4)
 	public Map<String, String> urlParameters;
 

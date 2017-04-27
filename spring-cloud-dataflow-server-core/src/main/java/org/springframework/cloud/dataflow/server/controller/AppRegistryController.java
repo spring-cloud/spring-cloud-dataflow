@@ -109,7 +109,7 @@ public class AppRegistryController implements ResourceLoaderAware {
 			@RequestParam(value = "detailed", defaultValue = "false") boolean detailed) {
 
 		List<AppRegistration> list = new ArrayList<>(appRegistry.findAll());
-		for (Iterator<AppRegistration> iterator = list.iterator(); iterator.hasNext(); ) {
+		for (Iterator<AppRegistration> iterator = list.iterator(); iterator.hasNext();) {
 			ApplicationType applicationType = iterator.next().getType();
 			if (type != null && applicationType != type) {
 				iterator.remove();

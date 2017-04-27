@@ -36,6 +36,7 @@ import org.springframework.util.Assert;
 public class TaskDefinition extends DataFlowAppDefinition {
 
 	public static final String SPRING_CLOUD_TASK_NAME = "spring.cloud.task.name";
+
 	/**
 	 * DSL text for the module.
 	 */
@@ -113,10 +114,12 @@ public class TaskDefinition extends DataFlowAppDefinition {
 		 * @see AppDefinition#getProperties()
 		 */
 		private final Map<String, String> properties = new HashMap<String, String>();
+
 		/**
 		 * @see DataFlowAppDefinition#registeredAppName
 		 */
 		private String registeredAppName;
+
 		/**
 		 * @see AppDefinition#getName()
 		 */

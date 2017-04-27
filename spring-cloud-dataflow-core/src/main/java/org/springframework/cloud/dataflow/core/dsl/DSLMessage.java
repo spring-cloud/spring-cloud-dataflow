@@ -47,20 +47,19 @@ public enum DSLMessage {
 	NO_WHITESPACE_BEFORE_ARG_NAME(ERROR, 101, "No whitespace allowed between '--' and option name"), //
 	NO_WHITESPACE_BEFORE_ARG_EQUALS(ERROR, 102, "No whitespace allowed after argument name and before '='"), //
 	NO_WHITESPACE_BEFORE_ARG_VALUE(ERROR, 103, "No whitespace allowed after '=' and before option value"), //
-	MORE_INPUT(ERROR, 104, "After parsing a valid stream, there is still more data: ''{0}''"),
-	EXPECTED_ARGUMENT_VALUE(ERROR, 105, "Expected an argument value but was ''{0}''"),
-	NON_TERMINATING_DOUBLE_QUOTED_STRING(ERROR, 106, "Cannot find terminating \" for string"), //
+	MORE_INPUT(ERROR, 104, "After parsing a valid stream, there is still more data: ''{0}''"), //
+	EXPECTED_ARGUMENT_VALUE(ERROR, 105, "Expected an argument value but was ''{0}''"), //
+	NON_TERMINATING_DOUBLE_QUOTED_STRING(ERROR, 106,"Cannot find terminating \" for string"), //
 	NON_TERMINATING_QUOTED_STRING(ERROR, 107, "Cannot find terminating '' for string"), //
-	MISSING_CHARACTER(ERROR, 108, "missing expected character ''{0}''"),
-	NOT_EXPECTED_TOKEN(ERROR, 111, "Unexpected token.  Expected ''{0}'' but was ''{1}''"),
+	MISSING_CHARACTER(ERROR, 108, "missing expected character ''{0}''"), //
+	NOT_EXPECTED_TOKEN(ERROR, 111, "Unexpected token.  Expected ''{0}'' but was ''{1}''"), //
 	OOD(ERROR, 112, "Unexpectedly ran out of input"), //
 	UNEXPECTED_ESCAPE_CHAR(ERROR, 114, "unexpected escape character."), //
 	UNEXPECTED_DATA(ERROR, 115, "unexpected data in stream definition ''{0}''"), //
 	UNRECOGNIZED_STREAM_REFERENCE(ERROR, 116, "unrecognized stream reference ''{0}''"), //
 	UNRECOGNIZED_APP_REFERENCE(ERROR, 117, "unrecognized app reference ''{0}''"), //
 	EXPECTED_APPNAME(ERROR, 118, "expected app name but found ''{0}''"), //
-	EXPECTED_WHITESPACE_AFTER_APP_BEFORE_ARGUMENT(ERROR,
-			119, "expected whitespace after app name and before argument"), //
+	EXPECTED_WHITESPACE_AFTER_APP_BEFORE_ARGUMENT(ERROR, 119, "expected whitespace after app name and before argument"), //
 	ILLEGAL_STREAM_NAME(ERROR, 122, "illegal name for a stream ''{0}''"), //
 	ILLEGAL_TASK_NAME(ERROR, 123, "illegal name for a task ''{0}''"), //
 	MISSING_VALUE_FOR_VARIABLE(ERROR, 125, "no value specified for variable ''{0}'' when using substream"), //
@@ -75,7 +74,7 @@ public enum DSLMessage {
 			"cannot use composed app ''{0}'' here, both that composed app and this stream define a source "
 					+ "destination"), //
 	CANNOT_USE_COMPOSEDAPP_HERE_ALREADY_HAS_SINK_DESTINATION(ERROR, 138,
-			"cannot use composed app ''{0}'' here, both that composed app and this stream define a sink destination"),//
+			"cannot use composed app ''{0}'' here, both that composed app and this stream define a sink destination"), //
 	EXPECTED_DESTINATION_PREFIX(ERROR, 133, "Expected destination prefix but found ''{0}''"), //
 	NO_WHITESPACE_IN_DESTINATION_DEFINITION(ERROR, 139,
 			"no whitespace allowed between components in a destination " + "name"), //
@@ -87,8 +86,7 @@ public enum DSLMessage {
 			"reference to ''{0}'' is not unique in the target stream ''{1}'', please label the relevant app and use "
 					+ "the label, or use a suffix index to indicate which occurrence of the app, e.g. ''{0}.0''"), //
 	NO_WHITESPACE_IN_DOTTED_NAME(ERROR, 145,
-			"no whitespace is allowed between dot and components of a name"),
-	DESTINATIONS_UNSUPPORTED_HERE(ERROR, 146,
+			"no whitespace is allowed between dot and components of a name"), DESTINATIONS_UNSUPPORTED_HERE(ERROR, 146,
 					"a destination is not supported in this kind of definition"), //
 	EXPECTED_WHITESPACE_AFTER_LABEL_COLON(ERROR, 147, "whitespace is expected after an app label"), //
 	EXPECTED_STREAM_NAME_AFTER_LABEL_COLON(ERROR, 148, "stream name is expected after an app label"), //
@@ -107,8 +105,7 @@ public enum DSLMessage {
 			"secondary sequences must have labels or are " + "unreachable"), //
 	TASK_VALIDATION_DUPLICATE_LABEL(ERROR, 159, "this label has already been defined"), //
 	TASK_VALIDATION_TRANSITION_TARGET_LABEL_UNDEFINED(ERROR, 160, "transition specifies an undefined label"), //
-	TASK_ELEMENT_IN_COMPOSED_DEFINITION_DOES_NOT_EXIST(ERROR, 161,
-			"task in composed task definition does not exist"), //
+	TASK_ELEMENT_IN_COMPOSED_DEFINITION_DOES_NOT_EXIST(ERROR, 161, "task in composed task definition does not exist"), //
 	TASK_UNEXPECTED_DATA(ERROR, 162, "unexpected data in task definition ''{0}''"), //
 	TASK_MORE_INPUT(ERROR, 163, "after parsing a valid task, there is still more data: ''{0}''"), //
 	TASK_VALIDATION_LABEL_CLASHES_WITH_TASKAPP_NAME(ERROR, 164,

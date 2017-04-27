@@ -503,7 +503,9 @@ public class GraphGeneratorVisitor extends TaskVisitor {
 
 		// Transitions made from inside this sequence which are not satisfied
 		final List<Context.TransitionTarget> outstandingTransitions = new ArrayList<>();
+
 		final Map<FlowNode, Map<String, Node>> labeledNodesInEachFlow = new HashMap<>();
+
 		FlowNode primaryFlow;
 
 		Sequence(int sequenceNumber, String label, Node sequenceStartNode) {
@@ -532,29 +534,38 @@ public class GraphGeneratorVisitor extends TaskVisitor {
 
 		// Nodes in this sequence that are labeled are recorded here
 		final Map<String, Node> nodesWithLabels = new HashMap<>();
+
 		// When a transition branch is taken to some other app within a flow,
 		// this records the app node that must be joined to the exit path
 		// from the entire flow.
 		public List<String> otherExits = new ArrayList<>();
+
 		// For forward references this keeps track of them so that they can be
 		// filled in later. The reference must be satisfied within the same flow
 		// or by a separate sequence. If that secondary sequence routes back
 		// to the primary, it must be within the same flow!
 		public List<Context.TransitionTarget> transitionTargets = new ArrayList<>();
+
 		public Map<String, Node> extraNodes = new HashMap<>();
+
 		// Within a flow, transitions to the 'same job' would share a node
 		// target, as would all transitions to an $END or $FAIL node. This
 		// keeps track of what has been created so it can be reused.
 		Map<String, Node> nodesSharedInFlow = new LinkedHashMap<String, Node>();
+
 		// When processing apps in a real Flow or Split, this is the Ast node
 		// for that Flow or Split.
 		LabelledTaskNode containingNode;
+
 		// Tracking what kind of context we are in
 		boolean isFlow = false;
+
 		boolean isSplit = false;
+
 		// Id of the first node in this context (start of a flow, start of a
 		// split)
 		private String startNodeId;
+
 		// As a flow/split is processed gradually we accumulate dangling nodes,
 		// those that need connecting to whatever comes next. For a flow there might
 		// just be one, but for a split multiple.
@@ -615,13 +626,17 @@ public class GraphGeneratorVisitor extends TaskVisitor {
 		static class TransitionTarget {
 			// The node to transition from
 			String nodeId;
+
 			// The state to be checked that would cause this transition
 			String onState;
+
 			// The label to be connected to
 			String label;
+
 			// Last node in flow, when joining things up, anywhere this got
 			// joined to, the inserted stuff will need to be joined to
 			String lastNodeId;
+
 			// Which flow was this transition in
 			FlowNode flow;
 

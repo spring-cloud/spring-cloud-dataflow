@@ -44,6 +44,7 @@ public class AppRegistryTemplate implements AppRegistryOperations {
 	 * Template for URI creation.
 	 */
 	private final UriTemplate uriTemplate;
+
 	/**
 	 * Template used for http interaction.
 	 */

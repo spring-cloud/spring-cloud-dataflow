@@ -40,11 +40,13 @@ public class CompletionConverter implements Converter<String> {
 
 	private static final Pattern NUMBER_OF_INVOCATIONS_CAPTURE = Pattern
 			.compile(String.format(".*%s(\\d+).*", TAB_COMPLETION_COUNT_PREFIX));
+
 	/**
 	 * To appear in the optionContext. Triggers the use of this converter and specifies
 	 * which kind of completion is expected.
 	 */
 	private static final String COMPLETION_CONTEXT_PREFIX = "completion-";
+
 	@Autowired
 	private DataFlowShell dataFlowShell;
 

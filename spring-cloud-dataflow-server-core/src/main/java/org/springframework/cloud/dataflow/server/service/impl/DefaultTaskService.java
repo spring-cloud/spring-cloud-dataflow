@@ -66,31 +66,42 @@ import org.springframework.util.StringUtils;
 public class DefaultTaskService implements TaskService {
 
 	private static final String DATAFLOW_SERVER_URI_KEY = "dataflowServerUri";
+
 	private final DataSourceProperties dataSourceProperties;
+
 	/**
 	 * Used to create TaskExecutions.
 	 */
 	private final TaskRepository taskExecutionRepository;
+
 	/**
 	 * Used to read TaskExecutions.
 	 */
 	private final TaskExplorer taskExplorer;
+
 	/**
 	 * Used to launch apps as tasks.
 	 */
 	private final TaskLauncher taskLauncher;
+
 	/**
 	 * The {@link AppRegistry} this service will use to look up task app URIs.
 	 */
 	private final AppRegistry registry;
+
 	/**
 	 * The {@link ResourceLoader} that will resolve URIs to {@link Resource}s.
 	 */
 	private final ResourceLoader resourceLoader;
+
 	private final TaskDefinitionRepository taskDefinitionRepository;
+
 	private final WhitelistProperties whitelistProperties;
+
 	private final TaskConfigurationProperties taskConfigurationProperties;
+
 	private final DeploymentIdRepository deploymentIdRepository;
+
 	private final String dataflowServerUri;
 
 	/**

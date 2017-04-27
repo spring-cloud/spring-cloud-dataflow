@@ -23,6 +23,7 @@ package org.springframework.cloud.dataflow.server.config.security.support;
 public class SecurityStateBean {
 
 	private boolean authenticationEnabled;
+
 	private boolean authorizationEnabled;
 
 	public SecurityStateBean() {
