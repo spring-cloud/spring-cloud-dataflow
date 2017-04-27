@@ -60,7 +60,6 @@ public class OAuth2ServerResource extends ExternalResource {
 		this.application = new SpringApplicationBuilder(OAuth2TestServer.class).build()
 				.run("--spring.config.location=classpath:/org/springframework/cloud/dataflow/server/local/security"
 						+ "/support/oauth2TestServerConfig.yml");
-
 	}
 
 	@Override

@@ -16,8 +16,6 @@
 
 package org.springframework.cloud.dataflow.server.rest.documentation;
 
-import org.junit.Before;
-import org.junit.ClassRule;
 import org.junit.Rule;
 
 import org.springframework.cloud.dataflow.server.local.LocalDataflowResource;
@@ -25,6 +23,7 @@ import org.springframework.restdocs.JUnitRestDocumentation;
 import org.springframework.restdocs.mockmvc.RestDocumentationResultHandler;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
 
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
@@ -37,10 +36,6 @@ import static org.springframework.restdocs.operation.preprocess.Preprocessors.pr
  */
 public abstract class BaseDocumentation {
 
-	@ClassRule
-	public final static LocalDataflowResource springDataflowServer = new LocalDataflowResource(
-			"classpath:rest-docs-config.yml");
-
 	protected String TARGET_DIRECTORY = "target/generated-snippets";
 
 	@Rule
@@ -50,16 +45,10 @@ public abstract class BaseDocumentation {
 
 	protected RestDocumentationResultHandler documentationHandler;
 
-	@Before
-	public void setupMocks() {
-		prepareDocumentationTests(restDocumentation);
-	}
-
-	protected void prepareDocumentationTests(JUnitRestDocumentation restDocumentation) {
+	protected void prepareDocumentationTests(WebApplicationContext context) {
 		this.documentationHandler = document("{class-name}/{method-name}", preprocessResponse(prettyPrint()));
-		this.mockMvc = MockMvcBuilders.webAppContextSetup(springDataflowServer.getWebApplicationContext())
-				.apply(documentationConfiguration(restDocumentation).uris().withPort(9393))
-				.alwaysDo(this.documentationHandler).build();
-	}
 
+		this.mockMvc = MockMvcBuilders.webAppContextSetup(context)
+				.apply(documentationConfiguration(this.restDocumentation)).alwaysDo(this.documentationHandler).build();
+	}
 }
