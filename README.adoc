@@ -68,4 +68,7 @@ We welcome contributions! Follow this https://github.com/spring-cloud/spring-clo
 
 * In eclipse you import these files by navigating `Windows -> Preferences` and then the menu items `Preferences > Java > Code Style > Formatter` and `Preferences > Java > Code Style > Organize Imports` respectfully.
 
-* In `IntelliJ`, install the plugin `Eclipse Code Formatter`.  You can find it doing a plugin search within `IntelliJ`.  Then navigate `File -> Other Settings -> Default Settings` and select the Eclipse Code Formatter.  Select the the `eclipse-code-formatter.xml` file for the field `Eclipse Java Formatter config file` and the file `eclipse.importorder` for the field `Import order`.
+* In `IntelliJ`, install the plugin `Eclipse Code Formatter`.  You can find it by searching the "Browse Repositories" under the plugin option within `IntelliJ` (Once installed you will need to reboot Intellij for it to take effect).
+Then navigate to `Intellij IDEA > Preferences` and select the Eclipse Code Formatter.  Select the `eclipse-code-formatter.xml` file for the field `Eclipse Java Formatter config file` and the file `eclipse.importorder` for the field `Import order`.
+Enable the `Eclipse code formatter` by clicking `Use the Eclipse code formatter` then click the *OK* button.
+** NOTE: If you configure the `Eclipse Code Formatter` from `File > Other Settings > Default Settings` it will set this policy across all of your Intellij projects.
