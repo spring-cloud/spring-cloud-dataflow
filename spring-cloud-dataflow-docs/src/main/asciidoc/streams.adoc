@@ -695,6 +695,31 @@ To override these application properties, one can specify the new property value
 dataflow:>stream deploy ticktock --properties "app.time.fixed-delay=4,app.log.level=ERROR"
 ----
 
+[[spring-cloud-dataflow-global-properties]]
+=== Common application properties
+
+In addition to configuration via DSL, Spring Cloud Data Flow provides a mechanism for setting common properties to all
+the streaming applications that are launched by it.
+This can be done by adding properties prefixed with `spring.cloud.dataflow.applicationProperties.stream` when starting
+the server.
+When doing so, the server will pass all the properties, without the prefix, to the instances it launches.
+
+For example, all the launched applications can be configured to use a specific Kafka broker by launching the
+Data Flow server with the following options:
+
+```
+--spring.cloud.dataflow.applicationProperties.stream.spring.cloud.stream.kafka.binder.brokers=192.168.1.100:9092
+--spring.cloud.dataflow.applicationProperties.stream.spring.cloud.stream.kafka.binder.zkNodes=192.168.1.100:2181
+```
+
+This will cause the properties `spring.cloud.stream.kafka.binder.brokers` and `spring.cloud.stream.kafka.binder.zkNodes`
+to be passed to all the launched applications.
+
+[NOTE]
+Properties configured using this mechanism have lower precedence than stream deployment properties.
+They will be overridden if a property with the same key is specified at stream deployment time (e.g.
+`app.http.spring.cloud.stream.kafka.binder.brokers` will override the common property).
+
 [[spring-cloud-dataflow-destroy-stream]]
 == Destroying a Stream
 
@@ -904,26 +929,6 @@ This can be done using the DSL syntax `http > :mydestination` or `:mydestination
 Second, you may need to determine the output channel of a stream based on some information that is only known at runtime.
 In that case, a router may be used in the sink position of a stream definition. For more information, refer to the Router Sink starter's
 link:https://github.com/spring-cloud-stream-app-starters/router/tree/master/spring-cloud-starter-stream-sink-router[README].
-
-[[spring-cloud-dataflow-global-properties]]
-=== Common application properties
-
-In addition to configuration via DSL, Spring Cloud Data Flow provides a mechanism for setting common properties to all the streaming applications that are launched by it.
-This can be done by adding properties prefixed with `spring.cloud.dataflow.applicationProperties.stream` when starting the server.
-When doing so, the server will pass all the properties, without the prefix, to the instances it launches.
-
-For example, all the launched applications can be configured to use a specific Kafka broker by launching the configuration server with the following options:
-
-```
---spring.cloud.dataflow.applicationProperties.stream.spring.cloud.stream.kafka.binder.brokers=192.168.1.100:9092
---spring.cloud.dataflow.applicationProperties.stream.spring.cloud.stream.kafka.binder.zkNodes=192.168.1.100:2181
-```
-
-This will cause the properties `spring.cloud.stream.kafka.binder.brokers` and `spring.cloud.stream.kafka.binder.zkNodes` to be passed to all the launched applications.
-
-[NOTE]
-Properties configured using this mechanism have lower precedence than stream deployment properties.
-They will be overridden if a property with the same key is specified at stream deployment time (e.g. `app.http.spring.cloud.stream.kafka.binder.brokers` will override the common property).
 
 [[spring-cloud-dataflow-stream-multi-binder]]
 == Stream applications with multiple binder configurations
