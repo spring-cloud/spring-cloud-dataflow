@@ -206,9 +206,10 @@ The target Spring Cloud Stream application starter should be re-packaged to supp
 [[dataflow-jdbc-sink]]
 === How to use JDBC-sink?
 The JDBC-sink can be used to insert message payload data into a relational database table. By default,
-it inserts the entire payload into a table named after `spring.application.name` value set at the
-application level, and if it is not set, by default the application expects the table with the name
-`messages`. To alter this behavior, the JDBC sink accepts link:https://github.com/spring-cloud-stream-app-starters/jdbc/blob/master/spring-cloud-starter-stream-sink-jdbc/README.adoc[several options] that you can pass using the --foo=bar notation in the stream, or change globally.
+it inserts the entire payload into a table named after `jdbc.table-name` property, and if it is not set,
+by default the application expects the table with the name `messages`. To alter this behavior, the
+JDBC sink accepts link:http://docs.spring.io/spring-cloud-stream-app-starters/docs/current/reference/html/spring-cloud-stream-modules-sinks.html#spring-cloud-stream-modules-jdbc-sink[several options]
+that you can pass using the --foo=bar notation in the stream, or change globally.
 
 A stream definition using `jdbc` sink relying on all defaults with MySQL as the backing database looks
 like the following. In this example, the system time is persisted in MySQL for every second.
