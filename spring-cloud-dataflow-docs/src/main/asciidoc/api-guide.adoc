@@ -117,22 +117,6 @@ include::{snippets}/api-documentation/index/response-fields.adoc[]
 
 include::{snippets}/api-documentation/index/http-response.adoc[]
 
-===== Example "stream create" request for a `ticktock` stream
-
-[source,bash]
-----
-curl -X POST -d "name=ticktock&definition=time | log" localhost:9393/streams/definitions?deploy=false
-----
-
-===== Example "stream deploy" request for a `ticktock` stream
-
-[source,bash]
-----
-curl -X POST http://localhost:9393/streams/deployments/ticktock
-----
-
-include::{snippets}/api-documentation/index/http-response.adoc[]
-
 [[api-guide-resources-index-links]]
 ===== Links
 
@@ -144,6 +128,7 @@ include::{snippets}/api-documentation/index/links.adoc[]
 [[resources-about]]
 === Server Meta Information
 
+==== Retrieving information about the server
 A `GET` request will return meta information for Spring Cloud Data Flow. This includes:
 
 * Runtime Environment Information
@@ -151,35 +136,100 @@ A `GET` request will return meta information for Spring Cloud Data Flow. This in
 * Dependency information of Spring Cloud Data Flow Server
 * Security information
 
-==== Request structure
+===== Request structure
 
 include::{snippets}/about-documentation/get-meta-information/http-request.adoc[]
 
-==== Example request
+===== Example request
 
 include::{snippets}/about-documentation/get-meta-information/curl-request.adoc[]
 
-==== Response structure
+===== Response structure
 
 include::{snippets}/about-documentation/get-meta-information/http-response.adoc[]
 
-[[resources-app-registry-list]]
-=== Listing Applications
+=== Registered Applications
 
+[[resources-app-registry-list]]
+==== Listing Applications
 A `GET` request will list all applications known to Spring Cloud Data Flow.
 
-==== Request structure
+===== Request structure
 
 include::{snippets}/app-registry-documentation/get-applications-filtered/http-request.adoc[]
 
-==== Request parameters
+===== Request parameters
 
 include::{snippets}/app-registry-documentation/get-applications-filtered/request-parameters.adoc[]
 
-==== Example request
+===== Example request
 
 include::{snippets}/app-registry-documentation/get-applications-filtered/curl-request.adoc[]
 
-==== Response structure
+===== Response structure
 
 include::{snippets}/app-registry-documentation/get-applications-filtered/http-response.adoc[]
+
+[[api-guide-resources-stream-definitions]]
+=== Stream Definitions
+
+==== Example "stream create" request for a `ticktock` stream
+
+[source,bash]
+----
+curl -X POST -d "name=ticktock&definition=time | log" localhost:9393/streams/definitions?deploy=false
+----
+
+
+[[api-guide-resources-stream-deployments]]
+=== Stream Deployments
+
+==== Example "stream deploy" request for a `ticktock` stream
+
+[source,bash]
+----
+curl -X POST http://localhost:9393/streams/deployments/ticktock
+----
+
+=== Task Definitions
+
+==== Creating a new Task Definition
+Creating a task definition is achieved by POSTing to the task definitions endpoint.
+
+===== Request structure
+
+include::{snippets}/task-definitions-documentation/create-definition/http-request.adoc[]
+
+===== Request parameters
+
+include::{snippets}/task-definitions-documentation/create-definition/request-parameters.adoc[]
+
+===== Example request
+
+include::{snippets}/task-definitions-documentation/create-definition/curl-request.adoc[]
+
+===== Response structure
+
+include::{snippets}/task-definitions-documentation/create-definition/http-response.adoc[]
+
+
+=== Task Launch
+
+==== Launching a Task
+Launching a task is done by requesting the creation of a new Task Execution.
+
+===== Request structure
+
+include::{snippets}/task-executions-documentation/launch-task/http-request.adoc[]
+
+===== Request parameters
+
+include::{snippets}/task-executions-documentation/launch-task/request-parameters.adoc[]
+
+===== Example request
+
+include::{snippets}/task-executions-documentation/launch-task/curl-request.adoc[]
+
+===== Response structure
+
+include::{snippets}/task-executions-documentation/launch-task/http-response.adoc[]
