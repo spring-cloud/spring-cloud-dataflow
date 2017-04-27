@@ -155,10 +155,6 @@ A `GET` request will return meta information for Spring Cloud Data Flow. This in
 
 include::{snippets}/about-documentation/get-meta-information/http-request.adoc[]
 
-==== Request parameters
-
-include::{snippets}/about-documentation/get-meta-information/request-parameters.adoc[]
-
 ==== Example request
 
 include::{snippets}/about-documentation/get-meta-information/curl-request.adoc[]
