@@ -25,9 +25,25 @@ package org.springframework.cloud.dataflow.core.dsl;
  * @author Andy Clement
  */
 public enum TokenKind {
-	IDENTIFIER, DOUBLE_MINUS("--"), EQUALS("="), AND("&"), ANDAND("&&"), OROR("||"), ARROW("->"), PIPE("|"), OPEN_PAREN(
-			"("), CLOSE_PAREN(")"), NEWLINE("\n"), STAR(
-					"*"), COLON(":"), GT(">"), LT("<"), SEMICOLON(";"), REFERENCE("@"), DOT("."), LITERAL_STRING,;
+	IDENTIFIER,
+	DOUBLE_MINUS("--"),
+	EQUALS("="),
+	AND("&"),
+	ANDAND("&&"),
+	OROR("||"),
+	ARROW("->"),
+	PIPE("|"),
+	OPEN_PAREN("("),
+	CLOSE_PAREN(")"),
+	NEWLINE("\n"),
+	STAR("*"),
+	COLON(":"),
+	GT(">"),
+	LT("<"),
+	SEMICOLON(";"),
+	REFERENCE("@"),
+	DOT("."),
+	LITERAL_STRING,;
 
 	char[] tokenChars;
 

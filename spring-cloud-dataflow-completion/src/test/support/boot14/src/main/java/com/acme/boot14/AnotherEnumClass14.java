@@ -20,5 +20,6 @@ package com.acme.boot14;
  * An enum class used in configuration properties
  */
 public enum AnotherEnumClass14 {
-	very_high, very_low;
+	very_high,
+	very_low;
 }

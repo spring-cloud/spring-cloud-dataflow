@@ -56,6 +56,9 @@ public interface AggregateCounterOperations {
 	void reset(String name);
 
 	public static enum Resolution {
-		minute, hour, day, month
+		minute,
+		hour,
+		day,
+		month
 	}
 }

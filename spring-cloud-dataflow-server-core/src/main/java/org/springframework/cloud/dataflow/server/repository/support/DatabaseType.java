@@ -34,8 +34,13 @@ import org.springframework.util.StringUtils;
  */
 public enum DatabaseType {
 
-	HSQL("HSQL Database Engine"), H2("H2"), ORACLE("Oracle"), MYSQL("MySQL"), POSTGRES("PostgreSQL"), SQLSERVER(
-			"Microsoft SQL Server"), DB2("DB2");
+	HSQL("HSQL Database Engine"),
+	H2("H2"),
+	ORACLE("Oracle"),
+	MYSQL("MySQL"),
+	POSTGRES("PostgreSQL"),
+	SQLSERVER("Microsoft SQL Server"),
+	DB2("DB2");
 
 	private static final Map<String, DatabaseType> dbNameMap;
 

@@ -49,7 +49,7 @@ public enum DSLMessage {
 	NO_WHITESPACE_BEFORE_ARG_VALUE(ERROR, 103, "No whitespace allowed after '=' and before option value"), //
 	MORE_INPUT(ERROR, 104, "After parsing a valid stream, there is still more data: ''{0}''"), //
 	EXPECTED_ARGUMENT_VALUE(ERROR, 105, "Expected an argument value but was ''{0}''"), //
-	NON_TERMINATING_DOUBLE_QUOTED_STRING(ERROR, 106,"Cannot find terminating \" for string"), //
+	NON_TERMINATING_DOUBLE_QUOTED_STRING(ERROR, 106, "Cannot find terminating \" for string"), //
 	NON_TERMINATING_QUOTED_STRING(ERROR, 107, "Cannot find terminating '' for string"), //
 	MISSING_CHARACTER(ERROR, 108, "missing expected character ''{0}''"), //
 	NOT_EXPECTED_TOKEN(ERROR, 111, "Unexpected token.  Expected ''{0}'' but was ''{1}''"), //
@@ -85,9 +85,8 @@ public enum DSLMessage {
 	APP_REFERENCE_NOT_UNIQUE(ERROR, 144,
 			"reference to ''{0}'' is not unique in the target stream ''{1}'', please label the relevant app and use "
 					+ "the label, or use a suffix index to indicate which occurrence of the app, e.g. ''{0}.0''"), //
-	NO_WHITESPACE_IN_DOTTED_NAME(ERROR, 145,
-			"no whitespace is allowed between dot and components of a name"), DESTINATIONS_UNSUPPORTED_HERE(ERROR, 146,
-					"a destination is not supported in this kind of definition"), //
+	NO_WHITESPACE_IN_DOTTED_NAME(ERROR, 145, "no whitespace is allowed between dot and components of a name"),
+	DESTINATIONS_UNSUPPORTED_HERE(ERROR, 146, "a destination is not supported in this kind of definition"), //
 	EXPECTED_WHITESPACE_AFTER_LABEL_COLON(ERROR, 147, "whitespace is expected after an app label"), //
 	EXPECTED_STREAM_NAME_AFTER_LABEL_COLON(ERROR, 148, "stream name is expected after an app label"), //
 	// These relate specifically to the composed task DSL
@@ -165,7 +164,9 @@ public enum DSLMessage {
 	}
 
 	public enum Kind {
-		INFO, WARNING, ERROR
+		INFO,
+		WARNING,
+		ERROR
 	}
 
 }

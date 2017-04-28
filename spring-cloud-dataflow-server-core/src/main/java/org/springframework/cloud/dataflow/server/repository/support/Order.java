@@ -22,5 +22,6 @@ package org.springframework.cloud.dataflow.server.repository.support;
  * @author Glenn Renfro
  */
 public enum Order {
-	ASCENDING, DESCENDING
+	ASCENDING,
+	DESCENDING
 }

@@ -22,8 +22,9 @@ import org.springframework.util.Assert;
  */
 public enum RoleType {
 
-	VIEW("ROLE_VIEW", "view role"), CREATE("ROLE_CREATE", "role for create operations"), MANAGE("ROLE_MANAGE",
-			"role for the boot management endpoints");
+	VIEW("ROLE_VIEW", "view role"),
+	CREATE("ROLE_CREATE", "role for create operations"),
+	MANAGE("ROLE_MANAGE", "role for the boot management endpoints");
 
 	private String key;
 

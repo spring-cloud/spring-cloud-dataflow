@@ -26,8 +26,9 @@ import org.springframework.util.Assert;
  */
 public enum CoreSecurityRoles {
 
-	VIEW("VIEW", "view role"), CREATE("CREATE", "role for create operations"), MANAGE("MANAGE",
-			"role for the boot management endpoints");
+	VIEW("VIEW", "view role"),
+	CREATE("CREATE", "role for create operations"),
+	MANAGE("MANAGE", "role for the boot management endpoints");
 
 	private String key;
 

@@ -29,16 +29,14 @@ import org.springframework.util.Assert;
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 public enum DeploymentStateResource {
 
-	DEPLOYING("deploying", "Deploying", "The app or group is being deployed."), DEPLOYED("deployed", "Deployed",
-			"All apps have been successfully deployed"), UNDEPLOYED("undeployed", "Undeployed",
-					"The app or group is known to the system, but is not currently deployed"), PARTIAL("partial",
-							"Partial",
-							"In the case of multiple apps, some have successfully deployed, while others have "
-									+ "not"), FAILED("failed", "Failed", "All apps have failed deployment"), ERROR(
-											"error", "Error",
-											"A system error occurred trying to determine deployment status"), UNKNOWN(
-													"unknown", "Unknown",
-													"The app or group deployment is not known to the system");
+	DEPLOYING("deploying", "Deploying", "The app or group is being deployed."),
+	DEPLOYED("deployed", "Deployed", "All apps have been successfully deployed"),
+	UNDEPLOYED("undeployed", "Undeployed", "The app or group is known to the system, but is not currently deployed"),
+	PARTIAL("partial", "Partial",
+			"In the case of multiple apps, some have successfully deployed, while others have " + "not"),
+	FAILED("failed", "Failed", "All apps have failed deployment"),
+	ERROR("error", "Error", "A system error occurred trying to determine deployment status"),
+	UNKNOWN("unknown", "Unknown", "The app or group deployment is not known to the system");
 
 	private final String key;
 

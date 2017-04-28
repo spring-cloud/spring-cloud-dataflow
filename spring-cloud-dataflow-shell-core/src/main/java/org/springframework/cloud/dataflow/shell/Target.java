@@ -242,7 +242,8 @@ public class Target {
 	}
 
 	public enum TargetStatus {
-		SUCCESS, ERROR
+		SUCCESS,
+		ERROR
 	}
 
 }

@@ -141,10 +141,12 @@ public class StepExecutionProgressInfo {
 
 	private enum PercentCompleteBasis {
 
-		UNKNOWN("unknown"), NOINFORMATION("percent.no.information,no.information", "no information"), ENDTIME(
-				"percent.end.time,end.time", "end time (already finished)"), DURATION("percent.duration,duration",
-						"extrapolated duration"), READCOUNT("percent.read.count,read.count",
-								"extrapolated read count"), NOHISTORY("percent.no.history,no.history", "no history");
+		UNKNOWN("unknown"),
+		NOINFORMATION("percent.no.information,no.information", "no information"),
+		ENDTIME("percent.end.time,end.time", "end time (already finished)"),
+		DURATION("percent.duration,duration", "extrapolated duration"),
+		READCOUNT("percent.read.count,read.count", "extrapolated read count"),
+		NOHISTORY("percent.no.history,no.history", "no history");
 
 		private final String[] codes;
 
