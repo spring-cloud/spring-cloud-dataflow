@@ -22,14 +22,19 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.actuate.autoconfigure.MetricExportAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration;
+import org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration;
 import org.springframework.boot.autoconfigure.integration.IntegrationAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerAutoConfiguration;
 import org.springframework.boot.autoconfigure.jmx.JmxAutoConfiguration;
+import org.springframework.boot.autoconfigure.ldap.LdapAutoConfiguration;
+import org.springframework.boot.autoconfigure.security.SecurityAutoConfiguration;
+import org.springframework.boot.autoconfigure.security.oauth2.OAuth2AutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.cloud.dataflow.autoconfigure.local.LocalDataFlowServerAutoConfiguration;
-import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolverAutoConfiguration;
 import org.springframework.cloud.deployer.spi.local.LocalDeployerAutoConfiguration;
 import org.springframework.core.io.Resource;
 import org.springframework.util.SocketUtils;
@@ -47,11 +52,17 @@ import org.springframework.web.bind.annotation.RestController;
 	exclude={
 		DataSourceAutoConfiguration.class,
 		DataSourceTransactionManagerAutoConfiguration.class,
+		IntegrationAutoConfiguration.class,
 		JmxAutoConfiguration.class,
+		LdapAutoConfiguration.class,
 		LocalDataFlowServerAutoConfiguration.class,
-		ApplicationConfigurationMetadataResolverAutoConfiguration.class,
 		LocalDeployerAutoConfiguration.class,
-		IntegrationAutoConfiguration.class})
+		MetricExportAutoConfiguration.class,
+		OAuth2AutoConfiguration.class,
+		RedisAutoConfiguration.class,
+		RedisRepositoriesAutoConfiguration.class,
+		SecurityAutoConfiguration.class
+	})
 public class FakeMetricsCollector {
 
 	private static final Log LOGGER = LogFactory.getLog(FakeMetricsCollector.class);
@@ -63,10 +74,10 @@ public class FakeMetricsCollector {
 		int port = SocketUtils.findAvailableTcpPort();
 		LOGGER.info("Setting Fake Metrics Collector port to " + port);
 		new SpringApplicationBuilder(FakeMetricsCollector.class)
-		.properties("server.port:" + port)
-		.properties("logging.level.org.springframework.boot.autoconfigure.logging=debug")
+		.properties("fakeMetricsCollector.port:" + port)
+		.properties("logging.level.org.springframework.boot=debug")
 		.build()
-		.run();
+		.run("--spring.config.location=classpath:/org/springframework/cloud/dataflow/server/local/metrics/fakeMetricsCollectorConfig.yml");
 	}
 
 	@RequestMapping("/collector/metrics/streams")
