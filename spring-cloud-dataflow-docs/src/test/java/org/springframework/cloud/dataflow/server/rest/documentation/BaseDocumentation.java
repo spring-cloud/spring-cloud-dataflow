@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import static org.springframework.restdocs.operation.preprocess.Preprocessors.pr
 
 /**
  * @author Gunnar Hillert
+ * @author Ilayaperumal Gopinathan
  */
 public abstract class BaseDocumentation {
 
@@ -57,7 +58,8 @@ public abstract class BaseDocumentation {
 	protected void prepareDocumentationTests(JUnitRestDocumentation restDocumentation) {
 		this.documentationHandler = document("{class-name}/{method-name}", preprocessResponse(prettyPrint()));
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(springDataflowServer.getWebApplicationContext())
-				.apply(documentationConfiguration(restDocumentation)).alwaysDo(this.documentationHandler).build();
+				.apply(documentationConfiguration(restDocumentation).uris().withPort(9393))
+				.alwaysDo(this.documentationHandler).build();
 	}
 
 }
