@@ -54,9 +54,9 @@ expressed in a properties style:
 
 For example:
 
-`task.timestamp=maven://org.springframework.cloud.task.app:timestamp-task:1.0.0.BUILD-SNAPSHOT`
+`task.timestamp=maven://org.springframework.cloud.task.app:timestamp-task:1.2.1.BUILD-SNAPSHOT`
 
-`processor.transform=maven://org.springframework.cloud.stream.app:transform-processor-rabbit:1.0.3.BUILD-SNAPSHOT`
+`processor.transform=maven://org.springframework.cloud.stream.app:transform-processor-rabbit:1.2.1.BUILD-SNAPSHOT`
 
 At the top of the bulk import page an _Uri_ can be specified that points to a properties file stored elsewhere, it
 should contain properties formatted as above. Alternatively, using the textbox labeled _Apps as Properties_
