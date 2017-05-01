@@ -362,6 +362,12 @@ A `task-launcher` sink expects a message containing a TaskLaunchRequest object i
 TaskLaunchRequest object the task-launcher will obtain the URI of the artifact to be launched as well as the
 properties and command line arguments to be used by the task.
 
+The `task-launcher-local` can be added to the available sinks by executing the app register command as follows (for the Rabbit Binder):
+
+```
+app register --name task-launcher-local --type sink --uri maven://org.springframework.cloud.stream.app:task-launcher-local-sink-rabbit:jar:1.2.0.RELEASE
+```
+
 === TriggerTask
 
 One way to launch a task using the `task-launcher` is to use the `triggertask` source. The `triggertask` source
@@ -372,6 +378,12 @@ would be to launch the timestamp task once every 5 seconds, the stream to implem
 stream create foo --definition "triggertask --triggertask.uri=maven://org.springframework.cloud.task.app:timestamp-task:jar:1.2.0.RELEASE --trigger.fixed-delay=5 | task-launcher-local" --deploy
 ```
 
+The `triggertask` can be added to the available sources by executing the app register command as follows (for the Rabbit Binder):
+
+```
+app register --type source --name triggertask --uri maven://org.springframework.cloud.stream.app:triggertask-source-rabbit:1.2.0.RELEASE
+```
+
 === TaskLaunchRequest-transform
 
 Another option to start a task using the `task-launcher` would be to create a stream using the
@@ -379,6 +391,12 @@ https://github.com/spring-cloud/spring-cloud-stream-app-starters/tree/master/pro
 
 ```
 stream create task-stream --definition "http --port=9000 | tasklaunchrequest-transform --uri=maven://org.springframework.cloud.task.app:timestamp-task:jar:1.2.0.RELEASE | task-launcher-local"
+```
+
+The `tasklaunchrequest-transform` can be added to the available processors by executing the app register command as follows (for the Rabbit Binder):
+
+```
+app register --type processor --name tasklaunchrequest-transform --uri maven://org.springframework.cloud.stream.app:tasklaunchrequest-transform-processor-rabbit:1.2.0.RELEASE
 ```
 
 [[spring-cloud-dataflow-composed-tasks]]
