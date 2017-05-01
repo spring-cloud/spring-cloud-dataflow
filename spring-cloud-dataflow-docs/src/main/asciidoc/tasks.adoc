@@ -350,8 +350,11 @@ The default Task/Batch event and destination names on the broker are enumerated 
 [[spring-cloud-dataflow-launch-tasks-from-stream]]
 == Launching Tasks from a Stream
 
-You can launch a task from a stream by using one of the available `task-launcher` sinks. Currently the only available
-`task-launcher` sink is the `task-launcher-local`, which will launch a task on your local machine.
+You can launch a task from a stream by using one of the available `task-launcher` sinks. Currently the platforms supported
+via the `task-launcher` sinks are
+https://github.com/spring-cloud/spring-cloud-stream-app-starters/tree/master/tasklauncher/spring-cloud-starter-stream-sink-tasklauncher-local[local],
+https://github.com/spring-cloud/spring-cloud-stream-app-starters/tree/master/tasklauncher/spring-cloud-starter-stream-sink-tasklauncher-cloudfoundry[Cloud Foundry], and
+https://github.com/spring-cloud/spring-cloud-stream-app-starters/tree/master/tasklauncher/spring-cloud-starter-stream-sink-tasklauncher-yarn[Yarn].
 
 NOTE: `task-launcher-local` is meant for development purposes only.
 
@@ -362,7 +365,7 @@ properties and command line arguments to be used by the task.
 The `task-launcher-local` can be added to the available sinks by executing the app register command as follows:
 
 ```
-app register --name task-launcher-local --type sink --uri maven://org.springframework.cloud.stream.app:task-launcher-local-sink-kafka:jar:1.0.0.BUILD-SNAPSHOT
+app register --name task-launcher-local --type sink --uri maven://org.springframework.cloud.stream.app:task-launcher-local-sink-kafka:jar:<DESIRED_VERSION>
 ```
 
 === TriggerTask
@@ -372,16 +375,16 @@ will emit a message with a TaskLaunchRequest object containing the required laun
 would be to launch the timestamp task once every 5 seconds, the stream to implement this would look like:
 
 ```
-stream create foo --definition "triggertask --triggertask.uri=maven://org.springframework.cloud.task.app:timestamp-task:jar:1.0.0.BUILD-SNAPSHOT --trigger.fixed-delay=5 | task-launcher-local" --deploy
+stream create foo --definition "triggertask --triggertask.uri=<uriToJar> --trigger.fixed-delay=5 | task-launcher-local" --deploy
 ```
 
-=== Translator
+=== TaskLaunchRequest-transform
 
-Another option to start a task using the `task-launcher` would be to create a stream using a your own translator
-(as a processor) to translate a message payload to a TaskLaunchRequest.  For example:
+Another option to start a task using the `task-launcher` would be to create a stream using the
+https://github.com/spring-cloud/spring-cloud-stream-app-starters/tree/master/processor/spring-cloud-starter-stream-processor-tasklaunchrequest-transform[Tasklaunchrequest-transform] processor to translate a message payload to a TaskLaunchRequest.  For example:
 
 ```
-http --server.port=9000 | my-task-processor | task-launcher-local
+stream create task-stream --definition "http --port=9000 | tasklaunchrequest-transform --uri=<uriToJar> | task-launcher-local
 ```
 
 [[spring-cloud-dataflow-composed-tasks]]
