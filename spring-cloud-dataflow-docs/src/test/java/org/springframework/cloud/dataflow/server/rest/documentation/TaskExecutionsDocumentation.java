@@ -17,10 +17,7 @@
 package org.springframework.cloud.dataflow.server.rest.documentation;
 
 import org.junit.Before;
-import org.junit.ClassRule;
 import org.junit.Test;
-
-import org.springframework.cloud.dataflow.server.local.LocalDataflowResource;
 
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
@@ -34,13 +31,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 public class TaskExecutionsDocumentation extends BaseDocumentation {
 
-	@ClassRule
-	public final static LocalDataflowResource springDataflowServer =
-			new LocalDataflowResource("classpath:rest-docs-config.yml");
-
 	@Before
 	public void setup() throws Exception {
-		super.prepareDocumentationTests(springDataflowServer.getWebApplicationContext());
 		this.mockMvc.perform(
 			post("/apps/task/timestamp")
 				.param("uri", "maven://org.springframework.cloud.task.app:timestamp-task:1.1.0.RELEASE")

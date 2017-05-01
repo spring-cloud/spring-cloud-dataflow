@@ -16,11 +16,8 @@
 
 package org.springframework.cloud.dataflow.server.rest.documentation;
 
-import org.junit.Before;
-import org.junit.ClassRule;
 import org.junit.Test;
 
-import org.springframework.cloud.dataflow.server.local.LocalDataflowResource;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.payload.JsonFieldType;
 
@@ -33,15 +30,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Gunnar Hillert
  */
 public class AboutDocumentation extends BaseDocumentation {
-
-	@ClassRule
-	public final static LocalDataflowResource springDataflowServer =
-			new LocalDataflowResource("classpath:rest-docs-config.yml");
-
-	@Before
-	public void setupMocks() {
-		super.prepareDocumentationTests(springDataflowServer.getWebApplicationContext());
-	}
 
 	@Test
 	public void getMetaInformation() throws Exception {

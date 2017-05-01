@@ -18,12 +18,9 @@ package org.springframework.cloud.dataflow.server.rest.documentation;
 
 import javax.servlet.RequestDispatcher;
 
-import org.junit.Before;
-import org.junit.ClassRule;
 import org.junit.Test;
 
 import org.springframework.cloud.dataflow.rest.Version;
-import org.springframework.cloud.dataflow.server.local.LocalDataflowResource;
 
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
@@ -41,15 +38,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Gunnar Hillert
  */
 public class ApiDocumentation extends BaseDocumentation {
-
-	@ClassRule
-	public final static LocalDataflowResource springDataflowServer =
-			new LocalDataflowResource("classpath:rest-docs-config.yml");
-
-	@Before
-	public void setupMocks() {
-		super.prepareDocumentationTests(springDataflowServer.getWebApplicationContext());
-	}
 
 	@Test
 	public void headers() throws Exception {

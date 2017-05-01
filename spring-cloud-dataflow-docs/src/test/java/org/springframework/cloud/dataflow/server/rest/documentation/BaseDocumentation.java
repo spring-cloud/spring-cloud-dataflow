@@ -16,8 +16,11 @@
 
 package org.springframework.cloud.dataflow.server.rest.documentation;
 
+import org.junit.Before;
+import org.junit.ClassRule;
 import org.junit.Rule;
 
+import org.springframework.cloud.dataflow.server.local.LocalDataflowResource;
 import org.springframework.restdocs.JUnitRestDocumentation;
 import org.springframework.restdocs.mockmvc.RestDocumentationResultHandler;
 import org.springframework.test.web.servlet.MockMvc;
@@ -35,7 +38,16 @@ import static org.springframework.restdocs.operation.preprocess.Preprocessors.pr
  */
 public abstract class BaseDocumentation {
 
-	protected String TARGET_DIRECTORY = "target/generated-snippets";
+	@ClassRule
+	public final static LocalDataflowResource springDataflowServer =
+			new LocalDataflowResource("classpath:rest-docs-config.yml");
+
+	@Before
+	public void setupMocks() {
+		this.prepareDocumentationTests(springDataflowServer.getWebApplicationContext());
+	}
+
+	public static final String TARGET_DIRECTORY = "target/generated-snippets";
 
 	@Rule
 	public JUnitRestDocumentation restDocumentation = new JUnitRestDocumentation(TARGET_DIRECTORY);
