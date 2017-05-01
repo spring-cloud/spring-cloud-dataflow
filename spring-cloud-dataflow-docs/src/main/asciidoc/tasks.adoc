@@ -590,7 +590,7 @@ button next to the composed task definition on the definitions tab.
 The DSL supports fine grained control over the transitions taken during the
 execution of the directed graph. Transitions are specified by providing a
 condition for equality based on the exit status of the previous task.
-A task transition is represented by the following symbol `->`.
+A task transition is represented by the following symbol `-&gt;`.
 
 ===== Basic Transition
 A basic transition would look like the following:
