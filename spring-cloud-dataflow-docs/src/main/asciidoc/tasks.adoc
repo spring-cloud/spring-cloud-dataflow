@@ -362,12 +362,6 @@ A `task-launcher` sink expects a message containing a TaskLaunchRequest object i
 TaskLaunchRequest object the task-launcher will obtain the URI of the artifact to be launched as well as the
 properties and command line arguments to be used by the task.
 
-The `task-launcher-local` can be added to the available sinks by executing the app register command as follows:
-
-```
-app register --name task-launcher-local --type sink --uri maven://org.springframework.cloud.stream.app:task-launcher-local-sink-kafka:jar:<DESIRED_VERSION>
-```
-
 === TriggerTask
 
 One way to launch a task using the `task-launcher` is to use the `triggertask` source. The `triggertask` source
@@ -375,7 +369,7 @@ will emit a message with a TaskLaunchRequest object containing the required laun
 would be to launch the timestamp task once every 5 seconds, the stream to implement this would look like:
 
 ```
-stream create foo --definition "triggertask --triggertask.uri=<uriToJar> --trigger.fixed-delay=5 | task-launcher-local" --deploy
+stream create foo --definition "triggertask --triggertask.uri=maven://org.springframework.cloud.task.app:timestamp-task:jar:1.2.0.RELEASE --trigger.fixed-delay=5 | task-launcher-local" --deploy
 ```
 
 === TaskLaunchRequest-transform
@@ -384,7 +378,7 @@ Another option to start a task using the `task-launcher` would be to create a st
 https://github.com/spring-cloud/spring-cloud-stream-app-starters/tree/master/processor/spring-cloud-starter-stream-processor-tasklaunchrequest-transform[Tasklaunchrequest-transform] processor to translate a message payload to a TaskLaunchRequest.  For example:
 
 ```
-stream create task-stream --definition "http --port=9000 | tasklaunchrequest-transform --uri=<uriToJar> | task-launcher-local
+stream create task-stream --definition "http --port=9000 | tasklaunchrequest-transform --uri=maven://org.springframework.cloud.task.app:timestamp-task:jar:1.2.0.RELEASE | task-launcher-local"
 ```
 
 [[spring-cloud-dataflow-composed-tasks]]
