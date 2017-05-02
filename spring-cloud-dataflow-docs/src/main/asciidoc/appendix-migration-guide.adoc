@@ -125,7 +125,7 @@ _for instance, in Spring Cloud Data Flow:_
 ----
 stream create f --definition ":foo > transform --expression=payload+'-foo' | log" --deploy
 stream create b --definition ":bar > transform --expression=payload+'-bar' | log" --deploy
-stream create r --definition "http | router --expression=payload.contains('a')?':foo':':bar'" --deploy
+stream create r --definition "http | router --expression=payload.contains('a')?'foo':'bar'" --deploy
 ----
 
 === Batch to Tasks
