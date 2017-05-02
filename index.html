@@ -50,64 +50,73 @@ badges:
 
 {% capture billboard_description %}
 
-Spring Cloud Data Flow is a cloud-native orchestration service for composable microservice applications on modern runtimes. With Spring Cloud Data Flow, developers can create and orchestrate data pipelines for common use cases such as data ingest, real-time analytics, and data import/export.
+Spring Cloud Data Flow is a toolkit for building data integration and real-time data processing pipelines.
+
+<br> 
+
+Pipelines consist of [Spring Boot](http://projects.spring.io/spring-boot/) apps, built using the [Spring Cloud Stream](http://cloud.spring.io/spring-cloud-stream/) or [Spring Cloud Task](http://cloud.spring.io/spring-cloud-task/) microservice frameworks. This makes Spring Cloud Data Flow suitable for a range of data processing use cases, from import/export to event streaming and predictive analytics. 
 
 {% endcapture %}
 
 {% capture main_content %}
 
-Spring Cloud Data Flow is the cloud-native redesign of [Spring XD](http://projects.spring.io/spring-xd/) – a project that aimed to simplify the development of Big Data applications. The stream and batch modules from Spring XD are refactored as Spring Boot based [stream](http://cloud.spring.io/spring-cloud-stream-app-starters/) and [task/batch](http://cloud.spring.io/spring-cloud-task-app-starters/) microservice applications respectively. These applications are now autonomous deployment units and they can "natively" run in modern runtimes such as Cloud Foundry, Apache YARN, Apache Mesos, and Kubernetes.
+## Overview
 
-Spring Cloud Data Flow offers a collection of patterns and best practices for microservices-based distributed streaming and task/batch data pipelines. 
+The server uses [Spring Cloud Deployer](https://github.com/spring-cloud/spring-cloud-deployer/), to deploy pipelines composed of microservices on a modern runtime such as Cloud Foundry, Kubernetes, Apache Mesos or Apache YARN.
 
-## Features
+A selection of [stream](http://cloud.spring.io/spring-cloud-stream-app-starters/) and [task/batch](http://cloud.spring.io/spring-cloud-task-app-starters/) starter apps for various data integration and processing scenarios have been made available to facilitate learning and experimentation.
 
-* Develop using DSL, REST-APIs, Dashboard, and the drag-and-drop GUI - Flo
-* Create, unit-test, troubleshoot and manage microservice applications in isolation
-* Build data pipelines rapidly using the out-of-the-box [stream](http://cloud.spring.io/spring-cloud-stream-app-starters/) and [task/batch](http://cloud.spring.io/spring-cloud-task-app-starters/) applications
-* Consume microservice applications as maven or docker artifacts
-* Scale data pipelines without interrupting data flows
-* Orchestrate data-centric applications on a variety of modern runtime platforms including Cloud Foundry, Apache YARN, Apache Mesos, and Kubernetes
-* Take advantage of metrics, health checks, and the remote management of each microservice application
+<u>Custom</u> apps targeting different middleware or data services can be built using the familiar Spring Boot style programming model.
+
+A simple <u>pipeline DSL</u> makes it easy to specify which apps to deploy and how to connect outputs and inputs.
+
+The <u>dashboard</u> offers a graphical editor for building new pipelines interactively, as well as views of deployable apps and running apps with metrics.
+
+The Spring Could Data Flow server exposes a <u>REST API</u> for composing and deploying data pipelines. A separate <u>shell</u> makes it easy to work with the API from the command line.
 
 <span id="quick-start"></span>
 
 ## Quick Start
 
-**Step 1** - Download the Spring Cloud Data Flow's Local-Server and Shell über-jar's:
+<u><b>Step 1</b></u> - Download the Spring Cloud Data Flow's Local-Server
 
 ```
 wget http://repo.spring.io/release/org/springframework/cloud/spring-cloud-dataflow-server-local/1.1.4.RELEASE/spring-cloud-dataflow-server-local-1.1.4.RELEASE.jar
 ```
 
-```
-wget http://repo.spring.io/release/org/springframework/cloud/spring-cloud-dataflow-shell/1.1.4.RELEASE/spring-cloud-dataflow-shell-1.1.4.RELEASE.jar
-```
-
-**Step 2** - [Download and Start Kafka 0.10](https://kafka.apache.org/quickstart) [_used as messaging middleware_]
-
-**Step 3** - Launch the Local-Server
+<u><b>Step 2</b></u> - Launch the Local-Server
 ```
 java -jar spring-cloud-dataflow-server-local-1.1.4.RELEASE.jar
 ```
 
-**Step 4** - Launch Shell on the same machine where the Local-Server is running
-```
-java -jar spring-cloud-dataflow-shell-1.1.4.RELEASE.jar
-```
+<u><b>Step 3</b></u> - [Download and Start Apache Kafka 0.10](https://kafka.apache.org/quickstart) [_used as messaging middleware_]
 
-**Step 5** - Bulk import out-of-the-box applications from the Shell
 
-```
-dataflow:>app import --uri http://bit.ly/Avogadro-SR1-stream-applications-kafka-10-maven
-```
+<u><b>Step 4</b></u> - Launch Dashboard at [http://localhost:9393/dashboard](http://localhost:9393/dashboard) and Bulk Import Applications
 
-**Step 6** - Create ‘ticktock’ stream from the Shell
-```
-dataflow:>stream create ticktock --definition "time | log" --deploy
-```
+<img class="styled-image" src="img/bulk-import.png" alt="Bulk Import Apps" title="The Bulk Import Apps Page"/>
+<br>
+<br>
 
-Once the ‘ticktock’ stream is deployed, you'll notice similar to the following in Local-Server console [_refer to Step 3_]. For instance, the logs for `log` application will be at: `/var/folders/...../ticktock.log` directory.
+<u><b>Step 5</b></u> - Bulk Import out-of-the-box applications for Apache Kafka (example: http://bit.ly/Bacon-RELEASE-stream-applications-kafka-10-maven)
+<br>
+<br>
+(_latest bit.ly links [here](http://cloud.spring.io/spring-cloud-stream-app-starters/#stream-app-starters-and-spring-cloud-data-flow-)_)
+
+<img class="styled-image" src="img/register-apps.png" alt="Bulk Import and Register Apps" title="The Bulk Import and Register Apps Page"/>
+<br>
+<br>
+
+<u><b>Step 6</b></u> - Create and deploy ‘ticktock’ stream
+
+<img class="styled-image" src="img/create-ticktock-stream.png" alt="Create TickTock Stream" title="The Create Stream Flo Canvas"/>
+<br>
+<br>
+<img class="styled-image" src="img/deploy-ticktock-stream.png" alt="Deploy TickTock Stream" title="The Deploy Stream Flo Canvas"/>
+<br>
+<br>
+
+Once the ‘ticktock’ stream is deployed, you'll notice similar to the following in Local-Server console [_refer to Step 2_]. For instance, the logs for `log` application will be at: `/var/folders/...../ticktock.log` directory.
 
 ```
 2016-07-18 22:08:24.777  INFO 73058 --- [nio-9393-exec-9] o.s.c.d.spi.local.LocalAppDeployer       : deploying app ticktock.log instance 0
@@ -116,19 +125,22 @@ Once the ‘ticktock’ stream is deployed, you'll notice similar to the followi
    Logs will be in /var/folders/c3/ctx7_rns6x30tq7rb76wzqwr0000gp/T/spring-cloud-dataflow-5011521526937452211/ticktock-1468904905074/ticktock.time
 ```
 
-**Step 7** - Verify ‘ticktock’ logs
+<u><b>Step 7</b></u> - Verify ‘ticktock’ logs
 ```
 tail -f /var/folders/ ... /ticktock.log/stdout_0.log
 ```
 
-**Step 8** - Review Local-Server's Dashboard capabilities at: http://localhost:9393/dashboard
+<u><b>Step 8</b></u> - Setup [metrics infrastructure](http://docs.spring.io/spring-cloud-dataflow/docs/1.2.0.BUILD-SNAPSHOT/reference/htmlsingle/#_monitoring_deployed_applications) to manage and monitor real-time channel metrics
+
+<img class="styled-image" src="img/metrics-ticktock-stream.png" alt="Metrics TickTock Stream" title="The Create Stream Flo Canvas and Metrics"/>
+<br>
 
 ## Spring Cloud Data Flow Implementations
 
 | __Server Type__ | __Stable Release__ | __Milestone/Snapshot Release__ |
 | --------------- | ------------------ | -------------------- |
 | Local Server | [1.1.4.RELEASE](http://repo.spring.io/libs-release/org/springframework/cloud/spring-cloud-dataflow-server-local/1.1.4.RELEASE/spring-cloud-dataflow-server-local-1.1.4.RELEASE.jar)[[docs](http://docs.spring.io/spring-cloud-dataflow/docs/1.1.4.RELEASE/reference/htmlsingle/)] | [1.2.0.RC1](http://repo.spring.io/libs-snapshot/org/springframework/cloud/spring-cloud-dataflow-server-local/1.2.0.RC1/spring-cloud-dataflow-server-local-1.2.0.RC1.jar)[[docs](http://docs.spring.io/spring-cloud-dataflow/docs/1.2.0.RC1/reference/htmlsingle/)] |
-| Cloud Foundry Server | [1.1.1.RELEASE](http://repo.spring.io/libs-release/org/springframework/cloud/spring-cloud-dataflow-server-cloudfoundry/1.1.1.RELEASE/spring-cloud-dataflow-server-cloudfoundry-1.1.1.RELEASE.jar)[[docs](http://docs.spring.io/spring-cloud-dataflow-server-cloudfoundry/docs/1.1.1.RELEASE/reference/htmlsingle/)] | [1.2.0.M1](http://repo.spring.io/libs-snapshot/org/springframework/cloud/spring-cloud-dataflow-server-cloudfoundry/1.2.0.M1/spring-cloud-dataflow-server-cloudfoundry-1.2.0.M1.jar)[[docs](http://docs.spring.io/spring-cloud-dataflow-server-cloudfoundry/docs/1.2.0.M1/reference/htmlsingle/)] |
+| Cloud Foundry Server | [1.1.1.RELEASE](http://repo.spring.io/libs-release/org/springframework/cloud/spring-cloud-dataflow-server-cloudfoundry/1.1.1.RELEASE/spring-cloud-dataflow-server-cloudfoundry-1.1.1.RELEASE.jar)[[docs](http://docs.spring.io/spring-cloud-dataflow-server-cloudfoundry/docs/1.1.1.RELEASE/reference/htmlsingle/)] | [1.2.0.RC1](http://repo.spring.io/libs-snapshot/org/springframework/cloud/spring-cloud-dataflow-server-cloudfoundry/1.2.0.RC1/spring-cloud-dataflow-server-cloudfoundry-1.2.0.RC1.jar)[[docs](http://docs.spring.io/spring-cloud-dataflow-server-cloudfoundry/docs/1.2.0.RC1/reference/htmlsingle/)] |
 | Apache YARN Server | [1.1.1.RELEASE](http://repo.spring.io/libs-release/org/springframework/cloud/spring-cloud-dataflow-server-yarn/1.1.1.RELEASE/spring-cloud-dataflow-server-yarn-1.1.1.RELEASE.jar)[[docs](http://docs.spring.io/spring-cloud-dataflow-server-yarn/docs/1.1.1.RELEASE/reference/htmlsingle/)] | [1.2.0.RC1](http://repo.spring.io/libs-snapshot/org/springframework/cloud/spring-cloud-dataflow-server-yarn/1.2.0.RC1/spring-cloud-dataflow-server-yarn-1.2.0.RC1.jar)[[docs](http://docs.spring.io/spring-cloud-dataflow-server-yarn/docs/1.2.0.RC1/reference/htmlsingle/)]  |
 | Kubernetes Server | [1.1.2.RELEASE](http://repo.spring.io/libs-release/org/springframework/cloud/spring-cloud-dataflow-server-kubernetes/1.1.2.RELEASE/spring-cloud-dataflow-server-kubernetes-1.1.2.RELEASE.jar)[[docs](http://docs.spring.io/spring-cloud-dataflow-server-kubernetes/docs/1.1.2.RELEASE/reference/htmlsingle/)] | [1.2.0.RC1](http://repo.spring.io/libs-snapshot/org/springframework/cloud/spring-cloud-dataflow-server-kubernetes/1.2.0.RC1/spring-cloud-dataflow-server-kubernetes-1.2.0.RC1.jar)[[docs](http://docs.spring.io/spring-cloud-dataflow-server-kubernetes/docs/1.2.0.RC1/reference/htmlsingle/)] |
 | Apache Mesos Server | [1.0.0.RELEASE](http://repo.spring.io/libs-milestone/org/springframework/cloud/spring-cloud-dataflow-server-mesos/1.0.0.RELEASE/spring-cloud-dataflow-server-mesos-1.0.0.RELEASE.jar)[[docs](http://docs.spring.io/spring-cloud-dataflow-server-mesos/docs/1.0.0.RELEASE/reference/htmlsingle/)] | [1.1.0.BUILD-SNAPSHOT](https://github.com/spring-cloud/spring-cloud-dataflow-server-mesos#building)[[docs](http://docs.spring.io/spring-cloud-dataflow-server-mesos/docs/current-SNAPSHOT/reference/htmlsingle/)] |
@@ -185,35 +197,28 @@ Spring Cloud Data Flow builds upon several projects and the top-level building b
 <hr style="border-top: dotted 3px;"/>
 <table class="project-body">
   <tr>
-    <td width="20%">
+    <td width="25%">
       <a href="https://github.com/spring-cloud/spring-cloud-dataflow/">
         <div >
           REST-APIs / Shell / DSL
         </div>
       </a>
     </td>
-    <td width="20%">
+    <td width="25%">
       <a href="https://github.com/spring-cloud/spring-cloud-dataflow-ui/">
         <div>
           Dashboard
         </div>
       </a>
     </td>
-    <td width="20%">
-      <a href="https://github.com/spring-cloud/spring-cloud-dataflow-ui/">
-        <div>
-          Flo for Spring Cloud Data Flow
-        </div>
-      </a>
-    </td>
-    <td width="20%">
+    <td width="25%">
       <a href="https://github.com/spring-projects/spring-flo/">
         <div>
           Spring Flo
         </div>
       </a>
     </td>
-    <td width="20%">
+    <td width="25%">
       <a href="https://github.com/spring-cloud/spring-cloud-dataflow-metrics-collector">
         <div>
           Spring Cloud Data Flow Metrics Collector
@@ -222,7 +227,7 @@ Spring Cloud Data Flow builds upon several projects and the top-level building b
     </td>
   </tr>
   <tr>
-    <td width="100%" colspan="5">
+    <td width="100%" colspan="4">
       <a href="https://github.com/spring-cloud/spring-cloud-dataflow/">
         <div >
           Spring Cloud Data Flow - Core
@@ -365,19 +370,22 @@ Spring Cloud Data Flow builds upon several projects and the top-level building b
 * [Spring Cloud Stream Applications](http://cloud.spring.io/spring-cloud-stream-app-starters/)
 * [Spring Cloud Task](http://cloud.spring.io/spring-cloud-task/)
 * [Spring Cloud Task Applications](http://cloud.spring.io/spring-cloud-task-app-starters/)
-* [Spring Cloud Data Flow Samples](https://github.com/spring-cloud/spring-cloud-dataflow-samples)
 * [Spring Cloud Data Flow UI](https://github.com/spring-cloud/spring-cloud-dataflow-ui)
+* [Spring Cloud Data Flow Metrics Collector](https://github.com/spring-cloud/spring-cloud-dataflow-metrics-collector)
 * [Spring Cloud Data Flow Cloud Foundry](http://cloud.spring.io/spring-cloud-dataflow-server-cloudfoundry/)
 * [Spring Cloud Data Flow YARN](http://cloud.spring.io/spring-cloud-dataflow-server-yarn/)
 * [Spring Cloud Data Flow Mesos](http://cloud.spring.io/spring-cloud-dataflow-server-mesos/)
 * [Spring Cloud Data Flow Kubernetes](http://cloud.spring.io/spring-cloud-dataflow-server-kubernetes/)
+* [Spring Cloud Data Flow Samples](https://github.com/spring-cloud/spring-cloud-dataflow-samples)
 * [Spring XD]({{site.projects_site_url}}/spring-xd/)
 
-### Blogs / Videos
+### Videos
 
 * [Data Microservices with Spring Cloud Data Flow](https://www.youtube.com/watch?v=Z6_ttC33N0U)
-* [Introducing Spring Cloud Data Flow](https://blog.pivotal.io/pivotal-cloud-foundry/products/introducing-spring-cloud-data-flow)
-* [Pivoting Spring XD to Spring Cloud Data Flow](https://www.youtube.com/watch?v=L6p1pzGgadA&index=1&list=PL62pIycqXx-RTg0LipBLgpF0HmJMGQsEg)
+* [Data Microservices in the Cloud](https://www.youtube.com/watch?v=H-T-0WdZ3Sk&index=174&list=PLAdzTan_eSPQ1fuLSBhyB4eEZF7JQM0Mx)
+* [Cloud Native Streaming and Event-Driven Microservices](https://www.youtube.com/watch?v=s6mP4lpkxvg&app=desktop)
+* [Data Microservices with Spring Cloud Stream, Task, and Spring Cloud Data Flow](https://vimeo.com/172808512)
+
 
 {% endcapture %}
 
