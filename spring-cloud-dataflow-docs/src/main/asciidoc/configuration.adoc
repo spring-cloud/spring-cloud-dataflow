@@ -88,7 +88,7 @@ By default, the Data Flow server is unsecured and runs on an unencrypted HTTP co
 You can secure your REST endpoints, as well as the Data Flow Dashboard by enabling HTTPS
 and requiring clients to authenticate using either:
 
-* http://oauth.net/2/[OAuth 2.0]
+* https://oauth.net/2/[OAuth 2.0]
 * Traditional Authentication (Incl. Basic Authentication)
 
 .Authentication Options
@@ -664,7 +664,7 @@ For further information, please refer to http://docs.spring.io/spring-security/s
 [[configuration-security-oauth2]]
 === OAuth 2.0
 
-http://oauth.net/2/[OAuth 2.0] allows you to integrate Spring Cloud
+https://oauth.net/2/[OAuth 2.0] allows you to integrate Spring Cloud
 Data Flow into Single Sign On (SSO) environments. The following 3 OAuth2 Grant Types will be used:
 
 * _Authorization Code_ - Used for the GUI (Browser) integration. You will be redirected to your OAuth Service for authentication

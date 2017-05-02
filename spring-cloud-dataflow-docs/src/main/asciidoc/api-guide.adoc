@@ -245,23 +245,23 @@ return an empty response.
 NOTE: In order to learn more about the Metrics Collector, please also refer to chapter
 <<configuration-monitoring-deployed-applications>>
 
-===== Request structure
+==== Request structure
 
 For example, a typical request may look like:
 
 include::{snippets}/metrics-for-stream-apps-without-collector-documentation/get-metrics-without-collector-running/http-request.adoc[]
 
-===== Example request
+==== Example request
 
 include::{snippets}/metrics-for-stream-apps-without-collector-documentation/get-metrics-without-collector-running/curl-request.adoc[]
 
-===== Response structure
+==== Response structure
 
 This REST endpoint uses https://github.com/Netflix/Hystrix[Hystrix] via the
 https://github.com/spring-cloud/spring-cloud-netflix[Spring Cloud Netflix] project
 under the covers to make a proxy HTTP request to the Metrics Collector.
 
-===== Example response
+==== Example response
 
 Therefore, the endpoint will not generate an error in case the
 Metrics Collector is not running, but rather gracefully degrade and return an
