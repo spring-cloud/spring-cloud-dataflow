@@ -172,9 +172,9 @@ Additional messaging delivery guarantees are those provided by the underlying me
 == Analytics
 Spring Cloud Data Flow is aware of certain Sink applications that will write counter data to Redis and provides an REST endpoint to read counter data.  The types of counters supported are
 
-* link:https://github.com/spring-cloud/spring-cloud-stream-app-starters/tree/master/metrics/spring-cloud-starter-stream-sink-counter[Counter] - Counts the number of messages it receives, optionally storing counts in a separate store such as redis.
-* link:https://github.com/spring-cloud/spring-cloud-stream-app-starters/tree/master/metrics/spring-cloud-starter-stream-sink-field-value-counter[Field Value Counter] - Counts occurrences of unique values for a named field in a message payload
-* link:https://github.com/spring-cloud/spring-cloud-stream-app-starters/tree/master/metrics/spring-cloud-starter-stream-sink-aggregate-counter[Aggregate Counter] - Stores total counts but also retains the total count values for each minute, hour day and month.
+* link:https://github.com/spring-cloud-stream-app-starters/counter/tree/master/spring-cloud-starter-stream-sink-counter[Counter] - Counts the number of messages it receives, optionally storing counts in a separate store such as redis.
+* link:https://github.com/spring-cloud-stream-app-starters/field-value-counter/tree/master/spring-cloud-starter-stream-sink-field-value-counter[Field Value Counter] - Counts occurrences of unique values for a named field in a message payload
+* link:https://github.com/spring-cloud-stream-app-starters/aggregate-counter/tree/master/spring-cloud-starter-stream-sink-aggregate-counter[Aggregate Counter] - Stores total counts but also retains the total count values for each minute, hour day and month.
 
 It is important to note that the timestamp that is used in the aggregate counter can come from a field in the message itself so that out of order messages are properly accounted.
 

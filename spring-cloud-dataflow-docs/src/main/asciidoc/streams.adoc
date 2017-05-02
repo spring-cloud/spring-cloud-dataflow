@@ -59,8 +59,8 @@ For example, if you would like to register the snapshot versions of the `http` a
 applications built with the RabbitMQ binder, you could do the following:
 
 ```
-dataflow:>app register --name http --type source --uri maven://org.springframework.cloud.stream.app:http-source-rabbit:1.1.2.BUILD-SNAPSHOT
-dataflow:>app register --name log --type sink --uri maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.1.2.BUILD-SNAPSHOT
+dataflow:>app register --name http --type source --uri maven://org.springframework.cloud.stream.app:http-source-rabbit:1.2.0.RELEASE
+dataflow:>app register --name log --type sink --uri maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.2.0.RELEASE
 ```
 
 If you would like to register multiple apps at one time, you can store them in a properties file
@@ -70,8 +70,8 @@ For example, if you would like to register the snapshot versions of the `http` a
 applications built with the RabbitMQ binder, you could have the following in a properties file [_eg: stream-apps.properties_]:
 
 ```
-source.http=maven://org.springframework.cloud.stream.app:http-source-rabbit:1.1.2.BUILD-SNAPSHOT
-sink.log=maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.1.2.BUILD-SNAPSHOT
+source.http=maven://org.springframework.cloud.stream.app:http-source-rabbit:1.2.1.BUILD-SNAPSHOT
+sink.log=maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.2.1.BUILD-SNAPSHOT
 ```
 
 Then to import the apps in bulk, use the `app import` command and provide the location of the properties file via `--uri`:
@@ -91,27 +91,27 @@ List of available Stream Application Starters:
 |Artifact Type |Stable Release |SNAPSHOT Release
 
 |RabbitMQ + Maven
-|http://bit.ly/Avogadro-SR1-stream-applications-rabbit-maven
+|http://bit.ly/Bacon-RELEASE-stream-applications-rabbit-maven
 |http://bit.ly/Bacon-BUILD-SNAPSHOT-stream-applications-rabbit-maven
 
 |RabbitMQ + Docker
-|http://bit.ly/Avogadro-SR1-stream-applications-rabbit-docker
+|http://bit.ly/Bacon-RELEASE-stream-applications-rabbit-docker
 |N/A
 
 |Kafka 0.9 + Maven
-|http://bit.ly/Avogadro-SR1-stream-applications-kafka-09-maven
+|http://bit.ly/Bacon-RELEASE-stream-applications-kafka-09-maven
 |http://bit.ly/Bacon-BUILD-SNAPSHOT-stream-applications-kafka-09-maven
 
 |Kafka 0.9 + Docker
-|http://bit.ly/Avogadro-SR1-stream-applications-kafka-09-docker
+|http://bit.ly/Bacon-RELEASE-stream-applications-kafka-09-docker
 |N/A
 
 |Kafka 0.10 + Maven
-|http://bit.ly/Avogadro-SR1-stream-applications-kafka-10-maven
+|http://bit.ly/Bacon-RELEASE-stream-applications-kafka-10-maven
 |http://bit.ly/Bacon-BUILD-SNAPSHOT-stream-applications-kafka-10-maven
 
 |Kafka 0.10 + Docker
-|http://bit.ly/Avogadro-SR1-stream-applications-kafka-10-docker
+|http://bit.ly/Bacon-RELEASE-stream-applications-kafka-10-docker
 |N/A
 |======================
 
@@ -122,11 +122,11 @@ List of available Task Application Starters:
 |Artifact Type |Stable Release |SNAPSHOT Release
 
 |Maven
-|http://bit.ly/Addison-GA-task-applications-maven
+|http://bit.ly/Belmont-GA-task-applications-maven
 |http://bit.ly/Belmont-BUILD-SNAPSHOT-task-applications-maven
 
 |Docker
-|http://bit.ly/Addison-GA-task-applications-docker
+|http://bit.ly/Belmont-GA-task-applications-docker
 |N/A
 |======================
 
@@ -138,7 +138,7 @@ As an example, if you would like to register all out-of-the-box stream applicati
 the following command.
 
 ```
-dataflow:>app import --uri http://bit.ly/Avogadro-SR1-stream-applications-rabbit-maven
+dataflow:>app import --uri http://bit.ly/Bacon-RELEASE-stream-applications-rabbit-maven
 ```
 
 You can also pass the `--local` option (which is `true` by default) to indicate whether the
@@ -210,7 +210,7 @@ Here is the contents of such an artifact, for the canonical `log` sink:
 
 [source, bash]
 ----
-$ jar tvf log-sink-rabbit-1.2.0.BUILD-SNAPSHOT-metadata.jar
+$ jar tvf log-sink-rabbit-1.2.1.BUILD-SNAPSHOT-metadata.jar
 373848 META-INF/spring-configuration-metadata.json
    174 META-INF/spring-configuration-metadata-whitelist.properties
 ----
@@ -264,8 +264,8 @@ When registering a single app _via_ `app register`, you can use the optional `--
 [source]
 ----
 dataflow:>app register --name log --type sink
-    --uri maven://org.springframework.cloud.stream.app:log-sink-kafka-10:1.2.0.RELEASE
-    --metadata-uri=maven://org.springframework.cloud.stream.app:log-sink-kafka-10:jar:metadata:1.2.0.BUILD-SNAPSHOT
+    --uri maven://org.springframework.cloud.stream.app:log-sink-kafka-10:1.2.1.BUILD-SNAPSHOT
+    --metadata-uri=maven://org.springframework.cloud.stream.app:log-sink-kafka-10:jar:metadata:1.2.1.BUILD-SNAPSHOT
 ----
 
 When registering several files using the `app import` command, the file should contain a `<type>.<name>.metadata` line
@@ -278,7 +278,7 @@ it _via_ `http://` or `file://` would be equally possible).
 ----
 ...
 source.http=docker:springcloudstream/http-source-rabbit:latest
-source.http.metadata=maven://org.springframework.cloud.stream.app:http-source-rabbit:jar:metadata:1.2.0.BUILD-SNAPSHOT
+source.http.metadata=maven://org.springframework.cloud.stream.app:http-source-rabbit:jar:metadata:1.2.1.BUILD-SNAPSHOT
 ...
 ----
 
@@ -313,7 +313,7 @@ The plugin is necesary for creating the executable jar that will be registered w
 Spring Initialzr will include the plugin in the generated POM.
 ====
 
-Once a custom application has been created, it can be registered as described in <<spring-cloud-dataflow-register-appss>>.
+Once a custom application has been created, it can be registered as described in <<spring-cloud-dataflow-register-apps>>.
 
 
 [[spring-cloud-dataflow-create-stream]]
