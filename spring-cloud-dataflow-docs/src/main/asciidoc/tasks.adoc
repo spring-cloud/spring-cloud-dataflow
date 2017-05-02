@@ -352,9 +352,9 @@ The default Task/Batch event and destination names on the broker are enumerated 
 
 You can launch a task from a stream by using one of the available `task-launcher` sinks. Currently the platforms supported
 via the `task-launcher` sinks are
-https://github.com/spring-cloud/spring-cloud-stream-app-starters/tree/master/tasklauncher/spring-cloud-starter-stream-sink-tasklauncher-local[local],
-https://github.com/spring-cloud/spring-cloud-stream-app-starters/tree/master/tasklauncher/spring-cloud-starter-stream-sink-tasklauncher-cloudfoundry[Cloud Foundry], and
-https://github.com/spring-cloud/spring-cloud-stream-app-starters/tree/master/tasklauncher/spring-cloud-starter-stream-sink-tasklauncher-yarn[Yarn].
+https://github.com/spring-cloud-stream-app-starters/tasklauncher-local[local],
+https://github.com/spring-cloud-stream-app-starters/tasklauncher-cloudfoundry[Cloud Foundry], and
+https://github.com/spring-cloud-stream-app-starters/tasklauncher-yarn[Yarn].
 
 NOTE: `task-launcher-local` is meant for development purposes only.
 
@@ -367,16 +367,18 @@ The `task-launcher-local` can be added to the available sinks by executing the a
 ```
 app register --name task-launcher-local --type sink --uri maven://org.springframework.cloud.stream.app:task-launcher-local-sink-rabbit:jar:1.2.0.RELEASE
 ```
+The remote maven repositories need to be configured explicitly unless the task artifacts being launched are in the local repository.
+For Example:
+```
+stream create task-stream2 --definition "http --port=9000 | tasklaunchrequest-transform --uri=maven://org.springframework.cloud.task.app:timestamp-task:jar:1.2.0.RC1 | task-launcher-local --maven.remote-repositories.repo1.url=http://repo.spring.io/libs-snapshot"
+```
+In the example above we see that we have configured `maven.remote-repositories.repo1.url` to use the `http://repo.spring.io/libs-snapshot` repository.
+
 
 === TriggerTask
 
 One way to launch a task using the `task-launcher` is to use the `triggertask` source. The `triggertask` source
-will emit a message with a TaskLaunchRequest object containing the required launch information. An example of this
-would be to launch the timestamp task once every 5 seconds, the stream to implement this would look like:
-
-```
-stream create foo --definition "triggertask --triggertask.uri=maven://org.springframework.cloud.task.app:timestamp-task:jar:1.2.0.RELEASE --trigger.fixed-delay=5 | task-launcher-local" --deploy
-```
+will emit a message with a TaskLaunchRequest object containing the required launch information.
 
 The `triggertask` can be added to the available sources by executing the app register command as follows (for the Rabbit Binder):
 
@@ -384,19 +386,28 @@ The `triggertask` can be added to the available sources by executing the app reg
 app register --type source --name triggertask --uri maven://org.springframework.cloud.stream.app:triggertask-source-rabbit:1.2.0.RELEASE
 ```
 
+An example of the triggertask
+would be to launch the timestamp task once every 5 seconds, the stream to implement this would look like:
+
+```
+stream create foo --definition "triggertask --triggertask.uri=maven://org.springframework.cloud.task.app:timestamp-task:jar:1.2.0.RELEASE --trigger.fixed-delay=5 | task-launcher-local --maven.remote-repositories.repo1.url=http://repo.spring.io/libs-snapshot" --deploy
+```
+
 === TaskLaunchRequest-transform
 
 Another option to start a task using the `task-launcher` would be to create a stream using the
-https://github.com/spring-cloud/spring-cloud-stream-app-starters/tree/master/processor/spring-cloud-starter-stream-processor-tasklaunchrequest-transform[Tasklaunchrequest-transform] processor to translate a message payload to a TaskLaunchRequest.  For example:
-
-```
-stream create task-stream --definition "http --port=9000 | tasklaunchrequest-transform --uri=maven://org.springframework.cloud.task.app:timestamp-task:jar:1.2.0.RELEASE | task-launcher-local"
-```
+https://github.com/spring-cloud/spring-cloud-stream-app-starters/tree/master/processor/spring-cloud-starter-stream-processor-tasklaunchrequest-transform[Tasklaunchrequest-transform] processor to translate a message payload to a TaskLaunchRequest.
 
 The `tasklaunchrequest-transform` can be added to the available processors by executing the app register command as follows (for the Rabbit Binder):
 
 ```
 app register --type processor --name tasklaunchrequest-transform --uri maven://org.springframework.cloud.stream.app:tasklaunchrequest-transform-processor-rabbit:1.2.0.RELEASE
+```
+
+An example of using the tasklaunchrequest-transform is as follows:
+
+```
+stream create task-stream --definition "http --port=9000 | tasklaunchrequest-transform --uri=maven://org.springframework.cloud.task.app:timestamp-task:jar:1.2.0.RELEASE | task-launcher-local --maven.remote-repositories.repo1.url=http://repo.spring.io/libs-snapshot"
 ```
 
 [[spring-cloud-dataflow-composed-tasks]]
