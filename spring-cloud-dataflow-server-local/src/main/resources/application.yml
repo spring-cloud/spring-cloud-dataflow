@@ -22,6 +22,7 @@ info:
 #  user:
 #    name: your-username
 #    password: your-password
+#    role: VIEW, CREATE, MANAGE
 
 # Oauth 2 support:
 
