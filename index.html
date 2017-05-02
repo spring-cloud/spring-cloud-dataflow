@@ -52,27 +52,29 @@ badges:
 
 Spring Cloud Data Flow is a toolkit for building data integration and real-time data processing pipelines.
 
-<br> 
+<br>
 
-Pipelines consist of [Spring Boot](http://projects.spring.io/spring-boot/) apps, built using the [Spring Cloud Stream](http://cloud.spring.io/spring-cloud-stream/) or [Spring Cloud Task](http://cloud.spring.io/spring-cloud-task/) microservice frameworks. This makes Spring Cloud Data Flow suitable for a range of data processing use cases, from import/export to event streaming and predictive analytics. 
+Pipelines consist of [Spring Boot](http://projects.spring.io/spring-boot/) apps, built using the [Spring Cloud Stream](http://cloud.spring.io/spring-cloud-stream/) or [Spring Cloud Task](http://cloud.spring.io/spring-cloud-task/) microservice frameworks. This makes Spring Cloud Data Flow suitable for a range of data processing use cases, from import/export to event streaming and predictive analytics.
 
 {% endcapture %}
 
 {% capture main_content %}
 
+<span id="overview"></span>
+
 ## Overview
 
-The server uses [Spring Cloud Deployer](https://github.com/spring-cloud/spring-cloud-deployer/), to deploy pipelines composed of microservices on a modern runtime such as Cloud Foundry, Kubernetes, Apache Mesos or Apache YARN.
+The Spring Cloud Data Flow server uses [Spring Cloud Deployer](https://github.com/spring-cloud/spring-cloud-deployer/), to deploy pipelines composed of microservices on a modern runtime such as Cloud Foundry, Kubernetes, Apache Mesos or Apache YARN.
 
 A selection of [stream](http://cloud.spring.io/spring-cloud-stream-app-starters/) and [task/batch](http://cloud.spring.io/spring-cloud-task-app-starters/) starter apps for various data integration and processing scenarios have been made available to facilitate learning and experimentation.
 
-<u>Custom</u> apps targeting different middleware or data services can be built using the familiar Spring Boot style programming model.
+[Custom](http://docs.spring.io/spring-cloud-dataflow/docs/current-SNAPSHOT/reference/htmlsingle/#custom-applications) stream and task applications, targeting different middleware or data services, can be built using the familiar Spring Boot style programming model.
 
-A simple <u>pipeline DSL</u> makes it easy to specify which apps to deploy and how to connect outputs and inputs.
+A simple [stream pipeline DSL](http://docs.spring.io/spring-cloud-dataflow/docs/current-SNAPSHOT/reference/htmlsingle/#_stream_dsl) makes it easy to specify which apps to deploy and how to connect outputs and inputs. A new [composed task DSL](http://docs.spring.io/spring-cloud-dataflow/docs/current-SNAPSHOT/reference/htmlsingle/#_composed_task_dsl) was added in v1.2.
 
-The <u>dashboard</u> offers a graphical editor for building new pipelines interactively, as well as views of deployable apps and running apps with metrics.
+The [dashboard](http://docs.spring.io/spring-cloud-dataflow/docs/current-SNAPSHOT/reference/htmlsingle/#dashboard-introduction) offers a graphical editor for building new pipelines interactively, as well as views of deployable apps and running apps with metrics.
 
-The Spring Could Data Flow server exposes a <u>REST API</u> for composing and deploying data pipelines. A separate <u>shell</u> makes it easy to work with the API from the command line.
+The Spring Could Data Flow server exposes a [REST API](http://docs.spring.io/spring-cloud-dataflow/docs/current-SNAPSHOT/reference/htmlsingle/#api-guide-overview) for composing and deploying data pipelines. A separate <u>shell</u> makes it easy to work with the API from the command line.
 
 <span id="quick-start"></span>
 
@@ -151,7 +153,7 @@ tail -f /var/folders/ ... /ticktock.log/stdout_0.log
 
 [Spring Cloud Data Flow for Red Hat OpenShift](https://github.com/donovanmuller/spring-cloud-dataflow-server-openshift)
 
-## Building Blocks of Spring Cloud Data Flow 
+## Building Blocks of Spring Cloud Data Flow
 
 Spring Cloud Data Flow builds upon several projects and the top-level building blocks of the ecosystem are listed in the following visual representation. Each project represents a core capability and they evolve in isolation, with separate release cadences - follow the links to find more details about each project.
 
