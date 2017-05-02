@@ -196,7 +196,7 @@ endif::omit-tasks-docs[]
 [[arch-data-flow-server-endpoints]]
 === Endpoints
 
-The Data Flow Server uses an embedded servlet container and exposes REST endpoints for creating, deploying, undeploying, and destroying streams and tasks, querying runtime state, analytics, and the like. The Data Flow Server is implemented using Spring’s MVC framework and the link:https://github.com/SpringSource/spring-hateoas[Spring HATEOAS] library to create REST representations that follow the HATEOAS principle.
+The Data Flow Server uses an embedded servlet container and exposes REST endpoints for creating, deploying, undeploying, and destroying streams and tasks, querying runtime state, analytics, and the like. The Data Flow Server is implemented using Spring’s MVC framework and the link:https://github.com/spring-projects/spring-hateoas[Spring HATEOAS] library to create REST representations that follow the HATEOAS principle.
 
 .The Spring Cloud Data Flow Server
 image::{dataflow-asciidoc}/images/dataflow-server-arch.png[The Spring Cloud Data Flow Server Architecture, scaledwidth="100%"]

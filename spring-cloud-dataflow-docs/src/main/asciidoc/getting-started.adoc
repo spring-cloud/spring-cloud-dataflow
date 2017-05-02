@@ -17,9 +17,9 @@ You need Java installed (Java 8 or later), and to build, you need to have Maven 
 
 You need to have an RDBMS for storing stream, task and app states in the database. The `local` Data Flow server by default uses embedded H2 database for this.
 
-You also need to have link:http://redis.io[Redis] running if you are running any streams that involve analytics applications. Redis may also be required run the unit/integration tests.
+You also need to have link:https://redis.io[Redis] running if you are running any streams that involve analytics applications. Redis may also be required run the unit/integration tests.
 
-For the deployed streams and tasks to communicate, either link:http://rabbitmq.com[RabbitMQ] or link:http://kafka.apache.org[Kafka] needs to be installed.
+For the deployed streams and tasks to communicate, either link:http://www.rabbitmq.com[RabbitMQ] or link:http://kafka.apache.org[Kafka] needs to be installed.
 
 [[getting-started-deploying-spring-cloud-dataflow]]
 == Deploying Spring Cloud Data Flow Local Server
@@ -167,7 +167,7 @@ dataflow:> stream create --name ticktock --definition "time --server.port=9000 |
 dataflow:> stream deploy --name ticktock --properties "deployer.time.local.javaOpts=-Xmx2048m -Dtest=foo"
 ----
 
-As a convenience you can set the property `deployer.memory` to set the Java option `-Xmx`.  So for example, 
+As a convenience you can set the property `deployer.memory` to set the Java option `-Xmx`.  So for example,
 
 [source,bash]
 ----
