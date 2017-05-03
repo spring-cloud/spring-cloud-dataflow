@@ -80,6 +80,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @author Patrick Peralta
  * @author Ilayaperumal Gopinathan
  * @author Gunnar Hillert
+ * @author Oleg Zhurakousky
  */
 @RestController
 @RequestMapping("/streams/definitions")
@@ -392,7 +393,13 @@ public class StreamDefinitionController {
 
 		@Override
 		public StreamDefinitionResource toResource(StreamDefinition stream) {
-			return createResourceWithId(stream.getName(), stream);
+			try {
+				return createResourceWithId(stream.getName(), stream);
+			}
+			catch (IllegalStateException e) {
+				logger.warn("Failed to create StreamDefinitionResource. " + e.getMessage());
+			}
+			return null;
 		}
 
 		@Override
