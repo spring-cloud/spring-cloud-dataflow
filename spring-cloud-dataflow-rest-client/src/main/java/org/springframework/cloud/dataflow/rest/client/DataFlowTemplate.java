@@ -163,8 +163,13 @@ public class DataFlowTemplate implements DataFlowOperations {
 		final RootResource resourceSupport = restTemplate.getForObject(baseURI, RootResource.class);
 
 		if (resourceSupport != null) {
-			String serverRevision = resourceSupport.getApiRevision() != null
-					? resourceSupport.getApiRevision().toString() : "[unknown]";
+			if (resourceSupport.getApiRevision() == null) {
+				throw new IllegalStateException("Incompatible version of Data Flow server detected.\n"
+								+ "Follow instructions in the documentation for the version of the server you are "
+								+ "using to download a compatible version of the shell.\n"
+								+ "Documentation can be accessed at http://cloud.spring.io/spring-cloud-dataflow/");
+			}
+			String serverRevision = resourceSupport.getApiRevision().toString();
 			if (!String.valueOf(Version.REVISION).equals(serverRevision)) {
 				String downloadURL = getLink(resourceSupport, "dashboard").getHref() + "#about";
 				throw new IllegalStateException(String.format(
