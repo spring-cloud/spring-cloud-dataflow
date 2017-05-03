@@ -39,8 +39,8 @@ import static org.springframework.restdocs.operation.preprocess.Preprocessors.pr
 public abstract class BaseDocumentation {
 
 	@ClassRule
-	public final static LocalDataflowResource springDataflowServer =
-			new LocalDataflowResource("classpath:rest-docs-config.yml");
+	public final static LocalDataflowResource springDataflowServer = new LocalDataflowResource(
+			"classpath:rest-docs-config.yml");
 
 	@Before
 	public void setupMocks() {
@@ -60,6 +60,7 @@ public abstract class BaseDocumentation {
 		this.documentationHandler = document("{class-name}/{method-name}", preprocessResponse(prettyPrint()));
 
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(context)
-				.apply(documentationConfiguration(this.restDocumentation)).alwaysDo(this.documentationHandler).build();
+				.apply(documentationConfiguration(this.restDocumentation).uris().withPort(9393))
+				.alwaysDo(this.documentationHandler).build();
 	}
 }
