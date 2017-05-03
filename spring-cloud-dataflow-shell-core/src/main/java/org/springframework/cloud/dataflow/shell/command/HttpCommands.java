@@ -60,7 +60,7 @@ import org.springframework.web.client.RestTemplate;
 @Component
 public class HttpCommands implements CommandMarker {
 
-	private static final String DEFAULT_MEDIA_TYPE = MediaType.TEXT_PLAIN_VALUE + "; Charset=UTF-8";
+	private static final String DEFAULT_MEDIA_TYPE = MediaType.TEXT_PLAIN_VALUE;
 
 	private static final String POST_HTTPSOURCE = "http post";
 
