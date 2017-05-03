@@ -80,28 +80,26 @@ The Spring Could Data Flow server exposes a [REST API](http://docs.spring.io/spr
 
 ## Quick Start
 
-<u><b>Step 1</b></u> - Download the Spring Cloud Data Flow's Local-Server
+<u><b>Step 1</b></u> - Download the Spring Cloud Data Flow Local-Server.<br>
+(_Mac users can use 'curl -O' instead of wget_)
 
 ```
 wget http://repo.spring.io/release/org/springframework/cloud/spring-cloud-dataflow-server-local/1.1.4.RELEASE/spring-cloud-dataflow-server-local-1.1.4.RELEASE.jar
 ```
 
-<u><b>Step 2</b></u> - Launch the Local-Server
+<br>
+<u><b>Step 2</b></u> - Launch the Local-Server.
 ```
 java -jar spring-cloud-dataflow-server-local-1.1.4.RELEASE.jar
 ```
 
-<u><b>Step 3</b></u> - [Download and Start Apache Kafka 0.10](https://kafka.apache.org/quickstart) [_used as messaging middleware_]
-
-
-<u><b>Step 4</b></u> - Launch Dashboard at [http://localhost:9393/dashboard](http://localhost:9393/dashboard) and Bulk Import Applications
-
-<img class="styled-image" src="img/bulk-import.png" alt="Bulk Import Apps" title="The Bulk Import Apps Page"/>
 <br>
-<br>
+<u><b>Step 3</b></u> - [Download and Start Apache Kafka 0.10](https://kafka.apache.org/quickstart) as messaging middleware.<br>
+_Mac homebrew users can 'brew install kafka'_.
 
-<u><b>Step 5</b></u> - Bulk Import out-of-the-box applications for Apache Kafka (example: http://bit.ly/Bacon-RELEASE-stream-applications-kafka-10-maven)
-<br>
+<u><b>Step 4</b></u> - Open the dashboard at [http://localhost:9393/dashboard](http://localhost:9393/dashboard).
+
+<u><b>Step 5</b></u> - Bulk Import out-of-the-box stream applications for Apache Kafka using the URI 'http://bit.ly/Bacon-RELEASE-stream-applications-kafka-10-maven'.
 <br>
 (_latest bit.ly links [here](http://cloud.spring.io/spring-cloud-stream-app-starters/#stream-app-starters-and-spring-cloud-data-flow-)_)
 
@@ -109,50 +107,41 @@ java -jar spring-cloud-dataflow-server-local-1.1.4.RELEASE.jar
 <br>
 <br>
 
-<u><b>Step 6</b></u> - Create and deploy ‘ticktock’ stream
+<u><b>Step 6</b></u> - Use 'Create Stream' under STREAMS to define and deploy a stream `time | log` called 'ticktock'.
 
 <img class="styled-image" src="img/create-ticktock-stream.png" alt="Create TickTock Stream" title="The Create Stream Flo Canvas"/>
 <br>
 <br>
 <img class="styled-image" src="img/deploy-ticktock-stream.png" alt="Deploy TickTock Stream" title="The Deploy Stream Flo Canvas"/>
 <br>
+
+Once the ‘ticktock’ stream is deployed, two running stream apps will appear under RUNTIME. Click on 'ticktock.log' to determine the location of the stdout log file.
+
+<img class="styled-image" src="img/ticktock-log-runtime.png" alt="Deploy TickTock Stream" title="The Deploy Stream Flo Canvas"/>
 <br>
 
-Once the ‘ticktock’ stream is deployed, you'll notice similar to the following in Local-Server console [_refer to Step 2_]. For instance, the logs for `log` application will be at: `/var/folders/...../ticktock.log` directory.
-
-```
-2016-07-18 22:08:24.777  INFO 73058 --- [nio-9393-exec-9] o.s.c.d.spi.local.LocalAppDeployer       : deploying app ticktock.log instance 0
-   Logs will be in /var/folders/c3/ctx7_rns6x30tq7rb76wzqwr0000gp/T/spring-cloud-dataflow-5011521526937452211/ticktock-1468904904769/ticktock.log
-2016-07-18 22:08:25.081  INFO 73058 --- [nio-9393-exec-9] o.s.c.d.spi.local.LocalAppDeployer       : deploying app ticktock.time instance 0
-   Logs will be in /var/folders/c3/ctx7_rns6x30tq7rb76wzqwr0000gp/T/spring-cloud-dataflow-5011521526937452211/ticktock-1468904905074/ticktock.time
-```
-
-<u><b>Step 7</b></u> - Verify ‘ticktock’ logs
+<u><b>Step 7</b></u> - Verify that events are being written to the ticktock log every second.
 ```
 tail -f /var/folders/ ... /ticktock.log/stdout_0.log
 ```
-
-<u><b>Step 8</b></u> - Setup [metrics infrastructure](http://docs.spring.io/spring-cloud-dataflow/docs/1.2.0.BUILD-SNAPSHOT/reference/htmlsingle/#_monitoring_deployed_applications) to manage and monitor real-time channel metrics
-
-<img class="styled-image" src="img/metrics-ticktock-stream.png" alt="Metrics TickTock Stream" title="The Create Stream Flo Canvas and Metrics"/>
 <br>
 
 ## Spring Cloud Data Flow Implementations
 
-| __Server Type__ | __Stable Release__ | __Milestone/Snapshot Release__ |
-| --------------- | ------------------ | -------------------- |
-| Local Server | [1.1.4.RELEASE](http://repo.spring.io/libs-release/org/springframework/cloud/spring-cloud-dataflow-server-local/1.1.4.RELEASE/spring-cloud-dataflow-server-local-1.1.4.RELEASE.jar)[[docs](http://docs.spring.io/spring-cloud-dataflow/docs/1.1.4.RELEASE/reference/htmlsingle/)] | [1.2.0.RC1](http://repo.spring.io/libs-snapshot/org/springframework/cloud/spring-cloud-dataflow-server-local/1.2.0.RC1/spring-cloud-dataflow-server-local-1.2.0.RC1.jar)[[docs](http://docs.spring.io/spring-cloud-dataflow/docs/1.2.0.RC1/reference/htmlsingle/)] |
+| __Server Type__      | __Stable Release__                                                                                                                                                                                                                                                                                                  | __Milestone/Snapshot Release__                                                                                                                                                                                                                                                                       |
+|:---------------------|:--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Local Server         | [1.1.4.RELEASE](http://repo.spring.io/libs-release/org/springframework/cloud/spring-cloud-dataflow-server-local/1.1.4.RELEASE/spring-cloud-dataflow-server-local-1.1.4.RELEASE.jar)[[docs](http://docs.spring.io/spring-cloud-dataflow/docs/1.1.4.RELEASE/reference/htmlsingle/)]                                   | [1.2.0.RC1](http://repo.spring.io/libs-snapshot/org/springframework/cloud/spring-cloud-dataflow-server-local/1.2.0.RC1/spring-cloud-dataflow-server-local-1.2.0.RC1.jar)[[docs](http://docs.spring.io/spring-cloud-dataflow/docs/1.2.0.RC1/reference/htmlsingle/)]                                   |
 | Cloud Foundry Server | [1.1.1.RELEASE](http://repo.spring.io/libs-release/org/springframework/cloud/spring-cloud-dataflow-server-cloudfoundry/1.1.1.RELEASE/spring-cloud-dataflow-server-cloudfoundry-1.1.1.RELEASE.jar)[[docs](http://docs.spring.io/spring-cloud-dataflow-server-cloudfoundry/docs/1.1.1.RELEASE/reference/htmlsingle/)] | [1.2.0.RC1](http://repo.spring.io/libs-snapshot/org/springframework/cloud/spring-cloud-dataflow-server-cloudfoundry/1.2.0.RC1/spring-cloud-dataflow-server-cloudfoundry-1.2.0.RC1.jar)[[docs](http://docs.spring.io/spring-cloud-dataflow-server-cloudfoundry/docs/1.2.0.RC1/reference/htmlsingle/)] |
-| Apache YARN Server | [1.1.1.RELEASE](http://repo.spring.io/libs-release/org/springframework/cloud/spring-cloud-dataflow-server-yarn/1.1.1.RELEASE/spring-cloud-dataflow-server-yarn-1.1.1.RELEASE.jar)[[docs](http://docs.spring.io/spring-cloud-dataflow-server-yarn/docs/1.1.1.RELEASE/reference/htmlsingle/)] | [1.2.0.RC1](http://repo.spring.io/libs-snapshot/org/springframework/cloud/spring-cloud-dataflow-server-yarn/1.2.0.RC1/spring-cloud-dataflow-server-yarn-1.2.0.RC1.jar)[[docs](http://docs.spring.io/spring-cloud-dataflow-server-yarn/docs/1.2.0.RC1/reference/htmlsingle/)]  |
-| Kubernetes Server | [1.1.2.RELEASE](http://repo.spring.io/libs-release/org/springframework/cloud/spring-cloud-dataflow-server-kubernetes/1.1.2.RELEASE/spring-cloud-dataflow-server-kubernetes-1.1.2.RELEASE.jar)[[docs](http://docs.spring.io/spring-cloud-dataflow-server-kubernetes/docs/1.1.2.RELEASE/reference/htmlsingle/)] | [1.2.0.RC1](http://repo.spring.io/libs-snapshot/org/springframework/cloud/spring-cloud-dataflow-server-kubernetes/1.2.0.RC1/spring-cloud-dataflow-server-kubernetes-1.2.0.RC1.jar)[[docs](http://docs.spring.io/spring-cloud-dataflow-server-kubernetes/docs/1.2.0.RC1/reference/htmlsingle/)] |
-| Apache Mesos Server | [1.0.0.RELEASE](http://repo.spring.io/libs-milestone/org/springframework/cloud/spring-cloud-dataflow-server-mesos/1.0.0.RELEASE/spring-cloud-dataflow-server-mesos-1.0.0.RELEASE.jar)[[docs](http://docs.spring.io/spring-cloud-dataflow-server-mesos/docs/1.0.0.RELEASE/reference/htmlsingle/)] | [1.1.0.BUILD-SNAPSHOT](https://github.com/spring-cloud/spring-cloud-dataflow-server-mesos#building)[[docs](http://docs.spring.io/spring-cloud-dataflow-server-mesos/docs/current-SNAPSHOT/reference/htmlsingle/)] |
+| Apache YARN Server   | [1.1.1.RELEASE](http://repo.spring.io/libs-release/org/springframework/cloud/spring-cloud-dataflow-server-yarn/1.1.1.RELEASE/spring-cloud-dataflow-server-yarn-1.1.1.RELEASE.jar)[[docs](http://docs.spring.io/spring-cloud-dataflow-server-yarn/docs/1.1.1.RELEASE/reference/htmlsingle/)]                         | [1.2.0.RC1](http://repo.spring.io/libs-snapshot/org/springframework/cloud/spring-cloud-dataflow-server-yarn/1.2.0.RC1/spring-cloud-dataflow-server-yarn-1.2.0.RC1.jar)[[docs](http://docs.spring.io/spring-cloud-dataflow-server-yarn/docs/1.2.0.RC1/reference/htmlsingle/)]                         |
+| Kubernetes Server    | [1.1.2.RELEASE](http://repo.spring.io/libs-release/org/springframework/cloud/spring-cloud-dataflow-server-kubernetes/1.1.2.RELEASE/spring-cloud-dataflow-server-kubernetes-1.1.2.RELEASE.jar)[[docs](http://docs.spring.io/spring-cloud-dataflow-server-kubernetes/docs/1.1.2.RELEASE/reference/htmlsingle/)]       | [1.2.0.RC1](http://repo.spring.io/libs-snapshot/org/springframework/cloud/spring-cloud-dataflow-server-kubernetes/1.2.0.RC1/spring-cloud-dataflow-server-kubernetes-1.2.0.RC1.jar)[[docs](http://docs.spring.io/spring-cloud-dataflow-server-kubernetes/docs/1.2.0.RC1/reference/htmlsingle/)]       |
+| Apache Mesos Server  | [1.0.0.RELEASE](http://repo.spring.io/libs-milestone/org/springframework/cloud/spring-cloud-dataflow-server-mesos/1.0.0.RELEASE/spring-cloud-dataflow-server-mesos-1.0.0.RELEASE.jar)[[docs](http://docs.spring.io/spring-cloud-dataflow-server-mesos/docs/1.0.0.RELEASE/reference/htmlsingle/)]                    | [1.1.0.BUILD-SNAPSHOT](https://github.com/spring-cloud/spring-cloud-dataflow-server-mesos#building)[[docs](http://docs.spring.io/spring-cloud-dataflow-server-mesos/docs/current-SNAPSHOT/reference/htmlsingle/)]                                                                                    |
 
 ## Community Spring Cloud Data Flow Implementations
 
-[Spring Cloud Data Flow for HashiCorp Nomad](https://github.com/donovanmuller/spring-cloud-dataflow-server-nomad)
+- [Spring Cloud Data Flow for HashiCorp Nomad](https://github.com/donovanmuller/spring-cloud-dataflow-server-nomad)
+- [Spring Cloud Data Flow for Red Hat OpenShift](https://github.com/donovanmuller/spring-cloud-dataflow-server-openshift)
 
-[Spring Cloud Data Flow for Red Hat OpenShift](https://github.com/donovanmuller/spring-cloud-dataflow-server-openshift)
-
+<br>
 ## Building Blocks of Spring Cloud Data Flow
 
 Spring Cloud Data Flow builds upon several projects and the top-level building blocks of the ecosystem are listed in the following visual representation. Each project represents a core capability and they evolve in isolation, with separate release cadences - follow the links to find more details about each project.
