@@ -21,8 +21,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URI;
-import java.nio.charset.Charset;
-import java.util.Collections;
 import java.util.HashMap;
 
 import com.fasterxml.jackson.core.JsonFactory;
@@ -60,7 +58,7 @@ import org.springframework.web.client.RestTemplate;
 @Component
 public class HttpCommands implements CommandMarker {
 
-	private static final String DEFAULT_MEDIA_TYPE = MediaType.TEXT_PLAIN_VALUE + "; Charset=UTF-8";
+	private static final String DEFAULT_MEDIA_TYPE = MediaType.TEXT_PLAIN_VALUE;
 
 	private static final String POST_HTTPSOURCE = "http post";
 
@@ -84,10 +82,6 @@ public class HttpCommands implements CommandMarker {
 			throws IOException {
 		Assert.isTrue(file != null || data != null, "One of 'file' or 'data' must be set");
 		Assert.isTrue(file == null || data == null, "Only one of 'file' or 'data' must be set");
-		if (mediaType.getCharset() == null) {
-			mediaType = new MediaType(mediaType,
-					Collections.singletonMap("charset", Charset.defaultCharset().toString()));
-		}
 
 		if (file != null) {
 			InputStreamReader isr = new InputStreamReader(new FileInputStream(file), mediaType.getCharset());
