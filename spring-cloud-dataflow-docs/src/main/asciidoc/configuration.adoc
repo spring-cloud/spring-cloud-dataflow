@@ -107,8 +107,10 @@ When choosing between _traditional authentication_ or _OAuth2_, keep in mind tha
 both options are mutually exclusive. Please refer to the sub-chapters below for
 a more detailed discussion.
 
-NOTE:
+[NOTE]
+====
 By default, the REST endpoints (administration, management and health), as well as the Dashboard UI do not require authenticated access.
+====
 
 [[configuration-security-enabling-https]]
 === Enabling HTTPS

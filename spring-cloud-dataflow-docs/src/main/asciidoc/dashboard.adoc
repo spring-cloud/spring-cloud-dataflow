@@ -29,7 +29,7 @@ For example: http://localhost:9393/dashboard[http://localhost:9393/dashboard]
 If you have enabled https, then it will be located at `\https://localhost:9393/dashboard`.
 If you have enabled security, a login form is available at `\http://localhost:9393/dashboard/#/login`.
 
-**Note**: The default Dashboard server port is `9393`
+NOTE: The default Dashboard server port is `9393`
 
 .The Spring Cloud Data Flow Dashboard
 image::{dataflow-asciidoc}/images/dataflow-dashboard-about.png[The Spring Cloud Data Flow Dashboard, scaledwidth="100%"]
@@ -60,11 +60,11 @@ For example:
 
 At the top of the bulk import page an _Uri_ can be specified that points to a properties file stored elsewhere, it
 should contain properties formatted as above. Alternatively, using the textbox labeled _Apps as Properties_
-it is possible to directly list each property string. Finally, if the properties are stored in a local file 
+it is possible to directly list each property string. Finally, if the properties are stored in a local file
 the _Select Properties File_ option will open a local file browser to select the file. After setting your definitions
 via one of these routes, click *Import*.
 
-At the bottom of the page there are quick links to the property files for common groups of stream apps and 
+At the bottom of the page there are quick links to the property files for common groups of stream apps and
 task apps. If those meet your needs, simply select your appropriate variant (rabbit, kafka, docker, etc) and
 click the *Import* action on those lines to immediately import all those applications.
 
@@ -114,7 +114,7 @@ In this tab, you can:
 * Write pipelines via DSL with content-assist and auto-complete
 * Use auto-adjustment and grid-layout capabilities in the GUI for simpler and interactive organization of pipelines
 
-Watch this https://www.youtube.com/watch?v=78CgV46OstI[screencast] that highlights some of the "Flo for Spring Cloud Data Flow" capabilities. Spring Flo https://github.com/spring-projects/spring-flo/wiki[wiki] includes more detailed content on core Flo capabilities. 
+Watch this https://www.youtube.com/watch?v=78CgV46OstI[screencast] that highlights some of the "Flo for Spring Cloud Data Flow" capabilities. Spring Flo https://github.com/spring-projects/spring-flo/wiki[wiki] includes more detailed content on core Flo capabilities.
 
 .Flo for Spring Cloud Data Flow
 image::{dataflow-asciidoc}/images/dataflow-flo-create-stream.png[Flo for Spring Cloud Data Flo, scaledwidth="100%"]
@@ -137,7 +137,7 @@ runtime environment _Apps_ allow users to create definitions for _Streams_ as
 well as _Tasks_. Consequently, the _Apps_ tab within the _Tasks_ section
 allows users to create _Task_ definitions.
 
-**Note**: You will also use this tab to create Batch Jobs.
+NOTE: You will also use this tab to create Batch Jobs.
 
 .List of Task Apps
 image::{dataflow-asciidoc}/images/dataflow-task-apps-list.png[List of Task Apps, scaledwidth="100%"]
@@ -153,7 +153,7 @@ On this screen you can create a new Task Definition. As a minimum you must provi
 name for the new definition. You will also have the option
 to specify various properties that are used during the deployment of the app.
 
-**Note**: Each parameter is only included if the _Include_ checkbox is selected.
+NOTE: Each parameter is only included if the _Include_ checkbox is selected.
 
 ==== View Task App Details
 
@@ -164,8 +164,8 @@ including the list of available options (properties) for that app.
 === Definitions
 
 This page lists the Data Flow Task definitions and provides actions to *launch*
-or *destroy* those tasks. It also provides a shortcut operation to define 
-one or more tasks using simple textual input, indicated by 
+or *destroy* those tasks. It also provides a shortcut operation to define
+one or more tasks using simple textual input, indicated by
 the *bulk define tasks* button.
 
 .List of Task Definitions
@@ -194,7 +194,7 @@ After entering any data a validator will run asynchronously to
 verify both the syntax and that the application name entered is
 a valid application and it supports the options
 specified. If validation fails the editor will show the errors with more
-information via tooltips. 
+information via tooltips.
 
 To make it easier to enter definitions into the text area, content assist is
 supported. Pressing *Ctrl+Space* will invoke content assist to suggest

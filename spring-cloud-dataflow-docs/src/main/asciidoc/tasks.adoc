@@ -118,7 +118,7 @@ dataflow:>app import --uri http://bit.ly/Belmont-GA-task-applications-maven
 
 You can also pass the `--local` option (which is TRUE by default) to indicate whether the
 properties file location should be resolved within the shell process itself. If the location should
-be resolved from the Data Flow Server process, specify `--local false`. 
+be resolved from the Data Flow Server process, specify `--local false`.
 
 When using either `app register` or `app import`, if a task app is already registered with
 the provided name, it will not be overridden by default. If you would like to override the
@@ -168,7 +168,7 @@ to `TaskLauncher` as application properties and it is up to an
 implementation to choose how those are passed into an actual task
 application. If the property is prefixed with `deployer` instead of `app` it is
 passed to `TaskLauncher` as a deployment property and its meaning may
-be `TaskLauncher` implementation specific. 
+be `TaskLauncher` implementation specific.
 
 ```
 dataflow:>task launch mytask --properties "deployer.timestamp.foo1=bar1,app.timestamp.foo2=bar2"
@@ -214,7 +214,7 @@ To display the latest task executions via the shell use the `task execution list
 
 To get a list of task executions for just one task definition, add `--name` and
 the task definition name, for example `task execution list --name foo`.  To retrieve full
-details for a task execution use the `task display` command with the id of the task execution, 
+details for a task execution use the `task display` command with the id of the task execution,
 for example `task display --id 549`.
 
 === Destroying a Task
@@ -230,7 +230,7 @@ dataflow:>task destroy mytask
 The task execution information for previously launched tasks for the definition will
 remain in the task repository.
 
-*Note:* This will not stop any currently executing tasks for this definition, instead it just
+NOTE: This will not stop any currently executing tasks for this definition, instead it just
 removes the task definition from the database.
 
 [[spring-cloud-dataflow-task-repository]]
@@ -312,7 +312,7 @@ spring:
 == Subscribing to Task/Batch Events
 
 You can also tap into various task/batch events when the task is launched.
-If the task is enabled to generate task and/or batch events (with the additional dependencies `spring-cloud-task-stream` and `spring-cloud-stream-binder-kafka`, in the case of Kafka as the binder), those events are published during the task lifecycle. 
+If the task is enabled to generate task and/or batch events (with the additional dependencies `spring-cloud-task-stream` and `spring-cloud-stream-binder-kafka`, in the case of Kafka as the binder), those events are published during the task lifecycle.
 By default, the destination names for those published events on the broker (rabbit, kafka etc.,) are the event names themselves (for instance: `task-events`, `job-execution-events` etc.,).
 
 ```
@@ -371,7 +371,7 @@ In the case of a maven based task that is to be launched, the `task-launcher` ap
 === TriggerTask
 
 One way to launch a task using the `task-launcher` is to use the https://github.com/spring-cloud-stream-app-starters/triggertask/blob/v1.2.0.RELEASE/spring-cloud-starter-stream-source-triggertask/README.adoc[triggertask] source. The `triggertask` source
-will emit a message with a `TaskLaunchRequest` object containing the required launch information. 
+will emit a message with a `TaskLaunchRequest` object containing the required launch information.
 The `triggertask` can be added to the available sources by executing the app register command as follows (for the Rabbit Binder):
 
 ```
@@ -387,7 +387,7 @@ stream create foo --definition "triggertask --triggertask.uri=maven://org.spring
 If you execute `runtime apps` you can find the log file for the task launcher sink. Tailing that file you can find the log file for the launched tasks. The setting of `triggertask.environment-properties` is so that all the task executions can be collected in the same H2 database used in the local version of the Data Flow Server.  You can then see the list of task executions using the shell command `task execution list`
 
 ```
-dataflow:>task execution list 
+dataflow:>task execution list
 ╔════════════════════╤══╤════════════════════════════╤════════════════════════════╤═════════╗
 ║     Task Name      │ID│         Start Time         │          End Time          │Exit Code║
 ╠════════════════════╪══╪════════════════════════════╪════════════════════════════╪═════════╣
@@ -437,7 +437,7 @@ app register --name composed-task-runner --type task --uri maven://org.springfra
 ```
 
 You can also configure Spring Cloud Data Flow to use a different task definition
-name for the composed task runner.  This can be done by setting the 
+name for the composed task runner.  This can be done by setting the
 `spring.cloud.dataflow.task.composedTaskRunnerName` property to the name
 of your choice.  You can then register the composed task runner application with
 the name you set using that property.
