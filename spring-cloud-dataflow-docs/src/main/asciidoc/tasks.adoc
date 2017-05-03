@@ -4,7 +4,7 @@
 [partintro]
 --
 This section goes into more detail about how you can work with
-http://cloud.spring.io/spring-cloud-task/[Spring Cloud Tasks]. It covers topics such as
+http://cloud.spring.io/spring-cloud-task/[Spring Cloud Task]. It covers topics such as
 creating and running task applications.
 
 If you're just starting out with Spring Cloud Data Flow, you should probably read the
@@ -34,7 +34,7 @@ typical lifecycle for tasks in the context of Spring Cloud Data Flow:
 
 === Creating a custom Task Application
 While Spring Cloud Task does provide a number of out of the box applications (via the
-https://github.com/spring-cloud/spring-cloud-task-app-starters[spring-cloud-task-app-starters]),
+https://github.com/spring-cloud-task-app-starters[spring-cloud-task-app-starters]),
 most task applications will be custom developed.  In order to create a custom task application:
 
 . Create a new project via http://start.spring.io[Spring Initializer] via either the
@@ -352,9 +352,9 @@ The default Task/Batch event and destination names on the broker are enumerated 
 
 You can launch a task from a stream by using one of the available `task-launcher` sinks. Currently the platforms supported
 via the `task-launcher` sinks are
-https://github.com/spring-cloud/spring-cloud-stream-app-starters/tree/master/tasklauncher/spring-cloud-starter-stream-sink-tasklauncher-local[local],
-https://github.com/spring-cloud/spring-cloud-stream-app-starters/tree/master/tasklauncher/spring-cloud-starter-stream-sink-tasklauncher-cloudfoundry[Cloud Foundry], and
-https://github.com/spring-cloud/spring-cloud-stream-app-starters/tree/master/tasklauncher/spring-cloud-starter-stream-sink-tasklauncher-yarn[Yarn].
+https://github.com/spring-cloud-stream-app-starters/tasklauncher-local[local],
+https://github.com/spring-cloud-stream-app-starters/tasklauncher-cloudfoundry[Cloud Foundry], and
+https://github.com/spring-cloud-stream-app-starters/tasklauncher-yarn[Yarn].
 
 NOTE: `task-launcher-local` is meant for development purposes only.
 
@@ -401,7 +401,7 @@ dataflow:>task execution list
 === TaskLaunchRequest-transform
 
 Another option to start a task using the `task-launcher` would be to create a stream using the
-https://github.com/spring-cloud/spring-cloud-stream-app-starters/tree/master/processor/spring-cloud-starter-stream-processor-tasklaunchrequest-transform[Tasklaunchrequest-transform] processor to translate a message payload to a `TaskLaunchRequest`.
+https://github.com/spring-cloud-stream-app-starters/tasklaunchrequest-transform[Tasklaunchrequest-transform] processor to translate a message payload to a `TaskLaunchRequest`.
 
 The `tasklaunchrequest-transform` can be added to the available processors by executing the app register command as follows (for the Rabbit Binder):
 

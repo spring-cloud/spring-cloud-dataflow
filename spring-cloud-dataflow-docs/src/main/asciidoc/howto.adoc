@@ -94,7 +94,7 @@ useful.
 
 === Deployment Logs
 Spring Cloud Data Flow builds upon link:https://github.com/spring-cloud/spring-cloud-deployer[Spring Cloud Deployer] SPI
-and the platform specific dataflow-server uses the respective link:https://github.com/spring-cloud?utf8=%E2%9C%93&query=deployer[SPI implementations].
+and the platform specific dataflow-server uses the respective link:https://github.com/spring-cloud?utf8=%E2%9C%93&q=spring-cloud-deployer[SPI implementations].
 Specifically, if we were to troubleshoot deployment specific issues; such as the network errors, it'd
 be useful to enable the DEBUG logs at the underlying deployer and the libraries used by it.
 
@@ -143,7 +143,7 @@ $ cf restage dataflow-server
 
 NOTE: Similar to the `local-deployer` and `cloudfoundry-deployer` options as discussed above, there
 are equivalent settings available for Apache YARN, Apache Mesos and Kubernetes variants, too. Check out the
-respective link:https://github.com/spring-cloud?utf8=%E2%9C%93&query=deployer[SPI implementations] to
+respective link:https://github.com/spring-cloud?utf8=%E2%9C%93&q=spring-cloud-deployer[SPI implementations] to
 find out more details about the packages to configure for logging.
 
 === Application Logs

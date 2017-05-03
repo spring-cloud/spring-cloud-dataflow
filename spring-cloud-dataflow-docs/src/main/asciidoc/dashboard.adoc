@@ -321,8 +321,7 @@ for the various analytics applications available in _Spring Cloud Data Flow_:
 * Field-Value Counters
 * Aggregate Counters
 
-For example, if you have created the `springtweets` stream and the corresponding
-counter in the <<counter, Counter chapter>>, you can now easily create the corresponding
+For example, if you create a stream with a link:https://github.com/spring-cloud-stream-app-starters/counter/tree/master/spring-cloud-starter-stream-sink-counter[Counter] application, you can now easily create the corresponding
 graph from within the **Dashboard** tab:
 
 1. Under `Metric Type`, select `Counters` from the select box
