@@ -1,6 +1,6 @@
 management:
   security:
-    roles: ADMIN
+    roles: MANAGE
 logging:
   level:
     org.springframework.beans: 'WARN'
