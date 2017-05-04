@@ -74,8 +74,8 @@ public class DefaultBootUserAuthenticationConfiguration extends GlobalAuthentica
 
 		if (this.managementServerProperties != null
 				&& this.managementServerProperties.getSecurity().getRoles().size() == 1
-				&& "ADMIN".equals(this.managementServerProperties.getSecurity().getRoles().get(0))) {
-			defaultSpringBootUser.getRole().add("ADMIN");
+				&& "MANAGE".equals(this.managementServerProperties.getSecurity().getRoles().get(0))) {
+			defaultSpringBootUser.getRole().add("MANAGE");
 		}
 
 		if (defaultSpringBootUser.getName().equals(user.getName())
