@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
-		xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>org.springframework.cloud</groupId>
 		<artifactId>spring-cloud-dataflow-parent</artifactId>
-		<version>1.2.0.BUILD-SNAPSHOT</version>
+		<version>1.2.0.RC2</version>
 	</parent>
 	<artifactId>spring-cloud-dataflow-docs</artifactId>
 	<name>Spring Cloud Data Flow Docs</name>
@@ -57,7 +56,7 @@
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-starter-dataflow-server-local</artifactId>
-			<version>1.2.0.BUILD-SNAPSHOT</version>
+			<version>1.2.0.RC2</version>
 			<type>test-jar</type>
 			<scope>test</scope>
 		</dependency>
@@ -167,7 +166,7 @@
 								<configuration>
 									<backend>html5</backend>
 									<attributes>
-										<toc2/>
+										<toc2 />
 									</attributes>
 								</configuration>
 							</execution>
@@ -179,7 +178,7 @@
 						<version>2.0.15</version>
 						<configuration>
 							<sourceDirectory>${basedir}/target/generated-docs</sourceDirectory>
-							<imgSrcPath/>
+							<imgSrcPath />
 							<graphicsize.extension>0</graphicsize.extension>
 							<includes>index.xml</includes>
 							<xincludeSupported>true</xincludeSupported>
@@ -193,7 +192,7 @@
 							</highlightXslthlConfig>
 							<preProcess>
 								<copy todir="${basedir}/target/generated-docs/images">
-									<fileset dir="${basedir}/src/main/docbook/images"/>
+									<fileset dir="${basedir}/src/main/docbook/images" />
 								</copy>
 							</preProcess>
 						</configuration>
@@ -227,14 +226,14 @@
 									<postProcess>
 										<copy todir="${basedir}/target/contents/reference/html">
 											<fileset dir="${basedir}/target/docbook/html">
-												<include name="**/*.html"/>
+												<include name="**/*.html" />
 											</fileset>
 										</copy>
 										<copy todir="${basedir}/target/contents/reference/html/images">
-											<fileset dir="${basedir}/target/generated-docs/images"/>
+											<fileset dir="${basedir}/target/generated-docs/images" />
 										</copy>
 										<copy todir="${basedir}/target/contents/reference/html/css">
-											<fileset dir="${basedir}/src/main/docbook/css"/>
+											<fileset dir="${basedir}/src/main/docbook/css" />
 										</copy>
 									</postProcess>
 								</configuration>
@@ -251,11 +250,10 @@
 									<postProcess>
 										<copy todir="${basedir}/target/contents/reference">
 											<fileset dir="${basedir}/target/docbook">
-												<include name="**/*.pdf"/>
+												<include name="**/*.pdf" />
 											</fileset>
 										</copy>
-										<move file="${basedir}/target/contents/reference/pdf/index.pdf"
-											  tofile="${basedir}/target/contents/reference/pdf/spring-cloud-dataflow-reference.pdf"/>
+										<move file="${basedir}/target/contents/reference/pdf/index.pdf" tofile="${basedir}/target/contents/reference/pdf/spring-cloud-dataflow-reference.pdf" />
 									</postProcess>
 								</configuration>
 							</execution>
@@ -270,18 +268,17 @@
 									<targetDirectory>${basedir}/target/docbook/epub</targetDirectory>
 									<preProcess>
 										<copy todir="${basedir}/target/docbook/epub/images">
-											<fileset dir="${basedir}/src/main/docbook/images"/>
-											<fileset dir="${basedir}/src/main/asciidoc/images"/>
+											<fileset dir="${basedir}/src/main/docbook/images" />
+											<fileset dir="${basedir}/src/main/asciidoc/images" />
 										</copy>
 									</preProcess>
 									<postProcess>
 										<copy todir="${basedir}/target/contents/reference/epub">
 											<fileset dir="${basedir}/target/docbook">
-												<include name="**/*.epub"/>
+												<include name="**/*.epub" />
 											</fileset>
 										</copy>
-										<move file="${basedir}/target/contents/reference/epub/index.epub"
-											  tofile="${basedir}/target/contents/reference/epub/spring-cloud-dataflow-reference.epub"/>
+										<move file="${basedir}/target/contents/reference/epub/index.epub" tofile="${basedir}/target/contents/reference/epub/spring-cloud-dataflow-reference.epub" />
 									</postProcess>
 								</configuration>
 							</execution>
@@ -324,14 +321,11 @@
 								<configuration>
 									<target>
 										<zip destfile="${project.build.directory}/${project.artifactId}-${project.version}.zip">
-											<zipfileset
-													src="${project.build.directory}/${project.artifactId}-${project.version}-javadoc.jar"
-													prefix="api"/>
-											<fileset dir="${project.build.directory}/contents"/>
-											<zipfileset dir="${project.build.directory}/generated-docs"
-														prefix="reference/htmlsingle">
-												<include name="index.html"/>
-												<include name="images/**"/>
+											<zipfileset src="${project.build.directory}/${project.artifactId}-${project.version}-javadoc.jar" prefix="api" />
+											<fileset dir="${project.build.directory}/contents" />
+											<zipfileset dir="${project.build.directory}/generated-docs" prefix="reference/htmlsingle">
+												<include name="index.html" />
+												<include name="images/**" />
 											</zipfileset>
 										</zip>
 									</target>
@@ -346,19 +340,15 @@
 								<configuration>
 									<exportAntProperties>true</exportAntProperties>
 									<target>
-										<taskdef resource="net/sf/antcontrib/antcontrib.properties"/>
-										<taskdef name="stringutil" classname="ise.antelope.tasks.StringUtilTask"/>
-										<var name="version-type" value="${project.version}"/>
-										<propertyregex property="version-type" override="true" input="${version-type}"
-													   regexp=".*\.(.*)" replace="\1"/>
-										<propertyregex property="version-type" override="true" input="${version-type}"
-													   regexp="(M)\d+" replace="MILESTONE"/>
-										<propertyregex property="version-type" override="true" input="${version-type}"
-													   regexp="(RC)\d+" replace="MILESTONE"/>
-										<propertyregex property="version-type" override="true" input="${version-type}"
-													   regexp="BUILD-(.*)" replace="SNAPSHOT"/>
+										<taskdef resource="net/sf/antcontrib/antcontrib.properties" />
+										<taskdef name="stringutil" classname="ise.antelope.tasks.StringUtilTask" />
+										<var name="version-type" value="${project.version}" />
+										<propertyregex property="version-type" override="true" input="${version-type}" regexp=".*\.(.*)" replace="\1" />
+										<propertyregex property="version-type" override="true" input="${version-type}" regexp="(M)\d+" replace="MILESTONE" />
+										<propertyregex property="version-type" override="true" input="${version-type}" regexp="(RC)\d+" replace="MILESTONE" />
+										<propertyregex property="version-type" override="true" input="${version-type}" regexp="BUILD-(.*)" replace="SNAPSHOT" />
 										<stringutil string="${version-type}" property="version-type-lowercase">
-											<lowercase/>
+											<lowercase />
 										</stringutil>
 									</target>
 								</configuration>
