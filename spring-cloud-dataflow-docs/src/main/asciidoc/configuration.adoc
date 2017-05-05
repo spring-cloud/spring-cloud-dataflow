@@ -796,8 +796,6 @@ Configure Spring Cloud Data Flow with the GitHub relevant Client Id and Secret:
 [source,yaml]
 ----
 security:
-  basic:
-    enabled: true
   oauth2:
     client:
       client-id: your-github-client-id
