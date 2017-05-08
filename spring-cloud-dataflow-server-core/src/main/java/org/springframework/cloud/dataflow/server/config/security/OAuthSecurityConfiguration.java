@@ -25,7 +25,6 @@ import org.apache.commons.lang.exception.ExceptionUtils;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.AuthoritiesExtractor;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.ResourceServerProperties;
@@ -105,6 +104,9 @@ public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 	@Autowired
 	private AuthorizationConfig authorizationConfig;
 
+	@Autowired(required=false)
+	private AuthoritiesExtractor authoritiesExtractor;
+
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 
@@ -155,18 +157,19 @@ public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 	}
 
 	@Bean
-	@ConditionalOnMissingBean(AuthoritiesExtractor.class)
-	public DefaultDataflowAuthoritiesExtractor authoritiesExtractor() {
-		logger.info("Setting up default AuthoritiesExtractor.");
-		return new DefaultDataflowAuthoritiesExtractor();
-	}
-
-	@Bean
 	public UserInfoTokenServices tokenServices() {
 		final UserInfoTokenServices tokenServices = new UserInfoTokenServices(resourceServerProperties.getUserInfoUri(),
 				authorizationCodeResourceDetails.getClientId());
 		tokenServices.setRestTemplate(oAuth2RestTemplate());
-		tokenServices.setAuthoritiesExtractor(authoritiesExtractor());
+
+		if (this.authoritiesExtractor == null) {
+			logger.info("Populating UserInfoTokenServices with default AuthoritiesExtractor.");
+			tokenServices.setAuthoritiesExtractor(new DefaultDataflowAuthoritiesExtractor());
+		}
+		else {
+			logger.info("Populating UserInfoTokenServices with AuthoritiesExtractor: " + this.authoritiesExtractor);
+			tokenServices.setAuthoritiesExtractor(this.authoritiesExtractor);
+		}
 		return tokenServices;
 	}
 
