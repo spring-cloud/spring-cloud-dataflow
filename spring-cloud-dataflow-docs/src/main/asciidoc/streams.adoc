@@ -122,11 +122,11 @@ List of available Task Application Starters:
 |Artifact Type |Stable Release |SNAPSHOT Release
 
 |Maven
-|http://bit.ly/Belmont-RC1-task-applications-maven
+|http://bit.ly/Belmont-GA-task-applications-maven
 |http://bit.ly/Belmont-BUILD-SNAPSHOT-task-applications-maven
 
 |Docker
-|http://bit.ly/Belmont-RC1-task-applications-docker
+|http://bit.ly/Belmont-GA-task-applications-docker
 |N/A
 |======================
 
