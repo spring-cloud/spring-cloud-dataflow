@@ -699,10 +699,6 @@ security:
 
 <1> Providing the Client Id in the OAuth Configuration Section will activate OAuth2 security
 
-NOTE: As of the current version, Spring Cloud Data Flow does not provide
-finer-grained authorization when OAUTH is used as authentication mechanism. Thus,
-once you are logged in, you have full access to all functionality.
-
 You can verify that basic authentication is working properly using _curl_:
 
 [source,bash]
@@ -720,6 +716,28 @@ the REST Api using the **Authorization** Http header:
 ```
 $ curl -H "Authorization: Bearer <ACCESS_TOKEN>" http://localhost:9393/
 ```
+
+[[configuration-security-oauth2-authorization]]
+==== OAuth REST Endpoint Authorization
+
+The OAuth2 authentication option uses the same authorization rules as used by the
+<<configuration-security-basic-authentication, Traditional Authentication>> option.
+
+[TIP]
+====
+The authorization rules are defined in `dataflow-server-defaults.yml` (Part of
+the Spring Cloud Data Flow Core Module). Please see the chapter on
+<<customizing-authorization, customizing authorization>> for more details.
+====
+
+Due to fact that the determination of security roles is very environment-specific,
+_Spring Cloud Data Flow_ will by default assign all roles to authenticated OAuth2
+users using the `DefaultDataflowAuthoritiesExtractor` class.
+
+You can customize that behavior by providing your own Spring bean definition that
+extends Spring Security OAuth's `AuthoritiesExtractor` interface. In that case,
+the custom bean definition will take precedence over the default one provided by
+_Spring Cloud Data Flow_
 
 [[configuration-security-oauth2-shell]]
 ==== OAuth Authentication using the Spring Cloud Data Flow Shell
