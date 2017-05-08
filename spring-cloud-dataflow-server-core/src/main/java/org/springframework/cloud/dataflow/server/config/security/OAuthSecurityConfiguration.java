@@ -21,6 +21,9 @@ import java.util.List;
 
 import javax.servlet.Filter;
 
+import org.apache.commons.lang.exception.ExceptionUtils;
+import org.slf4j.LoggerFactory;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.ResourceServerProperties;
@@ -28,9 +31,11 @@ import org.springframework.boot.autoconfigure.security.oauth2.resource.UserInfoT
 import org.springframework.cloud.dataflow.server.config.security.support.OnSecurityEnabledAndOAuth2Enabled;
 import org.springframework.cloud.dataflow.server.config.security.support.SecurityStateBean;
 import org.springframework.cloud.dataflow.server.service.impl.ManualOAuthAuthenticationProvider;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.event.EventListener;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -41,6 +46,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.oauth2.client.OAuth2ClientContext;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
+import org.springframework.security.oauth2.client.filter.OAuth2AuthenticationFailureEvent;
 import org.springframework.security.oauth2.client.filter.OAuth2ClientAuthenticationProcessingFilter;
 import org.springframework.security.oauth2.client.token.grant.code.AuthorizationCodeResourceDetails;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableOAuth2Client;
@@ -54,6 +60,7 @@ import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.accept.HeaderContentNegotiationStrategy;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.context.request.NativeWebRequest;
 
 import static org.springframework.cloud.dataflow.server.controller.UiController.dashboard;
@@ -70,6 +77,8 @@ import static org.springframework.cloud.dataflow.server.controller.UiController.
 @Conditional(OnSecurityEnabledAndOAuth2Enabled.class)
 public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
+	private static final org.slf4j.Logger logger = LoggerFactory.getLogger(OAuthSecurityConfiguration.class);
+
 	@Autowired
 	private SecurityStateBean securityStateBean;
 
@@ -84,6 +93,9 @@ public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
 	@Autowired
 	private ResourceServerProperties resourceServerProperties;
+
+	@Autowired
+	private ApplicationEventPublisher applicationEventPublisher;
 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
@@ -154,6 +166,7 @@ public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 				"/login");
 		oauthFilter.setRestTemplate(oAuth2RestTemplate());
 		oauthFilter.setTokenServices(tokenServices());
+		oauthFilter.setApplicationEventPublisher(this.applicationEventPublisher);
 		return oauthFilter;
 	}
 
@@ -169,6 +182,14 @@ public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 		final OAuth2AuthenticationManager oauthAuthenticationManager = new OAuth2AuthenticationManager();
 		oauthAuthenticationManager.setTokenServices(tokenServices());
 		return oauthAuthenticationManager;
+	}
+
+	@EventListener
+	public void handleOAuth2AuthenticationFailureEvent(OAuth2AuthenticationFailureEvent oAuth2AuthenticationFailureEvent) {
+		final int throwableIdex = ExceptionUtils.indexOfThrowable(oAuth2AuthenticationFailureEvent.getException(), ResourceAccessException.class);
+		if (throwableIdex > -1) {
+			logger.error("An error ocurred while accessing an authentication REST resource.", oAuth2AuthenticationFailureEvent.getException());
+		}
 	}
 
 	private static class BrowserDetectingContentNegotiationStrategy extends HeaderContentNegotiationStrategy {
