@@ -15,23 +15,14 @@
  */
 package org.springframework.cloud.dataflow.server.config.security;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import org.slf4j.LoggerFactory;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.cloud.dataflow.core.DataFlowPropertyKeys;
 import org.springframework.cloud.dataflow.server.config.security.support.OnSecurityEnabledAndOAuth2Disabled;
+import org.springframework.cloud.dataflow.server.config.security.support.SecurityConfigUtils;
 import org.springframework.cloud.dataflow.server.config.security.support.SecurityStateBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -50,8 +41,6 @@ import org.springframework.session.MapSessionRepository;
 import org.springframework.session.SessionRepository;
 import org.springframework.session.web.http.HeaderHttpSessionStrategy;
 import org.springframework.session.web.http.SessionRepositoryFilter;
-import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 import org.springframework.web.accept.ContentNegotiationStrategy;
 
 import static org.springframework.cloud.dataflow.server.controller.UiController.dashboard;
@@ -70,15 +59,6 @@ import static org.springframework.cloud.dataflow.server.controller.UiController.
 @Conditional(OnSecurityEnabledAndOAuth2Disabled.class)
 @EnableWebSecurity
 public class BasicAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
-
-	public static final Pattern AUTHORIZATION_RULE;
-
-	private static final org.slf4j.Logger logger = LoggerFactory.getLogger(BasicAuthSecurityConfiguration.class);
-
-	static {
-		String methodsRegex = StringUtils.arrayToDelimitedString(HttpMethod.values(), "|");
-		AUTHORIZATION_RULE = Pattern.compile("(" + methodsRegex + ")\\s+(.+)\\s+=>\\s+(.+)");
-	}
 
 	@Autowired
 	private ContentNegotiationStrategy contentNegotiationStrategy;
@@ -114,7 +94,7 @@ public class BasicAuthSecurityConfiguration extends WebSecurityConfigurerAdapter
 				.permitAll();
 
 		if (authorizationConfig.isEnabled()) {
-			security = configureSimpleSecurity(security);
+			security = SecurityConfigUtils.configureSimpleSecurity(security, authorizationConfig);
 		}
 
 		security.and().formLogin().loginPage(loginPage).loginProcessingUrl(dashboard("/login"))
@@ -143,55 +123,4 @@ public class BasicAuthSecurityConfiguration extends WebSecurityConfigurerAdapter
 		securityStateBean.setAuthorizationEnabled(true);
 	}
 
-	/**
-	 * Read the configuration for "simple" (that is, not ACL based) security and apply it.
-	 */
-	private ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry configureSimpleSecurity(
-			ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry security) {
-		for (String rule : authorizationConfig.getRules()) {
-			Matcher matcher = AUTHORIZATION_RULE.matcher(rule);
-			Assert.isTrue(matcher.matches(),
-					String.format("Unable to parse security rule [%s], expected format is 'HTTP_METHOD ANT_PATTERN => "
-							+ "SECURITY_ATTRIBUTE(S)'", rule));
-
-			HttpMethod method = HttpMethod.valueOf(matcher.group(1).trim());
-			String urlPattern = matcher.group(2).trim();
-			String attribute = matcher.group(3).trim();
-
-			logger.info("Authorization '{}' | '{}' | '{}'", method, attribute, urlPattern);
-			security = security.antMatchers(method, urlPattern).access(attribute);
-		}
-		return security;
-	}
-
-	/**
-	 * Holds configuration for the authorization aspects of security.
-	 *
-	 * @author Eric Bottard
-	 * @author Gunnar Hillert
-	 */
-	@ConfigurationProperties(prefix = DataFlowPropertyKeys.PREFIX + "security.authorization")
-	public static class AuthorizationConfig {
-
-		private boolean enabled = true;
-
-		private List<String> rules = new ArrayList<>();
-
-		public List<String> getRules() {
-			return rules;
-		}
-
-		public void setRules(List<String> rules) {
-			this.rules = rules;
-		}
-
-		public boolean isEnabled() {
-			return enabled;
-		}
-
-		public void setEnabled(boolean enabled) {
-			this.enabled = enabled;
-		}
-
-	}
 }
