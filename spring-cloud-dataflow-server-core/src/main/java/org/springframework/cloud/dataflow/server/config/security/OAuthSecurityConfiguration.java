@@ -25,10 +25,14 @@ import org.apache.commons.lang.exception.ExceptionUtils;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
+import org.springframework.boot.autoconfigure.security.oauth2.resource.AuthoritiesExtractor;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.ResourceServerProperties;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.UserInfoTokenServices;
+import org.springframework.cloud.dataflow.server.config.security.support.DefaultDataflowAuthoritiesExtractor;
 import org.springframework.cloud.dataflow.server.config.security.support.OnSecurityEnabledAndOAuth2Enabled;
+import org.springframework.cloud.dataflow.server.config.security.support.SecurityConfigUtils;
 import org.springframework.cloud.dataflow.server.config.security.support.SecurityStateBean;
 import org.springframework.cloud.dataflow.server.service.impl.ManualOAuthAuthenticationProvider;
 import org.springframework.context.ApplicationEventPublisher;
@@ -44,6 +48,7 @@ import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.annotation.web.configurers.ExpressionUrlAuthorizationConfigurer;
 import org.springframework.security.oauth2.client.OAuth2ClientContext;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.security.oauth2.client.filter.OAuth2AuthenticationFailureEvent;
@@ -97,6 +102,9 @@ public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 	@Autowired
 	private ApplicationEventPublisher applicationEventPublisher;
 
+	@Autowired
+	private AuthorizationConfig authorizationConfig;
+
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 
@@ -115,13 +123,27 @@ public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 		http.addFilterBefore(basicAuthenticationFilter, oauthFilter.getClass());
 		http.addFilterBefore(oAuth2AuthenticationProcessingFilter(), basicAuthenticationFilter.getClass());
 
+		ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry security =
+
 		http.authorizeRequests()
 			.antMatchers(
+				"/favicon.ico",
 				"/security/info**", "/login**", dashboard("/logout-success-oauth.html"),
-				dashboard("/styles/**"), dashboard("/images/**"), dashboard("/fonts/**"), dashboard("/lib/**")
-			).permitAll().anyRequest()
-			.authenticated().and()
-			.httpBasic().and()
+				dashboard("/styles/**"), dashboard("/images/**"), "/assets/**", dashboard("/fonts/**"), dashboard("/lib/**")
+			).permitAll()
+			.antMatchers("/", dashboard("/**"), "/dashboard", "/features").authenticated();
+
+		if (authorizationConfig.isEnabled()) {
+			security = SecurityConfigUtils.configureSimpleSecurity(security, authorizationConfig);
+			security.anyRequest().denyAll();
+			securityStateBean.setAuthorizationEnabled(true);
+		}
+		else {
+			security.anyRequest().authenticated();
+			securityStateBean.setAuthorizationEnabled(false);
+		}
+
+		http.httpBasic().and()
 			.logout()
 			.logoutSuccessUrl(dashboard("/logout-success-oauth.html"))
 			.and().csrf().disable()
@@ -130,7 +152,13 @@ public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 			.defaultAuthenticationEntryPointFor(basicAuthenticationEntryPoint, AnyRequestMatcher.INSTANCE);
 
 		securityStateBean.setAuthenticationEnabled(true);
-		securityStateBean.setAuthorizationEnabled(false);
+	}
+
+	@Bean
+	@ConditionalOnMissingBean(AuthoritiesExtractor.class)
+	public DefaultDataflowAuthoritiesExtractor authoritiesExtractor() {
+		logger.info("Setting up default AuthoritiesExtractor.");
+		return new DefaultDataflowAuthoritiesExtractor();
 	}
 
 	@Bean
@@ -138,8 +166,8 @@ public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 		final UserInfoTokenServices tokenServices = new UserInfoTokenServices(resourceServerProperties.getUserInfoUri(),
 				authorizationCodeResourceDetails.getClientId());
 		tokenServices.setRestTemplate(oAuth2RestTemplate());
+		tokenServices.setAuthoritiesExtractor(authoritiesExtractor());
 		return tokenServices;
-
 	}
 
 	@Bean

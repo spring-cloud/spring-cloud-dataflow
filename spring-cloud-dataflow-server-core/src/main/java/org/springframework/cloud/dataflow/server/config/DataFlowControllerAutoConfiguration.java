@@ -42,7 +42,7 @@ import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.registry.RdbmsUriRegistry;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
-import org.springframework.cloud.dataflow.server.config.security.BasicAuthSecurityConfiguration.AuthorizationConfig;
+import org.springframework.cloud.dataflow.server.config.security.AuthorizationConfig;
 import org.springframework.cloud.dataflow.server.config.security.support.OnSecurityEnabledAndOAuth2Disabled;
 import org.springframework.cloud.dataflow.server.config.security.support.SecurityStateBean;
 import org.springframework.cloud.dataflow.server.controller.AboutController;

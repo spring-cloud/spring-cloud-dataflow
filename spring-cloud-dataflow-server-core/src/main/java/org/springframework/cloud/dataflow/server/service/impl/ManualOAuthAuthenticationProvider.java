@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,21 +15,18 @@
  */
 package org.springframework.cloud.dataflow.server.service.impl;
 
-import java.util.ArrayList;
-import java.util.Collection;
-
 import org.slf4j.LoggerFactory;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.security.oauth2.OAuth2ClientProperties;
+import org.springframework.boot.autoconfigure.security.oauth2.resource.UserInfoTokenServices;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.client.DefaultOAuth2ClientContext;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.security.oauth2.client.resource.OAuth2AccessDeniedException;
@@ -37,7 +34,9 @@ import org.springframework.security.oauth2.client.token.AccessTokenProvider;
 import org.springframework.security.oauth2.client.token.DefaultAccessTokenRequest;
 import org.springframework.security.oauth2.client.token.grant.password.ResourceOwnerPasswordAccessTokenProvider;
 import org.springframework.security.oauth2.client.token.grant.password.ResourceOwnerPasswordResourceDetails;
+import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
+import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.web.client.ResourceAccessException;
 
 /**
@@ -55,6 +54,9 @@ public class ManualOAuthAuthenticationProvider implements AuthenticationProvider
 
 	@Value("${security.oauth2.client.access-token-uri}")
 	private String accessTokenUri;
+
+	@Autowired
+	private UserInfoTokenServices userInfoTokenServices;
 
 	public AccessTokenProvider userAccessTokenProvider() {
 		ResourceOwnerPasswordAccessTokenProvider accessTokenProvider = new ResourceOwnerPasswordAccessTokenProvider();
@@ -80,9 +82,10 @@ public class ManualOAuthAuthenticationProvider implements AuthenticationProvider
 				new DefaultOAuth2ClientContext(new DefaultAccessTokenRequest()));
 		template.setAccessTokenProvider(userAccessTokenProvider());
 
+		final OAuth2AccessToken accessToken;
 		try {
 			logger.warn("Authenticating user '{}' using accessTokenUri '{}'.", username, accessTokenUri);
-			template.getAccessToken();
+			accessToken = template.getAccessToken();
 		}
 		catch (OAuth2AccessDeniedException e) {
 			if (e.getCause() instanceof ResourceAccessException) {
@@ -99,10 +102,8 @@ public class ManualOAuthAuthenticationProvider implements AuthenticationProvider
 					String.format("Unable to perform OAuth authentication for user '%s'.", username), e);
 		}
 
-		final Collection<GrantedAuthority> authorities = new ArrayList<>();
-		UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(username, password,
-				authorities);
-		return token;
+		final OAuth2Authentication auth2Authentication = userInfoTokenServices.loadAuthentication(accessToken.getValue());
+		return auth2Authentication;
 	}
 
 	@Override

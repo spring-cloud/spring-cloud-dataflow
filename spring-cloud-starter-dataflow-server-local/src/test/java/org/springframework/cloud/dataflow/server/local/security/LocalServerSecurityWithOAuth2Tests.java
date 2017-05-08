@@ -26,7 +26,8 @@ import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.security.oauth2.client.token.grant.client.ClientCredentialsResourceDetails;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 
-import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
 import static org.springframework.cloud.dataflow.server.local.security.SecurityTestUtils.basicAuthorizationHeader;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -123,9 +124,10 @@ public class LocalServerSecurityWithOAuth2Tests {
 
 		localDataflowResource.getMockMvc()
 				.perform(get("/security/info").header("Authorization", "bearer " + accessTokenAsString)).andDo(print())
-				.andExpect(status().isOk()).andExpect(jsonPath("$.authorizationEnabled", is(Boolean.FALSE)))
+				.andExpect(status().isOk()).andExpect(jsonPath("$.authorizationEnabled", is(Boolean.TRUE)))
 				.andExpect(jsonPath("$.authenticated", is(Boolean.TRUE)))
-				.andExpect(jsonPath("$.authenticationEnabled", is(Boolean.TRUE)));
+				.andExpect(jsonPath("$.authenticationEnabled", is(Boolean.TRUE)))
+				.andExpect(jsonPath("$.roles", hasSize(3)));
 	}
 
 	@Test
