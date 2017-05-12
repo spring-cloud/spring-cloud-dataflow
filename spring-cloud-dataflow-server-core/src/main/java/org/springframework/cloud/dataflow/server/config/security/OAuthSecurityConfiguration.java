@@ -100,7 +100,8 @@ public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 
-		final RequestMatcher textHtmlMatcher = new MediaTypeRequestMatcher(new BrowserDetectingContentNegotiationStrategy(),
+		final RequestMatcher textHtmlMatcher = new MediaTypeRequestMatcher(
+				new BrowserDetectingContentNegotiationStrategy(),
 				MediaType.TEXT_HTML);
 
 		final BasicAuthenticationEntryPoint basicAuthenticationEntryPoint = new BasicAuthenticationEntryPoint();
@@ -116,18 +117,18 @@ public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 		http.addFilterBefore(oAuth2AuthenticationProcessingFilter(), basicAuthenticationFilter.getClass());
 
 		http.authorizeRequests()
-			.antMatchers(
-				"/security/info**", "/login**", dashboard("/logout-success-oauth.html"),
-				dashboard("/styles/**"), dashboard("/images/**"), dashboard("/fonts/**"), dashboard("/lib/**")
-			).permitAll().anyRequest()
-			.authenticated().and()
-			.httpBasic().and()
-			.logout()
-			.logoutSuccessUrl(dashboard("/logout-success-oauth.html"))
-			.and().csrf().disable()
-			.exceptionHandling()
-			.defaultAuthenticationEntryPointFor(new LoginUrlAuthenticationEntryPoint("/login"), textHtmlMatcher)
-			.defaultAuthenticationEntryPointFor(basicAuthenticationEntryPoint, AnyRequestMatcher.INSTANCE);
+				.antMatchers(
+						"/security/info**", "/login**", dashboard("/logout-success-oauth.html"),
+						dashboard("/styles/**"), dashboard("/images/**"), dashboard("/fonts/**"), dashboard("/lib/**"))
+				.permitAll().anyRequest()
+				.authenticated().and()
+				.httpBasic().and()
+				.logout()
+				.logoutSuccessUrl(dashboard("/logout-success-oauth.html"))
+				.and().csrf().disable()
+				.exceptionHandling()
+				.defaultAuthenticationEntryPointFor(new LoginUrlAuthenticationEntryPoint("/login"), textHtmlMatcher)
+				.defaultAuthenticationEntryPointFor(basicAuthenticationEntryPoint, AnyRequestMatcher.INSTANCE);
 
 		securityStateBean.setAuthenticationEnabled(true);
 		securityStateBean.setAuthorizationEnabled(false);
@@ -144,7 +145,8 @@ public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
 	@Bean
 	public OAuth2RestTemplate oAuth2RestTemplate() {
-		final OAuth2RestTemplate oAuth2RestTemplate = new OAuth2RestTemplate(authorizationCodeResourceDetails, oauth2ClientContext);
+		final OAuth2RestTemplate oAuth2RestTemplate = new OAuth2RestTemplate(authorizationCodeResourceDetails,
+				oauth2ClientContext);
 		return oAuth2RestTemplate;
 	}
 
@@ -185,10 +187,13 @@ public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 	}
 
 	@EventListener
-	public void handleOAuth2AuthenticationFailureEvent(OAuth2AuthenticationFailureEvent oAuth2AuthenticationFailureEvent) {
-		final int throwableIdex = ExceptionUtils.indexOfThrowable(oAuth2AuthenticationFailureEvent.getException(), ResourceAccessException.class);
+	public void handleOAuth2AuthenticationFailureEvent(
+			OAuth2AuthenticationFailureEvent oAuth2AuthenticationFailureEvent) {
+		final int throwableIdex = ExceptionUtils.indexOfThrowable(oAuth2AuthenticationFailureEvent.getException(),
+				ResourceAccessException.class);
 		if (throwableIdex > -1) {
-			logger.error("An error ocurred while accessing an authentication REST resource.", oAuth2AuthenticationFailureEvent.getException());
+			logger.error("An error ocurred while accessing an authentication REST resource.",
+					oAuth2AuthenticationFailureEvent.getException());
 		}
 	}
 
@@ -201,7 +206,7 @@ public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
 			final String userAgent = request.getHeader(HttpHeaders.USER_AGENT);
 			if (userAgent != null && userAgent.contains("Mozilla/5.0")
-				&& !supportedMediaTypes.contains(MediaType.APPLICATION_JSON)) {
+					&& !supportedMediaTypes.contains(MediaType.APPLICATION_JSON)) {
 
 				return Collections.singletonList(MediaType.TEXT_HTML);
 			}

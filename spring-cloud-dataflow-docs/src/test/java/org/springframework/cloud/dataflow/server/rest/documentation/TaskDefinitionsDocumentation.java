@@ -34,25 +34,22 @@ public class TaskDefinitionsDocumentation extends BaseDocumentation {
 	@Before
 	public void setup() throws Exception {
 		this.mockMvc.perform(
-			post("/apps/task/timestamp")
-				.param("uri", "maven://org.springframework.cloud.task.app:timestamp-task:1.1.0.RELEASE")
-		)
-		.andExpect(status().isCreated());
+				post("/apps/task/timestamp")
+						.param("uri", "maven://org.springframework.cloud.task.app:timestamp-task:1.1.0.RELEASE"))
+				.andExpect(status().isCreated());
 	}
 
 	@Test
 	public void createDefinition() throws Exception {
 		this.mockMvc.perform(
-			post("/tasks/definitions")
-			.param("name", "my-task")
-			.param("definition", "timestamp --format='YYYY MM DD'")
-		)
-		.andExpect(status().isOk())
-		.andDo(this.documentationHandler.document(
-			requestParameters(
-				parameterWithName("name").description("The name for the created task definitions"),
-				parameterWithName("definition").description("The definition for the task, using Data Flow DSL")
-			)
-		));
+				post("/tasks/definitions")
+						.param("name", "my-task")
+						.param("definition", "timestamp --format='YYYY MM DD'"))
+				.andExpect(status().isOk())
+				.andDo(this.documentationHandler.document(
+						requestParameters(
+								parameterWithName("name").description("The name for the created task definitions"),
+								parameterWithName("definition")
+										.description("The definition for the task, using Data Flow DSL"))));
 	}
 }

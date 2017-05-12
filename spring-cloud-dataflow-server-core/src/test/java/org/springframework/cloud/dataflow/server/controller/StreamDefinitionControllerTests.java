@@ -15,8 +15,6 @@
  */
 package org.springframework.cloud.dataflow.server.controller;
 
-
-
 import java.lang.reflect.Field;
 import java.net.URI;
 
@@ -50,10 +48,12 @@ public class StreamDefinitionControllerTests {
 		controller.save("foo", "foo|bar", false);
 	}
 
-	private static StreamDefinitionController buildStreamDefinitionControllerStub(UriRegistry uriRegistry) throws Exception {
+	private static StreamDefinitionController buildStreamDefinitionControllerStub(UriRegistry uriRegistry)
+			throws Exception {
 		Unsafe unsafe = getUnsafe();
 
-		StreamDefinitionController controller = (StreamDefinitionController) unsafe.allocateInstance(StreamDefinitionController.class);
+		StreamDefinitionController controller = (StreamDefinitionController) unsafe
+				.allocateInstance(StreamDefinitionController.class);
 
 		AppRegistry appRegistry = new AppRegistry(uriRegistry, mock(ResourceLoader.class));
 

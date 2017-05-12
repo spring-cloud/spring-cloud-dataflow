@@ -23,25 +23,24 @@ package org.springframework.cloud.dataflow.core;
  */
 public class StreamPropertyKeys {
 
-    // @formatter:off (not working)
-    static final String PREFIX = "spring.cloud.stream.";
-    /**
-     * Prefix for Spring Cloud Stream Metrics.
-     */
-    public static final String METRICS_PREFIX = PREFIX + "metrics.";
-    /**
-     * METRICS Key property key.
-     */
-    public static final String METRICS_KEY = METRICS_PREFIX + "key";
-    /**
-     * METRICS properties property key.
-     */
-    public static final String METRICS_PROPERTIES = METRICS_PREFIX + "properties";
-    /**
-     * Instance Count property key.
-     */
-    public static final String INSTANCE_COUNT = PREFIX + "instanceCount";
-
+	// @formatter:off (not working)
+	static final String PREFIX = "spring.cloud.stream.";
+	/**
+	 * Prefix for Spring Cloud Stream Metrics.
+	 */
+	public static final String METRICS_PREFIX = PREFIX + "metrics.";
+	/**
+	 * METRICS Key property key.
+	 */
+	public static final String METRICS_KEY = METRICS_PREFIX + "key";
+	/**
+	 * METRICS properties property key.
+	 */
+	public static final String METRICS_PROPERTIES = METRICS_PREFIX + "properties";
+	/**
+	 * Instance Count property key.
+	 */
+	public static final String INSTANCE_COUNT = PREFIX + "instanceCount";
 
     // @formatter:on
 }

@@ -56,9 +56,9 @@ public class FakeMetricsCollectorResource extends ExternalResource {
 		System.setProperty(FAKE_METRICS_COLLECTOR_PORT_PROPERTY, String.valueOf(this.serverPort));
 
 		this.application = new SpringApplicationBuilder(FakeMetricsCollector.class)
-			.properties("logging.level.org.springframework.boot.autoconfigure.logging=debug")
-			.build()
-			.run("--spring.config.location=classpath:/org/springframework/cloud/dataflow/server/local/metrics/fakeMetricsCollectorConfig.yml");
+				.properties("logging.level.org.springframework.boot.autoconfigure.logging=debug")
+				.build()
+				.run("--spring.config.location=classpath:/org/springframework/cloud/dataflow/server/local/metrics/fakeMetricsCollectorConfig.yml");
 
 	}
 

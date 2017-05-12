@@ -50,16 +50,15 @@ import org.springframework.web.bind.annotation.RestController;
  * @author Gunnar Hillert
  */
 @RestController
-@SpringBootApplication(
-	excludeName={"org.springframework.cloud.dataflow.shell.autoconfigure.BaseShellAutoConfiguration"},
-	exclude={
-		DataSourceAutoConfiguration.class,
-		DataSourceTransactionManagerAutoConfiguration.class,
-		JmxAutoConfiguration.class,
-		LocalDataFlowServerAutoConfiguration.class,
-		ApplicationConfigurationMetadataResolverAutoConfiguration.class,
-		LocalDeployerAutoConfiguration.class,
-		IntegrationAutoConfiguration.class})
+@SpringBootApplication(excludeName = {
+		"org.springframework.cloud.dataflow.shell.autoconfigure.BaseShellAutoConfiguration" }, exclude = {
+				DataSourceAutoConfiguration.class,
+				DataSourceTransactionManagerAutoConfiguration.class,
+				JmxAutoConfiguration.class,
+				LocalDataFlowServerAutoConfiguration.class,
+				ApplicationConfigurationMetadataResolverAutoConfiguration.class,
+				LocalDeployerAutoConfiguration.class,
+				IntegrationAutoConfiguration.class })
 public class OAuth2TestServer {
 
 	public static void main(String[] args) {

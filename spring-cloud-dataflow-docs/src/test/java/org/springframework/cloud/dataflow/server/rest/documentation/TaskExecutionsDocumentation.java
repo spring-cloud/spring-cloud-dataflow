@@ -34,32 +34,31 @@ public class TaskExecutionsDocumentation extends BaseDocumentation {
 	@Before
 	public void setup() throws Exception {
 		this.mockMvc.perform(
-			post("/apps/task/timestamp")
-				.param("uri", "maven://org.springframework.cloud.task.app:timestamp-task:1.1.0.RELEASE")
-		).andExpect(status().isCreated());
+				post("/apps/task/timestamp")
+						.param("uri", "maven://org.springframework.cloud.task.app:timestamp-task:1.1.0.RELEASE"))
+				.andExpect(status().isCreated());
 		this.mockMvc.perform(
-			post("/tasks/definitions")
-				.param("name", "my-task")
-				.param("definition", "timestamp --format='yyyy MM dd'")
-		).andExpect(status().isOk());
+				post("/tasks/definitions")
+						.param("name", "my-task")
+						.param("definition", "timestamp --format='yyyy MM dd'"))
+				.andExpect(status().isOk());
 	}
 
 	@Test
 	public void launchTask() throws Exception {
 		this.mockMvc.perform(
-			post("/tasks/executions")
-				.param("name", "my-task")
-				.param("properties", "app.my-task.foo=bar,deployer.my-task.something-else=3")
-				.param("arguments", "--server.port=8080,--foo=bar")
-		)
-			.andExpect(status().isCreated())
-			.andDo(this.documentationHandler.document(
-				requestParameters(
-					parameterWithName("name").description("The name of the task definition to launch"),
-					parameterWithName("properties").optional().description("Application and Deployer properties to use while launching"),
-					parameterWithName("arguments").optional().description("Command line arguments to pass to the task")
-				)
-			));
+				post("/tasks/executions")
+						.param("name", "my-task")
+						.param("properties", "app.my-task.foo=bar,deployer.my-task.something-else=3")
+						.param("arguments", "--server.port=8080,--foo=bar"))
+				.andExpect(status().isCreated())
+				.andDo(this.documentationHandler.document(
+						requestParameters(
+								parameterWithName("name").description("The name of the task definition to launch"),
+								parameterWithName("properties").optional()
+										.description("Application and Deployer properties to use while launching"),
+								parameterWithName("arguments").optional()
+										.description("Command line arguments to pass to the task"))));
 	}
 
 }
