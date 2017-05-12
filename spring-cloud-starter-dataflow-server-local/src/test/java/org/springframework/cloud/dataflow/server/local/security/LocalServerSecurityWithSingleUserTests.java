@@ -104,7 +104,7 @@ public class LocalServerSecurityWithSingleUserTests {
 								"force", "false") },
 				{ HttpMethod.POST, HttpStatus.UNAUTHORIZED, "/apps/task/taskname", null, null },
 
-				{ HttpMethod.DELETE, HttpStatus.OK, "/apps/task/taskname", singleUser, null },  // Should
+				{ HttpMethod.DELETE, HttpStatus.OK, "/apps/task/taskname", singleUser, null }, // Should
 																								// be
 																								// 404
 																								// -

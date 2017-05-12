@@ -123,6 +123,6 @@ public class ApiDocumentation extends BaseDocumentation {
 						fieldWithPath("['" + Version.REVISION_KEY + "']")
 								.description("Incremented each time " + "a change is implemented in this REST API")
 
-				)));
+		)));
 	}
 }

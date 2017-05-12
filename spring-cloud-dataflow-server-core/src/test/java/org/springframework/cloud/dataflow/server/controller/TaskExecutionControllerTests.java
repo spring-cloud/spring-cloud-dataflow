@@ -79,23 +79,34 @@ public class TaskExecutionControllerTests {
 	private final static String TASK_NAME_FOOBAR = BASE_TASK_NAME + "_FOOBAR";
 
 	private static boolean initialized = false;
+
 	private static List sampleArgumentList;
+
 	private static List sampleCleansedArgumentList;
+
 	@Autowired
 	private TaskExecutionDao dao;
+
 	@Autowired
 	private JobRepository jobRepository;
+
 	@Autowired
 	private TaskDefinitionRepository taskDefinitionRepository;
+
 	@Autowired
 	private TaskBatchDao taskBatchDao;
+
 	private MockMvc mockMvc;
+
 	@Autowired
 	private WebApplicationContext wac;
+
 	@Autowired
 	private TaskExplorer taskExplorer;
+
 	@Autowired
 	private TaskService taskService;
+
 	@Autowired
 	private TaskLauncher taskLauncher;
 

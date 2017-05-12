@@ -48,11 +48,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 public class MetricsForStreamAppsDocumentation {
 
-	private final static FakeMetricsCollectorResource fakeMetricsCollectorResource =
-			new FakeMetricsCollectorResource();
+	private final static FakeMetricsCollectorResource fakeMetricsCollectorResource = new FakeMetricsCollectorResource();
 
-	private final static LocalDataflowResource localDataflowResource =
-		new LocalDataflowResource("classpath:rest-docs-config.yml");
+	private final static LocalDataflowResource localDataflowResource = new LocalDataflowResource(
+			"classpath:rest-docs-config.yml");
 
 	@Rule
 	public JUnitRestDocumentation restDocumentation = new JUnitRestDocumentation(BaseDocumentation.TARGET_DIRECTORY);
@@ -81,10 +80,10 @@ public class MetricsForStreamAppsDocumentation {
 	@Test
 	public void getMetricsWithCollectorRunning() throws Exception {
 		this.mockMvc.perform(get("/metrics/streams")
-			.accept(MediaType.APPLICATION_JSON))
-			.andDo(print())
-			.andExpect(jsonPath("$[0].name", is("foostream")))
-			.andExpect(jsonPath("$[0].applications", hasSize(2)))
-			.andExpect(status().isOk());
+				.accept(MediaType.APPLICATION_JSON))
+				.andDo(print())
+				.andExpect(jsonPath("$[0].name", is("foostream")))
+				.andExpect(jsonPath("$[0].applications", hasSize(2)))
+				.andExpect(status().isOk());
 	}
 }
