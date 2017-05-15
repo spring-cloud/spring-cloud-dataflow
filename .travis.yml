@@ -7,8 +7,8 @@ jdk:
   - oraclejdk8
 install: true
 script:
-  - '[ "${TRAVIS_PULL_REQUEST}" != "false" ] || ./mvnw cobertura:cobertura package -Pfull -U -Dmaven.test.redirectTestOutputToFile=false'
-  - '[ "${TRAVIS_PULL_REQUEST}"  = "false" ] || ./mvnw cobertura:cobertura package -Pfull -U -Dmaven.test.redirectTestOutputToFile=false'
+  - '[ "${TRAVIS_PULL_REQUEST}" != "false" ] || ./mvnw cobertura:cobertura package -Pfull -U -Dmaven.test.redirectTestOutputToFile=true'
+  - '[ "${TRAVIS_PULL_REQUEST}"  = "false" ] || ./mvnw cobertura:cobertura package -Pfull -U -Dmaven.test.redirectTestOutputToFile=true'
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)
