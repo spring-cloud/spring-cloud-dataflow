@@ -45,7 +45,6 @@ public class TaskDefinition extends DataFlowAppDefinition {
 	TaskDefinition(String registeredAppName, String label, Map<String, String> properties) {
 		super(registeredAppName, label, properties);
 		this.dslText = "";
-		properties.put(SPRING_CLOUD_TASK_NAME, registeredAppName);
 	}
 
 	public TaskDefinition(String name, String dsl) {
