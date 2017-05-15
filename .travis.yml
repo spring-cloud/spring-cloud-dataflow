@@ -8,7 +8,7 @@ jdk:
 install: true
 script:
   - '[ "${TRAVIS_PULL_REQUEST}" != "false" ] || ./mvnw cobertura:cobertura package -Pfull -U -Dmaven.test.redirectTestOutputToFile=false'
-  - '[ "${TRAVIS_PULL_REQUEST}" = "false" ] || ./mvnw cobertura:cobertura package -DskipTests -U -Dmaven.test.redirectTestOutputToFile=false'
+  - '[ "${TRAVIS_PULL_REQUEST}"  = "false" ] || ./mvnw cobertura:cobertura package -Pfull -U -Dmaven.test.redirectTestOutputToFile=false'
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)
