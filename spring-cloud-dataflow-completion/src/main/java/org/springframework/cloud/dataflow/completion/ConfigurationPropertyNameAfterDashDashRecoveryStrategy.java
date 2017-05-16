@@ -20,17 +20,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
-import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.dsl.CheckPointedParseException;
 import org.springframework.cloud.dataflow.registry.AppRegistration;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
-import org.springframework.core.io.Resource;
-
-import static org.springframework.cloud.dataflow.completion.CompletionProposal.expanding;
 
 /**
  * Provides completion proposals when the user has typed the two dashes that precede an
@@ -38,19 +33,17 @@ import static org.springframework.cloud.dataflow.completion.CompletionProposal.e
  *
  * @author Eric Bottard
  * @author Mark Fisher
+ * @author Oleg Zhurakousky
  */
 class ConfigurationPropertyNameAfterDashDashRecoveryStrategy
 		extends StacktraceFingerprintingRecoveryStrategy<CheckPointedParseException> {
 
-	private final AppRegistry appRegistry;
-
-	private final ApplicationConfigurationMetadataResolver metadataResolver;
+	private final ProposalsCollectorSupportUtils collectorSupport;
 
 	ConfigurationPropertyNameAfterDashDashRecoveryStrategy(AppRegistry appRegistry,
 			ApplicationConfigurationMetadataResolver metadataResolver) {
 		super(CheckPointedParseException.class, "file --", "file | foo --");
-		this.appRegistry = appRegistry;
-		this.metadataResolver = metadataResolver;
+		this.collectorSupport = new ProposalsCollectorSupportUtils(appRegistry, metadataResolver);
 	}
 
 	@Override
@@ -61,38 +54,10 @@ class ConfigurationPropertyNameAfterDashDashRecoveryStrategy
 		StreamDefinition streamDefinition = new StreamDefinition("__dummy", safe);
 		StreamAppDefinition lastApp = streamDefinition.getDeploymentOrderIterator().next();
 
-		String lastAppName = lastApp.getName();
-		AppRegistration lastAppRegistration = null;
-		for (ApplicationType appType : CompletionUtils.determinePotentialTypes(lastApp)) {
-			lastAppRegistration = appRegistry.find(lastAppName, appType);
-			if (lastAppRegistration != null) {
-				break;
-			}
-		}
-		if (lastAppRegistration == null) {
-			// Not a valid app name, do nothing
-			return;
-		}
-		Set<String> alreadyPresentOptions = new HashSet<>(lastApp.getProperties().keySet());
-
-		Resource metadataResource = lastAppRegistration.getMetadataResource();
-
-		CompletionProposal.Factory proposals = expanding(dsl);
-
-		// For whitelisted properties, use their shortname
-		for (ConfigurationMetadataProperty property : metadataResolver.listProperties(metadataResource)) {
-			if (!alreadyPresentOptions.contains(property.getName())) {
-				collector.add(proposals.withSuffix(property.getName() + "=", property.getShortDescription()));
-			}
-		}
-
-		// For other properties, use their fully qualified name
-		if (detailLevel > 1) {
-			for (ConfigurationMetadataProperty property : metadataResolver.listProperties(metadataResource, true)) {
-				if (!alreadyPresentOptions.contains(property.getId())) {
-					collector.add(proposals.withSuffix(property.getId() + "=", property.getShortDescription()));
-				}
-			}
+		AppRegistration appRegistration = this.collectorSupport.findAppRegistration(lastApp.getName(), CompletionUtils.determinePotentialTypes(lastApp));
+		if (appRegistration != null) {
+			Set<String> alreadyPresentOptions = new HashSet<>(lastApp.getProperties().keySet());
+			this.collectorSupport.doAddProposals(safe, "", appRegistration, alreadyPresentOptions, collector, detailLevel);
 		}
 	}
 }

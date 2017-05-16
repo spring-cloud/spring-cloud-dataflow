@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,8 +63,7 @@ public class UnfinishedTaskAppNameExpansionStrategy implements TaskExpansionStra
 			String candidateName = appRegistration.getName();
 			if (validTypesAtThisPosition.contains(appRegistration.getType()) && !alreadyTyped.equals(candidateName)
 					&& candidateName.startsWith(alreadyTyped)) {
-				String expansion = appRegistration.getName();// CompletionUtils.maybeQualifyWithLabel(appRegistration
-				// .getName(), taskDefinition);
+				String expansion = appRegistration.getName();
 
 				collector.add(proposals.withSuffix(expansion.substring(alreadyTyped.length())));
 			}

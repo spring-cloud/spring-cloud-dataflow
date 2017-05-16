@@ -20,16 +20,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.core.dsl.CheckPointedParseException;
 import org.springframework.cloud.dataflow.registry.AppRegistration;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
-import org.springframework.core.io.Resource;
-
-import static org.springframework.cloud.dataflow.completion.CompletionProposal.expanding;
 
 /**
  * Provides completion proposals when the user has typed the two dashes that precede an
@@ -38,19 +34,17 @@ import static org.springframework.cloud.dataflow.completion.CompletionProposal.e
  * @author Eric Bottard
  * @author Mark Fisher
  * @author Andy Clement
+ * @author Oleg Zhurakousky
  */
 class ConfigurationPropertyNameAfterDashDashTaskRecoveryStrategy
 		extends StacktraceFingerprintingTaskRecoveryStrategy<CheckPointedParseException> {
 
-	private final AppRegistry appRegistry;
-
-	private final ApplicationConfigurationMetadataResolver metadataResolver;
+	private final ProposalsCollectorSupportUtils collectorSupport;
 
 	ConfigurationPropertyNameAfterDashDashTaskRecoveryStrategy(AppRegistry appRegistry,
 			ApplicationConfigurationMetadataResolver metadataResolver) {
 		super(CheckPointedParseException.class, "file --");
-		this.appRegistry = appRegistry;
-		this.metadataResolver = metadataResolver;
+		this.collectorSupport = new ProposalsCollectorSupportUtils(appRegistry, metadataResolver);
 	}
 
 	@Override
@@ -60,32 +54,11 @@ class ConfigurationPropertyNameAfterDashDashTaskRecoveryStrategy
 		String safe = exception.getExpressionStringUntilCheckpoint();
 		TaskDefinition taskDefinition = new TaskDefinition("__dummy", safe);
 
-		String appName = taskDefinition.getRegisteredAppName();
-		AppRegistration appRegistration = appRegistry.find(appName, ApplicationType.task);
-		if (appRegistration == null) {
-			// Not a valid app name, do nothing
-			return;
-		}
-		Set<String> alreadyPresentOptions = new HashSet<>(taskDefinition.getProperties().keySet());
+		AppRegistration appRegistration = this.collectorSupport.findAppRegistration(taskDefinition.getRegisteredAppName(), ApplicationType.task);
 
-		Resource metadataResource = appRegistration.getMetadataResource();
-
-		CompletionProposal.Factory proposals = expanding(dsl);
-
-		// For whitelisted properties, use their shortname
-		for (ConfigurationMetadataProperty property : metadataResolver.listProperties(metadataResource)) {
-			if (!alreadyPresentOptions.contains(property.getName())) {
-				collector.add(proposals.withSuffix(property.getName() + "=", property.getShortDescription()));
-			}
-		}
-
-		// For other properties, use their fully qualified name
-		if (detailLevel > 1) {
-			for (ConfigurationMetadataProperty property : metadataResolver.listProperties(metadataResource, true)) {
-				if (!alreadyPresentOptions.contains(property.getId())) {
-					collector.add(proposals.withSuffix(property.getId() + "=", property.getShortDescription()));
-				}
-			}
+		if (appRegistration != null) {
+			Set<String> alreadyPresentOptions = new HashSet<>(taskDefinition.getProperties().keySet());
+			this.collectorSupport.doAddProposals(safe, "", appRegistration, alreadyPresentOptions, collector, detailLevel);
 		}
 	}
 }
