@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.dataflow.registry;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -58,6 +59,7 @@ import org.springframework.util.StringUtils;
  * @author Gunnar Hillert
  * @author Thomas Risberg
  * @author Eric Bottard
+ * @author Oleg Zhurakousky
  */
 public class AppRegistry {
 
@@ -92,6 +94,7 @@ public class AppRegistry {
 	}
 
 	public AppRegistration save(String name, ApplicationType type, URI uri, URI metadataUri) {
+		this.validateApplicationUri(uri);
 		this.uriRegistry.register(key(name, type), uri);
 		if (metadataUri != null) {
 			this.uriRegistry.register(metadataKey(name, type), metadataUri);
@@ -234,5 +237,13 @@ public class AppRegistry {
 					uri));
 		}
 		return uri;
+	}
+
+	private void validateApplicationUri(URI uri){
+		if (uri.getScheme().toLowerCase().equals("file")){
+			File file = new File(uri);
+			Assert.isTrue(file.exists() && !file.isDirectory() && file.getName().toLowerCase().endsWith(".jar"),
+					"The specified 'file' URI must point to an existing Spring-boot JAR file. Was " + uri);
+		}
 	}
 }
