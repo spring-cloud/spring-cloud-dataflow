@@ -57,7 +57,7 @@ class ConfigurationPropertyNameAfterDashDashRecoveryStrategy
 		AppRegistration appRegistration = this.collectorSupport.findAppRegistration(lastApp.getName(), CompletionUtils.determinePotentialTypes(lastApp));
 		if (appRegistration != null) {
 			Set<String> alreadyPresentOptions = new HashSet<>(lastApp.getProperties().keySet());
-			this.collectorSupport.doAddProposals(safe, "", appRegistration, alreadyPresentOptions, collector, detailLevel);
+			this.collectorSupport.addPropertiesProposals(safe, "", appRegistration, alreadyPresentOptions, collector, detailLevel);
 		}
 	}
 }

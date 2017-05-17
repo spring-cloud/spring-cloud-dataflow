@@ -16,15 +16,10 @@
 
 package org.springframework.cloud.dataflow.completion;
 
-import java.io.IOException;
-import java.net.URLClassLoader;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
-import org.springframework.boot.configurationmetadata.ValueHint;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
-import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.dsl.CheckPointedParseException;
@@ -32,9 +27,6 @@ import org.springframework.cloud.dataflow.core.dsl.Token;
 import org.springframework.cloud.dataflow.core.dsl.TokenKind;
 import org.springframework.cloud.dataflow.registry.AppRegistration;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
-import org.springframework.core.io.Resource;
-
-import static org.springframework.cloud.dataflow.completion.CompletionProposal.expanding;
 
 /**
  * Attempts to fill in possible values after a {@literal --foo=} dangling construct in the
@@ -42,13 +34,12 @@ import static org.springframework.cloud.dataflow.completion.CompletionProposal.e
  *
  * @author Eric Bottard
  * @author Mark Fisher
+ * @author Oleg Zhurakousky
  */
 public class ConfigurationPropertyValueHintRecoveryStrategy
 		extends StacktraceFingerprintingRecoveryStrategy<CheckPointedParseException> {
 
-	private final AppRegistry appRegistry;
-
-	private final ApplicationConfigurationMetadataResolver metadataResolver;
+	private final ProposalsCollectorSupportUtils collectorSupport;
 
 	@Autowired
 	private ValueHintProvider[] valueHintProviders = new ValueHintProvider[0];
@@ -56,8 +47,7 @@ public class ConfigurationPropertyValueHintRecoveryStrategy
 	ConfigurationPropertyValueHintRecoveryStrategy(AppRegistry appRegistry,
 			ApplicationConfigurationMetadataResolver metadataResolver) {
 		super(CheckPointedParseException.class, "foo --bar=", "foo | wizz --bar=");
-		this.appRegistry = appRegistry;
-		this.metadataResolver = metadataResolver;
+		this.collectorSupport = new ProposalsCollectorSupportUtils(appRegistry, metadataResolver);
 	}
 
 	@Override
@@ -68,44 +58,8 @@ public class ConfigurationPropertyValueHintRecoveryStrategy
 
 		AppRegistration lastAppRegistration = lookupLastApp(exception);
 
-		if (lastAppRegistration == null) {
-			// Not a valid app name, do nothing
-			return;
-		}
-		Resource metadataResource = lastAppRegistration.getMetadataResource();
-
-		CompletionProposal.Factory proposals = expanding(dsl);
-
-		List<ConfigurationMetadataProperty> whiteList = metadataResolver.listProperties(metadataResource);
-
-		URLClassLoader classLoader = null;
-		try {
-			for (ConfigurationMetadataProperty property : metadataResolver.listProperties(metadataResource, true)) {
-				if (CompletionUtils.isMatchingProperty(propertyName, property, whiteList)) {
-					if (classLoader == null) {
-						classLoader = metadataResolver.createAppClassLoader(metadataResource);
-					}
-					for (ValueHintProvider valueHintProvider : valueHintProviders) {
-						for (ValueHint valueHint : valueHintProvider.generateValueHints(property, classLoader)) {
-							collector.add(proposals.withSuffix(String.valueOf(valueHint.getValue()),
-									valueHint.getShortDescription()));
-						}
-					}
-				}
-			}
-		}
-		catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-		finally {
-			if (classLoader != null) {
-				try {
-					classLoader.close();
-				}
-				catch (IOException e) {
-					// ignore
-				}
-			}
+		if (lastAppRegistration != null) {
+			this.collectorSupport.addValueHintsProposals(dsl, lastAppRegistration, collector, propertyName, valueHintProviders);
 		}
 	}
 
@@ -113,16 +67,7 @@ public class ConfigurationPropertyValueHintRecoveryStrategy
 		String safe = exception.getExpressionStringUntilCheckpoint();
 		StreamDefinition streamDefinition = new StreamDefinition("__dummy", safe);
 		StreamAppDefinition lastApp = streamDefinition.getDeploymentOrderIterator().next();
-
-		String lastAppName = lastApp.getName();
-		AppRegistration lastAppRegistration = null;
-		for (ApplicationType appType : CompletionUtils.determinePotentialTypes(lastApp)) {
-			lastAppRegistration = this.appRegistry.find(lastAppName, appType);
-			if (lastAppRegistration != null) {
-				break;
-			}
-		}
-		return lastAppRegistration;
+		return this.collectorSupport.findAppRegistration(lastApp.getName(), CompletionUtils.determinePotentialTypes(lastApp));
 	}
 
 	private String recoverPropertyName(CheckPointedParseException exception) {

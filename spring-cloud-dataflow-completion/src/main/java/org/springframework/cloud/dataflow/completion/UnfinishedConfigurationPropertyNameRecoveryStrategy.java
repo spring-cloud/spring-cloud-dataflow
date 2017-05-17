@@ -58,7 +58,7 @@ public class UnfinishedConfigurationPropertyNameRecoveryStrategy
 		if (appRegistration != null) {
 			String startsWith = ProposalsCollectorSupportUtils.computeStartsWith(exception);
 			Set<String> alreadyPresentOptions = new HashSet<>(lastApp.getProperties().keySet());
-			this.collectorSupport.doAddProposals(safe, startsWith, appRegistration, alreadyPresentOptions, collector, detailLevel);
+			this.collectorSupport.addPropertiesProposals(safe, startsWith, appRegistration, alreadyPresentOptions, collector, detailLevel);
 		}
 	}
 }

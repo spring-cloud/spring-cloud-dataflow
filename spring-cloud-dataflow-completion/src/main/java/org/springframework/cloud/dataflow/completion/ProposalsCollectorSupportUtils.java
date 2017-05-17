@@ -15,10 +15,13 @@
  */
 package org.springframework.cloud.dataflow.completion;
 
+import java.io.IOException;
+import java.net.URLClassLoader;
 import java.util.List;
 import java.util.Set;
 
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
+import org.springframework.boot.configurationmetadata.ValueHint;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.dsl.CheckPointedParseException;
@@ -44,13 +47,12 @@ class ProposalsCollectorSupportUtils {
 
 	private final ApplicationConfigurationMetadataResolver metadataResolver;
 
-	ProposalsCollectorSupportUtils(AppRegistry appRegistry,
-			ApplicationConfigurationMetadataResolver metadataResolver) {
+	ProposalsCollectorSupportUtils(AppRegistry appRegistry, ApplicationConfigurationMetadataResolver metadataResolver) {
 		this.appRegistry = appRegistry;
 		this.metadataResolver = metadataResolver;
 	}
 
-	void doAddProposals(String text, String startsWith, AppRegistration appRegistration, Set<String> alreadyPresentOptions, List<CompletionProposal> collector, int detailLevel){
+	void addPropertiesProposals(String text, String startsWith, AppRegistration appRegistration, Set<String> alreadyPresentOptions, List<CompletionProposal> collector, int detailLevel){
 		Resource metadataResource = appRegistration.getMetadataResource();
 		CompletionProposal.Factory proposals = expanding(text);
 
@@ -70,6 +72,59 @@ class ProposalsCollectorSupportUtils {
 				}
 			}
 		}
+	}
+
+	void addValueHintsProposals(final String dsl, AppRegistration appRegistration, final List<CompletionProposal> collector, final String propertyName, final ValueHintProvider[] valueHintProviders){
+		final Resource metadataResource = appRegistration.getMetadataResource();
+
+		final URLClassLoader classLoader = metadataResolver.createAppClassLoader(metadataResource);
+		this.doWithClassLoader(classLoader, () -> {
+			CompletionProposal.Factory proposals = expanding(dsl);
+			List<ConfigurationMetadataProperty> whiteList = metadataResolver.listProperties(metadataResource);
+			for (ConfigurationMetadataProperty property : metadataResolver.listProperties(metadataResource, true)) {
+				if (CompletionUtils.isMatchingProperty(propertyName, property, whiteList)) {
+					for (ValueHintProvider valueHintProvider : valueHintProviders) {
+						for (ValueHint valueHint : valueHintProvider.generateValueHints(property, classLoader)) {
+							collector.add(proposals.withSuffix(String.valueOf(valueHint.getValue()),
+									valueHint.getShortDescription()));
+						}
+					}
+				}
+			}
+			return null;
+		});
+	}
+
+	boolean addAlreadyTypedValueHintsProposals(final String text, AppRegistration appRegistration, final List<CompletionProposal> collector, final String propertyName, final ValueHintProvider[] valueHintProviders, final String alreadyTyped){
+		final Resource metadataResource = appRegistration.getMetadataResource();
+
+		final URLClassLoader classLoader = metadataResolver.createAppClassLoader(metadataResource);
+		return this.doWithClassLoader(classLoader, () -> {
+			CompletionProposal.Factory proposals = expanding(text);
+			List<ConfigurationMetadataProperty> allProps = metadataResolver.listProperties(metadataResource, true);
+			List<ConfigurationMetadataProperty> whiteListedProps = metadataResolver.listProperties(metadataResource);
+			for (ConfigurationMetadataProperty property : allProps) {
+				if (CompletionUtils.isMatchingProperty(propertyName, property, whiteListedProps)) {
+					for (ValueHintProvider valueHintProvider : valueHintProviders) {
+						List<ValueHint> valueHints = valueHintProvider.generateValueHints(property, classLoader);
+						if (!valueHints.isEmpty() && valueHintProvider.isExclusive(property)) {
+							collector.clear();
+						}
+						for (ValueHint valueHint : valueHints) {
+							String candidate = String.valueOf(valueHint.getValue());
+							if (!candidate.equals(alreadyTyped) && candidate.startsWith(alreadyTyped)) {
+								collector.add(proposals.withSuffix(candidate.substring(alreadyTyped.length()),
+										valueHint.getShortDescription()));
+							}
+						}
+						if (!valueHints.isEmpty() && valueHintProvider.isExclusive(property)) {
+							return true;
+						}
+					}
+				}
+			}
+			return false;
+		});
 	}
 
 	AppRegistration findAppRegistration(String appName, ApplicationType... appTypes){
@@ -101,5 +156,26 @@ class ProposalsCollectorSupportUtils {
 		}
 		String startsWith = startsWithBuffer.toString();
 		return startsWith;
+	}
+
+	/**
+	 * Emulates 'try-with-resources' by closing class loader (ignoring any exceptions) after executing callback.
+	 */
+	private <T> T doWithClassLoader(URLClassLoader classLoader, Callback<T> callback) {
+		try {
+			return callback.invoke();
+		}
+		finally {
+			try {
+				classLoader.close();
+			}
+			catch (IOException e) {
+				// ignore
+			}
+		}
+	}
+
+	private static interface Callback<T> {
+		T invoke();
 	}
 }

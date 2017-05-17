@@ -53,7 +53,7 @@ class AddAppOptionsTaskExpansionStrategy implements TaskExpansionStrategy {
 
 		if (appRegistration != null) {
 			Set<String> alreadyPresentOptions = new HashSet<>(taskDefinition.getProperties().keySet());
-			this.collectorSupport.doAddProposals(text, "", appRegistration, alreadyPresentOptions, collector, detailLevel);
+			this.collectorSupport.addPropertiesProposals(text, "", appRegistration, alreadyPresentOptions, collector, detailLevel);
 		}
 		return false;
 	}
