@@ -16,15 +16,11 @@
 
 package org.springframework.cloud.dataflow.completion;
 
-import java.io.IOException;
-import java.net.URLClassLoader;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
-import org.springframework.boot.configurationmetadata.ValueHint;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
@@ -33,9 +29,6 @@ import org.springframework.cloud.dataflow.core.dsl.Token;
 import org.springframework.cloud.dataflow.core.dsl.TokenKind;
 import org.springframework.cloud.dataflow.registry.AppRegistration;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
-import org.springframework.core.io.Resource;
-
-import static org.springframework.cloud.dataflow.completion.CompletionProposal.expanding;
 
 /**
  * Attempts to fill in possible values after a {@literal --foo=prefix} (syntactically
@@ -44,20 +37,18 @@ import static org.springframework.cloud.dataflow.completion.CompletionProposal.e
  * @author Eric Bottard
  * @author Mark Fisher
  * @author Andy Clement
+ * @author Oleg Zhurakousky
  */
 public class ConfigurationPropertyValueHintTaskExpansionStrategy implements TaskExpansionStrategy {
 
-	private final AppRegistry appRegistry;
-
-	private final ApplicationConfigurationMetadataResolver metadataResolver;
+	private final ProposalsCollectorSupportUtils collectorSupport;
 
 	@Autowired
 	private ValueHintProvider[] valueHintProviders = new ValueHintProvider[0];
 
 	ConfigurationPropertyValueHintTaskExpansionStrategy(AppRegistry appRegistry,
 			ApplicationConfigurationMetadataResolver metadataResolver) {
-		this.appRegistry = appRegistry;
-		this.metadataResolver = metadataResolver;
+		this.collectorSupport = new ProposalsCollectorSupportUtils(appRegistry, metadataResolver);
 	}
 
 	@Override
@@ -73,59 +64,10 @@ public class ConfigurationPropertyValueHintTaskExpansionStrategy implements Task
 
 		String alreadyTyped = parseResult.getProperties().get(propertyName);
 
-		String appName = parseResult.getRegisteredAppName();
-		AppRegistration appRegistration = appRegistry.find(appName, ApplicationType.task);
-		if (appRegistration == null) {
-			// Not a valid app name, do nothing
-			return false;
+		AppRegistration lastAppRegistration = this.collectorSupport.findAppRegistration(parseResult.getRegisteredAppName(), ApplicationType.task);
+		if (lastAppRegistration != null) {
+			return this.collectorSupport.addAlreadyTypedValueHintsProposals(text, lastAppRegistration, collector, propertyName, valueHintProviders, alreadyTyped);
 		}
-		Resource metadataResource = appRegistration.getMetadataResource();
-
-		CompletionProposal.Factory proposals = expanding(text);
-
-		List<ConfigurationMetadataProperty> allProps = metadataResolver.listProperties(metadataResource, true);
-		List<ConfigurationMetadataProperty> whiteListedProps = metadataResolver.listProperties(metadataResource);
-
-		URLClassLoader classLoader = null;
-		try {
-			for (ConfigurationMetadataProperty property : allProps) {
-				if (CompletionUtils.isMatchingProperty(propertyName, property, whiteListedProps)) {
-					if (classLoader == null) {
-						classLoader = metadataResolver.createAppClassLoader(metadataResource);
-					}
-					for (ValueHintProvider valueHintProvider : valueHintProviders) {
-						List<ValueHint> valueHints = valueHintProvider.generateValueHints(property, classLoader);
-						if (!valueHints.isEmpty() && valueHintProvider.isExclusive(property)) {
-							collector.clear();
-						}
-						for (ValueHint valueHint : valueHints) {
-							String candidate = String.valueOf(valueHint.getValue());
-							if (!candidate.equals(alreadyTyped) && candidate.startsWith(alreadyTyped)) {
-								collector.add(proposals.withSuffix(candidate.substring(alreadyTyped.length()),
-										valueHint.getShortDescription()));
-							}
-						}
-						if (!valueHints.isEmpty() && valueHintProvider.isExclusive(property)) {
-							return true;
-						}
-					}
-				}
-			}
-		}
-		catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-		finally {
-			if (classLoader != null) {
-				try {
-					classLoader.close();
-				}
-				catch (IOException e) {
-					// ignore
-				}
-			}
-		}
-
 		return false;
 	}
 
