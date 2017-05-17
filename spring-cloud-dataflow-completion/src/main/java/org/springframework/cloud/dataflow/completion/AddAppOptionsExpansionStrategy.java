@@ -51,7 +51,7 @@ class AddAppOptionsExpansionStrategy implements ExpansionStrategy {
 
 		if (appRegistration != null) {
 			Set<String> alreadyPresentOptions = new HashSet<>(lastApp.getProperties().keySet());
-			this.collectorSupport.doAddProposals(text, "", appRegistration, alreadyPresentOptions, collector, detailLevel);
+			this.collectorSupport.addPropertiesProposals(text, "", appRegistration, alreadyPresentOptions, collector, detailLevel);
 		}
 		return false;
 	}
