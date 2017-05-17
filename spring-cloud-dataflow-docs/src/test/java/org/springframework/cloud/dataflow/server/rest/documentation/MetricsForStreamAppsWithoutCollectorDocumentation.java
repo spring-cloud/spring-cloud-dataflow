@@ -31,8 +31,8 @@ public class MetricsForStreamAppsWithoutCollectorDocumentation extends BaseDocum
 	@Test
 	public void getMetricsWithoutCollectorRunning() throws Exception {
 		this.mockMvc.perform(get("/metrics/streams")
-			.accept(MediaType.APPLICATION_JSON))
-			.andExpect(status().isOk());
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk());
 	}
 
 }

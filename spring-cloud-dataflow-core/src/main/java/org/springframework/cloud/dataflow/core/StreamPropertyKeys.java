@@ -23,7 +23,7 @@ package org.springframework.cloud.dataflow.core;
  */
 public class StreamPropertyKeys {
 
-    // @formatter:off (not working)
+	// @formatter:off (not working)
     static final String PREFIX = "spring.cloud.stream.";
     /**
      * Prefix for Spring Cloud Stream Metrics.

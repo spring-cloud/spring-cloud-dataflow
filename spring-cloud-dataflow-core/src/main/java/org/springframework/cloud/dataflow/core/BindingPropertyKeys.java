@@ -25,7 +25,6 @@ package org.springframework.cloud.dataflow.core;
  */
 public class BindingPropertyKeys {
 
-
 	// @formatter:off (not working...)
     private static final String ROOT_PREFIX = StreamPropertyKeys.PREFIX;
 
