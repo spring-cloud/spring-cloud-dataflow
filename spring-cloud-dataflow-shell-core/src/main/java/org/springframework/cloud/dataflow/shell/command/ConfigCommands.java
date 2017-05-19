@@ -39,7 +39,9 @@ import org.springframework.cloud.dataflow.rest.resource.about.FeatureInfo;
 import org.springframework.cloud.dataflow.rest.resource.about.RuntimeEnvironmentDetails;
 import org.springframework.cloud.dataflow.rest.resource.about.SecurityInfo;
 import org.springframework.cloud.dataflow.rest.resource.security.SecurityInfoResource;
-import org.springframework.cloud.dataflow.rest.util.HttpUtils;
+import org.springframework.cloud.dataflow.rest.util.HttpClientConfigurer;
+import org.springframework.cloud.dataflow.rest.util.ProcessOutputResource;
+import org.springframework.cloud.dataflow.rest.util.ResourceBasedAuthorizationInterceptor;
 import org.springframework.cloud.dataflow.shell.Target;
 import org.springframework.cloud.dataflow.shell.TargetHolder;
 import org.springframework.cloud.dataflow.shell.command.support.RoleType;
@@ -50,6 +52,7 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
+import org.springframework.core.io.Resource;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
 import org.springframework.shell.core.CommandMarker;
@@ -84,6 +87,7 @@ import static org.springframework.shell.table.BorderSpecification.TOP;
  * @author Gary Russell
  * @author Mark Pollack
  * @author Eric Bottard
+ * @author Mike Heath
  */
 @Component
 @Configuration
@@ -112,6 +116,9 @@ public class ConfigCommands implements CommandMarker, InitializingBean, Applicat
 
 	@Value("${dataflow.skip-ssl-validation:" + Target.DEFAULT_UNSPECIFIED_SKIP_SSL_VALIDATION + "}")
 	private boolean skipSslValidation;
+
+	@Value("${dataflow.credentials-provider-command:" + Target.DEFAULT_CREDENTIALS_PROVIDER_COMMAND + "}")
+	private String credentialsProviderCommand;
 
 	private UserInput userInput;
 
@@ -164,12 +171,16 @@ public class ConfigCommands implements CommandMarker, InitializingBean, Applicat
 					"password" }, help = "the password for authenticated access to the Admin REST endpoint (valid only with a "
 							+ "username)", specifiedDefaultValue = Target.DEFAULT_SPECIFIED_PASSWORD, unspecifiedDefaultValue = Target.DEFAULT_UNSPECIFIED_PASSWORD) String targetPassword,
 			@CliOption(mandatory = false, key = {
+					"credentials-provider-command" }, help = "a command to run that outputs the HTTP credentials used for authentication", unspecifiedDefaultValue = Target.DEFAULT_CREDENTIALS_PROVIDER_COMMAND) String credentialsProviderCommand,
+			@CliOption(mandatory = false, key = {
 					"skip-ssl-validation" }, help = "accept any SSL certificate (even self-signed)", specifiedDefaultValue = Target.DEFAULT_SPECIFIED_SKIP_SSL_VALIDATION, unspecifiedDefaultValue = Target.DEFAULT_UNSPECIFIED_SKIP_SSL_VALIDATION) boolean skipSslValidation) {
-		if (!StringUtils.isEmpty(targetPassword) && StringUtils.isEmpty(targetUsername)) {
+		if (StringUtils.isEmpty(credentialsProviderCommand) &&
+				!StringUtils.isEmpty(targetPassword) && StringUtils.isEmpty(targetUsername)) {
 			return "A password may be specified only together with a username";
 		}
 
-		if (StringUtils.isEmpty(targetPassword) && !StringUtils.isEmpty(targetUsername)) {
+		if (StringUtils.isEmpty(credentialsProviderCommand) &&
+				StringUtils.isEmpty(targetPassword) && !StringUtils.isEmpty(targetUsername)) {
 			// read password from the command line
 			targetPassword = userInput.prompt("Password", "", false);
 		}
@@ -177,8 +188,17 @@ public class ConfigCommands implements CommandMarker, InitializingBean, Applicat
 		try {
 			this.targetHolder.setTarget(new Target(targetUriString, targetUsername, targetPassword, skipSslValidation));
 
-			HttpUtils.prepareRestTemplate(this.restTemplate, this.targetHolder.getTarget().getTargetUri(),
-					targetUsername, targetPassword, skipSslValidation);
+			final HttpClientConfigurer httpClientConfigurer = HttpClientConfigurer.create()
+					.targetHost(this.targetHolder.getTarget().getTargetUri())
+					.skipTlsCertificateVerification(skipSslValidation);
+			if (StringUtils.hasText(targetUsername) && StringUtils.hasText(targetPassword)) {
+				httpClientConfigurer.basicAuthCredentials(targetUsername, targetPassword);
+			}
+			if (StringUtils.hasText(credentialsProviderCommand)) {
+				final Resource credentialsResource = new ProcessOutputResource(credentialsProviderCommand.split("\\s+"));
+				httpClientConfigurer.addInterceptor(new ResourceBasedAuthorizationInterceptor(credentialsResource));
+			}
+			this.restTemplate.setRequestFactory(httpClientConfigurer.buildClientHttpRequestFactory());
 
 			this.shell.setDataFlowOperations(
 					new DataFlowTemplate(targetHolder.getTarget().getTargetUri(), this.restTemplate));
@@ -334,7 +354,6 @@ public class ConfigCommands implements CommandMarker, InitializingBean, Applicat
 								target.getTargetUriAsString(), targetException.toString()));
 			}
 		}
-
 	}
 
 	@Override
@@ -342,7 +361,7 @@ public class ConfigCommands implements CommandMarker, InitializingBean, Applicat
 		// Only invoke if the shell is executing in the same application context as the
 		// data flow server.
 		if (!initialized) {
-			target(this.serverUri, this.userName, this.password, this.skipSslValidation);
+			target(this.serverUri, this.userName, this.password, this.credentialsProviderCommand, this.skipSslValidation);
 		}
 	}
 
@@ -352,7 +371,7 @@ public class ConfigCommands implements CommandMarker, InitializingBean, Applicat
 		// mode.
 		if (applicationContext != null && !applicationContext.containsBean("streamDefinitionRepository")) {
 			initialized = true;
-			target(this.serverUri, this.userName, this.password, this.skipSslValidation);
+			target(this.serverUri, this.userName, this.password, this.credentialsProviderCommand, this.skipSslValidation);
 		}
 	}
 

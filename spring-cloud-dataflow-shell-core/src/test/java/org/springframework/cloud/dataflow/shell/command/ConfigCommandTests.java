@@ -116,7 +116,7 @@ public class ConfigCommandTests {
 
 		configCommands.onApplicationEvent(null);
 
-		final String targetResult = configCommands.target("http://localhost:9393", null, null, false);
+		final String targetResult = configCommands.target("http://localhost:9393", null, null, null, false);
 		assertThat(targetResult, containsString("Incompatible version of Data Flow server detected"));
 	}
 

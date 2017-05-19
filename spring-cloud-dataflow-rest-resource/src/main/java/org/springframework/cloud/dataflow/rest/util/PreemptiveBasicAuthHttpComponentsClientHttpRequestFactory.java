@@ -30,6 +30,10 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 
 /**
+ * {@link HttpComponentsClientHttpRequestFactory} extension that aggressively
+ * sends HTTP basic authentication credentials without having to first
+ * receive an HTTP 401 response from the server.
+ *
  * @author Gunnar Hillert
  */
 public class PreemptiveBasicAuthHttpComponentsClientHttpRequestFactory extends HttpComponentsClientHttpRequestFactory {
@@ -43,10 +47,6 @@ public class PreemptiveBasicAuthHttpComponentsClientHttpRequestFactory extends H
 
 	@Override
 	protected HttpContext createHttpContext(HttpMethod httpMethod, URI uri) {
-		return createHttpContext();
-	}
-
-	private HttpContext createHttpContext() {
 		final AuthCache authCache = new BasicAuthCache();
 
 		final BasicScheme basicAuth = new BasicScheme();
@@ -56,4 +56,5 @@ public class PreemptiveBasicAuthHttpComponentsClientHttpRequestFactory extends H
 		localcontext.setAttribute(HttpClientContext.AUTH_CACHE, authCache);
 		return localcontext;
 	}
+
 }
