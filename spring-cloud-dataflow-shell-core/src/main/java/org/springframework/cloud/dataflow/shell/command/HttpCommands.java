@@ -27,7 +27,7 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import org.springframework.cloud.dataflow.rest.util.HttpUtils;
+import org.springframework.cloud.dataflow.rest.util.HttpClientConfigurer;
 import org.springframework.cloud.dataflow.shell.Target;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -99,7 +99,11 @@ public class HttpCommands implements CommandMarker {
 			outputRequest("POST", requestURI, mediaType, data, buffer);
 			final RestTemplate restTemplate = createRestTemplate(buffer);
 
-			HttpUtils.prepareRestTemplate(restTemplate, requestURI, targetUsername, targetPassword, skipSslValidation);
+			restTemplate.setRequestFactory(HttpClientConfigurer.create()
+					.targetHost(requestURI)
+					.basicAuthCredentials(targetUsername, targetPassword)
+					.skipTlsCertificateVerification(skipSslValidation)
+					.buildClientHttpRequestFactory());
 
 			ResponseEntity<String> response = restTemplate.postForEntity(requestURI, request, String.class);
 			outputResponse(response, buffer);
@@ -137,7 +141,11 @@ public class HttpCommands implements CommandMarker {
 
 			final RestTemplate restTemplate = createRestTemplate(buffer);
 
-			HttpUtils.prepareRestTemplate(restTemplate, requestURI, targetUsername, targetPassword, skipSslValidation);
+			restTemplate.setRequestFactory(HttpClientConfigurer.create()
+					.targetHost(requestURI)
+					.basicAuthCredentials(targetUsername, targetPassword)
+					.skipTlsCertificateVerification(skipSslValidation)
+					.buildClientHttpRequestFactory());
 
 			ResponseEntity<String> response = restTemplate.getForEntity(requestURI, String.class);
 			outputResponse(response, buffer);

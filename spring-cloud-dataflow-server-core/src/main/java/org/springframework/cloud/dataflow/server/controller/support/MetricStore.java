@@ -28,7 +28,7 @@ import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.cloud.dataflow.rest.util.HttpUtils;
+import org.springframework.cloud.dataflow.rest.util.HttpClientConfigurer;
 import org.springframework.cloud.dataflow.server.config.MetricsProperties;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.PagedResources;
@@ -73,21 +73,23 @@ public class MetricStore {
 		messageConverter.setSupportedMediaTypes(MediaType.parseMediaTypes("application/hal+json"));
 		messageConverter.setObjectMapper(mapper);
 		restTemplate = new RestTemplate(Arrays.asList(messageConverter));
-		String baseURI = metricsProperties.getCollector().getUri();
+		final MetricsProperties.Collector collector = metricsProperties.getCollector();
+		String baseURI = collector.getUri();
 		if (StringUtils.hasText(baseURI)) {
 			try {
 				URI uri = new URI(baseURI);
 				this.collectorEndpoint = UriComponentsBuilder.fromUri(uri).path("/collector/metrics/streams").build()
 						.toString();
 				logger.info("Metrics Collector URI = [" + collectorEndpoint + "]");
-				validateUsernamePassword(metricsProperties.getCollector().getUsername(),
-						metricsProperties.getCollector().getPassword());
-				if (StringUtils.hasText(metricsProperties.getCollector().getUsername())
-						&& StringUtils.hasText(metricsProperties.getCollector().getPassword())) {
-					HttpUtils.prepareRestTemplate(this.restTemplate, new URI(collectorEndpoint),
-							metricsProperties.getCollector().getUsername(),
-							metricsProperties.getCollector().getPassword(),
-							metricsProperties.getCollector().isSkipSslValidation());
+				validateUsernamePassword(collector.getUsername(),
+						collector.getPassword());
+				if (StringUtils.hasText(collector.getUsername())
+						&& StringUtils.hasText(collector.getPassword())) {
+					this.restTemplate.setRequestFactory(HttpClientConfigurer.create()
+							.targetHost(new URI(collectorEndpoint))
+							.basicAuthCredentials(collector.getUsername(), collector.getPassword())
+							.skipTlsCertificateVerification(collector.isSkipSslValidation())
+							.buildClientHttpRequestFactory());
 					logger.debug("Configured basic security for Metrics Collector endpoint");
 				}
 				else {
