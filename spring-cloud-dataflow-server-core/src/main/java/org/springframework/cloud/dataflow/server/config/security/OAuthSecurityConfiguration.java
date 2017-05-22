@@ -26,7 +26,6 @@ import org.slf4j.LoggerFactory;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
-import org.springframework.boot.autoconfigure.security.oauth2.resource.AuthoritiesExtractor;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.ResourceServerProperties;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.UserInfoTokenServices;
 import org.springframework.cloud.dataflow.server.config.security.support.DefaultDataflowAuthoritiesExtractor;
@@ -104,9 +103,6 @@ public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 	@Autowired
 	private AuthorizationConfig authorizationConfig;
 
-	@Autowired(required=false)
-	private AuthoritiesExtractor authoritiesExtractor;
-
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 
@@ -161,15 +157,7 @@ public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 		final UserInfoTokenServices tokenServices = new UserInfoTokenServices(resourceServerProperties.getUserInfoUri(),
 				authorizationCodeResourceDetails.getClientId());
 		tokenServices.setRestTemplate(oAuth2RestTemplate());
-
-		if (this.authoritiesExtractor == null) {
-			logger.info("Populating UserInfoTokenServices with default AuthoritiesExtractor.");
-			tokenServices.setAuthoritiesExtractor(new DefaultDataflowAuthoritiesExtractor());
-		}
-		else {
-			logger.info("Populating UserInfoTokenServices with AuthoritiesExtractor: " + this.authoritiesExtractor);
-			tokenServices.setAuthoritiesExtractor(this.authoritiesExtractor);
-		}
+		tokenServices.setAuthoritiesExtractor(new DefaultDataflowAuthoritiesExtractor());
 		return tokenServices;
 	}
 
@@ -217,10 +205,12 @@ public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
 	@EventListener
 	public void handleOAuth2AuthenticationFailureEvent(OAuth2AuthenticationFailureEvent oAuth2AuthenticationFailureEvent) {
-		final int throwableIdex = ExceptionUtils.indexOfThrowable(oAuth2AuthenticationFailureEvent.getException(), ResourceAccessException.class);
-		if (throwableIdex > -1) {
+		final int throwableIdexForResourceAccessException = ExceptionUtils.indexOfThrowable(oAuth2AuthenticationFailureEvent.getException(), ResourceAccessException.class);
+
+		if (throwableIdexForResourceAccessException > -1) {
 			logger.error("An error ocurred while accessing an authentication REST resource.", oAuth2AuthenticationFailureEvent.getException());
 		}
+
 	}
 
 	private static class BrowserDetectingContentNegotiationStrategy extends HeaderContentNegotiationStrategy {
