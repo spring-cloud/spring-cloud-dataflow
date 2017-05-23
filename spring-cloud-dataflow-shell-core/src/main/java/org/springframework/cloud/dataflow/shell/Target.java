@@ -46,6 +46,8 @@ public class Target {
 
 	public static final String DEFAULT_UNSPECIFIED_SKIP_SSL_VALIDATION = "false";
 
+	public static final String DEFAULT_CREDENTIALS_PROVIDER_COMMAND = "";
+
 	public static final String DEFAULT_TARGET = DEFAULT_SCHEME + "://" + DEFAULT_HOST + ":" + DEFAULT_PORT + "/";
 
 	private final URI targetUri;
