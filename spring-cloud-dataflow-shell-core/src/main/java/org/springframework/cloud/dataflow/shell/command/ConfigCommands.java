@@ -43,6 +43,7 @@ import org.springframework.cloud.dataflow.rest.util.HttpClientConfigurer;
 import org.springframework.cloud.dataflow.rest.util.ProcessOutputResource;
 import org.springframework.cloud.dataflow.rest.util.ResourceBasedAuthorizationInterceptor;
 import org.springframework.cloud.dataflow.shell.Target;
+import org.springframework.cloud.dataflow.shell.TargetCredentials;
 import org.springframework.cloud.dataflow.shell.TargetHolder;
 import org.springframework.cloud.dataflow.shell.command.support.RoleType;
 import org.springframework.cloud.dataflow.shell.config.DataFlowShell;
@@ -195,6 +196,7 @@ public class ConfigCommands implements CommandMarker, InitializingBean, Applicat
 				httpClientConfigurer.basicAuthCredentials(targetUsername, targetPassword);
 			}
 			if (StringUtils.hasText(credentialsProviderCommand)) {
+				this.targetHolder.getTarget().setTargetCredentials(new TargetCredentials(true));
 				final Resource credentialsResource = new ProcessOutputResource(credentialsProviderCommand.split("\\s+"));
 				httpClientConfigurer.addInterceptor(new ResourceBasedAuthorizationInterceptor(credentialsResource));
 			}

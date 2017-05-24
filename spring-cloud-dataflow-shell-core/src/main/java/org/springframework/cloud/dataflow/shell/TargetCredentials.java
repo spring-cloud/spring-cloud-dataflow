@@ -37,9 +37,19 @@ public class TargetCredentials {
 
 	private final String password;
 
+	private final boolean usesAccessToken;
+
 	public TargetCredentials(String username, String password) {
 		this.username = username;
 		this.password = password;
+		this.usesAccessToken = false;
+	}
+
+	public TargetCredentials(boolean usesAccessToken) {
+		super();
+		this.username = null;
+		this.password = null;
+		this.usesAccessToken = usesAccessToken;
 	}
 
 	public String getUsername() {
@@ -51,7 +61,12 @@ public class TargetCredentials {
 	}
 
 	public String getDisplayableContents() {
-		return "[username='" + username + "', password='********']";
+		if (this.usesAccessToken) {
+			return "[Uses OAuth2 Access Token]";
+		}
+		else {
+			return "[username='" + username + "', password='********']";
+		}
 	}
 
 	public List<RoleType> getRoles() {
