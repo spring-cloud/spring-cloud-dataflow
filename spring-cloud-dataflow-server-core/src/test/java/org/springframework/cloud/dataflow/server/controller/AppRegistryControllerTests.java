@@ -16,6 +16,8 @@
 
 package org.springframework.cloud.dataflow.server.controller;
 
+import java.io.File;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -78,16 +80,16 @@ public class AppRegistryControllerTests {
 
 	@Test
 	public void testRegisterApplication() throws Exception {
-		mockMvc.perform(post("/apps/processor/blubba").param("uri", "file:///foo").accept(MediaType.APPLICATION_JSON))
+		mockMvc.perform(post("/apps/processor/blubba").param("uri", "maven://foo:bar:1.0.2").accept(MediaType.APPLICATION_JSON))
 				.andDo(print()).andExpect(status().isCreated());
-		assertThat(appRegistry.find("blubba", ApplicationType.processor).getUri().toString(), is("file:///foo"));
+		assertThat(appRegistry.find("blubba", ApplicationType.processor).getUri().toString(), is("maven://foo:bar:1.0.2"));
 	}
 
 	@Test
 	public void testRegisterApplicationTwice() throws Exception {
-		mockMvc.perform(post("/apps/processor/blubba").param("uri", "file:///foo").accept(MediaType.APPLICATION_JSON))
+		mockMvc.perform(post("/apps/processor/blubba").param("uri", "maven://foo:bar:1.0.2").accept(MediaType.APPLICATION_JSON))
 				.andDo(print()).andExpect(status().isCreated());
-		mockMvc.perform(post("/apps/processor/blubba").param("uri", "file:///foo").accept(MediaType.APPLICATION_JSON))
+		mockMvc.perform(post("/apps/processor/blubba").param("uri", "maven://foo:bar:1.0.2").accept(MediaType.APPLICATION_JSON))
 				.andDo(print()).andExpect(status().isConflict());
 	}
 
@@ -96,17 +98,17 @@ public class AppRegistryControllerTests {
 		mockMvc.perform(
 				post("/apps").param("uri", "classpath:app-registry.properties").accept(MediaType.APPLICATION_JSON))
 				.andDo(print()).andExpect(status().isCreated());
-		assertThat(appRegistry.find("foo", ApplicationType.sink).getUri().toString(), is("file:///bar"));
+		assertThat(appRegistry.find("foo", ApplicationType.sink).getUri().toString(), is("maven://foo:foo:1.0.2"));
 		assertThat(appRegistry.find("foo", ApplicationType.sink).getMetadataUri().toString(),
 				is("file:///bar-metadata"));
-		assertThat(appRegistry.find("bar", ApplicationType.source).getUri().toString(), is("file:///foo"));
+		assertThat(appRegistry.find("bar", ApplicationType.source).getUri().toString(), is("maven://bar:bar:1.0.2"));
 	}
 
 	@Test
 	public void testRegisterAll() throws Exception {
-		mockMvc.perform(post("/apps").param("apps", "sink.foo=file:///bar").accept(MediaType.APPLICATION_JSON))
+		mockMvc.perform(post("/apps").param("apps", "sink.foo=maven://foo:bar:1.0.2").accept(MediaType.APPLICATION_JSON))
 				.andDo(print()).andExpect(status().isCreated());
-		assertThat(appRegistry.find("foo", ApplicationType.sink).getUri().toString(), is("file:///bar"));
+		assertThat(appRegistry.find("foo", ApplicationType.sink).getUri().toString(), is("maven://foo:bar:1.0.2"));
 	}
 
 	@Test
@@ -158,7 +160,7 @@ public class AppRegistryControllerTests {
 	public void testRegisterAndListApplications() throws Exception {
 		mockMvc.perform(get("/apps").accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk())
 				.andExpect(jsonPath("content", hasSize(4)));
-		mockMvc.perform(post("/apps/processor/blubba").param("uri", "file:///foo").accept(MediaType.APPLICATION_JSON))
+		mockMvc.perform(post("/apps/processor/blubba").param("uri", "maven://foo:bar:1.0.2").accept(MediaType.APPLICATION_JSON))
 				.andDo(print()).andExpect(status().isCreated());
 		mockMvc.perform(get("/apps").accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk())
 				.andExpect(jsonPath("content", hasSize(5)));
@@ -173,7 +175,11 @@ public class AppRegistryControllerTests {
 
 	@Test
 	public void testUnregisterApplication() throws Exception {
-		mockMvc.perform(post("/apps/processor/blubba").param("uri", "file:///foo").accept(MediaType.APPLICATION_JSON))
+		File jar = new File("foo.jar");
+		jar.createNewFile();
+		jar.deleteOnExit();
+
+		mockMvc.perform(post("/apps/processor/blubba").param("uri", jar.toURI().toString()).accept(MediaType.APPLICATION_JSON))
 				.andDo(print()).andExpect(status().isCreated());
 		mockMvc.perform(delete("/apps/processor/blubba").accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isOk());
