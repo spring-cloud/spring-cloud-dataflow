@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.springframework.cloud</groupId>
 	<artifactId>spring-cloud-dataflow-parent</artifactId>
-	<version>1.2.2-BUILD-SNAPSHOT</version>
+	<version>1.2.2.BUILD-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<url>http://cloud.spring.io/spring-cloud-dataflow/</url>
 	<organization>
