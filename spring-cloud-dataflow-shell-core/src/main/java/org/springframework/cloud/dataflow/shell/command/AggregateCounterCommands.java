@@ -55,11 +55,11 @@ import org.springframework.stereotype.Component;
 @Component
 public class AggregateCounterCommands extends AbstractMetricsCommands implements CommandMarker {
 
-	private static final String DISPLAY_AGGR_COUNTER = "aggregate-counter display";
+	public static final String DISPLAY_AGGR_COUNTER = "aggregate-counter display";
 
-	private static final String LIST_AGGR_COUNTERS = "aggregate-counter list";
+	public static final String LIST_AGGR_COUNTERS = "aggregate-counter list";
 
-	private static final String DELETE_AGGR_COUNTER = "aggregate-counter delete";
+	public static final String DELETE_AGGR_COUNTER = "aggregate-counter delete";
 
 	@Autowired
 	private DataFlowShell dataFlowShell;

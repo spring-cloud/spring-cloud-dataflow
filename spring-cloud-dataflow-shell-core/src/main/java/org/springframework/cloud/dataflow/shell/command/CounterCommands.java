@@ -44,11 +44,11 @@ import org.springframework.stereotype.Component;
 @Component
 public class CounterCommands extends AbstractMetricsCommands implements CommandMarker {
 
-	private static final String DISPLAY_COUNTER = "counter display";
+	public static final String DISPLAY_COUNTER = "counter display";
 
-	private static final String LIST_COUNTERS = "counter list";
+	public static final String LIST_COUNTERS = "counter list";
 
-	private static final String DELETE_COUNTER = "counter reset";
+	public static final String DELETE_COUNTER = "counter reset";
 
 	@Autowired
 	private DataFlowShell dataFlowShell;

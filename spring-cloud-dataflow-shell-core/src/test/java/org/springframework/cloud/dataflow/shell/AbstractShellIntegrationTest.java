@@ -25,14 +25,24 @@ import org.junit.rules.TestName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.springframework.analytics.metrics.AggregateCounterRepository;
+import org.springframework.analytics.metrics.FieldValueCounterRepository;
+import org.springframework.analytics.metrics.memory.InMemoryAggregateCounterRepository;
+import org.springframework.analytics.metrics.memory.InMemoryFieldValueCounterRepository;
 import org.springframework.boot.SpringApplication;
+import org.springframework.boot.actuate.metrics.repository.InMemoryMetricRepository;
+import org.springframework.boot.actuate.metrics.repository.MetricRepository;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.cloud.dataflow.server.EnableDataFlowServer;
 import org.springframework.cloud.dataflow.shell.command.JobCommandTemplate;
+import org.springframework.cloud.dataflow.shell.command.MetricsCommandTemplate;
 import org.springframework.cloud.dataflow.shell.command.StreamCommandTemplate;
 import org.springframework.cloud.dataflow.shell.command.TaskCommandTemplate;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.shell.core.CommandResult;
 import org.springframework.shell.core.JLineShellComponent;
 import org.springframework.util.AlternativeJdkIdGenerator;
@@ -170,6 +180,11 @@ public abstract class AbstractShellIntegrationTest {
 		return new JobCommandTemplate(dataFlowShell);
 	}
 
+	/**
+	 * Return a {@link MetricsCommandTemplate} for issuing metrics related commands.
+	 */
+	protected MetricsCommandTemplate metrics() {return new MetricsCommandTemplate(dataFlowShell); }
+
 	// Util methods
 
 	/**
@@ -211,6 +226,23 @@ public abstract class AbstractShellIntegrationTest {
 
 	@EnableAutoConfiguration
 	@EnableDataFlowServer
+	@Configuration
 	public static class TestConfig {
+
+		@Bean
+		public MetricRepository metricRepository() {
+			return new InMemoryMetricRepository();
+		}
+
+		@Bean
+		public FieldValueCounterRepository fieldValueCounterReader() {
+			return new InMemoryFieldValueCounterRepository();
+		}
+
+		@Bean
+		public AggregateCounterRepository aggregateCounterReader(RedisConnectionFactory redisConnectionFactory) {
+			return new InMemoryAggregateCounterRepository();
+		}
+
 	}
 }
