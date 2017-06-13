@@ -43,7 +43,7 @@ public class ResourceBasedAuthorizationInterceptor implements HttpRequestInterce
 
 	@Override
 	public void process(HttpRequest httpRequest, HttpContext httpContext) throws HttpException, IOException {
-		final String credentials = StreamUtils.copyToString(resource.getInputStream(), StandardCharsets.UTF_8);
+		final String credentials = StreamUtils.copyToString(resource.getInputStream(), StandardCharsets.UTF_8).trim();
 		httpRequest.addHeader(HttpHeaders.AUTHORIZATION, credentials);
 	}
 }
