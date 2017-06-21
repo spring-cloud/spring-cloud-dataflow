@@ -227,6 +227,14 @@ public class StreamParserTests {
 		parse("foo-bar", "http | transform | sink");
 		parse("foo_bar", "http | transform | sink");
 	}
+	
+	@Test
+	public void parametersContainingNewlineCarriageReturn() {
+		StreamNode ast = parse(":producer > foobar --expression='aaa=bbb \n ccc=ddd' > :consumer");
+		assertEquals("aaa=bbb \n ccc=ddd", ast.getApp("foobar").getArguments()[0].getValue());
+		ast = parse(":producer > foobar --expression='aaa=bbb \r ccc=ddd' > :consumer");
+		assertEquals("aaa=bbb \r ccc=ddd", ast.getApp("foobar").getArguments()[0].getValue());
+	}
 
 	@Test
 	public void expressions_xd159_3() {
