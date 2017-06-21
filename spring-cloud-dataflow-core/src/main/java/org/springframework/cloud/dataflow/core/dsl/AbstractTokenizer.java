@@ -26,6 +26,7 @@ import org.springframework.util.Assert;
  * subclasses.
  *
  * @author Andy Clement
+ * @author Gary Russell
  */
 public abstract class AbstractTokenizer {
 
@@ -214,7 +215,8 @@ public abstract class AbstractTokenizer {
 	 */
 	protected boolean isArgValueIdentifierTerminator(char ch, boolean quoteOpen) {
 		return (ch == '|' && !quoteOpen) || (ch == ';' && !quoteOpen) || ch == '\0' || (ch == ' ' && !quoteOpen)
-				|| (ch == '\t' && !quoteOpen) || (ch == '>' && !quoteOpen) || ch == '\r' || ch == '\n';
+				|| (ch == '\t' && !quoteOpen) || (ch == '>' && !quoteOpen) || (ch == '\r' && !quoteOpen)
+				|| (ch == '\n' && !quoteOpen);
 	}
 
 	/**
