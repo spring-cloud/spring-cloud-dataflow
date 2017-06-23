@@ -170,6 +170,90 @@ include::{snippets}/app-registry-documentation/get-applications-filtered/curl-re
 
 include::{snippets}/app-registry-documentation/get-applications-filtered/http-response.adoc[]
 
+[[resources-app-registry-get]]
+==== Getting Information on a partical Application
+A `GET` request on `/apps/<type>/<name>` will get info on a particular application.
+
+===== Request structure
+
+include::{snippets}/app-registry-documentation/get-single-application/http-request.adoc[]
+
+===== Path parameters
+
+include::{snippets}/app-registry-documentation/get-single-application/path-parameters.adoc[]
+
+===== Example request
+
+include::{snippets}/app-registry-documentation/get-single-application/curl-request.adoc[]
+
+===== Response structure
+
+include::{snippets}/app-registry-documentation/get-single-application/http-response.adoc[]
+
+[[resources-app-registry-post]]
+==== Registering a New Application
+A `POST` request on `/apps/<type>/<name>` will allow registration of a new application.
+
+===== Request structure
+
+include::{snippets}/app-registry-documentation/registering-an-application/http-request.adoc[]
+
+===== Request parameters
+
+include::{snippets}/app-registry-documentation/registering-an-application/request-parameters.adoc[]
+
+===== Path parameters
+
+include::{snippets}/app-registry-documentation/registering-an-application/path-parameters.adoc[]
+
+===== Example request
+
+include::{snippets}/app-registry-documentation/registering-an-application/curl-request.adoc[]
+
+===== Response structure
+
+include::{snippets}/app-registry-documentation/registering-an-application/http-response.adoc[]
+
+[[resources-app-registry-delete]]
+==== Unregistering an Application
+A `DELETE` request on `/apps/<type>/<name>` will unregister a previously registered application.
+
+===== Request structure
+
+include::{snippets}/app-registry-documentation/unregistering-an-application/http-request.adoc[]
+
+===== Path parameters
+
+include::{snippets}/app-registry-documentation/unregistering-an-application/path-parameters.adoc[]
+
+===== Example request
+
+include::{snippets}/app-registry-documentation/unregistering-an-application/curl-request.adoc[]
+
+===== Response structure
+
+include::{snippets}/app-registry-documentation/unregistering-an-application/http-response.adoc[]
+
+[[resources-app-registry-bulk]]
+==== Registering Applications in Bulk
+A `POST` request on `/apps` allows registering multiple applications at once.
+
+===== Request structure
+
+include::{snippets}/app-registry-documentation/bulk-registering-apps/http-request.adoc[]
+
+===== Request parameters
+
+include::{snippets}/app-registry-documentation/bulk-registering-apps/request-parameters.adoc[]
+
+===== Example request
+
+include::{snippets}/app-registry-documentation/bulk-registering-apps/curl-request.adoc[]
+
+===== Response structure
+
+include::{snippets}/app-registry-documentation/bulk-registering-apps/http-response.adoc[]
+
 [[api-guide-resources-stream-definitions]]
 === Stream Definitions
 
