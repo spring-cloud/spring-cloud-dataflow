@@ -121,6 +121,7 @@ public abstract class BaseDocumentation {
 		);
 	}
 
+
 	/**
 	 * A {@link ResultHandler} that can be turned off and on.
 	 *
