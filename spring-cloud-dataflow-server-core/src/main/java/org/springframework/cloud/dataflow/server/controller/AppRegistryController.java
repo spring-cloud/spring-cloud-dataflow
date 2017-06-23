@@ -30,6 +30,7 @@ import java.util.concurrent.ForkJoinPool;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.core.ApplicationType;
@@ -42,6 +43,7 @@ import org.springframework.context.ResourceLoaderAware;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
@@ -107,16 +109,14 @@ public class AppRegistryController implements ResourceLoaderAware {
 			PagedResourcesAssembler<AppRegistration> pagedResourcesAssembler,
 			@RequestParam(value = "type", required = false) ApplicationType type) {
 
-		List<AppRegistration> list = new ArrayList<>(appRegistry.findAll());
-		for (Iterator<AppRegistration> iterator = list.iterator(); iterator.hasNext();) {
+		Page<AppRegistration> pagedRegistrations = appRegistry.findAll(pageable);
+		for (Iterator<AppRegistration> iterator = pagedRegistrations.iterator(); iterator.hasNext();) {
 			ApplicationType applicationType = iterator.next().getType();
 			if (type != null && applicationType != type) {
 				iterator.remove();
 			}
 		}
-		Collections.sort(list);
-		return pagedResourcesAssembler
-				.toResource(new PageImpl<>(list, pageable, list.size()), assembler);
+		return pagedResourcesAssembler.toResource(pagedRegistrations, this.assembler);
 	}
 
 	/**

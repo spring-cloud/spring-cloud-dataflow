@@ -29,9 +29,17 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.hasProperty;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.springframework.cloud.dataflow.core.ApplicationType.sink;
 import static org.springframework.cloud.dataflow.core.ApplicationType.source;
@@ -40,6 +48,7 @@ import static org.springframework.cloud.dataflow.core.ApplicationType.source;
  * Unit tests for {@link AppRegistry}.
  *
  * @author Eric Bottard
+ * @author Ilayaperumal Gopinathan
  */
 public class AppRegistryTests {
 
@@ -88,6 +97,27 @@ public class AppRegistryTests {
 						hasProperty("type", is(source))),
 				allOf(hasProperty("name", is("foo")), hasProperty("uri", is(URI.create("classpath:/foo-sink"))),
 						hasProperty("metadataUri", nullValue()), hasProperty("type", is(sink)))));
+	}
+
+	@Test
+	public void testFindAllPageable() {
+		uriRegistry.register("source.foo", URI.create("classpath:/foo-source"));
+		uriRegistry.register("sink.foo", URI.create("classpath:/foo-sink"));
+		uriRegistry.register("source.foo.metadata", URI.create("classpath:/foo-source-metadata"));
+		uriRegistry.register("source.bar", URI.create("classpath:/bar-source"));
+		uriRegistry.register("source.bar.metadata", URI.create("classpath:/bar-source-metadata"));
+
+		PageRequest pageRequest1 = new PageRequest(0, 2);
+		Page<AppRegistration> registrations1 = appRegistry.findAll(pageRequest1);
+		assertTrue(registrations1.getTotalElements() == 3);
+		assertTrue(registrations1.getContent().size() == 2);
+		assertTrue(registrations1.getContent().get(0).getName().equals("bar"));
+		assertTrue(registrations1.getContent().get(1).getName().equals("foo"));
+		PageRequest pageRequest2 = new PageRequest(1, 2);
+		Page<AppRegistration> registrations2 = appRegistry.findAll(pageRequest2);
+		assertTrue(registrations2.getTotalElements() == 3);
+		assertTrue(registrations2.getContent().size() == 1);
+		assertTrue(registrations2.getContent().get(0).getName().equals("foo"));
 	}
 
 	@Test
