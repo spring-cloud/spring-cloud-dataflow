@@ -42,6 +42,7 @@ import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.rest.resource.DeploymentStateResource;
 import org.springframework.cloud.dataflow.rest.resource.StreamDefinitionResource;
 import org.springframework.cloud.dataflow.server.DataFlowServerUtil;
+import org.springframework.cloud.dataflow.server.controller.support.ArgumentSanitizer;
 import org.springframework.cloud.dataflow.server.controller.support.ControllerUtils;
 import org.springframework.cloud.dataflow.server.controller.support.InvalidStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
@@ -81,6 +82,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @author Ilayaperumal Gopinathan
  * @author Gunnar Hillert
  * @author Oleg Zhurakousky
+ * @author Glenn Renfro
  */
 @RestController
 @RequestMapping("/streams/definitions")
@@ -189,9 +191,9 @@ public class StreamDefinitionController {
 	/**
 	 * Return a page-able list of {@link StreamDefinitionResource} defined streams.
 	 *
-	 * @param pageable page-able collection of {@code StreamDefinitionResource}s.
+	 * @param pageable  page-able collection of {@code StreamDefinitionResource}s.
 	 * @param assembler assembler for {@link StreamDefinition}
-	 * @param search optional search parameter
+	 * @param search    optional search parameter
 	 * @return list of stream definitions
 	 */
 	@RequestMapping(value = "", method = RequestMethod.GET)
@@ -407,7 +409,7 @@ public class StreamDefinitionController {
 		@Override
 		public StreamDefinitionResource instantiateResource(StreamDefinition stream) {
 			final StreamDefinitionResource resource = new StreamDefinitionResource(stream.getName(),
-					stream.getDslText());
+					ArgumentSanitizer.sanitizeStream(stream.getDslText()));
 			final DeploymentStateResource deploymentStateResource = ControllerUtils
 					.mapState(streamDeploymentStates.get(stream));
 			resource.setStatus(deploymentStateResource.getKey());
