@@ -56,7 +56,7 @@ public class DestinationNode extends AstNode {
 
 	@Override
 	public String toString() {
-		return getDestinationName();
+		return ":" + getDestinationName();
 	}
 
 	String getDestinationName() {

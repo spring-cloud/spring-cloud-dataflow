@@ -35,6 +35,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
+import org.springframework.cloud.dataflow.core.dsl.AppNode;
 import org.springframework.cloud.dataflow.core.dsl.ParseException;
 import org.springframework.cloud.dataflow.core.dsl.StreamNode;
 import org.springframework.cloud.dataflow.core.dsl.StreamParser;
@@ -42,6 +43,7 @@ import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.rest.resource.DeploymentStateResource;
 import org.springframework.cloud.dataflow.rest.resource.StreamDefinitionResource;
 import org.springframework.cloud.dataflow.server.DataFlowServerUtil;
+import org.springframework.cloud.dataflow.server.controller.support.ArgumentSanitizer;
 import org.springframework.cloud.dataflow.server.controller.support.ControllerUtils;
 import org.springframework.cloud.dataflow.server.controller.support.InvalidStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
@@ -81,6 +83,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @author Ilayaperumal Gopinathan
  * @author Gunnar Hillert
  * @author Oleg Zhurakousky
+ * @author Glenn Renfro
  */
 @RestController
 @RequestMapping("/streams/definitions")
@@ -189,9 +192,9 @@ public class StreamDefinitionController {
 	/**
 	 * Return a page-able list of {@link StreamDefinitionResource} defined streams.
 	 *
-	 * @param pageable page-able collection of {@code StreamDefinitionResource}s.
+	 * @param pageable  page-able collection of {@code StreamDefinitionResource}s.
 	 * @param assembler assembler for {@link StreamDefinition}
-	 * @param search optional search parameter
+	 * @param search    optional search parameter
 	 * @return list of stream definitions
 	 */
 	@RequestMapping(value = "", method = RequestMethod.GET)
@@ -207,7 +210,31 @@ public class StreamDefinitionController {
 		else {
 			streamDefinitions = repository.findAll(pageable);
 		}
+		streamDefinitions = getSanitizedStreamDefinitions(streamDefinitions, pageable);
 		return assembler.toResource(streamDefinitions, new Assembler(streamDefinitions));
+	}
+
+	private Page<StreamDefinition> getSanitizedStreamDefinitions(Page<StreamDefinition> streamDefinitions, Pageable pageable) {
+		ArgumentSanitizer argumentSanitizer = new ArgumentSanitizer();
+		List<StreamDefinition> resultDefinitions = new ArrayList<>();
+		for (StreamDefinition streamDefinition : streamDefinitions) {
+			StreamParser parser = new StreamParser(streamDefinition.getDslText());
+			StreamNode streamNode = parser.parse();
+			for (AppNode node : streamNode.getAppNodes()) {
+				for (int argumentPosition = 0; argumentPosition < node.getArguments().length; argumentPosition++) {
+					node.getArguments()[argumentPosition] = argumentSanitizer.sanitize(node.getArguments()[argumentPosition]);
+				}
+			}
+			resultDefinitions.add(new StreamDefinition(streamDefinition.getName(), streamNode.getStreamData()));
+		}
+		PageImpl <StreamDefinition> result;
+		if(pageable != null) {
+			result = new PageImpl<>(resultDefinitions, pageable, streamDefinitions.getTotalElements());
+		}
+		else {
+			result = new PageImpl<>(resultDefinitions);
+		}
+		return result;
 	}
 
 	/**
@@ -302,6 +329,7 @@ public class StreamDefinitionController {
 		List<StreamDefinition> result = new ArrayList<>(
 				findRelatedDefinitions(currentStreamDefinition, definitions, relatedDefinitions, nested));
 		Page<StreamDefinition> page = new PageImpl<>(result);
+		page = getSanitizedStreamDefinitions(page, null);
 		return assembler.toResource(page, new Assembler(page));
 	}
 
@@ -338,7 +366,9 @@ public class StreamDefinitionController {
 		if (definition == null) {
 			throw new NoSuchStreamDefinitionException(name);
 		}
-		return new Assembler(new PageImpl<>(Collections.singletonList(definition))).toResource(definition);
+		Page<StreamDefinition> page = getSanitizedStreamDefinitions(new PageImpl<>(Collections.singletonList(definition)), null);
+
+		return new Assembler(page).toResource(page.getContent().get(0));
 	}
 
 	/**
