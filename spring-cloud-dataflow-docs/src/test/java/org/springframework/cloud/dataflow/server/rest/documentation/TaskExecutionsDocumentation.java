@@ -16,9 +16,11 @@
 
 package org.springframework.cloud.dataflow.server.rest.documentation;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import static org.springframework.cloud.dataflow.core.ApplicationType.task;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
 import static org.springframework.restdocs.request.RequestDocumentation.requestParameters;
@@ -33,15 +35,17 @@ public class TaskExecutionsDocumentation extends BaseDocumentation {
 
 	@Before
 	public void setup() throws Exception {
-		this.mockMvc.perform(
-				post("/apps/task/timestamp")
-						.param("uri", "maven://org.springframework.cloud.task.app:timestamp-task:1.1.0.RELEASE"))
-				.andExpect(status().isCreated());
+		registerApp(task, "timestamp");
 		this.mockMvc.perform(
 				post("/tasks/definitions")
 						.param("name", "my-task")
 						.param("definition", "timestamp --format='yyyy MM dd'"))
 				.andExpect(status().isOk());
+	}
+
+	@After
+	public void tearDown() throws Exception {
+		unregisterApp(task, "timestamp");
 	}
 
 	@Test

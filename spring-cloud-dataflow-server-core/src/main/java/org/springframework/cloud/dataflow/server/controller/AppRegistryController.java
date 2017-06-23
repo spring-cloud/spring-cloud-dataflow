@@ -98,15 +98,13 @@ public class AppRegistryController implements ResourceLoaderAware {
 	 *
 	 * @param pagedResourcesAssembler the resource assembler for app registrations
 	 * @param type the application type: source, sink, processor, task
-	 * @param detailed provide detailed information (if available) for the application
 	 * @return the list of registered applications
 	 */
 	@RequestMapping(method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
 	public PagedResources<? extends AppRegistrationResource> list(
 			PagedResourcesAssembler<AppRegistration> pagedResourcesAssembler,
-			@RequestParam(value = "type", required = false) ApplicationType type,
-			@RequestParam(value = "detailed", defaultValue = "false") boolean detailed) {
+			@RequestParam(value = "type", required = false) ApplicationType type) {
 
 		List<AppRegistration> list = new ArrayList<>(appRegistry.findAll());
 		for (Iterator<AppRegistration> iterator = list.iterator(); iterator.hasNext();) {
