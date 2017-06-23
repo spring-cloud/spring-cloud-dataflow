@@ -16,17 +16,30 @@
 
 package org.springframework.cloud.dataflow.server.controller.support;
 
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.springframework.util.StringUtils;
 
 /**
  * Sanitizes potentially sensitive keys for a specific command line arg.
+ *
  * @author Glenn Renfro
  */
 public class ArgumentSanitizer {
-	private static final String[] REGEX_PARTS = { "*", "$", "^", "+" };
+	private static final String[] REGEX_PARTS = {"*", "$", "^", "+"};
 
-	private static final String[] KEYS_TO_SANITIZE = { "password", "secret", "key", "token", ".*credentials.*",
-			"vcap_services" };
+	private static final String REDACTION_STRING = "******";
+
+	private static final String[] KEYS_TO_SANITIZE = {"password", "secret", "key", "token", ".*credentials.*",
+			"vcap_services"};
+
+	public static Pattern passwordParameterPatternForStreams = Pattern.compile(
+			"(?i)(--[\\p{Z}]*[\\p{L}]*("
+					+ StringUtils.arrayToDelimitedString(KEYS_TO_SANITIZE, "|")
+					+ ")[\\p{L}]*[\\p{Z}]*=[\\p{Z}]*)((\"[\\p{L}|\\p{Pd}|\\p{Ps}|\\p{Pe}|\\p{Pc}|\\p{S}|\\p{N}|\\p{Z}]*\")|([\\p{N}|\\p{L}|\\p{Po}|\\p{Pc}|\\p{S}]*))",
+			Pattern.UNICODE_CASE);
+
 
 	private Pattern[] keysToSanitize;
 
@@ -55,6 +68,7 @@ public class ArgumentSanitizer {
 
 	/**
 	 * Replaces a potential secure value with "******".
+	 *
 	 * @param argument the argument to cleanse.
 	 * @return the argument with a potentially sanitized value
 	 */
@@ -67,10 +81,44 @@ public class ArgumentSanitizer {
 		String value = argument.substring(indexOfFirstEqual + 1);
 		for (Pattern pattern : this.keysToSanitize) {
 			if (pattern.matcher(key).matches()) {
-				value = "******";
+				value = REDACTION_STRING;
 				break;
 			}
 		}
 		return String.format("%s=%s", key, value);
 	}
+
+	/**
+	 * Redacts sensitive values in a stream.
+	 *
+	 * @param definition the definition to sanitize
+	 * @return Stream definition that has sensitive data redacted.
+	 */
+	public static String sanitizeStream(String definition) {
+		final StringBuffer output = new StringBuffer();
+		final Matcher matcher = passwordParameterPatternForStreams.matcher(definition);
+		while (matcher.find()) {
+			String passwordValue = matcher.group(3);
+			String maskedPasswordValue;
+			boolean isPipeAppended = false;
+			boolean isNameChannelAppended = false;
+			if (passwordValue.endsWith("|")) {
+				isPipeAppended = true;
+			}
+			if (passwordValue.endsWith(">")) {
+				isNameChannelAppended = true;
+			}
+			maskedPasswordValue = REDACTION_STRING;
+			if (isPipeAppended) {
+				maskedPasswordValue = maskedPasswordValue + " |";
+			}
+			if (isNameChannelAppended) {
+				maskedPasswordValue = maskedPasswordValue + " >";
+			}
+			matcher.appendReplacement(output, matcher.group(1) + maskedPasswordValue);
+		}
+		matcher.appendTail(output);
+		return output.toString();
+	}
+
 }
