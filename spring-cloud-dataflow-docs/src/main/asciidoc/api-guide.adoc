@@ -173,13 +173,111 @@ include::{snippets}/app-registry-documentation/get-applications-filtered/http-re
 [[api-guide-resources-stream-definitions]]
 === Stream Definitions
 
-==== Example "stream create" request for a `ticktock` stream
+[[api-guide-resources-stream-definitions-create]]
+==== Creating a new Stream Definition
+
+Creating a task definition is achieved by POSTing to the stream definitions endpoint.
+A simple curl request for a `ticktock` stream may look like:
 
 [source,bash]
 ----
 curl -X POST -d "name=ticktock&definition=time | log" localhost:9393/streams/definitions?deploy=false
 ----
 
+A stream definition you create may also contain additional parameters. For instance,
+in the following example we also provide the date-time format.
+
+===== Request structure
+
+include::{snippets}/stream-definitions-documentation/create-definition/http-request.adoc[]
+
+===== Request parameters
+
+include::{snippets}/stream-definitions-documentation/create-definition/request-parameters.adoc[]
+
+===== Example request
+
+include::{snippets}/stream-definitions-documentation/create-definition/curl-request.adoc[]
+
+===== Response structure
+
+include::{snippets}/stream-definitions-documentation/create-definition/http-response.adoc[]
+
+[[api-guide-resources-stream-definitions-list]]
+==== List all Stream Definitions
+
+===== Request structure
+
+include::{snippets}/stream-definitions-documentation/list-all-stream-definitions/http-request.adoc[]
+
+===== Request parameters
+
+include::{snippets}/stream-definitions-documentation/list-all-stream-definitions/request-parameters.adoc[]
+
+===== Example request
+
+include::{snippets}/stream-definitions-documentation/list-all-stream-definitions/curl-request.adoc[]
+
+===== Response structure
+
+include::{snippets}/stream-definitions-documentation/list-all-stream-definitions/http-response.adoc[]
+
+[[api-guide-resources-stream-definitions-list-related]]
+==== List related Stream Definitions
+
+===== Request structure
+
+include::{snippets}/stream-definitions-documentation/list-related-stream-definitions/http-request.adoc[]
+
+===== Request parameters
+
+include::{snippets}/stream-definitions-documentation/list-related-stream-definitions/request-parameters.adoc[]
+
+===== Example request
+
+include::{snippets}/stream-definitions-documentation/list-related-stream-definitions/curl-request.adoc[]
+
+===== Response structure
+
+include::{snippets}/stream-definitions-documentation/list-related-stream-definitions/http-response.adoc[]
+
+[[api-guide-resources-stream-definitions-delete-one]]
+==== Delete a single Stream Definition
+
+===== Request structure
+
+include::{snippets}/stream-definitions-documentation/stream-definition-delete1/http-request.adoc[]
+
+===== Request parameters
+
+There are no request parameter for this endpoint.
+
+===== Example request
+
+include::{snippets}/stream-definitions-documentation/stream-definition-delete1/curl-request.adoc[]
+
+===== Response structure
+
+include::{snippets}/stream-definitions-documentation/stream-definition-delete1/http-response.adoc[]
+
+[[api-guide-resources-stream-definitions-delete-all]]
+==== Delete all Stream Definitions
+
+===== Request structure
+
+include::{snippets}/stream-definitions-documentation/stream-definition-delete-all/http-request.adoc[]
+
+===== Request parameters
+
+There are no request parameter for this endpoint.
+
+===== Example request
+
+include::{snippets}/stream-definitions-documentation/stream-definition-delete-all/curl-request.adoc[]
+
+===== Response structure
+
+include::{snippets}/stream-definitions-documentation/stream-definition-delete-all/http-response.adoc[]
 
 [[api-guide-resources-stream-deployments]]
 === Stream Deployments
