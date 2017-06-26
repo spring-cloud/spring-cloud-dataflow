@@ -409,7 +409,7 @@ public class StreamDefinitionController {
 
 		@Override
 		public StreamDefinitionResource instantiateResource(StreamDefinition stream) {
-			StreamDefinition sanitizedStream = getSanitizedStreamDefinition(stream);
+			StreamDefinition sanitizedStream = stream;//getSanitizedStreamDefinition(stream);
 			final StreamDefinitionResource resource = new StreamDefinitionResource(sanitizedStream.getName(),
 					sanitizedStream.getDslText());
 			final DeploymentStateResource deploymentStateResource = ControllerUtils
