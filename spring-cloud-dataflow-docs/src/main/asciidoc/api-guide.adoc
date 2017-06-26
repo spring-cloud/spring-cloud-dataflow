@@ -416,6 +416,56 @@ include::{snippets}/task-executions-documentation/launch-task/curl-request.adoc[
 
 include::{snippets}/task-executions-documentation/launch-task/http-response.adoc[]
 
+=== Runtime Information about Applications
+
+It is possible to get information about running apps known to the system, either globally or individually.
+
+==== Listing All Applications at Runtime
+To retrieve information about all instances of all apps, query the `/runtime/apps` endpoint using `GET`.
+
+===== Request structure
+
+include::{snippets}/runtime-apps-documentation/list-all-apps/http-request.adoc[]
+
+===== Example request
+
+include::{snippets}/runtime-apps-documentation/list-all-apps/curl-request.adoc[]
+
+===== Response structure
+
+include::{snippets}/runtime-apps-documentation/list-all-apps/http-response.adoc[]
+
+==== Querying all Instances of a Single App
+To retrieve information about all instances of a particular app, query the `/runtime/apps/<appId>/instances` endpoint using `GET`.
+
+===== Request structure
+
+include::{snippets}/runtime-apps-documentation/list-all-apps/http-request.adoc[]
+
+===== Example request
+
+include::{snippets}/runtime-apps-documentation/list-all-apps/curl-request.adoc[]
+
+===== Response structure
+
+include::{snippets}/runtime-apps-documentation/list-all-apps/http-response.adoc[]
+
+==== Querying a Single Instance of a Single App
+Finally, to retrieve information about a particuler instance of a particular app,
+query the `/runtime/apps/<appId>/instances/<instanceId>` endpoint using `GET`.
+
+===== Request structure
+
+include::{snippets}/runtime-apps-documentation/list-all-apps/http-request.adoc[]
+
+===== Example request
+
+include::{snippets}/runtime-apps-documentation/list-all-apps/curl-request.adoc[]
+
+===== Response structure
+
+include::{snippets}/runtime-apps-documentation/list-all-apps/http-response.adoc[]
+
 [[resources-metrics-stream-applications]]
 === Metrics for Stream Applications
 

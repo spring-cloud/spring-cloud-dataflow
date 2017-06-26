@@ -102,6 +102,25 @@ public abstract class BaseDocumentation {
 		);
 	}
 
+	void createStream(String name, String definition, boolean deploy) throws Exception{
+		documentation.dontDocument(
+			() -> this.mockMvc.perform(
+				post("/streams/definitions")
+				.param("name", name)
+				.param("definition", definition)
+				.param("deploy", String.valueOf(deploy)))
+				.andExpect(status().isCreated())
+		);
+	}
+
+	void destroyStream(String name) throws Exception{
+		documentation.dontDocument(
+			() -> this.mockMvc.perform(
+				delete("/streams/definitions/{name}", name))
+				.andExpect(status().isOk())
+		);
+	}
+
 	/**
 	 * A {@link ResultHandler} that can be turned off and on.
 	 *
