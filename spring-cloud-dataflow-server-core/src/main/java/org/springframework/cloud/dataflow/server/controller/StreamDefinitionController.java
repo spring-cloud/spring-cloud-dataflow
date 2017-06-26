@@ -210,31 +210,7 @@ public class StreamDefinitionController {
 		else {
 			streamDefinitions = repository.findAll(pageable);
 		}
-		streamDefinitions = getSanitizedStreamDefinitions(streamDefinitions, pageable);
 		return assembler.toResource(streamDefinitions, new Assembler(streamDefinitions));
-	}
-
-	private Page<StreamDefinition> getSanitizedStreamDefinitions(Page<StreamDefinition> streamDefinitions, Pageable pageable) {
-		ArgumentSanitizer argumentSanitizer = new ArgumentSanitizer();
-		List<StreamDefinition> resultDefinitions = new ArrayList<>();
-		for (StreamDefinition streamDefinition : streamDefinitions) {
-			StreamParser parser = new StreamParser(streamDefinition.getDslText());
-			StreamNode streamNode = parser.parse();
-			for (AppNode node : streamNode.getAppNodes()) {
-				for (int argumentPosition = 0; argumentPosition < node.getArguments().length; argumentPosition++) {
-					node.getArguments()[argumentPosition] = argumentSanitizer.sanitize(node.getArguments()[argumentPosition]);
-				}
-			}
-			resultDefinitions.add(new StreamDefinition(streamDefinition.getName(), streamNode.getStreamData()));
-		}
-		PageImpl <StreamDefinition> result;
-		if(pageable != null) {
-			result = new PageImpl<>(resultDefinitions, pageable, streamDefinitions.getTotalElements());
-		}
-		else {
-			result = new PageImpl<>(resultDefinitions);
-		}
-		return result;
 	}
 
 	/**
@@ -329,7 +305,6 @@ public class StreamDefinitionController {
 		List<StreamDefinition> result = new ArrayList<>(
 				findRelatedDefinitions(currentStreamDefinition, definitions, relatedDefinitions, nested));
 		Page<StreamDefinition> page = new PageImpl<>(result);
-		page = getSanitizedStreamDefinitions(page, null);
 		return assembler.toResource(page, new Assembler(page));
 	}
 
@@ -366,9 +341,7 @@ public class StreamDefinitionController {
 		if (definition == null) {
 			throw new NoSuchStreamDefinitionException(name);
 		}
-		Page<StreamDefinition> page = getSanitizedStreamDefinitions(new PageImpl<>(Collections.singletonList(definition)), null);
-
-		return new Assembler(page).toResource(page.getContent().get(0));
+		return new Assembler(new PageImpl<>(Collections.singletonList(definition))).toResource(definition);
 	}
 
 	/**
@@ -434,8 +407,9 @@ public class StreamDefinitionController {
 
 		@Override
 		public StreamDefinitionResource instantiateResource(StreamDefinition stream) {
-			final StreamDefinitionResource resource = new StreamDefinitionResource(stream.getName(),
-					stream.getDslText());
+			StreamDefinition sanitizedStream = getSanitizedStreamDefinition(stream);
+			final StreamDefinitionResource resource = new StreamDefinitionResource(sanitizedStream.getName(),
+					sanitizedStream.getDslText());
 			final DeploymentStateResource deploymentStateResource = ControllerUtils
 					.mapState(streamDeploymentStates.get(stream));
 			resource.setStatus(deploymentStateResource.getKey());
@@ -443,5 +417,16 @@ public class StreamDefinitionController {
 			return resource;
 		}
 
+		private StreamDefinition getSanitizedStreamDefinition(StreamDefinition streamDefinition) {
+			ArgumentSanitizer argumentSanitizer = new ArgumentSanitizer();
+			StreamParser parser = new StreamParser(streamDefinition.getDslText());
+			StreamNode streamNode = parser.parse();
+			for (AppNode node : streamNode.getAppNodes()) {
+				for (int argumentPosition = 0; argumentPosition < node.getArguments().length; argumentPosition++) {
+					node.getArguments()[argumentPosition] = argumentSanitizer.sanitize(node.getArguments()[argumentPosition]);
+				}
+			}
+			return new StreamDefinition(streamDefinition.getName(), streamNode.getStreamData());
+		}
 	}
 }
