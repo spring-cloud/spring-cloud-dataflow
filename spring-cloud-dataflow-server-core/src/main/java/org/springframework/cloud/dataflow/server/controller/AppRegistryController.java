@@ -43,7 +43,9 @@ import org.springframework.context.ResourceLoaderAware;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.hateoas.PagedResources;
@@ -103,18 +105,18 @@ public class AppRegistryController implements ResourceLoaderAware {
 	@RequestMapping(method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
 	public PagedResources<? extends AppRegistrationResource> list(
+			Pageable pageable,
 			PagedResourcesAssembler<AppRegistration> pagedResourcesAssembler,
 			@RequestParam(value = "type", required = false) ApplicationType type) {
 
-		List<AppRegistration> list = new ArrayList<>(appRegistry.findAll());
-		for (Iterator<AppRegistration> iterator = list.iterator(); iterator.hasNext();) {
+		Page<AppRegistration> pagedRegistrations = appRegistry.findAll(pageable);
+		for (Iterator<AppRegistration> iterator = pagedRegistrations.iterator(); iterator.hasNext();) {
 			ApplicationType applicationType = iterator.next().getType();
 			if (type != null && applicationType != type) {
 				iterator.remove();
 			}
 		}
-		Collections.sort(list);
-		return pagedResourcesAssembler.toResource(new PageImpl<>(list), assembler);
+		return pagedResourcesAssembler.toResource(pagedRegistrations, this.assembler);
 	}
 
 	/**
@@ -198,6 +200,7 @@ public class AppRegistryController implements ResourceLoaderAware {
 	@RequestMapping(method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
 	public PagedResources<? extends AppRegistrationResource> registerAll(
+			Pageable pageable,
 			PagedResourcesAssembler<AppRegistration> pagedResourcesAssembler,
 			@RequestParam(value = "uri", required = false) String uri,
 			@RequestParam(value = "apps", required = false) Properties apps,
@@ -214,7 +217,9 @@ public class AppRegistryController implements ResourceLoaderAware {
 		}
 		Collections.sort(registrations);
 		prefetchMetadata(registrations);
-		return pagedResourcesAssembler.toResource(new PageImpl<>(registrations), assembler);
+		return pagedResourcesAssembler.toResource(
+				new PageImpl<>(registrations, pageable, appRegistry.findAll().size()),
+				assembler);
 	}
 
 	/**

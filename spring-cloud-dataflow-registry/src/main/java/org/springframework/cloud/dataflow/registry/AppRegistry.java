@@ -23,6 +23,7 @@ import java.net.URISyntaxException;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -39,6 +40,9 @@ import org.springframework.cloud.dataflow.registry.support.NoSuchAppRegistration
 import org.springframework.cloud.deployer.resource.registry.UriRegistry;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -58,6 +62,7 @@ import org.springframework.util.StringUtils;
  * @author Gunnar Hillert
  * @author Thomas Risberg
  * @author Eric Bottard
+ * @author Ilayaperumal Gopinathan
  */
 public class AppRegistry {
 
@@ -89,6 +94,23 @@ public class AppRegistry {
 	public List<AppRegistration> findAll() {
 		return this.uriRegistry.findAll().entrySet().stream().flatMap(toValidAppRegistration(metadataUriFromRegistry()))
 				.collect(Collectors.toList());
+	}
+
+	public Page<AppRegistration> findAll(Pageable pageable) {
+		List<AppRegistration> appRegistrations = this.uriRegistry.findAll().entrySet().stream()
+				.flatMap(toValidAppRegistration(metadataUriFromRegistry()))
+				.collect(Collectors.toList());
+		appRegistrations.sort(new Comparator<AppRegistration>() {
+			@Override
+			public int compare(AppRegistration o1, AppRegistration o2) {
+				return o1.compareTo(o2);
+			}
+		});
+		long count = appRegistrations.size();
+		long to = Math.min(count, pageable.getOffset() + pageable.getPageSize());
+
+		return new PageImpl<>(appRegistrations.subList(pageable.getOffset(), (int) to), pageable,
+				appRegistrations.size());
 	}
 
 	public AppRegistration save(String name, ApplicationType type, URI uri, URI metadataUri) {
