@@ -18,16 +18,12 @@ package org.springframework.cloud.dataflow.server.controller.support;
 
 import java.util.regex.Pattern;
 
-import org.springframework.cloud.dataflow.core.dsl.ArgumentNode;
-
 /**
  * Sanitizes potentially sensitive keys for a specific command line arg.
  * @author Glenn Renfro
  */
 public class ArgumentSanitizer {
 	private static final String[] REGEX_PARTS = { "*", "$", "^", "+" };
-
-	private static final String REDACTION_STRING = "******";
 
 	private static final String[] KEYS_TO_SANITIZE = { "password", "secret", "key", "token", ".*credentials.*",
 			"vcap_services" };
@@ -71,29 +67,10 @@ public class ArgumentSanitizer {
 		String value = argument.substring(indexOfFirstEqual + 1);
 		for (Pattern pattern : this.keysToSanitize) {
 			if (pattern.matcher(key).matches()) {
-				value = REDACTION_STRING;
+				value = "******";
 				break;
 			}
 		}
 		return String.format("%s=%s", key, value);
-	}
-
-	/**
-	 * Replaces a potential secure value with "******".
-	 * @param argument the argumentNode to cleanse.
-	 * @return the argumentNode with a potentially sanitized value
-	 */
-	public ArgumentNode sanitize(ArgumentNode argument) {
-
-		ArgumentNode result = argument;
-		for (Pattern pattern : this.keysToSanitize) {
-			if (pattern.matcher(argument.getName()).matches()) {
-				result = new ArgumentNode(argument.getName(), REDACTION_STRING,
-						argument.getStartPos(), argument.getStartPos() +
-						REDACTION_STRING.length());
-				break;
-			}
-		}
-		return result;
 	}
 }

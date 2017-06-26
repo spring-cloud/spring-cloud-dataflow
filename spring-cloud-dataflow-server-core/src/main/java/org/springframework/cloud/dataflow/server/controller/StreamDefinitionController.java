@@ -35,7 +35,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
-import org.springframework.cloud.dataflow.core.dsl.AppNode;
 import org.springframework.cloud.dataflow.core.dsl.ParseException;
 import org.springframework.cloud.dataflow.core.dsl.StreamNode;
 import org.springframework.cloud.dataflow.core.dsl.StreamParser;
@@ -43,7 +42,6 @@ import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.rest.resource.DeploymentStateResource;
 import org.springframework.cloud.dataflow.rest.resource.StreamDefinitionResource;
 import org.springframework.cloud.dataflow.server.DataFlowServerUtil;
-import org.springframework.cloud.dataflow.server.controller.support.ArgumentSanitizer;
 import org.springframework.cloud.dataflow.server.controller.support.ControllerUtils;
 import org.springframework.cloud.dataflow.server.controller.support.InvalidStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
@@ -83,7 +81,6 @@ import org.springframework.web.bind.annotation.RestController;
  * @author Ilayaperumal Gopinathan
  * @author Gunnar Hillert
  * @author Oleg Zhurakousky
- * @author Glenn Renfro
  */
 @RestController
 @RequestMapping("/streams/definitions")
@@ -192,9 +189,9 @@ public class StreamDefinitionController {
 	/**
 	 * Return a page-able list of {@link StreamDefinitionResource} defined streams.
 	 *
-	 * @param pageable  page-able collection of {@code StreamDefinitionResource}s.
+	 * @param pageable page-able collection of {@code StreamDefinitionResource}s.
 	 * @param assembler assembler for {@link StreamDefinition}
-	 * @param search    optional search parameter
+	 * @param search optional search parameter
 	 * @return list of stream definitions
 	 */
 	@RequestMapping(value = "", method = RequestMethod.GET)
@@ -409,9 +406,8 @@ public class StreamDefinitionController {
 
 		@Override
 		public StreamDefinitionResource instantiateResource(StreamDefinition stream) {
-			StreamDefinition sanitizedStream = getSanitizedStreamDefinition(stream);
-			final StreamDefinitionResource resource = new StreamDefinitionResource(sanitizedStream.getName(),
-					sanitizedStream.getDslText());
+			final StreamDefinitionResource resource = new StreamDefinitionResource(stream.getName(),
+					stream.getDslText());
 			final DeploymentStateResource deploymentStateResource = ControllerUtils
 					.mapState(streamDeploymentStates.get(stream));
 			resource.setStatus(deploymentStateResource.getKey());
@@ -419,16 +415,5 @@ public class StreamDefinitionController {
 			return resource;
 		}
 
-		private StreamDefinition getSanitizedStreamDefinition(StreamDefinition streamDefinition) {
-			ArgumentSanitizer argumentSanitizer = new ArgumentSanitizer();
-			StreamParser parser = new StreamParser(streamDefinition.getDslText());
-			StreamNode streamNode = parser.parse();
-			for (AppNode node : streamNode.getAppNodes()) {
-				for (int argumentPosition = 0; argumentPosition < node.getArguments().length; argumentPosition++) {
-					node.getArguments()[argumentPosition] = argumentSanitizer.sanitize(node.getArguments()[argumentPosition]);
-				}
-			}
-			return new StreamDefinition(streamDefinition.getName(), streamNode.getStreamData());
-		}
 	}
 }

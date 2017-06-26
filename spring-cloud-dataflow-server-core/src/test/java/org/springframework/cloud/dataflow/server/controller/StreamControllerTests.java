@@ -92,7 +92,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Ilayaperumal Gopinathan
  * @author Janne Valkealahti
  * @author Gunnar Hillert
- * @author Glenn Renfro
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestDependencies.class)
@@ -215,7 +214,6 @@ public class StreamControllerTests {
 		assertEquals(0, repository.count());
 		mockMvc.perform(post("/streams/definitions/").param("name", "myStream1").param("definition", "time | log")
 				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isCreated());
-
 		mockMvc.perform(post("/streams/definitions/").param("name", "myAnotherStream1")
 				.param("definition", "time | log").accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isCreated());
@@ -236,15 +234,7 @@ public class StreamControllerTests {
 		mockMvc.perform(post("/streams/definitions/").param("name", "myStream4")
 				.param("definition", ":myAnotherStream1 > log").accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isCreated());
-
-		mockMvc.perform(post("/streams/definitions/").param("name", "myStream5").param("definition", "time | log --secret=foo")
-				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isCreated());
-
-		mockMvc.perform(post("/streams/definitions/").param("name", "myStream6")
-				.param("definition", ":myStream5.time > log --password=bar").accept(MediaType.APPLICATION_JSON)).andDo(print())
-				.andExpect(status().isCreated());
-
-		assertEquals(10, repository.count());
+		assertEquals(8, repository.count());
 		String response = mockMvc
 				.perform(get("/streams/definitions/myStream1/related?nested=true").accept(MediaType.APPLICATION_JSON))
 				.andReturn().getResponse().getContentAsString();
@@ -252,78 +242,18 @@ public class StreamControllerTests {
 		assertTrue(response.contains(":myStream1.time > log"));
 		assertTrue(response.contains("time | log"));
 		assertTrue(response.contains("\"totalElements\":6"));
-
-		response = mockMvc
-				.perform(get("/streams/definitions/myStream5/related?nested=true").accept(MediaType.APPLICATION_JSON))
-				.andReturn().getResponse().getContentAsString();
-		assertTrue(response.contains(":myStream5.time > log --password=******"));
-		assertTrue(response.contains("time | log --secret=******"));
-		assertTrue(response.contains("\"totalElements\":2"));
-
 		String response2 = mockMvc.perform(
 				get("/streams/definitions/myAnotherStream1/related?nested=true").accept(MediaType.APPLICATION_JSON))
 				.andReturn().getResponse().getContentAsString();
 		assertTrue(response2.contains(":myAnotherStream1 > log"));
 		assertTrue(response2.contains("time | log"));
 		assertTrue(response2.contains("\"totalElements\":2"));
-
 		String response3 = mockMvc
 				.perform(get("/streams/definitions/myStream2/related?nested=true").accept(MediaType.APPLICATION_JSON))
 				.andReturn().getResponse().getContentAsString();
 		assertTrue(response3.contains(":myStream1 > log"));
 		assertTrue(response3.contains(":myStream2 > log"));
 		assertTrue(response3.contains("\"totalElements\":2"));
-	}
-
-	@Test
-	public void testFindAll() throws Exception {
-		assertEquals(0, repository.count());
-		mockMvc.perform(post("/streams/definitions/").param("name", "myStream1").param("definition", "time --password=foo| log")
-				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isCreated());
-		mockMvc.perform(post("/streams/definitions/").param("name", "myStream1A").param("definition", "time --foo=bar| log")
-				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isCreated());
-		mockMvc.perform(post("/streams/definitions/").param("name", "myAnotherStream1")
-				.param("definition", "time | log").accept(MediaType.APPLICATION_JSON)).andDo(print())
-				.andExpect(status().isCreated());
-		mockMvc.perform(post("/streams/definitions/").param("name", "myStream2").param("definition", ":myStream1 > log")
-				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isCreated());
-		mockMvc.perform(post("/streams/definitions/").param("name", "TapOnmyStream2")
-				.param("definition", ":myStream2 > log").accept(MediaType.APPLICATION_JSON)).andDo(print())
-				.andExpect(status().isCreated());
-		mockMvc.perform(post("/streams/definitions/").param("name", "myStream3")
-				.param("definition", ":myStream1.time > log").accept(MediaType.APPLICATION_JSON)).andDo(print())
-				.andExpect(status().isCreated());
-		mockMvc.perform(post("/streams/definitions/").param("name", "TapOnMyStream3")
-				.param("definition", ":myStream3 > log").accept(MediaType.APPLICATION_JSON)).andDo(print())
-				.andExpect(status().isCreated());
-		mockMvc.perform(post("/streams/definitions/").param("name", "MultipleNestedTaps")
-				.param("definition", ":TapOnMyStream3 > log").accept(MediaType.APPLICATION_JSON)).andDo(print())
-				.andExpect(status().isCreated());
-		mockMvc.perform(post("/streams/definitions/").param("name", "myStream4")
-				.param("definition", ":myAnotherStream1 > log").accept(MediaType.APPLICATION_JSON)).andDo(print())
-				.andExpect(status().isCreated());
-
-		assertEquals(9, repository.count());
-		String response = mockMvc
-				.perform(get("/streams/definitions/").accept(MediaType.APPLICATION_JSON))
-				.andReturn().getResponse().getContentAsString();
-
-		assertTrue(response.contains("time --password=****** | log"));
-		assertTrue(response.contains("time --foo=bar | log"));
-
-		assertTrue(response.contains(":myStream1.time > log"));
-		assertTrue(response.contains("time | log"));
-		assertTrue(response.contains(":myStream1 > log"));
-		assertTrue(response.contains(":myStream1.time > log"));
-		assertTrue(response.contains("time | log"));
-		assertTrue(response.contains(":myAnotherStream1 > log"));
-		assertTrue(response.contains("time | log"));
-		assertTrue(response.contains(":myStream1 > log"));
-		assertTrue(response.contains(":myStream2 > log"));
-		assertTrue(response.contains(":myStream3 > log"));
-
-		assertTrue(response.contains("\"totalElements\":9"));
-
 	}
 
 	@Test
@@ -571,24 +501,6 @@ public class StreamControllerTests {
 		mockMvc.perform(get("/streams/definitions/myStream").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk()).andExpect(content().json("{name: \"myStream\"}"))
 				.andExpect(content().json("{dslText: \"time | log\"}"));
-	}
-
-	@Test
-	public void testDisplaySingleStreamWithRedaction() throws Exception {
-		StreamDefinition streamDefinition1 = new StreamDefinition("myStream", "time --secret=foo | log");
-		for (StreamAppDefinition appDefinition : streamDefinition1.getAppDefinitions()) {
-			deploymentIdRepository.save(DeploymentKey.forStreamAppDefinition(appDefinition),
-					streamDefinition1.getName() + "." + appDefinition.getName());
-		}
-		repository.save(streamDefinition1);
-		assertEquals(1, repository.count());
-		AppStatus status = mock(AppStatus.class);
-		when(status.getState()).thenReturn(DeploymentState.unknown);
-		when(appDeployer.status("myStream.time")).thenReturn(status);
-		when(appDeployer.status("myStream.log")).thenReturn(status);
-		mockMvc.perform(get("/streams/definitions/myStream").accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk()).andExpect(content().json("{name: \"myStream\"}"))
-				.andExpect(content().json("{dslText: \"time --secret=****** | log\"}"));
 	}
 
 	@Test
