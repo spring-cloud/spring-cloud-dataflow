@@ -511,20 +511,6 @@ public class StreamParserTests {
 				equalTo("payload" + ".replace(\"abc\", '')"));
 	}
 
-	@Test
-	public void testGetStreamData()  {
-		StreamNode node = parse ("foo --test=bar | bar");
-		assertThat( node.getStreamData(), equalTo("foo --test=bar | bar"));
-
-		node = parse ("foo     --test=bar      |        bar");
-		assertThat( node.getStreamData(), equalTo("foo --test=bar | bar"));
-
-		node = parse (":fooStream > bar");
-		assertThat( node.getStreamData(), equalTo(":fooStream > bar"));
-
-		node = parse ("foo > :fooStream");
-		assertThat( node.getStreamData(), equalTo("foo > :fooStream"));
-	}
 
 	// ---
 

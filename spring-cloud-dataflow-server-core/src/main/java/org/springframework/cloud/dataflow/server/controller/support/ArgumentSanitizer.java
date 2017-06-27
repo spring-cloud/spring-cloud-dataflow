@@ -19,6 +19,7 @@ package org.springframework.cloud.dataflow.server.controller.support;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
@@ -33,10 +34,13 @@ public class ArgumentSanitizer {
 
 	private static final String[] KEYS_TO_SANITIZE = {"password", "secret", "key", "token", ".*credentials.*",
 			"vcap_services"};
-
-	public static Pattern passwordParameterPatternForStreams = Pattern.compile(
+	//used to find the passwords embedded in a stream definition
+	private static Pattern passwordParameterPatternForStreams = Pattern.compile(
+			//Search for the -- characters then look for unicode letters
 			"(?i)(--[\\p{Z}]*[\\p{L}]*("
+			//that match the following strings from the KEYS_TO_SANITIZE array
 					+ StringUtils.arrayToDelimitedString(KEYS_TO_SANITIZE, "|")
+			//Following the equal sign (group1) accept any number of unicode characters(letters, open punctuation, close punctuation etc) for the value to be sanitized for group 3.
 					+ ")[\\p{L}]*[\\p{Z}]*=[\\p{Z}]*)((\"[\\p{L}|\\p{Pd}|\\p{Ps}|\\p{Pe}|\\p{Pc}|\\p{S}|\\p{N}|\\p{Z}]*\")|([\\p{N}|\\p{L}|\\p{Po}|\\p{Pc}|\\p{S}]*))",
 			Pattern.UNICODE_CASE);
 
@@ -95,10 +99,12 @@ public class ArgumentSanitizer {
 	 * @return Stream definition that has sensitive data redacted.
 	 */
 	public static String sanitizeStream(String definition) {
+		Assert.hasText(definition, "definition must not be null nor empty");
 		final StringBuffer output = new StringBuffer();
 		final Matcher matcher = passwordParameterPatternForStreams.matcher(definition);
 		while (matcher.find()) {
 			String passwordValue = matcher.group(3);
+
 			String maskedPasswordValue;
 			boolean isPipeAppended = false;
 			boolean isNameChannelAppended = false;
