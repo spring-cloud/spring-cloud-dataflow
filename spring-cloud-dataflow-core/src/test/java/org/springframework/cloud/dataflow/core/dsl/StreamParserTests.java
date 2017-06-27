@@ -493,8 +493,6 @@ public class StreamParserTests {
 		checkForParseError("foo --name= value", DSLMessage.NO_WHITESPACE_BEFORE_ARG_VALUE, 12);
 	}
 
-	// ---
-
 	@Test
 	public void testComposedOptionNameErros() {
 		checkForParseError("foo --name.=value", DSLMessage.NOT_EXPECTED_TOKEN, 11);
@@ -512,6 +510,23 @@ public class StreamParserTests {
 		assertThat((String) ast.getAppNodes().get(1).getArgumentsAsProperties().get("expression"),
 				equalTo("payload" + ".replace(\"abc\", '')"));
 	}
+
+	@Test
+	public void testGetStreamData()  {
+		StreamNode node = parse ("foo --test=bar | bar");
+		assertThat( node.getStreamData(), equalTo("foo --test=bar | bar"));
+
+		node = parse ("foo     --test=bar      |        bar");
+		assertThat( node.getStreamData(), equalTo("foo --test=bar | bar"));
+
+		node = parse (":fooStream > bar");
+		assertThat( node.getStreamData(), equalTo(":fooStream > bar"));
+
+		node = parse ("foo > :fooStream");
+		assertThat( node.getStreamData(), equalTo("foo > :fooStream"));
+	}
+
+	// ---
 
 	StreamNode parse(String streamDefinition) {
 		return new StreamParser(streamDefinition).parse();
