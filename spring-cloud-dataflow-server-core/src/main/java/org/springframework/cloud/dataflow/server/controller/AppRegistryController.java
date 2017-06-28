@@ -23,10 +23,10 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.ForkJoinPool;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -108,13 +108,19 @@ public class AppRegistryController implements ResourceLoaderAware {
 			Pageable pageable,
 			PagedResourcesAssembler<AppRegistration> pagedResourcesAssembler,
 			@RequestParam(value = "type", required = false) ApplicationType type) {
+		Page<AppRegistration> pagedRegistrations;
+		if (type == null) {
+			pagedRegistrations = appRegistry.findAll(pageable);
+		}
+		else {
+			List<AppRegistration> appRegistrations = appRegistry.findAll().stream()
+				.filter(ar -> ar.getType() == type)
+				.collect(Collectors.toList());
+			long count = appRegistrations.size();
+			long to = Math.min(count, pageable.getOffset() + pageable.getPageSize());
 
-		Page<AppRegistration> pagedRegistrations = appRegistry.findAll(pageable);
-		for (Iterator<AppRegistration> iterator = pagedRegistrations.iterator(); iterator.hasNext();) {
-			ApplicationType applicationType = iterator.next().getType();
-			if (type != null && applicationType != type) {
-				iterator.remove();
-			}
+			pagedRegistrations = new PageImpl<>(appRegistrations.subList(pageable.getOffset(), (int) to), pageable,
+					appRegistrations.size());
 		}
 		return pagedResourcesAssembler.toResource(pagedRegistrations, this.assembler);
 
