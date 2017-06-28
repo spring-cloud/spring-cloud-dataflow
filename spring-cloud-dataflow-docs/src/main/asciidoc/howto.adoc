@@ -171,6 +171,41 @@ These properties can also be specified via `deployment` properties when deployin
 dataflow:>stream deploy foo --properties "app.*.logging.level.org.springframework.integration=DEBUG"
 ----
 
+==== Log redirect
+
+Given that each application is a separate process with each maintaining it's own set of logs, accessing individual logs could be a bit inconvinient especially in the early stages of the development when logs are accessed more often (i.e., debugging, troubleshooting, etc.).
+Since it is also a common pattern to rely on Local SCDF Server which deploys each application as a local JVM process using link:https://github.com/spring-cloud/spring-cloud-deployer-local[local-deployer], the framework provides support for redirecting such logs to a parent process’s streams (both stdout and stderr). So essentially with Local SCDF Server the application logs will appear in the logs of running Local SCDF Server.
+
+Typically when you deploy the stream you will see something like this in the server logs:
+[source,bash]
+----
+017-06-28 09:50:16.372  INFO 41161 --- [nio-9393-exec-7] o.s.c.d.spi.local.LocalAppDeployer       : Deploying app with deploymentId mystream.myapp instance 0.
+   Logs will be in /var/folders/l2/63gcnd9d7g5dxxpjbgr0trpw0000gn/T/spring-cloud-dataflow-5939494818997196225/mystream-1498661416369/mystream.myapp
+----
+However, by providing `local.inheritLogging=true` as a deployment property you will see the following:
+[source,bash]
+----
+017-06-28 09:50:16.372  INFO 41161 --- [nio-9393-exec-7] o.s.c.d.spi.local.LocalAppDeployer       : Deploying app with deploymentId mystream.myapp instance 0.
+   Logs will be inherited.
+----
+
+After which the application logs will appear along side the server logs.
+
+For example:
+[source,bash]
+----
+stream deploy --name mystream --properties "deployer.*.local.inheritLogging=true”
+----
+The above will enable log redirection for each application in the stream
+[source,bash]
+----
+stream deploy --name mystream --properties "deployer.myapp.local.inheritLogging=true”
+----
+The above will enable log redirection for application named ‘my app’ only.
+
+NOTE: Log redirect is only supported with link:https://github.com/spring-cloud/spring-cloud-deployer-local[local-deployer].
+
+
 [[faqs]]
 == Frequently asked questions
 In this section, we will review the frequently discussed questions in Spring Cloud Data Flow.
