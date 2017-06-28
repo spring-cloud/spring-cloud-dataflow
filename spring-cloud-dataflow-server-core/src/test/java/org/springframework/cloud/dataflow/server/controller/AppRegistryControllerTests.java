@@ -148,6 +148,12 @@ public class AppRegistryControllerTests {
 	}
 
 	@Test
+	public void testListApplicationsByType() throws Exception {
+		mockMvc.perform(get("/apps?type=task").accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk())
+				.andExpect(jsonPath("content", hasSize(1)));
+	}
+
+	@Test
 	public void testFindNonExistentApp() throws Exception {
 		mockMvc.perform(get("/apps/source/foo").accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().is4xxClientError()).andReturn().getResponse().getContentAsString()

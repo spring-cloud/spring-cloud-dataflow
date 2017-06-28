@@ -108,13 +108,23 @@ public class AppRegistryController implements ResourceLoaderAware {
 			Pageable pageable,
 			PagedResourcesAssembler<AppRegistration> pagedResourcesAssembler,
 			@RequestParam(value = "type", required = false) ApplicationType type) {
-
-		Page<AppRegistration> pagedRegistrations = appRegistry.findAll(pageable);
-		for (Iterator<AppRegistration> iterator = pagedRegistrations.iterator(); iterator.hasNext();) {
-			ApplicationType applicationType = iterator.next().getType();
-			if (type != null && applicationType != type) {
-				iterator.remove();
+		Page<AppRegistration> pagedRegistrations;
+		if (type == null) {
+			pagedRegistrations = appRegistry.findAll(pageable);
+		}
+		else {
+			List<AppRegistration> appRegistrations = appRegistry.findAll();
+			for (Iterator<AppRegistration> iterator = appRegistrations.iterator(); iterator.hasNext(); ) {
+				ApplicationType applicationType = iterator.next().getType();
+				if (applicationType != type) {
+					iterator.remove();
+				}
 			}
+			long count = appRegistrations.size();
+			long to = Math.min(count, pageable.getOffset() + pageable.getPageSize());
+
+			pagedRegistrations = new PageImpl<>(appRegistrations.subList(pageable.getOffset(), (int) to), pageable,
+					appRegistrations.size());
 		}
 		return pagedResourcesAssembler.toResource(pagedRegistrations, this.assembler);
 
