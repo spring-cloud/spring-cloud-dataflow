@@ -27,8 +27,8 @@
 		<javadoc.opts>-Xdoclint:none</javadoc.opts>
 		<spring-cloud-dataflow-ui.version>1.2.1.RELEASE</spring-cloud-dataflow-ui.version>
 
-		<spring-cloud-deployer.version>1.2.1.RELEASE</spring-cloud-deployer.version>
-		<spring-cloud-deployer-local.version>1.2.1.RELEASE</spring-cloud-deployer-local.version>
+		<spring-cloud-deployer.version>1.2.2.BUILD-SNAPSHOT</spring-cloud-deployer.version>
+		<spring-cloud-deployer-local.version>1.2.2.BUILD-SNAPSHOT</spring-cloud-deployer-local.version>
 
 		<!-- Note: Change ./spring-cloud-dataflow-server-local/pom.xml to match the spring-boot.version -->
 		<spring-boot.version>1.5.4.RELEASE</spring-boot.version>
