@@ -123,14 +123,7 @@
 					<plugin>
 						<groupId>org.asciidoctor</groupId>
 						<artifactId>asciidoctor-maven-plugin</artifactId>
-						<version>1.5.3</version>
-						<dependencies>
-							<dependency>
-								<groupId>org.asciidoctor</groupId>
-								<artifactId>asciidoctorj-pdf</artifactId>
-								<version>1.5.0-alpha.11</version>
-							</dependency>
-						</dependencies>
+						<version>1.5.5</version>
 						<configuration>
 							<sourceDocumentName>index.adoc</sourceDocumentName>
 							<doctype>book</doctype>
@@ -141,6 +134,7 @@
 								<project-artifactId>${project.artifactId}</project-artifactId>
 								<version-type-lowercase>${version-type-lowercase}</version-type-lowercase>
 								<snippets>${basedir}/target/generated-snippets</snippets>
+								<scsa-branch>${spring-cloud-stream-apps.branch}</scsa-branch>
 							</attributes>
 						</configuration>
 						<executions>
