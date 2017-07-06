@@ -18,12 +18,20 @@ package org.springframework.cloud.dataflow.server.rest.documentation;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.FixMethodOrder;
 import org.junit.Test;
+import org.junit.runners.MethodSorters;
 
 import static org.springframework.cloud.dataflow.core.ApplicationType.task;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.delete;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
+import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
+import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
+import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
 import static org.springframework.restdocs.request.RequestDocumentation.requestParameters;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
@@ -31,6 +39,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  *
  * @author Eric Bottard
  */
+
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class TaskDefinitionsDocumentation extends BaseDocumentation {
 
 	@Before
@@ -52,8 +62,53 @@ public class TaskDefinitionsDocumentation extends BaseDocumentation {
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
 						requestParameters(
-								parameterWithName("name").description("The name for the created task definitions"),
+								parameterWithName("name").description("The name for the created task definition"),
 								parameterWithName("definition")
 										.description("The definition for the task, using Data Flow DSL"))));
 	}
+
+	@Test
+	public void listAllTaskDefinitions() throws Exception {
+		this.mockMvc.perform(
+				get("/tasks/definitions")
+						.param("page", "0")
+						.param("size", "10"))
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andDo(this.documentationHandler.document(
+						requestParameters(
+								parameterWithName("page")
+										.description("The zero-based page number (optional)"),
+								parameterWithName("size")
+										.description("The requested page size (optional)")),
+						responseFields(
+								fieldWithPath("_embedded.taskDefinitionResourceList")
+										.description("Contains a collection of Task Definitions/"),
+								fieldWithPath("_links.self").description("Link to the task definitions resource"),
+								fieldWithPath("page").description("Pagination properties"))));
+	}
+
+	@Test
+	public void displayDetail() throws Exception {
+		this.mockMvc.perform(
+				get("/tasks/definitions/{my-task}","my-task"))
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andDo(this.documentationHandler.document(
+						pathParameters(parameterWithName("my-task")
+								.description("The name of an existing task definition (required)"))));
+	}
+
+	@Test
+	public void taskDefinitionDelete() throws Exception {
+		this.mockMvc.perform(
+				delete("/tasks/definitions/{my-task}", "my-task"))
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andDo(this.documentationHandler.document(
+						pathParameters(parameterWithName("my-task")
+								.description("The name of an existing task definition (required)"))
+				));
+	}
+
 }

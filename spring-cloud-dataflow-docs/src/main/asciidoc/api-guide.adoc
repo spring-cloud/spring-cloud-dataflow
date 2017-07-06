@@ -260,7 +260,7 @@ include::{snippets}/app-registry-documentation/bulk-registering-apps/http-respon
 [[api-guide-resources-stream-definitions-create]]
 ==== Creating a new Stream Definition
 
-Creating a task definition is achieved by POSTing to the stream definitions endpoint.
+Creating a stream definition is achieved by POSTing to the stream definitions endpoint.
 A simple curl request for a `ticktock` stream may look like:
 
 [source,bash]
@@ -394,6 +394,66 @@ include::{snippets}/task-definitions-documentation/create-definition/curl-reques
 
 include::{snippets}/task-definitions-documentation/create-definition/http-response.adoc[]
 
+[[api-guide-resources-task-definitions-list]]
+==== List all Task Definitions
+
+===== Request structure
+
+include::{snippets}/task-definitions-documentation/list-all-task-definitions/http-request.adoc[]
+
+===== Request parameters
+
+include::{snippets}/task-definitions-documentation/list-all-task-definitions/request-parameters.adoc[]
+
+===== Example request
+
+include::{snippets}/task-definitions-documentation/list-all-task-definitions/curl-request.adoc[]
+
+===== Response structure
+
+include::{snippets}/task-definitions-documentation/list-all-task-definitions/http-response.adoc[]
+
+[[api-guide-resources-task-definition-detail]]
+==== Retrieve Task Definition Detail
+
+===== Request structure
+
+include::{snippets}/task-definitions-documentation/display-detail/http-request.adoc[]
+
+include::{snippets}/task-definitions-documentation/display-detail/path-parameters.adoc[]
+
+===== Request parameters
+
+There are no request parameter for this endpoint.
+
+===== Example request
+
+include::{snippets}/task-definitions-documentation/display-detail/curl-request.adoc[]
+
+===== Response structure
+
+include::{snippets}/task-definitions-documentation/display-detail/http-response.adoc[]
+
+[[api-guide-resources-delete-task-definition]]
+==== Delete Task Definition
+
+===== Request structure
+
+include::{snippets}/task-definitions-documentation/task-definition-delete/http-request.adoc[]
+
+include::{snippets}/task-definitions-documentation/task-definition-delete/path-parameters.adoc[]
+
+===== Request parameters
+
+There are no request parameter for this endpoint.
+
+===== Example request
+
+include::{snippets}/task-definitions-documentation/task-definition-delete/curl-request.adoc[]
+
+===== Response structure
+
+include::{snippets}/task-definitions-documentation/task-definition-delete/http-response.adoc[]
 
 === Task Launch
 
