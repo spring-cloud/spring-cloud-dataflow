@@ -131,7 +131,7 @@ public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 								dashboard("/styles/**"), dashboard("/images/**"), "/assets/**", dashboard("/fonts/**"),
 								dashboard("/lib/**"))
 						.permitAll()
-						.antMatchers("/", dashboard("/**"), "/dashboard", "/features").authenticated();
+						.antMatchers("/api", dashboard("/**"), "/dashboard", "/features").authenticated();
 
 		if (authorizationConfig.isEnabled()) {
 			security = SecurityConfigUtils.configureSimpleSecurity(security, authorizationConfig);

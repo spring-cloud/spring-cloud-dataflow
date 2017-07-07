@@ -87,8 +87,8 @@ public class LocalServerSecurityWithSingleUserTests {
 	public static Collection<Object[]> data() {
 		return Arrays.asList(new Object[][] {
 
-				{ HttpMethod.GET, HttpStatus.OK, "/", singleUser, null },
-				{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/", null, null },
+				{ HttpMethod.GET, HttpStatus.OK, "/api", singleUser, null },
+				{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/api", null, null },
 
 				/* AppRegistryController */
 

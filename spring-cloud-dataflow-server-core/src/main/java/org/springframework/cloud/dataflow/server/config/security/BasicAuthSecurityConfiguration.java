@@ -89,7 +89,7 @@ public class BasicAuthSecurityConfiguration extends WebSecurityConfigurerAdapter
 		basicAuthenticationEntryPoint.afterPropertiesSet();
 
 		ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry security = http.csrf()
-				.disable().authorizeRequests().antMatchers("/").authenticated().antMatchers(dashboard("/**"),
+				.disable().authorizeRequests().antMatchers("/api").authenticated().antMatchers(dashboard("/**"),
 						"/authenticate", "/security/info", "/dashboard", "/features", "/assets/**")
 				.permitAll();
 

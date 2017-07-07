@@ -160,7 +160,9 @@ public class DataFlowTemplate implements DataFlowOperations {
 
 		this.restTemplate = prepareRestTemplate(restTemplate);
 
-		final RootResource resourceSupport = restTemplate.getForObject(baseURI, RootResource.class);
+		URI rootResourceURI = URI.create(baseURI.toString() + "/api");
+
+		final RootResource resourceSupport = restTemplate.getForObject(rootResourceURI, RootResource.class);
 
 		if (resourceSupport != null) {
 			if (resourceSupport.getApiRevision() == null) {

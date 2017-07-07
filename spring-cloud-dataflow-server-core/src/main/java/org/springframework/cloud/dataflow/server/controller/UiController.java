@@ -27,7 +27,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
  * @author Gunnar Hillert
  */
 @Controller
-@RequestMapping(UiController.WEB_UI_INDEX_PAGE_ROUTE)
+@RequestMapping({"/", UiController.WEB_UI_INDEX_PAGE_ROUTE})
 public class UiController {
 
 	public static final String WEB_UI_INDEX_PAGE_ROUTE = "/dashboard";

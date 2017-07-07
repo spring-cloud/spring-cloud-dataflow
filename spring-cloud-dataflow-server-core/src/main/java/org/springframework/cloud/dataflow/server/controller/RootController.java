@@ -62,6 +62,8 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 @ExposesResourceFor(RootResource.class)
 public class RootController {
 
+	public static final String BASE_PATH = "/api";
+
 	/**
 	 * Contains links pointing to controllers backing an entity type (such as streams).
 	 */
@@ -85,7 +87,7 @@ public class RootController {
 	 *
 	 * @return {@code ResourceSupport} object containing the Data Flow server's resources
 	 */
-	@RequestMapping("/")
+	@RequestMapping(BASE_PATH)
 	public RootResource info() {
 		RootResource root = new RootResource(Version.REVISION);
 

@@ -90,10 +90,10 @@ public class LocalServerSecurityWithUsersFileTests {
 	public static Collection<Object[]> data() {
 		return Arrays.asList(new Object[][] {
 
-				{ HttpMethod.GET, HttpStatus.OK, "/", manageOnlyUser, null },
-				{ HttpMethod.GET, HttpStatus.OK, "/", viewOnlyUser, null },
-				{ HttpMethod.GET, HttpStatus.OK, "/", createOnlyUser, null },
-				{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/", null, null },
+				{ HttpMethod.GET, HttpStatus.OK, "/api", manageOnlyUser, null },
+				{ HttpMethod.GET, HttpStatus.OK, "/api", viewOnlyUser, null },
+				{ HttpMethod.GET, HttpStatus.OK, "/api", createOnlyUser, null },
+				{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/api", null, null },
 
 				/* AppRegistryController */
 

@@ -56,14 +56,14 @@ public class LocalServerSecurityWithOAuth2Tests {
 	@Test
 	public void testAccessRootUrlWithBasicAuthCredentials() throws Exception {
 		localDataflowResource.getMockMvc()
-				.perform(get("/").header("Authorization", basicAuthorizationHeader("user", "secret10"))).andDo(print())
+				.perform(get("/api").header("Authorization", basicAuthorizationHeader("user", "secret10"))).andDo(print())
 				.andExpect(status().isOk());
 	}
 
 	@Test
 	public void testAccessRootUrlWithBasicAuthCredentialsWrongPassword() throws Exception {
 		localDataflowResource.getMockMvc()
-				.perform(get("/").header("Authorization", basicAuthorizationHeader("user", "wrong-password")))
+				.perform(get("/api").header("Authorization", basicAuthorizationHeader("user", "wrong-password")))
 				.andDo(print()).andExpect(status().isUnauthorized());
 	}
 
@@ -103,7 +103,7 @@ public class LocalServerSecurityWithOAuth2Tests {
 
 		final String accessTokenAsString = accessToken.getValue();
 
-		localDataflowResource.getMockMvc().perform(get("/").header("Authorization", "bearer " + accessTokenAsString))
+		localDataflowResource.getMockMvc().perform(get("/api").header("Authorization", "bearer " + accessTokenAsString))
 				.andDo(print()).andExpect(status().isOk());
 	}
 
@@ -132,7 +132,7 @@ public class LocalServerSecurityWithOAuth2Tests {
 
 	@Test
 	public void testAccessRootUrlWithWrongOAuth2AccessToken() throws Exception {
-		localDataflowResource.getMockMvc().perform(get("/").header("Authorization", "bearer 123456")).andDo(print())
+		localDataflowResource.getMockMvc().perform(get("/api").header("Authorization", "bearer 123456")).andDo(print())
 				.andExpect(status().isUnauthorized());
 	}
 
