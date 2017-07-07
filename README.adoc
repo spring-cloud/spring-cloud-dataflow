@@ -1,6 +1,6 @@
 == Spring Cloud Skipper
 
-A package manager that install, upgrade, and rollback applications to multiple Cloud Platforms.
+A package manager that installs, upgrades, and rolls back applications on multiple Cloud Platforms.
 
 Support application types are Spring Boot applications and those defined by Cloud Foundry application manifests.  Supported Cloud Platforms are local, Cloud Foundry, Kubernetes, and YARN.
 
