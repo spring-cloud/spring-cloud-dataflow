@@ -1,0 +1,7 @@
+[[appendix]]
+= Appendices
+
+include::appendix-migration-guide.adoc[]
+include::appendix-building.adoc[]
+include::appendix-contributing.adoc[]
+

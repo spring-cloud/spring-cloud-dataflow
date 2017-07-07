@@ -1,0 +1,23 @@
+[[skipper-documentation]]
+= Spring Cloud Skipper Overview
+
+[partintro]
+--
+This section provides a brief overview of the Spring Cloud Skipper reference documentation. Think of
+it as map for the rest of the document. You can read this reference guide in a linear
+fashion, or you can skip sections if something doesn't interest you.
+--
+
+[[skipper-documentation-intro]]
+== Introducing Spring Cloud Skipper
+Spring Cloud Skipper is a tool for installing applications to multiple cloud platforms.
+Skipper's upgrade and downgrade functionality can used as part of a Continuous Integration pipeline to achieve Continous Deployment.
+
+
+=== Features
+
+* Feature 1
+* Feature 2
+
+
+

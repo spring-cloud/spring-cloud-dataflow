@@ -1,0 +1,70 @@
+[appendix]
+[[building]]
+== Building
+To build the source you will need to install JDK 1.8.
+
+The build uses the Maven wrapper so you don't have to install a specific
+version of Maven.  To enable the tests for Redis you should run the server
+before bulding.  See below for more information on how to run Redis.
+
+The main build command is
+
+----
+$ ./mvnw clean install
+----
+
+You can also add '-DskipTests' if you like, to avoid running the tests.
+
+NOTE: You can also install Maven (>=3.3.3) yourself and run the `mvn` command
+in place of `./mvnw` in the examples below. If you do that you also
+might need to add `-P spring` if your local Maven settings do not
+contain repository declarations for spring pre-release artifacts.
+
+NOTE: Be aware that you might need to increase the amount of memory
+available to Maven by setting a `MAVEN_OPTS` environment variable with
+a value like `-Xmx512m -XX:MaxPermSize=128m`. We try to cover this in
+the `.mvn` configuration, so if you find you have to do it to make a
+build succeed, please raise a ticket to get the settings added to
+source control.
+
+=== Documentation
+
+There is a "full" profile that will generate documentation. You can build just the documentation by executing
+
+`$ ./mvnw clean package -DskipTests -P full -pl spring-cloud-skipper-docs -am`
+
+=== Working with the code
+If you don't have an IDE preference we would recommend that you use
+https://spring.io/tools[Spring Tools Suite] or
+http://www.eclipse.org[Eclipse] when working with the code. We use the
+http://www.eclipse.org/m2e/[m2eclipe] eclipse plugin for maven support. Other IDEs and tools
+should also work without issue.
+
+==== Importing into eclipse with m2eclipse
+We recommend the http://www.eclipse.org/m2e/[m2eclipe] eclipse plugin when working with
+eclipse. If you don't already have m2eclipse installed it is available from the "eclipse
+marketplace".
+
+Unfortunately m2e does not yet support Maven 3.3, so once the projects
+are imported into Eclipse you will also need to tell m2eclipse to use
+the `.settings.xml` file for the projects.  If you do not do this you
+may see many different errors related to the POMs in the
+projects.  Open your Eclipse preferences, expand the Maven
+preferences, and select User Settings.  In the User Settings field
+click Browse and navigate to the Spring Cloud project you imported
+selecting the `.settings.xml` file in that project.  Click Apply and
+then OK to save the preference changes.
+
+NOTE: Alternatively you can copy the repository settings from https://github.com/spring-cloud/spring-cloud-build/blob/master/.settings.xml[`.settings.xml`] into your own `~/.m2/settings.xml`.
+
+==== Importing into eclipse without m2eclipse
+If you prefer not to use m2eclipse you can generate eclipse project metadata using the
+following command:
+
+[indent=0]
+----
+	$ ./mvnw eclipse:eclipse
+----
+
+The generated eclipse projects can be imported by selecting `import existing projects`
+from the `file` menu.

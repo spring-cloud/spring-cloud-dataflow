@@ -1,0 +1,18 @@
+[[getting-started]]
+= Getting started
+
+[partintro]
+--
+This guide covers how you can get started quickly using Skipper
+--
+
+[[getting-started-system-requirements]]
+== System Requirements
+
+You need Java installed (Java 8 or later), and to build, you need to have Maven installed as well.
+
+You need to have link:https://redis.io[Redis] installed for storing Deployments.
+
+[[getting-started-installing-skipper]]
+== Install Skipper
+

@@ -1,0 +1,25 @@
+[[preface]]
+= Preface
+
+[[skipper-documentation-about]]
+== About the documentation
+The Spring Cloud Skipper reference guide is available as {spring-cloud-skipper-docs}/html[html],
+{spring-cloud-skipper-docs}/pdf/spring-cloud-dataflow-reference.pdf[pdf]
+and {spring-cloud-skipper-docs}/epub/spring-cloud-dataflow-reference.epub[epub] documents. The latest copy
+is available at {spring-cloud-skipper-docs-current}.
+
+Copies of this document may be made for your own use and for
+distribution to others, provided that you do not charge any fee for such copies and
+further provided that each copy contains this Copyright Notice, whether distributed in
+print or electronically.
+
+[[skipper-documentation-getting-help]]
+== Getting help
+Having trouble with Spring Cloud Data Flow, We'd like to help!
+
+* Ask a question - we monitor http://stackoverflow.com[stackoverflow.com] for questions
+  tagged with http://stackoverflow.com/tags/spring-cloud-dataflow[`spring-cloud-skipper`].
+* Report bugs with Spring Cloud Data Flow at https://github.com/spring-cloud/spring-cloud-skipper/issues.
+
+NOTE: All of Spring Cloud Skipper is open source, including the documentation! If you find problems
+with the docs; or if you just want to improve them, please {github-code}[get involved].

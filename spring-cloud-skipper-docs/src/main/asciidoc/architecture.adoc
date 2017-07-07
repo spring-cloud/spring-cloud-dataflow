@@ -1,0 +1,16 @@
+[[architecture]]
+= Architecture
+
+[[arch-intro]]
+== Introduction
+
+The major concepts of Skipper's architecture are...
+
+The supported runtimes are
+
+* Cloud Foundry
+* Apache YARN
+* Kubernetes
+* Apache Mesos
+* Local Server for development
+

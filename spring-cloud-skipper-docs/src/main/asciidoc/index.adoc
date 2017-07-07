@@ -1,0 +1,39 @@
+= Spring Cloud Data Flow Reference Guide
+Mark Pollack
+:doctype: book
+:toc:
+:toclevels: 4
+:source-highlighter: prettify
+:numbered:
+:icons: font
+:hide-uri-scheme:
+
+:spring-cloud-skipper-docs: http://docs.spring.io/spring-cloud-skipper/docs/{project-version}/reference
+:spring-cloud-skipper-docs-current: http://docs.spring.io/spring-cloud-skipper/docs/current-SNAPSHOT/reference/html/
+:spring-cloud-stream-docs: http://docs.spring.io/spring-cloud-stream/docs/current/reference/htmlsingle/index.html
+:github-repo: spring-cloud/spring-cloud-skipper
+:github-code: https://github.com/{github-repo}
+
+ifdef::backend-html5[]
+
+Version {project-version}
+
+(C) 2012-2017 Pivotal Software, Inc.
+
+_Copies of this document may be made for your own use and for distribution to
+others, provided that you do not charge any fee for such copies and further
+provided that each copy contains this Copyright Notice, whether distributed in
+print or electronically._
+
+endif::backend-html5[]
+
+// ======================================================================================
+
+include::preface.adoc[]
+include::spring-cloud-skipper-overview.adoc[]
+include::architecture.adoc[]
+include::getting-started.adoc[]
+include::appendix.adoc[]
+
+
+// ======================================================================================
