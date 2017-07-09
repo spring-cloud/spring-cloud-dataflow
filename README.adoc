@@ -59,6 +59,12 @@ $ ./mvnw clean install
 
 For more information on building, see this https://github.com/spring-cloud/spring-cloud-dataflow/blob/master/spring-cloud-dataflow-docs/src/main/asciidoc/appendix-building.adoc[link].
 
+==== Building on Windows
+
+When using Git on Windows to check out the project, it is important to handle line-endings correctly during checkouts. By default Git will change the line-endings during checkout to `CRLF`. This is, however, not desired for _Spring Cloud Data Flow_ as this may lead to test failures under Windows.
+
+Therefore, please ensure that you set Git property `core.autocrlf` to `false`, e.g. using: `$ git config core.autocrlf false`. Fore more information please refer to the https://git-scm.com/book/en/v2/Customizing-Git-Git-Configuration[Git documentation, Formatting and Whitespace].
+
 === Contributing
 
 We welcome contributions! Follow this https://github.com/spring-cloud/spring-cloud-dataflow/blob/master/spring-cloud-dataflow-docs/src/main/asciidoc/appendix-contributing.adoc[link] for more information on how to contribute.

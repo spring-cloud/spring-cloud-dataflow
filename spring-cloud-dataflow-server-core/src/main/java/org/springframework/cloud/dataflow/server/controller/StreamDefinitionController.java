@@ -260,7 +260,7 @@ public class StreamDefinitionController {
 		}
 		if (!errorMessages.isEmpty()) {
 			throw new InvalidStreamDefinitionException(
-					StringUtils.collectionToDelimitedString(errorMessages, System.lineSeparator()));
+					StringUtils.collectionToDelimitedString(errorMessages, "\n"));
 		}
 		this.repository.save(stream);
 		if (deploy) {
