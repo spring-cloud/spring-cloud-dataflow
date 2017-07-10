@@ -15,6 +15,7 @@ Sabby Anandan; Marius Bogoevici; Eric Bottard; Mark Fisher; Ilayaperumal Gopinat
 :github-code: https://github.com/{github-repo}
 
 :dataflow-asciidoc: https://raw.githubusercontent.com/spring-cloud/spring-cloud-dataflow/master/spring-cloud-dataflow-docs/src/main/asciidoc
+:stream-app-starters-root: https://raw.githubusercontent.com/spring-cloud-stream-app-starters
 
 ifdef::backend-html5[]
 
@@ -32,16 +33,29 @@ endif::backend-html5[]
 // ======================================================================================
 
 include::preface.adoc[]
+
 include::spring-cloud-dataflow-overview.adoc[]
+
 include::architecture.adoc[]
+
 include::getting-started.adoc[]
+
 include::configuration.adoc[]
+
 include::streams.adoc[]
+
+include::ootb-apps.adoc[]
+
 include::tasks.adoc[]
+
 include::dashboard.adoc[]
+
 include::howto.adoc[]
+
 include::api-guide.adoc[]
+
 include::dataflow-template.adoc[]
+
 include::appendix.adoc[]
 
 
