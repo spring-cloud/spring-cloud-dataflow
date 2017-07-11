@@ -58,7 +58,7 @@ Successfully targeted http://198.51.100.0
 dataflow:>
 ----
 +
-By default, the application registry will be empty. If you would like to register all out-of-the-box stream applications built with the Kafka binder in bulk, you can with the following command. For more details, review how to <<streams.adoc#spring-cloud-dataflow-register-apps, register applications>>.
+By default, the application registry will be empty. If you would like to register all out-of-the-box stream applications built with the Kafka binder in bulk, you can with the following command. For more details, review how to <<streams.adoc#spring-cloud-dataflow-register-stream-apps, register applications>>.
 +
 [source,bash,subs=attributes]
 ----

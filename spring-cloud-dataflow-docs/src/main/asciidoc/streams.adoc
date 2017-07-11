@@ -33,7 +33,7 @@ The shell provides tab completion for application properties and also the shell 
 
 NOTE: Supported Stream <appType>'s are: source, processor, and sink
 
-[[spring-cloud-dataflow-register-apps]]
+[[spring-cloud-dataflow-register-stream-apps]]
 == Register a Stream App
 
 Register a Stream App with the App Registry using the Spring Cloud Data Flow Shell
@@ -313,7 +313,7 @@ The plugin is necesary for creating the executable jar that will be registered w
 Spring Initialzr will include the plugin in the generated POM.
 ====
 
-Once a custom application has been created, it can be registered as described in <<spring-cloud-dataflow-register-apps>>.
+Once a custom application has been created, it can be registered as described in <<spring-cloud-dataflow-register-stream-apps>>.
 
 
 [[spring-cloud-dataflow-create-stream]]

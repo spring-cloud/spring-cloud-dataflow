@@ -41,7 +41,7 @@ follow the procedure link:http://docs.spring.io/spring-cloud-stream-app-starters
 CF implementations or as docker images, when deploying to Kubernetes and Mesos. Other than maven and
 docker resolution, you can also resolve application artifacts from `http`, `file`, or as `hdfs`
 coordinates
-* Unlike Spring XD, you do not have to upload the application bits while registering custom applications anymore; instead, you’re expected to <<spring-cloud-dataflow-register-apps, register>> the application coordinates that are hosted in the maven repository or by other means as discussed in the previous bullet
+* Unlike Spring XD, you do not have to upload the application bits while registering custom applications anymore; instead, you’re expected to <<spring-cloud-dataflow-register-stream-apps, register>> the application coordinates that are hosted in the maven repository or by other means as discussed in the previous bullet
 * By default, none of the out-of-the-box applications are preloaded already. It is intentionally designed to
 provide the flexibility to register app(s), as you find appropriate for the given use-case requirement
 * Depending on the binder choice, you can manually add the appropriate binder dependency to build

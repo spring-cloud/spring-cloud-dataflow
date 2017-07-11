@@ -61,6 +61,7 @@ Boot (there is one for running batch jobs for example).
   Boot conventions.
 .  The packaged application can be registered and deployed as noted below.
 
+[[spring-cloud-dataflow-register-task-apps]]
 === Registering a Task Application
 Register a Task App with the App Registry using the Spring Cloud Data Flow Shell
 `app register` command. You must provide a unique name and a URI that can be
