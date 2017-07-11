@@ -60,14 +60,25 @@ The REST endpoint `/features` provides information on the features enabled/disab
 [[configuration-rdbms]]
 == Database Configuration
 
+A relational database is used to store stream and task definitions as well as the state of executed tasks.
 Spring Cloud Data Flow provides schemas for H2, HSQLDB, MySQL, Oracle, Postgresql, DB2 and SqlServer that will be automatically created when the server starts.
+Out of the box Spring Cloud Data Flow offers an embedded instance of the H2 database.
+The H2 database is good for development purposes but is not recommended for production use.
 
 The JDBC drivers for *MySQL* (via MariaDB driver), *HSQLDB*, *PostgreSQL* along with embedded *H2* are available out of the box.
 If you are using any other database, then the corresponding JDBC driver jar needs to be on the classpath of the server.
 
-The database properties can be passed as command-line arguments to the Data Flow Server.
+The database properties can be passed as environment variables or command-line arguments to the Data Flow Server.
 
-For instance,
+
+* Environment variables:
+```
+export spring_datasource_url=jdbc:postgresql://localhost:5432/mydb
+export spring_datasource_username=myuser
+export spring_datasource_password=mypass
+export spring_datasource_driver-class-name="org.postgresql.Driver"
+```
+* Command Line arguments
 If you are using *MySQL*:
 
 [source,bash]
@@ -79,7 +90,7 @@ java -jar spring-cloud-dataflow-server-local/target/spring-cloud-dataflow-server
     --spring.datasource.driver-class-name=org.mariadb.jdbc.Driver &
 ----
 
-For *PostgreSQL*:
+If you are using *PostgreSQL*:
 
 [source,bash]
 ----
@@ -90,7 +101,7 @@ java -jar spring-cloud-dataflow-server-local/target/spring-cloud-dataflow-server
     --spring.datasource.driver-class-name=org.postgresql.Driver &
 ----
 
-For *HSQLDB*:
+If you are using *HSQLDB*:
 
 [source,bash]
 ----
@@ -111,6 +122,42 @@ embedded with Spring Cloud Data Flow set the
 `spring.dataflow.embedded.database.enabled` is set to false or a database
 other than h2 is specified as the datasource the embedded database will not
 start.
+
+=== Adding a custom JDBC driver
+To add a custom driver for the database, for example Oracle, it is recommended that you rebuild the Data Flow server and add the dependency to the Maven `pom.xml` file.
+Since there is a Spring Cloud Data Flow Server for each target platform, you will need to modify the appropriate maven `pom.xml` for each platform.  There are tags in each github repository for each server version.
+
+To add a custom JDBC driver dependency for the local server implementation:
+
+1. Select the tag that corresponds to the version of the server you want to rebuild and clone the github repository.
+2. Edit the spring-cloud-dataflow-server-local/pom.xml and in the `dependencies` section add the dependency for the database driver required.  In the sample below, and Oracle driver has been chosen.
+```
+<dependencies>
+...
+  <dependency>
+    <groupId>com.oracle.jdbc</groupId>
+    <artifactId>ojdbc8</artifactId>
+    <version>12.2.0.1</version>
+  </dependency>
+...
+</dependencies>
+```
+[start=3]
+1. Build the application as described here: <<appendix-building.adoc#building, Building Spring Cloud Data Flow>>
+
+You can also provide default values when rebuilding the server by adding the following properties to the dataflow-server.yml file
+
+For example adding postgres would look something like this:
+
+* dataflow-server.yml
+```
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/mydb
+    username: myuser
+    password: mypass
+    driver-class-name:org.postgresql.Driver
+```
 
 [[configuration-security]]
 == Security

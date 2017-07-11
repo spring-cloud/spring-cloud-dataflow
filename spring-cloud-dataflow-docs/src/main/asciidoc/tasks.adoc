@@ -13,7 +13,7 @@ this section.
 --
 
 [[spring-cloud-dataflow-task-intro]]
-== Introducing Spring Cloud Task
+== Introduction
 A task executes a process on demand.  In this case a task is a
 http://projects.spring.io/spring-boot/[Spring Boot] application that is annotated with
 `@EnableTask`.  Hence a user launches a task that performs a certain process, and once
@@ -26,13 +26,14 @@ based on the http://cloud.spring.io/spring-cloud-task/[Spring Cloud Task] projec
 Before we dive deeper into the details of creating Tasks, we need to understand the
 typical lifecycle for tasks in the context of Spring Cloud Data Flow:
 
-1. Register a Task App
-2. Create a Task Definition
-3. Launch a Task
-4. Task Execution
-5. Destroy a Task Definition
+1. Creating a Task Application
+2. Registering a Task Application
+3. Creating a Task Definition
+3. Launching a Task
+4. Reviewing Task Executions
+5. Destroying a Task Definition
 
-=== Creating a custom Task Application
+=== Creating a Task Application
 While Spring Cloud Task does provide a number of out of the box applications (via the
 https://github.com/spring-cloud-task-app-starters[spring-cloud-task-app-starters]),
 most task applications will be custom developed.  In order to create a custom task application:
@@ -61,6 +62,15 @@ Boot (there is one for running batch jobs for example).
   Boot conventions.
 .  The packaged application can be registered and deployed as noted below.
 
+==== Task Database Configuration
+
+When launching a task application be sure that the database driver that is being used by Spring Cloud Data Flow is also a dependency on the task application.
+For example if your Spring Cloud Data Flow is set to use Postgresql, be sure that the task application _also_ has Postgresql as a dependency.
+
+NOTE: When executing tasks externally (i.e. command line) and you wish for Spring Cloud Data Flow to show the TaskExecutions in its UI, be sure that common datasource settings are shared among the both.
+By default Spring Cloud Task will use a local H2 instance and the execution will not be recorded to the database used by Spring Cloud Data Flow.
+
+[[spring-cloud-dataflow-register-task-apps]]
 === Registering a Task Application
 Register a Task App with the App Registry using the Spring Cloud Data Flow Shell
 `app register` command. You must provide a unique name and a URI that can be
@@ -130,7 +140,7 @@ URI will be passed to a runtime container instance where it is resolved. Consult
 the specific documentation of each Data Flow Server for more detail.
 
 
-=== Creating a Task
+=== Creating a Task Definition
 Create a Task Definition from a Task App by providing a definition name as well as
 properties that apply to the task execution.  Creating a task definition can be done via
 the restful API or the shell.  To create a task definition using the shell, use the
@@ -217,7 +227,7 @@ the task definition name, for example `task execution list --name foo`.  To retr
 details for a task execution use the `task display` command with the id of the task execution,
 for example `task display --id 549`.
 
-=== Destroying a Task
+=== Destroying a Task Definition
 Destroying a Task Definition will remove the definition from the definition repository.
 This can be done via the restful API or via the shell.  To destroy a task via the shell
 use the `task destroy` command. For example:
@@ -233,80 +243,6 @@ remain in the task repository.
 NOTE: This will not stop any currently executing tasks for this definition, instead it just
 removes the task definition from the database.
 
-[[spring-cloud-dataflow-task-repository]]
-== Task Repository
-
-Out of the box Spring Cloud Data Flow offers an embedded instance of the H2 database.
-The H2 is good for development purposes but is not recommended for production use.
-
-=== Configuring the Task Execution Repository
-To add a driver for the database that will store the Task Execution information, a
-dependency for the driver will need to be added to a maven pom file and the
-Spring Cloud Data Flow will need to be rebuilt.  Since Spring Cloud Data Flow is comprised of an SPI for
-each environment it supports, please review the SPI's documentation on which POM should be
-updated to add the dependency and how to build.  This document will cover how to setup the
-dependency for local SPI.
-
-==== Local
-
-1. Open the spring-cloud-dataflow-server-local/pom.xml in your IDE.
-2. In the `dependencies` section add the dependency for the database driver required.  In
-the sample below postgresql has been chosen.
-```
-<dependencies>
-...
-    <dependency>
-        <groupId>org.postgresql</groupId>
-        <artifactId>postgresql</artifactId>
-    </dependency>
-...
-</dependencies>
-```
-[start=3]
-1. Save the changed pom.xml
-2. Build the application as described here: <<appendix-building.adoc#building, Building Spring Cloud Data Flow>>
-
-==== Task Application Repository
-
-When launching a task application be sure that the database driver that is being
-used by Spring Cloud Data Flow is also a dependency on the task application. For
-example if your Spring Cloud Data Flow is set to use Postgresql, be sure that
-the task application _also_ has Postgresql as a dependency.
-
-NOTE: When executing tasks externally (i.e. command line) and you wish for
-Spring Cloud Data Flow to show the TaskExecutions in its UI, be sure that
-common datasource settings are shared among the both. By default
-Spring Cloud Task will use a local H2 instance and the execution will
-not be recorded to the database used by Spring Cloud Data Flow.
-
-=== Datasource
-
-To configure the datasource Add the following properties to the dataflow-server.yml or via
-environment variables:
-
-a. spring.datasource.url
-b. spring.datasource.username
-c. spring.datasource.password
-d. spring.datasource.driver-class-name
-
-For example adding postgres would look something like this:
-
-* Environment variables:
-```
-export spring_datasource_url=jdbc:postgresql://localhost:5432/mydb
-export spring_datasource_username=myuser
-export spring_datasource_password=mypass
-export spring_datasource_driver-class-name="org.postgresql.Driver"
-```
-* dataflow-server.yml
-```
-spring:
-  datasource:
-    url: jdbc:postgresql://localhost:5432/mydb
-    username: myuser
-    password: mypass
-    driver-class-name:org.postgresql.Driver
-```
 
 [[spring-cloud-dataflow-task-events]]
 == Subscribing to Task/Batch Events
@@ -416,7 +352,7 @@ stream create task-stream --definition "http --port=9000 | tasklaunchrequest-tra
 ```
 
 [[spring-cloud-dataflow-composed-tasks]]
-== Composed Tasks
+== Composed Tasks DSL
 
 Spring Cloud Data Flow allows a user to create a directed graph where each node
 of the graph is a task application.  This is done by using the DSL for composed
