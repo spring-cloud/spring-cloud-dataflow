@@ -1,0 +1,224 @@
+[[dsl-guide]]
+== DSL Guide
+
+=== Introduction
+
+Spring Cloud Data Flow provides a DSL for managing streams, tasks and composed tasks.
+
+=== Streams Pipeline DSL
+
+A stream is defined using a unix-inspired link:https://en.wikipedia.org/wiki/Pipeline_(Unix)[Pipeline syntax].
+The syntax uses vertical bars, also known as "pipes" to connect multiple commands.
+The command `ls -l | grep key | less` in Unix takes the output of the `ls -l` process and pipes it to the input of the `grep key` process.  The output of `grep` in turn is sent to the input of the `less` process.  Each `|` symbol will connect the standard ouput of the program on the left to the standard input of the command on the right.  Data flows through the pipeline from left to right.
+
+In Data Flow, the Unix command is replaced by a Spring Cloud Stream application and each pipe symbol represents connecting the input and output of applications via messaging middleware, such as RabbitMQ or Apache Kafka.
+
+Each Spring Cloud Stream application is registered under a simple name.  The registration process specifies where the application can be obtained, for example in a Maven Repository or a Docker registry.  In Data Flow, we classify the Spring Cloud Stream applications as either Sources, Processors, or Sinks.
+
+As a simple example consider the collection of data from an HTTP Source writing to a File Sink. Using the DSL the stream description is:
+
+  http | file
+
+A stream that involves some processing would be expresed as:
+
+  http | filter | transform | file
+
+
+=== Application properties
+
+Each application takes properties to customize its behavior.  As an example the `http` source module exposes a `port` setting which allows the data ingestion port to be changed from the default value.
+
+  http --port=8090
+
+This `port` property is actually the same as the standard Spring Boot `server.port` property.
+Data Flow adds the ability to use the shorthand form `port` instead of `server.port`.
+One may also specify the longhand version as well.
+
+  http --server.port=8090
+
+This shorthand behavior is discussed more in the section on <<spring-cloud-dataflow-stream-app-whitelisting>>.
+If you have <<spring-cloud-dataflow-stream-app-metadata-artifact, registered application property metadata>> you can use tab completion in the shell after typing ``--`` to get a list of candidate property names.
+
+=== White space and quote rules
+
+It is only necessary to quote parameter values if they contain spaces or the `|` character. Here the transform processor is being passed a SpEL expression that will be applied to any data it encounters:
+
+  transform --expression='new StringBuilder(payload).reverse()'
+
+If the parameter value needs to embed a single quote, use two single quotes:
+
+  // Query is: Select * from /Customers where name='Smith'
+  scan --query='Select * from /Customers where name=''Smith'''
+
+[[named-destinations]]
+=== Named Destinations
+
+Instead of referencing a source or sink applications, you can use a named destination.
+When using the `|` symbol, applications are connected to each other using messaging middleware destination names created by the Data Flow server.
+In keeping with the unix analogy, one can redirect standard input and output using the less-than `<` greater-than `>` charaters.
+To specify the name of the destination, prefix it with a colon `:`.
+For example
+
+
+  http > :myNamedDestination
+
+Will send the output of the http source to the destination named `myNamedDestination`.  You can now create one or more streams that will consume data from the named destination.  For example
+
+  :myNamedDestination > file
+
+=== Fan-in and Fan-out
+
+Using named destinations, you can support Fan-in and Fan-out use cases.  Fan-in use cases are when multiple sources all send data to the same named destination. For example
+
+  s3 > :data
+  ftp > :data
+  http > :data
+
+Would direct the data payloads from the Amazon S3, FTP, and HTTP sources to the same named destination called `data`.  Then an additional stream created with the DSL expression
+
+  :data > file
+
+TBD: Fan out with router
+
+[[spring-cloud-dataflow-stream-tap-dsl]]
+== Tap a Stream
+
+Taps can be created at various producer endpoints in a stream. For a stream like this:
+
+```
+stream create --definition "http | step1: transform --expression=payload.toUpperCase() | step2: transform --expression=payload+'!' | log" --name mainstream --deploy
+
+```
+taps can be created at the output of `http`, `step1` and `step2`.
+
+To create a stream that acts as a 'tap' on another stream requires to specify the `source destination name` for the tap stream. The syntax for source destination name is:
+
+```
+`:<streamName>.<label/appName>`
+```
+To create a tap at the output of `http` in the stream above, the source destination name is `mainstream.http`
+To create a tap at the output of the first transform app in the stream above, the source destination name is `mainstream.step1`
+
+The tap stream DSL looks like this:
+
+```
+stream create --definition ":mainstream.http > counter" --name tap_at_http --deploy
+
+stream create --definition ":mainstream.step1 > jdbc" --name tap_at_step1_transformer --deploy
+```
+
+Note the colon (:) prefix before the destination names. The colon allows the parser to recognize this as a destination name instead of an app name.
+
+[[spring-cloud-dataflow-stream-app-labels]]
+== Using Labels in a Stream
+
+When a stream is comprised of multiple apps with the same name, they must be qualified with labels:
+```
+stream create --definition "http | firstLabel: transform --expression=payload.toUpperCase() | secondLabel: transform --expression=payload+'!' | log" --name myStreamWithLabels --deploy
+```
+
+[[dsl-quotes-escaping]]
+=== Single quotes, Double quotes, Escaping
+
+There is a *Spring Shell based client* that talks to the admin that is responsible for *parsing*. In turn, modules may themselves rely on embedded languages (like the *Spring Expression Language*) to accomplish their behavior.
+
+Those three components (shell, XD parser and SpEL) have rules about how they handle quotes and how syntax escaping works, and when stacked with each other, confusion may arise. This section explains the rules that apply and provides examples to the most common situations.
+
+[NOTE]
+.It's not always that complicated
+====
+This section focuses on the most complicated cases, when all 3 layers are involved. Of course, if you don't use the Data Flow shell (for example if you're using the REST API directly) or if module option values are not SpEL expressions, then escaping rules can be much simpler
+====
+
+==== Spring Shell
+Arguably, the most complex component when it comes to quotes is the shell. The rules can be laid out quite simply, though:
+
+* a shell command is made of keys (`--foo`) and corresponding values. There is a special, key-less mapping though, see below
+* a value can not normally contain spaces, as space is the default delimiter for commands
+* spaces can be added though, by surrounding the value with quotes (either single [`'`] or double [`"`] quotes)
+* if surrounded with quotes, a value can embed a literal quote of the same kind by prefixing it with a backslash (`\`)
+* Other escapes are available, such as `\t`, `\n`, `\r`, `\f` and unicode escapes of the form `\uxxxx`
+* Lastly, the key-less mapping is handled in a special way in the sense that if does not need quoting to contain spaces
+
+For example, the shell supports the `!` command to execute native shell commands. The `!` accepts a single, key-less argument. This is why the following works:
+----
+dataflow:>! rm foo
+----
+The argument here is the whole `rm foo` string, which is passed as is to the underlying shell.
+
+As another example, the following commands are strictly equivalent, and the argument value is `foo` (without the quotes):
+----
+dataflow:>stream destroy foo
+dataflow:>stream destroy --name foo
+dataflow:>stream destroy "foo"
+dataflow:>stream destroy --name "foo"
+----
+
+==== XD Syntax
+At the XD parser level (that is, inside the body of a stream or job definition) the rules are the following:
+
+* option values are normally parsed until the first space character
+* they can be made of literal strings though, surrounded by single or double quotes
+* To embed such a quote, use two consecutive quotes of the desired kind
+
+As such, the values of the `--expression` option to the filter module are semantically equivalent in the following examples:
+----
+filter --expression=payload>5
+filter --expression="payload>5"
+filter --expression='payload>5'
+filter --expression='payload > 5'
+----
+
+Arguably, the last one is more readable. It is made possible thanks to the surrounding quotes. The actual expression is `payload > 5` (without quotes).
+
+Now, let's imagine we want to test against string messages. If we'd like to compare the payload to the SpEL literal string, `"foo"`, this is how we could do:
+----
+filter --expression=payload=='foo'           <1>
+filter --expression='payload == ''foo'''     <2>
+filter --expression='payload == "foo"'       <3>
+----
+<1> This works because there are no spaces. Not very legible though
+<2> This uses single quotes to protect the whole argument, hence actual single quotes need to be doubled
+<3> But SpEL recognizes String literals with either single or double quotes, so this last method is arguably the best
+
+Please note that the examples above are to be considered outside of the Spring XD shell. When entered inside the shell, chances are that the whole stream definition will itself be inside double quotes, which would need escaping. The whole example then becomes:
+----
+xd:>stream create foo --definition "http | filter --expression=payload='foo' | log"
+xd:>stream create foo --definition "htpp | filter --expression='payload == ''foo''' | log"
+xd:>stream create foo --definition "http | filter --expression='payload == \"foo\"' | log"
+----
+
+==== SpEL syntax and SpEL literals
+The last piece of the puzzle is about SpEL expressions. Many modules accept options that are to be interpreted as SpEL expressions, and as seen above, String literals are handled in a special way there too. Basically,
+
+* literals can be enclosed in either single or double quotes
+* quotes need to be doubled to embed a literal quote. Single quotes inside double quotes need no special treatment, and _vice versa_
+
+As a last example, assume you want to use the xref:Processors#transform[transform] module. That module accepts an `expression` option which is a SpEL expression. It is to be evaluated against the incoming message, with a default of `payload` (which forwards the message payload untouched).
+
+It is important to understand that the following are equivalent:
+----
+transform --expression=payload
+transform --expression='payload'
+----
+
+but very different from the following:
+----
+transform --expression="'payload'"
+transform --expression='''payload'''
+----
+and other variations.
+
+The first series will simply evaluate to the message payload, while the latter examples will evaluate to the actual literal string `payload` (again, without quotes).
+
+==== Putting it all together
+As a last, complete example, let's review how one could force the transformation of all messages to the string literal `hello world`, by creating a stream in the context of the XD shell:
+
+----
+stream create foo --definition "http | transform --expression='''hello world''' | log" <1>
+stream create foo --definition "http | transform --expression='\"hello world\"' | log" <2>
+stream create foo --definition "http | transform --expression=\"'hello world'\" | log" <2>
+----
+
+<1> This uses single quotes around the string (at the XD parser level), but they need to be doubled because we're inside a string literal (very first single quote after the equals sign)
+<2> use single and double quotes respectively to encompass the whole string at the XD parser level. Hence, the other kind of quote can be used inside the string. The whole thing is inside the `--definition` argument to the shell though, which uses double quotes. So double quotes are escaped (at the shell level)
