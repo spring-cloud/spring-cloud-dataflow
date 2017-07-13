@@ -1,37 +1,80 @@
-[[streams]]
+[[spring-cloud-dataflow-streams]]
 = Streams
 
 [partintro]
+
 --
-In this section you will learn all about Streams and how to use them with Spring Cloud Data Flow.
+This section goes into more detail about how you can create Streams which are a collection of
+http://cloud.spring.io/spring-cloud-stream/[Spring Cloud Stream]. It covers topics such as
+creating and deploying Streams.
+
+If you're just starting out with Spring Cloud Data Flow, you should probably read the
+_<<getting-started.adoc#getting-started, Getting Started>>_ guide before diving into
+this section.
 --
 
 [[spring-cloud-dataflow-stream-intro]]
 == Introduction
+Streams are a collection of long lived http://cloud.spring.io/spring-cloud-stream/[Spring Cloud Stream] applications that communicate with each other over messaging middleware.
+A text based DSL defines the configuration and data flow between the applications.  While many applications are provided for you to implement common use-cases, you will typically create a custom Spring Cloud Stream application to implement custom business logic.
 
-In Spring Cloud Data Flow, a basic stream defines the ingestion of event data from a _source_ to a _sink_ that passes through any number of _processors_. Streams are composed of http://cloud.spring.io/spring-cloud-stream/[Spring Cloud Stream] applications and the deployment of stream definitions is done via the Data Flow Server (REST API). The xref:getting-started#getting-started[Getting Started] section shows you how to start the server and how to start and use the Spring Cloud Data Flow shell.
+[[spring-cloud-dataflow-stream-intro-dsl]]
+=== Stream Pipeline DSL
 
-A high level DSL is used to create stream definitions. The DSL to define a stream that has an http source and a file sink (with no processors) is shown below
+A stream is defined using a unix-inspired link:https://en.wikipedia.org/wiki/Pipeline_(Unix)[Pipeline syntax].
+The syntax uses vertical bars, also known as "pipes" to connect multiple commands.
+The command `ls -l | grep key | less` in Unix takes the output of the `ls -l` process and pipes it to the input of the `grep key` process.
+The output of `grep` in turn is sent to the input of the `less` process.
+Each `|` symbol will connect the standard ouput of the program on the left to the standard input of the command on the right.
+Data flows through the pipeline from left to right.
 
-```
-http | file
-```
-The DSL mimics UNIX pipes and filters syntax. Default values for ports and filenames are used in this example but can be overridden using `--` options, such as
+In Data Flow, the Unix command is replaced by a http://cloud.spring.io/spring-cloud-stream/[Spring Cloud Stream] application and each pipe symbol represents connecting the input and output of applications via messaging middleware, such as RabbitMQ or Apache Kafka.
 
-```
-http --server.port=8091 | file --directory=/tmp/httpdata/
-```
-To create these stream definitions you use the shell or make an HTTP POST request to the Spring Cloud Data Flow Server.  For more information on making HTTP request directly to the server, consult the <<api-guide, REST API Guide>>.
+Each Spring Cloud Stream application is registered under a simple name.
+The registration process specifies where the application can be obtained, for example in a Maven Repository or a Docker registry.  You can find out more information on how to register Spring Cloud Stream applications in this <<spring-cloud-dataflow-register-stream-apps,section>>.
+In Data Flow, we classify the Spring Cloud Stream applications as either Sources, Processors, or Sinks.
 
-== Stream DSL
+As a simple example consider the collection of data from an HTTP Source writing to a File Sink.
+Using the DSL the stream description is:
 
-In the example above, we connected a source to a sink using the pipe symbol `|`. You can also pass properties to the source and sink configurations. The property names will depend on the individual app implementations, but as an example, the `http` source app exposes a `server.port` setting and it allows you to change the data ingestion port from the default value. To create the stream using port 8000, we would use
-```
-dataflow:> stream create --definition "http --server.port=8000 | log" --name myhttpstream
-```
+  http | file
+
+A stream that involves some processing would be expresed as:
+
+  http | filter | transform | file
+
+Stream definitions can be created using the shell's `create stream` command.  For example:
+
+  dataflow:> stream create --name httpIngest --definition "http | file"
+
+The Stream DSL is passed in to the `--definition` command option.
+
+The deployment of stream definitions is done via the shell's `stream deploy` command.
+
+  dataflow:> stream deploy --name ticktock
+
+The xref:getting-started#getting-started[Getting Started] section shows you how to start the server and how to start and use the Spring Cloud Data Flow shell.
+
+Note that shell is calling the Data Flow Servers' REST API.  For more information on making HTTP request directly to the server, consult the <<api-guide, REST API Guide>>.
+
+=== Application properties
+
+Each application takes properties to customize its behavior.  As an example the `http` source module exposes a `port` setting which allows the data ingestion port to be changed from the default value.
+
+  dataflow:> stream create --definition "http --port=8090 | log" --name myhttpstream
+
+This `port` property is actually the same as the standard Spring Boot `server.port` property.
+Data Flow adds the ability to use the shorthand form `port` instead of `server.port`.
+One may also specify the longhand version as well.
+
+  dataflow:> stream create --definition "http --server.port=8000 | log" --name myhttpstream
+
+This shorthand behavior is discussed more in the section on <<spring-cloud-dataflow-stream-app-whitelisting>>.
+If you have <<spring-cloud-dataflow-stream-app-metadata-artifact, registered application property metadata>> you can use tab completion in the shell after typing ``--`` to get a list of candidate property names.
+
 The shell provides tab completion for application properties and also the shell command `app info <appType>:<appName>` provides additional documentation for all the supported properties.
 
-NOTE: Supported Stream <appType>'s are: source, processor, and sink
+NOTE: Supported Stream `<appType>`'s are: source, processor, and sink
 
 [[spring-cloud-dataflow-stream-lifecycle]]
 == Lifecycle of Streams
@@ -754,8 +797,12 @@ dataflow:> stream undeploy --name ticktock
 dataflow:> stream deploy --name ticktock
 ```
 
-[[spring-cloud-dataflow-stream-tap-dsl]]
-== Tap a Stream
+== Stream DSL
+
+This section covers additional features of the Stream DSL not covered in the  <<spring-cloud-dataflow-stream-intro-dsl,Stream DSL introduction>>.
+
+[[spring-cloud-dataflow-stream-dsl-tap]]
+=== Tap a Stream
 
 Taps can be created at various producer endpoints in a stream. For a stream like this:
 
@@ -783,56 +830,62 @@ stream create --definition ":mainstream.step1 > jdbc" --name tap_at_step1_transf
 
 Note the colon (:) prefix before the destination names. The colon allows the parser to recognize this as a destination name instead of an app name.
 
-[[spring-cloud-dataflow-stream-app-labels]]
-== Using Labels in a Stream
-
+[[spring-cloud-dataflow-stream-dsl-labels]]
+=== Using Labels in a Stream
 When a stream is comprised of multiple apps with the same name, they must be qualified with labels:
 ```
 stream create --definition "http | firstLabel: transform --expression=payload.toUpperCase() | secondLabel: transform --expression=payload+'!' | log" --name myStreamWithLabels --deploy
 ```
 
-[[spring-cloud-dataflow-stream-explicit-destination-names]]
-== Explicit Broker Destinations in a Stream
-
-One can connect to a specific destination name located in the broker (Rabbit, Kafka etc.,) either at the `source` or at the `sink` position.
-
-The following stream has the destination name at the `source` position:
-
-```
-stream create --definition ":myDestination > log" --name ingest_from_broker --deploy
-```
-
-This stream receives messages from the destination `myDestination` located at the broker and connects it to the `log` app.
 
 
-The following stream has the destination name at the `sink` position:
+[[spring-cloud-dataflow-stream-dsl-named-destinations]]
+=== Named Destinations
 
-```
-stream create --definition "http > :myDestination" --name ingest_to_broker --deploy
-```
-This stream sends the messages from the `http` app to the destination `myDestination` located at the broker.
+Instead of referencing a source or sink applications, you can use a named destination.
+A named destination corresponds to a specific destination name in the middleware broker (Rabbit, Kafka, etc.,).
+When using the `|` symbol, applications are connected to each other using messaging middleware destination names created by the Data Flow server.
+In keeping with the unix analogy, one can redirect standard input and output using the less-than `<` greater-than `>` charaters.
+To specify the name of the destination, prefix it with a colon `:`.
+For example the following stream has the destination name in the `source` position:
 
-From the above streams, notice that the `http` and `log` apps are interacting with each other via the broker (through the destination `myDestination`) rather than having a pipe directly between `http` and `log` within a single stream.
+  dataflow:>stream create --definition ":myDestination > log" --name ingest_from_broker --deploy
+
+
+This stream receives messages from the destination `myDestination` located at the broker and connects it to the `log` app. You can also create additional streams that will consume data from the same named destination.
+
+The following stream has the destination name in the `sink` position:
+
+  dataflow:>stream create --definition "http > :myDestination" --name ingest_to_broker --deploy
+
 
 It is also possible to connect two different destinations (`source` and `sink` positions) at the broker in a stream.
 
 ```
-stream create --definition ":destination1 > :destination2" --name bridge_destinations --deploy
+dataflow:>stream create --definition ":destination1 > :destination2" --name bridge_destinations --deploy
 ```
 
 In the above stream, both the destinations (`destination1` and `destination2`) are located in the broker. The messages flow from the source destination to the sink destination via a `bridge` app that connects them.
 
-[[spring-cloud-dataflow-stream-advanced]]
-== Directed Graphs in a Stream
 
-If directed graphs are needed instead of the simple linear streams described above, two features are relevant.
+[spring-cloud-dataflow-stream-dsl-fanin-fanout]]
+=== Fan-in and Fan-out
 
-First, named destinations may be used as a way to combine the output from multiple streams or for multiple consumers to share the output from a single stream.
-This can be done using the DSL syntax `http > :mydestination` or `:mydestination > log`.
+Using named destinations, you can support Fan-in and Fan-out use cases.  Fan-in use cases are when multiple sources all send data to the same named destination. For example
 
-Second, you may need to determine the output channel of a stream based on some information that is only known at runtime.
-In that case, a router may be used in the sink position of a stream definition. For more information, refer to the Router Sink starter's
-link:https://github.com/spring-cloud-stream-app-starters/router/tree/master/spring-cloud-starter-stream-sink-router[README].
+  s3 > :data
+  ftp > :data
+  http > :data
+
+Would direct the data payloads from the Amazon S3, FTP, and HTTP sources to the same named destination called `data`.  Then an additional stream created with the DSL expression
+
+  :data > file
+
+would have all the data from those three sources sent to the file sink.
+
+The Fan-out use case is when you determine the destination of a stream based on some information that is only known at runtime.
+In this case, the link:http://docs.spring.io/spring-cloud-stream-app-starters/docs/Bacon.RELEASE/reference/html/spring-cloud-stream-modules-sinks.html#spring-cloud-stream-modules-router-sink[Router Application] can be used to specify how to direct the incoming message to one of N named destinations.
+
 
 [[spring-cloud-dataflow-stream-multi-binder]]
 == Stream applications with multiple binder configurations

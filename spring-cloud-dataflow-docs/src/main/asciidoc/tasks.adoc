@@ -1,4 +1,4 @@
-[[spring-cloud-task]]
+[[spring-cloud-dataflow-task]]
 = Tasks
 
 [partintro]
@@ -22,7 +22,7 @@ data from a JDBC repository to an HDFS instance.  Tasks record the start time an
 time as well as the boot exit code in a relational database. The task implementation is
 based on the http://cloud.spring.io/spring-cloud-task/[Spring Cloud Task] project.
 
-== The Lifecycle of a task
+== The Lifecycle of a Task
 Before we dive deeper into the details of creating Tasks, we need to understand the
 typical lifecycle for tasks in the context of Spring Cloud Data Flow:
 
@@ -352,18 +352,18 @@ stream create task-stream --definition "http --port=9000 | tasklaunchrequest-tra
 ```
 
 [[spring-cloud-dataflow-composed-tasks]]
-== Composed Tasks DSL
+== Composed Tasks
 
 Spring Cloud Data Flow allows a user to create a directed graph where each node
 of the graph is a task application.  This is done by using the DSL for composed
 tasks.  A composed task can be created via the RESTful API, the Spring Cloud
 Data Flow Shell, or the Spring Cloud Data Flow UI.
 
-=== Configuring the Composed Task Runner in Spring Cloud Data Flow
+=== Configuring the Composed Task Runner
 
 Composed tasks are executed via a task application called the https://github.com/spring-cloud-task-app-starters/composed-task-runner[Composed Task Runner].
 
-==== Registering the Composed Task Runner application
+==== Registering the Composed Task Runner
 
 Out of the box the Composed Task Runner application is not registered with Spring Cloud Data Flow. So, to launch composed tasks we must first register the Composed
 Task Runner as an application with Spring Cloud Data Flow as follows:
@@ -378,7 +378,7 @@ name for the composed task runner.  This can be done by setting the
 of your choice.  You can then register the composed task runner application with
 the name you set using that property.
 
-==== Configuring the Composed Task Runner application
+==== Configuring the Composed Task Runner
 
 The Composed Task Runner application has a `dataflow.server.uri` property that is used for validation and for launching child tasks. This defaults
 to `http://localhost:9393`. If you run a distributed Spring Cloud Data Flow server, like you would do if you deploy the server on Cloud Foundry,
@@ -387,7 +387,7 @@ property for the Composed Task Runner application when launching a composed task
 for the Spring Cloud Data Flow server when it is started. For the latter case the `dataflow.server.uri` Composed Task Runner application property
 will be automatically set when a composed task is launched.
 
-=== Creating, Launching, and Destroying a Composed Task
+=== The Lifecycle of a Composed Task
 ==== Creating a Composed Task
 The DSL for the composed tasks is used when creating a task definition via the
 task create command. For example:
@@ -514,9 +514,9 @@ Spring Cloud Data Flow Dashboard or RESTful API), will relaunch  the
 `STOPPED` child task, and then launch the remaining (unlaunched) child tasks
 in the specified order.
 
-=== Composed Task DSL
+== Composed Tasks DSL
 
-==== Conditional Execution
+=== Conditional Execution
 Conditional execution is expressed using a double ampersand symbol `&&`.
 This allows each task in the sequence to be launched only if the previous task
 successfully completed. For example:
@@ -553,13 +553,13 @@ between:
 NOTE:  You can view a diagram of your directed graph by clicking the detail
 button next to the composed task definition on the definitions tab.
 
-==== Transitional Execution
+=== Transitional Execution
 The DSL supports fine grained control over the transitions taken during the
 execution of the directed graph. Transitions are specified by providing a
 condition for equality based on the exit status of the previous task.
 A task transition is represented by the following symbol `-&gt;`.
 
-===== Basic Transition
+==== Basic Transition
 A basic transition would look like the following:
 
 ```
@@ -592,7 +592,7 @@ select it by clicking it.  A bolt icon should appear, click that icon and
 enter the exit status required for that connector.  The solid line for that
 connector will turn to a dashed line.
 
-===== Transition With a Wildcard
+==== Transition With a Wildcard
 Wildcards are supported for transitions by the DSL for example:
 ```
 task create my-transition-composed-task --definition "foo 'FAILED' -> bar '*' -> baz"
@@ -608,7 +608,7 @@ Using the Spring Cloud Data Flow Dashboard to create the same
 .Basic Transition With Wildcard
 image::{dataflow-asciidoc}/images/dataflow-ctr-transition-basic-wildcard.png[Composed Task Basic Transition with Wildcard, scaledwidth="50%"]
 
-===== Transition With a Following Conditional Execution
+==== Transition With a Following Conditional Execution
 A transition can be followed by a conditional execution so long as the wildcard
 is not used. For example:
 ```
@@ -630,7 +630,7 @@ NOTE:  In this diagram we see the dashed line (transition) connecting the `foo` 
 to the target applications, but a solid line connecting the conditional executions
 between `foo`, `qux`, and  `quux`.
 
-==== Split Execution
+=== Split Execution
 Splits allow for multiple tasks within a composed task to be run in parallel.
 It is denoted by using angle brackets <> to group tasks and flows that are to
 be run in parallel. These tasks and flows are separated by the double pipe `||`
@@ -666,7 +666,7 @@ image::{dataflow-asciidoc}/images/dataflow-ctr-multiple-splits.png[Composed Task
 Notice that there is a `SYNC` control node that is by the designer when
 connecting two consecutive splits.
 
-===== Split Containing Conditional Execution
+==== Split Containing Conditional Execution
 A split can also have a conditional execution within the angle brackets.  For
 example:
 ```

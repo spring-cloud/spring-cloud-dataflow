@@ -33,12 +33,15 @@ The supported runtimes are
 
 There is a deployer Service Provider Interface (SPI) that enables you to extend Data Flow to deploy onto other runtimes, for example to support Docker Swarm. There are community implementations of Hashicorp's Nomad and RedHat Openshift is available. We look forward to working with the community for further contributions!
 
-The component that is responsible for deploying applications to a runtime is the Data Flow Server.  There is a Data Flow Server executable jar provided for each of the target runtimes.  The Data Flow server is responsible for interpreting
+The component that is responsible for deploying applications to a runtime is the Data Flow Server.  There is a Data Flow Server executable jar provided for each of the target runtimes.  The Data Flow server is responsible for:
 
-* A stream DSL that describes the logical flow of data through multiple applications.
-* A deployment manifest that describes the mapping of applications onto the runtime. For example, to set the initial number of instances, memory requirements, and data partitioning.
+* Interpreting and executing a stream DSL that describes the logical flow of data through multiple long lived applications.
+* Launching a long lived task application
+* Interpreting and executing a composed task DSL that describes the logical flow of data through multiple short lived applications.
+* Applyhing a deployment manifest that describes the mapping of applications onto the runtime. For example, to set the initial number of instances, memory requirements, and data partitioning.
+* Providing the runtime status of deployed applications
 
-As an example, the DSL to describe the flow of data from an http source to an Apache Cassandra sink would be written as “http | cassandra”.  These names in the DSL are registered with the Data Flow Server and map onto application artifacts that can be hosted in Maven or Docker repositories.  Many source, processor, and sink applications for common use-cases (e.g. jdbc, hdfs, http, router) are provided by the Spring Cloud Data Flow team.  The pipe symbol represents the communication between the two applications via messaging middleware. The two messaging middleware brokers that are supported are
+As an example, the stream DSL to describe the flow of data from an http source to an Apache Cassandra sink would be written as “http | cassandra”.  These names in the DSL are registered with the Data Flow Server and map onto application artifacts that can be hosted in Maven or Docker repositories.  Many source, processor, and sink applications for common use-cases (e.g. jdbc, hdfs, http, router) are provided by the Spring Cloud Data Flow team.  The pipe symbol represents the communication between the two applications via messaging middleware. The two messaging middleware brokers that are supported are
 
 * Apache Kafka
 * RabbitMQ
