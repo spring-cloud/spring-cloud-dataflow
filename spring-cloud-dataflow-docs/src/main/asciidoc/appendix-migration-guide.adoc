@@ -1,12 +1,8 @@
 [appendix]
-[[migration-guide]]
-== Migrating from Spring XD to Spring Cloud Data Flow
-
-[partintro]
---
+[[migrationguide]]
+== Spring XD to SCDF
 In this section you will learn all about the migration path from Spring XD to Spring Cloud Data Flow
 along with the tips and tricks.
---
 
 === Terminology Changes
 
