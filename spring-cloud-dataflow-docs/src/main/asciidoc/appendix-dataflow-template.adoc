@@ -1,12 +1,11 @@
+[appendix]
 [[dataflow-template]]
-= Data Flow Template
+== Data Flow Template
 
 As described in the previous chapter, Spring Cloud Data Flow's functionality is completely
 exposed via REST endpoints. While you can use those endpoints directly, Spring Cloud
 Data Flow also provides a Java-based API, which makes using those REST endpoints
 even easier.
-
-== Overview
 
 The central entrypoint is the `DataFlowTemplate` class in package `org.springframework.cloud.dataflow.rest.client`.
 
@@ -51,7 +50,7 @@ IMPORTANT: If a resource cannot be resolved, the respective sub-template will re
 in being _NULL_. A common cause is that Spring Cloud Data Flow offers for specific
 sets of features to be enabled/disabled when launching. For more information see <<enable-disable-specific-features>>.
 
-== Using the Data Flow Template
+=== Using the Data Flow Template
 
 When using the Data Flow Template the only needed Data Flow dependency is the
 Spring Cloud Data Flow Rest Client:

@@ -1,5 +1,6 @@
+[appendix]
 [[howto]]
-= '`How-to`' guides
+== '`How-to`' guides
 
 [partintro]
 --
@@ -15,7 +16,7 @@ We're also more than happy to extend this section; If you want to add a '`how-to
 can send us a {github-code}[pull request].
 --
 
-== Configure Maven Properties
+=== Configure Maven Properties
 
 You can set the maven properties such as local maven repository location, remote maven repositories and their authentication credentials including
 the proxy server properties via commandline properties when starting the Dataflow server or using the `SPRING_APPLICATION_JSON` environment property
@@ -81,8 +82,7 @@ NOTE: Depending on Spring Cloud Data Flow server implementation, you may have to
 environment properties using the platform specific environment-setting capabilities. For instance,
 in Cloud Foundry, you'd be passing them as `cf set-env SPRING_APPLICATION_JSON`.
 
-
-== Logging
+=== Logging
 
 Spring Cloud Data Flow is built upon several Spring projects, but ultimately the dataflow-server is a
 Spring Boot app, so the logging techniques that apply to any link:http://docs.spring.io/spring-boot/docs/current/reference/html/howto-logging.html#howto-logging[Spring Boot]
@@ -207,10 +207,10 @@ NOTE: Log redirect is only supported with link:https://github.com/spring-cloud/s
 
 
 [[faqs]]
-== Frequently asked questions
+=== Frequently asked questions
 In this section, we will review the frequently discussed questions in Spring Cloud Data Flow.
 
-=== Advanced SpEL expressions
+==== Advanced SpEL expressions
 
 One of the powerful features of SpEL expressions is http://docs.spring.io/spring/docs/current/spring-framework-reference/html/expressions.html#expressions-ref-functions[functions].
 Spring Integration provides `jsonPath()` and `xpath()` out-of-the-box http://docs.spring.io/spring-integration/reference/html/spel.html#spel-functions[SpEL-functions], if appropriate libraries are in the classpath.
@@ -239,7 +239,7 @@ Any other custom SpEL-function can also be used, but for this purpose you should
 The target Spring Cloud Stream application starter should be re-packaged to supply such a custom extension via built-in Spring Boot `@ComponentScan` mechanism or auto-configuration hook.
 
 [[dataflow-jdbc-sink]]
-=== How to use JDBC-sink?
+==== How to use JDBC-sink?
 The JDBC-sink can be used to insert message payload data into a relational database table. By default,
 it inserts the entire payload into a table named after the `jdbc.table-name` property, and if it is not set,
 by default the application expects to use a table with the name `messages`. To alter this behavior, the
@@ -292,7 +292,7 @@ mysql> select * from test.messages;
 ----
 
 [[dataflow-multiple-brokers]]
-=== How to use multiple message-binders?
+==== How to use multiple message-binders?
 For situations where the data is consumed and processed between two different message brokers, Spring
 Cloud Data Flow provides easy to override global configurations, out-of-the-box link:https://github.com/spring-cloud-stream-app-starters/bridge[`bridge-processor`],
 and DSL primitives to build these type of topologies.

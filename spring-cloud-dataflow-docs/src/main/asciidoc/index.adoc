@@ -1,12 +1,13 @@
 = Spring Cloud Data Flow Reference Guide
 Sabby Anandan; Marius Bogoevici; Eric Bottard; Mark Fisher; Ilayaperumal Gopinathan; Gunnar Hillert; Mark Pollack; Patrick Peralta; Glenn Renfro; Thomas Risberg; Dave Syer; David Turanski; Janne Valkealahti; Oleg Zhurakousky
 :doctype: book
-:toc:
+:toc: left
 :toclevels: 4
 :source-highlighter: prettify
 :numbered:
 :icons: font
 :hide-uri-scheme:
+:docinfo: shared
 
 :spring-cloud-dataflow-docs: http://docs.spring.io/spring-cloud-dataflow/docs/{project-version}/reference
 :spring-cloud-dataflow-docs-current: http://docs.spring.io/spring-cloud-dataflow/docs/current-SNAPSHOT/reference/html/
@@ -31,18 +32,14 @@ endif::backend-html5[]
 
 // ======================================================================================
 
-include::preface.adoc[]
-include::spring-cloud-dataflow-overview.adoc[]
-include::architecture.adoc[]
 include::getting-started.adoc[]
+include::applications.adoc[]
+include::architecture.adoc[]
 include::configuration.adoc[]
 include::streams.adoc[]
 include::tasks.adoc[]
 include::dashboard.adoc[]
-include::howto.adoc[]
 include::api-guide.adoc[]
-include::dataflow-template.adoc[]
 include::appendix.adoc[]
-
 
 // ======================================================================================
