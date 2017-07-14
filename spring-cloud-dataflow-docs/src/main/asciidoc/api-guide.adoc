@@ -455,7 +455,7 @@ include::{snippets}/task-definitions-documentation/task-definition-delete/curl-r
 
 include::{snippets}/task-definitions-documentation/task-definition-delete/http-response.adoc[]
 
-=== Task Launch
+=== Task Executions
 
 ==== Launching a Task
 Launching a task is done by requesting the creation of a new Task Execution.
@@ -475,6 +475,86 @@ include::{snippets}/task-executions-documentation/launch-task/curl-request.adoc[
 ===== Response structure
 
 include::{snippets}/task-executions-documentation/launch-task/http-response.adoc[]
+
+[[api-guide-resources-task-executions-list]]
+==== List All Task Executions
+
+===== Request structure
+
+include::{snippets}/task-executions-documentation/list-task-executions/http-request.adoc[]
+
+===== Request parameters
+
+include::{snippets}/task-executions-documentation/list-task-executions/request-parameters.adoc[]
+
+===== Example request
+
+include::{snippets}/task-executions-documentation/list-task-executions/curl-request.adoc[]
+
+===== Response structure
+
+include::{snippets}/task-executions-documentation/list-task-executions/http-response.adoc[]
+
+[[api-guide-resources-task-executions-list-by-name]]
+==== List All Task Executions With a Specified Task Name
+
+===== Request structure
+
+include::{snippets}/task-executions-documentation/list-task-executions-by-name/http-request.adoc[]
+
+===== Request parameters
+
+include::{snippets}/task-executions-documentation/list-task-executions-by-name/request-parameters.adoc[]
+
+===== Example request
+
+include::{snippets}/task-executions-documentation/list-task-executions-by-name/curl-request.adoc[]
+
+===== Response structure
+
+include::{snippets}/task-executions-documentation/list-task-executions-by-name/http-response.adoc[]
+
+[[api-guide-resources-task-executions-detail]]
+==== Task Execution Detail
+
+===== Request structure
+
+include::{snippets}/task-executions-documentation/launch-task-display-detail/http-request.adoc[]
+
+include::{snippets}/task-executions-documentation/launch-task-display-detail/path-parameters.adoc[]
+
+===== Request parameters
+
+There are no request parameter for this endpoint.
+
+===== Example request
+
+include::{snippets}/task-executions-documentation/launch-task-display-detail/curl-request.adoc[]
+
+===== Response structure
+
+include::{snippets}/task-executions-documentation/launch-task-display-detail/http-response.adoc[]
+
+[[api-guide-resources-task-executions-delete]]
+==== Delete Task Execution
+
+===== Request structure
+
+include::{snippets}/task-executions-documentation/remove-task-execution/http-request.adoc[]
+
+include::{snippets}/task-executions-documentation/remove-task-execution/path-parameters.adoc[]
+
+===== Request parameters
+
+There are no request parameter for this endpoint.
+
+===== Example request
+
+include::{snippets}/task-executions-documentation/remove-task-execution/curl-request.adoc[]
+
+===== Response structure
+
+include::{snippets}/task-executions-documentation/remove-task-execution/http-response.adoc[]
 
 === Runtime Information about Applications
 
