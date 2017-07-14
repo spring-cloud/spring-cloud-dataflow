@@ -35,7 +35,8 @@ There is a deployer Service Provider Interface (SPI) that enables you to extend 
 
 The component that is responsible for deploying applications to a runtime is the Data Flow Server.  There is a Data Flow Server executable jar provided for each of the target runtimes.  The Data Flow server is responsible for interpreting
 
-* A stream DSL that describes the logical flow of data through multiple applications.
+* A stream DSL that describes the logical flow of data through multiple long lived applications.
+* A composed task DSL that describes the logical flow of data through multiple short lived applications.
 * A deployment manifest that describes the mapping of applications onto the runtime. For example, to set the initial number of instances, memory requirements, and data partitioning.
 
 As an example, the DSL to describe the flow of data from an http source to an Apache Cassandra sink would be written as “http | cassandra”.  These names in the DSL are registered with the Data Flow Server and map onto application artifacts that can be hosted in Maven or Docker repositories.  Many source, processor, and sink applications for common use-cases (e.g. jdbc, hdfs, http, router) are provided by the Spring Cloud Data Flow team.  The pipe symbol represents the communication between the two applications via messaging middleware. The two messaging middleware brokers that are supported are
