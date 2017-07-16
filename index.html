@@ -76,6 +76,23 @@ The [dashboard](http://docs.spring.io/spring-cloud-dataflow/docs/current-SNAPSHO
 
 The Spring Could Data Flow server exposes a [REST API](http://docs.spring.io/spring-cloud-dataflow/docs/current-SNAPSHOT/reference/htmlsingle/#api-guide-overview) for composing and deploying data pipelines. A separate [shell](http://docs.spring.io/spring-cloud-dataflow/docs/current-SNAPSHOT/reference/htmlsingle/#getting-started-deploying-spring-cloud-dataflow) makes it easy to work with the API from the command line.
 
+## Platform Implementations
+
+An easy way to get started on Spring Cloud Data Flow would be to follow the platform-specific implementation links from the table below. Each of the implementations evolves in isolation with independent release cadences. It is highly recommended to review the platform-specific reference docs to learn more about the feature capabilities.
+
+| __Server Type__      | __Stable Release__                                                                                                                                                                                                                                                                                                  | __Milestone/Snapshot Release__                                                                                                                                                                                                                                                                       |
+|:---------------------|:--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Local Server         | [1.2.2.RELEASE](http://repo.spring.io/libs-release/org/springframework/cloud/spring-cloud-dataflow-server-local/1.2.2.RELEASE/spring-cloud-dataflow-server-local-1.2.2.RELEASE.jar)[[docs](http://docs.spring.io/spring-cloud-dataflow/docs/1.2.2.RELEASE/reference/htmlsingle/)]                                   | [1.2.3.BUILD-SNAPSHOT](http://repo.spring.io/libs-snapshot/org/springframework/cloud/spring-cloud-dataflow-server-local/1.2.3.BUILD-SNAPSHOT/spring-cloud-dataflow-server-local-1.2.3.BUILD-SNAPSHOT.jar)[[docs](http://docs.spring.io/spring-cloud-dataflow/docs/current-SNAPSHOT/reference/htmlsingle/)]                                   |
+| Cloud Foundry Server | [1.2.2.RELEASE](http://repo.spring.io/libs-release/org/springframework/cloud/spring-cloud-dataflow-server-cloudfoundry/1.2.2.RELEASE/spring-cloud-dataflow-server-cloudfoundry-1.2.2.RELEASE.jar)[[docs](http://docs.spring.io/spring-cloud-dataflow-server-cloudfoundry/docs/1.2.2.RELEASE/reference/htmlsingle/)] | [1.2.3.BUILD-SNAPSHOT](http://repo.spring.io/libs-snapshot/org/springframework/cloud/spring-cloud-dataflow-server-cloudfoundry/1.2.3.BUILD-SNAPSHOT/spring-cloud-dataflow-server-cloudfoundry-1.2.3.BUILD-SNAPSHOT.jar)[[docs](http://docs.spring.io/spring-cloud-dataflow-server-cloudfoundry/docs/current-SNAPSHOT/reference/htmlsingle/)] |
+| Apache YARN Server   | [1.2.1.RELEASE](http://repo.spring.io/libs-release/org/springframework/cloud/spring-cloud-dataflow-server-yarn/1.2.1.RELEASE/spring-cloud-dataflow-server-yarn-1.2.1.RELEASE.jar)[[docs](http://docs.spring.io/spring-cloud-dataflow-server-yarn/docs/1.2.0.RELEASE/reference/htmlsingle/)]                         | [1.2.2.BUILD-SNAPSHOT](http://repo.spring.io/libs-snapshot/org/springframework/cloud/spring-cloud-dataflow-server-yarn/1.2.2.BUILD-SNAPSHOT/spring-cloud-dataflow-server-yarn-1.2.2.BUILD-SNAPSHOT.jar)[[docs](http://docs.spring.io/spring-cloud-dataflow-server-yarn/docs/1.2.2.BUILD-SNAPSHOT/reference/htmlsingle/)]                         |
+| Kubernetes Server    | [1.2.1.RELEASE](http://repo.spring.io/libs-release/org/springframework/cloud/spring-cloud-dataflow-server-kubernetes/1.2.1.RELEASE/spring-cloud-dataflow-server-kubernetes-1.2.1.RELEASE.jar)[[docs](http://docs.spring.io/spring-cloud-dataflow-server-kubernetes/docs/1.2.1.RELEASE/reference/htmlsingle/)]       | [1.2.2.BUILD-SNAPSHOT](http://repo.spring.io/libs-snapshot/org/springframework/cloud/spring-cloud-dataflow-server-kubernetes/1.2.2.BUILD-SNAPSHOT/spring-cloud-dataflow-server-kubernetes-1.2.2.BUILD-SNAPSHOT.jar)[[docs](http://docs.spring.io/spring-cloud-dataflow-server-kubernetes/docs/1.2.2.BUILD-SNAPSHOT/reference/htmlsingle/)]       |
+| Apache Mesos Server  | [1.0.0.RELEASE](http://repo.spring.io/libs-milestone/org/springframework/cloud/spring-cloud-dataflow-server-mesos/1.0.0.RELEASE/spring-cloud-dataflow-server-mesos-1.0.0.RELEASE.jar)[[docs](http://docs.spring.io/spring-cloud-dataflow-server-mesos/docs/1.0.0.RELEASE/reference/htmlsingle/)]                    | [1.1.0.BUILD-SNAPSHOT](https://github.com/spring-cloud/spring-cloud-dataflow-server-mesos#building)[[docs](http://docs.spring.io/spring-cloud-dataflow-server-mesos/docs/current-SNAPSHOT/reference/htmlsingle/)]                                                                                    |
+
+## Community Implementations
+
+- [Spring Cloud Data Flow for HashiCorp Nomad](https://github.com/donovanmuller/spring-cloud-dataflow-server-nomad)
+- [Spring Cloud Data Flow for Red Hat OpenShift](https://github.com/donovanmuller/spring-cloud-dataflow-server-openshift)
+
 <span id="quick-start"></span>
 
 ## Quick Start
@@ -124,22 +141,6 @@ Once the ‘ticktock’ stream is deployed, two running stream apps will appear 
 ```
 tail -f /var/folders/ ... /ticktock.log/stdout_0.log
 ```
-<br>
-
-## Spring Cloud Data Flow Implementations
-
-| __Server Type__      | __Stable Release__                                                                                                                                                                                                                                                                                                  | __Milestone/Snapshot Release__                                                                                                                                                                                                                                                                       |
-|:---------------------|:--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Local Server         | [1.2.2.RELEASE](http://repo.spring.io/libs-release/org/springframework/cloud/spring-cloud-dataflow-server-local/1.2.2.RELEASE/spring-cloud-dataflow-server-local-1.2.2.RELEASE.jar)[[docs](http://docs.spring.io/spring-cloud-dataflow/docs/1.2.2.RELEASE/reference/htmlsingle/)]                                   | [1.2.3.BUILD-SNAPSHOT](http://repo.spring.io/libs-snapshot/org/springframework/cloud/spring-cloud-dataflow-server-local/1.2.3.BUILD-SNAPSHOT/spring-cloud-dataflow-server-local-1.2.3.BUILD-SNAPSHOT.jar)[[docs](http://docs.spring.io/spring-cloud-dataflow/docs/current-SNAPSHOT/reference/htmlsingle/)]                                   |
-| Cloud Foundry Server | [1.2.2.RELEASE](http://repo.spring.io/libs-release/org/springframework/cloud/spring-cloud-dataflow-server-cloudfoundry/1.2.2.RELEASE/spring-cloud-dataflow-server-cloudfoundry-1.2.2.RELEASE.jar)[[docs](http://docs.spring.io/spring-cloud-dataflow-server-cloudfoundry/docs/1.2.2.RELEASE/reference/htmlsingle/)] | [1.2.3.BUILD-SNAPSHOT](http://repo.spring.io/libs-snapshot/org/springframework/cloud/spring-cloud-dataflow-server-cloudfoundry/1.2.3.BUILD-SNAPSHOT/spring-cloud-dataflow-server-cloudfoundry-1.2.3.BUILD-SNAPSHOT.jar)[[docs](http://docs.spring.io/spring-cloud-dataflow-server-cloudfoundry/docs/current-SNAPSHOT/reference/htmlsingle/)] |
-| Apache YARN Server   | [1.2.0.RELEASE](http://repo.spring.io/libs-release/org/springframework/cloud/spring-cloud-dataflow-server-yarn/1.2.0.RELEASE/spring-cloud-dataflow-server-yarn-1.2.0.RELEASE.jar)[[docs](http://docs.spring.io/spring-cloud-dataflow-server-yarn/docs/1.2.0.RELEASE/reference/htmlsingle/)]                         | [1.2.1.BUILD-SNAPSHOT](http://repo.spring.io/libs-snapshot/org/springframework/cloud/spring-cloud-dataflow-server-yarn/1.2.1.BUILD-SNAPSHOT/spring-cloud-dataflow-server-yarn-1.2.1.BUILD-SNAPSHOT.jar)[[docs](http://docs.spring.io/spring-cloud-dataflow-server-yarn/docs/1.2.1.BUILD-SNAPSHOT/reference/htmlsingle/)]                         |
-| Kubernetes Server    | [1.2.1.RELEASE](http://repo.spring.io/libs-release/org/springframework/cloud/spring-cloud-dataflow-server-kubernetes/1.2.1.RELEASE/spring-cloud-dataflow-server-kubernetes-1.2.1.RELEASE.jar)[[docs](http://docs.spring.io/spring-cloud-dataflow-server-kubernetes/docs/1.2.1.RELEASE/reference/htmlsingle/)]       | [1.2.2.BUILD-SNAPSHOT](http://repo.spring.io/libs-snapshot/org/springframework/cloud/spring-cloud-dataflow-server-kubernetes/1.2.2.BUILD-SNAPSHOT/spring-cloud-dataflow-server-kubernetes-1.2.2.BUILD-SNAPSHOT.jar)[[docs](http://docs.spring.io/spring-cloud-dataflow-server-kubernetes/docs/1.2.2.BUILD-SNAPSHOT/reference/htmlsingle/)]       |
-| Apache Mesos Server  | [1.0.0.RELEASE](http://repo.spring.io/libs-milestone/org/springframework/cloud/spring-cloud-dataflow-server-mesos/1.0.0.RELEASE/spring-cloud-dataflow-server-mesos-1.0.0.RELEASE.jar)[[docs](http://docs.spring.io/spring-cloud-dataflow-server-mesos/docs/1.0.0.RELEASE/reference/htmlsingle/)]                    | [1.1.0.BUILD-SNAPSHOT](https://github.com/spring-cloud/spring-cloud-dataflow-server-mesos#building)[[docs](http://docs.spring.io/spring-cloud-dataflow-server-mesos/docs/current-SNAPSHOT/reference/htmlsingle/)]                                                                                    |
-
-## Community Spring Cloud Data Flow Implementations
-
-- [Spring Cloud Data Flow for HashiCorp Nomad](https://github.com/donovanmuller/spring-cloud-dataflow-server-nomad)
-- [Spring Cloud Data Flow for Red Hat OpenShift](https://github.com/donovanmuller/spring-cloud-dataflow-server-openshift)
 
 <br>
 ## Building Blocks of Spring Cloud Data Flow
@@ -361,17 +362,10 @@ Spring Cloud Data Flow builds upon several projects and the top-level building b
 * [Spring Cloud Stream Applications](http://cloud.spring.io/spring-cloud-stream-app-starters/)
 * [Spring Cloud Task](http://cloud.spring.io/spring-cloud-task/)
 * [Spring Cloud Task Applications](http://cloud.spring.io/spring-cloud-task-app-starters/)
-* [Spring Cloud Data Flow UI](https://github.com/spring-cloud/spring-cloud-dataflow-ui)
-* [Spring Cloud Data Flow Metrics Collector](https://github.com/spring-cloud/spring-cloud-dataflow-metrics-collector)
-* [Spring Cloud Data Flow Cloud Foundry](http://cloud.spring.io/spring-cloud-dataflow-server-cloudfoundry/)
-* [Spring Cloud Data Flow YARN](http://cloud.spring.io/spring-cloud-dataflow-server-yarn/)
-* [Spring Cloud Data Flow Mesos](http://cloud.spring.io/spring-cloud-dataflow-server-mesos/)
-* [Spring Cloud Data Flow Kubernetes](http://cloud.spring.io/spring-cloud-dataflow-server-kubernetes/)
-* [Spring Cloud Data Flow Samples](https://github.com/spring-cloud/spring-cloud-dataflow-samples)
-* [Spring XD]({{site.projects_site_url}}/spring-xd/)
 
 ### Videos
 
+* [Twitter Sentiment Analytics with TensorFlow](https://www.youtube.com/watch?v=QzF2Iii4s5c)
 * [Data Microservices with Spring Cloud Data Flow](https://www.youtube.com/watch?v=Z6_ttC33N0U)
 * [Data Microservices in the Cloud](https://www.youtube.com/watch?v=H-T-0WdZ3Sk&index=174&list=PLAdzTan_eSPQ1fuLSBhyB4eEZF7JQM0Mx)
 * [Cloud Native Streaming and Event-Driven Microservices](https://www.youtube.com/watch?v=s6mP4lpkxvg&app=desktop)
