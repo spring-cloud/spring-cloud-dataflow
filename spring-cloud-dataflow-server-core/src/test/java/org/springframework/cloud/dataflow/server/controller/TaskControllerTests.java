@@ -48,6 +48,7 @@ import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.verify;
@@ -270,6 +271,40 @@ public class TaskControllerTests {
 		assertEquals(1, repository.count());
 		mockMvc.perform(get("/tasks/definitions/myTask").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
 				.andExpect(content().json("{name: \"myTask\"}")).andExpect(content().json("{dslText: \"timestamp\"}"));
+	}
+
+
+	@Test
+	public void testFindAll() throws Exception {
+		assertEquals(0, repository.count());
+		appRegistry.save("task", ApplicationType.task, new URI("http://fake.example.com/"), null);
+		appRegistry.save("AAA", ApplicationType.task, new URI("http://fake.example.com/"), null);
+		appRegistry.save("BBB", ApplicationType.task, new URI("http://fake.example.com/"), null);
+		appRegistry.save("CCC", ApplicationType.task, new URI("http://fake.example.com/"), null);
+
+		mockMvc.perform(post("/tasks/definitions/").param("name", "taskOne").param("definition", "task --password=fooo")
+				.accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
+		mockMvc.perform(post("/tasks/definitions/").param("name", "taskTwo").param("definition", "task --secret=bar")
+				.accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
+		mockMvc.perform(post("/tasks/definitions/").param("name", "taskThree").param("definition", "task --param=baz")
+				.accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
+		mockMvc.perform(post("/tasks/definitions/").param("name", "taskFour").param("definition", "AAA && BBB && CCC")
+				.accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
+		mockMvc.perform(post("/tasks/definitions/").param("name", "taskFive").param("definition", "AAA --password=fo-o --param=bar && BBB --secret=foobar && CCC --param2=baz")
+				.accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
+
+
+		assertEquals(11, repository.count());
+
+		String response = mockMvc
+				.perform(get("/tasks/definitions/").accept(MediaType.APPLICATION_JSON))
+				.andReturn().getResponse().getContentAsString();
+
+		assertTrue(response.contains("task --password=******"));
+		assertTrue(response.contains("task --secret=******"));
+		assertTrue(response.contains("task --param=baz"));
+		assertTrue(response.contains("AAA && BBB && CCC"));
+		assertTrue(response.contains("AAA --password=****** --param=bar && BBB --secret=****** && CCC --param2=baz"));
 	}
 
 	@Test

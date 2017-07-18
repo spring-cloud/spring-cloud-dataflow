@@ -41,7 +41,7 @@ public class ArgumentSanitizer {
 			//that match the following strings from the KEYS_TO_SANITIZE array
 					+ StringUtils.arrayToDelimitedString(KEYS_TO_SANITIZE, "|")
 			//Following the equal sign (group1) accept any number of unicode characters(letters, open punctuation, close punctuation etc) for the value to be sanitized for group 3.
-					+ ")[\\p{L}]*[\\p{Z}]*=[\\p{Z}]*)((\"[\\p{L}|\\p{Pd}|\\p{Ps}|\\p{Pe}|\\p{Pc}|\\p{S}|\\p{N}|\\p{Z}]*\")|([\\p{N}|\\p{L}|\\p{Po}|\\p{Pc}|\\p{S}]*))",
+					+ ")[\\p{L}]*[\\p{Z}]*=[\\p{Z}]*)((\"[\\p{L}|\\p{Pd}|\\p{Ps}|\\p{Pe}|\\p{Pc}|\\p{S}|\\p{N}|\\p{Z}]*\")|([\\p{N}|\\p{L}|\\p{Pd}|\\p{Po}|\\p{Pc}|\\p{S}]*))",
 			Pattern.UNICODE_CASE);
 
 
@@ -98,7 +98,7 @@ public class ArgumentSanitizer {
 	 * @param definition the definition to sanitize
 	 * @return Stream definition that has sensitive data redacted.
 	 */
-	public static String sanitizeStream(String definition) {
+	public static String sanitizeDefinition(String definition) {
 		Assert.hasText(definition, "definition must not be null nor empty");
 		final StringBuffer output = new StringBuffer();
 		final Matcher matcher = passwordParameterPatternForStreams.matcher(definition);

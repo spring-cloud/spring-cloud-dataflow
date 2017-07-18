@@ -19,6 +19,7 @@ package org.springframework.cloud.dataflow.server.controller;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.rest.resource.TaskDefinitionResource;
+import org.springframework.cloud.dataflow.server.controller.support.ArgumentSanitizer;
 import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
 import org.springframework.cloud.dataflow.server.repository.DeploymentKey;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;
@@ -190,7 +191,7 @@ public class TaskDefinitionController {
 			}
 			String state = (status != null) ? status.getState().name() : "unknown";
 			TaskDefinitionResource taskDefinitionResource = new TaskDefinitionResource(taskDefinition.getName(),
-					taskDefinition.getDslText());
+					ArgumentSanitizer.sanitizeDefinition(taskDefinition.getDslText()));
 			taskDefinitionResource.setComposed(composed);
 			taskDefinitionResource.setStatus(state);
 			return taskDefinitionResource;

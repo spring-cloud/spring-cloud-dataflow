@@ -241,7 +241,7 @@ public class StreamControllerTests {
 				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isCreated());
 
 		mockMvc.perform(post("/streams/definitions/").param("name", "myStream6")
-				.param("definition", ":myStream5.time > log --password=bar").accept(MediaType.APPLICATION_JSON)).andDo(print())
+				.param("definition", ":myStream5.time > log --password=b-ar").accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isCreated());
 
 		assertEquals(10, repository.count());
@@ -316,7 +316,7 @@ public class StreamControllerTests {
 		mockMvc.perform(post("/streams/definitions/").param("name", "nameChannelPassword")
 				.param("definition", "time --password='foo'> :foobar")
 				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isCreated());
-		mockMvc.perform(post("/streams/definitions/").param("name", "twoParam").param("definition", "time --password=foo --arg=foo | log")
+		mockMvc.perform(post("/streams/definitions/").param("name", "twoParam").param("definition", "time --password=fo-o --arg=foo | log")
 				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isCreated());
 		mockMvc.perform(post("/streams/definitions/").param("name", "twoPipeInQuotes").param("definition", "time --password='fo|o' --arg=bar | log")
 				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isCreated());
