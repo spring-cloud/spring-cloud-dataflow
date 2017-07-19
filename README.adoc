@@ -25,7 +25,7 @@ The Data Flow Server is a Spring Boot application that provides a common REST AP
 runtime environment there is a different version of the Data Flow Server that depends upon a
 deployer SPI implementation for that environment. The github locations for these Data Flow Servers are:
 
-* https://github.com/spring-cloud/spring-cloud-dataflow/tree/master/spring-cloud-dataflow-server-local[Local] (intended for development use only)
+* https://github.com/spring-cloud/spring-cloud-dataflow/tree/master/spring-cloud-dataflow-server-local[Local]
 * https://github.com/spring-cloud/spring-cloud-dataflow-server-cloudfoundry[Cloud Foundry]
 * https://github.com/spring-cloud/spring-cloud-dataflow-server-yarn[Apache YARN]
 * https://github.com/spring-cloud/spring-cloud-dataflow-server-mesos[Apache Mesos]
