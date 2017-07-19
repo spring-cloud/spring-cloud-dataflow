@@ -54,6 +54,7 @@ import static org.junit.Assert.assertTrue;
  * @author Glenn Renfro
  * @author Ilayaperumal Gopinathan
  * @author Gunnar Hillert
+ * @author Janne Valkealahti
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = { EmbeddedDataSourceConfiguration.class, PropertyPlaceholderAutoConfiguration.class,
@@ -159,7 +160,7 @@ public class RdbmsStreamDefinitionRepositoryTests {
 
 		int count = 0;
 		for (@SuppressWarnings("unused")
-		StreamDefinition item : items) {
+				StreamDefinition item : items) {
 			count++;
 		}
 
@@ -180,7 +181,7 @@ public class RdbmsStreamDefinitionRepositoryTests {
 
 		int count = 0;
 		for (@SuppressWarnings("unused")
-		StreamDefinition item : items) {
+				StreamDefinition item : items) {
 			count++;
 		}
 
@@ -255,6 +256,12 @@ public class RdbmsStreamDefinitionRepositoryTests {
 		repository.save(new StreamDefinition("stream1", "time | log"));
 		repository.save(new StreamDefinition("stream2", "time | log"));
 		repository.save(new StreamDefinition("stream3", "time | log"));
+	}
+
+	private void initializeRepository(int count) {
+		for (int i = 0; i < count; i++) {
+			repository.save(new StreamDefinition("stream" + i, "time | log"));
+		}
 	}
 
 	protected void initializeRepositoryNotInOrder() {
@@ -507,6 +514,54 @@ public class RdbmsStreamDefinitionRepositoryTests {
 
 		String[] names = new String[] { "stream2" };
 		findAllUsingSearchPageable(searchPageable, names);
+	}
+
+	@Test
+	public void testSearchWithPagination() {
+		initializeRepository(25);
+		Pageable pageable1 = new PageRequest(0, 10);
+		Pageable pageable2 = new PageRequest(1, 10);
+		Pageable pageable3 = new PageRequest(2, 10);
+
+		final SearchPageable searchPageable1 = new SearchPageable(pageable1, "stream10");
+		searchPageable1.addColumns("DEFINITION_NAME", "DEFINITION");
+		Page<StreamDefinition> page = repository.search(searchPageable1);
+
+		assertEquals(page.getTotalElements(), 1);
+		assertEquals(page.getNumber(), 0);
+		assertEquals(page.getNumberOfElements(), 1);
+		assertEquals(page.getSize(), 10);
+		assertEquals(page.getContent().size(), 1);
+
+		final SearchPageable searchPageable2 = new SearchPageable(pageable1, "stream1");
+		searchPageable2.addColumns("DEFINITION_NAME", "DEFINITION");
+		page = repository.search(searchPageable2);
+
+		assertEquals(page.getTotalElements(), 11);
+		assertEquals(page.getNumber(), 0);
+		assertEquals(page.getNumberOfElements(), 10);
+		assertEquals(page.getSize(), 10);
+		assertEquals(page.getContent().size(), 10);
+
+		final SearchPageable searchPageable3 = new SearchPageable(pageable2, "stream1");
+		searchPageable3.addColumns("DEFINITION_NAME", "DEFINITION");
+		page = repository.search(searchPageable3);
+
+		assertEquals(page.getTotalElements(), 11);
+		assertEquals(page.getNumber(), 1);
+		assertEquals(page.getNumberOfElements(), 1);
+		assertEquals(page.getSize(), 10);
+		assertEquals(page.getContent().size(), 1);
+
+		final SearchPageable searchPageable4 = new SearchPageable(pageable3, "stream");
+		searchPageable4.addColumns("DEFINITION_NAME", "DEFINITION");
+		page = repository.search(searchPageable4);
+
+		assertEquals(page.getTotalElements(), 25);
+		assertEquals(page.getNumber(), 2);
+		assertEquals(page.getNumberOfElements(), 5);
+		assertEquals(page.getSize(), 10);
+		assertEquals(page.getContent().size(), 5);
 	}
 
 	private void findAllUsingSearchPageable(SearchPageable searchPageable, String[] expectedOrder) {
