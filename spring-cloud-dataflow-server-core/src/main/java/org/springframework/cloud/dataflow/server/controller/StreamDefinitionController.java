@@ -191,9 +191,9 @@ public class StreamDefinitionController {
 	/**
 	 * Return a page-able list of {@link StreamDefinitionResource} defined streams.
 	 *
-	 * @param pageable  page-able collection of {@code StreamDefinitionResource}s.
+	 * @param pageable page-able collection of {@code StreamDefinitionResource}s.
 	 * @param assembler assembler for {@link StreamDefinition}
-	 * @param search    optional search parameter
+	 * @param search optional search parameter
 	 * @return list of stream definitions
 	 */
 	@RequestMapping(value = "", method = RequestMethod.GET)
@@ -205,6 +205,11 @@ public class StreamDefinitionController {
 			final SearchPageable searchPageable = new SearchPageable(pageable, search);
 			searchPageable.addColumns("DEFINITION_NAME", "DEFINITION");
 			streamDefinitions = repository.search(searchPageable);
+			long count = streamDefinitions.getContent().size();
+			long to = Math.min(count, pageable.getOffset() + pageable.getPageSize());
+
+			streamDefinitions = new PageImpl<>(streamDefinitions.getContent().subList(pageable.getOffset(), (int) to), pageable,
+					streamDefinitions.getContent().size());
 		}
 		else {
 			streamDefinitions = repository.findAll(pageable);
