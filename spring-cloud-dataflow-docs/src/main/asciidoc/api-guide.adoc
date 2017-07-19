@@ -542,7 +542,7 @@ include::{snippets}/task-executions-documentation/launch-task-display-detail/htt
 
 include::{snippets}/task-executions-documentation/remove-task-execution/http-request.adoc[]
 
-include::{snippets}/task-executions-documentation/remove-task-execution-detail/path-parameters.adoc[]
+include::{snippets}/task-executions-documentation/remove-task-execution/path-parameters.adoc[]
 
 ===== Request parameters
 
@@ -554,7 +554,7 @@ include::{snippets}/task-executions-documentation/remove-task-execution/curl-req
 
 ===== Response structure
 
-include::{snippets}/task-executions-documentation/lremove-task-execution/http-response.adoc[]
+include::{snippets}/task-executions-documentation/remove-task-execution/http-response.adoc[]
 
 === Runtime Information about Applications
 
