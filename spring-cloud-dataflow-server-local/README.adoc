@@ -2,7 +2,11 @@
 
 The Data Flow Server implementation for deploying https://github.com/spring-cloud/spring-cloud-stream[Spring Cloud Stream]
 and https://github.com/spring-cloud/spring-cloud-task[Spring Cloud Task] apps locally by spawning
-a new JVM process on the local machine. This server is intended for development use only.
+a new JVM process on the local machine.
+
+NOTE: The local version of the Data Flow server should only be used for development
+and in environments where production grade resilience is provided via means other than
+Data Flow itself.
 
 == Getting Started
 
