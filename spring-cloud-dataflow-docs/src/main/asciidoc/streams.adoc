@@ -418,7 +418,7 @@ For more info on the property white listing refer to <<spring-cloud-dataflow-str
 
 Below are the white listed properties for the app `time`:
 
-[source,bash]
+[source,bash,options="nowrap"]
 ----
 dataflow:> app info source:time
 ╔══════════════════════════════╤══════════════════════════════╤══════════════════════════════╤══════════════════════════════╗
@@ -440,7 +440,7 @@ dataflow:> app info source:time
 
 Below are the white listed properties for the app `log`:
 
-[source,bash]
+[source,bash,options="nowrap"]
 ----
 dataflow:> app info sink:log
 ╔══════════════════════════════╤══════════════════════════════╤══════════════════════════════╤══════════════════════════════╗

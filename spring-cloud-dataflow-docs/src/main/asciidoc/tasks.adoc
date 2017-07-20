@@ -322,7 +322,8 @@ stream create foo --definition "triggertask --triggertask.uri=maven://org.spring
 
 If you execute `runtime apps` you can find the log file for the task launcher sink. Tailing that file you can find the log file for the launched tasks. The setting of `triggertask.environment-properties` is so that all the task executions can be collected in the same H2 database used in the local version of the Data Flow Server.  You can then see the list of task executions using the shell command `task execution list`
 
-```
+[source,bash,options="nowrap"]
+----
 dataflow:>task execution list
 ╔════════════════════╤══╤════════════════════════════╤════════════════════════════╤═════════╗
 ║     Task Name      │ID│         Start Time         │          End Time          │Exit Code║
@@ -332,7 +333,7 @@ dataflow:>task execution list
 ║timestamp-task_58971│2 │Tue May 02 12:11:50 EDT 2017│Tue May 02 12:11:50 EDT 2017│0        ║
 ║timestamp-task_13467│1 │Tue May 02 12:10:50 EDT 2017│Tue May 02 12:10:50 EDT 2017│0        ║
 ╚════════════════════╧══╧════════════════════════════╧════════════════════════════╧═════════╝
-```
+----
 
 === TaskLaunchRequest-transform
 
@@ -407,15 +408,18 @@ But before we launch the my-composed-task definition,  we can view what
 Spring Cloud Data Flow generated for us.  This can be done by executing the
 task list command.
 
-```
+[source,bash,options="nowrap"]
+----
 dataflow:>task list
-╔══════════════════════════╤═══════════════════════════════════════════════════════════════
-║        Task Name         │                      Task Definition
-╠══════════════════════════╪═══════════════════════════════════════════════════════════════
-║my-composed-task          │mytaskapp && timestamp
-║my-composed-task-mytaskapp│mytaskapp
-║my-composed-task-timestamp│timestamp
-```
+╔══════════════════════════╤══════════════════════╤═══════════╗
+║        Task Name         │   Task Definition    │Task Status║
+╠══════════════════════════╪══════════════════════╪═══════════╣
+║my-composed-task          │mytaskapp && timestamp│unknown    ║
+║my-composed-task-mytaskapp│mytaskapp             │unknown    ║
+║my-composed-task-timestamp│timestamp             │unknown    ║
+╚══════════════════════════╧══════════════════════╧═══════════╝
+----
+
 Spring Cloud Data Flow created three task definitions, one for each of the
 applications that comprises our composed task (`my-composed-task-mytaskapp` and
 `my-composed-task-timestamp`) as well as the composed task (`my-composed-task`)
@@ -439,7 +443,9 @@ task launch my-composed-task
 ```
 Once the task is launched and assuming all the tasks complete successfully you will
 see three task executions when executing a `task execution list`.  For example:
-```
+
+[source,bash,options="nowrap"]
+----
 dataflow:>task execution list
 ╔══════════════════════════╤═══╤════════════════════════════╤════════════════════════════╤═════════╗
 ║        Task Name         │ID │         Start Time         │          End Time          │Exit Code║
@@ -448,7 +454,7 @@ dataflow:>task execution list
 ║my-composed-task-mytaskapp│712│Wed Apr 12 16:42:57 EDT 2017│Wed Apr 12 16:42:57 EDT 2017│0        ║
 ║my-composed-task          │711│Wed Apr 12 16:42:55 EDT 2017│Wed Apr 12 16:43:15 EDT 2017│0        ║
 ╚══════════════════════════╧═══╧════════════════════════════╧════════════════════════════╧═════════╝
-```
+----
 In the example above we see that my-compose-task launched and it also launched
 the other tasks in sequential order and all of them executed successfully with
 "Exit Code" as `0`.
@@ -469,23 +475,23 @@ The same command used to destroy a stand-alone task is the same as destroying a
 composed task.  The only difference is that destroying a composed task will
 also destroy the child tasks associated with it.   For example
 
-```
+[source,bash,options="nowrap"]
+----
 dataflow:>task list
-╔══════════════════════════╤═══════════════════════════════════════════════════════════════
-║        Task Name         │                      Task Definition
-╠══════════════════════════╪═══════════════════════════════════════════════════════════════
-║my-composed-task          │mytaskapp && timestamp
-║my-composed-task-mytaskapp│mytaskapp
-║my-composed-task-timestamp│timestamp
-
+╔══════════════════════════╤══════════════════════╤═══════════╗
+║        Task Name         │   Task Definition    │Task Status║
+╠══════════════════════════╪══════════════════════╪═══════════╣
+║my-composed-task          │mytaskapp && timestamp│COMPLETED  ║
+║my-composed-task-mytaskapp│mytaskapp             │COMPLETED  ║
+║my-composed-task-timestamp│timestamp             │COMPLETED  ║
+╚══════════════════════════╧══════════════════════╧═══════════╝
 ...
 dataflow:>task destroy my-composed-task
 dataflow:>task list
-╔══════════════════════════╤═══════════════════════════════════════════════════════════════
-║        Task Name         │                      Task Definition
-╠══════════════════════════╪═══════════════════════════════════════════════════════════════
-╚══════════════════════════╧═══════════════════════════════════════════════════════════════
-```
+╔═════════╤═══════════════╤═══════════╗
+║Task Name│Task Definition│Task Status║
+╚═════════╧═══════════════╧═══════════╝
+----
 ==== Stopping a Composed Task
 In cases where a composed task execution needs to be stopped.  This can be done
 via the:

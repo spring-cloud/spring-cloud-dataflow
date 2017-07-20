@@ -13,7 +13,8 @@ The introductory chapters to the
 The Shell is built upon the link:https://projects.spring.io/spring-shell/[Spring Shell] project.
 There are command line options generic to Spring Shell and some specific to Data Flow.
 The shell takes the following command line options
-[source,bash]
+
+[source,bash,options="nowrap"]
 ----
 unix:>java -jar spring-cloud-dataflow-shell-1.2.1.RELEASE.jar --help
 Data Flow Options:
