@@ -153,9 +153,15 @@ public abstract class AbstractRdbmsKeyValueRepository<D> implements PagingAndSor
 				whereClause.append(" OR ");
 			}
 		}
+		StringBuilder sql = new StringBuilder();
+		sql.append("SELECT ").append(" ").append(selectClause);
+		sql.append(" FROM ").append(tableName);
+		sql.append(whereClause == null ? "" : whereClause);
 
+		String query = sql.toString();
+		List<D> result = jdbcTemplate.query(query, params.toArray(), rowMapper);
 		return queryForPageableResults(searchPageable.getPageable(), selectClause, tableName, whereClause.toString(),
-				params.toArray(), count());
+				params.toArray(), result.size());
 	}
 
 	@Override

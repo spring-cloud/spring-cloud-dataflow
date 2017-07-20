@@ -207,9 +207,8 @@ public class StreamDefinitionController {
 			streamDefinitions = repository.search(searchPageable);
 			long count = streamDefinitions.getContent().size();
 			long to = Math.min(count, pageable.getOffset() + pageable.getPageSize());
-
-			streamDefinitions = new PageImpl<>(streamDefinitions.getContent().subList(pageable.getOffset(), (int) to), pageable,
-					streamDefinitions.getContent().size());
+			streamDefinitions = new PageImpl<>(streamDefinitions.getContent(), pageable,
+					streamDefinitions.getTotalElements());
 		}
 		else {
 			streamDefinitions = repository.findAll(pageable);
