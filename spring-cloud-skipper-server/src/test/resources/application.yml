@@ -1,0 +1,21 @@
+spring:
+  main:
+    banner-mode: "off"
+  cloud:
+    skipper:
+      packageRepositoryUrls: classpath:packages.yml
+
+logging:
+  level:
+    org.springframework.beans: 'WARN'
+    org.springframework.context: 'WARN'
+    org.springframework.core.io: 'WARN'
+    org.springframework.data: 'WARN'
+    org.springframework.jmx: 'WARN'
+    org.springframework.web: 'WARN'
+    org.springframework.security: 'WARN'
+    org.springframework.integration: 'WARN'
+    org.springframework.boot: 'WARN'
+    org.hibernate: 'WARN'
+    # The following INFO is to log the generated password when using basic security
+    org.springframework.boot.autoconfigure.security: 'INFO'

@@ -44,7 +44,7 @@
         <module>spring-cloud-skipper</module>
         <module>spring-cloud-skipper-shell</module>
         <module>spring-cloud-skipper-shell-commands</module>
-        <module>spring-cloud-skipper-client</module>	
+        <module>spring-cloud-skipper-client</module>
         <module>spring-cloud-skipper-docs</module>
     </modules>
     <dependencyManagement>

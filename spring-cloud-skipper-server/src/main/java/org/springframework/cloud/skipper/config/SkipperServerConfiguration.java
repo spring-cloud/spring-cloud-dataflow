@@ -13,24 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.springframework.cloud.skipper.config;
 
-package org.springframework.cloud.skipper.shell;
-
-import org.springframework.boot.Banner;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
 
 /**
- * Bootstrap class for spring shell.
- *
- * @author Ilayaperumal Gopinathan
- * @author Josh Long
+ * @author Mark Pollack
  */
-@SpringBootApplication
-// @Import(ShellConfiguration.class)
-public class ShellApplication {
-
-	public static void main(String[] args) throws Exception {
-		new SpringApplicationBuilder().sources(ShellApplication.class).bannerMode(Banner.Mode.OFF).run(args);
-	}
+@Configuration
+@EnableConfigurationProperties(SkipperServerProperties.class)
+public class SkipperServerConfiguration {
 }
