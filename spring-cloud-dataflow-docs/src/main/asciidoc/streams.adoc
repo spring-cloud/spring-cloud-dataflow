@@ -2,7 +2,6 @@
 = Streams
 
 [partintro]
-
 --
 This section goes into more detail about how you can create Streams which are a collection of
 http://cloud.spring.io/spring-cloud-stream/[Spring Cloud Stream]. It covers topics such as

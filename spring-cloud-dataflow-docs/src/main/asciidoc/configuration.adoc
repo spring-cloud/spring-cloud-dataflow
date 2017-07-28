@@ -1,5 +1,6 @@
 [[configuration]]
 = Server Configuration
+
 [partintro]
 --
 In this section you will learn how to configure Spring Cloud Data Flow server's features such as the relational database to use and security.

@@ -29,9 +29,9 @@ typical lifecycle for tasks in the context of Spring Cloud Data Flow:
 1. Creating a Task Application
 2. Registering a Task Application
 3. Creating a Task Definition
-3. Launching a Task
-4. Reviewing Task Executions
-5. Destroying a Task Definition
+4. Launching a Task
+5. Reviewing Task Executions
+6. Destroying a Task Definition
 
 === Creating a Task Application
 While Spring Cloud Task does provide a number of out of the box applications (via the
