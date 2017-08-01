@@ -6,6 +6,11 @@ language: java
 jdk:
   - oraclejdk8
 install: true
-build: ./mvnw package
+script:
+  - '[ "${TRAVIS_PULL_REQUEST}" != "false" ] || ./mvnw package -Pfull -U -Dmaven.test.redirectTestOutputToFile=t
+rue'
+  - '[ "${TRAVIS_PULL_REQUEST}"  = "false" ] || ./mvnw package -Pfull -U -Dmaven.test.redirectTestOutputToFile=t
+rue'
+
 after_success:
   - bash <(curl -s https://codecov.io/bash)
