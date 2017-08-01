@@ -6,7 +6,6 @@ Support application types are Spring Boot applications and those defined by Clou
 
 Skipper can be used as part of implementing the practice of Continous Deployment.  It provides a versioned "single source of truth" that defines what applications were deployed to the cloud.  This enables easy rollbacks and upgrades without having to rebuild applications from source code.
 
-
 === Building
 
 Clone the repo and type
