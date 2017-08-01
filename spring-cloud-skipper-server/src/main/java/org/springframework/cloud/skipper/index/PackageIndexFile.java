@@ -27,16 +27,16 @@ import java.util.List;
  */
 public class PackageIndexFile {
 
-	private List<PackageSummary> packageSummaryList;
+	private List<PackageMetadata> packageMetadataList;
 
 	public PackageIndexFile() {
 	}
 
-	public List<PackageSummary> getPackageSummaryList() {
-		return packageSummaryList;
+	public List<PackageMetadata> getPackageMetadataList() {
+		return packageMetadataList;
 	}
 
-	public void setPackageSummaryList(List<PackageSummary> packageSummaryList) {
-		this.packageSummaryList = packageSummaryList;
+	public void setPackageMetadataList(List<PackageMetadata> packageMetadataList) {
+		this.packageMetadataList = packageMetadataList;
 	}
 }

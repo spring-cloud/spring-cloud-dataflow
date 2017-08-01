@@ -24,7 +24,7 @@ import javax.persistence.Id;
  * @author Mark Pollack
  */
 @Entity
-public class PackageSummary {
+public class PackageMetadata {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
@@ -49,7 +49,7 @@ public class PackageSummary {
 
 	private String version;
 
-	public PackageSummary() {
+	public PackageMetadata() {
 	}
 
 	public String getApiVersion() {

@@ -17,7 +17,7 @@ package org.springframework.cloud.skipper.repositories;
 
 import java.util.List;
 
-import org.springframework.cloud.skipper.index.PackageSummary;
+import org.springframework.cloud.skipper.index.PackageMetadata;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
@@ -26,8 +26,8 @@ import org.springframework.data.rest.core.annotation.RepositoryRestResource;
  * @author Mark Pollack
  */
 @RepositoryRestResource
-public interface PackageSummaryRepository extends PagingAndSortingRepository<PackageSummary, Long> {
+public interface PackageSummaryRepository extends PagingAndSortingRepository<PackageMetadata, Long> {
 
-	List<PackageSummary> findByName(@Param("name") String name);
+	List<PackageMetadata> findByName(@Param("name") String name);
 
 }

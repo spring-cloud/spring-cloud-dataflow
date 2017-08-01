@@ -56,8 +56,8 @@ public class PackageIndexSynchronizer {
 	public void loadAll() {
 		packageIndexDownloader.downloadPackageIndexes();
 		List<File> indexFiles = packageIndexDownloader.getIndexFiles();
-		List<PackageSummary> packageSummaryList = deserializeFromIndexFiles(indexFiles);
-		packageSummaryRepository.save(packageSummaryList);
+		List<PackageMetadata> packageMetadataList = deserializeFromIndexFiles(indexFiles);
+		packageSummaryRepository.save(packageMetadataList);
 	}
 
 	@EventListener
@@ -69,21 +69,21 @@ public class PackageIndexSynchronizer {
 	}
 
 	// Package protected for testing
-	List<PackageSummary> deserializeFromIndexFiles(List<File> indexFiles) {
-		List<PackageSummary> packageSummaryList = new ArrayList<>();
+	List<PackageMetadata> deserializeFromIndexFiles(List<File> indexFiles) {
+		List<PackageMetadata> packageMetadataList = new ArrayList<>();
 		YAMLMapper yamlMapper = new YAMLMapper();
 		for (File indexFile : indexFiles) {
 			try {
-				MappingIterator<PackageSummary> it = yamlMapper.readerFor(PackageSummary.class).readValues(indexFile);
+				MappingIterator<PackageMetadata> it = yamlMapper.readerFor(PackageMetadata.class).readValues(indexFile);
 				while (it.hasNextValue()) {
-					PackageSummary packageSummary = it.next();
-					packageSummaryList.add(packageSummary);
+					PackageMetadata packageMetadata = it.next();
+					packageMetadataList.add(packageMetadata);
 				}
 			}
 			catch (IOException e) {
 				throw new IllegalArgumentException("Can't parse Release manifest YAML", e);
 			}
 		}
-		return packageSummaryList;
+		return packageMetadataList;
 	}
 }
