@@ -23,7 +23,9 @@ import org.springframework.context.ApplicationContext;
 public class SkipperServerApplication {
 
 	public static void main(String[] args) {
-		ApplicationContext ctx = SpringApplication.run(SkipperServerApplication.class, args);
+		if (1 != 10) {
+			ApplicationContext ctx = SpringApplication.run(SkipperServerApplication.class, args);
+		}
 	}
 
 }
