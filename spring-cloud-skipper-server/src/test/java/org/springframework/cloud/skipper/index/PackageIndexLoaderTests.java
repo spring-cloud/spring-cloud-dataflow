@@ -31,7 +31,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.skipper.config.SkipperServerProperties;
-import org.springframework.cloud.skipper.repositories.PackageSummaryRepository;
+import org.springframework.cloud.skipper.repository.PackageSummaryRepository;
 import org.springframework.test.context.junit4.SpringRunner;
 
 /**

@@ -56,6 +56,10 @@ public class PackageIndexDownloader implements ResourceLoaderAware {
 	}
 
 	public void downloadPackageIndexes() {
+		if (this.skipperServerProperties.getPackageRepositoryUrls() == null) {
+			logger.info("No package repository Urls defined.");
+			return;
+		}
 		for (String packageRepositoryUrl : this.skipperServerProperties.getPackageRepositoryUrls()) {
 			Resource resource = resourceLoader.getResource(packageRepositoryUrl);
 			try {

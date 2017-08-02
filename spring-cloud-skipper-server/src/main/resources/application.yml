@@ -1,3 +1,5 @@
+server:
+  port: 7577
 spring:
   main:
     banner-mode: "off"

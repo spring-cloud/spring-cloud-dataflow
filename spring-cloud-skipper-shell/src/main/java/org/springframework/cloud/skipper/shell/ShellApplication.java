@@ -19,6 +19,8 @@ package org.springframework.cloud.skipper.shell;
 import org.springframework.boot.Banner;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.cloud.skipper.shell.config.ShellConfiguration;
+import org.springframework.context.annotation.Import;
 
 /**
  * Bootstrap class for spring shell.
@@ -27,7 +29,7 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
  * @author Josh Long
  */
 @SpringBootApplication
-// @Import(ShellConfiguration.class)
+@Import(ShellConfiguration.class)
 public class ShellApplication {
 
 	public static void main(String[] args) throws Exception {

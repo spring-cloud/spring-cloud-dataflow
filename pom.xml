@@ -23,20 +23,23 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>1.8</java.version>
+
         <jline.version>2.12</jline.version>
         <jopt.version>4.6</jopt.version>
 
+        <spring.version>4.3.7.RELEASE</spring.version>
         <spring-cloud.version>Dalston.RELEASE</spring-cloud.version>
         <spring-cloud-deployer.version>1.2.0.RELEASE</spring-cloud-deployer.version>
         <spring-cloud-deployer-local.version>1.2.0.RELEASE</spring-cloud-deployer-local.version>
+        <spring-shell.version>1.2.0.RELEASE</spring-shell.version>
+
         <jacoco-maven-plugin.version>0.7.9</jacoco-maven-plugin.version>
         <surefire-maven-plugin.version>2.20</surefire-maven-plugin.version>
         <sonar-maven-plugin.version>3.0.2</sonar-maven-plugin.version>
-
         <checkstyle.config.location>etc/checkstyle/checkstyle.xml</checkstyle.config.location>
         <javadoc.opts>-Xdoclint:none</javadoc.opts>
         <checkstyle.config.location>etc/checkstyle/checkstyle.xml</checkstyle.config.location>
-        <spring.version>4.3.7.RELEASE</spring.version>
+
     </properties>
 
     <modules>
@@ -62,9 +65,14 @@
                 <version>1.0.0-BUILD-SNAPSHOT</version>
             </dependency>
             <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-skipper</artifactId>
+                <version>1.0.0-BUILD-SNAPSHOT</version>
+            </dependency>
+            <dependency>
                 <groupId>org.springframework.shell</groupId>
                 <artifactId>spring-shell</artifactId>
-                <version>1.2.0.RELEASE</version>
+                <version>${spring-shell.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.zeroturnaround</groupId>
@@ -111,7 +119,6 @@
                 </executions>
             </plugin>
             <plugin>
-                <!-- Note: Change ./spring-cloud-dataflow-server-local/pom.xml to match changes here -->
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>
                 <executions>
@@ -176,7 +183,6 @@
                     </executions>
                 </plugin>
                 <plugin>
-                    <!-- Note: Change ./spring-cloud-dataflow-server-local/pom.xml to match changes here -->
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-checkstyle-plugin</artifactId>
                     <version>2.17</version>

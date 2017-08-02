@@ -19,6 +19,8 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Configuration;
 
 /**
+ * Main configuration class for the server.
+ *
  * @author Mark Pollack
  */
 @Configuration

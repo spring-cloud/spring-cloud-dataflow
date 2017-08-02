@@ -13,21 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.cloud.skipper.repositories;
+package org.springframework.cloud.skipper.shell;
 
-import java.util.List;
-
-import org.springframework.cloud.skipper.index.PackageMetadata;
-import org.springframework.data.repository.PagingAndSortingRepository;
-import org.springframework.data.repository.query.Param;
-import org.springframework.data.rest.core.annotation.RepositoryRestResource;
+import org.springframework.boot.Banner;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.cloud.skipper.shell.config.ShellConfiguration;
+import org.springframework.context.annotation.Import;
 
 /**
  * @author Mark Pollack
  */
-@RepositoryRestResource
-public interface PackageSummaryRepository extends PagingAndSortingRepository<PackageMetadata, Long> {
+@SpringBootApplication
+@Import(ShellConfiguration.class)
+public class ShellApplication {
 
-	List<PackageMetadata> findByName(@Param("name") String name);
+	public static void main(String[] args) throws Exception {
+		new SpringApplicationBuilder().sources(ShellApplication.class).bannerMode(Banner.Mode.OFF).run(args);
+	}
 
 }

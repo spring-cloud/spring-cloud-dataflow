@@ -1,0 +1,16 @@
+logging:
+  level:
+    org.springframework.cloud.skipper.shell: 'WARN'
+    org.springframework.cloud.skipper.shell.command: 'INFO'
+    org.springframework.cloud.skipper.shell.config: 'INFO'
+    org.springframework.cloud.skipper.shell.support: 'INFO'
+    org.springframework.context: 'WARN'
+    org.springframework.jmx: 'WARN'
+  pattern:
+    console: "%clr(%-5p): %logger : %msg%n"
+
+
+
+
+
+
