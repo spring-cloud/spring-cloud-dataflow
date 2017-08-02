@@ -39,7 +39,6 @@ import org.springframework.shell.core.annotation.CliCommand;
 import org.springframework.shell.core.annotation.CliOption;
 import org.springframework.shell.table.BeanListTableModel;
 import org.springframework.shell.table.CellMatchers;
-import org.springframework.shell.table.Formatter;
 import org.springframework.shell.table.SimpleHorizontalAligner;
 import org.springframework.shell.table.Table;
 import org.springframework.shell.table.TableBuilder;
@@ -81,7 +80,7 @@ public class AggregateCounterCommands extends AbstractMetricsCommands implements
 	@CliCommand(value = DISPLAY_AGGR_COUNTER, help = "Display aggregate counter values by chosen interval and "
 			+ "resolution(minute, hour)")
 	public Table display(
-			@CliOption(key = { "",
+			@CliOption(optionContext = "existing-aggregate-counter disable-string-converter", key = { "",
 					"name" }, help = "the name of the aggregate counter to display", mandatory = true) String name,
 			@CliOption(key = "from", help = "start-time for the interval. format: 'yyyy-MM-dd HH:mm:ss'", mandatory = false) String from,
 			@CliOption(key = "to", help = "end-time for the interval. format: 'yyyy-MM-dd HH:mm:ss'. defaults to "
@@ -130,8 +129,8 @@ public class AggregateCounterCommands extends AbstractMetricsCommands implements
 
 	@CliCommand(value = DELETE_AGGR_COUNTER, help = "Delete an aggregate counter")
 	public String delete(
-			@CliOption(key = { "", "name" }, help = "the name of the aggregate counter to delete", mandatory = true
-			/* , optionContext = "existing-aggregate-counter disable-string-converter" */) String name) {
+			@CliOption(key = { "", "name" }, help = "the name of the aggregate counter to delete", mandatory = true,
+			optionContext = "existing-aggregate-counter disable-string-converter") String name) {
 		aggregateCounterOperations().reset(name);
 		return String.format("Deleted aggregatecounter '%s'", name);
 	}
@@ -146,12 +145,7 @@ public class AggregateCounterCommands extends AbstractMetricsCommands implements
 		headers.put("value", "COUNT");
 		TableModel model = new BeanListTableModel<>(aggResource.getValues().entrySet(), headers);
 		Table table = DataFlowTables.applyStyle(new TableBuilder(model)).on(CellMatchers.ofType(Long.class))
-				.addFormatter(new Formatter() {
-					@Override
-					public String[] format(Object value) {
-						return new String[] { pattern.format(value) };
-					}
-				}).addAligner(SimpleHorizontalAligner.right).build();
+				.addFormatter(value -> new String[] { pattern.format(value) }).addAligner(SimpleHorizontalAligner.right).build();
 		return table;
 	}
 
