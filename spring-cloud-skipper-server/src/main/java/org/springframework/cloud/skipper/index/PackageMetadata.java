@@ -19,6 +19,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.validation.constraints.NotNull;
 
 /**
  * @author Mark Pollack
@@ -33,21 +34,73 @@ public class PackageMetadata {
 	/**
 	 * The Package Index spec version this file is based on. Required
 	 */
+	@NotNull
 	private String apiVersion;
-
-	/**
-	 *
-	 */
-	private String kind;
 
 	/**
 	 * The repository ID this Package Index file belongs to. Required
 	 */
+	@NotNull
 	private String origin;
 
+	/**
+	 * What type of package system is being used.
+	 */
+	private String kind;
+
+
+	/**
+	 * The name of the package
+	 */
 	private String name;
 
+	/**
+	 * The version of the package
+	 */
 	private String version;
+
+	/**
+	 * The version of the application in the package (assuming package maps to one app)
+	 */
+	private String appVersion;
+
+	/**
+	 * Location to source code for this package.
+	 */
+	private String packageSourceUrl;
+
+	/**
+	 * The home page of the package
+	 */
+	private String packageHomeUrl;
+
+	/**
+	 * A comma separated list of tags to use for searching
+	 */
+	private String tags;
+
+	/**
+	 * Who is maintaining this package
+	 */
+	private String maintainer;
+
+	/**
+	 * Brief description of the package.  The packages README.md will contain more information.
+	 * TODO - decide format.
+	 */
+	private String description;
+
+
+	/**
+	 * Hash of package binary that will be donwloaded using SHA256 hash algorithm.
+	 */
+	private String sha256;
+
+	/**
+	 * Url location of a icon.
+	 * TODO: size specification
+	 */
+	private String iconUrl;
 
 	public PackageMetadata() {
 	}
@@ -90,5 +143,77 @@ public class PackageMetadata {
 
 	public void setVersion(String version) {
 		this.version = version;
+	}
+
+	public long getId() {
+		return id;
+	}
+
+	public void setId(long id) {
+		this.id = id;
+	}
+
+	public String getAppVersion() {
+		return appVersion;
+	}
+
+	public void setAppVersion(String appVersion) {
+		this.appVersion = appVersion;
+	}
+
+	public String getPackageSourceUrl() {
+		return packageSourceUrl;
+	}
+
+	public void setPackageSourceUrl(String packageSourceUrl) {
+		this.packageSourceUrl = packageSourceUrl;
+	}
+
+	public String getPackageHomeUrl() {
+		return packageHomeUrl;
+	}
+
+	public void setPackageHomeUrl(String packageHomeUrl) {
+		this.packageHomeUrl = packageHomeUrl;
+	}
+
+	public String getTags() {
+		return tags;
+	}
+
+	public void setTags(String tags) {
+		this.tags = tags;
+	}
+
+	public String getMaintainer() {
+		return maintainer;
+	}
+
+	public void setMaintainer(String maintainer) {
+		this.maintainer = maintainer;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	public String getSha256() {
+		return sha256;
+	}
+
+	public void setSha256(String sha256) {
+		this.sha256 = sha256;
+	}
+
+	public String getIconUrl() {
+		return iconUrl;
+	}
+
+	public void setIconUrl(String iconUrl) {
+		this.iconUrl = iconUrl;
 	}
 }

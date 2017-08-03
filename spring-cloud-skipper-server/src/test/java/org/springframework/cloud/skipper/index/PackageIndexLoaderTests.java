@@ -31,7 +31,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.skipper.config.SkipperServerProperties;
-import org.springframework.cloud.skipper.repository.PackageSummaryRepository;
+import org.springframework.cloud.skipper.repository.PackageMetadataRepository;
 import org.springframework.test.context.junit4.SpringRunner;
 
 /**
@@ -48,7 +48,7 @@ public class PackageIndexLoaderTests {
 	private SkipperServerProperties skipperServerProperties;
 
 	@Autowired
-	private PackageSummaryRepository packageSummaryRepository;
+	private PackageMetadataRepository packageSummaryRepository;
 
 	@Before
 	public void cleanPackageIndexDir() throws IOException {

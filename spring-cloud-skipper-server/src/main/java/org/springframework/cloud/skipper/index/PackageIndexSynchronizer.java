@@ -25,7 +25,7 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.skipper.config.SkipperServerProperties;
-import org.springframework.cloud.skipper.repository.PackageSummaryRepository;
+import org.springframework.cloud.skipper.repository.PackageMetadataRepository;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
@@ -40,13 +40,13 @@ public class PackageIndexSynchronizer {
 
 	private PackageIndexDownloader packageIndexDownloader;
 
-	private PackageSummaryRepository packageSummaryRepository;
+	private PackageMetadataRepository packageSummaryRepository;
 
 	private SkipperServerProperties skipperServerProperties;
 
 	@Autowired
 	public PackageIndexSynchronizer(PackageIndexDownloader packageIndexDownloader,
-			PackageSummaryRepository packageSummaryRepository,
+			PackageMetadataRepository packageSummaryRepository,
 			SkipperServerProperties skipperServerProperties) {
 		this.packageIndexDownloader = packageIndexDownloader;
 		this.packageSummaryRepository = packageSummaryRepository;

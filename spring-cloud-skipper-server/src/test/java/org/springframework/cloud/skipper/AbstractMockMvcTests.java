@@ -13,21 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.cloud.skipper.repository;
+package org.springframework.cloud.skipper;
 
-import java.util.List;
+import org.junit.runner.RunWith;
 
-import org.springframework.cloud.skipper.index.PackageMetadata;
-import org.springframework.data.repository.PagingAndSortingRepository;
-import org.springframework.data.repository.query.Param;
-import org.springframework.data.rest.core.annotation.RepositoryRestResource;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
 
 /**
  * @author Mark Pollack
  */
-@RepositoryRestResource
-public interface PackageSummaryRepository extends PagingAndSortingRepository<PackageMetadata, Long> {
-
-	List<PackageMetadata> findByName(@Param("name") String name);
+@RunWith(SpringRunner.class)
+@SpringBootTest
+@AutoConfigureMockMvc
+public class AbstractMockMvcTests {
 
 }
