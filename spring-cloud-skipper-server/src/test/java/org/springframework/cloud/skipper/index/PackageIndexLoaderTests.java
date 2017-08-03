@@ -48,11 +48,11 @@ public class PackageIndexLoaderTests {
 	private SkipperServerProperties skipperServerProperties;
 
 	@Autowired
-	private PackageMetadataRepository packageSummaryRepository;
+	private PackageMetadataRepository packageMetadataRepository;
 
 	@Before
 	public void cleanPackageIndexDir() throws IOException {
-		packageSummaryRepository.deleteAll();
+		packageMetadataRepository.deleteAll();
 
 		List<File> files;
 		Path indexPath = Paths.get(skipperServerProperties.getPackageIndexDir());

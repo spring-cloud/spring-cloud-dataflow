@@ -40,16 +40,16 @@ public class PackageIndexSynchronizer {
 
 	private PackageIndexDownloader packageIndexDownloader;
 
-	private PackageMetadataRepository packageSummaryRepository;
+	private PackageMetadataRepository packageMetadataRepository;
 
 	private SkipperServerProperties skipperServerProperties;
 
 	@Autowired
 	public PackageIndexSynchronizer(PackageIndexDownloader packageIndexDownloader,
-			PackageMetadataRepository packageSummaryRepository,
+			PackageMetadataRepository packageMetadataRepository,
 			SkipperServerProperties skipperServerProperties) {
 		this.packageIndexDownloader = packageIndexDownloader;
-		this.packageSummaryRepository = packageSummaryRepository;
+		this.packageMetadataRepository = packageMetadataRepository;
 		this.skipperServerProperties = skipperServerProperties;
 	}
 
@@ -57,7 +57,7 @@ public class PackageIndexSynchronizer {
 		packageIndexDownloader.downloadPackageIndexes();
 		List<File> indexFiles = packageIndexDownloader.getIndexFiles();
 		List<PackageMetadata> packageMetadataList = deserializeFromIndexFiles(indexFiles);
-		packageSummaryRepository.save(packageMetadataList);
+		packageMetadataRepository.save(packageMetadataList);
 	}
 
 	@EventListener
