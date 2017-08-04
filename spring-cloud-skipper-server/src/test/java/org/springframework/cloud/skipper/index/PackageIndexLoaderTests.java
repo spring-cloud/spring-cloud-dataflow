@@ -56,12 +56,14 @@ public class PackageIndexLoaderTests {
 
 		List<File> files;
 		Path indexPath = Paths.get(skipperServerProperties.getPackageIndexDir());
-		try (Stream<Path> paths = Files.walk(indexPath, 1)) {
-			files = paths.map(i -> i.toAbsolutePath().toFile()).collect(Collectors.toList());
-		}
-		for (File file : files) {
-			if (file.getName().startsWith("file") || file.getName().startsWith("localhost")) {
-				file.delete();
+		if (Files.exists(indexPath)) {
+			try (Stream<Path> paths = Files.walk(indexPath, 1)) {
+				files = paths.map(i -> i.toAbsolutePath().toFile()).collect(Collectors.toList());
+			}
+			for (File file : files) {
+				if (file.getName().startsWith("file") || file.getName().startsWith("localhost")) {
+					file.delete();
+				}
 			}
 		}
 	}
