@@ -363,15 +363,72 @@ include::{snippets}/stream-definitions-documentation/stream-definition-delete-al
 
 include::{snippets}/stream-definitions-documentation/stream-definition-delete-all/http-response.adoc[]
 
-[[api-guide-resources-stream-deployments]]
+[[api-guide-resources-stream-deployment]]
 === Stream Deployments
 
-==== Example "stream deploy" request for a `ticktock` stream
+[[api-guide-resources-stream-deployment-deploy]]
+==== Deploying Stream Definition
 
-[source,bash]
-----
-curl -X POST http://localhost:9393/streams/deployments/ticktock
-----
+Deploying a stream definition is achieved by POSTing to the deployment definitions endpoint.
+Optionally a user can pass application params as properties via the request body.
+
+===== Request structure
+
+include::{snippets}/stream-deployments-documentation/deploy/http-request.adoc[]
+
+include::{snippets}/stream-deployments-documentation/deploy/path-parameters.adoc[]
+
+===== Request parameters
+
+There are no request parameter for this endpoint.
+
+===== Example request
+
+include::{snippets}/stream-deployments-documentation/deploy/curl-request.adoc[]
+
+===== Response structure
+
+include::{snippets}/stream-deployments-documentation/deploy/http-response.adoc[]
+
+[[api-guide-resources-stream-deployment-undeploy]]
+==== Undeploy Stream Definition
+
+===== Request structure
+
+include::{snippets}/stream-deployments-documentation/un-deploy/http-request.adoc[]
+
+include::{snippets}/stream-deployments-documentation/un-deploy/path-parameters.adoc[]
+
+===== Request parameters
+
+There are no request parameter for this endpoint.
+
+===== Example request
+
+include::{snippets}/stream-deployments-documentation/un-deploy/curl-request.adoc[]
+
+===== Response structure
+
+include::{snippets}/stream-deployments-documentation/un-deploy/http-response.adoc[]
+
+[[api-guide-resources-stream-deployment-undeploy-all]]
+==== Undeploy All Stream Definitions
+
+===== Request structure
+
+include::{snippets}/stream-deployments-documentation/un-deploy-all/http-request.adoc[]
+
+===== Request parameters
+
+There are no request parameter for this endpoint.
+
+===== Example request
+
+include::{snippets}/stream-deployments-documentation/un-deploy-all/curl-request.adoc[]
+
+===== Response structure
+
+include::{snippets}/stream-deployments-documentation/un-deploy-all/http-response.adoc[]
 
 === Task Definitions
 
