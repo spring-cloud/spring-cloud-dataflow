@@ -64,4 +64,10 @@ public class PackageMetadataMvcTests extends AbstractMockMvcTests {
 						.value("http://www.gilligansisle.com/images/a1.gif"))
 				.andExpect(jsonPath("$._embedded.packageMetadata[1].description").doesNotExist());
 	}
+
+	@Test
+	public void testFindAll() throws Exception {
+		PackageMetadataCreator.createTwoPackages(packageMetadataRepository);
+		mockMvc.perform(get("/packageMetadata")).andDo(print()).andExpect(status().isOk());
+	}
 }

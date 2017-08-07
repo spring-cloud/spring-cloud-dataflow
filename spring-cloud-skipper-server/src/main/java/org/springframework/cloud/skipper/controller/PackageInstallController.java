@@ -13,22 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.cloud.skipper.index;
+package org.springframework.cloud.skipper.controller;
 
-import org.springframework.data.rest.core.config.Projection;
+import org.springframework.cloud.skipper.domain.Release;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * @author Mark Pollack
  */
-@Projection(name = "summary", types = { PackageMetadata.class })
-public interface PackageSummary {
+@RestController
+@RequestMapping("/packageMetadata/{id}")
+public class PackageInstallController {
 
-	long getId();
-
-	String getName();
-
-	String getVersion();
-
-	String getIconUrl();
-
+	@RequestMapping(path = "/install", method = RequestMethod.PUT)
+	public Release install(@PathVariable("id") long id, @RequestBody String installData) {
+		return null;
+	}
 }

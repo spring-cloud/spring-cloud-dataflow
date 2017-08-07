@@ -13,22 +13,36 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.cloud.skipper.index;
+package org.springframework.cloud.skipper.domain;
 
-import org.springframework.data.rest.core.config.Projection;
+import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 
 /**
  * @author Mark Pollack
  */
-@Projection(name = "summary", types = { PackageMetadata.class })
-public interface PackageSummary {
+@Entity
+public class Release {
 
-	long getId();
+	@Id
+	@GeneratedValue(strategy = GenerationType.AUTO)
+	private long id;
 
-	String getName();
+	/**
+	 * A short name, to associate with the release of this package, must be unique.
+	 */
+	@NotNull
+	@Column(unique = true)
+	private String name;
 
-	String getVersion();
+	public Release() {
+	}
 
-	String getIconUrl();
+	public String getName() {
+		return name;
+	}
 
+	public void setName(String name) {
+		this.name = name;
+	}
 }

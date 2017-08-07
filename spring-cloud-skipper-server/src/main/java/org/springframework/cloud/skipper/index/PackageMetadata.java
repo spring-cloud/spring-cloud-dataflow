@@ -48,7 +48,6 @@ public class PackageMetadata {
 	 */
 	private String kind;
 
-
 	/**
 	 * The name of the package
 	 */
@@ -85,11 +84,10 @@ public class PackageMetadata {
 	private String maintainer;
 
 	/**
-	 * Brief description of the package.  The packages README.md will contain more information.
+	 * Brief description of the package. The packages README.md will contain more information.
 	 * TODO - decide format.
 	 */
 	private String description;
-
 
 	/**
 	 * Hash of package binary that will be donwloaded using SHA256 hash algorithm.
@@ -97,8 +95,7 @@ public class PackageMetadata {
 	private String sha256;
 
 	/**
-	 * Url location of a icon.
-	 * TODO: size specification
+	 * Url location of a icon. TODO: size specification
 	 */
 	private String iconUrl;
 
