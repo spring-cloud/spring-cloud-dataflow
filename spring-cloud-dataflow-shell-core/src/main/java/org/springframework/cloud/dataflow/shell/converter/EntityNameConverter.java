@@ -114,7 +114,7 @@ public class EntityNameConverter implements Converter<String> {
 	}
 
 	private Optional<String> determineKind(String optionContext) {
-		return Arrays.stream(optionContext.split(" "))
+		return Arrays.stream(optionContext.split("\\s+"))
 			.filter(s -> s.startsWith("existing"))
 			.map(s -> s.substring("existing-".length()))
 			.findFirst();
