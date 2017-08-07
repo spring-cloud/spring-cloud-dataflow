@@ -78,8 +78,8 @@ public class FieldValueCounterCommands extends AbstractMetricsCommands implement
 
 	@CliCommand(value = DISPLAY_COUNTER, help = "Display the value of a field value counter")
 	public List<Object> display(
-			@CliOption(key = { "",
-					"name" }, help = "the name of the field value counter to display", mandatory = true) String name,
+			@CliOption(key = { "", "name" }, help = "the name of the field value counter to display", mandatory = true,
+			optionContext = "existing-field-value-counter disable-string-converter") String name,
 			final @CliOption(key = "pattern", help = "the pattern used to format the values (see DecimalFormat)", mandatory = false, unspecifiedDefaultValue = NumberFormatConverter.DEFAULT) NumberFormat pattern) {
 		FieldValueCounterResource counter = fvcOperations().retrieve(name);
 
@@ -106,8 +106,8 @@ public class FieldValueCounterCommands extends AbstractMetricsCommands implement
 
 	@CliCommand(value = RESET_COUNTER, help = "Reset the field value counter with the given name")
 	public String reset(
-			@CliOption(mandatory = true, key = { "", "name" }, help = "the name of the field value counter to reset"
-			/* , optionContext = "existing-counter disable-string-converter" */) String name) {
+			@CliOption(mandatory = true, key = { "", "name" }, help = "the name of the field value counter to reset",
+			optionContext = "existing-field-value-counter disable-string-converter") String name) {
 		fvcOperations().reset(name);
 		return String.format("Deleted field value counter '%s'", name);
 	}

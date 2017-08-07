@@ -118,12 +118,8 @@ public class StreamCommands implements CommandMarker {
 
 	@CliCommand(value = DEPLOY_STREAM, help = "Deploy a previously created stream")
 	public String deployStream(
-			@CliOption(key = { "", "name" }, help = "the name of the stream to deploy", mandatory = true/*
-																										 * ,
-																										 * optionContext
-																										 * =
-																										 * "existing-stream undeployed disable-string-converter"
-																										 */) String name,
+			@CliOption(key = { "", "name" }, help = "the name of the stream to deploy", mandatory = true,
+			optionContext = "existing-stream disable-string-converter") String name,
 			@CliOption(key = {
 					PROPERTIES_OPTION }, help = "the properties for this deployment", mandatory = false) String properties,
 			@CliOption(key = {
@@ -163,13 +159,8 @@ public class StreamCommands implements CommandMarker {
 	}
 
 	@CliCommand(value = UNDEPLOY_STREAM, help = "Un-deploy a previously deployed stream")
-	public String undeployStream(@CliOption(key = { "",
-			"name" }, help = "the name of the stream to un-deploy", mandatory = true/*
-																					 * ,
-																					 * optionContext
-																					 * =
-																					 * "existing-stream deployed disable-string-converter"
-																					 */) String name) {
+	public String undeployStream(@CliOption(key = { "",	"name" }, help = "the name of the stream to un-deploy", mandatory = true,
+		optionContext = "existing-stream disable-string-converter") String name) {
 		streamOperations().undeploy(name);
 		return String.format("Un-deployed stream '%s'", name);
 	}
@@ -188,12 +179,8 @@ public class StreamCommands implements CommandMarker {
 
 	@CliCommand(value = DESTROY_STREAM, help = "Destroy an existing stream")
 	public String destroyStream(@CliOption(key = { "",
-			"name" }, help = "the name of the stream to destroy", mandatory = true/*
-																					 * ,
-																					 * optionContext
-																					 * =
-																					 * "existing-stream disable-string-converter"
-																					 */) String name) {
+			"name" }, help = "the name of the stream to destroy", mandatory = true,
+			optionContext = "existing-stream disable-string-converter") String name) {
 		streamOperations().destroy(name);
 		return String.format("Destroyed stream '%s'", name);
 	}

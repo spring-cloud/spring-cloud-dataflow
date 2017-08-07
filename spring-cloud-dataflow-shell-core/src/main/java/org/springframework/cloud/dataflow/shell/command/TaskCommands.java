@@ -55,7 +55,6 @@ import org.springframework.util.StringUtils;
  * @author Ilayaperumal Gopinathan
  */
 @Component
-// todo: reenable optionContext attributes
 public class TaskCommands implements CommandMarker {
 
 	private static final String LIST = "task list";
@@ -113,7 +112,8 @@ public class TaskCommands implements CommandMarker {
 
 	@CliCommand(value = LAUNCH, help = "Launch a previously created task")
 	public String launch(
-			@CliOption(key = { "", "name" }, help = "the name of the task to launch", mandatory = true) String name,
+			@CliOption(key = { "", "name" }, help = "the name of the task to launch", mandatory = true,
+				optionContext = "existing-task disable-string-converter") String name,
 			@CliOption(key = {
 					PROPERTIES_OPTION }, help = "the properties for this launch", mandatory = false) String properties,
 			@CliOption(key = {
@@ -151,14 +151,15 @@ public class TaskCommands implements CommandMarker {
 
 	@CliCommand(value = DESTROY, help = "Destroy an existing task")
 	public String destroy(
-			@CliOption(key = { "", "name" }, help = "the name of the task to destroy", mandatory = true) String name) {
+			@CliOption(key = { "", "name" }, help = "the name of the task to destroy", mandatory = true,
+				optionContext = "existing-task disable-string-converter") String name) {
 		taskOperations().destroy(name);
 		return String.format("Destroyed task '%s'", name);
 	}
 
 	@CliCommand(value = EXECUTION_LIST, help = "List created task executions filtered by taskName")
-	public Table executionListByName(@CliOption(key = {
-			"name" }, help = "the task name to be used as a filter", mandatory = false) String name) {
+	public Table executionListByName(@CliOption(key = "name", help = "the task name to be used as a filter",
+		optionContext = "existing-task disable-string-converter") String name) {
 
 		final PagedResources<TaskExecutionResource> tasks;
 		if (name == null) {

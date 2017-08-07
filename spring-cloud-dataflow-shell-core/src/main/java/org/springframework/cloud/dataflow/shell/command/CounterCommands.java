@@ -68,9 +68,9 @@ public class CounterCommands extends AbstractMetricsCommands implements CommandM
 	}
 
 	@CliCommand(value = DISPLAY_COUNTER, help = "Display the value of a counter")
-	public String display(@CliOption(key = { "", "name" }, help = "the name of the counter to display", mandatory = true
-	/* ,optionContext = "existing-counter disable-string-converter" */) String name,
-			@CliOption(key = "pattern", help = "the pattern used to format the value (see DecimalFormat)", mandatory = false, unspecifiedDefaultValue = NumberFormatConverter.DEFAULT) NumberFormat pattern) {
+	public String display(@CliOption(key = { "", "name" }, help = "the name of the counter to display", mandatory = true,
+		optionContext = "existing-counter disable-string-converter") String name,
+			@CliOption(key = "pattern", help = "the pattern used to format the value (see DecimalFormat)", unspecifiedDefaultValue = NumberFormatConverter.DEFAULT) NumberFormat pattern) {
 		CounterResource counter = counterOperations().retrieve(name);
 
 		return pattern.format(counter.getValue());
@@ -83,8 +83,8 @@ public class CounterCommands extends AbstractMetricsCommands implements CommandM
 	}
 
 	@CliCommand(value = DELETE_COUNTER, help = "Reset the counter with the given name")
-	public String reset(@CliOption(mandatory = true, key = { "", "name" }, help = "the name of the counter to reset"
-	/* , optionContext = "existing-counter disable-string-converter" */) String name) {
+	public String reset(@CliOption(mandatory = true, key = { "", "name" }, help = "the name of the counter to reset",
+		optionContext = "existing-counter disable-string-converter") String name) {
 		counterOperations().reset(name);
 		return String.format("Deleted counter '%s'", name);
 	}
