@@ -31,12 +31,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.skipper.AbstractIntegrationTest;
 import org.springframework.cloud.skipper.config.SkipperServerProperties;
 import org.springframework.cloud.skipper.repository.PackageMetadataRepository;
+import org.springframework.test.context.ActiveProfiles;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Mark Pollack
  */
+@ActiveProfiles("index-test")
 public class PackageIndexLoaderTests extends AbstractIntegrationTest {
 
 	@Autowired

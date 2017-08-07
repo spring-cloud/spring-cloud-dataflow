@@ -1,13 +1,7 @@
 spring:
   main:
     banner-mode: "off"
-  cloud:
-    skipper:
-      server:
-        packageRepositories:
-         -
-           name: test
-           url: "classpath:"
+
 
 logging:
   level:

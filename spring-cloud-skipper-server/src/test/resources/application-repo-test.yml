@@ -1,0 +1,8 @@
+spring:
+  cloud:
+    skipper:
+      server:
+        packageRepositories:
+         -
+           name: test
+           url: "classpath:/repositories/binaries/test"
