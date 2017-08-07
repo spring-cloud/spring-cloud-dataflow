@@ -7,7 +7,7 @@ spring:
         packageRepositories:
          -
            name: test
-           url: classpath:packages.yml
+           url: "classpath:"
 
 logging:
   level:

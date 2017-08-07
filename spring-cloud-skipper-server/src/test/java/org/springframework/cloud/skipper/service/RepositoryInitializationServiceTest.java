@@ -15,34 +15,28 @@
  */
 package org.springframework.cloud.skipper.service;
 
+import org.junit.Test;
+
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.cloud.skipper.config.SkipperServerProperties;
+import org.springframework.cloud.skipper.AbstractIntegrationTest;
 import org.springframework.cloud.skipper.repository.RepositoryRepository;
-import org.springframework.context.event.EventListener;
-import org.springframework.stereotype.Service;
+import org.springframework.test.annotation.DirtiesContext;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * When the Spring container is initialized, create database entries for Repository locations if they do not already
- * exist.
- *
  * @author Mark Pollack
  */
-@Service
-public class RepositoryInitializerService {
-
-	private final RepositoryRepository repositoryRepository;
-
-	private SkipperServerProperties skipperServerProperties;
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
+public class RepositoryInitializationServiceTest extends AbstractIntegrationTest {
 
 	@Autowired
-	public RepositoryInitializerService(RepositoryRepository repositoryRepository,
-										SkipperServerProperties skipperServerProperties) {
-		this.repositoryRepository = repositoryRepository;
+	private RepositoryRepository repositoryRepository;
+
+	@Test
+	public void intialize() throws Exception {
+		assertThat(repositoryRepository.count()).isEqualTo(1);
+		assertThat(repositoryRepository.findByName("test").getUrl()).isEqualTo("classpath:");
 	}
 
-	@EventListener
-	public void init(ApplicationReadyEvent event) {
-
-	}
 }

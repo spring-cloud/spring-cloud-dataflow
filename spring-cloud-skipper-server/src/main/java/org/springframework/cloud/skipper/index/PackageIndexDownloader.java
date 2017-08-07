@@ -58,8 +58,8 @@ public class PackageIndexDownloader implements ResourceLoaderAware {
 
 	public void downloadPackageIndexes() {
 		for (Repository packageRepository : this.skipperServerProperties.getPackageRepositories()) {
-			Resource resource = resourceLoader.getResource(packageRepository.getUrl());
 			try {
+				Resource resource = resourceLoader.getResource(packageRepository.getUrl()).createRelative("index.yml");
 				logger.info("Downloading from " + resource);
 				File packageDir = new File(skipperServerProperties.getPackageIndexDir());
 				packageDir.mkdirs();
@@ -67,7 +67,7 @@ public class PackageIndexDownloader implements ResourceLoaderAware {
 				StreamUtils.copy(resource.getInputStream(), new FileOutputStream(downloadedFile));
 			}
 			catch (IOException e) {
-				logger.error("Could not process package file from " + resource, e);
+				logger.error("Could not process package file from " + packageRepository, e);
 			}
 
 		}

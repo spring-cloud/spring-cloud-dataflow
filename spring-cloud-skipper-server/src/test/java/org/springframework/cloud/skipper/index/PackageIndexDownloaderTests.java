@@ -39,20 +39,20 @@ public class PackageIndexDownloaderTests {
 
 	@Test
 	public void calculateFilename() throws IOException {
-		UrlResource urlResource = new UrlResource("file:./spring-cloud-skipper-server/src/test/resources/packages.yml");
+		UrlResource urlResource = new UrlResource("file:./spring-cloud-skipper-server/src/test/resources/index.yml");
 		String filename = packageIndexDownloader.computeFilename(urlResource);
-		assertThat(filename).isEqualTo("file_dot_spring-cloud-skipper-server_src_test_resources_packages.yml");
+		assertThat(filename).isEqualTo("file_dot_spring-cloud-skipper-server_src_test_resources_index.yml");
 		urlResource = new UrlResource(
-				"file:/home/mpollack/projects/spring-cloud-skipper/spring-cloud-skipper-server/src/test/resources/packages.yml");
+				"file:/home/mpollack/projects/spring-cloud-skipper/spring-cloud-skipper-server/src/test/resources/index.yml");
 		filename = packageIndexDownloader.computeFilename(urlResource);
 		assertThat(filename).isEqualTo(
-				"file_home_mpollack_projects_spring-cloud-skipper_spring-cloud-skipper-server_src_test_resources_packages.yml");
-		urlResource = new UrlResource("http://localhost:8081/packages.yml");
+				"file_home_mpollack_projects_spring-cloud-skipper_spring-cloud-skipper-server_src_test_resources_index.yml");
+		urlResource = new UrlResource("http://localhost:8081/index.yml");
 		filename = packageIndexDownloader.computeFilename(urlResource);
-		assertThat(filename).isEqualTo("localhost_packages.yml");
+		assertThat(filename).isEqualTo("localhost_index.yml");
 
-		urlResource = new UrlResource("http://www.example.com/packages.yml");
+		urlResource = new UrlResource("http://www.example.com/index.yml");
 		filename = packageIndexDownloader.computeFilename(urlResource);
-		assertThat(filename).isEqualTo("www.example.com_packages.yml");
+		assertThat(filename).isEqualTo("www.example.com_index.yml");
 	}
 }

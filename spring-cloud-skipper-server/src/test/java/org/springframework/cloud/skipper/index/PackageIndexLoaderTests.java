@@ -26,22 +26,18 @@ import java.util.stream.Stream;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cloud.skipper.AbstractIntegrationTest;
 import org.springframework.cloud.skipper.config.SkipperServerProperties;
 import org.springframework.cloud.skipper.repository.PackageMetadataRepository;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Mark Pollack
  */
-@RunWith(SpringRunner.class)
-@SpringBootTest
-public class PackageIndexLoaderTests {
+public class PackageIndexLoaderTests extends AbstractIntegrationTest {
 
 	@Autowired
 	private PackageIndexDownloader packageIndexLoader;
@@ -81,6 +77,6 @@ public class PackageIndexLoaderTests {
 					.map(i -> i.toAbsolutePath().toFile()).collect(Collectors.toList());
 		}
 		assertThat(files.size()).isEqualTo(1);
-		assertThat(files.get(0).getName()).endsWith("target_test-classes_packages.yml");
+		assertThat(files.get(0).getName()).endsWith("target_test-classes_index.yml");
 	}
 }

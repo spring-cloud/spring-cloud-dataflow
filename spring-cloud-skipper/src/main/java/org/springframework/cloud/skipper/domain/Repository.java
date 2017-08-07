@@ -76,4 +76,13 @@ public class Repository {
 	public void setSourceUrl(String sourceUrl) {
 		this.sourceUrl = sourceUrl;
 	}
+
+	@Override
+	public String toString() {
+		return "Repository{" +
+				"name='" + name + '\'' +
+				", url='" + url + '\'' +
+				", sourceUrl='" + sourceUrl + '\'' +
+				'}';
+	}
 }
