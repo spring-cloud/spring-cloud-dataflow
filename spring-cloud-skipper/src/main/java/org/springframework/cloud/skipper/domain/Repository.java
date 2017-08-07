@@ -37,10 +37,16 @@ public class Repository {
 
 	/**
 	 * The root url that points to the location of an index.yaml file and other files
-	 * supporting the index e.g. icons-64x64.zip
+	 * supporting the index e.g. myapp-1.0.0.zip, icons-64x64.zip
 	 */
 	@NotNull
 	private String url;
+
+	/**
+	 * The url that points to the source package files that was used to create the index and other
+	 * supporting files from the URL property.
+	 */
+	private String sourceUrl;
 
 	// TODO security/checksum fields of referenced index file.
 
@@ -61,5 +67,13 @@ public class Repository {
 
 	public void setUrl(String url) {
 		this.url = url;
+	}
+
+	public String getSourceUrl() {
+		return sourceUrl;
+	}
+
+	public void setSourceUrl(String sourceUrl) {
+		this.sourceUrl = sourceUrl;
 	}
 }

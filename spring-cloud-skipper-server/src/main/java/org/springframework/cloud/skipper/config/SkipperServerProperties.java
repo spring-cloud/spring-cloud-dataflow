@@ -16,9 +16,11 @@
 package org.springframework.cloud.skipper.config;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.cloud.skipper.domain.Repository;
 
 /**
  * Configurable properties of the server.
@@ -28,21 +30,10 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties("spring.cloud.skipper.server")
 public class SkipperServerProperties {
 
-	/*
-	 * This can be extended to support an apt-like sources.list format, eg. deb
-	 * ftp://ftp.debian.org/debian sarge main contrib non-free
-	 *
-	 * maps onto
-	 *
-	 * ftp://ftp.debian.org/debian/dists/sarge/main/binary-i386/Packages
-	 * ftp://ftp.debian.org/debian/dists/sarge/contrib/binary-i386/Packages
-	 * ftp://ftp.debian.org/debian/dists/sarge/non-free/binary-i386/Packages
-	 *
-	 */
 	/**
 	 * List of locations for package Repositories
 	 */
-	private List<String> packageRepositoryUrls;
+	private List<Repository> packageRepositories = new ArrayList<>();
 
 	private String skipperHome = System.getProperty("user.home") + File.separator + ".skipper";
 
@@ -52,12 +43,12 @@ public class SkipperServerProperties {
 	 */
 	private boolean synchonizeIndexOnContextRefresh = true;
 
-	public List<String> getPackageRepositoryUrls() {
-		return packageRepositoryUrls;
+	public List<Repository> getPackageRepositories() {
+		return packageRepositories;
 	}
 
-	public void setPackageRepositoryUrls(List<String> packageRepositoryUrls) {
-		this.packageRepositoryUrls = packageRepositoryUrls;
+	public void setPackageRepositories(List<Repository> packageRepositories) {
+		this.packageRepositories = packageRepositories;
 	}
 
 	public String getSkipperHome() {

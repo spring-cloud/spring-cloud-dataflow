@@ -34,6 +34,8 @@ import org.springframework.cloud.skipper.config.SkipperServerProperties;
 import org.springframework.cloud.skipper.repository.PackageMetadataRepository;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 /**
  * @author Mark Pollack
  */
@@ -69,7 +71,16 @@ public class PackageIndexLoaderTests {
 	}
 
 	@Test
-	public void testDownloadPackageIndex() {
+	public void testDownloadPackageIndex() throws IOException {
 		packageIndexLoader.downloadPackageIndexes();
+		List<File> files;
+		Path indexPath = Paths.get(skipperServerProperties.getPackageIndexDir());
+		try (Stream<Path> paths = Files.walk(indexPath, 1)) {
+			files = paths
+					.filter(Files::isRegularFile)
+					.map(i -> i.toAbsolutePath().toFile()).collect(Collectors.toList());
+		}
+		assertThat(files.size()).isEqualTo(1);
+		assertThat(files.get(0).getName()).endsWith("target_test-classes_packages.yml");
 	}
 }

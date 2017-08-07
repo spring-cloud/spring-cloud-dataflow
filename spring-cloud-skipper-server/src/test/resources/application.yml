@@ -3,7 +3,11 @@ spring:
     banner-mode: "off"
   cloud:
     skipper:
-      packageRepositoryUrls: classpath:packages.yml
+      server:
+        packageRepositories:
+         -
+           name: test
+           url: classpath:packages.yml
 
 logging:
   level:

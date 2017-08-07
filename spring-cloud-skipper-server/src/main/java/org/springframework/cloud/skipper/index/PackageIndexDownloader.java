@@ -32,6 +32,7 @@ import org.slf4j.LoggerFactory;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.skipper.config.SkipperServerProperties;
+import org.springframework.cloud.skipper.domain.Repository;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
@@ -56,21 +57,17 @@ public class PackageIndexDownloader implements ResourceLoaderAware {
 	}
 
 	public void downloadPackageIndexes() {
-		if (this.skipperServerProperties.getPackageRepositoryUrls() == null) {
-			logger.info("No package repository Urls defined.");
-			return;
-		}
-		for (String packageRepositoryUrl : this.skipperServerProperties.getPackageRepositoryUrls()) {
-			Resource resource = resourceLoader.getResource(packageRepositoryUrl);
+		for (Repository packageRepository : this.skipperServerProperties.getPackageRepositories()) {
+			Resource resource = resourceLoader.getResource(packageRepository.getUrl());
 			try {
-				logger.info("Downloading from " + packageRepositoryUrl);
+				logger.info("Downloading from " + resource);
 				File packageDir = new File(skipperServerProperties.getPackageIndexDir());
 				packageDir.mkdirs();
 				File downloadedFile = new File(packageDir, computeFilename(resource));
 				StreamUtils.copy(resource.getInputStream(), new FileOutputStream(downloadedFile));
 			}
 			catch (IOException e) {
-				logger.error("Could not process package file from " + packageRepositoryUrl, e);
+				logger.error("Could not process package file from " + resource, e);
 			}
 
 		}
