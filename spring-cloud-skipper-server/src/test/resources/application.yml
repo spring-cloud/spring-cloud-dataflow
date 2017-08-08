@@ -1,7 +1,10 @@
 spring:
   main:
     banner-mode: "off"
-
+  cloud:
+    skipper:
+      server:
+        skipperHome: target/skipperTest
 
 logging:
   level:

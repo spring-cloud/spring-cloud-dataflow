@@ -65,27 +65,23 @@ public class PackageMetadataMvcTests extends AbstractMockMvcTests {
 						.value("http://www.gilligansisle.com/images/a2.gif"))
 				.andExpect(jsonPath("$._embedded.packageMetadata[0].description").doesNotExist())
 				.andExpect(jsonPath("$._embedded.packageMetadata[0]._links.install.href")
-						.value("http://localhost/packageMetadata/3/install"))
+						.value("http://localhost/packageMetadata/1/install"))
 				.andExpect(jsonPath("$._embedded.packageMetadata[1].version").value("2.0.0"))
 				.andExpect(jsonPath("$._embedded.packageMetadata[1].iconUrl")
 						.value("http://www.gilligansisle.com/images/a1.gif"))
 				.andExpect(jsonPath("$._embedded.packageMetadata[1]._links.install.href")
-						.value("http://localhost/packageMetadata/4/install"))
+						.value("http://localhost/packageMetadata/2/install"))
 				.andExpect(jsonPath("$._embedded.packageMetadata[1].description").doesNotExist());
-	}
 
-	@Test
-	public void testFindAll() throws Exception {
-		PackageMetadataCreator.createTwoPackages(packageMetadataRepository);
 		mockMvc.perform(get("/packageMetadata")).andDo(print()).andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.packageMetadata[0].version").value("1.0.0"))
 				.andExpect(jsonPath("$._embedded.packageMetadata[0].description").value("A very cool project"))
 				.andExpect(jsonPath("$._embedded.packageMetadata[0]._links.install.href")
-						.value("http://localhost/packageMetadata/3/install"))
+						.value("http://localhost/packageMetadata/1/install"))
 				.andExpect(jsonPath("$._embedded.packageMetadata[1].version").value("2.0.0"))
 				.andExpect(jsonPath("$._embedded.packageMetadata[1].description").value("Another very cool project"))
 				.andExpect(jsonPath("$._embedded.packageMetadata[1]._links.install.href")
-						.value("http://localhost/packageMetadata/4/install"));
-
+						.value("http://localhost/packageMetadata/2/install"));
 	}
+
 }

@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -53,6 +54,7 @@ public class PackageIndexLoaderTests extends AbstractIntegrationTest {
 	private PackageMetadataRepository packageMetadataRepository;
 
 	@Before
+	@After
 	public void cleanPackageIndexDir() throws IOException {
 		packageMetadataRepository.deleteAll();
 
