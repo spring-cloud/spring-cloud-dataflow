@@ -15,7 +15,6 @@
  */
 package org.springframework.cloud.skipper.repository;
 
-import org.junit.Before;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
@@ -44,11 +43,6 @@ public class PackageMetadataMvcTests extends AbstractMockMvcTests {
 
 	@Autowired
 	private PackageMetadataRepository packageMetadataRepository;
-
-	@Before
-	public void deleteAllBeforeTests() {
-		packageMetadataRepository.deleteAll();
-	}
 
 	@Test
 	public void shouldReturnRepositoryIndex() throws Exception {

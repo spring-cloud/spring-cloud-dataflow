@@ -5,6 +5,7 @@ spring:
     skipper:
       server:
         skipperHome: target/skipperTest
+        synchonizeIndexOnContextRefresh: false
 
 logging:
   level:
