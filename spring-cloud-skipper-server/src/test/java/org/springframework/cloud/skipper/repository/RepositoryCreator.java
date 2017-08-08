@@ -15,13 +15,12 @@
  */
 package org.springframework.cloud.skipper.repository;
 
-import org.springframework.cloud.skipper.AbstractIntegrationTest;
 import org.springframework.cloud.skipper.domain.Repository;
 
 /**
  * @author Mark Pollack
  */
-public class RepositoryCreator extends AbstractIntegrationTest {
+public class RepositoryCreator {
 
 	public static void createTwoRepositories(RepositoryRepository repositoryRepository) {
 		Repository repository = new Repository();

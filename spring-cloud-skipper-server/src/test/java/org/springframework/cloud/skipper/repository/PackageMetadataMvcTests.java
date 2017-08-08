@@ -16,10 +16,13 @@
 package org.springframework.cloud.skipper.repository;
 
 import org.junit.Before;
+import org.junit.FixMethodOrder;
 import org.junit.Test;
+import org.junit.runners.MethodSorters;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.skipper.AbstractMockMvcTests;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,6 +35,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Mark Pollack
  */
 @Transactional
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class PackageMetadataMvcTests extends AbstractMockMvcTests {
 
 	@Autowired
@@ -59,15 +64,28 @@ public class PackageMetadataMvcTests extends AbstractMockMvcTests {
 				.andExpect(jsonPath("$._embedded.packageMetadata[0].iconUrl")
 						.value("http://www.gilligansisle.com/images/a2.gif"))
 				.andExpect(jsonPath("$._embedded.packageMetadata[0].description").doesNotExist())
+				.andExpect(jsonPath("$._embedded.packageMetadata[0]._links.install.href")
+						.value("http://localhost/packageMetadata/3/install"))
 				.andExpect(jsonPath("$._embedded.packageMetadata[1].version").value("2.0.0"))
 				.andExpect(jsonPath("$._embedded.packageMetadata[1].iconUrl")
 						.value("http://www.gilligansisle.com/images/a1.gif"))
+				.andExpect(jsonPath("$._embedded.packageMetadata[1]._links.install.href")
+						.value("http://localhost/packageMetadata/4/install"))
 				.andExpect(jsonPath("$._embedded.packageMetadata[1].description").doesNotExist());
 	}
 
 	@Test
 	public void testFindAll() throws Exception {
 		PackageMetadataCreator.createTwoPackages(packageMetadataRepository);
-		mockMvc.perform(get("/packageMetadata")).andDo(print()).andExpect(status().isOk());
+		mockMvc.perform(get("/packageMetadata")).andDo(print()).andExpect(status().isOk())
+				.andExpect(jsonPath("$._embedded.packageMetadata[0].version").value("1.0.0"))
+				.andExpect(jsonPath("$._embedded.packageMetadata[0].description").value("A very cool project"))
+				.andExpect(jsonPath("$._embedded.packageMetadata[0]._links.install.href")
+						.value("http://localhost/packageMetadata/3/install"))
+				.andExpect(jsonPath("$._embedded.packageMetadata[1].version").value("2.0.0"))
+				.andExpect(jsonPath("$._embedded.packageMetadata[1].description").value("Another very cool project"))
+				.andExpect(jsonPath("$._embedded.packageMetadata[1]._links.install.href")
+						.value("http://localhost/packageMetadata/4/install"));
+
 	}
 }

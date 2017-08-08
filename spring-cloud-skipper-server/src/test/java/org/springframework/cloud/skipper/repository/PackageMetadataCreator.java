@@ -30,6 +30,7 @@ public class PackageMetadataCreator {
 		packageMetadata.setName("package1");
 		packageMetadata.setVersion("1.0.0");
 		packageMetadata.setIconUrl("http://www.gilligansisle.com/images/a2.gif");
+		packageMetadata.setDescription("A very cool project");
 		packageMetadata.setMaintainer("Alan Hale Jr.");
 		repository.save(packageMetadata);
 		packageMetadata = new PackageMetadata();
@@ -40,6 +41,7 @@ public class PackageMetadataCreator {
 		packageMetadata.setVersion("2.0.0");
 		packageMetadata.setIconUrl("http://www.gilligansisle.com/images/a1.gif");
 		packageMetadata.setMaintainer("Bob Denver");
+		packageMetadata.setDescription("Another very cool project");
 		repository.save(packageMetadata);
 	}
 }
