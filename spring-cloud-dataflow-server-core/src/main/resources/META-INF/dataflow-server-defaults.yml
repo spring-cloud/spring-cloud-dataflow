@@ -23,6 +23,7 @@ spring:
       security:
         authorization:
           enabled: true
+          permit-all-paths: "/authenticate,/security/info,/features,/assets/**"
           rules:
             # Metrics
 
