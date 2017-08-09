@@ -20,15 +20,14 @@ import org.springframework.cloud.skipper.client.SkipperClient;
 import org.springframework.cloud.skipper.domain.AboutInfo;
 import org.springframework.cloud.skipper.shell.command.support.SkipperClientUpdatedEvent;
 import org.springframework.context.event.EventListener;
-import org.springframework.shell.core.CommandMarker;
-import org.springframework.shell.core.annotation.CliCommand;
-import org.springframework.stereotype.Component;
+import org.springframework.shell.standard.ShellComponent;
+import org.springframework.shell.standard.ShellMethod;
 
 /**
  * @author Mark Pollack
  */
-@Component
-public class AboutInfoCommand implements CommandMarker {
+@ShellComponent
+public class AboutInfoCommand {
 
 	private SkipperClient skipperClient;
 
@@ -37,7 +36,7 @@ public class AboutInfoCommand implements CommandMarker {
 		this.skipperClient = skipperClient;
 	}
 
-	@CliCommand("skipper info")
+	@ShellMethod(key = "skipper info", value = "Get information about the Skipper server.")
 	public String info() {
 		AboutInfo aboutInfo = skipperClient.getAboutInfo();
 		return aboutInfo.toString();

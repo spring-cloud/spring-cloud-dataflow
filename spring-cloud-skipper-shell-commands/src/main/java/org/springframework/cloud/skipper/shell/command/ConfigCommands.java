@@ -33,16 +33,16 @@ import org.springframework.cloud.skipper.domain.AboutInfo;
 import org.springframework.cloud.skipper.shell.command.support.*;
 import org.springframework.context.*;
 import org.springframework.core.io.Resource;
-import org.springframework.shell.core.CommandMarker;
-import org.springframework.shell.core.annotation.CliCommand;
-import org.springframework.shell.core.annotation.CliOption;
-import org.springframework.stereotype.Component;
+import org.springframework.shell.standard.ShellComponent;
+import org.springframework.shell.standard.ShellMethod;
+import org.springframework.shell.standard.ShellOption;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
-import static org.springframework.cloud.skipper.client.SkipperClientProperties.*;
+import static org.springframework.cloud.skipper.client.SkipperClientProperties.DEFAULT_TARGET;
+import static org.springframework.shell.standard.ShellOption.NULL;
 
 /**
  * Configuration commands for the Shell. The default Skipper Server location is
@@ -56,12 +56,10 @@ import static org.springframework.cloud.skipper.client.SkipperClientProperties.*
  * @author Eric Bottard
  * @author Mike Heath
  */
-@Component
-public class ConfigCommands implements CommandMarker, InitializingBean, ApplicationListener<ApplicationReadyEvent>,
+@ShellComponent
+public class ConfigCommands implements InitializingBean, ApplicationListener<ApplicationReadyEvent>,
 		ApplicationEventPublisherAware,
 		ApplicationContextAware {
-
-	public static final String DEFAULT_UNSPECIFIED_SKIP_SSL_VALIDATION = "false";
 
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -79,56 +77,50 @@ public class ConfigCommands implements CommandMarker, InitializingBean, Applicat
 
 	private volatile boolean initialized;
 
-	private ConsoleUserInput userInput = new ConsoleUserInput();
+	private final ConsoleUserInput userInput;
 
 	@Autowired
 	public ConfigCommands(TargetHolder targetHolder, RestTemplate restTemplate,
-			SkipperClientProperties config) {
+			SkipperClientProperties config, ConsoleUserInput userInput) {
 		this.targetHolder = targetHolder;
 		this.restTemplate = restTemplate;
 		this.config = config;
+		this.userInput = userInput;
 	}
 
 	// @formatter:off
-	@CliCommand(value = {"skipper config server"}, help = "Configure the Spring Cloud Skipper REST server to use")
+	@ShellMethod(key = "skipper config server", value = "Configure the Spring Cloud Skipper REST server to use.")
 	public String target(
-			@CliOption(mandatory = false, key = {"", "uri"},
-					help = "the location of the Spring Cloud Skipper REST endpoint",
-					unspecifiedDefaultValue = DEFAULT_TARGET) String targetUrlString,
-			@CliOption(mandatory = false, key = {"username"},
-					help = "the username for authenticated access to the Admin REST endpoint",
-					unspecifiedDefaultValue = DEFAULT_USERNAME) String targetUsername,
-			@CliOption(mandatory = false, key = {"password"},
-					help = "the password for authenticated access to the Admin REST endpoint (valid only with a "
-							+ "username)",
-					specifiedDefaultValue = DEFAULT_PASSWORD) String targetPassword,
-			@CliOption(mandatory = false, key = {"credentials-provider-command"},
-					help = "a command to run that outputs the HTTP credentials used for authentication",
-					unspecifiedDefaultValue = DEFAULT_CREDENTIALS_PROVIDER_COMMAND) String credentialsProviderCommand,
-			@CliOption(mandatory = false, key = {"skip-ssl-validation"},
-					help = "accept any SSL certificate (even self-signed)",
-					specifiedDefaultValue = DEFAULT_SKIP_SSL_VALIDATION,
-					unspecifiedDefaultValue = DEFAULT_UNSPECIFIED_SKIP_SSL_VALIDATION) boolean skipSslValidation) {
+			@ShellOption(help = "the location of the Spring Cloud Skipper REST endpoint", defaultValue = DEFAULT_TARGET)
+			String uri,
+			@ShellOption(help = "the username for authenticated access to the Admin REST endpoint", defaultValue = NULL)
+			String username,
+			@ShellOption(help = "the password for authenticated access to the Admin REST endpoint " +
+					"(valid only with a username)", defaultValue = NULL)
+			String password,
+			@ShellOption(help = "a command to run that outputs the HTTP credentials used for authentication", defaultValue = NULL)
+			String credentialsProviderCommand,
+			@ShellOption(help = "accept any SSL certificate (even self-signed)")
+			boolean skipSslValidation) {
 		// @formatter:on
-		if (StringUtils.isEmpty(credentialsProviderCommand) &&
-				!StringUtils.isEmpty(targetPassword) && StringUtils.isEmpty(targetUsername)) {
+		if (credentialsProviderCommand == null && password != null && username == null) {
 			return "A password may be specified only together with a username";
 		}
 
-		if (StringUtils.isEmpty(credentialsProviderCommand) &&
-				StringUtils.isEmpty(targetPassword) && !StringUtils.isEmpty(targetUsername)) {
+		if (credentialsProviderCommand == null &&
+				password == null && username != null) {
 			// read password from the command line
-			targetPassword = userInput.prompt("Password", "", false);
+			password = userInput.prompt("Password", "", false);
 		}
 
 		try {
-			this.targetHolder.setTarget(new Target(targetUrlString, targetUsername, targetPassword, skipSslValidation));
+			this.targetHolder.setTarget(new Target(uri, username, password, skipSslValidation));
 
 			final HttpClientConfigurer httpClientConfigurer = HttpClientConfigurer.create()
 					.targetHost(this.targetHolder.getTarget().getTargetUri())
 					.skipTlsCertificateVerification(skipSslValidation);
-			if (StringUtils.hasText(targetUsername) && StringUtils.hasText(targetPassword)) {
-				httpClientConfigurer.basicAuthCredentials(targetUsername, targetPassword);
+			if (StringUtils.hasText(username) && StringUtils.hasText(password)) {
+				httpClientConfigurer.basicAuthCredentials(username, password);
 			}
 			if (StringUtils.hasText(credentialsProviderCommand)) {
 				this.targetHolder.getTarget().setTargetCredentials(new TargetCredentials(true));
@@ -146,7 +138,7 @@ public class ConfigCommands implements CommandMarker, InitializingBean, Applicat
 
 			// TODO - note, we don't yet know if we can access the specified URI
 			this.targetHolder.getTarget()
-					.setTargetResultMessage(String.format("Successfully targeted %s", targetUrlString));
+					.setTargetResultMessage(String.format("Successfully targeted %s", uri));
 
 		}
 		catch (Exception e) {
@@ -158,7 +150,7 @@ public class ConfigCommands implements CommandMarker, InitializingBean, Applicat
 		return (this.targetHolder.getTarget().getTargetResultMessage());
 	}
 
-	@CliCommand(value = { "skipper config info" }, help = "Show the Skipper server being used")
+	@ShellMethod(key = "skipper config info", value = "Show the Skipper server being used.")
 	public AboutInfo info() {
 		Target target = targetHolder.getTarget();
 		if (target.getTargetException() != null) {

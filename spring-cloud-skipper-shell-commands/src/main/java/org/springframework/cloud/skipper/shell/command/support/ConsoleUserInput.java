@@ -15,29 +15,22 @@
  */
 package org.springframework.cloud.skipper.shell.command.support;
 
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.List;
 
-import org.springframework.stereotype.Component;
+import org.jline.reader.LineReader;
 
 /**
- * Interact with the user via the console over sandard in and out.
+ * Interact with the user via the JLine terminal.
  *
  * @author Eric Bottard
- * @author Gary Russell
  */
-@Component
 public class ConsoleUserInput {
 
-	private InputStreamReader console = new InputStreamReader(System.in);
+	private final LineReader lineReader;
 
-	public ConsoleUserInput() {
-	}
-
-	public ConsoleUserInput(InputStreamReader console) {
-		this.console = console;
+	public ConsoleUserInput(LineReader lineReader) {
+		this.lineReader = lineReader;
 	}
 
 	/**
@@ -48,40 +41,15 @@ public class ConsoleUserInput {
 		List<String> optionsAsList = Arrays.asList(options);
 		String answer;
 		do {
-			System.out.format("%s %s: ", prompt, optionsAsList);
-			answer = read(console, true);
+			answer = lineReader.readLine(String.format("%s %s: ", prompt, optionsAsList));
 		}
 		while (!optionsAsList.contains(answer) && !"".equals(answer));
 		return "".equals(answer) && !optionsAsList.contains("") ? defaultValue : answer;
 	}
 
 	public String prompt(String prompt, String defaultValue, boolean echo) {
-		System.out.format("%s: ", prompt);
-		String answer = read(console, echo);
+		String answer = lineReader.readLine(prompt + ": ", '*');
 		return "".equals(answer) ? defaultValue : answer;
 	}
 
-	/**
-	 * Reads a single line of input from the console.
-	 *
-	 * @param console input
-	 * @param echo whether the input should be echoed (e.g. false for passwords, other
-	 * sensitive data)
-	 */
-	private String read(InputStreamReader console, boolean echo) {
-		StringBuilder builder = new StringBuilder();
-		try {
-			for (char c = (char) console.read(); !(c == '\n' || c == '\r'); c = (char) console.read()) {
-				if (echo) {
-					System.out.print(c);
-				}
-				builder.append(c);
-			}
-			System.out.println();
-		}
-		catch (IOException e) {
-			throw new IllegalStateException(e);
-		}
-		return builder.toString();
-	}
 }

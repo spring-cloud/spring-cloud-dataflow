@@ -15,12 +15,13 @@
  */
 package org.springframework.cloud.skipper.shell.config;
 
+import org.jline.utils.AttributedString;
+import org.jline.utils.AttributedStyle;
+
 import org.springframework.cloud.skipper.client.SkipperClient;
 import org.springframework.cloud.skipper.shell.command.support.SkipperClientUpdatedEvent;
 import org.springframework.context.event.EventListener;
-import org.springframework.core.Ordered;
-import org.springframework.core.annotation.Order;
-import org.springframework.shell.plugin.PromptProvider;
+import org.springframework.shell.jline.PromptProvider;
 import org.springframework.stereotype.Component;
 
 /**
@@ -30,23 +31,17 @@ import org.springframework.stereotype.Component;
  * @author Ilayaperumal Gopinathan
  */
 @Component
-@Order(Ordered.HIGHEST_PRECEDENCE)
 public class SkipperPromptProvider implements PromptProvider {
 
 	private SkipperClient skipperClient;
 
 	@Override
-	public String getProviderName() {
-		return "skipper";
-	}
-
-	@Override
-	public String getPrompt() {
+	public AttributedString getPrompt() {
 		if (skipperClient != null) {
-			return "server-unknown:>";
+			return new AttributedString("skipper:>", AttributedStyle.DEFAULT.foreground(AttributedStyle.YELLOW));
 		}
 		else {
-			return "skipper:>";
+			return new AttributedString("server-unknown:>", AttributedStyle.DEFAULT.foreground(AttributedStyle.RED));
 		}
 	}
 

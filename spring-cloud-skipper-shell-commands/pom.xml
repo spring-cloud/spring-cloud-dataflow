@@ -8,14 +8,13 @@
     <parent>
         <groupId>org.springframework.cloud</groupId>
         <artifactId>spring-cloud-skipper-parent</artifactId>
-        <version>1.0.0-BUILD-SNAPSHOT</version>
+        <version>1.0.0.BUILD-SNAPSHOT</version>
     </parent>
 
     <dependencies>
         <dependency>
             <groupId>org.springframework.shell</groupId>
-            <artifactId>spring-shell</artifactId>
-            <version>${spring-shell.version}</version>
+            <artifactId>spring-shell-starter</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>

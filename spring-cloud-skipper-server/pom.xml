@@ -8,7 +8,7 @@
     <parent>
         <groupId>org.springframework.cloud</groupId>
         <artifactId>spring-cloud-skipper-parent</artifactId>
-        <version>1.0.0-BUILD-SNAPSHOT</version>
+        <version>1.0.0.BUILD-SNAPSHOT</version>
     </parent>
 
     <properties>
@@ -114,8 +114,6 @@
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-skipper</artifactId>
-            <!-- TODO why does the version number need to be in the child pom -->
-            <version>1.0.0-BUILD-SNAPSHOT</version>
         </dependency>
 
         <dependency>
