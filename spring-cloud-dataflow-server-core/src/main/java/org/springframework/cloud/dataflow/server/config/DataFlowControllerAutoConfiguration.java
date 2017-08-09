@@ -42,9 +42,6 @@ import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.registry.RdbmsUriRegistry;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
-import org.springframework.cloud.dataflow.server.config.security.AuthorizationConfig;
-import org.springframework.cloud.dataflow.server.config.security.support.OnSecurityEnabledAndOAuth2Disabled;
-import org.springframework.cloud.dataflow.server.config.security.support.SecurityStateBean;
 import org.springframework.cloud.dataflow.server.controller.AboutController;
 import org.springframework.cloud.dataflow.server.controller.AppRegistryController;
 import org.springframework.cloud.dataflow.server.controller.CompletionController;
@@ -86,6 +83,11 @@ import org.springframework.context.annotation.Import;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.hateoas.EntityLinks;
 import org.springframework.scheduling.concurrent.ForkJoinPoolFactoryBean;
+import org.springframework.security.common.AuthorizationProperties;
+import org.springframework.security.common.support.FileSecurityProperties;
+import org.springframework.security.common.support.LdapSecurityProperties;
+import org.springframework.security.common.support.OnSecurityEnabledAndOAuth2Disabled;
+import org.springframework.security.common.support.SecurityStateBean;
 
 /**
  * Configuration for the Data Flow Server Controllers.
@@ -100,8 +102,7 @@ import org.springframework.scheduling.concurrent.ForkJoinPoolFactoryBean;
 @Configuration
 @Import(CompletionConfiguration.class)
 @ConditionalOnBean({ EnableDataFlowServerConfiguration.Marker.class, AppDeployer.class, TaskLauncher.class })
-@EnableConfigurationProperties({ AuthorizationConfig.class, FeaturesProperties.class, VersionInfoProperties.class,
-		MetricsProperties.class })
+@EnableConfigurationProperties({ FeaturesProperties.class, VersionInfoProperties.class, MetricsProperties.class })
 @ConditionalOnProperty(prefix = "dataflow.server", name = "enabled", havingValue = "true", matchIfMissing = true)
 @EnableCircuitBreaker
 public class DataFlowControllerAutoConfiguration {
@@ -303,6 +304,26 @@ public class DataFlowControllerAutoConfiguration {
 	@Bean
 	public MavenProperties mavenProperties() {
 		return new MavenConfigurationProperties();
+	}
+
+	@Bean
+	@ConfigurationProperties(prefix = "spring.cloud.dataflow.security.authorization")
+	public AuthorizationProperties authorizationProperties() {
+		return new AuthorizationProperties();
+	}
+
+	@Bean
+	@ConditionalOnProperty(name = "spring.cloud.dataflow.security.authentication.file.enabled", havingValue = "true")
+	@ConfigurationProperties(prefix = "spring.cloud.dataflow.security.authentication.file")
+	public FileSecurityProperties fileSecurityProperties() {
+		return new FileSecurityProperties();
+	}
+
+	@Bean
+	@ConditionalOnProperty(name = "spring.cloud.dataflow.security.authentication.ldap.enabled", havingValue = "true")
+	@ConfigurationProperties(prefix = "spring.cloud.dataflow.security.authentication.ldap")
+	public LdapSecurityProperties ldapSecurityProperties() {
+		return new LdapSecurityProperties();
 	}
 
 	@Bean

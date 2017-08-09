@@ -32,11 +32,6 @@ import org.springframework.cloud.dataflow.completion.CompletionConfiguration;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.config.features.FeaturesConfiguration;
 import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
-import org.springframework.cloud.dataflow.server.config.security.BasicAuthSecurityConfiguration;
-import org.springframework.cloud.dataflow.server.config.security.DefaultBootUserAuthenticationConfiguration;
-import org.springframework.cloud.dataflow.server.config.security.FileAuthenticationConfiguration;
-import org.springframework.cloud.dataflow.server.config.security.LdapAuthenticationConfiguration;
-import org.springframework.cloud.dataflow.server.config.security.OAuthSecurityConfiguration;
 import org.springframework.cloud.dataflow.server.config.web.WebConfiguration;
 import org.springframework.cloud.dataflow.server.repository.support.DataflowRdbmsInitializer;
 import org.springframework.context.annotation.Bean;
@@ -69,9 +64,7 @@ import static org.springframework.hateoas.config.EnableHypermediaSupport.Hyperme
 @EnableSpringDataWebSupport
 @Configuration
 @Import({ CompletionConfiguration.class, FeaturesConfiguration.class, WebConfiguration.class,
-		BasicAuthSecurityConfiguration.class, FileAuthenticationConfiguration.class,
-		DefaultBootUserAuthenticationConfiguration.class, LdapAuthenticationConfiguration.class,
-		OAuthSecurityConfiguration.class })
+		SecurityConfiguration.class })
 @EnableConfigurationProperties({ BatchProperties.class, CommonApplicationProperties.class })
 public class DataFlowServerConfiguration {
 
