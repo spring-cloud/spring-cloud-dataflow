@@ -33,6 +33,8 @@
         <spring-cloud-deployer-local.version>1.2.0.RELEASE</spring-cloud-deployer-local.version>
         <spring-shell.version>1.2.0.RELEASE</spring-shell.version>
 
+        <spring-cloud-skipper-ui.version>1.0.0.BUILD-SNAPSHOT</spring-cloud-skipper-ui.version>
+
         <jacoco-maven-plugin.version>0.7.9</jacoco-maven-plugin.version>
         <surefire-maven-plugin.version>2.20</surefire-maven-plugin.version>
         <sonar-maven-plugin.version>3.0.2</sonar-maven-plugin.version>
