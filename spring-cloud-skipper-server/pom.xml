@@ -11,6 +11,12 @@
         <version>1.0.0-BUILD-SNAPSHOT</version>
     </parent>
 
+    <properties>
+        <spring-cloud-deployer-cloudfoundry.version>1.2.2.RELEASE</spring-cloud-deployer-cloudfoundry.version>
+        <reactor.version>3.0.7.RELEASE</reactor.version>
+        <zeroturnaround.version>1.11</zeroturnaround.version>
+    </properties>
+
     <dependencies>
         <!--
           <dependency>
@@ -33,6 +39,25 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.data</groupId>
+            <artifactId>spring-data-keyvalue</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-mustache</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-tomcat</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.zeroturnaround</groupId>
+            <artifactId>zt-zip</artifactId>
+            <version>${zeroturnaround.version}</version>
         </dependency>
         <dependency>
             <groupId>com.h2database</groupId>
@@ -99,6 +124,16 @@
             <version>1.0.0-BUILD-SNAPSHOT</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-deployer-cloudfoundry</artifactId>
+            <version>${spring-cloud-deployer-cloudfoundry.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.projectreactor</groupId>
+            <artifactId>reactor-core</artifactId>
+            <version>${reactor.version}</version>
+        </dependency>
     </dependencies>
 
 

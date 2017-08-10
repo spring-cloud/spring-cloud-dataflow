@@ -25,6 +25,7 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.skipper.config.SkipperServerProperties;
+import org.springframework.cloud.skipper.domain.PackageMetadata;
 import org.springframework.cloud.skipper.repository.PackageMetadataRepository;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;

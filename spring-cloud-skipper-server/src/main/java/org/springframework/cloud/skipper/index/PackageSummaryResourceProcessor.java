@@ -16,6 +16,7 @@
 package org.springframework.cloud.skipper.index;
 
 import org.springframework.cloud.skipper.controller.PackageInstallController;
+import org.springframework.cloud.skipper.domain.PackageSummary;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.ResourceProcessor;

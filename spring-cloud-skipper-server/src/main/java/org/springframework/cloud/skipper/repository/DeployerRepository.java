@@ -15,21 +15,32 @@
  */
 package org.springframework.cloud.skipper.repository;
 
-import java.util.List;
-
-import org.springframework.cloud.skipper.domain.PackageMetadata;
+import org.springframework.cloud.skipper.deployer.Deployer;
 import org.springframework.data.repository.PagingAndSortingRepository;
-import org.springframework.data.repository.query.Param;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
+import org.springframework.data.rest.core.annotation.RestResource;
 
 /**
  * @author Mark Pollack
  */
-@RepositoryRestResource(path = "packageMetadata", collectionResourceRel = "packageMetadata")
-public interface PackageMetadataRepository extends PagingAndSortingRepository<PackageMetadata, String> {
+@RepositoryRestResource
+public interface DeployerRepository extends PagingAndSortingRepository<Deployer, String> {
 
-	List<PackageMetadata> findByName(@Param("name") String name);
+	Deployer findByName(String name);
 
-	PackageMetadata findByNameAndVersion(@Param("name") String name, @Param("version") String version);
+	@Override
+	@RestResource(exported = false)
+	Deployer save(Deployer deployer);
 
+	@Override
+	@RestResource(exported = false)
+	void delete(String s);
+
+	@Override
+	@RestResource(exported = false)
+	void delete(Deployer deployer);
+
+	@Override
+	@RestResource(exported = false)
+	void deleteAll();
 }

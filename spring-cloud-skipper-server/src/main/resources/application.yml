@@ -3,6 +3,14 @@ server:
 spring:
   main:
     banner-mode: "off"
+  cloud:
+    deployer:
+      cloudfoundry:
+        url: https://api.run.pivotal.io
+        org: dummy
+        space: dummy
+        username: dummy
+        password: dummy
 
 logging:
   level:

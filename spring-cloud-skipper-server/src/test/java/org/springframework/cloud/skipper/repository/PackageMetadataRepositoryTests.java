@@ -22,7 +22,7 @@ import org.junit.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.skipper.AbstractIntegrationTest;
-import org.springframework.cloud.skipper.index.PackageMetadata;
+import org.springframework.cloud.skipper.domain.PackageMetadata;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

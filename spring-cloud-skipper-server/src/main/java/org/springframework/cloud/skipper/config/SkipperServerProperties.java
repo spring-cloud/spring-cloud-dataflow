@@ -70,4 +70,8 @@ public class SkipperServerProperties {
 	public String getPackageIndexDir() {
 		return skipperHome + File.separator + "indexes";
 	}
+
+	public String getPackageDir() {
+		return skipperHome + File.separator + "packages";
+	}
 }

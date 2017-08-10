@@ -59,7 +59,8 @@ public class PackageIndexDownloader implements ResourceLoaderAware {
 	public void downloadPackageIndexes() {
 		for (Repository packageRepository : this.skipperServerProperties.getPackageRepositories()) {
 			try {
-				Resource resource = resourceLoader.getResource(packageRepository.getUrl()).createRelative("index.yml");
+				Resource resource = resourceLoader.getResource(packageRepository.getUrl()
+						+ File.separator + "index.yml");
 				logger.info("Downloading from " + resource);
 				File packageDir = new File(skipperServerProperties.getPackageIndexDir());
 				packageDir.mkdirs();

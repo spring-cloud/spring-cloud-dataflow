@@ -15,18 +15,39 @@
  */
 package org.springframework.cloud.skipper.controller;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.skipper.domain.InstallProperties;
+import org.springframework.cloud.skipper.domain.InstallRequest;
 import org.springframework.cloud.skipper.domain.Release;
+import org.springframework.cloud.skipper.service.ReleaseService;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 /**
  * @author Mark Pollack
  */
 @RestController
-@RequestMapping("/packageMetadata/{id}")
+@RequestMapping("/package")
 public class PackageInstallController {
 
-	@RequestMapping(path = "/install", method = RequestMethod.PUT)
-	public Release install(@PathVariable("id") long id, @RequestBody String installData) {
-		return null;
+	private ReleaseService releaseService;
+
+	@Autowired
+	public PackageInstallController(ReleaseService releaseService) {
+		this.releaseService = releaseService;
+	}
+
+//	@PostMapping
+//	@RequestMapping("/packageMetadata/install")
+//	@ResponseStatus(HttpStatus.CREATED)
+//	public Release install(@RequestBody InstallRequest installRequest) {
+//		return null;
+//	}
+
+	//@PostMapping
+	@RequestMapping(path = "/{id}/install", method = RequestMethod.POST)
+	@ResponseStatus(HttpStatus.CREATED)
+	public Release install(@PathVariable("id") String id, @RequestBody InstallProperties installProperties) {
+		return releaseService.install(id, installProperties);
 	}
 }

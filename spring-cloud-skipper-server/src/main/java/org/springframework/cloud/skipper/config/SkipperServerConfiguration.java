@@ -15,8 +15,19 @@
  */
 package org.springframework.cloud.skipper.config;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.cloud.deployer.resource.docker.DockerResourceLoader;
+import org.springframework.cloud.deployer.resource.maven.MavenProperties;
+import org.springframework.cloud.deployer.resource.maven.MavenResourceLoader;
+import org.springframework.cloud.deployer.resource.support.DelegatingResourceLoader;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.ResourceLoader;
+import org.springframework.hateoas.config.EnableHypermediaSupport;
 
 /**
  * Main configuration class for the server.
@@ -24,6 +35,26 @@ import org.springframework.context.annotation.Configuration;
  * @author Mark Pollack
  */
 @Configuration
-@EnableConfigurationProperties(SkipperServerProperties.class)
+@EnableConfigurationProperties({ SkipperServerProperties.class, CloudFoundryPlatformProperties.class,
+		LocalPlatformProperties.class })
 public class SkipperServerConfiguration {
+
+	@Bean
+	public MavenProperties mavenProperties() {
+		return new MavenConfigurationProperties();
+	}
+
+	@Bean
+	public DelegatingResourceLoader delegatingResourceLoader(MavenProperties mavenProperties) {
+		DockerResourceLoader dockerLoader = new DockerResourceLoader();
+		MavenResourceLoader mavenResourceLoader = new MavenResourceLoader(mavenProperties);
+		Map<String, ResourceLoader> loaders = new HashMap<>();
+		loaders.put("docker", dockerLoader);
+		loaders.put("maven", mavenResourceLoader);
+		return new DelegatingResourceLoader(loaders);
+	}
+
+	@ConfigurationProperties(prefix = "maven")
+	static class MavenConfigurationProperties extends MavenProperties {
+	}
 }

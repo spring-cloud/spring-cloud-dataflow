@@ -21,6 +21,7 @@ import org.junit.runner.RunWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cloud.skipper.AbstractMockMvcTests;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
@@ -36,20 +37,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /**
  * @author Mark Pollack
  */
-@RunWith(SpringRunner.class)
-@SpringBootTest
-public class AboutInfoControllerTests {
-
-	private MockMvc mockMvc;
-
-	@Autowired
-	private WebApplicationContext wac;
-
-	@Before
-	public void setupMockMvc() {
-		this.mockMvc = MockMvcBuilders.webAppContextSetup(wac)
-				.defaultRequest(get("/").accept(MediaType.APPLICATION_JSON)).build();
-	}
+public class AboutInfoControllerTests extends AbstractMockMvcTests {
 
 	@Test
 	public void aboutTest() throws Exception {

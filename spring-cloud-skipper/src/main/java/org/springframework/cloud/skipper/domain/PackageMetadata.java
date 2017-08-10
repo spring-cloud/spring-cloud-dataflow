@@ -13,23 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.cloud.skipper.index;
+package org.springframework.cloud.skipper.domain;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import javax.validation.constraints.NotNull;
+
+import org.springframework.data.annotation.Id;
+import org.springframework.data.keyvalue.annotation.KeySpace;
 
 /**
  * @author Mark Pollack
  */
-@Entity
+// @Entity
+@KeySpace("packagemetadata")
 public class PackageMetadata {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
-	private long id;
+	private String id;
 
 	/**
 	 * The Package Index spec version this file is based on. Required
@@ -142,11 +141,11 @@ public class PackageMetadata {
 		this.version = version;
 	}
 
-	public long getId() {
+	public String getId() {
 		return id;
 	}
 
-	public void setId(long id) {
+	public void setId(String id) {
 		this.id = id;
 	}
 
@@ -213,4 +212,74 @@ public class PackageMetadata {
 	public void setIconUrl(String iconUrl) {
 		this.iconUrl = iconUrl;
 	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
+
+		PackageMetadata that = (PackageMetadata) o;
+
+		if (apiVersion != null ? !apiVersion.equals(that.apiVersion) : that.apiVersion != null) {
+			return false;
+		}
+		if (origin != null ? !origin.equals(that.origin) : that.origin != null) {
+			return false;
+		}
+		if (kind != null ? !kind.equals(that.kind) : that.kind != null) {
+			return false;
+		}
+		if (name != null ? !name.equals(that.name) : that.name != null) {
+			return false;
+		}
+		if (version != null ? !version.equals(that.version) : that.version != null) {
+			return false;
+		}
+		if (appVersion != null ? !appVersion.equals(that.appVersion) : that.appVersion != null) {
+			return false;
+		}
+		if (packageSourceUrl != null ? !packageSourceUrl.equals(that.packageSourceUrl)
+				: that.packageSourceUrl != null) {
+			return false;
+		}
+		if (packageHomeUrl != null ? !packageHomeUrl.equals(that.packageHomeUrl) : that.packageHomeUrl != null) {
+			return false;
+		}
+		if (tags != null ? !tags.equals(that.tags) : that.tags != null) {
+			return false;
+		}
+		if (maintainer != null ? !maintainer.equals(that.maintainer) : that.maintainer != null) {
+			return false;
+		}
+		if (description != null ? !description.equals(that.description) : that.description != null) {
+			return false;
+		}
+		if (sha256 != null ? !sha256.equals(that.sha256) : that.sha256 != null) {
+			return false;
+		}
+		return iconUrl != null ? iconUrl.equals(that.iconUrl) : that.iconUrl == null;
+	}
+
+	@Override
+	public int hashCode() {
+		int result = apiVersion != null ? apiVersion.hashCode() : 0;
+		result = 31 * result + (origin != null ? origin.hashCode() : 0);
+		result = 31 * result + (kind != null ? kind.hashCode() : 0);
+		result = 31 * result + (name != null ? name.hashCode() : 0);
+		result = 31 * result + (version != null ? version.hashCode() : 0);
+		result = 31 * result + (appVersion != null ? appVersion.hashCode() : 0);
+		result = 31 * result + (packageSourceUrl != null ? packageSourceUrl.hashCode() : 0);
+		result = 31 * result + (packageHomeUrl != null ? packageHomeUrl.hashCode() : 0);
+		result = 31 * result + (tags != null ? tags.hashCode() : 0);
+		result = 31 * result + (maintainer != null ? maintainer.hashCode() : 0);
+		result = 31 * result + (description != null ? description.hashCode() : 0);
+		result = 31 * result + (sha256 != null ? sha256.hashCode() : 0);
+		result = 31 * result + (iconUrl != null ? iconUrl.hashCode() : 0);
+		return result;
+	}
+
 }

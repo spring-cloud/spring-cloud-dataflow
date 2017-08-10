@@ -21,10 +21,12 @@ import org.junit.runners.MethodSorters;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.skipper.AbstractMockMvcTests;
+import org.springframework.cloud.skipper.domain.PackageMetadata;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -39,9 +41,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class PackageMetadataMvcTests extends AbstractMockMvcTests {
 
 	@Autowired
-	private MockMvc mockMvc;
-
-	@Autowired
 	private PackageMetadataRepository packageMetadataRepository;
 
 	@Test
@@ -53,6 +52,10 @@ public class PackageMetadataMvcTests extends AbstractMockMvcTests {
 	@Test
 	public void testProjection() throws Exception {
 		PackageMetadataCreator.createTwoPackages(packageMetadataRepository);
+		PackageMetadata packageMetadata = packageMetadataRepository.findByNameAndVersion("package1", "1.0.0");
+		assertThat(packageMetadata.getId()).isNotNull();
+		packageMetadata = packageMetadataRepository.findByNameAndVersion("package2", "2.0.0");
+		assertThat(packageMetadata.getId()).isNotNull();
 		mockMvc.perform(get("/packageMetadata?projection=summary")).andDo(print()).andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.packageMetadata[0].version").value("1.0.0"))
 				.andExpect(jsonPath("$._embedded.packageMetadata[0].iconUrl")

@@ -15,21 +15,14 @@
  */
 package org.springframework.cloud.skipper.repository;
 
-import java.util.List;
-
-import org.springframework.cloud.skipper.domain.PackageMetadata;
-import org.springframework.data.repository.PagingAndSortingRepository;
-import org.springframework.data.repository.query.Param;
-import org.springframework.data.rest.core.annotation.RepositoryRestResource;
+import org.springframework.cloud.skipper.domain.Release;
 
 /**
  * @author Mark Pollack
  */
-@RepositoryRestResource(path = "packageMetadata", collectionResourceRel = "packageMetadata")
-public interface PackageMetadataRepository extends PagingAndSortingRepository<PackageMetadata, String> {
+public interface CustomReleaseRepository {
 
-	List<PackageMetadata> findByName(@Param("name") String name);
+	Release findLatestRelease(String releaseName);
 
-	PackageMetadata findByNameAndVersion(@Param("name") String name, @Param("version") String version);
-
+	Release findByNameAndVersion(String releaseName, int version);
 }

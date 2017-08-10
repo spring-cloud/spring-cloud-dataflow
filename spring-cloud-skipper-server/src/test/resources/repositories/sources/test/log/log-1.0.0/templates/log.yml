@@ -5,8 +5,8 @@ deployment:
   count: {{count}}
   applicationProperties:
     log.level: {{log.level}}
-  resource: {{resource.log.resourceGroupAndName}}:{{resource.log.version}}
-  resourceMetadata: {{resource.log.resourceGroupAndName}}:jar:metadata:{{resource.log.version}}
+  resource: {{resources.log.resourceGroupAndName}}:{{resources.log.version}}
+  resourceMetadata: {{resources.log.resourceGroupAndName}}:jar:metadata:{{resources.log.version}}
   deploymentProperties:
     memory: {{deployment.request.memory}}
     

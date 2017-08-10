@@ -33,9 +33,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class RepositoryMvcTests extends AbstractMockMvcTests {
 
 	@Autowired
-	private MockMvc mockMvc;
-
-	@Autowired
 	private RepositoryRepository repositoryRepository;
 
 	@Before

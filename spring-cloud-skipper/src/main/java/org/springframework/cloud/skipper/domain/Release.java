@@ -15,18 +15,21 @@
  */
 package org.springframework.cloud.skipper.domain;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.OneToOne;
 import javax.validation.constraints.NotNull;
+
+import org.springframework.data.annotation.Id;
+import org.springframework.data.keyvalue.annotation.KeySpace;
 
 /**
  * @author Mark Pollack
  */
-@Entity
+@KeySpace("release)")
 public class Release {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
-	private long id;
+	private String id;
 
 	/**
 	 * A short name, to associate with the release of this package, must be unique.
@@ -34,6 +37,18 @@ public class Release {
 	@NotNull
 	@Column(unique = true)
 	private String name;
+
+	private int version;
+
+	private Info info;
+
+	private Package pkg;
+
+	private ConfigValues configValues;
+
+	private String manifest;
+
+	private String platformName;
 
 	public Release() {
 	}
@@ -44,5 +59,53 @@ public class Release {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public int getVersion() {
+		return version;
+	}
+
+	public void setVersion(int version) {
+		this.version = version;
+	}
+
+	public Info getInfo() {
+		return info;
+	}
+
+	public void setInfo(Info info) {
+		this.info = info;
+	}
+
+	public Package getPkg() {
+		return pkg;
+	}
+
+	public void setPkg(Package pkg) {
+		this.pkg = pkg;
+	}
+
+	public ConfigValues getConfigValues() {
+		return configValues;
+	}
+
+	public void setConfigValues(ConfigValues configValues) {
+		this.configValues = configValues;
+	}
+
+	public String getManifest() {
+		return manifest;
+	}
+
+	public void setManifest(String manifest) {
+		this.manifest = manifest;
+	}
+
+	public String getPlatformName() {
+		return platformName;
+	}
+
+	public void setPlatformName(String platformName) {
+		this.platformName = platformName;
 	}
 }
