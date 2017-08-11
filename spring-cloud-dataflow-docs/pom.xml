@@ -75,7 +75,12 @@
 			<artifactId>json-path</artifactId>
 			<scope>test</scope>
 		</dependency>
-	</dependencies>
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-task-batch</artifactId>
+			<scope>test</scope>
+		</dependency>
+    </dependencies>
 	<profiles>
 		<profile>
 			<id>full</id>

@@ -613,6 +613,49 @@ include::{snippets}/task-executions-documentation/remove-task-execution/curl-req
 
 include::{snippets}/task-executions-documentation/remove-task-execution/http-response.adoc[]
 
+[[api-guide-resources-job-instances]]
+=== Job Instances
+
+[[api-guide-resources-job-instances-list]]
+==== List All Job Instances
+
+===== Request structure
+
+include::{snippets}/job-instances-documentation/list-job-instances/http-request.adoc[]
+
+===== Request parameters
+
+include::{snippets}/job-instances-documentation/list-job-instances/request-parameters.adoc[]
+
+===== Example request
+
+include::{snippets}/job-instances-documentation/list-job-instances/curl-request.adoc[]
+
+===== Response structure
+
+include::{snippets}/job-instances-documentation/list-job-instances/http-response.adoc[]
+
+[[api-guide-resources-job-instances-detail]]
+==== Job Instance Detail
+
+===== Request structure
+
+include::{snippets}/job-instances-documentation/job-display-detail/http-request.adoc[]
+
+include::{snippets}/job-instances-documentation/job-display-detail/path-parameters.adoc[]
+
+===== Request parameters
+
+There are no request parameter for this endpoint.
+
+===== Example request
+
+include::{snippets}/job-instances-documentation/job-display-detail/curl-request.adoc[]
+
+===== Response structure
+
+include::{snippets}/job-instances-documentation/job-display-detail/http-response.adoc[]
+
 === Runtime Information about Applications
 
 It is possible to get information about running apps known to the system, either globally or individually.
