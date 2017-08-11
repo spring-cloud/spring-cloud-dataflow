@@ -613,6 +613,70 @@ include::{snippets}/task-executions-documentation/remove-task-execution/curl-req
 
 include::{snippets}/task-executions-documentation/remove-task-execution/http-response.adoc[]
 
+[[api-guide-resources-job-step-executions]]
+=== Job Step Executions
+
+[[api-guide-resources-job-step-executions-list]]
+==== List All Step Executions For a Job Execution
+
+===== Request structure
+
+include::{snippets}/job-step-executions-documentation/list-step-executions-for-job/http-request.adoc[]
+
+===== Request parameters
+
+include::{snippets}/job-step-executions-documentation/list-step-executions-for-job/request-parameters.adoc[]
+
+===== Example request
+
+include::{snippets}/job-step-executions-documentation/list-step-executions-for-job/curl-request.adoc[]
+
+===== Response structure
+
+include::{snippets}/job-step-executions-documentation/list-step-executions-for-job/http-response.adoc[]
+
+[[api-guide-resources-job-step-execution-detail]]
+==== Job Step Execution Detail
+
+===== Request structure
+
+include::{snippets}/job-step-executions-documentation/step-detail/http-request.adoc[]
+
+include::{snippets}/job-step-executions-documentation/step-detail/path-parameters.adoc[]
+
+===== Request parameters
+
+There are no request parameter for this endpoint.
+
+===== Example request
+
+include::{snippets}/job-step-executions-documentation/step-detail/curl-request.adoc[]
+
+===== Response structure
+
+include::{snippets}/job-step-executions-documentation/step-detail/http-response.adoc[]
+
+[[api-guide-resources-job-step-execution-progress]]
+==== Job Step Execution Progress
+
+===== Request structure
+
+include::{snippets}/job-step-executions-documentation/step-progress/http-request.adoc[]
+
+include::{snippets}/job-step-executions-documentation/step-progress/path-parameters.adoc[]
+
+===== Request parameters
+
+There are no request parameter for this endpoint.
+
+===== Example request
+
+include::{snippets}/job-step-executions-documentation/step-progress/curl-request.adoc[]
+
+===== Response structure
+
+include::{snippets}/job-step-executions-documentation/step-progress/http-response.adoc[]
+
 === Runtime Information about Applications
 
 It is possible to get information about running apps known to the system, either globally or individually.
