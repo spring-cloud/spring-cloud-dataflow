@@ -18,6 +18,8 @@ package org.springframework.cloud.dataflow.server.rest.documentation;
 
 import java.util.concurrent.Callable;
 
+import javax.sql.DataSource;
+
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Rule;
@@ -67,6 +69,8 @@ public abstract class BaseDocumentation {
 
 	protected RestDocs documentation;
 
+	protected DataSource dataSource;
+
 	protected void prepareDocumentationTests(WebApplicationContext context) {
 		this.documentationHandler = document("{class-name}/{method-name}", preprocessResponse(prettyPrint()));
 		this.documentation = new ToggleableResultHandler(documentationHandler);
@@ -74,6 +78,8 @@ public abstract class BaseDocumentation {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(context)
 				.apply(documentationConfiguration(this.restDocumentation).uris().withPort(9393))
 				.alwaysDo((ToggleableResultHandler)this.documentation).build();
+
+		this.dataSource = springDataflowServer.getWebApplicationContext().getBean(DataSource.class);
 	}
 
 	/**

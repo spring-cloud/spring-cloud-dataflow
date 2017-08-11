@@ -430,6 +430,7 @@ include::{snippets}/stream-deployments-documentation/un-deploy-all/curl-request.
 
 include::{snippets}/stream-deployments-documentation/un-deploy-all/http-response.adoc[]
 
+[[api-guide-resources-task-definitions]]
 === Task Definitions
 
 ==== Creating a new Task Definition
@@ -512,6 +513,7 @@ include::{snippets}/task-definitions-documentation/task-definition-delete/curl-r
 
 include::{snippets}/task-definitions-documentation/task-definition-delete/http-response.adoc[]
 
+[[api-guide-resources-task-executions]]
 === Task Executions
 
 ==== Launching a Task
@@ -612,6 +614,110 @@ include::{snippets}/task-executions-documentation/remove-task-execution/curl-req
 ===== Response structure
 
 include::{snippets}/task-executions-documentation/remove-task-execution/http-response.adoc[]
+
+[[api-guide-resources-job-executions]]
+=== Job Executions
+
+[[api-guide-resources-job-executions-list]]
+==== List All Job Executions
+
+===== Request structure
+
+include::{snippets}/job-executions-documentation/list-job-executions/http-request.adoc[]
+
+===== Request parameters
+
+include::{snippets}/job-executions-documentation/list-job-executions/request-parameters.adoc[]
+
+===== Example request
+
+include::{snippets}/job-executions-documentation/list-job-executions/curl-request.adoc[]
+
+===== Response structure
+
+include::{snippets}/job-executions-documentation/list-job-executions/http-response.adoc[]
+
+[[api-guide-resources-job-executions-list-by-name]]
+==== List All Job Executions With a Specified Job Name
+
+===== Request structure
+
+include::{snippets}/job-executions-documentation/list-job-executions-by-name/http-request.adoc[]
+
+===== Request parameters
+
+include::{snippets}/job-executions-documentation/list-job-executions-by-name/request-parameters.adoc[]
+
+===== Example request
+
+include::{snippets}/job-executions-documentation/list-job-executions-by-name/curl-request.adoc[]
+
+===== Response structure
+
+include::{snippets}/job-executions-documentation/list-job-executions-by-name/http-response.adoc[]
+
+[[api-guide-resources-job-executions-detail]]
+==== Job Execution Detail
+
+===== Request structure
+
+include::{snippets}/job-executions-documentation/job-display-detail/http-request.adoc[]
+
+include::{snippets}/job-executions-documentation/job-display-detail/path-parameters.adoc[]
+
+===== Request parameters
+
+There are no request parameter for this endpoint.
+
+===== Example request
+
+include::{snippets}/job-executions-documentation/job-display-detail/curl-request.adoc[]
+
+===== Response structure
+
+include::{snippets}/job-executions-documentation/job-display-detail/http-response.adoc[]
+
+[[api-guide-resources-job-executions-stop]]
+==== Stop Job Execution
+
+===== Request structure
+
+include::{snippets}/job-executions-documentation/job-stop/http-request.adoc[]
+
+include::{snippets}/job-executions-documentation/job-stop/path-parameters.adoc[]
+
+===== Request parameters
+
+include::{snippets}/job-executions-documentation/job-stop/request-parameters.adoc[]
+
+===== Example request
+
+include::{snippets}/job-executions-documentation/job-stop/curl-request.adoc[]
+
+===== Response structure
+
+include::{snippets}/job-executions-documentation/job-stop/http-response.adoc[]
+
+[[api-guide-resources-job-executions-restart]]
+==== Restart Job Execution
+
+===== Request structure
+
+include::{snippets}/job-executions-documentation/job-restart/http-request.adoc[]
+
+include::{snippets}/job-executions-documentation/job-restart/path-parameters.adoc[]
+
+===== Request parameters
+
+include::{snippets}/job-executions-documentation/job-restart/request-parameters.adoc[]
+
+===== Example request
+
+include::{snippets}/job-executions-documentation/job-restart/curl-request.adoc[]
+
+===== Response structure
+
+include::{snippets}/job-executions-documentation/job-restart/http-response.adoc[]
 
 === Runtime Information about Applications
 
