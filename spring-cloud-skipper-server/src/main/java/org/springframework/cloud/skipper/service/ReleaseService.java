@@ -25,8 +25,15 @@ import com.samskivert.mustache.Mustache;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
-import org.springframework.cloud.skipper.domain.*;
+import org.springframework.cloud.skipper.domain.ConfigValues;
+import org.springframework.cloud.skipper.domain.Info;
+import org.springframework.cloud.skipper.domain.InstallProperties;
 import org.springframework.cloud.skipper.domain.Package;
+import org.springframework.cloud.skipper.domain.PackageMetadata;
+import org.springframework.cloud.skipper.domain.Release;
+import org.springframework.cloud.skipper.domain.Status;
+import org.springframework.cloud.skipper.domain.StatusCode;
+import org.springframework.cloud.skipper.domain.Template;
 import org.springframework.cloud.skipper.repository.PackageMetadataRepository;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Service;
@@ -55,15 +62,15 @@ public class ReleaseService {
 	}
 
 	/**
-	 * Downloads the package metadata and package zip file specified by the given Id and installs the
-	 * package on the target platform.
+	 * Downloads the package metadata and package zip file specified by the given Id and
+	 * installs the package on the target platform.
 	 * @param id of the package
-	 * @param installProperties contains the name of the release, the platfrom to deploy to, and configuration values
-	 *                          to replace in the package template.
+	 * @param installProperties contains the name of the release, the platfrom to deploy
+	 * to, and configuration values to replace in the package template.
 	 * @return the Release object associated with this installation
 	 */
 	public Release install(String id, InstallProperties installProperties) {
-		Assert.notNull(installProperties,"Install Properties can not be null");
+		Assert.notNull(installProperties, "Install Properties can not be null");
 		PackageMetadata packageMetadata = packageMetadataRepository.findOne(id);
 		packageService.downloadPackage(packageMetadata);
 		Package packageToInstall = packageService.loadPackage(packageMetadata);
@@ -115,10 +122,11 @@ public class ReleaseService {
 	}
 
 	/**
-	 * Merge the properties, derived from YAML format, contained in commandLineConfigValues
-	 * and templateConfigValue, giving preference to commandLineConfigValues. Assumes that the
-	 * YAML is stored as "raw" data in the ConfigValues object. If the "raw" data is empty or
-	 * null, an empty property object is returned.
+	 * Merge the properties, derived from YAML format, contained in
+	 * commandLineConfigValues and templateConfigValue, giving preference to
+	 * commandLineConfigValues. Assumes that the YAML is stored as "raw" data in the
+	 * ConfigValues object. If the "raw" data is empty or null, an empty property object
+	 * is returned.
 	 *
 	 * @param templateConfigValue YAML data defined in the template.yaml file
 	 * @param commandLineConfigValues YAML data passed at the application runtime
@@ -148,10 +156,11 @@ public class ReleaseService {
 	}
 
 	/**
-	 * Return a Properties object given a String that contains YAML. The Properties created by
-	 * this factory have nested paths for hierarchical objects. All exposed values are of type
-	 * {@code String}</b> for access through the common {@link Properties#getProperty} method.
-	 * See YamlPropertiesFactoryBean for more information.
+	 * Return a Properties object given a String that contains YAML. The Properties
+	 * created by this factory have nested paths for hierarchical objects. All exposed
+	 * values are of type {@code String}</b> for access through the common
+	 * {@link Properties#getProperty} method. See YamlPropertiesFactoryBean for more
+	 * information.
 	 * @param yamlString String that contains YAML
 	 * @return properties object containing contents of YAML file
 	 */

@@ -27,7 +27,6 @@ import org.springframework.cloud.deployer.resource.support.DelegatingResourceLoa
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ResourceLoader;
-import org.springframework.hateoas.config.EnableHypermediaSupport;
 
 /**
  * Main configuration class for the server.

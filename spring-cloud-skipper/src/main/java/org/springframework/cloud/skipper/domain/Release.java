@@ -16,7 +16,6 @@
 package org.springframework.cloud.skipper.domain;
 
 import javax.persistence.Column;
-import javax.persistence.OneToOne;
 import javax.validation.constraints.NotNull;
 
 import org.springframework.data.annotation.Id;

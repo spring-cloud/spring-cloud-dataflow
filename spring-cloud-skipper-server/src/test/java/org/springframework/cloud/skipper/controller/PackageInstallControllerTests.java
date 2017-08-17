@@ -15,26 +15,25 @@
  */
 package org.springframework.cloud.skipper.controller;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.Charset;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.skipper.AbstractMockMvcTests;
 import org.springframework.cloud.skipper.config.SkipperServerProperties;
 import org.springframework.cloud.skipper.domain.InstallProperties;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
 import org.springframework.cloud.skipper.repository.PackageMetadataRepository;
-import org.springframework.cloud.skipper.service.PackageService;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.util.FileSystemUtils;
-
-import java.io.File;
-import java.io.IOException;
-import java.nio.charset.Charset;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -43,11 +42,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 /**
  * @author Mark Pollack
+ * @author Ilayaperumal Gopinathan
  */
 @ActiveProfiles("repo-test")
-@TestPropertySource(properties = { "spring.cloud.skipper.server.synchonizeIndexOnContextRefresh=true" })
+@TestPropertySource(properties = { "spring.cloud.skipper.server.synchonizeIndexOnContextRefresh=true",
+		"spring.cloud.skipper.server.platform.local.accounts[test].key=value" })
 public class PackageInstallControllerTests extends AbstractMockMvcTests {
-
 
 	private final MediaType contentType = new MediaType(MediaType.APPLICATION_JSON.getType(),
 			MediaType.APPLICATION_JSON.getSubtype(), Charset.forName("utf8"));
@@ -68,8 +68,9 @@ public class PackageInstallControllerTests extends AbstractMockMvcTests {
 	@Test
 	public void install() throws Exception {
 		InstallProperties installProperties = new InstallProperties();
+		installProperties.setPlatformName("test");
 		PackageMetadata packageMetadata = packageMetadataRepository.findByNameAndVersion("log", "1.0.0");
-		MvcResult result = mockMvc.perform(post("/package/" + packageMetadata.getId() + "/install")
+		mockMvc.perform(post("/package/" + packageMetadata.getId() + "/install")
 				.content(convertObjectToJson(installProperties))).andDo(print())
 				.andExpect(status().isCreated()).andReturn();
 	}
@@ -82,4 +83,3 @@ public class PackageInstallControllerTests extends AbstractMockMvcTests {
 	}
 
 }
-
