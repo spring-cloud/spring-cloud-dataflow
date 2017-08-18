@@ -84,7 +84,7 @@ An easy way to get started on Spring Cloud Data Flow would be to follow the plat
 |:---------------------|:--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | Local Server         | [1.2.3.RELEASE](http://repo.spring.io/libs-release/org/springframework/cloud/spring-cloud-dataflow-server-local/1.2.3.RELEASE/spring-cloud-dataflow-server-local-1.2.3.RELEASE.jar)[[docs](http://docs.spring.io/spring-cloud-dataflow/docs/1.2.3.RELEASE/reference/htmlsingle/#getting-started)]                                   | [1.3.0.M1](http://repo.spring.io/libs-snapshot/org/springframework/cloud/spring-cloud-dataflow-server-local/1.3.0.M1/spring-cloud-dataflow-server-local-1.3.0.M1.jar)[[docs](http://docs.spring.io/spring-cloud-dataflow/docs/1.3.0.M1/reference/htmlsingle/#getting-started)]                                   |
 | Cloud Foundry Server | [1.2.3.RELEASE](http://repo.spring.io/libs-release/org/springframework/cloud/spring-cloud-dataflow-server-cloudfoundry/1.2.3.RELEASE/spring-cloud-dataflow-server-cloudfoundry-1.2.3.RELEASE.jar)[[docs](http://docs.spring.io/spring-cloud-dataflow-server-cloudfoundry/docs/1.2.3.RELEASE/reference/htmlsingle/#getting-started)] | [1.3.0.M1](http://repo.spring.io/libs-snapshot/org/springframework/cloud/spring-cloud-dataflow-server-cloudfoundry/1.3.0.M1/spring-cloud-dataflow-server-cloudfoundry-1.3.0.M1.jar)[[docs](http://docs.spring.io/spring-cloud-dataflow-server-cloudfoundry/docs/1.3.0.M1/reference/htmlsingle/#getting-started)] |
-| Kubernetes Server    | [1.2.2.RELEASE](http://repo.spring.io/libs-release/org/springframework/cloud/spring-cloud-dataflow-server-kubernetes/1.2.2.RELEASE/spring-cloud-dataflow-server-kubernetes-1.2.2.RELEASE.jar)[[docs](http://docs.spring.io/spring-cloud-dataflow-server-kubernetes/docs/1.2.2.RELEASE/reference/htmlsingle/#kubernetes-getting-started)]       | [1.3.0.BUILD-SNAPSHOT](http://repo.spring.io/libs-snapshot/org/springframework/cloud/spring-cloud-dataflow-server-kubernetes/1.3.0.BUILD-SNAPSHOT/spring-cloud-dataflow-server-kubernetes-1.3.0.BUILD-SNAPSHOT.jar)[[docs](http://docs.spring.io/spring-cloud-dataflow-server-kubernetes/docs/1.3.0.BUILD-SNAPSHOT/reference/htmlsingle/#kubernetes-getting-started)]       |
+| Kubernetes Server    | [1.2.2.RELEASE](http://repo.spring.io/libs-release/org/springframework/cloud/spring-cloud-dataflow-server-kubernetes/1.2.2.RELEASE/spring-cloud-dataflow-server-kubernetes-1.2.2.RELEASE.jar)[[docs](http://docs.spring.io/spring-cloud-dataflow-server-kubernetes/docs/1.2.2.RELEASE/reference/htmlsingle/#kubernetes-getting-started)]       | [1.3.0.M1](http://repo.spring.io/libs-snapshot/org/springframework/cloud/spring-cloud-dataflow-server-kubernetes/1.3.0.M1/spring-cloud-dataflow-server-kubernetes-1.3.0.M1.jar)[[docs](http://docs.spring.io/spring-cloud-dataflow-server-kubernetes/docs/1.3.0.M1/reference/htmlsingle/#kubernetes-getting-started)]       |
 | Apache YARN Server   | [1.2.1.RELEASE](http://repo.spring.io/libs-release/org/springframework/cloud/spring-cloud-dataflow-server-yarn/1.2.1.RELEASE/spring-cloud-dataflow-server-yarn-1.2.1.RELEASE.jar)[[docs](http://docs.spring.io/spring-cloud-dataflow-server-yarn/docs/1.2.0.RELEASE/reference/htmlsingle/#yarn-deploying-on-yarn)]                         | [1.2.2.BUILD-SNAPSHOT](http://repo.spring.io/libs-snapshot/org/springframework/cloud/spring-cloud-dataflow-server-yarn/1.2.2.BUILD-SNAPSHOT/spring-cloud-dataflow-server-yarn-1.2.2.BUILD-SNAPSHOT.jar)[[docs](http://docs.spring.io/spring-cloud-dataflow-server-yarn/docs/1.2.2.BUILD-SNAPSHOT/reference/htmlsingle/#yarn-deploying-on-yarn)]                         |
 | Apache Mesos Server  | [1.0.0.RELEASE](http://repo.spring.io/libs-milestone/org/springframework/cloud/spring-cloud-dataflow-server-mesos/1.0.0.RELEASE/spring-cloud-dataflow-server-mesos-1.0.0.RELEASE.jar)[[docs](http://docs.spring.io/spring-cloud-dataflow-server-mesos/docs/1.0.0.RELEASE/reference/htmlsingle/#_getting_started)]                    | [1.1.0.BUILD-SNAPSHOT](https://github.com/spring-cloud/spring-cloud-dataflow-server-mesos#building)[[docs](http://docs.spring.io/spring-cloud-dataflow-server-mesos/docs/current-SNAPSHOT/reference/htmlsingle/#_getting_started)]                                                                                    |
 
@@ -143,6 +143,7 @@ tail -f /var/folders/ ... /ticktock.log/stdout_0.log
 ```
 
 <br>
+
 ## Building Blocks of Spring Cloud Data Flow
 
 Spring Cloud Data Flow builds upon several projects and the top-level building blocks of the ecosystem are listed in the following visual representation. Each project represents a core capability and they evolve in isolation, with separate release cadences - follow the links to find more details about each project.
@@ -164,16 +165,16 @@ Spring Cloud Data Flow builds upon several projects and the top-level building b
       </a>
     </td>
     <td width="20%">
-      <a href="http://cloud.spring.io/spring-cloud-dataflow-server-yarn/">
-        <div >
-          Spring Cloud Data Flow Apache Yarn Server
+      <a href="http://cloud.spring.io/spring-cloud-dataflow-server-kubernetes/">
+        <div>
+          Spring Cloud Data Flow Kubernetes Server
         </div>
       </a>
     </td>
     <td width="20%">
-      <a href="http://cloud.spring.io/spring-cloud-dataflow-server-kubernetes/">
-        <div>
-          Spring Cloud Data Flow Kubernetes Server
+      <a href="http://cloud.spring.io/spring-cloud-dataflow-server-yarn/">
+        <div >
+          Spring Cloud Data Flow Apache Yarn Server
         </div>
       </a>
     </td>
@@ -258,16 +259,16 @@ Spring Cloud Data Flow builds upon several projects and the top-level building b
       </a>
     </td>
     <td width="20%">
-      <a href="https://github.com/spring-cloud/spring-cloud-deployer-yarn/">
-        <div>
-          Spring Cloud Deployer Yarn
+      <a href="https://github.com/spring-cloud/spring-cloud-deployer-kubernetes/">
+        <div >
+          Spring Cloud Deployer Kubernetes
         </div>
       </a>
     </td>
     <td width="20%">
-      <a href="https://github.com/spring-cloud/spring-cloud-deployer-kubernetes/">
-        <div >
-          Spring Cloud Deployer Kubernetes
+      <a href="https://github.com/spring-cloud/spring-cloud-deployer-yarn/">
+        <div>
+          Spring Cloud Deployer Yarn
         </div>
       </a>
     </td>
