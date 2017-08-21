@@ -20,23 +20,45 @@ import java.util.Map;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryConnectionProperties;
+import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryDeploymentProperties;
 
 /**
  * @author Mark Pollack
+ * @author Ilayaperumal Gopinathan
  */
 @ConfigurationProperties("spring.cloud.skipper.server.platform.cloudfoundry")
 public class CloudFoundryPlatformProperties {
 
-	private Map<String, CloudFoundryConnectionProperties> accounts = new LinkedHashMap<>();
+	private Map<String, CloudFoundryProperties> accounts = new LinkedHashMap<>();
 
-	public CloudFoundryPlatformProperties() {
-	}
-
-	public Map<String, CloudFoundryConnectionProperties> getAccounts() {
+	public Map<String, CloudFoundryProperties> getAccounts() {
 		return accounts;
 	}
 
-	public void setAccounts(Map<String, CloudFoundryConnectionProperties> accounts) {
+	public void setAccounts(Map<String, CloudFoundryProperties> accounts) {
 		this.accounts = accounts;
+	}
+
+	public static class CloudFoundryProperties {
+
+		private CloudFoundryConnectionProperties connection;
+
+		private CloudFoundryDeploymentProperties deployment;
+
+		public CloudFoundryConnectionProperties getConnection() {
+			return connection;
+		}
+
+		public void setConnection(CloudFoundryConnectionProperties connection) {
+			this.connection = connection;
+		}
+
+		public CloudFoundryDeploymentProperties getDeployment() {
+			return deployment;
+		}
+
+		public void setDeployment(CloudFoundryDeploymentProperties deployment) {
+			this.deployment = deployment;
+		}
 	}
 }

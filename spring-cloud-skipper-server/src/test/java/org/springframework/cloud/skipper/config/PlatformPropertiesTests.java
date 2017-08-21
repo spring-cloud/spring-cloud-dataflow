@@ -23,7 +23,6 @@ import org.junit.runner.RunWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryConnectionProperties;
 import org.springframework.cloud.deployer.spi.local.LocalDeployerProperties;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -32,6 +31,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Mark Pollack
+ * @author Ilayaperumal Gopinathan
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -46,11 +46,18 @@ public class PlatformPropertiesTests {
 
 	@Test
 	public void deserializationTest() {
-		Map<String, CloudFoundryConnectionProperties> cfAccounts = cloudFoundryPlatformProperties.getAccounts();
+		Map<String, CloudFoundryPlatformProperties.CloudFoundryProperties> cfAccounts = cloudFoundryPlatformProperties
+				.getAccounts();
 		assertThat(cfAccounts).hasSize(2);
 		assertThat(cfAccounts).containsKeys("dev", "qa");
-		assertThat(cfAccounts.get("dev").getOrg()).isEqualTo("myOrg");
-		assertThat(cfAccounts.get("qa").getOrg()).isEqualTo("myOrgQA");
+		assertThat(cfAccounts.get("dev").getConnection().getOrg()).isEqualTo("myOrg");
+		assertThat(cfAccounts.get("qa").getConnection().getOrg()).isEqualTo("myOrgQA");
+		assertThat(cfAccounts.get("dev").getDeployment().getMemory()).isEqualTo("512m");
+		assertThat(cfAccounts.get("dev").getDeployment().getDisk()).isEqualTo("2048m");
+		assertThat(cfAccounts.get("dev").getDeployment().getInstances()).isEqualTo(4);
+		assertThat(cfAccounts.get("qa").getDeployment().getMemory()).isEqualTo("756m");
+		assertThat(cfAccounts.get("qa").getDeployment().getDisk()).isEqualTo("724m");
+		assertThat(cfAccounts.get("qa").getDeployment().getInstances()).isEqualTo(2);
 
 		Map<String, LocalDeployerProperties> localAccounts = localPlatformProperties.getAccounts();
 		assertThat(localAccounts).hasSize(2);
