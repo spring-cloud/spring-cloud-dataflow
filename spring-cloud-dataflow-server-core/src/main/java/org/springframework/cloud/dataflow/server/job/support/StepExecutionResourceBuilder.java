@@ -34,7 +34,7 @@ import org.springframework.util.Assert;
 public class StepExecutionResourceBuilder {
 
 	static public StepExecutionResource toResource(StepExecution entity) {
-		return new StepExecutionResource(entity.getId(), entity, generateStepType(entity));
+		return new StepExecutionResource(entity.getJobExecution().getId(), entity, generateStepType(entity));
 	}
 
 	private static String generateStepType(StepExecution stepExecution) {
