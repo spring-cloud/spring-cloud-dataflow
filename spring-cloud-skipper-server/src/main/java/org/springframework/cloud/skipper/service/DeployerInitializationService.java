@@ -19,6 +19,8 @@ import java.time.Duration;
 import java.util.Map;
 
 import com.github.zafarkhaja.semver.Version;
+import io.fabric8.kubernetes.client.DefaultKubernetesClient;
+import io.fabric8.kubernetes.client.KubernetesClient;
 import org.cloudfoundry.client.CloudFoundryClient;
 import org.cloudfoundry.client.v2.info.GetInfoRequest;
 import org.cloudfoundry.operations.CloudFoundryOperations;
@@ -39,10 +41,15 @@ import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryAppNameGe
 import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryConnectionProperties;
 import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryDeploymentProperties;
 import org.springframework.cloud.deployer.spi.core.RuntimeEnvironmentInfo;
+import org.springframework.cloud.deployer.spi.kubernetes.ContainerFactory;
+import org.springframework.cloud.deployer.spi.kubernetes.DefaultContainerFactory;
+import org.springframework.cloud.deployer.spi.kubernetes.KubernetesAppDeployer;
+import org.springframework.cloud.deployer.spi.kubernetes.KubernetesDeployerProperties;
 import org.springframework.cloud.deployer.spi.local.LocalAppDeployer;
 import org.springframework.cloud.deployer.spi.local.LocalDeployerProperties;
 import org.springframework.cloud.deployer.spi.util.RuntimeVersionUtils;
 import org.springframework.cloud.skipper.config.CloudFoundryPlatformProperties;
+import org.springframework.cloud.skipper.config.KubernetesPlatformProperties;
 import org.springframework.cloud.skipper.config.LocalPlatformProperties;
 import org.springframework.cloud.skipper.deployer.Deployer;
 import org.springframework.cloud.skipper.repository.DeployerRepository;
@@ -60,25 +67,30 @@ public class DeployerInitializationService {
 
 	private final Logger logger = LoggerFactory.getLogger(DeployerInitializationService.class);
 
-	private LocalPlatformProperties localPlatformProperties;
+	private final LocalPlatformProperties localPlatformProperties;
 
-	private CloudFoundryPlatformProperties cloudFoundryPlatformProperties;
+	private final CloudFoundryPlatformProperties cloudFoundryPlatformProperties;
+
+	private final KubernetesPlatformProperties kubernetesPlatformProperties;
 
 	private DeployerRepository deployerRepository;
 
 	@Autowired
 	public DeployerInitializationService(DeployerRepository deployerRepository,
 			LocalPlatformProperties localPlatformProperties,
-			CloudFoundryPlatformProperties cloudFoundryPlatformProperties) {
+			CloudFoundryPlatformProperties cloudFoundryPlatformProperties,
+			KubernetesPlatformProperties kubernetesPlatformProperties) {
 		this.deployerRepository = deployerRepository;
 		this.localPlatformProperties = localPlatformProperties;
 		this.cloudFoundryPlatformProperties = cloudFoundryPlatformProperties;
+		this.kubernetesPlatformProperties = kubernetesPlatformProperties;
 	}
 
 	@EventListener
 	public void initialize(ApplicationReadyEvent event) {
 		createAndSaveLocalAppDeployers();
 		createAndSaveCFAppDeployers();
+		createAndSaveKubernetesAppDeployers();
 	}
 
 	protected void createAndSaveLocalAppDeployers() {
@@ -151,6 +163,19 @@ public class DeployerInitializationService {
 			catch (Exception e) {
 				logger.warn("CloudFoundry Deployer account" + entry.getKey() + " could not be added." + e.getMessage());
 			}
+		}
+	}
+
+	protected void createAndSaveKubernetesAppDeployers() {
+		Map<String, KubernetesDeployerProperties> kubernetesDeployerPropertiesMap = this.kubernetesPlatformProperties.getAccounts();
+		for (Map.Entry<String, KubernetesDeployerProperties> entry : kubernetesDeployerPropertiesMap.entrySet()) {
+			KubernetesDeployerProperties properties = entry.getValue();
+			KubernetesClient kubernetesClient = new DefaultKubernetesClient().inNamespace(properties.getNamespace());
+			ContainerFactory containerFactory = new DefaultContainerFactory(properties);
+			KubernetesAppDeployer kubernetesAppDeployer = new KubernetesAppDeployer(properties, kubernetesClient, containerFactory);
+			Deployer deployer = new Deployer(entry.getKey(), "kubernetes", kubernetesAppDeployer);
+			deployerRepository.save(deployer);
+			logger.info("Added Kubernetes Deployer account " + entry.getKey() + " into Deployer Repository.");
 		}
 	}
 }

@@ -23,6 +23,9 @@ import org.junit.runner.RunWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cloud.deployer.spi.kubernetes.EntryPointStyle;
+import org.springframework.cloud.deployer.spi.kubernetes.ImagePullPolicy;
+import org.springframework.cloud.deployer.spi.kubernetes.KubernetesDeployerProperties;
 import org.springframework.cloud.deployer.spi.local.LocalDeployerProperties;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -44,9 +47,12 @@ public class PlatformPropertiesTests {
 	@Autowired
 	private LocalPlatformProperties localPlatformProperties;
 
+	@Autowired
+	private KubernetesPlatformProperties kubernetesPlatformProperties;
+
 	@Test
 	public void deserializationTest() {
-		Map<String, CloudFoundryPlatformProperties.CloudFoundryProperties> cfAccounts = cloudFoundryPlatformProperties
+		Map<String, CloudFoundryPlatformProperties.CloudFoundryProperties> cfAccounts = this.cloudFoundryPlatformProperties
 				.getAccounts();
 		assertThat(cfAccounts).hasSize(2);
 		assertThat(cfAccounts).containsKeys("dev", "qa");
@@ -59,11 +65,23 @@ public class PlatformPropertiesTests {
 		assertThat(cfAccounts.get("qa").getDeployment().getDisk()).isEqualTo("724m");
 		assertThat(cfAccounts.get("qa").getDeployment().getInstances()).isEqualTo(2);
 
-		Map<String, LocalDeployerProperties> localAccounts = localPlatformProperties.getAccounts();
+		Map<String, LocalDeployerProperties> localAccounts = this.localPlatformProperties.getAccounts();
 		assertThat(localAccounts).hasSize(2);
 		assertThat(localAccounts).containsKeys("localDev", "localDevDebug");
 		assertThat(localAccounts.get("localDev").getShutdownTimeout()).isEqualTo(60);
 		assertThat(localAccounts.get("localDevDebug").getJavaOpts()).isEqualTo("-Xdebug");
+
+		Map<String, KubernetesDeployerProperties> k8sAccounts = this.kubernetesPlatformProperties.getAccounts();
+		assertThat(k8sAccounts).hasSize(2);
+		assertThat(k8sAccounts).containsKeys("dev", "qa");
+		assertThat(k8sAccounts.get("dev").getNamespace()).isEqualTo("devNamespace");
+		assertThat(k8sAccounts.get("dev").getImagePullPolicy()).isEqualTo(ImagePullPolicy.Always);
+		assertThat(k8sAccounts.get("dev").getEntryPointStyle()).isEqualTo(EntryPointStyle.exec);
+		assertThat(k8sAccounts.get("dev").getLimits().getCpu()).isEqualTo("4");
+		assertThat(k8sAccounts.get("qa").getNamespace()).isEqualTo("qaNamespace");
+		assertThat(k8sAccounts.get("qa").getImagePullPolicy()).isEqualTo(ImagePullPolicy.IfNotPresent);
+		assertThat(k8sAccounts.get("qa").getEntryPointStyle()).isEqualTo(EntryPointStyle.boot);
+		assertThat(k8sAccounts.get("qa").getLimits().getMemory()).isEqualTo("1024m");
 	}
 
 }

@@ -35,7 +35,7 @@ import org.springframework.core.io.ResourceLoader;
  */
 @Configuration
 @EnableConfigurationProperties({ SkipperServerProperties.class, CloudFoundryPlatformProperties.class,
-		LocalPlatformProperties.class })
+		LocalPlatformProperties.class, KubernetesPlatformProperties.class })
 public class SkipperServerConfiguration {
 
 	@Bean

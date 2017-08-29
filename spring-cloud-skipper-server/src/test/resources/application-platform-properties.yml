@@ -46,6 +46,21 @@ spring:
                   memory: 756m
                   disk: 724m
                   instances: 2
+          kubernetes:
+            accounts:
+              dev:
+                namespace: devNamespace
+                imagePullPolicy: Always
+                entryPointStyle: exec
+                limits:
+                  cpu: 4
+              qa:
+                namespace: qaNamespace
+                imagePullPolicy: IfNotPresent
+                entryPointStyle: boot
+                limits:
+                  memory: 1024m
+
 
 
 
