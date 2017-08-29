@@ -18,6 +18,7 @@ package org.springframework.cloud.skipper.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.skipperpackage.Deployproperties;
+import org.springframework.cloud.skipper.domain.skipperpackage.UndeployProperties;
 import org.springframework.cloud.skipper.service.ReleaseService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -46,5 +47,11 @@ public class PackageController {
 	@ResponseStatus(HttpStatus.CREATED)
 	public Release deploy(@PathVariable("id") String id, @RequestBody Deployproperties deployproperties) {
 		return this.releaseService.deploy(id, deployproperties);
+	}
+
+	@RequestMapping(path = "/undeploy", method = RequestMethod.POST)
+	@ResponseStatus(HttpStatus.CREATED)
+	public Release undeploy(@RequestBody UndeployProperties undeployProperties) {
+		return this.releaseService.undeploy(undeployProperties);
 	}
 }

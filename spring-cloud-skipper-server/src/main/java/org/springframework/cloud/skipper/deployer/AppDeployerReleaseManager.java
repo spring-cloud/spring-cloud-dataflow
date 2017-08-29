@@ -17,8 +17,10 @@ package org.springframework.cloud.skipper.deployer;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.MappingIterator;
@@ -39,21 +41,23 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 /**
- * A ReleaseManager implementation that uses the AppDeployer
+ * A ReleaseManager implementation that uses the AppDeployer.
+ *
  * @author Mark Pollack
+ * @author Ilayaperumal Gopinathan
  */
 @Service
 public class AppDeployerReleaseManager implements ReleaseManager {
 
-	private ReleaseRepository releaseRepository;
+	private final ReleaseRepository releaseRepository;
 
-	private ManifestStore manifestStore;
+	private final ManifestStore manifestStore;
 
-	private DelegatingResourceLoader delegatingResourceLoader;
+	private final DelegatingResourceLoader delegatingResourceLoader;
 
-	private AppDeployerDataRepository appDeployerDataRepository;
+	private final AppDeployerDataRepository appDeployerDataRepository;
 
-	private DeployerRepository deployerRepository;
+	private final DeployerRepository deployerRepository;
 
 	@Autowired
 	public AppDeployerReleaseManager(ReleaseRepository releaseRepository,
@@ -68,12 +72,12 @@ public class AppDeployerReleaseManager implements ReleaseManager {
 		this.deployerRepository = deployerRepository;
 	}
 
-	public void deploy(Release release) {
+	public Release deploy(Release release) {
 		// TODO review transaction semantics
-		releaseRepository.save(release);
+		this.releaseRepository.save(release);
 
 		// TODO how to rollback file system/git in case of DB errors later in method execution
-		manifestStore.store(release);
+		this.manifestStore.store(release);
 
 		// Deploy the application
 		List<Deployment> appDeployments = unmarshallDeployments(release.getManifest());
@@ -90,7 +94,7 @@ public class AppDeployerReleaseManager implements ReleaseManager {
 		appDeployerData.setReleaseVersion(release.getVersion());
 		appDeployerData.setDeploymentData(StringUtils.collectionToCommaDelimitedString(deploymentIds));
 
-		appDeployerDataRepository.save(appDeployerData);
+		this.appDeployerDataRepository.save(appDeployerData);
 
 		// Update Status in DB
 		Status status = new Status();
@@ -99,23 +103,32 @@ public class AppDeployerReleaseManager implements ReleaseManager {
 		release.getInfo().setDescription("Install complete");
 
 		// Store updated state in in DB
-		releaseRepository.save(release);
+		this.releaseRepository.save(release);
 		updateStatus(release);
-
+		return release;
 	}
 
-	public void undeploy(Release release) {
-		// List<String> deploymentIds = Arrays
-		// .asList(StringUtils.commaDelimitedListToStringArray(release.getDeploymentId()));
-		//
-		// for (String deploymentId : deploymentIds) {
-		// appDeployer.undeploy(deploymentId);
-		// }
-		// Status status = new Status();
-		// status.setStatusCode(StatusCode.SUPERSEDED);
-		// release.getInfo().setStatus(status);
-
-		releaseRepository.save(release);
+	public Release undeploy(Release release) {
+		AppDeployer appDeployer = deployerRepository.findByName(release.getPlatformName()).getDeployer();
+		Set<String> deploymentIds = new HashSet<>();
+		AppDeployerData appDeployerData = appDeployerDataRepository
+				.findByReleaseNameAndReleaseVersion(release.getName(), String.valueOf(release.getVersion()));
+		deploymentIds.addAll(StringUtils.commaDelimitedListToSet(appDeployerData.getDeploymentData()));
+		if (!deploymentIds.isEmpty()) {
+			Status deletingStatus = new Status();
+			deletingStatus.setStatusCode(StatusCode.DELETING);
+			release.getInfo().setStatus(deletingStatus);
+			this.releaseRepository.save(release);
+			for (String deploymentId : deploymentIds) {
+				appDeployer.undeploy(deploymentId);
+			}
+			Status deletedStatus = new Status();
+			deletedStatus.setStatusCode(StatusCode.DELETED);
+			release.getInfo().setStatus(deletedStatus);
+			release.getInfo().setDescription("Undeployment complete");
+			this.releaseRepository.save(release);
+		}
+		return release;
 	}
 
 	@Override

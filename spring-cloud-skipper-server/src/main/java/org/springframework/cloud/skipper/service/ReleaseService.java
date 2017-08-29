@@ -34,7 +34,9 @@ import org.springframework.cloud.skipper.domain.Status;
 import org.springframework.cloud.skipper.domain.StatusCode;
 import org.springframework.cloud.skipper.domain.Template;
 import org.springframework.cloud.skipper.domain.skipperpackage.Deployproperties;
+import org.springframework.cloud.skipper.domain.skipperpackage.UndeployProperties;
 import org.springframework.cloud.skipper.repository.PackageMetadataRepository;
+import org.springframework.cloud.skipper.repository.ReleaseRepository;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
@@ -46,17 +48,21 @@ import org.springframework.util.StringUtils;
 @Service
 public class ReleaseService {
 
-	private PackageMetadataRepository packageMetadataRepository;
+	private final PackageMetadataRepository packageMetadataRepository;
 
-	private PackageService packageService;
+	private final ReleaseRepository releaseRepository;
 
-	private ReleaseManager releaseManager;
+	private final PackageService packageService;
+
+	private final ReleaseManager releaseManager;
 
 	@Autowired
 	public ReleaseService(PackageMetadataRepository packageMetadataRepository,
+			ReleaseRepository releaseRepository,
 			PackageService packageService,
 			ReleaseManager releaseManager) {
 		this.packageMetadataRepository = packageMetadataRepository;
+		this.releaseRepository = releaseRepository;
 		this.packageService = packageService;
 		this.releaseManager = releaseManager;
 	}
@@ -71,11 +77,10 @@ public class ReleaseService {
 	 */
 	public Release deploy(String id, Deployproperties deployproperties) {
 		Assert.notNull(deployproperties, "Install Properties can not be null");
-		PackageMetadata packageMetadata = packageMetadataRepository.findOne(id);
-		packageService.downloadPackage(packageMetadata);
-		Package packageToInstall = packageService.loadPackage(packageMetadata);
+		PackageMetadata packageMetadata = this.packageMetadataRepository.findOne(id);
+		this.packageService.downloadPackage(packageMetadata);
+		Package packageToInstall = this.packageService.loadPackage(packageMetadata);
 		Release release = createInitialRelease(deployproperties, packageToInstall);
-
 		return deploy(release);
 	}
 
@@ -84,29 +89,42 @@ public class ReleaseService {
 		// Render yaml resources
 		String manifest = createManifest(release.getPkg(), model);
 		release.setManifest(manifest);
-
 		// Deployment
-		releaseManager.deploy(release);
+		return this.releaseManager.deploy(release);
+	}
 
+	public Release undeploy(UndeployProperties undeployProperties) {
+		Assert.notNull(undeployProperties, "Undeploy Properties can not be null");
+		Release release = getRelease(undeployProperties.getReleaseName(), undeployProperties.getVersion());
+		return this.releaseManager.undeploy(release);
+	}
+
+	public Release getRelease(String releaseName, String version) {
+		Release release;
+		if (version == null) {
+			release = this.releaseRepository.findLatestRelease(releaseName);
+		}
+		else {
+			release = this.releaseRepository.findByNameAndVersion(releaseName, version);
+		}
 		return release;
-
 	}
 
 	/**
 	 * Iterate overall the template files, replacing placeholders with model values. One
 	 * string is returned that contain all the YAML of multiple files using YAML file
 	 * delimiter.
-	 * @param packageToInstall The top level package that contains all templates where
+	 * @param packageToDeploy The top level package that contains all templates where
 	 * placeholders are to be replaced
 	 * @param model The placeholder values.
 	 * @return A YAML string containing all the templates with replaced values.
 	 */
-	public String createManifest(Package packageToInstall, Properties model) {
+	public String createManifest(Package packageToDeploy, Properties model) {
 
 		// Aggregate all valid manifests into one big doc.
 		StringBuilder sb = new StringBuilder();
 		// Top level templates.
-		List<Template> templates = packageToInstall.getTemplates();
+		List<Template> templates = packageToDeploy.getTemplates();
 		if (templates != null) {
 			for (Template template : templates) {
 				String templateAsString = new String(template.getData());
@@ -193,7 +211,7 @@ public class ReleaseService {
 		release.setConfigValues(deployproperties.getConfigValues());
 		release.setPkg(packageToInstall);
 
-		release.setVersion(1);
+		release.setVersion("1.0.0");
 		Info info = new Info();
 		info.setFirstDeployed(new Date());
 		info.setLastDeployed(new Date());

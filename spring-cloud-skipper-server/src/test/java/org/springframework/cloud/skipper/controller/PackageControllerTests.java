@@ -27,8 +27,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.skipper.AbstractMockMvcTests;
 import org.springframework.cloud.skipper.config.SkipperServerProperties;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
+import org.springframework.cloud.skipper.domain.Release;
+import org.springframework.cloud.skipper.domain.StatusCode;
 import org.springframework.cloud.skipper.domain.skipperpackage.Deployproperties;
+import org.springframework.cloud.skipper.domain.skipperpackage.UndeployProperties;
 import org.springframework.cloud.skipper.repository.PackageMetadataRepository;
+import org.springframework.cloud.skipper.repository.ReleaseRepository;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.util.FileSystemUtils;
@@ -52,6 +56,9 @@ public class PackageControllerTests extends AbstractMockMvcTests {
 	private PackageMetadataRepository packageMetadataRepository;
 
 	@Autowired
+	private ReleaseRepository releaseRepository;
+
+	@Autowired
 	private SkipperServerProperties skipperServerProperties;
 
 	@Before
@@ -62,13 +69,31 @@ public class PackageControllerTests extends AbstractMockMvcTests {
 	}
 
 	@Test
-	public void deploy() throws Exception {
+	public void deployAndUndeploy() throws Exception {
+		String packageName = "log";
+		String releaseName = "log-sink-app";
+		String version = "1.0.0";
 		Deployproperties deployproperties = new Deployproperties();
 		deployproperties.setPlatformName("test");
-		PackageMetadata packageMetadata = packageMetadataRepository.findByNameAndVersion("log", "1.0.0");
+		deployproperties.setReleaseName(releaseName);
+		PackageMetadata packageMetadata = packageMetadataRepository.findByNameAndVersion(packageName, version);
 		mockMvc.perform(post("/package/" + packageMetadata.getId() + "/deploy")
 				.content(convertObjectToJson(deployproperties))).andDo(print())
 				.andExpect(status().isCreated()).andReturn();
+		Release deployedRelease = this.releaseRepository.findByNameAndVersion(releaseName, version);
+		assertThat(deployedRelease.getName()).isEqualTo(releaseName);
+		assertThat(deployedRelease.getPlatformName()).isEqualTo("test");
+		assertThat(deployedRelease.getVersion()).isEqualTo(version);
+		assertThat(deployedRelease.getPkg().getMetadata()).isEqualTo(packageMetadata);
+		assertThat(deployedRelease.getInfo().getStatus().getStatusCode()).isEqualTo(StatusCode.DEPLOYED);
+		UndeployProperties undeployProperties = new UndeployProperties();
+		undeployProperties.setReleaseName(releaseName);
+		undeployProperties.setVersion(version);
+		mockMvc.perform(post("/package/undeploy")
+				.content(convertObjectToJson(undeployProperties))).andDo(print())
+				.andExpect(status().isCreated()).andReturn();
+		Release undeployedRelease = this.releaseRepository.findByNameAndVersion(releaseName, version);
+		assertThat(undeployedRelease.getInfo().getStatus().getStatusCode()).isEqualTo(StatusCode.DELETED);
 	}
 
 	public static String convertObjectToJson(Object object) throws IOException {

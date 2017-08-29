@@ -20,6 +20,7 @@ import org.springframework.cloud.skipper.domain.Release;
 
 /**
  * @author Mark Pollack
+ * @author Ilayaperumal Gopinathan
  */
 public class ReleaseRepositoryImpl implements CustomReleaseRepository {
 
@@ -34,8 +35,9 @@ public class ReleaseRepositoryImpl implements CustomReleaseRepository {
 		for (Release release : releases) {
 			// Find the latest release
 			if (release.getName().equals(releaseName)) {
-				if (release.getVersion() > lastVersion) {
-					lastVersion = release.getVersion();
+				int currentVersion = getNumberedVersion(release.getVersion());
+				if (currentVersion > lastVersion) {
+					lastVersion = currentVersion;
 					latestRelease = release;
 				}
 			}
@@ -43,13 +45,17 @@ public class ReleaseRepositoryImpl implements CustomReleaseRepository {
 		return latestRelease;
 	}
 
+	private int getNumberedVersion(String version) {
+		return Integer.valueOf(version.replaceAll(".", ""));
+	}
+
 	@Override
-	public Release findByNameAndVersion(String releaseName, int version) {
+	public Release findByNameAndVersion(String releaseName, String version) {
 		Iterable<Release> releases = releaseRepository.findAll();
 
 		Release matchingRelease = null;
 		for (Release release : releases) {
-			if (release.getName().equals(releaseName) && release.getVersion() == version) {
+			if (release.getName().equals(releaseName) && release.getVersion().equals(version)) {
 				matchingRelease = release;
 				break;
 			}

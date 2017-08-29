@@ -27,16 +27,17 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
 /**
  * @author Mark Pollack
+ * @author Ilayaperumal Gopinathan
  */
 @Component
 public class PackageMetadataResourceProcessor implements ResourceProcessor<Resource<PackageMetadata>> {
 
 	@Override
 	public Resource<PackageMetadata> process(Resource<PackageMetadata> packageMetadataResource) {
-		Link link = linkTo(
+		Link deployLink = linkTo(
 				methodOn(PackageController.class).deploy(packageMetadataResource.getContent().getId(), null))
 						.withRel("deploy");
-		packageMetadataResource.add(link);
+		packageMetadataResource.add(deployLink);
 		return packageMetadataResource;
 	}
 }

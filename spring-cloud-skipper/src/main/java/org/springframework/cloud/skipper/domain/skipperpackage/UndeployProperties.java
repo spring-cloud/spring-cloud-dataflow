@@ -13,16 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.cloud.skipper.repository;
-
-import org.springframework.cloud.skipper.domain.Release;
+package org.springframework.cloud.skipper.domain.skipperpackage;
 
 /**
- * @author Mark Pollack
+ * @author Ilayaperumal Gopinathan
  */
-public interface CustomReleaseRepository {
+public class UndeployProperties {
 
-	Release findLatestRelease(String releaseName);
+	private String releaseName;
 
-	Release findByNameAndVersion(String releaseName, String version);
+	private String version;
+
+	public String getReleaseName() {
+		return releaseName;
+	}
+
+	public void setReleaseName(String releaseName) {
+		this.releaseName = releaseName;
+	}
+
+	public String getVersion() {
+		return version;
+	}
+
+	public void setVersion(String version) {
+		this.version = version;
+	}
 }

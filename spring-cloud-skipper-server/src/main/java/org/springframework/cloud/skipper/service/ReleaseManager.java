@@ -27,9 +27,9 @@ import org.springframework.cloud.skipper.domain.Release;
  */
 public interface ReleaseManager {
 
-	void deploy(Release release);
+	Release deploy(Release release);
 
-	void undeploy(Release release);
+	Release undeploy(Release release);
 
 	void updateStatus(Release release);
 }
