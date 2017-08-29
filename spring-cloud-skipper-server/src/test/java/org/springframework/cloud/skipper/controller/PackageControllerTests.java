@@ -17,7 +17,6 @@ package org.springframework.cloud.skipper.controller;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.Charset;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -27,10 +26,9 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.skipper.AbstractMockMvcTests;
 import org.springframework.cloud.skipper.config.SkipperServerProperties;
-import org.springframework.cloud.skipper.domain.InstallProperties;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
+import org.springframework.cloud.skipper.domain.skipperpackage.Deployproperties;
 import org.springframework.cloud.skipper.repository.PackageMetadataRepository;
-import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.util.FileSystemUtils;
@@ -47,11 +45,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ActiveProfiles("repo-test")
 @TestPropertySource(properties = { "spring.cloud.skipper.server.synchonizeIndexOnContextRefresh=true",
 		"spring.cloud.skipper.server.platform.local.accounts[test].key=value",
-"maven.remote-repositories.repo1.url=http://repo.spring.io/libs-snapshot"})
-public class PackageInstallControllerTests extends AbstractMockMvcTests {
-
-	private final MediaType contentType = new MediaType(MediaType.APPLICATION_JSON.getType(),
-			MediaType.APPLICATION_JSON.getSubtype(), Charset.forName("utf8"));
+		"maven.remote-repositories.repo1.url=http://repo.spring.io/libs-snapshot" })
+public class PackageControllerTests extends AbstractMockMvcTests {
 
 	@Autowired
 	private PackageMetadataRepository packageMetadataRepository;
@@ -67,12 +62,12 @@ public class PackageInstallControllerTests extends AbstractMockMvcTests {
 	}
 
 	@Test
-	public void install() throws Exception {
-		InstallProperties installProperties = new InstallProperties();
-		installProperties.setPlatformName("test");
+	public void deploy() throws Exception {
+		Deployproperties deployproperties = new Deployproperties();
+		deployproperties.setPlatformName("test");
 		PackageMetadata packageMetadata = packageMetadataRepository.findByNameAndVersion("log", "1.0.0");
-		mockMvc.perform(post("/package/" + packageMetadata.getId() + "/install")
-				.content(convertObjectToJson(installProperties))).andDo(print())
+		mockMvc.perform(post("/package/" + packageMetadata.getId() + "/deploy")
+				.content(convertObjectToJson(deployproperties))).andDo(print())
 				.andExpect(status().isCreated()).andReturn();
 	}
 

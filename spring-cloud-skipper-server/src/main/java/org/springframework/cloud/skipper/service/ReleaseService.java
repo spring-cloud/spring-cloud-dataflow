@@ -27,13 +27,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
 import org.springframework.cloud.skipper.domain.ConfigValues;
 import org.springframework.cloud.skipper.domain.Info;
-import org.springframework.cloud.skipper.domain.InstallProperties;
 import org.springframework.cloud.skipper.domain.Package;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
 import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.Status;
 import org.springframework.cloud.skipper.domain.StatusCode;
 import org.springframework.cloud.skipper.domain.Template;
+import org.springframework.cloud.skipper.domain.skipperpackage.Deployproperties;
 import org.springframework.cloud.skipper.repository.PackageMetadataRepository;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Service;
@@ -63,23 +63,23 @@ public class ReleaseService {
 
 	/**
 	 * Downloads the package metadata and package zip file specified by the given Id and
-	 * installs the package on the target platform.
+	 * deploys the package on the target platform.
 	 * @param id of the package
-	 * @param installProperties contains the name of the release, the platfrom to deploy
+	 * @param deployproperties contains the name of the release, the platfrom to deploy
 	 * to, and configuration values to replace in the package template.
 	 * @return the Release object associated with this installation
 	 */
-	public Release install(String id, InstallProperties installProperties) {
-		Assert.notNull(installProperties, "Install Properties can not be null");
+	public Release deploy(String id, Deployproperties deployproperties) {
+		Assert.notNull(deployproperties, "Install Properties can not be null");
 		PackageMetadata packageMetadata = packageMetadataRepository.findOne(id);
 		packageService.downloadPackage(packageMetadata);
 		Package packageToInstall = packageService.loadPackage(packageMetadata);
-		Release release = createInitialRelease(installProperties, packageToInstall);
+		Release release = createInitialRelease(deployproperties, packageToInstall);
 
-		return install(release);
+		return deploy(release);
 	}
 
-	private Release install(Release release) {
+	private Release deploy(Release release) {
 		Properties model = mergeConfigValues(release.getConfigValues(), release.getPkg().getConfigValues());
 		// Render yaml resources
 		String manifest = createManifest(release.getPkg(), model);
@@ -186,11 +186,11 @@ public class ReleaseService {
 
 	}
 
-	private Release createInitialRelease(InstallProperties installProperties, Package packageToInstall) {
+	private Release createInitialRelease(Deployproperties deployproperties, Package packageToInstall) {
 		Release release = new Release();
-		release.setName(installProperties.getReleaseName());
-		release.setPlatformName(installProperties.getPlatformName());
-		release.setConfigValues(installProperties.getConfigValues());
+		release.setName(deployproperties.getReleaseName());
+		release.setPlatformName(deployproperties.getPlatformName());
+		release.setConfigValues(deployproperties.getConfigValues());
 		release.setPkg(packageToInstall);
 
 		release.setVersion(1);
@@ -200,7 +200,7 @@ public class ReleaseService {
 		Status status = new Status();
 		status.setStatusCode(StatusCode.UNKNOWN);
 		info.setStatus(status);
-		info.setDescription("Initial install underway");
+		info.setDescription("Initial deploy underway");
 		release.setInfo(info);
 		return release;
 	}

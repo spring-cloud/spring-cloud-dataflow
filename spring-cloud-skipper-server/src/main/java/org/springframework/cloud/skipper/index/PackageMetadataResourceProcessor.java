@@ -15,7 +15,7 @@
  */
 package org.springframework.cloud.skipper.index;
 
-import org.springframework.cloud.skipper.controller.PackageInstallController;
+import org.springframework.cloud.skipper.controller.PackageController;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Resource;
@@ -34,8 +34,8 @@ public class PackageMetadataResourceProcessor implements ResourceProcessor<Resou
 	@Override
 	public Resource<PackageMetadata> process(Resource<PackageMetadata> packageMetadataResource) {
 		Link link = linkTo(
-				methodOn(PackageInstallController.class).install(packageMetadataResource.getContent().getId(), null))
-						.withRel("install");
+				methodOn(PackageController.class).deploy(packageMetadataResource.getContent().getId(), null))
+						.withRel("deploy");
 		packageMetadataResource.add(link);
 		return packageMetadataResource;
 	}

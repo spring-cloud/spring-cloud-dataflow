@@ -56,24 +56,24 @@ public class PackageMetadataMvcTests extends AbstractMockMvcTests {
 				.andExpect(jsonPath("$._embedded.packageMetadata[0].iconUrl")
 						.value("http://www.gilligansisle.com/images/a2.gif"))
 				.andExpect(jsonPath("$._embedded.packageMetadata[0].description").doesNotExist())
-				.andExpect(jsonPath("$._embedded.packageMetadata[0]._links.install.href")
-						.value("http://localhost/package/1/install"))
+				.andExpect(jsonPath("$._embedded.packageMetadata[0]._links.deploy.href")
+						.value("http://localhost/package/1/deploy"))
 				.andExpect(jsonPath("$._embedded.packageMetadata[1].version").value("2.0.0"))
 				.andExpect(jsonPath("$._embedded.packageMetadata[1].iconUrl")
 						.value("http://www.gilligansisle.com/images/a1.gif"))
-				.andExpect(jsonPath("$._embedded.packageMetadata[1]._links.install.href")
-						.value("http://localhost/package/2/install"))
+				.andExpect(jsonPath("$._embedded.packageMetadata[1]._links.deploy.href")
+						.value("http://localhost/package/2/deploy"))
 				.andExpect(jsonPath("$._embedded.packageMetadata[1].description").doesNotExist());
 
 		mockMvc.perform(get("/packageMetadata")).andDo(print()).andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.packageMetadata[0].version").value("1.0.0"))
 				.andExpect(jsonPath("$._embedded.packageMetadata[0].description").value("A very cool project"))
-				.andExpect(jsonPath("$._embedded.packageMetadata[0]._links.install.href")
-						.value("http://localhost/package/1/install"))
+				.andExpect(jsonPath("$._embedded.packageMetadata[0]._links.deploy.href")
+						.value("http://localhost/package/1/deploy"))
 				.andExpect(jsonPath("$._embedded.packageMetadata[1].version").value("2.0.0"))
 				.andExpect(jsonPath("$._embedded.packageMetadata[1].description").value("Another very cool project"))
-				.andExpect(jsonPath("$._embedded.packageMetadata[1]._links.install.href")
-						.value("http://localhost/package/2/install"));
+				.andExpect(jsonPath("$._embedded.packageMetadata[1]._links.deploy.href")
+						.value("http://localhost/package/2/deploy"));
 	}
 
 }

@@ -13,21 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.cloud.skipper.domain;
+package org.springframework.cloud.skipper.domain.skipperpackage;
+
+import org.springframework.cloud.skipper.domain.ConfigValues;
 
 /**
  * @author Mark Pollack
  */
-public class InstallProperties {
+public class Deployproperties {
 
 	private String platformName;
 
 	private String releaseName;
 
 	private ConfigValues configValues;
-
-	public InstallProperties() {
-	}
 
 	public String getPlatformName() {
 		return platformName;
@@ -53,3 +52,4 @@ public class InstallProperties {
 		this.configValues = configValues;
 	}
 }
+

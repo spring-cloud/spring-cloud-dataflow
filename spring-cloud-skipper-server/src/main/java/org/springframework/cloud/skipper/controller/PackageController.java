@@ -16,8 +16,8 @@
 package org.springframework.cloud.skipper.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.skipper.domain.InstallProperties;
 import org.springframework.cloud.skipper.domain.Release;
+import org.springframework.cloud.skipper.domain.skipperpackage.Deployproperties;
 import org.springframework.cloud.skipper.service.ReleaseService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -29,29 +29,22 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * @author Mark Pollack
+ * @author Ilayaperumal Gopinathan
  */
 @RestController
 @RequestMapping("/package")
-public class PackageInstallController {
+public class PackageController {
 
 	private ReleaseService releaseService;
 
 	@Autowired
-	public PackageInstallController(ReleaseService releaseService) {
+	public PackageController(ReleaseService releaseService) {
 		this.releaseService = releaseService;
 	}
 
-	// @PostMapping
-	// @RequestMapping("/packageMetadata/install")
-	// @ResponseStatus(HttpStatus.CREATED)
-	// public Release install(@RequestBody InstallRequest installRequest) {
-	// return null;
-	// }
-
-	// @PostMapping
-	@RequestMapping(path = "/{id}/install", method = RequestMethod.POST)
+	@RequestMapping(path = "/{id}/deploy", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
-	public Release install(@PathVariable("id") String id, @RequestBody InstallProperties installProperties) {
-		return releaseService.install(id, installProperties);
+	public Release deploy(@PathVariable("id") String id, @RequestBody Deployproperties deployproperties) {
+		return this.releaseService.deploy(id, deployproperties);
 	}
 }
