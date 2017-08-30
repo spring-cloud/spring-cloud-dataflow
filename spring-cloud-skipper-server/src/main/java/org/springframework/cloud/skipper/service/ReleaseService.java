@@ -34,6 +34,7 @@ import org.springframework.cloud.skipper.domain.Status;
 import org.springframework.cloud.skipper.domain.StatusCode;
 import org.springframework.cloud.skipper.domain.Template;
 import org.springframework.cloud.skipper.domain.skipperpackage.Deployproperties;
+import org.springframework.cloud.skipper.domain.skipperpackage.RollbackProperties;
 import org.springframework.cloud.skipper.domain.skipperpackage.UndeployProperties;
 import org.springframework.cloud.skipper.domain.skipperpackage.UpdateProperties;
 import org.springframework.cloud.skipper.repository.PackageMetadataRepository;
@@ -45,6 +46,7 @@ import org.springframework.util.StringUtils;
 
 /**
  * @author Mark Pollack
+ * @author Ilayaperumal Gopinathan
  */
 @Service
 public class ReleaseService {
@@ -148,6 +150,14 @@ public class ReleaseService {
 		deploy(replacingRelease);
 		this.releaseManager.undeploy(existingRelease);
 		return replacingRelease;
+	}
+
+	public Release rollback(RollbackProperties rollbackProperties) {
+		Release releaseToRollback = getRelease(rollbackProperties.getReleaseName(),
+				rollbackProperties.getRollbackVersion());
+		Release currentRelease = getRelease(rollbackProperties.getReleaseName(), null);
+		update(currentRelease, releaseToRollback);
+		return releaseToRollback;
 	}
 
 	/**

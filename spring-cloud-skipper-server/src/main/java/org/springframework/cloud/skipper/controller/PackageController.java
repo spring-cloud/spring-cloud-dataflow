@@ -18,6 +18,7 @@ package org.springframework.cloud.skipper.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.skipperpackage.Deployproperties;
+import org.springframework.cloud.skipper.domain.skipperpackage.RollbackProperties;
 import org.springframework.cloud.skipper.domain.skipperpackage.UndeployProperties;
 import org.springframework.cloud.skipper.domain.skipperpackage.UpdateProperties;
 import org.springframework.cloud.skipper.service.ReleaseService;
@@ -60,5 +61,11 @@ public class PackageController {
 	@ResponseStatus(HttpStatus.CREATED)
 	public Release update(@RequestBody UpdateProperties updateProperties) {
 		return this.releaseService.update(updateProperties);
+	}
+
+	@RequestMapping(path = "/rollback", method = RequestMethod.POST)
+	@ResponseStatus(HttpStatus.CREATED)
+	public Release rollback(@RequestBody RollbackProperties rollbackProperties) {
+		return this.releaseService.rollback(rollbackProperties);
 	}
 }

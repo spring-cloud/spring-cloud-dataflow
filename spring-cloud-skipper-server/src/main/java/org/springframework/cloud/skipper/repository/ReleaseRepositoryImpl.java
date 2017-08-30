@@ -46,7 +46,7 @@ public class ReleaseRepositoryImpl implements CustomReleaseRepository {
 	}
 
 	private int getNumberedVersion(String version) {
-		return Integer.valueOf(version.replaceAll(".", ""));
+		return Integer.valueOf(version.replace(".", ""));
 	}
 
 	@Override
