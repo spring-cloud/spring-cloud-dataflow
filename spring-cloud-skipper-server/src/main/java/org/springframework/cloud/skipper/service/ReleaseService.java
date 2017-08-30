@@ -33,7 +33,7 @@ import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.Status;
 import org.springframework.cloud.skipper.domain.StatusCode;
 import org.springframework.cloud.skipper.domain.Template;
-import org.springframework.cloud.skipper.domain.skipperpackage.Deployproperties;
+import org.springframework.cloud.skipper.domain.skipperpackage.DeployProperties;
 import org.springframework.cloud.skipper.domain.skipperpackage.RollbackProperties;
 import org.springframework.cloud.skipper.domain.skipperpackage.UndeployProperties;
 import org.springframework.cloud.skipper.domain.skipperpackage.UpdateProperties;
@@ -74,16 +74,16 @@ public class ReleaseService {
 	 * Downloads the package metadata and package zip file specified by the given Id and
 	 * deploys the package on the target platform.
 	 * @param id of the package
-	 * @param deployproperties contains the name of the release, the platfrom to deploy
+	 * @param deployProperties contains the name of the release, the platfrom to deploy
 	 * to, and configuration values to replace in the package template.
 	 * @return the Release object associated with this installation
 	 */
-	public Release deploy(String id, Deployproperties deployproperties) {
-		Assert.notNull(deployproperties, "Install Properties can not be null");
+	public Release deploy(String id, DeployProperties deployProperties) {
+		Assert.notNull(deployProperties, "Install Properties can not be null");
 		PackageMetadata packageMetadata = this.packageMetadataRepository.findOne(id);
 		this.packageService.downloadPackage(packageMetadata);
 		Package packageToInstall = this.packageService.loadPackage(packageMetadata);
-		Release release = createInitialRelease(deployproperties, packageToInstall);
+		Release release = createInitialRelease(deployProperties, packageToInstall);
 		return deploy(release);
 	}
 
@@ -102,6 +102,14 @@ public class ReleaseService {
 		return this.releaseManager.undeploy(release);
 	}
 
+	public Release status(String releaseName, String version) {
+		return status(getRelease(releaseName, version));
+	}
+
+	public Release status(Release release) {
+		return this.releaseManager.status(release);
+	}
+
 	public Release getRelease(String releaseName, String version) {
 		Release release;
 		if (version == null) {
@@ -114,23 +122,23 @@ public class ReleaseService {
 	}
 
 	public Release update(UpdateProperties updateProperties) {
-		Deployproperties deployproperties = updateProperties.getConfig();
-		Release oldRelease = getRelease(deployproperties.getReleaseName(), updateProperties.getOldVersion());
+		DeployProperties deployProperties = updateProperties.getConfig();
+		Release oldRelease = getRelease(deployProperties.getReleaseName(), updateProperties.getOldVersion());
 		Release newRelease = createNewRelease(updateProperties.getPackageId(),
-				updateProperties.getNewVersion(), deployproperties);
+				updateProperties.getNewVersion(), deployProperties);
 		return update(oldRelease, newRelease);
 	}
 
-	public Release createNewRelease(String packageId, String newVersion, Deployproperties deployproperties) {
-		Assert.notNull(deployproperties, "Deploy Properties can not be null");
+	public Release createNewRelease(String packageId, String newVersion, DeployProperties deployProperties) {
+		Assert.notNull(deployProperties, "Deploy Properties can not be null");
 		PackageMetadata packageMetadata = this.packageMetadataRepository.findOne(packageId);
 		this.packageService.downloadPackage(packageMetadata);
 		Package packageToInstall = this.packageService.loadPackage(packageMetadata);
 		packageToInstall.getMetadata().setId(packageMetadata.getId());
 		Release release = new Release();
-		release.setName(deployproperties.getReleaseName());
-		release.setPlatformName(deployproperties.getPlatformName());
-		release.setConfigValues(deployproperties.getConfigValues());
+		release.setName(deployProperties.getReleaseName());
+		release.setPlatformName(deployProperties.getPlatformName());
+		release.setConfigValues(deployProperties.getConfigValues());
 		release.setPkg(packageToInstall);
 		release.setVersion(newVersion);
 		Info info = new Info();
@@ -254,11 +262,11 @@ public class ReleaseService {
 
 	}
 
-	private Release createInitialRelease(Deployproperties deployproperties, Package packageToInstall) {
+	private Release createInitialRelease(DeployProperties deployProperties, Package packageToInstall) {
 		Release release = new Release();
-		release.setName(deployproperties.getReleaseName());
-		release.setPlatformName(deployproperties.getPlatformName());
-		release.setConfigValues(deployproperties.getConfigValues());
+		release.setName(deployProperties.getReleaseName());
+		release.setPlatformName(deployProperties.getPlatformName());
+		release.setConfigValues(deployProperties.getConfigValues());
 		release.setPkg(packageToInstall);
 
 		release.setVersion("1.0.0");

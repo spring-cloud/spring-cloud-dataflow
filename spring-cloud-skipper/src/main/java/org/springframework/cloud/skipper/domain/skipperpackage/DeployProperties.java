@@ -20,7 +20,7 @@ import org.springframework.cloud.skipper.domain.ConfigValues;
 /**
  * @author Mark Pollack
  */
-public class Deployproperties {
+public class DeployProperties {
 
 	private String platformName;
 

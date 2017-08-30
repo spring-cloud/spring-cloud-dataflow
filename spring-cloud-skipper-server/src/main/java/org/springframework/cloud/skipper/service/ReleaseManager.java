@@ -32,5 +32,7 @@ public interface ReleaseManager {
 
 	Release undeploy(Release release);
 
+	Release status(Release release);
+
 	void updateStatus(Release release);
 }

@@ -26,7 +26,7 @@ public class UpdateProperties {
 
 	private String newVersion;
 
-	private Deployproperties config;
+	private DeployProperties config;
 
 	public String getOldVersion() {
 		return oldVersion;
@@ -44,11 +44,11 @@ public class UpdateProperties {
 		this.newVersion = newVersion;
 	}
 
-	public Deployproperties getConfig() {
+	public DeployProperties getConfig() {
 		return config;
 	}
 
-	public void setConfig(Deployproperties config) {
+	public void setConfig(DeployProperties config) {
 		this.config = config;
 	}
 

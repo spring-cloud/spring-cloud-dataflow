@@ -29,6 +29,9 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.deployer.resource.support.DelegatingResourceLoader;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
+import org.springframework.cloud.deployer.spi.app.AppInstanceStatus;
+import org.springframework.cloud.deployer.spi.app.AppStatus;
+import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.skipper.domain.*;
@@ -105,6 +108,38 @@ public class AppDeployerReleaseManager implements ReleaseManager {
 		// Store updated state in in DB
 		this.releaseRepository.save(release);
 		updateStatus(release);
+		return release;
+	}
+
+	public Release status(Release release) {
+		AppDeployer appDeployer = this.deployerRepository.findByName(release.getPlatformName()).getDeployer();
+		Set<String> deploymentIds = new HashSet<>();
+		AppDeployerData appDeployerData = this.appDeployerDataRepository
+				.findByReleaseNameAndReleaseVersion(release.getName(), release.getVersion());
+		deploymentIds.addAll(StringUtils.commaDelimitedListToSet(appDeployerData.getDeploymentData()));
+		if (!deploymentIds.isEmpty()) {
+			boolean allDeployed = true;
+			StringBuffer releaseStatusMsg = new StringBuffer();
+			for (String deploymentId : deploymentIds) {
+				AppStatus appStatus = appDeployer.status(deploymentId);
+				if (appStatus.getState() != DeploymentState.deployed) {
+					StringBuffer statusMsg = new StringBuffer(deploymentId + "=[");
+					allDeployed = false;
+					for (AppInstanceStatus appInstanceStatus : appStatus.getInstances().values()) {
+						statusMsg.append(appInstanceStatus.getId() + "=" + appInstanceStatus.getState());
+					}
+					statusMsg.append("]");
+					releaseStatusMsg.append(statusMsg);
+				}
+			}
+			if (allDeployed) {
+				release.getInfo().getStatus().setPlatformStatus("All the applications are deployed successfully.");
+			}
+			else {
+				release.getInfo().getStatus().setPlatformStatus(
+						"Not all the applications are deployed successfully. " + releaseStatusMsg.toString());
+			}
+		}
 		return release;
 	}
 

@@ -18,6 +18,7 @@ package org.springframework.cloud.skipper.controller;
 import java.io.File;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,9 +28,7 @@ import org.springframework.cloud.skipper.domain.PackageMetadata;
 import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.StatusCode;
 import org.springframework.cloud.skipper.domain.skipperpackage.DeployProperties;
-import org.springframework.cloud.skipper.domain.skipperpackage.RollbackProperties;
 import org.springframework.cloud.skipper.domain.skipperpackage.UndeployProperties;
-import org.springframework.cloud.skipper.domain.skipperpackage.UpdateProperties;
 import org.springframework.cloud.skipper.repository.PackageMetadataRepository;
 import org.springframework.cloud.skipper.repository.ReleaseRepository;
 import org.springframework.test.context.ActiveProfiles;
@@ -37,8 +36,11 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.util.FileSystemUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.CoreMatchers.startsWith;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
@@ -49,7 +51,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @TestPropertySource(properties = { "spring.cloud.skipper.server.synchonizeIndexOnContextRefresh=true",
 		"spring.cloud.skipper.server.platform.local.accounts[test].key=value",
 		"maven.remote-repositories.repo1.url=http://repo.spring.io/libs-snapshot" })
-public class PackageControllerTests extends AbstractMockMvcTests {
+public class ReleaseControllerTests extends AbstractMockMvcTests {
 
 	@Autowired
 	private PackageMetadataRepository packageMetadataRepository;
@@ -68,10 +70,10 @@ public class PackageControllerTests extends AbstractMockMvcTests {
 	}
 
 	@Test
-	public void deployUpdateRollbackAndUndeploy() throws Exception {
+	@Ignore
+	public void checkDeployStatus() throws Exception {
 		String packageName = "log";
 		String releaseName = "log-sink-app";
-		// Deploy
 		String initialVersion = "1.0.0";
 		DeployProperties deployProperties = new DeployProperties();
 		deployProperties.setPlatformName("test");
@@ -81,43 +83,14 @@ public class PackageControllerTests extends AbstractMockMvcTests {
 		mockMvc.perform(post("/package/" + packageMetadata.getId() + "/deploy")
 				.content(convertObjectToJson(deployProperties))).andDo(print())
 				.andExpect(status().isCreated()).andReturn();
-		Release deployedRelease = this.releaseRepository.findByNameAndVersion(releaseName, initialVersion);
-		assertThat(deployedRelease.getName()).isEqualTo(releaseName);
-		assertThat(deployedRelease.getPlatformName()).isEqualTo("test");
-		assertThat(deployedRelease.getVersion()).isEqualTo(initialVersion);
-		assertThat(deployedRelease.getPkg().getMetadata().equals(packageMetadata)).isTrue();
-		assertThat(deployedRelease.getInfo().getStatus().getStatusCode()).isEqualTo(StatusCode.DEPLOYED);
-		// Update
-		String updateVersion = "1.0.1";
-		String updatePkgName = "log2";
-		PackageMetadata updatePackageMetadata = packageMetadataRepository.findByNameAndVersion(updatePkgName,
-				updateVersion);
-		UpdateProperties updateProperties = new UpdateProperties();
-		updateProperties.setPackageId(updatePackageMetadata.getId());
-		updateProperties.setOldVersion(initialVersion);
-		updateProperties.setNewVersion(updateVersion);
-		DeployProperties newDeployProperties = new DeployProperties();
-		newDeployProperties.setPlatformName("test");
-		newDeployProperties.setReleaseName(releaseName);
-		updateProperties.setConfig(newDeployProperties);
-		mockMvc.perform(post("/package/update")
-				.content(convertObjectToJson(updateProperties))).andDo(print())
-				.andExpect(status().isCreated()).andReturn();
-		Release updatedRelease = this.releaseRepository.findByNameAndVersion(releaseName, updateVersion);
-		assertThat(updatedRelease.getName()).isEqualTo(releaseName);
-		assertThat(updatedRelease.getPlatformName()).isEqualTo("test");
-		assertThat(updatedRelease.getVersion()).isEqualTo(updateVersion);
-		assertThat(updatedRelease.getPkg().getMetadata().equals(updatePackageMetadata)).isTrue();
-		assertThat(updatedRelease.getInfo().getStatus().getStatusCode()).isEqualTo(StatusCode.DEPLOYED);
-		// Rollback
-		RollbackProperties rollbackProperties = new RollbackProperties();
-		rollbackProperties.setReleaseName(releaseName);
-		rollbackProperties.setRollbackVersion(initialVersion);
-		mockMvc.perform(post("/package/rollback")
-				.content(convertObjectToJson(rollbackProperties))).andDo(print())
-				.andExpect(status().isCreated()).andReturn();
-		Release rolledbackRelease = this.releaseRepository.findByNameAndVersion(releaseName, initialVersion);
-		assertThat(rolledbackRelease.getInfo().getStatus().getStatusCode()).isEqualTo(StatusCode.DEPLOYED);
+		// todo: Add timeout to check the status
+		Thread.sleep(12000);
+		mockMvc.perform(get("/release/status/log-sink-app/1.0.0")).andDo(print())
+				.andExpect(status().isCreated())
+				.andExpect(content().string(startsWith(
+						"{\"name\":\"log-sink-app\",\"version\":\"1.0.0\","
+								+ "\"info\":{\"status\":{\"statusCode\":\"DEPLOYED\","
+								+ "\"platformStatus\":\"All the applications are deployed successfully.")));
 		// Undeploy
 		UndeployProperties undeployProperties = new UndeployProperties();
 		undeployProperties.setReleaseName(releaseName);

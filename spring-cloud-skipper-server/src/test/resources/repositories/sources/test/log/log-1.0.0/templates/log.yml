@@ -9,4 +9,4 @@ deployment:
   resourceMetadata: {{resources.log.resourceGroupAndName}}:jar:metadata:{{resources.log.version}}
   deploymentProperties:
     memory: {{deployment.request.memory}}
-    
+    spring.cloud.deployer.local.inheritLogging: {{deployment.request.inheritLogging}}

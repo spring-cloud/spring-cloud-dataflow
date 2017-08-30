@@ -15,8 +15,11 @@
  */
 package org.springframework.cloud.skipper;
 
+import java.io.IOException;
 import java.nio.charset.Charset;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 
@@ -52,6 +55,13 @@ public abstract class AbstractMockMvcTests {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(wac)
 				.defaultRequest(get("/").accept(MediaType.APPLICATION_JSON).contentType(contentType))
 				.build();
+	}
+
+	public static String convertObjectToJson(Object object) throws IOException {
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+		String json = mapper.writeValueAsString(object);
+		return json;
 	}
 
 }
