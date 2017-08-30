@@ -31,6 +31,7 @@ import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.StatusCode;
 import org.springframework.cloud.skipper.domain.skipperpackage.Deployproperties;
 import org.springframework.cloud.skipper.domain.skipperpackage.UndeployProperties;
+import org.springframework.cloud.skipper.domain.skipperpackage.UpdateProperties;
 import org.springframework.cloud.skipper.repository.PackageMetadataRepository;
 import org.springframework.cloud.skipper.repository.ReleaseRepository;
 import org.springframework.test.context.ActiveProfiles;
@@ -69,14 +70,14 @@ public class PackageControllerTests extends AbstractMockMvcTests {
 	}
 
 	@Test
-	public void deployAndUndeploy() throws Exception {
+	public void deployUpdateAndUndeploy() throws Exception {
 		String packageName = "log";
 		String releaseName = "log-sink-app";
 		String version = "1.0.0";
 		Deployproperties deployproperties = new Deployproperties();
 		deployproperties.setPlatformName("test");
 		deployproperties.setReleaseName(releaseName);
-		PackageMetadata packageMetadata = packageMetadataRepository.findByNameAndVersion(packageName, version);
+		PackageMetadata packageMetadata = this.packageMetadataRepository.findByNameAndVersion(packageName, version);
 		mockMvc.perform(post("/package/" + packageMetadata.getId() + "/deploy")
 				.content(convertObjectToJson(deployproperties))).andDo(print())
 				.andExpect(status().isCreated()).andReturn();
@@ -84,15 +85,36 @@ public class PackageControllerTests extends AbstractMockMvcTests {
 		assertThat(deployedRelease.getName()).isEqualTo(releaseName);
 		assertThat(deployedRelease.getPlatformName()).isEqualTo("test");
 		assertThat(deployedRelease.getVersion()).isEqualTo(version);
-		assertThat(deployedRelease.getPkg().getMetadata()).isEqualTo(packageMetadata);
+		assertThat(deployedRelease.getPkg().getMetadata().equals(packageMetadata)).isTrue();
 		assertThat(deployedRelease.getInfo().getStatus().getStatusCode()).isEqualTo(StatusCode.DEPLOYED);
+		String updateVersion = "1.0.1";
+		String updatePkgName = "log2";
+		PackageMetadata updatePackageMetadata = packageMetadataRepository.findByNameAndVersion(updatePkgName,
+				updateVersion);
+		UpdateProperties updateProperties = new UpdateProperties();
+		updateProperties.setPackageId(updatePackageMetadata.getId());
+		updateProperties.setOldVersion(version);
+		updateProperties.setNewVersion(updateVersion);
+		Deployproperties newDeployProperties = new Deployproperties();
+		newDeployProperties.setPlatformName("test");
+		newDeployProperties.setReleaseName(releaseName);
+		updateProperties.setConfig(newDeployProperties);
+		mockMvc.perform(post("/package/update")
+				.content(convertObjectToJson(updateProperties))).andDo(print())
+				.andExpect(status().isCreated()).andReturn();
+		Release updatedRelease = this.releaseRepository.findByNameAndVersion(releaseName, updateVersion);
+		assertThat(updatedRelease.getName()).isEqualTo(releaseName);
+		assertThat(updatedRelease.getPlatformName()).isEqualTo("test");
+		assertThat(updatedRelease.getVersion()).isEqualTo(updateVersion);
+		assertThat(updatedRelease.getPkg().getMetadata().equals(updatePackageMetadata)).isTrue();
+		assertThat(updatedRelease.getInfo().getStatus().getStatusCode()).isEqualTo(StatusCode.DEPLOYED);
 		UndeployProperties undeployProperties = new UndeployProperties();
 		undeployProperties.setReleaseName(releaseName);
-		undeployProperties.setVersion(version);
+		undeployProperties.setVersion(updateVersion);
 		mockMvc.perform(post("/package/undeploy")
 				.content(convertObjectToJson(undeployProperties))).andDo(print())
 				.andExpect(status().isCreated()).andReturn();
-		Release undeployedRelease = this.releaseRepository.findByNameAndVersion(releaseName, version);
+		Release undeployedRelease = this.releaseRepository.findByNameAndVersion(releaseName, updateVersion);
 		assertThat(undeployedRelease.getInfo().getStatus().getStatusCode()).isEqualTo(StatusCode.DELETED);
 	}
 

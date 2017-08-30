@@ -24,6 +24,7 @@ import org.springframework.cloud.skipper.domain.Release;
  * implementations based on Spring Cloud State Machine or Concourse are possible.
  *
  * @author Mark Pollack
+ * @author Ilayaperumal Gopinathan
  */
 public interface ReleaseManager {
 

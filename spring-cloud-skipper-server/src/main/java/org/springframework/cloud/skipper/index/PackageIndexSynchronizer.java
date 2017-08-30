@@ -39,11 +39,11 @@ import org.springframework.stereotype.Component;
 @Component
 public class PackageIndexSynchronizer {
 
-	private PackageIndexDownloader packageIndexDownloader;
+	private final PackageIndexDownloader packageIndexDownloader;
 
-	private PackageMetadataRepository packageMetadataRepository;
+	private final PackageMetadataRepository packageMetadataRepository;
 
-	private SkipperServerProperties skipperServerProperties;
+	private final SkipperServerProperties skipperServerProperties;
 
 	@Autowired
 	public PackageIndexSynchronizer(PackageIndexDownloader packageIndexDownloader,
@@ -55,10 +55,10 @@ public class PackageIndexSynchronizer {
 	}
 
 	public void loadAll() {
-		packageIndexDownloader.downloadPackageIndexes();
+		this.packageIndexDownloader.downloadPackageIndexes();
 		List<File> indexFiles = packageIndexDownloader.getIndexFiles();
 		List<PackageMetadata> packageMetadataList = deserializeFromIndexFiles(indexFiles);
-		packageMetadataRepository.save(packageMetadataList);
+		this.packageMetadataRepository.save(packageMetadataList);
 	}
 
 	@EventListener

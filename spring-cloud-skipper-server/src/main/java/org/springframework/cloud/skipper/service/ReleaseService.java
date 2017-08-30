@@ -35,6 +35,7 @@ import org.springframework.cloud.skipper.domain.StatusCode;
 import org.springframework.cloud.skipper.domain.Template;
 import org.springframework.cloud.skipper.domain.skipperpackage.Deployproperties;
 import org.springframework.cloud.skipper.domain.skipperpackage.UndeployProperties;
+import org.springframework.cloud.skipper.domain.skipperpackage.UpdateProperties;
 import org.springframework.cloud.skipper.repository.PackageMetadataRepository;
 import org.springframework.cloud.skipper.repository.ReleaseRepository;
 import org.springframework.core.io.InputStreamResource;
@@ -108,6 +109,45 @@ public class ReleaseService {
 			release = this.releaseRepository.findByNameAndVersion(releaseName, version);
 		}
 		return release;
+	}
+
+	public Release update(UpdateProperties updateProperties) {
+		Deployproperties deployproperties = updateProperties.getConfig();
+		Release oldRelease = getRelease(deployproperties.getReleaseName(), updateProperties.getOldVersion());
+		Release newRelease = createNewRelease(updateProperties.getPackageId(),
+				updateProperties.getNewVersion(), deployproperties);
+		return update(oldRelease, newRelease);
+	}
+
+	public Release createNewRelease(String packageId, String newVersion, Deployproperties deployproperties) {
+		Assert.notNull(deployproperties, "Deploy Properties can not be null");
+		PackageMetadata packageMetadata = this.packageMetadataRepository.findOne(packageId);
+		this.packageService.downloadPackage(packageMetadata);
+		Package packageToInstall = this.packageService.loadPackage(packageMetadata);
+		packageToInstall.getMetadata().setId(packageMetadata.getId());
+		Release release = new Release();
+		release.setName(deployproperties.getReleaseName());
+		release.setPlatformName(deployproperties.getPlatformName());
+		release.setConfigValues(deployproperties.getConfigValues());
+		release.setPkg(packageToInstall);
+		release.setVersion(newVersion);
+		Info info = new Info();
+		info.setFirstDeployed(new Date());
+		info.setLastDeployed(new Date());
+		Status status = new Status();
+		status.setStatusCode(StatusCode.UNKNOWN);
+		info.setStatus(status);
+		info.setDescription("Update deploy underway");
+		release.setInfo(info);
+		return release;
+	}
+
+	public Release update(Release existingRelease, Release replacingRelease) {
+		Assert.notNull(existingRelease, "Existing Release must not be null");
+		Assert.notNull(replacingRelease, "Replacing Release must not be null");
+		deploy(replacingRelease);
+		this.releaseManager.undeploy(existingRelease);
+		return replacingRelease;
 	}
 
 	/**

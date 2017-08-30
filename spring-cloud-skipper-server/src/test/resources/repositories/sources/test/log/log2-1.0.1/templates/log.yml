@@ -1,0 +1,12 @@
+apiVersion: v2
+kind: Application
+deployment:
+  name: log
+  count: {{count}}
+  applicationProperties:
+    log.level: {{log.level}}
+  resource: {{resources.log.resourceGroupAndName}}:{{resources.log.version}}
+  resourceMetadata: {{resources.log.resourceGroupAndName}}:jar:metadata:{{resources.log.version}}
+  deploymentProperties:
+    memory: {{deployment.request.memory}}
+    
