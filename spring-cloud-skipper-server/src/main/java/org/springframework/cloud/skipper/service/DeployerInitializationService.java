@@ -174,7 +174,7 @@ public class DeployerInitializationService {
 			ContainerFactory containerFactory = new DefaultContainerFactory(properties);
 			KubernetesAppDeployer kubernetesAppDeployer = new KubernetesAppDeployer(properties, kubernetesClient, containerFactory);
 			Deployer deployer = new Deployer(entry.getKey(), "kubernetes", kubernetesAppDeployer);
-			deployerRepository.save(deployer);
+			this.deployerRepository.save(deployer);
 			logger.info("Added Kubernetes Deployer account " + entry.getKey() + " into Deployer Repository.");
 		}
 	}

@@ -16,9 +16,10 @@
 package org.springframework.cloud.skipper.controller;
 
 import java.io.File;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,14 +34,14 @@ import org.springframework.cloud.skipper.repository.PackageMetadataRepository;
 import org.springframework.cloud.skipper.repository.ReleaseRepository;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.util.FileSystemUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.CoreMatchers.startsWith;
+import static org.junit.Assert.fail;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
@@ -70,7 +71,6 @@ public class ReleaseControllerTests extends AbstractMockMvcTests {
 	}
 
 	@Test
-	@Ignore
 	public void checkDeployStatus() throws Exception {
 		String packageName = "log";
 		String releaseName = "log-sink-app";
@@ -83,14 +83,24 @@ public class ReleaseControllerTests extends AbstractMockMvcTests {
 		mockMvc.perform(post("/package/" + packageMetadata.getId() + "/deploy")
 				.content(convertObjectToJson(deployProperties))).andDo(print())
 				.andExpect(status().isCreated()).andReturn();
-		// todo: Add timeout to check the status
-		Thread.sleep(12000);
-		mockMvc.perform(get("/release/status/log-sink-app/1.0.0")).andDo(print())
-				.andExpect(status().isCreated())
-				.andExpect(content().string(startsWith(
-						"{\"name\":\"log-sink-app\",\"version\":\"1.0.0\","
-								+ "\"info\":{\"status\":{\"statusCode\":\"DEPLOYED\","
-								+ "\"platformStatus\":\"All the applications are deployed successfully.")));
+		CountDownLatch latch = new CountDownLatch(1);
+		Runnable statusCheck = new Runnable() {
+			@Override
+			public void run() {
+				try {
+					while (!getStatus(releaseName, initialVersion)) {
+						Thread.sleep(5000);
+					}
+					latch.countDown();
+				}
+				catch (Exception e) {
+					Thread.currentThread().interrupt();
+					fail("Interrupted while awaiting latch");
+				}
+			}
+		};
+		statusCheck.run();
+		assertThat(latch.await(120, TimeUnit.SECONDS)).describedAs("Status check timed out").isTrue();
 		// Undeploy
 		UndeployProperties undeployProperties = new UndeployProperties();
 		undeployProperties.setReleaseName(releaseName);
@@ -102,4 +112,21 @@ public class ReleaseControllerTests extends AbstractMockMvcTests {
 		assertThat(undeployedRelease.getInfo().getStatus().getStatusCode()).isEqualTo(StatusCode.DELETED);
 	}
 
+	private boolean getStatus(String releaseName, String version) {
+		try {
+			MvcResult result = mockMvc.perform(get(String.format("/release/status/%s/%s", releaseName, version)))
+					.andDo(print()).andReturn();
+			String content = result.getResponse().getContentAsString();
+			return content.startsWith(getSuccessStatus(releaseName, version));
+		}
+		catch (Exception e) {
+			return false;
+		}
+	}
+
+	private String getSuccessStatus(String release, String version) {
+		return "{\"name\":\"" + release + "\",\"version\":\"" + version + "\","
+				+ "\"info\":{\"status\":{\"statusCode\":\"DEPLOYED\","
+				+ "\"platformStatus\":\"All the applications are deployed successfully.";
+	}
 }

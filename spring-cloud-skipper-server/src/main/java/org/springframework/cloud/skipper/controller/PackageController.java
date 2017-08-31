@@ -40,6 +40,7 @@ public class PackageController {
 
 	private ReleaseService releaseService;
 
+
 	@Autowired
 	public PackageController(ReleaseService releaseService) {
 		this.releaseService = releaseService;
