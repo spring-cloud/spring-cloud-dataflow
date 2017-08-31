@@ -29,7 +29,6 @@ import org.springframework.cloud.skipper.domain.PackageMetadata;
 import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.StatusCode;
 import org.springframework.cloud.skipper.domain.skipperpackage.DeployProperties;
-import org.springframework.cloud.skipper.domain.skipperpackage.UndeployProperties;
 import org.springframework.cloud.skipper.repository.PackageMetadataRepository;
 import org.springframework.cloud.skipper.repository.ReleaseRepository;
 import org.springframework.test.context.ActiveProfiles;
@@ -38,7 +37,6 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.util.FileSystemUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.fail;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -84,35 +82,23 @@ public class ReleaseControllerTests extends AbstractMockMvcTests {
 				.content(convertObjectToJson(deployProperties))).andDo(print())
 				.andExpect(status().isCreated()).andReturn();
 		CountDownLatch latch = new CountDownLatch(1);
-		Runnable statusCheck = new Runnable() {
-			@Override
-			public void run() {
-				try {
-					while (!getStatus(releaseName, initialVersion)) {
-						Thread.sleep(5000);
-					}
-					latch.countDown();
-				}
-				catch (Exception e) {
-					Thread.currentThread().interrupt();
-					fail("Interrupted while awaiting latch");
-				}
-			}
-		};
-		statusCheck.run();
-		assertThat(latch.await(120, TimeUnit.SECONDS)).describedAs("Status check timed out").isTrue();
+		long startTime = System.currentTimeMillis();
+		while (!isDeployed(releaseName, initialVersion)
+				|| (System.currentTimeMillis() - startTime) < 12000) {
+			Thread.sleep(10000);
+		}
+		if (isDeployed(releaseName, initialVersion)) {
+			latch.countDown();
+		}
+		assertThat(latch.await(1, TimeUnit.SECONDS)).describedAs("Status check timed out").isTrue();
 		// Undeploy
-		UndeployProperties undeployProperties = new UndeployProperties();
-		undeployProperties.setReleaseName(releaseName);
-		undeployProperties.setVersion(initialVersion);
-		mockMvc.perform(post("/package/undeploy")
-				.content(convertObjectToJson(undeployProperties))).andDo(print())
+		mockMvc.perform(post("/package/undeploy/" + releaseName + "/" + initialVersion)).andDo(print())
 				.andExpect(status().isCreated()).andReturn();
 		Release undeployedRelease = this.releaseRepository.findByNameAndVersion(releaseName, initialVersion);
 		assertThat(undeployedRelease.getInfo().getStatus().getStatusCode()).isEqualTo(StatusCode.DELETED);
 	}
 
-	private boolean getStatus(String releaseName, String version) {
+	private boolean isDeployed(String releaseName, String version) {
 		try {
 			MvcResult result = mockMvc.perform(get(String.format("/release/status/%s/%s", releaseName, version)))
 					.andDo(print()).andReturn();

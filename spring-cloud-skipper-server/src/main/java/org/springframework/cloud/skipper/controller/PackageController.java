@@ -18,8 +18,6 @@ package org.springframework.cloud.skipper.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.skipperpackage.DeployProperties;
-import org.springframework.cloud.skipper.domain.skipperpackage.RollbackProperties;
-import org.springframework.cloud.skipper.domain.skipperpackage.UndeployProperties;
 import org.springframework.cloud.skipper.domain.skipperpackage.UpdateProperties;
 import org.springframework.cloud.skipper.service.ReleaseService;
 import org.springframework.http.HttpStatus;
@@ -52,10 +50,10 @@ public class PackageController {
 		return this.releaseService.deploy(id, deployProperties);
 	}
 
-	@RequestMapping(path = "/undeploy", method = RequestMethod.POST)
+	@RequestMapping(path = "/undeploy/{name}/{version:.+}", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
-	public Release undeploy(@RequestBody UndeployProperties undeployProperties) {
-		return this.releaseService.undeploy(undeployProperties);
+	public Release undeploy(@PathVariable("name") String releaseName, @PathVariable("version") String version) {
+		return this.releaseService.undeploy(releaseName, version);
 	}
 
 	@RequestMapping(path = "/update", method = RequestMethod.POST)
@@ -64,9 +62,9 @@ public class PackageController {
 		return this.releaseService.update(updateProperties);
 	}
 
-	@RequestMapping(path = "/rollback", method = RequestMethod.POST)
+	@RequestMapping(path = "/rollback/{name}/{version:.+}", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
-	public Release rollback(@RequestBody RollbackProperties rollbackProperties) {
-		return this.releaseService.rollback(rollbackProperties);
+	public Release rollback(@PathVariable("name") String releaseName, @PathVariable("version") String rollbackVersion) {
+		return this.releaseService.rollback(releaseName, rollbackVersion);
 	}
 }

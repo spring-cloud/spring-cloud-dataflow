@@ -34,8 +34,6 @@ import org.springframework.cloud.skipper.domain.Status;
 import org.springframework.cloud.skipper.domain.StatusCode;
 import org.springframework.cloud.skipper.domain.Template;
 import org.springframework.cloud.skipper.domain.skipperpackage.DeployProperties;
-import org.springframework.cloud.skipper.domain.skipperpackage.RollbackProperties;
-import org.springframework.cloud.skipper.domain.skipperpackage.UndeployProperties;
 import org.springframework.cloud.skipper.domain.skipperpackage.UpdateProperties;
 import org.springframework.cloud.skipper.repository.PackageMetadataRepository;
 import org.springframework.cloud.skipper.repository.ReleaseRepository;
@@ -96,9 +94,9 @@ public class ReleaseService {
 		return this.releaseManager.deploy(release);
 	}
 
-	public Release undeploy(UndeployProperties undeployProperties) {
-		Assert.notNull(undeployProperties, "Undeploy Properties can not be null");
-		Release release = getRelease(undeployProperties.getReleaseName(), undeployProperties.getVersion());
+	public Release undeploy(String releaseName, String version) {
+		Assert.notNull(releaseName, "Release name must not be null");
+		Release release = getRelease(releaseName, version);
 		return this.releaseManager.undeploy(release);
 	}
 
@@ -108,6 +106,10 @@ public class ReleaseService {
 
 	public Release status(Release release) {
 		return this.releaseManager.status(release);
+	}
+
+	public Release getLatestRelease(String releaseName) {
+		return this.releaseRepository.findLatestRelease(releaseName);
 	}
 
 	public Release getRelease(String releaseName, String version) {
@@ -160,10 +162,10 @@ public class ReleaseService {
 		return replacingRelease;
 	}
 
-	public Release rollback(RollbackProperties rollbackProperties) {
-		Release releaseToRollback = getRelease(rollbackProperties.getReleaseName(),
-				rollbackProperties.getRollbackVersion());
-		Release currentRelease = getRelease(rollbackProperties.getReleaseName(), null);
+	public Release rollback(String releaseName, String rollbackVersion) {
+		Assert.notNull(releaseName, "Release name must not be null");
+		Release releaseToRollback = getRelease(releaseName, rollbackVersion);
+		Release currentRelease = getLatestRelease(releaseName);
 		update(currentRelease, releaseToRollback);
 		return releaseToRollback;
 	}

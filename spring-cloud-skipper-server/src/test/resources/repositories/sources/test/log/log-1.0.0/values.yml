@@ -9,6 +9,6 @@ resources:
 deployment:
   request:
     memory: 1024m
-    inheritLogging: true
+    inheritLogging: false
 log:
   level: INFO
