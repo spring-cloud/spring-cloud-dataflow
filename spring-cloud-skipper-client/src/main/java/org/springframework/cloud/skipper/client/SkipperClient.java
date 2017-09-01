@@ -16,6 +16,8 @@
 package org.springframework.cloud.skipper.client;
 
 import org.springframework.cloud.skipper.domain.AboutInfo;
+import org.springframework.cloud.skipper.domain.Release;
+import org.springframework.cloud.skipper.domain.skipperpackage.DeployProperties;
 
 /**
  * The main client side interface to communicate with the Skipper Server.
@@ -40,4 +42,40 @@ public interface SkipperClient {
 	 * @return the package metadata with the projection set to summary
 	 */
 	String getPackageMetadata(boolean details);
+
+	/**
+	 * Deploy the package.
+	 *
+	 * @param packageId the package Id.
+	 * @param deployProperties the (@link DeployProperties)
+	 * @return the deployed {@link Release}
+	 */
+	String deploy(String packageId, DeployProperties deployProperties);
+
+	/**
+	 * Update the package.
+	 *
+	 * @param packageId the ID of the package to update.
+	 * @param deployProperties the (@link DeployProperties)
+	 * @return the deployed {@link Release}
+	 */
+	String update(String packageId, DeployProperties deployProperties);
+
+	/**
+	 * Undeploy a specific release.
+	 *
+	 * @param releaseName the release name
+	 * @param releaseVersion the release version.
+	 * @return the un-deployed {@link Release}
+	 */
+	String undeploy(String releaseName, int releaseVersion);
+
+	/**
+	 * Rollback a specific release.
+	 *
+	 * @param releaseName the release name
+	 * @param releaseVersion the release version.
+	 * @return the rolled back {@link Release}
+	 */
+	String rollback(String releaseName, int releaseVersion);
 }

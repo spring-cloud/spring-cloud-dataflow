@@ -19,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.cloud.skipper.domain.AboutInfo;
+import org.springframework.cloud.skipper.domain.skipperpackage.DeployProperties;
 import org.springframework.util.Assert;
 import org.springframework.web.client.RestTemplate;
 
@@ -72,5 +73,29 @@ public class DefaultSkipperClient implements SkipperClient {
 	public String getPackageMetadata(boolean details) {
 		String url = baseUrl + "/packageMetadata";
 		return this.restTemplate.getForObject((details) ? url : url + "?projection=summary", String.class);
+	}
+
+	@Override
+	public String deploy(String packageId, DeployProperties deployProperties) {
+		String url = String.format("%s/%s/%s/%s", baseUrl, "package", packageId, "deploy");
+		return this.restTemplate.postForObject(url, deployProperties, String.class);
+	}
+
+	@Override
+	public String update(String packageId, DeployProperties deployProperties) {
+		String url = String.format("%s/%s/%s/%s", baseUrl, "package", packageId, "update");
+		return this.restTemplate.postForObject(url, deployProperties, String.class);
+	}
+
+	@Override
+	public String undeploy(String releaseName, int releaseVersion) {
+		String url = String.format("%s/%s/%s/%s/%s", baseUrl, "release", "undeploy", releaseName, releaseVersion);
+		return this.restTemplate.postForObject(url, null, String.class);
+	}
+
+	@Override
+	public String rollback(String releaseName, int releaseVersion) {
+		String url = String.format("%s/%s/%s/%s/%s", baseUrl, "release", "rollback", releaseName, releaseVersion);
+		return this.restTemplate.postForObject(url, null, String.class);
 	}
 }
