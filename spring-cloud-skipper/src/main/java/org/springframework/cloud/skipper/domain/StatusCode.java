@@ -23,10 +23,10 @@ public enum StatusCode {
 	// Status_UNKNOWN indicates that a release is in an uncertain state.
 	UNKNOWN,
 
-	// Status_DEPLOYED indicates that the release has been pushed to Kubernetes.
+	// Status_DEPLOYED indicates that the release has been pushed to the platform.
 	DEPLOYED,
 
-	// Status_DELETED indicates that a release has been deleted from Kubermetes.
+	// Status_DELETED indicates that a release has been deleted from the platform.
 	DELETED,
 
 	// Status_SUPERSEDED indicates that this release object is outdated and a newer one

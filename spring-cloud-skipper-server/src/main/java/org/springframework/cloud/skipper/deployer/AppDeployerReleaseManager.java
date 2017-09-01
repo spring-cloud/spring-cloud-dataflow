@@ -16,11 +16,7 @@
 package org.springframework.cloud.skipper.deployer;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.MappingIterator;
@@ -34,12 +30,7 @@ import org.springframework.cloud.deployer.spi.app.AppStatus;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
-import org.springframework.cloud.skipper.domain.AppDeployerData;
-import org.springframework.cloud.skipper.domain.AppDeploymentKind;
-import org.springframework.cloud.skipper.domain.Deployment;
-import org.springframework.cloud.skipper.domain.Release;
-import org.springframework.cloud.skipper.domain.Status;
-import org.springframework.cloud.skipper.domain.StatusCode;
+import org.springframework.cloud.skipper.domain.*;
 import org.springframework.cloud.skipper.repository.DeployerRepository;
 import org.springframework.cloud.skipper.repository.ReleaseRepository;
 import org.springframework.cloud.skipper.service.ManifestStore;
@@ -240,7 +231,9 @@ public class AppDeployerReleaseManager implements ReleaseManager {
 		Resource resource = delegatingResourceLoader.getResource(deployment.getResource());
 
 		Map<String, String> deploymentProperties = deployment.getDeploymentProperties();
-		deploymentProperties.put(AppDeployer.COUNT_PROPERTY_KEY, String.valueOf(deployment.getCount()));
+		if (deployment.getCount() != 0) {
+			deploymentProperties.put(AppDeployer.COUNT_PROPERTY_KEY, String.valueOf(deployment.getCount()));
+		}
 		deploymentProperties.put(AppDeployer.GROUP_PROPERTY_KEY, releaseName + "-v" + version);
 
 		AppDeploymentRequest appDeploymentRequest = new AppDeploymentRequest(appDefinition, resource,

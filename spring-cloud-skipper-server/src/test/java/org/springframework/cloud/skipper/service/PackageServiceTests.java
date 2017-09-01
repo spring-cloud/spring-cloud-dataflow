@@ -21,15 +21,18 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.yaml.snakeyaml.Yaml;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.skipper.AbstractIntegrationTest;
 import org.springframework.cloud.skipper.config.SkipperServerProperties;
+import org.springframework.cloud.skipper.domain.ConfigValues;
 import org.springframework.cloud.skipper.domain.Package;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
 import org.springframework.cloud.skipper.domain.Template;
@@ -39,6 +42,7 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.util.FileSystemUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.entry;
 
 /**
  * @author Mark Pollack
@@ -99,5 +103,36 @@ public class PackageServiceTests extends AbstractIntegrationTest {
 		Template template = pkg.getTemplates().get(0);
 		assertThat(template.getName()).isEqualTo("log.yml");
 		assertThat(template.getData()).isNotEmpty();
+	}
+
+	@Test
+	public void deserializeNestedPackage() {
+		PackageMetadata packageMetadata = this.packageMetadataRepository.findByNameAndVersion("ticktock", "1.0.0");
+		packageService.downloadPackage(packageMetadata);
+		Package pkg = packageService.loadPackage(packageMetadata);
+		assertThat(pkg).isNotNull();
+		assertThat(pkg.getMetadata()).isEqualTo(packageMetadata);
+		assertThat(pkg.getDependencies()).hasSize(2);
+
+		Package logPkg = pkg.getDependencies().get(0);
+		assertThat(logPkg).isNotNull();
+		assertThat(logPkg.getMetadata().getName()).isEqualTo("log");
+		assertThat(logPkg.getMetadata().getVersion()).isEqualTo("2.0.0");
+		assertConfigValues(logPkg);
+
+		Package timePkg = pkg.getDependencies().get(1);
+		assertThat(timePkg).isNotNull();
+		assertThat(timePkg.getMetadata().getName()).isEqualTo("time");
+		assertThat(timePkg.getMetadata().getVersion()).isEqualTo("2.0.0");
+		assertConfigValues(timePkg);
+	}
+
+	protected void assertConfigValues(Package pkg) {
+		ConfigValues configValues = pkg.getConfigValues();
+		Yaml yaml = new Yaml();
+		Map logConfigValueMap = (Map) yaml.load(configValues.getRaw());
+		assertThat(logConfigValueMap).containsKeys("appVersion", "deployment");
+		Map deploymentMap = (Map) logConfigValueMap.get("deployment");
+		assertThat(deploymentMap).contains(entry("count", 1));
 	}
 }

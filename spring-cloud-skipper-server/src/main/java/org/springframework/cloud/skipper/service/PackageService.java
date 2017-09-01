@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import io.jsonwebtoken.lang.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.zeroturnaround.zip.ZipUtil;
@@ -63,6 +64,7 @@ public class PackageService implements ResourceLoaderAware {
 	}
 
 	public void downloadPackage(PackageMetadata packageMetadata) {
+		Assert.notNull(packageMetadata, "Can't download PackageMetadata, it is a null value.");
 		String originUrl = packageMetadata.getOrigin();
 		String sourceUrl = originUrl + "/" + packageMetadata.getName() + "/" +
 				packageMetadata.getName() + "-" + packageMetadata.getVersion() + ".zip";
@@ -85,12 +87,16 @@ public class PackageService implements ResourceLoaderAware {
 		// TODO check if already downloaded.
 		String resolvedPackagePath = calculatePackageUnzippedDirectory(packageMetadata).getPath();
 		// Get all files under path
+		return loadPackageOnPath(packageMetadata.getOrigin(), resolvedPackagePath);
+	}
+
+	public Package loadPackageOnPath(String packageOrigin, String packagePath) {
 		List<File> files;
-		try (Stream<Path> paths = Files.walk(Paths.get(resolvedPackagePath), 1)) {
+		try (Stream<Path> paths = Files.walk(Paths.get(packagePath), 1)) {
 			files = paths.map(i -> i.toAbsolutePath().toFile()).collect(Collectors.toList());
 		}
 		catch (IOException e) {
-			throw new PackageException("Could not process files in path " + resolvedPackagePath, e);
+			throw new PackageException("Could not process files in path " + packagePath, e);
 		}
 
 		Package pkg = new Package();
@@ -99,20 +105,30 @@ public class PackageService implements ResourceLoaderAware {
 		for (File file : files) {
 			// Package metadata
 			if (file.getName().equalsIgnoreCase("package.yaml") || file.getName().equalsIgnoreCase("package.yml")) {
-				pkg.setMetadata(loadPackageMetadata(file, packageMetadata.getOrigin()));
+				pkg.setMetadata(loadPackageMetadata(file, packageOrigin));
 				continue;
 			}
+			// Package property values for configuration
 			if (file.getName().equalsIgnoreCase("values.yaml") || file.getName().equalsIgnoreCase("values.yml")) {
 				pkg.setConfigValues(loadConfigValues(file));
 				continue;
 			}
-			// The template/manifiest file
+			// The template files
 			String absFileName = file.getAbsoluteFile().toString();
 			if (absFileName.endsWith("/templates")) {
 				pkg.setTemplates(loadTemplates(file));
 				continue;
 			}
-			// TODO: Deal with recursive packages
+			// dependent packages
+			if ((file.getName().equalsIgnoreCase("packages") && file.isDirectory())) {
+				System.out.println("found the packages directory");
+				File[] dependentPackageDirectories = file.listFiles();
+				List<Package> dependencies = new ArrayList<>();
+				for (File dependentPackageDirectory : dependentPackageDirectories) {
+					dependencies.add(loadPackageOnPath(packageOrigin, dependentPackageDirectory.getPath()));
+				}
+				pkg.setDependencies(dependencies);
+			}
 
 		}
 

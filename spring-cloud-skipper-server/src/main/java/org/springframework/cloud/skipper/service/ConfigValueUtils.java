@@ -1,0 +1,166 @@
+/*
+ * Copyright 2017 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.springframework.cloud.skipper.service;
+
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+
+import org.yaml.snakeyaml.Yaml;
+
+import org.springframework.cloud.skipper.domain.ConfigValues;
+import org.springframework.cloud.skipper.domain.Package;
+import org.springframework.util.StringUtils;
+
+/**
+ * Utility methods for merging of configuration values.
+ * @author Mark Pollack
+ */
+public class ConfigValueUtils {
+
+	/**
+	 * Merge configuration values from the Package and values passed at runtime. Values passed
+	 * at runtime override those specified in the package. The ConfigValue string is assumed
+	 * to be in YAML format and parsed into a Map.
+	 * <p>
+	 * The values for dependencies of packages are also merged, which higher level packages
+	 * overriding lower level packages. Only one level of dependent packages are currently
+	 * supported.
+	 * <p>
+	 * @param pkg The package to be installed or updated.
+	 * @param overrideValues Configuration values pass in at runtime, when installing or
+	 * updating.
+	 * @return The merged configuration values.
+	 */
+	public static Map<String, Object> mergeConfigValues(Package pkg, ConfigValues overrideValues) {
+		// parge ConfigValues to a map.
+		Yaml yaml = new Yaml();
+		Map<String, Object> mergedValues;
+		// merge top level override values on top level package values
+		if (StringUtils.hasText(overrideValues.getRaw())) {
+			Map<String, Object> overrideMap = (Map<String, Object>) yaml.load(overrideValues.getRaw());
+			mergedValues = mergeOverrideMap(pkg, overrideMap);
+		}
+		else {
+			mergedValues = mergeOverrideMap(pkg, new TreeMap<>());
+		}
+		// return mergedValues;
+		Map<String, Object> mergedValuesIncludingDeps = mergeDependencies(pkg, mergedValues);
+		return mergedValuesIncludingDeps;
+	}
+
+	/**
+	 * Merge top level configuration values from the Package and the configuration values
+	 * passed in at runtime. The merging ignores top level configuration values that are for
+	 * overriding dependent packages.
+	 * <p>
+	 * @param pkg The package being configured
+	 * @param overrideMap The runtime override values
+	 * @return A merged map of package configuration values and runtime override values.
+	 */
+	public static Map<String, Object> mergeOverrideMap(Package pkg, Map<String, Object> overrideMap) {
+		// if the package does not have any values, return just the override values.
+		if (!StringUtils.hasText(pkg.getConfigValues().getRaw())) {
+			return overrideMap;
+		}
+		// load the package values
+		Yaml yaml = new Yaml();
+		Map<String, Object> packageValueMap = (Map<String, Object>) yaml.load(pkg.getConfigValues().getRaw());
+
+		// exclude dependency values from being merged into the current packages' values
+		if (packageValueMap != null) {
+			for (Package dependency : pkg.getDependencies()) {
+				if (packageValueMap.containsKey(dependency.getMetadata().getName())) {
+					packageValueMap.remove(dependency.getMetadata().getName());
+				}
+			}
+		}
+		else {
+			packageValueMap = new TreeMap<>();
+		}
+
+		merge(packageValueMap, overrideMap);
+
+		return packageValueMap;
+	}
+
+	private static Map<String, Object> mergeDependencies(Package pkg, Map<String, Object> overrideMap) {
+		List<Package> dependencies = pkg.getDependencies();
+		if (dependencies.size() == 0) {
+			return overrideMap;
+		}
+		Map<String, Object> mergedValues = new TreeMap<>();
+
+		// parse ConfigValues to a map.
+		Yaml yaml = new Yaml();
+		Map<String, Object> currentPackageValueMap = new TreeMap<>();
+		if (StringUtils.hasText(pkg.getConfigValues().getRaw())) {
+			currentPackageValueMap = (Map<String, Object>) yaml.load(pkg.getConfigValues().getRaw());
+		}
+		if (currentPackageValueMap == null) {
+			currentPackageValueMap = new TreeMap<>();
+		}
+		for (Package dependency : dependencies) {
+			Map<String, Object> currentPackageValueMapForDependency = (Map<String, Object>) currentPackageValueMap
+					.getOrDefault(dependency.getMetadata().getName(), new TreeMap<>());
+			merge(currentPackageValueMapForDependency, overrideMap);
+			mergedValues.put(dependency.getMetadata().getName(),
+					// TODO support multiple levels of dependency, convert PackageValueMap to ConfigValues
+					mergeOverrideMap(dependency, currentPackageValueMapForDependency));
+		}
+		return mergedValues;
+
+	}
+
+	/**
+	 * Nested merge of maps where the values from map2 override those from map1.
+	 * @param map1 The base map to merge values onto
+	 * @param map2 The map of values to override those of the first map argument.
+	 */
+	public static void merge(Map<String, Object> map1, Map<String, Object> map2) {
+		for (String key : map2.keySet()) {
+			Object value2 = map2.get(key);
+			if (map1.containsKey(key)) {
+				Object value1 = map1.get(key);
+				if (value1 instanceof Map && value2 instanceof Map) {
+					merge((Map<String, Object>) value1, (Map<String, Object>) value2);
+				}
+				else if (value1 instanceof List && value2 instanceof List) {
+					map1.put(key, mergeList((List) value1, (List) value2));
+				}
+				else {
+					map1.put(key, value2);
+				}
+			}
+			else {
+				map1.put(key, value2);
+			}
+		}
+	}
+
+	/**
+	 * Merge two lists, the contents of the second list override those in the first.
+	 * @param list1 The base list to merge values onto.
+	 * @param list2 The list of value that override those of the first list argument.
+	 * @return the merged list
+	 */
+	public static List mergeList(List list1, List list2) {
+		list2.removeAll(list1);
+		list1.addAll(list2);
+		return list1;
+	}
+
+}

@@ -1,0 +1,13 @@
+# Default values for {{name}}
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates
+appVersion: 1.2.0.RELEASE # will be overridden via root package values.yml
+deployment:
+  count: 1 # will not be overridden
+  applicationProperties:
+    log.level: DEBUG  # will be overridden via root package values.yml
+    trigger.fixed-delay: 5  # will be overridden via root package values.yml
+    trigger.max-messages: 2 # will not be overridden
+  deploymentProperties:
+    memory: 1024m    # will not be overridden
+

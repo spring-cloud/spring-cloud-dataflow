@@ -43,7 +43,7 @@ public class Release {
 
 	private Package pkg;
 
-	private ConfigValues configValues;
+	private ConfigValues configValues = new ConfigValues();
 
 	private String manifest;
 
@@ -85,7 +85,12 @@ public class Release {
 	}
 
 	public ConfigValues getConfigValues() {
-		return configValues;
+		if (configValues == null) {
+			return new ConfigValues();
+		}
+		else {
+			return configValues;
+		}
 	}
 
 	public void setConfigValues(ConfigValues configValues) {

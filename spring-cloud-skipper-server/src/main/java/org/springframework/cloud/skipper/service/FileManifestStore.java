@@ -20,6 +20,8 @@ import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
 
+import io.jsonwebtoken.lang.Assert;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.skipper.config.SkipperServerProperties;
 import org.springframework.cloud.skipper.domain.Release;
@@ -51,6 +53,7 @@ public class FileManifestStore implements ManifestStore {
 	}
 
 	private void writeText(final File target, final String body) {
+		Assert.notNull(body, "Cannot write an emtpy manifest file, target file = " + target.getName());
 		try (OutputStream stream = new FileOutputStream(target, false)) {
 			StreamUtils.copy(body, Charset.forName("UTF-8"), stream);
 		}

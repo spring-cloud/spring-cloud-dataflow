@@ -17,22 +17,16 @@ package org.springframework.cloud.skipper.service;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.util.Date;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 
 import com.samskivert.mustache.Mustache;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
-import org.springframework.cloud.skipper.domain.ConfigValues;
-import org.springframework.cloud.skipper.domain.Info;
+import org.springframework.cloud.skipper.domain.*;
 import org.springframework.cloud.skipper.domain.Package;
-import org.springframework.cloud.skipper.domain.PackageMetadata;
-import org.springframework.cloud.skipper.domain.Release;
-import org.springframework.cloud.skipper.domain.Status;
-import org.springframework.cloud.skipper.domain.StatusCode;
-import org.springframework.cloud.skipper.domain.Template;
 import org.springframework.cloud.skipper.domain.skipperpackage.DeployProperties;
 import org.springframework.cloud.skipper.repository.PackageMetadataRepository;
 import org.springframework.cloud.skipper.repository.ReleaseRepository;
@@ -47,6 +41,8 @@ import org.springframework.util.StringUtils;
  */
 @Service
 public class ReleaseService {
+
+	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
 	private final PackageMetadataRepository packageMetadataRepository;
 
@@ -71,13 +67,34 @@ public class ReleaseService {
 	 * Downloads the package metadata and package zip file specified by the given Id and
 	 * deploys the package on the target platform.
 	 * @param id of the package
-	 * @param deployProperties contains the name of the release, the platfrom to deploy
-	 * to, and configuration values to replace in the package template.
-	 * @return the Release object associated with this installation
+	 * @param deployProperties contains the name of the release, the platfrom to deploy to,
+	 * and configuration values to replace in the package template.
+	 * @return the Release object associated with this deployment
 	 */
 	public Release deploy(String id, DeployProperties deployProperties) {
 		Assert.notNull(deployProperties, "Install Properties can not be null");
 		PackageMetadata packageMetadata = this.packageMetadataRepository.findOne(id);
+		return deploy(packageMetadata, deployProperties);
+	}
+
+	/**
+	 * Downloads the package metadata and package zip file specified by PackageIdentifier
+	 * property of the DeploymentRequest. Deploys the package on the target platform.
+	 * @param deployRequest the deploymentRequest
+	 * @return the Release object associated with this deployment
+	 */
+	public Release deploy(DeployRequest deployRequest) {
+		// TODO deployRequest validation.
+		PackageIdentifier packageIdentifier = deployRequest.getPackageIdentifier();
+		PackageMetadata packageMetadata = this.packageMetadataRepository.findByNameAndVersion(
+				packageIdentifier.getPackageName(),
+				packageIdentifier.getPackageVersion());
+		// TODO - what about multi-repository support....
+		// deployRequest.getPackageIdentifier().getRepositoryName()
+		return deploy(packageMetadata.getId(), deployRequest.getDeployProperties());
+	}
+
+	protected Release deploy(PackageMetadata packageMetadata, DeployProperties deployProperties) {
 		this.packageService.downloadPackage(packageMetadata);
 		Package packageToInstall = this.packageService.loadPackage(packageMetadata);
 		Release release = createInitialRelease(deployProperties, packageToInstall);
@@ -85,9 +102,11 @@ public class ReleaseService {
 	}
 
 	private Release deploy(Release release) {
-		Properties model = mergeConfigValues(release.getConfigValues(), release.getPkg().getConfigValues());
+		Map<String, Object> mergedMap = ConfigValueUtils.mergeConfigValues(release.getPkg(), release.getConfigValues());
+		// Properties model = mergeConfigValues(release.getPkg().getConfigValues(),
+		// release.getConfigValues());
 		// Render yaml resources
-		String manifest = createManifest(release.getPkg(), model);
+		String manifest = createManifest(release.getPkg(), mergedMap);
 		release.setManifest(manifest);
 		// Deployment
 		return this.releaseManager.deploy(release);
@@ -125,6 +144,12 @@ public class ReleaseService {
 	public Release update(String packageId, DeployProperties deployProperties) {
 		Release oldRelease = getLatestRelease(deployProperties.getReleaseName());
 		Release newRelease = createNewRelease(packageId, oldRelease.getVersion() + 1, deployProperties);
+		// Properties model = mergeConfigValues(newRelease.getPkg().getConfigValues(),
+		// newRelease.getConfigValues());
+		Map<String, Object> model = ConfigValueUtils.mergeConfigValues(newRelease.getPkg(),
+				newRelease.getConfigValues());
+		String manifest = createManifest(newRelease.getPkg(), model);
+		newRelease.setManifest(manifest);
 		return update(oldRelease, newRelease);
 	}
 
@@ -140,30 +165,54 @@ public class ReleaseService {
 		release.setConfigValues(deployProperties.getConfigValues());
 		release.setPkg(packageToInstall);
 		release.setVersion(newVersion);
+		Info info = createNewInfo("Update deploy underway");
+		release.setInfo(info);
+		return release;
+	}
+
+	protected Info createNewInfo(String update_deploy_underway) {
 		Info info = new Info();
 		info.setFirstDeployed(new Date());
 		info.setLastDeployed(new Date());
 		Status status = new Status();
 		status.setStatusCode(StatusCode.UNKNOWN);
 		info.setStatus(status);
-		info.setDescription("Update deploy underway");
-		release.setInfo(info);
-		return release;
+		info.setDescription(update_deploy_underway);
+		return info;
 	}
 
 	public Release update(Release existingRelease, Release replacingRelease) {
 		Assert.notNull(existingRelease, "Existing Release must not be null");
 		Assert.notNull(replacingRelease, "Replacing Release must not be null");
-		deploy(replacingRelease);
+		Release release = this.releaseManager.deploy(replacingRelease);
+		// TODO UpdateStrategy (manfiestSave, healthCheck)
 		this.releaseManager.undeploy(existingRelease);
-		return replacingRelease;
+		return release;
 	}
 
 	public Release rollback(String releaseName, int rollbackVersion) {
 		Assert.notNull(releaseName, "Release name must not be null");
-		Release releaseToRollback = getRelease(releaseName, rollbackVersion);
-		Release currentRelease = getLatestRelease(releaseName);
-		update(currentRelease, releaseToRollback);
+		Release releaseToRollback = this.releaseRepository.findByNameAndVersion(releaseName, rollbackVersion);
+		Assert.notNull(releaseToRollback, "Could not find Release to rollback to [releaseName,releaseVersion] = ["
+				+ releaseName + "," + rollbackVersion + "]");
+
+		Release currentRelease = this.releaseRepository.findLatestRelease(releaseName);
+		Assert.notNull(currentRelease, "Could not find current release with [releaseName] = [" + releaseName + "]");
+
+		logger.info("Rolling back releaseName={}.  Current version={}, Target version={}", releaseName,
+				currentRelease.getVersion(), releaseToRollback.getVersion());
+
+		Release newRelease = new Release();
+		newRelease.setName(releaseName);
+		newRelease.setPkg(releaseToRollback.getPkg());
+		newRelease.setManifest(releaseToRollback.getManifest());
+		newRelease.setVersion(currentRelease.getVersion() + 1);
+		newRelease.setPlatformName(releaseToRollback.getPlatformName());
+		// Do not set ConfigValues since the manifest from the previous release has already
+		// resolved those...
+		newRelease.setInfo(createNewInfo());
+
+		update(currentRelease, newRelease);
 		return releaseToRollback;
 	}
 
@@ -176,7 +225,7 @@ public class ReleaseService {
 	 * @param model The placeholder values.
 	 * @return A YAML string containing all the templates with replaced values.
 	 */
-	public String createManifest(Package packageToDeploy, Properties model) {
+	public String createManifest(Package packageToDeploy, Map<String, Object> model) {
 
 		// Aggregate all valid manifests into one big doc.
 		StringBuilder sb = new StringBuilder();
@@ -191,17 +240,26 @@ public class ReleaseService {
 			}
 		}
 
-		// TODO package dependencies
+		for (Package pkg : packageToDeploy.getDependencies()) {
+			String packageName = pkg.getMetadata().getName();
+			Map<String, Object> modelForDependency;
+			if (model.containsKey(packageName)) {
+				modelForDependency = (Map<String, Object>) model.get(pkg.getMetadata().getName());
+			}
+			else {
+				modelForDependency = new TreeMap<>();
+			}
+			sb.append(createManifest(pkg, modelForDependency));
+		}
 
 		return sb.toString();
 	}
 
 	/**
-	 * Merge the properties, derived from YAML format, contained in
-	 * commandLineConfigValues and templateConfigValue, giving preference to
-	 * commandLineConfigValues. Assumes that the YAML is stored as "raw" data in the
-	 * ConfigValues object. If the "raw" data is empty or null, an empty property object
-	 * is returned.
+	 * Merge the properties, derived from YAML format, contained in commandLineConfigValues
+	 * and templateConfigValue, giving preference to commandLineConfigValues. Assumes that the
+	 * YAML is stored as "raw" data in the ConfigValues object. If the "raw" data is empty or
+	 * null, an empty property object is returned.
 	 *
 	 * @param templateConfigValue YAML data defined in the template.yaml file
 	 * @param commandLineConfigValues YAML data passed at the application runtime
@@ -231,11 +289,10 @@ public class ReleaseService {
 	}
 
 	/**
-	 * Return a Properties object given a String that contains YAML. The Properties
-	 * created by this factory have nested paths for hierarchical objects. All exposed
-	 * values are of type {@code String}</b> for access through the common
-	 * {@link Properties#getProperty} method. See YamlPropertiesFactoryBean for more
-	 * information.
+	 * Return a Properties object given a String that contains YAML. The Properties created by
+	 * this factory have nested paths for hierarchical objects. All exposed values are of type
+	 * {@code String}</b> for access through the common {@link Properties#getProperty} method.
+	 * See YamlPropertiesFactoryBean for more information.
 	 * @param yamlString String that contains YAML
 	 * @return properties object containing contents of YAML file
 	 */
@@ -268,6 +325,12 @@ public class ReleaseService {
 		release.setConfigValues(deployProperties.getConfigValues());
 		release.setPkg(packageToInstall);
 		release.setVersion(1);
+		Info info = createNewInfo();
+		release.setInfo(info);
+		return release;
+	}
+
+	private Info createNewInfo() {
 		Info info = new Info();
 		info.setFirstDeployed(new Date());
 		info.setLastDeployed(new Date());
@@ -275,7 +338,7 @@ public class ReleaseService {
 		status.setStatusCode(StatusCode.UNKNOWN);
 		info.setStatus(status);
 		info.setDescription("Initial deploy underway");
-		release.setInfo(info);
-		return release;
+		return info;
 	}
+
 }

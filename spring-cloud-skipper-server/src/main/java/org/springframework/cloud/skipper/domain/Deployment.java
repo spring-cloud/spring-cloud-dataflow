@@ -15,6 +15,7 @@
  */
 package org.springframework.cloud.skipper.domain;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -27,15 +28,15 @@ public class Deployment {
 
 	private int count;
 
-	private Map<String, String> labels;
+	private Map<String, String> labels = new HashMap<>();
 
-	private Map<String, String> applicationProperties;
+	private Map<String, String> applicationProperties = new HashMap<>();
 
 	private String resource;
 
 	private String resourceMetadata;
 
-	private Map<String, String> deploymentProperties;
+	private Map<String, String> deploymentProperties = new HashMap<>();
 
 	public Deployment() {
 	}
@@ -65,7 +66,12 @@ public class Deployment {
 	}
 
 	public Map<String, String> getApplicationProperties() {
-		return applicationProperties;
+		if (applicationProperties == null) {
+			return new HashMap<>();
+		}
+		else {
+			return applicationProperties;
+		}
 	}
 
 	public void setApplicationProperties(Map<String, String> applicationProperties) {
@@ -89,7 +95,13 @@ public class Deployment {
 	}
 
 	public Map<String, String> getDeploymentProperties() {
-		return deploymentProperties;
+		if (deploymentProperties == null) {
+			return new HashMap<>();
+		}
+		else {
+			return deploymentProperties;
+		}
+
 	}
 
 	public void setDeploymentProperties(Map<String, String> deploymentProperties) {
