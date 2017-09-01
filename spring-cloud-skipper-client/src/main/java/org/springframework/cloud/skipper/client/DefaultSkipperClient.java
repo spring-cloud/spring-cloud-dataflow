@@ -26,6 +26,7 @@ import org.springframework.web.client.RestTemplate;
  * The default implementation to communicate with the Skipper Server.
  *
  * @author Mark Pollack
+ * @author Ilayaperumal Gopinathan
  */
 public class DefaultSkipperClient implements SkipperClient {
 
@@ -36,7 +37,7 @@ public class DefaultSkipperClient implements SkipperClient {
 	private final String baseUrl;
 
 	/**
-	 * Create a new DefaultSkipperClient given the URL of the Server.  This constructor
+	 * Create a new DefaultSkipperClient given the URL of the Server. This constructor
 	 * will create a new RestTemplate instance for communication.
 	 *
 	 * @param baseUrl the URL of the Server.
@@ -51,7 +52,7 @@ public class DefaultSkipperClient implements SkipperClient {
 	 * Create a new DefaultSkipperClient given the URL of the Server and a preconfigured
 	 * RestTemplate.
 	 *
-	 * @param baseUrl      the URL of the Server.
+	 * @param baseUrl the URL of the Server.
 	 * @param restTemplate the template to use to make http calls to the server.
 	 */
 	public DefaultSkipperClient(String baseUrl, RestTemplate restTemplate) {
@@ -64,6 +65,12 @@ public class DefaultSkipperClient implements SkipperClient {
 	@Override
 	public AboutInfo getAboutInfo() {
 		// TODO use Traverson API to find 'about' resource.
-		return restTemplate.getForObject(baseUrl + "/about", AboutInfo.class);
+		return this.restTemplate.getForObject(baseUrl + "/about", AboutInfo.class);
+	}
+
+	@Override
+	public String getPackageMetadata(boolean details) {
+		String url = baseUrl + "/packageMetadata";
+		return this.restTemplate.getForObject((details) ? url : url + "?projection=summary", String.class);
 	}
 }

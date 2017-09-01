@@ -21,6 +21,7 @@ import org.springframework.cloud.skipper.domain.AboutInfo;
  * The main client side interface to communicate with the Skipper Server.
  *
  * @author Mark Pollack
+ * @author Ilayaperumal Gopinathan
  */
 public interface SkipperClient {
 
@@ -32,4 +33,11 @@ public interface SkipperClient {
 	 * @return The AboutInfo for the server
 	 */
 	AboutInfo getAboutInfo();
+
+	/**
+	 *
+	 * @param details boolean flag to fetch all the metadata.
+	 * @return the package metadata with the projection set to summary
+	 */
+	String getPackageMetadata(boolean details);
 }
