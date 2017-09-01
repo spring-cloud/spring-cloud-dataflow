@@ -37,7 +37,7 @@ public class Release {
 	@Column(unique = true)
 	private String name;
 
-	private String version;
+	private int version;
 
 	private Info info;
 
@@ -60,11 +60,11 @@ public class Release {
 		this.name = name;
 	}
 
-	public String getVersion() {
+	public int getVersion() {
 		return version;
 	}
 
-	public void setVersion(String version) {
+	public void setVersion(int version) {
 		this.version = version;
 	}
 

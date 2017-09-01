@@ -29,7 +29,7 @@ public class AppDeployerData {
 
 	private String releaseName;
 
-	private String releaseVersion;
+	private Integer releaseVersion;
 
 	// Store deployment Ids associated with the given release.
 	private String deploymentData;
@@ -45,11 +45,11 @@ public class AppDeployerData {
 		this.releaseName = releaseName;
 	}
 
-	public String getReleaseVersion() {
+	public Integer getReleaseVersion() {
 		return releaseVersion;
 	}
 
-	public void setReleaseVersion(String releaseVersion) {
+	public void setReleaseVersion(Integer releaseVersion) {
 		this.releaseVersion = releaseVersion;
 	}
 

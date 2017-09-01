@@ -89,7 +89,7 @@ public class PackageServiceTests extends AbstractIntegrationTest {
 
 	@Test
 	public void deserializePackage() {
-		PackageMetadata packageMetadata = packageMetadataRepository.findByNameAndVersion("log", "1.0.0");
+		PackageMetadata packageMetadata = this.packageMetadataRepository.findByNameAndVersion("log", "1.0.0");
 		packageService.downloadPackage(packageMetadata);
 		Package pkg = packageService.loadPackage(packageMetadata);
 		assertThat(pkg).isNotNull();

@@ -35,7 +35,7 @@ public class ReleaseRepositoryImpl implements CustomReleaseRepository {
 		for (Release release : releases) {
 			// Find the latest release
 			if (release.getName().equals(releaseName)) {
-				int currentVersion = getNumberedVersion(release.getVersion());
+				int currentVersion = release.getVersion();
 				if (currentVersion > lastVersion) {
 					lastVersion = currentVersion;
 					latestRelease = release;
@@ -45,17 +45,13 @@ public class ReleaseRepositoryImpl implements CustomReleaseRepository {
 		return latestRelease;
 	}
 
-	private int getNumberedVersion(String version) {
-		return Integer.valueOf(version.replace(".", ""));
-	}
-
 	@Override
-	public Release findByNameAndVersion(String releaseName, String version) {
+	public Release findByNameAndVersion(String releaseName, int version) {
 		Iterable<Release> releases = releaseRepository.findAll();
 
 		Release matchingRelease = null;
 		for (Release release : releases) {
-			if (release.getName().equals(releaseName) && release.getVersion().equals(version)) {
+			if (release.getName().equals(releaseName) && release.getVersion() == version) {
 				matchingRelease = release;
 				break;
 			}

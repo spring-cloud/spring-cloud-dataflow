@@ -34,7 +34,12 @@ import org.springframework.cloud.deployer.spi.app.AppStatus;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
-import org.springframework.cloud.skipper.domain.*;
+import org.springframework.cloud.skipper.domain.AppDeployerData;
+import org.springframework.cloud.skipper.domain.AppDeploymentKind;
+import org.springframework.cloud.skipper.domain.Deployment;
+import org.springframework.cloud.skipper.domain.Release;
+import org.springframework.cloud.skipper.domain.Status;
+import org.springframework.cloud.skipper.domain.StatusCode;
 import org.springframework.cloud.skipper.repository.DeployerRepository;
 import org.springframework.cloud.skipper.repository.ReleaseRepository;
 import org.springframework.cloud.skipper.service.ManifestStore;
@@ -79,7 +84,8 @@ public class AppDeployerReleaseManager implements ReleaseManager {
 		// TODO review transaction semantics
 		this.releaseRepository.save(release);
 
-		// TODO how to rollback file system/git in case of DB errors later in method execution
+		// TODO how to rollback file system/git in case of DB errors later in method
+		// execution
 		this.manifestStore.store(release);
 
 		// Deploy the application
@@ -146,8 +152,8 @@ public class AppDeployerReleaseManager implements ReleaseManager {
 	public Release undeploy(Release release) {
 		AppDeployer appDeployer = deployerRepository.findByName(release.getPlatformName()).getDeployer();
 		Set<String> deploymentIds = new HashSet<>();
-		AppDeployerData appDeployerData = appDeployerDataRepository
-				.findByReleaseNameAndReleaseVersion(release.getName(), String.valueOf(release.getVersion()));
+		AppDeployerData appDeployerData = this.appDeployerDataRepository
+				.findByReleaseNameAndReleaseVersion(release.getName(), release.getVersion());
 		deploymentIds.addAll(StringUtils.commaDelimitedListToSet(appDeployerData.getDeploymentData()));
 		if (!deploymentIds.isEmpty()) {
 			Status deletingStatus = new Status();
@@ -170,7 +176,8 @@ public class AppDeployerReleaseManager implements ReleaseManager {
 	public void updateStatus(Release release) {
 		//
 		// boolean allClear = true;
-		// Map<String, AppInstanceStatus> instances = new HashMap<String, AppInstanceStatus>();
+		// Map<String, AppInstanceStatus> instances = new HashMap<String,
+		// AppInstanceStatus>();
 		// List<String> deploymentIds = Arrays
 		// .asList(StringUtils.commaDelimitedListToStringArray(release.getDeploymentId()));
 		//

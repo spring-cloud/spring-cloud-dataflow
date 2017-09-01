@@ -94,13 +94,13 @@ public class ReleaseService {
 		return this.releaseManager.deploy(release);
 	}
 
-	public Release undeploy(String releaseName, String version) {
+	public Release undeploy(String releaseName, Integer version) {
 		Assert.notNull(releaseName, "Release name must not be null");
 		Release release = getRelease(releaseName, version);
 		return this.releaseManager.undeploy(release);
 	}
 
-	public Release status(String releaseName, String version) {
+	public Release status(String releaseName, Integer version) {
 		return status(getRelease(releaseName, version));
 	}
 
@@ -112,7 +112,7 @@ public class ReleaseService {
 		return this.releaseRepository.findLatestRelease(releaseName);
 	}
 
-	public Release getRelease(String releaseName, String version) {
+	public Release getRelease(String releaseName, Integer version) {
 		Release release;
 		if (version == null) {
 			release = this.releaseRepository.findLatestRelease(releaseName);
@@ -131,7 +131,7 @@ public class ReleaseService {
 		return update(oldRelease, newRelease);
 	}
 
-	public Release createNewRelease(String packageId, String newVersion, DeployProperties deployProperties) {
+	public Release createNewRelease(String packageId, Integer newVersion, DeployProperties deployProperties) {
 		Assert.notNull(deployProperties, "Deploy Properties can not be null");
 		PackageMetadata packageMetadata = this.packageMetadataRepository.findOne(packageId);
 		this.packageService.downloadPackage(packageMetadata);
@@ -162,7 +162,7 @@ public class ReleaseService {
 		return replacingRelease;
 	}
 
-	public Release rollback(String releaseName, String rollbackVersion) {
+	public Release rollback(String releaseName, int rollbackVersion) {
 		Assert.notNull(releaseName, "Release name must not be null");
 		Release releaseToRollback = getRelease(releaseName, rollbackVersion);
 		Release currentRelease = getLatestRelease(releaseName);
@@ -270,8 +270,7 @@ public class ReleaseService {
 		release.setPlatformName(deployProperties.getPlatformName());
 		release.setConfigValues(deployProperties.getConfigValues());
 		release.setPkg(packageToInstall);
-
-		release.setVersion("1.0.0");
+		release.setVersion(1);
 		Info info = new Info();
 		info.setFirstDeployed(new Date());
 		info.setLastDeployed(new Date());

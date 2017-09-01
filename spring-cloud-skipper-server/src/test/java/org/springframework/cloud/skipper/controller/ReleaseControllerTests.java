@@ -63,6 +63,7 @@ public class ReleaseControllerTests extends AbstractMockMvcTests {
 
 	@Before
 	public void cleanupPackageDir() {
+		this.releaseRepository.deleteAll();
 		File packageDirectory = new File(skipperServerProperties.getPackageDir());
 		FileSystemUtils.deleteRecursively(new File(skipperServerProperties.getPackageDir()));
 		assertThat(packageDirectory).doesNotExist();
@@ -72,33 +73,33 @@ public class ReleaseControllerTests extends AbstractMockMvcTests {
 	public void checkDeployStatus() throws Exception {
 		String packageName = "log";
 		String releaseName = "log-sink-app";
-		String initialVersion = "1.0.0";
+		String packageVersion = "1.0.0";
 		DeployProperties deployProperties = new DeployProperties();
 		deployProperties.setPlatformName("test");
 		deployProperties.setReleaseName(releaseName);
 		PackageMetadata packageMetadata = this.packageMetadataRepository.findByNameAndVersion(packageName,
-				initialVersion);
+				packageVersion);
 		mockMvc.perform(post("/package/" + packageMetadata.getId() + "/deploy")
 				.content(convertObjectToJson(deployProperties))).andDo(print())
 				.andExpect(status().isCreated()).andReturn();
 		CountDownLatch latch = new CountDownLatch(1);
 		long startTime = System.currentTimeMillis();
-		while (!isDeployed(releaseName, initialVersion)
+		while (!isDeployed(releaseName, 1)
 				|| (System.currentTimeMillis() - startTime) < 12000) {
 			Thread.sleep(10000);
 		}
-		if (isDeployed(releaseName, initialVersion)) {
+		if (isDeployed(releaseName, 1)) {
 			latch.countDown();
 		}
 		assertThat(latch.await(1, TimeUnit.SECONDS)).describedAs("Status check timed out").isTrue();
 		// Undeploy
-		mockMvc.perform(post("/package/undeploy/" + releaseName + "/" + initialVersion)).andDo(print())
+		mockMvc.perform(post("/package/undeploy/" + releaseName + "/" + 1)).andDo(print())
 				.andExpect(status().isCreated()).andReturn();
-		Release undeployedRelease = this.releaseRepository.findByNameAndVersion(releaseName, initialVersion);
+		Release undeployedRelease = this.releaseRepository.findByNameAndVersion(releaseName, 1);
 		assertThat(undeployedRelease.getInfo().getStatus().getStatusCode()).isEqualTo(StatusCode.DELETED);
 	}
 
-	private boolean isDeployed(String releaseName, String version) {
+	private boolean isDeployed(String releaseName, Integer version) {
 		try {
 			MvcResult result = mockMvc.perform(get(String.format("/release/status/%s/%s", releaseName, version)))
 					.andDo(print()).andReturn();
@@ -110,8 +111,8 @@ public class ReleaseControllerTests extends AbstractMockMvcTests {
 		}
 	}
 
-	private String getSuccessStatus(String release, String version) {
-		return "{\"name\":\"" + release + "\",\"version\":\"" + version + "\","
+	private String getSuccessStatus(String release, Integer version) {
+		return "{\"name\":\"" + release + "\",\"version\":" + version + ","
 				+ "\"info\":{\"status\":{\"statusCode\":\"DEPLOYED\","
 				+ "\"platformStatus\":\"All the applications are deployed successfully.";
 	}

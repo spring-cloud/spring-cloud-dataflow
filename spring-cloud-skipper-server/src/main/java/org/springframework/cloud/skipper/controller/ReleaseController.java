@@ -39,9 +39,9 @@ public class ReleaseController {
 		this.releaseService = releaseService;
 	}
 
-	@RequestMapping(path = "/status/{name}/{version:.+}", method = RequestMethod.GET)
+	@RequestMapping(path = "/status/{name}/{version}", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
-	public Release status(@PathVariable("name") String name, @PathVariable("version") String version) {
+	public Release status(@PathVariable("name") String name, @PathVariable("version") int version) {
 		return this.releaseService.status(name, version);
 	}
 }

@@ -50,9 +50,9 @@ public class PackageController {
 		return this.releaseService.deploy(id, deployProperties);
 	}
 
-	@RequestMapping(path = "/undeploy/{name}/{version:.+}", method = RequestMethod.POST)
+	@RequestMapping(path = "/undeploy/{name}/{version}", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
-	public Release undeploy(@PathVariable("name") String releaseName, @PathVariable("version") String version) {
+	public Release undeploy(@PathVariable("name") String releaseName, @PathVariable("version") int version) {
 		return this.releaseService.undeploy(releaseName, version);
 	}
 
@@ -62,9 +62,9 @@ public class PackageController {
 		return this.releaseService.update(updateProperties);
 	}
 
-	@RequestMapping(path = "/rollback/{name}/{version:.+}", method = RequestMethod.POST)
+	@RequestMapping(path = "/rollback/{name}/{version}", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
-	public Release rollback(@PathVariable("name") String releaseName, @PathVariable("version") String rollbackVersion) {
+	public Release rollback(@PathVariable("name") String releaseName, @PathVariable("version") int rollbackVersion) {
 		return this.releaseService.rollback(releaseName, rollbackVersion);
 	}
 }

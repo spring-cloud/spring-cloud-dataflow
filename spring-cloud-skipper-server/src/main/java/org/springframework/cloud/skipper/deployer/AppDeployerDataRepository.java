@@ -23,6 +23,6 @@ import org.springframework.data.repository.PagingAndSortingRepository;
  */
 public interface AppDeployerDataRepository extends PagingAndSortingRepository<AppDeployerData, String> {
 
-	AppDeployerData findByReleaseNameAndReleaseVersion(String releaseName, String releaseVersion);
+	AppDeployerData findByReleaseNameAndReleaseVersion(String releaseName, Integer releaseVersion);
 
 }

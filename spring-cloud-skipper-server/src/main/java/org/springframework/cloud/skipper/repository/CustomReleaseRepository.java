@@ -24,5 +24,5 @@ public interface CustomReleaseRepository {
 
 	Release findLatestRelease(String releaseName);
 
-	Release findByNameAndVersion(String releaseName, String version);
+	Release findByNameAndVersion(String releaseName, int version);
 }

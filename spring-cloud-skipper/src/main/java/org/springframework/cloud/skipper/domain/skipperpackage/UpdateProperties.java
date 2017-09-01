@@ -22,25 +22,25 @@ public class UpdateProperties {
 
 	private String packageId;
 
-	private String oldVersion;
+	private int oldVersion;
 
-	private String newVersion;
+	private int newVersion;
 
 	private DeployProperties config;
 
-	public String getOldVersion() {
+	public int getOldVersion() {
 		return oldVersion;
 	}
 
-	public void setOldVersion(String oldVersion) {
+	public void setOldVersion(int oldVersion) {
 		this.oldVersion = oldVersion;
 	}
 
-	public String getNewVersion() {
+	public int getNewVersion() {
 		return newVersion;
 	}
 
-	public void setNewVersion(String newVersion) {
+	public void setNewVersion(int newVersion) {
 		this.newVersion = newVersion;
 	}
 
