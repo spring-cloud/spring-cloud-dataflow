@@ -26,6 +26,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
+ * REST controller for Release related operations such as un-deploy/rollback/status etc.
+ *
  * @author Ilayaperumal Gopinathan
  */
 @RestController
@@ -43,5 +45,17 @@ public class ReleaseController {
 	@ResponseStatus(HttpStatus.OK)
 	public Release status(@PathVariable("name") String name, @PathVariable("version") int version) {
 		return this.releaseService.status(name, version);
+	}
+
+	@RequestMapping(path = "/undeploy/{name}/{version}", method = RequestMethod.POST)
+	@ResponseStatus(HttpStatus.CREATED)
+	public Release undeploy(@PathVariable("name") String releaseName, @PathVariable("version") int releaseVersion) {
+		return this.releaseService.undeploy(releaseName, releaseVersion);
+	}
+
+	@RequestMapping(path = "/rollback/{name}/{version}", method = RequestMethod.POST)
+	@ResponseStatus(HttpStatus.CREATED)
+	public Release rollback(@PathVariable("name") String releaseName, @PathVariable("version") int rollbackVersion) {
+		return this.releaseService.rollback(releaseName, rollbackVersion);
 	}
 }

@@ -27,7 +27,6 @@ import org.springframework.cloud.skipper.domain.PackageMetadata;
 import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.StatusCode;
 import org.springframework.cloud.skipper.domain.skipperpackage.DeployProperties;
-import org.springframework.cloud.skipper.domain.skipperpackage.UpdateProperties;
 import org.springframework.cloud.skipper.repository.PackageMetadataRepository;
 import org.springframework.cloud.skipper.repository.ReleaseRepository;
 import org.springframework.test.context.ActiveProfiles;
@@ -67,7 +66,7 @@ public class PackageControllerTests extends AbstractMockMvcTests {
 	}
 
 	@Test
-	public void deployUpdateRollbackAndUndeploy() throws Exception {
+	public void packageDeployAndUpdate() throws Exception {
 		String packageName = "log";
 		String releaseName = "log-sink-app";
 		// Deploy
@@ -91,16 +90,11 @@ public class PackageControllerTests extends AbstractMockMvcTests {
 		String updatePkgName = "log2";
 		PackageMetadata updatePackageMetadata = packageMetadataRepository.findByNameAndVersion(updatePkgName,
 				updatePackageVersion);
-		UpdateProperties updateProperties = new UpdateProperties();
-		updateProperties.setPackageId(updatePackageMetadata.getId());
-		updateProperties.setOldVersion(1);
-		updateProperties.setNewVersion(2);
 		DeployProperties newDeployProperties = new DeployProperties();
 		newDeployProperties.setPlatformName("test");
 		newDeployProperties.setReleaseName(releaseName);
-		updateProperties.setConfig(newDeployProperties);
-		mockMvc.perform(post("/package/update")
-				.content(convertObjectToJson(updateProperties))).andDo(print())
+		mockMvc.perform(post("/package/" + updatePackageMetadata.getId() + "/update")
+				.content(convertObjectToJson(newDeployProperties))).andDo(print())
 				.andExpect(status().isCreated()).andReturn();
 		Release updatedRelease = this.releaseRepository.findByNameAndVersion(releaseName, 2);
 		assertThat(updatedRelease.getName()).isEqualTo(releaseName);
@@ -108,16 +102,6 @@ public class PackageControllerTests extends AbstractMockMvcTests {
 		assertThat(updatedRelease.getVersion()).isEqualTo(2);
 		assertThat(updatedRelease.getPkg().getMetadata().equals(updatePackageMetadata)).isTrue();
 		assertThat(updatedRelease.getInfo().getStatus().getStatusCode()).isEqualTo(StatusCode.DEPLOYED);
-		// Rollback
-		mockMvc.perform(post("/package/rollback/" + releaseName + "/" + 1)).andDo(print())
-				.andExpect(status().isCreated()).andReturn();
-		Release rolledbackRelease = this.releaseRepository.findByNameAndVersion(releaseName, 1);
-		assertThat(rolledbackRelease.getInfo().getStatus().getStatusCode()).isEqualTo(StatusCode.DEPLOYED);
-		// Undeploy
-		mockMvc.perform(post("/package/undeploy/" + releaseName + "/" + 1)).andDo(print())
-				.andExpect(status().isCreated()).andReturn();
-		Release undeployedRelease = this.releaseRepository.findByNameAndVersion(releaseName, 1);
-		assertThat(undeployedRelease.getInfo().getStatus().getStatusCode()).isEqualTo(StatusCode.DELETED);
 	}
 
 }

@@ -34,7 +34,6 @@ import org.springframework.cloud.skipper.domain.Status;
 import org.springframework.cloud.skipper.domain.StatusCode;
 import org.springframework.cloud.skipper.domain.Template;
 import org.springframework.cloud.skipper.domain.skipperpackage.DeployProperties;
-import org.springframework.cloud.skipper.domain.skipperpackage.UpdateProperties;
 import org.springframework.cloud.skipper.repository.PackageMetadataRepository;
 import org.springframework.cloud.skipper.repository.ReleaseRepository;
 import org.springframework.core.io.InputStreamResource;
@@ -123,11 +122,9 @@ public class ReleaseService {
 		return release;
 	}
 
-	public Release update(UpdateProperties updateProperties) {
-		DeployProperties deployProperties = updateProperties.getConfig();
-		Release oldRelease = getRelease(deployProperties.getReleaseName(), updateProperties.getOldVersion());
-		Release newRelease = createNewRelease(updateProperties.getPackageId(),
-				updateProperties.getNewVersion(), deployProperties);
+	public Release update(String packageId, DeployProperties deployProperties) {
+		Release oldRelease = getLatestRelease(deployProperties.getReleaseName());
+		Release newRelease = createNewRelease(packageId, oldRelease.getVersion() + 1, deployProperties);
 		return update(oldRelease, newRelease);
 	}
 

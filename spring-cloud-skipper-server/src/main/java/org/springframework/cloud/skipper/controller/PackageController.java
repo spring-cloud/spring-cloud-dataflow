@@ -18,7 +18,6 @@ package org.springframework.cloud.skipper.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.skipperpackage.DeployProperties;
-import org.springframework.cloud.skipper.domain.skipperpackage.UpdateProperties;
 import org.springframework.cloud.skipper.service.ReleaseService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -29,6 +28,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
+ * REST controller for Package related operations such as (deploy/update).
+ *
  * @author Mark Pollack
  * @author Ilayaperumal Gopinathan
  */
@@ -37,7 +38,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class PackageController {
 
 	private ReleaseService releaseService;
-
 
 	@Autowired
 	public PackageController(ReleaseService releaseService) {
@@ -50,21 +50,9 @@ public class PackageController {
 		return this.releaseService.deploy(id, deployProperties);
 	}
 
-	@RequestMapping(path = "/undeploy/{name}/{version}", method = RequestMethod.POST)
+	@RequestMapping(path = "{id}/update", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
-	public Release undeploy(@PathVariable("name") String releaseName, @PathVariable("version") int version) {
-		return this.releaseService.undeploy(releaseName, version);
-	}
-
-	@RequestMapping(path = "/update", method = RequestMethod.POST)
-	@ResponseStatus(HttpStatus.CREATED)
-	public Release update(@RequestBody UpdateProperties updateProperties) {
-		return this.releaseService.update(updateProperties);
-	}
-
-	@RequestMapping(path = "/rollback/{name}/{version}", method = RequestMethod.POST)
-	@ResponseStatus(HttpStatus.CREATED)
-	public Release rollback(@PathVariable("name") String releaseName, @PathVariable("version") int rollbackVersion) {
-		return this.releaseService.rollback(releaseName, rollbackVersion);
+	public Release update(@PathVariable("id") String packageId, @RequestBody DeployProperties deployProperties) {
+		return this.releaseService.update(packageId, deployProperties);
 	}
 }
