@@ -95,6 +95,9 @@ public class DeployerInitializationService {
 
 	protected void createAndSaveLocalAppDeployers() {
 		Map<String, LocalDeployerProperties> localDeployerPropertiesMap = localPlatformProperties.getAccounts();
+		if (localDeployerPropertiesMap.isEmpty()) {
+			localDeployerPropertiesMap.put("default", new LocalDeployerProperties());
+		}
 		for (Map.Entry<String, LocalDeployerProperties> entry : localDeployerPropertiesMap
 				.entrySet()) {
 			LocalAppDeployer localAppDeployer = new LocalAppDeployer(entry.getValue());
@@ -167,12 +170,14 @@ public class DeployerInitializationService {
 	}
 
 	protected void createAndSaveKubernetesAppDeployers() {
-		Map<String, KubernetesDeployerProperties> kubernetesDeployerPropertiesMap = this.kubernetesPlatformProperties.getAccounts();
+		Map<String, KubernetesDeployerProperties> kubernetesDeployerPropertiesMap = this.kubernetesPlatformProperties
+				.getAccounts();
 		for (Map.Entry<String, KubernetesDeployerProperties> entry : kubernetesDeployerPropertiesMap.entrySet()) {
 			KubernetesDeployerProperties properties = entry.getValue();
 			KubernetesClient kubernetesClient = new DefaultKubernetesClient().inNamespace(properties.getNamespace());
 			ContainerFactory containerFactory = new DefaultContainerFactory(properties);
-			KubernetesAppDeployer kubernetesAppDeployer = new KubernetesAppDeployer(properties, kubernetesClient, containerFactory);
+			KubernetesAppDeployer kubernetesAppDeployer = new KubernetesAppDeployer(properties, kubernetesClient,
+					containerFactory);
 			Deployer deployer = new Deployer(entry.getKey(), "kubernetes", kubernetesAppDeployer);
 			this.deployerRepository.save(deployer);
 			logger.info("Added Kubernetes Deployer account " + entry.getKey() + " into Deployer Repository.");
