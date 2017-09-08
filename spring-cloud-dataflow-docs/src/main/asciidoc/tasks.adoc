@@ -388,6 +388,15 @@ property for the Composed Task Runner application when launching a composed task
 for the Spring Cloud Data Flow server when it is started. For the latter case the `dataflow.server.uri` Composed Task Runner application property
 will be automatically set when a composed task is launched.
 
+In some cases you may wish to execute an instance of the Composed Task Runner via
+the Task Launcher sink.  In this case you must configure the Composed Task Runner
+to use the same datasource that the Spring Cloud Data Flow instance is using.
+The datasource properties are set via the `TaskLaunchRequest` through the use
+of the `commandlineArguments` or the `environmentProperties`.  This is because, the
+Composed Task Runner monitors the task_executions table to check the status of
+the tasks that it is executing.   Using this information from the table, it determines
+how it should navigate the graph.
+
 === The Lifecycle of a Composed Task
 ==== Creating a Composed Task
 The DSL for the composed tasks is used when creating a task definition via the
