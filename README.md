@@ -1,3 +1,3 @@
-# Spring Common Security
+# Spring Cloud Common Security
 
-This repo holds the security configuration classes that are common across Spring (Spring Cloud Data Flow/Skipper for now) projects.
+This repo holds the security configuration classes that are common across Spring Cloud (Spring Cloud Data Flow/Skipper for now) projects that use **Role** based authentication/authorization for their runtime server application(s).
