@@ -34,6 +34,11 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.client.circuitbreaker.EnableCircuitBreaker;
+import org.springframework.cloud.common.security.AuthorizationProperties;
+import org.springframework.cloud.common.security.support.FileSecurityProperties;
+import org.springframework.cloud.common.security.support.LdapSecurityProperties;
+import org.springframework.cloud.common.security.support.OnSecurityEnabledAndOAuth2Disabled;
+import org.springframework.cloud.common.security.support.SecurityStateBean;
 import org.springframework.cloud.dataflow.completion.CompletionConfiguration;
 import org.springframework.cloud.dataflow.completion.StreamCompletionProvider;
 import org.springframework.cloud.dataflow.completion.TaskCompletionProvider;
@@ -83,11 +88,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.hateoas.EntityLinks;
 import org.springframework.scheduling.concurrent.ForkJoinPoolFactoryBean;
-import org.springframework.security.common.AuthorizationProperties;
-import org.springframework.security.common.support.FileSecurityProperties;
-import org.springframework.security.common.support.LdapSecurityProperties;
-import org.springframework.security.common.support.OnSecurityEnabledAndOAuth2Disabled;
-import org.springframework.security.common.support.SecurityStateBean;
 
 /**
  * Configuration for the Data Flow Server Controllers.
@@ -327,7 +327,7 @@ public class DataFlowControllerAutoConfiguration {
 	}
 
 	@Bean
-	SecurityStateBean securityStateBean() {
+	public SecurityStateBean securityStateBean() {
 		return new SecurityStateBean();
 	}
 

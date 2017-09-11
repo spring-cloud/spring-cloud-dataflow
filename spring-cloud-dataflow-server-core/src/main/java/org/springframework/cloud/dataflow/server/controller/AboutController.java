@@ -16,6 +16,7 @@
 package org.springframework.cloud.dataflow.server.controller;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.common.security.support.SecurityStateBean;
 import org.springframework.cloud.dataflow.rest.resource.about.AboutResource;
 import org.springframework.cloud.dataflow.rest.resource.about.Dependency;
 import org.springframework.cloud.dataflow.rest.resource.about.FeatureInfo;
@@ -32,7 +33,6 @@ import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.hateoas.mvc.ControllerLinkBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
-import org.springframework.security.common.support.SecurityStateBean;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;

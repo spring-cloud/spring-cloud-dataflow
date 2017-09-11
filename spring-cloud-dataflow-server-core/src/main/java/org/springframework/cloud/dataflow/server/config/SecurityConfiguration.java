@@ -17,13 +17,13 @@
 package org.springframework.cloud.dataflow.server.config;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.cloud.common.security.BasicAuthSecurityConfiguration;
+import org.springframework.cloud.common.security.DefaultBootUserAuthenticationConfiguration;
+import org.springframework.cloud.common.security.FileAuthenticationConfiguration;
+import org.springframework.cloud.common.security.LdapAuthenticationConfiguration;
+import org.springframework.cloud.common.security.OAuthSecurityConfiguration;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.security.common.BasicAuthSecurityConfiguration;
-import org.springframework.security.common.DefaultBootUserAuthenticationConfiguration;
-import org.springframework.security.common.FileAuthenticationConfiguration;
-import org.springframework.security.common.LdapAuthenticationConfiguration;
-import org.springframework.security.common.OAuthSecurityConfiguration;
 
 /**
  * @author Ilayaperumal Gopinathan
