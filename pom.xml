@@ -128,7 +128,7 @@
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
-				<artifactId>spring-cloud-common-security-config-starter-web</artifactId>
+				<artifactId>spring-cloud-starter-common-security-config-web</artifactId>
 				<version>${spring-cloud-common-security-config.version}</version>
 			</dependency>
 			<dependency>
