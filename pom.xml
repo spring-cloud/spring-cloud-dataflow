@@ -22,7 +22,7 @@
 
     <modules>
         <module>spring-cloud-common-security-config-web</module>
-        <module>spring-cloud-common-security-config-starter-web</module>
+        <module>spring-cloud-starter-common-security-config-web</module>
     </modules>
 
 </project>
