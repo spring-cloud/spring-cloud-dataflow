@@ -17,8 +17,8 @@
 package org.springframework.cloud.dataflow.server.controller.security;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.common.security.support.SecurityStateBean;
 import org.springframework.cloud.dataflow.rest.resource.security.SecurityInfoResource;
-import org.springframework.cloud.dataflow.server.config.security.support.SecurityStateBean;
 import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.hateoas.mvc.ControllerLinkBuilder;
 import org.springframework.http.HttpStatus;
