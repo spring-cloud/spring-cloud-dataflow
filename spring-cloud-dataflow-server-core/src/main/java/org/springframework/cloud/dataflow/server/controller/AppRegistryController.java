@@ -45,6 +45,7 @@ import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.ExposesResourceFor;
@@ -96,10 +97,13 @@ public class AppRegistryController implements ResourceLoaderAware {
 	}
 
 	/**
-	 * List app registrations.
+	 * List app registrations. Optional type and search parameters can be
+	 * passed to do filtering. Search parameter only filters by {@code AppRegistration}
+	 * name field.
 	 *
 	 * @param pagedResourcesAssembler the resource assembler for app registrations
 	 * @param type the application type: source, sink, processor, task
+	 * @param search optional search parameter
 	 * @return the list of registered applications
 	 */
 	@RequestMapping(method = RequestMethod.GET)
@@ -107,21 +111,40 @@ public class AppRegistryController implements ResourceLoaderAware {
 	public PagedResources<? extends AppRegistrationResource> list(
 			Pageable pageable,
 			PagedResourcesAssembler<AppRegistration> pagedResourcesAssembler,
-			@RequestParam(value = "type", required = false) ApplicationType type) {
+			@RequestParam(value = "type", required = false) ApplicationType type,
+			@RequestParam(required = false) String search) {
 		Page<AppRegistration> pagedRegistrations;
-		if (type == null) {
+		if (type == null && search == null) {
 			pagedRegistrations = appRegistry.findAll(pageable);
 		}
 		else {
 			List<AppRegistration> appRegistrations = appRegistry.findAll().stream()
-				.filter(ar -> ar.getType() == type)
+				.filter(ar -> (type != null ? ar.getType() == type : true))
+				.filter(ar -> (StringUtils.hasText(search) ? ar.getName().contains(search) : true))
 				.collect(Collectors.toList());
 			long count = appRegistrations.size();
 			long to = Math.min(count, pageable.getOffset() + pageable.getPageSize());
 
-			pagedRegistrations = new PageImpl<>(appRegistrations.subList(pageable.getOffset(), (int) to), pageable,
-					appRegistrations.size());
+			// if a request for page is higher than number of items we actually have is either
+			// a rogue request or user was in high pages and applied filtering.
+			// in this case we simply reset to first page.
+			// we also need to explicitly set page and see what offset is when
+			// building new page.
+			// all this is done because we don't use a proper repository which would
+			// handle all these automatically.
+			int offset = 0;
+			int page = 0;
+			if (pageable.getOffset() <= to) {
+				offset = pageable.getOffset();
+				page = pageable.getPageNumber();
+			}
+			else if (pageable.getOffset() + pageable.getPageSize() <= to) {
+				offset = pageable.getOffset();
+			}
+			pagedRegistrations = new PageImpl<>(appRegistrations.subList(offset, (int) to),
+					new PageRequest(page, pageable.getPageSize()), appRegistrations.size());
 		}
+
 		return pagedResourcesAssembler.toResource(pagedRegistrations, this.assembler);
 
 	}
