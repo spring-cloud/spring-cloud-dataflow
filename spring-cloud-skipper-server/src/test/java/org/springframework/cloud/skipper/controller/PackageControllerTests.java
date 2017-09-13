@@ -87,7 +87,8 @@ public class PackageControllerTests extends AbstractMockMvcTests {
 		assertThat(deployedRelease.getInfo().getStatus().getStatusCode()).isEqualTo(StatusCode.DEPLOYED);
 		// Update
 		String updatePackageVersion = "1.0.1";
-		PackageMetadata updatePackageMetadata = packageMetadataRepository.findByNameAndVersion(packageName,
+		String updatePkgName = "log2";
+		PackageMetadata updatePackageMetadata = packageMetadataRepository.findByNameAndVersion(updatePkgName,
 				updatePackageVersion);
 		DeployProperties newDeployProperties = new DeployProperties();
 		newDeployProperties.setPlatformName("test");

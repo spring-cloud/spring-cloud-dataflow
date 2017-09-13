@@ -1,8 +1,8 @@
 apiVersion: v2
 kind: skipper
-name: log
+name: log2
 version: 1.0.1
-appVersion: 1.2.0.RELEASE
+appVersion: 1.2.0
 packageSourceUrl: https://github.com/spring-cloud-stream-app-starters/log/tree/v1.2.0.RELEASE
 packageHomeUrl: http://cloud.spring.io/spring-cloud-stream-app-starters/
 tags: logging, sink
