@@ -49,6 +49,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /**
  * @author Gunnar Hillert
  * @author Ilayaperumal Gopinathan
+ * @author Janne Valkealahti
+ * @author Glenn Renfro
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestDependencies.class)
@@ -149,30 +151,48 @@ public class AppRegistryControllerTests {
 
 	@Test
 	public void testListApplicationsByType() throws Exception {
-		mockMvc.perform(get("/apps?type=task").accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk())
+		mockMvc.perform(get("/apps?type=task").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
 				.andExpect(jsonPath("content", hasSize(1)));
 	}
 
 	@Test
+	public void testListApplicationsBySearch() throws Exception {
+		mockMvc.perform(get("/apps?search=timestamp").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
+				.andExpect(jsonPath("content", hasSize(1)));
+		mockMvc.perform(get("/apps?search=time").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
+				.andExpect(jsonPath("content", hasSize(2)));
+	}
+
+	@Test
+	public void testListApplicationsByTypeAndSearch() throws Exception {
+		mockMvc.perform(get("/apps?type=task&search=time").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
+				.andExpect(jsonPath("content", hasSize(1)));
+		mockMvc.perform(get("/apps?type=source&search=time").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
+				.andExpect(jsonPath("content", hasSize(1)));
+		mockMvc.perform(get("/apps?type=sink&search=time").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
+				.andExpect(jsonPath("content", hasSize(0)));
+	}
+
+	@Test
 	public void testFindNonExistentApp() throws Exception {
-		mockMvc.perform(get("/apps/source/foo").accept(MediaType.APPLICATION_JSON)).andDo(print())
+		mockMvc.perform(get("/apps/source/foo").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().is4xxClientError()).andReturn().getResponse().getContentAsString()
 				.contains("NoSuchAppRegistrationException");
 	}
 
 	@Test
 	public void testRegisterAndListApplications() throws Exception {
-		mockMvc.perform(get("/apps").accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk())
+		mockMvc.perform(get("/apps").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
 				.andExpect(jsonPath("content", hasSize(4)));
 		mockMvc.perform(post("/apps/processor/blubba").param("uri", "file:///foo").accept(MediaType.APPLICATION_JSON))
-				.andDo(print()).andExpect(status().isCreated());
-		mockMvc.perform(get("/apps").accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk())
+				.andExpect(status().isCreated());
+		mockMvc.perform(get("/apps").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
 				.andExpect(jsonPath("content", hasSize(5)));
 	}
 
 	@Test
 	public void testListSingleApplication() throws Exception {
-		mockMvc.perform(get("/apps/source/time").accept(MediaType.APPLICATION_JSON)).andDo(print())
+		mockMvc.perform(get("/apps/source/time").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk()).andExpect(jsonPath("name", is("time")))
 				.andExpect(jsonPath("type", is("source")));
 	}
@@ -180,14 +200,84 @@ public class AppRegistryControllerTests {
 	@Test
 	public void testUnregisterApplication() throws Exception {
 		mockMvc.perform(post("/apps/processor/blubba").param("uri", "file:///foo").accept(MediaType.APPLICATION_JSON))
-				.andDo(print()).andExpect(status().isCreated());
-		mockMvc.perform(delete("/apps/processor/blubba").accept(MediaType.APPLICATION_JSON)).andDo(print())
+				.andExpect(status().isCreated());
+		mockMvc.perform(delete("/apps/processor/blubba").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk());
 	}
 
 	@Test
 	public void testUnregisterApplicationNotFound() throws Exception {
-		mockMvc.perform(delete("/apps/processor/blubba").accept(MediaType.APPLICATION_JSON)).andDo(print())
+		mockMvc.perform(delete("/apps/processor/blubba").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isNotFound());
 	}
+
+	@Test
+	public void testPagination() throws Exception {
+		mockMvc.perform(get("/apps").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
+				.andExpect(jsonPath("page.size", is(20)))
+				.andExpect(jsonPath("page.totalElements", is(4)))
+				.andExpect(jsonPath("page.totalPages", is(1)))
+				.andExpect(jsonPath("page.number", is(0)));
+
+		mockMvc.perform(get("/apps?page=0&size=10").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
+				.andExpect(jsonPath("page.size", is(10)))
+				.andExpect(jsonPath("page.totalElements", is(4)))
+				.andExpect(jsonPath("page.totalPages", is(1)))
+				.andExpect(jsonPath("page.number", is(0)));
+
+		mockMvc.perform(get("/apps?page=0&size=1").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
+				.andExpect(jsonPath("page.size", is(1)))
+				.andExpect(jsonPath("page.totalElements", is(4)))
+				.andExpect(jsonPath("page.totalPages", is(4)))
+				.andExpect(jsonPath("page.number", is(0)));
+
+		mockMvc.perform(get("/apps?page=1&size=2").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
+				.andExpect(jsonPath("page.size", is(2)))
+				.andExpect(jsonPath("page.totalElements", is(4)))
+				.andExpect(jsonPath("page.totalPages", is(2)))
+				.andExpect(jsonPath("page.number", is(1)));
+
+		mockMvc.perform(get("/apps?page=0&size=3").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
+				.andExpect(jsonPath("page.size", is(3)))
+				.andExpect(jsonPath("page.totalElements", is(4)))
+				.andExpect(jsonPath("page.totalPages", is(2)))
+				.andExpect(jsonPath("page.number", is(0)));
+
+		mockMvc.perform(get("/apps?page=1&size=3").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
+				.andExpect(jsonPath("page.size", is(3)))
+				.andExpect(jsonPath("page.totalElements", is(4)))
+				.andExpect(jsonPath("page.totalPages", is(2)))
+				.andExpect(jsonPath("page.number", is(1)));
+
+		mockMvc.perform(get("/apps?page=5&size=2").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
+				.andExpect(jsonPath("page.size", is(2)))
+				.andExpect(jsonPath("page.totalElements", is(4)))
+				.andExpect(jsonPath("page.totalPages", is(2)))
+				.andExpect(jsonPath("page.number", is(0)));
+
+		mockMvc.perform(get("/apps?page=0&size=10&search=i").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
+				.andExpect(jsonPath("page.size", is(10)))
+				.andExpect(jsonPath("page.totalElements", is(3)))
+				.andExpect(jsonPath("page.totalPages", is(1)))
+				.andExpect(jsonPath("page.number", is(0)));
+
+		mockMvc.perform(get("/apps?page=0&size=1&search=i").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
+				.andExpect(jsonPath("page.size", is(1)))
+				.andExpect(jsonPath("page.totalElements", is(3)))
+				.andExpect(jsonPath("page.totalPages", is(3)))
+				.andExpect(jsonPath("page.number", is(0)));
+
+		mockMvc.perform(get("/apps?page=1&size=2&search=i").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
+				.andExpect(jsonPath("page.size", is(2)))
+				.andExpect(jsonPath("page.totalElements", is(3)))
+				.andExpect(jsonPath("page.totalPages", is(2)))
+				.andExpect(jsonPath("page.number", is(1)));
+
+		mockMvc.perform(get("/apps?page=5&size=2&search=i").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
+				.andExpect(jsonPath("page.size", is(2)))
+				.andExpect(jsonPath("page.totalElements", is(3)))
+				.andExpect(jsonPath("page.totalPages", is(2)))
+				.andExpect(jsonPath("page.number", is(0)));
+	}
+
 }
