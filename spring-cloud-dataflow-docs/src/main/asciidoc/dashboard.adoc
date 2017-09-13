@@ -32,7 +32,7 @@ If you have enabled security, a login form is available at `\http://localhost:93
 NOTE: The default Dashboard server port is `9393`
 
 .The Spring Cloud Data Flow Dashboard
-image::{dataflow-asciidoc}/images/dataflow-dashboard-about.png[The Spring Cloud Data Flow Dashboard, scaledwidth="100%"]
+image::{dataflow-asciidoc}/images/dataflow-dashboard-about-ver-1-3-0.png[The Spring Cloud Data Flow Dashboard, scaledwidth="100%"]
 
 [[dashboard-apps]]
 == Apps
@@ -42,7 +42,7 @@ provides the control to register/unregister them (if applicable). It is possible
 to import a number of applications at once using the *Bulk Import Applications* action.
 
 .List of Available Applications
-image::{dataflow-asciidoc}/images/dataflow-available-apps-list.png[List of available applications, scaledwidth="100%"]
+image::{dataflow-asciidoc}/images/dataflow-available-apps-list-ver-1-3-0.png[List of available applications, scaledwidth="100%"]
 
 === Bulk Import of Applications
 
@@ -69,7 +69,7 @@ task apps. If those meet your needs, simply select your appropriate variant (rab
 click the *Import* action on those lines to immediately import all those applications.
 
 .Bulk Import Applications
-image::{dataflow-asciidoc}/images/dataflow-bulk-import-applications.png[Bulk Import Applications, scaledwidth="100%"]
+image::{dataflow-asciidoc}/images/dataflow-bulk-import-applications-ver-1-3-0.png[Bulk Import Applications, scaledwidth="100%"]
 
 [[dashboard-runtime]]
 == Runtime
@@ -80,7 +80,7 @@ A list of the used deployment properties is available by clicking on the
 app id.
 
 .List of Running Applications
-image::{dataflow-asciidoc}/images/dataflow-runtime.png[List of running applications, scaledwidth="100%"]
+image::{dataflow-asciidoc}/images/dataflow-runtime-ver-1-3-0.png[List of running applications, scaledwidth="100%"]
 
 [[dashboard-streams]]
 == Streams
@@ -94,7 +94,7 @@ about the apps including any options passed to them. In this screenshot the time
 been expanded to show the visual representation:
 
 .List of Stream Definitions
-image::{dataflow-asciidoc}/images/dataflow-streams-list-definitions.png[List of Stream Definitions, scaledwidth="100%"]
+image::{dataflow-asciidoc}/images/dataflow-streams-list-definitions-ver-1-3-0.png[List of Stream Definitions, scaledwidth="100%"]
 
 If the *details* button is clicked the view will change to show a visual representation of that
 stream and also any related streams.  In the above example, if clicking *details* for the timer stream, the
@@ -102,7 +102,7 @@ view will change to the one shown below which clearly shows the relationship bet
 them are tapping into the timer stream).
 
 .Stream Details Page
-image::{dataflow-asciidoc}/images/dataflow-stream-details.png[Stream Details Page, scaledwidth="100%"]
+image::{dataflow-asciidoc}/images/dataflow-stream-details-ver-1-3-0.png[Stream Details Page, scaledwidth="100%"]
 
 [[dashboard-flo-streams-designer]]
 == Create Stream
@@ -117,7 +117,7 @@ In this tab, you can:
 Watch this https://www.youtube.com/watch?v=78CgV46OstI[screencast] that highlights some of the "Flo for Spring Cloud Data Flow" capabilities. Spring Flo https://github.com/spring-projects/spring-flo/wiki[wiki] includes more detailed content on core Flo capabilities.
 
 .Flo for Spring Cloud Data Flow
-image::{dataflow-asciidoc}/images/dataflow-flo-create-stream.png[Flo for Spring Cloud Data Flo, scaledwidth="100%"]
+image::{dataflow-asciidoc}/images/dataflow-flo-create-stream-ver-1-3-0.png[Flo for Spring Cloud Data Flo, scaledwidth="100%"]
 
 ifndef::omit-tasks-docs[]
 [[dashboard-tasks]]
@@ -140,7 +140,7 @@ allows users to create _Task_ definitions.
 NOTE: You will also use this tab to create Batch Jobs.
 
 .List of Task Apps
-image::{dataflow-asciidoc}/images/dataflow-task-apps-list.png[List of Task Apps, scaledwidth="100%"]
+image::{dataflow-asciidoc}/images/dataflow-task-apps-list-ver-1-3-0.png[List of Task Apps, scaledwidth="100%"]
 
 On this screen you can perform the following actions:
 
@@ -169,7 +169,7 @@ one or more tasks using simple textual input, indicated by
 the *bulk define tasks* button.
 
 .List of Task Definitions
-image::{dataflow-asciidoc}/images/dataflow-task-definitions-list.png[List of Task Definitions, scaledwidth="100%"]
+image::{dataflow-asciidoc}/images/dataflow-task-definitions-list-ver-1-3-0.png[List of Task Definitions, scaledwidth="100%"]
 
 ==== Creating Task Definitions using the bulk define interface
 
@@ -177,7 +177,7 @@ After pressing *bulk define tasks*, the following screen will
 be shown.
 
 .Bulk Define Tasks
-image::{dataflow-asciidoc}/images/dataflow-bulk-define-tasks.png[Bulk Define Tasks, scaledwidth="100%"]
+image::{dataflow-asciidoc}/images/dataflow-bulk-define-tasks-ver-1-3-0.png[Bulk Define Tasks, scaledwidth="100%"]
 
 It includes a textbox where one or more definitions can be entered
 and then various actions performed on those definitions.
@@ -229,7 +229,7 @@ In this tab, you can:
 interactive organization of the composed task
 
 .Composed Task Designer
-image::{dataflow-asciidoc}/images/dataflow-ctr-flo-tab.png[Composed Task Designer, scaledwidth="100%"]
+image::{dataflow-asciidoc}/images/dataflow-ctr-flo-tab-ver-1-3-0.png[Composed Task Designer, scaledwidth="100%"]
 
 ==== Launching Tasks
 
@@ -248,7 +248,7 @@ Task parameters are not typed.
 === Executions
 
 .List of Task Executions
-image::{dataflow-asciidoc}/images/dataflow-task-executions-list.png[List of Task Executions, scaledwidth="100%"]
+image::{dataflow-asciidoc}/images/dataflow-task-executions-list-ver-1-3-0.png[List of Task Executions, scaledwidth="100%"]
 
 [[dashboard-jobs]]
 == Jobs
@@ -262,7 +262,7 @@ In case of a failed job, you can also restart the task. When dealing with long-r
 Batch Jobs, you can also request to stop it.
 
 .List of Job Executions
-image::{dataflow-asciidoc}/images/dataflow-job-executions-list.png[List of Job Executions, scaledwidth="100%"]
+image::{dataflow-asciidoc}/images/dataflow-job-executions-list-ver-1-3-0.png[List of Job Executions, scaledwidth="100%"]
 
 [[dashboard-job-executions-list]]
 === List job executions
@@ -277,7 +277,7 @@ Thus, if the underlying definition has been deleted, _deleted_ will be shown.
 ==== Job execution details
 
 .Job Execution Details
-image::{dataflow-asciidoc}/images/dataflow-jobs-job-execution-details.png[Job Execution Details, scaledwidth="100%"]
+image::{dataflow-asciidoc}/images/dataflow-jobs-job-execution-details-ver-1-3-0.png[Job Execution Details, scaledwidth="100%"]
 
 The Job Execution Details screen also contains a list of the executed steps. You can
 further drill into the _Step Execution Details_ by clicking onto the magnifying glass.
@@ -307,7 +307,7 @@ metrics associated with the selected step such as *duration*, *read counts*, *wr
 counts* etc.
 
 .Step Execution History
-image::{dataflow-asciidoc}/images/dataflow-step-execution-history.png[Step Execution History, scaledwidth="100%"]
+image::{dataflow-asciidoc}/images/dataflow-step-execution-history-ver-1-3-0.png[Step Execution History, scaledwidth="100%"]
 endif::omit-tasks-docs[]
 
 
