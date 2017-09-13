@@ -41,6 +41,7 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -114,7 +115,24 @@ public class AppRegistry {
 		List<AppRegistration> appRegistrations = this.findAll();
 		long to = Math.min(appRegistrations.size(), pageable.getOffset() + pageable.getPageSize());
 
-		return new PageImpl<>(appRegistrations.subList(pageable.getOffset(), (int) to), pageable,
+		// if a request for page is higher than number of items we actually have is either
+		// a rogue request.
+		// in this case we simply reset to first page.
+		// we also need to explicitly set page and see what offset is when
+		// building new page.
+		// all this is done because we don't use a proper repository which would
+		// handle all these automatically.
+		int offset = 0;
+		int page = 0;
+		if (pageable.getOffset() <= to) {
+			offset = pageable.getOffset();
+			page = pageable.getPageNumber();
+		}
+		else if (pageable.getOffset() + pageable.getPageSize() <= to) {
+			offset = pageable.getOffset();
+		}
+
+		return new PageImpl<>(appRegistrations.subList(offset, (int) to), new PageRequest(page, pageable.getPageSize()),
 				appRegistrations.size());
 	}
 
