@@ -37,7 +37,7 @@ public class RepositoryInitializationServiceTest extends AbstractIntegrationTest
 
 	@Test
 	public void intialize() throws Exception {
-		//There will always be the local repository
+		// There will always be the local repository
 		assertThat(repositoryRepository.count()).isEqualTo(2);
 		assertThat(repositoryRepository.findByName("test").getUrl()).isEqualTo("classpath:");
 	}

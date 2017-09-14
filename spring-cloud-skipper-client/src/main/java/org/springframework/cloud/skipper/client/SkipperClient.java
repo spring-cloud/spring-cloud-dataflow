@@ -16,10 +16,10 @@
 package org.springframework.cloud.skipper.client;
 
 import org.springframework.cloud.skipper.domain.AboutInfo;
+import org.springframework.cloud.skipper.domain.DeployProperties;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
 import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.Repository;
-import org.springframework.cloud.skipper.domain.skipperpackage.DeployProperties;
 import org.springframework.hateoas.Resources;
 
 /**

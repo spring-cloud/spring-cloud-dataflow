@@ -17,10 +17,10 @@ package org.springframework.cloud.skipper.controller;
 
 import org.junit.Test;
 
+import org.springframework.cloud.skipper.domain.DeployProperties;
 import org.springframework.cloud.skipper.domain.DeployRequest;
 import org.springframework.cloud.skipper.domain.PackageIdentifier;
 import org.springframework.cloud.skipper.domain.Release;
-import org.springframework.cloud.skipper.domain.skipperpackage.DeployProperties;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 
@@ -61,20 +61,6 @@ public class PackageControllerTests extends AbstractControllerTests {
 		Release release = deploy(deployRequest);
 		assertReleaseIsDeployedSuccessfully(releaseName, "1");
 		assertThat(release.getVersion()).isEqualTo(1);
-	}
-
-	@Test
-	public void packageDeployAndUpdate() throws Exception {
-		String releaseName = "myLog";
-		Release release = deploy("log", "1.0.0", releaseName);
-		assertReleaseIsDeployedSuccessfully(releaseName, "1");
-		assertThat(release.getVersion()).isEqualTo(1);
-
-		// Update
-		release = update("log", "1.1.0", releaseName);
-		assertReleaseIsDeployedSuccessfully(releaseName, "2");
-		assertThat(release.getVersion()).isEqualTo(2);
-
 	}
 
 }

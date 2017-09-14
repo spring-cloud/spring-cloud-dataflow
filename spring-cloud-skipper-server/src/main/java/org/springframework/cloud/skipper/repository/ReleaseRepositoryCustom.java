@@ -26,7 +26,8 @@ public interface ReleaseRepositoryCustom {
 	 * Find the lasted in time, release object, by name.
 	 * @param releaseName the name of the release
 	 * @return the Release object
-	 * @throws org.springframework.cloud.skipper.index.PackageException if no Release for the given name can be found.
+	 * @throws org.springframework.cloud.skipper.index.PackageException if no Release for the
+	 * given name can be found.
 	 */
 	Release findLatestRelease(String releaseName);
 
@@ -34,8 +35,8 @@ public interface ReleaseRepositoryCustom {
 	 * Find the release for the given release name and version
 	 * @param releaseName the name of the release
 	 * @param version the version of the release
-	 * @return @throws org.springframework.cloud.skipper.index.PackageException if no Release for
-	 * the given name and version can be found.
+	 * @return @throws org.springframework.cloud.skipper.index.PackageException if no Release
+	 * for the given name and version can be found.
 	 */
 	Release findByNameAndVersion(String releaseName, int version);
 }

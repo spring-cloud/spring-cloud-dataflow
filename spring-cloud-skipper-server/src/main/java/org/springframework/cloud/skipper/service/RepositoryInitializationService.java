@@ -38,13 +38,13 @@ import org.springframework.stereotype.Service;
 @Service
 public class RepositoryInitializationService {
 
+	public final static String LOCAL_REPOSITORY_NAME = "local";
+
 	private final Logger logger = LoggerFactory.getLogger(RepositoryInitializationService.class);
 
 	private final RepositoryRepository repositoryRepository;
 
 	private final SkipperServerProperties skipperServerProperties;
-
-	public final static String LOCAL_REPOSITORY_NAME = "local";
 
 	@Autowired
 	public RepositoryInitializationService(RepositoryRepository repositoryRepository,

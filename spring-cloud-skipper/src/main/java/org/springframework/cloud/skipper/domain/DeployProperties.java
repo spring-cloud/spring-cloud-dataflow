@@ -13,20 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.cloud.skipper.domain.skipperpackage;
-
-import org.springframework.cloud.skipper.domain.ConfigValues;
+package org.springframework.cloud.skipper.domain;
 
 /**
  * @author Mark Pollack
  */
-public class DeployProperties {
-
+public class DeployProperties extends CommonProperties {
 	private String platformName;
-
-	private String releaseName;
-
-	private ConfigValues configValues;
 
 	public String getPlatformName() {
 		return platformName;
@@ -35,21 +28,4 @@ public class DeployProperties {
 	public void setPlatformName(String platformName) {
 		this.platformName = platformName;
 	}
-
-	public String getReleaseName() {
-		return releaseName;
-	}
-
-	public void setReleaseName(String releaseName) {
-		this.releaseName = releaseName;
-	}
-
-	public ConfigValues getConfigValues() {
-		return configValues;
-	}
-
-	public void setConfigValues(ConfigValues configValues) {
-		this.configValues = configValues;
-	}
 }
-

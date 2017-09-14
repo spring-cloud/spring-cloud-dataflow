@@ -68,7 +68,8 @@ public class ReleaseControllerTests extends AbstractControllerTests {
 		assertReleaseIsDeployedSuccessfully(releaseName, releaseVersion);
 		assertThat(release.getVersion()).isEqualTo(2);
 
-		// Rollback to release version 1, creating a third release version equivalent to the 1st.
+		// Rollback to release version 1, creating a third release version equivalent to
+		// the 1st.
 		releaseVersion = "3";
 		mockMvc.perform(post("/release/rollback/" + releaseName + "/" + 1)).andDo(print())
 				.andExpect(status().isCreated()).andReturn();
@@ -85,6 +86,19 @@ public class ReleaseControllerTests extends AbstractControllerTests {
 		Release undeployedRelease = this.releaseRepository.findByNameAndVersion(releaseName,
 				Integer.valueOf(releaseVersion));
 		assertThat(undeployedRelease.getInfo().getStatus().getStatusCode()).isEqualTo(StatusCode.DELETED);
+	}
+
+	@Test
+	public void packageDeployAndUpdate() throws Exception {
+		String releaseName = "myLog";
+		Release release = deploy("log", "1.0.0", releaseName);
+		assertReleaseIsDeployedSuccessfully(releaseName, "1");
+		assertThat(release.getVersion()).isEqualTo(1);
+
+		// Update
+		release = update("log", "1.1.0", releaseName);
+		assertReleaseIsDeployedSuccessfully(releaseName, "2");
+		assertThat(release.getVersion()).isEqualTo(2);
 	}
 
 }

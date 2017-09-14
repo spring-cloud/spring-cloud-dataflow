@@ -13,27 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.cloud.skipper.service;
-
-import org.springframework.cloud.skipper.domain.Release;
+package org.springframework.cloud.skipper.domain;
 
 /**
- * Manages the lifecycle of a releases.
- *
- * The current implementation is a simple sequence of AppDeployer commands, but more
- * sophisticated implementations based on Spring Cloud State Machine or Concourse are
- * possible.
- *
- * @author Mark Pollack
  * @author Ilayaperumal Gopinathan
  */
-public interface ReleaseManager {
+public class UpdateRequest {
 
-	Release deploy(Release release);
+	private PackageIdentifier packageIdentifier;
 
-	Release undeploy(Release release);
+	private UpdateProperties updateProperties;
 
-	Release status(Release release);
+	public PackageIdentifier getPackageIdentifier() {
+		return packageIdentifier;
+	}
 
-	void updateStatus(Release release);
+	public void setPackageIdentifier(PackageIdentifier packageIdentifier) {
+		this.packageIdentifier = packageIdentifier;
+	}
+
+	public UpdateProperties getUpdateProperties() {
+		return updateProperties;
+	}
+
+	public void setUpdateProperties(UpdateProperties updateProperties) {
+		this.updateProperties = updateProperties;
+	}
 }

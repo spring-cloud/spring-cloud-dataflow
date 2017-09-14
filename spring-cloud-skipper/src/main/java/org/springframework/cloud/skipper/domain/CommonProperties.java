@@ -13,27 +13,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.cloud.skipper.service;
-
-import org.springframework.cloud.skipper.domain.Release;
+package org.springframework.cloud.skipper.domain;
 
 /**
- * Manages the lifecycle of a releases.
- *
- * The current implementation is a simple sequence of AppDeployer commands, but more
- * sophisticated implementations based on Spring Cloud State Machine or Concourse are
- * possible.
- *
- * @author Mark Pollack
+ * Common property values shared between initial deploy and update requests.
  * @author Ilayaperumal Gopinathan
+ * @author Mark Pollack
  */
-public interface ReleaseManager {
+public class CommonProperties {
 
-	Release deploy(Release release);
+	private String releaseName;
 
-	Release undeploy(Release release);
+	private ConfigValues configValues;
 
-	Release status(Release release);
+	public String getReleaseName() {
+		return releaseName;
+	}
 
-	void updateStatus(Release release);
+	public void setReleaseName(String releaseName) {
+		this.releaseName = releaseName;
+	}
+
+	public ConfigValues getConfigValues() {
+		return configValues;
+	}
+
+	public void setConfigValues(ConfigValues configValues) {
+		this.configValues = configValues;
+	}
 }

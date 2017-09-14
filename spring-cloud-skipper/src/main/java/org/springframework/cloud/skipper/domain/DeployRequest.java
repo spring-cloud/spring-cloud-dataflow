@@ -15,8 +15,6 @@
  */
 package org.springframework.cloud.skipper.domain;
 
-import org.springframework.cloud.skipper.domain.skipperpackage.DeployProperties;
-
 /**
  * @author Mark Pollack
  */

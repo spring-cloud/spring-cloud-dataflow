@@ -17,9 +17,11 @@ package org.springframework.cloud.skipper.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.skipper.domain.Release;
+import org.springframework.cloud.skipper.domain.UpdateRequest;
 import org.springframework.cloud.skipper.service.ReleaseService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -47,6 +49,12 @@ public class ReleaseController {
 		return this.releaseService.status(name, version);
 	}
 
+	@RequestMapping(path = "/update", method = RequestMethod.POST)
+	@ResponseStatus(HttpStatus.CREATED)
+	public Release update(@RequestBody UpdateRequest updateRequest) {
+		return this.releaseService.update(updateRequest);
+	}
+
 	@RequestMapping(path = "/undeploy/{name}", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
 	public Release undeploy(@PathVariable("name") String releaseName) {
@@ -56,7 +64,7 @@ public class ReleaseController {
 	@RequestMapping(path = "/rollback/{name}/{version}", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
 	public Release rollback(@PathVariable("name") String releaseName,
-							@PathVariable("version") int rollbackVersion) {
+			@PathVariable("version") int rollbackVersion) {
 		return this.releaseService.rollback(releaseName, rollbackVersion);
 	}
 }

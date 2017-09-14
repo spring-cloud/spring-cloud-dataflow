@@ -48,6 +48,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StreamUtils;
 
 /**
+ * Service responsible for downloading package .zip files and loading them into the
+ * Package object
  * @author Mark Pollack
  */
 @Service
@@ -240,8 +242,8 @@ public class PackageService implements ResourceLoaderAware {
 	 * @return The directory where the package will be downloaded.
 	 */
 	public File calculatePackageDirectory(PackageMetadata packageMetadata) {
-		Repository localRepository =
-				this.repositoryRepository.findByName(RepositoryInitializationService.LOCAL_REPOSITORY_NAME);
+		Repository localRepository = this.repositoryRepository
+				.findByName(RepositoryInitializationService.LOCAL_REPOSITORY_NAME);
 		FileSystemResource fileSystemResource = new FileSystemResource(localRepository.getUrl());
 		return new File(fileSystemResource.getFilename()
 				+ File.separator + packageMetadata.getName());

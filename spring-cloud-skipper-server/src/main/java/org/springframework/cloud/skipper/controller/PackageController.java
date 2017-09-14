@@ -16,9 +16,9 @@
 package org.springframework.cloud.skipper.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.skipper.domain.DeployProperties;
 import org.springframework.cloud.skipper.domain.DeployRequest;
 import org.springframework.cloud.skipper.domain.Release;
-import org.springframework.cloud.skipper.domain.skipperpackage.DeployProperties;
 import org.springframework.cloud.skipper.service.ReleaseService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -55,11 +55,5 @@ public class PackageController {
 	@ResponseStatus(HttpStatus.CREATED)
 	public Release deploy(@PathVariable("id") String id, @RequestBody DeployProperties deployProperties) {
 		return this.releaseService.deploy(id, deployProperties);
-	}
-
-	@RequestMapping(path = "{id}/update", method = RequestMethod.POST)
-	@ResponseStatus(HttpStatus.CREATED)
-	public Release update(@PathVariable("id") String packageId, @RequestBody DeployProperties deployProperties) {
-		return this.releaseService.update(packageId, deployProperties);
 	}
 }

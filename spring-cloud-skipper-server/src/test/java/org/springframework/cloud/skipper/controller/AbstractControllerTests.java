@@ -23,11 +23,14 @@ import org.junit.Before;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.skipper.AbstractMockMvcTests;
 import org.springframework.cloud.skipper.config.SkipperServerProperties;
+import org.springframework.cloud.skipper.domain.DeployProperties;
 import org.springframework.cloud.skipper.domain.DeployRequest;
+import org.springframework.cloud.skipper.domain.PackageIdentifier;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
 import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.StatusCode;
-import org.springframework.cloud.skipper.domain.skipperpackage.DeployProperties;
+import org.springframework.cloud.skipper.domain.UpdateProperties;
+import org.springframework.cloud.skipper.domain.UpdateRequest;
 import org.springframework.cloud.skipper.repository.PackageMetadataRepository;
 import org.springframework.cloud.skipper.repository.ReleaseRepository;
 import org.springframework.util.FileSystemUtils;
@@ -39,6 +42,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 /**
  * @author Mark Pollack
+ * @author Ilayaperumal Gopinathan
  */
 public class AbstractControllerTests extends AbstractMockMvcTests {
 
@@ -61,9 +65,8 @@ public class AbstractControllerTests extends AbstractMockMvcTests {
 
 	@After
 	public void cleanupReleases() throws Exception {
-		// Add a sleep for now to give the local deployer a chance to deploy the app. This should
-		// go away
-		// once we introduce spring state machine.
+		// Add a sleep for now to give the local deployer a chance to deploy the app. This
+		// should go away once we introduce spring state machine.
 		Thread.sleep(5000);
 		for (Release release : releaseRepository.findAll()) {
 			if (release.getInfo().getStatus().getStatusCode() != StatusCode.DELETED) {
@@ -103,12 +106,18 @@ public class AbstractControllerTests extends AbstractMockMvcTests {
 	}
 
 	protected Release update(String packageName, String packageVersion, String releaseName) throws Exception {
-		DeployProperties newDeployProperties = createDeployProperties(releaseName);
-		PackageMetadata updatePackageMetadata = packageMetadataRepository.findByNameAndVersion(packageName,
+		UpdateRequest updateRequest = new UpdateRequest();
+		UpdateProperties updateProperties = createUpdateProperties(releaseName);
+		PackageIdentifier packageIdentifier = new PackageIdentifier();
+		packageIdentifier.setPackageName(packageName);
+		packageIdentifier.setPackageVersion(packageVersion);
+		updateRequest.setPackageIdentifier(packageIdentifier);
+		updateRequest.setUpdateProperties(updateProperties);
+		PackageMetadata updatePackageMetadata = this.packageMetadataRepository.findByNameAndVersion(packageName,
 				packageVersion);
 		assertThat(updatePackageMetadata).isNotNull();
-		mockMvc.perform(post("/package/" + updatePackageMetadata.getId() + "/update")
-				.content(convertObjectToJson(newDeployProperties))).andDo(print())
+		mockMvc.perform(post("/release/update")
+				.content(convertObjectToJson(updateRequest))).andDo(print())
 				.andExpect(status().isCreated()).andReturn();
 		Release updatedRelease = this.releaseRepository.findByNameAndVersion(releaseName, 2);
 		commonReleaseAssertions(releaseName, updatePackageMetadata, updatedRelease);
@@ -120,6 +129,12 @@ public class AbstractControllerTests extends AbstractMockMvcTests {
 		deployProperties.setPlatformName("test");
 		deployProperties.setReleaseName(releaseName);
 		return deployProperties;
+	}
+
+	protected UpdateProperties createUpdateProperties(String releaseName) {
+		UpdateProperties updateProperties = new UpdateProperties();
+		updateProperties.setReleaseName(releaseName);
+		return updateProperties;
 	}
 
 	protected void commonReleaseAssertions(String releaseName, PackageMetadata packageMetadata,

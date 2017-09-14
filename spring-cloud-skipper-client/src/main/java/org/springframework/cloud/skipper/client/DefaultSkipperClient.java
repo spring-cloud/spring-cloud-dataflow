@@ -24,9 +24,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.cloud.skipper.domain.AboutInfo;
+import org.springframework.cloud.skipper.domain.DeployProperties;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
 import org.springframework.cloud.skipper.domain.Repository;
-import org.springframework.cloud.skipper.domain.skipperpackage.DeployProperties;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.ResourceSupport;
@@ -53,8 +53,8 @@ public class DefaultSkipperClient implements SkipperClient {
 	private final Traverson traverson;
 
 	/**
-	 * Create a new DefaultSkipperClient given the URL of the Server. This constructor will
-	 * create a new RestTemplate instance for communication.
+	 * Create a new DefaultSkipperClient given the URL of the Server. This constructor
+	 * will create a new RestTemplate instance for communication.
 	 *
 	 * @param baseUrl the URL of the Server.
 	 */
@@ -95,7 +95,7 @@ public class DefaultSkipperClient implements SkipperClient {
 		if (!details) {
 			parameters.put("projection", "summary");
 			parameters.put("sort", "name,asc");
-			//TODO semver sort..
+			// TODO semver sort..
 		}
 		return traversalBuilder.withTemplateParameters(parameters).toObject(typeReference);
 	}
