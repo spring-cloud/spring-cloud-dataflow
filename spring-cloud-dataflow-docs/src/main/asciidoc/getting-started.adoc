@@ -119,13 +119,23 @@ $ java -jar spring-cloud-dataflow-server-local-{project-version}.jar --maven.loc
 --maven.remote-repositories.repo1.url=https://repo1
 --maven.remote-repositories.repo1.auth.username=user1
 --maven.remote-repositories.repo1.auth.password=pass1
---maven.remote-repositories.repo2.url=https://repo2 --maven.proxy.host=proxy1
+--maven.remote-repositories.repo1.snapshot-policy.update-policy=daily
+--maven.remote-repositories.repo1.snapshot-policy.checksum-policy=warn
+--maven.remote-repositories.repo1.release-policy.update-policy=never
+--maven.remote-repositories.repo1.release-policy.checksum-policy=fail
+--maven.remote-repositories.repo2.url=https://repo2
+--maven.remote-repositories.repo2.policy.update-policy=always
+--maven.remote-repositories.repo2.policy.checksum-policy=fail
+--maven.proxy.host=proxy1
 --maven.proxy.port=9010 --maven.proxy.auth.username=proxyuser1
 --maven.proxy.auth.password=proxypass1
 ----
 
 By default, the protocol is set to `http`. You can omit the auth properties if the proxy doesn't need a username and password. Also, the maven `localRepository` is set to `${user.home}/.m2/repository/` by default.
 Like in the above example, the remote repositories can be specified along with their authentication (if needed). If the remote repositories are behind a proxy, then the proxy properties can be specified as above.
+
+The repository policies can be specified per remote repository configuration as above.
+The key `policy` is applicable to both `snapshot` and the `release` repository policies.
 
 As these are Spring Boot `@ConfigurationProperties` you can also specify them as environment variables, e.g. MAVEN_REMOTE_REPOSITORIES_REPO1_URL.
 Another common option, is to set the properties using the `SPRING_APPLICATION_JSON` environment variable.
