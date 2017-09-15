@@ -35,15 +35,15 @@ public class Deployer {
 	private String type;
 
 	@JsonIgnore
-	private AppDeployer deployer;
+	private AppDeployer appDeployer;
 
 	Deployer() {
 	}
 
-	public Deployer(String name, String type, AppDeployer deployer) {
+	public Deployer(String name, String type, AppDeployer appDeployer) {
 		this.name = name;
 		this.type = type;
-		this.deployer = deployer;
+		this.appDeployer = appDeployer;
 	}
 
 	public String getId() {
@@ -58,12 +58,12 @@ public class Deployer {
 		this.name = name;
 	}
 
-	public AppDeployer getDeployer() {
-		return deployer;
+	public AppDeployer getAppDeployer() {
+		return appDeployer;
 	}
 
-	public void setDeployer(AppDeployer deployer) {
-		this.deployer = deployer;
+	public void setAppDeployer(AppDeployer deployer) {
+		this.appDeployer = deployer;
 	}
 
 	public String getType() {

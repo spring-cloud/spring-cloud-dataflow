@@ -5,6 +5,5 @@ spring:
         platform:
           local:
             accounts:
-              localDev:
+              default:
                 shutdownTimeout: 60
-                javaOpts: "-Dtest=foo"

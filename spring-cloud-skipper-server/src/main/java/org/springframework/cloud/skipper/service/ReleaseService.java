@@ -17,7 +17,11 @@ package org.springframework.cloud.skipper.service;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.util.*;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.TreeMap;
 
 import com.samskivert.mustache.Mustache;
 import org.slf4j.Logger;
@@ -25,9 +29,19 @@ import org.slf4j.LoggerFactory;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
-import org.springframework.cloud.skipper.domain.*;
+import org.springframework.cloud.skipper.domain.ConfigValues;
+import org.springframework.cloud.skipper.domain.DeployRequest;
+import org.springframework.cloud.skipper.domain.Info;
 import org.springframework.cloud.skipper.domain.Package;
+import org.springframework.cloud.skipper.domain.PackageIdentifier;
+import org.springframework.cloud.skipper.domain.PackageMetadata;
+import org.springframework.cloud.skipper.domain.Release;
+import org.springframework.cloud.skipper.domain.Status;
+import org.springframework.cloud.skipper.domain.StatusCode;
+import org.springframework.cloud.skipper.domain.Template;
 import org.springframework.cloud.skipper.domain.skipperpackage.DeployProperties;
+import org.springframework.cloud.skipper.index.PackageException;
+import org.springframework.cloud.skipper.repository.DeployerRepository;
 import org.springframework.cloud.skipper.repository.PackageMetadataRepository;
 import org.springframework.cloud.skipper.repository.ReleaseRepository;
 import org.springframework.core.io.InputStreamResource;
@@ -52,15 +66,19 @@ public class ReleaseService {
 
 	private final ReleaseManager releaseManager;
 
+	private final DeployerRepository deployerRepository;
+
 	@Autowired
 	public ReleaseService(PackageMetadataRepository packageMetadataRepository,
 			ReleaseRepository releaseRepository,
 			PackageService packageService,
-			ReleaseManager releaseManager) {
+			ReleaseManager releaseManager,
+			DeployerRepository deployerRepository) {
 		this.packageMetadataRepository = packageMetadataRepository;
 		this.releaseRepository = releaseRepository;
 		this.packageService = packageService;
 		this.releaseManager = releaseManager;
+		this.deployerRepository = deployerRepository;
 	}
 
 	/**
@@ -70,10 +88,15 @@ public class ReleaseService {
 	 * @param deployProperties contains the name of the release, the platfrom to deploy to,
 	 * and configuration values to replace in the package template.
 	 * @return the Release object associated with this deployment
+	 * @throws PackageException if the package to deploy can not be found.
 	 */
 	public Release deploy(String id, DeployProperties deployProperties) {
-		Assert.notNull(deployProperties, "Install Properties can not be null");
+		Assert.notNull(deployProperties, "Deploy Properties can not be null");
+		Assert.hasText(id, "Package ID can not be null");
 		PackageMetadata packageMetadata = this.packageMetadataRepository.findOne(id);
+		if (packageMetadata == null) {
+			throw new PackageException(String.format("Package with id='%s' can not be found.", id));
+		}
 		return deploy(packageMetadata, deployProperties);
 	}
 
@@ -95,6 +118,7 @@ public class ReleaseService {
 	}
 
 	protected Release deploy(PackageMetadata packageMetadata, DeployProperties deployProperties) {
+		Assert.notNull(packageMetadata, "Can't download PackageMetadata, it is a null value.");
 		this.packageService.downloadPackage(packageMetadata);
 		Package packageToInstall = this.packageService.loadPackage(packageMetadata);
 		Release release = createInitialRelease(deployProperties, packageToInstall);
@@ -327,7 +351,16 @@ public class ReleaseService {
 		release.setVersion(1);
 		Info info = createNewInfo();
 		release.setInfo(info);
+		validateInitialRelease(release);
 		return release;
+	}
+
+	/**
+	 * Do up front checks before deploying
+	 * @param release the initial release object this data provided by the end user.
+	 */
+	private void validateInitialRelease(Release release) {
+		this.deployerRepository.findByNameRequired(release.getPlatformName());
 	}
 
 	private Info createNewInfo() {

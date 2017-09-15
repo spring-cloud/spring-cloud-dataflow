@@ -15,32 +15,24 @@
  */
 package org.springframework.cloud.skipper.repository;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.skipper.deployer.Deployer;
-import org.springframework.data.repository.PagingAndSortingRepository;
-import org.springframework.data.rest.core.annotation.RepositoryRestResource;
-import org.springframework.data.rest.core.annotation.RestResource;
+import org.springframework.cloud.skipper.index.PackageException;
 
 /**
  * @author Mark Pollack
  */
-@RepositoryRestResource
-public interface DeployerRepository extends PagingAndSortingRepository<Deployer, String>, DeployerRepositoryCustom {
+public class DeployerRepositoryImpl implements DeployerRepositoryCustom {
 
-	Deployer findByName(String name);
-
-	@Override
-	@RestResource(exported = false)
-	Deployer save(Deployer deployer);
+	@Autowired
+	private DeployerRepository deployerRepository;
 
 	@Override
-	@RestResource(exported = false)
-	void delete(String s);
-
-	@Override
-	@RestResource(exported = false)
-	void delete(Deployer deployer);
-
-	@Override
-	@RestResource(exported = false)
-	void deleteAll();
+	public Deployer findByNameRequired(String name) {
+		Deployer deployer = deployerRepository.findByName(name);
+		if (deployer == null) {
+			throw new PackageException(String.format("Can not deploy, no deployer named '%s'", name));
+		}
+		return deployer;
+	}
 }

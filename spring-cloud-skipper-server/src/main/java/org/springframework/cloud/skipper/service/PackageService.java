@@ -33,13 +33,13 @@ import org.zeroturnaround.zip.ZipUtil;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.bind.YamlConfigurationFactory;
-import org.springframework.cloud.skipper.config.SkipperServerProperties;
 import org.springframework.cloud.skipper.domain.ConfigValues;
 import org.springframework.cloud.skipper.domain.Package;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
 import org.springframework.cloud.skipper.domain.Repository;
 import org.springframework.cloud.skipper.domain.Template;
 import org.springframework.cloud.skipper.index.PackageException;
+import org.springframework.cloud.skipper.repository.RepositoryRepository;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
@@ -57,11 +57,11 @@ public class PackageService implements ResourceLoaderAware {
 
 	private ResourceLoader resourceLoader;
 
-	private SkipperServerProperties skipperServerProperties;
+	private RepositoryRepository repositoryRepository;
 
 	@Autowired
-	public PackageService(SkipperServerProperties skipperServerProperties) {
-		this.skipperServerProperties = skipperServerProperties;
+	public PackageService(RepositoryRepository repositoryRepository) {
+		this.repositoryRepository = repositoryRepository;
 	}
 
 	public void downloadPackage(PackageMetadata packageMetadata) {
@@ -86,23 +86,25 @@ public class PackageService implements ResourceLoaderAware {
 		Assert.notNull(name, "name can not be null");
 		Assert.notNull(version, "version can not be null");
 		Resource sourceResource = null;
-		for (Repository packageRepository : this.skipperServerProperties.getPackageRepositories()) {
+		boolean found = false;
+		for (Repository packageRepository : this.repositoryRepository.findAll()) {
 			String sourceUrl = packageRepository.getUrl() + "/" + name + "/" +
 					name + "-" + version + ".zip";
 			sourceResource = resourceLoader.getResource(sourceUrl);
 			if (sourceResource.exists()) {
 				logger.debug(String.format("Found resource for Package name '%s', version '%s'.  URL = '%s' ",
 						name, version, sourceUrl));
+				found = true;
 				break;
 			}
 			else {
-				logger.debug(String.format("No resource for Package name '%', version '%s' at URL = '%s' ",
+				logger.debug(String.format("No resource for Package name '%s', version '%s' at URL = '%s' ",
 						name, version, sourceUrl));
 			}
 		}
-		if (sourceResource == null) {
+		if (!found) {
 			throw new PackageException(String.format(
-					"Resource for Package name '%', version '%s' was not found in any repository.", name, version));
+					"Resource for Package name '%s', version '%s' was not found in any repository.", name, version));
 		}
 		return sourceResource;
 	}
@@ -231,14 +233,17 @@ public class PackageService implements ResourceLoaderAware {
 	}
 
 	/**
-	 * Give the PackageMetadata, return the directory where the package will be downloaded.
+	 * Give the PackageMetadata, return the directory where the package will be downloaded to.
 	 * The directory takes the server's PackageDir configuraiton property and appends the
 	 * package name taken from the metadata.
 	 * @param packageMetadata the package's metadata.
 	 * @return The directory where the package will be downloaded.
 	 */
 	public File calculatePackageDirectory(PackageMetadata packageMetadata) {
-		return new File(skipperServerProperties.getPackageDir()
+		Repository localRepository =
+				this.repositoryRepository.findByName(RepositoryInitializationService.LOCAL_REPOSITORY_NAME);
+		FileSystemResource fileSystemResource = new FileSystemResource(localRepository.getUrl());
+		return new File(fileSystemResource.getFilename()
 				+ File.separator + packageMetadata.getName());
 	}
 

@@ -44,6 +44,8 @@ public class RepositoryInitializationService {
 
 	private final SkipperServerProperties skipperServerProperties;
 
+	public final static String LOCAL_REPOSITORY_NAME = "local";
+
 	@Autowired
 	public RepositoryInitializationService(RepositoryRepository repositoryRepository,
 			SkipperServerProperties skipperServerProperties) {
@@ -54,6 +56,7 @@ public class RepositoryInitializationService {
 	@EventListener
 	public void initialize(ApplicationReadyEvent event) {
 		List<Repository> configurationRepositories = skipperServerProperties.getPackageRepositories();
+		addLocalRepository();
 		for (Repository configurationRepository : configurationRepositories) {
 			if (repositoryRepository.findByName(configurationRepository.getName()) == null) {
 				logger.info("Initializing repository database with " + configurationRepository);
@@ -65,5 +68,12 @@ public class RepositoryInitializationService {
 			}
 		}
 
+	}
+
+	private void addLocalRepository() {
+		Repository repository = new Repository();
+		repository.setName(LOCAL_REPOSITORY_NAME);
+		repository.setUrl("file://" + skipperServerProperties.getPackageDir());
+		repositoryRepository.save(repository);
 	}
 }

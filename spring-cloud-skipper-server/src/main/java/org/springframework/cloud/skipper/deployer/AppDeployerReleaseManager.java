@@ -16,7 +16,11 @@
 package org.springframework.cloud.skipper.deployer;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.MappingIterator;
@@ -30,7 +34,12 @@ import org.springframework.cloud.deployer.spi.app.AppStatus;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
-import org.springframework.cloud.skipper.domain.*;
+import org.springframework.cloud.skipper.domain.AppDeployerData;
+import org.springframework.cloud.skipper.domain.AppDeploymentKind;
+import org.springframework.cloud.skipper.domain.Deployment;
+import org.springframework.cloud.skipper.domain.Release;
+import org.springframework.cloud.skipper.domain.Status;
+import org.springframework.cloud.skipper.domain.StatusCode;
 import org.springframework.cloud.skipper.repository.DeployerRepository;
 import org.springframework.cloud.skipper.repository.ReleaseRepository;
 import org.springframework.cloud.skipper.service.ManifestStore;
@@ -81,8 +90,8 @@ public class AppDeployerReleaseManager implements ReleaseManager {
 
 		// Deploy the application
 		List<Deployment> appDeployments = unmarshallDeployments(release.getManifest());
-
-		AppDeployer appDeployer = deployerRepository.findByName(release.getPlatformName()).getDeployer();
+		AppDeployer appDeployer = this.deployerRepository.findByNameRequired(release.getPlatformName())
+				.getAppDeployer();
 		List<String> deploymentIds = new ArrayList<>();
 		for (Deployment appDeployment : appDeployments) {
 			deploymentIds.add(appDeployer.deploy(
@@ -109,7 +118,8 @@ public class AppDeployerReleaseManager implements ReleaseManager {
 	}
 
 	public Release status(Release release) {
-		AppDeployer appDeployer = this.deployerRepository.findByName(release.getPlatformName()).getDeployer();
+		AppDeployer appDeployer = this.deployerRepository.findByNameRequired(release.getPlatformName())
+				.getAppDeployer();
 		Set<String> deploymentIds = new HashSet<>();
 		AppDeployerData appDeployerData = this.appDeployerDataRepository
 				.findByReleaseNameAndReleaseVersion(release.getName(), release.getVersion());
@@ -141,7 +151,8 @@ public class AppDeployerReleaseManager implements ReleaseManager {
 	}
 
 	public Release undeploy(Release release) {
-		AppDeployer appDeployer = deployerRepository.findByName(release.getPlatformName()).getDeployer();
+		AppDeployer appDeployer = this.deployerRepository.findByNameRequired(release.getPlatformName())
+				.getAppDeployer();
 		Set<String> deploymentIds = new HashSet<>();
 		AppDeployerData appDeployerData = this.appDeployerDataRepository
 				.findByReleaseNameAndReleaseVersion(release.getName(), release.getVersion());

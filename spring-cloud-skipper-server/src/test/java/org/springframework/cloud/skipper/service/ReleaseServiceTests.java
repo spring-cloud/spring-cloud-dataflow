@@ -19,27 +19,26 @@ import org.junit.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.skipper.AbstractIntegrationTest;
-import org.springframework.cloud.skipper.repository.RepositoryRepository;
-import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.cloud.skipper.domain.skipperpackage.DeployProperties;
+import org.springframework.cloud.skipper.index.PackageException;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * @author Mark Pollack
  */
-@ActiveProfiles("index-test")
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-public class RepositoryInitializationServiceTest extends AbstractIntegrationTest {
+@ActiveProfiles("repo-test")
+@TestPropertySource(properties = { "spring.cloud.skipper.server.synchonizeIndexOnContextRefresh=true" })
+public class ReleaseServiceTests extends AbstractIntegrationTest {
 
 	@Autowired
-	private RepositoryRepository repositoryRepository;
+	private ReleaseService releaseService;
 
 	@Test
-	public void intialize() throws Exception {
-		//There will always be the local repository
-		assertThat(repositoryRepository.count()).isEqualTo(2);
-		assertThat(repositoryRepository.findByName("test").getUrl()).isEqualTo("classpath:");
+	public void testBadArguments() {
+		assertThatThrownBy(() -> releaseService.deploy("badId", new DeployProperties()))
+				.isInstanceOf(PackageException.class);
 	}
-
 }

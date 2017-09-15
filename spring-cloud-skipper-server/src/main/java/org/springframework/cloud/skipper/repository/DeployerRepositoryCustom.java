@@ -16,31 +16,18 @@
 package org.springframework.cloud.skipper.repository;
 
 import org.springframework.cloud.skipper.deployer.Deployer;
-import org.springframework.data.repository.PagingAndSortingRepository;
-import org.springframework.data.rest.core.annotation.RepositoryRestResource;
-import org.springframework.data.rest.core.annotation.RestResource;
+import org.springframework.cloud.skipper.index.PackageException;
 
 /**
  * @author Mark Pollack
  */
-@RepositoryRestResource
-public interface DeployerRepository extends PagingAndSortingRepository<Deployer, String>, DeployerRepositoryCustom {
+public interface DeployerRepositoryCustom {
 
-	Deployer findByName(String name);
+	/**
+	 * Performs a findByName query and throws an exception if the name is not found.
+	 * @param name the name of the deployer
+	 * @return The deployer instance or {@link PackageException} if not found.
+	 */
+	Deployer findByNameRequired(String name);
 
-	@Override
-	@RestResource(exported = false)
-	Deployer save(Deployer deployer);
-
-	@Override
-	@RestResource(exported = false)
-	void delete(String s);
-
-	@Override
-	@RestResource(exported = false)
-	void delete(Deployer deployer);
-
-	@Override
-	@RestResource(exported = false)
-	void deleteAll();
 }

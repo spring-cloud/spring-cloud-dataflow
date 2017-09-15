@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: skipper
+name: log
+version: 1.0.0
+appVersion: 1.2.0.RC1
+packageSourceUrl: https://github.com/spring-cloud-stream-app-starters/log/tree/v1.2.0.RC1
+packageHomeUrl: http://cloud.spring.io/spring-cloud-stream-app-starters/
+tags: logging, sink
+maintainer: https://github.com/sobychacko
+description: The log sink uses the application logger to output the data for inspection.
