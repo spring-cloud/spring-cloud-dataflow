@@ -26,3 +26,4 @@ logging:
     org.hibernate: 'WARN'
     # The following INFO is to log the generated password when using basic security
     org.springframework.boot.autoconfigure.security: 'INFO'
+    org.springframework.skipper: 'INFO'

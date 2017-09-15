@@ -37,6 +37,7 @@ import org.springframework.cloud.skipper.config.SkipperServerProperties;
 import org.springframework.cloud.skipper.domain.ConfigValues;
 import org.springframework.cloud.skipper.domain.Package;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
+import org.springframework.cloud.skipper.domain.Repository;
 import org.springframework.cloud.skipper.domain.Template;
 import org.springframework.cloud.skipper.index.PackageException;
 import org.springframework.context.ResourceLoaderAware;
@@ -65,22 +66,45 @@ public class PackageService implements ResourceLoaderAware {
 
 	public void downloadPackage(PackageMetadata packageMetadata) {
 		Assert.notNull(packageMetadata, "Can't download PackageMetadata, it is a null value.");
-		String originUrl = packageMetadata.getOrigin();
-		String sourceUrl = originUrl + "/" + packageMetadata.getName() + "/" +
-				packageMetadata.getName() + "-" + packageMetadata.getVersion() + ".zip";
-		Resource sourceResource = resourceLoader.getResource(sourceUrl);
+		Resource sourceResource = findFirstPackageResourceThatExists(packageMetadata.getName(),
+				packageMetadata.getVersion());
 		File targetPath = calculatePackageDirectory(packageMetadata);
 		targetPath.mkdirs();
 		File targetFile = calculatePackageZipFile(packageMetadata, targetPath);
 		try {
 			StreamUtils.copy(sourceResource.getInputStream(), new FileOutputStream(targetFile));
 			logger.info("Downloaded package [" + packageMetadata.getName() + "-" + packageMetadata.getVersion()
-					+ "] from " + originUrl);
+					+ "] from " + sourceResource.getURL());
 		}
 		catch (IOException e) {
-			throw new PackageException("Could not copy " + sourceUrl + " to " + targetFile, e);
+			throw new PackageException("Could not copy " + sourceResource + " to " + targetFile, e);
 		}
 		ZipUtil.unpack(targetFile, targetPath);
+	}
+
+	private Resource findFirstPackageResourceThatExists(String name, String version) {
+		Assert.notNull(name, "name can not be null");
+		Assert.notNull(version, "version can not be null");
+		Resource sourceResource = null;
+		for (Repository packageRepository : this.skipperServerProperties.getPackageRepositories()) {
+			String sourceUrl = packageRepository.getUrl() + "/" + name + "/" +
+					name + "-" + version + ".zip";
+			sourceResource = resourceLoader.getResource(sourceUrl);
+			if (sourceResource.exists()) {
+				logger.debug(String.format("Found resource for Package name '%s', version '%s'.  URL = '%s' ",
+						name, version, sourceUrl));
+				break;
+			}
+			else {
+				logger.debug(String.format("No resource for Package name '%', version '%s' at URL = '%s' ",
+						name, version, sourceUrl));
+			}
+		}
+		if (sourceResource == null) {
+			throw new PackageException(String.format(
+					"Resource for Package name '%', version '%s' was not found in any repository.", name, version));
+		}
+		return sourceResource;
 	}
 
 	public Package loadPackage(PackageMetadata packageMetadata) {

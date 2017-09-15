@@ -1,0 +1,10 @@
+spring:
+  cloud:
+    skipper:
+      server:
+        platform:
+          local:
+            accounts:
+              localDev:
+                shutdownTimeout: 60
+                javaOpts: "-Dtest=foo"

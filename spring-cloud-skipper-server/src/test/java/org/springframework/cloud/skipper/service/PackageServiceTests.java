@@ -36,12 +36,14 @@ import org.springframework.cloud.skipper.domain.ConfigValues;
 import org.springframework.cloud.skipper.domain.Package;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
 import org.springframework.cloud.skipper.domain.Template;
+import org.springframework.cloud.skipper.index.PackageException;
 import org.springframework.cloud.skipper.repository.PackageMetadataRepository;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.util.FileSystemUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.entry;
 
 /**
@@ -65,6 +67,18 @@ public class PackageServiceTests extends AbstractIntegrationTest {
 		File packageDirectory = new File(skipperServerProperties.getPackageDir());
 		FileSystemUtils.deleteRecursively(new File(skipperServerProperties.getPackageDir()));
 		assertThat(packageDirectory).doesNotExist();
+	}
+
+	@Test
+	public void testExceptions() {
+		PackageMetadata packageMetadata = new PackageMetadata();
+		packageMetadata.setName("noname");
+		packageMetadata.setVersion("noversion");
+		assertThatThrownBy(() -> packageService.downloadPackage(packageMetadata))
+				.isInstanceOf(PackageException.class)
+				.withFailMessage(
+						"Resource for Package name 'noname', version 'noversion' was not found in any repository.");
+		assertThatThrownBy(() -> packageService.loadPackage(packageMetadata)).isInstanceOf(PackageException.class);
 	}
 
 	@Test
