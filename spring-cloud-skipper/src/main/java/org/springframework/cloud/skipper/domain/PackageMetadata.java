@@ -15,7 +15,10 @@
  */
 package org.springframework.cloud.skipper.domain;
 
+import javax.persistence.Lob;
 import javax.validation.constraints.NotNull;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.keyvalue.annotation.KeySpace;
@@ -73,6 +76,13 @@ public class PackageMetadata {
 	private String packageHomeUrl;
 
 	/**
+	 * Package file.
+	 */
+	@Lob
+	@JsonIgnore
+	private byte[] packageFile;
+
+	/**
 	 * A comma separated list of tags to use for searching
 	 */
 	private String tags;
@@ -83,8 +93,8 @@ public class PackageMetadata {
 	private String maintainer;
 
 	/**
-	 * Brief description of the package. The packages README.md will contain more information.
-	 * TODO - decide format.
+	 * Brief description of the package. The packages README.md will contain more
+	 * information. TODO - decide format.
 	 */
 	private String description;
 
@@ -171,6 +181,14 @@ public class PackageMetadata {
 
 	public void setPackageHomeUrl(String packageHomeUrl) {
 		this.packageHomeUrl = packageHomeUrl;
+	}
+
+	public byte[] getPackageFile() {
+		return packageFile;
+	}
+
+	public void setPackageFile(byte[] packageFile) {
+		this.packageFile = packageFile;
 	}
 
 	public String getTags() {

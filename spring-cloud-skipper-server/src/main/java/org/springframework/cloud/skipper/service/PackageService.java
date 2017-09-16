@@ -36,21 +36,26 @@ import org.springframework.boot.bind.YamlConfigurationFactory;
 import org.springframework.cloud.skipper.domain.ConfigValues;
 import org.springframework.cloud.skipper.domain.Package;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
+import org.springframework.cloud.skipper.domain.PackageUploadProperties;
 import org.springframework.cloud.skipper.domain.Repository;
 import org.springframework.cloud.skipper.domain.Template;
 import org.springframework.cloud.skipper.index.PackageException;
+import org.springframework.cloud.skipper.repository.PackageMetadataRepository;
 import org.springframework.cloud.skipper.repository.RepositoryRepository;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Service;
+import org.springframework.util.FileSystemUtils;
 import org.springframework.util.StreamUtils;
 
 /**
  * Service responsible for downloading package .zip files and loading them into the
- * Package object
+ * Package object.
+ *
  * @author Mark Pollack
+ * @author Ilayaperumal Gopinathan
  */
 @Service
 public class PackageService implements ResourceLoaderAware {
@@ -61,29 +66,64 @@ public class PackageService implements ResourceLoaderAware {
 
 	private RepositoryRepository repositoryRepository;
 
+	private PackageMetadataRepository packageMetadataRepository;
+
 	@Autowired
-	public PackageService(RepositoryRepository repositoryRepository) {
+	public PackageService(RepositoryRepository repositoryRepository,
+			PackageMetadataRepository packageMetadataRepository) {
 		this.repositoryRepository = repositoryRepository;
+		this.packageMetadataRepository = packageMetadataRepository;
 	}
 
 	public Package downloadPackage(PackageMetadata packageMetadata) {
 		Assert.notNull(packageMetadata, "Can't download PackageMetadata, it is a null value.");
-		Resource sourceResource = findFirstPackageResourceThatExists(packageMetadata.getName(),
-				packageMetadata.getVersion());
-		File targetPath = calculatePackageDownloadDirectory(packageMetadata);
-		targetPath.mkdirs();
-		File targetFile = calculatePackageZipFile(packageMetadata, targetPath);
+		File targetPath = null;
+		File targetFile = null;
+		Package downloadedPackage = null;
+		Path tmpDirPath = null;
 		try {
-			StreamUtils.copy(sourceResource.getInputStream(), new FileOutputStream(targetFile));
-			logger.info("Downloaded package [" + packageMetadata.getName() + "-" + packageMetadata.getVersion()
-					+ "] from " + sourceResource.getURL());
+			if (packageMetadata.getPackageFile() != null) {
+				tmpDirPath = Files.createTempDirectory("skipper");
+				targetPath = new File(tmpDirPath + File.separator + packageMetadata.getName());
+				targetPath.mkdirs();
+				targetFile = calculatePackageZipFile(packageMetadata, targetPath);
+				try {
+					StreamUtils.copy(packageMetadata.getPackageFile(), new FileOutputStream(targetFile));
+				}
+				catch (IOException e) {
+					throw new PackageException(
+							"Could not copy " + packageMetadata.getPackageFile() + " to " + targetFile, e);
+				}
+			}
+			else {
+				Resource sourceResource = findFirstPackageResourceThatExists(packageMetadata.getName(),
+						packageMetadata.getVersion());
+				targetPath = calculatePackageDownloadDirectory(packageMetadata);
+				targetPath.mkdirs();
+				targetFile = calculatePackageZipFile(packageMetadata, targetPath);
+				try {
+					StreamUtils.copy(sourceResource.getInputStream(), new FileOutputStream(targetFile));
+					logger.info("Downloaded package [" + packageMetadata.getName() + "-" + packageMetadata.getVersion()
+							+ "] from " + sourceResource.getURL());
+				}
+				catch (IOException e) {
+					throw new PackageException("Could not copy " + sourceResource + " to " + targetFile, e);
+				}
+				packageMetadata.setPackageFile(Files.readAllBytes(targetFile.toPath()));
+				this.packageMetadataRepository.save(packageMetadata);
+			}
+			ZipUtil.unpack(targetFile, targetPath);
+			return loadPackageOnPath(new File(targetPath, packageMetadata.getName() + "-" +
+					packageMetadata.getVersion()));
 		}
 		catch (IOException e) {
-			throw new PackageException("Could not copy " + sourceResource + " to " + targetFile, e);
+			throw new PackageException("Exception while setting PackageMetadata");
 		}
-		ZipUtil.unpack(targetFile, targetPath);
-		File unzipdir = new File(targetPath, packageMetadata.getName() + "-" + packageMetadata.getVersion());
-		return loadPackageOnPath("dummyValue", unzipdir.getAbsolutePath());
+		finally {
+			if (tmpDirPath != null && !FileSystemUtils.deleteRecursively(tmpDirPath.toFile())) {
+				logger.warn("Temporary directory can not be deleted: " + tmpDirPath);
+			}
+		}
 	}
 
 	private Resource findFirstPackageResourceThatExists(String name, String version) {
@@ -113,22 +153,61 @@ public class PackageService implements ResourceLoaderAware {
 		return sourceResource;
 	}
 
-	public Package loadPackageOnPath(String packageOrigin, String packagePath) {
+	public PackageMetadata upload(PackageUploadProperties packageUploadProperties) {
+		Assert.notNull(packageUploadProperties.getRepoName(), "Repo name must not be null");
+		// todo: Verify the repo name set to package upload properties always belong to local repository type.
+		Repository localRepositoryToUpload = this.repositoryRepository
+				.findByName(packageUploadProperties.getRepoName());
+		Assert.notNull(localRepositoryToUpload,
+				"Local repository " + packageUploadProperties.getRepoName() + "doesn't exist.");
+		Path packageFile;
+		PackageMetadata packageMetadata = null;
+		try {
+			Path packageDirPath = Files.createTempDirectory("skipper");
+			File packageDir = new File(packageDirPath + File.separator + packageUploadProperties.getName());
+			packageDir.mkdir();
+			packageFile = Paths
+					.get(packageDir.getPath() + File.separator + packageUploadProperties.getName() + "-"
+							+ packageUploadProperties.getVersion() + "." + packageUploadProperties.getExtension());
+			Assert.isTrue(packageDir.exists(), "Package directory doesn't exist.");
+			Files.write(packageFile, packageUploadProperties.getFileToUpload());
+			if (packageUploadProperties.getExtension().contains("zip")) {
+				ZipUtil.unpack(packageFile.toFile(), packageDir);
+			}
+			String unzippedPath = packageDir.getAbsolutePath() + File.separator + packageUploadProperties.getName()
+					+ "-" + packageUploadProperties.getVersion();
+			File unpackagedFile = new File(unzippedPath);
+			Assert.isTrue(unpackagedFile.exists(), "Package is expected to be unpacked, but it doesn't exist");
+			Package packageToUpload = loadPackageOnPath(unpackagedFile);
+			packageMetadata = packageToUpload.getMetadata();
+			// todo: Model the PackageMetadata -> Repository relationship in the DB.
+			packageMetadata.setOrigin(localRepositoryToUpload.getId());
+			packageMetadata.setPackageFile(packageUploadProperties.getFileToUpload());
+			if (!FileSystemUtils.deleteRecursively(packageDirPath.toFile())) {
+				logger.warn("Temporary directory can not be deleted: " + packageDirPath);
+			}
+			this.packageMetadataRepository.save(packageMetadata);
+		}
+		catch (IOException e) {
+			throw new PackageException("Sorry, failed to upload the package " + e.getCause());
+		}
+		return packageMetadata;
+	}
+
+	protected Package loadPackageOnPath(File unpackedPackage) {
 		List<File> files;
-		try (Stream<Path> paths = Files.walk(Paths.get(packagePath), 1)) {
+		try (Stream<Path> paths = Files.walk(Paths.get(unpackedPackage.getPath()), 1)) {
 			files = paths.map(i -> i.toAbsolutePath().toFile()).collect(Collectors.toList());
 		}
 		catch (IOException e) {
-			throw new PackageException("Could not process files in path " + packagePath, e);
+			throw new PackageException("Could not process files in path " + unpackedPackage.getPath(), e);
 		}
-
 		Package pkg = new Package();
-
 		// Iterate over all files and "deserialize" the package.
 		for (File file : files) {
 			// Package metadata
 			if (file.getName().equalsIgnoreCase("package.yaml") || file.getName().equalsIgnoreCase("package.yml")) {
-				pkg.setMetadata(loadPackageMetadata(file, packageOrigin));
+				pkg.setMetadata(loadPackageMetadata(file));
 				continue;
 			}
 			// Package property values for configuration
@@ -148,17 +227,18 @@ public class PackageService implements ResourceLoaderAware {
 				File[] dependentPackageDirectories = file.listFiles();
 				List<Package> dependencies = new ArrayList<>();
 				for (File dependentPackageDirectory : dependentPackageDirectories) {
-					dependencies.add(loadPackageOnPath(packageOrigin, dependentPackageDirectory.getPath()));
+					dependencies.add(loadPackageOnPath(dependentPackageDirectory));
 				}
 				pkg.setDependencies(dependencies);
 			}
-
 		}
-
+		if (!FileSystemUtils.deleteRecursively(unpackedPackage)) {
+			logger.warn("Temporary directory can not be deleted: " + unpackedPackage);
+		}
 		return pkg;
 	}
 
-	private PackageMetadata loadPackageMetadata(File file, String origin) {
+	private PackageMetadata loadPackageMetadata(File file) {
 		YamlConfigurationFactory<PackageMetadata> factory = new YamlConfigurationFactory<PackageMetadata>(
 				PackageMetadata.class);
 		factory.setResource(new FileSystemResource(file));
@@ -169,7 +249,6 @@ public class PackageService implements ResourceLoaderAware {
 		catch (Exception e) {
 			throw new PackageException("Exception processing yaml file " + file.getName(), e);
 		}
-		packageMetadata.setOrigin(origin);
 		return packageMetadata;
 	}
 
@@ -224,15 +303,10 @@ public class PackageService implements ResourceLoaderAware {
 		return new File(targetPath, packageMetadata.getName() + "-" + packageMetadata.getVersion() + ".zip");
 	}
 
-	public File calculatePackageUnzippedDirectory(PackageMetadata packageMetadata) {
-		return new File(calculatePackageDownloadDirectory(packageMetadata),
-				packageMetadata.getName() + "-" + packageMetadata.getVersion());
-	}
-
 	/**
-	 * Give the PackageMetadata, return the directory where the package will be downloaded to.
-	 * The directory takes the server's PackageDir configuraiton property and appends the
-	 * package name taken from the metadata.
+	 * Give the PackageMetadata, return the directory where the package will be downloaded
+	 * to. The directory takes the server's PackageDir configuraiton property and appends
+	 * the package name taken from the metadata.
 	 * @param packageMetadata the package's metadata.
 	 * @return The directory where the package will be downloaded.
 	 */

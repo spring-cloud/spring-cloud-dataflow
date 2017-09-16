@@ -17,12 +17,15 @@ package org.springframework.cloud.skipper.shell.command;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.StringTokenizer;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -35,6 +38,7 @@ import org.springframework.cloud.skipper.domain.DeployProperties;
 import org.springframework.cloud.skipper.domain.DeployRequest;
 import org.springframework.cloud.skipper.domain.PackageIdentifier;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
+import org.springframework.cloud.skipper.domain.PackageUploadProperties;
 import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.UpdateProperties;
 import org.springframework.cloud.skipper.domain.UpdateRequest;
@@ -49,6 +53,7 @@ import org.springframework.shell.table.Table;
 import org.springframework.shell.table.TableBuilder;
 import org.springframework.shell.table.TableModel;
 import org.springframework.util.Assert;
+import org.springframework.util.ResourceUtils;
 import org.springframework.util.StringUtils;
 
 import static org.springframework.shell.standard.ShellOption.NULL;
@@ -137,7 +142,7 @@ public class PackageCommands extends AbstractSkipperCommand {
 			@ShellOption(help = "the name of the release to rollback") String releaseName,
 			@ShellOption(help = "the specific release version to rollback to. " +
 					"Not specifying the value rolls back to the previous release.", defaultValue = "0") int releaseVersion) {
-		Release release =  skipperClient.rollback(releaseName, releaseVersion);
+		Release release = skipperClient.rollback(releaseName, releaseVersion);
 		StringBuilder sb = new StringBuilder();
 		sb.append(release.getName() + " has been rolled back.\n");
 		sb.append("Last Deployed: " + release.getInfo().getLastDeployed() + "\n");
@@ -148,7 +153,7 @@ public class PackageCommands extends AbstractSkipperCommand {
 	@ShellMethod(key = "package undeploy", value = "Undeploy the package")
 	public String undeploy(
 			@ShellOption(help = "the name of the release to undeploy") String releaseName) {
-		Release release =  skipperClient.undeploy(releaseName);
+		Release release = skipperClient.undeploy(releaseName);
 		StringBuilder sb = new StringBuilder();
 		sb.append(release.getName() + " has been undeployed.\n");
 		return sb.toString();
@@ -181,6 +186,33 @@ public class PackageCommands extends AbstractSkipperCommand {
 		packageIdentifier.setPackageVersion(packageVersion);
 		deployRequest.setPackageIdentifier(packageIdentifier);
 		return deployRequest;
+	}
+
+	@ShellMethod(key = "package upload", value = "Upload a package")
+	public String upload(@ShellOption(help = "the package to be uploaded") String path,
+			@ShellOption(help = "the local repository name to upload to", defaultValue = NULL) String repoName) {
+		PackageUploadProperties properties = new PackageUploadProperties();
+		try {
+			File file = ResourceUtils.getFile(path);
+			StringTokenizer tokenizer = new StringTokenizer(file.getName(), "-");
+			String fileName = (String) tokenizer.nextElement();
+			String versionAndExtension = (String) tokenizer.nextElement();
+			String extension = versionAndExtension.substring(versionAndExtension.lastIndexOf("."));
+			String version = versionAndExtension.replaceAll(extension, "");
+			properties.setName(fileName);
+			properties.setVersion(version);
+			properties.setExtension(extension);
+			properties.setRepoName(StringUtils.hasText(repoName) ? repoName : "local");
+			properties.setFileToUpload(Files.readAllBytes(file.toPath()));
+		}
+		catch (FileNotFoundException e) {
+			throw new IllegalArgumentException("File Not found: " + e.getMessage());
+		}
+		catch (IOException e) {
+			throw new IllegalArgumentException(e.getMessage());
+		}
+		PackageMetadata packageMetadata = skipperClient.upload(properties);
+		return "Package uploaded successfully:[" + packageMetadata.getName() + ":" + packageMetadata.getVersion() + "]";
 	}
 
 	private DeployProperties getDeployProperties(String releaseName, String platformName, File propertiesFile)

@@ -58,7 +58,7 @@ public class ConfigValueUtilsTests {
 	public void testYamlMerge() throws IOException {
 		Resource resource = new ClassPathResource("/org/springframework/cloud/skipper/service/ticktock-1.0.0");
 
-		Package pkg = packageService.loadPackageOnPath("classpathOrigin", resource.getFile().getPath());
+		Package pkg = packageService.loadPackageOnPath(resource.getFile());
 		Map<String, Object> mergedMap = ConfigValueUtils.mergeConfigValues(pkg, new ConfigValues());
 
 		DumperOptions dumperOptions = new DumperOptions();

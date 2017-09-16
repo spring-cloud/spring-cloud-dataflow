@@ -17,14 +17,9 @@ package org.springframework.cloud.skipper.service;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
+import io.jsonwebtoken.lang.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.yaml.snakeyaml.Yaml;
@@ -35,9 +30,12 @@ import org.springframework.cloud.skipper.config.SkipperServerProperties;
 import org.springframework.cloud.skipper.domain.ConfigValues;
 import org.springframework.cloud.skipper.domain.Package;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
+import org.springframework.cloud.skipper.domain.PackageUploadProperties;
+import org.springframework.cloud.skipper.domain.Repository;
 import org.springframework.cloud.skipper.domain.Template;
 import org.springframework.cloud.skipper.index.PackageException;
 import org.springframework.cloud.skipper.repository.PackageMetadataRepository;
+import org.springframework.cloud.skipper.repository.RepositoryRepository;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.util.FileSystemUtils;
@@ -48,6 +46,7 @@ import static org.assertj.core.api.Assertions.entry;
 
 /**
  * @author Mark Pollack
+ * @author Ilayaperumal Gopinathan
  */
 @ActiveProfiles("repo-test")
 @TestPropertySource(properties = { "spring.cloud.skipper.server.synchonizeIndexOnContextRefresh=true" })
@@ -61,6 +60,9 @@ public class PackageServiceTests extends AbstractIntegrationTest {
 
 	@Autowired
 	private SkipperServerProperties skipperServerProperties;
+
+	@Autowired
+	private RepositoryRepository repositoryRepository;
 
 	@Before
 	public void cleanupPackageDir() {
@@ -83,36 +85,46 @@ public class PackageServiceTests extends AbstractIntegrationTest {
 
 	@Test
 	public void download() {
-
 		PackageMetadata packageMetadata = packageMetadataRepository.findByNameAndVersion("log", "1.0.0");
 		assertThat(packageMetadata).isNotNull();
-		packageService.downloadPackage(packageMetadata);
-		File packageDirectory = packageService.calculatePackageDownloadDirectory(packageMetadata);
-		assertThat(packageDirectory).exists().canRead().canWrite();
-		File packageFile = packageService.calculatePackageZipFile(packageMetadata, packageDirectory);
-		assertThat(packageFile).exists();
-		File unzippedPackageDirectory = packageService.calculatePackageUnzippedDirectory(packageMetadata);
-		assertThat(unzippedPackageDirectory).exists();
-		List<File> files;
-		try (Stream<Path> paths = Files.walk(Paths.get(unzippedPackageDirectory.toString()), 2)) {
-			files = paths.map(i -> i.toAbsolutePath().toFile()).collect(Collectors.toList());
-		}
-		catch (IOException e) {
-			throw new IllegalArgumentException("Could not process files in path " + unzippedPackageDirectory.toString(),
-					e);
-		}
-		assertThat(files).extracting("name")
-				.contains("values.yml", "package.yml", "log.yml");
+		Package downloadedPackage = packageService.downloadPackage(packageMetadata);
+		assertThat(downloadedPackage.getMetadata()).isEqualToIgnoringGivenFields(packageMetadata,
+				"id", "origin", "packageFile");
+		assertThat(downloadedPackage.getTemplates()).isNotNull();
+		assertThat(downloadedPackage.getConfigValues()).isNotNull();
+	}
+
+	@Test
+	public void upload() throws IOException {
+		Repository repository = new Repository();
+		repository.setName("relative-path-repo");
+		repository.setUrl("http://example.com/repository/");
+		this.repositoryRepository.save(repository);
+		PackageMetadata packageMetadata = packageMetadataRepository.findByNameAndVersion("log", "1.0.0");
+		assertThat(packageMetadata).isNotNull();
+		this.packageService.downloadPackage(packageMetadata);
+		// Check for packageFile after downloading
+		PackageMetadata updatedPackageMetadata = packageMetadataRepository.findByNameAndVersion("log", "1.0.0");
+		Assert.notNull(updatedPackageMetadata.getPackageFile());
+		PackageUploadProperties properties = new PackageUploadProperties();
+		properties.setRepoName("relative-path-repo");
+		properties.setName("log");
+		properties.setVersion("1.0.0");
+		properties.setExtension("zip");
+		properties.setFileToUpload(updatedPackageMetadata.getPackageFile());
+		PackageMetadata uploadedPackageMetadata = this.packageService.upload(properties);
+		assertThat(uploadedPackageMetadata.getName().equals("log")).isTrue();
+		assertThat(uploadedPackageMetadata.getVersion().equals("1.0.0")).isTrue();
+		assertThat(packageMetadataRepository.findByNameAndVersion("log", "1.0.0")).isNotNull();
 	}
 
 	@Test
 	public void deserializePackage() {
 		PackageMetadata packageMetadata = this.packageMetadataRepository.findByNameAndVersion("log", "1.0.0");
-		packageService.downloadPackage(packageMetadata);
 		Package pkg = packageService.downloadPackage(packageMetadata);
 		assertThat(pkg).isNotNull();
 		assertThat(pkg.getConfigValues().getRaw()).contains("1024m");
-		assertThat(pkg.getMetadata()).isEqualToIgnoringGivenFields(packageMetadata, "id", "origin");
+		assertThat(pkg.getMetadata()).isEqualToIgnoringGivenFields(packageMetadata, "id", "origin", "packageFile");
 		assertThat(pkg.getTemplates()).hasSize(1);
 		Template template = pkg.getTemplates().get(0);
 		assertThat(template.getName()).isEqualTo("log.yml");
@@ -124,7 +136,7 @@ public class PackageServiceTests extends AbstractIntegrationTest {
 		PackageMetadata packageMetadata = this.packageMetadataRepository.findByNameAndVersion("ticktock", "1.0.0");
 		Package pkg = packageService.downloadPackage(packageMetadata);
 		assertThat(pkg).isNotNull();
-		assertThat(pkg.getMetadata()).isEqualToIgnoringGivenFields(packageMetadata, "id", "origin");
+		assertThat(pkg.getMetadata()).isEqualToIgnoringGivenFields(packageMetadata, "id", "origin", "packageFile");
 		assertThat(pkg.getDependencies()).hasSize(2);
 
 		Package logPkg = pkg.getDependencies().get(0);

@@ -38,8 +38,8 @@ public class SkipperServerProperties {
 	private String skipperHome = System.getProperty("user.home") + File.separator + ".skipper";
 
 	/**
-	 * Flag indicating to sync the local contents of the index directory with the database on
-	 * startup.
+	 * Flag indicating to sync the local contents of the index directory with the database
+	 * on startup.
 	 */
 	private boolean synchonizeIndexOnContextRefresh = true;
 

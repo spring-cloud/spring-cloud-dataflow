@@ -27,6 +27,7 @@ import org.springframework.cloud.skipper.domain.AboutInfo;
 import org.springframework.cloud.skipper.domain.DeployProperties;
 import org.springframework.cloud.skipper.domain.DeployRequest;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
+import org.springframework.cloud.skipper.domain.PackageUploadProperties;
 import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.Repository;
 import org.springframework.cloud.skipper.domain.UpdateRequest;
@@ -158,6 +159,12 @@ public class DefaultSkipperClient implements SkipperClient {
 		return this.restTemplate.getForObject(url, RepositoryResources.class);
 	}
 
+	@Override
+	public PackageMetadata upload(PackageUploadProperties packageUploadProperties) {
+		String url = String.format("%s/%s/%s", baseUrl, "package", "upload");
+		return this.restTemplate.postForObject(url, packageUploadProperties, PackageMetadata.class);
+	}
+
 	protected Traverson createTraverson(String baseUrl) {
 		try {
 			return new Traverson(new URI(baseUrl), MediaTypes.HAL_JSON);
@@ -170,5 +177,4 @@ public class DefaultSkipperClient implements SkipperClient {
 	public static class RepositoryResources extends Resources<Repository> {
 
 	}
-
 }

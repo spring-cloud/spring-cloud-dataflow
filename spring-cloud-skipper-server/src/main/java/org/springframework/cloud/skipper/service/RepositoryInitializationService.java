@@ -67,7 +67,6 @@ public class RepositoryInitializationService {
 						".  Repository name already in database.");
 			}
 		}
-
 	}
 
 	private void addLocalRepository() {
@@ -76,4 +75,5 @@ public class RepositoryInitializationService {
 		repository.setUrl("file://" + skipperServerProperties.getPackageDir());
 		repositoryRepository.save(repository);
 	}
+
 }

@@ -22,11 +22,14 @@ import javax.validation.constraints.NotNull;
  * @author Mark Pollack
  */
 @Entity
+// todo: Add isLocal flag to differentiate local vs remote.
+// todo: Add description
+// todo: Add order flag
 public class Repository {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
-	private long id;
+	private String id;
 
 	/**
 	 * A short name, e.g. 'stable' to associate with this repository, must be unique.
@@ -50,6 +53,14 @@ public class Repository {
 	// TODO security/checksum fields of referenced index file.
 
 	public Repository() {
+	}
+
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
 	}
 
 	public String getName() {

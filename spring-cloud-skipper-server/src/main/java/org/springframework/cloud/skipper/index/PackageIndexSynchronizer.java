@@ -66,7 +66,6 @@ public class PackageIndexSynchronizer {
 		if (this.skipperServerProperties.isSynchonizeIndexOnContextRefresh()) {
 			loadAll();
 		}
-
 	}
 
 	// Package protected for testing

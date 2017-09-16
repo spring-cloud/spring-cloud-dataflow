@@ -84,8 +84,8 @@ public class ReleaseService {
 	 * Downloads the package metadata and package zip file specified by the given Id and
 	 * deploys the package on the target platform.
 	 * @param id of the package
-	 * @param deployProperties contains the name of the release, the platfrom to deploy to,
-	 * and configuration values to replace in the package template.
+	 * @param deployProperties contains the name of the release, the platfrom to deploy
+	 * to, and configuration values to replace in the package template.
 	 * @return the Release object associated with this deployment
 	 * @throws PackageException if the package to deploy can not be found.
 	 */
@@ -137,8 +137,7 @@ public class ReleaseService {
 
 	protected Release deploy(PackageMetadata packageMetadata, DeployProperties deployProperties) {
 		Assert.notNull(packageMetadata, "Can't download package, PackageMetadata is a null value.");
-		Package packageToInstall = this.packageService.downloadPackage(packageMetadata);
-		Release release = createInitialRelease(deployProperties, packageToInstall);
+		Release release = createInitialRelease(deployProperties, this.packageService.downloadPackage(packageMetadata));
 		return deploy(release);
 	}
 
@@ -260,9 +259,7 @@ public class ReleaseService {
 		newRelease.setManifest(releaseToRollback.getManifest());
 		newRelease.setVersion(currentRelease.getVersion() + 1);
 		newRelease.setPlatformName(releaseToRollback.getPlatformName());
-		// Do not set ConfigValues since the manifest from the previous release has
-		// already
-		// resolved those...
+		// Do not set ConfigValues since the manifest from the previous release has already resolved those...
 		newRelease.setInfo(createNewInfo());
 
 		return update(currentRelease, newRelease);

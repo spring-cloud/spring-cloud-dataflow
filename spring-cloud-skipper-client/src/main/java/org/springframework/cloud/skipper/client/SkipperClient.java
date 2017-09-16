@@ -19,6 +19,7 @@ import org.springframework.cloud.skipper.domain.AboutInfo;
 import org.springframework.cloud.skipper.domain.DeployProperties;
 import org.springframework.cloud.skipper.domain.DeployRequest;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
+import org.springframework.cloud.skipper.domain.PackageUploadProperties;
 import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.Repository;
 import org.springframework.cloud.skipper.domain.UpdateRequest;
@@ -71,6 +72,15 @@ public interface SkipperClient {
 	 * @return the deploye {@link Release}
 	 */
 	Release update(UpdateRequest updateRequest);
+
+	/*
+	 * Upload the package.
+	 *
+	 * @param packageUploadProperties the properties for the package upload.
+	 * @return package metadata for the uploaded package
+	 */
+	PackageMetadata upload(PackageUploadProperties packageUploadProperties);
+
 	/**
 	 * Undeploy a specific release.
 	 *

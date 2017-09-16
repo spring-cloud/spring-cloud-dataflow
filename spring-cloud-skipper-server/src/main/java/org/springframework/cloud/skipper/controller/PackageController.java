@@ -18,7 +18,10 @@ package org.springframework.cloud.skipper.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.skipper.domain.DeployProperties;
 import org.springframework.cloud.skipper.domain.DeployRequest;
+import org.springframework.cloud.skipper.domain.PackageMetadata;
+import org.springframework.cloud.skipper.domain.PackageUploadProperties;
 import org.springframework.cloud.skipper.domain.Release;
+import org.springframework.cloud.skipper.service.PackageService;
 import org.springframework.cloud.skipper.service.ReleaseService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -40,9 +43,12 @@ public class PackageController {
 
 	private ReleaseService releaseService;
 
+	private PackageService packageService;
+
 	@Autowired
-	public PackageController(ReleaseService releaseService) {
+	public PackageController(ReleaseService releaseService, PackageService packageService) {
 		this.releaseService = releaseService;
+		this.packageService = packageService;
 	}
 
 	@RequestMapping(path = "/deploy", method = RequestMethod.POST)
@@ -55,5 +61,11 @@ public class PackageController {
 	@ResponseStatus(HttpStatus.CREATED)
 	public Release deploy(@PathVariable("id") String id, @RequestBody DeployProperties deployProperties) {
 		return this.releaseService.deploy(id, deployProperties);
+	}
+
+	@RequestMapping(path = "/upload", method = RequestMethod.POST)
+	@ResponseStatus(HttpStatus.CREATED)
+	public PackageMetadata upload(@RequestBody PackageUploadProperties packageUploadProperties) {
+		return this.packageService.upload(packageUploadProperties);
 	}
 }
