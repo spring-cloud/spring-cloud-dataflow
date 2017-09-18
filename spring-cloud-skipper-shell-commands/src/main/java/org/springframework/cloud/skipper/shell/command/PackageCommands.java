@@ -18,15 +18,15 @@ package org.springframework.cloud.skipper.shell.command;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.FilenameUtils;
-import org.yaml.snakeyaml.DumperOptions;
-import org.yaml.snakeyaml.Yaml;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
@@ -42,6 +42,7 @@ import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellOption;
 import org.springframework.shell.table.BeanListTableModel;
+import org.springframework.shell.table.Table;
 import org.springframework.shell.table.TableBuilder;
 import org.springframework.shell.table.TableModel;
 import org.springframework.util.Assert;
@@ -62,56 +63,49 @@ public class PackageCommands {
 	}
 
 	@ShellMethod(key = "package search", value = "Search for the packages")
-	public String searchPackage(
+	public Object searchPackage(
 			@ShellOption(help = "wildcard expression to search for the package name", defaultValue = NULL) String name,
 			@ShellOption(help = "boolean to set for more detailed package metadata") boolean details)
 			throws Exception {
 		Resources<PackageMetadata> resources = skipperClient.getPackageMetadata(name, details);
-		TableBuilder tableBuilder = null;
 		if (!details) {
 			LinkedHashMap<String, Object> headers = new LinkedHashMap<>();
 			headers.put("name", "Name");
 			headers.put("version", "Version");
 			headers.put("description", "Description");
 			TableModel model = new BeanListTableModel<>(resources.getContent(), headers);
-			tableBuilder = new TableBuilder(model);
+			TableBuilder tableBuilder = new TableBuilder(model);
 			TableUtils.applyStyle(tableBuilder);
-			// TODO is there a better way to get the current terminal width?
-			return tableBuilder.build().render(132);
+			return tableBuilder.build();
 		}
 		else {
 			ObjectMapper mapper = new ObjectMapper();
-			String[][] data = new String[resources.getContent().size()][1];
 			PackageMetadata[] packageMetadataResources = resources.getContent().toArray(new PackageMetadata[0]);
-			StringBuilder sb = new StringBuilder();
+			List<Table> tableList = new ArrayList<>();
 			for (int i = 0; i < resources.getContent().size(); i++) {
-				sb.append("---\n");
 				String json = mapper.writeValueAsString(packageMetadataResources[i]);
-				Map<String, Object> map = mapper.readValue(json, new TypeReference<Map<String, String>>() {
+				Map<String, String> map = mapper.readValue(json, new TypeReference<Map<String, String>>() {
 				});
-				DumperOptions dumperOptions = new DumperOptions();
-				dumperOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
-				dumperOptions.setPrettyFlow(true);
-				Yaml yaml = new Yaml(dumperOptions);
 				map.remove("id");
-				String yamlString = yaml.dump(map);
-				sb.append(yamlString);
+				LinkedHashMap<String, Object> headers = new LinkedHashMap<>();
+				headers.put("key", "Name");
+				headers.put("value", "Value");
+				TableModel model = new BeanListTableModel<>(map.entrySet(), headers);
+				TableBuilder tableBuilder = new TableBuilder(model);
+				TableUtils.applyStyle(tableBuilder);
+				tableList.add(tableBuilder.build());
 			}
-			sb.append("---\n");
-			return sb.toString();
+			return tableList;
 		}
-
 	}
 
 	@ShellMethod(key = "package deploy", value = "Deploy the package metadata")
 	public String deploy(
-			@ShellOption(help = "packageId of the package metadata to deploy", defaultValue = NULL) String packageId,
+			@ShellOption(help = "packageId of the package metadata to deploy") String packageId,
 			@ShellOption(help = "the properties file to use to deploy", defaultValue = NULL) File propertiesFile,
 			@ShellOption(help = "the release name to use", defaultValue = NULL) String releaseName,
 			@ShellOption(help = "the platform name to use", defaultValue = "default") String platformName)
 			throws IOException {
-		// todo: Make releaseName & propertiesFile mutually exclusive
-		Assert.notNull(packageId, "Package Id must not be null");
 		return skipperClient.deploy(packageId, getDeployProperties(releaseName, platformName, propertiesFile));
 	}
 

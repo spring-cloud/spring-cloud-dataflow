@@ -31,7 +31,7 @@
         <spring-cloud.version>Dalston.RELEASE</spring-cloud.version>
         <spring-cloud-deployer.version>1.2.1.RELEASE</spring-cloud-deployer.version>
         <spring-cloud-deployer-local.version>1.2.1.RELEASE</spring-cloud-deployer-local.version>
-        <spring-shell.version>2.0.0.M1</spring-shell.version>
+        <spring-shell.version>2.0.0.BUILD-SNAPSHOT</spring-shell.version>
         <jsonpath.version>2.2.0</jsonpath.version>
 
         <jacoco-maven-plugin.version>0.7.9</jacoco-maven-plugin.version>
