@@ -44,7 +44,6 @@ public class Repository {
 
 	/**
 	 * The url that points to the source package files that was used to create the index and
-	 * other supporting files from the URL property.
 	 */
 	private String sourceUrl;
 

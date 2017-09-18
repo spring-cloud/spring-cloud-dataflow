@@ -19,7 +19,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.cloud.skipper.domain.AboutInfo;
+import org.springframework.cloud.skipper.domain.Repository;
 import org.springframework.cloud.skipper.domain.skipperpackage.DeployProperties;
+import org.springframework.hateoas.ResourceSupport;
+import org.springframework.hateoas.Resources;
 import org.springframework.util.Assert;
 import org.springframework.web.client.RestTemplate;
 
@@ -65,7 +68,6 @@ public class DefaultSkipperClient implements SkipperClient {
 
 	@Override
 	public AboutInfo getAboutInfo() {
-		// TODO use Traverson API to find 'about' resource.
 		return this.restTemplate.getForObject(baseUrl + "/about", AboutInfo.class);
 	}
 
@@ -98,4 +100,34 @@ public class DefaultSkipperClient implements SkipperClient {
 		String url = String.format("%s/%s/%s/%s/%s", baseUrl, "release", "rollback", releaseName, releaseVersion);
 		return this.restTemplate.postForObject(url, null, String.class);
 	}
+
+	@Override
+	public Repository addRepository(String name, String rootUrl, String sourceUrl) {
+		String url = String.format("%s/%s", baseUrl, "repositories");
+		Repository repository = new Repository();
+		repository.setName(name);
+		repository.setUrl(rootUrl);
+		repository.setSourceUrl(sourceUrl);
+		return this.restTemplate.postForObject(url, repository, Repository.class);
+	}
+
+	@Override
+	public void deleteRepository(String name) {
+		String searchUrl = String.format("%s/%s/%s", baseUrl, "repositories", "search/findByName?name=" + name);
+		ResourceSupport resourceSupport = this.restTemplate.getForObject(searchUrl, ResourceSupport.class, name);
+		if (resourceSupport != null) {
+			this.restTemplate.delete(resourceSupport.getId().getHref());
+		}
+	}
+
+	@Override
+	public Resources<Repository> listRepositories() {
+		String url = String.format("%s/%s", baseUrl, "repositories?size=2000");
+		return this.restTemplate.getForObject(url, RepositoryResources.class);
+	}
+
+	public static class RepositoryResources extends Resources<Repository> {
+
+	}
+
 }

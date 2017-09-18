@@ -17,7 +17,9 @@ package org.springframework.cloud.skipper.client;
 
 import org.springframework.cloud.skipper.domain.AboutInfo;
 import org.springframework.cloud.skipper.domain.Release;
+import org.springframework.cloud.skipper.domain.Repository;
 import org.springframework.cloud.skipper.domain.skipperpackage.DeployProperties;
+import org.springframework.hateoas.Resources;
 
 /**
  * The main client side interface to communicate with the Skipper Server.
@@ -77,4 +79,29 @@ public interface SkipperClient {
 	 * @return the rolled back {@link Release}
 	 */
 	String rollback(String releaseName, int releaseVersion);
+
+
+	/**
+	 * Add a new Package Repository.
+	 *
+	 * @param name the name of the repository
+	 * @param rootUrl the root URL for the package
+	 * @param sourceUrl the source URL for the packages
+	 * @return the newly added Repository
+	 */
+	Repository addRepository(String name, String rootUrl, String sourceUrl);
+
+	/**
+	 * Delete a Package Repository.
+	 *
+	 * @param name the name of the repository
+	 */
+	void deleteRepository(String name);
+
+	/**
+	 * List Package Repositories.
+	 *
+	 * @return the list of package repositories
+	 */
+	Resources<Repository> listRepositories();
 }
