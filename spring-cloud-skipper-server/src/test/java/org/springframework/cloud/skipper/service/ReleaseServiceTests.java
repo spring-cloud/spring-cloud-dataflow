@@ -46,9 +46,10 @@ public class ReleaseServiceTests extends AbstractIntegrationTest {
 				.hasMessageContaining("less than zero");
 
 		assertThatThrownBy(() -> releaseService.rollback("badId", 1))
-				.isInstanceOf(IllegalArgumentException.class)
-				.hasMessageContaining("Could not find release = [badId]");
+				.isInstanceOf(PackageException.class)
+				.hasMessageContaining("Can not find a latest release named 'badId'");
 
-
+		assertThatThrownBy(() -> releaseService.undeploy(null))
+				.isInstanceOf(IllegalArgumentException.class);
 	}
 }

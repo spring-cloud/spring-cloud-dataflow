@@ -47,7 +47,7 @@ public class ReleaseControllerTests extends AbstractControllerTests {
 		assertThat(release.getVersion()).isEqualTo(1);
 
 		// Undeploy
-		mockMvc.perform(post("/release/undeploy/" + releaseName + "/" + 1)).andDo(print())
+		mockMvc.perform(post("/release/undeploy/" + releaseName)).andDo(print())
 				.andExpect(status().isCreated()).andReturn();
 		Release undeployedRelease = this.releaseRepository.findByNameAndVersion(releaseName, 1);
 		assertThat(undeployedRelease.getInfo().getStatus().getStatusCode()).isEqualTo(StatusCode.DELETED);
@@ -79,7 +79,7 @@ public class ReleaseControllerTests extends AbstractControllerTests {
 		assertThat(release.getInfo().getStatus().getStatusCode()).isEqualTo(StatusCode.DEPLOYED);
 
 		// Undeploy
-		mockMvc.perform(post("/release/undeploy/" + releaseName + "/" + releaseVersion))
+		mockMvc.perform(post("/release/undeploy/" + releaseName))
 				.andDo(print())
 				.andExpect(status().isCreated()).andReturn();
 		Release undeployedRelease = this.releaseRepository.findByNameAndVersion(releaseName,

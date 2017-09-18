@@ -65,10 +65,9 @@ public interface SkipperClient {
 	 * Undeploy a specific release.
 	 *
 	 * @param releaseName the release name
-	 * @param releaseVersion the release version.
 	 * @return the un-deployed {@link Release}
 	 */
-	String undeploy(String releaseName, int releaseVersion);
+	String undeploy(String releaseName);
 
 	/**
 	 * Rollback a specific release.

@@ -18,6 +18,7 @@ package org.springframework.cloud.skipper.shell.command.support;
 /**
  * Encapsulates the credentials to the Skipper Server Target, such as {@link #username}
  * and {@link #password}.
+ *
  * @author Gunnar Hillert
  * @since 1.0
  */

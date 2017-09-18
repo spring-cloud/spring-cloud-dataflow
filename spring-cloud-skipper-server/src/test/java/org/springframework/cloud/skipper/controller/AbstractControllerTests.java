@@ -67,7 +67,7 @@ public class AbstractControllerTests extends AbstractMockMvcTests {
 		Thread.sleep(5000);
 		for (Release release : releaseRepository.findAll()) {
 			if (release.getInfo().getStatus().getStatusCode() != StatusCode.DELETED) {
-				mockMvc.perform(post("/release/undeploy/" + release.getName() + "/" + release.getVersion()))
+				mockMvc.perform(post("/release/undeploy/" + release.getName()))
 						.andDo(print())
 						.andExpect(status().isCreated()).andReturn();
 			}

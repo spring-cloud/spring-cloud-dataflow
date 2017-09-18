@@ -30,8 +30,16 @@ import org.springframework.cloud.skipper.client.util.HttpClientConfigurer;
 import org.springframework.cloud.skipper.client.util.ProcessOutputResource;
 import org.springframework.cloud.skipper.client.util.ResourceBasedAuthorizationInterceptor;
 import org.springframework.cloud.skipper.domain.AboutInfo;
-import org.springframework.cloud.skipper.shell.command.support.*;
-import org.springframework.context.*;
+import org.springframework.cloud.skipper.shell.command.support.ConsoleUserInput;
+import org.springframework.cloud.skipper.shell.command.support.SkipperClientUpdatedEvent;
+import org.springframework.cloud.skipper.shell.command.support.Target;
+import org.springframework.cloud.skipper.shell.command.support.TargetCredentials;
+import org.springframework.cloud.skipper.shell.command.support.TargetHolder;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.ApplicationEventPublisherAware;
+import org.springframework.context.ApplicationListener;
 import org.springframework.core.io.Resource;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
@@ -63,6 +71,8 @@ public class ConfigCommands implements InitializingBean, ApplicationListener<App
 
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
+	private final ConsoleUserInput userInput;
+
 	private TargetHolder targetHolder;
 
 	private SkipperClient skipperClient;
@@ -77,8 +87,6 @@ public class ConfigCommands implements InitializingBean, ApplicationListener<App
 
 	private volatile boolean initialized;
 
-	private final ConsoleUserInput userInput;
-
 	@Autowired
 	public ConfigCommands(TargetHolder targetHolder, RestTemplate restTemplate,
 			SkipperClientProperties config, ConsoleUserInput userInput) {
@@ -92,16 +100,16 @@ public class ConfigCommands implements InitializingBean, ApplicationListener<App
 	@ShellMethod(key = "skipper config server", value = "Configure the Spring Cloud Skipper REST server to use.")
 	public String target(
 			@ShellOption(help = "the location of the Spring Cloud Skipper REST endpoint", defaultValue = DEFAULT_TARGET)
-			String uri,
+					String uri,
 			@ShellOption(help = "the username for authenticated access to the Admin REST endpoint", defaultValue = NULL)
-			String username,
+					String username,
 			@ShellOption(help = "the password for authenticated access to the Admin REST endpoint " +
 					"(valid only with a username)", defaultValue = NULL)
-			String password,
+					String password,
 			@ShellOption(help = "a command to run that outputs the HTTP credentials used for authentication", defaultValue = NULL)
-			String credentialsProviderCommand,
+					String credentialsProviderCommand,
 			@ShellOption(help = "accept any SSL certificate (even self-signed)")
-			boolean skipSslValidation) {
+					boolean skipSslValidation) {
 		// @formatter:on
 		if (credentialsProviderCommand == null && password != null && username == null) {
 			return "A password may be specified only together with a username";

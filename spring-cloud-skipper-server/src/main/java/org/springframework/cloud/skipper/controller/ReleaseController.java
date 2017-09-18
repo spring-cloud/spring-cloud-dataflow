@@ -47,10 +47,10 @@ public class ReleaseController {
 		return this.releaseService.status(name, version);
 	}
 
-	@RequestMapping(path = "/undeploy/{name}/{version}", method = RequestMethod.POST)
+	@RequestMapping(path = "/undeploy/{name}", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
-	public Release undeploy(@PathVariable("name") String releaseName, @PathVariable("version") int releaseVersion) {
-		return this.releaseService.undeploy(releaseName, releaseVersion);
+	public Release undeploy(@PathVariable("name") String releaseName) {
+		return this.releaseService.undeploy(releaseName);
 	}
 
 	@RequestMapping(path = "/rollback/{name}/{version}", method = RequestMethod.POST)

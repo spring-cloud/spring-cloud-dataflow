@@ -88,8 +88,8 @@ public class DefaultSkipperClient implements SkipperClient {
 	}
 
 	@Override
-	public String undeploy(String releaseName, int releaseVersion) {
-		String url = String.format("%s/%s/%s/%s/%s", baseUrl, "release", "undeploy", releaseName, releaseVersion);
+	public String undeploy(String releaseName) {
+		String url = String.format("%s/%s/%s/%s", baseUrl, "release", "undeploy", releaseName);
 		return this.restTemplate.postForObject(url, null, String.class);
 	}
 

@@ -41,7 +41,6 @@ public class TargetHolder {
 	/**
 	 * Return the {@link Target} which encapsulates not only the Target URI but also
 	 * success/error messages + status.
-	 *
 	 */
 	public Target getTarget() {
 		return target;

@@ -136,14 +136,14 @@ public class ReleaseService {
 		return this.releaseManager.deploy(release);
 	}
 
-	public Release undeploy(String releaseName, Integer version) {
+	public Release undeploy(String releaseName) {
 		Assert.notNull(releaseName, "Release name must not be null");
-		Release release = getRelease(releaseName, version);
+		Release release = this.releaseRepository.findLatestRelease(releaseName);
 		return this.releaseManager.undeploy(release);
 	}
 
 	public Release status(String releaseName, Integer version) {
-		return status(getRelease(releaseName, version));
+		return status(this.releaseRepository.findByNameAndVersion(releaseName, version));
 	}
 
 	public Release status(Release release) {
@@ -154,16 +154,6 @@ public class ReleaseService {
 		return this.releaseRepository.findLatestRelease(releaseName);
 	}
 
-	public Release getRelease(String releaseName, Integer version) {
-		Release release;
-		if (version == null) {
-			release = this.releaseRepository.findLatestRelease(releaseName);
-		}
-		else {
-			release = this.releaseRepository.findByNameAndVersion(releaseName, version);
-		}
-		return release;
-	}
 
 	public Release update(String packageId, DeployProperties deployProperties) {
 		Release oldRelease = getLatestRelease(deployProperties.getReleaseName());

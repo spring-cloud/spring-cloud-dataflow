@@ -24,7 +24,7 @@ import org.springframework.data.rest.core.annotation.RestResource;
  * @author Mark Pollack
  */
 @RepositoryRestResource
-public interface ReleaseRepository extends PagingAndSortingRepository<Release, String>, CustomReleaseRepository {
+public interface ReleaseRepository extends PagingAndSortingRepository<Release, String>, ReleaseRepositoryCustom {
 
 	@Override
 	@RestResource(exported = false)
