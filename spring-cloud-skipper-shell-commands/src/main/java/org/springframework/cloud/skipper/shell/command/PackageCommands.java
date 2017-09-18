@@ -18,20 +18,32 @@ package org.springframework.cloud.skipper.shell.command;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Properties;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.FilenameUtils;
+import org.yaml.snakeyaml.DumperOptions;
+import org.yaml.snakeyaml.Yaml;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
 import org.springframework.cloud.skipper.client.SkipperClient;
+import org.springframework.cloud.skipper.domain.PackageMetadata;
 import org.springframework.cloud.skipper.domain.skipperpackage.DeployProperties;
 import org.springframework.cloud.skipper.shell.command.support.SkipperClientUpdatedEvent;
+import org.springframework.cloud.skipper.shell.command.support.TableUtils;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.io.FileSystemResource;
+import org.springframework.hateoas.Resources;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellOption;
+import org.springframework.shell.table.BeanListTableModel;
+import org.springframework.shell.table.TableBuilder;
+import org.springframework.shell.table.TableModel;
 import org.springframework.util.Assert;
 
 import static org.springframework.shell.standard.ShellOption.NULL;
@@ -49,10 +61,46 @@ public class PackageCommands {
 		this.skipperClient = skipperClient;
 	}
 
-	@ShellMethod(key = "package list", value = "Get the package metadata")
-	public String packageMetadata(
-			@ShellOption(help = "boolean to set for more detailed package metadata", defaultValue = "false") boolean details) {
-		return skipperClient.getPackageMetadata(details);
+	@ShellMethod(key = "package search", value = "Search for the packages")
+	public String searchPackage(
+			@ShellOption(help = "wildcard expression to search for the package name", defaultValue = NULL) String name,
+			@ShellOption(help = "boolean to set for more detailed package metadata") boolean details)
+			throws Exception {
+		Resources<PackageMetadata> resources = skipperClient.getPackageMetadata(name, details);
+		TableBuilder tableBuilder = null;
+		if (!details) {
+			LinkedHashMap<String, Object> headers = new LinkedHashMap<>();
+			headers.put("name", "Name");
+			headers.put("version", "Version");
+			headers.put("description", "Description");
+			TableModel model = new BeanListTableModel<>(resources.getContent(), headers);
+			tableBuilder = new TableBuilder(model);
+			TableUtils.applyStyle(tableBuilder);
+			// TODO is there a better way to get the current terminal width?
+			return tableBuilder.build().render(132);
+		}
+		else {
+			ObjectMapper mapper = new ObjectMapper();
+			String[][] data = new String[resources.getContent().size()][1];
+			PackageMetadata[] packageMetadataResources = resources.getContent().toArray(new PackageMetadata[0]);
+			StringBuilder sb = new StringBuilder();
+			for (int i = 0; i < resources.getContent().size(); i++) {
+				sb.append("---\n");
+				String json = mapper.writeValueAsString(packageMetadataResources[i]);
+				Map<String, Object> map = mapper.readValue(json, new TypeReference<Map<String, String>>() {
+				});
+				DumperOptions dumperOptions = new DumperOptions();
+				dumperOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
+				dumperOptions.setPrettyFlow(true);
+				Yaml yaml = new Yaml(dumperOptions);
+				map.remove("id");
+				String yamlString = yaml.dump(map);
+				sb.append(yamlString);
+			}
+			sb.append("---\n");
+			return sb.toString();
+		}
+
 	}
 
 	@ShellMethod(key = "package deploy", value = "Deploy the package metadata")
@@ -115,4 +163,5 @@ public class PackageCommands {
 	void handle(SkipperClientUpdatedEvent event) {
 		this.skipperClient = event.getSkipperClient();
 	}
+
 }

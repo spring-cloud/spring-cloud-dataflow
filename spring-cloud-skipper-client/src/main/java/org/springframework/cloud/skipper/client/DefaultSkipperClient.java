@@ -15,15 +15,25 @@
  */
 package org.springframework.cloud.skipper.client;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.cloud.skipper.domain.AboutInfo;
+import org.springframework.cloud.skipper.domain.PackageMetadata;
 import org.springframework.cloud.skipper.domain.Repository;
 import org.springframework.cloud.skipper.domain.skipperpackage.DeployProperties;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.ResourceSupport;
 import org.springframework.hateoas.Resources;
+import org.springframework.hateoas.client.Traverson;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
 /**
@@ -40,16 +50,16 @@ public class DefaultSkipperClient implements SkipperClient {
 
 	private final String baseUrl;
 
+	private final Traverson traverson;
+
 	/**
-	 * Create a new DefaultSkipperClient given the URL of the Server. This constructor
-	 * will create a new RestTemplate instance for communication.
+	 * Create a new DefaultSkipperClient given the URL of the Server. This constructor will
+	 * create a new RestTemplate instance for communication.
 	 *
 	 * @param baseUrl the URL of the Server.
 	 */
 	public DefaultSkipperClient(String baseUrl) {
-		Assert.notNull(baseUrl, "The provided baseUrl must not be null.");
-		this.baseUrl = baseUrl;
-		this.restTemplate = new RestTemplate();
+		this(baseUrl, new RestTemplate());
 	}
 
 	/**
@@ -62,6 +72,7 @@ public class DefaultSkipperClient implements SkipperClient {
 	public DefaultSkipperClient(String baseUrl, RestTemplate restTemplate) {
 		Assert.notNull(baseUrl, "The provided baseURI must not be null.");
 		Assert.notNull(restTemplate, "The provided restTemplate must not be null.");
+		this.traverson = createTraverson(baseUrl);
 		this.baseUrl = baseUrl;
 		this.restTemplate = restTemplate;
 	}
@@ -72,9 +83,21 @@ public class DefaultSkipperClient implements SkipperClient {
 	}
 
 	@Override
-	public String getPackageMetadata(boolean details) {
-		String url = baseUrl + "/packageMetadata";
-		return this.restTemplate.getForObject((details) ? url : url + "?projection=summary", String.class);
+	public Resources<PackageMetadata> getPackageMetadata(String name, boolean details) {
+		ParameterizedTypeReference<Resources<PackageMetadata>> typeReference = new ParameterizedTypeReference<Resources<PackageMetadata>>() {
+		};
+		Traverson.TraversalBuilder traversalBuilder = this.traverson.follow("packageMetadata");
+		Map<String, Object> parameters = new HashMap<>();
+		if (StringUtils.hasText(name)) {
+			parameters.put("name", name);
+			traversalBuilder.follow("search", "findByNameLike");
+		}
+		if (!details) {
+			parameters.put("projection", "summary");
+			parameters.put("sort", "name,asc");
+			//TODO semver sort..
+		}
+		return traversalBuilder.withTemplateParameters(parameters).toObject(typeReference);
 	}
 
 	@Override
@@ -124,6 +147,15 @@ public class DefaultSkipperClient implements SkipperClient {
 	public Resources<Repository> listRepositories() {
 		String url = String.format("%s/%s", baseUrl, "repositories?size=2000");
 		return this.restTemplate.getForObject(url, RepositoryResources.class);
+	}
+
+	protected Traverson createTraverson(String baseUrl) {
+		try {
+			return new Traverson(new URI(baseUrl), MediaTypes.HAL_JSON);
+		}
+		catch (URISyntaxException e) {
+			throw new IllegalStateException("Bad URI syntax: " + baseUrl);
+		}
 	}
 
 	public static class RepositoryResources extends Resources<Repository> {

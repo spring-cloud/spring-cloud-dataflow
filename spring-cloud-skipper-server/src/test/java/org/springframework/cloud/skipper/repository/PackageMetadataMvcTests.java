@@ -55,7 +55,7 @@ public class PackageMetadataMvcTests extends AbstractMockMvcTests {
 				.andExpect(jsonPath("$._embedded.packageMetadata[0].version").value("1.0.0"))
 				.andExpect(jsonPath("$._embedded.packageMetadata[0].iconUrl")
 						.value("http://www.gilligansisle.com/images/a2.gif"))
-				.andExpect(jsonPath("$._embedded.packageMetadata[0].description").doesNotExist())
+				.andExpect(jsonPath("$._embedded.packageMetadata[0].maintainer").doesNotExist())
 				.andExpect(jsonPath("$._embedded.packageMetadata[0]._links.deploy.href")
 						.value("http://localhost/package/1/deploy"))
 				.andExpect(jsonPath("$._embedded.packageMetadata[1].version").value("2.0.0"))
@@ -63,7 +63,7 @@ public class PackageMetadataMvcTests extends AbstractMockMvcTests {
 						.value("http://www.gilligansisle.com/images/a1.gif"))
 				.andExpect(jsonPath("$._embedded.packageMetadata[1]._links.deploy.href")
 						.value("http://localhost/package/2/deploy"))
-				.andExpect(jsonPath("$._embedded.packageMetadata[1].description").doesNotExist());
+				.andExpect(jsonPath("$._embedded.packageMetadata[1].maintainer").doesNotExist());
 
 		mockMvc.perform(get("/packageMetadata")).andDo(print()).andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.packageMetadata[0].version").value("1.0.0"))

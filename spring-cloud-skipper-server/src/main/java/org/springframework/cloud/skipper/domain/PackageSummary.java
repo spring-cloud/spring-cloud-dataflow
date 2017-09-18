@@ -37,4 +37,6 @@ public interface PackageSummary {
 	String getVersion();
 
 	String getIconUrl();
+
+	String getDescription();
 }

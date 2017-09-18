@@ -25,13 +25,21 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class SkipperClientProperties {
 
 	public static final String DEFAULT_HOME = System.getProperty("user.home") + java.io.File.separator + ".skipper";
+
 	public static final String DEFAULT_SCHEME = "http";
+
 	public static final String DEFAULT_HOST = "localhost";
+
 	public static final int DEFAULT_PORT = 7577; // = skpr :)
+
 	public static final String DEFAULT_TARGET = DEFAULT_SCHEME + "://" + DEFAULT_HOST + ":" + DEFAULT_PORT + "/";
+
 	public static final String DEFAULT_USERNAME = "";
+
 	public static final String DEFAULT_PASSWORD = "";
+
 	public static final String DEFAULT_SKIP_SSL_VALIDATION = "true";
+
 	public static final String DEFAULT_CREDENTIALS_PROVIDER_COMMAND = "";
 
 	private String home = DEFAULT_HOME;

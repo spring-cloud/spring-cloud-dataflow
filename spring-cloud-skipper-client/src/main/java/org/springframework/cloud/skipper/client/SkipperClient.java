@@ -16,6 +16,7 @@
 package org.springframework.cloud.skipper.client;
 
 import org.springframework.cloud.skipper.domain.AboutInfo;
+import org.springframework.cloud.skipper.domain.PackageMetadata;
 import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.Repository;
 import org.springframework.cloud.skipper.domain.skipperpackage.DeployProperties;
@@ -39,11 +40,12 @@ public interface SkipperClient {
 	AboutInfo getAboutInfo();
 
 	/**
-	 *
+	 * Search for package metadata.
+	 * @param name optional name with wildcard support for searching
 	 * @param details boolean flag to fetch all the metadata.
 	 * @return the package metadata with the projection set to summary
 	 */
-	String getPackageMetadata(boolean details);
+	Resources<PackageMetadata> getPackageMetadata(String name, boolean details);
 
 	/**
 	 * Deploy the package.
@@ -79,7 +81,6 @@ public interface SkipperClient {
 	 * @return the rolled back {@link Release}
 	 */
 	String rollback(String releaseName, int releaseVersion);
-
 
 	/**
 	 * Add a new Package Repository.
