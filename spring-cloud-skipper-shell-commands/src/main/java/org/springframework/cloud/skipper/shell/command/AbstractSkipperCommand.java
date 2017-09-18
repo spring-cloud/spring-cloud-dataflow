@@ -15,27 +15,22 @@
  */
 package org.springframework.cloud.skipper.shell.command;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.skipper.client.SkipperClient;
-import org.springframework.cloud.skipper.domain.AboutInfo;
-import org.springframework.shell.standard.ShellComponent;
-import org.springframework.shell.standard.ShellMethod;
+import org.springframework.cloud.skipper.shell.command.support.SkipperClientUpdatedEvent;
+import org.springframework.context.event.EventListener;
 
 /**
+ * Contains a common reference for SkipperClient and an EventListener to get updates made
+ * through the 'skipper config' command.
  * @author Mark Pollack
  */
-@ShellComponent
-public class AboutInfoCommand extends AbstractSkipperCommand {
+public abstract class AbstractSkipperCommand {
 
-	@Autowired
-	public AboutInfoCommand(SkipperClient skipperClient) {
-		this.skipperClient = skipperClient;
+	// Updated via event publication
+	protected SkipperClient skipperClient;
+
+	@EventListener
+	void handle(SkipperClientUpdatedEvent event) {
+		this.skipperClient = event.getSkipperClient();
 	}
-
-	@ShellMethod(key = "skipper info", value = "Get information about the Skipper server.")
-	public String info() {
-		AboutInfo aboutInfo = skipperClient.getAboutInfo();
-		return "Skipper version " + aboutInfo.getVersion();
-	}
-
 }

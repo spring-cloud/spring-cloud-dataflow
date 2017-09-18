@@ -17,8 +17,6 @@ package org.springframework.cloud.skipper.shell.command;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.skipper.client.SkipperClient;
-import org.springframework.cloud.skipper.shell.command.support.SkipperClientUpdatedEvent;
-import org.springframework.context.event.EventListener;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellOption;
@@ -27,9 +25,7 @@ import org.springframework.shell.standard.ShellOption;
  * @author Ilayaperumal Gopinathan
  */
 @ShellComponent
-public class ReleaseCommands {
-
-	private SkipperClient skipperClient;
+public class ReleaseCommands extends AbstractSkipperCommand {
 
 	@Autowired
 	public ReleaseCommands(SkipperClient skipperClient) {
@@ -50,8 +46,4 @@ public class ReleaseCommands {
 		return skipperClient.rollback(releaseName, releaseVersion);
 	}
 
-	@EventListener
-	void handle(SkipperClientUpdatedEvent event) {
-		this.skipperClient = event.getSkipperClient();
-	}
 }

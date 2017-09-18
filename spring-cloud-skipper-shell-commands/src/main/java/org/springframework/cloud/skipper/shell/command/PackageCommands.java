@@ -33,9 +33,7 @@ import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
 import org.springframework.cloud.skipper.client.SkipperClient;
 import org.springframework.cloud.skipper.domain.DeployProperties;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
-import org.springframework.cloud.skipper.shell.command.support.SkipperClientUpdatedEvent;
 import org.springframework.cloud.skipper.shell.command.support.TableUtils;
-import org.springframework.context.event.EventListener;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.hateoas.Resources;
 import org.springframework.shell.standard.ShellComponent;
@@ -53,9 +51,7 @@ import static org.springframework.shell.standard.ShellOption.NULL;
  * @author Ilayaperumal Gopinathan
  */
 @ShellComponent
-public class PackageCommands {
-
-	private SkipperClient skipperClient;
+public class PackageCommands extends AbstractSkipperCommand {
 
 	@Autowired
 	public PackageCommands(SkipperClient skipperClient) {
@@ -151,11 +147,6 @@ public class PackageCommands {
 			}
 		}
 		return deployProperties;
-	}
-
-	@EventListener
-	void handle(SkipperClientUpdatedEvent event) {
-		this.skipperClient = event.getSkipperClient();
 	}
 
 }

@@ -22,9 +22,7 @@ import javax.validation.constraints.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.skipper.client.SkipperClient;
 import org.springframework.cloud.skipper.domain.Repository;
-import org.springframework.cloud.skipper.shell.command.support.SkipperClientUpdatedEvent;
 import org.springframework.cloud.skipper.shell.command.support.TableUtils;
-import org.springframework.context.event.EventListener;
 import org.springframework.hateoas.Resources;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
@@ -43,9 +41,7 @@ import static org.springframework.shell.standard.ShellOption.NULL;
  * @author Mark Pollack
  */
 @ShellComponent
-public class RepositoryCommands {
-
-	private SkipperClient skipperClient;
+public class RepositoryCommands extends AbstractSkipperCommand {
 
 	@Autowired
 	public RepositoryCommands(SkipperClient skipperClient) {
@@ -78,8 +74,4 @@ public class RepositoryCommands {
 		return TableUtils.applyStyle(tableBuilder).build();
 	}
 
-	@EventListener
-	void handle(SkipperClientUpdatedEvent event) {
-		this.skipperClient = event.getSkipperClient();
-	}
 }

@@ -46,7 +46,7 @@ public class SkipperPromptProvider implements PromptProvider {
 	}
 
 	@EventListener
-	void handle(SkipperClientUpdatedEvent event) {
+	public void handle(SkipperClientUpdatedEvent event) {
 		this.skipperClient = event.getSkipperClient();
 	}
 }

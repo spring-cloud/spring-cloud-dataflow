@@ -15,28 +15,34 @@
  */
 package org.springframework.cloud.skipper.shell.command.support;
 
-import org.springframework.cloud.skipper.client.SkipperClientProperties;
+import org.springframework.cloud.skipper.client.DefaultSkipperClient;
+import org.springframework.cloud.skipper.client.SkipperClient;
+import org.springframework.cloud.skipper.client.util.HttpClientConfigurer;
+import org.springframework.cloud.skipper.client.util.ProcessOutputResource;
+import org.springframework.cloud.skipper.client.util.ResourceBasedAuthorizationInterceptor;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.ApplicationEventPublisherAware;
+import org.springframework.core.io.Resource;
+import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
+import org.springframework.web.client.RestTemplate;
 
 /**
  * A singleton object that can be passed around while changing the target instance.
  *
  * @author Mark Pollack
  */
-public class TargetHolder {
+@Component
+public class TargetHolder implements ApplicationEventPublisherAware {
 
 	private Target target;
 
-	public TargetHolder(Target target) {
-		this.target = target;
-	}
+	private RestTemplate restTemplate = new RestTemplate();
 
-	/**
-	 * Constructor.
-	 */
-	public TargetHolder() {
-		target = new Target(SkipperClientProperties.DEFAULT_TARGET, null, null, false);
-	}
+	private ApplicationEventPublisher applicationEventPublisher;
+
+	private String credentialsProviderCommand;
 
 	/**
 	 * Return the {@link Target} which encapsulates not only the Target URI but also
@@ -50,10 +56,59 @@ public class TargetHolder {
 	 * Set the Skipper Server {@link Target}.
 	 *
 	 * @param target Must not be null.
+	 * @param credentialsProviderCommand
 	 */
-	public void setTarget(Target target) {
+	public void changeTarget(Target target, String credentialsProviderCommand) throws Exception {
 		Assert.notNull(target, "The provided target must not be null.");
 		this.target = target;
+		this.credentialsProviderCommand = credentialsProviderCommand;
+		attemptConnection();
 	}
 
+	private void attemptConnection() throws Exception {
+		SkipperClient skipperClient = null;
+
+		try {
+			final HttpClientConfigurer httpClientConfigurer = HttpClientConfigurer.create()
+					.targetHost(this.getTarget().getTargetUri())
+					.skipTlsCertificateVerification(this.getTarget().isSkipSslValidation());
+			if (this.getTarget().getTargetCredentials() != null
+					&& StringUtils.hasText(this.getTarget().getTargetCredentials().getUsername())
+					&& StringUtils.hasText(this.getTarget().getTargetCredentials().getPassword())) {
+				httpClientConfigurer.basicAuthCredentials(this.getTarget().getTargetCredentials().getUsername(),
+						this.getTarget().getTargetCredentials().getPassword());
+			}
+			if (StringUtils.hasText(credentialsProviderCommand)) {
+				this.getTarget().setTargetCredentials(new TargetCredentials(true));
+				final Resource credentialsResource = new ProcessOutputResource(
+						credentialsProviderCommand.split("\\s+"));
+				httpClientConfigurer.addInterceptor(new ResourceBasedAuthorizationInterceptor(credentialsResource));
+			}
+			this.restTemplate.setRequestFactory(httpClientConfigurer.buildClientHttpRequestFactory());
+
+			String uri = this.getTarget().getTargetUri().toURL().toString();
+			skipperClient = new DefaultSkipperClient(uri, this.restTemplate);
+			// Actually attempt connection
+			skipperClient.getAboutInfo();
+
+			this.getTarget()
+					.setTargetResultMessage(String.format("Successfully targeted %s", uri));
+
+		}
+		catch (Exception e) {
+			this.getTarget().setTargetException(e);
+			skipperClient = null;
+			throw e;
+		}
+		finally {
+			applicationEventPublisher.publishEvent(new SkipperClientUpdatedEvent(skipperClient));
+		}
+		// Other commands will be notified of the new SkipperClient object (may be null)
+
+	}
+
+	@Override
+	public void setApplicationEventPublisher(ApplicationEventPublisher applicationEventPublisher) {
+		this.applicationEventPublisher = applicationEventPublisher;
+	}
 }
