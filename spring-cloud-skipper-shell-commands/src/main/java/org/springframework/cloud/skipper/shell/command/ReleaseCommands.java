@@ -45,10 +45,11 @@ public class ReleaseCommands {
 		return skipperClient.undeploy(releaseName, releaseVersion);
 	}
 
-	@ShellMethod(key = "release rollback", value = "Rollback a specific release")
+	@ShellMethod(key = "release rollback", value = "Rollback to a previous release")
 	public String rollback(
-			@ShellOption(help = "the name of the release to rollback", defaultValue = NULL) String releaseName,
-			@ShellOption(help = "the release version to rollback to", defaultValue = NULL) int releaseVersion) {
+			@ShellOption(help = "the name of the release to rollback") String releaseName,
+			@ShellOption(help = "the specific release version to rollback to. " +
+					"Not specifying the value rolls back to the previous release.", defaultValue = "0") int releaseVersion) {
 		return skipperClient.rollback(releaseName, releaseVersion);
 	}
 

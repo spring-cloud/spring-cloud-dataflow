@@ -214,17 +214,34 @@ public class ReleaseService {
 		return release;
 	}
 
-	public Release rollback(String releaseName, int rollbackVersion) {
+	/**
+	 * Rollback the release name to the specified version.  If the version is 0, then rollback to the previous release.
+	 *
+	 * @param releaseName the name of the release
+	 * @param rollbackVersion the version of the release to rollback to
+	 * @return the Release
+	 */
+	public Release rollback(final String releaseName, final int rollbackVersion) {
 		Assert.notNull(releaseName, "Release name must not be null");
-		Release releaseToRollback = this.releaseRepository.findByNameAndVersion(releaseName, rollbackVersion);
-		Assert.notNull(releaseToRollback, "Could not find Release to rollback to [releaseName,releaseVersion] = ["
-				+ releaseName + "," + rollbackVersion + "]");
+		Assert.isTrue(rollbackVersion >= 0,
+				"Rollback version can not be less than zero.  Value = " + rollbackVersion);
 
 		Release currentRelease = this.releaseRepository.findLatestRelease(releaseName);
-		Assert.notNull(currentRelease, "Could not find current release with [releaseName] = [" + releaseName + "]");
+		Assert.notNull(currentRelease, "Could not find release = [" + releaseName + "]");
+
+		int rollbackVersionToUse = rollbackVersion;
+		if (rollbackVersion == 0) {
+			rollbackVersionToUse = currentRelease.getVersion() - 1;
+		}
+		Assert.isTrue(rollbackVersionToUse != 0, "Can not rollback to before version 1");
+
+		Release releaseToRollback = this.releaseRepository.findByNameAndVersion(releaseName, rollbackVersionToUse);
+		Assert.notNull(releaseToRollback, "Could not find Release to rollback to [releaseName,releaseVersion] = ["
+				+ releaseName + "," + rollbackVersionToUse + "]");
+
 
 		logger.info("Rolling back releaseName={}.  Current version={}, Target version={}", releaseName,
-				currentRelease.getVersion(), releaseToRollback.getVersion());
+				currentRelease.getVersion(), rollbackVersionToUse);
 
 		Release newRelease = new Release();
 		newRelease.setName(releaseName);

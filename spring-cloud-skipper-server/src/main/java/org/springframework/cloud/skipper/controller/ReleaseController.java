@@ -55,7 +55,8 @@ public class ReleaseController {
 
 	@RequestMapping(path = "/rollback/{name}/{version}", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
-	public Release rollback(@PathVariable("name") String releaseName, @PathVariable("version") int rollbackVersion) {
+	public Release rollback(@PathVariable("name") String releaseName,
+							@PathVariable("version") int rollbackVersion) {
 		return this.releaseService.rollback(releaseName, rollbackVersion);
 	}
 }
