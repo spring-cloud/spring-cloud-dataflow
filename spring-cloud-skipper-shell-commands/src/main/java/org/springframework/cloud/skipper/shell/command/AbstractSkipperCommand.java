@@ -20,8 +20,9 @@ import org.springframework.cloud.skipper.shell.command.support.SkipperClientUpda
 import org.springframework.context.event.EventListener;
 
 /**
- * Contains a common reference for SkipperClient and an EventListener to get updates made
+ * Contains a common reference for {@link SkipperClient} and an {@link EventListener} to get updates made
  * through the 'skipper config' command.
+ *
  * @author Mark Pollack
  */
 public abstract class AbstractSkipperCommand {

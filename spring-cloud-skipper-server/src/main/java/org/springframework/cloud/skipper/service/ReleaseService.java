@@ -43,6 +43,7 @@ import org.springframework.cloud.skipper.repository.PackageMetadataRepository;
 import org.springframework.cloud.skipper.repository.ReleaseRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 /**
  * Service responsible for the lifecycle of packages and releases, deploy/undeploy a
@@ -110,7 +111,7 @@ public class ReleaseService {
 		String packageName = packageIdentifier.getPackageName();
 		String packageVersion = packageIdentifier.getPackageVersion();
 		PackageMetadata packageMetadata;
-		if (packageVersion == null) {
+		if (!StringUtils.hasText(packageVersion)) {
 			List<PackageMetadata> packageMetadataList = this.packageMetadataRepository.findByName(packageName);
 			if (packageMetadataList.size() == 1) {
 				packageMetadata = packageMetadataList.get(0);
@@ -124,9 +125,7 @@ public class ReleaseService {
 			}
 		}
 		else {
-			packageMetadata = this.packageMetadataRepository.findByNameAndVersion(
-					packageName,
-					packageVersion);
+			packageMetadata = this.packageMetadataRepository.findByNameAndVersion(packageName, packageVersion);
 			if (packageMetadata == null) {
 				throw new PackageException(String.format("Can not find package '%s', version '%s'",
 						packageName, packageVersion));

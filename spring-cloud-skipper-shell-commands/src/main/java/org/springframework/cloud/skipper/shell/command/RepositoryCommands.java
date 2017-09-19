@@ -35,7 +35,7 @@ import org.springframework.shell.table.TableModel;
 import static org.springframework.shell.standard.ShellOption.NULL;
 
 /**
- * Commands to add, delete and list package repositories
+ * Commands to add, delete and list package repositories.
  *
  * @author Ilayaperumal Gopinathan
  * @author Mark Pollack

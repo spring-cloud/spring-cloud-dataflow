@@ -49,6 +49,7 @@ import org.springframework.shell.table.Table;
 import org.springframework.shell.table.TableBuilder;
 import org.springframework.shell.table.TableModel;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 import static org.springframework.shell.standard.ShellOption.NULL;
 
@@ -102,11 +103,11 @@ public class PackageCommands extends AbstractSkipperCommand {
 
 	@ShellMethod(key = "package deploy", value = "Deploy a package")
 	public String deploy(
-			@ShellOption(help = "name of the package deploy") String name,
+			@ShellOption(help = "name of the package to deploy") String name,
 			@ShellOption(help = "version of the package to deploy", defaultValue = NULL) String version,
 			// TODO specify a specific package repository
 			@ShellOption(help = "the properties file to use to deploy", defaultValue = NULL) File propertiesFile,
-			// TODO support generation of a relase name
+			// TODO support generation of a release name
 			@ShellOption(help = "the release name to use") String releaseName,
 			@ShellOption(help = "the platform name to use", defaultValue = "default") String platformName)
 			throws IOException {
@@ -185,7 +186,7 @@ public class PackageCommands extends AbstractSkipperCommand {
 	private DeployProperties getDeployProperties(String releaseName, String platformName, File propertiesFile)
 			throws IOException {
 		DeployProperties deployProperties = new DeployProperties();
-		if (releaseName != null) {
+		if (StringUtils.hasText(releaseName)) {
 			deployProperties.setReleaseName(releaseName);
 			deployProperties.setPlatformName(platformName);
 		}
