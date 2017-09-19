@@ -21,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.cloud.skipper.client.SkipperClientConfiguration;
@@ -33,6 +34,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.core.annotation.Order;
+import org.springframework.shell.ResultHandler;
 import org.springframework.shell.Shell;
 import org.springframework.shell.jline.DefaultShellApplicationRunner;
 import org.springframework.shell.jline.PromptProvider;
@@ -78,6 +80,10 @@ public class ShellConfiguration {
 		@Autowired
 		private SkipperClientProperties clientProperties;
 
+		@Autowired
+		@Qualifier("main")
+		private ResultHandler resultHandler;
+
 		@Override
 		public void run(ApplicationArguments args) throws Exception {
 			Target target = new Target(clientProperties.getServerUrl(), clientProperties.getUsername(),
@@ -89,7 +95,7 @@ public class ShellConfiguration {
 				targetHolder.changeTarget(target, null);
 			}
 			catch (Exception e) {
-				e.printStackTrace();
+				resultHandler.handleResult(e);
 			}
 
 		}
