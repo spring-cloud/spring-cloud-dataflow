@@ -17,9 +17,11 @@ package org.springframework.cloud.skipper.client;
 
 import org.springframework.cloud.skipper.domain.AboutInfo;
 import org.springframework.cloud.skipper.domain.DeployProperties;
+import org.springframework.cloud.skipper.domain.DeployRequest;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
 import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.Repository;
+import org.springframework.cloud.skipper.domain.UpdateRequest;
 import org.springframework.hateoas.Resources;
 
 /**
@@ -57,21 +59,25 @@ public interface SkipperClient {
 	String deploy(String packageId, DeployProperties deployProperties);
 
 	/**
-	 * Update the package.
-	 *
-	 * @param packageId the ID of the package to update.
-	 * @param deployProperties the (@link DeployProperties)
+	 * Deploy the package
+	 * @param deployRequest the package deploy request
 	 * @return the deployed {@link Release}
 	 */
-	String update(String packageId, DeployProperties deployProperties);
+	Release deploy(DeployRequest deployRequest);
 
+	/**
+	 * Update the package.
+	 * @param updateRequest the request to update the release
+	 * @return the deploye {@link Release}
+	 */
+	Release update(UpdateRequest updateRequest);
 	/**
 	 * Undeploy a specific release.
 	 *
 	 * @param releaseName the release name
 	 * @return the un-deployed {@link Release}
 	 */
-	String undeploy(String releaseName);
+	Release undeploy(String releaseName);
 
 	/**
 	 * Rollback a specific release.
@@ -80,7 +86,7 @@ public interface SkipperClient {
 	 * @param releaseVersion the release version.
 	 * @return the rolled back {@link Release}
 	 */
-	String rollback(String releaseName, int releaseVersion);
+	Release rollback(String releaseName, int releaseVersion);
 
 	/**
 	 * Add a new Package Repository.

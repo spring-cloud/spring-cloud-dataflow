@@ -25,8 +25,11 @@ import org.slf4j.LoggerFactory;
 
 import org.springframework.cloud.skipper.domain.AboutInfo;
 import org.springframework.cloud.skipper.domain.DeployProperties;
+import org.springframework.cloud.skipper.domain.DeployRequest;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
+import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.Repository;
+import org.springframework.cloud.skipper.domain.UpdateRequest;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.ResourceSupport;
@@ -107,21 +110,27 @@ public class DefaultSkipperClient implements SkipperClient {
 	}
 
 	@Override
-	public String update(String packageId, DeployProperties deployProperties) {
-		String url = String.format("%s/%s/%s/%s", baseUrl, "package", packageId, "update");
-		return this.restTemplate.postForObject(url, deployProperties, String.class);
+	public Release deploy(DeployRequest deployRequest) {
+		String url = String.format("%s/%s/%s", baseUrl, "package", "deploy");
+		return this.restTemplate.postForObject(url, deployRequest, Release.class);
 	}
 
 	@Override
-	public String undeploy(String releaseName) {
+	public Release update(UpdateRequest updateRequest) {
+		String url = String.format("%s/%s/%s", baseUrl, "release", "update");
+		return this.restTemplate.postForObject(url, updateRequest, Release.class);
+	}
+
+	@Override
+	public Release undeploy(String releaseName) {
 		String url = String.format("%s/%s/%s/%s", baseUrl, "release", "undeploy", releaseName);
-		return this.restTemplate.postForObject(url, null, String.class);
+		return this.restTemplate.postForObject(url, null, Release.class);
 	}
 
 	@Override
-	public String rollback(String releaseName, int releaseVersion) {
+	public Release rollback(String releaseName, int releaseVersion) {
 		String url = String.format("%s/%s/%s/%s/%s", baseUrl, "release", "rollback", releaseName, releaseVersion);
-		return this.restTemplate.postForObject(url, null, String.class);
+		return this.restTemplate.postForObject(url, null, Release.class);
 	}
 
 	@Override

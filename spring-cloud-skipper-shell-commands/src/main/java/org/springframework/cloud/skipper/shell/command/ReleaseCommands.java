@@ -18,8 +18,6 @@ package org.springframework.cloud.skipper.shell.command;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.skipper.client.SkipperClient;
 import org.springframework.shell.standard.ShellComponent;
-import org.springframework.shell.standard.ShellMethod;
-import org.springframework.shell.standard.ShellOption;
 
 /**
  * @author Ilayaperumal Gopinathan
@@ -32,18 +30,5 @@ public class ReleaseCommands extends AbstractSkipperCommand {
 		this.skipperClient = skipperClient;
 	}
 
-	@ShellMethod(key = "release undeploy", value = "Undeploy a release")
-	public String undeploy(
-			@ShellOption(help = "the name of the release to undeploy") String releaseName) {
-		return skipperClient.undeploy(releaseName);
-	}
-
-	@ShellMethod(key = "release rollback", value = "Rollback to a previous release")
-	public String rollback(
-			@ShellOption(help = "the name of the release to rollback") String releaseName,
-			@ShellOption(help = "the specific release version to rollback to. " +
-					"Not specifying the value rolls back to the previous release.", defaultValue = "0") int releaseVersion) {
-		return skipperClient.rollback(releaseName, releaseVersion);
-	}
 
 }

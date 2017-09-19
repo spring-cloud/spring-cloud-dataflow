@@ -107,11 +107,31 @@ public class ReleaseService {
 	public Release deploy(DeployRequest deployRequest) {
 		// TODO deployRequest validation.
 		PackageIdentifier packageIdentifier = deployRequest.getPackageIdentifier();
-		PackageMetadata packageMetadata = this.packageMetadataRepository.findByNameAndVersion(
-				packageIdentifier.getPackageName(),
-				packageIdentifier.getPackageVersion());
-		// TODO - what about multi-repository support....
-		// deployRequest.getPackageIdentifier().getRepositoryName()
+		String packageName = packageIdentifier.getPackageName();
+		String packageVersion = packageIdentifier.getPackageVersion();
+		PackageMetadata packageMetadata;
+		if (packageVersion == null) {
+			List<PackageMetadata> packageMetadataList = this.packageMetadataRepository.findByName(packageName);
+			if (packageMetadataList.size() == 1) {
+				packageMetadata = packageMetadataList.get(0);
+			}
+			else if (packageMetadataList == null) {
+				throw new PackageException("Can not find a package named " + packageName);
+			}
+			else {
+				// TODO multi-repository support....
+				throw new PackageException("Package name " + packageName + " is not unique across all repositories");
+			}
+		}
+		else {
+			packageMetadata = this.packageMetadataRepository.findByNameAndVersion(
+					packageName,
+					packageVersion);
+			if (packageMetadata == null) {
+				throw new PackageException(String.format("Can not find package '%s', version '%s'",
+						packageName, packageVersion));
+			}
+		}
 		return deploy(packageMetadata.getId(), deployRequest.getDeployProperties());
 	}
 
@@ -204,7 +224,7 @@ public class ReleaseService {
 		Release release = this.releaseManager.deploy(replacingRelease);
 		// TODO UpdateStrategy (manfiestSave, healthCheck)
 		this.releaseManager.undeploy(existingRelease);
-		return release;
+		return status(release);
 	}
 
 	/**
@@ -247,8 +267,7 @@ public class ReleaseService {
 		// resolved those...
 		newRelease.setInfo(createNewInfo());
 
-		update(currentRelease, newRelease);
-		return releaseToRollback;
+		return update(currentRelease, newRelease);
 	}
 
 	/**

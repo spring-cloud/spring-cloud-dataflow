@@ -32,7 +32,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
 import org.springframework.cloud.skipper.client.SkipperClient;
 import org.springframework.cloud.skipper.domain.DeployProperties;
+import org.springframework.cloud.skipper.domain.DeployRequest;
+import org.springframework.cloud.skipper.domain.PackageIdentifier;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
+import org.springframework.cloud.skipper.domain.Release;
+import org.springframework.cloud.skipper.domain.UpdateProperties;
+import org.springframework.cloud.skipper.domain.UpdateRequest;
 import org.springframework.cloud.skipper.shell.command.support.TableUtils;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.hateoas.Resources;
@@ -95,25 +100,86 @@ public class PackageCommands extends AbstractSkipperCommand {
 		}
 	}
 
-	@ShellMethod(key = "package deploy", value = "Deploy the package metadata")
+	@ShellMethod(key = "package deploy", value = "Deploy a package")
 	public String deploy(
-			@ShellOption(help = "packageId of the package metadata to deploy") String packageId,
+			@ShellOption(help = "name of the package deploy") String name,
+			@ShellOption(help = "version of the package to deploy", defaultValue = NULL) String version,
+			// TODO specify a specific package repository
 			@ShellOption(help = "the properties file to use to deploy", defaultValue = NULL) File propertiesFile,
-			@ShellOption(help = "the release name to use", defaultValue = NULL) String releaseName,
+			// TODO support generation of a relase name
+			@ShellOption(help = "the release name to use") String releaseName,
 			@ShellOption(help = "the platform name to use", defaultValue = "default") String platformName)
 			throws IOException {
-		return skipperClient.deploy(packageId, getDeployProperties(releaseName, platformName, propertiesFile));
+		Release release = skipperClient
+				.deploy(getDeployRequest(name, version, propertiesFile, releaseName, platformName));
+		return "Released " + release.getName();
 	}
 
-	@ShellMethod(key = "package update", value = "Update a specific release")
+	@ShellMethod(key = "package update", value = "Update a package")
 	public String update(
-			@ShellOption(help = "the package id to update", defaultValue = NULL) String packageId,
-			@ShellOption(help = "the properties file to use to deploy", defaultValue = NULL) File propertiesFile,
-			@ShellOption(help = "the release name to use", defaultValue = NULL) String releaseName,
-			@ShellOption(help = "the platform name to use", defaultValue = "default") String platformName)
+			@ShellOption(help = "the name of the release to update") String releaseName,
+			@ShellOption(help = "the name of the package to use for the update") String packageName,
+			@ShellOption(help = "the version of the package to use for the update") String packageVersion,
+			@ShellOption(help = "the properties file to use to deploy", defaultValue = NULL) File propertiesFile)
 			throws IOException {
-		Assert.notNull(packageId, "Package Id must not be null");
-		return skipperClient.update(packageId, getDeployProperties(releaseName, platformName, propertiesFile));
+		Release release = skipperClient
+				.update(getUpdateRequest(releaseName, packageName, packageVersion, propertiesFile));
+		StringBuilder sb = new StringBuilder();
+		sb.append(release.getName() + " has been updated.\n");
+		sb.append("Last Deployed: " + release.getInfo().getLastDeployed() + "\n");
+		sb.append("Status: " + release.getInfo().getStatus().getPlatformStatus() + "\n");
+		return sb.toString();
+	}
+
+	@ShellMethod(key = "package rollback", value = "Rollback the package to a previous release")
+	public String rollback(
+			@ShellOption(help = "the name of the release to rollback") String releaseName,
+			@ShellOption(help = "the specific release version to rollback to. " +
+					"Not specifying the value rolls back to the previous release.", defaultValue = "0") int releaseVersion) {
+		Release release =  skipperClient.rollback(releaseName, releaseVersion);
+		StringBuilder sb = new StringBuilder();
+		sb.append(release.getName() + " has been rolled back.\n");
+		sb.append("Last Deployed: " + release.getInfo().getLastDeployed() + "\n");
+		sb.append("Status: " + release.getInfo().getStatus().getPlatformStatus() + "\n");
+		return sb.toString();
+	}
+
+	@ShellMethod(key = "package undeploy", value = "Undeploy the package")
+	public String undeploy(
+			@ShellOption(help = "the name of the release to undeploy") String releaseName) {
+		Release release =  skipperClient.undeploy(releaseName);
+		StringBuilder sb = new StringBuilder();
+		sb.append(release.getName() + " has been undeployed.\n");
+		return sb.toString();
+	}
+
+	private UpdateRequest getUpdateRequest(String releaseName, String packageName, String packageVersion,
+			File propertiesFile) throws IOException {
+		UpdateRequest updateRequest = new UpdateRequest();
+		UpdateProperties updateProperties = new UpdateProperties();
+		updateProperties.setReleaseName(releaseName);
+		// TODO support config values from propertiesFile.
+		// updateProperties.setConfigValues();
+		updateRequest.setUpdateProperties(updateProperties);
+
+		PackageIdentifier packageIdentifier = new PackageIdentifier();
+		packageIdentifier.setPackageName(packageName);
+		packageIdentifier.setPackageVersion(packageVersion);
+		updateRequest.setPackageIdentifier(packageIdentifier);
+		updateRequest.setPackageIdentifier(packageIdentifier);
+		return updateRequest;
+	}
+
+	private DeployRequest getDeployRequest(String packageName, String packageVersion, File propertiesFile,
+			String releaseName, String platformName) throws IOException {
+		DeployProperties deployProperties = getDeployProperties(releaseName, platformName, propertiesFile);
+		DeployRequest deployRequest = new DeployRequest();
+		deployRequest.setDeployProperties(deployProperties);
+		PackageIdentifier packageIdentifier = new PackageIdentifier();
+		packageIdentifier.setPackageName(packageName);
+		packageIdentifier.setPackageVersion(packageVersion);
+		deployRequest.setPackageIdentifier(packageIdentifier);
+		return deployRequest;
 	}
 
 	private DeployProperties getDeployProperties(String releaseName, String platformName, File propertiesFile)
@@ -140,9 +206,10 @@ public class PackageCommands extends AbstractSkipperCommand {
 			}
 			if (props != null) {
 				Assert.notNull(props.getProperty("release-name"), "Release name must not be null");
+				// TODO why set these here?
 				deployProperties.setReleaseName(props.getProperty("release-name"));
 				deployProperties.setPlatformName(props.getProperty("platform-name", platformName));
-				// todo: support config values
+				// TODO support config values from propertiesFile
 				// deployProperties.setConfigValues();
 			}
 		}

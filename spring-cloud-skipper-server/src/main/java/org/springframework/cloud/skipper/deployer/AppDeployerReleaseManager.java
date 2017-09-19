@@ -80,12 +80,10 @@ public class AppDeployerReleaseManager implements ReleaseManager {
 		this.deployerRepository = deployerRepository;
 	}
 
-	public Release deploy(Release release) {
-		// TODO review transaction semantics
-		this.releaseRepository.save(release);
+	public Release deploy(Release releaseInput) {
 
-		// TODO how to rollback file system/git in case of DB errors later in method
-		// execution
+		Release release = this.releaseRepository.save(releaseInput);
+
 		this.manifestStore.store(release);
 
 		// Deploy the application
@@ -111,10 +109,8 @@ public class AppDeployerReleaseManager implements ReleaseManager {
 		release.getInfo().setStatus(status);
 		release.getInfo().setDescription("Install complete");
 
-		// Store updated state in in DB
-		this.releaseRepository.save(release);
-		updateStatus(release);
-		return release;
+		// Store updated state in in DB and compute status
+		return status(this.releaseRepository.save(release));
 	}
 
 	public Release status(Release release) {
@@ -144,7 +140,7 @@ public class AppDeployerReleaseManager implements ReleaseManager {
 			}
 			else {
 				release.getInfo().getStatus().setPlatformStatus(
-						"Not all the applications are deployed successfully. " + releaseStatusMsg.toString());
+						"Applications deploying... " + releaseStatusMsg.toString());
 			}
 		}
 		return release;
@@ -174,45 +170,6 @@ public class AppDeployerReleaseManager implements ReleaseManager {
 		return release;
 	}
 
-	@Override
-	public void updateStatus(Release release) {
-		//
-		// boolean allClear = true;
-		// Map<String, AppInstanceStatus> instances = new HashMap<String,
-		// AppInstanceStatus>();
-		// List<String> deploymentIds = Arrays
-		// .asList(StringUtils.commaDelimitedListToStringArray(release.getDeploymentId()));
-		//
-		// for (String deploymentId : deploymentIds) {
-		// AppStatus status = appDeployer.status(deploymentId);
-		// for (AppInstanceStatus appInstanceStatus : status.getInstances().values()) {
-		// if (appInstanceStatus.getState() != DeploymentState.deployed) {
-		// allClear = false;
-		// }
-		// }
-		// }
-		// if (allClear) {
-		// release.getInfo().getStatus().setPlatformStatus("All Applications deployed
-		// successfully");
-		// releaseRepository.save(release);
-		// }
-		// else {
-		// StringBuffer stringBuffer = new StringBuffer();
-		// stringBuffer.append("Not all applications deployed successfully. ");
-		// for (String deploymentId : deploymentIds) {
-		// AppStatus status = appDeployer.status(deploymentId);
-		// for (AppInstanceStatus appInstanceStatus : status.getInstances().values()) {
-		// stringBuffer.append(appInstanceStatus.getId()).append("=").append(appInstanceStatus.getState())
-		// .append(", ");
-		// }
-		// }
-		// String platformStatus = stringBuffer.toString();
-		// platformStatus = platformStatus.replaceAll(", $", "");
-		// release.getInfo().getStatus().setPlatformStatus(platformStatus);
-		// releaseRepository.save(release);
-		// }
-
-	}
 
 	private List<Deployment> unmarshallDeployments(String manifests) {
 

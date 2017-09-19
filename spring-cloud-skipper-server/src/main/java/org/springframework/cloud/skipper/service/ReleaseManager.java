@@ -35,5 +35,5 @@ public interface ReleaseManager {
 
 	Release status(Release release);
 
-	void updateStatus(Release release);
+	// void updateStatus(Release release);
 }
