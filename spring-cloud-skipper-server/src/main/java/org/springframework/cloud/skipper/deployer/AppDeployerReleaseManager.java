@@ -170,7 +170,6 @@ public class AppDeployerReleaseManager implements ReleaseManager {
 		return release;
 	}
 
-
 	private List<Deployment> unmarshallDeployments(String manifests) {
 
 		List<AppDeploymentKind> deploymentKindList = new ArrayList<>();

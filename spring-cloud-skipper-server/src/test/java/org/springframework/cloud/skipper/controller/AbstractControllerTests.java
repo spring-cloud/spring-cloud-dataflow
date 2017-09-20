@@ -141,7 +141,7 @@ public class AbstractControllerTests extends AbstractMockMvcTests {
 			Release deployedRelease) {
 		assertThat(deployedRelease.getName()).isEqualTo(releaseName);
 		assertThat(deployedRelease.getPlatformName()).isEqualTo("test");
-		assertThat(deployedRelease.getPkg().getMetadata()).isEqualToIgnoringGivenFields(packageMetadata, "id");
+		assertThat(deployedRelease.getPkg().getMetadata()).isEqualToIgnoringGivenFields(packageMetadata, "id", "origin");
 		assertThat(deployedRelease.getPkg().getMetadata().equals(packageMetadata));
 		assertThat(deployedRelease.getInfo().getStatus().getStatusCode()).isEqualTo(StatusCode.DEPLOYED);
 	}

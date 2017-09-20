@@ -78,7 +78,7 @@ public class PackageServiceTests extends AbstractIntegrationTest {
 				.isInstanceOf(PackageException.class)
 				.withFailMessage(
 						"Resource for Package name 'noname', version 'noversion' was not found in any repository.");
-		assertThatThrownBy(() -> packageService.loadPackage(packageMetadata)).isInstanceOf(PackageException.class);
+		assertThatThrownBy(() -> packageService.downloadPackage(packageMetadata)).isInstanceOf(PackageException.class);
 	}
 
 	@Test
@@ -87,7 +87,7 @@ public class PackageServiceTests extends AbstractIntegrationTest {
 		PackageMetadata packageMetadata = packageMetadataRepository.findByNameAndVersion("log", "1.0.0");
 		assertThat(packageMetadata).isNotNull();
 		packageService.downloadPackage(packageMetadata);
-		File packageDirectory = packageService.calculatePackageDirectory(packageMetadata);
+		File packageDirectory = packageService.calculatePackageDownloadDirectory(packageMetadata);
 		assertThat(packageDirectory).exists().canRead().canWrite();
 		File packageFile = packageService.calculatePackageZipFile(packageMetadata, packageDirectory);
 		assertThat(packageFile).exists();
@@ -109,10 +109,10 @@ public class PackageServiceTests extends AbstractIntegrationTest {
 	public void deserializePackage() {
 		PackageMetadata packageMetadata = this.packageMetadataRepository.findByNameAndVersion("log", "1.0.0");
 		packageService.downloadPackage(packageMetadata);
-		Package pkg = packageService.loadPackage(packageMetadata);
+		Package pkg = packageService.downloadPackage(packageMetadata);
 		assertThat(pkg).isNotNull();
 		assertThat(pkg.getConfigValues().getRaw()).contains("1024m");
-		assertThat(pkg.getMetadata()).isEqualTo(packageMetadata);
+		assertThat(pkg.getMetadata()).isEqualToIgnoringGivenFields(packageMetadata, "id", "origin");
 		assertThat(pkg.getTemplates()).hasSize(1);
 		Template template = pkg.getTemplates().get(0);
 		assertThat(template.getName()).isEqualTo("log.yml");
@@ -122,10 +122,9 @@ public class PackageServiceTests extends AbstractIntegrationTest {
 	@Test
 	public void deserializeNestedPackage() {
 		PackageMetadata packageMetadata = this.packageMetadataRepository.findByNameAndVersion("ticktock", "1.0.0");
-		packageService.downloadPackage(packageMetadata);
-		Package pkg = packageService.loadPackage(packageMetadata);
+		Package pkg = packageService.downloadPackage(packageMetadata);
 		assertThat(pkg).isNotNull();
-		assertThat(pkg.getMetadata()).isEqualTo(packageMetadata);
+		assertThat(pkg.getMetadata()).isEqualToIgnoringGivenFields(packageMetadata, "id", "origin");
 		assertThat(pkg.getDependencies()).hasSize(2);
 
 		Package logPkg = pkg.getDependencies().get(0);

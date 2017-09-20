@@ -120,8 +120,9 @@ public class ReleaseService {
 				throw new PackageException("Can not find a package named " + packageName);
 			}
 			else {
-				// TODO multi-repository support....
-				throw new PackageException("Package name " + packageName + " is not unique across all repositories");
+				// TODO find latest version
+				throw new PackageException("Package name " + packageName + " is not unique.  Finding latest version " +
+						" not yet implemented");
 			}
 		}
 		else {
@@ -136,8 +137,7 @@ public class ReleaseService {
 
 	protected Release deploy(PackageMetadata packageMetadata, DeployProperties deployProperties) {
 		Assert.notNull(packageMetadata, "Can't download package, PackageMetadata is a null value.");
-		this.packageService.downloadPackage(packageMetadata);
-		Package packageToInstall = this.packageService.loadPackage(packageMetadata);
+		Package packageToInstall = this.packageService.downloadPackage(packageMetadata);
 		Release release = createInitialRelease(deployProperties, packageToInstall);
 		return deploy(release);
 	}
@@ -188,8 +188,7 @@ public class ReleaseService {
 	public Release createReleaseForUpdate(PackageMetadata packageMetadata, Integer newVersion,
 			UpdateProperties deployProperties, String platformName) {
 		Assert.notNull(deployProperties, "Deploy Properties can not be null");
-		this.packageService.downloadPackage(packageMetadata);
-		Package packageToInstall = this.packageService.loadPackage(packageMetadata);
+		Package packageToInstall = this.packageService.downloadPackage(packageMetadata);
 		packageToInstall.getMetadata().setId(packageMetadata.getId());
 		Release release = new Release();
 		release.setName(deployProperties.getReleaseName());

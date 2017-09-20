@@ -12,6 +12,12 @@ spring:
         username: dummy
         password: dummy
 
+# TODO - remove, pre M1 development simplicity
+maven:
+  remoteRepositories:
+    springRepo:
+      url: https://repo.spring.io/libs-snapshot
+
 logging:
   level:
     org.springframework.beans: 'WARN'

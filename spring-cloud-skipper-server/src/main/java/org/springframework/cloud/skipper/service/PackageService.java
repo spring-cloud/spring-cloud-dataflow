@@ -66,11 +66,11 @@ public class PackageService implements ResourceLoaderAware {
 		this.repositoryRepository = repositoryRepository;
 	}
 
-	public void downloadPackage(PackageMetadata packageMetadata) {
+	public Package downloadPackage(PackageMetadata packageMetadata) {
 		Assert.notNull(packageMetadata, "Can't download PackageMetadata, it is a null value.");
 		Resource sourceResource = findFirstPackageResourceThatExists(packageMetadata.getName(),
 				packageMetadata.getVersion());
-		File targetPath = calculatePackageDirectory(packageMetadata);
+		File targetPath = calculatePackageDownloadDirectory(packageMetadata);
 		targetPath.mkdirs();
 		File targetFile = calculatePackageZipFile(packageMetadata, targetPath);
 		try {
@@ -82,6 +82,8 @@ public class PackageService implements ResourceLoaderAware {
 			throw new PackageException("Could not copy " + sourceResource + " to " + targetFile, e);
 		}
 		ZipUtil.unpack(targetFile, targetPath);
+		File unzipdir = new File(targetPath, packageMetadata.getName() + "-" + packageMetadata.getVersion());
+		return loadPackageOnPath("dummyValue", unzipdir.getAbsolutePath());
 	}
 
 	private Resource findFirstPackageResourceThatExists(String name, String version) {
@@ -109,13 +111,6 @@ public class PackageService implements ResourceLoaderAware {
 					"Resource for Package name '%s', version '%s' was not found in any repository.", name, version));
 		}
 		return sourceResource;
-	}
-
-	public Package loadPackage(PackageMetadata packageMetadata) {
-		// TODO check if already downloaded.
-		String resolvedPackagePath = calculatePackageUnzippedDirectory(packageMetadata).getPath();
-		// Get all files under path
-		return loadPackageOnPath(packageMetadata.getOrigin(), resolvedPackagePath);
 	}
 
 	public Package loadPackageOnPath(String packageOrigin, String packagePath) {
@@ -230,7 +225,7 @@ public class PackageService implements ResourceLoaderAware {
 	}
 
 	public File calculatePackageUnzippedDirectory(PackageMetadata packageMetadata) {
-		return new File(calculatePackageDirectory(packageMetadata),
+		return new File(calculatePackageDownloadDirectory(packageMetadata),
 				packageMetadata.getName() + "-" + packageMetadata.getVersion());
 	}
 
@@ -241,12 +236,12 @@ public class PackageService implements ResourceLoaderAware {
 	 * @param packageMetadata the package's metadata.
 	 * @return The directory where the package will be downloaded.
 	 */
-	public File calculatePackageDirectory(PackageMetadata packageMetadata) {
+	public File calculatePackageDownloadDirectory(PackageMetadata packageMetadata) {
 		Repository localRepository = this.repositoryRepository
 				.findByName(RepositoryInitializationService.LOCAL_REPOSITORY_NAME);
-		FileSystemResource fileSystemResource = new FileSystemResource(localRepository.getUrl());
-		return new File(fileSystemResource.getFilename()
-				+ File.separator + packageMetadata.getName());
+		String packagesPath = localRepository.getUrl().substring("file://".length());
+		File downloadDir = new File(packagesPath, "downloads");
+		return new File(downloadDir, packageMetadata.getName());
 	}
 
 	@Override
