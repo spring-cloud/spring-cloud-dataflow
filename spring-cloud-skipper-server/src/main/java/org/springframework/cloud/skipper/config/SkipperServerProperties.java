@@ -70,12 +70,5 @@ public class SkipperServerProperties {
 	public void setSynchonizeIndexOnContextRefresh(boolean synchonizeIndexOnContextRefresh) {
 		this.synchonizeIndexOnContextRefresh = synchonizeIndexOnContextRefresh;
 	}
-
-	public String getPackageIndexDir() {
-		return skipperHome + File.separator + "indexes";
-	}
-
-	public String getPackageDir() {
-		return skipperHome + File.separator + "packages";
-	}
+	
 }
