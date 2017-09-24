@@ -70,5 +70,4 @@ public class SkipperServerProperties {
 	public void setSynchonizeIndexOnContextRefresh(boolean synchonizeIndexOnContextRefresh) {
 		this.synchonizeIndexOnContextRefresh = synchonizeIndexOnContextRefresh;
 	}
-	
 }

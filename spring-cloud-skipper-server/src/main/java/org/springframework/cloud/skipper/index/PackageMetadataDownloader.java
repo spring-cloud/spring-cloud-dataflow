@@ -41,6 +41,7 @@ import org.springframework.util.FileSystemUtils;
 import org.springframework.util.StreamUtils;
 
 /**
+ * Downloads package metadata from known repositories.
  * @author Mark Pollack
  */
 @Component
@@ -48,7 +49,6 @@ public class PackageMetadataDownloader implements ResourceLoaderAware {
 
 	private final Logger logger = LoggerFactory.getLogger(PackageMetadataDownloader.class);
 
-	// private SkipperServerProperties skipperServerProperties;
 	private final RepositoryRepository repositoryRepository;
 
 	private ResourceLoader resourceLoader;
@@ -58,6 +58,10 @@ public class PackageMetadataDownloader implements ResourceLoaderAware {
 		this.repositoryRepository = repositoryRepository;
 	}
 
+	/**
+	 * Download package metadata from all repositories.
+	 * @return A list of package metadata, not yet persisted in the PackageMetadataRepository.
+	 */
 	public List<PackageMetadata> downloadPackageMetadata() {
 		List<PackageMetadata> finalMetadataList = new ArrayList<>();
 		Path targetPath = null;
@@ -91,12 +95,10 @@ public class PackageMetadataDownloader implements ResourceLoaderAware {
 				logger.warn("Temporary directory can not be deleted: " + targetPath);
 			}
 		}
-		// return deserializeFromIndexFiles(getIndexFiles());
 		return finalMetadataList;
 	}
 
-	// Package protected for testing
-	List<PackageMetadata> deserializeFromIndexFiles(List<File> indexFiles) {
+	protected List<PackageMetadata> deserializeFromIndexFiles(List<File> indexFiles) {
 		List<PackageMetadata> packageMetadataList = new ArrayList<>();
 		YAMLMapper yamlMapper = new YAMLMapper();
 		for (File indexFile : indexFiles) {

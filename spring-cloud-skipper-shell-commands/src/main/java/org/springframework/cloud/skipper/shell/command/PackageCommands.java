@@ -62,7 +62,7 @@ import static org.springframework.shell.standard.ShellOption.NULL;
  * @author Ilayaperumal Gopinathan
  */
 @ShellComponent
-public class 	PackageCommands extends AbstractSkipperCommand {
+public class PackageCommands extends AbstractSkipperCommand {
 
 	@Autowired
 	public PackageCommands(SkipperClient skipperClient) {

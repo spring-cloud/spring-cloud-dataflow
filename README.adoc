@@ -110,7 +110,7 @@ skipper:>package undeploy --release-name mylog
 mylog has been undeployed.
 ----
 
-You should not see any `log-sink-rabbit` apps in the `jps command.
+You should not see any `log-sink-rabbit` apps in the `jps` command.
 
 
 === Code formatting guidelines
