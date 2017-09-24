@@ -23,7 +23,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.cloud.skipper.config.SkipperServerProperties;
+import org.springframework.cloud.skipper.domain.PackageMetadata;
 import org.springframework.cloud.skipper.domain.Repository;
+import org.springframework.cloud.skipper.index.PackageMetadataDownloader;
+import org.springframework.cloud.skipper.repository.PackageMetadataRepository;
 import org.springframework.cloud.skipper.repository.RepositoryRepository;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
@@ -46,17 +49,40 @@ public class RepositoryInitializationService {
 
 	private final SkipperServerProperties skipperServerProperties;
 
+	private final PackageMetadataDownloader packageMetadataDownloader;
+
+	private final PackageMetadataRepository packageMetadataRepository;
+
 	@Autowired
 	public RepositoryInitializationService(RepositoryRepository repositoryRepository,
+			PackageMetadataRepository packageMetadataRepository,
+			PackageMetadataDownloader packageMetadataDownloader,
 			SkipperServerProperties skipperServerProperties) {
 		this.repositoryRepository = repositoryRepository;
+		this.packageMetadataRepository = packageMetadataRepository;
+		this.packageMetadataDownloader = packageMetadataDownloader;
 		this.skipperServerProperties = skipperServerProperties;
 	}
 
 	@EventListener
 	public void initialize(ApplicationReadyEvent event) {
+		synchronizeRepositories();
+		synchronizePackageMetadata();
+	}
+
+	private void synchronizePackageMetadata() {
+		if (this.skipperServerProperties.isSynchonizeIndexOnContextRefresh()) {
+			loadAllPackageMetadata();
+		}
+	}
+
+	private void loadAllPackageMetadata() {
+		List<PackageMetadata> packageMetadataList = this.packageMetadataDownloader.downloadPackageMetadata();
+		this.packageMetadataRepository.save(packageMetadataList);
+	}
+
+	private void synchronizeRepositories() {
 		List<Repository> configurationRepositories = skipperServerProperties.getPackageRepositories();
-		addLocalRepository();
 		for (Repository configurationRepository : configurationRepositories) {
 			if (repositoryRepository.findByName(configurationRepository.getName()) == null) {
 				logger.info("Initializing repository database with " + configurationRepository);
@@ -68,12 +94,4 @@ public class RepositoryInitializationService {
 			}
 		}
 	}
-
-	private void addLocalRepository() {
-		Repository repository = new Repository();
-		repository.setName(LOCAL_REPOSITORY_NAME);
-		repository.setUrl("file://" + skipperServerProperties.getPackageDir());
-		repositoryRepository.save(repository);
-	}
-
 }

@@ -36,9 +36,9 @@ import org.springframework.boot.bind.YamlConfigurationFactory;
 import org.springframework.cloud.skipper.domain.ConfigValues;
 import org.springframework.cloud.skipper.domain.Package;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
-import org.springframework.cloud.skipper.domain.PackageUploadProperties;
 import org.springframework.cloud.skipper.domain.Repository;
 import org.springframework.cloud.skipper.domain.Template;
+import org.springframework.cloud.skipper.domain.UploadRequest;
 import org.springframework.cloud.skipper.index.PackageException;
 import org.springframework.cloud.skipper.repository.PackageMetadataRepository;
 import org.springframework.cloud.skipper.repository.RepositoryRepository;
@@ -77,47 +77,85 @@ public class PackageService implements ResourceLoaderAware {
 
 	public Package downloadPackage(PackageMetadata packageMetadata) {
 		Assert.notNull(packageMetadata, "Can't download PackageMetadata, it is a null value.");
-		File targetPath = null;
-		File targetFile = null;
-		Package downloadedPackage = null;
+		// Database contains the package file from a previous upload
+		if (packageMetadata.getPackageFileBytes() != null) {
+			return deserializePackageFromDatabase(packageMetadata);
+		}
+		else {
+			return downloadAndDeserializePackage(packageMetadata);
+		}
+	}
+
+	private Package downloadAndDeserializePackage(PackageMetadata packageMetadata) {
+		Path targetPath = null;
+		// package file is in a non DB hosted repository
+		try {
+			targetPath = Files.createTempDirectory("skipper" + packageMetadata.getName());
+			File targetFile = calculatePackageZipFile(packageMetadata, targetPath.toFile());
+			// findOne will throw exception if not found.
+			Repository packageRepository = repositoryRepository.findOne(packageMetadata.getOrigin());
+			Resource sourceResource = getResourceForRepository(packageRepository, packageMetadata.getName(),
+					packageMetadata.getVersion());
+
+			logger.info("Downloading package file for " + packageMetadata.getName() + "-"
+					+ packageMetadata.getVersion() +
+					" from " + sourceResource.getDescription() + " to target file " + targetFile);
+			try {
+				StreamUtils.copy(sourceResource.getInputStream(), new FileOutputStream(targetFile));
+			}
+			catch (IOException e) {
+				throw new PackageException("Could not copy package file for " + packageMetadata.getName() + "-"
+						+ packageMetadata.getVersion() +
+						" from " + sourceResource.getDescription() + " to target file " + targetFile, e);
+			}
+			ZipUtil.unpack(targetFile, targetPath.toFile());
+			Package pkgToReturn = loadPackageOnPath(new File(targetPath.toFile(), packageMetadata.getName() + "-" +
+					packageMetadata.getVersion()));
+			// TODO should we have an option to not cache the package file?
+			packageMetadata.setPackageFileBytes(Files.readAllBytes(targetFile.toPath()));
+			// Only save once package is successfully deserialized and package file read.
+			pkgToReturn.setMetadata(this.packageMetadataRepository.save(packageMetadata));
+			return pkgToReturn;
+		}
+		catch (Exception e) {
+			throw new PackageException("Exception while downloading package zip file for "
+					+ packageMetadata.getName() + "-" + packageMetadata.getVersion() +
+					". PackageMetadata origin = " + packageMetadata.getOrigin(), e);
+		}
+		finally {
+			if (targetPath != null && !FileSystemUtils.deleteRecursively(targetPath.toFile())) {
+				logger.warn("Temporary directory can not be deleted: " + targetPath);
+			}
+		}
+	}
+
+	private Package deserializePackageFromDatabase(PackageMetadata packageMetadata) {
+		// package file was uploaded to a local DB hosted repository
 		Path tmpDirPath = null;
 		try {
-			if (packageMetadata.getPackageFile() != null) {
-				tmpDirPath = Files.createTempDirectory("skipper");
-				targetPath = new File(tmpDirPath + File.separator + packageMetadata.getName());
-				targetPath.mkdirs();
-				targetFile = calculatePackageZipFile(packageMetadata, targetPath);
-				try {
-					StreamUtils.copy(packageMetadata.getPackageFile(), new FileOutputStream(targetFile));
-				}
-				catch (IOException e) {
-					throw new PackageException(
-							"Could not copy " + packageMetadata.getPackageFile() + " to " + targetFile, e);
-				}
+			tmpDirPath = Files.createTempDirectory("skipper");
+			File targetPath = new File(tmpDirPath + File.separator + packageMetadata.getName());
+			targetPath.mkdirs();
+			File targetFile = calculatePackageZipFile(packageMetadata, targetPath);
+			try {
+				StreamUtils.copy(packageMetadata.getPackageFileBytes(), new FileOutputStream(targetFile));
 			}
-			else {
-				Resource sourceResource = findFirstPackageResourceThatExists(packageMetadata.getName(),
-						packageMetadata.getVersion());
-				targetPath = calculatePackageDownloadDirectory(packageMetadata);
-				targetPath.mkdirs();
-				targetFile = calculatePackageZipFile(packageMetadata, targetPath);
-				try {
-					StreamUtils.copy(sourceResource.getInputStream(), new FileOutputStream(targetFile));
-					logger.info("Downloaded package [" + packageMetadata.getName() + "-" + packageMetadata.getVersion()
-							+ "] from " + sourceResource.getURL());
-				}
-				catch (IOException e) {
-					throw new PackageException("Could not copy " + sourceResource + " to " + targetFile, e);
-				}
-				packageMetadata.setPackageFile(Files.readAllBytes(targetFile.toPath()));
-				this.packageMetadataRepository.save(packageMetadata);
+			catch (IOException e) {
+				throw new PackageException(
+						"Could not copy package file for " + packageMetadata.getName() + "-"
+								+ packageMetadata.getVersion() +
+								" from database to target file " + targetFile,
+						e);
 			}
 			ZipUtil.unpack(targetFile, targetPath);
-			return loadPackageOnPath(new File(targetPath, packageMetadata.getName() + "-" +
+			Package pkgToReturn = loadPackageOnPath(new File(targetPath, packageMetadata.getName() + "-" +
 					packageMetadata.getVersion()));
+			pkgToReturn.setMetadata(packageMetadata);
+			return pkgToReturn;
 		}
 		catch (IOException e) {
-			throw new PackageException("Exception while setting PackageMetadata");
+			throw new PackageException("Exception while deserializing package zip file from database "
+					+ packageMetadata.getName() + "-" + packageMetadata.getVersion(), e);
 		}
 		finally {
 			if (tmpDirPath != null && !FileSystemUtils.deleteRecursively(tmpDirPath.toFile())) {
@@ -126,75 +164,75 @@ public class PackageService implements ResourceLoaderAware {
 		}
 	}
 
-	private Resource findFirstPackageResourceThatExists(String name, String version) {
-		Assert.notNull(name, "name can not be null");
-		Assert.notNull(version, "version can not be null");
-		Resource sourceResource = null;
-		boolean found = false;
-		for (Repository packageRepository : this.repositoryRepository.findAll()) {
-			String sourceUrl = packageRepository.getUrl() + "/" + name + "/" +
-					name + "-" + version + ".zip";
-			sourceResource = resourceLoader.getResource(sourceUrl);
-			if (sourceResource.exists()) {
-				logger.debug(String.format("Found resource for Package name '%s', version '%s'.  URL = '%s' ",
-						name, version, sourceUrl));
-				found = true;
-				break;
-			}
-			else {
-				logger.debug(String.format("No resource for Package name '%s', version '%s' at URL = '%s' ",
-						name, version, sourceUrl));
-			}
+	private Resource getResourceForRepository(Repository packageRepository, String name, String version) {
+		String sourceUrl = packageRepository.getUrl() + "/" + name + "/" +
+				name + "-" + version + ".zip";
+		Resource resource = resourceLoader.getResource(sourceUrl);
+		if (resource.exists()) {
+			return resource;
 		}
-		if (!found) {
-			throw new PackageException(String.format(
-					"Resource for Package name '%s', version '%s' was not found in any repository.", name, version));
-		}
-		return sourceResource;
+		throw new PackageException("Resource " + name + "-" + version + " in package repository "
+				+ packageRepository.getName() + " does not exist.");
 	}
 
-	public PackageMetadata upload(PackageUploadProperties packageUploadProperties) {
-		Assert.notNull(packageUploadProperties.getRepoName(), "Repo name must not be null");
-		// todo: Verify the repo name set to package upload properties always belong to local repository type.
-		Repository localRepositoryToUpload = this.repositoryRepository
-				.findByName(packageUploadProperties.getRepoName());
-		Assert.notNull(localRepositoryToUpload,
-				"Local repository " + packageUploadProperties.getRepoName() + "doesn't exist.");
-		Path packageFile;
-		PackageMetadata packageMetadata = null;
+	public PackageMetadata upload(UploadRequest uploadRequest) {
+		validateUploadRequest(uploadRequest);
+		Repository localRepositoryToUpload = getRepositoryToUpload(uploadRequest.getRepoName());
+		Path packageDirPath = null;
 		try {
-			Path packageDirPath = Files.createTempDirectory("skipper");
-			File packageDir = new File(packageDirPath + File.separator + packageUploadProperties.getName());
+			packageDirPath = Files.createTempDirectory("skipperUpload");
+			File packageDir = new File(packageDirPath + File.separator + uploadRequest.getName());
 			packageDir.mkdir();
-			packageFile = Paths
-					.get(packageDir.getPath() + File.separator + packageUploadProperties.getName() + "-"
-							+ packageUploadProperties.getVersion() + "." + packageUploadProperties.getExtension());
+			Path packageFile = Paths
+					.get(packageDir.getPath() + File.separator + uploadRequest.getName() + "-"
+							+ uploadRequest.getVersion() + "." + uploadRequest.getExtension());
 			Assert.isTrue(packageDir.exists(), "Package directory doesn't exist.");
-			Files.write(packageFile, packageUploadProperties.getFileToUpload());
-			if (packageUploadProperties.getExtension().contains("zip")) {
-				ZipUtil.unpack(packageFile.toFile(), packageDir);
-			}
-			String unzippedPath = packageDir.getAbsolutePath() + File.separator + packageUploadProperties.getName()
-					+ "-" + packageUploadProperties.getVersion();
+			Files.write(packageFile, uploadRequest.getPackageFileAsBytes());
+			ZipUtil.unpack(packageFile.toFile(), packageDir);
+			String unzippedPath = packageDir.getAbsolutePath() + File.separator + uploadRequest.getName()
+					+ "-" + uploadRequest.getVersion();
 			File unpackagedFile = new File(unzippedPath);
 			Assert.isTrue(unpackagedFile.exists(), "Package is expected to be unpacked, but it doesn't exist");
 			Package packageToUpload = loadPackageOnPath(unpackagedFile);
-			packageMetadata = packageToUpload.getMetadata();
-			// todo: Model the PackageMetadata -> Repository relationship in the DB.
+			PackageMetadata packageMetadata = packageToUpload.getMetadata();
+			// TODO: Model the PackageMetadata -> Repository relationship in the DB.
 			packageMetadata.setOrigin(localRepositoryToUpload.getId());
-			packageMetadata.setPackageFile(packageUploadProperties.getFileToUpload());
-			if (!FileSystemUtils.deleteRecursively(packageDirPath.toFile())) {
-				logger.warn("Temporary directory can not be deleted: " + packageDirPath);
-			}
-			this.packageMetadataRepository.save(packageMetadata);
+			packageMetadata.setPackageFileBytes(uploadRequest.getPackageFileAsBytes());
+			return this.packageMetadataRepository.save(packageMetadata);
 		}
 		catch (IOException e) {
 			throw new PackageException("Sorry, failed to upload the package " + e.getCause());
 		}
-		return packageMetadata;
+		finally {
+			if (packageDirPath != null && !FileSystemUtils.deleteRecursively(packageDirPath.toFile())) {
+				logger.warn("Temporary directory can not be deleted: " + packageDirPath);
+			}
+		}
+	}
+
+	private Repository getRepositoryToUpload(String repoName) {
+		Repository localRepositoryToUpload = this.repositoryRepository.findByName(repoName);
+		Assert.notNull(localRepositoryToUpload,
+				"Can not upload, local repository " + repoName + "doesn't exist.");
+		// TODO: Verify the repo name set to package upload properties always belong to local
+		// repository type.
+		return localRepositoryToUpload;
+	}
+
+	private void validateUploadRequest(UploadRequest uploadRequest) {
+		Assert.notNull(uploadRequest.getRepoName(), "Repo name can not be null");
+		Assert.notNull(uploadRequest.getName(), "Name of package can not be null");
+		// TODO assert is semver format
+		Assert.notNull(uploadRequest.getVersion(), "Version can not be null");
+		Assert.notNull(uploadRequest.getExtension(), "Extension can not be null");
+		Assert.isTrue(uploadRequest.getExtension().equals("zip"), "Extension must be 'zip', not "
+				+ uploadRequest.getExtension());
+		Assert.notNull(uploadRequest.getPackageFileAsBytes(), "Package file as bytes must not be null");
+		Assert.notEmpty(uploadRequest.getPackageFileAsBytes(), "Package file as bytes must not be empty");
 	}
 
 	protected Package loadPackageOnPath(File unpackedPackage) {
+		Assert.notNull("File to load package from can not be null");
 		List<File> files;
 		try (Stream<Path> paths = Files.walk(Paths.get(unpackedPackage.getPath()), 1)) {
 			files = paths.map(i -> i.toAbsolutePath().toFile()).collect(Collectors.toList());
@@ -301,21 +339,6 @@ public class PackageService implements ResourceLoaderAware {
 
 	protected File calculatePackageZipFile(PackageMetadata packageMetadata, File targetPath) {
 		return new File(targetPath, packageMetadata.getName() + "-" + packageMetadata.getVersion() + ".zip");
-	}
-
-	/**
-	 * Give the PackageMetadata, return the directory where the package will be downloaded
-	 * to. The directory takes the server's PackageDir configuraiton property and appends
-	 * the package name taken from the metadata.
-	 * @param packageMetadata the package's metadata.
-	 * @return The directory where the package will be downloaded.
-	 */
-	public File calculatePackageDownloadDirectory(PackageMetadata packageMetadata) {
-		Repository localRepository = this.repositoryRepository
-				.findByName(RepositoryInitializationService.LOCAL_REPOSITORY_NAME);
-		String packagesPath = localRepository.getUrl().substring("file://".length());
-		File downloadDir = new File(packagesPath, "downloads");
-		return new File(downloadDir, packageMetadata.getName());
 	}
 
 	@Override

@@ -19,8 +19,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.skipper.domain.DeployProperties;
 import org.springframework.cloud.skipper.domain.DeployRequest;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
-import org.springframework.cloud.skipper.domain.PackageUploadProperties;
 import org.springframework.cloud.skipper.domain.Release;
+import org.springframework.cloud.skipper.domain.UploadRequest;
 import org.springframework.cloud.skipper.service.PackageService;
 import org.springframework.cloud.skipper.service.ReleaseService;
 import org.springframework.http.HttpStatus;
@@ -65,7 +65,7 @@ public class PackageController {
 
 	@RequestMapping(path = "/upload", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
-	public PackageMetadata upload(@RequestBody PackageUploadProperties packageUploadProperties) {
-		return this.packageService.upload(packageUploadProperties);
+	public PackageMetadata upload(@RequestBody UploadRequest uploadRequest) {
+		return this.packageService.upload(uploadRequest);
 	}
 }

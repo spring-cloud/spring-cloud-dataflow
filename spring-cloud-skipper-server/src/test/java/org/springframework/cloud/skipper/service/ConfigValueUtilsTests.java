@@ -27,12 +27,10 @@ import org.yaml.snakeyaml.Yaml;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.skipper.TestResourceUtils;
-import org.springframework.cloud.skipper.config.SkipperServerProperties;
 import org.springframework.cloud.skipper.domain.ConfigValues;
 import org.springframework.cloud.skipper.domain.Package;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.StreamUtils;
 
@@ -41,15 +39,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Mark Pollack
  */
-@ActiveProfiles("application-repo-source-test")
 @RunWith(SpringRunner.class)
 @SpringBootTest
 public class ConfigValueUtilsTests {
-
-	private static final Class<?> CLASS = ConfigValueUtils.class;
-
-	@Autowired
-	private SkipperServerProperties skipperServerProperties;
 
 	@Autowired
 	private PackageService packageService;

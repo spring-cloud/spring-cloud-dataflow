@@ -18,6 +18,101 @@ Clone the repo and type
 $ ./mvnw clean install
 ----
 
+which will run the tests as well.
+
+To just create the executables, type
+
+----
+$./mvnw clean package -DskipTests -Dmaven.javadoc.skip=true
+----
+
+=== Quick Tour
+
+There are some sample packages in the test directory that you can use to get started.  Create a `skipper.yml` file in your home directory
+
+```
+spring:
+  cloud:
+    skipper:
+      server:
+        packageRepositories:
+          -
+            name: test
+            url: "file:///home/mpollack/projects/spring-cloud-skipper/spring-cloud-skipper-server/src/test/resources/repositories/binaries/test/"
+```
+
+and start the Skipper server using
+
+----
+$ java -jar spring-cloud-skipper-server/target/spring-cloud-skipper-server-1.0.0.BUILD-SNAPSHOT.jar --spring.config.location=/home/mpollack/skipper.yml
+----
+
+Where you replace `/home/mpollack/` with your own home directory.
+
+Then launch the Skipper shell in another terminal
+
+----
+$ java -jar spring-cloud-skipper-shell/target/spring-cloud-skipper-shell-1.0.0.BUILD-SNAPSHOT.jar
+----
+
+The command `package search` should then show you the following output
+
+```
+skipper:>package search
+╔════════╤═══════╤═══════════════════════════════════════════════════════════════════════════╗
+║  Name  │Version│                                Description                                ║
+╠════════╪═══════╪═══════════════════════════════════════════════════════════════════════════╣
+║log     │2.0.0  │The log sink uses the application logger to output the data for inspection.║
+║log     │1.0.0  │The log sink uses the application logger to output the data for inspection.║
+║log     │1.1.0  │The log sink uses the application logger to output the data for inspection.║
+║ticktock│1.0.0  │The ticktock stream sends a time stamp and logs the value.                 ║
+║time    │2.0.0  │The time source periodically emits a timestamp string.                     ║
+╚════════╧═══════╧═══════════════════════════════════════════════════════════════════════════╝
+```
+
+In another window you can run `watch -n 2 jps` so see which Java processes are running, since by default, the local deployer will be used to deploy packages.
+
+Now deploy the log 1.0.0 package.
+
+----
+skipper:>package deploy --name log --version 1.0.0 --release-name mylog
+Released mylog
+----
+
+Note that the log 1.0.0 package deploys the version 1.2.0.RC1 of the application.  You should see the java app named `log-sink-rabbit-1.2.0.RC1.jar` running in the output of the `jps` command
+
+Now update the release with a newer version
+
+----
+skipper:>package update --release-name mylog --package-name log --package-version 2.0.0
+mylog has been updated.
+Last Deployed: Sun Sep 24 18:57:35 EDT 2017
+Status: Applications deploying... mylog-v2.log=[mylog-v2.log-0=deploying]
+----
+
+You should see the java app named `log-sink-rabbit-1.2.0.RELEASE.jar` running in the output of the `jps` command.
+
+Next rollback to the previous release
+
+----
+skipper:>package rollback --release-name mylog
+mylog has been rolled back.
+Last Deployed: Sun Sep 24 18:59:08 EDT 2017
+Status: Applications deploying... mylog-v3.log=[mylog-v3.log-0=deploying]
+----
+
+You should see the java app named `log-sink-rabbit-1.2.0.RC1.jar` running in the output of the `jps` command
+
+Now undeploy the release.
+
+----
+skipper:>package undeploy --release-name mylog
+mylog has been undeployed.
+----
+
+You should not see any `log-sink-rabbit` apps in the `jps command.
+
+
 === Code formatting guidelines
 
 * The directory ./etc/eclipse has two files for use with code formatting, `eclipse-code-formatter.xml` for the majority of the code formatting rules and `eclipse.importorder` to order the import statements.

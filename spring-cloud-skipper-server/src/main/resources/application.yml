@@ -3,14 +3,6 @@ server:
 spring:
   main:
     banner-mode: "off"
-  cloud:
-    deployer:
-      cloudfoundry:
-        url: https://api.run.pivotal.io
-        org: dummy
-        space: dummy
-        username: dummy
-        password: dummy
 
 # TODO - remove, pre M1 development simplicity
 maven:

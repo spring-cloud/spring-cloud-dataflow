@@ -38,10 +38,10 @@ import org.springframework.cloud.skipper.domain.DeployProperties;
 import org.springframework.cloud.skipper.domain.DeployRequest;
 import org.springframework.cloud.skipper.domain.PackageIdentifier;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
-import org.springframework.cloud.skipper.domain.PackageUploadProperties;
 import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.UpdateProperties;
 import org.springframework.cloud.skipper.domain.UpdateRequest;
+import org.springframework.cloud.skipper.domain.UploadRequest;
 import org.springframework.cloud.skipper.shell.command.support.TableUtils;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.hateoas.Resources;
@@ -62,7 +62,7 @@ import static org.springframework.shell.standard.ShellOption.NULL;
  * @author Ilayaperumal Gopinathan
  */
 @ShellComponent
-public class PackageCommands extends AbstractSkipperCommand {
+public class 	PackageCommands extends AbstractSkipperCommand {
 
 	@Autowired
 	public PackageCommands(SkipperClient skipperClient) {
@@ -191,7 +191,7 @@ public class PackageCommands extends AbstractSkipperCommand {
 	@ShellMethod(key = "package upload", value = "Upload a package")
 	public String upload(@ShellOption(help = "the package to be uploaded") String path,
 			@ShellOption(help = "the local repository name to upload to", defaultValue = NULL) String repoName) {
-		PackageUploadProperties properties = new PackageUploadProperties();
+		UploadRequest properties = new UploadRequest();
 		try {
 			File file = ResourceUtils.getFile(path);
 			StringTokenizer tokenizer = new StringTokenizer(file.getName(), "-");
@@ -203,7 +203,7 @@ public class PackageCommands extends AbstractSkipperCommand {
 			properties.setVersion(version);
 			properties.setExtension(extension);
 			properties.setRepoName(StringUtils.hasText(repoName) ? repoName : "local");
-			properties.setFileToUpload(Files.readAllBytes(file.toPath()));
+			properties.setPackageFileAsBytes(Files.readAllBytes(file.toPath()));
 		}
 		catch (FileNotFoundException e) {
 			throw new IllegalArgumentException("File Not found: " + e.getMessage());

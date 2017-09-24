@@ -27,10 +27,10 @@ import org.springframework.cloud.skipper.domain.AboutInfo;
 import org.springframework.cloud.skipper.domain.DeployProperties;
 import org.springframework.cloud.skipper.domain.DeployRequest;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
-import org.springframework.cloud.skipper.domain.PackageUploadProperties;
 import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.Repository;
 import org.springframework.cloud.skipper.domain.UpdateRequest;
+import org.springframework.cloud.skipper.domain.UploadRequest;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.ResourceSupport;
@@ -160,9 +160,9 @@ public class DefaultSkipperClient implements SkipperClient {
 	}
 
 	@Override
-	public PackageMetadata upload(PackageUploadProperties packageUploadProperties) {
+	public PackageMetadata upload(UploadRequest uploadRequest) {
 		String url = String.format("%s/%s/%s", baseUrl, "package", "upload");
-		return this.restTemplate.postForObject(url, packageUploadProperties, PackageMetadata.class);
+		return this.restTemplate.postForObject(url, uploadRequest, PackageMetadata.class);
 	}
 
 	protected Traverson createTraverson(String baseUrl) {

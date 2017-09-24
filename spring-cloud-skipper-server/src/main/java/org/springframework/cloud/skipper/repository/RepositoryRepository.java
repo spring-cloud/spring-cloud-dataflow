@@ -24,7 +24,7 @@ import org.springframework.data.rest.core.annotation.RepositoryRestResource;
  * @author Mark Pollack
  */
 @RepositoryRestResource(path = "repositories", collectionResourceRel = "repositories")
-public interface RepositoryRepository extends PagingAndSortingRepository<Repository, Long> {
+public interface RepositoryRepository extends PagingAndSortingRepository<Repository, String> {
 
 	Repository findByName(@Param("name") String name);
 

@@ -2,7 +2,7 @@ spring:
   cloud:
     skipper:
       server:
-        skipperHome: target/skipperTest
+        synchonizeIndexOnContextRefresh: true
         packageRepositories:
          -
            name: test

@@ -15,8 +15,6 @@
  */
 package org.springframework.cloud.skipper.controller;
 
-import java.io.File;
-
 import org.junit.After;
 import org.junit.Before;
 
@@ -33,7 +31,6 @@ import org.springframework.cloud.skipper.domain.UpdateProperties;
 import org.springframework.cloud.skipper.domain.UpdateRequest;
 import org.springframework.cloud.skipper.repository.PackageMetadataRepository;
 import org.springframework.cloud.skipper.repository.ReleaseRepository;
-import org.springframework.util.FileSystemUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -44,7 +41,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Mark Pollack
  * @author Ilayaperumal Gopinathan
  */
-public class AbstractControllerTests extends AbstractMockMvcTests {
+public abstract class AbstractControllerTests extends AbstractMockMvcTests {
 
 	@Autowired
 	protected PackageMetadataRepository packageMetadataRepository;
@@ -56,11 +53,8 @@ public class AbstractControllerTests extends AbstractMockMvcTests {
 	protected SkipperServerProperties skipperServerProperties;
 
 	@Before
-	public void cleanupPackageDir() {
+	public void cleanupReleaseRepository() {
 		this.releaseRepository.deleteAll();
-		File packageDirectory = new File(skipperServerProperties.getPackageDir());
-		FileSystemUtils.deleteRecursively(new File(skipperServerProperties.getPackageDir()));
-		assertThat(packageDirectory).doesNotExist();
 	}
 
 	@After

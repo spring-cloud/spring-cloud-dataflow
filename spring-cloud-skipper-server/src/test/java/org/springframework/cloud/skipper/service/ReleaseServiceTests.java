@@ -22,7 +22,6 @@ import org.springframework.cloud.skipper.AbstractIntegrationTest;
 import org.springframework.cloud.skipper.domain.DeployProperties;
 import org.springframework.cloud.skipper.index.PackageException;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.TestPropertySource;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -30,7 +29,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  * @author Mark Pollack
  */
 @ActiveProfiles("repo-test")
-@TestPropertySource(properties = { "spring.cloud.skipper.server.synchonizeIndexOnContextRefresh=true" })
 public class ReleaseServiceTests extends AbstractIntegrationTest {
 
 	@Autowired

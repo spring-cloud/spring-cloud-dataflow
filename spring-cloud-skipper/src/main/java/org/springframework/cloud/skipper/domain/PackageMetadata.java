@@ -183,12 +183,12 @@ public class PackageMetadata {
 		this.packageHomeUrl = packageHomeUrl;
 	}
 
-	public byte[] getPackageFile() {
+	public byte[] getPackageFileBytes() {
 		return packageFile;
 	}
 
-	public void setPackageFile(byte[] packageFile) {
-		this.packageFile = packageFile;
+	public void setPackageFileBytes(byte[] packageFileBytes) {
+		this.packageFile = packageFileBytes;
 	}
 
 	public String getTags() {

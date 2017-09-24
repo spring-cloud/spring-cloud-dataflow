@@ -31,8 +31,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Ilayaperumal Gopinathan
  */
 @ActiveProfiles("repo-test")
-@TestPropertySource(properties = { "spring.cloud.skipper.server.synchonizeIndexOnContextRefresh=true",
-		"spring.cloud.skipper.server.platform.local.accounts[test].key=value",
+@TestPropertySource(properties = { "spring.cloud.skipper.server.platform.local.accounts[test].key=value",
 		"maven.remote-repositories.repo1.url=http://repo.spring.io/libs-snapshot" })
 public class PackageControllerTests extends AbstractControllerTests {
 

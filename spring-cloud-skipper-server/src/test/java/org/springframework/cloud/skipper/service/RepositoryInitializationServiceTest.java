@@ -19,6 +19,7 @@ import org.junit.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.skipper.AbstractIntegrationTest;
+import org.springframework.cloud.skipper.repository.PackageMetadataRepository;
 import org.springframework.cloud.skipper.repository.RepositoryRepository;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
@@ -28,18 +29,22 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Mark Pollack
  */
-@ActiveProfiles("index-test")
+@ActiveProfiles("repo-test")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class RepositoryInitializationServiceTest extends AbstractIntegrationTest {
 
 	@Autowired
 	private RepositoryRepository repositoryRepository;
 
+	@Autowired
+	private PackageMetadataRepository packageMetadataRepository;
+
 	@Test
 	public void intialize() throws Exception {
-		// There will always be the local repository
-		assertThat(repositoryRepository.count()).isEqualTo(2);
-		assertThat(repositoryRepository.findByName("test").getUrl()).isEqualTo("classpath:");
+		assertThat(repositoryRepository.count()).isEqualTo(1);
+		assertThat(repositoryRepository.findByName("test").getUrl()).isEqualTo("classpath:/repositories/binaries/test");
+		// Note, this is a brittle assertion.
+		assertThat(packageMetadataRepository.count()).isEqualTo(5);
 	}
 
 }

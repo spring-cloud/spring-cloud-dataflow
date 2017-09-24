@@ -19,10 +19,10 @@ import org.springframework.cloud.skipper.domain.AboutInfo;
 import org.springframework.cloud.skipper.domain.DeployProperties;
 import org.springframework.cloud.skipper.domain.DeployRequest;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
-import org.springframework.cloud.skipper.domain.PackageUploadProperties;
 import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.Repository;
 import org.springframework.cloud.skipper.domain.UpdateRequest;
+import org.springframework.cloud.skipper.domain.UploadRequest;
 import org.springframework.hateoas.Resources;
 
 /**
@@ -76,10 +76,10 @@ public interface SkipperClient {
 	/*
 	 * Upload the package.
 	 *
-	 * @param packageUploadProperties the properties for the package upload.
+	 * @param uploadRequest the properties for the package upload.
 	 * @return package metadata for the uploaded package
 	 */
-	PackageMetadata upload(PackageUploadProperties packageUploadProperties);
+	PackageMetadata upload(UploadRequest uploadRequest);
 
 	/**
 	 * Undeploy a specific release.

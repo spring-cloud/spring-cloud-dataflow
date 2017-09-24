@@ -1,9 +1,0 @@
-spring:
-  cloud:
-    skipper:
-      server:
-        skipperHome: target/skipperTest
-        packageRepositories:
-         -
-           name: test
-           url: "classpath:"

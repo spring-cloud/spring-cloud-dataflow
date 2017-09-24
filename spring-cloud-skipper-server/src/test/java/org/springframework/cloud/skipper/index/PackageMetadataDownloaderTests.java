@@ -23,7 +23,6 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.UrlResource;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -33,28 +32,27 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest
-@ActiveProfiles("index-test")
-public class PackageIndexDownloaderTests {
+public class PackageMetadataDownloaderTests {
 
 	@Autowired
-	private PackageIndexDownloader packageIndexDownloader;
+	private PackageMetadataDownloader packageMetadataDownloader;
 
 	@Test
 	public void calculateFilename() throws IOException {
 		UrlResource urlResource = new UrlResource("file:./spring-cloud-skipper-server/src/test/resources/index.yml");
-		String filename = packageIndexDownloader.computeFilename(urlResource);
+		String filename = packageMetadataDownloader.computeFilename(urlResource);
 		assertThat(filename).isEqualTo("file_dot_spring-cloud-skipper-server_src_test_resources_index.yml");
 		urlResource = new UrlResource(
 				"file:/home/mpollack/projects/spring-cloud-skipper/spring-cloud-skipper-server/src/test/resources/index.yml");
-		filename = packageIndexDownloader.computeFilename(urlResource);
+		filename = packageMetadataDownloader.computeFilename(urlResource);
 		assertThat(filename).isEqualTo(
 				"file_home_mpollack_projects_spring-cloud-skipper_spring-cloud-skipper-server_src_test_resources_index.yml");
 		urlResource = new UrlResource("http://localhost:8081/index.yml");
-		filename = packageIndexDownloader.computeFilename(urlResource);
+		filename = packageMetadataDownloader.computeFilename(urlResource);
 		assertThat(filename).isEqualTo("localhost_index.yml");
 
 		urlResource = new UrlResource("http://www.example.com/index.yml");
-		filename = packageIndexDownloader.computeFilename(urlResource);
+		filename = packageMetadataDownloader.computeFilename(urlResource);
 		assertThat(filename).isEqualTo("www.example.com_index.yml");
 	}
 }

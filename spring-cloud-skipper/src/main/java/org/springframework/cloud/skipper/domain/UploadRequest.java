@@ -18,7 +18,7 @@ package org.springframework.cloud.skipper.domain;
 /**
  * @author Ilayaperumal Gopinathan
  */
-public class PackageUploadProperties {
+public class UploadRequest {
 
 	private String name;
 
@@ -28,7 +28,7 @@ public class PackageUploadProperties {
 
 	private String extension;
 
-	private byte[] fileToUpload;
+	private byte[] packageFileAsBytes;
 
 	public String getName() {
 		return name;
@@ -62,11 +62,11 @@ public class PackageUploadProperties {
 		this.extension = extension;
 	}
 
-	public byte[] getFileToUpload() {
-		return fileToUpload;
+	public byte[] getPackageFileAsBytes() {
+		return packageFileAsBytes;
 	}
 
-	public void setFileToUpload(byte[] fileToUpload) {
-		this.fileToUpload = fileToUpload;
+	public void setPackageFileAsBytes(byte[] packageFileAsBytes) {
+		this.packageFileAsBytes = packageFileAsBytes;
 	}
 }
