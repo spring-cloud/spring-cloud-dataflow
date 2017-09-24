@@ -56,9 +56,6 @@ public class PackageServiceTests extends AbstractIntegrationTest {
 	private PackageMetadataRepository packageMetadataRepository;
 
 	@Autowired
-	private SkipperServerProperties skipperServerProperties;
-
-	@Autowired
 	private RepositoryRepository repositoryRepository;
 
 	@Test

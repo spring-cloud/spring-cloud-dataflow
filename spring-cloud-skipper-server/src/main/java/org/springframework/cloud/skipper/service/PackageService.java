@@ -29,6 +29,7 @@ import java.util.stream.Stream;
 import io.jsonwebtoken.lang.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.zeroturnaround.zip.ZipUtil;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -117,10 +118,15 @@ public class PackageService implements ResourceLoaderAware {
 			pkgToReturn.setMetadata(this.packageMetadataRepository.save(packageMetadata));
 			return pkgToReturn;
 		}
-		catch (Exception e) {
+		catch (IOException ex) {
 			throw new PackageException("Exception while downloading package zip file for "
 					+ packageMetadata.getName() + "-" + packageMetadata.getVersion() +
-					". PackageMetadata origin = " + packageMetadata.getOrigin(), e);
+					". PackageMetadata origin = " + packageMetadata.getOrigin(), ex);
+		}
+		catch (InvalidDataAccessApiUsageException ex) {
+			throw new PackageException("Exception while downloading package zip file for "
+					+ packageMetadata.getName() + "-" + packageMetadata.getVersion() +
+					". PackageMetadata origin = " + packageMetadata.getOrigin() + "No repository found.", ex);
 		}
 		finally {
 			if (targetPath != null && !FileSystemUtils.deleteRecursively(targetPath.toFile())) {
