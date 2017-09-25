@@ -18,6 +18,8 @@ package org.springframework.cloud.skipper.service;
 import java.util.Map;
 
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,6 +49,9 @@ import static org.assertj.core.api.Assertions.entry;
  */
 @ActiveProfiles("repo-test")
 public class PackageServiceTests extends AbstractIntegrationTest {
+
+
+	private final Logger logger = LoggerFactory.getLogger(PackageServiceTests.class);
 
 	@Autowired
 	private PackageService packageService;
@@ -83,6 +88,10 @@ public class PackageServiceTests extends AbstractIntegrationTest {
 		assertThat(packageMetadata).isNotNull();
 		assertThat(packageMetadata.getPackageFileBytes()).isNullOrEmpty();
 		assertThat(packageService).isNotNull();
+		assertThat(packageMetadata.getId()).isNotNull();
+		Repository repository = repositoryRepository.findOne(packageMetadata.getId());
+		assertThat(repository).isNotNull();
+
 		Package downloadedPackage = packageService.downloadPackage(packageMetadata);
 		assertThat(downloadedPackage.getMetadata().getPackageFileBytes()).isNotNull();
 		assertThat(downloadedPackage.getMetadata()).isEqualToIgnoringGivenFields(packageMetadata);

@@ -297,4 +297,23 @@ public class PackageMetadata {
 		return result;
 	}
 
+	@Override
+	public String toString() {
+		return "PackageMetadata{" +
+				"id='" + id + '\'' +
+				", apiVersion='" + apiVersion + '\'' +
+				", origin='" + origin + '\'' +
+				", kind='" + kind + '\'' +
+				", name='" + name + '\'' +
+				", version='" + version + '\'' +
+				", appVersion='" + appVersion + '\'' +
+				", packageSourceUrl='" + packageSourceUrl + '\'' +
+				", packageHomeUrl='" + packageHomeUrl + '\'' +
+				", tags='" + tags + '\'' +
+				", maintainer='" + maintainer + '\'' +
+				", description='" + description + '\'' +
+				", sha256='" + sha256 + '\'' +
+				", iconUrl='" + iconUrl + '\'' +
+				'}';
+	}
 }
