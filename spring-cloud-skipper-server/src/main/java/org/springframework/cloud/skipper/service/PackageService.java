@@ -134,6 +134,7 @@ public class PackageService implements ResourceLoaderAware {
 		}
 		catch (Exception ex) {
 			logger.error("This is a catch all debug statement.", ex);
+			throw new PackageException("Catch all", ex);
 		}
 		finally {
 			if (targetPath != null && !FileSystemUtils.deleteRecursively(targetPath.toFile())) {
@@ -243,7 +244,7 @@ public class PackageService implements ResourceLoaderAware {
 	}
 
 	protected Package loadPackageOnPath(File unpackedPackage) {
-		Assert.notNull("File to load package from can not be null");
+		Assert.notNull(unpackedPackage, "File to load package from can not be null");
 		List<File> files;
 		try (Stream<Path> paths = Files.walk(Paths.get(unpackedPackage.getPath()), 1)) {
 			files = paths.map(i -> i.toAbsolutePath().toFile()).collect(Collectors.toList());
