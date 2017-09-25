@@ -62,6 +62,7 @@ public class PackageServiceTests extends AbstractIntegrationTest {
 		PackageMetadata packageMetadata = new PackageMetadata();
 		packageMetadata.setName("noname");
 		packageMetadata.setVersion("noversion");
+		assertThat(packageService).isNotNull();
 		assertThatThrownBy(() -> packageService.downloadPackage(packageMetadata))
 				.isInstanceOf(PackageException.class)
 				.withFailMessage(
@@ -81,6 +82,7 @@ public class PackageServiceTests extends AbstractIntegrationTest {
 		packageMetadata = packageMetadataRepository.findByNameAndVersion("log", "1.0.0");
 		assertThat(packageMetadata).isNotNull();
 		assertThat(packageMetadata.getPackageFileBytes()).isNullOrEmpty();
+		assertThat(packageService).isNotNull();
 		Package downloadedPackage = packageService.downloadPackage(packageMetadata);
 		assertThat(downloadedPackage.getMetadata().getPackageFileBytes()).isNotNull();
 		assertThat(downloadedPackage.getMetadata()).isEqualToIgnoringGivenFields(packageMetadata);
@@ -112,6 +114,7 @@ public class PackageServiceTests extends AbstractIntegrationTest {
 		uploadProperties.setPackageFileAsBytes(originalPackageBytes);
 
 		// Upload new package
+		assertThat(packageService).isNotNull();
 		PackageMetadata uploadedPackageMetadata = this.packageService.upload(uploadProperties);
 		assertThat(uploadedPackageMetadata.getName().equals("log")).isTrue();
 		assertThat(uploadedPackageMetadata.getVersion().equals("9.9.9")).isTrue();
@@ -136,6 +139,7 @@ public class PackageServiceTests extends AbstractIntegrationTest {
 	@Test
 	public void deserializePackage() {
 		PackageMetadata packageMetadata = this.packageMetadataRepository.findByNameAndVersion("log", "1.0.0");
+		assertThat(packageService).isNotNull();
 		Package pkg = packageService.downloadPackage(packageMetadata);
 		assertThat(pkg).isNotNull();
 		assertThat(pkg.getConfigValues().getRaw()).contains("1024m");
@@ -149,6 +153,7 @@ public class PackageServiceTests extends AbstractIntegrationTest {
 	@Test
 	public void deserializeNestedPackage() {
 		PackageMetadata packageMetadata = this.packageMetadataRepository.findByNameAndVersion("ticktock", "1.0.0");
+		assertThat(packageService).isNotNull();
 		Package pkg = packageService.downloadPackage(packageMetadata);
 		assertThat(pkg).isNotNull();
 		assertThat(pkg.getMetadata()).isEqualToIgnoringGivenFields(packageMetadata, "id", "origin", "packageFile");
