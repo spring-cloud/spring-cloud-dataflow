@@ -28,7 +28,6 @@ import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.util.Assert;
 import org.zeroturnaround.zip.ZipUtil;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,6 +47,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 import org.springframework.util.FileSystemUtils;
 import org.springframework.util.StreamUtils;
 
@@ -230,7 +230,7 @@ public class PackageService implements ResourceLoaderAware {
 		Assert.isTrue(uploadRequest.getExtension().equals("zip"), "Extension must be 'zip', not "
 				+ uploadRequest.getExtension());
 		Assert.notNull(uploadRequest.getPackageFileAsBytes(), "Package file as bytes must not be null");
-		Assert.isTrue(uploadRequest.getPackageFileAsBytes().length==0, "Package file as bytes must not be empty");
+		Assert.isTrue(uploadRequest.getPackageFileAsBytes().length == 0, "Package file as bytes must not be empty");
 	}
 
 	protected Package loadPackageOnPath(File unpackedPackage) {
