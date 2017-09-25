@@ -92,7 +92,8 @@ public class PackageServiceTests {
 		assertThat(packageMetadata.getPackageFileBytes()).isNullOrEmpty();
 		assertThat(packageService).isNotNull();
 		assertThat(packageMetadata.getId()).isNotNull();
-		Repository repository = repositoryRepository.findOne(packageMetadata.getId());
+		assertThat(packageMetadata.getOrigin()).isNotNull();
+		Repository repository = repositoryRepository.findOne(packageMetadata.getOrigin());
 		assertThat(repository).isNotNull();
 
 		Package downloadedPackage = packageService.downloadPackage(packageMetadata);

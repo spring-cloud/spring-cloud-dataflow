@@ -15,10 +15,8 @@
  */
 package org.springframework.cloud.skipper.repository;
 
-import org.junit.Before;
 import org.junit.Test;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.skipper.AbstractMockMvcTests;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -30,14 +28,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Mark Pollack
  */
 public class RepositoryMvcTests extends AbstractMockMvcTests {
-
-	@Autowired
-	private RepositoryRepository repositoryRepository;
-
-	@Before
-	public void deleteAllBeforeTests() {
-		repositoryRepository.deleteAll();
-	}
 
 	@Test
 	public void shouldReturnRepositoryIndex() throws Exception {

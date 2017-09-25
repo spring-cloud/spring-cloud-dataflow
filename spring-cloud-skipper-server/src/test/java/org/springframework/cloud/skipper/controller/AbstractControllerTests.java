@@ -16,7 +16,6 @@
 package org.springframework.cloud.skipper.controller;
 
 import org.junit.After;
-import org.junit.Before;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.skipper.AbstractMockMvcTests;
@@ -51,11 +50,6 @@ public abstract class AbstractControllerTests extends AbstractMockMvcTests {
 
 	@Autowired
 	protected SkipperServerProperties skipperServerProperties;
-
-	@Before
-	public void cleanupReleaseRepository() {
-		this.releaseRepository.deleteAll();
-	}
 
 	@After
 	public void cleanupReleases() throws Exception {

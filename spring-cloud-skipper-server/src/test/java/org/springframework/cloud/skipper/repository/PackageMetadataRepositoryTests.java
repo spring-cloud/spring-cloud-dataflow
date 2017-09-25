@@ -17,7 +17,6 @@ package org.springframework.cloud.skipper.repository;
 
 import java.util.List;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,11 +32,6 @@ public class PackageMetadataRepositoryTests extends AbstractIntegrationTest {
 
 	@Autowired
 	private PackageMetadataRepository packageMetadataRepository;
-
-	@Before
-	public void before() {
-		packageMetadataRepository.deleteAll();
-	}
 
 	@Test
 	public void basicCrud() {
