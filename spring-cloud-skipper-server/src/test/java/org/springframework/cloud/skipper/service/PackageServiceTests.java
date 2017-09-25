@@ -114,7 +114,7 @@ public class PackageServiceTests extends AbstractIntegrationTest {
 		assertThat(resource.exists()).isTrue();
 		byte[] originalPackageBytes = StreamUtils.copyToByteArray(resource.getInputStream());
 		assertThat(originalPackageBytes).isNotEmpty();
-		Assert.isTrue(originalPackageBytes.length == 0, "PackageServiceTests.Assert.isTrue: Package file as bytes must not be empty");
+		Assert.isTrue(originalPackageBytes.length != 0, "PackageServiceTests.Assert.isTrue: Package file as bytes must not be empty");
 		uploadProperties.setPackageFileAsBytes(originalPackageBytes);
 
 		// Upload new package
