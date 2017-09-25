@@ -98,6 +98,7 @@ public class PackageService implements ResourceLoaderAware {
 			// findOne will throw exception if not found.
 			logger.info("Finding repository for " + packageMetadata.getOrigin());
 			Repository packageRepository = repositoryRepository.findOne(packageMetadata.getOrigin());
+			logger.info("Found repository for " + packageMetadata.getOrigin());
 			Resource sourceResource = getResourceForRepository(packageRepository, packageMetadata.getName(),
 					packageMetadata.getVersion());
 
@@ -130,6 +131,9 @@ public class PackageService implements ResourceLoaderAware {
 			throw new PackageException("Exception while downloading package zip file for "
 					+ packageMetadata.getName() + "-" + packageMetadata.getVersion() +
 					". PackageMetadata origin = " + packageMetadata.getOrigin() + "No repository found.", ex);
+		}
+		catch (Exception ex) {
+			logger.error("This is a catch all debug statement.", ex);
 		}
 		finally {
 			if (targetPath != null && !FileSystemUtils.deleteRecursively(targetPath.toFile())) {
