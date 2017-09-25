@@ -22,9 +22,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -95,9 +97,15 @@ public class PackageService implements ResourceLoaderAware {
 			targetPath = TempFileUtils.createTempDirectory("skipper" + packageMetadata.getName());
 			logger.info("Calculating zip file name.");
 			File targetFile = calculatePackageZipFile(packageMetadata, targetPath.toFile());
-			// findOne will throw exception if not found.
 			logger.info("Finding repository for " + packageMetadata.getOrigin());
 			Repository packageRepository = repositoryRepository.findOne(packageMetadata.getOrigin());
+			if (packageRepository == null) {
+				List<Repository> list = StreamSupport
+						.stream(repositoryRepository.findAll().spliterator(), false)
+						.collect(Collectors.toList());
+				throw new PackageException("Can not find packageRepository for origin = "
+						+ packageMetadata.getOrigin() + "known repositories are " + Arrays.toString(list.toArray()));
+			}
 			logger.info("Found repository for " + packageMetadata.getOrigin());
 			logger.info("Getting Reosource for repository " + packageRepository);
 			Resource sourceResource = getResourceForRepository(packageRepository, packageMetadata.getName(),
