@@ -15,6 +15,8 @@
  */
 package org.springframework.cloud.skipper.service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.Test;
@@ -177,18 +179,27 @@ public class PackageServiceTests {
 		assertThat(pkg).isNotNull();
 		assertThat(pkg.getMetadata()).isEqualToIgnoringGivenFields(packageMetadata, "id", "origin", "packageFile");
 		assertThat(pkg.getDependencies()).hasSize(2);
+		List<String> packageNames = new ArrayList<>();
+		packageNames.add(pkg.getDependencies().get(0).getMetadata().getName());
+		packageNames.add(pkg.getDependencies().get(1).getMetadata().getName());
+		assertThat(packageNames).containsExactlyInAnyOrder("time", "log");
+		assertPackageContent(pkg.getDependencies().get(0));
+		assertPackageContent(pkg.getDependencies().get(1));
+	}
 
-		Package logPkg = pkg.getDependencies().get(0);
-		assertThat(logPkg).isNotNull();
-		assertThat(logPkg.getMetadata().getName()).isEqualTo("log");
-		assertThat(logPkg.getMetadata().getVersion()).isEqualTo("2.0.0");
-		assertConfigValues(logPkg);
-
-		Package timePkg = pkg.getDependencies().get(1);
-		assertThat(timePkg).isNotNull();
-		assertThat(timePkg.getMetadata().getName()).isEqualTo("time");
-		assertThat(timePkg.getMetadata().getVersion()).isEqualTo("2.0.0");
-		assertConfigValues(timePkg);
+	private void assertPackageContent(Package pkgContent) {
+		String packageName = pkgContent.getMetadata().getName();
+		assertThat(packageName).isIn("time", "log");
+		assertThat(pkgContent).isNotNull();
+		assertConfigValues(pkgContent);
+		if (packageName.equals("log")) {
+			assertThat(pkgContent.getMetadata().getName()).isEqualTo("log");
+			assertThat(pkgContent.getMetadata().getVersion()).isEqualTo("2.0.0");
+		}
+		else {
+			assertThat(pkgContent.getMetadata().getName()).isEqualTo("time");
+			assertThat(pkgContent.getMetadata().getVersion()).isEqualTo("2.0.0");
+		}
 	}
 
 	protected void assertConfigValues(Package pkg) {
