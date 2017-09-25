@@ -91,9 +91,12 @@ public class PackageService implements ResourceLoaderAware {
 		Path targetPath = null;
 		// package file is in a non DB hosted repository
 		try {
+			logger.info("creating temp directory");
 			targetPath = TempFileUtils.createTempDirectory("skipper" + packageMetadata.getName());
+			logger.info("Calculating zip file name.");
 			File targetFile = calculatePackageZipFile(packageMetadata, targetPath.toFile());
 			// findOne will throw exception if not found.
+			logger.info("Finding repository for " + packageMetadata.getOrigin());
 			Repository packageRepository = repositoryRepository.findOne(packageMetadata.getOrigin());
 			Resource sourceResource = getResourceForRepository(packageRepository, packageMetadata.getName(),
 					packageMetadata.getVersion());
@@ -139,10 +142,12 @@ public class PackageService implements ResourceLoaderAware {
 		// package file was uploaded to a local DB hosted repository
 		Path tmpDirPath = null;
 		try {
+			logger.info("deserializePackageFromDatabase: creating temp file");
 			tmpDirPath = TempFileUtils.createTempDirectory("skipper");
 			File targetPath = new File(tmpDirPath + File.separator + packageMetadata.getName());
 			targetPath.mkdirs();
 			File targetFile = calculatePackageZipFile(packageMetadata, targetPath);
+			logger.info("deserializePackageFromDatabase: calculatedPackageZipFile");
 			try {
 				StreamUtils.copy(packageMetadata.getPackageFileBytes(), new FileOutputStream(targetFile));
 			}
