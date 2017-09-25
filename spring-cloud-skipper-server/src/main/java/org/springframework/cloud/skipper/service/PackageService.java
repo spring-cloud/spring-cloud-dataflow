@@ -91,7 +91,7 @@ public class PackageService implements ResourceLoaderAware {
 		Path targetPath = null;
 		// package file is in a non DB hosted repository
 		try {
-			targetPath = Files.createTempDirectory("skipper" + packageMetadata.getName());
+			targetPath = TempFileUtils.createTempDirectory("skipper" + packageMetadata.getName());
 			File targetFile = calculatePackageZipFile(packageMetadata, targetPath.toFile());
 			// findOne will throw exception if not found.
 			Repository packageRepository = repositoryRepository.findOne(packageMetadata.getOrigin());
@@ -139,7 +139,7 @@ public class PackageService implements ResourceLoaderAware {
 		// package file was uploaded to a local DB hosted repository
 		Path tmpDirPath = null;
 		try {
-			tmpDirPath = Files.createTempDirectory("skipper");
+			tmpDirPath = TempFileUtils.createTempDirectory("skipper");
 			File targetPath = new File(tmpDirPath + File.separator + packageMetadata.getName());
 			targetPath.mkdirs();
 			File targetFile = calculatePackageZipFile(packageMetadata, targetPath);
@@ -158,10 +158,6 @@ public class PackageService implements ResourceLoaderAware {
 					packageMetadata.getVersion()));
 			pkgToReturn.setMetadata(packageMetadata);
 			return pkgToReturn;
-		}
-		catch (IOException e) {
-			throw new PackageException("Exception while deserializing package zip file from database "
-					+ packageMetadata.getName() + "-" + packageMetadata.getVersion(), e);
 		}
 		finally {
 			if (tmpDirPath != null && !FileSystemUtils.deleteRecursively(tmpDirPath.toFile())) {
@@ -186,7 +182,7 @@ public class PackageService implements ResourceLoaderAware {
 		Repository localRepositoryToUpload = getRepositoryToUpload(uploadRequest.getRepoName());
 		Path packageDirPath = null;
 		try {
-			packageDirPath = Files.createTempDirectory("skipperUpload");
+			packageDirPath = TempFileUtils.createTempDirectory("skipperUpload");
 			File packageDir = new File(packageDirPath + File.separator + uploadRequest.getName());
 			packageDir.mkdir();
 			Path packageFile = Paths
@@ -207,7 +203,7 @@ public class PackageService implements ResourceLoaderAware {
 			return this.packageMetadataRepository.save(packageMetadata);
 		}
 		catch (IOException e) {
-			throw new PackageException("Sorry, failed to upload the package " + e.getCause());
+			throw new PackageException("Failed to upload the package " + e.getCause());
 		}
 		finally {
 			if (packageDirPath != null && !FileSystemUtils.deleteRecursively(packageDirPath.toFile())) {

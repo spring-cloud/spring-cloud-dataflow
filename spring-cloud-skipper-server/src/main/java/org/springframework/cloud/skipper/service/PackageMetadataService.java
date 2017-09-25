@@ -13,13 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.cloud.skipper.index;
+package org.springframework.cloud.skipper.service;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URI;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,6 +31,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
 import org.springframework.cloud.skipper.domain.Repository;
+import org.springframework.cloud.skipper.index.PackageException;
 import org.springframework.cloud.skipper.repository.RepositoryRepository;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.core.io.Resource;
@@ -45,16 +45,16 @@ import org.springframework.util.StreamUtils;
  * @author Mark Pollack
  */
 @Component
-public class PackageMetadataDownloader implements ResourceLoaderAware {
+public class PackageMetadataService implements ResourceLoaderAware {
 
-	private final Logger logger = LoggerFactory.getLogger(PackageMetadataDownloader.class);
+	private final Logger logger = LoggerFactory.getLogger(PackageMetadataService.class);
 
 	private final RepositoryRepository repositoryRepository;
 
 	private ResourceLoader resourceLoader;
 
 	@Autowired
-	public PackageMetadataDownloader(RepositoryRepository repositoryRepository) {
+	public PackageMetadataService(RepositoryRepository repositoryRepository) {
 		this.repositoryRepository = repositoryRepository;
 	}
 
@@ -66,7 +66,7 @@ public class PackageMetadataDownloader implements ResourceLoaderAware {
 		List<PackageMetadata> finalMetadataList = new ArrayList<>();
 		Path targetPath = null;
 		try {
-			targetPath = Files.createTempDirectory("skipperIndex");
+			targetPath = TempFileUtils.createTempDirectory("skipperIndex");
 			for (Repository packageRepository : this.repositoryRepository.findAll()) {
 				try {
 					Resource resource = resourceLoader.getResource(packageRepository.getUrl()
@@ -83,12 +83,9 @@ public class PackageMetadataDownloader implements ResourceLoaderAware {
 					finalMetadataList.addAll(downloadedPackageMetadata);
 				}
 				catch (IOException e) {
-					logger.error("Could not process package file from " + packageRepository, e);
+					throw new PackageException("Could not process package file from " + packageRepository.getName(), e);
 				}
 			}
-		}
-		catch (Exception e) {
-			logger.error("Could not download package metadata from package repositories", e);
 		}
 		finally {
 			if (targetPath != null && !FileSystemUtils.deleteRecursively(targetPath.toFile())) {

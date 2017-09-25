@@ -25,7 +25,6 @@ import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.cloud.skipper.config.SkipperServerProperties;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
 import org.springframework.cloud.skipper.domain.Repository;
-import org.springframework.cloud.skipper.index.PackageMetadataDownloader;
 import org.springframework.cloud.skipper.repository.PackageMetadataRepository;
 import org.springframework.cloud.skipper.repository.RepositoryRepository;
 import org.springframework.context.event.EventListener;
@@ -49,18 +48,18 @@ public class RepositoryInitializationService {
 
 	private final SkipperServerProperties skipperServerProperties;
 
-	private final PackageMetadataDownloader packageMetadataDownloader;
+	private final PackageMetadataService packageMetadataService;
 
 	private final PackageMetadataRepository packageMetadataRepository;
 
 	@Autowired
 	public RepositoryInitializationService(RepositoryRepository repositoryRepository,
 			PackageMetadataRepository packageMetadataRepository,
-			PackageMetadataDownloader packageMetadataDownloader,
+			PackageMetadataService packageMetadataService,
 			SkipperServerProperties skipperServerProperties) {
 		this.repositoryRepository = repositoryRepository;
 		this.packageMetadataRepository = packageMetadataRepository;
-		this.packageMetadataDownloader = packageMetadataDownloader;
+		this.packageMetadataService = packageMetadataService;
 		this.skipperServerProperties = skipperServerProperties;
 	}
 
@@ -77,7 +76,7 @@ public class RepositoryInitializationService {
 	}
 
 	private void loadAllPackageMetadata() {
-		List<PackageMetadata> packageMetadataList = this.packageMetadataDownloader.downloadPackageMetadata();
+		List<PackageMetadata> packageMetadataList = this.packageMetadataService.downloadPackageMetadata();
 		this.packageMetadataRepository.save(packageMetadataList);
 	}
 

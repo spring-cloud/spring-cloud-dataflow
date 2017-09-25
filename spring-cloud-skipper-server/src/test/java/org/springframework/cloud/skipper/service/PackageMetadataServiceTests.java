@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.cloud.skipper.index;
+package org.springframework.cloud.skipper.service;
 
 import java.io.IOException;
 
@@ -32,27 +32,27 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest
-public class PackageMetadataDownloaderTests {
+public class PackageMetadataServiceTests {
 
 	@Autowired
-	private PackageMetadataDownloader packageMetadataDownloader;
+	private PackageMetadataService packageMetadataService;
 
 	@Test
 	public void calculateFilename() throws IOException {
 		UrlResource urlResource = new UrlResource("file:./spring-cloud-skipper-server/src/test/resources/index.yml");
-		String filename = packageMetadataDownloader.computeFilename(urlResource);
+		String filename = packageMetadataService.computeFilename(urlResource);
 		assertThat(filename).isEqualTo("file_dot_spring-cloud-skipper-server_src_test_resources_index.yml");
 		urlResource = new UrlResource(
 				"file:/home/mpollack/projects/spring-cloud-skipper/spring-cloud-skipper-server/src/test/resources/index.yml");
-		filename = packageMetadataDownloader.computeFilename(urlResource);
+		filename = packageMetadataService.computeFilename(urlResource);
 		assertThat(filename).isEqualTo(
 				"file_home_mpollack_projects_spring-cloud-skipper_spring-cloud-skipper-server_src_test_resources_index.yml");
 		urlResource = new UrlResource("http://localhost:8081/index.yml");
-		filename = packageMetadataDownloader.computeFilename(urlResource);
+		filename = packageMetadataService.computeFilename(urlResource);
 		assertThat(filename).isEqualTo("localhost_index.yml");
 
 		urlResource = new UrlResource("http://www.example.com/index.yml");
-		filename = packageMetadataDownloader.computeFilename(urlResource);
+		filename = packageMetadataService.computeFilename(urlResource);
 		assertThat(filename).isEqualTo("www.example.com_index.yml");
 	}
 }
