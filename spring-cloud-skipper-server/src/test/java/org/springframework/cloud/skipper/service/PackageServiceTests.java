@@ -140,7 +140,7 @@ public class PackageServiceTests extends AbstractIntegrationTest {
 	public void deserializePackage() {
 		PackageMetadata packageMetadata = this.packageMetadataRepository.findByNameAndVersion("log", "1.0.0");
 		assertThat(packageService).isNotNull();
-		Package pkg = packageService.downloadPackage(packageMetadata);
+			Package pkg = packageService.downloadPackage(packageMetadata);
 		assertThat(pkg).isNotNull();
 		assertThat(pkg.getConfigValues().getRaw()).contains("1024m");
 		assertThat(pkg.getMetadata()).isEqualToIgnoringGivenFields(packageMetadata, "id", "origin", "packageFile");
