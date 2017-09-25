@@ -110,6 +110,7 @@ public class PackageServiceTests extends AbstractIntegrationTest {
 		uploadProperties.setVersion("9.9.9");
 		uploadProperties.setExtension("zip");
 		Resource resource = new ClassPathResource("/org/springframework/cloud/skipper/service/log-9.9.9.zip");
+		assertThat(resource.exists()).isTrue();
 		byte[] originalPackageBytes = StreamUtils.copyToByteArray(resource.getInputStream());
 		uploadProperties.setPackageFileAsBytes(originalPackageBytes);
 
