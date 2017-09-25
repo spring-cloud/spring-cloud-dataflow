@@ -15,7 +15,6 @@
  */
 package org.springframework.cloud.skipper.service;
 
-import java.io.IOException;
 import java.util.Map;
 
 import org.junit.Test;
