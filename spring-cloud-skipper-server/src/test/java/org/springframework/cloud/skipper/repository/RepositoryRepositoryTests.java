@@ -15,6 +15,8 @@
  */
 package org.springframework.cloud.skipper.repository;
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,11 +27,18 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Mark Pollack
+ * @author Ilayaperumal Gopinathan
  */
 public class RepositoryRepositoryTests extends AbstractIntegrationTest {
 
 	@Autowired
 	private RepositoryRepository repositoryRepository;
+
+	@After
+	@Before
+	public void cleanupRepository() {
+		this.repositoryRepository.deleteAll();
+	}
 
 	@Test
 	public void basicCrud() {
