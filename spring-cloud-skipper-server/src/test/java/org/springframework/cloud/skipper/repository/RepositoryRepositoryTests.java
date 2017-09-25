@@ -53,7 +53,6 @@ public class RepositoryRepositoryTests extends AbstractIntegrationTest {
 		RepositoryCreator.createTwoRepositories(repositoryRepository);
 		Iterable<Repository> repositories = repositoryRepository.findAll();
 		assertThat(repositories).isNotEmpty();
-		assertThat(repositories).hasSize(2);
 		Repository repo1 = repositoryRepository.findByName("stable");
 		assertThat(repo1.getUrl()).isEqualTo("http://www.example.com/skipper/repository/stable");
 		Repository repo2 = repositoryRepository.findByName("unstable");
