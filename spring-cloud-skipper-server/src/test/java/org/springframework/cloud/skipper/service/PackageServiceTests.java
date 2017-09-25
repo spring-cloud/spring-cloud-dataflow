@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.util.Map;
 
 import org.junit.Test;
+import org.springframework.util.Assert;
 import org.yaml.snakeyaml.Yaml;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -113,6 +114,7 @@ public class PackageServiceTests extends AbstractIntegrationTest {
 		assertThat(resource.exists()).isTrue();
 		byte[] originalPackageBytes = StreamUtils.copyToByteArray(resource.getInputStream());
 		assertThat(originalPackageBytes).isNotEmpty();
+		Assert.isTrue(originalPackageBytes.length == 0, "PackageServiceTests.Assert.isTrue: Package file as bytes must not be empty");
 		uploadProperties.setPackageFileAsBytes(originalPackageBytes);
 
 		// Upload new package

@@ -79,7 +79,6 @@ public class PackageMetadata {
 	 * Package file.
 	 */
 	@Lob
-	@JsonIgnore
 	private byte[] packageFile;
 
 	/**
