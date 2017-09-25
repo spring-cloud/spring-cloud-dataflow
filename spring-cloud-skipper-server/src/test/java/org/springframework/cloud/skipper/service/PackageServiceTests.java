@@ -18,12 +18,13 @@ package org.springframework.cloud.skipper.service;
 import java.util.Map;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.skipper.AbstractIntegrationTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.skipper.domain.ConfigValues;
 import org.springframework.cloud.skipper.domain.Package;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
@@ -36,6 +37,7 @@ import org.springframework.cloud.skipper.repository.RepositoryRepository;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.util.Assert;
 import org.springframework.util.StreamUtils;
 
@@ -48,8 +50,9 @@ import static org.assertj.core.api.Assertions.entry;
  * @author Ilayaperumal Gopinathan
  */
 @ActiveProfiles("repo-test")
-public class PackageServiceTests extends AbstractIntegrationTest {
-
+@RunWith(SpringJUnit4ClassRunner.class)
+@SpringBootTest
+public class PackageServiceTests {
 
 	private final Logger logger = LoggerFactory.getLogger(PackageServiceTests.class);
 
@@ -122,7 +125,8 @@ public class PackageServiceTests extends AbstractIntegrationTest {
 		assertThat(resource.exists()).isTrue();
 		byte[] originalPackageBytes = StreamUtils.copyToByteArray(resource.getInputStream());
 		assertThat(originalPackageBytes).isNotEmpty();
-		Assert.isTrue(originalPackageBytes.length != 0, "PackageServiceTests.Assert.isTrue: Package file as bytes must not be empty");
+		Assert.isTrue(originalPackageBytes.length != 0,
+				"PackageServiceTests.Assert.isTrue: Package file as bytes must not be empty");
 		uploadProperties.setPackageFileAsBytes(originalPackageBytes);
 
 		// Upload new package

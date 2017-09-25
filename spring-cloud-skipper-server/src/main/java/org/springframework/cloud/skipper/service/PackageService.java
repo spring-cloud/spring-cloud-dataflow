@@ -104,7 +104,7 @@ public class PackageService implements ResourceLoaderAware {
 						.stream(repositoryRepository.findAll().spliterator(), false)
 						.collect(Collectors.toList());
 				throw new PackageException("Can not find packageRepository for origin = "
-						+ packageMetadata.getOrigin() + "known repositories are " + Arrays.toString(list.toArray()));
+						+ packageMetadata.getOrigin() + ". Known repositories are " + Arrays.toString(list.toArray()));
 			}
 			logger.info("Found repository for " + packageMetadata.getOrigin());
 			logger.info("Getting Reosource for repository " + packageRepository);
