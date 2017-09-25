@@ -94,7 +94,7 @@ public class PackageServiceTests extends AbstractIntegrationTest {
 	}
 
 	@Test
-	public void upload() throws IOException {
+	public void upload() throws Exception {
 		// Create throw away repository, treated to be a 'local' database repo by default for now.
 		Repository repository = new Repository();
 		repository.setName("database-repo");
