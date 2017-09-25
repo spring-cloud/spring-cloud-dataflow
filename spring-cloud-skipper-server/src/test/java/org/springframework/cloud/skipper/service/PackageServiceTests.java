@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.util.Map;
 
 import org.junit.Test;
-import org.springframework.util.Assert;
 import org.yaml.snakeyaml.Yaml;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +35,7 @@ import org.springframework.cloud.skipper.repository.RepositoryRepository;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.util.Assert;
 import org.springframework.util.StreamUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;

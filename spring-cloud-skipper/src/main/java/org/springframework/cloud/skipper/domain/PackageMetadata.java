@@ -18,8 +18,6 @@ package org.springframework.cloud.skipper.domain;
 import javax.persistence.Lob;
 import javax.validation.constraints.NotNull;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import org.springframework.data.annotation.Id;
 import org.springframework.data.keyvalue.annotation.KeySpace;
 
