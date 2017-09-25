@@ -23,6 +23,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cloud.skipper.AbstractIntegrationTest;
 import org.yaml.snakeyaml.Yaml;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,10 +54,8 @@ import static org.assertj.core.api.Assertions.entry;
  * @author Ilayaperumal Gopinathan
  */
 @ActiveProfiles("repo-test")
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-public class PackageServiceTests {
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
+public class PackageServiceTests extends AbstractIntegrationTest {
 
 	private final Logger logger = LoggerFactory.getLogger(PackageServiceTests.class);
 

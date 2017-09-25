@@ -37,7 +37,15 @@ public class RepositoryRepositoryTests extends AbstractIntegrationTest {
 	@After
 	@Before
 	public void cleanupRepository() {
-		this.repositoryRepository.deleteAll();
+		deleteRepoIfExists("stable");
+		deleteRepoIfExists("unstable");
+	}
+
+	private void deleteRepoIfExists(String repoName) {
+		Repository repo = repositoryRepository.findByName(repoName);
+		if (repo != null) {
+			this.repositoryRepository.delete(repo);
+		}
 	}
 
 	@Test
