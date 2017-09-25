@@ -99,7 +99,7 @@ public class PackageService implements ResourceLoaderAware {
 			logger.info("Finding repository for " + packageMetadata.getOrigin());
 			Repository packageRepository = repositoryRepository.findOne(packageMetadata.getOrigin());
 			logger.info("Found repository for " + packageMetadata.getOrigin());
-			logger.info("Getting Reosource for repository " + packageMetadata);
+			logger.info("Getting Reosource for repository " + packageRepository);
 			Resource sourceResource = getResourceForRepository(packageRepository, packageMetadata.getName(),
 					packageMetadata.getVersion());
 
