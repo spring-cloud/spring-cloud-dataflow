@@ -32,7 +32,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * REST controller for Package related operations such as (deploy/update).
+ * REST controller for Package related operations such as (deploy/upgrade).
  *
  * @author Mark Pollack
  * @author Ilayaperumal Gopinathan

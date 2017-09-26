@@ -27,8 +27,8 @@ import org.springframework.cloud.skipper.domain.PackageIdentifier;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
 import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.StatusCode;
-import org.springframework.cloud.skipper.domain.UpdateProperties;
-import org.springframework.cloud.skipper.domain.UpdateRequest;
+import org.springframework.cloud.skipper.domain.UpgradeProperties;
+import org.springframework.cloud.skipper.domain.UpgradeRequest;
 import org.springframework.cloud.skipper.repository.PackageMetadataRepository;
 import org.springframework.cloud.skipper.repository.ReleaseRepository;
 import org.springframework.test.annotation.DirtiesContext;
@@ -102,18 +102,18 @@ public abstract class AbstractControllerTests extends AbstractMockMvcTests {
 	}
 
 	protected Release update(String packageName, String packageVersion, String releaseName) throws Exception {
-		UpdateRequest updateRequest = new UpdateRequest();
-		UpdateProperties updateProperties = createUpdateProperties(releaseName);
+		UpgradeRequest upgradeRequest = new UpgradeRequest();
+		UpgradeProperties upgradeProperties = createUpdateProperties(releaseName);
 		PackageIdentifier packageIdentifier = new PackageIdentifier();
 		packageIdentifier.setPackageName(packageName);
 		packageIdentifier.setPackageVersion(packageVersion);
-		updateRequest.setPackageIdentifier(packageIdentifier);
-		updateRequest.setUpdateProperties(updateProperties);
+		upgradeRequest.setPackageIdentifier(packageIdentifier);
+		upgradeRequest.setUpgradeProperties(upgradeProperties);
 		PackageMetadata updatePackageMetadata = this.packageMetadataRepository.findByNameAndVersion(packageName,
 				packageVersion);
 		assertThat(updatePackageMetadata).isNotNull();
-		mockMvc.perform(post("/release/update")
-				.content(convertObjectToJson(updateRequest))).andDo(print())
+		mockMvc.perform(post("/release/upgrade")
+				.content(convertObjectToJson(upgradeRequest))).andDo(print())
 				.andExpect(status().isCreated()).andReturn();
 		Release updatedRelease = this.releaseRepository.findByNameAndVersion(releaseName, 2);
 		commonReleaseAssertions(releaseName, updatePackageMetadata, updatedRelease);
@@ -127,10 +127,10 @@ public abstract class AbstractControllerTests extends AbstractMockMvcTests {
 		return installProperties;
 	}
 
-	protected UpdateProperties createUpdateProperties(String releaseName) {
-		UpdateProperties updateProperties = new UpdateProperties();
-		updateProperties.setReleaseName(releaseName);
-		return updateProperties;
+	protected UpgradeProperties createUpdateProperties(String releaseName) {
+		UpgradeProperties upgradeProperties = new UpgradeProperties();
+		upgradeProperties.setReleaseName(releaseName);
+		return upgradeProperties;
 	}
 
 	protected void commonReleaseAssertions(String releaseName, PackageMetadata packageMetadata,

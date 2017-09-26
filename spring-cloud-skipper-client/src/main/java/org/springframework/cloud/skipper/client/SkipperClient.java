@@ -21,7 +21,7 @@ import org.springframework.cloud.skipper.domain.InstallRequest;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
 import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.Repository;
-import org.springframework.cloud.skipper.domain.UpdateRequest;
+import org.springframework.cloud.skipper.domain.UpgradeRequest;
 import org.springframework.cloud.skipper.domain.UploadRequest;
 import org.springframework.hateoas.Resources;
 
@@ -67,11 +67,11 @@ public interface SkipperClient {
 	Release installPackage(InstallRequest installRequest);
 
 	/**
-	 * Update the package.
-	 * @param updateRequest the request to update the release
-	 * @return the deploye {@link Release}
+	 * Upgrade a release.
+	 * @param upgradeRequest the request to upgrade the release
+	 * @return the upgraded {@link Release}
 	 */
-	Release update(UpdateRequest updateRequest);
+	Release upgrade(UpgradeRequest upgradeRequest);
 
 	/*
 	 * Upload the package.

@@ -35,8 +35,8 @@ import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.Status;
 import org.springframework.cloud.skipper.domain.StatusCode;
 import org.springframework.cloud.skipper.domain.Template;
-import org.springframework.cloud.skipper.domain.UpdateProperties;
-import org.springframework.cloud.skipper.domain.UpdateRequest;
+import org.springframework.cloud.skipper.domain.UpgradeProperties;
+import org.springframework.cloud.skipper.domain.UpgradeRequest;
 import org.springframework.cloud.skipper.index.PackageException;
 import org.springframework.cloud.skipper.repository.DeployerRepository;
 import org.springframework.cloud.skipper.repository.PackageMetadataRepository;
@@ -47,7 +47,7 @@ import org.springframework.util.StringUtils;
 
 /**
  * Service responsible for the lifecycle of packages and releases, install/undeploy a
- * package, update/rollback a release, and get status on a release.
+ * package, upgrade/rollback a release, and get status on a release.
  *
  * @author Mark Pollack
  * @author Ilayaperumal Gopinathan
@@ -168,33 +168,33 @@ public class ReleaseService {
 		return this.releaseRepository.findLatestRelease(releaseName);
 	}
 
-	public Release update(UpdateRequest updateRequest) {
-		UpdateProperties updateProperties = updateRequest.getUpdateProperties();
-		Release oldRelease = getLatestRelease(updateProperties.getReleaseName());
-		PackageIdentifier packageIdentifier = updateRequest.getPackageIdentifier();
+	public Release upgrade(UpgradeRequest upgradeRequest) {
+		UpgradeProperties upgradeProperties = upgradeRequest.getUpgradeProperties();
+		Release oldRelease = getLatestRelease(upgradeProperties.getReleaseName());
+		PackageIdentifier packageIdentifier = upgradeRequest.getPackageIdentifier();
 		// todo: search multi repository
 		PackageMetadata packageMetadata = this.packageMetadataRepository
 				.findByNameAndVersion(packageIdentifier.getPackageName(), packageIdentifier.getPackageVersion());
-		Release newRelease = createReleaseForUpdate(packageMetadata, oldRelease.getVersion() + 1, updateProperties,
+		Release newRelease = createReleaseForUpgrade(packageMetadata, oldRelease.getVersion() + 1, upgradeProperties,
 				oldRelease.getPlatformName());
 		Map<String, Object> model = ConfigValueUtils.mergeConfigValues(newRelease.getPkg(),
 				newRelease.getConfigValues());
 		String manifest = createManifest(newRelease.getPkg(), model);
 		newRelease.setManifest(manifest);
-		return update(oldRelease, newRelease);
+		return upgrade(oldRelease, newRelease);
 	}
 
-	public Release createReleaseForUpdate(PackageMetadata packageMetadata, Integer newVersion,
-			UpdateProperties deployProperties, String platformName) {
-		Assert.notNull(deployProperties, "Deploy Properties can not be null");
+	public Release createReleaseForUpgrade(PackageMetadata packageMetadata, Integer newVersion,
+			UpgradeProperties upgradeProperties, String platformName) {
+		Assert.notNull(upgradeProperties, "Upgrade Properties can not be null");
 		Package packageToInstall = this.packageService.downloadPackage(packageMetadata);
 		Release release = new Release();
-		release.setName(deployProperties.getReleaseName());
+		release.setName(upgradeProperties.getReleaseName());
 		release.setPlatformName(platformName);
-		release.setConfigValues(deployProperties.getConfigValues());
+		release.setConfigValues(upgradeProperties.getConfigValues());
 		release.setPkg(packageToInstall);
 		release.setVersion(newVersion);
-		Info info = createNewInfo("Update deploy underway");
+		Info info = createNewInfo("Upgrade install underway");
 		release.setInfo(info);
 		return release;
 	}
@@ -211,14 +211,14 @@ public class ReleaseService {
 	}
 
 	protected Info createNewInfo() {
-		return createNewInfo("Initial deploy underway");
+		return createNewInfo("Initial install underway");
 	}
 
-	public Release update(Release existingRelease, Release replacingRelease) {
+	public Release upgrade(Release existingRelease, Release replacingRelease) {
 		Assert.notNull(existingRelease, "Existing Release must not be null");
 		Assert.notNull(replacingRelease, "Replacing Release must not be null");
 		Release release = this.releaseManager.deploy(replacingRelease);
-		// TODO UpdateStrategy (manfiestSave, healthCheck)
+		// TODO UpgradeStrategy (manfiestSave, healthCheck)
 		this.releaseManager.undeploy(existingRelease);
 		return status(release);
 	}
@@ -262,7 +262,7 @@ public class ReleaseService {
 		// resolved those...
 		newRelease.setInfo(createNewInfo());
 
-		return update(currentRelease, newRelease);
+		return upgrade(currentRelease, newRelease);
 	}
 
 	/**

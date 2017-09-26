@@ -13,22 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.cloud.skipper.shell.command;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.skipper.client.SkipperClient;
-import org.springframework.shell.standard.ShellComponent;
+package org.springframework.cloud.skipper.domain;
 
 /**
  * @author Ilayaperumal Gopinathan
  */
-@ShellComponent
-public class ReleaseCommands extends AbstractSkipperCommand {
+public class UpgradeRequest {
 
-	@Autowired
-	public ReleaseCommands(SkipperClient skipperClient) {
-		this.skipperClient = skipperClient;
+	private PackageIdentifier packageIdentifier;
+
+	private UpgradeProperties upgradeProperties;
+
+	public PackageIdentifier getPackageIdentifier() {
+		return packageIdentifier;
 	}
 
+	public void setPackageIdentifier(PackageIdentifier packageIdentifier) {
+		this.packageIdentifier = packageIdentifier;
+	}
 
+	public UpgradeProperties getUpgradeProperties() {
+		return upgradeProperties;
+	}
+
+	public void setUpgradeProperties(UpgradeProperties upgradeProperties) {
+		this.upgradeProperties = upgradeProperties;
+	}
 }

@@ -29,7 +29,7 @@ import org.springframework.cloud.skipper.domain.InstallRequest;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
 import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.Repository;
-import org.springframework.cloud.skipper.domain.UpdateRequest;
+import org.springframework.cloud.skipper.domain.UpgradeRequest;
 import org.springframework.cloud.skipper.domain.UploadRequest;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.MediaTypes;
@@ -117,9 +117,9 @@ public class DefaultSkipperClient implements SkipperClient {
 	}
 
 	@Override
-	public Release update(UpdateRequest updateRequest) {
-		String url = String.format("%s/%s/%s", baseUrl, "release", "update");
-		return this.restTemplate.postForObject(url, updateRequest, Release.class);
+	public Release upgrade(UpgradeRequest upgradeRequest) {
+		String url = String.format("%s/%s/%s", baseUrl, "release", "upgrade");
+		return this.restTemplate.postForObject(url, upgradeRequest, Release.class);
 	}
 
 	@Override

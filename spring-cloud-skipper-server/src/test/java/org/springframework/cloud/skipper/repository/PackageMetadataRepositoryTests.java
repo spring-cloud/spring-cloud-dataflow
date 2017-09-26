@@ -47,7 +47,6 @@ public class PackageMetadataRepositoryTests extends AbstractIntegrationTest {
 		assertThat(packagesNamed2).isNotEmpty();
 		assertThat(packagesNamed2).hasSize(1);
 		assertThat(packagesNamed2.get(0).getMaintainer()).isEqualTo("Bob Denver");
-
 	}
 
 }

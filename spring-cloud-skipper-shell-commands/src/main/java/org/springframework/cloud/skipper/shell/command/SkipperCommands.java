@@ -39,8 +39,8 @@ import org.springframework.cloud.skipper.domain.InstallRequest;
 import org.springframework.cloud.skipper.domain.PackageIdentifier;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
 import org.springframework.cloud.skipper.domain.Release;
-import org.springframework.cloud.skipper.domain.UpdateProperties;
-import org.springframework.cloud.skipper.domain.UpdateRequest;
+import org.springframework.cloud.skipper.domain.UpgradeProperties;
+import org.springframework.cloud.skipper.domain.UpgradeRequest;
 import org.springframework.cloud.skipper.domain.UploadRequest;
 import org.springframework.cloud.skipper.shell.command.support.TableUtils;
 import org.springframework.core.io.FileSystemResource;
@@ -60,6 +60,7 @@ import static org.springframework.shell.standard.ShellOption.NULL;
 
 /**
  * @author Ilayaperumal Gopinathan
+ * @author Mark Pollack
  */
 @ShellComponent
 public class SkipperCommands extends AbstractSkipperCommand {
@@ -121,15 +122,16 @@ public class SkipperCommands extends AbstractSkipperCommand {
 		return "Released " + release.getName();
 	}
 
-	@ShellMethod(key = "package update", value = "Update a package")
-	public String update(
-			@ShellOption(help = "the name of the release to update") String releaseName,
-			@ShellOption(help = "the name of the package to use for the update") String packageName,
-			@ShellOption(help = "the version of the package to use for the update") String packageVersion,
-			@ShellOption(help = "the properties file to use to install", defaultValue = NULL) File propertiesFile)
+	@ShellMethod(key = "upgrade", value = "Upgrade a release")
+	public String upgradeRelease(
+			@ShellOption(help = "the name of the release to upgrade") String releaseName,
+			@ShellOption(help = "the name of the package to use for the upgrade") String packageName,
+			@ShellOption(help = "the version of the package to use for the upgrade") String packageVersion,
+			@ShellOption(help = "the properties file to use to install during the upgrade", defaultValue = NULL) File
+					propertiesFile)
 			throws IOException {
 		Release release = skipperClient
-				.update(getUpdateRequest(releaseName, packageName, packageVersion, propertiesFile));
+				.upgrade(getUpgradeRequest(releaseName, packageName, packageVersion, propertiesFile));
 		StringBuilder sb = new StringBuilder();
 		sb.append(release.getName() + " has been updated.\n");
 		sb.append("Last Deployed: " + release.getInfo().getLastDeployed() + "\n");
@@ -159,21 +161,21 @@ public class SkipperCommands extends AbstractSkipperCommand {
 		return sb.toString();
 	}
 
-	private UpdateRequest getUpdateRequest(String releaseName, String packageName, String packageVersion,
+	private UpgradeRequest getUpgradeRequest(String releaseName, String packageName, String packageVersion,
 			File propertiesFile) throws IOException {
-		UpdateRequest updateRequest = new UpdateRequest();
-		UpdateProperties updateProperties = new UpdateProperties();
-		updateProperties.setReleaseName(releaseName);
+		UpgradeRequest upgradeRequest = new UpgradeRequest();
+		UpgradeProperties upgradeProperties = new UpgradeProperties();
+		upgradeProperties.setReleaseName(releaseName);
 		// TODO support config values from propertiesFile.
-		// updateProperties.setConfigValues();
-		updateRequest.setUpdateProperties(updateProperties);
+		// upgradeProperties.setConfigValues();
+		upgradeRequest.setUpgradeProperties(upgradeProperties);
 
 		PackageIdentifier packageIdentifier = new PackageIdentifier();
 		packageIdentifier.setPackageName(packageName);
 		packageIdentifier.setPackageVersion(packageVersion);
-		updateRequest.setPackageIdentifier(packageIdentifier);
-		updateRequest.setPackageIdentifier(packageIdentifier);
-		return updateRequest;
+		upgradeRequest.setPackageIdentifier(packageIdentifier);
+		upgradeRequest.setPackageIdentifier(packageIdentifier);
+		return upgradeRequest;
 	}
 
 	private InstallRequest getInstallRequest(String packageName, String packageVersion, File propertiesFile,
