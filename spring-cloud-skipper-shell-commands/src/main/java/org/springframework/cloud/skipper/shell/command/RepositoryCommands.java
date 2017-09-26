@@ -48,7 +48,7 @@ public class RepositoryCommands extends AbstractSkipperCommand {
 		this.skipperClient = skipperClient;
 	}
 
-	@ShellMethod(key = "repository add", value = "Add package repository")
+	@ShellMethod(key = "repo add", value = "Add package repository")
 	public String add(@ShellOption(help = "name of the repository") @NotNull String name,
 			@ShellOption(help = "the root URL that points to index.yaml file") @NotNull String url,
 			@ShellOption(help = "the source URL to the package", defaultValue = NULL) String sourceUrl) {
@@ -56,13 +56,13 @@ public class RepositoryCommands extends AbstractSkipperCommand {
 		return "Repository '" + name + "' added.";
 	}
 
-	@ShellMethod(key = "repository delete", value = "Delete a package repository")
+	@ShellMethod(key = "repo delete", value = "Delete a package repository")
 	public String delete(@ShellOption(help = "name of the repository to delete") @NotNull String name) {
 		this.skipperClient.deleteRepository(name);
 		return "Repository '" + name + "' deleted.";
 	}
 
-	@ShellMethod(key = "repository list", value = "List package repositories")
+	@ShellMethod(key = "repo list", value = "List package repositories")
 	public Table list() {
 		Resources<Repository> repositoryResources = this.skipperClient.listRepositories();
 		LinkedHashMap<String, Object> headers = new LinkedHashMap<>();

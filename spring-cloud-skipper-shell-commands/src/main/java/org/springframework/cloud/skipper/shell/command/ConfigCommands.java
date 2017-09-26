@@ -60,7 +60,7 @@ public class ConfigCommands extends AbstractSkipperCommand {
 	}
 
 	// @formatter:off
-	@ShellMethod(key = "skipper config server", value = "Configure the Spring Cloud Skipper REST server to use.")
+	@ShellMethod(key = "config", value = "Configure the Spring Cloud Skipper REST server to use.")
 	public String target(
 			@ShellOption(help = "the location of the Spring Cloud Skipper REST endpoint", defaultValue = DEFAULT_TARGET)
 					String uri,
@@ -90,7 +90,7 @@ public class ConfigCommands extends AbstractSkipperCommand {
 		return (this.targetHolder.getTarget().getTargetResultMessage());
 	}
 
-	@ShellMethod(key = "skipper config info", value = "Show the Skipper server being used.")
+	@ShellMethod(key = "info", value = "Show the Skipper server being used.")
 	public AboutInfo info() {
 		Target target = targetHolder.getTarget();
 		if (target.getTargetException() != null) {
