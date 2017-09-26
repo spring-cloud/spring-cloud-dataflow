@@ -1,3 +1,7 @@
+info:
+  app:
+    name: "@project.artifactId@"
+    version: "@project.version@"
 server:
   port: 7577
 spring:

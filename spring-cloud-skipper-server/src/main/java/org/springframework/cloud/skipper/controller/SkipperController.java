@@ -16,6 +16,7 @@
 package org.springframework.cloud.skipper.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.skipper.domain.AboutInfo;
 import org.springframework.cloud.skipper.domain.InstallProperties;
 import org.springframework.cloud.skipper.domain.InstallRequest;
@@ -47,6 +48,12 @@ public class SkipperController {
 
 	private final PackageService packageService;
 
+	@Value("${info.app.name:#{null}}")
+	private String appName;
+
+	@Value("${info.app.version:#{null}}")
+	private String appVersion;
+
 	@Autowired
 	public SkipperController(ReleaseService releaseService, PackageService packageService) {
 		this.releaseService = releaseService;
@@ -56,7 +63,7 @@ public class SkipperController {
 	@RequestMapping(path = "/about", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
 	public AboutInfo getAboutInfo() {
-		return new AboutInfo("1.0.0");
+		return new AboutInfo(appName, appVersion);
 	}
 
 	@RequestMapping(path = "/upload", method = RequestMethod.POST)

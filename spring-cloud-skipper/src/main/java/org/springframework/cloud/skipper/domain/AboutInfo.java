@@ -25,8 +25,11 @@ public class AboutInfo {
 
 	private String version;
 
+	private String name;
+
 	@JsonCreator
-	public AboutInfo(@JsonProperty("version") String version) {
+	public AboutInfo(@JsonProperty("name") String name, @JsonProperty("version") String version) {
+		this.name = name;
 		this.version = version;
 	}
 
@@ -34,10 +37,12 @@ public class AboutInfo {
 		return version;
 	}
 
+	public String getName() {
+		return name;
+	}
+
 	@Override
 	public String toString() {
-		return "AboutInfo{" +
-				"version='" + version + '\'' +
-				'}';
+		return name + " v" + version;
 	}
 }
