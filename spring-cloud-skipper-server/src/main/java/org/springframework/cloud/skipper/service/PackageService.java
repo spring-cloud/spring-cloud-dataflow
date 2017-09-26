@@ -93,27 +93,19 @@ public class PackageService implements ResourceLoaderAware {
 		Path targetPath = null;
 		// package file is in a non DB hosted repository
 		try {
-			logger.info("creating temp directory");
 			targetPath = TempFileUtils.createTempDirectory("skipper" + packageMetadata.getName());
-			logger.info("Calculating zip file name.");
 			File targetFile = calculatePackageZipFile(packageMetadata, targetPath.toFile());
-			logger.info("Finding repository for " + packageMetadata.getOrigin());
+			logger.debug("Finding repository for package origin {}", packageMetadata.getOrigin());
 			Repository packageRepository = repositoryRepository.findOne(packageMetadata.getOrigin());
 			if (packageRepository == null) {
-				List<Repository> list = StreamSupport
-						.stream(repositoryRepository.findAll().spliterator(), false)
-						.collect(Collectors.toList());
-				throw new PackageException("Can not find packageRepository for origin = "
-						+ packageMetadata.getOrigin() + ". Known repositories are " + Arrays.toString(list.toArray()));
+				return throwDescriptiveException(packageMetadata);
 			}
-			logger.info("Found repository for " + packageMetadata.getOrigin());
-			logger.info("Getting Reosource for repository " + packageRepository);
 			Resource sourceResource = getResourceForRepository(packageRepository, packageMetadata.getName(),
 					packageMetadata.getVersion());
 
-			logger.info("Downloading package file for " + packageMetadata.getName() + "-"
-					+ packageMetadata.getVersion() +
-					" from " + sourceResource.getDescription() + " to target file " + targetFile);
+			logger.debug("Downloading package file for {}-{} from {} to target file {}",
+					packageMetadata.getName(), packageMetadata.getVersion(), sourceResource.getDescription(),
+					targetFile);
 			try {
 				StreamUtils.copy(sourceResource.getInputStream(), new FileOutputStream(targetFile));
 			}
@@ -152,16 +144,22 @@ public class PackageService implements ResourceLoaderAware {
 		}
 	}
 
+	private Package throwDescriptiveException(PackageMetadata packageMetadata) {
+		List<Repository> list = StreamSupport
+				.stream(repositoryRepository.findAll().spliterator(), false)
+				.collect(Collectors.toList());
+		throw new PackageException("Can not find packageRepository for origin = "
+				+ packageMetadata.getOrigin() + ". Known repositories are " + Arrays.toString(list.toArray()));
+	}
+
 	private Package deserializePackageFromDatabase(PackageMetadata packageMetadata) {
 		// package file was uploaded to a local DB hosted repository
 		Path tmpDirPath = null;
 		try {
-			logger.info("deserializePackageFromDatabase: creating temp file");
 			tmpDirPath = TempFileUtils.createTempDirectory("skipper");
 			File targetPath = new File(tmpDirPath + File.separator + packageMetadata.getName());
 			targetPath.mkdirs();
 			File targetFile = calculatePackageZipFile(packageMetadata, targetPath);
-			logger.info("deserializePackageFromDatabase: calculatedPackageZipFile");
 			try {
 				StreamUtils.copy(packageMetadata.getPackageFileBytes(), new FileOutputStream(targetFile));
 			}
@@ -186,8 +184,11 @@ public class PackageService implements ResourceLoaderAware {
 	}
 
 	private Resource getResourceForRepository(Repository packageRepository, String name, String version) {
+		// TODO local respository will not have url, add assertion
 		String sourceUrl = packageRepository.getUrl() + "/" + name + "/" +
 				name + "-" + version + ".zip";
+		logger.debug("PackageRepository.getUrl={}, Attempting to get resource at URL {} ", packageRepository.getUrl(),
+				sourceUrl);
 		Resource resource = resourceLoader.getResource(sourceUrl);
 		if (resource.exists()) {
 			return resource;
@@ -359,6 +360,7 @@ public class PackageService implements ResourceLoaderAware {
 	}
 
 	protected File calculatePackageZipFile(PackageMetadata packageMetadata, File targetPath) {
+		logger.debug("Calculating zip file name for {}", packageMetadata);
 		return new File(targetPath, packageMetadata.getName() + "-" + packageMetadata.getVersion() + ".zip");
 	}
 

@@ -19,6 +19,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.springframework.cloud.skipper.index.PackageException;
 
 /**
@@ -26,9 +29,14 @@ import org.springframework.cloud.skipper.index.PackageException;
  */
 public class TempFileUtils {
 
+	private static final Logger logger = LoggerFactory.getLogger(TempFileUtils.class);
+
 	public static Path createTempDirectory(String rootName) {
 		try {
-			return Files.createTempDirectory("skipperIndex");
+			logger.debug("Creating temp directory with root name {}", rootName);
+			Path pathToReturn = Files.createTempDirectory(rootName);
+			logger.debug("Created temp directory {}", pathToReturn.toString());
+			return pathToReturn;
 		}
 		catch (IOException e) {
 			throw new PackageException("Could not create temp directory", e);
