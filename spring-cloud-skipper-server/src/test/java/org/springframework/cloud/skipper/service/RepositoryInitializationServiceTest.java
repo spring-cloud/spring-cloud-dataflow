@@ -21,7 +21,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.skipper.AbstractIntegrationTest;
 import org.springframework.cloud.skipper.repository.PackageMetadataRepository;
 import org.springframework.cloud.skipper.repository.RepositoryRepository;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -30,7 +29,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Mark Pollack
  */
 @ActiveProfiles("repo-test")
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class RepositoryInitializationServiceTest extends AbstractIntegrationTest {
 
 	@Autowired

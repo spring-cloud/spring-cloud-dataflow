@@ -37,7 +37,6 @@ import org.springframework.cloud.skipper.repository.PackageMetadataRepository;
 import org.springframework.cloud.skipper.repository.RepositoryRepository;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.util.Assert;
 import org.springframework.util.StreamUtils;
@@ -51,7 +50,6 @@ import static org.assertj.core.api.Assertions.entry;
  * @author Ilayaperumal Gopinathan
  */
 @ActiveProfiles("repo-test")
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 public class PackageServiceTests extends AbstractIntegrationTest {
 
 	private final Logger logger = LoggerFactory.getLogger(PackageServiceTests.class);
