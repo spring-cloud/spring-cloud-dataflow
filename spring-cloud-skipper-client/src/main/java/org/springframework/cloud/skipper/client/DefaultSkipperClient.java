@@ -33,7 +33,7 @@ import org.springframework.cloud.skipper.domain.UpgradeRequest;
 import org.springframework.cloud.skipper.domain.UploadRequest;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.MediaTypes;
-import org.springframework.hateoas.ResourceSupport;
+import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.Resources;
 import org.springframework.hateoas.client.Traverson;
 import org.springframework.util.Assert;
@@ -146,10 +146,18 @@ public class DefaultSkipperClient implements SkipperClient {
 
 	@Override
 	public void deleteRepository(String name) {
-		String searchUrl = String.format("%s/%s/%s", baseUrl, "repositories", "search/findByName?name=" + name);
-		ResourceSupport resourceSupport = this.restTemplate.getForObject(searchUrl, ResourceSupport.class, name);
-		if (resourceSupport != null) {
-			this.restTemplate.delete(resourceSupport.getId().getHref());
+		ParameterizedTypeReference<Resource<Repository>> typeReference = new ParameterizedTypeReference<Resource<Repository>>() {
+		};
+		Traverson.TraversalBuilder traversalBuilder = this.traverson.follow("repositories", "search", "findByName");
+		Map<String, Object> parameters = new HashMap<>();
+		parameters.put("name", name);
+		Resource<Repository> repositoryResource = traversalBuilder.withTemplateParameters(parameters)
+				.toObject(typeReference);
+		if (repositoryResource != null) {
+			this.restTemplate.delete(repositoryResource.getId().getHref());
+		}
+		else {
+			throw new IllegalStateException("The Repository with the " + name + " doesn't exist.");
 		}
 	}
 
