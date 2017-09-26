@@ -18,6 +18,7 @@ package org.springframework.cloud.skipper.domain;
 /**
  * @author Mark Pollack
  */
+
 public enum StatusCode {
 
 	// Status_UNKNOWN indicates that a release is in an uncertain state.

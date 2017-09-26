@@ -188,7 +188,6 @@ public class ReleaseService {
 			UpdateProperties deployProperties, String platformName) {
 		Assert.notNull(deployProperties, "Deploy Properties can not be null");
 		Package packageToInstall = this.packageService.downloadPackage(packageMetadata);
-		packageToInstall.getMetadata().setId(packageMetadata.getId());
 		Release release = new Release();
 		release.setName(deployProperties.getReleaseName());
 		release.setPlatformName(platformName);

@@ -15,17 +15,13 @@
  */
 package org.springframework.cloud.skipper.domain;
 
-import org.springframework.data.annotation.Id;
-import org.springframework.data.keyvalue.annotation.KeySpace;
+import javax.persistence.Entity;
 
 /**
  * @author Mark Pollack
  */
-@KeySpace("appdeployerdata")
-public class AppDeployerData {
-
-	@Id
-	private String id;
+@Entity
+public class AppDeployerData extends AbstractEntity {
 
 	private String releaseName;
 

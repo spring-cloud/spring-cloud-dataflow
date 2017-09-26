@@ -15,12 +15,6 @@
  */
 package org.springframework.cloud.skipper.domain;
 
-import java.util.Map;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
-import org.springframework.util.StringUtils;
-
 /**
  * @author Mark Pollack
  */
@@ -28,9 +22,6 @@ public class ConfigValues {
 
 	// The raw YML string of configuration values.
 	private String raw;
-
-	// TODO: not currently used.
-	private Map<String, String> values;
 
 	public ConfigValues() {
 	}
@@ -43,19 +34,4 @@ public class ConfigValues {
 		this.raw = raw;
 	}
 
-	public Map<String, String> getValues() {
-		return values;
-	}
-
-	public void setValues(Map<String, String> values) {
-		this.values = values;
-	}
-
-	@JsonIgnore
-	public boolean isConfigEmpty() {
-		if (values == null || StringUtils.isEmpty(raw)) {
-			return true;
-		}
-		return false;
-	}
 }

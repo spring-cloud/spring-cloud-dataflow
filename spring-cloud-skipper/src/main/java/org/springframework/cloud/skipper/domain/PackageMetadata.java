@@ -15,23 +15,17 @@
  */
 package org.springframework.cloud.skipper.domain;
 
+import javax.persistence.Entity;
 import javax.persistence.Lob;
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import org.springframework.data.annotation.Id;
-import org.springframework.data.keyvalue.annotation.KeySpace;
-
 /**
  * @author Mark Pollack
  */
-// @Entity
-@KeySpace("packagemetadata")
-public class PackageMetadata {
-
-	@Id
-	private String id;
+@Entity
+public class PackageMetadata extends AbstractEntity {
 
 	/**
 	 * The Package Index spec version this file is based on. Required
@@ -93,8 +87,8 @@ public class PackageMetadata {
 	private String maintainer;
 
 	/**
-	 * Brief description of the package. The packages README.md will contain more
-	 * information. TODO - decide format.
+	 * Brief description of the package. The packages README.md will contain more information.
+	 * TODO - decide format.
 	 */
 	private String description;
 
@@ -149,14 +143,6 @@ public class PackageMetadata {
 
 	public void setVersion(String version) {
 		this.version = version;
-	}
-
-	public String getId() {
-		return id;
-	}
-
-	public void setId(String id) {
-		this.id = id;
 	}
 
 	public String getAppVersion() {
@@ -303,7 +289,7 @@ public class PackageMetadata {
 	@Override
 	public String toString() {
 		return "PackageMetadata{" +
-				"id='" + id + '\'' +
+				"id='" + getId() + '\'' +
 				", apiVersion='" + apiVersion + '\'' +
 				", origin='" + origin + '\'' +
 				", kind='" + kind + '\'' +

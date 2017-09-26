@@ -15,7 +15,8 @@
  */
 package org.springframework.cloud.skipper.domain;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
 import javax.validation.constraints.NotNull;
 
 /**
@@ -25,11 +26,7 @@ import javax.validation.constraints.NotNull;
 // todo: Add isLocal flag to differentiate local vs remote.
 // todo: Add description
 // todo: Add order flag
-public class Repository {
-
-	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
-	private String id;
+public class Repository extends AbstractEntity {
 
 	/**
 	 * A short name, e.g. 'stable' to associate with this repository, must be unique.
@@ -53,14 +50,6 @@ public class Repository {
 	// TODO security/checksum fields of referenced index file.
 
 	public Repository() {
-	}
-
-	public String getId() {
-		return id;
-	}
-
-	public void setId(String id) {
-		this.id = id;
 	}
 
 	public String getName() {

@@ -17,11 +17,17 @@ package org.springframework.cloud.skipper.domain;
 
 import java.util.Date;
 
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.OneToOne;
+
 /**
  * @author Mark Pollack
  */
-public class Info {
+@Entity
+public class Info extends AbstractEntity {
 
+	@OneToOne(cascade = { CascadeType.ALL })
 	private Status status;
 
 	private Date firstDeployed;

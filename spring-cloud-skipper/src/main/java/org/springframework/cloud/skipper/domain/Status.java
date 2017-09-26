@@ -15,12 +15,18 @@
  */
 package org.springframework.cloud.skipper.domain;
 
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+
 /**
  * @author Mark Pollack
  */
-public class Status {
+@Entity
+public class Status extends AbstractEntity {
 
 	// Status from the Release managment platform
+	@Enumerated(EnumType.STRING)
 	private StatusCode statusCode;
 
 	// Status from the underlying platform
