@@ -118,7 +118,7 @@ public class SkipperCommands extends AbstractSkipperCommand {
 			@ShellOption(help = "the platform name to use", defaultValue = "default") String platformName)
 			throws IOException {
 		Release release = skipperClient
-				.installPackage(getInstallRequest(name, version, propertiesFile, releaseName, platformName));
+				.install(getInstallRequest(name, version, propertiesFile, releaseName, platformName));
 		return "Released " + release.getName();
 	}
 
@@ -133,7 +133,7 @@ public class SkipperCommands extends AbstractSkipperCommand {
 		Release release = skipperClient
 				.upgrade(getUpgradeRequest(releaseName, packageName, packageVersion, propertiesFile));
 		StringBuilder sb = new StringBuilder();
-		sb.append(release.getName() + " has been updated.\n");
+		sb.append(release.getName() + " has been upgraded.\n");
 		sb.append("Last Deployed: " + release.getInfo().getLastDeployed() + "\n");
 		sb.append("Status: " + release.getInfo().getStatus().getPlatformStatus() + "\n");
 		return sb.toString();
@@ -157,7 +157,7 @@ public class SkipperCommands extends AbstractSkipperCommand {
 			@ShellOption(help = "the name of the release to delete") String releaseName) {
 		Release release = skipperClient.delete(releaseName);
 		StringBuilder sb = new StringBuilder();
-		sb.append(release.getName() + " has been undeployed.\n");
+		sb.append(release.getName() + " has been deleted.\n");
 		return sb.toString();
 	}
 

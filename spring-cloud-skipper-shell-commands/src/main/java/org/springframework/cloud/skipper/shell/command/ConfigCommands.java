@@ -15,9 +15,6 @@
  */
 package org.springframework.cloud.skipper.shell.command;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.skipper.client.SkipperServerException;
 import org.springframework.cloud.skipper.domain.AboutInfo;
@@ -45,8 +42,6 @@ import static org.springframework.shell.standard.ShellOption.NULL;
  */
 @ShellComponent
 public class ConfigCommands extends AbstractSkipperCommand {
-
-	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
 	private final ConsoleUserInput userInput;
 

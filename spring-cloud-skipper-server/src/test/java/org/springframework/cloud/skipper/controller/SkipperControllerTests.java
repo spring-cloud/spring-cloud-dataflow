@@ -78,8 +78,8 @@ public class SkipperControllerTests extends AbstractControllerTests {
 		// Undeploy
 		mockMvc.perform(post("/delete/" + releaseName)).andDo(print())
 				.andExpect(status().isCreated()).andReturn();
-		Release undeployedRelease = this.releaseRepository.findByNameAndVersion(releaseName, 1);
-		assertThat(undeployedRelease.getInfo().getStatus().getStatusCode()).isEqualTo(StatusCode.DELETED);
+		Release deletedRelease = this.releaseRepository.findByNameAndVersion(releaseName, 1);
+		assertThat(deletedRelease.getInfo().getStatus().getStatusCode()).isEqualTo(StatusCode.DELETED);
 	}
 
 	@Test
@@ -112,9 +112,9 @@ public class SkipperControllerTests extends AbstractControllerTests {
 		mockMvc.perform(post("/delete/" + releaseName))
 				.andDo(print())
 				.andExpect(status().isCreated()).andReturn();
-		Release undeployedRelease = this.releaseRepository.findByNameAndVersion(releaseName,
+		Release deletedRelease = this.releaseRepository.findByNameAndVersion(releaseName,
 				Integer.valueOf(releaseVersion));
-		assertThat(undeployedRelease.getInfo().getStatus().getStatusCode()).isEqualTo(StatusCode.DELETED);
+		assertThat(deletedRelease.getInfo().getStatus().getStatusCode()).isEqualTo(StatusCode.DELETED);
 	}
 
 	@Test

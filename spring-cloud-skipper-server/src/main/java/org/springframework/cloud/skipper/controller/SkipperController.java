@@ -34,7 +34,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * REST controller for Skipper server related operations such as package install, Release upgrade, delete, rollback.
+ * REST controller for Skipper server related operations such as install, upgrade, delete, and rollback.
  *
  * @author Mark Pollack
  * @author Ilayaperumal Gopinathan

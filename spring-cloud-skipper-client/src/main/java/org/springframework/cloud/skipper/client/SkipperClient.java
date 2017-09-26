@@ -57,14 +57,14 @@ public interface SkipperClient {
 	 * @param installProperties the (@link InstallProperties)
 	 * @return the deployed {@link Release}
 	 */
-	String installPackage(String packageId, InstallProperties installProperties);
+	String install(String packageId, InstallProperties installProperties);
 
 	/**
 	 * Install the package
-	 * @param installRequest the package installPackage request
+	 * @param installRequest the package install request
 	 * @return the installed {@link Release}
 	 */
-	Release installPackage(InstallRequest installRequest);
+	Release install(InstallRequest installRequest);
 
 	/**
 	 * Upgrade a release.

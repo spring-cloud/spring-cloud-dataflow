@@ -40,7 +40,7 @@ public class ConfigValueUtils {
 	 * overriding lower level packages. Only one level of dependent packages are currently
 	 * supported.
 	 * <p>
-	 * @param pkg The package to be installed or updated.
+	 * @param pkg The package to be installed or upgraded.
 	 * @param overrideValues Configuration values pass in at runtime, when installing or
 	 * updating.
 	 * @return The merged configuration values.

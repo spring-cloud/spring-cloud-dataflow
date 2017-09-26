@@ -55,10 +55,10 @@ Then launch the Skipper shell in another terminal
 $ java -jar spring-cloud-skipper-shell/target/spring-cloud-skipper-shell-1.0.0.BUILD-SNAPSHOT.jar
 ----
 
-The command `package search` should then show you the following output
+The command `search` will seach for all available packages. It should then show you the following output
 
 ```
-skipper:>package search
+skipper:>search
 ╔════════╤═══════╤═══════════════════════════════════════════════════════════════════════════╗
 ║  Name  │Version│                                Description                                ║
 ╠════════╪═══════╪═══════════════════════════════════════════════════════════════════════════╣
@@ -75,7 +75,7 @@ In another window you can run `watch -n 2 jps` so see which Java processes are r
 Now deploy the log 1.0.0 package.
 
 ----
-skipper:>package deploy --name log --version 1.0.0 --release-name mylog
+skipper:>install --name log --version 1.0.0 --release-name mylog
 Released mylog
 ----
 
@@ -84,8 +84,8 @@ Note that the log 1.0.0 package deploys the version 1.2.0.RC1 of the application
 Now update the release with a newer version
 
 ----
-skipper:>package update --release-name mylog --package-name log --package-version 2.0.0
-mylog has been updated.
+skipper:>upgrade --release-name mylog --package-name log --package-version 2.0.0
+mylog has been upgraded.
 Last Deployed: Sun Sep 24 18:57:35 EDT 2017
 Status: Applications deploying... mylog-v2.log=[mylog-v2.log-0=deploying]
 ----
@@ -95,7 +95,7 @@ You should see the java app named `log-sink-rabbit-1.2.0.RELEASE.jar` running in
 Next rollback to the previous release
 
 ----
-skipper:>package rollback --release-name mylog
+skipper:>rollback --release-name mylog
 mylog has been rolled back.
 Last Deployed: Sun Sep 24 18:59:08 EDT 2017
 Status: Applications deploying... mylog-v3.log=[mylog-v3.log-0=deploying]
@@ -103,10 +103,10 @@ Status: Applications deploying... mylog-v3.log=[mylog-v3.log-0=deploying]
 
 You should see the java app named `log-sink-rabbit-1.2.0.RC1.jar` running in the output of the `jps` command
 
-Now undeploy the release.
+Now delete the release.
 
 ----
-skipper:>package undeploy --release-name mylog
+skipper:>delete --release-name mylog
 mylog has been undeployed.
 ----
 

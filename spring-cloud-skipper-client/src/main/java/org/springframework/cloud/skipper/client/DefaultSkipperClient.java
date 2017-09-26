@@ -106,12 +106,12 @@ public class DefaultSkipperClient implements SkipperClient {
 	}
 
 	@Override
-	public String installPackage(String packageId, InstallProperties installProperties) {
+	public String install(String packageId, InstallProperties installProperties) {
 		String url = String.format("%s/%s/%s", baseUrl, "install", packageId);
 		return this.restTemplate.postForObject(url, installProperties, String.class);
 	}
 
-	public Release installPackage(InstallRequest installRequest) {
+	public Release install(InstallRequest installRequest) {
 		String url = String.format("%s/%s", baseUrl, "install");
 		return this.restTemplate.postForObject(url, installRequest, Release.class);
 	}
