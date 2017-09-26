@@ -24,16 +24,16 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.StringTokenizer;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.FilenameUtils;
+import org.yaml.snakeyaml.Yaml;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
 import org.springframework.cloud.skipper.client.SkipperClient;
+import org.springframework.cloud.skipper.domain.ConfigValues;
 import org.springframework.cloud.skipper.domain.InstallProperties;
 import org.springframework.cloud.skipper.domain.InstallRequest;
 import org.springframework.cloud.skipper.domain.PackageIdentifier;
@@ -43,7 +43,7 @@ import org.springframework.cloud.skipper.domain.UpgradeProperties;
 import org.springframework.cloud.skipper.domain.UpgradeRequest;
 import org.springframework.cloud.skipper.domain.UploadRequest;
 import org.springframework.cloud.skipper.shell.command.support.TableUtils;
-import org.springframework.core.io.FileSystemResource;
+import org.springframework.cloud.skipper.shell.command.support.YmlUtils;
 import org.springframework.hateoas.Resources;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
@@ -112,13 +112,16 @@ public class SkipperCommands extends AbstractSkipperCommand {
 			@ShellOption(help = "name of the package to install") String name,
 			@ShellOption(help = "version of the package to install", defaultValue = NULL) String version,
 			// TODO specify a specific package repository
-			@ShellOption(help = "the properties file to use to install", defaultValue = NULL) File propertiesFile,
+			@ShellOption(help = "specify values in a YAML file", defaultValue = NULL) File file,
+			@ShellOption(help = "the comma separated set of properties to override during install", defaultValue = NULL) String propertyString,
 			// TODO support generation of a release name
 			@ShellOption(help = "the release name to use") String releaseName,
+			// TODO investigate server side support of 'default'
 			@ShellOption(help = "the platform name to use", defaultValue = "default") String platformName)
 			throws IOException {
+		assertMutuallyExclusiveFileAndProperties(file, propertyString);
 		Release release = skipperClient
-				.install(getInstallRequest(name, version, propertiesFile, releaseName, platformName));
+				.install(getInstallRequest(name, version, file, propertyString, releaseName, platformName));
 		return "Released " + release.getName();
 	}
 
@@ -127,16 +130,26 @@ public class SkipperCommands extends AbstractSkipperCommand {
 			@ShellOption(help = "the name of the release to upgrade") String releaseName,
 			@ShellOption(help = "the name of the package to use for the upgrade") String packageName,
 			@ShellOption(help = "the version of the package to use for the upgrade") String packageVersion,
-			@ShellOption(help = "the properties file to use to install during the upgrade", defaultValue = NULL) File
-					propertiesFile)
+			@ShellOption(help = "specify values in a YAML file", defaultValue = NULL) File file,
+			@ShellOption(help = "the comma separated set of properties to override during upgrade",
+					defaultValue = NULL) String propertyString)
 			throws IOException {
+		assertMutuallyExclusiveFileAndProperties(file, propertyString);
 		Release release = skipperClient
-				.upgrade(getUpgradeRequest(releaseName, packageName, packageVersion, propertiesFile));
+				.upgrade(getUpgradeRequest(releaseName, packageName, packageVersion, file, propertyString));
 		StringBuilder sb = new StringBuilder();
 		sb.append(release.getName() + " has been upgraded.\n");
 		sb.append("Last Deployed: " + release.getInfo().getLastDeployed() + "\n");
 		sb.append("Status: " + release.getInfo().getStatus().getPlatformStatus() + "\n");
 		return sb.toString();
+	}
+
+	private void assertMutuallyExclusiveFileAndProperties(File yamlFile, String propertyString) {
+		Assert.isTrue(!(yamlFile != null && propertyString != null), "The options 'file' and 'set' options "
+				+ "are mutually exclusive.");
+		String extension = FilenameUtils.getExtension(yamlFile.getName());
+		Assert.isTrue((extension.equalsIgnoreCase("yml") || extension.equalsIgnoreCase("yaml")),
+				"The file should be YAML file");
 	}
 
 	@ShellMethod(key = "rollback", value = "Rollback the release to a previous or a specific release")
@@ -153,7 +166,7 @@ public class SkipperCommands extends AbstractSkipperCommand {
 	}
 
 	@ShellMethod(key = "delete", value = "Delete the release")
-	public String undeploy(
+	public String delete(
 			@ShellOption(help = "the name of the release to delete") String releaseName) {
 		Release release = skipperClient.delete(releaseName);
 		StringBuilder sb = new StringBuilder();
@@ -162,14 +175,17 @@ public class SkipperCommands extends AbstractSkipperCommand {
 	}
 
 	private UpgradeRequest getUpgradeRequest(String releaseName, String packageName, String packageVersion,
-			File propertiesFile) throws IOException {
+			File propertiesFile, String propertiesToOverride) throws IOException {
 		UpgradeRequest upgradeRequest = new UpgradeRequest();
 		UpgradeProperties upgradeProperties = new UpgradeProperties();
 		upgradeProperties.setReleaseName(releaseName);
-		// TODO support config values from propertiesFile.
-		// upgradeProperties.setConfigValues();
+		String configValuesYML = getYamlConfigValues(propertiesFile, propertiesToOverride);
+		if (StringUtils.hasText(configValuesYML)) {
+			ConfigValues configValues = new ConfigValues();
+			configValues.setRaw(configValuesYML);
+			upgradeProperties.setConfigValues(configValues);
+		}
 		upgradeRequest.setUpgradeProperties(upgradeProperties);
-
 		PackageIdentifier packageIdentifier = new PackageIdentifier();
 		packageIdentifier.setPackageName(packageName);
 		packageIdentifier.setPackageVersion(packageVersion);
@@ -178,9 +194,10 @@ public class SkipperCommands extends AbstractSkipperCommand {
 		return upgradeRequest;
 	}
 
-	private InstallRequest getInstallRequest(String packageName, String packageVersion, File propertiesFile,
-			String releaseName, String platformName) throws IOException {
-		InstallProperties installProperties = getInstallProperties(releaseName, platformName, propertiesFile);
+	private InstallRequest getInstallRequest(String packageName, String packageVersion, File yamlFile,
+			String propertyString, String releaseName, String platformName) throws IOException {
+		InstallProperties installProperties = getInstallProperties(releaseName, platformName, yamlFile,
+				propertyString);
 		InstallRequest installRequest = new InstallRequest();
 		installRequest.setInstallProperties(installProperties);
 		PackageIdentifier packageIdentifier = new PackageIdentifier();
@@ -217,38 +234,34 @@ public class SkipperCommands extends AbstractSkipperCommand {
 		return "Package uploaded successfully:[" + packageMetadata.getName() + ":" + packageMetadata.getVersion() + "]";
 	}
 
-	private InstallProperties getInstallProperties(String releaseName, String platformName, File propertiesFile)
-			throws IOException {
+	private InstallProperties getInstallProperties(String releaseName, String platformName, File yamlFile,
+			String propertiesToOverride) throws IOException {
 		InstallProperties installProperties = new InstallProperties();
 		if (StringUtils.hasText(releaseName)) {
 			installProperties.setReleaseName(releaseName);
-			installProperties.setPlatformName(platformName);
 		}
-		else {
-			String extension = FilenameUtils.getExtension(propertiesFile.getName());
-			Properties props = null;
-			if (extension.equals("yaml") || extension.equals("yml")) {
-				YamlPropertiesFactoryBean yamlPropertiesFactoryBean = new YamlPropertiesFactoryBean();
-				yamlPropertiesFactoryBean.setResources(new FileSystemResource(propertiesFile));
-				yamlPropertiesFactoryBean.afterPropertiesSet();
-				props = yamlPropertiesFactoryBean.getObject();
-			}
-			else {
-				props = new Properties();
-				try (FileInputStream fis = new FileInputStream(propertiesFile)) {
-					props.load(fis);
-				}
-			}
-			if (props != null) {
-				Assert.notNull(props.getProperty("release-name"), "Release name must not be null");
-				// TODO why set these here?
-				installProperties.setReleaseName(props.getProperty("release-name"));
-				installProperties.setPlatformName(props.getProperty("platform-name", platformName));
-				// TODO support config values from propertiesFile
-				// installProperties.setConfigValues();
-			}
+		//There is a 'default' value for platformName
+		installProperties.setPlatformName(platformName);
+		String configValuesYML = getYamlConfigValues(yamlFile, propertiesToOverride);
+		if (StringUtils.hasText(configValuesYML)) {
+			ConfigValues configValues = new ConfigValues();
+			configValues.setRaw(configValuesYML);
+			installProperties.setConfigValues(configValues);
 		}
 		return installProperties;
+	}
+
+	private String getYamlConfigValues(File yamlFile, String propertiesAsCsvString) throws IOException {
+		String configValuesYML = null;
+		if (yamlFile != null) {
+			Yaml yaml = new Yaml();
+			// Validate it is yaml formatted.
+			configValuesYML = yaml.dump(yaml.load(new FileInputStream(yamlFile)));
+		}
+		else if (StringUtils.hasText(propertiesAsCsvString)) {
+			configValuesYML = YmlUtils.convertFromCsvToYaml(propertiesAsCsvString);
+		}
+		return configValuesYML;
 	}
 
 }
