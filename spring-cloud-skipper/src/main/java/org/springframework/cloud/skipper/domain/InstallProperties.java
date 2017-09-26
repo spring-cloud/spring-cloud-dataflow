@@ -18,7 +18,7 @@ package org.springframework.cloud.skipper.domain;
 /**
  * @author Mark Pollack
  */
-public class DeployProperties extends CommonProperties {
+public class InstallProperties extends CommonProperties {
 
 	private String platformName;
 

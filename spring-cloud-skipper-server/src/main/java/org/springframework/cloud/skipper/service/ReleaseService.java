@@ -25,9 +25,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.skipper.domain.DeployProperties;
-import org.springframework.cloud.skipper.domain.DeployRequest;
 import org.springframework.cloud.skipper.domain.Info;
+import org.springframework.cloud.skipper.domain.InstallProperties;
+import org.springframework.cloud.skipper.domain.InstallRequest;
 import org.springframework.cloud.skipper.domain.Package;
 import org.springframework.cloud.skipper.domain.PackageIdentifier;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
@@ -46,7 +46,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
- * Service responsible for the lifecycle of packages and releases, deploy/undeploy a
+ * Service responsible for the lifecycle of packages and releases, install/undeploy a
  * package, update/rollback a release, and get status on a release.
  *
  * @author Mark Pollack
@@ -84,30 +84,30 @@ public class ReleaseService {
 	 * Downloads the package metadata and package zip file specified by the given Id and
 	 * deploys the package on the target platform.
 	 * @param id of the package
-	 * @param deployProperties contains the name of the release, the platfrom to deploy to,
+	 * @param installProperties contains the name of the release, the platfrom to deploy to,
 	 * and configuration values to replace in the package template.
 	 * @return the Release object associated with this deployment
 	 * @throws PackageException if the package to deploy can not be found.
 	 */
-	public Release deploy(String id, DeployProperties deployProperties) {
-		Assert.notNull(deployProperties, "Deploy properties can not be null");
+	public Release install(String id, InstallProperties installProperties) {
+		Assert.notNull(installProperties, "Deploy properties can not be null");
 		Assert.hasText(id, "Package id can not be null");
 		PackageMetadata packageMetadata = this.packageMetadataRepository.findOne(id);
 		if (packageMetadata == null) {
 			throw new PackageException(String.format("Package with id='%s' can not be found.", id));
 		}
-		return deploy(packageMetadata, deployProperties);
+		return install(packageMetadata, installProperties);
 	}
 
 	/**
 	 * Downloads the package metadata and package zip file specified by PackageIdentifier
 	 * property of the DeploymentRequest. Deploys the package on the target platform.
-	 * @param deployRequest the deploymentRequest
+	 * @param installRequest the install request
 	 * @return the Release object associated with this deployment
 	 */
-	public Release deploy(DeployRequest deployRequest) {
-		// TODO deployRequest validation.
-		PackageIdentifier packageIdentifier = deployRequest.getPackageIdentifier();
+	public Release install(InstallRequest installRequest) {
+		// TODO install request validation.
+		PackageIdentifier packageIdentifier = installRequest.getPackageIdentifier();
 		String packageName = packageIdentifier.getPackageName();
 		String packageVersion = packageIdentifier.getPackageVersion();
 		PackageMetadata packageMetadata;
@@ -132,12 +132,12 @@ public class ReleaseService {
 						packageName, packageVersion));
 			}
 		}
-		return deploy(packageMetadata.getId(), deployRequest.getDeployProperties());
+		return install(packageMetadata.getId(), installRequest.getInstallProperties());
 	}
 
-	protected Release deploy(PackageMetadata packageMetadata, DeployProperties deployProperties) {
+	protected Release install(PackageMetadata packageMetadata, InstallProperties installProperties) {
 		Assert.notNull(packageMetadata, "Can't download package, PackageMetadata is a null value.");
-		Release release = createInitialRelease(deployProperties, this.packageService.downloadPackage(packageMetadata));
+		Release release = createInitialRelease(installProperties, this.packageService.downloadPackage(packageMetadata));
 		return deploy(release);
 	}
 
@@ -304,11 +304,11 @@ public class ReleaseService {
 		return sb.toString();
 	}
 
-	protected Release createInitialRelease(DeployProperties deployProperties, Package packageToInstall) {
+	protected Release createInitialRelease(InstallProperties installProperties, Package packageToInstall) {
 		Release release = new Release();
-		release.setName(deployProperties.getReleaseName());
-		release.setPlatformName(deployProperties.getPlatformName());
-		release.setConfigValues(deployProperties.getConfigValues());
+		release.setName(installProperties.getReleaseName());
+		release.setPlatformName(installProperties.getPlatformName());
+		release.setConfigValues(installProperties.getConfigValues());
 		release.setPkg(packageToInstall);
 		release.setVersion(1);
 		Info info = createNewInfo();

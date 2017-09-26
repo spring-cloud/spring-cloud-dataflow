@@ -34,8 +34,8 @@ import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
 import org.springframework.cloud.skipper.client.SkipperClient;
-import org.springframework.cloud.skipper.domain.DeployProperties;
-import org.springframework.cloud.skipper.domain.DeployRequest;
+import org.springframework.cloud.skipper.domain.InstallProperties;
+import org.springframework.cloud.skipper.domain.InstallRequest;
 import org.springframework.cloud.skipper.domain.PackageIdentifier;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
 import org.springframework.cloud.skipper.domain.Release;
@@ -62,14 +62,14 @@ import static org.springframework.shell.standard.ShellOption.NULL;
  * @author Ilayaperumal Gopinathan
  */
 @ShellComponent
-public class PackageCommands extends AbstractSkipperCommand {
+public class SkipperCommands extends AbstractSkipperCommand {
 
 	@Autowired
-	public PackageCommands(SkipperClient skipperClient) {
+	public SkipperCommands(SkipperClient skipperClient) {
 		this.skipperClient = skipperClient;
 	}
 
-	@ShellMethod(key = "package search", value = "Search for the packages")
+	@ShellMethod(key = "search", value = "Search for the packages")
 	public Object searchPackage(
 			@ShellOption(help = "wildcard expression to search for the package name", defaultValue = NULL) String name,
 			@ShellOption(help = "boolean to set for more detailed package metadata") boolean details)
@@ -106,18 +106,18 @@ public class PackageCommands extends AbstractSkipperCommand {
 		}
 	}
 
-	@ShellMethod(key = "package deploy", value = "Deploy a package")
-	public String deploy(
-			@ShellOption(help = "name of the package to deploy") String name,
-			@ShellOption(help = "version of the package to deploy", defaultValue = NULL) String version,
+	@ShellMethod(key = "install", value = "Install a package")
+	public String installPackage(
+			@ShellOption(help = "name of the package to install") String name,
+			@ShellOption(help = "version of the package to install", defaultValue = NULL) String version,
 			// TODO specify a specific package repository
-			@ShellOption(help = "the properties file to use to deploy", defaultValue = NULL) File propertiesFile,
+			@ShellOption(help = "the properties file to use to install", defaultValue = NULL) File propertiesFile,
 			// TODO support generation of a release name
 			@ShellOption(help = "the release name to use") String releaseName,
 			@ShellOption(help = "the platform name to use", defaultValue = "default") String platformName)
 			throws IOException {
 		Release release = skipperClient
-				.deploy(getDeployRequest(name, version, propertiesFile, releaseName, platformName));
+				.installPackage(getInstallRequest(name, version, propertiesFile, releaseName, platformName));
 		return "Released " + release.getName();
 	}
 
@@ -126,7 +126,7 @@ public class PackageCommands extends AbstractSkipperCommand {
 			@ShellOption(help = "the name of the release to update") String releaseName,
 			@ShellOption(help = "the name of the package to use for the update") String packageName,
 			@ShellOption(help = "the version of the package to use for the update") String packageVersion,
-			@ShellOption(help = "the properties file to use to deploy", defaultValue = NULL) File propertiesFile)
+			@ShellOption(help = "the properties file to use to install", defaultValue = NULL) File propertiesFile)
 			throws IOException {
 		Release release = skipperClient
 				.update(getUpdateRequest(releaseName, packageName, packageVersion, propertiesFile));
@@ -176,20 +176,20 @@ public class PackageCommands extends AbstractSkipperCommand {
 		return updateRequest;
 	}
 
-	private DeployRequest getDeployRequest(String packageName, String packageVersion, File propertiesFile,
+	private InstallRequest getInstallRequest(String packageName, String packageVersion, File propertiesFile,
 			String releaseName, String platformName) throws IOException {
-		DeployProperties deployProperties = getDeployProperties(releaseName, platformName, propertiesFile);
-		DeployRequest deployRequest = new DeployRequest();
-		deployRequest.setDeployProperties(deployProperties);
+		InstallProperties installProperties = getInstallProperties(releaseName, platformName, propertiesFile);
+		InstallRequest installRequest = new InstallRequest();
+		installRequest.setInstallProperties(installProperties);
 		PackageIdentifier packageIdentifier = new PackageIdentifier();
 		packageIdentifier.setPackageName(packageName);
 		packageIdentifier.setPackageVersion(packageVersion);
-		deployRequest.setPackageIdentifier(packageIdentifier);
-		return deployRequest;
+		installRequest.setPackageIdentifier(packageIdentifier);
+		return installRequest;
 	}
 
-	@ShellMethod(key = "package upload", value = "Upload a package")
-	public String upload(@ShellOption(help = "the package to be uploaded") String path,
+	@ShellMethod(key = "upload", value = "Upload a package")
+	public String uploadPackage(@ShellOption(help = "the package to be uploaded") String path,
 			@ShellOption(help = "the local repository name to upload to", defaultValue = NULL) String repoName) {
 		UploadRequest properties = new UploadRequest();
 		try {
@@ -215,12 +215,12 @@ public class PackageCommands extends AbstractSkipperCommand {
 		return "Package uploaded successfully:[" + packageMetadata.getName() + ":" + packageMetadata.getVersion() + "]";
 	}
 
-	private DeployProperties getDeployProperties(String releaseName, String platformName, File propertiesFile)
+	private InstallProperties getInstallProperties(String releaseName, String platformName, File propertiesFile)
 			throws IOException {
-		DeployProperties deployProperties = new DeployProperties();
+		InstallProperties installProperties = new InstallProperties();
 		if (StringUtils.hasText(releaseName)) {
-			deployProperties.setReleaseName(releaseName);
-			deployProperties.setPlatformName(platformName);
+			installProperties.setReleaseName(releaseName);
+			installProperties.setPlatformName(platformName);
 		}
 		else {
 			String extension = FilenameUtils.getExtension(propertiesFile.getName());
@@ -240,13 +240,13 @@ public class PackageCommands extends AbstractSkipperCommand {
 			if (props != null) {
 				Assert.notNull(props.getProperty("release-name"), "Release name must not be null");
 				// TODO why set these here?
-				deployProperties.setReleaseName(props.getProperty("release-name"));
-				deployProperties.setPlatformName(props.getProperty("platform-name", platformName));
+				installProperties.setReleaseName(props.getProperty("release-name"));
+				installProperties.setPlatformName(props.getProperty("platform-name", platformName));
 				// TODO support config values from propertiesFile
-				// deployProperties.setConfigValues();
+				// installProperties.setConfigValues();
 			}
 		}
-		return deployProperties;
+		return installProperties;
 	}
 
 }

@@ -21,8 +21,8 @@ import org.junit.Before;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.skipper.AbstractMockMvcTests;
 import org.springframework.cloud.skipper.config.SkipperServerProperties;
-import org.springframework.cloud.skipper.domain.DeployProperties;
-import org.springframework.cloud.skipper.domain.DeployRequest;
+import org.springframework.cloud.skipper.domain.InstallProperties;
+import org.springframework.cloud.skipper.domain.InstallRequest;
 import org.springframework.cloud.skipper.domain.PackageIdentifier;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
 import org.springframework.cloud.skipper.domain.Release;
@@ -75,28 +75,28 @@ public abstract class AbstractControllerTests extends AbstractMockMvcTests {
 
 	protected Release deploy(String packageName, String packageVersion, String releaseName) throws Exception {
 		// Deploy
-		DeployProperties deployProperties = createDeployProperties(releaseName);
+		InstallProperties installProperties = createDeployProperties(releaseName);
 		PackageMetadata packageMetadata = this.packageMetadataRepository.findByNameAndVersion(packageName,
 				packageVersion);
 		assertThat(packageMetadata).isNotNull();
-		mockMvc.perform(post("/package/" + packageMetadata.getId() + "/deploy")
-				.content(convertObjectToJson(deployProperties))).andDo(print())
+		mockMvc.perform(post("/package/" + packageMetadata.getId() + "/install")
+				.content(convertObjectToJson(installProperties))).andDo(print())
 				.andExpect(status().isCreated()).andReturn();
 		Release deployedRelease = this.releaseRepository.findByNameAndVersion(releaseName, 1);
 		commonReleaseAssertions(releaseName, packageMetadata, deployedRelease);
 		return deployedRelease;
 	}
 
-	protected Release deploy(DeployRequest deployRequest) throws Exception {
-		mockMvc.perform(post("/package/deploy")
-				.content(convertObjectToJson(deployRequest))).andDo(print())
+	protected Release installPackage(InstallRequest installRequest) throws Exception {
+		mockMvc.perform(post("/package/install")
+				.content(convertObjectToJson(installRequest))).andDo(print())
 				.andExpect(status().isCreated()).andReturn();
 
-		String releaseName = deployRequest.getDeployProperties().getReleaseName();
+		String releaseName = installRequest.getInstallProperties().getReleaseName();
 		Release deployedRelease = this.releaseRepository.findByNameAndVersion(releaseName, 1);
 		PackageMetadata packageMetadata = this.packageMetadataRepository.findByNameAndVersion(
-				deployRequest.getPackageIdentifier().getPackageName(),
-				deployRequest.getPackageIdentifier().getPackageVersion());
+				installRequest.getPackageIdentifier().getPackageName(),
+				installRequest.getPackageIdentifier().getPackageVersion());
 		commonReleaseAssertions(releaseName, packageMetadata, deployedRelease);
 		return deployedRelease;
 	}
@@ -120,11 +120,11 @@ public abstract class AbstractControllerTests extends AbstractMockMvcTests {
 		return updatedRelease;
 	}
 
-	protected DeployProperties createDeployProperties(String releaseName) {
-		DeployProperties deployProperties = new DeployProperties();
-		deployProperties.setPlatformName("test");
-		deployProperties.setReleaseName(releaseName);
-		return deployProperties;
+	protected InstallProperties createDeployProperties(String releaseName) {
+		InstallProperties installProperties = new InstallProperties();
+		installProperties.setPlatformName("test");
+		installProperties.setReleaseName(releaseName);
+		return installProperties;
 	}
 
 	protected UpdateProperties createUpdateProperties(String releaseName) {

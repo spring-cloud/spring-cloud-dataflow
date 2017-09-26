@@ -24,8 +24,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.cloud.skipper.domain.AboutInfo;
-import org.springframework.cloud.skipper.domain.DeployProperties;
-import org.springframework.cloud.skipper.domain.DeployRequest;
+import org.springframework.cloud.skipper.domain.InstallProperties;
+import org.springframework.cloud.skipper.domain.InstallRequest;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
 import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.Repository;
@@ -106,15 +106,14 @@ public class DefaultSkipperClient implements SkipperClient {
 	}
 
 	@Override
-	public String deploy(String packageId, DeployProperties deployProperties) {
-		String url = String.format("%s/%s/%s/%s", baseUrl, "package", packageId, "deploy");
-		return this.restTemplate.postForObject(url, deployProperties, String.class);
+	public String installPackage(String packageId, InstallProperties installProperties) {
+		String url = String.format("%s/%s/%s/%s", baseUrl, "package", packageId, "install");
+		return this.restTemplate.postForObject(url, installProperties, String.class);
 	}
 
-	@Override
-	public Release deploy(DeployRequest deployRequest) {
-		String url = String.format("%s/%s/%s", baseUrl, "package", "deploy");
-		return this.restTemplate.postForObject(url, deployRequest, Release.class);
+	public Release installPackage(InstallRequest installRequest) {
+		String url = String.format("%s/%s/%s", baseUrl, "package", "install");
+		return this.restTemplate.postForObject(url, installRequest, Release.class);
 	}
 
 	@Override

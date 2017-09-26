@@ -35,7 +35,7 @@ public class PackageSummaryResourceProcessor implements ResourceProcessor<Resour
 	public Resource<PackageSummary> process(Resource<PackageSummary> packageSummaryResource) {
 		Link link = linkTo(
 				methodOn(PackageController.class).deploy(packageSummaryResource.getContent().getId(), null))
-						.withRel("deploy");
+						.withRel("install");
 		packageSummaryResource.add(link);
 		return packageSummaryResource;
 	}

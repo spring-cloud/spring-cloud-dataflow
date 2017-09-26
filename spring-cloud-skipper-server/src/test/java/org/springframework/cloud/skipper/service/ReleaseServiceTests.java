@@ -19,7 +19,7 @@ import org.junit.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.skipper.AbstractIntegrationTest;
-import org.springframework.cloud.skipper.domain.DeployProperties;
+import org.springframework.cloud.skipper.domain.InstallProperties;
 import org.springframework.cloud.skipper.index.PackageException;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -36,15 +36,15 @@ public class ReleaseServiceTests extends AbstractIntegrationTest {
 
 	@Test
 	public void testBadArguments() {
-		assertThatThrownBy(() -> releaseService.deploy("badId", new DeployProperties()))
+		assertThatThrownBy(() -> releaseService.install("badId", new InstallProperties()))
 				.isInstanceOf(PackageException.class)
 				.hasMessageContaining("can not be found");
 
-		assertThatThrownBy(() -> releaseService.deploy("badId", null))
+		assertThatThrownBy(() -> releaseService.install("badId", null))
 				.isInstanceOf(IllegalArgumentException.class)
 				.hasMessageContaining("Deploy properties can not be null");
 
-		assertThatThrownBy(() -> releaseService.deploy((String) null, new DeployProperties()))
+		assertThatThrownBy(() -> releaseService.install((String) null, new InstallProperties()))
 				.isInstanceOf(IllegalArgumentException.class)
 				.hasMessageContaining("Package id can not be null");
 

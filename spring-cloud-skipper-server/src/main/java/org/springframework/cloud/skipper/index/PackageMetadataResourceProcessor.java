@@ -34,10 +34,10 @@ public class PackageMetadataResourceProcessor implements ResourceProcessor<Resou
 
 	@Override
 	public Resource<PackageMetadata> process(Resource<PackageMetadata> packageMetadataResource) {
-		Link deployLink = linkTo(
+		Link installLink = linkTo(
 				methodOn(PackageController.class).deploy(packageMetadataResource.getContent().getId(), null))
-						.withRel("deploy");
-		packageMetadataResource.add(deployLink);
+						.withRel("install");
+		packageMetadataResource.add(installLink);
 		return packageMetadataResource;
 	}
 }

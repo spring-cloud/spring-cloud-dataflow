@@ -17,8 +17,8 @@ package org.springframework.cloud.skipper.controller;
 
 import org.junit.Test;
 
-import org.springframework.cloud.skipper.domain.DeployProperties;
-import org.springframework.cloud.skipper.domain.DeployRequest;
+import org.springframework.cloud.skipper.domain.InstallProperties;
+import org.springframework.cloud.skipper.domain.InstallRequest;
 import org.springframework.cloud.skipper.domain.PackageIdentifier;
 import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.test.context.ActiveProfiles;
@@ -46,18 +46,18 @@ public class PackageControllerTests extends AbstractControllerTests {
 	@Test
 	public void packageDeployRequest() throws Exception {
 		String releaseName = "myLog";
-		DeployRequest deployRequest = new DeployRequest();
+		InstallRequest installRequest = new InstallRequest();
 		PackageIdentifier packageIdentifier = new PackageIdentifier();
 		packageIdentifier.setPackageName("log");
 		packageIdentifier.setPackageVersion("1.0.0");
 		packageIdentifier.setRepositoryName("notused");
-		deployRequest.setPackageIdentifier(packageIdentifier);
-		DeployProperties deployProperties = new DeployProperties();
-		deployProperties.setReleaseName(releaseName);
-		deployProperties.setPlatformName("test");
-		deployRequest.setDeployProperties(deployProperties);
+		installRequest.setPackageIdentifier(packageIdentifier);
+		InstallProperties installProperties = new InstallProperties();
+		installProperties.setReleaseName(releaseName);
+		installProperties.setPlatformName("test");
+		installRequest.setInstallProperties(installProperties);
 
-		Release release = deploy(deployRequest);
+		Release release = installPackage(installRequest);
 		assertReleaseIsDeployedSuccessfully(releaseName, "1");
 		assertThat(release.getVersion()).isEqualTo(1);
 	}

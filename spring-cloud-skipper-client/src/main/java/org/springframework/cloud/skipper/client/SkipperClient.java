@@ -16,8 +16,8 @@
 package org.springframework.cloud.skipper.client;
 
 import org.springframework.cloud.skipper.domain.AboutInfo;
-import org.springframework.cloud.skipper.domain.DeployProperties;
-import org.springframework.cloud.skipper.domain.DeployRequest;
+import org.springframework.cloud.skipper.domain.InstallProperties;
+import org.springframework.cloud.skipper.domain.InstallRequest;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
 import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.Repository;
@@ -51,20 +51,20 @@ public interface SkipperClient {
 	Resources<PackageMetadata> getPackageMetadata(String name, boolean details);
 
 	/**
-	 * Deploy the package.
+	 * Install the package.
 	 *
 	 * @param packageId the package Id.
-	 * @param deployProperties the (@link DeployProperties)
+	 * @param installProperties the (@link InstallProperties)
 	 * @return the deployed {@link Release}
 	 */
-	String deploy(String packageId, DeployProperties deployProperties);
+	String installPackage(String packageId, InstallProperties installProperties);
 
 	/**
-	 * Deploy the package
-	 * @param deployRequest the package deploy request
-	 * @return the deployed {@link Release}
+	 * Install the package
+	 * @param installRequest the package installPackage request
+	 * @return the installed {@link Release}
 	 */
-	Release deploy(DeployRequest deployRequest);
+	Release installPackage(InstallRequest installRequest);
 
 	/**
 	 * Update the package.

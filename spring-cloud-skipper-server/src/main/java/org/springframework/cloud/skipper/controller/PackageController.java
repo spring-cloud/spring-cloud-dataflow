@@ -16,8 +16,8 @@
 package org.springframework.cloud.skipper.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.skipper.domain.DeployProperties;
-import org.springframework.cloud.skipper.domain.DeployRequest;
+import org.springframework.cloud.skipper.domain.InstallProperties;
+import org.springframework.cloud.skipper.domain.InstallRequest;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
 import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.UploadRequest;
@@ -51,16 +51,16 @@ public class PackageController {
 		this.packageService = packageService;
 	}
 
-	@RequestMapping(path = "/deploy", method = RequestMethod.POST)
+	@RequestMapping(path = "/install", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
-	public Release deploy(@RequestBody DeployRequest deployRequest) {
-		return this.releaseService.deploy(deployRequest);
+	public Release install(@RequestBody InstallRequest installRequest) {
+		return this.releaseService.install(installRequest);
 	}
 
-	@RequestMapping(path = "/{id}/deploy", method = RequestMethod.POST)
+	@RequestMapping(path = "/{id}/install", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
-	public Release deploy(@PathVariable("id") String id, @RequestBody DeployProperties deployProperties) {
-		return this.releaseService.deploy(id, deployProperties);
+	public Release deploy(@PathVariable("id") String id, @RequestBody InstallProperties installProperties) {
+		return this.releaseService.install(id, installProperties);
 	}
 
 	@RequestMapping(path = "/upload", method = RequestMethod.POST)

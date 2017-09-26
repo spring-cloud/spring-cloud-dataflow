@@ -18,11 +18,11 @@ package org.springframework.cloud.skipper.domain;
 /**
  * @author Mark Pollack
  */
-public class DeployRequest {
+public class InstallRequest {
 
 	private PackageIdentifier packageIdentifier;
 
-	private DeployProperties deployProperties;
+	private InstallProperties installProperties;
 
 	public PackageIdentifier getPackageIdentifier() {
 		return packageIdentifier;
@@ -32,11 +32,11 @@ public class DeployRequest {
 		this.packageIdentifier = packageIdentifier;
 	}
 
-	public DeployProperties getDeployProperties() {
-		return deployProperties;
+	public InstallProperties getInstallProperties() {
+		return installProperties;
 	}
 
-	public void setDeployProperties(DeployProperties deployProperties) {
-		this.deployProperties = deployProperties;
+	public void setInstallProperties(InstallProperties installProperties) {
+		this.installProperties = installProperties;
 	}
 }
