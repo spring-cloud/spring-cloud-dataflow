@@ -66,7 +66,7 @@ public abstract class AbstractControllerTests extends AbstractMockMvcTests {
 		Thread.sleep(5000);
 		for (Release release : releaseRepository.findAll()) {
 			if (release.getInfo().getStatus().getStatusCode() != StatusCode.DELETED) {
-				mockMvc.perform(post("/release/delete/" + release.getName()))
+				mockMvc.perform(post("/delete/" + release.getName()))
 						.andDo(print())
 						.andExpect(status().isCreated()).andReturn();
 			}
@@ -79,7 +79,7 @@ public abstract class AbstractControllerTests extends AbstractMockMvcTests {
 		PackageMetadata packageMetadata = this.packageMetadataRepository.findByNameAndVersion(packageName,
 				packageVersion);
 		assertThat(packageMetadata).isNotNull();
-		mockMvc.perform(post("/package/" + packageMetadata.getId() + "/install")
+		mockMvc.perform(post("/install/" + packageMetadata.getId())
 				.content(convertObjectToJson(installProperties))).andDo(print())
 				.andExpect(status().isCreated()).andReturn();
 		Release deployedRelease = this.releaseRepository.findByNameAndVersion(releaseName, 1);
@@ -88,7 +88,7 @@ public abstract class AbstractControllerTests extends AbstractMockMvcTests {
 	}
 
 	protected Release installPackage(InstallRequest installRequest) throws Exception {
-		mockMvc.perform(post("/package/install")
+		mockMvc.perform(post("/install")
 				.content(convertObjectToJson(installRequest))).andDo(print())
 				.andExpect(status().isCreated()).andReturn();
 
@@ -101,7 +101,7 @@ public abstract class AbstractControllerTests extends AbstractMockMvcTests {
 		return deployedRelease;
 	}
 
-	protected Release update(String packageName, String packageVersion, String releaseName) throws Exception {
+	protected Release upgrade(String packageName, String packageVersion, String releaseName) throws Exception {
 		UpgradeRequest upgradeRequest = new UpgradeRequest();
 		UpgradeProperties upgradeProperties = createUpdateProperties(releaseName);
 		PackageIdentifier packageIdentifier = new PackageIdentifier();
@@ -112,7 +112,7 @@ public abstract class AbstractControllerTests extends AbstractMockMvcTests {
 		PackageMetadata updatePackageMetadata = this.packageMetadataRepository.findByNameAndVersion(packageName,
 				packageVersion);
 		assertThat(updatePackageMetadata).isNotNull();
-		mockMvc.perform(post("/release/upgrade")
+		mockMvc.perform(post("/upgrade")
 				.content(convertObjectToJson(upgradeRequest))).andDo(print())
 				.andExpect(status().isCreated()).andReturn();
 		Release updatedRelease = this.releaseRepository.findByNameAndVersion(releaseName, 2);

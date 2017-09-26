@@ -16,10 +16,12 @@
 package org.springframework.cloud.skipper.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.skipper.domain.AboutInfo;
 import org.springframework.cloud.skipper.domain.InstallProperties;
 import org.springframework.cloud.skipper.domain.InstallRequest;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
 import org.springframework.cloud.skipper.domain.Release;
+import org.springframework.cloud.skipper.domain.UpgradeRequest;
 import org.springframework.cloud.skipper.domain.UploadRequest;
 import org.springframework.cloud.skipper.service.PackageService;
 import org.springframework.cloud.skipper.service.ReleaseService;
@@ -32,23 +34,35 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * REST controller for Package related operations such as (install/upgrade).
+ * REST controller for Skipper server related operations such as package install, Release upgrade, delete, rollback.
  *
  * @author Mark Pollack
  * @author Ilayaperumal Gopinathan
  */
 @RestController
-@RequestMapping("/package")
-public class PackageController {
+@RequestMapping("/")
+public class SkipperController {
 
-	private ReleaseService releaseService;
+	private final ReleaseService releaseService;
 
-	private PackageService packageService;
+	private final PackageService packageService;
 
 	@Autowired
-	public PackageController(ReleaseService releaseService, PackageService packageService) {
+	public SkipperController(ReleaseService releaseService, PackageService packageService) {
 		this.releaseService = releaseService;
 		this.packageService = packageService;
+	}
+
+	@RequestMapping(path = "/about", method = RequestMethod.GET)
+	@ResponseStatus(HttpStatus.OK)
+	public AboutInfo getAboutInfo() {
+		return new AboutInfo("1.0.0");
+	}
+
+	@RequestMapping(path = "/upload", method = RequestMethod.POST)
+	@ResponseStatus(HttpStatus.CREATED)
+	public PackageMetadata upload(@RequestBody UploadRequest uploadRequest) {
+		return this.packageService.upload(uploadRequest);
 	}
 
 	@RequestMapping(path = "/install", method = RequestMethod.POST)
@@ -57,15 +71,34 @@ public class PackageController {
 		return this.releaseService.install(installRequest);
 	}
 
-	@RequestMapping(path = "/{id}/install", method = RequestMethod.POST)
+	@RequestMapping(path = "/install/{id}", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
 	public Release deploy(@PathVariable("id") String id, @RequestBody InstallProperties installProperties) {
 		return this.releaseService.install(id, installProperties);
 	}
 
-	@RequestMapping(path = "/upload", method = RequestMethod.POST)
+	@RequestMapping(path = "/status/{name}/{version}", method = RequestMethod.GET)
+	@ResponseStatus(HttpStatus.OK)
+	public Release status(@PathVariable("name") String name, @PathVariable("version") int version) {
+		return this.releaseService.status(name, version);
+	}
+
+	@RequestMapping(path = "/upgrade", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
-	public PackageMetadata upload(@RequestBody UploadRequest uploadRequest) {
-		return this.packageService.upload(uploadRequest);
+	public Release upgrade(@RequestBody UpgradeRequest upgradeRequest) {
+		return this.releaseService.upgrade(upgradeRequest);
+	}
+
+	@RequestMapping(path = "/rollback/{name}/{version}", method = RequestMethod.POST)
+	@ResponseStatus(HttpStatus.CREATED)
+	public Release rollback(@PathVariable("name") String releaseName,
+			@PathVariable("version") int rollbackVersion) {
+		return this.releaseService.rollback(releaseName, rollbackVersion);
+	}
+
+	@RequestMapping(path = "/delete/{name}", method = RequestMethod.POST)
+	@ResponseStatus(HttpStatus.CREATED)
+	public Release delete(@PathVariable("name") String releaseName) {
+		return this.releaseService.delete(releaseName);
 	}
 }

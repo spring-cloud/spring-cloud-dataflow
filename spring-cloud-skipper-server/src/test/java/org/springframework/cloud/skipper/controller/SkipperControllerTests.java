@@ -17,6 +17,9 @@ package org.springframework.cloud.skipper.controller;
 
 import org.junit.Test;
 
+import org.springframework.cloud.skipper.domain.InstallProperties;
+import org.springframework.cloud.skipper.domain.InstallRequest;
+import org.springframework.cloud.skipper.domain.PackageIdentifier;
 import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.StatusCode;
 import org.springframework.test.context.ActiveProfiles;
@@ -34,7 +37,34 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ActiveProfiles("repo-test")
 @TestPropertySource(properties = { "spring.cloud.skipper.server.platform.local.accounts[test].key=value",
 		"maven.remote-repositories.repo1.url=http://repo.spring.io/libs-snapshot" })
-public class ReleaseControllerTests extends AbstractControllerTests {
+public class SkipperControllerTests extends AbstractControllerTests {
+
+	@Test
+	public void deployTickTock() throws Exception {
+		String releaseName = "myTicker";
+		Release release = deploy("ticktock", "1.0.0", "myTicker");
+		assertReleaseIsDeployedSuccessfully(releaseName, "1");
+		assertThat(release.getVersion()).isEqualTo(1);
+	}
+
+	@Test
+	public void packageDeployRequest() throws Exception {
+		String releaseName = "myLogRelease";
+		InstallRequest installRequest = new InstallRequest();
+		PackageIdentifier packageIdentifier = new PackageIdentifier();
+		packageIdentifier.setPackageName("log");
+		packageIdentifier.setPackageVersion("1.0.0");
+		packageIdentifier.setRepositoryName("notused");
+		installRequest.setPackageIdentifier(packageIdentifier);
+		InstallProperties installProperties = new InstallProperties();
+		installProperties.setReleaseName(releaseName);
+		installProperties.setPlatformName("test");
+		installRequest.setInstallProperties(installProperties);
+
+		Release release = installPackage(installRequest);
+		assertReleaseIsDeployedSuccessfully(releaseName, "1");
+		assertThat(release.getVersion()).isEqualTo(1);
+	}
 
 	@Test
 	public void checkDeployStatus() throws Exception {
@@ -46,7 +76,7 @@ public class ReleaseControllerTests extends AbstractControllerTests {
 		assertThat(release.getVersion()).isEqualTo(1);
 
 		// Undeploy
-		mockMvc.perform(post("/release/delete/" + releaseName)).andDo(print())
+		mockMvc.perform(post("/delete/" + releaseName)).andDo(print())
 				.andExpect(status().isCreated()).andReturn();
 		Release undeployedRelease = this.releaseRepository.findByNameAndVersion(releaseName, 1);
 		assertThat(undeployedRelease.getInfo().getStatus().getStatusCode()).isEqualTo(StatusCode.DELETED);
@@ -63,14 +93,14 @@ public class ReleaseControllerTests extends AbstractControllerTests {
 
 		// Update
 		String releaseVersion = "2";
-		release = update("log", "1.1.0", releaseName);
+		release = upgrade("log", "1.1.0", releaseName);
 		assertReleaseIsDeployedSuccessfully(releaseName, releaseVersion);
 		assertThat(release.getVersion()).isEqualTo(2);
 
 		// Rollback to release version 1, creating a third release version equivalent to
 		// the 1st.
 		releaseVersion = "3";
-		mockMvc.perform(post("/release/rollback/" + releaseName + "/" + 1)).andDo(print())
+		mockMvc.perform(post("/rollback/" + releaseName + "/" + 1)).andDo(print())
 				.andExpect(status().isCreated()).andReturn();
 		release = this.releaseRepository.findByNameAndVersion(releaseName, Integer.valueOf(releaseVersion));
 		assertReleaseIsDeployedSuccessfully(releaseName, "3");
@@ -79,7 +109,7 @@ public class ReleaseControllerTests extends AbstractControllerTests {
 		assertThat(release.getInfo().getStatus().getStatusCode()).isEqualTo(StatusCode.DEPLOYED);
 
 		// Undeploy
-		mockMvc.perform(post("/release/delete/" + releaseName))
+		mockMvc.perform(post("/delete/" + releaseName))
 				.andDo(print())
 				.andExpect(status().isCreated()).andReturn();
 		Release undeployedRelease = this.releaseRepository.findByNameAndVersion(releaseName,
@@ -88,14 +118,14 @@ public class ReleaseControllerTests extends AbstractControllerTests {
 	}
 
 	@Test
-	public void packageDeployAndUpdate() throws Exception {
+	public void packageDeployAndUpgrade() throws Exception {
 		String releaseName = "myLog";
 		Release release = deploy("log", "1.0.0", releaseName);
 		assertReleaseIsDeployedSuccessfully(releaseName, "1");
 		assertThat(release.getVersion()).isEqualTo(1);
 
-		// Update
-		release = update("log", "1.1.0", releaseName);
+		// Upgrade
+		release = upgrade("log", "1.1.0", releaseName);
 		assertReleaseIsDeployedSuccessfully(releaseName, "2");
 		assertThat(release.getVersion()).isEqualTo(2);
 	}

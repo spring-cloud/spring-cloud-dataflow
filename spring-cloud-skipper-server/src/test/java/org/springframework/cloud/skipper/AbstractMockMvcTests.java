@@ -85,7 +85,7 @@ public abstract class AbstractMockMvcTests {
 
 	private boolean isDeployed(String releaseName, String releaseVersion) {
 		try {
-			MvcResult result = mockMvc.perform(get(String.format("/release/status/%s/%s", releaseName, releaseVersion)))
+			MvcResult result = mockMvc.perform(get(String.format("/status/%s/%s", releaseName, releaseVersion)))
 					.andDo(print()).andReturn();
 			String content = result.getResponse().getContentAsString();
 			return content.startsWith(getSuccessStatus(releaseName, releaseVersion));

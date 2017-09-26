@@ -107,30 +107,30 @@ public class DefaultSkipperClient implements SkipperClient {
 
 	@Override
 	public String installPackage(String packageId, InstallProperties installProperties) {
-		String url = String.format("%s/%s/%s/%s", baseUrl, "package", packageId, "install");
+		String url = String.format("%s/%s/%s", baseUrl, "install", packageId);
 		return this.restTemplate.postForObject(url, installProperties, String.class);
 	}
 
 	public Release installPackage(InstallRequest installRequest) {
-		String url = String.format("%s/%s/%s", baseUrl, "package", "install");
+		String url = String.format("%s/%s", baseUrl, "install");
 		return this.restTemplate.postForObject(url, installRequest, Release.class);
 	}
 
 	@Override
 	public Release upgrade(UpgradeRequest upgradeRequest) {
-		String url = String.format("%s/%s/%s", baseUrl, "release", "upgrade");
+		String url = String.format("%s/%s", baseUrl, "upgrade");
 		return this.restTemplate.postForObject(url, upgradeRequest, Release.class);
 	}
 
 	@Override
 	public Release delete(String releaseName) {
-		String url = String.format("%s/%s/%s/%s", baseUrl, "release", "delete", releaseName);
+		String url = String.format("%s/%s/%s", baseUrl, "delete", releaseName);
 		return this.restTemplate.postForObject(url, null, Release.class);
 	}
 
 	@Override
 	public Release rollback(String releaseName, int releaseVersion) {
-		String url = String.format("%s/%s/%s/%s/%s", baseUrl, "release", "rollback", releaseName, releaseVersion);
+		String url = String.format("%s/%s/%s/%s", baseUrl, "rollback", releaseName, releaseVersion);
 		return this.restTemplate.postForObject(url, null, Release.class);
 	}
 
@@ -165,7 +165,7 @@ public class DefaultSkipperClient implements SkipperClient {
 
 	@Override
 	public PackageMetadata upload(UploadRequest uploadRequest) {
-		String url = String.format("%s/%s/%s", baseUrl, "package", "upload");
+		String url = String.format("%s/%s/%s", baseUrl, "upload");
 		return this.restTemplate.postForObject(url, uploadRequest, PackageMetadata.class);
 	}
 
