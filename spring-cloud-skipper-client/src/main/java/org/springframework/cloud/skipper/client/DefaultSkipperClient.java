@@ -123,8 +123,8 @@ public class DefaultSkipperClient implements SkipperClient {
 	}
 
 	@Override
-	public Release undeploy(String releaseName) {
-		String url = String.format("%s/%s/%s/%s", baseUrl, "release", "undeploy", releaseName);
+	public Release delete(String releaseName) {
+		String url = String.format("%s/%s/%s/%s", baseUrl, "release", "delete", releaseName);
 		return this.restTemplate.postForObject(url, null, Release.class);
 	}
 

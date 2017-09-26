@@ -46,7 +46,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
- * Service responsible for the lifecycle of packages and releases, install/undeploy a
+ * Service responsible for the lifecycle of packages and releases, install/delete a
  * package, upgrade/rollback a release, and get status on a release.
  *
  * @author Mark Pollack
@@ -150,7 +150,7 @@ public class ReleaseService {
 		return this.releaseManager.deploy(release);
 	}
 
-	public Release undeploy(String releaseName) {
+	public Release delete(String releaseName) {
 		Assert.notNull(releaseName, "Release name must not be null");
 		Release release = this.releaseRepository.findLatestRelease(releaseName);
 		return this.releaseManager.undeploy(release);

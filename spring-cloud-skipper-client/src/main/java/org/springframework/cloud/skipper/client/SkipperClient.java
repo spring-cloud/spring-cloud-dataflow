@@ -82,12 +82,12 @@ public interface SkipperClient {
 	PackageMetadata upload(UploadRequest uploadRequest);
 
 	/**
-	 * Undeploy a specific release.
+	 * Delete a specific release.
 	 *
 	 * @param releaseName the release name
-	 * @return the un-deployed {@link Release}
+	 * @return the deleted {@link Release}
 	 */
-	Release undeploy(String releaseName);
+	Release delete(String releaseName);
 
 	/**
 	 * Rollback a specific release.

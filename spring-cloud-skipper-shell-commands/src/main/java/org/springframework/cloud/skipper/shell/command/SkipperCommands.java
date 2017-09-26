@@ -139,7 +139,7 @@ public class SkipperCommands extends AbstractSkipperCommand {
 		return sb.toString();
 	}
 
-	@ShellMethod(key = "package rollback", value = "Rollback the package to a previous release")
+	@ShellMethod(key = "rollback", value = "Rollback the release to a previous or a specific release")
 	public String rollback(
 			@ShellOption(help = "the name of the release to rollback") String releaseName,
 			@ShellOption(help = "the specific release version to rollback to. " +
@@ -152,10 +152,10 @@ public class SkipperCommands extends AbstractSkipperCommand {
 		return sb.toString();
 	}
 
-	@ShellMethod(key = "package undeploy", value = "Undeploy the package")
+	@ShellMethod(key = "delete", value = "Delete the release")
 	public String undeploy(
-			@ShellOption(help = "the name of the release to undeploy") String releaseName) {
-		Release release = skipperClient.undeploy(releaseName);
+			@ShellOption(help = "the name of the release to delete") String releaseName) {
+		Release release = skipperClient.delete(releaseName);
 		StringBuilder sb = new StringBuilder();
 		sb.append(release.getName() + " has been undeployed.\n");
 		return sb.toString();

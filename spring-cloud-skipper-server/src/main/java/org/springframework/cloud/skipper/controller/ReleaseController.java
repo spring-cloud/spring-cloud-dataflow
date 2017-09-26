@@ -55,10 +55,10 @@ public class ReleaseController {
 		return this.releaseService.upgrade(upgradeRequest);
 	}
 
-	@RequestMapping(path = "/undeploy/{name}", method = RequestMethod.POST)
+	@RequestMapping(path = "/delete/{name}", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
-	public Release undeploy(@PathVariable("name") String releaseName) {
-		return this.releaseService.undeploy(releaseName);
+	public Release delete(@PathVariable("name") String releaseName) {
+		return this.releaseService.delete(releaseName);
 	}
 
 	@RequestMapping(path = "/rollback/{name}/{version}", method = RequestMethod.POST)
