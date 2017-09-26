@@ -31,7 +31,7 @@ public class DeployerRepositoryImpl implements DeployerRepositoryCustom {
 	public Deployer findByNameRequired(String name) {
 		Deployer deployer = deployerRepository.findByName(name);
 		if (deployer == null) {
-			throw new PackageException(String.format("Can not deploy, no deployer named '%s'", name));
+			throw new PackageException(String.format("Can not install, no deployer named '%s'", name));
 		}
 		return deployer;
 	}

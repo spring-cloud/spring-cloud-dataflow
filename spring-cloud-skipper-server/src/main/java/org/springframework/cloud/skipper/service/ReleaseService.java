@@ -84,10 +84,10 @@ public class ReleaseService {
 	 * Downloads the package metadata and package zip file specified by the given Id and
 	 * deploys the package on the target platform.
 	 * @param id of the package
-	 * @param installProperties contains the name of the release, the platfrom to deploy to,
+	 * @param installProperties contains the name of the release, the platfrom to install to,
 	 * and configuration values to replace in the package template.
 	 * @return the Release object associated with this deployment
-	 * @throws PackageException if the package to deploy can not be found.
+	 * @throws PackageException if the package to install can not be found.
 	 */
 	public Release install(String id, InstallProperties installProperties) {
 		Assert.notNull(installProperties, "Deploy properties can not be null");
@@ -138,22 +138,22 @@ public class ReleaseService {
 	protected Release install(PackageMetadata packageMetadata, InstallProperties installProperties) {
 		Assert.notNull(packageMetadata, "Can't download package, PackageMetadata is a null value.");
 		Release release = createInitialRelease(installProperties, this.packageService.downloadPackage(packageMetadata));
-		return deploy(release);
+		return install(release);
 	}
 
-	protected Release deploy(Release release) {
+	protected Release install(Release release) {
 		Map<String, Object> mergedMap = ConfigValueUtils.mergeConfigValues(release.getPkg(), release.getConfigValues());
 		// Render yaml resources
 		String manifest = createManifest(release.getPkg(), mergedMap);
 		release.setManifest(manifest);
 		// Deployment
-		return this.releaseManager.deploy(release);
+		return this.releaseManager.install(release);
 	}
 
 	public Release delete(String releaseName) {
 		Assert.notNull(releaseName, "Release name must not be null");
 		Release release = this.releaseRepository.findLatestRelease(releaseName);
-		return this.releaseManager.undeploy(release);
+		return this.releaseManager.delete(release);
 	}
 
 	public Release status(String releaseName, Integer version) {
@@ -217,9 +217,9 @@ public class ReleaseService {
 	public Release upgrade(Release existingRelease, Release replacingRelease) {
 		Assert.notNull(existingRelease, "Existing Release must not be null");
 		Assert.notNull(replacingRelease, "Replacing Release must not be null");
-		Release release = this.releaseManager.deploy(replacingRelease);
+		Release release = this.releaseManager.install(replacingRelease);
 		// TODO UpgradeStrategy (manfiestSave, healthCheck)
-		this.releaseManager.undeploy(existingRelease);
+		this.releaseManager.delete(existingRelease);
 		return status(release);
 	}
 

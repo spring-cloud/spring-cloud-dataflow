@@ -28,7 +28,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * REST controller for Release related operations such as un-deploy/rollback/status etc.
+ * REST controller for Release related operations such as delete /rollback/status etc.
  *
  * @author Ilayaperumal Gopinathan
  */

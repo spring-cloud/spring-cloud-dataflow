@@ -61,7 +61,7 @@ public abstract class AbstractControllerTests extends AbstractMockMvcTests {
 
 	@After
 	public void cleanupReleases() throws Exception {
-		// Add a sleep for now to give the local deployer a chance to deploy the app. This
+		// Add a sleep for now to give the local deployer a chance to install the app. This
 		// should go away once we introduce spring state machine.
 		Thread.sleep(5000);
 		for (Release release : releaseRepository.findAll()) {

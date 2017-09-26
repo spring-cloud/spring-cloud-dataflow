@@ -29,11 +29,10 @@ import org.springframework.cloud.skipper.domain.Release;
  */
 public interface ReleaseManager {
 
-	Release deploy(Release release);
+	Release install(Release release);
 
-	Release undeploy(Release release);
+	Release delete(Release release);
 
 	Release status(Release release);
 
-	// void updateStatus(Release release);
 }

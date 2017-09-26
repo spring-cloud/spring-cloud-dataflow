@@ -80,7 +80,7 @@ public class AppDeployerReleaseManager implements ReleaseManager {
 		this.deployerRepository = deployerRepository;
 	}
 
-	public Release deploy(Release releaseInput) {
+	public Release install(Release releaseInput) {
 
 		Release release = this.releaseRepository.save(releaseInput);
 
@@ -146,7 +146,7 @@ public class AppDeployerReleaseManager implements ReleaseManager {
 		return release;
 	}
 
-	public Release undeploy(Release release) {
+	public Release delete(Release release) {
 		AppDeployer appDeployer = this.deployerRepository.findByNameRequired(release.getPlatformName())
 				.getAppDeployer();
 		Set<String> deploymentIds = new HashSet<>();
