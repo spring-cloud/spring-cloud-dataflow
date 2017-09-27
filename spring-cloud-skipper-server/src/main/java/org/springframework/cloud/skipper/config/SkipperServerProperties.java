@@ -15,7 +15,6 @@
  */
 package org.springframework.cloud.skipper.config;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,14 +35,8 @@ public class SkipperServerProperties {
 	private List<Repository> packageRepositories = new ArrayList<>();
 
 	/**
-	 * TODO: Only used by the FileManifestStore, to be removed and replaced with
-	 * DbManifestStore
-	 */
-	private String skipperHome = System.getProperty("user.home") + File.separator + ".skipper";
-
-	/**
-	 * Flag indicating to sync the local contents of the index directory with the database on
-	 * startup.
+	 * Flag indicating to sync the local contents of the index directory with the database
+	 * on startup.
 	 */
 	private boolean synchonizeIndexOnContextRefresh = true;
 
@@ -53,14 +46,6 @@ public class SkipperServerProperties {
 
 	public void setPackageRepositories(List<Repository> packageRepositories) {
 		this.packageRepositories = packageRepositories;
-	}
-
-	public String getSkipperHome() {
-		return skipperHome;
-	}
-
-	public void setSkipperHome(String skipperHome) {
-		this.skipperHome = skipperHome;
 	}
 
 	public boolean isSynchonizeIndexOnContextRefresh() {

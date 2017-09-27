@@ -59,8 +59,6 @@ public class Release extends AbstractEntity {
 	@Lob
 	private String configValuesString;
 
-	//TODO Since we store the release manifest now in the DB, we don't need the ManifestStore unless we want to also
-	//     store external, e.g git.
 	@Lob
 	private String manifest;
 

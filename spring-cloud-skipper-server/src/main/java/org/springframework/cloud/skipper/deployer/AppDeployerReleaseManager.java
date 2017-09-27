@@ -42,7 +42,6 @@ import org.springframework.cloud.skipper.domain.Status;
 import org.springframework.cloud.skipper.domain.StatusCode;
 import org.springframework.cloud.skipper.repository.DeployerRepository;
 import org.springframework.cloud.skipper.repository.ReleaseRepository;
-import org.springframework.cloud.skipper.service.ManifestStore;
 import org.springframework.cloud.skipper.service.ReleaseManager;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
@@ -59,8 +58,6 @@ public class AppDeployerReleaseManager implements ReleaseManager {
 
 	private final ReleaseRepository releaseRepository;
 
-	private final ManifestStore manifestStore;
-
 	private final DelegatingResourceLoader delegatingResourceLoader;
 
 	private final AppDeployerDataRepository appDeployerDataRepository;
@@ -69,12 +66,10 @@ public class AppDeployerReleaseManager implements ReleaseManager {
 
 	@Autowired
 	public AppDeployerReleaseManager(ReleaseRepository releaseRepository,
-			ManifestStore manifestStore,
 			AppDeployerDataRepository appDeployerDataRepository,
 			DelegatingResourceLoader delegatingResourceLoader,
 			DeployerRepository deployerRepository) {
 		this.releaseRepository = releaseRepository;
-		this.manifestStore = manifestStore;
 		this.appDeployerDataRepository = appDeployerDataRepository;
 		this.delegatingResourceLoader = delegatingResourceLoader;
 		this.deployerRepository = deployerRepository;
@@ -83,8 +78,6 @@ public class AppDeployerReleaseManager implements ReleaseManager {
 	public Release install(Release releaseInput) {
 
 		Release release = this.releaseRepository.save(releaseInput);
-
-		this.manifestStore.store(release);
 
 		// Deploy the application
 		List<Deployment> appDeployments = unmarshallDeployments(release.getManifest());
