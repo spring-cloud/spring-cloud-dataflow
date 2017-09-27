@@ -59,6 +59,7 @@ import org.springframework.util.StringUtils;
 import static org.springframework.shell.standard.ShellOption.NULL;
 
 /**
+ * The main skipper commands that deal with packages and releases.
  * @author Ilayaperumal Gopinathan
  * @author Mark Pollack
  */
@@ -71,7 +72,7 @@ public class SkipperCommands extends AbstractSkipperCommand {
 	}
 
 	@ShellMethod(key = "search", value = "Search for the packages")
-	public Object searchPackage(
+	public Object search(
 			@ShellOption(help = "wildcard expression to search for the package name", defaultValue = NULL) String name,
 			@ShellOption(help = "boolean to set for more detailed package metadata") boolean details)
 			throws Exception {
@@ -108,7 +109,7 @@ public class SkipperCommands extends AbstractSkipperCommand {
 	}
 
 	@ShellMethod(key = "install", value = "Install a package")
-	public String installPackage(
+	public String install(
 			@ShellOption(help = "name of the package to install") String name,
 			@ShellOption(help = "version of the package to install", defaultValue = NULL) String version,
 			// TODO specify a specific package repository
@@ -125,14 +126,56 @@ public class SkipperCommands extends AbstractSkipperCommand {
 		return "Released " + release.getName();
 	}
 
+	private InstallRequest getInstallRequest(String packageName, String packageVersion, File yamlFile,
+			String propertyString, String releaseName, String platformName) throws IOException {
+		InstallProperties installProperties = getInstallProperties(releaseName, platformName, yamlFile,
+				propertyString);
+		InstallRequest installRequest = new InstallRequest();
+		installRequest.setInstallProperties(installProperties);
+		PackageIdentifier packageIdentifier = new PackageIdentifier();
+		packageIdentifier.setPackageName(packageName);
+		packageIdentifier.setPackageVersion(packageVersion);
+		installRequest.setPackageIdentifier(packageIdentifier);
+		return installRequest;
+	}
+
+	private InstallProperties getInstallProperties(String releaseName, String platformName, File yamlFile,
+			String propertiesToOverride) throws IOException {
+		InstallProperties installProperties = new InstallProperties();
+		if (StringUtils.hasText(releaseName)) {
+			installProperties.setReleaseName(releaseName);
+		}
+		// There is a 'default' value for platformName
+		installProperties.setPlatformName(platformName);
+		String configValuesYML = getYamlConfigValues(yamlFile, propertiesToOverride);
+		if (StringUtils.hasText(configValuesYML)) {
+			ConfigValues configValues = new ConfigValues();
+			configValues.setRaw(configValuesYML);
+			installProperties.setConfigValues(configValues);
+		}
+		return installProperties;
+	}
+
+	private String getYamlConfigValues(File yamlFile, String propertiesAsCsvString) throws IOException {
+		String configValuesYML = null;
+		if (yamlFile != null) {
+			Yaml yaml = new Yaml();
+			// Validate it is yaml formatted.
+			configValuesYML = yaml.dump(yaml.load(new FileInputStream(yamlFile)));
+		}
+		else if (StringUtils.hasText(propertiesAsCsvString)) {
+			configValuesYML = YmlUtils.convertFromCsvToYaml(propertiesAsCsvString);
+		}
+		return configValuesYML;
+	}
+
 	@ShellMethod(key = "upgrade", value = "Upgrade a release")
-	public String upgradeRelease(
+	public String upgrade(
 			@ShellOption(help = "the name of the release to upgrade") String releaseName,
 			@ShellOption(help = "the name of the package to use for the upgrade") String packageName,
 			@ShellOption(help = "the version of the package to use for the upgrade") String packageVersion,
 			@ShellOption(help = "specify values in a YAML file", defaultValue = NULL) File file,
-			@ShellOption(help = "the comma separated set of properties to override during upgrade",
-					defaultValue = NULL) String propertyString)
+			@ShellOption(help = "the comma separated set of properties to override during upgrade", defaultValue = NULL) String propertyString)
 			throws IOException {
 		assertMutuallyExclusiveFileAndProperties(file, propertyString);
 		Release release = skipperClient
@@ -152,6 +195,26 @@ public class SkipperCommands extends AbstractSkipperCommand {
 			Assert.isTrue((extension.equalsIgnoreCase("yml") || extension.equalsIgnoreCase("yaml")),
 					"The file should be YAML file");
 		}
+	}
+
+	private UpgradeRequest getUpgradeRequest(String releaseName, String packageName, String packageVersion,
+			File propertiesFile, String propertiesToOverride) throws IOException {
+		UpgradeRequest upgradeRequest = new UpgradeRequest();
+		UpgradeProperties upgradeProperties = new UpgradeProperties();
+		upgradeProperties.setReleaseName(releaseName);
+		String configValuesYML = getYamlConfigValues(propertiesFile, propertiesToOverride);
+		if (StringUtils.hasText(configValuesYML)) {
+			ConfigValues configValues = new ConfigValues();
+			configValues.setRaw(configValuesYML);
+			upgradeProperties.setConfigValues(configValues);
+		}
+		upgradeRequest.setUpgradeProperties(upgradeProperties);
+		PackageIdentifier packageIdentifier = new PackageIdentifier();
+		packageIdentifier.setPackageName(packageName);
+		packageIdentifier.setPackageVersion(packageVersion);
+		upgradeRequest.setPackageIdentifier(packageIdentifier);
+		upgradeRequest.setPackageIdentifier(packageIdentifier);
+		return upgradeRequest;
 	}
 
 	@ShellMethod(key = "rollback", value = "Rollback the release to a previous or a specific release")
@@ -176,41 +239,8 @@ public class SkipperCommands extends AbstractSkipperCommand {
 		return sb.toString();
 	}
 
-	private UpgradeRequest getUpgradeRequest(String releaseName, String packageName, String packageVersion,
-			File propertiesFile, String propertiesToOverride) throws IOException {
-		UpgradeRequest upgradeRequest = new UpgradeRequest();
-		UpgradeProperties upgradeProperties = new UpgradeProperties();
-		upgradeProperties.setReleaseName(releaseName);
-		String configValuesYML = getYamlConfigValues(propertiesFile, propertiesToOverride);
-		if (StringUtils.hasText(configValuesYML)) {
-			ConfigValues configValues = new ConfigValues();
-			configValues.setRaw(configValuesYML);
-			upgradeProperties.setConfigValues(configValues);
-		}
-		upgradeRequest.setUpgradeProperties(upgradeProperties);
-		PackageIdentifier packageIdentifier = new PackageIdentifier();
-		packageIdentifier.setPackageName(packageName);
-		packageIdentifier.setPackageVersion(packageVersion);
-		upgradeRequest.setPackageIdentifier(packageIdentifier);
-		upgradeRequest.setPackageIdentifier(packageIdentifier);
-		return upgradeRequest;
-	}
-
-	private InstallRequest getInstallRequest(String packageName, String packageVersion, File yamlFile,
-			String propertyString, String releaseName, String platformName) throws IOException {
-		InstallProperties installProperties = getInstallProperties(releaseName, platformName, yamlFile,
-				propertyString);
-		InstallRequest installRequest = new InstallRequest();
-		installRequest.setInstallProperties(installProperties);
-		PackageIdentifier packageIdentifier = new PackageIdentifier();
-		packageIdentifier.setPackageName(packageName);
-		packageIdentifier.setPackageVersion(packageVersion);
-		installRequest.setPackageIdentifier(packageIdentifier);
-		return installRequest;
-	}
-
 	@ShellMethod(key = "upload", value = "Upload a package")
-	public String uploadPackage(@ShellOption(help = "the package to be uploaded") String path,
+	public String upload(@ShellOption(help = "the package to be uploaded") String path,
 			@ShellOption(help = "the local repository name to upload to", defaultValue = NULL) String repoName) {
 		UploadRequest properties = new UploadRequest();
 		try {
@@ -235,35 +265,4 @@ public class SkipperCommands extends AbstractSkipperCommand {
 		PackageMetadata packageMetadata = skipperClient.upload(properties);
 		return "Package uploaded successfully:[" + packageMetadata.getName() + ":" + packageMetadata.getVersion() + "]";
 	}
-
-	private InstallProperties getInstallProperties(String releaseName, String platformName, File yamlFile,
-			String propertiesToOverride) throws IOException {
-		InstallProperties installProperties = new InstallProperties();
-		if (StringUtils.hasText(releaseName)) {
-			installProperties.setReleaseName(releaseName);
-		}
-		//There is a 'default' value for platformName
-		installProperties.setPlatformName(platformName);
-		String configValuesYML = getYamlConfigValues(yamlFile, propertiesToOverride);
-		if (StringUtils.hasText(configValuesYML)) {
-			ConfigValues configValues = new ConfigValues();
-			configValues.setRaw(configValuesYML);
-			installProperties.setConfigValues(configValues);
-		}
-		return installProperties;
-	}
-
-	private String getYamlConfigValues(File yamlFile, String propertiesAsCsvString) throws IOException {
-		String configValuesYML = null;
-		if (yamlFile != null) {
-			Yaml yaml = new Yaml();
-			// Validate it is yaml formatted.
-			configValuesYML = yaml.dump(yaml.load(new FileInputStream(yamlFile)));
-		}
-		else if (StringUtils.hasText(propertiesAsCsvString)) {
-			configValuesYML = YmlUtils.convertFromCsvToYaml(propertiesAsCsvString);
-		}
-		return configValuesYML;
-	}
-
 }
