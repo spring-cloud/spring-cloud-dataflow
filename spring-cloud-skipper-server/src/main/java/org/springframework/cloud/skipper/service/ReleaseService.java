@@ -324,4 +324,35 @@ public class ReleaseService {
 	protected void validateInitialRelease(Release release) {
 		this.deployerRepository.findByNameRequired(release.getPlatformName());
 	}
+
+	/**
+	 * List the history of versions for a given release.
+	 *
+	 * @param  releaseName the release name of the release to search for
+	 * @param  maxRevisions the maximum number of revisions to get
+	 * @return the list of all releases by the given name and revisions max.
+	 */
+	public List<Release> history(String releaseName, int maxRevisions) {
+		return this.releaseRepository.findReleaseRevisions(releaseName, maxRevisions);
+	}
+
+
+	/**
+	 * List the latest version of releases with status of deployed or failed.
+	 *
+	 * @param  releaseNameLike the wildcard name of releases to search for
+	 * @return the list of all matching releases
+	 */
+	public List<Release> list(String releaseNameLike) {
+		return this.releaseRepository.findLatestDeployedOrFailed(releaseNameLike);
+	}
+
+	/**
+	 * Get the latest revision of all releases with status of deployed or failed state.
+	 *
+	 * @return the list of all matching releases
+	 */
+	public List<Release> list() {
+		return this.releaseRepository.findLatestDeployedOrFailed();
+	}
 }

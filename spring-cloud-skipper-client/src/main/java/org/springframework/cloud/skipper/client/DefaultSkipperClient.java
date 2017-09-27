@@ -18,6 +18,7 @@ package org.springframework.cloud.skipper.client;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -36,6 +37,7 @@ import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.Resources;
 import org.springframework.hateoas.client.Traverson;
+import org.springframework.http.HttpMethod;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
@@ -132,6 +134,40 @@ public class DefaultSkipperClient implements SkipperClient {
 	public Release rollback(String releaseName, int releaseVersion) {
 		String url = String.format("%s/%s/%s/%s", baseUrl, "rollback", releaseName, releaseVersion);
 		return this.restTemplate.postForObject(url, null, Release.class);
+	}
+
+	@Override
+	public List<Release> list(String releaseNameLike) {
+		ParameterizedTypeReference<List<Release>> typeReference = new ParameterizedTypeReference<List<Release>>() {
+		};
+		String url;
+		if (StringUtils.hasText(releaseNameLike)) {
+			url = String.format("%s/%s/%s", baseUrl, "list", releaseNameLike);
+		}
+		else {
+			url = String.format("%s/%s", baseUrl, "list");
+		}
+		return this.restTemplate.exchange(url, HttpMethod.GET, null, typeReference, new HashMap<>()).getBody();
+	}
+
+	@Override
+	public List<Release> history(String releaseName, String maxRevisions) {
+		ParameterizedTypeReference<List<Release>> typeReference = new ParameterizedTypeReference<List<Release>>() {
+		};
+		Map<String, Object> parameters = new HashMap<>();
+		String url = String.format("%s/%s/%s/%s", baseUrl, "history", releaseName, maxRevisions);
+		return this.restTemplate.exchange(url, HttpMethod.GET, null, typeReference, parameters).getBody();
+	}
+
+	@Override
+	public Resources<Release> history(String releaseName) {
+		ParameterizedTypeReference<Resources<Release>> typeReference = new ParameterizedTypeReference<Resources<Release>>() {
+		};
+		Map<String, Object> parameters = new HashMap<>();
+		parameters.put("name", releaseName);
+		Traverson.TraversalBuilder traversalBuilder = this.traverson.follow("releases", "search",
+				"findByNameIgnoreCaseContainingOrderByNameAscVersionDesc");
+		return traversalBuilder.withTemplateParameters(parameters).toObject(typeReference);
 	}
 
 	@Override

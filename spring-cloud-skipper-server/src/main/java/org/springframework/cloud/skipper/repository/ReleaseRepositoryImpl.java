@@ -15,8 +15,12 @@
  */
 package org.springframework.cloud.skipper.repository;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.skipper.domain.Release;
+import org.springframework.cloud.skipper.domain.StatusCode;
 import org.springframework.cloud.skipper.index.PackageException;
 
 /**
@@ -30,19 +34,7 @@ public class ReleaseRepositoryImpl implements ReleaseRepositoryCustom {
 
 	@Override
 	public Release findLatestRelease(String releaseName) {
-		Iterable<Release> releases = releaseRepository.findAll();
-		int lastVersion = 0;
-		Release latestRelease = null;
-		for (Release release : releases) {
-			// Find the latest release
-			if (release.getName().equals(releaseName)) {
-				int currentVersion = release.getVersion();
-				if (currentVersion > lastVersion) {
-					lastVersion = currentVersion;
-					latestRelease = release;
-				}
-			}
-		}
+		Release latestRelease = this.releaseRepository.findTopByNameOrderByVersionDesc(releaseName);
 		if (latestRelease == null) {
 			throw new PackageException(String.format("Can not find a latest release named '%s'", releaseName));
 		}
@@ -51,7 +43,7 @@ public class ReleaseRepositoryImpl implements ReleaseRepositoryCustom {
 
 	@Override
 	public Release findByNameAndVersion(String releaseName, int version) {
-		Iterable<Release> releases = releaseRepository.findAll();
+		Iterable<Release> releases = this.releaseRepository.findAll();
 
 		Release matchingRelease = null;
 		for (Release release : releases) {
@@ -64,5 +56,34 @@ public class ReleaseRepositoryImpl implements ReleaseRepositoryCustom {
 			throw new PackageException(String.format("Can not find release '%s', version '%s'", releaseName, version));
 		}
 		return matchingRelease;
+	}
+
+	@Override
+	public List<Release> findReleaseRevisions(String releaseName, int revisions) {
+		int latestVersion = findLatestRelease(releaseName).getVersion();
+		int lowerVersion = latestVersion - Integer.valueOf(revisions);
+		return this.releaseRepository.findByNameAndVersionBetweenOrderByNameAscVersionDesc(releaseName,
+				lowerVersion + 1, latestVersion);
+	}
+
+	@Override
+	public List<Release> findLatestDeployedOrFailed(String releaseName) {
+		return getDeployedOrFailed(this.releaseRepository.findByNameIgnoreCaseContaining(releaseName));
+	}
+
+	@Override
+	public List<Release> findLatestDeployedOrFailed() {
+		return getDeployedOrFailed(this.releaseRepository.findAll());
+	}
+
+	private List<Release> getDeployedOrFailed(Iterable<Release> allReleases) {
+		List<Release> releases = new ArrayList<>();
+		for (Release release : allReleases) {
+			StatusCode releaseStatusCode = release.getInfo().getStatus().getStatusCode();
+			if (releaseStatusCode.equals(StatusCode.DEPLOYED) || releaseStatusCode.equals(StatusCode.FAILED)) {
+				releases.add(release);
+			}
+		}
+		return releases;
 	}
 }

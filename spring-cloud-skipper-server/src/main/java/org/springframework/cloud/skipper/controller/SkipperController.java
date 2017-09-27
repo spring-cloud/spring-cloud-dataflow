@@ -15,6 +15,8 @@
  */
 package org.springframework.cloud.skipper.controller;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.skipper.domain.AboutInfo;
@@ -35,7 +37,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * REST controller for Skipper server related operations such as install, upgrade, delete, and rollback.
+ * REST controller for Skipper server related operations such as install, upgrade, delete,
+ * and rollback.
  *
  * @author Mark Pollack
  * @author Ilayaperumal Gopinathan
@@ -107,5 +110,24 @@ public class SkipperController {
 	@ResponseStatus(HttpStatus.CREATED)
 	public Release delete(@PathVariable("name") String releaseName) {
 		return this.releaseService.delete(releaseName);
+	}
+
+	@RequestMapping(path = "/history/{name}/{max}", method = RequestMethod.GET)
+	@ResponseStatus(HttpStatus.OK)
+	public List<Release> history(@PathVariable("name") String releaseName,
+			@PathVariable("max") int maxRevisions) {
+		return this.releaseService.history(releaseName, maxRevisions);
+	}
+
+	@RequestMapping(path = "/list", method = RequestMethod.GET)
+	@ResponseStatus(HttpStatus.OK)
+	public List<Release> list() {
+		return this.releaseService.list();
+	}
+
+	@RequestMapping(path = "/list/{name}", method = RequestMethod.GET)
+	@ResponseStatus(HttpStatus.OK)
+	public List<Release> list(@PathVariable("name") String releaseName) {
+		return this.releaseService.list(releaseName);
 	}
 }

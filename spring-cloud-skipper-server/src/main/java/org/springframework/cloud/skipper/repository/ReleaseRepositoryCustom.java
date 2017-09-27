@@ -15,10 +15,13 @@
  */
 package org.springframework.cloud.skipper.repository;
 
+import java.util.List;
+
 import org.springframework.cloud.skipper.domain.Release;
 
 /**
  * @author Mark Pollack
+ * @author Ilayaperumal Gopinathan
  */
 public interface ReleaseRepositoryCustom {
 
@@ -39,4 +42,30 @@ public interface ReleaseRepositoryCustom {
 	 * for the given name and version can be found.
 	 */
 	Release findByNameAndVersion(String releaseName, int version);
+
+	/**
+	 * Find the revisions of the release, by name.
+	 * @param releaseName the name of the release
+	 * @param revisions the maximum number of revisions of the release to look for
+	 * @return the list of Releases with their revisions as history
+	 * @throws org.springframework.cloud.skipper.index.PackageException if no Release for the
+	 * given name can be found.
+	 */
+	List<Release> findReleaseRevisions(String releaseName, int revisions);
+
+	/**
+	 * Find the latest status (deployed or failed) of the release, by the name.
+	 * @param releaseName the name is the wildcard expression
+	 * @return list of releases (by the given name) that has the latest revision with the state either deployed or
+	 * failed.
+	 */
+	List<Release> findLatestDeployedOrFailed(String releaseName);
+
+	/**
+	 * Find the latest status (deployed or failed) of all the releases.
+	 *
+	 * @return list of releases that has the latest revision with the state either deployed or failed.
+	 */
+	List<Release> findLatestDeployedOrFailed();
+
 }

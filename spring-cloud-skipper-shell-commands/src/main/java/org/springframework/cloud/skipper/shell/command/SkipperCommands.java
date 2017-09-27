@@ -21,10 +21,13 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
+
+import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -71,7 +74,7 @@ public class SkipperCommands extends AbstractSkipperCommand {
 		this.skipperClient = skipperClient;
 	}
 
-	@ShellMethod(key = "search", value = "Search for the packages")
+	@ShellMethod(key = "search", value = "Search for the packages.")
 	public Object search(
 			@ShellOption(help = "wildcard expression to search for the package name", defaultValue = NULL) String name,
 			@ShellOption(help = "boolean to set for more detailed package metadata") boolean details)
@@ -108,7 +111,7 @@ public class SkipperCommands extends AbstractSkipperCommand {
 		}
 	}
 
-	@ShellMethod(key = "install", value = "Install a package")
+	@ShellMethod(key = "install", value = "Install a package.")
 	public String install(
 			@ShellOption(help = "name of the package to install") String name,
 			@ShellOption(help = "version of the package to install", defaultValue = NULL) String version,
@@ -169,7 +172,7 @@ public class SkipperCommands extends AbstractSkipperCommand {
 		return configValuesYML;
 	}
 
-	@ShellMethod(key = "upgrade", value = "Upgrade a release")
+	@ShellMethod(key = "upgrade", value = "Upgrade a release.")
 	public String upgrade(
 			@ShellOption(help = "the name of the release to upgrade") String releaseName,
 			@ShellOption(help = "the name of the package to use for the upgrade") String packageName,
@@ -217,7 +220,7 @@ public class SkipperCommands extends AbstractSkipperCommand {
 		return upgradeRequest;
 	}
 
-	@ShellMethod(key = "rollback", value = "Rollback the release to a previous or a specific release")
+	@ShellMethod(key = "rollback", value = "Rollback the release to a previous or a specific release.")
 	public String rollback(
 			@ShellOption(help = "the name of the release to rollback") String releaseName,
 			@ShellOption(help = "the specific release version to rollback to. " +
@@ -230,7 +233,7 @@ public class SkipperCommands extends AbstractSkipperCommand {
 		return sb.toString();
 	}
 
-	@ShellMethod(key = "delete", value = "Delete the release")
+	@ShellMethod(key = "delete", value = "Delete the release.")
 	public String delete(
 			@ShellOption(help = "the name of the release to delete") String releaseName) {
 		Release release = skipperClient.delete(releaseName);
@@ -239,7 +242,7 @@ public class SkipperCommands extends AbstractSkipperCommand {
 		return sb.toString();
 	}
 
-	@ShellMethod(key = "upload", value = "Upload a package")
+	@ShellMethod(key = "upload", value = "Upload a package.")
 	public String upload(@ShellOption(help = "the package to be uploaded") String path,
 			@ShellOption(help = "the local repository name to upload to", defaultValue = NULL) String repoName) {
 		UploadRequest properties = new UploadRequest();
@@ -265,4 +268,59 @@ public class SkipperCommands extends AbstractSkipperCommand {
 		PackageMetadata packageMetadata = skipperClient.upload(properties);
 		return "Package uploaded successfully:[" + packageMetadata.getName() + ":" + packageMetadata.getVersion() + "]";
 	}
+
+	@ShellMethod(key = "list", value = "List the latest version of releases with status of deployed or failed.")
+	public Table list(
+			@ShellOption(help = "wildcard expression to search by release name", defaultValue = NULL) String releaseName) {
+		List<Release> releases = this.skipperClient.list(releaseName);
+		LinkedHashMap<String, Object> headers = new LinkedHashMap<>();
+		headers.put("name", "Name");
+		headers.put("version", "Version");
+		headers.put("info.lastDeployed", "Last updated");
+		headers.put("info.status.statusCode", "Status");
+		headers.put("pkg.metadata.name", "Package Name");
+		headers.put("pkg.metadata.version", "Package Version");
+		headers.put("platformName", "Platform Name");
+		headers.put("info.status.platformStatus", "Platform Status");
+		TableModel model = new BeanListTableModel<>(releases, headers);
+		TableBuilder tableBuilder = new TableBuilder(model);
+		TableUtils.applyStyle(tableBuilder);
+		return tableBuilder.build();
+	}
+
+	@ShellMethod(key = "history", value = "List the history of versions for a given release.")
+	public Table history(
+			@ShellOption(help = "wildcard expression to search by release name") @NotNull String releaseName,
+			@ShellOption(help = "maximum number of revisions to include in the history", defaultValue = NULL) String max) {
+		Collection<Release> releases;
+		if (StringUtils.hasText(max)) {
+			assertMaxIsIntegerAndGreaterThanZero(max);
+			releases = this.skipperClient.history(releaseName, max);
+		}
+		else {
+			releases = this.skipperClient.history(releaseName).getContent();
+		}
+		LinkedHashMap<String, Object> headers = new LinkedHashMap<>();
+		headers.put("version", "Version");
+		headers.put("info.lastDeployed", "Last updated");
+		headers.put("info.status.statusCode", "Status");
+		headers.put("pkg.metadata.name", "Package Name");
+		headers.put("pkg.metadata.version", "Package Version");
+		headers.put("info.description", "Description");
+		TableModel model = new BeanListTableModel<>(releases, headers);
+		TableBuilder tableBuilder = new TableBuilder(model);
+		TableUtils.applyStyle(tableBuilder);
+		return tableBuilder.build();
+	}
+
+	private void assertMaxIsIntegerAndGreaterThanZero(String max) {
+		try {
+			int maxInt = Integer.parseInt(max);
+			Assert.isTrue(maxInt > 0, "The maximum number of revisions should be greater than zero.");
+		}
+		catch (NumberFormatException e) {
+			throw new NumberFormatException("The maximum number of revisions is not an integer. Input string = " + max);
+		}
+	}
+
 }

@@ -15,15 +15,19 @@
  */
 package org.springframework.cloud.skipper.repository;
 
+import java.util.List;
+
 import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.data.repository.query.Param;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 import org.springframework.data.rest.core.annotation.RestResource;
 
 /**
  * @author Mark Pollack
+ * @author Ilayaperumal Gopinathan
  */
-@RepositoryRestResource
+@RepositoryRestResource(path = "releases", collectionResourceRel = "releases")
 public interface ReleaseRepository extends PagingAndSortingRepository<Release, String>, ReleaseRepositoryCustom {
 
 	@Override
@@ -41,4 +45,13 @@ public interface ReleaseRepository extends PagingAndSortingRepository<Release, S
 	@Override
 	@RestResource(exported = false)
 	void deleteAll();
+
+	List<Release> findByNameIgnoreCaseContainingOrderByNameAscVersionDesc(@Param("name") String name);
+
+	List<Release> findByNameAndVersionBetweenOrderByNameAscVersionDesc(@Param("name") String name, @Param("from")
+			int fromVersion, @Param("to") int toVersion);
+
+	Release findTopByNameOrderByVersionDesc(@Param("name") String name);
+
+	List<Release> findByNameIgnoreCaseContaining(@Param("name") String name);
 }
