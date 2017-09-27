@@ -21,11 +21,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import org.slf4j.Logger;
@@ -33,18 +31,17 @@ import org.slf4j.LoggerFactory;
 import org.zeroturnaround.zip.ZipUtil;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.bind.YamlConfigurationFactory;
-import org.springframework.cloud.skipper.domain.ConfigValues;
+import org.springframework.cloud.skipper.SkipperUtils;
 import org.springframework.cloud.skipper.domain.Package;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
 import org.springframework.cloud.skipper.domain.Repository;
-import org.springframework.cloud.skipper.domain.Template;
 import org.springframework.cloud.skipper.domain.UploadRequest;
 import org.springframework.cloud.skipper.index.PackageException;
+import org.springframework.cloud.skipper.io.PackageReader;
+import org.springframework.cloud.skipper.io.TempFileUtils;
 import org.springframework.cloud.skipper.repository.PackageMetadataRepository;
 import org.springframework.cloud.skipper.repository.RepositoryRepository;
 import org.springframework.context.ResourceLoaderAware;
-import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
@@ -67,15 +64,19 @@ public class PackageService implements ResourceLoaderAware {
 
 	private ResourceLoader resourceLoader;
 
-	private RepositoryRepository repositoryRepository;
+	private final RepositoryRepository repositoryRepository;
 
-	private PackageMetadataRepository packageMetadataRepository;
+	private final PackageMetadataRepository packageMetadataRepository;
+
+	private final PackageReader packageReader;
 
 	@Autowired
 	public PackageService(RepositoryRepository repositoryRepository,
-			PackageMetadataRepository packageMetadataRepository) {
+			PackageMetadataRepository packageMetadataRepository,
+			PackageReader packageReader) {
 		this.repositoryRepository = repositoryRepository;
 		this.packageMetadataRepository = packageMetadataRepository;
+		this.packageReader = packageReader;
 	}
 
 	public Package downloadPackage(PackageMetadata packageMetadata) {
@@ -94,7 +95,7 @@ public class PackageService implements ResourceLoaderAware {
 		// package file is in a non DB hosted repository
 		try {
 			targetPath = TempFileUtils.createTempDirectory("skipper" + packageMetadata.getName());
-			File targetFile = calculatePackageZipFile(packageMetadata, targetPath.toFile());
+			File targetFile = SkipperUtils.calculatePackageZipFile(packageMetadata, targetPath.toFile());
 			logger.debug("Finding repository for package origin {}", packageMetadata.getOrigin());
 			Repository packageRepository = repositoryRepository.findOne(packageMetadata.getOrigin());
 			if (packageRepository == null) {
@@ -115,7 +116,7 @@ public class PackageService implements ResourceLoaderAware {
 						" from " + sourceResource.getDescription() + " to target file " + targetFile, e);
 			}
 			ZipUtil.unpack(targetFile, targetPath.toFile());
-			Package pkgToReturn = loadPackageOnPath(new File(targetPath.toFile(), packageMetadata.getName() + "-" +
+			Package pkgToReturn = this.packageReader.read(new File(targetPath.toFile(), packageMetadata.getName() + "-" +
 					packageMetadata.getVersion()));
 			// TODO should we have an option to not cache the package file?
 			packageMetadata.setPackageFileBytes(Files.readAllBytes(targetFile.toPath()));
@@ -159,7 +160,7 @@ public class PackageService implements ResourceLoaderAware {
 			tmpDirPath = TempFileUtils.createTempDirectory("skipper");
 			File targetPath = new File(tmpDirPath + File.separator + packageMetadata.getName());
 			targetPath.mkdirs();
-			File targetFile = calculatePackageZipFile(packageMetadata, targetPath);
+			File targetFile = SkipperUtils.calculatePackageZipFile(packageMetadata, targetPath);
 			try {
 				StreamUtils.copy(packageMetadata.getPackageFileBytes(), new FileOutputStream(targetFile));
 			}
@@ -171,7 +172,7 @@ public class PackageService implements ResourceLoaderAware {
 						e);
 			}
 			ZipUtil.unpack(targetFile, targetPath);
-			Package pkgToReturn = loadPackageOnPath(new File(targetPath, packageMetadata.getName() + "-" +
+			Package pkgToReturn = this.packageReader.read(new File(targetPath, packageMetadata.getName() + "-" +
 					packageMetadata.getVersion()));
 			pkgToReturn.setMetadata(packageMetadata);
 			return pkgToReturn;
@@ -215,10 +216,12 @@ public class PackageService implements ResourceLoaderAware {
 					+ "-" + uploadRequest.getVersion();
 			File unpackagedFile = new File(unzippedPath);
 			Assert.isTrue(unpackagedFile.exists(), "Package is expected to be unpacked, but it doesn't exist");
-			Package packageToUpload = loadPackageOnPath(unpackagedFile);
+			Package packageToUpload = this.packageReader.read(unpackagedFile);
 			PackageMetadata packageMetadata = packageToUpload.getMetadata();
 			// TODO: Model the PackageMetadata -> Repository relationship in the DB.
-			packageMetadata.setOrigin(localRepositoryToUpload.getId());
+			if (localRepositoryToUpload != null) {
+				packageMetadata.setOrigin(localRepositoryToUpload.getId());
+			}
 			packageMetadata.setPackageFileBytes(uploadRequest.getPackageFileAsBytes());
 			return this.packageMetadataRepository.save(packageMetadata);
 		}
@@ -234,8 +237,7 @@ public class PackageService implements ResourceLoaderAware {
 
 	private Repository getRepositoryToUpload(String repoName) {
 		Repository localRepositoryToUpload = this.repositoryRepository.findByName(repoName);
-		Assert.notNull(localRepositoryToUpload,
-				"Can not upload, local repository " + repoName + "doesn't exist.");
+		// todo: should we enforce the existence of the local repository always?
 		// TODO: Verify the repo name set to package upload properties always belong to local
 		// repository type.
 		return localRepositoryToUpload;
@@ -251,117 +253,6 @@ public class PackageService implements ResourceLoaderAware {
 				+ uploadRequest.getExtension());
 		Assert.notNull(uploadRequest.getPackageFileAsBytes(), "Package file as bytes must not be null");
 		Assert.isTrue(uploadRequest.getPackageFileAsBytes().length != 0, "Package file as bytes must not be empty");
-	}
-
-	protected Package loadPackageOnPath(File unpackedPackage) {
-		Assert.notNull(unpackedPackage, "File to load package from can not be null");
-		List<File> files;
-		try (Stream<Path> paths = Files.walk(Paths.get(unpackedPackage.getPath()), 1)) {
-			files = paths.map(i -> i.toAbsolutePath().toFile()).collect(Collectors.toList());
-		}
-		catch (IOException e) {
-			throw new PackageException("Could not process files in path " + unpackedPackage.getPath(), e);
-		}
-		Package pkg = new Package();
-		// Iterate over all files and "deserialize" the package.
-		for (File file : files) {
-			// Package metadata
-			if (file.getName().equalsIgnoreCase("package.yaml") || file.getName().equalsIgnoreCase("package.yml")) {
-				pkg.setMetadata(loadPackageMetadata(file));
-				continue;
-			}
-			// Package property values for configuration
-			if (file.getName().equalsIgnoreCase("values.yaml") || file.getName().equalsIgnoreCase("values.yml")) {
-				pkg.setConfigValues(loadConfigValues(file));
-				continue;
-			}
-			// The template files
-			String absFileName = file.getAbsoluteFile().toString();
-			if (absFileName.endsWith("/templates")) {
-				pkg.setTemplates(loadTemplates(file));
-				continue;
-			}
-			// dependent packages
-			if ((file.getName().equalsIgnoreCase("packages") && file.isDirectory())) {
-				System.out.println("found the packages directory");
-				File[] dependentPackageDirectories = file.listFiles();
-				List<Package> dependencies = new ArrayList<>();
-				for (File dependentPackageDirectory : dependentPackageDirectories) {
-					dependencies.add(loadPackageOnPath(dependentPackageDirectory));
-				}
-				pkg.setDependencies(dependencies);
-			}
-		}
-		if (!FileSystemUtils.deleteRecursively(unpackedPackage)) {
-			logger.warn("Temporary directory can not be deleted: " + unpackedPackage);
-		}
-		return pkg;
-	}
-
-	private PackageMetadata loadPackageMetadata(File file) {
-		YamlConfigurationFactory<PackageMetadata> factory = new YamlConfigurationFactory<PackageMetadata>(
-				PackageMetadata.class);
-		factory.setResource(new FileSystemResource(file));
-		PackageMetadata packageMetadata;
-		try {
-			packageMetadata = factory.getObject();
-		}
-		catch (Exception e) {
-			throw new PackageException("Exception processing yaml file " + file.getName(), e);
-		}
-		return packageMetadata;
-	}
-
-	private ConfigValues loadConfigValues(File file) {
-		ConfigValues configValues = new ConfigValues();
-		try {
-			configValues.setRaw(new String(Files.readAllBytes(file.toPath()), "UTF-8"));
-		}
-		catch (IOException e) {
-			throw new PackageException("Could read values file " + file.getAbsoluteFile(), e);
-		}
-
-		return configValues;
-	}
-
-	private List<Template> loadTemplates(File templatePath) {
-		List<File> files;
-		try (Stream<Path> paths = Files.walk(Paths.get(templatePath.getAbsolutePath()), 1)) {
-			files = paths.map(i -> i.toAbsolutePath().toFile()).collect(Collectors.toList());
-		}
-		catch (IOException e) {
-			throw new PackageException("Could not process files in template path " + templatePath, e);
-		}
-
-		List<Template> templates = new ArrayList<>();
-		for (File file : files) {
-			if (isYamlFile(file)) {
-				Template template = new Template();
-				template.setName(file.getName());
-				try {
-					template.setData(new String(Files.readAllBytes(file.toPath()), "UTF-8"));
-				}
-				catch (IOException e) {
-					throw new PackageException("Could read template file " + file.getAbsoluteFile(), e);
-				}
-				templates.add(template);
-			}
-		}
-		return templates;
-	}
-
-	private boolean isYamlFile(File file) {
-		Path path = Paths.get(file.getAbsolutePath());
-		String fileName = path.getFileName().toString();
-		if (!fileName.startsWith(".")) {
-			return (fileName.endsWith("yml") || fileName.endsWith("yaml"));
-		}
-		return false;
-	}
-
-	protected File calculatePackageZipFile(PackageMetadata packageMetadata, File targetPath) {
-		logger.debug("Calculating zip file name for {}", packageMetadata);
-		return new File(targetPath, packageMetadata.getName() + "-" + packageMetadata.getVersion() + ".zip");
 	}
 
 	@Override

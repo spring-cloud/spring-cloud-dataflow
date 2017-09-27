@@ -32,6 +32,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
 import org.springframework.cloud.skipper.domain.Repository;
 import org.springframework.cloud.skipper.index.PackageException;
+import org.springframework.cloud.skipper.io.TempFileUtils;
 import org.springframework.cloud.skipper.repository.RepositoryRepository;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.core.io.Resource;

@@ -37,6 +37,10 @@
             <groupId>com.fasterxml.jackson.dataformat</groupId>
             <artifactId>jackson-dataformat-yaml</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.zeroturnaround</groupId>
+            <artifactId>zt-zip</artifactId>
+        </dependency>
         <!-- commons lang needed for dateformat-yaml? -->
         <dependency>
             <groupId>org.apache.commons</groupId>

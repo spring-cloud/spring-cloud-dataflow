@@ -91,7 +91,7 @@ public class ConfigCommands extends AbstractSkipperCommand {
 		if (target.getTargetException() != null) {
 			throw new SkipperServerException(this.targetHolder.getTarget().getTargetResultMessage());
 		}
-		return this.skipperClient.getAboutInfo();
+		return this.skipperClient.info();
 	}
 
 }

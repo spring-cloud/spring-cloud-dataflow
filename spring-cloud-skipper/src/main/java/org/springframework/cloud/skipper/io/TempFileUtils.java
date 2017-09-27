@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.cloud.skipper.service;
+package org.springframework.cloud.skipper.io;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -21,8 +21,6 @@ import java.nio.file.Path;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import org.springframework.cloud.skipper.index.PackageException;
 
 /**
  * @author Mark Pollack
@@ -39,7 +37,8 @@ public class TempFileUtils {
 			return pathToReturn;
 		}
 		catch (IOException e) {
-			throw new PackageException("Could not create temp directory", e);
+			// todo: This could be SkipperException if SkipperException happens to move into spring-cloud-skipper
+			throw new IllegalStateException("Could not create temp directory", e);
 		}
 	}
 

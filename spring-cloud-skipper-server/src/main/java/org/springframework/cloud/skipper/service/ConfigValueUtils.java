@@ -73,7 +73,8 @@ public class ConfigValueUtils {
 	 */
 	public static Map<String, Object> mergeOverrideMap(Package pkg, Map<String, Object> overrideMap) {
 		// if the package does not have any values, return just the override values.
-		if (!StringUtils.hasText(pkg.getConfigValues().getRaw())) {
+		if (pkg.getConfigValues() == null || (pkg.getConfigValues() != null &&
+				!StringUtils.hasText(pkg.getConfigValues().getRaw()))) {
 			return overrideMap;
 		}
 		// load the package values
@@ -107,7 +108,7 @@ public class ConfigValueUtils {
 		// parse ConfigValues to a map.
 		Yaml yaml = new Yaml();
 		Map<String, Object> currentPackageValueMap = new TreeMap<>();
-		if (StringUtils.hasText(pkg.getConfigValues().getRaw())) {
+		if (pkg.getConfigValues() != null && StringUtils.hasText(pkg.getConfigValues().getRaw())) {
 			currentPackageValueMap = (Map<String, Object>) yaml.load(pkg.getConfigValues().getRaw());
 		}
 		if (currentPackageValueMap == null) {

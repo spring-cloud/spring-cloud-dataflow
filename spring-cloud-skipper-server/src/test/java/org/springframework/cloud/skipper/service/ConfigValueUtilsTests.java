@@ -29,6 +29,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.skipper.TestResourceUtils;
 import org.springframework.cloud.skipper.domain.ConfigValues;
 import org.springframework.cloud.skipper.domain.Package;
+import org.springframework.cloud.skipper.io.PackageReader;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -44,13 +45,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class ConfigValueUtilsTests {
 
 	@Autowired
-	private PackageService packageService;
+	private PackageReader packageReader;
 
 	@Test
 	public void testYamlMerge() throws IOException {
 		Resource resource = new ClassPathResource("/org/springframework/cloud/skipper/service/ticktock-1.0.0");
 
-		Package pkg = packageService.loadPackageOnPath(resource.getFile());
+		Package pkg = this.packageReader.read(resource.getFile());
 		Map<String, Object> mergedMap = ConfigValueUtils.mergeConfigValues(pkg, new ConfigValues());
 
 		DumperOptions dumperOptions = new DumperOptions();

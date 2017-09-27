@@ -44,7 +44,7 @@ public class SkipperClientProperties {
 
 	private String home = DEFAULT_HOME;
 
-	private String serverUrl = DEFAULT_TARGET;
+	private String uri = DEFAULT_TARGET;
 
 	private String username = DEFAULT_USERNAME;
 
@@ -62,12 +62,12 @@ public class SkipperClientProperties {
 		this.home = home;
 	}
 
-	public String getServerUrl() {
-		return serverUrl;
+	public String getUri() {
+		return uri;
 	}
 
-	public void setServerUrl(String url) {
-		this.serverUrl = url;
+	public void setUri(String url) {
+		this.uri = url;
 	}
 
 	public String getPassword() {

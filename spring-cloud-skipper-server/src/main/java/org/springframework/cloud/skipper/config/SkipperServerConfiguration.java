@@ -22,6 +22,10 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.cloud.deployer.resource.docker.DockerResourceLoader;
 import org.springframework.cloud.deployer.resource.maven.MavenResourceLoader;
 import org.springframework.cloud.deployer.resource.support.DelegatingResourceLoader;
+import org.springframework.cloud.skipper.io.DefaultPackageReader;
+import org.springframework.cloud.skipper.io.DefaultPackageWriter;
+import org.springframework.cloud.skipper.io.PackageReader;
+import org.springframework.cloud.skipper.io.PackageWriter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ResourceLoader;
@@ -30,6 +34,7 @@ import org.springframework.core.io.ResourceLoader;
  * Main configuration class for the server.
  *
  * @author Mark Pollack
+ * @author Ilayaperumal Gopinathan
  */
 @Configuration
 @EnableConfigurationProperties({ SkipperServerProperties.class, CloudFoundryPlatformProperties.class,
@@ -45,6 +50,16 @@ public class SkipperServerConfiguration {
 		loaders.put("docker", dockerLoader);
 		loaders.put("maven", mavenResourceLoader);
 		return new DelegatingResourceLoader(loaders);
+	}
+
+	@Bean
+	public PackageReader packageReader() {
+		return new DefaultPackageReader();
+	}
+
+	@Bean
+	public PackageWriter packageWriter() {
+		return new DefaultPackageWriter();
 	}
 
 }

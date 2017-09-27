@@ -86,7 +86,7 @@ public class ShellConfiguration {
 
 		@Override
 		public void run(ApplicationArguments args) throws Exception {
-			Target target = new Target(clientProperties.getServerUrl(), clientProperties.getUsername(),
+			Target target = new Target(clientProperties.getUri(), clientProperties.getUsername(),
 					clientProperties.getPassword(), clientProperties.isSkipSllValidation());
 
 			// Attempt connection (including against default values) but do not crash the shell on

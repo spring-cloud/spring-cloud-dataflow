@@ -89,7 +89,7 @@ public class TargetHolder implements ApplicationEventPublisherAware {
 			String uri = this.getTarget().getTargetUri().toURL().toString();
 			skipperClient = new DefaultSkipperClient(uri, this.restTemplate);
 			// Actually attempt connection
-			skipperClient.getAboutInfo();
+			skipperClient.info();
 
 			this.getTarget()
 					.setTargetResultMessage(String.format("Successfully targeted %s", uri));

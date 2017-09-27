@@ -79,7 +79,7 @@ public class SkipperCommands extends AbstractSkipperCommand {
 			@ShellOption(help = "wildcard expression to search for the package name", defaultValue = NULL) String name,
 			@ShellOption(help = "boolean to set for more detailed package metadata") boolean details)
 			throws Exception {
-		Resources<PackageMetadata> resources = skipperClient.getPackageMetadata(name, details);
+		Resources<PackageMetadata> resources = skipperClient.search(name, details);
 		if (!details) {
 			LinkedHashMap<String, Object> headers = new LinkedHashMap<>();
 			headers.put("name", "Name");
@@ -245,7 +245,7 @@ public class SkipperCommands extends AbstractSkipperCommand {
 	@ShellMethod(key = "upload", value = "Upload a package.")
 	public String upload(@ShellOption(help = "the package to be uploaded") String path,
 			@ShellOption(help = "the local repository name to upload to", defaultValue = NULL) String repoName) {
-		UploadRequest properties = new UploadRequest();
+		UploadRequest uploadRequest = new UploadRequest();
 		try {
 			File file = ResourceUtils.getFile(path);
 			StringTokenizer tokenizer = new StringTokenizer(file.getName(), "-");
@@ -253,11 +253,11 @@ public class SkipperCommands extends AbstractSkipperCommand {
 			String versionAndExtension = (String) tokenizer.nextElement();
 			String extension = versionAndExtension.substring(versionAndExtension.lastIndexOf("."));
 			String version = versionAndExtension.replaceAll(extension, "");
-			properties.setName(fileName);
-			properties.setVersion(version);
-			properties.setExtension(extension);
-			properties.setRepoName(StringUtils.hasText(repoName) ? repoName : "local");
-			properties.setPackageFileAsBytes(Files.readAllBytes(file.toPath()));
+			uploadRequest.setName(fileName);
+			uploadRequest.setVersion(version);
+			uploadRequest.setExtension(extension);
+			uploadRequest.setRepoName(StringUtils.hasText(repoName) ? repoName : "local");
+			uploadRequest.setPackageFileAsBytes(Files.readAllBytes(file.toPath()));
 		}
 		catch (FileNotFoundException e) {
 			throw new IllegalArgumentException("File Not found: " + e.getMessage());
@@ -265,7 +265,7 @@ public class SkipperCommands extends AbstractSkipperCommand {
 		catch (IOException e) {
 			throw new IllegalArgumentException(e.getMessage());
 		}
-		PackageMetadata packageMetadata = skipperClient.upload(properties);
+		PackageMetadata packageMetadata = skipperClient.upload(uploadRequest);
 		return "Package uploaded successfully:[" + packageMetadata.getName() + ":" + packageMetadata.getVersion() + "]";
 	}
 

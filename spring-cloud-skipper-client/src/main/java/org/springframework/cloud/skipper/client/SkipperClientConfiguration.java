@@ -41,7 +41,7 @@ public class SkipperClientConfiguration {
 
 	@Bean
 	public SkipperClient skipperClient(SkipperClientProperties properties, RestTemplate restTemplate) {
-		return new DefaultSkipperClient(properties.getServerUrl(), restTemplate);
+		return new DefaultSkipperClient(properties.getUri(), restTemplate);
 	}
 
 	public RestTemplate validateRestTemplate(RestTemplate restTemplate) {

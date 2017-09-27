@@ -42,7 +42,7 @@ public interface SkipperClient {
 	/**
 	 * @return The AboutInfo for the server
 	 */
-	AboutInfo getAboutInfo();
+	AboutInfo info();
 
 	/**
 	 * Search for package metadata.
@@ -50,7 +50,7 @@ public interface SkipperClient {
 	 * @param details boolean flag to fetch all the metadata.
 	 * @return the package metadata with the projection set to summary
 	 */
-	Resources<PackageMetadata> getPackageMetadata(String name, boolean details);
+	Resources<PackageMetadata> search(String name, boolean details);
 
 	/**
 	 * Install the package.
@@ -103,7 +103,7 @@ public interface SkipperClient {
 	/**
 	 * List the latest version of releases with status of deployed or failed.
 	 *
-	 * @param  releaseNameLike the wildcard name of releases to search for
+	 * @param releaseNameLike the wildcard name of releases to search for
 	 * @return the list of all matching releases
 	 */
 	List<Release> list(String releaseNameLike);
@@ -111,8 +111,8 @@ public interface SkipperClient {
 	/**
 	 * List the history of versions for a given release.
 	 *
-	 * @param  releaseName the release name of the release to search for
-	 * @param  maxRevisions the maximum number of revisions to get
+	 * @param releaseName the release name of the release to search for
+	 * @param maxRevisions the maximum number of revisions to get
 	 * @return the list of all releases by the given name and revisions max.
 	 */
 	List<Release> history(String releaseName, String maxRevisions);
@@ -120,7 +120,7 @@ public interface SkipperClient {
 	/**
 	 * List all releases for the given release name.
 	 *
-	 * @param  releaseName the release name of the release to search for
+	 * @param releaseName the release name of the release to search for
 	 * @return the list of all releases by the given name.
 	 */
 	Resources<Release> history(String releaseName);

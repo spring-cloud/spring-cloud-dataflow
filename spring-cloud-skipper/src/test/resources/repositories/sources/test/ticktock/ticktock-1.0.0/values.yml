@@ -1,0 +1,9 @@
+# Default values for {{name}}
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates
+
+foo: bar
+biz: baz
+
+# No values to override
+
