@@ -147,9 +147,11 @@ public class SkipperCommands extends AbstractSkipperCommand {
 	private void assertMutuallyExclusiveFileAndProperties(File yamlFile, String propertyString) {
 		Assert.isTrue(!(yamlFile != null && propertyString != null), "The options 'file' and 'set' options "
 				+ "are mutually exclusive.");
-		String extension = FilenameUtils.getExtension(yamlFile.getName());
-		Assert.isTrue((extension.equalsIgnoreCase("yml") || extension.equalsIgnoreCase("yaml")),
-				"The file should be YAML file");
+		if (yamlFile != null) {
+			String extension = FilenameUtils.getExtension(yamlFile.getName());
+			Assert.isTrue((extension.equalsIgnoreCase("yml") || extension.equalsIgnoreCase("yaml")),
+					"The file should be YAML file");
+		}
 	}
 
 	@ShellMethod(key = "rollback", value = "Rollback the release to a previous or a specific release")
