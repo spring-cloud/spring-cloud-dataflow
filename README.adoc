@@ -103,6 +103,19 @@ Status: Applications deploying... mylog-v3.log=[mylog-v3.log-0=deploying]
 
 You should see the java app named `log-sink-rabbit-1.2.0.RC1.jar` running in the output of the `jps` command
 
+The `history` command shows you the various releases that were made
+
+----
+skipper:>history --release-name mylog
+╔═══════╤════════════════════════════╤════════╤════════════╤═══════════════╤═════════════════════╗
+║Version│        Last updated        │ Status │Package Name│Package Version│     Description     ║
+╠═══════╪════════════════════════════╪════════╪════════════╪═══════════════╪═════════════════════╣
+║3      │Thu Sep 28 16:39:25 EDT 2017│DEPLOYED│log         │1.0.0          │Install complete     ║
+║2      │Thu Sep 28 16:38:52 EDT 2017│DELETED │log         │2.0.0          │Undeployment complete║
+║1      │Thu Sep 28 16:38:09 EDT 2017│DELETED │log         │1.0.0          │Undeployment complete║
+╚═══════╧════════════════════════════╧════════╧════════════╧═══════════════╧═════════════════════╝
+----
+
 Now delete the release.
 
 ----
