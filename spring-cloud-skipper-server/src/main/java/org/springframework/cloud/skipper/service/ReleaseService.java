@@ -132,7 +132,7 @@ public class ReleaseService {
 						packageName, packageVersion));
 			}
 		}
-		return install(packageMetadata.getId(), installRequest.getInstallProperties());
+		return install(packageMetadata, installRequest.getInstallProperties());
 	}
 
 	protected Release install(PackageMetadata packageMetadata, InstallProperties installProperties) {
