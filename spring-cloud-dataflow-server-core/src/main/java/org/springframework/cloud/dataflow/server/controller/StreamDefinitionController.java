@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -51,6 +52,7 @@ import org.springframework.cloud.dataflow.server.repository.DuplicateStreamDefin
 import org.springframework.cloud.dataflow.server.repository.NoSuchStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.support.SearchPageable;
+import org.springframework.cloud.dataflow.server.service.impl.DefaultStreamService;
 import org.springframework.cloud.dataflow.server.support.CannotDetermineApplicationTypeException;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
@@ -72,6 +74,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import static org.springframework.cloud.dataflow.server.stream.SkipperStreamDeployer.SKIPPER_ENABLED_PROPERTY_KEY;
+
 /**
  * Controller for operations on {@link StreamDefinition}. This includes CRUD and optional
  * deployment operations.
@@ -90,6 +94,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class StreamDefinitionController {
 
 	private static final Logger logger = LoggerFactory.getLogger(StreamDefinitionController.class);
+
+	/**
+	 * The service that is responsible for deploying streams.
+	 */
+	private final DefaultStreamService defaultStreamService;
 
 	/**
 	 * The repository this controller will use for stream CRUD operations.
@@ -112,8 +121,8 @@ public class StreamDefinitionController {
 	private final AppRegistry appRegistry;
 
 	/**
-	 * This deployment controller is used as a delegate when stream creation is
-	 * immediately followed by deployment.
+	 * This deployment controller is used as a delegate when stream creation is immediately
+	 * followed by deployment.
 	 */
 	private final StreamDeploymentController deploymentController;
 
@@ -126,28 +135,28 @@ public class StreamDefinitionController {
 	 * <li>deployment status computation to the provided {@link AppDeployer}</li>
 	 * </ul>
 	 *
-	 * @param repository the repository this controller will use for stream CRUD
-	 * operations
-	 * @param deploymentIdRepository the repository this controller will use for
-	 * deployment IDs
-	 * @param deploymentController the deployment controller to delegate deployment
-	 * operations
+	 * @param repository the repository this controller will use for stream CRUD operations
+	 * @param deploymentIdRepository the repository this controller will use for deployment
+	 * IDs
+	 * @param deploymentController the deployment controller to delegate deployment operations
 	 * @param deployer the deployer this controller will use to compute deployment status
 	 * @param appRegistry the app registry to look up registered apps
 	 */
 	public StreamDefinitionController(StreamDefinitionRepository repository,
 			DeploymentIdRepository deploymentIdRepository, StreamDeploymentController deploymentController,
-			AppDeployer deployer, AppRegistry appRegistry) {
+			AppDeployer deployer, AppRegistry appRegistry, DefaultStreamService defaultStreamService) {
 		Assert.notNull(repository, "StreamDefinitionRepository must not be null");
 		Assert.notNull(deploymentIdRepository, "DeploymentIdRepository must not be null");
 		Assert.notNull(deploymentController, "StreamDeploymentController must not be null");
 		Assert.notNull(deployer, "AppDeployer must not be null");
 		Assert.notNull(appRegistry, "AppRegistry must not be null");
+		Assert.notNull(defaultStreamService, "StreamDeploymentService must not be null");
 		this.deploymentController = deploymentController;
 		this.deploymentIdRepository = deploymentIdRepository;
 		this.repository = repository;
 		this.deployer = deployer;
 		this.appRegistry = appRegistry;
+		this.defaultStreamService = defaultStreamService;
 	}
 
 	/**
@@ -156,7 +165,7 @@ public class StreamDefinitionController {
 	 * @param states set of states for apps of a stream
 	 * @return the stream state based on app states
 	 */
-	static DeploymentState aggregateState(Set<DeploymentState> states) {
+	public static DeploymentState aggregateState(Set<DeploymentState> states) {
 		if (states.size() == 1) {
 			DeploymentState state = states.iterator().next();
 			logger.debug("aggregateState: Deployment State Set Size = 1.  Deployment State " + state);
@@ -223,16 +232,19 @@ public class StreamDefinitionController {
 	 * @param dsl DSL definition for stream
 	 * @param deploy if {@code true}, the stream is deployed upon creation (default is
 	 * {@code false})
+	 * @param useSkipper if {@code true}, delegate the deployment of the stream to skipper
+	 * (default is false)
 	 * @return the created stream definition
-	 * @throws DuplicateStreamDefinitionException if a stream definition with the same
-	 * name already exists
-	 * @throws InvalidStreamDefinitionException if there errors in parsing the strem DSL,
+	 * @throws DuplicateStreamDefinitionException if a stream definition with the same name
+	 * already exists
+	 * @throws InvalidStreamDefinitionException if there errors in parsing the stream DSL,
 	 * resolving the name, or type of applications in the stream
 	 */
 	@RequestMapping(value = "", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
 	public StreamDefinitionResource save(@RequestParam("name") String name, @RequestParam("definition") String dsl,
-			@RequestParam(value = "deploy", defaultValue = "false") boolean deploy) {
+			@RequestParam(value = "deploy", defaultValue = "false") boolean deploy,
+			@RequestParam(value = "useSkipper", defaultValue = "false") boolean useSkipper) {
 		StreamDefinition stream;
 		try {
 			stream = new StreamDefinition(name, dsl);
@@ -264,7 +276,11 @@ public class StreamDefinitionController {
 		}
 		this.repository.save(stream);
 		if (deploy) {
-			deploymentController.deploy(name, null);
+			Map<String, String> streamDeploymentProperties = new HashMap<>();
+			if (useSkipper) {
+				streamDeploymentProperties.put(SKIPPER_ENABLED_PROPERTY_KEY, "true");
+			}
+			defaultStreamService.deployStream(name, streamDeploymentProperties);
 		}
 		return new Assembler(new PageImpl<>(Collections.singletonList(stream))).toResource(stream);
 	}
@@ -285,9 +301,8 @@ public class StreamDefinitionController {
 	}
 
 	/**
-	 * Return a list of related stream definition resources based on the given stream
-	 * name. Related streams include the main stream and the tap stream(s) on the main
-	 * stream.
+	 * Return a list of related stream definition resources based on the given stream name.
+	 * Related streams include the main stream and the tap stream(s) on the main stream.
 	 *
 	 * @param name the name of an existing stream definition (required)
 	 * @param nested if should recursively search for related stream definitions

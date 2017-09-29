@@ -1,0 +1,217 @@
+/*
+ * Copyright 2017 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.springframework.cloud.dataflow.server.stream;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.yaml.snakeyaml.DumperOptions;
+import org.yaml.snakeyaml.Yaml;
+
+import org.springframework.cloud.deployer.spi.app.DeploymentState;
+import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
+import org.springframework.cloud.skipper.client.SkipperClient;
+import org.springframework.cloud.skipper.domain.ConfigValues;
+import org.springframework.cloud.skipper.domain.InstallProperties;
+import org.springframework.cloud.skipper.domain.InstallRequest;
+import org.springframework.cloud.skipper.domain.Package;
+import org.springframework.cloud.skipper.domain.PackageIdentifier;
+import org.springframework.cloud.skipper.domain.PackageMetadata;
+import org.springframework.cloud.skipper.domain.Template;
+import org.springframework.cloud.skipper.domain.UploadRequest;
+import org.springframework.cloud.skipper.io.DefaultPackageWriter;
+import org.springframework.cloud.skipper.io.PackageWriter;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
+import org.springframework.util.Assert;
+import org.springframework.util.StreamUtils;
+import org.springframework.util.StringUtils;
+
+import static org.springframework.cloud.deployer.spi.app.AppDeployer.COUNT_PROPERTY_KEY;
+
+/**
+ * Delegates to Skipper to deploy the stream.
+ * @author Mark Pollack
+ */
+public class SkipperStreamDeployer implements StreamDeployer {
+
+	public static final String SKIPPER_KEY_PREFIX = "spring.cloud.dataflow.skipper";
+	public static final String SKIPPER_ENABLED_PROPERTY_KEY = SKIPPER_KEY_PREFIX + ".enabled";
+	private static Log logger = LogFactory.getLog(SkipperStreamDeployer.class);
+	private final SkipperClient skipperClient;
+
+	public SkipperStreamDeployer(SkipperClient skipperClient) {
+		Assert.notNull(skipperClient, "SkipperClient can not be null");
+		this.skipperClient = skipperClient;
+	}
+
+	@Override
+	public String calculateStreamState(String streamName) {
+		// TODO call out to skipper for stream state.
+		return DeploymentState.unknown.toString();
+	}
+
+	@Override
+	public void deployStream(StreamDeploymentRequest streamDeploymentRequest) {
+		logger.info("Deploying Stream " + streamDeploymentRequest.getStreamName() + " using skipper.");
+		// Create the package .zip file to upload
+		File packageFile = createPackageForStream(streamDeploymentRequest);
+
+		// Upload the package
+		UploadRequest uploadRequest = new UploadRequest();
+		uploadRequest.setName(streamDeploymentRequest.getStreamName());
+		uploadRequest.setVersion("1.0.0"); // TODO use from skipperDeploymentProperties if set.
+		uploadRequest.setExtension("zip");
+		uploadRequest.setRepoName("local"); // TODO use from skipperDeploymentProperties if set.
+		try {
+			uploadRequest.setPackageFileAsBytes(Files.readAllBytes(packageFile.toPath()));
+		}
+		catch (IOException e) {
+			throw new IllegalArgumentException("Can't read packageFile " + packageFile, e);
+		}
+		skipperClient.upload(uploadRequest);
+
+		// Install the package
+		InstallRequest installRequest = new InstallRequest();
+		PackageIdentifier packageIdentifier = new PackageIdentifier();
+		packageIdentifier.setPackageName(streamDeploymentRequest.getStreamName());
+		packageIdentifier.setPackageVersion("1.0.0");
+		packageIdentifier.setRepositoryName("local");
+		installRequest.setPackageIdentifier(packageIdentifier);
+		InstallProperties installProperties = new InstallProperties();
+		installProperties.setPlatformName("default");
+		installProperties.setReleaseName("my" + streamDeploymentRequest.getStreamName());
+		installProperties.setConfigValues(new ConfigValues());
+		installRequest.setInstallProperties(installProperties);
+		skipperClient.install(installRequest);
+
+		// TODO store releasename in deploymentIdRepository...
+		// this.deploymentIdRepository.save(DeploymentKey.forStreamAppDefinition(streamAppDefinition),
+		// id);
+
+	}
+
+	private File createPackageForStream(StreamDeploymentRequest streamDeploymentRequest) {
+		PackageWriter packageWriter = new DefaultPackageWriter();
+		Package pkgtoWrite = createPackage(streamDeploymentRequest);
+		Path tempPath;
+		try {
+			tempPath = Files.createTempDirectory("streampackages");
+		}
+		catch (IOException e) {
+			throw new IllegalArgumentException("Can't create temp diroectory");
+		}
+		File outputDirectory = tempPath.toFile();
+
+		File zipFile = packageWriter.write(pkgtoWrite, outputDirectory);
+		return zipFile;
+	}
+
+	private Package createPackage(StreamDeploymentRequest streamDeploymentRequest) {
+		Package pkg = new Package();
+		PackageMetadata packageMetadata = new PackageMetadata();
+		packageMetadata.setName(streamDeploymentRequest.getStreamName());
+		packageMetadata.setVersion("1.0.0");
+		packageMetadata.setMaintainer("dataflow");
+		packageMetadata.setDescription(streamDeploymentRequest.getDslText());
+		pkg.setMetadata(packageMetadata);
+
+		pkg.setDependencies(createDependentPackages(streamDeploymentRequest));
+
+		return pkg;
+	}
+
+	private List<Package> createDependentPackages(StreamDeploymentRequest streamDeploymentRequest) {
+		List<Package> packageList = new ArrayList<>();
+		for (AppDeploymentRequest appDeploymentRequest : streamDeploymentRequest.getAppDeploymentRequests()) {
+			packageList.add(createDependentPackage(streamDeploymentRequest.getStreamName(), appDeploymentRequest));
+		}
+		return packageList;
+	}
+
+	private Package createDependentPackage(String streamName, AppDeploymentRequest appDeploymentRequest) {
+		Package pkg = new Package();
+
+		PackageMetadata packageMetadata = new PackageMetadata();
+		packageMetadata.setName(appDeploymentRequest.getDefinition().getName());
+		packageMetadata.setVersion("1.0.0");
+		packageMetadata.setMaintainer("dataflow");
+
+		pkg.setMetadata(packageMetadata);
+
+		Map<String, Object> deploymentMap = new HashMap<>();
+
+		try {
+			deploymentMap.put("resource", appDeploymentRequest.getResource().getURI().toString());
+		}
+		catch (IOException e) {
+			throw new IllegalArgumentException("Can't get URI of resource", e);
+		}
+		String countProperty = appDeploymentRequest.getDeploymentProperties().get(COUNT_PROPERTY_KEY);
+		int count = (StringUtils.hasText(countProperty)) ? Integer.parseInt(countProperty) : 1;
+		deploymentMap.put("count", Integer.toString(count));
+		deploymentMap.put("name", appDeploymentRequest.getDefinition().getName());
+		deploymentMap.put("applicationProperties", appDeploymentRequest.getDefinition().getProperties());
+		deploymentMap.put("deploymentProperties", appDeploymentRequest.getDeploymentProperties());
+
+		ConfigValues configValues = new ConfigValues();
+		Map<String, Object> configValueMap = new HashMap<>();
+		configValueMap.put("deployment", deploymentMap);
+
+		DumperOptions dumperOptions = new DumperOptions();
+		dumperOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
+		dumperOptions.setPrettyFlow(true);
+		Yaml yaml = new Yaml(dumperOptions);
+		configValues.setRaw(yaml.dump(configValueMap));
+
+		pkg.setConfigValues(configValues);
+		pkg.setTemplates(createGenericTemplate());
+		return pkg;
+
+	}
+
+	private List<Template> createGenericTemplate() {
+		Resource resource = new ClassPathResource("/org/springframework/cloud/skipper/io/generic-template.yml");
+		String genericTempateData = null;
+		try {
+			genericTempateData = StreamUtils.copyToString(resource.getInputStream(), Charset.defaultCharset());
+		}
+		catch (IOException e) {
+			throw new IllegalArgumentException("Can't load generic template", e);
+		}
+		Template template = new Template();
+		template.setData(genericTempateData);
+		try {
+			template.setName(resource.getURL().toString());
+		}
+		catch (IOException e) {
+			e.printStackTrace();
+		}
+		List<Template> templateList = new ArrayList<>();
+		templateList.add(template);
+		return templateList;
+	}
+
+}

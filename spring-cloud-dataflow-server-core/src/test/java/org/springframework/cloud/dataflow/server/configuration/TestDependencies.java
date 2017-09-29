@@ -56,8 +56,11 @@ import org.springframework.cloud.dataflow.server.repository.InMemoryTaskDefiniti
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.TaskService;
+import org.springframework.cloud.dataflow.server.service.impl.DefaultStreamService;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskService;
 import org.springframework.cloud.dataflow.server.service.impl.TaskConfigurationProperties;
+import org.springframework.cloud.dataflow.server.stream.AppDeployerStreamDeployer;
+import org.springframework.cloud.dataflow.server.stream.SkipperStreamDeployer;
 import org.springframework.cloud.deployer.resource.maven.MavenProperties;
 import org.springframework.cloud.deployer.resource.maven.MavenResourceLoader;
 import org.springframework.cloud.deployer.resource.registry.InMemoryUriRegistry;
@@ -65,6 +68,7 @@ import org.springframework.cloud.deployer.resource.registry.UriRegistry;
 import org.springframework.cloud.deployer.resource.support.DelegatingResourceLoader;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
+import org.springframework.cloud.skipper.client.SkipperClient;
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.cloud.task.repository.TaskRepository;
 import org.springframework.cloud.task.repository.support.SimpleTaskRepository;
@@ -119,16 +123,49 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	public StreamDeploymentController streamDeploymentController(StreamDefinitionRepository repository,
 			DeploymentIdRepository deploymentIdRepository, AppRegistry registry,
 			ApplicationConfigurationMetadataResolver metadataResolver,
-			CommonApplicationProperties applicationProperties) {
+			CommonApplicationProperties applicationProperties, DefaultStreamService defaultStreamService) {
 		return new StreamDeploymentController(repository, deploymentIdRepository, registry, appDeployer(),
-				metadataResolver, applicationProperties);
+				metadataResolver, applicationProperties, defaultStreamService);
+	}
+
+	@Bean
+	public DefaultStreamService streamDeploymentService(AppRegistry appRegistry,
+			CommonApplicationProperties commonApplicationProperties,
+			ApplicationConfigurationMetadataResolver applicationConfigurationMetadataResolver,
+			StreamDefinitionRepository streamDefinitionRepository,
+			AppDeployerStreamDeployer appDeployerStreamDeployer,
+			SkipperStreamDeployer skipperStreamDeployer) {
+		return new DefaultStreamService(appRegistry,
+				commonApplicationProperties,
+				applicationConfigurationMetadataResolver,
+				streamDefinitionRepository,
+				appDeployerStreamDeployer,
+				skipperStreamDeployer);
+	}
+
+	@Bean
+	public AppDeployerStreamDeployer appDeployerStreamDeployer(AppDeployer appDeployer,
+			DeploymentIdRepository deploymentIdRepository,
+			StreamDefinitionRepository streamDefinitionRepository) {
+		return new AppDeployerStreamDeployer(appDeployer, deploymentIdRepository, streamDefinitionRepository);
+	}
+
+	@Bean
+	public SkipperStreamDeployer skipperStreamDeployer(SkipperClient skipperClient) {
+		return new SkipperStreamDeployer(skipperClient);
+	}
+
+	@Bean
+	public SkipperClient skipperClient() {
+		return SkipperClient.create("http://localhost:7577");
 	}
 
 	@Bean
 	public StreamDefinitionController streamDefinitionController(StreamDefinitionRepository repository,
-			DeploymentIdRepository deploymentIdRepository, StreamDeploymentController deploymentController) {
+			DeploymentIdRepository deploymentIdRepository, StreamDeploymentController deploymentController,
+			DefaultStreamService defaultStreamService) {
 		return new StreamDefinitionController(repository, deploymentIdRepository, deploymentController, appDeployer(),
-				appRegistry());
+				appRegistry(), defaultStreamService);
 	}
 
 	@Bean

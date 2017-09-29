@@ -102,7 +102,8 @@ public class ManualOAuthAuthenticationProvider implements AuthenticationProvider
 					String.format("Unable to perform OAuth authentication for user '%s'.", username), e);
 		}
 
-		final OAuth2Authentication auth2Authentication = userInfoTokenServices.loadAuthentication(accessToken.getValue());
+		final OAuth2Authentication auth2Authentication = userInfoTokenServices
+				.loadAuthentication(accessToken.getValue());
 		return auth2Authentication;
 	}
 

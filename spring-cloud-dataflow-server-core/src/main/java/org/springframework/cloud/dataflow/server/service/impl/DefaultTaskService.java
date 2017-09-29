@@ -108,18 +108,16 @@ public class DefaultTaskService implements TaskService {
 	 * Initializes the {@link DefaultTaskService}.
 	 *
 	 * @param dataSourceProperties the data source properties.
-	 * @param taskDefinitionRepository the {@link TaskDefinitionRepository} this service
-	 * will use for task CRUD operations.
-	 * @param taskExecutionRepository the repository this service will use for deployment
-	 * IDs.
+	 * @param taskDefinitionRepository the {@link TaskDefinitionRepository} this service will
+	 * use for task CRUD operations.
+	 * @param taskExecutionRepository the repository this service will use for deployment IDs.
 	 * @param taskExplorer the explorer this service will use to lookup task executions
 	 * @param registry URI registry this service will use to look up app URIs.
 	 * @param resourceLoader the {@link ResourceLoader} that will resolve URIs to
 	 * {@link Resource}s.
 	 * @param taskLauncher the launcher this service will use to launch task apps.
 	 * @param metaDataResolver the metadata resolver
-	 * @param taskConfigurationProperties the properties used to define the behavior of
-	 * tasks
+	 * @param taskConfigurationProperties the properties used to define the behavior of tasks
 	 * @param deploymentIdRepository the repository that maps deployment keys to IDs
 	 * @param dataflowServerUri the data flow server URI
 	 */
@@ -247,9 +245,9 @@ public class DefaultTaskService implements TaskService {
 	}
 
 	/**
-	 * Return a copy of a given task definition where short form parameters have been
-	 * expanded to their long form (amongst the whitelisted supported properties of the
-	 * app) if applicable.
+	 * Return a copy of a given task definition where short form parameters have been expanded
+	 * to their long form (amongst the whitelisted supported properties of the app) if
+	 * applicable.
 	 */
 	private AppDefinition mergeAndExpandAppProperties(TaskDefinition original, Resource resource,
 			Map<String, String> appDeploymentProperties) {

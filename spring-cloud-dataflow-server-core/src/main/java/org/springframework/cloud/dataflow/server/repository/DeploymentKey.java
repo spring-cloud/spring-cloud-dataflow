@@ -18,6 +18,7 @@ package org.springframework.cloud.dataflow.server.repository;
 
 import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
+import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.util.Assert;
 
 /**
@@ -37,6 +38,12 @@ public abstract class DeploymentKey {
 	public static String forStreamAppDefinition(StreamAppDefinition streamAppDefinition) {
 		Assert.notNull(streamAppDefinition, "streamAppDefinition must not be null");
 		return String.format("%s.%s", streamAppDefinition.getStreamName(), streamAppDefinition.getName());
+	}
+
+	public static String forAppDeploymentRequest(String streamName, AppDefinition appDefinition) {
+		Assert.notNull(streamName, "streamName must not be null");
+		Assert.notNull(appDefinition, "appDefinition must not be null");
+		return String.format("%s.%s", streamName, appDefinition.getName());
 	}
 
 	/**

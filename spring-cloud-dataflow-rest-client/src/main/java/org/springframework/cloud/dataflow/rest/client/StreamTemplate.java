@@ -75,14 +75,21 @@ public class StreamTemplate implements StreamOperations {
 
 	@Override
 	public StreamDefinitionResource createStream(String name, String definition, boolean deploy) {
+		return createStream(name, definition, deploy, false);
+	}
+
+	@Override
+	public StreamDefinitionResource createStream(String name, String definition, boolean deploy, boolean useSkipper) {
 		MultiValueMap<String, Object> values = new LinkedMultiValueMap<>();
 		values.add("name", name);
 		values.add("definition", definition);
 		values.add("deploy", Boolean.toString(deploy));
+		values.add("useSkipper", Boolean.toString(useSkipper));
 		StreamDefinitionResource stream = restTemplate.postForObject(definitionsLink.expand().getHref(), values,
 				StreamDefinitionResource.class);
 		return stream;
 	}
+
 
 	@Override
 	public void deploy(String name, Map<String, String> properties) {
