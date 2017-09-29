@@ -41,16 +41,15 @@ public interface TaskService {
 	long executeTask(String taskName, Map<String, String> taskDeploymentProperties, List<String> commandLineArgs);
 
 	/**
-	 * Cleanup the resources that resulted from running the task with the given execution
-	 * id.
+	 * Cleanup the resources that resulted from running the task with the given execution id.
 	 *
 	 * @param id the execution id
 	 */
 	void cleanupExecution(long id);
 
 	/**
-	 * Saves the task definition. If it is a Composed Task then the task definitions
-	 * required for a ComposedTaskRunner task are also created.
+	 * Saves the task definition. If it is a Composed Task then the task definitions required
+	 * for a ComposedTaskRunner task are also created.
 	 *
 	 * @param name The name of the task.
 	 * @param dsl The dsl that comprises the task.

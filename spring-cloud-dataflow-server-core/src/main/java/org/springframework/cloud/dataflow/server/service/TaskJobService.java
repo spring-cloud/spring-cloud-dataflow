@@ -41,19 +41,19 @@ import org.springframework.data.domain.Pageable;
 public interface TaskJobService {
 
 	/**
-	 * Retrieves Pageable list of {@link JobExecution}s from the JobRepository and matches
-	 * the data with a task id.
+	 * Retrieves Pageable list of {@link JobExecution}s from the JobRepository and matches the
+	 * data with a task id.
 	 *
 	 * @param pageable enumerates the data to be returned.
 	 * @return List containing {@link TaskJobExecution}s.
-	 * @throws NoSuchJobExecutionException in the event that a job execution id specified
-	 * is not present when looking up stepExecutions for the result.
+	 * @throws NoSuchJobExecutionException in the event that a job execution id specified is
+	 * not present when looking up stepExecutions for the result.
 	 */
 	List<TaskJobExecution> listJobExecutions(Pageable pageable) throws NoSuchJobExecutionException;
 
 	/**
-	 * Retrieves Pageable list of {@link JobExecution} from the JobRepository with a
-	 * specific jobName and matches the data with a task id.
+	 * Retrieves Pageable list of {@link JobExecution} from the JobRepository with a specific
+	 * jobName and matches the data with a task id.
 	 *
 	 * @param pageable enumerates the data to be returned.
 	 * @param jobName the name of the job for which to search.
@@ -67,14 +67,14 @@ public interface TaskJobService {
 	 *
 	 * @param id the id of the {@link JobExecution}
 	 * @return the {@link TaskJobExecution}s associated with the id.
-	 * @throws NoSuchJobExecutionException if the specified job execution for the id does
-	 * not exist.
+	 * @throws NoSuchJobExecutionException if the specified job execution for the id does not
+	 * exist.
 	 */
 	TaskJobExecution getJobExecution(long id) throws NoSuchJobExecutionException;
 
 	/**
-	 * Retrieves Pageable list of {@link JobInstanceExecutions} from the JobRepository
-	 * with a specific jobName and matches the data with the associated JobExecutions.
+	 * Retrieves Pageable list of {@link JobInstanceExecutions} from the JobRepository with a
+	 * specific jobName and matches the data with the associated JobExecutions.
 	 *
 	 * @param pageable enumerates the data to be returned.
 	 * @param jobName the name of the job for which to search.
@@ -125,8 +125,8 @@ public interface TaskJobService {
 	 * deemed restartable. Otherwise a {@link JobNotRestartableException} is being thrown.
 	 *
 	 * @param jobExecutionId The id of the JobExecution to restart.
-	 * @throws NoSuchJobExecutionException if the JobExecution for the provided id does
-	 * not exist.
+	 * @throws NoSuchJobExecutionException if the JobExecution for the provided id does not
+	 * exist.
 	 */
 	void restartJobExecution(long jobExecutionId) throws NoSuchJobExecutionException;
 
@@ -134,14 +134,12 @@ public interface TaskJobService {
 	 * Requests a {@link JobExecution} to stop.
 	 * <p>
 	 * Please remember, that calling this method only requests a job execution to stop
-	 * processing. This method does not guarantee a {@link JobExecution} to stop. It is
-	 * the responsibility of the implementor of the {@link Job} to react to that request.
-	 * Furthermore, this method does not interfere with the associated
-	 * {@link TaskExecution}.
+	 * processing. This method does not guarantee a {@link JobExecution} to stop. It is the
+	 * responsibility of the implementor of the {@link Job} to react to that request.
+	 * Furthermore, this method does not interfere with the associated {@link TaskExecution}.
 	 *
 	 * @param jobExecutionId The id of the {@link JobExecution} to stop
-	 * @throws NoSuchJobExecutionException if no job execution exists for the
-	 * jobExecutionId.
+	 * @throws NoSuchJobExecutionException if no job execution exists for the jobExecutionId.
 	 * @throws JobExecutionNotRunningException if a stop is requested on a job that is not
 	 * running.
 	 * @see org.springframework.batch.admin.service.JobService#stop(Long)

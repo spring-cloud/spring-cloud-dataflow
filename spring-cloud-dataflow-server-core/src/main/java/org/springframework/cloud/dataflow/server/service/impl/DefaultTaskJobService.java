@@ -79,8 +79,8 @@ public class DefaultTaskJobService implements TaskJobService {
 	}
 
 	/**
-	 * Retrieves Pageable list of {@link JobExecution}s from the JobRepository and matches
-	 * the data with a task id.
+	 * Retrieves Pageable list of {@link JobExecution}s from the JobRepository and matches the
+	 * data with a task id.
 	 *
 	 * @param pageable enumerates the data to be returned.
 	 * @return List containing {@link TaskJobExecution}s.
@@ -104,8 +104,8 @@ public class DefaultTaskJobService implements TaskJobService {
 	}
 
 	/**
-	 * Retrieves Pageable list of {@link JobExecution} from the JobRepository with a
-	 * specific jobName and matches the data with a task id.
+	 * Retrieves Pageable list of {@link JobExecution} from the JobRepository with a specific
+	 * jobName and matches the data with a task id.
 	 *
 	 * @param pageable enumerates the data to be returned.
 	 * @param jobName the name of the job for which to search.
@@ -132,8 +132,8 @@ public class DefaultTaskJobService implements TaskJobService {
 	}
 
 	/**
-	 * Retrieves Pageable list of {@link JobInstanceExecutions} from the JobRepository
-	 * with a specific jobName and matches the data with the associated JobExecutions.
+	 * Retrieves Pageable list of {@link JobInstanceExecutions} from the JobRepository with a
+	 * specific jobName and matches the data with the associated JobExecutions.
 	 *
 	 * @param pageable enumerates the data to be returned.
 	 * @param jobName the name of the job for which to search.
