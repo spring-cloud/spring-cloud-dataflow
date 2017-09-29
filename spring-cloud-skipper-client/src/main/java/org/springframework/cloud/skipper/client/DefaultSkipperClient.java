@@ -209,7 +209,7 @@ public class DefaultSkipperClient implements SkipperClient {
 
 	@Override
 	public PackageMetadata upload(UploadRequest uploadRequest) {
-		String url = String.format("%s/%s/%s", baseUrl, "upload");
+		String url = String.format("%s/%s", baseUrl, "upload");
 		return this.restTemplate.postForObject(url, uploadRequest, PackageMetadata.class);
 	}
 
