@@ -16,6 +16,8 @@
 package org.springframework.cloud.dataflow.server.stream;
 
 /**
+ * SPI for deploying the apps in a stream and providing information about the status of
+ * those deployed apps.
  * @author Mark Pollack
  */
 public interface StreamDeployer {

@@ -207,7 +207,7 @@ public class SkipperStreamDeployer implements StreamDeployer {
 			template.setName(resource.getURL().toString());
 		}
 		catch (IOException e) {
-			e.printStackTrace();
+			logger.error("Could not get URL of resource " + resource.getDescription(), e);
 		}
 		List<Template> templateList = new ArrayList<>();
 		templateList.add(template);
