@@ -15,8 +15,8 @@
  */
 package org.springframework.cloud.skipper.repository;
 
+import org.springframework.cloud.skipper.SkipperException;
 import org.springframework.cloud.skipper.deployer.Deployer;
-import org.springframework.cloud.skipper.index.PackageException;
 
 /**
  * @author Mark Pollack
@@ -26,7 +26,7 @@ public interface DeployerRepositoryCustom {
 	/**
 	 * Performs a findByName query and throws an exception if the name is not found.
 	 * @param name the name of the deployer
-	 * @return The deployer instance or {@link PackageException} if not found.
+	 * @return The deployer instance or {@link SkipperException} if not found.
 	 */
 	Deployer findByNameRequired(String name);
 

@@ -29,9 +29,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.skipper.SkipperException;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
 import org.springframework.cloud.skipper.domain.Repository;
-import org.springframework.cloud.skipper.index.PackageException;
 import org.springframework.cloud.skipper.io.TempFileUtils;
 import org.springframework.cloud.skipper.repository.RepositoryRepository;
 import org.springframework.context.ResourceLoaderAware;
@@ -84,7 +84,7 @@ public class PackageMetadataService implements ResourceLoaderAware {
 					finalMetadataList.addAll(downloadedPackageMetadata);
 				}
 				catch (IOException e) {
-					throw new PackageException("Could not process package file from " + packageRepository.getName(), e);
+					throw new SkipperException("Could not process package file from " + packageRepository.getName(), e);
 				}
 			}
 		}

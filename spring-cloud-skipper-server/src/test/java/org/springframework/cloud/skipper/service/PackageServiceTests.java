@@ -26,13 +26,13 @@ import org.yaml.snakeyaml.Yaml;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.skipper.AbstractIntegrationTest;
+import org.springframework.cloud.skipper.SkipperException;
 import org.springframework.cloud.skipper.domain.ConfigValues;
 import org.springframework.cloud.skipper.domain.Package;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
 import org.springframework.cloud.skipper.domain.Repository;
 import org.springframework.cloud.skipper.domain.Template;
 import org.springframework.cloud.skipper.domain.UploadRequest;
-import org.springframework.cloud.skipper.index.PackageException;
 import org.springframework.cloud.skipper.repository.PackageMetadataRepository;
 import org.springframework.cloud.skipper.repository.RepositoryRepository;
 import org.springframework.core.io.ClassPathResource;
@@ -70,10 +70,10 @@ public class PackageServiceTests extends AbstractIntegrationTest {
 		packageMetadata.setVersion("noversion");
 		assertThat(packageService).isNotNull();
 		assertThatThrownBy(() -> packageService.downloadPackage(packageMetadata))
-				.isInstanceOf(PackageException.class)
+				.isInstanceOf(SkipperException.class)
 				.withFailMessage(
 						"Resource for Package name 'noname', version 'noversion' was not found in any repository.");
-		assertThatThrownBy(() -> packageService.downloadPackage(packageMetadata)).isInstanceOf(PackageException.class);
+		assertThatThrownBy(() -> packageService.downloadPackage(packageMetadata)).isInstanceOf(SkipperException.class);
 	}
 
 	@Test

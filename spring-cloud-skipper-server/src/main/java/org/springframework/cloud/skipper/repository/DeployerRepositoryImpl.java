@@ -16,8 +16,8 @@
 package org.springframework.cloud.skipper.repository;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.skipper.SkipperException;
 import org.springframework.cloud.skipper.deployer.Deployer;
-import org.springframework.cloud.skipper.index.PackageException;
 
 /**
  * @author Mark Pollack
@@ -31,7 +31,7 @@ public class DeployerRepositoryImpl implements DeployerRepositoryCustom {
 	public Deployer findByNameRequired(String name) {
 		Deployer deployer = deployerRepository.findByName(name);
 		if (deployer == null) {
-			throw new PackageException(String.format("Can not install, no deployer named '%s'", name));
+			throw new SkipperException(String.format("Can not install, no deployer named '%s'", name));
 		}
 		return deployer;
 	}

@@ -29,6 +29,7 @@ import org.springframework.cloud.skipper.domain.StatusCode;
 import org.springframework.test.context.ActiveProfiles;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Java6Assertions.fail;
 
 /**
  * @author Ilayaperumal Gopinathan
@@ -181,6 +182,31 @@ public class ReleaseRepositoryTests extends AbstractIntegrationTest {
 		List<Release> deployedOrFailedAll = this.releaseRepository.findLatestDeployedOrFailed("");
 		assertThat(deployedOrFailedAll).isNotEmpty();
 		assertThat(deployedOrFailedAll).hasSize(2);
+	}
+
+	@Test
+	public void verifyReleaseNotFoundByName() {
+		String releaseName = "random";
+		try {
+			this.releaseRepository.findLatestRelease(releaseName);
+			fail("Expected ReleaseNotFoundException");
+		}
+		catch (ReleaseNotFoundException e) {
+			assertThat(e.getMessage().equals(ReleaseNotFoundException.getExceptionMessage(releaseName)));
+		}
+	}
+
+	@Test
+	public void verifyReleaseNotFoundByNameAndVersion() {
+		String releaseName = "random";
+		int version = 1;
+		try {
+			this.releaseRepository.findByNameAndVersion(releaseName, version);
+			fail("Expected ReleaseNotFoundException");
+		}
+		catch (ReleaseNotFoundException e) {
+			assertThat(e.getMessage().equals(ReleaseNotFoundException.getExceptionMessage(releaseName, version)));
+		}
 	}
 
 }

@@ -31,12 +31,12 @@ import org.slf4j.LoggerFactory;
 import org.zeroturnaround.zip.ZipUtil;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.skipper.SkipperException;
 import org.springframework.cloud.skipper.SkipperUtils;
 import org.springframework.cloud.skipper.domain.Package;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
 import org.springframework.cloud.skipper.domain.Repository;
 import org.springframework.cloud.skipper.domain.UploadRequest;
-import org.springframework.cloud.skipper.index.PackageException;
 import org.springframework.cloud.skipper.io.PackageReader;
 import org.springframework.cloud.skipper.io.TempFileUtils;
 import org.springframework.cloud.skipper.repository.PackageMetadataRepository;
@@ -61,14 +61,10 @@ import org.springframework.util.StreamUtils;
 public class PackageService implements ResourceLoaderAware {
 
 	private final Logger logger = LoggerFactory.getLogger(PackageService.class);
-
-	private ResourceLoader resourceLoader;
-
 	private final RepositoryRepository repositoryRepository;
-
 	private final PackageMetadataRepository packageMetadataRepository;
-
 	private final PackageReader packageReader;
+	private ResourceLoader resourceLoader;
 
 	@Autowired
 	public PackageService(RepositoryRepository repositoryRepository,
@@ -111,13 +107,14 @@ public class PackageService implements ResourceLoaderAware {
 				StreamUtils.copy(sourceResource.getInputStream(), new FileOutputStream(targetFile));
 			}
 			catch (IOException e) {
-				throw new PackageException("Could not copy package file for " + packageMetadata.getName() + "-"
+				throw new SkipperException("Could not copy package file for " + packageMetadata.getName() + "-"
 						+ packageMetadata.getVersion() +
 						" from " + sourceResource.getDescription() + " to target file " + targetFile, e);
 			}
 			ZipUtil.unpack(targetFile, targetPath.toFile());
-			Package pkgToReturn = this.packageReader.read(new File(targetPath.toFile(), packageMetadata.getName() + "-" +
-					packageMetadata.getVersion()));
+			Package pkgToReturn = this.packageReader
+					.read(new File(targetPath.toFile(), packageMetadata.getName() + "-" +
+							packageMetadata.getVersion()));
 			// TODO should we have an option to not cache the package file?
 			packageMetadata.setPackageFileBytes(Files.readAllBytes(targetFile.toPath()));
 			// Only save once package is successfully deserialized and package file read.
@@ -125,18 +122,18 @@ public class PackageService implements ResourceLoaderAware {
 			return pkgToReturn;
 		}
 		catch (IOException ex) {
-			throw new PackageException("Exception while downloading package zip file for "
+			throw new SkipperException("Exception while downloading package zip file for "
 					+ packageMetadata.getName() + "-" + packageMetadata.getVersion() +
 					". PackageMetadata origin = " + packageMetadata.getOrigin(), ex);
 		}
 		catch (InvalidDataAccessApiUsageException ex) {
-			throw new PackageException("Exception while downloading package zip file for "
+			throw new SkipperException("Exception while downloading package zip file for "
 					+ packageMetadata.getName() + "-" + packageMetadata.getVersion() +
 					". PackageMetadata origin = " + packageMetadata.getOrigin() + "No repository found.", ex);
 		}
 		catch (Exception ex) {
 			logger.error("This is a catch all debug statement.", ex);
-			throw new PackageException("Catch all", ex);
+			throw new SkipperException("Catch all", ex);
 		}
 		finally {
 			if (targetPath != null && !FileSystemUtils.deleteRecursively(targetPath.toFile())) {
@@ -149,7 +146,7 @@ public class PackageService implements ResourceLoaderAware {
 		List<Repository> list = StreamSupport
 				.stream(repositoryRepository.findAll().spliterator(), false)
 				.collect(Collectors.toList());
-		throw new PackageException("Can not find packageRepository for origin = "
+		throw new SkipperException("Can not find packageRepository for origin = "
 				+ packageMetadata.getOrigin() + ". Known repositories are " + Arrays.toString(list.toArray()));
 	}
 
@@ -165,7 +162,7 @@ public class PackageService implements ResourceLoaderAware {
 				StreamUtils.copy(packageMetadata.getPackageFileBytes(), new FileOutputStream(targetFile));
 			}
 			catch (IOException e) {
-				throw new PackageException(
+				throw new SkipperException(
 						"Could not copy package file for " + packageMetadata.getName() + "-"
 								+ packageMetadata.getVersion() +
 								" from database to target file " + targetFile,
@@ -194,7 +191,7 @@ public class PackageService implements ResourceLoaderAware {
 		if (resource.exists()) {
 			return resource;
 		}
-		throw new PackageException("Resource " + name + "-" + version + " in package repository "
+		throw new SkipperException("Resource " + name + "-" + version + " in package repository "
 				+ packageRepository.getName() + " does not exist.");
 	}
 
@@ -226,7 +223,7 @@ public class PackageService implements ResourceLoaderAware {
 			return this.packageMetadataRepository.save(packageMetadata);
 		}
 		catch (IOException e) {
-			throw new PackageException("Failed to upload the package " + e.getCause());
+			throw new SkipperException("Failed to upload the package " + e.getCause());
 		}
 		finally {
 			if (packageDirPath != null && !FileSystemUtils.deleteRecursively(packageDirPath.toFile())) {

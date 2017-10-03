@@ -48,8 +48,8 @@ public interface ReleaseRepository extends PagingAndSortingRepository<Release, S
 
 	List<Release> findByNameIgnoreCaseContainingOrderByNameAscVersionDesc(@Param("name") String name);
 
-	List<Release> findByNameAndVersionBetweenOrderByNameAscVersionDesc(@Param("name") String name, @Param("from")
-			int fromVersion, @Param("to") int toVersion);
+	List<Release> findByNameAndVersionBetweenOrderByNameAscVersionDesc(@Param("name") String name,
+			@Param("from") int fromVersion, @Param("to") int toVersion);
 
 	Release findTopByNameOrderByVersionDesc(@Param("name") String name);
 

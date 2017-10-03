@@ -25,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.skipper.SkipperException;
 import org.springframework.cloud.skipper.domain.Info;
 import org.springframework.cloud.skipper.domain.InstallProperties;
 import org.springframework.cloud.skipper.domain.InstallRequest;
@@ -37,9 +38,9 @@ import org.springframework.cloud.skipper.domain.StatusCode;
 import org.springframework.cloud.skipper.domain.Template;
 import org.springframework.cloud.skipper.domain.UpgradeProperties;
 import org.springframework.cloud.skipper.domain.UpgradeRequest;
-import org.springframework.cloud.skipper.index.PackageException;
 import org.springframework.cloud.skipper.repository.DeployerRepository;
 import org.springframework.cloud.skipper.repository.PackageMetadataRepository;
+import org.springframework.cloud.skipper.repository.ReleaseNotFoundException;
 import org.springframework.cloud.skipper.repository.ReleaseRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
@@ -87,14 +88,14 @@ public class ReleaseService {
 	 * @param installProperties contains the name of the release, the platfrom to install to,
 	 * and configuration values to replace in the package template.
 	 * @return the Release object associated with this deployment
-	 * @throws PackageException if the package to install can not be found.
+	 * @throws SkipperException if the package to install can not be found.
 	 */
 	public Release install(String id, InstallProperties installProperties) {
 		Assert.notNull(installProperties, "Deploy properties can not be null");
 		Assert.hasText(id, "Package id can not be null");
 		PackageMetadata packageMetadata = this.packageMetadataRepository.findOne(id);
 		if (packageMetadata == null) {
-			throw new PackageException(String.format("Package with id='%s' can not be found.", id));
+			throw new SkipperException(String.format("Package with id='%s' can not be found.", id));
 		}
 		return install(packageMetadata, installProperties);
 	}
@@ -106,7 +107,7 @@ public class ReleaseService {
 	 * @return the Release object associated with this deployment
 	 */
 	public Release install(InstallRequest installRequest) {
-		// TODO install request validation.
+		validateInstallRequest(installRequest);
 		PackageIdentifier packageIdentifier = installRequest.getPackageIdentifier();
 		String packageName = packageIdentifier.getPackageName();
 		String packageVersion = packageIdentifier.getPackageVersion();
@@ -117,22 +118,43 @@ public class ReleaseService {
 				packageMetadata = packageMetadataList.get(0);
 			}
 			else if (packageMetadataList == null) {
-				throw new PackageException("Can not find a package named " + packageName);
+				throw new SkipperException("Can not find a package named " + packageName);
 			}
 			else {
 				// TODO find latest version
-				throw new PackageException("Package name " + packageName + " is not unique.  Finding latest version " +
+				throw new SkipperException("Package name " + packageName + " is not unique.  Finding latest version " +
 						" not yet implemented");
 			}
 		}
 		else {
 			packageMetadata = this.packageMetadataRepository.findByNameAndVersion(packageName, packageVersion);
 			if (packageMetadata == null) {
-				throw new PackageException(String.format("Can not find package '%s', version '%s'",
+				throw new SkipperException(String.format("Can not find package '%s', version '%s'",
 						packageName, packageVersion));
 			}
 		}
 		return install(packageMetadata, installRequest.getInstallProperties());
+	}
+
+	private void validateInstallRequest(InstallRequest installRequest) {
+		Assert.notNull(installRequest.getInstallProperties(), "Install properties must not be null");
+		Assert.isTrue(StringUtils.hasText(installRequest.getInstallProperties().getPlatformName()),
+				"Platform name must not be empty");
+		Assert.isTrue(StringUtils.hasText(installRequest.getInstallProperties().getReleaseName()),
+				"Release name must not be empty");
+		Assert.notNull(installRequest.getPackageIdentifier(), "Package identifier must not be null");
+		Assert.isTrue(StringUtils.hasText(installRequest.getPackageIdentifier().getPackageName()),
+				"Package name must not be empty");
+		Assert.isTrue(StringUtils.hasText(installRequest.getPackageIdentifier().getPackageVersion()),
+				"Package version must not be empty");
+		try {
+			Release release = this.releaseRepository.findLatestRelease(installRequest.getInstallProperties()
+					.getReleaseName());
+			throw new SkipperException("Release with the name [" + release.getName() + "] already exists.");
+		}
+		catch (ReleaseNotFoundException e) {
+			// ignore as this is expected.
+		}
 	}
 
 	protected Release install(PackageMetadata packageMetadata, InstallProperties installProperties) {
@@ -328,19 +350,18 @@ public class ReleaseService {
 	/**
 	 * List the history of versions for a given release.
 	 *
-	 * @param  releaseName the release name of the release to search for
-	 * @param  maxRevisions the maximum number of revisions to get
+	 * @param releaseName the release name of the release to search for
+	 * @param maxRevisions the maximum number of revisions to get
 	 * @return the list of all releases by the given name and revisions max.
 	 */
 	public List<Release> history(String releaseName, int maxRevisions) {
 		return this.releaseRepository.findReleaseRevisions(releaseName, maxRevisions);
 	}
 
-
 	/**
 	 * List the latest version of releases with status of deployed or failed.
 	 *
-	 * @param  releaseNameLike the wildcard name of releases to search for
+	 * @param releaseNameLike the wildcard name of releases to search for
 	 * @return the list of all matching releases
 	 */
 	public List<Release> list(String releaseNameLike) {

@@ -13,19 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.cloud.skipper.index;
+package org.springframework.cloud.skipper;
 
 /**
  * @author Mark Pollack
  */
 @SuppressWarnings("serial")
-public class PackageException extends RuntimeException {
+public class SkipperException extends RuntimeException {
 
-	public PackageException(String message) {
+	public SkipperException(String message) {
 		super(message);
 	}
 
-	public PackageException(String message, Throwable cause) {
+	public SkipperException(String message, Throwable cause) {
 		super(message, cause);
 	}
 }
