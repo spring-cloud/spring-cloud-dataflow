@@ -61,9 +61,13 @@ import org.springframework.util.StreamUtils;
 public class PackageService implements ResourceLoaderAware {
 
 	private final Logger logger = LoggerFactory.getLogger(PackageService.class);
+
 	private final RepositoryRepository repositoryRepository;
+
 	private final PackageMetadataRepository packageMetadataRepository;
+
 	private final PackageReader packageReader;
+
 	private ResourceLoader resourceLoader;
 
 	@Autowired

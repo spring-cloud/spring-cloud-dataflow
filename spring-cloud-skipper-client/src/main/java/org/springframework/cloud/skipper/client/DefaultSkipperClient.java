@@ -15,8 +15,10 @@
  */
 package org.springframework.cloud.skipper.client;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,15 +33,18 @@ import org.springframework.cloud.skipper.domain.InstallRequest;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
 import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.Repository;
+import org.springframework.cloud.skipper.domain.Template;
 import org.springframework.cloud.skipper.domain.UpgradeRequest;
 import org.springframework.cloud.skipper.domain.UploadRequest;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.Resources;
 import org.springframework.hateoas.client.Traverson;
 import org.springframework.http.HttpMethod;
 import org.springframework.util.Assert;
+import org.springframework.util.StreamUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
@@ -82,6 +87,28 @@ public class DefaultSkipperClient implements SkipperClient {
 		this.traverson = createTraverson(baseUri);
 		this.baseUri = baseUri;
 		this.restTemplate = restTemplate;
+	}
+
+	@Override
+	public Template getSpringBootAppTemplate() {
+		org.springframework.core.io.Resource resource = new ClassPathResource("/org/springframework/cloud/skipper/io/generic-template.yml");
+		String genericTempateData = null;
+		try {
+			genericTempateData = StreamUtils.copyToString(resource.getInputStream(), Charset.defaultCharset());
+		}
+		catch (IOException e) {
+			throw new IllegalArgumentException("Can't load generic template", e);
+		}
+		Template template = new Template();
+		template.setData(genericTempateData);
+		try {
+			template.setName(resource.getURL().toString());
+		}
+		catch (IOException e) {
+			log.error("Could not get URL of resource " + resource.getDescription(), e);
+			throw new SkipperServerException("Could not get URL of resource " + resource.getDescription(), e);
+		}
+		return template;
 	}
 
 	@Override

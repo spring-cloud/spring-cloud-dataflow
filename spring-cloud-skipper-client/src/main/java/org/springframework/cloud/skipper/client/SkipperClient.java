@@ -24,6 +24,7 @@ import org.springframework.cloud.skipper.domain.InstallRequest;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
 import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.Repository;
+import org.springframework.cloud.skipper.domain.Template;
 import org.springframework.cloud.skipper.domain.UpgradeRequest;
 import org.springframework.cloud.skipper.domain.UploadRequest;
 import org.springframework.hateoas.Resources;
@@ -39,6 +40,12 @@ public interface SkipperClient {
 	static SkipperClient create(String baseUrl) {
 		return new DefaultSkipperClient(baseUrl);
 	}
+
+	/**
+	 * Return the template for deploying a Spring Boot Application using skipper.
+	 * @return
+	 */
+	Template getSpringBootAppTemplate();
 
 	/**
 	 * @return The AboutInfo for the server

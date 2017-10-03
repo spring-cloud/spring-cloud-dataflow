@@ -15,16 +15,12 @@
  */
 package org.springframework.cloud.skipper.deployer;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
-
-import com.fasterxml.jackson.databind.MappingIterator;
-import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
+import java.util.TreeMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.deployer.resource.support.DelegatingResourceLoader;
@@ -34,10 +30,12 @@ import org.springframework.cloud.deployer.spi.app.AppStatus;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
+import org.springframework.cloud.skipper.SkipperException;
 import org.springframework.cloud.skipper.domain.AppDeployerData;
-import org.springframework.cloud.skipper.domain.AppDeploymentKind;
-import org.springframework.cloud.skipper.domain.Deployment;
 import org.springframework.cloud.skipper.domain.Release;
+import org.springframework.cloud.skipper.domain.SpringBootAppKind;
+import org.springframework.cloud.skipper.domain.SpringBootAppKindReader;
+import org.springframework.cloud.skipper.domain.SpringBootAppSpec;
 import org.springframework.cloud.skipper.domain.Status;
 import org.springframework.cloud.skipper.domain.StatusCode;
 import org.springframework.cloud.skipper.repository.DeployerRepository;
@@ -45,6 +43,7 @@ import org.springframework.cloud.skipper.repository.ReleaseRepository;
 import org.springframework.cloud.skipper.service.ReleaseManager;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
@@ -80,15 +79,17 @@ public class AppDeployerReleaseManager implements ReleaseManager {
 		Release release = this.releaseRepository.save(releaseInput);
 
 		// Deploy the application
-		List<Deployment> appDeployments = unmarshallDeployments(release.getManifest());
+		SpringBootAppKindReader springBootAppKindReader = new SpringBootAppKindReader();
+		List<SpringBootAppKind> springBootAppKindList = springBootAppKindReader.read(release.getManifest());
 		AppDeployer appDeployer = this.deployerRepository.findByNameRequired(release.getPlatformName())
 				.getAppDeployer();
 		List<String> deploymentIds = new ArrayList<>();
-		for (Deployment appDeployment : appDeployments) {
+		for (SpringBootAppKind springBootAppKind : springBootAppKindList) {
 			deploymentIds.add(appDeployer.deploy(
-					createAppDeploymentRequest(appDeployment, release.getName(),
+					createAppDeploymentRequest(springBootAppKind, release.getName(),
 							String.valueOf(release.getVersion()))));
 		}
+
 		AppDeployerData appDeployerData = new AppDeployerData();
 		appDeployerData.setReleaseName(release.getName());
 		appDeployerData.setReleaseVersion(release.getVersion());
@@ -163,37 +164,34 @@ public class AppDeployerReleaseManager implements ReleaseManager {
 		return release;
 	}
 
-	private List<Deployment> unmarshallDeployments(String manifests) {
-
-		List<AppDeploymentKind> deploymentKindList = new ArrayList<>();
-		YAMLMapper mapper = new YAMLMapper();
-		try {
-			MappingIterator<AppDeploymentKind> it = mapper.readerFor(AppDeploymentKind.class).readValues(manifests);
-			while (it.hasNextValue()) {
-				AppDeploymentKind deploymentKind = it.next();
-				deploymentKindList.add(deploymentKind);
-			}
-
-		}
-		catch (IOException e) {
-			throw new IllegalArgumentException("Can't parse Package's manifest YAML", e);
-		}
-
-		List<Deployment> deploymentList = deploymentKindList.stream().map(AppDeploymentKind::getDeployment)
-				.collect(Collectors.toList());
-		return deploymentList;
-	}
-
-	private AppDeploymentRequest createAppDeploymentRequest(Deployment deployment, String releaseName,
+	private AppDeploymentRequest createAppDeploymentRequest(SpringBootAppKind springBootAppKind, String releaseName,
 			String version) {
 
-		AppDefinition appDefinition = new AppDefinition(deployment.getName(), deployment.getApplicationProperties());
-		Resource resource = delegatingResourceLoader.getResource(deployment.getResource());
+		Map<String, String> metadata = springBootAppKind.getMetadata();
+		SpringBootAppSpec spec = springBootAppKind.getSpec();
 
-		Map<String, String> deploymentProperties = deployment.getDeploymentProperties();
-		if (deployment.getCount() != 0) {
-			deploymentProperties.put(AppDeployer.COUNT_PROPERTY_KEY, String.valueOf(deployment.getCount()));
+		if (!metadata.containsKey("name")) {
+			throw new SkipperException("Package template must define a 'name' property in the metadata");
 		}
+
+		Map<String, String> applicationProperties = new TreeMap<>();
+		if (spec.getApplicationProperties() != null) {
+			applicationProperties.putAll(spec.getApplicationProperties());
+		}
+		AppDefinition appDefinition = new AppDefinition(metadata.get("name"), applicationProperties);
+
+		Assert.hasText(spec.getResource(), "Package template must define a resource uri");
+		Resource resource = delegatingResourceLoader.getResource(spec.getResource());
+
+		Map<String, String> deploymentProperties = new TreeMap<>();
+		if (spec.getDeploymentProperties() != null) {
+			deploymentProperties.putAll(spec.getDeploymentProperties());
+		}
+
+		if (metadata.containsKey("count")) {
+			deploymentProperties.put(AppDeployer.COUNT_PROPERTY_KEY, String.valueOf(metadata.get("count")));
+		}
+
 		deploymentProperties.put(AppDeployer.GROUP_PROPERTY_KEY, releaseName + "-v" + version);
 
 		AppDeploymentRequest appDeploymentRequest = new AppDeploymentRequest(appDefinition, resource,

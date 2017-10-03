@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2015 the original author or authors.
+ * Copyright 2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,23 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.springframework.cloud.skipper.client;
 
+import org.junit.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
 /**
- * A Java exception thrown when the server returns unexpected data.
- *
- * @author Gary Russell
+ * @author Mark Pollack
  */
-@SuppressWarnings("serial")
-public class SkipperServerException extends RuntimeException {
+public class DefaultSkipperClientTests {
 
-	public SkipperServerException(String message) {
-		super(message);
+	@Test
+	public void genericTemplateTest() {
+		SkipperClient skipperClient = new DefaultSkipperClient("http://localhost:7577");
+		assertThat(skipperClient.getSpringBootAppTemplate()).isNotNull();
+		assertThat(skipperClient.getSpringBootAppTemplate().getData()).isNotEmpty();
 	}
-
-	public SkipperServerException(String message, Exception e) {
-		super(message, e);
-	}
-
 }

@@ -1,14 +1,17 @@
-apiVersion: v1
-kind: Application
-deployment:
-  name: {{deployment.name}}
-  count: {{deployment.count}}
+apiVersion: skipper/v1
+kind: SpringBootApp
+metadata:
+  {{#metadata.entrySet}}
+  {{key}}: {{value}}
+  {{/metadata.entrySet}}
+spec:
+  resource: {{spec.resource}}:{{version}}
+  resourceMetadata: {{spec.resource}}:jar:metadata:{{version}}
   applicationProperties:
-    {{#deployment.applicationProperties.entrySet}}
+    {{#spec.applicationProperties.entrySet}}
     {{key}}: {{value}}
-    {{/deployment.applicationProperties.entrySet}}
-  resource: {{deployment.resource}}
+    {{/spec.applicationProperties.entrySet}}
   deploymentProperties:
-    {{#deployment.deploymentProperties.entrySet}}
+    {{#spec.deploymentProperties.entrySet}}
     {{key}}: {{value}}
-    {{/deployment.deploymentProperties.entrySet}}
+    {{/spec.deploymentProperties.entrySet}}

@@ -197,11 +197,23 @@ public class PackageServiceTests extends AbstractIntegrationTest {
 	}
 
 	protected void assertConfigValues(Package pkg) {
+		//Note same config values for both time and log
 		ConfigValues configValues = pkg.getConfigValues();
 		Yaml yaml = new Yaml();
-		Map logConfigValueMap = (Map) yaml.load(configValues.getRaw());
-		assertThat(logConfigValueMap).containsKeys("appVersion", "deployment");
-		Map deploymentMap = (Map) logConfigValueMap.get("deployment");
-		assertThat(deploymentMap).contains(entry("count", 1));
+		Map<String, Object> logConfigValueMap = (Map<String, Object>) yaml.load(configValues.getRaw());
+		assertThat(logConfigValueMap).containsKeys("version", "metadata", "spec");
+		assertThat(logConfigValueMap.get("version")).isEqualTo("1.2.0.RELEASE");
+		Map<String, Object> metadataMap = (Map<String, Object>) logConfigValueMap.get("metadata");
+		assertThat(metadataMap).hasSize(1);
+		assertThat(metadataMap).contains(entry("count", 1));
+		Map<String, Object> spec = (Map<String, Object>) logConfigValueMap.get("spec");
+		assertThat(spec).hasSize(2);
+		Map<String, String> applicationProperties = (Map<String, String>) spec.get("applicationProperties");
+		assertThat(applicationProperties).hasSize(1);
+		assertThat(applicationProperties).contains(entry("log.level", "DEBUG"));
+		Map<String, String> deploymentProperties = (Map<String, String>) spec.get("deploymentProperties");
+		assertThat(deploymentProperties).hasSize(1);
+		assertThat(deploymentProperties).contains(entry("memory", "1024m"));
+
 	}
 }

@@ -1,10 +1,10 @@
-apiVersion: v2
-kind: Application
-deployment:
+apiVersion: skipper/v1
+kind: SpringBootApp
+metadata:
   name: log
   count: {{count}}
-  applicationProperties:
-    log.level: {{log.level}}
+  type: sink
+spec:
   resource: {{resources.log.resourceGroupAndName}}:{{resources.log.version}}
   resourceMetadata: {{resources.log.resourceGroupAndName}}:jar:metadata:{{resources.log.version}}
   deploymentProperties:

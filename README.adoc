@@ -81,27 +81,58 @@ Released mylog
 
 Note that the log 1.0.0 package deploys the version 1.2.0.RC1 of the application.  You should see the java app named `log-sink-rabbit-1.2.0.RC1.jar` running in the output of the `jps` command
 
+You can ask for the status using the status command
+---
+skipper:>status --release-name mylog
+╔═══════════════╤═══════════════════════════════════════════════╗
+║Last Deployed  │Tue Oct 03 21:07:48 EDT 2017                   ║
+║Status         │DEPLOYED                                       ║
+║Platform Status│All the applications are deployed successfully.║
+╚═══════════════╧═══════════════════════════════════════════════╝
+---
+
 Now update the release with a newer version
 
 ----
 skipper:>upgrade --release-name mylog --package-name log --package-version 2.0.0
 mylog has been upgraded.
-Last Deployed: Sun Sep 24 18:57:35 EDT 2017
+Last Deployed: Tue Oct 03 21:09:01 EDT 2017
 Status: Applications deploying... mylog-v2.log=[mylog-v2.log-0=deploying]
 ----
 
 You should see the java app named `log-sink-rabbit-1.2.0.RELEASE.jar` running in the output of the `jps` command.
+
+The status command should shortly show it has been deployed successfully.  Note you can type `!status` to execute the last command that started with the word `status`
+---
+skipper:>status --release-name mylog
+╔═══════════════╤═══════════════════════════════════════════════╗
+║Last Deployed  │Tue Oct 03 21:09:01 EDT 2017                   ║
+║Status         │DEPLOYED                                       ║
+║Platform Status│All the applications are deployed successfully.║
+╚═══════════════╧═══════════════════════════════════════════════╝
+---
 
 Next rollback to the previous release
 
 ----
 skipper:>rollback --release-name mylog
 mylog has been rolled back.
-Last Deployed: Sun Sep 24 18:59:08 EDT 2017
+Last Deployed: Tue Oct 03 21:10:11 EDT 2017
 Status: Applications deploying... mylog-v3.log=[mylog-v3.log-0=deploying]
 ----
 
 You should see the java app named `log-sink-rabbit-1.2.0.RC1.jar` running in the output of the `jps` command
+
+The status command should shortly show it has been deployed successfully.
+
+---
+skipper:>status --release-name mylog
+╔═══════════════╤═══════════════════════════════════════════════╗
+║Last Deployed  │Tue Oct 03 21:10:11 EDT 2017                   ║
+║Status         │DEPLOYED                                       ║
+║Platform Status│All the applications are deployed successfully.║
+╚═══════════════╧═══════════════════════════════════════════════╝
+---
 
 The `history` command shows you the various releases that were made
 
@@ -110,9 +141,9 @@ skipper:>history --release-name mylog
 ╔═══════╤════════════════════════════╤════════╤════════════╤═══════════════╤═════════════════════╗
 ║Version│        Last updated        │ Status │Package Name│Package Version│     Description     ║
 ╠═══════╪════════════════════════════╪════════╪════════════╪═══════════════╪═════════════════════╣
-║3      │Thu Sep 28 16:39:25 EDT 2017│DEPLOYED│log         │1.0.0          │Install complete     ║
-║2      │Thu Sep 28 16:38:52 EDT 2017│DELETED │log         │2.0.0          │Undeployment complete║
-║1      │Thu Sep 28 16:38:09 EDT 2017│DELETED │log         │1.0.0          │Undeployment complete║
+║3      │Tue Oct 03 21:10:11 EDT 2017│DEPLOYED│log         │1.0.0          │Install complete     ║
+║2      │Tue Oct 03 21:09:01 EDT 2017│DELETED │log         │2.0.0          │Undeployment complete║
+║1      │Tue Oct 03 21:07:48 EDT 2017│DELETED │log         │1.0.0          │Undeployment complete║
 ╚═══════╧════════════════════════════╧════════╧════════════╧═══════════════╧═════════════════════╝
 ----
 

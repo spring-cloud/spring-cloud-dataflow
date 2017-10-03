@@ -35,8 +35,8 @@ public class SkipperServerProperties {
 	private List<Repository> packageRepositories = new ArrayList<>();
 
 	/**
-	 * Flag indicating to sync the local contents of the index directory with the database
-	 * on startup.
+	 * Flag indicating to sync the local contents of the index directory with the database on
+	 * startup.
 	 */
 	private boolean synchonizeIndexOnContextRefresh = true;
 

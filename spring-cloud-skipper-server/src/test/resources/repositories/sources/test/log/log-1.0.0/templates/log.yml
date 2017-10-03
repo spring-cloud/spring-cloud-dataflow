@@ -1,12 +1,14 @@
-apiVersion: v1
-kind: Application
-deployment:
+apiVersion: skipper/v1
+kind: SpringBootApp
+metadata:
   name: log
   count: {{count}}
-  applicationProperties:
-    log.level: {{log.level}}
+  type: sink
+spec:
   resource: {{resources.log.resourceGroupAndName}}:{{resources.log.version}}
   resourceMetadata: {{resources.log.resourceGroupAndName}}:jar:metadata:{{resources.log.version}}
+  applicationProperties:
+    log.level: DEBUG
   deploymentProperties:
     memory: {{deployment.request.memory}}
     spring.cloud.deployer.local.inheritLogging: {{deployment.request.inheritLogging}}
