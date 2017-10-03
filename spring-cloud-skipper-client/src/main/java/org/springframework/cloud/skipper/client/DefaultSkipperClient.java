@@ -25,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.cloud.skipper.domain.AboutInfo;
+import org.springframework.cloud.skipper.domain.Info;
 import org.springframework.cloud.skipper.domain.InstallProperties;
 import org.springframework.cloud.skipper.domain.InstallRequest;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
@@ -86,6 +87,13 @@ public class DefaultSkipperClient implements SkipperClient {
 	@Override
 	public AboutInfo info() {
 		return this.restTemplate.getForObject(baseUri + "/about", AboutInfo.class);
+	}
+
+	@Override
+	public Info status(String releaseName) {
+		Map<String, String> uriVariables = new HashMap<String, String>();
+		uriVariables.put("releaseName", releaseName);
+		return this.restTemplate.getForObject(baseUri + "/status/{releaseName}", Info.class, uriVariables);
 	}
 
 	@Override

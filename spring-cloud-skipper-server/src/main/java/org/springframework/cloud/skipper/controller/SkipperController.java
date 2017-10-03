@@ -20,15 +20,18 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.skipper.domain.AboutInfo;
+import org.springframework.cloud.skipper.domain.Info;
 import org.springframework.cloud.skipper.domain.InstallProperties;
 import org.springframework.cloud.skipper.domain.InstallRequest;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
 import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.UpgradeRequest;
 import org.springframework.cloud.skipper.domain.UploadRequest;
+import org.springframework.cloud.skipper.repository.ReleaseNotFoundException;
 import org.springframework.cloud.skipper.service.PackageService;
 import org.springframework.cloud.skipper.service.ReleaseService;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -87,6 +90,12 @@ public class SkipperController {
 		return this.releaseService.install(id, installProperties);
 	}
 
+	@RequestMapping(path = "/status/{name}", method = RequestMethod.GET)
+	@ResponseStatus(HttpStatus.OK)
+	public Info status(@PathVariable("name") String name) {
+		return this.releaseService.status(name);
+	}
+
 	@RequestMapping(path = "/status/{name}/{version}", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
 	public Release status(@PathVariable("name") String name, @PathVariable("version") int version) {
@@ -129,5 +138,11 @@ public class SkipperController {
 	@ResponseStatus(HttpStatus.OK)
 	public List<Release> list(@PathVariable("name") String releaseName) {
 		return this.releaseService.list(releaseName);
+	}
+
+	@ResponseStatus(value = HttpStatus.NOT_FOUND, reason = "Release doesn't exist")
+	@ExceptionHandler(ReleaseNotFoundException.class)
+	public void releaseNotExist() {
+		// handle ReleaseNotFoundException by returning 404
 	}
 }

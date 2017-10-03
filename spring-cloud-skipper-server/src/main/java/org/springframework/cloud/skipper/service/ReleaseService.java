@@ -178,6 +178,18 @@ public class ReleaseService {
 		return this.releaseManager.delete(release);
 	}
 
+	public Info status(String releaseName) {
+		Release release = this.releaseRepository.findTopByNameOrderByVersionDesc(releaseName);
+		if (release == null) {
+			throw new ReleaseNotFoundException(releaseName);
+		}
+		release = status(release);
+		if (release == null) {
+			throw new ReleaseNotFoundException(releaseName);
+		}
+		return release.getInfo();
+	}
+
 	public Release status(String releaseName, Integer version) {
 		return status(this.releaseRepository.findByNameAndVersion(releaseName, version));
 	}

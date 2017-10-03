@@ -20,10 +20,15 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.skipper.AbstractIntegrationTest;
 import org.springframework.cloud.skipper.SkipperException;
+import org.springframework.cloud.skipper.domain.Info;
 import org.springframework.cloud.skipper.domain.InstallProperties;
+import org.springframework.cloud.skipper.domain.InstallRequest;
+import org.springframework.cloud.skipper.domain.PackageIdentifier;
+import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.repository.ReleaseNotFoundException;
 import org.springframework.test.context.ActiveProfiles;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
@@ -59,5 +64,41 @@ public class ReleaseServiceTests extends AbstractIntegrationTest {
 
 		assertThatThrownBy(() -> releaseService.delete(null))
 				.isInstanceOf(IllegalArgumentException.class);
+	}
+
+	@Test
+	public void testInstall() {
+		InstallProperties installProperties = new InstallProperties();
+		installProperties.setReleaseName("logrelease");
+		installProperties.setPlatformName("default");
+		InstallRequest installRequest = new InstallRequest();
+		installRequest.setInstallProperties(installProperties);
+		PackageIdentifier packageIdentifier = new PackageIdentifier();
+		packageIdentifier.setPackageName("log");
+		packageIdentifier.setPackageVersion("1.0.0");
+		installRequest.setPackageIdentifier(packageIdentifier);
+		Release release = releaseService.install(installRequest);
+		assertThat(release).isNotNull();
+	}
+
+	@Test(expected = ReleaseNotFoundException.class)
+	public void testStatusReleaseDoesNotExist() {
+		releaseService.status("notexist");
+	}
+
+	@Test
+	public void testStatusReleaseExist() {
+		InstallProperties installProperties = new InstallProperties();
+		installProperties.setReleaseName("testexists");
+		installProperties.setPlatformName("default");
+		InstallRequest installRequest = new InstallRequest();
+		installRequest.setInstallProperties(installProperties);
+		PackageIdentifier packageIdentifier = new PackageIdentifier();
+		packageIdentifier.setPackageName("log");
+		packageIdentifier.setPackageVersion("1.0.0");
+		installRequest.setPackageIdentifier(packageIdentifier);
+		releaseService.install(installRequest);
+		Info info = releaseService.status("testexists");
+		assertThat(info).isNotNull();
 	}
 }

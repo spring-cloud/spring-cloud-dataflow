@@ -37,6 +37,7 @@ import org.yaml.snakeyaml.Yaml;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.skipper.client.SkipperClient;
 import org.springframework.cloud.skipper.domain.ConfigValues;
+import org.springframework.cloud.skipper.domain.Info;
 import org.springframework.cloud.skipper.domain.InstallProperties;
 import org.springframework.cloud.skipper.domain.InstallRequest;
 import org.springframework.cloud.skipper.domain.PackageIdentifier;
@@ -48,9 +49,11 @@ import org.springframework.cloud.skipper.domain.UploadRequest;
 import org.springframework.cloud.skipper.shell.command.support.TableUtils;
 import org.springframework.cloud.skipper.shell.command.support.YmlUtils;
 import org.springframework.hateoas.Resources;
+import org.springframework.http.HttpStatus;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellOption;
+import org.springframework.shell.table.ArrayTableModel;
 import org.springframework.shell.table.BeanListTableModel;
 import org.springframework.shell.table.Table;
 import org.springframework.shell.table.TableBuilder;
@@ -58,6 +61,7 @@ import org.springframework.shell.table.TableModel;
 import org.springframework.util.Assert;
 import org.springframework.util.ResourceUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.web.client.HttpStatusCodeException;
 
 import static org.springframework.shell.standard.ShellOption.NULL;
 
@@ -310,6 +314,33 @@ public class SkipperCommands extends AbstractSkipperCommand {
 		TableModel model = new BeanListTableModel<>(releases, headers);
 		TableBuilder tableBuilder = new TableBuilder(model);
 		TableUtils.applyStyle(tableBuilder);
+		return tableBuilder.build();
+	}
+
+	@ShellMethod(key = "status", value = "Status for a last known release version.")
+	public Object status(
+			@ShellOption(help = "release name") @NotNull String releaseName) {
+		Info info;
+		try {
+			info = this.skipperClient.status(releaseName);
+		}
+		catch (HttpStatusCodeException e) {
+			if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
+				// 404 means release not found.
+				// TODO it'd be nice to rethrow ReleaseNotFoundException in
+				// SkipperClient but that exception is on server
+				return "Release with name '" + releaseName + "' not found";
+			}
+			// if something else, rethrow
+			throw e;
+		}
+		Object[][] data = new Object[3][];
+		data[0] = new Object[]{"Last Deployed", info.getFirstDeployed()};
+		data[1] = new Object[]{"Status", info.getStatus().getStatusCode().toString()};
+		data[2] = new Object[]{"Platform Status", info.getStatus().getPlatformStatus()};
+		TableModel model = new ArrayTableModel(data);
+		TableBuilder tableBuilder = new TableBuilder(model);
+		TableUtils.applyStyleNoHeader(tableBuilder);
 		return tableBuilder.build();
 	}
 

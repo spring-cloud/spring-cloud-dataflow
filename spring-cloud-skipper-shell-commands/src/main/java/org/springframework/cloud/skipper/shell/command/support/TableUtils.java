@@ -26,6 +26,7 @@ import org.springframework.shell.table.Tables;
 /**
  * @author Ilayaperumal Gopinathan
  * @author Eric Bottard
+ * @author Janne Valkealahti
  */
 public class TableUtils {
 
@@ -54,4 +55,18 @@ public class TableUtils {
 		return Tables.configureKeyValueRendering(builder, " = ");
 	}
 
+	/**
+	 * Customize the given TableBuilder with almost same way than
+	 * {@link #applyStyle(TableBuilder)} but do not use any header styling.
+	 *
+	 * @param builder the table builder to use
+	 * @return the configured table builder
+	 */
+	public static TableBuilder applyStyleNoHeader(TableBuilder builder) {
+		builder.addOutlineBorder(BorderStyle.fancy_double)
+				.paintBorder(BorderStyle.air, BorderSpecification.INNER_VERTICAL).fromTopLeft().toBottomRight()
+				.paintBorder(BorderStyle.fancy_light, BorderSpecification.INNER_VERTICAL).fromTopLeft()
+				.toBottomRight();
+		return Tables.configureKeyValueRendering(builder, " = ");
+	}
 }

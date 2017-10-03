@@ -18,6 +18,7 @@ package org.springframework.cloud.skipper.client;
 import java.util.List;
 
 import org.springframework.cloud.skipper.domain.AboutInfo;
+import org.springframework.cloud.skipper.domain.Info;
 import org.springframework.cloud.skipper.domain.InstallProperties;
 import org.springframework.cloud.skipper.domain.InstallRequest;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
@@ -148,4 +149,12 @@ public interface SkipperClient {
 	 * @return the list of package repositories
 	 */
 	Resources<Repository> listRepositories();
+
+	/**
+	 * Return a status info of a last known release version.
+	 *
+	 * @param releaseName the release name
+	 * @return the status info of a release or {@code NULL} if release not found
+	 */
+	Info status(String releaseName);
 }
