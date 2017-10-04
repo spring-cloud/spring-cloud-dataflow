@@ -58,14 +58,13 @@ public class ConfigValueUtils {
 			mergedValues = mergeOverrideMap(pkg, new TreeMap<>());
 		}
 		// return mergedValues;
-		Map<String, Object> mergedValuesIncludingDeps = mergeDependencies(pkg, mergedValues);
+		Map<String, Object> mergedValuesIncludingDeps = mergePackagesIncludingDependencies(pkg, mergedValues);
 		return mergedValuesIncludingDeps;
 	}
 
 	/**
 	 * Merge top level configuration values from the Package and the configuration values
-	 * passed in at runtime. The merging ignores top level configuration values that are for
-	 * overriding dependent packages.
+	 * passed in at runtime.
 	 * <p>
 	 * @param pkg The package being configured
 	 * @param overrideMap The runtime override values
@@ -98,7 +97,8 @@ public class ConfigValueUtils {
 		return packageValueMap;
 	}
 
-	private static Map<String, Object> mergeDependencies(Package pkg, Map<String, Object> overrideMap) {
+	private static Map<String, Object> mergePackagesIncludingDependencies(Package pkg,
+			Map<String, Object> overrideMap) {
 		List<Package> dependencies = pkg.getDependencies();
 		if (dependencies.size() == 0) {
 			return overrideMap;
@@ -106,6 +106,41 @@ public class ConfigValueUtils {
 		Map<String, Object> mergedValues = new TreeMap<>();
 
 		// parse ConfigValues to a map.
+		Map<String, Object> currentPackageValueMap = convertConfigValuesToMap(pkg);
+
+		// Merge top level value properties
+		for (Map.Entry<String, Object> stringObjectEntry : overrideMap.entrySet()) {
+			if (!(stringObjectEntry.getValue() instanceof Map)) {
+				if (currentPackageValueMap.containsKey(stringObjectEntry.getKey())) {
+					mergedValues.put(stringObjectEntry.getKey(), stringObjectEntry.getValue());
+				}
+			}
+		}
+		for (Package dependency : dependencies) {
+			String dependencyName = dependency.getMetadata().getName();
+			Map<String, Object> currentPackageValueMapForDependency = (Map<String, Object>) currentPackageValueMap
+					.getOrDefault(dependencyName, new TreeMap<>());
+
+			// If the override Map contains configuration for dependencies, unravel the override Map,
+			// otherwise ignore
+			Map<String, Object> overrideMapToUse;
+			if (overrideMap.containsKey(dependencyName)) {
+				overrideMapToUse = (Map<String, Object>) overrideMap.get(dependencyName);
+			}
+			else {
+				overrideMapToUse = new TreeMap<>();
+			}
+			merge(currentPackageValueMapForDependency, overrideMapToUse);
+
+			mergedValues.put(dependency.getMetadata().getName(),
+					// TODO support multiple levels of dependency, convert PackageValueMap to ConfigValues
+					mergeOverrideMap(dependency, currentPackageValueMapForDependency));
+		}
+		return mergedValues;
+
+	}
+
+	private static Map<String, Object> convertConfigValuesToMap(Package pkg) {
 		Yaml yaml = new Yaml();
 		Map<String, Object> currentPackageValueMap = new TreeMap<>();
 		if (pkg.getConfigValues() != null && StringUtils.hasText(pkg.getConfigValues().getRaw())) {
@@ -114,16 +149,7 @@ public class ConfigValueUtils {
 		if (currentPackageValueMap == null) {
 			currentPackageValueMap = new TreeMap<>();
 		}
-		for (Package dependency : dependencies) {
-			Map<String, Object> currentPackageValueMapForDependency = (Map<String, Object>) currentPackageValueMap
-					.getOrDefault(dependency.getMetadata().getName(), new TreeMap<>());
-			merge(currentPackageValueMapForDependency, overrideMap);
-			mergedValues.put(dependency.getMetadata().getName(),
-					// TODO support multiple levels of dependency, convert PackageValueMap to ConfigValues
-					mergeOverrideMap(dependency, currentPackageValueMapForDependency));
-		}
-		return mergedValues;
-
+		return currentPackageValueMap;
 	}
 
 	/**

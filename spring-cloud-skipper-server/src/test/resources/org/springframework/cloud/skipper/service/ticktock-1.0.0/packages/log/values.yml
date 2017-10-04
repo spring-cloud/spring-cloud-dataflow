@@ -1,7 +1,7 @@
 # Default values for {{name}}
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates
-appVersion: 1.2.0.RELEASE # will not be overridden
+appVersion: 1.2.0.RELEASE # will be overridden using top level ConfigValues
 deployment:
   count: 1 # will be overridden
   applicationProperties:

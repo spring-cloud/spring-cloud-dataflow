@@ -18,6 +18,7 @@ package org.springframework.cloud.skipper.service;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.Map;
+import java.util.TreeMap;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -49,15 +50,25 @@ public class ConfigValueUtilsTests {
 
 	@Test
 	public void testYamlMerge() throws IOException {
-		Resource resource = new ClassPathResource("/org/springframework/cloud/skipper/service/ticktock-1.0.0");
-
-		Package pkg = this.packageReader.read(resource.getFile());
-		Map<String, Object> mergedMap = ConfigValueUtils.mergeConfigValues(pkg, new ConfigValues());
-
 		DumperOptions dumperOptions = new DumperOptions();
 		dumperOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
 		dumperOptions.setPrettyFlow(true);
 		Yaml yaml = new Yaml(dumperOptions);
+
+		Resource resource = new ClassPathResource("/org/springframework/cloud/skipper/service/ticktock-1.0.0");
+
+		Package pkg = this.packageReader.read(resource.getFile());
+		ConfigValues configValues = new ConfigValues();
+		Map<String, Object> configValuesMap = new TreeMap<>();
+		Map<String, Object> logMap = new TreeMap<>();
+		logMap.put("appVersion", "1.2.1.RELEASE");
+		configValuesMap.put("log", logMap);
+		configValuesMap.put("hello", "universe");
+
+		String configYaml = yaml.dump(configValuesMap);
+		configValues.setRaw(configYaml);
+		Map<String, Object> mergedMap = ConfigValueUtils.mergeConfigValues(pkg, configValues);
+
 		String mergedYaml = yaml.dump(mergedMap);
 		String expectedYaml = StreamUtils.copyToString(
 				TestResourceUtils.qualifiedResource(getClass(), "merged.yaml").getInputStream(),

@@ -1,5 +1,6 @@
+hello: universe
 log:
-  appVersion: 1.2.0.RELEASE
+  appVersion: 1.2.1.RELEASE
   deployment:
     count: 2
     applicationProperties:
