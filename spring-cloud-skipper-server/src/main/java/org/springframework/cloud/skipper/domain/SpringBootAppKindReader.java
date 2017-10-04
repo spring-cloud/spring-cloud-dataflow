@@ -25,9 +25,9 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 /**
  * @author Mark Pollack
  */
-public class SpringBootAppKindReader {
+public abstract class SpringBootAppKindReader {
 
-	public List<SpringBootAppKind> read(String manifest) {
+	public static List<SpringBootAppKind> read(String manifest) {
 		List<SpringBootAppKind> springBootAppKindList = new ArrayList<>();
 		YAMLMapper mapper = new YAMLMapper();
 		try {

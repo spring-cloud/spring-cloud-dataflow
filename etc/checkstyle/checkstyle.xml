@@ -115,7 +115,7 @@
         </module>
 
         <module name="ReturnCount">
-            <property name="max" value="3"/>
+            <property name="max" value="4"/>
             <property name="tokens" value="METHOD_DEF"/>
         </module>
 

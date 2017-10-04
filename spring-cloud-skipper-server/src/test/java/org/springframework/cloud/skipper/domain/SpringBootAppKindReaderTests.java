@@ -35,12 +35,10 @@ public class SpringBootAppKindReaderTests {
 
 	@Test
 	public void readTests() throws IOException {
-		SpringBootAppKindReader springBootAppKindReader = new SpringBootAppKindReader();
-
 		String manifestAyml = StreamUtils.copyToString(
 				TestResourceUtils.qualifiedResource(getClass(), "manifest.yml").getInputStream(),
 				Charset.defaultCharset());
-		List<SpringBootAppKind> springBootAppKindList = springBootAppKindReader.read(manifestAyml);
+		List<SpringBootAppKind> springBootAppKindList = SpringBootAppKindReader.read(manifestAyml);
 
 		assertThat(springBootAppKindList).hasSize(2);
 		assertTimeOrLogApp(springBootAppKindList.get(0));

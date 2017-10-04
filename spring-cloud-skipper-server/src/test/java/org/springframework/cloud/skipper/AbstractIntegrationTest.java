@@ -15,9 +15,17 @@
  */
 package org.springframework.cloud.skipper;
 
+import org.junit.After;
 import org.junit.runner.RunWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cloud.skipper.domain.Release;
+import org.springframework.cloud.skipper.domain.StatusCode;
+import org.springframework.cloud.skipper.repository.ReleaseRepository;
+import org.springframework.cloud.skipper.service.ReleaseService;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,4 +41,29 @@ import org.springframework.transaction.annotation.Transactional;
 @SpringBootTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 public abstract class AbstractIntegrationTest {
+
+	private final Logger logger = LoggerFactory.getLogger(AbstractIntegrationTest.class);
+
+	@Autowired
+	protected ReleaseRepository releaseRepository;
+
+	@Autowired
+	protected ReleaseService releaseService;
+
+	@After
+	public void cleanupReleases() {
+		// Add a sleep for now to give the local deployer a chance to install the app. This
+		// should go away once we introduce spring state machine.
+		try {
+			Thread.sleep(5000);
+			for (Release release : releaseRepository.findAll()) {
+				if (release.getInfo().getStatus().getStatusCode() != StatusCode.DELETED) {
+					releaseService.delete(release.getName());
+				}
+			}
+		}
+		catch (Exception e) {
+			logger.error("error cleaning up resource in integration test");
+		}
+	}
 }

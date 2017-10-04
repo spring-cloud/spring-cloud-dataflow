@@ -15,7 +15,19 @@
  */
 package org.springframework.cloud.skipper.domain;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import javax.persistence.Entity;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import org.springframework.cloud.skipper.SkipperException;
 
 /**
  * @author Mark Pollack
@@ -55,5 +67,38 @@ public class AppDeployerData extends AbstractEntity {
 
 	public void setDeploymentData(String deploymentData) {
 		this.deploymentData = deploymentData;
+	}
+
+	public Map<String, String> getDeploymentDataAsMap() {
+		try {
+			ObjectMapper mapper = new ObjectMapper();
+			TypeReference<Map<String, String>> typeRef = new TypeReference<Map<String, String>>() {
+			};
+			HashMap<String, String> result = mapper.readValue(this.deploymentData, typeRef);
+			return result;
+		}
+		catch (Exception e) {
+			throw new SkipperException("Could not parse appNameDeploymentIdMap JSON:" + this.deploymentData, e);
+		}
+	}
+
+	public void setDeploymentDataUsingMap(Map<String, String> appNameDeploymentIdMap) {
+		ObjectMapper objectMapper = new ObjectMapper();
+		try {
+			setDeploymentData(objectMapper.writeValueAsString(appNameDeploymentIdMap));
+		}
+		catch (JsonProcessingException e) {
+			throw new SkipperException("Could not serialize appNameDeploymentIdMap", e);
+		}
+	}
+
+	public List<String> getDeploymentIds() {
+		if (this.deploymentData != null) {
+			Map<String, String> appNameDeploymentIdMap = this.getDeploymentDataAsMap();
+			return appNameDeploymentIdMap.values().stream().collect(Collectors.toList());
+		}
+		else {
+			return new ArrayList<>();
+		}
 	}
 }

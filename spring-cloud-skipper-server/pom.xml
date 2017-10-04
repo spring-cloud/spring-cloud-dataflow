@@ -19,12 +19,6 @@
     </properties>
 
     <dependencies>
-        <!--
-          <dependency>
-              <groupId>org.springframework.cloud</groupId>
-              <artifactId>spring-cloud-skipper</artifactId>
-              </dependency>
-          -->
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-config</artifactId>
@@ -144,6 +138,11 @@
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-deployer-kubernetes</artifactId>
             <version>${spring-cloud-deployer-kubernetes.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>23.1-jre</version>
         </dependency>
     </dependencies>
 

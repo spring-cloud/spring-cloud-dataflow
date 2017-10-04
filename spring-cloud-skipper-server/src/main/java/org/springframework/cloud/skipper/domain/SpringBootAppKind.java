@@ -17,6 +17,8 @@ package org.springframework.cloud.skipper.domain;
 
 import java.util.Map;
 
+import org.springframework.cloud.skipper.SkipperException;
+
 /**
  * @author Mark Pollack
  */
@@ -63,5 +65,17 @@ public class SpringBootAppKind {
 
 	public void setSpec(SpringBootAppSpec spec) {
 		this.spec = spec;
+	}
+
+	/**
+	 * Return the value of the name property in the application's metadata.
+	 * @return The value of the name
+	 * @throws SkipperException if the name property can not be found in the metadata.
+	 */
+	public String getApplicationName() {
+		if (!this.metadata.containsKey("name")) {
+			throw new SkipperException("SpringBootAppKind must define a 'name' property in the metadata");
+		}
+		return this.metadata.get("name");
 	}
 }
