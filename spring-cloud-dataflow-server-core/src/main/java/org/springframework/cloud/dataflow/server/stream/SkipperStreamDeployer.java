@@ -17,7 +17,6 @@ package org.springframework.cloud.dataflow.server.stream;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -30,6 +29,7 @@ import org.apache.commons.logging.LogFactory;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 
+import org.springframework.cloud.deployer.resource.maven.MavenResource;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.skipper.client.SkipperClient;
@@ -43,10 +43,8 @@ import org.springframework.cloud.skipper.domain.Template;
 import org.springframework.cloud.skipper.domain.UploadRequest;
 import org.springframework.cloud.skipper.io.DefaultPackageWriter;
 import org.springframework.cloud.skipper.io.PackageWriter;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
-import org.springframework.util.StreamUtils;
 import org.springframework.util.StringUtils;
 
 import static org.springframework.cloud.deployer.spi.app.AppDeployer.COUNT_PROPERTY_KEY;
@@ -161,24 +159,30 @@ public class SkipperStreamDeployer implements StreamDeployer {
 
 		pkg.setMetadata(packageMetadata);
 
-		Map<String, Object> deploymentMap = new HashMap<>();
-
-		try {
-			deploymentMap.put("resource", appDeploymentRequest.getResource().getURI().toString());
-		}
-		catch (IOException e) {
-			throw new IllegalArgumentException("Can't get URI of resource", e);
-		}
-		String countProperty = appDeploymentRequest.getDeploymentProperties().get(COUNT_PROPERTY_KEY);
-		int count = (StringUtils.hasText(countProperty)) ? Integer.parseInt(countProperty) : 1;
-		deploymentMap.put("count", Integer.toString(count));
-		deploymentMap.put("name", appDeploymentRequest.getDefinition().getName());
-		deploymentMap.put("applicationProperties", appDeploymentRequest.getDefinition().getProperties());
-		deploymentMap.put("deploymentProperties", appDeploymentRequest.getDeploymentProperties());
-
 		ConfigValues configValues = new ConfigValues();
 		Map<String, Object> configValueMap = new HashMap<>();
-		configValueMap.put("deployment", deploymentMap);
+		Map<String, Object> metadataMap = new HashMap<>();
+		Map<String, Object> specMap = new HashMap<>();
+
+		// Add version
+		String version = getResourceVersion(appDeploymentRequest.getResource());
+		configValueMap.put("version", version);
+
+		// Add metadata
+		String countProperty = appDeploymentRequest.getDeploymentProperties().get(COUNT_PROPERTY_KEY);
+		int count = (StringUtils.hasText(countProperty)) ? Integer.parseInt(countProperty) : 1;
+		metadataMap.put("count", Integer.toString(count));
+		metadataMap.put("name", appDeploymentRequest.getDefinition().getName());
+
+		// Add spec
+		String resourceWithoutVersion = getResourceWithoutVersion(appDeploymentRequest.getResource());
+		specMap.put("resource", resourceWithoutVersion);
+		specMap.put("applicationProperties", appDeploymentRequest.getDefinition().getProperties());
+		specMap.put("deploymentProperties", appDeploymentRequest.getDeploymentProperties());
+
+		//Add metadata and spec to top level map
+		configValueMap.put("metadata", metadataMap);
+		configValueMap.put("spec", specMap);
 
 		DumperOptions dumperOptions = new DumperOptions();
 		dumperOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
@@ -192,23 +196,30 @@ public class SkipperStreamDeployer implements StreamDeployer {
 
 	}
 
+	public static String getResourceVersion(Resource resource) {
+		if (resource instanceof MavenResource) {
+			MavenResource mavenResource = (MavenResource) resource;
+			return mavenResource.getVersion();
+		} else {
+			//TODO handle docker and http resource
+			throw new IllegalArgumentException("Can't extract version from resource " + resource.getDescription());
+		}
+	}
+
+	public static String getResourceWithoutVersion(Resource resource) {
+		if (resource instanceof MavenResource) {
+			MavenResource mavenResource = (MavenResource) resource;
+			return String.format("maven://%s:%s",
+					mavenResource.getGroupId(),
+					mavenResource.getArtifactId());
+		} else {
+			//TODO handle docker and http resource
+			throw new IllegalArgumentException("Can't extract version from resource " + resource.getDescription());
+		}
+	}
+
 	private List<Template> createGenericTemplate() {
-		Resource resource = new ClassPathResource("/org/springframework/cloud/skipper/io/generic-template.yml");
-		String genericTempateData = null;
-		try {
-			genericTempateData = StreamUtils.copyToString(resource.getInputStream(), Charset.defaultCharset());
-		}
-		catch (IOException e) {
-			throw new IllegalArgumentException("Can't load generic template", e);
-		}
-		Template template = new Template();
-		template.setData(genericTempateData);
-		try {
-			template.setName(resource.getURL().toString());
-		}
-		catch (IOException e) {
-			logger.error("Could not get URL of resource " + resource.getDescription(), e);
-		}
+		Template template = this.skipperClient.getSpringBootAppTemplate();
 		List<Template> templateList = new ArrayList<>();
 		templateList.add(template);
 		return templateList;
