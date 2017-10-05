@@ -98,7 +98,7 @@ public abstract class AbstractMockMvcTests {
 	private String getSuccessStatus(String release, String version) {
 		return "{\"name\":\"" + release + "\",\"version\":" + version + ","
 				+ "\"info\":{\"status\":{\"statusCode\":\"DEPLOYED\","
-				+ "\"platformStatus\":\"All the applications are deployed successfully.";
+				+ "\"platformStatus\":\"All the applications are deployed successfully";
 	}
 
 }

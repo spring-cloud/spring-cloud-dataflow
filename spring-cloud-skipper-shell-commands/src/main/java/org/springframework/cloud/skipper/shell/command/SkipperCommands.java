@@ -319,10 +319,16 @@ public class SkipperCommands extends AbstractSkipperCommand {
 
 	@ShellMethod(key = "status", value = "Status for a last known release version.")
 	public Object status(
-			@ShellOption(help = "release name") @NotNull String releaseName) {
+			@ShellOption(help = "release name") @NotNull String releaseName,
+			@ShellOption(help = "the specific release version.", defaultValue = NULL) Integer releaseVersion) {
 		Info info;
 		try {
-			info = this.skipperClient.status(releaseName);
+			if (releaseVersion == null) {
+				info = this.skipperClient.status(releaseName);
+			}
+			else {
+				info = this.skipperClient.status(releaseName, releaseVersion);
+			}
 		}
 		catch (HttpStatusCodeException e) {
 			if (e.getStatusCode() == HttpStatus.NOT_FOUND) {

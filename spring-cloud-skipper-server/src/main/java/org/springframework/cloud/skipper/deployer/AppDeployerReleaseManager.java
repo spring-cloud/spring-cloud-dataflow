@@ -22,12 +22,14 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.deployer.resource.support.DelegatingResourceLoader;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.app.AppInstanceStatus;
 import org.springframework.cloud.deployer.spi.app.AppStatus;
-import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.skipper.SkipperException;
@@ -55,6 +57,8 @@ import org.springframework.util.StringUtils;
 @Service
 public class AppDeployerReleaseManager implements ReleaseManager {
 
+	private static final Logger log = LoggerFactory.getLogger(AppDeployerReleaseManager.class);
+
 	private final ReleaseRepository releaseRepository;
 
 	private final DelegatingResourceLoader delegatingResourceLoader;
@@ -77,7 +81,7 @@ public class AppDeployerReleaseManager implements ReleaseManager {
 	public Release install(Release releaseInput) {
 
 		Release release = this.releaseRepository.save(releaseInput);
-
+		log.debug("Manifest = " + releaseInput.getManifest());
 		// Deploy the application
 		SpringBootAppKindReader springBootAppKindReader = new SpringBootAppKindReader();
 		List<SpringBootAppKind> springBootAppKindList = springBootAppKindReader.read(release.getManifest());
@@ -107,6 +111,7 @@ public class AppDeployerReleaseManager implements ReleaseManager {
 		return status(this.releaseRepository.save(release));
 	}
 
+
 	public Release status(Release release) {
 		AppDeployer appDeployer = this.deployerRepository.findByNameRequired(release.getPlatformName())
 				.getAppDeployer();
@@ -114,27 +119,53 @@ public class AppDeployerReleaseManager implements ReleaseManager {
 		AppDeployerData appDeployerData = this.appDeployerDataRepository
 				.findByReleaseNameAndReleaseVersion(release.getName(), release.getVersion());
 		deploymentIds.addAll(StringUtils.commaDelimitedListToSet(appDeployerData.getDeploymentData()));
+		log.debug("Getting status for {} using deploymentIds {}", release,
+				StringUtils.collectionToCommaDelimitedString(deploymentIds));
+
 		if (!deploymentIds.isEmpty()) {
-			boolean allDeployed = true;
-			StringBuffer releaseStatusMsg = new StringBuffer();
+			// mainly track deployed and unknown statuses. for any other
+			// combination, get more details from instances.
+			int deployedCount = 0;
+			int unknownCount = 0;
+			List<String> platformStatusMessages = new ArrayList<>();
 			for (String deploymentId : deploymentIds) {
 				AppStatus appStatus = appDeployer.status(deploymentId);
-				if (appStatus.getState() != DeploymentState.deployed) {
-					StringBuffer statusMsg = new StringBuffer(deploymentId + "=[");
-					allDeployed = false;
-					for (AppInstanceStatus appInstanceStatus : appStatus.getInstances().values()) {
-						statusMsg.append(appInstanceStatus.getId() + "=" + appInstanceStatus.getState());
-					}
-					statusMsg.append("]");
-					releaseStatusMsg.append(statusMsg);
+				log.debug("App Deployer for deploymentId {} gives status {}", deploymentId, appStatus);
+
+				StringBuffer statusMsg = new StringBuffer(deploymentId + "=[");
+				for (AppInstanceStatus appInstanceStatus : appStatus.getInstances().values()) {
+					statusMsg.append(appInstanceStatus.getId() + "=" + appInstanceStatus.getState() + "\n");
+				}
+				statusMsg.setLength(statusMsg.length() - 1);
+				statusMsg.append("]");
+				platformStatusMessages.add(statusMsg.toString());
+
+				switch (appStatus.getState()) {
+				case deployed:
+					deployedCount++;
+					break;
+				case unknown:
+					unknownCount++;
+					break;
+				case deploying:
+				case undeployed:
+				case partial:
+				case failed:
+				case error:
+				default:
+					break;
 				}
 			}
-			if (allDeployed) {
-				release.getInfo().getStatus().setPlatformStatus("All the applications are deployed successfully.");
+			if (deployedCount == deploymentIds.size()) {
+				release.getInfo().getStatus().setPlatformStatus("All the applications are deployed successfully.\n"
+						+ StringUtils.collectionToCommaDelimitedString(platformStatusMessages));
+			}
+			else if (unknownCount == deploymentIds.size()) {
+				release.getInfo().getStatus().setPlatformStatus("All applications unknown to system.\n");
 			}
 			else {
-				release.getInfo().getStatus().setPlatformStatus(
-						"Applications deploying... " + releaseStatusMsg.toString());
+				release.getInfo().getStatus().setPlatformStatus("State of applications:\n"
+						+ StringUtils.collectionToCommaDelimitedString(platformStatusMessages));
 			}
 		}
 		return release;

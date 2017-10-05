@@ -124,6 +124,16 @@ public class DefaultSkipperClient implements SkipperClient {
 	}
 
 	@Override
+	public Info status(String releaseName, int releaseVersion) {
+		Map<String, String> uriVariables = new HashMap<String, String>();
+		uriVariables.put("releaseName", releaseName);
+		uriVariables.put("releaseVersion", Integer.toString(releaseVersion));
+		Release release = this.restTemplate.getForObject(baseUri + "/status/{releaseName}/{releaseVersion}",
+				Release.class, uriVariables);
+		return release.getInfo();
+	}
+
+	@Override
 	public Resources<PackageMetadata> search(String name, boolean details) {
 		ParameterizedTypeReference<Resources<PackageMetadata>> typeReference = new ParameterizedTypeReference<Resources<PackageMetadata>>() {
 		};
