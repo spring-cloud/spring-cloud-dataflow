@@ -7,14 +7,18 @@ spring:
         synchonizeIndexOnContextRefresh: false
   datasource:
     initialize: true
-    url:
+    url: 'jdbc:h2:mem:testdb;DB_CLOSE_DELAY=- 1;DB_CLOSE_ON_EXIT=FALSE'
+    driverClassName: org.h2.Driver
+    username: sa
+    password:
+  jpa:
+    generate-ddl: true
+    hibernate:
+      ddl-auto: create
+
 maven:
   remoteRepositories:
-    springRepo:
-      url: 'jdbc:h2:mem:testdb;DB_CLOSE_DELAY=- 1;DB_CLOSE_ON_EXIT=FALSE'
-      driverClassName: org.h2.Driver
-      username: sa
-      password:
+    springRepo: https://repo.spring.io/libs-snapshot
 
 logging:
   level:

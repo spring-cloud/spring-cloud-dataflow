@@ -50,6 +50,8 @@ public class AppDeployerReleaseManager implements ReleaseManager {
 
 	private static final Logger logger = LoggerFactory.getLogger(AppDeployerReleaseManager.class);
 
+	public static String ALL_APPS_DEPLOYED_MESSAGE = "All the applications have been deployed successfully.";
+
 	private final ReleaseRepository releaseRepository;
 
 	private final AppDeployerDataRepository appDeployerDataRepository;
@@ -187,11 +189,11 @@ public class AppDeployerReleaseManager implements ReleaseManager {
 				}
 			}
 			if (deployedCount == deploymentIds.size()) {
-				release.getInfo().getStatus().setPlatformStatus("All the applications are deployed successfully.\n"
+				release.getInfo().getStatus().setPlatformStatus(ALL_APPS_DEPLOYED_MESSAGE + "\n"
 						+ StringUtils.collectionToCommaDelimitedString(platformStatusMessages));
 			}
 			else if (unknownCount == deploymentIds.size()) {
-				release.getInfo().getStatus().setPlatformStatus("All applications unknown to system.\n");
+				release.getInfo().getStatus().setPlatformStatus("All applications are unknown to system.\n");
 			}
 			else {
 				release.getInfo().getStatus().setPlatformStatus("State of applications:\n"

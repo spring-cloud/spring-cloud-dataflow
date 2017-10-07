@@ -30,6 +30,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cloud.skipper.deployer.AppDeployerReleaseManager;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
@@ -76,8 +77,12 @@ public abstract class AbstractMockMvcTests {
 			throws InterruptedException {
 		CountDownLatch latch = new CountDownLatch(1);
 		long startTime = System.currentTimeMillis();
-		while (!isDeployed(releaseName, releaseVersion)
-				|| (System.currentTimeMillis() - startTime) < 12000) {
+		while (!isDeployed(releaseName, releaseVersion)) {
+			if ((System.currentTimeMillis() - startTime) > 60000) {
+				logger.info("Stopping polling for deployed status after 60 seconds for release={} version={}",
+						releaseName, releaseVersion);
+				break;
+			}
 			Thread.sleep(10000);
 		}
 		if (isDeployed(releaseName, releaseVersion)) {
@@ -93,7 +98,7 @@ public abstract class AbstractMockMvcTests {
 					.andReturn();
 			String content = result.getResponse().getContentAsString();
 			logger.info("Status = " + content);
-			return content.startsWith(getSuccessStatus(releaseName, releaseVersion));
+			return content.contains(getSuccessStatus(releaseName, releaseVersion));
 		}
 		catch (Exception e) {
 			return false;
@@ -103,7 +108,7 @@ public abstract class AbstractMockMvcTests {
 	private String getSuccessStatus(String release, String version) {
 		return "{\"name\":\"" + release + "\",\"version\":" + version + ","
 				+ "\"info\":{\"status\":{\"statusCode\":\"DEPLOYED\","
-				+ "\"platformStatus\":\"All the applications are deployed successfully";
+				+ "\"platformStatus\":\"" + AppDeployerReleaseManager.ALL_APPS_DEPLOYED_MESSAGE;
 	}
 
 }
