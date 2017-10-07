@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.cloud.skipper.service;
+package org.springframework.cloud.skipper.deployer;
 
 import org.springframework.cloud.skipper.domain.Release;
 

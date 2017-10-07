@@ -20,7 +20,7 @@ import java.util.List;
 import org.springframework.util.Assert;
 
 /**
- * Report returned from the {@link ReleaseAnalysisService} that gives the
+ * Report returned from the {@link ReleaseAnalyzer} that gives the
  * {@link ReleaseDifference} that describes if there is a difference between the existing
  * release and the requested on, and if so, a description of the differences. The list of
  * application names is also provided. Deployment strategies are the consumers of this

@@ -35,9 +35,9 @@ import org.springframework.cloud.skipper.domain.SpringBootAppKind;
 import org.springframework.cloud.skipper.domain.SpringBootAppKindReader;
 import org.springframework.cloud.skipper.domain.Status;
 import org.springframework.cloud.skipper.domain.StatusCode;
+import org.springframework.cloud.skipper.repository.AppDeployerDataRepository;
 import org.springframework.cloud.skipper.repository.DeployerRepository;
 import org.springframework.cloud.skipper.repository.ReleaseRepository;
-import org.springframework.cloud.skipper.service.ReleaseManager;
 import org.springframework.util.StringUtils;
 
 /**
@@ -58,19 +58,19 @@ public class AppDeployerReleaseManager implements ReleaseManager {
 
 	private final DeployerRepository deployerRepository;
 
-	private final ReleaseAnalysisService releaseAnalysisService;
+	private final ReleaseAnalyzer releaseAnalyzer;
 
 	private final AppDeploymentRequestFactory appDeploymentRequestFactory;
 
 	public AppDeployerReleaseManager(ReleaseRepository releaseRepository,
 			AppDeployerDataRepository appDeployerDataRepository,
 			DeployerRepository deployerRepository,
-			ReleaseAnalysisService releaseAnalysisService,
+			ReleaseAnalyzer releaseAnalyzer,
 			AppDeploymentRequestFactory appDeploymentRequestFactory) {
 		this.releaseRepository = releaseRepository;
 		this.appDeployerDataRepository = appDeployerDataRepository;
 		this.deployerRepository = deployerRepository;
-		this.releaseAnalysisService = releaseAnalysisService;
+		this.releaseAnalyzer = releaseAnalyzer;
 		this.appDeploymentRequestFactory = appDeploymentRequestFactory;
 	}
 
@@ -114,7 +114,7 @@ public class AppDeployerReleaseManager implements ReleaseManager {
 
 		Release release = this.releaseRepository.save(replacingRelease);
 
-		ReleaseAnalysisReport releaseAnalysisReport = this.releaseAnalysisService.analyze(existingRelease,
+		ReleaseAnalysisReport releaseAnalysisReport = this.releaseAnalyzer.analyze(existingRelease,
 				replacingRelease);
 
 		if (!releaseAnalysisReport.getReleaseDifference().areEqual()) {

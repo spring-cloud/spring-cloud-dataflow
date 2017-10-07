@@ -79,8 +79,11 @@ public class ConfigValueUtils {
 		}
 		// load the package values
 		Yaml yaml = new Yaml();
-
 		Object object = yaml.load(pkg.getConfigValues().getRaw());
+		if (object == null) {
+			// Config Values could have been file with comments only, no data.
+			return overrideMap;
+		}
 		Map<String, Object> packageValueMap = null;
 		if (object instanceof Map) {
 			packageValueMap = (Map<String, Object>) object;

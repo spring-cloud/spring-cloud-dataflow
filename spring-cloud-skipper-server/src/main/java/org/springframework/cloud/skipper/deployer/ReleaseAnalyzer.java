@@ -40,9 +40,9 @@ import org.springframework.util.StringUtils;
  * top level package template
  * @author Mark Pollack
  */
-public class ReleaseAnalysisService {
+public class ReleaseAnalyzer {
 
-	private final Logger logger = LoggerFactory.getLogger(ReleaseAnalysisService.class);
+	private final Logger logger = LoggerFactory.getLogger(ReleaseAnalyzer.class);
 
 	/**
 	 * Analyze the existing release and the replacing release to determine the minimal number

@@ -21,7 +21,6 @@ import java.util.Map;
 
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
-import org.springframework.cloud.skipper.deployer.AppDeployerDataRepository;
 import org.springframework.cloud.skipper.deployer.AppDeploymentRequestFactory;
 import org.springframework.cloud.skipper.deployer.ReleaseAnalysisReport;
 import org.springframework.cloud.skipper.domain.AppDeployerData;
@@ -30,6 +29,7 @@ import org.springframework.cloud.skipper.domain.SpringBootAppKind;
 import org.springframework.cloud.skipper.domain.SpringBootAppKindReader;
 import org.springframework.cloud.skipper.domain.Status;
 import org.springframework.cloud.skipper.domain.StatusCode;
+import org.springframework.cloud.skipper.repository.AppDeployerDataRepository;
 import org.springframework.cloud.skipper.repository.DeployerRepository;
 import org.springframework.cloud.skipper.repository.ReleaseRepository;
 

@@ -20,7 +20,7 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.skipper.AbstractIntegrationTest;
 import org.springframework.cloud.skipper.deployer.ReleaseAnalysisReport;
-import org.springframework.cloud.skipper.deployer.ReleaseAnalysisService;
+import org.springframework.cloud.skipper.deployer.ReleaseAnalyzer;
 import org.springframework.cloud.skipper.domain.ConfigValues;
 import org.springframework.cloud.skipper.domain.InstallProperties;
 import org.springframework.cloud.skipper.domain.InstallRequest;
@@ -40,7 +40,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @ActiveProfiles("repo-test")
 @TestPropertySource(properties = { "maven.remote-repositories.repo1.url=http://repo.spring.io/libs-snapshot" })
-public class ReleaseAnalysisServiceTests extends AbstractIntegrationTest {
+public class ReleaseAnalyzerTests extends AbstractIntegrationTest {
 
 	@Autowired
 	DeployerRepository deployerRepository;
@@ -52,7 +52,7 @@ public class ReleaseAnalysisServiceTests extends AbstractIntegrationTest {
 	ReleaseRepository releaseRepository;
 
 	@Autowired
-	ReleaseAnalysisService releaseAnalysisService;
+	ReleaseAnalyzer releaseAnalyzer;
 
 	@Test
 	public void test() throws InterruptedException {
@@ -99,7 +99,7 @@ public class ReleaseAnalysisServiceTests extends AbstractIntegrationTest {
 
 		assertThat(upgradedRelease.getName()).isEqualTo(releaseName);
 		System.out.println("upgraded relerase \n" + upgradedRelease.getManifest());
-		ReleaseAnalysisReport releaseAnalysisReport = this.releaseAnalysisService.analyze(installedRelease,
+		ReleaseAnalysisReport releaseAnalysisReport = this.releaseAnalyzer.analyze(installedRelease,
 				upgradedRelease);
 
 		System.out.println("sleeping for 5 seconds ----------------");

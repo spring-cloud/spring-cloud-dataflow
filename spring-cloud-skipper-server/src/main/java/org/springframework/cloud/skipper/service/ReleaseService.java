@@ -25,7 +25,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.cloud.skipper.SkipperException;
-import org.springframework.cloud.skipper.deployer.ReleaseAnalysisService;
+import org.springframework.cloud.skipper.deployer.ReleaseAnalyzer;
+import org.springframework.cloud.skipper.deployer.ReleaseManager;
 import org.springframework.cloud.skipper.domain.Info;
 import org.springframework.cloud.skipper.domain.InstallProperties;
 import org.springframework.cloud.skipper.domain.InstallRequest;
@@ -69,20 +70,20 @@ public class ReleaseService {
 
 	private final DeployerRepository deployerRepository;
 
-	private ReleaseAnalysisService releaseAnalysisService;
+	private ReleaseAnalyzer releaseAnalyzer;
 
 	public ReleaseService(PackageMetadataRepository packageMetadataRepository,
 			ReleaseRepository releaseRepository,
 			PackageService packageService,
 			ReleaseManager releaseManager,
 			DeployerRepository deployerRepository,
-			ReleaseAnalysisService releaseAnalysisService) {
+			ReleaseAnalyzer releaseAnalyzer) {
 		this.packageMetadataRepository = packageMetadataRepository;
 		this.releaseRepository = releaseRepository;
 		this.packageService = packageService;
 		this.releaseManager = releaseManager;
 		this.deployerRepository = deployerRepository;
-		this.releaseAnalysisService = releaseAnalysisService;
+		this.releaseAnalyzer = releaseAnalyzer;
 	}
 
 	/**
