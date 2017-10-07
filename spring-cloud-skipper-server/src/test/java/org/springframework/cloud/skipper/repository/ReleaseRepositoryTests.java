@@ -45,14 +45,12 @@ public class ReleaseRepositoryTests extends AbstractIntegrationTest {
 		PackageMetadata packageMetadata1 = new PackageMetadata();
 		packageMetadata1.setName("package1");
 		packageMetadata1.setVersion("1.0.0");
-		packageMetadata1.setAppVersion("1.2.0.RELEASE");
 		org.springframework.cloud.skipper.domain.Package pkg1 = new org.springframework.cloud.skipper.domain.Package();
 		pkg1.setMetadata(packageMetadata1);
 
 		PackageMetadata packageMetadata2 = new PackageMetadata();
 		packageMetadata2.setName("package2");
 		packageMetadata2.setVersion("1.0.1");
-		packageMetadata2.setAppVersion("1.2.1.RELEASE");
 		org.springframework.cloud.skipper.domain.Package pkg2 = new org.springframework.cloud.skipper.domain.Package();
 		pkg2.setMetadata(packageMetadata2);
 
@@ -130,9 +128,6 @@ public class ReleaseRepositoryTests extends AbstractIntegrationTest {
 				.getVersion());
 		assertThat(foundByNameAndVersion.getPkg().getMetadata().getName()).isEqualTo(release2.getPkg().getMetadata()
 				.getName());
-		assertThat(foundByNameAndVersion.getPkg().getMetadata().getAppVersion())
-				.isEqualTo(release2.getPkg().getMetadata()
-						.getAppVersion());
 
 		// findLatestRelease
 		Release latestRelease = this.releaseRepository.findLatestRelease(release1.getName());

@@ -30,6 +30,7 @@ import java.util.StringTokenizer;
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.FilenameUtils;
 import org.yaml.snakeyaml.Yaml;
@@ -96,6 +97,7 @@ public class SkipperCommands extends AbstractSkipperCommand {
 		}
 		else {
 			ObjectMapper mapper = new ObjectMapper();
+			mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 			PackageMetadata[] packageMetadataResources = resources.getContent().toArray(new PackageMetadata[0]);
 			List<Table> tableList = new ArrayList<>();
 			for (int i = 0; i < resources.getContent().size(); i++) {

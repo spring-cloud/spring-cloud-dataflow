@@ -26,6 +26,7 @@ import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.springframework.util.StringUtils;
@@ -143,6 +144,7 @@ public class Release extends AbstractEntity {
 	@PostLoad
 	public void afterLoad() {
 		ObjectMapper mapper = new ObjectMapper();
+		mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 		try {
 			this.pkg = mapper.readValue(this.pkgJsonString, Package.class);
 			this.configValues = new ConfigValues();

@@ -54,11 +54,6 @@ public class PackageMetadata extends AbstractEntity {
 	private String version;
 
 	/**
-	 * The version of the application in the package (assuming package maps to one app)
-	 */
-	private String appVersion;
-
-	/**
 	 * Location to source code for this package.
 	 */
 	private String packageSourceUrl;
@@ -142,14 +137,6 @@ public class PackageMetadata extends AbstractEntity {
 
 	public void setVersion(String version) {
 		this.version = version;
-	}
-
-	public String getAppVersion() {
-		return appVersion;
-	}
-
-	public void setAppVersion(String appVersion) {
-		this.appVersion = appVersion;
 	}
 
 	public String getPackageSourceUrl() {
@@ -242,9 +229,6 @@ public class PackageMetadata extends AbstractEntity {
 		if (version != null ? !version.equals(that.version) : that.version != null) {
 			return false;
 		}
-		if (appVersion != null ? !appVersion.equals(that.appVersion) : that.appVersion != null) {
-			return false;
-		}
 		if (packageSourceUrl != null ? !packageSourceUrl.equals(that.packageSourceUrl)
 				: that.packageSourceUrl != null) {
 			return false;
@@ -274,7 +258,6 @@ public class PackageMetadata extends AbstractEntity {
 		result = 31 * result + (kind != null ? kind.hashCode() : 0);
 		result = 31 * result + (name != null ? name.hashCode() : 0);
 		result = 31 * result + (version != null ? version.hashCode() : 0);
-		result = 31 * result + (appVersion != null ? appVersion.hashCode() : 0);
 		result = 31 * result + (packageSourceUrl != null ? packageSourceUrl.hashCode() : 0);
 		result = 31 * result + (packageHomeUrl != null ? packageHomeUrl.hashCode() : 0);
 		result = 31 * result + (tags != null ? tags.hashCode() : 0);
@@ -294,7 +277,6 @@ public class PackageMetadata extends AbstractEntity {
 				", kind='" + kind + '\'' +
 				", name='" + name + '\'' +
 				", version='" + version + '\'' +
-				", appVersion='" + appVersion + '\'' +
 				", packageSourceUrl='" + packageSourceUrl + '\'' +
 				", packageHomeUrl='" + packageHomeUrl + '\'' +
 				", tags='" + tags + '\'' +

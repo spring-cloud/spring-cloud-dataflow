@@ -27,6 +27,7 @@ import java.util.stream.Stream;
 
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
+import org.yaml.snakeyaml.representer.Representer;
 import org.zeroturnaround.zip.commons.FileUtils;
 
 import org.springframework.cloud.skipper.domain.ConfigValues;
@@ -133,7 +134,11 @@ public class DefaultPackageReader implements PackageReader {
 	}
 
 	private PackageMetadata loadPackageMetadata(File file) {
-		Yaml yaml = new Yaml(new Constructor(PackageMetadata.class));
+		// The Representer will not try to set the value in the YAML on the
+		// Java object if it isn't present on the object
+		Representer representer = new Representer();
+		representer.getPropertyUtils().setSkipMissingProperties(true);
+		Yaml yaml = new Yaml(new Constructor(PackageMetadata.class), representer);
 		String fileContents = null;
 		try {
 			fileContents = FileUtils.readFileToString(file);

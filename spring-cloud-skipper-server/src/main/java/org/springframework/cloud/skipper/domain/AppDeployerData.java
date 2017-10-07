@@ -25,6 +25,7 @@ import javax.persistence.Entity;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.springframework.cloud.skipper.SkipperException;
@@ -72,6 +73,7 @@ public class AppDeployerData extends AbstractEntity {
 	public Map<String, String> getDeploymentDataAsMap() {
 		try {
 			ObjectMapper mapper = new ObjectMapper();
+			mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 			TypeReference<Map<String, String>> typeRef = new TypeReference<Map<String, String>>() {
 			};
 			HashMap<String, String> result = mapper.readValue(this.deploymentData, typeRef);

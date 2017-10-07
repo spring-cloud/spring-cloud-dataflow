@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 
@@ -30,6 +31,7 @@ public abstract class SpringBootAppKindReader {
 	public static List<SpringBootAppKind> read(String manifest) {
 		List<SpringBootAppKind> springBootAppKindList = new ArrayList<>();
 		YAMLMapper mapper = new YAMLMapper();
+		mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 		try {
 			MappingIterator<SpringBootAppKind> it = mapper.readerFor(SpringBootAppKind.class).readValues(manifest);
 			while (it.hasNextValue()) {

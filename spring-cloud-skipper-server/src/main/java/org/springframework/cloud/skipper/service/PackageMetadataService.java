@@ -23,6 +23,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import org.slf4j.Logger;
@@ -95,6 +96,7 @@ public class PackageMetadataService implements ResourceLoaderAware {
 	protected List<PackageMetadata> deserializeFromIndexFiles(List<File> indexFiles) {
 		List<PackageMetadata> packageMetadataList = new ArrayList<>();
 		YAMLMapper yamlMapper = new YAMLMapper();
+		yamlMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 		for (File indexFile : indexFiles) {
 			try {
 				MappingIterator<PackageMetadata> it = yamlMapper.readerFor(PackageMetadata.class).readValues(indexFile);
