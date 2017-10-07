@@ -102,6 +102,18 @@ public class SkipperController {
 		return this.releaseService.status(name, version);
 	}
 
+	@RequestMapping(path = "/manifest/{name}", method = RequestMethod.GET)
+	@ResponseStatus(HttpStatus.OK)
+	public String manifest(@PathVariable("name") String name) {
+		return this.releaseService.manifest(name);
+	}
+
+	@RequestMapping(path = "/manifest/{name}/{version}", method = RequestMethod.GET)
+	@ResponseStatus(HttpStatus.OK)
+	public String manifest(@PathVariable("name") String name, @PathVariable("version") int version) {
+		return this.releaseService.manifest(name, version);
+	}
+
 	@RequestMapping(path = "/upgrade", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
 	public Release upgrade(@RequestBody UpgradeRequest upgradeRequest) {

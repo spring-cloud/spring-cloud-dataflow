@@ -55,7 +55,7 @@ public interface SkipperClient {
 	/**
 	 * Search for package metadata.
 	 * @param name optional name with wildcard support for searching
-	 * @param details boolean flag to fetch all the metadata.
+	 * @param details boolean flag to fetch all the metadata
 	 * @return the package metadata with the projection set to summary
 	 */
 	Resources<PackageMetadata> search(String name, boolean details);
@@ -86,7 +86,7 @@ public interface SkipperClient {
 	/*
 	 * Upload the package.
 	 *
-	 * @param uploadRequest the properties for the package upload.
+	 * @param uploadRequest the properties for the package upload
 	 * @return package metadata for the uploaded package
 	 */
 	PackageMetadata upload(UploadRequest uploadRequest);
@@ -103,7 +103,7 @@ public interface SkipperClient {
 	 * Rollback a specific release.
 	 *
 	 * @param releaseName the release name
-	 * @param releaseVersion the release version.
+	 * @param releaseVersion the release version
 	 * @return the rolled back {@link Release}
 	 */
 	Release rollback(String releaseName, int releaseVersion);
@@ -129,7 +129,7 @@ public interface SkipperClient {
 	 * List all releases for the given release name.
 	 *
 	 * @param releaseName the release name of the release to search for
-	 * @return the list of all releases by the given name.
+	 * @return the list of all releases by the given name
 	 */
 	Resources<Release> history(String releaseName);
 
@@ -169,8 +169,26 @@ public interface SkipperClient {
 	 * Return a status info of a release version.
 	 *
 	 * @param releaseName the release name
-	 * @param releaseVersion the release version.
+	 * @param releaseVersion the release version
 	 * @return the status info of a release
 	 */
 	Info status(String releaseName, int releaseVersion);
+
+	/**
+	 * Return the manifest of the last known release. For packages with dependencies, the
+	 * manifest includes the contents of those dependencies.
+	 * @param releaseName the release name
+	 * @return the manifest
+	 */
+	String manifest(String releaseName);
+
+	/**
+	 * Return a manifest info of a release version. For packages with dependencies, the
+	 * manifest includes the contents of those dependencies.
+	 *
+	 * @param releaseName the release name
+	 * @param releaseVersion the release version
+	 * @return the manifest info of a release
+	 */
+	String manifest(String releaseName, int releaseVersion);
 }

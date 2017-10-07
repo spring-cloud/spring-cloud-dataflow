@@ -172,6 +172,7 @@ public class ReleaseService {
 		Map<String, Object> mergedMap = ConfigValueUtils.mergeConfigValues(release.getPkg(), release.getConfigValues());
 		// Render yaml resources
 		String manifest = createManifest(release.getPkg(), mergedMap);
+		logger.debug("Manifest = " + manifest);
 		release.setManifest(manifest);
 		// Deployment
 		Release releaseToReturn = this.releaseManager.install(release);
@@ -199,6 +200,18 @@ public class ReleaseService {
 
 	public Info status(String releaseName, Integer version) {
 		return status(this.releaseRepository.findByNameAndVersion(releaseName, version)).getInfo();
+	}
+
+	public String manifest(String releaseName) {
+		Release release = this.releaseRepository.findTopByNameOrderByVersionDesc(releaseName);
+		if (release == null) {
+			throw new ReleaseNotFoundException(releaseName);
+		}
+		return release.getManifest();
+	}
+
+	public String manifest(String releaseName, Integer version) {
+		return this.releaseRepository.findByNameAndVersion(releaseName, version).getManifest();
 	}
 
 	public Release status(Release release) {
@@ -391,4 +404,5 @@ public class ReleaseService {
 	public List<Release> list() {
 		return this.releaseRepository.findLatestDeployedOrFailed();
 	}
+
 }

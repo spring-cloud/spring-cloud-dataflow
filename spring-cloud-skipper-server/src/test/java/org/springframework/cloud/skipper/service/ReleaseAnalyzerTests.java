@@ -16,6 +16,8 @@
 package org.springframework.cloud.skipper.service;
 
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.skipper.AbstractIntegrationTest;
@@ -41,6 +43,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ActiveProfiles("repo-test")
 @TestPropertySource(properties = { "maven.remote-repositories.repo1.url=http://repo.spring.io/libs-snapshot" })
 public class ReleaseAnalyzerTests extends AbstractIntegrationTest {
+
+	private final Logger logger = LoggerFactory.getLogger(ReleaseAnalyzerTests.class);
 
 	@Autowired
 	DeployerRepository deployerRepository;
@@ -75,9 +79,9 @@ public class ReleaseAnalyzerTests extends AbstractIntegrationTest {
 		Release installedRelease = releaseService.install(installRequest);
 
 		assertThat(installedRelease.getName()).isEqualTo(releaseName);
-		System.out.println("installed release \n" + installedRelease.getManifest());
+		logger.info("installed release \n" + installedRelease.getManifest());
 
-		System.out.println("sleeping for 10 seconds ----------------");
+		logger.info("sleeping for 10 seconds ----------------");
 		Thread.sleep(10000);
 
 		UpgradeProperties upgradeProperties = new UpgradeProperties();

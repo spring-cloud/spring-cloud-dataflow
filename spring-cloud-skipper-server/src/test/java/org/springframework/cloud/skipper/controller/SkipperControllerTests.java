@@ -24,8 +24,10 @@ import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.StatusCode;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.web.servlet.MvcResult;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -92,11 +94,21 @@ public class SkipperControllerTests extends AbstractControllerTests {
 		assertReleaseIsDeployedSuccessfully(releaseName, "1");
 		assertThat(release.getVersion()).isEqualTo(1);
 
+		// Check manifest
+		MvcResult result = mockMvc.perform(get("/manifest/" + releaseName)).andDo(print())
+				.andExpect(status().isOk()).andReturn();
+		assertThat(result.getResponse().getContentAsString()).isNotEmpty();
+
 		// Update
 		String releaseVersion = "2";
 		release = upgrade("log", "1.1.0", releaseName);
 		assertReleaseIsDeployedSuccessfully(releaseName, releaseVersion);
 		assertThat(release.getVersion()).isEqualTo(2);
+
+		// Check manifest
+		result = mockMvc.perform(get("/manifest/" + releaseName + "/2")).andDo(print())
+				.andExpect(status().isOk()).andReturn();
+		assertThat(result.getResponse().getContentAsString()).isNotEmpty();
 
 		// Rollback to release version 1, creating a third release version equivalent to
 		// the 1st.

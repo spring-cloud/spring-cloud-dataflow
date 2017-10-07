@@ -23,6 +23,8 @@ import com.samskivert.mustache.Mustache;
 import com.samskivert.mustache.Template;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -41,6 +43,8 @@ import static org.assertj.core.api.Assertions.entry;
 @SpringBootTest
 public class PackageTemplateTests {
 
+	private final Logger logger = LoggerFactory.getLogger(PackageTemplateTests.class);
+
 	@Value("classpath:templates/packageUsingNestedMaps.yml")
 	private Resource nestedMapResource;
 
@@ -58,7 +62,7 @@ public class PackageTemplateTests {
 		String resolvedYml = mustacheTemplate.execute(model);
 		Map map = (Map) yaml.load(resolvedYml);
 
-		System.out.println(resolvedYml);
+		logger.info("Resolved yml = " + resolvedYml);
 		assertThat(map).containsKeys("apiVersion", "deployment");
 		Map deploymentMap = (Map) map.get("deployment");
 		assertThat(deploymentMap).contains(entry("name", "time"))
