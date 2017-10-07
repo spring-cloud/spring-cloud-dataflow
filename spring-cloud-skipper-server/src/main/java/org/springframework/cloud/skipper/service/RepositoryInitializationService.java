@@ -20,7 +20,6 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.cloud.skipper.config.SkipperServerProperties;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
@@ -28,7 +27,6 @@ import org.springframework.cloud.skipper.domain.Repository;
 import org.springframework.cloud.skipper.repository.PackageMetadataRepository;
 import org.springframework.cloud.skipper.repository.RepositoryRepository;
 import org.springframework.context.event.EventListener;
-import org.springframework.stereotype.Service;
 
 /**
  * Takes respository application configuration properties and udpates the Repository
@@ -37,7 +35,6 @@ import org.springframework.stereotype.Service;
  *
  * @author Mark Pollack
  */
-@Service
 public class RepositoryInitializationService {
 
 	public final static String LOCAL_REPOSITORY_NAME = "local";
@@ -52,7 +49,6 @@ public class RepositoryInitializationService {
 
 	private final PackageMetadataRepository packageMetadataRepository;
 
-	@Autowired
 	public RepositoryInitializationService(RepositoryRepository repositoryRepository,
 			PackageMetadataRepository packageMetadataRepository,
 			PackageMetadataService packageMetadataService,

@@ -23,7 +23,6 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.app.AppInstanceStatus;
 import org.springframework.cloud.deployer.spi.app.AppStatus;
@@ -39,9 +38,7 @@ import org.springframework.cloud.skipper.domain.StatusCode;
 import org.springframework.cloud.skipper.repository.DeployerRepository;
 import org.springframework.cloud.skipper.repository.ReleaseRepository;
 import org.springframework.cloud.skipper.service.ReleaseManager;
-import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
-
 
 /**
  * A ReleaseManager implementation that uses an AppDeployer.
@@ -49,7 +46,6 @@ import org.springframework.util.StringUtils;
  * @author Mark Pollack
  * @author Ilayaperumal Gopinathan
  */
-@Service
 public class AppDeployerReleaseManager implements ReleaseManager {
 
 	private static final Logger logger = LoggerFactory.getLogger(AppDeployerReleaseManager.class);
@@ -64,7 +60,6 @@ public class AppDeployerReleaseManager implements ReleaseManager {
 
 	private final AppDeploymentRequestFactory appDeploymentRequestFactory;
 
-	@Autowired
 	public AppDeployerReleaseManager(ReleaseRepository releaseRepository,
 			AppDeployerDataRepository appDeployerDataRepository,
 			DeployerRepository deployerRepository,
@@ -154,10 +149,8 @@ public class AppDeployerReleaseManager implements ReleaseManager {
 		AppDeployerData appDeployerData = this.appDeployerDataRepository
 				.findByReleaseNameAndReleaseVersion(release.getName(), release.getVersion());
 		List<String> deploymentIds = appDeployerData.getDeploymentIds();
-		deploymentIds.addAll(StringUtils.commaDelimitedListToSet(appDeployerData.getDeploymentData()));
 		logger.debug("Getting status for {} using deploymentIds {}", release,
 				StringUtils.collectionToCommaDelimitedString(deploymentIds));
-
 
 		if (!deploymentIds.isEmpty()) {
 			// mainly track deployed and unknown statuses. for any other
@@ -178,19 +171,19 @@ public class AppDeployerReleaseManager implements ReleaseManager {
 				platformStatusMessages.add(statusMsg.toString());
 
 				switch (appStatus.getState()) {
-					case deployed:
-						deployedCount++;
-						break;
-					case unknown:
-						unknownCount++;
-						break;
-					case deploying:
-					case undeployed:
-					case partial:
-					case failed:
-					case error:
-					default:
-						break;
+				case deployed:
+					deployedCount++;
+					break;
+				case unknown:
+					unknownCount++;
+					break;
+				case deploying:
+				case undeployed:
+				case partial:
+				case failed:
+				case error:
+				default:
+					break;
 				}
 			}
 			if (deployedCount == deploymentIds.size()) {

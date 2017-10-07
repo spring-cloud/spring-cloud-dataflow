@@ -24,6 +24,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.runner.RunWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -37,7 +39,6 @@ import org.springframework.web.context.WebApplicationContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 
 /**
  * @author Mark Pollack
@@ -46,6 +47,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 @SpringBootTest
 @AutoConfigureMockMvc
 public abstract class AbstractMockMvcTests {
+
+	private final Logger logger = LoggerFactory.getLogger(AbstractMockMvcTests.class);
 
 	private final MediaType contentType = new MediaType(MediaType.APPLICATION_JSON.getType(),
 			MediaType.APPLICATION_JSON.getSubtype(), Charset.forName("utf8"));
@@ -85,9 +88,11 @@ public abstract class AbstractMockMvcTests {
 
 	private boolean isDeployed(String releaseName, String releaseVersion) {
 		try {
+			logger.info("Checking status of release={} version={}", releaseName, releaseVersion);
 			MvcResult result = mockMvc.perform(get(String.format("/status/%s/%s", releaseName, releaseVersion)))
-					.andDo(print()).andReturn();
+					.andReturn();
 			String content = result.getResponse().getContentAsString();
+			logger.info("Status = " + content);
 			return content.startsWith(getSuccessStatus(releaseName, releaseVersion));
 		}
 		catch (Exception e) {

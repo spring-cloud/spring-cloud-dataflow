@@ -25,14 +25,12 @@ import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.skipper.domain.SpringBootAppKind;
 import org.springframework.cloud.skipper.domain.SpringBootAppSpec;
 import org.springframework.core.io.Resource;
-import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 
 /**
  * Utilities for managing AppDeploymentRequests
  * @author Mark Pollack
  */
-@Component
 public class AppDeploymentRequestFactory {
 
 	private final DelegatingResourceLoader delegatingResourceLoader;

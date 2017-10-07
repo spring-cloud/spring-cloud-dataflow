@@ -34,8 +34,9 @@ import org.springframework.cloud.skipper.repository.DeployerRepository;
 import org.springframework.cloud.skipper.repository.ReleaseRepository;
 
 /**
- * Very simple approach to deploying a new application.  All the new apps are deployed and then all the old
- * apps are undeployed. There is no health check done to see if new apps are healthy.
+ * Very simple approach to deploying a new application. All the new apps are deployed and
+ * then all the old apps are undeployed. There is no health check done to see if new apps
+ * are healthy.
  * @author Mark Pollack
  */
 public class SimpleRedBlackUpgradeStrategy implements UpgradeStrategy {

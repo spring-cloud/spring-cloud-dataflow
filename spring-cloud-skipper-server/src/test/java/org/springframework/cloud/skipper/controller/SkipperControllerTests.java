@@ -36,7 +36,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 @ActiveProfiles("repo-test")
 @TestPropertySource(properties = { "spring.cloud.skipper.server.platform.local.accounts[test].key=value",
-		"maven.remote-repositories.repo1.url=http://repo.spring.io/libs-snapshot" })
+		"maven.remote-repositories.repo1.url=http://repo.spring.io/libs-snapshot",
+		"spring.cloud.skipper.server.disableReleaseStateUpdateService=true"})
 public class SkipperControllerTests extends AbstractControllerTests {
 
 	@Test

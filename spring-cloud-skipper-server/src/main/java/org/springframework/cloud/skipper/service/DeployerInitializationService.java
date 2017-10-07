@@ -33,7 +33,6 @@ import org.cloudfoundry.reactor.tokenprovider.PasswordGrantTokenProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryAppDeployer;
@@ -54,7 +53,6 @@ import org.springframework.cloud.skipper.config.LocalPlatformProperties;
 import org.springframework.cloud.skipper.deployer.Deployer;
 import org.springframework.cloud.skipper.repository.DeployerRepository;
 import org.springframework.context.event.EventListener;
-import org.springframework.stereotype.Service;
 
 /**
  * Populates the DeployerRepository with AppDeployer instances
@@ -62,7 +60,6 @@ import org.springframework.stereotype.Service;
  * @author Mark Pollack
  * @author Ilayaperumal Gopinathan
  */
-@Service
 public class DeployerInitializationService {
 
 	private final Logger logger = LoggerFactory.getLogger(DeployerInitializationService.class);
@@ -75,7 +72,6 @@ public class DeployerInitializationService {
 
 	private DeployerRepository deployerRepository;
 
-	@Autowired
 	public DeployerInitializationService(DeployerRepository deployerRepository,
 			LocalPlatformProperties localPlatformProperties,
 			CloudFoundryPlatformProperties cloudFoundryPlatformProperties,

@@ -24,21 +24,23 @@ import org.springframework.cloud.skipper.domain.Info;
 import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.repository.ReleaseRepository;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
 /**
- * Service which schedules background updates for applications known to {@link ReleaseRepository}.
+ * Service which schedules background updates for applications known to
+ * {@link ReleaseRepository}.
  *
  * @author Janne Valkealahti
  *
  */
-@Service
 public class ReleaseStateUpdateService {
 
 	private static final Logger log = LoggerFactory.getLogger(ReleaseStateUpdateService.class);
+
 	private final ReleaseService releaseService;
+
 	private final ReleaseRepository releaseRepository;
+
 	private long nextFullPoll;
 
 	/**
@@ -76,7 +78,8 @@ public class ReleaseStateUpdateService {
 						release = releaseService.status(release);
 						log.debug("New Release state {} {}", release.getName(), release.getInfo().getStatus(),
 								release.getInfo().getStatus() != null
-										? release.getInfo().getStatus().getPlatformStatus() : "");
+										? release.getInfo().getStatus().getPlatformStatus()
+										: "");
 						releaseRepository.save(release);
 					}
 					catch (Exception e) {

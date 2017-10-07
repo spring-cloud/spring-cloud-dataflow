@@ -30,7 +30,6 @@ import org.springframework.cloud.skipper.SkipperException;
 import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.SpringBootAppKind;
 import org.springframework.cloud.skipper.domain.SpringBootAppKindReader;
-import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 /**
@@ -41,7 +40,6 @@ import org.springframework.util.StringUtils;
  * top level package template
  * @author Mark Pollack
  */
-@Service
 public class ReleaseAnalysisService {
 
 	private final Logger logger = LoggerFactory.getLogger(ReleaseAnalysisService.class);
@@ -191,7 +189,8 @@ public class ReleaseAnalysisService {
 
 	}
 
-	private ReleaseDifference getReleaseDifferenceForDeploymentProps(MapDifference<String, String> deploymentPropertiesDifference) {
+	private ReleaseDifference getReleaseDifferenceForDeploymentProps(
+			MapDifference<String, String> deploymentPropertiesDifference) {
 		StringBuffer differenceBuilder = new StringBuffer();
 		Joiner.MapJoiner mapJoiner = Joiner.on(",").withKeyValueSeparator("=");
 		differenceBuilder.append("\nDeployement Properties Differences (existing, replacing)\n");
@@ -217,7 +216,8 @@ public class ReleaseAnalysisService {
 		return new ReleaseDifference(false, differenceBuilder.toString());
 	}
 
-	private ReleaseDifference getReleaseDifferenceForAppProps(MapDifference<String, String> applicationPropertiesDifference) {
+	private ReleaseDifference getReleaseDifferenceForAppProps(
+			MapDifference<String, String> applicationPropertiesDifference) {
 		StringBuffer differenceBuilder = new StringBuffer();
 		Joiner.MapJoiner mapJoiner = Joiner.on(",").withKeyValueSeparator("=");
 		differenceBuilder.append("\nApplication Properties Differences\n");

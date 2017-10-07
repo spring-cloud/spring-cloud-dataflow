@@ -30,7 +30,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.zeroturnaround.zip.ZipUtil;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.skipper.SkipperException;
 import org.springframework.cloud.skipper.SkipperUtils;
 import org.springframework.cloud.skipper.domain.Package;
@@ -45,7 +44,6 @@ import org.springframework.context.ResourceLoaderAware;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
-import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import org.springframework.util.FileSystemUtils;
 import org.springframework.util.StreamUtils;
@@ -57,7 +55,6 @@ import org.springframework.util.StreamUtils;
  * @author Mark Pollack
  * @author Ilayaperumal Gopinathan
  */
-@Service
 public class PackageService implements ResourceLoaderAware {
 
 	private final Logger logger = LoggerFactory.getLogger(PackageService.class);
@@ -70,7 +67,6 @@ public class PackageService implements ResourceLoaderAware {
 
 	private ResourceLoader resourceLoader;
 
-	@Autowired
 	public PackageService(RepositoryRepository repositoryRepository,
 			PackageMetadataRepository packageMetadataRepository,
 			PackageReader packageReader) {

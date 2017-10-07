@@ -24,7 +24,6 @@ import com.samskivert.mustache.Mustache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.skipper.SkipperException;
 import org.springframework.cloud.skipper.deployer.ReleaseAnalysisService;
 import org.springframework.cloud.skipper.domain.Info;
@@ -43,7 +42,6 @@ import org.springframework.cloud.skipper.repository.DeployerRepository;
 import org.springframework.cloud.skipper.repository.PackageMetadataRepository;
 import org.springframework.cloud.skipper.repository.ReleaseNotFoundException;
 import org.springframework.cloud.skipper.repository.ReleaseRepository;
-import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -51,10 +49,12 @@ import org.springframework.util.StringUtils;
  * Service responsible for the lifecycle of packages and releases, install/delete a
  * package, upgrade/rollback a release, and get status on a release.
  *
+ * It handles the validation of requests, retrieval of metadata and release information,
+ * as well as merging of yaml files in a template. Delegates to a {@link ReleaseManager}
+ *
  * @author Mark Pollack
  * @author Ilayaperumal Gopinathan
  */
-@Service
 public class ReleaseService {
 
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -71,7 +71,6 @@ public class ReleaseService {
 
 	private ReleaseAnalysisService releaseAnalysisService;
 
-	@Autowired
 	public ReleaseService(PackageMetadataRepository packageMetadataRepository,
 			ReleaseRepository releaseRepository,
 			PackageService packageService,

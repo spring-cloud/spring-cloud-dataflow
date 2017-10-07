@@ -28,7 +28,6 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.skipper.SkipperException;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
 import org.springframework.cloud.skipper.domain.Repository;
@@ -37,7 +36,6 @@ import org.springframework.cloud.skipper.repository.RepositoryRepository;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
-import org.springframework.stereotype.Component;
 import org.springframework.util.FileSystemUtils;
 import org.springframework.util.StreamUtils;
 
@@ -45,7 +43,6 @@ import org.springframework.util.StreamUtils;
  * Downloads package metadata from known repositories.
  * @author Mark Pollack
  */
-@Component
 public class PackageMetadataService implements ResourceLoaderAware {
 
 	private final Logger logger = LoggerFactory.getLogger(PackageMetadataService.class);
@@ -54,7 +51,6 @@ public class PackageMetadataService implements ResourceLoaderAware {
 
 	private ResourceLoader resourceLoader;
 
-	@Autowired
 	public PackageMetadataService(RepositoryRepository repositoryRepository) {
 		this.repositoryRepository = repositoryRepository;
 	}
