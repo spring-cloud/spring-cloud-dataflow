@@ -28,8 +28,6 @@ import org.springframework.cloud.skipper.domain.Release;
  */
 public interface ReleaseManager {
 
-
-
 	Release install(Release release);
 
 	Release upgrade(Release existingRelease, Release replacingRelease, String upgradeStrategyName);

@@ -73,6 +73,7 @@ public class ShellConfiguration {
 	}
 
 	@Order(DefaultShellApplicationRunner.PRECEDENCE - 10)
+	@SuppressWarnings("unchecked")
 	private static class InitialConnectionApplicationRunner implements ApplicationRunner {
 		@Autowired
 		private TargetHolder targetHolder;

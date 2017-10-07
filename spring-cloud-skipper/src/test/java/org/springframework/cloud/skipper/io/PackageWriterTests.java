@@ -83,11 +83,6 @@ public class PackageWriterTests {
 				Charset.defaultCharset());
 		assertThat(zipEntryAsString).isEqualTo(expectedYaml);
 	}
-	/*
-	 * String expectedYaml = StreamUtils.copyToString(
-	 * TestResourceUtils.qualifiedResource(getClass(), "merged.yaml").getInputStream(),
-	 * Charset.defaultCharset()); assertThat(mergedYaml).isEqualTo(expectedYaml);
-	 */
 
 	private Package createSimplePackage() throws IOException {
 		Package pkg = new Package();
@@ -100,7 +95,7 @@ public class PackageWriterTests {
 		pkg.setMetadata(packageMetadata);
 
 		// Add ConfigValues
-		Map map = new HashMap<String, String>();
+		Map<String, String> map = new HashMap<>();
 		map.put("foo", "bar");
 		map.put("fiz", "faz");
 		DumperOptions dumperOptions = new DumperOptions();

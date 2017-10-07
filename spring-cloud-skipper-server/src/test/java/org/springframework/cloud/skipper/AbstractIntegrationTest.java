@@ -42,7 +42,7 @@ import org.springframework.transaction.annotation.Transactional;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 public abstract class AbstractIntegrationTest {
 
-	private final Logger logger = LoggerFactory.getLogger(AbstractIntegrationTest.class);
+	private final Logger logger = LoggerFactory.getLogger(getClass());
 
 	@Autowired
 	protected ReleaseRepository releaseRepository;

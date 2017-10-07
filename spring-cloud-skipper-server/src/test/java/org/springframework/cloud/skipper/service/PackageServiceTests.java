@@ -196,6 +196,7 @@ public class PackageServiceTests extends AbstractIntegrationTest {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	protected void assertConfigValues(Package pkg) {
 		// Note same config values for both time and log
 		ConfigValues configValues = pkg.getConfigValues();

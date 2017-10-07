@@ -91,7 +91,8 @@ public class DefaultSkipperClient implements SkipperClient {
 
 	@Override
 	public Template getSpringBootAppTemplate() {
-		org.springframework.core.io.Resource resource = new ClassPathResource("/org/springframework/cloud/skipper/io/generic-template.yml");
+		org.springframework.core.io.Resource resource = new ClassPathResource(
+				"/org/springframework/cloud/skipper/io/generic-template.yml");
 		String genericTempateData = null;
 		try {
 			genericTempateData = StreamUtils.copyToString(resource.getInputStream(), Charset.defaultCharset());
@@ -128,9 +129,8 @@ public class DefaultSkipperClient implements SkipperClient {
 		Map<String, String> uriVariables = new HashMap<String, String>();
 		uriVariables.put("releaseName", releaseName);
 		uriVariables.put("releaseVersion", Integer.toString(releaseVersion));
-		Release release = this.restTemplate.getForObject(baseUri + "/status/{releaseName}/{releaseVersion}",
-				Release.class, uriVariables);
-		return release.getInfo();
+		return this.restTemplate.getForObject(baseUri + "/status/{releaseName}/{releaseVersion}",
+				Info.class, uriVariables);
 	}
 
 	@Override

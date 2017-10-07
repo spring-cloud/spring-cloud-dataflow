@@ -24,6 +24,7 @@ import org.springframework.data.rest.core.annotation.RestResource;
  * @author Mark Pollack
  */
 @RepositoryRestResource
+@SuppressWarnings("unchecked")
 public interface DeployerRepository extends PagingAndSortingRepository<Deployer, String>, DeployerRepositoryCustom {
 
 	Deployer findByName(String name);

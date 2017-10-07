@@ -28,6 +28,7 @@ import org.springframework.data.rest.core.annotation.RestResource;
  * @author Ilayaperumal Gopinathan
  */
 @RepositoryRestResource(path = "releases", collectionResourceRel = "releases")
+@SuppressWarnings("unchecked")
 public interface ReleaseRepository extends PagingAndSortingRepository<Release, String>, ReleaseRepositoryCustom {
 
 	@Override

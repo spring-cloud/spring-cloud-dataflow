@@ -21,6 +21,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.runner.RunWith;
@@ -31,6 +32,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.skipper.deployer.AppDeployerReleaseManager;
+import org.springframework.cloud.skipper.domain.Info;
+import org.springframework.cloud.skipper.domain.StatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
@@ -96,19 +99,26 @@ public abstract class AbstractMockMvcTests {
 			logger.info("Checking status of release={} version={}", releaseName, releaseVersion);
 			MvcResult result = mockMvc.perform(get(String.format("/status/%s/%s", releaseName, releaseVersion)))
 					.andReturn();
-			String content = result.getResponse().getContentAsString();
-			logger.info("Status = " + content);
-			return content.contains(getSuccessStatus(releaseName, releaseVersion));
+			Info info = convertContentToInfo(result.getResponse().getContentAsString());
+
+			logger.info("Status = " + info.getStatus());
+			return info.getStatus().getStatusCode().equals(StatusCode.DEPLOYED) &&
+					info.getStatus().getPlatformStatus().contains(AppDeployerReleaseManager.ALL_APPS_DEPLOYED_MESSAGE);
 		}
 		catch (Exception e) {
 			return false;
 		}
 	}
 
-	private String getSuccessStatus(String release, String version) {
-		return "{\"name\":\"" + release + "\",\"version\":" + version + ","
-				+ "\"info\":{\"status\":{\"statusCode\":\"DEPLOYED\","
-				+ "\"platformStatus\":\"" + AppDeployerReleaseManager.ALL_APPS_DEPLOYED_MESSAGE;
+	private Info convertContentToInfo(String json) {
+		ObjectMapper objectMapper = new ObjectMapper();
+		try {
+			return objectMapper.readValue(json, new TypeReference<Info>() {
+			});
+		}
+		catch (IOException e) {
+			throw new IllegalArgumentException("Can't parse JSON for Info", e);
+		}
 	}
 
 }

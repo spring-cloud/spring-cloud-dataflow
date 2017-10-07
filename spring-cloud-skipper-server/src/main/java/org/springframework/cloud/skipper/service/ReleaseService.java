@@ -189,14 +189,15 @@ public class ReleaseService {
 			throw new ReleaseNotFoundException(releaseName);
 		}
 		release = status(release);
+		// TODO check contract for status wrt to returning null.
 		if (release == null) {
 			throw new ReleaseNotFoundException(releaseName);
 		}
 		return release.getInfo();
 	}
 
-	public Release status(String releaseName, Integer version) {
-		return status(this.releaseRepository.findByNameAndVersion(releaseName, version));
+	public Info status(String releaseName, Integer version) {
+		return status(this.releaseRepository.findByNameAndVersion(releaseName, version)).getInfo();
 	}
 
 	public Release status(Release release) {

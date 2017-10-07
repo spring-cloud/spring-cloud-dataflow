@@ -48,6 +48,7 @@ public class PackageTemplateTests {
 	private Resource valuesResource;
 
 	@Test
+	@SuppressWarnings("unchecked")
 	public void testMustasche() throws IOException {
 		Yaml yaml = new Yaml();
 		Map model = (Map) yaml.load(valuesResource.getInputStream());

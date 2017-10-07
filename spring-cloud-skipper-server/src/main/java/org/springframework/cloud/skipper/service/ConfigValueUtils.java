@@ -21,6 +21,7 @@ import java.util.TreeMap;
 
 import org.yaml.snakeyaml.Yaml;
 
+import org.springframework.cloud.skipper.SkipperException;
 import org.springframework.cloud.skipper.domain.ConfigValues;
 import org.springframework.cloud.skipper.domain.Package;
 import org.springframework.util.StringUtils;
@@ -78,7 +79,15 @@ public class ConfigValueUtils {
 		}
 		// load the package values
 		Yaml yaml = new Yaml();
-		Map<String, Object> packageValueMap = (Map<String, Object>) yaml.load(pkg.getConfigValues().getRaw());
+
+		Object object = yaml.load(pkg.getConfigValues().getRaw());
+		Map<String, Object> packageValueMap = null;
+		if (object instanceof Map) {
+			packageValueMap = (Map<String, Object>) object;
+		}
+		else {
+			throw new SkipperException("Config Values that are not a map are not yet supported.");
+		}
 
 		// exclude dependency values from being merged into the current packages' values
 		if (packageValueMap != null) {
