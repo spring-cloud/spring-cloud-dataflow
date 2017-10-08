@@ -27,7 +27,7 @@ import org.springframework.util.Assert;
 public enum DeploymentStateDisplay {
 
 	DEPLOYING("deploying", "Deploying", "The applications are being deployed."),
-	DEPLOYED("deployed", "Deployed", "All apps have been successfully deployed."),
+	DEPLOYED("deployed", "Deployed", "All applications have been successfully deployed."),
 	UNDEPLOYED("undeployed", "Undeployed", "The applciations are known to the system, but is not currently deployed."),
 	PARTIAL("partial", "Partial",
 			"Some applications have successfully deployed, while others have not."),

@@ -119,8 +119,23 @@ public class SkipperCommands extends AbstractSkipperCommand {
 			return DeploymentState.deploying;
 		}
 
+		if (allAppsDeployed(states)) {
+			return DeploymentState.deployed;
+		}
+
 		logger.debug("aggregateState: Returing " + DeploymentState.partial);
 		return DeploymentState.partial;
+	}
+
+	private static boolean allAppsDeployed(List<DeploymentState> deploymentStateList) {
+		boolean allDeployed = true;
+		for (DeploymentState deploymentState : deploymentStateList) {
+			if (deploymentState != DeploymentState.deployed) {
+				allDeployed = false;
+				break;
+			}
+		}
+		return allDeployed;
 	}
 
 	@ShellMethod(key = "search", value = "Search for the packages.")
