@@ -16,19 +16,13 @@
 
 package org.springframework.cloud.dataflow.server.controller;
 
-import java.util.AbstractMap;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,7 +41,6 @@ import org.springframework.cloud.dataflow.server.controller.support.ArgumentSani
 import org.springframework.cloud.dataflow.server.controller.support.ControllerUtils;
 import org.springframework.cloud.dataflow.server.controller.support.InvalidStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
-import org.springframework.cloud.dataflow.server.repository.DeploymentKey;
 import org.springframework.cloud.dataflow.server.repository.DuplicateStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.NoSuchStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
@@ -56,7 +49,6 @@ import org.springframework.cloud.dataflow.server.service.StreamService;
 import org.springframework.cloud.dataflow.server.support.CannotDetermineApplicationTypeException;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
-import org.springframework.cloud.deployer.spi.app.MultiStateAppDeployer;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -374,16 +366,6 @@ public class StreamDefinitionController {
 		this.repository.deleteAll();
 	}
 
-	private Map<String, DeploymentState> gatherDeploymentStates(String... ids) {
-		if (deployer instanceof MultiStateAppDeployer) {
-			return ((MultiStateAppDeployer) deployer).states(ids);
-		}
-		else {
-			return Arrays.stream(ids)
-					.collect(Collectors.toMap(Function.identity(), id -> deployer.status(id).getState()));
-		}
-	}
-
 	/**
 	 * {@link org.springframework.hateoas.ResourceAssembler} implementation that converts
 	 * {@link StreamDefinition}s to {@link StreamDefinitionResource}s.
@@ -395,22 +377,8 @@ public class StreamDefinitionController {
 		public Assembler(Page<StreamDefinition> streamDefinitions) {
 			super(StreamDefinitionController.class, StreamDefinitionResource.class);
 
-			Map<StreamDefinition, List<String>> deploymentIdsPerStream = streamDefinitions.getContent().stream()
-					.collect(Collectors.toMap(Function.identity(),
-							sd -> sd.getAppDefinitions().stream().map(
-									sad -> deploymentIdRepository.findOne(DeploymentKey.forStreamAppDefinition(sad)))
-									.collect(Collectors.toList())));
-
-			// Map from app deployment id to state
-			Map<String, DeploymentState> statePerApp = gatherDeploymentStates(deploymentIdsPerStream.values().stream()
-					.flatMap(Collection::stream).filter(Objects::nonNull).toArray(String[]::new));
-
-			// Map from SCDF Stream to aggregate state
-			streamDeploymentStates = deploymentIdsPerStream.entrySet().stream()
-					.map(kv -> new AbstractMap.SimpleImmutableEntry<>(kv.getKey(), aggregateState(kv.getValue().stream()
-							.map(deploymentId -> statePerApp.getOrDefault(deploymentId, DeploymentState.unknown))
-							.collect(Collectors.toSet()))))
-					.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+			streamDeploymentStates = StreamDefinitionController.this.streamService
+					.state(streamDefinitions.getContent());
 
 		}
 

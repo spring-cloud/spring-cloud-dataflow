@@ -15,25 +15,20 @@
  */
 package org.springframework.cloud.dataflow.server.stream;
 
-import java.util.List;
-import java.util.Map;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-import org.springframework.cloud.dataflow.core.StreamDefinition;
+import org.springframework.cloud.deployer.spi.app.AppStatus;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
 
 /**
- * SPI for deploying the apps in a stream and providing information about the status of
- * those deployed apps.
  * @author Mark Pollack
  */
-public interface StreamDeployer {
+public abstract class AppStatusMixin extends AppStatus {
 
-	// TODO return 'stream handle' stream name for AppDeployer impl, release name for Skipper
-	// impl.
-	// TODO store releaseName in SCDF for stream name?
-	void deployStream(StreamDeploymentRequest streamDeploymentRequest);
-
-	String calculateStreamState(String streamName);
-
-	Map<StreamDefinition, DeploymentState> state(List<StreamDefinition> content);
+	@JsonCreator
+	AppStatusMixin(@JsonProperty("deploymentId") String deploymentId,
+			@JsonProperty("state") DeploymentState deploymentState) {
+		super(deploymentId, deploymentState);
+	}
 }

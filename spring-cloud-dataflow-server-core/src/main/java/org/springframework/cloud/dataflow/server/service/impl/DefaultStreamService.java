@@ -76,8 +76,11 @@ public class DefaultStreamService implements StreamService {
 	 * for metrics export.
 	 */
 	private static final String METRICS_TRIGGER_INCLUDES = "spring.metrics.export.triggers.application.includes";
+
 	private static final String DEFAULT_PARTITION_KEY_EXPRESSION = "payload";
+
 	private static Log logger = LogFactory.getLog(DefaultStreamService.class);
+
 	private final WhitelistProperties whitelistProperties;
 
 	/**
@@ -408,4 +411,15 @@ public class DefaultStreamService implements StreamService {
 						&& appDeploymentProperties.get(BindingPropertyKeys.INPUT_PARTITIONED).equalsIgnoreCase("true"));
 	}
 
+	// State
+
+	@Override
+	public Map<StreamDefinition, DeploymentState> state(List<StreamDefinition> streamDefinitions) {
+
+		if (System.getProperty("USE_SKIPPER") != null) {
+			return this.skipperStreamDeployer.state(streamDefinitions);
+		} else {
+			return this.appDeployerStreamDeployer.state(streamDefinitions);
+		}
+	}
 }
