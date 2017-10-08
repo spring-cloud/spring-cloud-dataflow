@@ -27,14 +27,14 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 public class PackageMetadata extends AbstractEntity {
 
 	/**
-	 * The Package Index spec version this file is based on.
-	 * todo: Make this a Required once we enforce apiVersion during package creation.
+	 * The Package Index spec version this file is based on. todo: Make this a Required once
+	 * we enforce apiVersion during package creation.
 	 */
 	private String apiVersion;
 
 	/**
-	 * The repository ID this Package Index file belongs to.
-	 * todo: Make this as Required once we have repository backed package for upload etc.,
+	 * The repository ID this Package Index file belongs to. todo: Make this as Required once
+	 * we have repository backed package for upload etc.,
 	 */
 	private String origin;
 

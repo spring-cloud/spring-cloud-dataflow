@@ -15,9 +15,27 @@
  */
 package org.springframework.cloud.skipper.domain;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.Lob;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.Version;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.module.SimpleAbstractTypeResolver;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+
+import org.springframework.cloud.deployer.spi.app.AppInstanceStatus;
+import org.springframework.cloud.deployer.spi.app.AppStatus;
+import org.springframework.cloud.deployer.spi.app.DeploymentState;
 
 /**
  * @author Mark Pollack
@@ -30,6 +48,7 @@ public class Status extends AbstractEntity {
 	private StatusCode statusCode;
 
 	// Status from the underlying platform
+	@Lob
 	private String platformStatus;
 
 	public Status() {
@@ -49,6 +68,61 @@ public class Status extends AbstractEntity {
 
 	public void setPlatformStatus(String platformStatus) {
 		this.platformStatus = platformStatus;
+	}
+
+	@JsonIgnore
+	public void setPlatformStatusAsAppStatusList(List<AppStatus> appStatusList) {
+		ObjectMapper objectMapper = new ObjectMapper();
+		// Avoids serializing objects such as OutputStreams in LocalDeployer.
+		objectMapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+		try {
+			this.platformStatus = objectMapper.writeValueAsString(appStatusList);
+		}
+		catch (JsonProcessingException e) {
+			// TODO replace with SkipperException when it moves to domain module.
+			throw new IllegalArgumentException("Could not serialize list of Application Status", e);
+		}
+	}
+
+	@JsonIgnore
+	public String getPlatformStatusPrettyPrint() {
+		List<AppStatus> appStatusList = getAppStatusList();
+		StringBuffer statusMsg = new StringBuffer();
+		for (AppStatus appStatus : appStatusList) {
+			statusMsg.append(appStatus.getDeploymentId() + "[");
+			for (AppInstanceStatus appInstanceStatus : appStatus.getInstances().values()) {
+				statusMsg.append(appInstanceStatus.getId() + "=" + appInstanceStatus.getState() + "\n");
+			}
+			statusMsg.setLength(statusMsg.length() - 1);
+			statusMsg.append("]\n");
+		}
+		return statusMsg.toString();
+	}
+
+	@JsonIgnore
+	public List<DeploymentState> getDeploymentStateList() {
+		return getAppStatusList().stream().map(appStatus -> appStatus.getState()).collect(Collectors.toList());
+	}
+
+	@JsonIgnore
+	public List<AppStatus> getAppStatusList() {
+		try {
+			ObjectMapper mapper = new ObjectMapper();
+			mapper.addMixIn(AppStatus.class, AppStatusMixin.class);
+			mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+			SimpleModule module = new SimpleModule("CustomModel", Version.unknownVersion());
+			SimpleAbstractTypeResolver resolver = new SimpleAbstractTypeResolver();
+			resolver.addMapping(AppInstanceStatus.class, AppInstanceStatusImpl.class);
+			module.setAbstractTypes(resolver);
+			mapper.registerModule(module);
+			TypeReference<List<AppStatus>> typeRef = new TypeReference<List<AppStatus>>() {
+			};
+			List<AppStatus> result = mapper.readValue(this.platformStatus, typeRef);
+			return result;
+		}
+		catch (Exception e) {
+			throw new IllegalArgumentException("Could not parse Skipper Platfrom Status JSON:" + platformStatus, e);
+		}
 	}
 
 	@Override

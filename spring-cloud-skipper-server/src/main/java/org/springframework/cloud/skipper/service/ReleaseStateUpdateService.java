@@ -78,7 +78,7 @@ public class ReleaseStateUpdateService {
 						release = releaseService.status(release);
 						log.debug("New Release state {} {}", release.getName(), release.getInfo().getStatus(),
 								release.getInfo().getStatus() != null
-										? release.getInfo().getStatus().getPlatformStatus()
+										? release.getInfo().getStatus().getPlatformStatusPrettyPrint()
 										: "");
 						releaseRepository.save(release);
 					}

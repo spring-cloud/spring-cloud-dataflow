@@ -17,6 +17,7 @@ package org.springframework.cloud.skipper;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -31,7 +32,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cloud.skipper.deployer.AppDeployerReleaseManager;
+import org.springframework.cloud.deployer.spi.app.AppStatus;
+import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.cloud.skipper.domain.Info;
 import org.springframework.cloud.skipper.domain.StatusCode;
 import org.springframework.http.MediaType;
@@ -103,11 +105,23 @@ public abstract class AbstractMockMvcTests {
 
 			logger.info("Status = " + info.getStatus());
 			return info.getStatus().getStatusCode().equals(StatusCode.DEPLOYED) &&
-					info.getStatus().getPlatformStatus().contains(AppDeployerReleaseManager.ALL_APPS_DEPLOYED_MESSAGE);
+					allAppsDeployed(info.getStatus().getAppStatusList());
 		}
 		catch (Exception e) {
+			logger.error("Exception getting status", e);
 			return false;
 		}
+	}
+
+	private boolean allAppsDeployed(List<AppStatus> appStatusList) {
+		boolean allDeployed = true;
+		for (AppStatus appStatus : appStatusList) {
+			if (appStatus.getState() != DeploymentState.deployed) {
+				allDeployed = false;
+				break;
+			}
+		}
+		return allDeployed;
 	}
 
 	private Info convertContentToInfo(String json) {

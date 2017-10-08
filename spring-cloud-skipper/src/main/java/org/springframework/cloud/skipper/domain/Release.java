@@ -98,7 +98,7 @@ public class Release extends AbstractEntity {
 
 	public void setPkg(Package pkg) {
 		this.pkg = pkg;
-		//TODO Do we want to store the package file at this specific moment in time?
+		// TODO Do we want to store the package file at this specific moment in time?
 		this.pkg.getMetadata().setPackageFileBytes(null);
 		ObjectMapper mapper = new ObjectMapper();
 		try {

@@ -13,25 +13,39 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.cloud.skipper.shell.command;
+package org.springframework.cloud.skipper.domain;
 
-import org.springframework.cloud.skipper.client.SkipperClient;
-import org.springframework.cloud.skipper.shell.command.support.SkipperClientUpdatedEvent;
-import org.springframework.context.event.EventListener;
+import java.util.Map;
+
+import org.springframework.cloud.deployer.spi.app.AppInstanceStatus;
+import org.springframework.cloud.deployer.spi.app.DeploymentState;
 
 /**
- * Contains a common reference for {@link SkipperClient} and an {@link EventListener} to
- * get updates made through the 'skipper config' command.
- *
  * @author Mark Pollack
  */
-public abstract class AbstractSkipperCommand {
+public class AppInstanceStatusImpl implements AppInstanceStatus {
 
-	// Updated via event publication
-	protected SkipperClient skipperClient;
+	private String id;
 
-	@EventListener
-	void handle(SkipperClientUpdatedEvent event) {
-		this.skipperClient = event.getSkipperClient();
+	private DeploymentState state;
+
+	private Map<String, String> attributes;
+
+	public AppInstanceStatusImpl() {
+	}
+
+	@Override
+	public String getId() {
+		return id;
+	}
+
+	@Override
+	public DeploymentState getState() {
+		return state;
+	}
+
+	@Override
+	public Map<String, String> getAttributes() {
+		return attributes;
 	}
 }

@@ -29,7 +29,7 @@ import org.springframework.hateoas.Identifiable;
  * @author Oliver Gierke
  */
 @MappedSuperclass
-//TODO consider using Long instead of String
+// TODO consider using Long instead of String
 public class AbstractEntity implements Identifiable<String> {
 
 	private final @Id @GeneratedValue(strategy = GenerationType.AUTO) @JsonIgnore String id;
@@ -43,4 +43,3 @@ public class AbstractEntity implements Identifiable<String> {
 		return this.id;
 	}
 }
-

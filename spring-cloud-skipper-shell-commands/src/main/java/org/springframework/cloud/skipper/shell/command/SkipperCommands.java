@@ -33,9 +33,12 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.FilenameUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.cloud.skipper.client.SkipperClient;
 import org.springframework.cloud.skipper.domain.ConfigValues;
 import org.springframework.cloud.skipper.domain.Info;
@@ -47,6 +50,7 @@ import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.UpgradeProperties;
 import org.springframework.cloud.skipper.domain.UpgradeRequest;
 import org.springframework.cloud.skipper.domain.UploadRequest;
+import org.springframework.cloud.skipper.shell.command.support.DeploymentStateDisplay;
 import org.springframework.cloud.skipper.shell.command.support.TableUtils;
 import org.springframework.cloud.skipper.shell.command.support.YmlUtils;
 import org.springframework.hateoas.Resources;
@@ -74,9 +78,49 @@ import static org.springframework.shell.standard.ShellOption.NULL;
 @ShellComponent
 public class SkipperCommands extends AbstractSkipperCommand {
 
+	private static final Logger logger = LoggerFactory.getLogger(SkipperCommands.class);
+
 	@Autowired
 	public SkipperCommands(SkipperClient skipperClient) {
 		this.skipperClient = skipperClient;
+	}
+
+	/**
+	 * Aggregate the set of app states into a single state for a stream.
+	 *
+	 * @param states set of states for apps of a stream
+	 * @return the stream state based on app states
+	 */
+	public static DeploymentState aggregateState(List<DeploymentState> states) {
+		if (states.size() == 1) {
+			DeploymentState state = states.iterator().next();
+			logger.debug("aggregateState: Deployment State Set Size = 1.  Deployment State " + state);
+			// a stream which is known to the stream definition repository
+			// but unknown to deployers is undeployed
+			if (state == DeploymentState.unknown) {
+				logger.debug("aggregateState: Returning " + DeploymentState.undeployed);
+				return DeploymentState.undeployed;
+			}
+			else {
+				logger.debug("aggregateState: Returning " + state);
+				return state;
+			}
+		}
+		if (states.isEmpty() || states.contains(DeploymentState.error)) {
+			logger.debug("aggregateState: Returning " + DeploymentState.error);
+			return DeploymentState.error;
+		}
+		if (states.contains(DeploymentState.failed)) {
+			logger.debug("aggregateState: Returning " + DeploymentState.failed);
+			return DeploymentState.failed;
+		}
+		if (states.contains(DeploymentState.deploying)) {
+			logger.debug("aggregateState: Returning " + DeploymentState.deploying);
+			return DeploymentState.deploying;
+		}
+
+		logger.debug("aggregateState: Returing " + DeploymentState.partial);
+		return DeploymentState.partial;
 	}
 
 	@ShellMethod(key = "search", value = "Search for the packages.")
@@ -192,7 +236,7 @@ public class SkipperCommands extends AbstractSkipperCommand {
 		StringBuilder sb = new StringBuilder();
 		sb.append(release.getName() + " has been upgraded.\n");
 		sb.append("Last Deployed: " + release.getInfo().getLastDeployed() + "\n");
-		sb.append("Status: " + release.getInfo().getStatus().getPlatformStatus() + "\n");
+		sb.append("Status: " + release.getInfo().getStatus().getPlatformStatusPrettyPrint() + "\n");
 		return sb.toString();
 	}
 
@@ -235,7 +279,7 @@ public class SkipperCommands extends AbstractSkipperCommand {
 		StringBuilder sb = new StringBuilder();
 		sb.append(release.getName() + " has been rolled back.\n");
 		sb.append("Last Deployed: " + release.getInfo().getLastDeployed() + "\n");
-		sb.append("Status: " + release.getInfo().getStatus().getPlatformStatus() + "\n");
+		sb.append("Status: " + release.getInfo().getStatus().getPlatformStatusPrettyPrint() + "\n");
 		return sb.toString();
 	}
 
@@ -343,9 +387,14 @@ public class SkipperCommands extends AbstractSkipperCommand {
 			throw e;
 		}
 		Object[][] data = new Object[3][];
-		data[0] = new Object[]{"Last Deployed", info.getFirstDeployed()};
-		data[1] = new Object[]{"Status", info.getStatus().getStatusCode().toString()};
-		data[2] = new Object[]{"Platform Status", info.getStatus().getPlatformStatus()};
+		data[0] = new Object[] { "Last Deployed", info.getFirstDeployed() };
+		data[1] = new Object[] { "Status", info.getStatus().getStatusCode().toString() };
+
+		DeploymentState aggregateState = aggregateState(info.getStatus().getDeploymentStateList());
+		StringBuilder sb = new StringBuilder();
+		sb.append(DeploymentStateDisplay.fromKey(aggregateState.name()).getDescription() + "\n");
+		sb.append(info.getStatus().getPlatformStatusPrettyPrint());
+		data[2] = new Object[] { "Platform Status", sb.toString() };
 		TableModel model = new ArrayTableModel(data);
 		TableBuilder tableBuilder = new TableBuilder(model);
 		TableUtils.applyStyleNoHeader(tableBuilder);

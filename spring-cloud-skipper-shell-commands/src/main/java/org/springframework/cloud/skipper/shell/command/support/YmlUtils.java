@@ -28,7 +28,7 @@ public abstract class YmlUtils {
 	public static String convertFromCsvToYaml(String propertiesAsString) {
 		String stringToConvert = propertiesAsString.replaceAll(",", "\n");
 		String yamlString = Props2YAML.fromContent(stringToConvert).convert();
-		//validate the yaml can be parsed
+		// validate the yaml can be parsed
 		Yaml yaml = new Yaml();
 		yaml.load(yamlString);
 		return yamlString;

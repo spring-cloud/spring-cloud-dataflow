@@ -85,11 +85,12 @@ You can ask for the status using the status command
 
 ```
 skipper:>status --release-name mylog
-╔═══════════════╤═══════════════════════════════════════════════╗
-║Last Deployed  │Tue Oct 03 21:07:48 EDT 2017                   ║
-║Status         │DEPLOYED                                       ║
-║Platform Status│All the applications are deployed successfully.║
-╚═══════════════╧═══════════════════════════════════════════════╝
+╔═══════════════╤════════════════════════════════════════╗
+║Last Deployed  │Sun Oct 08 00:00:42 EDT 2017            ║
+║Status         │DEPLOYED                                ║
+║Platform Status│All apps have been successfully deployed║
+║               │mylog-v1.log[mylog-v1.log-0=deployed]   ║
+╚═══════════════╧════════════════════════════════════════╝
 ```
 
 The manifest for this release that represents the file instructions to deploy onto the platform, can be shown using the `get manifest` command.
@@ -120,8 +121,8 @@ Now update the release with a newer version
 ```
 skipper:>upgrade --release-name mylog --package-name log --package-version 2.0.0
 mylog has been upgraded.
-Last Deployed: Tue Oct 03 21:09:01 EDT 2017
-Status: Applications deploying... mylog-v2.log=[mylog-v2.log-0=deploying]
+Last Deployed: Sun Oct 08 00:04:48 EDT 2017
+Status: mylog-v2.log[mylog-v2.log-0=deploying]
 ```
 
 You should see the java app named `log-sink-rabbit-1.2.0.RELEASE.jar` running in the output of the `jps` command.
@@ -130,11 +131,12 @@ The status command should shortly show it has been deployed successfully.  Note 
 
 ```
 skipper:>status --release-name mylog
-╔═══════════════╤═══════════════════════════════════════════════╗
-║Last Deployed  │Tue Oct 03 21:09:01 EDT 2017                   ║
-║Status         │DEPLOYED                                       ║
-║Platform Status│All the applications are deployed successfully.║
-╚═══════════════╧═══════════════════════════════════════════════╝
+╔═══════════════╤════════════════════════════════════════╗
+║Last Deployed  │Sun Oct 08 00:04:48 EDT 2017            ║
+║Status         │DEPLOYED                                ║
+║Platform Status│All apps have been successfully deployed║
+║               │mylog-v2.log[mylog-v2.log-0=deployed]   ║
+╚═══════════════╧════════════════════════════════════════╝
 ```
 
 Next rollback to the previous release
@@ -142,8 +144,8 @@ Next rollback to the previous release
 ```
 skipper:>rollback --release-name mylog
 mylog has been rolled back.
-Last Deployed: Tue Oct 03 21:10:11 EDT 2017
-Status: Applications deploying... mylog-v3.log=[mylog-v3.log-0=deploying]
+Last Deployed: Sun Oct 08 00:05:53 EDT 2017
+Status: mylog-v3.log[mylog-v3.log-0=deploying]
 ```
 
 You should see the java app named `log-sink-rabbit-1.2.0.RC1.jar` running in the output of the `jps` command
@@ -152,31 +154,32 @@ The status command should shortly show it has been deployed successfully.
 
 ```
 skipper:>status --release-name mylog
-╔═══════════════╤═══════════════════════════════════════════════╗
-║Last Deployed  │Tue Oct 03 21:10:11 EDT 2017                   ║
-║Status         │DEPLOYED                                       ║
-║Platform Status│All the applications are deployed successfully.║
-╚═══════════════╧═══════════════════════════════════════════════╝
+╔═══════════════╤════════════════════════════════════════╗
+║Last Deployed  │Sun Oct 08 00:05:53 EDT 2017            ║
+║Status         │DEPLOYED                                ║
+║Platform Status│All apps have been successfully deployed║
+║               │mylog-v3.log[mylog-v3.log-0=deployed]   ║
+╚═══════════════╧════════════════════════════════════════╝
 ```
 
 The `history` command shows you the various releases that were made
 
 ```
 skipper:>history --release-name mylog
-╔═══════╤════════════════════════════╤════════╤════════════╤═══════════════╤═════════════════════╗
-║Version│        Last updated        │ Status │Package Name│Package Version│     Description     ║
-╠═══════╪════════════════════════════╪════════╪════════════╪═══════════════╪═════════════════════╣
-║3      │Tue Oct 03 21:10:11 EDT 2017│DEPLOYED│log         │1.0.0          │Install complete     ║
-║2      │Tue Oct 03 21:09:01 EDT 2017│DELETED │log         │2.0.0          │Undeployment complete║
-║1      │Tue Oct 03 21:07:48 EDT 2017│DELETED │log         │1.0.0          │Undeployment complete║
-╚═══════╧════════════════════════════╧════════╧════════════╧═══════════════╧═════════════════════╝
+╔═══════╤════════════════════════════╤════════╤════════════╤═══════════════╤════════════════╗
+║Version│        Last updated        │ Status │Package Name│Package Version│  Description   ║
+╠═══════╪════════════════════════════╪════════╪════════════╪═══════════════╪════════════════╣
+║3      │Sun Oct 08 00:05:53 EDT 2017│DEPLOYED│log         │1.0.0          │Upgrade complete║
+║2      │Sun Oct 08 00:04:48 EDT 2017│DELETED │log         │2.0.0          │Delete complete ║
+║1      │Sun Oct 08 00:00:42 EDT 2017│DELETED │log         │1.0.0          │Delete complete ║
+╚═══════╧════════════════════════════╧════════╧════════════╧═══════════════╧════════════════╝
 ```
 
 Now delete the release.
 
 ```
 skipper:>delete --release-name mylog
-mylog has been undeployed.
+mylog has been deleted.
 ```
 
 You should not see any `log-sink-rabbit` apps in the `jps` command.
