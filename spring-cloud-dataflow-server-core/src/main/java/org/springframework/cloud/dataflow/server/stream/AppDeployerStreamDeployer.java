@@ -15,8 +15,16 @@
  */
 package org.springframework.cloud.dataflow.server.stream;
 
+import java.util.AbstractMap;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.EnumSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -30,6 +38,7 @@ import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepo
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.app.AppStatus;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
+import org.springframework.cloud.deployer.spi.app.MultiStateAppDeployer;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.util.Assert;
 
@@ -112,5 +121,36 @@ public class AppDeployerStreamDeployer implements StreamDeployer {
 			}
 		}
 		return StreamDefinitionController.aggregateState(appStates).toString();
+	}
+
+	@Override
+	public Map<StreamDefinition, DeploymentState> state(List<StreamDefinition> streamDefinitions) {
+		Map<StreamDefinition, List<String>> deploymentIdsPerStream = streamDefinitions.stream()
+				.collect(Collectors.toMap(Function.identity(),
+						sd -> sd.getAppDefinitions().stream().map(
+								sad -> deploymentIdRepository.findOne(DeploymentKey.forStreamAppDefinition(sad)))
+								.collect(Collectors.toList())));
+
+		// Map from app deployment id to state
+		Map<String, DeploymentState> statePerApp = gatherDeploymentStates(deploymentIdsPerStream.values().stream()
+				.flatMap(Collection::stream).filter(Objects::nonNull).toArray(String[]::new));
+
+		// Map from SCDF Stream to aggregate state
+		return deploymentIdsPerStream.entrySet().stream()
+				.map(kv -> new AbstractMap.SimpleImmutableEntry<>(kv.getKey(),
+						StreamDefinitionController.aggregateState(kv.getValue().stream()
+								.map(deploymentId -> statePerApp.getOrDefault(deploymentId, DeploymentState.unknown))
+								.collect(Collectors.toSet()))))
+				.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+	}
+
+	private Map<String, DeploymentState> gatherDeploymentStates(String... ids) {
+		if (appDeployer instanceof MultiStateAppDeployer) {
+			return ((MultiStateAppDeployer) appDeployer).states(ids);
+		}
+		else {
+			return Arrays.stream(ids)
+					.collect(Collectors.toMap(Function.identity(), id -> appDeployer.status(id).getState()));
+		}
 	}
 }

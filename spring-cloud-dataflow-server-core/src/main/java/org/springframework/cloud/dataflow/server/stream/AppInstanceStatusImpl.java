@@ -13,26 +13,39 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.cloud.dataflow.server.service;
+package org.springframework.cloud.dataflow.server.stream;
 
-import java.util.List;
 import java.util.Map;
 
-import org.springframework.cloud.dataflow.core.StreamDefinition;
+import org.springframework.cloud.deployer.spi.app.AppInstanceStatus;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
 
 /**
- * Deploys the specified stream. Implementations are resonsible for expanding deployment
- * wildcard expressions.
  * @author Mark Pollack
  */
-public interface StreamService {
-	/**
-	 * Deploys the stream with the user provided deployment properites.
-	 * @param name the name of the stream
-	 * @param deploymentProperties deployment properties to use as passed in from the client.
-	 */
-	void deployStream(String name, Map<String, String> deploymentProperties);
+public class AppInstanceStatusImpl implements AppInstanceStatus {
 
-	Map<StreamDefinition, DeploymentState> state(List<StreamDefinition> content);
+	private String id;
+
+	private DeploymentState state;
+
+	private Map<String, String> attributes;
+
+	public AppInstanceStatusImpl() {
+	}
+
+	@Override
+	public String getId() {
+		return id;
+	}
+
+	@Override
+	public DeploymentState getState() {
+		return state;
+	}
+
+	@Override
+	public Map<String, String> getAttributes() {
+		return attributes;
+	}
 }

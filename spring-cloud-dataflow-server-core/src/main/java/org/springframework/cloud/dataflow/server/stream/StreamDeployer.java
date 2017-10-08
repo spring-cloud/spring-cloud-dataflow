@@ -15,6 +15,12 @@
  */
 package org.springframework.cloud.dataflow.server.stream;
 
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.cloud.dataflow.core.StreamDefinition;
+import org.springframework.cloud.deployer.spi.app.DeploymentState;
+
 /**
  * SPI for deploying the apps in a stream and providing information about the status of
  * those deployed apps.
@@ -28,4 +34,6 @@ public interface StreamDeployer {
 	void deployStream(StreamDeploymentRequest streamDeploymentRequest);
 
 	String calculateStreamState(String streamName);
+
+	Map<StreamDefinition, DeploymentState> state(List<StreamDefinition> content);
 }
