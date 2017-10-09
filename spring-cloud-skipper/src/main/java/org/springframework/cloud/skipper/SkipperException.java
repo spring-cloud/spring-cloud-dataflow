@@ -16,15 +16,30 @@
 package org.springframework.cloud.skipper;
 
 /**
+ * Generic exception indicating a problem in components interacting with
+ * {@code Skipper}.
+ *
  * @author Mark Pollack
+ * @author Janne Valkealahti
  */
 @SuppressWarnings("serial")
 public class SkipperException extends RuntimeException {
 
+	/**
+	 * Instantiates a new {@code SkipperException}.
+	 *
+	 * @param message the message
+	 */
 	public SkipperException(String message) {
 		super(message);
 	}
 
+	/**
+	 * Instantiates a new {@code SkipperException}.
+	 *
+	 * @param message the message
+	 * @param cause the cause
+	 */
 	public SkipperException(String message, Throwable cause) {
 		super(message, cause);
 	}

@@ -13,33 +13,51 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.cloud.skipper.repository;
-
-import org.springframework.cloud.skipper.SkipperException;
+package org.springframework.cloud.skipper;
 
 /**
+ * A {@link SkipperException} indicating a missing {@code Skipper} release.
+ *
  * @author Ilayaperumal Gopinathan
+ * @author Janne Valkealahti
  */
 @SuppressWarnings("serial")
 public class ReleaseNotFoundException extends SkipperException {
 
+	/**
+	 * Instantiates a new {@code ReleaseNotFoundException}.
+	 *
+	 * @param releaseName the release name
+	 */
 	public ReleaseNotFoundException(String releaseName) {
 		super(getExceptionMessage(releaseName));
 	}
 
+	/**
+	 * Instantiates a new {@code ReleaseNotFoundException}.
+	 *
+	 * @param releaseName the release name
+	 * @param version the version
+	 */
 	public ReleaseNotFoundException(String releaseName, int version) {
 		super(getExceptionMessage(releaseName, version));
 	}
 
+	/**
+	 * Instantiates a new {@code ReleaseNotFoundException}.
+	 *
+	 * @param releaseName the release name
+	 * @param cause the cause
+	 */
 	public ReleaseNotFoundException(String releaseName, Throwable cause) {
 		super(getExceptionMessage(releaseName), cause);
 	}
 
-	public static String getExceptionMessage(String releaseName) {
+	private static String getExceptionMessage(String releaseName) {
 		return String.format("Release with the name [%s] doesn't exist", releaseName);
 	}
 
-	public static String getExceptionMessage(String releaseName, int version) {
+	private static String getExceptionMessage(String releaseName, int version) {
 		return String.format("Release with the name [%s] and version [%s] doesn't exist", releaseName, version);
 	}
 }

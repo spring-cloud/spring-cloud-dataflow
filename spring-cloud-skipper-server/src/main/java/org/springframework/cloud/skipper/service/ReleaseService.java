@@ -24,6 +24,7 @@ import com.samskivert.mustache.Mustache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.springframework.cloud.skipper.ReleaseNotFoundException;
 import org.springframework.cloud.skipper.SkipperException;
 import org.springframework.cloud.skipper.deployer.ReleaseAnalyzer;
 import org.springframework.cloud.skipper.deployer.ReleaseManager;
@@ -41,7 +42,6 @@ import org.springframework.cloud.skipper.domain.UpgradeProperties;
 import org.springframework.cloud.skipper.domain.UpgradeRequest;
 import org.springframework.cloud.skipper.repository.DeployerRepository;
 import org.springframework.cloud.skipper.repository.PackageMetadataRepository;
-import org.springframework.cloud.skipper.repository.ReleaseNotFoundException;
 import org.springframework.cloud.skipper.repository.ReleaseRepository;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;

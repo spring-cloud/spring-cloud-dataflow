@@ -17,6 +17,7 @@ package org.springframework.cloud.skipper.repository;
 
 import java.util.List;
 
+import org.springframework.cloud.skipper.ReleaseNotFoundException;
 import org.springframework.cloud.skipper.SkipperException;
 import org.springframework.cloud.skipper.domain.Release;
 

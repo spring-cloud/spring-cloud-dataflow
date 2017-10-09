@@ -21,6 +21,7 @@ import org.junit.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.skipper.AbstractIntegrationTest;
+import org.springframework.cloud.skipper.ReleaseNotFoundException;
 import org.springframework.cloud.skipper.domain.Info;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
 import org.springframework.cloud.skipper.domain.Release;
@@ -187,7 +188,7 @@ public class ReleaseRepositoryTests extends AbstractIntegrationTest {
 			fail("Expected ReleaseNotFoundException");
 		}
 		catch (ReleaseNotFoundException e) {
-			assertThat(e.getMessage().equals(ReleaseNotFoundException.getExceptionMessage(releaseName)));
+			assertThat(e.getMessage().equals(String.format("Release with the name [%s] doesn't exist", releaseName)));
 		}
 	}
 
@@ -200,7 +201,7 @@ public class ReleaseRepositoryTests extends AbstractIntegrationTest {
 			fail("Expected ReleaseNotFoundException");
 		}
 		catch (ReleaseNotFoundException e) {
-			assertThat(e.getMessage().equals(ReleaseNotFoundException.getExceptionMessage(releaseName, version)));
+			assertThat(e.getMessage().equals(String.format("Release with the name [%s] and version [%s] doesn't exist", releaseName, version)));
 		}
 	}
 
