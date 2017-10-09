@@ -13,9 +13,28 @@
     <properties>
         <main.basedir>${basedir}/..</main.basedir>
     </properties>
-    <dependencies>
-
-    </dependencies>
+	<dependencies>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.restdocs</groupId>
+			<artifactId>spring-restdocs-mockmvc</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.restdocs</groupId>
+			<artifactId>spring-restdocs-core</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.jayway.jsonpath</groupId>
+			<artifactId>json-path</artifactId>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
     <profiles>
         <profile>
             <id>full</id>
@@ -80,7 +99,7 @@
                                 <project-version>${project.version}</project-version>
                                 <project-artifactId>${project.artifactId}</project-artifactId>
                                 <version-type-lowercase>${version-type-lowercase}</version-type-lowercase>
-                                <snippets>${basedir}/target/generated-snippets</snippets>
+                                <snippets>${main.basedir}/spring-cloud-skipper-server/target/generated-snippets</snippets>
                             </attributes>
                         </configuration>
                         <executions>

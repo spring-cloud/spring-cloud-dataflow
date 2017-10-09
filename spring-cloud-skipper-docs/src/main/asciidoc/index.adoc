@@ -1,5 +1,6 @@
 = Spring Cloud Skipper Reference Guide
-Mark Pollack, Ilayaperumal Gopinathan, Janne Valkealahti
+Mark Pollack; Ilayaperumal Gopinathan; Janne Valkealahti; Gunnar Hillert
+
 :doctype: book
 :toc:
 :toclevels: 4
@@ -33,6 +34,7 @@ include::preface.adoc[]
 include::spring-cloud-skipper-overview.adoc[]
 include::architecture.adoc[]
 include::getting-started.adoc[]
+include::api-guide.adoc[]
 include::appendix.adoc[]
 
 

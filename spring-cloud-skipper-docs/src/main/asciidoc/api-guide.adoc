@@ -1,0 +1,290 @@
+[[api-guide]]
+= REST API Guide
+
+[partintro]
+--
+In this section you will learn all about the Spring Cloud Skipper REST API.
+--
+
+[[api-guide-overview]]
+== Overview
+
+Spring Cloud Skipper provides a  REST API allowing you to access all aspects of
+the server. In fact the Spring Cloud Skipper Shell is a first-class consumer of
+that API.
+
+[[api-guide-overview-http-verbs]]
+=== HTTP verbs
+
+Spring Cloud Skipper tries to adhere as closely as possible to standard HTTP and
+REST conventions in its use of HTTP verbs.
+
+|===
+| Verb | Usage
+
+| `GET`
+| Used to retrieve a resource
+
+| `POST`
+| Used to create a new resource
+
+| `PUT`
+| Used to update an existing resource, including partial updates. Also used for
+resources that imply the concept of `restarts`.
+
+| `DELETE`
+| Used to delete an existing resource
+|===
+
+[[api-guide-overview-http-status-codes]]
+=== HTTP status codes
+
+RESTful note tries to adhere as closely as possible to standard HTTP and REST conventions in its use of HTTP status codes.
+
+|===
+| Status code | Usage
+
+| `200 OK`
+| The request completed successfully
+
+| `201 Created`
+| A new resource has been created successfully. The resource's URI is available from the response's `Location` header
+
+| `204 No Content`
+| An update to an existing resource has been applied successfully
+
+| `400 Bad Request`
+| The request was malformed. The response body will include an error providing further information
+
+| `404 Not Found`
+| The requested resource did not exist
+
+|===
+
+[[api-guide-overview-headers]]
+=== Headers
+
+Every response has the following header(s):
+
+include::{snippets}/api-documentation/headers/response-headers.adoc[]
+
+[[api-guide-overview-errors]]
+=== Errors
+
+include::{snippets}/api-documentation/errors/response-fields.adoc[]
+
+[[api-guide-overview-hypermedia]]
+=== Hypermedia
+
+Spring Cloud Skipper uses hypermedia and resources include links to other resources
+in their responses. Responses are in http://stateless.co/hal_specification.html[Hypertext Application from resource to resource Language (HAL)] format. Links can be found beneath the `_links` key. Users of the API should not create URIs themselves, instead they should use the above-described links to navigate.
+
+[[api-guide-resources]]
+== Resources
+
+[[api-guide-resources-index]]
+=== Index
+
+The index provides the entry point into Spring Cloud Data Flow's REST API.
+
+[[api-guide-resources-index-access]]
+==== Accessing the index
+
+A `GET` request is used to access the index
+
+===== Request structure
+
+include::{snippets}/api-documentation/index/http-request.adoc[]
+
+===== Example request
+
+include::{snippets}/api-documentation/index/curl-request.adoc[]
+
+===== Example response
+
+include::{snippets}/api-documentation/index/http-response.adoc[]
+
+[[api-guide-resources-index-links]]
+===== Links
+
+The main element of the index are the links as they allow you to traverse the API
+and execute the desired functionality:
+
+include::{snippets}/api-documentation/index/links.adoc[]
+
+[[resources-about]]
+=== Server Meta Information
+
+==== Retrieving information about the server
+A `GET` request will return meta information for Spring Cloud Skipper. This includes:
+
+* Server name, typically `spring-cloud-skipper-server`
+* Version of the server, e.g. `{project-version}`
+
+===== Request structure
+
+include::{snippets}/about-documentation/get-meta-information/http-request.adoc[]
+
+===== Example request
+
+include::{snippets}/about-documentation/get-meta-information/curl-request.adoc[]
+
+===== Response structure
+
+include::{snippets}/about-documentation/get-meta-information/http-response.adoc[]
+
+===== Response fields
+
+include::{snippets}/about-documentation/get-meta-information/response-fields.adoc[]
+
+[[resources-repositories]]
+=== Resources Repositories
+
+==== Retrieving a list of repositories
+A `GET` request will return a paginated list for all Spring Cloud Skipper repositories.
+
+===== Request structure
+
+include::{snippets}/repositories-documentation/get-all-repositories/http-request.adoc[]
+
+===== Example request
+
+include::{snippets}/repositories-documentation/get-all-repositories/curl-request.adoc[]
+
+===== Response structure
+
+include::{snippets}/repositories-documentation/get-all-repositories/http-response.adoc[]
+
+===== Response fields
+
+include::{snippets}/repositories-documentation/get-all-repositories/response-fields.adoc[]
+
+==== Retrieving a single repository
+
+A `GET` request will return a single Spring Cloud Skipper repositories.
+
+===== Request structure
+
+include::{snippets}/repositories-documentation/get-single-repository/http-request.adoc[]
+
+===== Example request
+
+include::{snippets}/repositories-documentation/get-single-repository/curl-request.adoc[]
+
+===== Response structure
+
+include::{snippets}/repositories-documentation/get-single-repository/http-response.adoc[]
+
+===== Response fields
+
+include::{snippets}/repositories-documentation/get-single-repository/response-fields.adoc[]
+
+[[resources-app-deployers-datas]]
+=== App Deployers Datas
+
+==== Retrieving a list of app deployer datas
+A `GET` request will return a paginated list for all Spring Cloud Skipper repositories.
+
+===== Request structure
+
+include::{snippets}/app-deployers-datas-documentation/get-all-app-deployer-datas/http-request.adoc[]
+
+===== Example request
+
+include::{snippets}/app-deployers-datas-documentation/get-all-app-deployer-datas/curl-request.adoc[]
+
+===== Response structure
+
+include::{snippets}/app-deployers-datas-documentation/get-all-app-deployer-datas/http-response.adoc[]
+
+===== Response fields
+
+include::{snippets}/app-deployers-datas-documentation/get-all-app-deployer-datas/response-fields.adoc[]
+
+[[resources-app-deployers-datas]]
+=== Deployers
+
+==== Retrieving a list of app deployer datas
+A `GET` request will return a paginated list for all Spring Cloud Skipper repositories.
+
+===== Request structure
+
+include::{snippets}/deployers-documentation/get-all-deployers/http-request.adoc[]
+
+===== Example request
+
+include::{snippets}/deployers-documentation/get-all-deployers/curl-request.adoc[]
+
+===== Response structure
+
+include::{snippets}/deployers-documentation/get-all-deployers/http-response.adoc[]
+
+===== Response fields
+
+include::{snippets}/deployers-documentation/get-all-deployers/response-fields.adoc[]
+
+[[resources-app-deployers-datas]]
+=== Releases
+
+==== Retrieving a list of releases
+A `GET` request will return a paginated list for all Spring Cloud Skipper releases.
+
+===== Request structure
+
+include::{snippets}/releases-documentation/get-all-releases/http-request.adoc[]
+
+===== Example request
+
+include::{snippets}/releases-documentation/get-all-releases/curl-request.adoc[]
+
+===== Response structure
+
+include::{snippets}/releases-documentation/get-all-releases/http-response.adoc[]
+
+===== Response fields
+
+include::{snippets}/releases-documentation/get-all-releases/response-fields.adoc[]
+
+[[resources-package-metadata]]
+=== Package Metadata
+
+==== Retrieving a list of package metadata
+
+A `GET` request will return a paginated list for all Spring Cloud Skipper releases.
+
+===== Request structure
+
+include::{snippets}/package-metadata-documentation/get-all-package-metadata/http-request.adoc[]
+
+===== Example request
+
+include::{snippets}/package-metadata-documentation/get-all-package-metadata/curl-request.adoc[]
+
+===== Response structure
+
+include::{snippets}/package-metadata-documentation/get-all-package-metadata/http-response.adoc[]
+
+===== Response fields
+
+include::{snippets}/package-metadata-documentation/get-all-package-metadata/response-fields.adoc[]
+
+==== Package metadata details
+
+A `GET` request will return details of a package using the _id_ of the package.
+
+===== Request structure
+
+include::{snippets}/package-metadata-documentation/get-package-metadata-details/http-request.adoc[]
+
+===== Example request
+
+include::{snippets}/package-metadata-documentation/get-package-metadata-details/curl-request.adoc[]
+
+===== Response structure
+
+include::{snippets}/package-metadata-documentation/get-package-metadata-details/http-response.adoc[]
+
+===== Response fields
+
+include::{snippets}/package-metadata-documentation/get-package-metadata-details/response-fields.adoc[]
+

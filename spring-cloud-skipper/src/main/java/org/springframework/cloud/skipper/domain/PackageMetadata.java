@@ -87,7 +87,7 @@ public class PackageMetadata extends AbstractEntity {
 	private String description;
 
 	/**
-	 * Hash of package binary that will be donwloaded using SHA256 hash algorithm.
+	 * Hash of package binary that will be downloaded using SHA256 hash algorithm.
 	 */
 	private String sha256;
 
