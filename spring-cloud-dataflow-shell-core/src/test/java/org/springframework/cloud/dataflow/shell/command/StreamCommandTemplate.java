@@ -114,7 +114,11 @@ public class StreamCommandTemplate {
 	 *
 	 * @param streamname name of the stream
 	 */
-	public void deploy(String streamname) {
+	public void deploy(String streamname, boolean useSkipper) {
+		String command = "stream deploy --name " + streamname;
+		if(useSkipper) {
+			command = command + " --useSkipper";
+		}
 		CommandResult cr = shell.executeCommand("stream deploy --name " + streamname);
 		// stateVerifier.waitForDeploy(streamname);
 		assertTrue("Failure.  CommandResult = " + cr.toString(), cr.isSuccess());
