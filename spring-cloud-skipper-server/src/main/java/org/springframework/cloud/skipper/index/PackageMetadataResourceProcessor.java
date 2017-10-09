@@ -35,7 +35,7 @@ public class PackageMetadataResourceProcessor implements ResourceProcessor<Resou
 	@Override
 	public Resource<PackageMetadata> process(Resource<PackageMetadata> packageMetadataResource) {
 		Link installLink = linkTo(
-				methodOn(SkipperController.class).deploy(packageMetadataResource.getContent().getId(), null))
+				methodOn(SkipperController.class).install(packageMetadataResource.getContent().getId(), null))
 						.withRel("install");
 		packageMetadataResource.add(installLink);
 		return packageMetadataResource;
