@@ -79,7 +79,7 @@ public class SkipperControllerTests extends AbstractControllerTests {
 		assertThat(release.getVersion()).isEqualTo(1);
 
 		// Undeploy
-		mockMvc.perform(post("/delete/" + releaseName)).andDo(print())
+		mockMvc.perform(post("/api/delete/" + releaseName)).andDo(print())
 				.andExpect(status().isCreated()).andReturn();
 		Release deletedRelease = this.releaseRepository.findByNameAndVersion(releaseName, 1);
 		assertThat(deletedRelease.getInfo().getStatus().getStatusCode()).isEqualTo(StatusCode.DELETED);
@@ -95,7 +95,7 @@ public class SkipperControllerTests extends AbstractControllerTests {
 		assertThat(release.getVersion()).isEqualTo(1);
 
 		// Check manifest
-		MvcResult result = mockMvc.perform(get("/manifest/" + releaseName)).andDo(print())
+		MvcResult result = mockMvc.perform(get("/api/manifest/" + releaseName)).andDo(print())
 				.andExpect(status().isOk()).andReturn();
 		assertThat(result.getResponse().getContentAsString()).isNotEmpty();
 
@@ -106,14 +106,14 @@ public class SkipperControllerTests extends AbstractControllerTests {
 		assertThat(release.getVersion()).isEqualTo(2);
 
 		// Check manifest
-		result = mockMvc.perform(get("/manifest/" + releaseName + "/2")).andDo(print())
+		result = mockMvc.perform(get("/api/manifest/" + releaseName + "/2")).andDo(print())
 				.andExpect(status().isOk()).andReturn();
 		assertThat(result.getResponse().getContentAsString()).isNotEmpty();
 
 		// Rollback to release version 1, creating a third release version equivalent to
 		// the 1st.
 		releaseVersion = "3";
-		mockMvc.perform(post("/rollback/" + releaseName + "/" + 1)).andDo(print())
+		mockMvc.perform(post("/api/rollback/" + releaseName + "/" + 1)).andDo(print())
 				.andExpect(status().isCreated()).andReturn();
 		release = this.releaseRepository.findByNameAndVersion(releaseName, Integer.valueOf(releaseVersion));
 		assertReleaseIsDeployedSuccessfully(releaseName, "3");
@@ -122,7 +122,7 @@ public class SkipperControllerTests extends AbstractControllerTests {
 		assertThat(release.getInfo().getStatus().getStatusCode()).isEqualTo(StatusCode.DEPLOYED);
 
 		// Undeploy
-		mockMvc.perform(post("/delete/" + releaseName))
+		mockMvc.perform(post("/api/delete/" + releaseName))
 				.andDo(print())
 				.andExpect(status().isCreated()).andReturn();
 		Release deletedRelease = this.releaseRepository.findByNameAndVersion(releaseName,

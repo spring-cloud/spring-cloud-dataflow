@@ -74,8 +74,7 @@ public abstract class AbstractMockMvcTests {
 	@Before
 	public void setupMockMvc() {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(wac)
-				.defaultRequest(get("/").accept(MediaType.APPLICATION_JSON).contentType(contentType))
-				.build();
+				.defaultRequest(get("/").accept(MediaType.APPLICATION_JSON).contentType(contentType)).build();
 	}
 
 	protected void assertReleaseIsDeployedSuccessfully(String releaseName, String releaseVersion)
@@ -99,7 +98,7 @@ public abstract class AbstractMockMvcTests {
 	private boolean isDeployed(String releaseName, String releaseVersion) {
 		try {
 			logger.info("Checking status of release={} version={}", releaseName, releaseVersion);
-			MvcResult result = mockMvc.perform(get(String.format("/status/%s/%s", releaseName, releaseVersion)))
+			MvcResult result = mockMvc.perform(get(String.format("/api/status/%s/%s", releaseName, releaseVersion)))
 					.andReturn();
 			Info info = convertContentToInfo(result.getResponse().getContentAsString());
 

@@ -7,6 +7,9 @@ server:
 spring:
   main:
     banner-mode: "off"
+  data:
+    rest:
+      base-path: /api
 
 # TODO - remove, pre M1 development simplicity
 maven:

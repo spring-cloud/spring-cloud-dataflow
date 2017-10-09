@@ -32,7 +32,7 @@ public class AboutDocumentation extends BaseDocumentation {
 
 	@Test
 	public void getMetaInformation() throws Exception {
-		this.mockMvc.perform(get("/about").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
+		this.mockMvc.perform(get("/api/about").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
 			.andDo(this.documentationHandler.document(
 				responseFields(
 					fieldWithPath("name").description("Name of the Skipper server."),

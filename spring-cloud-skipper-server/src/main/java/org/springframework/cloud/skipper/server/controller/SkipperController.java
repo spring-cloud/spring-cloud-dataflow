@@ -47,7 +47,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @author Ilayaperumal Gopinathan
  */
 @RestController
-@RequestMapping("/")
+@RequestMapping("/api")
 public class SkipperController {
 
 	private final ReleaseService releaseService;

@@ -30,7 +30,7 @@ public class SkipperClientProperties {
 
 	public static final int DEFAULT_PORT = 7577; // = skpr :)
 
-	public static final String DEFAULT_TARGET = DEFAULT_SCHEME + "://" + DEFAULT_HOST + ":" + DEFAULT_PORT + "/";
+	public static final String DEFAULT_TARGET = DEFAULT_SCHEME + "://" + DEFAULT_HOST + ":" + DEFAULT_PORT + "/api";
 
 	public static final String DEFAULT_USERNAME = "";
 

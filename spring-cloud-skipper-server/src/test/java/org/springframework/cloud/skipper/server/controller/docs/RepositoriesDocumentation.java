@@ -52,6 +52,9 @@ public class RepositoriesDocumentation extends BaseDocumentation {
 					fieldWithPath("_embedded.repositories[].name").description("Name of the Repository"),
 					fieldWithPath("_embedded.repositories[].url").description("Url of the Repository"),
 					fieldWithPath("_embedded.repositories[].sourceUrl").description("Source Url of the repository"),
+					fieldWithPath("_embedded.repositories[].description").description("Description of the Repository"),
+					fieldWithPath("_embedded.repositories[].local").description("Is the repo local?"),
+					fieldWithPath("_embedded.repositories[].repoOrder").description("Order of the Repository"),
 					fieldWithPath("_embedded.repositories[]._links.self.href").ignored(),
 					fieldWithPath("_embedded.repositories[]._links.repository.href").ignored()
 				).and(super.defaultLinkProperties))
@@ -73,6 +76,9 @@ public class RepositoriesDocumentation extends BaseDocumentation {
 				responseFields(
 					fieldWithPath("name").description("Name of the Repository"),
 					fieldWithPath("url").description("URL of the Repository"),
+					fieldWithPath("description").description("Description of the Repository"),
+					fieldWithPath("local").description("Is the repo local?"),
+					fieldWithPath("repoOrder").description("Order of the Repository"),
 					fieldWithPath("sourceUrl").description("Source URL of the repository")
 				).and(super.defaultLinkProperties))
 			);
