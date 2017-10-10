@@ -15,7 +15,11 @@
  */
 package org.springframework.cloud.dataflow.server.service;
 
+import java.util.List;
 import java.util.Map;
+
+import org.springframework.cloud.dataflow.core.StreamDefinition;
+import org.springframework.cloud.deployer.spi.app.DeploymentState;
 
 /**
  * Deploys the specified stream. Implementations are responsible for expanding deployment
@@ -30,4 +34,6 @@ public interface StreamService {
 	 * @param deploymentProperties deployment properties to use as passed in from the client.
 	 */
 	void deployStream(String name, Map<String, String> deploymentProperties);
+
+	Map<StreamDefinition, DeploymentState> state(List<StreamDefinition> content);
 }

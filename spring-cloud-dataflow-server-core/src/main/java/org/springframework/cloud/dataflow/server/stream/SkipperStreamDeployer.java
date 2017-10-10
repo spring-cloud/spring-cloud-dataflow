@@ -23,17 +23,30 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.core.Version;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleAbstractTypeResolver;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 
+import org.springframework.cloud.dataflow.core.StreamDefinition;
+import org.springframework.cloud.dataflow.server.controller.StreamDefinitionController;
 import org.springframework.cloud.deployer.resource.maven.MavenResource;
+import org.springframework.cloud.deployer.spi.app.AppInstanceStatus;
+import org.springframework.cloud.deployer.spi.app.AppStatus;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.skipper.client.SkipperClient;
 import org.springframework.cloud.skipper.domain.ConfigValues;
+import org.springframework.cloud.skipper.domain.Info;
 import org.springframework.cloud.skipper.domain.InstallProperties;
 import org.springframework.cloud.skipper.domain.InstallRequest;
 import org.springframework.cloud.skipper.domain.Package;
@@ -56,8 +69,11 @@ import static org.springframework.cloud.deployer.spi.app.AppDeployer.COUNT_PROPE
 public class SkipperStreamDeployer implements StreamDeployer {
 
 	public static final String SKIPPER_KEY_PREFIX = "spring.cloud.dataflow.skipper";
+
 	public static final String SKIPPER_ENABLED_PROPERTY_KEY = SKIPPER_KEY_PREFIX + ".enabled";
+
 	private static Log logger = LogFactory.getLog(SkipperStreamDeployer.class);
+
 	private final SkipperClient skipperClient;
 
 	public SkipperStreamDeployer(SkipperClient skipperClient) {
@@ -65,10 +81,68 @@ public class SkipperStreamDeployer implements StreamDeployer {
 		this.skipperClient = skipperClient;
 	}
 
+	public static String getResourceVersion(Resource resource) {
+		if (resource instanceof MavenResource) {
+			MavenResource mavenResource = (MavenResource) resource;
+			return mavenResource.getVersion();
+		}
+		else {
+			// TODO handle docker and http resource
+			throw new IllegalArgumentException("Can't extract version from resource " + resource.getDescription());
+		}
+	}
+
+	public static String getResourceWithoutVersion(Resource resource) {
+		if (resource instanceof MavenResource) {
+			MavenResource mavenResource = (MavenResource) resource;
+			return String.format("maven://%s:%s",
+					mavenResource.getGroupId(),
+					mavenResource.getArtifactId());
+		}
+		else {
+			// TODO handle docker and http resource
+			throw new IllegalArgumentException("Can't extract version from resource " + resource.getDescription());
+		}
+	}
+
 	@Override
 	public String calculateStreamState(String streamName) {
 		// TODO call out to skipper for stream state.
 		return DeploymentState.unknown.toString();
+	}
+
+	@Override
+	public Map<StreamDefinition, DeploymentState> state(List<StreamDefinition> streamDefinitions) {
+		Map<StreamDefinition, DeploymentState> states = new HashMap<>();
+		for (StreamDefinition streamDefinition : streamDefinitions) {
+			Info info = this.skipperClient.status("my" + streamDefinition.getName());
+			List<AppStatus> appStatusList = deserializeAppStatus(info.getStatus().getPlatformStatus());
+			Set<DeploymentState> deploymentStateList = appStatusList.stream().map(appStatus -> appStatus.getState())
+					.collect(Collectors.toSet());
+			DeploymentState aggregateState = StreamDefinitionController.aggregateState(deploymentStateList);
+			states.put(streamDefinition, aggregateState);
+		}
+		return states;
+	}
+
+	public List<AppStatus> deserializeAppStatus(String platformStatus) {
+		try {
+			ObjectMapper mapper = new ObjectMapper();
+			mapper.addMixIn(AppStatus.class, AppStatusMixin.class);
+			mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+			SimpleModule module = new SimpleModule("CustomModel", Version.unknownVersion());
+			SimpleAbstractTypeResolver resolver = new SimpleAbstractTypeResolver();
+			resolver.addMapping(AppInstanceStatus.class, AppInstanceStatusImpl.class);
+			module.setAbstractTypes(resolver);
+			mapper.registerModule(module);
+			TypeReference<List<AppStatus>> typeRef = new TypeReference<List<AppStatus>>() {
+			};
+			List<AppStatus> result = mapper.readValue(platformStatus, typeRef);
+			return result;
+		}
+		catch (Exception e) {
+			throw new IllegalArgumentException("Could not parse Skipper Platfrom Status JSON:" + platformStatus, e);
+		}
 	}
 
 	@Override
@@ -180,7 +254,7 @@ public class SkipperStreamDeployer implements StreamDeployer {
 		specMap.put("applicationProperties", appDeploymentRequest.getDefinition().getProperties());
 		specMap.put("deploymentProperties", appDeploymentRequest.getDeploymentProperties());
 
-		//Add metadata and spec to top level map
+		// Add metadata and spec to top level map
 		configValueMap.put("metadata", metadataMap);
 		configValueMap.put("spec", specMap);
 
@@ -194,28 +268,6 @@ public class SkipperStreamDeployer implements StreamDeployer {
 		pkg.setTemplates(createGenericTemplate());
 		return pkg;
 
-	}
-
-	public static String getResourceVersion(Resource resource) {
-		if (resource instanceof MavenResource) {
-			MavenResource mavenResource = (MavenResource) resource;
-			return mavenResource.getVersion();
-		} else {
-			//TODO handle docker and http resource
-			throw new IllegalArgumentException("Can't extract version from resource " + resource.getDescription());
-		}
-	}
-
-	public static String getResourceWithoutVersion(Resource resource) {
-		if (resource instanceof MavenResource) {
-			MavenResource mavenResource = (MavenResource) resource;
-			return String.format("maven://%s:%s",
-					mavenResource.getGroupId(),
-					mavenResource.getArtifactId());
-		} else {
-			//TODO handle docker and http resource
-			throw new IllegalArgumentException("Can't extract version from resource " + resource.getDescription());
-		}
 	}
 
 	private List<Template> createGenericTemplate() {

@@ -15,25 +15,37 @@
  */
 package org.springframework.cloud.dataflow.server.stream;
 
-import java.util.List;
 import java.util.Map;
 
-import org.springframework.cloud.dataflow.core.StreamDefinition;
+import org.springframework.cloud.deployer.spi.app.AppInstanceStatus;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
 
 /**
- * SPI for deploying the apps in a stream and providing information about the status of
- * those deployed apps.
  * @author Mark Pollack
  */
-public interface StreamDeployer {
+public class AppInstanceStatusImpl implements AppInstanceStatus {
 
-	// TODO return 'stream handle' stream name for AppDeployer impl, release name for Skipper
-	// impl.
-	// TODO store releaseName in SCDF for stream name?
-	void deployStream(StreamDeploymentRequest streamDeploymentRequest);
+	private String id;
 
-	String calculateStreamState(String streamName);
+	private DeploymentState state;
 
-	Map<StreamDefinition, DeploymentState> state(List<StreamDefinition> content);
+	private Map<String, String> attributes;
+
+	public AppInstanceStatusImpl() {
+	}
+
+	@Override
+	public String getId() {
+		return id;
+	}
+
+	@Override
+	public DeploymentState getState() {
+		return state;
+	}
+
+	@Override
+	public Map<String, String> getAttributes() {
+		return attributes;
+	}
 }
