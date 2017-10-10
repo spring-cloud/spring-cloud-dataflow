@@ -16,6 +16,8 @@
 package org.springframework.cloud.skipper.domain;
 
 /**
+ * Properties for upgrade operation.
+ *
  * @author Ilayaperumal Gopinathan
  */
 public class UpgradeProperties extends CommonProperties {

@@ -20,6 +20,8 @@ import javax.persistence.Entity;
 import javax.validation.constraints.NotNull;
 
 /**
+ * Repository for the packages.
+ *
  * @author Mark Pollack
  */
 @Entity

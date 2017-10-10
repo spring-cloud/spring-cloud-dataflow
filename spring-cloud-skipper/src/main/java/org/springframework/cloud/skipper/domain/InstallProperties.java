@@ -16,6 +16,8 @@
 package org.springframework.cloud.skipper.domain;
 
 /**
+ * Properties for the package installation.
+ *
  * @author Mark Pollack
  */
 public class InstallProperties extends CommonProperties {

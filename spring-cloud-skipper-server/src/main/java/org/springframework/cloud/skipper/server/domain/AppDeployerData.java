@@ -32,6 +32,8 @@ import org.springframework.cloud.skipper.SkipperException;
 import org.springframework.cloud.skipper.domain.AbstractEntity;
 
 /**
+ * Entity that contains deployment data for the given release identified by the release name and version.
+ *
  * @author Mark Pollack
  */
 @Entity

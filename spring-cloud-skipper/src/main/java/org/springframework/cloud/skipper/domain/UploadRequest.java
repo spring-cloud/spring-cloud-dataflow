@@ -16,6 +16,8 @@
 package org.springframework.cloud.skipper.domain;
 
 /**
+ * This contains all the request attributes for upload of a package.
+ *
  * @author Ilayaperumal Gopinathan
  */
 public class UploadRequest {

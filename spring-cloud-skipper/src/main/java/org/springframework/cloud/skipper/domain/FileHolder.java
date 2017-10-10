@@ -16,6 +16,8 @@
 package org.springframework.cloud.skipper.domain;
 
 /**
+ * Holder object that contains file name and its content as byte[].
+ *
  * @author Mark Pollack
  */
 public class FileHolder {

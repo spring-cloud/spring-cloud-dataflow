@@ -16,6 +16,8 @@
 package org.springframework.cloud.skipper.domain;
 
 /**
+ * InstallRequest contains request attributes for the package install operation.
+ *
  * @author Mark Pollack
  */
 public class InstallRequest {

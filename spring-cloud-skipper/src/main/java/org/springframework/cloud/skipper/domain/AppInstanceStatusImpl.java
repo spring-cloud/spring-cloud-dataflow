@@ -21,6 +21,8 @@ import org.springframework.cloud.deployer.spi.app.AppInstanceStatus;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
 
 /**
+ * Implementation for {@link AppInstanceStatus} that has deployment state and attributes.
+ *
  * @author Mark Pollack
  */
 public class AppInstanceStatusImpl implements AppInstanceStatus {

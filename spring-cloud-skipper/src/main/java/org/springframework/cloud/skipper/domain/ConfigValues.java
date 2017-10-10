@@ -16,6 +16,8 @@
 package org.springframework.cloud.skipper.domain;
 
 /**
+ * Configuration values for the deployment.
+ *
  * @author Mark Pollack
  */
 public class ConfigValues {

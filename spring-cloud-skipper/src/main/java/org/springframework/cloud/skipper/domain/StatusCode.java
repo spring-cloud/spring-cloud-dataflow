@@ -16,6 +16,8 @@
 package org.springframework.cloud.skipper.domain;
 
 /**
+ * Release's status code definition
+ *
  * @author Mark Pollack
  */
 

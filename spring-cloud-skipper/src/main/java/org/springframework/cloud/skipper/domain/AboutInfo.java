@@ -19,6 +19,8 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
+ * This contains information about the underlying Skipper server.
+ *
  * @author Mark Pollack
  */
 public class AboutInfo {

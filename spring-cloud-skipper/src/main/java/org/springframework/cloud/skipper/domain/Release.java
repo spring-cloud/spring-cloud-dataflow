@@ -32,6 +32,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.util.StringUtils;
 
 /**
+ * The entity corresponds to Release of the package.
+ *
  * @author Mark Pollack
  */
 @Entity

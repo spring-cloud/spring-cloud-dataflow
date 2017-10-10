@@ -20,6 +20,8 @@ import java.util.Map;
 import org.springframework.cloud.skipper.SkipperException;
 
 /**
+ * Wrapper for Spring Boot based application.
+ *
  * @author Mark Pollack
  */
 public class SpringBootAppKind {

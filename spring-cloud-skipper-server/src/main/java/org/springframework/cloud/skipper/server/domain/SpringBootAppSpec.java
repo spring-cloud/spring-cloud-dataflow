@@ -18,6 +18,8 @@ package org.springframework.cloud.skipper.server.domain;
 import java.util.Map;
 
 /**
+ * Specification to handle Spring Boot based application.
+ *
  * @author Mark Pollack
  */
 public class SpringBootAppSpec {

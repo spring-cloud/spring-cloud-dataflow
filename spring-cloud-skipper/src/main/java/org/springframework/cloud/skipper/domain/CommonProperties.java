@@ -16,7 +16,8 @@
 package org.springframework.cloud.skipper.domain;
 
 /**
- * Common property values shared between initial deploy and update requests.
+ * Common property values shared between initial install and update requests.
+ *
  * @author Ilayaperumal Gopinathan
  * @author Mark Pollack
  */

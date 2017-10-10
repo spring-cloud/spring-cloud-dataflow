@@ -21,6 +21,8 @@ import javax.persistence.Lob;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
+ * Metadata for the Package.
+ *
  * @author Mark Pollack
  */
 @Entity

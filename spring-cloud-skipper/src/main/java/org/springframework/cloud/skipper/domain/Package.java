@@ -19,6 +19,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * Package is the installation unit that contains metadata, dependencies, configuration values and related attributes.
+ *
  * @author Mark Pollack
  */
 public class Package {

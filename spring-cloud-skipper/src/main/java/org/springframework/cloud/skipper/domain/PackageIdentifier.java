@@ -16,6 +16,8 @@
 package org.springframework.cloud.skipper.domain;
 
 /**
+ * The identifier that uniquely identifies a package.
+ *
  * @author Mark Pollack
  */
 public class PackageIdentifier {

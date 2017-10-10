@@ -16,6 +16,8 @@
 package org.springframework.cloud.skipper.domain;
 
 /**
+ * This contains all the request attributes for upgrade operation.
+ *
  * @author Ilayaperumal Gopinathan
  */
 public class UpgradeRequest {

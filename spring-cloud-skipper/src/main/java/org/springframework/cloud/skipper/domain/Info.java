@@ -22,6 +22,8 @@ import javax.persistence.Entity;
 import javax.persistence.OneToOne;
 
 /**
+ * Basic information about the package deployment operation.
+ *
  * @author Mark Pollack
  */
 @Entity

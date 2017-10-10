@@ -38,6 +38,9 @@ import org.springframework.cloud.deployer.spi.app.AppStatus;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
 
 /**
+ * Status contains release's status from the release management platform and the corresponding deployment platform
+ * status.
+ *
  * @author Mark Pollack
  */
 @Entity
