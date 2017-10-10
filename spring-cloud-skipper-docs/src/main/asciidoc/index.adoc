@@ -1,5 +1,5 @@
-= Spring Cloud Data Flow Reference Guide
-Mark Pollack
+= Spring Cloud Skipper Reference Guide
+Mark Pollack, Ilayaperumal Gopinathan, Janne Valkealahti
 :doctype: book
 :toc:
 :toclevels: 4
