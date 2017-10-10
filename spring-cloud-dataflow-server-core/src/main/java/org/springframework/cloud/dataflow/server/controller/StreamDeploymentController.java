@@ -34,7 +34,7 @@ import org.springframework.cloud.dataflow.server.repository.DeploymentIdReposito
 import org.springframework.cloud.dataflow.server.repository.DeploymentKey;
 import org.springframework.cloud.dataflow.server.repository.NoSuchStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
-import org.springframework.cloud.dataflow.server.service.impl.DefaultStreamService;
+import org.springframework.cloud.dataflow.server.service.StreamService;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.app.AppStatus;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
@@ -49,6 +49,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+
+import static org.springframework.cloud.dataflow.server.stream.SkipperStreamDeployer.SKIPPER_ENABLED_PROPERTY_KEY;
 
 /**
  * Controller for deployment operations on {@link StreamDefinition}.
@@ -71,8 +73,10 @@ public class StreamDeploymentController {
 	 * for metrics export.
 	 */
 	private static final String METRICS_TRIGGER_INCLUDES = "spring.metrics.export.triggers.application.includes";
+
 	private static Log logger = LogFactory.getLog(StreamDeploymentController.class);
-	private final DefaultStreamService defaultStreamService;
+
+	private final StreamService streamService;
 
 	/**
 	 * The repository this controller will use for stream CRUD operations.
@@ -116,25 +120,26 @@ public class StreamDeploymentController {
 	 * @param deployer the deployer this controller will use to deploy stream apps
 	 * @param metadataResolver the application metadata resolver
 	 * @param commonProperties common set of application properties
+	 * @param streamService the underlying StreamService to deploy the stream
 	 */
 	public StreamDeploymentController(StreamDefinitionRepository repository,
 									  DeploymentIdRepository deploymentIdRepository, AppRegistry registry, AppDeployer deployer,
 									  ApplicationConfigurationMetadataResolver metadataResolver, CommonApplicationProperties commonProperties,
-									  DefaultStreamService defaultStreamService) {
+									  StreamService streamService) {
 		Assert.notNull(repository, "StreamDefinitionRepository must not be null");
 		Assert.notNull(deploymentIdRepository, "DeploymentIdRepository must not be null");
 		Assert.notNull(registry, "AppRegistry must not be null");
 		Assert.notNull(deployer, "AppDeployer must not be null");
 		Assert.notNull(metadataResolver, "MetadataResolver must not be null");
 		Assert.notNull(commonProperties, "CommonApplicationProperties must not be null");
-		Assert.notNull(defaultStreamService, "StreamDeploymentService must not be null");
+		Assert.notNull(streamService, "StreamDeploymentService must not be null");
 		this.repository = repository;
 		this.deploymentIdRepository = deploymentIdRepository;
 		this.registry = registry;
 		this.deployer = deployer;
 		this.whitelistProperties = new WhitelistProperties(metadataResolver);
 		this.commonApplicationProperties = commonProperties;
-		this.defaultStreamService = defaultStreamService;
+		this.streamService = streamService;
 	}
 
 	/**
@@ -173,8 +178,13 @@ public class StreamDeploymentController {
 	@RequestMapping(value = "/{name}", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
 	public void deploy(@PathVariable("name") String name,
-					   @RequestBody(required = false) Map<String, String> properties) {
-		defaultStreamService.deployStream(name, properties);
+			@RequestBody(required = false) Map<String, String> properties) {
+		if (properties != null && properties.containsKey("useSkipper") &&
+				properties.get("useSkipper").equalsIgnoreCase("true")) {
+			properties.put(SKIPPER_ENABLED_PROPERTY_KEY, "true");
+			properties.remove("useSkipper");
+		}
+		this.streamService.deployStream(name, properties);
 	}
 
 	/**

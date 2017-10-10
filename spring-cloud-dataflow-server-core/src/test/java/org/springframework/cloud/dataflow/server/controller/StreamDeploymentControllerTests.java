@@ -17,6 +17,7 @@
 package org.springframework.cloud.dataflow.server.controller;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import org.hamcrest.collection.IsMapContaining;
 import org.junit.Assert;
@@ -25,6 +26,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
@@ -42,11 +44,14 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 
 import static org.hamcrest.CoreMatchers.not;
+import static org.mockito.Mockito.verify;
+import static org.springframework.cloud.dataflow.server.stream.SkipperStreamDeployer.SKIPPER_ENABLED_PROPERTY_KEY;
 
 /**
  * Unit tests for StreamDeploymentController.
  *
  * @author Eric Bottard
+ * @author Ilayaperumal Gopinathan
  */
 @RunWith(MockitoJUnitRunner.class)
 public class StreamDeploymentControllerTests {
@@ -133,6 +138,20 @@ public class StreamDeploymentControllerTests {
 
 		Assert.assertThat(modified.getProperties(), IsMapContaining.hasEntry("date.some-long-property", "yy"));
 
+	}
+
+	@Test
+	public void testDeployViaStreamService() {
+		Map<String, String> deploymentProperties = new HashMap<>();
+		deploymentProperties.put("useSkipper", "true");
+		this.controller.deploy("test", deploymentProperties);
+		ArgumentCaptor<String> argumentCaptor1 = ArgumentCaptor.forClass(String.class);
+		ArgumentCaptor<Map> argumentCaptor2 = ArgumentCaptor.forClass(Map.class);
+		verify(defaultStreamService).deployStream(argumentCaptor1.capture(), argumentCaptor2.capture());
+		Assert.assertEquals(argumentCaptor1.getValue(), "test");
+		Assert.assertTrue("Skipper enabled property is missing", argumentCaptor2.getValue().containsKey(SKIPPER_ENABLED_PROPERTY_KEY));
+		Assert.assertFalse("useSkipper key shouldn't exist", argumentCaptor2.getValue().containsKey("useSkipper"));
+		Assert.assertEquals(argumentCaptor2.getValue().get(SKIPPER_ENABLED_PROPERTY_KEY), "true");
 	}
 
 }
