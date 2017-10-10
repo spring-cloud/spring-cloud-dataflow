@@ -28,17 +28,33 @@ import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
 
 /**
- * Utilities for managing AppDeploymentRequests
+ * Factory managing {@link AppDeploymentRequest}s.
+ *
  * @author Mark Pollack
+ * @author Janne Valkealahti
  */
 public class AppDeploymentRequestFactory {
 
 	private final DelegatingResourceLoader delegatingResourceLoader;
 
+	/**
+	 * Instantiates a new {@code AppDeploymentRequestFactory}.
+	 *
+	 * @param delegatingResourceLoader the delegating resource loader
+	 */
 	public AppDeploymentRequestFactory(DelegatingResourceLoader delegatingResourceLoader) {
+		Assert.notNull(delegatingResourceLoader, "'delegatingResourceLoader' must be set");
 		this.delegatingResourceLoader = delegatingResourceLoader;
 	}
 
+	/**
+	 * Creates an {@link AppDeploymentRequest}.
+	 *
+	 * @param springBootAppKind the boot app kind
+	 * @param releaseName the release name
+	 * @param version the release version
+	 * @return a created AppDeploymentRequest
+	 */
 	public AppDeploymentRequest createAppDeploymentRequest(SpringBootAppKind springBootAppKind, String releaseName,
 			String version) {
 		SpringBootAppSpec spec = springBootAppKind.getSpec();
@@ -46,7 +62,10 @@ public class AppDeploymentRequestFactory {
 		if (spec.getApplicationProperties() != null) {
 			applicationProperties.putAll(spec.getApplicationProperties());
 		}
-		AppDefinition appDefinition = new AppDefinition(springBootAppKind.getApplicationName(), applicationProperties);
+		// we need to keep group name same for consumer groups not getting broken, but
+		// app name needs to differentiate as otherwise it may result same deployment id and
+		// failure on a deployer.
+		AppDefinition appDefinition = new AppDefinition(springBootAppKind.getApplicationName() + "-v" + version, applicationProperties);
 
 		Assert.hasText(spec.getResource(), "Package template must define a resource uri");
 		Resource resource = delegatingResourceLoader.getResource(spec.getResource());
@@ -60,8 +79,7 @@ public class AppDeploymentRequestFactory {
 			deploymentProperties.put(AppDeployer.COUNT_PROPERTY_KEY, String.valueOf(metadata.get("count")));
 		}
 
-		// TODO fix setting of group property with new version, will mess up consumer groups.
-		deploymentProperties.put(AppDeployer.GROUP_PROPERTY_KEY, releaseName + "-v" + version);
+		deploymentProperties.put(AppDeployer.GROUP_PROPERTY_KEY, releaseName);
 
 		AppDeploymentRequest appDeploymentRequest = new AppDeploymentRequest(appDefinition, resource,
 				deploymentProperties);
