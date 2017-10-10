@@ -50,7 +50,7 @@ public class Repository extends AbstractEntity {
 	/**
 	 * Is this a local or remote repository. Uploads are only allowed to a local repository
 	 */
-	private boolean local;
+	private Boolean local = false;
 
 	/**
 	 * A short description of the repository.
@@ -61,7 +61,7 @@ public class Repository extends AbstractEntity {
 	 * An integer used to determine which repository is preferred over others when searching
 	 * for a package.
 	 */
-	private int order;
+	private Integer repoOrder;
 
 	// TODO security/checksum fields of referenced index file.
 
@@ -108,12 +108,12 @@ public class Repository extends AbstractEntity {
 		this.description = description;
 	}
 
-	public int getOrder() {
-		return order;
+	public Integer getRepoOrder() {
+		return repoOrder;
 	}
 
-	public void setOrder(int order) {
-		this.order = order;
+	public void setRepoOrder(Integer repoOrder) {
+		this.repoOrder = repoOrder;
 	}
 
 	@Override
