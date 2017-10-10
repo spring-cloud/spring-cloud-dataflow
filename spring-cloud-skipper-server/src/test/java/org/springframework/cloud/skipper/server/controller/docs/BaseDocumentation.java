@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.skipper.controller.docs;
+package org.springframework.cloud.skipper.server.controller.docs;
 
 import java.util.Arrays;
 import java.util.List;
@@ -23,7 +23,7 @@ import org.junit.Before;
 import org.junit.Rule;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.skipper.controller.AbstractControllerTests;
+import org.springframework.cloud.skipper.server.controller.AbstractControllerTests;
 import org.springframework.restdocs.JUnitRestDocumentation;
 import org.springframework.restdocs.hypermedia.HypermediaDocumentation;
 import org.springframework.restdocs.hypermedia.LinkDescriptor;

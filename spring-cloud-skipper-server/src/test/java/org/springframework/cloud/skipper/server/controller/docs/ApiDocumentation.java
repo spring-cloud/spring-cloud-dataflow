@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.skipper.controller.docs;
+package org.springframework.cloud.skipper.server.controller.docs;
 
 import javax.servlet.RequestDispatcher;
 

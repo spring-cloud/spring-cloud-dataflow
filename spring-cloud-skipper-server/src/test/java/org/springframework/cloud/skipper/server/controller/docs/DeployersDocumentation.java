@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.skipper.controller.docs;
+package org.springframework.cloud.skipper.server.controller.docs;
 
 import org.junit.Test;
 
@@ -32,12 +32,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ActiveProfiles("repo-test")
 @TestPropertySource(properties = { "spring.cloud.skipper.server.platform.local.accounts[test].key=value",
 		"maven.remote-repositories.repo1.url=http://repo.spring.io/libs-snapshot" })
-public class AppDeployersDatasDocumentation extends BaseDocumentation {
+public class DeployersDocumentation extends BaseDocumentation {
 
 	@Test
-	public void getAllAppDeployerDatas() throws Exception {
+	public void getAllDeployers() throws Exception {
 		this.mockMvc.perform(
-			get("/appDeployerDatas")
+			get("/deployers")
 				.param("page", "0")
 				.param("size", "10"))
 			.andDo(print())
@@ -45,7 +45,11 @@ public class AppDeployersDatasDocumentation extends BaseDocumentation {
 			.andDo(this.documentationHandler.document(
 				super.paginationRequestParameterProperties,
 				super.paginationProperties.and(
-					fieldWithPath("_embedded.appDeployerDatas").description("Array of App Deployer Data objects.")
+					fieldWithPath("_embedded.deployers").description("Array containing Deployer objects"),
+					fieldWithPath("_embedded.deployers[].name").description("Name of the deployer"),
+					fieldWithPath("_embedded.deployers[].type").description("Type of the deployer (e.g. 'local')"),
+					fieldWithPath("_embedded.deployers[]._links.self.href").ignored(),
+					fieldWithPath("_embedded.deployers[]._links.deployer.href").ignored()
 				).and(super.defaultLinkProperties),
 				super.linksForSkipper()
 			)

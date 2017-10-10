@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.skipper.controller.docs;
+package org.springframework.cloud.skipper.server.controller.docs;
 
 import org.junit.Test;
 
@@ -32,12 +32,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ActiveProfiles("repo-test")
 @TestPropertySource(properties = { "spring.cloud.skipper.server.platform.local.accounts[test].key=value",
 		"maven.remote-repositories.repo1.url=http://repo.spring.io/libs-snapshot" })
-public class ReleasesDocumentation extends BaseDocumentation {
+public class AppDeployersDatasDocumentation extends BaseDocumentation {
 
 	@Test
-	public void getAllReleases() throws Exception {
+	public void getAllAppDeployerDatas() throws Exception {
 		this.mockMvc.perform(
-			get("/releases")
+			get("/appDeployerDatas")
 				.param("page", "0")
 				.param("size", "10"))
 			.andDo(print())
@@ -45,7 +45,7 @@ public class ReleasesDocumentation extends BaseDocumentation {
 			.andDo(this.documentationHandler.document(
 				super.paginationRequestParameterProperties,
 				super.paginationProperties.and(
-					fieldWithPath("_embedded.releases").description("Provides a list of releases")
+					fieldWithPath("_embedded.appDeployerDatas").description("Array of App Deployer Data objects.")
 				).and(super.defaultLinkProperties),
 				super.linksForSkipper()
 			)
