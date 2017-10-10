@@ -18,8 +18,9 @@ package org.springframework.cloud.dataflow.server.service;
 import java.util.Map;
 
 /**
- * Deploys the specified stream. Implementations are resonsible for expanding deployment
+ * Deploys the specified stream. Implementations are responsible for expanding deployment
  * wildcard expressions.
+ *
  * @author Mark Pollack
  */
 public interface StreamService {

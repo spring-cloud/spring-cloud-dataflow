@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -51,6 +52,7 @@ import org.springframework.stereotype.Component;
  * @author Ilayaperumal Gopinathan
  * @author Mark Fisher
  * @author Gunnar Hillert
+ * @author Glenn Renfro
  */
 @Component
 // todo: reenable optionContext attributes
@@ -124,7 +126,8 @@ public class StreamCommands implements CommandMarker {
 			@CliOption(key = {
 					PROPERTIES_OPTION }, help = "the properties for this deployment", mandatory = false) String properties,
 			@CliOption(key = {
-					PROPERTIES_FILE_OPTION }, help = "the properties for this deployment (as a File)", mandatory = false) File propertiesFile)
+					PROPERTIES_FILE_OPTION }, help = "the properties for this deployment (as a File)", mandatory = false) File propertiesFile,
+			@CliOption(key = "useSkipper", help = "whether to deploy the stream using skipper", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean useSkipper)
 			throws IOException {
 		int which = Assertions.atMostOneOf(PROPERTIES_OPTION, properties, PROPERTIES_FILE_OPTION, propertiesFile);
 		Map<String, String> propertiesToUse;
@@ -150,10 +153,13 @@ public class StreamCommands implements CommandMarker {
 			propertiesToUse = DeploymentPropertiesUtils.convert(props);
 			break;
 		case -1: // Neither option specified
-			propertiesToUse = Collections.<String, String>emptyMap();
+			propertiesToUse = (useSkipper) ? new HashMap<>(1) : Collections.<String, String>emptyMap();
 			break;
 		default:
 			throw new AssertionError();
+		}
+		if (useSkipper) {
+			propertiesToUse.put("useSkipper", "true");
 		}
 		streamOperations().deploy(name, propertiesToUse);
 		return String.format("Deployment request has been sent for stream '%s'", name);
