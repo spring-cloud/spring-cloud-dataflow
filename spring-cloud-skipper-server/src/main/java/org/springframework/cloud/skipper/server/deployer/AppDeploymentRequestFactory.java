@@ -18,6 +18,9 @@ package org.springframework.cloud.skipper.server.deployer;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.springframework.cloud.deployer.resource.support.DelegatingResourceLoader;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.core.AppDefinition;
@@ -34,6 +37,8 @@ import org.springframework.util.Assert;
  * @author Janne Valkealahti
  */
 public class AppDeploymentRequestFactory {
+
+	private static final Logger logger = LoggerFactory.getLogger(AppDeploymentRequestFactory.class);
 
 	private final DelegatingResourceLoader delegatingResourceLoader;
 
@@ -79,7 +84,10 @@ public class AppDeploymentRequestFactory {
 			deploymentProperties.put(AppDeployer.COUNT_PROPERTY_KEY, String.valueOf(metadata.get("count")));
 		}
 
-		deploymentProperties.put(AppDeployer.GROUP_PROPERTY_KEY, releaseName);
+		if (!deploymentProperties.containsKey(AppDeployer.GROUP_PROPERTY_KEY)) {
+			logger.debug("Defaulting spring.cloud.deployer.group=" + releaseName);
+			deploymentProperties.put(AppDeployer.GROUP_PROPERTY_KEY, releaseName);
+		}
 
 		AppDeploymentRequest appDeploymentRequest = new AppDeploymentRequest(appDefinition, resource,
 				deploymentProperties);
