@@ -25,9 +25,6 @@ import javax.validation.constraints.NotNull;
  * @author Mark Pollack
  */
 @Entity
-// todo: Add isLocal flag to differentiate local vs remote.
-// todo: Add description
-// todo: Add order flag
 public class Repository extends AbstractEntity {
 
 	/**
@@ -46,8 +43,25 @@ public class Repository extends AbstractEntity {
 
 	/**
 	 * The url that points to the source package files that was used to create the index and
+	 * packages.
 	 */
 	private String sourceUrl;
+
+	/**
+	 * Is this a local or remote repository. Uploads are only allowed to a local repository
+	 */
+	private boolean local;
+
+	/**
+	 * A short description of the repository.
+	 */
+	private String description;
+
+	/**
+	 * An integer used to determine which repository is preferred over others when searching
+	 * for a package.
+	 */
+	private int order;
 
 	// TODO security/checksum fields of referenced index file.
 
@@ -78,12 +92,36 @@ public class Repository extends AbstractEntity {
 		this.sourceUrl = sourceUrl;
 	}
 
+	public boolean isLocal() {
+		return local;
+	}
+
+	public void setLocal(boolean local) {
+		this.local = local;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	public int getOrder() {
+		return order;
+	}
+
+	public void setOrder(int order) {
+		this.order = order;
+	}
+
 	@Override
 	public String toString() {
 		return "Repository{" +
 				"name='" + name + '\'' +
 				", url='" + url + '\'' +
-				", sourceUrl='" + sourceUrl + '\'' +
+				", local=" + local +
 				'}';
 	}
 }
