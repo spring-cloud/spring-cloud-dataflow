@@ -24,8 +24,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties("spring.cloud.skipper.client")
 public class SkipperClientProperties {
 
-	public static final String DEFAULT_HOME = System.getProperty("user.home") + java.io.File.separator + ".skipper";
-
 	public static final String DEFAULT_SCHEME = "http";
 
 	public static final String DEFAULT_HOST = "localhost";
@@ -42,8 +40,6 @@ public class SkipperClientProperties {
 
 	public static final String DEFAULT_CREDENTIALS_PROVIDER_COMMAND = "";
 
-	private String home = DEFAULT_HOME;
-
 	private String uri = DEFAULT_TARGET;
 
 	private String username = DEFAULT_USERNAME;
@@ -53,14 +49,6 @@ public class SkipperClientProperties {
 	private boolean skipSllValidation = Boolean.getBoolean(DEFAULT_SKIP_SSL_VALIDATION);
 
 	private String credentialsProviderCommand = DEFAULT_CREDENTIALS_PROVIDER_COMMAND;
-
-	public String getHome() {
-		return home;
-	}
-
-	public void setHome(String home) {
-		this.home = home;
-	}
 
 	public String getUri() {
 		return uri;
