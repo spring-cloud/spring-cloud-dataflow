@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.persistence.Entity;
+import javax.persistence.Lob;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -32,7 +33,11 @@ import org.springframework.cloud.skipper.SkipperException;
 import org.springframework.cloud.skipper.domain.AbstractEntity;
 
 /**
- * Entity that contains deployment data for the given release identified by the release name and version.
+ * Entity that contains deployment data for the given release identified by the release
+ * name and version.
+ *
+ * The deployment data is a JSON serialized Map containing the application name and
+ * deployment id.
  *
  * @author Mark Pollack
  */
@@ -44,6 +49,7 @@ public class AppDeployerData extends AbstractEntity {
 	private Integer releaseVersion;
 
 	// Store deployment Ids associated with the given release.
+	@Lob
 	private String deploymentData;
 
 	public AppDeployerData() {

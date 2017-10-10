@@ -19,7 +19,7 @@ import org.springframework.cloud.skipper.domain.PackageMetadata;
 import org.springframework.data.rest.core.config.Projection;
 
 /**
- * Defines summary information of a package, only the id, name, version and IconUrl.
+ * Defines summary information of a package, only the id, name, version and icon URL.
  *
  * Interface that adds the Spring Data REST Projection annotation to avoid adding a Spring
  * Data REST dependency to the core skipper domain class.

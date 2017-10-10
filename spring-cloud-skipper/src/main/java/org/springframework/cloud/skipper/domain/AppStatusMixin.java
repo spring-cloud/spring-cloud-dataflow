@@ -22,6 +22,8 @@ import org.springframework.cloud.deployer.spi.app.AppStatus;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
 
 /**
+ * A Jackson mixin that will call the constructor that takes the {@literal deploymentId}
+ * and {@literal state} properties.
  * @author Mark Pollack
  */
 public abstract class AppStatusMixin extends AppStatus {

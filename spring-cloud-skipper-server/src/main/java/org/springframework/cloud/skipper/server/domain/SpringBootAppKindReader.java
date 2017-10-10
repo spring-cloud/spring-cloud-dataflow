@@ -24,6 +24,10 @@ import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 
 /**
+ * Deserializes using Jackson a String to a {@link SpringBootAppKind} class. Sets
+ * {@literal DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES} to {@literal false} so
+ * values in the YAML that are not represented in the SpringBootAppKind class will not
+ * throw an exception in the deserialization process.
  * @author Mark Pollack
  */
 public abstract class SpringBootAppKindReader {

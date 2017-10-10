@@ -20,7 +20,29 @@ import java.util.Map;
 import org.springframework.cloud.skipper.SkipperException;
 
 /**
- * Wrapper for Spring Boot based application.
+ * A kubernetes resource style representation of a Spring Boot application that will be
+ * deployed using the Spring Cloud Deployer API.
+ *
+ * This class is commonly referred to as 'the manifest', meaning the complete list of the
+ * application resource, properties, metadata and deployment properties.
+ * It is serialized/deserialized from YAML. An example is:
+ * {@literal
+ * apiVersion: skipper/v1
+ * kind: SpringBootApp
+ * metadata:
+ *   name: log-sink
+ *   count: 2
+ *   type: sink
+ * spec:
+ * resource: maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.2.0.RELEASE
+ * resourceMetadata: maven://org.springframework.cloud.stream.app:log-sink-rabbit:jar:metadata:1.2.0.RELEASE
+ * applicationProperties:
+ *  log.level: INFO
+ *  log.expression: hellobaby
+ * deploymentProperties:
+ *   memory: 1024
+ *   disk: 2
+ * }
  *
  * @author Mark Pollack
  */
