@@ -39,7 +39,7 @@ public class RepositoryInitializationServiceTest extends AbstractIntegrationTest
 
 	@Test
 	public void intialize() throws Exception {
-		assertThat(repositoryRepository.count()).isEqualTo(1);
+		assertThat(repositoryRepository.count()).isEqualTo(2);
 		assertThat(repositoryRepository.findByName("test").getUrl()).isEqualTo("classpath:/repositories/binaries/test");
 		// Note, this is a brittle assertion.
 		assertThat(packageMetadataRepository.count()).isEqualTo(5);

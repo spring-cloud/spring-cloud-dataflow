@@ -182,6 +182,7 @@ public class DefaultSkipperClient implements SkipperClient {
 	@Override
 	public Release upgrade(UpgradeRequest upgradeRequest) {
 		String url = String.format("%s/%s", baseUri, "upgrade");
+		log.debug("Posting UpgradeRequest to " + url + ". UpgradeRequest = " + upgradeRequest);
 		return this.restTemplate.postForObject(url, upgradeRequest, Release.class);
 	}
 

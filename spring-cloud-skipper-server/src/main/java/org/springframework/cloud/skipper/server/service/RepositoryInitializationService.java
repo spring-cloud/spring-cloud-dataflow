@@ -21,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.cloud.skipper.SkipperException;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
 import org.springframework.cloud.skipper.domain.Repository;
 import org.springframework.cloud.skipper.server.config.SkipperServerProperties;
@@ -72,8 +73,13 @@ public class RepositoryInitializationService {
 	}
 
 	private void loadAllPackageMetadata() {
-		List<PackageMetadata> packageMetadataList = this.packageMetadataService.downloadPackageMetadata();
-		this.packageMetadataRepository.save(packageMetadataList);
+		try {
+			List<PackageMetadata> packageMetadataList = this.packageMetadataService.downloadPackageMetadata();
+			this.packageMetadataRepository.save(packageMetadataList);
+		}
+		catch (SkipperException e) {
+			logger.warn("Could not load package metadata from remote repositories", e);
+		}
 	}
 
 	private void synchronizeRepositories() {

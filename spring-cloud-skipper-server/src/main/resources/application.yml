@@ -10,12 +10,26 @@ spring:
   data:
     rest:
       base-path: /api
+  cloud:
+    skipper:
+      server:
+        synchonizeIndexOnContextRefresh: false
+        packageRepositories:
+          -
+            name: local
+            url: "http://localhost:7577"
+            local: true
+            description: Default local database backed repository
 
-# TODO - remove, pre M1 development simplicity
+
+# TODO - remove libs-snapshot maven repo , pre M1 development simplicity
 maven:
   remoteRepositories:
     springRepo:
       url: https://repo.spring.io/libs-snapshot
+
+
+
 
 logging:
   level:

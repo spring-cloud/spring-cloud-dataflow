@@ -31,6 +31,7 @@ import org.springframework.cloud.skipper.domain.UploadRequest;
 import org.springframework.cloud.skipper.server.service.PackageService;
 import org.springframework.cloud.skipper.server.service.ReleaseService;
 import org.springframework.http.HttpStatus;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -117,6 +118,8 @@ public class SkipperController {
 	@RequestMapping(path = "/upgrade", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
 	public Release upgrade(@RequestBody UpgradeRequest upgradeRequest) {
+		Assert.notNull(upgradeRequest.getUpgradeProperties(), "UpgradeProperties can not be null");
+		Assert.notNull(upgradeRequest.getPackageIdentifier(), "PackageIdentifier can not be null");
 		return this.releaseService.upgrade(upgradeRequest);
 	}
 

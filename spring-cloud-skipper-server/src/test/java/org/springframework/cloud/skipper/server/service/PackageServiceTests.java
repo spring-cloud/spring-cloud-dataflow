@@ -116,7 +116,7 @@ public class PackageServiceTests extends AbstractIntegrationTest {
 		assertThat(packageMetadata).isNull();
 
 		UploadRequest uploadProperties = new UploadRequest();
-		uploadProperties.setRepoName("database-repo");
+		uploadProperties.setRepoName("local");
 		uploadProperties.setName("log");
 		uploadProperties.setVersion("9.9.9");
 		uploadProperties.setExtension("zip");

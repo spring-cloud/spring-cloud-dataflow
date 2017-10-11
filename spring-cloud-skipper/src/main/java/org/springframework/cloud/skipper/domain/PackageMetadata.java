@@ -157,10 +157,12 @@ public class PackageMetadata extends AbstractEntity {
 		this.packageHomeUrl = packageHomeUrl;
 	}
 
+	@JsonIgnore
 	public byte[] getPackageFileBytes() {
 		return packageFile;
 	}
 
+	@JsonIgnore
 	public void setPackageFileBytes(byte[] packageFileBytes) {
 		this.packageFile = packageFileBytes;
 	}

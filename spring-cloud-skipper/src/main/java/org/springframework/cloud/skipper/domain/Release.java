@@ -100,10 +100,10 @@ public class Release extends AbstractEntity {
 
 	public void setPkg(Package pkg) {
 		this.pkg = pkg;
-		// TODO Do we want to store the package file at this specific moment in time?
-		this.pkg.getMetadata().setPackageFileBytes(null);
 		ObjectMapper mapper = new ObjectMapper();
 		try {
+			// TODO verify this behavior
+			// Note that @JsonIgnore is on the package file byte array field.
 			this.pkgJsonString = mapper.writeValueAsString(pkg);
 		}
 		catch (JsonProcessingException e) {

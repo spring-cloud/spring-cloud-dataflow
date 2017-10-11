@@ -4,6 +4,12 @@ spring:
       server:
         synchonizeIndexOnContextRefresh: true
         packageRepositories:
-         -
-           name: test
-           url: "classpath:/repositories/binaries/test"
+          -
+            name: test
+            url: "classpath:/repositories/binaries/test"
+            description: test repository with a few packages
+          -
+            name: local
+            url: "http://localhost:7577"
+            local: true
+            description: Default local database backed repository

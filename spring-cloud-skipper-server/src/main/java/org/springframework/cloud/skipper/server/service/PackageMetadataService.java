@@ -58,8 +58,7 @@ public class PackageMetadataService implements ResourceLoaderAware {
 
 	/**
 	 * Download package metadata from all repositories.
-	 * @return A list of package metadata, not yet persisted in the
-	 * PackageMetadataRepository.
+	 * @return A list of package metadata, not yet persisted in the PackageMetadataRepository.
 	 */
 	public List<PackageMetadata> downloadPackageMetadata() {
 		List<PackageMetadata> finalMetadataList = new ArrayList<>();
@@ -68,18 +67,27 @@ public class PackageMetadataService implements ResourceLoaderAware {
 			targetPath = TempFileUtils.createTempDirectory("skipperIndex");
 			for (Repository packageRepository : this.repositoryRepository.findAll()) {
 				try {
-					Resource resource = resourceLoader.getResource(packageRepository.getUrl()
-							+ File.separator + "index.yml");
-					logger.info("Downloading from " + resource);
-					File downloadedFile = new File(targetPath.toFile(), computeFilename(resource));
-					StreamUtils.copy(resource.getInputStream(), new FileOutputStream(downloadedFile));
-					List<File> downloadedFileAsList = new ArrayList<>();
-					downloadedFileAsList.add(downloadedFile);
-					List<PackageMetadata> downloadedPackageMetadata = deserializeFromIndexFiles(downloadedFileAsList);
-					for (PackageMetadata packageMetadata : downloadedPackageMetadata) {
-						packageMetadata.setOrigin(packageRepository.getId());
+					if (!packageRepository.isLocal()) {
+						Resource resource = resourceLoader.getResource(packageRepository.getUrl()
+								+ File.separator + "index.yml");
+						if (resource.exists()) {
+							logger.info("Downloading package metadata from " + resource);
+							File downloadedFile = new File(targetPath.toFile(), computeFilename(resource));
+							StreamUtils.copy(resource.getInputStream(), new FileOutputStream(downloadedFile));
+							List<File> downloadedFileAsList = new ArrayList<>();
+							downloadedFileAsList.add(downloadedFile);
+							List<PackageMetadata> downloadedPackageMetadata = deserializeFromIndexFiles(
+									downloadedFileAsList);
+							for (PackageMetadata packageMetadata : downloadedPackageMetadata) {
+								packageMetadata.setOrigin(packageRepository.getId());
+							}
+							finalMetadataList.addAll(downloadedPackageMetadata);
+						}
+						else {
+							logger.info("Package metadata index resource does not exist: "
+									+ resource.getDescription());
+						}
 					}
-					finalMetadataList.addAll(downloadedPackageMetadata);
 				}
 				catch (IOException e) {
 					throw new SkipperException("Could not process package file from " + packageRepository.getName(), e);

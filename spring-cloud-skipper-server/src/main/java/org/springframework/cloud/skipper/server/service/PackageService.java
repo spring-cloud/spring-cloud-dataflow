@@ -234,9 +234,13 @@ public class PackageService implements ResourceLoaderAware {
 
 	private Repository getRepositoryToUpload(String repoName) {
 		Repository localRepositoryToUpload = this.repositoryRepository.findByName(repoName);
-		// todo: should we enforce the existence of the local repository always?
-		// TODO: Verify the repo name set to package upload properties always belong to local
-		// repository type.
+		// TODO: Verify the repo name set to package upload properties always belong to local repository type.
+		if (localRepositoryToUpload == null) {
+			throw new SkipperException("Could not find local repository to upload to named " + repoName);
+		}
+		if (!localRepositoryToUpload.isLocal()) {
+			throw new SkipperException("Repository to upload to is not a local database hosted repository.");
+		}
 		return localRepositoryToUpload;
 	}
 
