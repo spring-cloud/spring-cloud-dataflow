@@ -376,7 +376,6 @@ public class StreamDefinitionController {
 
 		public Assembler(Page<StreamDefinition> streamDefinitions) {
 			super(StreamDefinitionController.class, StreamDefinitionResource.class);
-
 			streamDeploymentStates = StreamDefinitionController.this.streamService
 					.state(streamDefinitions.getContent());
 
@@ -397,10 +396,13 @@ public class StreamDefinitionController {
 		public StreamDefinitionResource instantiateResource(StreamDefinition stream) {
 			final StreamDefinitionResource resource = new StreamDefinitionResource(stream.getName(),
 					ArgumentSanitizer.sanitizeStream(stream.getDslText()));
-			final DeploymentStateResource deploymentStateResource = ControllerUtils
-					.mapState(streamDeploymentStates.get(stream));
-			resource.setStatus(deploymentStateResource.getKey());
-			resource.setStatusDescription(deploymentStateResource.getDescription());
+			DeploymentState deploymentState = streamDeploymentStates.get(stream);
+			if (deploymentState != null) {
+				final DeploymentStateResource deploymentStateResource = ControllerUtils
+						.mapState(deploymentState);
+				resource.setStatus(deploymentStateResource.getKey());
+				resource.setStatusDescription(deploymentStateResource.getDescription());
+			}
 			return resource;
 		}
 

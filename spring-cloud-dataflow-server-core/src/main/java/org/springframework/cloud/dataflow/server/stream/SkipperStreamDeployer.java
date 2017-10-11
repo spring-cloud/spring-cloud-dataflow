@@ -57,8 +57,10 @@ import org.springframework.cloud.skipper.domain.UploadRequest;
 import org.springframework.cloud.skipper.io.DefaultPackageWriter;
 import org.springframework.cloud.skipper.io.PackageWriter;
 import org.springframework.core.io.Resource;
+import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
+import org.springframework.web.client.HttpStatusCodeException;
 
 import static org.springframework.cloud.deployer.spi.app.AppDeployer.COUNT_PROPERTY_KEY;
 
@@ -115,12 +117,24 @@ public class SkipperStreamDeployer implements StreamDeployer {
 	public Map<StreamDefinition, DeploymentState> state(List<StreamDefinition> streamDefinitions) {
 		Map<StreamDefinition, DeploymentState> states = new HashMap<>();
 		for (StreamDefinition streamDefinition : streamDefinitions) {
-			Info info = this.skipperClient.status("my" + streamDefinition.getName());
-			List<AppStatus> appStatusList = deserializeAppStatus(info.getStatus().getPlatformStatus());
-			Set<DeploymentState> deploymentStateList = appStatusList.stream().map(appStatus -> appStatus.getState())
-					.collect(Collectors.toSet());
-			DeploymentState aggregateState = StreamDefinitionController.aggregateState(deploymentStateList);
-			states.put(streamDefinition, aggregateState);
+			try {
+				//todo: Better naming for the release name
+				Info info = this.skipperClient.status("my" + streamDefinition.getName());
+				List<AppStatus> appStatusList = deserializeAppStatus(info.getStatus().getPlatformStatus());
+				Set<DeploymentState> deploymentStateList = appStatusList.stream().map(appStatus -> appStatus.getState())
+						.collect(Collectors.toSet());
+				DeploymentState aggregateState = StreamDefinitionController.aggregateState(deploymentStateList);
+				states.put(streamDefinition, aggregateState);
+			}
+			// todo: Handle ReleaseNotFoundException at the server side
+			catch (HttpStatusCodeException e) {
+				if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
+					// ignore
+				}
+				else {
+					throw new RuntimeException(e);
+				}
+			}
 		}
 		return states;
 	}
@@ -174,6 +188,7 @@ public class SkipperStreamDeployer implements StreamDeployer {
 		installRequest.setPackageIdentifier(packageIdentifier);
 		InstallProperties installProperties = new InstallProperties();
 		installProperties.setPlatformName("default");
+		//todo: Better naming for the release name
 		installProperties.setReleaseName("my" + streamDeploymentRequest.getStreamName());
 		installProperties.setConfigValues(new ConfigValues());
 		installRequest.setInstallProperties(installProperties);
