@@ -35,6 +35,7 @@ import org.springframework.cloud.skipper.server.deployer.ReleaseAnalyzer;
 import org.springframework.cloud.skipper.server.deployer.ReleaseManager;
 import org.springframework.cloud.skipper.server.index.PackageMetadataResourceProcessor;
 import org.springframework.cloud.skipper.server.index.PackageSummaryResourceProcessor;
+import org.springframework.cloud.skipper.server.index.SkipperControllerResourceProcessor;
 import org.springframework.cloud.skipper.server.repository.AppDeployerDataRepository;
 import org.springframework.cloud.skipper.server.repository.DeployerRepository;
 import org.springframework.cloud.skipper.server.repository.PackageMetadataRepository;
@@ -58,6 +59,7 @@ import org.springframework.data.map.repository.config.EnableMapRepositories;
  * @author Mark Pollack
  * @author Ilayaperumal Gopinathan
  * @author Janne Valkealahti
+ * @author Gunnar Hillert
  */
 @Configuration
 @EnableConfigurationProperties({ SkipperServerProperties.class, CloudFoundryPlatformProperties.class,
@@ -76,6 +78,11 @@ public class SkipperServerConfiguration {
 	@Bean
 	public PackageMetadataResourceProcessor packageMetadataResourceProcessor() {
 		return new PackageMetadataResourceProcessor();
+	}
+
+	@Bean
+	public SkipperControllerResourceProcessor skipperControllerResourceProcessor() {
+		return new SkipperControllerResourceProcessor();
 	}
 
 	@Bean

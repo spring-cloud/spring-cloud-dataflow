@@ -31,6 +31,7 @@ import org.springframework.cloud.skipper.domain.UploadRequest;
 import org.springframework.cloud.skipper.server.service.PackageService;
 import org.springframework.cloud.skipper.server.service.ReleaseService;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -103,15 +104,13 @@ public class SkipperController {
 	}
 
 	@RequestMapping(path = "/manifest/{name}", method = RequestMethod.GET)
-	@ResponseStatus(HttpStatus.OK)
-	public String manifest(@PathVariable("name") String name) {
-		return this.releaseService.manifest(name);
+	public ResponseEntity<String> manifest(@PathVariable("name") String name) {
+		return new ResponseEntity<String>(this.releaseService.manifest(name), HttpStatus.OK);
 	}
 
 	@RequestMapping(path = "/manifest/{name}/{version}", method = RequestMethod.GET)
-	@ResponseStatus(HttpStatus.OK)
-	public String manifest(@PathVariable("name") String name, @PathVariable("version") int version) {
-		return this.releaseService.manifest(name, version);
+	public ResponseEntity<String> manifest(@PathVariable("name") String name, @PathVariable("version") int version) {
+		return new ResponseEntity<String>(this.releaseService.manifest(name, version), HttpStatus.OK);
 	}
 
 	@RequestMapping(path = "/upgrade", method = RequestMethod.POST)

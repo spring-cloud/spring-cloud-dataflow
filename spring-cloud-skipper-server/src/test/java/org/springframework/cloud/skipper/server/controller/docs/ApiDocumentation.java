@@ -22,7 +22,6 @@ import org.junit.Test;
 
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
-
 import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
 import static org.springframework.restdocs.headers.HeaderDocumentation.responseHeaders;
 import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.linkWithRel;
@@ -68,12 +67,28 @@ public class ApiDocumentation extends BaseDocumentation {
 	@Test
 	public void index() throws Exception {
 		this.mockMvc.perform(get("/")).andExpect(status().isOk()).andDo(this.documentationHandler.document(links(
+			linkWithRel("about").description("Provides meta information of the server"),
+			linkWithRel("upload").description("Upload a package"),
+			linkWithRel("install").description("Install a package"),
+			linkWithRel("install-with-package-id").description("Install a package by also providing the package id"),
 			linkWithRel("appDeployerDatas").description("Exposes App Deployer Data"),
 			linkWithRel("repositories").description("Exposes package repositories"),
 			linkWithRel("deployers").description("Exposes deployer"),
 			linkWithRel("releases").description("Exposes release information"),
 			linkWithRel("packageMetadata").description("Provides details for Package Metadata"),
-			linkWithRel("profile").description("Entrypoint to provide ALPS metadata defining simple descriptions of application-level semantics.")
+			linkWithRel("profile").description("Entrypoint to provide ALPS metadata defining simple descriptions of application-level semantics"),
+
+			linkWithRel("status").description("Status for a last known release version"),
+			linkWithRel("status-by-name-and-version").description("Status for a last known release version by release name"),
+
+			linkWithRel("manifest").description("Get a release's manifest"),
+			linkWithRel("manifest-by-name-and-version").description("Get a release's manifest by providing name and version"),
+			linkWithRel("upgrade").description("Upgrade a release"),
+			linkWithRel("rollback").description("Rollback the release to a previous or a specific release"),
+			linkWithRel("delete").description("Delete the release"),
+			linkWithRel("history").description("List the history of versions for a given release"),
+			linkWithRel("list").description("List the latest version of releases with status of deployed or failed"),
+			linkWithRel("list-by-name").description("List the latest version of releases by release name with status of deployed or failed")
 		)));
 	}
 }
