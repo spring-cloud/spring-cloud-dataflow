@@ -19,6 +19,7 @@ package org.springframework.cloud.dataflow.rest.client;
 import java.util.Map;
 
 import org.springframework.cloud.dataflow.rest.resource.StreamDefinitionResource;
+import org.springframework.cloud.skipper.domain.PackageIdentifier;
 import org.springframework.hateoas.PagedResources;
 
 /**
@@ -33,7 +34,7 @@ public interface StreamOperations {
 	/**
 	 * @return the list streams known to the system.
 	 */
-	public PagedResources<StreamDefinitionResource> list();
+	PagedResources<StreamDefinitionResource> list();
 
 	/**
 	 * Create a new stream, optionally deploying it.
@@ -43,7 +44,7 @@ public interface StreamOperations {
 	 * @param deploy whether to deploy the stream after creating its definition
 	 * @return the new stream definition
 	 */
-	public StreamDefinitionResource createStream(String name, String definition, boolean deploy);
+	StreamDefinitionResource createStream(String name, String definition, boolean deploy);
 
 	/**
 	 * Create a new stream, optionally deploying it, using skipper.
@@ -54,7 +55,7 @@ public interface StreamOperations {
 	 * @param useSkipper delegate the deployment of the stream to skipper
 	 * @return the new stream definition
 	 */
-	public StreamDefinitionResource createStream(String name, String definition, boolean deploy, boolean useSkipper);
+	StreamDefinitionResource createStream(String name, String definition, boolean deploy, boolean useSkipper);
 
 	/**
 	 * Deploy an already created stream.
@@ -62,30 +63,39 @@ public interface StreamOperations {
 	 * @param name the name of the stream
 	 * @param properties the deployment properties
 	 */
-	public void deploy(String name, Map<String, String> properties);
+	void deploy(String name, Map<String, String> properties);
 
 	/**
 	 * Undeploy a deployed stream, retaining its definition.
 	 *
 	 * @param name the name of the stream
 	 */
-	public void undeploy(String name);
+	void undeploy(String name);
 
 	/**
 	 * Undeploy all currently deployed streams.
 	 */
-	public void undeployAll();
+	void undeployAll();
 
 	/**
 	 * Destroy an existing stream.
 	 *
 	 * @param name the name of the stream
 	 */
-	public void destroy(String name);
+	void destroy(String name);
 
 	/**
 	 * Destroy all streams known to the system.
 	 */
-	public void destroyAll();
+	void destroyAll();
 
+	/**
+	 * Update the stream given its corresponding releaseName in Skipper using the specified
+	 * package and updated yaml config.
+	 * @param streamName the name of the stream to update
+	 * @param releaseName the corresponding release name of the stream in skipper
+	 * @param packageIdentifier the package that corresponds to this stream
+	 * @param yaml the values to change in the update
+	 */
+	void updateStream(String streamName, String releaseName, PackageIdentifier packageIdentifier, String yaml);
 }

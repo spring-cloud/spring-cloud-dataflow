@@ -36,4 +36,5 @@ public interface StreamService {
 	void deployStream(String name, Map<String, String> deploymentProperties);
 
 	Map<StreamDefinition, DeploymentState> state(List<StreamDefinition> content);
+
 }

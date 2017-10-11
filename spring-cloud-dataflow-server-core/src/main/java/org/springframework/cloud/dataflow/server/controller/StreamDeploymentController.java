@@ -20,21 +20,19 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.StreamPropertyKeys;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
+import org.springframework.cloud.dataflow.rest.UpdateStreamRequest;
 import org.springframework.cloud.dataflow.rest.resource.StreamDeploymentResource;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
 import org.springframework.cloud.dataflow.server.repository.DeploymentKey;
 import org.springframework.cloud.dataflow.server.repository.NoSuchStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
-import org.springframework.cloud.dataflow.server.service.StreamService;
+import org.springframework.cloud.dataflow.server.service.impl.DefaultStreamService;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.app.AppStatus;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
@@ -74,9 +72,7 @@ public class StreamDeploymentController {
 	 */
 	private static final String METRICS_TRIGGER_INCLUDES = "spring.metrics.export.triggers.application.includes";
 
-	private static Log logger = LogFactory.getLog(StreamDeploymentController.class);
-
-	private final StreamService streamService;
+	private final DefaultStreamService defaultStreamService;
 
 	/**
 	 * The repository this controller will use for stream CRUD operations.
@@ -120,26 +116,26 @@ public class StreamDeploymentController {
 	 * @param deployer the deployer this controller will use to deploy stream apps
 	 * @param metadataResolver the application metadata resolver
 	 * @param commonProperties common set of application properties
-	 * @param streamService the underlying StreamService to deploy the stream
+	 * @param defaultStreamService the underlying StreamService to deploy the stream
 	 */
 	public StreamDeploymentController(StreamDefinitionRepository repository,
 									  DeploymentIdRepository deploymentIdRepository, AppRegistry registry, AppDeployer deployer,
 									  ApplicationConfigurationMetadataResolver metadataResolver, CommonApplicationProperties commonProperties,
-									  StreamService streamService) {
+									  DefaultStreamService defaultStreamService) {
 		Assert.notNull(repository, "StreamDefinitionRepository must not be null");
 		Assert.notNull(deploymentIdRepository, "DeploymentIdRepository must not be null");
 		Assert.notNull(registry, "AppRegistry must not be null");
 		Assert.notNull(deployer, "AppDeployer must not be null");
 		Assert.notNull(metadataResolver, "MetadataResolver must not be null");
 		Assert.notNull(commonProperties, "CommonApplicationProperties must not be null");
-		Assert.notNull(streamService, "StreamDeploymentService must not be null");
+		Assert.notNull(defaultStreamService, "StreamDeploymentService must not be null");
 		this.repository = repository;
 		this.deploymentIdRepository = deploymentIdRepository;
 		this.registry = registry;
 		this.deployer = deployer;
 		this.whitelistProperties = new WhitelistProperties(metadataResolver);
 		this.commonApplicationProperties = commonProperties;
-		this.streamService = streamService;
+		this.defaultStreamService = defaultStreamService;
 	}
 
 	/**
@@ -175,7 +171,7 @@ public class StreamDeploymentController {
 	 *
 	 * @param name the name of an existing stream definition (required)
 	 * @param properties the deployment properties for the stream as a comma-delimited list of
-	 * key=value pairs
+	 * key=value pairsef
 	 */
 	@RequestMapping(value = "/{name}", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
@@ -186,7 +182,15 @@ public class StreamDeploymentController {
 			properties.put(SKIPPER_ENABLED_PROPERTY_KEY, "true");
 			properties.remove("useSkipper");
 		}
-		this.streamService.deployStream(name, properties);
+		this.defaultStreamService.deployStream(name, properties);
+	}
+
+	@RequestMapping(value = "/update/{name}", method = RequestMethod.POST)
+	@ResponseStatus(HttpStatus.CREATED)
+	public void update(@PathVariable("name") String name,
+			@RequestBody UpdateStreamRequest updateStreamRequest) {
+		this.defaultStreamService.upgradeStream(name, updateStreamRequest.getReleaseName(),
+				updateStreamRequest.getPackageIdentifier(), updateStreamRequest.getYaml());
 	}
 
 	/**

@@ -51,6 +51,7 @@ import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
+import org.springframework.cloud.skipper.domain.PackageIdentifier;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
@@ -415,11 +416,18 @@ public class DefaultStreamService implements StreamService {
 
 	@Override
 	public Map<StreamDefinition, DeploymentState> state(List<StreamDefinition> streamDefinitions) {
-
 		if (System.getProperty("USE_SKIPPER") != null) {
 			return this.skipperStreamDeployer.state(streamDefinitions);
 		} else {
 			return this.appDeployerStreamDeployer.state(streamDefinitions);
+		}
+	}
+
+	public void upgradeStream(String name, String releaseName, PackageIdentifier packageIdenfier, String yaml) {
+		if (System.getProperty("USE_SKIPPER") != null) {
+			this.skipperStreamDeployer.upgradeStream(name, releaseName, packageIdenfier, yaml);
+		} else {
+			throw new IllegalStateException("Can only update stream when using the Skipper deployer.");
 		}
 	}
 }
