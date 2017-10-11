@@ -219,6 +219,8 @@ public class ReleaseService {
 	}
 
 	public Release upgrade(UpgradeRequest upgradeRequest) {
+		Assert.notNull(upgradeRequest.getUpgradeProperties(), "UpgradeProperties can not be null");
+		Assert.notNull(upgradeRequest.getPackageIdentifier(), "PackageIdentifier can not be null");
 		UpgradeProperties upgradeProperties = upgradeRequest.getUpgradeProperties();
 		Release oldRelease = this.releaseRepository.findLatestRelease(upgradeProperties.getReleaseName());
 		PackageIdentifier packageIdentifier = upgradeRequest.getPackageIdentifier();
