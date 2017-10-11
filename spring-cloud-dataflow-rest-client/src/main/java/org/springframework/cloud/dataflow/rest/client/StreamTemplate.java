@@ -18,7 +18,9 @@ package org.springframework.cloud.dataflow.rest.client;
 
 import java.util.Map;
 
+import org.springframework.cloud.dataflow.rest.UpdateStreamRequest;
 import org.springframework.cloud.dataflow.rest.resource.StreamDefinitionResource;
+import org.springframework.cloud.skipper.domain.PackageIdentifier;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.ResourceSupport;
 import org.springframework.util.Assert;
@@ -114,5 +116,16 @@ public class StreamTemplate implements StreamOperations {
 	@Override
 	public void destroyAll() {
 		restTemplate.delete(definitionsLink.getHref());
+	}
+
+	@Override
+	public void updateStream(String streamName, String releaseName, PackageIdentifier packageIdentifier, String yaml) {
+		Assert.hasText(streamName, "Stream name cannot be null or empty");
+		Assert.notNull(packageIdentifier, "PackageIdentifier cannot be null");
+		Assert.hasText(packageIdentifier.getPackageName(), "Package Name cannot be null or empty");
+		Assert.hasText(releaseName, "Release name cannot be null or empty");
+		UpdateStreamRequest updateStreamRequest = new UpdateStreamRequest(releaseName, packageIdentifier, yaml);
+		String url = deploymentsLink.getHref() + "/update/" + streamName;
+		restTemplate.postForObject(url, updateStreamRequest, Object.class);
 	}
 }

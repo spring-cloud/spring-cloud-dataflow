@@ -20,14 +20,12 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.StreamPropertyKeys;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
+import org.springframework.cloud.dataflow.rest.UpdateStreamRequest;
 import org.springframework.cloud.dataflow.rest.resource.StreamDeploymentResource;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
@@ -71,7 +69,7 @@ public class StreamDeploymentController {
 	 * for metrics export.
 	 */
 	private static final String METRICS_TRIGGER_INCLUDES = "spring.metrics.export.triggers.application.includes";
-	private static Log logger = LogFactory.getLog(StreamDeploymentController.class);
+
 	private final DefaultStreamService defaultStreamService;
 
 	/**
@@ -118,9 +116,9 @@ public class StreamDeploymentController {
 	 * @param commonProperties common set of application properties
 	 */
 	public StreamDeploymentController(StreamDefinitionRepository repository,
-									  DeploymentIdRepository deploymentIdRepository, AppRegistry registry, AppDeployer deployer,
-									  ApplicationConfigurationMetadataResolver metadataResolver, CommonApplicationProperties commonProperties,
-									  DefaultStreamService defaultStreamService) {
+			DeploymentIdRepository deploymentIdRepository, AppRegistry registry, AppDeployer deployer,
+			ApplicationConfigurationMetadataResolver metadataResolver, CommonApplicationProperties commonProperties,
+			DefaultStreamService defaultStreamService) {
 		Assert.notNull(repository, "StreamDefinitionRepository must not be null");
 		Assert.notNull(deploymentIdRepository, "DeploymentIdRepository must not be null");
 		Assert.notNull(registry, "AppRegistry must not be null");
@@ -168,13 +166,21 @@ public class StreamDeploymentController {
 	 *
 	 * @param name the name of an existing stream definition (required)
 	 * @param properties the deployment properties for the stream as a comma-delimited list of
-	 * key=value pairs
+	 * key=value pairsef
 	 */
 	@RequestMapping(value = "/{name}", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
 	public void deploy(@PathVariable("name") String name,
-					   @RequestBody(required = false) Map<String, String> properties) {
+			@RequestBody(required = false) Map<String, String> properties) {
 		defaultStreamService.deployStream(name, properties);
+	}
+
+	@RequestMapping(value = "/update/{name}", method = RequestMethod.POST)
+	@ResponseStatus(HttpStatus.CREATED)
+	public void update(@PathVariable("name") String name,
+			@RequestBody UpdateStreamRequest updateStreamRequest) {
+		defaultStreamService.upgradeStream(name, updateStreamRequest.getReleaseName(),
+				updateStreamRequest.getPackageIdentifier(), updateStreamRequest.getYaml());
 	}
 
 	/**

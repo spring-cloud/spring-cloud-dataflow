@@ -53,6 +53,8 @@ import org.springframework.cloud.skipper.domain.Package;
 import org.springframework.cloud.skipper.domain.PackageIdentifier;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
 import org.springframework.cloud.skipper.domain.Template;
+import org.springframework.cloud.skipper.domain.UpgradeProperties;
+import org.springframework.cloud.skipper.domain.UpgradeRequest;
 import org.springframework.cloud.skipper.domain.UploadRequest;
 import org.springframework.cloud.skipper.io.DefaultPackageWriter;
 import org.springframework.cloud.skipper.io.PackageWriter;
@@ -277,4 +279,15 @@ public class SkipperStreamDeployer implements StreamDeployer {
 		return templateList;
 	}
 
+	public void upgradeStream(String name, String releaseName, PackageIdentifier packageIdentifier, String yaml) {
+		UpgradeRequest upgradeRequest = new UpgradeRequest();
+		upgradeRequest.setPackageIdentifier(packageIdentifier);
+		UpgradeProperties upgradeProperties = new UpgradeProperties();
+		ConfigValues configValues = new ConfigValues();
+		configValues.setRaw(yaml);
+		upgradeProperties.setConfigValues(configValues);
+		upgradeProperties.setReleaseName(releaseName);
+		upgradeRequest.setUpgradeProperties(upgradeProperties);
+		this.skipperClient.upgrade(upgradeRequest);
+	}
 }

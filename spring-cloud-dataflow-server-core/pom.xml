@@ -153,9 +153,14 @@
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-skipper-client</artifactId>
-			<version>1.0.0.BUILD-SNAPSHOT</version>
+			<version>${spring-cloud-skipper.version}</version>
 		</dependency>
-	</dependencies>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-skipper</artifactId>
+            <version>${spring-cloud-skipper.version}</version>
+        </dependency>
+    </dependencies>
 	<build>
 		<resources>
 			<resource>

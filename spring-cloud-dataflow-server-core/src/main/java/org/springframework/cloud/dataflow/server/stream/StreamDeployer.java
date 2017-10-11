@@ -36,4 +36,5 @@ public interface StreamDeployer {
 	String calculateStreamState(String streamName);
 
 	Map<StreamDefinition, DeploymentState> state(List<StreamDefinition> content);
+
 }
