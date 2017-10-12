@@ -74,6 +74,7 @@ import org.springframework.cloud.dataflow.server.controller.security.SecurityCon
 import org.springframework.cloud.dataflow.server.controller.support.MetricStore;
 import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
+import org.springframework.cloud.dataflow.server.repository.StreamDeploymentRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.TaskJobService;
 import org.springframework.cloud.dataflow.server.service.TaskService;
@@ -153,50 +154,54 @@ public class DataFlowControllerAutoConfiguration {
 	}
 
 	@Bean
-	@ConditionalOnBean(StreamDefinitionRepository.class)
+	@ConditionalOnBean({StreamDefinitionRepository.class, StreamDeploymentRepository.class})
 	public StreamDeploymentController streamDeploymentController(StreamDefinitionRepository repository,
 			DeploymentIdRepository deploymentIdRepository, AppRegistry registry, AppDeployer deployer,
 			ApplicationConfigurationMetadataResolver metadataResolver, CommonApplicationProperties appsProperties,
-			DefaultStreamService defaultStreamService) {
+			StreamDeploymentRepository streamDeploymentRepository, DefaultStreamService defaultStreamService) {
 		return new StreamDeploymentController(repository, deploymentIdRepository, registry, deployer, metadataResolver,
-				appsProperties, defaultStreamService);
+				appsProperties, streamDeploymentRepository, defaultStreamService);
 	}
 
 	@Bean
-	@ConditionalOnBean(StreamDefinitionRepository.class)
+	@ConditionalOnBean({StreamDefinitionRepository.class, StreamDeploymentRepository.class})
 	public SkipperClient skipperClient(SkipperClientProperties skipperClientProperties) {
 		logger.info("Skipper URI = [" + skipperClientProperties.getUri() + "]");
 		return SkipperClient.create(skipperClientProperties.getUri());
 	}
 
 	@Bean
-	@ConditionalOnBean(StreamDefinitionRepository.class)
+	@ConditionalOnBean({StreamDefinitionRepository.class, StreamDeploymentRepository.class})
 	public DefaultStreamService streamDeploymentService(AppRegistry appRegistry,
 			CommonApplicationProperties commonApplicationProperties,
 			ApplicationConfigurationMetadataResolver applicationConfigurationMetadataResolver,
 			StreamDefinitionRepository streamDefinitionRepository,
+			StreamDeploymentRepository streamDeploymentRepository,
 			AppDeployerStreamDeployer appDeployerStreamDeployer,
 			SkipperStreamDeployer skipperStreamDeployer) {
 		return new DefaultStreamService(appRegistry,
 				commonApplicationProperties,
 				applicationConfigurationMetadataResolver,
 				streamDefinitionRepository,
+				streamDeploymentRepository,
 				appDeployerStreamDeployer,
 				skipperStreamDeployer);
 	}
 
 	@Bean
-	@ConditionalOnBean(StreamDefinitionRepository.class)
+	@ConditionalOnBean({StreamDefinitionRepository.class, StreamDeploymentRepository.class})
 	public AppDeployerStreamDeployer appDeployerStreamDeployer(AppDeployer appDeployer,
 			DeploymentIdRepository deploymentIdRepository,
-			StreamDefinitionRepository streamDefinitionRepository) {
-		return new AppDeployerStreamDeployer(appDeployer, deploymentIdRepository, streamDefinitionRepository);
+			StreamDefinitionRepository streamDefinitionRepository,
+			StreamDeploymentRepository streamDeploymentRepository) {
+		return new AppDeployerStreamDeployer(appDeployer, deploymentIdRepository, streamDefinitionRepository,
+				streamDeploymentRepository);
 	}
 
 	@Bean
-	@ConditionalOnBean(StreamDefinitionRepository.class)
-	public SkipperStreamDeployer skipperStreamDeployer(SkipperClient skipperClient) {
-		return new SkipperStreamDeployer(skipperClient);
+	@ConditionalOnBean({StreamDefinitionRepository.class, StreamDeploymentRepository.class})
+	public SkipperStreamDeployer skipperStreamDeployer(SkipperClient skipperClient, StreamDeploymentRepository streamDeploymentRepository) {
+		return new SkipperStreamDeployer(skipperClient, streamDeploymentRepository);
 	}
 
 	@Bean

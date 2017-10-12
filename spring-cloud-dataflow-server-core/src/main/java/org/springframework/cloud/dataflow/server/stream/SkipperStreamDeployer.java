@@ -38,7 +38,9 @@ import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 
 import org.springframework.cloud.dataflow.core.StreamDefinition;
+import org.springframework.cloud.dataflow.core.StreamDeployment;
 import org.springframework.cloud.dataflow.server.controller.StreamDefinitionController;
+import org.springframework.cloud.dataflow.server.repository.StreamDeploymentRepository;
 import org.springframework.cloud.deployer.resource.maven.MavenResource;
 import org.springframework.cloud.deployer.spi.app.AppInstanceStatus;
 import org.springframework.cloud.deployer.spi.app.AppStatus;
@@ -68,7 +70,9 @@ import static org.springframework.cloud.deployer.spi.app.AppDeployer.COUNT_PROPE
 
 /**
  * Delegates to Skipper to deploy the stream.
+ *
  * @author Mark Pollack
+ * @author Ilayaperumal Gopinathan
  */
 public class SkipperStreamDeployer implements StreamDeployer {
 
@@ -80,9 +84,13 @@ public class SkipperStreamDeployer implements StreamDeployer {
 
 	private final SkipperClient skipperClient;
 
-	public SkipperStreamDeployer(SkipperClient skipperClient) {
+	private final StreamDeploymentRepository streamDeploymentRepository;
+
+	public SkipperStreamDeployer(SkipperClient skipperClient, StreamDeploymentRepository streamDeploymentRepository) {
 		Assert.notNull(skipperClient, "SkipperClient can not be null");
+		Assert.notNull(streamDeploymentRepository, "StreamDeploymentRepository can not be null");
 		this.skipperClient = skipperClient;
+		this.streamDeploymentRepository = streamDeploymentRepository;
 	}
 
 	public static String getResourceVersion(Resource resource) {
@@ -184,18 +192,23 @@ public class SkipperStreamDeployer implements StreamDeployer {
 		// Install the package
 		InstallRequest installRequest = new InstallRequest();
 		PackageIdentifier packageIdentifier = new PackageIdentifier();
-		packageIdentifier.setPackageName(streamDeploymentRequest.getStreamName());
+		String streamName = streamDeploymentRequest.getStreamName();
+		packageIdentifier.setPackageName(streamName);
 		packageIdentifier.setPackageVersion("1.0.0");
-		packageIdentifier.setRepositoryName("local");
+		String repoName = "local";
+		packageIdentifier.setRepositoryName(repoName);
 		installRequest.setPackageIdentifier(packageIdentifier);
 		InstallProperties installProperties = new InstallProperties();
 		installProperties.setPlatformName("default");
 		//todo: Better naming for the release name
-		installProperties.setReleaseName("my" + streamDeploymentRequest.getStreamName());
+		String releaseName = "my" + streamName;
+		installProperties.setReleaseName(releaseName);
 		installProperties.setConfigValues(new ConfigValues());
 		installRequest.setInstallProperties(installProperties);
+		StreamDeployment streamDeployment = new StreamDeployment(streamName, StreamDeployers.skipper.name(),  streamName,
+				releaseName, repoName);
 		skipperClient.install(installRequest);
-
+		this.streamDeploymentRepository.save(streamDeployment);
 		// TODO store releasename in deploymentIdRepository...
 		// this.deploymentIdRepository.save(DeploymentKey.forStreamAppDefinition(streamAppDefinition),
 		// id);
