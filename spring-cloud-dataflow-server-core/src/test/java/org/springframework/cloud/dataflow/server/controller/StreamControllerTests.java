@@ -43,6 +43,7 @@ import org.springframework.cloud.dataflow.server.repository.DeploymentKey;
 import org.springframework.cloud.dataflow.server.repository.InMemoryDeploymentIdRepository;
 import org.springframework.cloud.dataflow.server.repository.InMemoryStreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
+import org.springframework.cloud.dataflow.server.repository.StreamDeploymentRepository;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultStreamService;
 import org.springframework.cloud.deployer.resource.maven.MavenProperties;
 import org.springframework.cloud.deployer.resource.maven.MavenResource;
@@ -124,6 +125,9 @@ public class StreamControllerTests {
 	private CommonApplicationProperties appsProperties;
 
 	@Autowired
+	private StreamDeploymentRepository streamDeploymentRepository;
+
+	@Autowired
 	private DefaultStreamService defaultStreamService;
 
 	@Before
@@ -143,7 +147,8 @@ public class StreamControllerTests {
 	public void testConstructorMissingRepository() {
 		StreamDeploymentController deploymentController = new StreamDeploymentController(
 				new InMemoryStreamDefinitionRepository(), new InMemoryDeploymentIdRepository(), appRegistry,
-				appDeployer, metadataResolver, new CommonApplicationProperties(), defaultStreamService);
+				appDeployer, metadataResolver, new CommonApplicationProperties(), streamDeploymentRepository,
+				defaultStreamService);
 		new StreamDefinitionController(null, null, deploymentController, appDeployer, appRegistry, defaultStreamService);
 	}
 
@@ -157,7 +162,8 @@ public class StreamControllerTests {
 	public void testConstructorMissingDeployer() {
 		StreamDeploymentController deploymentController = new StreamDeploymentController(
 				new InMemoryStreamDefinitionRepository(), new InMemoryDeploymentIdRepository(), appRegistry,
-				appDeployer, metadataResolver, new CommonApplicationProperties(), defaultStreamService);
+				appDeployer, metadataResolver, new CommonApplicationProperties(), streamDeploymentRepository,
+				defaultStreamService);
 		new StreamDefinitionController(new InMemoryStreamDefinitionRepository(), new InMemoryDeploymentIdRepository(),
 				deploymentController, null, appRegistry, defaultStreamService);
 	}

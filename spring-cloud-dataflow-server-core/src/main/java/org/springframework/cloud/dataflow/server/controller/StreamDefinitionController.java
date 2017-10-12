@@ -285,10 +285,10 @@ public class StreamDefinitionController {
 	@RequestMapping(value = "/{name}", method = RequestMethod.DELETE)
 	@ResponseStatus(HttpStatus.OK)
 	public void delete(@PathVariable("name") String name) {
-		if (repository.findOne(name) == null) {
+		if (this.repository.findOne(name) == null) {
 			throw new NoSuchStreamDefinitionException(name);
 		}
-		deploymentController.undeploy(name);
+		this.deploymentController.undeploy(name);
 		this.repository.delete(name);
 	}
 

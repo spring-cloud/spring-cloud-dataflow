@@ -31,10 +31,12 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
+import org.springframework.cloud.dataflow.core.StreamDeployment;
 import org.springframework.cloud.dataflow.server.controller.StreamDefinitionController;
 import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
 import org.springframework.cloud.dataflow.server.repository.DeploymentKey;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
+import org.springframework.cloud.dataflow.server.repository.StreamDeploymentRepository;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.app.AppStatus;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
@@ -46,6 +48,7 @@ import org.springframework.util.Assert;
  * Uses an AppDeployer instance to deploy the stream.
  *
  * @author Mark Pollack
+ * @author Ilayaperumal Gopinathan
  */
 public class AppDeployerStreamDeployer implements StreamDeployer {
 
@@ -69,19 +72,26 @@ public class AppDeployerStreamDeployer implements StreamDeployer {
 	 */
 	private final StreamDefinitionRepository streamDefinitionRepository;
 
+	/**
+	 * The repository for Stream deployments
+	 */
+	private final StreamDeploymentRepository streamDeploymentRepository;
+
 	public AppDeployerStreamDeployer(AppDeployer appDeployer, DeploymentIdRepository deploymentIdRepository,
-			StreamDefinitionRepository streamDefinitionRepository) {
+			StreamDefinitionRepository streamDefinitionRepository,
+			StreamDeploymentRepository streamDeploymentRepository) {
 		Assert.notNull(appDeployer, "AppDeployer must not be null");
 		Assert.notNull(deploymentIdRepository, "DeploymentIdRepository must not be null");
 		Assert.notNull(streamDefinitionRepository, "StreamDefinitionRepository must not be null");
+		Assert.notNull(streamDeploymentRepository, "StreamDeploymentRepository must not be null");
 		this.appDeployer = appDeployer;
 		this.deploymentIdRepository = deploymentIdRepository;
 		this.streamDefinitionRepository = streamDefinitionRepository;
+		this.streamDeploymentRepository = streamDeploymentRepository;
 	}
 
 	@Override
 	public void deployStream(StreamDeploymentRequest streamDeploymentRequest) {
-
 		for (AppDeploymentRequest appDeploymentRequest : streamDeploymentRequest.getAppDeploymentRequests()) {
 			try {
 				logger.info(String.format(deployLoggingString, appDeploymentRequest.getDefinition().getName(),
@@ -103,6 +113,9 @@ public class AppDeployerStreamDeployer implements StreamDeployer {
 						e);
 			}
 		}
+		StreamDeployment streamDeployment = new StreamDeployment(streamDeploymentRequest.getStreamName(),
+				StreamDeployers.appdeployer.name(), null, null, null);
+		this.streamDeploymentRepository.save(streamDeployment);
 	}
 
 	@Override

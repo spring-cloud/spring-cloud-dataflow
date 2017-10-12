@@ -32,6 +32,7 @@ import org.springframework.cloud.dataflow.server.repository.DeploymentIdReposito
 import org.springframework.cloud.dataflow.server.repository.DeploymentKey;
 import org.springframework.cloud.dataflow.server.repository.NoSuchStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
+import org.springframework.cloud.dataflow.server.repository.StreamDeploymentRepository;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultStreamService;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.app.AppStatus;
@@ -102,6 +103,11 @@ public class StreamDeploymentController {
 	private final CommonApplicationProperties commonApplicationProperties;
 
 	/**
+	 * The respository for the stream deployments.
+	 */
+	private final StreamDeploymentRepository streamDeploymentRepository;
+
+	/**
 	 * Create a {@code StreamDeploymentController} that delegates
 	 * <ul>
 	 * <li>CRUD operations to the provided {@link StreamDefinitionRepository}</li>
@@ -116,18 +122,20 @@ public class StreamDeploymentController {
 	 * @param deployer the deployer this controller will use to deploy stream apps
 	 * @param metadataResolver the application metadata resolver
 	 * @param commonProperties common set of application properties
+	 * @param streamDeploymentRepository the repository for the stream deployments
 	 * @param defaultStreamService the underlying StreamService to deploy the stream
 	 */
 	public StreamDeploymentController(StreamDefinitionRepository repository,
-									DeploymentIdRepository deploymentIdRepository, AppRegistry registry, AppDeployer deployer,
-									ApplicationConfigurationMetadataResolver metadataResolver, CommonApplicationProperties commonProperties,
-									DefaultStreamService defaultStreamService) {
+			DeploymentIdRepository deploymentIdRepository, AppRegistry registry, AppDeployer deployer,
+			ApplicationConfigurationMetadataResolver metadataResolver, CommonApplicationProperties commonProperties,
+			StreamDeploymentRepository streamDeploymentRepository, DefaultStreamService defaultStreamService) {
 		Assert.notNull(repository, "StreamDefinitionRepository must not be null");
 		Assert.notNull(deploymentIdRepository, "DeploymentIdRepository must not be null");
 		Assert.notNull(registry, "AppRegistry must not be null");
 		Assert.notNull(deployer, "AppDeployer must not be null");
 		Assert.notNull(metadataResolver, "MetadataResolver must not be null");
 		Assert.notNull(commonProperties, "CommonApplicationProperties must not be null");
+		Assert.notNull(repository, "StreamDefinitionRepository must not be null");
 		Assert.notNull(defaultStreamService, "StreamDeploymentService must not be null");
 		this.repository = repository;
 		this.deploymentIdRepository = deploymentIdRepository;
@@ -135,6 +143,7 @@ public class StreamDeploymentController {
 		this.deployer = deployer;
 		this.whitelistProperties = new WhitelistProperties(metadataResolver);
 		this.commonApplicationProperties = commonProperties;
+		this.streamDeploymentRepository = streamDeploymentRepository;
 		this.defaultStreamService = defaultStreamService;
 	}
 
@@ -229,6 +238,7 @@ public class StreamDeploymentController {
 				this.deploymentIdRepository.delete(key);
 			}
 		}
+		this.streamDeploymentRepository.delete(stream.getName());
 	}
 
 }

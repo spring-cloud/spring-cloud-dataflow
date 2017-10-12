@@ -23,7 +23,9 @@ import org.springframework.cloud.dataflow.completion.RecoveryStrategy;
 import org.springframework.cloud.dataflow.completion.StreamCompletionProvider;
 import org.springframework.cloud.dataflow.server.completion.TapOnDestinationRecoveryStrategy;
 import org.springframework.cloud.dataflow.server.repository.RdbmsStreamDefinitionRepository;
+import org.springframework.cloud.dataflow.server.repository.RdbmsStreamDeploymentRepository;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
+import org.springframework.cloud.dataflow.server.repository.StreamDeploymentRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -38,6 +40,12 @@ public class StreamConfiguration {
 	@ConditionalOnMissingBean
 	public StreamDefinitionRepository streamDefinitionRepository(DataSource dataSource) {
 		return new RdbmsStreamDefinitionRepository(dataSource);
+	}
+
+	@Bean
+	@ConditionalOnMissingBean
+	public StreamDeploymentRepository streamDeploymentRepository(DataSource dataSource) {
+		return new RdbmsStreamDeploymentRepository(dataSource);
 	}
 
 	@Bean

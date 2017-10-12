@@ -32,6 +32,7 @@ import org.springframework.cloud.dataflow.core.BindingPropertyKeys;
 import org.springframework.cloud.dataflow.core.DataFlowPropertyKeys;
 import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
+import org.springframework.cloud.dataflow.core.StreamDeployment;
 import org.springframework.cloud.dataflow.core.StreamPropertyKeys;
 import org.springframework.cloud.dataflow.registry.AppRegistration;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
@@ -42,10 +43,13 @@ import org.springframework.cloud.dataflow.server.controller.StreamAlreadyDeploye
 import org.springframework.cloud.dataflow.server.controller.StreamAlreadyDeployingException;
 import org.springframework.cloud.dataflow.server.controller.WhitelistProperties;
 import org.springframework.cloud.dataflow.server.repository.NoSuchStreamDefinitionException;
+import org.springframework.cloud.dataflow.server.repository.NoSuchStreamDeploymentException;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
+import org.springframework.cloud.dataflow.server.repository.StreamDeploymentRepository;
 import org.springframework.cloud.dataflow.server.service.StreamService;
 import org.springframework.cloud.dataflow.server.stream.AppDeployerStreamDeployer;
 import org.springframework.cloud.dataflow.server.stream.SkipperStreamDeployer;
+import org.springframework.cloud.dataflow.server.stream.StreamDeployers;
 import org.springframework.cloud.dataflow.server.stream.StreamDeploymentRequest;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
@@ -67,6 +71,7 @@ import static org.springframework.cloud.deployer.spi.app.AppDeployer.COUNT_PROPE
  * use {@link AppDeployerStreamDeployer}.
  * </p>
  * @author Mark Pollack
+ * @author Ilayaperumal Gopinathan
  */
 @Service
 public class DefaultStreamService implements StreamService {
@@ -89,6 +94,8 @@ public class DefaultStreamService implements StreamService {
 	 */
 	private final StreamDefinitionRepository streamDefinitionRepository;
 
+	private final StreamDeploymentRepository streamDeploymentRepository;
+
 	/**
 	 * The app registry this controller will use to lookup apps.
 	 */
@@ -107,18 +114,21 @@ public class DefaultStreamService implements StreamService {
 			CommonApplicationProperties commonApplicationProperties,
 			ApplicationConfigurationMetadataResolver metadataResolver,
 			StreamDefinitionRepository streamDefinitionRepository,
+			StreamDeploymentRepository streamDeploymentRepository,
 			AppDeployerStreamDeployer appDeployerStreamDeployer,
 			SkipperStreamDeployer skipperStreamDeployer) {
 		Assert.notNull(appRegistry, "AppRegistry must not be null");
 		Assert.notNull(commonApplicationProperties, "CommonApplicationProperties must not be null");
 		Assert.notNull(metadataResolver, "MetadataResolver must not be null");
 		Assert.notNull(streamDefinitionRepository, "StreamDefinitionRepository must not be null");
+		Assert.notNull(streamDeploymentRepository, "StreamDeploymentRepository must not be null");
 		Assert.notNull(appDeployerStreamDeployer, "AppDeployerStreamDeployer must not be null");
 		Assert.notNull(skipperStreamDeployer, "SkipperStreamDeployer must not be null");
 		this.appRegistry = appRegistry;
 		this.commonApplicationProperties = commonApplicationProperties;
 		this.whitelistProperties = new WhitelistProperties(metadataResolver);
 		this.streamDefinitionRepository = streamDefinitionRepository;
+		this.streamDeploymentRepository = streamDeploymentRepository;
 		this.appDeployerStreamDeployer = appDeployerStreamDeployer;
 		this.skipperStreamDeployer = skipperStreamDeployer;
 	}
@@ -416,17 +426,45 @@ public class DefaultStreamService implements StreamService {
 
 	@Override
 	public Map<StreamDefinition, DeploymentState> state(List<StreamDefinition> streamDefinitions) {
-		if (System.getProperty("USE_SKIPPER") != null) {
-			return this.skipperStreamDeployer.state(streamDefinitions);
-		} else {
-			return this.appDeployerStreamDeployer.state(streamDefinitions);
+		Map<StreamDefinition, DeploymentState> states = new HashMap<>();
+		List<StreamDefinition> skipperStreams = new ArrayList<>();
+		List<StreamDefinition> appDeployerStreams = new ArrayList<>();
+		for (StreamDefinition streamDefinition: streamDefinitions) {
+			StreamDeployment streamDeployment = this.streamDeploymentRepository.findOne(streamDefinition.getName());
+			if (streamDeployment == null) {
+				states.put(streamDefinition, DeploymentState.unknown);
+			}
+			else {
+				if (streamDeployment.getDeployerName().equals(StreamDeployers.skipper.name())) {
+					skipperStreams.add(streamDefinition);
+				}
+				else if (streamDeployment.getDeployerName().equals(StreamDeployers.appdeployer.name())){
+					appDeployerStreams.add(streamDefinition);
+				}
+				else {
+					logger.error("Unknown deployer " + streamDeployment.getDeployerName() +
+							" for " + streamDeployment.getStreamName());
+				}
+			}
 		}
+		if (!skipperStreams.isEmpty()) {
+			states.putAll(this.skipperStreamDeployer.state(skipperStreams));
+		}
+		if (!appDeployerStreams.isEmpty()) {
+			states.putAll(this.appDeployerStreamDeployer.state(appDeployerStreams));
+		}
+		return states;
 	}
 
-	public void upgradeStream(String name, String releaseName, PackageIdentifier packageIdenfier, String yaml) {
-		if (System.getProperty("USE_SKIPPER") != null) {
-			this.skipperStreamDeployer.upgradeStream(name, releaseName, packageIdenfier, yaml);
-		} else {
+	public void upgradeStream(String streamName, String releaseName, PackageIdentifier packageIdenfier, String yaml) {
+		StreamDeployment streamDeployment = this.streamDeploymentRepository.findOne(streamName);
+		if (streamDeployment == null) {
+			throw new NoSuchStreamDeploymentException(streamName);
+		}
+		if (streamDeployment.getDeployerName().equals(StreamDeployers.skipper.name())) {
+			this.skipperStreamDeployer.upgradeStream(streamName, releaseName, packageIdenfier, yaml);
+		}
+		else {
 			throw new IllegalStateException("Can only update stream when using the Skipper deployer.");
 		}
 	}
