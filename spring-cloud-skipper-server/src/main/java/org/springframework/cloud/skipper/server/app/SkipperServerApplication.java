@@ -13,24 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.cloud.skipper.server;
+package org.springframework.cloud.skipper.server.app;
 
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryDeployerAutoConfiguration;
 import org.springframework.cloud.deployer.spi.kubernetes.KubernetesAutoConfiguration;
 import org.springframework.cloud.deployer.spi.local.LocalDeployerAutoConfiguration;
-import org.springframework.data.map.repository.config.EnableMapRepositories;
+import org.springframework.cloud.skipper.server.EnableSkipperServer;
 
-@SpringBootApplication
-@EnableAutoConfiguration(exclude = { CloudFoundryDeployerAutoConfiguration.class,
-		LocalDeployerAutoConfiguration.class, KubernetesAutoConfiguration.class })
-@EnableMapRepositories
+@SpringBootApplication(exclude = { CloudFoundryDeployerAutoConfiguration.class, LocalDeployerAutoConfiguration.class,
+		KubernetesAutoConfiguration.class })
+@EnableSkipperServer
 public class SkipperServerApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(SkipperServerApplication.class, args);
 	}
-
 }

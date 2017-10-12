@@ -28,7 +28,15 @@ import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
+import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
+import org.springframework.boot.autoconfigure.jdbc.EmbeddedDataSourceConfiguration;
+import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cloud.skipper.server.config.SkipperServerConfiguration;
+import org.springframework.cloud.skipper.server.templates.PackageTemplateTests.TestConfig;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.core.io.Resource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.StreamUtils;
@@ -36,11 +44,12 @@ import org.springframework.util.StreamUtils;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.entry;
 
+
 /**
  * @author Mark Pollack
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest
+@SpringBootTest(classes = TestConfig.class)
 public class PackageTemplateTests {
 
 	private final Logger logger = LoggerFactory.getLogger(PackageTemplateTests.class);
@@ -72,5 +81,12 @@ public class PackageTemplateTests {
 		Map deploymentProperties = (Map) deploymentMap.get("deploymentProperties");
 		assertThat(deploymentProperties).contains(entry("app.time.producer.partitionKeyExpression", "payload"),
 				entry("app.log.spring.cloud.stream.bindings.input.consumer.maxAttempts", 5));
+	}
+
+	@Configuration
+	@ImportAutoConfiguration(classes = { JacksonAutoConfiguration.class, EmbeddedDataSourceConfiguration.class,
+			HibernateJpaAutoConfiguration.class })
+	@Import(SkipperServerConfiguration.class)
+	static class TestConfig {
 	}
 }

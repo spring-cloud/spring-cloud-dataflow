@@ -21,17 +21,26 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
+import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
+import org.springframework.boot.autoconfigure.jdbc.EmbeddedDataSourceConfiguration;
+import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cloud.skipper.server.config.SkipperServerConfiguration;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.core.io.UrlResource;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import static org.springframework.cloud.skipper.server.service.PackageMetadataServiceTests.TestConfig;
+
 /**
  * @author Mark Pollack
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest
+@SpringBootTest(classes = TestConfig.class)
 public class PackageMetadataServiceTests {
 
 	@Autowired
@@ -54,5 +63,12 @@ public class PackageMetadataServiceTests {
 		urlResource = new UrlResource("http://www.example.com/index.yml");
 		filename = packageMetadataService.computeFilename(urlResource);
 		assertThat(filename).isEqualTo("www.example.com_index.yml");
+	}
+
+	@Configuration
+	@ImportAutoConfiguration(classes = { JacksonAutoConfiguration.class, EmbeddedDataSourceConfiguration.class,
+			HibernateJpaAutoConfiguration.class })
+	@Import(SkipperServerConfiguration.class)
+	static class TestConfig {
 	}
 }

@@ -166,6 +166,7 @@
                 <filtering>true</filtering>
                 <includes>
                     <include>application.yml</include>
+                    <include>META-INF/spring.factories</include>
                 </includes>
             </resource>
         </resources>

@@ -28,10 +28,13 @@ import org.springframework.cloud.skipper.io.DefaultPackageReader;
 import org.springframework.cloud.skipper.io.DefaultPackageWriter;
 import org.springframework.cloud.skipper.io.PackageReader;
 import org.springframework.cloud.skipper.io.PackageWriter;
+import org.springframework.cloud.skipper.server.controller.SkipperController;
 import org.springframework.cloud.skipper.server.deployer.AppDeployerReleaseManager;
 import org.springframework.cloud.skipper.server.deployer.AppDeploymentRequestFactory;
 import org.springframework.cloud.skipper.server.deployer.ReleaseAnalyzer;
 import org.springframework.cloud.skipper.server.deployer.ReleaseManager;
+import org.springframework.cloud.skipper.server.index.PackageMetadataResourceProcessor;
+import org.springframework.cloud.skipper.server.index.PackageSummaryResourceProcessor;
 import org.springframework.cloud.skipper.server.repository.AppDeployerDataRepository;
 import org.springframework.cloud.skipper.server.repository.DeployerRepository;
 import org.springframework.cloud.skipper.server.repository.PackageMetadataRepository;
@@ -46,19 +49,39 @@ import org.springframework.cloud.skipper.server.service.RepositoryInitialization
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.data.map.repository.config.EnableMapRepositories;
 
 /**
  * Main configuration class for the server.
  *
  * @author Mark Pollack
  * @author Ilayaperumal Gopinathan
+ * @author Janne Valkealahti
  */
 @Configuration
 @EnableConfigurationProperties({ SkipperServerProperties.class, CloudFoundryPlatformProperties.class,
 		LocalPlatformProperties.class, KubernetesPlatformProperties.class,
 		MavenConfigurationProperties.class })
 @EntityScan({"org.springframework.cloud.skipper.domain", "org.springframework.cloud.skipper.server.domain"})
+@EnableMapRepositories(basePackages = "org.springframework.cloud.skipper.server.repository")
+@EnableJpaRepositories(basePackages = "org.springframework.cloud.skipper.server.repository")
 public class SkipperServerConfiguration {
+
+	@Bean
+	public PackageSummaryResourceProcessor packageSummaryResourceProcessor() {
+		return new PackageSummaryResourceProcessor();
+	}
+
+	@Bean
+	public PackageMetadataResourceProcessor packageMetadataResourceProcessor() {
+		return new PackageMetadataResourceProcessor();
+	}
+
+	@Bean
+	public SkipperController skipperController(ReleaseService releaseService, PackageService packageService) {
+		return new SkipperController(releaseService, packageService);
+	}
 
 	// Services
 

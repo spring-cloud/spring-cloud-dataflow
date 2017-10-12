@@ -26,11 +26,18 @@ import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
+import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
+import org.springframework.boot.autoconfigure.jdbc.EmbeddedDataSourceConfiguration;
+import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.skipper.domain.ConfigValues;
 import org.springframework.cloud.skipper.domain.Package;
 import org.springframework.cloud.skipper.io.PackageReader;
 import org.springframework.cloud.skipper.server.TestResourceUtils;
+import org.springframework.cloud.skipper.server.config.SkipperServerConfiguration;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -38,11 +45,13 @@ import org.springframework.util.StreamUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import static org.springframework.cloud.skipper.server.service.ConfigValueUtilsTests.TestConfig;
+
 /**
  * @author Mark Pollack
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest
+@SpringBootTest(classes  = TestConfig.class)
 public class ConfigValueUtilsTests {
 
 	@Autowired
@@ -74,5 +83,12 @@ public class ConfigValueUtilsTests {
 				TestResourceUtils.qualifiedResource(getClass(), "merged.yaml").getInputStream(),
 				Charset.defaultCharset());
 		assertThat(mergedYaml).isEqualTo(expectedYaml);
+	}
+
+	@Configuration
+	@ImportAutoConfiguration(classes = { JacksonAutoConfiguration.class, EmbeddedDataSourceConfiguration.class,
+			HibernateJpaAutoConfiguration.class })
+	@Import(SkipperServerConfiguration.class)
+	static class TestConfig {
 	}
 }
