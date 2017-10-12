@@ -18,6 +18,10 @@ package org.springframework.cloud.dataflow.server.local;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.IntStream;
 
 import org.springframework.util.ReflectionUtils;
 
@@ -93,6 +97,16 @@ public class TestUtils {
 					"Cannot find method '" + method + "' in the class hierarchy of " + target.getClass());
 		method.setAccessible(true);
 		return (T) ReflectionUtils.invokeMethod(method, target, args);
+	}
+
+	public static Map<String, String> toImmutableMap(
+			String... entries) {
+		if(entries.length % 2 == 1)
+			throw new IllegalArgumentException("Invalid entries");
+		return Collections.unmodifiableMap(IntStream.range(0, entries.length / 2).map(i -> i * 2)
+				.collect(HashMap::new,
+						(m, i) -> m.put(entries[i], entries[i + 1]),
+						Map::putAll));
 	}
 
 }

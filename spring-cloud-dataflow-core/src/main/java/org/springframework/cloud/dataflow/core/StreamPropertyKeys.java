@@ -42,5 +42,5 @@ public class StreamPropertyKeys {
 	 */
 	public static final String INSTANCE_COUNT = PREFIX + "instanceCount";
 
-    // @formatter:on
+	// @formatter:on
 }
