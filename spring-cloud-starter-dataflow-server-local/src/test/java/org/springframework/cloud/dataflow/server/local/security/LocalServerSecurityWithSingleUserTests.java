@@ -19,7 +19,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 
-import com.google.common.collect.ImmutableMap;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.rules.RuleChain;
@@ -32,6 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.cloud.dataflow.server.local.LocalDataflowResource;
+import org.springframework.cloud.dataflow.server.local.TestUtils;
 import org.springframework.data.authentication.UserCredentials;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -85,6 +85,7 @@ public class LocalServerSecurityWithSingleUserTests {
 
 	@Parameters(name = "Authentication Test {index} - {0} {2} - Returns: {1}")
 	public static Collection<Object[]> data() {
+
 		return Arrays.asList(new Object[][] {
 
 				{ HttpMethod.GET, HttpStatus.OK, "/", singleUser, null },
@@ -100,8 +101,7 @@ public class LocalServerSecurityWithSingleUserTests {
 
 				{ HttpMethod.POST, HttpStatus.BAD_REQUEST, "/apps/task/taskname", singleUser, null },
 				{ HttpMethod.POST, HttpStatus.CREATED, "/apps/task/taskname", singleUser,
-						ImmutableMap.of("uri", "maven://io.spring.cloud:scdf-sample-app:jar:1.0.0.BUILD-SNAPSHOT",
-								"force", "false") },
+						TestUtils.toImmutableMap("uri", "maven://io.spring.cloud:scdf-sample-app:jar:1.0.0.BUILD-SNAPSHOT","force", "false")},
 				{ HttpMethod.POST, HttpStatus.UNAUTHORIZED, "/apps/task/taskname", null, null },
 
 				{ HttpMethod.DELETE, HttpStatus.OK, "/apps/task/taskname", singleUser, null }, // Should
@@ -112,39 +112,39 @@ public class LocalServerSecurityWithSingleUserTests {
 				{ HttpMethod.DELETE, HttpStatus.UNAUTHORIZED, "/apps/task/taskname", null, null },
 
 				{ HttpMethod.POST, HttpStatus.CREATED, "/apps", singleUser,
-						ImmutableMap.of("uri", "http://bit" + ".ly/1-0-2-GA-stream-applications-rabbit-maven", "apps",
+						TestUtils.toImmutableMap("uri", "http://bit" + ".ly/1-0-2-GA-stream-applications-rabbit-maven", "apps",
 								"app=is_ignored", "force", "false") },
 				// Should be 400 -
 				// See https://github.com/spring-cloud/spring-cloud-dataflow/issues/1071
 				{ HttpMethod.POST, HttpStatus.CREATED, "/apps", singleUser,
-						ImmutableMap.of("uri", "http://bit" + ".ly/1-0-2-GA-stream-applications-rabbit-maven", "force",
+						TestUtils.toImmutableMap("uri", "http://bit" + ".ly/1-0-2-GA-stream-applications-rabbit-maven", "force",
 								"false") },
 				{ HttpMethod.POST, HttpStatus.UNAUTHORIZED, "/apps", null,
-						ImmutableMap.of("uri", "???", "apps", "??", "force", "true") },
+						TestUtils.toImmutableMap("uri", "???", "apps", "??", "force", "true") },
 
 				/* CompletionController */
 
 				{ HttpMethod.GET, HttpStatus.BAD_REQUEST, "/completions/stream", singleUser, null },
-				{ HttpMethod.GET, HttpStatus.OK, "/completions/stream", singleUser, ImmutableMap.of("start", "2") },
+				{ HttpMethod.GET, HttpStatus.OK, "/completions/stream", singleUser, TestUtils.toImmutableMap("start", "2") },
 				{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/completions/stream", null, null },
 
 				{ HttpMethod.GET, HttpStatus.BAD_REQUEST, "/completions/task", singleUser, null },
-				{ HttpMethod.GET, HttpStatus.OK, "/completions/task", singleUser, ImmutableMap.of("start", "2") },
+				{ HttpMethod.GET, HttpStatus.OK, "/completions/task", singleUser, TestUtils.toImmutableMap("start", "2") },
 				{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/completions/task", null, null },
 
 				{ HttpMethod.GET, HttpStatus.OK, "/completions/stream", singleUser,
-						ImmutableMap.of("start", "2", "detailLevel", "2") },
+						TestUtils.toImmutableMap("start", "2", "detailLevel", "2") },
 				{ HttpMethod.GET, HttpStatus.BAD_REQUEST, "/completions/stream", singleUser,
-						ImmutableMap.of("start", "2", "detailLevel", "-123") },
+						TestUtils.toImmutableMap("start", "2", "detailLevel", "-123") },
 				{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/completions/stream", null,
-						ImmutableMap.of("detailLevel", "2") },
+						TestUtils.toImmutableMap("detailLevel", "2") },
 
 				{ HttpMethod.GET, HttpStatus.OK, "/completions/task", singleUser,
-						ImmutableMap.of("start", "2", "detailLevel", "2") },
+						TestUtils.toImmutableMap("start", "2", "detailLevel", "2") },
 				{ HttpMethod.GET, HttpStatus.BAD_REQUEST, "/completions/task", singleUser,
-						ImmutableMap.of("start", "2", "detailLevel", "-123") },
+						TestUtils.toImmutableMap("start", "2", "detailLevel", "-123") },
 				{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/completions/task", null,
-						ImmutableMap.of("detailLevel", "2") },
+						TestUtils.toImmutableMap("detailLevel", "2") },
 
 				/* ToolsController */
 
@@ -155,14 +155,14 @@ public class LocalServerSecurityWithSingleUserTests {
 				{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/tools/convertTaskGraphToText", null, null },
 
 				{ HttpMethod.GET, HttpStatus.FORBIDDEN, "/tools/parseTaskTextToGraph", singleUser,
-						ImmutableMap.of("definition", "fooApp") },
+						TestUtils.toImmutableMap("definition", "fooApp") },
 				{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/tools/parseTaskTextToGraph", null,
-						ImmutableMap.of("definition", "fooApp") },
+						TestUtils.toImmutableMap("definition", "fooApp") },
 
 				{ HttpMethod.GET, HttpStatus.FORBIDDEN, "/tools/convertTaskGraphToText", singleUser,
-						ImmutableMap.of("detailLevel", "2") },
+						TestUtils.toImmutableMap("detailLevel", "2") },
 				{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/tools/convertTaskGraphToText", null,
-						ImmutableMap.of("detailLevel", "2") },
+						TestUtils.toImmutableMap("detailLevel", "2") },
 
 				/* FeaturesController */
 
@@ -175,44 +175,44 @@ public class LocalServerSecurityWithSingleUserTests {
 				{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/jobs/executions", null, null },
 
 				{ HttpMethod.GET, HttpStatus.OK, "/jobs/executions", singleUser,
-						ImmutableMap.of("page", "0", "size", "10") },
+						TestUtils.toImmutableMap("page", "0", "size", "10") },
 				{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/jobs/executions", null,
-						ImmutableMap.of("page", "0", "size", "10") },
+						TestUtils.toImmutableMap("page", "0", "size", "10") },
 
 				{ HttpMethod.GET, HttpStatus.NOT_FOUND, "/jobs/executions", singleUser,
-						ImmutableMap.of("name", "myname") },
+						TestUtils.toImmutableMap("name", "myname") },
 				{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/jobs/executions", null,
-						ImmutableMap.of("name", "myname") },
+						TestUtils.toImmutableMap("name", "myname") },
 
 				{ HttpMethod.GET, HttpStatus.NOT_FOUND, "/jobs/executions", singleUser,
-						ImmutableMap.of("name", "myname", "page", "0", "size", "10") },
+						TestUtils.toImmutableMap("name", "myname", "page", "0", "size", "10") },
 				{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/jobs/executions", null,
-						ImmutableMap.of("name", "myname", "page", "0", "size", "10") },
+						TestUtils.toImmutableMap("name", "myname", "page", "0", "size", "10") },
 
 				{ HttpMethod.GET, HttpStatus.NOT_FOUND, "/jobs/executions/123", singleUser, null },
 				{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/jobs/executions/123", null, null },
 
 				{ HttpMethod.PUT, HttpStatus.NOT_FOUND, "/jobs/executions/123", singleUser,
-						ImmutableMap.of("stop", "true") },
+						TestUtils.toImmutableMap("stop", "true") },
 				{ HttpMethod.PUT, HttpStatus.UNAUTHORIZED, "/jobs/executions/123", null,
-						ImmutableMap.of("stop", "true") },
+						TestUtils.toImmutableMap("stop", "true") },
 
 				{ HttpMethod.PUT, HttpStatus.NOT_FOUND, "/jobs/executions/123", singleUser,
-						ImmutableMap.of("restart", "true") },
+						TestUtils.toImmutableMap("restart", "true") },
 				{ HttpMethod.PUT, HttpStatus.UNAUTHORIZED, "/jobs/executions/123", null,
-						ImmutableMap.of("restart", "true") },
+						TestUtils.toImmutableMap("restart", "true") },
 
 				/* JobInstanceController */
 
 				{ HttpMethod.GET, HttpStatus.NOT_FOUND, "/jobs/instances", singleUser,
-						ImmutableMap.of("name", "my-job-name") },
+						TestUtils.toImmutableMap("name", "my-job-name") },
 				{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/jobs/instances", null,
-						ImmutableMap.of("name", "my-job-name") },
+						TestUtils.toImmutableMap("name", "my-job-name") },
 
 				{ HttpMethod.GET, HttpStatus.NOT_FOUND, "/jobs/instances", singleUser,
-						ImmutableMap.of("name", "my-job-name", "page", "0", "size", "10") },
+						TestUtils.toImmutableMap("name", "my-job-name", "page", "0", "size", "10") },
 				{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/jobs/instances", null,
-						ImmutableMap.of("name", "my-job-name", "page", "0", "size", "10") },
+						TestUtils.toImmutableMap("name", "my-job-name", "page", "0", "size", "10") },
 
 				{ HttpMethod.GET, HttpStatus.BAD_REQUEST, "/jobs/instances", singleUser, null },
 				{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/jobs/instances", null, null },
@@ -229,9 +229,9 @@ public class LocalServerSecurityWithSingleUserTests {
 				{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/jobs/executions/abc/steps", null, null },
 
 				{ HttpMethod.GET, HttpStatus.NOT_FOUND, "/jobs/executions/123/steps", singleUser,
-						ImmutableMap.of("name", "my-job-name", "page", "0", "size", "10") },
+						TestUtils.toImmutableMap("name", "my-job-name", "page", "0", "size", "10") },
 				{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/jobs/executions/123/steps", null,
-						ImmutableMap.of("name", "my-job-name", "page", "0", "size", "10") },
+						TestUtils.toImmutableMap("name", "my-job-name", "page", "0", "size", "10") },
 
 				{ HttpMethod.GET, HttpStatus.NOT_FOUND, "/jobs/executions/123/steps/1", singleUser, null },
 				{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/jobs/executions/123/steps/1", null, null },
@@ -261,24 +261,24 @@ public class LocalServerSecurityWithSingleUserTests {
 				{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/streams/definitions", null, null },
 
 				{ HttpMethod.GET, HttpStatus.OK, "/streams/definitions", singleUser,
-						ImmutableMap.of("page", "0", "size", "10") },
+						TestUtils.toImmutableMap("page", "0", "size", "10") },
 				{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/streams/definitions", null,
-						ImmutableMap.of("page", "0", "size", "10") },
+						TestUtils.toImmutableMap("page", "0", "size", "10") },
 
 				{ HttpMethod.GET, HttpStatus.OK, "/streams/definitions", singleUser,
-						ImmutableMap.of("search", "mysearch") },
+						TestUtils.toImmutableMap("search", "mysearch") },
 				{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/streams/definitions", null,
-						ImmutableMap.of("search", "mysearch") },
+						TestUtils.toImmutableMap("search", "mysearch") },
 
 				{ HttpMethod.POST, HttpStatus.BAD_REQUEST, "/streams/definitions", singleUser,
-						ImmutableMap.of("name", "myname", "definition", "fooo | baaar") },
+						TestUtils.toImmutableMap("name", "myname", "definition", "fooo | baaar") },
 				{ HttpMethod.POST, HttpStatus.UNAUTHORIZED, "/streams/definitions", null,
-						ImmutableMap.of("name", "myname", "definition", "fooo | baaar") },
+						TestUtils.toImmutableMap("name", "myname", "definition", "fooo | baaar") },
 
 				{ HttpMethod.POST, HttpStatus.BAD_REQUEST, "/streams/definitions", singleUser,
-						ImmutableMap.of("name", "myname") },
+						TestUtils.toImmutableMap("name", "myname") },
 				{ HttpMethod.POST, HttpStatus.UNAUTHORIZED, "/streams/definitions", null,
-						ImmutableMap.of("name", "myname") },
+						TestUtils.toImmutableMap("name", "myname") },
 
 				{ HttpMethod.DELETE, HttpStatus.NOT_FOUND, "/streams/definitions/delete-me", singleUser, null },
 				{ HttpMethod.DELETE, HttpStatus.UNAUTHORIZED, "/streams/definitions/delete-me", null, null },
@@ -287,9 +287,9 @@ public class LocalServerSecurityWithSingleUserTests {
 				{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/streams/definitions/my-stream/related", null, null },
 
 				{ HttpMethod.GET, HttpStatus.BAD_REQUEST, "/streams/definitions/my-stream/related", singleUser,
-						ImmutableMap.of("nested", "wrong-param") },
+						TestUtils.toImmutableMap("nested", "wrong-param") },
 				{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/streams/definitions/my-stream/related", null,
-						ImmutableMap.of("nested", "wrong-param") },
+						TestUtils.toImmutableMap("nested", "wrong-param") },
 
 				{ HttpMethod.GET, HttpStatus.NOT_FOUND, "/streams/definitions/my-stream", singleUser, null },
 				{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/streams/definitions/my-stream", null, null },
@@ -311,12 +311,12 @@ public class LocalServerSecurityWithSingleUserTests {
 				/* TaskDefinitionController */
 
 				{ HttpMethod.POST, HttpStatus.BAD_REQUEST, "/tasks/definitions", singleUser,
-						ImmutableMap.of("name", "my-name") },
+						TestUtils.toImmutableMap("name", "my-name") },
 				{ HttpMethod.POST, HttpStatus.UNAUTHORIZED, "/tasks/definitions", null,
-						ImmutableMap.of("name", "my-name") },
+						TestUtils.toImmutableMap("name", "my-name") },
 
 				{ HttpMethod.POST, HttpStatus.INTERNAL_SERVER_ERROR, "/tasks/definitions", singleUser,
-						ImmutableMap.of("name", "my-name", "definition", "foo") }, // Should
+						TestUtils.toImmutableMap("name", "my-name", "definition", "foo") }, // Should
 																					// be
 																					// a
 																					// `400`
@@ -325,7 +325,7 @@ public class LocalServerSecurityWithSingleUserTests {
 																					// See
 				// also: https://github.com/spring-cloud/spring-cloud-dataflow/issues/1075
 				{ HttpMethod.POST, HttpStatus.UNAUTHORIZED, "/tasks/definitions", null,
-						ImmutableMap.of("name", "my-name", "definition", "foo") },
+						TestUtils.toImmutableMap("name", "my-name", "definition", "foo") },
 
 				/* TaskExecutionController */
 
@@ -333,14 +333,14 @@ public class LocalServerSecurityWithSingleUserTests {
 				{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/tasks/executions", null, null },
 
 				{ HttpMethod.GET, HttpStatus.OK, "/tasks/executions", singleUser,
-						ImmutableMap.of("page", "0", "size", "10") },
+						TestUtils.toImmutableMap("page", "0", "size", "10") },
 				{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/tasks/executions", null,
-						ImmutableMap.of("page", "0", "size", "10") },
+						TestUtils.toImmutableMap("page", "0", "size", "10") },
 
 				{ HttpMethod.GET, HttpStatus.NOT_FOUND, "/tasks/executions", singleUser,
-						ImmutableMap.of("name", "my-task-name") },
+						TestUtils.toImmutableMap("name", "my-task-name") },
 				{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/tasks/executions", null,
-						ImmutableMap.of("name", "my-task-name") },
+						TestUtils.toImmutableMap("name", "my-task-name") },
 
 				{ HttpMethod.GET, HttpStatus.NOT_FOUND, "/tasks/executions/123", singleUser, null },
 				{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/tasks/executions/123", null, null },
@@ -352,9 +352,9 @@ public class LocalServerSecurityWithSingleUserTests {
 				{ HttpMethod.POST, HttpStatus.UNAUTHORIZED, "/tasks/executions", null, null },
 
 				{ HttpMethod.POST, HttpStatus.NOT_FOUND, "/tasks/executions", singleUser,
-						ImmutableMap.of("name", "my-task-name") },
+						TestUtils.toImmutableMap("name", "my-task-name") },
 				{ HttpMethod.POST, HttpStatus.UNAUTHORIZED, "/tasks/executions", null,
-						ImmutableMap.of("name", "my-task-name") },
+						TestUtils.toImmutableMap("name", "my-task-name") },
 
 				/* UiController */
 

@@ -119,9 +119,9 @@ public class StreamDeploymentController {
 	 * @param defaultStreamService the underlying StreamService to deploy the stream
 	 */
 	public StreamDeploymentController(StreamDefinitionRepository repository,
-									  DeploymentIdRepository deploymentIdRepository, AppRegistry registry, AppDeployer deployer,
-									  ApplicationConfigurationMetadataResolver metadataResolver, CommonApplicationProperties commonProperties,
-									  DefaultStreamService defaultStreamService) {
+									DeploymentIdRepository deploymentIdRepository, AppRegistry registry, AppDeployer deployer,
+									ApplicationConfigurationMetadataResolver metadataResolver, CommonApplicationProperties commonProperties,
+									DefaultStreamService defaultStreamService) {
 		Assert.notNull(repository, "StreamDefinitionRepository must not be null");
 		Assert.notNull(deploymentIdRepository, "DeploymentIdRepository must not be null");
 		Assert.notNull(registry, "AppRegistry must not be null");
