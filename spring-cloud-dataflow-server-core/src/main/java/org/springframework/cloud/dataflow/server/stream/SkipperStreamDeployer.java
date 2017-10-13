@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.core.Version;
@@ -41,6 +42,7 @@ import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.StreamDeployment;
 import org.springframework.cloud.dataflow.server.controller.StreamDefinitionController;
 import org.springframework.cloud.dataflow.server.repository.StreamDeploymentRepository;
+import org.springframework.cloud.deployer.resource.docker.DockerResource;
 import org.springframework.cloud.deployer.resource.maven.MavenResource;
 import org.springframework.cloud.deployer.spi.app.AppInstanceStatus;
 import org.springframework.cloud.deployer.spi.app.AppStatus;
@@ -73,6 +75,7 @@ import static org.springframework.cloud.deployer.spi.app.AppDeployer.COUNT_PROPE
  *
  * @author Mark Pollack
  * @author Ilayaperumal Gopinathan
+ * @author Soby Chacko
  */
 public class SkipperStreamDeployer implements StreamDeployer {
 
@@ -98,8 +101,12 @@ public class SkipperStreamDeployer implements StreamDeployer {
 			MavenResource mavenResource = (MavenResource) resource;
 			return mavenResource.getVersion();
 		}
+		else if (resource instanceof DockerResource) {
+			DockerResource dockerResource = (DockerResource) resource;
+			return formatDockerResource(dockerResource, (s, i) -> s.substring(i + 1, s.length()));
+		}
 		else {
-			// TODO handle docker and http resource
+			// TODO handle http resource
 			throw new IllegalArgumentException("Can't extract version from resource " + resource.getDescription());
 		}
 	}
@@ -111,9 +118,26 @@ public class SkipperStreamDeployer implements StreamDeployer {
 					mavenResource.getGroupId(),
 					mavenResource.getArtifactId());
 		}
+		else if (resource instanceof DockerResource) {
+			DockerResource dockerResource = (DockerResource) resource;
+			return formatDockerResource(dockerResource, (s, i) -> s.substring(0, i));
+		}
 		else {
-			// TODO handle docker and http resource
+			// TODO handle http resource
 			throw new IllegalArgumentException("Can't extract version from resource " + resource.getDescription());
+		}
+	}
+
+	private static String formatDockerResource(DockerResource dockerResource, BiFunction<String, Integer, String> function) {
+		try {
+			String dockerResourceUri = dockerResource.getURI().toString();
+			Assert.isTrue(StringUtils.countOccurrencesOf(dockerResourceUri, ":") == 2,
+					"Invalid docker resource URI: " + dockerResourceUri);
+			int indexOfVersionSeparator = dockerResourceUri.lastIndexOf(":");
+			return function.apply(dockerResourceUri, indexOfVersionSeparator);
+		}
+		catch (IOException e) {
+			throw new RuntimeException(e);
 		}
 	}
 

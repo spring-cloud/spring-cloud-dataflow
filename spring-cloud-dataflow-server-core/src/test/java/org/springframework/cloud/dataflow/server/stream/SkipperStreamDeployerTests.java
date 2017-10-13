@@ -17,17 +17,19 @@ package org.springframework.cloud.dataflow.server.stream;
 
 import org.junit.Test;
 
+import org.springframework.cloud.deployer.resource.docker.DockerResource;
 import org.springframework.cloud.deployer.resource.maven.MavenResource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Mark Pollack
+ * @author Soby Chacko
  */
 public class SkipperStreamDeployerTests {
 
 	@Test
-	public void testResourceProcessing() {
+	public void testMavenResourceProcessing() {
 		MavenResource mavenResource = new MavenResource.Builder()
 				.artifactId("timestamp-task")
 				.groupId("org.springframework.cloud.task.app")
@@ -37,4 +39,19 @@ public class SkipperStreamDeployerTests {
 		assertThat(resourceWithoutVersion).isEqualTo("maven://org.springframework.cloud.task.app:timestamp-task");
 		assertThat(SkipperStreamDeployer.getResourceVersion(mavenResource)).isEqualTo("1.0.0.RELEASE");
 	}
+
+	@Test
+	public void testDockerResourceProcessing() {
+		DockerResource dockerResource = new DockerResource("springcloudstream/file-source-kafka-10:1.2.0.RELEASE");
+		assertThat(SkipperStreamDeployer.getResourceWithoutVersion(dockerResource)).isEqualTo("docker:springcloudstream/file-source-kafka-10");
+		assertThat(SkipperStreamDeployer.getResourceVersion(dockerResource)).isEqualTo("1.2.0.RELEASE");
+	}
+
+	@Test (expected = IllegalArgumentException.class)
+	public void testInvalidDockerResourceProcessing() {
+		DockerResource dockerResource = new DockerResource("springcloudstream:file-source-kafka-10:1.2.0.RELEASE");
+		SkipperStreamDeployer.getResourceWithoutVersion(dockerResource);
+
+	}
+
 }
