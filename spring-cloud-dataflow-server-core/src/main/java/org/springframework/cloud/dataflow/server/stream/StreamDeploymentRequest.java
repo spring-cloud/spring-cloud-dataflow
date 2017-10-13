@@ -22,7 +22,10 @@ import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.util.Assert;
 
 /**
+ * Deployment request for {@link StreamDeployer} implementations.
+ *
  * @author Mark Pollack
+ * @author Ilayaperumal Gopinathan
  */
 public class StreamDeploymentRequest {
 
@@ -82,5 +85,14 @@ public class StreamDeploymentRequest {
 	 */
 	public List<AppDeploymentRequest> getAppDeploymentRequests() {
 		return appDeploymentRequests;
+	}
+
+	/**
+	 * Return the Stream Deployer properties.
+	 *
+	 * @return the map of stream deployer properties specific to StreamDeployer implementations.
+	 */
+	public Map<String, String> getStreamDeployerProperties() {
+		return streamDeployerProperties;
 	}
 }

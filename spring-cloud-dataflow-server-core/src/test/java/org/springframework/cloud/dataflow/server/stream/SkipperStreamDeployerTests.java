@@ -15,14 +15,26 @@
  */
 package org.springframework.cloud.dataflow.server.stream;
 
-import org.junit.Test;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
+import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+
+import org.springframework.cloud.dataflow.server.repository.StreamDeploymentRepository;
 import org.springframework.cloud.deployer.resource.maven.MavenResource;
+import org.springframework.cloud.skipper.client.SkipperClient;
+import org.springframework.cloud.skipper.domain.InstallRequest;
+import org.springframework.cloud.skipper.domain.UploadRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 /**
  * @author Mark Pollack
+ * @author Ilayaperumal Gopinathan
  */
 public class SkipperStreamDeployerTests {
 
@@ -37,4 +49,35 @@ public class SkipperStreamDeployerTests {
 		assertThat(resourceWithoutVersion).isEqualTo("maven://org.springframework.cloud.task.app:timestamp-task");
 		assertThat(SkipperStreamDeployer.getResourceVersion(mavenResource)).isEqualTo("1.0.0.RELEASE");
 	}
+
+	@Test
+	public void testInstallUploadProperties() {
+		Map<String, String> skipperDeployerProperties = new HashMap<>();
+		skipperDeployerProperties.put(SkipperStreamDeployer.SKIPPER_PACKAGE_NAME, "package1");
+		skipperDeployerProperties.put(SkipperStreamDeployer.SKIPPER_PACKAGE_VERSION, "1.0.1");
+		skipperDeployerProperties.put(SkipperStreamDeployer.SKIPPER_PLATFORM_NAME, "platform1");
+		skipperDeployerProperties.put(SkipperStreamDeployer.SKIPPER_PACKAGE_REPO_NAME, "mylocal-repo1");
+		StreamDeploymentRequest streamDeploymentRequest = new StreamDeploymentRequest("test1", "time | log",
+				new ArrayList<>(),
+				skipperDeployerProperties);
+		SkipperClient skipperClient = mock(SkipperClient.class);
+		SkipperStreamDeployer skipperStreamDeployer = new SkipperStreamDeployer(skipperClient, mock
+				(StreamDeploymentRepository.class));
+		skipperStreamDeployer.deployStream(streamDeploymentRequest);
+		ArgumentCaptor<UploadRequest> uploadRequestCaptor = ArgumentCaptor.forClass(UploadRequest.class);
+		ArgumentCaptor<InstallRequest> installRequestCaptor = ArgumentCaptor.forClass(InstallRequest.class);
+		verify(skipperClient).install(installRequestCaptor.capture());
+		assertThat(installRequestCaptor.getValue().getPackageIdentifier()).isNotNull();
+		assertThat(installRequestCaptor.getValue().getPackageIdentifier().getPackageName()).isEqualTo("package1");
+		assertThat(installRequestCaptor.getValue().getPackageIdentifier().getPackageVersion()).isEqualTo("1.0.1");
+		assertThat(installRequestCaptor.getValue().getPackageIdentifier().getRepositoryName()).isEqualTo("mylocal-repo1");
+		assertThat(installRequestCaptor.getValue().getInstallProperties().getPlatformName()).isEqualTo("platform1");
+		verify(skipperClient).upload(uploadRequestCaptor.capture());
+		assertThat(uploadRequestCaptor.getValue()).isNotNull();
+		assertThat(uploadRequestCaptor.getValue().getName()).isEqualTo("package1");
+		assertThat(uploadRequestCaptor.getValue().getVersion()).isEqualTo("1.0.1");
+		assertThat(installRequestCaptor.getValue().getPackageIdentifier().getRepositoryName()).isEqualTo("mylocal-repo1");
+		assertThat(installRequestCaptor.getValue().getInstallProperties().getPlatformName()).isEqualTo("platform1");
+	}
+
 }
