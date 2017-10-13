@@ -44,4 +44,47 @@ public class PackageMetadataCreator {
 		packageMetadata.setDescription("Another very cool project");
 		repository.save(packageMetadata);
 	}
+
+	public static void createPackageWithMultipleVersions(PackageMetadataRepository repository) {
+		PackageMetadata packageMetadata = new PackageMetadata();
+		packageMetadata.setApiVersion("1");
+		packageMetadata.setOrigin("www.example.com");
+		packageMetadata.setKind("skipper");
+		packageMetadata.setName("package1");
+		packageMetadata.setVersion("1.0.0");
+		packageMetadata.setIconUrl("http://www.gilligansisle.com/images/a2.gif");
+		packageMetadata.setDescription("A very cool project");
+		packageMetadata.setMaintainer("Alan Hale Jr.");
+		repository.save(packageMetadata);
+		packageMetadata = new PackageMetadata();
+		packageMetadata.setApiVersion("1");
+		packageMetadata.setOrigin("www.example.com");
+		packageMetadata.setKind("skipper");
+		packageMetadata.setName("package1");
+		packageMetadata.setVersion("2.0.0");
+		packageMetadata.setIconUrl("http://www.gilligansisle.com/images/a1.gif");
+		packageMetadata.setMaintainer("Bob Denver");
+		packageMetadata.setDescription("Another very cool project");
+		repository.save(packageMetadata);
+		packageMetadata = new PackageMetadata();
+		packageMetadata.setApiVersion("1");
+		packageMetadata.setOrigin("www.example.com");
+		packageMetadata.setKind("skipper");
+		packageMetadata.setName("package2");
+		packageMetadata.setVersion("1.0.1");
+		packageMetadata.setIconUrl("http://www.gilligansisle.com/images/a1.gif");
+		packageMetadata.setMaintainer("Bob Denver");
+		packageMetadata.setDescription("Another very cool project");
+		repository.save(packageMetadata);
+		packageMetadata = new PackageMetadata();
+		packageMetadata.setApiVersion("1");
+		packageMetadata.setOrigin("www.example.com");
+		packageMetadata.setKind("skipper");
+		packageMetadata.setName("package2");
+		packageMetadata.setVersion("1.1.0");
+		packageMetadata.setIconUrl("http://www.gilligansisle.com/images/a1.gif");
+		packageMetadata.setMaintainer("Bob Denver");
+		packageMetadata.setDescription("Another very cool project");
+		repository.save(packageMetadata);
+	}
 }

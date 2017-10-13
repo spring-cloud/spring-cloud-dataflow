@@ -108,14 +108,15 @@ public class ReleaseService {
 	/**
 	 * Downloads the package metadata and package zip file specified by PackageIdentifier
 	 * property of the DeploymentRequest. Deploys the package on the target platform.
+	 *
 	 * @param installRequest the install request
 	 * @return the Release object associated with this deployment
 	 */
 	public Release install(InstallRequest installRequest) {
 		validateInstallRequest(installRequest);
 		PackageIdentifier packageIdentifier = installRequest.getPackageIdentifier();
-		String packageName = packageIdentifier.getPackageName();
 		String packageVersion = packageIdentifier.getPackageVersion();
+		String packageName = packageIdentifier.getPackageName();
 		PackageMetadata packageMetadata;
 		if (!StringUtils.hasText(packageVersion)) {
 			List<PackageMetadata> packageMetadataList = this.packageMetadataRepository.findByName(packageName);
@@ -126,9 +127,7 @@ public class ReleaseService {
 				throw new SkipperException("Can not find a package named " + packageName);
 			}
 			else {
-				// TODO find latest version
-				throw new SkipperException("Package name " + packageName + " is not unique.  Finding latest version " +
-						" not yet implemented");
+				packageMetadata = this.packageMetadataRepository.findFirstByNameOrderByVersionDesc(packageName);
 			}
 		}
 		else {
@@ -150,8 +149,6 @@ public class ReleaseService {
 		Assert.notNull(installRequest.getPackageIdentifier(), "Package identifier must not be null");
 		Assert.isTrue(StringUtils.hasText(installRequest.getPackageIdentifier().getPackageName()),
 				"Package name must not be empty");
-		Assert.isTrue(StringUtils.hasText(installRequest.getPackageIdentifier().getPackageVersion()),
-				"Package version must not be empty");
 		try {
 			Release release = this.releaseRepository.findLatestRelease(installRequest.getInstallProperties()
 					.getReleaseName());

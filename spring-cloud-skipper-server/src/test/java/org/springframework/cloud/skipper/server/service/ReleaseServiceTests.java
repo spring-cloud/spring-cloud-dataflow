@@ -33,6 +33,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * @author Mark Pollack
+ * @author Ilayaperumal Gopinathan
  */
 @ActiveProfiles("repo-test")
 public class ReleaseServiceTests extends AbstractIntegrationTest {
@@ -79,6 +80,22 @@ public class ReleaseServiceTests extends AbstractIntegrationTest {
 		installRequest.setPackageIdentifier(packageIdentifier);
 		Release release = releaseService.install(installRequest);
 		assertThat(release).isNotNull();
+		assertThat(release.getPkg().getMetadata().getVersion()).isEqualTo("1.0.0");
+	}
+
+	@Test
+	public void testInstallByLatestPackage() {
+		InstallProperties installProperties = new InstallProperties();
+		installProperties.setReleaseName("latestPackage");
+		installProperties.setPlatformName("default");
+		InstallRequest installRequest = new InstallRequest();
+		installRequest.setInstallProperties(installProperties);
+		PackageIdentifier packageIdentifier = new PackageIdentifier();
+		packageIdentifier.setPackageName("log");
+		installRequest.setPackageIdentifier(packageIdentifier);
+		Release release = releaseService.install(installRequest);
+		assertThat(release).isNotNull();
+		assertThat(release.getPkg().getMetadata().getVersion()).isEqualTo("2.0.0");
 	}
 
 	@Test(expected = ReleaseNotFoundException.class)
