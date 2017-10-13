@@ -75,7 +75,7 @@ In another window you can run `watch -n 2 jps` so see which Java processes are r
 Now deploy the log 1.0.0 package.
 
 ----
-skipper:>install --name log --version 1.0.0 --release-name mylog
+skipper:>install --package-name log --package-version 1.0.0 --release-name mylog
 Released mylog
 ----
 
