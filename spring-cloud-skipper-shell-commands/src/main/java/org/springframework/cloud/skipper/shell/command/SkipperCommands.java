@@ -178,8 +178,8 @@ public class SkipperCommands extends AbstractSkipperCommand {
 
 	@ShellMethod(key = "install", value = "Install a package.")
 	public String install(
-			@ShellOption(help = "name of the package to install") String name,
-			@ShellOption(help = "version of the package to install", defaultValue = NULL) String version,
+			@ShellOption(help = "name of the package to install") String packageName,
+			@ShellOption(help = "version of the package to install", defaultValue = NULL) String packageVersion,
 			// TODO specify a specific package repository
 			@ShellOption(help = "specify values in a YAML file", defaultValue = NULL) File file,
 			@ShellOption(help = "the comma separated set of properties to override during install", defaultValue = NULL) String propertyString,
@@ -190,7 +190,7 @@ public class SkipperCommands extends AbstractSkipperCommand {
 			throws IOException {
 		assertMutuallyExclusiveFileAndProperties(file, propertyString);
 		Release release = skipperClient
-				.install(getInstallRequest(name, version, file, propertyString, releaseName, platformName));
+				.install(getInstallRequest(packageName, packageVersion, file, propertyString, releaseName, platformName));
 		return "Released " + release.getName();
 	}
 
