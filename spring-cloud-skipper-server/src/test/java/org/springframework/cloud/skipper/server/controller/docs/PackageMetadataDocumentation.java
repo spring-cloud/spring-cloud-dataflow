@@ -40,48 +40,35 @@ public class PackageMetadataDocumentation extends BaseDocumentation {
 	@Test
 	public void getAllPackageMetadata() throws Exception {
 		this.mockMvc.perform(
-				get("/packageMetadata")
-						.param("page", "0")
-						.param("size", "10"))
-				.andDo(print())
-				.andExpect(status().isOk())
-				.andDo(this.documentationHandler.document(
-						super.paginationRequestParameterProperties,
-						super.paginationProperties.and(
-								fieldWithPath("_embedded.packageMetadata")
-										.description("Contains a collection of Package Metadata items"),
-								fieldWithPath("_embedded.packageMetadata[].apiVersion")
-										.description("The Package Index spec version this file is based on"),
-								fieldWithPath("_embedded.packageMetadata[].origin")
-										.description("The repository ID this Package Index file belongs to"),
-								fieldWithPath("_embedded.packageMetadata[].kind")
-										.description("What type of package system is being used"),
-								fieldWithPath("_embedded.packageMetadata[].name")
-										.description("The name of the package"),
-								fieldWithPath("_embedded.packageMetadata[].version")
-										.description("The version of the package"),
-								fieldWithPath("_embedded.packageMetadata[].packageSourceUrl")
-										.description("Location to source code for this package"),
-								fieldWithPath("_embedded.packageMetadata[].packageHomeUrl")
-										.description("The home page of the package"),
-								fieldWithPath("_embedded.packageMetadata[].tags")
-										.description("A comma separated list of tags to use for searching"),
-								fieldWithPath("_embedded.packageMetadata[].maintainer")
-										.description("Who is maintaining this package"),
-								fieldWithPath("_embedded.packageMetadata[].description")
-										.description("Brief description of the package"),
-								fieldWithPath("_embedded.packageMetadata[].sha256").description(
-										"Hash of package binary that will be downloaded using SHA256 hash algorithm"),
-								fieldWithPath("_embedded.packageMetadata[].iconUrl")
-										.description("Url location of a icon"),
-								// fieldWithPath("_embedded.packageMetadata[].packageFileBytes").description("Size of
-								// the file in bytes"),
-								fieldWithPath("_embedded.packageMetadata[]._links.self.href").ignored(),
-								fieldWithPath("_embedded.packageMetadata[]._links.packageMetadata.href").ignored(),
-								fieldWithPath("_embedded.packageMetadata[]._links.packageMetadata.templated").ignored(),
-								fieldWithPath("_embedded.packageMetadata[]._links.install.href").ignored())
-								.and(super.defaultLinkProperties),
-						super.linksForSkipper()));
+			get("/packageMetadata")
+				.param("page", "0")
+				.param("size", "10"))
+			.andDo(print())
+			.andExpect(status().isOk())
+			.andDo(this.documentationHandler.document(
+				super.paginationRequestParameterProperties,
+				super.paginationProperties.and(
+					fieldWithPath("_embedded.packageMetadata").description("Contains a collection of Package Metadata items"),
+					fieldWithPath("_embedded.packageMetadata[].apiVersion").description("The Package Index spec version this file is based on"),
+					fieldWithPath("_embedded.packageMetadata[].origin").description("The repository ID this Package Index file belongs to"),
+					fieldWithPath("_embedded.packageMetadata[].kind").description("What type of package system is being used"),
+					fieldWithPath("_embedded.packageMetadata[].name").description("The name of the package"),
+					fieldWithPath("_embedded.packageMetadata[].version").description("The version of the package"),
+					fieldWithPath("_embedded.packageMetadata[].packageSourceUrl").description("Location to source code for this package"),
+					fieldWithPath("_embedded.packageMetadata[].packageHomeUrl").description("The home page of the package"),
+					fieldWithPath("_embedded.packageMetadata[].tags").description("A comma separated list of tags to use for searching"),
+					fieldWithPath("_embedded.packageMetadata[].maintainer").description("Who is maintaining this package"),
+					fieldWithPath("_embedded.packageMetadata[].description").description("Brief description of the package"),
+					fieldWithPath("_embedded.packageMetadata[].sha256").description(
+							"Hash of package binary that will be downloaded using SHA256 hash algorithm"),
+					fieldWithPath("_embedded.packageMetadata[].iconUrl")
+							.description("Url location of a icon"),
+					fieldWithPath("_embedded.packageMetadata[]._links.self.href").ignored(),
+					fieldWithPath("_embedded.packageMetadata[]._links.packageMetadata.href").ignored(),
+					fieldWithPath("_embedded.packageMetadata[]._links.packageMetadata.templated").ignored(),
+					fieldWithPath("_embedded.packageMetadata[]._links.install.href").ignored())
+					.and(super.defaultLinkProperties),
+				super.linksForSkipper()));
 	}
 
 	@Test
@@ -89,33 +76,28 @@ public class PackageMetadataDocumentation extends BaseDocumentation {
 		deploy("log", "1.0.0", "test2");
 
 		this.mockMvc.perform(
-				get("/packageMetadata/{packageMetadataId}", 1))
-				.andDo(print())
-				.andExpect(status().isOk())
-				.andDo(this.documentationHandler.document(
-						pathParameters(
-								parameterWithName("packageMetadataId").description("The id of the package to query")),
-						responseFields(
-								fieldWithPath("apiVersion")
-										.description("The Package Index spec version this file is based on"),
-								fieldWithPath("origin")
-										.description("The repository ID this Package Index file belongs to"),
-								fieldWithPath("kind").description("What type of package system is being used"),
-								fieldWithPath("name").description("The name of the package"),
-								fieldWithPath("version").description("The version of the package"),
-								fieldWithPath("packageSourceUrl")
-										.description("Location to source code for this package"),
-								fieldWithPath("packageHomeUrl").description("The home page of the package"),
-								fieldWithPath("tags")
-										.description("A comma separated list of tags to use for searching"),
-								fieldWithPath("maintainer").description("Who is maintaining this package"),
-								fieldWithPath("description").description("Brief description of the package"),
-								fieldWithPath("sha256").description(
-										"Hash of package binary that will be downloaded using SHA256 hash algorithm"),
-								fieldWithPath("iconUrl").description("Url location of a icon"),
-								// fieldWithPath("packageFileBytes").description("Size of the file in bytes"),
-								fieldWithPath("_links.packageMetadata.href").ignored(),
-								fieldWithPath("_links.packageMetadata.templated").ignored(),
-								fieldWithPath("_links.install.href").ignored()).and(super.defaultLinkProperties)));
+			get("/packageMetadata/{packageMetadataId}", 1))
+			.andDo(print())
+			.andExpect(status().isOk())
+			.andDo(this.documentationHandler.document(
+				pathParameters(
+					parameterWithName("packageMetadataId").description("The id of the package to query")),
+				responseFields(
+					fieldWithPath("apiVersion").description("The Package Index spec version this file is based on"),
+					fieldWithPath("origin").description("The repository ID this Package Index file belongs to"),
+					fieldWithPath("kind").description("What type of package system is being used"),
+					fieldWithPath("name").description("The name of the package"),
+					fieldWithPath("version").description("The version of the package"),
+					fieldWithPath("packageSourceUrl").description("Location to source code for this package"),
+					fieldWithPath("packageHomeUrl").description("The home page of the package"),
+					fieldWithPath("tags").description("A comma separated list of tags to use for searching"),
+					fieldWithPath("maintainer").description("Who is maintaining this package"),
+					fieldWithPath("description").description("Brief description of the package"),
+					fieldWithPath("sha256").description("Hash of package binary that will be downloaded using SHA256 hash algorithm"),
+					fieldWithPath("iconUrl").description("Url location of a icon"),
+					fieldWithPath("_links.packageMetadata.href").ignored(),
+					fieldWithPath("_links.packageMetadata.templated").ignored(),
+					fieldWithPath("_links.install.href").ignored())
+				.and(super.defaultLinkProperties)));
 	}
 }

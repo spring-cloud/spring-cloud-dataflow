@@ -67,36 +67,42 @@ public class SkipperController {
 		this.packageService = packageService;
 	}
 
+	//DONE
 	@RequestMapping(path = "/about", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
 	public AboutInfo getAboutInfo() {
 		return new AboutInfo(appName, appVersion);
 	}
 
+	//DONE
 	@RequestMapping(path = "/upload", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
 	public PackageMetadata upload(@RequestBody UploadRequest uploadRequest) {
 		return this.packageService.upload(uploadRequest);
 	}
 
+	//DONE
 	@RequestMapping(path = "/install", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
 	public Release install(@RequestBody InstallRequest installRequest) {
 		return this.releaseService.install(installRequest);
 	}
 
+	//DONE
 	@RequestMapping(path = "/install/{id}", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
 	public Release install(@PathVariable("id") String id, @RequestBody InstallProperties installProperties) {
 		return this.releaseService.install(id, installProperties);
 	}
 
+	//DONE
 	@RequestMapping(path = "/status/{name}", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
 	public Info status(@PathVariable("name") String name) {
 		return this.releaseService.status(name);
 	}
 
+	//DONE
 	@RequestMapping(path = "/status/{name}/{version}", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
 	public Info status(@PathVariable("name") String name, @PathVariable("version") int version) {
