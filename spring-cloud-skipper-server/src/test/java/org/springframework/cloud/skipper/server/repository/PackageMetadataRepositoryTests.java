@@ -36,15 +36,15 @@ public class PackageMetadataRepositoryTests extends AbstractIntegrationTest {
 
 	@Test
 	public void basicCrud() {
-		PackageMetadataCreator.createTwoPackages(packageMetadataRepository);
-		Iterable<PackageMetadata> packages = packageMetadataRepository.findAll();
+		PackageMetadataCreator.createTwoPackages(this.packageMetadataRepository);
+		Iterable<PackageMetadata> packages = this.packageMetadataRepository.findAll();
 		assertThat(packages).isNotEmpty();
 		assertThat(packages).hasSize(2);
-		List<PackageMetadata> packagesNamed1 = packageMetadataRepository.findByName("package1");
+		List<PackageMetadata> packagesNamed1 = this.packageMetadataRepository.findByName("package1");
 		assertThat(packagesNamed1).isNotEmpty();
 		assertThat(packagesNamed1).hasSize(1);
 		assertThat(packagesNamed1.get(0).getMaintainer()).isEqualTo("Alan Hale Jr.");
-		List<PackageMetadata> packagesNamed2 = packageMetadataRepository.findByName("package2");
+		List<PackageMetadata> packagesNamed2 = this.packageMetadataRepository.findByName("package2");
 		assertThat(packagesNamed2).isNotEmpty();
 		assertThat(packagesNamed2).hasSize(1);
 		assertThat(packagesNamed2.get(0).getMaintainer()).isEqualTo("Bob Denver");
@@ -52,14 +52,28 @@ public class PackageMetadataRepositoryTests extends AbstractIntegrationTest {
 
 	@Test
 	public void verifyMultipleVersions() {
-		PackageMetadataCreator.createPackageWithMultipleVersions(packageMetadataRepository);
-		Iterable<PackageMetadata> packages = packageMetadataRepository.findAll();
+		PackageMetadataCreator.createPackageWithMultipleVersions(this.packageMetadataRepository);
+		Iterable<PackageMetadata> packages = this.packageMetadataRepository.findAll();
 		assertThat(packages).isNotEmpty();
 		assertThat(packages).hasSize(4);
-		PackageMetadata latestPackage1 = packageMetadataRepository.findFirstByNameOrderByVersionDesc("package1");
+		PackageMetadata latestPackage1 = this.packageMetadataRepository.findFirstByNameOrderByVersionDesc("package1");
 		assertThat(latestPackage1.getVersion()).isEqualTo("2.0.0");
-		PackageMetadata latestPackage2 = packageMetadataRepository.findFirstByNameOrderByVersionDesc("package2");
+		PackageMetadata latestPackage2 = this.packageMetadataRepository.findFirstByNameOrderByVersionDesc("package2");
 		assertThat(latestPackage2.getVersion()).isEqualTo("1.1.0");
+	}
+
+	@Test
+	public void findByNameQueries() {
+		PackageMetadataCreator.createPackageWithMultipleVersions(this.packageMetadataRepository);
+		Iterable<PackageMetadata> packages = this.packageMetadataRepository.findByNameContainingIgnoreCase("PACK");
+		assertThat(packages).isNotEmpty();
+		assertThat(packages).hasSize(4);
+		Iterable<PackageMetadata> packages2 = this.packageMetadataRepository.findByNameContainingIgnoreCase("age");
+		assertThat(packages2).isNotEmpty();
+		assertThat(packages2).hasSize(4);
+		Iterable<PackageMetadata> packages3 = this.packageMetadataRepository.findByNameContainingIgnoreCase("1");
+		assertThat(packages3).isNotEmpty();
+		assertThat(packages3).hasSize(2);
 	}
 
 }

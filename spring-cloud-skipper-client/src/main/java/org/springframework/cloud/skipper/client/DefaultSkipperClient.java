@@ -158,7 +158,7 @@ public class DefaultSkipperClient implements SkipperClient {
 		parameters.put("size", 2000);
 		if (StringUtils.hasText(name)) {
 			parameters.put("name", name);
-			traversalBuilder.follow("search", "findByNameLike");
+			traversalBuilder.follow("search", "findByNameContainingIgnoreCase");
 		}
 		if (!details) {
 			parameters.put("projection", "summary");
