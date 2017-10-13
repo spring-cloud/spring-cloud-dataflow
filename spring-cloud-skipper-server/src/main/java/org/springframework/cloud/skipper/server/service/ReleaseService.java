@@ -131,13 +131,19 @@ public class ReleaseService {
 			}
 		}
 		else {
-			packageMetadata = this.packageMetadataRepository.findByNameAndVersion(packageName, packageVersion);
-			if (packageMetadata == null) {
-				throw new SkipperException(String.format("Can not find package '%s', version '%s'",
-						packageName, packageVersion));
-			}
+			packageMetadata = getPackageMetadata(packageName, packageVersion);
 		}
 		return install(packageMetadata, installRequest.getInstallProperties());
+	}
+
+	PackageMetadata getPackageMetadata(String packageName, String packageVersion) {
+		PackageMetadata packageMetadata = this.packageMetadataRepository.findByNameAndVersion(packageName,
+				packageVersion);
+		if (packageMetadata == null) {
+			throw new SkipperException(String.format("Can not find package '%s', version '%s'",
+					packageName, packageVersion));
+		}
+		return packageMetadata;
 	}
 
 	private void validateInstallRequest(InstallRequest installRequest) {
@@ -222,8 +228,8 @@ public class ReleaseService {
 		Release oldRelease = this.releaseRepository.findLatestRelease(upgradeProperties.getReleaseName());
 		PackageIdentifier packageIdentifier = upgradeRequest.getPackageIdentifier();
 		// todo: search multi repository
-		PackageMetadata packageMetadata = this.packageMetadataRepository
-				.findByNameAndVersion(packageIdentifier.getPackageName(), packageIdentifier.getPackageVersion());
+		PackageMetadata packageMetadata = getPackageMetadata(packageIdentifier.getPackageName(), packageIdentifier
+				.getPackageVersion());
 		Release newRelease = createReleaseForUpgrade(packageMetadata, oldRelease.getVersion() + 1, upgradeProperties,
 				oldRelease.getPlatformName());
 		Map<String, Object> model = ConfigValueUtils.mergeConfigValues(newRelease.getPkg(),

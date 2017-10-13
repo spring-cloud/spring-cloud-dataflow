@@ -23,11 +23,18 @@ import org.springframework.cloud.skipper.SkipperException;
 import org.springframework.cloud.skipper.domain.Info;
 import org.springframework.cloud.skipper.domain.InstallProperties;
 import org.springframework.cloud.skipper.domain.InstallRequest;
+import org.springframework.cloud.skipper.domain.Package;
 import org.springframework.cloud.skipper.domain.PackageIdentifier;
+import org.springframework.cloud.skipper.domain.PackageMetadata;
 import org.springframework.cloud.skipper.domain.Release;
+import org.springframework.cloud.skipper.domain.Status;
+import org.springframework.cloud.skipper.domain.StatusCode;
+import org.springframework.cloud.skipper.domain.UpgradeProperties;
+import org.springframework.cloud.skipper.domain.UpgradeRequest;
 import org.springframework.cloud.skipper.server.AbstractIntegrationTest;
 import org.springframework.test.context.ActiveProfiles;
 
+import static junit.framework.TestCase.fail;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -103,6 +110,11 @@ public class ReleaseServiceTests extends AbstractIntegrationTest {
 		releaseService.status("notexist");
 	}
 
+	@Test(expected = SkipperException.class)
+	public void testPackageNotFound() {
+		this.releaseService.getPackageMetadata("random", "1.2.4");
+	}
+
 	@Test
 	public void testStatusReleaseExist() {
 		InstallProperties installProperties = new InstallProperties();
@@ -117,5 +129,48 @@ public class ReleaseServiceTests extends AbstractIntegrationTest {
 		releaseService.install(installRequest);
 		Info info = releaseService.status("testexists");
 		assertThat(info).isNotNull();
+	}
+
+	@Test
+	public void testUpdatePackageNotFound() {
+		PackageMetadata packageMetadata1 = new PackageMetadata();
+		packageMetadata1.setName("package1");
+		packageMetadata1.setVersion("1.0.0");
+		Package pkg1 = new Package();
+		pkg1.setMetadata(packageMetadata1);
+
+		Info deployedInfo = new Info();
+		Status deployedStatus = new Status();
+		deployedStatus.setPlatformStatus("Deployed successfully");
+		deployedStatus.setStatusCode(StatusCode.DEPLOYED);
+		deployedInfo.setStatus(deployedStatus);
+
+		String releaseName = "existing";
+		Release release1 = new Release();
+		release1.setName(releaseName);
+		release1.setVersion(1);
+		release1.setPlatformName("platform1");
+		release1.setPkg(pkg1);
+		release1.setInfo(deployedInfo);
+		this.releaseRepository.save(release1);
+
+		UpgradeProperties upgradeProperties = new UpgradeProperties();
+		upgradeProperties.setReleaseName(releaseName);
+		UpgradeRequest upgradeRequest = new UpgradeRequest();
+		upgradeRequest.setUpgradeProperties(upgradeProperties);
+		PackageIdentifier packageIdentifier = new PackageIdentifier();
+		String packageName = "random";
+		String packageVersion = "1.0.0";
+		packageIdentifier.setPackageName(packageName);
+		packageIdentifier.setPackageVersion(packageVersion);
+		upgradeRequest.setPackageIdentifier(packageIdentifier);
+		try {
+			Release release = releaseService.upgrade(upgradeRequest);
+			fail("Expected to throw SkipperException");
+		}
+		catch (SkipperException e) {
+			assertThat(e.getMessage()).isEqualTo(String.format("Can not find package '%s', version '%s'",
+					packageName, packageVersion));
+		}
 	}
 }
