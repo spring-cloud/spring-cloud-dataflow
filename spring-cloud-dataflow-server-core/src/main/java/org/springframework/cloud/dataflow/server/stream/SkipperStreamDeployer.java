@@ -68,8 +68,6 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.HttpStatusCodeException;
 
-import static org.springframework.cloud.deployer.spi.app.AppDeployer.COUNT_PROPERTY_KEY;
-
 /**
  * Delegates to Skipper to deploy the stream.
  *
@@ -80,6 +78,14 @@ import static org.springframework.cloud.deployer.spi.app.AppDeployer.COUNT_PROPE
 public class SkipperStreamDeployer implements StreamDeployer {
 
 	public static final String SKIPPER_KEY_PREFIX = "spring.cloud.dataflow.skipper";
+
+	public static final String SKIPPER_PACKAGE_NAME = SKIPPER_KEY_PREFIX + ".packageName";
+
+	public static final String SKIPPER_PACKAGE_VERSION = SKIPPER_KEY_PREFIX + ".packageVersion";
+
+	public static final String SKIPPER_PACKAGE_REPO_NAME = SKIPPER_KEY_PREFIX + ".repoName";
+
+	public static final String SKIPPER_PLATFORM_NAME = SKIPPER_KEY_PREFIX + ".platformName";
 
 	public static final String SKIPPER_ENABLED_PROPERTY_KEY = SKIPPER_KEY_PREFIX + ".enabled";
 
@@ -196,15 +202,23 @@ public class SkipperStreamDeployer implements StreamDeployer {
 	@Override
 	public void deployStream(StreamDeploymentRequest streamDeploymentRequest) {
 		logger.info("Deploying Stream " + streamDeploymentRequest.getStreamName() + " using skipper.");
+		Map<String, String> streamDeployerProperties = streamDeploymentRequest.getStreamDeployerProperties();
+		String repoName = streamDeployerProperties.get(SKIPPER_PACKAGE_REPO_NAME);
+		repoName = (StringUtils.hasText(repoName)) ? (repoName) : "local";
+		String platformName = streamDeployerProperties.get(SKIPPER_PLATFORM_NAME);
+		platformName = (StringUtils.hasText(platformName)) ? platformName : "default";
+		String packageName = streamDeployerProperties.get(SKIPPER_PACKAGE_NAME);
+		packageName = (StringUtils.hasText(packageName)) ? packageName : streamDeploymentRequest.getStreamName();
+		String packageVersion = streamDeployerProperties.get(SKIPPER_PACKAGE_VERSION);
+		packageVersion = (StringUtils.hasText(packageVersion)) ? packageVersion : "1.0.0";
 		// Create the package .zip file to upload
-		File packageFile = createPackageForStream(streamDeploymentRequest);
-
+		File packageFile = createPackageForStream(packageName, packageVersion, streamDeploymentRequest);
 		// Upload the package
 		UploadRequest uploadRequest = new UploadRequest();
-		uploadRequest.setName(streamDeploymentRequest.getStreamName());
-		uploadRequest.setVersion("1.0.0"); // TODO use from skipperDeploymentProperties if set.
+		uploadRequest.setName(streamDeployerProperties.get(SKIPPER_PACKAGE_NAME));
+		uploadRequest.setVersion(packageVersion);
 		uploadRequest.setExtension("zip");
-		uploadRequest.setRepoName("local"); // TODO use from skipperDeploymentProperties if set.
+		uploadRequest.setRepoName(repoName); // TODO use from skipperDeploymentProperties if set.
 		try {
 			uploadRequest.setPackageFileAsBytes(Files.readAllBytes(packageFile.toPath()));
 		}
@@ -212,18 +226,16 @@ public class SkipperStreamDeployer implements StreamDeployer {
 			throw new IllegalArgumentException("Can't read packageFile " + packageFile, e);
 		}
 		skipperClient.upload(uploadRequest);
-
 		// Install the package
+		String streamName = streamDeploymentRequest.getStreamName();
 		InstallRequest installRequest = new InstallRequest();
 		PackageIdentifier packageIdentifier = new PackageIdentifier();
-		String streamName = streamDeploymentRequest.getStreamName();
-		packageIdentifier.setPackageName(streamName);
-		packageIdentifier.setPackageVersion("1.0.0");
-		String repoName = "local";
+		packageIdentifier.setPackageName(packageName);
+		packageIdentifier.setPackageVersion(packageVersion);
 		packageIdentifier.setRepositoryName(repoName);
 		installRequest.setPackageIdentifier(packageIdentifier);
 		InstallProperties installProperties = new InstallProperties();
-		installProperties.setPlatformName("default");
+		installProperties.setPlatformName(platformName);
 		//todo: Better naming for the release name
 		String releaseName = "my" + streamName;
 		installProperties.setReleaseName(releaseName);
@@ -239,9 +251,10 @@ public class SkipperStreamDeployer implements StreamDeployer {
 
 	}
 
-	private File createPackageForStream(StreamDeploymentRequest streamDeploymentRequest) {
+	private File createPackageForStream(String packageName, String packageVersion, StreamDeploymentRequest
+			streamDeploymentRequest) {
 		PackageWriter packageWriter = new DefaultPackageWriter();
-		Package pkgtoWrite = createPackage(streamDeploymentRequest);
+		Package pkgtoWrite = createPackage(packageName, packageVersion, streamDeploymentRequest);
 		Path tempPath;
 		try {
 			tempPath = Files.createTempDirectory("streampackages");
@@ -255,34 +268,36 @@ public class SkipperStreamDeployer implements StreamDeployer {
 		return zipFile;
 	}
 
-	private Package createPackage(StreamDeploymentRequest streamDeploymentRequest) {
+	private Package createPackage(String packageName, String packageVersion, StreamDeploymentRequest
+			streamDeploymentRequest) {
 		Package pkg = new Package();
 		PackageMetadata packageMetadata = new PackageMetadata();
-		packageMetadata.setName(streamDeploymentRequest.getStreamName());
-		packageMetadata.setVersion("1.0.0");
+		packageMetadata.setName(packageName);
+		packageMetadata.setVersion(packageVersion);
 		packageMetadata.setMaintainer("dataflow");
 		packageMetadata.setDescription(streamDeploymentRequest.getDslText());
 		pkg.setMetadata(packageMetadata);
-
-		pkg.setDependencies(createDependentPackages(streamDeploymentRequest));
-
+		pkg.setDependencies(createDependentPackages(packageVersion, streamDeploymentRequest));
 		return pkg;
 	}
 
-	private List<Package> createDependentPackages(StreamDeploymentRequest streamDeploymentRequest) {
+	private List<Package> createDependentPackages(String packageVersion, StreamDeploymentRequest
+			streamDeploymentRequest) {
 		List<Package> packageList = new ArrayList<>();
 		for (AppDeploymentRequest appDeploymentRequest : streamDeploymentRequest.getAppDeploymentRequests()) {
-			packageList.add(createDependentPackage(streamDeploymentRequest.getStreamName(), appDeploymentRequest));
+			packageList.add(createDependentPackage(packageVersion, appDeploymentRequest));
 		}
 		return packageList;
 	}
 
-	private Package createDependentPackage(String streamName, AppDeploymentRequest appDeploymentRequest) {
+	private Package createDependentPackage(String packageVersion, AppDeploymentRequest
+			appDeploymentRequest) {
 		Package pkg = new Package();
+		String packageName = appDeploymentRequest.getDefinition().getName();
 
 		PackageMetadata packageMetadata = new PackageMetadata();
-		packageMetadata.setName(appDeploymentRequest.getDefinition().getName());
-		packageMetadata.setVersion("1.0.0");
+		packageMetadata.setName(packageName);
+		packageMetadata.setVersion(packageVersion);
 		packageMetadata.setMaintainer("dataflow");
 
 		pkg.setMetadata(packageMetadata);
@@ -297,10 +312,7 @@ public class SkipperStreamDeployer implements StreamDeployer {
 		configValueMap.put("version", version);
 
 		// Add metadata
-		String countProperty = appDeploymentRequest.getDeploymentProperties().get(COUNT_PROPERTY_KEY);
-		int count = (StringUtils.hasText(countProperty)) ? Integer.parseInt(countProperty) : 1;
-		metadataMap.put("count", Integer.toString(count));
-		metadataMap.put("name", appDeploymentRequest.getDefinition().getName());
+		metadataMap.put("name", packageName);
 
 		// Add spec
 		String resourceWithoutVersion = getResourceWithoutVersion(appDeploymentRequest.getResource());
