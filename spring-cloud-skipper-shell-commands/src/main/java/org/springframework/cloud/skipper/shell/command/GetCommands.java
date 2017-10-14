@@ -49,7 +49,8 @@ public class GetCommands extends AbstractSkipperCommand {
 		this.yaml = new Yaml(dumperOptions);
 	}
 
-	@ShellMethod(key = "get manifest", value = "Status for a last known release version.")
+	@ShellMethod(key = "get manifest", value = "Get the manifest values for the latest or a specific version of the "
+			+ "release")
 	public Object getManifest(
 			@ShellOption(help = "release name") @NotNull String releaseName,
 			@ShellOption(help = "the specific release version.", defaultValue = NULL) Integer releaseVersion) {
