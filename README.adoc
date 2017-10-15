@@ -35,6 +35,7 @@ spring:
   cloud:
     skipper:
       server:
+        synchonizeIndexOnContextRefresh: true
         packageRepositories:
           -
             name: test
@@ -48,6 +49,9 @@ $ java -jar spring-cloud-skipper-server/target/spring-cloud-skipper-server-1.0.0
 ----
 
 Where you replace `/home/mpollack/` with your own home directory.
+
+The property `spring.cloud.skipper.server.synchonizeIndexOnContextRefresh` when set to `true` loads the packages from
+ the configured `packageRepositories` during the server startup.
 
 Then launch the Skipper shell in another terminal
 
