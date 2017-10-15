@@ -257,7 +257,7 @@ public class SkipperCommands extends AbstractSkipperCommand {
 	}
 
 	private void assertMutuallyExclusiveFileAndProperties(File yamlFile, String propertyString) {
-		Assert.isTrue(!(yamlFile != null && propertyString != null), "The options 'file' and 'set' options "
+		Assert.isTrue(!(yamlFile != null && propertyString != null), "The options 'file' and 'property-string' options "
 				+ "are mutually exclusive.");
 		if (yamlFile != null) {
 			String extension = FilenameUtils.getExtension(yamlFile.getName());
