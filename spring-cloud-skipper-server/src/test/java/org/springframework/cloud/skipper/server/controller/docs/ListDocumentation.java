@@ -21,8 +21,10 @@ import org.junit.Test;
 import org.springframework.cloud.skipper.domain.InstallProperties;
 import org.springframework.cloud.skipper.domain.InstallRequest;
 import org.springframework.cloud.skipper.domain.PackageIdentifier;
+import org.springframework.cloud.skipper.domain.StatusCode;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.util.StringUtils;
 
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
@@ -60,34 +62,37 @@ public class ListDocumentation extends BaseDocumentation {
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
 					responseFields(
-						fieldWithPath("[].name").description("TBD"),
-						fieldWithPath("[].version").description("TBD"),
-						fieldWithPath("[].info.status.statusCode").description("TBD"),
-						fieldWithPath("[].info.status.platformStatus").description("TBD"),
-						fieldWithPath("[].info.firstDeployed").description("TBD"),
-						fieldWithPath("[].info.lastDeployed").description("TBD"),
-						fieldWithPath("[].info.deleted").description("TBD"),
-						fieldWithPath("[].info.description").description("TBD"),
-						fieldWithPath("[].pkg.metadata.apiVersion").description("TBD"),
-						fieldWithPath("[].pkg.metadata.origin").description("TBD"),
-						fieldWithPath("[].pkg.metadata.kind").description("TBD"),
-						fieldWithPath("[].pkg.metadata.name").description("TBD"),
-						fieldWithPath("[].pkg.metadata.version").description("TBD"),
-						fieldWithPath("[].pkg.metadata.packageSourceUrl").description("TBD"),
-						fieldWithPath("[].pkg.metadata.packageHomeUrl").description("TBD"),
-						fieldWithPath("[].pkg.metadata.tags").description("TBD"),
-						fieldWithPath("[].pkg.metadata.maintainer").description("TBD"),
-						fieldWithPath("[].pkg.metadata.description").description("TBD"),
-						fieldWithPath("[].pkg.metadata.sha256").description("TBD"),
-						fieldWithPath("[].pkg.metadata.iconUrl").description("TBD"),
-						fieldWithPath("[].pkg.templates[].name").description("TBD"),
-						fieldWithPath("[].pkg.templates[].data").description("TBD"),
-						fieldWithPath("[].pkg.dependencies").description("TBD"),
-						fieldWithPath("[].pkg.configValues.raw").description("TBD"),
-						fieldWithPath("[].pkg.fileHolders").description("TBD"),
-						fieldWithPath("[].configValues.raw").description("TBD"),
-						fieldWithPath("[].manifest").description("TBD"),
-						fieldWithPath("[].platformName").description("TBD")
+						fieldWithPath("[].name").description("Name of the release"),
+						fieldWithPath("[].version").description("Version of the release"),
+						fieldWithPath("[].info.status.statusCode").description(
+							String.format("StatusCode of the release's status (%s)",
+								StringUtils.arrayToCommaDelimitedString(StatusCode.values()))
+						),
+						fieldWithPath("[].info.status.platformStatus").description("Status from the underlying platform"),
+						fieldWithPath("[].info.firstDeployed").description("Date/Time of first deployment"),
+						fieldWithPath("[].info.lastDeployed").description("Date/Time of last deployment"),
+						fieldWithPath("[].info.deleted").description("Date/Time of when the release was deleted"),
+						fieldWithPath("[].info.description").description("Human-friendly 'log entry' about this release"),
+						fieldWithPath("[].pkg.metadata.apiVersion").description("The Package Index spec version this file is based on"),
+						fieldWithPath("[].pkg.metadata.origin").description("The repository ID this Package Index file belongs to"),
+						fieldWithPath("[].pkg.metadata.kind").description("What type of package system is being used"),
+						fieldWithPath("[].pkg.metadata.name").description("The name of the package"),
+						fieldWithPath("[].pkg.metadata.version").description("The version of the package"),
+						fieldWithPath("[].pkg.metadata.packageSourceUrl").description("Location to source code for this package"),
+						fieldWithPath("[].pkg.metadata.packageHomeUrl").description("The home page of the package"),
+						fieldWithPath("[].pkg.metadata.tags").description("A comma separated list of tags to use for searching"),
+						fieldWithPath("[].pkg.metadata.maintainer").description("Who is maintaining this package"),
+						fieldWithPath("[].pkg.metadata.description").description("Brief description of the package"),
+						fieldWithPath("[].pkg.metadata.sha256").description("Hash of package binary that will be downloaded using SHA256 hash algorithm"),
+						fieldWithPath("[].pkg.metadata.iconUrl").description("Url location of a icon"),
+						fieldWithPath("[].pkg.templates[].name").description("Name is the path-like name of the template"),
+						fieldWithPath("[].pkg.templates[].data").description("Data is the template as string data"),
+						fieldWithPath("[].pkg.dependencies").description("The packages that this package depends upon"),
+						fieldWithPath("[].pkg.configValues.raw").description("The raw YAML string of configuration values"),
+						fieldWithPath("[].pkg.fileHolders").description("Miscellaneous files in a package, e.g. README, LICENSE, etc."),
+						fieldWithPath("[].configValues.raw").description("The raw YAML string of configuration values"),
+						fieldWithPath("[].manifest").description("The manifest of the release"),
+						fieldWithPath("[].platformName").description("Platform name of the release")
 					)
 				));
 	}
@@ -113,34 +118,37 @@ public class ListDocumentation extends BaseDocumentation {
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
 					responseFields(
-						fieldWithPath("[].name").description("TBD"),
-						fieldWithPath("[].version").description("TBD"),
-						fieldWithPath("[].info.status.statusCode").description("TBD"),
-						fieldWithPath("[].info.status.platformStatus").description("TBD"),
-						fieldWithPath("[].info.firstDeployed").description("TBD"),
-						fieldWithPath("[].info.lastDeployed").description("TBD"),
-						fieldWithPath("[].info.deleted").description("TBD"),
-						fieldWithPath("[].info.description").description("TBD"),
-						fieldWithPath("[].pkg.metadata.apiVersion").description("TBD"),
-						fieldWithPath("[].pkg.metadata.origin").description("TBD"),
-						fieldWithPath("[].pkg.metadata.kind").description("TBD"),
-						fieldWithPath("[].pkg.metadata.name").description("TBD"),
-						fieldWithPath("[].pkg.metadata.version").description("TBD"),
-						fieldWithPath("[].pkg.metadata.packageSourceUrl").description("TBD"),
-						fieldWithPath("[].pkg.metadata.packageHomeUrl").description("TBD"),
-						fieldWithPath("[].pkg.metadata.tags").description("TBD"),
-						fieldWithPath("[].pkg.metadata.maintainer").description("TBD"),
-						fieldWithPath("[].pkg.metadata.description").description("TBD"),
-						fieldWithPath("[].pkg.metadata.sha256").description("TBD"),
-						fieldWithPath("[].pkg.metadata.iconUrl").description("TBD"),
-						fieldWithPath("[].pkg.templates[].name").description("TBD"),
-						fieldWithPath("[].pkg.templates[].data").description("TBD"),
-						fieldWithPath("[].pkg.dependencies").description("TBD"),
-						fieldWithPath("[].pkg.configValues.raw").description("TBD"),
-						fieldWithPath("[].pkg.fileHolders").description("TBD"),
-						fieldWithPath("[].configValues.raw").description("TBD"),
-						fieldWithPath("[].manifest").description("TBD"),
-						fieldWithPath("[].platformName").description("TBD")
+						fieldWithPath("[].name").description("Name of the release"),
+						fieldWithPath("[].version").description("Version of the release"),
+						fieldWithPath("[].info.status.statusCode").description(
+							String.format("StatusCode of the release's status (%s)",
+								StringUtils.arrayToCommaDelimitedString(StatusCode.values()))
+						),
+						fieldWithPath("[].info.status.platformStatus").description("Status from the underlying platform"),
+						fieldWithPath("[].info.firstDeployed").description("Date/Time of first deployment"),
+						fieldWithPath("[].info.lastDeployed").description("Date/Time of last deployment"),
+						fieldWithPath("[].info.deleted").description("Date/Time of when the release was deleted"),
+						fieldWithPath("[].info.description").description("Human-friendly 'log entry' about this release"),
+						fieldWithPath("[].pkg.metadata.apiVersion").description("The Package Index spec version this file is based on"),
+						fieldWithPath("[].pkg.metadata.origin").description("The repository ID this Package Index file belongs to"),
+						fieldWithPath("[].pkg.metadata.kind").description("What type of package system is being used"),
+						fieldWithPath("[].pkg.metadata.name").description("The name of the package"),
+						fieldWithPath("[].pkg.metadata.version").description("The version of the package"),
+						fieldWithPath("[].pkg.metadata.packageSourceUrl").description("Location to source code for this package"),
+						fieldWithPath("[].pkg.metadata.packageHomeUrl").description("The home page of the package"),
+						fieldWithPath("[].pkg.metadata.tags").description("A comma separated list of tags to use for searching"),
+						fieldWithPath("[].pkg.metadata.maintainer").description("Who is maintaining this package"),
+						fieldWithPath("[].pkg.metadata.description").description("Brief description of the package"),
+						fieldWithPath("[].pkg.metadata.sha256").description("Hash of package binary that will be downloaded using SHA256 hash algorithm"),
+						fieldWithPath("[].pkg.metadata.iconUrl").description("Url location of a icon"),
+						fieldWithPath("[].pkg.templates[].name").description("Name is the path-like name of the template"),
+						fieldWithPath("[].pkg.templates[].data").description("Data is the template as string data"),
+						fieldWithPath("[].pkg.dependencies").description("The packages that this package depends upon"),
+						fieldWithPath("[].pkg.configValues.raw").description("The raw YAML string of configuration values"),
+						fieldWithPath("[].pkg.fileHolders").description("Miscellaneous files in a package, e.g. README, LICENSE, etc."),
+						fieldWithPath("[].configValues.raw").description("The raw YAML string of configuration values"),
+						fieldWithPath("[].manifest").description("The manifest of the release"),
+						fieldWithPath("[].platformName").description("Platform name of the release")
 					)
 				));
 	}

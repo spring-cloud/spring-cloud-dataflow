@@ -22,8 +22,10 @@ import org.springframework.cloud.skipper.domain.InstallProperties;
 import org.springframework.cloud.skipper.domain.InstallRequest;
 import org.springframework.cloud.skipper.domain.PackageIdentifier;
 import org.springframework.cloud.skipper.domain.Release;
+import org.springframework.cloud.skipper.domain.StatusCode;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.util.StringUtils;
 
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
@@ -61,12 +63,15 @@ public class StatusDocumentation extends BaseDocumentation {
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
 					responseFields(
-						fieldWithPath("status.statusCode").description("TBD"),
-						fieldWithPath("status.platformStatus").description("TBD"),
-						fieldWithPath("firstDeployed").description("TBD"),
-						fieldWithPath("lastDeployed").description("TBD"),
-						fieldWithPath("deleted").description("TBD"),
-						fieldWithPath("description").description("TBD")
+						fieldWithPath("status.statusCode").description(
+							String.format("StatusCode of the release's status (%s)",
+								StringUtils.arrayToCommaDelimitedString(StatusCode.values()))
+						),
+						fieldWithPath("status.platformStatus").description("Status from the underlying platform"),
+						fieldWithPath("firstDeployed").description("Date/Time of first deployment"),
+						fieldWithPath("lastDeployed").description("Date/Time of last deployment"),
+						fieldWithPath("deleted").description("Date/Time of when the release was deleted"),
+						fieldWithPath("description").description("Human-friendly 'log entry' about this release")
 					)
 				));
 	}
@@ -94,12 +99,15 @@ public class StatusDocumentation extends BaseDocumentation {
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
 					responseFields(
-						fieldWithPath("status.statusCode").description("TBD"),
-						fieldWithPath("status.platformStatus").description("TBD"),
-						fieldWithPath("firstDeployed").description("TBD"),
-						fieldWithPath("lastDeployed").description("TBD"),
-						fieldWithPath("deleted").description("TBD"),
-						fieldWithPath("description").description("TBD")
+						fieldWithPath("status.statusCode").description(
+							String.format("StatusCode of the release's status (%s)",
+								StringUtils.arrayToCommaDelimitedString(StatusCode.values()))
+						),
+						fieldWithPath("status.platformStatus").description("Status from the underlying platform"),
+						fieldWithPath("firstDeployed").description("Date/Time of first deployment"),
+						fieldWithPath("lastDeployed").description("Date/Time of last deployment"),
+						fieldWithPath("deleted").description("Date/Time of when the release was deleted"),
+						fieldWithPath("description").description("Human-friendly 'log entry' about this release")
 					)
 				));
 	}
