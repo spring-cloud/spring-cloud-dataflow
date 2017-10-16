@@ -13,25 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.cloud.skipper.server.repository;
+package org.springframework.cloud.skipper.server.controller;
 
 import org.junit.Test;
 
-import org.springframework.cloud.skipper.server.AbstractMockMvcTests;
-
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
- * @author Mark Pollack
+ * @author Gunnar Hillert
  */
-public class RepositoryMvcTests extends AbstractMockMvcTests {
+public class RootControllerTests extends AbstractControllerTests {
 
 	@Test
-	public void shouldReturnRepositoryIndex() throws Exception {
-		mockMvc.perform(get("/api")).andDo(print()).andExpect(status().isOk()).andExpect(
-				jsonPath("$._links.repositories").exists());
+	public void indexUrlShouldRedirect() throws Exception {
+		mockMvc.perform(get("/")).andDo(print())
+				.andExpect(status().is3xxRedirection())
+				.andExpect(redirectedUrl("/api"));
 	}
 }

@@ -40,7 +40,7 @@ public class ApiDocumentation extends BaseDocumentation {
 
 	@Test
 	public void headers() throws Exception {
-		this.mockMvc.perform(get("/")).andExpect(status().isOk())
+		this.mockMvc.perform(get("/api")).andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(responseHeaders(headerWithName("Content-Type")
 						.description("The Content-Type of the payload, e.g. " + "`application/hal+json`"))));
 	}
@@ -67,7 +67,7 @@ public class ApiDocumentation extends BaseDocumentation {
 
 	@Test
 	public void index() throws Exception {
-		this.mockMvc.perform(get("/")).andExpect(status().isOk()).andDo(this.documentationHandler.document(links(
+		this.mockMvc.perform(get("/api")).andExpect(status().isOk()).andDo(this.documentationHandler.document(links(
 			linkWithRel("about").description("Provides meta information of the server"),
 			linkWithRel("upload").description("Uploads a package"),
 			linkWithRel("install").description("Installs a package"),

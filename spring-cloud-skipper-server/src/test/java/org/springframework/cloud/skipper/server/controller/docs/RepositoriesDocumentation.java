@@ -40,7 +40,7 @@ public class RepositoriesDocumentation extends BaseDocumentation {
 	@Test
 	public void getAllRepositories() throws Exception {
 		this.mockMvc.perform(
-			get("/repositories")
+			get("/api/repositories")
 				.param("page", "0")
 				.param("size", "10"))
 			.andDo(print())
@@ -66,7 +66,7 @@ public class RepositoriesDocumentation extends BaseDocumentation {
 		deploy("log", "1.0.0", "test2");
 
 		this.mockMvc.perform(
-			get("/repositories/{repositoryId}", 1))
+			get("/api/repositories/{repositoryId}", 1))
 			.andDo(print())
 			.andExpect(status().isOk())
 			.andDo(this.documentationHandler.document(

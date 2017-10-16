@@ -1,6 +1,9 @@
 spring:
   main:
     banner-mode: "off"
+  data:
+    rest:
+      base-path: /api
   cloud:
     skipper:
       server:

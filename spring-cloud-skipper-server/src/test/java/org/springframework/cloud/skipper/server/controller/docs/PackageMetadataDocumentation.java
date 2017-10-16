@@ -40,7 +40,7 @@ public class PackageMetadataDocumentation extends BaseDocumentation {
 	@Test
 	public void getAllPackageMetadata() throws Exception {
 		this.mockMvc.perform(
-			get("/packageMetadata")
+			get("/api/packageMetadata")
 				.param("page", "0")
 				.param("size", "10"))
 			.andDo(print())
@@ -76,7 +76,7 @@ public class PackageMetadataDocumentation extends BaseDocumentation {
 		deploy("log", "1.0.0", "test2");
 
 		this.mockMvc.perform(
-			get("/packageMetadata/{packageMetadataId}", 1))
+			get("/api/packageMetadata/{packageMetadataId}", 1))
 			.andDo(print())
 			.andExpect(status().isOk())
 			.andDo(this.documentationHandler.document(

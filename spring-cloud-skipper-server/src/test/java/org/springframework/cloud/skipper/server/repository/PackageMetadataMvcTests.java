@@ -40,7 +40,7 @@ public class PackageMetadataMvcTests extends AbstractMockMvcTests {
 
 	@Test
 	public void shouldReturnRepositoryIndex() throws Exception {
-		mockMvc.perform(get("/")).andDo(print()).andExpect(status().isOk()).andExpect(
+		mockMvc.perform(get("/api")).andDo(print()).andExpect(status().isOk()).andExpect(
 				jsonPath("$._links.packageMetadata").exists());
 	}
 
@@ -51,7 +51,7 @@ public class PackageMetadataMvcTests extends AbstractMockMvcTests {
 		assertThat(packageMetadata.getId()).isNotNull();
 		packageMetadata = packageMetadataRepository.findByNameAndVersion("package2", "2.0.0");
 		assertThat(packageMetadata.getId()).isNotNull();
-		mockMvc.perform(get("/packageMetadata?projection=summary")).andDo(print()).andExpect(status().isOk())
+		mockMvc.perform(get("/api/packageMetadata?projection=summary")).andDo(print()).andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.packageMetadata[0].version").value("1.0.0"))
 				.andExpect(jsonPath("$._embedded.packageMetadata[0].iconUrl")
 						.value("http://www.gilligansisle.com/images/a2.gif"))
@@ -65,7 +65,7 @@ public class PackageMetadataMvcTests extends AbstractMockMvcTests {
 						.value("http://localhost/api/install/2"))
 				.andExpect(jsonPath("$._embedded.packageMetadata[1].maintainer").doesNotExist());
 
-		mockMvc.perform(get("/packageMetadata")).andDo(print()).andExpect(status().isOk())
+		mockMvc.perform(get("/api/packageMetadata")).andDo(print()).andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.packageMetadata[0].version").value("1.0.0"))
 				.andExpect(jsonPath("$._embedded.packageMetadata[0].description").value("A very cool project"))
 				.andExpect(jsonPath("$._embedded.packageMetadata[0]._links.install.href")

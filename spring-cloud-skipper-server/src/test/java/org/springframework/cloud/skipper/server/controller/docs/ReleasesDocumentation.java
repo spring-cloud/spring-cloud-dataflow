@@ -37,7 +37,7 @@ public class ReleasesDocumentation extends BaseDocumentation {
 	@Test
 	public void getAllReleases() throws Exception {
 		this.mockMvc.perform(
-			get("/releases")
+			get("/api/releases")
 				.param("page", "0")
 				.param("size", "10"))
 			.andDo(print())

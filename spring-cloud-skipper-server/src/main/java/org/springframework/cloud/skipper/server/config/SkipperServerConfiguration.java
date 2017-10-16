@@ -28,6 +28,7 @@ import org.springframework.cloud.skipper.io.DefaultPackageReader;
 import org.springframework.cloud.skipper.io.DefaultPackageWriter;
 import org.springframework.cloud.skipper.io.PackageReader;
 import org.springframework.cloud.skipper.io.PackageWriter;
+import org.springframework.cloud.skipper.server.controller.RootController;
 import org.springframework.cloud.skipper.server.controller.SkipperController;
 import org.springframework.cloud.skipper.server.deployer.AppDeployerReleaseManager;
 import org.springframework.cloud.skipper.server.deployer.AppDeploymentRequestFactory;
@@ -88,6 +89,11 @@ public class SkipperServerConfiguration {
 	@Bean
 	public SkipperController skipperController(ReleaseService releaseService, PackageService packageService) {
 		return new SkipperController(releaseService, packageService);
+	}
+
+	@Bean
+	public RootController rootController() {
+		return new RootController();
 	}
 
 	// Services

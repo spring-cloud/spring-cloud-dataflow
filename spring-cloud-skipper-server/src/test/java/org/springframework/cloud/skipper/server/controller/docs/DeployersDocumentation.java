@@ -37,7 +37,7 @@ public class DeployersDocumentation extends BaseDocumentation {
 	@Test
 	public void getAllDeployers() throws Exception {
 		this.mockMvc.perform(
-			get("/deployers")
+			get("/api/deployers")
 				.param("page", "0")
 				.param("size", "10"))
 			.andDo(print())
