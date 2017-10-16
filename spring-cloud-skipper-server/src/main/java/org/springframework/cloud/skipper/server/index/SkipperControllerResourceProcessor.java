@@ -25,6 +25,7 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
 /**
  * @author Gunnar Hillert
+ * @author Ilayaperumal Gopinathan
  */
 @Component
 public class SkipperControllerResourceProcessor implements ResourceProcessor<RepositoryLinksResource> {
@@ -34,17 +35,25 @@ public class SkipperControllerResourceProcessor implements ResourceProcessor<Rep
 		resource.add(ControllerLinkBuilder.linkTo(methodOn(SkipperController.class).getAboutInfo()).withRel("about"));
 		resource.add(ControllerLinkBuilder.linkTo(methodOn(SkipperController.class).upload(null)).withRel("upload"));
 		resource.add(ControllerLinkBuilder.linkTo(methodOn(SkipperController.class).install(null)).withRel("install"));
-		resource.add(ControllerLinkBuilder.linkTo(methodOn(SkipperController.class).install(null, null)).withRel("install-with-package-id"));
-		resource.add(ControllerLinkBuilder.linkTo(methodOn(SkipperController.class).status(null)).withRel("status"));
-		resource.add(ControllerLinkBuilder.linkTo(methodOn(SkipperController.class).status(null, 123)).withRel("status-by-name-and-version"));
-		resource.add(ControllerLinkBuilder.linkTo(methodOn(SkipperController.class).manifest(null)).withRel("manifest"));
-		resource.add(ControllerLinkBuilder.linkTo(methodOn(SkipperController.class).manifest(null, 123)).withRel("manifest-by-name-and-version"));
+		resource.add(ControllerLinkBuilder.linkTo(methodOn(SkipperController.class).install(null, null))
+				.withRel("install/id"));
+		resource.add(
+				ControllerLinkBuilder.linkTo(methodOn(SkipperController.class).status(null)).withRel("status/name"));
+		resource.add(ControllerLinkBuilder.linkTo(methodOn(SkipperController.class).status(null, 123))
+				.withRel("status/name/version"));
+		resource.add(
+				ControllerLinkBuilder.linkTo(methodOn(SkipperController.class).manifest(null)).withRel("manifest"));
+		resource.add(ControllerLinkBuilder.linkTo(methodOn(SkipperController.class).manifest(null, 123))
+				.withRel("manifest/name/version"));
 		resource.add(ControllerLinkBuilder.linkTo(methodOn(SkipperController.class).upgrade(null)).withRel("upgrade"));
-		resource.add(ControllerLinkBuilder.linkTo(methodOn(SkipperController.class).rollback(null, -1)).withRel("rollback"));
+		resource.add(
+				ControllerLinkBuilder.linkTo(methodOn(SkipperController.class).rollback(null, 123))
+						.withRel("rollback"));
 		resource.add(ControllerLinkBuilder.linkTo(methodOn(SkipperController.class).delete(null)).withRel("delete"));
-		resource.add(ControllerLinkBuilder.linkTo(methodOn(SkipperController.class).history(null, 123)).withRel("history"));
+		resource.add(
+				ControllerLinkBuilder.linkTo(methodOn(SkipperController.class).history(null, 123)).withRel("history"));
 		resource.add(ControllerLinkBuilder.linkTo(methodOn(SkipperController.class).list()).withRel("list"));
-		resource.add(ControllerLinkBuilder.linkTo(methodOn(SkipperController.class).list(null)).withRel("list-by-name"));
+		resource.add(ControllerLinkBuilder.linkTo(methodOn(SkipperController.class).list(null)).withRel("list/name"));
 		return resource;
 	}
 }

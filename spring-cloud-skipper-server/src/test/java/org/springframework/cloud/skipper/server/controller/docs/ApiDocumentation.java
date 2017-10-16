@@ -34,6 +34,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 /**
  * @author Gunnar Hillert
+ * @author Ilayaperumal Gopinathan
  */
 public class ApiDocumentation extends BaseDocumentation {
 
@@ -68,27 +69,28 @@ public class ApiDocumentation extends BaseDocumentation {
 	public void index() throws Exception {
 		this.mockMvc.perform(get("/")).andExpect(status().isOk()).andDo(this.documentationHandler.document(links(
 			linkWithRel("about").description("Provides meta information of the server"),
-			linkWithRel("upload").description("Upload a package"),
-			linkWithRel("install").description("Install a package"),
-			linkWithRel("install-with-package-id").description("Install a package by also providing the package id"),
+			linkWithRel("upload").description("Uploads a package"),
+			linkWithRel("install").description("Installs a package"),
+			linkWithRel("install/id").description("Installs a package by also providing the package id"),
 			linkWithRel("appDeployerDatas").description("Exposes App Deployer Data"),
 			linkWithRel("repositories").description("Exposes package repositories"),
 			linkWithRel("deployers").description("Exposes deployer"),
 			linkWithRel("releases").description("Exposes release information"),
 			linkWithRel("packageMetadata").description("Provides details for Package Metadata"),
 			linkWithRel("profile").description("Entrypoint to provide ALPS metadata defining simple descriptions of application-level semantics"),
-
-			linkWithRel("status").description("Status for a last known release version"),
-			linkWithRel("status-by-name-and-version").description("Status for a last known release version by release name"),
-
+			linkWithRel("status/name").description("Get the status for the last known release version of the release "
+					+ "by the given release name"),
+			linkWithRel("status/name/version").description("Get the status for the release by the given release name "
+					+ "and version"),
 			linkWithRel("manifest").description("Get a release's manifest"),
-			linkWithRel("manifest-by-name-and-version").description("Get a release's manifest by providing name and version"),
+			linkWithRel("manifest/name/version").description("Get a release's manifest by providing name and version"),
 			linkWithRel("upgrade").description("Upgrade a release"),
 			linkWithRel("rollback").description("Rollback the release to a previous or a specific release"),
 			linkWithRel("delete").description("Delete the release"),
 			linkWithRel("history").description("List the history of versions for a given release"),
 			linkWithRel("list").description("List the latest version of releases with status of deployed or failed"),
-			linkWithRel("list-by-name").description("List the latest version of releases by release name with status of deployed or failed")
+			linkWithRel("list/name").description("List the latest version of releases by release name with status of "
+					+ "deployed or failed")
 		)));
 	}
 }
