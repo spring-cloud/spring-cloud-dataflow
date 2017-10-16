@@ -86,4 +86,11 @@ public class ReleaseRepositoryImpl implements ReleaseRepositoryCustom {
 		}
 		return releases;
 	}
+
+	@Override
+	public Release findLatestReleaseIfDeleted(String releaseName) {
+		Release latestRelease = this.releaseRepository.findTopByNameOrderByVersionDesc(releaseName);
+		return (latestRelease != null &&
+				latestRelease.getInfo().getStatus().getStatusCode().equals(StatusCode.DELETED)) ? latestRelease : null;
+	}
 }

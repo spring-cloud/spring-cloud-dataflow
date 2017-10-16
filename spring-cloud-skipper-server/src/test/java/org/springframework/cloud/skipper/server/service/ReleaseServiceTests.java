@@ -126,9 +126,97 @@ public class ReleaseServiceTests extends AbstractIntegrationTest {
 		packageIdentifier.setPackageName("log");
 		packageIdentifier.setPackageVersion("1.0.0");
 		installRequest.setPackageIdentifier(packageIdentifier);
-		releaseService.install(installRequest);
-		Info info = releaseService.status("testexists");
+		this.releaseService.install(installRequest);
+		Info info = this.releaseService.status("testexists");
 		assertThat(info).isNotNull();
+	}
+
+	@Test
+	public void testInstallReleaseThatIsNotDeleted() {
+		InstallProperties installProperties = new InstallProperties();
+		String releaseName = "installDeployedRelease";
+		installProperties.setReleaseName(releaseName);
+		installProperties.setPlatformName("default");
+		InstallRequest installRequest = new InstallRequest();
+		installRequest.setInstallProperties(installProperties);
+		PackageIdentifier packageIdentifier = new PackageIdentifier();
+		packageIdentifier.setPackageName("log");
+		packageIdentifier.setPackageVersion("1.0.0");
+		installRequest.setPackageIdentifier(packageIdentifier);
+		Release release = this.releaseService.install(installRequest);
+		assertThat(release).isNotNull();
+
+		//Now let's install it a second time.
+		try {
+			this.releaseService.install(installRequest);
+			fail("Expected to fail when installing already deployed release.");
+		}
+		catch (SkipperException e) {
+			assertThat(e.getMessage()).isEqualTo("Release with the name [" + releaseName + "] already exists "
+					+ "and it is not deleted.");
+		}
+	}
+
+	@Test
+	public void testInstallDeletedRelease() {
+		InstallProperties installProperties = new InstallProperties();
+		String releaseName = "deletedRelease";
+		installProperties.setReleaseName(releaseName);
+		installProperties.setPlatformName("default");
+		InstallRequest installRequest = new InstallRequest();
+		installRequest.setInstallProperties(installProperties);
+		PackageIdentifier packageIdentifier = new PackageIdentifier();
+		packageIdentifier.setPackageName("log");
+		packageIdentifier.setPackageVersion("1.0.0");
+		installRequest.setPackageIdentifier(packageIdentifier);
+		// Install
+		Release release = releaseService.install(installRequest);
+		assertThat(release).isNotNull();
+		// Delete
+		this.releaseService.delete(releaseName);
+		// Install again
+		Release release2 = releaseService.install(installRequest);
+		assertThat(release2.getVersion()).isEqualTo(2);
+	}
+
+	@Test
+	public void testRollbackDeletedRelease() {
+		InstallProperties installProperties = new InstallProperties();
+		String releaseName = "rollbackDeletedRelease";
+		installProperties.setReleaseName(releaseName);
+		installProperties.setPlatformName("default");
+		InstallRequest installRequest = new InstallRequest();
+		installRequest.setInstallProperties(installProperties);
+		PackageIdentifier packageIdentifier = new PackageIdentifier();
+		packageIdentifier.setPackageName("log");
+		packageIdentifier.setPackageVersion("1.0.0");
+		installRequest.setPackageIdentifier(packageIdentifier);
+		// Install
+		Release release = releaseService.install(installRequest);
+		assertThat(release).isNotNull();
+		assertThat(release.getVersion()).isEqualTo(1);
+
+		// Upgrade
+		UpgradeProperties upgradeProperties = new UpgradeProperties();
+		upgradeProperties.setReleaseName(releaseName);
+		UpgradeRequest upgradeRequest = new UpgradeRequest();
+		upgradeRequest.setUpgradeProperties(upgradeProperties);
+		packageIdentifier = new PackageIdentifier();
+		String packageName = "log";
+		String packageVersion = "2.0.0";
+		packageIdentifier.setPackageName(packageName);
+		packageIdentifier.setPackageVersion(packageVersion);
+		upgradeRequest.setPackageIdentifier(packageIdentifier);
+		Release upgradedRelease = releaseService.upgrade(upgradeRequest);
+		assertThat(upgradedRelease.getVersion()).isEqualTo(2);
+
+		// Delete
+		this.releaseService.delete(releaseName);
+
+		// Rollback
+		Release rolledBackRelease = this.releaseService.rollback(releaseName, 0);
+		assertThat(rolledBackRelease.getManifest()).isEqualTo(upgradedRelease.getManifest());
+
 	}
 
 	@Test

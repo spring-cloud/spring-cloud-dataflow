@@ -19,7 +19,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
+import org.springframework.cloud.deployer.spi.app.AppStatus;
+import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.Status;
@@ -40,6 +45,8 @@ import org.springframework.cloud.skipper.server.repository.ReleaseRepository;
  * @author Mark Pollack
  */
 public class SimpleRedBlackUpgradeStrategy implements UpgradeStrategy {
+
+	private final Logger logger = LoggerFactory.getLogger(SimpleRedBlackUpgradeStrategy.class);
 
 	private final ReleaseRepository releaseRepository;
 
@@ -85,8 +92,7 @@ public class SimpleRedBlackUpgradeStrategy implements UpgradeStrategy {
 
 		// Carry over the applicationDeployment information for apps that were not updated.
 		AppDeployerData existingAppDeployerData = this.appDeployerDataRepository.findByReleaseNameAndReleaseVersion(
-				existingRelease.getName(),
-				existingRelease.getVersion());
+				existingRelease.getName(), existingRelease.getVersion());
 		Map<String, String> existingAppNamesAndDeploymentIds = existingAppDeployerData.getDeploymentDataAsMap();
 
 		for (Map.Entry<String, String> existingEntry : existingAppNamesAndDeploymentIds.entrySet()) {
@@ -133,7 +139,15 @@ public class SimpleRedBlackUpgradeStrategy implements UpgradeStrategy {
 
 		for (Map.Entry<String, String> appNameAndDeploymentId : appNamesAndDeploymentIds.entrySet()) {
 			if (applicationNamesToDelete.contains(appNameAndDeploymentId.getKey())) {
-				appDeployer.undeploy(appNameAndDeploymentId.getValue());
+				AppStatus appStatus = appDeployer.status(appNameAndDeploymentId.getValue());
+				if (appStatus.getState().equals(DeploymentState.deployed)) {
+					appDeployer.undeploy(appNameAndDeploymentId.getValue());
+				}
+				else {
+					logger.warn("For Release name {}, did not undeploy existing app {} as it status is not 'deployed'.",
+							release.getName(),
+							appNameAndDeploymentId.getKey());
+				}
 			}
 		}
 

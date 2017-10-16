@@ -32,8 +32,6 @@ public interface ReleaseManager {
 
 	Release upgrade(Release existingRelease, Release replacingRelease, String upgradeStrategyName);
 
-	// Release rollback(Release existingRelease, Release replacingRelease);
-
 	Release delete(Release release);
 
 	Release status(Release release);

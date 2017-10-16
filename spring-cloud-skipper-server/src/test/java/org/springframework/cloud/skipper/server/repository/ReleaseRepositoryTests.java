@@ -114,10 +114,42 @@ public class ReleaseRepositoryTests extends AbstractIntegrationTest {
 		release5.setInfo(failedInfo);
 		this.releaseRepository.save(release5);
 
+		Release release6 = new Release();
+		release6.setName("multipleDeleted");
+		release6.setVersion(1);
+		release6.setPlatformName("platform2");
+		release6.setPkg(pkg1);
+		release6.setInfo(deployedInfo);
+		this.releaseRepository.save(release6);
+
+		Release release7 = new Release();
+		release7.setName(release6.getName());
+		release7.setVersion(2);
+		release7.setPlatformName(release6.getPlatformName());
+		release7.setPkg(pkg2);
+		release7.setInfo(deletedInfo);
+		this.releaseRepository.save(release7);
+
+		Release release8 = new Release();
+		release8.setName(release6.getName());
+		release8.setVersion(3);
+		release8.setPlatformName(release6.getPlatformName());
+		release8.setPkg(pkg2);
+		release8.setInfo(failedInfo);
+		this.releaseRepository.save(release8);
+
+		Release release9 = new Release();
+		release9.setName(release6.getName());
+		release9.setVersion(4);
+		release9.setPlatformName(release6.getPlatformName());
+		release9.setPkg(pkg2);
+		release9.setInfo(deletedInfo);
+		this.releaseRepository.save(release9);
+
 		// findAll
 		Iterable<Release> releases = this.releaseRepository.findAll();
 		assertThat(releases).isNotEmpty();
-		assertThat(releases).hasSize(5);
+		assertThat(releases).hasSize(9);
 
 		// findByNameAndVersion
 		Release foundByNameAndVersion = this.releaseRepository.findByNameAndVersion(release1.getName(), 2);
@@ -178,7 +210,13 @@ public class ReleaseRepositoryTests extends AbstractIntegrationTest {
 
 		List<Release> deployedOrFailedAll = this.releaseRepository.findLatestDeployedOrFailed("");
 		assertThat(deployedOrFailedAll).isNotEmpty();
-		assertThat(deployedOrFailedAll).hasSize(2);
+		assertThat(deployedOrFailedAll).hasSize(4);
+
+		Release latestDeletedRelease1 = this.releaseRepository.findLatestReleaseIfDeleted(release1.getName());
+		assertThat(latestDeletedRelease1).isNull();
+
+		Release latestDeletedRelease2 = this.releaseRepository.findLatestReleaseIfDeleted(release6.getName());
+		assertThat(latestDeletedRelease2.getVersion()).isEqualTo(4);
 	}
 
 	@Test

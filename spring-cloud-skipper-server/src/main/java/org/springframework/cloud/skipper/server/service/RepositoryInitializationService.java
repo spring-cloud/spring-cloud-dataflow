@@ -30,7 +30,7 @@ import org.springframework.cloud.skipper.server.repository.RepositoryRepository;
 import org.springframework.context.event.EventListener;
 
 /**
- * Takes respository application configuration properties and udpates the Repository
+ * Takes repository application configuration properties and update the Repository
  * database on application startup. Entries are only created if no existing Repository
  * with the same name exists.
  *

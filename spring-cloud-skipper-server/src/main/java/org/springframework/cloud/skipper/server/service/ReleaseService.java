@@ -153,9 +153,14 @@ public class ReleaseService {
 		Assert.isTrue(StringUtils.hasText(installRequest.getPackageIdentifier().getPackageName()),
 				"Package name must not be empty");
 		try {
-			Release release = this.releaseRepository.findLatestRelease(installRequest.getInstallProperties()
+			Release latestRelease = this.releaseRepository.findLatestRelease(installRequest.getInstallProperties()
 					.getReleaseName());
-			throw new SkipperException("Release with the name [" + release.getName() + "] already exists.");
+			if (latestRelease != null &&
+					!latestRelease.getInfo().getStatus().getStatusCode().equals(StatusCode.DELETED)) {
+				throw new SkipperException("Release with the name [" +
+						installRequest.getInstallProperties().getReleaseName()
+						+ "] already exists and it is not deleted.");
+			}
 		}
 		catch (ReleaseNotFoundException e) {
 			// ignore as this is expected.
@@ -164,7 +169,19 @@ public class ReleaseService {
 
 	protected Release install(PackageMetadata packageMetadata, InstallProperties installProperties) {
 		Assert.notNull(packageMetadata, "Can't download package, PackageMetadata is a null value.");
-		Release release = createInitialRelease(installProperties, this.packageService.downloadPackage(packageMetadata));
+		Release existingDeletedRelease = this.releaseRepository
+				.findLatestReleaseIfDeleted(installProperties.getReleaseName());
+		int releaseVersion;
+		if (existingDeletedRelease != null) {
+			logger.info("Re-using existing release name [{}] of previously deleted release.",
+					installProperties.getReleaseName());
+			releaseVersion = existingDeletedRelease.getVersion() + 1;
+		}
+		else {
+			releaseVersion = 1;
+		}
+		Release release = createInitialRelease(installProperties, this.packageService.downloadPackage(packageMetadata),
+				releaseVersion);
 		return install(release);
 	}
 
@@ -269,9 +286,7 @@ public class ReleaseService {
 	public Release upgrade(Release existingRelease, Release replacingRelease) {
 		Assert.notNull(existingRelease, "Existing Release must not be null");
 		Assert.notNull(replacingRelease, "Replacing Release must not be null");
-
 		Release release = this.releaseManager.upgrade(existingRelease, replacingRelease, "simple");
-
 		return status(release);
 	}
 
@@ -293,8 +308,14 @@ public class ReleaseService {
 
 		int rollbackVersionToUse = rollbackVersion;
 		if (rollbackVersion == 0) {
-			rollbackVersionToUse = currentRelease.getVersion() - 1;
+			if (currentRelease.getInfo().getStatus().getStatusCode().equals(StatusCode.DELETED)) {
+				rollbackVersionToUse = currentRelease.getVersion();
+			}
+			else {
+				rollbackVersionToUse = currentRelease.getVersion() - 1;
+			}
 		}
+
 		Assert.isTrue(rollbackVersionToUse != 0, "Can not rollback to before version 1");
 
 		Release releaseToRollback = this.releaseRepository.findByNameAndVersion(releaseName, rollbackVersionToUse);
@@ -313,16 +334,23 @@ public class ReleaseService {
 		// Do not set ConfigValues since the manifest from the previous release has
 		// already resolved those...
 		newRollbackRelease.setInfo(createNewInfo());
-		return upgrade(currentRelease, newRollbackRelease);
+		if (currentRelease.getInfo().getStatus().getStatusCode().equals(StatusCode.DELETED)) {
+			// Since the current release is not deployed, we just do a new install.
+			return install(newRollbackRelease);
+		}
+		else {
+			return upgrade(currentRelease, newRollbackRelease);
+		}
 	}
 
-	protected Release createInitialRelease(InstallProperties installProperties, Package packageToInstall) {
+	protected Release createInitialRelease(InstallProperties installProperties, Package packageToInstall,
+			int releaseVersion) {
 		Release release = new Release();
 		release.setName(installProperties.getReleaseName());
 		release.setPlatformName(installProperties.getPlatformName());
 		release.setConfigValues(installProperties.getConfigValues());
 		release.setPkg(packageToInstall);
-		release.setVersion(1);
+		release.setVersion(releaseVersion);
 		Info info = createNewInfo();
 		release.setInfo(info);
 		validateInitialRelease(release);
