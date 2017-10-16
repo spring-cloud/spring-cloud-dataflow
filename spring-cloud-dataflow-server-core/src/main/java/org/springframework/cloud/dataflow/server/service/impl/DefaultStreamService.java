@@ -78,8 +78,8 @@ public class DefaultStreamService implements StreamService {
 
 	/**
 	 * This is the spring boot property key that Spring Cloud Stream uses to filter the
-	 * metrics to import when the specific Spring Cloud Stream "applicaiton" trigger is fired
-	 * for metrics export.
+	 * metrics to import when the specific Spring Cloud Stream "applicaiton" trigger is
+	 * fired for metrics export.
 	 */
 	private static final String METRICS_TRIGGER_INCLUDES = "spring.metrics.export.triggers.application.includes";
 
@@ -141,6 +141,24 @@ public class DefaultStreamService implements StreamService {
 		deployStreamWithDefinition(createStreamDefinitionForDeploy(name, deploymentProperties), deploymentProperties);
 	}
 
+	@Override
+	public void undeployStream(String streamName) {
+		StreamDeployment streamDeployment = this.streamDeploymentRepository.findOne(streamName);
+		if (streamDeployment != null) {
+			switch (StreamDeployers.valueOf(streamDeployment.getDeployerName())) {
+			case appdeployer: {
+				this.appDeployerStreamDeployer.undeployStream(streamName);
+				break;
+			}
+			case skipper: {
+				this.skipperStreamDeployer.undeployStream(streamName);
+				break;
+			}
+			}
+			this.streamDeploymentRepository.delete(streamName);
+		}
+	}
+
 	private StreamDefinition createStreamDefinitionForDeploy(String name,
 			Map<String, String> deploymentProperties) {
 		StreamDefinition streamDefinition = this.streamDefinitionRepository.findOne(name);
@@ -151,10 +169,10 @@ public class DefaultStreamService implements StreamService {
 		Map<String, String> skipperDeploymentProperties = getSkipperProperties(deploymentProperties);
 		String status;
 		if (skipperDeploymentProperties.containsKey(SkipperStreamDeployer.SKIPPER_ENABLED_PROPERTY_KEY)) {
-			status = skipperStreamDeployer.calculateStreamState(name);
+			status = this.skipperStreamDeployer.calculateStreamState(name);
 		}
 		else {
-			status = appDeployerStreamDeployer.calculateStreamState(name);
+			status = this.appDeployerStreamDeployer.calculateStreamState(name);
 		}
 
 		if (DeploymentState.deployed.equals(DeploymentState.valueOf(status))) {
@@ -281,8 +299,8 @@ public class DefaultStreamService implements StreamService {
 	 *
 	 * @param appDefinition the {@link StreamAppDefinition} for which to return a map of
 	 * properties
-	 * @param streamDeploymentProperties deployment properties for the stream that the app is
-	 * defined in
+	 * @param streamDeploymentProperties deployment properties for the stream that the app
+	 * is defined in
 	 * @return map of properties for an app
 	 */
 	private Map<String, String> extractAppProperties(StreamAppDefinition appDefinition,
@@ -306,8 +324,8 @@ public class DefaultStreamService implements StreamService {
 	}
 
 	/**
-	 * Return {@code true} if the upstream app (the app that appears before the provided app)
-	 * contains partition related properties.
+	 * Return {@code true} if the upstream app (the app that appears before the provided
+	 * app) contains partition related properties.
 	 *
 	 * @param stream stream for the app
 	 * @param currentApp app for which to determine if the upstream app has partition
@@ -354,9 +372,9 @@ public class DefaultStreamService implements StreamService {
 	}
 
 	/**
-	 * Return a new app definition where definition-time and deploy-time properties have been
-	 * merged and short form parameters have been expanded to their long form (amongst the
-	 * whitelisted supported properties of the app) if applicable.
+	 * Return a new app definition where definition-time and deploy-time properties have
+	 * been merged and short form parameters have been expanded to their long form
+	 * (amongst the whitelisted supported properties of the app) if applicable.
 	 */
 	/* default */ AppDefinition mergeAndExpandAppProperties(StreamAppDefinition original, Resource metadataResource,
 			Map<String, String> appDeployTimeProperties) {
@@ -375,8 +393,8 @@ public class DefaultStreamService implements StreamService {
 	 * Add app properties for producing partitioned data to the provided properties.
 	 *
 	 * @param properties properties to update
-	 * @param nextInstanceCount the number of instances for the next (downstream) app in the
-	 * stream
+	 * @param nextInstanceCount the number of instances for the next (downstream) app in
+	 * the stream
 	 */
 	private void updateProducerPartitionProperties(Map<String, String> properties, int nextInstanceCount) {
 		properties.put(BindingPropertyKeys.OUTPUT_PARTITION_COUNT, String.valueOf(nextInstanceCount));
@@ -398,8 +416,8 @@ public class DefaultStreamService implements StreamService {
 	 * Return the app instance count indicated in the provided properties.
 	 *
 	 * @param properties deployer properties for the app for which to determine the count
-	 * @return instance count indicated in the provided properties; if the properties do not
-	 * contain a count, a value of {@code 1} is returned
+	 * @return instance count indicated in the provided properties; if the properties do
+	 * not contain a count, a value of {@code 1} is returned
 	 */
 	private int getInstanceCount(Map<String, String> properties) {
 		return Integer.valueOf(properties.getOrDefault(COUNT_PROPERTY_KEY, "1"));
@@ -407,8 +425,8 @@ public class DefaultStreamService implements StreamService {
 
 	/**
 	 * Return {@code true} if an app is a consumer of partitioned data. This is determined
-	 * either by the deployment properties for the app or whether the previous (upstream) app
-	 * is publishing partitioned data.
+	 * either by the deployment properties for the app or whether the previous (upstream)
+	 * app is publishing partitioned data.
 	 *
 	 * @param appDeploymentProperties deployment properties for the app
 	 * @param upstreamAppSupportsPartition if true, previous (upstream) app in the stream
@@ -429,7 +447,7 @@ public class DefaultStreamService implements StreamService {
 		Map<StreamDefinition, DeploymentState> states = new HashMap<>();
 		List<StreamDefinition> skipperStreams = new ArrayList<>();
 		List<StreamDefinition> appDeployerStreams = new ArrayList<>();
-		for (StreamDefinition streamDefinition: streamDefinitions) {
+		for (StreamDefinition streamDefinition : streamDefinitions) {
 			StreamDeployment streamDeployment = this.streamDeploymentRepository.findOne(streamDefinition.getName());
 			if (streamDeployment == null) {
 				states.put(streamDefinition, DeploymentState.unknown);
@@ -438,7 +456,7 @@ public class DefaultStreamService implements StreamService {
 				if (streamDeployment.getDeployerName().equals(StreamDeployers.skipper.name())) {
 					skipperStreams.add(streamDefinition);
 				}
-				else if (streamDeployment.getDeployerName().equals(StreamDeployers.appdeployer.name())){
+				else if (streamDeployment.getDeployerName().equals(StreamDeployers.appdeployer.name())) {
 					appDeployerStreams.add(streamDefinition);
 				}
 				else {

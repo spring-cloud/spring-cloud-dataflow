@@ -307,6 +307,12 @@ public class SkipperStreamDeployer implements StreamDeployer {
 		return templateList;
 	}
 
+	@Override
+	public void undeployStream(String streamName) {
+		String releaseName = "my" + streamName;
+		this.skipperClient.delete(releaseName);
+	}
+
 	public void upgradeStream(String name, String releaseName, PackageIdentifier packageIdentifier, String yaml) {
 		UpgradeRequest upgradeRequest = new UpgradeRequest();
 		upgradeRequest.setPackageIdentifier(packageIdentifier);

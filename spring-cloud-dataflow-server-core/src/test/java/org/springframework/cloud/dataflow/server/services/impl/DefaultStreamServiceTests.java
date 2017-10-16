@@ -113,6 +113,34 @@ public class DefaultStreamServiceTests {
 	}
 
 	@Test
+	public void verifyUndeployStream() {
+		StreamDeploymentRepository streamDeploymentRepository = mock(StreamDeploymentRepository.class);
+		AppDeployerStreamDeployer appDeployerStreamDeployer = mock(AppDeployerStreamDeployer.class);
+		SkipperStreamDeployer skipperStreamDeployer = mock(SkipperStreamDeployer.class);
+		DefaultStreamService defaultStreamService = new DefaultStreamService(mock(AppRegistry.class),
+				mock(CommonApplicationProperties.class),
+				mock(ApplicationConfigurationMetadataResolver.class),
+				mock(StreamDefinitionRepository.class),
+				streamDeploymentRepository, appDeployerStreamDeployer, skipperStreamDeployer);
+		StreamDefinition streamDefinition1 = new StreamDefinition("test1", "time | log");
+		StreamDeployment streamDeployment1 = new StreamDeployment(streamDefinition1.getName(),
+				StreamDeployers.appdeployer.name(), null, null, null);
+		StreamDefinition streamDefinition2 = new StreamDefinition("test2", "time | log");
+		StreamDeployment streamDeployment2 = new StreamDeployment(streamDefinition2.getName(),
+				StreamDeployers.skipper.name(), "pkg1", "release1", "local");
+		when(streamDeploymentRepository.findOne(streamDeployment1.getStreamName())).thenReturn(streamDeployment1);
+		when(streamDeploymentRepository.findOne(streamDeployment2.getStreamName())).thenReturn(streamDeployment2);
+		defaultStreamService.undeployStream(streamDefinition1.getName());
+		verify(appDeployerStreamDeployer, times(1)).undeployStream(streamDefinition1.getName());
+		verifyNoMoreInteractions(appDeployerStreamDeployer);
+		verify(skipperStreamDeployer, never()).undeployStream(streamDefinition1.getName());
+		defaultStreamService.undeployStream(streamDefinition2.getName());
+		verify(skipperStreamDeployer, times(1)).undeployStream(streamDefinition2.getName());
+		verifyNoMoreInteractions(skipperStreamDeployer);
+		verify(appDeployerStreamDeployer, never()).undeployStream(streamDefinition2.getName());
+	}
+
+	@Test
 	public void verifyAppDeployerUpgrade() {
 		try {
 			defaultStreamService.upgradeStream(streamDeployment1.getStreamName(), streamDeployment1.getReleaseName(),

@@ -16,7 +16,6 @@
 
 package org.springframework.cloud.dataflow.server.controller;
 
-import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -29,14 +28,11 @@ import org.springframework.cloud.dataflow.rest.UpdateStreamRequest;
 import org.springframework.cloud.dataflow.rest.resource.StreamDeploymentResource;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
-import org.springframework.cloud.dataflow.server.repository.DeploymentKey;
 import org.springframework.cloud.dataflow.server.repository.NoSuchStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.StreamDeploymentRepository;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultStreamService;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
-import org.springframework.cloud.deployer.spi.app.AppStatus;
-import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.core.io.Resource;
 import org.springframework.hateoas.ExposesResourceFor;
@@ -159,7 +155,7 @@ public class StreamDeploymentController {
 		if (stream == null) {
 			throw new NoSuchStreamDefinitionException(name);
 		}
-		undeployStream(stream);
+		this.defaultStreamService.undeployStream(name);
 	}
 
 	/**
@@ -169,7 +165,7 @@ public class StreamDeploymentController {
 	@ResponseStatus(HttpStatus.OK)
 	public void undeployAll() {
 		for (StreamDefinition stream : this.repository.findAll()) {
-			this.undeployStream(stream);
+			this.defaultStreamService.undeployStream(stream.getName());
 		}
 	}
 
@@ -218,27 +214,6 @@ public class StreamDeploymentController {
 		merged.putIfAbsent(METRICS_TRIGGER_INCLUDES, "integration**");
 
 		return new AppDefinition(original.getName(), merged);
-	}
-
-	/**
-	 * Undeploy the given stream.
-	 *
-	 * @param stream stream to undeploy
-	 */
-	private void undeployStream(StreamDefinition stream) {
-		for (StreamAppDefinition appDefinition : stream.getAppDefinitions()) {
-			String key = DeploymentKey.forStreamAppDefinition(appDefinition);
-			String id = this.deploymentIdRepository.findOne(key);
-			// if id is null, assume nothing is deployed
-			if (id != null) {
-				AppStatus status = this.deployer.status(id);
-				if (!EnumSet.of(DeploymentState.unknown, DeploymentState.undeployed).contains(status.getState())) {
-					this.deployer.undeploy(id);
-				}
-				this.deploymentIdRepository.delete(key);
-			}
-		}
-		this.streamDeploymentRepository.delete(stream.getName());
 	}
 
 }

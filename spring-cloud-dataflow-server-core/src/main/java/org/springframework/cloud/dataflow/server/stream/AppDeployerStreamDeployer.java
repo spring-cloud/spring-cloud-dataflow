@@ -119,6 +119,24 @@ public class AppDeployerStreamDeployer implements StreamDeployer {
 	}
 
 	@Override
+	public void undeployStream(String streamName) {
+		StreamDefinition streamDefinition = this.streamDefinitionRepository.findOne(streamName);
+		for (StreamAppDefinition appDefinition : streamDefinition.getAppDefinitions()) {
+			String key = DeploymentKey.forStreamAppDefinition(appDefinition);
+			String id = this.deploymentIdRepository.findOne(key);
+			// if id is null, assume nothing is deployed
+			if (id != null) {
+				AppStatus status = this.appDeployer.status(id);
+				if (!EnumSet.of(DeploymentState.unknown, DeploymentState.undeployed).contains(status.getState())) {
+					this.appDeployer.undeploy(id);
+				}
+				this.deploymentIdRepository.delete(key);
+			}
+		}
+		this.streamDeploymentRepository.delete(streamDefinition.getName());
+	}
+
+	@Override
 	public String calculateStreamState(String streamName) {
 		Set<DeploymentState> appStates = EnumSet.noneOf(DeploymentState.class);
 		StreamDefinition stream = this.streamDefinitionRepository.findOne(streamName);
