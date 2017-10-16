@@ -22,9 +22,10 @@ import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
 
 /**
- * SPI for deploying the apps in a stream and providing information about the status of
- * those deployed apps.
+ * SPI for handling deployment related operations on the apps in a stream.
+ *
  * @author Mark Pollack
+ * @author Ilayaperumal Gopinathan
  */
 public interface StreamDeployer {
 
@@ -36,5 +37,12 @@ public interface StreamDeployer {
 	String calculateStreamState(String streamName);
 
 	Map<StreamDefinition, DeploymentState> state(List<StreamDefinition> content);
+
+	/**
+	 * Undeploys the stream identified by the given stream name.
+	 *
+	 * @param name the name of the stream to un-deploy
+	 */
+	void undeployStream(String name);
 
 }

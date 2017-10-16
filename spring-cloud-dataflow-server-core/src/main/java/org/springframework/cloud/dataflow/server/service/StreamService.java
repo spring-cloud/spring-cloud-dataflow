@@ -22,19 +22,27 @@ import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
 
 /**
- * Deploys the specified stream. Implementations are responsible for expanding deployment
- * wildcard expressions.
+ * Specify the supported operations on the stream.
  *
  * @author Mark Pollack
+ * @author Ilayaperumal Gopinathan
  */
 public interface StreamService {
 	/**
-	 * Deploys the stream with the user provided deployment properites.
+	 * Deploys the stream with the user provided deployment properties.
+	 * Implementations are responsible for expanding deployment wildcard expressions.
 	 * @param name the name of the stream
 	 * @param deploymentProperties deployment properties to use as passed in from the client.
 	 */
 	void deployStream(String name, Map<String, String> deploymentProperties);
 
 	Map<StreamDefinition, DeploymentState> state(List<StreamDefinition> content);
+
+	/**
+	 * Un-deploys the stream identified by the given stream name.
+	 *
+	 * @param name the name of the stream to un-deploy
+	 */
+	void undeployStream(String name);
 
 }

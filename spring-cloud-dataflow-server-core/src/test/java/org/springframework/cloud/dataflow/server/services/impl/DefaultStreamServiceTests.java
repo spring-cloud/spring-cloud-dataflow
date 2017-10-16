@@ -76,21 +76,24 @@ public class DefaultStreamServiceTests {
 
 	private List<StreamDefinition> skipperStreamDefinitions = new ArrayList<>();
 
-	private StreamDeploymentRepository streamDeploymentRepository = mock(StreamDeploymentRepository.class);
+	private StreamDeploymentRepository streamDeploymentRepository ;
 
-	private AppDeployerStreamDeployer appDeployerStreamDeployer = mock(AppDeployerStreamDeployer.class);
+	private AppDeployerStreamDeployer appDeployerStreamDeployer;
 
-	private SkipperStreamDeployer skipperStreamDeployer = mock(SkipperStreamDeployer.class);
+	private SkipperStreamDeployer skipperStreamDeployer;
 
 	private DefaultStreamService defaultStreamService;
 
 	@Before
 	public void setupMock() {
+		this.streamDeploymentRepository = mock(StreamDeploymentRepository.class);
+		this.appDeployerStreamDeployer = mock(AppDeployerStreamDeployer.class);
+		this.skipperStreamDeployer = mock(SkipperStreamDeployer.class);
 		this.defaultStreamService = new DefaultStreamService(mock(AppRegistry.class),
 				mock(CommonApplicationProperties.class),
 				mock(ApplicationConfigurationMetadataResolver.class),
 				mock(StreamDefinitionRepository.class),
-				streamDeploymentRepository, appDeployerStreamDeployer, skipperStreamDeployer);
+				this.streamDeploymentRepository, this.appDeployerStreamDeployer, this.skipperStreamDeployer);
 		this.streamDefinitionList.add(streamDefinition1);
 		this.appDeployerStreamDefinitions.add(streamDefinition1);
 		this.streamDefinitionList.add(streamDefinition2);
@@ -104,18 +107,38 @@ public class DefaultStreamServiceTests {
 
 	@Test
 	public void verifyUpgradeStream() {
-		defaultStreamService.upgradeStream(streamDeployment2.getStreamName(), streamDeployment2.getReleaseName(),
+		this.defaultStreamService.upgradeStream(streamDeployment2.getStreamName(), streamDeployment2.getReleaseName(),
 				null, null);
-		verify(skipperStreamDeployer, times(1)).upgradeStream(streamDeployment2.getStreamName(),
-				streamDeployment2.getReleaseName(), null, null);
-		verifyNoMoreInteractions(skipperStreamDeployer);
-		verify(appDeployerStreamDeployer, never()).deployStream(any());
+		verify(this.skipperStreamDeployer, times(1)).upgradeStream(this.streamDeployment2.getStreamName(),
+				this.streamDeployment2.getReleaseName(), null, null);
+		verifyNoMoreInteractions(this.skipperStreamDeployer);
+		verify(this.appDeployerStreamDeployer, never()).deployStream(any());
+	}
+
+	@Test
+	public void verifyUndeployStream() {
+		StreamDefinition streamDefinition1 = new StreamDefinition("test1", "time | log");
+		StreamDeployment streamDeployment1 = new StreamDeployment(streamDefinition1.getName(),
+				StreamDeployers.appdeployer.name(), null, null, null);
+		StreamDefinition streamDefinition2 = new StreamDefinition("test2", "time | log");
+		StreamDeployment streamDeployment2 = new StreamDeployment(streamDefinition2.getName(),
+				StreamDeployers.skipper.name(), "pkg1", "release1", "local");
+		when(this.streamDeploymentRepository.findOne(streamDeployment1.getStreamName())).thenReturn(streamDeployment1);
+		when(this.streamDeploymentRepository.findOne(streamDeployment2.getStreamName())).thenReturn(streamDeployment2);
+		this.defaultStreamService.undeployStream(streamDefinition1.getName());
+		verify(this.appDeployerStreamDeployer, times(1)).undeployStream(streamDefinition1.getName());
+		verifyNoMoreInteractions(this.appDeployerStreamDeployer);
+		verify(this.skipperStreamDeployer, never()).undeployStream(streamDefinition1.getName());
+		this.defaultStreamService.undeployStream(streamDefinition2.getName());
+		verify(this.skipperStreamDeployer, times(1)).undeployStream(streamDefinition2.getName());
+		verifyNoMoreInteractions(this.skipperStreamDeployer);
+		verify(this.appDeployerStreamDeployer, never()).undeployStream(streamDefinition2.getName());
 	}
 
 	@Test
 	public void verifyAppDeployerUpgrade() {
 		try {
-			defaultStreamService.upgradeStream(streamDeployment1.getStreamName(), streamDeployment1.getReleaseName(),
+			this.defaultStreamService.upgradeStream(this.streamDeployment1.getStreamName(), this.streamDeployment1.getReleaseName(),
 					null, null);
 			fail("IllegalStateException is expected to be thrown.");
 		}
@@ -128,18 +151,18 @@ public class DefaultStreamServiceTests {
 	@Test
 	public void verifyDeploymentState() {
 		Map<StreamDefinition, DeploymentState> appDeployerStates = new HashMap<>();
-		appDeployerStates.put(streamDefinition1, DeploymentState.deployed);
-		when(appDeployerStreamDeployer.state(appDeployerStreamDefinitions)).thenReturn(appDeployerStates);
+		appDeployerStates.put(this.streamDefinition1, DeploymentState.deployed);
+		when(this.appDeployerStreamDeployer.state(this.appDeployerStreamDefinitions)).thenReturn(appDeployerStates);
 		Map<StreamDefinition, DeploymentState> skipperDeployerStates = new HashMap<>();
-		skipperDeployerStates.put(streamDefinition2, DeploymentState.undeployed);
-		skipperDeployerStates.put(streamDefinition3, DeploymentState.failed);
-		when(skipperStreamDeployer.state(skipperStreamDefinitions)).thenReturn(skipperDeployerStates);
-		Map<StreamDefinition, DeploymentState> states = defaultStreamService.state(streamDefinitionList);
+		skipperDeployerStates.put(this.streamDefinition2, DeploymentState.undeployed);
+		skipperDeployerStates.put(this.streamDefinition3, DeploymentState.failed);
+		when(this.skipperStreamDeployer.state(this.skipperStreamDefinitions)).thenReturn(skipperDeployerStates);
+		Map<StreamDefinition, DeploymentState> states = this.defaultStreamService.state(this.streamDefinitionList);
 		Assert.isTrue(states.size() == 3, "Deployment states size mismatch");
-		Assert.isTrue(states.get(streamDefinition1).equals(DeploymentState.deployed), "Deployment state is incorrect");
-		Assert.isTrue(states.get(streamDefinition2).equals(DeploymentState.undeployed),
+		Assert.isTrue(states.get(this.streamDefinition1).equals(DeploymentState.deployed), "Deployment state is incorrect");
+		Assert.isTrue(states.get(this.streamDefinition2).equals(DeploymentState.undeployed),
 				"Deployment state is incorrect");
-		Assert.isTrue(states.get(streamDefinition3).equals(DeploymentState.failed), "Deployment state is incorrect");
+		Assert.isTrue(states.get(this.streamDefinition3).equals(DeploymentState.failed), "Deployment state is incorrect");
 	}
 
 }

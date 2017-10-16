@@ -30,6 +30,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * Creates asciidoc snippets for endpoints exposed by {@literal RuntimeAppsController}.
  *
  * @author Eric Bottard
+ * @author Ilayaperumal Gopinathan
  */
 public class RuntimeAppsDocumentation extends BaseDocumentation {
 
