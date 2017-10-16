@@ -15,6 +15,7 @@
  */
 package org.springframework.cloud.dataflow.server.stream;
 
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -22,12 +23,14 @@ import java.util.Map;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
-import org.springframework.cloud.deployer.resource.docker.DockerResource;
 import org.springframework.cloud.dataflow.server.repository.StreamDeploymentRepository;
+import org.springframework.cloud.deployer.resource.docker.DockerResource;
 import org.springframework.cloud.deployer.resource.maven.MavenResource;
 import org.springframework.cloud.skipper.client.SkipperClient;
 import org.springframework.cloud.skipper.domain.InstallRequest;
 import org.springframework.cloud.skipper.domain.UploadRequest;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -37,6 +40,7 @@ import static org.mockito.Mockito.verify;
  * @author Mark Pollack
  * @author Soby Chacko
  * @author Ilayaperumal Gopinathan
+ * @author Glenn Renfro
  */
 public class SkipperStreamDeployerTests {
 
@@ -95,4 +99,22 @@ public class SkipperStreamDeployerTests {
 		assertThat(installRequestCaptor.getValue().getInstallProperties().getPlatformName()).isEqualTo("platform1");
 	}
 
+	@Test
+	public void testFileResourceProcessing() throws MalformedURLException{
+		Resource resource = new UrlResource("file:/springcloudstream/file-source-kafka-10-1.2.0.RELEASE.jar");
+		assertThat(SkipperStreamDeployer.getResourceWithoutVersion(resource)).isEqualTo("file:/springcloudstream/file-source-kafka-10.jar");
+		assertThat(SkipperStreamDeployer.getResourceVersion(resource)).isEqualTo("1.2.0.RELEASE");
+
+		resource = new UrlResource("file:/springcloudstream/file-source-kafka-10-1.2.0.BUILD-SNAPSHOT.jar");
+		assertThat(SkipperStreamDeployer.getResourceWithoutVersion(resource)).isEqualTo("file:/springcloudstream/file-source-kafka-10.jar");
+		assertThat(SkipperStreamDeployer.getResourceVersion(resource)).isEqualTo("1.2.0.BUILD-SNAPSHOT");
+
+		resource = new UrlResource("http://springcloudstream/file-source-kafka-10-1.2.0.RELEASE.jar");
+		assertThat(SkipperStreamDeployer.getResourceWithoutVersion(resource)).isEqualTo("http://springcloudstream/file-source-kafka-10.jar");
+		assertThat(SkipperStreamDeployer.getResourceVersion(resource)).isEqualTo("1.2.0.RELEASE");
+
+		resource = new UrlResource("http://springcloudstream/file-source-kafka-crap.jar");
+		assertThat(SkipperStreamDeployer.getResourceWithoutVersion(resource)).isEqualTo("http://springcloudstream/file-source-kafka.jar");
+		assertThat(SkipperStreamDeployer.getResourceVersion(resource)).isEqualTo("crap");
+	}
 }

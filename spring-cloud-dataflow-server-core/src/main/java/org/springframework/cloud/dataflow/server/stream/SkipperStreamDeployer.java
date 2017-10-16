@@ -74,6 +74,7 @@ import org.springframework.web.client.HttpStatusCodeException;
  * @author Mark Pollack
  * @author Ilayaperumal Gopinathan
  * @author Soby Chacko
+ * @author Glenn Renfro
  */
 public class SkipperStreamDeployer implements StreamDeployer {
 
@@ -102,7 +103,13 @@ public class SkipperStreamDeployer implements StreamDeployer {
 		this.streamDeploymentRepository = streamDeploymentRepository;
 	}
 
+	/**
+	 * Extracts the version from the resource.
+	 * @param resource to be used.
+	 * @return version the resource.
+	 */
 	public static String getResourceVersion(Resource resource) {
+		Assert.notNull(resource, "resource must not be null");
 		if (resource instanceof MavenResource) {
 			MavenResource mavenResource = (MavenResource) resource;
 			return mavenResource.getVersion();
@@ -111,13 +118,26 @@ public class SkipperStreamDeployer implements StreamDeployer {
 			DockerResource dockerResource = (DockerResource) resource;
 			return formatDockerResource(dockerResource, (s, i) -> s.substring(i + 1, s.length()));
 		}
-		else {
-			// TODO handle http resource
-			throw new IllegalArgumentException("Can't extract version from resource " + resource.getDescription());
+		return extractGenericVersion(resource);
+	}
+
+	private static String extractGenericVersion(Resource resource)  {
+		try {
+			String uri = resource.getURI().toString();
+			return uri.substring(getVersionIndex(uri) + 1, uri.lastIndexOf("."));
+		}
+		catch (IOException ioe) {
+			throw new RuntimeException(ioe);
 		}
 	}
 
+	/**
+	 * Extracts the string representing the resource with the version number extracted.
+	 * @param resource to be used.
+	 * @return String representation of the resource.
+	 */
 	public static String getResourceWithoutVersion(Resource resource) {
+		Assert.notNull(resource, "resource must not be null");
 		if (resource instanceof MavenResource) {
 			MavenResource mavenResource = (MavenResource) resource;
 			return String.format("maven://%s:%s",
@@ -128,10 +148,7 @@ public class SkipperStreamDeployer implements StreamDeployer {
 			DockerResource dockerResource = (DockerResource) resource;
 			return formatDockerResource(dockerResource, (s, i) -> s.substring(0, i));
 		}
-		else {
-			// TODO handle http resource
-			throw new IllegalArgumentException("Can't extract version from resource " + resource.getDescription());
-		}
+		return extractGenericResourceWithoutVersion(resource);
 	}
 
 	private static String formatDockerResource(DockerResource dockerResource, BiFunction<String, Integer, String> function) {
@@ -145,6 +162,24 @@ public class SkipperStreamDeployer implements StreamDeployer {
 		catch (IOException e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+	private static String extractGenericResourceWithoutVersion(Resource resource) {
+		try {
+			String uri = resource.getURI().toString();
+			return String.format("%s.%s", uri.substring(0, getVersionIndex(uri)),
+					StringUtils.getFilenameExtension(uri));
+		}
+		catch (IOException ioe) {
+			throw new RuntimeException(ioe);
+		}
+	}
+
+	private static int getVersionIndex(String uri) {
+		int indexOfSnapshot = uri.lastIndexOf(".BUILD-SNAPSHOT");
+		return (indexOfSnapshot > -1) ?
+				uri.substring(0, indexOfSnapshot).lastIndexOf('-') :
+				uri.lastIndexOf('-');
 	}
 
 	@Override
