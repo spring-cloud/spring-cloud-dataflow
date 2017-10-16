@@ -142,7 +142,7 @@ include::{snippets}/about-documentation/get-meta-information/response-fields.ado
 
 ==== Upload a package
 
-TBD
+Upload  a package into a configured `local` repository.
 
 ===== Request structure
 
@@ -165,7 +165,7 @@ include::{snippets}/upload-documentation/upload-release/response-fields.adoc[]
 
 ==== Install a package
 
-TBD
+Install a package (identified by the InstallRequest) into the target platform.
 
 ===== Request structure
 
@@ -185,7 +185,7 @@ include::{snippets}/install-documentation/install-package/response-fields.adoc[]
 
 ==== Install a package with id
 
-TBD
+Install a package identified by its ID into the target platform.
 
 ===== Request structure
 
@@ -284,9 +284,9 @@ include::{snippets}/manifest-documentation/get-manifest-of-release-for-version/h
 [[resources-upgrade]]
 === Upgrade
 
-==== Upgrade a package
+==== Upgrade a release
 
-TBD
+Upgrade an existing release using the configured package and config values from the UpgradeRequest.
 
 ===== Request structure
 
@@ -332,7 +332,7 @@ include::{snippets}/rollback-documentation/rollback-release/response-fields.adoc
 
 ==== Delete a release
 
-TBD
+Delete an existing release by uninstalling the installed packages corresponding to the release.
 
 ===== Request structure
 
@@ -463,7 +463,7 @@ include::{snippets}/repositories-documentation/get-single-repository/response-fi
 === App Deployers Datas
 
 ==== Retrieving a list of app deployer datas
-A `GET` request will return a paginated list for all Spring Cloud Skipper repositories.
+A `GET` request will return a paginated list for all Spring Cloud Skipper app deployer data.
 
 ===== Request structure
 
@@ -484,8 +484,8 @@ include::{snippets}/app-deployers-datas-documentation/get-all-app-deployer-datas
 [[resources-app-deployers-datas]]
 === Deployers
 
-==== Retrieving a list of app deployer datas
-A `GET` request will return a paginated list for all Spring Cloud Skipper repositories.
+==== Retrieving a list of app deployers
+A `GET` request will return a paginated list for all the Spring Cloud Skipper application deployers.
 
 ===== Request structure
 
@@ -530,7 +530,7 @@ include::{snippets}/releases-documentation/get-all-releases/response-fields.adoc
 
 ==== Retrieving a list of package metadata
 
-A `GET` request will return a paginated list for all Spring Cloud Skipper releases.
+A `GET` request will return a paginated list for all Spring Cloud Skipper package metadata.
 
 ===== Request structure
 
