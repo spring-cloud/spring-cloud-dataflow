@@ -39,6 +39,7 @@ import org.yaml.snakeyaml.Yaml;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
+import org.springframework.cloud.skipper.ReleaseNotFoundException;
 import org.springframework.cloud.skipper.client.SkipperClient;
 import org.springframework.cloud.skipper.domain.ConfigValues;
 import org.springframework.cloud.skipper.domain.Info;
@@ -54,7 +55,6 @@ import org.springframework.cloud.skipper.shell.command.support.DeploymentStateDi
 import org.springframework.cloud.skipper.shell.command.support.TableUtils;
 import org.springframework.cloud.skipper.shell.command.support.YmlUtils;
 import org.springframework.hateoas.Resources;
-import org.springframework.http.HttpStatus;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellOption;
@@ -66,7 +66,6 @@ import org.springframework.shell.table.TableModel;
 import org.springframework.util.Assert;
 import org.springframework.util.ResourceUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.web.client.HttpStatusCodeException;
 
 import static org.springframework.shell.standard.ShellOption.NULL;
 
@@ -392,15 +391,8 @@ public class SkipperCommands extends AbstractSkipperCommand {
 				info = this.skipperClient.status(releaseName, releaseVersion);
 			}
 		}
-		catch (HttpStatusCodeException e) {
-			if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
-				// 404 means release not found.
-				// TODO it'd be nice to rethrow ReleaseNotFoundException in
-				// SkipperClient but that exception is on server
-				return "Release with name '" + releaseName + "' not found";
-			}
-			// if something else, rethrow
-			throw e;
+		catch (ReleaseNotFoundException e) {
+			return "Release with name '" + e.getReleaseName() + "' not found";
 		}
 		Object[][] data = new Object[3][];
 		data[0] = new Object[] { "Last Deployed", info.getFirstDeployed() };

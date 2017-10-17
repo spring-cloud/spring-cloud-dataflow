@@ -151,9 +151,9 @@ public class SkipperController {
 		return this.releaseService.list(releaseName);
 	}
 
-	@ResponseStatus(value = HttpStatus.NOT_FOUND, reason = "Release doesn't exist")
+	@ResponseStatus(value = HttpStatus.NOT_FOUND, reason = "Release not found")
 	@ExceptionHandler(ReleaseNotFoundException.class)
-	public void releaseNotExist() {
-		// handle ReleaseNotFoundException by returning 404
+	public void handleReleaseNotFoundException() {
+		// needed for server not to log 500 errors
 	}
 }

@@ -15,6 +15,8 @@
  */
 package org.springframework.cloud.skipper.client;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
@@ -26,7 +28,9 @@ import org.springframework.web.client.RestTemplate;
 
 /**
  * Client's configuration class.
+ *
  * @author Mark Pollack
+ * @author Janne Valkealahti
  */
 @Configuration
 @EnableConfigurationProperties(SkipperClientProperties.class)
@@ -34,8 +38,9 @@ import org.springframework.web.client.RestTemplate;
 public class SkipperClientConfiguration {
 
 	@Bean
-	public RestTemplate restTemplate(RestTemplateBuilder restTemplateBuilder) {
-		RestTemplate restTemplate = restTemplateBuilder.build();
+	public RestTemplate restTemplate(RestTemplateBuilder restTemplateBuilder, ObjectMapper objectMapper) {
+		RestTemplate restTemplate = restTemplateBuilder
+				.errorHandler(new SkipperClientResponseErrorHandler(objectMapper)).build();
 		return validateRestTemplate(restTemplate);
 	}
 

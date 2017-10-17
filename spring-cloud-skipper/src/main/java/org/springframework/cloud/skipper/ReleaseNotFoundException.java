@@ -24,6 +24,9 @@ package org.springframework.cloud.skipper;
 @SuppressWarnings("serial")
 public class ReleaseNotFoundException extends SkipperException {
 
+	private final String releaseName;
+	private final Integer releaseVersion;
+
 	/**
 	 * Instantiates a new {@code ReleaseNotFoundException}.
 	 *
@@ -31,6 +34,8 @@ public class ReleaseNotFoundException extends SkipperException {
 	 */
 	public ReleaseNotFoundException(String releaseName) {
 		super(getExceptionMessage(releaseName));
+		this.releaseName = releaseName;
+		this.releaseVersion = null;
 	}
 
 	/**
@@ -41,6 +46,8 @@ public class ReleaseNotFoundException extends SkipperException {
 	 */
 	public ReleaseNotFoundException(String releaseName, int version) {
 		super(getExceptionMessage(releaseName, version));
+		this.releaseName = releaseName;
+		this.releaseVersion = version;
 	}
 
 	/**
@@ -51,6 +58,26 @@ public class ReleaseNotFoundException extends SkipperException {
 	 */
 	public ReleaseNotFoundException(String releaseName, Throwable cause) {
 		super(getExceptionMessage(releaseName), cause);
+		this.releaseName = releaseName;
+		this.releaseVersion = null;
+	}
+
+	/**
+	 * Gets the release name.
+	 *
+	 * @return the release name
+	 */
+	public String getReleaseName() {
+		return releaseName;
+	}
+
+	/**
+	 * Gets the release version.
+	 *
+	 * @return the release version
+	 */
+	public Integer getReleaseVersion() {
+		return releaseVersion;
 	}
 
 	private static String getExceptionMessage(String releaseName) {

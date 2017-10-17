@@ -15,6 +15,9 @@
  */
 package org.springframework.cloud.skipper.server.controller;
 
+import javax.servlet.DispatcherType;
+import javax.servlet.ServletContext;
+
 import org.junit.Test;
 
 import org.springframework.cloud.skipper.domain.InstallProperties;
@@ -22,9 +25,11 @@ import org.springframework.cloud.skipper.domain.InstallRequest;
 import org.springframework.cloud.skipper.domain.PackageIdentifier;
 import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.StatusCode;
+import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.RequestBuilder;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -143,4 +148,34 @@ public class SkipperControllerTests extends AbstractControllerTests {
 		assertThat(release.getVersion()).isEqualTo(2);
 	}
 
+	@Test
+	public void testStatusReportsErrorForMissingRelease() throws Exception {
+		// In a real container the response is carried over into the error dispatcher, but
+		// in the mock a new one is created so we have to assert the status at this
+		// intermediate point
+		MvcResult result = mockMvc.perform(get("/api/status/myLog")).andDo(print())
+				.andExpect(status().is4xxClientError()).andReturn();
+		MvcResult response = this.mockMvc.perform(new ErrorDispatcher(result, "/error"))
+				.andReturn();
+		assertThat(response.getResponse().getContentAsString()).contains("ReleaseNotFoundException");
+	}
+
+	private class ErrorDispatcher implements RequestBuilder {
+
+		private MvcResult result;
+		private String path;
+
+		ErrorDispatcher(MvcResult result, String path) {
+			this.result = result;
+			this.path = path;
+		}
+
+		@Override
+		public MockHttpServletRequest buildRequest(ServletContext servletContext) {
+			MockHttpServletRequest request = this.result.getRequest();
+			request.setDispatcherType(DispatcherType.ERROR);
+			request.setRequestURI(this.path);
+			return request;
+		}
+	}
 }

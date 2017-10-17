@@ -38,11 +38,15 @@ public class TargetHolder implements ApplicationEventPublisherAware {
 
 	private Target target;
 
-	private RestTemplate restTemplate = new RestTemplate();
+	private final RestTemplate restTemplate;
 
 	private ApplicationEventPublisher applicationEventPublisher;
 
 	private String credentialsProviderCommand;
+
+	public TargetHolder(RestTemplate restTemplate) {
+		this.restTemplate = restTemplate;
+	}
 
 	/**
 	 * Return the {@link Target} which encapsulates not only the Target URI but also

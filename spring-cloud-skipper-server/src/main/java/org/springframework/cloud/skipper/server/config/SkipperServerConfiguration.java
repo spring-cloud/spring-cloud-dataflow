@@ -20,6 +20,7 @@ import java.util.Map;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
+import org.springframework.boot.autoconfigure.web.ErrorAttributes;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.deployer.resource.docker.DockerResourceLoader;
 import org.springframework.cloud.deployer.resource.maven.MavenResourceLoader;
@@ -30,6 +31,7 @@ import org.springframework.cloud.skipper.io.PackageReader;
 import org.springframework.cloud.skipper.io.PackageWriter;
 import org.springframework.cloud.skipper.server.controller.RootController;
 import org.springframework.cloud.skipper.server.controller.SkipperController;
+import org.springframework.cloud.skipper.server.controller.SkipperErrorAttributes;
 import org.springframework.cloud.skipper.server.deployer.AppDeployerReleaseManager;
 import org.springframework.cloud.skipper.server.deployer.AppDeploymentRequestFactory;
 import org.springframework.cloud.skipper.server.deployer.ReleaseAnalyzer;
@@ -72,6 +74,12 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableJpaRepositories(basePackages = "org.springframework.cloud.skipper.server.repository")
 @EnableTransactionManagement
 public class SkipperServerConfiguration {
+
+	@Bean
+	public ErrorAttributes errorAttributes() {
+		// override boot's DefaultErrorAttributes
+		return new SkipperErrorAttributes();
+	}
 
 	@Bean
 	public PackageSummaryResourceProcessor packageSummaryResourceProcessor() {
