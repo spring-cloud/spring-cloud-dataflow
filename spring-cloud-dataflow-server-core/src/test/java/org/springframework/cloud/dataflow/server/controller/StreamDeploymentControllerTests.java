@@ -83,12 +83,12 @@ public class StreamDeploymentControllerTests {
 	private DefaultStreamService defaultStreamService;
 
 	@Mock
-	private StreamDeploymentRepository stramDeploymentRepository;
+	private StreamDeploymentRepository streamDeploymentRepository;
 
 	@Before
 	public void setup() {
 		controller = new StreamDeploymentController(streamDefinitionRepository, deploymentIdRepository, appRegistry,
-				appDeployer, metadataResolver, commonApplicationProperties, stramDeploymentRepository,
+				appDeployer, metadataResolver, commonApplicationProperties, streamDeploymentRepository,
 				defaultStreamService);
 	}
 

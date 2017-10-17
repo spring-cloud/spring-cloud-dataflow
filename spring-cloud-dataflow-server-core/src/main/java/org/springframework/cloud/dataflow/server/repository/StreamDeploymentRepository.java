@@ -24,12 +24,33 @@ import org.springframework.cloud.dataflow.core.StreamDeployment;
  */
 public interface StreamDeploymentRepository {
 
+	/**
+	 * Store Stream deployment entry.
+	 *
+	 * @param streamDeployment the stream deployment to save
+	 * @return the streamDeployment that is saved
+	 */
 	StreamDeployment save(StreamDeployment streamDeployment);
 
+	/**
+	 * Find a specific StreamDeployment by stream name.
+	 * @param streamName the stream name corresponding to the stream deployment
+	 * @return the stream deployment
+	 */
 	StreamDeployment findOne(String streamName);
 
+	/**
+	 * Get all Stream deployment entries
+	 *
+	 * @return the iterable StreamDeployment entries
+	 */
 	Iterable<StreamDeployment> findAll();
 
+	/**
+	 * Delete a Stream deployment identified by the given stream name.
+	 *
+	 * @param streamName the stream name corresponding to the stream deployment
+	 */
 	void delete(String streamName);
 
 }

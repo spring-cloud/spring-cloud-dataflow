@@ -114,7 +114,7 @@ public class AppDeployerStreamDeployer implements StreamDeployer {
 			}
 		}
 		StreamDeployment streamDeployment = new StreamDeployment(streamDeploymentRequest.getStreamName(),
-				StreamDeployers.appdeployer.name(), null, null, null);
+				StreamDeployers.appdeployer.name());
 		this.streamDeploymentRepository.save(streamDeployment);
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,6 +69,7 @@ public class RdbmsStreamDeploymentRepository implements StreamDeploymentReposito
 
 	@Override
 	public StreamDeployment findOne(String streamName) {
+		Assert.hasText(streamName, "Stream name must not be empty or null");
 		List<Map<String, Object>> result = jdbcTemplate.queryForList(SELECT_ONE_SQL, streamName);
 		if (!result.isEmpty()) {
 			Map<String, Object> map = result.get(0);
@@ -80,8 +81,8 @@ public class RdbmsStreamDeploymentRepository implements StreamDeploymentReposito
 
 	@Override
 	public Iterable<StreamDeployment> findAll() {
-		List<StreamDeployment> streamDeployments = new ArrayList<>();
 		List<Map<String, Object>> result = jdbcTemplate.queryForList(SELECT_ALL_SQL);
+		List<StreamDeployment> streamDeployments = new ArrayList<>(result.size());
 		for (Map<String, Object> map : result) {
 			streamDeployments.add(new StreamDeployment(get(map, "STREAM_NAME"), get(map, "DEPLOYER_NAME"), get(map,
 					"RELEASE_NAME"), get(map, "PACKAGE_NAME"), get(map, "REPO_NAME")));
@@ -95,7 +96,7 @@ public class RdbmsStreamDeploymentRepository implements StreamDeploymentReposito
 
 	@Override
 	public void delete(String streamName) {
-		Assert.hasText(streamName, "Stream name must not be empty nor null");
+		Assert.hasText(streamName, "Stream name must not be empty or null");
 		jdbcTemplate.update(DELETE_SQL, streamName);
 	}
 }

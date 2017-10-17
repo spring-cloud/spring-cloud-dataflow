@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2017 the original author or authors.
+ * Copyright 2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,6 +61,15 @@ public class DefaultStreamServiceTests {
 
 	private StreamDefinition streamDefinition3 = new StreamDefinition("test3", "time | log");
 
+	private StreamDeployment streamDeployment1 = new StreamDeployment(streamDefinition1.getName(),
+			StreamDeployers.appdeployer.name(), null, null, null);
+
+	private StreamDeployment streamDeployment2 = new StreamDeployment(streamDefinition2.getName(),
+			StreamDeployers.skipper.name(), "pkg1", "release1", "local");
+
+	private StreamDeployment streamDeployment3 = new StreamDeployment(streamDefinition3.getName(),
+			StreamDeployers.skipper.name(), "pkg1", "release2", "local");
+
 	private List<StreamDefinition> streamDefinitionList = new ArrayList<>();
 
 	private List<StreamDefinition> appDeployerStreamDefinitions = new ArrayList<>();
@@ -88,12 +97,6 @@ public class DefaultStreamServiceTests {
 		this.streamDefinitionList.add(streamDefinition3);
 		this.skipperStreamDefinitions.add(streamDefinition2);
 		this.skipperStreamDefinitions.add(streamDefinition3);
-		StreamDeployment streamDeployment1 = new StreamDeployment(streamDefinition1.getName(),
-				StreamDeployers.appdeployer.name(), null, null, null);
-		StreamDeployment streamDeployment2 = new StreamDeployment(streamDefinition2.getName(),
-				StreamDeployers.skipper.name(), "pkg1", "release1", "local");
-		StreamDeployment streamDeployment3 = new StreamDeployment(streamDefinition3.getName(),
-				StreamDeployers.skipper.name(), "pkg1", "release2", "local");
 		when(streamDeploymentRepository.findOne(streamDeployment1.getStreamName())).thenReturn(streamDeployment1);
 		when(streamDeploymentRepository.findOne(streamDeployment2.getStreamName())).thenReturn(streamDeployment2);
 		when(streamDeploymentRepository.findOne(streamDeployment3.getStreamName())).thenReturn(streamDeployment3);
@@ -101,22 +104,6 @@ public class DefaultStreamServiceTests {
 
 	@Test
 	public void verifyUpgradeStream() {
-		StreamDeploymentRepository streamDeploymentRepository = mock(StreamDeploymentRepository.class);
-		AppDeployerStreamDeployer appDeployerStreamDeployer = mock(AppDeployerStreamDeployer.class);
-		SkipperStreamDeployer skipperStreamDeployer = mock(SkipperStreamDeployer.class);
-		DefaultStreamService defaultStreamService = new DefaultStreamService(mock(AppRegistry.class),
-				mock(CommonApplicationProperties.class),
-				mock(ApplicationConfigurationMetadataResolver.class),
-				mock(StreamDefinitionRepository.class),
-				streamDeploymentRepository, appDeployerStreamDeployer, skipperStreamDeployer);
-		StreamDefinition streamDefinition1 = new StreamDefinition("test1", "time | log");
-		StreamDeployment streamDeployment1 = new StreamDeployment(streamDefinition1.getName(),
-				StreamDeployers.appdeployer.name(), null, null, null);
-		StreamDefinition streamDefinition2 = new StreamDefinition("test2", "time | log");
-		StreamDeployment streamDeployment2 = new StreamDeployment(streamDefinition2.getName(),
-				StreamDeployers.skipper.name(), "pkg1", "release1", "local");
-		when(streamDeploymentRepository.findOne(streamDeployment1.getStreamName())).thenReturn(streamDeployment1);
-		when(streamDeploymentRepository.findOne(streamDeployment2.getStreamName())).thenReturn(streamDeployment2);
 		defaultStreamService.upgradeStream(streamDeployment2.getStreamName(), streamDeployment2.getReleaseName(),
 				null, null);
 		verify(skipperStreamDeployer, times(1)).upgradeStream(streamDeployment2.getStreamName(),
@@ -127,22 +114,6 @@ public class DefaultStreamServiceTests {
 
 	@Test
 	public void verifyAppDeployerUpgrade() {
-		StreamDeploymentRepository streamDeploymentRepository = mock(StreamDeploymentRepository.class);
-		AppDeployerStreamDeployer appDeployerStreamDeployer = mock(AppDeployerStreamDeployer.class);
-		SkipperStreamDeployer skipperStreamDeployer = mock(SkipperStreamDeployer.class);
-		DefaultStreamService defaultStreamService = new DefaultStreamService(mock(AppRegistry.class),
-				mock(CommonApplicationProperties.class),
-				mock(ApplicationConfigurationMetadataResolver.class),
-				mock(StreamDefinitionRepository.class),
-				streamDeploymentRepository, appDeployerStreamDeployer, skipperStreamDeployer);
-		StreamDefinition streamDefinition1 = new StreamDefinition("test1", "time | log");
-		StreamDeployment streamDeployment1 = new StreamDeployment(streamDefinition1.getName(),
-				StreamDeployers.appdeployer.name(), null, null, null);
-		StreamDefinition streamDefinition2 = new StreamDefinition("test2", "time | log");
-		StreamDeployment streamDeployment2 = new StreamDeployment(streamDefinition2.getName(),
-				StreamDeployers.skipper.name(), "pkg1", "release1", "local");
-		when(streamDeploymentRepository.findOne(streamDeployment1.getStreamName())).thenReturn(streamDeployment1);
-		when(streamDeploymentRepository.findOne(streamDeployment2.getStreamName())).thenReturn(streamDeployment2);
 		try {
 			defaultStreamService.upgradeStream(streamDeployment1.getStreamName(), streamDeployment1.getReleaseName(),
 					null, null);

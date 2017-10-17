@@ -16,6 +16,8 @@
 
 package org.springframework.cloud.dataflow.core;
 
+import org.springframework.util.Assert;
+
 /**
  * Represents Stream deployment model.
  *
@@ -50,11 +52,17 @@ public class StreamDeployment {
 
 	public StreamDeployment(String streamName, String deployerName, String packageName, String releaseName,
 			String repoName) {
+		Assert.hasText(streamName, "Stream name must not be null");
+		Assert.hasText(deployerName, "Deployer name Name must not be null");
 		this.streamName = streamName;
 		this.deployerName = deployerName;
 		this.packageName = packageName;
 		this.releaseName = releaseName;
 		this.repoName = repoName;
+	}
+
+	public StreamDeployment(String streamName, String deployerName) {
+		this(streamName, deployerName, null, null, null);
 	}
 
 	public String getStreamName() {
