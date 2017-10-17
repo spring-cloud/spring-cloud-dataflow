@@ -44,9 +44,11 @@ import org.springframework.context.ResourceLoaderAware;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import org.springframework.util.FileSystemUtils;
 import org.springframework.util.StreamUtils;
+
 
 /**
  * Service responsible for downloading package .zip files and loading them into the
@@ -54,6 +56,7 @@ import org.springframework.util.StreamUtils;
  *
  * @author Mark Pollack
  * @author Ilayaperumal Gopinathan
+ * @author Glenn Renfro
  */
 public class PackageService implements ResourceLoaderAware {
 
@@ -75,6 +78,7 @@ public class PackageService implements ResourceLoaderAware {
 		this.packageReader = packageReader;
 	}
 
+	@Transactional
 	public Package downloadPackage(PackageMetadata packageMetadata) {
 		Assert.notNull(packageMetadata, "Can't download PackageMetadata, it is a null value.");
 		// Database contains the package file from a previous upload
@@ -194,7 +198,7 @@ public class PackageService implements ResourceLoaderAware {
 		throw new SkipperException("Resource " + name + "-" + version + " in package repository "
 				+ packageRepository.getName() + " does not exist.");
 	}
-
+	@Transactional
 	public PackageMetadata upload(UploadRequest uploadRequest) {
 		validateUploadRequest(uploadRequest);
 		Repository localRepositoryToUpload = getRepositoryToUpload(uploadRequest.getRepoName());

@@ -32,7 +32,7 @@ public class RootController {
 	 * Handles the root URL of Skipper. Redirects users to the
 	 * REST API entry point at {@code /api }.
 	 *
-	 * @return
+	 * @return RedirectView to api
 	 */
 	@RequestMapping("/")
 	public RedirectView index() {

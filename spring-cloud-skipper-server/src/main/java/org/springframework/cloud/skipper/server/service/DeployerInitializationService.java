@@ -53,12 +53,14 @@ import org.springframework.cloud.skipper.server.config.LocalPlatformProperties;
 import org.springframework.cloud.skipper.server.deployer.Deployer;
 import org.springframework.cloud.skipper.server.repository.DeployerRepository;
 import org.springframework.context.event.EventListener;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Populates the DeployerRepository with AppDeployer instances
  *
  * @author Mark Pollack
  * @author Ilayaperumal Gopinathan
+ * @author Glenn Renfro
  */
 public class DeployerInitializationService {
 
@@ -83,6 +85,7 @@ public class DeployerInitializationService {
 	}
 
 	@EventListener
+	@Transactional
 	public void initialize(ApplicationReadyEvent event) {
 		createAndSaveLocalAppDeployers();
 		createAndSaveCFAppDeployers();

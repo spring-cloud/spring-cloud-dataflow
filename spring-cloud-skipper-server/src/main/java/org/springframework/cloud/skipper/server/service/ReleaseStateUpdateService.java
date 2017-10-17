@@ -24,6 +24,7 @@ import org.springframework.cloud.skipper.domain.Info;
 import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.server.repository.ReleaseRepository;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
 /**
@@ -31,6 +32,7 @@ import org.springframework.util.Assert;
  * {@link ReleaseRepository}.
  *
  * @author Janne Valkealahti
+ * @author Glenn Renfro
  *
  */
 public class ReleaseStateUpdateService {
@@ -59,6 +61,7 @@ public class ReleaseStateUpdateService {
 	}
 
 	@Scheduled(initialDelay = 5000, fixedRate = 5000)
+	@Transactional
 	public void update() {
 		long now = System.currentTimeMillis();
 		boolean fullPoll = now > nextFullPoll;

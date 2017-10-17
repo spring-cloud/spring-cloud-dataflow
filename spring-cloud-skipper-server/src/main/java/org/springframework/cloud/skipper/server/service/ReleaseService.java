@@ -40,8 +40,10 @@ import org.springframework.cloud.skipper.server.deployer.ReleaseManager;
 import org.springframework.cloud.skipper.server.repository.DeployerRepository;
 import org.springframework.cloud.skipper.server.repository.PackageMetadataRepository;
 import org.springframework.cloud.skipper.server.repository.ReleaseRepository;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
+
 
 /**
  * Service responsible for the lifecycle of packages and releases, install/delete a
@@ -52,6 +54,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Mark Pollack
  * @author Ilayaperumal Gopinathan
+ * @author Glenn Renfro
  */
 public class ReleaseService {
 
@@ -92,6 +95,7 @@ public class ReleaseService {
 	 * @return the Release object associated with this deployment
 	 * @throws SkipperException if the package to install can not be found.
 	 */
+	@Transactional
 	public Release install(String id, InstallProperties installProperties) {
 		Assert.notNull(installProperties, "Deploy properties can not be null");
 		Assert.hasText(id, "Package id can not be null");
@@ -109,6 +113,7 @@ public class ReleaseService {
 	 * @param installRequest the install request
 	 * @return the Release object associated with this deployment
 	 */
+	@Transactional
 	public Release install(InstallRequest installRequest) {
 		validateInstallRequest(installRequest);
 		PackageIdentifier packageIdentifier = installRequest.getPackageIdentifier();
@@ -196,6 +201,7 @@ public class ReleaseService {
 		return releaseToReturn;
 	}
 
+	@Transactional
 	public Release delete(String releaseName) {
 		Assert.notNull(releaseName, "Release name must not be null");
 		Release release = this.releaseRepository.findLatestRelease(releaseName);
@@ -235,6 +241,7 @@ public class ReleaseService {
 		return this.releaseManager.status(release);
 	}
 
+	@Transactional
 	public Release upgrade(UpgradeRequest upgradeRequest) {
 		Assert.notNull(upgradeRequest.getUpgradeProperties(), "UpgradeProperties can not be null");
 		Assert.notNull(upgradeRequest.getPackageIdentifier(), "PackageIdentifier can not be null");
@@ -283,6 +290,7 @@ public class ReleaseService {
 		return createNewInfo("Initial install underway");
 	}
 
+	@Transactional
 	public Release upgrade(Release existingRelease, Release replacingRelease) {
 		Assert.notNull(existingRelease, "Existing Release must not be null");
 		Assert.notNull(replacingRelease, "Replacing Release must not be null");

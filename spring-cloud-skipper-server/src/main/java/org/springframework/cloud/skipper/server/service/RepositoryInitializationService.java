@@ -28,6 +28,7 @@ import org.springframework.cloud.skipper.server.config.SkipperServerProperties;
 import org.springframework.cloud.skipper.server.repository.PackageMetadataRepository;
 import org.springframework.cloud.skipper.server.repository.RepositoryRepository;
 import org.springframework.context.event.EventListener;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Takes repository application configuration properties and update the Repository
@@ -35,6 +36,7 @@ import org.springframework.context.event.EventListener;
  * with the same name exists.
  *
  * @author Mark Pollack
+ * @author Glenn Renfro
  */
 public class RepositoryInitializationService {
 
@@ -61,6 +63,7 @@ public class RepositoryInitializationService {
 	}
 
 	@EventListener
+	@Transactional
 	public void initialize(ApplicationReadyEvent event) {
 		synchronizeRepositories();
 		synchronizePackageMetadata();

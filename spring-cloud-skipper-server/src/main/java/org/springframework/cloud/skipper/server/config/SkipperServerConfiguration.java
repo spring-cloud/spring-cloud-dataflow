@@ -53,6 +53,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.data.map.repository.config.EnableMapRepositories;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 /**
  * Main configuration class for the server.
@@ -69,6 +70,7 @@ import org.springframework.data.map.repository.config.EnableMapRepositories;
 @EntityScan({"org.springframework.cloud.skipper.domain", "org.springframework.cloud.skipper.server.domain"})
 @EnableMapRepositories(basePackages = "org.springframework.cloud.skipper.server.repository")
 @EnableJpaRepositories(basePackages = "org.springframework.cloud.skipper.server.repository")
+@EnableTransactionManagement
 public class SkipperServerConfiguration {
 
 	@Bean
