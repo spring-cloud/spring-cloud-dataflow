@@ -79,16 +79,10 @@ public class AppDeploymentRequestFactory {
 		if (spec.getDeploymentProperties() != null) {
 			deploymentProperties.putAll(spec.getDeploymentProperties());
 		}
-		Map<String, String> metadata = springBootAppKind.getMetadata();
-		if (metadata.containsKey("count")) {
-			deploymentProperties.put(AppDeployer.COUNT_PROPERTY_KEY, String.valueOf(metadata.get("count")));
-		}
-
 		if (!deploymentProperties.containsKey(AppDeployer.GROUP_PROPERTY_KEY)) {
 			logger.debug("Defaulting spring.cloud.deployer.group=" + releaseName);
 			deploymentProperties.put(AppDeployer.GROUP_PROPERTY_KEY, releaseName);
 		}
-
 		AppDeploymentRequest appDeploymentRequest = new AppDeploymentRequest(appDefinition, resource,
 				deploymentProperties);
 		return appDeploymentRequest;

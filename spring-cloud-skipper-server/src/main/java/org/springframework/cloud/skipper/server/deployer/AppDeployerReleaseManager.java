@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,9 +35,12 @@ import org.springframework.cloud.skipper.server.deployer.strategies.SimpleRedBla
 import org.springframework.cloud.skipper.server.domain.AppDeployerData;
 import org.springframework.cloud.skipper.server.domain.SpringBootAppKind;
 import org.springframework.cloud.skipper.server.domain.SpringBootAppKindReader;
+import org.springframework.cloud.skipper.server.domain.SpringBootAppSpec;
 import org.springframework.cloud.skipper.server.repository.AppDeployerDataRepository;
 import org.springframework.cloud.skipper.server.repository.DeployerRepository;
 import org.springframework.cloud.skipper.server.repository.ReleaseRepository;
+import org.springframework.cloud.skipper.server.service.ConfigValueUtils;
+import org.springframework.cloud.skipper.server.service.ManifestUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -48,6 +52,8 @@ import org.springframework.util.StringUtils;
 public class AppDeployerReleaseManager implements ReleaseManager {
 
 	private static final Logger logger = LoggerFactory.getLogger(AppDeployerReleaseManager.class);
+
+	public static final String SPRING_CLOUD_DEPLOYER_COUNT = "spring.cloud.deployer.count";
 
 	private final ReleaseRepository releaseRepository;
 
@@ -81,7 +87,7 @@ public class AppDeployerReleaseManager implements ReleaseManager {
 				.getAppDeployer();
 		Map<String, String> appNameDeploymentIdMap = new HashMap<>();
 		for (SpringBootAppKind springBootAppKind : springBootAppKindList) {
-			AppDeploymentRequest appDeploymentRequest = appDeploymentRequestFactory.createAppDeploymentRequest(
+			AppDeploymentRequest appDeploymentRequest = this.appDeploymentRequestFactory.createAppDeploymentRequest(
 					springBootAppKind,
 					release.getName(),
 					String.valueOf(release.getVersion()));
@@ -108,12 +114,39 @@ public class AppDeployerReleaseManager implements ReleaseManager {
 
 	@Override
 	public Release upgrade(Release existingRelease, Release replacingRelease, String upgradeStrategyName) {
-
+		ReleaseAnalysisReport releaseAnalysisReport = this.releaseAnalyzer.analyze(existingRelease, replacingRelease);
+		AppDeployerData existingAppDeployerData = this.appDeployerDataRepository.findByReleaseNameAndReleaseVersion(
+				existingRelease.getName(), existingRelease.getVersion());
+		Map<String, String> existingAppNamesAndDeploymentIds = existingAppDeployerData.getDeploymentDataAsMap();
+		List<String> applicationNamesToUpgrade = releaseAnalysisReport.getApplicationNamesToUpgrade();
+		List<AppStatus> appStatuses = status(existingRelease).getInfo().getStatus().getAppStatusList();
+		Map<String, String> appsCount = new HashMap<>();
+		for (Map.Entry<String, String> existingEntry : existingAppNamesAndDeploymentIds.entrySet()) {
+			String existingName = existingEntry.getKey();
+			if (applicationNamesToUpgrade.contains(existingName)) {
+				String deploymentId = existingAppNamesAndDeploymentIds.get(existingName);
+				for (AppStatus appStatus : appStatuses) {
+					if (appStatus.getDeploymentId().equals(deploymentId)) {
+						appsCount.put(existingName, String.valueOf(appStatus.getInstances().size()));
+					}
+				}
+			}
+		}
+		Map<String, Object> model = ConfigValueUtils.mergeConfigValues(replacingRelease.getPkg(),
+				replacingRelease.getConfigValues());
+		for (Map.Entry<String, Object> entry : model.entrySet()) {
+			if (appsCount.keySet().contains(entry.getKey())) {
+				Map<String, Object> modelValue = (Map<String, Object>) model.getOrDefault(entry.getKey(), new TreeMap<String, Object>());
+				Map<String, Object> specMap = (Map<String, Object>) modelValue.getOrDefault(SpringBootAppKind.SPEC_STRING,
+						new TreeMap<String, Object>());
+				Map<String, Object> deploymentPropertiesMap = (Map<String, Object>) specMap
+						.getOrDefault(SpringBootAppSpec.DEPLOYMENT_PROPERTIES_STRING, new TreeMap<String, Object>());
+				deploymentPropertiesMap.put(SPRING_CLOUD_DEPLOYER_COUNT, appsCount.get(entry.getKey()));
+			}
+		}
+		String manifest = ManifestUtils.createManifest(replacingRelease.getPkg(), model);
+		replacingRelease.setManifest(manifest);
 		Release release = this.releaseRepository.save(replacingRelease);
-
-		ReleaseAnalysisReport releaseAnalysisReport = this.releaseAnalyzer.analyze(existingRelease,
-				replacingRelease);
-
 		if (!releaseAnalysisReport.getReleaseDifference().areEqual()) {
 			logger.info("Difference report for upgrade of release " + replacingRelease.getName());
 			logger.info(releaseAnalysisReport.getReleaseDifference().getDifferenceSummary());
@@ -130,7 +163,6 @@ public class AppDeployerReleaseManager implements ReleaseManager {
 			throw new SkipperException(
 					"Package to upgrade has not difference than existing deployed package. Not upgrading.");
 		}
-
 		return status(release);
 	}
 

@@ -2,7 +2,6 @@ apiVersion: skipper/v1
 kind: SpringBootApp
 metadata:
   name: time
-  count: {{metadata.count}}
   type: source
 spec:
   resource: maven://org.springframework.cloud.stream.app:time-source-rabbit:{{version}}
@@ -10,8 +9,8 @@ spec:
   applicationProperties:
     {{#spec.applicationProperties.entrySet}}
     {{key}}: {{value}}
-    {{/deployment.applicationProperties.entrySet}}
+    {{/spec.applicationProperties.entrySet}}
   deploymentProperties:
     {{#spec.deploymentProperties.entrySet}}
     {{key}}: {{value}}`
-    {{/deployment.deploymentProperties.entrySet}}
+    {{/spec.deploymentProperties.entrySet}}

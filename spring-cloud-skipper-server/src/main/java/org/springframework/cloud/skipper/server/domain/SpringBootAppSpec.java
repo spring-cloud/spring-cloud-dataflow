@@ -22,8 +22,13 @@ import java.util.Map;
  * {@link SpringBootAppKind} instance.
  *
  * @author Mark Pollack
+ * @author Ilayaperumal Gopinathan
  */
 public class SpringBootAppSpec {
+
+	public static final String APPLICATION_PROPERTIES_STRING = "applicationProperties";
+
+	public static final String DEPLOYMENT_PROPERTIES_STRING = "deploymentProperties";
 
 	private String resource;
 

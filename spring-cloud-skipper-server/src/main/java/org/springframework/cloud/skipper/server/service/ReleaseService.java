@@ -18,9 +18,7 @@ package org.springframework.cloud.skipper.server.service;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
-import com.samskivert.mustache.Mustache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,7 +33,6 @@ import org.springframework.cloud.skipper.domain.PackageMetadata;
 import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.Status;
 import org.springframework.cloud.skipper.domain.StatusCode;
-import org.springframework.cloud.skipper.domain.Template;
 import org.springframework.cloud.skipper.domain.UpgradeProperties;
 import org.springframework.cloud.skipper.domain.UpgradeRequest;
 import org.springframework.cloud.skipper.server.deployer.ReleaseAnalyzer;
@@ -174,7 +171,7 @@ public class ReleaseService {
 	protected Release install(Release release) {
 		Map<String, Object> mergedMap = ConfigValueUtils.mergeConfigValues(release.getPkg(), release.getConfigValues());
 		// Render yaml resources
-		String manifest = createManifest(release.getPkg(), mergedMap);
+		String manifest = ManifestUtils.createManifest(release.getPkg(), mergedMap);
 		logger.debug("Manifest = " + manifest);
 		release.setManifest(manifest);
 		// Deployment
@@ -234,7 +231,7 @@ public class ReleaseService {
 				oldRelease.getPlatformName());
 		Map<String, Object> model = ConfigValueUtils.mergeConfigValues(newRelease.getPkg(),
 				newRelease.getConfigValues());
-		String manifest = createManifest(newRelease.getPkg(), model);
+		String manifest = ManifestUtils.createManifest(newRelease.getPkg(), model);
 		newRelease.setManifest(manifest);
 		return upgrade(oldRelease, newRelease);
 	}
@@ -313,50 +310,10 @@ public class ReleaseService {
 		newRollbackRelease.setManifest(releaseToRollback.getManifest());
 		newRollbackRelease.setVersion(currentRelease.getVersion() + 1);
 		newRollbackRelease.setPlatformName(releaseToRollback.getPlatformName());
-		// Do not set ConfigValues since the manifest from the previous release has already
-		// resolved those...
+		// Do not set ConfigValues since the manifest from the previous release has
+		// already resolved those...
 		newRollbackRelease.setInfo(createNewInfo());
-
 		return upgrade(currentRelease, newRollbackRelease);
-	}
-
-	/**
-	 * Iterate overall the template files, replacing placeholders with model values. One
-	 * string is returned that contain all the YAML of multiple files using YAML file
-	 * delimiter.
-	 * @param packageToDeploy The top level package that contains all templates where
-	 * placeholders are to be replaced
-	 * @param model The placeholder values.
-	 * @return A YAML string containing all the templates with replaced values.
-	 */
-	public String createManifest(Package packageToDeploy, Map<String, Object> model) {
-
-		// Aggregate all valid manifests into one big doc.
-		StringBuilder sb = new StringBuilder();
-		// Top level templates.
-		List<Template> templates = packageToDeploy.getTemplates();
-		if (templates != null) {
-			for (Template template : templates) {
-				String templateAsString = new String(template.getData());
-				com.samskivert.mustache.Template mustacheTemplate = Mustache.compiler().compile(templateAsString);
-				sb.append("\n---\n# Source: " + template.getName() + "\n");
-				sb.append(mustacheTemplate.execute(model));
-			}
-		}
-
-		for (Package pkg : packageToDeploy.getDependencies()) {
-			String packageName = pkg.getMetadata().getName();
-			Map<String, Object> modelForDependency;
-			if (model.containsKey(packageName)) {
-				modelForDependency = (Map<String, Object>) model.get(pkg.getMetadata().getName());
-			}
-			else {
-				modelForDependency = new TreeMap<>();
-			}
-			sb.append(createManifest(pkg, modelForDependency));
-		}
-
-		return sb.toString();
 	}
 
 	protected Release createInitialRelease(InstallProperties installProperties, Package packageToInstall) {

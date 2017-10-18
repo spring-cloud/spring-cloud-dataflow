@@ -2,7 +2,6 @@ apiVersion: skipper/v1
 kind: SpringBootApp
 metadata:
   name: log
-  count: {{metadata.count}}
   type: sink
 spec:
   resource: maven://org.springframework.cloud.stream.app:log-sink-rabbit:{{version}}

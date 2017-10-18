@@ -31,7 +31,6 @@ import org.springframework.cloud.skipper.SkipperException;
  * kind: SpringBootApp
  * metadata:
  *   name: log-sink
- *   count: 2
  *   type: sink
  * spec:
  * resource: maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.2.0.RELEASE
@@ -45,8 +44,17 @@ import org.springframework.cloud.skipper.SkipperException;
  * }
  *
  * @author Mark Pollack
+ * @author Ilayaperumal Gopinathan
  */
 public class SpringBootAppKind {
+
+	public static final String API_VERSION_STRING = "apiVersion";
+
+	public static final String KIND_STRING = "kind";
+
+	public static final String METADATA_STRING = "metadata";
+
+	public static final String SPEC_STRING = "spec";
 
 	private String apiVersion;
 

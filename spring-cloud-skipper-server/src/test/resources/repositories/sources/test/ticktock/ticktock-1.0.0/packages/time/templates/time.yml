@@ -2,7 +2,6 @@ apiVersion: skipper/v1
 kind: SpringBootApp
 metadata:
   name: time
-  count: {{metadata.count}}
   type: source
 spec:
   resource: maven://org.springframework.cloud.stream.app:time-source-rabbit:{{version}}

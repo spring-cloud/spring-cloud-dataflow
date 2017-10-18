@@ -2,8 +2,6 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates
 version: 1.2.0.RELEASE
-metadata:
-  count: 1
 spec:
   applicationProperties:
     log.level: DEBUG
