@@ -34,7 +34,7 @@ import org.springframework.cloud.skipper.server.service.ReleaseService;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
@@ -44,9 +44,12 @@ import static org.springframework.cloud.skipper.server.AbstractIntegrationTest.T
  * Base class to implement transactional integration tests using the root application
  * configuration.
  *
- * @author Oliver Gierke
+ * @author Mark Pollack
+ * @author Ilayaperumal Gopinathan
+ * @author Janne Valkealahti
+ * @author Glenn Renfro
  */
-@RunWith(SpringJUnit4ClassRunner.class)
+@RunWith(SpringRunner.class)
 @Transactional
 @SpringBootTest(classes = TestConfig.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)

@@ -32,6 +32,7 @@ import org.springframework.cloud.skipper.domain.StatusCode;
 import org.springframework.cloud.skipper.domain.UpgradeProperties;
 import org.springframework.cloud.skipper.domain.UpgradeRequest;
 import org.springframework.cloud.skipper.server.AbstractIntegrationTest;
+import org.springframework.cloud.skipper.server.repository.PackageMetadataRepository;
 import org.springframework.test.context.ActiveProfiles;
 
 import static junit.framework.TestCase.fail;
@@ -41,12 +42,16 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 /**
  * @author Mark Pollack
  * @author Ilayaperumal Gopinathan
+ * @author Glenn Renfro
  */
 @ActiveProfiles("repo-test")
 public class ReleaseServiceTests extends AbstractIntegrationTest {
 
 	@Autowired
 	private ReleaseService releaseService;
+
+	@Autowired
+	private PackageMetadataRepository packageMetadataRepository;
 
 	@Test
 	public void testBadArguments() {
@@ -110,9 +115,38 @@ public class ReleaseServiceTests extends AbstractIntegrationTest {
 		releaseService.status("notexist");
 	}
 
-	@Test(expected = SkipperException.class)
+	@Test
 	public void testPackageNotFound() {
-		this.releaseService.getPackageMetadata("random", "1.2.4");
+		boolean exceptionFired = false;
+		try {
+			this.releaseService.getPackageMetadata("random", "1.2.4");
+		}
+		catch (SkipperException se) {
+			assertThat(se.getMessage()).isEqualTo("Can not find package 'random', version '1.2.4'");
+			exceptionFired = true;
+		}
+		assertThat(exceptionFired).isTrue();
+	}
+
+	@Test
+	public void testPackageDuplicateFound() {
+		PackageMetadata packageMetadata = new PackageMetadata();
+		packageMetadata.setApiVersion("v1");
+		packageMetadata.setOrigin("1");
+		packageMetadata.setKind("skipper");
+		packageMetadata.setName("log");
+		packageMetadata.setVersion("1.0.0");
+		packageMetadataRepository.save(packageMetadata);
+
+		boolean exceptionFired = false;
+		try {
+			this.releaseService.getPackageMetadata("log", "1.0.0");
+		}
+		catch (SkipperException se) {
+			assertThat(se.getMessage()).isEqualTo("Same name package in different repositories.  Need to support.");
+			exceptionFired = true;
+		}
+		assertThat(exceptionFired).isTrue();
 	}
 
 	@Test
@@ -253,7 +287,7 @@ public class ReleaseServiceTests extends AbstractIntegrationTest {
 		packageIdentifier.setPackageVersion(packageVersion);
 		upgradeRequest.setPackageIdentifier(packageIdentifier);
 		try {
-			Release release = releaseService.upgrade(upgradeRequest);
+			releaseService.upgrade(upgradeRequest);
 			fail("Expected to throw SkipperException");
 		}
 		catch (SkipperException e) {
