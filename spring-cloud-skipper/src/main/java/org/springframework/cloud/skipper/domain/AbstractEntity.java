@@ -19,6 +19,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
+import javax.persistence.Version;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -38,6 +39,10 @@ public class AbstractEntity implements Identifiable<Long> {
 	@JsonIgnore
 	private final Long id;
 
+	@Version
+	@JsonIgnore
+	private Long objectVersion;
+
 	protected AbstractEntity() {
 		this.id = null;
 	}
@@ -46,4 +51,9 @@ public class AbstractEntity implements Identifiable<Long> {
 	public Long getId() {
 		return this.id;
 	}
+
+	public Long getObjectVersion() {
+		return objectVersion;
+	}
+
 }
