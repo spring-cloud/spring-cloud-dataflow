@@ -68,10 +68,11 @@ public class PlatformPropertiesTests {
 		assertThat(cfAccounts.get("dev").getDeployment().getMemory()).isEqualTo("512m");
 		assertThat(cfAccounts.get("dev").getDeployment().getDisk()).isEqualTo("2048m");
 		assertThat(cfAccounts.get("dev").getDeployment().getInstances()).isEqualTo(4);
+		assertThat(cfAccounts.get("dev").getDeployment().getServices()).containsExactly("rabbit", "mysql");
 		assertThat(cfAccounts.get("qa").getDeployment().getMemory()).isEqualTo("756m");
 		assertThat(cfAccounts.get("qa").getDeployment().getDisk()).isEqualTo("724m");
 		assertThat(cfAccounts.get("qa").getDeployment().getInstances()).isEqualTo(2);
-
+		assertThat(cfAccounts.get("qa").getDeployment().getServices()).containsExactly("rabbitQA", "mysqlQA");
 		Map<String, LocalDeployerProperties> localAccounts = this.localPlatformProperties.getAccounts();
 		assertThat(localAccounts).hasSize(2);
 		assertThat(localAccounts).containsKeys("localDev", "localDevDebug");
