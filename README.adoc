@@ -39,7 +39,7 @@ spring:
         packageRepositories:
           -
             name: test
-            url: "file:///home/mpollack/projects/spring-cloud-skipper/spring-cloud-skipper-server/src/test/resources/repositories/binaries/test/"
+            url: "file:///home/mpollack/projects/spring-cloud-skipper/spring-cloud-skipper-server-core/src/test/resources/repositories/binaries/test/"
 ```
 
 and start the Skipper server using
