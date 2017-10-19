@@ -243,11 +243,11 @@ public class SkipperCommands extends AbstractSkipperCommand {
 			@ShellOption(help = "the name of the package to use for the upgrade") String packageName,
 			@ShellOption(help = "the version of the package to use for the upgrade") String packageVersion,
 			@ShellOption(help = "specify values in a YAML file", defaultValue = NULL) File file,
-			@ShellOption(help = "the comma separated set of properties to override during upgrade", defaultValue = NULL) String propertyString)
+			@ShellOption(help = "the comma separated set of properties to override during upgrade", defaultValue = NULL) String properties)
 			throws IOException {
-		assertMutuallyExclusiveFileAndProperties(file, propertyString);
+		assertMutuallyExclusiveFileAndProperties(file, properties);
 		Release release = skipperClient
-				.upgrade(getUpgradeRequest(releaseName, packageName, packageVersion, file, propertyString));
+				.upgrade(getUpgradeRequest(releaseName, packageName, packageVersion, file, properties));
 		StringBuilder sb = new StringBuilder();
 		sb.append(release.getName() + " has been upgraded.\n");
 		sb.append("Last Deployed: " + release.getInfo().getLastDeployed() + "\n");
