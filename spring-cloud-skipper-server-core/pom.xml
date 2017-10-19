@@ -12,7 +12,7 @@
     </parent>
 
     <properties>
-        <spring-cloud-deployer-cloudfoundry.version>1.2.2.RELEASE</spring-cloud-deployer-cloudfoundry.version>
+        <spring-cloud-deployer-cloudfoundry.version>1.3.0.M2</spring-cloud-deployer-cloudfoundry.version>
         <spring-cloud-deployer-kubernetes.version>1.2.2.RELEASE</spring-cloud-deployer-kubernetes.version>
         <reactor.version>3.0.7.RELEASE</reactor.version>
         <zeroturnaround.version>1.11</zeroturnaround.version>
