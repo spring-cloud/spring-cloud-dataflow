@@ -36,11 +36,6 @@ public class PackageMetadata extends AbstractEntity {
 	private String apiVersion;
 
 	/**
-	 * Indicates the origin of the repository (free form text).
-	 */
-	private String origin;
-
-	/**
 	 * The repository ID this Package Index file belongs to.
 	 */
 	private Long repositoryId;
@@ -120,14 +115,6 @@ public class PackageMetadata extends AbstractEntity {
 
 	public void setKind(String kind) {
 		this.kind = kind;
-	}
-
-	public String getOrigin() {
-		return origin;
-	}
-
-	public void setOrigin(String origin) {
-		this.origin = origin;
 	}
 
 	public String getName() {
@@ -234,9 +221,6 @@ public class PackageMetadata extends AbstractEntity {
 		if (apiVersion != null ? !apiVersion.equals(that.apiVersion) : that.apiVersion != null) {
 			return false;
 		}
-		if (origin != null ? !origin.equals(that.origin) : that.origin != null) {
-			return false;
-		}
 		if (repositoryId != null ? !repositoryId.equals(that.repositoryId) : that.repositoryId != null) {
 			return false;
 		}
@@ -274,7 +258,6 @@ public class PackageMetadata extends AbstractEntity {
 	@Override
 	public int hashCode() {
 		int result = apiVersion != null ? apiVersion.hashCode() : 0;
-		result = 31 * result + (origin != null ? origin.hashCode() : 0);
 		result = 31 * result + (kind != null ? kind.hashCode() : 0);
 		result = 31 * result + (name != null ? name.hashCode() : 0);
 		result = 31 * result + (version != null ? version.hashCode() : 0);
@@ -293,7 +276,6 @@ public class PackageMetadata extends AbstractEntity {
 		return "PackageMetadata{" +
 				"id='" + getId() + '\'' +
 				", apiVersion='" + apiVersion + '\'' +
-				", origin='" + origin + '\'' +
 				", repositoryId='" + repositoryId + '\'' +
 				", kind='" + kind + '\'' +
 				", name='" + name + '\'' +

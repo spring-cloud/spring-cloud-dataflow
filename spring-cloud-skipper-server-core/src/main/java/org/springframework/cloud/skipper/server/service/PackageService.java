@@ -96,7 +96,7 @@ public class PackageService implements ResourceLoaderAware {
 		try {
 			targetPath = TempFileUtils.createTempDirectory("skipper" + packageMetadata.getName());
 			File targetFile = SkipperUtils.calculatePackageZipFile(packageMetadata, targetPath.toFile());
-			logger.debug("Finding repository for package origin {}", packageMetadata.getOrigin());
+			logger.debug("Finding repository for package  {}", packageMetadata.getName());
 			Repository packageRepository = repositoryRepository.findOne(packageMetadata.getRepositoryId());
 			if (packageRepository == null) {
 				return throwDescriptiveException(packageMetadata);
@@ -128,12 +128,12 @@ public class PackageService implements ResourceLoaderAware {
 		catch (IOException ex) {
 			throw new SkipperException("Exception while downloading package zip file for "
 					+ packageMetadata.getName() + "-" + packageMetadata.getVersion() +
-					". PackageMetadata origin = " + packageMetadata.getOrigin(), ex);
+					". PackageMetadata repositoryId = " + packageMetadata.getRepositoryId(), ex);
 		}
 		catch (InvalidDataAccessApiUsageException ex) {
 			throw new SkipperException("Exception while downloading package zip file for "
 					+ packageMetadata.getName() + "-" + packageMetadata.getVersion() +
-					". PackageMetadata origin = " + packageMetadata.getOrigin() + "No repository found.", ex);
+					". PackageMetadata repositoryId = " + packageMetadata.getRepositoryId() + "No repository found.", ex);
 		}
 		catch (Exception ex) {
 			logger.error("This is a catch all debug statement.", ex);
@@ -150,8 +150,8 @@ public class PackageService implements ResourceLoaderAware {
 		List<Repository> list = StreamSupport
 				.stream(repositoryRepository.findAll().spliterator(), false)
 				.collect(Collectors.toList());
-		throw new SkipperException("Can not find packageRepository for origin = "
-				+ packageMetadata.getOrigin() + ". Known repositories are " + Arrays.toString(list.toArray()));
+		throw new SkipperException("Can not find packageRepository with Id = "
+				+ packageMetadata.getRepositoryId() + ". Known repositories are " + Arrays.toString(list.toArray()));
 	}
 
 	private Package deserializePackageFromDatabase(PackageMetadata packageMetadata) {

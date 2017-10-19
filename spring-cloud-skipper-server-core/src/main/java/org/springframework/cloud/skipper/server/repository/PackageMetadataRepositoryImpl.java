@@ -20,7 +20,6 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
 import org.springframework.cloud.skipper.domain.Repository;
-import org.springframework.util.StringUtils;
 
 /**
  * Implementation for the {@link PackageMetadataRepositoryCustom} methods.
@@ -47,9 +46,9 @@ public class PackageMetadataRepositoryImpl implements PackageMetadataRepositoryC
 		}
 		List<Repository> repositoriesByRepoOrder = this.repositoryRepository.findAllByOrderByRepoOrderDesc();
 		for (Repository repository: repositoriesByRepoOrder) {
-			String repoId = repository.getId();
+			Long repoId = repository.getId();
 			for (PackageMetadata packageMetadata: packageMetadataList) {
-				if (StringUtils.hasText(packageMetadata.getOrigin()) && packageMetadata.getOrigin().equals(repoId)) {
+				if ((packageMetadata.getRepositoryId() != null) && packageMetadata.getRepositoryId().equals(repoId)) {
 					return packageMetadata;
 				}
 			}

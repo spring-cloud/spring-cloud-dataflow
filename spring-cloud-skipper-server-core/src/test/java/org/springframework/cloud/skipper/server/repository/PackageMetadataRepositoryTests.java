@@ -98,12 +98,12 @@ public class PackageMetadataRepositoryTests extends AbstractIntegrationTest {
 		assertThat(packageMetadataList.size()).isEqualTo(3);
 		assertThat(packageMetadataList.get(0).getName()).isEqualTo("package1");
 		assertThat(packageMetadataList.get(0).getVersion()).isEqualTo("1.0.0");
-		assertThat(packageMetadataList.get(0).getOrigin()).isEqualTo(this.repositoryRepository.findByName(repoName2)
+		assertThat(packageMetadataList.get(0).getRepositoryId()).isEqualTo(this.repositoryRepository.findByName(repoName2)
 				.getId());
 		PackageMetadata packageMetadata = this.packageMetadataRepository.findByNameAndVersionByMaxRepoOrder("package1",
 				"1.0.0");
 		assertThat(packageMetadata.getApiVersion()).isEqualTo("1.0.1");
-		assertThat(packageMetadata.getOrigin()).isEqualTo(this.repositoryRepository.findByName(repoName3).getId());
+		assertThat(packageMetadata.getRepositoryId()).isEqualTo(this.repositoryRepository.findByName(repoName3).getId());
 	}
 
 }

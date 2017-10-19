@@ -90,7 +90,7 @@ public class PackageServiceTests extends AbstractIntegrationTest {
 		assertThat(packageMetadata.getPackageFileBytes()).isNullOrEmpty();
 		assertThat(packageService).isNotNull();
 		assertThat(packageMetadata.getId()).isNotNull();
-		assertThat(packageMetadata.getOrigin()).isNotNull();
+		assertThat(packageMetadata.getRepositoryId()).isNotNull();
 		Repository repository = repositoryRepository.findOne(packageMetadata.getRepositoryId());
 		assertThat(repository).isNotNull();
 
