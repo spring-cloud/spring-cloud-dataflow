@@ -41,7 +41,7 @@
             <groupId>org.zeroturnaround</groupId>
             <artifactId>zt-zip</artifactId>
         </dependency>
-        <!-- commons lang needed for dateformat-yaml? -->
+        <!-- commons lang needed for date format-yaml? -->
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>

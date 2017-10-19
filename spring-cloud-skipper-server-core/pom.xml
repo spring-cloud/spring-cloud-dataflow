@@ -16,7 +16,6 @@
         <spring-cloud-deployer-kubernetes.version>1.2.2.RELEASE</spring-cloud-deployer-kubernetes.version>
         <reactor.version>3.0.7.RELEASE</reactor.version>
         <zeroturnaround.version>1.11</zeroturnaround.version>
-        <!-- <spring-restdocs.version>1.2.2.RELEASE</spring-restdocs.version> -->
         <spring-restdocs.version>1.2.2.RELEASE</spring-restdocs.version>
     </properties>
 
@@ -76,7 +75,7 @@
             <groupId>com.fasterxml.jackson.dataformat</groupId>
             <artifactId>jackson-dataformat-yaml</artifactId>
         </dependency>
-        <!-- commons lang needed for datformat-yaml? -->
+        <!-- commons lang needed for date-format-yaml? -->
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
