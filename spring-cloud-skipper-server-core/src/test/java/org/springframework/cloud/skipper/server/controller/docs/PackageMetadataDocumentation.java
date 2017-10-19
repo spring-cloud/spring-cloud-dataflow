@@ -50,6 +50,7 @@ public class PackageMetadataDocumentation extends BaseDocumentation {
 				super.paginationProperties.and(
 					fieldWithPath("_embedded.packageMetadata").description("Contains a collection of Package Metadata items"),
 					fieldWithPath("_embedded.packageMetadata[].apiVersion").description("The Package Index spec version this file is based on"),
+					fieldWithPath("_embedded.packageMetadata[].origin").description("Indicates the origin of the repository (free form text)"),
 					fieldWithPath("_embedded.packageMetadata[].repositoryId").description("The repository ID this Package Index file belongs to"),
 					fieldWithPath("_embedded.packageMetadata[].kind").description("What type of package system is being used"),
 					fieldWithPath("_embedded.packageMetadata[].name").description("The name of the package"),
@@ -84,6 +85,7 @@ public class PackageMetadataDocumentation extends BaseDocumentation {
 					parameterWithName("packageMetadataId").description("The id of the package to query")),
 				responseFields(
 					fieldWithPath("apiVersion").description("The Package Index spec version this file is based on"),
+					fieldWithPath("origin").description("Indicates the origin of the repository (free form text)"),
 					fieldWithPath("repositoryId").description("The repository ID this Package Index file belongs to"),
 					fieldWithPath("kind").description("What type of package system is being used"),
 					fieldWithPath("name").description("The name of the package"),

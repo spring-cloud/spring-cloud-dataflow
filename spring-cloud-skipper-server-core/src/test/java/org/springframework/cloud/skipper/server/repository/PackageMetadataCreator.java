@@ -25,6 +25,7 @@ public class PackageMetadataCreator {
 	public static void createTwoPackages(PackageMetadataRepository repository) {
 		PackageMetadata packageMetadata = new PackageMetadata();
 		packageMetadata.setApiVersion("1");
+		packageMetadata.setOrigin("www.package-repos.com/repo1");
 		packageMetadata.setRepositoryId(1L);
 		packageMetadata.setKind("skipper");
 		packageMetadata.setName("package1");
@@ -36,6 +37,7 @@ public class PackageMetadataCreator {
 		packageMetadata = new PackageMetadata();
 		packageMetadata.setApiVersion("1");
 		packageMetadata.setRepositoryId(1L);
+		packageMetadata.setOrigin("www.package-repos.com/repo2");
 		packageMetadata.setKind("skipper");
 		packageMetadata.setName("package2");
 		packageMetadata.setVersion("2.0.0");

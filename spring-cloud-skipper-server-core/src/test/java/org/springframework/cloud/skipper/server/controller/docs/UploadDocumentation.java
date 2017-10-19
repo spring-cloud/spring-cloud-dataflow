@@ -78,6 +78,7 @@ public class UploadDocumentation extends BaseDocumentation {
 				this.documentationHandler.document(
 					responseFields(
 						fieldWithPath("apiVersion").description("The Package Index spec version this file is based on"),
+						fieldWithPath("origin").description("Indicates the origin of the repository (free form text)"),
 						fieldWithPath("repositoryId").description("The repository ID this Package Index file belongs to"),
 						fieldWithPath("kind").description("What type of package system is being used"),
 						fieldWithPath("name").description("The name of the package"),
