@@ -28,7 +28,6 @@ import org.slf4j.LoggerFactory;
 
 import org.springframework.cloud.skipper.domain.AboutInfo;
 import org.springframework.cloud.skipper.domain.Info;
-import org.springframework.cloud.skipper.domain.InstallProperties;
 import org.springframework.cloud.skipper.domain.InstallRequest;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
 import org.springframework.cloud.skipper.domain.Release;
@@ -166,12 +165,6 @@ public class DefaultSkipperClient implements SkipperClient {
 			// TODO semver sort..
 		}
 		return traversalBuilder.withTemplateParameters(parameters).toObject(typeReference);
-	}
-
-	@Override
-	public String install(String packageId, InstallProperties installProperties) {
-		String url = String.format("%s/%s/%s", baseUri, "install", packageId);
-		return this.restTemplate.postForObject(url, installProperties, String.class);
 	}
 
 	public Release install(InstallRequest installRequest) {

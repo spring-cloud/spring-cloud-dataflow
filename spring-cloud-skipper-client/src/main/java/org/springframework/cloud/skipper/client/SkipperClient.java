@@ -19,7 +19,6 @@ import java.util.List;
 
 import org.springframework.cloud.skipper.domain.AboutInfo;
 import org.springframework.cloud.skipper.domain.Info;
-import org.springframework.cloud.skipper.domain.InstallProperties;
 import org.springframework.cloud.skipper.domain.InstallRequest;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
 import org.springframework.cloud.skipper.domain.Release;
@@ -59,15 +58,6 @@ public interface SkipperClient {
 	 * @return the package metadata with the projection set to summary
 	 */
 	Resources<PackageMetadata> search(String name, boolean details);
-
-	/**
-	 * Install the package.
-	 *
-	 * @param packageId the package Id.
-	 * @param installProperties the (@link InstallProperties)
-	 * @return the deployed {@link Release}
-	 */
-	String install(String packageId, InstallProperties installProperties);
 
 	/**
 	 * Install the package
