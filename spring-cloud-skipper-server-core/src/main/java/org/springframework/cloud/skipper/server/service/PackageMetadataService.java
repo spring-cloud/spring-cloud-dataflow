@@ -79,7 +79,7 @@ public class PackageMetadataService implements ResourceLoaderAware {
 							List<PackageMetadata> downloadedPackageMetadata = deserializeFromIndexFiles(
 									downloadedFileAsList);
 							for (PackageMetadata packageMetadata : downloadedPackageMetadata) {
-								packageMetadata.setOrigin(packageRepository.getId());
+								packageMetadata.setRepositoryId(packageRepository.getId());
 							}
 							finalMetadataList.addAll(downloadedPackageMetadata);
 						}

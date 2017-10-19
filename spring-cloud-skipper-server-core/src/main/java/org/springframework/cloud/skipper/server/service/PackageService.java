@@ -97,7 +97,7 @@ public class PackageService implements ResourceLoaderAware {
 			targetPath = TempFileUtils.createTempDirectory("skipper" + packageMetadata.getName());
 			File targetFile = SkipperUtils.calculatePackageZipFile(packageMetadata, targetPath.toFile());
 			logger.debug("Finding repository for package origin {}", packageMetadata.getOrigin());
-			Repository packageRepository = repositoryRepository.findOne(packageMetadata.getOrigin());
+			Repository packageRepository = repositoryRepository.findOne(packageMetadata.getRepositoryId());
 			if (packageRepository == null) {
 				return throwDescriptiveException(packageMetadata);
 			}
@@ -221,7 +221,7 @@ public class PackageService implements ResourceLoaderAware {
 			PackageMetadata packageMetadata = packageToUpload.getMetadata();
 			// TODO: Model the PackageMetadata -> Repository relationship in the DB.
 			if (localRepositoryToUpload != null) {
-				packageMetadata.setOrigin(localRepositoryToUpload.getId());
+				packageMetadata.setRepositoryId(localRepositoryToUpload.getId());
 			}
 			packageMetadata.setPackageFileBytes(uploadRequest.getPackageFileAsBytes());
 			return this.packageMetadataRepository.save(packageMetadata);

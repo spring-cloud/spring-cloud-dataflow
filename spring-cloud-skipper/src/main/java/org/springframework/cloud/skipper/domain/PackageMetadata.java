@@ -24,6 +24,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  * Metadata for the Package.
  *
  * @author Mark Pollack
+ * @author Gunnar Hillert
  */
 @Entity
 public class PackageMetadata extends AbstractEntity {
@@ -35,10 +36,14 @@ public class PackageMetadata extends AbstractEntity {
 	private String apiVersion;
 
 	/**
-	 * The repository ID this Package Index file belongs to. todo: Make this as Required once
-	 * we have repository backed package for upload etc.,
+	 * Indicates the origin of the repository (free form text).
 	 */
 	private String origin;
+
+	/**
+	 * The repository ID this Package Index file belongs to.
+	 */
+	private Long repositoryId;
 
 	/**
 	 * What type of package system is being used.
@@ -207,6 +212,14 @@ public class PackageMetadata extends AbstractEntity {
 		this.iconUrl = iconUrl;
 	}
 
+	public Long getRepositoryId() {
+		return repositoryId;
+	}
+
+	public void setRepositoryId(Long repositoryId) {
+		this.repositoryId = repositoryId;
+	}
+
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) {
@@ -222,6 +235,9 @@ public class PackageMetadata extends AbstractEntity {
 			return false;
 		}
 		if (origin != null ? !origin.equals(that.origin) : that.origin != null) {
+			return false;
+		}
+		if (repositoryId != null ? !repositoryId.equals(that.repositoryId) : that.repositoryId != null) {
 			return false;
 		}
 		if (kind != null ? !kind.equals(that.kind) : that.kind != null) {
@@ -278,6 +294,7 @@ public class PackageMetadata extends AbstractEntity {
 				"id='" + getId() + '\'' +
 				", apiVersion='" + apiVersion + '\'' +
 				", origin='" + origin + '\'' +
+				", repositoryId='" + repositoryId + '\'' +
 				", kind='" + kind + '\'' +
 				", name='" + name + '\'' +
 				", version='" + version + '\'' +

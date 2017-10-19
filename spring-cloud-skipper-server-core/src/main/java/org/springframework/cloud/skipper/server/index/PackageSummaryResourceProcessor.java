@@ -34,7 +34,7 @@ public class PackageSummaryResourceProcessor implements ResourceProcessor<Resour
 	@Override
 	public Resource<PackageSummary> process(Resource<PackageSummary> packageSummaryResource) {
 		Link link = linkTo(
-				methodOn(SkipperController.class).install(packageSummaryResource.getContent().getId(), null))
+				methodOn(SkipperController.class).install(Long.valueOf(packageSummaryResource.getContent().getId()), null))
 						.withRel("install");
 		packageSummaryResource.add(link);
 		return packageSummaryResource;

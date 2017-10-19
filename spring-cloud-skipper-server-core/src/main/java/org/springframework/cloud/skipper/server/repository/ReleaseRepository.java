@@ -29,7 +29,7 @@ import org.springframework.data.rest.core.annotation.RestResource;
  */
 @RepositoryRestResource(path = "releases", collectionResourceRel = "releases")
 @SuppressWarnings("unchecked")
-public interface ReleaseRepository extends PagingAndSortingRepository<Release, String>, ReleaseRepositoryCustom {
+public interface ReleaseRepository extends PagingAndSortingRepository<Release, Long>, ReleaseRepositoryCustom {
 
 	@Override
 	@RestResource(exported = false)
@@ -37,7 +37,7 @@ public interface ReleaseRepository extends PagingAndSortingRepository<Release, S
 
 	@Override
 	@RestResource(exported = false)
-	void delete(String id);
+	void delete(Long id);
 
 	@Override
 	@RestResource(exported = false)

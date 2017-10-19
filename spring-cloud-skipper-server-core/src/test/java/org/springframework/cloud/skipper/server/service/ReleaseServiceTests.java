@@ -55,15 +55,15 @@ public class ReleaseServiceTests extends AbstractIntegrationTest {
 
 	@Test
 	public void testBadArguments() {
-		assertThatThrownBy(() -> releaseService.install("badId", new InstallProperties()))
+		assertThatThrownBy(() -> releaseService.install(123L, new InstallProperties()))
 				.isInstanceOf(SkipperException.class)
 				.hasMessageContaining("can not be found");
 
-		assertThatThrownBy(() -> releaseService.install("badId", null))
+		assertThatThrownBy(() -> releaseService.install(123L, null))
 				.isInstanceOf(IllegalArgumentException.class)
 				.hasMessageContaining("Deploy properties can not be null");
 
-		assertThatThrownBy(() -> releaseService.install((String) null, new InstallProperties()))
+		assertThatThrownBy(() -> releaseService.install((Long) null, new InstallProperties()))
 				.isInstanceOf(IllegalArgumentException.class)
 				.hasMessageContaining("Package id can not be null");
 

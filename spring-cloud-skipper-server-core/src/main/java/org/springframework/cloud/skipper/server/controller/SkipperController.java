@@ -87,7 +87,7 @@ public class SkipperController {
 
 	@RequestMapping(path = "/install/{id}", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
-	public Release install(@PathVariable("id") String id, @RequestBody InstallProperties installProperties) {
+	public Release install(@PathVariable("id") Long id, @RequestBody InstallProperties installProperties) {
 		return this.releaseService.install(id, installProperties);
 	}
 

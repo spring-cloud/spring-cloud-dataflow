@@ -96,9 +96,9 @@ public class ReleaseService {
 	 * @throws SkipperException if the package to install can not be found.
 	 */
 	@Transactional
-	public Release install(String id, InstallProperties installProperties) {
+	public Release install(Long id, InstallProperties installProperties) {
 		Assert.notNull(installProperties, "Deploy properties can not be null");
-		Assert.hasText(id, "Package id can not be null");
+		Assert.notNull(id, "Package id can not be null");
 		PackageMetadata packageMetadata = this.packageMetadataRepository.findOne(id);
 		if (packageMetadata == null) {
 			throw new SkipperException(String.format("Package with id='%s' can not be found.", id));
