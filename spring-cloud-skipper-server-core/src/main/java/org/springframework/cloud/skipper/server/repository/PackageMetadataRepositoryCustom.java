@@ -15,27 +15,22 @@
  */
 package org.springframework.cloud.skipper.server.repository;
 
-import java.util.List;
-
-import org.springframework.cloud.skipper.domain.Repository;
-import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.cloud.skipper.domain.PackageMetadata;
 import org.springframework.data.repository.query.Param;
-import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 
 /**
- * @author Mark Pollack
  * @author Ilayaperumal Gopinathan
  */
-@RepositoryRestResource(path = "repositories", collectionResourceRel = "repositories")
-public interface RepositoryRepository extends PagingAndSortingRepository<Repository, String> {
-
-	Repository findByName(@Param("name") String name);
+public interface PackageMetadataRepositoryCustom {
 
 	/**
-	 * Get all the repositories with their repository order in descending order.
+	 * Find the {@link PackageMetadata} with the given name, version and also from the repository that has the
+	 * highest order set.
 	 *
-	 * @return the list of repositories
+	 * @param name the name of the package metadata
+	 * @param version the version of the package metadata
+	 * @return the package metadata
 	 */
-	List<Repository> findAllByOrderByRepoOrderDesc();
+	PackageMetadata findByNameAndVersionByMaxRepoOrder(@Param("name") String name, @Param("version") String version);
 
 }

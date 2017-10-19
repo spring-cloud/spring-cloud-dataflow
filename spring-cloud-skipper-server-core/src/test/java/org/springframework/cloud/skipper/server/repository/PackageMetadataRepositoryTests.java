@@ -34,6 +34,9 @@ public class PackageMetadataRepositoryTests extends AbstractIntegrationTest {
 	@Autowired
 	private PackageMetadataRepository packageMetadataRepository;
 
+	@Autowired
+	private RepositoryRepository repositoryRepository;
+
 	@Test
 	public void basicCrud() {
 		PackageMetadataCreator.createTwoPackages(this.packageMetadataRepository);
@@ -74,6 +77,33 @@ public class PackageMetadataRepositoryTests extends AbstractIntegrationTest {
 		Iterable<PackageMetadata> packages3 = this.packageMetadataRepository.findByNameContainingIgnoreCase("1");
 		assertThat(packages3).isNotEmpty();
 		assertThat(packages3).hasSize(2);
+	}
+
+	@Test
+	public void findByNameAndVersionWithMultipleRepos() {
+		String repoName1 = "local1";
+		String repoName2 = "remote1";
+		String repoName3 = "remote2";
+		RepositoryCreator.createRepository(this.repositoryRepository, repoName1, 0);
+		RepositoryCreator.createRepository(this.repositoryRepository, repoName2, 1);
+		RepositoryCreator.createRepository(this.repositoryRepository, repoName3, 2);
+		PackageMetadataCreator.createTwoPackages(this.packageMetadataRepository,
+				this.repositoryRepository.findByName(repoName1).getId(), "1.0.0");
+		PackageMetadataCreator.createTwoPackages(this.packageMetadataRepository,
+				this.repositoryRepository.findByName(repoName2).getId(), "2.0.1");
+		PackageMetadataCreator.createTwoPackages(this.packageMetadataRepository,
+				this.repositoryRepository.findByName(repoName3).getId(), "1.0.1");
+		List<PackageMetadata> packageMetadataList = this.packageMetadataRepository
+				.findByNameAndVersionOrderByApiVersionDesc("package1", "1.0.0");
+		assertThat(packageMetadataList.size()).isEqualTo(3);
+		assertThat(packageMetadataList.get(0).getName()).isEqualTo("package1");
+		assertThat(packageMetadataList.get(0).getVersion()).isEqualTo("1.0.0");
+		assertThat(packageMetadataList.get(0).getOrigin()).isEqualTo(this.repositoryRepository.findByName(repoName2)
+				.getId());
+		PackageMetadata packageMetadata = this.packageMetadataRepository.findByNameAndVersionByMaxRepoOrder("package1",
+				"1.0.0");
+		assertThat(packageMetadata.getApiVersion()).isEqualTo("1.0.1");
+		assertThat(packageMetadata.getOrigin()).isEqualTo(this.repositoryRepository.findByName(repoName3).getId());
 	}
 
 }

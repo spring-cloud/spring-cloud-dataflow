@@ -87,4 +87,29 @@ public class PackageMetadataCreator {
 		packageMetadata.setDescription("Another very cool project");
 		repository.save(packageMetadata);
 	}
+
+	public static void createTwoPackages(PackageMetadataRepository repository, String repoId, String apiVersion) {
+		PackageMetadata packageMetadata = new PackageMetadata();
+		packageMetadata.setApiVersion(apiVersion);
+		packageMetadata.setOrigin(repoId);
+		packageMetadata.setKind("skipper");
+		packageMetadata.setName("package1");
+		packageMetadata.setVersion("1.0.0");
+		packageMetadata.setIconUrl("http://www.gilligansisle.com/images/a2.gif");
+		packageMetadata.setDescription("A very cool project");
+		packageMetadata.setMaintainer("Alan Hale Jr.");
+		repository.save(packageMetadata);
+		packageMetadata = new PackageMetadata();
+		packageMetadata.setApiVersion(apiVersion);
+		packageMetadata.setOrigin(repoId);
+		packageMetadata.setKind("skipper");
+		packageMetadata.setName("package2");
+		packageMetadata.setVersion("2.0.0");
+		packageMetadata.setIconUrl("http://www.gilligansisle.com/images/a1.gif");
+		packageMetadata.setMaintainer("Bob Denver");
+		packageMetadata.setDescription("Another very cool project");
+		repository.save(packageMetadata);
+	}
+
+
 }

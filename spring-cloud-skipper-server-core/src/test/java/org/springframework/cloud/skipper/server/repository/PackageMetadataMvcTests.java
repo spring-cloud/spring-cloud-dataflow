@@ -47,9 +47,9 @@ public class PackageMetadataMvcTests extends AbstractMockMvcTests {
 	@Test
 	public void testProjection() throws Exception {
 		PackageMetadataCreator.createTwoPackages(packageMetadataRepository);
-		PackageMetadata packageMetadata = packageMetadataRepository.findByNameAndVersion("package1", "1.0.0");
+		PackageMetadata packageMetadata = packageMetadataRepository.findByNameAndVersionByMaxRepoOrder("package1", "1.0.0");
 		assertThat(packageMetadata.getId()).isNotNull();
-		packageMetadata = packageMetadataRepository.findByNameAndVersion("package2", "2.0.0");
+		packageMetadata = packageMetadataRepository.findByNameAndVersionByMaxRepoOrder("package2", "2.0.0");
 		assertThat(packageMetadata.getId()).isNotNull();
 		mockMvc.perform(get("/api/packageMetadata?projection=summary")).andDo(print()).andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.packageMetadata[0].version").value("1.0.0"))

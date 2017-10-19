@@ -78,14 +78,14 @@ public class PackageServiceTests extends AbstractIntegrationTest {
 
 	@Test
 	public void download() {
-		PackageMetadata packageMetadata = packageMetadataRepository.findByNameAndVersion("log", "1.0.0");
+		PackageMetadata packageMetadata = packageMetadataRepository.findByNameAndVersionByMaxRepoOrder("log", "1.0.0");
 		// Other tests may have caused the file to be loaded into the database, ensure we start
 		// fresh.
 		if (packageMetadata.getPackageFileBytes() != null) {
 			packageMetadata.setPackageFileBytes(null);
 			packageMetadataRepository.save(packageMetadata);
 		}
-		packageMetadata = packageMetadataRepository.findByNameAndVersion("log", "1.0.0");
+		packageMetadata = packageMetadataRepository.findByNameAndVersionByMaxRepoOrder("log", "1.0.0");
 		assertThat(packageMetadata).isNotNull();
 		assertThat(packageMetadata.getPackageFileBytes()).isNullOrEmpty();
 		assertThat(packageService).isNotNull();
@@ -99,7 +99,7 @@ public class PackageServiceTests extends AbstractIntegrationTest {
 		assertThat(downloadedPackage.getMetadata()).isEqualToIgnoringGivenFields(packageMetadata);
 		assertThat(downloadedPackage.getTemplates()).isNotNull();
 		assertThat(downloadedPackage.getConfigValues()).isNotNull();
-		packageMetadata = packageMetadataRepository.findByNameAndVersion("log", "1.0.0");
+		packageMetadata = packageMetadataRepository.findByNameAndVersionByMaxRepoOrder("log", "1.0.0");
 		assertThat(packageMetadata.getPackageFileBytes()).isNotNull();
 	}
 
@@ -112,7 +112,7 @@ public class PackageServiceTests extends AbstractIntegrationTest {
 		this.repositoryRepository.save(repository);
 
 		// Package log 9.9.9 should not exist, since it hasn't been uploaded yet.
-		PackageMetadata packageMetadata = packageMetadataRepository.findByNameAndVersion("log", "9.9.9");
+		PackageMetadata packageMetadata = packageMetadataRepository.findByNameAndVersionByMaxRepoOrder("log", "9.9.9");
 		assertThat(packageMetadata).isNull();
 
 		UploadRequest uploadProperties = new UploadRequest();
@@ -135,7 +135,7 @@ public class PackageServiceTests extends AbstractIntegrationTest {
 		assertThat(uploadedPackageMetadata.getVersion().equals("9.9.9")).isTrue();
 
 		// Retrieve new package
-		PackageMetadata retrievedPackageMetadata = packageMetadataRepository.findByNameAndVersion("log", "9.9.9");
+		PackageMetadata retrievedPackageMetadata = packageMetadataRepository.findByNameAndVersionByMaxRepoOrder("log", "9.9.9");
 		assertThat(retrievedPackageMetadata.getName().equals("log")).isTrue();
 		assertThat(retrievedPackageMetadata.getVersion().equals("9.9.9")).isTrue();
 		assertThat(retrievedPackageMetadata).isNotNull();
@@ -153,7 +153,7 @@ public class PackageServiceTests extends AbstractIntegrationTest {
 
 	@Test
 	public void deserializePackage() {
-		PackageMetadata packageMetadata = this.packageMetadataRepository.findByNameAndVersion("log", "1.0.0");
+		PackageMetadata packageMetadata = this.packageMetadataRepository.findByNameAndVersionByMaxRepoOrder("log", "1.0.0");
 		assertThat(packageService).isNotNull();
 		Package pkg = packageService.downloadPackage(packageMetadata);
 		assertThat(pkg).isNotNull();
@@ -167,7 +167,7 @@ public class PackageServiceTests extends AbstractIntegrationTest {
 
 	@Test
 	public void deserializeNestedPackage() {
-		PackageMetadata packageMetadata = this.packageMetadataRepository.findByNameAndVersion("ticktock", "1.0.0");
+		PackageMetadata packageMetadata = this.packageMetadataRepository.findByNameAndVersionByMaxRepoOrder("ticktock", "1.0.0");
 		assertThat(packageService).isNotNull();
 		Package pkg = packageService.downloadPackage(packageMetadata);
 		assertThat(pkg).isNotNull();

@@ -129,27 +129,6 @@ public class ReleaseServiceTests extends AbstractIntegrationTest {
 	}
 
 	@Test
-	public void testPackageDuplicateFound() {
-		PackageMetadata packageMetadata = new PackageMetadata();
-		packageMetadata.setApiVersion("v1");
-		packageMetadata.setOrigin("1");
-		packageMetadata.setKind("skipper");
-		packageMetadata.setName("log");
-		packageMetadata.setVersion("1.0.0");
-		packageMetadataRepository.save(packageMetadata);
-
-		boolean exceptionFired = false;
-		try {
-			this.releaseService.getPackageMetadata("log", "1.0.0");
-		}
-		catch (SkipperException se) {
-			assertThat(se.getMessage()).isEqualTo("Same name package in different repositories.  Need to support.");
-			exceptionFired = true;
-		}
-		assertThat(exceptionFired).isTrue();
-	}
-
-	@Test
 	public void testStatusReleaseExist() {
 		InstallProperties installProperties = new InstallProperties();
 		installProperties.setReleaseName("testexists");

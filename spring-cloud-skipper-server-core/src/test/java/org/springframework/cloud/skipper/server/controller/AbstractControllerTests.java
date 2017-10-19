@@ -77,7 +77,7 @@ public abstract class AbstractControllerTests extends AbstractMockMvcTests {
 	protected Release deploy(String packageName, String packageVersion, String releaseName) throws Exception {
 		// Deploy
 		InstallProperties installProperties = createDeployProperties(releaseName);
-		PackageMetadata packageMetadata = this.packageMetadataRepository.findByNameAndVersion(packageName,
+		PackageMetadata packageMetadata = this.packageMetadataRepository.findByNameAndVersionByMaxRepoOrder(packageName,
 				packageVersion);
 		assertThat(packageMetadata).isNotNull();
 		mockMvc.perform(post("/api/install/" + packageMetadata.getId())
@@ -95,7 +95,7 @@ public abstract class AbstractControllerTests extends AbstractMockMvcTests {
 
 		String releaseName = installRequest.getInstallProperties().getReleaseName();
 		Release deployedRelease = this.releaseRepository.findByNameAndVersion(releaseName, 1);
-		PackageMetadata packageMetadata = this.packageMetadataRepository.findByNameAndVersion(
+		PackageMetadata packageMetadata = this.packageMetadataRepository.findByNameAndVersionByMaxRepoOrder(
 				installRequest.getPackageIdentifier().getPackageName(),
 				installRequest.getPackageIdentifier().getPackageVersion());
 		commonReleaseAssertions(releaseName, packageMetadata, deployedRelease);
@@ -110,7 +110,7 @@ public abstract class AbstractControllerTests extends AbstractMockMvcTests {
 		packageIdentifier.setPackageVersion(packageVersion);
 		upgradeRequest.setPackageIdentifier(packageIdentifier);
 		upgradeRequest.setUpgradeProperties(upgradeProperties);
-		PackageMetadata updatePackageMetadata = this.packageMetadataRepository.findByNameAndVersion(packageName,
+		PackageMetadata updatePackageMetadata = this.packageMetadataRepository.findByNameAndVersionByMaxRepoOrder(packageName,
 				packageVersion);
 		assertThat(updatePackageMetadata).isNotNull();
 		mockMvc.perform(post("/api/upgrade")

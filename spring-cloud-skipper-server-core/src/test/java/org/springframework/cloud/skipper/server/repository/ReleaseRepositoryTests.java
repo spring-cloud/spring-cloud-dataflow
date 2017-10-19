@@ -151,7 +151,7 @@ public class ReleaseRepositoryTests extends AbstractIntegrationTest {
 		assertThat(releases).isNotEmpty();
 		assertThat(releases).hasSize(9);
 
-		// findByNameAndVersion
+		// findByNameAndVersionOrderByApiVersionDesc
 		Release foundByNameAndVersion = this.releaseRepository.findByNameAndVersion(release1.getName(), 2);
 		assertThat(foundByNameAndVersion).isNotNull();
 		assertThat(foundByNameAndVersion.getInfo().getStatus().getStatusCode()).isEqualTo(release2.getInfo().getStatus()

@@ -139,18 +139,12 @@ public class ReleaseService {
 	}
 
 	PackageMetadata getPackageMetadata(String packageName, String packageVersion) {
-		PackageMetadata packageMetadata;
-		try {
-			packageMetadata = this.packageMetadataRepository.findByNameAndVersion(packageName,
+		PackageMetadata packageMetadata = this.packageMetadataRepository.findByNameAndVersionByMaxRepoOrder(packageName,
 					packageVersion);
-			if (packageMetadata == null) {
+		if (packageMetadata == null) {
 				throw new SkipperException(String.format("Can not find package '%s', version '%s'",
 						packageName, packageVersion));
 			}
-		}
-		catch (org.springframework.dao.IncorrectResultSizeDataAccessException e) {
-			throw new SkipperException("Same name package in different repositories.  Need to support.");
-		}
 		return packageMetadata;
 	}
 
