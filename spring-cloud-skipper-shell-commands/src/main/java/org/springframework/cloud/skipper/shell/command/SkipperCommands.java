@@ -182,22 +182,23 @@ public class SkipperCommands extends AbstractSkipperCommand {
 					defaultValue = NULL) String packageVersion,
 			// TODO specify a specific package repository
 			@ShellOption(help = "specify values in a YAML file", defaultValue = NULL) File file,
-			@ShellOption(help = "the comma separated set of properties to override during install", defaultValue = NULL) String propertyString,
+			@ShellOption(help = "the comma separated set of properties to override during install", defaultValue =
+					NULL) String properties,
 			// TODO support generation of a release name
 			@ShellOption(help = "the release name to use") String releaseName,
 			// TODO investigate server side support of 'default'
 			@ShellOption(help = "the platform name to use", defaultValue = "default") String platformName)
 			throws IOException {
-		assertMutuallyExclusiveFileAndProperties(file, propertyString);
+		assertMutuallyExclusiveFileAndProperties(file, properties);
 		Release release = skipperClient
-				.install(getInstallRequest(packageName, packageVersion, file, propertyString, releaseName, platformName));
+				.install(getInstallRequest(packageName, packageVersion, file, properties, releaseName, platformName));
 		return "Released " + release.getName();
 	}
 
 	private InstallRequest getInstallRequest(String packageName, String packageVersion, File yamlFile,
-			String propertyString, String releaseName, String platformName) throws IOException {
+			String properties, String releaseName, String platformName) throws IOException {
 		InstallProperties installProperties = getInstallProperties(releaseName, platformName, yamlFile,
-				propertyString);
+				properties);
 		InstallRequest installRequest = new InstallRequest();
 		installRequest.setInstallProperties(installProperties);
 		PackageIdentifier packageIdentifier = new PackageIdentifier();
@@ -255,8 +256,8 @@ public class SkipperCommands extends AbstractSkipperCommand {
 		return sb.toString();
 	}
 
-	private void assertMutuallyExclusiveFileAndProperties(File yamlFile, String propertyString) {
-		Assert.isTrue(!(yamlFile != null && propertyString != null), "The options 'file' and 'property-string' options "
+	private void assertMutuallyExclusiveFileAndProperties(File yamlFile, String properties) {
+		Assert.isTrue(!(yamlFile != null && properties != null), "The options 'file' and 'properties' options "
 				+ "are mutually exclusive.");
 		if (yamlFile != null) {
 			String extension = FilenameUtils.getExtension(yamlFile.getName());
