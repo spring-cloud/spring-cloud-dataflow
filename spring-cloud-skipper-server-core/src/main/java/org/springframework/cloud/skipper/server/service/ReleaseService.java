@@ -35,7 +35,6 @@ import org.springframework.cloud.skipper.domain.Status;
 import org.springframework.cloud.skipper.domain.StatusCode;
 import org.springframework.cloud.skipper.domain.UpgradeProperties;
 import org.springframework.cloud.skipper.domain.UpgradeRequest;
-import org.springframework.cloud.skipper.server.deployer.ReleaseAnalyzer;
 import org.springframework.cloud.skipper.server.deployer.ReleaseManager;
 import org.springframework.cloud.skipper.server.repository.DeployerRepository;
 import org.springframework.cloud.skipper.server.repository.PackageMetadataRepository;
@@ -70,20 +69,16 @@ public class ReleaseService {
 
 	private final DeployerRepository deployerRepository;
 
-	private ReleaseAnalyzer releaseAnalyzer;
-
 	public ReleaseService(PackageMetadataRepository packageMetadataRepository,
 			ReleaseRepository releaseRepository,
 			PackageService packageService,
 			ReleaseManager releaseManager,
-			DeployerRepository deployerRepository,
-			ReleaseAnalyzer releaseAnalyzer) {
+			DeployerRepository deployerRepository) {
 		this.packageMetadataRepository = packageMetadataRepository;
 		this.releaseRepository = releaseRepository;
 		this.packageService = packageService;
 		this.releaseManager = releaseManager;
 		this.deployerRepository = deployerRepository;
-		this.releaseAnalyzer = releaseAnalyzer;
 	}
 
 	/**
@@ -248,7 +243,6 @@ public class ReleaseService {
 		UpgradeProperties upgradeProperties = upgradeRequest.getUpgradeProperties();
 		Release oldRelease = this.releaseRepository.findLatestRelease(upgradeProperties.getReleaseName());
 		PackageIdentifier packageIdentifier = upgradeRequest.getPackageIdentifier();
-		// todo: search multi repository
 		PackageMetadata packageMetadata = getPackageMetadata(packageIdentifier.getPackageName(), packageIdentifier
 				.getPackageVersion());
 		Release newRelease = createReleaseForUpgrade(packageMetadata, oldRelease.getVersion() + 1, upgradeProperties,

@@ -144,10 +144,9 @@ public class SkipperServerConfiguration {
 			ReleaseRepository releaseRepository,
 			PackageService packageService,
 			ReleaseManager releaseManager,
-			DeployerRepository deployerRepository,
-			ReleaseAnalyzer releaseAnalyzer) {
+			DeployerRepository deployerRepository) {
 		return new ReleaseService(packageMetadataRepository, releaseRepository, packageService, releaseManager,
-				deployerRepository, releaseAnalyzer);
+				deployerRepository);
 	}
 
 	@Bean
