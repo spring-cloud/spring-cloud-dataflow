@@ -42,7 +42,7 @@ public interface SkipperClient {
 
 	/**
 	 * Return the template for deploying a Spring Boot Application using skipper.
-	 * @return
+	 * @return the SpringBootApp template
 	 */
 	Template getSpringBootAppTemplate();
 

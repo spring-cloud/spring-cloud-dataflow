@@ -28,6 +28,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.DefaultResponseErrorHandler;
+import org.springframework.web.client.ResponseErrorHandler;
 
 /**
  * A {@link ResponseErrorHandler} used in client's RestTemplate to throw
