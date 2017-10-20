@@ -13,7 +13,7 @@ spring:
   cloud:
     skipper:
       server:
-        synchonizeIndexOnContextRefresh: false
+        synchonizeIndexOnContextRefresh: true
         packageRepositories:
           -
             name: local
