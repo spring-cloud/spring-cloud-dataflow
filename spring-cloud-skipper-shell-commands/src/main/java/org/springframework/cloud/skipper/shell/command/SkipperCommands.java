@@ -16,7 +16,6 @@
 package org.springframework.cloud.skipper.shell.command;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -35,7 +34,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.yaml.snakeyaml.Yaml;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
@@ -178,12 +176,10 @@ public class SkipperCommands extends AbstractSkipperCommand {
 	@ShellMethod(key = "install", value = "Install a package.")
 	public String install(
 			@ShellOption(help = "name of the package to install") String packageName,
-			@ShellOption(help = "version of the package to install, if not specified latest version will be used",
-					defaultValue = NULL) String packageVersion,
+			@ShellOption(help = "version of the package to install, if not specified latest version will be used", defaultValue = NULL) String packageVersion,
 			// TODO specify a specific package repository
 			@ShellOption(help = "specify values in a YAML file", defaultValue = NULL) File file,
-			@ShellOption(help = "the comma separated set of properties to override during install", defaultValue =
-					NULL) String properties,
+			@ShellOption(help = "the comma separated set of properties to override during install", defaultValue = NULL) String properties,
 			// TODO support generation of a release name
 			@ShellOption(help = "the release name to use") String releaseName,
 			// TODO investigate server side support of 'default'
@@ -216,26 +212,13 @@ public class SkipperCommands extends AbstractSkipperCommand {
 		}
 		// There is a 'default' value for platformName
 		installProperties.setPlatformName(platformName);
-		String configValuesYML = getYamlConfigValues(yamlFile, propertiesToOverride);
+		String configValuesYML = YmlUtils.getYamlConfigValues(yamlFile, propertiesToOverride);
 		if (StringUtils.hasText(configValuesYML)) {
 			ConfigValues configValues = new ConfigValues();
 			configValues.setRaw(configValuesYML);
 			installProperties.setConfigValues(configValues);
 		}
 		return installProperties;
-	}
-
-	private String getYamlConfigValues(File yamlFile, String propertiesAsCsvString) throws IOException {
-		String configValuesYML = null;
-		if (yamlFile != null) {
-			Yaml yaml = new Yaml();
-			// Validate it is yaml formatted.
-			configValuesYML = yaml.dump(yaml.load(new FileInputStream(yamlFile)));
-		}
-		else if (StringUtils.hasText(propertiesAsCsvString)) {
-			configValuesYML = YmlUtils.convertFromCsvToYaml(propertiesAsCsvString);
-		}
-		return configValuesYML;
 	}
 
 	@ShellMethod(key = "upgrade", value = "Upgrade a release.")
@@ -271,7 +254,7 @@ public class SkipperCommands extends AbstractSkipperCommand {
 		UpgradeRequest upgradeRequest = new UpgradeRequest();
 		UpgradeProperties upgradeProperties = new UpgradeProperties();
 		upgradeProperties.setReleaseName(releaseName);
-		String configValuesYML = getYamlConfigValues(propertiesFile, propertiesToOverride);
+		String configValuesYML = YmlUtils.getYamlConfigValues(propertiesFile, propertiesToOverride);
 		if (StringUtils.hasText(configValuesYML)) {
 			ConfigValues configValues = new ConfigValues();
 			configValues.setRaw(configValuesYML);
