@@ -18,6 +18,7 @@ package org.springframework.cloud.skipper.server.deployer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import com.google.common.base.Joiner;
@@ -165,6 +166,12 @@ public class ReleaseAnalyzer {
 		Map<String, String> replacingApplicationProperties = replacingSpringBootAppKind.getSpec()
 				.getApplicationProperties();
 
+		if (existingApplicationProperties == null) {
+			existingApplicationProperties = new TreeMap<>();
+		}
+		if (replacingApplicationProperties == null) {
+			replacingApplicationProperties = new TreeMap<>();
+		}
 		MapDifference<String, String> applicationPropertiesDifference = Maps.difference(existingApplicationProperties,
 				replacingApplicationProperties);
 
@@ -178,6 +185,12 @@ public class ReleaseAnalyzer {
 		Map<String, String> replacingDeploymentProperties = replacingSpringBootAppKind.getSpec()
 				.getDeploymentProperties();
 
+		if (existingDeploymentProperties == null) {
+			existingDeploymentProperties = new TreeMap<>();
+		}
+		if (replacingDeploymentProperties == null) {
+			replacingDeploymentProperties = new TreeMap<>();
+		}
 		MapDifference<String, String> deploymentPropertiesDifference = Maps.difference(existingDeploymentProperties,
 				replacingDeploymentProperties);
 

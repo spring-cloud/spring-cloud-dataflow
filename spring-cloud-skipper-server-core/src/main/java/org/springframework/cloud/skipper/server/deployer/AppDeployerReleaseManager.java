@@ -161,7 +161,7 @@ public class AppDeployerReleaseManager implements ReleaseManager {
 		}
 		else {
 			throw new SkipperException(
-					"Package to upgrade has not difference than existing deployed package. Not upgrading.");
+					"Package to upgrade has no difference than existing deployed package. Not upgrading.");
 		}
 		return status(release);
 	}

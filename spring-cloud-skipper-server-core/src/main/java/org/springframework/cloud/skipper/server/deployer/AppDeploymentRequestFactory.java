@@ -25,6 +25,7 @@ import org.springframework.cloud.deployer.resource.support.DelegatingResourceLoa
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
+import org.springframework.cloud.skipper.SkipperException;
 import org.springframework.cloud.skipper.server.domain.SpringBootAppKind;
 import org.springframework.cloud.skipper.server.domain.SpringBootAppSpec;
 import org.springframework.core.io.Resource;
@@ -70,10 +71,18 @@ public class AppDeploymentRequestFactory {
 		// we need to keep group name same for consumer groups not getting broken, but
 		// app name needs to differentiate as otherwise it may result same deployment id and
 		// failure on a deployer.
-		AppDefinition appDefinition = new AppDefinition(springBootAppKind.getApplicationName() + "-v" + version, applicationProperties);
+		AppDefinition appDefinition = new AppDefinition(springBootAppKind.getApplicationName() + "-v" + version,
+				applicationProperties);
 
 		Assert.hasText(spec.getResource(), "Package template must define a resource uri");
-		Resource resource = delegatingResourceLoader.getResource(spec.getResource());
+		Resource resource;
+		try {
+			resource = delegatingResourceLoader.getResource(spec.getResource());
+		}
+		catch (Exception e) {
+			throw new SkipperException(
+					"Could not load Resource " + spec.getResource() + ". Message = " + e.getMessage(), e);
+		}
 
 		Map<String, String> deploymentProperties = new TreeMap<>();
 		if (spec.getDeploymentProperties() != null) {

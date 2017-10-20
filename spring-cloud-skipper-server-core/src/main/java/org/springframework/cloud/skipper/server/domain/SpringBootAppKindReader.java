@@ -20,8 +20,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import org.springframework.cloud.skipper.SkipperException;
 
 /**
  * Deserializes using Jackson a String to a {@link SpringBootAppKind} class. Sets
@@ -31,6 +36,8 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
  * @author Mark Pollack
  */
 public abstract class SpringBootAppKindReader {
+
+	private final static Logger logger = LoggerFactory.getLogger(SpringBootAppKindReader.class);
 
 	public static List<SpringBootAppKind> read(String manifest) {
 		List<SpringBootAppKind> springBootAppKindList = new ArrayList<>();
@@ -43,8 +50,13 @@ public abstract class SpringBootAppKindReader {
 				springBootAppKindList.add(springBootAppKind);
 			}
 		}
+		catch (JsonMappingException e) {
+			logger.error("Can't parse Package's manifest YAML = " + manifest);
+			throw new SkipperException("JsonMappingException - Can't parse Package's manifest YAML = " + manifest, e);
+		}
 		catch (IOException e) {
-			throw new IllegalArgumentException("Can't parse Package's manifest YAML", e);
+			logger.error("Can't parse Package's manifest YAML = " + manifest);
+			throw new SkipperException("IOException - Can't parse Package's manifest YAML = " + manifest, e);
 		}
 		return springBootAppKindList;
 	}
