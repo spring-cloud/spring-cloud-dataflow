@@ -129,6 +129,14 @@ public class ReleaseServiceTests extends AbstractIntegrationTest {
 	}
 
 	@Test
+	public void testLatestPackageByName() {
+		String packageName = "log";
+		PackageMetadata packageMetadata = this.packageMetadataRepository.findFirstByNameOrderByVersionDesc(packageName);
+		PackageMetadata latestPackageMetadata = this.releaseService.getPackageMetadata(packageName, null);
+		assertThat(packageMetadata).isEqualTo(latestPackageMetadata);
+	}
+
+	@Test
 	public void testStatusReleaseExist() {
 		InstallProperties installProperties = new InstallProperties();
 		installProperties.setReleaseName("testexists");
