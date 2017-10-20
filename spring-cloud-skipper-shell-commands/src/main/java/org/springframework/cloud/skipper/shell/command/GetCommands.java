@@ -15,8 +15,6 @@
  */
 package org.springframework.cloud.skipper.shell.command;
 
-import java.util.Map;
-
 import javax.validation.constraints.NotNull;
 
 import org.yaml.snakeyaml.DumperOptions;
@@ -74,10 +72,5 @@ public class GetCommands extends AbstractSkipperCommand {
 			throw e;
 		}
 		return manifest;
-	}
-
-	private String formatManifest(String manifest) {
-		Map<String, String> manifestAsMap = (Map<String, String>) yaml.load(manifest);
-		return yaml.dump(manifestAsMap);
 	}
 }

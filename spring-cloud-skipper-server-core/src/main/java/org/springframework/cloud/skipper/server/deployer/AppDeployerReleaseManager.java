@@ -113,6 +113,7 @@ public class AppDeployerReleaseManager implements ReleaseManager {
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public Release upgrade(Release existingRelease, Release replacingRelease, String upgradeStrategyName) {
 		ReleaseAnalysisReport releaseAnalysisReport = this.releaseAnalyzer.analyze(existingRelease, replacingRelease);
 		AppDeployerData existingAppDeployerData = this.appDeployerDataRepository.findByReleaseNameAndReleaseVersion(

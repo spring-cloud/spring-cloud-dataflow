@@ -38,6 +38,7 @@ public class ManifestUtils {
 	 * @param model The placeholder values.
 	 * @return A YAML string containing all the templates with replaced values.
 	 */
+	@SuppressWarnings("unchecked")
 	public static String createManifest(Package packageToDeploy, Map<String, Object> model) {
 
 		// Aggregate all valid manifests into one big doc.

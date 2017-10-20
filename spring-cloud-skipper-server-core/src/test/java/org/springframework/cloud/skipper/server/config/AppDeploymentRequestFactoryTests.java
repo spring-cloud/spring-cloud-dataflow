@@ -35,6 +35,7 @@ import static org.mockito.Mockito.when;
 public class AppDeploymentRequestFactoryTests {
 
 	@Test
+	@SuppressWarnings("unchecked")
 	public void testGetResourceExceptionHandler() {
 		DelegatingResourceLoader resourceLoader = mock(DelegatingResourceLoader.class);
 		AppDeploymentRequestFactory appDeploymentRequestFactory = new AppDeploymentRequestFactory(resourceLoader);

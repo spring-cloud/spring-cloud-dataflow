@@ -30,6 +30,7 @@ import org.springframework.util.StringUtils;
  * Utility methods for merging of configuration values.
  * @author Mark Pollack
  */
+@SuppressWarnings("unchecked")
 public class ConfigValueUtils {
 
 	/**
