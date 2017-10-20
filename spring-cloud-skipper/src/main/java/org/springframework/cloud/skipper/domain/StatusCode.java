@@ -32,13 +32,7 @@ public enum StatusCode {
 	// Status_DELETED indicates that a release has been deleted from the platform.
 	DELETED,
 
-	// Status_SUPERSEDED indicates that this release object is outdated and a newer one
-	// exists.
-	SUPERSEDED,
-
 	// Status_FAILED indicates that the release was not successfully deployed.
-	FAILED,
+	FAILED
 
-	// Status_DELETING indicates that a delete operation is underway.
-	DELETING
 }

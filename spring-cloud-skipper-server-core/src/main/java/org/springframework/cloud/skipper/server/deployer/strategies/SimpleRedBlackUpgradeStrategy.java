@@ -132,11 +132,6 @@ public class SimpleRedBlackUpgradeStrategy implements UpgradeStrategy {
 
 		Map<String, String> appNamesAndDeploymentIds = appDeployerData.getDeploymentDataAsMap();
 
-		Status deletingStatus = new Status();
-		deletingStatus.setStatusCode(StatusCode.DELETING);
-		release.getInfo().setStatus(deletingStatus);
-		this.releaseRepository.save(release);
-
 		for (Map.Entry<String, String> appNameAndDeploymentId : appNamesAndDeploymentIds.entrySet()) {
 			if (applicationNamesToDelete.contains(appNameAndDeploymentId.getKey())) {
 				AppStatus appStatus = appDeployer.status(appNameAndDeploymentId.getValue());

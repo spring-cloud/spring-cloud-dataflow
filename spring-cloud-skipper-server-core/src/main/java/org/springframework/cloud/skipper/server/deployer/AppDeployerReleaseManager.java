@@ -223,10 +223,6 @@ public class AppDeployerReleaseManager implements ReleaseManager {
 				.findByReleaseNameAndReleaseVersion(release.getName(), release.getVersion());
 		List<String> deploymentIds = appDeployerData.getDeploymentIds();
 		if (!deploymentIds.isEmpty()) {
-			Status deletingStatus = new Status();
-			deletingStatus.setStatusCode(StatusCode.DELETING);
-			release.getInfo().setStatus(deletingStatus);
-			this.releaseRepository.save(release);
 			for (String deploymentId : deploymentIds) {
 				appDeployer.undeploy(deploymentId);
 			}
