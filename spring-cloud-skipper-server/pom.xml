@@ -21,6 +21,11 @@
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-skipper-server-core</artifactId>
         </dependency>
+        <dependency>
+            <groupId>io.projectreactor</groupId>
+            <artifactId>reactor-core</artifactId>
+            <version>${reactor.version}</version>
+        </dependency>
     </dependencies>
     <build>
         <resources>
