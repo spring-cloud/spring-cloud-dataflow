@@ -1,0 +1,23 @@
+[[skipper-commands-reference]]
+= Skipper Commands
+
+[[skipper-commands-release]]
+== Release and Package commands
+
+Describe the commands in SkipperCommands.java
+
+[[skipper-commands-manifest]]
+== Manifest commands
+
+Describe the commands in GetCommands.java
+
+[[skipper-commands-platform]]
+== Platform commands
+
+Describe the commands in PlatformCommands.java
+
+[[skipper-commands-repository]]
+== Repository commands
+
+Describe the commands in RepositoryCommands.java
+

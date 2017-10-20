@@ -31,9 +31,12 @@ endif::backend-html5[]
 // ======================================================================================
 
 include::preface.adoc[]
-include::spring-cloud-skipper-overview.adoc[]
-include::architecture.adoc[]
+include::overview.adoc[]
 include::getting-started.adoc[]
+include::using.adoc[]
+include::tour.adoc[]
+include::command-reference.adoc[]
+include::architecture.adoc[]
 include::api-guide.adoc[]
 include::appendix.adoc[]
 

@@ -28,6 +28,12 @@ To just create the executables, type
 $./mvnw clean package -DskipTests -Dmaven.javadoc.skip=true
 ----
 
+To build just the documentation, ignoring the RESTDocs generated from tests
+----
+./mvnw -DskipTests -Pfull package -pl spring-cloud-skipper-docs
+----
+
+
 === Quick Tour
 
 There are some sample packages in the test directory that you can use to get started.  Create a `skipper.yml` file in your home directory

@@ -1,0 +1,28 @@
+[[skipper-tour]]
+= Using Skipper
+
+This section is the 'three hour tour' of Skipper.  It descriptes how to configure and use the main feature set of Skipper in detail.  We will cover, platforms, packages, repositories, releases and update strategies.
+
+[[skipper-platforms]]
+== Platforms
+
+Skipper supports deploying to multiple platforms.
+The platforms included in the 1.0 M1 release are Local, Cloud Foundry and Kubernetes.
+For each platform, you can configure multiple accounts.
+Each `account name` must be globally unique accross all platforms.
+
+Usually different `accounts` will correspond to a different orgs/spaces for Cloud Foundry and different namespaces for a single Kubernetes cluster.
+
+NOTE: Roles to control which user can deploy to which platform will be provided in the next release.
+
+
+Platforms are defined using Spring Boot's https://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-external-config.html[Externalied Configuration] feature.
+To simplify setup in 1.0 M1, if a local platform account is not defined in your configuration, Skipper will create a `local` deployer implementation named `default`.
+
+You can make use of the http://cloud.spring.io/spring-cloud-static/spring-cloud-config/1.3.3.RELEASE/multi/multi__spring_cloud_config_server.html#_encryption_and_decryption[Encryption and Decryption] features of Spring Cloud Config as one way to secure credentials.
+
+Distinct from where Skipper will deploy application, you can also run the Skipper server itself on a platform.  Installation on other platforms is covered in the <<skipper-installation>> section.
+
+
+
+
