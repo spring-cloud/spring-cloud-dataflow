@@ -20,8 +20,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.view.RedirectView;
 
 /**
- * Main UI root controller. For now it's only task is to redirect
- * the root URL to the Rest API endpoint {@code /api }
+ * Main UI root controller. For now it's only task is to redirect the root URL to the Rest
+ * API endpoint {@code /api }
  *
  * @author Gunnar Hillert
  */
@@ -29,8 +29,8 @@ import org.springframework.web.servlet.view.RedirectView;
 public class RootController {
 
 	/**
-	 * Handles the root URL of Skipper. Redirects users to the
-	 * REST API entry point at {@code /api }.
+	 * Handles the root URL of Skipper. Redirects users to the REST API entry point at
+	 * {@code /api }.
 	 *
 	 * @return RedirectView to api
 	 */

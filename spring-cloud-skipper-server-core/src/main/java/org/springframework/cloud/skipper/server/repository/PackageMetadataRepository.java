@@ -35,7 +35,8 @@ public interface PackageMetadataRepository extends PagingAndSortingRepository<Pa
 
 	List<PackageMetadata> findByNameContainingIgnoreCase(@Param("name") String name);
 
-	List<PackageMetadata> findByNameAndVersionOrderByApiVersionDesc(@Param("name") String name, @Param("version") String version);
+	List<PackageMetadata> findByNameAndVersionOrderByApiVersionDesc(@Param("name") String name,
+			@Param("version") String version);
 
 	PackageMetadata findFirstByNameOrderByVersionDesc(@Param("name") String name);
 

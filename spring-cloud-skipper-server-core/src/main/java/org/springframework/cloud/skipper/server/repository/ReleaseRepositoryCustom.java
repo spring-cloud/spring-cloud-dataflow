@@ -74,7 +74,8 @@ public interface ReleaseRepositoryCustom {
 	 * {@link org.springframework.cloud.skipper.domain.StatusCode.DELETED}.
 	 *
 	 * @param releaseName the name of the release
-	 * @return if the latest status of the release is deleted then the release is returned, otherwise null.
+	 * @return if the latest status of the release is deleted then the release is returned,
+	 * otherwise null.
 	 */
 	Release findLatestReleaseIfDeleted(String releaseName);
 

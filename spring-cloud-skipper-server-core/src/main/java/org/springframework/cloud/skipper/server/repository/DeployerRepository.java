@@ -15,7 +15,7 @@
  */
 package org.springframework.cloud.skipper.server.repository;
 
-import org.springframework.cloud.skipper.server.deployer.Deployer;
+import org.springframework.cloud.skipper.domain.Deployer;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 import org.springframework.data.rest.core.annotation.RestResource;

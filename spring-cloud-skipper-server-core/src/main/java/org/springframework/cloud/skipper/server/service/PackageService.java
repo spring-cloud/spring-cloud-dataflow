@@ -49,7 +49,6 @@ import org.springframework.util.Assert;
 import org.springframework.util.FileSystemUtils;
 import org.springframework.util.StreamUtils;
 
-
 /**
  * Service responsible for downloading package .zip files and loading them into the
  * Package object.
@@ -133,7 +132,8 @@ public class PackageService implements ResourceLoaderAware {
 		catch (InvalidDataAccessApiUsageException ex) {
 			throw new SkipperException("Exception while downloading package zip file for "
 					+ packageMetadata.getName() + "-" + packageMetadata.getVersion() +
-					". PackageMetadata repositoryId = " + packageMetadata.getRepositoryId() + "No repository found.", ex);
+					". PackageMetadata repositoryId = " + packageMetadata.getRepositoryId() + "No repository found.",
+					ex);
 		}
 		catch (Exception ex) {
 			logger.error("This is a catch all debug statement.", ex);
@@ -198,6 +198,7 @@ public class PackageService implements ResourceLoaderAware {
 		throw new SkipperException("Resource " + name + "-" + version + " in package repository "
 				+ packageRepository.getName() + " does not exist.");
 	}
+
 	@Transactional
 	public PackageMetadata upload(UploadRequest uploadRequest) {
 		validateUploadRequest(uploadRequest);
@@ -238,7 +239,8 @@ public class PackageService implements ResourceLoaderAware {
 
 	private Repository getRepositoryToUpload(String repoName) {
 		Repository localRepositoryToUpload = this.repositoryRepository.findByName(repoName);
-		// TODO: Verify the repo name set to package upload properties always belong to local repository type.
+		// TODO: Verify the repo name set to package upload properties always belong to local
+		// repository type.
 		if (localRepositoryToUpload == null) {
 			throw new SkipperException("Could not find local repository to upload to named " + repoName);
 		}

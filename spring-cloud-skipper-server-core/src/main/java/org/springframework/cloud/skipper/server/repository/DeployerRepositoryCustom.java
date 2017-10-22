@@ -16,7 +16,7 @@
 package org.springframework.cloud.skipper.server.repository;
 
 import org.springframework.cloud.skipper.SkipperException;
-import org.springframework.cloud.skipper.server.deployer.Deployer;
+import org.springframework.cloud.skipper.domain.Deployer;
 
 /**
  * @author Mark Pollack

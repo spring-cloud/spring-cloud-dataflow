@@ -51,10 +51,8 @@ import org.springframework.util.StringUtils;
  */
 public class AppDeployerReleaseManager implements ReleaseManager {
 
-	private static final Logger logger = LoggerFactory.getLogger(AppDeployerReleaseManager.class);
-
 	public static final String SPRING_CLOUD_DEPLOYER_COUNT = "spring.cloud.deployer.count";
-
+	private static final Logger logger = LoggerFactory.getLogger(AppDeployerReleaseManager.class);
 	private final ReleaseRepository releaseRepository;
 
 	private final AppDeployerDataRepository appDeployerDataRepository;
@@ -137,8 +135,10 @@ public class AppDeployerReleaseManager implements ReleaseManager {
 				replacingRelease.getConfigValues());
 		for (Map.Entry<String, Object> entry : model.entrySet()) {
 			if (appsCount.keySet().contains(entry.getKey())) {
-				Map<String, Object> modelValue = (Map<String, Object>) model.getOrDefault(entry.getKey(), new TreeMap<String, Object>());
-				Map<String, Object> specMap = (Map<String, Object>) modelValue.getOrDefault(SpringBootAppKind.SPEC_STRING,
+				Map<String, Object> modelValue = (Map<String, Object>) model.getOrDefault(entry.getKey(),
+						new TreeMap<String, Object>());
+				Map<String, Object> specMap = (Map<String, Object>) modelValue.getOrDefault(
+						SpringBootAppKind.SPEC_STRING,
 						new TreeMap<String, Object>());
 				Map<String, Object> deploymentPropertiesMap = (Map<String, Object>) specMap
 						.getOrDefault(SpringBootAppSpec.DEPLOYMENT_PROPERTIES_STRING, new TreeMap<String, Object>());

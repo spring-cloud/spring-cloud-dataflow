@@ -27,6 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.cloud.skipper.domain.AboutInfo;
+import org.springframework.cloud.skipper.domain.Deployer;
 import org.springframework.cloud.skipper.domain.Info;
 import org.springframework.cloud.skipper.domain.InstallRequest;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
@@ -257,6 +258,16 @@ public class DefaultSkipperClient implements SkipperClient {
 		ParameterizedTypeReference<Resources<Repository>> typeReference = new ParameterizedTypeReference<Resources<Repository>>() {
 		};
 		Traverson.TraversalBuilder traversalBuilder = this.traverson.follow("repositories");
+		Map<String, Object> parameters = new HashMap<>();
+		parameters.put("size", 2000);
+		return traversalBuilder.withTemplateParameters(parameters).toObject(typeReference);
+	}
+
+	@Override
+	public Resources<Deployer> listDeployers() {
+		ParameterizedTypeReference<Resources<Deployer>> typeReference = new ParameterizedTypeReference<Resources<Deployer>>() {
+		};
+		Traverson.TraversalBuilder traversalBuilder = this.traverson.follow("deployers");
 		Map<String, Object> parameters = new HashMap<>();
 		parameters.put("size", 2000);
 		return traversalBuilder.withTemplateParameters(parameters).toObject(typeReference);

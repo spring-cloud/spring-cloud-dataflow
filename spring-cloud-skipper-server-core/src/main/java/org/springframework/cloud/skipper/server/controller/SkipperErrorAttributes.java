@@ -23,8 +23,7 @@ import org.springframework.cloud.skipper.ReleaseNotFoundException;
 import org.springframework.web.context.request.RequestAttributes;
 
 /**
- * Custom {@link ErrorAttributes} adding skipper specific fields for its own
- * errors.
+ * Custom {@link ErrorAttributes} adding skipper specific fields for its own errors.
  *
  * @author Janne Valkealahti
  *

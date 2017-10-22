@@ -24,9 +24,8 @@ import org.springframework.cloud.skipper.SkipperException;
  * deployed using the Spring Cloud Deployer API.
  *
  * This class is commonly referred to as 'the manifest', meaning the complete list of the
- * application resource, properties, metadata and deployment properties.
- * It is serialized/deserialized from YAML. An example is:
- * {@literal
+ * application resource, properties, metadata and deployment properties. It is
+ * serialized/deserialized from YAML. An example is: {@literal
  * apiVersion: skipper/v1
  * kind: SpringBootApp
  * metadata:

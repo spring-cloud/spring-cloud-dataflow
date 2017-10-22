@@ -36,8 +36,9 @@ public class PackageMetadataRepositoryImpl implements PackageMetadataRepositoryC
 
 	@Override
 	public PackageMetadata findByNameAndVersionByMaxRepoOrder(String packageName, String packageVersion) {
-		List<PackageMetadata> packageMetadataList = this.packageMetadataRepository.findByNameAndVersionOrderByApiVersionDesc(packageName,
-				packageVersion);
+		List<PackageMetadata> packageMetadataList = this.packageMetadataRepository
+				.findByNameAndVersionOrderByApiVersionDesc(packageName,
+						packageVersion);
 		if (packageMetadataList.size() == 0) {
 			return null;
 		}
@@ -45,15 +46,16 @@ public class PackageMetadataRepositoryImpl implements PackageMetadataRepositoryC
 			return packageMetadataList.get(0);
 		}
 		List<Repository> repositoriesByRepoOrder = this.repositoryRepository.findAllByOrderByRepoOrderDesc();
-		for (Repository repository: repositoriesByRepoOrder) {
+		for (Repository repository : repositoriesByRepoOrder) {
 			Long repoId = repository.getId();
-			for (PackageMetadata packageMetadata: packageMetadataList) {
+			for (PackageMetadata packageMetadata : packageMetadataList) {
 				if ((packageMetadata.getRepositoryId() != null) && packageMetadata.getRepositoryId().equals(repoId)) {
 					return packageMetadata;
 				}
 			}
 		}
-		// if no repoId matches, then return the first package that matches (which has the highest api version set).
+		// if no repoId matches, then return the first package that matches (which has the highest
+		// api version set).
 		return packageMetadataList.get(0);
 	}
 }

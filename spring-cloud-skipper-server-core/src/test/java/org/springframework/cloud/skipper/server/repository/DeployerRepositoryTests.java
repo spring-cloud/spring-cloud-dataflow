@@ -20,8 +20,8 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.deployer.spi.local.LocalAppDeployer;
 import org.springframework.cloud.deployer.spi.local.LocalDeployerProperties;
+import org.springframework.cloud.skipper.domain.Deployer;
 import org.springframework.cloud.skipper.server.AbstractIntegrationTest;
-import org.springframework.cloud.skipper.server.deployer.Deployer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -37,10 +37,13 @@ public class DeployerRepositoryTests extends AbstractIntegrationTest {
 	public void basicCrud() {
 		LocalAppDeployer localAppDeployer = new LocalAppDeployer(new LocalDeployerProperties());
 		Deployer deployer = new Deployer("localDeployer", "local", localAppDeployer);
+		deployer.setDescription("This is a test local Deployer.");
 		this.deployerRepository.save(deployer);
 		// Count is 2 including the default one which was added at the time of bootstrap.
 		assertThat(deployerRepository.count()).isEqualTo(2);
 		assertThat(deployer.getId()).isNotEmpty();
 		assertThat(deployerRepository.findByName("localDeployer")).isNotNull();
+		assertThat(deployerRepository.findByName("localDeployer").getDescription()).isNotNull();
+		assertThat(deployerRepository.findByName("default").getDescription()).isNotNull();
 	}
 }

@@ -69,7 +69,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableConfigurationProperties({ SkipperServerProperties.class, CloudFoundryPlatformProperties.class,
 		LocalPlatformProperties.class, KubernetesPlatformProperties.class,
 		MavenConfigurationProperties.class })
-@EntityScan({"org.springframework.cloud.skipper.domain", "org.springframework.cloud.skipper.server.domain"})
+@EntityScan({ "org.springframework.cloud.skipper.domain", "org.springframework.cloud.skipper.server.domain" })
 @EnableMapRepositories(basePackages = "org.springframework.cloud.skipper.server.repository")
 @EnableJpaRepositories(basePackages = "org.springframework.cloud.skipper.server.repository")
 @EnableTransactionManagement

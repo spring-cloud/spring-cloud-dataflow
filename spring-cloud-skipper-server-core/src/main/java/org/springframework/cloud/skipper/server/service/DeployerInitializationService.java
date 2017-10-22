@@ -47,13 +47,14 @@ import org.springframework.cloud.deployer.spi.kubernetes.KubernetesDeployerPrope
 import org.springframework.cloud.deployer.spi.local.LocalAppDeployer;
 import org.springframework.cloud.deployer.spi.local.LocalDeployerProperties;
 import org.springframework.cloud.deployer.spi.util.RuntimeVersionUtils;
+import org.springframework.cloud.skipper.domain.Deployer;
 import org.springframework.cloud.skipper.server.config.CloudFoundryPlatformProperties;
 import org.springframework.cloud.skipper.server.config.KubernetesPlatformProperties;
 import org.springframework.cloud.skipper.server.config.LocalPlatformProperties;
-import org.springframework.cloud.skipper.server.deployer.Deployer;
 import org.springframework.cloud.skipper.server.repository.DeployerRepository;
 import org.springframework.context.event.EventListener;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 /**
  * Populates the DeployerRepository with AppDeployer instances
@@ -101,9 +102,25 @@ public class DeployerInitializationService {
 				.entrySet()) {
 			LocalAppDeployer localAppDeployer = new LocalAppDeployer(entry.getValue());
 			Deployer deployer = new Deployer(entry.getKey(), "local", localAppDeployer);
+			deployer.setDescription(prettyPrintLocalDeployerProperties(entry.getValue()));
 			deployerRepository.save(deployer);
 			logger.info("Added Local Deployer account " + entry.getKey() + " into Deployer Repository.");
 		}
+	}
+
+	private String prettyPrintLocalDeployerProperties(LocalDeployerProperties localDeployerProperties) {
+		StringBuffer stringBuffer = new StringBuffer();
+		if (localDeployerProperties.getJavaOpts() != null) {
+			stringBuffer.append("JavaOpts = [" + localDeployerProperties.getJavaOpts() + "], ");
+		}
+		stringBuffer.append("ShutdownTimeout = [" + localDeployerProperties.getShutdownTimeout() + "], ");
+		stringBuffer.append("EnvVarsToInherit = ["
+				+ StringUtils.arrayToCommaDelimitedString(localDeployerProperties.getEnvVarsToInherit()) + "], ");
+		stringBuffer.append("JavaCmd = [" + localDeployerProperties.getJavaCmd() + "], ");
+		stringBuffer.append("WorkingDirectoriesRoot = [" + localDeployerProperties.getWorkingDirectoriesRoot() + "], ");
+		stringBuffer.append("DeleteFilesOnExit = [" + localDeployerProperties.isDeleteFilesOnExit() + "]");
+		return stringBuffer.toString();
+
 	}
 
 	protected void createAndSaveCFAppDeployers() {
@@ -159,6 +176,9 @@ public class DeployerInitializationService {
 						deploymentProperties,
 						cloudFoundryOperations, runtimeEnvironmentInfo);
 				Deployer deployer = new Deployer(entry.getKey(), "cloudfoundry", cfAppDeployer);
+				deployer.setDescription(String.format("org = [%s], space = [%s], url = [%s]",
+						connectionProperties.getOrg(), connectionProperties.getSpace(),
+						connectionProperties.getUrl()));
 				deployerRepository.save(deployer);
 				logger.info("Adding CF Deployer account " + entry.getKey() + " into Deployer Repository.");
 			}
@@ -178,6 +198,9 @@ public class DeployerInitializationService {
 			KubernetesAppDeployer kubernetesAppDeployer = new KubernetesAppDeployer(properties, kubernetesClient,
 					containerFactory);
 			Deployer deployer = new Deployer(entry.getKey(), "kubernetes", kubernetesAppDeployer);
+			deployer.setDescription(String.format("master url = [%s], namespace = [%s], api version = [%s]",
+					kubernetesClient.getMasterUrl(), kubernetesClient.getNamespace(),
+					kubernetesClient.getApiVersion()));
 			this.deployerRepository.save(deployer);
 			logger.info("Added Kubernetes Deployer account " + entry.getKey() + " into Deployer Repository.");
 		}

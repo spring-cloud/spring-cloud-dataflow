@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.cloud.skipper.server.deployer;
+package org.springframework.cloud.skipper.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -33,6 +33,8 @@ public class Deployer {
 	private String name;
 
 	private String type;
+
+	private String description;
 
 	@JsonIgnore
 	private AppDeployer appDeployer;
@@ -72,5 +74,17 @@ public class Deployer {
 
 	public void setType(String type) {
 		this.type = type;
+	}
+
+	public void setId(String id) {
+		this.id = id;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
 	}
 }

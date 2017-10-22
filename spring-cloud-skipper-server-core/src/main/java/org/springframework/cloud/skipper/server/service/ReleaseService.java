@@ -84,8 +84,8 @@ public class ReleaseService {
 	 * Downloads the package metadata and package zip file specified by the given Id and
 	 * deploys the package on the target platform.
 	 * @param id of the package
-	 * @param installProperties contains the name of the release, the platfrom to install
-	 * to, and configuration values to replace in the package template.
+	 * @param installProperties contains the name of the release, the platfrom to install to,
+	 * and configuration values to replace in the package template.
 	 * @return the Release object associated with this deployment
 	 * @throws SkipperException if the package to install can not be found.
 	 */
@@ -299,8 +299,8 @@ public class ReleaseService {
 	}
 
 	/**
-	 * Rollback the release name to the specified version. If the version is 0, then
-	 * rollback to the previous release.
+	 * Rollback the release name to the specified version. If the version is 0, then rollback
+	 * to the previous release.
 	 *
 	 * @param releaseName the name of the release
 	 * @param rollbackVersion the version of the release to rollback to
