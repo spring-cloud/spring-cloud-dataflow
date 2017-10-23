@@ -1,0 +1,16 @@
+apiVersion: skipper/v1
+kind: SpringBootApp
+metadata:
+  name: log2
+  type: sink
+spec:
+  resource: docker:springcloudstream/log-sink-rabbit:{{version}}
+  resourceMetadata: maven://org.springframework.cloud.stream.app:log-sink-rabbit:jar:metadata:{{version}}
+  applicationProperties:
+    {{#spec.applicationProperties.entrySet}}
+    {{key}}: {{value}}
+    {{/spec.applicationProperties.entrySet}}
+  deploymentProperties:
+    {{#spec.deploymentProperties.entrySet}}
+    {{key}}: {{value}}
+    {{/spec.deploymentProperties.entrySet}}

@@ -64,3 +64,28 @@ tags: stream, time, log
 maintainer: https://github.com/markpollack
 description: The ticktock stream sends a time stamp and logs the value.
 
+---
+apiVersion: v1
+kind: skipper
+origin: classpath:/repositories/binaries/test
+name: log2
+version: 1.0.0
+appVersion: 1.1.0.RELEASE
+packageSourceUrl: https://github.com/spring-cloud-stream-app-starters/log/tree/v1.1.0.RELEASE
+packageHomeUrl: http://cloud.spring.io/spring-cloud-stream-app-starters/
+tags: logging, sink
+maintainer: https://github.com/sobychacko
+description: Docker version of the log sink application version
+
+---
+apiVersion: v1
+kind: skipper
+origin: classpath:/repositories/binaries/test
+name: log2
+version: 2.0.0
+appVersion: 1.2.0.RELEASE
+packageSourceUrl: https://github.com/spring-cloud-stream-app-starters/log/tree/v1.2.0.RELEASE
+packageHomeUrl: http://cloud.spring.io/spring-cloud-stream-app-starters/
+tags: logging, sink
+maintainer: https://github.com/sobychacko
+description: Docker version of the log sink application
