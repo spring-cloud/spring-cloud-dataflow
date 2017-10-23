@@ -6,9 +6,11 @@ image:https://codecov.io/gh/spring-cloud/spring-cloud-skipper/branch/master/grap
 
 A package manager that installs, upgrades, and rolls back applications on multiple Cloud Platforms.
 
-Support application types are Spring Boot applications and those defined by Cloud Foundry application manifests.  Supported Cloud Platforms are local, Cloud Foundry, Kubernetes, and YARN.
+Supported application types are Spring Boot applications and those defined by Cloud Foundry application manifests.
+Supported Cloud Platforms are local, Cloud Foundry and Kubernetes.
 
-Skipper can be used as part of implementing the practice of Continous Deployment.  It provides a versioned "single source of truth" that defines what applications were deployed to the cloud.  This enables easy rollbacks and upgrades without having to rebuild applications from source code.
+Skipper can be used as part of implementing the practice of Continuous Deployment.  It provides a versioned "single
+source of truth" that defines what applications were deployed to the cloud.  This enables easy rollbacks and upgrades without having to rebuild applications from source code.
 
 === Building
 
