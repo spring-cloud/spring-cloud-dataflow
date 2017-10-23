@@ -98,4 +98,11 @@ public interface StreamOperations {
 	 * @param yaml the values to change in the update
 	 */
 	void updateStream(String streamName, String releaseName, PackageIdentifier packageIdentifier, String yaml);
+
+	/**
+	 * Queries the server for the stream definition
+	 * @param streamName the name of the stream to get status
+	 * @return The current stream definition with updated status
+	 */
+	StreamDefinitionResource getStreamDefinition(String streamName);
 }

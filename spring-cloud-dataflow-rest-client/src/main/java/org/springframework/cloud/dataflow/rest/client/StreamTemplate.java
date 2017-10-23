@@ -128,4 +128,10 @@ public class StreamTemplate implements StreamOperations {
 		String url = deploymentsLink.getHref() + "/update/" + streamName;
 		restTemplate.postForObject(url, updateStreamRequest, Object.class);
 	}
+
+	@Override
+	public StreamDefinitionResource getStreamDefinition(String streamName) {
+		String uriTemplate = this.definitionLink.expand(streamName).getHref();
+		return restTemplate.getForObject(uriTemplate, StreamDefinitionResource.class);
+	}
 }
