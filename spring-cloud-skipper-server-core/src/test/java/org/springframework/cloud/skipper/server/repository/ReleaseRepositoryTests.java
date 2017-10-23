@@ -29,14 +29,18 @@ import org.springframework.cloud.skipper.domain.Status;
 import org.springframework.cloud.skipper.domain.StatusCode;
 import org.springframework.cloud.skipper.server.AbstractIntegrationTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Java6Assertions.fail;
 
 /**
+ * Uses @Transactional for ease of re-using existing JPA managed objects within
+ * Spring's managed test method transaction
  * @author Ilayaperumal Gopinathan
  */
 @ActiveProfiles("repo-test")
+@Transactional
 public class ReleaseRepositoryTests extends AbstractIntegrationTest {
 
 	@Autowired
@@ -240,7 +244,8 @@ public class ReleaseRepositoryTests extends AbstractIntegrationTest {
 			fail("Expected ReleaseNotFoundException");
 		}
 		catch (ReleaseNotFoundException e) {
-			assertThat(e.getMessage().equals(String.format("Release with the name [%s] and version [%s] doesn't exist", releaseName, version)));
+			assertThat(e.getMessage().equals(
+					String.format("Release with the name [%s] and version [%s] doesn't exist", releaseName, version)));
 		}
 	}
 

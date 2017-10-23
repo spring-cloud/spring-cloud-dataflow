@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 
 import org.springframework.cloud.skipper.domain.Info;
 import org.springframework.cloud.skipper.domain.Release;
+import org.springframework.cloud.skipper.server.deployer.ReleaseManager;
 import org.springframework.cloud.skipper.server.repository.ReleaseRepository;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,7 +40,7 @@ public class ReleaseStateUpdateService {
 
 	private static final Logger log = LoggerFactory.getLogger(ReleaseStateUpdateService.class);
 
-	private final ReleaseService releaseService;
+	private final ReleaseManager releaseManager;
 
 	private final ReleaseRepository releaseRepository;
 
@@ -51,10 +52,10 @@ public class ReleaseStateUpdateService {
 	 * @param releaseService the release service
 	 * @param releaseRepository the release repository
 	 */
-	public ReleaseStateUpdateService(ReleaseService releaseService, ReleaseRepository releaseRepository) {
-		Assert.notNull(releaseService, "'releaseService' must be set");
+	public ReleaseStateUpdateService(ReleaseManager releaseManager, ReleaseRepository releaseRepository) {
+		Assert.notNull(releaseManager, "'releaseManager' must be set");
 		Assert.notNull(releaseRepository, "'releaseRepository' must be set");
-		this.releaseService = releaseService;
+		this.releaseManager = releaseManager;
 		this.releaseRepository = releaseRepository;
 		this.nextFullPoll = getNextFullPoll();
 		log.info("Setting up ReleaseStateUpdateService");
@@ -78,7 +79,7 @@ public class ReleaseStateUpdateService {
 				boolean poll = fullPoll || (info.getLastDeployed().getTime() > (now - 120000));
 				if (poll) {
 					try {
-						release = releaseService.status(release);
+						release = releaseManager.status(release);
 						log.debug("New Release state {} {}", release.getName(), release.getInfo().getStatus(),
 								release.getInfo().getStatus() != null
 										? release.getInfo().getStatus().getPlatformStatusPrettyPrint()

@@ -112,4 +112,13 @@ public class AppDeployerData extends AbstractEntity {
 			return new ArrayList<>();
 		}
 	}
+
+	@Override
+	public String toString() {
+		return "AppDeployerData{" +
+				"releaseName='" + releaseName + '\'' +
+				", releaseVersion=" + releaseVersion +
+				", deploymentData='" + deploymentData + '\'' +
+				'}';
+	}
 }

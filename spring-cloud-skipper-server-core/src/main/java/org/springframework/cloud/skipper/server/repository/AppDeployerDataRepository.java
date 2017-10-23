@@ -21,7 +21,8 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 /**
  * @author Mark Pollack
  */
-public interface AppDeployerDataRepository extends PagingAndSortingRepository<AppDeployerData, Long> {
+public interface AppDeployerDataRepository
+		extends PagingAndSortingRepository<AppDeployerData, Long>, AppDeployerDataRepositoryCustom {
 
 	AppDeployerData findByReleaseNameAndReleaseVersion(String releaseName, Integer releaseVersion);
 

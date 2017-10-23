@@ -120,6 +120,8 @@ public class SkipperControllerTests extends AbstractControllerTests {
 		releaseVersion = "3";
 		mockMvc.perform(post("/api/rollback/" + releaseName + "/" + 1)).andDo(print())
 				.andExpect(status().isCreated()).andReturn();
+		sleep();
+
 		release = this.releaseRepository.findByNameAndVersion(releaseName, Integer.valueOf(releaseVersion));
 		assertReleaseIsDeployedSuccessfully(releaseName, "3");
 
@@ -163,6 +165,7 @@ public class SkipperControllerTests extends AbstractControllerTests {
 	private class ErrorDispatcher implements RequestBuilder {
 
 		private MvcResult result;
+
 		private String path;
 
 		ErrorDispatcher(MvcResult result, String path) {

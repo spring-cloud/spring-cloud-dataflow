@@ -17,7 +17,12 @@ package org.springframework.cloud.skipper.server.config;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Executor;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.autoconfigure.web.ErrorAttributes;
@@ -36,6 +41,11 @@ import org.springframework.cloud.skipper.server.deployer.AppDeployerReleaseManag
 import org.springframework.cloud.skipper.server.deployer.AppDeploymentRequestFactory;
 import org.springframework.cloud.skipper.server.deployer.ReleaseAnalyzer;
 import org.springframework.cloud.skipper.server.deployer.ReleaseManager;
+import org.springframework.cloud.skipper.server.deployer.strategies.DeleteStep;
+import org.springframework.cloud.skipper.server.deployer.strategies.HealthCheckAndDeleteStep;
+import org.springframework.cloud.skipper.server.deployer.strategies.HealthCheckProperties;
+import org.springframework.cloud.skipper.server.deployer.strategies.SimpleRedBlackUpgradeStrategy;
+import org.springframework.cloud.skipper.server.deployer.strategies.UpgradeStrategy;
 import org.springframework.cloud.skipper.server.index.PackageMetadataResourceProcessor;
 import org.springframework.cloud.skipper.server.index.PackageSummaryResourceProcessor;
 import org.springframework.cloud.skipper.server.index.SkipperControllerResourceProcessor;
@@ -55,6 +65,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.data.map.repository.config.EnableMapRepositories;
+import org.springframework.scheduling.annotation.AsyncConfigurer;
+import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 /**
@@ -68,12 +81,15 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @Configuration
 @EnableConfigurationProperties({ SkipperServerProperties.class, CloudFoundryPlatformProperties.class,
 		LocalPlatformProperties.class, KubernetesPlatformProperties.class,
-		MavenConfigurationProperties.class })
+		MavenConfigurationProperties.class, HealthCheckProperties.class })
 @EntityScan({ "org.springframework.cloud.skipper.domain", "org.springframework.cloud.skipper.server.domain" })
 @EnableMapRepositories(basePackages = "org.springframework.cloud.skipper.server.repository")
 @EnableJpaRepositories(basePackages = "org.springframework.cloud.skipper.server.repository")
 @EnableTransactionManagement
-public class SkipperServerConfiguration {
+@EnableAsync
+public class SkipperServerConfiguration implements AsyncConfigurer {
+
+	private final Logger logger = LoggerFactory.getLogger(SkipperServerConfiguration.class);
 
 	@Bean
 	public ErrorAttributes errorAttributes() {
@@ -151,9 +167,9 @@ public class SkipperServerConfiguration {
 
 	@Bean
 	@ConditionalOnProperty("spring.cloud.skipper.server.disableReleaseStateUpdateService")
-	public ReleaseStateUpdateService releaseStateUpdateService(ReleaseService releaseService,
+	public ReleaseStateUpdateService releaseStateUpdateService(ReleaseManager releaseManager,
 			ReleaseRepository releaseRepository) {
-		return new ReleaseStateUpdateService(releaseService, releaseRepository);
+		return new ReleaseStateUpdateService(releaseManager, releaseRepository);
 	}
 
 	@Bean
@@ -172,9 +188,52 @@ public class SkipperServerConfiguration {
 			AppDeployerDataRepository appDeployerDataRepository,
 			DeployerRepository deployerRepository,
 			ReleaseAnalyzer releaseAnalyzer,
-			AppDeploymentRequestFactory appDeploymentRequestFactory) {
+			AppDeploymentRequestFactory appDeploymentRequestFactory,
+			UpgradeStrategy updateStrategy) {
 		return new AppDeployerReleaseManager(releaseRepository, appDeployerDataRepository, deployerRepository,
-				releaseAnalyzer, appDeploymentRequestFactory);
+				releaseAnalyzer, appDeploymentRequestFactory, updateStrategy);
+	}
+
+	@Bean
+	public DeleteStep deleteStep(ReleaseRepository releaseRepository,
+			DeployerRepository deployerRepository,
+			AppDeployerDataRepository appDeployerDataRepository) {
+		return new DeleteStep(releaseRepository, deployerRepository, appDeployerDataRepository);
+	}
+
+	@Bean
+	public UpgradeStrategy updateStrategy(ReleaseRepository releaseRepository,
+			DeployerRepository deployerRepository,
+			AppDeployerDataRepository appDeployerDataRepository,
+			AppDeploymentRequestFactory appDeploymentRequestFactory,
+			HealthCheckAndDeleteStep healthCheckAndDeleteStep) {
+		return new SimpleRedBlackUpgradeStrategy(releaseRepository, deployerRepository,
+				appDeployerDataRepository, appDeploymentRequestFactory, healthCheckAndDeleteStep);
+	}
+
+	@Bean
+	public HealthCheckAndDeleteStep healthCheckAndDeleteStep(ReleaseRepository releaseRepository,
+			DeployerRepository deployerRepository,
+			AppDeployerDataRepository appDeployerDataRepository,
+			DeleteStep deleteStep,
+			HealthCheckProperties healthCheckProperties) {
+		return new HealthCheckAndDeleteStep(releaseRepository,
+				deployerRepository,
+				appDeployerDataRepository,
+				deleteStep,
+				healthCheckProperties);
+	}
+
+	@Bean(name = "skipperThreadPoolTaskExecutor")
+	@Override
+	public Executor getAsyncExecutor() {
+		return new ThreadPoolTaskExecutor();
+	}
+
+	@Override
+	public AsyncUncaughtExceptionHandler getAsyncUncaughtExceptionHandler() {
+		return (throwable, method, objects) -> logger.error("Exception thrown in @Async Method " + method.getName(),
+				throwable);
 	}
 
 	@Bean

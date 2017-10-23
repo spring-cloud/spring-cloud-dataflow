@@ -15,24 +15,13 @@
  */
 package org.springframework.cloud.skipper.server.repository;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.skipper.SkipperException;
-import org.springframework.cloud.skipper.domain.Deployer;
+import org.springframework.cloud.skipper.server.domain.AppDeployerData;
 
 /**
  * @author Mark Pollack
  */
-public class DeployerRepositoryImpl implements DeployerRepositoryCustom {
+public interface AppDeployerDataRepositoryCustom {
 
-	@Autowired
-	private DeployerRepository deployerRepository;
+	AppDeployerData findByReleaseNameAndReleaseVersionRequired(String releaseName, Integer releaseVersion);
 
-	@Override
-	public Deployer findByNameRequired(String name) {
-		Deployer deployer = deployerRepository.findByName(name);
-		if (deployer == null) {
-			throw new SkipperException(String.format("No deployer named '%s'", name));
-		}
-		return deployer;
-	}
 }

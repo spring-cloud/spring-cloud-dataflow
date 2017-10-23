@@ -64,13 +64,15 @@ public class ReleaseAnalyzer {
 		if (existingRelease.getPkg().getDependencies().size() == replacingRelease.getPkg().getDependencies().size()) {
 			if (existingRelease.getPkg().getDependencies().size() == 0) {
 				logger.info("Existing Package and Upgrade Package both have no dependent packages.");
-				return analyzeTopLevelPackagesOnly(existingSpringBootAppKindList, replacingSpringBootAppKindList);
+				return analyzeTopLevelPackagesOnly(existingSpringBootAppKindList, replacingSpringBootAppKindList,
+						existingRelease, replacingRelease);
 			}
 			else {
 				if (existingRelease.getPkg().getTemplates().size() == 0 &&
 						replacingRelease.getPkg().getTemplates().size() == 0) {
 					logger.info("Existing Package and Upgrade package both have no top level templates");
-					return analyzeDependentPackagesOnly(existingSpringBootAppKindList, replacingSpringBootAppKindList);
+					return analyzeDependentPackagesOnly(existingSpringBootAppKindList, replacingSpringBootAppKindList,
+							existingRelease, replacingRelease);
 				}
 				else {
 					throw new SkipperException("Can not yet compare package with top level templates and dependencies");
@@ -84,7 +86,8 @@ public class ReleaseAnalyzer {
 	}
 
 	private ReleaseAnalysisReport analyzeDependentPackagesOnly(List<SpringBootAppKind> existingSpringBootAppKindList,
-			List<SpringBootAppKind> replacingSpringBootAppKindList) {
+			List<SpringBootAppKind> replacingSpringBootAppKindList,
+			Release existingRelease, Release replacingRelease) {
 		List<String> appsToDelete = new ArrayList<>();
 		StringBuilder diffMessagesBuilder = new StringBuilder();
 		for (SpringBootAppKind existingSpringBootAppKind : existingSpringBootAppKindList) {
@@ -100,16 +103,17 @@ public class ReleaseAnalyzer {
 		}
 		if (appsToDelete.size() != 0) {
 			ReleaseDifference releaseDifference = new ReleaseDifference(false, diffMessagesBuilder.toString());
-			return new ReleaseAnalysisReport(appsToDelete, releaseDifference);
+			return new ReleaseAnalysisReport(appsToDelete, releaseDifference, existingRelease, replacingRelease);
 		}
 		else {
 			ReleaseDifference releaseDifference = new ReleaseDifference(true);
-			return new ReleaseAnalysisReport(new ArrayList<>(), releaseDifference);
+			return new ReleaseAnalysisReport(new ArrayList<>(), releaseDifference, existingRelease, replacingRelease);
 		}
 	}
 
 	private ReleaseAnalysisReport analyzeTopLevelPackagesOnly(List<SpringBootAppKind> existingSpringBootAppKindList,
-			List<SpringBootAppKind> replacingSpringBootAppKindList) {
+			List<SpringBootAppKind> replacingSpringBootAppKindList,
+			Release existingRelease, Release replacingRelease) {
 		ReleaseDifference difference = compare(existingSpringBootAppKindList.get(0),
 				replacingSpringBootAppKindList.get(0));
 		List<String> appsToDelete = new ArrayList<>();
@@ -117,7 +121,7 @@ public class ReleaseAnalyzer {
 			logger.info("Differences detected, upgrading " + existingSpringBootAppKindList.get(0).getApplicationName());
 			appsToDelete.add(existingSpringBootAppKindList.get(0).getApplicationName().trim());
 		}
-		return new ReleaseAnalysisReport(appsToDelete, difference);
+		return new ReleaseAnalysisReport(appsToDelete, difference, existingRelease, replacingRelease);
 	}
 
 	private SpringBootAppKind findMatching(String existingApplicationName,

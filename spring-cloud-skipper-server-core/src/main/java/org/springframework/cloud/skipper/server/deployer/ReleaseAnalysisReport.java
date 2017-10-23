@@ -17,6 +17,7 @@ package org.springframework.cloud.skipper.server.deployer;
 
 import java.util.List;
 
+import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.util.Assert;
 
 /**
@@ -34,17 +35,26 @@ public class ReleaseAnalysisReport {
 
 	private final ReleaseDifference releaseDifference;
 
+	private final Release existingRelease;
+
+	private final Release replacingRelease;
+
 	/**
 	 * Create an analysis report.
 	 * @param applicationNamesToUpgrade the list of application names that needs to be updates
 	 * @param releaseDifference a description of the changes between the current release and
 	 * the proposed release
+	 * @param existingRelease the currently deployed release
+	 * @param replacingRelease the release to be deployed
 	 */
-	public ReleaseAnalysisReport(List<String> applicationNamesToUpgrade, ReleaseDifference releaseDifference) {
+	public ReleaseAnalysisReport(List<String> applicationNamesToUpgrade, ReleaseDifference releaseDifference,
+			Release existingRelease, Release replacingRelease) {
 		Assert.notNull(applicationNamesToUpgrade, "ApplicationNamesToUpgrade can not be null.");
 		Assert.notNull(releaseDifference, "ReleaseDifference can not be null.");
 		this.applicationNamesToUpgrade = applicationNamesToUpgrade;
 		this.releaseDifference = releaseDifference;
+		this.existingRelease = existingRelease;
+		this.replacingRelease = replacingRelease;
 	}
 
 	public List<String> getApplicationNamesToUpgrade() {
@@ -53,5 +63,13 @@ public class ReleaseAnalysisReport {
 
 	public ReleaseDifference getReleaseDifference() {
 		return releaseDifference;
+	}
+
+	public Release getExistingRelease() {
+		return existingRelease;
+	}
+
+	public Release getReplacingRelease() {
+		return replacingRelease;
 	}
 }

@@ -35,6 +35,7 @@ import org.springframework.cloud.skipper.domain.Status;
 import org.springframework.cloud.skipper.domain.StatusCode;
 import org.springframework.cloud.skipper.domain.UpgradeProperties;
 import org.springframework.cloud.skipper.domain.UpgradeRequest;
+import org.springframework.cloud.skipper.server.deployer.ReleaseAnalysisReport;
 import org.springframework.cloud.skipper.server.deployer.ReleaseManager;
 import org.springframework.cloud.skipper.server.repository.DeployerRepository;
 import org.springframework.cloud.skipper.server.repository.PackageMetadataRepository;
@@ -202,6 +203,11 @@ public class ReleaseService {
 		return releaseToReturn;
 	}
 
+	/**
+	 * Delete the release.
+	 * @param releaseName the name of the release
+	 * @return the state of the release after requesting a deletion
+	 */
 	@Transactional
 	public Release delete(String releaseName) {
 		Assert.notNull(releaseName, "Release name must not be null");
@@ -209,6 +215,12 @@ public class ReleaseService {
 		return this.releaseManager.delete(release);
 	}
 
+	/**
+	 * Return the current status of the release
+	 * @param releaseName the name of the release
+	 * @return The latest state of the release as stored in the database
+	 */
+	@Transactional
 	public Info status(String releaseName) {
 		Release release = this.releaseRepository.findTopByNameOrderByVersionDesc(releaseName);
 		if (release == null) {
@@ -222,10 +234,23 @@ public class ReleaseService {
 		return release.getInfo();
 	}
 
+	/**
+	 * Return the current status of the release given the release and version.
+	 * @param releaseName name of the release
+	 * @param version release version
+	 * @return The latest state of the release as stored in the database
+	 */
+	@Transactional
 	public Info status(String releaseName, Integer version) {
 		return status(this.releaseRepository.findByNameAndVersion(releaseName, version)).getInfo();
 	}
 
+	/**
+	 * Return the manifest, the final set of instructions to deploy for a given release.
+	 * @param releaseName the name of the release
+	 * @return the release manifest
+	 */
+	@Transactional
 	public String manifest(String releaseName) {
 		Release release = this.releaseRepository.findTopByNameOrderByVersionDesc(releaseName);
 		if (release == null) {
@@ -234,33 +259,64 @@ public class ReleaseService {
 		return release.getManifest();
 	}
 
+	/**
+	 * Return the manifest, the final set of instructions to deploy for a given release, given
+	 * the name and version.
+	 * @param releaseName the name of the release
+	 * @param version the release version
+	 * @return the release manifest
+	 */
+	@Transactional
 	public String manifest(String releaseName, Integer version) {
 		return this.releaseRepository.findByNameAndVersion(releaseName, version).getManifest();
 	}
 
-	public Release status(Release release) {
+	private Release status(Release release) {
 		return this.releaseManager.status(release);
 	}
 
-	@Transactional
+	/**
+	 * Perform the release in two steps, each within it's own transaction. The first step
+	 * determines what changes need to be made, the second step performs the actaul upgrade,
+	 * waiting for new apps to be healthy, and deleting old apps.
+	 * @param upgradeRequest The update request
+	 * @return the initially created release object
+	 */
 	public Release upgrade(UpgradeRequest upgradeRequest) {
+		ReleaseAnalysisReport releaseAnalysisReport = createReport(upgradeRequest);
+		// This is expected to be executed on another thread.
+		releaseManager.upgrade(releaseAnalysisReport);
+		return status(releaseAnalysisReport.getReplacingRelease());
+	}
+
+	/**
+	 * Merges the configuration values for the replacing release, creates the manfiest, and
+	 * creates the Report for the next stage of upgrading a Release.
+	 * @param upgradeRequest containing the {@link UpgradeProperties} and
+	 * {@link PackageIdentifier} for the update.
+	 * @return A report of what needs to change to bring the current release to the requested
+	 * release
+	 */
+	@Transactional
+	public ReleaseAnalysisReport createReport(UpgradeRequest upgradeRequest) {
 		Assert.notNull(upgradeRequest.getUpgradeProperties(), "UpgradeProperties can not be null");
 		Assert.notNull(upgradeRequest.getPackageIdentifier(), "PackageIdentifier can not be null");
 		UpgradeProperties upgradeProperties = upgradeRequest.getUpgradeProperties();
-		Release oldRelease = this.releaseRepository.findLatestRelease(upgradeProperties.getReleaseName());
+		Release existingRelease = this.releaseRepository.findLatestRelease(upgradeProperties.getReleaseName());
 		PackageIdentifier packageIdentifier = upgradeRequest.getPackageIdentifier();
 		PackageMetadata packageMetadata = getPackageMetadata(packageIdentifier.getPackageName(), packageIdentifier
 				.getPackageVersion());
-		Release newRelease = createReleaseForUpgrade(packageMetadata, oldRelease.getVersion() + 1, upgradeProperties,
-				oldRelease.getPlatformName());
-		Map<String, Object> model = ConfigValueUtils.mergeConfigValues(newRelease.getPkg(),
-				newRelease.getConfigValues());
-		String manifest = ManifestUtils.createManifest(newRelease.getPkg(), model);
-		newRelease.setManifest(manifest);
-		return upgrade(oldRelease, newRelease);
+		Release replacingRelease = createReleaseForUpgrade(packageMetadata, existingRelease.getVersion() + 1,
+				upgradeProperties,
+				existingRelease.getPlatformName());
+		Map<String, Object> model = ConfigValueUtils.mergeConfigValues(replacingRelease.getPkg(),
+				replacingRelease.getConfigValues());
+		String manifest = ManifestUtils.createManifest(replacingRelease.getPkg(), model);
+		replacingRelease.setManifest(manifest);
+		return this.releaseManager.createReport(existingRelease, replacingRelease);
 	}
 
-	public Release createReleaseForUpgrade(PackageMetadata packageMetadata, Integer newVersion,
+	private Release createReleaseForUpgrade(PackageMetadata packageMetadata, Integer newVersion,
 			UpgradeProperties upgradeProperties, String platformName) {
 		Assert.notNull(upgradeProperties, "Upgrade Properties can not be null");
 		Package packageToInstall = this.packageService.downloadPackage(packageMetadata);
@@ -290,20 +346,13 @@ public class ReleaseService {
 		return createNewInfo("Initial install underway");
 	}
 
-	@Transactional
-	public Release upgrade(Release existingRelease, Release replacingRelease) {
-		Assert.notNull(existingRelease, "Existing Release must not be null");
-		Assert.notNull(replacingRelease, "Replacing Release must not be null");
-		Release release = this.releaseManager.upgrade(existingRelease, replacingRelease, "simple");
-		return status(release);
-	}
-
 	/**
 	 * Rollback the release name to the specified version. If the version is 0, then rollback
 	 * to the previous release.
 	 *
 	 * @param releaseName the name of the release
-	 * @param rollbackVersion the version of the release to rollback to
+	 * @param rollbackVersion the version of the release to rollback to. If the version is 0,
+	 * then rollback to the previous release.
 	 * @return the Release
 	 */
 	public Release rollback(final String releaseName, final int rollbackVersion) {
@@ -314,6 +363,7 @@ public class ReleaseService {
 		Release currentRelease = this.releaseRepository.findLatestRelease(releaseName);
 		Assert.notNull(currentRelease, "Could not find release = [" + releaseName + "]");
 
+		// Determine with version to rollback to
 		int rollbackVersionToUse = rollbackVersion;
 		if (rollbackVersion == 0) {
 			if (currentRelease.getInfo().getStatus().getStatusCode().equals(StatusCode.DELETED)) {
@@ -323,7 +373,6 @@ public class ReleaseService {
 				rollbackVersionToUse = currentRelease.getVersion() - 1;
 			}
 		}
-
 		Assert.isTrue(rollbackVersionToUse != 0, "Can not rollback to before version 1");
 
 		Release releaseToRollback = this.releaseRepository.findByNameAndVersion(releaseName, rollbackVersionToUse);
@@ -349,6 +398,14 @@ public class ReleaseService {
 		else {
 			return upgrade(currentRelease, newRollbackRelease);
 		}
+	}
+
+	private Release upgrade(Release existingRelease, Release replacingRelease) {
+		ReleaseAnalysisReport releaseAnalysisReport = this.releaseManager.createReport(existingRelease,
+				replacingRelease);
+		// This is expected to be executed on another thread.
+		releaseManager.upgrade(releaseAnalysisReport);
+		return status(releaseAnalysisReport.getReplacingRelease());
 	}
 
 	protected Release createInitialRelease(InstallProperties installProperties, Package packageToInstall,

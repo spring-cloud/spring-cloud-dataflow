@@ -32,6 +32,7 @@ import org.springframework.cloud.skipper.domain.StatusCode;
 import org.springframework.cloud.skipper.domain.UpgradeProperties;
 import org.springframework.cloud.skipper.domain.UpgradeRequest;
 import org.springframework.cloud.skipper.server.AbstractIntegrationTest;
+import org.springframework.cloud.skipper.server.repository.AppDeployerDataRepository;
 import org.springframework.cloud.skipper.server.repository.PackageMetadataRepository;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -40,6 +41,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
+ * Tests ReleaseService methods.
  * @author Mark Pollack
  * @author Ilayaperumal Gopinathan
  * @author Glenn Renfro
@@ -52,6 +54,9 @@ public class ReleaseServiceTests extends AbstractIntegrationTest {
 
 	@Autowired
 	private PackageMetadataRepository packageMetadataRepository;
+
+	@Autowired
+	private AppDeployerDataRepository appDeployerDataRepository;
 
 	@Test
 	public void testBadArguments() {
@@ -91,6 +96,7 @@ public class ReleaseServiceTests extends AbstractIntegrationTest {
 		packageIdentifier.setPackageVersion("1.0.0");
 		installRequest.setPackageIdentifier(packageIdentifier);
 		Release release = releaseService.install(installRequest);
+		sleep();
 		assertThat(release).isNotNull();
 		assertThat(release.getPkg().getMetadata().getVersion()).isEqualTo("1.0.0");
 	}
@@ -167,7 +173,7 @@ public class ReleaseServiceTests extends AbstractIntegrationTest {
 		Release release = this.releaseService.install(installRequest);
 		assertThat(release).isNotNull();
 
-		//Now let's install it a second time.
+		// Now let's install it a second time.
 		try {
 			this.releaseService.install(installRequest);
 			fail("Expected to fail when installing already deployed release.");
@@ -192,11 +198,13 @@ public class ReleaseServiceTests extends AbstractIntegrationTest {
 		installRequest.setPackageIdentifier(packageIdentifier);
 		// Install
 		Release release = releaseService.install(installRequest);
+		sleep();
 		assertThat(release).isNotNull();
 		// Delete
 		this.releaseService.delete(releaseName);
 		// Install again
 		Release release2 = releaseService.install(installRequest);
+		sleep();
 		assertThat(release2.getVersion()).isEqualTo(2);
 	}
 
@@ -214,8 +222,10 @@ public class ReleaseServiceTests extends AbstractIntegrationTest {
 		installRequest.setPackageIdentifier(packageIdentifier);
 		// Install
 		Release release = releaseService.install(installRequest);
+		sleep();
 		assertThat(release).isNotNull();
 		assertThat(release.getVersion()).isEqualTo(1);
+		this.appDeployerDataRepository.findByReleaseNameAndReleaseVersionRequired(releaseName, 1);
 
 		// Upgrade
 		UpgradeProperties upgradeProperties = new UpgradeProperties();
@@ -229,15 +239,24 @@ public class ReleaseServiceTests extends AbstractIntegrationTest {
 		packageIdentifier.setPackageVersion(packageVersion);
 		upgradeRequest.setPackageIdentifier(packageIdentifier);
 		Release upgradedRelease = releaseService.upgrade(upgradeRequest);
+		sleep();
 		assertThat(upgradedRelease.getVersion()).isEqualTo(2);
+		this.appDeployerDataRepository.findByReleaseNameAndReleaseVersionRequired(releaseName, 2);
 
 		// Delete
 		this.releaseService.delete(releaseName);
+		sleep();
+		Release deletedRelease = releaseRepository.findByNameAndVersion(releaseName, 2);
+		assertThat(deletedRelease.getInfo().getStatus().getStatusCode().equals(StatusCode.DELETED));
 
 		// Rollback
 		Release rolledBackRelease = this.releaseService.rollback(releaseName, 0);
+		sleep();
 		assertThat(rolledBackRelease.getManifest()).isEqualTo(upgradedRelease.getManifest());
+		assertThat(rolledBackRelease.getInfo().getStatus().getStatusCode().equals(StatusCode.DEPLOYED));
 
+		deletedRelease = releaseRepository.findByNameAndVersion(releaseName, 2);
+		assertThat(deletedRelease.getInfo().getStatus().getStatusCode().equals(StatusCode.DELETED));
 	}
 
 	@Test

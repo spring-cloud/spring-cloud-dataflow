@@ -17,6 +17,8 @@ package org.springframework.cloud.skipper.server.controller;
 
 import org.junit.After;
 import org.junit.Before;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.skipper.domain.InstallProperties;
@@ -45,6 +47,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 public abstract class AbstractControllerTests extends AbstractMockMvcTests {
 
+	private final Logger logger = LoggerFactory.getLogger(getClass());
+
 	@Autowired
 	protected PackageMetadataRepository packageMetadataRepository;
 
@@ -64,12 +68,19 @@ public abstract class AbstractControllerTests extends AbstractMockMvcTests {
 		// Add a sleep for now to give the local deployer a chance to install the app.
 		// This
 		// should go away once we introduce spring state machine.
+		logger.info("Test Clean up - deleting all releases.");
 		Thread.sleep(5000);
 		for (Release release : releaseRepository.findAll()) {
 			if (release.getInfo().getStatus().getStatusCode() != StatusCode.DELETED) {
-				mockMvc.perform(post("/api/delete/" + release.getName()))
-						.andDo(print())
-						.andExpect(status().isCreated()).andReturn();
+				try {
+					mockMvc.perform(post("/api/delete/" + release.getName()))
+							.andDo(print())
+							.andExpect(status().isCreated()).andReturn();
+				}
+				catch (Exception e) {
+					logger.warn("Can not delete release {}-v{}, as it has not yet deployed.", release.getName(),
+							release.getVersion());
+				}
 			}
 		}
 	}
@@ -83,16 +94,26 @@ public abstract class AbstractControllerTests extends AbstractMockMvcTests {
 		mockMvc.perform(post("/api/install/" + packageMetadata.getId())
 				.content(convertObjectToJson(installProperties))).andDo(print())
 				.andExpect(status().isCreated()).andReturn();
+		sleep();
 		Release deployedRelease = this.releaseRepository.findByNameAndVersion(releaseName, 1);
 		commonReleaseAssertions(releaseName, packageMetadata, deployedRelease);
 		return deployedRelease;
+	}
+
+	protected void sleep() {
+		try {
+			Thread.sleep(20000);
+		}
+		catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 	}
 
 	protected Release installPackage(InstallRequest installRequest) throws Exception {
 		mockMvc.perform(post("/api/install")
 				.content(convertObjectToJson(installRequest))).andDo(print())
 				.andExpect(status().isCreated()).andReturn();
-
+		sleep();
 		String releaseName = installRequest.getInstallProperties().getReleaseName();
 		Release deployedRelease = this.releaseRepository.findByNameAndVersion(releaseName, 1);
 		PackageMetadata packageMetadata = this.packageMetadataRepository.findByNameAndVersionByMaxRepoOrder(
@@ -110,12 +131,14 @@ public abstract class AbstractControllerTests extends AbstractMockMvcTests {
 		packageIdentifier.setPackageVersion(packageVersion);
 		upgradeRequest.setPackageIdentifier(packageIdentifier);
 		upgradeRequest.setUpgradeProperties(upgradeProperties);
-		PackageMetadata updatePackageMetadata = this.packageMetadataRepository.findByNameAndVersionByMaxRepoOrder(packageName,
+		PackageMetadata updatePackageMetadata = this.packageMetadataRepository.findByNameAndVersionByMaxRepoOrder(
+				packageName,
 				packageVersion);
 		assertThat(updatePackageMetadata).isNotNull();
 		mockMvc.perform(post("/api/upgrade")
 				.content(convertObjectToJson(upgradeRequest))).andDo(print())
 				.andExpect(status().isCreated()).andReturn();
+		sleep();
 		Release updatedRelease = this.releaseRepository.findByNameAndVersion(releaseName, 2);
 		commonReleaseAssertions(releaseName, updatePackageMetadata, updatedRelease);
 		return updatedRelease;

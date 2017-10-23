@@ -60,7 +60,7 @@ public class UpgradeDocumentation extends BaseDocumentation {
 		installRequest.setInstallProperties(installProperties);
 
 		installPackage(installRequest);
-
+		sleep();
 		final String packageVersion = "1.1.0";
 		final String packageName = "log";
 
@@ -114,5 +114,7 @@ public class UpgradeDocumentation extends BaseDocumentation {
 					fieldWithPath("platformName").description("Platform name of the release")
 				)
 			));
+		sleep();
 	}
+
 }

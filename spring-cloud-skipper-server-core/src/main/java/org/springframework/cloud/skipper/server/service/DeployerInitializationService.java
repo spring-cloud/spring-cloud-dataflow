@@ -183,7 +183,7 @@ public class DeployerInitializationService {
 				logger.info("Adding CF Deployer account " + entry.getKey() + " into Deployer Repository.");
 			}
 			catch (Exception e) {
-				logger.warn("CloudFoundry Deployer account" + entry.getKey() + " could not be added." + e.getMessage());
+				logger.error("CloudFoundry Platform account" + entry.getKey() + " could not be registered." + e.getMessage());
 			}
 		}
 	}

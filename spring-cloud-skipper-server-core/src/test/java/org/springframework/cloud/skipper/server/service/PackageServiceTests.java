@@ -38,6 +38,7 @@ import org.springframework.cloud.skipper.server.repository.RepositoryRepository;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import org.springframework.util.StreamUtils;
 
@@ -46,10 +47,13 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.entry;
 
 /**
+ * Uses @Transactional for ease of re-using existing JPA managed objects within Spring's
+ * managed test method transaction
  * @author Mark Pollack
  * @author Ilayaperumal Gopinathan
  */
 @ActiveProfiles("repo-test")
+@Transactional
 public class PackageServiceTests extends AbstractIntegrationTest {
 
 	private final Logger logger = LoggerFactory.getLogger(PackageServiceTests.class);
@@ -135,7 +139,8 @@ public class PackageServiceTests extends AbstractIntegrationTest {
 		assertThat(uploadedPackageMetadata.getVersion().equals("9.9.9")).isTrue();
 
 		// Retrieve new package
-		PackageMetadata retrievedPackageMetadata = packageMetadataRepository.findByNameAndVersionByMaxRepoOrder("log", "9.9.9");
+		PackageMetadata retrievedPackageMetadata = packageMetadataRepository.findByNameAndVersionByMaxRepoOrder("log",
+				"9.9.9");
 		assertThat(retrievedPackageMetadata.getName().equals("log")).isTrue();
 		assertThat(retrievedPackageMetadata.getVersion().equals("9.9.9")).isTrue();
 		assertThat(retrievedPackageMetadata).isNotNull();
@@ -153,7 +158,8 @@ public class PackageServiceTests extends AbstractIntegrationTest {
 
 	@Test
 	public void deserializePackage() {
-		PackageMetadata packageMetadata = this.packageMetadataRepository.findByNameAndVersionByMaxRepoOrder("log", "1.0.0");
+		PackageMetadata packageMetadata = this.packageMetadataRepository.findByNameAndVersionByMaxRepoOrder("log",
+				"1.0.0");
 		assertThat(packageService).isNotNull();
 		Package pkg = packageService.downloadPackage(packageMetadata);
 		assertThat(pkg).isNotNull();
@@ -167,7 +173,8 @@ public class PackageServiceTests extends AbstractIntegrationTest {
 
 	@Test
 	public void deserializeNestedPackage() {
-		PackageMetadata packageMetadata = this.packageMetadataRepository.findByNameAndVersionByMaxRepoOrder("ticktock", "1.0.0");
+		PackageMetadata packageMetadata = this.packageMetadataRepository.findByNameAndVersionByMaxRepoOrder("ticktock",
+				"1.0.0");
 		assertThat(packageService).isNotNull();
 		Package pkg = packageService.downloadPackage(packageMetadata);
 		assertThat(pkg).isNotNull();
