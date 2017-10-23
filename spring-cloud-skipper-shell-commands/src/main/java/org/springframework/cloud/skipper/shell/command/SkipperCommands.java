@@ -222,7 +222,7 @@ public class SkipperCommands extends AbstractSkipperCommand {
 	}
 
 	@ShellMethod(key = "upgrade", value = "Upgrade a release.")
-	public String upgrade(
+	public Object upgrade(
 			@ShellOption(help = "the name of the release to upgrade") String releaseName,
 			@ShellOption(help = "the name of the package to use for the upgrade") String packageName,
 			@ShellOption(help = "the version of the package to use for the upgrade") String packageVersion,

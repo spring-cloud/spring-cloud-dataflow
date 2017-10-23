@@ -17,16 +17,18 @@ package org.springframework.cloud.skipper.shell.command.support;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import io.codearte.props2yaml.Props2YAML;
 import org.yaml.snakeyaml.Yaml;
 
+import org.springframework.cloud.skipper.SkipperException;
 import org.springframework.util.StringUtils;
 
 /**
- * Utility for converting a String of comma delimited property values to YAML.
- * To be moved into the server side for AppDeployer based manifests
+ * Utility for converting a String of comma delimited property values to YAML. To be moved
+ * into the server side for AppDeployer based manifests
  *
  * @author Ilayaperumal Gopinathan
  * @author Mark Pollack
@@ -59,7 +61,12 @@ public abstract class YmlUtils {
 		if (yamlFile != null) {
 			Yaml yaml = new Yaml();
 			// Validate it is yaml formatted.
-			configValuesYML = yaml.dump(yaml.load(new FileInputStream(yamlFile)));
+			try {
+				configValuesYML = yaml.dump(yaml.load(new FileInputStream(yamlFile)));
+			}
+			catch (FileNotFoundException e) {
+				throw new SkipperException("Could not find file " + yamlFile.toString());
+			}
 		}
 		else if (StringUtils.hasText(propertiesAsCsvString)) {
 			String propertyValues = propertiesAsCsvString.replaceAll(APPLICATION_PROPERTIES_PREFIX,
