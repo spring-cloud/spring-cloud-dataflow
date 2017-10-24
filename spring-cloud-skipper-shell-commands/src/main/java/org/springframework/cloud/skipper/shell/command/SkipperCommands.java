@@ -235,8 +235,18 @@ public class SkipperCommands extends AbstractSkipperCommand {
 		StringBuilder sb = new StringBuilder();
 		sb.append(release.getName() + " has been upgraded.\n");
 		sb.append("Last Deployed: " + release.getInfo().getLastDeployed() + "\n");
-		sb.append("Status: " + release.getInfo().getStatus().getPlatformStatusPrettyPrint() + "\n");
+		updateStatus(sb, release);
 		return sb.toString();
+	}
+
+	private void updateStatus(StringBuilder sb, Release release) {
+		sb.append("Release Status: " + release.getInfo().getStatus().getStatusCode() + "\n");
+		if (StringUtils.hasText(release.getInfo().getStatus().getPlatformStatus())) {
+			sb.append("Platform Status: " + release.getInfo().getStatus().getPlatformStatusPrettyPrint());
+		}
+		else {
+			sb.append("Platform Status: unknown");
+		}
 	}
 
 	private void assertMutuallyExclusiveFileAndProperties(File yamlFile, String properties) {
@@ -278,7 +288,7 @@ public class SkipperCommands extends AbstractSkipperCommand {
 		StringBuilder sb = new StringBuilder();
 		sb.append(release.getName() + " has been rolled back.\n");
 		sb.append("Last Deployed: " + release.getInfo().getLastDeployed() + "\n");
-		sb.append("Status: " + release.getInfo().getStatus().getPlatformStatusPrettyPrint() + "\n");
+		updateStatus(sb, release);
 		return sb.toString();
 	}
 
