@@ -19,6 +19,7 @@ package org.springframework.cloud.dataflow.server.service.impl;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -28,6 +29,7 @@ import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConf
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.core.TaskDefinition.TaskDefinitionBuilder;
+import org.springframework.cloud.dataflow.core.dsl.TaskApp;
 import org.springframework.cloud.dataflow.core.dsl.TaskNode;
 import org.springframework.cloud.dataflow.core.dsl.TaskParser;
 import org.springframework.cloud.dataflow.registry.AppRegistration;
@@ -163,11 +165,12 @@ public class DefaultTaskService implements TaskService {
 		}
 		TaskParser taskParser = new TaskParser(taskDefinition.getName(), taskDefinition.getDslText(), true, true);
 		TaskNode taskNode = taskParser.parse();
-		// if composed task definition replace definition with with one composed task
+		// if composed task definition replace definition with one composed task
 		// runner and executable graph.
 		if (taskNode.isComposed()) {
 			taskDefinition = new TaskDefinition(taskDefinition.getName(),
 					createComposedTaskDefinition(taskNode.toExecutableDSL()));
+			taskDeploymentProperties = establishComposedTaskProperties(taskDeploymentProperties, taskNode);
 		}
 
 		AppRegistration appRegistration = this.registry.find(taskDefinition.getRegisteredAppName(),
@@ -197,6 +200,33 @@ public class DefaultTaskService implements TaskService {
 		}
 		taskExecutionRepository.updateExternalExecutionId(taskExecution.getExecutionId(), id);
 		return taskExecution.getExecutionId();
+	}
+
+	private Map<String, String> establishComposedTaskProperties(
+			Map<String, String> taskDeploymentProperties,
+			TaskNode taskNode) {
+		String result = "";
+		taskDeploymentProperties = new HashMap<>(taskDeploymentProperties);
+		for (TaskApp subTask : taskNode.getTaskApps()) {
+			String subTaskName = String.format("app.%s-%s.", taskNode.getName(),
+					(subTask.getLabel() == null) ? subTask.getName() : subTask.getLabel());
+			Set<String> propertyKeys = taskDeploymentProperties.keySet().
+					stream().filter(taskProperty -> taskProperty.startsWith(subTaskName))
+					.collect(Collectors.toSet());
+			for (String taskProperty : propertyKeys) {
+				if (result.length() != 0) {
+					result += ", ";
+				}
+				result += String.format("%sapp.%s=%s", subTaskName,
+						taskProperty.substring(subTaskName.length()),
+						taskDeploymentProperties.get(taskProperty));
+				taskDeploymentProperties.remove(taskProperty);
+			}
+		}
+		if (result.length() != 0) {
+			taskDeploymentProperties.put("app.composed-task-runner.composed-task-properties", result);
+		}
+		return taskDeploymentProperties;
 	}
 
 	private void updateDataFlowUriIfNeeded(Map<String, String> appDeploymentProperties, List<String> commandLineArgs) {
