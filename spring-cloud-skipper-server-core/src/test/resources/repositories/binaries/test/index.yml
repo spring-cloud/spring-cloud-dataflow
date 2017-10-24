@@ -2,10 +2,9 @@
 ---
 apiVersion: v1
 kind: skipper
-origin: classpath:/repositories/binaries/test
+origin: samples-package-repository
 name: log
 version: 1.0.0
-appVersion: 1.2.0.RC1
 packageSourceUrl: https://github.com/spring-cloud-stream-app-starters/log/tree/v1.2.0.RC1
 packageHomeUrl: http://cloud.spring.io/spring-cloud-stream-app-starters/
 tags: logging, sink
@@ -15,10 +14,9 @@ description: The log sink uses the application logger to output the data for ins
 ---
 apiVersion: v2
 kind: skipper
-origin: classpath:/repositories/binaries/test
+origin: samples-package-repository
 name: log
 version: 1.1.0
-appVersion: 1.3.0.M1
 packageSourceUrl: https://github.com/spring-cloud-stream-app-starters/log/tree/v1.2.0.RELEASE
 packageHomeUrl: http://cloud.spring.io/spring-cloud-stream-app-starters/
 tags: logging, sink
@@ -28,10 +26,9 @@ description: The log sink uses the application logger to output the data for ins
 ---
 apiVersion: v1
 kind: skipper
-origin: classpath:/repositories/binaries/test
+origin: samples-package-repository
 name: log
 version: 2.0.0
-appVersion: 1.2.0.RELEASE
 packageSourceUrl: https://github.com/spring-cloud-stream-app-starters/log/tree/v1.2.0.RELEASE
 packageHomeUrl: http://cloud.spring.io/spring-cloud-stream-app-starters/
 tags: logging, sink
@@ -41,10 +38,9 @@ description: The log sink uses the application logger to output the data for ins
 ---
 apiVersion: v1
 kind: skipper
-origin: classpath:/repositories/binaries/test
+origin: samples-package-repository
 name: time
 version: 2.0.0
-appVersion: 1.2.0.RELEASE
 packageSourceUrl: https://github.com/spring-cloud-stream-app-starters/time/tree/v1.2.0.RELEASE
 packageHomeUrl: http://cloud.spring.io/spring-cloud-stream-app-starters/
 tags: time, source
@@ -54,10 +50,9 @@ description: The time source periodically emits a timestamp string.
 ---
 apiVersion: v1
 kind: skipper
-origin: classpath:/repositories/binaries/test
+origin: samples-package-repository
 name: ticktock
 version: 1.0.0
-appVersion: 1.0.0
 packageSourceUrl: https://example.com/dataflow/ticktock
 packageHomeUrl: http://example.com/dataflow/ticktock
 tags: stream, time, log
@@ -67,7 +62,7 @@ description: The ticktock stream sends a time stamp and logs the value.
 ---
 apiVersion: v1
 kind: skipper
-origin: classpath:/repositories/binaries/test
+origin: samples-package-repository
 name: log-docker
 version: 1.0.0
 packageSourceUrl: https://github.com/spring-cloud-stream-app-starters/log/tree/v1.1.0.RELEASE
@@ -79,7 +74,7 @@ description: Docker version of the log sink application version
 ---
 apiVersion: v1
 kind: skipper
-origin: classpath:/repositories/binaries/test
+origin: samples-package-repository
 name: log-docker
 version: 2.0.0
 packageSourceUrl: https://github.com/spring-cloud-stream-app-starters/log/tree/v1.2.0.RELEASE
