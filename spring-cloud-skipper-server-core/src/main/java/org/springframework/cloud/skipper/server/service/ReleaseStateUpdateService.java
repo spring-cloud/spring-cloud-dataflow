@@ -49,7 +49,7 @@ public class ReleaseStateUpdateService {
 	/**
 	 * Instantiates a new release state update service.
 	 *
-	 * @param releaseService the release service
+	 * @param releaseManager the release manager
 	 * @param releaseRepository the release repository
 	 */
 	public ReleaseStateUpdateService(ReleaseManager releaseManager, ReleaseRepository releaseRepository) {
