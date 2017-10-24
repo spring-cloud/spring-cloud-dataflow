@@ -235,7 +235,6 @@ public class SkipperCommands extends AbstractSkipperCommand {
 		StringBuilder sb = new StringBuilder();
 		sb.append(release.getName() + " has been upgraded.\n");
 		sb.append("Last Deployed: " + release.getInfo().getLastDeployed() + "\n");
-		updateStatus(sb, release);
 		return sb.toString();
 	}
 
@@ -340,7 +339,7 @@ public class SkipperCommands extends AbstractSkipperCommand {
 		headers.put("pkg.metadata.name", "Package Name");
 		headers.put("pkg.metadata.version", "Package Version");
 		headers.put("platformName", "Platform Name");
-		headers.put("info.status.platformStatus", "Platform Status");
+		headers.put("info.status.platformStatusPrettyPrint", "Platform Status");
 		TableModel model = new BeanListTableModel<>(releases, headers);
 		TableBuilder tableBuilder = new TableBuilder(model);
 		TableUtils.applyStyle(tableBuilder);

@@ -13,16 +13,20 @@ spring:
   cloud:
     skipper:
       server:
-        synchonizeIndexOnContextRefresh: true
         packageRepositories:
           -
+            name: experimental
+            url: http://skipper-repository.cfapps.io/repository/experimental
+            description: Experimental Skipper Repository
+            repoOrder: 0
+          -
             name: local
-            url: "http://localhost:7577"
+            url: http://${spring.cloud.client.hostname}:7577
             local: true
             description: Default local database backed repository
+            repoOrder: 1
 
 
-# TODO - remove libs-snapshot maven repo , pre M1 development simplicity
 maven:
   remoteRepositories:
     springRepo:

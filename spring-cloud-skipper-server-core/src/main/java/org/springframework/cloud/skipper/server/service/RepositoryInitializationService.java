@@ -40,8 +40,6 @@ import org.springframework.transaction.annotation.Transactional;
  */
 public class RepositoryInitializationService {
 
-	public final static String LOCAL_REPOSITORY_NAME = "local";
-
 	private final Logger logger = LoggerFactory.getLogger(RepositoryInitializationService.class);
 
 	private final RepositoryRepository repositoryRepository;

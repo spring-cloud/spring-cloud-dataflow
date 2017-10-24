@@ -19,5 +19,21 @@ Describe the commands in PlatformCommands.java
 [[skipper-commands-repository]]
 == Repository commands
 
-Describe the commands in RepositoryCommands.java
+You can list add or delete a repository using the commands `repo add`, `repo delete` and `repo list`
 
+An example output of `repo list` is shown below
+```
+skipper:>repo list
+╔════════════╤═══════════════════════════════════════════════════════════╤═════╤═════╗
+║    Name    │                            URL                            │Local│Order║
+╠════════════╪═══════════════════════════════════════════════════════════╪═════╪═════╣
+║experimental│http://skipper-repository.cfapps.io/repository/experimental│false│0    ║
+║local       │http://10.55.13.45:7577                                    │true │1    ║
+╚════════════╧═══════════════════════════════════════════════════════════╧═════╧═════╝
+```
+If a repository is local, it is backed by Skipper's database and you will be able to upload packages to the repository.
+If it is not local, it is a remote repository and you are only
+able to read packages.
+The packages in a remote repository are updated outside of Skipper's control.
+The 1.0 M1 release only polls the remote repository for contents upon server startup.
+Follow issue https://github.com/spring-cloud/spring-cloud-skipper/issues/262[GH-262] for more on adding support for dynamic updating of remote repository metadata.

@@ -1,4 +1,4 @@
-[[skipper-tour]]
+[[three-hour-tour]]
 = Using Skipper
 
 This section is the 'three hour tour' of Skipper.  It descriptes how to configure and use the main feature set of Skipper in detail.  We will cover, platforms, packages, repositories, releases and update strategies.

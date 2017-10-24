@@ -1,0 +1,15 @@
+[[three-minute-tour]]
+= Three minute Tour
+This section is a more involved getting started guide that covers additional commands when deploying apps to the local machine, Cloud Foundry and Kuberenetes via minikube.
+
+== Using the local machine
+
+Picking up from the <<three-second-tour>> left off, we will show some additional commands and features of Skipper.
+
+== Using Cloud Foundry
+
+== Using Kuberenetes
+
+
+
+

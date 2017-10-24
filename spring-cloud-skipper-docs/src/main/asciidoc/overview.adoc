@@ -14,7 +14,7 @@ The main concepts are Repositories, Packages, Platforms, Releases, and Update st
 This allows Skipper to deploy Spring Boot applications to Cloud Foundry, Kubernetes, Apache YARN, and your local machine.
 You can configure a single Skipper server to deploy to multiple platforms, with each platform identified by a unique name.
 
-NOTE: The Spring Cloud Deployer libraries for Apache Mesos, Redhat Openshift, and Hashicorp Nomad were not bundled with Skipper in 1.0 M1.  Skipper 1.0 M1 has only been tested using the local and Cloud Foundry Deployers.
+NOTE: The Spring Cloud Deployer libraries for Apache Mesos, Redhat Openshift, and Hashicorp Nomad were not bundled with Skipper in 1.0 M1.  Skipper 1.0 M1 has only been tested using the local, Cloud Foundry, and Kubernetes Deployers.
 
 *Packages* define the basic recipie for installing an application.
 A package can define a single application or it can define a group of applications.
@@ -39,11 +39,11 @@ A release has a name, and you provide that name when upgrading, rolling back, de
 //A Stream has a source applications that sends data via messaging middleware to a processor application, which in turns sends data to a sink application.
 //A processor application may change often, as the implementation changes.  Data Flow used to destro
 
-
-=== Features
-
-* Feature 1
-* Feature 2
+//
+//=== Features
+//
+//* Feature 1
+//* Feature 2
 
 
 

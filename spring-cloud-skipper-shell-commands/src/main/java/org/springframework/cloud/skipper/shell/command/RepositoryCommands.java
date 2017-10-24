@@ -67,8 +67,9 @@ public class RepositoryCommands extends AbstractSkipperCommand {
 		Resources<Repository> repositoryResources = this.skipperClient.listRepositories();
 		LinkedHashMap<String, Object> headers = new LinkedHashMap<>();
 		headers.put("name", "Name");
-		headers.put("url", "Root URL");
-		headers.put("sourceUrl", "Source URL");
+		headers.put("url", "URL");
+		headers.put("local", "Local");
+		headers.put("repoOrder", "Order");
 		TableModel model = new BeanListTableModel<>(repositoryResources.getContent(), headers);
 		TableBuilder tableBuilder = new TableBuilder(model);
 		return TableUtils.applyStyle(tableBuilder).build();

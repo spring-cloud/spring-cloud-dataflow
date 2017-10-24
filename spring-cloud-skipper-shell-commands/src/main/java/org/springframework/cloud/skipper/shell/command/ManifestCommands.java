@@ -31,15 +31,16 @@ import org.springframework.web.client.HttpStatusCodeException;
 import static org.springframework.shell.standard.ShellOption.NULL;
 
 /**
+ * Commands that operation on the manifest.
  * @author Mark Pollack
  */
 @ShellComponent
-public class GetCommands extends AbstractSkipperCommand {
+public class ManifestCommands extends AbstractSkipperCommand {
 
 	private Yaml yaml;
 
 	@Autowired
-	public GetCommands(SkipperClient skipperClient) {
+	public ManifestCommands(SkipperClient skipperClient) {
 		this.skipperClient = skipperClient;
 		DumperOptions dumperOptions = new DumperOptions();
 		dumperOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
@@ -47,11 +48,10 @@ public class GetCommands extends AbstractSkipperCommand {
 		this.yaml = new Yaml(dumperOptions);
 	}
 
-	@ShellMethod(key = "get manifest", value = "Get the manifest values for the latest or a specific version of the "
-			+ "release")
+	@ShellMethod(key = "manifest get", value = "Get the manifest for a release")
 	public Object getManifest(
 			@ShellOption(help = "release name") @NotNull String releaseName,
-			@ShellOption(help = "the specific release version.", defaultValue = NULL) Integer releaseVersion) {
+			@ShellOption(help = "specific release version.", defaultValue = NULL) Integer releaseVersion) {
 		String manifest;
 		try {
 			if (releaseVersion == null) {

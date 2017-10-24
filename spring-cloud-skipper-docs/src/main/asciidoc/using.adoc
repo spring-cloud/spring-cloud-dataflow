@@ -1,9 +1,0 @@
-[[using-skipper]]
-= Using Skipper
-
-[[three-minute-tour]]
-== A three minute tour
-
-
-
-
