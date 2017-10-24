@@ -1,7 +1,7 @@
 apiVersion: skipper/v1
 kind: SpringBootApp
 metadata:
-  name: log2
+  name: log-docker
   type: sink
 spec:
   resource: docker:springcloudstream/log-sink-rabbit:{{version}}
