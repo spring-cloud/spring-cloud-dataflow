@@ -896,6 +896,22 @@ public class TaskParserTests {
 		checkForParseError("App1 ->xx", DSLMessage.TASK_ARROW_SHOULD_BE_PRECEDED_BY_CODE, 5);
 		checkForParseError("App1 xx->", DSLMessage.OOD, 9);
 	}
+	
+	@Test
+	public void graphToText_1712() {
+		assertGraph("[0:START][1:timestamp][2:END][0-1][1-2]","timestamp");
+		// In issue 1712 the addition of an empty properties map to the link damages the
+		// generation of the DSL. It was expecting null if there are no properties.
+		TaskNode ctn = parse("timestamp");
+		Graph graph = ctn.toGraph();
+		// Setting these to empty maps mirrors what the UI is doing in SCDF 1.3.0.M3
+		graph.nodes.get(0).metadata = new HashMap<>();
+		graph.nodes.get(1).metadata = new HashMap<>();
+		graph.nodes.get(2).metadata = new HashMap<>();
+		graph.links.get(0).properties = new HashMap<>();
+		graph.links.get(1).properties = new HashMap<>();
+		assertEquals("timestamp", graph.toDSLText());
+	}
 
 	@Test
 	public void graphToText() {
