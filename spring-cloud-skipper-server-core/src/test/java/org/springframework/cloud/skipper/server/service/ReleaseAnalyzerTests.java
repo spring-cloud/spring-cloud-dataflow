@@ -15,6 +15,7 @@
  */
 package org.springframework.cloud.skipper.server.service;
 
+import org.junit.After;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,6 +31,7 @@ import org.springframework.cloud.skipper.domain.UpgradeRequest;
 import org.springframework.cloud.skipper.server.AbstractIntegrationTest;
 import org.springframework.cloud.skipper.server.deployer.ReleaseAnalysisReport;
 import org.springframework.cloud.skipper.server.deployer.ReleaseAnalyzer;
+import org.springframework.cloud.skipper.server.deployer.strategies.HealthCheckProperties;
 import org.springframework.cloud.skipper.server.repository.DeployerRepository;
 import org.springframework.cloud.skipper.server.repository.ReleaseRepository;
 import org.springframework.test.context.ActiveProfiles;
@@ -39,6 +41,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Mark Pollack
+ * @author Ilayaperumal Gopinathan
  */
 @ActiveProfiles("repo-test")
 @TestPropertySource(properties = { "maven.remote-repositories.repo1.url=http://repo.spring.io/libs-snapshot" })
@@ -58,8 +61,18 @@ public class ReleaseAnalyzerTests extends AbstractIntegrationTest {
 	@Autowired
 	ReleaseAnalyzer releaseAnalyzer;
 
+	@Autowired
+	private HealthCheckProperties healthCheckProperties;
+
+	@After
+	public void cleanup() throws InterruptedException {
+		// Sleep until asynchronous health check to be done for the upgrade - the max time would be the configured
+		// timeout
+		Thread.sleep(this.healthCheckProperties.getTimeoutInMillis());
+	}
+
 	@Test
-	public void test() throws InterruptedException {
+	public void releaseAnalyzerTest() throws InterruptedException {
 
 		String platformName = "default";
 
@@ -102,12 +115,15 @@ public class ReleaseAnalyzerTests extends AbstractIntegrationTest {
 		Release upgradedRelease = releaseService.upgrade(upgradeRequest);
 
 		assertThat(upgradedRelease.getName()).isEqualTo(releaseName);
-		System.out.println("upgraded relerase \n" + upgradedRelease.getManifest());
+		System.out.println("upgraded release \n" + upgradedRelease.getManifest());
 		ReleaseAnalysisReport releaseAnalysisReport = this.releaseAnalyzer.analyze(installedRelease,
 				upgradedRelease);
 
 		System.out.println("sleeping for 5 seconds ----------------");
 		Thread.sleep(5000);
+		assertThat(releaseAnalysisReport.getReleaseDifference()).isNotNull();
+		assertThat(releaseAnalysisReport.getReleaseDifference().getDifferenceSummary())
+				.contains("log.level=(DEBUG, error)");
 	}
 
 }

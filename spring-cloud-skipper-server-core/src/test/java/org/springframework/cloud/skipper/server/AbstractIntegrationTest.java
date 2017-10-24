@@ -114,13 +114,11 @@ public abstract class AbstractIntegrationTest {
 					}
 				}
 			}
-			Thread.sleep(1000);
-			new JdbcTemplate(dataSource).execute("RUNSCRIPT FROM '" + dbScriptFile.getPath() + "'");
 		}
 		catch (InterruptedException e) {
 			logger.error("Exception while cleaning up resources", e);
 		}
-
+		new JdbcTemplate(dataSource).execute("RUNSCRIPT FROM '" + dbScriptFile.getPath() + "'");
 	}
 
 	@Configuration
