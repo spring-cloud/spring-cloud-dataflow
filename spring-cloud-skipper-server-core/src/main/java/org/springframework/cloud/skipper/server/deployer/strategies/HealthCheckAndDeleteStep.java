@@ -21,7 +21,6 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.springframework.beans.BeansException;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.app.AppStatus;
@@ -34,17 +33,17 @@ import org.springframework.cloud.skipper.server.domain.AppDeployerData;
 import org.springframework.cloud.skipper.server.repository.AppDeployerDataRepository;
 import org.springframework.cloud.skipper.server.repository.DeployerRepository;
 import org.springframework.cloud.skipper.server.repository.ReleaseRepository;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.event.EventListener;
 
 /**
  * Responsible for checking the health of the latest deployed release, and then deleting
  * those applications from the previous release. Executed asynchronously to avoid the
  * client waiting a long time, potentially minutes, when executing update.
+ *
  * @author Mark Pollack
+ * @author Ilayaperumal Gopinathan
  */
-public class HealthCheckAndDeleteStep implements ApplicationContextAware {
+public class HealthCheckAndDeleteStep {
 
 	private final Logger logger = LoggerFactory.getLogger(HealthCheckAndDeleteStep.class);
 
@@ -59,8 +58,6 @@ public class HealthCheckAndDeleteStep implements ApplicationContextAware {
 	private final HealthCheckProperties healthCheckProperties;
 
 	private ReleaseManager releaseManager;
-
-	private ApplicationContext applicationContext;
 
 	public HealthCheckAndDeleteStep(ReleaseRepository releaseRepository,
 			DeployerRepository deployerRepository,
@@ -170,11 +167,6 @@ public class HealthCheckAndDeleteStep implements ApplicationContextAware {
 	@EventListener
 	public void initialize(ApplicationReadyEvent event) {
 		// NOTE circular ref will go away with introduction of state machine.
-		this.releaseManager = this.applicationContext.getBean(ReleaseManager.class);
-	}
-
-	@Override
-	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-		this.applicationContext = applicationContext;
+		this.releaseManager = event.getApplicationContext().getBean(ReleaseManager.class);
 	}
 }

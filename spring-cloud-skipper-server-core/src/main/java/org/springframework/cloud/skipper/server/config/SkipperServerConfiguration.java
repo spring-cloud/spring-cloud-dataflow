@@ -91,6 +91,8 @@ public class SkipperServerConfiguration implements AsyncConfigurer {
 
 	private final Logger logger = LoggerFactory.getLogger(SkipperServerConfiguration.class);
 
+	public static final String SKIPPER_THREAD_POOL_EXECUTOR = "skipperThreadPoolTaskExecutor";
+
 	@Bean
 	public ErrorAttributes errorAttributes() {
 		// override boot's DefaultErrorAttributes
@@ -196,18 +198,16 @@ public class SkipperServerConfiguration implements AsyncConfigurer {
 
 	@Bean
 	public DeleteStep deleteStep(ReleaseRepository releaseRepository,
-			DeployerRepository deployerRepository,
-			AppDeployerDataRepository appDeployerDataRepository) {
-		return new DeleteStep(releaseRepository, deployerRepository, appDeployerDataRepository);
+			DeployerRepository deployerRepository) {
+		return new DeleteStep(releaseRepository, deployerRepository);
 	}
 
 	@Bean
-	public UpgradeStrategy updateStrategy(ReleaseRepository releaseRepository,
-			DeployerRepository deployerRepository,
+	public UpgradeStrategy updateStrategy(DeployerRepository deployerRepository,
 			AppDeployerDataRepository appDeployerDataRepository,
 			AppDeploymentRequestFactory appDeploymentRequestFactory,
 			HealthCheckAndDeleteStep healthCheckAndDeleteStep) {
-		return new SimpleRedBlackUpgradeStrategy(releaseRepository, deployerRepository,
+		return new SimpleRedBlackUpgradeStrategy(deployerRepository,
 				appDeployerDataRepository, appDeploymentRequestFactory, healthCheckAndDeleteStep);
 	}
 
@@ -224,7 +224,7 @@ public class SkipperServerConfiguration implements AsyncConfigurer {
 				healthCheckProperties);
 	}
 
-	@Bean(name = "skipperThreadPoolTaskExecutor")
+	@Bean(name = SKIPPER_THREAD_POOL_EXECUTOR)
 	@Override
 	public Executor getAsyncExecutor() {
 		return new ThreadPoolTaskExecutor();

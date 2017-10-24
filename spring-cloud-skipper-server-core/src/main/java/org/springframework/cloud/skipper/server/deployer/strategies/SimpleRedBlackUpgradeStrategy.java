@@ -32,9 +32,10 @@ import org.springframework.cloud.skipper.server.domain.SpringBootAppKind;
 import org.springframework.cloud.skipper.server.domain.SpringBootAppKindReader;
 import org.springframework.cloud.skipper.server.repository.AppDeployerDataRepository;
 import org.springframework.cloud.skipper.server.repository.DeployerRepository;
-import org.springframework.cloud.skipper.server.repository.ReleaseRepository;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.transaction.annotation.Transactional;
+
+import static org.springframework.cloud.skipper.server.config.SkipperServerConfiguration.SKIPPER_THREAD_POOL_EXECUTOR;
 
 /**
  * Very simple approach to deploying a new application. All the new apps are deployed and
@@ -46,8 +47,6 @@ public class SimpleRedBlackUpgradeStrategy implements UpgradeStrategy {
 
 	private final Logger logger = LoggerFactory.getLogger(SimpleRedBlackUpgradeStrategy.class);
 
-	private final ReleaseRepository releaseRepository;
-
 	private final DeployerRepository deployerRepository;
 
 	private final AppDeployerDataRepository appDeployerDataRepository;
@@ -56,12 +55,10 @@ public class SimpleRedBlackUpgradeStrategy implements UpgradeStrategy {
 
 	private final HealthCheckAndDeleteStep healthCheckAndDeleteStep;
 
-	public SimpleRedBlackUpgradeStrategy(ReleaseRepository releaseRepository,
-			DeployerRepository deployerRepository,
+	public SimpleRedBlackUpgradeStrategy(DeployerRepository deployerRepository,
 			AppDeployerDataRepository appDeployerDataRepository,
 			AppDeploymentRequestFactory appDeploymentRequestFactory,
 			HealthCheckAndDeleteStep healthCheckAndDeleteStep) {
-		this.releaseRepository = releaseRepository;
 		this.deployerRepository = deployerRepository;
 		this.appDeployerDataRepository = appDeployerDataRepository;
 		this.appDeploymentRequestFactory = appDeploymentRequestFactory;
@@ -69,7 +66,7 @@ public class SimpleRedBlackUpgradeStrategy implements UpgradeStrategy {
 	}
 
 	@Override
-	@Async("skipperThreadPoolTaskExecutor")
+	@Async(SKIPPER_THREAD_POOL_EXECUTOR)
 	@Transactional
 	public Release upgrade(Release existingRelease, Release replacingRelease,
 			ReleaseAnalysisReport releaseAnalysisReport) {
@@ -112,10 +109,6 @@ public class SimpleRedBlackUpgradeStrategy implements UpgradeStrategy {
 		appDeployerData.setReleaseVersion(replacingRelease.getVersion());
 		appDeployerData.setDeploymentDataUsingMap(appNameDeploymentIdMap);
 		this.appDeployerDataRepository.save(appDeployerData);
-
-		// AppDeployerData replacingAppDeployerData = this.appDeployerDataRepository
-		// .findByReleaseNameAndReleaseVersionRequired(
-		// replacingRelease.getName(), replacingRelease.getVersion());
 
 		this.healthCheckAndDeleteStep.waitForNewAppsToDeploy(existingRelease,
 				applicationNamesToUpgrade, replacingRelease);

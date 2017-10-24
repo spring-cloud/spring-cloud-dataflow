@@ -28,7 +28,6 @@ import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.Status;
 import org.springframework.cloud.skipper.domain.StatusCode;
 import org.springframework.cloud.skipper.server.domain.AppDeployerData;
-import org.springframework.cloud.skipper.server.repository.AppDeployerDataRepository;
 import org.springframework.cloud.skipper.server.repository.DeployerRepository;
 import org.springframework.cloud.skipper.server.repository.ReleaseRepository;
 
@@ -45,13 +44,9 @@ public class DeleteStep {
 
 	private final DeployerRepository deployerRepository;
 
-	private final AppDeployerDataRepository appDeployerDataRepository;
-
-	public DeleteStep(ReleaseRepository releaseRepository, DeployerRepository deployerRepository,
-			AppDeployerDataRepository appDeployerDataRepository) {
+	public DeleteStep(ReleaseRepository releaseRepository, DeployerRepository deployerRepository) {
 		this.releaseRepository = releaseRepository;
 		this.deployerRepository = deployerRepository;
-		this.appDeployerDataRepository = appDeployerDataRepository;
 	}
 
 	public Release delete(Release release, AppDeployerData existingAppDeployerData,
@@ -69,9 +64,8 @@ public class DeleteStep {
 					appDeployer.undeploy(appNameAndDeploymentId.getValue());
 				}
 				else {
-					logger.warn("For Release name {}, did not undeploy existing app {} as it status is not 'deployed'.",
-							release.getName(),
-							appNameAndDeploymentId.getKey());
+					logger.warn("For Release name {}, did not undeploy existing app {} as its status is not "
+									+ "'deployed'.", release.getName(), appNameAndDeploymentId.getKey());
 				}
 			}
 		}

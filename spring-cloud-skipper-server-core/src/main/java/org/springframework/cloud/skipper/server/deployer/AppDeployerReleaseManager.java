@@ -175,7 +175,7 @@ public class AppDeployerReleaseManager implements ReleaseManager {
 
 		String manifest = ManifestUtils.createManifest(replacingRelease.getPkg(), model);
 		replacingRelease.setManifest(manifest);
-		Release release = this.releaseRepository.save(replacingRelease);
+		this.releaseRepository.save(replacingRelease);
 		if (releaseAnalysisReport.getReleaseDifference().areEqual()) {
 			throw new SkipperException(
 					"Package to upgrade has no difference than existing deployed package. Not upgrading.");
@@ -189,7 +189,7 @@ public class AppDeployerReleaseManager implements ReleaseManager {
 				"Difference report for upgrade of release " + releaseAnalysisReport.getReplacingRelease().getName());
 		logger.info(releaseAnalysisReport.getReleaseDifference().getDifferenceSummary());
 		// Do upgrades async
-		Release release = this.upgradeStrategy.upgrade(releaseAnalysisReport.getExistingRelease(),
+		this.upgradeStrategy.upgrade(releaseAnalysisReport.getExistingRelease(),
 				releaseAnalysisReport.getReplacingRelease(), releaseAnalysisReport);
 	}
 

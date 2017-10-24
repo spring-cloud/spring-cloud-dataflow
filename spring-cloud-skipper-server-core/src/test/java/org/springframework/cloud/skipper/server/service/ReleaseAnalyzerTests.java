@@ -65,10 +65,16 @@ public class ReleaseAnalyzerTests extends AbstractIntegrationTest {
 	private HealthCheckProperties healthCheckProperties;
 
 	@After
-	public void cleanup() throws InterruptedException {
+	public void cleanup() {
 		// Sleep until asynchronous health check to be done for the upgrade - the max time would be the configured
 		// timeout
-		Thread.sleep(this.healthCheckProperties.getTimeoutInMillis());
+		try {
+			Thread.sleep(this.healthCheckProperties.getTimeoutInMillis());
+		}
+		catch (InterruptedException e) {
+			logger.info("Interrupted exception ", e);
+			Thread.currentThread().interrupt();
+		}
 	}
 
 	@Test

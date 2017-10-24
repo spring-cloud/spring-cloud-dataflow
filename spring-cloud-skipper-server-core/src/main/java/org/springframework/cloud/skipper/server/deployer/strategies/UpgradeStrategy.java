@@ -21,14 +21,16 @@ import org.springframework.cloud.skipper.server.deployer.ReleaseAnalysisReport;
 /**
  * A strategy interface for how to deploy a new release on top of an existing release
  * driven by the information comparing the two releases.
+ *
  * @author Mark Pollack
  */
 public interface UpgradeStrategy {
 
 	/**
 	 * Given the two releases, the one currently deployed, the 'existingRelease' and to one to
-	 * be deployed, the 'replacingRelace', use the information in the analysis report to
+	 * be deployed, the 'replacingRelease', use the information in the analysis report to
 	 * deploy the apps in the new release and delete the apps in the old.
+	 *
 	 * @param existingRelease the apps currently deployed
 	 * @param replacingRelease the apps to be deployed
 	 * @param releaseAnalysisReport report to guide the strategy on what apps to replace.
