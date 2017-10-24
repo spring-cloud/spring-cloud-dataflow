@@ -437,6 +437,10 @@ public class Graph {
 		}
 		return result;
 	}
+	
+	private boolean hasNoProperties(Link link) {
+		return link.properties == null || link.properties.size() == 0;
+	}
 
 	private List<Link> findLinksFrom(Node n, boolean includeThoseLeadingToEnd) {
 		List<Link> result = new ArrayList<>();
@@ -444,7 +448,7 @@ public class Graph {
 			if (link.from.equals(n.id)) {
 				// Only include links to 'END' if there are properties on it
 				if (includeThoseLeadingToEnd
-						|| !(findNodeById(link.to).name.equals("END") && link.properties == null)) {
+						|| !(findNodeById(link.to).name.equals("END") && hasNoProperties(link))) {
 					result.add(link);
 				}
 			}
