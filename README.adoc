@@ -28,9 +28,14 @@ To just create the executables, type
 $./mvnw clean package -DskipTests -Dmaven.javadoc.skip=true
 ----
 
-To build just the documentation, ignoring the RESTDocs generated from tests
+To build just the documentation, if the RESTDocs generated from tests are already present.
 ----
 ./mvnw -DskipTests -Pfull package -pl spring-cloud-skipper-docs
+----
+
+To run just the RESTDocs documentation
+----
+./mvnw -pl spring-cloud-skipper-server-core -Dtest=*Documentation*
 ----
 
 
