@@ -3,7 +3,7 @@ kind: SpringBootApp
 metadata:
   name: helloworld-docker
 spec:
-  resource: springcloud/spring-cloud-skipper-samples-helloworld:{{version}}
+  resource: docker:springcloud/spring-cloud-skipper-samples-helloworld:{{version}}
   applicationProperties:
     {{#spec.applicationProperties.entrySet}}
     {{key}}: {{value}}
