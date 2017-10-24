@@ -135,6 +135,25 @@ public class ReleaseServiceTests extends AbstractIntegrationTest {
 	}
 
 	@Test
+	public void testInstallPackageNotFound() {
+		InstallProperties installProperties = new InstallProperties();
+		installProperties.setReleaseName("latestPackage");
+		installProperties.setPlatformName("default");
+		InstallRequest installRequest = new InstallRequest();
+		installRequest.setInstallProperties(installProperties);
+		PackageIdentifier packageIdentifier = new PackageIdentifier();
+		packageIdentifier.setPackageName("random");
+		installRequest.setPackageIdentifier(packageIdentifier);
+		try {
+			releaseService.install(installRequest);
+			fail("SkipperException is expected for non existing package");
+		}
+		catch (Exception se) {
+			assertThat(se.getMessage()).isEqualTo("Can not find a package named 'random'");
+		}
+	}
+
+	@Test
 	public void testLatestPackageByName() {
 		String packageName = "log";
 		PackageMetadata packageMetadata = this.packageMetadataRepository.findFirstByNameOrderByVersionDesc(packageName);

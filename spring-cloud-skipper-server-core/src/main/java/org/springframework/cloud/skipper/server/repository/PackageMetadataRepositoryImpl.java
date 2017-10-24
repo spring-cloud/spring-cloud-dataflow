@@ -18,6 +18,7 @@ package org.springframework.cloud.skipper.server.repository;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.skipper.SkipperException;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
 import org.springframework.cloud.skipper.domain.Repository;
 
@@ -54,8 +55,16 @@ public class PackageMetadataRepositoryImpl implements PackageMetadataRepositoryC
 				}
 			}
 		}
-		// if no repoId matches, then return the first package that matches (which has the highest
-		// api version set).
+		// if no repoId matches, then return the first package that matches (which has the highest api version set).
 		return packageMetadataList.get(0);
+	}
+
+	@Override
+	public List<PackageMetadata> findByNameRequired(String packageName) {
+		List<PackageMetadata> packageMetadata = this.packageMetadataRepository.findByName(packageName);
+		if (packageMetadata.isEmpty()) {
+			throw new SkipperException(String.format("Can not find a package named '%s'", packageName));
+		}
+		return packageMetadata;
 	}
 }

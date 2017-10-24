@@ -43,12 +43,12 @@ public class PackageMetadataRepositoryTests extends AbstractIntegrationTest {
 		Iterable<PackageMetadata> packages = this.packageMetadataRepository.findAll();
 		assertThat(packages).isNotEmpty();
 		assertThat(packages).hasSize(2);
-		List<PackageMetadata> packagesNamed1 = this.packageMetadataRepository.findByName("package1");
+		List<PackageMetadata> packagesNamed1 = this.packageMetadataRepository.findByNameRequired("package1");
 		assertThat(packagesNamed1).isNotEmpty();
 		assertThat(packagesNamed1).hasSize(1);
 		assertThat(packagesNamed1.get(0).getOrigin()).isEqualTo("www.package-repos.com/repo1");
 		assertThat(packagesNamed1.get(0).getMaintainer()).isEqualTo("Alan Hale Jr.");
-		List<PackageMetadata> packagesNamed2 = this.packageMetadataRepository.findByName("package2");
+		List<PackageMetadata> packagesNamed2 = this.packageMetadataRepository.findByNameRequired("package2");
 		assertThat(packagesNamed2).isNotEmpty();
 		assertThat(packagesNamed2).hasSize(1);
 		assertThat(packagesNamed2.get(0).getMaintainer()).isEqualTo("Bob Denver");

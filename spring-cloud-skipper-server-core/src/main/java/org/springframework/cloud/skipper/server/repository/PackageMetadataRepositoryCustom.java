@@ -15,6 +15,9 @@
  */
 package org.springframework.cloud.skipper.server.repository;
 
+import java.util.List;
+
+import org.springframework.cloud.skipper.SkipperException;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
 import org.springframework.data.repository.query.Param;
 
@@ -24,13 +27,23 @@ import org.springframework.data.repository.query.Param;
 public interface PackageMetadataRepositoryCustom {
 
 	/**
-	 * Find the {@link PackageMetadata} with the given name, version and also from the
-	 * repository that has the highest order set.
+	 * Find the {@link PackageMetadata} with the given name, version and also from the repository that has the highest
+	 * order set.
 	 *
 	 * @param name the name of the package metadata
 	 * @param version the version of the package metadata
 	 * @return the package metadata
 	 */
 	PackageMetadata findByNameAndVersionByMaxRepoOrder(@Param("name") String name, @Param("version") String version);
+
+	/**
+	 * Find the list of {@link PackageMetadata} by the given package name.
+	 *
+	 * @param name the package name
+	 * @return the list of package metadata by the given name
+	 * @throws {@link org.springframework.cloud.skipper.SkipperException} if there is no
+	 * package exists with the given name.
+	 */
+	List<PackageMetadata> findByNameRequired(@Param("name") String name) throws SkipperException;
 
 }

@@ -116,12 +116,9 @@ public class ReleaseService {
 		String packageName = packageIdentifier.getPackageName();
 		PackageMetadata packageMetadata;
 		if (!StringUtils.hasText(packageVersion)) {
-			List<PackageMetadata> packageMetadataList = this.packageMetadataRepository.findByName(packageName);
+			List<PackageMetadata> packageMetadataList = this.packageMetadataRepository.findByNameRequired(packageName);
 			if (packageMetadataList.size() == 1) {
 				packageMetadata = packageMetadataList.get(0);
-			}
-			else if (packageMetadataList == null) {
-				throw new SkipperException("Can not find a package named " + packageName);
 			}
 			else {
 				packageMetadata = this.packageMetadataRepository.findFirstByNameOrderByVersionDesc(packageName);
