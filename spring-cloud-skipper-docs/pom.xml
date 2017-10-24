@@ -34,6 +34,26 @@
 			<artifactId>json-path</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-skipper-server</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-skipper-server-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-skipper-shell</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-skipper-shell-commands</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-skipper-client</artifactId>
+		</dependency>
 	</dependencies>
     <profiles>
         <profile>
@@ -99,7 +119,7 @@
                                 <project-version>${project.version}</project-version>
                                 <project-artifactId>${project.artifactId}</project-artifactId>
                                 <version-type-lowercase>${version-type-lowercase}</version-type-lowercase>
-                                <snippets>${main.basedir}/spring-cloud-skipper-server-core/target/generated-snippets</snippets>
+                                <snippets>${basedir}/target/generated-snippets</snippets>
                             </attributes>
                         </configuration>
                         <executions>
@@ -227,27 +247,25 @@
                             </dependency>
                         </dependencies>
                         <executions>
-                            <!--
-                              <execution>
-                                  <id>package-and-attach-docs-zip</id>
-                                  <phase>package</phase>
-                                  <goals>
-                                      <goal>run</goal>
-                                  </goals>
-                                  <configuration>
-                                      <target>
-                                          <zip destfile="${project.build.directory}/${project.artifactId}-${project.version}.zip">
-                                              <zipfileset src="${project.build.directory}/${project.artifactId}-${project.version}-javadoc.jar" prefix="api" />
-                                              <fileset dir="${project.build.directory}/contents" />
-                                              <zipfileset dir="${project.build.directory}/generated-docs" prefix="reference/htmlsingle">
-                                                  <include name="index.html" />
-                                                  <include name="images/**" />
-                                              </zipfileset>
-                                          </zip>
-                                      </target>
-                                  </configuration>
-                                  </execution>
-  -->
+                            <execution>
+                                <id>package-and-attach-docs-zip</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <target>
+                                        <zip destfile="${project.build.directory}/${project.artifactId}-${project.version}.zip">
+                                            <zipfileset src="${project.build.directory}/${project.artifactId}-${project.version}-javadoc.jar" prefix="api" />
+                                            <fileset dir="${project.build.directory}/contents" />
+                                            <zipfileset dir="${project.build.directory}/generated-docs" prefix="reference/htmlsingle">
+                                                <include name="index.html" />
+                                                <include name="images/**" />
+                                            </zipfileset>
+                                        </zip>
+                                    </target>
+                                </configuration>
+                            </execution>
                             <execution>
                                 <id>setup-maven-properties</id>
                                 <phase>validate</phase>
