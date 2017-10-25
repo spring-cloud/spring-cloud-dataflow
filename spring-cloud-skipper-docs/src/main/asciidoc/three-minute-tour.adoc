@@ -12,6 +12,7 @@ Skipper uses a Relational Database to store state.
  In this tour we will just be using the embedded database.
  You can modify the example manifest file below to bind to a relational database service instead of using the embedded database.
 
+[source,bash,options="nowrap"]
 ----
 applications:
 - name: mlp-skipper
@@ -77,6 +78,7 @@ Successfully targeted https://mlp-skipper.cfapps.io/api
 ```
 
 The `repo list` command shows the `experimental` and `local` repositories, since they are configured by default.
+[source,bash,options="nowrap"]
 ----
 skipper:>repo list
 ╔════════════╤═══════════════════════════════════════════════════════════╤═════╤═════╗
