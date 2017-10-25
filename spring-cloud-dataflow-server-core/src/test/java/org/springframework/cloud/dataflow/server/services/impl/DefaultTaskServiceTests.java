@@ -110,8 +110,6 @@ public class DefaultTaskServiceTests {
 		resourceLoader = mock(ResourceLoader.class);
 		metadataResolver = mock(ApplicationConfigurationMetadataResolver.class);
 		taskLauncher = mock(TaskLauncher.class);
-		when(this.appRegistry.find(anyString(), any(ApplicationType.class)))
-				.thenReturn(new AppRegistration("some-name", task, URI.create("http://helloworld"), resourceLoader));
 		when(this.resourceLoader.getResource(anyString())).thenReturn(mock(Resource.class));
 		taskService = new DefaultTaskService(dataSourceProperties, taskDefinitionRepository, taskExplorer,
 				taskExecutionRepository, appRegistry, resourceLoader, taskLauncher, metadataResolver,
@@ -121,6 +119,7 @@ public class DefaultTaskServiceTests {
 	@Test
 	@DirtiesContext
 	public void executeSingleTaskTest() {
+		initializeSuccessfulRegistry();
 		when(taskLauncher.launch(anyObject())).thenReturn("0");
 		assertEquals(1L, this.taskService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>()));
 	}
@@ -128,6 +127,7 @@ public class DefaultTaskServiceTests {
 	@Test
 	@DirtiesContext
 	public void executeMultipleTasksTest() {
+		initializeSuccessfulRegistry();
 		when(taskLauncher.launch(anyObject())).thenReturn("0");
 		assertEquals(1L, this.taskService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>()));
 		assertEquals(2L, this.taskService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>()));
@@ -137,6 +137,7 @@ public class DefaultTaskServiceTests {
 	@DirtiesContext
 	public void executeTaskWithNullIDReturnedTest() {
 		boolean errorCaught = false;
+		initializeSuccessfulRegistry();
 		when(this.taskLauncher.launch(anyObject())).thenReturn(null);
 		try {
 			taskService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>());
@@ -175,6 +176,7 @@ public class DefaultTaskServiceTests {
 	@DirtiesContext
 	public void createSequenceComposedTask() {
 		String dsl = "AAA && BBB";
+		initializeSuccessfulRegistry();
 		taskService.saveTaskDefinition("seqTask", dsl);
 		verifyTaskExistsInRepo("seqTask", dsl);
 
@@ -186,11 +188,30 @@ public class DefaultTaskServiceTests {
 	@DirtiesContext
 	public void createSplitComposedTask() {
 		String dsl = "<AAA || BBB>";
+		initializeSuccessfulRegistry();
 		taskService.saveTaskDefinition("splitTask", dsl);
 		verifyTaskExistsInRepo("splitTask", dsl);
 
 		verifyTaskExistsInRepo("splitTask-AAA", "AAA");
 		verifyTaskExistsInRepo("splitTask-BBB", "BBB");
+	}
+
+	@Test
+	@DirtiesContext
+	public void createFailedComposedTask() {
+		String dsl = "AAA && BBB";
+		initializeFailRegistry();
+		boolean isExceptionThrown = false;
+		try{
+			taskService.saveTaskDefinition("splitTask", dsl);
+		}
+		catch (IllegalArgumentException iae) {
+			isExceptionThrown = true;
+		}
+		assertTrue("IllegalArgumentException was expected to be thrown", isExceptionThrown);
+		assertFalse(wasTaskDefinitionCreated("splitTask"));
+		assertFalse(wasTaskDefinitionCreated("splitTask-AAA"));
+		assertFalse(wasTaskDefinitionCreated("splitTask-BBB"));
 	}
 
 	@Test
@@ -212,6 +233,7 @@ public class DefaultTaskServiceTests {
 	@DirtiesContext
 	public void createTransitionComposedTask() {
 		String dsl = "AAA 'FAILED' -> BBB '*' -> CCC";
+		initializeSuccessfulRegistry();
 		taskService.saveTaskDefinition("transitionTask", dsl);
 		verifyTaskExistsInRepo("transitionTask", dsl);
 
@@ -222,6 +244,7 @@ public class DefaultTaskServiceTests {
 	@Test
 	@DirtiesContext
 	public void createSimpleTask() {
+		initializeSuccessfulRegistry();
 		taskService.saveTaskDefinition("simpleTask", "AAA --foo=bar");
 		verifyTaskExistsInRepo("simpleTask", "AAA --foo=bar");
 	}
@@ -230,6 +253,7 @@ public class DefaultTaskServiceTests {
 	@DirtiesContext
 	public void deleteComposedTask() {
 		String dsl = "AAA && BBB && CCC";
+		initializeSuccessfulRegistry();
 		taskService.saveTaskDefinition("deleteTask", dsl);
 		verifyTaskExistsInRepo("deleteTask-AAA", "AAA");
 		verifyTaskExistsInRepo("deleteTask-BBB", "BBB");
@@ -244,6 +268,7 @@ public class DefaultTaskServiceTests {
 	@Test
 	@DirtiesContext
 	public void deleteComposedTaskDeleteOnlyChildren() {
+		initializeSuccessfulRegistry();
 		taskService.saveTaskDefinition("deleteTask-AAA", "AAA");
 		String dsl = "BBB && CCC";
 		taskService.saveTaskDefinition("deleteTask", dsl);
@@ -262,6 +287,7 @@ public class DefaultTaskServiceTests {
 	@DirtiesContext
 	public void deleteComposedTaskWithLabel() {
 		String dsl = "LLL: AAA && BBB";
+		initializeSuccessfulRegistry();
 		taskService.saveTaskDefinition("deleteTask", dsl);
 		verifyTaskExistsInRepo("deleteTask-LLL", "AAA");
 		verifyTaskExistsInRepo("deleteTask-BBB", "BBB");
@@ -318,10 +344,25 @@ public class DefaultTaskServiceTests {
 		assertTrue(!appDeploymentProperties.containsKey("DATAFLOW-SERVER-URI"));
 	}
 
+	private void initializeSuccessfulRegistry() {
+		when(this.appRegistry.find(anyString(), any(ApplicationType.class)))
+				.thenReturn(new AppRegistration("some-name", task, URI.create("http://helloworld"), resourceLoader));
+	}
+
+	private void initializeFailRegistry() throws IllegalArgumentException{
+		when(this.appRegistry.find(anyString(), any(ApplicationType.class)))
+				.thenThrow(new IllegalArgumentException(
+						String.format("Application name '%s' with type '%s' does not exist in the app registry.", "fake",
+								ApplicationType.task)));
+	}
 	private void verifyTaskExistsInRepo(String taskName, String dsl) {
 		TaskDefinition taskDefinition = taskDefinitionRepository.findOne(taskName);
 
 		assertThat(taskDefinition.getName(), is(equalTo(taskName)));
 		assertThat(taskDefinition.getDslText(), is(equalTo(dsl)));
+	}
+	private boolean wasTaskDefinitionCreated(String taskName) {
+		TaskDefinition taskDefinition = taskDefinitionRepository.findOne(taskName);
+		return taskDefinition != null;
 	}
 }

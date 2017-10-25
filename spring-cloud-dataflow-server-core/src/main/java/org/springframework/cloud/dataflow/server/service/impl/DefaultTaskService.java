@@ -275,6 +275,10 @@ public class DefaultTaskService implements TaskService {
 		TaskParser taskParser = new TaskParser(name, dsl, true, true);
 		TaskNode taskNode = taskParser.parse();
 		if (taskNode.isComposed()) {
+			// verify that the task apps required for composed task exist
+			taskNode.getTaskApps().stream().forEach(task -> {
+				validateAppExists(task.getName());
+			});
 			// Create the child task definitions needed for the composed task
 			taskNode.getTaskApps().stream().forEach(task -> {
 				// Add arguments to child task definitions
@@ -288,19 +292,23 @@ public class DefaultTaskService implements TaskService {
 			taskDefinitionRepository.save(new TaskDefinition(name, dsl));
 		}
 		else {
-			saveStandardTaskDefinition(new TaskDefinition(name, dsl));
+			TaskDefinition taskDefinition = new TaskDefinition(name, dsl);
+			validateAppExists(taskDefinition.getRegisteredAppName());
+			saveStandardTaskDefinition(taskDefinition);
 		}
 
 	}
 
 	private void saveStandardTaskDefinition(TaskDefinition taskDefinition) {
-		String appName = taskDefinition.getRegisteredAppName();
+		taskDefinitionRepository.save(taskDefinition);
+	}
+
+	private void validateAppExists(String appName) {
 		if (registry.find(appName, ApplicationType.task) == null) {
 			throw new IllegalArgumentException(
 					String.format("Application name '%s' with type '%s' does not exist in the app registry.", appName,
 							ApplicationType.task));
 		}
-		taskDefinitionRepository.save(taskDefinition);
 	}
 
 	private String createComposedTaskDefinition(String graph) {
