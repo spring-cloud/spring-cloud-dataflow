@@ -23,9 +23,9 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties("spring.cloud.skipper.server.strategies.healthcheck")
 public class HealthCheckProperties {
 
-	private long timeoutInMillis = 12000;
+	private long timeoutInMillis = 300000; // 5 minutes
 
-	private long sleepInMillis = 5000;
+	private long sleepInMillis = 5000; // 5 seconds
 
 	public long getTimeoutInMillis() {
 		return timeoutInMillis;

@@ -8,6 +8,333 @@ Picking up from the <<three-second-tour>> left off, we will show some additional
 
 == Using Cloud Foundry
 
+Skipper uses a Relational Database to store state.
+ In this tour we will just be using the embedded database.
+ You can modify the example manifest file below to bind to a relational database service instead of using the embedded database.
+
+----
+applications:
+- name: mlp-skipper
+  host: mlp-skipper
+  memory: 1G
+  disk_quota: 1G
+  timeout: 180
+  instances: 1
+  path: spring-cloud-skipper-server-1.0.0.M1.jar
+env:
+    SPRING_APPLICATION_NAME: mlp-skipper
+    SPRING_CLOUD_SKIPPER_SERVER_ENABLE_LOCAL_PLATFORM: false
+    SPRING_CLOUD_SKIPPER_SERVER_STRATEGIES_HEALTHCHECK.TIMEOUTINMILLIS: 300000
+    SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[cf-dev]_CONNECTION_URL: https://api.run.pivotal.io
+    SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[cf-dev]_CONNECTION_ORG: scdf-ci
+    SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[cf-dev]_CONNECTION_SPACE: space-mark
+    SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[cf-dev]_CONNECTION_DOMAIN: cfapps.io
+    SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[cf-dev]_CONNECTION_USERNAME: user@example.com
+    SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[cf-dev]_CONNECTION_PASSWORD: drowssap
+    SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[cf-dev]_CONNECTION_SKIP_SSL_VALIDATION: false
+    SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[cf-dev]_DEPLOYMENT_DELETE_ROUTES: false
+----
+
+This defines `cf-dev` as a named Cloud Foundry account.
+You can define multiple Cloud Foundry accounts and reference them in the shell commands when ever there is a command option for `--platform-name`.
+
+The `deployment.deleteRoutes` property is important if you are deploying HTTP apps.  When doing an upgrade, setting this to false prevents the routes from disappearing after deleting the old application.  The underlying Spring Cloud Deployer library for Cloud Foundry has `true` as the default.
+
+Note you can also run the Skipper Server locally and deploy to Cloud Foundry.
+In this case, it is more convenient to specify the configuration as an `skipper.yml` file, shown below, and start the server with the option `--spring.config.location=skipper.yml`
+
+----
+spring:
+  cloud:
+    skipper:
+      server:
+        enableLocalPlatform: false
+        strategies:
+          healthcheck:
+            timeoutinmillis: 300000
+        platform:
+          cloudfoundry:
+            accounts:
+              cf-dev:
+                connection:
+                  url: https://api.run.pivotal.io
+                  org: scdf-ci
+                  space: space-mark
+                  domain: cfapps.io
+                  username: mpollack@gopivotal.com
+                  password: krypton
+                  skipSslValidation: false
+                deployment:
+                  deleteRoutes: false
+----
+
+When you start the Skipper shell, it defaults to looking for the Skipper server on the same (local) machine.
+To specify the Skipper server that is running on Cloud Foundry, use the CF route with the `config` command
+
+```
+skipper:>config --uri https://mlp-skipper.cfapps.io/api
+Successfully targeted https://mlp-skipper.cfapps.io/api
+```
+
+The `repo list` command shows the `experimental` and `local` repositories, since they are configured by default.
+----
+skipper:>repo list
+╔════════════╤═══════════════════════════════════════════════════════════╤═════╤═════╗
+║    Name    │                            URL                            │Local│Order║
+╠════════════╪═══════════════════════════════════════════════════════════╪═════╪═════╣
+║experimental│http://skipper-repository.cfapps.io/repository/experimental│false│0    ║
+║local       │http://d4d6d1b6-c7e5-4226-69ec-01d4:7577                   │true │1    ║
+╚════════════╧═══════════════════════════════════════════════════════════╧═════╧═════╝
+----
+
+and the `search` command shows
+[source,bash,options="nowrap"]
+----
+skipper:>search
+╔═════════════════╤═══════╤════════════════════════════════════════════════════════════════════════════════╗
+║      Name       │Version│                                  Description                                   ║
+╠═════════════════╪═══════╪════════════════════════════════════════════════════════════════════════════════╣
+║helloworld       │1.0.1  │The app has two endpoints, /about and /greeting in Portuguese.  Maven resource. ║
+║helloworld       │1.0.0  │The app has two endpoints, /about and /greeting in English.  Maven resource.    ║
+║helloworld-docker│1.0.1  │The app has two endpoints, /about and /greeting in Portuguese.  Docker resource.║
+║helloworld-docker│1.0.0  │The app has two endpoints, /about and /greeting in English.  Docker resource.   ║
+╚═════════════════╧═══════╧════════════════════════════════════════════════════════════════════════════════╝
+----
+
+The command `platform list` shows which platforms the server has been configured with, in this case just one Cloud Foundry platform.  Disabling the local platform with the property `enableLocalPlatform = false` is why the default `local` platform does not appear.
+
+[source,bash,options="nowrap"]
+----
+skipper:>platform list
+╔══════╤════════════╤═════════════════════════════════════════════════════════════════════════╗
+║ Name │    Type    │                               Description                               ║
+╠══════╪════════════╪═════════════════════════════════════════════════════════════════════════╣
+║cf-dev│cloudfoundry│org = [scdf-ci], space = [space-mark], url = [https://api.run.pivotal.io]║
+╚══════╧════════════╧═════════════════════════════════════════════════════════════════════════╝
+----
+
+Let's install the Hello World app, specifially, the maven based artifact.
+
+----
+skipper:>install --release-name helloworldpcf --package-name helloworld --package-version 1.0.0 --platform-name cf-dev --properties spec.deploymentProperties.spring.cloud.deployer.cloudfoundry.route=helloworldpcf.cfapps.io
+Released helloworld-pcf
+----
+
+If you do not specify `--platform-name cf-dev` the command will fail since the command property defaults to a platform named `default`.  Instead of specifying it, you can register this Cloud Foundry Platform account in the manifest with the name `default` instead of `cf-dev`.
+
+As it takes a bit of time for the app to spin up, you can monitor the process using the `status command`. It will likely say `FAILED` for a while until we optimize the call made to Cloud Foundry to get 'early start status'.
+----
+skipper:>status --release-name helloworldpcf
+╔═══════════════╤════════════════════════════════════════════════════════════════════╗
+║Last Deployed  │Tue Oct 24 22:54:30 EDT 2017                                        ║
+║Status         │DEPLOYED                                                            ║
+║Platform Status│The applications are being deployed.                                ║
+║               │helloworldpcf-helloworld-v1[helloworldpcf-helloworld-v1-0=deploying]║
+╚═══════════════╧════════════════════════════════════════════════════════════════════╝
+----
+
+Eventually the Platform Status will say `All applications have been successfully deployed.`
+
+Note that the status `DEPLOYED` above indicates that Skipper has told the platform to deploy.  Skipper does not keep track of the intermediate states 'deploying' or 'deleting'.
+
+A `cf apps` command will now have a new listing for this deployed application.
+
+----
+$ cf apps
+Getting apps in org scdf-ci / space space-mark as mpollack@gopivotal.com...
+OK
+
+name                          requested state   instances   memory   disk   urls
+helloworldpcf-helloworld-v1   started           1/1         1G       1G     helloworldpcf.cfapps.io
+----
+
+You can now curl the `greeting` endpoint and the `about` endpoint.
+----
+$ curl http://helloworldpcf.cfapps.io/greeting
+Hello World!
+$ curl http://helloworldpcf.cfapps.io/about
+Hello World v1.0.0.RELEASE
+----
+
+The name of the application is based on the convention <release-name>-<package-name>-v<incrementing-counter>.
+
+Also note that we specified a route for this application that is different than the application's name.
+The deployment property `spring.cloud.deployer.cloudfoundry.route` is set to something that will not change across the deployment of different versions of this application, in this case `helloworldpcf.cfapps.io`.
+
+The package provides a means to template the application version, application properties and deployment properties that are used to deploy the application to Cloud Foundry.  The `manifest get` command shows the final YAML file which is passed off to the Spring Cloud Deployer Library.
+
+----
+skipper:>manifest get --release-name helloworldpcf
+
+---
+# Source: helloworld.yml
+apiVersion: skipper/v1
+kind: SpringBootApp
+metadata:
+  name: helloworld
+  type: demo
+spec:
+  resource: maven://org.springframework.cloud.samples:spring-cloud-skipper-samples-helloworld:1.0.0.RELEASE
+  applicationProperties:
+  deploymentProperties:
+    spring.cloud.deployer.cloudfoundry.route: helloworldpcf.cfapps.io
+----
+
+The manifest is in a Kubernetes Resource file inspired format.  By looking at the manifest you can see which maven artifact was used and which properties were set before the final push to Cloud Foundry.
+The metadata values that are present will be used in the next release to support searching for releases based on those values.
+
+Since it is somewhat awkward to specify multiple flattened out YAML values for the `--properties` argument in the shell, you can also specify the location of a YAML file when installing or upgrading.
+We will use a YAML file we will update the release.  This application contains a Spring Boot `@ConfigurationProperty` named `helloworld.greeting`, so we will set that along with a standard Spring Boot property `endpoints.sensitive=false`.  We will also bump the memory up to 2G.
+
+----
+spec:
+  applicationProperties:
+    endpoints.sensitive: false
+    helloworld.greeting: yo
+  deploymentProperties:
+    spring.cloud.deployer.cloudfoundry.route: helloworldpcf.cfapps.io
+    spring.cloud.deployer.memory: 2048m
+----
+
+The `install` command
+----
+skipper:>upgrade --release-name helloworldpcf --package-name helloworld --package-version 1.0.0 --file /home/mpollack/helloworld-upgrade.yml
+helloworldpcf has been upgraded.
+Last Deployed: Tue Oct 24 22:57:02 EDT 2017
+----
+
+Will start another instance of the hello world application. If you do not specify `--package-version` it will pick the latest version of the `helloworld` package.  You do not need to specify the `--platform-name` as it will always be where the current application was deployed.
+
+The `cf apps` and `cf routes` command shows
+
+----
+$ cf apps
+Getting apps in org scdf-ci / space space-mark as mpollack@gopivotal.com...
+OK
+
+name                          requested state   instances   memory   disk   urls
+helloworldpcf-helloworld-v1   started           1/1         1G       1G     helloworldpcf.cfapps.io
+helloworldpcf-helloworld-v2   stopped           0/1         2G       1G     helloworldpcf.cfapps.io
+----
+
+and
+
+[source,bash,options="nowrap"]
+----
+$ cf routes
+Getting routes for org scdf-ci / space space-mark as mpollack@gopivotal.com ...
+
+space        host                          domain      port   path   type   apps                                                      service
+space-mark   helloworldpcf                 cfapps.io                        helloworldpcf-helloworld-v1,helloworldpcf-helloworld-v2
+
+----
+
+At this point Skipper is looking to see if the health endpoint of the Boot application is ok.
+The property `spring.cloud.skipper.server.strategies.healthcheck.timeoutInMillis` is the maximum time the upgrade process will wait for a healthy app.  It will fail the deployment if it is not healthy within that time.
+The property `spring.cloud.skipper.server.strategies.healthcheck.sleepInMillis` is how long to sleep between health checks.
+
+The current upgrade strategy is very simple.  More flexible upgrade strategies are planned along with the introduction of the https://projects.spring.io/spring-statemachine/[Spring Cloud State Machine] project to orchestrate the update process.
+
+You can now curl the `greeting` endpoint and the `about` endpoint.
+----
+$ curl http://helloworldpcf.cfapps.io/greeting
+yo
+$ curl http://helloworldpcf.cfapps.io/about
+Hello World v1.0.0.RELEASE
+----
+
+The `list` command shows you the current `DEPLOYED` and `DELETED` release for every release name.
+In this case there is just one entry
+----
+skipper:>list
+╔═════════════╤═══════╤════════════════════════════╤════════╤════════════╤═══════════════╤═════════════╤═══════════════╗
+║    Name     │Version│        Last updated        │ Status │Package Name│Package Version│Platform Name│Platform Status║
+╠═════════════╪═══════╪════════════════════════════╪════════╪════════════╪═══════════════╪═════════════╪═══════════════╣
+║helloworldpcf│2      │Tue Oct 24 22:57:02 EDT 2017│DEPLOYED│helloworld  │1.0.0          │cf-dev       │               ║
+╚═════════════╧═══════╧════════════════════════════╧════════╧════════════╧═══════════════╧═════════════╧═══════════════╝
+----
+
+You can get the full history of the release using the `history` command
+----
+skipper:>history --release-name helloworldpcf
+╔═══════╤════════════════════════════╤════════╤════════════╤═══════════════╤════════════════╗
+║Version│        Last updated        │ Status │Package Name│Package Version│  Description   ║
+╠═══════╪════════════════════════════╪════════╪════════════╪═══════════════╪════════════════╣
+║2      │Tue Oct 24 22:57:02 EDT 2017│DEPLOYED│helloworld  │1.0.0          │Upgrade complete║
+║1      │Tue Oct 24 22:54:30 EDT 2017│DELETED │helloworld  │1.0.0          │Delete complete ║
+╚═══════╧════════════════════════════╧════════╧════════════╧═══════════════╧════════════════╝
+----
+
+A more typical upgrade process is not to change application properties, but to change the version of the application because the code has change.  We will now upgrade the release to use a new maven artifact, version 1.0.1, which also corresponds to version 1.0.1 of the helloworld package.
+In this case we will not add any additional properties other than the route.
+
+----
+skipper:>upgrade --release-name helloworldpcf --package-name helloworld --package-version 1.0.1 --properties spec.deploymentProperties.spring.cloud.deployer.cloudfoundry.route=helloworldpcf.cfapps.io
+helloworldpcf has been upgraded.
+Last Deployed: Tue Oct 24 23:09:39 EDT 2017
+----
+
+Note that the the current releases properties such as using 2G, or the greeting being `yo` are not carried over.  In a future release we will introduce a `--reuse-properties` command that will carry the current release properties over to the next release to be made.
+
+After a while the status will indiate all has been deployed
+----
+skipper:>status --release-name helloworldpcf
+╔═══════════════╤═══════════════════════════════════════════════════════════════════╗
+║Last Deployed  │Tue Oct 24 23:09:39 EDT 2017                                       ║
+║Status         │DEPLOYED                                                           ║
+║Platform Status│All applications have been successfully deployed.                  ║
+║               │helloworldpcf-helloworld-v3[helloworldpcf-helloworld-v3-0=deployed]║
+╚═══════════════╧═══════════════════════════════════════════════════════════════════╝
+----
+
+And a curl command shows
+----
+curl http://helloworldpcf.cfapps.io/greeting
+Olá Mundo!
+$ curl http://helloworldpcf.cfapps.io/about
+Hello World v1.0.1.RELEASE
+----
+
+Our history now looks like
+----
+skipper:>history --release-name helloworldpcf
+╔═══════╤════════════════════════════╤════════╤════════════╤═══════════════╤════════════════╗
+║Version│        Last updated        │ Status │Package Name│Package Version│  Description   ║
+╠═══════╪════════════════════════════╪════════╪════════════╪═══════════════╪════════════════╣
+║3      │Tue Oct 24 23:09:39 EDT 2017│DEPLOYED│helloworld  │1.0.1          │Upgrade complete║
+║2      │Tue Oct 24 22:57:02 EDT 2017│DELETED │helloworld  │1.0.0          │Delete complete ║
+║1      │Tue Oct 24 22:54:30 EDT 2017│DELETED │helloworld  │1.0.0          │Delete complete ║
+╚═══════╧════════════════════════════╧════════╧════════════╧═══════════════╧════════════════╝
+----
+
+Next we will use the `rollback` command to deploy an older version of the application.
+Since we have the manifest for that version, we have all we need to redeploy and earlier release.
+
+----
+skipper:>rollback --release-name helloworldpcf --release-version 2
+helloworldpcf has been rolled back.
+Last Deployed: Tue Oct 24 23:15:01 EDT 2017
+----
+
+The history now shows a new `v4` version, even though it is identical to the `v2` version.
+
+----
+skipper:>history --release-name helloworldpcf
+╔═══════╤════════════════════════════╤════════╤════════════╤═══════════════╤════════════════╗
+║Version│        Last updated        │ Status │Package Name│Package Version│  Description   ║
+╠═══════╪════════════════════════════╪════════╪════════════╪═══════════════╪════════════════╣
+║4      │Tue Oct 24 23:15:01 EDT 2017│DEPLOYED│helloworld  │1.0.0          │Upgrade complete║
+║3      │Tue Oct 24 23:09:39 EDT 2017│DELETED │helloworld  │1.0.1          │Delete complete ║
+║2      │Tue Oct 24 22:57:02 EDT 2017│DELETED │helloworld  │1.0.0          │Delete complete ║
+║1      │Tue Oct 24 22:54:30 EDT 2017│DELETED │helloworld  │1.0.0          │Delete complete ║
+╚═══════╧════════════════════════════╧════════╧════════════╧═══════════════╧════════════════╝
+----
+The curl commands show
+
+----
+
+----
+
 == Using Kuberenetes
 
 

@@ -51,6 +51,7 @@ import org.springframework.cloud.skipper.domain.Deployer;
 import org.springframework.cloud.skipper.server.config.CloudFoundryPlatformProperties;
 import org.springframework.cloud.skipper.server.config.KubernetesPlatformProperties;
 import org.springframework.cloud.skipper.server.config.LocalPlatformProperties;
+import org.springframework.cloud.skipper.server.config.SkipperServerProperties;
 import org.springframework.cloud.skipper.server.repository.DeployerRepository;
 import org.springframework.context.event.EventListener;
 import org.springframework.transaction.annotation.Transactional;
@@ -75,14 +76,18 @@ public class DeployerInitializationService {
 
 	private DeployerRepository deployerRepository;
 
+	private SkipperServerProperties skipperServerProperties;
+
 	public DeployerInitializationService(DeployerRepository deployerRepository,
 			LocalPlatformProperties localPlatformProperties,
 			CloudFoundryPlatformProperties cloudFoundryPlatformProperties,
-			KubernetesPlatformProperties kubernetesPlatformProperties) {
+			KubernetesPlatformProperties kubernetesPlatformProperties,
+			SkipperServerProperties skipperServerProperties) {
 		this.deployerRepository = deployerRepository;
 		this.localPlatformProperties = localPlatformProperties;
 		this.cloudFoundryPlatformProperties = cloudFoundryPlatformProperties;
 		this.kubernetesPlatformProperties = kubernetesPlatformProperties;
+		this.skipperServerProperties = skipperServerProperties;
 	}
 
 	@EventListener
@@ -94,17 +99,22 @@ public class DeployerInitializationService {
 	}
 
 	protected void createAndSaveLocalAppDeployers() {
-		Map<String, LocalDeployerProperties> localDeployerPropertiesMap = localPlatformProperties.getAccounts();
-		if (localDeployerPropertiesMap.isEmpty()) {
-			localDeployerPropertiesMap.put("default", new LocalDeployerProperties());
+		if (this.skipperServerProperties.isEnableLocalPlatform()) {
+			Map<String, LocalDeployerProperties> localDeployerPropertiesMap = localPlatformProperties.getAccounts();
+			if (localDeployerPropertiesMap.isEmpty()) {
+				localDeployerPropertiesMap.put("default", new LocalDeployerProperties());
+			}
+			for (Map.Entry<String, LocalDeployerProperties> entry : localDeployerPropertiesMap
+					.entrySet()) {
+				LocalAppDeployer localAppDeployer = new LocalAppDeployer(entry.getValue());
+				Deployer deployer = new Deployer(entry.getKey(), "local", localAppDeployer);
+				deployer.setDescription(prettyPrintLocalDeployerProperties(entry.getValue()));
+				deployerRepository.save(deployer);
+				logger.info("Added Local Deployer account " + entry.getKey() + " into Deployer Repository.");
+			}
 		}
-		for (Map.Entry<String, LocalDeployerProperties> entry : localDeployerPropertiesMap
-				.entrySet()) {
-			LocalAppDeployer localAppDeployer = new LocalAppDeployer(entry.getValue());
-			Deployer deployer = new Deployer(entry.getKey(), "local", localAppDeployer);
-			deployer.setDescription(prettyPrintLocalDeployerProperties(entry.getValue()));
-			deployerRepository.save(deployer);
-			logger.info("Added Local Deployer account " + entry.getKey() + " into Deployer Repository.");
+		else {
+			logger.info("Local Platform accounts disabled.");
 		}
 	}
 
@@ -183,7 +193,8 @@ public class DeployerInitializationService {
 				logger.info("Adding CF Deployer account " + entry.getKey() + " into Deployer Repository.");
 			}
 			catch (Exception e) {
-				logger.error("CloudFoundry Platform account" + entry.getKey() + " could not be registered." + e.getMessage());
+				logger.error("CloudFoundry Platform account" + entry.getKey() + " could not be registered."
+						+ e.getMessage());
 			}
 		}
 	}

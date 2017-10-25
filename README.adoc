@@ -114,7 +114,7 @@ skipper:>status --release-name mylog
 The manifest for this release that represents the file instructions to deploy onto the platform, can be shown using the `get manifest` command.
 
 ```
-skipper:>get manifest --release-name mylog
+skipper:>manifest get --release-name mylog
 
 ---
 # Source: log.yml

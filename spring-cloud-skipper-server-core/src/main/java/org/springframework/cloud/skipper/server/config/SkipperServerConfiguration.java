@@ -89,9 +89,8 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableAsync
 public class SkipperServerConfiguration implements AsyncConfigurer {
 
-	private final Logger logger = LoggerFactory.getLogger(SkipperServerConfiguration.class);
-
 	public static final String SKIPPER_THREAD_POOL_EXECUTOR = "skipperThreadPoolTaskExecutor";
+	private final Logger logger = LoggerFactory.getLogger(SkipperServerConfiguration.class);
 
 	@Bean
 	public ErrorAttributes errorAttributes() {
@@ -130,9 +129,11 @@ public class SkipperServerConfiguration implements AsyncConfigurer {
 	public DeployerInitializationService deployerInitializationService(DeployerRepository deployerRepository,
 			LocalPlatformProperties localPlatformProperties,
 			CloudFoundryPlatformProperties cloudFoundryPlatformProperties,
-			KubernetesPlatformProperties kubernetesPlatformProperties) {
+			KubernetesPlatformProperties kubernetesPlatformProperties,
+			SkipperServerProperties skipperServerProperties) {
 		return new DeployerInitializationService(deployerRepository, localPlatformProperties,
-				cloudFoundryPlatformProperties, kubernetesPlatformProperties);
+				cloudFoundryPlatformProperties, kubernetesPlatformProperties,
+				skipperServerProperties);
 	}
 
 	@Bean

@@ -104,14 +104,16 @@ public class HealthCheckAndDeleteStep {
 						replacingRelease.getVersion());
 			}
 			else {
-				logger.error("New release " + replacingRelease.getName() + " was not detected as healthy." +
-						"Keeping existing release, deleting apps of replacing release");
+				logger.error("New release " + replacingRelease.getName() + " was not detected as healthy after " +
+						this.healthCheckProperties.getTimeoutInMillis() + "milliseconds.  " +
+						"Keeping existing release, and Deleting apps of replacing release");
 				this.releaseManager.delete(replacingRelease);
 				Status status = new Status();
 				status.setStatusCode(StatusCode.FAILED);
 				replacingRelease.getInfo().setStatus(status);
 				replacingRelease.getInfo().setStatus(status);
-				replacingRelease.getInfo().setDescription("Did not detect apps in release as healthy.");
+				replacingRelease.getInfo().setDescription("Did not detect apps in repalcing release as healthy after " +
+						this.healthCheckProperties.getSleepInMillis() + " ms.");
 				this.releaseRepository.save(replacingRelease);
 			}
 		}

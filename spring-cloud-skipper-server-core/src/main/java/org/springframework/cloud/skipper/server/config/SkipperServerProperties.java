@@ -41,6 +41,11 @@ public class SkipperServerProperties {
 	private boolean synchonizeIndexOnContextRefresh = true;
 
 	/**
+	 * Flag indicating if any local platform accounts should be registered.
+	 */
+	private boolean enableLocalPlatform = true;
+
+	/**
 	 * Flag indicating if the ReleaseStateUpdateService, which has a
 	 * {@link org.springframework.scheduling.annotation.Scheduled} method, should be created.
 	 */
@@ -68,5 +73,13 @@ public class SkipperServerProperties {
 
 	public void setDisableReleaseStateUpdateService(boolean disableReleaseStateUpdateService) {
 		this.disableReleaseStateUpdateService = disableReleaseStateUpdateService;
+	}
+
+	public boolean isEnableLocalPlatform() {
+		return enableLocalPlatform;
+	}
+
+	public void setEnableLocalPlatform(boolean enableLocalPlatform) {
+		this.enableLocalPlatform = enableLocalPlatform;
 	}
 }

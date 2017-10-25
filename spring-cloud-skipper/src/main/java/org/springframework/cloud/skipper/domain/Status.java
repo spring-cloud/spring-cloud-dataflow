@@ -15,6 +15,7 @@
  */
 package org.springframework.cloud.skipper.domain;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -91,6 +92,7 @@ public class Status extends AbstractEntity {
 	public String getPlatformStatusPrettyPrint() {
 		List<AppStatus> appStatusList = getAppStatusList();
 		StringBuffer statusMsg = new StringBuffer();
+
 		for (AppStatus appStatus : appStatusList) {
 			statusMsg.append(appStatus.getDeploymentId() + "[");
 			for (AppInstanceStatus appInstanceStatus : appStatus.getInstances().values()) {
@@ -120,8 +122,10 @@ public class Status extends AbstractEntity {
 			mapper.registerModule(module);
 			TypeReference<List<AppStatus>> typeRef = new TypeReference<List<AppStatus>>() {
 			};
-			List<AppStatus> result = mapper.readValue(this.platformStatus, typeRef);
-			return result;
+			if (this.platformStatus != null) {
+				return mapper.readValue(this.platformStatus, typeRef);
+			}
+			return new ArrayList<AppStatus>();
 		}
 		catch (Exception e) {
 			throw new IllegalArgumentException("Could not parse Skipper Platfrom Status JSON:" + platformStatus, e);

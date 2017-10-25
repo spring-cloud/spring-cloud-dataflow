@@ -185,7 +185,8 @@ public class SkipperCommands extends AbstractSkipperCommand {
 			// TODO investigate server side support of 'default'
 			@ShellOption(help = "the platform name to use", defaultValue = "default") String platformName)
 			throws IOException {
-		assertMutuallyExclusiveFileAndProperties(file, properties);
+		// Commented out until https://github.com/spring-cloud/spring-cloud-skipper/issues/263 is addressed
+		//assertMutuallyExclusiveFileAndProperties(file, properties);
 		Release release = skipperClient
 				.install(getInstallRequest(packageName, packageVersion, file, properties, releaseName, platformName));
 		return "Released " + release.getName();
@@ -229,7 +230,8 @@ public class SkipperCommands extends AbstractSkipperCommand {
 			@ShellOption(help = "specify values in a YAML file", defaultValue = NULL) File file,
 			@ShellOption(help = "the comma separated set of properties to override during upgrade", defaultValue = NULL) String properties)
 			throws IOException {
-		assertMutuallyExclusiveFileAndProperties(file, properties);
+		// Commented out until https://github.com/spring-cloud/spring-cloud-skipper/issues/263 is addressed
+		//assertMutuallyExclusiveFileAndProperties(file, properties);
 		Release release = skipperClient
 				.upgrade(getUpgradeRequest(releaseName, packageName, packageVersion, file, properties));
 		StringBuilder sb = new StringBuilder();
@@ -287,7 +289,6 @@ public class SkipperCommands extends AbstractSkipperCommand {
 		StringBuilder sb = new StringBuilder();
 		sb.append(release.getName() + " has been rolled back.\n");
 		sb.append("Last Deployed: " + release.getInfo().getLastDeployed() + "\n");
-		updateStatus(sb, release);
 		return sb.toString();
 	}
 
