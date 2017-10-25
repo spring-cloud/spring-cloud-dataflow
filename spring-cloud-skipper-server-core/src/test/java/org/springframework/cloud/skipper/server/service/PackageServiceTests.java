@@ -163,7 +163,7 @@ public class PackageServiceTests extends AbstractIntegrationTest {
 		assertThat(packageService).isNotNull();
 		Package pkg = packageService.downloadPackage(packageMetadata);
 		assertThat(pkg).isNotNull();
-		assertThat(pkg.getConfigValues().getRaw()).contains("1024m");
+		assertThat(pkg.getConfigValues().getRaw()).contains("1.2.0.RC1");
 		assertThat(pkg.getMetadata()).isEqualToIgnoringGivenFields(packageMetadata, "id", "origin", "packageFile");
 		assertThat(pkg.getTemplates()).hasSize(1);
 		Template template = pkg.getTemplates().get(0);
