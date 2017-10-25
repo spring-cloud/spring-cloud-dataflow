@@ -299,11 +299,12 @@ public class ReleaseService {
 		Assert.notNull(upgradeRequest.getUpgradeProperties(), "UpgradeProperties can not be null");
 		Assert.notNull(upgradeRequest.getPackageIdentifier(), "PackageIdentifier can not be null");
 		UpgradeProperties upgradeProperties = upgradeRequest.getUpgradeProperties();
-		Release existingRelease = this.releaseRepository.findLatestRelease(upgradeProperties.getReleaseName());
+		Release existingRelease = this.releaseRepository.findLatestReleaseForUpdate(upgradeProperties.getReleaseName());
+		Release latestRelease = this.releaseRepository.findLatestRelease(upgradeProperties.getReleaseName());
 		PackageIdentifier packageIdentifier = upgradeRequest.getPackageIdentifier();
 		PackageMetadata packageMetadata = getPackageMetadata(packageIdentifier.getPackageName(), packageIdentifier
 				.getPackageVersion());
-		Release replacingRelease = createReleaseForUpgrade(packageMetadata, existingRelease.getVersion() + 1,
+		Release replacingRelease = createReleaseForUpgrade(packageMetadata, latestRelease.getVersion() + 1,
 				upgradeProperties,
 				existingRelease.getPlatformName());
 		Map<String, Object> model = ConfigValueUtils.mergeConfigValues(replacingRelease.getPkg(),
@@ -357,7 +358,7 @@ public class ReleaseService {
 		Assert.isTrue(rollbackVersion >= 0,
 				"Rollback version can not be less than zero.  Value = " + rollbackVersion);
 
-		Release currentRelease = this.releaseRepository.findLatestRelease(releaseName);
+		Release currentRelease = this.releaseRepository.findLatestReleaseForUpdate(releaseName);
 		Assert.notNull(currentRelease, "Could not find release = [" + releaseName + "]");
 
 		// Determine with version to rollback to

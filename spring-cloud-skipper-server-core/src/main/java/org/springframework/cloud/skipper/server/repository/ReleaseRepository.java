@@ -47,6 +47,8 @@ public interface ReleaseRepository extends PagingAndSortingRepository<Release, L
 	@RestResource(exported = false)
 	void deleteAll();
 
+	List<Release> findByNameOrderByVersionDesc(@Param("name") String name);
+
 	List<Release> findByNameIgnoreCaseContainingOrderByNameAscVersionDesc(@Param("name") String name);
 
 	List<Release> findByNameAndVersionBetweenOrderByNameAscVersionDesc(@Param("name") String name,

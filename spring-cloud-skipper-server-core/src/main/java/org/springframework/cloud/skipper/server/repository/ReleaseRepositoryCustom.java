@@ -36,6 +36,16 @@ public interface ReleaseRepositoryCustom {
 	Release findLatestRelease(String releaseName);
 
 	/**
+	 * Find the lasted in time, release object, by name whose status is neither unknown nor failed.
+	 * This release can be used for upgrade/rollback operations.
+	 * @param releaseName the name of the release
+	 * @return the Release object
+	 * @throws {@link ReleaseNotFoundException} if no latest Release (with the deployed/deleted status) for the given
+	 * name can be found.
+	 */
+	Release findLatestReleaseForUpdate(String releaseName);
+
+	/**
 	 * Find the release for the given release name and version
 	 * @param releaseName the name of the release
 	 * @param version the version of the release
