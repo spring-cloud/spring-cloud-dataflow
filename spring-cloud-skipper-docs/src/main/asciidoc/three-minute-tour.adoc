@@ -267,7 +267,7 @@ skipper:>history --release-name helloworldpcf
 ╚═══════╧════════════════════════════╧════════╧════════════╧═══════════════╧════════════════╝
 ----
 
-A more typical upgrade process is not to change application properties, but to change the version of the application because the code has change.  We will now upgrade the release to use a new maven artifact, version 1.0.1, which also corresponds to version 1.0.1 of the helloworld package.
+A more typical upgrade process is not to change application properties, but to change the version of the application because the code has change.  We will now upgrade the release to use a new maven artifact, version 1.0.1, which also corresponds to version 1.0.1 of the helloworld skipper package.
 In this case we will not add any additional properties other than the route.
 
 ----
@@ -277,7 +277,6 @@ Last Deployed: Tue Oct 24 23:09:39 EDT 2017
 ----
 
 Note that the the current releases properties such as using 2G, or the greeting being `yo` are not carried over.  In a future release we will introduce a `--reuse-properties` command that will carry the current release properties over to the next release to be made.
-
 After a while the status will indiate all has been deployed
 ----
 skipper:>status --release-name helloworldpcf
@@ -334,7 +333,10 @@ skipper:>history --release-name helloworldpcf
 The curl commands show
 
 ----
-
+$ curl http://helloworldpcf.cfapps.io/greeting
+yo
+$ curl http://helloworldpcf.cfapps.io/about
+Hello World v1.0.0.RELEASE
 ----
 
 == Using Kuberenetes
@@ -401,7 +403,7 @@ Let's install the Hello World app, specifically, the Docker based artifact.
 
 ----
 skipper:>install --release-name helloworldk8s --package-name helloworld-docker --package-version 1.0.0 --platform-name minikube --properties spec.deploymentProperties.spring.cloud.deployer.kubernetes.createNodePort=32123
-Released helloworld-pcf
+Released helloworldk8s
 ----
 
 If you do not specify `--platform-name minikube` the command will fail since the command property defaults to a platform named `default`.  Instead of specifying it, you can register this Kubernetes Platform account in the manifest with the name `default` instead of `minikube`.
@@ -411,10 +413,10 @@ As it takes a bit of time for the app to spin up, you can monitor the process us
 ----
 skipper:>status --release-name helloworldk8s
 ╔═══════════════╤══════════════════════════════════════════════════════════════════════════════════════╗
-║Last Deployed  │Wed Oct 25 12:31:49 EDT 2017                                                          ║
+║Last Deployed  │Wed Oct 25 17:34:24 EDT 2017                                                          ║
 ║Status         │DEPLOYED                                                                              ║
 ║Platform Status│The applications are being deployed.                                                  ║
-║               │helloworldk8s-helloworld-docker-v1[helloworldk8s-helloworld-docker-v1-8wghk=deploying]║
+║               │helloworldk8s-helloworld-docker-v1[helloworldk8s-helloworld-docker-v1-g8j39=deploying]║
 ╚═══════════════╧══════════════════════════════════════════════════════════════════════════════════════╝
 ----
 
@@ -428,12 +430,13 @@ A `kubectl pods` command will now have a new listing for this deployed applicati
 ----
 $ kubectl get pods
 NAME                                       READY     STATUS    RESTARTS   AGE
-helloworldk8s-helloworld-docker-v1-8wghk   1/1       Running   0          3m
+helloworldk8s-helloworld-docker-v1-g8j39   0/1       Running   0          37s
 
 $ kubectl get service
 NAME                                 CLUSTER-IP   EXTERNAL-IP   PORT(S)          AGE
-helloworldk8s-helloworld-docker-v1   10.0.0.68    <nodes>       8080:32123/TCP   3m
-kubernetes                           10.0.0.1     <none>        443/TCP          23h
+helloworldk8s-helloworld-docker-v1   10.0.0.202   <nodes>       8080:32123/TCP   41s
+kubernetes                           10.0.0.1     <none>        443/TCP          57m
+
 ----
 
 To get the URL of this app on minikube
@@ -471,7 +474,7 @@ spec:
     spring.cloud.deployer.kubernetes.createNodePort: 32123
 ----
 
-The manifest is in a Kubernetes Resource file inspired format.  By looking at the manifest you can see which maven artifact was used and which properties were set before the final push to Cloud Foundry.
+The manifest is in a Kubernetes Resource file inspired format.  By looking at the manifest you can see which Docker images was used and which properties were set before the final push to Kubernetes.
 The metadata values that are present will be used in the next release to support searching for releases based on those values.
 
 Since it is somewhat awkward to specify multiple flattened out YAML values for the `--properties` argument in the shell, you can also specify the location of a YAML file when installing or upgrading.
@@ -503,17 +506,17 @@ the `kubectl get all` command shows
 ----
 $ kubectl get all
 NAME                                          READY     STATUS    RESTARTS   AGE
-po/helloworldk8s-helloworld-docker-v1-4kqrf   1/1       Running   0          3m
-po/helloworldk8s-helloworld-docker-v2-1rv71   1/1       Running   0          54s
+po/helloworldk8s-helloworld-docker-v1-g8j39   1/1       Running   0          2m
+po/helloworldk8s-helloworld-docker-v2-jz85l   0/1       Running   0          50s
 
 NAME                                    DESIRED   CURRENT   READY     AGE
-rc/helloworldk8s-helloworld-docker-v1   1         1         1         3m
-rc/helloworldk8s-helloworld-docker-v2   1         1         1         54s
+rc/helloworldk8s-helloworld-docker-v1   1         1         1         2m
+rc/helloworldk8s-helloworld-docker-v2   1         1         0         50s
 
 NAME                                     CLUSTER-IP   EXTERNAL-IP   PORT(S)          AGE
-svc/helloworldk8s-helloworld-docker-v1   10.0.0.247   <nodes>       8080:32123/TCP   3m
-svc/helloworldk8s-helloworld-docker-v2   10.0.0.180   <none>        8080/TCP         55s
-svc/kubernetes                           10.0.0.1     <none>        443/TCP          1d
+svc/helloworldk8s-helloworld-docker-v1   10.0.0.202   <nodes>       8080:32123/TCP   2m
+svc/helloworldk8s-helloworld-docker-v2   10.0.0.154   <nodes>       8080:32124/TCP   51s
+svc/kubernetes                           10.0.0.1     <none>        443/TCP          59m
 ----
 
 At this point Skipper is looking to see if the health endpoint of the Boot application is ok.
@@ -526,11 +529,109 @@ The current upgrade strategy is very simple, if the new app is healthy, the old 
 More flexible upgrade strategies are planned along with the introduction of the https://projects.spring.io/spring-statemachine/[Spring Cloud State Machine] project to orchestrate the update process.
 
 
-To get the URL of this app on minikube
+You can now curl the `greeting` endpoint and the `about` endpoint.
+----
+$ curl http://192.168.99.100:32124/greeting
+yo
+$ curl http://192.168.99.100:32124/about
+Hello World v1.0.0.RELEASE
+----
+
+
+The `list` command shows you the current `DEPLOYED` and `DELETED` release for every release name.
+In this case there is just one entry
 
 ----
-$ minikube service --url helloworldk8s-helloworld-docker-v1
-http://192.168.99.100:32123
+skipper:>list
+╔═════════════╤═══════╤════════════════════════════╤════════╤═════════════════╤═══════════════╤═════════════╤═══════════════╗
+║    Name     │Version│        Last updated        │ Status │  Package Name   │Package Version│Platform Name│Platform Status║
+╠═════════════╪═══════╪════════════════════════════╪════════╪═════════════════╪═══════════════╪═════════════╪═══════════════╣
+║helloworldk8s│2      │Wed Oct 25 17:36:16 EDT 2017│DEPLOYED│helloworld-docker│1.0.0          │minikube     │               ║
+╚═════════════╧═══════╧════════════════════════════╧════════╧═════════════════╧═══════════════╧═════════════╧═══════════════╝
 ----
 
+You can get the full history of the release using the `history` command
 
+----
+skipper:>history --release-name helloworldk8s
+╔═══════╤════════════════════════════╤════════╤═════════════════╤═══════════════╤════════════════╗
+║Version│        Last updated        │ Status │  Package Name   │Package Version│  Description   ║
+╠═══════╪════════════════════════════╪════════╪═════════════════╪═══════════════╪════════════════╣
+║2      │Wed Oct 25 17:36:16 EDT 2017│DEPLOYED│helloworld-docker│1.0.0          │Upgrade complete║
+║1      │Wed Oct 25 17:34:24 EDT 2017│DELETED │helloworld-docker│1.0.0          │Delete complete ║
+╚═══════╧════════════════════════════╧════════╧═════════════════╧═══════════════╧════════════════╝
+----
+A more typical upgrade process is not to change application properties, but to change the version of the application because the code has change.  We will now upgrade the release to use a new Docker artifact, version 1.0.1, which also corresponds to version 1.0.1 of the helloworld Skipper package.
+In this case we will not add any additional properties other than the NodePort.
+
+----
+skipper:>upgrade --release-name helloworldk8s --package-name helloworld-docker --package-version 1.0.1 --properties spec.deploymentProperties.spring.cloud.deployer.kubernetes.createNodePort=32125
+Released helloworldk8s
+----
+
+Note that the the current releases properties such as using 2G, or the greeting being `yo` are not carried over.  In a future release we will introduce a `--reuse-properties` command that will carry the current release properties over to the next release to be made.
+After a while the status will indiate all has been deployed
+
+----
+skipper:>status --release-name helloworldk8s
+╔═══════════════╤═════════════════════════════════════════════════════════════════════════════════════╗
+║Last Deployed  │Wed Oct 25 17:41:33 EDT 2017                                                         ║
+║Status         │DEPLOYED                                                                             ║
+║Platform Status│All applications have been successfully deployed.                                    ║
+║               │helloworldk8s-helloworld-docker-v3[helloworldk8s-helloworld-docker-v3-t6ztv=deployed]║
+╚═══════════════╧═════════════════════════════════════════════════════════════════════════════════════╝
+----
+
+And a curl command shows
+----
+$ curl http://192.168.99.100:32125/greeting
+Olá Mundo!
+
+$ curl http://192.168.99.100:32125/about
+Hello World v1.0.1.RELEASE
+----
+
+Our history now looks like
+
+----
+skipper:>history --release-name helloworldk8s
+╔═══════╤════════════════════════════╤════════╤═════════════════╤═══════════════╤════════════════╗
+║Version│        Last updated        │ Status │  Package Name   │Package Version│  Description   ║
+╠═══════╪════════════════════════════╪════════╪═════════════════╪═══════════════╪════════════════╣
+║3      │Wed Oct 25 17:41:33 EDT 2017│DEPLOYED│helloworld-docker│1.0.1          │Upgrade complete║
+║2      │Wed Oct 25 17:36:16 EDT 2017│DELETED │helloworld-docker│1.0.0          │Delete complete ║
+║1      │Wed Oct 25 17:34:24 EDT 2017│DELETED │helloworld-docker│1.0.0          │Delete complete ║
+╚═══════╧════════════════════════════╧════════╧═════════════════╧═══════════════╧════════════════╝
+----
+
+Next we will use the `rollback` command to deploy an older version of the application.
+Since we have the manifest for that version, we have all we need to redeploy and earlier release.
+
+----
+skipper:>rollback --release-name helloworldk8s --release-version 2
+helloworldk8s has been rolled back.
+Last Deployed: Wed Oct 25 17:44:25 EDT 2017
+----
+
+The history now shows a new `v4` version, even though it is identical to the `v2` version.
+
+----
+skipper:>history --release-name helloworldk8s
+╔═══════╤════════════════════════════╤════════╤═════════════════╤═══════════════╤════════════════╗
+║Version│        Last updated        │ Status │  Package Name   │Package Version│  Description   ║
+╠═══════╪════════════════════════════╪════════╪═════════════════╪═══════════════╪════════════════╣
+║4      │Wed Oct 25 17:44:25 EDT 2017│DEPLOYED│helloworld-docker│1.0.0          │Upgrade complete║
+║3      │Wed Oct 25 17:41:33 EDT 2017│DELETED │helloworld-docker│1.0.1          │Delete complete ║
+║2      │Wed Oct 25 17:36:16 EDT 2017│DELETED │helloworld-docker│1.0.0          │Delete complete ║
+║1      │Wed Oct 25 17:34:24 EDT 2017│DELETED │helloworld-docker│1.0.0          │Delete complete ║
+╚═══════╧════════════════════════════╧════════╧═════════════════╧═══════════════╧════════════════╝
+----
+
+The curl commands show
+
+----
+$ curl http://192.168.99.100:32124/greeting
+yo
+$ curl http://192.168.99.100:32124/about
+Hello World v1.0.0.RELEASE
+----
