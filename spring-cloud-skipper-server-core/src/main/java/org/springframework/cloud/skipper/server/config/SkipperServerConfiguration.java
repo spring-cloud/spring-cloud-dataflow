@@ -57,6 +57,7 @@ import org.springframework.cloud.skipper.server.repository.RepositoryRepository;
 import org.springframework.cloud.skipper.server.service.DeployerInitializationService;
 import org.springframework.cloud.skipper.server.service.PackageMetadataService;
 import org.springframework.cloud.skipper.server.service.PackageService;
+import org.springframework.cloud.skipper.server.service.ReleaseReportService;
 import org.springframework.cloud.skipper.server.service.ReleaseService;
 import org.springframework.cloud.skipper.server.service.ReleaseStateUpdateService;
 import org.springframework.cloud.skipper.server.service.RepositoryInitializationService;
@@ -90,6 +91,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 public class SkipperServerConfiguration implements AsyncConfigurer {
 
 	public static final String SKIPPER_THREAD_POOL_EXECUTOR = "skipperThreadPoolTaskExecutor";
+
 	private final Logger logger = LoggerFactory.getLogger(SkipperServerConfiguration.class);
 
 	@Bean
@@ -159,13 +161,23 @@ public class SkipperServerConfiguration implements AsyncConfigurer {
 	}
 
 	@Bean
+	public ReleaseReportService releaseReportService(PackageMetadataRepository packageMetadataRepository,
+			ReleaseRepository releaseRepository,
+			PackageService packageService,
+			ReleaseManager releaseManager) {
+		return new ReleaseReportService(packageMetadataRepository, releaseRepository, packageService, releaseManager);
+	}
+
+	@Bean
 	public ReleaseService releaseService(PackageMetadataRepository packageMetadataRepository,
 			ReleaseRepository releaseRepository,
 			PackageService packageService,
 			ReleaseManager releaseManager,
-			DeployerRepository deployerRepository) {
-		return new ReleaseService(packageMetadataRepository, releaseRepository, packageService, releaseManager,
-				deployerRepository);
+			DeployerRepository deployerRepository,
+			ReleaseReportService releaseReportService) {
+		return new ReleaseService(packageMetadataRepository, releaseRepository,
+				packageService, releaseManager,
+				deployerRepository, releaseReportService);
 	}
 
 	@Bean

@@ -15,7 +15,6 @@
  */
 package org.springframework.cloud.skipper.server.service;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -31,9 +30,7 @@ import org.springframework.cloud.skipper.domain.Package;
 import org.springframework.cloud.skipper.domain.PackageIdentifier;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
 import org.springframework.cloud.skipper.domain.Release;
-import org.springframework.cloud.skipper.domain.Status;
 import org.springframework.cloud.skipper.domain.StatusCode;
-import org.springframework.cloud.skipper.domain.UpgradeProperties;
 import org.springframework.cloud.skipper.domain.UpgradeRequest;
 import org.springframework.cloud.skipper.server.deployer.ReleaseAnalysisReport;
 import org.springframework.cloud.skipper.server.deployer.ReleaseManager;
@@ -69,16 +66,20 @@ public class ReleaseService {
 
 	private final DeployerRepository deployerRepository;
 
+	private final ReleaseReportService releaseReportService;
+
 	public ReleaseService(PackageMetadataRepository packageMetadataRepository,
 			ReleaseRepository releaseRepository,
 			PackageService packageService,
 			ReleaseManager releaseManager,
-			DeployerRepository deployerRepository) {
+			DeployerRepository deployerRepository,
+			ReleaseReportService releaseReportService) {
 		this.packageMetadataRepository = packageMetadataRepository;
 		this.releaseRepository = releaseRepository;
 		this.packageService = packageService;
 		this.releaseManager = releaseManager;
 		this.deployerRepository = deployerRepository;
+		this.releaseReportService = releaseReportService;
 	}
 
 	/**
@@ -125,26 +126,10 @@ public class ReleaseService {
 			}
 		}
 		else {
-			packageMetadata = getPackageMetadata(packageName, packageVersion);
-		}
-		return install(packageMetadata, installRequest.getInstallProperties());
-	}
-
-	PackageMetadata getPackageMetadata(String packageName, String packageVersion) {
-		Assert.isTrue(StringUtils.hasText(packageName), "Package name must not be empty");
-		PackageMetadata packageMetadata;
-		if (StringUtils.hasText(packageVersion)) {
-			packageMetadata = this.packageMetadataRepository.findByNameAndVersionByMaxRepoOrder(packageName,
+			packageMetadata = this.packageMetadataRepository.findByNameAndOptionalVersionRequired(packageName,
 					packageVersion);
 		}
-		else {
-			packageMetadata = this.packageMetadataRepository.findFirstByNameOrderByVersionDesc(packageName);
-		}
-		if (packageMetadata == null) {
-			throw new SkipperException(String.format("Can not find package '%s', version '%s'", packageName,
-					packageVersion));
-		}
-		return packageMetadata;
+		return install(packageMetadata, installRequest.getInstallProperties());
 	}
 
 	private void validateInstallRequest(InstallRequest installRequest) {
@@ -280,68 +265,14 @@ public class ReleaseService {
 	 * @return the initially created release object
 	 */
 	public Release upgrade(UpgradeRequest upgradeRequest) {
-		ReleaseAnalysisReport releaseAnalysisReport = createReport(upgradeRequest);
+		ReleaseAnalysisReport releaseAnalysisReport = this.releaseReportService.createReport(upgradeRequest);
 		// This is expected to be executed on another thread.
 		this.releaseManager.upgrade(releaseAnalysisReport);
 		return status(releaseAnalysisReport.getReplacingRelease());
 	}
 
-	/**
-	 * Merges the configuration values for the replacing release, creates the manfiest, and
-	 * creates the Report for the next stage of upgrading a Release.
-	 * @param upgradeRequest containing the {@link UpgradeProperties} and
-	 * {@link PackageIdentifier} for the update.
-	 * @return A report of what needs to change to bring the current release to the requested
-	 * release
-	 */
-	@Transactional
-	public ReleaseAnalysisReport createReport(UpgradeRequest upgradeRequest) {
-		Assert.notNull(upgradeRequest.getUpgradeProperties(), "UpgradeProperties can not be null");
-		Assert.notNull(upgradeRequest.getPackageIdentifier(), "PackageIdentifier can not be null");
-		UpgradeProperties upgradeProperties = upgradeRequest.getUpgradeProperties();
-		Release existingRelease = this.releaseRepository.findLatestReleaseForUpdate(upgradeProperties.getReleaseName());
-		Release latestRelease = this.releaseRepository.findLatestRelease(upgradeProperties.getReleaseName());
-		PackageIdentifier packageIdentifier = upgradeRequest.getPackageIdentifier();
-		PackageMetadata packageMetadata = getPackageMetadata(packageIdentifier.getPackageName(), packageIdentifier
-				.getPackageVersion());
-		Release replacingRelease = createReleaseForUpgrade(packageMetadata, latestRelease.getVersion() + 1,
-				upgradeProperties,
-				existingRelease.getPlatformName());
-		Map<String, Object> model = ConfigValueUtils.mergeConfigValues(replacingRelease.getPkg(),
-				replacingRelease.getConfigValues());
-		String manifest = ManifestUtils.createManifest(replacingRelease.getPkg(), model);
-		replacingRelease.setManifest(manifest);
-		return this.releaseManager.createReport(existingRelease, replacingRelease);
-	}
-
-	private Release createReleaseForUpgrade(PackageMetadata packageMetadata, Integer newVersion,
-			UpgradeProperties upgradeProperties, String platformName) {
-		Assert.notNull(upgradeProperties, "Upgrade Properties can not be null");
-		Package packageToInstall = this.packageService.downloadPackage(packageMetadata);
-		Release release = new Release();
-		release.setName(upgradeProperties.getReleaseName());
-		release.setPlatformName(platformName);
-		release.setConfigValues(upgradeProperties.getConfigValues());
-		release.setPkg(packageToInstall);
-		release.setVersion(newVersion);
-		Info info = createNewInfo("Upgrade install underway");
-		release.setInfo(info);
-		return release;
-	}
-
-	protected Info createNewInfo(String description) {
-		Info info = new Info();
-		info.setFirstDeployed(new Date());
-		info.setLastDeployed(new Date());
-		Status status = new Status();
-		status.setStatusCode(StatusCode.UNKNOWN);
-		info.setStatus(status);
-		info.setDescription(description);
-		return info;
-	}
-
 	protected Info createNewInfo() {
-		return createNewInfo("Initial install underway");
+		return Info.createNewInfo("Initial install underway");
 	}
 
 	/**

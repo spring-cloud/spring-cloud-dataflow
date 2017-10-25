@@ -84,4 +84,21 @@ public class Info extends AbstractEntity {
 	public void setDescription(String description) {
 		this.description = description;
 	}
+
+	/**
+	 * Create a new Info instance with the given description, first deployed and last deployed dates
+	 * set to the current date-time, and StatusCode.UNKNOWN.
+	 * @param description a string describing the general info status at a level finer than StatusCode
+	 * @return a new Info object
+	 */
+	public static Info createNewInfo(String description) {
+		Info info = new Info();
+		info.setFirstDeployed(new Date());
+		info.setLastDeployed(new Date());
+		Status status = new Status();
+		status.setStatusCode(StatusCode.UNKNOWN);
+		info.setStatus(status);
+		info.setDescription(description);
+		return info;
+	}
 }

@@ -27,8 +27,8 @@ import org.springframework.data.repository.query.Param;
 public interface PackageMetadataRepositoryCustom {
 
 	/**
-	 * Find the {@link PackageMetadata} with the given name, version and also from the repository that has the highest
-	 * order set.
+	 * Find the {@link PackageMetadata} with the given name, version and also from the
+	 * repository that has the highest order set.
 	 *
 	 * @param name the name of the package metadata
 	 * @param version the version of the package metadata
@@ -45,5 +45,17 @@ public interface PackageMetadataRepositoryCustom {
 	 * package exists with the given name.
 	 */
 	List<PackageMetadata> findByNameRequired(@Param("name") String name) throws SkipperException;
+
+	/**
+	 * Find the {@link PackageMetadata} given the package name and version. If packageVersion
+	 * is specified, delegate to findByNameAndVersionByMaxRepoOrder, otherwise delegate to
+	 * findFirstByNameOrderByVersionDesc. Throw an e
+	 * @param packageName the name of the package
+	 * @param packageVersion the version, maybe empty.
+	 * @return the package metadata
+	 * @throws {@link org.springframework.cloud.skipper.SkipperException} if there is no
+	 * package exists with the given name.
+	 */
+	PackageMetadata findByNameAndOptionalVersionRequired(String packageName, String packageVersion);
 
 }

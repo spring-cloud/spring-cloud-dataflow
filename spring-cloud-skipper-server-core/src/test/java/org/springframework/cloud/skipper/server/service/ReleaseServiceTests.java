@@ -125,7 +125,7 @@ public class ReleaseServiceTests extends AbstractIntegrationTest {
 	public void testPackageNotFound() {
 		boolean exceptionFired = false;
 		try {
-			this.releaseService.getPackageMetadata("random", "1.2.4");
+			this.packageMetadataRepository.findByNameAndOptionalVersionRequired("random", "1.2.4");
 		}
 		catch (SkipperException se) {
 			assertThat(se.getMessage()).isEqualTo("Can not find package 'random', version '1.2.4'");
@@ -157,7 +157,8 @@ public class ReleaseServiceTests extends AbstractIntegrationTest {
 	public void testLatestPackageByName() {
 		String packageName = "log";
 		PackageMetadata packageMetadata = this.packageMetadataRepository.findFirstByNameOrderByVersionDesc(packageName);
-		PackageMetadata latestPackageMetadata = this.releaseService.getPackageMetadata(packageName, null);
+		PackageMetadata latestPackageMetadata = this.packageMetadataRepository
+				.findByNameAndOptionalVersionRequired(packageName, null);
 		assertThat(packageMetadata).isEqualTo(latestPackageMetadata);
 	}
 
