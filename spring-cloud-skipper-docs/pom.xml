@@ -119,7 +119,7 @@
                                 <project-version>${project.version}</project-version>
                                 <project-artifactId>${project.artifactId}</project-artifactId>
                                 <version-type-lowercase>${version-type-lowercase}</version-type-lowercase>
-                                <snippets>${main.basedir}/spring-cloud-skipper-server-core/target/generated-snippets</snippets>
+                                <snippets>${basedir}/../spring-cloud-skipper-server-core/target/generated-snippets</snippets>
                             </attributes>
                         </configuration>
                         <executions>
