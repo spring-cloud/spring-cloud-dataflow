@@ -272,7 +272,7 @@ public class ReleaseServiceTests extends AbstractIntegrationTest {
 		// Rollback
 		Release rolledBackRelease = this.releaseService.rollback(releaseName, 0);
 		sleep();
-		assertThat(rolledBackRelease.getManifest()).isEqualTo(upgradedRelease.getManifest());
+		assertThat(rolledBackRelease.getManifest()).isEqualTo(release.getManifest());
 		assertThat(rolledBackRelease.getInfo().getStatus().getStatusCode().equals(StatusCode.DEPLOYED));
 
 		deletedRelease = releaseRepository.findByNameAndVersion(releaseName, 2);

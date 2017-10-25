@@ -46,6 +46,15 @@ public interface ReleaseRepositoryCustom {
 	Release findLatestReleaseForUpdate(String releaseName);
 
 	/**
+	 * Find the release to rollback from the existing version.
+	 *
+	 * @param releaseName the name of the release to rollback
+	 * @return the Release object to rollback to
+	 * @throws {@link ReleaseNotFoundException} if no latest Release found to rollback to.
+	 */
+	Release findReleaseToRollback(String releaseName);
+
+	/**
 	 * Find the release for the given release name and version
 	 * @param releaseName the name of the release
 	 * @param version the version of the release

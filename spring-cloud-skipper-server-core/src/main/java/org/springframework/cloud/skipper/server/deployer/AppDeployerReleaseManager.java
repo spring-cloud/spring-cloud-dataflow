@@ -163,6 +163,10 @@ public class AppDeployerReleaseManager implements ReleaseManager {
 	@Override
 	public ReleaseAnalysisReport createReport(Release existingRelease, Release replacingRelease) {
 		ReleaseAnalysisReport releaseAnalysisReport = this.releaseAnalyzer.analyze(existingRelease, replacingRelease);
+		if (releaseAnalysisReport.getReleaseDifference().areEqual()) {
+			throw new SkipperException(
+					"Package to upgrade has no difference than existing deployed/deleted package. Not upgrading.");
+		}
 		AppDeployerData existingAppDeployerData = this.appDeployerDataRepository
 				.findByReleaseNameAndReleaseVersionRequired(
 						existingRelease.getName(), existingRelease.getVersion());
@@ -176,10 +180,6 @@ public class AppDeployerReleaseManager implements ReleaseManager {
 		String manifest = ManifestUtils.createManifest(replacingRelease.getPkg(), model);
 		replacingRelease.setManifest(manifest);
 		this.releaseRepository.save(replacingRelease);
-		if (releaseAnalysisReport.getReleaseDifference().areEqual()) {
-			throw new SkipperException(
-					"Package to upgrade has no difference than existing deployed package. Not upgrading.");
-		}
 		return releaseAnalysisReport;
 	}
 
@@ -196,33 +196,45 @@ public class AppDeployerReleaseManager implements ReleaseManager {
 	private Map<String, Object> calculateAppCountsForRelease(Release replacingRelease,
 			Map<String, String> existingAppNamesAndDeploymentIds, List<String> applicationNamesToUpgrade,
 			List<AppStatus> appStatuses) {
-		Map<String, String> appsCount = new HashMap<>();
+		Map<String, Object> model = ConfigValueUtils.mergeConfigValues(replacingRelease.getPkg(),
+				replacingRelease.getConfigValues());
 		for (Map.Entry<String, String> existingEntry : existingAppNamesAndDeploymentIds.entrySet()) {
 			String existingName = existingEntry.getKey();
 			if (applicationNamesToUpgrade.contains(existingName)) {
 				String deploymentId = existingAppNamesAndDeploymentIds.get(existingName);
 				for (AppStatus appStatus : appStatuses) {
 					if (appStatus.getDeploymentId().equals(deploymentId)) {
-						appsCount.put(existingName, String.valueOf(appStatus.getInstances().size()));
+						String appsCount = String.valueOf(appStatus.getInstances().size());
+						if (replacingRelease.getPkg().getDependencies().isEmpty()) {
+							updateCountProperty(model, appsCount);
+						}
+						else {
+							for (Map.Entry<String, Object> entry : model.entrySet()) {
+								if (existingName.contains(entry.getKey())) {
+									Map<String, Object> appModel = (Map<String, Object>) model.getOrDefault(entry.getKey(),
+											new TreeMap<String, Object>());
+									updateCountProperty(appModel, appsCount);
+								}
+							}
+						}
 					}
 				}
 			}
 		}
-		Map<String, Object> model = ConfigValueUtils.mergeConfigValues(replacingRelease.getPkg(),
-				replacingRelease.getConfigValues());
-		for (Map.Entry<String, Object> entry : model.entrySet()) {
-			if (appsCount.keySet().contains(entry.getKey())) {
-				Map<String, Object> modelValue = (Map<String, Object>) model.getOrDefault(entry.getKey(),
-						new TreeMap<String, Object>());
-				Map<String, Object> specMap = (Map<String, Object>) modelValue.getOrDefault(
-						SpringBootAppKind.SPEC_STRING,
-						new TreeMap<String, Object>());
-				Map<String, Object> deploymentPropertiesMap = (Map<String, Object>) specMap
-						.getOrDefault(SpringBootAppSpec.DEPLOYMENT_PROPERTIES_STRING, new TreeMap<String, Object>());
-				deploymentPropertiesMap.put(SPRING_CLOUD_DEPLOYER_COUNT, appsCount.get(entry.getKey()));
-			}
-		}
+
 		return model;
+	}
+
+	private void updateCountProperty(Map<String, Object> model, String appsCount) {
+		Map<String, Object> specMap = (Map<String, Object>) model.getOrDefault(SpringBootAppKind.SPEC_STRING,
+				new TreeMap<String, Object>());
+		Map<String, Object> deploymentPropertiesMap = (Map<String, Object>) specMap.get(SpringBootAppSpec.DEPLOYMENT_PROPERTIES_STRING);
+		// explicit null check instead of getOrDefault is required as deploymentProperties could have been explicitly
+		// set to null.
+		if (deploymentPropertiesMap == null) {
+			deploymentPropertiesMap = new TreeMap<String, Object>();
+		}
+		deploymentPropertiesMap.put(SPRING_CLOUD_DEPLOYER_COUNT, appsCount);
 	}
 
 	public Release status(Release release) {

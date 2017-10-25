@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 
 import org.springframework.cloud.skipper.ReleaseNotFoundException;
 import org.springframework.cloud.skipper.SkipperException;
+import org.springframework.cloud.skipper.domain.ConfigValues;
 import org.springframework.cloud.skipper.domain.Info;
 import org.springframework.cloud.skipper.domain.InstallProperties;
 import org.springframework.cloud.skipper.domain.InstallRequest;
@@ -294,17 +295,17 @@ public class ReleaseService {
 
 		// Determine with version to rollback to
 		int rollbackVersionToUse = rollbackVersion;
+		Release releaseToRollback = null;
 		if (rollbackVersion == 0) {
-			if (currentRelease.getInfo().getStatus().getStatusCode().equals(StatusCode.DELETED)) {
-				rollbackVersionToUse = currentRelease.getVersion();
-			}
-			else {
-				rollbackVersionToUse = currentRelease.getVersion() - 1;
+			releaseToRollback = this.releaseRepository.findReleaseToRollback(releaseName);
+		}
+		else {
+			releaseToRollback = this.releaseRepository.findByNameAndVersion(releaseName, rollbackVersionToUse);
+			StatusCode statusCode = releaseToRollback.getInfo().getStatus().getStatusCode();
+			if (!(statusCode.equals(StatusCode.DEPLOYED) || statusCode.equals(StatusCode.DELETED))) {
+				throw new SkipperException("Rollback version should either be in deployed or deleted status.");
 			}
 		}
-		Assert.isTrue(rollbackVersionToUse != 0, "Can not rollback to before version 1");
-
-		Release releaseToRollback = this.releaseRepository.findByNameAndVersion(releaseName, rollbackVersionToUse);
 		Assert.notNull(releaseToRollback, "Could not find Release to rollback to [releaseName,releaseVersion] = ["
 				+ releaseName + "," + rollbackVersionToUse + "]");
 
@@ -317,8 +318,9 @@ public class ReleaseService {
 		newRollbackRelease.setManifest(releaseToRollback.getManifest());
 		newRollbackRelease.setVersion(currentRelease.getVersion() + 1);
 		newRollbackRelease.setPlatformName(releaseToRollback.getPlatformName());
-		// Do not set ConfigValues since the manifest from the previous release has
-		// already resolved those...
+		ConfigValues configValues = new ConfigValues();
+		configValues.setRaw(releaseToRollback.getManifest());
+		newRollbackRelease.setConfigValues(configValues);
 		newRollbackRelease.setInfo(createNewInfo());
 		if (currentRelease.getInfo().getStatus().getStatusCode().equals(StatusCode.DELETED)) {
 			// Since the current release is not deployed, we just do a new install.

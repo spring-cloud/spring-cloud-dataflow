@@ -186,6 +186,10 @@ public class ReleaseAnalyzer {
 		if (replacingDeploymentProperties == null) {
 			replacingDeploymentProperties = new TreeMap<>();
 		}
+		// exclude deployer count from computing the difference
+		existingDeploymentProperties.remove(AppDeployerReleaseManager.SPRING_CLOUD_DEPLOYER_COUNT);
+		replacingDeploymentProperties.remove(AppDeployerReleaseManager.SPRING_CLOUD_DEPLOYER_COUNT);
+
 		MapDifference<String, String> deploymentPropertiesDifference = Maps.difference(existingDeploymentProperties,
 				replacingDeploymentProperties);
 
