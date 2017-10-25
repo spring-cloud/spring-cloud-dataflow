@@ -19,6 +19,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.StringTokenizer;
 
 import io.codearte.props2yaml.Props2YAML;
 import org.yaml.snakeyaml.Yaml;
@@ -45,7 +46,9 @@ public abstract class YmlUtils {
 
 	private static final String DOT_CHAR = "\\.";
 
-	private static final String DOT_CHAR_REPLACEMENT = "-";
+	private static final String DOT_CHAR_REPLACEMENT = "------";
+
+	private static final String SPEC_STRING = ".spec.";
 
 	public static String convertFromCsvToYaml(String propertiesAsString) {
 		String stringToConvert = propertiesAsString.replaceAll(",", "\n");
@@ -69,22 +72,43 @@ public abstract class YmlUtils {
 			}
 		}
 		else if (StringUtils.hasText(propertiesAsCsvString)) {
-			String propertyValues = propertiesAsCsvString.replaceAll(APPLICATION_PROPERTIES_PREFIX,
-					SPEC_APPLICATION_PROPERTIES_REPLACEMENT);
-			propertyValues = propertyValues.replaceAll(DEPLOYMENT_PROPERTIES_PREFIX,
-					SPEC_DEPLOYMENT_PROPERTIES_REPLACEMENT);
-			// Replace the original property keys' dots to avoid type errors when using Props2YML
-			propertyValues = propertyValues.replaceAll(DOT_CHAR, DOT_CHAR_REPLACEMENT);
-			propertyValues = propertyValues.replaceAll(SPEC_APPLICATION_PROPERTIES_REPLACEMENT,
-					APPLICATION_PROPERTIES_PREFIX);
-			propertyValues = propertyValues.replaceAll(SPEC_DEPLOYMENT_PROPERTIES_REPLACEMENT,
-					DEPLOYMENT_PROPERTIES_PREFIX);
-			String ymlString = Props2YAML.fromContent(propertyValues.replaceAll(",", "\n")).convert();
+			StringTokenizer tokenizer = new StringTokenizer(propertiesAsCsvString, ",");
+			StringBuilder sb = new StringBuilder();
+			while (tokenizer.hasMoreElements()) {
+				String value = tokenizer.nextToken();
+				if (value.contains(SPEC_STRING)) {
+					int i = value.indexOf(SPEC_STRING) + 1;
+					String trimmed = value.substring(i);
+					String prefix = value.substring(0, i);
+					String modifiedString = modifyString(trimmed);
+					value = new String(prefix + modifiedString);
+				}
+				else {
+					value = modifyString(value);
+				}
+				sb.append(value);
+				sb.append("\n");
+			}
+			String ymlString = Props2YAML.fromContent(sb.toString()).convert();
 			// Revert original property keys' dots
 			ymlString = ymlString.replaceAll(DOT_CHAR_REPLACEMENT, DOT_CHAR);
 			Yaml yaml = new Yaml();
 			configValuesYML = yaml.dump(yaml.load(ymlString));
 		}
 		return configValuesYML;
+	}
+
+	private static String modifyString(String property) {
+		String propertyValue = property.replaceAll(APPLICATION_PROPERTIES_PREFIX,
+				SPEC_APPLICATION_PROPERTIES_REPLACEMENT);
+		propertyValue = propertyValue.replaceAll(DEPLOYMENT_PROPERTIES_PREFIX,
+				SPEC_DEPLOYMENT_PROPERTIES_REPLACEMENT);
+		// Replace the original property keys' dots to avoid type errors when using Props2YML
+		propertyValue = propertyValue.replaceAll(DOT_CHAR, DOT_CHAR_REPLACEMENT);
+		propertyValue = propertyValue.replaceAll(SPEC_APPLICATION_PROPERTIES_REPLACEMENT,
+				APPLICATION_PROPERTIES_PREFIX);
+		propertyValue = propertyValue.replaceAll(SPEC_DEPLOYMENT_PROPERTIES_REPLACEMENT,
+				DEPLOYMENT_PROPERTIES_PREFIX);
+		return propertyValue;
 	}
 }

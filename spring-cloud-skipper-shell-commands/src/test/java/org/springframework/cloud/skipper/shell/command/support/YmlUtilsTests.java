@@ -28,6 +28,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Mark Pollack
+ * @author Ilayaperumal Gopinathan
  */
 public class YmlUtilsTests {
 
@@ -48,6 +49,28 @@ public class YmlUtilsTests {
 				new ClassPathResource("/org/springframework/cloud/skipper/shell/command/support/log4j.yml");
 		assertThat(yml).isEqualTo(StreamUtils.copyToString(convertedYmlResource.getInputStream(),
 				Charset.defaultCharset()));
+	}
+
+	@Test
+	public void testPropertiesParsingWithPackageDeps() throws IOException {
+		String properties = "log.spec.deploymentProperties.spring.cloud.deployer.cloudfoundry.route=mlp3-helloworld.cfapps.io,"
+				+ "time.spec.deploymentProperties.spring.cloud.deployer.cloudfoundry.route=mlp1-helloworld.cfapps.io";
+		String propertiesYml = YmlUtils.getYamlConfigValues(null, properties);
+		assertThat(propertiesYml).isEqualTo(
+				"log:\n"
+				+ "  spec:\n"
+				+ "    deploymentProperties: {spring.cloud.deployer.cloudfoundry.route: mlp3-helloworld.cfapps.io}\n"
+				+ "time:\n"
+				+ "  spec:\n"
+				+ "    deploymentProperties: {spring.cloud.deployer.cloudfoundry.route: mlp1-helloworld.cfapps.io}\n");
+	}
+
+	@Test
+	public void testPropertiesParsing() throws IOException {
+		String properties = "spec.deploymentProperties.spring.cloud.deployer.cloudfoundry.route=mlp3-helloworld.cfapps.io";
+		String propertiesYml = YmlUtils.getYamlConfigValues(null, properties);
+		assertThat(propertiesYml).isEqualTo("spec:\n"
+				+ "  deploymentProperties: {spring.cloud.deployer.cloudfoundry.route: mlp3-helloworld.cfapps.io}\n");
 	}
 
 }
