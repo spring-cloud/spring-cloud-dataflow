@@ -53,15 +53,20 @@ public class ConfigValueUtils {
 		Map<String, Object> mergedValues;
 		// merge top level override values on top level package values
 		if (StringUtils.hasText(overrideValues.getRaw())) {
-			Map<String, Object> overrideMap = (Map<String, Object>) yaml.load(overrideValues.getRaw());
-			mergedValues = mergeOverrideMap(pkg, overrideMap);
+			Object data = yaml.load(overrideValues.getRaw());
+			if (data instanceof  Map) {
+				Map<String, Object> overrideMap = (Map<String, Object>) yaml.load(overrideValues.getRaw());
+				mergedValues = mergeOverrideMap(pkg, overrideMap);
+			} else {
+				throw new SkipperException("Was expecting override values to produce a Map, instead got class = " +
+						data.getClass() + "overrideValues.getRaw() = " + overrideValues.getRaw());
+			}
 		}
 		else {
 			mergedValues = mergeOverrideMap(pkg, new TreeMap<>());
 		}
 		// return mergedValues;
-		Map<String, Object> mergedValuesIncludingDeps = mergePackagesIncludingDependencies(pkg, mergedValues);
-		return mergedValuesIncludingDeps;
+		return mergePackagesIncludingDependencies(pkg, mergedValues);
 	}
 
 	/**
@@ -85,7 +90,7 @@ public class ConfigValueUtils {
 			// Config Values could have been file with comments only, no data.
 			return overrideMap;
 		}
-		Map<String, Object> packageValueMap = null;
+		Map<String, Object> packageValueMap;
 		if (object instanceof Map) {
 			packageValueMap = (Map<String, Object>) object;
 		}
