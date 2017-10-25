@@ -86,6 +86,7 @@ description: Docker version of the log sink application
 ---
 apiVersion: v1
 kind: skipper
+origin: samples-package-repository
 name: helloworld-docker
 version: 1.0.0
 packageSourceUrl: https://github.com/spring-cloud-stream-app-starters/log/tree/v1.1.0.RELEASE
