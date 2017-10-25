@@ -83,7 +83,7 @@ spring:
 
             - DELETE /streams/deployments/*          => hasRole('ROLE_CREATE')
             - DELETE /streams/deployments            => hasRole('ROLE_CREATE')
-            - POST   /streams/deployments/*          => hasRole('ROLE_CREATE')
+            - POST   /streams/deployments/**         => hasRole('ROLE_CREATE')
 
             # Task Definitions
 
