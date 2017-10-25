@@ -54,10 +54,11 @@ public class ConfigValueUtils {
 		// merge top level override values on top level package values
 		if (StringUtils.hasText(overrideValues.getRaw())) {
 			Object data = yaml.load(overrideValues.getRaw());
-			if (data instanceof  Map) {
+			if (data instanceof Map) {
 				Map<String, Object> overrideMap = (Map<String, Object>) yaml.load(overrideValues.getRaw());
 				mergedValues = mergeOverrideMap(pkg, overrideMap);
-			} else {
+			}
+			else {
 				throw new SkipperException("Was expecting override values to produce a Map, instead got class = " +
 						data.getClass() + "overrideValues.getRaw() = " + overrideValues.getRaw());
 			}
