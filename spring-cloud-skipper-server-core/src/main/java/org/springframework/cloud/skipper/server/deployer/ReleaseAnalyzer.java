@@ -39,7 +39,9 @@ import org.springframework.util.StringUtils;
  * supports detecting changes between the two packages that either a) both have a single
  * top level package template b) both have the same number of dependent packages and no
  * top level package template
+ *
  * @author Mark Pollack
+ * @author Ilayaperumal Gopinathan
  */
 public class ReleaseAnalyzer {
 
@@ -143,17 +145,6 @@ public class ReleaseAnalyzer {
 	private ReleaseDifference compare(SpringBootAppKind existingSpringBootAppKind,
 			SpringBootAppKind replacingSpringBootAppKind) {
 
-		// application name ame must be equal??
-		// String existingAppName = existingSpringBootAppKind.getApplicationName().trim();
-		// String replacingAppName = replacingSpringBootAppKind.getApplicationName().trim();
-		// if (!existingAppName.equals(replacingAppName)) {
-		// String difference = String.format("Existing application name =[%s], Replacing
-		// application name=[%s]",
-		// existingAppName,
-		// replacingAppName);
-		// return new ReleaseDifference(false, difference);
-		// }
-
 		// Fail fast for now...
 
 		String existingResource = existingSpringBootAppKind.getSpec().getResource().trim();
@@ -198,7 +189,7 @@ public class ReleaseAnalyzer {
 		MapDifference<String, String> deploymentPropertiesDifference = Maps.difference(existingDeploymentProperties,
 				replacingDeploymentProperties);
 
-		if (!applicationPropertiesDifference.areEqual()) {
+		if (!deploymentPropertiesDifference.areEqual()) {
 			return getReleaseDifferenceForDeploymentProps(deploymentPropertiesDifference);
 		}
 
