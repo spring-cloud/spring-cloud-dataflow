@@ -4,10 +4,13 @@ metadata:
   name: log
   type: sink
 spec:
-  resource: {{resources.log.resourceGroupAndName}}:{{resources.log.version}}
-  resourceMetadata: {{resources.log.resourceGroupAndName}}:jar:metadata:{{resources.log.version}}
+  resource: maven://org.springframework.cloud.stream.app:log-sink-rabbit:{{version}}
+  resourceMetadata: maven://org.springframework.cloud.stream.app:log-sink-rabbit:jar:metadata:{{version}}
   applicationProperties:
-    log.level: DEBUG
+    {{#spec.applicationProperties.entrySet}}
+    {{key}}: {{value}}
+    {{/spec.applicationProperties.entrySet}}
   deploymentProperties:
-    memory: {{deployment.request.memory}}
-    spring.cloud.deployer.local.inheritLogging: {{deployment.request.inheritLogging}}
+    {{#spec.deploymentProperties.entrySet}}
+    {{key}}: {{value}}
+    {{/spec.deploymentProperties.entrySet}}
