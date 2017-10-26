@@ -25,7 +25,8 @@ spring:
             local: true
             description: Default local database backed repository
             repoOrder: 1
-
+  mustache:
+    check-template-location: false
 
 maven:
   remoteRepositories:
@@ -46,6 +47,7 @@ logging:
     org.springframework.security: 'WARN'
     org.springframework.integration: 'WARN'
     org.springframework.boot: 'WARN'
+    org.springframework.boot.context.embedded.tomcat: 'INFO'
     org.hibernate: 'WARN'
     # The following INFO is to log the generated password when using basic security
     org.springframework.boot.autoconfigure.security: 'INFO'
