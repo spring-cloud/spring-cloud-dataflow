@@ -42,8 +42,10 @@ import org.springframework.cloud.skipper.server.deployer.AppDeploymentRequestFac
 import org.springframework.cloud.skipper.server.deployer.ReleaseAnalyzer;
 import org.springframework.cloud.skipper.server.deployer.ReleaseManager;
 import org.springframework.cloud.skipper.server.deployer.strategies.DeleteStep;
-import org.springframework.cloud.skipper.server.deployer.strategies.HealthCheckAndDeleteStep;
+import org.springframework.cloud.skipper.server.deployer.strategies.DeployAppStep;
+import org.springframework.cloud.skipper.server.deployer.strategies.HandleHealthCheckStep;
 import org.springframework.cloud.skipper.server.deployer.strategies.HealthCheckProperties;
+import org.springframework.cloud.skipper.server.deployer.strategies.HealthCheckStep;
 import org.springframework.cloud.skipper.server.deployer.strategies.SimpleRedBlackUpgradeStrategy;
 import org.springframework.cloud.skipper.server.deployer.strategies.UpgradeStrategy;
 import org.springframework.cloud.skipper.server.index.PackageMetadataResourceProcessor;
@@ -219,18 +221,37 @@ public class SkipperServerConfiguration implements AsyncConfigurer {
 	public UpgradeStrategy updateStrategy(DeployerRepository deployerRepository,
 			AppDeployerDataRepository appDeployerDataRepository,
 			AppDeploymentRequestFactory appDeploymentRequestFactory,
-			HealthCheckAndDeleteStep healthCheckAndDeleteStep) {
+			HealthCheckStep healthCheckStep,
+			HandleHealthCheckStep healthCheckAndDeleteStep,
+			ReleaseRepository releaseRepository, DeployAppStep deployAppStep) {
 		return new SimpleRedBlackUpgradeStrategy(deployerRepository,
-				appDeployerDataRepository, appDeploymentRequestFactory, healthCheckAndDeleteStep);
+				appDeployerDataRepository, appDeploymentRequestFactory, healthCheckStep, healthCheckAndDeleteStep,
+				deployAppStep,
+				releaseRepository);
 	}
 
 	@Bean
-	public HealthCheckAndDeleteStep healthCheckAndDeleteStep(ReleaseRepository releaseRepository,
+	public HealthCheckStep healthCheckStep(AppDeployerDataRepository appDeployerDataRepository,
+			DeployerRepository deployerRepository,
+			HealthCheckProperties healthCheckProperties) {
+		return new HealthCheckStep(appDeployerDataRepository, deployerRepository, healthCheckProperties);
+	}
+
+	@Bean
+	public DeployAppStep DeployAppStep(DeployerRepository deployerRepository,
+			AppDeploymentRequestFactory appDeploymentRequestFactory,
+			AppDeployerDataRepository appDeployerDataRepository, ReleaseRepository releaseRepository) {
+		return new DeployAppStep(deployerRepository, appDeploymentRequestFactory, appDeployerDataRepository,
+				releaseRepository);
+	}
+
+	@Bean
+	public HandleHealthCheckStep healthCheckAndDeleteStep(ReleaseRepository releaseRepository,
 			DeployerRepository deployerRepository,
 			AppDeployerDataRepository appDeployerDataRepository,
 			DeleteStep deleteStep,
 			HealthCheckProperties healthCheckProperties) {
-		return new HealthCheckAndDeleteStep(releaseRepository,
+		return new HandleHealthCheckStep(releaseRepository,
 				deployerRepository,
 				appDeployerDataRepository,
 				deleteStep,

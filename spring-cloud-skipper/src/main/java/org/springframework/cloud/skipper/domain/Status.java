@@ -39,8 +39,8 @@ import org.springframework.cloud.deployer.spi.app.AppStatus;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
 
 /**
- * Status contains release's status from the release management platform and the corresponding deployment platform
- * status.
+ * Status contains release's status from the release management platform and the
+ * corresponding deployment platform status.
  *
  * @author Mark Pollack
  */
@@ -94,12 +94,18 @@ public class Status extends AbstractEntity {
 		StringBuffer statusMsg = new StringBuffer();
 
 		for (AppStatus appStatus : appStatusList) {
-			statusMsg.append(appStatus.getDeploymentId() + "[");
-			for (AppInstanceStatus appInstanceStatus : appStatus.getInstances().values()) {
-				statusMsg.append(appInstanceStatus.getId() + "=" + appInstanceStatus.getState() + "\n");
+			statusMsg.append("[" + appStatus.getDeploymentId() + "]");
+			if (appStatus.getInstances().isEmpty()) {
+				statusMsg.append(", State = [" + appStatus.getState() + "]");
 			}
-			statusMsg.setLength(statusMsg.length() - 1);
-			statusMsg.append("]\n");
+			else {
+				statusMsg.append(", State = [");
+				for (AppInstanceStatus appInstanceStatus : appStatus.getInstances().values()) {
+					statusMsg.append(appInstanceStatus.getId() + "=" + appInstanceStatus.getState() + "\n");
+				}
+				statusMsg.setLength(statusMsg.length() - 1);
+				statusMsg.append("]\n");
+			}
 		}
 		return statusMsg.toString();
 	}

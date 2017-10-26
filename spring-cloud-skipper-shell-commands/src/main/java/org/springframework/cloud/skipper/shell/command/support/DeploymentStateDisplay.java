@@ -30,7 +30,7 @@ public enum DeploymentStateDisplay {
 	DEPLOYED("deployed", "Deployed", "All applications have been successfully deployed."),
 	UNDEPLOYED("undeployed", "Undeployed", "The applications are known to the system, but is not currently deployed."),
 	PARTIAL("partial", "Partial",
-			"Some applications have successfully deployed, while others have not."),
+			"The applications are being deployed."),
 	FAILED("failed", "Failed", "All apps have failed deployment."),
 	ERROR("error", "Error", "A system error occurred trying to determine platform status."),
 	UNKNOWN("unknown", "Unknown", "The applications are not known to the system.");

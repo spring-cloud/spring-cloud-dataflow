@@ -120,7 +120,7 @@ public class ReleaseAnalyzer {
 				replacingSpringBootAppKindList.get(0));
 		List<String> appsToDelete = new ArrayList<>();
 		if (!difference.areEqual()) {
-			logger.info("Differences detected, upgrading " + existingSpringBootAppKindList.get(0).getApplicationName());
+			logger.info("Differences detected, upgrading app " + existingSpringBootAppKindList.get(0).getApplicationName());
 			appsToDelete.add(existingSpringBootAppKindList.get(0).getApplicationName().trim());
 		}
 		return new ReleaseAnalysisReport(appsToDelete, difference, existingRelease, replacingRelease);

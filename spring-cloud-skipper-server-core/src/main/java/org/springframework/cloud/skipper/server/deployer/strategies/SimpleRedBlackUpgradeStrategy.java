@@ -15,32 +15,27 @@
  */
 package org.springframework.cloud.skipper.server.deployer.strategies;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.springframework.cloud.deployer.spi.app.AppDeployer;
-import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.skipper.domain.Release;
+import org.springframework.cloud.skipper.domain.StatusCode;
 import org.springframework.cloud.skipper.server.deployer.AppDeploymentRequestFactory;
 import org.springframework.cloud.skipper.server.deployer.ReleaseAnalysisReport;
-import org.springframework.cloud.skipper.server.domain.AppDeployerData;
-import org.springframework.cloud.skipper.server.domain.SpringBootAppKind;
-import org.springframework.cloud.skipper.server.domain.SpringBootAppKindReader;
 import org.springframework.cloud.skipper.server.repository.AppDeployerDataRepository;
 import org.springframework.cloud.skipper.server.repository.DeployerRepository;
+import org.springframework.cloud.skipper.server.repository.ReleaseRepository;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.transaction.annotation.Transactional;
 
 import static org.springframework.cloud.skipper.server.config.SkipperServerConfiguration.SKIPPER_THREAD_POOL_EXECUTOR;
 
 /**
- * Very simple approach to deploying a new application. All the new apps are deployed and
- * then all the old apps are undeployed. There is no health check done to see if new apps
- * are healthy.
+ * A simple approach to deploying a new application. All the new apps are deployed and a
+ * health check is done to on the new apps. If they are healthy, the old apps are deleted.
+ * Executes on it's own thread since it is a long lived operation. Delegates to
+ * {@link DeployAppStep}, {@link HealthCheckStep} and {@link HandleHealthCheckStep}
  * @author Mark Pollack
  */
 public class SimpleRedBlackUpgradeStrategy implements UpgradeStrategy {
@@ -53,66 +48,42 @@ public class SimpleRedBlackUpgradeStrategy implements UpgradeStrategy {
 
 	private final AppDeploymentRequestFactory appDeploymentRequestFactory;
 
-	private final HealthCheckAndDeleteStep healthCheckAndDeleteStep;
+	private final HealthCheckStep healthCheckStep;
+
+	private final HandleHealthCheckStep handleHealthCheckStep;
+
+	private final ReleaseRepository releaseRepository;
+
+	private final DeployAppStep deployAppStep;
 
 	public SimpleRedBlackUpgradeStrategy(DeployerRepository deployerRepository,
 			AppDeployerDataRepository appDeployerDataRepository,
 			AppDeploymentRequestFactory appDeploymentRequestFactory,
-			HealthCheckAndDeleteStep healthCheckAndDeleteStep) {
+			HealthCheckStep healthCheckStep,
+			HandleHealthCheckStep handleHealthCheckStep,
+			DeployAppStep deployAppStep,
+			ReleaseRepository releaseRepository) {
 		this.deployerRepository = deployerRepository;
 		this.appDeployerDataRepository = appDeployerDataRepository;
 		this.appDeploymentRequestFactory = appDeploymentRequestFactory;
-		this.healthCheckAndDeleteStep = healthCheckAndDeleteStep;
+		this.healthCheckStep = healthCheckStep;
+		this.handleHealthCheckStep = handleHealthCheckStep;
+		this.deployAppStep = deployAppStep;
+		this.releaseRepository = releaseRepository;
 	}
 
 	@Override
 	@Async(SKIPPER_THREAD_POOL_EXECUTOR)
-	@Transactional
 	public Release upgrade(Release existingRelease, Release replacingRelease,
 			ReleaseAnalysisReport releaseAnalysisReport) {
 
-		List<String> applicationNamesToUpgrade = releaseAnalysisReport.getApplicationNamesToUpgrade();
-		AppDeployer appDeployer = this.deployerRepository.findByNameRequired(replacingRelease.getPlatformName())
-				.getAppDeployer();
-
-		// Update status in the db "To be upgraded [time, log]. Upgrading [log].
-
-		// Deploy the application
-		List<SpringBootAppKind> springBootAppKindList = SpringBootAppKindReader.read(replacingRelease.getManifest());
-
-		Map<String, String> appNameDeploymentIdMap = new HashMap<>();
-		for (SpringBootAppKind springBootAppKind : springBootAppKindList) {
-			if (applicationNamesToUpgrade.contains(springBootAppKind.getApplicationName())) {
-				AppDeploymentRequest appDeploymentRequest = appDeploymentRequestFactory.createAppDeploymentRequest(
-						springBootAppKind, replacingRelease.getName(),
-						String.valueOf(replacingRelease.getVersion()));
-				String deploymentId = appDeployer.deploy(appDeploymentRequest);
-				appNameDeploymentIdMap.put(springBootAppKind.getApplicationName(), deploymentId);
-			}
+		List<String> applicationNamesToUpgrade = this.deployAppStep.deployApps(existingRelease, replacingRelease,
+				releaseAnalysisReport);
+		if (!replacingRelease.getInfo().getStatus().getStatusCode().equals(StatusCode.FAILED)) {
+			boolean isHealthy = this.healthCheckStep.waitForNewAppsToDeploy(replacingRelease);
+			this.handleHealthCheckStep.handleHealthCheck(isHealthy, existingRelease,
+					applicationNamesToUpgrade, replacingRelease);
 		}
-
-		// Carry over the applicationDeployment information for apps that were not updated.
-		AppDeployerData existingAppDeployerData = this.appDeployerDataRepository
-				.findByReleaseNameAndReleaseVersionRequired(
-						existingRelease.getName(), existingRelease.getVersion());
-		Map<String, String> existingAppNamesAndDeploymentIds = existingAppDeployerData.getDeploymentDataAsMap();
-
-		for (Map.Entry<String, String> existingEntry : existingAppNamesAndDeploymentIds.entrySet()) {
-			String existingName = existingEntry.getKey();
-			if (!appNameDeploymentIdMap.containsKey(existingName)) {
-				appNameDeploymentIdMap.put(existingName, existingEntry.getValue());
-			}
-		}
-
-		AppDeployerData appDeployerData = new AppDeployerData();
-		appDeployerData.setReleaseName(replacingRelease.getName());
-		appDeployerData.setReleaseVersion(replacingRelease.getVersion());
-		appDeployerData.setDeploymentDataUsingMap(appNameDeploymentIdMap);
-		this.appDeployerDataRepository.save(appDeployerData);
-
-		this.healthCheckAndDeleteStep.waitForNewAppsToDeploy(existingRelease,
-				applicationNamesToUpgrade, replacingRelease);
-
 		return replacingRelease;
 	}
 

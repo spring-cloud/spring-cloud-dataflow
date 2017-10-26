@@ -26,6 +26,8 @@ import org.slf4j.LoggerFactory;
 
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.app.AppStatus;
+import org.springframework.cloud.deployer.spi.app.DeploymentState;
+import org.springframework.cloud.deployer.spi.app.MultiStateAppDeployer;
 import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryDeploymentProperties;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.skipper.SkipperException;
@@ -211,7 +213,8 @@ public class AppDeployerReleaseManager implements ReleaseManager {
 						else {
 							for (Map.Entry<String, Object> entry : model.entrySet()) {
 								if (existingName.contains(entry.getKey())) {
-									Map<String, Object> appModel = (Map<String, Object>) model.getOrDefault(entry.getKey(),
+									Map<String, Object> appModel = (Map<String, Object>) model.getOrDefault(
+											entry.getKey(),
 											new TreeMap<String, Object>());
 									updateCountProperty(appModel, appsCount);
 								}
@@ -228,8 +231,10 @@ public class AppDeployerReleaseManager implements ReleaseManager {
 	private void updateCountProperty(Map<String, Object> model, String appsCount) {
 		Map<String, Object> specMap = (Map<String, Object>) model.getOrDefault(SpringBootAppKind.SPEC_STRING,
 				new TreeMap<String, Object>());
-		Map<String, Object> deploymentPropertiesMap = (Map<String, Object>) specMap.get(SpringBootAppSpec.DEPLOYMENT_PROPERTIES_STRING);
-		// explicit null check instead of getOrDefault is required as deploymentProperties could have been explicitly
+		Map<String, Object> deploymentPropertiesMap = (Map<String, Object>) specMap
+				.get(SpringBootAppSpec.DEPLOYMENT_PROPERTIES_STRING);
+		// explicit null check instead of getOrDefault is required as deploymentProperties could
+		// have been explicitly
 		// set to null.
 		if (deploymentPropertiesMap == null) {
 			deploymentPropertiesMap = new TreeMap<String, Object>();
@@ -256,9 +261,22 @@ public class AppDeployerReleaseManager implements ReleaseManager {
 			// combination, get more details from instances.
 			int deployedCount = 0;
 			int unknownCount = 0;
+			Map<String, DeploymentState> deploymentStateMap = new HashMap<>();
+			if (appDeployer instanceof MultiStateAppDeployer) {
+				MultiStateAppDeployer multiStateAppDeployer = (MultiStateAppDeployer) appDeployer;
+				deploymentStateMap = multiStateAppDeployer.states(StringUtils.toStringArray(deploymentIds));
+			}
 			List<AppStatus> appStatusList = new ArrayList<>();
 			for (String deploymentId : deploymentIds) {
 				AppStatus appStatus = appDeployer.status(deploymentId);
+
+				if (appStatus.getState().equals(DeploymentState.failed)) {
+					// check if we have 'early' status computed via multiStateAppDeployer
+					if (deploymentStateMap.containsKey(deploymentId)) {
+						appStatus = AppStatus.of(deploymentId).generalState(deploymentStateMap.get(deploymentId))
+								.build();
+					}
+				}
 				logger.debug("App Deployer for deploymentId {} gives status {}", deploymentId, appStatus);
 				appStatusList.add(appStatus);
 

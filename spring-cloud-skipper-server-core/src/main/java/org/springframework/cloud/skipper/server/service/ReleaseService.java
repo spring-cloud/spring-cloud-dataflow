@@ -269,7 +269,7 @@ public class ReleaseService {
 		ReleaseAnalysisReport releaseAnalysisReport = this.releaseReportService.createReport(upgradeRequest);
 		// This is expected to be executed on another thread.
 		this.releaseManager.upgrade(releaseAnalysisReport);
-		return status(releaseAnalysisReport.getReplacingRelease());
+		return releaseAnalysisReport.getReplacingRelease();
 	}
 
 	protected Info createNewInfo() {
