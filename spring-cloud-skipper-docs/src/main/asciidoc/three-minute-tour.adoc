@@ -114,6 +114,7 @@ skipper:>platform list
 
 Let's install the Hello World app, specifically, the maven based artifact.
 
+[source,bash,options="nowrap"]
 ----
 skipper:>install --release-name helloworldpcf --package-name helloworld --package-version 1.0.0 --platform-name cf-dev --properties spec.deploymentProperties.spring.cloud.deployer.cloudfoundry.route=helloworldpcf.cfapps.io
 Released helloworld-pcf
@@ -196,6 +197,7 @@ spec:
 ----
 
 The `upgrade` command
+[source,bash,options="nowrap"]
 ----
 skipper:>upgrade --release-name helloworldpcf --package-name helloworld --package-version 1.0.0 --file /home/mpollack/helloworld-upgrade.yml
 helloworldpcf has been upgraded.
@@ -269,6 +271,7 @@ skipper:>history --release-name helloworldpcf
 
 A more typical upgrade process is not to change application properties, but to change the version of the application because the code has change.  We will now upgrade the release to use a new maven artifact, version 1.0.1, which also corresponds to version 1.0.1 of the helloworld skipper package.
 In this case we will not add any additional properties other than the route.
+
 
 ----
 skipper:>upgrade --release-name helloworldpcf --package-name helloworld --package-version 1.0.1 --properties spec.deploymentProperties.spring.cloud.deployer.cloudfoundry.route=helloworldpcf.cfapps.io
@@ -400,7 +403,7 @@ skipper:>platform list
 ----
 
 Let's install the Hello World app, specifically, the Docker based artifact.
-
+[source,bash,options="nowrap"]
 ----
 skipper:>install --release-name helloworldk8s --package-name helloworld-docker --package-version 1.0.0 --platform-name minikube --properties spec.deploymentProperties.spring.cloud.deployer.kubernetes.createNodePort=32123
 Released helloworldk8s
@@ -491,7 +494,7 @@ spec:
 ----
 
 The `upgrade` command
-
+[source,bash,options="nowrap"]
 ----
 skipper:>upgrade --release-name helloworldk8s --package-name helloworld-docker --package-version 1.0.0 --file /home/mpollack/helloworld-upgrade-k8s.yml
 helloworldk8s has been upgraded.
@@ -564,6 +567,7 @@ skipper:>history --release-name helloworldk8s
 A more typical upgrade process is not to change application properties, but to change the version of the application because the code has change.  We will now upgrade the release to use a new Docker artifact, version 1.0.1, which also corresponds to version 1.0.1 of the helloworld Skipper package.
 In this case we will not add any additional properties other than the NodePort.
 
+[source,bash,options="nowrap"]
 ----
 skipper:>upgrade --release-name helloworldk8s --package-name helloworld-docker --package-version 1.0.1 --properties spec.deploymentProperties.spring.cloud.deployer.kubernetes.createNodePort=32125
 Released helloworldk8s
