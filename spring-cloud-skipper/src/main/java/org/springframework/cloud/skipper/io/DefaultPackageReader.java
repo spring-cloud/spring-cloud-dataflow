@@ -38,6 +38,7 @@ import org.springframework.util.Assert;
 
 /**
  * @author Mark Pollack
+ * @author Gunnar Hillert
  */
 public class DefaultPackageReader implements PackageReader {
 
@@ -56,6 +57,7 @@ public class DefaultPackageReader implements PackageReader {
 		for (File file : files) {
 			// Package metadata
 			if (file.getName().equalsIgnoreCase("package.yaml") || file.getName().equalsIgnoreCase("package.yml")) {
+
 				pkg.setMetadata(loadPackageMetadata(file));
 				continue;
 			}
@@ -68,8 +70,8 @@ public class DefaultPackageReader implements PackageReader {
 			}
 
 			// The template files
-			String absFileName = file.getAbsoluteFile().toString();
-			if (absFileName.endsWith("/templates")) {
+			final File absoluteFile = file.getAbsoluteFile();
+			if (absoluteFile.isDirectory() && absoluteFile.getName().equals("templates")) {
 				pkg.setTemplates(loadTemplates(file));
 				continue;
 			}
