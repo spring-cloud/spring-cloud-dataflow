@@ -57,6 +57,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 /**
  * @author Thomas Risberg
@@ -68,6 +69,7 @@ import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 @Configuration
 @ConditionalOnProperty(prefix = FeaturesProperties.FEATURES_PREFIX, name = FeaturesProperties.TASKS_ENABLED, matchIfMissing = true)
 @EnableConfigurationProperties({ TaskConfigurationProperties.class })
+@EnableTransactionManagement
 public class TaskConfiguration {
 
 	@Autowired
