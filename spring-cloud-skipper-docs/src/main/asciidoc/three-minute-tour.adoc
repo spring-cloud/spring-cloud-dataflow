@@ -59,8 +59,8 @@ spring:
                   org: scdf-ci
                   space: space-mark
                   domain: cfapps.io
-                  username: mpollack@gopivotal.com
-                  password: krypton
+                  username: <your-username>
+                  password: <your-password>
                   skipSslValidation: false
                 deployment:
                   deleteRoutes: false
