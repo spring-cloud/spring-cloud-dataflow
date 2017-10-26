@@ -1,13 +1,13 @@
 = Spring Cloud Skipper Reference Guide
-Mark Pollack; Ilayaperumal Gopinathan; Janne Valkealahti; Gunnar Hillert
-
+Mark Pollack; Ilayaperumal Gopinathan; Janne Valkealahti; Gunnar Hillert; Sabby Anandan
 :doctype: book
-:toc:
+:toc: left
 :toclevels: 4
 :source-highlighter: prettify
 :numbered:
 :icons: font
 :hide-uri-scheme:
+:docinfo: shared
 
 :spring-cloud-skipper-docs: http://docs.spring.io/spring-cloud-skipper/docs/{project-version}/reference
 :spring-cloud-skipper-docs-current: http://docs.spring.io/spring-cloud-skipper/docs/current-SNAPSHOT/reference/html/
