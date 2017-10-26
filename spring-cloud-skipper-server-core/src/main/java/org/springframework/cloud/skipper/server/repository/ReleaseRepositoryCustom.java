@@ -28,7 +28,7 @@ import org.springframework.cloud.skipper.domain.Release;
 public interface ReleaseRepositoryCustom {
 
 	/**
-	 * Find the lasted in time, release object, by name.
+	 * Find the latest in time, release object, by name.
 	 * @param releaseName the name of the release
 	 * @return the Release object
 	 * @throws {@link ReleaseNotFoundException} if no Release for the given name can be found.
@@ -36,7 +36,15 @@ public interface ReleaseRepositoryCustom {
 	Release findLatestRelease(String releaseName);
 
 	/**
-	 * Find the lasted in time, release object, by name whose status is neither unknown nor failed.
+	 * Find the latest in time, release object, by name and with the deployed status.
+	 * @param releaseName the name of the release
+	 * @return the Release object
+	 * @throws {@link ReleaseNotFoundException} if no deployed Release for the given name can be found.
+	 */
+	Release findLatestDeployedRelease(String releaseName);
+
+	/**
+	 * Find the latest in time, release object, by name whose status is neither unknown nor failed.
 	 * This release can be used for upgrade/rollback operations.
 	 * @param releaseName the name of the release
 	 * @return the Release object

@@ -42,6 +42,17 @@ public class ReleaseRepositoryImpl implements ReleaseRepositoryCustom {
 	}
 
 	@Override
+	public Release findLatestDeployedRelease(String releaseName) {
+		List<Release> releases = this.releaseRepository.findByNameOrderByVersionDesc(releaseName);
+		for (Release release : releases) {
+			if (release.getInfo().getStatus().getStatusCode().equals(StatusCode.DEPLOYED)) {
+				return release;
+			}
+		}
+		throw new ReleaseNotFoundException(releaseName);
+	}
+
+	@Override
 	public Release findLatestReleaseForUpdate(String releaseName) {
 		List<Release> releases = this.releaseRepository.findByNameOrderByVersionDesc(releaseName);
 		for (Release release : releases) {

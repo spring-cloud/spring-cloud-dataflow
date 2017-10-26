@@ -194,7 +194,7 @@ public class ReleaseService {
 	@Transactional
 	public Release delete(String releaseName) {
 		Assert.notNull(releaseName, "Release name must not be null");
-		Release release = this.releaseRepository.findLatestRelease(releaseName);
+		Release release = this.releaseRepository.findLatestDeployedRelease(releaseName);
 		return this.releaseManager.delete(release);
 	}
 

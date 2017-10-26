@@ -35,8 +35,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Java6Assertions.fail;
 
 /**
- * Uses @Transactional for ease of re-using existing JPA managed objects within Spring's
- * managed test method transaction
  * @author Ilayaperumal Gopinathan
  */
 @ActiveProfiles("repo-test")
@@ -299,6 +297,18 @@ public class ReleaseRepositoryTests extends AbstractIntegrationTest {
 		Release latestReleaseForUpdate2 = this.releaseRepository.findLatestReleaseForUpdate(release13.getName());
 		assertThat(latestReleaseForUpdate2.getVersion()).isEqualTo(2);
 
+		// deployed -> deleted -> unknown
+		Release latestDeployedRelease = this.releaseRepository.findLatestDeployedRelease(release13.getName());
+		assertThat(latestDeployedRelease.getVersion()).isEqualTo(1);
+
+		try {
+			this.releaseRepository.findLatestDeployedRelease(release4.getName());
+			fail("ReleaseNotFoundException is expected");
+		}
+		catch (ReleaseNotFoundException e) {
+			assertThat(e.getMessage())
+					.isEqualTo(String.format("Release with the name [%s] doesn't exist", release4.getName()));
+		}
 		try {
 			this.releaseRepository.findLatestReleaseForUpdate(release16.getName());
 			fail("ReleaseNotFoundException is expected");
