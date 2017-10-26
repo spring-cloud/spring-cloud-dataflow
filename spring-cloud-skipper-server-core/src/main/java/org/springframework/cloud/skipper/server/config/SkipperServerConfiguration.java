@@ -185,7 +185,8 @@ public class SkipperServerConfiguration implements AsyncConfigurer {
 	}
 
 	@Bean
-	@ConditionalOnProperty(value = "spring.cloud.skipper.server.enableReleaseStateUpdateService", matchIfMissing = true)
+	@ConditionalOnProperty(prefix = "spring.cloud.skipper.server", name = "enableReleaseStateUpdateService",
+			matchIfMissing = true)
 	public ReleaseStateUpdateService releaseStateUpdateService(ReleaseManager releaseManager,
 			ReleaseRepository releaseRepository) {
 		return new ReleaseStateUpdateService(releaseManager, releaseRepository);
