@@ -8,7 +8,9 @@ A package manager that installs, upgrades, and rolls back applications on multip
 
 Supported application types are Spring Boot applications.
 
-Supported Cloud Platforms are local, Cloud Foundry and Kubernetes.
+Supported Cloud Platforms are `Cloud Foundry`, `Kubernetes`.
+
+For development experience, `Local` deployment is supported.
 
 Skipper can be used as part of implementing the practice of Continuous Deployment.  It provides a versioned "single
 source of truth" that defines what applications were deployed to the cloud.  This enables easy rollbacks and upgrades without having to rebuild applications from source code.
@@ -29,14 +31,16 @@ To just create the executables, type
 $./mvnw clean package -DskipTests -Dmaven.javadoc.skip=true
 ----
 
-To build just the documentation, if the RESTDocs generated from tests are already present.
+To generate just the RESTDocs documentation
+
 ----
-./mvnw -DskipTests -Pfull package -pl spring-cloud-skipper-docs
+./mvnw test -pl spring-cloud-skipper-server-core -Dtest=*Documentation*
 ----
 
-To run just the RESTDocs documentation
+To build just the documentation, if the RESTDocs generated from tests are already present
+
 ----
-./mvnw -pl spring-cloud-skipper-server-core -Dtest=*Documentation*
+./mvnw -DskipTests -Pfull package -pl spring-cloud-skipper-docs
 ----
 
 
@@ -49,7 +53,6 @@ spring:
   cloud:
     skipper:
       server:
-        synchonizeIndexOnContextRefresh: true
         packageRepositories:
           -
             name: test
@@ -64,28 +67,31 @@ $ java -jar spring-cloud-skipper-server/target/spring-cloud-skipper-server-1.0.0
 
 Where you replace `/home/mpollack/` with your own home directory.
 
-The property `spring.cloud.skipper.server.synchonizeIndexOnContextRefresh` when set to `true` loads the packages from
- the configured `packageRepositories` during the server startup.
-
 Then launch the Skipper shell in another terminal
 
 ----
 $ java -jar spring-cloud-skipper-shell/target/spring-cloud-skipper-shell-1.0.0.BUILD-SNAPSHOT.jar
 ----
 
-The command `search` will seach for all available packages. It should then show you the following output
+The command `search` will search for all available packages. It should then show you the following output
 
 ```
 skipper:>search
-╔════════╤═══════╤═══════════════════════════════════════════════════════════════════════════╗
-║  Name  │Version│                                Description                                ║
-╠════════╪═══════╪═══════════════════════════════════════════════════════════════════════════╣
-║log     │2.0.0  │The log sink uses the application logger to output the data for inspection.║
-║log     │1.0.0  │The log sink uses the application logger to output the data for inspection.║
-║log     │1.1.0  │The log sink uses the application logger to output the data for inspection.║
-║ticktock│1.0.0  │The ticktock stream sends a time stamp and logs the value.                 ║
-║time    │2.0.0  │The time source periodically emits a timestamp string.                     ║
-╚════════╧═══════╧═══════════════════════════════════════════════════════════════════════════╝
+╔═════════════════╤═══════╤═════════════════════════════════════════════════════════════╗
+║      Name       │Version│                         Description                         ║
+╠═════════════════╪═══════╪═════════════════════════════════════════════════════════════╣
+║helloworld-docker│1.0.0  │The hello world app says hello.                              ║
+║log              │1.1.0  │The log sink uses the application logger to output the data  ║
+║                 │       │for inspection.                                              ║
+║log              │2.0.0  │The log sink uses the application logger to output the data  ║
+║                 │       │for inspection.                                              ║
+║log              │1.0.0  │The log sink uses the application logger to output the data  ║
+║                 │       │for inspection.                                              ║
+║log-docker       │1.0.0  │Docker version of the log sink application version           ║
+║log-docker       │2.0.0  │Docker version of the log sink application                   ║
+║ticktock         │1.0.0  │The ticktock stream sends a time stamp and logs the value.   ║
+║time             │2.0.0  │The time source periodically emits a timestamp string.       ║
+╚═════════════════╧═══════╧═════════════════════════════════════════════════════════════╝
 ```
 
 In another window you can run `watch -n 2 jps` so see which Java processes are running, since by default, the local deployer will be used to deploy packages.
@@ -104,7 +110,7 @@ You can ask for the status using the status command
 ```
 skipper:>status --release-name mylog
 ╔═══════════════╤════════════════════════════════════════╗
-║Last Deployed  │Sun Oct 08 00:00:42 EDT 2017            ║
+║Last Deployed  │Thu Oct 26 10:59:31 IST 2017            ║
 ║Status         │DEPLOYED                                ║
 ║Platform Status│All apps have been successfully deployed║
 ║               │mylog-v1.log[mylog-v1.log-0=deployed]   ║
@@ -128,10 +134,7 @@ spec:
   resource: maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.2.0.RC1
   resourceMetadata: maven://org.springframework.cloud.stream.app:log-sink-rabbit:jar:metadata:1.2.0.RC1
   applicationProperties:
-    log.level: DEBUG
   deploymentProperties:
-    memory: 1024m
-    spring.cloud.deployer.local.inheritLogging: false
 ```
 
 Now update the release with a newer version
@@ -139,8 +142,7 @@ Now update the release with a newer version
 ```
 skipper:>upgrade --release-name mylog --package-name log --package-version 2.0.0
 mylog has been upgraded.
-Last Deployed: Sun Oct 08 00:04:48 EDT 2017
-Status: mylog-v2.log[mylog-v2.log-0=deploying]
+Last Deployed: Thu Oct 26 11:00:43 IST 2017
 ```
 
 You should see the java app named `log-sink-rabbit-1.2.0.RELEASE.jar` running in the output of the `jps` command.
@@ -149,12 +151,12 @@ The status command should shortly show it has been deployed successfully.  Note 
 
 ```
 skipper:>status --release-name mylog
-╔═══════════════╤════════════════════════════════════════╗
-║Last Deployed  │Sun Oct 08 00:04:48 EDT 2017            ║
-║Status         │DEPLOYED                                ║
-║Platform Status│All apps have been successfully deployed║
-║               │mylog-v2.log[mylog-v2.log-0=deployed]   ║
-╚═══════════════╧════════════════════════════════════════╝
+╔═══════════════╤═════════════════════════════════════════════════╗
+║Last Deployed  │Thu Oct 26 11:00:43 IST 2017                     ║
+║Status         │DEPLOYED                                         ║
+║Platform Status│All applications have been successfully deployed.║
+║               │mylog.log-v2[mylog.log-v2-0=deployed]            ║
+╚═══════════════╧═════════════════════════════════════════════════╝
 ```
 
 Next rollback to the previous release
@@ -162,8 +164,7 @@ Next rollback to the previous release
 ```
 skipper:>rollback --release-name mylog
 mylog has been rolled back.
-Last Deployed: Sun Oct 08 00:05:53 EDT 2017
-Status: mylog-v3.log[mylog-v3.log-0=deploying]
+Last Deployed: Thu Oct 26 11:01:47 IST 2017
 ```
 
 You should see the java app named `log-sink-rabbit-1.2.0.RC1.jar` running in the output of the `jps` command
@@ -172,25 +173,29 @@ The status command should shortly show it has been deployed successfully.
 
 ```
 skipper:>status --release-name mylog
-╔═══════════════╤════════════════════════════════════════╗
-║Last Deployed  │Sun Oct 08 00:05:53 EDT 2017            ║
-║Status         │DEPLOYED                                ║
-║Platform Status│All apps have been successfully deployed║
-║               │mylog-v3.log[mylog-v3.log-0=deployed]   ║
-╚═══════════════╧════════════════════════════════════════╝
+╔═══════════════╤═════════════════════════════════════════════════╗
+║Last Deployed  │Thu Oct 26 11:01:47 IST 2017                     ║
+║Status         │DEPLOYED                                         ║
+║Platform Status│All applications have been successfully deployed.║
+║               │mylog.log-v3[mylog.log-v3-0=deployed]            ║
+╚═══════════════╧═════════════════════════════════════════════════╝
 ```
 
 The `history` command shows you the various releases that were made
 
 ```
 skipper:>history --release-name mylog
-╔═══════╤════════════════════════════╤════════╤════════════╤═══════════════╤════════════════╗
-║Version│        Last updated        │ Status │Package Name│Package Version│  Description   ║
-╠═══════╪════════════════════════════╪════════╪════════════╪═══════════════╪════════════════╣
-║3      │Sun Oct 08 00:05:53 EDT 2017│DEPLOYED│log         │1.0.0          │Upgrade complete║
-║2      │Sun Oct 08 00:04:48 EDT 2017│DELETED │log         │2.0.0          │Delete complete ║
-║1      │Sun Oct 08 00:00:42 EDT 2017│DELETED │log         │1.0.0          │Delete complete ║
-╚═══════╧════════════════════════════╧════════╧════════════╧═══════════════╧════════════════╝
+╔═══════╤═════════════════════════╤════════╤═══════════╤══════════════╤═══════════════╗
+║Version│      Last updated       │ Status │  Package  │   Package    │  Description  ║
+║       │                         │        │   Name    │   Version    │               ║
+╠═══════╪═════════════════════════╪════════╪═══════════╪══════════════╪═══════════════╣
+║3      │Thu Oct 26 11:01:47 IST  │DEPLOYED│log        │1.0.0         │Upgrade        ║
+║       │2017                     │        │           │              │complete       ║
+║2      │Thu Oct 26 11:00:43 IST  │DELETED │log        │2.0.0         │Delete complete║
+║       │2017                     │        │           │              │               ║
+║1      │Thu Oct 26 10:59:31 IST  │DELETED │log        │1.0.0         │Delete complete║
+║       │2017                     │        │           │              │               ║
+╚═══════╧═════════════════════════╧════════╧═══════════╧══════════════╧═══════════════╝
 ```
 
 Now delete the release.
