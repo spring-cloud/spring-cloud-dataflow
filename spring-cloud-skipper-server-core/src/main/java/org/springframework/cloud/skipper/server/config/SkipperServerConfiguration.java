@@ -70,6 +70,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.data.map.repository.config.EnableMapRepositories;
 import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
@@ -90,6 +91,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableJpaRepositories(basePackages = "org.springframework.cloud.skipper.server.repository")
 @EnableTransactionManagement
 @EnableAsync
+@EnableScheduling
 public class SkipperServerConfiguration implements AsyncConfigurer {
 
 	public static final String SKIPPER_THREAD_POOL_EXECUTOR = "skipperThreadPoolTaskExecutor";
@@ -183,7 +185,7 @@ public class SkipperServerConfiguration implements AsyncConfigurer {
 	}
 
 	@Bean
-	@ConditionalOnProperty("spring.cloud.skipper.server.disableReleaseStateUpdateService")
+	@ConditionalOnProperty(value = "spring.cloud.skipper.server.enableReleaseStateUpdateService", matchIfMissing = true)
 	public ReleaseStateUpdateService releaseStateUpdateService(ReleaseManager releaseManager,
 			ReleaseRepository releaseRepository) {
 		return new ReleaseStateUpdateService(releaseManager, releaseRepository);

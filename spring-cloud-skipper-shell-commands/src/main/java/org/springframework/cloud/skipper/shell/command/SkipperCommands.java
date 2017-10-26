@@ -189,7 +189,7 @@ public class SkipperCommands extends AbstractSkipperCommand {
 		//assertMutuallyExclusiveFileAndProperties(file, properties);
 		Release release = skipperClient
 				.install(getInstallRequest(packageName, packageVersion, file, properties, releaseName, platformName));
-		return "Released " + release.getName();
+		return "Released " + release.getName() + ". Now at version v" + release.getVersion() + ".";
 	}
 
 	private InstallRequest getInstallRequest(String packageName, String packageVersion, File yamlFile,
@@ -235,8 +235,7 @@ public class SkipperCommands extends AbstractSkipperCommand {
 		Release release = skipperClient
 				.upgrade(getUpgradeRequest(releaseName, packageName, packageVersion, file, properties));
 		StringBuilder sb = new StringBuilder();
-		sb.append(release.getName() + " has been upgraded.\n");
-		sb.append("Last Deployed: " + release.getInfo().getLastDeployed() + "\n");
+		sb.append(release.getName() + " has been upgraded.  Now at version v" + release.getVersion() + ".");
 		return sb.toString();
 	}
 
@@ -287,8 +286,7 @@ public class SkipperCommands extends AbstractSkipperCommand {
 					"Not specifying the value rolls back to the previous release.", defaultValue = "0") int releaseVersion) {
 		Release release = skipperClient.rollback(releaseName, releaseVersion);
 		StringBuilder sb = new StringBuilder();
-		sb.append(release.getName() + " has been rolled back.\n");
-		sb.append("Last Deployed: " + release.getInfo().getLastDeployed() + "\n");
+		sb.append(release.getName() + " has been rolled back.  Now at version v" + release.getVersion() + ".");
 		return sb.toString();
 	}
 

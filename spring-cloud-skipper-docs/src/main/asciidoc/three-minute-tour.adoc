@@ -1,10 +1,159 @@
 [[three-minute-tour]]
 = Three minute Tour
-This section is a more involved getting started guide that covers additional commands when deploying apps to the local machine, Cloud Foundry and Kuberenetes via minikube.
+
+Picking up from where the <<three-second-tour>> left off, this section walk through additional commands and features of Skipper.  Each section walk through the same set of operations, but for a different plaform.
+
 
 == Using the local machine
 
-Picking up from the <<three-second-tour>> left off, we will show some additional commands and features of Skipper.
+Start up the server and shell as in the <<three-second-tour>>
+
+Install and update the hello world applications.
+
+[source,bash,options="nowrap"]
+----
+skipper:>install --release-name helloworldlocal --package-name helloworld --package-version 1.0.0 --properties spec.applicationProperties.server.port=8099
+Released helloworldlocal. Now at version v1.
+----
+
+You can now curl the `greeting` endpoint.
+```
+$ curl http://localhost:8099/greeting
+Hello World!
+$ curl http://localhost:8099/about
+Hello World v1.0.0.RELEASE
+```
+
+We will use a YAML file to update the release.  This application contains a Spring Boot `@ConfigurationProperty` named `helloworld.greeting`, so we will set that along with a standard Spring Boot property `endpoints.sensitive=false`.  We will also bump the memory up to 2G, make the Boot actuator endpoint not sensitive and set the port to 8100.
+
+The `helloworld-upgrade-local.yml file contains
+----
+spec:
+  applicationProperties:
+    server.port: 8100
+    endpoints.sensitive: false
+    helloworld.greeting: yo
+  deploymentProperties:
+    spring.cloud.deployer.memory: 2048m
+----
+
+The `upgrade` command
+[source,bash,options="nowrap"]
+----
+skipper:>upgrade --release-name helloworldlocal --package-name helloworld --package-version 1.0.1 --file /home/mpollack/helloworld-upgrade-local.yml
+helloworldlocal has been upgraded.  Now at version v2.
+----
+
+The current upgrade strategy is very simple, if the new app is healthy, the old app is removed.  There is not a rolling upgrade option, all new apps are deployed, checked for health, and then previous versions removed.
+More flexible upgrade strategies are planned along with the introduction of the https://projects.spring.io/spring-statemachine/[Spring Cloud State Machine] project to orchestrate the update process.
+
+
+You can now curl the `greeting` endpoint and the `about` endpoint.
+```
+$ curl http://localhost:8100/greeting
+yo
+$ curl http://localhost:8100/about
+Hello World v1.0.1.RELEASE
+```
+
+The `list` command shows you the current `DEPLOYED` and `DELETED` releases for every release name.
+In this case there is just one entry
+
+[source,bash,options="nowrap"]
+----
+skipper:>list
+╔═══════════════╤═══════╤═════════════╤════════╤══════════╤═════════╤═════════╤═══════════════════════════════════════════════════════════════════════╗
+║     Name      │Version│Last updated │ Status │ Package  │ Package │Platform │                            Platform Status                            ║
+║               │       │             │        │   Name   │ Version │  Name   │                                                                       ║
+╠═══════════════╪═══════╪═════════════╪════════╪══════════╪═════════╪═════════╪═══════════════════════════════════════════════════════════════════════╣
+║helloworldlocal│1      │Thu Oct 26   │DEPLOYED│helloworld│1.0.0    │default  │helloworldlocal.helloworld-v1[helloworldlocal.helloworld-v1-0=deployed]║
+║               │       │16:40:12 EDT │        │          │         │         │                                                                       ║
+║               │       │2017         │        │          │         │         │                                                                       ║
+╚═══════════════╧═══════╧═════════════╧════════╧══════════╧═════════╧═════════╧═══════════════════════════════════════════════════════════════════════╝
+----
+
+You can get the full history of the release using the `history command.
+----
+skipper:>history --release-name helloworldlocal
+╔═══════╤════════════════════════════╤════════╤════════════╤═══════════════╤════════════════╗
+║Version│        Last updated        │ Status │Package Name│Package Version│  Description   ║
+╠═══════╪════════════════════════════╪════════╪════════════╪═══════════════╪════════════════╣
+║2      │Thu Oct 26 16:40:31 EDT 2017│DEPLOYED│helloworld  │1.0.1          │Upgrade complete║
+║1      │Thu Oct 26 16:40:12 EDT 2017│DELETED │helloworld  │1.0.0          │Delete complete ║
+╚═══════╧════════════════════════════╧════════╧════════════╧═══════════════╧════════════════╝
+----
+
+Do see what changed, you can look at the Skipper manifest for each release using the `manifest get` command.
+  A `manifest diff` command is coming in the next release.
+
+----
+skipper:>manifest get --release-name helloworldlocal --release-version 2
+
+---
+# Source: helloworld.yml
+apiVersion: skipper/v1
+kind: SpringBootApp
+metadata:
+  name: helloworld
+  type: demo
+spec:
+  resource: maven://org.springframework.cloud.samples:spring-cloud-skipper-samples-helloworld:1.0.1.RELEASE
+  applicationProperties:
+    server.port: 8100
+    endpoints.sensitive: false
+    helloworld.greeting: yo
+  deploymentProperties:
+    spring.cloud.deployer.memory: 2048m
+    spring.cloud.deployer.count: 1
+----
+
+and
+
+----
+skipper:>manifest get --release-name helloworldlocal --release-version 1
+
+---
+# Source: helloworld.yml
+apiVersion: skipper/v1
+kind: SpringBootApp
+metadata:
+  name: helloworld
+  type: demo
+spec:
+  resource: maven://org.springframework.cloud.samples:spring-cloud-skipper-samples-helloworld:1.0.0.RELEASE
+  applicationProperties:
+    server.port: 8099
+  deploymentProperties:
+----
+
+Next we will use the `rollback` command to deploy an older version of the application.
+Since we have the manifest for that version, we have all we need to redeploy and earlier release.
+
+----
+skipper:>rollback --release-name helloworldlocal --release-version 1
+helloworldlocal has been rolled back.  Now at version v3.
+----
+
+The history now shows a new `v3` version, even though it is identical in terms of app behavior to the `v2` version.
+----
+skipper:>history --release-name helloworldlocal
+╔═══════╤════════════════════════════╤════════╤════════════╤═══════════════╤════════════════╗
+║Version│        Last updated        │ Status │Package Name│Package Version│  Description   ║
+╠═══════╪════════════════════════════╪════════╪════════════╪═══════════════╪════════════════╣
+║3      │Thu Oct 26 16:49:18 EDT 2017│DEPLOYED│helloworld  │1.0.0          │Upgrade complete║
+║2      │Thu Oct 26 16:40:31 EDT 2017│DELETED │helloworld  │1.0.1          │Delete complete ║
+║1      │Thu Oct 26 16:40:12 EDT 2017│DELETED │helloworld  │1.0.0          │Delete complete ║
+╚═══════╧════════════════════════════╧════════╧════════════╧═══════════════╧════════════════╝
+----
+
+
+You can now curl the `greeting` endpoint.
+```
+$ curl http://localhost:8099/greeting
+Hello World!
+$ curl http://localhost:8099/about
+Hello World v1.0.0.RELEASE
+```
 
 == Using Cloud Foundry
 
@@ -184,7 +333,7 @@ The manifest is in a Kubernetes Resource file inspired format.  By looking at th
 The metadata values that are present will be used in the next release to support searching for releases based on those values.
 
 Since it is somewhat awkward to specify multiple flattened out YAML values for the `--properties` argument in the shell, you can also specify the location of a YAML file when installing or upgrading.
-We will use a YAML file we will update the release.  This application contains a Spring Boot `@ConfigurationProperty` named `helloworld.greeting`, so we will set that along with a standard Spring Boot property `endpoints.sensitive=false`.  We will also bump the memory up to 2G.
+We will use a YAML file to update the release.  This application contains a Spring Boot `@ConfigurationProperty` named `helloworld.greeting`, so we will set that along with a standard Spring Boot property `endpoints.sensitive=false`.  We will also bump the memory up to 2G.
 
 ----
 spec:
@@ -247,8 +396,9 @@ $ curl http://helloworldpcf.cfapps.io/about
 Hello World v1.0.0.RELEASE
 ----
 
-The `list` command shows you the current `DEPLOYED` and `DELETED` release for every release name.
+The `list` command shows you the current `DEPLOYED` and `DELETED` releases for every release name.
 In this case there is just one entry
+[source,bash,options="nowrap"]
 ----
 skipper:>list
 ╔═════════════╤═══════╤════════════════════════════╤════════╤════════════╤═══════════════╤═════════════╤═══════════════╗
@@ -320,7 +470,7 @@ helloworldpcf has been rolled back.
 Last Deployed: Tue Oct 24 23:15:01 EDT 2017
 ----
 
-The history now shows a new `v4` version, even though it is identical to the `v2` version.
+The history now shows a new `v4` version, even though it is identical in terms of app behavior to the `v2` version.
 
 ----
 skipper:>history --release-name helloworldpcf
@@ -553,7 +703,7 @@ skipper:>list
 ╚═════════════╧═══════╧════════════════════════════╧════════╧═════════════════╧═══════════════╧═════════════╧═══════════════╝
 ----
 
-You can get the full history of the release using the `history` command
+You can get the full history of the release using the `history` command.
 
 ----
 skipper:>history --release-name helloworldk8s

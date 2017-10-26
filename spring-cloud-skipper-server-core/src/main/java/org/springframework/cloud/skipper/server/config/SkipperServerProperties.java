@@ -49,7 +49,7 @@ public class SkipperServerProperties {
 	 * Flag indicating if the ReleaseStateUpdateService, which has a
 	 * {@link org.springframework.scheduling.annotation.Scheduled} method, should be created.
 	 */
-	private boolean disableReleaseStateUpdateService; // false
+	private boolean enableReleaseStateUpdateService;
 
 	public List<Repository> getPackageRepositories() {
 		return packageRepositories;
@@ -67,12 +67,12 @@ public class SkipperServerProperties {
 		this.synchonizeIndexOnContextRefresh = synchonizeIndexOnContextRefresh;
 	}
 
-	public boolean isDisableReleaseStateUpdateService() {
-		return disableReleaseStateUpdateService;
+	public boolean isEnableReleaseStateUpdateService() {
+		return enableReleaseStateUpdateService;
 	}
 
-	public void setDisableReleaseStateUpdateService(boolean disableReleaseStateUpdateService) {
-		this.disableReleaseStateUpdateService = disableReleaseStateUpdateService;
+	public void setEnableReleaseStateUpdateService(boolean enableReleaseStateUpdateService) {
+		this.enableReleaseStateUpdateService = enableReleaseStateUpdateService;
 	}
 
 	public boolean isEnableLocalPlatform() {

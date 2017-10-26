@@ -64,6 +64,7 @@ public class ReleaseStateUpdateService {
 	@Scheduled(initialDelay = 5000, fixedRate = 5000)
 	@Transactional
 	public void update() {
+		log.debug("Updating Release stategit.");
 		long now = System.currentTimeMillis();
 		boolean fullPoll = now > nextFullPoll;
 		if (fullPoll) {

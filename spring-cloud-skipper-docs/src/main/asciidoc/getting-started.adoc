@@ -69,10 +69,11 @@ skipper:>search
 ----
 
 Install the Maven based Hello World application using the `install` command.  Since this application picks a random port for the http server by default, we specify the Spring Boot property `server.port`, prefixed via `spec.applicationProperties`.
-```
+[source,bash,options="nowrap"]
+----
 skipper:>install --release-name helloworld-local --package-name helloworld --package-version 1.0.0 --properties spec.applicationProperties.server.port=8099
 Released helloworld-local
-```
+----
 You can now curl the `greeting` endpoint.
 ```
 $ curl http://localhost:8099/greeting
@@ -90,11 +91,12 @@ skipper:>status --release-name helloworld-local
 ╚═══════════════╧═════════════════════════════════════════════════════════════════════════╝
 ```
 Let's upgrade the release. The `1.0.1` package refers to a newly released application that changed the default value of the greeting to be in Portugese`.
-```
+[source,bash,options="nowrap"]
+----
 skipper:>upgrade --release-name helloworld-local --package-name helloworld --package-version 1.0.1  --properties spec.applicationProperties.server.port=8100
 helloworld-local has been upgraded.
 Last Deployed: Tue Oct 24 18:43:01 EDT 2017
-```
+----
 This will deploy the new version of the application, wait until it is healthy, and then destroy the old version of the application.  You can now curl the `greeting` endpoint at the new port and see that the application has been updated.
 ```
 $ curl http://localhost:8100/greeting
