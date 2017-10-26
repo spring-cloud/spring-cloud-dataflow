@@ -27,7 +27,6 @@ import org.springframework.cloud.skipper.domain.StatusCode;
 import org.springframework.cloud.skipper.server.deployer.ReleaseManager;
 import org.springframework.cloud.skipper.server.domain.AppDeployerData;
 import org.springframework.cloud.skipper.server.repository.AppDeployerDataRepository;
-import org.springframework.cloud.skipper.server.repository.DeployerRepository;
 import org.springframework.cloud.skipper.server.repository.ReleaseRepository;
 import org.springframework.context.event.EventListener;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,8 +45,6 @@ public class HandleHealthCheckStep {
 
 	private final ReleaseRepository releaseRepository;
 
-	private final DeployerRepository deployerRepository;
-
 	private final AppDeployerDataRepository appDeployerDataRepository;
 
 	private final DeleteStep deleteStep;
@@ -57,12 +54,10 @@ public class HandleHealthCheckStep {
 	private ReleaseManager releaseManager;
 
 	public HandleHealthCheckStep(ReleaseRepository releaseRepository,
-			DeployerRepository deployerRepository,
 			AppDeployerDataRepository appDeployerDataRepository,
 			DeleteStep deleteStep,
 			HealthCheckProperties healthCheckProperties) {
 		this.releaseRepository = releaseRepository;
-		this.deployerRepository = deployerRepository;
 		this.appDeployerDataRepository = appDeployerDataRepository;
 		this.deleteStep = deleteStep;
 		this.healthCheckProperties = healthCheckProperties;
@@ -97,15 +92,15 @@ public class HandleHealthCheckStep {
 	private void deleteReplacingRelease(Release replacingRelease) {
 		try {
 			logger.error("New release " + replacingRelease.getName() + " was not detected as healthy after " +
-					this.healthCheckProperties.getTimeoutInMillis() + "milliseconds.  " +
+					this.healthCheckProperties.getTimeoutInMillis() + " milliseconds.  " +
 					"Keeping existing release, and Deleting apps of replacing release");
 			this.releaseManager.delete(replacingRelease);
 			Status status = new Status();
 			status.setStatusCode(StatusCode.FAILED);
 			replacingRelease.getInfo().setStatus(status);
 			replacingRelease.getInfo().setStatus(status);
-			replacingRelease.getInfo().setDescription("Did not detect apps in repalcing release as healthy after " +
-					this.healthCheckProperties.getSleepInMillis() + " ms.");
+			replacingRelease.getInfo().setDescription("Did not detect apps in replacing release as healthy after " +
+					this.healthCheckProperties.getTimeoutInMillis() + " ms.");
 			this.releaseRepository.save(replacingRelease);
 		}
 		catch (Exception e) {

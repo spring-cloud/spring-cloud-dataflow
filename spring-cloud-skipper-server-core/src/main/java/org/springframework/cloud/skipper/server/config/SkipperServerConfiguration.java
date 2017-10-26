@@ -218,16 +218,11 @@ public class SkipperServerConfiguration implements AsyncConfigurer {
 	}
 
 	@Bean
-	public UpgradeStrategy updateStrategy(DeployerRepository deployerRepository,
-			AppDeployerDataRepository appDeployerDataRepository,
-			AppDeploymentRequestFactory appDeploymentRequestFactory,
-			HealthCheckStep healthCheckStep,
+	public UpgradeStrategy updateStrategy(HealthCheckStep healthCheckStep,
 			HandleHealthCheckStep healthCheckAndDeleteStep,
-			ReleaseRepository releaseRepository, DeployAppStep deployAppStep) {
-		return new SimpleRedBlackUpgradeStrategy(deployerRepository,
-				appDeployerDataRepository, appDeploymentRequestFactory, healthCheckStep, healthCheckAndDeleteStep,
-				deployAppStep,
-				releaseRepository);
+			DeployAppStep deployAppStep) {
+		return new SimpleRedBlackUpgradeStrategy(healthCheckStep, healthCheckAndDeleteStep,
+				deployAppStep);
 	}
 
 	@Bean
@@ -247,12 +242,10 @@ public class SkipperServerConfiguration implements AsyncConfigurer {
 
 	@Bean
 	public HandleHealthCheckStep healthCheckAndDeleteStep(ReleaseRepository releaseRepository,
-			DeployerRepository deployerRepository,
 			AppDeployerDataRepository appDeployerDataRepository,
 			DeleteStep deleteStep,
 			HealthCheckProperties healthCheckProperties) {
 		return new HandleHealthCheckStep(releaseRepository,
-				deployerRepository,
 				appDeployerDataRepository,
 				deleteStep,
 				healthCheckProperties);

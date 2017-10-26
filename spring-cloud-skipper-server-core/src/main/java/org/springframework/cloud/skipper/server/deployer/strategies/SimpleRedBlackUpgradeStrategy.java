@@ -17,16 +17,9 @@ package org.springframework.cloud.skipper.server.deployer.strategies;
 
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.StatusCode;
-import org.springframework.cloud.skipper.server.deployer.AppDeploymentRequestFactory;
 import org.springframework.cloud.skipper.server.deployer.ReleaseAnalysisReport;
-import org.springframework.cloud.skipper.server.repository.AppDeployerDataRepository;
-import org.springframework.cloud.skipper.server.repository.DeployerRepository;
-import org.springframework.cloud.skipper.server.repository.ReleaseRepository;
 import org.springframework.scheduling.annotation.Async;
 
 import static org.springframework.cloud.skipper.server.config.SkipperServerConfiguration.SKIPPER_THREAD_POOL_EXECUTOR;
@@ -40,43 +33,24 @@ import static org.springframework.cloud.skipper.server.config.SkipperServerConfi
  */
 public class SimpleRedBlackUpgradeStrategy implements UpgradeStrategy {
 
-	private final Logger logger = LoggerFactory.getLogger(SimpleRedBlackUpgradeStrategy.class);
-
-	private final DeployerRepository deployerRepository;
-
-	private final AppDeployerDataRepository appDeployerDataRepository;
-
-	private final AppDeploymentRequestFactory appDeploymentRequestFactory;
-
 	private final HealthCheckStep healthCheckStep;
 
 	private final HandleHealthCheckStep handleHealthCheckStep;
 
-	private final ReleaseRepository releaseRepository;
-
 	private final DeployAppStep deployAppStep;
 
-	public SimpleRedBlackUpgradeStrategy(DeployerRepository deployerRepository,
-			AppDeployerDataRepository appDeployerDataRepository,
-			AppDeploymentRequestFactory appDeploymentRequestFactory,
-			HealthCheckStep healthCheckStep,
+	public SimpleRedBlackUpgradeStrategy(HealthCheckStep healthCheckStep,
 			HandleHealthCheckStep handleHealthCheckStep,
-			DeployAppStep deployAppStep,
-			ReleaseRepository releaseRepository) {
-		this.deployerRepository = deployerRepository;
-		this.appDeployerDataRepository = appDeployerDataRepository;
-		this.appDeploymentRequestFactory = appDeploymentRequestFactory;
+			DeployAppStep deployAppStep) {
 		this.healthCheckStep = healthCheckStep;
 		this.handleHealthCheckStep = handleHealthCheckStep;
 		this.deployAppStep = deployAppStep;
-		this.releaseRepository = releaseRepository;
 	}
 
 	@Override
 	@Async(SKIPPER_THREAD_POOL_EXECUTOR)
 	public Release upgrade(Release existingRelease, Release replacingRelease,
 			ReleaseAnalysisReport releaseAnalysisReport) {
-
 		List<String> applicationNamesToUpgrade = this.deployAppStep.deployApps(existingRelease, replacingRelease,
 				releaseAnalysisReport);
 		if (!replacingRelease.getInfo().getStatus().getStatusCode().equals(StatusCode.FAILED)) {
