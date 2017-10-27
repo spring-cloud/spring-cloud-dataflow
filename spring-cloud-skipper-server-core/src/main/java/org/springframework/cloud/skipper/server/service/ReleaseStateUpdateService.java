@@ -64,31 +64,31 @@ public class ReleaseStateUpdateService {
 	@Scheduled(initialDelay = 5000, fixedRate = 5000)
 	@Transactional
 	public synchronized void update() {
-		log.info("Scheduled update state method running...");
+		log.debug("Scheduled update state method running...");
 		long now = System.currentTimeMillis();
-		boolean fullPoll = now > nextFullPoll;
+		boolean fullPoll = now > this.nextFullPoll;
 		if (fullPoll) {
 			// setup next full poll
-			nextFullPoll = getNextFullPoll();
-			log.info("Setup next full poll at {}", new Date(nextFullPoll));
+			this.nextFullPoll = getNextFullPoll();
+			log.debug("Setup next full poll at {}", new Date(this.nextFullPoll));
 		}
-		Iterable<Release> releases = releaseRepository.findLatestDeployedOrFailed();
+		Iterable<Release> releases = this.releaseRepository.findLatestDeployedOrFailed();
 		for (Release release : releases) {
 			Info info = release.getInfo();
 			if (checkInfo(info)) {
 				// poll new apps every time or we do full poll anyway
 				boolean isNewApp = (info.getLastDeployed().getTime() > (now - 120000));
-				log.info("Considering updating state for {}-v{}", release.getName(), release.getVersion());
-				log.info("fullPoll = {}, isNewApp = {}", fullPoll, isNewApp);
+				log.debug("Considering updating state for {}-v{}", release.getName(), release.getVersion());
+				log.debug("fullPoll = {}, isNewApp = {}", fullPoll, isNewApp);
 				boolean poll = fullPoll || (isNewApp);
 				if (poll) {
 					try {
-						release = releaseManager.status(release);
-						log.info("New Release state {} {}", release.getName(), release.getInfo().getStatus(),
+						release = this.releaseManager.status(release);
+						log.debug("New Release state {} {}", release.getName(), release.getInfo().getStatus(),
 								release.getInfo().getStatus() != null
 										? release.getInfo().getStatus().getPlatformStatusPrettyPrint()
 										: "");
-						releaseRepository.save(release);
+						this.releaseRepository.save(release);
 					}
 					catch (Exception e) {
 						log.warn("Unable to update release status for release " + release.getName() + "-v"
@@ -96,7 +96,7 @@ public class ReleaseStateUpdateService {
 					}
 				}
 				else {
-					log.info("Not updating state for {}-v{}", release.getName(), release.getVersion());
+					log.debug("Not updating state for {}-v{}", release.getName(), release.getVersion());
 				}
 			}
 		}
