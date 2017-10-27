@@ -19,7 +19,6 @@ package org.springframework.cloud.skipper.server.controller.docs;
 import org.junit.Test;
 
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.TestPropertySource;
 
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
@@ -30,8 +29,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Gunnar Hillert
  */
 @ActiveProfiles("repo-test")
-@TestPropertySource(properties = { "spring.cloud.skipper.server.platform.local.accounts[test].key=value",
-		"maven.remote-repositories.repo1.url=http://repo.spring.io/libs-snapshot" })
 public class DeployersDocumentation extends BaseDocumentation {
 
 	@Test

@@ -48,22 +48,58 @@ import static org.springframework.restdocs.request.RequestDocumentation.paramete
 import static org.springframework.restdocs.request.RequestDocumentation.requestParameters;
 
 /**
- * Sets up Spring Rest Docs via {@link #setupMocks()} and also provides common snippets to be used by
- * the various documentation tests.
+ * Sets up Spring Rest Docs via {@link #setupMocks()} and also provides common snippets to
+ * be used by the various documentation tests.
  *
  * @author Gunnar Hillert
  */
 public abstract class BaseDocumentation extends AbstractControllerTests {
 
+	@Rule
+	public final JUnitRestDocumentation restDocumentation = new JUnitRestDocumentation();
+	/**
+	 * Snippet, documenting common pagination properties.
+	 */
+	protected final ResponseFieldsSnippet paginationProperties = responseFields(
+			fieldWithPath("page").description("Pagination properties"),
+			fieldWithPath("page.size").description("The size of the page being returned"),
+			fieldWithPath("page.totalElements").description("Total elements available for pagination"),
+			fieldWithPath("page.totalPages").description("Total amount of pages"),
+			fieldWithPath("page.number").description("Page number of the page returned (zero-based)"));
+	/**
+	 * Snippet for link properties. Set to ignore common links.
+	 */
+	protected final List<FieldDescriptor> defaultLinkProperties = Arrays.asList(
+			fieldWithPath("_links.self.href").ignored().optional(),
+			fieldWithPath("_links.self.templated").ignored().optional(),
+			fieldWithPath("_links.profile.href").ignored().optional(),
+			fieldWithPath("_links.repository.href").ignored().optional(),
+			fieldWithPath("_links.search.href").ignored().optional());
+	/**
+	 * Snippet for common pagination-related request parameters.
+	 */
+	protected final RequestParametersSnippet paginationRequestParameterProperties = requestParameters(
+			parameterWithName("page").description("The zero-based page number (optional)"),
+			parameterWithName("size").description("The requested page size (optional)"));
+	protected RestDocumentationResultHandler documentationHandler;
+	protected MockMvc mockMvc;
 	@Autowired
 	WebApplicationContext context;
 
-	@Rule
-	public final JUnitRestDocumentation restDocumentation = new JUnitRestDocumentation();
-
-	protected RestDocumentationResultHandler documentationHandler;
-
-	protected MockMvc mockMvc;
+	/**
+	 * {@link LinksSnippet} for common links. Common links are set to be ignored.
+	 *
+	 * @param descriptors Provide addition link descriptors
+	 * @return the link snipped
+	 */
+	public static LinksSnippet linksForSkipper(LinkDescriptor... descriptors) {
+		return HypermediaDocumentation.links(
+				linkWithRel("self").ignored(),
+				linkWithRel("profile").ignored(),
+				linkWithRel("search").ignored(),
+				linkWithRel("deployer").ignored().optional(),
+				linkWithRel("curies").ignored().optional()).and(descriptors);
+	}
 
 	@Before
 	public void setupMocks() {
@@ -77,57 +113,11 @@ public abstract class BaseDocumentation extends AbstractControllerTests {
 
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(this.context)
 				.apply(documentationConfiguration(this.restDocumentation).uris()
-				.withScheme("http")
-				.withHost("localhost")
-				.withPort(7577))
+						.withScheme("http")
+						.withHost("localhost")
+						.withPort(7577))
 				.alwaysDo(this.documentationHandler)
-		.build();
-	}
-
-	/**
-	 * Snippet, documenting common pagination properties.
-	 */
-	protected final ResponseFieldsSnippet paginationProperties = responseFields(
-		fieldWithPath("page").description("Pagination properties"),
-		fieldWithPath("page.size").description("The size of the page being returned"),
-		fieldWithPath("page.totalElements").description("Total elements available for pagination"),
-		fieldWithPath("page.totalPages").description("Total amount of pages"),
-		fieldWithPath("page.number").description("Page number of the page returned (zero-based)")
-	);
-
-	/**
-	 * Snippet for link properties. Set to ignore common links.
-	 */
-	protected final List<FieldDescriptor> defaultLinkProperties = Arrays.asList(
-		fieldWithPath("_links.self.href").ignored().optional(),
-		fieldWithPath("_links.self.templated").ignored().optional(),
-		fieldWithPath("_links.profile.href").ignored().optional(),
-		fieldWithPath("_links.repository.href").ignored().optional(),
-		fieldWithPath("_links.search.href").ignored().optional()
-	);
-
-	/**
-	 * Snippet for common pagination-related request parameters.
-	 */
-	protected final RequestParametersSnippet paginationRequestParameterProperties = requestParameters(
-		parameterWithName("page").description("The zero-based page number (optional)"),
-		parameterWithName("size").description("The requested page size (optional)")
-	);
-
-	/**
-	 * {@link LinksSnippet} for common links. Common links are set to be ignored.
-	 *
-	 * @param descriptors Provide addition link descriptors
-	 * @return the link snipped
-	 */
-	public static LinksSnippet linksForSkipper(LinkDescriptor... descriptors) {
-		return HypermediaDocumentation.links(
-			linkWithRel("self").ignored(),
-			linkWithRel("profile").ignored(),
-			linkWithRel("search").ignored(),
-			linkWithRel("deployer").ignored().optional(),
-			linkWithRel("curies").ignored().optional()
-		).and(descriptors);
+				.build();
 	}
 
 }

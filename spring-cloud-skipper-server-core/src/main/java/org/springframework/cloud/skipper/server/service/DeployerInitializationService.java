@@ -110,7 +110,7 @@ public class DeployerInitializationService {
 				Deployer deployer = new Deployer(entry.getKey(), "local", localAppDeployer);
 				deployer.setDescription(prettyPrintLocalDeployerProperties(entry.getValue()));
 				deployerRepository.save(deployer);
-				logger.info("Added Local Deployer account " + entry.getKey() + " into Deployer Repository.");
+				logger.info("Added Local Deployer account named '" + entry.getKey() + "' into Deployer Repository.");
 			}
 		}
 		else {

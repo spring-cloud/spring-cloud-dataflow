@@ -34,6 +34,7 @@ import org.springframework.cloud.skipper.server.config.SkipperServerProperties;
 import org.springframework.cloud.skipper.server.repository.PackageMetadataRepository;
 import org.springframework.cloud.skipper.server.repository.ReleaseRepository;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.web.servlet.MvcResult;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -85,37 +86,30 @@ public abstract class AbstractControllerTests extends AbstractMockMvcTests {
 		}
 	}
 
-	protected Release deploy(String packageName, String packageVersion, String releaseName) throws Exception {
+	protected Release install(String packageName, String packageVersion, String releaseName) throws Exception {
 		// Deploy
-		InstallProperties installProperties = createDeployProperties(releaseName);
+		InstallProperties installProperties = createInstallProperties(releaseName);
 		PackageMetadata packageMetadata = this.packageMetadataRepository.findByNameAndVersionByMaxRepoOrder(packageName,
 				packageVersion);
 		assertThat(packageMetadata).isNotNull();
-		mockMvc.perform(post("/api/install/" + packageMetadata.getId())
+		MvcResult result = mockMvc.perform(post("/api/install/" + packageMetadata.getId())
 				.content(convertObjectToJson(installProperties))).andDo(print())
 				.andExpect(status().isCreated()).andReturn();
-		sleep();
-		Release deployedRelease = this.releaseRepository.findByNameAndVersion(releaseName, 1);
+		Release release = convertContentToRelease(result.getResponse().getContentAsString());
+		assertReleaseIsDeployedSuccessfully(releaseName, release.getVersion());
+		Release deployedRelease = this.releaseRepository.findByNameAndVersion(releaseName, release.getVersion());
 		commonReleaseAssertions(releaseName, packageMetadata, deployedRelease);
 		return deployedRelease;
 	}
 
-	protected void sleep() {
-		try {
-			Thread.sleep(20000);
-		}
-		catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-	}
-
 	protected Release installPackage(InstallRequest installRequest) throws Exception {
-		mockMvc.perform(post("/api/install")
+		MvcResult result = mockMvc.perform(post("/api/install")
 				.content(convertObjectToJson(installRequest))).andDo(print())
 				.andExpect(status().isCreated()).andReturn();
-		sleep();
+		Release release = convertContentToRelease(result.getResponse().getContentAsString());
+		assertReleaseIsDeployedSuccessfully(release.getName(), release.getVersion());
 		String releaseName = installRequest.getInstallProperties().getReleaseName();
-		Release deployedRelease = this.releaseRepository.findByNameAndVersion(releaseName, 1);
+		Release deployedRelease = this.releaseRepository.findByNameAndVersion(releaseName, release.getVersion());
 		PackageMetadata packageMetadata = this.packageMetadataRepository.findByNameAndVersionByMaxRepoOrder(
 				installRequest.getPackageIdentifier().getPackageName(),
 				installRequest.getPackageIdentifier().getPackageVersion());
@@ -135,32 +129,29 @@ public abstract class AbstractControllerTests extends AbstractMockMvcTests {
 				packageName,
 				packageVersion);
 		assertThat(updatePackageMetadata).isNotNull();
-		mockMvc.perform(post("/api/upgrade")
+		MvcResult result = mockMvc.perform(post("/api/upgrade")
 				.content(convertObjectToJson(upgradeRequest))).andDo(print())
 				.andExpect(status().isCreated()).andReturn();
-		sleep();
-		Release updatedRelease = this.releaseRepository.findByNameAndVersion(releaseName, 2);
+		Release release = convertContentToRelease(result.getResponse().getContentAsString());
+		assertReleaseIsDeployedSuccessfully(releaseName, release.getVersion());
+		Release updatedRelease = this.releaseRepository.findByNameAndVersion(releaseName, release.getVersion());
 		commonReleaseAssertions(releaseName, updatePackageMetadata, updatedRelease);
 		return updatedRelease;
 	}
 
-	protected InstallProperties createDeployProperties(String releaseName) {
-		InstallProperties installProperties = new InstallProperties();
-		installProperties.setPlatformName("test");
-		installProperties.setReleaseName(releaseName);
-		return installProperties;
-	}
-
-	protected UpgradeProperties createUpdateProperties(String releaseName) {
-		UpgradeProperties upgradeProperties = new UpgradeProperties();
-		upgradeProperties.setReleaseName(releaseName);
-		return upgradeProperties;
+	protected Release rollback(String releaseName, int releaseVersion) throws Exception {
+		MvcResult result = mockMvc.perform(post("/api/rollback/" + releaseName + "/" + releaseVersion)).andDo(print())
+				.andExpect(status().isCreated()).andReturn();
+		Release release = convertContentToRelease(result.getResponse().getContentAsString());
+		assertReleaseIsDeployedSuccessfully(releaseName, release.getVersion());
+		Release updatedRelease = this.releaseRepository.findByNameAndVersion(releaseName, release.getVersion());
+		return updatedRelease;
 	}
 
 	protected void commonReleaseAssertions(String releaseName, PackageMetadata packageMetadata,
 			Release deployedRelease) {
 		assertThat(deployedRelease.getName()).isEqualTo(releaseName);
-		assertThat(deployedRelease.getPlatformName()).isEqualTo("test");
+		assertThat(deployedRelease.getPlatformName()).isEqualTo("default");
 		assertThat(deployedRelease.getPkg().getMetadata()).isEqualToIgnoringGivenFields(packageMetadata,
 				"id", "origin", "packageFile", "objectVersion");
 		assertThat(deployedRelease.getPkg().getMetadata().equals(packageMetadata));

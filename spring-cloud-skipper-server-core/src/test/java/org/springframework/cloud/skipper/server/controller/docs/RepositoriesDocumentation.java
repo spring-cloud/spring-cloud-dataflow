@@ -19,7 +19,6 @@ package org.springframework.cloud.skipper.server.controller.docs;
 import org.junit.Test;
 
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.TestPropertySource;
 
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
@@ -33,54 +32,53 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Gunnar Hillert
  */
 @ActiveProfiles("repo-test")
-@TestPropertySource(properties = { "spring.cloud.skipper.server.platform.local.accounts[test].key=value",
-		"maven.remote-repositories.repo1.url=http://repo.spring.io/libs-snapshot" })
 public class RepositoriesDocumentation extends BaseDocumentation {
 
 	@Test
 	public void getAllRepositories() throws Exception {
 		this.mockMvc.perform(
-			get("/api/repositories")
-				.param("page", "0")
-				.param("size", "10"))
-			.andDo(print())
-			.andExpect(status().isOk())
-			.andDo(this.documentationHandler.document(
-				super.paginationRequestParameterProperties,
-				super.paginationProperties.and(
-					fieldWithPath("_embedded.repositories").description("Contains a collection of Repositories"),
-					fieldWithPath("_embedded.repositories[].name").description("Name of the Repository"),
-					fieldWithPath("_embedded.repositories[].url").description("Url of the Repository"),
-					fieldWithPath("_embedded.repositories[].sourceUrl").description("Source Url of the repository"),
-					fieldWithPath("_embedded.repositories[].description").description("Description of the Repository"),
-					fieldWithPath("_embedded.repositories[].local").description("Is the repo local?"),
-					fieldWithPath("_embedded.repositories[].repoOrder").description("Order of the Repository"),
-					fieldWithPath("_embedded.repositories[]._links.self.href").ignored(),
-					fieldWithPath("_embedded.repositories[]._links.repository.href").ignored()
-				).and(super.defaultLinkProperties))
-			);
+				get("/api/repositories")
+						.param("page", "0")
+						.param("size", "10"))
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andDo(this.documentationHandler.document(
+						super.paginationRequestParameterProperties,
+						super.paginationProperties.and(
+								fieldWithPath("_embedded.repositories")
+										.description("Contains a collection of Repositories"),
+								fieldWithPath("_embedded.repositories[].name").description("Name of the Repository"),
+								fieldWithPath("_embedded.repositories[].url").description("Url of the Repository"),
+								fieldWithPath("_embedded.repositories[].sourceUrl")
+										.description("Source Url of the repository"),
+								fieldWithPath("_embedded.repositories[].description")
+										.description("Description of the Repository"),
+								fieldWithPath("_embedded.repositories[].local").description("Is the repo local?"),
+								fieldWithPath("_embedded.repositories[].repoOrder")
+										.description("Order of the Repository"),
+								fieldWithPath("_embedded.repositories[]._links.self.href").ignored(),
+								fieldWithPath("_embedded.repositories[]._links.repository.href").ignored())
+								.and(super.defaultLinkProperties)));
 	}
 
 	@Test
 	public void getSingleRepository() throws Exception {
-		deploy("log", "1.0.0", "test2");
+		install("log", "1.0.0", "test2");
 
 		this.mockMvc.perform(
-			get("/api/repositories/{repositoryId}", 1))
-			.andDo(print())
-			.andExpect(status().isOk())
-			.andDo(this.documentationHandler.document(
-				pathParameters(
-					parameterWithName("repositoryId").description("The id of the repository to query")
-				),
-				responseFields(
-					fieldWithPath("name").description("Name of the Repository"),
-					fieldWithPath("url").description("URL of the Repository"),
-					fieldWithPath("description").description("Description of the Repository"),
-					fieldWithPath("local").description("Is the repo local?"),
-					fieldWithPath("repoOrder").description("Order of the Repository"),
-					fieldWithPath("sourceUrl").description("Source URL of the repository")
-				).and(super.defaultLinkProperties))
-			);
+				get("/api/repositories/{repositoryId}", 1))
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andDo(this.documentationHandler.document(
+						pathParameters(
+								parameterWithName("repositoryId").description("The id of the repository to query")),
+						responseFields(
+								fieldWithPath("name").description("Name of the Repository"),
+								fieldWithPath("url").description("URL of the Repository"),
+								fieldWithPath("description").description("Description of the Repository"),
+								fieldWithPath("local").description("Is the repo local?"),
+								fieldWithPath("repoOrder").description("Order of the Repository"),
+								fieldWithPath("sourceUrl").description("Source URL of the repository"))
+										.and(super.defaultLinkProperties)));
 	}
 }

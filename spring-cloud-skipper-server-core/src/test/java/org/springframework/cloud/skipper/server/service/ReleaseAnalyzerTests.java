@@ -15,14 +15,12 @@
  */
 package org.springframework.cloud.skipper.server.service;
 
-import org.junit.After;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.skipper.domain.ConfigValues;
-import org.springframework.cloud.skipper.domain.InstallProperties;
 import org.springframework.cloud.skipper.domain.InstallRequest;
 import org.springframework.cloud.skipper.domain.PackageIdentifier;
 import org.springframework.cloud.skipper.domain.Release;
@@ -64,44 +62,22 @@ public class ReleaseAnalyzerTests extends AbstractIntegrationTest {
 	@Autowired
 	private HealthCheckProperties healthCheckProperties;
 
-	@After
-	public void cleanup() {
-		// Sleep until asynchronous health check to be done for the upgrade - the max time would be the configured
-		// timeout
-		try {
-			Thread.sleep(this.healthCheckProperties.getTimeoutInMillis());
-		}
-		catch (InterruptedException e) {
-			logger.info("Interrupted exception ", e);
-			Thread.currentThread().interrupt();
-		}
-	}
-
 	@Test
 	public void releaseAnalyzerTest() throws InterruptedException {
-
-		String platformName = "default";
-
-		String releaseName = "logrelease";
+		String releaseName = "logreleaseAnalyzer";
 		String packageName = "ticktock";
 		String packageVersion = "1.0.0";
-		InstallProperties installProperties = new InstallProperties();
-		installProperties.setReleaseName(releaseName);
-		installProperties.setPlatformName(platformName);
 		InstallRequest installRequest = new InstallRequest();
-		installRequest.setInstallProperties(installProperties);
+		installRequest.setInstallProperties(createInstallProperties(releaseName));
 
 		PackageIdentifier packageIdentifier = new PackageIdentifier();
 		packageIdentifier.setPackageName(packageName);
 		packageIdentifier.setPackageVersion(packageVersion);
 		installRequest.setPackageIdentifier(packageIdentifier);
-		Release installedRelease = releaseService.install(installRequest);
+		Release installedRelease = install(installRequest);
 
 		assertThat(installedRelease.getName()).isEqualTo(releaseName);
 		logger.info("installed release \n" + installedRelease.getManifest());
-
-		logger.info("sleeping for 10 seconds ----------------");
-		Thread.sleep(10000);
 
 		UpgradeProperties upgradeProperties = new UpgradeProperties();
 		ConfigValues configValues = new ConfigValues();
@@ -118,18 +94,17 @@ public class ReleaseAnalyzerTests extends AbstractIntegrationTest {
 		packageIdentifier.setPackageVersion(packageVersion);
 		upgradeRequest.setPackageIdentifier(packageIdentifier);
 
-		Release upgradedRelease = releaseService.upgrade(upgradeRequest);
+		Release upgradedRelease = upgrade(upgradeRequest);
 
 		assertThat(upgradedRelease.getName()).isEqualTo(releaseName);
-		System.out.println("upgraded release \n" + upgradedRelease.getManifest());
+		logger.info("upgraded release \n" + upgradedRelease.getManifest());
 		ReleaseAnalysisReport releaseAnalysisReport = this.releaseAnalyzer.analyze(installedRelease,
 				upgradedRelease);
 
-		System.out.println("sleeping for 5 seconds ----------------");
-		Thread.sleep(5000);
 		assertThat(releaseAnalysisReport.getReleaseDifference()).isNotNull();
 		assertThat(releaseAnalysisReport.getReleaseDifference().getDifferenceSummary())
 				.contains("log.level=(DEBUG, error)");
+		assertThat("1").isNotEmpty();
 	}
 
 }

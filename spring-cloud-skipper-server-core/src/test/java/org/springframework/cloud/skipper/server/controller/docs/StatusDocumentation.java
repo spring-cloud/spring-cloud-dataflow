@@ -18,7 +18,6 @@ package org.springframework.cloud.skipper.server.controller.docs;
 
 import org.junit.Test;
 
-import org.springframework.cloud.skipper.domain.InstallProperties;
 import org.springframework.cloud.skipper.domain.InstallRequest;
 import org.springframework.cloud.skipper.domain.PackageIdentifier;
 import org.springframework.cloud.skipper.domain.Release;
@@ -37,9 +36,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Gunnar Hillert
  */
 @ActiveProfiles("repo-test")
-@TestPropertySource(properties = { "spring.cloud.skipper.server.platform.local.accounts[test].key=value",
-		"maven.remote-repositories.repo1.url=http://repo.spring.io/libs-snapshot",
-		"spring.cloud.skipper.server.enableReleaseStateUpdateService=false" })
+@TestPropertySource(properties = { "spring.cloud.skipper.server.enableReleaseStateUpdateService=false" })
 public class StatusDocumentation extends BaseDocumentation {
 
 	@Test
@@ -51,10 +48,7 @@ public class StatusDocumentation extends BaseDocumentation {
 		packageIdentifier.setPackageVersion("1.0.0");
 		packageIdentifier.setRepositoryName("notused");
 		installRequest.setPackageIdentifier(packageIdentifier);
-		final InstallProperties installProperties = new InstallProperties();
-		installProperties.setReleaseName(releaseName);
-		installProperties.setPlatformName("test");
-		installRequest.setInstallProperties(installProperties);
+		installRequest.setInstallProperties(createInstallProperties(releaseName));
 
 		final Release release = installPackage(installRequest);
 
@@ -84,10 +78,7 @@ public class StatusDocumentation extends BaseDocumentation {
 		packageIdentifier.setPackageVersion("1.0.0");
 		packageIdentifier.setRepositoryName("notused");
 		installRequest.setPackageIdentifier(packageIdentifier);
-		final InstallProperties installProperties = new InstallProperties();
-		installProperties.setReleaseName(releaseName);
-		installProperties.setPlatformName("test");
-		installRequest.setInstallProperties(installProperties);
+		installRequest.setInstallProperties(createInstallProperties(releaseName));
 
 		final Release release = installPackage(installRequest);
 

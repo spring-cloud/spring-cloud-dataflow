@@ -22,6 +22,7 @@ import javax.sql.DataSource;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,8 +33,11 @@ import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.EmbeddedDataSourceConfiguration;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cloud.skipper.domain.Info;
+import org.springframework.cloud.skipper.domain.InstallRequest;
 import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.StatusCode;
+import org.springframework.cloud.skipper.domain.UpgradeRequest;
 import org.springframework.cloud.skipper.server.config.SkipperServerConfiguration;
 import org.springframework.cloud.skipper.server.repository.ReleaseRepository;
 import org.springframework.cloud.skipper.server.service.ReleaseService;
@@ -58,29 +62,23 @@ import static org.springframework.cloud.skipper.server.AbstractIntegrationTest.T
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestConfig.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
-public abstract class AbstractIntegrationTest {
+public abstract class AbstractIntegrationTest extends AbstractAssertReleaseDeployedTest {
 
 	private final Logger logger = LoggerFactory.getLogger(getClass());
+
+	@Rule
+	public LogTestNameRule logTestName = new LogTestNameRule();
 
 	@Autowired
 	protected ReleaseRepository releaseRepository;
 
 	@Autowired
-	protected ReleaseService releaseService;
-
-	@Autowired
 	protected DataSource dataSource;
 
-	private File dbScriptFile;
+	@Autowired
+	protected ReleaseService releaseService;
 
-	protected void sleep() {
-		try {
-			Thread.sleep(20000);
-		}
-		catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-	}
+	private File dbScriptFile;
 
 	@Before
 	public void beforeDumpSchema() {
@@ -104,6 +102,7 @@ public abstract class AbstractIntegrationTest {
 			for (Release release : releaseRepository.findAll()) {
 				if (release.getInfo().getStatus().getStatusCode() != StatusCode.DELETED) {
 					try {
+						logger.info("After test clean up, deleting release " + release.getName());
 						releaseService.delete(release.getName());
 					}
 					catch (Exception e) {
@@ -121,11 +120,54 @@ public abstract class AbstractIntegrationTest {
 		new JdbcTemplate(dataSource).execute("RUNSCRIPT FROM '" + dbScriptFile.getPath() + "'");
 	}
 
+	@Override
+	protected boolean isDeployed(String releaseName, int releaseVersion) {
+		try {
+			logger.info("Checking status of release={} version={}", releaseName, releaseVersion);
+			Release release = releaseRepository.findByNameAndVersion(releaseName, releaseVersion);
+			Info info = release.getInfo();
+
+			logger.info("Status = " + info.getStatus());
+			return info.getStatus().getStatusCode().equals(StatusCode.DEPLOYED) &&
+					allAppsDeployed(info.getStatus().getAppStatusList());
+		}
+		catch (Exception e) {
+			logger.error("Exception getting status", e);
+			return false;
+		}
+	}
+
+	protected Release install(InstallRequest installRequest) throws InterruptedException {
+		Release release = releaseService.install(installRequest);
+		assertReleaseIsDeployedSuccessfully(release.getName(), release.getVersion());
+		return release;
+	}
+
+	protected Release upgrade(UpgradeRequest upgradeRequest) throws InterruptedException {
+		Release release = releaseService.upgrade(upgradeRequest);
+		assertReleaseIsDeployedSuccessfully(release.getName(), release.getVersion());
+		return release;
+	}
+
+	protected Release rollback(String releaseName, int releaseVersion) throws InterruptedException {
+		Release release = releaseService.rollback(releaseName, releaseVersion);
+		// Need to use the value of version passed back from calling rollback,
+		// since 0 implies most recent deleted release
+		assertReleaseIsDeployedSuccessfully(release.getName(), release.getVersion());
+		return release;
+	}
+
+	protected Release delete(String releaseName) {
+		logger.info("Deleting release {}", releaseName);
+		return releaseService.delete(releaseName);
+	}
+
 	@Configuration
-	@ImportAutoConfiguration(classes = { JacksonAutoConfiguration.class, EmbeddedDataSourceConfiguration.class,
-			HibernateJpaAutoConfiguration.class })
+	@ImportAutoConfiguration(classes = { JacksonAutoConfiguration.class,
+			EmbeddedDataSourceConfiguration.class, HibernateJpaAutoConfiguration.class })
 	@Import(SkipperServerConfiguration.class)
 	@EnableWebMvc
 	static class TestConfig {
 	}
+
 }

@@ -20,7 +20,6 @@ import java.nio.charset.Charset;
 
 import org.junit.Test;
 
-import org.springframework.cloud.skipper.domain.InstallProperties;
 import org.springframework.cloud.skipper.domain.InstallRequest;
 import org.springframework.cloud.skipper.domain.PackageIdentifier;
 import org.springframework.cloud.skipper.domain.Release;
@@ -37,9 +36,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Gunnar Hillert
  */
 @ActiveProfiles("repo-test")
-@TestPropertySource(properties = { "spring.cloud.skipper.server.platform.local.accounts[test].key=value",
-		"maven.remote-repositories.repo1.url=http://repo.spring.io/libs-snapshot",
-		"spring.cloud.skipper.server.enableReleaseStateUpdateService=false" })
+@TestPropertySource(properties = { "spring.cloud.skipper.server.enableReleaseStateUpdateService=false" })
 public class ManifestDocumentation extends BaseDocumentation {
 
 	@Test
@@ -51,10 +48,7 @@ public class ManifestDocumentation extends BaseDocumentation {
 		packageIdentifier.setPackageVersion("1.0.0");
 		packageIdentifier.setRepositoryName("notused");
 		installRequest.setPackageIdentifier(packageIdentifier);
-		final InstallProperties installProperties = new InstallProperties();
-		installProperties.setReleaseName(releaseName);
-		installProperties.setPlatformName("test");
-		installRequest.setInstallProperties(installProperties);
+		installRequest.setInstallProperties(createInstallProperties(releaseName));
 
 		final Release release = installPackage(installRequest);
 
@@ -62,12 +56,12 @@ public class ManifestDocumentation extends BaseDocumentation {
 				MediaType.APPLICATION_JSON.getSubtype(), Charset.forName("utf8"));
 
 		this.mockMvc.perform(
-			get("/api/manifest/{releaseName}", release.getName()).accept(MediaType.APPLICATION_JSON).contentType(contentType)
-				).andDo(print())
+				get("/api/manifest/{releaseName}", release.getName()).accept(MediaType.APPLICATION_JSON)
+						.contentType(contentType))
+				.andDo(print())
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
-					responseBody()
-				));
+						responseBody()));
 	}
 
 	@Test
@@ -79,20 +73,16 @@ public class ManifestDocumentation extends BaseDocumentation {
 		packageIdentifier.setPackageVersion("1.0.0");
 		packageIdentifier.setRepositoryName("notused");
 		installRequest.setPackageIdentifier(packageIdentifier);
-		final InstallProperties installProperties = new InstallProperties();
-		installProperties.setReleaseName(releaseName);
-		installProperties.setPlatformName("test");
-		installRequest.setInstallProperties(installProperties);
+		installRequest.setInstallProperties(createInstallProperties(releaseName));
 
 		final Release release = installPackage(installRequest);
 
 		this.mockMvc.perform(
-			get("/api/manifest/{releaseName}/{releaseVersion}",
-					release.getName(), release.getVersion()))
+				get("/api/manifest/{releaseName}/{releaseVersion}",
+						release.getName(), release.getVersion()))
 				.andDo(print())
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
-						responseBody()
-				));
+						responseBody()));
 	}
 }

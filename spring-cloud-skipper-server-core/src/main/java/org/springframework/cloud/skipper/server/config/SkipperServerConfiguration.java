@@ -18,6 +18,7 @@ package org.springframework.cloud.skipper.server.config;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,7 +72,6 @@ import org.springframework.data.map.repository.config.EnableMapRepositories;
 import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 /**
@@ -94,7 +94,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableScheduling
 public class SkipperServerConfiguration implements AsyncConfigurer {
 
-	public static final String SKIPPER_THREAD_POOL_EXECUTOR = "skipperThreadPoolTaskExecutor";
+	public static final String SKIPPER_EXECUTOR = "skipperThreadPoolTaskExecutor";
 
 	private final Logger logger = LoggerFactory.getLogger(SkipperServerConfiguration.class);
 
@@ -185,8 +185,7 @@ public class SkipperServerConfiguration implements AsyncConfigurer {
 	}
 
 	@Bean
-	@ConditionalOnProperty(prefix = "spring.cloud.skipper.server", name = "enableReleaseStateUpdateService",
-			matchIfMissing = true)
+	@ConditionalOnProperty(prefix = "spring.cloud.skipper.server", name = "enableReleaseStateUpdateService", matchIfMissing = true)
 	public ReleaseStateUpdateService releaseStateUpdateService(ReleaseManager releaseManager,
 			ReleaseRepository releaseRepository) {
 		return new ReleaseStateUpdateService(releaseManager, releaseRepository);
@@ -254,10 +253,10 @@ public class SkipperServerConfiguration implements AsyncConfigurer {
 				healthCheckProperties);
 	}
 
-	@Bean(name = SKIPPER_THREAD_POOL_EXECUTOR)
+	@Bean(name = SKIPPER_EXECUTOR)
 	@Override
 	public Executor getAsyncExecutor() {
-		return new ThreadPoolTaskExecutor();
+		return Executors.newSingleThreadScheduledExecutor();
 	}
 
 	@Override

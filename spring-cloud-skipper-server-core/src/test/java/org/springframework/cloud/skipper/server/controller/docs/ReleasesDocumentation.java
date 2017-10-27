@@ -19,7 +19,6 @@ package org.springframework.cloud.skipper.server.controller.docs;
 import org.junit.Test;
 
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.TestPropertySource;
 
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
@@ -30,25 +29,21 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Gunnar Hillert
  */
 @ActiveProfiles("repo-test")
-@TestPropertySource(properties = { "spring.cloud.skipper.server.platform.local.accounts[test].key=value",
-		"maven.remote-repositories.repo1.url=http://repo.spring.io/libs-snapshot" })
 public class ReleasesDocumentation extends BaseDocumentation {
 
 	@Test
 	public void getAllReleases() throws Exception {
 		this.mockMvc.perform(
-			get("/api/releases")
-				.param("page", "0")
-				.param("size", "10"))
-			.andDo(print())
-			.andExpect(status().isOk())
-			.andDo(this.documentationHandler.document(
-				super.paginationRequestParameterProperties,
-				super.paginationProperties.and(
-					fieldWithPath("_embedded.releases").description("Provides a list of releases")
-				).and(super.defaultLinkProperties),
-				super.linksForSkipper()
-			)
-		);
+				get("/api/releases")
+						.param("page", "0")
+						.param("size", "10"))
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andDo(this.documentationHandler.document(
+						super.paginationRequestParameterProperties,
+						super.paginationProperties.and(
+								fieldWithPath("_embedded.releases").description("Provides a list of releases"))
+								.and(super.defaultLinkProperties),
+						super.linksForSkipper()));
 	}
 }

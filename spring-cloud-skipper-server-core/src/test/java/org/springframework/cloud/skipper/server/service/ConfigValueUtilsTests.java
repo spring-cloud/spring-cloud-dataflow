@@ -40,18 +40,19 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.StreamUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
-
 import static org.springframework.cloud.skipper.server.service.ConfigValueUtilsTests.TestConfig;
 
 /**
  * @author Mark Pollack
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes  = TestConfig.class)
+@SpringBootTest(classes = TestConfig.class)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 public class ConfigValueUtilsTests {
 
 	@Autowired

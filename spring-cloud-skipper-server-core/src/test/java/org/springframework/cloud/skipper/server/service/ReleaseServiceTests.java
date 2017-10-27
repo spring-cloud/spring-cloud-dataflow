@@ -16,6 +16,8 @@
 package org.springframework.cloud.skipper.server.service;
 
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.skipper.ReleaseNotFoundException;
@@ -23,11 +25,9 @@ import org.springframework.cloud.skipper.SkipperException;
 import org.springframework.cloud.skipper.domain.Info;
 import org.springframework.cloud.skipper.domain.InstallProperties;
 import org.springframework.cloud.skipper.domain.InstallRequest;
-import org.springframework.cloud.skipper.domain.Package;
 import org.springframework.cloud.skipper.domain.PackageIdentifier;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
 import org.springframework.cloud.skipper.domain.Release;
-import org.springframework.cloud.skipper.domain.Status;
 import org.springframework.cloud.skipper.domain.StatusCode;
 import org.springframework.cloud.skipper.domain.UpgradeProperties;
 import org.springframework.cloud.skipper.domain.UpgradeRequest;
@@ -49,8 +49,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 @ActiveProfiles("repo-test")
 public class ReleaseServiceTests extends AbstractIntegrationTest {
 
-	@Autowired
-	private ReleaseService releaseService;
+	private final Logger logger = LoggerFactory.getLogger(ReleaseServiceTests.class);
 
 	@Autowired
 	private PackageMetadataRepository packageMetadataRepository;
@@ -85,35 +84,55 @@ public class ReleaseServiceTests extends AbstractIntegrationTest {
 	}
 
 	@Test
-	public void testInstall() {
-		InstallProperties installProperties = new InstallProperties();
-		installProperties.setReleaseName("logrelease");
-		installProperties.setPlatformName("default");
+	public void testInstallAndUpdatePackageNotFound() throws InterruptedException {
+		String releaseName = "logrelease";
 		InstallRequest installRequest = new InstallRequest();
-		installRequest.setInstallProperties(installProperties);
+		installRequest.setInstallProperties(createInstallProperties(releaseName));
 		PackageIdentifier packageIdentifier = new PackageIdentifier();
 		packageIdentifier.setPackageName("log");
 		packageIdentifier.setPackageVersion("1.0.0");
 		installRequest.setPackageIdentifier(packageIdentifier);
-		Release release = releaseService.install(installRequest);
-		sleep();
+		Release release = install(installRequest);
+		installRequest.setPackageIdentifier(packageIdentifier);
 		assertThat(release).isNotNull();
 		assertThat(release.getPkg().getMetadata().getVersion()).isEqualTo("1.0.0");
+		Info info = this.releaseService.status(releaseName);
+		assertThat(info).isNotNull();
+
+		UpgradeProperties upgradeProperties = new UpgradeProperties();
+		upgradeProperties.setReleaseName(releaseName);
+		UpgradeRequest upgradeRequest = new UpgradeRequest();
+		upgradeRequest.setUpgradeProperties(upgradeProperties);
+		packageIdentifier = new PackageIdentifier();
+		String packageName = "random";
+		String packageVersion = "1.0.0";
+		packageIdentifier.setPackageName(packageName);
+		packageIdentifier.setPackageVersion(packageVersion);
+		upgradeRequest.setPackageIdentifier(packageIdentifier);
+		try {
+			releaseService.upgrade(upgradeRequest);
+			fail("Expected to throw SkipperException");
+		}
+		catch (SkipperException e) {
+			assertThat(e.getMessage()).isEqualTo(String.format("Can not find package '%s', version '%s'",
+					packageName, packageVersion));
+		}
+
+		delete(release.getName());
 	}
 
 	@Test
-	public void testInstallByLatestPackage() {
-		InstallProperties installProperties = new InstallProperties();
-		installProperties.setReleaseName("latestPackage");
-		installProperties.setPlatformName("default");
+	public void testInstallByLatestPackage() throws InterruptedException {
 		InstallRequest installRequest = new InstallRequest();
-		installRequest.setInstallProperties(installProperties);
+		installRequest.setInstallProperties(createInstallProperties("latestPackage"));
 		PackageIdentifier packageIdentifier = new PackageIdentifier();
 		packageIdentifier.setPackageName("log");
 		installRequest.setPackageIdentifier(packageIdentifier);
-		Release release = releaseService.install(installRequest);
+		Release release = install(installRequest);
 		assertThat(release).isNotNull();
 		assertThat(release.getPkg().getMetadata().getVersion()).isEqualTo("2.0.0");
+		delete(release.getName());
+
 	}
 
 	@Test(expected = ReleaseNotFoundException.class)
@@ -136,11 +155,8 @@ public class ReleaseServiceTests extends AbstractIntegrationTest {
 
 	@Test
 	public void testInstallPackageNotFound() {
-		InstallProperties installProperties = new InstallProperties();
-		installProperties.setReleaseName("latestPackage");
-		installProperties.setPlatformName("default");
 		InstallRequest installRequest = new InstallRequest();
-		installRequest.setInstallProperties(installProperties);
+		installRequest.setInstallProperties(createInstallProperties("latestPackage"));
 		PackageIdentifier packageIdentifier = new PackageIdentifier();
 		packageIdentifier.setPackageName("random");
 		installRequest.setPackageIdentifier(packageIdentifier);
@@ -163,39 +179,20 @@ public class ReleaseServiceTests extends AbstractIntegrationTest {
 	}
 
 	@Test
-	public void testStatusReleaseExist() {
-		InstallProperties installProperties = new InstallProperties();
-		installProperties.setReleaseName("testexists");
-		installProperties.setPlatformName("default");
-		InstallRequest installRequest = new InstallRequest();
-		installRequest.setInstallProperties(installProperties);
-		PackageIdentifier packageIdentifier = new PackageIdentifier();
-		packageIdentifier.setPackageName("log");
-		packageIdentifier.setPackageVersion("1.0.0");
-		installRequest.setPackageIdentifier(packageIdentifier);
-		this.releaseService.install(installRequest);
-		Info info = this.releaseService.status("testexists");
-		assertThat(info).isNotNull();
-	}
-
-	@Test
-	public void testInstallReleaseThatIsNotDeleted() {
-		InstallProperties installProperties = new InstallProperties();
+	public void testInstallReleaseThatIsNotDeleted() throws InterruptedException {
 		String releaseName = "installDeployedRelease";
-		installProperties.setReleaseName(releaseName);
-		installProperties.setPlatformName("default");
 		InstallRequest installRequest = new InstallRequest();
-		installRequest.setInstallProperties(installProperties);
+		installRequest.setInstallProperties(createInstallProperties(releaseName));
 		PackageIdentifier packageIdentifier = new PackageIdentifier();
 		packageIdentifier.setPackageName("log");
 		packageIdentifier.setPackageVersion("1.0.0");
 		installRequest.setPackageIdentifier(packageIdentifier);
-		Release release = this.releaseService.install(installRequest);
+		Release release = install(installRequest);
 		assertThat(release).isNotNull();
 
 		// Now let's install it a second time.
 		try {
-			this.releaseService.install(installRequest);
+			install(installRequest);
 			fail("Expected to fail when installing already deployed release.");
 		}
 		catch (SkipperException e) {
@@ -205,44 +202,36 @@ public class ReleaseServiceTests extends AbstractIntegrationTest {
 	}
 
 	@Test
-	public void testInstallDeletedRelease() {
-		InstallProperties installProperties = new InstallProperties();
+	public void testInstallDeletedRelease() throws InterruptedException {
 		String releaseName = "deletedRelease";
-		installProperties.setReleaseName(releaseName);
-		installProperties.setPlatformName("default");
 		InstallRequest installRequest = new InstallRequest();
-		installRequest.setInstallProperties(installProperties);
+		installRequest.setInstallProperties(createInstallProperties(releaseName));
 		PackageIdentifier packageIdentifier = new PackageIdentifier();
 		packageIdentifier.setPackageName("log");
 		packageIdentifier.setPackageVersion("1.0.0");
 		installRequest.setPackageIdentifier(packageIdentifier);
 		// Install
-		Release release = releaseService.install(installRequest);
-		sleep();
+		Release release = install(installRequest);
 		assertThat(release).isNotNull();
 		// Delete
-		this.releaseService.delete(releaseName);
+		delete(releaseName);
 		// Install again
-		Release release2 = releaseService.install(installRequest);
-		sleep();
+		Release release2 = install(installRequest);
 		assertThat(release2.getVersion()).isEqualTo(2);
 	}
 
 	@Test
-	public void testRollbackDeletedRelease() {
-		InstallProperties installProperties = new InstallProperties();
+	public void testRollbackDeletedRelease() throws InterruptedException {
 		String releaseName = "rollbackDeletedRelease";
-		installProperties.setReleaseName(releaseName);
-		installProperties.setPlatformName("default");
 		InstallRequest installRequest = new InstallRequest();
-		installRequest.setInstallProperties(installProperties);
+		installRequest.setInstallProperties(createInstallProperties(releaseName));
 		PackageIdentifier packageIdentifier = new PackageIdentifier();
 		packageIdentifier.setPackageName("log");
 		packageIdentifier.setPackageVersion("1.0.0");
 		installRequest.setPackageIdentifier(packageIdentifier);
 		// Install
-		Release release = releaseService.install(installRequest);
-		sleep();
+		logger.info("Installing log 1.0.0 package");
+		Release release = install(installRequest);
 		assertThat(release).isNotNull();
 		assertThat(release.getVersion()).isEqualTo(1);
 		this.appDeployerDataRepository.findByReleaseNameAndReleaseVersionRequired(releaseName, 1);
@@ -258,67 +247,30 @@ public class ReleaseServiceTests extends AbstractIntegrationTest {
 		packageIdentifier.setPackageName(packageName);
 		packageIdentifier.setPackageVersion(packageVersion);
 		upgradeRequest.setPackageIdentifier(packageIdentifier);
-		Release upgradedRelease = releaseService.upgrade(upgradeRequest);
-		sleep();
+		logger.info("Upgrading to log 2.0.0 package");
+		Release upgradedRelease = upgrade(upgradeRequest);
+
 		assertThat(upgradedRelease.getVersion()).isEqualTo(2);
 		this.appDeployerDataRepository.findByReleaseNameAndReleaseVersionRequired(releaseName, 2);
 
 		// Delete
-		this.releaseService.delete(releaseName);
-		sleep();
+		delete(releaseName);
+
 		Release deletedRelease = releaseRepository.findByNameAndVersion(releaseName, 2);
 		assertThat(deletedRelease.getInfo().getStatus().getStatusCode().equals(StatusCode.DELETED));
 
 		// Rollback
-		Release rolledBackRelease = this.releaseService.rollback(releaseName, 0);
-		sleep();
+		logger.info("Rolling back the release " + release);
+
+		Release rolledBackRelease = rollback(releaseName, 0);
+
 		assertThat(rolledBackRelease.getManifest()).isEqualTo(release.getManifest());
 		assertThat(rolledBackRelease.getInfo().getStatus().getStatusCode().equals(StatusCode.DEPLOYED));
 
 		deletedRelease = releaseRepository.findByNameAndVersion(releaseName, 2);
 		assertThat(deletedRelease.getInfo().getStatus().getStatusCode().equals(StatusCode.DELETED));
+
+		delete(rolledBackRelease.getName());
 	}
 
-	@Test
-	public void testUpdatePackageNotFound() {
-		PackageMetadata packageMetadata1 = new PackageMetadata();
-		packageMetadata1.setName("package1");
-		packageMetadata1.setVersion("1.0.0");
-		Package pkg1 = new Package();
-		pkg1.setMetadata(packageMetadata1);
-
-		Info deployedInfo = new Info();
-		Status deployedStatus = new Status();
-		deployedStatus.setPlatformStatus("Deployed successfully");
-		deployedStatus.setStatusCode(StatusCode.DEPLOYED);
-		deployedInfo.setStatus(deployedStatus);
-
-		String releaseName = "existing";
-		Release release1 = new Release();
-		release1.setName(releaseName);
-		release1.setVersion(1);
-		release1.setPlatformName("platform1");
-		release1.setPkg(pkg1);
-		release1.setInfo(deployedInfo);
-		this.releaseRepository.save(release1);
-
-		UpgradeProperties upgradeProperties = new UpgradeProperties();
-		upgradeProperties.setReleaseName(releaseName);
-		UpgradeRequest upgradeRequest = new UpgradeRequest();
-		upgradeRequest.setUpgradeProperties(upgradeProperties);
-		PackageIdentifier packageIdentifier = new PackageIdentifier();
-		String packageName = "random";
-		String packageVersion = "1.0.0";
-		packageIdentifier.setPackageName(packageName);
-		packageIdentifier.setPackageVersion(packageVersion);
-		upgradeRequest.setPackageIdentifier(packageIdentifier);
-		try {
-			releaseService.upgrade(upgradeRequest);
-			fail("Expected to throw SkipperException");
-		}
-		catch (SkipperException e) {
-			assertThat(e.getMessage()).isEqualTo(String.format("Can not find package '%s', version '%s'",
-					packageName, packageVersion));
-		}
-	}
 }

@@ -42,9 +42,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Gunnar Hillert
  */
 @ActiveProfiles("repo-test")
-@TestPropertySource(properties = { "spring.cloud.skipper.server.platform.local.accounts[test].key=value",
-		"maven.remote-repositories.repo1.url=http://repo.spring.io/libs-snapshot",
-		"spring.cloud.skipper.server.enableReleaseStateUpdateService=false" })
+@TestPropertySource(properties = { "spring.cloud.skipper.server.enableReleaseStateUpdateService=false" })
 public class UploadDocumentation extends BaseDocumentation {
 
 	@Test
@@ -60,7 +58,8 @@ public class UploadDocumentation extends BaseDocumentation {
 		uploadProperties.setName("log");
 		uploadProperties.setVersion("9.9.9");
 		uploadProperties.setExtension("zip");
-		final Resource resource = new ClassPathResource("/org/springframework/cloud/skipper/server/service/log-9.9.9.zip");
+		final Resource resource = new ClassPathResource(
+				"/org/springframework/cloud/skipper/server/service/log-9.9.9.zip");
 		assertThat(resource.exists()).isTrue();
 		final byte[] originalPackageBytes = StreamUtils.copyToByteArray(resource.getInputStream());
 		assertThat(originalPackageBytes).isNotEmpty();
@@ -72,26 +71,29 @@ public class UploadDocumentation extends BaseDocumentation {
 				MediaType.APPLICATION_JSON.getSubtype(), Charset.forName("utf8"));
 
 		mockMvc.perform(post("/api/upload").accept(MediaType.APPLICATION_JSON).contentType(contentType)
-			.content(convertObjectToJson(uploadProperties))).andDo(print())
-			.andExpect(status().isCreated())
-			.andDo(
-				this.documentationHandler.document(
-					responseFields(
-						fieldWithPath("apiVersion").description("The Package Index spec version this file is based on"),
-						fieldWithPath("origin").description("Indicates the origin of the repository (free form text)"),
-						fieldWithPath("repositoryId").description("The repository ID this Package Index file belongs to"),
-						fieldWithPath("kind").description("What type of package system is being used"),
-						fieldWithPath("name").description("The name of the package"),
-						fieldWithPath("version").description("The version of the package"),
-						fieldWithPath("packageSourceUrl").description("Location to source code for this package"),
-						fieldWithPath("packageHomeUrl").description("The home page of the package"),
-						fieldWithPath("tags").description("A comma separated list of tags to use for searching"),
-						fieldWithPath("maintainer").description("Who is maintaining this package"),
-						fieldWithPath("description").description("Brief description of the package"),
-						fieldWithPath("sha256").description("Hash of package binary that will be downloaded using SHA256 hash algorithm"),
-						fieldWithPath("iconUrl").description("Url location of a icon")
-					)
-				)
-			);
+				.content(convertObjectToJson(uploadProperties))).andDo(print())
+				.andExpect(status().isCreated())
+				.andDo(
+						this.documentationHandler.document(
+								responseFields(
+										fieldWithPath("apiVersion")
+												.description("The Package Index spec version this file is based on"),
+										fieldWithPath("origin")
+												.description("Indicates the origin of the repository (free form text)"),
+										fieldWithPath("repositoryId")
+												.description("The repository ID this Package Index file belongs to"),
+										fieldWithPath("kind").description("What type of package system is being used"),
+										fieldWithPath("name").description("The name of the package"),
+										fieldWithPath("version").description("The version of the package"),
+										fieldWithPath("packageSourceUrl")
+												.description("Location to source code for this package"),
+										fieldWithPath("packageHomeUrl").description("The home page of the package"),
+										fieldWithPath("tags")
+												.description("A comma separated list of tags to use for searching"),
+										fieldWithPath("maintainer").description("Who is maintaining this package"),
+										fieldWithPath("description").description("Brief description of the package"),
+										fieldWithPath("sha256").description(
+												"Hash of package binary that will be downloaded using SHA256 hash algorithm"),
+										fieldWithPath("iconUrl").description("Url location of a icon"))));
 	}
 }

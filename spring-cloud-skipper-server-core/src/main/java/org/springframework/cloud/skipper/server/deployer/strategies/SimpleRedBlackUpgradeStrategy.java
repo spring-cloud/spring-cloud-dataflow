@@ -22,7 +22,7 @@ import org.springframework.cloud.skipper.domain.StatusCode;
 import org.springframework.cloud.skipper.server.deployer.ReleaseAnalysisReport;
 import org.springframework.scheduling.annotation.Async;
 
-import static org.springframework.cloud.skipper.server.config.SkipperServerConfiguration.SKIPPER_THREAD_POOL_EXECUTOR;
+import static org.springframework.cloud.skipper.server.config.SkipperServerConfiguration.SKIPPER_EXECUTOR;
 
 /**
  * A simple approach to deploying a new application. All the new apps are deployed and a
@@ -48,7 +48,7 @@ public class SimpleRedBlackUpgradeStrategy implements UpgradeStrategy {
 	}
 
 	@Override
-	@Async(SKIPPER_THREAD_POOL_EXECUTOR)
+	@Async(SKIPPER_EXECUTOR)
 	public Release upgrade(Release existingRelease, Release replacingRelease,
 			ReleaseAnalysisReport releaseAnalysisReport) {
 		List<String> applicationNamesToUpgrade = this.deployAppStep.deployApps(existingRelease, replacingRelease,

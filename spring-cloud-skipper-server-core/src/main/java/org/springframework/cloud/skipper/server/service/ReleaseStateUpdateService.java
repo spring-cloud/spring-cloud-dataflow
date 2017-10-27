@@ -63,36 +63,53 @@ public class ReleaseStateUpdateService {
 
 	@Scheduled(initialDelay = 5000, fixedRate = 5000)
 	@Transactional
-	public void update() {
-		log.debug("Updating Release stategit.");
+	public synchronized void update() {
+		log.info("Scheduled update state method running...");
 		long now = System.currentTimeMillis();
 		boolean fullPoll = now > nextFullPoll;
 		if (fullPoll) {
 			// setup next full poll
 			nextFullPoll = getNextFullPoll();
-			log.debug("Setup next full poll at {}", new Date(nextFullPoll));
+			log.info("Setup next full poll at {}", new Date(nextFullPoll));
 		}
 		Iterable<Release> releases = releaseRepository.findLatestDeployedOrFailed();
 		for (Release release : releases) {
 			Info info = release.getInfo();
-			if (info != null) {
+			if (checkInfo(info)) {
 				// poll new apps every time or we do full poll anyway
-				boolean poll = fullPoll || (info.getLastDeployed().getTime() > (now - 120000));
+				boolean isNewApp = (info.getLastDeployed().getTime() > (now - 120000));
+				log.info("Considering updating state for {}-v{}", release.getName(), release.getVersion());
+				log.info("fullPoll = {}, isNewApp = {}", fullPoll, isNewApp);
+				boolean poll = fullPoll || (isNewApp);
 				if (poll) {
 					try {
 						release = releaseManager.status(release);
-						log.debug("New Release state {} {}", release.getName(), release.getInfo().getStatus(),
+						log.info("New Release state {} {}", release.getName(), release.getInfo().getStatus(),
 								release.getInfo().getStatus() != null
 										? release.getInfo().getStatus().getPlatformStatusPrettyPrint()
 										: "");
 						releaseRepository.save(release);
 					}
 					catch (Exception e) {
-						log.warn("Unable to update release status", e);
+						log.warn("Unable to update release status for release " + release.getName() + "-v"
+								+ release.getVersion(), e);
 					}
+				}
+				else {
+					log.info("Not updating state for {}-v{}", release.getName(), release.getVersion());
 				}
 			}
 		}
+	}
+
+	private boolean checkInfo(Info info) {
+		if (info == null) {
+			throw new IllegalStateException("Info can not be null.");
+		}
+		if (info.getLastDeployed() == null) {
+			throw new IllegalStateException("Info.LastDeployed can not be null.");
+		}
+		return true;
 	}
 
 	/**
