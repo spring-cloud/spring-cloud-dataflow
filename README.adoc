@@ -100,7 +100,7 @@ Now deploy the log 1.0.0 package.
 
 ----
 skipper:>install --package-name log --package-version 1.0.0 --release-name mylog
-Released mylog
+Released mylog. Now at version v1.
 ----
 
 Note that the log 1.0.0 package deploys the version 1.2.0.RC1 of the application.  You should see the java app named `log-sink-rabbit-1.2.0.RC1.jar` running in the output of the `jps` command
@@ -109,12 +109,12 @@ You can ask for the status using the status command
 
 ```
 skipper:>status --release-name mylog
-╔═══════════════╤════════════════════════════════════════╗
-║Last Deployed  │Thu Oct 26 10:59:31 IST 2017            ║
-║Status         │DEPLOYED                                ║
-║Platform Status│All apps have been successfully deployed║
-║               │mylog-v1.log[mylog-v1.log-0=deployed]   ║
-╚═══════════════╧════════════════════════════════════════╝
+╔═══════════════╤═════════════════════════════════════════════════╗
+║Last Deployed  │Fri Oct 27 15:44:00 IST 2017                     ║
+║Status         │DEPLOYED                                         ║
+║Platform Status│All applications have been successfully deployed.║
+║               │[mylog.log-v1], State = [mylog.log-v1-0=deployed]║
+╚═══════════════╧═════════════════════════════════════════════════╝
 ```
 
 The manifest for this release that represents the file instructions to deploy onto the platform, can be shown using the `get manifest` command.
@@ -141,8 +141,7 @@ Now update the release with a newer version
 
 ```
 skipper:>upgrade --release-name mylog --package-name log --package-version 2.0.0
-mylog has been upgraded.
-Last Deployed: Thu Oct 26 11:00:43 IST 2017
+mylog has been upgraded.  Now at version v2.
 ```
 
 You should see the java app named `log-sink-rabbit-1.2.0.RELEASE.jar` running in the output of the `jps` command.
@@ -152,10 +151,10 @@ The status command should shortly show it has been deployed successfully.  Note 
 ```
 skipper:>status --release-name mylog
 ╔═══════════════╤═════════════════════════════════════════════════╗
-║Last Deployed  │Thu Oct 26 11:00:43 IST 2017                     ║
+║Last Deployed  │Fri Oct 27 15:45:43 IST 2017                     ║
 ║Status         │DEPLOYED                                         ║
 ║Platform Status│All applications have been successfully deployed.║
-║               │mylog.log-v2[mylog.log-v2-0=deployed]            ║
+║               │[mylog.log-v2], State = [mylog.log-v2-0=deployed]║
 ╚═══════════════╧═════════════════════════════════════════════════╝
 ```
 
@@ -163,8 +162,7 @@ Next rollback to the previous release
 
 ```
 skipper:>rollback --release-name mylog
-mylog has been rolled back.
-Last Deployed: Thu Oct 26 11:01:47 IST 2017
+mylog has been rolled back.  Now at version v3.
 ```
 
 You should see the java app named `log-sink-rabbit-1.2.0.RC1.jar` running in the output of the `jps` command
@@ -174,10 +172,10 @@ The status command should shortly show it has been deployed successfully.
 ```
 skipper:>status --release-name mylog
 ╔═══════════════╤═════════════════════════════════════════════════╗
-║Last Deployed  │Thu Oct 26 11:01:47 IST 2017                     ║
+║Last Deployed  │Fri Oct 27 15:48:03 IST 2017                     ║
 ║Status         │DEPLOYED                                         ║
 ║Platform Status│All applications have been successfully deployed.║
-║               │mylog.log-v3[mylog.log-v3-0=deployed]            ║
+║               │[mylog.log-v3], State = [mylog.log-v3-0=deployed]║
 ╚═══════════════╧═════════════════════════════════════════════════╝
 ```
 
@@ -185,17 +183,13 @@ The `history` command shows you the various releases that were made
 
 ```
 skipper:>history --release-name mylog
-╔═══════╤═════════════════════════╤════════╤═══════════╤══════════════╤═══════════════╗
-║Version│      Last updated       │ Status │  Package  │   Package    │  Description  ║
-║       │                         │        │   Name    │   Version    │               ║
-╠═══════╪═════════════════════════╪════════╪═══════════╪══════════════╪═══════════════╣
-║3      │Thu Oct 26 11:01:47 IST  │DEPLOYED│log        │1.0.0         │Upgrade        ║
-║       │2017                     │        │           │              │complete       ║
-║2      │Thu Oct 26 11:00:43 IST  │DELETED │log        │2.0.0         │Delete complete║
-║       │2017                     │        │           │              │               ║
-║1      │Thu Oct 26 10:59:31 IST  │DELETED │log        │1.0.0         │Delete complete║
-║       │2017                     │        │           │              │               ║
-╚═══════╧═════════════════════════╧════════╧═══════════╧══════════════╧═══════════════╝
+╔═══════╤════════════════════════════╤════════╤════════════╤═══════════════╤════════════════╗
+║Version│        Last updated        │ Status │Package Name│Package Version│  Description   ║
+╠═══════╪════════════════════════════╪════════╪════════════╪═══════════════╪════════════════╣
+║3      │Fri Oct 27 15:48:03 IST 2017│DEPLOYED│log         │1.0.0          │Upgrade complete║
+║2      │Fri Oct 27 15:45:43 IST 2017│DELETED │log         │2.0.0          │Delete complete ║
+║1      │Fri Oct 27 15:44:00 IST 2017│DELETED │log         │1.0.0          │Delete complete ║
+╚═══════╧════════════════════════════╧════════╧════════════╧═══════════════╧════════════════╝
 ```
 
 Now delete the release.
