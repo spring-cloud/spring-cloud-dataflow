@@ -41,11 +41,11 @@ public abstract class AbstractAssertReleaseDeployedTest {
 		CountDownLatch latch = new CountDownLatch(1);
 		long startTime = System.currentTimeMillis();
 		while (!isDeployed(releaseName, releaseVersion)) {
-			if ((System.currentTimeMillis() - startTime) > 60000) {
+			if ((System.currentTimeMillis() - startTime) > 120000) {
 				logger.info("Stopping polling for deployed status after 60 seconds for release={} version={}",
 						releaseName, releaseVersion);
 				fail("Could not determine if release " + releaseName + "-v" + releaseVersion +
-						"was deployed successfully, timed out polling.");
+						" was deployed successfully, timed out polling.");
 			}
 			Thread.sleep(10000);
 		}

@@ -120,8 +120,6 @@
                     </excludes>
                     <!-- see http://stackoverflow.com/questions/18107375/getting-skipping-jacoco-execution-due-to-missing-execution-data-file-upon-exec -->
                     <argLine>${argLine}</argLine>
-                    <forkCount>1</forkCount>
-                    <reuseForks>false</reuseForks>
                 </configuration>
             </plugin>
             <plugin>

@@ -18,7 +18,6 @@ package org.springframework.cloud.skipper.server.config;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,7 +70,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.data.map.repository.config.EnableMapRepositories;
 import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.annotation.EnableAsync;
-import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 /**
@@ -91,7 +90,6 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableJpaRepositories(basePackages = "org.springframework.cloud.skipper.server.repository")
 @EnableTransactionManagement
 @EnableAsync
-@EnableScheduling
 public class SkipperServerConfiguration implements AsyncConfigurer {
 
 	public static final String SKIPPER_EXECUTOR = "skipperThreadPoolTaskExecutor";
@@ -256,7 +254,11 @@ public class SkipperServerConfiguration implements AsyncConfigurer {
 	@Bean(name = SKIPPER_EXECUTOR)
 	@Override
 	public Executor getAsyncExecutor() {
-		return Executors.newSingleThreadScheduledExecutor();
+		ThreadPoolTaskExecutor threadPoolTaskExecutor = new ThreadPoolTaskExecutor();
+		threadPoolTaskExecutor.setCorePoolSize(5);
+		threadPoolTaskExecutor.setMaxPoolSize(10);
+		threadPoolTaskExecutor.setThreadNamePrefix("StateUpdate-");
+		return threadPoolTaskExecutor;
 	}
 
 	@Override
