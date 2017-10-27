@@ -17,6 +17,7 @@ package org.springframework.cloud.skipper.domain;
 
 import javax.persistence.Entity;
 import javax.persistence.Lob;
+import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -30,9 +31,10 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 public class PackageMetadata extends AbstractEntity {
 
 	/**
-	 * The Package Index spec version this file is based on. todo: Make this a Required once
+	 * The Package Index spec version this file is based on.
 	 * we enforce apiVersion during package creation.
 	 */
+	@NotNull
 	private String apiVersion;
 
 	/**
@@ -48,16 +50,19 @@ public class PackageMetadata extends AbstractEntity {
 	/**
 	 * What type of package system is being used.
 	 */
+	@NotNull
 	private String kind;
 
 	/**
 	 * The name of the package
 	 */
+	@NotNull
 	private String name;
 
 	/**
 	 * The version of the package
 	 */
+	@NotNull
 	private String version;
 
 	/**

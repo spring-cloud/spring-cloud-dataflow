@@ -4,7 +4,7 @@
 This section is the 'three hour tour' of Skipper.  It describes how to configure and use the main feature set of Skipper
  in detail.  We will cover, platforms, packages, repositories, releases and update strategies.
 
-[[skipper-platforms]]
+[[platforms]]
 == Platforms
 
 Skipper supports deploying to multiple platforms.
@@ -24,6 +24,229 @@ You can make use of the http://cloud.spring.io/spring-cloud-static/spring-cloud-
 
 Distinct from where Skipper will deploy application, you can also run the Skipper server itself on a platform.  Installation on other platforms is covered in the <<skipper-installation>> section.
 
+[[packages]]
+== Packages
+
+Packages contain all the necessary information to install your application or group of applications.
+The approach to decribing the applications is to use a YAML file that provides all the necessary information to help facilitate searching for your application hosted in a Package Registry and to install your application to a platform.
+To make it easy to customize a package, the YAML files are templated.  The final version of the YAML file, with all values substituted is known as the release `manifest`.
+Skipper currently understands how to deploy applications based off a YAML file that contains the information needed for a Spring Cloud Deployer implementation to deploy an application.  It describes, where to find the application (either a http, maven or docker location) , application properties (think Spring Boot `@ConfigurationProperties`), an deployment properites (how much memory to use).
+Future version of Skiipper may provide support for other YAML manifest file formats, e.g. Cloud Foundry, or Kuberentes resource files.
 
 
+[[package-format]]
+=== Package Format
+
+A package is a collection of YAML files that are zipped up into a file with the naming convention
+`PackageName-PackageVersion.zip` for example: `mypackage-1.0.0.zip`
+
+A package can define a single application or a group of applications.
+See <<package-with-multi-apps>> for more details on packages with multiple applications
+
+When unzipped, the package has the following directory strucutre
+
+----
+mypackage-1.0.0
+├── package.yml
+├── templates
+│   └── template.yml
+└── values.yml
+----
+
+The YAML files can have either `.yml` or `.yaml` extensions.
+The `package.yml` file is the metadata about the package and is used to support Skipper's search functionality.
+The `template.yml` is a YML file with placeholders for values that are specified in the `values.yml` file.
+When installing a package, placeholder values can also be specified and they would override the values in the `values.yml` file.
+The templating engine that Skipper uses https://github.com/samskivert/jmustache[JMustache]
+
+[[package-format-mutliple-apps]]
+=== Package with multiple applications
+
+A package can contain a group of applications bundled in it.
+In those cases, the structure of the package would look like this:
+
+----
+mypackagegroup-1.0.0
+├── package.yml
+├── packages
+│   ├── app1
+│   │   ├── package.yml
+│   │   ├── templates
+│   │   │   └── log.yml
+│   │   └── values.yml
+│   └── app2
+│       ├── package.yml
+│       ├── templates
+│       │   └── time.yml
+│       └── values.yml
+└── values.yml
+----
+
+In the above, the `mypackagegroup` would still have its own `package.yml`, `values.yml` to specify the package metadata
+ and the values to override.
+All the applications inside the `mypackagegroup`  are considered sub-packages and would follow the similar package
+structure as the individual packages.
+These sub packages need to be specified inside the `packages` directory of the root package `mypackagegroup`.
+
+
+[[package-metadata]]
+=== Package Metadata
+
+The `package.yml` file specifies the package metadata.
+A sample package metadata would look like this:
+
+----
+apiVersion: v1
+kind: skipper
+name: mypackage
+version: 1.0.0
+packageSourceUrl: https://github.com/some-mypackage-project/v1.0.0.RELEASE
+packageHomeUrl: http://some-mypackage-project/
+tags: skipper, mypackage, sample
+maintainer: https://github.com/maintainer
+description: This is a mypackage sample.
+----
+
+The `apiVersion`, `kind`, `name` and `version` fields of the package metadata are required fields.
+There are many optional fields, described below.
+
+NOTE: The package search functionality in 1.0 M1 is only a wildcard match against the name of the package.
+
+* `packageSourceUrl` - 	Location to source code for this package.
+* `packageHomeUrl` - The home page of the package
+* `tags` -  A comma separated list of tags to be used for searching
+* `maintainer` - Who is maintaining this package
+* `description` Free form text describing the functionality of the package.  Will generally be shown in search results.
+* `sha256` - Hash of package binary  (not yet enforced)
+* `iconUrl` - URL for an icon to show for this package.
+* `origin` - Free form text describing the origin of this package, for example your company name.
+
+A Package Repository exposes an `index.yml` file that contains multiple metadata documents, separated by the standard three dash notation `---` to separate the documents.  For example http://skipper-repository.cfapps.io/repository/experimental/index.yml[index.yml].
+
+See the section
+
+[[package-template-files]]
+=== Package Templates
+
+The `template.yml` file in a package structure such as
+
+----
+mypackage-1.0.0
+├── package.yml
+├── templates
+│   └── template.yml
+└── values.yml
+----
+
+will commonly have the following content:
+
+----
+apiVersion: skipper/v1
+kind: SpringBootApp
+metadata:
+  name: mypackage
+  type: sample
+spec:
+  resource: maven://org.mysample:mypackage:{{version}}
+  applicationProperties:
+    {{#spec.applicationProperties.entrySet}}
+    {{key}}: {{value}}
+    {{/spec.applicationProperties.entrySet}}
+  deploymentProperties:
+    {{#spec.deploymentProperties.entrySet}}
+    {{key}}: {{value}}
+    {{/spec.deploymentProperties.entrySet}}
+----
+
+The `apiVersion`, `kind` and `spec.resource` are required.
+
+The `spec.resource` defines where the application executable is located.
+This is either a Spring Boot uberjar hosted under a http endpoint or a maven or docker repository.  There is a template placeholder `{{version}}` so that the version of a specific application can be easily upgraded without having to create a new package .zip file.
+
+ The format for the `resource` is an typical `http://` or a `maven://` or `docker:`, whose format is less commonly known.
+ Here are some examples:
+
+----
+spec:
+  resource: maven://org.springframework.cloud.samples:spring-cloud-skipper-samples-helloworld:1.0.0.RELEASE
+----
+The first part before the `:` is the Maven group name and the second part after the `:` is the artifact name.  The last part is the version.
+
+----
+spec:
+  resource: docker:springcloud/spring-cloud-skipper-samples-helloworld:1.0.0.RELEASE
+----
+This follows typical naming conventions of <user>/<repo>:<tag>.
+
+
+
+
+The metadata is used to help search for applications after they have been installed and is not available in Skipper M1.
+
+Currently, only `SpringBootApp` kind is supported.
+The `spec` contains the resource specification and the properties for the package.
+The `resource` represents the resource URI to download the application from. This would typically be a maven
+co-ordinate or a docker image URL.
+The `SpringBootApp` kind of application can have `applicationProperties` and `deploymentProperties` as the
+configuration properties.
+The application properties correspond to the properties for the application itself.
+The deployment properties correspond to the properties for the deployment operation performed by Spring Cloud
+Deployer implementations.
+
+[[package-values]]
+== Package Values
+
+The `values` YAML file contains the default values for any of the keys specified in the template files.
+
+For instance,
+
+----
+version: 1.0.0.RELEASE
+spec:
+  applicationProperties:
+    server.port: 9090
+----
+
+
+[[package-upload]]
+== Package Upload
+
+After creating the package in the above structure, we can compress it in a zip file with the name
+[PackageName]-[PackageVersion].zip e.g. mypackage-1.0.0.zip
+
+For instance, the package directory would look like this before compression:
+
+----
+mypackage-1.0.0
+├── package.yml
+├── templates
+│   └── template.yml
+└── values.yml
+----
+This zip file can be uploaded into one of the local repositories of Skipper server.
+By default, Skipper server has the local repository with the name `local`.
+
+Using the Skipper Shell, we can upload the package zip into Skipper server's one of the local repositories.
+
+[source,bash,options="nowrap"]
+----
+skipper:>upload --path /path-to-package/mypackage-1.0.0.zip
+Package uploaded successfully:[mypackage:1.0.0]
+----
+
+If no `--repo-name` is set, the `upload` command will use `local` as the repository to upload.
+
+[source,bash,options="nowrap"]
+----
+skipper:>search
+╔═════════════════╤═══════╤════════════════════════════════════════════════════════════════════════════════╗
+║      Name       │Version│                                  Description                                   ║
+╠═════════════════╪═══════╪════════════════════════════════════════════════════════════════════════════════╣
+║helloworld       │1.0.0  │The app has two endpoints, /about and /greeting in English.  Maven resource.    ║
+║helloworld       │1.0.1  │The app has two endpoints, /about and /greeting in Portuguese.  Maven resource. ║
+║helloworld-docker│1.0.0  │The app has two endpoints, /about and /greeting in English.  Docker resource.   ║
+║helloworld-docker│1.0.1  │The app has two endpoints, /about and /greeting in Portuguese.  Docker resource.║
+║mypackage        │1.0.0  │This is a mypackage sample                                                      ║
+╚═════════════════╧═══════╧════════════════════════════════════════════════════════════════════════════════╝
+----
 

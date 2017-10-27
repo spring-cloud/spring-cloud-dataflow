@@ -24,7 +24,6 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.StringTokenizer;
 
 import javax.validation.constraints.NotNull;
 
@@ -185,8 +184,9 @@ public class SkipperCommands extends AbstractSkipperCommand {
 			// TODO investigate server side support of 'default'
 			@ShellOption(help = "the platform name to use", defaultValue = "default") String platformName)
 			throws IOException {
-		// Commented out until https://github.com/spring-cloud/spring-cloud-skipper/issues/263 is addressed
-		//assertMutuallyExclusiveFileAndProperties(file, properties);
+		// Commented out until https://github.com/spring-cloud/spring-cloud-skipper/issues/263 is
+		// addressed
+		// assertMutuallyExclusiveFileAndProperties(file, properties);
 		Release release = skipperClient
 				.install(getInstallRequest(packageName, packageVersion, file, properties, releaseName, platformName));
 		return "Released " + release.getName() + ". Now at version v" + release.getVersion() + ".";
@@ -230,8 +230,9 @@ public class SkipperCommands extends AbstractSkipperCommand {
 			@ShellOption(help = "specify values in a YAML file", defaultValue = NULL) File file,
 			@ShellOption(help = "the comma separated set of properties to override during upgrade", defaultValue = NULL) String properties)
 			throws IOException {
-		// Commented out until https://github.com/spring-cloud/spring-cloud-skipper/issues/263 is addressed
-		//assertMutuallyExclusiveFileAndProperties(file, properties);
+		// Commented out until https://github.com/spring-cloud/spring-cloud-skipper/issues/263 is
+		// addressed
+		// assertMutuallyExclusiveFileAndProperties(file, properties);
 		Release release = skipperClient
 				.upgrade(getUpgradeRequest(releaseName, packageName, packageVersion, file, properties));
 		StringBuilder sb = new StringBuilder();
@@ -305,11 +306,11 @@ public class SkipperCommands extends AbstractSkipperCommand {
 		UploadRequest uploadRequest = new UploadRequest();
 		try {
 			File file = ResourceUtils.getFile(path);
-			StringTokenizer tokenizer = new StringTokenizer(file.getName(), "-");
-			String fileName = (String) tokenizer.nextElement();
-			String versionAndExtension = (String) tokenizer.nextElement();
-			String extension = versionAndExtension.substring(versionAndExtension.lastIndexOf("."));
-			String version = versionAndExtension.replaceAll(extension, "");
+			String zipFileName = file.getName();
+			String fileName = zipFileName.substring(0, zipFileName.lastIndexOf("-"));
+			String versionAndExtension = zipFileName.substring(fileName.length() + 1);
+			String extension = versionAndExtension.substring(versionAndExtension.lastIndexOf(".") + 1);
+			String version = versionAndExtension.replaceAll("." + extension, "");
 			uploadRequest.setName(fileName);
 			uploadRequest.setVersion(version);
 			uploadRequest.setExtension(extension);

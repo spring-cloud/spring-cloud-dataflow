@@ -4,7 +4,7 @@
 Picking up from where the <<three-second-tour>> left off, this section walks through the additional commands and
 other features of Skipper.  Each section walks through the same set of operations, but for a different platform.
 
-
+[[tour-local]]
 == Using the local machine
 
 Start up the server and shell as in the <<three-second-tour>>
@@ -163,6 +163,7 @@ $ curl http://localhost:8099/about
 Hello World v1.0.0.RELEASE
 ```
 
+[[tour-cloud-foundry]]
 == Using Cloud Foundry
 
 Skipper uses a Relational Database to store state.
@@ -521,6 +522,7 @@ $ curl http://helloworldpcf.cfapps.io/about
 Hello World v1.0.0.RELEASE
 ----
 
+[[tour-kubernetes]]
 == Using Kuberenetes
 
 In this example we will be running the Skipper server on the local machine and deploying to minikube also running on the local machine.
