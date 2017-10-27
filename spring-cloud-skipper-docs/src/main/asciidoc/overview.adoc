@@ -3,27 +3,34 @@
 
 
 Spring Cloud Skipper is a tool for installing, upgrading and rolling back applications to multiple cloud platforms.
-You can use Skipper standalone or integrate it with your Continuous Integration piplines to help achieve Continuous Deployment of your applications.
+You can use Skipper standalone or integrate it with your Continuous Integration pipelines to help achieve Continuous
+Deployment of your applications.
 
-Skipper consists of a server application that exposes an http API. A shell application provides easy to use command to interact with the server.  The server uses a database to store state.  Documentation to call the http API is available in the reference guide.
+Skipper consists of a server application that exposes an HTTP API. A shell application provides easy to use commands to
+interact with the server.  The server uses a database to store states.  Documentation to call the HTTP API is
+available in the reference guide.
 
-The main concepts in Skipper were highly influenced from those in https://github.com/kubernetes/helm[Helm], which presents the user with a familar `apt-get` or `brew` like software installation experience.
+The main concepts in Skipper were highly influenced from those in https://github.com/kubernetes/helm[Helm], which
+presents the user with a familiar `apt-get` or `brew` like software installation experience.
 The main concepts are Repositories, Packages, Platforms, Releases and Update strategies.
 
 *Platforms* are where your apps run.  For the first release of Skipper, support for deploying applications to platforms is provided by the https://github.com/spring-cloud/spring-cloud-deployer[Spring Cloud Deployer] family of libraries.
-This allows Skipper to deploy Spring Boot applications to Cloud Foundry, Kubernetes, Apache YARN and your local machine.
-You can configure a single Skipper server to deploy to multiple platforms, with each platform identified by a unique name.
+This allows Skipper to deploy Spring Boot applications to Cloud Foundry, Kubernetes and your local machine.
+You can configure a single Skipper server to deploy to multiple platforms, with each platform account is identified
+by a unique name.
 
-NOTE: The Spring Cloud Deployer libraries for Apache Mesos, Redhat Openshift and Hashicorp Nomad were not bundled with Skipper in 1.0 M1.  Skipper 1.0 M1 has only been tested using the local, Cloud Foundry and Kubernetes Deployers.
+NOTE: The Spring Cloud Deployer libraries for Apache YARN, Apache Mesos, Redhat Openshift and Hashicorp Nomad were not
+bundled with Skipper in 1.0 M1.  Skipper 1.0 M1 has only been tested using the local, Cloud Foundry and Kubernetes Deployers.
 
-*Packages* define the basic recipe for installing an application.
+*Packages* defines the basic recipe for installing an application.
 A package can define a single application or it can define a group of applications.
-It contains descriptive metadata, the location of the Spring Boot uberjar and default application or deployment properties.
+It contains descriptive metadata, the location of the Spring Boot uberjar and the default application or deployment
+properties.
 The location of the uberjar can be a Maven repository, docker registry, file location, or http location.
 A package is a collection of Yaml files that are zipped up into a file with a naming convention such as name-version.zip, e.g. myapp-1.0.3.zip.
 
 *Repositories* are where package metadata and zip files are hosted.  Repositories and be 'local' or 'remote'.
-A remote repository is one that is only accessible via http.
+A remote repository is the one that is only accessible via http.
 Any arbitrary web app that serves up files off a file system can be used to host a remote repository as long as certain directory and file naming conventions are followed.
 A local repository is managed by the Skipper server and backed by a database. Skipper lets you search for packages that are hosted in repositories.
 
@@ -31,19 +38,3 @@ A local repository is managed by the Skipper server and backed by a database. Sk
 A release has a name and you provide that name when upgrading, rolling back and deleting applications. You can also query for releases to discover the state of packages that have been installed.
 
 *Update Strategies* are the steps taken to upgrade an application from one version to another. In Skipper terms, it is how we go from one Release to another.  Note, an upgrade may keep the same version, but instead update applications properties.  Also, rolling back is often similar in practice to updating.
-
-//
-//== History
-//
-//Skipper was created out of the need to update applications that were deployed by Spring Cloud Data Flow.  Spring Cloud Data Flow deploys a group of applications known as a "Stream".
-//A Stream has a source applications that sends data via messaging middleware to a processor application, which in turns sends data to a sink application.
-//A processor application may change often, as the implementation changes.  Data Flow used to destro
-
-//
-//=== Features
-//
-//* Feature 1
-//* Feature 2
-
-
-

@@ -70,7 +70,9 @@ spring:
 [[skipper-installation-kubernetes]]
 == Installing on Kubernetes
 
-There is not yet a docker image for Skipper.  In the meantime, you can run Skipper locally and depoy to Kubernetes
+There is a docker image `springcloud/spring-cloud-skipper-server` is available for Skipper server in dockerhub.
+You can use this to run the Skipper server in Kubernetes.
+
 
 [skipper-kubernetes-configuration]
 === Kuberenetes configuration
@@ -93,7 +95,3 @@ spring:
                 namespace: qaNamespace
                 memory: 1024m
 ```
-
-=== Using local instance of Skipper to Deploy to Kubernetes
-
-TBD

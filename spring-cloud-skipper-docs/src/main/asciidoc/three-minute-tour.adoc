@@ -1,7 +1,8 @@
 [[three-minute-tour]]
 = Three minute Tour
 
-Picking up from where the <<three-second-tour>> left off, this section walk through additional commands and features of Skipper.  Each section walk through the same set of operations, but for a different plaform.
+Picking up from where the <<three-second-tour>> left off, this section walks through the additional commands and
+other features of Skipper.  Each section walks through the same set of operations, but for a different platform.
 
 
 == Using the local machine
@@ -26,7 +27,7 @@ Hello World v1.0.0.RELEASE
 
 We will use a YAML file to update the release.  This application contains a Spring Boot `@ConfigurationProperty` named `helloworld.greeting`, so we will set that along with a standard Spring Boot property `endpoints.sensitive=false`.  We will also bump the memory up to 2G, make the Boot actuator endpoint not sensitive and set the port to 8100.
 
-The `helloworld-upgrade-local.yml file contains
+The `helloworld-upgrade-local.yml` file contains
 ----
 spec:
   applicationProperties:
@@ -45,7 +46,8 @@ helloworldlocal has been upgraded.  Now at version v2.
 ----
 
 The current upgrade strategy is very simple, if the new app is healthy, the old app is removed.  There is not a rolling upgrade option, all new apps are deployed, checked for health, and then previous versions removed.
-More flexible upgrade strategies are planned along with the introduction of the https://projects.spring.io/spring-statemachine/[Spring Cloud State Machine] project to orchestrate the update process.
+More flexible upgrade strategies are planned along with the introduction of the https://projects.spring
+.io/spring-statemachine/[Spring Cloud State Machine] project to orchestrate the update process.
 
 
 You can now curl the `greeting` endpoint and the `about` endpoint.
@@ -62,30 +64,32 @@ In this case there is just one entry
 [source,bash,options="nowrap"]
 ----
 skipper:>list
-╔═══════════════╤═══════╤═════════════╤════════╤══════════╤═════════╤═════════╤═══════════════════════════════════════════════════════════════════════╗
-║     Name      │Version│Last updated │ Status │ Package  │ Package │Platform │                            Platform Status                            ║
-║               │       │             │        │   Name   │ Version │  Name   │                                                                       ║
-╠═══════════════╪═══════╪═════════════╪════════╪══════════╪═════════╪═════════╪═══════════════════════════════════════════════════════════════════════╣
-║helloworldlocal│1      │Thu Oct 26   │DEPLOYED│helloworld│1.0.0    │default  │helloworldlocal.helloworld-v1[helloworldlocal.helloworld-v1-0=deployed]║
-║               │       │16:40:12 EDT │        │          │         │         │                                                                       ║
-║               │       │2017         │        │          │         │         │                                                                       ║
-╚═══════════════╧═══════╧═════════════╧════════╧══════════╧═════════╧═════════╧═══════════════════════════════════════════════════════════════════════╝
+╔═══════════════╤═══════╤═════════════╤════════╤══════════╤═════════╤═════════╤════════════════════════════════════════════════════╗
+║     Name      │Version│Last updated │ Status │ Package  │ Package │Platform │                  Platform Status                   ║
+║               │       │             │        │   Name   │ Version │  Name   │                                                    ║
+╠═══════════════╪═══════╪═════════════╪════════╪══════════╪═════════╪═════════╪════════════════════════════════════════════════════╣
+║helloworldlocal│2      │Fri Oct 27   │DEPLOYED│helloworld│1.0.1    │default  │[helloworldlocal.helloworld-v2], State =            ║
+║               │       │16:39:03 IST │        │          │         │         │[helloworldlocal.helloworld-v2-0=deployed]          ║
+║               │       │2017         │        │          │         │         │                                                    ║
+╚═══════════════╧═══════╧═════════════╧════════╧══════════╧═════════╧═════════╧════════════════════════════════════════════════════╝
 ----
 
-You can get the full history of the release using the `history command.
+You can get the full history of the release using the `history` command.
+[source,bash,options="nowrap"]
 ----
 skipper:>history --release-name helloworldlocal
 ╔═══════╤════════════════════════════╤════════╤════════════╤═══════════════╤════════════════╗
 ║Version│        Last updated        │ Status │Package Name│Package Version│  Description   ║
 ╠═══════╪════════════════════════════╪════════╪════════════╪═══════════════╪════════════════╣
-║2      │Thu Oct 26 16:40:31 EDT 2017│DEPLOYED│helloworld  │1.0.1          │Upgrade complete║
-║1      │Thu Oct 26 16:40:12 EDT 2017│DELETED │helloworld  │1.0.0          │Delete complete ║
+║2      │Fri Oct 27 16:39:03 IST 2017│DEPLOYED│helloworld  │1.0.1          │Upgrade complete║
+║1      │Fri Oct 27 16:37:59 IST 2017│DELETED │helloworld  │1.0.0          │Delete complete ║
 ╚═══════╧════════════════════════════╧════════╧════════════╧═══════════════╧════════════════╝
 ----
 
-Do see what changed, you can look at the Skipper manifest for each release using the `manifest get` command.
+To see what changed, you can look at the Skipper manifest for each release using the `manifest get` command.
   A `manifest diff` command is coming in the next release.
 
+[source,bash,options="nowrap"]
 ----
 skipper:>manifest get --release-name helloworldlocal --release-version 2
 
@@ -109,6 +113,7 @@ spec:
 
 and
 
+[source,bash,options="nowrap"]
 ----
 skipper:>manifest get --release-name helloworldlocal --release-version 1
 
@@ -127,22 +132,25 @@ spec:
 ----
 
 Next we will use the `rollback` command to deploy an older version of the application.
-Since we have the manifest for that version, we have all we need to redeploy and earlier release.
+Since we have the manifest for that version, we have all we need to redeploy an earlier release.
 
+[source,bash,options="nowrap"]
 ----
 skipper:>rollback --release-name helloworldlocal --release-version 1
 helloworldlocal has been rolled back.  Now at version v3.
 ----
 
 The history now shows a new `v3` version, even though it is identical in terms of app behavior to the `v2` version.
+
+[source,bash,options="nowrap"]
 ----
 skipper:>history --release-name helloworldlocal
 ╔═══════╤════════════════════════════╤════════╤════════════╤═══════════════╤════════════════╗
 ║Version│        Last updated        │ Status │Package Name│Package Version│  Description   ║
 ╠═══════╪════════════════════════════╪════════╪════════════╪═══════════════╪════════════════╣
-║3      │Thu Oct 26 16:49:18 EDT 2017│DEPLOYED│helloworld  │1.0.0          │Upgrade complete║
-║2      │Thu Oct 26 16:40:31 EDT 2017│DELETED │helloworld  │1.0.1          │Delete complete ║
-║1      │Thu Oct 26 16:40:12 EDT 2017│DELETED │helloworld  │1.0.0          │Delete complete ║
+║3      │Fri Oct 27 16:42:47 IST 2017│DEPLOYED│helloworld  │1.0.0          │Upgrade complete║
+║2      │Fri Oct 27 16:39:03 IST 2017│DELETED │helloworld  │1.0.1          │Delete complete ║
+║1      │Fri Oct 27 16:37:59 IST 2017│DELETED │helloworld  │1.0.0          │Delete complete ║
 ╚═══════╧════════════════════════════╧════════╧════════════╧═══════════════╧════════════════╝
 ----
 
@@ -179,8 +187,8 @@ env:
     SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[cf-dev]_CONNECTION_ORG: scdf-ci
     SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[cf-dev]_CONNECTION_SPACE: space-mark
     SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[cf-dev]_CONNECTION_DOMAIN: cfapps.io
-    SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[cf-dev]_CONNECTION_USERNAME: user@example.com
-    SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[cf-dev]_CONNECTION_PASSWORD: drowssap
+    SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[cf-dev]_CONNECTION_USERNAME: <your-username>
+    SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[cf-dev]_CONNECTION_PASSWORD: <your-password>
     SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[cf-dev]_CONNECTION_SKIP_SSL_VALIDATION: false
     SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[cf-dev]_DEPLOYMENT_DELETE_ROUTES: false
 ----
@@ -188,10 +196,12 @@ env:
 This defines `cf-dev` as a named Cloud Foundry account.
 You can define multiple Cloud Foundry accounts and reference them in the shell commands when ever there is a command option for `--platform-name`.
 
-The `deployment.deleteRoutes` property is important if you are deploying HTTP apps.  When doing an upgrade, setting this to false prevents the routes from disappearing after deleting the old application.  The underlying Spring Cloud Deployer library for Cloud Foundry has `true` as the default.
+The `deployment.deleteRoutes` property is important if you are deploying HTTP apps.  When doing an upgrade, setting
+this to false prevents the routes from disappearing after deleting the old application.  The underlying Spring Cloud
+Deployer library for Cloud Foundry has this value set to `true` as the default.
 
 Note you can also run the Skipper Server locally and deploy to Cloud Foundry.
-In this case, it is more convenient to specify the configuration as an `skipper.yml` file, shown below, and start the server with the option `--spring.config.location=skipper.yml`
+In this case, it is more convenient to specify the configuration as a `skipper.yml` file, shown below, and start the server with the option `--spring.config.location=skipper.yml`
 
 ----
 spring:
@@ -215,7 +225,7 @@ spring:
                   deleteRoutes: false
 ----
 
-When you start the Skipper shell, it defaults to looking for the Skipper server on the same (local) machine.
+When you start the Skipper shell, by default it tries to look for the Skipper server on the same (local) machine.
 To specify the Skipper server that is running on Cloud Foundry, use the CF route with the `config` command
 
 ```
@@ -266,12 +276,14 @@ Let's install the Hello World app, specifically, the maven based artifact.
 [source,bash,options="nowrap"]
 ----
 skipper:>install --release-name helloworldpcf --package-name helloworld --package-version 1.0.0 --platform-name cf-dev --properties spec.deploymentProperties.spring.cloud.deployer.cloudfoundry.route=helloworldpcf.cfapps.io
-Released helloworld-pcf
+Released helloworld-pcf. Now at version v1.
 ----
 
 If you do not specify `--platform-name cf-dev` the command will fail since the command property defaults to a platform named `default`.  Instead of specifying it, you can register this Cloud Foundry Platform account in the manifest with the name `default` instead of `cf-dev`.
 
-As it takes a bit of time for the app to spin up, you can monitor the process using the `status command`. It will likely say `FAILED` for a while until we optimize the call made to Cloud Foundry to get 'early start status'.
+You can monitor the process using the `status command`.
+
+[source,bash,options="nowrap"]
 ----
 skipper:>status --release-name helloworldpcf
 ╔═══════════════╤════════════════════════════════════════════════════════════════════╗
@@ -288,6 +300,7 @@ Note that the status `DEPLOYED` above indicates that Skipper has told the platfo
 
 A `cf apps` command will now have a new listing for this deployed application.
 
+[source,bash,options="nowrap"]
 ----
 $ cf apps
 Getting apps in org scdf-ci / space space-mark as mpollack@gopivotal.com...
@@ -298,6 +311,8 @@ helloworldpcf-helloworld-v1   started           1/1         1G       1G     hell
 ----
 
 You can now curl the `greeting` endpoint and the `about` endpoint.
+
+[source,bash,options="nowrap"]
 ----
 $ curl http://helloworldpcf.cfapps.io/greeting
 Hello World!
@@ -310,8 +325,10 @@ The name of the application is based on the convention <release-name>-<package-n
 Also note that we specified a route for this application that is different than the application's name.
 The deployment property `spring.cloud.deployer.cloudfoundry.route` is set to something that will not change across the deployment of different versions of this application, in this case `helloworldpcf.cfapps.io`.
 
-The package provides a means to template the application version, application properties and deployment properties that are used to deploy the application to Cloud Foundry.  The `manifest get` command shows the final YAML file which is passed off to the Spring Cloud Deployer Library.
+The package provides a means to template the application version, application properties and deployment properties that are used to deploy the application to Cloud Foundry.
+The `manifest get` command shows the final YAML file which is passed off to the Spring Cloud Deployer Library.
 
+[source,bash,options="nowrap"]
 ----
 skipper:>manifest get --release-name helloworldpcf
 
@@ -349,14 +366,14 @@ The `upgrade` command
 [source,bash,options="nowrap"]
 ----
 skipper:>upgrade --release-name helloworldpcf --package-name helloworld --package-version 1.0.0 --file /home/mpollack/helloworld-upgrade.yml
-helloworldpcf has been upgraded.
-Last Deployed: Tue Oct 24 22:57:02 EDT 2017
+helloworldpcf has been upgraded.  Now at version v2.
 ----
 
 Will start another instance of the hello world application. If you do not specify `--package-version` it will pick the latest version of the `helloworld` package.  You do not need to specify the `--platform-name` as it will always be where the current application was deployed.
 
 The `cf apps` and `cf routes` command shows
 
+[source,bash,options="nowrap"]
 ----
 $ cf apps
 Getting apps in org scdf-ci / space space-mark as mpollack@gopivotal.com...
@@ -389,6 +406,7 @@ The current upgrade strategy is very simple, if the new app is healthy, the old 
 More flexible upgrade strategies are planned along with the introduction of the https://projects.spring.io/spring-statemachine/[Spring Cloud State Machine] project to orchestrate the update process.
 
 You can now curl the `greeting` endpoint and the `about` endpoint.
+[source,bash,options="nowrap"]
 ----
 $ curl http://helloworldpcf.cfapps.io/greeting
 yo
@@ -398,6 +416,7 @@ Hello World v1.0.0.RELEASE
 
 The `list` command shows you the current `DEPLOYED` and `DELETED` releases for every release name.
 In this case there is just one entry
+
 [source,bash,options="nowrap"]
 ----
 skipper:>list
@@ -409,6 +428,8 @@ skipper:>list
 ----
 
 You can get the full history of the release using the `history` command
+
+[source,bash,options="nowrap"]
 ----
 skipper:>history --release-name helloworldpcf
 ╔═══════╤════════════════════════════╤════════╤════════════╤═══════════════╤════════════════╗
@@ -422,15 +443,17 @@ skipper:>history --release-name helloworldpcf
 A more typical upgrade process is not to change application properties, but to change the version of the application because the code has change.  We will now upgrade the release to use a new maven artifact, version 1.0.1, which also corresponds to version 1.0.1 of the helloworld skipper package.
 In this case we will not add any additional properties other than the route.
 
-
+[source,bash,options="nowrap"]
 ----
 skipper:>upgrade --release-name helloworldpcf --package-name helloworld --package-version 1.0.1 --properties spec.deploymentProperties.spring.cloud.deployer.cloudfoundry.route=helloworldpcf.cfapps.io
-helloworldpcf has been upgraded.
-Last Deployed: Tue Oct 24 23:09:39 EDT 2017
+helloworldpcf has been upgraded.  Now at version v3.
 ----
 
-Note that the the current releases properties such as using 2G, or the greeting being `yo` are not carried over.  In a future release we will introduce a `--reuse-properties` command that will carry the current release properties over to the next release to be made.
-After a while the status will indiate all has been deployed
+Note that the current release's property values such as using 2G, or the greeting being `yo` are not carried over.
+In a future release we will introduce a `--reuse-properties` command that will carry the current release properties over to the next release to be made.
+You can monitor the status of the upgrade using the `status` command
+
+[source,bash,options="nowrap"]
 ----
 skipper:>status --release-name helloworldpcf
 ╔═══════════════╤═══════════════════════════════════════════════════════════════════╗
@@ -442,6 +465,8 @@ skipper:>status --release-name helloworldpcf
 ----
 
 And a curl command shows
+
+[source,bash,options="nowrap"]
 ----
 curl http://helloworldpcf.cfapps.io/greeting
 Olá Mundo!
@@ -450,6 +475,8 @@ Hello World v1.0.1.RELEASE
 ----
 
 Our history now looks like
+
+[source,bash,options="nowrap"]
 ----
 skipper:>history --release-name helloworldpcf
 ╔═══════╤════════════════════════════╤════════╤════════════╤═══════════════╤════════════════╗
@@ -462,16 +489,17 @@ skipper:>history --release-name helloworldpcf
 ----
 
 Next we will use the `rollback` command to deploy an older version of the application.
-Since we have the manifest for that version, we have all we need to redeploy and earlier release.
+Since we have the manifest for that version, we have all we need to redeploy an earlier release.
 
+[source,bash,options="nowrap"]
 ----
 skipper:>rollback --release-name helloworldpcf --release-version 2
-helloworldpcf has been rolled back.
-Last Deployed: Tue Oct 24 23:15:01 EDT 2017
+helloworldpcf has been rolled back.  Now at version v4.
 ----
 
 The history now shows a new `v4` version, even though it is identical in terms of app behavior to the `v2` version.
 
+[source,bash,options="nowrap"]
 ----
 skipper:>history --release-name helloworldpcf
 ╔═══════╤════════════════════════════╤════════╤════════════╤═══════════════╤════════════════╗
@@ -483,8 +511,9 @@ skipper:>history --release-name helloworldpcf
 ║1      │Tue Oct 24 22:54:30 EDT 2017│DELETED │helloworld  │1.0.0          │Delete complete ║
 ╚═══════╧════════════════════════════╧════════╧════════════╧═══════════════╧════════════════╝
 ----
-The curl commands show
 
+The curl commands show
+[source,bash,options="nowrap"]
 ----
 $ curl http://helloworldpcf.cfapps.io/greeting
 yo
@@ -499,7 +528,7 @@ In this example we will be running the Skipper server on the local machine and d
 NOTE: The upgrade approach in 1.0 M1 does not handle correctly the routing of http traffic between versions, so take what is below with a grain of salt.  The Spring Cloud Deployer for Kubernetes creates a service, replication controller, and pod for the app (or optionally
   a Deployment)  This is not an issue for apps that communicate via Messaging middleware.  Treat the current M1 release as a WIP.
 
-Start the skipper server with the option `--spring.config.location=skipper.yml` where the YAML is shown below.
+Start the Skipper server with the option `--spring.config.location=skipper.yml` where the YAML is shown below.
 
 ----
 spring:
@@ -556,12 +585,12 @@ Let's install the Hello World app, specifically, the Docker based artifact.
 [source,bash,options="nowrap"]
 ----
 skipper:>install --release-name helloworldk8s --package-name helloworld-docker --package-version 1.0.0 --platform-name minikube --properties spec.deploymentProperties.spring.cloud.deployer.kubernetes.createNodePort=32123
-Released helloworldk8s
+Released helloworldk8s. Now at version v1.
 ----
 
 If you do not specify `--platform-name minikube` the command will fail since the command property defaults to a platform named `default`.  Instead of specifying it, you can register this Kubernetes Platform account in the manifest with the name `default` instead of `minikube`.
 
-As it takes a bit of time for the app to spin up, you can monitor the process using the `status command`.
+You can monitor the process using the `status command`.
 [source,bash,options="nowrap"]
 ----
 skipper:>status --release-name helloworldk8s
@@ -579,7 +608,7 @@ Eventually the Platform Status will say `All applications have been successfully
 Note that the status `DEPLOYED` above indicates that Skipper has told the platform to deploy.  Skipper does not keep track of the intermediate states 'deploying' or 'deleting'.
 
 A `kubectl pods` command will now have a new listing for this deployed application
-
+[source,bash,options="nowrap"]
 ----
 $ kubectl get pods
 NAME                                       READY     STATUS    RESTARTS   AGE
@@ -593,13 +622,14 @@ kubernetes                           10.0.0.1     <none>        443/TCP         
 ----
 
 To get the URL of this app on minikube
-
+[source,bash,options="nowrap"]
 ----
 $ minikube service --url helloworldk8s-helloworld-docker-v1
 http://192.168.99.100:32123
 ----
 
 You can now curl the `greeting` endpoint and the `about` endpoint.
+[source,bash,options="nowrap"]
 ----
 $ curl http://192.168.99.100:32123/greeting
 Hello World!
@@ -647,15 +677,16 @@ The `upgrade` command
 [source,bash,options="nowrap"]
 ----
 skipper:>upgrade --release-name helloworldk8s --package-name helloworld-docker --package-version 1.0.0 --file /home/mpollack/helloworld-upgrade-k8s.yml
-helloworldk8s has been upgraded.
-Last Deployed: Wed Oct 25 13:29:01 EDT 2017
+helloworldk8s has been upgraded.  Now at version v2.
 ----
 
-Will start another instance of the hello world application. If you do not specify `--package-version` it will pick the latest version of the `helloworld` package.  You do not need to specify the `--platform-name` as it will always be where the current application was deployed.
+Will start another instance of the hello world application. If you do not specify `--package-version` it will pick
+the latest version of the `helloworld-docker` package.  You do not need to specify the `--platform-name` as it will
+always be where the current application was deployed.
 
 
 the `kubectl get all` command shows
-
+[source,bash,options="nowrap"]
 ----
 $ kubectl get all
 NAME                                          READY     STATUS    RESTARTS   AGE
@@ -683,6 +714,8 @@ More flexible upgrade strategies are planned along with the introduction of the 
 
 
 You can now curl the `greeting` endpoint and the `about` endpoint.
+
+[source,bash,options="nowrap"]
 ----
 $ curl http://192.168.99.100:32124/greeting
 yo
@@ -693,7 +726,7 @@ Hello World v1.0.0.RELEASE
 
 The `list` command shows you the current `DEPLOYED` and `DELETED` release for every release name.
 In this case there is just one entry
-
+[source,bash,options="nowrap"]
 ----
 skipper:>list
 ╔═════════════╤═══════╤════════════════════════════╤════════╤═════════════════╤═══════════════╤═════════════╤═══════════════╗
@@ -720,12 +753,14 @@ In this case we will not add any additional properties other than the NodePort.
 [source,bash,options="nowrap"]
 ----
 skipper:>upgrade --release-name helloworldk8s --package-name helloworld-docker --package-version 1.0.1 --properties spec.deploymentProperties.spring.cloud.deployer.kubernetes.createNodePort=32125
-Released helloworldk8s
+Released helloworldk8s. Now at version v3.
 ----
 
-Note that the the current releases properties such as using 2G, or the greeting being `yo` are not carried over.  In a future release we will introduce a `--reuse-properties` command that will carry the current release properties over to the next release to be made.
-After a while the status will indiate all has been deployed
+Note that the the current release's property values such as using 2G, or the greeting being `yo` are not carried over.
+In a future release we will introduce a `--reuse-properties` command that will carry the current release properties over to the next release to be made.
+You can monitor the status of the upgrade using the `status` command
 
+[source,bash,options="nowrap"]
 ----
 skipper:>status --release-name helloworldk8s
 ╔═══════════════╤═════════════════════════════════════════════════════════════════════════════════════╗
@@ -737,6 +772,7 @@ skipper:>status --release-name helloworldk8s
 ----
 
 And a curl command shows
+[source,bash,options="nowrap"]
 ----
 $ curl http://192.168.99.100:32125/greeting
 Olá Mundo!
@@ -746,7 +782,7 @@ Hello World v1.0.1.RELEASE
 ----
 
 Our history now looks like
-
+[source,bash,options="nowrap"]
 ----
 skipper:>history --release-name helloworldk8s
 ╔═══════╤════════════════════════════╤════════╤═════════════════╤═══════════════╤════════════════╗
@@ -759,8 +795,9 @@ skipper:>history --release-name helloworldk8s
 ----
 
 Next we will use the `rollback` command to deploy an older version of the application.
-Since we have the manifest for that version, we have all we need to redeploy and earlier release.
+Since we have the manifest for that version, we have all we need to redeploy an earlier release.
 
+[source,bash,options="nowrap"]
 ----
 skipper:>rollback --release-name helloworldk8s --release-version 2
 helloworldk8s has been rolled back.
@@ -769,6 +806,7 @@ Last Deployed: Wed Oct 25 17:44:25 EDT 2017
 
 The history now shows a new `v4` version, even though it is identical to the `v2` version.
 
+[source,bash,options="nowrap"]
 ----
 skipper:>history --release-name helloworldk8s
 ╔═══════╤════════════════════════════╤════════╤═════════════════╤═══════════════╤════════════════╗
@@ -782,7 +820,7 @@ skipper:>history --release-name helloworldk8s
 ----
 
 The curl commands show
-
+[source,bash,options="nowrap"]
 ----
 $ curl http://192.168.99.100:32124/greeting
 yo

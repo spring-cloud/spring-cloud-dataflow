@@ -1,7 +1,8 @@
 [[three-hour-tour]]
 = Using Skipper
 
-This section is the 'three hour tour' of Skipper.  It descriptes how to configure and use the main feature set of Skipper in detail.  We will cover, platforms, packages, repositories, releases and update strategies.
+This section is the 'three hour tour' of Skipper.  It describes how to configure and use the main feature set of Skipper
+ in detail.  We will cover, platforms, packages, repositories, releases and update strategies.
 
 [[skipper-platforms]]
 == Platforms
@@ -9,7 +10,7 @@ This section is the 'three hour tour' of Skipper.  It descriptes how to configur
 Skipper supports deploying to multiple platforms.
 The platforms included in the 1.0 M1 release are Local, Cloud Foundry and Kubernetes.
 For each platform, you can configure multiple accounts.
-Each `account name` must be globally unique accross all platforms.
+Each `account name` must be globally unique across all platforms.
 
 Usually different `accounts` will correspond to a different orgs/spaces for Cloud Foundry and different namespaces for a single Kubernetes cluster.
 

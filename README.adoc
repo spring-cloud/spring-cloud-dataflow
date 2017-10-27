@@ -75,7 +75,8 @@ $ java -jar spring-cloud-skipper-shell/target/spring-cloud-skipper-shell-1.0.0.B
 
 The command `search` will search for all available packages. It should then show you the following output
 
-```
+[source,bash,options="nowrap"]
+----
 skipper:>search
 ╔═════════════════╤═══════╤═════════════════════════════════════════════════════════════╗
 ║      Name       │Version│                         Description                         ║
@@ -92,12 +93,13 @@ skipper:>search
 ║ticktock         │1.0.0  │The ticktock stream sends a time stamp and logs the value.   ║
 ║time             │2.0.0  │The time source periodically emits a timestamp string.       ║
 ╚═════════════════╧═══════╧═════════════════════════════════════════════════════════════╝
-```
+----
 
 In another window you can run `watch -n 2 jps` so see which Java processes are running, since by default, the local deployer will be used to deploy packages.
 
 Now deploy the log 1.0.0 package.
 
+[source,bash,options="nowrap"]
 ----
 skipper:>install --package-name log --package-version 1.0.0 --release-name mylog
 Released mylog. Now at version v1.
@@ -107,7 +109,8 @@ Note that the log 1.0.0 package deploys the version 1.2.0.RC1 of the application
 
 You can ask for the status using the status command
 
-```
+[source,bash,options="nowrap"]
+----
 skipper:>status --release-name mylog
 ╔═══════════════╤═════════════════════════════════════════════════╗
 ║Last Deployed  │Fri Oct 27 15:44:00 IST 2017                     ║
@@ -115,11 +118,12 @@ skipper:>status --release-name mylog
 ║Platform Status│All applications have been successfully deployed.║
 ║               │[mylog.log-v1], State = [mylog.log-v1-0=deployed]║
 ╚═══════════════╧═════════════════════════════════════════════════╝
-```
+----
 
 The manifest for this release that represents the file instructions to deploy onto the platform, can be shown using the `get manifest` command.
 
-```
+[source,bash,options="nowrap"]
+----
 skipper:>manifest get --release-name mylog
 
 ---
@@ -135,20 +139,22 @@ spec:
   resourceMetadata: maven://org.springframework.cloud.stream.app:log-sink-rabbit:jar:metadata:1.2.0.RC1
   applicationProperties:
   deploymentProperties:
-```
+----
 
 Now update the release with a newer version
 
-```
+[source,bash,options="nowrap"]
+----
 skipper:>upgrade --release-name mylog --package-name log --package-version 2.0.0
 mylog has been upgraded.  Now at version v2.
-```
+----
 
 You should see the java app named `log-sink-rabbit-1.2.0.RELEASE.jar` running in the output of the `jps` command.
 
 The status command should shortly show it has been deployed successfully.  Note you can type `!status` to execute the last command that started with the word `status`
 
-```
+[source,bash,options="nowrap"]
+----
 skipper:>status --release-name mylog
 ╔═══════════════╤═════════════════════════════════════════════════╗
 ║Last Deployed  │Fri Oct 27 15:45:43 IST 2017                     ║
@@ -156,20 +162,22 @@ skipper:>status --release-name mylog
 ║Platform Status│All applications have been successfully deployed.║
 ║               │[mylog.log-v2], State = [mylog.log-v2-0=deployed]║
 ╚═══════════════╧═════════════════════════════════════════════════╝
-```
+----
 
 Next rollback to the previous release
 
-```
+[source,bash,options="nowrap"]
+----
 skipper:>rollback --release-name mylog
 mylog has been rolled back.  Now at version v3.
-```
+----
 
 You should see the java app named `log-sink-rabbit-1.2.0.RC1.jar` running in the output of the `jps` command
 
 The status command should shortly show it has been deployed successfully.
 
-```
+[source,bash,options="nowrap"]
+----
 skipper:>status --release-name mylog
 ╔═══════════════╤═════════════════════════════════════════════════╗
 ║Last Deployed  │Fri Oct 27 15:48:03 IST 2017                     ║
@@ -177,11 +185,12 @@ skipper:>status --release-name mylog
 ║Platform Status│All applications have been successfully deployed.║
 ║               │[mylog.log-v3], State = [mylog.log-v3-0=deployed]║
 ╚═══════════════╧═════════════════════════════════════════════════╝
-```
+----
 
 The `history` command shows you the various releases that were made
 
-```
+[source,bash,options="nowrap"]
+----
 skipper:>history --release-name mylog
 ╔═══════╤════════════════════════════╤════════╤════════════╤═══════════════╤════════════════╗
 ║Version│        Last updated        │ Status │Package Name│Package Version│  Description   ║
@@ -190,14 +199,16 @@ skipper:>history --release-name mylog
 ║2      │Fri Oct 27 15:45:43 IST 2017│DELETED │log         │2.0.0          │Delete complete ║
 ║1      │Fri Oct 27 15:44:00 IST 2017│DELETED │log         │1.0.0          │Delete complete ║
 ╚═══════╧════════════════════════════╧════════╧════════════╧═══════════════╧════════════════╝
-```
+----
 
 Now delete the release.
 
-```
+
+[source,bash,options="nowrap"]
+----
 skipper:>delete --release-name mylog
 mylog has been deleted.
-```
+----
 
 You should not see any `log-sink-rabbit` apps in the `jps` command.
 
