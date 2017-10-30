@@ -198,7 +198,7 @@ This defines `cf-dev` as a named Cloud Foundry account.
 You can define multiple Cloud Foundry accounts and reference them in the shell commands when ever there is a command option for `--platform-name`.
 
 The `deployment.deleteRoutes` property is important if you are deploying HTTP apps.  When doing an upgrade, setting
-this to false prevents the routes from disappearing after deleting the old application.  The underlying Spring Cloud
+this to `false` prevents the routes from disappearing after deleting the old application.  The underlying Spring Cloud
 Deployer library for Cloud Foundry has this value set to `true` as the default.
 
 Note you can also run the Skipper Server locally and deploy to Cloud Foundry.
@@ -277,7 +277,7 @@ Let's install the Hello World app, specifically, the maven based artifact.
 [source,bash,options="nowrap"]
 ----
 skipper:>install --release-name helloworldpcf --package-name helloworld --package-version 1.0.0 --platform-name cf-dev --properties spec.deploymentProperties.spring.cloud.deployer.cloudfoundry.route=helloworldpcf.cfapps.io
-Released helloworld-pcf. Now at version v1.
+Released helloworldpcf. Now at version v1.
 ----
 
 If you do not specify `--platform-name cf-dev` the command will fail since the command property defaults to a platform named `default`.  Instead of specifying it, you can register this Cloud Foundry Platform account in the manifest with the name `default` instead of `cf-dev`.
@@ -287,12 +287,12 @@ You can monitor the process using the `status command`.
 [source,bash,options="nowrap"]
 ----
 skipper:>status --release-name helloworldpcf
-╔═══════════════╤════════════════════════════════════════════════════════════════════╗
-║Last Deployed  │Tue Oct 24 22:54:30 EDT 2017                                        ║
-║Status         │DEPLOYED                                                            ║
-║Platform Status│The applications are being deployed.                                ║
-║               │helloworldpcf-helloworld-v1[helloworldpcf-helloworld-v1-0=deploying]║
-╚═══════════════╧════════════════════════════════════════════════════════════════════╝
+╔═══════════════╤════════════════════════════════════════════════╗
+║Last Deployed  │Tue Oct 24 22:54:30 EDT 2017                    ║
+║Status         │DEPLOYED                                        ║
+║Platform Status│The applications are being deployed.            ║
+║               │[helloworldpcf-helloworld-v1], State = [partial]║
+╚═══════════════╧════════════════════════════════════════════════╝
 ----
 
 Eventually the Platform Status will say `All applications have been successfully deployed.`
@@ -399,7 +399,7 @@ space-mark   helloworldpcf                 cfapps.io                        hell
 
 At this point Skipper is looking to see if the health endpoint of the Boot application is ok.
 The property `spring.cloud.skipper.server.strategies.healthcheck.timeoutInMillis` is the maximum time the upgrade process will wait for a healthy app.
-The default value is 5 seconds.
+The default value is 5 minutes.
 Skipper will fail the deployment if it is not healthy within that time.
 The property `spring.cloud.skipper.server.strategies.healthcheck.sleepInMillis` is how long to sleep between health checks.
 
@@ -420,12 +420,13 @@ In this case there is just one entry
 
 [source,bash,options="nowrap"]
 ----
-skipper:>list
-╔═════════════╤═══════╤════════════════════════════╤════════╤════════════╤═══════════════╤═════════════╤═══════════════╗
-║    Name     │Version│        Last updated        │ Status │Package Name│Package Version│Platform Name│Platform Status║
-╠═════════════╪═══════╪════════════════════════════╪════════╪════════════╪═══════════════╪═════════════╪═══════════════╣
-║helloworldpcf│2      │Tue Oct 24 22:57:02 EDT 2017│DEPLOYED│helloworld  │1.0.0          │cf-dev       │               ║
-╚═════════════╧═══════╧════════════════════════════╧════════╧════════════╧═══════════════╧═════════════╧═══════════════╝
+╔══════════════╤═══════╤══════════════════════════╤════════╤═══════════╤══════════════╤════════════╤══════════════════════════════════════════════════════════════════════════════╗
+║     Name     │Version│       Last updated       │ Status │  Package  │   Package    │  Platform  │                               Platform Status                                ║
+║              │       │                          │        │   Name    │   Version    │    Name    │                                                                              ║
+╠══════════════╪═══════╪══════════════════════════╪════════╪═══════════╪══════════════╪════════════╪══════════════════════════════════════════════════════════════════════════════╣
+║helloworldpcf │2      │Tue Oct 24 22:57:02 EDT   │DEPLOYED│helloworld │1.0.0         │cf-dev      │ [helloworldpcf-helloworld-v2], State =                                       ║
+║              │       │2017                      │        │           │              │            │ [helloworldpcf-helloworld-v2-0=deployed]                                     ║
+╚══════════════╧═══════╧══════════════════════════╧════════╧═══════════╧══════════════╧════════════╧══════════════════════════════════════════════════════════════════════════════╝
 ----
 
 You can get the full history of the release using the `history` command
@@ -442,7 +443,7 @@ skipper:>history --release-name helloworldpcf
 ----
 
 A more typical upgrade process is not to change application properties, but to change the version of the application because the code has change.  We will now upgrade the release to use a new maven artifact, version 1.0.1, which also corresponds to version 1.0.1 of the helloworld skipper package.
-In this case we will not add any additional properties other than the route.
+In this case, we will not add any additional properties other than the route.
 
 [source,bash,options="nowrap"]
 ----
@@ -457,12 +458,12 @@ You can monitor the status of the upgrade using the `status` command
 [source,bash,options="nowrap"]
 ----
 skipper:>status --release-name helloworldpcf
-╔═══════════════╤═══════════════════════════════════════════════════════════════════╗
-║Last Deployed  │Tue Oct 24 23:09:39 EDT 2017                                       ║
-║Status         │DEPLOYED                                                           ║
-║Platform Status│All applications have been successfully deployed.                  ║
-║               │helloworldpcf-helloworld-v3[helloworldpcf-helloworld-v3-0=deployed]║
-╚═══════════════╧═══════════════════════════════════════════════════════════════════╝
+╔═══════════════╤═════════════════════════════════════════════════════════════════════════════════╗
+║Last Deployed  │Tue Oct 24 23:09:39 EDT 2017                                                     ║
+║Status         │DEPLOYED                                                                         ║
+║Platform Status│All applications have been successfully deployed.                                ║
+║               │[helloworldpcf-helloworld-v3], State = [helloworldpcf-helloworld-v3-0=deployed]  ║
+╚═══════════════╧═════════════════════════════════════════════════════════════════════════════════╝
 ----
 
 And a curl command shows
@@ -596,12 +597,12 @@ You can monitor the process using the `status command`.
 [source,bash,options="nowrap"]
 ----
 skipper:>status --release-name helloworldk8s
-╔═══════════════╤══════════════════════════════════════════════════════════════════════════════════════╗
-║Last Deployed  │Wed Oct 25 17:34:24 EDT 2017                                                          ║
-║Status         │DEPLOYED                                                                              ║
-║Platform Status│The applications are being deployed.                                                  ║
-║               │helloworldk8s-helloworld-docker-v1[helloworldk8s-helloworld-docker-v1-g8j39=deploying]║
-╚═══════════════╧══════════════════════════════════════════════════════════════════════════════════════╝
+╔═══════════════╤══════════════════════════════════════════════════════════════════════════════════════════════════╗
+║Last Deployed  │Wed Oct 25 17:34:24 EDT 2017                                                                      ║
+║Status         │DEPLOYED                                                                                          ║
+║Platform Status│The applications are being deployed.                                                              ║
+║               │[helloworldk8s-helloworld-docker-v1], State = [helloworldk8s-helloworld-docker-v1-cch68=deploying]║
+╚═══════════════╧══════════════════════════════════════════════════════════════════════════════════════════════════╝
 ----
 
 
@@ -643,6 +644,7 @@ The name of the application is based on the convention <release-name>-<package-n
 
 The package provides a means to template the application version, application properties and deployment properties that are used to deploy the application to Kubernetes.  The `manifest get` command shows the final YAML file which is passed off to the Spring Cloud Deployer Library.
 
+[source,bash,options="nowrap"]
 ----
 skipper:>manifest get --release-name helloworldk8s
 
@@ -663,16 +665,18 @@ The manifest is in a Kubernetes Resource file inspired format.  By looking at th
 The metadata values that are present will be used in the next release to support searching for releases based on those values.
 
 Since it is somewhat awkward to specify multiple flattened out YAML values for the `--properties` argument in the shell, you can also specify the location of a YAML file when installing or upgrading.
-We will use a YAML file we will update the release.  This application contains a Spring Boot `@ConfigurationProperty` named `helloworld.greeting`, so we will set that along with a standard Spring Boot property `endpoints.sensitive=false`.  We will also bump the memory up to 2G.
+We will use a YAML file when we will update the release.  This application contains a Spring Boot
+`@ConfigurationProperty` named `helloworld.greeting`, so we will set that along with a standard Spring Boot property `endpoints.sensitive=false`.  We will also bump the memory up to 2G.
 
+[source,bash,options="nowrap"]
 ----
 spec:
   applicationProperties:
     endpoints.sensitive: false
     helloworld.greeting: yo
   deploymentProperties:
-    spring.cloud.deployer.kubernetes.createNodePort=32124
-    spring.cloud.deployer.memory=2048m
+    spring.cloud.deployer.kubernetes.createNodePort: 32124
+    spring.cloud.deployer.memory: 2048m
 ----
 
 The `upgrade` command
@@ -682,7 +686,7 @@ skipper:>upgrade --release-name helloworldk8s --package-name helloworld-docker -
 helloworldk8s has been upgraded.  Now at version v2.
 ----
 
-Will start another instance of the hello world application. If you do not specify `--package-version` it will pick
+This will start another instance of the hello world application. If you do not specify `--package-version` it will pick
 the latest version of the `helloworld-docker` package.  You do not need to specify the `--platform-name` as it will
 always be where the current application was deployed.
 
@@ -707,7 +711,7 @@ svc/kubernetes                           10.0.0.1     <none>        443/TCP     
 
 At this point Skipper is looking to see if the health endpoint of the Boot application is ok.
 The property `spring.cloud.skipper.server.strategies.healthcheck.timeoutInMillis` is the maximum time the upgrade process will wait for a healthy app.
-The default value is 5 seconds.
+The default value is 5 minutes.
 Skipper will fail the deployment if it is not healthy within that time.
 The property `spring.cloud.skipper.server.strategies.healthcheck.sleepInMillis` is how long to sleep between health checks.
 
@@ -765,12 +769,12 @@ You can monitor the status of the upgrade using the `status` command
 [source,bash,options="nowrap"]
 ----
 skipper:>status --release-name helloworldk8s
-╔═══════════════╤═════════════════════════════════════════════════════════════════════════════════════╗
-║Last Deployed  │Wed Oct 25 17:41:33 EDT 2017                                                         ║
-║Status         │DEPLOYED                                                                             ║
-║Platform Status│All applications have been successfully deployed.                                    ║
-║               │helloworldk8s-helloworld-docker-v3[helloworldk8s-helloworld-docker-v3-t6ztv=deployed]║
-╚═══════════════╧═════════════════════════════════════════════════════════════════════════════════════╝
+╔═══════════════╤══════════════════════════════════════════════════════════════════════════════════════════════════╗
+║Last Deployed  │Wed Oct 25 17:41:33 EDT 2017                                                                      ║
+║Status         │DEPLOYED                                                                                          ║
+║Platform Status│All applications have been successfully deployed.                                                 ║
+║               │[helloworldk8s-helloworld-docker-v3], State = [helloworldk8s-helloworld-docker-v3-sb59j=deployed] ║
+╚═══════════════╧══════════════════════════════════════════════════════════════════════════════════════════════════╝
 ----
 
 And a curl command shows
@@ -802,8 +806,7 @@ Since we have the manifest for that version, we have all we need to redeploy an 
 [source,bash,options="nowrap"]
 ----
 skipper:>rollback --release-name helloworldk8s --release-version 2
-helloworldk8s has been rolled back.
-Last Deployed: Wed Oct 25 17:44:25 EDT 2017
+helloworldk8s has been rolled back.  Now at version v4.
 ----
 
 The history now shows a new `v4` version, even though it is identical to the `v2` version.
