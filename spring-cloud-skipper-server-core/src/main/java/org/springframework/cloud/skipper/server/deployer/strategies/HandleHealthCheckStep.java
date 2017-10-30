@@ -29,6 +29,7 @@ import org.springframework.cloud.skipper.server.domain.AppDeployerData;
 import org.springframework.cloud.skipper.server.repository.AppDeployerDataRepository;
 import org.springframework.cloud.skipper.server.repository.ReleaseRepository;
 import org.springframework.context.event.EventListener;
+import org.springframework.dao.DataAccessException;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -103,6 +104,9 @@ public class HandleHealthCheckStep {
 					this.healthCheckProperties.getTimeoutInMillis() + " ms.");
 			this.releaseRepository.save(replacingRelease);
 		}
+		catch (DataAccessException e) {
+			throw e;
+		}
 		catch (Exception e) {
 			// Update Status in DB
 			Status status = new Status();
@@ -125,6 +129,9 @@ public class HandleHealthCheckStep {
 					existingRelease.getName(),
 					existingRelease.getVersion());
 			this.deleteStep.delete(existingRelease, existingAppDeployerData, applicationNamesToUpgrade);
+		}
+		catch (DataAccessException e) {
+			throw e;
 		}
 		catch (Exception e) {
 			// Update Status in DB

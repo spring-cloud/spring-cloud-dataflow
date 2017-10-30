@@ -33,6 +33,7 @@ import org.springframework.cloud.skipper.server.domain.SpringBootAppKindReader;
 import org.springframework.cloud.skipper.server.repository.AppDeployerDataRepository;
 import org.springframework.cloud.skipper.server.repository.DeployerRepository;
 import org.springframework.cloud.skipper.server.repository.ReleaseRepository;
+import org.springframework.dao.DataAccessException;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -80,6 +81,9 @@ public class DeployAppStep {
 			appDeployerData.setReleaseVersion(replacingRelease.getVersion());
 			appDeployerData.setDeploymentDataUsingMap(appNameDeploymentIdMap);
 			this.appDeployerDataRepository.save(appDeployerData);
+		}
+		catch (DataAccessException e) {
+			throw e;
 		}
 		catch (Exception e) {
 			Status status = new Status();
