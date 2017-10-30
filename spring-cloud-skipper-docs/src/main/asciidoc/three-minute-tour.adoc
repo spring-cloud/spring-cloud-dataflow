@@ -7,9 +7,9 @@ other features of Skipper.  Each section walks through the same set of operation
 [[tour-local]]
 == Using the local machine
 
-Start up the server and shell as in the <<three-second-tour>>
+Start up the server and shell as in the <<three-second-tour, three second tour>>.
 
-Install and update the hello world applications.
+Let's install and then update the hello world application.
 
 [source,bash,options="nowrap"]
 ----

@@ -23,7 +23,7 @@ Search Package Repositories for existing applications.
 * Use via a standalone interactive shell or via web APIs to supplement a fully automated CI workflows.
 
 == Concepts
-The main concepts are Repositories, Packages, Platforms, Releases and Release Workflows.
+The main concepts are Platforms, Packages, Repositories, Releases and Release Workflows.
 
 *Platforms* are where your apps run.  For the first release of Skipper, support for deploying applications to platforms is provided by the https://github.com/spring-cloud/spring-cloud-deployer[Spring Cloud Deployer] family of libraries.
 This allows Skipper to deploy Spring Boot applications to Cloud Foundry, Kubernetes and your local machine.

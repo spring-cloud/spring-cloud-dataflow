@@ -1,16 +1,13 @@
 [[architecture]]
 = Architecture
 
-[[arch-intro]]
-== Introduction
+Skipper is a basic client server architecture.
+The server exposes a HTTP API that is used by the interactive shell.
+The server persists Package Metadata and Release state in a relational database.
 
-The major concepts of Skipper's architecture are...
+Platforms are defined using Spring Boot's https://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-external-config.html[Externalied Configuration] feature.  See the <<platforms>> section for more information on configuring the platfoms.
+The platforms map onto an instance of a Spring Cloud Deployer implementation which is what is repsonsible for deploying the applications.
 
-The supported runtimes are
-
-* Cloud Foundry
-* Apache YARN
-* Kubernetes
-* Apache Mesos
-* Local Server for development
+The release workflow is currently a hard-coded `blue/green` workflow.
+The plan is to use the https://projects.spring.io/spring-statemachine/[Spring Cloud State Machine] project to orchestrate the release workflow.
 

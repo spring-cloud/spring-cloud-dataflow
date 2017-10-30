@@ -13,7 +13,11 @@ The main build command is
 $ ./mvnw clean install
 ----
 
-You can also add '-DskipTests' if you like, to avoid running the tests.
+To create the executables and avoid running the tests and generating Javadocs, use the command
+
+----
+$./mvnw clean package -DskipTests -Dmaven.javadoc.skip=true
+----
 
 NOTE: You can also install Maven (>=3.3.3) yourself and run the `mvn` command
 in place of `./mvnw` in the examples below. If you do that you also
@@ -29,37 +33,20 @@ source control.
 
 === Documentation
 
-There is a "full" profile that will generate documentation. You can build just the documentation by executing
+To generate just the REST Docs documentation, use the command
 
-`$ ./mvnw clean package -DskipTests -P full -pl spring-cloud-skipper-docs -am`
+----
+./mvnw test -pl spring-cloud-skipper-server-core -Dtest=*Documentation*
+----
 
-=== Working with the code
-If you don't have an IDE preference we would recommend that you use
-https://spring.io/tools[Spring Tools Suite] or
-http://www.eclipse.org[Eclipse] when working with the code. We use the
-http://www.eclipse.org/m2e/[m2eclipe] eclipse plugin for maven support. Other IDEs and tools
-should also work without issue.
+To build the asciidoctor documentation only, use the command
 
-==== Importing into eclipse with m2eclipse
-We recommend the http://www.eclipse.org/m2e/[m2eclipe] eclipse plugin when working with
-eclipse. If you don't already have m2eclipse installed it is available from the "eclipse
-marketplace".
+----
+./mvnw clean package -DskipTests -Pfull package -pl spring-cloud-skipper-docs
+----
 
-Unfortunately m2e does not yet support Maven 3.3, so once the projects
-are imported into Eclipse you will also need to tell m2eclipse to use
-the `.settings.xml` file for the projects.  If you do not do this you
-may see many different errors related to the POMs in the
-projects.  Open your Eclipse preferences, expand the Maven
-preferences, and select User Settings.  In the User Settings field
-click Browse and navigate to the Spring Cloud project you imported
-selecting the `.settings.xml` file in that project.  Click Apply and
-then OK to save the preference changes.
-
-NOTE: Alternatively you can copy the repository settings from https://github.com/spring-cloud/spring-cloud-build/blob/master/.settings.xml[`.settings.xml`] into your own `~/.m2/settings.xml`.
-
-==== Importing into eclipse without m2eclipse
-If you prefer not to use m2eclipse you can generate eclipse project metadata using the
-following command:
+=== Importing into eclipse
+You can generate eclipse project metadata using the following command:
 
 [indent=0]
 ----
