@@ -58,10 +58,9 @@ spring:
 
 Packages contain all the necessary information to install your application or group of applications.
 The approach to decribing the applications is to use a YAML file that provides all the necessary information to help facilitate searching for your application hosted in a Package Registry and to install your application to a platform.
+
 To make it easy to customize a package, the YAML files are templated.  The final version of the YAML file, with all values substituted is known as the release `manifest`.
 Skipper currently understands how to deploy applications based off a YAML file that contains the information needed for a Spring Cloud Deployer implementation to deploy an application.  It describes, where to find the application (either a http, maven or docker location) , application properties (think Spring Boot `@ConfigurationProperties`), an deployment properites (how much memory to use).
-Future version of Skiipper may provide support for other YAML manifest file formats, e.g. Cloud Foundry, or Kuberentes resource files.
-
 
 [[package-format]]
 === Package Format
@@ -70,9 +69,8 @@ A package is a collection of YAML files that are zipped up into a file with the 
 `PackageName-PackageVersion.zip` for example: `mypackage-1.0.0.zip`
 
 A package can define a single application or a group of applications.
-See <<package-with-multi-apps>> for more details on packages with multiple applications
 
-When unzipped, the package has the following directory strucutre
+The single application package file, `mypackage-1.0.0.zip` when unzipped, should have the following directory structure.
 
 ----
 mypackage-1.0.0
@@ -82,11 +80,15 @@ mypackage-1.0.0
 └── values.yml
 ----
 
-The YAML files can have either `.yml` or `.yaml` extensions.
-The `package.yml` file is the metadata about the package and is used to support Skipper's search functionality.
-The `template.yml` is a YML file with placeholders for values that are specified in the `values.yml` file.
+The `package.yml` file contains metadata about the package and is used to support Skipper's search functionality.
+The `template.yml` file contains placeholders for values that are specified in the `values.yml` file.
 When installing a package, placeholder values can also be specified and they would override the values in the `values.yml` file.
-The templating engine that Skipper uses https://github.com/samskivert/jmustache[JMustache]
+The templating engine that Skipper uses https://github.com/samskivert/jmustache[JMustache].
+The YAML files can have either `.yml` or `.yaml` extensions.
+
+The files https://github.com/markpollack/skipper-sample-repository/blob/master/src/main/resources/static/repository/experimental/helloworld/helloworld-1.0.0.zip[helloworld-1.0.0.zip] or https://github.com/markpollack/skipper-sample-repository/blob/master/src/main/resources/static/repository/experimental/helloworld-docker/helloworld-docker-1.0.0.zip[helloworld-docker-1.0.0.zip] are good examples to use as a basis to create your own package 'by-hand'.
+
+The source code for the helloword sample can be found https://github.com/markpollack/skipper-samples[here].
 
 [[package-format-mutliple-apps]]
 === Package with multiple applications
@@ -116,6 +118,8 @@ In the above, the `mypackagegroup` would still have its own `package.yml`, `valu
 All the applications inside the `mypackagegroup`  are considered sub-packages and would follow the similar package
 structure as the individual packages.
 These sub packages need to be specified inside the `packages` directory of the root package `mypackagegroup`.
+
+The file https://github.com/spring-cloud/spring-cloud-skipper/blob/master/spring-cloud-skipper-server-core/src/test/resources/repositories/binaries/test/ticktock/ticktock-1.0.0.zip[ticktock-1.0.0.zip] is a good example to use as a basis for creating your own package 'by-hand'.
 
 
 [[package-metadata]]
@@ -223,11 +227,11 @@ The deployment properties correspond to the properties for the deployment operat
 Deployer implementations.
 
 [[package-values]]
-== Package Values
+=== Package Values
 
 The `values` YAML file contains the default values for any of the keys specified in the template files.
 
-For instance,
+For instance, in a package that defines one application, the format is
 
 ----
 version: 1.0.0.RELEASE
@@ -236,9 +240,49 @@ spec:
     server.port: 9090
 ----
 
+If the package defines multiple applications, provide the name of the package in the top level YML section to scope the `spec` section.  That is, given a multiple application package with the layout
+
+----
+ticktock-1.0.0/
+├── packages
+│   ├── log
+│   │   ├── package.yml
+│   │   └── values.yml
+│   └── time
+│       ├── package.yml
+│       └── values.yml
+├── package.yml
+└── values.yml
+
+----
+A top level `values.yml` file
+
+----
+hello: world
+
+time:
+  appVersion: 1.3.0.M1
+  deployment:
+    applicationProperties:
+      log.level: WARN
+      trigger.fixed-delay: 1
+log:
+  deployment:
+    count: 2
+    applicationProperties:
+      log.level: WARN
+      log.name: skipperlogger
+----
+
+Would set `hello` as a variable available to be used as a placeholder in the `packages\log\values.yml` file and the `packages\time\values.yml`.  However, the YML section under `time:` is applied only to the `packages\time\values.yml` file and the YML section under `log:` is applied only to the `packages\time\values.yml` file.
+
+
+
+
+
 
 [[package-upload]]
-== Package Upload
+=== Package Upload
 
 After creating the package in the above structure, we can compress it in a zip file with the name
 [PackageName]-[PackageVersion].zip e.g. mypackage-1.0.0.zip
@@ -278,4 +322,42 @@ skipper:>search
 ║mypackage        │1.0.0  │This is a mypackage sample                                                      ║
 ╚═════════════════╧═══════╧════════════════════════════════════════════════════════════════════════════════╝
 ----
+
+== Repositories
+
+Repositories are where package metadata and package .zip files are hosted.  Repositores can be local or remote, were local means backed by Skipper's relational database and remote means a filesystem exposed over http.
+
+When registering a remote registry, for example, the `experimental` one that is currently defined by default in addition to one named local` use the following format:
+
+----
+spring
+  cloud:
+    skipper:
+      server:
+        packageRepositories:
+          -
+            name: experimental
+            url: http://skipper-repository.cfapps.io/repository/experimental
+            description: Experimental Skipper Repository
+            repoOrder: 0
+          -
+            name: local
+            url: http://${spring.cloud.client.hostname}:7577
+            local: true
+            description: Default local database backed repository
+            repoOrder: 1
+
+----
+
+The `repoOrder` determines which repository will serve up a package if one with the same name is registered in two or more repositories.
+
+The directory structure assumed for a remote repository is the registered `url` value followed by the package name and then the zip file name., e.g. `http://skipper-repository.cfapps.io/repository/experimental/helloworld/helloworld-1.0.0.zip` for the package `helloworld` with the version `1.0.0`.  Directly under the registered `url` is expected to be a file named `index.yml`, e.g. http://skipper-repository.cfapps.io/repository/experimental/index.yml.  This contains the package metadata for all the packages hosted by the repository.
+
+It is up to you to update the `index.yml` file 'by-hand' for remote repositories.
+
+'local' repositories are backed by Skipper's database.  In the 1.0 M1 release they does not expose the index.yml or the .zip files under a filesystem like URL structure as with remote repositories. This will be provided in the next version.  However, on the positive side, you can upload packages to a local repository and don't need to maintain an index file.  See the skipper command section for information on creating local repositories.
+
+A good example that shows using a Spring Boot web application with static resources to host a Repository can be found https://github.com/markpollack/skipper-sample-repository[here].  This application is currently running under http://skipper-repository.cfapps.io/repository/experimental.
+
+
 
