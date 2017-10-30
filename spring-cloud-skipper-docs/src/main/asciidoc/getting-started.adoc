@@ -17,22 +17,25 @@ This section will cover installing Skipper on your local machine as it is the ea
 
 * Download the Skipper Server and Shell apps:
 
+[source,bash,subs=attributes]
 ```
-wget http://repo.spring.io/libs-milestone/org/springframework/cloud/spring-cloud-skipper-server/1.0.0.M1/spring-cloud-skipper-server-1.0.0.M1.jar
+wget http://repo.spring.io/{version-type-lowercase}/org/springframework/cloud/spring-cloud-skipper-server/{project-version}/spring-cloud-skipper-server-{project-version}.jar
 
-wget http://repo.spring.io/libs-milestone/org/springframework/cloud/spring-cloud-skipper-shell/1.0.0.M1/spring-cloud-skipper-shell-1.0.0.M1.jar
+wget http://repo.spring.io/{version-type-lowercase}/org/springframework/cloud/spring-cloud-skipper-shell/{project-version}/spring-cloud-skipper-shell-{project-version}.jar
 ```
 
 * Launch the Server and Shell apps:
 
 ```
-java -jar spring-cloud-skipper-server-1.0.0.M1.jar
+java -jar spring-cloud-skipper-server-{project-version}.jar
 
 
-java -jar spring-cloud-skipper-shell-1.0.0.M1.jar
+java -jar spring-cloud-skipper-shell-{project-version}.jar
 ```
 
 The default port that the server listens on is 7577.  That is `SKPR` on a telephone keypad.  :)
+
+There is also a docker image hosted on https://hub.docker.com/r/springcloud/spring-cloud-skipper-server/[dockerhub]
 
 * Install some apps!
 

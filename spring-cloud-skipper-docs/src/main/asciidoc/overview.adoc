@@ -1,18 +1,29 @@
 [[overview]]
 = Spring Cloud Skipper Overview
 
+Skipper is a lightweight tool that allows you to discover Spring Boot applications and manage their lifecycle on multiple Cloud Platforms.  You can use Skipper standalone or integrate it with your Continuous Integration pipelines to help achieve Continuous Deployment of your applications.
 
-Spring Cloud Skipper is a tool for installing, upgrading and rolling back applications to multiple cloud platforms.
-You can use Skipper standalone or integrate it with your Continuous Integration pipelines to help achieve Continuous
-Deployment of your applications.
+Skipper consists of a server application that exposes a HTTP API. A shell application provides easy to use <<skipper-commands,commands>> to
+interact with the server.  The server uses a database to store state.  Documentation to call the HTTP API is
+available in the <<api-guide>>.
 
-Skipper consists of a server application that exposes an HTTP API. A shell application provides easy to use commands to
-interact with the server.  The server uses a database to store states.  Documentation to call the HTTP API is
-available in the reference guide.
+Applications in Skipper are bundled as packages which contain a templated configuration file and a default set of values that are used to fill in the template. You can override these defaults when installing or upgrading a package. Skipper provides a means to orchestrate the upgrade/rollback procedure of applications between different versions, taking the minimal set of actions to bring the system to the desired state.
 
-The main concepts in Skipper were highly influenced from those in https://github.com/kubernetes/helm[Helm], which
-presents the user with a familiar `apt-get` or `brew` like software installation experience.
-The main concepts are Repositories, Packages, Platforms, Releases and Update strategies.
+Skipper's design is influenced by a large number of projects in the Kubernetes ecosystem that perform resource templating and/or orchestration, hence the nautically inspired project name Skipper.  In particular, https://github.com/kubernetes/helm[Helm]'s approach to present a user with familiar `apt-get` or `brew` like installation experience was a big influence.
+
+== Features
+
+The main features are:
+
+* Define multiple platform accounts (local, Cloud Foundry, Kubernetes) where Spring Boot applications can be deployed.
+Search Package Repositories for existing applications.
+* Substitute variables in Mustache templated files that describe how to deploy applications to a platform.
+* Install/Upgrade/Rollback a package based on a simple workflow.
+* Store the history of resolved template files (aka 'application manifests') which represent the final description of what has been deployed to a platform for a specific release.
+* Use via a standalone interactive shell or via web APIs to supplement a fully automated CI workflows.
+
+== Concepts
+The main concepts are Repositories, Packages, Platforms, Releases and Release Workflows.
 
 *Platforms* are where your apps run.  For the first release of Skipper, support for deploying applications to platforms is provided by the https://github.com/spring-cloud/spring-cloud-deployer[Spring Cloud Deployer] family of libraries.
 This allows Skipper to deploy Spring Boot applications to Cloud Foundry, Kubernetes and your local machine.
@@ -34,7 +45,8 @@ A remote repository is the one that is only accessible via http.
 Any arbitrary web app that serves up files off a file system can be used to host a remote repository as long as certain directory and file naming conventions are followed.
 A local repository is managed by the Skipper server and backed by a database. Skipper lets you search for packages that are hosted in repositories.
 
-*Releases* are created in Skipper after you install a package.
-A release has a name and you provide that name when upgrading, rolling back and deleting applications. You can also query for releases to discover the state of packages that have been installed.
+*Releases* are created in Skipper after you install, upgrade or rollback a package.
+A release has a name and you provide that name to perform operations against the release such as upgrading, rolling back and deleting applications. The release contains the fully resolved template files (aka 'application manifests') that represent the final description of what has been deployed to the platform. You can also query for releases to discover the state of packages that have been installed and retrieve the application manifests for a specific release.
 
-*Update Strategies* are the steps taken to upgrade an application from one version to another. In Skipper terms, it is how we go from one Release to another.  Note, an upgrade may keep the same version, but instead update applications properties.  Also, rolling back is often similar in practice to updating.
+*Release Workflows* are the steps taken to upgrade or rollback an application from one version to another. In Skipper terms, it is how we go from one Release to another on a Platform.  Note, an upgrade may keep the same version, but instead update applications properties.
+
