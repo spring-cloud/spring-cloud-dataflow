@@ -296,7 +296,7 @@ public class SkipperCommands extends AbstractSkipperCommand {
 			@ShellOption(help = "the name of the release to delete") String releaseName) {
 		Release release = skipperClient.delete(releaseName);
 		StringBuilder sb = new StringBuilder();
-		sb.append(release.getName() + " has been deleted.\n");
+		sb.append(release.getName() + " has been deleted.");
 		return sb.toString();
 	}
 

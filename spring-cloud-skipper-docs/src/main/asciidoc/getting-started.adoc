@@ -89,16 +89,16 @@ Hello World!
 The release name `helloworld-local` is used for subsequent commands such as status, upgrade or delete.
 
 To see the status of the release, use the `status` command
-```
+[source,bash,options="nowrap"]
+----
 skipper:>status --release-name helloworld-local
-╔═════════════╤══════════════════════════════════════════════════════════════════════════════╗
-║Last Deployed│Fri Oct 27 16:17:53 IST 2017                                                  ║
-║Status       │DEPLOYED                                                                      ║
-║Platform     │All applications have been successfully deployed.                             ║
-║Status       │[helloworld-local.helloworld-v1], State =                                     ║
-║             │[helloworld-local.helloworld-v1-0=deployed]                                   ║
-╚═════════════╧══════════════════════════════════════════════════════════════════════════════╝
-```
+╔═══════════════╤═════════════════════════════════════════════════════════════════════════════════════╗
+║Last Deployed  │Fri Oct 27 16:17:53 IST 2017                                                         ║
+║Status         │DEPLOYED                                                                             ║
+║Platform Status│All applications have been successfully deployed.                                    ║
+║               │[helloworld-local.helloworld-v1], State = [helloworld-local.helloworld-v1-0=deployed]║
+╚═══════════════╧═════════════════════════════════════════════════════════════════════════════════════╝
+----
 Let's upgrade the release. The `1.0.1` package refers to a newly released application that changed the default value of the greeting to be in Portugese`.
 
 [source,bash,options="nowrap"]
@@ -112,13 +112,12 @@ This will deploy the new version of the application, wait until it is healthy, a
 [source,bash,options="nowrap"]
 ----
 skipper:>status --release-name helloworld-local
-╔═════════════╤══════════════════════════════════════════════════════════════════════════════╗
-║Last Deployed│Fri Oct 27 16:20:07 IST 2017                                                  ║
-║Status       │DEPLOYED                                                                      ║
-║Platform     │All applications have been successfully deployed.                             ║
-║Status       │[helloworld-local.helloworld-v2], State =                                     ║
-║             │[helloworld-local.helloworld-v2-0=deployed]                                   ║
-╚═════════════╧══════════════════════════════════════════════════════════════════════════════╝
+╔═══════════════╤═════════════════════════════════════════════════════════════════════════════════════╗
+║Last Deployed  │Fri Oct 27 16:20:07 IST 2017                                                         ║
+║Status         │DEPLOYED                                                                             ║
+║Platform Status│All applications have been successfully deployed.                                    ║
+║               │[helloworld-local.helloworld-v1], State = [helloworld-local.helloworld-v1-0=deployed]║
+╚═══════════════╧═════════════════════════════════════════════════════════════════════════════════════╝
 ----
 
 You can now curl the `greeting` endpoint at the new port and see that the application has been updated.
