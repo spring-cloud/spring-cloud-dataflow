@@ -307,6 +307,8 @@ public class SkipperStreamDeployer implements StreamDeployer {
 			streamDeploymentRequest) {
 		Package pkg = new Package();
 		PackageMetadata packageMetadata = new PackageMetadata();
+		packageMetadata.setApiVersion("skipper/v1");
+		packageMetadata.setKind("SpringBootApp");
 		packageMetadata.setName(packageName);
 		packageMetadata.setVersion(packageVersion);
 		packageMetadata.setMaintainer("dataflow");
@@ -331,6 +333,8 @@ public class SkipperStreamDeployer implements StreamDeployer {
 		String packageName = appDeploymentRequest.getDefinition().getName();
 
 		PackageMetadata packageMetadata = new PackageMetadata();
+		packageMetadata.setApiVersion("skipper/v1");
+		packageMetadata.setKind("SpringBootApp");
 		packageMetadata.setName(packageName);
 		packageMetadata.setVersion(packageVersion);
 		packageMetadata.setMaintainer("dataflow");
