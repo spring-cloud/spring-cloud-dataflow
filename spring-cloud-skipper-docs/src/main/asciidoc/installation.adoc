@@ -67,6 +67,9 @@ spring:
                   services: rabbitQA
 
 ```
+
+For information on the deployment properties that can be configured can be found in https://github.com/spring-cloud/spring-cloud-deployer-cloudfoundry/blob/master/src/main/java/org/springframework/cloud/deployer/spi/cloudfoundry/CloudFoundryDeploymentProperties.java[CloudFoundryDeploymentProperties].
+
 [[skipper-installation-kubernetes]]
 == Installing on Kubernetes
 
@@ -95,3 +98,5 @@ spring:
                 namespace: qaNamespace
                 memory: 1024m
 ```
+
+Mnore information on the deployment properties that can be configured can be found in https://github.com/spring-cloud/spring-cloud-deployer-kubernetes/blob/master/src/main/java/org/springframework/cloud/deployer/spi/kubernetes/KubernetesDeployerProperties.java[KubernetesDeployerProperties]

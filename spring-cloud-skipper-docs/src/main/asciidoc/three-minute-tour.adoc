@@ -5,7 +5,7 @@ Picking up from where the <<three-second-tour>> left off, this section walks thr
 other features of Skipper.  Each section walks through the same set of operations, but for a different platform.
 
 [[tour-local]]
-== Using the local machine
+== Local machine
 
 Start up the server and shell as in the <<three-second-tour, three second tour>>.
 
@@ -164,7 +164,7 @@ Hello World v1.0.0.RELEASE
 ```
 
 [[tour-cloud-foundry]]
-== Using Cloud Foundry
+== Cloud Foundry
 
 Skipper uses a Relational Database to store state.
  In this tour we will just be using the embedded database.
@@ -524,7 +524,7 @@ Hello World v1.0.0.RELEASE
 ----
 
 [[tour-kubernetes]]
-== Using Kuberenetes
+== Kuberenetes
 
 In this example we will be running the Skipper server on the local machine and deploying to minikube also running on the local machine.
 

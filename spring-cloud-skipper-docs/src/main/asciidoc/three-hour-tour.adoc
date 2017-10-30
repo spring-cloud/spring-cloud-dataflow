@@ -1,8 +1,11 @@
 [[three-hour-tour]]
 = Using Skipper
 
-This section is the 'three hour tour' of Skipper.  It describes how to configure and use the main feature set of Skipper
- in detail.  We will cover, platforms, packages, repositories, releases and update strategies.
+This section is the 'three hour tour' of Skipper.  It describes how to configure and use the main feature set of Skipper in detail.
+ We will cover, platforms, packages, repositories, releases and update strategies.
+
+Feel free to reach out on https://gitter.im/spring-cloud/spring-cloud-skipper[Gitter] for help and ask questions on https://stackoverflow.com/questions/tagged/spring-cloud-skipper[Stack Overflow].
+Issues can be filed on https://github.com/spring-cloud/spring-cloud-skipper/issues[Github issues].
 
 [[platforms]]
 == Platforms
@@ -50,8 +53,13 @@ spring:
             accounts:
               minikube:
                 namespace: default
-
 ----
+
+The properties available for each platform can be found in these classes
+
+* https://github.com/spring-cloud/spring-cloud-deployer-local/blob/master/spring-cloud-deployer-local/src/main/java/org/springframework/cloud/deployer/spi/local/LocalDeployerProperties.java[LocalDeployerProperties].
+* https://github.com/spring-cloud/spring-cloud-deployer-cloudfoundry/blob/master/src/main/java/org/springframework/cloud/deployer/spi/cloudfoundry/CloudFoundryDeploymentProperties.java[CloudFoundryDeploymentProperties] for `deployment:` and https://github.com/spring-cloud/spring-cloud-deployer-cloudfoundry/blob/master/src/main/java/org/springframework/cloud/deployer/spi/cloudfoundry/CloudFoundryConnectionProperties.java[CloudFoundryConnectionProperties] for the `connection:`.
+* https://github.com/spring-cloud/spring-cloud-deployer-kubernetes/blob/master/src/main/java/org/springframework/cloud/deployer/spi/kubernetes/KubernetesDeployerProperties.java[KubernetesDeployerProperties]
 
 [[packages]]
 == Packages
@@ -211,8 +219,15 @@ spec:
 ----
 This follows typical naming conventions of <user>/<repo>:<tag>.
 
+There is only one setting to specify with maven repositories to search.  This applies across all platform accounts.  By default the configuration
 
+----
+maven:
+  remoteRepositories:
+    springRepo: https://repo.spring.io/libs-snapshot
+----
 
+Is used.  You can specify other entries and also specify proxy properties.  This is currently best documented https://docs.spring.io/spring-cloud-dataflow/docs/1.3.0.M2/reference/htmlsingle/#getting-started-maven-configuration[here].
 
 The metadata is used to help search for applications after they have been installed and is not available in Skipper M1.
 
@@ -223,8 +238,7 @@ co-ordinate or a docker image URL.
 The `SpringBootApp` kind of application can have `applicationProperties` and `deploymentProperties` as the
 configuration properties.
 The application properties correspond to the properties for the application itself.
-The deployment properties correspond to the properties for the deployment operation performed by Spring Cloud
-Deployer implementations.
+The deployment properties correspond to the properties for the deployment operation performed by Spring Cloud Deployer implementations.
 
 [[package-values]]
 === Package Values
@@ -275,10 +289,6 @@ log:
 ----
 
 Would set `hello` as a variable available to be used as a placeholder in the `packages\log\values.yml` file and the `packages\time\values.yml`.  However, the YML section under `time:` is applied only to the `packages\time\values.yml` file and the YML section under `log:` is applied only to the `packages\time\values.yml` file.
-
-
-
-
 
 
 [[package-upload]]
