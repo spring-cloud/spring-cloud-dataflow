@@ -4,17 +4,252 @@
 [[skipper-commands-release]]
 == Release and Package commands
 
-Describe the commands in SkipperCommands.java
+=== Search command
+The command `search` shows all the packages available to be installed by the Skipper server.
+
+[source,bash,options="nowrap"]
+----
+skipper:>search
+╔═════════════════╤═══════╤════════════════════════════════════════════════════════════════════════════════╗
+║      Name       │Version│                                  Description                                   ║
+╠═════════════════╪═══════╪════════════════════════════════════════════════════════════════════════════════╣
+║helloworld       │1.0.0  │The app has two endpoints, /about and /greeting in English.  Maven resource.    ║
+║helloworld       │1.0.1  │The app has two endpoints, /about and /greeting in Portuguese.  Maven resource. ║
+║helloworld-docker│1.0.1  │The app has two endpoints, /about and /greeting in Portuguese.  Docker resource.║
+║helloworld-docker│1.0.0  │The app has two endpoints, /about and /greeting in English.  Docker resource.   ║
+╚═════════════════╧═══════╧════════════════════════════════════════════════════════════════════════════════╝
+----
+
+The `search` command can use `--name` option to search for the package name containing the given option value.
+
+[source,bash,options="nowrap"]
+----
+skipper:>search --name helloworld-
+╔═════════════════╤═══════╤════════════════════════════════════════════════════════════════════════════════╗
+║      Name       │Version│                                  Description                                   ║
+╠═════════════════╪═══════╪════════════════════════════════════════════════════════════════════════════════╣
+║helloworld-docker│1.0.0  │The app has two endpoints, /about and /greeting in English.  Docker resource.   ║
+║helloworld-docker│1.0.1  │The app has two endpoints, /about and /greeting in Portuguese.  Docker resource.║
+╚═════════════════╧═══════╧════════════════════════════════════════════════════════════════════════════════╝
+----
+
+To search for more details of the packages, the option `--details` can be used.
+
+[source,bash,options="nowrap"]
+----
+skipper:>search --name helloworld- --details
+╔════════════════╤═════════════════════════════════════════════════════════════════════════════╗
+║      Name      │                                    Value                                    ║
+╠════════════════╪═════════════════════════════════════════════════════════════════════════════╣
+║apiVersion      │v1                                                                           ║
+║origin          │A sample repository for using Skipper                                        ║
+║repositoryId    │1                                                                            ║
+║kind            │skipper                                                                      ║
+║name            │helloworld-docker                                                            ║
+║version         │1.0.0                                                                        ║
+║packageSourceUrl│https://github.com/markpollack/skipper-sample-repository                     ║
+║packageHomeUrl  │https://github.com/markpollack/skipper-sample-repository                     ║
+║tags            │web, demo, docker, helloworld                                                ║
+║maintainer      │https://github.com/markpollack                                               ║
+║description     │The app has two endpoints, /about and /greeting in English.  Docker resource.║
+║sha256          │                                                                             ║
+║iconUrl         │                                                                             ║
+╚════════════════╧═════════════════════════════════════════════════════════════════════════════╝
+
+╔════════════════╤════════════════════════════════════════════════════════════════════════════════╗
+║      Name      │                                     Value                                      ║
+╠════════════════╪════════════════════════════════════════════════════════════════════════════════╣
+║apiVersion      │v1                                                                              ║
+║origin          │A sample repository for using Skipper                                           ║
+║repositoryId    │1                                                                               ║
+║kind            │skipper                                                                         ║
+║name            │helloworld-docker                                                               ║
+║version         │1.0.1                                                                           ║
+║packageSourceUrl│https://github.com/markpollack/skipper-sample-repository                        ║
+║packageHomeUrl  │https://github.com/markpollack/skipper-sample-repository                        ║
+║tags            │web, demo, docker, helloworld                                                   ║
+║maintainer      │https://github.com/markpollack                                                  ║
+║description     │The app has two endpoints, /about and /greeting in Portuguese.  Docker resource.║
+║sha256          │                                                                                ║
+║iconUrl         │                                                                                ║
+╚════════════════╧════════════════════════════════════════════════════════════════════════════════╝
+
+----
+
+=== Install command
+
+This command installs a package.
+
+[source,bash,options="nowrap"]
+----
+skipper:>install --release-name helloworldlocal --package-name helloworld --package-version 1.0.0 --properties spec.applicationProperties.server.port=8099
+Released helloworldlocal. Now at version v1.
+----
+
+If no `package-version` is specified, then the latest package version by the given `package-name` will be considered.
+If no `platform-name` is specified, the platform name `default` will be used.
+The properties can either be provided via comma separated YAML String using the `--properties` option or, via a YAML
+file using the `--file` option.
+
+=== Upgrade command
+
+This command upgrades a package.
+
+[source,bash,options="nowrap"]
+----
+skipper:>upgrade --release-name helloworldlocal --package-name helloworld --package-version 1.0.0 --properties spec.applicationProperties.server.port=9090
+helloworldpcf has been upgraded.  Now at version v2.
+----
+
+If no `package-version` is specified, then the latest package version by the given `package-name` will be considered.
+The properties can either be provided via comma separated YAML String using the `--properties` option or, via a YAML
+file using the `--file` option.
+
+NOTE: An upgrade can be done by overriding the package version or by keeping the existing package version but by
+overriding the properties. When overriding the package version, it needs to accompany with the corresponding
+properties as the existing properties won't be carried over.
+In a future release we will introduce a `--reuse-properties` command that will carry the current release properties over to the next release to be made.
+
+=== Status command
+
+This command shows the `status` of a specific release and version.
+
+[source,bash,options="nowrap"]
+----
+skipper:>status --release-name helloworldlocal
+╔═══════════════╤═══════════════════════════════════════════════════════════════════════════════════╗
+║Last Deployed  │Mon Oct 30 17:53:50 IST 2017                                                       ║
+║Status         │DEPLOYED                                                                           ║
+║Platform Status│All applications have been successfully deployed.                                  ║
+║               │[helloworldlocal.helloworld-v2], State = [helloworldlocal.helloworld-v2-0=deployed]║
+╚═══════════════╧═══════════════════════════════════════════════════════════════════════════════════╝
+----
+
+If no `--release-version` specifed, then the latest release version will be used.
+
+[source,bash,options="nowrap"]
+----
+skipper:>status --release-name helloworldlocal --release-version 1
+╔═══════════════╤════════════════════════════════════════════════════════════════════════╗
+║Last Deployed  │Mon Oct 30 17:52:57 IST 2017                                            ║
+║Status         │DELETED                                                                 ║
+║Platform Status│The applications are known to the system, but is not currently deployed.║
+║               │[helloworldlocal.helloworld-v1], State = [unknown]                      ║
+╚═══════════════╧════════════════════════════════════════════════════════════════════════╝
+----
+
+=== Rollback command
+
+This command rollsback the release to a specific version.
+
+[source,bash,options="nowrap"]
+----
+skipper:>rollback --release-name helloworldlocal --release-version 1
+helloworldlocal has been rolled back.  Now at version v3.
+----
+
+If no `--release-version` specified, then the rollback version is the previous stable release (either in `DELETED` or
+`DEPLOYED` status).
+
+=== List command
+
+This command lists the latest deployed or failed release.
+
+[source,bash,options="nowrap"]
+----
+skipper:>list
+╔═══════════════╤═══════╤═════════════════════════╤════════╤═══════════╤══════════════╤════════════╤══════════════════════════════════════════════════════════════════════════════╗
+║     Name      │Version│      Last updated       │ Status │  Package  │   Package    │  Platform  │                               Platform Status                                ║
+║               │       │                         │        │   Name    │   Version    │    Name    │                                                                              ║
+╠═══════════════╪═══════╪═════════════════════════╪════════╪═══════════╪══════════════╪════════════╪══════════════════════════════════════════════════════════════════════════════╣
+║helloworldlocal│3      │Mon Oct 30 17:57:41 IST  │DEPLOYED│helloworld │1.0.0         │default     │[helloworldlocal.helloworld-v3], State =                                      ║
+║               │       │2017                     │        │           │              │            │[helloworldlocal.helloworld-v3-0=deployed]                                    ║
+╚═══════════════╧═══════╧═════════════════════════╧════════╧═══════════╧══════════════╧════════════╧══════════════════════════════════════════════════════════════════════════════╝
+----
+
+
+=== History command
+
+This command shows the history of a specific release.
+
+[source,bash,options="nowrap"]
+----
+skipper:>history --release-name helloworldlocal
+╔═══════╤════════════════════════════╤════════╤════════════╤═══════════════╤════════════════╗
+║Version│        Last updated        │ Status │Package Name│Package Version│  Description   ║
+╠═══════╪════════════════════════════╪════════╪════════════╪═══════════════╪════════════════╣
+║3      │Mon Oct 30 17:57:41 IST 2017│DEPLOYED│helloworld  │1.0.0          │Upgrade complete║
+║2      │Mon Oct 30 17:53:50 IST 2017│DELETED │helloworld  │1.0.0          │Delete complete ║
+║1      │Mon Oct 30 17:52:57 IST 2017│DELETED │helloworld  │1.0.0          │Delete complete ║
+╚═══════╧════════════════════════════╧════════╧════════════╧═══════════════╧════════════════╝
+----
+
+The number of revisions in the history result can be limited using `--max` option. For instance,
+
+[source,bash,options="nowrap"]
+----
+skipper:>history --release-name helloworldlocal --max 2
+╔═══════╤════════════════════════════╤════════╤════════════╤═══════════════╤════════════════╗
+║Version│        Last updated        │ Status │Package Name│Package Version│  Description   ║
+╠═══════╪════════════════════════════╪════════╪════════════╪═══════════════╪════════════════╣
+║3      │Mon Oct 30 17:57:41 IST 2017│DEPLOYED│helloworld  │1.0.0          │Upgrade complete║
+║2      │Mon Oct 30 17:53:50 IST 2017│DELETED │helloworld  │1.0.0          │Delete complete ║
+╚═══════╧════════════════════════════╧════════╧════════════╧═══════════════╧════════════════╝
+----
+
+=== Delete command
+
+This command deletes a specific release's latest deployed revision.
+
+[source,bash,options="nowrap"]
+----
+skipper:>delete --release-name helloworldlocal
+helloworldlocal has been deleted.
+----
+
 
 [[skipper-commands-manifest]]
 == Manifest commands
 
-Describe the commands in GetCommands.java
+The `manifest get` command shows the manifest used for a specific release.
+
+[source,bash,options="nowrap"]
+----
+skipper:>manifest get --release-name helloworldk8s
+
+---
+# Source: template.yml
+apiVersion: skipper/v1
+kind: SpringBootApp
+metadata:
+  name: helloworld-docker
+spec:
+  resource: docker:springcloud/spring-cloud-skipper-samples-helloworld:1.0.0.RELEASE
+  applicationProperties:
+  deploymentProperties:
+    spring.cloud.deployer.kubernetes.createNodePort: 32123
+----
+
 
 [[skipper-commands-platform]]
 == Platform commands
 
-Describe the commands in PlatformCommands.java
+The `platform list` command shows the list all the available deployment platform accounts.
+
+An example output of `platform list` can be
+
+```
+skipper:>platform list
+╔════════╤════════════╤══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
+║  Name  │    Type    │                                                                         Description                                                                          ║
+╠════════╪════════════╪══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣
+║default │local       │ShutdownTimeout = [30], EnvVarsToInherit = [TMP,LANG,LANGUAGE,LC_.*,PATH], JavaCmd =                                                                          ║
+║        │            │[/Library/Java/JavaVirtualMachines/jdk1.8.0_131.jdk/Contents/Home/jre/bin/java], WorkingDirectoriesRoot = [/var/folders/t3/qf1wkpwj4lgd9gjccwk0wr7h0000gp/T], ║
+║        │            │DeleteFilesOnExit = [true]                                                                                                                                    ║
+║cf-dev  │cloudfoundry│org = [scdf-ci], space = [ilaya-space], url = [https://api.run.pivotal.io]                                                                                    ║
+║minikube│kubernetes  │master url = [https://192.168.99.101:8443/], namespace = [default], api version = [v1]                                                                        ║
+╚════════╧════════════╧══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+```
 
 [[skipper-commands-repository]]
 == Repository commands
