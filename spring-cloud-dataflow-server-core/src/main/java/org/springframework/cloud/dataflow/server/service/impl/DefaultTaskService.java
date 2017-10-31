@@ -39,6 +39,7 @@ import org.springframework.cloud.dataflow.server.repository.DeploymentKey;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.TaskService;
+import org.springframework.cloud.dataflow.server.support.ApplicationDoesNotExistException;
 import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
@@ -296,7 +297,7 @@ public class DefaultTaskService implements TaskService {
 	private void saveStandardTaskDefinition(TaskDefinition taskDefinition) {
 		String appName = taskDefinition.getRegisteredAppName();
 		if (registry.find(appName, ApplicationType.task) == null) {
-			throw new IllegalArgumentException(
+			throw new ApplicationDoesNotExistException(
 					String.format("Application name '%s' with type '%s' does not exist in the app registry.", appName,
 							ApplicationType.task));
 		}

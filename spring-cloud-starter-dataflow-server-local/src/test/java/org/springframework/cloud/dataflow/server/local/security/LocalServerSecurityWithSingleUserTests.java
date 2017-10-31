@@ -315,15 +315,9 @@ public class LocalServerSecurityWithSingleUserTests {
 				{ HttpMethod.POST, HttpStatus.UNAUTHORIZED, "/tasks/definitions", null,
 						TestUtils.toImmutableMap("name", "my-name") },
 
-				{ HttpMethod.POST, HttpStatus.INTERNAL_SERVER_ERROR, "/tasks/definitions", singleUser,
-						TestUtils.toImmutableMap("name", "my-name", "definition", "foo") }, // Should
-																					// be
-																					// a
-																					// `400`
-																					// error
-																					// -
-																					// See
-				// also: https://github.com/spring-cloud/spring-cloud-dataflow/issues/1075
+				{ HttpMethod.POST, HttpStatus.NOT_FOUND, "/tasks/definitions", singleUser,
+						TestUtils.toImmutableMap("name", "my-name", "definition", "foo") },
+				{ HttpMethod.POST, HttpStatus.BAD_REQUEST, "/tasks/definitions", singleUser, null },
 				{ HttpMethod.POST, HttpStatus.UNAUTHORIZED, "/tasks/definitions", null,
 						TestUtils.toImmutableMap("name", "my-name", "definition", "foo") },
 
