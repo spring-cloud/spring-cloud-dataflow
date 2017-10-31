@@ -128,7 +128,7 @@ public class TaskControllerTests {
 		assertEquals(0, repository.count());
 
 		mockMvc.perform(post("/tasks/definitions/").param("name", "myTask").param("definition", "task")
-				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().is5xxServerError());
+				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isNotFound());
 
 		assertEquals(0, repository.count());
 	}
