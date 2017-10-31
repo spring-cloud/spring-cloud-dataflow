@@ -51,7 +51,8 @@ class ExpandOneDashToTwoDashesTaskRecoveryStrategy
 			new TaskDefinition("__dummy", withDashDash);
 		}
 		catch (CheckPointedParseException recoverable) {
-			Assert.isTrue(recoveryAfterDashDash.shouldTrigger(withDashDash, recoverable));
+			Assert.isTrue(recoveryAfterDashDash.shouldTrigger(withDashDash, recoverable),
+					"did not trigger after dash-dash");
 			recoveryAfterDashDash.addProposals(withDashDash, recoverable, detailLevel, proposals);
 		}
 	}

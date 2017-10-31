@@ -83,8 +83,8 @@ public class LdapServerResource extends ExternalResource {
 			FileCopyUtils.copy(keyStoreResource.getInputStream(), new FileOutputStream(temporaryKeyStoreFile));
 			FileCopyUtils.copy(trustStoreResource.getInputStream(), new FileOutputStream(temporaryTrustStoreFile));
 
-			Assert.isTrue(temporaryKeyStoreFile.isFile());
-			Assert.isTrue(temporaryTrustStoreFile.isFile());
+			Assert.isTrue(temporaryKeyStoreFile.isFile(), "temporaryKeyStoreFile.isFile can not be null");
+			Assert.isTrue(temporaryTrustStoreFile.isFile(), "temporaryTrustStoreFile.isfile can not be null");
 
 			apacheDSContainer.setKeyStoreFile(temporaryKeyStoreFile);
 			apacheDSContainer.setKeyStorePassword(KEY_STORE_PASSWORD);

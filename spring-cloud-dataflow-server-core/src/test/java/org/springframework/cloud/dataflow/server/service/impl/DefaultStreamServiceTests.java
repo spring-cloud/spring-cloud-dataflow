@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.dataflow.server.services.impl;
+package org.springframework.cloud.dataflow.server.service.impl;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -22,17 +22,18 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 
-import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
+import org.springframework.cloud.dataflow.configuration.metadata.BootApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.StreamDeployment;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.StreamDeploymentRepository;
-import org.springframework.cloud.dataflow.server.service.impl.DefaultStreamService;
 import org.springframework.cloud.dataflow.server.stream.AppDeployerStreamDeployer;
 import org.springframework.cloud.dataflow.server.stream.SkipperStreamDeployer;
 import org.springframework.cloud.dataflow.server.stream.StreamDeployers;
@@ -51,9 +52,13 @@ import static org.mockito.Mockito.when;
 
 /**
  * @author Ilayaperumal Gopinathan
+ * @author Eric Bottard
  */
 @RunWith(SpringRunner.class)
 public class DefaultStreamServiceTests {
+
+	@Rule
+	public ExpectedException thrown = ExpectedException.none();
 
 	private StreamDefinition streamDefinition1 = new StreamDefinition("test1", "time | log");
 
@@ -82,6 +87,8 @@ public class DefaultStreamServiceTests {
 
 	private SkipperStreamDeployer skipperStreamDeployer;
 
+	private AppDeploymentRequestCreator appDeploymentRequestCreator;
+
 	private DefaultStreamService defaultStreamService;
 
 	@Before
@@ -89,11 +96,12 @@ public class DefaultStreamServiceTests {
 		this.streamDeploymentRepository = mock(StreamDeploymentRepository.class);
 		this.appDeployerStreamDeployer = mock(AppDeployerStreamDeployer.class);
 		this.skipperStreamDeployer = mock(SkipperStreamDeployer.class);
-		this.defaultStreamService = new DefaultStreamService(mock(AppRegistry.class),
+		this.appDeploymentRequestCreator = new AppDeploymentRequestCreator(mock(AppRegistry.class),
 				mock(CommonApplicationProperties.class),
-				mock(ApplicationConfigurationMetadataResolver.class),
-				mock(StreamDefinitionRepository.class),
-				this.streamDeploymentRepository, this.appDeployerStreamDeployer, this.skipperStreamDeployer);
+				new BootApplicationConfigurationMetadataResolver());
+		this.defaultStreamService = new DefaultStreamService(mock(StreamDefinitionRepository.class),
+				this.streamDeploymentRepository, this.appDeployerStreamDeployer, this.skipperStreamDeployer,
+				appDeploymentRequestCreator);
 		this.streamDefinitionList.add(streamDefinition1);
 		this.appDeployerStreamDefinitions.add(streamDefinition1);
 		this.streamDefinitionList.add(streamDefinition2);
@@ -107,10 +115,9 @@ public class DefaultStreamServiceTests {
 
 	@Test
 	public void verifyUpgradeStream() {
-		this.defaultStreamService.upgradeStream(streamDeployment2.getStreamName(), streamDeployment2.getReleaseName(),
+		this.defaultStreamService.updateStream(streamDeployment2.getStreamName(), streamDeployment2.getReleaseName(),
 				null, null);
-		verify(this.skipperStreamDeployer, times(1)).upgradeStream(this.streamDeployment2.getStreamName(),
-				this.streamDeployment2.getReleaseName(), null, null);
+		verify(this.skipperStreamDeployer, times(1)).upgradeStream(this.streamDeployment2.getReleaseName(), null, null);
 		verifyNoMoreInteractions(this.skipperStreamDeployer);
 		verify(this.appDeployerStreamDeployer, never()).deployStream(any());
 	}
@@ -138,7 +145,7 @@ public class DefaultStreamServiceTests {
 	@Test
 	public void verifyAppDeployerUpgrade() {
 		try {
-			this.defaultStreamService.upgradeStream(this.streamDeployment1.getStreamName(), this.streamDeployment1.getReleaseName(),
+			this.defaultStreamService.updateStream(this.streamDeployment1.getStreamName(), this.streamDeployment1.getReleaseName(),
 					null, null);
 			fail("IllegalStateException is expected to be thrown.");
 		}

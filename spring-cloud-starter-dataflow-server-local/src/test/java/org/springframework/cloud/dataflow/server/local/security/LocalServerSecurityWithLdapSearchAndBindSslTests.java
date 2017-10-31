@@ -21,6 +21,7 @@ import org.junit.rules.RuleChain;
 import org.junit.rules.TestRule;
 
 import org.springframework.cloud.dataflow.server.local.LocalDataflowResource;
+import org.springframework.test.annotation.DirtiesContext;
 
 import static org.springframework.cloud.dataflow.server.local.security.SecurityTestUtils.basicAuthorizationHeader;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -31,6 +32,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Marius Bogoevici
  * @author Gunnar Hillert
  */
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 public class LocalServerSecurityWithLdapSearchAndBindSslTests {
 
 	private final static LocalDataflowResource localDataflowResource = new LocalDataflowResource(

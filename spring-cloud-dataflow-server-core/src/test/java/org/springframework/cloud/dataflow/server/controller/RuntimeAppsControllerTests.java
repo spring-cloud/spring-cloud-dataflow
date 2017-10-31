@@ -24,14 +24,21 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
+import org.springframework.cloud.dataflow.core.StreamDeployment;
 import org.springframework.cloud.dataflow.registry.AppRegistration;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
 import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
+import org.springframework.cloud.dataflow.server.repository.StreamDeploymentRepository;
+import org.springframework.cloud.dataflow.server.stream.StreamDeployers;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.app.AppStatus;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
+import org.springframework.cloud.skipper.client.SkipperClient;
+import org.springframework.cloud.skipper.domain.Info;
+import org.springframework.cloud.skipper.domain.Status;
+import org.springframework.cloud.skipper.domain.StatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.annotation.DirtiesContext;
@@ -68,10 +75,16 @@ public class RuntimeAppsControllerTests {
 	private AppDeployer appDeployer;
 
 	@Autowired
+	private StreamDeploymentRepository streamDeploymentRepository;
+
+	@Autowired
 	private StreamDefinitionRepository streamDefinitionRepository;
 
 	@Autowired
 	private DeploymentIdRepository deploymentIdRepository;
+
+	@Autowired
+	private SkipperClient skipperClient;
 
 	@Before
 	public void setupMocks() throws Exception {
@@ -83,8 +96,25 @@ public class RuntimeAppsControllerTests {
 
 		StreamDefinition streamDefinition1 = new StreamDefinition("ticktock1", "time|log");
 		StreamDefinition streamDefinition2 = new StreamDefinition("ticktock2", "time|log");
+		StreamDefinition streamDefinition3 = new StreamDefinition("ticktock3", "time|log");
+		StreamDefinition streamDefinition4 = new StreamDefinition("ticktock4", "time|log");
 		streamDefinitionRepository.save(streamDefinition1);
 		streamDefinitionRepository.save(streamDefinition2);
+		streamDefinitionRepository.save(streamDefinition3);
+		streamDefinitionRepository.save(streamDefinition4);
+
+		StreamDeployment streamDeployment1 = new StreamDeployment(streamDefinition1.getName(), StreamDeployers
+				.appdeployer.name());
+		StreamDeployment streamDeployment2 = new StreamDeployment(streamDefinition2.getName(), StreamDeployers
+				.appdeployer.name());
+		StreamDeployment streamDeployment3 = new StreamDeployment(streamDefinition3.getName(), StreamDeployers
+				.skipper.name());
+		StreamDeployment streamDeployment4 = new StreamDeployment(streamDefinition4.getName(), StreamDeployers
+				.skipper.name());
+		this.streamDeploymentRepository.save(streamDeployment1);
+		this.streamDeploymentRepository.save(streamDeployment2);
+		this.streamDeploymentRepository.save(streamDeployment3);
+		this.streamDeploymentRepository.save(streamDeployment4);
 
 		deploymentIdRepository.save("ticktock1.time", "ticktock1.time");
 		deploymentIdRepository.save("ticktock1.log", "ticktock1.log");
@@ -99,6 +129,30 @@ public class RuntimeAppsControllerTests {
 				.thenReturn(AppStatus.of("ticktock2.time").generalState(DeploymentState.deployed).build());
 		when(appDeployer.status("ticktock2.log"))
 				.thenReturn(AppStatus.of("ticktock2.log").generalState(DeploymentState.deployed).build());
+		Info ticktock3Info = new Info();
+		Status ticktock3Status = new Status();
+		ticktock3Status.setStatusCode(StatusCode.DEPLOYED);
+		ticktock3Status.setPlatformStatus("[{\"deploymentId\":\"ticktock3.log-v1\","
+				+ "\"instances\":{\"ticktock3.log-v1-0\":{\"instanceNumber\":0,\"id\":\"ticktock3.log-v1-0\",\"state\":\"deployed\"}},\"state\":\"deployed\"},"
+				+ "{\"deploymentId\":\"ticktock3.time-v1\",\"instances\":{\"ticktock3.time-v1-0\":{\"instanceNumber\":0,\"baseUrl\":\"http://192.168.1.100:32451\","
+				+ "\"process\":{\"alive\":true,\"inputStream\":{},\"outputStream\":{},\"errorStream\":{}},"
+				+ "\"attributes\":{\"guid\":\"32451\",\"pid\":\"53492\",\"port\":\"32451\"},"
+				+ "\"id\":\"ticktock3.time-v1-0\",\"state\":\"deployed\"}},\"state\":\"deployed\"}]");
+		ticktock3Info.setStatus(ticktock3Status);
+		Info ticktock4Info = new Info();
+		Status ticktock4Status = new Status();
+		ticktock4Status.setStatusCode(StatusCode.DEPLOYED);
+		ticktock4Status.setPlatformStatus("[{\"deploymentId\":\"ticktock4.log-v1\","
+				+ "\"instances\":{\"ticktock4.log-v1-0\":{\"instanceNumber\":0,\"id\":\"ticktock4.log-v1-0\","
+				+ "\"state\":\"deployed\"}},\"state\":\"deployed\"},"
+				+ "{\"deploymentId\":\"ticktock4.time-v1\",\"instances\":{\"ticktock4.time-v1-0\":{\"instanceNumber\":0,"
+				+ "\"baseUrl\":\"http://192.168.1.100:32451\","
+				+ "\"process\":{\"alive\":true,\"inputStream\":{},\"outputStream\":{},\"errorStream\":{}},"
+				+ "\"attributes\":{\"guid\":\"32451\",\"pid\":\"53492\",\"port\":\"32451\"},"
+				+ "\"id\":\"ticktock4.time-v1-0\",\"state\":\"deployed\"}},\"state\":\"deployed\"}]");
+		ticktock4Info.setStatus(ticktock4Status);
+		when(this.skipperClient.status("ticktock3")).thenReturn(ticktock3Info);
+		when(this.skipperClient.status("ticktock4")).thenReturn(ticktock4Info);
 
 		when(appDeployer.status("foo")).thenReturn(AppStatus.of("foo").generalState(DeploymentState.unknown).build());
 		AppStatus validAppStatus = AppStatus.of("a1.valid").generalState(DeploymentState.failed).build();
@@ -130,6 +184,10 @@ public class RuntimeAppsControllerTests {
 		assertThat(responseString.getContentAsString().contains("ticktock1.log"), is(true));
 		assertThat(responseString.getContentAsString().contains("ticktock2.time"), is(true));
 		assertThat(responseString.getContentAsString().contains("ticktock2.log"), is(true));
+		assertThat(responseString.getContentAsString().contains("ticktock3.time"), is(true));
+		assertThat(responseString.getContentAsString().contains("ticktock3.log"), is(true));
+		assertThat(responseString.getContentAsString().contains("ticktock4.time"), is(true));
+		assertThat(responseString.getContentAsString().contains("ticktock4.log"), is(true));
 	}
 
 	@Test

@@ -40,14 +40,12 @@ import org.springframework.cloud.dataflow.server.DataFlowServerUtil;
 import org.springframework.cloud.dataflow.server.controller.support.ArgumentSanitizer;
 import org.springframework.cloud.dataflow.server.controller.support.ControllerUtils;
 import org.springframework.cloud.dataflow.server.controller.support.InvalidStreamDefinitionException;
-import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
 import org.springframework.cloud.dataflow.server.repository.DuplicateStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.NoSuchStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.support.SearchPageable;
 import org.springframework.cloud.dataflow.server.service.StreamService;
 import org.springframework.cloud.dataflow.server.support.CannotDetermineApplicationTypeException;
-import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -66,7 +64,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import static org.springframework.cloud.dataflow.server.stream.SkipperStreamDeployer.SKIPPER_ENABLED_PROPERTY_KEY;
+import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_ENABLED_PROPERTY_KEY;
 
 /**
  * Controller for operations on {@link StreamDefinition}. This includes CRUD and optional
@@ -88,24 +86,9 @@ public class StreamDefinitionController {
 	private static final Logger logger = LoggerFactory.getLogger(StreamDefinitionController.class);
 
 	/**
-	 * The service that is responsible for deploying streams.
-	 */
-	private final StreamService streamService;
-
-	/**
 	 * The repository this controller will use for stream CRUD operations.
 	 */
 	private final StreamDefinitionRepository repository;
-
-	/**
-	 * The repository this controller will use for deployment IDs.
-	 */
-	private final DeploymentIdRepository deploymentIdRepository;
-
-	/**
-	 * The deployer this controller will use to compute stream deployment status.
-	 */
-	private final AppDeployer deployer;
 
 	/**
 	 * The app registry this controller will use to lookup apps.
@@ -113,40 +96,28 @@ public class StreamDefinitionController {
 	private final AppRegistry appRegistry;
 
 	/**
-	 * This deployment controller is used as a delegate when stream creation is immediately
-	 * followed by deployment.
+	 * The service that is responsible for deploying streams.
 	 */
-	private final StreamDeploymentController deploymentController;
+	private final StreamService streamService;
 
 	/**
 	 * Create a {@code StreamDefinitionController} that delegates
 	 * <ul>
 	 * <li>CRUD operations to the provided {@link StreamDefinitionRepository}</li>
-	 * <li>deployment ID operations to the provided {@link DeploymentIdRepository}</li>
-	 * <li>deployment operations to the provided {@link StreamDeploymentController}</li>
-	 * <li>deployment status computation to the provided {@link AppDeployer}</li>
+	 * <li>deployment operations and status computation via {@link StreamService}</li>
 	 * </ul>
 	 *
 	 * @param repository the repository this controller will use for stream CRUD operations
-	 * @param deploymentIdRepository the repository this controller will use for deployment
-	 * IDs
-	 * @param deploymentController the deployment controller to delegate deployment operations
-	 * @param deployer the deployer this controller will use to compute deployment status
 	 * @param appRegistry the app registry to look up registered apps
+	 * @param streamService the stream service to use to delegate stream operations such as
+	 * deploy/status.
 	 */
-	public StreamDefinitionController(StreamDefinitionRepository repository,
-			DeploymentIdRepository deploymentIdRepository, StreamDeploymentController deploymentController,
-			AppDeployer deployer, AppRegistry appRegistry, StreamService streamService) {
+	public StreamDefinitionController(StreamDefinitionRepository repository, AppRegistry appRegistry,
+			StreamService streamService) {
 		Assert.notNull(repository, "StreamDefinitionRepository must not be null");
-		Assert.notNull(deploymentIdRepository, "DeploymentIdRepository must not be null");
-		Assert.notNull(deploymentController, "StreamDeploymentController must not be null");
-		Assert.notNull(deployer, "AppDeployer must not be null");
 		Assert.notNull(appRegistry, "AppRegistry must not be null");
-		Assert.notNull(streamService, "StreamDeploymentService must not be null");
-		this.deploymentController = deploymentController;
-		this.deploymentIdRepository = deploymentIdRepository;
+		Assert.notNull(streamService, "StreamService must not be null");
 		this.repository = repository;
-		this.deployer = deployer;
 		this.appRegistry = appRegistry;
 		this.streamService = streamService;
 	}
@@ -288,7 +259,7 @@ public class StreamDefinitionController {
 		if (this.repository.findOne(name) == null) {
 			throw new NoSuchStreamDefinitionException(name);
 		}
-		this.deploymentController.undeploy(name);
+		this.streamService.undeployStream(name);
 		this.repository.delete(name);
 	}
 
@@ -362,7 +333,9 @@ public class StreamDefinitionController {
 	@RequestMapping(value = "", method = RequestMethod.DELETE)
 	@ResponseStatus(HttpStatus.OK)
 	public void deleteAll() {
-		deploymentController.undeployAll();
+		for (StreamDefinition streamDefinition : this.repository.findAll()) {
+			this.streamService.undeployStream(streamDefinition.getName());
+		}
 		this.repository.deleteAll();
 	}
 

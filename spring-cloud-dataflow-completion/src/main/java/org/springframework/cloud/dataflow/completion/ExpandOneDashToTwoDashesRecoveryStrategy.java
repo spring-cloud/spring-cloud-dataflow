@@ -49,7 +49,8 @@ class ExpandOneDashToTwoDashesRecoveryStrategy extends StacktraceFingerprintingR
 			new StreamDefinition("__dummy", withDashDash);
 		}
 		catch (CheckPointedParseException recoverable) {
-			Assert.isTrue(recoveryAfterDashDash.shouldTrigger(withDashDash, recoverable));
+			Assert.isTrue(recoveryAfterDashDash.shouldTrigger(withDashDash, recoverable),
+					"did not tigger after dash-dash");
 			recoveryAfterDashDash.addProposals(withDashDash, recoverable, detailLevel, proposals);
 		}
 	}

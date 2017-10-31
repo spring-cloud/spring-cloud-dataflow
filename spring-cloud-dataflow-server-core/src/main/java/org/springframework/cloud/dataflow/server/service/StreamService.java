@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.cloud.dataflow.core.StreamDefinition;
+import org.springframework.cloud.dataflow.rest.UpdateStreamRequest;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
 
 /**
@@ -36,7 +37,22 @@ public interface StreamService {
 	 */
 	void deployStream(String name, Map<String, String> deploymentProperties);
 
-	Map<StreamDefinition, DeploymentState> state(List<StreamDefinition> content);
+	/**
+	 * Retrieve the deployment state for the given stream definitions.
+	 *
+	 * @param streamDefinitions the list of Stream definitions to calculate the deployment states.
+	 * @return the map containing the stream definitions and their deployment states.
+	 */
+	Map<StreamDefinition, DeploymentState> state(List<StreamDefinition> streamDefinitions);
+
+	/**
+	 * Update the stream using the UpdateStreamRequest.
+	 *
+	 * @param streamName the name of the stream to update
+	 * @param updateStreamRequest the UpdateStreamRequest to use during the update
+	 */
+	void updateStream(String streamName, UpdateStreamRequest updateStreamRequest);
+
 
 	/**
 	 * Un-deploys the stream identified by the given stream name.

@@ -176,7 +176,7 @@ public class ApacheDSContainerWithSecurity
 	}
 
 	public void setWorkingDirectory(File workingDir) {
-		Assert.notNull(workingDir);
+		Assert.notNull(workingDir, "Working Directory can not be null");
 
 		logger.info("Setting working directory for LDAP_PROVIDER: " + workingDir.getAbsolutePath());
 
@@ -238,7 +238,7 @@ public class ApacheDSContainerWithSecurity
 		catch (LdapNameNotFoundException e) {
 			try {
 				LdapDN dn = new LdapDN(root);
-				Assert.isTrue(root.startsWith("dc="));
+				Assert.isTrue(root.startsWith("dc="), "root must start with 'dc='");
 				String dc = root.substring(3, root.indexOf(','));
 				ServerEntry entry = service.newEntry(dn);
 				entry.add("objectClass", "top", "domain", "extensibleObject");

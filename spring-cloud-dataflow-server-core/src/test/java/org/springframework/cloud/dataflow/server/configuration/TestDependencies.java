@@ -57,7 +57,9 @@ import org.springframework.cloud.dataflow.server.repository.InMemoryTaskDefiniti
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.StreamDeploymentRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
+import org.springframework.cloud.dataflow.server.service.StreamService;
 import org.springframework.cloud.dataflow.server.service.TaskService;
+import org.springframework.cloud.dataflow.server.service.impl.AppDeploymentRequestCreator;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultStreamService;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskService;
 import org.springframework.cloud.dataflow.server.service.impl.TaskConfigurationProperties;
@@ -123,29 +125,30 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 
 	@Bean
 	public StreamDeploymentController streamDeploymentController(StreamDefinitionRepository repository,
-			DeploymentIdRepository deploymentIdRepository, AppRegistry registry,
-			ApplicationConfigurationMetadataResolver metadataResolver,
-			CommonApplicationProperties applicationProperties, StreamDeploymentRepository streamDeploymentRepository,
-			DefaultStreamService defaultStreamService) {
-		return new StreamDeploymentController(repository, deploymentIdRepository, registry, appDeployer(),
-				metadataResolver, applicationProperties, streamDeploymentRepository, defaultStreamService);
+			StreamService streamService) {
+		return new StreamDeploymentController(repository, streamService);
 	}
 
 	@Bean
-	public DefaultStreamService streamDeploymentService(AppRegistry appRegistry,
-			CommonApplicationProperties commonApplicationProperties,
-			ApplicationConfigurationMetadataResolver applicationConfigurationMetadataResolver,
-			StreamDefinitionRepository streamDefinitionRepository,
+	public StreamService streamService(StreamDefinitionRepository streamDefinitionRepository,
 			StreamDeploymentRepository streamDeploymentRepository,
 			AppDeployerStreamDeployer appDeployerStreamDeployer,
-			SkipperStreamDeployer skipperStreamDeployer) {
-		return new DefaultStreamService(appRegistry,
-				commonApplicationProperties,
-				applicationConfigurationMetadataResolver,
-				streamDefinitionRepository,
+			SkipperStreamDeployer skipperStreamDeployer,
+			AppDeploymentRequestCreator appDeploymentRequestCreator) {
+		return new DefaultStreamService(streamDefinitionRepository,
 				streamDeploymentRepository,
 				appDeployerStreamDeployer,
-				skipperStreamDeployer);
+				skipperStreamDeployer,
+				appDeploymentRequestCreator);
+	}
+
+	@Bean
+	AppDeploymentRequestCreator streamDeploymentPropertiesUtils(AppRegistry appRegistry,
+																CommonApplicationProperties commonApplicationProperties,
+																ApplicationConfigurationMetadataResolver applicationConfigurationMetadataResolver) {
+		return new AppDeploymentRequestCreator(appRegistry,
+				commonApplicationProperties,
+				applicationConfigurationMetadataResolver);
 	}
 
 	@Bean
@@ -164,15 +167,13 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 
 	@Bean
 	public SkipperClient skipperClient() {
-		return SkipperClient.create("http://localhost:7577");
+		return mock(SkipperClient.class);
 	}
 
 	@Bean
 	public StreamDefinitionController streamDefinitionController(StreamDefinitionRepository repository,
-			DeploymentIdRepository deploymentIdRepository, StreamDeploymentController deploymentController,
-			DefaultStreamService defaultStreamService) {
-		return new StreamDefinitionController(repository, deploymentIdRepository, deploymentController, appDeployer(),
-				appRegistry(), defaultStreamService);
+			StreamService streamService) {
+		return new StreamDefinitionController(repository, appRegistry(), streamService);
 	}
 
 	@Bean
@@ -203,9 +204,10 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	}
 
 	@Bean
-	public RuntimeAppsController runtimeAppsController(MetricStore metricStore) {
-		return new RuntimeAppsController(streamDefinitionRepository(), deploymentIdRepository(), appDeployer(),
-				metricStore, new ForkJoinPool(2));
+	public RuntimeAppsController runtimeAppsController(MetricStore metricStore, StreamService streamService) {
+		return new RuntimeAppsController(streamDefinitionRepository(), streamDeploymentRepository(),
+				deploymentIdRepository(), appDeployer(),
+				metricStore, new ForkJoinPool(2), skipperClient());
 	}
 
 	@Bean
