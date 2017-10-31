@@ -16,25 +16,15 @@
 
 package org.springframework.cloud.dataflow.server.controller;
 
-import java.util.HashMap;
 import java.util.Map;
 
-import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
-import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
-import org.springframework.cloud.dataflow.core.StreamPropertyKeys;
-import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.rest.UpdateStreamRequest;
 import org.springframework.cloud.dataflow.rest.resource.StreamDeploymentResource;
-import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
-import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
 import org.springframework.cloud.dataflow.server.repository.NoSuchStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
-import org.springframework.cloud.dataflow.server.repository.StreamDeploymentRepository;
-import org.springframework.cloud.dataflow.server.service.impl.DefaultStreamService;
+import org.springframework.cloud.dataflow.server.service.StreamService;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
-import org.springframework.cloud.deployer.spi.core.AppDefinition;
-import org.springframework.core.io.Resource;
 import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
@@ -44,8 +34,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-
-import static org.springframework.cloud.dataflow.server.stream.SkipperStreamDeployer.SKIPPER_ENABLED_PROPERTY_KEY;
 
 /**
  * Controller for deployment operations on {@link StreamDefinition}.
@@ -62,14 +50,7 @@ import static org.springframework.cloud.dataflow.server.stream.SkipperStreamDepl
 @ExposesResourceFor(StreamDeploymentResource.class)
 public class StreamDeploymentController {
 
-	/**
-	 * This is the spring boot property key that Spring Cloud Stream uses to filter the
-	 * metrics to import when the specific Spring Cloud Stream "applicaiton" trigger is fired
-	 * for metrics export.
-	 */
-	private static final String METRICS_TRIGGER_INCLUDES = "spring.metrics.export.triggers.application.includes";
-
-	private final DefaultStreamService defaultStreamService;
+	private final StreamService streamService;
 
 	/**
 	 * The repository this controller will use for stream CRUD operations.
@@ -77,70 +58,20 @@ public class StreamDeploymentController {
 	private final StreamDefinitionRepository repository;
 
 	/**
-	 * The repository this controller will use for deployment IDs.
-	 */
-	private final DeploymentIdRepository deploymentIdRepository;
-
-	/**
-	 * The app registry this controller will use to lookup apps.
-	 */
-	private final AppRegistry registry;
-
-	/**
-	 * The deployer this controller will use to deploy stream apps.
-	 */
-	private final AppDeployer deployer;
-
-	private final WhitelistProperties whitelistProperties;
-
-	/**
-	 * General properties to be applied to applications on deployment.
-	 */
-	private final CommonApplicationProperties commonApplicationProperties;
-
-	/**
-	 * The respository for the stream deployments.
-	 */
-	private final StreamDeploymentRepository streamDeploymentRepository;
-
-	/**
 	 * Create a {@code StreamDeploymentController} that delegates
 	 * <ul>
 	 * <li>CRUD operations to the provided {@link StreamDefinitionRepository}</li>
-	 * <li>app retrieval to the provided {@link AppRegistry}</li>
-	 * <li>deployment operations to the provided {@link AppDeployer}</li>
+	 * <li>deployment operations to the provided {@link AppDeployer} via {@link StreamService}</li>
 	 * </ul>
 	 *
 	 * @param repository the repository this controller will use for stream CRUD operations
-	 * @param deploymentIdRepository the repository this controller will use for deployment
-	 * IDs
-	 * @param registry the registry this controller will use to lookup apps
-	 * @param deployer the deployer this controller will use to deploy stream apps
-	 * @param metadataResolver the application metadata resolver
-	 * @param commonProperties common set of application properties
-	 * @param streamDeploymentRepository the repository for the stream deployments
-	 * @param defaultStreamService the underlying StreamService to deploy the stream
+	 * @param streamService the underlying StreamService to deploy the stream
 	 */
-	public StreamDeploymentController(StreamDefinitionRepository repository,
-			DeploymentIdRepository deploymentIdRepository, AppRegistry registry, AppDeployer deployer,
-			ApplicationConfigurationMetadataResolver metadataResolver, CommonApplicationProperties commonProperties,
-			StreamDeploymentRepository streamDeploymentRepository, DefaultStreamService defaultStreamService) {
+	public StreamDeploymentController(StreamDefinitionRepository repository, StreamService streamService) {
 		Assert.notNull(repository, "StreamDefinitionRepository must not be null");
-		Assert.notNull(deploymentIdRepository, "DeploymentIdRepository must not be null");
-		Assert.notNull(registry, "AppRegistry must not be null");
-		Assert.notNull(deployer, "AppDeployer must not be null");
-		Assert.notNull(metadataResolver, "MetadataResolver must not be null");
-		Assert.notNull(commonProperties, "CommonApplicationProperties must not be null");
-		Assert.notNull(repository, "StreamDefinitionRepository must not be null");
-		Assert.notNull(defaultStreamService, "StreamDeploymentService must not be null");
+		Assert.notNull(streamService, "StreamService must not be null");
 		this.repository = repository;
-		this.deploymentIdRepository = deploymentIdRepository;
-		this.registry = registry;
-		this.deployer = deployer;
-		this.whitelistProperties = new WhitelistProperties(metadataResolver);
-		this.commonApplicationProperties = commonProperties;
-		this.streamDeploymentRepository = streamDeploymentRepository;
-		this.defaultStreamService = defaultStreamService;
+		this.streamService = streamService;
 	}
 
 	/**
@@ -155,7 +86,7 @@ public class StreamDeploymentController {
 		if (stream == null) {
 			throw new NoSuchStreamDefinitionException(name);
 		}
-		this.defaultStreamService.undeployStream(name);
+		this.streamService.undeployStream(name);
 	}
 
 	/**
@@ -165,7 +96,7 @@ public class StreamDeploymentController {
 	@ResponseStatus(HttpStatus.OK)
 	public void undeployAll() {
 		for (StreamDefinition stream : this.repository.findAll()) {
-			this.defaultStreamService.undeployStream(stream.getName());
+			this.streamService.undeployStream(stream.getName());
 		}
 	}
 
@@ -182,38 +113,14 @@ public class StreamDeploymentController {
 	@ResponseStatus(HttpStatus.CREATED)
 	public void deploy(@PathVariable("name") String name,
 			@RequestBody(required = false) Map<String, String> properties) {
-		if (properties != null && properties.containsKey("useSkipper") &&
-				properties.get("useSkipper").equalsIgnoreCase("true")) {
-			properties.put(SKIPPER_ENABLED_PROPERTY_KEY, "true");
-			properties.remove("useSkipper");
-		}
-		this.defaultStreamService.deployStream(name, properties);
+		this.streamService.deployStream(name, properties);
 	}
 
 	@RequestMapping(value = "/update/{name}", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
 	public void update(@PathVariable("name") String name,
 			@RequestBody UpdateStreamRequest updateStreamRequest) {
-		this.defaultStreamService.upgradeStream(name, updateStreamRequest.getReleaseName(),
-				updateStreamRequest.getPackageIdentifier(), updateStreamRequest.getYaml());
-	}
-
-	/**
-	 * Return a new app definition where definition-time and deploy-time properties have been
-	 * merged and short form parameters have been expanded to their long form (amongst the
-	 * whitelisted supported properties of the app) if applicable.
-	 */
-	/* default */ AppDefinition mergeAndExpandAppProperties(StreamAppDefinition original, Resource metadataResource,
-			Map<String, String> appDeployTimeProperties) {
-		Map<String, String> merged = new HashMap<>(original.getProperties());
-		merged.putAll(appDeployTimeProperties);
-		merged = whitelistProperties.qualifyProperties(merged, metadataResource);
-
-		merged.putIfAbsent(StreamPropertyKeys.METRICS_PROPERTIES, "spring.application.name,spring.application.index,"
-				+ "spring.cloud.application.*,spring.cloud.dataflow.*");
-		merged.putIfAbsent(METRICS_TRIGGER_INCLUDES, "integration**");
-
-		return new AppDefinition(original.getName(), merged);
+		this.streamService.updateStream(name, updateStreamRequest);
 	}
 
 }

@@ -27,7 +27,7 @@ import org.springframework.cloud.deployer.spi.app.DeploymentState;
  * @author Mark Pollack
  * @author Ilayaperumal Gopinathan
  */
-public interface StreamService {
+public interface StreamService extends StreamUpdateService {
 	/**
 	 * Deploys the stream with the user provided deployment properties.
 	 * Implementations are responsible for expanding deployment wildcard expressions.
@@ -36,7 +36,13 @@ public interface StreamService {
 	 */
 	void deployStream(String name, Map<String, String> deploymentProperties);
 
-	Map<StreamDefinition, DeploymentState> state(List<StreamDefinition> content);
+	/**
+	 * Retrieve the deployment state for the given stream definitions.
+	 *
+	 * @param streamDefinitions the list of Stream definitions to calculate the deployment states.
+	 * @return the map containing the stream definitions and their deployment states.
+	 */
+	Map<StreamDefinition, DeploymentState> state(List<StreamDefinition> streamDefinitions);
 
 	/**
 	 * Un-deploys the stream identified by the given stream name.

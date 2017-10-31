@@ -35,6 +35,10 @@ import org.springframework.core.io.UrlResource;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_PACKAGE_NAME;
+import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_PACKAGE_VERSION;
+import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_PLATFORM_NAME;
+import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_REPO_NAME;
 
 /**
  * @author Mark Pollack
@@ -72,10 +76,10 @@ public class SkipperStreamDeployerTests {
 	@Test
 	public void testInstallUploadProperties() {
 		Map<String, String> skipperDeployerProperties = new HashMap<>();
-		skipperDeployerProperties.put(SkipperStreamDeployer.SKIPPER_PACKAGE_NAME, "package1");
-		skipperDeployerProperties.put(SkipperStreamDeployer.SKIPPER_PACKAGE_VERSION, "1.0.1");
-		skipperDeployerProperties.put(SkipperStreamDeployer.SKIPPER_PLATFORM_NAME, "platform1");
-		skipperDeployerProperties.put(SkipperStreamDeployer.SKIPPER_PACKAGE_REPO_NAME, "mylocal-repo1");
+		skipperDeployerProperties.put(SKIPPER_PACKAGE_NAME, "package1");
+		skipperDeployerProperties.put(SKIPPER_PACKAGE_VERSION, "1.0.1");
+		skipperDeployerProperties.put(SKIPPER_PLATFORM_NAME, "platform1");
+		skipperDeployerProperties.put(SKIPPER_REPO_NAME, "mylocal-repo1");
 		StreamDeploymentRequest streamDeploymentRequest = new StreamDeploymentRequest("test1", "time | log",
 				new ArrayList<>(),
 				skipperDeployerProperties);
