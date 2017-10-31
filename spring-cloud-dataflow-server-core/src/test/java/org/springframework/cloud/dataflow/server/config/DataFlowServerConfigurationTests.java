@@ -29,11 +29,15 @@ import org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoCon
 import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.security.SecurityAutoConfiguration;
+import org.springframework.boot.autoconfigure.web.WebClientAutoConfiguration;
+import org.springframework.boot.test.util.EnvironmentTestUtils;
 import org.springframework.cloud.dataflow.server.EnableDataFlowServer;
 import org.springframework.cloud.dataflow.server.service.TaskService;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskService;
+import org.springframework.cloud.dataflow.server.support.TestUtils;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
+import org.springframework.cloud.skipper.client.SkipperClient;
 import org.springframework.cloud.task.repository.TaskRepository;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -66,7 +70,8 @@ public class DataFlowServerConfigurationTests {
 		context.register(DataFlowServerConfigurationTests.TestConfiguration.class, RedisAutoConfiguration.class,
 				SecurityAutoConfiguration.class, DataFlowServerAutoConfiguration.class,
 				DataFlowControllerAutoConfiguration.class, DataSourceAutoConfiguration.class,
-				DataFlowServerConfiguration.class, PropertyPlaceholderAutoConfiguration.class);
+				DataFlowServerConfiguration.class, PropertyPlaceholderAutoConfiguration.class,
+				WebClientAutoConfiguration.class);
 		environment = new StandardEnvironment();
 		propertySources = environment.getPropertySources();
 	}
@@ -123,6 +128,16 @@ public class DataFlowServerConfigurationTests {
 	public void testNoServer() {
 		context.refresh();
 		assertFalse(context.containsBean("initH2TCPServer"));
+	}
+
+	@Test
+	public void testSkipperConfig() throws Exception {
+		EnvironmentTestUtils.addEnvironment(context, "spring.cloud.skipper.client.uri:http://fakehost:1234/api");
+		context.refresh();
+		SkipperClient skipperClient = context.getBean(SkipperClient.class);
+		Object baseUri = TestUtils.readField("baseUri", skipperClient);
+		assertNotNull(baseUri);
+		assertTrue(baseUri.equals("http://fakehost:1234/api"));
 	}
 
 	@EnableDataFlowServer
