@@ -19,7 +19,6 @@ package org.springframework.cloud.dataflow.shell.command;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -75,7 +74,9 @@ public class StreamCommands implements CommandMarker {
 
 	private static final String DEPLOY_STREAM = "stream deploy";
 
-	private static final String UPDATE_STREAM = "stream update";
+	private static final String STREAM_SKIPPER_DEPLOY = "stream skipper deploy";
+
+	private static final String STREAM_SKIPPER_UPDATE = "stream skipper update";
 
 	private static final String UNDEPLOY_STREAM = "stream undeploy";
 
@@ -104,9 +105,8 @@ public class StreamCommands implements CommandMarker {
 		return dataFlowShell.hasAccess(RoleType.VIEW, OpsType.STREAM);
 	}
 
-	@CliAvailabilityIndicator({ CREATE_STREAM, DEPLOY_STREAM, UPDATE_STREAM, UNDEPLOY_STREAM, UNDEPLOY_STREAM_ALL,
-			DESTROY_STREAM,
-			DESTROY_STREAM_ALL })
+	@CliAvailabilityIndicator({ CREATE_STREAM, DEPLOY_STREAM, STREAM_SKIPPER_DEPLOY, STREAM_SKIPPER_UPDATE,
+			UNDEPLOY_STREAM, UNDEPLOY_STREAM_ALL, DESTROY_STREAM, DESTROY_STREAM_ALL })
 	public boolean availableWithCreateRole() {
 		return dataFlowShell.hasAccess(RoleType.CREATE, OpsType.STREAM);
 	}
@@ -127,9 +127,8 @@ public class StreamCommands implements CommandMarker {
 			@CliOption(mandatory = true, key = { "", "name" }, help = "the name to give to the stream") String name,
 			@CliOption(mandatory = true, key = { "definition" }, help = "a stream definition, using the DSL (e.g. "
 					+ "\"http --port=9000 | hdfs\")", optionContext = "disable-string-converter completion-stream") String dsl,
-			@CliOption(key = "deploy", help = "whether to deploy the stream immediately", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean deploy,
-			@CliOption(key = "useSkipper", help = "whether to deploy the stream using skipper", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean useSkipper) {
-		streamOperations().createStream(name, dsl, deploy, useSkipper);
+			@CliOption(key = "deploy", help = "whether to deploy the stream immediately", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean deploy) {
+		streamOperations().createStream(name, dsl, deploy);
 		String message = String.format("Created new stream '%s'", name);
 		if (deploy) {
 			message += "\nDeployment request has been sent";
@@ -137,29 +136,46 @@ public class StreamCommands implements CommandMarker {
 		return message;
 	}
 
-	@CliCommand(value = DEPLOY_STREAM, help = "Deploy a previously created stream")
-	public String deployStream(
+	@CliCommand(value = STREAM_SKIPPER_DEPLOY, help = "Deploy a previously created stream using Skipper")
+	public String deployStreamUsingSkipper(
 			@CliOption(key = { "",
 					"name" }, help = "the name of the stream to deploy", mandatory = true, optionContext = "existing-stream disable-string-converter") String name,
 			@CliOption(key = {
-					PROPERTIES_OPTION }, help = "the properties for this deployment") String properties,
+					PROPERTIES_OPTION }, help = "the properties for this deployment") String deploymentProperties,
 			@CliOption(key = {
 					PROPERTIES_FILE_OPTION }, help = "the properties for this deployment (as a File)") File propertiesFile,
-			@CliOption(key = "useSkipper", help = "whether to deploy the stream using skipper",
-					unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean useSkipper,
-			@CliOption(key = "packageName", help = "the name of the package to deploy when using Skipper") String packageName,
-			@CliOption(key = "packageVersion", help = "the package version of the package to deploy "
+			@CliOption(key = "packageVersion", help = "the package version of the package to deploy.  Default is 1.0.0"
 					+ "when using Skipper", unspecifiedDefaultValue = "1.0.0") String packageVersion,
-			@CliOption(key = "platformName", help = "the name of the target platform to deploy when using Skipper")
-					String platformName,
+			@CliOption(key = "platformName", help = "the name of the target platform to deploy when using Skipper") String platformName,
 			@CliOption(key = "repoName", help = "the name of the local repository to upload the package when using "
 					+ "Skipper") String repoName)
 			throws IOException {
-		int which = Assertions.atMostOneOf(PROPERTIES_OPTION, properties, PROPERTIES_FILE_OPTION, propertiesFile);
+		int which = Assertions.atMostOneOf(PROPERTIES_OPTION, deploymentProperties, PROPERTIES_FILE_OPTION,
+				propertiesFile);
+		Map<String, String> propertiesToUse = getDeploymentProperties(deploymentProperties, propertiesFile, which);
+		propertiesToUse.put(SKIPPER_ENABLED_PROPERTY_KEY, "true");
+		propertiesToUse.put(SKIPPER_PACKAGE_NAME, name);
+		Assert.isTrue(StringUtils.hasText(packageVersion), "Package version must be set when using Skipper.");
+		propertiesToUse.put(SKIPPER_PACKAGE_VERSION, packageVersion);
+		if (StringUtils.hasText(platformName)) {
+			propertiesToUse.put(SKIPPER_PLATFORM_NAME, platformName);
+		}
+		if (StringUtils.hasText(repoName)) {
+			propertiesToUse.put(SKIPPER_REPO_NAME, repoName);
+		}
+		streamOperations().deploy(name, propertiesToUse);
+		return String.format("Deployment request has been sent for stream '%s'", name);
+	}
+
+	private Map<String, String> getDeploymentProperties(@CliOption(key = {
+			PROPERTIES_OPTION }, help = "the properties for this deployment") String deploymentProperties,
+			@CliOption(key = {
+					PROPERTIES_FILE_OPTION }, help = "the properties for this deployment (as a File)") File propertiesFile,
+			int which) throws IOException {
 		Map<String, String> propertiesToUse;
 		switch (which) {
 		case 0:
-			propertiesToUse = DeploymentPropertiesUtils.parse(properties);
+			propertiesToUse = DeploymentPropertiesUtils.parse(deploymentProperties);
 			break;
 		case 1:
 			String extension = FilenameUtils.getExtension(propertiesFile.getName());
@@ -179,45 +195,38 @@ public class StreamCommands implements CommandMarker {
 			propertiesToUse = DeploymentPropertiesUtils.convert(props);
 			break;
 		case -1: // Neither option specified
-			propertiesToUse = (useSkipper) ? new HashMap<>(1) : Collections.<String, String>emptyMap();
+			propertiesToUse = new HashMap<>(1);
 			break;
 		default:
 			throw new AssertionError();
 		}
-		if (useSkipper) {
-			propertiesToUse.put(SKIPPER_ENABLED_PROPERTY_KEY, "true");
-			propertiesToUse.put(SKIPPER_PACKAGE_NAME , StringUtils.hasText(packageName) ? packageName : name);
-			Assert.isTrue(StringUtils.hasText(packageVersion), "Package version must be set when using Skipper.");
-			propertiesToUse.put(SKIPPER_PACKAGE_VERSION, packageVersion);
-			if (StringUtils.hasText(platformName)) {
-				propertiesToUse.put(SKIPPER_PLATFORM_NAME, platformName);
-			}
-			if (StringUtils.hasText(repoName)) {
-				propertiesToUse.put(SKIPPER_REPO_NAME, repoName);
-			}
-		}
-		else {
-			Assert.isTrue(platformName == null, "Platform name can only be specified when deploying the stream using "
-							+ "Skipper");
-			Assert.isTrue(repoName == null, "Repository name can only be specified when deploying the stream using "
-					+ "Skipper");
-			Assert.isTrue(packageName == null, "Package name can only be specified when deploying the stream using "
-					+ "Skipper");
-			Assert.isTrue(packageVersion == null, "Package version can only be specified when deploying the stream "
-					+ "using Skipper");
-		}
+		return propertiesToUse;
+	}
+
+	@CliCommand(value = DEPLOY_STREAM, help = "Deploy a previously created stream")
+	public String deployStream(
+			@CliOption(key = { "",
+					"name" }, help = "the name of the stream to deploy", mandatory = true, optionContext = "existing-stream disable-string-converter") String name,
+			@CliOption(key = {
+					PROPERTIES_OPTION }, help = "the properties for this deployment") String deploymentProperties,
+			@CliOption(key = {
+					PROPERTIES_FILE_OPTION }, help = "the properties for this deployment (as a File)") File propertiesFile)
+			throws IOException {
+		int which = Assertions.atMostOneOf(PROPERTIES_OPTION, deploymentProperties, PROPERTIES_FILE_OPTION,
+				propertiesFile);
+		Map<String, String> propertiesToUse = getDeploymentProperties(deploymentProperties, propertiesFile, which);
 		streamOperations().deploy(name, propertiesToUse);
 		return String.format("Deployment request has been sent for stream '%s'", name);
 	}
 
-	@CliCommand(value = UPDATE_STREAM, help = "Update a previously created stream")
+	@CliCommand(value = STREAM_SKIPPER_UPDATE, help = "Update a previously created stream using Skipper")
 	public String updateStream(
-			@CliOption(key = { "", "name" }, help = "the name of the stream to update", mandatory = true,
-					optionContext = "existing-stream disable-string-converter") String name,
-			@CliOption(key = { "properties" }, help = "Flattened YAML style properties to update the stream",
-					mandatory = false) String properties,
-			@CliOption(key = { YAML_FILE_OPTION }, help = "the YAML file with values to update the stream",
-					mandatory = false) File yamlFile,
+			@CliOption(key = { "",
+					"name" }, help = "the name of the stream to update", mandatory = true, optionContext = "existing-stream disable-string-converter") String name,
+			@CliOption(key = {
+					"properties" }, help = "Flattened YAML style properties to update the stream", mandatory = false) String properties,
+			@CliOption(key = {
+					YAML_FILE_OPTION }, help = "the YAML file with values to update the stream", mandatory = false) File yamlFile,
 			@CliOption(key = "packageVersion", help = "the package version of the package to update when using "
 					+ "Skipper") String packageVersion,
 			@CliOption(key = "repoName", help = "the name of the local repository to upload the package when using "
