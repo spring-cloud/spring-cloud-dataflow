@@ -90,7 +90,7 @@ import org.springframework.cloud.deployer.resource.support.DelegatingResourceLoa
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.cloud.skipper.client.SkipperClient;
-import org.springframework.cloud.skipper.client.SkipperClientConfiguration;
+import org.springframework.cloud.skipper.client.SkipperClientProperties;
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
@@ -113,7 +113,8 @@ import org.springframework.scheduling.concurrent.ForkJoinPoolFactoryBean;
 @Configuration
 @Import(CompletionConfiguration.class)
 @ConditionalOnBean({ EnableDataFlowServerConfiguration.Marker.class, AppDeployer.class, TaskLauncher.class })
-@EnableConfigurationProperties({ FeaturesProperties.class, VersionInfoProperties.class, MetricsProperties.class })
+@EnableConfigurationProperties({ FeaturesProperties.class, VersionInfoProperties.class, MetricsProperties.class,
+	SkipperClientProperties.class})
 @ConditionalOnProperty(prefix = "dataflow.server", name = "enabled", havingValue = "true", matchIfMissing = true)
 @EnableCircuitBreaker
 public class DataFlowControllerAutoConfiguration {
@@ -174,6 +175,19 @@ public class DataFlowControllerAutoConfiguration {
 	}
 
 	@Bean
+	@ConditionalOnBean({StreamDefinitionRepository.class, StreamDeploymentRepository.class})
+	public SkipperStreamDeployer skipperStreamDeployer(SkipperClient skipperClient, StreamDeploymentRepository streamDeploymentRepository) {
+		return new SkipperStreamDeployer(skipperClient, streamDeploymentRepository);
+	}
+
+	@Bean
+	@ConditionalOnBean({StreamDefinitionRepository.class, StreamDeploymentRepository.class})
+	public SkipperClient skipperClient(SkipperClientProperties skipperClientProperties) {
+		logger.info("Skipper URI = [" + skipperClientProperties.getUri() + "]");
+		return SkipperClient.create(skipperClientProperties.getUri());
+	}
+
+	@Bean
 	public AppDeploymentRequestCreator streamDeploymentPropertiesUtils(AppRegistry appRegistry,
 			CommonApplicationProperties commonApplicationProperties,
 			ApplicationConfigurationMetadataResolver applicationConfigurationMetadataResolver) {
@@ -191,6 +205,7 @@ public class DataFlowControllerAutoConfiguration {
 		return new AppDeployerStreamDeployer(appDeployer, deploymentIdRepository, streamDefinitionRepository,
 				streamDeploymentRepository);
 	}
+
 
 	@Bean
 	@ConditionalOnBean({ StreamDefinitionRepository.class, StreamDeploymentRepository.class })
@@ -374,17 +389,6 @@ public class DataFlowControllerAutoConfiguration {
 		return new SecurityStateBean();
 	}
 
-	@Configuration
-	@Import(SkipperClientConfiguration.class)
-	@ConditionalOnBean({ StreamDefinitionRepository.class, StreamDeploymentRepository.class })
-	public static class SkipperConfiguration {
-
-		@Bean
-		public SkipperStreamDeployer skipperStreamDeployer(SkipperClient skipperClient,
-				StreamDeploymentRepository streamDeploymentRepository) {
-			return new SkipperStreamDeployer(skipperClient, streamDeploymentRepository);
-		}
-	}
 
 	@ConfigurationProperties(prefix = "maven")
 	static class MavenConfigurationProperties extends MavenProperties {
