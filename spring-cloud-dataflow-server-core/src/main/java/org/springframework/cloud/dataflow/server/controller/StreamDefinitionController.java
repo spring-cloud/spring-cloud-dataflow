@@ -64,8 +64,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_ENABLED_PROPERTY_KEY;
-
 /**
  * Controller for operations on {@link StreamDefinition}. This includes CRUD and optional
  * deployment operations.
@@ -195,8 +193,6 @@ public class StreamDefinitionController {
 	 * @param dsl DSL definition for stream
 	 * @param deploy if {@code true}, the stream is deployed upon creation (default is
 	 * {@code false})
-	 * @param useSkipper if {@code true}, delegate the deployment of the stream to skipper
-	 * (default is false)
 	 * @return the created stream definition
 	 * @throws DuplicateStreamDefinitionException if a stream definition with the same name
 	 * already exists
@@ -206,8 +202,7 @@ public class StreamDefinitionController {
 	@RequestMapping(value = "", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
 	public StreamDefinitionResource save(@RequestParam("name") String name, @RequestParam("definition") String dsl,
-			@RequestParam(value = "deploy", defaultValue = "false") boolean deploy,
-			@RequestParam(value = "useSkipper", defaultValue = "false") boolean useSkipper) {
+			@RequestParam(value = "deploy", defaultValue = "false") boolean deploy) {
 		StreamDefinition stream;
 		try {
 			stream = new StreamDefinition(name, dsl);
@@ -239,11 +234,7 @@ public class StreamDefinitionController {
 		}
 		this.repository.save(stream);
 		if (deploy) {
-			Map<String, String> streamDeploymentProperties = new HashMap<>();
-			if (useSkipper) {
-				streamDeploymentProperties.put(SKIPPER_ENABLED_PROPERTY_KEY, "true");
-			}
-			this.streamService.deployStream(name, streamDeploymentProperties);
+			this.streamService.deployStream(name, new HashMap<>());
 		}
 		return new Assembler(new PageImpl<>(Collections.singletonList(stream))).toResource(stream);
 	}
