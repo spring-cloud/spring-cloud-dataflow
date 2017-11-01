@@ -45,7 +45,7 @@ public class StreamDefinitionControllerTests {
 		when(uriRegistry.find("sink.bar")).thenReturn(new URI("file://bar"));
 
 		StreamDefinitionController controller = buildStreamDefinitionControllerStub(uriRegistry);
-		controller.save("foo", "foo|bar", false, false);
+		controller.save("foo", "foo|bar", false);
 	}
 
 	private static StreamDefinitionController buildStreamDefinitionControllerStub(UriRegistry uriRegistry)
