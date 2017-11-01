@@ -47,7 +47,6 @@ import org.springframework.cloud.dataflow.server.service.TaskService;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.cloud.task.repository.TaskRepository;
-import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -72,8 +71,8 @@ import static org.springframework.cloud.dataflow.core.ApplicationType.task;
  * @author Ilayaperumal Gopinathan
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = { EmbeddedDataSourceConfiguration.class, PropertyPlaceholderAutoConfiguration.class,
-		TaskServiceDependencies.class })
+@SpringBootTest(classes = { EmbeddedDataSourceConfiguration.class,
+		TaskServiceDependencies.class, PropertyPlaceholderAutoConfiguration.class })
 public class DefaultTaskServiceTests {
 
 	private final static String BASE_TASK_NAME = "myTask";
@@ -92,27 +91,24 @@ public class DefaultTaskServiceTests {
 	@Autowired
 	private TaskExplorer taskExplorer;
 
+	@Autowired
 	private AppRegistry appRegistry;
 
+	@Autowired
 	private ResourceLoader resourceLoader;
 
+	@Autowired
 	private TaskLauncher taskLauncher;
 
+	@Autowired
 	private ApplicationConfigurationMetadataResolver metadataResolver;
 
+	@Autowired
 	private TaskService taskService;
 
 	@Before
 	public void setupMockMVC() {
 		taskDefinitionRepository.save(new TaskDefinition(TASK_NAME_ORIG, "demo"));
-		appRegistry = mock(AppRegistry.class);
-		resourceLoader = mock(ResourceLoader.class);
-		metadataResolver = mock(ApplicationConfigurationMetadataResolver.class);
-		taskLauncher = mock(TaskLauncher.class);
-		when(this.resourceLoader.getResource(anyString())).thenReturn(mock(Resource.class));
-		taskService = new DefaultTaskService(dataSourceProperties, taskDefinitionRepository, taskExplorer,
-				taskExecutionRepository, appRegistry, resourceLoader, taskLauncher, metadataResolver,
-				new TaskConfigurationProperties(), new InMemoryDeploymentIdRepository(), null);
 	}
 
 	@Test
@@ -367,7 +363,7 @@ public class DefaultTaskServiceTests {
 		String dsl = "AAA && BBB";
 		initializeSuccessfulRegistry();
 		boolean isExceptionThrown = false;
-		taskService.saveTaskDefinition("splitTask-AAA", "AAA");
+		taskService.saveTaskDefinition("splitTask-BBB", "BBB");
 		try{
 			taskService.saveTaskDefinition("splitTask", dsl);
 		}
@@ -376,8 +372,8 @@ public class DefaultTaskServiceTests {
 		}
 		assertTrue("DuplicateTaskException was expected to be thrown", isExceptionThrown);
 		assertFalse(wasTaskDefinitionCreated("splitTask"));
-		assertTrue(wasTaskDefinitionCreated("splitTask-AAA"));
-		assertFalse(wasTaskDefinitionCreated("splitTask-BBB"));
+		assertFalse(wasTaskDefinitionCreated("splitTask-AAA"));
+		assertTrue(wasTaskDefinitionCreated("splitTask-BBB"));
 	}
 
 	private void verifyTaskExistsInRepo(String taskName, String dsl) {
@@ -393,10 +389,12 @@ public class DefaultTaskServiceTests {
 	}
 
 	private void initializeFailRegistry() throws IllegalArgumentException{
-		when(this.appRegistry.find(anyString(), any(ApplicationType.class)))
+		when(this.appRegistry.find("BBB", ApplicationType.task))
 				.thenThrow(new IllegalArgumentException(
 						String.format("Application name '%s' with type '%s' does not exist in the app registry.", "fake",
 								ApplicationType.task)));
+		when(this.appRegistry.find("AAA", ApplicationType.task))
+				.thenReturn(mock(AppRegistration.class));
 	}
 	private boolean wasTaskDefinitionCreated(String taskName) {
 		TaskDefinition taskDefinition = taskDefinitionRepository.findOne(taskName);

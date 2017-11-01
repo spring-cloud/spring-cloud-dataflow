@@ -18,8 +18,18 @@ package org.springframework.cloud.dataflow.server.configuration;
 
 import javax.sql.DataSource;
 
-import org.springframework.cloud.dataflow.server.repository.InMemoryTaskDefinitionRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
+import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
+import org.springframework.cloud.dataflow.registry.AppRegistry;
+import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
+import org.springframework.cloud.dataflow.server.repository.InMemoryDeploymentIdRepository;
+import org.springframework.cloud.dataflow.server.repository.RdbmsTaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
+import org.springframework.cloud.dataflow.server.repository.support.DataflowRdbmsInitializer;
+import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskService;
+import org.springframework.cloud.dataflow.server.service.impl.TaskConfigurationProperties;
+import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.cloud.task.repository.TaskRepository;
 import org.springframework.cloud.task.repository.support.SimpleTaskExplorer;
@@ -28,13 +38,24 @@ import org.springframework.cloud.task.repository.support.TaskExecutionDaoFactory
 import org.springframework.cloud.task.repository.support.TaskRepositoryInitializer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
+
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * @author Glenn Renfro
  */
-
+@EnableTransactionManagement
 @Configuration
 public class TaskServiceDependencies {
+
+	@Autowired
+	DataSourceProperties dataSourceProperties;
 
 	@Bean
 	public TaskRepositoryInitializer taskExecutionRepository(DataSource dataSource) {
@@ -44,8 +65,8 @@ public class TaskServiceDependencies {
 	}
 
 	@Bean
-	public TaskDefinitionRepository taskDefinitionRepository() {
-		return new InMemoryTaskDefinitionRepository();
+	public TaskDefinitionRepository taskDefinitionRepository(DataSource dataSource) {
+		return new RdbmsTaskDefinitionRepository(dataSource);
 	}
 
 	@Bean
@@ -63,4 +84,54 @@ public class TaskServiceDependencies {
 		return new TaskExecutionDaoFactoryBean(dataSource);
 	}
 
+	@Bean
+	public AppRegistry appRegistry() {
+		return mock(AppRegistry.class);
+	}
+
+	@Bean
+	public ResourceLoader resourceLoader() {
+		ResourceLoader resourceLoader = mock(ResourceLoader.class);
+		when(resourceLoader.getResource(anyString())).thenReturn(mock(Resource.class));
+		return resourceLoader;
+	}
+
+	@Bean
+	TaskLauncher taskLauncher() {
+		return 	mock(TaskLauncher.class);
+
+	}
+
+	@Bean
+	ApplicationConfigurationMetadataResolver metadataResolver() {
+		return mock(ApplicationConfigurationMetadataResolver.class);
+	}
+
+	@Bean
+	public DataflowRdbmsInitializer definitionRepositoryInitializer(DataSource dataSource) {
+		DataflowRdbmsInitializer definitionRepositoryInitializer = new DataflowRdbmsInitializer(featuresProperties());
+		definitionRepositoryInitializer.setDataSource(dataSource);
+		return definitionRepositoryInitializer;
+	}
+
+	@Bean
+	public FeaturesProperties featuresProperties() {
+		return new FeaturesProperties();
+	}
+
+	@Bean
+	public DataSourceTransactionManager transactionManager(DataSource dataSource) {
+		return new DataSourceTransactionManager(dataSource);
+	}
+
+	@Bean
+	public DefaultTaskService defaultTaskService(TaskDefinitionRepository taskDefinitionRepository, TaskExplorer taskExplorer,
+			TaskRepository taskExecutionRepository, AppRegistry appRegistry,
+			ResourceLoader resourceLoader, TaskLauncher taskLauncher,
+			ApplicationConfigurationMetadataResolver metadataResolver) {
+		return new DefaultTaskService(dataSourceProperties, taskDefinitionRepository, taskExplorer,
+				taskExecutionRepository, appRegistry, resourceLoader, taskLauncher, metadataResolver,
+				new TaskConfigurationProperties(), new InMemoryDeploymentIdRepository(), null);
+
+	}
 }
