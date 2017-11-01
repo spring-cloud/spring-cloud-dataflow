@@ -68,6 +68,15 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.HttpStatusCodeException;
 
+import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_DEFAULT_API_VERSION;
+import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_DEFAULT_KIND;
+import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_DEFAULT_MAINTAINER;
+import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_PACKAGE_NAME;
+import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_PACKAGE_VERSION;
+import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_PLATFORM_NAME;
+import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_REPO_NAME;
+import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_STREAM_PREFIX;
+
 /**
  * Delegates to Skipper to deploy the stream.
  *
@@ -77,18 +86,6 @@ import org.springframework.web.client.HttpStatusCodeException;
  * @author Glenn Renfro
  */
 public class SkipperStreamDeployer implements StreamDeployer {
-
-	public static final String SKIPPER_KEY_PREFIX = "spring.cloud.dataflow.skipper";
-
-	public static final String SKIPPER_PACKAGE_NAME = SKIPPER_KEY_PREFIX + ".packageName";
-
-	public static final String SKIPPER_PACKAGE_VERSION = SKIPPER_KEY_PREFIX + ".packageVersion";
-
-	public static final String SKIPPER_PACKAGE_REPO_NAME = SKIPPER_KEY_PREFIX + ".repoName";
-
-	public static final String SKIPPER_PLATFORM_NAME = SKIPPER_KEY_PREFIX + ".platformName";
-
-	public static final String SKIPPER_ENABLED_PROPERTY_KEY = SKIPPER_KEY_PREFIX + ".enabled";
 
 	private static Log logger = LogFactory.getLog(SkipperStreamDeployer.class);
 
@@ -193,8 +190,7 @@ public class SkipperStreamDeployer implements StreamDeployer {
 		Map<StreamDefinition, DeploymentState> states = new HashMap<>();
 		for (StreamDefinition streamDefinition : streamDefinitions) {
 			try {
-				//todo: Better naming for the release name
-				Info info = this.skipperClient.status("my" + streamDefinition.getName());
+				Info info = this.skipperClient.status(SKIPPER_STREAM_PREFIX + streamDefinition.getName());
 				List<AppStatus> appStatusList = deserializeAppStatus(info.getStatus().getPlatformStatus());
 				Set<DeploymentState> deploymentStateList = appStatusList.stream().map(appStatus -> appStatus.getState())
 						.collect(Collectors.toSet());
@@ -214,7 +210,7 @@ public class SkipperStreamDeployer implements StreamDeployer {
 		return states;
 	}
 
-	public List<AppStatus> deserializeAppStatus(String platformStatus) {
+	public static List<AppStatus> deserializeAppStatus(String platformStatus) {
 		try {
 			ObjectMapper mapper = new ObjectMapper();
 			mapper.addMixIn(AppStatus.class, AppStatusMixin.class);
@@ -230,27 +226,27 @@ public class SkipperStreamDeployer implements StreamDeployer {
 			return result;
 		}
 		catch (Exception e) {
-			throw new IllegalArgumentException("Could not parse Skipper Platfrom Status JSON:" + platformStatus, e);
+			throw new IllegalArgumentException("Could not parse Skipper Platform Status JSON:" + platformStatus, e);
 		}
 	}
 
 	@Override
 	public void deployStream(StreamDeploymentRequest streamDeploymentRequest) {
-		logger.info("Deploying Stream " + streamDeploymentRequest.getStreamName() + " using skipper.");
 		Map<String, String> streamDeployerProperties = streamDeploymentRequest.getStreamDeployerProperties();
-		String repoName = streamDeployerProperties.get(SKIPPER_PACKAGE_REPO_NAME);
+		String packageVersion = streamDeployerProperties.get(SKIPPER_PACKAGE_VERSION);
+		Assert.isTrue(StringUtils.hasText(packageVersion), "Package Version must be set");
+		logger.info("Deploying Stream " + streamDeploymentRequest.getStreamName() + " using skipper.");
+		String repoName = streamDeployerProperties.get(SKIPPER_REPO_NAME);
 		repoName = (StringUtils.hasText(repoName)) ? (repoName) : "local";
 		String platformName = streamDeployerProperties.get(SKIPPER_PLATFORM_NAME);
 		platformName = (StringUtils.hasText(platformName)) ? platformName : "default";
 		String packageName = streamDeployerProperties.get(SKIPPER_PACKAGE_NAME);
 		packageName = (StringUtils.hasText(packageName)) ? packageName : streamDeploymentRequest.getStreamName();
-		String packageVersion = streamDeployerProperties.get(SKIPPER_PACKAGE_VERSION);
-		packageVersion = (StringUtils.hasText(packageVersion)) ? packageVersion : "1.0.0";
 		// Create the package .zip file to upload
 		File packageFile = createPackageForStream(packageName, packageVersion, streamDeploymentRequest);
 		// Upload the package
 		UploadRequest uploadRequest = new UploadRequest();
-		uploadRequest.setName(streamDeployerProperties.get(SKIPPER_PACKAGE_NAME));
+		uploadRequest.setName(packageName);
 		uploadRequest.setVersion(packageVersion);
 		uploadRequest.setExtension("zip");
 		uploadRequest.setRepoName(repoName); // TODO use from skipperDeploymentProperties if set.
@@ -271,8 +267,7 @@ public class SkipperStreamDeployer implements StreamDeployer {
 		installRequest.setPackageIdentifier(packageIdentifier);
 		InstallProperties installProperties = new InstallProperties();
 		installProperties.setPlatformName(platformName);
-		//todo: Better naming for the release name
-		String releaseName = "my" + streamName;
+		String releaseName = SKIPPER_STREAM_PREFIX + streamName;
 		installProperties.setReleaseName(releaseName);
 		installProperties.setConfigValues(new ConfigValues());
 		installRequest.setInstallProperties(installProperties);
@@ -307,11 +302,11 @@ public class SkipperStreamDeployer implements StreamDeployer {
 			streamDeploymentRequest) {
 		Package pkg = new Package();
 		PackageMetadata packageMetadata = new PackageMetadata();
-		packageMetadata.setApiVersion("skipper/v1");
-		packageMetadata.setKind("SpringBootApp");
+		packageMetadata.setApiVersion(SKIPPER_DEFAULT_API_VERSION);
+		packageMetadata.setKind(SKIPPER_DEFAULT_KIND);
 		packageMetadata.setName(packageName);
 		packageMetadata.setVersion(packageVersion);
-		packageMetadata.setMaintainer("dataflow");
+		packageMetadata.setMaintainer(SKIPPER_DEFAULT_MAINTAINER);
 		packageMetadata.setDescription(streamDeploymentRequest.getDslText());
 		pkg.setMetadata(packageMetadata);
 		pkg.setDependencies(createDependentPackages(packageVersion, streamDeploymentRequest));
@@ -333,11 +328,11 @@ public class SkipperStreamDeployer implements StreamDeployer {
 		String packageName = appDeploymentRequest.getDefinition().getName();
 
 		PackageMetadata packageMetadata = new PackageMetadata();
-		packageMetadata.setApiVersion("skipper/v1");
-		packageMetadata.setKind("SpringBootApp");
+		packageMetadata.setApiVersion(SKIPPER_DEFAULT_API_VERSION);
+		packageMetadata.setKind(SKIPPER_DEFAULT_KIND);
 		packageMetadata.setName(packageName);
 		packageMetadata.setVersion(packageVersion);
-		packageMetadata.setMaintainer("dataflow");
+		packageMetadata.setMaintainer(SKIPPER_DEFAULT_MAINTAINER);
 
 		pkg.setMetadata(packageMetadata);
 
@@ -384,16 +379,16 @@ public class SkipperStreamDeployer implements StreamDeployer {
 
 	@Override
 	public void undeployStream(String streamName) {
-		String releaseName = "my" + streamName;
+		String releaseName = SKIPPER_STREAM_PREFIX + streamName;
 		this.skipperClient.delete(releaseName);
 	}
 
-	public void upgradeStream(String name, String releaseName, PackageIdentifier packageIdentifier, String yaml) {
+	public void upgradeStream(String releaseName, PackageIdentifier packageIdentifier, String configYml) {
 		UpgradeRequest upgradeRequest = new UpgradeRequest();
 		upgradeRequest.setPackageIdentifier(packageIdentifier);
 		UpgradeProperties upgradeProperties = new UpgradeProperties();
 		ConfigValues configValues = new ConfigValues();
-		configValues.setRaw(yaml);
+		configValues.setRaw(configYml);
 		upgradeProperties.setConfigValues(configValues);
 		upgradeProperties.setReleaseName(releaseName);
 		upgradeRequest.setUpgradeProperties(upgradeProperties);

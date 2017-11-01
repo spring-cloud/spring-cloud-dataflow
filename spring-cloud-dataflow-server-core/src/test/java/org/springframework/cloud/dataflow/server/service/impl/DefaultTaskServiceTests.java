@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.dataflow.server.services.impl;
+package org.springframework.cloud.dataflow.server.service.impl;
 
 import java.lang.reflect.Method;
 import java.net.URI;
@@ -43,8 +43,6 @@ import org.springframework.cloud.dataflow.server.repository.InMemoryDeploymentId
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.TaskService;
-import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskService;
-import org.springframework.cloud.dataflow.server.service.impl.TaskConfigurationProperties;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.cloud.task.repository.TaskRepository;

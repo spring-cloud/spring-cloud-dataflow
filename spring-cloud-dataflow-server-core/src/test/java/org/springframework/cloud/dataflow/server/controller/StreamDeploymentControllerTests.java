@@ -19,7 +19,6 @@ package org.springframework.cloud.dataflow.server.controller;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.hamcrest.collection.IsMapContaining;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -30,23 +29,11 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
-import org.springframework.cloud.dataflow.configuration.metadata.BootApplicationConfigurationMetadataResolver;
-import org.springframework.cloud.dataflow.core.StreamAppDefinition;
-import org.springframework.cloud.dataflow.registry.AppRegistry;
-import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
-import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
-import org.springframework.cloud.dataflow.server.repository.StreamDeploymentRepository;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultStreamService;
-import org.springframework.cloud.deployer.spi.app.AppDeployer;
-import org.springframework.cloud.deployer.spi.core.AppDefinition;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.Resource;
 
-import static org.hamcrest.CoreMatchers.not;
 import static org.mockito.Mockito.verify;
-import static org.springframework.cloud.dataflow.server.stream.SkipperStreamDeployer.SKIPPER_ENABLED_PROPERTY_KEY;
+import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_ENABLED_PROPERTY_KEY;
 
 /**
  * Unit tests for StreamDeploymentController.
@@ -66,89 +53,17 @@ public class StreamDeploymentControllerTests {
 	private StreamDefinitionRepository streamDefinitionRepository;
 
 	@Mock
-	private DeploymentIdRepository deploymentIdRepository;
-
-	@Mock
-	private AppRegistry appRegistry;
-
-	@Mock
-	private AppDeployer appDeployer;
-
-	private ApplicationConfigurationMetadataResolver metadataResolver = new BootApplicationConfigurationMetadataResolver();
-
-	@Mock
-	private CommonApplicationProperties commonApplicationProperties;
-
-	@Mock
 	private DefaultStreamService defaultStreamService;
-
-	@Mock
-	private StreamDeploymentRepository streamDeploymentRepository;
 
 	@Before
 	public void setup() {
-		controller = new StreamDeploymentController(streamDefinitionRepository, deploymentIdRepository, appRegistry,
-				appDeployer, metadataResolver, commonApplicationProperties, streamDeploymentRepository,
-				defaultStreamService);
-	}
-
-	@Test
-	public void testRequalifyShortWhiteListedProperty() {
-		StreamAppDefinition appDefinition = new StreamAppDefinition.Builder().setRegisteredAppName("my-app")
-				.setProperty("timezone", "GMT+2").build("streamname");
-
-		Resource app = new ClassPathResource("/apps/whitelist-source");
-		AppDefinition modified = controller.mergeAndExpandAppProperties(appDefinition, app, new HashMap<>());
-
-		Assert.assertThat(modified.getProperties(), IsMapContaining.hasEntry("date.timezone", "GMT+2"));
-		Assert.assertThat(modified.getProperties(), not(IsMapContaining.hasKey("timezone")));
-	}
-
-	@Test
-	public void testSameNamePropertiesOKAsLongAsNotUsedAsShorthand() {
-		StreamAppDefinition appDefinition = new StreamAppDefinition.Builder().setRegisteredAppName("my-app")
-				.setProperty("time.format", "hh").setProperty("date.format", "yy").build("streamname");
-
-		Resource app = new ClassPathResource("/apps/whitelist-source");
-		AppDefinition modified = controller.mergeAndExpandAppProperties(appDefinition, app, new HashMap<>());
-
-		Assert.assertThat(modified.getProperties(), IsMapContaining.hasEntry("date.format", "yy"));
-		Assert.assertThat(modified.getProperties(), IsMapContaining.hasEntry("time.format", "hh"));
-	}
-
-	@Test
-	public void testSameNamePropertiesKOWhenShorthand() {
-		StreamAppDefinition appDefinition = new StreamAppDefinition.Builder().setRegisteredAppName("my-app")
-				.setProperty("format", "hh").build("streamname");
-
-		Resource app = new ClassPathResource("/apps/whitelist-source");
-
-		thrown.expect(IllegalArgumentException.class);
-		thrown.expectMessage("Ambiguous short form property 'format'");
-		thrown.expectMessage("date.format");
-		thrown.expectMessage("time.format");
-
-		controller.mergeAndExpandAppProperties(appDefinition, app, new HashMap<>());
-
-	}
-
-	@Test
-	public void testShorthandsAcceptRelaxedVariations() {
-		StreamAppDefinition appDefinition = new StreamAppDefinition.Builder().setRegisteredAppName("my-app")
-				.setProperty("someLongProperty", "yy") // Use camelCase here
-				.build("streamname");
-
-		Resource app = new ClassPathResource("/apps/whitelist-source");
-		AppDefinition modified = controller.mergeAndExpandAppProperties(appDefinition, app, new HashMap<>());
-
-		Assert.assertThat(modified.getProperties(), IsMapContaining.hasEntry("date.some-long-property", "yy"));
-
+		this.controller = new StreamDeploymentController(streamDefinitionRepository, defaultStreamService);
 	}
 
 	@Test
 	public void testDeployViaStreamService() {
 		Map<String, String> deploymentProperties = new HashMap<>();
-		deploymentProperties.put("useSkipper", "true");
+		deploymentProperties.put(SKIPPER_ENABLED_PROPERTY_KEY, "true");
 		this.controller.deploy("test", deploymentProperties);
 		ArgumentCaptor<String> argumentCaptor1 = ArgumentCaptor.forClass(String.class);
 		ArgumentCaptor<Map> argumentCaptor2 = ArgumentCaptor.forClass(Map.class);

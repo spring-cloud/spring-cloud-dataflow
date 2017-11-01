@@ -53,9 +53,11 @@ public interface StreamOperations {
 	 * @param definition the stream definition DSL
 	 * @param deploy whether to deploy the stream after creating its definition
 	 * @param useSkipper delegate the deployment of the stream to skipper
+	 * @param packageVersion the package version to use for this stream
 	 * @return the new stream definition
 	 */
-	StreamDefinitionResource createStream(String name, String definition, boolean deploy, boolean useSkipper);
+	StreamDefinitionResource createStream(String name, String definition, boolean deploy, boolean useSkipper,
+			String packageVersion);
 
 	/**
 	 * Deploy an already created stream.

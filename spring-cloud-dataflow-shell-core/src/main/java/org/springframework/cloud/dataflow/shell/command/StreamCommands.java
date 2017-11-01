@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.apache.commons.io.FilenameUtils;
+import org.springframework.cloud.dataflow.rest.SkipperStream;
 import org.yaml.snakeyaml.Yaml;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,6 +51,12 @@ import org.springframework.shell.table.TableBuilder;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
+
+import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_ENABLED_PROPERTY_KEY;
+import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_PACKAGE_NAME;
+import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_REPO_NAME;
+import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_PACKAGE_VERSION;
+import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_PLATFORM_NAME;
 
 /**
  * Stream commands.
@@ -87,8 +94,6 @@ public class StreamCommands implements CommandMarker {
 
 	private static final String YAML_FILE_OPTION = "yamlFile";
 
-	public static final String SKIPPER_KEY_PREFIX = "spring.cloud.dataflow.skipper";
-
 	@Autowired
 	private DataFlowShell dataFlowShell;
 
@@ -124,8 +129,12 @@ public class StreamCommands implements CommandMarker {
 			@CliOption(mandatory = true, key = { "definition" }, help = "a stream definition, using the DSL (e.g. "
 					+ "\"http --port=9000 | hdfs\")", optionContext = "disable-string-converter completion-stream") String dsl,
 			@CliOption(key = "deploy", help = "whether to deploy the stream immediately", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean deploy,
+			@CliOption(key = "packageVersion", help = "the package version of the package to deploy when using Skipper") String packageVersion,
 			@CliOption(key = "useSkipper", help = "whether to deploy the stream using skipper", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean useSkipper) {
-		streamOperations().createStream(name, dsl, deploy, useSkipper);
+		if (useSkipper) {
+			Assert.isTrue(StringUtils.hasText(packageVersion), "Package version must be set when using Skipper.");
+		}
+		streamOperations().createStream(name, dsl, deploy, useSkipper, packageVersion);
 		String message = String.format("Created new stream '%s'", name);
 		if (deploy) {
 			message += "\nDeployment request has been sent";
@@ -144,8 +153,8 @@ public class StreamCommands implements CommandMarker {
 			@CliOption(key = "useSkipper", help = "whether to deploy the stream using skipper",
 					unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean useSkipper,
 			@CliOption(key = "packageName", help = "the name of the package to deploy when using Skipper") String packageName,
-			@CliOption(key = "packageVersion", help = "the package version of the package to deploy when using "
-					+ "Skipper") String packageVersion,
+			@CliOption(key = "packageVersion", help = "the package version of the package to deploy "
+					+ "when using Skipper") String packageVersion,
 			@CliOption(key = "platformName", help = "the name of the target platform to deploy when using Skipper")
 					String platformName,
 			@CliOption(key = "repoName", help = "the name of the local repository to upload the package when using "
@@ -181,17 +190,15 @@ public class StreamCommands implements CommandMarker {
 			throw new AssertionError();
 		}
 		if (useSkipper) {
-			propertiesToUse.put("useSkipper", "true");
-			propertiesToUse.put(SKIPPER_KEY_PREFIX + "." + "packageName" ,
-					StringUtils.hasText(packageName) ? packageName : name);
-			Assert.isTrue(StringUtils.hasText(packageVersion), "Package version is required when deploying the stream"
-					+ " using Skipper.");
-			propertiesToUse.put(SKIPPER_KEY_PREFIX + "." + "packageVersion", packageVersion);
+			propertiesToUse.put(SKIPPER_ENABLED_PROPERTY_KEY, "true");
+			propertiesToUse.put(SKIPPER_PACKAGE_NAME , StringUtils.hasText(packageName) ? packageName : name);
+			Assert.isTrue(StringUtils.hasText(packageVersion), "Package version must be set when using Skipper.");
+			propertiesToUse.put(SKIPPER_PACKAGE_VERSION, packageVersion);
 			if (StringUtils.hasText(platformName)) {
-				propertiesToUse.put(SKIPPER_KEY_PREFIX + "." + "platformName", platformName);
+				propertiesToUse.put(SKIPPER_PLATFORM_NAME, platformName);
 			}
 			if (StringUtils.hasText(repoName)) {
-				propertiesToUse.put(SKIPPER_KEY_PREFIX + "." + "repoName", repoName);
+				propertiesToUse.put(SKIPPER_REPO_NAME, repoName);
 			}
 		}
 		else {
@@ -223,7 +230,7 @@ public class StreamCommands implements CommandMarker {
 			throws IOException {
 		assertMutuallyExclusiveFileAndProperties(yamlFile, properties);
 		String yamlConfigValues = getYamlConfigValues(yamlFile, properties);
-		String releaseName = "my" + name;
+		String releaseName = SkipperStream.SKIPPER_STREAM_PREFIX + name;
 		PackageIdentifier packageIdentifier = new PackageIdentifier();
 		packageIdentifier.setPackageName(name);
 		if (StringUtils.hasText(packageVersion)) {
