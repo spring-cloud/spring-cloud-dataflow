@@ -86,6 +86,56 @@ public class AppDeploymentRequestCreator {
 		this.whitelistProperties = new WhitelistProperties(metadataResolver);
 	}
 
+	public List<AppDeploymentRequest> createUpdateRequests(StreamDefinition streamDefinition,
+			Map<String, String> updateProperties) {
+		List<AppDeploymentRequest> appDeploymentRequests = new ArrayList<>();
+		if (updateProperties == null) {
+			updateProperties = Collections.emptyMap();
+		}
+		Iterator<StreamAppDefinition> iterator = streamDefinition.getDeploymentOrderIterator();
+		while (iterator.hasNext()) {
+			StreamAppDefinition currentApp = iterator.next();
+			ApplicationType type = DataFlowServerUtil.determineApplicationType(currentApp);
+			AppRegistration registration = this.appRegistry.find(currentApp.getRegisteredAppName(), type);
+			Assert.notNull(registration, String.format("no application '%s' of type '%s' exists in the registry",
+					currentApp.getName(), type));
+
+			String version = extractAppVersionProperty(currentApp, updateProperties);
+			List<String> commandlineArguments = new ArrayList<>();
+			if (version != null) {
+				commandlineArguments.add(version);
+			}
+			Map<String, String> appUpdateTimeProperties = extractAppProperties(currentApp, updateProperties);
+			Map<String, String> deployerDeploymentProperties = DeploymentPropertiesUtils
+					.extractAndQualifyDeployerProperties(updateProperties, currentApp.getName());
+
+			logger.info(String.format("Downloading resource URI [%s]", registration.getUri()));
+			Resource appResource = registration.getResource();
+			Resource metadataResource = registration.getMetadataResource();
+
+			Map<String, String> expandedAppUpdateTimeProperties = this.whitelistProperties
+					.qualifyProperties(appUpdateTimeProperties, metadataResource);
+
+			AppDefinition appDefinition = new AppDefinition(currentApp.getName(), expandedAppUpdateTimeProperties);
+
+			AppDeploymentRequest request = new AppDeploymentRequest(appDefinition, appResource,
+					deployerDeploymentProperties, commandlineArguments);
+
+			appDeploymentRequests.add(request);
+		}
+		return appDeploymentRequests;
+	}
+
+	private String extractAppVersionProperty(StreamAppDefinition appDefinition, Map<String, String> updateProperties) {
+		String versionPrefix = String.format("version.%s", appDefinition.getName());
+		for (Map.Entry<String, String> entry : updateProperties.entrySet()) {
+			if (entry.getKey().startsWith(versionPrefix)) {
+				return entry.getValue();
+			}
+		}
+		return null;
+	}
+
 	/**
 	 * Create a list of {@link AppDeploymentRequest}s from the provided
 	 * {@link StreamDefinition} and map of deployment properties.

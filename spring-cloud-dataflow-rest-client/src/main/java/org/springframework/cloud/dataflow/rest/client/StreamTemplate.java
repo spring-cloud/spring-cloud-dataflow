@@ -86,7 +86,6 @@ public class StreamTemplate implements StreamOperations {
 		return stream;
 	}
 
-
 	@Override
 	public void deploy(String name, Map<String, String> properties) {
 		restTemplate.postForObject(deploymentLink.expand(name).getHref(), properties, Object.class);
@@ -113,12 +112,15 @@ public class StreamTemplate implements StreamOperations {
 	}
 
 	@Override
-	public void updateStream(String streamName, String releaseName, PackageIdentifier packageIdentifier, String yaml) {
+	public void updateStream(String streamName, String releaseName, PackageIdentifier packageIdentifier,
+			Map<String, String> updateProperties) {
 		Assert.hasText(streamName, "Stream name cannot be null or empty");
 		Assert.notNull(packageIdentifier, "PackageIdentifier cannot be null");
 		Assert.hasText(packageIdentifier.getPackageName(), "Package Name cannot be null or empty");
 		Assert.hasText(releaseName, "Release name cannot be null or empty");
-		UpdateStreamRequest updateStreamRequest = new UpdateStreamRequest(releaseName, packageIdentifier, yaml);
+		Assert.notNull(updateProperties, "UpdateProperties cannot be null");
+		UpdateStreamRequest updateStreamRequest = new UpdateStreamRequest(releaseName, packageIdentifier,
+				updateProperties);
 		String url = deploymentsLink.getHref() + "/update/" + streamName;
 		restTemplate.postForObject(url, updateStreamRequest, Object.class);
 	}

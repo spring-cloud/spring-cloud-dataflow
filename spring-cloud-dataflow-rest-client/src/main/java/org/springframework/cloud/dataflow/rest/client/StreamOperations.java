@@ -84,9 +84,10 @@ public interface StreamOperations {
 	 * @param streamName the name of the stream to update
 	 * @param releaseName the corresponding release name of the stream in skipper
 	 * @param packageIdentifier the package that corresponds to this stream
-	 * @param yaml the values to change in the update
+	 * @param updateProperties a map of properties to use for updating the stream
 	 */
-	void updateStream(String streamName, String releaseName, PackageIdentifier packageIdentifier, String yaml);
+	void updateStream(String streamName, String releaseName, PackageIdentifier packageIdentifier,
+			Map<String, String> updateProperties);
 
 	/**
 	 * Queries the server for the stream definition

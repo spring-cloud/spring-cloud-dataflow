@@ -23,6 +23,8 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.yaml.snakeyaml.DumperOptions;
+import org.yaml.snakeyaml.Yaml;
 
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.StreamDeployment;
@@ -122,20 +124,61 @@ public class DefaultStreamService implements StreamService {
 	@Override
 	public void updateStream(String streamName, UpdateStreamRequest updateStreamRequest) {
 		updateStream(streamName, updateStreamRequest.getReleaseName(),
-				updateStreamRequest.getPackageIdentifier(), updateStreamRequest.getYaml());
+				updateStreamRequest.getPackageIdentifier(), updateStreamRequest.getUpdateProperties());
 	}
 
-	public void updateStream(String streamName, String releaseName, PackageIdentifier packageIdenfier, String yaml) {
+	public void updateStream(String streamName, String releaseName, PackageIdentifier packageIdenfier,
+			Map<String, String> updateProperties) {
 		StreamDeployment streamDeployment = this.streamDeploymentRepository.findOne(streamName);
 		if (streamDeployment == null) {
 			throw new NoSuchStreamDeploymentException(streamName);
 		}
 		if (streamDeployment.getDeployerName().equals(StreamDeployers.skipper.name())) {
+			String yaml = convertPropertiesToSkipperYaml(streamName, updateProperties);
 			this.skipperStreamDeployer.upgradeStream(releaseName, packageIdenfier, yaml);
 		}
 		else {
 			throw new IllegalStateException("Can only update stream when using the Skipper deployer.");
 		}
+	}
+
+	public String convertPropertiesToSkipperYaml(String streamName, Map<String, String> updateProperties) {
+		StreamDefinition streamDefinition = this.streamDefinitionRepository.findOne(streamName);
+		if (streamDefinition == null) {
+			throw new NoSuchStreamDefinitionException(streamName);
+		}
+
+		List<AppDeploymentRequest> appDeploymentRequests = this.appDeploymentRequestCreator
+				.createUpdateRequests(streamDefinition, updateProperties);
+		Map<String, Object> skipperConfigValuesMap = new HashMap<>();
+		for (AppDeploymentRequest appDeploymentRequest : appDeploymentRequests) {
+			boolean hasProps = false;
+			String appName = appDeploymentRequest.getDefinition().getName();
+			Map<String, Object> appMap = new HashMap<>();
+			Map<String, Object> specMap = new HashMap<>();
+			if (!appDeploymentRequest.getDefinition().getProperties().isEmpty()) {
+				hasProps = true;
+				specMap.put("applicationProperties", appDeploymentRequest.getDefinition().getProperties());
+			}
+			if (!appDeploymentRequest.getDeploymentProperties().isEmpty()) {
+				hasProps = true;
+				specMap.put("deploymentProperties", appDeploymentRequest.getDeploymentProperties());
+			}
+			if (hasProps) {
+				appMap.put("spec", specMap);
+			}
+			if (appDeploymentRequest.getCommandlineArguments().size() == 1) {
+				appMap.put("version", appDeploymentRequest.getCommandlineArguments().get(0));
+			}
+			if (appMap.size() != 0) {
+				skipperConfigValuesMap.put(appName, appMap);
+			}
+		}
+		DumperOptions dumperOptions = new DumperOptions();
+		dumperOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
+		dumperOptions.setPrettyFlow(true);
+		Yaml yaml = new Yaml(dumperOptions);
+		return yaml.dump(skipperConfigValuesMap);
 	}
 
 	private StreamDefinition createStreamDefinitionForDeploy(String name,
@@ -187,8 +230,8 @@ public class DefaultStreamService implements StreamService {
 				.filter(mapEntry -> !mapEntry.getKey().startsWith(SKIPPER_KEY_PREFIX))
 				.collect(Collectors.toMap(mapEntry -> mapEntry.getKey(), mapEntry -> mapEntry.getValue()));
 
-		List<AppDeploymentRequest> appDeploymentRequests = this.appDeploymentRequestCreator.createRequests
-				(streamDefinition, deploymentPropertiesToUse);
+		List<AppDeploymentRequest> appDeploymentRequests = this.appDeploymentRequestCreator
+				.createRequests(streamDefinition, deploymentPropertiesToUse);
 
 		if (skipperDeploymentProperties.containsKey(SKIPPER_ENABLED_PROPERTY_KEY)) {
 			this.skipperStreamDeployer.deployStream(new StreamDeploymentRequest(streamDefinition.getName(),

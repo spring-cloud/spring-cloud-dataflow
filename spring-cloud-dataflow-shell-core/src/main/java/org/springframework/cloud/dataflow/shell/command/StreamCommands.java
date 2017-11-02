@@ -226,14 +226,19 @@ public class StreamCommands implements CommandMarker {
 			@CliOption(key = {
 					"properties" }, help = "Flattened YAML style properties to update the stream", mandatory = false) String properties,
 			@CliOption(key = {
-					YAML_FILE_OPTION }, help = "the YAML file with values to update the stream", mandatory = false) File yamlFile,
+					PROPERTIES_FILE_OPTION }, help = "the properties for the stream update (as a File)", mandatory = false) File propertiesFile,
 			@CliOption(key = "packageVersion", help = "the package version of the package to update when using "
 					+ "Skipper") String packageVersion,
 			@CliOption(key = "repoName", help = "the name of the local repository to upload the package when using "
 					+ "Skipper") String repoName)
 			throws IOException {
-		assertMutuallyExclusiveFileAndProperties(yamlFile, properties);
-		String yamlConfigValues = getYamlConfigValues(yamlFile, properties);
+		int which = Assertions.atMostOneOf(PROPERTIES_OPTION, properties, PROPERTIES_FILE_OPTION,
+				propertiesFile);
+		Map<String, String> propertiesToUse = getDeploymentProperties(properties, propertiesFile, which);
+
+
+		//assertMutuallyExclusiveFileAndProperties(propertiesFile, properties);
+		//String yamlConfigValues = getYamlConfigValues(propertiesFile, properties);
 		PackageIdentifier packageIdentifier = new PackageIdentifier();
 		packageIdentifier.setPackageName(name);
 		if (StringUtils.hasText(packageVersion)) {
@@ -242,7 +247,7 @@ public class StreamCommands implements CommandMarker {
 		if (StringUtils.hasText(repoName)) {
 			packageIdentifier.setRepositoryName(repoName);
 		}
-		streamOperations().updateStream(name, name, packageIdentifier, yamlConfigValues);
+		streamOperations().updateStream(name, name, packageIdentifier, propertiesToUse);
 		return String.format("Update request has been sent for stream '%s'", name);
 	}
 
