@@ -1,0 +1,9 @@
+log:
+  version: 1.1.1.RELEASE
+  spec:
+    applicationProperties:
+      server.port: '9999'
+      log.level: ERROR
+      endpoints.sensitive: 'false'
+    deploymentProperties:
+      spring.cloud.deployer.memory: 4096m

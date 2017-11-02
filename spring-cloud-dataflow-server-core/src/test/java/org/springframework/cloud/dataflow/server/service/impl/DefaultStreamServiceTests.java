@@ -42,7 +42,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.Assert;
 
 import static junit.framework.TestCase.fail;
-import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -81,7 +80,9 @@ public class DefaultStreamServiceTests {
 
 	private List<StreamDefinition> skipperStreamDefinitions = new ArrayList<>();
 
-	private StreamDeploymentRepository streamDeploymentRepository ;
+	private StreamDeploymentRepository streamDeploymentRepository;
+
+	private StreamDefinitionRepository streamDefinitionRepository;
 
 	private AppDeployerStreamDeployer appDeployerStreamDeployer;
 
@@ -91,11 +92,15 @@ public class DefaultStreamServiceTests {
 
 	private DefaultStreamService defaultStreamService;
 
+	private AppRegistry appRegistry;
+
 	@Before
 	public void setupMock() {
 		this.streamDeploymentRepository = mock(StreamDeploymentRepository.class);
+		this.streamDefinitionRepository = mock(StreamDefinitionRepository.class);
 		this.appDeployerStreamDeployer = mock(AppDeployerStreamDeployer.class);
 		this.skipperStreamDeployer = mock(SkipperStreamDeployer.class);
+		this.appRegistry = mock(AppRegistry.class);
 		this.appDeploymentRequestCreator = new AppDeploymentRequestCreator(mock(AppRegistry.class),
 				mock(CommonApplicationProperties.class),
 				new BootApplicationConfigurationMetadataResolver());
@@ -108,18 +113,10 @@ public class DefaultStreamServiceTests {
 		this.streamDefinitionList.add(streamDefinition3);
 		this.skipperStreamDefinitions.add(streamDefinition2);
 		this.skipperStreamDefinitions.add(streamDefinition3);
+		when(streamDefinitionRepository.findOne("test2")).thenReturn(streamDefinition2);
 		when(streamDeploymentRepository.findOne(streamDeployment1.getStreamName())).thenReturn(streamDeployment1);
 		when(streamDeploymentRepository.findOne(streamDeployment2.getStreamName())).thenReturn(streamDeployment2);
 		when(streamDeploymentRepository.findOne(streamDeployment3.getStreamName())).thenReturn(streamDeployment3);
-	}
-
-	@Test
-	public void verifyUpgradeStream() {
-		this.defaultStreamService.updateStream(streamDeployment2.getStreamName(), streamDeployment2.getReleaseName(),
-				null, null);
-		verify(this.skipperStreamDeployer, times(1)).upgradeStream(this.streamDeployment2.getReleaseName(), null, null);
-		verifyNoMoreInteractions(this.skipperStreamDeployer);
-		verify(this.appDeployerStreamDeployer, never()).deployStream(any());
 	}
 
 	@Test
@@ -145,7 +142,8 @@ public class DefaultStreamServiceTests {
 	@Test
 	public void verifyAppDeployerUpgrade() {
 		try {
-			this.defaultStreamService.updateStream(this.streamDeployment1.getStreamName(), this.streamDeployment1.getReleaseName(),
+			this.defaultStreamService.updateStream(this.streamDeployment1.getStreamName(),
+					this.streamDeployment1.getReleaseName(),
 					null, null);
 			fail("IllegalStateException is expected to be thrown.");
 		}
@@ -166,10 +164,12 @@ public class DefaultStreamServiceTests {
 		when(this.skipperStreamDeployer.state(this.skipperStreamDefinitions)).thenReturn(skipperDeployerStates);
 		Map<StreamDefinition, DeploymentState> states = this.defaultStreamService.state(this.streamDefinitionList);
 		Assert.isTrue(states.size() == 3, "Deployment states size mismatch");
-		Assert.isTrue(states.get(this.streamDefinition1).equals(DeploymentState.deployed), "Deployment state is incorrect");
+		Assert.isTrue(states.get(this.streamDefinition1).equals(DeploymentState.deployed),
+				"Deployment state is incorrect");
 		Assert.isTrue(states.get(this.streamDefinition2).equals(DeploymentState.undeployed),
 				"Deployment state is incorrect");
-		Assert.isTrue(states.get(this.streamDefinition3).equals(DeploymentState.failed), "Deployment state is incorrect");
+		Assert.isTrue(states.get(this.streamDefinition3).equals(DeploymentState.failed),
+				"Deployment state is incorrect");
 	}
 
 }

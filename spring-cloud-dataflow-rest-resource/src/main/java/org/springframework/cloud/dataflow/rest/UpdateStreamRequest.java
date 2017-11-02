@@ -17,8 +17,10 @@ package org.springframework.cloud.dataflow.rest;
 
 import org.springframework.cloud.skipper.domain.PackageIdentifier;
 
+import java.util.Map;
+
 /**
- * Caputures the required data for updating a stream using Skipper.
+ * Captures the required data for updating a stream using Skipper.
  * @author Mark Pollack
  */
 public class UpdateStreamRequest {
@@ -27,15 +29,17 @@ public class UpdateStreamRequest {
 
 	private PackageIdentifier packageIdentifier;
 
-	private String yaml;
+	private Map<String, String> updateProperties;
 
 	public UpdateStreamRequest() {
 	}
+	
 
-	public UpdateStreamRequest(String releaseName, PackageIdentifier packageIdentifier, String yaml) {
+	public UpdateStreamRequest(String releaseName, PackageIdentifier packageIdentifier,
+			Map<String, String> updateProperties) {
 		this.releaseName = releaseName;
 		this.packageIdentifier = packageIdentifier;
-		this.yaml = yaml;
+		this.updateProperties = updateProperties;
 	}
 
 	public String getReleaseName() {
@@ -54,12 +58,12 @@ public class UpdateStreamRequest {
 		this.packageIdentifier = packageIdentifier;
 	}
 
-	public String getYaml() {
-		return yaml;
+	public Map<String, String> getUpdateProperties() {
+		return updateProperties;
 	}
 
-	public void setYaml(String yaml) {
-		this.yaml = yaml;
+	public void setUpdateProperties(Map<String, String> updateProperties) {
+		this.updateProperties = updateProperties;
 	}
 
 	@Override
@@ -67,7 +71,7 @@ public class UpdateStreamRequest {
 		return "UpdateStreamRequest{" +
 				"releaseName='" + releaseName + '\'' +
 				", packageIdentifier=" + packageIdentifier +
-				", yaml='" + yaml + '\'' +
+				", updateProperties=" + updateProperties +
 				'}';
 	}
 }
