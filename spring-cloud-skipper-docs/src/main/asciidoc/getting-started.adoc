@@ -99,7 +99,8 @@ skipper:>status --release-name helloworld-local
 ║               │[helloworld-local.helloworld-v1], State = [helloworld-local.helloworld-v1-0=deployed]║
 ╚═══════════════╧═════════════════════════════════════════════════════════════════════════════════════╝
 ----
-Let's upgrade the release. The `1.0.1` package refers to a newly released application that changed the default value of the greeting to be in Portugese`.
+Let's upgrade the release. The `1.0.1` package refers to a newly released application that changed the default value
+of the greeting to be in `Portuguese`.
 
 [source,bash,options="nowrap"]
 ----
@@ -116,7 +117,7 @@ skipper:>status --release-name helloworld-local
 ║Last Deployed  │Fri Oct 27 16:20:07 IST 2017                                                         ║
 ║Status         │DEPLOYED                                                                             ║
 ║Platform Status│All applications have been successfully deployed.                                    ║
-║               │[helloworld-local.helloworld-v1], State = [helloworld-local.helloworld-v1-0=deployed]║
+║               │[helloworld-local.helloworld-v2], State = [helloworld-local.helloworld-v2-0=deployed]║
 ╚═══════════════╧═════════════════════════════════════════════════════════════════════════════════════╝
 ----
 
