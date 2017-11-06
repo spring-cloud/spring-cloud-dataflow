@@ -23,7 +23,6 @@ import org.slf4j.LoggerFactory;
 
 import org.springframework.cloud.skipper.ReleaseNotFoundException;
 import org.springframework.cloud.skipper.SkipperException;
-import org.springframework.cloud.skipper.domain.ConfigValues;
 import org.springframework.cloud.skipper.domain.Info;
 import org.springframework.cloud.skipper.domain.InstallProperties;
 import org.springframework.cloud.skipper.domain.InstallRequest;
@@ -318,9 +317,7 @@ public class ReleaseService {
 		newRollbackRelease.setManifest(releaseToRollback.getManifest());
 		newRollbackRelease.setVersion(currentRelease.getVersion() + 1);
 		newRollbackRelease.setPlatformName(releaseToRollback.getPlatformName());
-		ConfigValues configValues = new ConfigValues();
-		configValues.setRaw(releaseToRollback.getManifest());
-		newRollbackRelease.setConfigValues(configValues);
+		newRollbackRelease.setConfigValues(releaseToRollback.getConfigValues());
 		newRollbackRelease.setInfo(createNewInfo());
 		if (currentRelease.getInfo().getStatus().getStatusCode().equals(StatusCode.DELETED)) {
 			// Since the current release is not deployed, we just do a new install.

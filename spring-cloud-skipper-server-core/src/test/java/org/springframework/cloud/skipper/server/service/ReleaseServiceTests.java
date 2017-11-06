@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.skipper.ReleaseNotFoundException;
 import org.springframework.cloud.skipper.SkipperException;
+import org.springframework.cloud.skipper.domain.ConfigValues;
 import org.springframework.cloud.skipper.domain.Info;
 import org.springframework.cloud.skipper.domain.InstallProperties;
 import org.springframework.cloud.skipper.domain.InstallRequest;
@@ -224,7 +225,11 @@ public class ReleaseServiceTests extends AbstractIntegrationTest {
 	public void testRollbackDeletedRelease() throws InterruptedException {
 		String releaseName = "rollbackDeletedRelease";
 		InstallRequest installRequest = new InstallRequest();
-		installRequest.setInstallProperties(createInstallProperties(releaseName));
+		InstallProperties installProperties = createInstallProperties(releaseName);
+		ConfigValues installConfig = new ConfigValues();
+		installConfig.setRaw("log:\n  version: 1.2.0.RC1\ntime:\n  version: 1.2.0.RC1\n");
+		installProperties.setConfigValues(installConfig);
+		installRequest.setInstallProperties(installProperties);
 		PackageIdentifier packageIdentifier = new PackageIdentifier();
 		packageIdentifier.setPackageName("log");
 		packageIdentifier.setPackageVersion("1.0.0");
@@ -239,6 +244,9 @@ public class ReleaseServiceTests extends AbstractIntegrationTest {
 		// Upgrade
 		UpgradeProperties upgradeProperties = new UpgradeProperties();
 		upgradeProperties.setReleaseName(releaseName);
+		ConfigValues upgradeConfig = new ConfigValues();
+		upgradeConfig.setRaw("log:\n  version: 1.2.0.RELEASE\ntime:\n  version: 1.2.0.RELEASE\n");
+		upgradeProperties.setConfigValues(upgradeConfig);
 		UpgradeRequest upgradeRequest = new UpgradeRequest();
 		upgradeRequest.setUpgradeProperties(upgradeProperties);
 		packageIdentifier = new PackageIdentifier();
@@ -251,6 +259,7 @@ public class ReleaseServiceTests extends AbstractIntegrationTest {
 		Release upgradedRelease = upgrade(upgradeRequest);
 
 		assertThat(upgradedRelease.getVersion()).isEqualTo(2);
+		assertThat(upgradedRelease.getConfigValues()).isEqualTo(upgradeRequest.getUpgradeProperties().getConfigValues());
 		this.appDeployerDataRepository.findByReleaseNameAndReleaseVersionRequired(releaseName, 2);
 
 		// Delete
@@ -265,6 +274,7 @@ public class ReleaseServiceTests extends AbstractIntegrationTest {
 		Release rolledBackRelease = rollback(releaseName, 0);
 
 		assertThat(rolledBackRelease.getManifest()).isEqualTo(release.getManifest());
+		assertThat(rolledBackRelease.getConfigValues().getRaw()).isEqualTo(release.getConfigValues().getRaw());
 		assertThat(rolledBackRelease.getInfo().getStatus().getStatusCode().equals(StatusCode.DEPLOYED));
 
 		deletedRelease = releaseRepository.findByNameAndVersion(releaseName, 2);
