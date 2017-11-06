@@ -29,8 +29,6 @@ import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.TestPropertySource;
 import org.zeroturnaround.zip.ZipUtil;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,6 +47,8 @@ import org.springframework.cloud.skipper.domain.UploadRequest;
 import org.springframework.cloud.skipper.io.DefaultPackageReader;
 import org.springframework.cloud.skipper.io.PackageReader;
 import org.springframework.cloud.skipper.io.TempFileUtils;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.StreamUtils;
 
@@ -123,7 +123,14 @@ public class DefaultStreamServiceIntegrationTests {
 		String expectedYaml = StreamUtils.copyToString(
 				TestResourceUtils.qualifiedResource(getClass(), "install.yml").getInputStream(),
 				Charset.defaultCharset());
-		assertThat(pkg.getDependencies().get(0).getConfigValues().getRaw()).isEqualTo(expectedYaml);
+		Package logPackage = null;
+		for (Package subpkg: pkg.getDependencies()) {
+			if (subpkg.getMetadata().getName().equals("log")) {
+				logPackage = subpkg;
+			}
+		}
+		assertThat(logPackage).isNotNull();
+		assertThat(logPackage.getConfigValues().getRaw()).isEqualTo(expectedYaml);
 	}
 
 	private Map<String, String> createSkipperDeploymentProperties() {
