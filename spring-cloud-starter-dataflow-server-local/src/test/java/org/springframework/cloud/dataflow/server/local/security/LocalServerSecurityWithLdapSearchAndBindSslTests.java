@@ -16,6 +16,7 @@
 package org.springframework.cloud.dataflow.server.local.security;
 
 import org.junit.ClassRule;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.rules.RuleChain;
 import org.junit.rules.TestRule;
@@ -32,6 +33,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Marius Bogoevici
  * @author Gunnar Hillert
  */
+@Ignore("ssl tests unreliable, see gh1764")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 public class LocalServerSecurityWithLdapSearchAndBindSslTests {
 
