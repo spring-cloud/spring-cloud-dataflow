@@ -141,7 +141,7 @@ public class TaskExecutionController {
 	public long launch(@RequestParam("name") String taskName, @RequestParam(required = false) String properties,
 			@RequestParam(required = false) List<String> arguments) {
 		Map<String, String> propertiesToUse = DeploymentPropertiesUtils.parse(properties);
-		DeploymentPropertiesUtils.ensureJustDeploymentProperties(propertiesToUse);
+		DeploymentPropertiesUtils.validateDeploymentProperties(propertiesToUse);
 		return this.taskService.executeTask(taskName, propertiesToUse,
 				DeploymentPropertiesUtils.parseParams(arguments));
 	}

@@ -156,14 +156,21 @@ public class AppDeploymentRequestCreator {
 			StreamAppDefinition currentApp = iterator.next();
 			ApplicationType type = DataFlowServerUtil.determineApplicationType(currentApp);
 
-			AppRegistration registration = this.appRegistry.find(currentApp.getRegisteredAppName(), type);
-			Assert.notNull(registration, String.format("no application '%s' of type '%s' exists in the registry",
+			AppRegistration appRegistration = this.appRegistry.find(currentApp.getRegisteredAppName(), type);
+			Assert.notNull(appRegistration, String.format("no application '%s' of type '%s' exists in the registry",
 					currentApp.getName(), type));
 
 			Map<String, String> appDeployTimeProperties = extractAppProperties(currentApp, streamDeploymentProperties);
 			Map<String, String> deployerDeploymentProperties = DeploymentPropertiesUtils
 					.extractAndQualifyDeployerProperties(streamDeploymentProperties, currentApp.getName());
 			deployerDeploymentProperties.put(AppDeployer.GROUP_PROPERTY_KEY, currentApp.getStreamName());
+
+			String version = extractAppVersionProperty(currentApp, streamDeploymentProperties);
+			List<String> commandlineArguments = new ArrayList<>();
+			if (version != null) {
+				//TODO ensure new version as a resource exists and load that AppRegistration
+				commandlineArguments.add(version);
+			}
 
 			boolean upstreamAppSupportsPartition = upstreamAppHasPartitionInfo(streamDefinition, currentApp,
 					streamDeploymentProperties);
@@ -189,9 +196,9 @@ public class AppDeploymentRequestCreator {
 			nextAppCount = getInstanceCount(deployerDeploymentProperties);
 			isDownStreamAppPartitioned = isPartitionedConsumer(appDeployTimeProperties, upstreamAppSupportsPartition);
 
-			logger.info(String.format("Downloading resource URI [%s]", registration.getUri()));
-			Resource appResource = registration.getResource();
-			Resource metadataResource = registration.getMetadataResource();
+			logger.info(String.format("Downloading resource URI [%s]", appRegistration.getUri()));
+			Resource appResource = appRegistration.getResource();
+			Resource metadataResource = appRegistration.getMetadataResource();
 
 			// add properties needed for metrics system
 			appDeployTimeProperties.put(DataFlowPropertyKeys.STREAM_NAME, currentApp.getStreamName());
@@ -207,11 +214,10 @@ public class AppDeploymentRequestCreator {
 					appDeployTimeProperties);
 
 			AppDeploymentRequest request = new AppDeploymentRequest(revisedDefinition, appResource,
-					deployerDeploymentProperties);
+					deployerDeploymentProperties, commandlineArguments);
 
 			appDeploymentRequests.add(request);
 		}
-		DeploymentPropertiesUtils.ensureJustDeploymentProperties(streamDeploymentProperties);
 		return appDeploymentRequests;
 	}
 

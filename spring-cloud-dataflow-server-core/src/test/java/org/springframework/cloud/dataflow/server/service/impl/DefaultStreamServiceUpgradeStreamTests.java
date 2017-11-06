@@ -75,8 +75,7 @@ public class DefaultStreamServiceUpgradeStreamTests {
 				null, null);
 		verify(this.skipperStreamDeployer, times(1))
 				.upgradeStream(this.streamDeployment2.getReleaseName(),
-						null,
-						"{\n  }\n");
+						null, "");
 		verifyNoMoreInteractions(this.skipperStreamDeployer);
 		verify(this.appDeployerStreamDeployer, never()).deployStream(any());
 	}

@@ -61,7 +61,8 @@ public class StreamDeploymentController {
 	 * Create a {@code StreamDeploymentController} that delegates
 	 * <ul>
 	 * <li>CRUD operations to the provided {@link StreamDefinitionRepository}</li>
-	 * <li>deployment operations to the provided {@link AppDeployer} via {@link StreamService}</li>
+	 * <li>deployment operations to the provided {@link AppDeployer} via
+	 * {@link StreamService}</li>
 	 * </ul>
 	 *
 	 * @param repository the repository this controller will use for stream CRUD operations
@@ -101,10 +102,7 @@ public class StreamDeploymentController {
 	}
 
 	/**
-	 * Request deployment of an existing stream definition.  If the properties
-	 * contains the property useSkipper=true  then this property will
-	 * be replaced with the property spring.cloud.dataflow.skipper.enabled=true.
-	 *
+	 * Request deployment of an existing stream definition.
 	 * @param name the name of an existing stream definition (required)
 	 * @param properties the deployment properties for the stream as a comma-delimited list of
 	 * key=value pairsef

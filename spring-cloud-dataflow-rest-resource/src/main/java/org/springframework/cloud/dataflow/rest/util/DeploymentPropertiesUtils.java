@@ -53,14 +53,14 @@ public final class DeploymentPropertiesUtils {
 	}
 
 	/**
-	 * Parses a String comprised of 0 or more comma-delimited key=value pairs where each
-	 * key has the format: {@code app.[appname].[key]} or
-	 * {@code deployer.[appname].[key]}. Values may themselves contain commas, since the
-	 * split points will be based upon the key pattern.
+	 * Parses a String comprised of 0 or more comma-delimited key=value pairs where each key
+	 * has the format: {@code app.[appname].[key]} or {@code deployer.[appname].[key]}. Values
+	 * may themselves contain commas, since the split points will be based upon the key
+	 * pattern.
 	 * <p>
-	 * Logic of parsing key/value pairs from a string is based on few rules and
-	 * assumptions 1. keys will not have commas or equals. 2. First raw split is done by
-	 * commas which will need to be fixed later if value is a comma-delimited list.
+	 * Logic of parsing key/value pairs from a string is based on few rules and assumptions 1.
+	 * keys will not have commas or equals. 2. First raw split is done by commas which will
+	 * need to be fixed later if value is a comma-delimited list.
 	 *
 	 * @param s the string to parse
 	 * @return the Map of parsed key value pairs
@@ -96,13 +96,13 @@ public final class DeploymentPropertiesUtils {
 	}
 
 	/**
-	 * Ensure that deployment properties doesn't have keys not starting with either
-	 * {@code app.} or {@code deployer.}. In case non supported key is found
-	 * {@link IllegalArgumentException} is thrown.
+	 * Ensure that deployment properties only have keys starting with {@code app.} or
+	 * {@code deployer.}. In case non supported key is found {@link IllegalArgumentException}
+	 * is thrown.
 	 *
 	 * @param properties the properties to check
 	 */
-	public static void ensureJustDeploymentProperties(Map<String, String> properties) {
+	public static void validateDeploymentProperties(Map<String, String> properties) {
 		if (properties == null) {
 			return;
 		}
@@ -116,9 +116,30 @@ public final class DeploymentPropertiesUtils {
 	}
 
 	/**
-	 * Retain only properties that are meant for the <em>deployer</em> of a given app
-	 * (those that start with {@code deployer.[appname]} or {@code deployer.*}) and
-	 * qualify all property values with the {@code spring.cloud.deployer.} prefix.
+	 * Ensure that deployment properties only have keys starting with {@code app.},
+	 * {@code deployer.} or {@code version.}. In case non supported key is found
+	 * {@link IllegalArgumentException} is thrown.
+	 *
+	 * @param properties the properties to check
+	 */
+	public static void validateSkipperDeploymentProperties(Map<String, String> properties) {
+		if (properties == null) {
+			return;
+		}
+		for (Entry<String, String> property : properties.entrySet()) {
+			String key = property.getKey();
+			if (!key.startsWith("app.") && !key.startsWith("deployer.") && !key.startsWith("version.")) {
+				throw new IllegalArgumentException(
+						"Only deployment property keys starting with 'app.' or 'deployer.'  or 'version.'" +
+								" allowed, got '" + key + "'");
+			}
+		}
+	}
+
+	/**
+	 * Retain only properties that are meant for the <em>deployer</em> of a given app (those
+	 * that start with {@code deployer.[appname]} or {@code deployer.*}) and qualify all
+	 * property values with the {@code spring.cloud.deployer.} prefix.
 	 *
 	 * @param input the deplopyment properties
 	 * @param appName the app name
@@ -186,8 +207,8 @@ public final class DeploymentPropertiesUtils {
 	}
 
 	/**
-	 * Returns a String representation of deployment properties as a comma separated list
-	 * of key=value pairs.
+	 * Returns a String representation of deployment properties as a comma separated list of
+	 * key=value pairs.
 	 *
 	 * @param properties the properties to format
 	 * @return the properties formatted as a String
@@ -204,8 +225,8 @@ public final class DeploymentPropertiesUtils {
 	}
 
 	/**
-	 * Convert Properties to a Map with String keys and values. Entries whose key or value
-	 * is not a String are omitted.
+	 * Convert Properties to a Map with String keys and values. Entries whose key or value is
+	 * not a String are omitted.
 	 *
 	 * @param properties the properties object
 	 * @return the equivalent {@code Map<String,String>}
@@ -233,8 +254,8 @@ public final class DeploymentPropertiesUtils {
 	}
 
 	/**
-	 * Parses a list of command line parameters and returns a list of parameters which
-	 * doesn't contain any special quoting either for values or whole parameter.
+	 * Parses a list of command line parameters and returns a list of parameters which doesn't
+	 * contain any special quoting either for values or whole parameter.
 	 *
 	 * @param params the params
 	 * @return the list

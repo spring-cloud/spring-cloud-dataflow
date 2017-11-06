@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 
@@ -174,11 +175,15 @@ public class DefaultStreamService implements StreamService {
 				skipperConfigValuesMap.put(appName, appMap);
 			}
 		}
-		DumperOptions dumperOptions = new DumperOptions();
-		dumperOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
-		dumperOptions.setPrettyFlow(true);
-		Yaml yaml = new Yaml(dumperOptions);
-		return yaml.dump(skipperConfigValuesMap);
+		if (!skipperConfigValuesMap.isEmpty()) {
+			DumperOptions dumperOptions = new DumperOptions();
+			dumperOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
+			dumperOptions.setPrettyFlow(true);
+			Yaml yaml = new Yaml(dumperOptions);
+			return yaml.dump(skipperConfigValuesMap);
+		} else {
+			return "";
+		}
 	}
 
 	private StreamDefinition createStreamDefinitionForDeploy(String name,
@@ -233,11 +238,14 @@ public class DefaultStreamService implements StreamService {
 		List<AppDeploymentRequest> appDeploymentRequests = this.appDeploymentRequestCreator
 				.createRequests(streamDefinition, deploymentPropertiesToUse);
 
+
 		if (skipperDeploymentProperties.containsKey(SKIPPER_ENABLED_PROPERTY_KEY)) {
+			DeploymentPropertiesUtils.validateSkipperDeploymentProperties(deploymentPropertiesToUse);
 			this.skipperStreamDeployer.deployStream(new StreamDeploymentRequest(streamDefinition.getName(),
 					streamDefinition.getDslText(), appDeploymentRequests, skipperDeploymentProperties));
 		}
 		else {
+			DeploymentPropertiesUtils.validateDeploymentProperties(deploymentPropertiesToUse);
 			this.appDeployerStreamDeployer.deployStream(new StreamDeploymentRequest(streamDefinition.getName(),
 					streamDefinition.getDslText(), appDeploymentRequests, new HashMap<>()));
 		}

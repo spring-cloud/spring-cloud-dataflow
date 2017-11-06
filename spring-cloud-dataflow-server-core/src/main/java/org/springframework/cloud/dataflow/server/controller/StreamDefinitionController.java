@@ -84,9 +84,9 @@ public class StreamDefinitionController {
 	private static final Logger logger = LoggerFactory.getLogger(StreamDefinitionController.class);
 
 	/**
-	 * The repository this controller will use for stream CRUD operations.
+	 * The streamDefinitionRepository this controller will use for stream CRUD operations.
 	 */
-	private final StreamDefinitionRepository repository;
+	private final StreamDefinitionRepository streamDefinitionRepository;
 
 	/**
 	 * The app registry this controller will use to lookup apps.
@@ -105,7 +105,8 @@ public class StreamDefinitionController {
 	 * <li>deployment operations and status computation via {@link StreamService}</li>
 	 * </ul>
 	 *
-	 * @param repository the repository this controller will use for stream CRUD operations
+	 * @param repository the streamDefinitionRepository this controller will use for stream
+	 * CRUD operations
 	 * @param appRegistry the app registry to look up registered apps
 	 * @param streamService the stream service to use to delegate stream operations such as
 	 * deploy/status.
@@ -115,7 +116,7 @@ public class StreamDefinitionController {
 		Assert.notNull(repository, "StreamDefinitionRepository must not be null");
 		Assert.notNull(appRegistry, "AppRegistry must not be null");
 		Assert.notNull(streamService, "StreamService must not be null");
-		this.repository = repository;
+		this.streamDefinitionRepository = repository;
 		this.appRegistry = appRegistry;
 		this.streamService = streamService;
 	}
@@ -130,7 +131,7 @@ public class StreamDefinitionController {
 		if (states.size() == 1) {
 			DeploymentState state = states.iterator().next();
 			logger.debug("aggregateState: Deployment State Set Size = 1.  Deployment State " + state);
-			// a stream which is known to the stream definition repository
+			// a stream which is known to the stream definition streamDefinitionRepository
 			// but unknown to deployers is undeployed
 			if (state == DeploymentState.unknown) {
 				logger.debug("aggregateState: Returning " + DeploymentState.undeployed);
@@ -174,14 +175,14 @@ public class StreamDefinitionController {
 		if (search != null) {
 			final SearchPageable searchPageable = new SearchPageable(pageable, search);
 			searchPageable.addColumns("DEFINITION_NAME", "DEFINITION");
-			streamDefinitions = repository.search(searchPageable);
+			streamDefinitions = streamDefinitionRepository.search(searchPageable);
 			long count = streamDefinitions.getContent().size();
 			long to = Math.min(count, pageable.getOffset() + pageable.getPageSize());
 			streamDefinitions = new PageImpl<>(streamDefinitions.getContent(), pageable,
 					streamDefinitions.getTotalElements());
 		}
 		else {
-			streamDefinitions = repository.findAll(pageable);
+			streamDefinitions = streamDefinitionRepository.findAll(pageable);
 		}
 		return assembler.toResource(streamDefinitions, new Assembler(streamDefinitions));
 	}
@@ -203,15 +204,15 @@ public class StreamDefinitionController {
 	@ResponseStatus(HttpStatus.CREATED)
 	public StreamDefinitionResource save(@RequestParam("name") String name, @RequestParam("definition") String dsl,
 			@RequestParam(value = "deploy", defaultValue = "false") boolean deploy) {
-		StreamDefinition stream;
+		StreamDefinition streamDefinition;
 		try {
-			stream = new StreamDefinition(name, dsl);
+			streamDefinition = new StreamDefinition(name, dsl);
 		}
 		catch (ParseException ex) {
 			throw new InvalidStreamDefinitionException(ex.getMessage());
 		}
 		List<String> errorMessages = new ArrayList<>();
-		for (StreamAppDefinition streamAppDefinition : stream.getAppDefinitions()) {
+		for (StreamAppDefinition streamAppDefinition : streamDefinition.getAppDefinitions()) {
 			final String appName = streamAppDefinition.getRegisteredAppName();
 			final ApplicationType appType;
 			try {
@@ -232,11 +233,11 @@ public class StreamDefinitionController {
 			throw new InvalidStreamDefinitionException(
 					StringUtils.collectionToDelimitedString(errorMessages, "\n"));
 		}
-		this.repository.save(stream);
+		this.streamDefinitionRepository.save(streamDefinition);
 		if (deploy) {
 			this.streamService.deployStream(name, new HashMap<>());
 		}
-		return new Assembler(new PageImpl<>(Collections.singletonList(stream))).toResource(stream);
+		return new Assembler(new PageImpl<>(Collections.singletonList(streamDefinition))).toResource(streamDefinition);
 	}
 
 	/**
@@ -247,11 +248,11 @@ public class StreamDefinitionController {
 	@RequestMapping(value = "/{name}", method = RequestMethod.DELETE)
 	@ResponseStatus(HttpStatus.OK)
 	public void delete(@PathVariable("name") String name) {
-		if (this.repository.findOne(name) == null) {
+		if (this.streamDefinitionRepository.findOne(name) == null) {
 			throw new NoSuchStreamDefinitionException(name);
 		}
 		this.streamService.undeployStream(name);
-		this.repository.delete(name);
+		this.streamDefinitionRepository.delete(name);
 	}
 
 	/**
@@ -270,11 +271,11 @@ public class StreamDefinitionController {
 			@RequestParam(value = "nested", required = false, defaultValue = "false") boolean nested,
 			PagedResourcesAssembler<StreamDefinition> assembler) {
 		Set<StreamDefinition> relatedDefinitions = new LinkedHashSet<>();
-		StreamDefinition currentStreamDefinition = repository.findOne(name);
+		StreamDefinition currentStreamDefinition = streamDefinitionRepository.findOne(name);
 		if (currentStreamDefinition == null) {
 			throw new NoSuchStreamDefinitionException(name);
 		}
-		Iterable<StreamDefinition> definitions = repository.findAll();
+		Iterable<StreamDefinition> definitions = streamDefinitionRepository.findAll();
 		List<StreamDefinition> result = new ArrayList<>(findRelatedDefinitions(currentStreamDefinition, definitions,
 				relatedDefinitions, nested));
 		Page<StreamDefinition> page = new PageImpl<>(result, pageable,
@@ -311,7 +312,7 @@ public class StreamDefinitionController {
 	@RequestMapping(value = "/{name}", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
 	public StreamDefinitionResource display(@PathVariable("name") String name) {
-		StreamDefinition definition = repository.findOne(name);
+		StreamDefinition definition = streamDefinitionRepository.findOne(name);
 		if (definition == null) {
 			throw new NoSuchStreamDefinitionException(name);
 		}
@@ -324,10 +325,10 @@ public class StreamDefinitionController {
 	@RequestMapping(value = "", method = RequestMethod.DELETE)
 	@ResponseStatus(HttpStatus.OK)
 	public void deleteAll() {
-		for (StreamDefinition streamDefinition : this.repository.findAll()) {
+		for (StreamDefinition streamDefinition : this.streamDefinitionRepository.findAll()) {
 			this.streamService.undeployStream(streamDefinition.getName());
 		}
-		this.repository.deleteAll();
+		this.streamDefinitionRepository.deleteAll();
 	}
 
 	/**

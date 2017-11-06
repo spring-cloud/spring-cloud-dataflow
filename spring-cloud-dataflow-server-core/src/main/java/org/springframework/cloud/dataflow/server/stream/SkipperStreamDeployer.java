@@ -339,9 +339,13 @@ public class SkipperStreamDeployer implements StreamDeployer {
 		Map<String, Object> metadataMap = new HashMap<>();
 		Map<String, Object> specMap = new HashMap<>();
 
-		// Add version
+		// Add version, including possible override via deploymentProperties - hack to store version in cmdline args
 		String version = getResourceVersion(appDeploymentRequest.getResource());
-		configValueMap.put("version", version);
+		if (appDeploymentRequest.getCommandlineArguments().size() == 1) {
+			configValueMap.put("version", appDeploymentRequest.getCommandlineArguments().get(0));
+		} else {
+			configValueMap.put("version", version);
+		}
 
 		// Add metadata
 		metadataMap.put("name", packageName);

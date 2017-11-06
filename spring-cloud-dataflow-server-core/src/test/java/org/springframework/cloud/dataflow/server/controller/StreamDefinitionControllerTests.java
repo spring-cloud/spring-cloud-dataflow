@@ -59,7 +59,7 @@ public class StreamDefinitionControllerTests {
 		DirectFieldAccessor accessor = new DirectFieldAccessor(controller);
 		accessor.setPropertyValue("appRegistry", appRegistry);
 		accessor.setPropertyValue("streamService", mock(StreamService.class));
-		accessor.setPropertyValue("repository", mock(StreamDefinitionRepository.class));
+		accessor.setPropertyValue("streamDefinitionRepository", mock(StreamDefinitionRepository.class));
 		return controller;
 	}
 
