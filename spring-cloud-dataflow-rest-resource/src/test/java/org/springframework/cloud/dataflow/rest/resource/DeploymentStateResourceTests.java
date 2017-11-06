@@ -42,7 +42,7 @@ public class DeploymentStateResourceTests {
 
 		assertThat(documentContext.read("$.key"), is("deployed"));
 		assertThat(documentContext.read("$.displayName"), is("Deployed"));
-		assertThat(documentContext.read("$.description"), is("All apps have been successfully deployed"));
+		assertThat(documentContext.read("$.description"), is("The stream has been successfully deployed"));
 
 	}
 

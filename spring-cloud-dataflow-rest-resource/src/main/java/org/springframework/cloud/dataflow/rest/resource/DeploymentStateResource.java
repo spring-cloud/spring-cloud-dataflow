@@ -29,8 +29,8 @@ import org.springframework.util.Assert;
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 public enum DeploymentStateResource {
 
-	DEPLOYING("deploying", "Deploying", "The app or group is being deployed."),
-	DEPLOYED("deployed", "Deployed", "All apps have been successfully deployed"),
+	DEPLOYING("deploying", "Deploying", "The stream is being deployed."),
+	DEPLOYED("deployed", "Deployed", "The stream has been successfully deployed"),
 	UNDEPLOYED("undeployed", "Undeployed", "The app or group is known to the system, but is not currently deployed"),
 	PARTIAL("partial", "Partial",
 			"In the case of multiple apps, some have successfully deployed, while others have " + "not"),
