@@ -384,15 +384,30 @@ public class SkipperStreamDeployer implements StreamDeployer {
 		this.skipperClient.delete(streamName);
 	}
 
-	public void upgradeStream(String releaseName, PackageIdentifier packageIdentifier, String configYml) {
+	/**
+	 * Update the stream identified by the PackageIdentifier and runtime configuration values.
+	 * @param streamName the name of the stream to upgrade
+	 * @param packageIdentifier the name of the package in skipper
+	 * @param configYml the YML formatted configuration values to use when upgrading
+	 */
+	public void upgradeStream(String streamName, PackageIdentifier packageIdentifier, String configYml) {
 		UpgradeRequest upgradeRequest = new UpgradeRequest();
 		upgradeRequest.setPackageIdentifier(packageIdentifier);
 		UpgradeProperties upgradeProperties = new UpgradeProperties();
 		ConfigValues configValues = new ConfigValues();
 		configValues.setRaw(configYml);
 		upgradeProperties.setConfigValues(configValues);
-		upgradeProperties.setReleaseName(releaseName);
+		upgradeProperties.setReleaseName(streamName);
 		upgradeRequest.setUpgradeProperties(upgradeProperties);
 		this.skipperClient.upgrade(upgradeRequest);
+	}
+
+	/**
+	 * Rollback the stream to a specific version
+	 * @param streamName the name of the stream to rollback
+	 * @param releaseVersion the version of the stream to rollback to
+	 */
+	public void rollbackStream(String streamName, int releaseVersion) {
+		this.skipperClient.rollback(streamName, releaseVersion);
 	}
 }

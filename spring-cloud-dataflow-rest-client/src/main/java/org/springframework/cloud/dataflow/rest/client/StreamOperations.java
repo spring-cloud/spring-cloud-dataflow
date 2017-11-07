@@ -90,7 +90,16 @@ public interface StreamOperations {
 			Map<String, String> updateProperties);
 
 	/**
-	 * Queries the server for the stream definition
+	 * Rollback the stream to the previous or a specific release version.
+	 *
+	 * @param streamName the name of the stream to rollback
+	 * @param version the version to rollback to. If the version is 0, then rollback to the previous release.
+	 * The version can not be less than zero.
+	 */
+	void rollbackStream(String streamName, int version);
+
+	/**
+	 * Queries the server for the stream definition.
 	 * @param streamName the name of the stream to get status
 	 * @return The current stream definition with updated status
 	 */

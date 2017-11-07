@@ -126,6 +126,13 @@ public class StreamTemplate implements StreamOperations {
 	}
 
 	@Override
+	public void rollbackStream(String streamName, int version) {
+		Assert.hasText(streamName, "Release name cannot be null or empty");
+		String url = deploymentsLink.getHref() + "/rollback/" + streamName + "/" + version;
+		restTemplate.postForObject(url, null, Object.class);
+	}
+
+	@Override
 	public StreamDefinitionResource getStreamDefinition(String streamName) {
 		String uriTemplate = this.definitionLink.expand(streamName).getHref();
 		return restTemplate.getForObject(uriTemplate, StreamDefinitionResource.class);
