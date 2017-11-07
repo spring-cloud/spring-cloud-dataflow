@@ -74,4 +74,14 @@ public class StreamDeploymentControllerTests {
 		Assert.assertEquals(argumentCaptor2.getValue().get(SKIPPER_ENABLED_PROPERTY_KEY), "true");
 	}
 
+	@Test
+	public void testRollbackViaStreamService() {
+		this.controller.rollback("test1", 2);
+		ArgumentCaptor<String> argumentCaptor1 = ArgumentCaptor.forClass(String.class);
+		ArgumentCaptor<Integer> argumentCaptor2 = ArgumentCaptor.forClass(Integer.class);
+		verify(defaultStreamService).rollbackStream(argumentCaptor1.capture(), argumentCaptor2.capture());
+		Assert.assertEquals(argumentCaptor1.getValue(), "test1");
+		Assert.assertTrue("Rollback version is incorrect", argumentCaptor2.getValue() == 2);
+	}
+
 }

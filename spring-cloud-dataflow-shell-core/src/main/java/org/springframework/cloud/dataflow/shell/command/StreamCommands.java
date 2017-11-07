@@ -78,6 +78,8 @@ public class StreamCommands implements CommandMarker {
 
 	private static final String STREAM_SKIPPER_UPDATE = "stream skipper update";
 
+	private static final String STREAM_SKIPPER_ROLLBACK = "stream skipper rollback";
+
 	private static final String UNDEPLOY_STREAM = "stream undeploy";
 
 	private static final String UNDEPLOY_STREAM_ALL = "stream all undeploy";
@@ -248,7 +250,7 @@ public class StreamCommands implements CommandMarker {
 			packageIdentifier.setRepositoryName(repoName);
 		}
 		streamOperations().updateStream(name, name, packageIdentifier, propertiesToUse);
-		return String.format("Update request has been sent for stream '%s'", name);
+		return String.format("Update request has been sent for the stream '%s'", name);
 	}
 
 	private void assertMutuallyExclusiveFileAndProperties(File yamlFile, String propertyString) {
@@ -273,6 +275,18 @@ public class StreamCommands implements CommandMarker {
 		}
 		return configValuesYML;
 	}
+
+	@CliCommand(value = STREAM_SKIPPER_ROLLBACK, help = "Rollback a stream using Skipper")
+	public String rollbackStreamUsingSkipper(
+			@CliOption(key = { "", "name" }, help = "the name of the stream to rollback", mandatory = true,
+					optionContext = "existing-stream disable-string-converter") String name,
+			@CliOption(key = { "releaseVersion" }, help = "the Skipper release version to rollback to",
+					unspecifiedDefaultValue = "0") int releaseVersion) {
+		this.streamOperations().rollbackStream(name, releaseVersion);
+		return String.format("Rollback request has been sent for the stream '%s'", name);
+	}
+
+
 
 	@CliCommand(value = UNDEPLOY_STREAM, help = "Un-deploy a previously deployed stream")
 	public String undeployStream(@CliOption(key = { "",

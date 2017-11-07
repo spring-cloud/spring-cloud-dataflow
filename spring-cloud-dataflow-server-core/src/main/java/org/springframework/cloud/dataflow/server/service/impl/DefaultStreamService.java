@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
+import org.springframework.util.StringUtils;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 
@@ -139,7 +140,22 @@ public class DefaultStreamService implements StreamService {
 			this.skipperStreamDeployer.upgradeStream(releaseName, packageIdenfier, yaml);
 		}
 		else {
-			throw new IllegalStateException("Can only update stream when using the Skipper deployer.");
+			throw new IllegalStateException("Can only update stream when using the Skipper stream deployer.");
+		}
+	}
+
+	@Override
+	public void rollbackStream(String streamName, int releaseVersion) {
+		Assert.isTrue(StringUtils.hasText(streamName), "Stream name must not be null");
+		StreamDeployment streamDeployment = this.streamDeploymentRepository.findOne(streamName);
+		if (streamDeployment == null) {
+			throw new NoSuchStreamDeploymentException(streamName);
+		}
+		if (streamDeployment.getDeployerName().equals(StreamDeployers.skipper.name())) {
+			this.skipperStreamDeployer.rollbackStream(streamName, releaseVersion);
+		}
+		else {
+			throw new IllegalStateException("Can only rollback stream when using the Skipper stream deployer.");
 		}
 	}
 

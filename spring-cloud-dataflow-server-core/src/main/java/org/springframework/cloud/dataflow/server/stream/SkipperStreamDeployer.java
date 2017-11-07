@@ -395,4 +395,8 @@ public class SkipperStreamDeployer implements StreamDeployer {
 		upgradeRequest.setUpgradeProperties(upgradeProperties);
 		this.skipperClient.upgrade(upgradeRequest);
 	}
+
+	public void rollbackStream(String streamName, int releaseVersion) {
+		this.skipperClient.rollback(streamName, releaseVersion);
+	}
 }
