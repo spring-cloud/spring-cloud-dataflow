@@ -116,9 +116,14 @@ public class StreamDeploymentController {
 
 	@RequestMapping(value = "/update/{name}", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
-	public void update(@PathVariable("name") String name,
-			@RequestBody UpdateStreamRequest updateStreamRequest) {
+	public void update(@PathVariable("name") String name, @RequestBody UpdateStreamRequest updateStreamRequest) {
 		this.streamService.updateStream(name, updateStreamRequest);
+	}
+
+	@RequestMapping(value = "/rollback/{name}/{version}", method = RequestMethod.POST)
+	@ResponseStatus(HttpStatus.CREATED)
+	public void rollback(@PathVariable("name") String name, @PathVariable("version") int version) {
+		this.streamService.rollbackStream(name, version);
 	}
 
 }

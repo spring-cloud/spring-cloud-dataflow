@@ -53,6 +53,15 @@ public interface StreamService {
 	 */
 	void updateStream(String streamName, UpdateStreamRequest updateStreamRequest);
 
+	/**
+	 * Rollback the stream to the previous or a specific version of the stream.
+	 *
+	 * @param streamName the name of the stream to rollback
+	 * @param releaseVersion the version to rollback to (if not specified, rollback to the previous deleted/deployed
+	 * release version of the stream.
+	 */
+	void rollbackStream(String streamName, int releaseVersion);
+
 
 	/**
 	 * Un-deploys the stream identified by the given stream name.

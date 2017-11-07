@@ -42,6 +42,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.Assert;
 
 import static junit.framework.TestCase.fail;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -140,6 +141,32 @@ public class DefaultStreamServiceTests {
 	}
 
 	@Test
+	public void verifyRollbackStream() {
+		StreamDefinition streamDefinition1 = new StreamDefinition("test1", "time | log");
+		StreamDeployment streamDeployment1 = new StreamDeployment(streamDefinition1.getName(),
+				StreamDeployers.appdeployer.name(), null, null, null);
+		StreamDefinition streamDefinition2 = new StreamDefinition("test2", "time | log");
+		StreamDeployment streamDeployment2 = new StreamDeployment(streamDefinition2.getName(),
+				StreamDeployers.skipper.name(), "pkg1", "release1", "local");
+		when(this.streamDeploymentRepository.findOne(streamDeployment1.getStreamName())).thenReturn(streamDeployment1);
+		when(this.streamDeploymentRepository.findOne(streamDeployment2.getStreamName())).thenReturn(streamDeployment2);
+
+		verifyNoMoreInteractions(this.skipperStreamDeployer);
+		verifyNoMoreInteractions(this.appDeployerStreamDeployer);
+		try {
+			this.defaultStreamService.rollbackStream(streamDefinition1.getName(), 0);
+			fail("IllegalStateException is expected when trying to rollback a stream that was deployed using "
+					+ "app deployer");
+		}
+		catch (IllegalStateException e) {
+			assertThat(e.getMessage()).isEqualTo("Can only rollback stream when using the Skipper stream deployer.");
+		}
+		this.defaultStreamService.rollbackStream(streamDefinition2.getName(), 0);
+		verify(this.skipperStreamDeployer, times(1)).rollbackStream(streamDefinition2.getName(), 0);
+		verifyNoMoreInteractions(this.appDeployerStreamDeployer);
+	}
+
+	@Test
 	public void verifyAppDeployerUpgrade() {
 		try {
 			this.defaultStreamService.updateStream(this.streamDeployment1.getStreamName(),
@@ -148,7 +175,7 @@ public class DefaultStreamServiceTests {
 			fail("IllegalStateException is expected to be thrown.");
 		}
 		catch (IllegalStateException e) {
-			Assert.isTrue(e.getMessage().equals("Can only update stream when using the Skipper deployer."),
+			Assert.isTrue(e.getMessage().equals("Can only update stream when using the Skipper stream deployer."),
 					"Incorrect Exception message");
 		}
 	}
