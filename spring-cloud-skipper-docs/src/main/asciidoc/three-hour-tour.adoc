@@ -138,7 +138,7 @@ A sample package metadata would look like this:
 
 ----
 apiVersion: v1
-kind: skipper
+kind: skipperPackageMetadata
 name: mypackage
 version: 1.0.0
 packageSourceUrl: https://github.com/some-mypackage-project/v1.0.0.RELEASE
@@ -183,7 +183,7 @@ will commonly have the following content:
 
 ----
 apiVersion: skipper/v1
-kind: SpringBootApp
+kind: SpringCloudDeployerApplication
 metadata:
   name: mypackage
   type: sample
@@ -231,11 +231,11 @@ Is used.  You can specify other entries and also specify proxy properties.  This
 
 The metadata is used to help search for applications after they have been installed and is not available in Skipper M1.
 
-Currently, only `SpringBootApp` kind is supported.
+Currently, only `SpringCloudDeployerApplication` kind is supported which means the applications can be deployed into the target platforms only using their corresponding Spring Cloud Deployer implementations (CF, Kubernetes Deployer etc.).
 The `spec` contains the resource specification and the properties for the package.
 The `resource` represents the resource URI to download the application from. This would typically be a maven
 co-ordinate or a docker image URL.
-The `SpringBootApp` kind of application can have `applicationProperties` and `deploymentProperties` as the
+The `SpringCloudDeployerApplication` kind of application can have `applicationProperties` and `deploymentProperties` as the
 configuration properties.
 The application properties correspond to the properties for the application itself.
 The deployment properties correspond to the properties for the deployment operation performed by Spring Cloud Deployer implementations.

@@ -48,7 +48,7 @@ public class ConfigValueUtils {
 	 * @return The merged configuration values.
 	 */
 	public static Map<String, Object> mergeConfigValues(Package pkg, ConfigValues overrideValues) {
-		// parge ConfigValues to a map.
+		// parse ConfigValues to a map.
 		Yaml yaml = new Yaml();
 		Map<String, Object> mergedValues;
 		// merge top level override values on top level package values

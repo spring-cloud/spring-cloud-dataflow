@@ -8,7 +8,6 @@ deployment:
     {{key}}: {{value}}
     {{/deployment.applicationProperties.entrySet}}
   resource: maven://org.springframework.cloud.stream.app:time-source-rabbit:{{appVersion}}
-  resourceMetadata: maven://org.springframework.cloud.stream.app:time-source-rabbit:jar:metadata:{{appVersion}}
   deploymentProperties:
     {{#deployment.deploymentProperties.entrySet}}
     {{key}}: {{value}}

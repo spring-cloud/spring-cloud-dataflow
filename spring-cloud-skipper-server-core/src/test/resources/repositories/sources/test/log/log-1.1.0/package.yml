@@ -1,5 +1,5 @@
 apiVersion: v2
-kind: skipper
+kind: skipperPackageMetadata
 name: log
 version: 1.1.0
 packageSourceUrl: https://github.com/spring-cloud-stream-app-starters/log/tree/v1.3.0.M1

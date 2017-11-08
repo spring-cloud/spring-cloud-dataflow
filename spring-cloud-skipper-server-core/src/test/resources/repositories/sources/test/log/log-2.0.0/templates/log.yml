@@ -1,11 +1,11 @@
-apiVersion: skipper/v1
-kind: SpringBootApp
+apiVersion: skipperPackageMetadata/v1
+kind: SpringCloudDeployerApplication
 metadata:
   name: log
   type: sink
 spec:
-  resource: maven://org.springframework.cloud.stream.app:log-sink-rabbit:{{version}}
-  resourceMetadata: maven://org.springframework.cloud.stream.app:log-sink-rabbit:jar:metadata:{{version}}
+  resource: maven://org.springframework.cloud.stream.app:log-sink-rabbit
+  version: {{version}}
   applicationProperties:
     {{#spec.applicationProperties.entrySet}}
     {{key}}: {{value}}

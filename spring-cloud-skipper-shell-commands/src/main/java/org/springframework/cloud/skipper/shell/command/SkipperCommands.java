@@ -119,7 +119,7 @@ public class SkipperCommands extends AbstractSkipperCommand {
 			return DeploymentState.deployed;
 		}
 
-		logger.debug("aggregateState: Returing " + DeploymentState.partial);
+		logger.debug("aggregateState: Returning " + DeploymentState.partial);
 		return DeploymentState.partial;
 	}
 

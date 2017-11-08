@@ -1,6 +1,6 @@
 ---
-apiVersion: skipper/v1
-kind: SpringBootApp
+apiVersion: skipperPackageMetadata/v1
+kind: SpringBootApp1
 metadata:
   name: log-sink
   count: 2
@@ -15,8 +15,8 @@ spec:
     memory: 1024
     disk: 2
 ---
-apiVersion: skipper/v1
-kind: SpringBootApp
+apiVersion: skipperPackageMetadata/v1
+kind: SpringCloudDeployerApplication
 metadata:
   name: time-source
   count: 5

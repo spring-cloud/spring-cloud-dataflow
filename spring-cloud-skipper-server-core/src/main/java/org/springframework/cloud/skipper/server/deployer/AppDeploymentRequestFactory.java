@@ -26,16 +26,19 @@ import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.skipper.SkipperException;
-import org.springframework.cloud.skipper.server.domain.SpringBootAppKind;
-import org.springframework.cloud.skipper.server.domain.SpringBootAppSpec;
+import org.springframework.cloud.skipper.server.domain.SpringCloudDeployerApplicationManifest;
+import org.springframework.cloud.skipper.server.domain.SpringCloudDeployerApplicationSpec;
 import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
+
+import static org.springframework.cloud.skipper.server.deployer.ResourceUtils.getResourceLocation;
 
 /**
  * Factory managing {@link AppDeploymentRequest}s.
  *
  * @author Mark Pollack
  * @author Janne Valkealahti
+ * @author Ilayaperumal Gopinathan
  */
 public class AppDeploymentRequestFactory {
 
@@ -56,14 +59,14 @@ public class AppDeploymentRequestFactory {
 	/**
 	 * Creates an {@link AppDeploymentRequest}.
 	 *
-	 * @param springBootAppKind the boot app kind
+	 * @param applicationSpec the Spring Cloud Deployer application spec
 	 * @param releaseName the release name
 	 * @param version the release version
 	 * @return a created AppDeploymentRequest
 	 */
-	public AppDeploymentRequest createAppDeploymentRequest(SpringBootAppKind springBootAppKind, String releaseName,
+	public AppDeploymentRequest createAppDeploymentRequest(SpringCloudDeployerApplicationManifest applicationSpec, String releaseName,
 			String version) {
-		SpringBootAppSpec spec = springBootAppKind.getSpec();
+		SpringCloudDeployerApplicationSpec spec = applicationSpec.getSpec();
 		Map<String, String> applicationProperties = new TreeMap<>();
 		if (spec.getApplicationProperties() != null) {
 			applicationProperties.putAll(spec.getApplicationProperties());
@@ -71,13 +74,11 @@ public class AppDeploymentRequestFactory {
 		// we need to keep group name same for consumer groups not getting broken, but
 		// app name needs to differentiate as otherwise it may result same deployment id and
 		// failure on a deployer.
-		AppDefinition appDefinition = new AppDefinition(springBootAppKind.getApplicationName() + "-v" + version,
+		AppDefinition appDefinition = new AppDefinition(applicationSpec.getApplicationName() + "-v" + version,
 				applicationProperties);
-
-		Assert.hasText(spec.getResource(), "Package template must define a resource uri");
 		Resource resource;
 		try {
-			resource = delegatingResourceLoader.getResource(spec.getResource());
+			resource = delegatingResourceLoader.getResource(getResourceLocation(spec.getResource(), spec.getVersion()));
 		}
 		catch (Exception e) {
 			throw new SkipperException(

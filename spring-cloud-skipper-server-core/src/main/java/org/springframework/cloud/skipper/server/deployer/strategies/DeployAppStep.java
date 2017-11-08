@@ -28,8 +28,8 @@ import org.springframework.cloud.skipper.domain.StatusCode;
 import org.springframework.cloud.skipper.server.deployer.AppDeploymentRequestFactory;
 import org.springframework.cloud.skipper.server.deployer.ReleaseAnalysisReport;
 import org.springframework.cloud.skipper.server.domain.AppDeployerData;
-import org.springframework.cloud.skipper.server.domain.SpringBootAppKind;
-import org.springframework.cloud.skipper.server.domain.SpringBootAppKindReader;
+import org.springframework.cloud.skipper.server.domain.SpringCloudDeployerApplicationManifest;
+import org.springframework.cloud.skipper.server.domain.SpringCloudDeployerApplicationManifestReader;
 import org.springframework.cloud.skipper.server.repository.AppDeployerDataRepository;
 import org.springframework.cloud.skipper.server.repository.DeployerRepository;
 import org.springframework.cloud.skipper.server.repository.ReleaseRepository;
@@ -52,12 +52,16 @@ public class DeployAppStep {
 
 	private final ReleaseRepository releaseRepository;
 
+	private final SpringCloudDeployerApplicationManifestReader applicationManifestReader;
+
 	public DeployAppStep(DeployerRepository deployerRepository, AppDeploymentRequestFactory appDeploymentRequestFactory,
-			AppDeployerDataRepository appDeployerDataRepository, ReleaseRepository releaseRepository) {
+			AppDeployerDataRepository appDeployerDataRepository, ReleaseRepository releaseRepository,
+			SpringCloudDeployerApplicationManifestReader applicationManifestReader) {
 		this.deployerRepository = deployerRepository;
 		this.appDeploymentRequestFactory = appDeploymentRequestFactory;
 		this.appDeployerDataRepository = appDeployerDataRepository;
 		this.releaseRepository = releaseRepository;
+		this.applicationManifestReader = applicationManifestReader;
 	}
 
 	@Transactional
@@ -113,20 +117,21 @@ public class DeployAppStep {
 
 	private Map<String, String> deploy(Release replacingRelease, List<String> applicationNamesToUpgrade,
 			AppDeployer appDeployer) {
-		List<SpringBootAppKind> springBootAppKindList = SpringBootAppKindReader
-				.read(replacingRelease.getManifest());
+		List<? extends SpringCloudDeployerApplicationManifest> applicationSpecList = this.applicationManifestReader
+				.read(replacingRelease
+						.getManifest());
 
 		Map<String, String> appNameDeploymentIdMap = new HashMap<>();
-		for (SpringBootAppKind springBootAppKind : springBootAppKindList) {
-			if (applicationNamesToUpgrade.contains(springBootAppKind.getApplicationName())) {
+		for (SpringCloudDeployerApplicationManifest applicationManifest : applicationSpecList) {
+			if (applicationNamesToUpgrade.contains(applicationManifest.getApplicationName())) {
 				AppDeploymentRequest appDeploymentRequest = appDeploymentRequestFactory.createAppDeploymentRequest(
-						springBootAppKind, replacingRelease.getName(),
+						applicationManifest, replacingRelease.getName(),
 						String.valueOf(replacingRelease.getVersion()));
 				// =============
 				// DEPLOY DEPLOY
 				// =============
 				String deploymentId = appDeployer.deploy(appDeploymentRequest);
-				appNameDeploymentIdMap.put(springBootAppKind.getApplicationName(), deploymentId);
+				appNameDeploymentIdMap.put(applicationManifest.getApplicationName(), deploymentId);
 			}
 		}
 		return appNameDeploymentIdMap;

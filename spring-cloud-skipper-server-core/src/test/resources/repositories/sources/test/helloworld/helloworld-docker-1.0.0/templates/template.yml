@@ -1,9 +1,10 @@
-apiVersion: skipper/v1
-kind: SpringBootApp
+apiVersion: skipperPackageMetadata/v1
+kind: SpringCloudDeployerApplication
 metadata:
   name: helloworld-docker
 spec:
-  resource: docker:springcloud/spring-cloud-skipper-samples-helloworld:{{version}}
+  resource: docker:springcloud/spring-cloud-skipper-samples-helloworld
+  version: {{version}}
   applicationProperties:
     {{#spec.applicationProperties.entrySet}}
     {{key}}: {{value}}

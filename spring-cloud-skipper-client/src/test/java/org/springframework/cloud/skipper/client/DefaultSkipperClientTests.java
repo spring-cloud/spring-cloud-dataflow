@@ -54,8 +54,8 @@ public class DefaultSkipperClientTests {
 	@Test
 	public void genericTemplateTest() {
 		SkipperClient skipperClient = new DefaultSkipperClient("http://localhost:7577");
-		assertThat(skipperClient.getSpringBootAppTemplate()).isNotNull();
-		assertThat(skipperClient.getSpringBootAppTemplate().getData()).isNotEmpty();
+		assertThat(skipperClient.getSpringCloudDeployerApplicationTemplate()).isNotNull();
+		assertThat(skipperClient.getSpringCloudDeployerApplicationTemplate().getData()).isNotEmpty();
 	}
 
 	@Test

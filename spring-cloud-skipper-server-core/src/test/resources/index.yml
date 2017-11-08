@@ -1,14 +1,14 @@
 
 ---
 apiVersion: v1
-kind: skipper
+kind: skipperPackageMetadata
 origin: org.springframework.cloud.skipper.testing
 name: scdf
 version: 1.2.3
 
 ---
 apiVersion: v1
-kind: skipper
+kind: skipperPackageMetadata
 origin: org.springframework.cloud.skipper.testing
 name: zipkin
 version: 1.28.1

@@ -42,7 +42,7 @@ public class RepositoryInitializationServiceTest extends AbstractIntegrationTest
 		assertThat(repositoryRepository.count()).isEqualTo(2);
 		assertThat(repositoryRepository.findByName("test").getUrl()).isEqualTo("classpath:/repositories/binaries/test");
 		// Note, this is a brittle assertion.
-		assertThat(packageMetadataRepository.count()).isEqualTo(5);
+		assertThat(packageMetadataRepository.count()).isGreaterThan(5);
 	}
 
 }

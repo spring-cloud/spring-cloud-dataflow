@@ -90,7 +90,7 @@ public class DefaultSkipperClient implements SkipperClient {
 	}
 
 	@Override
-	public Template getSpringBootAppTemplate() {
+	public Template getSpringCloudDeployerApplicationTemplate() {
 		org.springframework.core.io.Resource resource = new ClassPathResource(
 				"/org/springframework/cloud/skipper/io/generic-template.yml");
 		String genericTempateData = null;

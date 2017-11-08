@@ -8,7 +8,6 @@ deployment:
     {{key}}: {{value}}
     {{/deployment.applicationProperties.entrySet}}
   resource: maven://org.springframework.cloud.stream.app:log-sink-rabbit:{{appVersion}}
-  resourceMetadata: maven://org.springframework.cloud.stream.app:log-sink-rabbit:jar:metadata:{{appVersion}}
   deploymentProperties:
     {{#deployment.deploymentProperties.entrySet}}
     {{key}}: {{value}}

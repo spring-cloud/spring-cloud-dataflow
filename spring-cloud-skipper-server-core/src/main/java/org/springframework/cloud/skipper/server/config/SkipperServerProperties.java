@@ -25,6 +25,7 @@ import org.springframework.cloud.skipper.domain.Repository;
  * Configurable properties of the server.
  *
  * @author Mark Pollack
+ * @author Eric Bottard
  */
 @ConfigurationProperties("spring.cloud.skipper.server")
 public class SkipperServerProperties {
@@ -50,6 +51,12 @@ public class SkipperServerProperties {
 	 * {@link org.springframework.scheduling.annotation.Scheduled} method, should be created.
 	 */
 	private boolean enableReleaseStateUpdateService;
+
+	/**
+	 * The target percentage of free disk space to always aim for when cleaning downloaded
+	 * resources. Specify as an integer greater than zero and less than 100. Default is 25.
+	 */
+	private int freeDiskSpacePercentage = 25;
 
 	public List<Repository> getPackageRepositories() {
 		return packageRepositories;
@@ -81,5 +88,13 @@ public class SkipperServerProperties {
 
 	public void setEnableLocalPlatform(boolean enableLocalPlatform) {
 		this.enableLocalPlatform = enableLocalPlatform;
+	}
+
+	public int getFreeDiskSpacePercentage() {
+		return freeDiskSpacePercentage;
+	}
+
+	public void setFreeDiskSpacePercentage(int freeDiskSpacePercentage) {
+		this.freeDiskSpacePercentage = freeDiskSpacePercentage;
 	}
 }

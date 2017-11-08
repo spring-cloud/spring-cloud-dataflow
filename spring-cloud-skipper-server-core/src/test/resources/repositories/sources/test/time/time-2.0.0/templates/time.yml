@@ -1,11 +1,11 @@
-apiVersion: skipper/v1
-kind: SpringBootApp
+apiVersion: skipperPackageMetadata/v1
+kind: SpringCloudDeployerApplication
 metadata:
   name: time
   type: source
 spec:
-  resource: maven://org.springframework.cloud.stream.app:time-source-rabbit:{{version}}
-  resourceMetadata: maven://org.springframework.cloud.stream.app:time-source-rabbit:jar:metadata:{{version}}
+  resource: maven://org.springframework.cloud.stream.app:time-source-rabbit
+  version: {{version}}
   applicationProperties:
     {{#spec.applicationProperties.entrySet}}
     {{key}}: {{value}}

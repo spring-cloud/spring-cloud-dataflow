@@ -26,8 +26,8 @@ import org.springframework.cloud.skipper.SkipperException;
  * This class is commonly referred to as 'the manifest', meaning the complete list of the
  * application resource, properties, metadata and deployment properties. It is
  * serialized/deserialized from YAML. An example is: {@literal
- * apiVersion: skipper/v1
- * kind: SpringBootApp
+ * apiVersion: skipperPackageMetadata/v1
+ * kind: SpringCloudDeployerApplication
  * metadata:
  *   name: log-sink
  *   type: sink
@@ -45,7 +45,7 @@ import org.springframework.cloud.skipper.SkipperException;
  * @author Mark Pollack
  * @author Ilayaperumal Gopinathan
  */
-public class SpringBootAppKind {
+public class SpringCloudDeployerApplicationManifest {
 
 	public static final String API_VERSION_STRING = "apiVersion";
 
@@ -55,15 +55,23 @@ public class SpringBootAppKind {
 
 	public static final String SPEC_STRING = "spec";
 
+	protected SpringCloudDeployerApplicationSpec spec;
+
 	private String apiVersion;
 
 	private String kind;
 
 	private Map<String, String> metadata;
 
-	private SpringBootAppSpec spec;
+	public SpringCloudDeployerApplicationManifest() {
+	}
 
-	public SpringBootAppKind() {
+	public SpringCloudDeployerApplicationSpec getSpec() {
+		return spec;
+	}
+
+	public void setSpec(SpringCloudDeployerApplicationSpec spec) {
+		this.spec = spec;
 	}
 
 	public String getApiVersion() {
@@ -90,14 +98,6 @@ public class SpringBootAppKind {
 		this.metadata = metadata;
 	}
 
-	public SpringBootAppSpec getSpec() {
-		return spec;
-	}
-
-	public void setSpec(SpringBootAppSpec spec) {
-		this.spec = spec;
-	}
-
 	/**
 	 * Return the value of the name property in the application's metadata.
 	 * @return The value of the name
@@ -105,7 +105,7 @@ public class SpringBootAppKind {
 	 */
 	public String getApplicationName() {
 		if (!this.metadata.containsKey("name")) {
-			throw new SkipperException("SpringBootAppKind must define a 'name' property in the metadata");
+			throw new SkipperException("SpringCloudDeployerApplicationManifest must define a 'name' property in the metadata");
 		}
 		return this.metadata.get("name");
 	}

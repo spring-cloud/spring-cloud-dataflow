@@ -219,8 +219,8 @@ skipper:>manifest get --release-name helloworldk8s
 
 ---
 # Source: template.yml
-apiVersion: skipper/v1
-kind: SpringBootApp
+apiVersion: skipperPackageMetadata/v1
+kind: SpringCloudDeployerApplication
 metadata:
   name: helloworld-docker
 spec:
