@@ -17,6 +17,30 @@ this section.
 Streams are a collection of long lived http://cloud.spring.io/spring-cloud-stream/[Spring Cloud Stream] applications that communicate with each other over messaging middleware.
 A text based DSL defines the configuration and data flow between the applications.  While many applications are provided for you to implement common use-cases, you will typically create a custom Spring Cloud Stream application to implement custom business logic.
 
+The general lifecycle of a Stream is:
+
+1. Register applications
+2. Create a Stream Definition
+3. Deploy the Stream
+4. Undeploy or Destroy the Stream.
+
+There are two options for deploying streams:
+
+1. Use a Data Flow Server implementation that deploys to a single platform.
+
+2. Configure the Data Flow Server to delegate the deployment to new server in the Spring Cloud ecosystem named http://cloud.spring.io/spring-cloud-skipper/[Skipper].
+
+
+When using the first option, you can use the Data Flow Server for Cloud Foundry to deploy streams to a single org and space on Cloud Foundry.
+Alternatively, you can use Data Flow for Kuberenetes to deploy stream to a single namespace on a Kubernetes cluster.
+See http://cloud.spring.io/spring-cloud-dataflow/#platform-implementations[here] for a list of implementations.
+
+When using the second option, you can configure Skipper to deploy applications to one or more Cloud Foundry org/spaces, one or more namespaces on a Kubernetes cluster, as well as deploy to the local machine.
+When deploying a stream in Data Flow using Skipper, you can specify which platfrom to use.
+Skipper also provides Data Flow with the ability to perform updates to deployed streams.
+There are many ways the applications in a stream can be updated, but one of the most common examples is to upgrade a processor application with new custom business logic while leaving the existing source and sink applications alone.
+
+
 [[spring-cloud-dataflow-stream-intro-dsl]]
 === Stream Pipeline DSL
 
@@ -76,7 +100,7 @@ The shell provides tab completion for application properties and also the shell 
 NOTE: Supported Stream `<appType>`'s are: source, processor, and sink
 
 [[spring-cloud-dataflow-stream-lifecycle]]
-== Lifecycle of Streams
+== Stream Lifecycle
 
 [[spring-cloud-dataflow-register-stream-apps]]
 === Register a Stream App
@@ -373,35 +397,11 @@ dataflow:> stream create --definition "time | log" --name ticktock
 ```
 This defines a stream named `ticktock` based off the DSL expression `time | log`.  The DSL uses the "pipe" symbol `|`, to connect a source to a sink.
 
-Then to deploy the stream execute the following shell command (or alternatively add the `--deploy` flag when creating the stream so that this step is not needed):
 
-```
-dataflow:> stream deploy --name ticktock
-```
-The Data Flow Server resolves `time` and `log` to maven coordinates and uses those to launch the `time` and `log` applications of the stream.
-
-```
-2016-06-01 09:41:21.728  INFO 79016 --- [nio-9393-exec-6] o.s.c.d.spi.local.LocalAppDeployer       : deploying app ticktock.log instance 0
-   Logs will be in /var/folders/wn/8jxm_tbd1vj28c8vj37n900m0000gn/T/spring-cloud-dataflow-912434582726479179/ticktock-1464788481708/ticktock.log
-2016-06-01 09:41:21.914  INFO 79016 --- [nio-9393-exec-6] o.s.c.d.spi.local.LocalAppDeployer       : deploying app ticktock.time instance 0
-   Logs will be in /var/folders/wn/8jxm_tbd1vj28c8vj37n900m0000gn/T/spring-cloud-dataflow-912434582726479179/ticktock-1464788481910/ticktock.time
-```
-
-In this example, the time source simply sends the current time as a message each second, and the log sink outputs it using the logging framework.
-You can tail the `stdout` log (which has an "_<instance>" suffix). The log files are located within the directory displayed in the Data Flow Server's log output, as shown above.
-
-```
-$ tail -f /var/folders/wn/8jxm_tbd1vj28c8vj37n900m0000gn/T/spring-cloud-dataflow-912434582726479179/ticktock-1464788481708/ticktock.log/stdout_0.log
-2016-06-01 09:45:11.250  INFO 79194 --- [  kafka-binder-] log.sink    : 06/01/16 09:45:11
-2016-06-01 09:45:12.250  INFO 79194 --- [  kafka-binder-] log.sink    : 06/01/16 09:45:12
-2016-06-01 09:45:13.251  INFO 79194 --- [  kafka-binder-] log.sink    : 06/01/16 09:45:13
-```
 ==== Application properties
 
 Application properties are the properties associated with each application in the stream. When the application is deployed, the application properties are applied to the application via
 command line arguments or environment variables based on the underlying deployment implementation.
-
-===== Passing application properties when creating a stream
 
 The following stream
 
@@ -464,20 +464,90 @@ dataflow:> stream create --definition "time --fixed-delay=5 | log --level=WARN" 
 Note that the properties `fixed-delay` and `level` defined above for the apps `time` and `log` are the 'short-form' property names provided by the shell completion.
 These 'short-form' property names are applicable only for the white-listed properties and in all other cases, only _fully qualified_ property names should be used.
 
+
+[[spring-cloud-dataflow-global-properties]]
+==== Common application properties
+
+In addition to configuration via DSL, Spring Cloud Data Flow provides a mechanism for setting common properties to all
+the streaming applications that are launched by it.
+This can be done by adding properties prefixed with `spring.cloud.dataflow.applicationProperties.stream` when starting
+the server.
+When doing so, the server will pass all the properties, without the prefix, to the instances it launches.
+
+For example, all the launched applications can be configured to use a specific Kafka broker by launching the
+Data Flow server with the following options:
+
+```
+--spring.cloud.dataflow.applicationProperties.stream.spring.cloud.stream.kafka.binder.brokers=192.168.1.100:9092
+--spring.cloud.dataflow.applicationProperties.stream.spring.cloud.stream.kafka.binder.zkNodes=192.168.1.100:2181
+```
+
+This will cause the properties `spring.cloud.stream.kafka.binder.brokers` and `spring.cloud.stream.kafka.binder.zkNodes`
+to be passed to all the launched applications.
+
+[NOTE]
+Properties configured using this mechanism have lower precedence than stream deployment properties.
+They will be overridden if a property with the same key is specified at stream deployment time (e.g.
+`app.http.spring.cloud.stream.kafka.binder.brokers` will override the common property).
+
+
+[[spring-cloud-dataflow-deploy-stream]]
+=== Deploying a Stream
+
+This section describes how to deploy a Stream when the Spring Cloud Data Flow server is responsible for deploying the stream.  The following section, <<spring-cloud-dataflow-deploy-stream-skipper>>, covers the new deployment and upgrade features when the Spring Cloud Data Flow server delegates to Skipper for stream deployment.  In both cases, the description of how deployment properties applies to both approaches of Stream deployment.
+
+Give the `ticktock` stream definition:
+```
+dataflow:> stream create --definition "time | log" --name ticktock
+```
+You can deploy the stream using the following command:
+Then to deploy the stream execute the following shell command
+
+```
+dataflow:> stream deploy --name ticktock
+```
+The Data Flow Server resolves `time` and `log` to maven coordinates and uses those to launch the `time` and `log` applications of the stream.
+
+```
+2016-06-01 09:41:21.728  INFO 79016 --- [nio-9393-exec-6] o.s.c.d.spi.local.LocalAppDeployer       : deploying app ticktock.log instance 0
+   Logs will be in /var/folders/wn/8jxm_tbd1vj28c8vj37n900m0000gn/T/spring-cloud-dataflow-912434582726479179/ticktock-1464788481708/ticktock.log
+2016-06-01 09:41:21.914  INFO 79016 --- [nio-9393-exec-6] o.s.c.d.spi.local.LocalAppDeployer       : deploying app ticktock.time instance 0
+   Logs will be in /var/folders/wn/8jxm_tbd1vj28c8vj37n900m0000gn/T/spring-cloud-dataflow-912434582726479179/ticktock-1464788481910/ticktock.time
+```
+
+In this example, the time source simply sends the current time as a message each second, and the log sink outputs it using the logging framework.
+You can tail the `stdout` log (which has an "_<instance>" suffix). The log files are located within the directory displayed in the Data Flow Server's log output, as shown above.
+
+```
+$ tail -f /var/folders/wn/8jxm_tbd1vj28c8vj37n900m0000gn/T/spring-cloud-dataflow-912434582726479179/ticktock-1464788481708/ticktock.log/stdout_0.log
+2016-06-01 09:45:11.250  INFO 79194 --- [  kafka-binder-] log.sink    : 06/01/16 09:45:11
+2016-06-01 09:45:12.250  INFO 79194 --- [  kafka-binder-] log.sink    : 06/01/16 09:45:12
+2016-06-01 09:45:13.251  INFO 79194 --- [  kafka-binder-] log.sink    : 06/01/16 09:45:13
+```
+
+You can also create an deploy the stream in one step by passing the `--deploy` flag when creating the stream.
+
+```
+dataflow:> stream create --definition "time | log" --name ticktock --deploy
+```
+
+However, it is not very common in real world use cases to do create and deploy the stream in one step.
+The reason is that when you use the `stream deploy` command, you can pass in properties that define how to map the applications onto the platform, e.g. what is the memory size of the container to use, the number of each application to run, or to enable data partitioning features.
+Properties can also override application properties which were set when creating the stream.
+The next sections cover this in detail.
+
 ==== Deployment properties
 
-When deploying the stream, properties that control the deployment of the apps into the target platform are known as `deployment` properties.
-For instance, one can specify how many instances need to be deployed for the specific application defined in the stream using the deployment property called `count`.
+When deploying a stream, you can specify properties that fall into two groups.
 
-===== Application properties versus Deployer properties
+1. Properties that control how the apps are deployed to the target platform.
+These properties use a `deployer` prefix.  These are referred to as `deployer` properties.
+2. Properties that set application properties or override application properties set during stream creation.  These are referred to as `application` properties.
 
-Starting with version 1.2, the distinction between properties that are meant for the _deployed app_ and properties that
-govern _how_ this app is deployed (thanks to some implementation of a
-https://github.com/spring-cloud/spring-cloud-deployer/[spring cloud deployer]) is more explicit. The former should be
-passed using the syntax `app.<app-name>.<property-name>=<value>` while the latter use the
-`deployer.<app-name>.<short-property-name>=<value>`
 
-The following table recaps the difference in behavior between the two.
+The syntax for `deployer` properties is `deployer.<app-name>.<short-property-name>=<value>` and the syntax for `application` properties `app.<app-name>.<property-name>=<value>`.  This syntax is used when passing deployment properties via the shell.  You may also specify them in a YAML file which is discussed below.
+
+The following table shows the difference in behavior between settings `deployer` and `application` properties when deploying an application.
 
 |===
 | | Application Properties | Deployer Properties
@@ -501,7 +571,7 @@ The following table recaps the difference in behavior between the two.
 |===
 
 
-===== Passing instance count as deployment property
+===== Passing instance count
 
 If you would like to have multiple instances of an application in the stream, you
 can include a deployer property with the deploy command:
@@ -518,7 +588,8 @@ Note that `count` is the *reserved* property name used by the underlying deploye
 
 IMPORTANT: See <<spring-cloud-dataflow-stream-app-labels>>.
 
-===== Inline vs file reference properties
+
+===== Inline vs file based properties
 
 When using the Spring Cloud Data Flow Shell, there are two ways to provide deployment
 properties: either *inline* or via a *file reference*. Those two ways are exclusive
@@ -576,7 +647,7 @@ app:
       partitionKeyExpression: payload
 ```
 
-===== Passing application properties when deploying a stream
+===== Passing application properties
 
 The application properties can also be specified when deploying a stream. When specified during deployment, these application properties can either be specified as
  'short-form' property names (applicable for white-listed properties) or _fully qualified_ property names. The application properties should have the prefix "app.<appName/label>".
@@ -609,8 +680,9 @@ the application properties can be defined as:
 stream deploy ticktock --properties "app.a.fixed-delay=4,app.b.level=ERROR"
 ----
 
+
 [[passing_producer_consumer_properties]]
-===== Passing Spring Cloud Stream properties for the application
+===== Passing Spring Cloud Stream properties
 Spring Cloud Data Flow sets the `required` Spring Cloud Stream properties for the applications inside the stream. Most importantly, the `spring.cloud.stream.bindings.<input/output>.destination` is set internally for the apps to bind.
 
 If someone wants to override any of the Spring Cloud Stream properties, they can be set via deployment properties.
@@ -660,7 +732,7 @@ dataflow:>stream deploy ticktock --properties "app.time.spring.cloud.stream.rabb
 ----
 
 [[passing_stream_partition_properties]]
-===== Passing stream partition properties during stream deployment
+===== Passing stream partition properties
 A common pattern in stream processing is to partition the data as it is streamed.
 This entails deploying multiple instances of a message consuming app and using
 content-based routing so that messages with a given key (as determined at runtime)
@@ -751,31 +823,6 @@ To override these application properties, one can specify the new property value
 dataflow:>stream deploy ticktock --properties "app.time.fixed-delay=4,app.log.level=ERROR"
 ----
 
-[[spring-cloud-dataflow-global-properties]]
-==== Common application properties
-
-In addition to configuration via DSL, Spring Cloud Data Flow provides a mechanism for setting common properties to all
-the streaming applications that are launched by it.
-This can be done by adding properties prefixed with `spring.cloud.dataflow.applicationProperties.stream` when starting
-the server.
-When doing so, the server will pass all the properties, without the prefix, to the instances it launches.
-
-For example, all the launched applications can be configured to use a specific Kafka broker by launching the
-Data Flow server with the following options:
-
-```
---spring.cloud.dataflow.applicationProperties.stream.spring.cloud.stream.kafka.binder.brokers=192.168.1.100:9092
---spring.cloud.dataflow.applicationProperties.stream.spring.cloud.stream.kafka.binder.zkNodes=192.168.1.100:2181
-```
-
-This will cause the properties `spring.cloud.stream.kafka.binder.brokers` and `spring.cloud.stream.kafka.binder.zkNodes`
-to be passed to all the launched applications.
-
-[NOTE]
-Properties configured using this mechanism have lower precedence than stream deployment properties.
-They will be overridden if a property with the same key is specified at stream deployment time (e.g.
-`app.http.spring.cloud.stream.kafka.binder.brokers` will override the common property).
-
 [[spring-cloud-dataflow-destroy-stream]]
 === Destroying a Stream
 
@@ -787,14 +834,86 @@ dataflow:> stream destroy --name ticktock
 
 If the stream was deployed, it will be undeployed before the stream definition is deleted.
 
-[[spring-cloud-dataflow-deploy-undeploy-stream]]
-=== Deploying and Undeploying Streams
+[[spring-cloud-dataflow-undeploy-stream]]
+=== Undeploying Streams
 
-Often you will want to stop a stream, but retain the name and definition for future use. In that case you can `undeploy` the stream by name and issue the `deploy` command at a later time to restart it.
+Often you will want to stop a stream, but retain the name and definition for future use. In that case you can `undeploy` the stream by name.
 ```
 dataflow:> stream undeploy --name ticktock
 dataflow:> stream deploy --name ticktock
 ```
+
+You can issue the `deploy` command at a later time to restart it.
+```
+dataflow:> stream deploy --name ticktock
+```
+
+[[spring-cloud-dataflow-stream-lifecycle-skipper]]
+== Stream Lifecycle with Skipper
+
+https://cloud.spring.io/spring-cloud-skipper/[Skipper] is a server that allows you to discover Spring Boot applications and manage their lifecycle on multiple Cloud Platforms.
+
+Applications in Skipper are bundled as packages which contain templated configuration files. They also contain an option `values` file that contains default values using to fill in template placeholders.
+Skipper's templated configuration files contain placeholders for application properties, application version, and deployment properties.
+Packages are uploaded to Skipper and stored in a package repository.
+Skipper's package repository is analogous to those found in tools such as `apt-get` or `brew`.
+
+You can override template values when installing or upgrading a package.
+Skipper orchestrates the upgrade/rollback procedure of applications between different versions, taking the minimal set of actions to bring the system to the desired state.
+An application is considered different when upgrading if any of it's application properties, deployment properties (excluding count), or application version (e.g. 1.0.0.RELEASE) is different from the currently installed application.
+
+Spring Cloud Data Flow is integrated with Skipper by generating a Skipper package when deploying a Stream.
+The generated package name is the same name as the Stream.
+The generated package is uploaded to Skipper's package repository and Data Flow then instructs
+Skipper to install the package that corresponds to the Stream.
+Subsequent commands to upgrade and rollback applications within the Stream are passed through to Skipper after some validation checks are performed by Data Flow.
+
+
+[[spring-cloud-dataflow-stream-lifecycle-skipper-create]]
+=== Creating and Deploying a Stream
+You create and deploy a stream using skipper in two steps, creating the stream definition and then deploying the stream.
+[source,bash]
+----
+dataflow:> stream create --name httptest --definition "http --server.port=9000 | log"
+dataflow:> stream skipper deploy --name httptest
+----
+
+There is an important optional command argument to the `stream skipper deploy` command, which is `--platformName`.
+Skipper can be configured to deploy to multiple platforms.
+Skipper is pre-configured with a platform named `default` which will deploys applications to the local machine where Skipper is running.
+The default value of the command line argument `--platformName` is `default`.
+If you are commonly deploying to one platform, when installing Skipper you can override the configuration of the `default` platform.  Otherwise, specify the platformName if you want to deploy to platforms such as PCF and Kubernetes.
+
+
+NOTE: In future releases, only the local Data Flow server will be configured with the `default` platform.
+
+NOTE: In the current release of Data Flow, there is not yet a command/REST endpoint to list the platforms that Skipper is configured to use.
+As such, you will have to find out the platform name to use by either running the Skipper Shell or knowing how you configured the platforms for Skipper when installing Skipper.
+
+[[spring-cloud-dataflow-stream-lifecycle-skipper-update]]
+=== Updating a Stream
+To update the stream, use the command `stream skipper update` which takes as a command argument either `--properties` or `--propertiesFile`.
+You can pass in values to these command arguments in the same format as when deploy the stream with or without Skipper.
+There is an important new top level prefix available when using Skipper, which is `version`.
+If the Stream `http | log` was deployed, and the version of `log` which registered at the time of deployment was `1.1.0.RELEASE`, the following command will update the Stream to use the `1.2.0.RELEASE` of the log application.
+[source,bash]
+----
+dataflow:>stream skipper update --name httptest --properties version.log=1.2.0.RELEASE
+----
+
+NOTE: The `--propertiesFile` can be in a YAML format, which is preferred since the underlying model that Skipper uses is YAML based and the translation from java.util.Properties format to YAML does not cover all possible YAML documents.
+
+[[spring-cloud-dataflow-stream-lifecycle-skipper-rollback]]
+=== Rollback a Stream
+You can rollback to a previous version of the Stream using the command `stream skipper rollback`.
+[source,bash]
+----
+dataflow:>stream skipper rollback --name httptest
+----
+
+
+NOTE: There is an optional `--releaseVersion` command argument which is the version of the Stream.  In the current release of Data Flow, there is not yet a command/REST endpoint to list all the versions of the Stream that have been deployed.
+As such, if you want to rollback to something other than the previous release, you will need to run the Skipper Shell.
 
 == Stream DSL
 

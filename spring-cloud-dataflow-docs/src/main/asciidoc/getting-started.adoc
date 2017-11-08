@@ -22,8 +22,7 @@ You also need to have link:https://redis.io[Redis] running if you are running an
 For the deployed streams and tasks to communicate, either link:http://www.rabbitmq.com[RabbitMQ] or link:http://kafka.apache.org[Kafka] needs to be installed.
 
 [[getting-started-deploying-spring-cloud-dataflow]]
-== Deploying Spring Cloud Data Flow Local Server
-
+== Installation
 . Download the Spring Cloud Data Flow Server and Shell apps:
 +
 [source,bash,subs=attributes]
@@ -33,16 +32,33 @@ wget http://repo.spring.io/{version-type-lowercase}/org/springframework/cloud/sp
 wget http://repo.spring.io/{version-type-lowercase}/org/springframework/cloud/spring-cloud-dataflow-shell/{project-version}/spring-cloud-dataflow-shell-{project-version}.jar
 ----
 +
+. Download Skipper if you would like the added features of upgrading and rolling back Streams since Data Flow delegates to Skipper for those features.
++
+[source,yaml,options=nowrap,subs=attributes]
+----
+wget http://repo.spring.io/{skipper-version-type-lowercase}/org/springframework/cloud/spring-cloud-skipper-server/{skipper-version}/spring-cloud-skipper-server-{skipper-version}.jar
+wget http://repo.spring.io/{skipper-version-type-lowercase}/org/springframework/cloud/spring-cloud-skipper-shell/{skipper-version}/spring-cloud-skipper-shell-{skipper-version}.jar
+----
++
+. Launch Skipper
++
+In the directory where you downloaded skipper, run the server using `java -jar`
++
+[source,bash,subs=attributes]
+----
+$ java -jar spring-cloud-skipper-server-{skipper-version}.jar
+----
++
 . Launch the Data Flow Server
 +
-.. Since the Data Flow Server is a Spring Boot application, you can run it just by using `java -jar`.
+In the directory where you downloaded Data Flow, run the server using `java -jar`
 +
 [source,bash,subs=attributes]
 ----
 $ java -jar spring-cloud-dataflow-server-local-{project-version}.jar
 ----
 +
-. Launch the shell:
+. Launch the Data Flow Shell:
 +
 [source,bash,subs=attributes]
 ----
@@ -58,17 +74,37 @@ Successfully targeted http://198.51.100.0
 dataflow:>
 ----
 +
-By default, the application registry will be empty. If you would like to register all out-of-the-box stream applications built with the Kafka binder in bulk, you can with the following command. For more details, review how to <<streams.adoc#spring-cloud-dataflow-register-stream-apps, register applications>>.
+If Skipper and the Data Flow server are not running on the same host, set the configuration property `spring.cloud.skipper.client.uri` to the location of Skipper, e.g.
++
+[source,bash,subs=attributes]
+----
+$ java -jar -jar spring-cloud-dataflow-server-local-{project-version}.jar --spring.cloud.config.skipper.client.uri=http://192.51.100.1:7577/api
+----
+
+[[getting-started-deploying-streams-spring-cloud-dataflow]]
+== Deploying Streams
+. Import Apps
++
+By default, the application registry will be empty. If you would like to register all out-of-the-box stream applications built with the Kafka binder in bulk, you can with the following command.
 +
 [source,bash,subs=attributes]
 ----
 $ dataflow:>app import --uri http://bit.ly/Bacon-RELEASE-stream-applications-kafka-10-maven
 ----
+Alternatively you can register all the stream applications with the Rabbit binder
++
+[source,bash,subs=attributes]
+----
+$ dataflow:>app import --uri http://bit.ly/Bacon-RELEASE-stream-applications-rabbit-maven
+----
+For more details, such as how to register applications that are based on docker containers, review the section on how to <<streams.adoc#spring-cloud-dataflow-register-stream-apps, register applications>>.
 +
 NOTE: Depending on your environment, you may need to configure the Data Flow Server to point to a custom
-Maven repository location or configure proxy settings.  See <<getting-started-maven-configuration>> for more information.
+Maven repository location or configure proxy settings.  See <<configuration-maven>> for more information.
 +
-. You can now use the shell commands to list available applications (source/processors/sink) and create streams. For example:
+. Create Streams without Skipper
++
+You can now use the shell commands to list available applications (source/processors/sink) and create streams. For example:
 +
 [source,bash]
 ----
@@ -81,11 +117,36 @@ files for the `http` and `log` applications.  Tail the log file for each applica
 the application has started.
 +
 Now post some data
++
 [source,bash]
 ----
 dataflow:> http post --target http://localhost:9000 --data "hello world"
 ----
 Look to see if `hello world` ended up in log files for the `log` application.
++
+. Create Streams with Skipper
++
+You can now use the shell commands to list available applications (source/processors/sink) and create streams. For example:
++
+[source,bash]
+----
+dataflow:> stream create --name httptest --definition "http --server.port=9000 | log"
+dataflow:> stream skipper deploy --name httptest
+----
++
+NOTE: You will need to wait a little while until the apps are actually deployed successfully
+before posting data.  Look in the log file of the Skipper server for the location of the log
+files for the `http` and `log` applications.  Tail the log file for each application to verify
+the application has started.
++
+Now post some data
+[source,bash]
+----
+dataflow:> http post --target http://localhost:9000 --data "hello world"
+----
+Look to see if `hello world` ended up in log files for the `log` application.
+
+You can read more about the general features of using Skipper to deploy streams in the section <<spring-cloud-dataflow-stream-lifecycle-skipper>> and how to upgrade and rollback streams in the section <<spring-cloud-dataflow-streams-skipper>>.
 
 [NOTE]
 ====
@@ -93,7 +154,6 @@ When deploying locally, each app (and each app instance, in case of `count>1`) g
 unless you explicitly assign one with `--server.port=x`. In both cases, this setting is propagated as a configuration
 property that will override any lower-level setting that you may have used (_e.g._ in `application.yml` files).
 ====
-
 
 [TIP]
 ====
@@ -107,81 +167,5 @@ to `WARNING` in `logback.xml`:
 ----
 
 ====
-
-[[getting-started-maven-configuration]]
-=== Maven Configuration
-If you want to override specific maven configuration properties (remote repositories, proxies, etc.) and/or run the Data Flow Server behind a proxy,
-you need to specify those properties as command line arguments when starting the Data Flow Server. For example:
-
-[source,bash,subs=attributes]
-----
-$ java -jar spring-cloud-dataflow-server-local-{project-version}.jar --maven.localRepository=mylocal
---maven.remote-repositories.repo1.url=https://repo1
---maven.remote-repositories.repo1.auth.username=user1
---maven.remote-repositories.repo1.auth.password=pass1
---maven.remote-repositories.repo1.snapshot-policy.update-policy=daily
---maven.remote-repositories.repo1.snapshot-policy.checksum-policy=warn
---maven.remote-repositories.repo1.release-policy.update-policy=never
---maven.remote-repositories.repo1.release-policy.checksum-policy=fail
---maven.remote-repositories.repo2.url=https://repo2
---maven.remote-repositories.repo2.policy.update-policy=always
---maven.remote-repositories.repo2.policy.checksum-policy=fail
---maven.proxy.host=proxy1
---maven.proxy.port=9010 --maven.proxy.auth.username=proxyuser1
---maven.proxy.auth.password=proxypass1
-----
-
-By default, the protocol is set to `http`. You can omit the auth properties if the proxy doesn't need a username and password. Also, the maven `localRepository` is set to `${user.home}/.m2/repository/` by default.
-Like in the above example, the remote repositories can be specified along with their authentication (if needed). If the remote repositories are behind a proxy, then the proxy properties can be specified as above.
-
-The repository policies can be specified per remote repository configuration as above.
-The key `policy` is applicable to both `snapshot` and the `release` repository policies.
-
-You can refer https://github.com/eclipse/aether-core/blob/4cf5f7a406b516a45d8bf15e7dfe3fb3849cb87b/aether-api/src/main/java/org/eclipse/aether/repository/RepositoryPolicy.java#L16[Repository Policies] for the list of
-supported repository policies.
-
-As these are Spring Boot `@ConfigurationProperties` you can also specify them as environment variables, e.g. MAVEN_REMOTE_REPOSITORIES_REPO1_URL.
-Another common option, is to set the properties using the `SPRING_APPLICATION_JSON` environment variable.
-An example of how the JSON is structured is shown below:
-
-[source,bash]
-----
-$ SPRING_APPLICATION_JSON='{ "maven": { "local-repository": null,
-"remote-repositories": { "repo1": { "url": "https://repo1", "auth": { "username": "repo1user", "password": "repo1pass" } }, "repo2": { "url": "https://repo2" } },
-"proxy": { "host": "proxyhost", "port": 9018, "auth": { "username": "proxyuser", "password": "proxypass" } } } }' java -jar spring-cloud-dataflow-server-local-{project-version}.jar
-----
-
-[[getting-started-application-configuration]]
-== Application Configuration
-You can use the following configuration properties of the Data Flow server to customize how applications are deployed.
-
-[source,properties,indent=0,subs="verbatim,attributes,macros"]
-----
-spring.cloud.deployer.local.workingDirectoriesRoot=java.io.tmpdir # Directory in which all created processes will run and create log files.
-
-spring.cloud.deployer.local.deleteFilesOnExit=true # Whether to delete created files and directories on JVM exit.
-
-spring.cloud.deployer.local.envVarsToInherit=TMP,LANG,LANGUAGE,"LC_.*. # Array of regular expression patterns for environment variables that will be passed to launched applications.
-
-spring.cloud.deployer.local.javaCmd=java # Command to run java.
-
-spring.cloud.deployer.local.shutdownTimeout=30 # Max number of seconds to wait for app shutdown.
-
-spring.cloud.deployer.local.javaOpts= # The Java options to pass to the JVM
-----
-
-When deploying the application you can also set deployer properties prefixed with `deployer.<name of application>`, So for example to set Java options for the time application in the `ticktock` stream, use the following stream deployment properties.
-[source,bash]
-----
-dataflow:> stream create --name ticktock --definition "time --server.port=9000 | log"
-dataflow:> stream deploy --name ticktock --properties "deployer.time.local.javaOpts=-Xmx2048m -Dtest=foo"
-----
-
-As a convenience you can set the property `deployer.memory` to set the Java option `-Xmx`.  So for example,
-
-[source,bash]
-----
-dataflow:> stream deploy --name ticktock --properties "deployer.time.memory=2048m"
-----
-
-At deployment time, if you specify an `-Xmx` option in the `deployer.<app>.local.javaOpts` property in addition to a value of the `deployer.<app>.local.memory` option, the value in the `javaOpts` property has precedence.  Also, the `javaOpts` property set when deploying the application has precedence over the Data Flow server's `spring.cloud.deployer.local.javaOpts` property.
+== Deploying Tasks
+Refer to the section, <<[[spring-cloud-dataflow-register-task-apps>>, for an example on how to get started using Tasks in Spring Cloud Data Flow.

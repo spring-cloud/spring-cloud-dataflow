@@ -91,6 +91,7 @@ import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.cloud.skipper.client.SkipperClient;
 import org.springframework.cloud.skipper.client.SkipperClientConfiguration;
+import org.springframework.cloud.skipper.client.SkipperClientProperties;
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
@@ -119,18 +120,6 @@ import org.springframework.scheduling.concurrent.ForkJoinPoolFactoryBean;
 public class DataFlowControllerAutoConfiguration {
 
 	private static Log logger = LogFactory.getLog(DataFlowControllerAutoConfiguration.class);
-
-	@Configuration
-	@Import(SkipperClientConfiguration.class)
-	@ConditionalOnBean({StreamDefinitionRepository.class, StreamDeploymentRepository.class})
-	public static class SkipperConfiguration {
-
-		@Bean
-		public SkipperStreamDeployer skipperStreamDeployer(SkipperClient skipperClient,
-				StreamDeploymentRepository streamDeploymentRepository) {
-			return new SkipperStreamDeployer(skipperClient, streamDeploymentRepository);
-		}
-	}
 
 	@Bean
 	public UriRegistry uriRegistry(DataSource dataSource) {
@@ -209,7 +198,8 @@ public class DataFlowControllerAutoConfiguration {
 	public RuntimeAppsController runtimeAppsController(StreamDefinitionRepository repository,
 			StreamDeploymentRepository streamDeploymentRepository, DeploymentIdRepository deploymentIdRepository,
 			AppDeployer appDeployer, MetricStore metricStore, SkipperClient skipperClient) {
-		return new RuntimeAppsController(repository, streamDeploymentRepository, deploymentIdRepository, appDeployer,
+		return new RuntimeAppsController(repository, streamDeploymentRepository, deploymentIdRepository,
+				appDeployer,
 				metricStore, runtimeAppsStatusFJPFB().getObject(), skipperClient);
 	}
 
@@ -245,7 +235,8 @@ public class DataFlowControllerAutoConfiguration {
 	public TaskDefinitionController taskDefinitionController(TaskDefinitionRepository repository,
 			DeploymentIdRepository deploymentIdRepository, TaskLauncher taskLauncher, AppRegistry appRegistry,
 			TaskService taskService) {
-		return new TaskDefinitionController(repository, deploymentIdRepository, taskLauncher, appRegistry, taskService);
+		return new TaskDefinitionController(repository, deploymentIdRepository, taskLauncher, appRegistry,
+				taskService);
 	}
 
 	@Bean
@@ -386,6 +377,19 @@ public class DataFlowControllerAutoConfiguration {
 		return new SecurityStateBean();
 	}
 
+	@Configuration
+	@Import(SkipperClientConfiguration.class)
+	@ConditionalOnBean({ StreamDefinitionRepository.class, StreamDeploymentRepository.class })
+	public static class SkipperConfiguration {
+
+		@Bean
+		public SkipperStreamDeployer skipperStreamDeployer(SkipperClient skipperClient,
+				StreamDeploymentRepository streamDeploymentRepository,
+				SkipperClientProperties skipperClientProperties) {
+			logger.info("Skipper URI [" + skipperClientProperties.getUri() + "]");
+			return new SkipperStreamDeployer(skipperClient, streamDeploymentRepository);
+		}
+	}
 
 	@ConfigurationProperties(prefix = "maven")
 	static class MavenConfigurationProperties extends MavenProperties {

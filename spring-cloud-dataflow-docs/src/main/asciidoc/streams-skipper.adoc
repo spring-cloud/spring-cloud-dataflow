@@ -1,0 +1,10 @@
+[[spring-cloud-dataflow-streams-skipper]]
+= Streams with Skipper
+
+The section <<spring-cloud-dataflow-stream-lifecycle-skipper>> covers the overall role of Skipper in Spring Cloud Data Flow.
+
+This section is a continuation of the getting started section that shows how Streams can be updated and rolled back specific to the Local Data Flow server.
+
+
+
+

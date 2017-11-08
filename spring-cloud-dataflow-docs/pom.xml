@@ -146,22 +146,12 @@
 								<project-artifactId>${project.artifactId}</project-artifactId>
 								<version-type-lowercase>${version-type-lowercase}</version-type-lowercase>
 								<snippets>${basedir}/target/generated-snippets</snippets>
+								<skipper-version>${spring-cloud-skipper.version}</skipper-version>
+								<skipper-version-type-lowercase>${skipper-version-type-lowercase}</skipper-version-type-lowercase>
+								<skipper-branch-or-tag>${skipper-branch-or-tag}</skipper-branch-or-tag>
 							</attributes>
 						</configuration>
 						<executions>
-							<execution>
-								<id>generate-docbook</id>
-								<phase>prepare-package</phase>
-								<goals>
-									<goal>process-asciidoc</goal>
-								</goals>
-								<configuration>
-									<backend>docbook5</backend>
-									<attributes>
-										<docinfo>true</docinfo>
-									</attributes>
-								</configuration>
-							</execution>
 							<execution>
 								<id>generate-html5</id>
 								<phase>prepare-package</phase>
@@ -243,50 +233,6 @@
 									</postProcess>
 								</configuration>
 							</execution>
-							<execution>
-								<id>pdf</id>
-								<goals>
-									<goal>generate-pdf</goal>
-								</goals>
-								<phase>prepare-package</phase>
-								<configuration>
-									<foCustomization>${basedir}/src/main/docbook/xsl/pdf.xsl</foCustomization>
-									<targetDirectory>${basedir}/target/docbook/pdf</targetDirectory>
-									<postProcess>
-										<copy todir="${basedir}/target/contents/reference">
-											<fileset dir="${basedir}/target/docbook">
-												<include name="**/*.pdf" />
-											</fileset>
-										</copy>
-										<move file="${basedir}/target/contents/reference/pdf/index.pdf" tofile="${basedir}/target/contents/reference/pdf/spring-cloud-dataflow-reference.pdf" />
-									</postProcess>
-								</configuration>
-							</execution>
-							<execution>
-								<id>epub</id>
-								<goals>
-									<goal>generate-epub3</goal>
-								</goals>
-								<phase>prepare-package</phase>
-								<configuration>
-									<epubCustomization>${basedir}/src/main/docbook/xsl/epub.xsl</epubCustomization>
-									<targetDirectory>${basedir}/target/docbook/epub</targetDirectory>
-									<preProcess>
-										<copy todir="${basedir}/target/docbook/epub/images">
-											<fileset dir="${basedir}/src/main/docbook/images" />
-											<fileset dir="${basedir}/src/main/asciidoc/images" />
-										</copy>
-									</preProcess>
-									<postProcess>
-										<copy todir="${basedir}/target/contents/reference/epub">
-											<fileset dir="${basedir}/target/docbook">
-												<include name="**/*.epub" />
-											</fileset>
-										</copy>
-										<move file="${basedir}/target/contents/reference/epub/index.epub" tofile="${basedir}/target/contents/reference/epub/spring-cloud-dataflow-reference.epub" />
-									</postProcess>
-								</configuration>
-							</execution>
 						</executions>
 					</plugin>
 					<plugin>
@@ -347,6 +293,7 @@
 									<target>
 										<taskdef resource="net/sf/antcontrib/antcontrib.properties" />
 										<taskdef name="stringutil" classname="ise.antelope.tasks.StringUtilTask" />
+
 										<var name="version-type" value="${project.version}" />
 										<propertyregex property="version-type" override="true" input="${version-type}" regexp=".*\.(.*)" replace="\1" />
 										<propertyregex property="version-type" override="true" input="${version-type}" regexp="(M)\d+" replace="MILESTONE" />
@@ -355,6 +302,16 @@
 										<stringutil string="${version-type}" property="version-type-lowercase">
 											<lowercase />
 										</stringutil>
+
+										<var name="skipper-version-type" value="${spring-cloud-skipper.version}" />
+										<propertyregex property="skipper-version-type" override="true" input="${skipper-version-type}" regexp=".*\.(.*)" replace="\1" />
+										<propertyregex property="skipper-version-type" override="true" input="${skipper-version-type}" regexp="(M)\d+" replace="MILESTONE" />
+										<propertyregex property="skipper-version-type" override="true" input="${skipper-version-type}" regexp="(RC)\d+" replace="MILESTONE" />
+										<propertyregex property="skipper-version-type" override="true" input="${skipper-version-type}" regexp="BUILD-(.*)" replace="SNAPSHOT" />
+										<stringutil string="${skipper-version-type}" property="skipper-version-type-lowercase">
+											<lowercase />
+										</stringutil>
+
 									</target>
 								</configuration>
 							</execution>

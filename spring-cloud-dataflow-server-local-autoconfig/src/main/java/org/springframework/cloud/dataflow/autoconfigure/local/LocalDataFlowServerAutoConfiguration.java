@@ -59,5 +59,4 @@ public class LocalDataFlowServerAutoConfiguration {
 		float fRatio = localDeployerProperties.getFreeDiskSpacePercentage() / 100F;
 		return new LRUCleaningResourceLoaderBeanPostProcessor(fRatio, repositoryCache);
 	}
-
 }

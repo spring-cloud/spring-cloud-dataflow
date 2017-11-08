@@ -1,5 +1,5 @@
 [[configuration]]
-= Server Configuration
+= Configuration
 
 [partintro]
 --
@@ -30,7 +30,7 @@ Note: Since analytics feature is enabled by default, the Data Flow server is exp
 The REST endpoint `/features` provides information on the features enabled/disabled.
 
 [[configuration-rdbms]]
-== Database Configuration
+== Database
 
 A relational database is used to store stream and task definitions as well as the state of executed tasks.
 Spring Cloud Data Flow provides schemas for H2, HSQLDB, MySQL, Oracle, Postgresql, DB2 and SqlServer that will be automatically created when the server starts.
@@ -130,6 +130,94 @@ spring:
     password: mypass
     driver-class-name:org.postgresql.Driver
 ```
+
+
+[[configuration-deployer]]
+== Local Deployer
+You can use the following configuration properties of the Data Flow Local server's deployer to customize how applications are deployed.
+
+[source,properties,indent=0,subs="verbatim,attributes,macros"]
+----
+spring.cloud.deployer.local.workingDirectoriesRoot=java.io.tmpdir # Directory in which all created processes will run and create log files.
+
+spring.cloud.deployer.local.deleteFilesOnExit=true # Whether to delete created files and directories on JVM exit.
+
+spring.cloud.deployer.local.envVarsToInherit=TMP,LANG,LANGUAGE,"LC_.*. # Array of regular expression patterns for environment variables that will be passed to launched applications.
+
+spring.cloud.deployer.local.javaCmd=java # Command to run java.
+
+spring.cloud.deployer.local.shutdownTimeout=30 # Max number of seconds to wait for app shutdown.
+
+spring.cloud.deployer.local.javaOpts= # The Java options to pass to the JVM
+----
+
+When deploying the application you can also set deployer properties prefixed with `deployer.<name of application>`, So for example to set Java options for the time application in the `ticktock` stream, use the following stream deployment properties.
+[source,bash]
+----
+dataflow:> stream create --name ticktock --definition "time --server.port=9000 | log"
+dataflow:> stream deploy --name ticktock --properties "deployer.time.local.javaOpts=-Xmx2048m -Dtest=foo"
+----
+
+As a convenience you can set the property `deployer.memory` to set the Java option `-Xmx`.  So for example,
+
+[source,bash]
+----
+dataflow:> stream deploy --name ticktock --properties "deployer.time.memory=2048m"
+----
+
+At deployment time, if you specify an `-Xmx` option in the `deployer.<app>.local.javaOpts` property in addition to a value of the `deployer.<app>.local.memory` option, the value in the `javaOpts` property has precedence.  Also, the `javaOpts` property set when deploying the application has precedence over the Data Flow server's `spring.cloud.deployer.local.javaOpts` property.
+
+[[configuration-maven]]
+== Maven
+If you want to override specific maven configuration properties (remote repositories, proxies, etc.) and/or run the Data Flow Server behind a proxy,
+you need to specify those properties as command line arguments when starting the Data Flow Server. For example:
+
+[source,bash,subs=attributes]
+----
+$ java -jar spring-cloud-dataflow-server-local-{project-version}.jar --maven.localRepository=mylocal
+--maven.remote-repositories.repo1.url=https://repo1
+--maven.remote-repositories.repo1.auth.username=user1
+--maven.remote-repositories.repo1.auth.password=pass1
+--maven.remote-repositories.repo1.snapshot-policy.update-policy=daily
+--maven.remote-repositories.repo1.snapshot-policy.checksum-policy=warn
+--maven.remote-repositories.repo1.release-policy.update-policy=never
+--maven.remote-repositories.repo1.release-policy.checksum-policy=fail
+--maven.remote-repositories.repo2.url=https://repo2
+--maven.remote-repositories.repo2.policy.update-policy=always
+--maven.remote-repositories.repo2.policy.checksum-policy=fail
+--maven.proxy.host=proxy1
+--maven.proxy.port=9010 --maven.proxy.auth.username=proxyuser1
+--maven.proxy.auth.password=proxypass1
+----
+
+By default, the protocol is set to `http`. You can omit the auth properties if the proxy doesn't need a username and password. Also, the maven `localRepository` is set to `${user.home}/.m2/repository/` by default.
+Like in the above example, the remote repositories can be specified along with their authentication (if needed). If the remote repositories are behind a proxy, then the proxy properties can be specified as above.
+
+The repository policies can be specified per remote repository configuration as above.
+The key `policy` is applicable to both `snapshot` and the `release` repository policies.
+
+You can refer https://github.com/eclipse/aether-core/blob/4cf5f7a406b516a45d8bf15e7dfe3fb3849cb87b/aether-api/src/main/java/org/eclipse/aether/repository/RepositoryPolicy.java#L16[Repository Policies] for the list of
+supported repository policies.
+
+As these are Spring Boot `@ConfigurationProperties` you can also specify them as environment variables, e.g. MAVEN_REMOTE_REPOSITORIES_REPO1_URL.
+Another common option, is to set the properties using the `SPRING_APPLICATION_JSON` environment variable.
+An example of how the JSON is structured is shown below:
+
+[source,bash]
+----
+$ SPRING_APPLICATION_JSON='{ "maven": { "local-repository": null,
+"remote-repositories": { "repo1": { "url": "https://repo1", "auth": { "username": "repo1user", "password": "repo1pass" } }, "repo2": { "url": "https://repo2" } },
+"proxy": { "host": "proxyhost", "port": 9018, "auth": { "username": "proxyuser", "password": "proxypass" } } } }' java -jar spring-cloud-dataflow-server-local-{project-version}.jar
+----
+
+[[configuration-skipper]]
+== Skipper
+To use features such as Stream update and rollback, the Data Flow Server delegates to the Skipper server to manage the Stream's lifecycle.  Set the configuration property `spring.cloud.skipper.client.uri` to the location of Skipper, e.g.
++
+[source,bash,subs=attributes]
+----
+$ java -jar -jar spring-cloud-dataflow-server-local-{project-version}.jar --spring.cloud.config.skipper.client.uri=http://192.51.100.1:7577/api
+----
 
 [[configuration-security]]
 == Security
