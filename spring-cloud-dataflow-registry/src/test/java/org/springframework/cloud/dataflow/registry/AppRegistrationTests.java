@@ -43,8 +43,12 @@ public class AppRegistrationTests {
 	@Test
 	public void testMetadata() throws IOException {
 		AppRegistration registration = new AppRegistration("foo", task, URI.create("file:///foobar"),
-				new DefaultResourceLoader());
+				URI.create("file:///foobar"), new DefaultResourceLoader());
 		assertThat(registration.getMetadataResource().getFile()).hasName("foobar");
+
+		registration = new AppRegistration("foo", task, URI.create("file:///foobar"),
+				new DefaultResourceLoader());
+		assertThat(registration.getMetadataResource()).isNull();
 
 		registration = new AppRegistration("foo", task, URI.create("file:///foobar"),
 				URI.create("file:///foobar-metadata"), new DefaultResourceLoader());

@@ -231,7 +231,7 @@ public class StreamCompletionProviderTests {
 					String filename = name + "-" + type;
 					File file = new File(ROOT, filename);
 					if (file.exists()) {
-						return new AppRegistration(name, type, file.toURI(), resourceLoader);
+						return new AppRegistration(name, type, file.toURI(), file.toURI(), resourceLoader);
 					}
 					else {
 						return null;

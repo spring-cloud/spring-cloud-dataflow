@@ -24,7 +24,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.core.Version;
@@ -42,8 +41,7 @@ import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.StreamDeployment;
 import org.springframework.cloud.dataflow.server.controller.StreamDefinitionController;
 import org.springframework.cloud.dataflow.server.repository.StreamDeploymentRepository;
-import org.springframework.cloud.deployer.resource.docker.DockerResource;
-import org.springframework.cloud.deployer.resource.maven.MavenResource;
+import org.springframework.cloud.dataflow.server.support.ResourceUtils;
 import org.springframework.cloud.deployer.spi.app.AppInstanceStatus;
 import org.springframework.cloud.deployer.spi.app.AppStatus;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
@@ -62,7 +60,6 @@ import org.springframework.cloud.skipper.domain.UpgradeRequest;
 import org.springframework.cloud.skipper.domain.UploadRequest;
 import org.springframework.cloud.skipper.io.DefaultPackageWriter;
 import org.springframework.cloud.skipper.io.PackageWriter;
-import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -99,83 +96,24 @@ public class SkipperStreamDeployer implements StreamDeployer {
 		this.streamDeploymentRepository = streamDeploymentRepository;
 	}
 
-	/**
-	 * Extracts the version from the resource.
-	 * @param resource to be used.
-	 * @return version the resource.
-	 */
-	public static String getResourceVersion(Resource resource) {
-		Assert.notNull(resource, "resource must not be null");
-		if (resource instanceof MavenResource) {
-			MavenResource mavenResource = (MavenResource) resource;
-			return mavenResource.getVersion();
-		}
-		else if (resource instanceof DockerResource) {
-			DockerResource dockerResource = (DockerResource) resource;
-			return formatDockerResource(dockerResource, (s, i) -> s.substring(i + 1, s.length()));
-		}
-		return extractGenericVersion(resource);
-	}
-
-	private static String extractGenericVersion(Resource resource)  {
+	public static List<AppStatus> deserializeAppStatus(String platformStatus) {
 		try {
-			String uri = resource.getURI().toString();
-			return uri.substring(getVersionIndex(uri) + 1, uri.lastIndexOf("."));
+			ObjectMapper mapper = new ObjectMapper();
+			mapper.addMixIn(AppStatus.class, AppStatusMixin.class);
+			mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+			SimpleModule module = new SimpleModule("CustomModel", Version.unknownVersion());
+			SimpleAbstractTypeResolver resolver = new SimpleAbstractTypeResolver();
+			resolver.addMapping(AppInstanceStatus.class, AppInstanceStatusImpl.class);
+			module.setAbstractTypes(resolver);
+			mapper.registerModule(module);
+			TypeReference<List<AppStatus>> typeRef = new TypeReference<List<AppStatus>>() {
+			};
+			List<AppStatus> result = mapper.readValue(platformStatus, typeRef);
+			return result;
 		}
-		catch (IOException ioe) {
-			throw new RuntimeException(ioe);
+		catch (Exception e) {
+			throw new IllegalArgumentException("Could not parse Skipper Platform Status JSON:" + platformStatus, e);
 		}
-	}
-
-	/**
-	 * Extracts the string representing the resource with the version number extracted.
-	 * @param resource to be used.
-	 * @return String representation of the resource.
-	 */
-	public static String getResourceWithoutVersion(Resource resource) {
-		Assert.notNull(resource, "resource must not be null");
-		if (resource instanceof MavenResource) {
-			MavenResource mavenResource = (MavenResource) resource;
-			return String.format("maven://%s:%s",
-					mavenResource.getGroupId(),
-					mavenResource.getArtifactId());
-		}
-		else if (resource instanceof DockerResource) {
-			DockerResource dockerResource = (DockerResource) resource;
-			return formatDockerResource(dockerResource, (s, i) -> s.substring(0, i));
-		}
-		return extractGenericResourceWithoutVersion(resource);
-	}
-
-	private static String formatDockerResource(DockerResource dockerResource, BiFunction<String, Integer, String> function) {
-		try {
-			String dockerResourceUri = dockerResource.getURI().toString();
-			Assert.isTrue(StringUtils.countOccurrencesOf(dockerResourceUri, ":") == 2,
-					"Invalid docker resource URI: " + dockerResourceUri);
-			int indexOfVersionSeparator = dockerResourceUri.lastIndexOf(":");
-			return function.apply(dockerResourceUri, indexOfVersionSeparator);
-		}
-		catch (IOException e) {
-			throw new RuntimeException(e);
-		}
-	}
-
-	private static String extractGenericResourceWithoutVersion(Resource resource) {
-		try {
-			String uri = resource.getURI().toString();
-			return String.format("%s.%s", uri.substring(0, getVersionIndex(uri)),
-					StringUtils.getFilenameExtension(uri));
-		}
-		catch (IOException ioe) {
-			throw new RuntimeException(ioe);
-		}
-	}
-
-	private static int getVersionIndex(String uri) {
-		int indexOfSnapshot = uri.lastIndexOf(".BUILD-SNAPSHOT");
-		return (indexOfSnapshot > -1) ?
-				uri.substring(0, indexOfSnapshot).lastIndexOf('-') :
-				uri.lastIndexOf('-');
 	}
 
 	@Override
@@ -207,26 +145,6 @@ public class SkipperStreamDeployer implements StreamDeployer {
 			}
 		}
 		return states;
-	}
-
-	public static List<AppStatus> deserializeAppStatus(String platformStatus) {
-		try {
-			ObjectMapper mapper = new ObjectMapper();
-			mapper.addMixIn(AppStatus.class, AppStatusMixin.class);
-			mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-			SimpleModule module = new SimpleModule("CustomModel", Version.unknownVersion());
-			SimpleAbstractTypeResolver resolver = new SimpleAbstractTypeResolver();
-			resolver.addMapping(AppInstanceStatus.class, AppInstanceStatusImpl.class);
-			module.setAbstractTypes(resolver);
-			mapper.registerModule(module);
-			TypeReference<List<AppStatus>> typeRef = new TypeReference<List<AppStatus>>() {
-			};
-			List<AppStatus> result = mapper.readValue(platformStatus, typeRef);
-			return result;
-		}
-		catch (Exception e) {
-			throw new IllegalArgumentException("Could not parse Skipper Platform Status JSON:" + platformStatus, e);
-		}
 	}
 
 	@Override
@@ -269,7 +187,7 @@ public class SkipperStreamDeployer implements StreamDeployer {
 		installProperties.setReleaseName(streamName);
 		installProperties.setConfigValues(new ConfigValues());
 		installRequest.setInstallProperties(installProperties);
-		StreamDeployment streamDeployment = new StreamDeployment(streamName, StreamDeployers.skipper.name(),  streamName,
+		StreamDeployment streamDeployment = new StreamDeployment(streamName, StreamDeployers.skipper.name(), streamName,
 				streamName, repoName);
 		skipperClient.install(installRequest);
 		this.streamDeploymentRepository.save(streamDeployment);
@@ -279,8 +197,8 @@ public class SkipperStreamDeployer implements StreamDeployer {
 
 	}
 
-	private File createPackageForStream(String packageName, String packageVersion, StreamDeploymentRequest
-			streamDeploymentRequest) {
+	private File createPackageForStream(String packageName, String packageVersion,
+			StreamDeploymentRequest streamDeploymentRequest) {
 		PackageWriter packageWriter = new DefaultPackageWriter();
 		Package pkgtoWrite = createPackage(packageName, packageVersion, streamDeploymentRequest);
 		Path tempPath;
@@ -296,8 +214,8 @@ public class SkipperStreamDeployer implements StreamDeployer {
 		return zipFile;
 	}
 
-	private Package createPackage(String packageName, String packageVersion, StreamDeploymentRequest
-			streamDeploymentRequest) {
+	private Package createPackage(String packageName, String packageVersion,
+			StreamDeploymentRequest streamDeploymentRequest) {
 		Package pkg = new Package();
 		PackageMetadata packageMetadata = new PackageMetadata();
 		packageMetadata.setApiVersion(SKIPPER_DEFAULT_API_VERSION);
@@ -311,8 +229,8 @@ public class SkipperStreamDeployer implements StreamDeployer {
 		return pkg;
 	}
 
-	private List<Package> createDependentPackages(String packageVersion, StreamDeploymentRequest
-			streamDeploymentRequest) {
+	private List<Package> createDependentPackages(String packageVersion,
+			StreamDeploymentRequest streamDeploymentRequest) {
 		List<Package> packageList = new ArrayList<>();
 		for (AppDeploymentRequest appDeploymentRequest : streamDeploymentRequest.getAppDeploymentRequests()) {
 			packageList.add(createDependentPackage(packageVersion, appDeploymentRequest));
@@ -320,8 +238,7 @@ public class SkipperStreamDeployer implements StreamDeployer {
 		return packageList;
 	}
 
-	private Package createDependentPackage(String packageVersion, AppDeploymentRequest
-			appDeploymentRequest) {
+	private Package createDependentPackage(String packageVersion, AppDeploymentRequest appDeploymentRequest) {
 		Package pkg = new Package();
 		String packageName = appDeploymentRequest.getDefinition().getName();
 
@@ -339,11 +256,13 @@ public class SkipperStreamDeployer implements StreamDeployer {
 		Map<String, Object> metadataMap = new HashMap<>();
 		Map<String, Object> specMap = new HashMap<>();
 
-		// Add version, including possible override via deploymentProperties - hack to store version in cmdline args
-		String version = getResourceVersion(appDeploymentRequest.getResource());
+		// Add version, including possible override via deploymentProperties - hack to store
+		// version in cmdline args
+		String version = ResourceUtils.getResourceVersion(appDeploymentRequest.getResource());
 		if (appDeploymentRequest.getCommandlineArguments().size() == 1) {
 			configValueMap.put("version", appDeploymentRequest.getCommandlineArguments().get(0));
-		} else {
+		}
+		else {
 			configValueMap.put("version", version);
 		}
 
@@ -351,7 +270,7 @@ public class SkipperStreamDeployer implements StreamDeployer {
 		metadataMap.put("name", packageName);
 
 		// Add spec
-		String resourceWithoutVersion = getResourceWithoutVersion(appDeploymentRequest.getResource());
+		String resourceWithoutVersion = ResourceUtils.getResourceWithoutVersion(appDeploymentRequest.getResource());
 		specMap.put("resource", resourceWithoutVersion);
 		specMap.put("applicationProperties", appDeploymentRequest.getDefinition().getProperties());
 		specMap.put("deploymentProperties", appDeploymentRequest.getDeploymentProperties());

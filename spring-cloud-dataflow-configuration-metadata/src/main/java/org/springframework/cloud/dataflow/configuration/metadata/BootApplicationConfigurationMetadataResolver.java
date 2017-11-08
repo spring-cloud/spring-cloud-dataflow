@@ -92,12 +92,14 @@ public class BootApplicationConfigurationMetadataResolver extends ApplicationCon
 	 */
 	public List<ConfigurationMetadataProperty> listProperties(Resource app, boolean exhaustive) {
 		try {
-			Archive archive = resolveAsArchive(app);
-			return listProperties(archive, exhaustive);
+			if (app != null) {
+				Archive archive = resolveAsArchive(app);
+				return listProperties(archive, exhaustive);
+			}
 		}
 		catch (IOException e) {
-			return Collections.emptyList();
 		}
+		return Collections.emptyList();
 	}
 
 	public List<ConfigurationMetadataProperty> listProperties(Archive archive, boolean exhaustive) {
