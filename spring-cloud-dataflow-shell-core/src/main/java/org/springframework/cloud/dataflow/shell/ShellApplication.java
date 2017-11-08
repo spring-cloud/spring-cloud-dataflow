@@ -17,8 +17,10 @@
 package org.springframework.cloud.dataflow.shell;
 
 import org.springframework.boot.Banner;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.cloud.dataflow.rest.client.config.DataFlowClientAutoConfiguration;
 
 /**
  * Bootstrap class for spring shell.
@@ -28,6 +30,7 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
  */
 @EnableDataFlowShell
 @SpringBootApplication
+@EnableAutoConfiguration(exclude = DataFlowClientAutoConfiguration.class)
 public class ShellApplication {
 
 	public static void main(String[] args) throws Exception {
