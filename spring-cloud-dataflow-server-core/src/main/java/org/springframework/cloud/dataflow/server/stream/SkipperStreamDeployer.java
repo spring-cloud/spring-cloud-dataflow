@@ -162,9 +162,7 @@ public class SkipperStreamDeployer implements StreamDeployer {
 
 	private static String extractGenericResourceWithoutVersion(Resource resource) {
 		try {
-			String uri = resource.getURI().toString();
-			return String.format("%s.%s", uri.substring(0, getVersionIndex(uri)),
-					StringUtils.getFilenameExtension(uri));
+			return resource.getURI().toString();
 		}
 		catch (IOException ioe) {
 			throw new RuntimeException(ioe);

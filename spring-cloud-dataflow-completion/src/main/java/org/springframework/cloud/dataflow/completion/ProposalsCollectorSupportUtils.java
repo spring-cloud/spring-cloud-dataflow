@@ -76,28 +76,31 @@ class ProposalsCollectorSupportUtils {
 
 	void addValueHintsProposals(final String dsl, AppRegistration appRegistration, final List<CompletionProposal> collector, final String propertyName, final ValueHintProvider[] valueHintProviders){
 		final Resource metadataResource = appRegistration.getMetadataResource();
-
-		final URLClassLoader classLoader = metadataResolver.createAppClassLoader(metadataResource);
-		this.doWithClassLoader(classLoader, () -> {
-			CompletionProposal.Factory proposals = expanding(dsl);
-			List<ConfigurationMetadataProperty> whiteList = metadataResolver.listProperties(metadataResource);
-			for (ConfigurationMetadataProperty property : metadataResolver.listProperties(metadataResource, true)) {
-				if (CompletionUtils.isMatchingProperty(propertyName, property, whiteList)) {
-					for (ValueHintProvider valueHintProvider : valueHintProviders) {
-						for (ValueHint valueHint : valueHintProvider.generateValueHints(property, classLoader)) {
-							collector.add(proposals.withSuffix(String.valueOf(valueHint.getValue()),
-									valueHint.getShortDescription()));
+		if (metadataResource != null) {
+			final URLClassLoader classLoader = metadataResolver.createAppClassLoader(metadataResource);
+			this.doWithClassLoader(classLoader, () -> {
+				CompletionProposal.Factory proposals = expanding(dsl);
+				List<ConfigurationMetadataProperty> whiteList = metadataResolver.listProperties(metadataResource);
+				for (ConfigurationMetadataProperty property : metadataResolver.listProperties(metadataResource, true)) {
+					if (CompletionUtils.isMatchingProperty(propertyName, property, whiteList)) {
+						for (ValueHintProvider valueHintProvider : valueHintProviders) {
+							for (ValueHint valueHint : valueHintProvider.generateValueHints(property, classLoader)) {
+								collector.add(proposals.withSuffix(String.valueOf(valueHint.getValue()),
+										valueHint.getShortDescription()));
+							}
 						}
 					}
 				}
-			}
-			return null;
-		});
+				return null;
+			});
+		}
 	}
 
 	boolean addAlreadyTypedValueHintsProposals(final String text, AppRegistration appRegistration, final List<CompletionProposal> collector, final String propertyName, final ValueHintProvider[] valueHintProviders, final String alreadyTyped){
 		final Resource metadataResource = appRegistration.getMetadataResource();
-
+		if (metadataResource == null) {
+			return false;
+		}
 		final URLClassLoader classLoader = metadataResolver.createAppClassLoader(metadataResource);
 		return this.doWithClassLoader(classLoader, () -> {
 			CompletionProposal.Factory proposals = expanding(text);
