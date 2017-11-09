@@ -22,22 +22,45 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 
+import org.springframework.cloud.dataflow.rest.util.CheckableResource;
 import org.springframework.cloud.dataflow.rest.util.HttpClientConfigurer;
 import org.springframework.cloud.dataflow.rest.util.ResourceBasedAuthorizationInterceptor;
 import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.Resource;
+
+import java.io.IOException;
 
 /**
- *
  * @author Mike Heath
  */
 public class HttpClientTest {
+
+	static final class TestException extends IOException {
+		TestException() {
+			super("It broke");
+		}
+	}
+
+	static final class ByteArrayCheckableResource extends ByteArrayResource implements CheckableResource {
+		private final IOException exception;
+
+		ByteArrayCheckableResource(byte[] byteArray, IOException exc) {
+			super(byteArray);
+			exception = exc;
+		}
+
+		@Override
+		public void check() throws IOException {
+			if (exception != null) {
+				throw exception;
+			}
+		}
+	}
 
 	@Test(expected = Passed.class)
 	public void resourceBasedAuthorizationHeader() throws Exception {
 		final String credentials = "Super Secret Credentials";
 
-		final Resource resource = new ByteArrayResource(credentials.getBytes());
+		final CheckableResource resource = new ByteArrayCheckableResource(credentials.getBytes(), null);
 
 		try (final CloseableHttpClient client = HttpClientConfigurer.create()
 				.addInterceptor(new ResourceBasedAuthorizationInterceptor(resource))
@@ -53,6 +76,26 @@ public class HttpClientTest {
 		}
 	}
 
-	static final class Passed extends RuntimeException {}
+	static final class Passed extends RuntimeException {
+	}
 
+	@Test(expected = TestException.class)
+	public void resourceBasedAuthorizationHeaderResourceCheck() throws Exception {
+		final String credentials = "Super Secret Credentials";
+
+		final CheckableResource resource = new ByteArrayCheckableResource(credentials.getBytes(), new TestException());
+
+		try (final CloseableHttpClient client = HttpClientConfigurer.create()
+				.addInterceptor(new ResourceBasedAuthorizationInterceptor(resource))
+				.addInterceptor((request, context) -> {
+					final String authorization = request.getFirstHeader(HttpHeaders.AUTHORIZATION).getValue();
+					Assertions.assertThat(authorization).isEqualTo(credentials);
+
+					// Throw an exception to short-circuit making an HTTP request
+					throw new Passed();
+				})
+				.buildHttpClient()) {
+			client.execute(new HttpGet("http://test.com"));
+		}
+	}
 }

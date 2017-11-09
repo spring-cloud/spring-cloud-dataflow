@@ -35,15 +35,16 @@ import org.springframework.util.StreamUtils;
  */
 public class ResourceBasedAuthorizationInterceptor implements HttpRequestInterceptor {
 
-	private final Resource resource;
+	private final CheckableResource resource;
 
-	public ResourceBasedAuthorizationInterceptor(Resource resource) {
+	public ResourceBasedAuthorizationInterceptor(CheckableResource resource) {
 		this.resource = resource;
 	}
 
 	@Override
 	public void process(HttpRequest httpRequest, HttpContext httpContext) throws HttpException, IOException {
 		final String credentials = StreamUtils.copyToString(resource.getInputStream(), StandardCharsets.UTF_8).trim();
+		resource.check();
 		httpRequest.addHeader(HttpHeaders.AUTHORIZATION, credentials);
 	}
 }

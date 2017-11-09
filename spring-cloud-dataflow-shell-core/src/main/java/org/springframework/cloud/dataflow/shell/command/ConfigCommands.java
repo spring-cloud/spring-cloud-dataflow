@@ -39,6 +39,7 @@ import org.springframework.cloud.dataflow.rest.resource.about.FeatureInfo;
 import org.springframework.cloud.dataflow.rest.resource.about.RuntimeEnvironmentDetails;
 import org.springframework.cloud.dataflow.rest.resource.about.SecurityInfo;
 import org.springframework.cloud.dataflow.rest.resource.security.SecurityInfoResource;
+import org.springframework.cloud.dataflow.rest.util.CheckableResource;
 import org.springframework.cloud.dataflow.rest.util.HttpClientConfigurer;
 import org.springframework.cloud.dataflow.rest.util.ProcessOutputResource;
 import org.springframework.cloud.dataflow.rest.util.ResourceBasedAuthorizationInterceptor;
@@ -53,7 +54,6 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
-import org.springframework.core.io.Resource;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
 import org.springframework.shell.core.CommandMarker;
@@ -197,7 +197,7 @@ public class ConfigCommands implements CommandMarker, InitializingBean, Applicat
 			}
 			if (StringUtils.hasText(credentialsProviderCommand)) {
 				this.targetHolder.getTarget().setTargetCredentials(new TargetCredentials(true));
-				final Resource credentialsResource = new ProcessOutputResource(credentialsProviderCommand.split("\\s+"));
+				final CheckableResource credentialsResource = new ProcessOutputResource(credentialsProviderCommand.split("\\s+"));
 				httpClientConfigurer.addInterceptor(new ResourceBasedAuthorizationInterceptor(credentialsResource));
 			}
 			this.restTemplate.setRequestFactory(httpClientConfigurer.buildClientHttpRequestFactory());

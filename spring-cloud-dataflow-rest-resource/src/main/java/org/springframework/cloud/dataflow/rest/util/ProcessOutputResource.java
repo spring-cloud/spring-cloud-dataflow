@@ -21,15 +21,20 @@ import java.io.InputStream;
 
 import org.springframework.core.io.AbstractResource;
 
+import static java.lang.String.format;
+
 /**
  * {@link org.springframework.core.io.Resource} implementation to create an
  * operating system process process and capture its output.
  *
  * @author Mike Heath
  */
-public class ProcessOutputResource extends AbstractResource {
+public class ProcessOutputResource extends AbstractResource implements CheckableResource {
 
 	private final ProcessBuilder processBuilder;
+
+	private final Object monitor = new Object();
+	private Process process;
 
 	public ProcessOutputResource(String... command) {
 		processBuilder = new ProcessBuilder(command);
@@ -42,11 +47,26 @@ public class ProcessOutputResource extends AbstractResource {
 
 	@Override
 	public InputStream getInputStream() throws IOException {
-		return processBuilder.start().getInputStream();
+		synchronized (monitor) {
+			process = processBuilder.start();
+		}
+		return process.getInputStream();
 	}
 
 	@Override
 	public String toString() {
 		return getDescription();
+	}
+
+	@Override
+	public void check() throws IOException {
+		synchronized (monitor) {
+			if (process != null && !process.isAlive()) {
+				int exitStatusCode = process.exitValue();
+				if (exitStatusCode != 0) {
+					throw new IOException(format("Command for resource %s failed with exit status code %d", toString(), exitStatusCode));
+				}
+			}
+		}
 	}
 }
