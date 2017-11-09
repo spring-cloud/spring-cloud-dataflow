@@ -908,7 +908,7 @@ DataFlowTemplate client = //...;
 Stream ticktock = Stream.Builder(client).name("ticktock").definition("time | log").create();
 ----
 [NOTE]
-For your convenience, the `spring-cloud-dataflow-rest-client` library provides a bean of type `Stream.StreamNameBuilder` with the `DataFlowTemplate` already configured.
+For your convenience, the `spring-cloud-dataflow-rest-client` library provides a bean of type `StreamBuilder` with the `DataFlowTemplate` already configured.
 
 === Creating Streams using the Java DSL
 
