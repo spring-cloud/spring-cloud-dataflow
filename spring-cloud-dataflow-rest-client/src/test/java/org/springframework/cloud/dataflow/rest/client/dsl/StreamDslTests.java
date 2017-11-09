@@ -3,8 +3,6 @@ package org.springframework.cloud.dataflow.rest.client.dsl;
 import java.util.Collections;
 import java.util.Map;
 
-import static org.assertj.core.api.Assertions.*;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -17,6 +15,8 @@ import org.springframework.cloud.dataflow.rest.client.DataFlowOperations;
 import org.springframework.cloud.dataflow.rest.client.StreamOperations;
 import org.springframework.cloud.dataflow.rest.resource.StreamDefinitionResource;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 /**
  * @author Vinicius Carvalho
  */
@@ -27,6 +27,12 @@ public class StreamDslTests {
 
 	@Mock
 	private StreamOperations streamOperations;
+
+	private StreamApplication timeApplication = new StreamApplication("time");
+
+	private StreamApplication filterApplication = new StreamApplication("filter");
+
+	private StreamApplication logApplication = new StreamApplication("log");
 
 	@Before
 	public void init() {
@@ -134,11 +140,11 @@ public class StreamDslTests {
 			}
 		}).when(streamOperations).deploy(Mockito.eq("ticktock"), Mockito.anyMap());
 
-		StreamBuilder streamBuilder = Stream.builder(client).name("ticktock").definition("time | log")
+		StreamDefinition streamDefinition = Stream.builder(client).name("ticktock").definition("time | log")
 				.create();
 		Mockito.verify(streamOperations, Mockito.times(1)).createStream(
 				Mockito.eq("ticktock"), Mockito.eq("time | log"), Mockito.eq(false));
-		Stream stream = streamBuilder.deploy();
+		Stream stream = streamDefinition.deploy();
 		assertThat("deploying").isEqualTo(stream.getStatus());
 	}
 
@@ -160,14 +166,16 @@ public class StreamDslTests {
 	@Test
 	public void testDuplicateNameWithLabel() throws Exception {
 		StreamApplication filter2 = new StreamApplication("filter").label("filter2");
-		Stream.builder(client).name("test").source("time").processor("filter").processor(filter2).sink("log").create();
+		Stream.builder(client).name("test").source(timeApplication).processor(filterApplication).processor(filter2)
+				.sink(logApplication).create();
 		Mockito.verify(streamOperations, Mockito.times(1)).createStream(
 				Mockito.eq("test"), Mockito.eq("time | filter | filter2: filter | log"), Mockito.eq(false));
 	}
 
 	@Test(expected = IllegalStateException.class)
 	public void testDuplicateNameNoLabel() throws Exception {
-		Stream.builder(client).name("test").source("time").processor("filter").processor("filter").sink("log").create();
+		Stream.builder(client).name("test").source(timeApplication).processor(filterApplication)
+				.processor(filterApplication).sink(logApplication).create();
 	}
 
 	@Test

@@ -7,7 +7,6 @@ import java.util.List;
 import org.springframework.cloud.dataflow.rest.client.DataFlowOperations;
 import org.springframework.cloud.dataflow.rest.resource.StreamDefinitionResource;
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 
 /**
  * Represents a Stream deployed on DataFlow server. Instances of this class are created using a fluent style builder {@link Builder}.
@@ -46,12 +45,12 @@ public class Stream {
 	}
 
 	/**
-	 *
-	 * @param client - {@link DataFlowOperations} client instance
-	 * @return A fluent style builder to create and deploy streams
+	 * Fluent API method to create a {@link StreamBuilder}.
+	 * @param client {@link DataFlowOperations} client instance
+	 * @return A fluent style builder to create streams
 	 */
-	public static Builder builder(DataFlowOperations client) {
-		return new Builder(client);
+	public static StreamBuilder builder(DataFlowOperations client) {
+		return new StreamBuilder(client);
 	}
 
 	String getDefinition() {
@@ -60,11 +59,11 @@ public class Stream {
 
 	/**
 	 * Undeploy the current {@link Stream}. This method invokes the remote server
-	 * @return A reference the the {@link StreamBuilder} so one can invoke other builder operations such as {@link StreamBuilder#deploy()}
+	 * @return A reference the the {@link StreamDefinition} so one can invoke other builder operations such as {@link StreamDefinition#deploy()}
 	 */
-	public StreamBuilder undeploy() {
+	public StreamDefinition undeploy() {
 		client.streamOperations().undeploy(this.name);
-		return new StreamBuilder(this.name, this.client, this.definition,
+		return new StreamDefinition(this.name, this.client, this.definition,
 				this.applications);
 	}
 
@@ -84,25 +83,6 @@ public class Stream {
 		return resource.getStatus();
 	}
 
-	public static class Builder {
-
-		private DataFlowOperations client;
-
-		private Builder(DataFlowOperations client) {
-			this.client = client;
-		}
-
-		/**
-		 *
-		 * @param name - The unique identifier of a Stream with the server
-		 * @return
-		 */
-		public StreamNameBuilder name(String name) {
-			return new StreamNameBuilder(name, client);
-		}
-
-	}
-
 	public static class StreamNameBuilder {
 
 		private String name;
@@ -113,7 +93,7 @@ public class Stream {
 
 		private String definition;
 
-		private StreamNameBuilder(String name, DataFlowOperations client) {
+		StreamNameBuilder(String name, DataFlowOperations client) {
 			this.client = client;
 			Assert.hasLength(name, "Stream name can't be empty");
 			this.name = name;
@@ -126,19 +106,6 @@ public class Stream {
 		 */
 		public SourceBuilder source(StreamApplication source) {
 			Assert.notNull(source, "Source application can't be null");
-			return new SourceBuilder(
-					source.type(StreamApplication.ApplicationType.SOURCE), this);
-		}
-
-		/**
-		 * Convenient wrapper around {@link #source(StreamApplication)} that creates a {@link StreamApplication} with the provided name
-		 * @param name
-		 * @return SourceBuilder
-		 */
-		public SourceBuilder source(String name) {
-			Assert.isTrue(StringUtils.hasLength(name),
-					"Source application can't be null");
-			StreamApplication source = new StreamApplication(name);
 			return new SourceBuilder(
 					source.type(StreamApplication.ApplicationType.SOURCE), this);
 		}
@@ -157,10 +124,10 @@ public class Stream {
 
 		/**
 		 * Creates the Stream. This method will invoke the remote server and create a stream
-		 * @return StreamBuilder to allow deploying operations on the created Stream
+		 * @return StreamDefinition to allow deploying operations on the created Stream
 		 */
-		private StreamBuilder create() {
-			return new StreamBuilder(this.name, this.client, this.definition,
+		private StreamDefinition create() {
+			return new StreamDefinition(this.name, this.client, this.definition,
 					this.applications);
 		}
 
@@ -200,10 +167,10 @@ public class Stream {
 
 		/**
 		 * Creates the Stream. This method will invoke the remote server and create a stream
-		 * @return StreamBuilder to allow deploying operations on the created Stream
+		 * @return StreamDefinition to allow deploying operations on the created Stream
 		 */
-		public StreamBuilder create() {
-			return new StreamBuilder(this.name, this.client, this.definition,
+		public StreamDefinition create() {
+			return new StreamDefinition(this.name, this.client, this.definition,
 					Collections.emptyList());
 		}
 	}
@@ -225,18 +192,7 @@ public class Stream {
 					processor.type(StreamApplication.ApplicationType.PROCESSOR),
 					this.parent);
 		}
-		/**
-		 * Convenient wrapper around {@link #processor(StreamApplication)} that creates a {@link StreamApplication} with the provided name
-		 * @param name
-		 * @return
-		 */
-		public ProcessorBuilder processor(String name) {
-			Assert.hasLength(name, "Processor name can't be empty");
-			StreamApplication processor = new StreamApplication(name);
-			return new ProcessorBuilder(
-					processor.type(StreamApplication.ApplicationType.PROCESSOR),
-					this.parent);
-		}
+
 		/**
 		 * Appends a {@link StreamApplication} as a sink for this stream
 		 * @param sink - The {@link StreamApplication} being added
@@ -247,18 +203,6 @@ public class Stream {
 			return new SinkBuilder(sink.type(StreamApplication.ApplicationType.SINK),
 					this.parent);
 		}
-		/**
-		 * Convenient wrapper around {@link #sink(StreamApplication)} that creates a {@link StreamApplication} with the provided name
-		 * @param name
-		 * @return
-		 */
-		public SinkBuilder sink(String name) {
-			Assert.hasLength(name, "Sink name can't be empty");
-			StreamApplication sink = new StreamApplication(name);
-			return new SinkBuilder(sink.type(StreamApplication.ApplicationType.SINK),
-					this.parent);
-		}
-
 	}
 
 	public static class ProcessorBuilder extends BaseBuilder {
@@ -268,18 +212,6 @@ public class Stream {
 			super(application, parent);
 		}
 
-		/**
-		 * Convenient wrapper around {@link #processor(StreamApplication)} that creates a {@link StreamApplication} with the provided name
-		 * @param name
-		 * @return
-		 */
-		public ProcessorBuilder processor(String name) {
-			Assert.hasLength(name, "Processor name can't be empty");
-			StreamApplication processor = new StreamApplication(name);
-			return new ProcessorBuilder(
-					processor.type(StreamApplication.ApplicationType.PROCESSOR),
-					this.parent);
-		}
 		/**
 		 * Appends a {@link StreamApplication} as a processor for this stream
 		 * @param processor - The {@link StreamApplication} being added
@@ -301,17 +233,7 @@ public class Stream {
 			return new SinkBuilder(sink.type(StreamApplication.ApplicationType.SINK),
 					this.parent);
 		}
-		/**
-		 * Convenient wrapper around {@link #sink(StreamApplication)} that creates a {@link StreamApplication} with the provided name
-		 * @param name
-		 * @return
-		 */
-		public SinkBuilder sink(String name) {
-			Assert.hasLength(name, "Sink name can't be empty");
-			StreamApplication sink = new StreamApplication(name);
-			return new SinkBuilder(sink.type(StreamApplication.ApplicationType.SINK),
-					this.parent);
-		}
+
 	}
 
 	public static class SinkBuilder extends BaseBuilder {
@@ -320,7 +242,7 @@ public class Stream {
 			super(application, parent);
 		}
 
-		public StreamBuilder create() {
+		public StreamDefinition create() {
 			return this.parent.create();
 		}
 
