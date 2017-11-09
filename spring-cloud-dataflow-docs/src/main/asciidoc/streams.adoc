@@ -885,6 +885,83 @@ would have all the data from those three sources sent to the file sink.
 The Fan-out use case is when you determine the destination of a stream based on some information that is only known at runtime.
 In this case, the link:http://docs.spring.io/spring-cloud-stream-app-starters/docs/Bacon.RELEASE/reference/html/spring-cloud-stream-modules-sinks.html#spring-cloud-stream-modules-router-sink[Router Application] can be used to specify how to direct the incoming message to one of N named destinations.
 
+[[spring-cloud-dataflow-stream-java-dsl]]
+== Stream Java DSL
+
+If you prefer to deploy streams programmatically, you can do so by using the fluent style DSL api provided by the `spring-cloud-dataflow-rest-client` module.
+The java DSL is a convenient wrapper around the `DataFlowTemplate` class that makes it simpler to create and deploy applications.
+Start by adding it to your project:
+
+[source,xml,subs="attributes+"]
+----
+<dependency>
+	<groupId>org.springframework.cloud</groupId>
+	<artifactId>spring-cloud-dataflow-rest-client</artifactId>
+	<version>{project-version}</version>
+</dependency>
+----
+
+To create a Stream you need to supply a `DataFlowTemplate` to the `Stream.Builder` static method:
+[source,java]
+----
+DataFlowTemplate client = //...;
+Stream ticktock = Stream.Builder(client).name("ticktock").definition("time | log").create();
+----
+[NOTE]
+For your convenience, the `spring-cloud-dataflow-rest-client` library provides a bean of type `Stream.StreamNameBuilder` with the `DataFlowTemplate` already configured.
+
+=== Creating Streams using the Java DSL
+
+The java DSL offers two styles to create Streams, if you prefer the pipes and filters DSL provided by dataflow you can use the `definition()` method and provide your own DSL definition.
+If you prefer a more fluent style usage, you can daisy chain methods via the `source()`, `processor()`, `sink()` methods.
+To demonstrate both styles we will create a simple stream using both approaches.
+
+[source,java]
+----
+@Autowired
+private Stream.StreamNameBuilder builder;
+
+public void usingDefinition() throws Exception{
+
+   Map<String, String> deploymentProperties = new HashMap<>();
+   deploymentProperties.put("app.splitter.producer.partitionKeyExpression",
+         "payload");
+   deploymentProperties.put("deployer.log.count", "2");
+
+   Stream woodchuck = builder.name("woodchuck").definition(
+         "http --server.port=9900 | splitter --expression=payload.split(' ') | log")
+         .create().deploy(deploymentProperties);
+
+   while(!woodchuck.getStatus().equals("deployed")){ # <1>
+      Thread.sleep(5000);
+   }
+
+   woodchuck.destroy();
+}
+
+public void fluent() throws Exception{
+
+   Stream woodchuck = builder.name("woodchuck")
+         .source(new StreamApplication("http").addProperty("server.port", 9900))
+         .processor(new StreamApplication("splitter")
+               .addProperty("producer.partitionKeyExpression", "payload"))
+         .sink(new StreamApplication("log")
+               .addDeploymentProperty("count", 2)) # <2>
+         .create().deploy();
+
+   while(!woodchuck.getStatus().equals("deployed")){
+      Thread.sleep(5000);
+   }
+
+   woodchuck.destroy();
+
+}
+----
+
+<1> You can poll for the stream status using `getStatus()` method
+<2> When using the fluent style and adding deployment properties to the application you don't need to prefix it with `deployer.<app_name>`
+
+
 
 [[spring-cloud-dataflow-stream-multi-binder]]
 == Stream applications with multiple binder configurations
