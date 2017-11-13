@@ -27,7 +27,10 @@ import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.autoconfigure.web.ErrorAttributes;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.cloud.common.security.AuthorizationProperties;
+import org.springframework.cloud.common.security.support.SecurityStateBean;
 import org.springframework.cloud.deployer.resource.docker.DockerResourceLoader;
 import org.springframework.cloud.deployer.resource.maven.MavenProperties;
 import org.springframework.cloud.deployer.resource.maven.MavenResourceLoader;
@@ -69,6 +72,7 @@ import org.springframework.cloud.skipper.server.service.ReleaseStateUpdateServic
 import org.springframework.cloud.skipper.server.service.RepositoryInitializationService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.data.map.repository.config.EnableMapRepositories;
@@ -94,6 +98,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableJpaRepositories(basePackages = "org.springframework.cloud.skipper.server.repository")
 @EnableTransactionManagement
 @EnableAsync
+@Import({ SecurityConfiguration.class })
 public class SkipperServerConfiguration implements AsyncConfigurer {
 
 	public static final String SKIPPER_EXECUTOR = "skipperThreadPoolTaskExecutor";
@@ -305,6 +310,17 @@ public class SkipperServerConfiguration implements AsyncConfigurer {
 	@Bean
 	public PackageWriter packageWriter() {
 		return new DefaultPackageWriter();
+	}
+
+	@Bean
+	public SecurityStateBean securityStateBean() {
+		return new SecurityStateBean();
+	}
+
+	@Bean
+	@ConfigurationProperties(prefix = "spring.cloud.skipper.security.authorization")
+	public AuthorizationProperties authorizationProperties() {
+		return new AuthorizationProperties();
 	}
 
 }

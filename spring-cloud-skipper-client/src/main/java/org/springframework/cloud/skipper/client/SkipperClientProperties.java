@@ -19,7 +19,9 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
  * Configuration properties for making a connection to the Skipper server.
+ *
  * @author Mark Pollack
+ * @author Gunnar Hillert
  */
 @ConfigurationProperties("spring.cloud.skipper.client")
 public class SkipperClientProperties {
@@ -46,7 +48,7 @@ public class SkipperClientProperties {
 
 	private String password = DEFAULT_PASSWORD;
 
-	private boolean skipSllValidation = Boolean.getBoolean(DEFAULT_SKIP_SSL_VALIDATION);
+	private boolean skipSslValidation = Boolean.getBoolean(DEFAULT_SKIP_SSL_VALIDATION);
 
 	private String credentialsProviderCommand = DEFAULT_CREDENTIALS_PROVIDER_COMMAND;
 
@@ -66,12 +68,12 @@ public class SkipperClientProperties {
 		this.password = password;
 	}
 
-	public boolean isSkipSllValidation() {
-		return skipSllValidation;
+	public boolean isSkipSslValidation() {
+		return skipSslValidation;
 	}
 
-	public void setSkipSllValidation(boolean skipSllValidation) {
-		this.skipSllValidation = skipSllValidation;
+	public void setSkipSslValidation(boolean skipSslValidation) {
+		this.skipSslValidation = skipSslValidation;
 	}
 
 	public String getCredentialsProviderCommand() {

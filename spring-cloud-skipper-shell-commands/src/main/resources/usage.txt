@@ -1,6 +1,6 @@
 Skipper Options:
 
-  --spring.cloud.skipper.client.serverUrl=<uri>                        Address of the Skipper Server [default: http://localhost:7577].
+  --spring.cloud.skipper.client.uri=<uri>                        Address of the Skipper Server [default: http://localhost:7577].
   --spring.cloud.skipper.client.username=<USER>                        Username of the Skipper Server [no default].
   --spring.cloud.skipper.client.password=<PASSWORD>                    Password of the Skipper Server [no default].
   --spring.cloud.skipper.client.credentials-provider-command=<COMMAND> Executes an external command which must return an OAuth Access Token [no default].

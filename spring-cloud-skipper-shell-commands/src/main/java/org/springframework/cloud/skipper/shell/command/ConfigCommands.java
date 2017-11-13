@@ -93,5 +93,4 @@ public class ConfigCommands extends AbstractSkipperCommand {
 		}
 		return this.skipperClient.info();
 	}
-
 }

@@ -1,7 +1,12 @@
+
 info:
   app:
     name: "@project.artifactId@"
     version: "@project.version@"
+management:
+  security:
+    roles: MANAGE
+  context-path: /actuator
 server:
   port: 7577
 spring:
@@ -27,6 +32,80 @@ spring:
             local: true
             description: Default local database backed repository
             repoOrder: 1
+      security:
+        authorization:
+          enabled: true
+          permit-all-paths: "/authenticate,/security/info,/features,/assets/**,/dashboard/logout-success-oauth.html"
+          authenticated-paths: "/api/**,/,/api"
+          rules:
+            # About
+
+            - GET    /api/about                      => hasRole('ROLE_VIEW')
+
+             # AppDeployerDatas
+
+            - GET    /api/appDeployerDatas           => hasRole('ROLE_VIEW')
+
+            # Delete
+
+            - DELETE /api/delete/**                  => hasRole('ROLE_CREATE')
+
+            # Deployers
+
+            - GET /api/deployers                     => hasRole('ROLE_VIEW')
+
+            # History
+
+            - GET /api/history/**                    => hasRole('ROLE_VIEW')
+
+            # Install
+
+            - POST /api/install                      => hasRole('ROLE_CREATE')
+            - POST /api/install/**                   => hasRole('ROLE_CREATE')
+
+            # List
+
+            - GET /api/list                         => hasRole('ROLE_VIEW')
+            - GET /api/list/**                      => hasRole('ROLE_VIEW')
+
+            # Manifest
+
+            - GET /api/manifest/**                  => hasRole('ROLE_VIEW')
+
+            # PackageMetaData
+
+            - GET /api/packageMetadata              => hasRole('ROLE_VIEW')
+            - GET /api/packageMetadata/**           => hasRole('ROLE_VIEW')
+
+            # Release
+
+            - GET /api/releases                     => hasRole('ROLE_VIEW')
+
+            # Repositories
+
+            - GET /api/repositories                 => hasRole('ROLE_VIEW')
+            - GET /api/repositories/**              => hasRole('ROLE_VIEW')
+
+            # Rollback
+
+            - POST /api/rollback/**                 => hasRole('ROLE_CREATE')
+
+            # Status
+
+            - POST /api/status/**                   => hasRole('ROLE_VIEW')
+
+            # Upgrade
+
+            - POST /api/upgrade                     => hasRole('ROLE_CREATE')
+
+            # Upload
+
+            - POST /api/upload                      => hasRole('ROLE_CREATE')
+
+            # Boot Endpoints
+
+            - GET  /actuator/**                     => hasRole('ROLE_MANAGE')
+
   mustache:
     check-template-location: false
 
@@ -34,9 +113,6 @@ maven:
   remoteRepositories:
     springRepo:
       url: https://repo.spring.io/libs-snapshot
-
-
-
 
 logging:
   level:

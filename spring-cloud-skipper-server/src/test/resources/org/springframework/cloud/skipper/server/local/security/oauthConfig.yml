@@ -1,0 +1,11 @@
+security:
+  oauth2:
+    client:
+      client-id: myclient
+      client-secret: mysecret
+      access-token-uri: http://127.0.0.1:${oauth2.port}/oauth/token
+      user-authorization-uri: http://127.0.0.1:${oauth2.port}/oauth/authorize
+    resource:
+      user-info-uri: http://127.0.0.1:${oauth2.port}/me
+    authorization:
+      check-token-access: isAuthenticated()

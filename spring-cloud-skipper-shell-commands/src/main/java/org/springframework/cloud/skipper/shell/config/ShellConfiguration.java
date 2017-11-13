@@ -21,7 +21,6 @@ import org.jline.reader.Parser;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.cloud.skipper.client.SkipperClientConfiguration;
-import org.springframework.cloud.skipper.client.SkipperClientProperties;
 import org.springframework.cloud.skipper.shell.command.support.ConsoleUserInput;
 import org.springframework.cloud.skipper.shell.command.support.InitializeConnectionApplicationRunner;
 import org.springframework.cloud.skipper.shell.command.support.InteractiveModeApplicationRunner;
@@ -42,10 +41,21 @@ import org.springframework.shell.jline.PromptProvider;
  * @author Eric Bottard
  * @author Ilayaperumal Gopinathan
  * @author Janne Valkealahti
+ * @author Gunnar Hillert
  */
 @Configuration
 @Import(SkipperClientConfiguration.class)
 public class ShellConfiguration {
+
+	@Bean
+	public ApplicationRunner helpAwareShellApplicationRunner() {
+		return new HelpAwareShellApplicationRunner();
+	}
+
+	@Bean
+	public ApplicationRunner initialConnectionApplicationRunner() {
+		return new InitialConnectionApplicationRunner();
+	}
 
 	@Bean
 	public ApplicationRunner initialConnectionApplicationRunner(TargetHolder targetHolder,
