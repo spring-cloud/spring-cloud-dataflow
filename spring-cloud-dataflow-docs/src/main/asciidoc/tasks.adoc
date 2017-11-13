@@ -351,6 +351,44 @@ For example:
 ```
 stream create task-stream --definition "http --port=9000 | tasklaunchrequest-transform --uri=maven://org.springframework.cloud.task.app:timestamp-task:jar:1.2.0.RELEASE | task-launcher-local --maven.remote-repositories.repo1.url=http://repo.spring.io/libs-release"
 ```
+=== Launching a Composed Task From a Stream
+A composed task can be launched using one of the `task-launcher` sinks as discussed
+<<spring-cloud-dataflow-launch-tasks-from-stream, here>>.  Since we will be using
+the `ComposedTaskRunner` directly we will need to setup the task definitions it
+will use prior to the creation of the composed task launching stream.  So let's
+say that we wanted to create the following composed task definition `AAA && BBB`.
+The first step would be to create the task definitions.  For example:
+```
+task create CTR-AAA --definition "AAA"
+task create CTR-BBB --definition "BBB"
+```
+Now that the task definitions we need for composed task definition are ready, we
+need to create a stream that will launch `ComposedTaskRunner`.
+So in this case we will create a stream that has a trigger that will emit a message
+once every 30 seconds, a transformer that will create a `TaskLaunchRequest` for
+each message received, and a `task-launcher-local` sink that will launch a
+the `ComposedTaskRunner` on our local machine. The stream should look something like this:
+```
+stream create ctr-stream --definition "time --fixed-delay=30 | tasklaunchrequest-transform --uri=maven://org.springframework.cloud.task.app:composedtaskrunner-task:<current release> --command-line-arguments='--graph=taskfun-AAA&&taskfun-BBB --increment-instance-enabled=true --spring.datasource.url=...' | task-launcher-local"
+```
+In the example above we see that the `tasklaunchrequest-transform` is establishing
+2 primary components:
+
+* *uri* - the URI of the `ComposedTaskRunner` that will be used.
+* *command-line-arguments* - that configure the `ComposedTaskRunner`.
+
+For now let's focus on the configuration that is required to launch the
+`ComposedTaskRunner`:
+
+* *graph* - this is the graph that is to be executed by the `ComposedTaskRunner`.
+In this case it is `AAA&&BBB`
+* *increment-instance-enabled* - this allows each execution of `ComposedTaskRunner`
+to be unique.  `ComposedTaskRunner` is built using http://projects.spring.io/spring-batch/[Spring Batch], and thus each
+we will want a new Job Instance for each launch of the `ComposedTaskRunner`.  To
+do this we set the increment-instance-enabled to be `true`.
+* *spring.datasource.** - establishes the datasource that is used by Spring Cloud
+Data Flow.  This is so that the `ComposedTaskRunner` can update the state of
+its execution.
 
 [[spring-cloud-dataflow-composed-tasks]]
 == Composed Tasks
@@ -528,46 +566,6 @@ NOTE: Restarting a Composed Task job that has been stopped (via the
 Spring Cloud Data Flow Dashboard or RESTful API), will relaunch  the
 `STOPPED` child task, and then launch the remaining (unlaunched) child tasks
 in the specified order.
-
-==== Launching a Composed Task From a Stream
-A composed task can be launched using one of the `task-launcher` sinks as discussed
-<<spring-cloud-dataflow-launch-tasks-from-stream, here>>.  Since we will be using
-the `ComposedTaskRunner` directly we will need to setup the task definitions it
-will use prior to the creation of the composed task launching stream.  So let's
-say that we wanted to create the following composed task definition `AAA && BBB`.
-The first step would be to create the task definitions.  For example:
-```
-task create CTR-AAA --definition "AAA"
-task create CTR-BBB --definition "BBB"
-```
-Now that the task definitions we need for composed task definition are ready, we
-need to create a stream that will launch `ComposedTaskRunner`.
-So in this case we will create a stream that has a trigger that will emit a message
-once every 30 seconds, a transformer that will create a `TaskLaunchRequest` for
-each message received, and a `task-launcher-local` sink that will launch a
-the `ComposedTaskRunner` on our local machine. The stream should look something like this:
-```
-stream create ctr-stream --definition "time --fixed-delay=30 | tasklaunchrequest-transform --uri=maven://org.springframework.cloud.task.app:composedtaskrunner-task:<current release> --command-line-arguments='--graph=taskfun-AAA&&taskfun-BBB --increment-instance-enabled=true --spring.datasource.url=...' | task-launcher-local"
-```
-In the example above we see that the `tasklaunchrequest-transform` is establishing
-2 primary components:
-
-* *uri* - the URI of the `ComposedTaskRunner` that will be used.
-* *command-line-arguments* - that configure the `ComposedTaskRunner`.
-
-For now let's focus on the configuration that is required to launch the
-`ComposedTaskRunner`:
-
-* *graph* - this is the graph that is to be executed by the `ComposedTaskRunner`.
-In this case it is `AAA&&BBB`
-* *increment-instance-enabled* - this allows each execution of `ComposedTaskRunner`
-to be unique.  `ComposedTaskRunner` is built using http://projects.spring.io/spring-batch/[Spring Batch], and thus each
-we will want a new Job Instance for each launch of the `ComposedTaskRunner`.  To
-do this we set the increment-instance-enabled to be `true`.
-* *spring.datasource.** - establishes the datasource that is used by Spring Cloud
-Data Flow.  This is so that the `ComposedTaskRunner` can update the state of
-its execution.
-
 
 == Composed Tasks DSL
 
