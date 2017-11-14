@@ -113,7 +113,7 @@ public class BootVersionsCompletionProviderTests {
 					String filename = name + "-1.0.0.BUILD-SNAPSHOT.jar";
 					File file = new File(ROOT, filename);
 					if (file.exists()) {
-						return new AppRegistration(name, type, file.toURI(), resourceLoader);
+						return new AppRegistration(name, type, file.toURI(), file.toURI(), resourceLoader);
 					}
 					else {
 						return null;

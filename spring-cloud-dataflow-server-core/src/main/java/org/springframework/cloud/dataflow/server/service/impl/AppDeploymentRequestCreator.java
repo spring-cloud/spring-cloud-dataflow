@@ -196,7 +196,6 @@ public class AppDeploymentRequestCreator {
 			nextAppCount = getInstanceCount(deployerDeploymentProperties);
 			isDownStreamAppPartitioned = isPartitionedConsumer(appDeployTimeProperties, upstreamAppSupportsPartition);
 
-			logger.info(String.format("Downloading resource URI [%s]", appRegistration.getUri()));
 			Resource appResource = appRegistration.getResource();
 			Resource metadataResource = appRegistration.getMetadataResource();
 

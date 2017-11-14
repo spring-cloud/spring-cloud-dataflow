@@ -124,7 +124,7 @@ public class AppRegistration implements Comparable<AppRegistration> {
 	}
 
 	public Resource getMetadataResource() {
-		return metadataUri != null ? this.loader.getResource(this.metadataUri.toString()) : getResource();
+		return metadataUri != null ? this.loader.getResource(this.metadataUri.toString()) : null;
 	}
 
 	public Resource getResource() {
