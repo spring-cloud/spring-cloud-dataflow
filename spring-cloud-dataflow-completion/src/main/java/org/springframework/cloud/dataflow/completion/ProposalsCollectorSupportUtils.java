@@ -54,21 +54,24 @@ class ProposalsCollectorSupportUtils {
 
 	void addPropertiesProposals(String text, String startsWith, AppRegistration appRegistration, Set<String> alreadyPresentOptions, List<CompletionProposal> collector, int detailLevel){
 		Resource metadataResource = appRegistration.getMetadataResource();
-		CompletionProposal.Factory proposals = expanding(text);
-
 		// For whitelisted properties, use their simple name
-		for (ConfigurationMetadataProperty property : metadataResolver.listProperties(metadataResource)) {
-			String name = property.getName();
-			if (!alreadyPresentOptions.contains(name) && name.startsWith(startsWith)) {
-				collector.add(proposals.withSeparateTokens("--" + property.getName() + "=", property.getShortDescription()));
+		if (metadataResource != null) {
+			CompletionProposal.Factory proposals = expanding(text);
+			for (ConfigurationMetadataProperty property : metadataResolver.listProperties(metadataResource)) {
+				String name = property.getName();
+				if (!alreadyPresentOptions.contains(name) && name.startsWith(startsWith)) {
+					collector.add(proposals
+							.withSeparateTokens("--" + property.getName() + "=", property.getShortDescription()));
+				}
 			}
-		}
-		// For other properties (including WL'ed in full form), use their id
-		if (detailLevel > 1) {
-			for (ConfigurationMetadataProperty property : metadataResolver.listProperties(metadataResource, true)) {
-				String id = property.getId();
-				if (!alreadyPresentOptions.contains(id) && id.startsWith(startsWith)) {
-					collector.add(proposals.withSeparateTokens("--" + property.getId() + "=", property.getShortDescription()));
+			// For other properties (including WL'ed in full form), use their id
+			if (detailLevel > 1) {
+				for (ConfigurationMetadataProperty property : metadataResolver.listProperties(metadataResource, true)) {
+					String id = property.getId();
+					if (!alreadyPresentOptions.contains(id) && id.startsWith(startsWith)) {
+						collector.add(proposals
+								.withSeparateTokens("--" + property.getId() + "=", property.getShortDescription()));
+					}
 				}
 			}
 		}

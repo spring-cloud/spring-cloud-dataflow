@@ -162,6 +162,7 @@ public class SkipperStreamDeployer implements StreamDeployer {
 
 	private static String extractGenericResourceWithoutVersion(Resource resource) {
 		try {
+			// For generic resources we return the complete URI which could contain the version as well
 			return resource.getURI().toString();
 		}
 		catch (IOException ioe) {
