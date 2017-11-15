@@ -283,75 +283,6 @@ The default Task/Batch event and destination names on the broker are enumerated 
 |Skip events|`skip-events`
 |===
 
-[[spring-cloud-dataflow-launch-tasks-from-stream]]
-== Launching Tasks from a Stream
-
-You can launch a task from a stream by using one of the available `task-launcher` sinks. Currently the platforms supported
-via the `task-launcher` sinks are
-https://github.com/spring-cloud-stream-app-starters/tasklauncher-local[local],
-https://github.com/spring-cloud-stream-app-starters/tasklauncher-cloudfoundry[Cloud Foundry], and
-https://github.com/spring-cloud-stream-app-starters/tasklauncher-yarn[Yarn].
-
-NOTE: `task-launcher-local` is meant for development purposes only.
-
-A `task-launcher` sink expects a message containing a https://github.com/spring-cloud/spring-cloud-task/blob/master/spring-cloud-task-stream/src/main/java/org/springframework/cloud/task/launcher/TaskLaunchRequest.java[TaskLaunchRequest] object in its payload. From the `TaskLaunchRequest` object the `task-launcher` will obtain the URI of the artifact to be launched as well as the environment properties, command line arguments, deployment properties and application name to be used by the task.
-
-The https://github.com/spring-cloud-stream-app-starters/tasklauncher-local/blob/v1.2.0.RELEASE/spring-cloud-starter-stream-sink-task-launcher-local/README.adoc[task-launcher-local] can be added to the available sinks by executing the app register command as follows (for the Rabbit Binder):
-
-```
-app register --name task-launcher-local --type sink --uri maven://org.springframework.cloud.stream.app:task-launcher-local-sink-rabbit:jar:1.2.0.RELEASE
-```
-
-In the case of a maven based task that is to be launched, the `task-launcher` application is responsible for downloading the artifact.  You *must* configure the `task-launcher` with the appropriate configuration of https://github.com/spring-cloud/spring-cloud-deployer/blob/master/spring-cloud-deployer-resource-maven/src/main/java/org/springframework/cloud/deployer/resource/maven/MavenProperties.java[Maven Properties] such as `--maven.remote-repositories.repo1.url=http://repo.spring.io/libs-milestone"` to resolve artifacts, in this case against a milestone repo.  Note that this repo can be different than the one used to register the `task-launcher` application itself.
-
-=== TriggerTask
-
-One way to launch a task using the `task-launcher` is to use the https://github.com/spring-cloud-stream-app-starters/triggertask/blob/v1.2.0.RELEASE/spring-cloud-starter-stream-source-triggertask/README.adoc[triggertask] source. The `triggertask` source
-will emit a message with a `TaskLaunchRequest` object containing the required launch information.
-The `triggertask` can be added to the available sources by executing the app register command as follows (for the Rabbit Binder):
-
-```
-app register --type source --name triggertask --uri maven://org.springframework.cloud.stream.app:triggertask-source-rabbit:1.2.0.RELEASE
-```
-
-An example of this would be to launch the timestamp task once every 60 seconds, the stream to implement this would look like:
-
-```
-stream create foo --definition "triggertask --triggertask.uri=maven://org.springframework.cloud.task.app:timestamp-task:jar:1.2.0.RELEASE --trigger.fixed-delay=60 --triggertask.environment-properties=spring.datasource.url=jdbc:h2:tcp://localhost:19092/mem:dataflow,spring.datasource.username=sa | task-launcher-local --maven.remote-repositories.repo1.url=http://repo.spring.io/libs-release" --deploy
-```
-
-If you execute `runtime apps` you can find the log file for the task launcher sink. Tailing that file you can find the log file for the launched tasks. The setting of `triggertask.environment-properties` is so that all the task executions can be collected in the same H2 database used in the local version of the Data Flow Server.  You can then see the list of task executions using the shell command `task execution list`
-
-[source,bash,options="nowrap"]
-----
-dataflow:>task execution list
-╔════════════════════╤══╤════════════════════════════╤════════════════════════════╤═════════╗
-║     Task Name      │ID│         Start Time         │          End Time          │Exit Code║
-╠════════════════════╪══╪════════════════════════════╪════════════════════════════╪═════════╣
-║timestamp-task_26176│4 │Tue May 02 12:13:49 EDT 2017│Tue May 02 12:13:49 EDT 2017│0        ║
-║timestamp-task_32996│3 │Tue May 02 12:12:49 EDT 2017│Tue May 02 12:12:49 EDT 2017│0        ║
-║timestamp-task_58971│2 │Tue May 02 12:11:50 EDT 2017│Tue May 02 12:11:50 EDT 2017│0        ║
-║timestamp-task_13467│1 │Tue May 02 12:10:50 EDT 2017│Tue May 02 12:10:50 EDT 2017│0        ║
-╚════════════════════╧══╧════════════════════════════╧════════════════════════════╧═════════╝
-----
-
-=== TaskLaunchRequest-transform
-
-Another option to start a task using the `task-launcher` would be to create a stream using the
-https://github.com/spring-cloud-stream-app-starters/tasklaunchrequest-transform[Tasklaunchrequest-transform] processor to translate a message payload to a `TaskLaunchRequest`.
-
-The `tasklaunchrequest-transform` can be added to the available processors by executing the app register command as follows (for the Rabbit Binder):
-
-```
-app register --type processor --name tasklaunchrequest-transform --uri maven://org.springframework.cloud.stream.app:tasklaunchrequest-transform-processor-rabbit:1.2.0.RELEASE
-```
-
-For example:
-
-```
-stream create task-stream --definition "http --port=9000 | tasklaunchrequest-transform --uri=maven://org.springframework.cloud.task.app:timestamp-task:jar:1.2.0.RELEASE | task-launcher-local --maven.remote-repositories.repo1.url=http://repo.spring.io/libs-release"
-```
-
 [[spring-cloud-dataflow-composed-tasks]]
 == Composed Tasks
 
@@ -696,7 +627,76 @@ Using the Spring Cloud Data Flow Dashboard to create the same
 .Split with conditional execution
 image::{dataflow-asciidoc}/images/dataflow-ctr-split-contains-conditional.png[Composed Task Split With Conditional Execution, scaledwidth="50%"]
 
-== Launching a Composed Task From a Stream
+[[spring-cloud-dataflow-launch-tasks-from-stream]]
+== Launching Tasks from a Stream
+
+You can launch a task from a stream by using one of the available `task-launcher` sinks. Currently the platforms supported
+via the `task-launcher` sinks are
+https://github.com/spring-cloud-stream-app-starters/tasklauncher-local[local],
+https://github.com/spring-cloud-stream-app-starters/tasklauncher-cloudfoundry[Cloud Foundry], and
+https://github.com/spring-cloud-stream-app-starters/tasklauncher-yarn[Yarn].
+
+NOTE: `task-launcher-local` is meant for development purposes only.
+
+A `task-launcher` sink expects a message containing a https://github.com/spring-cloud/spring-cloud-task/blob/master/spring-cloud-task-stream/src/main/java/org/springframework/cloud/task/launcher/TaskLaunchRequest.java[TaskLaunchRequest] object in its payload. From the `TaskLaunchRequest` object the `task-launcher` will obtain the URI of the artifact to be launched as well as the environment properties, command line arguments, deployment properties and application name to be used by the task.
+
+The https://github.com/spring-cloud-stream-app-starters/tasklauncher-local/blob/v1.2.0.RELEASE/spring-cloud-starter-stream-sink-task-launcher-local/README.adoc[task-launcher-local] can be added to the available sinks by executing the app register command as follows (for the Rabbit Binder):
+
+```
+app register --name task-launcher-local --type sink --uri maven://org.springframework.cloud.stream.app:task-launcher-local-sink-rabbit:jar:1.2.0.RELEASE
+```
+
+In the case of a maven based task that is to be launched, the `task-launcher` application is responsible for downloading the artifact.  You *must* configure the `task-launcher` with the appropriate configuration of https://github.com/spring-cloud/spring-cloud-deployer/blob/master/spring-cloud-deployer-resource-maven/src/main/java/org/springframework/cloud/deployer/resource/maven/MavenProperties.java[Maven Properties] such as `--maven.remote-repositories.repo1.url=http://repo.spring.io/libs-milestone"` to resolve artifacts, in this case against a milestone repo.  Note that this repo can be different than the one used to register the `task-launcher` application itself.
+
+=== TriggerTask
+
+One way to launch a task using the `task-launcher` is to use the https://github.com/spring-cloud-stream-app-starters/triggertask/blob/v1.2.0.RELEASE/spring-cloud-starter-stream-source-triggertask/README.adoc[triggertask] source. The `triggertask` source
+will emit a message with a `TaskLaunchRequest` object containing the required launch information.
+The `triggertask` can be added to the available sources by executing the app register command as follows (for the Rabbit Binder):
+
+```
+app register --type source --name triggertask --uri maven://org.springframework.cloud.stream.app:triggertask-source-rabbit:1.2.0.RELEASE
+```
+
+An example of this would be to launch the timestamp task once every 60 seconds, the stream to implement this would look like:
+
+```
+stream create foo --definition "triggertask --triggertask.uri=maven://org.springframework.cloud.task.app:timestamp-task:jar:1.2.0.RELEASE --trigger.fixed-delay=60 --triggertask.environment-properties=spring.datasource.url=jdbc:h2:tcp://localhost:19092/mem:dataflow,spring.datasource.username=sa | task-launcher-local --maven.remote-repositories.repo1.url=http://repo.spring.io/libs-release" --deploy
+```
+
+If you execute `runtime apps` you can find the log file for the task launcher sink. Tailing that file you can find the log file for the launched tasks. The setting of `triggertask.environment-properties` is so that all the task executions can be collected in the same H2 database used in the local version of the Data Flow Server.  You can then see the list of task executions using the shell command `task execution list`
+
+[source,bash,options="nowrap"]
+----
+dataflow:>task execution list
+╔════════════════════╤══╤════════════════════════════╤════════════════════════════╤═════════╗
+║     Task Name      │ID│         Start Time         │          End Time          │Exit Code║
+╠════════════════════╪══╪════════════════════════════╪════════════════════════════╪═════════╣
+║timestamp-task_26176│4 │Tue May 02 12:13:49 EDT 2017│Tue May 02 12:13:49 EDT 2017│0        ║
+║timestamp-task_32996│3 │Tue May 02 12:12:49 EDT 2017│Tue May 02 12:12:49 EDT 2017│0        ║
+║timestamp-task_58971│2 │Tue May 02 12:11:50 EDT 2017│Tue May 02 12:11:50 EDT 2017│0        ║
+║timestamp-task_13467│1 │Tue May 02 12:10:50 EDT 2017│Tue May 02 12:10:50 EDT 2017│0        ║
+╚════════════════════╧══╧════════════════════════════╧════════════════════════════╧═════════╝
+----
+
+=== TaskLaunchRequest-transform
+
+Another option to start a task using the `task-launcher` would be to create a stream using the
+https://github.com/spring-cloud-stream-app-starters/tasklaunchrequest-transform[Tasklaunchrequest-transform] processor to translate a message payload to a `TaskLaunchRequest`.
+
+The `tasklaunchrequest-transform` can be added to the available processors by executing the app register command as follows (for the Rabbit Binder):
+
+```
+app register --type processor --name tasklaunchrequest-transform --uri maven://org.springframework.cloud.stream.app:tasklaunchrequest-transform-processor-rabbit:1.2.0.RELEASE
+```
+
+For example:
+
+```
+stream create task-stream --definition "http --port=9000 | tasklaunchrequest-transform --uri=maven://org.springframework.cloud.task.app:timestamp-task:jar:1.2.0.RELEASE | task-launcher-local --maven.remote-repositories.repo1.url=http://repo.spring.io/libs-release"
+```
+
+=== Launching a Composed Task From a Stream
 A composed task can be launched using one of the `task-launcher` sinks as discussed
 <<spring-cloud-dataflow-launch-tasks-from-stream, here>>.  Since we will be using
 the `ComposedTaskRunner` directly we will need to setup the task definitions it
