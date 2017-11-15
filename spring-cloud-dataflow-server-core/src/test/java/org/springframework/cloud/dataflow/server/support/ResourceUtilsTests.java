@@ -24,6 +24,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Mark Pollack
+ * @author Ilayaperumal Gopinathan
  */
 public class ResourceUtilsTests {
 
@@ -33,42 +34,50 @@ public class ResourceUtilsTests {
 		ResourceUtils.getUrlResourceVersion(urlResource);
 	}
 
+	@Test(expected = IllegalArgumentException.class)
+	public void testInvalidUrlResource() throws Exception {
+		UrlResource urlResource = new UrlResource("http://repo.spring"
+				+ ".io/libs-release/org/springframework/cloud/stream/app/file-sink-rabbit/1.2.0.RELEASE/file-sink-rabbit-1.2.0.RELEASE.jar");
+		ResourceUtils.getUrlResourceWithoutVersion(urlResource);
+	}
+
 	@Test
 	public void testJars() throws MalformedURLException {
 		//Dashes in artifact name
-		UrlResource urlResource = new UrlResource("http://repo.spring.io/libs-release/org/springframework/cloud/stream/app/file-sink-rabbit/1.2.0.RELEASE/file-sink-rabbit-1.2.0.RELEASE.jar");
+		UrlResource urlResource = new UrlResource("http://repo.spring.io/libs-release/org/springframework/cloud/stream/app/file-sink-rabbit/file-sink-rabbit-1.2.0.RELEASE.jar");
 		String version = ResourceUtils.getUrlResourceVersion(urlResource);
 		assertThat(version).isEqualTo("1.2.0.RELEASE");
 
 		String theRest = ResourceUtils.getResourceWithoutVersion(urlResource);
-		assertThat(theRest).isEqualTo("http://repo.spring.io/libs-release/org/springframework/cloud/stream/app/file-sink-rabbit/1.2.0.RELEASE/file-sink-rabbit");
+		assertThat(theRest).isEqualTo("http://repo.spring.io/libs-release/org/springframework/cloud/stream/app/file-sink-rabbit/file-sink-rabbit");
 
 		//No dashes in artfiact name - BUILD-SNAPSHOT
-		urlResource = new UrlResource("http://repo.spring.io/libs-release/org/springframework/cloud/stream/app/file/1.2.0.BUILD-SNAPSHOT/file-1.2.0.BUILD-SNAPSHOT.jar");
+		urlResource = new UrlResource("http://repo.spring.io/libs-release/org/springframework/cloud/stream/app/file/file-1.2.0.BUILD-SNAPSHOT.jar");
 		version = ResourceUtils.getUrlResourceVersion(urlResource);
 		assertThat(version).isEqualTo("1.2.0.BUILD-SNAPSHOT");
 		theRest = ResourceUtils.getResourceWithoutVersion(urlResource);
-		assertThat(theRest).isEqualTo("http://repo.spring.io/libs-release/org/springframework/cloud/stream/app/file/1.2.0.BUILD-SNAPSHOT/file");
+		assertThat(theRest).isEqualTo("http://repo.spring.io/libs-release/org/springframework/cloud/stream/app/file/file");
 
 		//No dashes in artfiact name - RELEASE
-		urlResource = new UrlResource("http://repo.spring.io/libs-release/org/springframework/cloud/stream/app/file/1.2.0.RELEASE/file-1.2.0.RELEASE.jar");
+		urlResource = new UrlResource("http://repo.spring.io/libs-release/org/springframework/cloud/stream/app/file/file-1.2.0.RELEASE.jar");
 		version = ResourceUtils.getUrlResourceVersion(urlResource);
 		assertThat(version).isEqualTo("1.2.0.RELEASE");
 		theRest = ResourceUtils.getResourceWithoutVersion(urlResource);
-		assertThat(theRest).isEqualTo("http://repo.spring.io/libs-release/org/springframework/cloud/stream/app/file/1.2.0.RELEASE/file");
+		assertThat(theRest).isEqualTo("http://repo.spring.io/libs-release/org/springframework/cloud/stream/app/file/file");
 
 		//Spring style snapshots naming scheme
-		urlResource = new UrlResource("http://repo.spring.io/libs-release/org/springframework/cloud/stream/app/file-sink-rabbit/1.2.0.RELEASE/file-sink-rabbit-1.2.0.BUILD-SNAPSHOT.jar");
+		urlResource = new UrlResource("http://repo.spring.io/libs-release/org/springframework/cloud/stream/app/file-sink-rabbit/file-sink-rabbit-1.2.0.BUILD-SNAPSHOT.jar");
 		version = ResourceUtils.getUrlResourceVersion(urlResource);
 		assertThat(version).isEqualTo("1.2.0.BUILD-SNAPSHOT");
 		theRest = ResourceUtils.getResourceWithoutVersion(urlResource);
-		assertThat(theRest).isEqualTo("http://repo.spring.io/libs-release/org/springframework/cloud/stream/app/file-sink-rabbit/1.2.0.RELEASE/file-sink-rabbit");
+		assertThat(theRest).isEqualTo("http://repo.spring.io/libs-release/org/springframework/cloud/stream/app/file-sink-rabbit/file-sink-rabbit");
 
 		//Standard maven style naming scheme
-		urlResource = new UrlResource("http://repo.spring.io/libs-release/org/springframework/cloud/stream/app/file-sink-rabbit/1.2.0-SNAPSHOT/file-sink-rabbit-1.2.0-SNAPSHOT.jar");
+		urlResource = new UrlResource("http://repo.spring.io/libs-release/org/springframework/cloud/stream/app/file-sink-rabbit/file-sink-rabbit-1.2.0-SNAPSHOT.jar");
 		version = ResourceUtils.getUrlResourceVersion(urlResource);
-		assertThat(version).isEqualTo("1.2.0-SNAPSHOT");		theRest = ResourceUtils.getResourceWithoutVersion(urlResource);
-		assertThat(theRest).isEqualTo("http://repo.spring.io/libs-release/org/springframework/cloud/stream/app/file-sink-rabbit/1.2.0-SNAPSHOT/file-sink-rabbit");
+		assertThat(version).isEqualTo("1.2.0-SNAPSHOT");
+		theRest = ResourceUtils.getResourceWithoutVersion(urlResource);
+		assertThat(theRest).isEqualTo("http://repo.spring.io/libs-release/org/springframework/cloud/stream/app/file-sink-rabbit/file-sink-rabbit");
 
 	}
 }
