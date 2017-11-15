@@ -258,12 +258,14 @@ public class ConfigCommands implements CommandMarker, InitializingBean, Applicat
 		Map<String, String> versions = new LinkedHashMap<>();
 		modelBuilder.addRow().addValue("Versions").addValue(versions);
 		rowIndex++;
-		versions.compute(about.getVersionInfo().getImplementation().getName(),
-				(k, v) -> about.getVersionInfo().getImplementation().getVersion());
-		versions.compute(about.getVersionInfo().getCore().getName(),
-				(k, v) -> about.getVersionInfo().getCore().getVersion());
-		versions.compute(about.getVersionInfo().getDashboard().getName(),
-				(k, v) -> about.getVersionInfo().getDashboard().getVersion());
+		versions.compute(about.getVersionInfo().getImplementationDependency().getName(),
+				(k, v) -> about.getVersionInfo().getImplementationDependency().getVersion());
+		versions.compute(about.getVersionInfo().getCoreDependency().getName(),
+				(k, v) -> about.getVersionInfo().getCoreDependency().getVersion());
+		versions.compute(about.getVersionInfo().getDashboardDependency().getName(),
+				(k, v) -> about.getVersionInfo().getDashboardDependency().getVersion());
+		versions.compute(about.getVersionInfo().getShellDependency().getName(),
+				(k, v) -> about.getVersionInfo().getShellDependency().getVersion());
 
 		SecurityInfo securityInfo = about.getSecurityInfo();
 		modelBuilder.addRow().addValue("Security").addValue(securityInfo);
