@@ -32,6 +32,7 @@ import org.springframework.cloud.dataflow.server.repository.DeploymentIdReposito
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.deployer.resource.support.DelegatingResourceLoader;
+import org.springframework.cloud.deployer.resource.support.LRUCleaningResourceLoader;
 import org.springframework.cloud.deployer.spi.local.LocalAppDeployer;
 import org.springframework.cloud.deployer.spi.local.LocalTaskLauncher;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -86,7 +87,9 @@ public class LocalConfigurationTests {
 
 		// default on DataFlowControllerAutoConfiguration only adds maven,
 		// LocalDataFlowServerAutoConfiguration also adds docker so test on those.
-		DelegatingResourceLoader delegatingResourceLoader = context.getBean(DelegatingResourceLoader.class);
+		LRUCleaningResourceLoader lruCleaningResourceLoader = context.getBean(LRUCleaningResourceLoader.class);
+		DelegatingResourceLoader delegatingResourceLoader =
+				(DelegatingResourceLoader)TestUtils.readField("delegate", lruCleaningResourceLoader);
 		Map<String, ResourceLoader> loaders = TestUtils.readField("loaders", delegatingResourceLoader);
 		assertThat(loaders.size(), is(2));
 		assertThat(loaders.get("maven"), notNullValue());
