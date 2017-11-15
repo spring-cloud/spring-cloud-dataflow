@@ -22,6 +22,7 @@ import org.springframework.cloud.dataflow.core.DataFlowPropertyKeys;
  * Properties for version information of core dependencies.
  *
  * @author Gunnar Hillert
+ * @author Glenn Renfro
  */
 @ConfigurationProperties(prefix = VersionInfoProperties.VERSION_INFO_PREFIX)
 public class VersionInfoProperties {
@@ -31,6 +32,48 @@ public class VersionInfoProperties {
 	private String dataflowCoreVersion;
 
 	private String dataflowDashboardVersion;
+
+	private String dataflowShellVersion;
+
+	private String implementationUrl;
+
+	private String coreUrl;
+
+	private String dashboardUrl;
+
+	private String shellUrl;
+
+	public String getImplementationUrl() {
+		return implementationUrl;
+	}
+
+	public void setImplementationUrl(String implementationUrl) {
+		this.implementationUrl = implementationUrl;
+	}
+
+	public String getCoreUrl() {
+		return coreUrl;
+	}
+
+	public void setCoreUrl(String coreUrl) {
+		this.coreUrl = coreUrl;
+	}
+
+	public String getDashboardUrl() {
+		return dashboardUrl;
+	}
+
+	public void setDashboardUrl(String dashboardUrl) {
+		this.dashboardUrl = dashboardUrl;
+	}
+
+	public String getShellUrl() {
+		return shellUrl;
+	}
+
+	public void setShellUrl(String shellUrl) {
+		this.shellUrl = shellUrl;
+	}
 
 	public String getDataflowCoreVersion() {
 		return dataflowCoreVersion;
@@ -48,4 +91,11 @@ public class VersionInfoProperties {
 		this.dataflowDashboardVersion = dataflowDashboardVersion;
 	}
 
+	public String getDataflowShellVersion() {
+		return dataflowShellVersion;
+	}
+
+	public void setDataflowShellVersion(String dataflowShellVersion) {
+		this.dataflowShellVersion = dataflowShellVersion;
+	}
 }

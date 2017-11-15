@@ -20,6 +20,7 @@ package org.springframework.cloud.dataflow.rest.resource.about;
  * Provides version information about core libraries used.
  *
  * @author Gunnar Hillert
+ * @author Glenn Renfro
  */
 public class VersionInfo {
 
@@ -28,6 +29,8 @@ public class VersionInfo {
 	private Dependency core = new Dependency();
 
 	private Dependency dashboard = new Dependency();
+
+	private Dependency shell = new Dependency();
 
 	/**
 	 * Default constructor for serialization frameworks.
@@ -57,5 +60,13 @@ public class VersionInfo {
 
 	public void setDashboard(Dependency dashboard) {
 		this.dashboard = dashboard;
+	}
+
+	public Dependency getShell() {
+		return shell;
+	}
+
+	public void setShell(Dependency shell) {
+		this.shell = shell;
 	}
 }

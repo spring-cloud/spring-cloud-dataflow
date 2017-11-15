@@ -16,16 +16,28 @@
 
 package org.springframework.cloud.dataflow.rest.resource.about;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 /**
  * Holds dependency information of a lbrary used by Spring Cloud Dataflow.
  *
  * @author Gunnar Hillert
+ * @author Glenn Renfro
  */
+
 public class Dependency {
 
 	private String name;
 
 	private String version;
+
+	@JsonInclude(JsonInclude.Include.NON_NULL)
+	private String checksumSha1;
+
+	@JsonInclude(JsonInclude.Include.NON_NULL)
+	private String checksumSha256;
+
+	private String url;
 
 	/**
 	 * Default constructor for serialization frameworks.
@@ -33,10 +45,14 @@ public class Dependency {
 	public Dependency() {
 	}
 
-	public Dependency(String name, String version) {
+	public Dependency(String name, String version, String checksumsha1,
+			String checksumsha256, String url) {
 		super();
 		this.name = name;
 		this.version = version;
+		this.checksumSha1 = checksumsha1;
+		this.checksumSha256 = checksumsha256;
+		this.url = url;
 	}
 
 	public String getName() {
@@ -55,4 +71,28 @@ public class Dependency {
 		this.version = version;
 	}
 
+	public String getChecksumSha1() {
+		return checksumSha1;
+	}
+
+	public void setChecksumSha1(String checksumSha1)
+	{
+		this.checksumSha1 = checksumSha1;
+	}
+
+	public String getUrl() {
+		return url;
+	}
+
+	public void setUrl(String url) {
+		this.url = url;
+	}
+
+	public String getChecksumSha256() {
+		return checksumSha256;
+	}
+
+	public void setChecksumSha256(String checksumSha256) {
+		this.checksumSha256 = checksumSha256;
+	}
 }
