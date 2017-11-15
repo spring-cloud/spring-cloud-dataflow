@@ -1167,14 +1167,60 @@ then add to the generated Maven pom file the MetricWriter implementation you
 want to use.  The documentation on the Data Flow Metrics project pages provides
 the additional information you need to get started.
 
+== About Configuration
+The Spring Cloud Data Flow About Restful API result contains a display name,
+version, and if specified a url for each of the major dependencies that
+comprise Spring Cloud Data Flow.  The result (if enabled) also contains the
+sha1 and or sha256 checksum values for the shell dependency. The information
+that is returned for each of the dependencies is configurable via the following
+properties:
 
+* spring.cloud.dataflow.version-info.spring-cloud-dataflow-core.name - the
+name to be used for the core.
+* spring.cloud.dataflow.version-info.spring-cloud-dataflow-core.version -
+the version to be used for the core.
+* spring.cloud.dataflow.version-info.spring-cloud-dataflow-dashboard.name - the
+name to be used for the dashboard.
+* spring.cloud.dataflow.version-info.spring-cloud-dataflow-dashboard.version -
+the version to be used for the dashboard.
+* spring.cloud.dataflow.version-info.spring-cloud-dataflow-implementation.name - the
+name to be used for the implementation.
+* spring.cloud.dataflow.version-info.spring-cloud-dataflow-implementation.version -
+the version to be used for the implementation.
+* spring.cloud.dataflow.version-info.spring-cloud-dataflow-shell.name - the
+name to be used for the shell.
+* spring.cloud.dataflow.version-info.spring-cloud-dataflow-shell.version -
+the version to be used for the shell.
+* spring.cloud.dataflow.version-info.spring-cloud-dataflow-shell.url -
+the url to be used for downloading the shell dependency.
+* spring.cloud.dataflow.version-info.spring-cloud-dataflow-shell.checksum-sha1 - the
+checksum1 value that will be returned with the shell dependency info.
+* spring.cloud.dataflow.version-info.spring-cloud-dataflow-shell.checksum-sha256 -
+the checksum256 value that will be returned with the shell dependency info.
+* spring.cloud.dataflow.version-info.spring-cloud-dataflow-shell.checksum-sha1-url -
+if the `spring.cloud.dataflow.version-info.spring-cloud-dataflow-shell.checksum-sha1`
+is not specified then SCDF will use contents of the file specified at this URL for the checksum.
+* spring.cloud.dataflow.version-info.spring-cloud-dataflow-shell.checksum-sha256-url -
+if the `spring.cloud.dataflow.version-info.spring-cloud-dataflow-shell.checksum-sha256`
+is not specified then SCDF will use contents of the file specified at this URL for the checksum.
 
+=== Enabling Shell Checksum values
+By default checksum values will not be displayed for the shell dependency if
+you need this feature enabled then set the
+`spring.cloud.dataflow.version-info.dependency-fetch.enabled` property to true.
 
+=== Reserved values for urls
+There are reserved values (surrounded by curly braces) that you can insert into
+the url that will make sure that the links are up to date:
 
+* repository - if using a build-snapshot, milestone or release candidate of
+Data Flow, the repository will refer to repo-spring-io repository else it will
+refer to Maven Central.
+* version - Will insert this version of the jar/pom.
 
-
-
-
-
-
+For example:
+`https://myrepository/org/springframework/cloud/spring-cloud-dataflow-shell/{version}/spring-cloud-dataflow-shell-{version}.jar`
+would produce
+`https://myrepository/org/springframework/cloud/spring-cloud-dataflow-shell/1.2.3.RELEASE/spring-cloud-dataflow-shell-1.2.3.RELEASE.jar`
+if you were using the 1.2.3.RELEASE version of the Spring Cloud Data Flow Shell
 
