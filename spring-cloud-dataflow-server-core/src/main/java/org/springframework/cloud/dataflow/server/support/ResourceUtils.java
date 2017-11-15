@@ -53,6 +53,7 @@ public class ResourceUtils {
 		String version = getUrlResourceVersion(urlResource);
 		URI uri = getUri(urlResource);
 		String theRest = uri.toString().substring(0, uri.toString().indexOf("-" + version));
+		Assert.isTrue(!theRest.contains(version), "URL resource with version as part of its path is not supported.");
 		return theRest;
 	}
 
@@ -68,7 +69,10 @@ public class ResourceUtils {
 
 	private static String getFileNameNoExtension(UrlResource urlResource) {
 		URI uri = getUri(urlResource);
-		String lastSegment = new File(uri.getPath()).getName();
+		String uriPath = uri.getPath();
+		Assert.isTrue(StringUtils.hasText(uriPath), "URI path doesn't exist");
+		String lastSegment = new File(uriPath).getName();
+		Assert.isTrue(lastSegment.indexOf(".") != -1, "URI file name extension doesn't exist");
 		return lastSegment.substring(0, lastSegment.lastIndexOf("."));
 	}
 
