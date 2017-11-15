@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.dataflow.autoconfigure.local;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -25,6 +26,8 @@ import org.springframework.cloud.deployer.resource.docker.DockerResourceLoader;
 import org.springframework.cloud.deployer.resource.maven.MavenProperties;
 import org.springframework.cloud.deployer.resource.maven.MavenResourceLoader;
 import org.springframework.cloud.deployer.resource.support.DelegatingResourceLoader;
+import org.springframework.cloud.deployer.resource.support.LRUCleaningResourceLoaderBeanPostProcessor;
+import org.springframework.cloud.deployer.spi.local.LocalDeployerProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ResourceLoader;
@@ -47,4 +50,14 @@ public class LocalDataFlowServerAutoConfiguration {
 		loaders.put("maven", mavenResourceLoader);
 		return new DelegatingResourceLoader(loaders);
 	}
+
+	@Bean
+	public LRUCleaningResourceLoaderBeanPostProcessor lruCleaningResourceLoaderInstaller(
+			LocalDeployerProperties localDeployerProperties,
+			MavenProperties mavenProperties) {
+		File repositoryCache = new File(mavenProperties.getLocalRepository());
+		float fRatio = localDeployerProperties.getFreeDiskSpacePercentage() / 100F;
+		return new LRUCleaningResourceLoaderBeanPostProcessor(fRatio, repositoryCache);
+	}
+
 }
