@@ -976,6 +976,7 @@ public StreamApplication httpApplication(){
     return new StreamApplication("http");
 }
 
+@Bean
 public Stream createStream(){
     return builder.name("sample")
            .source(httpApplication())
