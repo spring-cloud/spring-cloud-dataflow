@@ -889,7 +889,7 @@ In this case, the link:http://docs.spring.io/spring-cloud-stream-app-starters/do
 == Stream Java DSL
 
 If you prefer to deploy streams programmatically, you can do so by using the fluent style DSL api provided by the `spring-cloud-dataflow-rest-client` module.
-The java DSL is a convenient wrapper around the `DataFlowTemplate` class that makes it simpler to create and deploy applications.
+The java DSL is a convenient wrapper around the `DataFlowTemplate` class that makes it simpler to create and deploy streams.
 Start by adding it to your project:
 
 [source,xml,subs="attributes+"]
@@ -901,14 +901,14 @@ Start by adding it to your project:
 </dependency>
 ----
 
-To create a Stream you need to supply a `DataFlowTemplate` to the `Stream.Builder` static method:
+In order to create streams you need to provide a `Stream.Builder` instance first.
 [source,java]
 ----
-DataFlowTemplate client = //...;
-Stream ticktock = Stream.Builder(client).name("ticktock").definition("time | log").create();
+@Bean
+public Stream.Builder builder() throws Exception{
+    return new Stream.Builder(new DataFlowTemplate(new URI("http://localhost:9393")));
+}
 ----
-[NOTE]
-For your convenience, the `spring-cloud-dataflow-rest-client` library provides a bean of type `StreamBuilder` with the `DataFlowTemplate` already configured.
 
 === Creating Streams using the Java DSL
 
@@ -919,7 +919,7 @@ To demonstrate both styles we will create a simple stream using both approaches.
 [source,java]
 ----
 @Autowired
-private Stream.StreamNameBuilder builder;
+private Stream.Builder builder; #<1>
 
 public void usingDefinition() throws Exception{
 
@@ -932,7 +932,7 @@ public void usingDefinition() throws Exception{
          "http --server.port=9900 | splitter --expression=payload.split(' ') | log")
          .create().deploy(deploymentProperties);
 
-   while(!woodchuck.getStatus().equals("deployed")){ # <1>
+   while(!woodchuck.getStatus().equals("deployed")){ # <2>
       Thread.sleep(5000);
    }
 
@@ -946,7 +946,7 @@ public void fluent() throws Exception{
          .processor(new StreamApplication("splitter")
                .addProperty("producer.partitionKeyExpression", "payload"))
          .sink(new StreamApplication("log")
-               .addDeploymentProperty("count", 2)) # <2>
+               .addDeploymentProperty("count", 2)) # <3>
          .create().deploy();
 
    while(!woodchuck.getStatus().equals("deployed")){
@@ -957,11 +957,34 @@ public void fluent() throws Exception{
 
 }
 ----
+<1> Assumes that a bean of type `Stream.Builder` is available in your application context.
+<2> You can poll for the stream status using `getStatus()` method
+<3> When using the fluent style and adding deployment properties to the application you don't need to prefix it with `deployer.<app_name>`
+[NOTE]
+In order to create/deploy your streams, you need to make sure that the corresponding apps have been registered in the DataFlow server first.
+Attempting to create or deploy a stream that contains an unknown app will throw an exception.
 
-<1> You can poll for the stream status using `getStatus()` method
-<2> When using the fluent style and adding deployment properties to the application you don't need to prefix it with `deployer.<app_name>`
+The Stream applications can also be beans within your application that could be injected to create Streams.
 
+[source,java]
+----
+@Autowired
+private Stream.Builder builder;
 
+@Bean
+public StreamApplication httpApplication(){
+    return new StreamApplication("http");
+}
+
+public Stream createStream(){
+    return builder.name("sample")
+           .source(httpApplication())
+           .sink("log") # <1>
+           .create();
+}
+
+----
+<1> `source()`, `processor()` and `sink()` methods have an overloaded version that accepts just a String and creates a Stream application.
 
 [[spring-cloud-dataflow-stream-multi-binder]]
 == Stream applications with multiple binder configurations
