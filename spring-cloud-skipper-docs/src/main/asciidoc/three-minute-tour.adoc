@@ -187,11 +187,11 @@ env:
     SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[cf-dev]_CONNECTION_URL: https://api.run.pivotal.io
     SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[cf-dev]_CONNECTION_ORG: scdf-ci
     SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[cf-dev]_CONNECTION_SPACE: space-mark
-    SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[cf-dev]_CONNECTION_DOMAIN: cfapps.io
     SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[cf-dev]_CONNECTION_USERNAME: <your-username>
     SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[cf-dev]_CONNECTION_PASSWORD: <your-password>
     SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[cf-dev]_CONNECTION_SKIP_SSL_VALIDATION: false
     SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[cf-dev]_DEPLOYMENT_DELETE_ROUTES: false
+    SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[cf-dev]_DEPLOYMENT_DOMAIN: cfapps.io
 ----
 
 This defines `cf-dev` as a named Cloud Foundry account.
@@ -218,12 +218,12 @@ spring:
                   url: https://api.run.pivotal.io
                   org: scdf-ci
                   space: space-mark
-                  domain: cfapps.io
                   username: <your-username>
                   password: <your-password>
                   skipSslValidation: false
                 deployment:
                   deleteRoutes: false
+                  domain: cfapps.io
 ----
 
 When you start the Skipper shell, by default it tries to look for the Skipper server on the same (local) machine.
