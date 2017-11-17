@@ -292,7 +292,7 @@ public class SkipperStreamDeployer implements StreamDeployer {
 	}
 
 	private List<Template> createGenericTemplate() {
-		Template template = this.skipperClient.getSpringBootAppTemplate();
+		Template template = this.skipperClient.getSpringCloudDeployerApplicationTemplate();
 		List<Template> templateList = new ArrayList<>();
 		templateList.add(template);
 		return templateList;
