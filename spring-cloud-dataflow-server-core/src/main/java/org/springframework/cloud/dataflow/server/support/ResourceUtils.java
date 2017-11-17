@@ -69,7 +69,10 @@ public class ResourceUtils {
 
 	private static String getFileNameNoExtension(UrlResource urlResource) {
 		URI uri = getUri(urlResource);
-		String lastSegment = new File(uri.getPath()).getName();
+		String uriPath = uri.getPath();
+		Assert.isTrue(StringUtils.hasText(uriPath), "URI path doesn't exist");
+		String lastSegment = new File(uriPath).getName();
+		Assert.isTrue(lastSegment.indexOf(".") != -1, "URI file name extension doesn't exist");
 		return lastSegment.substring(0, lastSegment.lastIndexOf("."));
 	}
 
