@@ -4,15 +4,19 @@ image:https://codecov.io/gh/spring-cloud/spring-cloud-dataflow/branch/master/gra
 
 == Spring Cloud Data Flow image:https://build.spring.io/plugins/servlet/wittified/build-status/SCD-BMASTER[Build Status, link=https://build.spring.io/browse/SCD-BMASTER] image:https://badge.waffle.io/spring-cloud/spring-cloud-dataflow.svg?label=ready&title=Ready[Stories Ready, link=http://waffle.io/spring-cloud/spring-cloud-dataflow] image:https://badge.waffle.io/spring-cloud/spring-cloud-dataflow.svg?label=In%20Progress&title=In%20Progress[Stories In Progress, link=http://waffle.io/spring-cloud/spring-cloud-dataflow]
 
-The Spring Cloud Data Flow project provides orchestration for data microservices, including long-lived
-https://github.com/spring-cloud/spring-cloud-stream[Spring Cloud Stream] applications and
-short-lived https://github.com/spring-cloud/spring-cloud-task[Spring Cloud Task] applications.
+Spring Cloud Data Flow is a toolkit for building data integration and real-time data processing pipelines. 
+
+Pipelines consist of Spring Boot apps, built using the https://github.com/spring-cloud/spring-cloud-stream[Spring Cloud Stream] 
+or https://github.com/spring-cloud/spring-cloud-task[Spring Cloud Task] microservice frameworks. 
+
+This makes Spring Cloud Data Flow suitable for a range of data processing use cases, from import/export to 
+event streaming and predictive analytics.
 
 == Components
 
 The https://github.com/spring-cloud/spring-cloud-dataflow/tree/master/spring-cloud-dataflow-core[Core]
 domain module includes the concept of a *stream* that is a composition of spring-cloud-stream
-modules in a linear pipeline from a *source* to a *sink*, optionally including *processor* module(s)
+modules in a linear pipeline from a *source* to a *sink*, optionally including *processor* application(s)
 in between. The domain also includes the concept of a *task*, which may be any process that does
 not run indefinitely, including https://github.com/spring-projects/spring-batch[Spring Batch] jobs.
 
@@ -27,9 +31,9 @@ deployer SPI implementation for that environment. The github locations for these
 
 * https://github.com/spring-cloud/spring-cloud-dataflow/tree/master/spring-cloud-dataflow-server-local[Local]
 * https://github.com/spring-cloud/spring-cloud-dataflow-server-cloudfoundry[Cloud Foundry]
+* https://github.com/spring-cloud/spring-cloud-dataflow-server-kubernetes[Kubernetes]
 * https://github.com/spring-cloud/spring-cloud-dataflow-server-yarn[Apache YARN]
 * https://github.com/spring-cloud/spring-cloud-dataflow-server-mesos[Apache Mesos]
-* https://github.com/spring-cloud/spring-cloud-dataflow-server-kubernetes[Kubernetes]
 
 _There are also community maintained Spring Cloud Data Flow implementations for Hashicorp's https://github.com/donovanmuller/spring-cloud-dataflow-server-nomad[Nomad] and RedHat's https://github.com/donovanmuller/spring-cloud-dataflow-server-openshift[Openshift]._
 
@@ -39,9 +43,9 @@ The github locations for the corresponding Spring Cloud Deployer SPI implementat
 
 * https://github.com/spring-cloud/spring-cloud-deployer-local[Local]
 * https://github.com/spring-cloud/spring-cloud-deployer-cloudfoundry[Cloud Foundry]
+* https://github.com/spring-cloud/spring-cloud-deployer-kubernetes[Kubernetes]
 * https://github.com/spring-cloud/spring-cloud-deployer-yarn[Apache YARN]
 * https://github.com/spring-cloud/spring-cloud-deployer-mesos[Apache Mesos]
-* https://github.com/spring-cloud/spring-cloud-deployer-kubernetes[Kubernetes]
 
 The https://github.com/spring-cloud/spring-cloud-dataflow/tree/master/spring-cloud-dataflow-shell[Shell]
 connects to the Data Flow Server's REST API and supports a DSL that simplifies the process of
@@ -68,6 +72,10 @@ Therefore, please ensure that you set Git property `core.autocrlf` to `false`, e
 === Contributing
 
 We welcome contributions! Follow this https://github.com/spring-cloud/spring-cloud-dataflow/blob/master/spring-cloud-dataflow-docs/src/main/asciidoc/appendix-contributing.adoc[link] for more information on how to contribute.
+
+=== Reporting Issues
+
+When reporting problems, it'd be helpful if the bug report includes the details listed on this https://github.com/spring-cloud/spring-cloud-dataflow/wiki/Reporting-Issues[wiki-article]. 
 
 === Code formatting guidelines
 
