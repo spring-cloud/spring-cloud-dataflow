@@ -46,11 +46,10 @@ helloworldlocal has been upgraded.  Now at version v2.
 ----
 
 The current upgrade strategy is very simple, if the new app is healthy, the old app is removed.  There is not a rolling upgrade option, all new apps are deployed, checked for health, and then previous versions removed.
-More flexible upgrade strategies are planned along with the introduction of the https://projects.spring
-.io/spring-statemachine/[Spring Cloud State Machine] project to orchestrate the update process.
+More flexible upgrade strategies are planned along with the introduction of the https://projects.spring.io/spring-statemachine/[Spring Cloud State Machine] project to orchestrate the update process.
 
 
-You can now curl the `greeting` endpoint and the `about` endpoint.
+You can now curl the `greeting` endpoint and the `about` endpoint or view them in your browser.
 ```
 $ curl http://localhost:8100/greeting
 yo
@@ -168,7 +167,7 @@ Hello World v1.0.0.RELEASE
 
 Skipper uses a Relational Database to store state.
  In this tour we will just be using the embedded database.
- You can modify the example manifest file below to bind to a relational database service instead of using the embedded database.
+ You can modify the example manifest file below to bind to a relational database service instead of using the embedded database. You can find an example <<building, here>>.
 
 [source,bash,options="nowrap"]
 ----

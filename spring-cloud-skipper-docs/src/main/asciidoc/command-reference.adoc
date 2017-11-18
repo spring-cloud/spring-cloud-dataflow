@@ -87,7 +87,9 @@ Released helloworldlocal. Now at version v1.
 ----
 
 If no `package-version` is specified, then the latest package version by the given `package-name` will be considered.
+
 If no `platform-name` is specified, the platform name `default` will be used.
+
 The properties can either be provided via comma separated YAML String using the `--properties` option or, via a YAML
 file using the `--file` option.
 
