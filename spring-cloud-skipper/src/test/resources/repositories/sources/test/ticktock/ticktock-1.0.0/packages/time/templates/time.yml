@@ -1,4 +1,4 @@
-apiVersion: v1
+apiVersion: skipper.spring.io/v1
 kind: Application
 deployment:
   name: time

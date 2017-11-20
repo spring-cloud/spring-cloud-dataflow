@@ -1,5 +1,5 @@
 ---
-apiVersion: skipperPackageMetadata/v1
+apiVersion: skipper.spring.io/v1
 kind: SpringBootApp
 metadata:
   name: log-sink
@@ -15,7 +15,7 @@ spec:
     memory: 1024
     disk: 2
 ---
-apiVersion: skipperPackageMetadata/v1
+apiVersion: skipper.spring.io/v1
 kind: SpringCloudDeployerApplication
 metadata:
   name: time-source

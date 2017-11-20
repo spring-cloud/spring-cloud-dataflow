@@ -1,7 +1,7 @@
 
 ---
-apiVersion: v1
-kind: skipperPackageMetadata
+apiVersion: skipper.spring.io/v1
+kind: SkipperPackageMetadata
 origin: samples-package-repository
 name: log
 version: 1.0.0
@@ -12,8 +12,8 @@ maintainer: https://github.com/sobychacko
 description: The log sink uses the application logger to output the data for inspection.
 
 ---
-apiVersion: v2
-kind: skipperPackageMetadata
+apiVersion: skipper.spring.io/v1
+kind: SkipperPackageMetadata
 origin: samples-package-repository
 name: log
 version: 1.1.0
@@ -24,8 +24,8 @@ maintainer: https://github.com/sobychacko
 description: The log sink uses the application logger to output the data for inspection.
 
 ---
-apiVersion: v1
-kind: skipperPackageMetadata
+apiVersion: skipper.spring.io/v1
+kind: SkipperPackageMetadata
 origin: samples-package-repository
 name: log
 version: 2.0.0
@@ -36,8 +36,8 @@ maintainer: https://github.com/sobychacko
 description: The log sink uses the application logger to output the data for inspection.
 
 ---
-apiVersion: v1
-kind: skipperPackageMetadata
+apiVersion: skipper.spring.io/v1
+kind: SkipperPackageMetadata
 origin: samples-package-repository
 name: time
 version: 2.0.0
@@ -48,8 +48,8 @@ maintainer: https://github.com/sobychacko
 description: The time source periodically emits a timestamp string.
 
 ---
-apiVersion: v1
-kind: skipperPackageMetadata
+apiVersion: skipper.spring.io/v1
+kind: SkipperPackageMetadata
 origin: samples-package-repository
 name: ticktock
 version: 1.0.0
@@ -60,8 +60,8 @@ maintainer: https://github.com/markpollack
 description: The ticktock stream sends a time stamp and logs the value.
 
 ---
-apiVersion: v1
-kind: skipperPackageMetadata
+apiVersion: skipper.spring.io/v1
+kind: SkipperPackageMetadata
 origin: samples-package-repository
 name: log-docker
 version: 1.0.0
@@ -72,8 +72,8 @@ maintainer: https://github.com/sobychacko
 description: Docker version of the log sink application
 
 ---
-apiVersion: v1
-kind: skipperPackageMetadata
+apiVersion: skipper.spring.io/v1
+kind: SkipperPackageMetadata
 origin: samples-package-repository
 name: log-docker
 version: 2.0.0
@@ -84,8 +84,8 @@ maintainer: https://github.com/sobychacko
 description: Docker version of the log sink application
 
 ---
-apiVersion: v1
-kind: skipperPackageMetadata
+apiVersion: skipper.spring.io/v1
+kind: SkipperPackageMetadata
 origin: samples-package-repository
 name: helloworld-docker
 version: 1.0.0

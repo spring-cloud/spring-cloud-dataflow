@@ -50,7 +50,7 @@ public class DefaultPackageReader implements PackageReader {
 			files = paths.map(i -> i.toAbsolutePath().toFile()).collect(Collectors.toList());
 		}
 		catch (IOException e) {
-			throw new IllegalArgumentException("Could not process files in path " + packageDirectory.getPath(), e);
+			throw new IllegalArgumentException("Could not process files in path " + packageDirectory.getPath() + ". " + e.getMessage(), e);
 		}
 		Package pkg = new Package();
 		// Iterate over all files and "deserialize" the package.

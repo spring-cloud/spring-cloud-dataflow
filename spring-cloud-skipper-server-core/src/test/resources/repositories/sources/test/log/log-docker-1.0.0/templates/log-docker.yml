@@ -1,4 +1,4 @@
-apiVersion: skipperPackageMetadata/v1
+apiVersion: skipper.spring.io/v1
 kind: SpringCloudDeployerApplication
 metadata:
   name: log-docker

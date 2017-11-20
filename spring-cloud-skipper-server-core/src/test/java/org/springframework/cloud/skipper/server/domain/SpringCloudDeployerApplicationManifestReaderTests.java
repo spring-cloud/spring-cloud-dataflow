@@ -117,7 +117,7 @@ public class SpringCloudDeployerApplicationManifestReaderTests {
 	}
 
 	private void assertApiAndKind(SpringCloudDeployerApplicationManifest applicationManifest) {
-		assertThat(applicationManifest.getApiVersion()).isEqualTo("skipperPackageMetadata/v1");
+		assertThat(applicationManifest.getApiVersion()).isEqualTo("skipper.spring.io/v1");
 		assertThat(applicationManifest.getKind()).isIn("SpringCloudDeployerApplication", "SpringBootApp");
 	}
 

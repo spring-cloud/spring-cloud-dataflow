@@ -112,7 +112,8 @@ public class PackageService implements ResourceLoaderAware {
 			catch (IOException e) {
 				throw new SkipperException("Could not copy package file for " + packageMetadata.getName() + "-"
 						+ packageMetadata.getVersion() +
-						" from " + sourceResource.getDescription() + " to target file " + targetFile, e);
+						" from " + sourceResource.getDescription() + " to target file " + targetFile + ". "
+						+ e.getMessage(), e);
 			}
 			ZipUtil.unpack(targetFile, targetPath.toFile());
 			Package pkgToReturn = this.packageReader
@@ -132,12 +133,11 @@ public class PackageService implements ResourceLoaderAware {
 		catch (InvalidDataAccessApiUsageException ex) {
 			throw new SkipperException("Exception while downloading package zip file for "
 					+ packageMetadata.getName() + "-" + packageMetadata.getVersion() +
-					". PackageMetadata repositoryId = " + packageMetadata.getRepositoryId() + "No repository found.",
-					ex);
+					". PackageMetadata repositoryId = " + packageMetadata.getRepositoryId() +
+					"No repository found.", ex);
 		}
 		catch (Exception ex) {
-			logger.error("This is a catch all debug statement.", ex);
-			throw new SkipperException("Catch all", ex);
+			throw new SkipperException("Could not download an deserialize package.", ex);
 		}
 		finally {
 			if (targetPath != null && !FileSystemUtils.deleteRecursively(targetPath.toFile())) {
@@ -228,7 +228,7 @@ public class PackageService implements ResourceLoaderAware {
 			return this.packageMetadataRepository.save(packageMetadata);
 		}
 		catch (IOException e) {
-			throw new SkipperException("Failed to upload the package " + e.getCause());
+			throw new SkipperException("Failed to upload the package.", e);
 		}
 		finally {
 			if (packageDirPath != null && !FileSystemUtils.deleteRecursively(packageDirPath.toFile())) {

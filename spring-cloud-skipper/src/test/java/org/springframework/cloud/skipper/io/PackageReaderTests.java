@@ -49,8 +49,8 @@ public class PackageReaderTests {
 	@SuppressWarnings("unchecked")
 	private void assertTickTockPackage(Package pkg) {
 		PackageMetadata metadata = pkg.getMetadata();
-		assertThat(metadata.getApiVersion()).isEqualTo("v1");
-		assertThat(metadata.getKind()).isEqualTo("skipper");
+		assertThat(metadata.getApiVersion()).isEqualTo("skipper.spring.io/v1");
+		assertThat(metadata.getKind()).isEqualTo("SkipperPackageMetadata");
 		assertThat(metadata.getName()).isEqualTo("ticktock");
 		assertThat(metadata.getVersion()).isEqualTo("1.0.0");
 		assertThat(metadata.getPackageSourceUrl()).isEqualTo("https://example.com/dataflow/ticktock");
@@ -81,8 +81,8 @@ public class PackageReaderTests {
 
 	private void assertLogPackage(Package pkg) {
 		PackageMetadata metadata = pkg.getMetadata();
-		assertThat(metadata.getApiVersion()).isEqualTo("v1");
-		assertThat(metadata.getKind()).isEqualTo("skipper");
+		assertThat(metadata.getApiVersion()).isEqualTo("skipper.spring.io/v1");
+		assertThat(metadata.getKind()).isEqualTo("SkipperPackageMetadata");
 		assertThat(metadata.getName()).isEqualTo("log");
 		assertThat(metadata.getVersion()).isEqualTo("2.0.0");
 		assertThat(metadata.getPackageSourceUrl())
@@ -97,8 +97,8 @@ public class PackageReaderTests {
 
 	private void assertTimePackage(Package pkg) {
 		PackageMetadata metadata = pkg.getMetadata();
-		assertThat(metadata.getApiVersion()).isEqualTo("v1");
-		assertThat(metadata.getKind()).isEqualTo("skipper");
+		assertThat(metadata.getApiVersion()).isEqualTo("skipper.spring.io/v1");
+		assertThat(metadata.getKind()).isEqualTo("SkipperPackageMetadata");
 		assertThat(metadata.getName()).isEqualTo("time");
 		assertThat(metadata.getVersion()).isEqualTo("2.0.0");
 		assertThat(metadata.getPackageSourceUrl())
