@@ -137,8 +137,8 @@ The `package.yml` file specifies the package metadata.
 A sample package metadata would look like this:
 
 ----
-apiVersion: v1
-kind: skipperPackageMetadata
+apiVersion: skipper.spring.io/v1
+kind: SkipperPackageMetadata
 name: mypackage
 version: 1.0.0
 packageSourceUrl: https://github.com/some-mypackage-project/v1.0.0.RELEASE
@@ -182,7 +182,7 @@ mypackage-1.0.0
 will commonly have the following content:
 
 ----
-apiVersion: skipper/v1
+apiVersion: skipper.spring.io/v1
 kind: SpringCloudDeployerApplication
 metadata:
   name: mypackage

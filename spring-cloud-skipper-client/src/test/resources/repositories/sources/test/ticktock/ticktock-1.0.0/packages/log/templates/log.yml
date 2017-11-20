@@ -1,5 +1,5 @@
 apiVersion: skipper.spring.io/v1
-kind: Application
+kind: SpringCloudDeployerApplication
 deployment:
   name: log
   count: {{deployment.count}}

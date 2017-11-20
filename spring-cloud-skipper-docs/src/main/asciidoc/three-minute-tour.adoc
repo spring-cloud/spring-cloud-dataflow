@@ -95,7 +95,7 @@ skipper:>manifest get --release-name helloworldlocal --release-version 2
 
 ---
 # Source: helloworld.yml
-apiVersion: skipper/v1
+apiVersion: skipper.spring.io/v1
 kind: SpringCloudDeployerApplication
 metadata:
   name: helloworld
@@ -119,7 +119,7 @@ skipper:>manifest get --release-name helloworldlocal --release-version 1
 
 ---
 # Source: helloworld.yml
-apiVersion: skipper/v1
+apiVersion: skipper.spring.io/v1
 kind: SpringCloudDeployerApplication
 metadata:
   name: helloworld
@@ -335,7 +335,7 @@ skipper:>manifest get --release-name helloworldpcf
 
 ---
 # Source: helloworld.yml
-apiVersion: skipper/v1
+apiVersion: skipper.spring.io/v1
 kind: SpringCloudDeployerApplication
 metadata:
   name: helloworld
@@ -650,7 +650,7 @@ skipper:>manifest get --release-name helloworldk8s
 
 ---
 # Source: template.yml
-apiVersion: skipperPackage/v1
+apiVersion: skipper.spring.io/v1
 kind: SpringCloudDeployerApplication
 metadata:
   name: helloworld-docker
