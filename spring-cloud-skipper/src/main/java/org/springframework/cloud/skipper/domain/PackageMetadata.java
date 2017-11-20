@@ -17,6 +17,7 @@ package org.springframework.cloud.skipper.domain;
 
 import javax.persistence.Entity;
 import javax.persistence.Lob;
+import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -28,6 +29,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  * @author Gunnar Hillert
  */
 @Entity
+@Table(name = "SkipperPackageMetadata")
 public class PackageMetadata extends AbstractEntity {
 
 	/**

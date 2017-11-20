@@ -22,6 +22,7 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 import org.springframework.data.rest.core.annotation.RestResource;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author Mark Pollack
@@ -47,14 +48,19 @@ public interface ReleaseRepository extends PagingAndSortingRepository<Release, L
 	@RestResource(exported = false)
 	void deleteAll();
 
+	@Transactional(readOnly = true)
 	List<Release> findByNameOrderByVersionDesc(@Param("name") String name);
 
+	@Transactional(readOnly = true)
 	List<Release> findByNameIgnoreCaseContainingOrderByNameAscVersionDesc(@Param("name") String name);
 
+	@Transactional(readOnly = true)
 	List<Release> findByNameAndVersionBetweenOrderByNameAscVersionDesc(@Param("name") String name,
 			@Param("from") int fromVersion, @Param("to") int toVersion);
 
+	@Transactional(readOnly = true)
 	Release findTopByNameOrderByVersionDesc(@Param("name") String name);
 
+	@Transactional(readOnly = true)
 	List<Release> findByNameIgnoreCaseContaining(@Param("name") String name);
 }

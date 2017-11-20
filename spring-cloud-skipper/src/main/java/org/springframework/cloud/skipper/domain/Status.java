@@ -23,6 +23,7 @@ import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Lob;
+import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -45,6 +46,7 @@ import org.springframework.cloud.deployer.spi.app.DeploymentState;
  * @author Mark Pollack
  */
 @Entity
+@Table(name = "SkipperStatus")
 public class Status extends AbstractEntity {
 
 	// Status from the Release managment platform

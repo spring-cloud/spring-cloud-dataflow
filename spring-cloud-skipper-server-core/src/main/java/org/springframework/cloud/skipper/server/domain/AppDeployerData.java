@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
 
 import javax.persistence.Entity;
 import javax.persistence.Lob;
+import javax.persistence.Table;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -42,6 +43,7 @@ import org.springframework.cloud.skipper.domain.AbstractEntity;
  * @author Mark Pollack
  */
 @Entity
+@Table(name = "SkipperAppDeployerData")
 public class AppDeployerData extends AbstractEntity {
 
 	private String releaseName;

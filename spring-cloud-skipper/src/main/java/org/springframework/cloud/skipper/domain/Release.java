@@ -22,6 +22,7 @@ import javax.persistence.Entity;
 import javax.persistence.Lob;
 import javax.persistence.OneToOne;
 import javax.persistence.PostLoad;
+import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 
@@ -37,6 +38,7 @@ import org.springframework.util.StringUtils;
  * @author Mark Pollack
  */
 @Entity
+@Table(name = "SkipperRelease")
 public class Release extends AbstractEntity {
 
 	/**

@@ -20,6 +20,7 @@ import java.util.Date;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.OneToOne;
+import javax.persistence.Table;
 
 /**
  * Basic information about the package deployment operation.
@@ -27,6 +28,7 @@ import javax.persistence.OneToOne;
  * @author Mark Pollack
  */
 @Entity
+@Table(name = "SkipperInfo")
 public class Info extends AbstractEntity {
 
 	@OneToOne(cascade = { CascadeType.ALL })

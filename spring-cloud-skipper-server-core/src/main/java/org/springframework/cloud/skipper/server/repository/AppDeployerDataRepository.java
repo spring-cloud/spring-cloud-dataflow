@@ -17,6 +17,7 @@ package org.springframework.cloud.skipper.server.repository;
 
 import org.springframework.cloud.skipper.server.domain.AppDeployerData;
 import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author Mark Pollack
@@ -24,6 +25,7 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 public interface AppDeployerDataRepository
 		extends PagingAndSortingRepository<AppDeployerData, Long>, AppDeployerDataRepositoryCustom {
 
+	@Transactional(readOnly = true)
 	AppDeployerData findByReleaseNameAndReleaseVersion(String releaseName, Integer releaseVersion);
 
 }
