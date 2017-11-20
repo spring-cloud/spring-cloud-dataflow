@@ -10,6 +10,8 @@ spring:
   data:
     rest:
       base-path: /api
+  jpa:
+    generate-ddl: true
   cloud:
     skipper:
       server:

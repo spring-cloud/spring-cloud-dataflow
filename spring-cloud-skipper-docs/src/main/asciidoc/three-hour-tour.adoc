@@ -196,7 +196,8 @@ metadata:
   name: mypackage
   type: sample
 spec:
-  resource: maven://org.mysample:mypackage:{{version}}
+  resource: maven://org.mysample:mypackage
+  version: {{version}}
   applicationProperties:
     {{#spec.applicationProperties.entrySet}}
     {{key}}: {{value}}
@@ -209,25 +210,39 @@ spec:
 
 The `apiVersion`, `kind` and `spec.resource` are required.
 
-The `spec.resource` defines where the application executable is located.
-This is either a Spring Boot uberjar hosted under a http endpoint or a maven or docker repository.  There is a template placeholder `{{version}}` so that the version of a specific application can be easily upgraded without having to create a new package .zip file.
+The `spec.resource` and `spec.version` defines where the application executable is located.
+This is either a Spring Boot uberjar hosted under a http endpoint or a maven or docker repository.  The template placeholder `{{version}}` so that the version of a specific application can be easily upgraded without having to create a new package .zip file.
 
-The format for the `resource` is an typical `http://` or a `maven://` or `docker:`, whose format is less commonly known.
-Here are some examples:
+The `resource` is `http://` or a `maven://` or `docker:` based.  The format for specifying a `resource` is shown below.
 
 ----
 spec:
   resource: maven://org.springframework.cloud.samples:spring-cloud-skipper-samples-helloworld:1.0.0.RELEASE
-  resource: maven://{{maven-group-name}}:{{artifact-name}}:{{version}}
+  version: 1.0.0.RELEASE
 ----
 
-This shows the broad structure that maven uses. The first part before the `:` is the Maven group name and the second part after the `:` is the artifact name.  The last part is the version.
+The mapping to maven artifact names is
+----
+spec:
+  resource: maven://<maven-group-name>:<maven-artifact-name>
+  version:<maven-version>
+----
+
+For docker,
 
 ----
 spec:
-  resource: docker:springcloud/spring-cloud-skipper-samples-helloworld:1.0.0.RELEASE
+  resource: docker:springcloud/spring-cloud-skipper-samples-helloworld
+  version: 1.0.0.RELEASE
 ----
-This follows typical naming conventions of <user>/<repo>:<tag>.
+
+The mapping to docker registry names is
+
+----
+spec:
+  resource: docker:<user>/<repo>
+  version: <tag>
+----
 
 There is only one setting to specify with maven repositories to search.  This applies across all platform accounts.  By default the configuration:
 
