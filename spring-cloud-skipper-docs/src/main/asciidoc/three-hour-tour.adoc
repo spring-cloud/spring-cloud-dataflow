@@ -131,7 +131,7 @@ The file https://github.com/spring-cloud/spring-cloud-skipper/blob/master/spring
 
 
 [[package-metadata]]
-=== Package Metadata (Package.yml)
+=== Package Metadata (package.yml)
 
 The `package.yml` file specifies the package metadata.
 A sample package metadata would look like this:
@@ -169,12 +169,12 @@ description: This is a mypackage sample.
 * `iconUrl` - URL for an icon to show for this package.
 * `origin` - Free form text describing the origin of this package, for example your company name.
 
-NOTE: The package search functionality in 1.0 M1 is only a wildcard match against the name of the package.
+NOTE: Currently, the package search functionality is only a wildcard match against the name of the package.
 
 A Package Repository exposes an `index.yml` file that contains multiple metadata documents, separated by the standard three dash notation `---` to separate the documents.  For example http://skipper-repository.cfapps.io/repository/experimental/index.yml[index.yml].
 
 [[package-template-files]]
-=== Package Templates (Template.yml)
+=== Package Templates (template.yml)
 
 The `template.yml` file in a package structure such as
 
@@ -263,8 +263,11 @@ The application properties correspond to the properties for the application itse
 
 The deployment properties correspond to the properties for the deployment operation performed by Spring Cloud Deployer implementations.
 
+NOTE: The `name` of the template file can be anything as all the files under `templates` directory are loaded to
+apply the template configurations.
+
 [[package-values]]
-=== Package Values (Values.yml)
+=== Package Values (values.yml)
 
 The `values` YAML file contains the default values for any of the keys specified in the template files.
 
@@ -357,21 +360,25 @@ skipper:>search
 ╚═════════════════╧═══════╧════════════════════════════════════════════════════════════════════════════════╝
 ----
 
-[[create-our-package]]
+[[create-your-package]]
 === Creating Your Own Package
 
-For this package, we are going to be creating a super simple package, using the `helloworld` app above and uploading it to our local machine.
+In this section, we will try to create a package that can be deployed using Spring Cloud Deployer implementations.
 
-To get started creating your own package, create a folder following the naming convention (`[package-name]-[package-version]`), in our case it will be `helloworld-1.0.0`. In this folder, create an empty `values.yml`, `package.yml` and `templates` folder. In the `templates` folder create an empty `template.yml` file.
+For this package, we are going to be creating a super simple package and uploading it to our local machine.
+
+To get started creating your own package, create a folder following the naming convention (`[package-name]-[package-version]`), in our case it will be `demo-1.0.0`.
+In this directory, create empty files `values.yml`, `package.yml` and a `templates` directory.
+In the `templates` directory create an empty `template.yml` file.
 
 Go into the `package.yml` where we are going to specify the package metadata, for this app we are only going to be filling the minimum values possible:
 
 ----
 # package.yml
 
-apiVersion: v1
-kind: skipper
-name: helloworld
+apiVersion: skipper.spring.io/v1
+kind: SkipperPackageMetadata
+name: demo
 version: 1.0.0
 description: Greets the world!
 ----
@@ -379,17 +386,18 @@ description: Greets the world!
 Importantly here, ensure that your `name` and `version` matches the `name` and `version` in your folder name or you will get an error.
 
 Next, open up your `templates/template.yml`. Here we are going to be specifying the actual information about your package and most importantly setting default values.
-In the `template.yml`, for now you can add all the values here (unadvised) or you can set placeholders using {{placeholder-name}} and fill them in using the `values.yml`. We are going to be using the second route, but if it isn't working try entering the values directly and see if that fixes the issue.
+In the `template.yml`, copy the template for the kind `SpringCloudDeployerApplication` from the above sample.
 
 ----
 # templates/template.yml
 
-apiVersion: skipper/v1
-kind: SpringBootApp
+apiVersion: skipper.spring.io/v1
+kind: SpringCloudDeployerApplication
 metadata:
-  name: helloworld
+  name: demo
 spec:
-  resource: maven://org.springframework.cloud.samples:spring-cloud-skipper-samples-helloworld:{{version}}
+  resource: maven://org.springframework.cloud.samples:spring-cloud-skipper-samples-helloworld
+  version: {{version}}
   applicationProperties:
     {{#spec.applicationProperties.entrySet}}
     {{key}}: {{value}}
@@ -400,7 +408,8 @@ spec:
     {{/spec.deploymentProperties.entrySet}}
 ----
 
-Simply, this specifies our application name is helloworld, and finds our package in maven and we can specify a `version`, `applicationProperties` and `deploymentProperties` in our `values.yml`. So lets do that.
+Simply, this specifies our application name is `demo`, and finds our package in maven and we can specify a `version`,
+`applicationProperties` and `deploymentProperties` in our `values.yml`. So lets do that.
 
 ----
 # values.yml
@@ -413,47 +422,49 @@ spec:
     server.port: 8100
 ----
 
-This will set out `version` to 1.0.0. And also set the `#spec.applicationProperties.entrySet` map with the property: server.port: 8100. When filled out, your `template.yml` would look like this:
+This will set out `version` to `1.0.0.RELEASE` and also set the `server.port=8100` as one of the application properties.
+When the Skipper Package reader resolves these values by merging the `values.yml` against the template, the resolved values would look like this:
 
 ----
 # hypothetical template.yml
 
-apiVersion: skipper/v1
-kind: SpringBootApp
+apiVersion: skipper.spring.io/v1
+kind: SpringCloudDeployerApplication
 metadata:
-  name: helloworld
+  name: demo
 spec:
-  resource: maven://org.springframework.cloud.samples:spring-cloud-skipper-samples-helloworld:1.0.0.RELEASE
+  resource: maven://org.springframework.cloud.samples:spring-cloud-skipper-samples-helloworld
+  version: 1.0.0.RELEASE
   applicationProperties:
     server.port: 8100
   deploymentProperties:
 ----
 
-As mentioned above, one reason that it's better to use `values.yml` instead of entering the values directly is that it allows you to overwrite the values at run time using the `--file` or `--properties` flags.
+The reason to use `values.yml` instead of entering the values directly is that it allows you to overwrite the values at run time using the `--file` or `--properties` flags.
 
 We have now finished making our file, we now have to zip it up. The easiest way to do is the `zip -r` command line command. You should see something like:
 
 ----
-$ zip -r helloworld-1.0.0.zip helloworld-1.0.0/
-  adding: helloworld-1.0.0/ (stored 0%)
-  adding: helloworld-1.0.0/package.yml (deflated 14%)
-  adding: helloworld-1.0.0/templates/ (stored 0%)
-  adding: helloworld-1.0.0/templates/template.yml (deflated 55%)
-  adding: helloworld-1.0.0/values.yml (deflated 4%)
+$ zip -r demo-1.0.0.zip demo-1.0.0/
+  adding: demo-1.0.0/ (stored 0%)
+  adding: demo-1.0.0/package.yml (deflated 14%)
+  adding: demo-1.0.0/templates/ (stored 0%)
+  adding: demo-1.0.0/templates/template.yml (deflated 55%)
+  adding: demo-1.0.0/values.yml (deflated 4%)
 ----
 
 Armed with our zipped file and the path to it, we can head to skipper and use the `upload` command:
 
 ----
-skipper:> upload --path /Users/path-to-your-zip/helloworld.zip
-Package uploaded successfully:[helloworld:1.0.0]
+skipper:> upload --path /Users/path-to-your-zip/demo-1.0.0.zip
+Package uploaded successfully:[demo:1.0.0]
 ----
 
 Now you can search for it as shown above, then install it!
 
 ----
-skipper:>install --package-name helloworld --package-version 1.0.0 --release-name helloworld
-Released helloworld. Now at version v1.
+skipper:>install --package-name demo --package-version 1.0.0 --release-name demo
+Released demo. Now at version v1.
 ----
 
 Congratulations! You have now created, packaged, uploaded and installed your own Skipper Package!
