@@ -168,7 +168,7 @@ public class AppDeploymentRequestCreator {
 			String version = extractAppVersionProperty(currentApp, streamDeploymentProperties);
 			List<String> commandlineArguments = new ArrayList<>();
 			if (version != null) {
-				//TODO ensure new version as a resource exists and load that AppRegistration
+				// TODO ensure new version as a resource exists and load that AppRegistration
 				commandlineArguments.add(version);
 			}
 
@@ -217,6 +217,8 @@ public class AppDeploymentRequestCreator {
 			AppDeploymentRequest request = new AppDeploymentRequest(revisedDefinition, appResource,
 					deployerDeploymentProperties, commandlineArguments);
 
+			logger.debug("Created AppDeploymentRequest = " + request.toString() + " AppDefinition = "
+					+ request.getDefinition().toString());
 			appDeploymentRequests.add(request);
 		}
 		return appDeploymentRequests;
