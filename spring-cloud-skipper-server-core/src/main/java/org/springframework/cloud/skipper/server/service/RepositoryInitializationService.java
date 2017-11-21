@@ -76,7 +76,14 @@ public class RepositoryInitializationService {
 	private void loadAllPackageMetadata() {
 		try {
 			List<PackageMetadata> packageMetadataList = this.packageMetadataService.downloadPackageMetadata();
-			this.packageMetadataRepository.save(packageMetadataList);
+			for (PackageMetadata packageMetadata : packageMetadataList) {
+				if (this.packageMetadataRepository.findByRepositoryIdAndNameAndVersion(
+						packageMetadata.getRepositoryId(),
+						packageMetadata.getName(),
+						packageMetadata.getVersion()) == null) {
+					this.packageMetadataRepository.save(packageMetadata);
+				}
+			}
 		}
 		catch (SkipperException e) {
 			logger.warn("Could not load package metadata from remote repositories", e);
