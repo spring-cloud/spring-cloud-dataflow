@@ -144,10 +144,10 @@ spec:
     log.level: DEBUG
   deploymentProperties:
     memory: 1024m
-[source,bash,options="nowrap"]
 ----
 
 You can then use the `--properties` option in the `upgrade` command as shown below
+
 [source,bash,options="nowrap"]
 ----
 skipper:>upgrade --release-name ticktockskipper --package-name ticktock --properties log.version=1.1.1.RELEASE
