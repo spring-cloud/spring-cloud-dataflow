@@ -11,14 +11,14 @@ Issues can be filed on https://github.com/spring-cloud/spring-cloud-skipper/issu
 == Platforms
 
 Skipper supports deploying to multiple platforms.
-The platforms included in the 1.0 M1 release are Local, Cloud Foundry and Kubernetes.
+The platforms included are Local, Cloud Foundry and Kubernetes.
 For each platform, you can configure multiple accounts.
 Each `account name` must be globally unique across all platforms.
 
 Usually different `accounts` will correspond to a different orgs/spaces for Cloud Foundry and different namespaces for a single Kubernetes cluster.
 
 Platforms are defined using Spring Boot's https://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-external-config.html[Externalized Configuration] feature.
-To simplify setup in 1.0 M1, if a local platform account is not defined in your configuration, Skipper will create a `local` deployer implementation named `default`.
+To simplify setup in 1.0 M2, if a local platform account is not defined in your configuration, Skipper will create a `local` deployer implementation named `default`.
 
 You can make use of the http://cloud.spring.io/spring-cloud-static/spring-cloud-config/1.3.3.RELEASE/multi/multi__spring_cloud_config_server.html#_encryption_and_decryption[Encryption and Decryption] features of Spring Cloud Config as one way to secure credentials.
 
@@ -262,7 +262,7 @@ env:
 ...
 ----
 
-The metadata is used to help search for applications after they have been installed and is not available in Skipper M1.
+The metadata is used to help search for applications after they have been installed and is not available in Skipper 1.0 M2.
 
 Currently, only `SpringCloudDeployerApplication` kind is supported which means the applications can be deployed into the target platforms only using their corresponding Spring Cloud Deployer implementations (CF, Kubernetes Deployer etc.).
 
@@ -516,7 +516,7 @@ The directory structure assumed for a remote repository is the registered `url` 
 
 It is up to you to update the `index.yml` file 'by-hand' for remote repositories.
 
-'Local' repositories are backed by Skipper's database.  In the 1.0 M1 release they does not expose the index.yml or the .zip files under a filesystem like URL structure as with remote repositories. This will be provided in the next version.  However, on the positive side, you can upload packages to a local repository and don't need to maintain an index file.  See the skipper command section for information on creating local repositories.
+'Local' repositories are backed by Skipper's database.  In the 1.0 M2 release they does not expose the index.yml or the .zip files under a filesystem like URL structure as with remote repositories. This will be provided in the next version.  However, on the positive side, you can upload packages to a local repository and don't need to maintain an index file.  See the skipper command section for information on creating local repositories.
 
 A good example that shows using a Spring Boot web application with static resources to host a Repository can be found https://github.com/markpollack/skipper-sample-repository[here].  This application is currently running under http://skipper-repository.cfapps.io/repository/experimental.
 

@@ -178,7 +178,7 @@ applications:
   disk_quota: 1G
   timeout: 180
   instances: 1
-  path: spring-cloud-skipper-server-1.0.0.M1.jar
+  path: spring-cloud-skipper-server-1.0.0.M2.jar
 env:
     SPRING_APPLICATION_NAME: mlp-skipper
     SPRING_CLOUD_SKIPPER_SERVER_ENABLE_LOCAL_PLATFORM: false
@@ -527,8 +527,8 @@ Hello World v1.0.0.RELEASE
 
 In this example we will be running the Skipper server on the local machine and deploying to minikube also running on the local machine.
 
-NOTE: The upgrade approach in 1.0 M1 does not handle correctly the routing of http traffic between versions, so take what is below with a grain of salt.  The Spring Cloud Deployer for Kubernetes creates a service, replication controller, and pod for the app (or optionally
-  a Deployment)  This is not an issue for apps that communicate via Messaging middleware.  Treat the current M1 release as a WIP.
+NOTE: The upgrade approach in 1.0 M2 does not handle correctly the routing of http traffic between versions, so take what is below with a grain of salt.  The Spring Cloud Deployer for Kubernetes creates a service, replication controller, and pod for the app (or optionally
+  a Deployment)  This is not an issue for apps that communicate via Messaging middleware.  Treat the current M2 release as a WIP.
 
 Start the Skipper server with the option `--spring.config.location=skipper.yml` where the YAML is shown below.
 

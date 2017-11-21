@@ -31,7 +31,7 @@ You can configure a single Skipper server to deploy to multiple platforms, with 
 by a unique name.
 
 NOTE: The Spring Cloud Deployer libraries for Apache YARN, Apache Mesos, Redhat Openshift and Hashicorp Nomad were not
-bundled with Skipper in 1.0 M1.  Skipper 1.0 M1 has only been tested using the local, Cloud Foundry and Kubernetes Deployers.
+bundled with Skipper in 1.0 M2.  Skipper 1.0 M2 has only been tested using the local, Cloud Foundry and Kubernetes Deployers.
 
 *Packages* defines the basic recipe for installing an application.
 A package can define a single application or it can define a group of applications.
