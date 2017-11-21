@@ -52,6 +52,7 @@ import org.springframework.util.StringUtils;
  * @author Mark Pollack
  * @author Ilayaperumal Gopinathan
  */
+@SuppressWarnings({"unchecked", "deprecation"})
 public class AppDeployerReleaseManager implements ReleaseManager {
 
 	public static final String SPRING_CLOUD_DEPLOYER_COUNT = "spring.cloud.deployer.count";

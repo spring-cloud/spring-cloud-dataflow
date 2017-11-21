@@ -4,8 +4,7 @@
 To build the source you will need to install JDK 1.8.
 
 The build uses the Maven wrapper so you don't have to install a specific
-version of Maven.  To enable the tests for Redis you should run the server
-before bulding.  See below for more information on how to run Redis.
+version of Maven.
 
 The main build command is
 
@@ -13,7 +12,7 @@ The main build command is
 $ ./mvnw clean install
 ----
 
-To create the executables and avoid running the tests and generating Javadocs, use the command
+To create the executables and avoid running the tests and generating JavaDocs, use the command
 
 ----
 $./mvnw clean package -DskipTests -Dmaven.javadoc.skip=true
