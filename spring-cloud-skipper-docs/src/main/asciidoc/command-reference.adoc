@@ -112,6 +112,47 @@ overriding the properties. When overriding the package version, it needs to acco
 properties as the existing properties won't be carried over.
 In a future release we will introduce a `--reuse-properties` command that will carry the current release properties over to the next release to be made.
 
+
+When performing an update on a package that contains nested packages, use the name of the package as a prefix in the property string or as the first level in the YAML document.
+For example, the `ticktock` package that contains a `time` and a `log` application, a command to upgrade the `log` application would be
+
+[source,bash,options="nowrap"]
+----
+skipper:>upgrade --release-name ticktockskipper --package-name ticktock --file /home/mpollack/log-level-change.yml
+----
+
+where `log-level-change.yml` is
+
+[source,bash,options="nowrap"]
+----
+log:
+  version: 1.1.1.RELEASE
+  spec:
+    applicationProperties:
+      server.port: 9999
+      endpoints.sensitive: false
+      log.level: ERROR
+----
+
+Since it is quite a common use-case to change only the version of the application, the packages can list the version as a top level property in the `values.yml` file.  For example, in the test package `ticktock` (located https://github.com/spring-cloud/spring-cloud-skipper/blob/master/spring-cloud-skipper-server-core/src/test/resources/repositories/sources/test/ticktock/ticktock-1.0.0/packages/log/values.yml[here]), `values.yml` is
+
+[source,bash,options="nowrap"]
+----
+version: 1.1.0.RELEASE
+spec:
+  applicationProperties:
+    log.level: DEBUG
+  deploymentProperties:
+    memory: 1024m
+[source,bash,options="nowrap"]
+----
+
+You can then use the `--properties` option in the `upgrade` command as shown below
+[source,bash,options="nowrap"]
+----
+skipper:>upgrade --release-name ticktockskipper --package-name ticktock --properties log.version=1.1.1.RELEASE
+----
+
 === Status command
 
 This command shows the `status` of a specific release and version.

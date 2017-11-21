@@ -41,12 +41,12 @@ public class YmlUtilsTests {
 
 	@Test
 	public void testBasicContent() throws IOException {
-		Resource resource =
-				new ClassPathResource("/org/springframework/cloud/skipper/shell/command/support/log4j.properties");
+		Resource resource = new ClassPathResource(
+				"/org/springframework/cloud/skipper/shell/command/support/log4j.properties");
 		String stringToConvert = StreamUtils.copyToString(resource.getInputStream(), Charset.defaultCharset());
 		String yml = YmlUtils.convertFromCsvToYaml(stringToConvert);
-		Resource convertedYmlResource =
-				new ClassPathResource("/org/springframework/cloud/skipper/shell/command/support/log4j.yml");
+		Resource convertedYmlResource = new ClassPathResource(
+				"/org/springframework/cloud/skipper/shell/command/support/log4j.yml");
 		assertThat(yml).isEqualTo(StreamUtils.copyToString(convertedYmlResource.getInputStream(),
 				Charset.defaultCharset()));
 	}
@@ -58,11 +58,11 @@ public class YmlUtilsTests {
 		String propertiesYml = YmlUtils.getYamlConfigValues(null, properties);
 		assertThat(propertiesYml).isEqualTo(
 				"log:\n"
-				+ "  spec:\n"
-				+ "    deploymentProperties: {spring.cloud.deployer.cloudfoundry.route: mlp3-helloworld.cfapps.io}\n"
-				+ "time:\n"
-				+ "  spec:\n"
-				+ "    deploymentProperties: {spring.cloud.deployer.cloudfoundry.route: mlp1-helloworld.cfapps.io}\n");
+						+ "  spec:\n"
+						+ "    deploymentProperties: {spring.cloud.deployer.cloudfoundry.route: mlp3-helloworld.cfapps.io}\n"
+						+ "time:\n"
+						+ "  spec:\n"
+						+ "    deploymentProperties: {spring.cloud.deployer.cloudfoundry.route: mlp1-helloworld.cfapps.io}\n");
 	}
 
 	@Test
@@ -71,6 +71,13 @@ public class YmlUtilsTests {
 		String propertiesYml = YmlUtils.getYamlConfigValues(null, properties);
 		assertThat(propertiesYml).isEqualTo("spec:\n"
 				+ "  deploymentProperties: {spring.cloud.deployer.cloudfoundry.route: mlp3-helloworld.cfapps.io}\n");
+	}
+
+	@Test
+	public void testLogVersion() throws IOException {
+		String properties = "log.version=1.1.1.RELEASE";
+		String propertiesYml = YmlUtils.getYamlConfigValues(null, properties);
+		assertThat(propertiesYml).isEqualTo("log: {version: 1.1.1.RELEASE}\n");
 	}
 
 }

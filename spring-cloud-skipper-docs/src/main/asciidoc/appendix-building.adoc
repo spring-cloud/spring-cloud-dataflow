@@ -42,7 +42,7 @@ To generate just the REST Docs documentation, use the command
 To build the asciidoctor documentation only, use the command
 
 ----
-./mvnw clean package -DskipTests -Pfull -pl spring-cloud-skipper-docs
+./mvnw package -DskipTests -Pfull -pl spring-cloud-skipper-docs
 ----
 
 === Importing into eclipse

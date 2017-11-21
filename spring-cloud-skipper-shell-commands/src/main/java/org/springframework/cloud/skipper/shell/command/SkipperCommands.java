@@ -226,7 +226,7 @@ public class SkipperCommands extends AbstractSkipperCommand {
 	public Object upgrade(
 			@ShellOption(help = "the name of the release to upgrade") String releaseName,
 			@ShellOption(help = "the name of the package to use for the upgrade") String packageName,
-			@ShellOption(help = "the version of the package to use for the upgrade", defaultValue = NULL) String packageVersion,
+			@ShellOption(help = "the version of the package to use for the upgrade, if not specified latest version will be used", defaultValue = NULL) String packageVersion,
 			@ShellOption(help = "specify values in a YAML file", defaultValue = NULL) File file,
 			@ShellOption(help = "the comma separated set of properties to override during upgrade", defaultValue = NULL) String properties)
 			throws IOException {

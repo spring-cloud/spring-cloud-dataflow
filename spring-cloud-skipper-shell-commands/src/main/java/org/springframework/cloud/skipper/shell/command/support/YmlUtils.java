@@ -48,7 +48,9 @@ public abstract class YmlUtils {
 
 	private static final String DOT_CHAR_REPLACEMENT = "------";
 
-	private static final String SPEC_STRING = ".spec.";
+	private static final String DOT_SPEC_STRING = ".spec.";
+
+	private static final String SPEC_STRING = "spec.";
 
 	public static String convertFromCsvToYaml(String propertiesAsString) {
 		String stringToConvert = propertiesAsString.replaceAll(",", "\n");
@@ -72,29 +74,35 @@ public abstract class YmlUtils {
 			}
 		}
 		else if (StringUtils.hasText(propertiesAsCsvString)) {
-			StringTokenizer tokenizer = new StringTokenizer(propertiesAsCsvString, ",");
-			StringBuilder sb = new StringBuilder();
-			while (tokenizer.hasMoreElements()) {
-				String value = tokenizer.nextToken();
-				if (value.contains(SPEC_STRING)) {
-					int i = value.indexOf(SPEC_STRING) + 1;
-					String trimmed = value.substring(i);
-					String prefix = value.substring(0, i);
-					String modifiedString = modifyString(trimmed);
-					value = new String(prefix + modifiedString);
-				}
-				else {
-					value = modifyString(value);
-				}
-				sb.append(value);
-				sb.append("\n");
-			}
-			String ymlString = Props2YAML.fromContent(sb.toString()).convert();
-			// Revert original property keys' dots
-			ymlString = ymlString.replaceAll(DOT_CHAR_REPLACEMENT, DOT_CHAR);
-			Yaml yaml = new Yaml();
-			configValuesYML = yaml.dump(yaml.load(ymlString));
+			configValuesYML = convertToYaml(propertiesAsCsvString);
 		}
+		return configValuesYML;
+	}
+
+	private static String convertToYaml(String propertiesAsCsvString) {
+		String configValuesYML;
+		StringTokenizer tokenizer = new StringTokenizer(propertiesAsCsvString, ",");
+		StringBuilder sb = new StringBuilder();
+		while (tokenizer.hasMoreElements()) {
+			String value = tokenizer.nextToken();
+			if (value.contains(DOT_SPEC_STRING)) {
+				int i = value.indexOf(DOT_SPEC_STRING) + 1;
+				String trimmed = value.substring(i);
+				String prefix = value.substring(0, i);
+				String modifiedString = modifyString(trimmed);
+				value = new String(prefix + modifiedString);
+			}
+			else if (value.contains(SPEC_STRING)) {
+				value = modifyString(value);
+			}
+			sb.append(value);
+			sb.append("\n");
+		}
+		String ymlString = Props2YAML.fromContent(sb.toString()).convert();
+		// Revert original property keys' dots
+		ymlString = ymlString.replaceAll(DOT_CHAR_REPLACEMENT, DOT_CHAR);
+		Yaml yaml = new Yaml();
+		configValuesYML = yaml.dump(yaml.load(ymlString));
 		return configValuesYML;
 	}
 
