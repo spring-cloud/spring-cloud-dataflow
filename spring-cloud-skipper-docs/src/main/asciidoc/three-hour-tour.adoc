@@ -215,20 +215,19 @@ This is either a Spring Boot uberjar hosted under a http endpoint or a maven or 
 
 The `resource` is `http://` or a `maven://` or `docker:` based.  The format for specifying a `resource` is shown below.
 
+==== HTTP Resources
+
 ----
 spec:
-  resource: maven://org.springframework.cloud.samples:spring-cloud-skipper-samples-helloworld:1.0.0.RELEASE
+  resource: http://example.com/app/hello-world
   version: 1.0.0.RELEASE
 ----
 
-The mapping to maven artifact names is
-----
-spec:
-  resource: maven://<maven-group-name>:<maven-artifact-name>
-  version:<maven-version>
-----
+There is a naming convention that must be followed for HTTP based resource so that Skipper can assemble a full URL from the `resource` and `version` field and also parse the version number given the URL.
+The above `spec` will reference a URL at `http://example.com/app/hello-world-1.0.0.RELEASE.jar`.
+The `resource` and `version` fields should not have any numbers after the `-` character.
 
-For docker,
+==== Docker Resources
 
 ----
 spec:
@@ -242,6 +241,22 @@ The mapping to docker registry names is
 spec:
   resource: docker:<user>/<repo>
   version: <tag>
+----
+
+
+==== Maven Resources
+
+----
+spec:
+  resource: maven://org.springframework.cloud.samples:spring-cloud-skipper-samples-helloworld:1.0.0.RELEASE
+  version: 1.0.0.RELEASE
+----
+
+The mapping to maven artifact names is
+----
+spec:
+  resource: maven://<maven-group-name>:<maven-artifact-name>
+  version:<maven-version>
 ----
 
 There is only one setting to specify with maven repositories to search.  This applies across all platform accounts.  By default the configuration:
