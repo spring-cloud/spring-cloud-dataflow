@@ -18,24 +18,20 @@ package org.springframework.cloud.skipper.shell.config;
 import org.jline.reader.LineReader;
 import org.jline.reader.Parser;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.cloud.skipper.client.SkipperClientConfiguration;
 import org.springframework.cloud.skipper.client.SkipperClientProperties;
 import org.springframework.cloud.skipper.shell.command.support.ConsoleUserInput;
-import org.springframework.cloud.skipper.shell.command.support.SkipperShellApplicationRunner;
-import org.springframework.cloud.skipper.shell.command.support.Target;
+import org.springframework.cloud.skipper.shell.command.support.InitializeConnectionApplicationRunner;
+import org.springframework.cloud.skipper.shell.command.support.InteractiveModeApplicationRunner;
 import org.springframework.cloud.skipper.shell.command.support.TargetHolder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.core.annotation.Order;
 import org.springframework.shell.ResultHandler;
 import org.springframework.shell.Shell;
-import org.springframework.shell.jline.DefaultShellApplicationRunner;
 import org.springframework.shell.jline.PromptProvider;
 
 /**
@@ -52,49 +48,21 @@ import org.springframework.shell.jline.PromptProvider;
 public class ShellConfiguration {
 
 	@Bean
-	public ApplicationRunner initialConnectionApplicationRunner() {
-		return new InitialConnectionApplicationRunner();
+	public ApplicationRunner initialConnectionApplicationRunner(TargetHolder targetHolder,
+																@Qualifier("main") ResultHandler resultHandler,
+																SkipperClientProperties skipperClientProperties) {
+		return new InitializeConnectionApplicationRunner(targetHolder, resultHandler, skipperClientProperties);
 	}
 
 	@Bean
 	public ApplicationRunner applicationRunner(LineReader lineReader, PromptProvider promptProvider, Parser parser,
 			Shell shell) {
-		return new SkipperShellApplicationRunner(lineReader, promptProvider, parser, shell);
+		return new InteractiveModeApplicationRunner(lineReader, promptProvider, parser, shell);
 	}
 
 	@Bean
 	public ConsoleUserInput userInput(@Lazy LineReader lineReader) {
 		return new ConsoleUserInput(lineReader);
-	}
-
-	@Order(DefaultShellApplicationRunner.PRECEDENCE - 10)
-	@SuppressWarnings("unchecked")
-	private static class InitialConnectionApplicationRunner implements ApplicationRunner {
-		@Autowired
-		private TargetHolder targetHolder;
-
-		@Autowired
-		private SkipperClientProperties clientProperties;
-
-		@Autowired
-		@Qualifier("main")
-		private ResultHandler resultHandler;
-
-		@Override
-		public void run(ApplicationArguments args) throws Exception {
-			Target target = new Target(clientProperties.getUri(), clientProperties.getUsername(),
-					clientProperties.getPassword(), clientProperties.isSkipSllValidation());
-
-			// Attempt connection (including against default values) but do not crash the shell on
-			// error
-			try {
-				targetHolder.changeTarget(target, null);
-			}
-			catch (Exception e) {
-				resultHandler.handleResult(e);
-			}
-
-		}
 	}
 
 }
