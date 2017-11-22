@@ -134,7 +134,7 @@ public class StreamDslTests {
 			}
 		}).when(streamOperations).deploy(Mockito.eq("ticktock"), Mockito.anyMap());
 
-		Stream.StreamBuilder streamBuilder = Stream.builder(client).name("ticktock").definition("time | log")
+		StreamBuilder streamBuilder = Stream.builder(client).name("ticktock").definition("time | log")
 				.create();
 		Mockito.verify(streamOperations, Mockito.times(1)).createStream(
 				Mockito.eq("ticktock"), Mockito.eq("time | log"), Mockito.eq(false));
