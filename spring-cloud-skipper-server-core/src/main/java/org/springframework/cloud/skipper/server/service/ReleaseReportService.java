@@ -67,7 +67,7 @@ public class ReleaseReportService {
 	 * @return A report of what needs to change to bring the current release to the requested
 	 * release
 	 */
-	@Transactional(readOnly = true)
+	@Transactional
 	public ReleaseAnalysisReport createReport(UpgradeRequest upgradeRequest) {
 		Assert.notNull(upgradeRequest.getUpgradeProperties(), "UpgradeProperties can not be null");
 		Assert.notNull(upgradeRequest.getPackageIdentifier(), "PackageIdentifier can not be null");
