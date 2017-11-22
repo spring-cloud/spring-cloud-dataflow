@@ -17,8 +17,6 @@ package org.springframework.cloud.skipper.shell.config;
 
 import org.jline.reader.LineReader;
 import org.jline.reader.Parser;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -27,6 +25,7 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.cloud.skipper.client.SkipperClientConfiguration;
 import org.springframework.cloud.skipper.client.SkipperClientProperties;
 import org.springframework.cloud.skipper.shell.command.support.ConsoleUserInput;
+import org.springframework.cloud.skipper.shell.command.support.SkipperShellApplicationRunner;
 import org.springframework.cloud.skipper.shell.command.support.Target;
 import org.springframework.cloud.skipper.shell.command.support.TargetHolder;
 import org.springframework.context.annotation.Bean;
@@ -46,25 +45,21 @@ import org.springframework.shell.jline.PromptProvider;
  * @author Mark Pollack
  * @author Eric Bottard
  * @author Ilayaperumal Gopinathan
+ * @author Janne Valkealahti
  */
 @Configuration
 @Import(SkipperClientConfiguration.class)
 public class ShellConfiguration {
 
-	private static final Logger logger = LoggerFactory.getLogger(ShellConfiguration.class);
-
-	@Bean
-	public ApplicationRunner defaultShellRunner(
-			LineReader lineReader,
-			PromptProvider promptProvider,
-			Parser parser,
-			Shell shell) {
-		return new DefaultShellApplicationRunner(lineReader, promptProvider, parser, shell);
-	}
-
 	@Bean
 	public ApplicationRunner initialConnectionApplicationRunner() {
 		return new InitialConnectionApplicationRunner();
+	}
+
+	@Bean
+	public ApplicationRunner applicationRunner(LineReader lineReader, PromptProvider promptProvider, Parser parser,
+			Shell shell) {
+		return new SkipperShellApplicationRunner(lineReader, promptProvider, parser, shell);
 	}
 
 	@Bean

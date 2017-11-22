@@ -1,3 +1,6 @@
+spring:
+    main:
+        banner-mode: 'off'
 logging:
   level:
     org.springframework.cloud.skipper.shell: 'WARN'
