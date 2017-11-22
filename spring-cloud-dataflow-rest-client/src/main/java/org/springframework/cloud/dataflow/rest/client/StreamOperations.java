@@ -104,4 +104,5 @@ public interface StreamOperations {
 	 * @return The current stream definition with updated status
 	 */
 	StreamDefinitionResource getStreamDefinition(String streamName);
+
 }

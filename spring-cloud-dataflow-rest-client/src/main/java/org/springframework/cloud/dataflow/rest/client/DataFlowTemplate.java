@@ -122,7 +122,7 @@ public class DataFlowTemplate implements DataFlowOperations {
 	private final AboutOperations aboutOperations;
 
 	/**
-	 * Setup a {@link DataFlowTemplate} using the provided baseURI. Will create a
+	 * Setup a {@link DataFlowTemplate} using the provided baseURI. Will build a
 	 * {@link RestTemplate} implicitly with the required set of Jackson MixIns. For more
 	 * information, please see {@link #prepareRestTemplate(RestTemplate)}.
 	 * <p>
