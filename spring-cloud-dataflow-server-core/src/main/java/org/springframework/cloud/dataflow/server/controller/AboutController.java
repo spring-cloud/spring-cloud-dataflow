@@ -200,24 +200,24 @@ public class AboutController {
 		String url = constructUrl(versionInfoProperties.getImplementationUrl(),
 				this.implementationName,
 				this.implementationVersion);
-		versionInfo.setImplementation(new Dependency(this.implementationName,
+		versionInfo.setImplementationDependency(new Dependency(this.implementationName,
 				this.implementationVersion,
 				getChecksum(url, SHA1), getChecksum(url, SHA256), url));
 		url = constructUrl(versionInfoProperties.getCoreUrl(), null,
 				versionInfoProperties.getDataflowCoreVersion());
-		versionInfo.setCore(new Dependency("Spring Cloud Data Flow Core",
+		versionInfo.setCoreDependency(new Dependency("Spring Cloud Data Flow Core",
 				versionInfoProperties.getDataflowCoreVersion(),
 				getChecksum(url, SHA1), getChecksum(url, SHA256), url));
 		url = constructUrl(versionInfoProperties.getDashboardUrl(),
 				null, versionInfoProperties.getDataflowDashboardVersion());
-		versionInfo.setDashboard(
+		versionInfo.setDashboardDependency(
 				new Dependency("Spring Cloud Dataflow UI",
 						versionInfoProperties.getDataflowDashboardVersion(),
 						getChecksum(url, SHA1), getChecksum(url, SHA256), url
 				));
 		url = constructUrl(versionInfoProperties.getShellUrl(),
 				null, versionInfoProperties.getDataflowShellVersion());
-		versionInfo.setShell(
+		versionInfo.setShellDependency(
 				new Dependency("Spring Cloud Data Flow Shell",
 						versionInfoProperties.getDataflowShellVersion(),
 						getChecksum(url, SHA1), getChecksum(url, SHA256), url));
