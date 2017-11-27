@@ -1,26 +1,61 @@
 package org.springframework.cloud.dataflow.rest.client;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import java.util.Collections;
 
+import org.junit.Assert;
+import org.junit.Test;
+import org.mockito.Mockito;
+
+import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.cloud.dataflow.rest.client.config.DataFlowClientProperties;
+import org.springframework.cloud.dataflow.rest.client.dsl.StreamBuilder;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.annotation.Bean;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.web.client.RestTemplate;
+
 
 /**
  * @author Vinicius Carvalho
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest
 public class DataFlowClientAutoConfigurationTests {
 
 	@Test
 	public void contextLoads() throws Exception {
+		ConfigurableApplicationContext applicationContext = SpringApplication.run(TestApplication.class, "--spring.cloud.dataflow.client.enableDsl=true");
+		Assert.assertNotNull(applicationContext.getBean(DataFlowTemplate.class));
+		Assert.assertNotNull(applicationContext.getBean(StreamBuilder.class));
+		RestTemplate template = applicationContext.getBean(RestTemplate.class);
+		//No auth
+		Mockito.verify(template, Mockito.times(0)).setRequestFactory(Mockito.any());
+		applicationContext.close();
+	}
 
+	@Test
+	public void usingAuthentication() throws Exception {
+		ConfigurableApplicationContext applicationContext = SpringApplication.run(TestApplication.class,
+				"--spring.cloud.dataflow.client.security.username=foo", "--spring.cloud.dataflow.client.security.password=bar", "--spring.cloud.dataflow.client.enableDsl=true");
+		Assert.assertNotNull(applicationContext.getBean(DataFlowTemplate.class));
+		Assert.assertNotNull(applicationContext.getBean(StreamBuilder.class));
+
+		RestTemplate template = applicationContext.getBean(RestTemplate.class);
+		DataFlowClientProperties properties = applicationContext.getBean(DataFlowClientProperties.class);
+		Assert.assertNotNull(properties.getSecurity());
+		Assert.assertEquals("foo", properties.getSecurity().getUsername());
+		Assert.assertEquals("bar", properties.getSecurity().getPassword());
+		Mockito.verify(template, Mockito.times(1)).setRequestFactory(Mockito.any());
+		applicationContext.close();
 	}
 
 	@SpringBootApplication
 	static class TestApplication {
 
+		@Bean
+		public RestTemplate restTemplate() {
+			RestTemplate mock = Mockito.mock(RestTemplate.class);
+			Mockito.when(mock.getMessageConverters()).thenReturn(Collections.singletonList(new MappingJackson2HttpMessageConverter()));
+			return mock;
+		}
 	}
 }

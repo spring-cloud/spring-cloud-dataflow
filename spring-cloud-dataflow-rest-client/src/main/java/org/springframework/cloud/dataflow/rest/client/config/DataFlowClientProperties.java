@@ -4,9 +4,11 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.cloud.dataflow.core.DataFlowPropertyKeys;
 
 /**
+ * Configuration properties used in {@link DataFlowClientAutoConfiguration}
+ *
  * @author Vinicius Carvalho
  */
-@ConfigurationProperties(prefix = DataFlowPropertyKeys.PREFIX + ".client")
+@ConfigurationProperties(prefix = DataFlowPropertyKeys.PREFIX + "client")
 public class DataFlowClientProperties {
 
 	private String target = "http://localhost:9393";
@@ -14,6 +16,16 @@ public class DataFlowClientProperties {
 	private Security security = new Security();
 
 	private boolean skipSslValidation = true;
+
+	private boolean enableDsl = false;
+
+	public boolean isEnableDsl() {
+		return enableDsl;
+	}
+
+	public void setEnableDsl(boolean enableDsl) {
+		this.enableDsl = enableDsl;
+	}
 
 	public boolean isSkipSslValidation() {
 		return skipSslValidation;
@@ -42,6 +54,7 @@ public class DataFlowClientProperties {
 	public static class Security {
 
 		private String username;
+
 		private String password;
 
 		public String getUsername() {
