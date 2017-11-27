@@ -18,6 +18,7 @@ package org.springframework.cloud.skipper.shell.command.support;
 import java.io.File;
 import java.io.FileReader;
 import java.io.Reader;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -71,9 +72,16 @@ public class SkipperShellApplicationRunner implements ApplicationRunner {
 	@Override
 	public void run(ApplicationArguments args) throws Exception {
 		// if we have args, assume one time run
-		if (args.getSourceArgs().length > 0) {
+		ArrayList<String> argsToShellCommand = new ArrayList<>();
+		for (String arg : args.getSourceArgs()) {
+			// consider client connection options as non command args
+			if (!arg.contains("spring.cloud.skipper.client")) {
+				argsToShellCommand.add(arg);
+			}
+		}
+		if (argsToShellCommand.size() > 0) {
 			CommandInputProvider inputProvider = new CommandInputProvider(
-					StringUtils.arrayToDelimitedString(args.getSourceArgs(), " "));
+					StringUtils.collectionToDelimitedString(argsToShellCommand, " "));
 			shell.run(inputProvider);
 			return;
 		}
