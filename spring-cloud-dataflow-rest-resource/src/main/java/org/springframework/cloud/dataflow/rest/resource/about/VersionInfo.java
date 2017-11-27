@@ -20,14 +20,17 @@ package org.springframework.cloud.dataflow.rest.resource.about;
  * Provides version information about core libraries used.
  *
  * @author Gunnar Hillert
+ * @author Glenn Renfro
  */
 public class VersionInfo {
 
-	private Dependency implementation = new Dependency();
+	private Dependency implementationDependency = new Dependency();
 
-	private Dependency core = new Dependency();
+	private Dependency coreDependency = new Dependency();
 
-	private Dependency dashboard = new Dependency();
+	private Dependency dashboardDependency = new Dependency();
+
+	private Dependency shellDependency = new Dependency();
 
 	/**
 	 * Default constructor for serialization frameworks.
@@ -35,27 +38,75 @@ public class VersionInfo {
 	public VersionInfo() {
 	}
 
-	public Dependency getCore() {
-		return core;
+	/**
+	 * Retrieves the current {@link Dependency} for the implementation.
+	 *
+	 * @return {@link Dependency} instance containing Implementation information.
+	 */
+	public Dependency getImplementationDependency() {
+		return implementationDependency;
 	}
 
-	public void setCore(Dependency core) {
-		this.core = core;
+	/**
+	 * Establish the {@link Dependency} for the implementation.
+	 *
+	 * @param implementationDependency the {@link Dependency} instance for the implementation.
+	 */
+	public void setImplementationDependency(Dependency implementationDependency) {
+		this.implementationDependency = implementationDependency;
 	}
 
-	public Dependency getImplementation() {
-		return implementation;
+	/**
+	 * Retrieves the current {@link Dependency} for the core Data Flow instance.
+	 *
+	 * @return {@link Dependency} instance containing core Data Flow information.
+	 */
+	public Dependency getCoreDependency() {
+		return coreDependency;
 	}
 
-	public void setImplementation(Dependency implementation) {
-		this.implementation = implementation;
+	/**
+	 * Establish the {@link Dependency} for the Data Flow core.
+	 *
+	 * @param coreDependency the {@link Dependency} instance for the Data Flow core.
+	 */
+	public void setCoreDependency(Dependency coreDependency) {
+		this.coreDependency = coreDependency;
 	}
 
-	public Dependency getDashboard() {
-		return dashboard;
+	/**
+	 * Retrieves the current {@link Dependency} for the Data Flow UI instance.
+	 *
+	 * @return {@link Dependency} instance containing Data Flow UI information.
+	 */
+	public Dependency getDashboardDependency() {
+		return dashboardDependency;
 	}
 
-	public void setDashboard(Dependency dashboard) {
-		this.dashboard = dashboard;
+	/**
+	 * Establish the {@link Dependency} for the dashboard.
+	 *
+	 * @param dashboardDependency the {@link Dependency} instance for the dashboard.
+	 */
+	public void setDashboardDependency(Dependency dashboardDependency) {
+		this.dashboardDependency = dashboardDependency;
+	}
+
+	/**
+	 * Retrieves the current {@link Dependency} for the shell instance.
+	 *
+	 * @return {@link Dependency} instance containing shell information.
+	 */
+	public Dependency getShellDependency() {
+		return shellDependency;
+	}
+
+	/**
+	 * Establish the {@link Dependency} for the shell.
+	 *
+	 * @param shellDependency the {@link Dependency} instance for the shell.
+	 */
+	public void setShellDependency(Dependency shellDependency) {
+		this.shellDependency = shellDependency;
 	}
 }

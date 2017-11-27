@@ -96,8 +96,8 @@ public class ConfigCommandTests {
 		dataFlowShell.setDataFlowOperations(dataFlowOperations);
 
 		aboutResource.getFeatureInfo().setTasksEnabled(false);
-		aboutResource.getVersionInfo().getCore().setName("Foo Core");
-		aboutResource.getVersionInfo().getCore().setVersion("1.2.3.BUILD-SNAPSHOT");
+		aboutResource.getVersionInfo().getCoreDependency().setName("Foo Core");
+		aboutResource.getVersionInfo().getCoreDependency().setVersion("1.2.3.BUILD-SNAPSHOT");
 		aboutResource.getSecurityInfo().setAuthenticationEnabled(true);
 		aboutResource.getRuntimeEnvironment().getAppDeployer().setJavaVersion("1.8");
 		aboutResource.getRuntimeEnvironment().getAppDeployer().getPlatformSpecificInfo().put("Some", "Stuff");

@@ -16,16 +16,28 @@
 
 package org.springframework.cloud.dataflow.rest.resource.about;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 /**
  * Holds dependency information of a lbrary used by Spring Cloud Dataflow.
  *
  * @author Gunnar Hillert
+ * @author Glenn Renfro
  */
+
 public class Dependency {
 
 	private String name;
 
 	private String version;
+
+	@JsonInclude(JsonInclude.Include.NON_NULL)
+	private String checksumSha1;
+
+	@JsonInclude(JsonInclude.Include.NON_NULL)
+	private String checksumSha256;
+
+	private String url;
 
 	/**
 	 * Default constructor for serialization frameworks.
@@ -33,26 +45,104 @@ public class Dependency {
 	public Dependency() {
 	}
 
-	public Dependency(String name, String version) {
+	public Dependency(String name, String version, String checksumsha1,
+			String checksumsha256, String url) {
 		super();
 		this.name = name;
 		this.version = version;
+		this.checksumSha1 = checksumsha1;
+		this.checksumSha256 = checksumsha256;
+		this.url = url;
 	}
 
+	/**
+	 * Retrieve the current name for the {@link Dependency}
+
+	 * @return the name for the {@link Dependency}
+	 */
 	public String getName() {
 		return name;
 	}
 
+	/**
+	 * Establish the name for the {@link Dependency}.
+	 *
+	 * @param name {@link String} representing the name.
+	 */
 	public void setName(String name) {
 		this.name = name;
 	}
 
+	/**
+	 * Retrieve the current version for the {@link Dependency}
+	 *
+	 * @return the version for the {@link Dependency}
+	 */
 	public String getVersion() {
 		return version;
 	}
 
+	/**
+	 * Establish the version for the {@link Dependency}.
+	 *
+	 * @param version {@link String} representing the version.
+	 */
 	public void setVersion(String version) {
 		this.version = version;
 	}
 
+	/**
+	 * Retrieve the current checksumSha1 for the {@link Dependency}
+	 *
+	 * @return the checksumSha1 for the {@link Dependency}
+	 */
+	public String getChecksumSha1() {
+		return checksumSha1;
+	}
+
+	/**
+	 * Establish the checksumSha1 for the {@link Dependency}.
+	 *
+	 * @param checksumSha1 {@link String} representing the checksumSha1.
+	 */
+	public void setChecksumSha1(String checksumSha1)
+	{
+		this.checksumSha1 = checksumSha1;
+	}
+
+	/**
+	 * Retrieve the current url for the {@link Dependency}
+	 *
+	 * @return the url for the {@link Dependency}
+	 */
+	public String getUrl() {
+		return url;
+	}
+
+	/**
+	 * Establish the url for the {@link Dependency}.
+	 *
+	 * @param url {@link String} representing the url.
+	 */
+	public void setUrl(String url) {
+		this.url = url;
+	}
+
+	/**
+	 * Retrieve the current checksumSha256 for the {@link Dependency}
+	 *
+	 * @return the checksumSha256 for the {@link Dependency}
+	 */
+	public String getChecksumSha256() {
+		return checksumSha256;
+	}
+
+	/**
+	 * Establish the checksumSha1256 for the {@link Dependency}.
+	 *
+	 * @param checksumSha256 {@link String} representing the checksumSha256.
+	 */
+	public void setChecksumSha256(String checksumSha256) {
+		this.checksumSha256 = checksumSha256;
+	}
 }
