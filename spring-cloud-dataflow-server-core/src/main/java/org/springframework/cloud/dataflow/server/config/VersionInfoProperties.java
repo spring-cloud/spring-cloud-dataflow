@@ -43,58 +43,128 @@ public class VersionInfoProperties {
 
 	private String shellUrl;
 
+	/**
+	 * Retrieves the current {@link String} for the implementation url.
+	 *
+	 * @return {@link String} containing implementation url.
+	 */
 	public String getImplementationUrl() {
 		return implementationUrl;
 	}
 
+	/**
+	 * Establishes the implementation url.
+	 *
+	 * @param implementationUrl {@String} containing the implementation url.
+	 */
 	public void setImplementationUrl(String implementationUrl) {
 		this.implementationUrl = implementationUrl;
 	}
 
+	/**
+	 * Retrieves the current {@link String} for the core url.
+	 *
+	 * @return {@link String} containing core url.
+	 */
 	public String getCoreUrl() {
 		return coreUrl;
 	}
 
+	/**
+	 * Establishes the core url.
+	 *
+	 * @param coreUrl {@String} containing the core url.
+	 */
 	public void setCoreUrl(String coreUrl) {
 		this.coreUrl = coreUrl;
 	}
 
+	/**
+	 * Retrieves the current {@link String} for the dashboard url.
+	 *
+	 * @return {@link String} containing dashboard url.
+	 */
 	public String getDashboardUrl() {
 		return dashboardUrl;
 	}
 
+	/**
+	 * Establishes the dashboard url.
+	 *
+	 * @param dashboardUrl {@String} containing the dashboard url.
+	 */
 	public void setDashboardUrl(String dashboardUrl) {
 		this.dashboardUrl = dashboardUrl;
 	}
 
+	/**
+	 * Retrieves the current {@link String} for the shell url.
+	 *
+	 * @return {@link String} containing shell url.
+	 */
 	public String getShellUrl() {
 		return shellUrl;
 	}
 
+	/**
+	 * Establishes the shell url.
+	 *
+	 * @param shellUrl {@String} containing the shell url.
+	 */
 	public void setShellUrl(String shellUrl) {
 		this.shellUrl = shellUrl;
 	}
 
+	/**
+	 * Retrieves the current {@link String} for the core version.
+	 *
+	 * @return {@link String} containing core version.
+	 */
 	public String getDataflowCoreVersion() {
 		return dataflowCoreVersion;
 	}
 
+	/**
+	 * Establishes the data flow core version.
+	 *
+	 * @param dataflowCoreVersion {@String} containing the core version.
+	 */
 	public void setDataflowCoreVersion(String dataflowCoreVersion) {
 		this.dataflowCoreVersion = dataflowCoreVersion;
 	}
 
+	/**
+	 * Retrieves the current {@link String} for the dashboard version.
+	 *
+	 * @return {@link String} containing dashboard version.
+	 */
 	public String getDataflowDashboardVersion() {
 		return dataflowDashboardVersion;
 	}
 
+	/**
+	 * Establishes the data flow dashboard version.
+	 *
+	 * @param dataflowDashboardVersion {@String} containing the dashboard version.
+	 */
 	public void setDataflowDashboardVersion(String dataflowDashboardVersion) {
 		this.dataflowDashboardVersion = dataflowDashboardVersion;
 	}
 
+	/**
+	 * Retrieves the current {@link String} for the shell version.
+	 *
+	 * @return {@link String} containing shell version.
+	 */
 	public String getDataflowShellVersion() {
 		return dataflowShellVersion;
 	}
 
+	/**
+	 * Establishes the shell version.
+	 *
+	 * @param dataflowShellVersion {@String} containing the shell version.
+	 */
 	public void setDataflowShellVersion(String dataflowShellVersion) {
 		this.dataflowShellVersion = dataflowShellVersion;
 	}
