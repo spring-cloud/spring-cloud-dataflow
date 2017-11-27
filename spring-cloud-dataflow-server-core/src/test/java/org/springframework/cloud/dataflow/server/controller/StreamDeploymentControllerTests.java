@@ -16,6 +16,10 @@
 
 package org.springframework.cloud.dataflow.server.controller;
 
+import static org.mockito.Mockito.*;
+import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_ENABLED_PROPERTY_KEY;
+
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -28,12 +32,10 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultStreamService;
-
-import static org.mockito.Mockito.verify;
-import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_ENABLED_PROPERTY_KEY;
+import org.springframework.cloud.skipper.client.SkipperClient;
+import org.springframework.hateoas.Resources;
 
 /**
  * Unit tests for StreamDeploymentController.
@@ -55,9 +57,12 @@ public class StreamDeploymentControllerTests {
 	@Mock
 	private DefaultStreamService defaultStreamService;
 
+	@Mock
+	private SkipperClient skipperClient;
+
 	@Before
 	public void setup() {
-		this.controller = new StreamDeploymentController(streamDefinitionRepository, defaultStreamService);
+		this.controller = new StreamDeploymentController(streamDefinitionRepository, defaultStreamService, skipperClient);
 	}
 
 	@Test
@@ -82,6 +87,13 @@ public class StreamDeploymentControllerTests {
 		verify(defaultStreamService).rollbackStream(argumentCaptor1.capture(), argumentCaptor2.capture());
 		Assert.assertEquals(argumentCaptor1.getValue(), "test1");
 		Assert.assertTrue("Rollback version is incorrect", argumentCaptor2.getValue() == 2);
+	}
+
+	@Test
+	public void tesPlatformsListViaSkipperClient() {
+		when(skipperClient.listDeployers()).thenReturn(new Resources<>(new ArrayList<>(), new ArrayList<>()));
+		this.controller.platformList();
+		verify(skipperClient, times(1)).listDeployers();
 	}
 
 }

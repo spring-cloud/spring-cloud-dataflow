@@ -16,7 +16,11 @@
 
 package org.springframework.cloud.dataflow.server.controller;
 
+import java.util.Collection;
 import java.util.Map;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.rest.UpdateStreamRequest;
@@ -25,6 +29,9 @@ import org.springframework.cloud.dataflow.server.repository.NoSuchStreamDefiniti
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.StreamService;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
+import org.springframework.cloud.skipper.client.SkipperClient;
+import org.springframework.cloud.skipper.domain.Deployer;
+import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
@@ -50,7 +57,11 @@ import org.springframework.web.bind.annotation.RestController;
 @ExposesResourceFor(StreamDeploymentResource.class)
 public class StreamDeploymentController {
 
+	private static final Logger logger = LoggerFactory.getLogger(StreamDeploymentController.class);
+
 	private final StreamService streamService;
+
+	private final SkipperClient skipperClient;
 
 	/**
 	 * The repository this controller will use for stream CRUD operations.
@@ -67,12 +78,16 @@ public class StreamDeploymentController {
 	 *
 	 * @param repository the repository this controller will use for stream CRUD operations
 	 * @param streamService the underlying StreamService to deploy the stream
+	 * @param skipperClient the Skipper client to use for Skipper related services
 	 */
-	public StreamDeploymentController(StreamDefinitionRepository repository, StreamService streamService) {
+	public StreamDeploymentController(StreamDefinitionRepository repository, StreamService streamService,
+			SkipperClient skipperClient) {
 		Assert.notNull(repository, "StreamDefinitionRepository must not be null");
 		Assert.notNull(streamService, "StreamService must not be null");
+		Assert.notNull(skipperClient, "SkipperClient must not be null");
 		this.repository = repository;
 		this.streamService = streamService;
+		this.skipperClient = skipperClient;
 	}
 
 	/**
@@ -126,4 +141,32 @@ public class StreamDeploymentController {
 		this.streamService.rollbackStream(name, version);
 	}
 
+	@RequestMapping(value = "/manifest/{name}/{version}", method = RequestMethod.GET)
+	@ResponseStatus(HttpStatus.OK)
+	public String manifest(@PathVariable("name") String name, @PathVariable("version") int version) {
+		if (version > 0) {
+			return this.skipperClient.manifest(name, version);
+		}
+		else {
+			return this.skipperClient.manifest(name);
+		}
+	}
+
+	@RequestMapping(path = "/history/{name}/{max}", method = RequestMethod.GET)
+	@ResponseStatus(HttpStatus.OK)
+	public Collection<Release> history(@PathVariable("name") String releaseName,
+			@PathVariable("max") int maxRevisions) {
+		if (maxRevisions > 0) {
+			return this.skipperClient.history(releaseName, String.valueOf(maxRevisions));
+		}
+		else {
+			return this.skipperClient.history(releaseName).getContent();
+		}
+	}
+
+	@RequestMapping(path = "/platform/list", method = RequestMethod.GET)
+	@ResponseStatus(HttpStatus.OK)
+	public Collection<Deployer> platformList() {
+		return this.skipperClient.listDeployers().getContent();
+	}
 }
