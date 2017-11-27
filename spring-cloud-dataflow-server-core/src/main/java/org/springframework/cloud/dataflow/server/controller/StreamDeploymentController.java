@@ -30,6 +30,7 @@ import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepo
 import org.springframework.cloud.dataflow.server.service.StreamService;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.skipper.client.SkipperClient;
+import org.springframework.cloud.skipper.domain.Deployer;
 import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.http.HttpStatus;
@@ -163,4 +164,9 @@ public class StreamDeploymentController {
 		}
 	}
 
+	@RequestMapping(path = "/platform/list", method = RequestMethod.GET)
+	@ResponseStatus(HttpStatus.OK)
+	public Collection<Deployer> platformList() {
+		return this.skipperClient.listDeployers().getContent();
+	}
 }

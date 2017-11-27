@@ -20,6 +20,7 @@ import java.util.Collection;
 import java.util.Map;
 
 import org.springframework.cloud.dataflow.rest.resource.StreamDefinitionResource;
+import org.springframework.cloud.skipper.domain.Deployer;
 import org.springframework.cloud.skipper.domain.PackageIdentifier;
 import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.hateoas.PagedResources;
@@ -123,4 +124,9 @@ public interface StreamOperations {
 	 * @return the history of releases for the stream
 	 */
 	Collection<Release> history(String streamName, int max);
+
+	/**
+	 * @return the list of all Skipper platforms
+	 */
+	Collection<Deployer> listPlatforms();
 }

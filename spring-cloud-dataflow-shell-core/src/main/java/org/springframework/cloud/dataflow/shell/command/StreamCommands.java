@@ -37,6 +37,7 @@ import org.springframework.cloud.dataflow.shell.command.support.OpsType;
 import org.springframework.cloud.dataflow.shell.command.support.RoleType;
 import org.springframework.cloud.dataflow.shell.command.support.YmlUtils;
 import org.springframework.cloud.dataflow.shell.config.DataFlowShell;
+import org.springframework.cloud.skipper.domain.Deployer;
 import org.springframework.cloud.skipper.domain.PackageIdentifier;
 import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.core.io.FileSystemResource;
@@ -86,6 +87,8 @@ public class StreamCommands implements CommandMarker {
 	private static final String STREAM_SKIPPER_MANIFEST_GET = "stream skipper manifest";
 
 	private static final String STREAM_SKIPPER_HISTORY = "stream skipper history";
+
+	private static final String STREAM_SKIPPER_PLATFORM_LIST = "stream skipper platform-list";
 
 	private static final String UNDEPLOY_STREAM = "stream undeploy";
 
@@ -258,6 +261,17 @@ public class StreamCommands implements CommandMarker {
 		TableBuilder tableBuilder = new TableBuilder(model);
 		DataFlowTables.applyStyle(tableBuilder);
 		return tableBuilder.build();
+	}
+
+	@CliCommand(value = STREAM_SKIPPER_PLATFORM_LIST, help = "List Skipper platforms")
+	public Table listPlatforms() {
+		Collection<Deployer> platforms = streamOperations().listPlatforms();
+		LinkedHashMap<String, Object> headers = new LinkedHashMap<>();
+		headers.put("name", "Name");
+		headers.put("type", "Type");
+		headers.put("description", "Description");
+		BeanListTableModel<Deployer> model = new BeanListTableModel<>(platforms, headers);
+		return DataFlowTables.applyStyle(new TableBuilder(model)).build();
 	}
 
 	@CliCommand(value = STREAM_SKIPPER_UPDATE, help = "Update a previously created stream using Skipper")
