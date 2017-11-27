@@ -125,8 +125,8 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 
 	@Bean
 	public StreamDeploymentController streamDeploymentController(StreamDefinitionRepository repository,
-			StreamService streamService) {
-		return new StreamDeploymentController(repository, streamService);
+			StreamService streamService, SkipperClient skipperClient) {
+		return new StreamDeploymentController(repository, streamService, skipperClient);
 	}
 
 	@Bean

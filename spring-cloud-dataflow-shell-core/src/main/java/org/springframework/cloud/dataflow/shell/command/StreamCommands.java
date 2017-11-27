@@ -19,6 +19,7 @@ package org.springframework.cloud.dataflow.shell.command;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -37,6 +38,7 @@ import org.springframework.cloud.dataflow.shell.command.support.RoleType;
 import org.springframework.cloud.dataflow.shell.command.support.YmlUtils;
 import org.springframework.cloud.dataflow.shell.config.DataFlowShell;
 import org.springframework.cloud.skipper.domain.PackageIdentifier;
+import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.shell.core.CommandMarker;
@@ -46,6 +48,7 @@ import org.springframework.shell.core.annotation.CliOption;
 import org.springframework.shell.table.BeanListTableModel;
 import org.springframework.shell.table.Table;
 import org.springframework.shell.table.TableBuilder;
+import org.springframework.shell.table.TableModel;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -79,6 +82,10 @@ public class StreamCommands implements CommandMarker {
 	private static final String STREAM_SKIPPER_UPDATE = "stream skipper update";
 
 	private static final String STREAM_SKIPPER_ROLLBACK = "stream skipper rollback";
+
+	private static final String STREAM_SKIPPER_MANIFEST_GET = "stream skipper manifest";
+
+	private static final String STREAM_SKIPPER_HISTORY = "stream skipper history";
 
 	private static final String UNDEPLOY_STREAM = "stream undeploy";
 
@@ -218,7 +225,39 @@ public class StreamCommands implements CommandMarker {
 				propertiesFile);
 		Map<String, String> propertiesToUse = getDeploymentProperties(deploymentProperties, propertiesFile, which);
 		streamOperations().deploy(name, propertiesToUse);
-		return String.format("Deployment request has been sent for stream '%s'", name);
+		return String.format("Deployment request has been sent for stream '%s'\n", name);
+	}
+
+	@CliCommand(value = STREAM_SKIPPER_MANIFEST_GET, help = "Get manifest for the stream deployed using Skipper")
+	public String getManifest(
+			@CliOption(key = { "",
+					"name" }, help = "the name of the stream", mandatory = true, optionContext = "existing-stream "
+					+ "disable-string-converter") String name,
+			@CliOption(key = { "releaseVersion" }, help = "the Skipper release version to get the manifest for",
+					unspecifiedDefaultValue = "0") int releaseVersion) {
+		String manifest = streamOperations().getManifest(name, releaseVersion);
+		return String.format("%s", manifest.substring(1, manifest.length() - 1));
+	}
+
+	@CliCommand(value = STREAM_SKIPPER_HISTORY, help = "Get history for the stream deployed using Skipper")
+	public Table history(
+			@CliOption(key = { "",
+					"name" }, help = "the name of the stream", mandatory = true, optionContext = "existing-stream "
+					+ "disable-string-converter") String name,
+			@CliOption(key = { "max" }, help = "the maximum number of revisions to retrieve",
+					unspecifiedDefaultValue = "0") int max) {
+		Collection<Release> releases = streamOperations().history(name, max);
+		LinkedHashMap<String, Object> headers = new LinkedHashMap<>();
+		headers.put("version", "Version");
+		headers.put("info.lastDeployed", "Last updated");
+		headers.put("info.status.statusCode", "Status");
+		headers.put("pkg.metadata.name", "Package Name");
+		headers.put("pkg.metadata.version", "Package Version");
+		headers.put("info.description", "Description");
+		TableModel model = new BeanListTableModel<>(releases, headers);
+		TableBuilder tableBuilder = new TableBuilder(model);
+		DataFlowTables.applyStyle(tableBuilder);
+		return tableBuilder.build();
 	}
 
 	@CliCommand(value = STREAM_SKIPPER_UPDATE, help = "Update a previously created stream using Skipper")

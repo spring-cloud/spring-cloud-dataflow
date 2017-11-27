@@ -31,6 +31,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultStreamService;
+import org.springframework.cloud.skipper.client.SkipperClient;
 
 import static org.mockito.Mockito.verify;
 import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_ENABLED_PROPERTY_KEY;
@@ -55,9 +56,12 @@ public class StreamDeploymentControllerTests {
 	@Mock
 	private DefaultStreamService defaultStreamService;
 
+	@Mock
+	private SkipperClient skipperClient;
+
 	@Before
 	public void setup() {
-		this.controller = new StreamDeploymentController(streamDefinitionRepository, defaultStreamService);
+		this.controller = new StreamDeploymentController(streamDefinitionRepository, defaultStreamService, skipperClient);
 	}
 
 	@Test

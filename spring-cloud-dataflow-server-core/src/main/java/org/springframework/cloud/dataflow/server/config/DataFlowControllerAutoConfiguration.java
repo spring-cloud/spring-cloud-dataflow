@@ -16,11 +16,13 @@
 
 package org.springframework.cloud.dataflow.server.config;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.sql.DataSource;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -36,6 +38,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.cloud.client.circuitbreaker.EnableCircuitBreaker;
 import org.springframework.cloud.common.security.AuthorizationProperties;
 import org.springframework.cloud.common.security.support.FileSecurityProperties;
@@ -89,9 +92,10 @@ import org.springframework.cloud.deployer.resource.registry.UriRegistry;
 import org.springframework.cloud.deployer.resource.support.DelegatingResourceLoader;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
+import org.springframework.cloud.skipper.client.DefaultSkipperClient;
 import org.springframework.cloud.skipper.client.SkipperClient;
-import org.springframework.cloud.skipper.client.SkipperClientConfiguration;
 import org.springframework.cloud.skipper.client.SkipperClientProperties;
+import org.springframework.cloud.skipper.client.SkipperClientResponseErrorHandler;
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
@@ -99,7 +103,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.hateoas.EntityLinks;
+import org.springframework.http.converter.StringHttpMessageConverter;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.scheduling.concurrent.ForkJoinPoolFactoryBean;
+import org.springframework.web.client.RestTemplate;
 
 /**
  * Configuration for the Data Flow Server Controllers.
@@ -156,8 +163,8 @@ public class DataFlowControllerAutoConfiguration {
 	@Bean
 	@ConditionalOnBean({ StreamDefinitionRepository.class, StreamDeploymentRepository.class })
 	public StreamDeploymentController streamDeploymentController(StreamDefinitionRepository repository,
-			StreamService streamService) {
-		return new StreamDeploymentController(repository, streamService);
+			StreamService streamService, SkipperClient skipperClient) {
+		return new StreamDeploymentController(repository, streamService, skipperClient);
 	}
 
 	@Bean
@@ -378,9 +385,18 @@ public class DataFlowControllerAutoConfiguration {
 	}
 
 	@Configuration
-	@Import(SkipperClientConfiguration.class)
 	@ConditionalOnBean({ StreamDefinitionRepository.class, StreamDeploymentRepository.class })
+	@EnableConfigurationProperties(SkipperClientProperties.class)
 	public static class SkipperConfiguration {
+
+		@Bean
+		public SkipperClient skipperClient(SkipperClientProperties properties,
+				RestTemplateBuilder restTemplateBuilder, ObjectMapper objectMapper) {
+			RestTemplate restTemplate = restTemplateBuilder.errorHandler(new SkipperClientResponseErrorHandler
+					(objectMapper)).messageConverters(Arrays.asList(new StringHttpMessageConverter(), new
+					MappingJackson2HttpMessageConverter(objectMapper))).build();
+			return new DefaultSkipperClient(properties.getUri(), restTemplate);
+		}
 
 		@Bean
 		public SkipperStreamDeployer skipperStreamDeployer(SkipperClient skipperClient,

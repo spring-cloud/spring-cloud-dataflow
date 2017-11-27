@@ -16,10 +16,12 @@
 
 package org.springframework.cloud.dataflow.rest.client;
 
+import java.util.Collection;
 import java.util.Map;
 
 import org.springframework.cloud.dataflow.rest.resource.StreamDefinitionResource;
 import org.springframework.cloud.skipper.domain.PackageIdentifier;
+import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.hateoas.PagedResources;
 
 /**
@@ -105,4 +107,20 @@ public interface StreamOperations {
 	 */
 	StreamDefinitionResource getStreamDefinition(String streamName);
 
+	/**
+	 * Get manifest for the given stream deployed via Skipper.
+	 * Optionally, the version can be used to retrieve the version for a specific version of the stream.
+	 * @param streamName the stream(release) name
+	 * @param version the version of the release
+	 * @return the manifest for the given stream and version
+	 */
+	String getManifest(String streamName, int version);
+
+	/**
+	 * Get the history of releases for the given stream deployed via Skipper.
+	 * @param streamName the stream(release) name
+	 * @param max the maximum number of revisions to include in the history
+	 * @return the history of releases for the stream
+	 */
+	Collection<Release> history(String streamName, int max);
 }
