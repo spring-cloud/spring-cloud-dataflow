@@ -85,19 +85,18 @@ $ java -jar -jar spring-cloud-dataflow-server-local-{project-version}.jar --spri
 == Deploying Streams
 . Import Apps
 +
-By default, the application registry will be empty. If you would like to register all out-of-the-box stream applications built with the Kafka binder in bulk, you can with the following command.
-+
-[source,bash,subs=attributes]
-----
-$ dataflow:>app import --uri http://bit.ly/Bacon-RELEASE-stream-applications-kafka-10-maven
-----
-Alternatively you can register all the stream applications with the Rabbit binder
-+
-[source,bash,subs=attributes]
-----
-$ dataflow:>app import --uri http://bit.ly/Bacon-RELEASE-stream-applications-rabbit-maven
-----
-For more details, such as how to register applications that are based on docker containers, review the section on how to <<streams.adoc#spring-cloud-dataflow-register-stream-apps, register applications>>.
+By default, the application registry will be empty.
+Let's register two applications, `http` and `log` that communicate using RabbitMQ.
+
+```
+dataflow:>app register --name http --type source --uri maven://org.springframework.cloud.stream.app:http-source-rabbit:1.2.0.RELEASE
+Successfully registered application 'source:http'
+
+dataflow:>app register --name log --type sink --uri maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.1.0.RELEASE
+Successfully registered application 'sink:log'
+``
+
+For more details, such as how to register applications that are based on docker containers or use Kafka as the messaging middleware, review the section on how to <<streams.adoc#spring-cloud-dataflow-register-stream-apps, register applications>>.
 +
 NOTE: Depending on your environment, you may need to configure the Data Flow Server to point to a custom
 Maven repository location or configure proxy settings.  See <<configuration-maven>> for more information.

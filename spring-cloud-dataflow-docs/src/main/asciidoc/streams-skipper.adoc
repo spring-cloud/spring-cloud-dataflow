@@ -3,8 +3,123 @@
 
 The section <<spring-cloud-dataflow-stream-lifecycle-skipper>> covers the overall role of Skipper in Spring Cloud Data Flow.
 
-This section is a continuation of the getting started section that shows how Streams can be updated and rolled back specific to the Local Data Flow server.
+This section is a continuation of the getting started section on <<getting-started-deploying-streams-spring-cloud-dataflow>> and shows how Streams can be updated and rolled back using the Local Data Flow server and Skipper.
+The getting started section leaves off with the Stream `httptest` deployed.
+The Stream consists of two applications, the `http` and the `log` sink.
+If you execute the unix command `jps` you can see the two java processes running.
 
+[source,bash]
+----
+$ jps | grep rabbit
+12643 log-sink-rabbit-1.1.0.RELEASE.jar
+12645 http-source-rabbit-1.2.0.RELEASE.jar
+----
 
+== Upgrading
+We will now upgrade the log sink to version 1.2.0.RELEASE.
+Since we are deploying on the local deployer we will need to set the port to a different value (9001) than the currently running log sink's value of 9000.
+While we are at it, let's update log level to be `ERROR` and configure the Spring Boot actuator endpoints to be accessible without a password.
+Create a YAML file named `local-log-update.yml` with the following contents
+[source,yml]
+----
+version:
+  log: 1.2.0.RELEASE
+app:
+  log:
+    server.port: 9001
+    log.level: ERROR
+----
 
+Now update the Stream
+[source,bash]
+----
+dataflow:> stream skipper update --name httptest --propertiesFile /home/mpollack/local-log-update.yml
+Update request has been sent for the stream 'httptest'
+----
+
+Executing the unix command `jps` you can see the two java processes running, but now the log application is version 1.2.0.RELEASE
+
+[source,bash]
+----
+$ jps | grep rabbit
+22034 http-source-rabbit-1.2.0.RELEASE.jar
+22031 log-sink-rabbit-1.1.0.RELEASE.jar
+----
+
+Looking in the log file of the Skipper server, you will see the following log entries
+
+[source,bash,options=nowrap]
+----
+INFO 12591 --- [  StateUpdate-1] o.s.c.d.spi.local.LocalAppDeployer       : Deploying app with deploymentId httptest.log-v2 instance 0.
+   Logs will be in /tmp/spring-cloud-dataflow-5262910238261867964/httptest-1511749222274/httptest.log-v2
+INFO 12591 --- [  StateUpdate-1] o.s.c.s.s.d.strategies.HealthCheckStep   : Waiting for apps in release httptest-v2 to be healthy.
+INFO 12591 --- [  StateUpdate-1] o.s.c.s.s.d.s.HandleHealthCheckStep      : Release httptest-v2 has been DEPLOYED
+INFO 12591 --- [  StateUpdate-1] o.s.c.s.s.d.s.HandleHealthCheckStep      : Apps in release httptest-v2 are healthy.
+----
+
+`cd` to the directory `/tmp/spring-cloud-dataflow-5262910238261867964/httptest-1511749222274/httptest.log-v2` and `tail -f stdout_0.log`
+
+Now post a message to the http source at port `9000`
+
+[source,bash]
+----
+dataflow:> http post --target http://localhost:9000 --data "hello world upgraded"
+----
+
+And the log message will now be at the error level
+[source,bash]
+----
+ERROR 22311 --- [http.httptest-1] log-sink  : hello world upgraded
+----
+
+If you query the `/info` endpoint of the app, you can also see that it is at version `1.2.0.RELEASE`
+[source,bash]
+----
+$ curl http://localhost:9002/info
+{"app":{"description":"Spring Cloud Stream Log Sink Rabbit Binder Application","name":"log-sink-rabbit","version":"1.2.0.RELEASE"}}
+----
+== Rolling back
+
+To go back to the previous version of the stream, you use the `stream skipper rollback` command
+
+[source,bash]
+----
+dataflow:>stream skipper rollback --name httptest
+Rollback request has been sent for the stream 'httptest'
+----
+
+Executing the unix command `jps` you can see the two java processes running, but now the log application is back to 1.1.0.RELEASE.  The http source process has remain unchanged.
+
+[source,bash]
+----
+$ jps | grep rabbit
+22034 http-source-rabbit-1.2.0.RELEASE.jar
+23939 log-sink-rabbit-1.1.0.RELEASE.jar
+----
+
+Looking in the log file for the skipper server, you will see the following log entries
+
+[source,bash,options=nowrap]
+----
+INFO 21487 --- [  StateUpdate-2] o.s.c.d.spi.local.LocalAppDeployer       : Deploying app with deploymentId httptest.log-v3 instance 0.
+   Logs will be in /tmp/spring-cloud-dataflow-3784227772192239992/httptest-1511755751505/httptest.log-v3
+INFO 21487 --- [  StateUpdate-2] o.s.c.s.s.d.strategies.HealthCheckStep   : Waiting for apps in release httptest-v3 to be healthy.
+INFO 21487 --- [  StateUpdate-2] o.s.c.s.s.d.s.HandleHealthCheckStep      : Release httptest-v3 has been DEPLOYED
+INFO 21487 --- [  StateUpdate-2] o.s.c.s.s.d.s.HandleHealthCheckStep      : Apps in release httptest-v3 are healthy.
+----
+
+`cd` to the directory `/tmp/spring-cloud-dataflow-3784227772192239992/httptest-1511755751505/httptest.log-v3` and `tail -f stdout_0.log`
+
+Now post a message to the http source at port `9000`
+
+[source,bash]
+----
+dataflow:> http post --target http://localhost:9000 --data "hello world upgraded"
+----
+
+And the log message in the log sink will now be back at the info error level.
+[source,bash]
+----
+INFO 23939 --- [http.httptest-1] log-sink                                 : hello world rollback
+----
 

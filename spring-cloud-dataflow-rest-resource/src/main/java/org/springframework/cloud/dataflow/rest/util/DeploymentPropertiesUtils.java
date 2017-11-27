@@ -17,6 +17,7 @@
 package org.springframework.cloud.dataflow.rest.util;
 
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -225,15 +226,15 @@ public final class DeploymentPropertiesUtils {
 	}
 
 	/**
-	 * Convert Properties to a Map with String keys and values. Entries whose key or value is
-	 * not a String are omitted.
+	 * Convert Properties to a Map with String keys and String values.
 	 *
 	 * @param properties the properties object
 	 * @return the equivalent {@code Map<String,String>}
 	 */
 	public static Map<String, String> convert(Properties properties) {
 		Map<String, String> result = new HashMap<>(properties.size());
-		for (String key : properties.stringPropertyNames()) {
+		for (Enumeration<?> e = properties.propertyNames(); e.hasMoreElements();) {
+			String key = (String) e.nextElement();
 			result.put(key, properties.getProperty(key));
 		}
 		return result;
