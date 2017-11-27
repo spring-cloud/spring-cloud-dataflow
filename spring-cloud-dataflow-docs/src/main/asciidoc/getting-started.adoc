@@ -87,19 +87,21 @@ $ java -jar -jar spring-cloud-dataflow-server-local-{project-version}.jar --spri
 +
 By default, the application registry will be empty.
 Let's register two applications, `http` and `log` that communicate using RabbitMQ.
-
++
 ```
 dataflow:>app register --name http --type source --uri maven://org.springframework.cloud.stream.app:http-source-rabbit:1.2.0.RELEASE
 Successfully registered application 'source:http'
 
 dataflow:>app register --name log --type sink --uri maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.1.0.RELEASE
 Successfully registered application 'sink:log'
-``
-
+```
++
 For more details, such as how to register applications that are based on docker containers or use Kafka as the messaging middleware, review the section on how to <<streams.adoc#spring-cloud-dataflow-register-stream-apps, register applications>>.
 +
 NOTE: Depending on your environment, you may need to configure the Data Flow Server to point to a custom
 Maven repository location or configure proxy settings.  See <<configuration-maven>> for more information.
++
+There are two options for deploying Streams.  The "traditional" way that Data Flow has always used and a new way that delegates to the Skipper server.  Deploying using Skipper will enable you to update and rollback the streams while the traditional way will not.
 +
 . Create Streams without Skipper
 +
@@ -154,17 +156,5 @@ unless you explicitly assign one with `--server.port=x`. In both cases, this set
 property that will override any lower-level setting that you may have used (_e.g._ in `application.yml` files).
 ====
 
-[TIP]
-====
-In case you encounter unexpected errors when executing shell commands, you can
-retrieve more detailed error information by setting the exception logging level
-to `WARNING` in `logback.xml`:
-
-[source,xml]
-----
-<logger name="org.springframework.shell.core.JLineShellComponent.exceptions" level="WARNING"/>
-----
-
-====
 == Deploying Tasks
-Refer to the section, <<[[spring-cloud-dataflow-register-task-apps>>, for an example on how to get started using Tasks in Spring Cloud Data Flow.
+Refer to the section, <<spring-cloud-dataflow-register-task-apps>>, for an example on how to get started using Tasks in Spring Cloud Data Flow.
