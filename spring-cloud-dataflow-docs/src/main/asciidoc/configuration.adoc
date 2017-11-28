@@ -1167,36 +1167,14 @@ then add to the generated Maven pom file the MetricWriter implementation you
 want to use.  The documentation on the Data Flow Metrics project pages provides
 the additional information you need to get started.
 
-== About Configuration
-The Spring Cloud Data Flow About Restful API result contains a link to the jars
-and the sha1 and or sha256 checksum values for each of the Data Flow components (i.e.
-the Spring Cloud Data Flow Shell). These links are configurable and by default,
-they  refer to jars that are stored at Maven Central. However
-since you may be running behind a firewall you may wish to point to a local
-repository. These links are configured via the following properties:
 
-* spring.cloud.dataflow.version-info.implementation-url - link to the Spring
-Cloud Data Flow Server-<implementation> (implementation can be
-cloud-foundry, kubernetes, local, etc) jar file.
-* spring.cloud.dataflow.version-info.core-url - link to the Spring Cloud Data
-Flow Core pom.
-* spring.cloud.dataflow.version-info.dashboard-url - link to the Spring Cloud
-Data Flow UI jar.
-* spring.cloud.dataflow.version-info.shell-url - link to the Spring Cloud Data
-Flow Shell jar.
 
-There are reserved values (surrounded by curly braces) that you can insert into
-the url that will make sure that the links are up to date:
 
-* implementation - inserts the type of Data Flow (Cloud Foundry, Kubernetes, Local, etc).
-* repository - if using a build-snapshot, milestone or release candidate of
-Data Flow, the repository will refer to repo-spring-io repository else it will
-refer to Maven Central.
-* version - Will insert this version of the jar/pom.
 
-For example:
-`https://myrepository/org/springframework/cloud/{implementation}/{version}/{implementation}-{version}.jar`
-would produce
-`https://myrepository/org/springframework/cloud/spring-cloud-dataflow-server-local/1.2.3.RELEASE/spring-cloud-dataflow-server-local-1.2.3.RELEASE.jar`
-if you were using the 1.2.3.RELEASE version of the Spring Cloud Data Flow Local Server.
+
+
+
+
+
+
 

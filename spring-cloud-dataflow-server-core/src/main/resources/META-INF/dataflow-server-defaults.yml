@@ -22,11 +22,6 @@ spring:
       version-info:
         dataflow-dashboard-version: "@spring-cloud-dataflow-ui.version@"
         dataflow-core-version: "@project.version@"
-        dataflow-shell-version: "@project.version@"
-        implementation-url: "{repository}/org/springframework/cloud/{implementation}/{version}/{implementation}-{version}.jar"
-        core-url: "{repository}/org/springframework/cloud/spring-cloud-dataflow-parent/{version}/spring-cloud-dataflow-parent-{version}.pom"
-        dashboard-url: "{repository}/org/springframework/cloud/spring-cloud-dataflow-ui/{version}/spring-cloud-dataflow-ui-{version}.jar"
-        shell-url: "{repository}/org/springframework/cloud/spring-cloud-dataflow-shell/{version}/spring-cloud-dataflow-shell-{version}.jar"
       security:
         authorization:
           enabled: true
