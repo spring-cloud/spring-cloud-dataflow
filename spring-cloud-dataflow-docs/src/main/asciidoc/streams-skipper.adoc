@@ -5,8 +5,8 @@ The section <<spring-cloud-dataflow-stream-lifecycle-skipper>> covers the overal
 
 This section is a continuation of the getting started section on <<getting-started-deploying-streams-spring-cloud-dataflow>> and shows how Streams can be updated and rolled back using the Local Data Flow server and Skipper.
 The getting started section leaves off with the Stream `httptest` deployed.
-The Stream consists of two applications, the `http` and the `log` sink.
-If you execute the unix command `jps` you can see the two java processes running.
+The Stream consists of two applications, the `http` source and the `log` sink.
+If you execute the Unix command `jps` you can see the two java processes running.
 
 [source,bash]
 ----
@@ -17,8 +17,8 @@ $ jps | grep rabbit
 
 == Upgrading
 We will now upgrade the log sink to version 1.2.0.RELEASE.
-Since we are deploying on the local deployer we will need to set the port to a different value (9001) than the currently running log sink's value of 9000.
-While we are at it, let's update log level to be `ERROR` and configure the Spring Boot actuator endpoints to be accessible without a password.
+Since we are using the local server we will need to set the port to a different value (9001) than the currently running log sink's value of 9000 to avoid a conflict.
+While we are at it, let's update log level to be `ERROR`.
 Create a YAML file named `local-log-update.yml` with the following contents
 [source,yml]
 ----
@@ -26,7 +26,7 @@ version:
   log: 1.2.0.RELEASE
 app:
   log:
-    server.port: 9001
+    server.port: 9002
     log.level: ERROR
 ----
 
@@ -37,7 +37,7 @@ dataflow:> stream skipper update --name httptest --propertiesFile /home/mpollack
 Update request has been sent for the stream 'httptest'
 ----
 
-Executing the unix command `jps` you can see the two java processes running, but now the log application is version 1.2.0.RELEASE
+Executing the Unix command `jps` you can see the two java processes running, but now the log application is version 1.2.0.RELEASE
 
 [source,bash]
 ----
@@ -78,9 +78,85 @@ If you query the `/info` endpoint of the app, you can also see that it is at ver
 $ curl http://localhost:9002/info
 {"app":{"description":"Spring Cloud Stream Log Sink Rabbit Binder Application","name":"log-sink-rabbit","version":"1.2.0.RELEASE"}}
 ----
+
+=== Stream History
+
+The history of the Stream can be viewed by executing the `stream skipper history` command
+
+[source,bash]
+----
+dataflow:>stream skipper history --name httptest
+╔═══════╤════════════════════════════╤════════╤════════════╤═══════════════╤════════════════╗
+║Version│        Last updated        │ Status │Package Name│Package Version│  Description   ║
+╠═══════╪════════════════════════════╪════════╪════════════╪═══════════════╪════════════════╣
+║2      │Mon Nov 27 22:41:16 EST 2017│DEPLOYED│httptest    │1.0.0          │Upgrade complete║
+║1      │Mon Nov 27 22:40:41 EST 2017│DELETED │httptest    │1.0.0          │Delete complete ║
+╚═══════╧════════════════════════════╧════════╧════════════╧═══════════════╧════════════════╝
+----
+
+=== Stream Manifest
+
+The manifest is a YAML document that represents the final state of what was deployed to the platform.
+You can view the manifest for any Stream version using the command `stream skipper manifest --name <name-of-stream> --releaseVersion <optional-version>`
+If the `--releaseVersion` is not specified, the manifest for the last version is returned.
+
+[source,bash]
+----
+dataflow:>stream skipper manifest --name httptest
+
+---
+# Source: log.yml
+apiVersion: skipper.spring.io/v1
+kind: SpringCloudDeployerApplication
+metadata:
+  name: log
+spec:
+  resource: maven://org.springframework.cloud.stream.app:log-sink-rabbit
+  version: 1.2.0.RELEASE
+  applicationProperties:
+    spring.metrics.export.triggers.application.includes: integration**
+    spring.cloud.dataflow.stream.app.label: log
+    spring.cloud.stream.metrics.key: httptest.log.${spring.cloud.application.guid}
+    spring.cloud.stream.bindings.input.group: httptest
+    spring.cloud.stream.metrics.properties: spring.application.name,spring.application.index,spring.cloud.application.*,spring.cloud.dataflow.*
+    spring.cloud.dataflow.stream.name: httptest
+    spring.cloud.dataflow.stream.app.type: sink
+    spring.cloud.stream.bindings.input.destination: httptest.http
+  deploymentProperties:
+    spring.cloud.deployer.indexed: true
+    spring.cloud.deployer.group: httptest
+    spring.cloud.deployer.count: 1
+
+---
+# Source: http.yml
+apiVersion: skipper.spring.io/v1
+kind: SpringCloudDeployerApplication
+metadata:
+  name: http
+spec:
+  resource: maven://org.springframework.cloud.stream.app:http-source-rabbit
+  version: 1.2.0.RELEASE
+  applicationProperties:
+    spring.metrics.export.triggers.application.includes: integration**
+    spring.cloud.dataflow.stream.app.label: http
+    spring.cloud.stream.metrics.key: httptest.http.${spring.cloud.application.guid}
+    spring.cloud.stream.bindings.output.producer.requiredGroups: httptest
+    spring.cloud.stream.metrics.properties: spring.application.name,spring.application.index,spring.cloud.application.*,spring.cloud.dataflow.*
+    server.port: 9000
+    spring.cloud.stream.bindings.output.destination: httptest.http
+    spring.cloud.dataflow.stream.name: httptest
+    spring.cloud.dataflow.stream.app.type: source
+  deploymentProperties:
+    spring.cloud.deployer.group: httptest
+----
+
+The majority of the deployment and application properties were set by Data Flow in order to enable the applications to talk to each other and sending application metrics with identifying labels.
+
+If you compare this YAML document to the one for `--releaseVersion=1` you will see the difference in the log application version.
+
 == Rolling back
 
-To go back to the previous version of the stream, you use the `stream skipper rollback` command
+To go back to the previous version of the stream, use the `stream skipper rollback` command.
 
 [source,bash]
 ----
@@ -88,7 +164,7 @@ dataflow:>stream skipper rollback --name httptest
 Rollback request has been sent for the stream 'httptest'
 ----
 
-Executing the unix command `jps` you can see the two java processes running, but now the log application is back to 1.1.0.RELEASE.  The http source process has remain unchanged.
+Executing the Unix command `jps` you can see the two java processes running, but now the log application is back to 1.1.0.RELEASE.  The http source process has remain unchanged.
 
 [source,bash]
 ----
@@ -120,6 +196,20 @@ dataflow:> http post --target http://localhost:9000 --data "hello world upgraded
 And the log message in the log sink will now be back at the info error level.
 [source,bash]
 ----
-INFO 23939 --- [http.httptest-1] log-sink                                 : hello world rollback
+INFO 23939 --- [http.httptest-1] log-sink  : hello world rollback
 ----
 
+The history command now shows the third version of the stream hsa been deployed.
+
+[source,bash]
+----
+dataflow:>stream skipper history --name httptest
+╔═══════╤════════════════════════════╤════════╤════════════╤═══════════════╤════════════════╗
+║Version│        Last updated        │ Status │Package Name│Package Version│  Description   ║
+╠═══════╪════════════════════════════╪════════╪════════════╪═══════════════╪════════════════╣
+║3      │Mon Nov 27 23:01:13 EST 2017│DEPLOYED│httptest    │1.0.0          │Upgrade complete║
+║2      │Mon Nov 27 22:41:16 EST 2017│DELETED │httptest    │1.0.0          │Delete complete ║
+║1      │Mon Nov 27 22:40:41 EST 2017│DELETED │httptest    │1.0.0          │Delete complete ║
+╚═══════╧════════════════════════════╧════════╧════════════╧═══════════════╧════════════════╝
+----
+If you look at the manifest for version 3, it will show version 1.1.0.RELEASE for the log sink.

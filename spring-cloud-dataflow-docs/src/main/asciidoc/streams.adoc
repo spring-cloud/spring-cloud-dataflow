@@ -861,13 +861,14 @@ dataflow:> stream deploy --name ticktock
 
 https://cloud.spring.io/spring-cloud-skipper/[Skipper] is a server that allows you to discover Spring Boot applications and manage their lifecycle on multiple Cloud Platforms.
 
-Applications in Skipper are bundled as packages which contain templated configuration files. They also contain an option `values` file that contains default values using to fill in template placeholders.
+Applications in Skipper are bundled as packages which contain templated configuration files. They also contain an optional `values` file that contains default values using to fill in template placeholders.  You can find out more about the format of the package .zip file in Skipper's documentation on https://docs.spring.io/spring-cloud-skipper/docs/1.0.0.M2/reference/htmlsingle/#packages[Packages].
 Skipper's templated configuration files contain placeholders for application properties, application version, and deployment properties.
-Packages are uploaded to Skipper and stored in a package repository.
+Package .zip files are uploaded to Skipper and stored in a package repository.
 Skipper's package repository is analogous to those found in tools such as `apt-get` or `brew`.
 
 You can override template values when installing or upgrading a package.
 Skipper orchestrates the upgrade/rollback procedure of applications between different versions, taking the minimal set of actions to bring the system to the desired state.
+For example, if only one application in a stream has been updated, only that single application is deployed with a new version and the old version undeployed.
 An application is considered different when upgrading if any of it's application properties, deployment properties (excluding count), or application version (e.g. 1.0.0.RELEASE) is different from the currently installed application.
 
 Spring Cloud Data Flow is integrated with Skipper by generating a Skipper package when deploying a Stream.
@@ -890,13 +891,11 @@ There is an important optional command argument to the `stream skipper deploy` c
 Skipper can be configured to deploy to multiple platforms.
 Skipper is pre-configured with a platform named `default` which will deploys applications to the local machine where Skipper is running.
 The default value of the command line argument `--platformName` is `default`.
-If you are commonly deploying to one platform, when installing Skipper you can override the configuration of the `default` platform.  Otherwise, specify the platformName if you want to deploy to platforms such as PCF and Kubernetes.
-
+If you are commonly deploying to one platform, when installing Skipper you can override the configuration of the `default` platform.
+Otherwise, specify the platformName to one of the values returned by the command `stream skipper platform-list`
 
 NOTE: In future releases, only the local Data Flow server will be configured with the `default` platform.
 
-NOTE: In the current release of Data Flow, there is not yet a command/REST endpoint to list the platforms that Skipper is configured to use.
-As such, you will have to find out the platform name to use by either running the Skipper Shell or knowing how you configured the platforms for Skipper when installing Skipper.
 
 [[spring-cloud-dataflow-stream-lifecycle-skipper-update]]
 === Updating a Stream
@@ -909,7 +908,79 @@ If the Stream `http | log` was deployed, and the version of `log` which register
 dataflow:>stream skipper update --name httptest --properties version.log=1.2.0.RELEASE
 ----
 
-NOTE: The `--propertiesFile` can be in a YAML format, which is preferred since the underlying model that Skipper uses is YAML based and the translation from java.util.Properties format to YAML does not cover all possible YAML documents.
+=== Stream versions
+Skipper keeps a history of the Streams that were deployed.
+After updating a Stream, there will be a second version of the stream.
+You can query for the history of the versions using the command `stream skipper history --name <name-of-stream>`.
+
+[source,bash]
+----
+dataflow:>stream skipper history --name httptest
+╔═══════╤════════════════════════════╤════════╤════════════╤═══════════════╤════════════════╗
+║Version│        Last updated        │ Status │Package Name│Package Version│  Description   ║
+╠═══════╪════════════════════════════╪════════╪════════════╪═══════════════╪════════════════╣
+║2      │Mon Nov 27 22:41:16 EST 2017│DEPLOYED│httptest    │1.0.0          │Upgrade complete║
+║1      │Mon Nov 27 22:40:41 EST 2017│DELETED │httptest    │1.0.0          │Delete complete ║
+╚═══════╧════════════════════════════╧════════╧════════════╧═══════════════╧════════════════╝
+----
+
+=== Stream Manifests
+Skipper keeps an "manifest" of the all the applications, their application properties and deployment properties after all values have been substituted.
+This represents the final state of what was deployed to the platform.
+You can view the manifest for any of the versions of a Stream using the command `stream skipper manifest --name <name-of-stream> --releaseVersion <optional-version>`
+If the `--releaseVersion` is not specified, the manifest for the last version is returned.
+
+[source,bash]
+----
+dataflow:>stream skipper manifest --name httptest
+
+---
+# Source: log.yml
+apiVersion: skipper.spring.io/v1
+kind: SpringCloudDeployerApplication
+metadata:
+  name: log
+spec:
+  resource: maven://org.springframework.cloud.stream.app:log-sink-rabbit
+  version: 1.2.0.RELEASE
+  applicationProperties:
+    spring.metrics.export.triggers.application.includes: integration**
+    spring.cloud.dataflow.stream.app.label: log
+    spring.cloud.stream.metrics.key: httptest.log.${spring.cloud.application.guid}
+    spring.cloud.stream.bindings.input.group: httptest
+    spring.cloud.stream.metrics.properties: spring.application.name,spring.application.index,spring.cloud.application.*,spring.cloud.dataflow.*
+    spring.cloud.dataflow.stream.name: httptest
+    spring.cloud.dataflow.stream.app.type: sink
+    spring.cloud.stream.bindings.input.destination: httptest.http
+  deploymentProperties:
+    spring.cloud.deployer.indexed: true
+    spring.cloud.deployer.group: httptest
+    spring.cloud.deployer.count: 1
+
+---
+# Source: http.yml
+apiVersion: skipper.spring.io/v1
+kind: SpringCloudDeployerApplication
+metadata:
+  name: http
+spec:
+  resource: maven://org.springframework.cloud.stream.app:http-source-rabbit
+  version: 1.2.0.RELEASE
+  applicationProperties:
+    spring.metrics.export.triggers.application.includes: integration**
+    spring.cloud.dataflow.stream.app.label: http
+    spring.cloud.stream.metrics.key: httptest.http.${spring.cloud.application.guid}
+    spring.cloud.stream.bindings.output.producer.requiredGroups: httptest
+    spring.cloud.stream.metrics.properties: spring.application.name,spring.application.index,spring.cloud.application.*,spring.cloud.dataflow.*
+    server.port: 9000
+    spring.cloud.stream.bindings.output.destination: httptest.http
+    spring.cloud.dataflow.stream.name: httptest
+    spring.cloud.dataflow.stream.app.type: source
+  deploymentProperties:
+    spring.cloud.deployer.group: httptest
+----
+
+The majority of the deployment and application properties were set by Data Flow in order to enable the applications to talk to each other and sending application metrics with identifying labels.
 
 [[spring-cloud-dataflow-stream-lifecycle-skipper-rollback]]
 === Rollback a Stream
@@ -919,9 +990,22 @@ You can rollback to a previous version of the Stream using the command `stream s
 dataflow:>stream skipper rollback --name httptest
 ----
 
+There is an optional `--releaseVersion` command argument which is the version of the Stream.
+If not specified, the rollback goes to the previous stream version.
 
-NOTE: There is an optional `--releaseVersion` command argument which is the version of the Stream.  In the current release of Data Flow, there is not yet a command/REST endpoint to list all the versions of the Stream that have been deployed.
-As such, if you want to rollback to something other than the previous release, you will need to run the Skipper Shell.
+=== Application Count
+
+The application count is a dynamic property of the system.
+If due to scaling at runtime, the application to be upgraded has 5 instances running, then 5 instances of the upgraded application will be deployed.
+
+=== Skipper's Upgrade Strategy
+
+Skipper has a simple 'red/black' upgrade strategy.  It deploys the new version of the applications, as many instances as the currently running version, and checks the `/health` endpoint of the application.
+If the health of the new application is good, then the previous application is undeployed.
+If the health of the new application is bad, then all new applications are undeployed and the upgrade is considered not successful.
+
+The upgrade strategy is not a rolling upgrade, so if 5 applications of the application to upgrade are runningn, then in a sunny day scenario, 5 of the new applications will also be running before the older version is undeployed.
+Future versions of Skipper will support rolling upgrades and other types of checks, e.g. manual, to continue to upgrade process.
 
 == Stream DSL
 
