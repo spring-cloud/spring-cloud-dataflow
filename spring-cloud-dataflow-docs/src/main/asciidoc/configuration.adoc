@@ -841,10 +841,15 @@ You can verify that basic authentication is working properly using _curl_:
 
 [source,bash]
 ----
-$ curl -u myusername:mypassword http://localhost:9393/
+$ curl -u myusername:mypassword http://localhost:9393/ -H 'Accept: application/json'
 ----
 
 As a result you should see a list of available REST endpoints.
+
+IMPORTANT: Please be aware that when accessing the Root URL via web browser and
+enabled security, you will be redirected to the Dashboard UI. In order to see the
+list of REST endpoints, specify the `application/json` Accept header using tools
+such as Postman (Chrome) or RESTClient (Firefox).
 
 Besides Basic Authentication, you can also provide an Access Token in order to
 access the REST Api. In order to make that happen, you would retrieve an
@@ -852,7 +857,7 @@ OAuth2 Access Token from your OAuth2 provider first, and then pass that Access T
 the REST Api using the **Authorization** Http header:
 
 ```
-$ curl -H "Authorization: Bearer <ACCESS_TOKEN>" http://localhost:9393/
+$ curl -H "Authorization: Bearer <ACCESS_TOKEN>" http://localhost:9393/ -H 'Accept: application/json'
 ```
 
 [[configuration-security-oauth2-authorization]]
