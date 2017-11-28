@@ -1,0 +1,367 @@
+[[streams-dev-guide]]
+= Stream Developer Guide
+
+In this section we will cover how to create, test and run Spring Cloud Stream
+applications on your local machine.
+We will also show how to map these applications into Spring Cloud Data Flow and deploy them.
+
+
+[[streams-dev-guide-prebuilt-apps]]
+== Prebuilt applications
+The link:http://cloud.spring.io/spring-cloud-stream-app-starters/[Spring Cloud Stream App Starters]
+project provides many applications that you can start using right away.
+For example, there is an http source application that will recive messages
+posted to an http endpoint and publish the data to the messaging middleware.
+Each existing application comes in three variations, one for each type of
+messaging middlware that is supported.
+The current supported messaging
+middleware systems are RabbitMQ, Apache Kafka 0.9 and Apache Kafka 0.10.
+All the applications are based on
+link:https://projects.spring.io/spring-boot/[Spring Boot] and
+link:https://cloud.spring.io/spring-cloud-stream/[Spring Cloud Stream].
+
+Applications are published as a Maven artifact as well as a Docker image.
+The Maven artifacts are published to Maven central and the link:http://repo.spring.io/release[Spring Release Repository]
+for GA releases.
+Milestone and snapshot releases are published to the
+link:http://repo.spring.io/milestone[Spring Milestone] and link:http://repo.spring.io/snapshot[Snapshot] repositories respectfully.
+Docker images are pushed
+to link:https://hub.docker.com/u/springcloudstream/[Docker Hub].
+
+We will be using the maven artifacts for our examples.  The root location
+of the Spring Repository that hosts the GA artifacts of prebuilt applications is
+http://repo.spring.io/release/org/springframework/cloud/stream/app/
+
+[[streams-dev-guiderunning-prebuilt-apps]]
+== Running prebuilt applications
+In this example we will be using RabbitMQ as the messaging middleware.
+Follow the directions on link:https://www.rabbitmq.com/download.html[rabbitmq.com] for
+your platform.
+Then install the link:https://www.rabbitmq.com/management.html[management plugin]
+
+We will run the http source application and the log sink application.
+The two applications will use RabbitMQ to communicate.
+
+First, download each application
+
+[source,bash]
+----
+wget http://repo.spring.io/snapshot/org/springframework/cloud/stream/app/http-source-rabbit/1.2.0.BUILD-SNAPSHOT/http-source-rabbit-1.2.0.BUILD-SNAPSHOT.jar
+
+wget http://repo.spring.io/release/org/springframework/cloud/stream/app/log-sink-rabbit/1.1.1.RELEASE/log-sink-rabbit-1.1.1.RELEASE.jar
+----
+These are Spring Boot applications that include the
+link:http://docs.spring.io/spring-boot/docs/current/reference/html/production-ready.html[Spring Boot Actuator]
+and the
+link:http://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-security.html[Spring Security Starter].  You can specify link:https://docs.spring.io/spring-boot/docs/current/reference/html/common-application-properties.html[common Spring Boot properties] to configure each application.  The properties
+that are specific to each application are listed in
+link:http://docs.spring.io/spring-cloud-stream-app-starters/docs/Avogadro.SR1/reference/html/[documentation for Spring App Starters], for example the
+link:http://docs.spring.io/spring-cloud-stream-app-starters/docs/Avogadro.SR1/reference/html/sources.html#spring-cloud-stream-modules-http-source[http source] and the
+link:http://docs.spring.io/spring-cloud-stream-app-starters/docs/Avogadro.SR1/reference/html/spring-cloud-stream-modules-sinks.html#spring-cloud-stream-modules-log-sink[log sink]
+
+Now lets run the http source application.  Just for fun let's pass in a few options as system properties
+
+[source,bash]
+----
+java -Dserver.port=8123 -Dhttp.path-pattern=/data -Dspring.cloud.stream.bindings.output.destination=sensorData -jar http-source-rabbit-1.2.0.BUILD-SNAPSHOT.jar
+----
+
+The property `server.port` comes from Spring Boot's Web support and the property `http.path-pattern` comes from the HTTP source application - link:https://github.com/spring-cloud-stream-app-starters/http/blob/master/spring-cloud-starter-stream-source-http/src/main/java/org/springframework/cloud/stream/app/http/source/HttpSourceProperties.java[HttpSourceProperties].
+The http source app will be listening on port 8123 under the the path `/data`.
+
+The property `spring.cloud.stream.bindings.output.destination` comes from the Spring Cloud Stream library and is the name of the messaging destination that will be shared between the source and the sink.
+The string `output` in this property is the name of the Spring Integration channel whose contents will be
+published to the messaging middleware.
+The literal string `output` is baked into the convenience class link:http://docs.spring.io/spring-cloud-stream/docs/current/reference/htmlsingle/#__literal_source_literal_literal_sink_literal_and_literal_processor_literal[Source] for use in an application that has a single outbound channel.
+
+Now lets run the log sink application and change the logging level to WARN.
+
+[source,bash]
+----
+java -Dlog.level=WARN -Dspring.cloud.stream.bindings.input.destination=sensorData -jar log-sink-rabbit-1.1.1.RELEASE.jar
+----
+
+The property `log.level` comes from the log sink application - link:https://github.com/spring-cloud-stream-app-starters/log/blob/master/spring-cloud-starter-stream-sink-log/src/main/java/org/springframework/cloud/stream/app/log/sink/LogSinkProperties.java[LogSinkProperties].
+
+The value of the property `spring.cloud.stream.bindings.input.destination` is set to `sensorData` so that the source and sink applications can communicate to each other.
+The string `input` in this property is the name of the Spring Integration channel where messages will be received from the messaging middleware.
+The literal string `input` is baked into the convenience class
+link:http://docs.spring.io/spring-cloud-stream/docs/current/reference/htmlsingle/#__literal_source_literal_literal_sink_literal_and_literal_processor_literal[Sink] for use in an application that has a single inbound channel.
+
+[source,bash]
+----
+curl -H "Content-Type: application/json" -X POST -d '{"id":"1","temperature":"100"}' http://localhost:8123/data
+----
+
+The log sink application will then show the following output
+
+[source,bash]
+----
+2017-03-17 15:30:17.825  WARN 22710 --- [_qquaYekbQ0nA-1] log-sink                                 : {"id":"1","temperature":"100"}
+----
+
+== Custom processor application
+
+Now let us create and test an application that does some processing on the output of the
+http source and then send data to the log sink.
+We will make use of the link:link:http://docs.spring.io/spring-cloud-stream/docs/current/reference/htmlsingle/#__literal_source_literal_literal_sink_literal_and_literal_processor_literal[Processor] convenience class that has both an inbound channel and an outbound channel.
+
+Visit the link:https://start.spring.io/[Spring Initialzr] site and create a new
+Maven project with the group name `io.spring.stream.sample` and the artifact name `transformer`.
+In the dependencies text box, type `stream rabbit` to select the Spring Cloud Stream dependency that will use the RabbitMQ binder.
+
+Unzip the project and bring the project into your favorite IDE
+Create a class called Transformer in the `io.spring.stream.sample` package with the following contents.
+
+[source,java]
+----
+package io.spring.stream.sample;
+
+import org.springframework.cloud.stream.annotation.EnableBinding;
+import org.springframework.cloud.stream.annotation.Output;
+import org.springframework.cloud.stream.annotation.StreamListener;
+import org.springframework.cloud.stream.messaging.Processor;
+
+import java.util.HashMap;
+import java.util.Map;
+
+@EnableBinding(Processor.class)
+public class Transformer {
+
+    @StreamListener(Processor.INPUT)
+    @Output(Processor.OUTPUT)
+    public Map<String, Object> transform(Map<String, Object> doc) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("sensor_id", doc.getOrDefault("id", "-1"));
+        map.put("temp_val", doc.getOrDefault("temperature", "-999"));
+        return map;
+    }
+}
+----
+
+Then open the already created `TransformerApplicationTests` class and create a
+simple unit test for the Transformer class.  An example of this is shown below.
+
+[source,java]
+----
+package io.spring.stream.sample;
+
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.entry;
+
+@RunWith(SpringRunner.class)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+public class TransformApplicationTests {
+
+    @Autowired
+    private Transformer transformer;
+
+    @Test
+    public void simpleTest() {
+        Map<String, Object> resultMap = transformer.transform(createInputData());
+        assertThat(resultMap).hasSize(2)
+                .contains(entry("sensor_id", "1"))
+                .contains(entry("temp_val", "100"));
+    }
+
+    private Map<String, Object> createInputData() {
+        HashMap<String, Object> inputData = new HashMap<>();
+        inputData.put("id", "1");
+        inputData.put("temperature", "100");
+        return inputData;
+    }
+}
+----
+
+Executing `./mvnw clean package` in the root directory of the transformer
+project will generate the artifact `transformer-0.0.1-SNAPSHOT.jar` under the
+`target directory.
+
+Now run all three applications:
+
+[source,bash]
+----
+java -Dserver.port=8123 \
+     -Dhttp.path-pattern=/data \
+     -Dspring.cloud.stream.bindings.output.destination=sensorData \
+     -jar http-source-rabbit-1.2.0.BUILD-SNAPSHOT.jar
+
+java -Dserver.port=8090 \
+ -Dspring.cloud.stream.bindings.input.destination=sensorData \
+ -Dspring.cloud.stream.bindings.output.destination=normalizedSensorData \
+ -jar transformer-0.0.1-SNAPSHOT.jar
+
+java -Dlog.level=WARN \
+     -Dspring.cloud.stream.bindings.input.destination=normalizedSensorData \
+     -jar log-sink-rabbit-1.1.1.RELEASE.jar
+----
+
+Now lets post some content to the http source application
+
+[source,bash]
+----
+curl -H "Content-Type: application/json" -X POST -d '{"id":"2","temperature":"200"}' http://localhost:8123/data
+----
+
+Will result in the log sink showing the following output
+
+[source,bash]
+----
+2017-03-24 16:09:42.726  WARN 7839 --- [Raj4gYSoR_6YA-1] log-sink                                 : {sensor_id=2, temp_val=200}
+----
+
+== Improving the quality of service
+
+Without additional configuration, RabbitMQ applications that produce data will create a durable topic exchange and RabbitMQ applications that consume data will create an anonymous autodelete queue.
+This can result in a message not being stored and forwarded by the producer if the producer application started before the consumer application.
+Even though the exchange is durable, there needs to be a durable queue bound to the exchange
+for the message to be stored for later consumption.
+
+Producer applications should set the `spring.cloud.stream.bindings.<channelName>.producer.requiredGroups` property to pre-create durable queues and bind them to the exchange.
+The consumer applications should then specify the `spring.cloud.stream.bindings.<channelName>.group` property to consume from the same named durable queue.  link:http://docs.spring.io/spring-cloud-stream/docs/current/reference/htmlsingle/#consumer-groups[Consumer groups] are also the means by which multiple instances of a consuming application can participate in a competing
+consumer relationship with other members of the same consumer group.
+
+[source,bash]
+----
+java -Dserver.port=8123 \
+     -Dhttp.path-pattern=/data \
+     -Dspring.cloud.stream.bindings.output.destination=sensorData \
+     -Dspring.cloud.stream.bindings.output.producer.requiredGroups=sensorDataGroup \
+     -jar http-source-rabbit-1.2.0.BUILD-SNAPSHOT.jar
+
+java -Dserver.port=8090 \
+     -Dspring.cloud.stream.bindings.input.destination=sensorData \
+     -Dspring.cloud.stream.bindings.input.group=sensorDataGroup \
+     -Dspring.cloud.stream.bindings.output.destination=normalizedSensorData \
+     -Dspring.cloud.stream.bindings.output.producer.requiredGroups=normalizedSensorDataGroup \
+     -jar transformer-0.0.1-SNAPSHOT.jar
+
+java -Dlog.level=WARN \
+     -Dspring.cloud.stream.bindings.input.destination=normalizedSensorData \
+     -Dspring.cloud.stream.bindings.input.group=normalizedSensorDataGroup \
+     -jar log-sink-rabbit-1.1.1.RELEASE.jar
+----
+Posting data to the http source as before will result in the same log message in
+the sink.
+
+== Mapping applications onto Data Flow
+
+Spring Cloud Data Flow (SCDF) provides a higher level way to create this group of three Spring Cloud Stream applications by introducing the concept of a stream.
+A stream is defined using a unix-pipes and filters DSL.
+Each application is first registered with under a simple name, for example `http`, `transformer` and `log` for the applications we are using.
+The stream DSL to connect these three applications is `http | transformer | log`.
+
+Spring Cloud Data Flow has server and shell components.
+Through the shell you can easily register applications under a name and also create and deploy streams.
+You can also use the JavaDSL to perform the same actions, however we will demonstrate using the shell.
+
+In the shell application, register the jar files you have on your local machine
+using the following commands.  In this example, the `http` and `log` applications
+are in the `/home/mpollack/temp/dev` directory and the transformer jar is in the
+`/home/mpollack/dev-marketing/transformer/target` directory
+
+[source,bash]
+----
+dataflow:>app register --type source --name http --uri file://home/mpollack/temp/dev/http-source-rabbit-1.2.0.BUILD-SNAPSHOT.jar
+
+dataflow:>app register --type processor --name transformer --uri file://home/mpollack/dev-marketing/transformer/target/transformer-0.0.1-SNAPSHOT.jar
+
+dataflow:>app register --type sink --name log --uri file://home/mpollack/temp/dev/log-sink-rabbit-1.1.1.RELEASE.jar
+----
+
+Now we can create a stream definition and deploy it
+
+[source,bash]
+----
+stream create --name httpIngest --definition "http --server.port=8123 --path-pattern=/data | transformer --server.port=8090 | log --level=WARN" --deploy
+
+----
+
+
+and in the shell you can query for the list of stream
+
+[source,bash,options="nowrap"]
+----
+dataflow:>stream list
+╔═══════════╤════════════════════════════════════════════════════════════════════════════════════════════════╤═════════╗
+║Stream Name│                                       Stream Definition                                        │ Status  ║
+╠═══════════╪════════════════════════════════════════════════════════════════════════════════════════════════╪═════════╣
+║httpIngest │http --server.port=8123 --path-pattern=/data | transformer --server.port=8090 | log --level=WARN│Deploying║
+╚═══════════╧════════════════════════════════════════════════════════════════════════════════════════════════╧═════════╝
+
+----
+
+Eventually you will see the status column say `Deployed`.
+
+In the server log you will see
+
+----
+2017-03-24 17:12:44.071  INFO 9829 --- [nio-9393-exec-6] o.s.c.d.spi.local.LocalAppDeployer       : deploying app httpIngest.log instance 0
+   Logs will be in /tmp/spring-cloud-dataflow-4401025649434774446/httpIngest-1490389964038/httpIngest.log
+2017-03-24 17:12:44.153  INFO 9829 --- [nio-9393-exec-6] o.s.c.d.spi.local.LocalAppDeployer       : deploying app httpIngest.transformer instance 0
+   Logs will be in /tmp/spring-cloud-dataflow-4401025649434774446/httpIngest-1490389964143/httpIngest.transformer
+2017-03-24 17:12:44.285  INFO 9829 --- [nio-9393-exec-6] o.s.c.d.spi.local.LocalAppDeployer       : deploying app httpIngest.http instance 0
+   Logs will be in /tmp/spring-cloud-dataflow-4401025649434774446/httpIngest-1490389964264/httpIngest.http
+----
+
+You can go to each directory to see the logs of each application.
+In the RabbitMQ management console you will see two exchanges and two durable queues.
+
+The SCDF server has configured the input and output destinations,
+`requiredGroups` and  `group` property for each application as was done
+explicitly in the previous
+
+Now lets post some content to the http source application
+
+[source,bash]
+----
+curl -H "Content-Type: application/json" -X POST -d '{"id":"1","temperature":"100"}' http://localhost:8123/data
+----
+
+tailing the stdout_0.log file for the log sink will then show
+
+[source,bash]
+----
+2017-03-24 17:29:55.280  WARN 11302 --- [er.httpIngest-1] log-sink                                 : {sensor_id=4, temp_val=400}
+----
+
+If you acces the Boot actuator endpoint for the applications, you will see the conventions that SCDF has made for the destination names, consumer groups, and requiredGroups configuration properties.
+[source,bash]
+----
+# for the http source
+"spring.cloud.stream.bindings.output.producer.requiredGroups": "httpIngest",
+"spring.cloud.stream.bindings.output.destination": "httpIngest.http",
+"spring.cloud.application.group": "httpIngest",
+
+
+# For the transformer
+"spring.cloud.stream.bindings.input.group": "httpIngest",
+"spring.cloud.stream.bindings.output.producer.requiredGroups": "httpIngest",
+
+
+"spring.cloud.stream.bindings.output.destination": "httpIngest.transformer",
+"spring.cloud.stream.bindings.input.destination": "httpIngest.http",
+"spring.cloud.application.group": "httpIngest",
+
+# for the log sink
+"spring.cloud.stream.bindings.input.group": "httpIngest",
+"spring.cloud.stream.bindings.input.destination": "httpIngest.transformer",
+"spring.cloud.application.group": "httpIngest",
+----
+
+
+
+
+
+
+
