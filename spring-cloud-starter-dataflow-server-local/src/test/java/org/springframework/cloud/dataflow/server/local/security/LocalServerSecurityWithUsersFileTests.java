@@ -448,6 +448,12 @@ public class LocalServerSecurityWithUsersFileTests {
 				{ HttpMethod.POST, HttpStatus.NOT_FOUND, "/streams/deployments/my-stream", createOnlyUser, null },
 				{ HttpMethod.POST, HttpStatus.UNAUTHORIZED, "/streams/deployments/my-stream", null, null },
 
+				{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/streams/deployments/history/my-stream/2", null, null },
+
+				{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/streams/deployments/manifest/my-stream/2", null, null },
+
+				{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/streams/deployments/platform/list", null, null },
+
 				/* TaskDefinitionController */
 
 				{ HttpMethod.POST, HttpStatus.FORBIDDEN, "/tasks/definitions", manageOnlyUser,
