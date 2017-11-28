@@ -16,13 +16,19 @@
 
 package org.springframework.cloud.dataflow.rest.client;
 
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.cloud.dataflow.rest.UpdateStreamRequest;
 import org.springframework.cloud.dataflow.rest.resource.StreamDefinitionResource;
+import org.springframework.cloud.skipper.domain.Deployer;
 import org.springframework.cloud.skipper.domain.PackageIdentifier;
+import org.springframework.cloud.skipper.domain.Release;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.ResourceSupport;
+import org.springframework.http.HttpMethod;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -130,6 +136,35 @@ public class StreamTemplate implements StreamOperations {
 		Assert.hasText(streamName, "Release name cannot be null or empty");
 		String url = deploymentsLink.getHref() + "/rollback/" + streamName + "/" + version;
 		restTemplate.postForObject(url, null, Object.class);
+	}
+
+
+	@Override
+	public String getManifest(String streamName, int version) {
+		Assert.hasText(streamName, "Release name cannot be null or empty");
+		String url = String.format("%s/%s/%s/%s", deploymentsLink.getHref(), "manifest", streamName, version);
+		return restTemplate.getForObject(url, String.class);
+	}
+
+	@Override
+	public Collection<Release> history(String streamName, int maxRevisions) {
+		Assert.hasText(streamName, "Release name cannot be null or empty");
+		ParameterizedTypeReference<Collection<Release>> typeReference = new ParameterizedTypeReference<Collection<Release>>
+				() {
+		};
+		Map<String, Object> parameters = new HashMap<>();
+		String url = String.format("%s/%s/%s/%s", deploymentsLink.getHref(), "history", streamName, maxRevisions);
+		return this.restTemplate.exchange(url, HttpMethod.GET, null, typeReference, parameters).getBody();
+	}
+
+	@Override
+	public Collection<Deployer> listPlatforms() {
+		ParameterizedTypeReference<Collection<Deployer>> typeReference = new ParameterizedTypeReference<Collection<Deployer>>
+				() {
+		};
+		Map<String, Object> parameters = new HashMap<>();
+		String url = url = deploymentsLink.getHref() + "/platform/list";
+		return this.restTemplate.exchange(url, HttpMethod.GET, null, typeReference, parameters).getBody();
 	}
 
 	@Override
