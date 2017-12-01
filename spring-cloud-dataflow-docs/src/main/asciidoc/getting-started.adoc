@@ -32,7 +32,7 @@ wget http://repo.spring.io/{version-type-lowercase}/org/springframework/cloud/sp
 wget http://repo.spring.io/{version-type-lowercase}/org/springframework/cloud/spring-cloud-dataflow-shell/{project-version}/spring-cloud-dataflow-shell-{project-version}.jar
 ----
 +
-. Download Skipper if you would like the added features of upgrading and rolling back Streams since Data Flow delegates to Skipper for those features.
+. Download http://cloud.spring.io/spring-cloud-skipper/[Skipper] if you would like the added features of upgrading and rolling back Streams since Data Flow delegates to Skipper for those features.
 +
 [source,yaml,options=nowrap,subs=attributes]
 ----
