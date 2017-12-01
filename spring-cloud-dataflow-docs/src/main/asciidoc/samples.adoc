@@ -24,3 +24,5 @@ The samples are part of separate https://github.com/spring-cloud/spring-cloud-da
 
 .Functions
 * https://docs.spring.io/spring-cloud-dataflow-samples/docs/current/reference/html/_functions.html#_functions_in_spring_cloud_data_flow[Using Spring Cloud Function]
+
+
