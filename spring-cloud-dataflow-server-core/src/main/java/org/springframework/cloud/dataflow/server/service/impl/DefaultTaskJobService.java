@@ -237,8 +237,11 @@ public class DefaultTaskJobService implements TaskJobService {
 
 	private TaskJobExecution getTaskJobExecution(JobExecution jobExecution) {
 		Assert.notNull(jobExecution, "jobExecution must not be null");
-		return new TaskJobExecution(taskExplorer.getTaskExecutionIdByJobExecutionId(jobExecution.getId()), jobExecution,
-				isTaskDefined(jobExecution));
+		Long taskExecutionId = taskExplorer.getTaskExecutionIdByJobExecutionId(jobExecution.getId());
+		TaskJobExecution taskJobExecution = new TaskJobExecution(
+				taskExecutionId, jobExecution,
+				isTaskDefined(taskExecutionId));
+		return taskJobExecution;
 	}
 
 	private JobInstanceExecutions getJobInstanceExecution(JobInstance jobInstance) throws NoSuchJobException {
@@ -248,10 +251,13 @@ public class DefaultTaskJobService implements TaskJobService {
 		return new JobInstanceExecutions(jobInstance, getTaskJobExecutionsForList(jobExecutions));
 	}
 
-	private boolean isTaskDefined(JobExecution jobExecution) {
-		TaskExecution taskExecution = taskExplorer
-				.getTaskExecution(taskExplorer.getTaskExecutionIdByJobExecutionId(jobExecution.getId()));
-		TaskDefinition definition = taskDefinitionRepository.findOne(taskExecution.getTaskName());
+	private boolean isTaskDefined(Long taskExecutionId) {
+		TaskDefinition definition = null;
+		if (taskExecutionId != null) {
+			TaskExecution taskExecution = taskExplorer
+					.getTaskExecution(taskExecutionId);
+			definition = taskDefinitionRepository.findOne(taskExecution.getTaskName());
+		}
 		return (definition != null);
 	}
 }

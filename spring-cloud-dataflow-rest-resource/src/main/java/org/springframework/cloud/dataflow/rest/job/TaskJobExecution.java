@@ -25,13 +25,13 @@ import org.springframework.util.Assert;
  * @author Glenn Renfro
  */
 public class TaskJobExecution {
-	private final long taskId;
+	private final Long taskId;
 
 	private final boolean isTaskDefined;
 
 	private final JobExecution jobExecution;
 
-	public TaskJobExecution(long taskId, JobExecution jobExecution, boolean isTaskDefined) {
+	public TaskJobExecution(Long taskId, JobExecution jobExecution, boolean isTaskDefined) {
 		Assert.notNull(jobExecution, "jobExecution must not be null");
 		this.taskId = taskId;
 		this.jobExecution = jobExecution;
@@ -41,7 +41,7 @@ public class TaskJobExecution {
 	/**
 	 * @return the Task Id that is associated with the {@link JobExecution}.
 	 */
-	public long getTaskId() {
+	public Long getTaskId() {
 		return taskId;
 	}
 
