@@ -78,6 +78,8 @@ public class JobExecutionControllerTests {
 
 	private final static String JOB_NAME_FOOBAR = BASE_JOB_NAME + "_FOOBAR";
 
+	private final static String JOB_NAME_NOTASK = BASE_JOB_NAME + "_NOTASK";
+
 	private static boolean initialized = false;
 
 	@Autowired
@@ -102,9 +104,10 @@ public class JobExecutionControllerTests {
 			createSampleJob(JOB_NAME_ORIG, 1);
 			createSampleJob(JOB_NAME_FOO, 1);
 			createSampleJob(JOB_NAME_FOOBAR, 2);
-			createSampleJob(JOB_NAME_COMPLETED, 1, BatchStatus.COMPLETED);
-			createSampleJob(JOB_NAME_STARTED, 1, BatchStatus.STARTED);
-			createSampleJob(JOB_NAME_STOPPED, 1, BatchStatus.STOPPED);
+			createSampleJob(JOB_NAME_COMPLETED, 1, BatchStatus.COMPLETED, true);
+			createSampleJob(JOB_NAME_STARTED, 1, BatchStatus.STARTED, true);
+			createSampleJob(JOB_NAME_STOPPED, 1, BatchStatus.STOPPED, true);
+			createSampleJobNoTask(JOB_NAME_NOTASK, 1);
 			initialized = true;
 		}
 	}
@@ -180,8 +183,8 @@ public class JobExecutionControllerTests {
 	@Test
 	public void testGetAllExecutions() throws Exception {
 		mockMvc.perform(get("/jobs/executions/").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
-				.andExpect(jsonPath("$.content[*].taskExecutionId", containsInAnyOrder(6, 5, 4, 3, 3, 2, 1)))
-				.andExpect(jsonPath("$.content", hasSize(7)));
+				.andExpect(jsonPath("$.content[*].taskExecutionId", containsInAnyOrder(null, 6, 5, 4, 3, 3, 2, 1)))
+				.andExpect(jsonPath("$.content", hasSize(8)));
 	}
 
 	@Test
@@ -202,19 +205,32 @@ public class JobExecutionControllerTests {
 	}
 
 	@Test
+	public void testGetNoTaskExecutionsByName() throws Exception {
+		mockMvc.perform(get("/jobs/executions/").param("name", JOB_NAME_NOTASK).accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.content[0].jobExecution.jobInstance.jobName", is(JOB_NAME_NOTASK)))
+				.andExpect(jsonPath("$.content", hasSize(1)));
+	}
+
+	@Test
 	public void testGetExecutionsByNameNotFound() throws Exception {
 		mockMvc.perform(get("/jobs/executions/").param("name", "BAZ").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isNotFound());
 	}
 
-	private void createSampleJob(String jobName, int jobExecutionCount, BatchStatus status) {
+	private void createSampleJob(String jobName, int jobExecutionCount,
+			BatchStatus status, boolean createTask) {
 		JobInstance instance = jobRepository.createJobInstance(jobName, new JobParameters());
-		TaskExecution taskExecution = dao.createTaskExecution(jobName, new Date(), new ArrayList<String>(), null);
+		TaskExecution taskExecution = (createTask) ?
+				dao.createTaskExecution(jobName, new Date(), new ArrayList<String>(), null)
+				: null;
 		JobExecution jobExecution = null;
 
 		for (int i = 0; i < jobExecutionCount; i++) {
 			jobExecution = jobRepository.createJobExecution(instance, new JobParameters(), null);
-			taskBatchDao.saveRelationship(taskExecution, jobExecution);
+			if (createTask) {
+				taskBatchDao.saveRelationship(taskExecution, jobExecution);
+			}
 			jobExecution.setStatus(status);
 			if (BatchStatus.STOPPED.equals(status)) {
 				jobExecution.setEndTime(new Date());
@@ -224,6 +240,10 @@ public class JobExecutionControllerTests {
 	}
 
 	private void createSampleJob(String jobName, int jobExecutionCount) {
-		createSampleJob(jobName, jobExecutionCount, BatchStatus.UNKNOWN);
+		createSampleJob(jobName, jobExecutionCount, BatchStatus.UNKNOWN, true);
+	}
+
+	private void createSampleJobNoTask(String jobName, int jobExecutionCount) {
+		createSampleJob(jobName, jobExecutionCount, BatchStatus.UNKNOWN, false);
 	}
 }

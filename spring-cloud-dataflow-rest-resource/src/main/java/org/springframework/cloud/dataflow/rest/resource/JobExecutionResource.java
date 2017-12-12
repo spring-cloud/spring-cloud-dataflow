@@ -184,7 +184,7 @@ public class JobExecutionResource extends ResourceSupport {
 		return jobParameters;
 	}
 
-	public long getTaskExecutionId() {
+	public Long getTaskExecutionId() {
 		return taskExecutionId;
 	}
 
