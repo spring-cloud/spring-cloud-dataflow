@@ -37,13 +37,14 @@ import org.springframework.web.client.RestTemplate;
  * @author Mark Fisher
  * @author Gunnar Hillert
  * @author Patrick Peralta
+ * @author Christian Tzolov
  */
 public class AppRegistryTemplate implements AppRegistryOperations {
 
 	/**
 	 * Template for URI creation.
 	 */
-	private final UriTemplate uriTemplate;
+	protected final UriTemplate uriTemplate;
 
 	/**
 	 * Template used for http interaction.
@@ -79,9 +80,21 @@ public class AppRegistryTemplate implements AppRegistryOperations {
 	}
 
 	@Override
+	public void unregister(String name, ApplicationType applicationType, String version) {
+		String uri = uriTemplate.toString() + "/{type}/{name}/{version}";
+		restTemplate.delete(uri, applicationType.name(), name, version);
+	}
+
+	@Override
 	public DetailedAppRegistrationResource info(String name, ApplicationType type) {
 		String uri = uriTemplate.toString() + "/{type}/{name}";
 		return restTemplate.getForObject(uri, DetailedAppRegistrationResource.class, type, name);
+	}
+
+	@Override
+	public DetailedAppRegistrationResource info(String name, ApplicationType type, String version) {
+		String uri = uriTemplate.toString() + "/{type}/{name}/{version}";
+		return restTemplate.getForObject(uri, DetailedAppRegistrationResource.class, type, name, version);
 	}
 
 	@Override
@@ -99,8 +112,22 @@ public class AppRegistryTemplate implements AppRegistryOperations {
 	}
 
 	@Override
+	public AppRegistrationResource register(String name, ApplicationType type, String version, String uri,
+			String metadataUri, boolean force) {
+		MultiValueMap<String, Object> values = new LinkedMultiValueMap<>();
+		values.add("uri", uri);
+		if (metadataUri != null) {
+			values.add("metadata-uri", metadataUri);
+		}
+		values.add("force", Boolean.toString(force));
+
+		return restTemplate.postForObject(uriTemplate.toString() + "/{type}/{name}/{version}", values,
+				AppRegistrationResource.class, type, name, version);
+	}
+
+	@Override
 	public PagedResources<AppRegistrationResource> importFromResource(String uri, boolean force) {
-		MultiValueMap<String, Object> values = new LinkedMultiValueMap<String, Object>();
+		MultiValueMap<String, Object> values = new LinkedMultiValueMap<>();
 		values.add("uri", uri);
 		values.add("force", Boolean.toString(force));
 		return restTemplate.postForObject(uriTemplate.toString(), values, AppRegistrationResource.Page.class);
@@ -108,7 +135,7 @@ public class AppRegistryTemplate implements AppRegistryOperations {
 
 	@Override
 	public PagedResources<AppRegistrationResource> registerAll(Properties apps, boolean force) {
-		MultiValueMap<String, Object> values = new LinkedMultiValueMap<String, Object>();
+		MultiValueMap<String, Object> values = new LinkedMultiValueMap<>();
 		StringBuffer buffer = new StringBuffer();
 		for (String key : apps.stringPropertyNames()) {
 			buffer.append(String.format("%s=%s\n", key, apps.getProperty(key)));
@@ -116,5 +143,10 @@ public class AppRegistryTemplate implements AppRegistryOperations {
 		values.add("apps", buffer.toString());
 		values.add("force", Boolean.toString(force));
 		return restTemplate.postForObject(uriTemplate.toString(), values, AppRegistrationResource.Page.class);
+	}
+
+	@Override
+	public void makeDefault(String name, ApplicationType type, String version) {
+		restTemplate.put(uriTemplate.toString() + "/{type}/{name}/{version}", null, type, name, version);
 	}
 }

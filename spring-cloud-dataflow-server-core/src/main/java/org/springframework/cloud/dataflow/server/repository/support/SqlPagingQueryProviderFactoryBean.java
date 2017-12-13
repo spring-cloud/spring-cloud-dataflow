@@ -16,6 +16,8 @@
 
 package org.springframework.cloud.dataflow.server.repository.support;
 
+import static org.springframework.cloud.dataflow.server.repository.support.DatabaseType.*;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -25,14 +27,6 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.jdbc.support.MetaDataAccessException;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
-
-import static org.springframework.cloud.dataflow.server.repository.support.DatabaseType.DB2;
-import static org.springframework.cloud.dataflow.server.repository.support.DatabaseType.H2;
-import static org.springframework.cloud.dataflow.server.repository.support.DatabaseType.HSQL;
-import static org.springframework.cloud.dataflow.server.repository.support.DatabaseType.MYSQL;
-import static org.springframework.cloud.dataflow.server.repository.support.DatabaseType.ORACLE;
-import static org.springframework.cloud.dataflow.server.repository.support.DatabaseType.POSTGRES;
-import static org.springframework.cloud.dataflow.server.repository.support.DatabaseType.SQLSERVER;
 
 /**
  * Factory bean for {@link PagingQueryProvider} interface. The database type will be

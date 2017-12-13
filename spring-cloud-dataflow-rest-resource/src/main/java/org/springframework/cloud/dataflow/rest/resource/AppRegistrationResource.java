@@ -44,9 +44,24 @@ public class AppRegistrationResource extends ResourceSupport {
 	private String uri;
 
 	/**
+	 * App version.
+	 */
+	private String version;
+
+	/**
+	 * Is default app version for all (name, type) applications
+	 */
+	private Boolean defaultVersion;
+
+
+	/**
 	 * Default constructor for serialization frameworks.
 	 */
 	protected AppRegistrationResource() {
+	}
+
+	public AppRegistrationResource(String name, String type, String uri) {
+		this(name, type, null, uri, false);
 	}
 
 	/**
@@ -54,12 +69,16 @@ public class AppRegistrationResource extends ResourceSupport {
 	 *
 	 * @param name app name
 	 * @param type app type
+	 * @param version app version
 	 * @param uri uri for app resource
+	 * @param defaultVersion is this application selected to the be default version in DSL
 	 */
-	public AppRegistrationResource(String name, String type, String uri) {
+	public AppRegistrationResource(String name, String type, String version, String uri, Boolean defaultVersion) {
 		this.name = name;
 		this.type = type;
+		this.version = version;
 		this.uri = uri;
+		this.defaultVersion = defaultVersion;
 	}
 
 	/**
@@ -81,6 +100,20 @@ public class AppRegistrationResource extends ResourceSupport {
 	 */
 	public String getUri() {
 		return uri;
+	}
+
+	/**
+	 * @return version of the app
+	 */
+	public String getVersion() {
+		return version;
+	}
+
+	/**
+	 * @return if this app selected to be the default
+	 */
+	public Boolean getDefaultVersion() {
+		return defaultVersion;
 	}
 
 	/**

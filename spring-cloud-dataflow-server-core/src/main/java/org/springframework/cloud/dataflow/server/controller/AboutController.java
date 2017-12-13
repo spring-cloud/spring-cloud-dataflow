@@ -17,13 +17,7 @@ package org.springframework.cloud.dataflow.server.controller;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.common.security.support.SecurityStateBean;
-import org.springframework.cloud.dataflow.rest.resource.about.AboutResource;
-import org.springframework.cloud.dataflow.rest.resource.about.Dependency;
-import org.springframework.cloud.dataflow.rest.resource.about.FeatureInfo;
-import org.springframework.cloud.dataflow.rest.resource.about.RuntimeEnvironment;
-import org.springframework.cloud.dataflow.rest.resource.about.RuntimeEnvironmentDetails;
-import org.springframework.cloud.dataflow.rest.resource.about.SecurityInfo;
-import org.springframework.cloud.dataflow.rest.resource.about.VersionInfo;
+import org.springframework.cloud.dataflow.rest.resource.about.*;
 import org.springframework.cloud.dataflow.server.config.VersionInfoProperties;
 import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;

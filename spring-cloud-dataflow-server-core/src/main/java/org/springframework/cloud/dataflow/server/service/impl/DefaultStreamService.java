@@ -15,6 +15,9 @@
  */
 package org.springframework.cloud.dataflow.server.service.impl;
 
+import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_ENABLED_PROPERTY_KEY;
+import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_KEY_PREFIX;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -23,14 +26,10 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
-import org.springframework.util.StringUtils;
-import org.yaml.snakeyaml.DumperOptions;
-import org.yaml.snakeyaml.Yaml;
-
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.StreamDeployment;
 import org.springframework.cloud.dataflow.rest.UpdateStreamRequest;
+import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
 import org.springframework.cloud.dataflow.server.controller.StreamAlreadyDeployedException;
 import org.springframework.cloud.dataflow.server.controller.StreamAlreadyDeployingException;
 import org.springframework.cloud.dataflow.server.repository.NoSuchStreamDefinitionException;
@@ -47,9 +46,9 @@ import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.skipper.domain.PackageIdentifier;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
-
-import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_ENABLED_PROPERTY_KEY;
-import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_KEY_PREFIX;
+import org.springframework.util.StringUtils;
+import org.yaml.snakeyaml.DumperOptions;
+import org.yaml.snakeyaml.Yaml;
 
 /**
  * Performs manipulation on application and deployment properties, expanding shorthand
@@ -228,7 +227,7 @@ public class DefaultStreamService implements StreamService {
 	}
 
 	private Map<String, String> getSkipperProperties(Map<String, String> deploymentProperties) {
-		// Extract skipper properties
+		// Extract service properties
 		return deploymentProperties.entrySet().stream()
 				.filter(mapEntry -> mapEntry.getKey().startsWith(SKIPPER_KEY_PREFIX))
 				.collect(Collectors.toMap(mapEntry -> mapEntry.getKey(), mapEntry -> mapEntry.getValue()));
@@ -244,9 +243,9 @@ public class DefaultStreamService implements StreamService {
 	private void deployStreamWithDefinition(StreamDefinition streamDefinition,
 			Map<String, String> streamDeploymentProperties) {
 
-		// Extract skipper properties
+		// Extract service properties
 		Map<String, String> skipperDeploymentProperties = getSkipperProperties(streamDeploymentProperties);
-		// Create map without any skipper properties
+		// Create map without any service properties
 		Map<String, String> deploymentPropertiesToUse = streamDeploymentProperties.entrySet().stream()
 				.filter(mapEntry -> !mapEntry.getKey().startsWith(SKIPPER_KEY_PREFIX))
 				.collect(Collectors.toMap(mapEntry -> mapEntry.getKey(), mapEntry -> mapEntry.getValue()));

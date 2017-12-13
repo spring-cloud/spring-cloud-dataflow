@@ -60,6 +60,16 @@ public interface AppRegistryOperations {
 	DetailedAppRegistrationResource info(String name, ApplicationType type);
 
 	/**
+	 * Retrieve information about an application registration.
+	 *
+	 * @param name name of application
+	 * @param type application type
+	 * @param version application version
+	 * @return detailed information about an application registration
+	 */
+	DetailedAppRegistrationResource info(String name, ApplicationType type, String version);
+
+	/**
 	 * Register an application name and type with its Maven coordinates.
 	 *
 	 * @param name application name
@@ -72,12 +82,43 @@ public interface AppRegistryOperations {
 	AppRegistrationResource register(String name, ApplicationType type, String uri, String metadataUri, boolean force);
 
 	/**
+	 * Register an application name, type and version with its Maven coordinates.
+	 *
+	 * @param name application name
+	 * @param type application type
+	 * @param version application version
+	 * @param uri URI for the application artifact
+	 * @param metadataUri URI for the application metadata artifact
+	 * @param force if {@code true}, overwrites a pre-existing registration
+	 * @return the new app registration
+	 */
+	AppRegistrationResource register(String name, ApplicationType type, String version, String uri,
+			String metadataUri, boolean force);
+
+	/**
 	 * Unregister an application name and type.
 	 *
 	 * @param name application name
 	 * @param type application type
 	 */
 	void unregister(String name, ApplicationType type);
+
+	/**
+	 * Unregister an application by name type and version
+	 *
+	 * @param name application name
+	 * @param type application type
+	 * @param version application version
+	 */
+	void unregister(String name, ApplicationType type, String version);
+
+	/**
+	 * Set application version to default
+	 * @param name application name
+	 * @param type application type
+	 * @param version application version
+	 */
+	void makeDefault(String name, ApplicationType type, String version);
 
 	/**
 	 * Register all applications listed in a properties file.
@@ -87,6 +128,7 @@ public interface AppRegistryOperations {
 	 * @return the paged list of new app registrations
 	 */
 	PagedResources<AppRegistrationResource> importFromResource(String uri, boolean force);
+
 
 	/**
 	 * Register all applications provided as key/value pairs.

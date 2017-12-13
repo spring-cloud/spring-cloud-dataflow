@@ -22,7 +22,6 @@ import java.util.function.BiFunction;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-
 import org.springframework.cloud.deployer.resource.docker.DockerResource;
 import org.springframework.cloud.deployer.resource.maven.MavenResource;
 import org.springframework.core.io.Resource;

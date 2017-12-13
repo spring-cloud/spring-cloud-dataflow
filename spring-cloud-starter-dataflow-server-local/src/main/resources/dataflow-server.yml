@@ -21,12 +21,15 @@ maven:
 spring:
   application:
     name: spring-cloud-dataflow-server-local
+  jpa:
+    hibernate:
+      ddl-auto: create
   cloud:
     config:
       uri: http://localhost:8888
 
   datasource:
-    url: jdbc:h2:tcp://localhost:19092/mem:dataflow
+    url: jdbc:h2:tcp://localhost:19092/mem:dataflow;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
     username: sa
     password:
     driverClassName: org.h2.Driver

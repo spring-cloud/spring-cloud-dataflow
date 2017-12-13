@@ -56,19 +56,19 @@ public class DetailedAppRegistrationResource extends AppRegistrationResource {
 	 * @param type application type
 	 * @param coordinates Maven coordinates for the application artifact
 	 */
-	public DetailedAppRegistrationResource(String name, String type, String coordinates) {
-		super(name, type, coordinates);
+	public DetailedAppRegistrationResource(String name, String type, String version, String coordinates, Boolean isDefault) {
+		super(name, type, version, coordinates, isDefault);
 	}
 
 	/**
 	 * Construct a {@code DetailedAppRegistrationResource} object based on the provided
 	 * {@link AppRegistrationResource}.
 	 *
-	 * @param resource {@code AppRegistrationResource} from which to obtain app
-	 * registration data
+	 * @param resource {@code AppRegistrationResource} from which to obtain app registration
+	 * data
 	 */
 	public DetailedAppRegistrationResource(AppRegistrationResource resource) {
-		super(resource.getName(), resource.getType(), resource.getUri());
+		super(resource.getName(), resource.getType(), resource.getVersion(), resource.getUri(), resource.getDefaultVersion());
 	}
 
 	/**

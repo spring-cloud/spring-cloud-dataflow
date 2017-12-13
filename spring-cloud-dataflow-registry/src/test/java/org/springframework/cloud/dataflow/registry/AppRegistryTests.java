@@ -16,33 +16,25 @@
 
 package org.springframework.cloud.dataflow.registry;
 
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
+import static org.springframework.cloud.dataflow.core.ApplicationType.sink;
+import static org.springframework.cloud.dataflow.core.ApplicationType.source;
+
 import java.net.URI;
 import java.util.List;
 
 import org.hamcrest.Matchers;
 import org.junit.Test;
-
+import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
 import org.springframework.cloud.dataflow.registry.support.NoSuchAppRegistrationException;
 import org.springframework.cloud.deployer.resource.registry.InMemoryUriRegistry;
 import org.springframework.cloud.deployer.resource.registry.UriRegistry;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.DefaultResourceLoader;
-import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-
-import static org.hamcrest.Matchers.allOf;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.hasProperty;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.springframework.cloud.dataflow.core.ApplicationType.sink;
-import static org.springframework.cloud.dataflow.core.ApplicationType.source;
 
 /**
  * Unit tests for {@link AppRegistry}.
@@ -66,16 +58,12 @@ public class AppRegistryTests {
 
 	@Test
 	public void testFound() {
-		Resource resource = new ClassPathResource("/foo");
-		Resource metadataMesource = new ClassPathResource("/foo-metadata");
 		uriRegistry.register("source.foo", URI.create("classpath:/foo"));
 		uriRegistry.register("source.foo.metadata", URI.create("classpath:/foo-metadata"));
 
 		AppRegistration registration = appRegistry.find("foo", source);
 		assertThat(registration.getName(), is("foo"));
 		assertThat(registration.getType(), is(source));
-		assertThat(registration.getResource(), is(resource));
-		assertThat(registration.getMetadataResource(), is(metadataMesource));
 	}
 
 	@Test
@@ -126,13 +114,8 @@ public class AppRegistryTests {
 
 		AppRegistration registration = appRegistry.find("foo", source);
 
-		Resource resource = new ClassPathResource("/foo");
-		Resource metadataMesource = new ClassPathResource("/foo-metadata");
-
 		assertThat(registration.getName(), is("foo"));
 		assertThat(registration.getType(), is(source));
-		assertThat(registration.getResource(), is(resource));
-		assertThat(registration.getMetadataResource(), is(metadataMesource));
 	}
 
 	@Test

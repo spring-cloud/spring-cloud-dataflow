@@ -16,26 +16,15 @@
 
 package org.springframework.cloud.dataflow.server.controller;
 
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
+
 import org.springframework.analytics.rest.domain.AggregateCounterResource;
 import org.springframework.analytics.rest.domain.CounterResource;
 import org.springframework.analytics.rest.domain.FieldValueCounterResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.dataflow.rest.Version;
-import org.springframework.cloud.dataflow.rest.resource.AppInstanceStatusResource;
-import org.springframework.cloud.dataflow.rest.resource.AppRegistrationResource;
-import org.springframework.cloud.dataflow.rest.resource.AppStatusResource;
-import org.springframework.cloud.dataflow.rest.resource.CompletionProposalsResource;
-import org.springframework.cloud.dataflow.rest.resource.JobExecutionResource;
-import org.springframework.cloud.dataflow.rest.resource.JobInstanceResource;
-import org.springframework.cloud.dataflow.rest.resource.RootResource;
-import org.springframework.cloud.dataflow.rest.resource.StepExecutionProgressInfoResource;
-import org.springframework.cloud.dataflow.rest.resource.StepExecutionResource;
-import org.springframework.cloud.dataflow.rest.resource.StreamDefinitionResource;
-import org.springframework.cloud.dataflow.rest.resource.StreamDeploymentResource;
-import org.springframework.cloud.dataflow.rest.resource.TaskDefinitionResource;
-import org.springframework.cloud.dataflow.rest.resource.TaskExecutionResource;
-import org.springframework.cloud.dataflow.rest.resource.TaskToolsResource;
+import org.springframework.cloud.dataflow.rest.resource.*;
 import org.springframework.cloud.dataflow.rest.resource.about.AboutResource;
 import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
 import org.springframework.hateoas.EntityLinks;
@@ -45,8 +34,6 @@ import org.springframework.hateoas.ResourceSupport;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponents;
-
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 
 /**
  * Controller for the root resource of the Data Flow server.

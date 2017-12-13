@@ -27,8 +27,8 @@ import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.dsl.CheckPointedParseException;
 import org.springframework.cloud.dataflow.core.dsl.Token;
 import org.springframework.cloud.dataflow.core.dsl.TokenKind;
-import org.springframework.cloud.dataflow.registry.AppRegistration;
-import org.springframework.cloud.dataflow.registry.AppRegistry;
+import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
+import org.springframework.cloud.dataflow.registry.AppRegistryCommon;
 
 /**
  * Attempts to fill in possible values after a {@literal --foo=prefix} (syntactically
@@ -45,7 +45,7 @@ public class ConfigurationPropertyValueHintExpansionStrategy implements Expansio
 	@Autowired
 	private ValueHintProvider[] valueHintProviders = new ValueHintProvider[0];
 
-	ConfigurationPropertyValueHintExpansionStrategy(AppRegistry appRegistry,
+	ConfigurationPropertyValueHintExpansionStrategy(AppRegistryCommon appRegistry,
 			ApplicationConfigurationMetadataResolver metadataResolver) {
 		this.collectorSupport = new ProposalsCollectorSupportUtils(appRegistry, metadataResolver);
 	}

@@ -16,13 +16,9 @@
 
 package org.springframework.cloud.dataflow.server.controller;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import static java.util.stream.Collectors.toList;
+
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ForkJoinPool;
 import java.util.stream.Stream;
@@ -59,8 +55,6 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import static java.util.stream.Collectors.toList;
 
 /**
  * Exposes runtime status of deployed apps.

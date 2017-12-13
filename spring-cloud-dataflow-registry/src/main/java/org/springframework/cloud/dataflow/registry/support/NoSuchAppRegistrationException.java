@@ -16,7 +16,7 @@
 package org.springframework.cloud.dataflow.registry.support;
 
 import org.springframework.cloud.dataflow.core.ApplicationType;
-import org.springframework.cloud.dataflow.registry.AppRegistration;
+import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
 
 /**
  * Thrown when an {@link AppRegistration} of a given name and {@link ApplicationType} was

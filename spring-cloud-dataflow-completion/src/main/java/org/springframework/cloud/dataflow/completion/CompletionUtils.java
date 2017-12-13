@@ -21,11 +21,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
-import org.springframework.cloud.dataflow.core.ApplicationType;
-import org.springframework.cloud.dataflow.core.BindingPropertyKeys;
-import org.springframework.cloud.dataflow.core.StreamAppDefinition;
-import org.springframework.cloud.dataflow.core.StreamDefinition;
-import org.springframework.cloud.dataflow.core.TaskPropertyKeys;
+import org.springframework.cloud.dataflow.core.*;
 
 /**
  * Various utility methods used throughout the completion package.

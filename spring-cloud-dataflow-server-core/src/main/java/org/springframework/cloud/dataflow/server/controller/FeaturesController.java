@@ -19,11 +19,7 @@ import org.springframework.cloud.dataflow.rest.resource.FeaturesInfoResource;
 import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
 import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * REST controller that provides features that are enabled/disabled on the dataflow

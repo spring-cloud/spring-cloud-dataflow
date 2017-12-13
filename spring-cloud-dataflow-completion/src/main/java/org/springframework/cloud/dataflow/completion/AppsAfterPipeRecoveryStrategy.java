@@ -16,15 +16,15 @@
 
 package org.springframework.cloud.dataflow.completion;
 
+import static org.springframework.cloud.dataflow.core.ApplicationType.processor;
+import static org.springframework.cloud.dataflow.core.ApplicationType.sink;
+
 import java.util.List;
 
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.dsl.CheckPointedParseException;
-import org.springframework.cloud.dataflow.registry.AppRegistration;
-import org.springframework.cloud.dataflow.registry.AppRegistry;
-
-import static org.springframework.cloud.dataflow.core.ApplicationType.processor;
-import static org.springframework.cloud.dataflow.core.ApplicationType.sink;
+import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
+import org.springframework.cloud.dataflow.registry.AppRegistryCommon;
 
 /**
  * Provides completions for the case where the user has entered a pipe symbol and a app
@@ -36,9 +36,9 @@ import static org.springframework.cloud.dataflow.core.ApplicationType.sink;
 public class AppsAfterPipeRecoveryStrategy
 		extends StacktraceFingerprintingRecoveryStrategy<CheckPointedParseException> {
 
-	private final AppRegistry appRegistry;
+	private final AppRegistryCommon appRegistry;
 
-	AppsAfterPipeRecoveryStrategy(AppRegistry appRegistry) {
+	AppsAfterPipeRecoveryStrategy(AppRegistryCommon appRegistry) {
 		super(CheckPointedParseException.class, "foo |", "foo | ");
 		this.appRegistry = appRegistry;
 	}

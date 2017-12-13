@@ -20,6 +20,8 @@ import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
+import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
+import org.springframework.cloud.dataflow.server.config.web.WebConfiguration;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
@@ -29,7 +31,7 @@ import org.springframework.context.annotation.Import;
  * @author Janne Valkealahti
  */
 @Configuration
-@AutoConfigureBefore(value = JacksonAutoConfiguration.class)
+@AutoConfigureBefore({HibernateJpaAutoConfiguration.class, JacksonAutoConfiguration.class, WebConfiguration.class})
 @ConditionalOnBean(EnableDataFlowServerConfiguration.Marker.class)
 @Import(DataFlowServerConfiguration.class)
 @ConditionalOnProperty(prefix = "dataflow.server", name = "enabled", havingValue = "true", matchIfMissing = true)

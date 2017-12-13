@@ -15,28 +15,17 @@
  */
 package org.springframework.cloud.dataflow.server.stream;
 
+import static org.springframework.cloud.dataflow.rest.SkipperStream.*;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
-import com.fasterxml.jackson.core.Version;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleAbstractTypeResolver;
-import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.yaml.snakeyaml.DumperOptions;
-import org.yaml.snakeyaml.Yaml;
-
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.StreamDeployment;
 import org.springframework.cloud.dataflow.server.controller.StreamDefinitionController;
@@ -47,31 +36,23 @@ import org.springframework.cloud.deployer.spi.app.AppStatus;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.skipper.client.SkipperClient;
-import org.springframework.cloud.skipper.domain.ConfigValues;
-import org.springframework.cloud.skipper.domain.Info;
-import org.springframework.cloud.skipper.domain.InstallProperties;
-import org.springframework.cloud.skipper.domain.InstallRequest;
+import org.springframework.cloud.skipper.domain.*;
 import org.springframework.cloud.skipper.domain.Package;
-import org.springframework.cloud.skipper.domain.PackageIdentifier;
-import org.springframework.cloud.skipper.domain.PackageMetadata;
-import org.springframework.cloud.skipper.domain.Template;
-import org.springframework.cloud.skipper.domain.UpgradeProperties;
-import org.springframework.cloud.skipper.domain.UpgradeRequest;
-import org.springframework.cloud.skipper.domain.UploadRequest;
 import org.springframework.cloud.skipper.io.DefaultPackageWriter;
 import org.springframework.cloud.skipper.io.PackageWriter;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.HttpStatusCodeException;
+import org.yaml.snakeyaml.DumperOptions;
+import org.yaml.snakeyaml.Yaml;
 
-import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_DEFAULT_API_VERSION;
-import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_DEFAULT_KIND;
-import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_DEFAULT_MAINTAINER;
-import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_PACKAGE_NAME;
-import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_PACKAGE_VERSION;
-import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_PLATFORM_NAME;
-import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_REPO_NAME;
+import com.fasterxml.jackson.core.Version;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleAbstractTypeResolver;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 
 /**
  * Delegates to Skipper to deploy the stream.

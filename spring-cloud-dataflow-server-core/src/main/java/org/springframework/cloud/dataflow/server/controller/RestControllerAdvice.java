@@ -21,7 +21,6 @@ import javax.validation.ConstraintViolationException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import org.springframework.batch.admin.service.NoSuchStepExecutionException;
 import org.springframework.batch.core.launch.JobExecutionNotRunningException;
 import org.springframework.batch.core.launch.NoSuchJobException;
@@ -31,11 +30,7 @@ import org.springframework.boot.actuate.endpoint.mvc.MetricsMvcEndpoint;
 import org.springframework.cloud.dataflow.registry.support.NoSuchAppRegistrationException;
 import org.springframework.cloud.dataflow.server.controller.support.InvalidStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.job.support.JobNotRestartableException;
-import org.springframework.cloud.dataflow.server.repository.DuplicateStreamDefinitionException;
-import org.springframework.cloud.dataflow.server.repository.DuplicateTaskException;
-import org.springframework.cloud.dataflow.server.repository.NoSuchStreamDefinitionException;
-import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;
-import org.springframework.cloud.dataflow.server.repository.NoSuchTaskExecutionException;
+import org.springframework.cloud.dataflow.server.repository.*;
 import org.springframework.cloud.dataflow.server.support.ApplicationDoesNotExistException;
 import org.springframework.hateoas.VndErrors;
 import org.springframework.http.HttpStatus;

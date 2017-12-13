@@ -20,21 +20,16 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 import java.util.concurrent.ForkJoinPool;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.core.ApplicationType;
-import org.springframework.cloud.dataflow.registry.AppRegistration;
+import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.registry.support.NoSuchAppRegistrationException;
 import org.springframework.cloud.dataflow.rest.resource.AppRegistrationResource;
@@ -54,12 +49,7 @@ import org.springframework.hateoas.mvc.ResourceAssemblerSupport;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * Handles all {@link AppRegistry} related interactions.
@@ -167,7 +157,7 @@ public class AppRegistryController implements ResourceLoaderAware {
 		DetailedAppRegistrationResource result = new DetailedAppRegistrationResource(
 				assembler.toResource(registration));
 		List<ConfigurationMetadataProperty> properties = metadataResolver
-				.listProperties(registration.getMetadataResource());
+				.listProperties(appRegistry.getAppMetadataResource(registration));
 		for (ConfigurationMetadataProperty property : properties) {
 			result.addOption(property);
 		}
@@ -262,7 +252,7 @@ public class AppRegistryController implements ResourceLoaderAware {
 			appRegistrations.stream().filter(r -> r.getMetadataUri() != null).parallel().forEach(r -> {
 				logger.info("Eagerly fetching {}", r.getMetadataUri());
 				try {
-					r.getMetadataResource();
+					this.appRegistry.getAppMetadataResource(r);
 				}
 				catch (Exception e) {
 					logger.warn("Could not fetch " + r.getMetadataUri(), e);

@@ -17,7 +17,7 @@
 package org.springframework.cloud.dataflow.server.controller;
 
 import org.springframework.cloud.dataflow.core.TaskDefinition;
-import org.springframework.cloud.dataflow.registry.AppRegistry;
+import org.springframework.cloud.dataflow.registry.AppRegistryCommon;
 import org.springframework.cloud.dataflow.rest.resource.TaskDefinitionResource;
 import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
 import org.springframework.cloud.dataflow.server.repository.DeploymentKey;
@@ -34,12 +34,7 @@ import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.mvc.ResourceAssemblerSupport;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * Controller for operations on {@link TaskDefinition}. This includes CRUD operations.
@@ -64,7 +59,7 @@ public class TaskDefinitionController {
 	/**
 	 * The app registry this controller will use to lookup apps.
 	 */
-	private final AppRegistry appRegistry;
+	private final AppRegistryCommon appRegistry;
 
 	private TaskDefinitionRepository repository;
 
@@ -87,7 +82,7 @@ public class TaskDefinitionController {
 	 * @param taskService handles specialized behavior needed for tasks.
 	 */
 	public TaskDefinitionController(TaskDefinitionRepository repository, DeploymentIdRepository deploymentIdRepository,
-			TaskLauncher taskLauncher, AppRegistry appRegistry, TaskService taskService) {
+			TaskLauncher taskLauncher, AppRegistryCommon appRegistry, TaskService taskService) {
 		Assert.notNull(repository, "repository must not be null");
 		Assert.notNull(deploymentIdRepository, "deploymentIdRepository must not be null");
 		Assert.notNull(taskLauncher, "taskLauncher must not be null");

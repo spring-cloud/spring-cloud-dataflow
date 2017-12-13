@@ -30,8 +30,9 @@ import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.core.TaskDefinition.TaskDefinitionBuilder;
 import org.springframework.cloud.dataflow.core.dsl.TaskNode;
 import org.springframework.cloud.dataflow.core.dsl.TaskParser;
-import org.springframework.cloud.dataflow.registry.AppRegistration;
+import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
+import org.springframework.cloud.dataflow.registry.AppRegistryCommon;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
 import org.springframework.cloud.dataflow.server.controller.WhitelistProperties;
 import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
@@ -89,7 +90,7 @@ public class DefaultTaskService implements TaskService {
 	/**
 	 * The {@link AppRegistry} this service will use to look up task app URIs.
 	 */
-	private final AppRegistry registry;
+	private final AppRegistryCommon registry;
 
 	/**
 	 * The {@link ResourceLoader} that will resolve URIs to {@link Resource}s.
@@ -125,7 +126,7 @@ public class DefaultTaskService implements TaskService {
 	 */
 	public DefaultTaskService(DataSourceProperties dataSourceProperties,
 			TaskDefinitionRepository taskDefinitionRepository, TaskExplorer taskExplorer,
-			TaskRepository taskExecutionRepository, AppRegistry registry, ResourceLoader resourceLoader,
+			TaskRepository taskExecutionRepository, AppRegistryCommon registry, ResourceLoader resourceLoader,
 			TaskLauncher taskLauncher, ApplicationConfigurationMetadataResolver metaDataResolver,
 			TaskConfigurationProperties taskConfigurationProperties, DeploymentIdRepository deploymentIdRepository,
 			String dataflowServerUri) {
@@ -173,8 +174,8 @@ public class DefaultTaskService implements TaskService {
 		AppRegistration appRegistration = this.registry.find(taskDefinition.getRegisteredAppName(),
 				ApplicationType.task);
 		Assert.notNull(appRegistration, "Unknown task app: " + taskDefinition.getRegisteredAppName());
-		Resource appResource = appRegistration.getResource();
-		Resource metadataResource = appRegistration.getMetadataResource();
+		Resource appResource = this.registry.getAppResource(appRegistration);
+		Resource metadataResource = this.registry.getAppMetadataResource(appRegistration);
 
 		TaskExecution taskExecution = taskExecutionRepository.createTaskExecution(taskName);
 		taskDefinition = this.updateTaskProperties(taskDefinition);

@@ -28,7 +28,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.configuration.metadata.BootApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.core.ApplicationType;
-import org.springframework.cloud.dataflow.registry.AppRegistration;
+import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.deployer.resource.registry.InMemoryUriRegistry;
 import org.springframework.context.annotation.Bean;
@@ -113,7 +113,7 @@ public class BootVersionsCompletionProviderTests {
 					String filename = name + "-1.0.0.BUILD-SNAPSHOT.jar";
 					File file = new File(ROOT, filename);
 					if (file.exists()) {
-						return new AppRegistration(name, type, file.toURI(), file.toURI(), resourceLoader);
+						return new AppRegistration(name, type, file.toURI(), file.toURI());
 					}
 					else {
 						return null;
