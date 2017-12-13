@@ -20,8 +20,8 @@ import java.util.List;
 
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.dsl.CheckPointedParseException;
-import org.springframework.cloud.dataflow.registry.AppRegistration;
-import org.springframework.cloud.dataflow.registry.AppRegistry;
+import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
+import org.springframework.cloud.dataflow.registry.AppRegistryCommon;
 
 /**
  * Proposes source app names when the user has typed nothing.
@@ -33,9 +33,9 @@ import org.springframework.cloud.dataflow.registry.AppRegistry;
 class EmptyStartYieldsSourceAppsTaskRecoveryStrategy
 		extends StacktraceFingerprintingTaskRecoveryStrategy<CheckPointedParseException> {
 
-	private final AppRegistry registry;
+	private final AppRegistryCommon registry;
 
-	public EmptyStartYieldsSourceAppsTaskRecoveryStrategy(AppRegistry registry) {
+	public EmptyStartYieldsSourceAppsTaskRecoveryStrategy(AppRegistryCommon registry) {
 		super(CheckPointedParseException.class, "");
 		this.registry = registry;
 	}

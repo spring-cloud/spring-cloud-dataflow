@@ -27,8 +27,8 @@ import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.dsl.CheckPointedParseException;
 import org.springframework.cloud.dataflow.core.dsl.Token;
 import org.springframework.cloud.dataflow.core.dsl.TokenKind;
-import org.springframework.cloud.dataflow.registry.AppRegistration;
-import org.springframework.cloud.dataflow.registry.AppRegistry;
+import org.springframework.cloud.dataflow.registry.AppRegistryCommon;
+import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
 import org.springframework.core.io.Resource;
 
 import static org.springframework.cloud.dataflow.completion.CompletionProposal.expanding;
@@ -43,17 +43,17 @@ import static org.springframework.cloud.dataflow.completion.CompletionProposal.e
  */
 class ProposalsCollectorSupportUtils {
 
-	private final AppRegistry appRegistry;
+	private final AppRegistryCommon appRegistry;
 
 	private final ApplicationConfigurationMetadataResolver metadataResolver;
 
-	ProposalsCollectorSupportUtils(AppRegistry appRegistry, ApplicationConfigurationMetadataResolver metadataResolver) {
+	ProposalsCollectorSupportUtils(AppRegistryCommon appRegistry, ApplicationConfigurationMetadataResolver metadataResolver) {
 		this.appRegistry = appRegistry;
 		this.metadataResolver = metadataResolver;
 	}
 
 	void addPropertiesProposals(String text, String startsWith, AppRegistration appRegistration, Set<String> alreadyPresentOptions, List<CompletionProposal> collector, int detailLevel){
-		Resource metadataResource = appRegistration.getMetadataResource();
+		Resource metadataResource = appRegistry.getAppMetadataResource(appRegistration);
 		// For whitelisted properties, use their simple name
 		if (metadataResource != null) {
 			CompletionProposal.Factory proposals = expanding(text);
@@ -78,7 +78,7 @@ class ProposalsCollectorSupportUtils {
 	}
 
 	void addValueHintsProposals(final String dsl, AppRegistration appRegistration, final List<CompletionProposal> collector, final String propertyName, final ValueHintProvider[] valueHintProviders){
-		final Resource metadataResource = appRegistration.getMetadataResource();
+		final Resource metadataResource = this.appRegistry.getAppMetadataResource(appRegistration);
 		if (metadataResource != null) {
 			final URLClassLoader classLoader = metadataResolver.createAppClassLoader(metadataResource);
 			this.doWithClassLoader(classLoader, () -> {
@@ -100,7 +100,7 @@ class ProposalsCollectorSupportUtils {
 	}
 
 	boolean addAlreadyTypedValueHintsProposals(final String text, AppRegistration appRegistration, final List<CompletionProposal> collector, final String propertyName, final ValueHintProvider[] valueHintProviders, final String alreadyTyped){
-		final Resource metadataResource = appRegistration.getMetadataResource();
+		final Resource metadataResource = this.appRegistry.getAppMetadataResource(appRegistration);
 		if (metadataResource == null) {
 			return false;
 		}

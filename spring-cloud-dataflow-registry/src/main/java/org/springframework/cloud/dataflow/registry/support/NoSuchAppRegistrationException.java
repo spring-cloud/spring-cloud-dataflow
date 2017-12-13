@@ -16,7 +16,7 @@
 package org.springframework.cloud.dataflow.registry.support;
 
 import org.springframework.cloud.dataflow.core.ApplicationType;
-import org.springframework.cloud.dataflow.registry.AppRegistration;
+import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
 
 /**
  * Thrown when an {@link AppRegistration} of a given name and {@link ApplicationType} was
@@ -30,5 +30,9 @@ public class NoSuchAppRegistrationException extends RuntimeException {
 
 	public NoSuchAppRegistrationException(String name, ApplicationType type) {
 		super(String.format("The '%s:%s' application could not be found.", type, name));
+	}
+
+	public NoSuchAppRegistrationException(String name, ApplicationType type, String version) {
+		super(String.format("The '%s:%s:%s' application could not be found.", type, name, version));
 	}
 }

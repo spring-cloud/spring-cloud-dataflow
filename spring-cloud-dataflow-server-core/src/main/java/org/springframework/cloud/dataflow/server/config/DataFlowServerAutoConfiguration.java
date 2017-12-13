@@ -29,7 +29,7 @@ import org.springframework.context.annotation.Import;
  * @author Janne Valkealahti
  */
 @Configuration
-@AutoConfigureBefore(value = JacksonAutoConfiguration.class)
+@AutoConfigureBefore({JacksonAutoConfiguration.class})
 @ConditionalOnBean(EnableDataFlowServerConfiguration.Marker.class)
 @Import(DataFlowServerConfiguration.class)
 @ConditionalOnProperty(prefix = "dataflow.server", name = "enabled", havingValue = "true", matchIfMissing = true)

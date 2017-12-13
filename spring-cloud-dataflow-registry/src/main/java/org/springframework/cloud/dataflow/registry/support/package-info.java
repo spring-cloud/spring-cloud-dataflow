@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 /**
- * Contains {@link org.springframework.cloud.dataflow.registry.AppRegistration} support
+ * Contains {@link org.springframework.cloud.dataflow.registry.domain.AppRegistration} support
  * classes.
  */
 package org.springframework.cloud.dataflow.registry.support;

@@ -26,6 +26,7 @@ import org.springframework.boot.autoconfigure.integration.IntegrationAutoConfigu
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerAutoConfiguration;
 import org.springframework.boot.autoconfigure.jmx.JmxAutoConfiguration;
+import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 import org.springframework.boot.autoconfigure.security.oauth2.authserver.AuthorizationServerProperties;
 import org.springframework.boot.autoconfigure.security.oauth2.authserver.OAuth2AuthorizationServerConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -55,6 +56,7 @@ import org.springframework.web.bind.annotation.RestController;
 				DataSourceAutoConfiguration.class,
 				DataSourceTransactionManagerAutoConfiguration.class,
 				JmxAutoConfiguration.class,
+				HibernateJpaAutoConfiguration.class,
 				LocalDataFlowServerAutoConfiguration.class,
 				ApplicationConfigurationMetadataResolverAutoConfiguration.class,
 				LocalDeployerAutoConfiguration.class,

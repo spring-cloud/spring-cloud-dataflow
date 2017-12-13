@@ -19,8 +19,8 @@ package org.springframework.cloud.dataflow.completion;
 import java.util.List;
 
 import org.springframework.cloud.dataflow.core.ApplicationType;
-import org.springframework.cloud.dataflow.registry.AppRegistration;
-import org.springframework.cloud.dataflow.registry.AppRegistry;
+import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
+import org.springframework.cloud.dataflow.registry.AppRegistryCommon;
 
 /**
  * Proposes source app names when the user has typed nothing.
@@ -31,9 +31,9 @@ import org.springframework.cloud.dataflow.registry.AppRegistry;
 class EmptyStartYieldsSourceAppsRecoveryStrategy
 		extends StacktraceFingerprintingRecoveryStrategy<IllegalArgumentException> {
 
-	private final AppRegistry registry;
+	private final AppRegistryCommon registry;
 
-	public EmptyStartYieldsSourceAppsRecoveryStrategy(AppRegistry registry) {
+	public EmptyStartYieldsSourceAppsRecoveryStrategy(AppRegistryCommon registry) {
 		super(IllegalArgumentException.class, "");
 		this.registry = registry;
 	}

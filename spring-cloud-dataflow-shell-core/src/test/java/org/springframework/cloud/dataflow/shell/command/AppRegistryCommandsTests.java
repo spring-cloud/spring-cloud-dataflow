@@ -16,6 +16,10 @@
 
 package org.springframework.cloud.dataflow.shell.command;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.when;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -27,7 +31,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.rest.client.AppRegistryOperations;
 import org.springframework.cloud.dataflow.rest.client.DataFlowOperations;
@@ -36,10 +39,6 @@ import org.springframework.cloud.dataflow.shell.config.DataFlowShell;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.shell.table.Table;
 import org.springframework.shell.table.TableModel;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.when;
 
 /**
  * Unit tests for {@link AppRegistryCommands}.
@@ -75,7 +74,7 @@ public class AppRegistryCommandsTests {
 		PagedResources<AppRegistrationResource> result = new PagedResources<>(data, metadata);
 		when(appRegistryOperations.list()).thenReturn(result);
 
-		Object commandResult = appRegistryCommands.list();
+		Object commandResult = appRegistryCommands.list(null);
 		assertThat((String) commandResult, CoreMatchers.containsString("app register"));
 		assertThat((String) commandResult, CoreMatchers.containsString("app import"));
 	}
@@ -98,7 +97,7 @@ public class AppRegistryCommandsTests {
 		Object[][] expected = new String[][] { { "source", "processor", "sink", "task" },
 				{ "http", "filter", "log", null }, { "file", "transform", null, null },
 				{ null, "moving-average", null, null }, };
-		TableModel model = ((Table) appRegistryCommands.list()).getModel();
+		TableModel model = ((Table) appRegistryCommands.list(null)).getModel();
 		for (int row = 0; row < expected.length; row++) {
 			for (int col = 0; col < expected[row].length; col++) {
 				assertThat(model.getValue(row, col), Matchers.is(expected[row][col]));
@@ -109,7 +108,8 @@ public class AppRegistryCommandsTests {
 	@Test
 	public void testUnknownModule() {
 		List<Object> result = appRegistryCommands
-				.info(new AppRegistryCommands.QualifiedApplicationName("unknown", ApplicationType.processor));
+				.info(new AppRegistryCommands.QualifiedApplicationName("unknown", ApplicationType.processor),
+						null);
 		assertEquals((String) result.get(0), "Application info is not available for processor:unknown");
 	}
 
@@ -121,7 +121,21 @@ public class AppRegistryCommandsTests {
 		boolean force = false;
 		AppRegistrationResource resource = new AppRegistrationResource(name, type.name(), uri);
 		when(appRegistryOperations.register(name, type, uri, null, force)).thenReturn(resource);
-		String result = appRegistryCommands.register(name, type, uri, null, force);
+		String result = appRegistryCommands.register(name, type, null, uri, null, force);
+		assertEquals("Successfully registered application 'sink:foo'", result);
+	}
+
+	@Test
+	public void versionedRegister() {
+		String name = "foo";
+		ApplicationType type = ApplicationType.sink;
+		String version = "1.0.0";
+		boolean isDefault = true;
+		String uri = "file:///foo";
+		boolean force = false;
+		AppRegistrationResource resource = new AppRegistrationResource(name, type.name(), version, uri, isDefault);
+		when(appRegistryOperations.register(name, type, uri, null, force)).thenReturn(resource);
+		String result = appRegistryCommands.register(name, type, uri, version, null, force);
 		assertEquals("Successfully registered application 'sink:foo'", result);
 	}
 

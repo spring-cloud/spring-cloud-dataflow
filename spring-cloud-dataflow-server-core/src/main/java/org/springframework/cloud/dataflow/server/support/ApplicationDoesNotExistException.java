@@ -15,7 +15,7 @@
  */
 package org.springframework.cloud.dataflow.server.support;
 
-import org.springframework.cloud.dataflow.registry.AppRegistration;
+import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
 import org.springframework.cloud.dataflow.server.service.TaskService;
 
 /**

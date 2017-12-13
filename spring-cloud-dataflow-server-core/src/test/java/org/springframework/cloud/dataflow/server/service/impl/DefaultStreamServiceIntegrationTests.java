@@ -157,7 +157,7 @@ public class DefaultStreamServiceIntegrationTests {
 		String packageName = uploadRequestCaptor.getValue().getName();
 		String packageVersion= uploadRequestCaptor.getValue().getVersion();
 		byte[] packageBytes = uploadRequestCaptor.getValue().getPackageFileAsBytes();
-		Path targetPath = TempFileUtils.createTempDirectory("skipper" + packageName);
+		Path targetPath = TempFileUtils.createTempDirectory("service" + packageName);
 		File targetFile = new File(targetPath.toFile(), packageName + "-" + packageVersion + ".zip");
 		StreamUtils.copy(packageBytes, new FileOutputStream(targetFile));
 		ZipUtil.unpack(targetFile, targetPath.toFile());

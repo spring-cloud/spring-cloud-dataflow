@@ -20,8 +20,8 @@ import java.util.List;
 
 import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
-import org.springframework.cloud.dataflow.registry.AppRegistration;
-import org.springframework.cloud.dataflow.registry.AppRegistry;
+import org.springframework.cloud.dataflow.registry.AppRegistryCommon;
+import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
 
 import static org.springframework.cloud.dataflow.core.ApplicationType.processor;
 import static org.springframework.cloud.dataflow.core.ApplicationType.sink;
@@ -35,9 +35,9 @@ import static org.springframework.cloud.dataflow.core.ApplicationType.sink;
  */
 public class PipeIntoOtherAppsExpansionStrategy implements ExpansionStrategy {
 
-	private final AppRegistry appRegistry;
+	private final AppRegistryCommon appRegistry;
 
-	public PipeIntoOtherAppsExpansionStrategy(AppRegistry appRegistry) {
+	public PipeIntoOtherAppsExpansionStrategy(AppRegistryCommon appRegistry) {
 		this.appRegistry = appRegistry;
 	}
 

@@ -31,6 +31,7 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerAutoConfiguration;
 import org.springframework.boot.autoconfigure.jmx.JmxAutoConfiguration;
 import org.springframework.boot.autoconfigure.ldap.LdapAutoConfiguration;
+import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 import org.springframework.boot.autoconfigure.security.SecurityAutoConfiguration;
 import org.springframework.boot.autoconfigure.security.oauth2.OAuth2AutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -60,7 +61,8 @@ import org.springframework.web.bind.annotation.RestController;
 				OAuth2AutoConfiguration.class,
 				RedisAutoConfiguration.class,
 				RedisRepositoriesAutoConfiguration.class,
-				SecurityAutoConfiguration.class
+				SecurityAutoConfiguration.class,
+				HibernateJpaAutoConfiguration.class
 		})
 public class FakeMetricsCollector {
 

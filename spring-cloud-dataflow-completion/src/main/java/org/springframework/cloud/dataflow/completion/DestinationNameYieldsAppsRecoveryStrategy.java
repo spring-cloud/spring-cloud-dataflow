@@ -19,8 +19,8 @@ package org.springframework.cloud.dataflow.completion;
 import java.util.List;
 
 import org.springframework.cloud.dataflow.core.dsl.CheckPointedParseException;
-import org.springframework.cloud.dataflow.registry.AppRegistration;
-import org.springframework.cloud.dataflow.registry.AppRegistry;
+import org.springframework.cloud.dataflow.registry.AppRegistryCommon;
+import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
 
 import static org.springframework.cloud.dataflow.core.ApplicationType.processor;
 import static org.springframework.cloud.dataflow.core.ApplicationType.sink;
@@ -34,9 +34,9 @@ import static org.springframework.cloud.dataflow.core.ApplicationType.sink;
 class DestinationNameYieldsAppsRecoveryStrategy
 		extends StacktraceFingerprintingRecoveryStrategy<CheckPointedParseException> {
 
-	private final AppRegistry appRegistry;
+	private final AppRegistryCommon appRegistry;
 
-	public DestinationNameYieldsAppsRecoveryStrategy(AppRegistry appRegistry) {
+	public DestinationNameYieldsAppsRecoveryStrategy(AppRegistryCommon appRegistry) {
 		super(CheckPointedParseException.class, ":foo >", ":foo > ");
 		this.appRegistry = appRegistry;
 	}
