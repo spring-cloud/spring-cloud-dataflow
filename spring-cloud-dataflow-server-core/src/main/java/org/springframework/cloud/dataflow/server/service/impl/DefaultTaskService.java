@@ -210,14 +210,17 @@ public class DefaultTaskService implements TaskService {
 		for (TaskApp subTask : taskNode.getTaskApps()) {
 			String subTaskName = String.format("app.%s-%s.", taskNode.getName(),
 					(subTask.getLabel() == null) ? subTask.getName() : subTask.getLabel());
+			String scdfTaskName = String.format("app.%s.%s.", taskNode.getName(),
+					(subTask.getLabel() == null) ? subTask.getName() : subTask.getLabel());
 			Set<String> propertyKeys = taskDeploymentProperties.keySet().
-					stream().filter(taskProperty -> taskProperty.startsWith(subTaskName))
+					stream().filter(taskProperty -> taskProperty.startsWith(scdfTaskName))
 					.collect(Collectors.toSet());
 			for (String taskProperty : propertyKeys) {
 				if (result.length() != 0) {
 					result += ", ";
 				}
-				result += String.format("%sapp.%s=%s", subTaskName,
+				result += String.format("%sapp.%s.%s=%s", subTaskName,
+						subTask.getName(),
 						taskProperty.substring(subTaskName.length()),
 						taskDeploymentProperties.get(taskProperty));
 				taskDeploymentProperties.remove(taskProperty);
