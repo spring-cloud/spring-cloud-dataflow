@@ -46,6 +46,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.util.Assert;
 import org.springframework.util.StreamUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.web.client.RestOperations;
 import org.springframework.web.client.RestTemplate;
 
 /**
@@ -84,7 +85,7 @@ public class DefaultSkipperClient implements SkipperClient {
 	public DefaultSkipperClient(String baseUri, RestTemplate restTemplate) {
 		Assert.notNull(baseUri, "The provided baseURI must not be null.");
 		Assert.notNull(restTemplate, "The provided restTemplate must not be null.");
-		this.traverson = createTraverson(baseUri);
+		this.traverson = createTraverson(baseUri, restTemplate);
 		this.baseUri = baseUri;
 		this.restTemplate = restTemplate;
 	}
@@ -281,9 +282,9 @@ public class DefaultSkipperClient implements SkipperClient {
 		return this.restTemplate.postForObject(url, uploadRequest, PackageMetadata.class);
 	}
 
-	protected Traverson createTraverson(String baseUrl) {
+	protected Traverson createTraverson(String baseUrl, RestOperations restOperations) {
 		try {
-			return new Traverson(new URI(baseUrl), MediaTypes.HAL_JSON);
+			return new Traverson(new URI(baseUrl), MediaTypes.HAL_JSON).setRestOperations(restOperations);
 		}
 		catch (URISyntaxException e) {
 			throw new IllegalStateException("Bad URI syntax: " + baseUrl);

@@ -219,6 +219,74 @@ no way to merge lists). Always refer to your version of `application.yml`, as th
 
 [source,yaml]
 ----
+# About
+
+            - GET    /api/about                      => hasRole('ROLE_VIEW')
+
+             # AppDeployerDatas
+
+            - GET    /api/appDeployerDatas           => hasRole('ROLE_VIEW')
+
+            # Delete
+
+            - DELETE /api/delete/**                  => hasRole('ROLE_CREATE')
+
+            # Deployers
+
+            - GET /api/deployers                     => hasRole('ROLE_VIEW')
+
+            # History
+
+            - GET /api/history/**                    => hasRole('ROLE_VIEW')
+
+            # Install
+
+            - POST /api/install                      => hasRole('ROLE_CREATE')
+            - POST /api/install/**                   => hasRole('ROLE_CREATE')
+
+            # List
+
+            - GET /api/list                         => hasRole('ROLE_VIEW')
+            - GET /api/list/**                      => hasRole('ROLE_VIEW')
+
+            # Manifest
+
+            - GET /api/manifest/**                  => hasRole('ROLE_VIEW')
+
+            # PackageMetaData
+
+            - GET /api/packageMetadata              => hasRole('ROLE_VIEW')
+            - GET /api/packageMetadata/**           => hasRole('ROLE_VIEW')
+
+            # Release
+
+            - GET /api/releases                     => hasRole('ROLE_VIEW')
+
+            # Repositories
+
+            - GET /api/repositories                 => hasRole('ROLE_VIEW')
+            - GET /api/repositories/**              => hasRole('ROLE_VIEW')
+
+            # Rollback
+
+            - POST /api/rollback/**                 => hasRole('ROLE_CREATE')
+
+            # Status
+
+            - POST /api/status/**                   => hasRole('ROLE_VIEW')
+
+            # Upgrade
+
+            - POST /api/upgrade                     => hasRole('ROLE_CREATE')
+
+            # Upload
+
+            - POST /api/upload                      => hasRole('ROLE_CREATE')
+
+            # Boot Endpoints
+
+            - GET  /actuator/**                     => hasRole('ROLE_MANAGE')
+
 ----
 
 The format of each line is the following:

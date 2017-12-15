@@ -54,7 +54,7 @@ public class InitializeConnectionApplicationRunner implements ApplicationRunner 
 	@Override
 	public void run(ApplicationArguments args) throws Exception {
 		Target target = new Target(skipperClientProperties.getUri(), skipperClientProperties.getUsername(),
-				skipperClientProperties.getPassword(), skipperClientProperties.isSkipSllValidation());
+				skipperClientProperties.getPassword(), skipperClientProperties.isSkipSslValidation());
 
 		// Attempt connection (including against default values) but do not crash the shell on
 		// error

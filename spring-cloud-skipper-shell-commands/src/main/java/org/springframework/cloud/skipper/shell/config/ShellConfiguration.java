@@ -21,6 +21,7 @@ import org.jline.reader.Parser;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.cloud.skipper.client.SkipperClientConfiguration;
+import org.springframework.cloud.skipper.client.SkipperClientProperties;
 import org.springframework.cloud.skipper.shell.command.support.ConsoleUserInput;
 import org.springframework.cloud.skipper.shell.command.support.InitializeConnectionApplicationRunner;
 import org.springframework.cloud.skipper.shell.command.support.InteractiveModeApplicationRunner;
