@@ -18,8 +18,6 @@ package org.springframework.cloud.common.security;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
-
 /**
  * Holds configuration for the authorization aspects of security.
  *

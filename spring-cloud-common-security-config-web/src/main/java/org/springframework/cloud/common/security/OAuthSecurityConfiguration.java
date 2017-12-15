@@ -78,25 +78,25 @@ public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 	private static final org.slf4j.Logger logger = LoggerFactory.getLogger(OAuthSecurityConfiguration.class);
 
 	@Autowired
-	private SecurityStateBean securityStateBean;
+	protected SecurityStateBean securityStateBean;
 
 	@Autowired
-	private SecurityProperties securityProperties;
+	protected SecurityProperties securityProperties;
 
 	@Autowired
-	private OAuth2ClientContext oauth2ClientContext;
+	protected OAuth2ClientContext oauth2ClientContext;
 
 	@Autowired
-	private AuthorizationCodeResourceDetails authorizationCodeResourceDetails;
+	protected AuthorizationCodeResourceDetails authorizationCodeResourceDetails;
 
 	@Autowired
-	private ResourceServerProperties resourceServerProperties;
+	protected ResourceServerProperties resourceServerProperties;
 
 	@Autowired
-	private ApplicationEventPublisher applicationEventPublisher;
+	protected ApplicationEventPublisher applicationEventPublisher;
 
 	@Autowired
-	private AuthorizationProperties authorizationProperties;
+	protected AuthorizationProperties authorizationProperties;
 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
@@ -147,7 +147,7 @@ public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 	}
 
 	@Bean
-	public UserInfoTokenServices tokenServices() {
+	protected UserInfoTokenServices tokenServices() {
 		final UserInfoTokenServices tokenServices = new UserInfoTokenServices(resourceServerProperties.getUserInfoUri(),
 				authorizationCodeResourceDetails.getClientId());
 		tokenServices.setRestTemplate(oAuth2RestTemplate());
@@ -156,26 +156,26 @@ public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 	}
 
 	@Bean
-	public OAuth2RestTemplate oAuth2RestTemplate() {
+	protected OAuth2RestTemplate oAuth2RestTemplate() {
 		final OAuth2RestTemplate oAuth2RestTemplate = new OAuth2RestTemplate(authorizationCodeResourceDetails,
 				oauth2ClientContext);
 		return oAuth2RestTemplate;
 	}
 
 	@Bean
-	public AuthenticationProvider authenticationProvider() {
+	protected AuthenticationProvider authenticationProvider() {
 		return new ManualOAuthAuthenticationProvider();
 	}
 
 	@Bean
-	public ProviderManager providerManager() {
+	protected ProviderManager providerManager() {
 		List<AuthenticationProvider> providers = new ArrayList<>();
 		providers.add(this.authenticationProvider());
 		ProviderManager providerManager = new ProviderManager(providers);
 		return providerManager;
 	}
 
-	private Filter oauthFilter() {
+	protected Filter oauthFilter() {
 		final OAuth2ClientAuthenticationProcessingFilter oauthFilter = new OAuth2ClientAuthenticationProcessingFilter(
 				"/login");
 		oauthFilter.setRestTemplate(oAuth2RestTemplate());
@@ -184,7 +184,7 @@ public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 		return oauthFilter;
 	}
 
-	private OAuth2AuthenticationProcessingFilter oAuth2AuthenticationProcessingFilter() {
+	protected OAuth2AuthenticationProcessingFilter oAuth2AuthenticationProcessingFilter() {
 		final OAuth2AuthenticationProcessingFilter oAuth2AuthenticationProcessingFilter = new OAuth2AuthenticationProcessingFilter();
 		oAuth2AuthenticationProcessingFilter.setAuthenticationManager(oauthAuthenticationManager());
 		oAuth2AuthenticationProcessingFilter.setStateless(false);
@@ -205,11 +205,11 @@ public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 				oAuth2AuthenticationFailureEvent.getException());
 	}
 
-	private String dashboard(String path) {
+	protected String dashboard(String path) {
 		return this.authorizationProperties.getDashboardUrl() + path;
 	}
 
-	private static class BrowserDetectingContentNegotiationStrategy extends HeaderContentNegotiationStrategy {
+	protected static class BrowserDetectingContentNegotiationStrategy extends HeaderContentNegotiationStrategy {
 
 		@Override
 		public List<MediaType> resolveMediaTypes(NativeWebRequest request)
