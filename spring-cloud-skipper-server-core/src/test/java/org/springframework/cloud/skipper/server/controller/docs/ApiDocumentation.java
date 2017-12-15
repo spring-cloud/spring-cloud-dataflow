@@ -77,6 +77,11 @@ public class ApiDocumentation extends BaseDocumentation {
 				linkWithRel("deployers").description("Exposes deployer"),
 				linkWithRel("releases").description("Exposes release information"),
 				linkWithRel("packageMetadata").description("Provides details for Package Metadata"),
+				linkWithRel("jpaRepositoryStates").description(""),
+				linkWithRel("jpaRepositoryGuards").description(""),
+				linkWithRel("jpaRepositoryTransitions").description(""),
+				linkWithRel("jpaRepositoryStateMachines").description(""),
+				linkWithRel("jpaRepositoryActions").description(""),
 				linkWithRel("profile").description(
 						"Entrypoint to provide ALPS metadata defining simple descriptions of application-level semantics"),
 				linkWithRel("status/name")

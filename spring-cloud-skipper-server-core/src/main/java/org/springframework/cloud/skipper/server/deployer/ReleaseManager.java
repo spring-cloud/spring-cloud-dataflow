@@ -47,13 +47,6 @@ public interface ReleaseManager {
 	ReleaseAnalysisReport createReport(Release existingRelease, Release replacingRelease);
 
 	/**
-	 * Given a report of what should be upgraded, perform the upgrade. It is expected this is
-	 * a long lived operation executed asynchronously to the client request.
-	 * @param releaseAnalysisReport report describing what actions to take to upgrade
-	 */
-	void upgrade(ReleaseAnalysisReport releaseAnalysisReport);
-
-	/**
 	 * Delete the release
 	 * @param release the release to delete
 	 * @return the updated release object after deltion

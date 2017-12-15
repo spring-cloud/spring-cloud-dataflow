@@ -17,7 +17,6 @@ package org.springframework.cloud.skipper.server.controller;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.skipper.ReleaseNotFoundException;
 import org.springframework.cloud.skipper.domain.AboutInfo;
@@ -30,6 +29,7 @@ import org.springframework.cloud.skipper.domain.UpgradeRequest;
 import org.springframework.cloud.skipper.domain.UploadRequest;
 import org.springframework.cloud.skipper.server.service.PackageService;
 import org.springframework.cloud.skipper.server.service.ReleaseService;
+import org.springframework.cloud.skipper.server.statemachine.SkipperStateMachineService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -61,10 +61,13 @@ public class SkipperController {
 	@Value("${info.app.version:#{null}}")
 	private String appVersion;
 
-	@Autowired
-	public SkipperController(ReleaseService releaseService, PackageService packageService) {
+	private SkipperStateMachineService skipperStateMachineService;
+
+	public SkipperController(ReleaseService releaseService, PackageService packageService,
+			SkipperStateMachineService skipperStateMachineService) {
 		this.releaseService = releaseService;
 		this.packageService = packageService;
+		this.skipperStateMachineService = skipperStateMachineService;
 	}
 
 	@RequestMapping(path = "/about", method = RequestMethod.GET)
@@ -82,13 +85,13 @@ public class SkipperController {
 	@RequestMapping(path = "/install", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
 	public Release install(@RequestBody InstallRequest installRequest) {
-		return this.releaseService.install(installRequest);
+		return this.skipperStateMachineService.installRelease(installRequest);
 	}
 
 	@RequestMapping(path = "/install/{id}", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
 	public Release install(@PathVariable("id") Long id, @RequestBody InstallProperties installProperties) {
-		return this.releaseService.install(id, installProperties);
+		return this.skipperStateMachineService.installRelease(id, installProperties);
 	}
 
 	@RequestMapping(path = "/status/{name}", method = RequestMethod.GET)
@@ -116,20 +119,20 @@ public class SkipperController {
 	@RequestMapping(path = "/upgrade", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
 	public Release upgrade(@RequestBody UpgradeRequest upgradeRequest) {
-		return this.releaseService.upgrade(upgradeRequest);
+		return this.skipperStateMachineService.upgradeRelease(upgradeRequest);
 	}
 
 	@RequestMapping(path = "/rollback/{name}/{version}", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
 	public Release rollback(@PathVariable("name") String releaseName,
 			@PathVariable("version") int rollbackVersion) {
-		return this.releaseService.rollback(releaseName, rollbackVersion);
+		return this.skipperStateMachineService.rollbackRelease(releaseName, rollbackVersion);
 	}
 
 	@RequestMapping(path = "/delete/{name}", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
 	public Release delete(@PathVariable("name") String releaseName) {
-		return this.releaseService.delete(releaseName);
+		return this.skipperStateMachineService.deleteRelease(releaseName);
 	}
 
 	@RequestMapping(path = "/history/{name}/{max}", method = RequestMethod.GET)

@@ -31,7 +31,6 @@ import org.springframework.cloud.skipper.domain.PackageIdentifier;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
 import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.StatusCode;
-import org.springframework.cloud.skipper.domain.UpgradeRequest;
 import org.springframework.cloud.skipper.server.deployer.ReleaseAnalysisReport;
 import org.springframework.cloud.skipper.server.deployer.ReleaseManager;
 import org.springframework.cloud.skipper.server.repository.DeployerRepository;
@@ -169,12 +168,13 @@ public class ReleaseService {
 		else {
 			releaseVersion = 1;
 		}
+
 		Release release = createInitialRelease(installProperties, this.packageService.downloadPackage(packageMetadata),
 				releaseVersion);
 		return install(release);
 	}
 
-	protected Release install(Release release) {
+	public Release install(Release release) {
 		Map<String, Object> mergedMap = ConfigValueUtils.mergeConfigValues(release.getPkg(), release.getConfigValues());
 		// Render yaml resources
 		String manifest = ManifestUtils.createManifest(release.getPkg(), mergedMap);
@@ -257,83 +257,12 @@ public class ReleaseService {
 		return this.releaseManager.status(release);
 	}
 
-	/**
-	 * Perform the release in two steps, each within it's own transaction. The first step
-	 * determines what changes need to be made, the second step performs the actaul upgrade,
-	 * waiting for new apps to be healthy, and deleting old apps.
-	 * @param upgradeRequest The update request
-	 * @return the initially created release object
-	 */
-	public Release upgrade(UpgradeRequest upgradeRequest) {
-		ReleaseAnalysisReport releaseAnalysisReport = this.releaseReportService.createReport(upgradeRequest);
-		// This is expected to be executed on another thread.
-		this.releaseManager.upgrade(releaseAnalysisReport);
-		return releaseAnalysisReport.getReplacingRelease();
-	}
-
 	protected Info createNewInfo() {
 		return Info.createNewInfo("Initial install underway");
 	}
 
-	/**
-	 * Rollback the release name to the specified version. If the version is 0, then rollback
-	 * to the previous release.
-	 *
-	 * @param releaseName the name of the release
-	 * @param rollbackVersion the version of the release to rollback to. If the version is 0,
-	 * then rollback to the previous release.
-	 * @return the Release
-	 */
-	public Release rollback(final String releaseName, final int rollbackVersion) {
-		Assert.notNull(releaseName, "Release name must not be null");
-		Assert.isTrue(rollbackVersion >= 0,
-				"Rollback version can not be less than zero.  Value = " + rollbackVersion);
-
-		Release currentRelease = this.releaseRepository.findLatestReleaseForUpdate(releaseName);
-		Assert.notNull(currentRelease, "Could not find release = [" + releaseName + "]");
-
-		// Determine with version to rollback to
-		int rollbackVersionToUse = rollbackVersion;
-		Release releaseToRollback = null;
-		if (rollbackVersion == 0) {
-			releaseToRollback = this.releaseRepository.findReleaseToRollback(releaseName);
-		}
-		else {
-			releaseToRollback = this.releaseRepository.findByNameAndVersion(releaseName, rollbackVersionToUse);
-			StatusCode statusCode = releaseToRollback.getInfo().getStatus().getStatusCode();
-			if (!(statusCode.equals(StatusCode.DEPLOYED) || statusCode.equals(StatusCode.DELETED))) {
-				throw new SkipperException("Rollback version should either be in deployed or deleted status.");
-			}
-		}
-		Assert.notNull(releaseToRollback, "Could not find Release to rollback to [releaseName,releaseVersion] = ["
-				+ releaseName + "," + rollbackVersionToUse + "]");
-
-		logger.info("Rolling back releaseName={}.  Current version={}, Target version={}", releaseName,
-				currentRelease.getVersion(), rollbackVersionToUse);
-
-		Release newRollbackRelease = new Release();
-		newRollbackRelease.setName(releaseName);
-		newRollbackRelease.setPkg(releaseToRollback.getPkg());
-		newRollbackRelease.setManifest(releaseToRollback.getManifest());
-		newRollbackRelease.setVersion(currentRelease.getVersion() + 1);
-		newRollbackRelease.setPlatformName(releaseToRollback.getPlatformName());
-		newRollbackRelease.setConfigValues(releaseToRollback.getConfigValues());
-		newRollbackRelease.setInfo(createNewInfo());
-		if (currentRelease.getInfo().getStatus().getStatusCode().equals(StatusCode.DELETED)) {
-			// Since the current release is not deployed, we just do a new install.
-			return install(newRollbackRelease);
-		}
-		else {
-			return upgrade(currentRelease, newRollbackRelease);
-		}
-	}
-
-	private Release upgrade(Release existingRelease, Release replacingRelease) {
-		ReleaseAnalysisReport releaseAnalysisReport = this.releaseManager.createReport(existingRelease,
-				replacingRelease);
-		// This is expected to be executed on another thread.
-		releaseManager.upgrade(releaseAnalysisReport);
-		return status(releaseAnalysisReport.getReplacingRelease());
+	public ReleaseAnalysisReport createReport(Release existingRelease, Release replacingRelease) {
+		return this.releaseManager.createReport(existingRelease, replacingRelease);
 	}
 
 	protected Release createInitialRelease(InstallProperties installProperties, Package packageToInstall,

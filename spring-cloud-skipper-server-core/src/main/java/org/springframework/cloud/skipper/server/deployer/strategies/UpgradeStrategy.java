@@ -26,16 +26,12 @@ import org.springframework.cloud.skipper.server.deployer.ReleaseAnalysisReport;
  */
 public interface UpgradeStrategy {
 
-	/**
-	 * Given the two releases, the one currently deployed, the 'existingRelease' and to one to
-	 * be deployed, the 'replacingRelease', use the information in the analysis report to
-	 * deploy the apps in the new release and delete the apps in the old.
-	 *
-	 * @param existingRelease the apps currently deployed
-	 * @param replacingRelease the apps to be deployed
-	 * @param releaseAnalysisReport report to guide the strategy on what apps to replace.
-	 * @return the replacingRelease, now deployed.
-	 */
-	Release upgrade(Release existingRelease, Release replacingRelease, ReleaseAnalysisReport releaseAnalysisReport);
+	void deployApps(Release existingRelease, Release replacingRelease, ReleaseAnalysisReport releaseAnalysisReport);
+
+	boolean checkStatus(Release replacingRelease);
+
+	void accept(Release existingRelease, Release replacingRelease, ReleaseAnalysisReport releaseAnalysisReport);
+
+	void cancel(Release existingRelease, Release replacingRelease, ReleaseAnalysisReport releaseAnalysisReport);
 
 }

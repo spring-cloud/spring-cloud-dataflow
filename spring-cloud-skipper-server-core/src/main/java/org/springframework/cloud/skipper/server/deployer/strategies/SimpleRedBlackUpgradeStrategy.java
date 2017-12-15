@@ -15,14 +15,8 @@
  */
 package org.springframework.cloud.skipper.server.deployer.strategies;
 
-import java.util.List;
-
 import org.springframework.cloud.skipper.domain.Release;
-import org.springframework.cloud.skipper.domain.StatusCode;
 import org.springframework.cloud.skipper.server.deployer.ReleaseAnalysisReport;
-import org.springframework.scheduling.annotation.Async;
-
-import static org.springframework.cloud.skipper.server.config.SkipperServerConfiguration.SKIPPER_EXECUTOR;
 
 /**
  * A simple approach to deploying a new application. All the new apps are deployed and a
@@ -48,17 +42,26 @@ public class SimpleRedBlackUpgradeStrategy implements UpgradeStrategy {
 	}
 
 	@Override
-	@Async(SKIPPER_EXECUTOR)
-	public Release upgrade(Release existingRelease, Release replacingRelease,
+	public void deployApps(Release existingRelease, Release replacingRelease, ReleaseAnalysisReport releaseAnalysisReport) {
+		this.deployAppStep.deployApps(existingRelease, replacingRelease, releaseAnalysisReport);
+	}
+
+	@Override
+	public boolean checkStatus(Release replacingRelease) {
+		return this.healthCheckStep.isHealthy(replacingRelease);
+	}
+
+	@Override
+	public void accept(Release existingRelease, Release replacingRelease,
 			ReleaseAnalysisReport releaseAnalysisReport) {
-		List<String> applicationNamesToUpgrade = this.deployAppStep.deployApps(existingRelease, replacingRelease,
-				releaseAnalysisReport);
-		if (!replacingRelease.getInfo().getStatus().getStatusCode().equals(StatusCode.FAILED)) {
-			boolean isHealthy = this.healthCheckStep.waitForNewAppsToDeploy(replacingRelease);
-			this.handleHealthCheckStep.handleHealthCheck(isHealthy, existingRelease,
-					applicationNamesToUpgrade, replacingRelease);
-		}
-		return replacingRelease;
+		this.handleHealthCheckStep.handleHealthCheck(true, existingRelease,
+				releaseAnalysisReport.getApplicationNamesToUpgrade(), replacingRelease);
+	}
+
+	@Override
+	public void cancel(Release existingRelease, Release replacingRelease, ReleaseAnalysisReport releaseAnalysisReport) {
+		this.handleHealthCheckStep.handleHealthCheck(false, existingRelease,
+				releaseAnalysisReport.getApplicationNamesToUpgrade(), replacingRelease);
 	}
 
 }

@@ -38,6 +38,7 @@ import org.springframework.cloud.skipper.server.templates.PackageTemplateTests.T
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.io.Resource;
+import org.springframework.statemachine.boot.autoconfigure.StateMachineJpaRepositoriesAutoConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.StreamUtils;
 
@@ -85,7 +86,7 @@ public class PackageTemplateTests {
 
 	@Configuration
 	@ImportAutoConfiguration(classes = { JacksonAutoConfiguration.class, EmbeddedDataSourceConfiguration.class,
-			HibernateJpaAutoConfiguration.class })
+			HibernateJpaAutoConfiguration.class, StateMachineJpaRepositoriesAutoConfiguration.class })
 	@Import(SkipperServerConfiguration.class)
 	static class TestConfig {
 	}

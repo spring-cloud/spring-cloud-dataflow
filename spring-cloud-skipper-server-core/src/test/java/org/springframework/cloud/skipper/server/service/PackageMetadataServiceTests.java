@@ -30,6 +30,7 @@ import org.springframework.cloud.skipper.server.config.SkipperServerConfiguratio
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.io.UrlResource;
+import org.springframework.statemachine.boot.autoconfigure.StateMachineJpaRepositoriesAutoConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -67,7 +68,7 @@ public class PackageMetadataServiceTests {
 
 	@Configuration
 	@ImportAutoConfiguration(classes = { JacksonAutoConfiguration.class, EmbeddedDataSourceConfiguration.class,
-			HibernateJpaAutoConfiguration.class })
+			HibernateJpaAutoConfiguration.class, StateMachineJpaRepositoriesAutoConfiguration.class })
 	@Import(SkipperServerConfiguration.class)
 	static class TestConfig {
 	}

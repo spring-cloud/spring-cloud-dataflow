@@ -34,7 +34,6 @@ import org.springframework.cloud.skipper.SkipperException;
 import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.Status;
 import org.springframework.cloud.skipper.domain.StatusCode;
-import org.springframework.cloud.skipper.server.deployer.strategies.UpgradeStrategy;
 import org.springframework.cloud.skipper.server.domain.AppDeployerData;
 import org.springframework.cloud.skipper.server.domain.SpringCloudDeployerApplicationManifest;
 import org.springframework.cloud.skipper.server.domain.SpringCloudDeployerApplicationManifestReader;
@@ -69,8 +68,6 @@ public class AppDeployerReleaseManager implements ReleaseManager {
 
 	private final AppDeploymentRequestFactory appDeploymentRequestFactory;
 
-	private final UpgradeStrategy upgradeStrategy;
-
 	private final SpringCloudDeployerApplicationManifestReader applicationManifestReader;
 
 	public AppDeployerReleaseManager(ReleaseRepository releaseRepository,
@@ -78,14 +75,12 @@ public class AppDeployerReleaseManager implements ReleaseManager {
 			DeployerRepository deployerRepository,
 			ReleaseAnalyzer releaseAnalyzer,
 			AppDeploymentRequestFactory appDeploymentRequestFactory,
-			UpgradeStrategy updateStrategy,
 			SpringCloudDeployerApplicationManifestReader applicationManifestReader) {
 		this.releaseRepository = releaseRepository;
 		this.appDeployerDataRepository = appDeployerDataRepository;
 		this.deployerRepository = deployerRepository;
 		this.releaseAnalyzer = releaseAnalyzer;
 		this.appDeploymentRequestFactory = appDeploymentRequestFactory;
-		this.upgradeStrategy = updateStrategy;
 		this.applicationManifestReader = applicationManifestReader;
 	}
 
@@ -191,16 +186,6 @@ public class AppDeployerReleaseManager implements ReleaseManager {
 		replacingRelease.setManifest(manifest);
 		this.releaseRepository.save(replacingRelease);
 		return releaseAnalysisReport;
-	}
-
-	@Override
-	public void upgrade(ReleaseAnalysisReport releaseAnalysisReport) {
-		logger.info(
-				"Difference report for upgrade of release " + releaseAnalysisReport.getReplacingRelease().getName());
-		logger.info(releaseAnalysisReport.getReleaseDifference().getDifferenceSummary());
-		// Do upgrades async
-		this.upgradeStrategy.upgrade(releaseAnalysisReport.getExistingRelease(),
-				releaseAnalysisReport.getReplacingRelease(), releaseAnalysisReport);
 	}
 
 	private Map<String, Object> calculateAppCountsForRelease(Release replacingRelease,

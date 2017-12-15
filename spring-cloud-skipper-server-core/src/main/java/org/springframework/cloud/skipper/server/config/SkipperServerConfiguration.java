@@ -70,6 +70,10 @@ import org.springframework.cloud.skipper.server.service.ReleaseReportService;
 import org.springframework.cloud.skipper.server.service.ReleaseService;
 import org.springframework.cloud.skipper.server.service.ReleaseStateUpdateService;
 import org.springframework.cloud.skipper.server.service.RepositoryInitializationService;
+import org.springframework.cloud.skipper.server.statemachine.SkipperStateMachineService;
+import org.springframework.cloud.skipper.server.statemachine.StateMachineConfiguration;
+import org.springframework.cloud.skipper.server.statemachine.StateMachineExecutorConfiguration;
+import org.springframework.cloud.skipper.server.statemachine.StateMachinePersistConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -98,7 +102,8 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableJpaRepositories(basePackages = "org.springframework.cloud.skipper.server.repository")
 @EnableTransactionManagement
 @EnableAsync
-@Import({ SecurityConfiguration.class })
+@Import({ StateMachinePersistConfiguration.class, StateMachineExecutorConfiguration.class,
+		StateMachineConfiguration.class, SecurityConfiguration.class })
 public class SkipperServerConfiguration implements AsyncConfigurer {
 
 	public static final String SKIPPER_EXECUTOR = "skipperThreadPoolTaskExecutor";
@@ -127,8 +132,9 @@ public class SkipperServerConfiguration implements AsyncConfigurer {
 	}
 
 	@Bean
-	public SkipperController skipperController(ReleaseService releaseService, PackageService packageService) {
-		return new SkipperController(releaseService, packageService);
+	public SkipperController skipperController(ReleaseService releaseService, PackageService packageService,
+			SkipperStateMachineService skipperStateMachineService) {
+		return new SkipperController(releaseService, packageService, skipperStateMachineService);
 	}
 
 	@Bean
@@ -223,10 +229,9 @@ public class SkipperServerConfiguration implements AsyncConfigurer {
 			DeployerRepository deployerRepository,
 			ReleaseAnalyzer releaseAnalyzer,
 			AppDeploymentRequestFactory appDeploymentRequestFactory,
-			UpgradeStrategy updateStrategy,
 			SpringCloudDeployerApplicationManifestReader applicationManifestReader) {
 		return new AppDeployerReleaseManager(releaseRepository, appDeployerDataRepository, deployerRepository,
-				releaseAnalyzer, appDeploymentRequestFactory, updateStrategy, applicationManifestReader);
+				releaseAnalyzer, appDeploymentRequestFactory, applicationManifestReader);
 	}
 
 	@Bean

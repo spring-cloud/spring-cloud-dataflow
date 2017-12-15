@@ -51,6 +51,29 @@ public class HealthCheckStep {
 		this.healthCheckProperties = healthCheckProperties;
 	}
 
+	public boolean isHealthy(Release replacingRelease) {
+		AppDeployerData replacingAppDeployerData = this.appDeployerDataRepository
+				.findByReleaseNameAndReleaseVersionRequired(
+						replacingRelease.getName(), replacingRelease.getVersion());
+
+		Map<String, String> appNamesAndDeploymentIds = replacingAppDeployerData.getDeploymentDataAsMap();
+
+		AppDeployer appDeployer = this.deployerRepository
+				.findByNameRequired(replacingRelease.getPlatformName())
+				.getAppDeployer();
+
+		logger.debug("Getting status for apps in replacing release {}-v{}", replacingRelease.getName(),
+				replacingRelease.getVersion());
+		for (Map.Entry<String, String> appNameAndDeploymentId : appNamesAndDeploymentIds.entrySet()) {
+			AppStatus status = appDeployer.status(appNameAndDeploymentId.getValue());
+			if (status.getState() == DeploymentState.deployed) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
 	public boolean waitForNewAppsToDeploy(Release replacingRelease) {
 		AppDeployerData replacingAppDeployerData = this.appDeployerDataRepository
 				.findByReleaseNameAndReleaseVersionRequired(

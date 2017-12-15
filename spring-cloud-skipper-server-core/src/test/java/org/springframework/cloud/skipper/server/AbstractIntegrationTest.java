@@ -42,9 +42,11 @@ import org.springframework.cloud.skipper.server.config.SkipperServerConfiguratio
 import org.springframework.cloud.skipper.server.deployer.ReleaseManager;
 import org.springframework.cloud.skipper.server.repository.ReleaseRepository;
 import org.springframework.cloud.skipper.server.service.ReleaseService;
+import org.springframework.cloud.skipper.server.statemachine.SkipperStateMachineService;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.statemachine.boot.autoconfigure.StateMachineJpaRepositoriesAutoConfiguration;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
@@ -81,6 +83,9 @@ public abstract class AbstractIntegrationTest extends AbstractAssertReleaseDeplo
 
 	@Autowired
 	protected ReleaseManager releaseManager;
+
+	@Autowired
+	protected SkipperStateMachineService skipperStateMachineService;
 
 	private File dbScriptFile;
 
@@ -144,19 +149,19 @@ public abstract class AbstractIntegrationTest extends AbstractAssertReleaseDeplo
 	}
 
 	protected Release install(InstallRequest installRequest) throws InterruptedException {
-		Release release = releaseService.install(installRequest);
+		Release release = skipperStateMachineService.installRelease(installRequest);
 		assertReleaseIsDeployedSuccessfully(release.getName(), release.getVersion());
 		return release;
 	}
 
 	protected Release upgrade(UpgradeRequest upgradeRequest) throws InterruptedException {
-		Release release = releaseService.upgrade(upgradeRequest);
+		Release release = skipperStateMachineService.upgradeRelease(upgradeRequest);
 		assertReleaseIsDeployedSuccessfully(release.getName(), release.getVersion());
 		return release;
 	}
 
 	protected Release rollback(String releaseName, int releaseVersion) throws InterruptedException {
-		Release release = releaseService.rollback(releaseName, releaseVersion);
+		Release release = skipperStateMachineService.rollbackRelease(releaseName, releaseVersion);
 		// Need to use the value of version passed back from calling rollback,
 		// since 0 implies most recent deleted release
 		assertReleaseIsDeployedSuccessfully(release.getName(), release.getVersion());
@@ -169,8 +174,8 @@ public abstract class AbstractIntegrationTest extends AbstractAssertReleaseDeplo
 	}
 
 	@Configuration
-	@ImportAutoConfiguration(classes = { JacksonAutoConfiguration.class,
-			EmbeddedDataSourceConfiguration.class, HibernateJpaAutoConfiguration.class })
+	@ImportAutoConfiguration(classes = { JacksonAutoConfiguration.class, EmbeddedDataSourceConfiguration.class,
+			HibernateJpaAutoConfiguration.class, StateMachineJpaRepositoriesAutoConfiguration.class })
 	@Import(SkipperServerConfiguration.class)
 	@EnableWebMvc
 	static class TestConfig {
