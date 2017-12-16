@@ -32,6 +32,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 /**
  * Convenience wrapper for the {@link } that operates on higher level
@@ -117,7 +118,13 @@ public class DefaultAppRegistryService extends AbstractAppRegistryCommon impleme
 
 	@Override
 	public Page<AppRegistration> findAllByTypeAndNameIsLike(ApplicationType type, String name, Pageable pageable) {
-		return this.appRegistrationRepository.findAllByTypeAndNameIsLike(type, name, pageable);
+		if (!StringUtils.hasText(name) && type == null) {
+			return findAll(pageable);
+		} else if (StringUtils.hasText(name)) {
+			return this.appRegistrationRepository.findAllByTypeAndNameIsLike(type, name, pageable);
+		} else {
+			return this.appRegistrationRepository.findAllByType(type, pageable);
+		}
 	}
 
 	@Override

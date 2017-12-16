@@ -21,6 +21,8 @@ public interface AppRegistrationRepository extends PagingAndSortingRepository<Ap
 
 	Page<AppRegistration> findAllByTypeAndNameIsLike(ApplicationType type, String name, Pageable pageable);
 
+	Page<AppRegistration> findAllByType(ApplicationType type, Pageable pageable);
+
 	@Override
 	<S extends AppRegistration> S save(S s);
 

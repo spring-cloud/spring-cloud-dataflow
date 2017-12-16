@@ -99,16 +99,11 @@ public class VersionedAppRegistryController {
 			PagedResourcesAssembler<AppRegistration> pagedResourcesAssembler,
 			@RequestParam(value = "type", required = false) ApplicationType type,
 			@RequestParam(required = false) String search) {
-		Page<AppRegistration> pagedRegistrations;
-		if (type == null && search == null) {
-			pagedRegistrations = appRegistryService.findAll(pageable);
-		}
-		else {
-			pagedRegistrations = appRegistryService.findAllByTypeAndNameIsLike(type, search, pageable);
-		}
+
+		Page<AppRegistration> pagedRegistrations = appRegistryService.findAllByTypeAndNameIsLike(type, search,
+				pageable);
 
 		return pagedResourcesAssembler.toResource(pagedRegistrations, this.assembler);
-
 	}
 
 	/**
