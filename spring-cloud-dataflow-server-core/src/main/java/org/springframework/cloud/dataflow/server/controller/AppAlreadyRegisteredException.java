@@ -15,7 +15,7 @@
  */
 package org.springframework.cloud.dataflow.server.controller;
 
-import org.springframework.cloud.dataflow.registry.AppRegistration;
+import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
 
 /**
  * @author Glenn Renfro

@@ -18,7 +18,6 @@ package org.springframework.cloud.dataflow.server.repository.support;
 
 import java.util.HashMap;
 import java.util.Map;
-
 import javax.sql.DataSource;
 
 import org.springframework.beans.factory.FactoryBean;

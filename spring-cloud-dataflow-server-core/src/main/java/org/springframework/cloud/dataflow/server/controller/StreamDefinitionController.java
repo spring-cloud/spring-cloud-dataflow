@@ -33,7 +33,7 @@ import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.dsl.ParseException;
 import org.springframework.cloud.dataflow.core.dsl.StreamNode;
 import org.springframework.cloud.dataflow.core.dsl.StreamParser;
-import org.springframework.cloud.dataflow.registry.AppRegistry;
+import org.springframework.cloud.dataflow.registry.AppRegistryCommon;
 import org.springframework.cloud.dataflow.rest.resource.DeploymentStateResource;
 import org.springframework.cloud.dataflow.rest.resource.StreamDefinitionResource;
 import org.springframework.cloud.dataflow.server.DataFlowServerUtil;
@@ -91,7 +91,7 @@ public class StreamDefinitionController {
 	/**
 	 * The app registry this controller will use to lookup apps.
 	 */
-	private final AppRegistry appRegistry;
+	private final AppRegistryCommon appRegistry;
 
 	/**
 	 * The service that is responsible for deploying streams.
@@ -111,7 +111,7 @@ public class StreamDefinitionController {
 	 * @param streamService the stream service to use to delegate stream operations such as
 	 * deploy/status.
 	 */
-	public StreamDefinitionController(StreamDefinitionRepository repository, AppRegistry appRegistry,
+	public StreamDefinitionController(StreamDefinitionRepository repository, AppRegistryCommon appRegistry,
 			StreamService streamService) {
 		Assert.notNull(repository, "StreamDefinitionRepository must not be null");
 		Assert.notNull(appRegistry, "AppRegistry must not be null");
@@ -223,7 +223,7 @@ public class StreamDefinitionController {
 						e.getMessage()));
 				continue;
 			}
-			if (appRegistry.find(appName, appType) == null) {
+			if (!appRegistry.appExist(appName, appType)) {
 				errorMessages.add(
 						String.format("Application name '%s' with type '%s' does not exist in the app " + "registry.",
 								appName, appType));

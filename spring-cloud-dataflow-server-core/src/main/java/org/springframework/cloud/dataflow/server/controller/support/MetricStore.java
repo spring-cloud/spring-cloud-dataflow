@@ -41,6 +41,7 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
+
 /**
  * Store implementation returning metrics info from a collector application. Implemented
  * via hystrix command having a fallback to empty response.

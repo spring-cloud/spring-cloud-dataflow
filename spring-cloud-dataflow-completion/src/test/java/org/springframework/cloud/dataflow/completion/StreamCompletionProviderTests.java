@@ -31,7 +31,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.configuration.metadata.BootApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.core.ApplicationType;
-import org.springframework.cloud.dataflow.registry.AppRegistration;
+import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.deployer.resource.registry.InMemoryUriRegistry;
 import org.springframework.context.annotation.Bean;
@@ -231,7 +231,7 @@ public class StreamCompletionProviderTests {
 					String filename = name + "-" + type;
 					File file = new File(ROOT, filename);
 					if (file.exists()) {
-						return new AppRegistration(name, type, file.toURI(), file.toURI(), resourceLoader);
+						return new AppRegistration(name, type, file.toURI(), file.toURI());
 					}
 					else {
 						return null;
@@ -253,7 +253,7 @@ public class StreamCompletionProviderTests {
 					Assert.isTrue(matcher.matches(), fileName + " does not match expected pattern.");
 					String name = matcher.group("name");
 					ApplicationType type = ApplicationType.valueOf(matcher.group("type"));
-					return new AppRegistration(name, type, file.toURI(), resourceLoader);
+					return new AppRegistration(name, type, file.toURI());
 				}
 			};
 		}

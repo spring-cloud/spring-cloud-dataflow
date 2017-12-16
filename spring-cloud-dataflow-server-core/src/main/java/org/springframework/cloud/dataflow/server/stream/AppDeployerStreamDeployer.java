@@ -15,14 +15,7 @@
  */
 package org.springframework.cloud.dataflow.server.stream;
 
-import java.util.AbstractMap;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -98,8 +91,8 @@ public class AppDeployerStreamDeployer implements StreamDeployer {
 						streamDeploymentRequest.getStreamName(), appDeploymentRequest.getResource().getURI()));
 				String id = this.appDeployer.deploy(appDeploymentRequest);
 				this.deploymentIdRepository.save(DeploymentKey
-						.forAppDeploymentRequest(streamDeploymentRequest.getStreamName(),
-								appDeploymentRequest.getDefinition()),
+								.forAppDeploymentRequest(streamDeploymentRequest.getStreamName(),
+										appDeploymentRequest.getDefinition()),
 						id);
 			}
 			catch (Exception e) {

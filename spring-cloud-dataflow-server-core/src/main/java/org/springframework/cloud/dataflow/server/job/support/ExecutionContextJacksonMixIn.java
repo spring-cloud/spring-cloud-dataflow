@@ -19,10 +19,10 @@ package org.springframework.cloud.dataflow.server.job.support;
 import java.util.Map;
 import java.util.Set;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.item.ExecutionContext;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Jackson MixIn for the JSON serialization of the {@link ExecutionContext} class, which

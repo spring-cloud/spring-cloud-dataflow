@@ -24,8 +24,8 @@ import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConf
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.core.dsl.CheckPointedParseException;
-import org.springframework.cloud.dataflow.registry.AppRegistration;
-import org.springframework.cloud.dataflow.registry.AppRegistry;
+import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
+import org.springframework.cloud.dataflow.registry.AppRegistryCommon;
 
 /**
  * Provides completions for the case where the user has started to type an app
@@ -41,7 +41,7 @@ public class UnfinishedConfigurationPropertyNameTaskRecoveryStrategy
 
 	private final ProposalsCollectorSupportUtils collectorSupport;
 
-	UnfinishedConfigurationPropertyNameTaskRecoveryStrategy(AppRegistry appRegistry,
+	UnfinishedConfigurationPropertyNameTaskRecoveryStrategy(AppRegistryCommon appRegistry,
 			ApplicationConfigurationMetadataResolver metadataResolver) {
 		super(CheckPointedParseException.class, "file --foo", "file --foo.");
 		this.collectorSupport = new ProposalsCollectorSupportUtils(appRegistry, metadataResolver);

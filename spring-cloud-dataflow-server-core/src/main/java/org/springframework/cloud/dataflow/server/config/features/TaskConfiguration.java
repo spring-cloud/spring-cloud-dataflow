@@ -17,8 +17,6 @@ package org.springframework.cloud.dataflow.server.config.features;
 
 import javax.sql.DataSource;
 
-import org.h2.tools.Server;
-
 import org.springframework.batch.admin.service.JobService;
 import org.springframework.batch.admin.service.SimpleJobServiceFactoryBean;
 import org.springframework.batch.core.configuration.support.MapJobRegistry;
@@ -36,7 +34,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
-import org.springframework.cloud.dataflow.registry.AppRegistry;
+import org.springframework.cloud.dataflow.registry.AppRegistryCommon;
 import org.springframework.cloud.dataflow.server.job.TaskExplorerFactoryBean;
 import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
 import org.springframework.cloud.dataflow.server.repository.RdbmsTaskDefinitionRepository;
@@ -91,7 +89,7 @@ public class TaskConfiguration {
 	@Bean
 	@ConditionalOnBean(TaskDefinitionRepository.class)
 	public TaskService taskService(TaskDefinitionRepository repository, TaskExplorer taskExplorer,
-			TaskRepository taskExecutionRepository, AppRegistry registry, DelegatingResourceLoader resourceLoader,
+			TaskRepository taskExecutionRepository, AppRegistryCommon registry, DelegatingResourceLoader resourceLoader,
 			TaskLauncher taskLauncher, ApplicationConfigurationMetadataResolver metadataResolver,
 			TaskConfigurationProperties taskConfigurationProperties, DeploymentIdRepository deploymentIdRepository) {
 		return new DefaultTaskService(dataSourceProperties, repository, taskExplorer, taskExecutionRepository, registry,
@@ -131,7 +129,7 @@ public class TaskConfiguration {
 	public static class H2ServerConfiguration {
 
 		@Bean
-		public JobRepositoryFactoryBean jobRepositoryFactoryBeanForServer(DataSource dataSource, Server server,
+		public JobRepositoryFactoryBean jobRepositoryFactoryBeanForServer(DataSource dataSource,
 				DataSourceTransactionManager dataSourceTransactionManager) {
 			JobRepositoryFactoryBean repositoryFactoryBean = new JobRepositoryFactoryBean();
 			repositoryFactoryBean.setDataSource(dataSource);
@@ -146,7 +144,7 @@ public class TaskConfiguration {
 		}
 
 		@Bean
-		public TaskRepositoryInitializer taskRepositoryInitializerForDefaultDB(DataSource dataSource, Server server) {
+		public TaskRepositoryInitializer taskRepositoryInitializerForDefaultDB(DataSource dataSource) {
 			TaskRepositoryInitializer taskRepositoryInitializer = new TaskRepositoryInitializer();
 			taskRepositoryInitializer.setDataSource(dataSource);
 			return taskRepositoryInitializer;
@@ -154,8 +152,7 @@ public class TaskConfiguration {
 
 		@Bean
 		@ConditionalOnMissingBean
-		public TaskDefinitionRepository taskDefinitionRepository(DataSource dataSource, Server server)
-				throws Exception {
+		public TaskDefinitionRepository taskDefinitionRepository(DataSource dataSource) {
 			return new RdbmsTaskDefinitionRepository(dataSource);
 		}
 	}

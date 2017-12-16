@@ -15,6 +15,7 @@
  */
 package org.springframework.cloud.dataflow.server.service.impl;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -32,8 +33,8 @@ import org.springframework.cloud.dataflow.core.DataFlowPropertyKeys;
 import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.StreamPropertyKeys;
-import org.springframework.cloud.dataflow.registry.AppRegistration;
-import org.springframework.cloud.dataflow.registry.AppRegistry;
+import org.springframework.cloud.dataflow.registry.AppRegistryCommon;
+import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
 import org.springframework.cloud.dataflow.server.DataFlowServerUtil;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
@@ -69,13 +70,13 @@ public class AppDeploymentRequestCreator {
 
 	private static Log logger = LogFactory.getLog(AppDeploymentRequestCreator.class);
 
-	private final AppRegistry appRegistry;
+	private final AppRegistryCommon appRegistry;
 
 	private final CommonApplicationProperties commonApplicationProperties;
 
 	private final WhitelistProperties whitelistProperties;
 
-	public AppDeploymentRequestCreator(AppRegistry appRegistry,
+	public AppDeploymentRequestCreator(AppRegistryCommon appRegistry,
 			CommonApplicationProperties commonApplicationProperties,
 			ApplicationConfigurationMetadataResolver metadataResolver) {
 		Assert.notNull(appRegistry, "AppRegistry must not be null");
@@ -96,9 +97,10 @@ public class AppDeploymentRequestCreator {
 		while (iterator.hasNext()) {
 			StreamAppDefinition currentApp = iterator.next();
 			ApplicationType type = DataFlowServerUtil.determineApplicationType(currentApp);
-			AppRegistration registration = this.appRegistry.find(currentApp.getRegisteredAppName(), type);
-			Assert.notNull(registration, String.format("no application '%s' of type '%s' exists in the registry",
-					currentApp.getName(), type));
+			AppRegistration appRegistration = this.appRegistry.find(currentApp.getRegisteredAppName(), type);
+			Assert.notNull(appRegistration,
+					String.format("no application '%s' of type '%s' exists in the registry",
+							currentApp.getName(), type));
 
 			String version = extractAppVersionProperty(currentApp, updateProperties);
 			List<String> commandlineArguments = new ArrayList<>();
@@ -109,9 +111,13 @@ public class AppDeploymentRequestCreator {
 			Map<String, String> deployerDeploymentProperties = DeploymentPropertiesUtils
 					.extractAndQualifyDeployerProperties(updateProperties, currentApp.getName());
 
-			logger.info(String.format("Downloading resource URI [%s]", registration.getUri()));
-			Resource appResource = registration.getResource();
-			Resource metadataResource = registration.getMetadataResource();
+			Resource appResource = appRegistry.getAppResource(appRegistration);
+			try {
+				logger.info(String.format("Downloading resource URI [%s]", appResource.getURI()));
+			}
+			catch (IOException e) {
+			}
+			Resource metadataResource = appRegistry.getAppMetadataResource(appRegistration);
 
 			Map<String, String> expandedAppUpdateTimeProperties = this.whitelistProperties
 					.qualifyProperties(appUpdateTimeProperties, metadataResource);
@@ -155,7 +161,6 @@ public class AppDeploymentRequestCreator {
 		while (iterator.hasNext()) {
 			StreamAppDefinition currentApp = iterator.next();
 			ApplicationType type = DataFlowServerUtil.determineApplicationType(currentApp);
-
 			AppRegistration appRegistration = this.appRegistry.find(currentApp.getRegisteredAppName(), type);
 			Assert.notNull(appRegistration, String.format("no application '%s' of type '%s' exists in the registry",
 					currentApp.getName(), type));
@@ -197,9 +202,9 @@ public class AppDeploymentRequestCreator {
 			isDownStreamAppPartitioned = isPartitionedConsumer(appDeployTimeProperties, upstreamAppSupportsPartition);
 
 			logger.info(String.format("Creating resource with [%s] for application [%s]",
-					appRegistration.getUri(), currentApp.getName()));
-			Resource appResource = appRegistration.getResource();
-			Resource metadataResource = appRegistration.getMetadataResource();
+					appRegistration.getUri().toString(), currentApp.getName()));
+			Resource appResource = this.appRegistry.getAppResource(appRegistration);
+			Resource metadataResource = this.appRegistry.getAppMetadataResource(appRegistration);
 
 			// add properties needed for metrics system
 			appDeployTimeProperties.put(DataFlowPropertyKeys.STREAM_NAME, currentApp.getStreamName());

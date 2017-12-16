@@ -22,7 +22,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolverAutoConfiguration;
-import org.springframework.cloud.dataflow.registry.AppRegistry;
+import org.springframework.cloud.dataflow.registry.AppRegistryCommon;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -40,7 +40,7 @@ import org.springframework.context.annotation.Import;
 public class CompletionConfiguration {
 
 	@Autowired
-	private AppRegistry appRegistry;
+	private AppRegistryCommon appRegistry;
 
 	@Autowired
 	private ApplicationConfigurationMetadataResolver metadataResolver;
