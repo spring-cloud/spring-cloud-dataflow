@@ -17,7 +17,6 @@
 package org.springframework.cloud.dataflow.registry.domain;
 
 import java.net.URI;
-
 import javax.persistence.Entity;
 
 import org.springframework.cloud.dataflow.core.ApplicationType;

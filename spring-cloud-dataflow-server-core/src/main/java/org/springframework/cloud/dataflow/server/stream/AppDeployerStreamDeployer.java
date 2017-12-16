@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.StreamDeployment;
@@ -90,8 +91,8 @@ public class AppDeployerStreamDeployer implements StreamDeployer {
 						streamDeploymentRequest.getStreamName(), appDeploymentRequest.getResource().getURI()));
 				String id = this.appDeployer.deploy(appDeploymentRequest);
 				this.deploymentIdRepository.save(DeploymentKey
-						.forAppDeploymentRequest(streamDeploymentRequest.getStreamName(),
-								appDeploymentRequest.getDefinition()),
+								.forAppDeploymentRequest(streamDeploymentRequest.getStreamName(),
+										appDeploymentRequest.getDefinition()),
 						id);
 			}
 			catch (Exception e) {

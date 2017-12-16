@@ -16,7 +16,6 @@
 package org.springframework.cloud.dataflow.registry.domain;
 
 import java.net.URI;
-
 import javax.persistence.AttributeConverter;
 import javax.persistence.Converter;
 

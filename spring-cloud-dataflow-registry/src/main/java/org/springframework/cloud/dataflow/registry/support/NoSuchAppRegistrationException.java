@@ -31,4 +31,8 @@ public class NoSuchAppRegistrationException extends RuntimeException {
 	public NoSuchAppRegistrationException(String name, ApplicationType type) {
 		super(String.format("The '%s:%s' application could not be found.", type, name));
 	}
+
+	public NoSuchAppRegistrationException(String name, ApplicationType type, String version) {
+		super(String.format("The '%s:%s:%s' application could not be found.", type, name, version));
+	}
 }

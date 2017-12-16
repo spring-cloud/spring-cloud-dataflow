@@ -15,11 +15,15 @@
  */
 package org.springframework.cloud.dataflow.registry.domain;
 
-import javax.persistence.*;
-
-import org.springframework.hateoas.Identifiable;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.MappedSuperclass;
+import javax.persistence.Version;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import org.springframework.hateoas.Identifiable;
 
 /**
  * Base class for entity implementations. Uses a {@link Long} id.

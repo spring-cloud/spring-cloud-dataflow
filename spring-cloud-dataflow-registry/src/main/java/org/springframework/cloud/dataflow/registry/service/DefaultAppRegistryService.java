@@ -21,11 +21,12 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.registry.AbstractAppRegistryCommon;
 import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
 import org.springframework.cloud.dataflow.registry.repository.AppRegistrationRepository;
-import org.springframework.cloud.dataflow.registry.support.NoSuchAppRegistrationException2;
+import org.springframework.cloud.dataflow.registry.support.NoSuchAppRegistrationException;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.data.domain.Page;
@@ -103,7 +104,7 @@ public class DefaultAppRegistryService extends AbstractAppRegistryCommon impleme
 				.findAppRegistrationByNameAndTypeAndVersion(name, type, version);
 
 		if (newDefault == null) {
-			throw new NoSuchAppRegistrationException2(name, type, version);
+			throw new NoSuchAppRegistrationException(name, type, version);
 		}
 
 		newDefault.setDefaultVersion(true);
@@ -147,7 +148,7 @@ public class DefaultAppRegistryService extends AbstractAppRegistryCommon impleme
 
 	/**
 	 * Deletes an {@link AppRegistration}. If the {@link AppRegistration} does not exist, a
-	 * {@link NoSuchAppRegistrationException2} will be thrown.
+	 * {@link NoSuchAppRegistrationException} will be thrown.
 	 *
 	 * @param name Name of the AppRegistration to delete
 	 * @param type Type of the AppRegistration to delete

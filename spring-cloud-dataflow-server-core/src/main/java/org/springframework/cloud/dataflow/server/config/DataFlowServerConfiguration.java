@@ -16,8 +16,6 @@
 
 package org.springframework.cloud.dataflow.server.config;
 
-import static org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType.HAL;
-
 import javax.sql.DataSource;
 
 import org.springframework.boot.autoconfigure.batch.BatchProperties;
@@ -34,6 +32,8 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+
+import static org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType.HAL;
 
 /**
  * Configuration for the Data Flow Server application context. This includes support for

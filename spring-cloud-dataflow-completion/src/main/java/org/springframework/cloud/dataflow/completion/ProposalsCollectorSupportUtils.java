@@ -15,8 +15,6 @@
  */
 package org.springframework.cloud.dataflow.completion;
 
-import static org.springframework.cloud.dataflow.completion.CompletionProposal.expanding;
-
 import java.io.IOException;
 import java.net.URLClassLoader;
 import java.util.List;
@@ -29,9 +27,11 @@ import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.dsl.CheckPointedParseException;
 import org.springframework.cloud.dataflow.core.dsl.Token;
 import org.springframework.cloud.dataflow.core.dsl.TokenKind;
-import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
 import org.springframework.cloud.dataflow.registry.AppRegistryCommon;
+import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
 import org.springframework.core.io.Resource;
+
+import static org.springframework.cloud.dataflow.completion.CompletionProposal.expanding;
 
 /**
  * Support class to be used by various strategies to gather {@link CompletionProposal}s
