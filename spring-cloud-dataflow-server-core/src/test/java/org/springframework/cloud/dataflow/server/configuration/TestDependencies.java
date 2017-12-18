@@ -33,6 +33,7 @@ import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConf
 import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.server.config.MetricsProperties;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
+import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
 import org.springframework.cloud.dataflow.server.controller.AppRegistryController;
 import org.springframework.cloud.dataflow.server.controller.CompletionController;
 import org.springframework.cloud.dataflow.server.controller.MetricsController;
@@ -130,16 +131,23 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	}
 
 	@Bean
+	public FeaturesProperties featuresProperties() {
+		return new FeaturesProperties();
+	}
+
+	@Bean
 	public StreamService streamService(StreamDefinitionRepository streamDefinitionRepository,
 			StreamDeploymentRepository streamDeploymentRepository,
 			AppDeployerStreamDeployer appDeployerStreamDeployer,
 			SkipperStreamDeployer skipperStreamDeployer,
-			AppDeploymentRequestCreator appDeploymentRequestCreator) {
+			AppDeploymentRequestCreator appDeploymentRequestCreator,
+			FeaturesProperties featuresProperties) {
 		return new DefaultStreamService(streamDefinitionRepository,
 				streamDeploymentRepository,
 				appDeployerStreamDeployer,
 				skipperStreamDeployer,
-				appDeploymentRequestCreator);
+				appDeploymentRequestCreator,
+				featuresProperties);
 	}
 
 	@Bean

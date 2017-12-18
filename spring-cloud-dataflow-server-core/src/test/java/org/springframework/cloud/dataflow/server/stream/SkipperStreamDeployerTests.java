@@ -23,8 +23,8 @@ import java.util.Map;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
+import org.springframework.cloud.dataflow.registry.support.ResourceUtils;
 import org.springframework.cloud.dataflow.server.repository.StreamDeploymentRepository;
-import org.springframework.cloud.dataflow.server.support.ResourceUtils;
 import org.springframework.cloud.deployer.resource.docker.DockerResource;
 import org.springframework.cloud.deployer.resource.maven.MavenResource;
 import org.springframework.cloud.skipper.client.SkipperClient;

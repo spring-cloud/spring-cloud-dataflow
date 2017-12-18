@@ -39,9 +39,9 @@ import org.yaml.snakeyaml.Yaml;
 
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.StreamDeployment;
+import org.springframework.cloud.dataflow.registry.support.ResourceUtils;
 import org.springframework.cloud.dataflow.server.controller.StreamDefinitionController;
 import org.springframework.cloud.dataflow.server.repository.StreamDeploymentRepository;
-import org.springframework.cloud.dataflow.server.support.ResourceUtils;
 import org.springframework.cloud.deployer.spi.app.AppInstanceStatus;
 import org.springframework.cloud.deployer.spi.app.AppStatus;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;

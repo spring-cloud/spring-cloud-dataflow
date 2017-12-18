@@ -30,6 +30,7 @@ import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.StreamDeployment;
 import org.springframework.cloud.dataflow.rest.UpdateStreamRequest;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
+import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
 import org.springframework.cloud.dataflow.server.controller.StreamAlreadyDeployedException;
 import org.springframework.cloud.dataflow.server.controller.StreamAlreadyDeployingException;
 import org.springframework.cloud.dataflow.server.repository.NoSuchStreamDefinitionException;
@@ -80,27 +81,37 @@ public class DefaultStreamService implements StreamService {
 
 	private final AppDeploymentRequestCreator appDeploymentRequestCreator;
 
+	private final FeaturesProperties featuresProperties;
+
 	public DefaultStreamService(StreamDefinitionRepository streamDefinitionRepository,
 			StreamDeploymentRepository streamDeploymentRepository,
 			AppDeployerStreamDeployer appDeployerStreamDeployer,
 			SkipperStreamDeployer skipperStreamDeployer,
-			AppDeploymentRequestCreator appDeploymentRequestCreator) {
+			AppDeploymentRequestCreator appDeploymentRequestCreator,
+			FeaturesProperties featuresProperties) {
 		Assert.notNull(streamDefinitionRepository, "StreamDefinitionRepository must not be null");
 		Assert.notNull(streamDeploymentRepository, "StreamDeploymentRepository must not be null");
 		Assert.notNull(appDeployerStreamDeployer, "AppDeployerStreamDeployer must not be null");
 		Assert.notNull(skipperStreamDeployer, "SkipperStreamDeployer must not be null");
 		Assert.notNull(appDeploymentRequestCreator, "AppDeploymentRequestCreator must not be null");
+		Assert.notNull(featuresProperties, "FeauturesProperties must not be null");
 		this.streamDefinitionRepository = streamDefinitionRepository;
 		this.streamDeploymentRepository = streamDeploymentRepository;
 		this.appDeployerStreamDeployer = appDeployerStreamDeployer;
 		this.skipperStreamDeployer = skipperStreamDeployer;
 		this.appDeploymentRequestCreator = appDeploymentRequestCreator;
+		this.featuresProperties = featuresProperties;
 	}
 
 	@Override
 	public void deployStream(String name, Map<String, String> deploymentProperties) {
 		if (deploymentProperties == null) {
 			deploymentProperties = new HashMap<>();
+		}
+		Map<String, String> skipperDeploymentProperties = getSkipperProperties(deploymentProperties);
+		if (skipperDeploymentProperties.containsKey(SKIPPER_ENABLED_PROPERTY_KEY) && !this.featuresProperties.isSkipperEnabled()) {
+			throw new IllegalStateException("Skipper mode is not enabled for the Data Flow Server. Try enabling it with the property"
+													+ " 'spring.cloud.dataflow.features.skipper-enabled'");
 		}
 		deployStreamWithDefinition(createStreamDefinitionForDeploy(name, deploymentProperties), deploymentProperties);
 	}

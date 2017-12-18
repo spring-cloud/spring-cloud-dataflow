@@ -37,6 +37,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
+import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
 import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.StreamService;
@@ -61,6 +62,7 @@ import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_PACK
 
 /**
  * @author Mark Pollack
+ * @author Ilayaperumal Gopinathan
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestDependencies.class)
@@ -80,6 +82,9 @@ public class DefaultStreamServiceIntegrationTests {
 	@MockBean
 	private SkipperClient skipperClient;
 
+	@Autowired
+	private FeaturesProperties featuresProperties;
+
 	@After
 	public void destroyStream() {
 		appRegistry.delete("log", ApplicationType.sink);
@@ -89,7 +94,7 @@ public class DefaultStreamServiceIntegrationTests {
 	}
 
 	@Test
-	public void validateSkipperDeploymentProperites() throws URISyntaxException, IOException {
+	public void validateSkipperDeploymentProperites() throws URISyntaxException {
 		createTickTock();
 
 		Map<String, String> deploymentProperties = createSkipperDeploymentProperties();
@@ -97,10 +102,25 @@ public class DefaultStreamServiceIntegrationTests {
 		deploymentProperties.put("badthing.version.log", "1.2.0.RELEASE");
 
 		try {
+			this.featuresProperties.setSkipperEnabled(true);
 			streamService.deployStream("ticktock", deploymentProperties);
 			fail("Expected an IllegalArgumentException to be thrown.");
 		} catch (IllegalArgumentException e) {
 			assertThat(e.getMessage()).isEqualTo("Only deployment property keys starting with 'app.' or 'deployer.'  or 'version.' allowed, got 'badthing.version.log'");
+		}
+	}
+
+	@Test
+	public void failSkipperDeploymentWhenSkipperModeDisabled() throws URISyntaxException {
+		createTickTock();
+		Map<String, String> deploymentProperties = createSkipperDeploymentProperties();
+		try {
+			this.featuresProperties.setSkipperEnabled(false);
+			streamService.deployStream("ticktock", deploymentProperties);
+			fail("Expected an IllegalStateException to be thrown.");
+		} catch (IllegalStateException e) {
+			assertThat(e.getMessage()).isEqualTo("Skipper mode is not enabled for the Data Flow Server. "
+														+ "Try enabling it with the property 'spring.cloud.dataflow.features.skipper-enabled'");
 		}
 	}
 
@@ -112,6 +132,7 @@ public class DefaultStreamServiceIntegrationTests {
 		// override log to 1.2.0.RELEASE
 		deploymentProperties.put("version.log", "1.2.0.RELEASE");
 
+		this.featuresProperties.setSkipperEnabled(true);
 		streamService.deployStream("ticktock", deploymentProperties);
 
 		ArgumentCaptor<UploadRequest> uploadRequestCaptor = ArgumentCaptor.forClass(UploadRequest.class);

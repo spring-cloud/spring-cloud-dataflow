@@ -37,9 +37,9 @@ import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.registry.service.DefaultAppRegistryService;
 import org.springframework.cloud.dataflow.registry.support.NoSuchAppRegistrationException;
+import org.springframework.cloud.dataflow.registry.support.ResourceUtils;
 import org.springframework.cloud.dataflow.rest.resource.AppRegistrationResource;
 import org.springframework.cloud.dataflow.rest.resource.DetailedAppRegistrationResource;
-import org.springframework.cloud.dataflow.server.support.ResourceUtils;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
@@ -147,7 +147,10 @@ public class VersionedAppRegistryController {
 	@ResponseStatus(HttpStatus.OK)
 	public DetailedAppRegistrationResource info(@PathVariable("type") ApplicationType type,
 			@PathVariable("name") String name) {
-		String defaultVersion = appRegistryService.getDefaultApp(name, type).getVersion();
+		if (this.appRegistryService.getDefaultApp(name, type) == null) {
+			throw new RuntimeException(String.format("No default version exists for the app [%s:%s]", name, type));
+		}
+		String defaultVersion = this.appRegistryService.getDefaultApp(name, type).getVersion();
 		return info(type, name, defaultVersion);
 	}
 

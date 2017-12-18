@@ -16,12 +16,12 @@
 
 package org.springframework.cloud.dataflow.server.config;
 
+import javax.sql.DataSource;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.sql.DataSource;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -31,7 +31,6 @@ import org.springframework.analytics.rest.controller.AggregateCounterController;
 import org.springframework.analytics.rest.controller.CounterController;
 import org.springframework.analytics.rest.controller.FieldValueCounterController;
 import org.springframework.batch.admin.service.JobService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.metrics.repository.MetricRepository;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
@@ -59,7 +58,6 @@ import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.registry.service.DefaultAppRegistryService;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
-import org.springframework.cloud.dataflow.server.config.features.SkipperConfiguration;
 import org.springframework.cloud.dataflow.server.controller.AboutController;
 import org.springframework.cloud.dataflow.server.controller.AppRegistryController;
 import org.springframework.cloud.dataflow.server.controller.CompletionController;
@@ -118,8 +116,6 @@ import org.springframework.scheduling.concurrent.ForkJoinPoolFactoryBean;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.client.RestTemplate;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 /**
  * Configuration for the Data Flow Server Controllers.
  *
@@ -131,7 +127,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 @SuppressWarnings("all")
 @Configuration
-@Import({CompletionConfiguration.class, SkipperConfiguration.class})
+@Import(CompletionConfiguration.class)
 @ConditionalOnBean({EnableDataFlowServerConfiguration.Marker.class, AppDeployer.class, TaskLauncher.class})
 @EnableConfigurationProperties({FeaturesProperties.class, VersionInfoProperties.class, MetricsProperties.class})
 @ConditionalOnProperty(prefix = "dataflow.server", name = "enabled", havingValue = "true", matchIfMissing = true)
@@ -142,9 +138,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class DataFlowControllerAutoConfiguration {
 
 	private static Log logger = LogFactory.getLog(DataFlowControllerAutoConfiguration.class);
-
-	@Autowired(required = false)
-	private SkipperStreamDeployer skipperStreamDeployer;
 
 	@Bean
 	public UriRegistry uriRegistry(DataSource dataSource) {
@@ -233,12 +226,15 @@ public class DataFlowControllerAutoConfiguration {
 	public StreamService streamDeploymentService(StreamDefinitionRepository streamDefinitionRepository,
 			StreamDeploymentRepository streamDeploymentRepository,
 			AppDeployerStreamDeployer appDeployerStreamDeployer,
-			AppDeploymentRequestCreator appDeploymentRequestCreator) {
+			SkipperStreamDeployer skipperStreamDeployer,
+			AppDeploymentRequestCreator appDeploymentRequestCreator,
+			FeaturesProperties featuresProperties) {
 		return new DefaultStreamService(streamDefinitionRepository,
 				streamDeploymentRepository,
 				appDeployerStreamDeployer,
-				this.skipperStreamDeployer,
-				appDeploymentRequestCreator);
+				skipperStreamDeployer,
+				appDeploymentRequestCreator,
+				featuresProperties);
 	}
 
 	@Bean
