@@ -40,6 +40,7 @@ import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.StatusCode;
 import org.springframework.cloud.skipper.domain.UpgradeProperties;
 import org.springframework.cloud.skipper.server.config.SkipperServerConfiguration;
+import org.springframework.cloud.skipper.server.config.SkipperServerPlatformConfiguration;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
@@ -134,7 +135,8 @@ public abstract class AbstractMockMvcTests extends AbstractAssertReleaseDeployed
 	@Configuration
 	@ImportAutoConfiguration(classes = { JacksonAutoConfiguration.class, EmbeddedDataSourceConfiguration.class,
 			HibernateJpaAutoConfiguration.class, RepositoryRestMvcAutoConfiguration.class,
-			ErrorMvcAutoConfiguration.class, StateMachineJpaRepositoriesAutoConfiguration.class })
+			ErrorMvcAutoConfiguration.class, StateMachineJpaRepositoriesAutoConfiguration.class,
+			SkipperServerPlatformConfiguration.class })
 	@Import(SkipperServerConfiguration.class)
 	@EnableWebMvc
 	static class TestConfig {

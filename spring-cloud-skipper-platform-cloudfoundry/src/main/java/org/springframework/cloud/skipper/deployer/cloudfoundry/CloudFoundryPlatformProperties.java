@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.skipper.server.config;
+package org.springframework.cloud.skipper.deployer.cloudfoundry;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -26,6 +26,7 @@ import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryDeploymen
 /**
  * @author Mark Pollack
  * @author Ilayaperumal Gopinathan
+ * @author Donovan Muller
  */
 @ConfigurationProperties("spring.cloud.skipper.server.platform.cloudfoundry")
 public class CloudFoundryPlatformProperties {

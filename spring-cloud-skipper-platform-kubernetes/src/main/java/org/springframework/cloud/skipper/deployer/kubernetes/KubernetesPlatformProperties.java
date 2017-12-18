@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.skipper.server.config;
+package org.springframework.cloud.skipper.deployer.kubernetes;
 
 import java.util.LinkedHashMap;
 import java.util.Map;

@@ -37,7 +37,7 @@ import org.springframework.cloud.skipper.server.EnableSkipperServer;
 		KubernetesAutoConfiguration.class,
 		SessionAutoConfiguration.class,
 		org.springframework.boot.autoconfigure.security.SecurityAutoConfiguration.class,
-		org.springframework.boot.actuate.autoconfigure.ManagementWebSecurityAutoConfiguration.class})
+		org.springframework.boot.actuate.autoconfigure.ManagementWebSecurityAutoConfiguration.class })
 @EnableSkipperServer
 public class LocalTestSkipperServer {
 

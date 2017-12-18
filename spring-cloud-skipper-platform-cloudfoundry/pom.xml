@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>spring-cloud-skipper-platform-cloudfoundry</artifactId>
+    <packaging>jar</packaging>
+    <name>Spring Cloud Skipper :: CloudFoundry Platform</name>
+    <parent>
+        <artifactId>spring-cloud-skipper-parent</artifactId>
+        <groupId>org.springframework.cloud</groupId>
+        <version>1.0.0.BUILD-SNAPSHOT</version>
+    </parent>
+
+    <properties>
+        <spring-cloud-deployer-cloudfoundry.version>1.3.0.M6</spring-cloud-deployer-cloudfoundry.version>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-skipper</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-deployer-cloudfoundry</artifactId>
+            <version>${spring-cloud-deployer-cloudfoundry.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.projectreactor</groupId>
+            <artifactId>reactor-core</artifactId>
+            <version>${reactor.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-configuration-processor</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>META-INF/spring.factories</include>
+                </includes>
+            </resource>
+        </resources>
+    </build>
+</project>

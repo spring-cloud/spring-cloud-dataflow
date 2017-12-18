@@ -1,0 +1,39 @@
+spring:
+  cloud:
+    skipper:
+      server:
+        packageRepositories:
+         -
+           name: test
+           url: "classpath:"
+        platform:
+          cloudfoundry:
+            accounts:
+              dev:
+                connection:
+                  url: https://api.run.pivotal.io
+                  org: myOrg
+                  space: mySpace
+                  domain: cfapps.io
+                  username: skipper@example.com
+                  password: drowssap
+                  skipSslValidation: false
+                deployment:
+                  memory: 512m
+                  disk: 2048m
+                  instances: 4
+                  services: rabbit,mysql
+              qa:
+                connection:
+                  url: https://api.run.pivotal.io
+                  org: myOrgQA
+                  space: mySpaceQA
+                  domain: cfapps.io
+                  username: skipper@example.com
+                  password: drowssap
+                  skipSslValidation: true
+                deployment:
+                  memory: 756m
+                  disk: 724m
+                  instances: 2
+                  services: rabbitQA,mysqlQA

@@ -39,6 +39,7 @@ import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.StatusCode;
 import org.springframework.cloud.skipper.domain.UpgradeRequest;
 import org.springframework.cloud.skipper.server.config.SkipperServerConfiguration;
+import org.springframework.cloud.skipper.server.config.SkipperServerPlatformConfiguration;
 import org.springframework.cloud.skipper.server.deployer.ReleaseManager;
 import org.springframework.cloud.skipper.server.repository.ReleaseRepository;
 import org.springframework.cloud.skipper.server.service.ReleaseService;
@@ -175,7 +176,8 @@ public abstract class AbstractIntegrationTest extends AbstractAssertReleaseDeplo
 
 	@Configuration
 	@ImportAutoConfiguration(classes = { JacksonAutoConfiguration.class, EmbeddedDataSourceConfiguration.class,
-			HibernateJpaAutoConfiguration.class, StateMachineJpaRepositoriesAutoConfiguration.class })
+			HibernateJpaAutoConfiguration.class, StateMachineJpaRepositoriesAutoConfiguration.class,
+			SkipperServerPlatformConfiguration.class })
 	@Import(SkipperServerConfiguration.class)
 	@EnableWebMvc
 	static class TestConfig {

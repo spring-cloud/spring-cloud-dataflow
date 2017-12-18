@@ -50,8 +50,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @author Gunnar Hillert
  */
 @RestController
-@SpringBootApplication(excludeName = {},
-	exclude = {
+@SpringBootApplication(excludeName = {}, exclude = {
 		JmxAutoConfiguration.class,
 		LocalDeployerAutoConfiguration.class,
 		IntegrationAutoConfiguration.class,
@@ -66,7 +65,7 @@ public class OAuth2TestServer {
 		new SpringApplicationBuilder(OAuth2TestServer.class)
 				.properties("oauth2.port:" + oauth2ServerPort).build()
 				.run("--spring.config.location=classpath:" +
-		"org/springframework/cloud/skipper/server/local/security/support/oauth2TestServerConfig.yml");
+						"org/springframework/cloud/skipper/server/local/security/support/oauth2TestServerConfig.yml");
 	}
 
 	@RequestMapping({ "/user", "/me" })

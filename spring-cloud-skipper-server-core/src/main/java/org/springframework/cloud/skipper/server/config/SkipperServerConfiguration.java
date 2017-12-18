@@ -63,7 +63,6 @@ import org.springframework.cloud.skipper.server.repository.DeployerRepository;
 import org.springframework.cloud.skipper.server.repository.PackageMetadataRepository;
 import org.springframework.cloud.skipper.server.repository.ReleaseRepository;
 import org.springframework.cloud.skipper.server.repository.RepositoryRepository;
-import org.springframework.cloud.skipper.server.service.DeployerInitializationService;
 import org.springframework.cloud.skipper.server.service.PackageMetadataService;
 import org.springframework.cloud.skipper.server.service.PackageService;
 import org.springframework.cloud.skipper.server.service.ReleaseReportService;
@@ -92,12 +91,14 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
  * @author Ilayaperumal Gopinathan
  * @author Janne Valkealahti
  * @author Gunnar Hillert
+ * @author Donovan Muller
  */
 @Configuration
-@EnableConfigurationProperties({ SkipperServerProperties.class, CloudFoundryPlatformProperties.class,
-		LocalPlatformProperties.class, KubernetesPlatformProperties.class,
-		MavenConfigurationProperties.class, HealthCheckProperties.class })
-@EntityScan({ "org.springframework.cloud.skipper.domain", "org.springframework.cloud.skipper.server.domain" })
+@EnableConfigurationProperties({ SkipperServerProperties.class,
+		LocalPlatformProperties.class, MavenConfigurationProperties.class,
+		HealthCheckProperties.class })
+@EntityScan({ "org.springframework.cloud.skipper.domain",
+		"org.springframework.cloud.skipper.server.domain" })
 @EnableMapRepositories(basePackages = "org.springframework.cloud.skipper.server.repository")
 @EnableJpaRepositories(basePackages = "org.springframework.cloud.skipper.server.repository")
 @EnableTransactionManagement
@@ -143,17 +144,6 @@ public class SkipperServerConfiguration implements AsyncConfigurer {
 	}
 
 	// Services
-
-	@Bean
-	public DeployerInitializationService deployerInitializationService(DeployerRepository deployerRepository,
-			LocalPlatformProperties localPlatformProperties,
-			CloudFoundryPlatformProperties cloudFoundryPlatformProperties,
-			KubernetesPlatformProperties kubernetesPlatformProperties,
-			SkipperServerProperties skipperServerProperties) {
-		return new DeployerInitializationService(deployerRepository, localPlatformProperties,
-				cloudFoundryPlatformProperties, kubernetesPlatformProperties,
-				skipperServerProperties);
-	}
 
 	@Bean
 	public PackageMetadataService packageMetadataService(RepositoryRepository repositoryRepository) {

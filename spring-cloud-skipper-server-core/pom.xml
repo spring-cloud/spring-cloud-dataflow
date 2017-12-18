@@ -12,8 +12,6 @@
 
     <properties>
         <spring-cloud-deployer-cloudfoundry.version>1.3.0.M6</spring-cloud-deployer-cloudfoundry.version>
-        <spring-cloud-deployer-kubernetes.version>1.3.0.M1</spring-cloud-deployer-kubernetes.version>
-        <reactor.version>3.0.7.RELEASE</reactor.version>
         <zeroturnaround.version>1.11</zeroturnaround.version>
         <spring-restdocs.version>1.2.2.RELEASE</spring-restdocs.version>
     </properties>
@@ -161,6 +159,7 @@
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-skipper</artifactId>
+            <version>1.0.0.BUILD-SNAPSHOT</version>
         </dependency>
 
         <dependency>
@@ -168,17 +167,7 @@
             <artifactId>spring-cloud-deployer-cloudfoundry</artifactId>
             <version>${spring-cloud-deployer-cloudfoundry.version}</version>
         </dependency>
-        <dependency>
-            <groupId>io.projectreactor</groupId>
-            <artifactId>reactor-core</artifactId>
-            <version>${reactor.version}</version>
-        </dependency>
 
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-deployer-kubernetes</artifactId>
-            <version>${spring-cloud-deployer-kubernetes.version}</version>
-        </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>

@@ -1,0 +1,14 @@
+spring:
+  cloud:
+    skipper:
+      server:
+        platform:
+          cloudfoundry:
+            accounts:
+              dev:
+                connection:
+                  space: mySpace
+          kubernetes:
+            accounts:
+              dev:
+                namespace: devNamespace

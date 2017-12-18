@@ -1,0 +1,23 @@
+spring:
+  cloud:
+    skipper:
+      server:
+        packageRepositories:
+         -
+           name: test
+           url: "classpath:"
+        platform:
+          kubernetes:
+            accounts:
+              dev:
+                namespace: devNamespace
+                imagePullPolicy: Always
+                entryPointStyle: exec
+                limits:
+                  cpu: 4
+              qa:
+                namespace: qaNamespace
+                imagePullPolicy: IfNotPresent
+                entryPointStyle: boot
+                limits:
+                  memory: 1024m
