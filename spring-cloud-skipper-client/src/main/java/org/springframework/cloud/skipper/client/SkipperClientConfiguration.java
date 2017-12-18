@@ -37,8 +37,13 @@ import org.springframework.web.client.RestTemplate;
 @EnableHypermediaSupport(type = EnableHypermediaSupport.HypermediaType.HAL)
 public class SkipperClientConfiguration {
 
-	@Bean
-	public RestTemplate restTemplate(RestTemplateBuilder restTemplateBuilder, ObjectMapper objectMapper) {
+	/**
+	 * Default bean name for {@link RestTemplate} created by {@code SkipperClientConfiguration}.
+	 */
+	public final static String SKIPPERCLIENT_RESTTEMPLATE_BEAN_NAME = "skipperClientRestTemplate";
+
+	@Bean(name = SKIPPERCLIENT_RESTTEMPLATE_BEAN_NAME)
+	public RestTemplate skipperClientRestTemplate(RestTemplateBuilder restTemplateBuilder, ObjectMapper objectMapper) {
 		RestTemplate restTemplate = restTemplateBuilder
 				.errorHandler(new SkipperClientResponseErrorHandler(objectMapper)).build();
 		return validateRestTemplate(restTemplate);
