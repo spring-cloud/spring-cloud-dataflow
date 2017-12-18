@@ -42,7 +42,8 @@ public class SpringCloudDeployerApplicationManifestReaderTests {
 		String manifestYaml = StreamUtils.copyToString(
 				TestResourceUtils.qualifiedResource(getClass(), "manifest.yml").getInputStream(),
 				Charset.defaultCharset());
-		List<SpringCloudDeployerApplicationManifest> applicationSpecList = this.applicationManifestReader.read(manifestYaml);
+		List<SpringCloudDeployerApplicationManifest> applicationSpecList = this.applicationManifestReader
+				.read(manifestYaml);
 
 		assertThat(applicationSpecList).hasSize(2);
 		assertThat(applicationSpecList.get(0) instanceof SpringCloudDeployerApplicationManifest).isTrue();
@@ -57,7 +58,8 @@ public class SpringCloudDeployerApplicationManifestReaderTests {
 				TestResourceUtils.qualifiedResource(getClass(), "erroneous-manifest.yml").getInputStream(),
 				Charset.defaultCharset());
 		try {
-			List<SpringCloudDeployerApplicationManifest> applicationSpecList = this.applicationManifestReader.read(manifestYaml);
+			List<SpringCloudDeployerApplicationManifest> applicationSpecList = this.applicationManifestReader
+					.read(manifestYaml);
 			fail("Expected IllegalStateException when non matching appKinds are found");
 		}
 		catch (SkipperException e) {
@@ -89,6 +91,9 @@ public class SpringCloudDeployerApplicationManifestReaderTests {
 		SpringCloudDeployerApplicationSpec spec = applicationSpec.getSpec();
 		assertThat(spec.getResource())
 				.isEqualTo("maven://org.springframework.cloud.stream.app:time-source-rabbit:1.2.0.RELEASE");
+		assertThat(spec.getResourceMetadata())
+				.isEqualTo(
+						"maven://org.springframework.cloud.stream.app:time-source-rabbit:jar:metadata:1.2.0.RELEASE");
 		assertThat(spec.getApplicationProperties()).hasSize(1);
 		assertThat(spec.getApplicationProperties()).containsEntry("log.level", "DEBUG");
 
@@ -107,6 +112,8 @@ public class SpringCloudDeployerApplicationManifestReaderTests {
 		SpringCloudDeployerApplicationSpec spec = applicationSpec.getSpec();
 		assertThat(spec.getResource())
 				.isEqualTo("maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.2.0.RELEASE");
+		assertThat(spec.getResourceMetadata())
+				.isEqualTo("maven://org.springframework.cloud.stream.app:log-sink-rabbit:jar:metadata:1.2.0.RELEASE");
 		assertThat(spec.getApplicationProperties()).hasSize(2);
 		assertThat(spec.getApplicationProperties()).containsEntry("log.level", "INFO");
 		assertThat(spec.getApplicationProperties()).containsEntry("log.expression", "hellobaby");

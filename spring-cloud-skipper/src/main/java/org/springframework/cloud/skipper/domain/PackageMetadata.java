@@ -62,6 +62,11 @@ public class PackageMetadata extends AbstractEntity {
 	private String name;
 
 	/**
+	 * The display name of the package
+	 */
+	private String displayName;
+
+	/**
 	 * The version of the package
 	 */
 	@NotNull
@@ -143,6 +148,14 @@ public class PackageMetadata extends AbstractEntity {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public String getDisplayName() {
+		return displayName;
+	}
+
+	public void setDisplayName(String displayName) {
+		this.displayName = displayName;
 	}
 
 	public String getVersion() {

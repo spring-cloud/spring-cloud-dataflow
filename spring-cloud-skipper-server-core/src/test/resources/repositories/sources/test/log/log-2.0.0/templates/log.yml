@@ -5,6 +5,7 @@ metadata:
   type: sink
 spec:
   resource: maven://org.springframework.cloud.stream.app:log-sink-rabbit
+  resourceMetadata: maven://org.springframework.cloud.stream.app:log-sink-rabbit:jar:metadata:{{version}}
   version: {{version}}
   applicationProperties:
     {{#spec.applicationProperties.entrySet}}

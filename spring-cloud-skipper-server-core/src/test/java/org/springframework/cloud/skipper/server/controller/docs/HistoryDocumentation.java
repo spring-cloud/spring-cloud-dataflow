@@ -60,25 +60,26 @@ public class HistoryDocumentation extends BaseDocumentation {
 										String.format("StatusCode of the release's status (%s)",
 												StringUtils.arrayToCommaDelimitedString(StatusCode.values()))),
 								fieldWithPath("[].info.status.platformStatus")
-										.description("Status from the underlying platform"),
+								.description("Status from the underlying platform"),
 								fieldWithPath("[].info.firstDeployed").description("Date/Time of first deployment"),
 								fieldWithPath("[].info.lastDeployed").description("Date/Time of last deployment"),
 								fieldWithPath("[].info.deleted")
-										.description("Date/Time of when the release was deleted"),
+								.description("Date/Time of when the release was deleted"),
 								fieldWithPath("[].info.description")
-										.description("Human-friendly 'log entry' about this release"),
+								.description("Human-friendly 'log entry' about this release"),
 								fieldWithPath("[].pkg.metadata.apiVersion")
-										.description("The Package Index spec version this file is based on"),
+								.description("The Package Index spec version this file is based on"),
 								fieldWithPath("[].pkg.metadata.origin")
-										.description("Indicates the origin of the repository (free form text)"),
+								.description("Indicates the origin of the repository (free form text)"),
 								fieldWithPath("[].pkg.metadata.repositoryId")
-										.description("The repository ID this Package Index file belongs to"),
+								.description("The repository ID this Package Index file belongs to"),
 								fieldWithPath("[].pkg.metadata.kind")
-										.description("What type of package system is being used"),
+								.description("What type of package system is being used"),
 								fieldWithPath("[].pkg.metadata.name").description("The name of the package"),
+								fieldWithPath("[].pkg.metadata.displayName").description("Display name of the release"),
 								fieldWithPath("[].pkg.metadata.version").description("The version of the package"),
 								fieldWithPath("[].pkg.metadata.packageSourceUrl")
-										.description("Location to source code for this package"),
+								.description("Location to source code for this package"),
 								fieldWithPath("[].pkg.metadata.packageHomeUrl")
 										.description("The home page of the package"),
 								fieldWithPath("[].pkg.metadata.tags")

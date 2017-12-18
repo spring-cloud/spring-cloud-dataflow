@@ -57,6 +57,8 @@ public class PackageMetadataDocumentation extends BaseDocumentation {
 										.description("What type of package system is being used"),
 								fieldWithPath("_embedded.packageMetadata[].name")
 										.description("The name of the package"),
+								fieldWithPath("_embedded.packageMetadata[].displayName")
+										.description("Display name of the release"),
 								fieldWithPath("_embedded.packageMetadata[].version")
 										.description("The version of the package"),
 								fieldWithPath("_embedded.packageMetadata[].packageSourceUrl")
@@ -101,6 +103,7 @@ public class PackageMetadataDocumentation extends BaseDocumentation {
 										.description("The repository ID this Package Index file belongs to"),
 								fieldWithPath("kind").description("What type of package system is being used"),
 								fieldWithPath("name").description("The name of the package"),
+								fieldWithPath("displayName").description("The display name of the package"),
 								fieldWithPath("version").description("The version of the package"),
 								fieldWithPath("packageSourceUrl")
 										.description("Location to source code for this package"),

@@ -5,6 +5,7 @@ metadata:
   type: source
 spec:
   resource: maven://org.springframework.cloud.stream.app:time-source-rabbit
+  resourceMetadata: maven://org.springframework.cloud.stream.app:time-source-rabbit:jar:metadata:{{version}}
   version: {{version}}
   applicationProperties:
     {{#spec.applicationProperties.entrySet}}

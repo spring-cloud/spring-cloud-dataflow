@@ -33,6 +33,8 @@ public class SpringCloudDeployerApplicationSpec {
 
 	private String resource;
 
+	private String resourceMetadata;
+
 	private String version;
 
 	private Map<String, String> applicationProperties;
@@ -48,6 +50,14 @@ public class SpringCloudDeployerApplicationSpec {
 
 	public void setResource(String resource) {
 		this.resource = resource;
+	}
+
+	public String getResourceMetadata() {
+		return resourceMetadata;
+	}
+
+	public void setResourceMetadata(String resourceMetadata) {
+		this.resourceMetadata = resourceMetadata;
 	}
 
 	public String getVersion() {

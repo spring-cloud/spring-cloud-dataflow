@@ -82,6 +82,7 @@ public class InstallDocumentation extends BaseDocumentation {
 								fieldWithPath("pkg.metadata.kind")
 										.description("What type of package system is being used"),
 								fieldWithPath("pkg.metadata.name").description("The name of the package"),
+								fieldWithPath("pkg.metadata.displayName").description("Display name of the release"),
 								fieldWithPath("pkg.metadata.version").description("The version of the package"),
 								fieldWithPath("pkg.metadata.packageSourceUrl")
 										.description("Location to source code for this package"),
@@ -158,6 +159,7 @@ public class InstallDocumentation extends BaseDocumentation {
 								fieldWithPath("pkg.metadata.kind")
 										.description("What type of package system is being used"),
 								fieldWithPath("pkg.metadata.name").description("The name of the package"),
+								fieldWithPath("pkg.metadata.displayName").description("Display name of the release"),
 								fieldWithPath("pkg.metadata.version").description("The version of the package"),
 								fieldWithPath("pkg.metadata.packageSourceUrl")
 										.description("Location to source code for this package"),

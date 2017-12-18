@@ -4,8 +4,9 @@ metadata:
   name: log-docker
   type: sink
 spec:
-   resource: docker:springcloudstream/log-sink-rabbit
-   version: {{version}}
+  resource: docker:springcloudstream/log-sink-rabbit
+  resourceMetadata: maven://org.springframework.cloud.stream.app:log-sink-rabbit:jar:metadata:{{version}}
+  version: {{version}}
   applicationProperties:
     {{#spec.applicationProperties.entrySet}}
     {{key}}: {{value}}

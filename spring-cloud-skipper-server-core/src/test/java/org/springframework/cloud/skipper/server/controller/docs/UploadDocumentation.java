@@ -84,6 +84,7 @@ public class UploadDocumentation extends BaseDocumentation {
 												.description("The repository ID this Package Index file belongs to"),
 										fieldWithPath("kind").description("What type of package system is being used"),
 										fieldWithPath("name").description("The name of the package"),
+										fieldWithPath("displayName").description("The display name of the package"),
 										fieldWithPath("version").description("The version of the package"),
 										fieldWithPath("packageSourceUrl")
 												.description("Location to source code for this package"),
