@@ -64,7 +64,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest(classes = { EmbeddedDataSourceConfiguration.class, JobDependencies.class,
 		PropertyPlaceholderAutoConfiguration.class, BatchProperties.class })
 @EnableConfigurationProperties({ CommonApplicationProperties.class })
-@DirtiesContext
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class JobExecutionControllerTests {
 
 	private final static String BASE_JOB_NAME = "myJob";
@@ -81,7 +81,7 @@ public class JobExecutionControllerTests {
 
 	private final static String JOB_NAME_FOOBAR = BASE_JOB_NAME + "_FOOBAR";
 
-	private static boolean initialized = false;
+	private final static String JOB_NAME_NO_TASK = BASE_JOB_NAME + "_NO_TASK";
 
 	@Autowired
 	private TaskExecutionDao dao;
@@ -101,15 +101,12 @@ public class JobExecutionControllerTests {
 	public void setupMockMVC() {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(wac)
 				.defaultRequest(get("/").accept(MediaType.APPLICATION_JSON)).build();
-		if (!initialized) {
-			createSampleJob(JOB_NAME_ORIG, 1);
-			createSampleJob(JOB_NAME_FOO, 1);
-			createSampleJob(JOB_NAME_FOOBAR, 2);
-			createSampleJob(JOB_NAME_COMPLETED, 1, BatchStatus.COMPLETED);
-			createSampleJob(JOB_NAME_STARTED, 1, BatchStatus.STARTED);
-			createSampleJob(JOB_NAME_STOPPED, 1, BatchStatus.STOPPED);
-			initialized = true;
-		}
+		createSampleJob(JOB_NAME_ORIG, 1);
+		createSampleJob(JOB_NAME_FOO, 1);
+		createSampleJob(JOB_NAME_FOOBAR, 2);
+		createSampleJob(JOB_NAME_COMPLETED, 1, BatchStatus.COMPLETED);
+		createSampleJob(JOB_NAME_STARTED, 1, BatchStatus.STARTED);
+		createSampleJob(JOB_NAME_STOPPED, 1, BatchStatus.STOPPED);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
@@ -181,6 +178,14 @@ public class JobExecutionControllerTests {
 	}
 
 	@Test
+	public void testGetAllExecutionsFailed() throws Exception {
+		createDirtyJob(JOB_NAME_NO_TASK, BatchStatus.STOPPED);
+
+		mockMvc.perform(get("/jobs/executions/").accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isNotFound());
+	}
+
+	@Test
 	public void testGetAllExecutions() throws Exception {
 		mockMvc.perform(get("/jobs/executions/").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
 				.andExpect(jsonPath("$.content[*].taskExecutionId", containsInAnyOrder(6, 5, 4, 3, 3, 2, 1)))
@@ -224,6 +229,17 @@ public class JobExecutionControllerTests {
 			}
 			jobRepository.update(jobExecution);
 		}
+	}
+
+	private void createDirtyJob(String jobName, BatchStatus status) {
+		JobInstance instance = jobRepository.createJobInstance(jobName, new JobParameters());
+		JobExecution jobExecution = jobRepository.createJobExecution(
+				instance, new JobParameters(), null);
+		jobExecution.setStatus(status);
+		if (BatchStatus.STOPPED.equals(status)) {
+			jobExecution.setEndTime(new Date());
+		}
+		jobRepository.update(jobExecution);
 	}
 
 	private void createSampleJob(String jobName, int jobExecutionCount) {
