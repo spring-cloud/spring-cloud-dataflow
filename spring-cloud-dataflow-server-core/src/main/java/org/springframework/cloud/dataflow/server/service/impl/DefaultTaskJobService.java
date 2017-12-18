@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2017 the original author or authors.
+ * Copyright 2016-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ import org.springframework.cloud.dataflow.rest.job.JobInstanceExecutions;
 import org.springframework.cloud.dataflow.rest.job.TaskJobExecution;
 import org.springframework.cloud.dataflow.rest.job.support.JobUtils;
 import org.springframework.cloud.dataflow.server.job.support.JobNotRestartableException;
+import org.springframework.cloud.dataflow.server.repository.NoSuchTaskBatchException;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.TaskJobService;
@@ -237,7 +238,17 @@ public class DefaultTaskJobService implements TaskJobService {
 
 	private TaskJobExecution getTaskJobExecution(JobExecution jobExecution) {
 		Assert.notNull(jobExecution, "jobExecution must not be null");
-		return new TaskJobExecution(taskExplorer.getTaskExecutionIdByJobExecutionId(jobExecution.getId()), jobExecution,
+		Long taskExecutionId = taskExplorer.getTaskExecutionIdByJobExecutionId(
+				jobExecution.getId());
+		if(taskExecutionId == null) {
+			String message = String.format("No corresponding taskExecutionId " +
+					"for jobExecutionId %s.  This indicates that Spring " +
+					"Batch application has been executed that is not a Spring " +
+					"Cloud Task.", jobExecution.getId());
+			logger.warn(message);
+			throw new NoSuchTaskBatchException(message);
+		}
+		return new TaskJobExecution(taskExecutionId, jobExecution,
 				isTaskDefined(jobExecution));
 	}
 
