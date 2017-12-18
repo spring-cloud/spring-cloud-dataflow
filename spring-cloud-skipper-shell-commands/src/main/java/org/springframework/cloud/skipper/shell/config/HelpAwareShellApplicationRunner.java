@@ -22,6 +22,7 @@ import java.io.Reader;
 
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.cloud.skipper.shell.command.support.ShellUtils;
 import org.springframework.core.annotation.Order;
 import org.springframework.shell.jline.DefaultShellApplicationRunner;
 import org.springframework.util.Assert;
@@ -41,7 +42,7 @@ public class HelpAwareShellApplicationRunner implements ApplicationRunner {
 
 	@Override
 	public void run(ApplicationArguments args) throws Exception {
-		if (args.containsOption("help")) {
+		if (ShellUtils.hasHelpOption(args)) {
 			String usageInstructions;
 
 			final Reader reader = new InputStreamReader(getInputStream(HelpAwareShellApplicationRunner.class, "/usage.txt"));
@@ -54,7 +55,6 @@ public class HelpAwareShellApplicationRunner implements ApplicationRunner {
 				throw new IllegalStateException("Cannot read stream", ex);
 			}
 			System.out.println(usageInstructions);
-			System.exit(0);
 		}
 	}
 

@@ -53,6 +53,13 @@ public class InitializeConnectionApplicationRunner implements ApplicationRunner 
 
 	@Override
 	public void run(ApplicationArguments args) throws Exception {
+		// user just wants to print help, do not try
+		// to init connection. HelpAwareShellApplicationRunner simply output
+		// usage and InteractiveModeApplicationRunner forces to run help.
+		if (ShellUtils.hasHelpOption(args)) {
+			return;
+		}
+
 		Target target = new Target(skipperClientProperties.getUri(), skipperClientProperties.getUsername(),
 				skipperClientProperties.getPassword(), skipperClientProperties.isSkipSslValidation());
 

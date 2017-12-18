@@ -90,6 +90,12 @@ public class InteractiveModeApplicationRunner implements ApplicationRunner {
 			}
 		}
 		if (argsToShellCommand.size() > 0) {
+			if (ShellUtils.hasHelpOption(args)) {
+				// going into 'help' mode. HelpAwareShellApplicationRunner already
+				// printed usage, we just force running just help.
+				argsToShellCommand.clear();
+				argsToShellCommand.add("help");
+			}
 			CommandInputProvider inputProvider = new CommandInputProvider(
 					StringUtils.collectionToDelimitedString(argsToShellCommand, " "));
 			shell.run(inputProvider);
