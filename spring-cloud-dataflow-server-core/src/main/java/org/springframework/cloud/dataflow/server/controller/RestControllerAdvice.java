@@ -34,6 +34,7 @@ import org.springframework.cloud.dataflow.server.job.support.JobNotRestartableEx
 import org.springframework.cloud.dataflow.server.repository.DuplicateStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.DuplicateTaskException;
 import org.springframework.cloud.dataflow.server.repository.NoSuchStreamDefinitionException;
+import org.springframework.cloud.dataflow.server.repository.NoSuchTaskBatchException;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskExecutionException;
 import org.springframework.cloud.dataflow.server.support.ApplicationDoesNotExistException;
@@ -140,7 +141,7 @@ public class RestControllerAdvice {
 	@ExceptionHandler({ NoSuchStreamDefinitionException.class, NoSuchAppRegistrationException.class,
 			NoSuchTaskDefinitionException.class, NoSuchTaskExecutionException.class, NoSuchJobExecutionException.class,
 			NoSuchJobInstanceException.class, NoSuchJobException.class, NoSuchStepExecutionException.class,
-			MetricsMvcEndpoint.NoSuchMetricException.class, NoSuchAppException.class,
+			NoSuchTaskBatchException.class, MetricsMvcEndpoint.NoSuchMetricException.class, NoSuchAppException.class,
 			NoSuchAppInstanceException.class, ApplicationDoesNotExistException.class })
 	@ResponseStatus(HttpStatus.NOT_FOUND)
 	@ResponseBody
