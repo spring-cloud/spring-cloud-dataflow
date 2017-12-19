@@ -132,7 +132,8 @@ public class AboutControllerTests {
 			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.version=1.2.3.RELEASE",
 			"spring.cloud.dataflow.version-info.dependency-fetch.enabled=true",
 			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.url=https://repo.spring.io/libs-milestone/org/springframework/cloud/spring-cloud-dataflow-shell/1.3.0.BUILD-SNAPSHOT/spring-cloud-dataflow-shell-1.3.0.BUILD-SNAPSHOT.jsdfasdf",
-			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.checksum-sha1-url={repository}/org/springframework/cloud/spring-cloud-dataflow-shell/{version}/spring-cloud-dataflow-shell-{version}.jar.sha1"
+			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.checksum-sha1-url=",
+			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.checksum-sha256-url="
 	})
 	public static class ChecksumNoDefault {
 
@@ -148,13 +149,12 @@ public class AboutControllerTests {
 		}
 
 		@Test
-		public void testChecksumDisabled() throws Exception {
+		public void testChecksumNoDefaults() throws Exception {
 			ResultActions result = mockMvc.perform(get("/about").accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk());
 			result.andExpect(jsonPath("$.featureInfo.analyticsEnabled", is(false)))
 					.andExpect(jsonPath("$.versionInfo.shell.name", is("Spring Cloud Data Flow Shell")))
 					.andExpect(jsonPath("$.versionInfo.shell.url", is("https://repo.spring.io/libs-milestone/org/springframework/cloud/spring-cloud-dataflow-shell/1.3.0.BUILD-SNAPSHOT/spring-cloud-dataflow-shell-1.3.0.BUILD-SNAPSHOT.jsdfasdf")))
-					.andExpect(jsonPath("$.versionInfo.shell.version", is("1.2.3.RELEASE")))
-					.andExpect(jsonPath("$.versionInfo.shell.checksumSha1", is("eac063b0f09a50b07d9f83842341b3adfadc546f")))
+					.andExpect(jsonPath("$.versionInfo.shell.checksumSha1").doesNotExist())
 					.andExpect(jsonPath("$.versionInfo.shell.checksumSha256").doesNotExist());
 		}
 	}

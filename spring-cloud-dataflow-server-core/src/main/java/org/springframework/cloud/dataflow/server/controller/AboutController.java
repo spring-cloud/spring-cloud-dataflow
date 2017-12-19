@@ -220,7 +220,7 @@ public class AboutController {
 	private String getChecksum(String defaultValue, String url,
 			String version) {
 		String result = defaultValue;
-		if(result == null) {
+		if(result == null && StringUtils.hasText(url)) {
 			CloseableHttpClient httpClient = HttpClients.custom()
 					.setSSLHostnameVerifier(new NoopHostnameVerifier())
 					.build();
