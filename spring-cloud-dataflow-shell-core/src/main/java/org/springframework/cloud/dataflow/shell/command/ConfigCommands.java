@@ -264,6 +264,8 @@ public class ConfigCommands implements CommandMarker, InitializingBean, Applicat
 				(k, v) -> about.getVersionInfo().getCore().getVersion());
 		versions.compute(about.getVersionInfo().getDashboard().getName(),
 				(k, v) -> about.getVersionInfo().getDashboard().getVersion());
+		versions.compute(about.getVersionInfo().getShell().getName(),
+				(k, v) -> about.getVersionInfo().getShell().getVersion());
 
 		SecurityInfo securityInfo = about.getSecurityInfo();
 		modelBuilder.addRow().addValue("Security").addValue(securityInfo);

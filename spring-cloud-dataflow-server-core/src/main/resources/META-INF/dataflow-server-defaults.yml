@@ -20,8 +20,24 @@ spring:
   cloud:
     dataflow:
       version-info:
-        dataflow-dashboard-version: "@spring-cloud-dataflow-ui.version@"
-        dataflow-core-version: "@project.version@"
+        dependency-fetch:
+          enabled: false
+        dependencies:
+          spring-cloud-dataflow-dashboard:
+            name: Spring Cloud Dataflow UI
+            version: "@spring-cloud-dataflow-ui.version@"
+          spring-cloud-dataflow-core:
+            name: Spring Cloud Data Flow Core
+            version: "@project.version@"
+          spring-cloud-dataflow-implementation:
+            name: spring-cloud-dataflow-server-local
+            version: "@project.version@"
+          spring-cloud-dataflow-shell:
+            name: Spring Cloud Data Flow Shell
+            version: "@project.version@"
+            url: "{repository}/org/springframework/cloud/spring-cloud-dataflow-shell/{version}/spring-cloud-dataflow-shell-{version}.jar"
+            checksum-sha1-url: "{repository}/org/springframework/cloud/spring-cloud-dataflow-shell/{version}/spring-cloud-dataflow-shell-{version}.jar.sha1"
+            checksum-sha256-url: "{repository}/org/springframework/cloud/spring-cloud-dataflow-shell/{version}/spring-cloud-dataflow-shell-{version}.jar.sha256"
       security:
         authorization:
           enabled: true

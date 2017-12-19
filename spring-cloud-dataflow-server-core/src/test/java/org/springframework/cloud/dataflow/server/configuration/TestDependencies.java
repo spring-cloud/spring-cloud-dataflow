@@ -26,14 +26,17 @@ import java.util.concurrent.ForkJoinPool;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.cloud.common.security.support.SecurityStateBean;
 import org.springframework.cloud.dataflow.completion.CompletionConfiguration;
 import org.springframework.cloud.dataflow.completion.StreamCompletionProvider;
 import org.springframework.cloud.dataflow.completion.TaskCompletionProvider;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.server.config.MetricsProperties;
+import org.springframework.cloud.dataflow.server.config.VersionInfoProperties;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
+import org.springframework.cloud.dataflow.server.controller.AboutController;
 import org.springframework.cloud.dataflow.server.controller.AppRegistryController;
 import org.springframework.cloud.dataflow.server.controller.CompletionController;
 import org.springframework.cloud.dataflow.server.controller.MetricsController;
@@ -72,6 +75,7 @@ import org.springframework.cloud.deployer.resource.registry.InMemoryUriRegistry;
 import org.springframework.cloud.deployer.resource.registry.UriRegistry;
 import org.springframework.cloud.deployer.resource.support.DelegatingResourceLoader;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
+import org.springframework.cloud.deployer.spi.core.RuntimeEnvironmentInfo;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.cloud.skipper.client.SkipperClient;
 import org.springframework.cloud.task.repository.TaskExplorer;
@@ -90,6 +94,7 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
 
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType.HAL;
 
 /**
@@ -102,7 +107,9 @@ import static org.springframework.hateoas.config.EnableHypermediaSupport.Hyperme
 @EnableHypermediaSupport(type = HAL)
 @Import(CompletionConfiguration.class)
 @EnableWebMvc
-@EnableConfigurationProperties({ CommonApplicationProperties.class, MetricsProperties.class })
+@EnableConfigurationProperties({ CommonApplicationProperties.class,
+		MetricsProperties.class,
+		VersionInfoProperties.class})
 public class TestDependencies extends WebMvcConfigurationSupport {
 
 	@Bean
@@ -337,5 +344,30 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	@ConditionalOnMissingBean
 	public DeploymentIdRepository deploymentIdRepository() {
 		return new InMemoryDeploymentIdRepository();
+	}
+
+
+	@Bean
+	public AboutController aboutController(VersionInfoProperties versionInfoProperties) {
+		AppDeployer appDeployer = mock(AppDeployer.class);
+		TaskLauncher taskLauncher = mock(TaskLauncher.class);
+		RuntimeEnvironmentInfo.Builder builder = new RuntimeEnvironmentInfo.Builder();
+		RuntimeEnvironmentInfo appDeployerEnvInfo = builder.implementationName("testAppDepImplementationName").
+				implementationVersion("testAppDepImplementationVersion").
+				platformType("testAppDepPlatformType").
+				platformApiVersion("testAppDepPlatformApiVersion").
+				platformClientVersion("testAppDepPlatformClientVersion").spiClass(Class.class).
+				platformHostVersion("testAppDepPlatformHostVersion").build();
+		RuntimeEnvironmentInfo taskDeployerEnvInfo = builder.implementationName("testTaskDepImplementationName").
+				implementationVersion("testTaskDepImplementationVersion").
+				platformType("testTaskDepPlatformType").
+				platformApiVersion("testTaskDepPlatformApiVersion").
+				platformClientVersion("testTaskDepPlatformClientVersion").spiClass(Class.class).
+				platformHostVersion("testTaskDepPlatformHostVersion").build();
+		when(appDeployer.environmentInfo()).thenReturn(appDeployerEnvInfo);
+		when(taskLauncher.environmentInfo()).thenReturn(taskDeployerEnvInfo);
+		return new AboutController(appDeployer, taskLauncher,
+				mock(FeaturesProperties.class), versionInfoProperties,
+				mock(SecurityStateBean.class));
 	}
 }
