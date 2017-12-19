@@ -118,10 +118,8 @@ public class ReleaseServiceTests extends AbstractIntegrationTest {
 			fail("Expected to throw SkipperException");
 		}
 		catch (SkipperException e) {
-			assertThat(e.getMessage()).isEqualTo("ReleaseAnalysis report is null");
-			//TODO get the right exception thrown from the state machine
-			//assertThat(e.getMessage()).isEqualTo(String.format("Can not find package '%s', version '%s'",
-			//		packageName, packageVersion));
+			assertThat(e.getMessage()).isEqualTo(String.format("Can not find package '%s', version '%s'",
+					packageName, packageVersion));
 		}
 
 		delete(release.getName());

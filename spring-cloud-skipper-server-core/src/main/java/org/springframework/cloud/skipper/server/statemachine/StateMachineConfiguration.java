@@ -42,6 +42,7 @@ import org.springframework.statemachine.persist.StateMachineRuntimePersister;
 import org.springframework.statemachine.service.DefaultStateMachineService;
 import org.springframework.statemachine.service.StateMachineService;
 import org.springframework.statemachine.state.State;
+import org.springframework.statemachine.transition.TransitionConflightPolicy;
 
 /**
  * Statemachine(s) related configurations.
@@ -91,6 +92,7 @@ public class StateMachineConfiguration {
 							log.info("Entering state {}", state);
 						}
 					})
+					.transitionConflightPolicy(TransitionConflightPolicy.PARENT)
 				.and()
 				.withPersistence()
 					.runtimePersister(stateMachineRuntimePersister);
