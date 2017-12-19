@@ -54,13 +54,8 @@ public class ShellConfiguration {
 	}
 
 	@Bean
-	public ApplicationRunner initialConnectionApplicationRunner() {
-		return new InitialConnectionApplicationRunner();
-	}
-
-	@Bean
-	public ApplicationRunner initialConnectionApplicationRunner(TargetHolder targetHolder,
-																@Qualifier("main") ResultHandler resultHandler,
+	public ApplicationRunner initializeConnectionApplicationRunner(TargetHolder targetHolder,
+																@Qualifier("main") ResultHandler<Exception> resultHandler,
 																SkipperClientProperties skipperClientProperties) {
 		return new InitializeConnectionApplicationRunner(targetHolder, resultHandler, skipperClientProperties);
 	}

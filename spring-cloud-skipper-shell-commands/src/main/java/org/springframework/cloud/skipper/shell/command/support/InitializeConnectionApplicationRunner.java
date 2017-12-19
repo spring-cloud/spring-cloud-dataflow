@@ -23,19 +23,20 @@ import org.springframework.shell.ResultHandler;
 import org.springframework.shell.jline.DefaultShellApplicationRunner;
 
 /**
- * An {@link ApplicationRunner} implementation that initializes the connecction to the
+ * An {@link ApplicationRunner} implementation that initialises the connection to the
  * Data Flow Server. Has higher precedence than {@link InteractiveModeApplicationRunner}.
+ *
  * @author Eric Bottard
+ * @author Janne Valkealahti
  */
 @Order(DefaultShellApplicationRunner.PRECEDENCE - 10)
-@SuppressWarnings("unchecked")
 public class InitializeConnectionApplicationRunner implements ApplicationRunner {
 
 	private TargetHolder targetHolder;
 
 	private SkipperClientProperties skipperClientProperties;
 
-	private ResultHandler resultHandler;
+	private ResultHandler<Exception> resultHandler;
 
 	/**
 	 * Construct a new InitializeConnectionApplicationRunner instance.
@@ -44,7 +45,7 @@ public class InitializeConnectionApplicationRunner implements ApplicationRunner 
 	 * @param skipperClientProperties
 	 */
 	public InitializeConnectionApplicationRunner(TargetHolder targetHolder,
-			ResultHandler resultHandler,
+			ResultHandler<Exception> resultHandler,
 			SkipperClientProperties skipperClientProperties) {
 		this.targetHolder = targetHolder;
 		this.resultHandler = resultHandler;
