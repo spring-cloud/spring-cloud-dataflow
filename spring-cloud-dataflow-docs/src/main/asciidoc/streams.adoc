@@ -502,7 +502,7 @@ They will be overridden if a property with the same key is specified at stream d
 [[spring-cloud-dataflow-deploy-stream]]
 === Deploying a Stream
 
-This section describes how to deploy a Stream when the Spring Cloud Data Flow server is responsible for deploying the stream.  The following section, <<spring-cloud-dataflow-deploy-stream-skipper>>, covers the new deployment and upgrade features when the Spring Cloud Data Flow server delegates to Skipper for stream deployment.  In both cases, the description of how deployment properties applies to both approaches of Stream deployment.
+This section describes how to deploy a Stream when the Spring Cloud Data Flow server is responsible for deploying the stream.  The following section, <<spring-cloud-dataflow-stream-lifecycle-skipper>>, covers the new deployment and upgrade features when the Spring Cloud Data Flow server delegates to Skipper for stream deployment.  In both cases, the description of how deployment properties applies to both approaches of Stream deployment.
 
 Give the `ticktock` stream definition:
 ```
