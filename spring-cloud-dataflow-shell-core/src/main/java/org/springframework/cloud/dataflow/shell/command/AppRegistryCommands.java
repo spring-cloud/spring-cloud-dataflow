@@ -119,8 +119,12 @@ public class AppRegistryCommands implements CommandMarker, ResourceLoaderAware {
 			if (info != null) {
 				List<ConfigurationMetadataProperty> options = info.getOptions();
 				result.add(String.format("Information about %s application '%s':", application.type, application.name));
-				result.add(String.format("Version: '%s':", info.getVersion()));
-				result.add(String.format("Default application version: '%s':", info.getDefaultVersion()));
+				if (info.getVersion() != null) {
+					result.add(String.format("Version: '%s':", info.getVersion()));
+				}
+				if (info.getDefaultVersion()) {
+					result.add(String.format("Default application version: '%s':", info.getDefaultVersion()));
+				}
 				result.add(String.format("Resource URI: %s", info.getUri()));
 				if (info.getShortDescription() != null) {
 					result.add(info.getShortDescription());
