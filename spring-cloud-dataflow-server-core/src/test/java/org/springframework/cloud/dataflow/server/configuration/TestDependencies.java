@@ -25,7 +25,6 @@ import java.util.concurrent.ForkJoinPool;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
@@ -42,6 +41,8 @@ import org.springframework.cloud.dataflow.registry.AppRegistryCommon;
 import org.springframework.cloud.dataflow.registry.repository.AppRegistrationRepository;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.registry.service.DefaultAppRegistryService;
+import org.springframework.cloud.dataflow.server.ConditionalOnSkipperDisabled;
+import org.springframework.cloud.dataflow.server.ConditionalOnSkipperEnabled;
 import org.springframework.cloud.dataflow.server.config.MetricsProperties;
 import org.springframework.cloud.dataflow.server.config.VersionInfoProperties;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
@@ -75,8 +76,9 @@ import org.springframework.cloud.dataflow.server.repository.TaskDefinitionReposi
 import org.springframework.cloud.dataflow.server.service.StreamService;
 import org.springframework.cloud.dataflow.server.service.TaskService;
 import org.springframework.cloud.dataflow.server.service.impl.AppDeploymentRequestCreator;
-import org.springframework.cloud.dataflow.server.service.impl.DefaultStreamService;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskService;
+import org.springframework.cloud.dataflow.server.service.impl.SimpleStreamService;
+import org.springframework.cloud.dataflow.server.service.impl.SkipperStreamService;
 import org.springframework.cloud.dataflow.server.service.impl.TaskConfigurationProperties;
 import org.springframework.cloud.dataflow.server.stream.AppDeployerStreamDeployer;
 import org.springframework.cloud.dataflow.server.stream.SkipperStreamDeployer;
@@ -114,6 +116,7 @@ import static org.springframework.hateoas.config.EnableHypermediaSupport.Hyperme
  * @author Mark Fisher
  * @author Gunnar Hillert
  * @author Ilayaperumal Gopinathan
+ * @author Christian Tzolov
  */
 @Configuration
 @EnableSpringDataWebSupport
@@ -166,52 +169,62 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	}
 
 	@Bean
-	public StreamService streamService(StreamDefinitionRepository streamDefinitionRepository,
-			StreamDeploymentRepository streamDeploymentRepository,
-			AppDeployerStreamDeployer appDeployerStreamDeployer,
+	@ConditionalOnSkipperEnabled
+	public StreamService skipperStreamService(StreamDefinitionRepository streamDefinitionRepository,
+			StreamDeploymentRepository streamDeploymentRepository, AppRegistryService appRegistryService,
 			SkipperStreamDeployer skipperStreamDeployer,
-			AppDeploymentRequestCreator appDeploymentRequestCreator,
-			FeaturesProperties featuresProperties) {
-		return new DefaultStreamService(streamDefinitionRepository,
+			AppDeploymentRequestCreator appDeploymentRequestCreator) {
+		return new SkipperStreamService(streamDefinitionRepository,
 				streamDeploymentRepository,
-				appDeployerStreamDeployer,
+				appRegistryService,
 				skipperStreamDeployer,
-				appDeploymentRequestCreator,
-				featuresProperties);
+				appDeploymentRequestCreator);
 	}
 
 	@Bean
-	AppDeploymentRequestCreator streamDeploymentPropertiesUtils(AppRegistryCommon appRegistry,
-																CommonApplicationProperties commonApplicationProperties,
-																ApplicationConfigurationMetadataResolver applicationConfigurationMetadataResolver) {
-		return new AppDeploymentRequestCreator(appRegistry,
+	@ConditionalOnSkipperDisabled
+	public StreamService simpleStreamService(StreamDefinitionRepository streamDefinitionRepository,
+			StreamDeploymentRepository streamDeploymentRepository, AppDeployerStreamDeployer appDeployerStreamDeployer,
+			AppDeploymentRequestCreator appDeploymentRequestCreator) {
+		return new SimpleStreamService(streamDefinitionRepository,
+				streamDeploymentRepository, appDeployerStreamDeployer, appDeploymentRequestCreator);
+	}
+
+	@Bean
+	AppDeploymentRequestCreator streamDeploymentPropertiesUtils(AppRegistryCommon appRegistryCommon,
+			CommonApplicationProperties commonApplicationProperties,
+			ApplicationConfigurationMetadataResolver applicationConfigurationMetadataResolver) {
+		return new AppDeploymentRequestCreator(appRegistryCommon,
 				commonApplicationProperties,
 				applicationConfigurationMetadataResolver);
 	}
 
 	@Bean
+	@ConditionalOnSkipperDisabled
 	public AppDeployerStreamDeployer appDeployerStreamDeployer(AppDeployer appDeployer,
-			DeploymentIdRepository deploymentIdRepository,
-			StreamDefinitionRepository streamDefinitionRepository, StreamDeploymentRepository streamDeploymentRepository) {
+			DeploymentIdRepository deploymentIdRepository, StreamDefinitionRepository streamDefinitionRepository,
+			StreamDeploymentRepository streamDeploymentRepository) {
 		return new AppDeployerStreamDeployer(appDeployer, deploymentIdRepository, streamDefinitionRepository,
 				streamDeploymentRepository);
 	}
 
 	@Bean
+	@ConditionalOnSkipperEnabled
 	public SkipperStreamDeployer skipperStreamDeployer(SkipperClient skipperClient,
 			StreamDeploymentRepository streamDeploymentRepository) {
 		return new SkipperStreamDeployer(skipperClient, streamDeploymentRepository);
 	}
 
 	@Bean
+//	@ConditionalOnSkipperEnabled
 	public SkipperClient skipperClient() {
 		return mock(SkipperClient.class);
 	}
 
 	@Bean
 	public StreamDefinitionController streamDefinitionController(StreamDefinitionRepository repository,
-			AppRegistryCommon appRegistry, StreamService streamService) {
-		return new StreamDefinitionController(repository, appRegistry, streamService);
+			StreamService streamService, AppRegistryCommon appRegistryCommon) {
+		return new StreamDefinitionController(repository, appRegistryCommon, streamService);
 	}
 
 	@Bean
@@ -231,31 +244,27 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	}
 
 	@Bean
-	@ConditionalOnExpression("#{'${" + FeaturesProperties.FEATURES_PREFIX + "." + FeaturesProperties.SKIPPER_ENABLED
-			+ ":false}'.equalsIgnoreCase('false')}")
+	@ConditionalOnSkipperDisabled
 	public AppRegistryController appRegistryController(AppRegistry registry,
 			ApplicationConfigurationMetadataResolver metadataResolver) {
 		return new AppRegistryController(registry, metadataResolver, new ForkJoinPool(2));
 	}
 
 	@Bean
-	@ConditionalOnExpression("#{'${" + FeaturesProperties.FEATURES_PREFIX + "." + FeaturesProperties.SKIPPER_ENABLED
-			+ ":false}'.equalsIgnoreCase('false')}")
+	@ConditionalOnSkipperDisabled
 	public AppRegistry appRegistry(UriRegistry uriRegistry, DelegatingResourceLoader resourceLoader) {
 		return new AppRegistry(uriRegistry, resourceLoader);
 	}
 
 	@Bean
-	@ConditionalOnExpression("#{'${" + FeaturesProperties.FEATURES_PREFIX + "." + FeaturesProperties.SKIPPER_ENABLED
-			+ ":false}'.equalsIgnoreCase('true')}")
+	@ConditionalOnSkipperEnabled
 	public AppRegistryService appRegistryService(AppRegistrationRepository appRegistrationRepository,
 			MavenProperties mavenProperties) {
 		return new DefaultAppRegistryService(appRegistrationRepository, resourceLoader(mavenProperties), mavenProperties);
 	}
 
 	@Bean
-	@ConditionalOnExpression("#{'${" + FeaturesProperties.FEATURES_PREFIX + "." + FeaturesProperties.SKIPPER_ENABLED
-			+ ":false}'.equalsIgnoreCase('true')}")
+	@ConditionalOnSkipperEnabled
 	public VersionedAppRegistryController versionedAppRegistryController(AppRegistryService appRegistry,
 			ApplicationConfigurationMetadataResolver metadataResolver, MavenProperties mavenProperties) {
 		return new VersionedAppRegistryController(appRegistry, metadataResolver, new ForkJoinPool(2), mavenProperties);
@@ -339,13 +348,27 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	}
 
 	@Bean
+	@ConditionalOnSkipperDisabled
 	public UriRegistry uriRegistry() {
 		return new InMemoryUriRegistry();
 	}
 
 	@Bean
-	public DataFlowAppRegistryPopulator dataflowUriRegistryPopulator(AppRegistryCommon appRegistry) {
-		return new DataFlowAppRegistryPopulator(appRegistry, "classpath:META-INF/test-apps.properties");
+	@ConditionalOnSkipperDisabled
+	public AppRegistry appRegistry() {
+		return new AppRegistry(uriRegistry(), resourceLoader());
+	}
+
+	@Bean
+	@ConditionalOnSkipperEnabled
+	public AppRegistryService appRegistryService(AppRegistrationRepository appRegistrationRepository,
+			DelegatingResourceLoader resourceLoader) {
+		return new DefaultAppRegistryService(appRegistrationRepository, resourceLoader);
+	}
+
+	@Bean
+	public DataFlowAppRegistryPopulator dataflowUriRegistryPopulator(AppRegistryCommon appRegistryCommon) {
+		return new DataFlowAppRegistryPopulator(appRegistryCommon, "classpath:META-INF/test-apps.properties");
 	}
 
 	@Bean

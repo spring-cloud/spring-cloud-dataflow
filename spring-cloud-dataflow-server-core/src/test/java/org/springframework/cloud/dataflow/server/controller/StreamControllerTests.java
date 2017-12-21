@@ -42,7 +42,7 @@ import org.springframework.cloud.dataflow.server.repository.DeploymentIdReposito
 import org.springframework.cloud.dataflow.server.repository.DeploymentKey;
 import org.springframework.cloud.dataflow.server.repository.InMemoryStreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
-import org.springframework.cloud.dataflow.server.service.impl.DefaultStreamService;
+import org.springframework.cloud.dataflow.server.service.StreamService;
 import org.springframework.cloud.deployer.resource.maven.MavenProperties;
 import org.springframework.cloud.deployer.resource.maven.MavenResource;
 import org.springframework.cloud.deployer.resource.maven.MavenResourceLoader;
@@ -124,7 +124,7 @@ public class StreamControllerTests {
 	private CommonApplicationProperties appsProperties;
 
 	@Autowired
-	private DefaultStreamService defaultStreamService;
+	private StreamService defaultStreamService;
 
 	@Autowired
 	private SkipperClient skipperClient;
@@ -365,7 +365,7 @@ public class StreamControllerTests {
 				.param("definition", "foo --.spring.cloud.stream.metrics.properties=spring* | bar")
 				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isBadRequest())
 				.andExpect(jsonPath("$[0].logref", is("InvalidStreamDefinitionException"))).andExpect(
-						jsonPath("$[0].message", startsWith("111E:(pos 6): Unexpected token.  Expected '.' but was")));
+				jsonPath("$[0].message", startsWith("111E:(pos 6): Unexpected token.  Expected '.' but was")));
 	}
 
 	@Test
