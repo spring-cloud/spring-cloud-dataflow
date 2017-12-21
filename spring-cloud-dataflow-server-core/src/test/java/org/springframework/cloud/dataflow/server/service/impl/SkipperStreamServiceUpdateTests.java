@@ -27,9 +27,11 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
+import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
 import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.support.TestResourceUtils;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.StreamUtils;
 
@@ -40,10 +42,11 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestDependencies.class)
-public class DefaultStreamServiceUpdateTests {
+@TestPropertySource(properties = { FeaturesProperties.FEATURES_PREFIX + "." + FeaturesProperties.SKIPPER_ENABLED + "=true" })
+public class SkipperStreamServiceUpdateTests {
 
 	@Autowired
-	private DefaultStreamService streamService;
+	private SkipperStreamService streamService;
 
 	@Autowired
 	private StreamDefinitionRepository streamDefinitionRepository;

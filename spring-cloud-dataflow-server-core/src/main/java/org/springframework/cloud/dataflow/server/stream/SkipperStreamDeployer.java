@@ -54,6 +54,7 @@ import org.springframework.cloud.skipper.domain.InstallRequest;
 import org.springframework.cloud.skipper.domain.Package;
 import org.springframework.cloud.skipper.domain.PackageIdentifier;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
+import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.Template;
 import org.springframework.cloud.skipper.domain.UpgradeProperties;
 import org.springframework.cloud.skipper.domain.UpgradeRequest;
@@ -147,8 +148,7 @@ public class SkipperStreamDeployer implements StreamDeployer {
 		return states;
 	}
 
-	@Override
-	public void deployStream(StreamDeploymentRequest streamDeploymentRequest) {
+	public Release deployStream(StreamDeploymentRequest streamDeploymentRequest) {
 		Map<String, String> streamDeployerProperties = streamDeploymentRequest.getStreamDeployerProperties();
 		String packageVersion = streamDeployerProperties.get(SKIPPER_PACKAGE_VERSION);
 		Assert.isTrue(StringUtils.hasText(packageVersion), "Package Version must be set");
@@ -189,12 +189,12 @@ public class SkipperStreamDeployer implements StreamDeployer {
 		installRequest.setInstallProperties(installProperties);
 		StreamDeployment streamDeployment = new StreamDeployment(streamName, StreamDeployers.skipper.name(), streamName,
 				streamName, repoName);
-		skipperClient.install(installRequest);
+		Release release = skipperClient.install(installRequest);
 		this.streamDeploymentRepository.save(streamDeployment);
 		// TODO store releasename in deploymentIdRepository...
 		// this.deploymentIdRepository.save(DeploymentKey.forStreamAppDefinition(streamAppDefinition),
 		// id);
-
+		return release;
 	}
 
 	private File createPackageForStream(String packageName, String packageVersion,
@@ -309,7 +309,7 @@ public class SkipperStreamDeployer implements StreamDeployer {
 	 * @param packageIdentifier the name of the package in skipper
 	 * @param configYml the YML formatted configuration values to use when upgrading
 	 */
-	public void upgradeStream(String streamName, PackageIdentifier packageIdentifier, String configYml) {
+	public Release upgradeStream(String streamName, PackageIdentifier packageIdentifier, String configYml) {
 		UpgradeRequest upgradeRequest = new UpgradeRequest();
 		upgradeRequest.setPackageIdentifier(packageIdentifier);
 		UpgradeProperties upgradeProperties = new UpgradeProperties();
@@ -318,7 +318,7 @@ public class SkipperStreamDeployer implements StreamDeployer {
 		upgradeProperties.setConfigValues(configValues);
 		upgradeProperties.setReleaseName(streamName);
 		upgradeRequest.setUpgradeProperties(upgradeProperties);
-		this.skipperClient.upgrade(upgradeRequest);
+		return this.skipperClient.upgrade(upgradeRequest);
 	}
 
 	/**

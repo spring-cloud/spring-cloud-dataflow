@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -36,14 +37,19 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
-import org.springframework.cloud.dataflow.registry.AppRegistry;
+import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
+import org.springframework.cloud.dataflow.rest.UpdateStreamRequest;
 import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
 import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.StreamService;
 import org.springframework.cloud.dataflow.server.support.TestResourceUtils;
 import org.springframework.cloud.skipper.client.SkipperClient;
+import org.springframework.cloud.skipper.domain.InstallRequest;
 import org.springframework.cloud.skipper.domain.Package;
+import org.springframework.cloud.skipper.domain.PackageIdentifier;
+import org.springframework.cloud.skipper.domain.Release;
+import org.springframework.cloud.skipper.domain.UpgradeRequest;
 import org.springframework.cloud.skipper.domain.UploadRequest;
 import org.springframework.cloud.skipper.io.DefaultPackageReader;
 import org.springframework.cloud.skipper.io.PackageReader;
@@ -55,7 +61,9 @@ import org.springframework.util.StreamUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
+import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_ENABLED_PROPERTY_KEY;
 import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_PACKAGE_NAME;
 import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_PACKAGE_VERSION;
@@ -63,12 +71,14 @@ import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_PACK
 /**
  * @author Mark Pollack
  * @author Ilayaperumal Gopinathan
+ * @author Christian Tzolov
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestDependencies.class)
-@TestPropertySource(properties = { "spring.main.banner-mode=off" })
+@TestPropertySource(properties = { "spring.main.banner-mode=off",
+		FeaturesProperties.FEATURES_PREFIX + "." + FeaturesProperties.SKIPPER_ENABLED + "=true" })
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
-public class DefaultStreamServiceIntegrationTests {
+public class SkipperStreamServiceIntegrationTests {
 
 	@Autowired
 	private StreamService streamService;
@@ -77,7 +87,7 @@ public class DefaultStreamServiceIntegrationTests {
 	private StreamDefinitionRepository streamDefinitionRepository;
 
 	@Autowired
-	private AppRegistry appRegistry;
+	private AppRegistryService appRegistryService;
 
 	@MockBean
 	private SkipperClient skipperClient;
@@ -85,54 +95,43 @@ public class DefaultStreamServiceIntegrationTests {
 	@Autowired
 	private FeaturesProperties featuresProperties;
 
+	@Before
+	public void before() throws URISyntaxException {
+		createTickTock();
+	}
+
 	@After
 	public void destroyStream() {
-		appRegistry.delete("log", ApplicationType.sink);
-		appRegistry.delete("time", ApplicationType.source);
+		appRegistryService.delete("log", ApplicationType.sink, "1.2.0.RELEASE");
+		appRegistryService.delete("time", ApplicationType.source, "1.2.0.RELEASE");
 		streamService.undeployStream("ticktock");
 		streamDefinitionRepository.deleteAll();
 	}
 
 	@Test
-	public void validateSkipperDeploymentProperites() throws URISyntaxException {
-		createTickTock();
+	public void validateSkipperDeploymentProperties() {
 
 		Map<String, String> deploymentProperties = createSkipperDeploymentProperties();
-		// override log to 1.2.0.RELEASE
+		// override log version to 1.2.0.RELEASE
 		deploymentProperties.put("badthing.version.log", "1.2.0.RELEASE");
 
 		try {
-			this.featuresProperties.setSkipperEnabled(true);
 			streamService.deployStream("ticktock", deploymentProperties);
 			fail("Expected an IllegalArgumentException to be thrown.");
-		} catch (IllegalArgumentException e) {
-			assertThat(e.getMessage()).isEqualTo("Only deployment property keys starting with 'app.' or 'deployer.'  or 'version.' allowed, got 'badthing.version.log'");
+		}
+		catch (IllegalArgumentException e) {
+			assertThat(e.getMessage()).isEqualTo("Only deployment property keys starting with 'app.' or 'deployer.'" +
+					"  or 'version.' allowed, got 'badthing.version.log'");
 		}
 	}
 
 	@Test
-	public void failSkipperDeploymentWhenSkipperModeDisabled() throws URISyntaxException {
-		createTickTock();
-		Map<String, String> deploymentProperties = createSkipperDeploymentProperties();
-		try {
-			this.featuresProperties.setSkipperEnabled(false);
-			streamService.deployStream("ticktock", deploymentProperties);
-			fail("Expected an IllegalStateException to be thrown.");
-		} catch (IllegalStateException e) {
-			assertThat(e.getMessage()).isEqualTo("Skipper mode is not enabled for the Data Flow Server. "
-														+ "Try enabling it with the property 'spring.cloud.dataflow.features.skipper-enabled'");
-		}
-	}
-
-	@Test
-	public void testInstallVersionOverride() throws URISyntaxException, IOException {
-		createTickTock();
+	public void testInstallVersionOverride() throws IOException {
 
 		Map<String, String> deploymentProperties = createSkipperDeploymentProperties();
 		// override log to 1.2.0.RELEASE
 		deploymentProperties.put("version.log", "1.2.0.RELEASE");
 
-		this.featuresProperties.setSkipperEnabled(true);
 		streamService.deployStream("ticktock", deploymentProperties);
 
 		ArgumentCaptor<UploadRequest> uploadRequestCaptor = ArgumentCaptor.forClass(UploadRequest.class);
@@ -140,18 +139,80 @@ public class DefaultStreamServiceIntegrationTests {
 
 		Package pkg = loadPackageFromBytes(uploadRequestCaptor);
 
-		// ExpectedYaml will have verison: 1.2.0.RELEASE and not 1.1.1.RELEASE
+		// ExpectedYaml will have version: 1.2.0.RELEASE and not 1.1.1.RELEASE
 		String expectedYaml = StreamUtils.copyToString(
 				TestResourceUtils.qualifiedResource(getClass(), "install.yml").getInputStream(),
 				Charset.defaultCharset());
 		Package logPackage = null;
-		for (Package subpkg: pkg.getDependencies()) {
+		for (Package subpkg : pkg.getDependencies()) {
 			if (subpkg.getMetadata().getName().equals("log")) {
 				logPackage = subpkg;
 			}
 		}
 		assertThat(logPackage).isNotNull();
 		assertThat(logPackage.getConfigValues().getRaw()).isEqualTo(expectedYaml);
+	}
+
+	@Test
+	public void testUpdateStreamDslOnDeploy() throws IOException {
+
+		// Create stream
+		StreamDefinition streamDefinition = new StreamDefinition("ticktock", "time --fixed-delay=100 | log --level=DEBUG");
+		this.streamDefinitionRepository.delete(streamDefinition.getName());
+		this.streamDefinitionRepository.save(streamDefinition);
+
+		StreamDefinition streamDefinitionBeforeDeploy = this.streamDefinitionRepository.findOne("ticktock");
+		assertThat(streamDefinitionBeforeDeploy.getDslText())
+				.isEqualTo("time --fixed-delay=100 | log --level=DEBUG");
+
+		String expectedReleaseManifest = StreamUtils.copyToString(
+				TestResourceUtils.qualifiedResource(getClass(), "deployManifest.yml").getInputStream(),
+				Charset.defaultCharset());
+		Release release = new Release();
+		release.setManifest(expectedReleaseManifest);
+		when(skipperClient.install(isA(InstallRequest.class))).thenReturn(release);
+
+		Map<String, String> deploymentProperties = createSkipperDeploymentProperties();
+		deploymentProperties.put("version.log", "1.2.0.RELEASE");
+
+		streamService.deployStream("ticktock", deploymentProperties);
+
+
+		StreamDefinition streamDefinitionAfterDeploy = this.streamDefinitionRepository.findOne("ticktock");
+		assertThat(streamDefinitionAfterDeploy.getDslText())
+				.isEqualTo("time --trigger.fixed-delay=100 | log --log.level=DEBUG");
+	}
+
+	@Test
+	public void testUpdateStreamDslOnUpgrade() throws IOException {
+
+		// Create stream
+		StreamDefinition streamDefinition = new StreamDefinition("ticktock", "time --fixed-delay=100 | log --level=DEBUG");
+		this.streamDefinitionRepository.delete(streamDefinition.getName());
+		this.streamDefinitionRepository.save(streamDefinition);
+
+		streamService.deployStream("ticktock", createSkipperDeploymentProperties());
+
+		StreamDefinition streamDefinitionBeforeDeploy = this.streamDefinitionRepository.findOne("ticktock");
+		assertThat(streamDefinitionBeforeDeploy.getDslText())
+				.isEqualTo("time --fixed-delay=100 | log --level=DEBUG");
+
+		String expectedReleaseManifest = StreamUtils.copyToString(
+				TestResourceUtils.qualifiedResource(getClass(), "upgradeManifest.yml").getInputStream(),
+				Charset.defaultCharset());
+		Release release = new Release();
+		release.setManifest(expectedReleaseManifest);
+		when(skipperClient.upgrade(isA(UpgradeRequest.class))).thenReturn(release);
+
+		Map<String, String> deploymentProperties = createSkipperDeploymentProperties();
+		deploymentProperties.put("version.log", "1.2.0.RELEASE");
+
+		streamService.updateStream("ticktock",
+				new UpdateStreamRequest("ticktock", new PackageIdentifier(), deploymentProperties));
+
+		StreamDefinition streamDefinitionAfterDeploy = this.streamDefinitionRepository.findOne("ticktock");
+		assertThat(streamDefinitionAfterDeploy.getDslText())
+				.isEqualTo("time --trigger.fixed-delay=200 | log --log.level=INFO");
 	}
 
 	private Map<String, String> createSkipperDeploymentProperties() {
@@ -163,10 +224,10 @@ public class DefaultStreamServiceIntegrationTests {
 	}
 
 	private void createTickTock() throws URISyntaxException {
-		String uri = "maven://org.springframework.cloud.stream.app:time-source-rabbit:1.2.0.RELEASE";
-		appRegistry.save("time", ApplicationType.source, new URI(uri),null);
-		uri = "maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.1.1.RELEASE";
-		appRegistry.save("log", ApplicationType.sink, new URI(uri),null);
+		String timeUri = "maven://org.springframework.cloud.stream.app:time-source-rabbit:1.2.0.RELEASE";
+		appRegistryService.save("time", ApplicationType.source, "1.2.0.RELEASE", new URI(timeUri), null);
+		String logUri = "maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.1.1.RELEASE";
+		appRegistryService.save("log", ApplicationType.sink, "1.2.0.RELEASE", new URI(logUri), null);
 
 		// Create stream
 		StreamDefinition streamDefinition = new StreamDefinition("ticktock", "time | log");
@@ -176,7 +237,7 @@ public class DefaultStreamServiceIntegrationTests {
 	private Package loadPackageFromBytes(ArgumentCaptor<UploadRequest> uploadRequestCaptor) throws IOException {
 		PackageReader packageReader = new DefaultPackageReader();
 		String packageName = uploadRequestCaptor.getValue().getName();
-		String packageVersion= uploadRequestCaptor.getValue().getVersion();
+		String packageVersion = uploadRequestCaptor.getValue().getVersion();
 		byte[] packageBytes = uploadRequestCaptor.getValue().getPackageFileAsBytes();
 		Path targetPath = TempFileUtils.createTempDirectory("service" + packageName);
 		File targetFile = new File(targetPath.toFile(), packageName + "-" + packageVersion + ".zip");
@@ -185,6 +246,5 @@ public class DefaultStreamServiceIntegrationTests {
 		return packageReader
 				.read(new File(targetPath.toFile(), packageName + "-" + packageVersion));
 	}
-
 
 }

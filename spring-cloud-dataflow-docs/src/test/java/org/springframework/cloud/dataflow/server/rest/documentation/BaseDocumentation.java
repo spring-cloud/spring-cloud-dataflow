@@ -94,7 +94,7 @@ public abstract class BaseDocumentation {
 		documentation.dontDocument(
 			() -> this.mockMvc.perform(
 				post(String.format("/apps/%s/%s", type, name))
-					.param("uri", String.format("maven://%s:%s-%s%s:1.1.0.RELEASE", group, name, type, binder)))
+					.param("uri", String.format("maven://%s:%s-%s%s:1.2.0.RELEASE", group, name, type, binder)))
 				.andExpect(status().isCreated())
 		);
 	}

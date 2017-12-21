@@ -83,7 +83,6 @@ public class AppDeployerStreamDeployer implements StreamDeployer {
 		this.streamDeploymentRepository = streamDeploymentRepository;
 	}
 
-	@Override
 	public void deployStream(StreamDeploymentRequest streamDeploymentRequest) {
 		for (AppDeploymentRequest appDeploymentRequest : streamDeploymentRequest.getAppDeploymentRequests()) {
 			try {

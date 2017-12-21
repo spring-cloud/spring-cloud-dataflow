@@ -16,10 +16,10 @@
 
 package org.springframework.cloud.dataflow.server.config;
 
-import javax.sql.DataSource;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import javax.sql.DataSource;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.logging.Log;
@@ -33,7 +33,6 @@ import org.springframework.analytics.rest.controller.FieldValueCounterController
 import org.springframework.batch.admin.service.JobService;
 import org.springframework.boot.actuate.metrics.repository.MetricRepository;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
@@ -56,6 +55,8 @@ import org.springframework.cloud.dataflow.registry.RdbmsUriRegistry;
 import org.springframework.cloud.dataflow.registry.repository.AppRegistrationRepository;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.registry.service.DefaultAppRegistryService;
+import org.springframework.cloud.dataflow.server.ConditionalOnSkipperDisabled;
+import org.springframework.cloud.dataflow.server.ConditionalOnSkipperEnabled;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
 import org.springframework.cloud.dataflow.server.controller.AboutController;
@@ -89,7 +90,8 @@ import org.springframework.cloud.dataflow.server.service.StreamService;
 import org.springframework.cloud.dataflow.server.service.TaskJobService;
 import org.springframework.cloud.dataflow.server.service.TaskService;
 import org.springframework.cloud.dataflow.server.service.impl.AppDeploymentRequestCreator;
-import org.springframework.cloud.dataflow.server.service.impl.DefaultStreamService;
+import org.springframework.cloud.dataflow.server.service.impl.AppDeployerStreamService;
+import org.springframework.cloud.dataflow.server.service.impl.SkipperStreamService;
 import org.springframework.cloud.dataflow.server.stream.AppDeployerStreamDeployer;
 import org.springframework.cloud.dataflow.server.stream.SkipperStreamDeployer;
 import org.springframework.cloud.deployer.resource.maven.MavenProperties;
@@ -124,6 +126,7 @@ import org.springframework.web.client.RestTemplate;
  * @author Ilayaperumal Gopinathan
  * @author Andy Clement
  * @author Glenn Renfro
+ * @author Christian Tzolov
  */
 @SuppressWarnings("all")
 @Configuration
@@ -145,24 +148,21 @@ public class DataFlowControllerAutoConfiguration {
 	}
 
 	@Bean
-	@ConditionalOnExpression("#{'${" + FeaturesProperties.FEATURES_PREFIX + "." + FeaturesProperties.SKIPPER_ENABLED
-			+ ":false}'.equalsIgnoreCase('false')}")
+	@ConditionalOnSkipperDisabled
 	public AppRegistry appRegistry(UriRegistry uriRegistry, DelegatingResourceLoader resourceLoader,
 			MavenProperties mavenProperties) {
 		return new AppRegistry(uriRegistry, resourceLoader, mavenProperties);
 	}
 
 	@Bean
-	@ConditionalOnExpression("#{'${" + FeaturesProperties.FEATURES_PREFIX + "." + FeaturesProperties.SKIPPER_ENABLED
-			+ ":false}'.equalsIgnoreCase('true')}")
+	@ConditionalOnSkipperEnabled
 	public AppRegistryService appRegistryService(AppRegistrationRepository appRegistrationRepository,
 			DelegatingResourceLoader resourceLoader) {
 		return new DefaultAppRegistryService(appRegistrationRepository, resourceLoader, mavenProperties());
 	}
 
 	@Bean
-	@ConditionalOnExpression("#{'${" + FeaturesProperties.FEATURES_PREFIX + "." + FeaturesProperties.SKIPPER_ENABLED
-			+ ":false}'.equalsIgnoreCase('true')}")
+	@ConditionalOnSkipperEnabled
 	public VersionedAppRegistryController appRegistryController2(AppRegistryService appRegistry,
 			ApplicationConfigurationMetadataResolver metadataResolver) {
 		return new VersionedAppRegistryController(appRegistry, metadataResolver, appRegistryFJPFB().getObject(), mavenProperties());
@@ -223,19 +223,29 @@ public class DataFlowControllerAutoConfiguration {
 	}
 
 	@Bean
+	@ConditionalOnSkipperEnabled
 	@ConditionalOnBean({StreamDefinitionRepository.class, StreamDeploymentRepository.class})
-	public StreamService streamDeploymentService(StreamDefinitionRepository streamDefinitionRepository,
+	public StreamService skipperStreamDeploymentService(StreamDefinitionRepository streamDefinitionRepository,
+			StreamDeploymentRepository streamDeploymentRepository, AppRegistryService appRegistryService,
+			SkipperStreamDeployer skipperStreamDeployer, AppDeploymentRequestCreator appDeploymentRequestCreator) {
+		return new SkipperStreamService(streamDefinitionRepository,
+				streamDeploymentRepository,
+				appRegistryService,
+				skipperStreamDeployer,
+				appDeploymentRequestCreator);
+	}
+
+	@Bean
+	@ConditionalOnSkipperDisabled
+	@ConditionalOnBean({StreamDefinitionRepository.class, StreamDeploymentRepository.class})
+	public StreamService simpleStreamDeploymentService(StreamDefinitionRepository streamDefinitionRepository,
 			StreamDeploymentRepository streamDeploymentRepository,
 			AppDeployerStreamDeployer appDeployerStreamDeployer,
-			SkipperStreamDeployer skipperStreamDeployer,
-			AppDeploymentRequestCreator appDeploymentRequestCreator,
-			FeaturesProperties featuresProperties) {
-		return new DefaultStreamService(streamDefinitionRepository,
+			AppDeploymentRequestCreator appDeploymentRequestCreator) {
+		return new AppDeployerStreamService(streamDefinitionRepository,
 				streamDeploymentRepository,
 				appDeployerStreamDeployer,
-				skipperStreamDeployer,
-				appDeploymentRequestCreator,
-				featuresProperties);
+				appDeploymentRequestCreator);
 	}
 
 	@Bean
@@ -248,6 +258,7 @@ public class DataFlowControllerAutoConfiguration {
 	}
 
 	@Bean
+	@ConditionalOnSkipperDisabled
 	@ConditionalOnBean({StreamDefinitionRepository.class, StreamDeploymentRepository.class})
 	public AppDeployerStreamDeployer appDeployerStreamDeployer(AppDeployer appDeployer,
 			DeploymentIdRepository deploymentIdRepository,
@@ -372,8 +383,7 @@ public class DataFlowControllerAutoConfiguration {
 	}
 
 	@Bean
-	@ConditionalOnExpression("#{'${" + FeaturesProperties.FEATURES_PREFIX + "." + FeaturesProperties.SKIPPER_ENABLED
-			+ ":false}'.equalsIgnoreCase('false')}")
+	@ConditionalOnSkipperDisabled
 	public AppRegistryController appRegistryController(AppRegistry appRegistry,
 			ApplicationConfigurationMetadataResolver metadataResolver) {
 		return new AppRegistryController(appRegistry, metadataResolver, appRegistryFJPFB().getObject());
