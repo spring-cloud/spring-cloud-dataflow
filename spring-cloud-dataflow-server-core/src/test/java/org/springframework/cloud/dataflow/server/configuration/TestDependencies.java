@@ -16,15 +16,14 @@
 
 package org.springframework.cloud.dataflow.server.configuration;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ForkJoinPool;
-
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
+import org.springframework.boot.autoconfigure.jdbc.EmbeddedDataSourceConfiguration;
+import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.common.security.support.SecurityStateBean;
 import org.springframework.cloud.dataflow.completion.CompletionConfiguration;
@@ -32,35 +31,22 @@ import org.springframework.cloud.dataflow.completion.StreamCompletionProvider;
 import org.springframework.cloud.dataflow.completion.TaskCompletionProvider;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
+import org.springframework.cloud.dataflow.registry.AppRegistryCommon;
+import org.springframework.cloud.dataflow.registry.repository.AppRegistrationRepository;
+import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
+import org.springframework.cloud.dataflow.registry.service.DefaultAppRegistryService;
 import org.springframework.cloud.dataflow.server.config.MetricsProperties;
 import org.springframework.cloud.dataflow.server.config.VersionInfoProperties;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
-import org.springframework.cloud.dataflow.server.controller.AboutController;
-import org.springframework.cloud.dataflow.server.controller.AppRegistryController;
-import org.springframework.cloud.dataflow.server.controller.CompletionController;
-import org.springframework.cloud.dataflow.server.controller.MetricsController;
-import org.springframework.cloud.dataflow.server.controller.RestControllerAdvice;
-import org.springframework.cloud.dataflow.server.controller.RuntimeAppsController;
-import org.springframework.cloud.dataflow.server.controller.StreamDefinitionController;
-import org.springframework.cloud.dataflow.server.controller.StreamDeploymentController;
-import org.springframework.cloud.dataflow.server.controller.TaskDefinitionController;
-import org.springframework.cloud.dataflow.server.controller.TaskExecutionController;
-import org.springframework.cloud.dataflow.server.controller.ToolsController;
+import org.springframework.cloud.dataflow.server.controller.*;
 import org.springframework.cloud.dataflow.server.controller.support.ApplicationsMetrics;
 import org.springframework.cloud.dataflow.server.controller.support.ApplicationsMetrics.Application;
 import org.springframework.cloud.dataflow.server.controller.support.ApplicationsMetrics.Instance;
 import org.springframework.cloud.dataflow.server.controller.support.ApplicationsMetrics.Metric;
 import org.springframework.cloud.dataflow.server.controller.support.MetricStore;
 import org.springframework.cloud.dataflow.server.registry.DataFlowAppRegistryPopulator;
-import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
-import org.springframework.cloud.dataflow.server.repository.InMemoryDeploymentIdRepository;
-import org.springframework.cloud.dataflow.server.repository.InMemoryStreamDefinitionRepository;
-import org.springframework.cloud.dataflow.server.repository.InMemoryStreamDeploymentRepository;
-import org.springframework.cloud.dataflow.server.repository.InMemoryTaskDefinitionRepository;
-import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
-import org.springframework.cloud.dataflow.server.repository.StreamDeploymentRepository;
-import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
+import org.springframework.cloud.dataflow.server.repository.*;
 import org.springframework.cloud.dataflow.server.service.StreamService;
 import org.springframework.cloud.dataflow.server.service.TaskService;
 import org.springframework.cloud.dataflow.server.service.impl.AppDeploymentRequestCreator;
@@ -87,11 +73,15 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.io.FileSystemResourceLoader;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
+
+import java.util.*;
+import java.util.concurrent.ForkJoinPool;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -101,16 +91,23 @@ import static org.springframework.hateoas.config.EnableHypermediaSupport.Hyperme
  * @author Michael Minella
  * @author Mark Fisher
  * @author Gunnar Hillert
+ * @author Ilayaperumal Gopinathan
  */
 @Configuration
 @EnableSpringDataWebSupport
 @EnableHypermediaSupport(type = HAL)
 @Import(CompletionConfiguration.class)
+@ImportAutoConfiguration({HibernateJpaAutoConfiguration.class, EmbeddedDataSourceConfiguration.class})
 @EnableWebMvc
 @EnableConfigurationProperties({ CommonApplicationProperties.class,
 		MetricsProperties.class,
 		VersionInfoProperties.class})
+@EntityScan({"org.springframework.cloud.dataflow.registry.domain"})
+@EnableJpaRepositories(basePackages = "org.springframework.cloud.dataflow.registry.repository")
 public class TestDependencies extends WebMvcConfigurationSupport {
+
+	@Autowired
+	private AppRegistrationRepository appRegistrationRepository;
 
 	@Bean
 	public RestControllerAdvice restControllerAdvice() {
@@ -118,7 +115,7 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	}
 
 	@Bean
-	public ResourceLoader resourceLoader() {
+	public DelegatingResourceLoader resourceLoader() {
 		MavenProperties mavenProperties = new MavenProperties();
 		mavenProperties.setRemoteRepositories(new HashMap<>(Collections.singletonMap("springRepo",
 				new MavenProperties.RemoteRepository("https://repo.spring.io/libs-snapshot"))));
@@ -158,7 +155,7 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	}
 
 	@Bean
-	AppDeploymentRequestCreator streamDeploymentPropertiesUtils(AppRegistry appRegistry,
+	AppDeploymentRequestCreator streamDeploymentPropertiesUtils(AppRegistryCommon appRegistry,
 																CommonApplicationProperties commonApplicationProperties,
 																ApplicationConfigurationMetadataResolver applicationConfigurationMetadataResolver) {
 		return new AppDeploymentRequestCreator(appRegistry,
@@ -187,8 +184,8 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 
 	@Bean
 	public StreamDefinitionController streamDefinitionController(StreamDefinitionRepository repository,
-			StreamService streamService) {
-		return new StreamDefinitionController(repository, appRegistry(), streamService);
+			AppRegistryCommon appRegistry, StreamService streamService) {
+		return new StreamDefinitionController(repository, appRegistry, streamService);
 	}
 
 	@Bean
@@ -208,9 +205,33 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	}
 
 	@Bean
+	@ConditionalOnExpression("#{'${" + FeaturesProperties.FEATURES_PREFIX + "." + FeaturesProperties.SKIPPER_ENABLED
+			+ ":false}'.equalsIgnoreCase('false')}")
 	public AppRegistryController appRegistryController(AppRegistry registry,
 			ApplicationConfigurationMetadataResolver metadataResolver) {
 		return new AppRegistryController(registry, metadataResolver, new ForkJoinPool(2));
+	}
+
+	@Bean
+	@ConditionalOnExpression("#{'${" + FeaturesProperties.FEATURES_PREFIX + "." + FeaturesProperties.SKIPPER_ENABLED
+			+ ":false}'.equalsIgnoreCase('false')}")
+	public AppRegistry appRegistry(UriRegistry uriRegistry, DelegatingResourceLoader resourceLoader) {
+		return new AppRegistry(uriRegistry, resourceLoader);
+	}
+
+	@Bean
+	@ConditionalOnExpression("#{'${" + FeaturesProperties.FEATURES_PREFIX + "." + FeaturesProperties.SKIPPER_ENABLED
+			+ ":false}'.equalsIgnoreCase('true')}")
+	public AppRegistryService appRegistryService(AppRegistrationRepository appRegistrationRepository) {
+		return new DefaultAppRegistryService(appRegistrationRepository, resourceLoader());
+	}
+
+	@Bean
+	@ConditionalOnExpression("#{'${" + FeaturesProperties.FEATURES_PREFIX + "." + FeaturesProperties.SKIPPER_ENABLED
+			+ ":false}'.equalsIgnoreCase('true')}")
+	public VersionedAppRegistryController versionedAppRegistryController(AppRegistryService appRegistry,
+																ApplicationConfigurationMetadataResolver metadataResolver) {
+		return new VersionedAppRegistryController(appRegistry, metadataResolver, new ForkJoinPool(2));
 	}
 
 	@Bean
@@ -270,16 +291,18 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 
 	@Bean
 	public TaskDefinitionController taskDefinitionController(TaskDefinitionRepository repository,
-			DeploymentIdRepository deploymentIdRepository, ApplicationConfigurationMetadataResolver metadataResolver) {
-		return new TaskDefinitionController(repository, deploymentIdRepository, taskLauncher(), appRegistry(),
-				taskService(metadataResolver, taskRepository(), deploymentIdRepository));
+			DeploymentIdRepository deploymentIdRepository, ApplicationConfigurationMetadataResolver metadataResolver,
+															AppRegistryCommon appRegistry) {
+		return new TaskDefinitionController(repository, deploymentIdRepository, taskLauncher(), appRegistry,
+				taskService(metadataResolver, taskRepository(), deploymentIdRepository, appRegistry));
 	}
 
 	@Bean
 	public TaskExecutionController taskExecutionController(TaskExplorer explorer,
-			ApplicationConfigurationMetadataResolver metadataResolver, DeploymentIdRepository deploymentIdRepository) {
+			ApplicationConfigurationMetadataResolver metadataResolver, DeploymentIdRepository deploymentIdRepository,
+														AppRegistryCommon appRegistry) {
 		return new TaskExecutionController(explorer,
-				taskService(metadataResolver, taskRepository(), deploymentIdRepository), taskDefinitionRepository());
+				taskService(metadataResolver, taskRepository(), deploymentIdRepository, appRegistry), taskDefinitionRepository());
 	}
 
 	@Bean
@@ -293,13 +316,8 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	}
 
 	@Bean
-	public AppRegistry appRegistry() {
-		return new AppRegistry(uriRegistry(), resourceLoader());
-	}
-
-	@Bean
-	public DataFlowAppRegistryPopulator dataflowUriRegistryPopulator() {
-		return new DataFlowAppRegistryPopulator(appRegistry(), "classpath:META-INF/test-apps.properties");
+	public DataFlowAppRegistryPopulator dataflowUriRegistryPopulator(AppRegistryCommon appRegistry) {
+		return new DataFlowAppRegistryPopulator(appRegistry, "classpath:META-INF/test-apps.properties");
 	}
 
 	@Bean
@@ -319,9 +337,10 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 
 	@Bean
 	public TaskService taskService(ApplicationConfigurationMetadataResolver metadataResolver,
-			TaskRepository taskExecutionRepository, DeploymentIdRepository deploymentIdRepository) {
+			TaskRepository taskExecutionRepository, DeploymentIdRepository deploymentIdRepository,
+								AppRegistryCommon appRegistry) {
 		return new DefaultTaskService(new DataSourceProperties(), taskDefinitionRepository(), taskExplorer(),
-				taskExecutionRepository, appRegistry(), resourceLoader(), taskLauncher(), metadataResolver,
+				taskExecutionRepository, appRegistry, resourceLoader(), taskLauncher(), metadataResolver,
 				new TaskConfigurationProperties(), deploymentIdRepository, null);
 	}
 

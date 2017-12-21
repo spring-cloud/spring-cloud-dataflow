@@ -154,7 +154,7 @@ public class DataFlowControllerAutoConfiguration {
 	@Bean
 	@ConditionalOnExpression("#{'${" + FeaturesProperties.FEATURES_PREFIX + "." + FeaturesProperties.SKIPPER_ENABLED
 			+ ":false}'.equalsIgnoreCase('true')}")
-	public AppRegistryCommon appRegistryService(AppRegistrationRepository appRegistrationRepository,
+	public AppRegistryService appRegistryService(AppRegistrationRepository appRegistrationRepository,
 			DelegatingResourceLoader resourceLoader) {
 		return new DefaultAppRegistryService(appRegistrationRepository, resourceLoader);
 	}
@@ -371,10 +371,8 @@ public class DataFlowControllerAutoConfiguration {
 	}
 
 	@Bean
-	@ConditionalOnMissingBean(VersionedAppRegistryController.class)
 	@ConditionalOnExpression("#{'${" + FeaturesProperties.FEATURES_PREFIX + "." + FeaturesProperties.SKIPPER_ENABLED
 			+ ":false}'.equalsIgnoreCase('false')}")
-	//@ConditionalOnProperty(prefix = FeaturesProperties.FEATURES_PREFIX, name = FeaturesProperties.SKIPPER_ENABLED)
 	public AppRegistryController appRegistryController(AppRegistry appRegistry,
 			ApplicationConfigurationMetadataResolver metadataResolver) {
 		return new AppRegistryController(appRegistry, metadataResolver, appRegistryFJPFB().getObject());
