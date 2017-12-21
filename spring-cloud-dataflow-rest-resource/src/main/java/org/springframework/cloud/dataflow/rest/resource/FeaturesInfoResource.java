@@ -24,11 +24,14 @@ import org.springframework.hateoas.ResourceSupport;
  * @author Ilayaperumal Gopinathan
  */
 public class FeaturesInfoResource extends ResourceSupport {
+
 	private boolean analyticsEnabled = true;
 
 	private boolean streamsEnabled = true;
 
 	private boolean tasksEnabled = true;
+
+	private boolean skipperEnabled = true;
 
 	/**
 	 * Default constructor for serialization frameworks.
@@ -58,6 +61,14 @@ public class FeaturesInfoResource extends ResourceSupport {
 
 	public void setTasksEnabled(boolean tasksEnabled) {
 		this.tasksEnabled = tasksEnabled;
+	}
+
+	public boolean isSkipperEnabled() {
+		return skipperEnabled;
+	}
+
+	public void setSkipperEnabled(boolean skipperEnabled) {
+		this.skipperEnabled = skipperEnabled;
 	}
 
 }

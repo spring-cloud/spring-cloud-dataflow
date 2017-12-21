@@ -109,6 +109,8 @@ public class AboutController {
 		featureInfo.setAnalyticsEnabled(featuresProperties.isAnalyticsEnabled());
 		featureInfo.setStreamsEnabled(featuresProperties.isStreamsEnabled());
 		featureInfo.setTasksEnabled(featuresProperties.isTasksEnabled());
+		featureInfo.setSkipperEnabled(featuresProperties.isSkipperEnabled());
+
 
 		final VersionInfo versionInfo = getVersionInfo();
 
