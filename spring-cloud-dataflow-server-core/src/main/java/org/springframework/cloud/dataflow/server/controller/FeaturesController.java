@@ -55,6 +55,7 @@ public class FeaturesController {
 		featuresInfoResource.setAnalyticsEnabled(featuresProperties.isAnalyticsEnabled());
 		featuresInfoResource.setStreamsEnabled(featuresProperties.isStreamsEnabled());
 		featuresInfoResource.setTasksEnabled(featuresProperties.isTasksEnabled());
+		featuresInfoResource.setSkipperEnabled(featuresProperties.isSkipperEnabled());
 		return featuresInfoResource;
 	}
 }
