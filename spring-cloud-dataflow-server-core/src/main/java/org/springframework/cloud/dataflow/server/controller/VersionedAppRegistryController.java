@@ -16,20 +16,8 @@
 
 package org.springframework.cloud.dataflow.server.controller;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Properties;
-import java.util.concurrent.ForkJoinPool;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.core.ApplicationType;
@@ -52,12 +40,14 @@ import org.springframework.hateoas.mvc.ResourceAssemblerSupport;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.*;
+import java.util.concurrent.ForkJoinPool;
 
 /**
  * Handles all {@link DefaultAppRegistryService} related interactions.
@@ -110,7 +100,7 @@ public class VersionedAppRegistryController {
 			@RequestParam(value = "type", required = false) ApplicationType type,
 			@RequestParam(required = false) String search) {
 
-		Page<AppRegistration> pagedRegistrations = appRegistryService.findAllByTypeAndNameIsLike(type, search,
+		Page<AppRegistration> pagedRegistrations = this.appRegistryService.findAllByTypeAndNameIsLike(type, search,
 				pageable);
 
 		return pagedResourcesAssembler.toResource(pagedRegistrations, this.assembler);
@@ -130,7 +120,7 @@ public class VersionedAppRegistryController {
 			@PathVariable("name") String name, @PathVariable("version") String version) {
 		AppRegistration registration = appRegistryService.find(name, type, version);
 		if (registration == null) {
-			throw new NoSuchAppRegistrationException(name, type); // TODO add version
+			throw new NoSuchAppRegistrationException(name, type, version);
 		}
 		DetailedAppRegistrationResource result = new DetailedAppRegistrationResource(
 				assembler.toResource(registration));
@@ -147,6 +137,9 @@ public class VersionedAppRegistryController {
 	@ResponseStatus(HttpStatus.OK)
 	public DetailedAppRegistrationResource info(@PathVariable("type") ApplicationType type,
 			@PathVariable("name") String name) {
+		if (!this.appRegistryService.appExist(name, type)) {
+			throw new NoSuchAppRegistrationException(name, type);
+		}
 		if (this.appRegistryService.getDefaultApp(name, type) == null) {
 			throw new RuntimeException(String.format("No default version exists for the app [%s:%s]", name, type));
 		}
@@ -175,7 +168,7 @@ public class VersionedAppRegistryController {
 			throw new AppAlreadyRegisteredException(previous);
 		}
 		try {
-			AppRegistration registration = appRegistryService.save(name, type, version, new URI(uri),
+			AppRegistration registration = this.appRegistryService.save(name, type, version, new URI(uri),
 					metadataUri != null ? new URI(metadataUri) : null);
 			prefetchMetadata(Arrays.asList(registration));
 		}
@@ -203,11 +196,11 @@ public class VersionedAppRegistryController {
 	 * @param name module name
 	 * @param version module version
 	 */
-	@RequestMapping(value = "/{type}/{name}/{version}", method = RequestMethod.PUT)
+	@RequestMapping(value = "/{type}/{name}/{version:.+}", method = RequestMethod.PUT)
 	@ResponseStatus(HttpStatus.ACCEPTED)
 	public void makeDefault(@PathVariable("type") ApplicationType type, @PathVariable("name") String name,
 			@PathVariable("version") String version) {
-		appRegistryService.setDefaultApp(name, type, version);
+		this.appRegistryService.setDefaultApp(name, type, version);
 	}
 
 	/**
@@ -218,7 +211,7 @@ public class VersionedAppRegistryController {
 	 * @param name the application name
 	 * @param version application version
 	 */
-	@RequestMapping(value = "/{type}/{name}/{version}", method = RequestMethod.DELETE)
+	@RequestMapping(value = "/{type}/{name}/{version:.+}}", method = RequestMethod.DELETE)
 	@ResponseStatus(HttpStatus.OK)
 	public void unregister(@PathVariable("type") ApplicationType type, @PathVariable("name") String name,
 			@PathVariable("version") String version) {
@@ -229,8 +222,14 @@ public class VersionedAppRegistryController {
 	@RequestMapping(value = "/{type}/{name}", method = RequestMethod.DELETE)
 	@ResponseStatus(HttpStatus.OK)
 	public void unregister(@PathVariable("type") ApplicationType type, @PathVariable("name") String name) {
-		String defaultVersion = appRegistryService.getDefaultApp(name, type).getVersion();
-		this.unregister(type, name, defaultVersion);
+		if (this.appRegistryService.find(name, type) == null) {
+			throw new NoSuchAppRegistrationException(name, type);
+		}
+		AppRegistration appRegistration = this.appRegistryService.getDefaultApp(name, type);
+		if (appRegistration == null) {
+			throw new RuntimeException(String.format("No default version exists for the app [%s:%s]", name, type));
+		}
+		this.unregister(type, name, appRegistration.getVersion());
 	}
 
 	/**

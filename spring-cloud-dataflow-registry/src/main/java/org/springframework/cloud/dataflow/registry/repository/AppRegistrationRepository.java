@@ -10,6 +10,7 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 
 /**
  * @author Christian Tzolov
+ * @author Ilayaperumal Gopinathan
  */
 public interface AppRegistrationRepository extends PagingAndSortingRepository<AppRegistration, Long> {
 
@@ -19,9 +20,11 @@ public interface AppRegistrationRepository extends PagingAndSortingRepository<Ap
 
 	void deleteAppRegistrationByNameAndTypeAndVersion(String name, ApplicationType type, String version);
 
-	Page<AppRegistration> findAllByTypeAndNameIsLike(ApplicationType type, String name, Pageable pageable);
+	Page<AppRegistration> findAllByTypeAndNameContainingIgnoreCase(ApplicationType type, String name, Pageable pageable);
 
 	Page<AppRegistration> findAllByType(ApplicationType type, Pageable pageable);
+
+	Page<AppRegistration> findAllByNameContainingIgnoreCase(String name, Pageable pageable);
 
 	@Override
 	<S extends AppRegistration> S save(S s);

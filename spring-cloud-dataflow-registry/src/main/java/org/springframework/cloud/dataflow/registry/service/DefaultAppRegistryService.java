@@ -121,9 +121,14 @@ public class DefaultAppRegistryService extends AbstractAppRegistryCommon impleme
 	public Page<AppRegistration> findAllByTypeAndNameIsLike(ApplicationType type, String name, Pageable pageable) {
 		if (!StringUtils.hasText(name) && type == null) {
 			return findAll(pageable);
-		} else if (StringUtils.hasText(name)) {
-			return this.appRegistrationRepository.findAllByTypeAndNameIsLike(type, name, pageable);
-		} else {
+		}
+		else if (StringUtils.hasText(name) && type == null) {
+			return this.appRegistrationRepository.findAllByNameContainingIgnoreCase(name, pageable);
+		}
+		else if (StringUtils.hasText(name)) {
+			return this.appRegistrationRepository.findAllByTypeAndNameContainingIgnoreCase(type, name, pageable);
+		}
+		else {
 			return this.appRegistrationRepository.findAllByType(type, pageable);
 		}
 	}
