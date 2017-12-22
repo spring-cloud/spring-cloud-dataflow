@@ -39,13 +39,12 @@ import org.springframework.cloud.dataflow.server.repository.StreamDeploymentRepo
 import org.springframework.cloud.dataflow.server.stream.SkipperStreamDeployer;
 import org.springframework.cloud.dataflow.server.stream.StreamDeployers;
 import org.springframework.cloud.dataflow.server.stream.StreamDeploymentRequest;
-import org.springframework.cloud.dataflow.server.stream.manifest.SpringCloudDeployerApplicationManifest;
-import org.springframework.cloud.dataflow.server.stream.manifest.SpringCloudDeployerApplicationManifestReader;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.skipper.domain.PackageIdentifier;
 import org.springframework.cloud.skipper.domain.Release;
-import org.springframework.stereotype.Service;
+import org.springframework.cloud.skipper.domain.SpringCloudDeployerApplicationManifest;
+import org.springframework.cloud.skipper.domain.SpringCloudDeployerApplicationManifestReader;
 import org.springframework.util.Assert;
 
 import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_KEY_PREFIX;
@@ -57,7 +56,6 @@ import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_KEY_
  * @author Ilayaperumal Gopinathan
  * @author Christian Tzolov
  */
-@Service
 public class SkipperStreamService extends AbstractStreamService {
 
 	private static Log logger = LogFactory.getLog(SkipperStreamService.class);

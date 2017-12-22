@@ -26,7 +26,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.After;
-import org.junit.Ignore;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -64,6 +64,7 @@ import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_PACK
 /**
  * @author Mark Pollack
  * @author Ilayaperumal Gopinathan
+ * @author Christian Tzolov
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestDependencies.class)
@@ -79,7 +80,7 @@ public class SkipperStreamServiceIntegrationTests {
 	private StreamDefinitionRepository streamDefinitionRepository;
 
 	@Autowired
-	private AppRegistryService appRegistry;
+	private AppRegistryService appRegistryService;
 
 	@MockBean
 	private SkipperClient skipperClient;
@@ -87,57 +88,43 @@ public class SkipperStreamServiceIntegrationTests {
 	@Autowired
 	private FeaturesProperties featuresProperties;
 
+	@Before
+	public void before() throws URISyntaxException {
+		createTickTock();
+	}
+
 	@After
 	public void destroyStream() {
-//		appRegistry.delete("log", ApplicationType.sink);
-//		appRegistry.delete("time", ApplicationType.source);
+		appRegistryService.delete("log", ApplicationType.sink, "1.2.0.RELEASE");
+		appRegistryService.delete("time", ApplicationType.source, "1.2.0.RELEASE");
 		streamService.undeployStream("ticktock");
 		streamDefinitionRepository.deleteAll();
 	}
 
 	@Test
-	public void validateSkipperDeploymentProperites() throws URISyntaxException {
-		createTickTock();
+	public void validateSkipperDeploymentProperties() {
 
 		Map<String, String> deploymentProperties = createSkipperDeploymentProperties();
-		// override log to 1.2.0.RELEASE
+		// override log version to 1.2.0.RELEASE
 		deploymentProperties.put("badthing.version.log", "1.2.0.RELEASE");
 
 		try {
-			this.featuresProperties.setSkipperEnabled(true);
 			streamService.deployStream("ticktock", deploymentProperties);
 			fail("Expected an IllegalArgumentException to be thrown.");
 		}
 		catch (IllegalArgumentException e) {
-			assertThat(e.getMessage()).isEqualTo("Only deployment property keys starting with 'app.' or 'deployer.'  or 'version.' allowed, got 'badthing.version.log'");
+			assertThat(e.getMessage()).isEqualTo("Only deployment property keys starting with 'app.' or 'deployer.'" +
+					"  or 'version.' allowed, got 'badthing.version.log'");
 		}
 	}
 
 	@Test
-	@Ignore
-	public void failSkipperDeploymentWhenSkipperModeDisabled() throws URISyntaxException {
-		createTickTock();
-		Map<String, String> deploymentProperties = createSkipperDeploymentProperties();
-		try {
-			this.featuresProperties.setSkipperEnabled(false);
-			streamService.deployStream("ticktock", deploymentProperties);
-			fail("Expected an IllegalStateException to be thrown.");
-		}
-		catch (IllegalStateException e) {
-			assertThat(e.getMessage()).isEqualTo("Skipper mode is not enabled for the Data Flow Server. "
-					+ "Try enabling it with the property 'spring.cloud.dataflow.features.skipper-enabled'");
-		}
-	}
-
-	@Test
-	public void testInstallVersionOverride() throws URISyntaxException, IOException {
-		createTickTock();
+	public void testInstallVersionOverride() throws IOException {
 
 		Map<String, String> deploymentProperties = createSkipperDeploymentProperties();
 		// override log to 1.2.0.RELEASE
 		deploymentProperties.put("version.log", "1.2.0.RELEASE");
 
-		this.featuresProperties.setSkipperEnabled(true);
 		streamService.deployStream("ticktock", deploymentProperties);
 
 		ArgumentCaptor<UploadRequest> uploadRequestCaptor = ArgumentCaptor.forClass(UploadRequest.class);
@@ -145,7 +132,7 @@ public class SkipperStreamServiceIntegrationTests {
 
 		Package pkg = loadPackageFromBytes(uploadRequestCaptor);
 
-		// ExpectedYaml will have verison: 1.2.0.RELEASE and not 1.1.1.RELEASE
+		// ExpectedYaml will have version: 1.2.0.RELEASE and not 1.1.1.RELEASE
 		String expectedYaml = StreamUtils.copyToString(
 				TestResourceUtils.qualifiedResource(getClass(), "install.yml").getInputStream(),
 				Charset.defaultCharset());
@@ -168,10 +155,10 @@ public class SkipperStreamServiceIntegrationTests {
 	}
 
 	private void createTickTock() throws URISyntaxException {
-		String uri = "maven://org.springframework.cloud.stream.app:time-source-rabbit:1.2.0.RELEASE";
-		appRegistry.save("time", ApplicationType.source, "1.2.0.RELEASE", new URI(uri), null);
-		uri = "maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.1.1.RELEASE";
-		appRegistry.save("log", ApplicationType.sink, "1.2.0.RELEASE", new URI(uri), null);
+		String timeUri = "maven://org.springframework.cloud.stream.app:time-source-rabbit:1.2.0.RELEASE";
+		appRegistryService.save("time", ApplicationType.source, "1.2.0.RELEASE", new URI(timeUri), null);
+		String logUri = "maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.1.1.RELEASE";
+		appRegistryService.save("log", ApplicationType.sink, "1.2.0.RELEASE", new URI(logUri), null);
 
 		// Create stream
 		StreamDefinition streamDefinition = new StreamDefinition("ticktock", "time | log");
@@ -190,6 +177,5 @@ public class SkipperStreamServiceIntegrationTests {
 		return packageReader
 				.read(new File(targetPath.toFile(), packageName + "-" + packageVersion));
 	}
-
 
 }

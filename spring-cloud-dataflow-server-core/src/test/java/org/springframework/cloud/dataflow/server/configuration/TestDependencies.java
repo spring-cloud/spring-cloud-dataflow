@@ -77,7 +77,7 @@ import org.springframework.cloud.dataflow.server.service.StreamService;
 import org.springframework.cloud.dataflow.server.service.TaskService;
 import org.springframework.cloud.dataflow.server.service.impl.AppDeploymentRequestCreator;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskService;
-import org.springframework.cloud.dataflow.server.service.impl.SimpleStreamService;
+import org.springframework.cloud.dataflow.server.service.impl.AppDeployerStreamService;
 import org.springframework.cloud.dataflow.server.service.impl.SkipperStreamService;
 import org.springframework.cloud.dataflow.server.service.impl.TaskConfigurationProperties;
 import org.springframework.cloud.dataflow.server.stream.AppDeployerStreamDeployer;
@@ -103,6 +103,7 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
@@ -129,6 +130,7 @@ import static org.springframework.hateoas.config.EnableHypermediaSupport.Hyperme
 		VersionInfoProperties.class})
 @EntityScan({"org.springframework.cloud.dataflow.registry.domain"})
 @EnableJpaRepositories(basePackages = "org.springframework.cloud.dataflow.registry.repository")
+@EnableTransactionManagement
 public class TestDependencies extends WebMvcConfigurationSupport {
 
 	@Autowired
@@ -182,7 +184,7 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	public StreamService simpleStreamService(StreamDefinitionRepository streamDefinitionRepository,
 			StreamDeploymentRepository streamDeploymentRepository, AppDeployerStreamDeployer appDeployerStreamDeployer,
 			AppDeploymentRequestCreator appDeploymentRequestCreator) {
-		return new SimpleStreamService(streamDefinitionRepository,
+		return new AppDeployerStreamService(streamDefinitionRepository,
 				streamDeploymentRepository, appDeployerStreamDeployer, appDeploymentRequestCreator);
 	}
 

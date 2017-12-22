@@ -48,7 +48,7 @@ import org.springframework.util.StringUtils;
  * </p>
  * The {@link AbstractStreamService} deployer is agnostic service. For deploying streams on
  * Skipper use the {@link SkipperStreamService} and for the Simple mode stream deployment use
- * the {@link SimpleStreamService}.
+ * the {@link AppDeployerStreamService}.
  * </p>
  *
  * @author Mark Pollack
