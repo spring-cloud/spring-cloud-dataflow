@@ -88,13 +88,13 @@ public class SkipperStreamService extends AbstractStreamService {
 	/**
 	 * Deploy a stream as defined by its stream name and optional deployment properties.
 	 *
-	 * @param name the stream name to deploy
+	 * @param streamName the stream name to deploy
 	 * @param deploymentProperties the deployment properties for the stream
 	 */
 	@Override
-	public void doDeployStream(String name, Map<String, String> deploymentProperties) {
+	public void doDeployStream(String streamName, Map<String, String> deploymentProperties) {
 
-		StreamDefinition streamDefinition = createStreamDefinitionForDeploy(name);
+		StreamDefinition streamDefinition = createStreamDefinitionForDeploy(streamName);
 
 		// Extract skipper properties
 		Map<String, String> skipperDeploymentProperties = getSkipperProperties(deploymentProperties);
@@ -107,8 +107,15 @@ public class SkipperStreamService extends AbstractStreamService {
 				.createRequests(streamDefinition, deploymentPropertiesToUse);
 
 		DeploymentPropertiesUtils.validateSkipperDeploymentProperties(deploymentPropertiesToUse);
-		this.skipperStreamDeployer.deployStream(new StreamDeploymentRequest(streamDefinition.getName(),
+		Release release = this.skipperStreamDeployer.deployStream(new StreamDeploymentRequest(streamDefinition.getName(),
 				streamDefinition.getDslText(), appDeploymentRequests, skipperDeploymentProperties));
+
+		if (release != null) {
+			updateStreamDefinitionFromReleaseManifest(streamName, release.getManifest());
+		}
+		else {
+			logger.warn("Missing release after Stream Update!");
+		}
 	}
 
 	@Override
