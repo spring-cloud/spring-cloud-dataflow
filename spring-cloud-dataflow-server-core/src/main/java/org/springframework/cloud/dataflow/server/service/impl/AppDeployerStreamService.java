@@ -33,7 +33,6 @@ import org.springframework.cloud.dataflow.server.stream.StreamDeploymentRequest;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.skipper.domain.PackageIdentifier;
-import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
 import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_KEY_PREFIX;
@@ -45,10 +44,9 @@ import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_KEY_
  * @author Ilayaperumal Gopinathan
  * @author Christian Tzolov
  */
-@Service
-public class SimpleStreamService extends AbstractStreamService {
+public class AppDeployerStreamService extends AbstractStreamService {
 
-	private static Log logger = LogFactory.getLog(SimpleStreamService.class);
+	private static Log logger = LogFactory.getLog(AppDeployerStreamService.class);
 
 	/**
 	 * The repository this controller will use for stream CRUD operations.
@@ -57,7 +55,7 @@ public class SimpleStreamService extends AbstractStreamService {
 
 	private final AppDeploymentRequestCreator appDeploymentRequestCreator;
 
-	public SimpleStreamService(StreamDefinitionRepository streamDefinitionRepository,
+	public AppDeployerStreamService(StreamDefinitionRepository streamDefinitionRepository,
 			StreamDeploymentRepository streamDeploymentRepository,
 			AppDeployerStreamDeployer appDeployerStreamDeployer,
 			AppDeploymentRequestCreator appDeploymentRequestCreator) {
