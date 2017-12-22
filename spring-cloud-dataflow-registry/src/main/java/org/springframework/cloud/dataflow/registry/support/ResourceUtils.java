@@ -18,19 +18,25 @@ package org.springframework.cloud.dataflow.registry.support;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.function.BiFunction;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.springframework.cloud.deployer.resource.docker.DockerResource;
+import org.springframework.cloud.deployer.resource.maven.MavenProperties;
 import org.springframework.cloud.deployer.resource.maven.MavenResource;
+import org.springframework.cloud.deployer.resource.support.DownloadingUrlResourceLoader;
+import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.UrlResource;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
  * @author Mark Pollack
+ * @author Ilayaperumal Gopinathan
  */
 public class ResourceUtils {
 
@@ -87,6 +93,44 @@ public class ResourceUtils {
 	}
 
 	/**
+	 * Retrieve the corresponding {@link Resource} instance based on the URI String.
+	 * Maven properties are used if the URI corresponds to maven resource.
+	 *
+	 * @param uriString String representation of the resource URI
+	 * @param mavenProperties the maven properties to use in case of maven resource
+	 * @return the resource instance
+	 */
+	public static Resource getResource(String uriString, MavenProperties mavenProperties) {
+		Assert.isTrue(StringUtils.hasText(uriString), "Resource URI must not be empty");
+		try {
+			URI uri = new URI(uriString);
+			String scheme = uri.getScheme();
+			Assert.notNull(scheme, "a scheme (prefix) is required");
+			if (scheme.equals("maven")) {
+				String coordinates = uriString.replaceFirst("maven:\\/*", "");
+				MavenResource mavenResource = MavenResource.parse(coordinates, mavenProperties);
+				return mavenResource;
+			}
+			else if (scheme.equals("docker")) {
+				return new DockerResource(uriString);
+			}
+			else {
+				ResourceLoader resourceLoader = null;
+				if (!scheme.equalsIgnoreCase("http") && !scheme.equalsIgnoreCase("https")) {
+					resourceLoader = new DefaultResourceLoader();
+				}
+				else {
+					resourceLoader = new DownloadingUrlResourceLoader();
+				}
+				return resourceLoader.getResource(uriString);
+			}
+		}
+		catch (URISyntaxException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	/**
 	 * Extracts the version from the resource. Supported resource types are {@link
 	 * MavenResource}, {@link DockerResource}, and {@link UrlResource}. @param resource to be
 	 * used. @return the version the resource. @throws
@@ -108,6 +152,17 @@ public class ResourceUtils {
 			throw new IllegalArgumentException("Do not support extracting resource from Resource of type "
 					+ resource.getClass().getSimpleName());
 		}
+	}
+
+	/**
+	 * Returns the version for the given resource URI string.
+	 *
+	 * @param uriString String representation of the resource URI
+	 * @param mavenProperties the maven properties to use in case of maven resource
+	 * @return the resource version
+	 */
+	public static String getResourceVersion(String uriString, MavenProperties mavenProperties) {
+		return ResourceUtils.getResourceVersion(getResource(uriString, mavenProperties));
 	}
 
 	private static String formatDockerResource(DockerResource dockerResource,

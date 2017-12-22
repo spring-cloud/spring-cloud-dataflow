@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
 import org.springframework.cloud.dataflow.registry.support.ResourceUtils;
+import org.springframework.cloud.deployer.resource.maven.MavenProperties;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
@@ -27,6 +28,7 @@ import org.springframework.util.StringUtils;
  * {@link AppRegistryCommon} implementation common for the Classic and the Skipper modes.
  * 
  * @author Christian Tzolov
+ * @author Ilayaperumal Gopinathan
  */
 public abstract class AbstractAppRegistryCommon implements AppRegistryCommon {
 
@@ -34,19 +36,22 @@ public abstract class AbstractAppRegistryCommon implements AppRegistryCommon {
 
 	public static final String METADATA_KEY_SUFFIX = "metadata";
 
-	private ResourceLoader resourceLoader;
+	protected ResourceLoader resourceLoader;
+
+	protected MavenProperties mavenProperties;
 
 	public AbstractAppRegistryCommon(ResourceLoader resourceLoader) {
 		this.resourceLoader = resourceLoader;
 	}
 
-	public ResourceLoader getResourceLoader() {
-		return this.resourceLoader;
+	public AbstractAppRegistryCommon(ResourceLoader resourceLoader, MavenProperties mavenProperties) {
+		this.resourceLoader = resourceLoader;
+		this.mavenProperties = mavenProperties;
 	}
 
 	@Override
 	public Resource getAppResource(AppRegistration appRegistration) {
-		return this.resourceLoader.getResource(appRegistration.getUri().toString());
+		return ResourceUtils.getResource(appRegistration.getUri().toString(), this.mavenProperties);
 	}
 
 	@Override
@@ -121,9 +126,7 @@ public abstract class AbstractAppRegistryCommon implements AppRegistryCommon {
 
 	private String getVersionOrBroken(String uri) {
 		try {
-			Resource appResource = resourceLoader.getResource(uri);
-
-			return ResourceUtils.getResourceVersion(appResource);
+			return ResourceUtils.getResourceVersion(uri, this.mavenProperties);
 		}
 		catch (IllegalStateException ise) {
 			logger.warn("", ise);

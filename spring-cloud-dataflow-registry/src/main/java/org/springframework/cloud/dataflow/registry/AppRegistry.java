@@ -31,6 +31,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
 import org.springframework.cloud.dataflow.registry.support.NoSuchAppRegistrationException;
+import org.springframework.cloud.deployer.resource.maven.MavenProperties;
 import org.springframework.cloud.deployer.resource.registry.UriRegistry;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
@@ -66,8 +67,6 @@ public class AppRegistry extends AbstractAppRegistryCommon implements AppRegistr
 
 	private final UriRegistry uriRegistry;
 
-	private final ResourceLoader resourceLoader;
-
 	private static final Function<Map.Entry<Object, Object>, AbstractMap.SimpleImmutableEntry<String, URI>> toStringAndUriFUNC = kv -> {
 		try {
 			return new AbstractMap.SimpleImmutableEntry<>((String) kv.getKey(), new URI((String) kv.getValue()));
@@ -80,9 +79,14 @@ public class AppRegistry extends AbstractAppRegistryCommon implements AppRegistr
 	public AppRegistry(UriRegistry uriRegistry, ResourceLoader resourceLoader) {
 		super(resourceLoader);
 		Assert.notNull(uriRegistry, "'uriRegistry' must not be null");
+		this.uriRegistry = uriRegistry;
+	}
+
+	public AppRegistry(UriRegistry uriRegistry, ResourceLoader resourceLoader, MavenProperties mavenProperties) {
+		super(resourceLoader, mavenProperties);
+		Assert.notNull(uriRegistry, "'uriRegistry' must not be null");
 		Assert.notNull(resourceLoader, "'resourceLoader' must not be null");
 		this.uriRegistry = uriRegistry;
-		this.resourceLoader = resourceLoader;
 	}
 
 	public AppRegistration find(String name, ApplicationType type) {

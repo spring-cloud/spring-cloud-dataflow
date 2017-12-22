@@ -27,6 +27,7 @@ import org.springframework.cloud.dataflow.registry.AbstractAppRegistryCommon;
 import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
 import org.springframework.cloud.dataflow.registry.repository.AppRegistrationRepository;
 import org.springframework.cloud.dataflow.registry.support.NoSuchAppRegistrationException;
+import org.springframework.cloud.deployer.resource.maven.MavenProperties;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.data.domain.Page;
@@ -64,16 +65,11 @@ public class DefaultAppRegistryService extends AbstractAppRegistryCommon impleme
 	private final AppRegistrationRepository appRegistrationRepository;
 
 	public DefaultAppRegistryService(AppRegistrationRepository appRegistrationRepository,
-			ResourceLoader resourceLoader) {
-		super(resourceLoader);
+			ResourceLoader resourceLoader, MavenProperties mavenProperties) {
+		super(resourceLoader, mavenProperties);
 		Assert.notNull(appRegistrationRepository, "'appRegistrationRepository' must not be null");
 		Assert.notNull(resourceLoader, "'resourceLoader' must not be null");
 		this.appRegistrationRepository = appRegistrationRepository;
-	}
-
-	@Override
-	public Resource getResource(String uri) {
-		return (uri == null) ? null : this.getResourceLoader().getResource(uri);
 	}
 
 	@Override

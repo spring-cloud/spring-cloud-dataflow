@@ -147,8 +147,9 @@ public class DataFlowControllerAutoConfiguration {
 	@Bean
 	@ConditionalOnExpression("#{'${" + FeaturesProperties.FEATURES_PREFIX + "." + FeaturesProperties.SKIPPER_ENABLED
 			+ ":false}'.equalsIgnoreCase('false')}")
-	public AppRegistry appRegistry(UriRegistry uriRegistry, DelegatingResourceLoader resourceLoader) {
-		return new AppRegistry(uriRegistry, resourceLoader);
+	public AppRegistry appRegistry(UriRegistry uriRegistry, DelegatingResourceLoader resourceLoader,
+			MavenProperties mavenProperties) {
+		return new AppRegistry(uriRegistry, resourceLoader, mavenProperties);
 	}
 
 	@Bean
@@ -156,7 +157,7 @@ public class DataFlowControllerAutoConfiguration {
 			+ ":false}'.equalsIgnoreCase('true')}")
 	public AppRegistryService appRegistryService(AppRegistrationRepository appRegistrationRepository,
 			DelegatingResourceLoader resourceLoader) {
-		return new DefaultAppRegistryService(appRegistrationRepository, resourceLoader);
+		return new DefaultAppRegistryService(appRegistrationRepository, resourceLoader, mavenProperties());
 	}
 
 	@Bean
@@ -164,7 +165,7 @@ public class DataFlowControllerAutoConfiguration {
 			+ ":false}'.equalsIgnoreCase('true')}")
 	public VersionedAppRegistryController appRegistryController2(AppRegistryService appRegistry,
 			ApplicationConfigurationMetadataResolver metadataResolver) {
-		return new VersionedAppRegistryController(appRegistry, metadataResolver, appRegistryFJPFB().getObject());
+		return new VersionedAppRegistryController(appRegistry, metadataResolver, appRegistryFJPFB().getObject(), mavenProperties());
 	}
 
 	@Bean

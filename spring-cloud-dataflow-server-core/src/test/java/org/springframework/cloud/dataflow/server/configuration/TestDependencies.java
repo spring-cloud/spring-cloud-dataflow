@@ -137,11 +137,15 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	}
 
 	@Bean
-	public DelegatingResourceLoader resourceLoader() {
+	public MavenProperties mavenProperties() {
 		MavenProperties mavenProperties = new MavenProperties();
 		mavenProperties.setRemoteRepositories(new HashMap<>(Collections.singletonMap("springRepo",
 				new MavenProperties.RemoteRepository("https://repo.spring.io/libs-snapshot"))));
+		return mavenProperties;
+	}
 
+	@Bean
+	public DelegatingResourceLoader resourceLoader(MavenProperties mavenProperties) {
 		Map<String, ResourceLoader> resourceLoaders = new HashMap<>();
 		resourceLoaders.put("maven", new MavenResourceLoader(mavenProperties));
 		resourceLoaders.put("file", new FileSystemResourceLoader());
@@ -244,16 +248,17 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	@Bean
 	@ConditionalOnExpression("#{'${" + FeaturesProperties.FEATURES_PREFIX + "." + FeaturesProperties.SKIPPER_ENABLED
 			+ ":false}'.equalsIgnoreCase('true')}")
-	public AppRegistryService appRegistryService(AppRegistrationRepository appRegistrationRepository) {
-		return new DefaultAppRegistryService(appRegistrationRepository, resourceLoader());
+	public AppRegistryService appRegistryService(AppRegistrationRepository appRegistrationRepository,
+			MavenProperties mavenProperties) {
+		return new DefaultAppRegistryService(appRegistrationRepository, resourceLoader(mavenProperties), mavenProperties);
 	}
 
 	@Bean
 	@ConditionalOnExpression("#{'${" + FeaturesProperties.FEATURES_PREFIX + "." + FeaturesProperties.SKIPPER_ENABLED
 			+ ":false}'.equalsIgnoreCase('true')}")
 	public VersionedAppRegistryController versionedAppRegistryController(AppRegistryService appRegistry,
-																ApplicationConfigurationMetadataResolver metadataResolver) {
-		return new VersionedAppRegistryController(appRegistry, metadataResolver, new ForkJoinPool(2));
+			ApplicationConfigurationMetadataResolver metadataResolver, MavenProperties mavenProperties) {
+		return new VersionedAppRegistryController(appRegistry, metadataResolver, new ForkJoinPool(2), mavenProperties);
 	}
 
 	@Bean
@@ -314,17 +319,18 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	@Bean
 	public TaskDefinitionController taskDefinitionController(TaskDefinitionRepository repository,
 			DeploymentIdRepository deploymentIdRepository, ApplicationConfigurationMetadataResolver metadataResolver,
-															AppRegistryCommon appRegistry) {
+			AppRegistryCommon appRegistry, DelegatingResourceLoader delegatingResourceLoader) {
 		return new TaskDefinitionController(repository, deploymentIdRepository, taskLauncher(), appRegistry,
-				taskService(metadataResolver, taskRepository(), deploymentIdRepository, appRegistry));
+				taskService(metadataResolver, taskRepository(), deploymentIdRepository, appRegistry, delegatingResourceLoader));
 	}
 
 	@Bean
 	public TaskExecutionController taskExecutionController(TaskExplorer explorer,
 			ApplicationConfigurationMetadataResolver metadataResolver, DeploymentIdRepository deploymentIdRepository,
-														AppRegistryCommon appRegistry) {
+			AppRegistryCommon appRegistry, DelegatingResourceLoader delegatingResourceLoader) {
 		return new TaskExecutionController(explorer,
-				taskService(metadataResolver, taskRepository(), deploymentIdRepository, appRegistry), taskDefinitionRepository());
+				taskService(metadataResolver, taskRepository(), deploymentIdRepository, appRegistry, delegatingResourceLoader),
+				taskDefinitionRepository());
 	}
 
 	@Bean
@@ -360,9 +366,9 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	@Bean
 	public TaskService taskService(ApplicationConfigurationMetadataResolver metadataResolver,
 			TaskRepository taskExecutionRepository, DeploymentIdRepository deploymentIdRepository,
-								AppRegistryCommon appRegistry) {
+								AppRegistryCommon appRegistry, DelegatingResourceLoader delegatingResourceLoader) {
 		return new DefaultTaskService(new DataSourceProperties(), taskDefinitionRepository(), taskExplorer(),
-				taskExecutionRepository, appRegistry, resourceLoader(), taskLauncher(), metadataResolver,
+				taskExecutionRepository, appRegistry, delegatingResourceLoader, taskLauncher(), metadataResolver,
 				new TaskConfigurationProperties(), deploymentIdRepository, null);
 	}
 

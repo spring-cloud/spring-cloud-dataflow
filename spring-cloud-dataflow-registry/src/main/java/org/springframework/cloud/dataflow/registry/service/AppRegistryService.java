@@ -5,7 +5,6 @@ import java.net.URI;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.registry.AppRegistryCommon;
 import org.springframework.cloud.dataflow.registry.domain.AppRegistration;
-import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -36,8 +35,6 @@ public interface AppRegistryService extends AppRegistryCommon {
 	AppRegistration save(String name, ApplicationType type, String version, URI uri, URI metadataUri);
 
 	void delete(String name, ApplicationType type, String version);
-
-	Resource getResource(String uri);
 
 	boolean appExist(String name, ApplicationType type, String version);
 

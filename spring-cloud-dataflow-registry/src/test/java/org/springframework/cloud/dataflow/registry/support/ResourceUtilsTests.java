@@ -15,13 +15,17 @@
  */
 package org.springframework.cloud.dataflow.registry.support;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
-
 import java.net.MalformedURLException;
 
 import org.junit.Test;
+
+import org.springframework.cloud.deployer.resource.maven.MavenProperties;
+import org.springframework.cloud.deployer.resource.maven.MavenResource;
+import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /**
  * @author Mark Pollack
@@ -115,6 +119,19 @@ public class ResourceUtilsTests {
 		assertThat(version).isEqualTo("1.2.0-SNAPSHOT");
 		theRest = ResourceUtils.getResourceWithoutVersion(urlResource);
 		assertThat(theRest).isEqualTo("http://repo.spring.io/libs-release/org/springframework/cloud/stream/app/file-sink-rabbit/file-sink-rabbit");
+	}
 
+	@Test
+	public void testGetResource() {
+		String mavenUri = "maven://org.springframework.cloud.stream.app:aggregate-counter-sink-rabbit:1.3.0.RELEASE";
+		Resource resource = ResourceUtils.getResource(mavenUri, new MavenProperties());
+		assertThat(resource).isInstanceOf(MavenResource.class);
+	}
+
+	@Test
+	public void testGetResourceVersion() {
+		String mavenUri = "maven://org.springframework.cloud.stream.app:aggregate-counter-sink-rabbit:1.3.0.RELEASE";
+		String version = ResourceUtils.getResourceVersion(ResourceUtils.getResource(mavenUri, new MavenProperties()));
+		assertThat(version).isEqualTo("1.3.0.RELEASE");
 	}
 }

@@ -40,8 +40,10 @@ import org.springframework.cloud.dataflow.registry.support.NoSuchAppRegistration
 import org.springframework.cloud.dataflow.registry.support.ResourceUtils;
 import org.springframework.cloud.dataflow.rest.resource.AppRegistrationResource;
 import org.springframework.cloud.dataflow.rest.resource.DetailedAppRegistrationResource;
+import org.springframework.cloud.deployer.resource.maven.MavenProperties;
 import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.Resource;
+import org.springframework.core.io.DefaultResourceLoader;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -85,12 +87,17 @@ public class VersionedAppRegistryController {
 
 	private ForkJoinPool forkJoinPool;
 
+	private final MavenProperties mavenProperties;
+
+	private ResourceLoader resourceLoader = new DefaultResourceLoader();
+
 	public VersionedAppRegistryController(AppRegistryService appRegistryService,
 			ApplicationConfigurationMetadataResolver metadataResolver,
-			ForkJoinPool forkJoinPool) {
+			ForkJoinPool forkJoinPool, MavenProperties mavenProperties) {
 		this.appRegistryService = appRegistryService;
 		this.metadataResolver = metadataResolver;
 		this.forkJoinPool = forkJoinPool;
+		this.mavenProperties = mavenProperties;
 	}
 
 	/**
@@ -193,9 +200,7 @@ public class VersionedAppRegistryController {
 	public void register(@PathVariable("type") ApplicationType type, @PathVariable("name") String name,
 			@RequestParam("uri") String uri, @RequestParam(name = "metadata-uri", required = false) String metadataUri,
 			@RequestParam(value = "force", defaultValue = "false") boolean force) {
-
-		Resource resource = this.appRegistryService.getResource(uri);
-		String version = ResourceUtils.getResourceVersion(resource);
+		String version = ResourceUtils.getResourceVersion(uri, this.mavenProperties);
 		this.register(type, name, version, uri, metadataUri, force);
 	}
 
@@ -263,7 +268,7 @@ public class VersionedAppRegistryController {
 		List<AppRegistration> registrations = new ArrayList<>();
 
 		if (StringUtils.hasText(uri)) {
-			registrations.addAll(appRegistryService.importAll(force, this.appRegistryService.getResource(uri)));
+			registrations.addAll(appRegistryService.importAll(force, this.resourceLoader.getResource(uri)));
 		}
 		else if (!CollectionUtils.isEmpty(apps)) {
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
