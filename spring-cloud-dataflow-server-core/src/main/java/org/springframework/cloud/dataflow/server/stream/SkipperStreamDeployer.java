@@ -148,8 +148,7 @@ public class SkipperStreamDeployer implements StreamDeployer {
 		return states;
 	}
 
-	@Override
-	public void deployStream(StreamDeploymentRequest streamDeploymentRequest) {
+	public Release deployStream(StreamDeploymentRequest streamDeploymentRequest) {
 		Map<String, String> streamDeployerProperties = streamDeploymentRequest.getStreamDeployerProperties();
 		String packageVersion = streamDeployerProperties.get(SKIPPER_PACKAGE_VERSION);
 		Assert.isTrue(StringUtils.hasText(packageVersion), "Package Version must be set");
@@ -190,12 +189,12 @@ public class SkipperStreamDeployer implements StreamDeployer {
 		installRequest.setInstallProperties(installProperties);
 		StreamDeployment streamDeployment = new StreamDeployment(streamName, StreamDeployers.skipper.name(), streamName,
 				streamName, repoName);
-		skipperClient.install(installRequest);
+		Release release = skipperClient.install(installRequest);
 		this.streamDeploymentRepository.save(streamDeployment);
 		// TODO store releasename in deploymentIdRepository...
 		// this.deploymentIdRepository.save(DeploymentKey.forStreamAppDefinition(streamAppDefinition),
 		// id);
-
+		return release;
 	}
 
 	private File createPackageForStream(String packageName, String packageVersion,
