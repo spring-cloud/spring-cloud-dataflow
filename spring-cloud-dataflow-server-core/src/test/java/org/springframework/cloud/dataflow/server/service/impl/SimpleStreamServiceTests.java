@@ -90,7 +90,7 @@ public class SimpleStreamServiceTests {
 
 	private AppDeploymentRequestCreator appDeploymentRequestCreator;
 
-	private SimpleStreamService simpleStreamService;
+	private AppDeployerStreamService simpleStreamService;
 
 	@Before
 	public void setupMock() {
@@ -101,7 +101,7 @@ public class SimpleStreamServiceTests {
 		this.appDeploymentRequestCreator = new AppDeploymentRequestCreator(mock(AppRegistry.class),
 				mock(CommonApplicationProperties.class),
 				new BootApplicationConfigurationMetadataResolver());
-		this.simpleStreamService = new SimpleStreamService(mock(StreamDefinitionRepository.class),
+		this.simpleStreamService = new AppDeployerStreamService(mock(StreamDefinitionRepository.class),
 				this.streamDeploymentRepository, this.appDeployerStreamDeployer, this.appDeploymentRequestCreator);
 		this.streamDefinitionList.add(streamDefinition1);
 		this.appDeployerStreamDefinitions.add(streamDefinition1);
