@@ -19,8 +19,8 @@ import org.junit.Test;
 
 import org.springframework.cloud.deployer.resource.support.DelegatingResourceLoader;
 import org.springframework.cloud.skipper.SkipperException;
-import org.springframework.cloud.skipper.server.domain.SpringCloudDeployerApplicationManifest;
-import org.springframework.cloud.skipper.server.domain.SpringCloudDeployerApplicationSpec;
+import org.springframework.cloud.skipper.domain.SpringCloudDeployerApplicationManifest;
+import org.springframework.cloud.skipper.domain.SpringCloudDeployerApplicationSpec;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Fail.fail;

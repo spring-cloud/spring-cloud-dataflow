@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.cloud.skipper.server.domain;
+package org.springframework.cloud.skipper.domain;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -23,7 +23,7 @@ import java.util.Map;
 import org.junit.Test;
 
 import org.springframework.cloud.skipper.SkipperException;
-import org.springframework.cloud.skipper.server.TestResourceUtils;
+import org.springframework.cloud.skipper.TestResourceUtils;
 import org.springframework.util.StreamUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;

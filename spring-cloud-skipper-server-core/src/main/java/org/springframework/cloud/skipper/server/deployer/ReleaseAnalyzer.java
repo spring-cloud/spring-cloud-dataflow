@@ -29,8 +29,8 @@ import org.slf4j.LoggerFactory;
 
 import org.springframework.cloud.skipper.SkipperException;
 import org.springframework.cloud.skipper.domain.Release;
-import org.springframework.cloud.skipper.server.domain.SpringCloudDeployerApplicationManifest;
-import org.springframework.cloud.skipper.server.domain.SpringCloudDeployerApplicationManifestReader;
+import org.springframework.cloud.skipper.domain.SpringCloudDeployerApplicationManifest;
+import org.springframework.cloud.skipper.domain.SpringCloudDeployerApplicationManifestReader;
 import org.springframework.util.StringUtils;
 
 /**

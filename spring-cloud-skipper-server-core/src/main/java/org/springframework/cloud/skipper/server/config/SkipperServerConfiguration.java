@@ -36,6 +36,7 @@ import org.springframework.cloud.deployer.resource.maven.MavenProperties;
 import org.springframework.cloud.deployer.resource.maven.MavenResourceLoader;
 import org.springframework.cloud.deployer.resource.support.DelegatingResourceLoader;
 import org.springframework.cloud.deployer.resource.support.LRUCleaningResourceLoaderBeanPostProcessor;
+import org.springframework.cloud.skipper.domain.SpringCloudDeployerApplicationManifestReader;
 import org.springframework.cloud.skipper.io.DefaultPackageReader;
 import org.springframework.cloud.skipper.io.DefaultPackageWriter;
 import org.springframework.cloud.skipper.io.PackageReader;
@@ -54,7 +55,6 @@ import org.springframework.cloud.skipper.server.deployer.strategies.HealthCheckP
 import org.springframework.cloud.skipper.server.deployer.strategies.HealthCheckStep;
 import org.springframework.cloud.skipper.server.deployer.strategies.SimpleRedBlackUpgradeStrategy;
 import org.springframework.cloud.skipper.server.deployer.strategies.UpgradeStrategy;
-import org.springframework.cloud.skipper.server.domain.SpringCloudDeployerApplicationManifestReader;
 import org.springframework.cloud.skipper.server.index.PackageMetadataResourceProcessor;
 import org.springframework.cloud.skipper.server.index.PackageSummaryResourceProcessor;
 import org.springframework.cloud.skipper.server.index.SkipperControllerResourceProcessor;

@@ -26,8 +26,8 @@ import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.skipper.SkipperException;
-import org.springframework.cloud.skipper.server.domain.SpringCloudDeployerApplicationManifest;
-import org.springframework.cloud.skipper.server.domain.SpringCloudDeployerApplicationSpec;
+import org.springframework.cloud.skipper.domain.SpringCloudDeployerApplicationManifest;
+import org.springframework.cloud.skipper.domain.SpringCloudDeployerApplicationSpec;
 import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
 

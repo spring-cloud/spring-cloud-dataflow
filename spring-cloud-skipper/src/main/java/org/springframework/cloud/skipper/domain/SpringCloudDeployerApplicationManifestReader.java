@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.cloud.skipper.server.domain;
+package org.springframework.cloud.skipper.domain;
 
 import java.io.IOException;
 import java.util.ArrayList;
