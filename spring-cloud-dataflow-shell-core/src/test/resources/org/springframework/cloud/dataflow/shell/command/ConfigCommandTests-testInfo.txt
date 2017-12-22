@@ -2,7 +2,8 @@
 ║     Target      │        http://localhost:9393        ║
 ╟─────────────────┼─────────────────────────────────────╢
 ║                 │Analytics Enabled: true              ║
-║    Features     │  Streams Enabled: true              ║
+║    Features     │  Skipper Enabled: false             ║
+║                 │  Streams Enabled: true              ║
 ║                 │    Tasks Enabled: false             ║
 ╟─────────────────┼─────────────────────────────────────╢
 ║    Versions     │Foo Core: 1.2.3.BUILD-SNAPSHOT       ║

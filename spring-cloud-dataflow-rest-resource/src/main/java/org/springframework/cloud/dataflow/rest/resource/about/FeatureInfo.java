@@ -30,7 +30,7 @@ public class FeatureInfo {
 
 	private boolean tasksEnabled = true;
 
-	private boolean skipperEnabled = true;
+	private boolean skipperEnabled = false;
 
 	/**
 	 * Default constructor for serialization frameworks.
