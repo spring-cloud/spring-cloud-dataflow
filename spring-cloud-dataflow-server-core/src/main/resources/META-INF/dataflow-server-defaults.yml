@@ -121,4 +121,4 @@ spring:
             # Tools
 
             - POST   /tools/**                       => hasRole('ROLE_CREATE')
-            - POST   /tools/**                       => hasRole('ROLE_CREATE')
+
