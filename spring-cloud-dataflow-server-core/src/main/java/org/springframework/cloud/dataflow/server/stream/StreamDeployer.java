@@ -29,10 +29,6 @@ import org.springframework.cloud.deployer.spi.app.DeploymentState;
  */
 public interface StreamDeployer {
 
-	// TODO return 'stream handle' stream name for AppDeployer impl, release name for Skipper impl.
-	// TODO store releaseName in SCDF for stream name?
-//	void  deployStream(StreamDeploymentRequest streamDeploymentRequest);
-
 	String calculateStreamState(String streamName);
 
 	Map<StreamDefinition, DeploymentState> state(List<StreamDefinition> content);
