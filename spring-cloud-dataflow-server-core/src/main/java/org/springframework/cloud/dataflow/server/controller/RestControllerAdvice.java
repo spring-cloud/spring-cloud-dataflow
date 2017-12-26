@@ -39,6 +39,7 @@ import org.springframework.cloud.dataflow.server.repository.NoSuchTaskExecutionE
 import org.springframework.cloud.dataflow.server.support.ApplicationDoesNotExistException;
 import org.springframework.hateoas.VndErrors;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.UnsatisfiedServletRequestParameterException;
@@ -164,7 +165,7 @@ public class RestControllerAdvice {
 	 * @return the error response in JSON format with media type
 	 * application/vnd.error+json
 	 */
-	@ExceptionHandler({ MissingServletRequestParameterException.class,
+	@ExceptionHandler({ MissingServletRequestParameterException.class, HttpMessageNotReadableException.class,
 			UnsatisfiedServletRequestParameterException.class, MethodArgumentTypeMismatchException.class,
 			InvalidStreamDefinitionException.class })
 	@ResponseStatus(HttpStatus.BAD_REQUEST)

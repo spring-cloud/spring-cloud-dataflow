@@ -171,11 +171,11 @@ public class LocalServerSecurityWithSingleUserTests {
 				{ HttpMethod.PUT, HttpStatus.FORBIDDEN, "/tools/convertTaskGraphToText", singleUser,
 						TestUtils.toImmutableMap("detailLevel", "2") },
 
-				{ HttpMethod.POST, HttpStatus.INTERNAL_SERVER_ERROR, "/tools/parseTaskTextToGraph", singleUser,
+				{ HttpMethod.POST, HttpStatus.BAD_REQUEST, "/tools/parseTaskTextToGraph", singleUser,
 						TestUtils.toImmutableMap("name", "foo", "dsl", "t1 && t2")},
 				{ HttpMethod.POST, HttpStatus.UNAUTHORIZED, "/tools/parseTaskTextToGraph", null, null },
 
-				{ HttpMethod.POST, HttpStatus.INTERNAL_SERVER_ERROR, "/tools/convertTaskGraphToText", singleUser, null},
+				{ HttpMethod.POST, HttpStatus.BAD_REQUEST, "/tools/convertTaskGraphToText", singleUser, null},
 				{ HttpMethod.POST, HttpStatus.UNAUTHORIZED, "/tools/convertTaskGraphToText", null, null },
 
 				/* FeaturesController */
@@ -399,8 +399,8 @@ public class LocalServerSecurityWithSingleUserTests {
 
 				/* LoginController */
 
-				{ HttpMethod.POST, HttpStatus.INTERNAL_SERVER_ERROR, "/authenticate", singleUser, null },
-				{ HttpMethod.POST, HttpStatus.INTERNAL_SERVER_ERROR, "/authenticate", null, null },
+				{ HttpMethod.POST, HttpStatus.BAD_REQUEST, "/authenticate", singleUser, null },
+				{ HttpMethod.POST, HttpStatus.BAD_REQUEST, "/authenticate", null, null },
 
 				/* SecurityController */
 

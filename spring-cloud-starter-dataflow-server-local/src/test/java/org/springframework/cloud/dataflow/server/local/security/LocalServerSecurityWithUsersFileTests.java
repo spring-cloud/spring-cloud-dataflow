@@ -562,10 +562,10 @@ public class LocalServerSecurityWithUsersFileTests {
 
 				/* LoginController */
 
-				{ HttpMethod.POST, HttpStatus.INTERNAL_SERVER_ERROR, "/authenticate", manageOnlyUser, null },
-				{ HttpMethod.POST, HttpStatus.INTERNAL_SERVER_ERROR, "/authenticate", viewOnlyUser, null },
-				{ HttpMethod.POST, HttpStatus.INTERNAL_SERVER_ERROR, "/authenticate", createOnlyUser, null },
-				{ HttpMethod.POST, HttpStatus.INTERNAL_SERVER_ERROR, "/authenticate", null, null },
+				{ HttpMethod.POST, HttpStatus.BAD_REQUEST, "/authenticate", manageOnlyUser, null },
+				{ HttpMethod.POST, HttpStatus.BAD_REQUEST, "/authenticate", viewOnlyUser, null },
+				{ HttpMethod.POST, HttpStatus.BAD_REQUEST, "/authenticate", createOnlyUser, null },
+				{ HttpMethod.POST, HttpStatus.BAD_REQUEST, "/authenticate", null, null },
 
 				/* SecurityController */
 

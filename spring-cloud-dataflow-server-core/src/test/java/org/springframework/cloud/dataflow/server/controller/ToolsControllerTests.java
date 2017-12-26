@@ -65,7 +65,7 @@ public class ToolsControllerTests {
 	@Test
 	public void testMissingArgumentFailure() throws Exception {
 		mockMvc.perform(post("/tools/parseTaskTextToGraph").accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isInternalServerError());
+				.andExpect(status().isBadRequest());
 	}
 
 	@Test
