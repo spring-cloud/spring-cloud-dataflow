@@ -16,9 +16,6 @@
 
 package org.springframework.cloud.dataflow.server.controller;
 
-import static org.mockito.Mockito.*;
-import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_ENABLED_PROPERTY_KEY;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -32,10 +29,16 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
-import org.springframework.cloud.dataflow.server.service.impl.DefaultStreamService;
+import org.springframework.cloud.dataflow.server.service.StreamService;
 import org.springframework.cloud.skipper.client.SkipperClient;
 import org.springframework.hateoas.Resources;
+
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_ENABLED_PROPERTY_KEY;
 
 /**
  * Unit tests for StreamDeploymentController.
@@ -55,7 +58,7 @@ public class StreamDeploymentControllerTests {
 	private StreamDefinitionRepository streamDefinitionRepository;
 
 	@Mock
-	private DefaultStreamService defaultStreamService;
+	private StreamService defaultStreamService;
 
 	@Mock
 	private SkipperClient skipperClient;

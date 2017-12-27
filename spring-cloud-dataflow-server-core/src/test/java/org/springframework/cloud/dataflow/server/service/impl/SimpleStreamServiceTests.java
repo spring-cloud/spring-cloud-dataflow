@@ -17,9 +17,7 @@
 package org.springframework.cloud.dataflow.server.service.impl;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -32,13 +30,12 @@ import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.StreamDeployment;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
-import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
+import org.springframework.cloud.dataflow.server.repository.IncompatibleStreamDeployerException;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.StreamDeploymentRepository;
 import org.springframework.cloud.dataflow.server.stream.AppDeployerStreamDeployer;
 import org.springframework.cloud.dataflow.server.stream.SkipperStreamDeployer;
 import org.springframework.cloud.dataflow.server.stream.StreamDeployers;
-import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.Assert;
 
@@ -54,9 +51,10 @@ import static org.mockito.Mockito.when;
 /**
  * @author Ilayaperumal Gopinathan
  * @author Eric Bottard
+ * @author Christian Tzolov
  */
 @RunWith(SpringRunner.class)
-public class DefaultStreamServiceTests {
+public class SimpleStreamServiceTests {
 
 	@Rule
 	public ExpectedException thrown = ExpectedException.none();
@@ -92,11 +90,7 @@ public class DefaultStreamServiceTests {
 
 	private AppDeploymentRequestCreator appDeploymentRequestCreator;
 
-	private DefaultStreamService defaultStreamService;
-
-	private AppRegistry appRegistry;
-
-	private FeaturesProperties featuresProperties = new FeaturesProperties();
+	private AppDeployerStreamService simpleStreamService;
 
 	@Before
 	public void setupMock() {
@@ -104,13 +98,11 @@ public class DefaultStreamServiceTests {
 		this.streamDefinitionRepository = mock(StreamDefinitionRepository.class);
 		this.appDeployerStreamDeployer = mock(AppDeployerStreamDeployer.class);
 		this.skipperStreamDeployer = mock(SkipperStreamDeployer.class);
-		this.appRegistry = mock(AppRegistry.class);
 		this.appDeploymentRequestCreator = new AppDeploymentRequestCreator(mock(AppRegistry.class),
 				mock(CommonApplicationProperties.class),
 				new BootApplicationConfigurationMetadataResolver());
-		this.defaultStreamService = new DefaultStreamService(mock(StreamDefinitionRepository.class),
-				this.streamDeploymentRepository, this.appDeployerStreamDeployer, this.skipperStreamDeployer,
-				appDeploymentRequestCreator, this.featuresProperties);
+		this.simpleStreamService = new AppDeployerStreamService(mock(StreamDefinitionRepository.class),
+				this.streamDeploymentRepository, this.appDeployerStreamDeployer, this.appDeploymentRequestCreator);
 		this.streamDefinitionList.add(streamDefinition1);
 		this.appDeployerStreamDefinitions.add(streamDefinition1);
 		this.streamDefinitionList.add(streamDefinition2);
@@ -128,19 +120,28 @@ public class DefaultStreamServiceTests {
 		StreamDefinition streamDefinition1 = new StreamDefinition("test1", "time | log");
 		StreamDeployment streamDeployment1 = new StreamDeployment(streamDefinition1.getName(),
 				StreamDeployers.appdeployer.name(), null, null, null);
-		StreamDefinition streamDefinition2 = new StreamDefinition("test2", "time | log");
-		StreamDeployment streamDeployment2 = new StreamDeployment(streamDefinition2.getName(),
-				StreamDeployers.skipper.name(), "pkg1", "release1", "local");
 		when(this.streamDeploymentRepository.findOne(streamDeployment1.getStreamName())).thenReturn(streamDeployment1);
-		when(this.streamDeploymentRepository.findOne(streamDeployment2.getStreamName())).thenReturn(streamDeployment2);
-		this.defaultStreamService.undeployStream(streamDefinition1.getName());
+		this.simpleStreamService.undeployStream(streamDefinition1.getName());
 		verify(this.appDeployerStreamDeployer, times(1)).undeployStream(streamDefinition1.getName());
 		verifyNoMoreInteractions(this.appDeployerStreamDeployer);
 		verify(this.skipperStreamDeployer, never()).undeployStream(streamDefinition1.getName());
-		this.defaultStreamService.undeployStream(streamDefinition2.getName());
-		verify(this.skipperStreamDeployer, times(1)).undeployStream(streamDefinition2.getName());
-		verifyNoMoreInteractions(this.skipperStreamDeployer);
-		verify(this.appDeployerStreamDeployer, never()).undeployStream(streamDefinition2.getName());
+	}
+
+	@Test
+	public void verifyUndeployStream2() {
+		StreamDefinition streamDefinition2 = new StreamDefinition("test2", "time | log");
+		StreamDeployment streamDeployment2 = new StreamDeployment(streamDefinition2.getName(),
+				StreamDeployers.skipper.name(), "pkg1", "release1", "local");
+		when(this.streamDeploymentRepository.findOne(streamDeployment2.getStreamName())).thenReturn(streamDeployment2);
+
+		try {
+			this.simpleStreamService.undeployStream(streamDefinition2.getName());
+			fail("IncompatibleStreamDeployerException is expected when trying to rollback a stream that was deployed using "
+					+ "app deployer");
+		}
+		catch (IncompatibleStreamDeployerException e) {
+
+		}
 	}
 
 	@Test
@@ -148,31 +149,22 @@ public class DefaultStreamServiceTests {
 		StreamDefinition streamDefinition1 = new StreamDefinition("test1", "time | log");
 		StreamDeployment streamDeployment1 = new StreamDeployment(streamDefinition1.getName(),
 				StreamDeployers.appdeployer.name(), null, null, null);
-		StreamDefinition streamDefinition2 = new StreamDefinition("test2", "time | log");
-		StreamDeployment streamDeployment2 = new StreamDeployment(streamDefinition2.getName(),
-				StreamDeployers.skipper.name(), "pkg1", "release1", "local");
 		when(this.streamDeploymentRepository.findOne(streamDeployment1.getStreamName())).thenReturn(streamDeployment1);
-		when(this.streamDeploymentRepository.findOne(streamDeployment2.getStreamName())).thenReturn(streamDeployment2);
-
-		verifyNoMoreInteractions(this.skipperStreamDeployer);
 		verifyNoMoreInteractions(this.appDeployerStreamDeployer);
 		try {
-			this.defaultStreamService.rollbackStream(streamDefinition1.getName(), 0);
+			this.simpleStreamService.rollbackStream(streamDefinition1.getName(), 0);
 			fail("IllegalStateException is expected when trying to rollback a stream that was deployed using "
 					+ "app deployer");
 		}
 		catch (IllegalStateException e) {
 			assertThat(e.getMessage()).isEqualTo("Can only rollback stream when using the Skipper stream deployer.");
 		}
-		this.defaultStreamService.rollbackStream(streamDefinition2.getName(), 0);
-		verify(this.skipperStreamDeployer, times(1)).rollbackStream(streamDefinition2.getName(), 0);
-		verifyNoMoreInteractions(this.appDeployerStreamDeployer);
 	}
 
 	@Test
 	public void verifyAppDeployerUpgrade() {
 		try {
-			this.defaultStreamService.updateStream(this.streamDeployment1.getStreamName(),
+			this.simpleStreamService.updateStream(this.streamDeployment1.getStreamName(),
 					this.streamDeployment1.getReleaseName(),
 					null, null);
 			fail("IllegalStateException is expected to be thrown.");
@@ -182,24 +174,4 @@ public class DefaultStreamServiceTests {
 					"Incorrect Exception message");
 		}
 	}
-
-	@Test
-	public void verifyDeploymentState() {
-		Map<StreamDefinition, DeploymentState> appDeployerStates = new HashMap<>();
-		appDeployerStates.put(this.streamDefinition1, DeploymentState.deployed);
-		when(this.appDeployerStreamDeployer.state(this.appDeployerStreamDefinitions)).thenReturn(appDeployerStates);
-		Map<StreamDefinition, DeploymentState> skipperDeployerStates = new HashMap<>();
-		skipperDeployerStates.put(this.streamDefinition2, DeploymentState.undeployed);
-		skipperDeployerStates.put(this.streamDefinition3, DeploymentState.failed);
-		when(this.skipperStreamDeployer.state(this.skipperStreamDefinitions)).thenReturn(skipperDeployerStates);
-		Map<StreamDefinition, DeploymentState> states = this.defaultStreamService.state(this.streamDefinitionList);
-		Assert.isTrue(states.size() == 3, "Deployment states size mismatch");
-		Assert.isTrue(states.get(this.streamDefinition1).equals(DeploymentState.deployed),
-				"Deployment state is incorrect");
-		Assert.isTrue(states.get(this.streamDefinition2).equals(DeploymentState.undeployed),
-				"Deployment state is incorrect");
-		Assert.isTrue(states.get(this.streamDefinition3).equals(DeploymentState.failed),
-				"Deployment state is incorrect");
-	}
-
 }

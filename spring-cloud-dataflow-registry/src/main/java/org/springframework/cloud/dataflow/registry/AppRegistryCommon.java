@@ -74,5 +74,10 @@ public interface AppRegistryCommon {
 	 */
 	Resource getAppMetadataResource(AppRegistration appRegistration);
 
+	/**
+	 * Save an {@link AppRegistration} instance.
+	 * @param app appRegistration to save
+	 * @return the saved appRegistration
+	 */
 	AppRegistration save(AppRegistration app);
 }
