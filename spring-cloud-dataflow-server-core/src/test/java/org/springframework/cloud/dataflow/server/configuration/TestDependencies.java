@@ -357,15 +357,15 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 
 	@Bean
 	@ConditionalOnSkipperDisabled
-	public AppRegistry appRegistry() {
-		return new AppRegistry(uriRegistry(), resourceLoader());
+	public AppRegistry appRegistry(DelegatingResourceLoader resourceLoader) {
+		return new AppRegistry(uriRegistry(), resourceLoader);
 	}
 
 	@Bean
 	@ConditionalOnSkipperEnabled
 	public AppRegistryService appRegistryService(AppRegistrationRepository appRegistrationRepository,
-			DelegatingResourceLoader resourceLoader) {
-		return new DefaultAppRegistryService(appRegistrationRepository, resourceLoader);
+			DelegatingResourceLoader resourceLoader,  MavenProperties mavenProperties) {
+		return new DefaultAppRegistryService(appRegistrationRepository, resourceLoader, mavenProperties);
 	}
 
 	@Bean

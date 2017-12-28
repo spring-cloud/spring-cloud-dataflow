@@ -9,10 +9,6 @@ import org.springframework.cloud.dataflow.registry.support.NoSuchAppRegistration
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-<<<<<<<HEAD
-		=======
-		>>>>>>>address review comments
-
 /**
  * @author Christian Tzolov
  */
