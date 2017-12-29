@@ -17,6 +17,7 @@
 package org.springframework.cloud.dataflow.server.service.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -101,6 +102,7 @@ public class SkipperStreamServiceTests {
 		this.streamDefinitionList.add(streamDefinition3);
 		this.skipperStreamDefinitions.add(streamDefinition2);
 		this.skipperStreamDefinitions.add(streamDefinition3);
+		this.skipperStreamDefinitions.add(streamDefinition4);
 		when(streamDefinitionRepository.findOne("test2")).thenReturn(streamDefinition2);
 		when(streamDeploymentRepository.findOne(streamDeployment1.getStreamName())).thenReturn(streamDeployment1);
 		when(streamDeploymentRepository.findOne(streamDeployment2.getStreamName())).thenReturn(streamDeployment2);
@@ -176,22 +178,22 @@ public class SkipperStreamServiceTests {
 	}
 
 	@Test
-	public void verifyDeploymentState() {
+	public void verifySkipperDeploymentState() {
 
 		Map<StreamDefinition, DeploymentState> skipperDeployerStates = new HashMap<>();
 		skipperDeployerStates.put(this.streamDefinition2, DeploymentState.undeployed);
 		skipperDeployerStates.put(this.streamDefinition3, DeploymentState.failed);
-		skipperDeployerStates.put(this.streamDefinition4, DeploymentState.deployed);
 
-		when(this.skipperStreamDeployer.state(this.skipperStreamDefinitions)).thenReturn(skipperDeployerStates);
+		when(this.skipperStreamDeployer.state(
+				Arrays.asList(streamDefinition2, streamDefinition3))).thenReturn(skipperDeployerStates);
 
-		Map<StreamDefinition, DeploymentState> states = this.skipperStreamService.state(this.streamDefinitionList);
-
-		System.out.println(states.size());
+		// Note that streamDefinition4 has not been deployed? E.g. there is is not deployer in the registry
+		Map<StreamDefinition, DeploymentState> states = this.skipperStreamService.state(
+				Arrays.asList(streamDefinition2, streamDefinition3, streamDefinition4));
 
 		Assert.isTrue(states.size() == 3, "Deployment states size mismatch");
 
-		Assert.isTrue(states.get(this.streamDefinition4).equals(DeploymentState.deployed),
+		Assert.isTrue(states.get(this.streamDefinition4).equals(DeploymentState.unknown),
 				"Deployment state is incorrect");
 		Assert.isTrue(states.get(this.streamDefinition2).equals(DeploymentState.undeployed),
 				"Deployment state is incorrect");

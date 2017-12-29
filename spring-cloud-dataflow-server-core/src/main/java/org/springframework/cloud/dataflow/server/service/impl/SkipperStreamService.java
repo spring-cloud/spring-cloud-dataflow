@@ -45,6 +45,7 @@ import org.springframework.cloud.skipper.domain.PackageIdentifier;
 import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.SpringCloudDeployerApplicationManifest;
 import org.springframework.cloud.skipper.domain.SpringCloudDeployerApplicationManifestReader;
+import org.springframework.cloud.skipper.domain.SpringCloudDeployerApplicationSpec;
 import org.springframework.util.Assert;
 
 import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_KEY_PREFIX;
@@ -59,6 +60,9 @@ import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_KEY_
 public class SkipperStreamService extends AbstractStreamService {
 
 	private static Log logger = LogFactory.getLog(SkipperStreamService.class);
+
+	public static final String SPRING_CLOUD_DATAFLOW_STREAM_APP_LABEL = "spring.cloud.dataflow.stream.app.label";
+	public static final String SPRING_CLOUD_DATAFLOW_STREAM_APP_TYPE = "spring.cloud.dataflow.stream.app.type";
 
 	/**
 	 * The repository this controller will use for stream CRUD operations.
@@ -107,14 +111,17 @@ public class SkipperStreamService extends AbstractStreamService {
 				.createRequests(streamDefinition, deploymentPropertiesToUse);
 
 		DeploymentPropertiesUtils.validateSkipperDeploymentProperties(deploymentPropertiesToUse);
-		Release release = this.skipperStreamDeployer.deployStream(new StreamDeploymentRequest(streamDefinition.getName(),
-				streamDefinition.getDslText(), appDeploymentRequests, skipperDeploymentProperties));
+
+		StreamDeploymentRequest streamDeploymentRequest = new StreamDeploymentRequest(streamDefinition.getName(),
+				streamDefinition.getDslText(), appDeploymentRequests, skipperDeploymentProperties);
+
+		Release release = this.skipperStreamDeployer.deployStream(streamDeploymentRequest);
 
 		if (release != null) {
 			updateStreamDefinitionFromReleaseManifest(streamName, release.getManifest());
 		}
 		else {
-			logger.warn("Missing release after Stream Update!");
+			logger.error("Missing skipper release after Stream deploy!");
 		}
 	}
 
@@ -129,8 +136,8 @@ public class SkipperStreamService extends AbstractStreamService {
 	}
 
 	@Override
-	public void doUpdateStream(String streamName, String releaseName, PackageIdentifier packageIdentifier, Map<String,
-			String> updateProperties) {
+	public void doUpdateStream(String streamName, String releaseName, PackageIdentifier packageIdentifier,
+			Map<String, String> updateProperties) {
 		String yamlProperties = convertPropertiesToSkipperYaml(streamName, updateProperties);
 		Release release = this.skipperStreamDeployer.upgradeStream(releaseName, packageIdentifier, yamlProperties);
 
@@ -138,7 +145,7 @@ public class SkipperStreamService extends AbstractStreamService {
 			updateStreamDefinitionFromReleaseManifest(streamName, release.getManifest());
 		}
 		else {
-			logger.warn("Missing release after Stream Update!");
+			logger.error("Missing release after Stream Update!");
 		}
 	}
 
@@ -150,7 +157,7 @@ public class SkipperStreamService extends AbstractStreamService {
 		Map<String, SpringCloudDeployerApplicationManifest> appManifestMap = new HashMap<>();
 
 		for (SpringCloudDeployerApplicationManifest am : appManifests) {
-			String name = am.getSpec().getApplicationProperties().get("spring.cloud.dataflow.stream.app.label");
+			String name = am.getSpec().getApplicationProperties().get(SPRING_CLOUD_DATAFLOW_STREAM_APP_LABEL);
 			appManifestMap.put(name, am);
 		}
 
@@ -183,15 +190,14 @@ public class SkipperStreamService extends AbstractStreamService {
 			SpringCloudDeployerApplicationManifest appManifest) {
 
 		String version = appManifest.getSpec().getVersion();
-		//String name = appManifest.getSpec().getApplicationProperties().get("spring.cloud.dataflow.stream.app.label");
 		String name = appDefinition.getRegisteredAppName();
 		ApplicationType type = ApplicationType.valueOf(
-				appManifest.getSpec().getApplicationProperties().get("spring.cloud.dataflow.stream.app.type"));
-		String resource = appManifest.getSpec().getApplicationProperties().get("spring.cloud.dataflow.stream.app.type");
+				appManifest.getSpec().getApplicationProperties().get(SPRING_CLOUD_DATAFLOW_STREAM_APP_TYPE));
+		String resourceUri = appManifest.getSpec().getResource();
 
 		if (!this.appRegistryService.appExist(name, type, version)) {
 			URI metadataUri = null; // TODO Skipper should provide the metadata URI as well
-			this.appRegistryService.save(name, type, version, URI.create(resource), metadataUri);
+			this.appRegistryService.save(name, type, version, URI.create(resourceUri), metadataUri);
 		}
 	}
 
@@ -216,14 +222,16 @@ public class SkipperStreamService extends AbstractStreamService {
 			Map<String, Object> specMap = new HashMap<>();
 			if (!appDeploymentRequest.getDefinition().getProperties().isEmpty()) {
 				hasProps = true;
-				specMap.put("applicationProperties", appDeploymentRequest.getDefinition().getProperties());
+				specMap.put(SpringCloudDeployerApplicationSpec.APPLICATION_PROPERTIES_STRING,
+						appDeploymentRequest.getDefinition().getProperties());
 			}
 			if (!appDeploymentRequest.getDeploymentProperties().isEmpty()) {
 				hasProps = true;
-				specMap.put("deploymentProperties", appDeploymentRequest.getDeploymentProperties());
+				specMap.put(SpringCloudDeployerApplicationSpec.DEPLOYMENT_PROPERTIES_STRING,
+						appDeploymentRequest.getDeploymentProperties());
 			}
 			if (hasProps) {
-				appMap.put("spec", specMap);
+				appMap.put(SpringCloudDeployerApplicationManifest.SPEC_STRING, specMap);
 			}
 			if (appDeploymentRequest.getCommandlineArguments().size() == 1) {
 				appMap.put("version", appDeploymentRequest.getCommandlineArguments().get(0));
@@ -251,7 +259,6 @@ public class SkipperStreamService extends AbstractStreamService {
 				.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 	}
 
-	// State
 	@Override
 	public Map<StreamDefinition, DeploymentState> doState(List<StreamDefinition> streamDefinitions) {
 		return this.skipperStreamDeployer.state(streamDefinitions);

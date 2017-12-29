@@ -104,13 +104,6 @@ public class AppDeployerStreamService extends AbstractStreamService {
 		throw new IllegalStateException("Can only rollback stream when using the Skipper stream deployer.");
 	}
 
-	private Map<String, String> getSkipperProperties(Map<String, String> deploymentProperties) {
-		// Extract skipper properties
-		return deploymentProperties.entrySet().stream()
-				.filter(mapEntry -> mapEntry.getKey().startsWith(SKIPPER_KEY_PREFIX))
-				.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-	}
-
 	// State
 	@Override
 	public Map<StreamDefinition, DeploymentState> doState(List<StreamDefinition> streamDefinitions) {

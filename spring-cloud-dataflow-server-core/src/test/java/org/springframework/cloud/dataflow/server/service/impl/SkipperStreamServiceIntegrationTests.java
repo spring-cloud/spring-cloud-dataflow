@@ -38,13 +38,18 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
+import org.springframework.cloud.dataflow.rest.UpdateStreamRequest;
 import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
 import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.StreamService;
 import org.springframework.cloud.dataflow.server.support.TestResourceUtils;
 import org.springframework.cloud.skipper.client.SkipperClient;
+import org.springframework.cloud.skipper.domain.InstallRequest;
 import org.springframework.cloud.skipper.domain.Package;
+import org.springframework.cloud.skipper.domain.PackageIdentifier;
+import org.springframework.cloud.skipper.domain.Release;
+import org.springframework.cloud.skipper.domain.UpgradeRequest;
 import org.springframework.cloud.skipper.domain.UploadRequest;
 import org.springframework.cloud.skipper.io.DefaultPackageReader;
 import org.springframework.cloud.skipper.io.PackageReader;
@@ -56,7 +61,9 @@ import org.springframework.util.StreamUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
+import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_ENABLED_PROPERTY_KEY;
 import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_PACKAGE_NAME;
 import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_PACKAGE_VERSION;
@@ -144,6 +151,68 @@ public class SkipperStreamServiceIntegrationTests {
 		}
 		assertThat(logPackage).isNotNull();
 		assertThat(logPackage.getConfigValues().getRaw()).isEqualTo(expectedYaml);
+	}
+
+	@Test
+	public void testUpdateStreamDslOnDeploy() throws IOException {
+
+		// Create stream
+		StreamDefinition streamDefinition = new StreamDefinition("ticktock", "time --fixed-delay=100 | log --level=DEBUG");
+		this.streamDefinitionRepository.delete(streamDefinition.getName());
+		this.streamDefinitionRepository.save(streamDefinition);
+
+		StreamDefinition streamDefinitionBeforeDeploy = this.streamDefinitionRepository.findOne("ticktock");
+		assertThat(streamDefinitionBeforeDeploy.getDslText())
+				.isEqualTo("time --fixed-delay=100 | log --level=DEBUG");
+
+		String expectedReleaseManifest = StreamUtils.copyToString(
+				TestResourceUtils.qualifiedResource(getClass(), "deployManifest.yml").getInputStream(),
+				Charset.defaultCharset());
+		Release release = new Release();
+		release.setManifest(expectedReleaseManifest);
+		when(skipperClient.install(isA(InstallRequest.class))).thenReturn(release);
+
+		Map<String, String> deploymentProperties = createSkipperDeploymentProperties();
+		deploymentProperties.put("version.log", "1.2.0.RELEASE");
+
+		streamService.deployStream("ticktock", deploymentProperties);
+
+
+		StreamDefinition streamDefinitionAfterDeploy = this.streamDefinitionRepository.findOne("ticktock");
+		assertThat(streamDefinitionAfterDeploy.getDslText())
+				.isEqualTo("time --trigger.fixed-delay=100 | log --log.level=DEBUG");
+	}
+
+	@Test
+	public void testUpdateStreamDslOnUpgrade() throws IOException {
+
+		// Create stream
+		StreamDefinition streamDefinition = new StreamDefinition("ticktock", "time --fixed-delay=100 | log --level=DEBUG");
+		this.streamDefinitionRepository.delete(streamDefinition.getName());
+		this.streamDefinitionRepository.save(streamDefinition);
+
+		streamService.deployStream("ticktock", createSkipperDeploymentProperties());
+
+		StreamDefinition streamDefinitionBeforeDeploy = this.streamDefinitionRepository.findOne("ticktock");
+		assertThat(streamDefinitionBeforeDeploy.getDslText())
+				.isEqualTo("time --fixed-delay=100 | log --level=DEBUG");
+
+		String expectedReleaseManifest = StreamUtils.copyToString(
+				TestResourceUtils.qualifiedResource(getClass(), "upgradeManifest.yml").getInputStream(),
+				Charset.defaultCharset());
+		Release release = new Release();
+		release.setManifest(expectedReleaseManifest);
+		when(skipperClient.upgrade(isA(UpgradeRequest.class))).thenReturn(release);
+
+		Map<String, String> deploymentProperties = createSkipperDeploymentProperties();
+		deploymentProperties.put("version.log", "1.2.0.RELEASE");
+
+		streamService.updateStream("ticktock",
+				new UpdateStreamRequest("ticktock", new PackageIdentifier(), deploymentProperties));
+
+		StreamDefinition streamDefinitionAfterDeploy = this.streamDefinitionRepository.findOne("ticktock");
+		assertThat(streamDefinitionAfterDeploy.getDslText())
+				.isEqualTo("time --trigger.fixed-delay=200 | log --log.level=INFO");
 	}
 
 	private Map<String, String> createSkipperDeploymentProperties() {

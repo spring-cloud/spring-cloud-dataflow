@@ -54,7 +54,7 @@ import static org.mockito.Mockito.when;
  * @author Christian Tzolov
  */
 @RunWith(SpringRunner.class)
-public class SimpleStreamServiceTests {
+public class AppDeployerStreamServiceTests {
 
 	@Rule
 	public ExpectedException thrown = ExpectedException.none();

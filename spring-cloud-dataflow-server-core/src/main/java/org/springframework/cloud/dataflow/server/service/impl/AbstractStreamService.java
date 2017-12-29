@@ -46,8 +46,8 @@ import org.springframework.util.StringUtils;
  * application property values, resolving wildcard deployment properties, and creates a
  * {@link StreamDeploymentRequest}.
  * </p>
- * The {@link AbstractStreamService} deployer is agnostic service. For deploying streams on
- * Skipper use the {@link SkipperStreamService} and for the Simple mode stream deployment use
+ * The {@link AbstractStreamService} deployer is agnostic. For deploying streams on
+ * Skipper use the {@link SkipperStreamService} and for the AppDeploy stream deployment use
  * the {@link AppDeployerStreamService}.
  * </p>
  *
@@ -172,7 +172,8 @@ public abstract class AbstractStreamService implements StreamService {
 				deployerSpecificStreamDefinitions.add(streamDefinition);
 			}
 			else {
-				logger.warn("Deployer incompatible stream definition:" + streamDefinition);
+				logger.error("Invalid deployer:" + streamDefinition.getName() + ":" + streamDeployment.getDeployerName());
+				throw new IncompatibleStreamDeployerException(this.streamDeployer.name());
 			}
 		}
 		if (!deployerSpecificStreamDefinitions.isEmpty()) {
