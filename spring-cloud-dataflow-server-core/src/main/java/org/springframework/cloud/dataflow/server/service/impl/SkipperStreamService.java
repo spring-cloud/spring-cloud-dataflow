@@ -16,6 +16,7 @@
 package org.springframework.cloud.dataflow.server.service.impl;
 
 import java.net.URI;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -31,9 +32,13 @@ import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinitionToDslConverter;
+import org.springframework.cloud.dataflow.core.StreamDeployment;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
+import org.springframework.cloud.dataflow.rest.UpdateStreamRequest;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
+import org.springframework.cloud.dataflow.server.repository.IncompatibleStreamDeployerException;
 import org.springframework.cloud.dataflow.server.repository.NoSuchStreamDefinitionException;
+import org.springframework.cloud.dataflow.server.repository.NoSuchStreamDeploymentException;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.StreamDeploymentRepository;
 import org.springframework.cloud.dataflow.server.stream.SkipperStreamDeployer;
@@ -41,12 +46,14 @@ import org.springframework.cloud.dataflow.server.stream.StreamDeployers;
 import org.springframework.cloud.dataflow.server.stream.StreamDeploymentRequest;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
+import org.springframework.cloud.skipper.domain.Deployer;
 import org.springframework.cloud.skipper.domain.PackageIdentifier;
 import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.SpringCloudDeployerApplicationManifest;
 import org.springframework.cloud.skipper.domain.SpringCloudDeployerApplicationManifestReader;
 import org.springframework.cloud.skipper.domain.SpringCloudDeployerApplicationSpec;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_KEY_PREFIX;
 
@@ -135,20 +142,6 @@ public class SkipperStreamService extends AbstractStreamService {
 		this.skipperStreamDeployer.undeployStream(streamName);
 	}
 
-	@Override
-	public void doUpdateStream(String streamName, String releaseName, PackageIdentifier packageIdentifier,
-			Map<String, String> updateProperties) {
-		String yamlProperties = convertPropertiesToSkipperYaml(streamName, updateProperties);
-		Release release = this.skipperStreamDeployer.upgradeStream(releaseName, packageIdentifier, yamlProperties);
-
-		if (release != null) {
-			updateStreamDefinitionFromReleaseManifest(streamName, release.getManifest());
-		}
-		else {
-			logger.error("Missing release after Stream Update!");
-		}
-	}
-
 	private void updateStreamDefinitionFromReleaseManifest(String streamName, String releaseManifest) {
 
 		List<SpringCloudDeployerApplicationManifest> appManifests =
@@ -202,7 +195,43 @@ public class SkipperStreamService extends AbstractStreamService {
 	}
 
 	@Override
-	public void doRollbackStream(String streamName, int releaseVersion) {
+	public void updateStream(String streamName, UpdateStreamRequest updateStreamRequest) {
+		updateStream(streamName, updateStreamRequest.getReleaseName(),
+				updateStreamRequest.getPackageIdentifier(), updateStreamRequest.getUpdateProperties());
+	}
+
+	public void updateStream(String streamName, String releaseName, PackageIdentifier packageIdenfier,
+			Map<String, String> updateProperties) {
+		StreamDeployment streamDeployment = this.streamDeploymentRepository.findOne(streamName);
+		if (streamDeployment == null) {
+			throw new NoSuchStreamDeploymentException(streamName);
+		}
+		if (this.streamDeployer != StreamDeployers.valueOf(streamDeployment.getDeployerName())) {
+			throw new IncompatibleStreamDeployerException(streamDeployer.name());
+		}
+
+		String yamlProperties = convertPropertiesToSkipperYaml(streamName, updateProperties);
+		Release release = this.skipperStreamDeployer.upgradeStream(releaseName, packageIdenfier, yamlProperties);
+
+		if (release != null) {
+			updateStreamDefinitionFromReleaseManifest(streamName, release.getManifest());
+		}
+		else {
+			logger.error("Missing release after Stream Update!");
+		}
+
+	}
+
+	@Override
+	public void rollbackStream(String streamName, int releaseVersion) {
+		Assert.isTrue(StringUtils.hasText(streamName), "Stream name must not be null");
+		StreamDeployment streamDeployment = this.streamDeploymentRepository.findOne(streamName);
+		if (streamDeployment == null) {
+			throw new NoSuchStreamDeploymentException(streamName);
+		}
+		if (this.streamDeployer != StreamDeployers.valueOf(streamDeployment.getDeployerName())) {
+			throw new IncompatibleStreamDeployerException(streamDeployer.name());
+		}
 		this.skipperStreamDeployer.rollbackStream(streamName, releaseVersion);
 	}
 
@@ -262,5 +291,20 @@ public class SkipperStreamService extends AbstractStreamService {
 	@Override
 	public Map<StreamDefinition, DeploymentState> doState(List<StreamDefinition> streamDefinitions) {
 		return this.skipperStreamDeployer.state(streamDefinitions);
+	}
+
+	@Override
+	public String manifest(String name, int version) {
+		return this.skipperStreamDeployer.manifest(name, version);
+	}
+
+	@Override
+	public Collection<Release> history(String releaseName, int maxRevisions) {
+		return this.skipperStreamDeployer.history(releaseName, maxRevisions);
+	}
+
+	@Override
+	public Collection<Deployer> platformList() {
+		return this.skipperStreamDeployer.platformList();
 	}
 }

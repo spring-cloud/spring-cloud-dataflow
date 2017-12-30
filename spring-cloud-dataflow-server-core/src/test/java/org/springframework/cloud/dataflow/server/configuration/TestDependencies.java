@@ -25,6 +25,7 @@ import java.util.concurrent.ForkJoinPool;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
@@ -75,13 +76,14 @@ import org.springframework.cloud.dataflow.server.repository.StreamDeploymentRepo
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.StreamService;
 import org.springframework.cloud.dataflow.server.service.TaskService;
+import org.springframework.cloud.dataflow.server.service.impl.AppDeployerStreamService;
 import org.springframework.cloud.dataflow.server.service.impl.AppDeploymentRequestCreator;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskService;
-import org.springframework.cloud.dataflow.server.service.impl.AppDeployerStreamService;
 import org.springframework.cloud.dataflow.server.service.impl.SkipperStreamService;
 import org.springframework.cloud.dataflow.server.service.impl.TaskConfigurationProperties;
 import org.springframework.cloud.dataflow.server.stream.AppDeployerStreamDeployer;
 import org.springframework.cloud.dataflow.server.stream.SkipperStreamDeployer;
+import org.springframework.cloud.dataflow.server.stream.StreamDeployer;
 import org.springframework.cloud.deployer.resource.maven.MavenProperties;
 import org.springframework.cloud.deployer.resource.maven.MavenResourceLoader;
 import org.springframework.cloud.deployer.resource.registry.InMemoryUriRegistry;
@@ -123,12 +125,12 @@ import static org.springframework.hateoas.config.EnableHypermediaSupport.Hyperme
 @EnableSpringDataWebSupport
 @EnableHypermediaSupport(type = HAL)
 @Import(CompletionConfiguration.class)
-@ImportAutoConfiguration({HibernateJpaAutoConfiguration.class, EmbeddedDataSourceConfiguration.class})
+@ImportAutoConfiguration({ HibernateJpaAutoConfiguration.class, EmbeddedDataSourceConfiguration.class })
 @EnableWebMvc
 @EnableConfigurationProperties({ CommonApplicationProperties.class,
 		MetricsProperties.class,
-		VersionInfoProperties.class})
-@EntityScan({"org.springframework.cloud.dataflow.registry.domain"})
+		VersionInfoProperties.class })
+@EntityScan({ "org.springframework.cloud.dataflow.registry.domain" })
 @EnableJpaRepositories(basePackages = "org.springframework.cloud.dataflow.registry.repository")
 @EnableTransactionManagement
 public class TestDependencies extends WebMvcConfigurationSupport {
@@ -161,8 +163,8 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 
 	@Bean
 	public StreamDeploymentController streamDeploymentController(StreamDefinitionRepository repository,
-			StreamService streamService, SkipperClient skipperClient) {
-		return new StreamDeploymentController(repository, streamService, skipperClient);
+			StreamService streamService) {
+		return new StreamDeploymentController(repository, streamService);
 	}
 
 	@Bean
@@ -185,7 +187,7 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 
 	@Bean
 	@ConditionalOnSkipperDisabled
-	public StreamService simpleStreamService(StreamDefinitionRepository streamDefinitionRepository,
+	public AppDeployerStreamService simpleStreamService(StreamDefinitionRepository streamDefinitionRepository,
 			StreamDeploymentRepository streamDeploymentRepository, AppDeployerStreamDeployer appDeployerStreamDeployer,
 			AppDeploymentRequestCreator appDeploymentRequestCreator) {
 		return new AppDeployerStreamService(streamDefinitionRepository,
@@ -193,7 +195,7 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	}
 
 	@Bean
-	AppDeploymentRequestCreator streamDeploymentPropertiesUtils(AppRegistryCommon appRegistryCommon,
+	public AppDeploymentRequestCreator streamDeploymentPropertiesUtils(AppRegistryCommon appRegistryCommon,
 			CommonApplicationProperties commonApplicationProperties,
 			ApplicationConfigurationMetadataResolver applicationConfigurationMetadataResolver) {
 		return new AppDeploymentRequestCreator(appRegistryCommon,
@@ -207,18 +209,19 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 			DeploymentIdRepository deploymentIdRepository, StreamDefinitionRepository streamDefinitionRepository,
 			StreamDeploymentRepository streamDeploymentRepository) {
 		return new AppDeployerStreamDeployer(appDeployer, deploymentIdRepository, streamDefinitionRepository,
-				streamDeploymentRepository);
+				streamDeploymentRepository, new ForkJoinPool(2));
 	}
 
 	@Bean
 	@ConditionalOnSkipperEnabled
 	public SkipperStreamDeployer skipperStreamDeployer(SkipperClient skipperClient,
-			StreamDeploymentRepository streamDeploymentRepository) {
-		return new SkipperStreamDeployer(skipperClient, streamDeploymentRepository);
+			StreamDeploymentRepository streamDeploymentRepository, StreamDefinitionRepository streamDefinitionRepository) {
+		return new SkipperStreamDeployer(skipperClient, streamDeploymentRepository, streamDefinitionRepository,
+				new ForkJoinPool(2));
 	}
 
 	@Bean
-//	@ConditionalOnSkipperEnabled
+	@ConditionalOnSkipperEnabled
 	public SkipperClient skipperClient() {
 		return mock(SkipperClient.class);
 	}
@@ -278,15 +281,14 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	}
 
 	@Bean
-	public RuntimeAppsController runtimeAppsController(MetricStore metricStore, StreamService streamService) {
-		return new RuntimeAppsController(streamDefinitionRepository(), streamDeploymentRepository(),
-				deploymentIdRepository(), appDeployer(),
-				metricStore, new ForkJoinPool(2), skipperClient());
+	public RuntimeAppsController runtimeAppsController(MetricStore metricStore, StreamDeployer streamDeployer) {
+		return new RuntimeAppsController(streamDeployer, metricStore);
 	}
 
 	@Bean
-	public RuntimeAppsController.AppInstanceController appInstanceController() {
-		return new RuntimeAppsController.AppInstanceController(appDeployer());
+	@ConditionalOnBean({ StreamDefinitionRepository.class, StreamDeploymentRepository.class })
+	public RuntimeAppsController.AppInstanceController appInstanceController(StreamDeployer streamDeployer) {
+		return new RuntimeAppsController.AppInstanceController(streamDeployer);
 	}
 
 	@Bean
@@ -364,7 +366,7 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	@Bean
 	@ConditionalOnSkipperEnabled
 	public AppRegistryService appRegistryService(AppRegistrationRepository appRegistrationRepository,
-			DelegatingResourceLoader resourceLoader,  MavenProperties mavenProperties) {
+			DelegatingResourceLoader resourceLoader, MavenProperties mavenProperties) {
 		return new DefaultAppRegistryService(appRegistrationRepository, resourceLoader, mavenProperties);
 	}
 
@@ -391,7 +393,7 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	@Bean
 	public TaskService taskService(ApplicationConfigurationMetadataResolver metadataResolver,
 			TaskRepository taskExecutionRepository, DeploymentIdRepository deploymentIdRepository,
-								AppRegistryCommon appRegistry, DelegatingResourceLoader delegatingResourceLoader) {
+			AppRegistryCommon appRegistry, DelegatingResourceLoader delegatingResourceLoader) {
 		return new DefaultTaskService(new DataSourceProperties(), taskDefinitionRepository(), taskExplorer(),
 				taskExecutionRepository, appRegistry, delegatingResourceLoader, taskLauncher(), metadataResolver,
 				new TaskConfigurationProperties(), deploymentIdRepository, null);
@@ -421,7 +423,7 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 
 	@Bean
 	public AboutController aboutController(VersionInfoProperties versionInfoProperties) {
-		AppDeployer appDeployer = mock(AppDeployer.class);
+		StreamDeployer streamDeployer = mock(StreamDeployer.class);
 		TaskLauncher taskLauncher = mock(TaskLauncher.class);
 		RuntimeEnvironmentInfo.Builder builder = new RuntimeEnvironmentInfo.Builder();
 		RuntimeEnvironmentInfo appDeployerEnvInfo = builder.implementationName("testAppDepImplementationName").
@@ -436,9 +438,9 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 				platformApiVersion("testTaskDepPlatformApiVersion").
 				platformClientVersion("testTaskDepPlatformClientVersion").spiClass(Class.class).
 				platformHostVersion("testTaskDepPlatformHostVersion").build();
-		when(appDeployer.environmentInfo()).thenReturn(appDeployerEnvInfo);
+		when(streamDeployer.environmentInfo()).thenReturn(appDeployerEnvInfo);
 		when(taskLauncher.environmentInfo()).thenReturn(taskDeployerEnvInfo);
-		return new AboutController(appDeployer, taskLauncher,
+		return new AboutController(streamDeployer, taskLauncher,
 				mock(FeaturesProperties.class), versionInfoProperties,
 				mock(SecurityStateBean.class));
 	}

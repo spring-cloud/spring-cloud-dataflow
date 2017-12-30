@@ -25,21 +25,17 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.StreamDeployment;
-import org.springframework.cloud.dataflow.rest.UpdateStreamRequest;
 import org.springframework.cloud.dataflow.server.controller.StreamAlreadyDeployedException;
 import org.springframework.cloud.dataflow.server.controller.StreamAlreadyDeployingException;
 import org.springframework.cloud.dataflow.server.repository.IncompatibleStreamDeployerException;
 import org.springframework.cloud.dataflow.server.repository.NoSuchStreamDefinitionException;
-import org.springframework.cloud.dataflow.server.repository.NoSuchStreamDeploymentException;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.StreamDeploymentRepository;
 import org.springframework.cloud.dataflow.server.service.StreamService;
 import org.springframework.cloud.dataflow.server.stream.StreamDeployers;
 import org.springframework.cloud.dataflow.server.stream.StreamDeploymentRequest;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
-import org.springframework.cloud.skipper.domain.PackageIdentifier;
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 
 /**
  * Performs manipulation on application and deployment properties, expanding shorthand
@@ -102,42 +98,6 @@ public abstract class AbstractStreamService implements StreamService {
 
 	protected abstract void doUndeployStream(String streamName);
 
-	@Override
-	public void updateStream(String streamName, UpdateStreamRequest updateStreamRequest) {
-		updateStream(streamName, updateStreamRequest.getReleaseName(),
-				updateStreamRequest.getPackageIdentifier(), updateStreamRequest.getUpdateProperties());
-	}
-
-	public void updateStream(String streamName, String releaseName, PackageIdentifier packageIdenfier,
-			Map<String, String> updateProperties) {
-		StreamDeployment streamDeployment = this.streamDeploymentRepository.findOne(streamName);
-		if (streamDeployment == null) {
-			throw new NoSuchStreamDeploymentException(streamName);
-		}
-		if (this.streamDeployer != StreamDeployers.valueOf(streamDeployment.getDeployerName())) {
-			throw new IncompatibleStreamDeployerException(streamDeployer.name());
-		}
-
-		doUpdateStream(streamName, releaseName, packageIdenfier, updateProperties);
-	}
-
-	protected abstract void doUpdateStream(String streamName, String releaseName, PackageIdentifier packageIdenfier,
-			Map<String, String> updateProperties);
-
-	@Override
-	public void rollbackStream(String streamName, int releaseVersion) {
-		Assert.isTrue(StringUtils.hasText(streamName), "Stream name must not be null");
-		StreamDeployment streamDeployment = this.streamDeploymentRepository.findOne(streamName);
-		if (streamDeployment == null) {
-			throw new NoSuchStreamDeploymentException(streamName);
-		}
-		if (this.streamDeployer != StreamDeployers.valueOf(streamDeployment.getDeployerName())) {
-			throw new IncompatibleStreamDeployerException(streamDeployer.name());
-		}
-		doRollbackStream(streamName, releaseVersion);
-	}
-
-	protected abstract void doRollbackStream(String streamName, int releaseVersion);
 
 	protected StreamDefinition createStreamDefinitionForDeploy(String name) {
 		StreamDefinition streamDefinition = this.streamDefinitionRepository.findOne(name);

@@ -24,28 +24,16 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ForkJoinPool;
-import java.util.stream.Stream;
 
-import org.springframework.cloud.dataflow.core.StreamDefinition;
-import org.springframework.cloud.dataflow.core.StreamDeployment;
 import org.springframework.cloud.dataflow.rest.resource.AppInstanceStatusResource;
 import org.springframework.cloud.dataflow.rest.resource.AppStatusResource;
 import org.springframework.cloud.dataflow.server.controller.support.ApplicationsMetrics;
 import org.springframework.cloud.dataflow.server.controller.support.ControllerUtils;
 import org.springframework.cloud.dataflow.server.controller.support.MetricStore;
-import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
-import org.springframework.cloud.dataflow.server.repository.DeploymentKey;
-import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
-import org.springframework.cloud.dataflow.server.repository.StreamDeploymentRepository;
-import org.springframework.cloud.dataflow.server.stream.SkipperStreamDeployer;
-import org.springframework.cloud.dataflow.server.stream.StreamDeployers;
-import org.springframework.cloud.deployer.spi.app.AppDeployer;
+import org.springframework.cloud.dataflow.server.stream.StreamDeployer;
 import org.springframework.cloud.deployer.spi.app.AppInstanceStatus;
 import org.springframework.cloud.deployer.spi.app.AppStatus;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
-import org.springframework.cloud.skipper.client.SkipperClient;
-import org.springframework.cloud.skipper.domain.Info;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
@@ -60,8 +48,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import static java.util.stream.Collectors.toList;
-
 /**
  * Exposes runtime status of deployed apps.
  *
@@ -70,6 +56,7 @@ import static java.util.stream.Collectors.toList;
  * @author Janne Valkealahti
  * @author Ilayaperumal Gopinathan
  * @author Gunnar Hillert
+ * @author Christian Tzolov
  */
 @RestController
 @RequestMapping("/runtime/apps")
@@ -84,132 +71,38 @@ public class RuntimeAppsController {
 	};
 
 	/**
-	 * The repository this controller will use for stream CRUD operations.
+	 * Common stream deployer logics
 	 */
-	private final StreamDefinitionRepository streamDefinitionRepository;
-
-	private final StreamDeploymentRepository streamDeploymentRepository;
-
-	/**
-	 * The repository this controller will use for deployment IDs.
-	 */
-	private final DeploymentIdRepository deploymentIdRepository;
-
-	/**
-	 * The deployer this controller will use to deploy stream apps.
-	 */
-	private final AppDeployer appDeployer;
+	private final StreamDeployer streamDeployer;
 
 	private final ResourceAssembler<AppStatus, AppStatusResource> statusAssembler = new Assembler();
 
 	private final MetricStore metricStore;
 
-	private final ForkJoinPool forkJoinPool;
-
-	private final SkipperClient skipperClient;
-
 	/**
 	 * Instantiates a new runtime apps controller.
 	 *
-	 * @param streamDefinitionRepository the repository this controller will use for stream CRUD operations
-	 * @param streamDeploymentRepository the repository to use to retrieve stream deployments
-	 * @param deploymentIdRepository the repository this controller will use for deployment IDs
-	 * @param appDeployer the deployer this controller will use to get the status of deployed stream apps
+	 * @param streamDeployer the deployer this controller will use to get the status of deployed stream apps
 	 * @param metricStore the proxy to the metrics collector
-	 * @param forkJoinPool a ForkJoinPool which will be used to query AppStatuses in parallel
-	 * @param skipperClient the Skipper client to get the status from Skipper server
 	 */
-	public RuntimeAppsController(StreamDefinitionRepository streamDefinitionRepository,
-			StreamDeploymentRepository streamDeploymentRepository,
-			DeploymentIdRepository deploymentIdRepository, AppDeployer appDeployer, MetricStore metricStore,
-			ForkJoinPool forkJoinPool, SkipperClient skipperClient) {
-		Assert.notNull(streamDefinitionRepository, "StreamDefinitionRepository must not be null");
-		Assert.notNull(streamDeploymentRepository, "StreamDeploymentRepository must not be null");
-		Assert.notNull(deploymentIdRepository, "DeploymentIdRepository must not be null");
-		Assert.notNull(appDeployer, "AppDeployer must not be null");
+	public RuntimeAppsController(StreamDeployer streamDeployer, MetricStore metricStore) {
+		Assert.notNull(streamDeployer, "StreamDeployer must not be null");
 		Assert.notNull(metricStore, "MetricStore must not be null");
-		Assert.notNull(forkJoinPool, "ForkJoinPool must not be null");
-		Assert.notNull(skipperClient, "SkipperClient must not be null");
-		this.streamDefinitionRepository = streamDefinitionRepository;
-		this.streamDeploymentRepository = streamDeploymentRepository;
-		this.deploymentIdRepository = deploymentIdRepository;
-		this.appDeployer = appDeployer;
+		this.streamDeployer = streamDeployer;
 		this.metricStore = metricStore;
-		this.forkJoinPool = forkJoinPool;
-		this.skipperClient = skipperClient;
 	}
 
 	@RequestMapping
 	public PagedResources<AppStatusResource> list(Pageable pageable, PagedResourcesAssembler<AppStatus> assembler)
 			throws ExecutionException, InterruptedException {
 
-		List<String> appDeployerStreams = new ArrayList<>();
-		List<String> skipperStreams = new ArrayList<>();
-		List<StreamDefinition> appDeployerStreamDefinitions = new ArrayList<>();
-		Iterable<StreamDefinition> streamDefinitions = this.streamDefinitionRepository.findAll();
-		Iterable<StreamDeployment> streamDeployments = this.streamDeploymentRepository.findAll();
-		long deploymentSize = 0;
-		for (StreamDeployment streamDeployment: streamDeployments) {
-			deploymentSize++;
-			if (streamDeployment.getDeployerName().equals(StreamDeployers.skipper.name())) {
-				skipperStreams.add(streamDeployment.getStreamName());
-			}
-			else if (streamDeployment.getDeployerName().equals(StreamDeployers.appdeployer.name())) {
-				appDeployerStreams.add(streamDeployment.getStreamName());
-			}
-		}
-		for (StreamDefinition streamDefinition : streamDefinitions) {
-			if (appDeployerStreams.contains(streamDefinition.getName())) {
-				appDeployerStreamDefinitions.add(streamDefinition);
-			}
-		}
-		List<AppStatus> statuses = new ArrayList<>();
-		statuses.addAll(getAppDeployerStatuses(pageable, appDeployerStreamDefinitions));
-		statuses.addAll(getSkipperStatuses(pageable, skipperStreams)
-				.stream().flatMap(List::stream).collect(toList()));
+		List<AppStatus> statuses = streamDeployer.getAppStatuses(pageable);
+
 		enrichWithMetrics(statuses);
+		int deploymentSize = statuses.size(); // TODO to check if this count is the expected one.
 		// finally, pass in pageable and tell how many items we have in all pages
 		return assembler.toResource(new PageImpl<>(statuses, pageable, deploymentSize), statusAssembler);
-	}
 
-	private List<AppStatus> getAppDeployerStatuses(Pageable pageable,
-			List<StreamDefinition> appDeployerStreamDefinitions) throws ExecutionException, InterruptedException  {
-		// First build a sorted list of deployment id's so that we have
-		// a predictable paging order.
-		List<String> deploymentIds = appDeployerStreamDefinitions.stream().flatMap(sd -> sd.getAppDefinitions().stream()).flatMap(sad -> {
-			String key = DeploymentKey.forStreamAppDefinition(sad);
-			String id = this.deploymentIdRepository.findOne(key);
-			return id != null ? Stream.of(id) : Stream.empty();
-		}).sorted((o1, o2) -> o1.compareTo(o2)).collect(toList());
-
-		// Running this this inside the FJP will make sure it is used by the parallel stream
-		// Skip first items depending on page size, then take page and discard rest.
-		// todo: Use correct pageable values based on the number of apps deployed via all supported StreamDeployers
-		return this.forkJoinPool
-				.submit(() -> deploymentIds.stream().skip(pageable.getPageNumber() * pageable.getPageSize())
-						.limit(pageable.getPageSize()).parallel().map(appDeployer::status).collect(toList()))
-				.get();
-	}
-
-	private List<List<AppStatus>> getSkipperStatuses(Pageable pageable, List<String> skipperStreamNames)
-			throws ExecutionException, InterruptedException{
-		//todo: Pageable values correspond to the number apps while Skipper status is done at the stream level.
-		//todo: Fix the mismatch with Skipper stream apps' pagination
-		return this.forkJoinPool
-				.submit(() -> skipperStreamNames.stream().skip(pageable.getPageNumber() * pageable.getPageSize())
-						.limit(pageable.getPageSize()).parallel().map(this::skipperStatus).collect(toList())).get();
-	}
-
-	private List<AppStatus> skipperStatus(String streamName) {
-		List<AppStatus> appStatuses = new ArrayList<>();
-		try {
-			Info info = this.skipperClient.status(streamName);
-			appStatuses.addAll(SkipperStreamDeployer.deserializeAppStatus(info.getStatus().getPlatformStatus()));
-		}
-		catch (Exception e) {
-			// ignore as we query status for all the streams.
-		}
-		return appStatuses;
 	}
 
 	private void enrichWithMetrics(List<AppStatus> statuses) {
@@ -254,7 +147,7 @@ public class RuntimeAppsController {
 
 	@RequestMapping("/{id}")
 	public AppStatusResource display(@PathVariable String id) {
-		AppStatus status = appDeployer.status(id);
+		AppStatus status = streamDeployer.getAppStatus(id);
 		if (status.getState().equals(DeploymentState.unknown)) {
 			throw new NoSuchAppException(id);
 		}
@@ -293,16 +186,16 @@ public class RuntimeAppsController {
 	@ExposesResourceFor(AppInstanceStatusResource.class)
 	public static class AppInstanceController {
 
-		private final AppDeployer appDeployer;
+		private final StreamDeployer streamDeployer;
 
-		public AppInstanceController(AppDeployer appDeployer) {
-			this.appDeployer = appDeployer;
+		public AppInstanceController(StreamDeployer streamDeployer) {
+			this.streamDeployer = streamDeployer;
 		}
 
 		@RequestMapping
 		public PagedResources<AppInstanceStatusResource> list(Pageable pageable, @PathVariable String appId,
 				PagedResourcesAssembler<AppInstanceStatus> assembler) {
-			AppStatus status = appDeployer.status(appId);
+			AppStatus status = streamDeployer.getAppStatus(appId);
 			if (status.getState().equals(DeploymentState.unknown)) {
 				throw new NoSuchAppException(appId);
 			}
@@ -314,7 +207,7 @@ public class RuntimeAppsController {
 
 		@RequestMapping("/{instanceId}")
 		public AppInstanceStatusResource display(@PathVariable String appId, @PathVariable String instanceId) {
-			AppStatus status = appDeployer.status(appId);
+			AppStatus status = streamDeployer.getAppStatus(appId);
 			if (status.getState().equals(DeploymentState.unknown)) {
 				throw new NoSuchAppException(appId);
 			}

@@ -29,7 +29,6 @@ import org.springframework.cloud.dataflow.server.repository.NoSuchStreamDefiniti
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.StreamService;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
-import org.springframework.cloud.skipper.client.SkipperClient;
 import org.springframework.cloud.skipper.domain.Deployer;
 import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.hateoas.ExposesResourceFor;
@@ -61,8 +60,6 @@ public class StreamDeploymentController {
 
 	private final StreamService streamService;
 
-	private final SkipperClient skipperClient;
-
 	/**
 	 * The repository this controller will use for stream CRUD operations.
 	 */
@@ -78,16 +75,12 @@ public class StreamDeploymentController {
 	 *
 	 * @param repository the repository this controller will use for stream CRUD operations
 	 * @param streamService the underlying StreamService to deploy the stream
-	 * @param skipperClient the Skipper client to use for Skipper related services
 	 */
-	public StreamDeploymentController(StreamDefinitionRepository repository, StreamService streamService,
-			SkipperClient skipperClient) {
+	public StreamDeploymentController(StreamDefinitionRepository repository, StreamService streamService) {
 		Assert.notNull(repository, "StreamDefinitionRepository must not be null");
 		Assert.notNull(streamService, "StreamService must not be null");
-		Assert.notNull(skipperClient, "SkipperClient must not be null");
 		this.repository = repository;
 		this.streamService = streamService;
-		this.skipperClient = skipperClient;
 	}
 
 	/**
@@ -144,29 +137,19 @@ public class StreamDeploymentController {
 	@RequestMapping(value = "/manifest/{name}/{version}", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
 	public String manifest(@PathVariable("name") String name, @PathVariable("version") int version) {
-		if (version > 0) {
-			return this.skipperClient.manifest(name, version);
-		}
-		else {
-			return this.skipperClient.manifest(name);
-		}
+		return this.streamService.manifest(name, version);
 	}
 
 	@RequestMapping(path = "/history/{name}/{max}", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
 	public Collection<Release> history(@PathVariable("name") String releaseName,
 			@PathVariable("max") int maxRevisions) {
-		if (maxRevisions > 0) {
-			return this.skipperClient.history(releaseName, String.valueOf(maxRevisions));
-		}
-		else {
-			return this.skipperClient.history(releaseName).getContent();
-		}
+		return this.streamService.history(releaseName, maxRevisions);
 	}
 
 	@RequestMapping(path = "/platform/list", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
 	public Collection<Deployer> platformList() {
-		return this.skipperClient.listDeployers().getContent();
+		return this.streamService.platformList();
 	}
 }

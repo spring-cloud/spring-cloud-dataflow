@@ -27,7 +27,7 @@ import org.springframework.cloud.dataflow.server.config.features.FeaturesPropert
 /**
  * @author Christian Tzolov
  */
-@Target({ElementType.METHOD, ElementType.ANNOTATION_TYPE})
+@Target({ElementType.TYPE, ElementType.METHOD, ElementType.ANNOTATION_TYPE, ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
 @ConditionalOnExpression("#{'${" + FeaturesProperties.FEATURES_PREFIX + "." + FeaturesProperties.SKIPPER_ENABLED
 		+ ":false}'.equalsIgnoreCase('true')}")

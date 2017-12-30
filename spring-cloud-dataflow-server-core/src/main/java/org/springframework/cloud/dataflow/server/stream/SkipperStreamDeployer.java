@@ -20,10 +20,13 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ForkJoinPool;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.core.Version;
@@ -40,7 +43,9 @@ import org.yaml.snakeyaml.Yaml;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.StreamDeployment;
 import org.springframework.cloud.dataflow.registry.support.ResourceUtils;
+import org.springframework.cloud.dataflow.server.controller.NoSuchAppException;
 import org.springframework.cloud.dataflow.server.controller.StreamDefinitionController;
+import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.StreamDeploymentRepository;
 import org.springframework.cloud.deployer.spi.app.AppInstanceStatus;
 import org.springframework.cloud.deployer.spi.app.AppStatus;
@@ -48,6 +53,7 @@ import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.skipper.client.SkipperClient;
 import org.springframework.cloud.skipper.domain.ConfigValues;
+import org.springframework.cloud.skipper.domain.Deployer;
 import org.springframework.cloud.skipper.domain.Info;
 import org.springframework.cloud.skipper.domain.InstallProperties;
 import org.springframework.cloud.skipper.domain.InstallRequest;
@@ -61,11 +67,13 @@ import org.springframework.cloud.skipper.domain.UpgradeRequest;
 import org.springframework.cloud.skipper.domain.UploadRequest;
 import org.springframework.cloud.skipper.io.DefaultPackageWriter;
 import org.springframework.cloud.skipper.io.PackageWriter;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.HttpStatusCodeException;
 
+import static java.util.stream.Collectors.toList;
 import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_DEFAULT_API_VERSION;
 import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_DEFAULT_KIND;
 import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_DEFAULT_MAINTAINER;
@@ -81,6 +89,7 @@ import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_REPO
  * @author Ilayaperumal Gopinathan
  * @author Soby Chacko
  * @author Glenn Renfro
+ * @author Christian Tzolov
  */
 public class SkipperStreamDeployer implements StreamDeployer {
 
@@ -90,11 +99,20 @@ public class SkipperStreamDeployer implements StreamDeployer {
 
 	private final StreamDeploymentRepository streamDeploymentRepository;
 
-	public SkipperStreamDeployer(SkipperClient skipperClient, StreamDeploymentRepository streamDeploymentRepository) {
+	private final StreamDefinitionRepository streamDefinitionRepository;
+
+	private final ForkJoinPool forkJoinPool;
+
+	public SkipperStreamDeployer(SkipperClient skipperClient, StreamDeploymentRepository streamDeploymentRepository,
+			StreamDefinitionRepository streamDefinitionRepository, ForkJoinPool forkJoinPool) {
 		Assert.notNull(skipperClient, "SkipperClient can not be null");
 		Assert.notNull(streamDeploymentRepository, "StreamDeploymentRepository can not be null");
+		Assert.notNull(streamDefinitionRepository, "StreamDefinitionRepository can not be null");
+		Assert.notNull(forkJoinPool, "ForkJoinPool can not be null");
 		this.skipperClient = skipperClient;
 		this.streamDeploymentRepository = streamDeploymentRepository;
+		this.streamDefinitionRepository = streamDefinitionRepository;
+		this.forkJoinPool = forkJoinPool;
 	}
 
 	public static List<AppStatus> deserializeAppStatus(String platformStatus) {
@@ -303,6 +321,53 @@ public class SkipperStreamDeployer implements StreamDeployer {
 		this.skipperClient.delete(streamName);
 	}
 
+	@Override
+	public List<AppStatus> getAppStatuses(Pageable pageable) throws ExecutionException, InterruptedException {
+		List<String> skipperStreams = new ArrayList<>();
+		Iterable<StreamDefinition> streamDefinitions = this.streamDefinitionRepository.findAll();
+		for (StreamDefinition streamDefinition : streamDefinitions) {
+			skipperStreams.add(streamDefinition.getName());
+		}
+		List<AppStatus> statuses = new ArrayList<>();
+		statuses.addAll(getSkipperStatuses(pageable, skipperStreams).stream().flatMap(List::stream).collect(toList()));
+		return statuses;
+	}
+
+	@Override
+	public AppStatus getAppStatus(String id) {
+		Iterable<StreamDefinition> streamDefinitions = this.streamDefinitionRepository.findAll();
+		for (StreamDefinition streamDefinition : streamDefinitions) {
+			List<AppStatus> appStatuses = skipperStatus(streamDefinition.getName());
+			for (AppStatus appStatus : appStatuses) {
+				if (appStatus.getDeploymentId().equals(id)) {
+					return appStatus;
+				}
+			}
+		}
+		throw new NoSuchAppException(id);
+	}
+
+	private List<List<AppStatus>> getSkipperStatuses(Pageable pageable, List<String> skipperStreamNames)
+			throws ExecutionException, InterruptedException {
+		//todo: Pageable values correspond to the number apps while Skipper status is done at the stream level.
+		//todo: Fix the mismatch with Skipper stream apps' pagination
+		return this.forkJoinPool
+				.submit(() -> skipperStreamNames.stream().skip(pageable.getPageNumber() * pageable.getPageSize())
+						.limit(pageable.getPageSize()).parallel().map(this::skipperStatus).collect(toList())).get();
+	}
+
+	private List<AppStatus> skipperStatus(String streamName) {
+		List<AppStatus> appStatuses = new ArrayList<>();
+		try {
+			Info info = this.skipperClient.status(streamName);
+			appStatuses.addAll(SkipperStreamDeployer.deserializeAppStatus(info.getStatus().getPlatformStatus()));
+		}
+		catch (Exception e) {
+			// ignore as we query status for all the streams.
+		}
+		return appStatuses;
+	}
+
 	/**
 	 * Update the stream identified by the PackageIdentifier and runtime configuration values.
 	 * @param streamName the name of the stream to upgrade
@@ -328,5 +393,22 @@ public class SkipperStreamDeployer implements StreamDeployer {
 	 */
 	public void rollbackStream(String streamName, int releaseVersion) {
 		this.skipperClient.rollback(streamName, releaseVersion);
+	}
+
+	public String manifest(String name, int version) {
+		return this.skipperClient.manifest(name, version);
+	}
+
+	public Collection<Release> history(String releaseName, int maxRevisions) {
+		if (maxRevisions > 0) {
+			return this.skipperClient.history(releaseName, String.valueOf(maxRevisions));
+		}
+		else {
+			return this.skipperClient.history(releaseName).getContent();
+		}
+	}
+
+	public Collection<Deployer> platformList() {
+		return this.skipperClient.listDeployers().getContent();
 	}
 }

@@ -23,18 +23,16 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.StreamDeployment;
+import org.springframework.cloud.dataflow.server.ConditionalOnSkipperEnabled;
 import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
 import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.StreamDeploymentRepository;
-import org.springframework.cloud.dataflow.server.stream.AppDeployerStreamDeployer;
 import org.springframework.cloud.dataflow.server.stream.SkipperStreamDeployer;
 import org.springframework.cloud.dataflow.server.stream.StreamDeployers;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -55,13 +53,11 @@ public class SkipperStreamServiceUpgradeStreamTests {
 	private SkipperStreamService streamService;
 
 	@MockBean
+	@ConditionalOnSkipperEnabled
 	private SkipperStreamDeployer skipperStreamDeployer;
 
 	@MockBean
 	private StreamDeploymentRepository streamDeploymentRepository;
-
-	@MockBean
-	private AppDeployerStreamDeployer appDeployerStreamDeployer;
 
 	private StreamDefinition streamDefinition2 = new StreamDefinition("test2", "time | log");
 
@@ -79,7 +75,6 @@ public class SkipperStreamServiceUpgradeStreamTests {
 				.upgradeStream(this.streamDeployment2.getReleaseName(),
 						null, "");
 		verifyNoMoreInteractions(this.skipperStreamDeployer);
-		verify(this.appDeployerStreamDeployer, never()).deployStream(any());
 	}
 
 }

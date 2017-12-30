@@ -32,7 +32,6 @@ import org.springframework.cloud.dataflow.server.stream.StreamDeployers;
 import org.springframework.cloud.dataflow.server.stream.StreamDeploymentRequest;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
-import org.springframework.cloud.skipper.domain.PackageIdentifier;
 import org.springframework.util.Assert;
 
 import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_KEY_PREFIX;
@@ -91,17 +90,6 @@ public class AppDeployerStreamService extends AbstractStreamService {
 	@Override
 	public void doUndeployStream(String streamName) {
 		this.appDeployerStreamDeployer.undeployStream(streamName);
-	}
-
-	@Override
-	public void doUpdateStream(String streamName, String releaseName, PackageIdentifier packageIdenfier,
-			Map<String, String> updateProperties) {
-		throw new IllegalStateException("Can only update stream when using the Skipper stream deployer.");
-	}
-
-	@Override
-	public void doRollbackStream(String streamName, int releaseVersion) {
-		throw new IllegalStateException("Can only rollback stream when using the Skipper stream deployer.");
 	}
 
 	// State
