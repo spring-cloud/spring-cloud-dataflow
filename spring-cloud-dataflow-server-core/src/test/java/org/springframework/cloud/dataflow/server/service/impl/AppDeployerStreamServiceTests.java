@@ -29,6 +29,7 @@ import org.springframework.cloud.dataflow.configuration.metadata.BootApplication
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.StreamDeployment;
 import org.springframework.cloud.dataflow.registry.AppRegistry;
+import org.springframework.cloud.dataflow.rest.UpdateStreamRequest;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.repository.IncompatibleStreamDeployerException;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
@@ -37,10 +38,7 @@ import org.springframework.cloud.dataflow.server.stream.AppDeployerStreamDeploye
 import org.springframework.cloud.dataflow.server.stream.SkipperStreamDeployer;
 import org.springframework.cloud.dataflow.server.stream.StreamDeployers;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.util.Assert;
 
-import static junit.framework.TestCase.fail;
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -127,51 +125,28 @@ public class AppDeployerStreamServiceTests {
 		verify(this.skipperStreamDeployer, never()).undeployStream(streamDefinition1.getName());
 	}
 
-	@Test
+	@Test(expected = IncompatibleStreamDeployerException.class)
 	public void verifyUndeployStream2() {
 		StreamDefinition streamDefinition2 = new StreamDefinition("test2", "time | log");
 		StreamDeployment streamDeployment2 = new StreamDeployment(streamDefinition2.getName(),
 				StreamDeployers.skipper.name(), "pkg1", "release1", "local");
 		when(this.streamDeploymentRepository.findOne(streamDeployment2.getStreamName())).thenReturn(streamDeployment2);
-
-		try {
-			this.simpleStreamService.undeployStream(streamDefinition2.getName());
-			fail("IncompatibleStreamDeployerException is expected when trying to rollback a stream that was deployed using "
-					+ "app deployer");
-		}
-		catch (IncompatibleStreamDeployerException e) {
-
-		}
+		this.simpleStreamService.undeployStream(streamDefinition2.getName());
 	}
 
-	@Test
+	@Test(expected = IncompatibleStreamDeployerException.class)
 	public void verifyRollbackStream() {
 		StreamDefinition streamDefinition1 = new StreamDefinition("test1", "time | log");
 		StreamDeployment streamDeployment1 = new StreamDeployment(streamDefinition1.getName(),
 				StreamDeployers.appdeployer.name(), null, null, null);
 		when(this.streamDeploymentRepository.findOne(streamDeployment1.getStreamName())).thenReturn(streamDeployment1);
 		verifyNoMoreInteractions(this.appDeployerStreamDeployer);
-		try {
-			this.simpleStreamService.rollbackStream(streamDefinition1.getName(), 0);
-			fail("IllegalStateException is expected when trying to rollback a stream that was deployed using "
-					+ "app deployer");
-		}
-		catch (IllegalStateException e) {
-			assertThat(e.getMessage()).isEqualTo("Can only rollback stream when using the Skipper stream deployer.");
-		}
+
+		this.simpleStreamService.rollbackStream(streamDefinition1.getName(), 0);
 	}
 
-	@Test
+	@Test(expected = IncompatibleStreamDeployerException.class)
 	public void verifyAppDeployerUpgrade() {
-		try {
-			this.simpleStreamService.updateStream(this.streamDeployment1.getStreamName(),
-					this.streamDeployment1.getReleaseName(),
-					null, null);
-			fail("IllegalStateException is expected to be thrown.");
-		}
-		catch (IllegalStateException e) {
-			Assert.isTrue(e.getMessage().equals("Can only update stream when using the Skipper stream deployer."),
-					"Incorrect Exception message");
-		}
+		this.simpleStreamService.updateStream(this.streamDeployment1.getStreamName(), mock(UpdateStreamRequest.class));
 	}
 }

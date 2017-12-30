@@ -52,7 +52,6 @@ import org.springframework.cloud.deployer.spi.app.AppInstanceStatus;
 import org.springframework.cloud.deployer.spi.app.AppStatus;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
-import org.springframework.cloud.skipper.client.SkipperClient;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
@@ -126,9 +125,6 @@ public class StreamControllerTests {
 	@Autowired
 	private StreamService defaultStreamService;
 
-	@Autowired
-	private SkipperClient skipperClient;
-
 	@Before
 	public void setupMocks() {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(wac)
@@ -145,7 +141,7 @@ public class StreamControllerTests {
 	@Test(expected = IllegalArgumentException.class)
 	public void testConstructorMissingRepository() {
 		StreamDeploymentController deploymentController = new StreamDeploymentController(
-				new InMemoryStreamDefinitionRepository(), defaultStreamService, skipperClient);
+				new InMemoryStreamDefinitionRepository(), defaultStreamService);
 		new StreamDefinitionController(null, appRegistry, defaultStreamService);
 	}
 

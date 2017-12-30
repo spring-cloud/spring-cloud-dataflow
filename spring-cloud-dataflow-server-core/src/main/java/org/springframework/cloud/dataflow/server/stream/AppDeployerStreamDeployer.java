@@ -15,9 +15,20 @@
  */
 package org.springframework.cloud.dataflow.server.stream;
 
-import java.util.*;
+import java.util.AbstractMap;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ForkJoinPool;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -35,13 +46,18 @@ import org.springframework.cloud.deployer.spi.app.AppStatus;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.cloud.deployer.spi.app.MultiStateAppDeployer;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
+import org.springframework.cloud.deployer.spi.core.RuntimeEnvironmentInfo;
+import org.springframework.data.domain.Pageable;
 import org.springframework.util.Assert;
+
+import static java.util.stream.Collectors.toList;
 
 /**
  * Uses an AppDeployer instance to deploy the stream.
  *
  * @author Mark Pollack
  * @author Ilayaperumal Gopinathan
+ * @author Christian Tzolov
  */
 public class AppDeployerStreamDeployer implements StreamDeployer {
 
@@ -70,17 +86,24 @@ public class AppDeployerStreamDeployer implements StreamDeployer {
 	 */
 	private final StreamDeploymentRepository streamDeploymentRepository;
 
+	/**
+	 *
+	 */
+	private final ForkJoinPool forkJoinPool;
+
 	public AppDeployerStreamDeployer(AppDeployer appDeployer, DeploymentIdRepository deploymentIdRepository,
 			StreamDefinitionRepository streamDefinitionRepository,
-			StreamDeploymentRepository streamDeploymentRepository) {
+			StreamDeploymentRepository streamDeploymentRepository, ForkJoinPool forkJoinPool) {
 		Assert.notNull(appDeployer, "AppDeployer must not be null");
 		Assert.notNull(deploymentIdRepository, "DeploymentIdRepository must not be null");
 		Assert.notNull(streamDefinitionRepository, "StreamDefinitionRepository must not be null");
 		Assert.notNull(streamDeploymentRepository, "StreamDeploymentRepository must not be null");
+		Assert.notNull(forkJoinPool, "ForkJoinPool must not be null");
 		this.appDeployer = appDeployer;
 		this.deploymentIdRepository = deploymentIdRepository;
 		this.streamDefinitionRepository = streamDefinitionRepository;
 		this.streamDeploymentRepository = streamDeploymentRepository;
+		this.forkJoinPool = forkJoinPool;
 	}
 
 	public void deployStream(StreamDeploymentRequest streamDeploymentRequest) {
@@ -175,5 +198,51 @@ public class AppDeployerStreamDeployer implements StreamDeployer {
 			return Arrays.stream(ids)
 					.collect(Collectors.toMap(Function.identity(), id -> appDeployer.status(id).getState()));
 		}
+	}
+
+	@Override
+	public List<AppStatus> getAppStatuses(Pageable pageable) throws ExecutionException, InterruptedException {
+
+		Iterable<StreamDefinition> streamDefinitions = this.streamDefinitionRepository.findAll();
+		Iterable<StreamDeployment> streamDeployments = this.streamDeploymentRepository.findAll();
+
+		List<String> appDeployerStreams = new ArrayList<>();
+		for (StreamDeployment streamDeployment : streamDeployments) {
+			appDeployerStreams.add(streamDeployment.getStreamName());
+
+		}
+
+		List<StreamDefinition> appDeployerStreamDefinitions = new ArrayList<>();
+		for (StreamDefinition streamDefinition : streamDefinitions) {
+			if (appDeployerStreams.contains(streamDefinition.getName())) {
+				appDeployerStreamDefinitions.add(streamDefinition);
+			}
+		}
+
+		// First build a sorted list of deployment id's so that we have a predictable paging order.
+		List<String> deploymentIds = appDeployerStreamDefinitions.stream()
+				.flatMap(sd -> sd.getAppDefinitions().stream()).flatMap(sad -> {
+					String key = DeploymentKey.forStreamAppDefinition(sad);
+					String id = this.deploymentIdRepository.findOne(key);
+					return id != null ? Stream.of(id) : Stream.empty();
+				}).sorted(String::compareTo).collect(toList());
+
+		// Running this this inside the FJP will make sure it is used by the parallel stream
+		// Skip first items depending on page size, then take page and discard rest.
+		// todo: Use correct pageable values based on the number of apps deployed via all supported StreamDeployers
+		return this.forkJoinPool.submit(() -> deploymentIds.stream()
+				.skip(pageable.getPageNumber() * pageable.getPageSize())
+				.limit(pageable.getPageSize()).parallel().map(appDeployer::status).collect(toList()))
+				.get();
+	}
+
+	@Override
+	public AppStatus getAppStatus(String id) {
+		return appDeployer.status(id);
+	}
+
+	@Override
+	public RuntimeEnvironmentInfo environmentInfo() {
+		return appDeployer.environmentInfo();
 	}
 }

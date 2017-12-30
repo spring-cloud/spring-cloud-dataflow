@@ -15,6 +15,7 @@
  */
 package org.springframework.cloud.dataflow.server.service.impl;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,7 +25,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.cloud.dataflow.core.StreamDefinition;
+import org.springframework.cloud.dataflow.rest.UpdateStreamRequest;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
+import org.springframework.cloud.dataflow.server.repository.IncompatibleStreamDeployerException;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.StreamDeploymentRepository;
 import org.springframework.cloud.dataflow.server.stream.AppDeployerStreamDeployer;
@@ -32,7 +35,8 @@ import org.springframework.cloud.dataflow.server.stream.StreamDeployers;
 import org.springframework.cloud.dataflow.server.stream.StreamDeploymentRequest;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
-import org.springframework.cloud.skipper.domain.PackageIdentifier;
+import org.springframework.cloud.skipper.domain.Deployer;
+import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.util.Assert;
 
 import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_KEY_PREFIX;
@@ -93,20 +97,34 @@ public class AppDeployerStreamService extends AbstractStreamService {
 		this.appDeployerStreamDeployer.undeployStream(streamName);
 	}
 
-	@Override
-	public void doUpdateStream(String streamName, String releaseName, PackageIdentifier packageIdenfier,
-			Map<String, String> updateProperties) {
-		throw new IllegalStateException("Can only update stream when using the Skipper stream deployer.");
-	}
-
-	@Override
-	public void doRollbackStream(String streamName, int releaseVersion) {
-		throw new IllegalStateException("Can only rollback stream when using the Skipper stream deployer.");
-	}
-
 	// State
 	@Override
 	public Map<StreamDefinition, DeploymentState> doState(List<StreamDefinition> streamDefinitions) {
 		return this.appDeployerStreamDeployer.state(streamDefinitions);
+	}
+
+	@Override
+	public void updateStream(String streamName, UpdateStreamRequest updateStreamRequest) {
+		throw new IncompatibleStreamDeployerException(StreamDeployers.appdeployer.toString());
+	}
+
+	@Override
+	public void rollbackStream(String streamName, int releaseVersion) {
+		throw new IncompatibleStreamDeployerException(StreamDeployers.appdeployer.toString());
+	}
+
+	@Override
+	public String manifest(String releaseName, int releaseVersion) {
+		throw new IncompatibleStreamDeployerException(StreamDeployers.appdeployer.toString());
+	}
+
+	@Override
+	public Collection<Release> history(String releaseName, int maxRevisions) {
+		throw new IncompatibleStreamDeployerException(StreamDeployers.appdeployer.toString());
+	}
+
+	@Override
+	public Collection<Deployer> platformList() {
+		throw new IncompatibleStreamDeployerException(StreamDeployers.appdeployer.toString());
 	}
 }

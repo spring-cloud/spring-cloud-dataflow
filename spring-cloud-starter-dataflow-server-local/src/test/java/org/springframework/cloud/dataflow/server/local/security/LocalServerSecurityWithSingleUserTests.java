@@ -60,7 +60,7 @@ public class LocalServerSecurityWithSingleUserTests {
 	private final static Logger logger = LoggerFactory.getLogger(LocalServerSecurityWithSingleUserTests.class);
 
 	private final static LocalDataflowResource localDataflowResource = new LocalDataflowResource(
-			"classpath:org/springframework/cloud/dataflow/server/local/security" + "/singleUser.yml");
+			"classpath:org/springframework/cloud/dataflow/server/local/security/singleUser.yml");
 
 	@ClassRule
 	public static TestRule springDataflowAndLdapServer = RuleChain.outerRule(localDataflowResource);

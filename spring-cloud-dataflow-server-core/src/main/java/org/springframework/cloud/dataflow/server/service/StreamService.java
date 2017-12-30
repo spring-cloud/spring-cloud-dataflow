@@ -15,18 +15,22 @@
  */
 package org.springframework.cloud.dataflow.server.service;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.rest.UpdateStreamRequest;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
+import org.springframework.cloud.skipper.domain.Deployer;
+import org.springframework.cloud.skipper.domain.Release;
 
 /**
  * Specify the supported operations on the stream.
  *
  * @author Mark Pollack
  * @author Ilayaperumal Gopinathan
+ * @author Christian Tzolov
  */
 public interface StreamService {
 	/**
@@ -36,6 +40,14 @@ public interface StreamService {
 	 * @param deploymentProperties deployment properties to use as passed in from the client.
 	 */
 	void deployStream(String name, Map<String, String> deploymentProperties);
+
+
+	/**
+	 * Un-deploys the stream identified by the given stream name.
+	 *
+	 * @param name the name of the stream to un-deploy
+	 */
+	void undeployStream(String name);
 
 	/**
 	 * Retrieve the deployment state for the given stream definitions.
@@ -62,12 +74,26 @@ public interface StreamService {
 	 */
 	void rollbackStream(String streamName, int releaseVersion);
 
+	/**
+	 * Return a manifest info of a release version. For packages with dependencies, the
+	 * manifest includes the contents of those dependencies.
+	 *
+	 * @param releaseName the release name
+	 * @param releaseVersion the release version
+	 * @return the manifest info of a release
+	 */
+	String manifest(String releaseName, int releaseVersion);
 
 	/**
-	 * Un-deploys the stream identified by the given stream name.
-	 *
-	 * @param name the name of the stream to un-deploy
+	 * Get stream's deployment history
+	 * @param releaseName Stream release name
+	 * @param maxRevisions If positive, the max release revision to filter by. Negative value will return all releases.
+	 * @return List or Releases for this release name
 	 */
-	void undeployStream(String name);
+	Collection<Release> history(String releaseName, int maxRevisions);
 
+	/**
+	 * @return list of supported deployment platforms
+	 */
+	Collection<Deployer> platformList();
 }

@@ -32,7 +32,7 @@ import org.springframework.cloud.dataflow.rest.resource.about.SecurityInfo;
 import org.springframework.cloud.dataflow.rest.resource.about.VersionInfo;
 import org.springframework.cloud.dataflow.server.config.VersionInfoProperties;
 import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
-import org.springframework.cloud.deployer.spi.app.AppDeployer;
+import org.springframework.cloud.dataflow.server.stream.StreamDeployer;
 import org.springframework.cloud.deployer.spi.core.RuntimeEnvironmentInfo;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.hateoas.ExposesResourceFor;
@@ -67,6 +67,8 @@ public class AboutController {
 
 	private static final Logger logger = LoggerFactory.getLogger(AboutController.class);
 
+	private final StreamDeployer streamDeployer;
+
 	private final FeaturesProperties featuresProperties;
 
 	private final VersionInfoProperties versionInfoProperties;
@@ -82,13 +84,11 @@ public class AboutController {
 	@Value("${info.app.version:#{null}}")
 	private String implementationVersion;
 
-	private AppDeployer appDeployer;
-
 	private TaskLauncher taskLauncher;
 
-	public AboutController(AppDeployer appDeployer, TaskLauncher taskLauncher, FeaturesProperties featuresProperties,
+	public AboutController(StreamDeployer streamDeployer, TaskLauncher taskLauncher, FeaturesProperties featuresProperties,
 			VersionInfoProperties versionInfoProperties, SecurityStateBean securityStateBean) {
-		this.appDeployer = appDeployer;
+		this.streamDeployer = streamDeployer;
 		this.taskLauncher = taskLauncher;
 		this.featuresProperties = featuresProperties;
 		this.versionInfoProperties = versionInfoProperties;
@@ -148,8 +148,8 @@ public class AboutController {
 
 		final RuntimeEnvironment runtimeEnvironment = new RuntimeEnvironment();
 
-		if (this.appDeployer != null) {
-			final RuntimeEnvironmentInfo deployerEnvironmentInfo = this.appDeployer.environmentInfo();
+		if (this.streamDeployer != null) {
+			final RuntimeEnvironmentInfo deployerEnvironmentInfo = this.streamDeployer.environmentInfo();
 			final RuntimeEnvironmentDetails deployerInfo = new RuntimeEnvironmentDetails();
 
 			deployerInfo.setDeployerImplementationVersion(deployerEnvironmentInfo.getImplementationVersion());

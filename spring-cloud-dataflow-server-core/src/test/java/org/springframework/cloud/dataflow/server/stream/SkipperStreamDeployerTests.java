@@ -19,11 +19,13 @@ import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ForkJoinPool;
 
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
 import org.springframework.cloud.dataflow.registry.support.ResourceUtils;
+import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.StreamDeploymentRepository;
 import org.springframework.cloud.deployer.resource.docker.DockerResource;
 import org.springframework.cloud.deployer.resource.maven.MavenResource;
@@ -32,10 +34,14 @@ import org.springframework.cloud.skipper.domain.InstallRequest;
 import org.springframework.cloud.skipper.domain.UploadRequest;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
+import org.springframework.hateoas.Resources;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_PACKAGE_NAME;
 import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_PACKAGE_VERSION;
 import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_PLATFORM_NAME;
@@ -85,8 +91,8 @@ public class SkipperStreamDeployerTests {
 				new ArrayList<>(),
 				skipperDeployerProperties);
 		SkipperClient skipperClient = mock(SkipperClient.class);
-		SkipperStreamDeployer skipperStreamDeployer = new SkipperStreamDeployer(skipperClient, mock
-				(StreamDeploymentRepository.class));
+		SkipperStreamDeployer skipperStreamDeployer = new SkipperStreamDeployer(skipperClient,
+				mock(StreamDeploymentRepository.class), mock(StreamDefinitionRepository.class), mock(ForkJoinPool.class));
 		skipperStreamDeployer.deployStream(streamDeploymentRequest);
 		ArgumentCaptor<UploadRequest> uploadRequestCaptor = ArgumentCaptor.forClass(UploadRequest.class);
 		ArgumentCaptor<InstallRequest> installRequestCaptor = ArgumentCaptor.forClass(InstallRequest.class);
@@ -123,6 +129,36 @@ public class SkipperStreamDeployerTests {
 	public void testFileResourceWithoutVersion() throws MalformedURLException {
 		Resource resource = new UrlResource("http://springcloudstream/filesourcekafkacrap.jar");
 		assertThat(ResourceUtils.getResourceWithoutVersion(resource)).isEqualTo("http://springcloudstream/filesourcekafkacrap.jar");
+	}
+
+	@Test
+	public void testManifest() {
+		SkipperClient skipperClient = mock(SkipperClient.class);
+		SkipperStreamDeployer skipperStreamDeployer = new SkipperStreamDeployer(skipperClient,
+				mock(StreamDeploymentRepository.class), mock(StreamDefinitionRepository.class), mock(ForkJoinPool.class));
+
+		skipperStreamDeployer.manifest("name", 666);
+
+		verify(skipperClient).manifest(eq("name"), eq(666));
+	}
+
+	@Test
+	public void testPlatformList() {
+		SkipperClient skipperClient = mock(SkipperClient.class);
+		when(skipperClient.listDeployers()).thenReturn(new Resources<>(new ArrayList<>(), new ArrayList<>()));
+		SkipperStreamDeployer skipperStreamDeployer = new SkipperStreamDeployer(skipperClient,
+				mock(StreamDeploymentRepository.class), mock(StreamDefinitionRepository.class), mock(ForkJoinPool.class));
+		skipperStreamDeployer.platformList();
+		verify(skipperClient, times(1)).listDeployers();
+	}
+
+	@Test
+	public void testHistory() {
+		SkipperClient skipperClient = mock(SkipperClient.class);
+		SkipperStreamDeployer skipperStreamDeployer = new SkipperStreamDeployer(skipperClient,
+				mock(StreamDeploymentRepository.class), mock(StreamDefinitionRepository.class), mock(ForkJoinPool.class));
+		skipperStreamDeployer.history("releaseName", 666);
+		verify(skipperClient).history(eq("releaseName"), eq("666"));
 	}
 
 }
