@@ -20,7 +20,6 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 import org.springframework.cloud.dataflow.core.StreamDefinition;
-import org.springframework.cloud.dataflow.server.repository.IncompatibleStreamDeployerException;
 import org.springframework.cloud.deployer.spi.app.AppStatus;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.cloud.deployer.spi.core.RuntimeEnvironmentInfo;
@@ -49,7 +48,5 @@ public interface StreamDeployer {
 
 	AppStatus getAppStatus(String id);
 
-	default RuntimeEnvironmentInfo environmentInfo() {
-		throw new IncompatibleStreamDeployerException("AppDeployer");
-	}
+	RuntimeEnvironmentInfo environmentInfo();
 }

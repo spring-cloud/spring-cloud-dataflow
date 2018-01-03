@@ -21,8 +21,6 @@ import java.util.Map;
 
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.rest.UpdateStreamRequest;
-import org.springframework.cloud.dataflow.server.repository.IncompatibleStreamDeployerException;
-import org.springframework.cloud.dataflow.server.stream.StreamDeployers;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.cloud.skipper.domain.Deployer;
 import org.springframework.cloud.skipper.domain.Release;
@@ -65,9 +63,7 @@ public interface StreamService {
 	 * @param streamName the name of the stream to update
 	 * @param updateStreamRequest the UpdateStreamRequest to use during the update
 	 */
-	default void updateStream(String streamName, UpdateStreamRequest updateStreamRequest) {
-		throw new IncompatibleStreamDeployerException(StreamDeployers.appdeployer.toString());
-	}
+	void updateStream(String streamName, UpdateStreamRequest updateStreamRequest);
 
 	/**
 	 * Rollback the stream to the previous or a specific version of the stream.
@@ -76,9 +72,7 @@ public interface StreamService {
 	 * @param releaseVersion the version to rollback to (if not specified, rollback to the previous deleted/deployed
 	 * release version of the stream.
 	 */
-	default void rollbackStream(String streamName, int releaseVersion) {
-		throw new IncompatibleStreamDeployerException(StreamDeployers.appdeployer.toString());
-	}
+	void rollbackStream(String streamName, int releaseVersion);
 
 	/**
 	 * Return a manifest info of a release version. For packages with dependencies, the
@@ -88,9 +82,7 @@ public interface StreamService {
 	 * @param releaseVersion the release version
 	 * @return the manifest info of a release
 	 */
-	default String manifest(String releaseName, int releaseVersion) {
-		throw new IncompatibleStreamDeployerException(StreamDeployers.appdeployer.toString());
-	}
+	String manifest(String releaseName, int releaseVersion);
 
 	/**
 	 * Get stream's deployment history
@@ -98,14 +90,10 @@ public interface StreamService {
 	 * @param maxRevisions If positive, the max release revision to filter by. Negative value will return all releases.
 	 * @return List or Releases for this release name
 	 */
-	default Collection<Release> history(String releaseName, int maxRevisions) {
-		throw new IncompatibleStreamDeployerException(StreamDeployers.appdeployer.toString());
-	}
+	Collection<Release> history(String releaseName, int maxRevisions);
 
 	/**
 	 * @return list of supported deployment platforms
 	 */
-	default Collection<Deployer> platformList() {
-		throw new IncompatibleStreamDeployerException(StreamDeployers.appdeployer.toString());
-	}
+	Collection<Deployer> platformList();
 }
