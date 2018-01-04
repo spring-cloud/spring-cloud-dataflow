@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2015-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,8 +23,66 @@ import org.springframework.hateoas.ResourceSupport;
  * A HATEOAS representation of a stream deployment.
  *
  * @author Eric Bottard
+ * @author Ilayaperumal Gopinathan
  */
 public class StreamDeploymentResource extends ResourceSupport {
+
+	/**
+	 * The name of the stream under deployment.
+	 */
+	private String streamName;
+
+	/**
+	 * Stream definition DSL text.
+	 */
+	private String dslText;
+
+	/**
+	 * Stream status (i.e. deployed, undeployed, etc).
+	 */
+	private String status;
+
+	/**
+	 * The JSON String value of the deployment properties Map<String, String> values.
+	 */
+	private String deploymentProperties;
+
+	/**
+	 * Default constructor for serialization frameworks.
+	 */
+	protected StreamDeploymentResource() {
+	}
+
+	public StreamDeploymentResource(String streamName, String dslText) {
+		this(streamName, dslText, "");
+	}
+
+	public StreamDeploymentResource(String streamName, String dslText, String deploymentProperties) {
+		this(streamName, dslText, deploymentProperties, "");
+	}
+
+	public StreamDeploymentResource(String streamName, String dslText, String deploymentProperties, String status) {
+		this.streamName = streamName;
+		this.dslText = dslText;
+		this.deploymentProperties = deploymentProperties;
+		this.status = status;
+	}
+
+	public String getStreamName() {
+		return streamName;
+	}
+
+	public String getDeploymentProperties() {
+		return deploymentProperties;
+	}
+
+	public String getDslText() {
+		return dslText;
+	}
+
+	public String getStatus() {
+		return status;
+	}
 
 	public static class Page extends PagedResources<StreamDeploymentResource> {
 

@@ -37,6 +37,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
+import org.springframework.cloud.dataflow.core.StreamDeployment;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.rest.UpdateStreamRequest;
 import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
@@ -206,13 +207,37 @@ public class SkipperStreamServiceIntegrationTests {
 
 		Map<String, String> deploymentProperties = createSkipperDeploymentProperties();
 		deploymentProperties.put("version.log", "1.2.0.RELEASE");
-
 		streamService.updateStream("ticktock",
 				new UpdateStreamRequest("ticktock", new PackageIdentifier(), deploymentProperties));
 
 		StreamDefinition streamDefinitionAfterDeploy = this.streamDefinitionRepository.findOne("ticktock");
 		assertThat(streamDefinitionAfterDeploy.getDslText())
 				.isEqualTo("time --trigger.fixed-delay=200 | log --log.level=INFO");
+	}
+
+	@Test
+	public void testStreamInfo() throws IOException {
+
+		// Create stream
+		StreamDefinition streamDefinition = new StreamDefinition("ticktock",
+				"time --fixed-delay=100 | log --level=DEBUG");
+		this.streamDefinitionRepository.delete(streamDefinition.getName());
+		this.streamDefinitionRepository.save(streamDefinition);
+
+		Map<String, String> deploymentProperties = createSkipperDeploymentProperties();
+		this.streamService.deployStream("ticktock", deploymentProperties);
+		String releaseManifest = StreamUtils.copyToString(
+				TestResourceUtils.qualifiedResource(getClass(), "deployManifest.yml").getInputStream(),
+				Charset.defaultCharset());
+		String deploymentProps = "{\"log\":{\"spring.cloud.deployer.indexed\":\"true\","
+										+ "\"spring.cloud.deployer.group\":\"ticktock\","
+										+ "\"maven:\\/\\/org.springframework.cloud.stream.app:log-sink-rabbit\":\"1.2.0.RELEASE\"}"
+										+ ",\"time\":{\"maven:\\/\\/org.springframework.cloud.stream.app:time-source-rabbit\":\"1.2.0.RELEASE\","
+										+ "\"spring.cloud.deployer.group\":\"ticktock\"}}";
+		when(skipperClient.manifest(streamDefinition.getName())).thenReturn(releaseManifest);
+		StreamDeployment streamDeployment = this.streamService.info(streamDefinition.getName());
+		assertThat(streamDeployment.getStreamName()).isEqualTo(streamDefinition.getName());
+		assertThat(streamDeployment.getDeploymentProperties()).contains(deploymentProps);
 	}
 
 	private Map<String, String> createSkipperDeploymentProperties() {

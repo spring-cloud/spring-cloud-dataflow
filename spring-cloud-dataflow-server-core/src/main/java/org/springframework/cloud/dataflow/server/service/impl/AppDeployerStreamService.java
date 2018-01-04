@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,11 +25,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.cloud.dataflow.core.StreamDefinition;
+import org.springframework.cloud.dataflow.core.StreamDeployment;
 import org.springframework.cloud.dataflow.rest.UpdateStreamRequest;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
 import org.springframework.cloud.dataflow.server.repository.IncompatibleStreamDeployerException;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
-import org.springframework.cloud.dataflow.server.repository.StreamDeploymentRepository;
 import org.springframework.cloud.dataflow.server.stream.AppDeployerStreamDeployer;
 import org.springframework.cloud.dataflow.server.stream.StreamDeployers;
 import org.springframework.cloud.dataflow.server.stream.StreamDeploymentRequest;
@@ -60,10 +60,9 @@ public class AppDeployerStreamService extends AbstractStreamService {
 	private final AppDeploymentRequestCreator appDeploymentRequestCreator;
 
 	public AppDeployerStreamService(StreamDefinitionRepository streamDefinitionRepository,
-			StreamDeploymentRepository streamDeploymentRepository,
 			AppDeployerStreamDeployer appDeployerStreamDeployer,
 			AppDeploymentRequestCreator appDeploymentRequestCreator) {
-		super(streamDefinitionRepository, streamDeploymentRepository, StreamDeployers.appdeployer);
+		super(streamDefinitionRepository, StreamDeployers.appdeployer);
 		Assert.notNull(appDeployerStreamDeployer, "AppDeployerStreamDeployer must not be null");
 		Assert.notNull(appDeploymentRequestCreator, "AppDeploymentRequestCreator must not be null");
 		this.appDeployerStreamDeployer = appDeployerStreamDeployer;
@@ -93,7 +92,7 @@ public class AppDeployerStreamService extends AbstractStreamService {
 	}
 
 	@Override
-	public void doUndeployStream(String streamName) {
+	public void undeployStream(String streamName) {
 		this.appDeployerStreamDeployer.undeployStream(streamName);
 	}
 
@@ -126,5 +125,10 @@ public class AppDeployerStreamService extends AbstractStreamService {
 	@Override
 	public Collection<Deployer> platformList() {
 		throw new IncompatibleStreamDeployerException(StreamDeployers.appdeployer.toString());
+	}
+
+	@Override
+	public StreamDeployment info(String streamName) {
+		return this.appDeployerStreamDeployer.getStreamInfo(streamName);
 	}
 }

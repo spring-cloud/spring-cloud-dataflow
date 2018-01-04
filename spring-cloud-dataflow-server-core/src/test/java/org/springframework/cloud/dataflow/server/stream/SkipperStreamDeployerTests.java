@@ -26,7 +26,6 @@ import org.mockito.ArgumentCaptor;
 
 import org.springframework.cloud.dataflow.registry.support.ResourceUtils;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
-import org.springframework.cloud.dataflow.server.repository.StreamDeploymentRepository;
 import org.springframework.cloud.deployer.resource.docker.DockerResource;
 import org.springframework.cloud.deployer.resource.maven.MavenResource;
 import org.springframework.cloud.skipper.client.SkipperClient;
@@ -92,7 +91,7 @@ public class SkipperStreamDeployerTests {
 				skipperDeployerProperties);
 		SkipperClient skipperClient = mock(SkipperClient.class);
 		SkipperStreamDeployer skipperStreamDeployer = new SkipperStreamDeployer(skipperClient,
-				mock(StreamDeploymentRepository.class), mock(StreamDefinitionRepository.class), mock(ForkJoinPool.class));
+				mock(StreamDefinitionRepository.class), mock(ForkJoinPool.class));
 		skipperStreamDeployer.deployStream(streamDeploymentRequest);
 		ArgumentCaptor<UploadRequest> uploadRequestCaptor = ArgumentCaptor.forClass(UploadRequest.class);
 		ArgumentCaptor<InstallRequest> installRequestCaptor = ArgumentCaptor.forClass(InstallRequest.class);
@@ -135,7 +134,7 @@ public class SkipperStreamDeployerTests {
 	public void testManifest() {
 		SkipperClient skipperClient = mock(SkipperClient.class);
 		SkipperStreamDeployer skipperStreamDeployer = new SkipperStreamDeployer(skipperClient,
-				mock(StreamDeploymentRepository.class), mock(StreamDefinitionRepository.class), mock(ForkJoinPool.class));
+				mock(StreamDefinitionRepository.class), mock(ForkJoinPool.class));
 
 		skipperStreamDeployer.manifest("name", 666);
 
@@ -147,7 +146,7 @@ public class SkipperStreamDeployerTests {
 		SkipperClient skipperClient = mock(SkipperClient.class);
 		when(skipperClient.listDeployers()).thenReturn(new Resources<>(new ArrayList<>(), new ArrayList<>()));
 		SkipperStreamDeployer skipperStreamDeployer = new SkipperStreamDeployer(skipperClient,
-				mock(StreamDeploymentRepository.class), mock(StreamDefinitionRepository.class), mock(ForkJoinPool.class));
+				mock(StreamDefinitionRepository.class), mock(ForkJoinPool.class));
 		skipperStreamDeployer.platformList();
 		verify(skipperClient, times(1)).listDeployers();
 	}
@@ -156,7 +155,7 @@ public class SkipperStreamDeployerTests {
 	public void testHistory() {
 		SkipperClient skipperClient = mock(SkipperClient.class);
 		SkipperStreamDeployer skipperStreamDeployer = new SkipperStreamDeployer(skipperClient,
-				mock(StreamDeploymentRepository.class), mock(StreamDefinitionRepository.class), mock(ForkJoinPool.class));
+				mock(StreamDefinitionRepository.class), mock(ForkJoinPool.class));
 		skipperStreamDeployer.history("releaseName", 666);
 		verify(skipperClient).history(eq("releaseName"), eq("666"));
 	}

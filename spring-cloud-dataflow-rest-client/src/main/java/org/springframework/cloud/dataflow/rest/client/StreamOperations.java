@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2015-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.util.Collection;
 import java.util.Map;
 
 import org.springframework.cloud.dataflow.rest.resource.StreamDefinitionResource;
+import org.springframework.cloud.dataflow.rest.resource.StreamDeploymentResource;
 import org.springframework.cloud.skipper.domain.Deployer;
 import org.springframework.cloud.skipper.domain.PackageIdentifier;
 import org.springframework.cloud.skipper.domain.Release;
@@ -38,6 +39,12 @@ public interface StreamOperations {
 	 * @return the list streams known to the system.
 	 */
 	PagedResources<StreamDefinitionResource> list();
+
+	/**
+	 * @param name the name of the stream
+	 * @return retrieve the stream info.
+	 */
+	StreamDeploymentResource info(String name);
 
 	/**
 	 * Create a new stream, optionally deploying it.

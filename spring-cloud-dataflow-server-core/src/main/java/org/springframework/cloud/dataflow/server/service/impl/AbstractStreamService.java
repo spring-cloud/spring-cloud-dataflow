@@ -15,7 +15,6 @@
  */
 package org.springframework.cloud.dataflow.server.service.impl;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,13 +23,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.cloud.dataflow.core.StreamDefinition;
-import org.springframework.cloud.dataflow.core.StreamDeployment;
 import org.springframework.cloud.dataflow.server.controller.StreamAlreadyDeployedException;
 import org.springframework.cloud.dataflow.server.controller.StreamAlreadyDeployingException;
-import org.springframework.cloud.dataflow.server.repository.IncompatibleStreamDeployerException;
 import org.springframework.cloud.dataflow.server.repository.NoSuchStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
-import org.springframework.cloud.dataflow.server.repository.StreamDeploymentRepository;
 import org.springframework.cloud.dataflow.server.service.StreamService;
 import org.springframework.cloud.dataflow.server.stream.StreamDeployers;
 import org.springframework.cloud.dataflow.server.stream.StreamDeploymentRequest;
@@ -60,17 +56,12 @@ public abstract class AbstractStreamService implements StreamService {
 	 */
 	protected final StreamDefinitionRepository streamDefinitionRepository;
 
-	protected final StreamDeploymentRepository streamDeploymentRepository;
-
 	protected final StreamDeployers streamDeployer;
 
-	public AbstractStreamService(StreamDefinitionRepository streamDefinitionRepository,
-			StreamDeploymentRepository streamDeploymentRepository, StreamDeployers streamDeployer) {
+	public AbstractStreamService(StreamDefinitionRepository streamDefinitionRepository, StreamDeployers streamDeployer) {
 		Assert.notNull(streamDefinitionRepository, "StreamDefinitionRepository must not be null");
-		Assert.notNull(streamDeploymentRepository, "StreamDeploymentRepository must not be null");
 		Assert.notNull(streamDeployer, "StreamDeployer must not be null");
 		this.streamDefinitionRepository = streamDefinitionRepository;
-		this.streamDeploymentRepository = streamDeploymentRepository;
 		this.streamDeployer = streamDeployer;
 	}
 
@@ -83,20 +74,6 @@ public abstract class AbstractStreamService implements StreamService {
 	}
 
 	protected abstract void doDeployStream(String name, Map<String, String> deploymentProperties);
-
-	@Override
-	public void undeployStream(String streamName) {
-		StreamDeployment streamDeployment = this.streamDeploymentRepository.findOne(streamName);
-		if (streamDeployment != null) {
-			if (this.streamDeployer != StreamDeployers.valueOf(streamDeployment.getDeployerName())) {
-				throw new IncompatibleStreamDeployerException(streamDeployer.name());
-			}
-			doUndeployStream(streamName);
-			this.streamDeploymentRepository.delete(streamName);
-		}
-	}
-
-	protected abstract void doUndeployStream(String streamName);
 
 
 	protected StreamDefinition createStreamDefinitionForDeploy(String name) {
@@ -121,25 +98,7 @@ public abstract class AbstractStreamService implements StreamService {
 	// State
 	@Override
 	public Map<StreamDefinition, DeploymentState> state(List<StreamDefinition> streamDefinitions) {
-		Map<StreamDefinition, DeploymentState> states = new HashMap<>();
-		List<StreamDefinition> deployerSpecificStreamDefinitions = new ArrayList<>();
-		for (StreamDefinition streamDefinition : streamDefinitions) {
-			StreamDeployment streamDeployment = this.streamDeploymentRepository.findOne(streamDefinition.getName());
-			if (streamDeployment == null) {
-				states.put(streamDefinition, DeploymentState.unknown);
-			}
-			else if (this.streamDeployer == StreamDeployers.valueOf(streamDeployment.getDeployerName())) {
-				deployerSpecificStreamDefinitions.add(streamDefinition);
-			}
-			else {
-				logger.error("Invalid deployer:" + streamDefinition.getName() + ":" + streamDeployment.getDeployerName());
-				throw new IncompatibleStreamDeployerException(this.streamDeployer.name());
-			}
-		}
-		if (!deployerSpecificStreamDefinitions.isEmpty()) {
-			states.putAll(this.doState(deployerSpecificStreamDefinitions));
-		}
-		return states;
+		return this.doState(streamDefinitions);
 	}
 
 	protected abstract Map<StreamDefinition, DeploymentState> doState(List<StreamDefinition> streamDefinitions);

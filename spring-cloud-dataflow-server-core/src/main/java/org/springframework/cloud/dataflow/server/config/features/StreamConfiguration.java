@@ -21,6 +21,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cloud.dataflow.completion.RecoveryStrategy;
 import org.springframework.cloud.dataflow.completion.StreamCompletionProvider;
+import org.springframework.cloud.dataflow.server.ConditionalOnSkipperDisabled;
 import org.springframework.cloud.dataflow.server.completion.TapOnDestinationRecoveryStrategy;
 import org.springframework.cloud.dataflow.server.repository.RdbmsStreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.RdbmsStreamDeploymentRepository;
@@ -44,6 +45,7 @@ public class StreamConfiguration {
 
 	@Bean
 	@ConditionalOnMissingBean
+	@ConditionalOnSkipperDisabled
 	public StreamDeploymentRepository streamDeploymentRepository(DataSource dataSource) {
 		return new RdbmsStreamDeploymentRepository(dataSource);
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,6 @@ import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.StreamDeploymentRepository;
 import org.springframework.cloud.dataflow.server.stream.SkipperStreamDeployer;
-import org.springframework.cloud.dataflow.server.stream.StreamDeployers;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -61,18 +60,16 @@ public class SkipperStreamServiceUpgradeStreamTests {
 
 	private StreamDefinition streamDefinition2 = new StreamDefinition("test2", "time | log");
 
-	private StreamDeployment streamDeployment2 = new StreamDeployment(streamDefinition2.getName(),
-			StreamDeployers.skipper.name(), "pkg1", "release1", "local");
+	private StreamDeployment streamDeployment2 = new StreamDeployment(streamDefinition2.getName(), "");
 
 	@Test
 	public void verifyUpgradeStream() {
 		when(streamDefinitionRepository.findOne("test2")).thenReturn(streamDefinition2);
 		when(streamDeploymentRepository.findOne(streamDeployment2.getStreamName())).thenReturn(streamDeployment2);
-		streamService.updateStream(streamDeployment2.getStreamName(),
-				streamDeployment2.getReleaseName(),
+		streamService.updateStream(streamDeployment2.getStreamName(), streamDeployment2.getStreamName(),
 				null, null);
 		verify(this.skipperStreamDeployer, times(1))
-				.upgradeStream(this.streamDeployment2.getReleaseName(),
+				.upgradeStream(this.streamDeployment2.getStreamName(),
 						null, "");
 		verifyNoMoreInteractions(this.skipperStreamDeployer);
 	}

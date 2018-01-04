@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2016 the original author or authors.
+ * Copyright 2015-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.dataflow.server.controller;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 
@@ -23,17 +24,24 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.cloud.dataflow.core.StreamDefinition;
+import org.springframework.cloud.dataflow.core.StreamDeployment;
 import org.springframework.cloud.dataflow.rest.UpdateStreamRequest;
+import org.springframework.cloud.dataflow.rest.resource.DeploymentStateResource;
 import org.springframework.cloud.dataflow.rest.resource.StreamDeploymentResource;
+import org.springframework.cloud.dataflow.server.controller.support.ArgumentSanitizer;
+import org.springframework.cloud.dataflow.server.controller.support.ControllerUtils;
 import org.springframework.cloud.dataflow.server.repository.NoSuchStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.StreamService;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
+import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.cloud.skipper.domain.Deployer;
 import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.hateoas.ExposesResourceFor;
+import org.springframework.hateoas.mvc.ResourceAssemblerSupport;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -112,8 +120,31 @@ public class StreamDeploymentController {
 	/**
 	 * Request deployment of an existing stream definition.
 	 * @param name the name of an existing stream definition (required)
+	 */
+	@RequestMapping(value = "/{name}", method = RequestMethod.GET)
+	@ResponseStatus(HttpStatus.CREATED)
+	public StreamDeploymentResource info(@PathVariable("name") String name) {
+		StreamDefinition streamDefinition = this.repository.findOne(name);
+		if (streamDefinition == null) {
+			throw new NoSuchStreamDefinitionException(name);
+		}
+		StreamDeployment streamDeployment = this.streamService.info(name);
+		Map<StreamDefinition, DeploymentState> streamDeploymentStates =
+				this.streamService.state(Arrays.asList(streamDefinition));
+		DeploymentState deploymentState = streamDeploymentStates.get(streamDefinition);
+		String status = "";
+		if (deploymentState != null) {
+			final DeploymentStateResource deploymentStateResource = ControllerUtils.mapState(deploymentState);
+			status = deploymentStateResource.getKey();
+		}
+		return new Assembler(streamDefinition.getDslText(), status).toResource(streamDeployment);
+	}
+
+	/**
+	 * Request deployment of an existing stream definition.
+	 * @param name the name of an existing stream definition (required)
 	 * @param properties the deployment properties for the stream as a comma-delimited list of
-	 * key=value pairsef
+	 * key=value pairs
 	 */
 	@RequestMapping(value = "/{name}", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
@@ -151,5 +182,50 @@ public class StreamDeploymentController {
 	@ResponseStatus(HttpStatus.OK)
 	public Collection<Deployer> platformList() {
 		return this.streamService.platformList();
+	}
+
+	/**
+	 * {@link org.springframework.hateoas.ResourceAssembler} implementation that converts
+	 * {@link StreamDeployment}s to {@link StreamDeploymentResource}s.
+	 */
+	class Assembler extends ResourceAssemblerSupport<StreamDeployment, StreamDeploymentResource> {
+
+		private final String dslText;
+
+		private final String status;
+
+		public Assembler(String dslText, String status) {
+			super(StreamDeploymentController.class, StreamDeploymentResource.class);
+			this.dslText = dslText;
+			this.status = status;
+		}
+
+		@Override
+		public StreamDeploymentResource toResource(StreamDeployment streamDeployment) {
+			try {
+				return createResourceWithId(streamDeployment.getStreamName(), streamDeployment);
+			}
+			catch (IllegalStateException e) {
+				logger.warn("Failed to create StreamDeploymentResource. " + e.getMessage());
+			}
+			return null;
+		}
+
+		@Override
+		public StreamDeploymentResource instantiateResource(StreamDeployment streamDeployment) {
+			String deploymentProperties = "";
+			if (StringUtils.hasText(streamDeployment.getDeploymentProperties()) && canDisplayDeploymentProperties()) {
+				deploymentProperties = streamDeployment.getDeploymentProperties();
+			}
+			return new StreamDeploymentResource(streamDeployment.getStreamName(),
+					ArgumentSanitizer.sanitizeStream(this.dslText), deploymentProperties, this.status);
+		}
+
+		private boolean canDisplayDeploymentProperties() {
+			return StringUtils.hasText(this.status) &&
+					(this.status.equals(DeploymentState.deployed.name()))
+					|| this.status.equals(DeploymentState.deploying.name());
+		}
+
 	}
 }

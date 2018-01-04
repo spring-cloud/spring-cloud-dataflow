@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2017 the original author or authors.
+ * Copyright 2015-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -175,11 +175,9 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	@Bean
 	@ConditionalOnSkipperEnabled
 	public StreamService skipperStreamService(StreamDefinitionRepository streamDefinitionRepository,
-			StreamDeploymentRepository streamDeploymentRepository, AppRegistryService appRegistryService,
-			SkipperStreamDeployer skipperStreamDeployer,
+			AppRegistryService appRegistryService, SkipperStreamDeployer skipperStreamDeployer,
 			AppDeploymentRequestCreator appDeploymentRequestCreator) {
 		return new SkipperStreamService(streamDefinitionRepository,
-				streamDeploymentRepository,
 				appRegistryService,
 				skipperStreamDeployer,
 				appDeploymentRequestCreator);
@@ -188,10 +186,9 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	@Bean
 	@ConditionalOnSkipperDisabled
 	public AppDeployerStreamService simpleStreamService(StreamDefinitionRepository streamDefinitionRepository,
-			StreamDeploymentRepository streamDeploymentRepository, AppDeployerStreamDeployer appDeployerStreamDeployer,
-			AppDeploymentRequestCreator appDeploymentRequestCreator) {
-		return new AppDeployerStreamService(streamDefinitionRepository,
-				streamDeploymentRepository, appDeployerStreamDeployer, appDeploymentRequestCreator);
+			AppDeployerStreamDeployer appDeployerStreamDeployer, AppDeploymentRequestCreator appDeploymentRequestCreator) {
+		return new AppDeployerStreamService(streamDefinitionRepository, appDeployerStreamDeployer,
+				appDeploymentRequestCreator);
 	}
 
 	@Bean
@@ -215,9 +212,8 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	@Bean
 	@ConditionalOnSkipperEnabled
 	public SkipperStreamDeployer skipperStreamDeployer(SkipperClient skipperClient,
-			StreamDeploymentRepository streamDeploymentRepository, StreamDefinitionRepository streamDefinitionRepository) {
-		return new SkipperStreamDeployer(skipperClient, streamDeploymentRepository, streamDefinitionRepository,
-				new ForkJoinPool(2));
+			StreamDefinitionRepository streamDefinitionRepository) {
+		return new SkipperStreamDeployer(skipperClient, streamDefinitionRepository, new ForkJoinPool(2));
 	}
 
 	@Bean
