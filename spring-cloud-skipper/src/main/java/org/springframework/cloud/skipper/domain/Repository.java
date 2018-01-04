@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,25 +15,27 @@
  */
 package org.springframework.cloud.skipper.domain;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
 
 /**
  * Repository for the packages.
  *
  * @author Mark Pollack
+ * @author Gunnar Hillert
+ *
  */
 @Entity
-@Table(name = "SkipperRepository")
+@Table(name = "SkipperRepository",
+	uniqueConstraints = @UniqueConstraint(name = "uk_repository", columnNames = { "name" }))
 public class Repository extends AbstractEntity {
 
 	/**
 	 * A short name, e.g. 'stable' to associate with this repository, must be unique.
 	 */
 	@NotNull
-	@Column(unique = true)
 	private String name;
 
 	/**

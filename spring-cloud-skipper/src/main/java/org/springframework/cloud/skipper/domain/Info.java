@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,8 @@ import java.util.Date;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.ForeignKey;
+import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
@@ -26,12 +28,14 @@ import javax.persistence.Table;
  * Basic information about the package deployment operation.
  *
  * @author Mark Pollack
+ * @author Gunnar Hillert
  */
 @Entity
 @Table(name = "SkipperInfo")
 public class Info extends AbstractEntity {
 
 	@OneToOne(cascade = { CascadeType.ALL })
+	@JoinColumn(foreignKey = @ForeignKey(name = "fk_info_status"))
 	private Status status;
 
 	private Date firstDeployed;

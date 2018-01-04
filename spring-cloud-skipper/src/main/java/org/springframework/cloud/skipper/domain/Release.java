@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,8 @@ import java.io.IOException;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.ForeignKey;
+import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
 import javax.persistence.OneToOne;
 import javax.persistence.PostLoad;
@@ -36,6 +38,7 @@ import org.springframework.util.StringUtils;
  * The entity corresponds to Release of the package.
  *
  * @author Mark Pollack
+ * @author Gunnar Hillert
  */
 @Entity
 @Table(name = "SkipperRelease")
@@ -50,6 +53,7 @@ public class Release extends AbstractEntity {
 	private int version;
 
 	@OneToOne(cascade = { CascadeType.ALL })
+	@JoinColumn(foreignKey = @ForeignKey(name = "fk_release_info"))
 	private Info info;
 
 	@Transient
