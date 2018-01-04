@@ -17,6 +17,8 @@ spring:
       base-path: /api
   jpa:
     generate-ddl: true
+    properties:
+      hibernate.id.new_generator_mappings: true
   cloud:
     skipper:
       server:
