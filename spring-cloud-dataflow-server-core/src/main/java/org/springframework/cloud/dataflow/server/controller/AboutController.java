@@ -149,23 +149,27 @@ public class AboutController {
 		final RuntimeEnvironment runtimeEnvironment = new RuntimeEnvironment();
 
 		if (this.streamDeployer != null) {
-			final RuntimeEnvironmentInfo deployerEnvironmentInfo = this.streamDeployer.environmentInfo();
-			final RuntimeEnvironmentDetails deployerInfo = new RuntimeEnvironmentDetails();
+			try {
+				final RuntimeEnvironmentInfo deployerEnvironmentInfo = this.streamDeployer.environmentInfo();
+				final RuntimeEnvironmentDetails deployerInfo = new RuntimeEnvironmentDetails();
 
-			deployerInfo.setDeployerImplementationVersion(deployerEnvironmentInfo.getImplementationVersion());
-			deployerInfo.setDeployerName(deployerEnvironmentInfo.getImplementationName());
-			deployerInfo.setDeployerSpiVersion(deployerEnvironmentInfo.getSpiVersion());
-			deployerInfo.setJavaVersion(deployerEnvironmentInfo.getJavaVersion());
-			deployerInfo.setPlatformApiVersion(deployerEnvironmentInfo.getPlatformApiVersion());
-			deployerInfo.setPlatformClientVersion(deployerEnvironmentInfo.getPlatformClientVersion());
-			deployerInfo.setPlatformHostVersion(deployerEnvironmentInfo.getPlatformHostVersion());
-			deployerInfo.setPlatformSpecificInfo(deployerEnvironmentInfo.getPlatformSpecificInfo());
-			deployerInfo.setPlatformHostVersion(deployerEnvironmentInfo.getPlatformHostVersion());
-			deployerInfo.setPlatformType(deployerEnvironmentInfo.getPlatformType());
-			deployerInfo.setSpringBootVersion(deployerEnvironmentInfo.getSpringBootVersion());
-			deployerInfo.setSpringVersion(deployerEnvironmentInfo.getSpringVersion());
+				deployerInfo.setDeployerImplementationVersion(deployerEnvironmentInfo.getImplementationVersion());
+				deployerInfo.setDeployerName(deployerEnvironmentInfo.getImplementationName());
+				deployerInfo.setDeployerSpiVersion(deployerEnvironmentInfo.getSpiVersion());
+				deployerInfo.setJavaVersion(deployerEnvironmentInfo.getJavaVersion());
+				deployerInfo.setPlatformApiVersion(deployerEnvironmentInfo.getPlatformApiVersion());
+				deployerInfo.setPlatformClientVersion(deployerEnvironmentInfo.getPlatformClientVersion());
+				deployerInfo.setPlatformHostVersion(deployerEnvironmentInfo.getPlatformHostVersion());
+				deployerInfo.setPlatformSpecificInfo(deployerEnvironmentInfo.getPlatformSpecificInfo());
+				deployerInfo.setPlatformHostVersion(deployerEnvironmentInfo.getPlatformHostVersion());
+				deployerInfo.setPlatformType(deployerEnvironmentInfo.getPlatformType());
+				deployerInfo.setSpringBootVersion(deployerEnvironmentInfo.getSpringBootVersion());
+				deployerInfo.setSpringVersion(deployerEnvironmentInfo.getSpringVersion());
 
-			runtimeEnvironment.setAppDeployer(deployerInfo);
+				runtimeEnvironment.setAppDeployer(deployerInfo);
+			} catch (UnsupportedOperationException uoe) {
+				logger.debug("expected in skipper mode due to #392");
+			}
 		}
 
 		if (this.taskLauncher != null) {

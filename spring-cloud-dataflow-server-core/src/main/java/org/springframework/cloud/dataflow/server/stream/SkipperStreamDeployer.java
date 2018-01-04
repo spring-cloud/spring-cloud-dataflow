@@ -45,7 +45,6 @@ import org.springframework.cloud.dataflow.core.StreamDeployment;
 import org.springframework.cloud.dataflow.registry.support.ResourceUtils;
 import org.springframework.cloud.dataflow.server.controller.NoSuchAppException;
 import org.springframework.cloud.dataflow.server.controller.StreamDefinitionController;
-import org.springframework.cloud.dataflow.server.repository.IncompatibleStreamDeployerException;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.StreamDeploymentRepository;
 import org.springframework.cloud.deployer.spi.app.AppInstanceStatus;
@@ -352,7 +351,7 @@ public class SkipperStreamDeployer implements StreamDeployer {
 	@Override
 	public RuntimeEnvironmentInfo environmentInfo() {
 		// TODO To fix when https://github.com/spring-cloud/spring-cloud-skipper/issues/392
-		throw new IncompatibleStreamDeployerException("AppDeployer");
+		throw new UnsupportedOperationException("EnvironmentInfo is not supported for Skipper yet (issue#392)");
 	}
 
 	private List<List<AppStatus>> getSkipperStatuses(Pageable pageable, List<String> skipperStreamNames)

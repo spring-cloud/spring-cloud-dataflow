@@ -34,6 +34,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.isEmptyOrNullString;
+import static org.hamcrest.Matchers.not;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -89,7 +90,8 @@ public class AboutControllerTests {
 				.andExpect(jsonPath("$.securityInfo.authorizationEnabled", is(false)))
 				.andExpect(jsonPath("$.securityInfo.formLogin", is(false)))
 				.andExpect(jsonPath("$.securityInfo.authenticated", is(false)))
-				.andExpect(jsonPath("$.securityInfo.username", isEmptyOrNullString()));
+				.andExpect(jsonPath("$.securityInfo.username", isEmptyOrNullString()))
+				.andExpect(jsonPath("$.runtimeEnvironment.appDeployer.deployerName", not(isEmptyOrNullString())));
 	}
 
 	@RunWith(SpringRunner.class)
@@ -157,6 +159,57 @@ public class AboutControllerTests {
 					.andExpect(jsonPath("$.versionInfo.shell.url", is("https://repo.spring.io/libs-milestone/org/springframework/cloud/spring-cloud-dataflow-shell/1.3.0.BUILD-SNAPSHOT/spring-cloud-dataflow-shell-1.3.0.BUILD-SNAPSHOT.jsdfasdf")))
 					.andExpect(jsonPath("$.versionInfo.shell.checksumSha1").doesNotExist())
 					.andExpect(jsonPath("$.versionInfo.shell.checksumSha256").doesNotExist());
+		}
+	}
+
+	@RunWith(SpringRunner.class)
+	@SpringBootTest(classes = TestDependencies.class, properties = {"spring.cloud.dataflow.features.skipper-enabled=true"})
+	@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+	@TestPropertySource(properties = {
+			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-implementation.version=1.2.3.IMPLEMENTATION.TEST",
+			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-core.version=1.2.3.CORE.TEST",
+			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-dashboard.version=1.2.3.UI.TEST",
+			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.version=1.2.3.SHELL.TEST",
+			"spring.cloud.dataflow.version-info.dependency-fetch.enabled=true",
+			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.url=https://repo.spring.io/libs-milestone/org/springframework/cloud/spring-cloud-dataflow-shell/1.3.0.BUILD-SNAPSHOT/spring-cloud-dataflow-shell-1.3.0.BUILD-SNAPSHOT.jsdfasdf",
+			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.name=Spring Cloud Data Flow Shell Test",
+			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.checksum-sha1=ABCDEFG",
+			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.checksum-sha1-url={repository}/org/springframework/cloud/spring-cloud-dataflow-shell/{version}/spring-cloud-dataflow-shell-{version}.jar.sha1"
+	})
+	public static class SkipperMode {
+		private MockMvc mockMvc;
+
+		@Autowired
+		private WebApplicationContext wac;
+
+		@Before
+		public void setupMocks() {
+			this.mockMvc = MockMvcBuilders.webAppContextSetup(wac)
+					.defaultRequest(get("/").accept(MediaType.APPLICATION_JSON)).build();
+		}
+
+		@Test
+		public void testListApplications() throws Exception {
+			ResultActions result = mockMvc.perform(get("/about").accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk());
+			result.andExpect(jsonPath("$.featureInfo.analyticsEnabled", is(false)))
+					.andExpect(jsonPath("$.featureInfo.skipperEnabled", is(false)))
+					.andExpect(jsonPath("$.versionInfo.implementation.name", is("spring-cloud-dataflow-server-local")))
+					.andExpect(jsonPath("$.versionInfo.implementation.version", is("1.2.3.IMPLEMENTATION.TEST")))
+					.andExpect(jsonPath("$.versionInfo.core.name", is("Spring Cloud Data Flow Core")))
+					.andExpect(jsonPath("$.versionInfo.core.version", is("1.2.3.CORE.TEST")))
+					.andExpect(jsonPath("$.versionInfo.dashboard.name", is("Spring Cloud Dataflow UI")))
+					.andExpect(jsonPath("$.versionInfo.dashboard.version", is("1.2.3.UI.TEST")))
+					.andExpect(jsonPath("$.versionInfo.shell.name", is("Spring Cloud Data Flow Shell Test")))
+					.andExpect(jsonPath("$.versionInfo.shell.url", is("https://repo.spring.io/libs-milestone/org/springframework/cloud/spring-cloud-dataflow-shell/1.3.0.BUILD-SNAPSHOT/spring-cloud-dataflow-shell-1.3.0.BUILD-SNAPSHOT.jsdfasdf")))
+					.andExpect(jsonPath("$.versionInfo.shell.version", is("1.2.3.SHELL.TEST")))
+					.andExpect(jsonPath("$.versionInfo.shell.checksumSha1", is("ABCDEFG")))
+					.andExpect(jsonPath("$.versionInfo.shell.checksumSha256").doesNotExist())
+					.andExpect(jsonPath("$.securityInfo.authenticationEnabled", is(false)))
+					.andExpect(jsonPath("$.securityInfo.authorizationEnabled", is(false)))
+					.andExpect(jsonPath("$.securityInfo.formLogin", is(false)))
+					.andExpect(jsonPath("$.securityInfo.authenticated", is(false)))
+					.andExpect(jsonPath("$.securityInfo.username", isEmptyOrNullString()))
+					.andExpect(jsonPath("$.runtimeEnvironment.appDeployer.deployerName", isEmptyOrNullString()));
 		}
 	}
 }
