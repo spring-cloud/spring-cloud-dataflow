@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,7 +62,7 @@ public class SkipperStreamServiceUpgradeStreamTests {
 	private StreamDefinition streamDefinition2 = new StreamDefinition("test2", "time | log");
 
 	private StreamDeployment streamDeployment2 = new StreamDeployment(streamDefinition2.getName(),
-			StreamDeployers.skipper.name(), "pkg1", "release1", "local");
+			StreamDeployers.skipper.name(), "", "", "pkg1", "release1", "local");
 
 	@Test
 	public void verifyUpgradeStream() {

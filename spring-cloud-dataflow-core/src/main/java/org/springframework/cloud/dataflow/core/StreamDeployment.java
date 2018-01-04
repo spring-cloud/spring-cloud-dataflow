@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,11 +50,23 @@ public class StreamDeployment {
 	 */
 	private final String repoName;
 
-	public StreamDeployment(String streamName, String deployerName, String packageName, String releaseName,
-			String repoName) {
+	/**
+	 * The JSON String value of the deployment properties Map<String, String> values.
+	 */
+	private String deploymentProperties;
+
+	/**
+	 * The JSON String value for all the apps and their versions.
+	 */
+	private String appVersions;
+
+	public StreamDeployment(String streamName, String deployerName, String deploymentProperties, String appVersions,
+			String packageName, String releaseName, String repoName) {
 		Assert.hasText(streamName, "Stream name must not be null");
 		Assert.hasText(deployerName, "Deployer name Name must not be null");
 		this.streamName = streamName;
+		this.deploymentProperties = deploymentProperties;
+		this.appVersions = appVersions;
 		this.deployerName = deployerName;
 		this.packageName = packageName;
 		this.releaseName = releaseName;
@@ -62,7 +74,11 @@ public class StreamDeployment {
 	}
 
 	public StreamDeployment(String streamName, String deployerName) {
-		this(streamName, deployerName, null, null, null);
+		this(streamName, deployerName, "", null, null, null, null);
+	}
+
+	public StreamDeployment(String streamName, String deployerName, String deploymentProperties, String appVersions) {
+		this(streamName, deployerName, deploymentProperties, appVersions, null, null, null);
 	}
 
 	public String getStreamName() {
@@ -85,5 +101,12 @@ public class StreamDeployment {
 		return repoName;
 	}
 
+	public String getDeploymentProperties() {
+		return this.deploymentProperties;
+	}
+
+	public String getAppVersions() {
+		return this.appVersions;
+	}
 
 }

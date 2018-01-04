@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2017 the original author or authors.
+ * Copyright 2015-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,14 +21,10 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URI;
-import java.util.HashMap;
-
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.springframework.cloud.dataflow.rest.util.HttpClientConfigurer;
 import org.springframework.cloud.dataflow.shell.Target;
+import org.springframework.cloud.dataflow.shell.command.support.ShellUtils;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -196,21 +192,7 @@ public class HttpCommands implements CommandMarker {
 				.append(OsUtils.LINE_SEPARATOR);
 		String maybeJson = response.getBody();
 		if (maybeJson != null) {
-			buffer.append(prettyPrintIfJson(maybeJson));
-		}
-	}
-
-	private String prettyPrintIfJson(String maybeJson) {
-		JsonFactory factory = new JsonFactory();
-		ObjectMapper mapper = new ObjectMapper(factory);
-		TypeReference<HashMap<String, Object>> typeRef = new TypeReference<HashMap<String, Object>>() {
-		};
-		try {
-			return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(mapper.readValue(maybeJson, typeRef));
-		}
-		catch (IOException e) {
-			// Not JSON? Return unchanged
-			return maybeJson;
+			buffer.append(ShellUtils.prettyPrintIfJson(maybeJson));
 		}
 	}
 

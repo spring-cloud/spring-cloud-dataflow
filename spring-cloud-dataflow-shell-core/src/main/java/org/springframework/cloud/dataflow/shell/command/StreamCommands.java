@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2017 the original author or authors.
+ * Copyright 2015-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,11 @@ package org.springframework.cloud.dataflow.shell.command;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
@@ -32,9 +34,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
 import org.springframework.cloud.dataflow.rest.client.StreamOperations;
 import org.springframework.cloud.dataflow.rest.resource.StreamDefinitionResource;
+import org.springframework.cloud.dataflow.rest.resource.StreamDeploymentResource;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
 import org.springframework.cloud.dataflow.shell.command.support.OpsType;
 import org.springframework.cloud.dataflow.shell.command.support.RoleType;
+import org.springframework.cloud.dataflow.shell.command.support.ShellUtils;
 import org.springframework.cloud.dataflow.shell.command.support.YmlUtils;
 import org.springframework.cloud.dataflow.shell.config.DataFlowShell;
 import org.springframework.cloud.skipper.domain.Deployer;
@@ -46,10 +50,13 @@ import org.springframework.shell.core.CommandMarker;
 import org.springframework.shell.core.annotation.CliAvailabilityIndicator;
 import org.springframework.shell.core.annotation.CliCommand;
 import org.springframework.shell.core.annotation.CliOption;
+import org.springframework.shell.table.AbsoluteWidthSizeConstraints;
 import org.springframework.shell.table.BeanListTableModel;
+import org.springframework.shell.table.CellMatchers;
 import org.springframework.shell.table.Table;
 import org.springframework.shell.table.TableBuilder;
 import org.springframework.shell.table.TableModel;
+import org.springframework.shell.table.TableModelBuilder;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -73,6 +80,8 @@ import static org.springframework.cloud.dataflow.rest.SkipperStream.SKIPPER_REPO
 public class StreamCommands implements CommandMarker {
 
 	private static final String LIST_STREAM = "stream list";
+
+	private static final String INFO_STREAM = "stream info";
 
 	private static final String CREATE_STREAM = "stream create";
 
@@ -112,7 +121,7 @@ public class StreamCommands implements CommandMarker {
 	@Autowired
 	private UserInput userInput;
 
-	@CliAvailabilityIndicator({ LIST_STREAM })
+	@CliAvailabilityIndicator({ LIST_STREAM, INFO_STREAM })
 	public boolean availableWithViewRole() {
 		return dataFlowShell.hasAccess(RoleType.VIEW, OpsType.STREAM);
 	}
@@ -132,6 +141,28 @@ public class StreamCommands implements CommandMarker {
 		headers.put("statusDescription", "Status");
 		BeanListTableModel<StreamDefinitionResource> model = new BeanListTableModel<>(streams, headers);
 		return DataFlowTables.applyStyle(new TableBuilder(model)).build();
+	}
+
+	@CliCommand(value = INFO_STREAM, help = "Show information about a specific stream")
+	public List<Object> streamInfo(@CliOption(key = { "",
+			"name" }, help = "the name of the stream to show", mandatory = true, optionContext = "existing-stream disable-string-converter") String name) {
+		List<Object> result = new ArrayList<>();
+		final StreamDeploymentResource stream = streamOperations().info(name);
+		TableModelBuilder<Object> modelBuilder = new TableModelBuilder<>();
+		modelBuilder.addRow().addValue("Name").addValue("DSL").addValue("Status");
+		modelBuilder.addRow().addValue(stream.getName())
+					.addValue(stream.getDslText())
+					.addValue(stream.getStatus());
+		TableBuilder builder = DataFlowTables.applyStyle(new TableBuilder(modelBuilder.build()))
+									.on(CellMatchers.table()).addSizer(new AbsoluteWidthSizeConstraints(30)).and();
+		result.add(builder.build());
+		if (stream.getAppVersions() != null) {
+			result.add(String.format("Deployed App versions: %s", ShellUtils.prettyPrintIfJson(stream.getAppVersions())));
+		}
+		if (stream.getDeploymentProperties() != null) {
+			result.add(String.format("Stream Deployment properties: %s", ShellUtils.prettyPrintIfJson(stream.getDeploymentProperties())));
+		}
+		return result;
 	}
 
 	@CliCommand(value = CREATE_STREAM, help = "Create a new stream definition")

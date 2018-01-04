@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,13 +64,13 @@ public class AppDeployerStreamServiceTests {
 	private StreamDefinition streamDefinition3 = new StreamDefinition("test3", "time | log");
 
 	private StreamDeployment streamDeployment1 = new StreamDeployment(streamDefinition1.getName(),
-			StreamDeployers.appdeployer.name(), null, null, null);
+			StreamDeployers.appdeployer.name());
 
 	private StreamDeployment streamDeployment2 = new StreamDeployment(streamDefinition2.getName(),
-			StreamDeployers.skipper.name(), "pkg1", "release1", "local");
+			StreamDeployers.skipper.name(), "", "", "pkg1", "release1", "local");
 
 	private StreamDeployment streamDeployment3 = new StreamDeployment(streamDefinition3.getName(),
-			StreamDeployers.skipper.name(), "pkg1", "release2", "local");
+			StreamDeployers.skipper.name(), "", "", "pkg1", "release2", "local");
 
 	private List<StreamDefinition> streamDefinitionList = new ArrayList<>();
 
@@ -117,7 +117,7 @@ public class AppDeployerStreamServiceTests {
 	public void verifyUndeployStream() {
 		StreamDefinition streamDefinition1 = new StreamDefinition("test1", "time | log");
 		StreamDeployment streamDeployment1 = new StreamDeployment(streamDefinition1.getName(),
-				StreamDeployers.appdeployer.name(), null, null, null);
+				StreamDeployers.appdeployer.name());
 		when(this.streamDeploymentRepository.findOne(streamDeployment1.getStreamName())).thenReturn(streamDeployment1);
 		this.simpleStreamService.undeployStream(streamDefinition1.getName());
 		verify(this.appDeployerStreamDeployer, times(1)).undeployStream(streamDefinition1.getName());
@@ -129,7 +129,7 @@ public class AppDeployerStreamServiceTests {
 	public void verifyUndeployStream2() {
 		StreamDefinition streamDefinition2 = new StreamDefinition("test2", "time | log");
 		StreamDeployment streamDeployment2 = new StreamDeployment(streamDefinition2.getName(),
-				StreamDeployers.skipper.name(), "pkg1", "release1", "local");
+				StreamDeployers.skipper.name(), "", "", "pkg1", "release1", "local");
 		when(this.streamDeploymentRepository.findOne(streamDeployment2.getStreamName())).thenReturn(streamDeployment2);
 		this.simpleStreamService.undeployStream(streamDefinition2.getName());
 	}
@@ -138,7 +138,7 @@ public class AppDeployerStreamServiceTests {
 	public void verifyRollbackStream() {
 		StreamDefinition streamDefinition1 = new StreamDefinition("test1", "time | log");
 		StreamDeployment streamDeployment1 = new StreamDeployment(streamDefinition1.getName(),
-				StreamDeployers.appdeployer.name(), null, null, null);
+				StreamDeployers.appdeployer.name());
 		when(this.streamDeploymentRepository.findOne(streamDeployment1.getStreamName())).thenReturn(streamDeployment1);
 		verifyNoMoreInteractions(this.appDeployerStreamDeployer);
 

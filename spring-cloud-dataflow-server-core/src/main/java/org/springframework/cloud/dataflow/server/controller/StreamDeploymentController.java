@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2016 the original author or authors.
+ * Copyright 2015-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.dataflow.server.controller;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 
@@ -23,15 +24,22 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.cloud.dataflow.core.StreamDefinition;
+import org.springframework.cloud.dataflow.core.StreamDeployment;
 import org.springframework.cloud.dataflow.rest.UpdateStreamRequest;
+import org.springframework.cloud.dataflow.rest.resource.DeploymentStateResource;
 import org.springframework.cloud.dataflow.rest.resource.StreamDeploymentResource;
+import org.springframework.cloud.dataflow.server.controller.support.ArgumentSanitizer;
+import org.springframework.cloud.dataflow.server.controller.support.ControllerUtils;
 import org.springframework.cloud.dataflow.server.repository.NoSuchStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
+import org.springframework.cloud.dataflow.server.repository.StreamDeploymentRepository;
 import org.springframework.cloud.dataflow.server.service.StreamService;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
+import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.cloud.skipper.domain.Deployer;
 import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.hateoas.ExposesResourceFor;
+import org.springframework.hateoas.mvc.ResourceAssemblerSupport;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -66,6 +74,12 @@ public class StreamDeploymentController {
 	private final StreamDefinitionRepository repository;
 
 	/**
+	 * The repository this controller will use to retrieve stream deployment.
+	 */
+	private final StreamDeploymentRepository streamDeploymentRepository;
+
+
+	/**
 	 * Create a {@code StreamDeploymentController} that delegates
 	 * <ul>
 	 * <li>CRUD operations to the provided {@link StreamDefinitionRepository}</li>
@@ -74,12 +88,15 @@ public class StreamDeploymentController {
 	 * </ul>
 	 *
 	 * @param repository the repository this controller will use for stream CRUD operations
+	 * @param streamDeploymentRepository repository this controller will use to retrieve stream deployment
 	 * @param streamService the underlying StreamService to deploy the stream
 	 */
-	public StreamDeploymentController(StreamDefinitionRepository repository, StreamService streamService) {
+	public StreamDeploymentController(StreamDefinitionRepository repository,
+			StreamDeploymentRepository streamDeploymentRepository, StreamService streamService) {
 		Assert.notNull(repository, "StreamDefinitionRepository must not be null");
 		Assert.notNull(streamService, "StreamService must not be null");
 		this.repository = repository;
+		this.streamDeploymentRepository = streamDeploymentRepository;
 		this.streamService = streamService;
 	}
 
@@ -112,8 +129,27 @@ public class StreamDeploymentController {
 	/**
 	 * Request deployment of an existing stream definition.
 	 * @param name the name of an existing stream definition (required)
+	 */
+	@RequestMapping(value = "/{name}", method = RequestMethod.GET)
+	@ResponseStatus(HttpStatus.CREATED)
+	public StreamDeploymentResource info(@PathVariable("name") String name) {
+		StreamDefinition streamDefinition = this.repository.findOne(name);
+		if (streamDefinition == null) {
+			throw new NoSuchStreamDefinitionException(name);
+		}
+		StreamDeployment streamDeployment = this.streamDeploymentRepository.findOne(name);
+		if (streamDeployment == null) {
+			return new StreamDeploymentResource(streamDefinition.getName(), streamDefinition.getDslText(),
+					null, null,null, null, null, null);
+		}
+		return new Assembler(streamDefinition).toResource(streamDeployment);
+	}
+
+	/**
+	 * Request deployment of an existing stream definition.
+	 * @param name the name of an existing stream definition (required)
 	 * @param properties the deployment properties for the stream as a comma-delimited list of
-	 * key=value pairsef
+	 * key=value pairs
 	 */
 	@RequestMapping(value = "/{name}", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
@@ -151,5 +187,47 @@ public class StreamDeploymentController {
 	@ResponseStatus(HttpStatus.OK)
 	public Collection<Deployer> platformList() {
 		return this.streamService.platformList();
+	}
+
+	/**
+	 * {@link org.springframework.hateoas.ResourceAssembler} implementation that converts
+	 * {@link StreamDeployment}s to {@link StreamDeploymentResource}s.
+	 */
+	class Assembler extends ResourceAssemblerSupport<StreamDeployment, StreamDeploymentResource> {
+
+		private final StreamDefinition streamDefinition;
+
+		public Assembler(StreamDefinition streamDefinition) {
+			super(StreamDeploymentController.class, StreamDeploymentResource.class);
+			this.streamDefinition = streamDefinition;
+		}
+
+		@Override
+		public StreamDeploymentResource toResource(StreamDeployment stream) {
+			try {
+				return createResourceWithId(this.streamDefinition.getName(), stream);
+			}
+			catch (IllegalStateException e) {
+				logger.warn("Failed to create StreamDeploymentResource. " + e.getMessage());
+			}
+			return null;
+		}
+
+		@Override
+		public StreamDeploymentResource instantiateResource(StreamDeployment stream) {
+			final StreamDeploymentResource resource = new StreamDeploymentResource(this.streamDefinition.getName(),
+					ArgumentSanitizer.sanitizeStream(this.streamDefinition.getDslText()), stream.getDeploymentProperties(),
+					stream.getAppVersions(), stream.getDeployerName(), stream.getPackageName(), stream.getReleaseName(),
+					stream.getRepoName());
+			Map<StreamDefinition, DeploymentState> streamDeploymentStates = StreamDeploymentController.this.streamService.state(Arrays.asList(this.streamDefinition));
+			DeploymentState deploymentState = streamDeploymentStates.get(this.streamDefinition);
+			if (deploymentState != null) {
+				final DeploymentStateResource deploymentStateResource = ControllerUtils.mapState(deploymentState);
+				resource.setStatus(deploymentStateResource.getKey());
+				resource.setStatusDescription(deploymentStateResource.getDescription());
+			}
+			return resource;
+		}
+
 	}
 }

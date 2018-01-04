@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2017 the original author or authors.
+ * Copyright 2015-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,6 +41,7 @@ import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
 import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
 import org.springframework.cloud.dataflow.server.repository.DeploymentKey;
 import org.springframework.cloud.dataflow.server.repository.InMemoryStreamDefinitionRepository;
+import org.springframework.cloud.dataflow.server.repository.InMemoryStreamDeploymentRepository;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.StreamService;
 import org.springframework.cloud.deployer.resource.maven.MavenProperties;
@@ -141,7 +142,7 @@ public class StreamControllerTests {
 	@Test(expected = IllegalArgumentException.class)
 	public void testConstructorMissingRepository() {
 		StreamDeploymentController deploymentController = new StreamDeploymentController(
-				new InMemoryStreamDefinitionRepository(), defaultStreamService);
+				new InMemoryStreamDefinitionRepository(), new InMemoryStreamDeploymentRepository(), defaultStreamService);
 		new StreamDefinitionController(null, appRegistry, defaultStreamService);
 	}
 

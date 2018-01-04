@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ import com.fasterxml.jackson.databind.module.SimpleAbstractTypeResolver;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.JSONObject;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 
@@ -206,8 +207,17 @@ public class SkipperStreamDeployer implements StreamDeployer {
 		installProperties.setReleaseName(streamName);
 		installProperties.setConfigValues(new ConfigValues());
 		installRequest.setInstallProperties(installProperties);
-		StreamDeployment streamDeployment = new StreamDeployment(streamName, StreamDeployers.skipper.name(), streamName,
-				streamName, repoName);
+		Map<String, Map<String, String>> deploymentProperties = new HashMap<>();
+		Map<String, String> appVersions = new HashMap<>();
+		for (AppDeploymentRequest appDeploymentRequest: streamDeploymentRequest.getAppDeploymentRequests()) {
+			deploymentProperties.put(appDeploymentRequest.getDefinition().getName(), appDeploymentRequest.getDeploymentProperties());
+			appVersions.put(appDeploymentRequest.getDefinition().getName(), ResourceUtils.getResourceVersion(appDeploymentRequest.getResource()));
+		}
+		String deploymentPropertiesJSON = new JSONObject(deploymentProperties).toString();
+		String appVersionsJSON = new JSONObject(appVersions).toString();
+		StreamDeployment streamDeployment = new StreamDeployment(streamName, StreamDeployers.skipper.name(),
+				deploymentPropertiesJSON, appVersionsJSON,
+				streamName, streamName, repoName);
 		Release release = skipperClient.install(installRequest);
 		this.streamDeploymentRepository.save(streamDeployment);
 		// TODO store releasename in deploymentIdRepository...

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2017 the original author or authors.
+ * Copyright 2016-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,11 @@
 
 package org.springframework.cloud.dataflow.server.config;
 
+import javax.sql.DataSource;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ForkJoinPool;
-import javax.sql.DataSource;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -172,8 +172,8 @@ public class DataFlowControllerAutoConfiguration {
 	@Bean
 	@ConditionalOnBean({ StreamDefinitionRepository.class, StreamDeploymentRepository.class })
 	public StreamDeploymentController streamDeploymentController(StreamDefinitionRepository repository,
-			StreamService streamService) {
-		return new StreamDeploymentController(repository, streamService);
+			StreamDeploymentRepository streamDeploymentRepository, StreamService streamService) {
+		return new StreamDeploymentController(repository, streamDeploymentRepository, streamService);
 	}
 
 	@Configuration
