@@ -422,7 +422,7 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 
 
 	@Bean
-	public AboutController aboutController(VersionInfoProperties versionInfoProperties) {
+	public AboutController aboutController(VersionInfoProperties versionInfoProperties, FeaturesProperties featuresProperties) {
 		StreamDeployer streamDeployer = mock(StreamDeployer.class);
 		TaskLauncher taskLauncher = mock(TaskLauncher.class);
 		RuntimeEnvironmentInfo.Builder builder = new RuntimeEnvironmentInfo.Builder();
@@ -438,7 +438,12 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 				platformApiVersion("testTaskDepPlatformApiVersion").
 				platformClientVersion("testTaskDepPlatformClientVersion").spiClass(Class.class).
 				platformHostVersion("testTaskDepPlatformHostVersion").build();
-		when(streamDeployer.environmentInfo()).thenReturn(appDeployerEnvInfo);
+		if (!featuresProperties.isSkipperEnabled()) {
+			when(streamDeployer.environmentInfo()).thenReturn(appDeployerEnvInfo);
+		}
+		else {
+			when(streamDeployer.environmentInfo()).thenThrow(new UnsupportedOperationException());
+		}
 		when(taskLauncher.environmentInfo()).thenReturn(taskDeployerEnvInfo);
 		return new AboutController(streamDeployer, taskLauncher,
 				mock(FeaturesProperties.class), versionInfoProperties,
