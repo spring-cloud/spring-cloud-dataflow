@@ -27,7 +27,7 @@ Note: Since analytics feature is enabled by default, the Data Flow server is exp
       This also means that the Data Flow server's `health` depends on the redis store availability as well.
       If you do not want to enabled HTTP endpoints to read analytics data written to Redis, then disable the analytics feature using the property mentioned above.
 
-The REST endpoint `/features` provides information on the features enabled/disabled.
+The REST endpoint `/about` provides information on the features enabled/disabled.
 
 [[configuration-rdbms]]
 == Database
