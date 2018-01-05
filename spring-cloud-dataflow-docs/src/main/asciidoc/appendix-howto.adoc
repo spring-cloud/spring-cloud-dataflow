@@ -330,7 +330,7 @@ destinations. Since we are publishing and subscribing from two different messagi
 to build the `bridge-processor` with both RabbitMQ and Apache Kafka binders in the classpath. To do that,
 head over to http://start-scs.cfapps.io/ and select `Bridge Processor`, `Kafka binder starter`, and
 `Rabbit binder starter` as the dependencies and follow the patching procedure described in the
-link:http://docs.spring.io/spring-cloud-stream-app-starters/docs/Bacon.RELEASE/reference/html/_introduction.html#customizing-binder[reference guide].
+link:http://docs.spring.io/spring-cloud-stream-app-starters/docs/Celsius.SR1/reference/html/_introduction.html#customizing-binder[reference guide].
 Specifically, for the `bridge-processor`, you'd have to import the `BridgeProcessorConfiguration`
 provided by the starter.
 
