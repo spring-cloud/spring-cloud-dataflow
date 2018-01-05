@@ -41,7 +41,7 @@ spring:
       security:
         authorization:
           enabled: true
-          permit-all-paths: "/authenticate,/security/info,/features,/assets/**,/dashboard/logout-success-oauth.html"
+          permit-all-paths: "/authenticate,/security/info,/assets/**,/dashboard/logout-success-oauth.html"
           rules:
             # Metrics
 

@@ -186,13 +186,6 @@ public class LocalServerSecurityWithUsersFileTestsWithoutTasks {
 				{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/completions/task", null,
 						TestUtils.toImmutableMap("detailLevel", "2") },
 
-				/* FeaturesController */
-
-				{ HttpMethod.GET, HttpStatus.OK, "/features", adminOnlyUser, null },
-				{ HttpMethod.GET, HttpStatus.OK, "/features", viewOnlyUser, null },
-				{ HttpMethod.GET, HttpStatus.OK, "/features", createOnlyUser, null },
-				{ HttpMethod.GET, HttpStatus.OK, "/features", null, null },
-
 				/* JobExecutionController */
 
 				{ HttpMethod.GET, HttpStatus.FORBIDDEN, "/jobs/executions", adminOnlyUser, null },

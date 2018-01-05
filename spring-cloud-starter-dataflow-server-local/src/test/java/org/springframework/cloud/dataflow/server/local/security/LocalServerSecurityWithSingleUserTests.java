@@ -178,11 +178,6 @@ public class LocalServerSecurityWithSingleUserTests {
 				{ HttpMethod.POST, HttpStatus.BAD_REQUEST, "/tools/convertTaskGraphToText", singleUser, null},
 				{ HttpMethod.POST, HttpStatus.UNAUTHORIZED, "/tools/convertTaskGraphToText", null, null },
 
-				/* FeaturesController */
-
-				{ HttpMethod.GET, HttpStatus.OK, "/features", singleUser, null },
-				{ HttpMethod.GET, HttpStatus.OK, "/features", null, null },
-
 				/* JobExecutionController */
 
 				{ HttpMethod.GET, HttpStatus.OK, "/jobs/executions", singleUser, null },

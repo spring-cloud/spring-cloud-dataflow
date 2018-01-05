@@ -65,7 +65,6 @@ import org.springframework.cloud.dataflow.server.config.features.FeaturesPropert
 import org.springframework.cloud.dataflow.server.controller.AboutController;
 import org.springframework.cloud.dataflow.server.controller.AppRegistryController;
 import org.springframework.cloud.dataflow.server.controller.CompletionController;
-import org.springframework.cloud.dataflow.server.controller.FeaturesController;
 import org.springframework.cloud.dataflow.server.controller.JobExecutionController;
 import org.springframework.cloud.dataflow.server.controller.JobInstanceController;
 import org.springframework.cloud.dataflow.server.controller.JobStepExecutionController;
@@ -403,11 +402,6 @@ public class DataFlowControllerAutoConfiguration {
 	@Conditional(OnSecurityEnabledAndOAuth2Disabled.class)
 	public LoginController loginController() {
 		return new LoginController();
-	}
-
-	@Bean
-	public FeaturesController featuresController(FeaturesProperties featuresProperties) {
-		return new FeaturesController(featuresProperties);
 	}
 
 	@Bean
