@@ -162,28 +162,20 @@ List of available Stream Application Starters:
 |Artifact Type |Stable Release |SNAPSHOT Release
 
 |RabbitMQ + Maven
-|http://bit.ly/Bacon-RELEASE-stream-applications-rabbit-maven
-|http://bit.ly/Bacon-BUILD-SNAPSHOT-stream-applications-rabbit-maven
+|http://bit.ly/Celsius-SR1-stream-applications-rabbit-maven
+|http://bit.ly/Celsius-BUILD-SNAPSHOT-stream-applications-rabbit-maven
 
 |RabbitMQ + Docker
-|http://bit.ly/Bacon-RELEASE-stream-applications-rabbit-docker
-|N/A
-
-|Kafka 0.9 + Maven
-|http://bit.ly/Bacon-RELEASE-stream-applications-kafka-09-maven
-|http://bit.ly/Bacon-BUILD-SNAPSHOT-stream-applications-kafka-09-maven
-
-|Kafka 0.9 + Docker
-|http://bit.ly/Bacon-RELEASE-stream-applications-kafka-09-docker
-|N/A
+|http://bit.ly/Celsius-SR1-stream-applications-rabbit-docker
+|http://bit.ly/Celsius-BUILD-SNAPSHOT-stream-applications-rabbit-docker
 
 |Kafka 0.10 + Maven
-|http://bit.ly/Bacon-RELEASE-stream-applications-kafka-10-maven
-|http://bit.ly/Bacon-BUILD-SNAPSHOT-stream-applications-kafka-10-maven
+|http://bit.ly/Celsius-SR1-stream-applications-kafka-10-maven
+|http://bit.ly/Celsius-BUILD-SNAPSHOT-stream-applications-kafka-10-maven
 
 |Kafka 0.10 + Docker
-|http://bit.ly/Bacon-RELEASE-stream-applications-kafka-10-docker
-|N/A
+|http://bit.ly/Celsius-SR1-stream-applications-kafka-10-docker
+|http://bit.ly/Celsius-BUILD-SNAPSHOT-stream-applications-kafka-10-docker
 |======================
 
 List of available Task Application Starters:
@@ -193,12 +185,12 @@ List of available Task Application Starters:
 |Artifact Type |Stable Release |SNAPSHOT Release
 
 |Maven
-|http://bit.ly/Belmont-GA-task-applications-maven
-|http://bit.ly/Belmont-BUILD-SNAPSHOT-task-applications-maven
+|http://bit.ly/Clark-GA-task-applications-maven
+|http://bit.ly/Clark-BUILD-SNAPSHOT-task-applications-maven
 
 |Docker
-|http://bit.ly/Belmont-GA-task-applications-docker
-|N/A
+|http://bit.ly/Clark-GA-task-applications-docker
+|http://bit.ly/Clark-BUILD-SNAPSHOT-task-applications-docker
 |======================
 
 You can find more information about the available task starters in the http://cloud.spring.io/spring-cloud-task-app-starters/[Task App Starters Project Page] and
@@ -209,13 +201,13 @@ As an example, ff you would like to register all out-of-the-box stream applicati
 
 [source,bash,subs=attributes]
 ----
-$ dataflow:>app import --uri http://bit.ly/Bacon-RELEASE-stream-applications-kafka-10-maven
+$ dataflow:>app import --uri http://bit.ly/Celsius-SR1-stream-applications-kafka-10-maven
 ----
 Alternatively you can register all the stream applications with the Rabbit binder
 
 [source,bash,subs=attributes]
 ----
-$ dataflow:>app import --uri http://bit.ly/Bacon-RELEASE-stream-applications-rabbit-maven
+$ dataflow:>app import --uri http://bit.ly/Celsius-SR1-stream-applications-rabbit-maven
 ----
 
 You can also pass the `--local` option (which is `true` by default) to indicate whether the
@@ -1094,7 +1086,7 @@ Would direct the data payloads from the Amazon S3, FTP, and HTTP sources to the 
 would have all the data from those three sources sent to the file sink.
 
 The Fan-out use case is when you determine the destination of a stream based on some information that is only known at runtime.
-In this case, the link:http://docs.spring.io/spring-cloud-stream-app-starters/docs/Bacon.RELEASE/reference/html/spring-cloud-stream-modules-sinks.html#spring-cloud-stream-modules-router-sink[Router Application] can be used to specify how to direct the incoming message to one of N named destinations.
+In this case, the link:http://docs.spring.io/spring-cloud-stream-app-starters/docs/Celsius.SR1/reference/html/spring-cloud-stream-modules-sinks.html#spring-cloud-stream-modules-router-sink[Router Application] can be used to specify how to direct the incoming message to one of N named destinations.
 
 [[spring-cloud-dataflow-stream-java-dsl]]
 == Stream Java DSL
