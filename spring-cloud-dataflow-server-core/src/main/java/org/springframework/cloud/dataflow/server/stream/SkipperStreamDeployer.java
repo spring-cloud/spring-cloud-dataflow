@@ -351,7 +351,7 @@ public class SkipperStreamDeployer implements StreamDeployer {
 	@Override
 	public RuntimeEnvironmentInfo environmentInfo() {
 		// TODO To fix when https://github.com/spring-cloud/spring-cloud-skipper/issues/392
-		throw new UnsupportedOperationException("EnvironmentInfo is not supported for Skipper yet (issue#392)");
+		throw new UnsupportedOperationException("EnvironmentInfo is not supported for Skipper mode");
 	}
 
 	private List<List<AppStatus>> getSkipperStatuses(Pageable pageable, List<String> skipperStreamNames)

@@ -168,7 +168,7 @@ public class AboutController {
 
 				runtimeEnvironment.setAppDeployer(deployerInfo);
 			} catch (UnsupportedOperationException uoe) {
-				logger.debug("expected in skipper mode due to #392");
+				logger.debug("RuntimeEnvironmentInfo is not supported!");
 			}
 		}
 
