@@ -178,7 +178,7 @@ public class ReleaseService {
 		Map<String, Object> mergedMap = ConfigValueUtils.mergeConfigValues(release.getPkg(), release.getConfigValues());
 		// Render yaml resources
 		String manifest = ManifestUtils.createManifest(release.getPkg(), mergedMap);
-		logger.debug("Manifest = " + manifest);
+		logger.debug("Manifest = " + ArgumentSanitizer.sanitizeYml(manifest));
 		release.setManifest(manifest);
 		// Deployment
 		Release releaseToReturn = this.releaseManager.install(release);

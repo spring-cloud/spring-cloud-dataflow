@@ -41,6 +41,7 @@ import org.springframework.cloud.skipper.server.domain.AppDeployerData;
 import org.springframework.cloud.skipper.server.repository.AppDeployerDataRepository;
 import org.springframework.cloud.skipper.server.repository.DeployerRepository;
 import org.springframework.cloud.skipper.server.repository.ReleaseRepository;
+import org.springframework.cloud.skipper.server.service.ArgumentSanitizer;
 import org.springframework.cloud.skipper.server.service.ConfigValueUtils;
 import org.springframework.cloud.skipper.server.service.ManifestUtils;
 import org.springframework.util.StringUtils;
@@ -87,7 +88,7 @@ public class AppDeployerReleaseManager implements ReleaseManager {
 	public Release install(Release releaseInput) {
 		validate(releaseInput);
 		Release release = this.releaseRepository.save(releaseInput);
-		logger.debug("Manifest = " + releaseInput.getManifest());
+		logger.debug("Manifest = " + ArgumentSanitizer.sanitizeYml(releaseInput.getManifest()));
 		// Deploy the application
 		List<? extends SpringCloudDeployerApplicationManifest> applicationSpecList = this.applicationManifestReader
 				.read(release.getManifest());
