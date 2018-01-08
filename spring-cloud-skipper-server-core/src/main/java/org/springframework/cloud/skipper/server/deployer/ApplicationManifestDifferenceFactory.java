@@ -19,15 +19,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import com.google.common.collect.MapDifference;
-import com.google.common.collect.Maps;
-
 import org.springframework.cloud.skipper.domain.SpringCloudDeployerApplicationManifest;
 import org.springframework.cloud.skipper.domain.deployer.ApplicationManifestDifference;
+import org.springframework.cloud.skipper.support.PropertiesDiff;
 import org.springframework.util.Assert;
 
 /**
  * A Factory to create an {@link ApplicationManifestDifference}.
+ *
  * @author Mark Pollack
  */
 public class ApplicationManifestDifferenceFactory {
@@ -58,7 +57,7 @@ public class ApplicationManifestDifferenceFactory {
 				getDeploymentPropertiesDifference(existingApplicationManifest, replacingApplicationManifest));
 	}
 
-	protected MapDifference getApiAndKindDifference(
+	protected PropertiesDiff getApiAndKindDifference(
 			SpringCloudDeployerApplicationManifest existingApplicationManifest,
 			SpringCloudDeployerApplicationManifest replacingApplicationManifest) {
 		Map<String, String> existingApiAndKindMap = new HashMap<>();
@@ -69,10 +68,10 @@ public class ApplicationManifestDifferenceFactory {
 		replacingApiAndKindMap.put("apiVersion", replacingApplicationManifest.getApiVersion().trim());
 		replacingApiAndKindMap.put("kind", replacingApplicationManifest.getKind().trim());
 
-		return Maps.difference(existingApiAndKindMap, replacingApiAndKindMap);
+		return PropertiesDiff.builder().left(existingApiAndKindMap).right(replacingApiAndKindMap).build();
 	}
 
-	protected MapDifference getMetadataDifference(SpringCloudDeployerApplicationManifest existingApplicationManifest,
+	protected PropertiesDiff getMetadataDifference(SpringCloudDeployerApplicationManifest existingApplicationManifest,
 			SpringCloudDeployerApplicationManifest replacingApplicationManifest) {
 
 		Map<String, String> existingMetadataProperties = Optional.ofNullable(existingApplicationManifest.getMetadata())
@@ -81,10 +80,10 @@ public class ApplicationManifestDifferenceFactory {
 		Map<String, String> replacingMetadataProperties = Optional
 				.ofNullable(replacingApplicationManifest.getMetadata()).orElse(new HashMap<>());
 
-		return Maps.difference(existingMetadataProperties, replacingMetadataProperties);
+		return PropertiesDiff.builder().left(existingMetadataProperties).right(replacingMetadataProperties).build();
 	}
 
-	protected MapDifference getResourceAndVersionDifference(
+	protected PropertiesDiff getResourceAndVersionDifference(
 			SpringCloudDeployerApplicationManifest existingApplicationManifest,
 			SpringCloudDeployerApplicationManifest replacingApplicationManifest) {
 		Map<String, String> existingResourceAndVersionMap = new HashMap<>();
@@ -95,10 +94,10 @@ public class ApplicationManifestDifferenceFactory {
 		replacingResourceAndVersionMap.put("resource", replacingApplicationManifest.getSpec().getResource().trim());
 		replacingResourceAndVersionMap.put("version", replacingApplicationManifest.getSpec().getVersion().trim());
 
-		return Maps.difference(existingResourceAndVersionMap, replacingResourceAndVersionMap);
+		return PropertiesDiff.builder().left(existingResourceAndVersionMap).right(replacingResourceAndVersionMap).build();
 	}
 
-	protected MapDifference getApplicationPropertiesDifference(
+	protected PropertiesDiff getApplicationPropertiesDifference(
 			SpringCloudDeployerApplicationManifest existingApplicationManifest,
 			SpringCloudDeployerApplicationManifest replacingApplicationManifest) {
 
@@ -108,10 +107,10 @@ public class ApplicationManifestDifferenceFactory {
 		Map<String, String> replacingApplicationProperties = Optional
 				.ofNullable(replacingApplicationManifest.getSpec().getApplicationProperties()).orElse(new HashMap<>());
 
-		return Maps.difference(existingApplicationProperties, replacingApplicationProperties);
+		return PropertiesDiff.builder().left(existingApplicationProperties).right(replacingApplicationProperties).build();
 	}
 
-	protected MapDifference getDeploymentPropertiesDifference(
+	protected PropertiesDiff getDeploymentPropertiesDifference(
 			SpringCloudDeployerApplicationManifest existingApplicationManifest,
 			SpringCloudDeployerApplicationManifest replacingApplicationManifest) {
 
@@ -125,7 +124,6 @@ public class ApplicationManifestDifferenceFactory {
 		existingDeploymentProperties.remove(AppDeployerReleaseManager.SPRING_CLOUD_DEPLOYER_COUNT);
 		replacingDeploymentProperties.remove(AppDeployerReleaseManager.SPRING_CLOUD_DEPLOYER_COUNT);
 
-		return Maps.difference(existingDeploymentProperties, replacingDeploymentProperties);
+		return PropertiesDiff.builder().left(existingDeploymentProperties).right(replacingDeploymentProperties).build();
 	}
-
 }

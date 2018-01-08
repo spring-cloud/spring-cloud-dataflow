@@ -15,18 +15,17 @@
  */
 package org.springframework.cloud.skipper.server.deployer;
 
-import com.google.common.base.Joiner;
-import com.google.common.collect.MapDifference;
+import java.util.stream.Collectors;
 
 import org.springframework.cloud.skipper.domain.deployer.ApplicationManifestDifference;
+import org.springframework.cloud.skipper.support.PropertiesDiff;
 
 /**
  * Generate a summary description of an {@link ApplicationManifestDifference}.
+ *
  * @author Mark Pollack
  */
 public class ApplicationManifestDifferenceSummaryGenerator {
-
-	private Joiner.MapJoiner mapJoiner = Joiner.on(",").withKeyValueSeparator("=");
 
 	/**
 	 * Generate a textual summary of the ApplicationManifestDifference
@@ -78,26 +77,45 @@ public class ApplicationManifestDifferenceSummaryGenerator {
 		return stringBuffer.toString();
 	}
 
-	private void printMapDifference(StringBuffer stringBuffer, MapDifference mapDifference) {
-		if (!mapDifference.entriesDiffering().isEmpty()) {
+	private void printMapDifference(StringBuffer stringBuffer, PropertiesDiff mapDifference) {
+		if (!mapDifference.getChanged().isEmpty()) {
 			stringBuffer.append("Entries Differing\n");
 			stringBuffer.append("-----------------\n");
-			stringBuffer.append(mapJoiner.join(mapDifference.entriesDiffering()) + "\n\n");
+
+			stringBuffer.append(mapDifference.getChanged().entrySet().stream()
+					.map(e -> e.getKey() + "=(" + e.getValue().getOriginal() + ", " + e.getValue().getReplaced() + ")")
+					.collect(Collectors.joining(",")));
+			stringBuffer.append("\n\n");
 		}
-		if (!mapDifference.entriesOnlyOnLeft().isEmpty()) {
+		if (!mapDifference.getRemoved().isEmpty()) {
 			stringBuffer.append("Entries only in existing app\n");
 			stringBuffer.append("----------------------------\n");
-			stringBuffer.append(mapJoiner.join(mapDifference.entriesOnlyOnLeft()) + "\n\n");
+
+			stringBuffer.append(mapDifference.getRemoved().entrySet().stream()
+					.map(e -> e.getKey() + "=(" + e.getValue() + ")")
+					.collect(Collectors.joining(",")));
+
+			stringBuffer.append("\n\n");
 		}
-		if (!mapDifference.entriesOnlyOnRight().isEmpty()) {
+		if (!mapDifference.getAdded().isEmpty()) {
 			stringBuffer.append("Entries only in replacing app\n");
 			stringBuffer.append("-----------------------------\n");
-			stringBuffer.append(mapJoiner.join(mapDifference.entriesOnlyOnRight()) + "\n\n");
+
+			stringBuffer.append(mapDifference.getAdded().entrySet().stream()
+					.map(e -> e.getKey() + "=(" + e.getValue() + ")")
+					.collect(Collectors.joining(",")));
+
+			stringBuffer.append("\n\n");
 		}
-		if (!mapDifference.entriesInCommon().isEmpty()) {
+		if (!mapDifference.getCommon().isEmpty()) {
 			stringBuffer.append("Common Properties\n");
 			stringBuffer.append("-----------------\n");
-			stringBuffer.append(mapJoiner.join(mapDifference.entriesInCommon()) + "\n\n");
+
+			stringBuffer.append(mapDifference.getCommon().entrySet().stream()
+					.map(e -> e.getKey() + "=(" + e.getValue() + ")")
+					.collect(Collectors.joining(",")));
+
+			stringBuffer.append("\n\n");
 		}
 		stringBuffer.append("\n");
 	}

@@ -85,7 +85,6 @@ public class DifferenceTests {
 			assertThat(applicationManifestDifference.getDeploymentPropertiesDifference().areEqual()).isTrue();
 			ApplicationManifestDifferenceSummaryGenerator summaryGenerator = new ApplicationManifestDifferenceSummaryGenerator();
 			String summary = summaryGenerator.generateSummary(applicationManifestDifference);
-			System.out.println(summary);
 			if (i == 0) {
 				assertThat(summary).contains("log.level=(INFO, DEBUG)");
 			}

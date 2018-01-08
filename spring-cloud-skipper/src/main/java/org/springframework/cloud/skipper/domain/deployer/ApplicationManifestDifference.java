@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,35 +17,36 @@ package org.springframework.cloud.skipper.domain.deployer;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.google.common.collect.MapDifference;
 
+import org.springframework.cloud.skipper.support.PropertiesDiff;
 import org.springframework.util.Assert;
 
 /**
  * Describes the difference between two ApplicationManifests
+ *
  * @author Mark Pollack
  */
 public class ApplicationManifestDifference {
 
 	private final String applicationName;
 
-	private final MapDifference apiAndKindDifference;
+	private final PropertiesDiff apiAndKindDifference;
 
-	private final MapDifference metadataDifference;
+	private final PropertiesDiff metadataDifference;
 
-	private final MapDifference resourceAndVersionDifference;
+	private final PropertiesDiff resourceAndVersionDifference;
 
-	private final MapDifference applicationPropertiesDifference;
+	private final PropertiesDiff applicationPropertiesDifference;
 
-	private final MapDifference deploymentPropertiesDifference;
+	private final PropertiesDiff deploymentPropertiesDifference;
 
 	@JsonCreator
 	public ApplicationManifestDifference(@JsonProperty("applicationName") String applicationName,
-			@JsonProperty("apiAndKindDifference") MapDifference apiAndKindDifference,
-			@JsonProperty("metadataDifference") MapDifference metadataDifference,
-			@JsonProperty("resourceAndVersionDifference") MapDifference resourceAndVersionDifference,
-			@JsonProperty("applicationPropertiesDifference") MapDifference applicationPropertiesDifference,
-			@JsonProperty("deploymentPropertiesDifference") MapDifference deploymentPropertiesDifference) {
+			@JsonProperty("apiAndKindDifference") PropertiesDiff apiAndKindDifference,
+			@JsonProperty("metadataDifference") PropertiesDiff metadataDifference,
+			@JsonProperty("resourceAndVersionDifference") PropertiesDiff resourceAndVersionDifference,
+			@JsonProperty("applicationPropertiesDifference") PropertiesDiff applicationPropertiesDifference,
+			@JsonProperty("deploymentPropertiesDifference") PropertiesDiff deploymentPropertiesDifference) {
 		Assert.notNull(applicationName, "applicationName can not be null");
 		Assert.notNull(apiAndKindDifference, "apiAndKindDifference can not be null");
 		Assert.notNull(metadataDifference, "metadataDifference can not be null");
@@ -64,23 +65,23 @@ public class ApplicationManifestDifference {
 		return this.applicationName;
 	}
 
-	public MapDifference getApiAndKindDifference() {
+	public PropertiesDiff getApiAndKindDifference() {
 		return this.apiAndKindDifference;
 	}
 
-	public MapDifference getMetadataDifference() {
+	public PropertiesDiff getMetadataDifference() {
 		return this.metadataDifference;
 	}
 
-	public MapDifference getResourceAndVersionDifference() {
+	public PropertiesDiff getResourceAndVersionDifference() {
 		return this.resourceAndVersionDifference;
 	}
 
-	public MapDifference getApplicationPropertiesDifference() {
+	public PropertiesDiff getApplicationPropertiesDifference() {
 		return this.applicationPropertiesDifference;
 	}
 
-	public MapDifference getDeploymentPropertiesDifference() {
+	public PropertiesDiff getDeploymentPropertiesDifference() {
 		return this.deploymentPropertiesDifference;
 	}
 
