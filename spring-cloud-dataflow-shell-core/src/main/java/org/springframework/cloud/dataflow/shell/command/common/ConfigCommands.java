@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017 the original author or authors.
+ * Copyright 2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.dataflow.shell.command;
+package org.springframework.cloud.dataflow.shell.command.common;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -43,6 +43,8 @@ import org.springframework.cloud.dataflow.rest.util.CheckableResource;
 import org.springframework.cloud.dataflow.rest.util.HttpClientConfigurer;
 import org.springframework.cloud.dataflow.rest.util.ProcessOutputResource;
 import org.springframework.cloud.dataflow.rest.util.ResourceBasedAuthorizationInterceptor;
+import org.springframework.cloud.dataflow.shell.DataFlowMode;
+import org.springframework.cloud.dataflow.shell.IncompatibleDataFlowMode;
 import org.springframework.cloud.dataflow.shell.Target;
 import org.springframework.cloud.dataflow.shell.TargetCredentials;
 import org.springframework.cloud.dataflow.shell.TargetHolder;
@@ -106,6 +108,9 @@ public class ConfigCommands implements CommandMarker, InitializingBean, Applicat
 	@Autowired
 	private RestTemplate restTemplate;
 
+	@Value("${dataflow.mode:classic}")
+	private DataFlowMode shellDataflowMode = DataFlowMode.classic;
+
 	@Value("${dataflow.uri:" + Target.DEFAULT_TARGET + "}")
 	private String serverUri;
 
@@ -162,6 +167,10 @@ public class ConfigCommands implements CommandMarker, InitializingBean, Applicat
 		this.serverUri = serverUri;
 	}
 
+	public void setShellDataflowMode(DataFlowMode shellDataflowMode) {
+		this.shellDataflowMode = shellDataflowMode;
+	}
+
 	@CliCommand(value = { "dataflow config server" }, help = "Configure the Spring Cloud Data Flow REST server to use")
 	public String target(
 			@CliOption(mandatory = false, key = { "",
@@ -170,7 +179,7 @@ public class ConfigCommands implements CommandMarker, InitializingBean, Applicat
 					"username" }, help = "the username for authenticated access to the Admin REST endpoint", unspecifiedDefaultValue = Target.DEFAULT_USERNAME) String targetUsername,
 			@CliOption(mandatory = false, key = {
 					"password" }, help = "the password for authenticated access to the Admin REST endpoint (valid only with a "
-							+ "username)", specifiedDefaultValue = Target.DEFAULT_SPECIFIED_PASSWORD, unspecifiedDefaultValue = Target.DEFAULT_UNSPECIFIED_PASSWORD) String targetPassword,
+					+ "username)", specifiedDefaultValue = Target.DEFAULT_SPECIFIED_PASSWORD, unspecifiedDefaultValue = Target.DEFAULT_UNSPECIFIED_PASSWORD) String targetPassword,
 			@CliOption(mandatory = false, key = {
 					"credentials-provider-command" }, help = "a command to run that outputs the HTTP credentials used for authentication", unspecifiedDefaultValue = Target.DEFAULT_CREDENTIALS_PROVIDER_COMMAND) String credentialsProviderCommand,
 			@CliOption(mandatory = false, key = {
@@ -221,6 +230,18 @@ public class ConfigCommands implements CommandMarker, InitializingBean, Applicat
 			this.targetHolder.getTarget().setAuthenticationEnabled(securityInfoResource.isAuthenticationEnabled());
 			this.targetHolder.getTarget().setAuthorizationEnabled(securityInfoResource.isAuthorizationEnabled());
 
+			DataFlowMode serverDataFlowMode = getServerDataFlowMode();
+
+			logger.info(String.format("Shell mode: %s, Server mode: %s", shellDataflowMode, serverDataFlowMode));
+
+			if (shellDataflowMode == serverDataFlowMode) {
+				this.targetHolder.getTarget()
+						.setTargetResultMessage(String.format("Shell mode: %s, Server mode: %s",
+								shellDataflowMode, serverDataFlowMode));
+			} else {
+				throw new IncompatibleDataFlowMode(String.format("You must re-start the Shell with " +
+						"--dataflow.mode=%s", serverDataFlowMode));
+			}
 		}
 		catch (Exception e) {
 			this.targetHolder.getTarget().setTargetException(e);
@@ -229,6 +250,19 @@ public class ConfigCommands implements CommandMarker, InitializingBean, Applicat
 		}
 		return (this.targetHolder.getTarget().getTargetResultMessage());
 
+	}
+
+	private DataFlowMode getServerDataFlowMode() {
+		if (shell.getDataFlowOperations() == null
+				|| shell.getDataFlowOperations().aboutOperation() == null) {
+			throw new IllegalStateException("If the server is available the about operation should be present");
+		}
+
+		if (shell.getDataFlowOperations().aboutOperation().get().getFeatureInfo().isSkipperEnabled()) {
+			return DataFlowMode.skipper;
+		}
+
+		return DataFlowMode.classic;
 	}
 
 	@CliCommand(value = { "dataflow config info" }, help = "Show the Dataflow server being used")
@@ -336,6 +370,16 @@ public class ConfigCommands implements CommandMarker, InitializingBean, Applicat
 		if (targetException instanceof DataFlowServerException) {
 			String message = String.format("Unable to parse server response: %s - at URI '%s'.",
 					targetException.getMessage(), target.getTargetUriAsString());
+			if (logger.isDebugEnabled()) {
+				logger.debug(message, targetException);
+			}
+			else {
+				logger.warn(message);
+			}
+			this.targetHolder.getTarget().setTargetResultMessage(message);
+		}
+		else if (targetException instanceof IncompatibleDataFlowMode) {
+			String message = targetException.getMessage();
 			if (logger.isDebugEnabled()) {
 				logger.debug(message, targetException);
 			}

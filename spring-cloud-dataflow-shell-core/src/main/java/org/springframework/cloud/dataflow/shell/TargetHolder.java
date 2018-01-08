@@ -16,7 +16,7 @@
 
 package org.springframework.cloud.dataflow.shell;
 
-import org.springframework.cloud.dataflow.shell.command.ConfigCommands;
+import org.springframework.cloud.dataflow.shell.command.common.ConfigCommands;
 import org.springframework.util.Assert;
 
 /**

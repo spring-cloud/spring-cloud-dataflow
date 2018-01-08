@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2015 the original author or authors.
+ * Copyright 2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.dataflow.shell.command;
+package org.springframework.cloud.dataflow.shell.command.common;
 
 /**
  * Abstraction for a mechanism used to get user interactive user input.
@@ -33,7 +33,7 @@ public interface UserInput {
 	 * @param options valid input option set
 	 * @return the prompt text to display to the user
 	 */
-	public String promptWithOptions(String prompt, String defaultValue, String... options);
+	String promptWithOptions(String prompt, String defaultValue, String... options);
 
 	/**
 	 * Display a prompt text to the user and expect them to enter a free-form value.
@@ -46,6 +46,6 @@ public interface UserInput {
 	 * passwords)
 	 * @return the prompt text to display to the user
 	 */
-	public String prompt(String prompt, String defaultValue, boolean echo);
+	String prompt(String prompt, String defaultValue, boolean echo);
 
 }

@@ -18,6 +18,9 @@ package org.springframework.cloud.dataflow.shell.command;
 
 import java.util.List;
 
+import org.springframework.cloud.dataflow.shell.command.common.AggregateCounterCommands;
+import org.springframework.cloud.dataflow.shell.command.common.CounterCommands;
+import org.springframework.cloud.dataflow.shell.command.common.FieldValueCounterCommands;
 import org.springframework.shell.core.JLineShellComponent;
 import org.springframework.shell.table.Table;
 

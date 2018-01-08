@@ -4,6 +4,7 @@ Data Flow Options:
   --dataflow.password=<PASSWORD>                    Password of the Data Flow Server [no default].
   --dataflow.credentials-provider-command=<COMMAND> Executes an external command which must return an OAuth Access Token [no default].
   --dataflow.skip-ssl-validation=<true|false>       Accept any SSL certificate (even self-signed) [default: no].
+  --dataflow.mode=<MODE>                            Server DataFlow mode: 'classic' or 'skipper' modes. [default: classic].
   --spring.shell.historySize=<SIZE>                 Default size of the shell log file [default: 3000].
   --spring.shell.commandFile=<FILE>                 Data Flow Shell executes commands read from the file(s) and then exits.
   --help                                            This message.

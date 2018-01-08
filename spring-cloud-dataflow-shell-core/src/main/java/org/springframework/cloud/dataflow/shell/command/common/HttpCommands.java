@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.dataflow.shell.command;
+package org.springframework.cloud.dataflow.shell.command.common;
 
 import java.io.File;
 import java.io.FileInputStream;

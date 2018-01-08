@@ -21,7 +21,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.rest.resource.AppRegistrationResource;
-import org.springframework.cloud.dataflow.shell.command.AppRegistryCommands;
+import org.springframework.cloud.dataflow.shell.command.common.AbstractAppRegistryCommands;
 import org.springframework.cloud.dataflow.shell.config.DataFlowShell;
 import org.springframework.shell.ShellException;
 import org.springframework.shell.core.Completion;
@@ -32,7 +32,7 @@ import org.springframework.util.StringUtils;
 
 /**
  * Knows how to build and query
- * {@link org.springframework.cloud.dataflow.shell.command.AppRegistryCommands.QualifiedApplicationName}s.
+ * {@link AbstractAppRegistryCommands.QualifiedApplicationName}s.
  *
  * @author Eric Bottard
  * @author Ilayaperumal Gopinathan
@@ -40,25 +40,25 @@ import org.springframework.util.StringUtils;
  * @author Mark Fisher
  */
 @Component
-public class QualifiedApplicationNameConverter implements Converter<AppRegistryCommands.QualifiedApplicationName> {
+public class QualifiedApplicationNameConverter implements Converter<AbstractAppRegistryCommands.QualifiedApplicationName> {
 
 	@Autowired
 	private DataFlowShell dataFlowShell;
 
 	@Override
 	public boolean supports(Class<?> type, String optionContext) {
-		return AppRegistryCommands.QualifiedApplicationName.class.isAssignableFrom(type);
+		return AbstractAppRegistryCommands.QualifiedApplicationName.class.isAssignableFrom(type);
 	}
 
 	@Override
-	public AppRegistryCommands.QualifiedApplicationName convertFromText(String value, Class<?> targetType,
+	public AbstractAppRegistryCommands.QualifiedApplicationName convertFromText(String value, Class<?> targetType,
 			String optionContext) {
 		int colonIndex = value.indexOf(':');
 		if (colonIndex == -1) {
 			throw new ShellException("Incorrect syntax. Valid syntax is '<ApplicationType>:<ApplicationName>'.");
 		}
 		ApplicationType applicationType = ApplicationType.valueOf(value.substring(0, colonIndex));
-		return new AppRegistryCommands.QualifiedApplicationName(value.substring(colonIndex + 1), applicationType);
+		return new AbstractAppRegistryCommands.QualifiedApplicationName(value.substring(colonIndex + 1), applicationType);
 	}
 
 	@Override

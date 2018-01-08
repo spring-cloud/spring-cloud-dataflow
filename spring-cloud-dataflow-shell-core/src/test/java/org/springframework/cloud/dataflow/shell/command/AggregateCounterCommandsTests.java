@@ -25,6 +25,7 @@ import org.junit.Test;
 
 import org.springframework.analytics.metrics.AggregateCounterRepository;
 import org.springframework.cloud.dataflow.shell.AbstractShellIntegrationTest;
+import org.springframework.cloud.dataflow.shell.command.common.AggregateCounterCommands;
 import org.springframework.shell.table.Table;
 
 import static org.hamcrest.Matchers.is;

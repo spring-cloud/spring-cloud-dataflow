@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2017 the original author or authors.
+ * Copyright 2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.dataflow.shell.command;
+package org.springframework.cloud.dataflow.shell.command.common;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -22,16 +22,13 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Properties;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.rest.client.AppRegistryOperations;
 import org.springframework.cloud.dataflow.rest.resource.AppRegistrationResource;
-import org.springframework.cloud.dataflow.rest.resource.DetailedAppRegistrationResource;
 import org.springframework.cloud.dataflow.shell.command.support.OpsType;
 import org.springframework.cloud.dataflow.shell.command.support.RoleType;
 import org.springframework.cloud.dataflow.shell.config.DataFlowShell;
-import org.springframework.context.ResourceLoaderAware;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
@@ -41,14 +38,9 @@ import org.springframework.shell.core.CommandMarker;
 import org.springframework.shell.core.annotation.CliAvailabilityIndicator;
 import org.springframework.shell.core.annotation.CliCommand;
 import org.springframework.shell.core.annotation.CliOption;
-import org.springframework.shell.table.AbsoluteWidthSizeConstraints;
-import org.springframework.shell.table.CellMatchers;
 import org.springframework.shell.table.TableBuilder;
 import org.springframework.shell.table.TableModel;
-import org.springframework.shell.table.TableModelBuilder;
-import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 
 /**
  * Commands for working with the application registry. Allows retrieval of information
@@ -65,99 +57,37 @@ import org.springframework.util.StringUtils;
  * @author Gunnar Hillert
  * @author Christian Tzolov
  */
-@Component
-public class AppRegistryCommands implements CommandMarker, ResourceLoaderAware {
+public abstract class AbstractAppRegistryCommands implements CommandMarker {
 
 	private final static String LIST_APPLICATIONS = "app list";
-
-	private final static String APPLICATION_INFO = "app info";
-
-	private final static String UNREGISTER_APPLICATION = "app unregister";
 
 	private static final String REGISTER_APPLICATION = "app register";
 
 	private static final String IMPORT_APPLICATIONS = "app import";
 
-	private static final String DEFAULT_APPLICATION = "app default";
+	protected DataFlowShell dataFlowShell;
 
-	private DataFlowShell dataFlowShell;
+	protected ResourceLoader resourceLoader = new DefaultResourceLoader();
 
-	private ResourceLoader resourceLoader = new DefaultResourceLoader();
-
-	@Autowired
 	public void setDataFlowShell(DataFlowShell dataFlowShell) {
 		this.dataFlowShell = dataFlowShell;
 	}
 
-	@Override
 	public void setResourceLoader(ResourceLoader resourceLoader) {
 		Assert.notNull(resourceLoader, "resourceLoader must not be null");
 		this.resourceLoader = resourceLoader;
 	}
 
-	@CliAvailabilityIndicator({ LIST_APPLICATIONS, APPLICATION_INFO })
+	@CliAvailabilityIndicator({ LIST_APPLICATIONS })
 	public boolean availableWithViewRole() {
 		return dataFlowShell.hasAccess(RoleType.VIEW, OpsType.APP_REGISTRY);
 	}
 
-	@CliAvailabilityIndicator({ UNREGISTER_APPLICATION, REGISTER_APPLICATION, IMPORT_APPLICATIONS,
-			DEFAULT_APPLICATION })
+	@CliAvailabilityIndicator({ REGISTER_APPLICATION, IMPORT_APPLICATIONS })
 	public boolean availableWithCreateRole() {
 		return dataFlowShell.hasAccess(RoleType.CREATE, OpsType.APP_REGISTRY);
 	}
 
-	@CliCommand(value = APPLICATION_INFO, help = "Get information about an application")
-	public List<Object> info(
-			@CliOption(mandatory = true, key = { "", "id" },
-					help = "id of the application to query in the form of 'type:name'") QualifiedApplicationName application,
-			@CliOption(key = { "version" }, help = "the version for the registered application") String version	) {
-		List<Object> result = new ArrayList<>();
-		try {
-			DetailedAppRegistrationResource info = StringUtils.hasText(version)?
-					appRegistryOperations().info(application.name, application.type, version):
-					appRegistryOperations().info(application.name, application.type);
-			if (info != null) {
-				List<ConfigurationMetadataProperty> options = info.getOptions();
-				result.add(String.format("Information about %s application '%s':", application.type, application.name));
-				if (info.getVersion() != null) {
-					result.add(String.format("Version: '%s':", info.getVersion()));
-				}
-				if (info.getDefaultVersion()) {
-					result.add(String.format("Default application version: '%s':", info.getDefaultVersion()));
-				}
-				result.add(String.format("Resource URI: %s", info.getUri()));
-				if (info.getShortDescription() != null) {
-					result.add(info.getShortDescription());
-				}
-				if (options == null) {
-					result.add("Application options metadata is not available");
-				}
-				else {
-					TableModelBuilder<Object> modelBuilder = new TableModelBuilder<>();
-					modelBuilder.addRow().addValue("Option Name").addValue("Description").addValue("Default")
-							.addValue("Type");
-					for (ConfigurationMetadataProperty option : options) {
-						modelBuilder.addRow().addValue(option.getId())
-								.addValue(option.getDescription() == null ? "<unknown>" : option.getDescription())
-								.addValue(prettyPrintDefaultValue(option))
-								.addValue(option.getType() == null ? "<unknown>" : option.getType());
-					}
-					TableBuilder builder = DataFlowTables.applyStyle(new TableBuilder(modelBuilder.build()))
-							.on(CellMatchers.table()).addSizer(new AbsoluteWidthSizeConstraints(30)).and();
-					result.add(builder.build());
-				}
-			}
-			else {
-				result.add(String.format("Application info is not available for %s:%s", application.type,
-						application.name));
-			}
-		}
-		catch (Exception e) {
-			result.add(
-					String.format("Application info is not available for %s:%s", application.type, application.name));
-		}
-		return result;
-	}
 
 	@CliCommand(value = REGISTER_APPLICATION, help = "Register a new application")
 	public String register(
@@ -165,30 +95,13 @@ public class AppRegistryCommands implements CommandMarker, ResourceLoaderAware {
 					"name" }, help = "the name for the registered application") String name,
 			@CliOption(mandatory = true, key = {
 					"type" }, help = "the type for the registered application") ApplicationType type,
-			@CliOption(key = {
-					"version" }, help = "the version for the registered application") String version,
 			@CliOption(mandatory = true, key = { "uri" }, help = "URI for the application artifact") String uri,
 			@CliOption(key = { "metadata-uri" }, help = "Metadata URI for the application artifact") String metadataUri,
 			@CliOption(key = "force", help = "force update if application is already registered (only if not in use)", specifiedDefaultValue = "true", unspecifiedDefaultValue = "false") boolean force) {
-		if (StringUtils.hasText(version)) {
-			appRegistryOperations().register(name, type, version, uri, metadataUri, force);
-		}
-		else {
-			appRegistryOperations().register(name, type, uri, metadataUri, force);
-		}
+
+		appRegistryOperations().register(name, type, uri, metadataUri, force);
+
 		return String.format(("Successfully registered application '%s:%s'"), type, name);
-	}
-
-	@CliCommand(value = UNREGISTER_APPLICATION, help = "Unregister an application")
-	public String unregister(
-			@CliOption(mandatory = true, key = { "",
-					"name" }, help = "name of the application to unregister") String name,
-			@CliOption(mandatory = true, key = {
-					"type" }, help = "type of the application to unregister") ApplicationType type,
-			@CliOption(key = { "version" }, help = "the version for the registered application") String version) {
-
-		appRegistryOperations().unregister(name, type, version);
-		return String.format(("Successfully unregistered application '%s' with type %s"), name, type);
 	}
 
 	@CliCommand(value = LIST_APPLICATIONS, help = "List all registered applications")
@@ -283,7 +196,7 @@ public class AppRegistryCommands implements CommandMarker, ResourceLoaderAware {
 				return (applications.keySet().size() == numRegistered)
 						? String.format("Successfully registered applications: %s", applications.keySet())
 						: String.format("Successfully registered %d applications from %s", numRegistered,
-								applications.keySet());
+						applications.keySet());
 			}
 			catch (IOException e) {
 				throw new IllegalArgumentException(e);
@@ -296,30 +209,8 @@ public class AppRegistryCommands implements CommandMarker, ResourceLoaderAware {
 		}
 	}
 
-	@CliCommand(value = DEFAULT_APPLICATION, help = "Change the default application version")
-	public String defaultApplicaiton(
-			@CliOption(mandatory = true, key = { "",
-					"id" }, help = "id of the application to query in the form of 'type:name'") QualifiedApplicationName application,
-			@CliOption(mandatory = true, key = {
-					"version" }, help = "the new default application version") String version) {
 
-		appRegistryOperations().makeDefault(application.name, application.type, version);
-
-		return String.format("New default Application %s:%s:%s", application.type, application.name, version);
-	}
-
-	/**
-	 * Escapes some special values so that they don't disturb console rendering and are easier
-	 * to read.
-	 */
-	private String prettyPrintDefaultValue(ConfigurationMetadataProperty o) {
-		if (o.getDefaultValue() == null) {
-			return "<none>";
-		}
-		return o.getDefaultValue().toString().replace("\n", "\\n").replace("\t", "\\t").replace("\f", "\\f");
-	}
-
-	private AppRegistryOperations appRegistryOperations() {
+	protected AppRegistryOperations appRegistryOperations() {
 		return dataFlowShell.getDataFlowOperations().appRegistryOperations();
 	}
 
@@ -336,6 +227,17 @@ public class AppRegistryCommands implements CommandMarker, ResourceLoaderAware {
 			this.name = name;
 			this.type = type;
 		}
+	}
+
+	/**
+	 * Escapes some special values so that they don't disturb console rendering and are easier
+	 * to read.
+	 */
+	protected String prettyPrintDefaultValue(ConfigurationMetadataProperty o) {
+		if (o.getDefaultValue() == null) {
+			return "<none>";
+		}
+		return o.getDefaultValue().toString().replace("\n", "\\n").replace("\t", "\\t").replace("\f", "\\f");
 	}
 
 }

@@ -23,6 +23,7 @@ import org.junit.Test;
 
 import org.springframework.analytics.metrics.FieldValueCounterRepository;
 import org.springframework.cloud.dataflow.shell.AbstractShellIntegrationTest;
+import org.springframework.cloud.dataflow.shell.command.common.FieldValueCounterCommands;
 import org.springframework.shell.table.Table;
 
 import static org.hamcrest.Matchers.is;
