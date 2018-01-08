@@ -17,13 +17,8 @@ package org.springframework.cloud.skipper.server.deployer;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
 import java.util.stream.Collectors;
 
-import com.google.common.base.Joiner;
-import com.google.common.collect.MapDifference;
-import com.google.common.collect.Maps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,6 +26,8 @@ import org.springframework.cloud.skipper.SkipperException;
 import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.SpringCloudDeployerApplicationManifest;
 import org.springframework.cloud.skipper.domain.SpringCloudDeployerApplicationManifestReader;
+import org.springframework.cloud.skipper.domain.deployer.ApplicationManifestDifference;
+import org.springframework.cloud.skipper.domain.deployer.ReleaseDifference;
 import org.springframework.util.StringUtils;
 
 /**
@@ -48,6 +45,8 @@ public class ReleaseAnalyzer {
 	private final SpringCloudDeployerApplicationManifestReader applicationManifestReader;
 
 	private final Logger logger = LoggerFactory.getLogger(ReleaseAnalyzer.class);
+
+	private ApplicationManifestDifferenceFactory applicationManifestDifferenceFactory = new ApplicationManifestDifferenceFactory();
 
 	public ReleaseAnalyzer(SpringCloudDeployerApplicationManifestReader applicationManifestReader) {
 		this.applicationManifestReader = applicationManifestReader;
@@ -101,45 +100,54 @@ public class ReleaseAnalyzer {
 			List<? extends SpringCloudDeployerApplicationManifest> existingApplicationSpecList,
 			List<? extends SpringCloudDeployerApplicationManifest> replacingApplicationSpecList,
 			Release existingRelease, Release replacingRelease) {
-		List<String> appsToDelete = new ArrayList<>();
-		StringBuilder diffMessagesBuilder = new StringBuilder();
+
+		List<ApplicationManifestDifference> applicationManifestDifferences = new ArrayList<>();
+
 		for (SpringCloudDeployerApplicationManifest existingApplicationManifest : existingApplicationSpecList) {
+			String applicationName = existingApplicationManifest.getApplicationName();
 			SpringCloudDeployerApplicationManifest matchingReplacingApplicationManifest = findMatching(
-					existingApplicationManifest.getApplicationName(),
-					replacingApplicationSpecList);
-			ReleaseDifference difference = compare(existingApplicationManifest,
-					matchingReplacingApplicationManifest);
-			if (!difference.areEqual()) {
-				logger.info(
-						"Dependent package difference found for " + existingApplicationManifest.getApplicationName());
-				appsToDelete.add(existingApplicationManifest.getApplicationName());
-				diffMessagesBuilder.append(difference.getDifferenceSummary());
-				diffMessagesBuilder.append("\n");
-			}
+					applicationName, replacingApplicationSpecList);
+			ApplicationManifestDifference applicationManifestDifference = applicationManifestDifferenceFactory
+					.createApplicationManifestDifference(applicationName,
+							existingApplicationManifest,
+							matchingReplacingApplicationManifest);
+			applicationManifestDifferences.add(applicationManifestDifference);
 		}
-		if (appsToDelete.size() != 0) {
-			ReleaseDifference releaseDifference = new ReleaseDifference(false, diffMessagesBuilder.toString());
-			return new ReleaseAnalysisReport(appsToDelete, releaseDifference, existingRelease, replacingRelease);
-		}
-		else {
-			ReleaseDifference releaseDifference = new ReleaseDifference(true);
-			return new ReleaseAnalysisReport(new ArrayList<>(), releaseDifference, existingRelease, replacingRelease);
-		}
+
+		return createReleaseAnalysisReport(existingRelease, replacingRelease, applicationManifestDifferences);
+
 	}
 
 	private ReleaseAnalysisReport analyzeTopLevelPackagesOnly(
 			List<? extends SpringCloudDeployerApplicationManifest> existingApplicationSpecList,
 			List<? extends SpringCloudDeployerApplicationManifest> replacingApplicationSpecList,
 			Release existingRelease, Release replacingRelease) {
-		ReleaseDifference difference = compare(existingApplicationSpecList.get(0),
-				replacingApplicationSpecList.get(0));
-		List<String> appsToDelete = new ArrayList<>();
-		if (!difference.areEqual()) {
-			logger.info(
-					"Differences detected, upgrading app " + existingApplicationSpecList.get(0).getApplicationName());
-			appsToDelete.add(existingApplicationSpecList.get(0).getApplicationName().trim());
+
+		List<ApplicationManifestDifference> applicationManifestDifferences = new ArrayList<>();
+
+		ApplicationManifestDifference applicationManifestDifference = applicationManifestDifferenceFactory
+				.createApplicationManifestDifference(
+						existingApplicationSpecList.get(0).getApplicationName(),
+						existingApplicationSpecList.get(0),
+						replacingApplicationSpecList.get(0));
+		applicationManifestDifferences.add(applicationManifestDifference);
+
+		return createReleaseAnalysisReport(existingRelease, replacingRelease, applicationManifestDifferences);
+	}
+
+	private ReleaseAnalysisReport createReleaseAnalysisReport(Release existingRelease,
+			Release replacingRelease,
+			List<ApplicationManifestDifference> applicationManifestDifferences) {
+		List<String> appsToUpgrade = new ArrayList<>();
+		ReleaseDifference releaseDifference = new ReleaseDifference();
+		releaseDifference.setDifferences(applicationManifestDifferences);
+		if (!releaseDifference.areEqual()) {
+			logger.info("Differences detected between existing and replacing application manifests."
+					+ "Upgrading applications = [" +
+					StringUtils.collectionToCommaDelimitedString(releaseDifference.getChangedApplicationNames()) + "]");
+			appsToUpgrade.addAll(releaseDifference.getChangedApplicationNames());
 		}
-		return new ReleaseAnalysisReport(appsToDelete, difference, existingRelease, replacingRelease);
+		return new ReleaseAnalysisReport(appsToUpgrade, releaseDifference, existingRelease, replacingRelease);
 	}
 
 	private SpringCloudDeployerApplicationManifest findMatching(String existingApplicationName,
@@ -156,129 +164,5 @@ public class ReleaseAnalyzer {
 				"Did not find existing application name [%s] in list of replacing applications [%s].",
 				existingApplicationName, StringUtils.collectionToCommaDelimitedString(existingApplicationNames));
 		throw new SkipperException(exceptionMessage);
-	}
-
-	private ReleaseDifference compare(SpringCloudDeployerApplicationManifest existingApplicationManifest,
-			SpringCloudDeployerApplicationManifest replacingApplicationManifest) {
-
-		// Fail fast for now...
-
-		String existingResource = existingApplicationManifest.getSpec().getResource().trim();
-		String replacingResource = replacingApplicationManifest.getSpec().getResource().trim();
-		String existingResourceVersion = existingApplicationManifest.getSpec().getVersion();
-		String replacingResourceVersion = replacingApplicationManifest.getSpec().getVersion();
-
-		String existingResourceWithVersion = ResourceUtils.getResourceLocation(existingResource,
-				existingResourceVersion);
-		String replacingResourceWithVersion = ResourceUtils.getResourceLocation(replacingResource,
-				replacingResourceVersion);
-		if (!existingResourceWithVersion.equals(replacingResourceWithVersion)) {
-			String difference = String.format("Existing resource =[%s], Replacing name=[%s]", existingResource,
-					replacingResource);
-			return new ReleaseDifference(false, difference);
-		}
-
-		// Compare SpringCloudDeployerApplicationManifest Properties
-		if (existingApplicationManifest instanceof SpringCloudDeployerApplicationManifest
-				&& replacingApplicationManifest instanceof SpringCloudDeployerApplicationManifest) {
-			Map<String, String> existingApplicationProperties = ((SpringCloudDeployerApplicationManifest) existingApplicationManifest)
-					.getSpec().getApplicationProperties();
-			Map<String, String> replacingApplicationProperties = ((SpringCloudDeployerApplicationManifest) replacingApplicationManifest)
-					.getSpec().getApplicationProperties();
-
-			if (existingApplicationProperties == null) {
-				existingApplicationProperties = new TreeMap<>();
-			}
-			if (replacingApplicationProperties == null) {
-				replacingApplicationProperties = new TreeMap<>();
-			}
-			MapDifference<String, String> applicationPropertiesDifference = Maps
-					.difference(existingApplicationProperties,
-							replacingApplicationProperties);
-
-			if (!applicationPropertiesDifference.areEqual()) {
-				return getReleaseDifferenceForAppProps(applicationPropertiesDifference);
-			}
-
-			// Compare Deployment Properties
-			Map<String, String> existingDeploymentProperties = ((SpringCloudDeployerApplicationManifest) existingApplicationManifest)
-					.getSpec().getDeploymentProperties();
-			Map<String, String> replacingDeploymentProperties = ((SpringCloudDeployerApplicationManifest) replacingApplicationManifest)
-					.getSpec().getDeploymentProperties();
-
-			if (existingDeploymentProperties == null) {
-				existingDeploymentProperties = new TreeMap<>();
-			}
-			if (replacingDeploymentProperties == null) {
-				replacingDeploymentProperties = new TreeMap<>();
-			}
-			// exclude deployer count from computing the difference
-			existingDeploymentProperties.remove(AppDeployerReleaseManager.SPRING_CLOUD_DEPLOYER_COUNT);
-			replacingDeploymentProperties.remove(AppDeployerReleaseManager.SPRING_CLOUD_DEPLOYER_COUNT);
-
-			MapDifference<String, String> deploymentPropertiesDifference = Maps.difference(existingDeploymentProperties,
-					replacingDeploymentProperties);
-
-			if (!deploymentPropertiesDifference.areEqual()) {
-				return getReleaseDifferenceForDeploymentProps(deploymentPropertiesDifference);
-			}
-		}
-
-		return new ReleaseDifference(true);
-
-	}
-
-	private ReleaseDifference getReleaseDifferenceForDeploymentProps(
-			MapDifference<String, String> deploymentPropertiesDifference) {
-		StringBuffer differenceBuilder = new StringBuffer();
-		Joiner.MapJoiner mapJoiner = Joiner.on(",").withKeyValueSeparator("=");
-		differenceBuilder.append("\nDeployement Properties Differences (existing, replacing)\n");
-		differenceBuilder.append("==================================\n");
-		if (!deploymentPropertiesDifference.entriesDiffering().isEmpty()) {
-			differenceBuilder.append(mapJoiner.join(deploymentPropertiesDifference.entriesDiffering()) + "\n");
-		}
-		if (!deploymentPropertiesDifference.entriesOnlyOnLeft().isEmpty()) {
-			differenceBuilder.append("Only in existing app\n");
-			differenceBuilder.append("========================\n");
-			differenceBuilder.append(mapJoiner.join(deploymentPropertiesDifference.entriesOnlyOnLeft()) + "\n");
-		}
-		if (!deploymentPropertiesDifference.entriesOnlyOnRight().isEmpty()) {
-			differenceBuilder.append("Only in replacing app\n");
-			differenceBuilder.append("=====================\n");
-			differenceBuilder.append(mapJoiner.join(deploymentPropertiesDifference.entriesOnlyOnRight()) + "\n");
-		}
-		if (!deploymentPropertiesDifference.entriesInCommon().isEmpty()) {
-			differenceBuilder.append("Common Properites\n");
-			differenceBuilder.append("=================\n");
-			differenceBuilder.append(mapJoiner.join(deploymentPropertiesDifference.entriesInCommon()) + "\n");
-		}
-		return new ReleaseDifference(false, differenceBuilder.toString());
-	}
-
-	private ReleaseDifference getReleaseDifferenceForAppProps(
-			MapDifference<String, String> applicationPropertiesDifference) {
-		StringBuffer differenceBuilder = new StringBuffer();
-		Joiner.MapJoiner mapJoiner = Joiner.on(",").withKeyValueSeparator("=");
-		differenceBuilder.append("\nSpringCloudDeployerApplicationManifest Properties Differences\n");
-		differenceBuilder.append("==================================\n");
-		if (!applicationPropertiesDifference.entriesDiffering().isEmpty()) {
-			differenceBuilder.append(mapJoiner.join(applicationPropertiesDifference.entriesDiffering()) + "\n");
-		}
-		if (!applicationPropertiesDifference.entriesOnlyOnLeft().isEmpty()) {
-			differenceBuilder.append("Only in existing app\n");
-			differenceBuilder.append("========================\n");
-			differenceBuilder.append(mapJoiner.join(applicationPropertiesDifference.entriesOnlyOnLeft()) + "\n");
-		}
-		if (!applicationPropertiesDifference.entriesOnlyOnRight().isEmpty()) {
-			differenceBuilder.append("Only in replacing app\n");
-			differenceBuilder.append("=====================\n");
-			differenceBuilder.append(mapJoiner.join(applicationPropertiesDifference.entriesOnlyOnRight()) + "\n");
-		}
-		if (!applicationPropertiesDifference.entriesInCommon().isEmpty()) {
-			differenceBuilder.append("Common Properties\n");
-			differenceBuilder.append("=================\n");
-			differenceBuilder.append(mapJoiner.join(applicationPropertiesDifference.entriesInCommon()) + "\n");
-		}
-		return new ReleaseDifference(false, differenceBuilder.toString());
 	}
 }

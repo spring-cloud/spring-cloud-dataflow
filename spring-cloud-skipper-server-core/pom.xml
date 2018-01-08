@@ -171,7 +171,7 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>23.1-jre</version>
+            <version>${guava.version}</version>
          </dependency>
          <dependency>
             <groupId>org.springframework.restdocs</groupId>

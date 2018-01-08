@@ -31,8 +31,8 @@ import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.Status;
 import org.springframework.cloud.skipper.domain.StatusCode;
 import org.springframework.cloud.skipper.domain.UpgradeRequest;
+import org.springframework.cloud.skipper.domain.deployer.ReleaseDifference;
 import org.springframework.cloud.skipper.server.deployer.ReleaseAnalysisReport;
-import org.springframework.cloud.skipper.server.deployer.ReleaseDifference;
 import org.springframework.cloud.skipper.server.deployer.ReleaseManager;
 import org.springframework.cloud.skipper.server.deployer.strategies.DeployAppStep;
 import org.springframework.cloud.skipper.server.deployer.strategies.HandleHealthCheckStep;
@@ -168,7 +168,7 @@ public class StateMachineTests {
 	@Test
 	public void testSimpleUpgradeShouldNotError() throws Exception {
 		Mockito.when(releaseReportService.createReport(any())).thenReturn(new ReleaseAnalysisReport(new ArrayList<>(),
-				new ReleaseDifference(true), new Release(), new Release()));
+				new ReleaseDifference(), new Release(), new Release()));
 		Mockito.when(upgradeStrategy.checkStatus(any()))
 				.thenReturn(true);
 
@@ -204,7 +204,7 @@ public class StateMachineTests {
 	@Test
 	public void testUpgradeFailsNewAppFailToDeploy() throws Exception {
 		Mockito.when(releaseReportService.createReport(any())).thenReturn(new ReleaseAnalysisReport(new ArrayList<>(),
-				new ReleaseDifference(true), new Release(), new Release()));
+				new ReleaseDifference(), new Release(), new Release()));
 		Mockito.when(upgradeStrategy.checkStatus(any()))
 				.thenReturn(false);
 
@@ -252,7 +252,7 @@ public class StateMachineTests {
 	@Test
 	public void testUpgradeCancelWhileCheckingApps() throws Exception {
 		Mockito.when(releaseReportService.createReport(any())).thenReturn(new ReleaseAnalysisReport(new ArrayList<>(),
-				new ReleaseDifference(true), new Release(), new Release()));
+				new ReleaseDifference(), new Release(), new Release()));
 		Mockito.when(upgradeStrategy.checkStatus(any()))
 				.thenReturn(false);
 
@@ -350,7 +350,7 @@ public class StateMachineTests {
 	@Test
 	public void testInstallDeniedWhileUpgrading() throws Exception {
 		Mockito.when(releaseReportService.createReport(any())).thenReturn(new ReleaseAnalysisReport(new ArrayList<>(),
-				new ReleaseDifference(true), new Release(), new Release()));
+				new ReleaseDifference(), new Release(), new Release()));
 		Mockito.when(upgradeStrategy.checkStatus(any()))
 				.thenReturn(false);
 

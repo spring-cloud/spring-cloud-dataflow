@@ -102,9 +102,9 @@ public class ReleaseAnalyzerTests extends AbstractIntegrationTest {
 				upgradedRelease);
 
 		assertThat(releaseAnalysisReport.getReleaseDifference()).isNotNull();
-		assertThat(releaseAnalysisReport.getReleaseDifference().getDifferenceSummary())
+		System.out.println(releaseAnalysisReport.getReleaseDifferenceSummary());
+		assertThat(releaseAnalysisReport.getReleaseDifferenceSummary())
 				.contains("log.level=(DEBUG, error)");
-		assertThat("1").isNotEmpty();
 	}
 
 }

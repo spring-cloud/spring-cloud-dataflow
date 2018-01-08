@@ -18,6 +18,7 @@ package org.springframework.cloud.skipper.server.deployer;
 import java.util.List;
 
 import org.springframework.cloud.skipper.domain.Release;
+import org.springframework.cloud.skipper.domain.deployer.ReleaseDifference;
 import org.springframework.util.Assert;
 
 /**
@@ -51,6 +52,8 @@ public class ReleaseAnalysisReport {
 			Release existingRelease, Release replacingRelease) {
 		Assert.notNull(applicationNamesToUpgrade, "ApplicationNamesToUpgrade can not be null.");
 		Assert.notNull(releaseDifference, "ReleaseDifference can not be null.");
+		Assert.notNull(existingRelease, "ExistingRelease can not be null.");
+		Assert.notNull(replacingRelease, "ReplacingRelease can not be null.");
 		this.applicationNamesToUpgrade = applicationNamesToUpgrade;
 		this.releaseDifference = releaseDifference;
 		this.existingRelease = existingRelease;
@@ -58,18 +61,27 @@ public class ReleaseAnalysisReport {
 	}
 
 	public List<String> getApplicationNamesToUpgrade() {
-		return applicationNamesToUpgrade;
+		return this.applicationNamesToUpgrade;
 	}
 
 	public ReleaseDifference getReleaseDifference() {
-		return releaseDifference;
+		return this.releaseDifference;
+	}
+
+	public String getReleaseDifferenceSummary() {
+		ReleaseDifferenceSummaryGenerator releaseDifferenceSummaryGenerator = new ReleaseDifferenceSummaryGenerator();
+		return releaseDifferenceSummaryGenerator.generateSummary(existingRelease.getName(),
+				existingRelease.getVersion(),
+				replacingRelease.getName(),
+				replacingRelease.getVersion(),
+				this.releaseDifference);
 	}
 
 	public Release getExistingRelease() {
-		return existingRelease;
+		return this.existingRelease;
 	}
 
 	public Release getReplacingRelease() {
-		return replacingRelease;
+		return this.replacingRelease;
 	}
 }
