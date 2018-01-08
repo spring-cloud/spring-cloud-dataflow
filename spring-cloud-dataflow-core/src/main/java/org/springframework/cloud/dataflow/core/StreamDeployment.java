@@ -17,6 +17,7 @@
 package org.springframework.cloud.dataflow.core;
 
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 /**
  * Represents Stream deployment model.
@@ -31,82 +32,26 @@ public class StreamDeployment {
 	private final String streamName;
 
 	/**
-	 * The deployer used for the stream deployment. The deployer could be app deployer or Skipper.
-	 */
-	private final String deployerName;
-
-	/**
-	 * The package used during the deployment (mainly used by Skipper).
-	 */
-	private final String packageName;
-
-	/**
-	 * The release name for the deployment in Skipper.
-	 */
-	private final String releaseName;
-
-	/**
-	 * The package repository name used by Skipper for the package used in the deployment.
-	 */
-	private final String repoName;
-
-	/**
 	 * The JSON String value of the deployment properties Map<String, String> values.
 	 */
 	private String deploymentProperties;
 
-	/**
-	 * The JSON String value for all the apps and their versions.
-	 */
-	private String appVersions;
+	public StreamDeployment(String streamName) {
+		this(streamName, "");
+	}
 
-	public StreamDeployment(String streamName, String deployerName, String deploymentProperties, String appVersions,
-			String packageName, String releaseName, String repoName) {
+	public StreamDeployment(String streamName, String deploymentProperties) {
 		Assert.hasText(streamName, "Stream name must not be null");
-		Assert.hasText(deployerName, "Deployer name Name must not be null");
 		this.streamName = streamName;
-		this.deploymentProperties = deploymentProperties;
-		this.appVersions = appVersions;
-		this.deployerName = deployerName;
-		this.packageName = packageName;
-		this.releaseName = releaseName;
-		this.repoName = repoName;
-	}
-
-	public StreamDeployment(String streamName, String deployerName) {
-		this(streamName, deployerName, "", null, null, null, null);
-	}
-
-	public StreamDeployment(String streamName, String deployerName, String deploymentProperties, String appVersions) {
-		this(streamName, deployerName, deploymentProperties, appVersions, null, null, null);
+		this.deploymentProperties = StringUtils.hasText(deploymentProperties) ? deploymentProperties: "";
 	}
 
 	public String getStreamName() {
 		return streamName;
 	}
 
-	public String getDeployerName() {
-		return deployerName;
-	}
-
-	public String getPackageName() {
-		return packageName;
-	}
-
-	public String getReleaseName() {
-		return releaseName;
-	}
-
-	public String getRepoName() {
-		return repoName;
-	}
-
 	public String getDeploymentProperties() {
 		return this.deploymentProperties;
-	}
-
-	public String getAppVersions() {
-		return this.appVersions;
 	}
 
 }

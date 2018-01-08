@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.cloud.dataflow.core.StreamDefinition;
+import org.springframework.cloud.dataflow.core.StreamDeployment;
 import org.springframework.cloud.dataflow.rest.UpdateStreamRequest;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.cloud.skipper.domain.Deployer;
@@ -96,4 +97,11 @@ public interface StreamService {
 	 * @return list of supported deployment platforms
 	 */
 	Collection<Deployer> platformList();
+
+	/**
+	 * Get stream information including the deployment properties etc.
+	 * @param streamName the name of the stream
+	 * @return the stream deployment information
+	 */
+	StreamDeployment info(String streamName);
 }

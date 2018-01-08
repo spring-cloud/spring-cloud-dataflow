@@ -163,8 +163,8 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 
 	@Bean
 	public StreamDeploymentController streamDeploymentController(StreamDefinitionRepository repository,
-			StreamDeploymentRepository streamDeploymentRepository, StreamService streamService) {
-		return new StreamDeploymentController(repository, streamDeploymentRepository, streamService);
+			StreamService streamService) {
+		return new StreamDeploymentController(repository, streamService);
 	}
 
 	@Bean

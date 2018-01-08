@@ -17,8 +17,12 @@
 package org.springframework.cloud.dataflow.server.service.impl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import org.json.JSONObject;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -63,14 +67,11 @@ public class AppDeployerStreamServiceTests {
 
 	private StreamDefinition streamDefinition3 = new StreamDefinition("test3", "time | log");
 
-	private StreamDeployment streamDeployment1 = new StreamDeployment(streamDefinition1.getName(),
-			StreamDeployers.appdeployer.name());
+	private StreamDeployment streamDeployment1 = new StreamDeployment(streamDefinition1.getName());
 
-	private StreamDeployment streamDeployment2 = new StreamDeployment(streamDefinition2.getName(),
-			StreamDeployers.skipper.name(), "", "", "pkg1", "release1", "local");
+	private StreamDeployment streamDeployment2 = new StreamDeployment(streamDefinition2.getName());
 
-	private StreamDeployment streamDeployment3 = new StreamDeployment(streamDefinition3.getName(),
-			StreamDeployers.skipper.name(), "", "", "pkg1", "release2", "local");
+	private StreamDeployment streamDeployment3 = new StreamDeployment(streamDefinition3.getName());
 
 	private List<StreamDefinition> streamDefinitionList = new ArrayList<>();
 
@@ -126,19 +127,9 @@ public class AppDeployerStreamServiceTests {
 	}
 
 	@Test(expected = IncompatibleStreamDeployerException.class)
-	public void verifyUndeployStream2() {
-		StreamDefinition streamDefinition2 = new StreamDefinition("test2", "time | log");
-		StreamDeployment streamDeployment2 = new StreamDeployment(streamDefinition2.getName(),
-				StreamDeployers.skipper.name(), "", "", "pkg1", "release1", "local");
-		when(this.streamDeploymentRepository.findOne(streamDeployment2.getStreamName())).thenReturn(streamDeployment2);
-		this.simpleStreamService.undeployStream(streamDefinition2.getName());
-	}
-
-	@Test(expected = IncompatibleStreamDeployerException.class)
 	public void verifyRollbackStream() {
 		StreamDefinition streamDefinition1 = new StreamDefinition("test1", "time | log");
-		StreamDeployment streamDeployment1 = new StreamDeployment(streamDefinition1.getName(),
-				StreamDeployers.appdeployer.name());
+		StreamDeployment streamDeployment1 = new StreamDeployment(streamDefinition1.getName());
 		when(this.streamDeploymentRepository.findOne(streamDeployment1.getStreamName())).thenReturn(streamDeployment1);
 		verifyNoMoreInteractions(this.appDeployerStreamDeployer);
 
@@ -148,5 +139,23 @@ public class AppDeployerStreamServiceTests {
 	@Test(expected = IncompatibleStreamDeployerException.class)
 	public void verifyAppDeployerUpgrade() {
 		this.simpleStreamService.updateStream(this.streamDeployment1.getStreamName(), mock(UpdateStreamRequest.class));
+	}
+
+	@Test
+	public void verifyStreamInfo() {
+		StreamDefinition streamDefinition1 = new StreamDefinition("test1", "time | log");
+		Map<String, String> deploymentProperties1 = new HashMap<>();
+		deploymentProperties1.put("test1", "value1");
+		Map<String, String> deploymentProperties2 = new HashMap<>();
+		deploymentProperties2.put("test2", "value2");
+		Map<String, Map<String, String>> streamDeploymentProperties = new HashMap<>();
+		streamDeploymentProperties.put("time", deploymentProperties1);
+		streamDeploymentProperties.put("log", deploymentProperties2);
+		StreamDeployment streamDeployment1 = new StreamDeployment(streamDefinition1.getName(),
+				new JSONObject(streamDeploymentProperties).toString());
+		when(this.appDeployerStreamDeployer.getStreamInfo(streamDeployment1.getStreamName())).thenReturn(streamDeployment1);
+		StreamDeployment streamDeployment = this.simpleStreamService.info("test1");
+		Assert.assertTrue(streamDeployment.getStreamName().equals(streamDefinition1.getName()));
+		Assert.assertTrue(streamDeployment.getDeploymentProperties().equals("{\"log\":{\"test2\":\"value2\"},\"time\":{\"test1\":\"value1\"}}"));
 	}
 }

@@ -15,7 +15,6 @@
  */
 package org.springframework.cloud.dataflow.server.service.impl;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,10 +23,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.cloud.dataflow.core.StreamDefinition;
-import org.springframework.cloud.dataflow.core.StreamDeployment;
 import org.springframework.cloud.dataflow.server.controller.StreamAlreadyDeployedException;
 import org.springframework.cloud.dataflow.server.controller.StreamAlreadyDeployingException;
-import org.springframework.cloud.dataflow.server.repository.IncompatibleStreamDeployerException;
 import org.springframework.cloud.dataflow.server.repository.NoSuchStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.StreamDeploymentRepository;
@@ -86,14 +83,7 @@ public abstract class AbstractStreamService implements StreamService {
 
 	@Override
 	public void undeployStream(String streamName) {
-		StreamDeployment streamDeployment = this.streamDeploymentRepository.findOne(streamName);
-		if (streamDeployment != null) {
-			if (this.streamDeployer != StreamDeployers.valueOf(streamDeployment.getDeployerName())) {
-				throw new IncompatibleStreamDeployerException(streamDeployer.name());
-			}
-			doUndeployStream(streamName);
-			this.streamDeploymentRepository.delete(streamName);
-		}
+		doUndeployStream(streamName);
 	}
 
 	protected abstract void doUndeployStream(String streamName);
@@ -121,25 +111,7 @@ public abstract class AbstractStreamService implements StreamService {
 	// State
 	@Override
 	public Map<StreamDefinition, DeploymentState> state(List<StreamDefinition> streamDefinitions) {
-		Map<StreamDefinition, DeploymentState> states = new HashMap<>();
-		List<StreamDefinition> deployerSpecificStreamDefinitions = new ArrayList<>();
-		for (StreamDefinition streamDefinition : streamDefinitions) {
-			StreamDeployment streamDeployment = this.streamDeploymentRepository.findOne(streamDefinition.getName());
-			if (streamDeployment == null) {
-				states.put(streamDefinition, DeploymentState.unknown);
-			}
-			else if (this.streamDeployer == StreamDeployers.valueOf(streamDeployment.getDeployerName())) {
-				deployerSpecificStreamDefinitions.add(streamDefinition);
-			}
-			else {
-				logger.error("Invalid deployer:" + streamDefinition.getName() + ":" + streamDeployment.getDeployerName());
-				throw new IncompatibleStreamDeployerException(this.streamDeployer.name());
-			}
-		}
-		if (!deployerSpecificStreamDefinitions.isEmpty()) {
-			states.putAll(this.doState(deployerSpecificStreamDefinitions));
-		}
-		return states;
+		return this.doState(streamDefinitions);
 	}
 
 	protected abstract Map<StreamDefinition, DeploymentState> doState(List<StreamDefinition> streamDefinitions);

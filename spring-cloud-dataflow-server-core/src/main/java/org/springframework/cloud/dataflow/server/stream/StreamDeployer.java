@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 import org.springframework.cloud.dataflow.core.StreamDefinition;
+import org.springframework.cloud.dataflow.core.StreamDeployment;
 import org.springframework.cloud.deployer.spi.app.AppStatus;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.cloud.deployer.spi.core.RuntimeEnvironmentInfo;
@@ -49,4 +50,11 @@ public interface StreamDeployer {
 	AppStatus getAppStatus(String id);
 
 	RuntimeEnvironmentInfo environmentInfo();
+
+	/**
+	 * Get stream information (including the deployment properties) for the given stream name.
+	 * @param streamName the name of the stream
+	 * @return stream deployment information
+	 */
+	StreamDeployment getStreamInfo(String streamName);
 }

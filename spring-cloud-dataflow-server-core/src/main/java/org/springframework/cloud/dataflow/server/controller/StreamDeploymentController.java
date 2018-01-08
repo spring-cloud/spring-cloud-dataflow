@@ -32,7 +32,6 @@ import org.springframework.cloud.dataflow.server.controller.support.ArgumentSani
 import org.springframework.cloud.dataflow.server.controller.support.ControllerUtils;
 import org.springframework.cloud.dataflow.server.repository.NoSuchStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
-import org.springframework.cloud.dataflow.server.repository.StreamDeploymentRepository;
 import org.springframework.cloud.dataflow.server.service.StreamService;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
@@ -74,12 +73,6 @@ public class StreamDeploymentController {
 	private final StreamDefinitionRepository repository;
 
 	/**
-	 * The repository this controller will use to retrieve stream deployment.
-	 */
-	private final StreamDeploymentRepository streamDeploymentRepository;
-
-
-	/**
 	 * Create a {@code StreamDeploymentController} that delegates
 	 * <ul>
 	 * <li>CRUD operations to the provided {@link StreamDefinitionRepository}</li>
@@ -88,15 +81,12 @@ public class StreamDeploymentController {
 	 * </ul>
 	 *
 	 * @param repository the repository this controller will use for stream CRUD operations
-	 * @param streamDeploymentRepository repository this controller will use to retrieve stream deployment
 	 * @param streamService the underlying StreamService to deploy the stream
 	 */
-	public StreamDeploymentController(StreamDefinitionRepository repository,
-			StreamDeploymentRepository streamDeploymentRepository, StreamService streamService) {
+	public StreamDeploymentController(StreamDefinitionRepository repository, StreamService streamService) {
 		Assert.notNull(repository, "StreamDefinitionRepository must not be null");
 		Assert.notNull(streamService, "StreamService must not be null");
 		this.repository = repository;
-		this.streamDeploymentRepository = streamDeploymentRepository;
 		this.streamService = streamService;
 	}
 
@@ -137,11 +127,7 @@ public class StreamDeploymentController {
 		if (streamDefinition == null) {
 			throw new NoSuchStreamDefinitionException(name);
 		}
-		StreamDeployment streamDeployment = this.streamDeploymentRepository.findOne(name);
-		if (streamDeployment == null) {
-			return new StreamDeploymentResource(streamDefinition.getName(), streamDefinition.getDslText(),
-					null, null,null, null, null, null);
-		}
+		StreamDeployment streamDeployment = this.streamService.info(name);
 		return new Assembler(streamDefinition).toResource(streamDeployment);
 	}
 
@@ -216,9 +202,8 @@ public class StreamDeploymentController {
 		@Override
 		public StreamDeploymentResource instantiateResource(StreamDeployment stream) {
 			final StreamDeploymentResource resource = new StreamDeploymentResource(this.streamDefinition.getName(),
-					ArgumentSanitizer.sanitizeStream(this.streamDefinition.getDslText()), stream.getDeploymentProperties(),
-					stream.getAppVersions(), stream.getDeployerName(), stream.getPackageName(), stream.getReleaseName(),
-					stream.getRepoName());
+					ArgumentSanitizer.sanitizeStream(this.streamDefinition.getDslText()), stream.getDeploymentProperties()
+			);
 			Map<StreamDefinition, DeploymentState> streamDeploymentStates = StreamDeploymentController.this.streamService.state(Arrays.asList(this.streamDefinition));
 			DeploymentState deploymentState = streamDeploymentStates.get(this.streamDefinition);
 			if (deploymentState != null) {

@@ -31,7 +31,6 @@ import org.springframework.cloud.dataflow.registry.repository.AppRegistrationRep
 import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.StreamDeploymentRepository;
-import org.springframework.cloud.dataflow.server.stream.StreamDeployers;
 import org.springframework.cloud.skipper.client.SkipperClient;
 import org.springframework.cloud.skipper.domain.Info;
 import org.springframework.cloud.skipper.domain.Status;
@@ -92,10 +91,8 @@ public class RuntimeAppsControllerSkipperTests {
 		streamDefinitionRepository.save(streamDefinition3);
 		streamDefinitionRepository.save(streamDefinition4);
 
-		StreamDeployment streamDeployment3 = new StreamDeployment(streamDefinition3.getName(), StreamDeployers
-				.skipper.name());
-		StreamDeployment streamDeployment4 = new StreamDeployment(streamDefinition4.getName(), StreamDeployers
-				.skipper.name());
+		StreamDeployment streamDeployment3 = new StreamDeployment(streamDefinition3.getName());
+		StreamDeployment streamDeployment4 = new StreamDeployment(streamDefinition4.getName());
 		this.streamDeploymentRepository.save(streamDeployment3);
 		this.streamDeploymentRepository.save(streamDeployment4);
 

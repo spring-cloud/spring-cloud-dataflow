@@ -172,8 +172,8 @@ public class DataFlowControllerAutoConfiguration {
 	@Bean
 	@ConditionalOnBean({ StreamDefinitionRepository.class, StreamDeploymentRepository.class })
 	public StreamDeploymentController streamDeploymentController(StreamDefinitionRepository repository,
-			StreamDeploymentRepository streamDeploymentRepository, StreamService streamService) {
-		return new StreamDeploymentController(repository, streamDeploymentRepository, streamService);
+			StreamService streamService) {
+		return new StreamDeploymentController(repository, streamService);
 	}
 
 	@Configuration

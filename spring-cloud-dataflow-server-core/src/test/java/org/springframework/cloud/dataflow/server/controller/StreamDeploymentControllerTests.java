@@ -37,7 +37,6 @@ import org.springframework.cloud.dataflow.rest.resource.StreamDeploymentResource
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.StreamDeploymentRepository;
 import org.springframework.cloud.dataflow.server.service.StreamService;
-import org.springframework.cloud.dataflow.server.stream.StreamDeployers;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.cloud.skipper.domain.Deployer;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -83,7 +82,7 @@ public class StreamDeploymentControllerTests {
 	public void setup() {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
-		this.controller = new StreamDeploymentController(streamDefinitionRepository, streamDeploymentRepository, defaultStreamService);
+		this.controller = new StreamDeploymentController(streamDefinitionRepository, defaultStreamService);
 	}
 
 	@Test
@@ -130,20 +129,18 @@ public class StreamDeploymentControllerTests {
 		appVersions.put("time", "1.0.0.BUILD-SNAPSHOT");
 		appVersions.put("log", "1.0.0.BUILD-SNAPSHOT");
 		StreamDefinition streamDefinition = new StreamDefinition("testStream1", "time | log");
-		StreamDeployment streamDeployment = new StreamDeployment(streamDefinition.getName(), StreamDeployers.appdeployer.name(),
-				new JSONObject(streamDeploymentProperties).toString(), new JSONObject(appVersions).toString());
+		StreamDeployment streamDeployment = new StreamDeployment(streamDefinition.getName(),
+				new JSONObject(streamDeploymentProperties).toString());
 		Map<StreamDefinition, DeploymentState> streamDeploymentStates = new HashMap<>();
 		streamDeploymentStates.put(streamDefinition, DeploymentState.deployed);
 		when(this.streamDefinitionRepository.findOne(streamDefinition.getName())).thenReturn(streamDefinition);
-		when(this.streamDeploymentRepository.findOne(streamDefinition.getName())).thenReturn(streamDeployment);
+		when(this.defaultStreamService.info(streamDefinition.getName())).thenReturn(streamDeployment);
 		when(this.defaultStreamService.state(anyListOf(StreamDefinition.class))).thenReturn(streamDeploymentStates);
 		StreamDeploymentResource streamDeploymentResource = this.controller.info(streamDefinition.getName());
 		Assert.assertTrue(streamDeploymentResource.getStreamName().equals(streamDefinition.getName()));
 		Assert.assertTrue(streamDeploymentResource.getDslText().equals(streamDefinition.getDslText()));
 		Assert.assertTrue(streamDeploymentResource.getStreamName().equals(streamDefinition.getName()));
-		Assert.assertTrue(streamDeploymentResource.getDeployerName().equals(StreamDeployers.appdeployer.name()));
 		Assert.assertTrue(streamDeploymentResource.getDeploymentProperties().equals("{\"log\":{\"test2\":\"value2\"},\"time\":{\"test1\":\"value1\"}}"));
-		Assert.assertTrue(streamDeploymentResource.getAppVersions().contains("{\"log\":\"1.0.0.BUILD-SNAPSHOT\",\"time\":\"1.0.0.BUILD-SNAPSHOT\"}"));
 		Assert.assertTrue(streamDeploymentResource.getStatus().equals(DeploymentState.deployed.name()));
 	}
 

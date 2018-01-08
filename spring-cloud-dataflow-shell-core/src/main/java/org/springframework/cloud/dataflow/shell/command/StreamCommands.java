@@ -156,10 +156,8 @@ public class StreamCommands implements CommandMarker {
 		TableBuilder builder = DataFlowTables.applyStyle(new TableBuilder(modelBuilder.build()))
 									.on(CellMatchers.table()).addSizer(new AbsoluteWidthSizeConstraints(30)).and();
 		result.add(builder.build());
-		if (stream.getAppVersions() != null) {
-			result.add(String.format("Deployed App versions: %s", ShellUtils.prettyPrintIfJson(stream.getAppVersions())));
-		}
-		if (stream.getDeploymentProperties() != null) {
+		if (StringUtils.hasText(stream.getDeploymentProperties())) {
+			//TODO: rename Deployment properties for Skipper as it includes apps' info (app:version) as well
 			result.add(String.format("Stream Deployment properties: %s", ShellUtils.prettyPrintIfJson(stream.getDeploymentProperties())));
 		}
 		return result;

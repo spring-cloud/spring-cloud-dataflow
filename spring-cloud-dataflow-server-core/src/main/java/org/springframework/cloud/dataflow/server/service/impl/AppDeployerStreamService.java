@@ -25,6 +25,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.cloud.dataflow.core.StreamDefinition;
+import org.springframework.cloud.dataflow.core.StreamDeployment;
 import org.springframework.cloud.dataflow.rest.UpdateStreamRequest;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
 import org.springframework.cloud.dataflow.server.repository.IncompatibleStreamDeployerException;
@@ -126,5 +127,10 @@ public class AppDeployerStreamService extends AbstractStreamService {
 	@Override
 	public Collection<Deployer> platformList() {
 		throw new IncompatibleStreamDeployerException(StreamDeployers.appdeployer.toString());
+	}
+
+	@Override
+	public StreamDeployment info(String streamName) {
+		return this.appDeployerStreamDeployer.getStreamInfo(streamName);
 	}
 }

@@ -42,6 +42,7 @@ import org.springframework.cloud.dataflow.registry.support.ResourceUtils;
 import org.springframework.cloud.dataflow.server.controller.StreamDefinitionController;
 import org.springframework.cloud.dataflow.server.repository.DeploymentIdRepository;
 import org.springframework.cloud.dataflow.server.repository.DeploymentKey;
+import org.springframework.cloud.dataflow.server.repository.NoSuchStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.StreamDeploymentRepository;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
@@ -138,8 +139,7 @@ public class AppDeployerStreamDeployer implements StreamDeployer {
 			appVersions.put(appDeploymentRequest.getDefinition().getName(), ResourceUtils.getResourceVersion(appDeploymentRequest.getResource()));
 		}
 		StreamDeployment streamDeployment = new StreamDeployment(streamDeploymentRequest.getStreamName(),
-				StreamDeployers.appdeployer.name(), new JSONObject(deploymentProperties).toString(),
-				new JSONObject(appVersions).toString());
+				new JSONObject(deploymentProperties).toString());
 		this.streamDeploymentRepository.save(streamDeployment);
 	}
 
@@ -254,5 +254,18 @@ public class AppDeployerStreamDeployer implements StreamDeployer {
 	@Override
 	public RuntimeEnvironmentInfo environmentInfo() {
 		return appDeployer.environmentInfo();
+	}
+
+	@Override
+	public StreamDeployment getStreamInfo(String streamName) {
+		StreamDefinition streamDefinition = this.streamDefinitionRepository.findOne(streamName);
+		if (streamDefinition == null) {
+			throw new NoSuchStreamDefinitionException(streamName);
+		}
+		StreamDeployment streamDeployment = this.streamDeploymentRepository.findOne(streamName);
+		if (streamDeployment == null) {
+			streamDeployment = new StreamDeployment(streamDefinition.getName());
+		}
+		return streamDeployment;
 	}
 }

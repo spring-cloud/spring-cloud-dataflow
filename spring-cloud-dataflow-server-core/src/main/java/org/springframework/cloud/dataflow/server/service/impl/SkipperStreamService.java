@@ -36,7 +36,6 @@ import org.springframework.cloud.dataflow.core.StreamDeployment;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.rest.UpdateStreamRequest;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
-import org.springframework.cloud.dataflow.server.repository.IncompatibleStreamDeployerException;
 import org.springframework.cloud.dataflow.server.repository.NoSuchStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.NoSuchStreamDeploymentException;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
@@ -202,17 +201,8 @@ public class SkipperStreamService extends AbstractStreamService {
 
 	public void updateStream(String streamName, String releaseName, PackageIdentifier packageIdenfier,
 			Map<String, String> updateProperties) {
-		StreamDeployment streamDeployment = this.streamDeploymentRepository.findOne(streamName);
-		if (streamDeployment == null) {
-			throw new NoSuchStreamDeploymentException(streamName);
-		}
-		if (this.streamDeployer != StreamDeployers.valueOf(streamDeployment.getDeployerName())) {
-			throw new IncompatibleStreamDeployerException(streamDeployer.name());
-		}
-
 		String yamlProperties = convertPropertiesToSkipperYaml(streamName, updateProperties);
 		Release release = this.skipperStreamDeployer.upgradeStream(releaseName, packageIdenfier, yamlProperties);
-
 		if (release != null) {
 			updateStreamDefinitionFromReleaseManifest(streamName, release.getManifest());
 		}
@@ -228,9 +218,6 @@ public class SkipperStreamService extends AbstractStreamService {
 		StreamDeployment streamDeployment = this.streamDeploymentRepository.findOne(streamName);
 		if (streamDeployment == null) {
 			throw new NoSuchStreamDeploymentException(streamName);
-		}
-		if (this.streamDeployer != StreamDeployers.valueOf(streamDeployment.getDeployerName())) {
-			throw new IncompatibleStreamDeployerException(streamDeployer.name());
 		}
 		this.skipperStreamDeployer.rollbackStream(streamName, releaseVersion);
 	}
@@ -306,5 +293,10 @@ public class SkipperStreamService extends AbstractStreamService {
 	@Override
 	public Collection<Deployer> platformList() {
 		return this.skipperStreamDeployer.platformList();
+	}
+
+	@Override
+	public StreamDeployment info(String streamName) {
+		return this.skipperStreamDeployer.getStreamInfo(streamName);
 	}
 }

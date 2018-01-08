@@ -16,12 +16,11 @@
 
 package org.springframework.cloud.dataflow.server.repository;
 
+import javax.sql.DataSource;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
-import javax.sql.DataSource;
 
 import org.springframework.cloud.dataflow.core.StreamDeployment;
 import org.springframework.cloud.dataflow.server.controller.StreamAlreadyDeployedException;
@@ -37,14 +36,11 @@ public class RdbmsStreamDeploymentRepository implements StreamDeploymentReposito
 
 	private static final String TABLE_NAME = "STREAM_DEPLOYMENTS";
 
-	private static final String SELECT_ONE_SQL = String.format("select STREAM_NAME, DEPLOYMENT_PROPS, APP_VERSIONS, DEPLOYER_NAME, PACKAGE_NAME, "
-			+ "RELEASE_NAME, REPO_NAME from %s where STREAM_NAME = ?", TABLE_NAME);
+	private static final String SELECT_ONE_SQL = String.format("select STREAM_NAME, DEPLOYMENT_PROPS from %s where STREAM_NAME = ?", TABLE_NAME);
 
-	private static final String SELECT_ALL_SQL = String.format("select STREAM_NAME, DEPLOYMENT_PROPS, APP_VERSIONS, DEPLOYER_NAME, PACKAGE_NAME, "
-			+ "RELEASE_NAME, REPO_NAME from %s", TABLE_NAME);
+	private static final String SELECT_ALL_SQL = String.format("select STREAM_NAME, DEPLOYMENT_PROPS from %s", TABLE_NAME);
 
-	private static final String INSERT_SQL = String.format("insert into %s (STREAM_NAME, DEPLOYMENT_PROPS, APP_VERSIONS, DEPLOYER_NAME, PACKAGE_NAME, "
-			+ "RELEASE_NAME, REPO_NAME) values (?, ?, ?, ?, ?, ?, ?)", TABLE_NAME);
+	private static final String INSERT_SQL = String.format("insert into %s (STREAM_NAME, DEPLOYMENT_PROPS) values (?, ?)", TABLE_NAME);
 
 	private static final String DELETE_SQL = String.format("delete from %s where STREAM_NAME=?", TABLE_NAME);
 
@@ -61,11 +57,8 @@ public class RdbmsStreamDeploymentRepository implements StreamDeploymentReposito
 			throw new StreamAlreadyDeployedException(streamDeployment.getStreamName());
 		}
 		int rows = jdbcTemplate.update(INSERT_SQL, new Object[] { streamDeployment.getStreamName(),
-						streamDeployment.getDeploymentProperties(), streamDeployment.getAppVersions(),
-						streamDeployment.getDeployerName(), streamDeployment.getReleaseName(),
-						streamDeployment.getPackageName(), streamDeployment.getRepoName() },
-				new int[] { Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR,
-						Types.VARCHAR });
+						streamDeployment.getDeploymentProperties() },
+				new int[] { Types.VARCHAR, Types.VARCHAR });
 		return (rows == 1) ? streamDeployment : null;
 	}
 
@@ -75,9 +68,7 @@ public class RdbmsStreamDeploymentRepository implements StreamDeploymentReposito
 		List<Map<String, Object>> result = jdbcTemplate.queryForList(SELECT_ONE_SQL, streamName);
 		if (!result.isEmpty()) {
 			Map<String, Object> map = result.get(0);
-			return new StreamDeployment(get(map, "STREAM_NAME"), get(map, "DEPLOYER_NAME"), get(map, "DEPLOYMENT_PROPS"),
-					get(map, "APP_VERSIONS"), get(map, "RELEASE_NAME"),
-					get(map, "PACKAGE_NAME"), get(map, "REPO_NAME"));
+			return new StreamDeployment(get(map, "STREAM_NAME"), get(map, "DEPLOYMENT_PROPS"));
 		}
 		return null;
 	}
@@ -87,10 +78,7 @@ public class RdbmsStreamDeploymentRepository implements StreamDeploymentReposito
 		List<Map<String, Object>> result = jdbcTemplate.queryForList(SELECT_ALL_SQL);
 		List<StreamDeployment> streamDeployments = new ArrayList<>(result.size());
 		for (Map<String, Object> map : result) {
-			streamDeployments.add(new StreamDeployment(get(map, "STREAM_NAME"), get(map, "DEPLOYER_NAME"),
-					get(map, "DEPLOYMENT_PROPS"),
-					get(map, "APP_VERSIONS"), get(map, "RELEASE_NAME"),
-					get(map, "PACKAGE_NAME"), get(map, "REPO_NAME")));
+			streamDeployments.add(new StreamDeployment(get(map, "STREAM_NAME"), get(map, "DEPLOYMENT_PROPS")));
 		}
 		return streamDeployments;
 	}

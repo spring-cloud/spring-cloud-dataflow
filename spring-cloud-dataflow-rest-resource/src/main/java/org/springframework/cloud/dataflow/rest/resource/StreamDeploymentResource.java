@@ -32,34 +32,9 @@ public class StreamDeploymentResource extends StreamDefinitionResource {
 	private String streamName;
 
 	/**
-	 * The deployer used for the stream deployment. The deployer could be app deployer or Skipper.
-	 */
-	private String deployerName;
-
-	/**
-	 * The package used during the deployment (mainly used by Skipper).
-	 */
-	private String packageName;
-
-	/**
-	 * The release name for the deployment in Skipper.
-	 */
-	private String releaseName;
-
-	/**
-	 * The package repository name used by Skipper for the package used in the deployment.
-	 */
-	private String repoName;
-
-	/**
 	 * The JSON String value of the deployment properties Map<String, String> values.
 	 */
 	private String deploymentProperties;
-
-	/**
-	 * The JSON String value of the apps and their versions used in the stream..
-	 */
-	private String appVersions;
 
 	/**
 	 * Default constructor for serialization frameworks.
@@ -71,40 +46,18 @@ public class StreamDeploymentResource extends StreamDefinitionResource {
 		return streamName;
 	}
 
-	public String getDeployerName() {
-		return deployerName;
-	}
-
-	public String getPackageName() {
-		return packageName;
-	}
-
-	public String getReleaseName() {
-		return releaseName;
-	}
-
-	public String getRepoName() {
-		return repoName;
-	}
-
 	public String getDeploymentProperties() {
 		return deploymentProperties;
 	}
 
-	public String getAppVersions() {
-		return appVersions;
+	public StreamDeploymentResource(String streamName, String dslText) {
+		this(streamName, dslText, "");
 	}
 
-	public StreamDeploymentResource(String streamName, String dslText, String deploymentProperties, String appVersions,
-			String deployerName, String packageName, String releaseName, String repoName) {
+	public StreamDeploymentResource(String streamName, String dslText, String deploymentProperties) {
 		super(streamName, dslText);
 		this.streamName = streamName;
 		this.deploymentProperties = deploymentProperties;
-		this.appVersions = appVersions;
-		this.deployerName = deployerName;
-		this.packageName = packageName;
-		this.releaseName = releaseName;
-		this.repoName = repoName;
 	}
 
 	public static class Page extends PagedResources<StreamDeploymentResource> {
